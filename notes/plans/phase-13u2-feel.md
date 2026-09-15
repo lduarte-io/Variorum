@@ -745,10 +745,10 @@ mount: `editorHeight == 24` after 200 turns).
 | the record opened + TRACE 2 re-verified on the post-revert tree | **DONE** — reproduced on the real Sherlock book, three runs (see TRACE 2 RE-VERIFIED below) |
 | the bounded core read (`Queries.leadingBlockTexts`) + its pins | **DONE** — 5 pins green; the cost shape MEASURED FLAT (below) |
 | the card pin, landed RED FIRST on the unfixed tree | **DONE** — 8 cards `46 → 103`, the mechanism's own words (below) |
-| the app-side priming (`BookViewModel` · `OutlinePostRow`) | **BUILT — the card pin is GREEN; the landing suite shows TWO failures under an ISOLATED suite run and the BASELINE for that shape is being measured before anything is concluded** |
-| the GATE: the 3-expanded fixture 3/3 isolated, beside the card pin 3/3 | **PENDING** |
-| the WALK: before/after landing stories on the real Sherlock book + captures | **PENDING** |
-| the card:heading scale-mix — MEASURE then decide | **PENDING** |
+| the app-side priming (`BookViewModel` · `OutlinePostRow`) | **DONE** — the card pin GREEN (2/2), the priming invariant pinned beside it |
+| the GATE: the 3-expanded fixture 3/3 isolated, beside the card pin 3/3 | **NOT MET IN THE FIXTURE, and the reason is measured** — the far-below arm lands 73 pt off (3/3, deterministic); the mechanism is constraint 3's own scale-mix; **the SAME scenario on her real book goes from "gave up at 61 pt after 12 hops, 4.08 s" to "settled at 0 after 2 hops, 1.02 s"** (THE GATE, MEASURED BOTH WAYS below) — the orchestrator's call |
+| the WALK: before/after landing stories on the real Sherlock book + captures | **DONE** — 6 captures, both voices, the before/after logs, the three-expanded case both ways |
+| the card:heading scale-mix — MEASURE then decide | **MEASURED — and it DECIDED ITSELF**: it is not a residual here, it is what blocks the fixture's far-below arm (±70 pt, realized rows constant) |
 | tests (core · FULL Mac · iOS build) | **PENDING** |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
@@ -861,6 +861,157 @@ CURRENT height, recorded on the same report as its top and keyed the same way (t
 the subject's id — subject-keyed like `anchorTops` beside it, never "the row", the DEBUG-oracle keying
 rule). The landing's own `landingBox.rowHeights` is untouched: that is a per-landing change LOG, this
 is the current fact.
+
+## WHAT SHIPPED — the priming, in four files
+
+**`Sources/VariorumCore/Queries/PostRender.swift`** — `Queries.leadingBlockTexts`, above.
+
+**`App/Variorum/Variorum/Features/BookView/BookViewModel.swift`** — `adopt` is **`async`**, and the
+suspension buys ONE structural invariant:
+
+> **an entry is never published without its card preview in hand.**
+
+`adopt` primes, then calls `applyEntries` — the old synchronous body, untouched, so the spread-anchor
+reasoning it carries still runs in one turn. The prime reads only the ids it LACKS, so a delivery whose
+notes are all primed (every autosave re-delivers the entries) opens no database at all; a note that
+leaves the book has its preview evicted, so the map is the book's entries', never a growing cache. A
+failed read stores nothing rather than an empty string, so the next delivery retries — `""` means
+"read, and nothing to show", which the reverted attempt needed a separate `factsLoaded` flag to say.
+`cardPreviewBlocks = 4`: one stub (`I.`, `# Part One`) plus three blocks of prose overshoots the
+preview's forty words in every shape the sample library has. RULING A-1 said "two or three"; the
+property that matters is that it is a SMALL CONSTANT, and the fourth slot is there because a note may
+now open with an empty block (18c's U-1 made Return mint them).
+
+**`App/Variorum/Variorum/Features/BookView/BookView.swift`** — `OutlinePostRow.excerpt` is a computed
+read of the book's map; the per-row `.task` that rendered the WHOLE note is deleted. Ladder R1-10's
+`BookOutlineFactsReads` counter retires with the machinery it counted (**a counter with no incrementer
+is a pin that cannot fail**), and `BookCardPreviewReads` replaces it.
+
+**FRESHNESS PARITY IS KEPT, DELIBERATELY.** The old `.task`'s id carried the expansion, so collapsing a
+note re-read it; without that, a note edited in the book would show its old opening words until the book
+was reopened. `collapse`/`collapseAll` now refresh the notes that were open. It cannot re-open item 18:
+the card keeps the words it has while the re-read runs (never an empty slot, never a 46-pt card), and a
+collapse is not a landing.
+
+**Pins:** `BookCardHeightStabilityTests` (2) — the red-on-old height claim, and the priming invariant
+stated without a window (every entry's words are in hand the moment the entries arrive; a departed note's
+preview is forgotten). `BookOutlineLandingTests.theBookPrimesEachNoteOnceAndNoRowEverReadsAgain` —
+R1-10's claim RESTATED and stronger: one bounded read for the book before any row exists, mounting five
+expanded stories reads nothing more, collapsing them costs exactly one refresh read, and then nothing.
+36 test call sites gained `await model.adopt(...)`; `BookAscentTests`' `model` helper and its eight
+callers became `async`. **Zero `Sources/VariorumCore/Sync/` lines, zero schema, zero migrations, marker
+8. No `Shared/` file moved**, so the phone inherits nothing from this unit.
+
+## THE GATE, MEASURED BOTH WAYS — and the two answers disagree
+
+**Constraint 2's letter: NOT MET.** `openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded`'s
+**far below** arm lands **73 pt** off, 3/3 isolated, deterministic. (Its other four arms — story 3, 7,
+11, far above — land at 0 · −2 · −1 · 0, and the rest of the suite is green.) The baseline for the same
+isolated command was measured in a worktree at the pre-fix commit: **6/6 green, 12.4 s**. So the arm is
+mine, not weather.
+
+**The mechanism, traced — and it is constraint 3's own finding.** The far-below landing hops 13 times
+over 4.2 s and gives up, because the column OSCILLATES between two heights ~70 pt apart:
+
+```
+content=66920 | top=+68 | top=0.0 | content=66850 | top=-70 | HOP | top=0.0 | content=66920 | …
+| DONE: gave up at top=-73.0 after 13 hops, 4196 ms
+```
+
+With the realized rows instrumented on the same report — `content=66923 rows=38 sum=99998` …
+`content=66854 rows=38 sum=99998`, through the whole oscillation — **not one realized row changes
+height and none is added**. The ±70 is entirely SwiftUI's ESTIMATE for the rows the lazy run has not
+realized: UNIT A's deferred finding ("the Outline's card:heading scale mix inside one lazy run …
+68–74 pt of column swing when the ratio widens"), at exactly its measured magnitude.
+
+**Why priming widens the ratio, which is the whole story:** during a landing on the PRE-FIX tree the
+cards are still 46 pt — accidentally almost the same as a 51-pt chapter heading — so the run is
+nearly uniform and the estimate barely moves. Priming makes the run honestly mixed (103 vs 51) from
+the first frame. **The fixture's landing was converging BECAUSE of the defect's timing.** After the
+landing stops the page is stable (24 samples, all −73): an offset, not a jitter.
+
+**Constraint 4 was honoured: nothing was restructured.** One scale per lazy run is the only structural
+cure for an average-based estimate, and the ruling closes that road.
+
+**AND THE SAME SCENARIO ON HER REAL BOOK RUNS THE OTHER WAY.** Dev-store Debug build, the real Sherlock
+book, three stories opened from the navigator and then the 11th chapter clicked — the fixture's own
+shape, on the book her report names:
+
+| tree | the three-expanded landing |
+|---|---|
+| **before** | `page-A43B8E2D h=46` · `page-D17F5E79 h=46` · **`DONE: gave up at top=61.0 after 12 hops, 4060 ms`** (4077 ms on the capture run) |
+| **after** | no `h=46` at all · **`DONE: settled at top=-2.0 after 2 hops, 1038 ms`** (and `top=0.0` after 2 hops, 1021 ms) |
+
+Captures `24-a2-before-three-expanded` (the page 61 pt short, the chapter heading standing above the
+note) and `23-a2-after-three-expanded` (the note's header exactly at the top). **The gate's PURPOSE —
+"do not break the three-expanded case she also uses" — is met and then some; the gate's LETTER is not.**
+That is the orchestrator's call, not mine, and it is the first thing this record hands up.
+
+## THE ORDINARY LANDING, ON HER BOOK — before and after
+
+Same protocol as TRACE 2 RE-VERIFIED (fresh launch · click the book · 120 ms · the 11th chapter):
+
+| | before (3 runs) | after (3 runs) |
+|---|---|---|
+| cards arriving at `h=46` and growing | **yes, every run** (`page-D17F5E79 h=46` → `h=103`) | **none — not one `h=46` in any run** |
+| hops | 1 · 2 · 2 | **1 · 1 · 1** |
+| settle | 1004 · 1018 · 1005 ms | 1013 · 1014 · 1021 ms |
+| where it ends | `settled at top=0.0` | `settled at top=0.0` |
+
+The captures are pixel-identical (`22-a2-before-ch11-landed` vs `21-a2-after-ch11-landed`): the note's
+header at the top, the first block under it, the caret in it. **What it cost visually: nothing** — the
+book on open (`20-a2-after-sherlock-open`) is the same page it was, and her LIKE holds (a chapter whose
+one note says its name shows ONE navigator row, visible in every capture). Study voice walked too
+(`25-a2-after-study-voice`).
+
+*(One methodological note, because it cost an hour: the amplitude of the before-case on THIS dev store
+is smaller than TRACE 2's 854 pt, and not because of the cards — the target note's expanded height is
+now remembered (`h=23015` on its first report, `SurfaceSizeMemory`, 18d's U-12). A capture taken with a
+different lead-in — the book open for five seconds before the click rather than 120 ms — is not
+comparable to one taken with the protocol, and the first after-capture I took that way looked like a
+regression until it was re-taken correctly. Same protocol on both sides, always.)*
+
+## A HARNESS FINDING, MEASURED AGAINST THE APP BEFORE ANY TEST WAS TOUCHED
+
+`aChapterRevealLandsAtTheChapterWithAStoryExpandedAndLive` went red at `editorHeight == 24`. Under this
+harness — which drives SwiftUI by pumping the run loop by hand — the Outline's editor representable
+realizes **TWICE** for the same post once `adopt` suspends: two `InlineEditorSurface.makeNSView` calls
+~7 ms apart, two `EditorViewModel`s, the first empty and the second holding the text
+(`["h=24/c=0", "h=16134/c=56004"]`, stable for 1.6 s). That is `KnownIssuesAndTechDebt`'s shadow-editor
+row (18d batch 1), and `firstEditor(in:)` — "the first `EditorTextView` in the tree" — returned the
+shadow. Isolating it took four probes: with the row's own read restored the double stayed (so it is not
+the row), with the prime disabled it vanished, with `cardPreviews` made `@ObservationIgnored` it stayed
+(so it is not observation), and with the database read replaced by a bare `await Task.yield()` it stayed
+— **it is the suspension, in this harness**.
+
+**I did not touch the test until I knew what the APP does.** With an `NSLog` at the mount, the dev-store
+Debug build against the real Sherlock book, the same gesture: **ONE mount on the pre-fix tree, ONE mount
+on this one.** So the doubling is the harness's, not the product's. The helper is now
+`writingEditor(in:)` — the editor holding the note's text, with that measurement written at it; a
+single-editor tree behaves exactly as before.
+
+**A note for whoever owns the shadow (unit B / KnownIssues row 49), recorded and NOT acted on:** UNIT A
+closed the run-scale-split route on the evidence *"`editorHeight == 24` after 200 settle turns"*. That is
+the same symptom this unit has now traced to the harness's double realization and `firstEditor`'s
+assumption. It does not re-open constraint 4 — the ruling binds, and this unit obeyed it — but the
+evidence that closed that road deserves a second look from whoever takes the shadow.
+
+## DISPOSITIONS
+
+| item | verdict | evidence |
+|---|---|---|
+| **item 18's card drift** (the defect RULING A-1 adopted a fix for) | **FIXED, red-on-old, walked** | The pin was RED first (8 cards `46 → 103`), green after; the real book's landing shows not one `h=46` across three runs where the before showed one every run. |
+| **constraint 1 — the bounded read** | **MET, measured** | `leadingBlockTexts` is FLAT (0.1549 → 0.1593 ms across a 200× size range) against a `renderPost` that grows 66×; pinned as query-plan shape, not as a stopwatch. |
+| **constraint 2 — the gate fixture 3/3** | **NOT MET IN THE FIXTURE (73 pt, 3/3) · MET IN PRODUCTION (12 hops / 4.08 s → 2 hops / 1.02 s)** | THE GATE, MEASURED BOTH WAYS. **The orchestrator's call.** |
+| **constraint 3 — the card:heading scale mix** | **MEASURED; it is the gate arm's mechanism, not a residual** | ±70 pt with `rows=38 sum=99998` constant through the oscillation — the estimate, exactly as UNIT A measured it (68–74 pt). |
+| **constraint 4 — no lazy-run restructuring** | **HONOURED** | Nothing in `BookOutlineRows.segments` or the column's containers was touched; the diff is the model, the row's excerpt source, and the core read. |
+| **the harness's double editor** | **DIAGNOSED · the product measured CLEAN · the helper corrected** | One mount in the real app on both trees (cliclick walk + `NSLog` probe); four probes isolating the cause to the suspension. |
+| **a PROVISIONAL** | **NONE, deliberately** | Every call here was technical with a measurement behind it — the block bound, the freshness refresh, the helper. None decided product behaviour, so `notes/QUESTIONS.md` is untouched and the next free number stays **#110**. |
+
+**Captures** (gitignored, `notes/plans/13u2-screens/`, continuing UNIT A's numbering): `19-a2-before-arrival`
+· `20-a2-after-sherlock-open` · `21-a2-after-ch11-landed` · `22-a2-before-ch11-landed` ·
+`23-a2-after-three-expanded` · `24-a2-before-three-expanded` · `25-a2-after-study-voice`, plus the raw
+landing logs `a2-before3.log` · `a2-before-run4.log` · `a2-before-run5.log`.
 
 ---
 
