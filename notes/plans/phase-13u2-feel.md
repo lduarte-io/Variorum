@@ -1509,6 +1509,14 @@ read the clamped span. Three consequences fall out for free, and each is worth n
 - `CrossBlockRefusal.diagnose` walks the same raw-span run, so **the diagnosis and the plan still
   agree** with no change to `diagnose`'s geometry at all.
 
+**THE COST, because P1 asks.** The clamp is ONE extra pass over the entry ranges, beside the two
+`plan` already makes (`entryRanges()` and the run walk) — and it stops as soon as the separators pass
+the span, so it is bounded by the span's position rather than always by the document. The standing
+cost pins measured it on the same tree: `planCrossBlockEdit @8000 blocks — 2.12 ms`,
+`crossBlockRefusal @20k blocks — 3.85 ms`, `separatorPair @20k — 8.14 ms`, all green. No new
+allocation per keystroke either: the clamp runs only inside the gate's `.crossesBlockBoundary` arm,
+which an ordinary keystroke never reaches.
+
 **3. Shape (i) — clamp and edit — is deliberately NOT a `Plan`.** After the clamp the gesture sits
 inside one block. Routing it through the compound would have given a one-block text edit a
 STRUCTURAL undo entry, and a structural rewrite clears the text-undo stack — so ⌘Z would be dead on
