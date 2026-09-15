@@ -1761,7 +1761,7 @@ foreign-string compare).
 | piece | state |
 |---|---|
 | the record opened | **DONE** |
-| item 2 — the eager space-eater (BOTH platforms) | PENDING |
+| item 2 — the eager space-eater (BOTH platforms) | **TRACED + FIXED** — the durability mint's edge trim; red-on-old on the Mac (5 of 9 pins, 8 issues); the phone inherits the shared brain and has its own landing pin (TRACE D-1) |
 | item 10 — starred items scroll past ~7 | PENDING |
 | item 11 — paste without newlines (+ the phone's rule) | PENDING |
 | item 13 — the note title's room · row 93 — the nameless prompt | PENDING |
@@ -1775,6 +1775,75 @@ foreign-string compare).
 | PROVISIONALs → `notes/QUESTIONS.md` (next free **#112**) | PENDING |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
+
+## TRACE D-1 — ITEM 2, THE EAGER SPACE-EATER: the durability mint's edge trim
+
+Her words: *"it's really annoying in both variorum and variorum mobile when you typed a space but
+are sitting there thinking of a word and the program eagerly eats your space."*
+
+**The mechanism, end to end.** A note whose text has not yet become blocks is an OPEN TAIL. Two
+seconds after the last keystroke the DURABILITY MINT fires (`EditorViewModel.idleMintTail` on the
+Mac, `MobileEditorViewModel.idleMintTail` on the phone; `finalizeWork` at teardown/quit is the
+same road) and plans `CrystallizationPlanner.Kind.idle`. That plan's segments come from
+`SegmentationRules.bulkSegments`, which puts every piece through `trimmedPiece` — and
+`trimmedPiece` strips the piece's TRAILING horizontal whitespace. So the mint's planned region
+text differs from what is on screen by exactly the space she just typed, `finishMint` takes its
+`normalized != tailText` branch, and:
+
+```swift
+programmaticReplace(region, with: normalized, blockID: nil, caretToEndIfWasAtEnd: true)
+textView?.undoManager?.removeAllActions()
+```
+
+— her live text is rewritten under the caret, **and the text view's undo stack is cleared in the
+same breath**, so ⌘Z cannot bring the character back either. Two seconds after typing a space,
+mid-thought, the space is gone and there is no road to it. That is her report, exactly.
+
+**RED ON OLD, measured on the pre-fix tree** (`-only-testing:VariorumTests/SpaceEaterTests`,
+9 tests, **5 failed with 8 issues**), verbatim from the run:
+
+```
+✘ theDurabilityMintKeepsTheSpaceUnderHerCaret
+    (plan?.mints → ["the quick brown"]) == ["the quick brown "]
+    (plan?.normalizedRegionText(applyingFirst: 1) → "the quick brown") == "the quick brown "
+✘ typingASpaceAndPausingKeepsItOnTheSurfaceAndInTheStore
+    (harness.documentText → "the quick brown") == "the quick brown "
+    (stored → [Optional("the quick brown")]) == [Optional("the quick brown ")]
+✘ theSpaceSurvivesTheTeardownMintToo
+    (stored → [Optional("still thinking")]) == [Optional("still thinking ")]
+```
+
+The app-level arms drive the REAL `NSTextInputClient` path on a mounted `EditorTextView` and read
+both the surface and the store, so the pin is about the app's behaviour and not only about a pure
+function.
+
+**THE FOUR THAT PASS ON BOTH TREES are named rather than claimed** (a pin green on both sides pins
+a PRESERVED behaviour, never a fix): bulk entry still trims every edge (a paste is not her caret —
+the K8 trim law is untouched); type-time crystallization still trims a completed paragraph (`.typing`
+mints the paragraph she typed PAST, never the one under the caret); a tail ending in a NEWLINE run
+is unchanged (the r−1 rule owns that case); and the phone's paste pin.
+
+**THE FIX — four lines inside `CrystallizationPlanner.plan(.idle)`, `App/Variorum/Shared/EditorBrain/`,
+so BOTH platforms inherit it with no platform arm.** The `.idle` kind already exists for exactly
+this class: it was split off from `.bulk` at the author's 2026-07-12 ruling (Phase 10 review round
+1, MAJOR 2) so the durability mint *"never collapses a pending typed gap — the trailing newline run
+survives … byte-identical region, no visible collapse at mint."* **A typed trailing SPACE is the
+same class of typed text as a typed trailing NEWLINE**, so it now survives the same way: when the
+tail does not end in a newline run, the last mint keeps the tail's own trailing horizontal
+whitespace. `normalizedRegionText` then equals the tail again — which means the mint performs **no
+programmatic edit at all**, rather than a smaller one.
+
+**Scope, deliberately narrow and stated at the line:** only the piece the caret is ON. Interior
+pieces are paragraphs she typed PAST and keep the shipped trim; bulk entry is untouched; and a
+tail like `"abc\n   "`, whose last line `bulkSegments` drops whole, keeps its shipped behaviour
+(appending that run to `"abc"` would move whitespace across a line the mint is collapsing anyway).
+The wider reading — every piece of a durability mint keeping its typed edges — is recorded for her
+as **QUESTIONS #112(a)**.
+
+**BOTH PLATFORMS.** The phone consumes the same `plan` through its own `crystallizeIfNeeded`, so it
+needed **no phone-side arm**; `MobileSpaceEaterTests` drives the phone's OWN road (a real
+`NSTextStorage` edit through `typeEdit`, then `idleMintTail`, then the store) and reads
+`storage.string` and the stored block texts — **2 tests, green** on the simulator.
 
 ---
 

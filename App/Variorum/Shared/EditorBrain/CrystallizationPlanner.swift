@@ -156,7 +156,7 @@ nonisolated enum CrystallizationPlanner {
                         remaindersAfter: Array(repeating: "", count: segments.count),
                         remainingTail: nil)
         case .idle(let mode):
-            let segments = SegmentationRules.bulkSegments(tail, mode: mode)
+            var segments = SegmentationRules.bulkSegments(tail, mode: mode)
             guard !segments.isEmpty else { return nil }
             // The pending gap: r trailing newlines keep r−1 as the open
             // tail (the last piece gains the separator), so the region
@@ -164,6 +164,48 @@ nonisolated enum CrystallizationPlanner {
             var trailingRun = 0
             for character in tail.reversed() {
                 if character == "\n" { trailingRun += 1 } else { break }
+            }
+            // **THE SPACE UNDER HER CARET (13u2 UNIT D, item 2 — her words:
+            // "you typed a space but are sitting there thinking of a word
+            // and the program eagerly eats your space").** The durability
+            // mint is not bulk entry: every character in this tail is text
+            // she typed seconds ago, and the caret is sitting at its end.
+            // `bulkSegments` edge-trims each piece (the K8 trim law), so a
+            // trailing space made `normalizedRegionText` differ from the
+            // tail by exactly that character — and the editor's mint-apply
+            // then ran a `programmaticReplace` over her live text (and
+            // cleared the text view's undo stack with it, so ⌘Z could not
+            // bring the character back).
+            //
+            // This kind ALREADY exists to prevent precisely that class: it
+            // was split from `.bulk` at the author's 2026-07-12 ruling
+            // (Phase 10 review round 1, MAJOR 2) so the durability mint
+            // "never collapses a pending typed gap — the trailing newline
+            // run survives ... byte-identical region, no visible collapse".
+            // A typed trailing SPACE is the same class as a typed trailing
+            // NEWLINE, so it survives the same way. **Scope, deliberately
+            // narrow:** only the piece the caret is on — i.e. only when the
+            // tail does not end in a newline run, so the last mint IS the
+            // tail's end. Interior pieces are paragraphs she typed PAST and
+            // keep the shipped trim, and bulk entry (paste, import, pool
+            // drop) is untouched. (QUESTIONS #112(a) records the wider
+            // reading for her.)
+            //
+            // The last line must be NON-BLANK to be the piece the last mint
+            // came from: a tail of `"abc\n   "` ends in horizontal
+            // whitespace whose line `bulkSegments` dropped entirely, and
+            // appending it to `"abc"` would move whitespace across a line
+            // the mint is collapsing anyway. That shape keeps its shipped
+            // behaviour exactly.
+            if trailingRun == 0,
+               let lastLine = tail.split(separator: "\n", omittingEmptySubsequences: false).last,
+               !lastLine.allSatisfy(\.isWhitespace) {
+                let kept = lastLine.reversed().prefix {
+                    $0.unicodeScalars.allSatisfy(CharacterSet.whitespaces.contains)
+                }
+                if !kept.isEmpty {
+                    segments[segments.count - 1] += String(kept.reversed())
+                }
             }
             return Plan(kind: kind, mints: segments,
                         remaindersAfter: Array(repeating: "", count: segments.count),
