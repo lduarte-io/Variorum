@@ -766,6 +766,38 @@ extension PaneTextView {
     static func makeTakeSurface() -> PaneTextView {
         makeSurface(inset: takeSurfaceInset, allowsUndo: true)
     }
+
+    /// **WHERE A PANE'S PROSE STARTS, from the pane's own leading edge**
+    /// (13u2 UNIT B — her item 19: *"the text indents in index mode where
+    /// you're editing it, which should not be happening the second you click
+    /// into a block."*).
+    ///
+    /// A `PaneSurfaceView`'s first glyph does NOT sit at its SwiftUI frame's
+    /// edge: the text container is inset by `takeSurfaceInset`, and AppKit's
+    /// text container adds its own `lineFragmentPadding` on top. A host that
+    /// renders the SAME block two ways — read-cheap `Text` at rest, a live
+    /// pane on click — has to pay that difference back in its own padding or
+    /// the text visibly jumps sideways the moment the block goes live.
+    ///
+    /// **MEASURED, never assumed**: both terms are read off a real surface,
+    /// so a change to either (an inset tweak, a container configured
+    /// differently) moves the hosts that line up with it instead of silently
+    /// re-opening the defect. Computed once, on the main actor, from a throwaway
+    /// surface — the same construction every pane makes.
+    static let proseLeadingInset: CGFloat = takeSurfaceInset + appKitLineFragmentPadding
+
+    /// AppKit's own default padding inside a text container, MEASURED rather
+    /// than looked up (`IndexProseColumnTests` constructs a real surface and
+    /// fails if this number or the inset above ever stops describing it — a
+    /// TEXTKIT2 §5 point-release fact, held where a pin can see it). It is a
+    /// plain constant here rather than a probe because these are read inside
+    /// SwiftUI bodies, and a body is not where a text view should be built.
+    static let appKitLineFragmentPadding: CGFloat = 5
+
+    /// The same fact on the VERTICAL axis — where a pane's first LINE starts
+    /// below its own top edge. No fragment padding on this axis; the
+    /// container inset alone.
+    static let proseTopInset: CGFloat = takeSurfaceInset
 }
 
 // MARK: - Where a pane's caret lands when it takes the ring

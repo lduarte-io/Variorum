@@ -108,6 +108,29 @@ extension ReadEditPane {
 /// rendered paragraphs (a click on them is the upgrade). Washed when
 /// selected, the ordinal in the margin, one generous click target.
 private struct ReadEditBlock: View {
+    /// This surface's resting padding — what the read tier used to pad on
+    /// every side, and still the trailing/bottom measure.
+    static let restingLeading = IndexProseColumn.readEditResting
+    static let restingTop = IndexProseColumn.readEditRestingTop
+    /// The two tiers' leading and top padding, derived from that one number
+    /// and the pane's own inset so they cannot drift (13u2 UNIT B).
+    @MainActor static var readTierLeading: CGFloat {
+        IndexProseColumn.readTierLeading(
+            resting: restingLeading, paneInset: PaneTextView.proseLeadingInset)
+    }
+    @MainActor static var livePaneLeading: CGFloat {
+        IndexProseColumn.livePaneLeading(
+            resting: restingLeading, paneInset: PaneTextView.proseLeadingInset)
+    }
+    @MainActor static var readTierTop: CGFloat {
+        IndexProseColumn.readTierTop(
+            resting: restingTop, paneInset: PaneTextView.proseTopInset)
+    }
+    @MainActor static var livePaneTop: CGFloat {
+        IndexProseColumn.livePaneTop(
+            resting: restingTop, paneInset: PaneTextView.proseTopInset)
+    }
+
     let model: BlockTOCViewModel
     let tokens: VoiceTokens
     let indicator: EditingIndicatorStyle
@@ -157,18 +180,19 @@ private struct ReadEditBlock: View {
                             offset: range.location)
                     },
                     caretOnGoingLive: model.caretLanding(forVariant: variantID))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 4)
-                    // 17o batch c (row 6, named in the brief): this pane's
-                    // own overlay CONSUMES the one rule instead of keeping a
-                    // second one — under `.off`/`.background` no ring is
-                    // drawn here and the pane carries the wash itself.
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(
-                                PaneDecoration.hostRing(
-                                    indicator: indicator, tokens: tokens) ?? .clear,
-                                lineWidth: 1))
+                    // 13u2 UNIT B (her item 19): the live pane's PROSE lands
+                    // exactly where the read tier's did — the host pays back
+                    // only the remainder of the pane's own inset, so clicking
+                    // into a block does not step the text sideways.
+                    .padding(.leading, ReadEditBlock.livePaneLeading)
+                    .padding(.trailing, ReadEditBlock.restingLeading)
+                    .padding(.top, ReadEditBlock.livePaneTop)
+                    .padding(.bottom, ReadEditBlock.restingTop)
+                // (17o batch c's own host ring RETIRED at 13u2 UNIT B: the
+                //  pane draws the indicator itself, in the same shape and the
+                //  same token, so this overlay was a SECOND concentric ring —
+                //  visible in the walk's captures. One editing mark, one
+                //  drawer: `PaneDecoration.resolve`, inside the pane.)
             } else {
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
@@ -183,9 +207,20 @@ private struct ReadEditBlock: View {
                         Text(" ").font(tokens.body)
                     }
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
+                // 13u2 UNIT B: the read tier's prose sits at the SAME column
+                // as the live pane's (`IndexProseColumn` — one number, both
+                // tiers derived).
+                .padding(.leading, ReadEditBlock.readTierLeading)
+                .padding(.trailing, ReadEditBlock.restingLeading)
+                .padding(.top, ReadEditBlock.readTierTop)
+                .padding(.bottom, ReadEditBlock.restingTop)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                // **THE FIRST-CLICK HIGHLIGHT** (her item 19): a block chosen
+                // from the index column washes, and that is NOT the editing
+                // indicator's to govern — *"it shouldn't stop the item from
+                // being highlighted on the left and highlighted when you first
+                // click on it from the index column"*. A block she is EDITING
+                // wears the R14/R22 setting's mark instead, drawn by the pane.
                 .background(
                     selected ? AnyShapeStyle(tokens.wash) : AnyShapeStyle(.clear),
                     in: RoundedRectangle(cornerRadius: 8))

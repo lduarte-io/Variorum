@@ -407,4 +407,41 @@ extension ReadModeTests {
             #expect(blocks.contains(expected), "…one of the note's own blocks")
         }
     }
+
+    // MARK: - 13u2 UNIT B — her item 19 (R-13u-10)
+
+    /// **THE INDEX HIGHLIGHT FOLLOWS THE EDITING CURSOR.** Her words:
+    /// *"when you click into another block, that one isn't highlighted as the
+    /// one being edited and the wrong index block on the left stays
+    /// highlighted… the index highlight should follow where your editing
+    /// cursor is regardless of what your setting of showing it on the editor
+    /// is."* Reproduced in the walk (capture 31): block 02 live with its
+    /// caret in it, and the `▸ 04` row highlighted on the left.
+    ///
+    /// The RING is the authority now and the selection follows it, so EVERY
+    /// road that moves the ring keeps the column honest — a click in the pane
+    /// (which always did), a landing, and the programmatic `makeLive` this
+    /// pin drives, which is the road that had no selection half at all.
+    ///
+    /// RED ON OLD: the column's mark stays on the block the click before it
+    /// had selected.
+    @Test func theIndexColumnMarksTheBlockTheCursorIsIn() async throws {
+        try await mounted(face: .edit) { world in
+            let second = world.blockIDs[1]
+            let third = world.blockIDs[2]
+            #expect(ReadModeOracle.selectedBlockID == world.blockIDs[0])
+
+            // A road that moves the ring WITHOUT going through the host's own
+            // selection door — exactly what a landing does.
+            world.model.makeLive(second, variantID: world.variantIDs[1])
+            #expect(await world.poll { ReadModeOracle.selectedBlockID == second },
+                    "the column followed the cursor into block 2")
+            #expect(world.session.commandRouter.focusedBlock?.blockID == second,
+                    "…and the note's ONE current-block fact followed too (row 39)")
+
+            world.model.makeLive(third, variantID: world.variantIDs[2])
+            #expect(await world.poll { ReadModeOracle.selectedBlockID == third },
+                    "and again, by the same rule")
+        }
+    }
 }

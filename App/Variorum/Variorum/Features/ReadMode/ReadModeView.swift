@@ -161,7 +161,24 @@ struct ReadModeView: View {
                     selectedBlockID: selectedBlockID,
                     showsCount: face == .edit,
                     columnTarget: $columnTarget,
-                    onSelect: { blockID in select(blockID, scrollFace: true) },
+                    onSelect: { blockID in
+                        // **A COLUMN CLICK IS NAVIGATION** (13u2 UNIT B, her
+                        // item 19 — PROVISIONAL, QUESTIONS #110). Her two
+                        // clauses only agree if the index highlight and the
+                        // editing cursor can never name different blocks:
+                        // clicking a row *"will also highlight the block on
+                        // the right, which I do think is helpful"*, and *"the
+                        // index highlight should follow where your editing
+                        // cursor is"*. So a row click that names a DIFFERENT
+                        // block than the live one releases the ring — the
+                        // pane's text lands through the one coordinator, the
+                        // clicked block wears the selection wash, and nothing
+                        // is being edited until she clicks into it. Clicking
+                        // the row of the block she is already in changes
+                        // nothing.
+                        if let live = model.liveBlockID, live != blockID { model.blur() }
+                        select(blockID, scrollFace: true)
+                    },
                     onJump: onJump)
                     .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
                         #if DEBUG
@@ -215,7 +232,31 @@ struct ReadModeView: View {
             report()
         }
         .onChange(of: selectedBlockID) { _, _ in report() }
-        .onChange(of: model.liveBlockID) { _, _ in report() }
+        // **THE INDEX HIGHLIGHT FOLLOWS THE EDITING CURSOR** (13u2 UNIT B —
+        // her item 19, verbatim: *"the index highlight should follow where
+        // your editing cursor is regardless of what your setting of showing it
+        // on the editor is."*). It is the SECOND half of what she reported:
+        // clicking a row on the left selects a block WITHOUT making it live,
+        // so with a block already live the column highlighted one block while
+        // her caret sat in another — *"the wrong index block on the left stays
+        // highlighted"*, reproduced in the walk (capture 31).
+        //
+        // The ring is the authority; the selection follows it, never the other
+        // way round, so every road that moves the ring — a click in the pane,
+        // a landing, a programmatic `makeLive` — keeps the column honest with
+        // one rule. The COLUMN scrolls to the row; the PANE deliberately does
+        // not (clicking what you can see must not move it under you), and the
+        // note's current-block fact is reported so the other modes land where
+        // she was.
+        .onChange(of: model.liveBlockID) { _, live in
+            if let live, live != selectedBlockID {
+                selectedBlockID = live
+                columnTarget = live
+                session.commandRouter.noteFocusedBlock(
+                    live, variantID: rowsByID[live]?.variantID, postID: postID)
+            }
+            report()
+        }
         .onChange(of: form) { _, _ in report() }
     }
 
@@ -491,6 +532,12 @@ private struct ReadPageColumn: View {
                 .padding(.vertical, 28)
                 .frame(maxWidth: .infinity)
             }
+            // 13u2 UNIT B (her item 19): the room behind the CREAM PAGE is the
+            // voice's own, never a palette's — *"leave that white so that the
+            // cream read page isn't on a colorful background."* The host still
+            // paints `tokens.room` for the `edit` face, whose column and pane
+            // cover it; this is the one face where the room shows.
+            .background(ReadingPageTokens.room(voice: tokens.voice, dark: dark))
             .onChange(of: pageTarget) { _, target in
                 guard let target else { return }
                 // Ladder R1-3: unanimated, on the row's identity (the Outline

@@ -65,7 +65,9 @@ struct NotePagesView: View {
                 spread
             }
         }
-        .background(tokens.room)
+        // 13u2 UNIT B (her item 19): the leaves' room is the voice's own,
+        // never a palette's.
+        .background(ReadingPageTokens.room(voice: tokens.voice, dark: scheme == .dark))
         .background(PageTurnKeyMonitor(onTurn: { turn in
             let leaves = turn == .back ? -2 : 2
             guard pages.canTurn(by: leaves) else { return }

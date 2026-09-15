@@ -342,4 +342,115 @@ struct BookIndexEditingTests {
             edit.teardown()
         }
     }
+
+    // MARK: - 13u2 UNIT B — her item 19 (R-13u-10), the book Index's presentation
+
+    /// **(a) THE WHOLE NOTE NO LONGER TAKES THE WASH.** Her words, verbatim:
+    /// *"in index, even when I have a color mode on I don't want the whole
+    /// note i'm editing to be that color, it's too much."* The selected note
+    /// is still marked — its TITLE line takes the same wash the column's own
+    /// row does — and the mark is a row, not a slab the prose is read through.
+    ///
+    /// Two measured rectangles, because that is what the claim is about.
+    /// RED ON OLD: the washed rectangle IS the note's rectangle (the
+    /// background sat on the note's whole `VStack`), so the ratio is 1.
+    /// Measured after: **25.0 pt of a 152.0-pt note.**
+    @Test func theSelectedNotesWashMarksItsTitleNotItsWholeBody() async throws {
+        try await withIndexBook { session, db, readingID, postIDs, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            structure.mode = .index
+            #if DEBUG
+            BookIndexGeometry.reset()
+            #endif
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            #if DEBUG
+            // The arrival seed selects the first note.
+            let first = postIDs[0]
+            await settle(window, hosting, until: {
+                BookIndexGeometry.paneSelectionWashHeights[first] != nil
+                    && (BookIndexGeometry.paneNoteHeights[first] ?? 0) > 0
+            })
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            let wash = try #require(BookIndexGeometry.paneSelectionWashHeights[first],
+                                    "the selected note reported its wash")
+            let note = try #require(BookIndexGeometry.paneNoteHeights[first],
+                                    "…and its own height")
+            print("[13u2 B a] wash \(wash) of note \(note)")
+            #expect(note > 100, "the fixture's note is several blocks tall: \(note)")
+            #expect(wash < note / 3,
+                    "the wash marks a line, not the note: \(wash) of \(note)")
+            #endif
+        }
+    }
+
+    /// **(c) CLICKING INTO A BLOCK DOES NOT MOVE ITS PROSE.** Her words:
+    /// *"the text indents in index mode where you're editing it, which should
+    /// not be happening the second you click into a block."*
+    ///
+    /// One x, measured the same way in both tiers (`BookIndexGeometry`
+    /// .paneProseLeading): the read tier reports its text column's own
+    /// leading edge; the live tier reports its pane's, plus the pane's
+    /// MEASURED internal inset. RED ON OLD: the two differ by
+    /// `PaneTextView.proseLeadingInset` — 11 pt on this machine — because
+    /// both tiers were padded the same and only one of them has an inset.
+    @Test func clickingIntoABlockDoesNotMoveItsProseSideways() async throws {
+        try await withIndexBook { session, db, readingID, postIDs, blocks in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            structure.mode = .index
+            #if DEBUG
+            BookIndexGeometry.reset()
+            #endif
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            #if DEBUG
+            let target = blocks[postIDs[0]]![1]
+            await settle(window, hosting, until: {
+                BookIndexGeometry.paneProseLeading[target.blockID] != nil
+            })
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            let atRest = try #require(BookIndexGeometry.paneProseLeading[target.blockID],
+                                      "the read tier reported where its prose starts")
+
+            model.requestLanding(LandingTarget(postID: postIDs[0], blockID: target.blockID))
+            await settle(window, hosting, until: { editablePanes(in: hosting).count == 1 })
+            await settle(window, hosting, until: { false }, maxTurns: 8)
+            let live = try #require(BookIndexGeometry.paneProseLeading[target.blockID],
+                                    "the live pane reported where its prose starts")
+            print("[13u2 B c] rest \(atRest) · live \(live) · inset \(PaneTextView.proseLeadingInset)")
+            #expect(PaneTextView.proseLeadingInset > 0,
+                    "a pane really does inset its own prose — the defect's whole cause")
+            #expect(abs(live - atRest) <= 1,
+                    "the prose did not move: rest \(atRest), live \(live)")
+            #endif
+        }
+    }
+
+    // **(d) THE BOOK INDEX'S COLUMN — DISMISSED AS HOLLOW, and recorded.**
+    // A pin was written here asserting that a LANDING on another note moves
+    // the column's mark to it. It passes on the PRE-FIX tree: `landOrSeed`
+    // already selects the revealed note before its pane makes a block live,
+    // and the row's own tap selects too — so in this column, whose rows are
+    // NOTES, the mark already follows the ring by every road there is. The
+    // defect she reported is the NOTE surface's column, whose rows are
+    // BLOCKS; its pin is `ReadModeTests.theIndexColumnMarksTheBlockTheCursorIsIn`.
+    // (The follow that WAS added here is gone with the pin — it also tore the
+    // index's state down; `BookIndexView` carries the measurement.)
+
 }

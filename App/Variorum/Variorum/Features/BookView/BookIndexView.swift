@@ -52,12 +52,40 @@ enum BookIndexGeometry {
     /// never `idealWidth`. Keyed by the BOOK's id: suites run in parallel,
     /// so a pin must read ITS book's panel, not the last one drawn anywhere.
     static var columnFrames: [String: CGRect] = [:]
+    /// **13u2 UNIT B (her item 19): the rectangle the SELECTED note's wash
+    /// actually covers, and the note's own height beside it.** *"I don't want
+    /// the whole note i'm editing to be that color"* is a claim about two
+    /// rectangles, so the pin reads the rectangles. Keyed by the NOTE's id
+    /// (the subject-keyed rule, KnownIssues row 50).
+    static var paneSelectionWashHeights: [String: CGFloat] = [:]
+    static var paneNoteHeights: [String: CGFloat] = [:]
+    /// **13u2 UNIT B (her item 19): where a block's PROSE starts, per tier.**
+    /// *"the text indents in index mode where you're editing it"* is a claim
+    /// about one x, measured the same way in both tiers: the read tier reports
+    /// its text column's own leading edge, the live tier its pane's plus the
+    /// pane's MEASURED internal inset (`PaneTextView.proseLeadingInset`).
+    /// Keyed by the BLOCK's id (the subject-keyed rule).
+    static var paneProseLeading: [String: CGFloat] = [:]
 
     static func reset() {
         chapterCountFrame = nil
         noteMenuFrame = nil
         columnFrames = [:]
+        paneProseLeading = [:]
+        paneSelectionWashHeights = [:]
+        paneNoteHeights = [:]
     }
+}
+#endif
+
+/// 13u2 UNIT B: what the selection probe observes. The observed value carries
+/// the SELECTION as well as the height, because a geometry action fires on a
+/// VALUE change and the header's height is the same before and after the wash
+/// appears — a height-only probe would never write while `selected` is true.
+#if DEBUG
+nonisolated struct BookIndexWashReport: Equatable, Sendable {
+    var height: CGFloat
+    var selected: Bool
 }
 #endif
 
@@ -301,6 +329,18 @@ struct BookIndexView<Masthead: View>: View {
         }
         .onChange(of: model.pendingReveal) { _, _ in landOrSeed() }
         .onChange(of: model.entries) { _, _ in landOrSeed() }
+        // **NO SELECTION-FOLLOW HERE, and the reason is measured** (13u2
+        // UNIT B, her item 19). The note surface's column needed one — its
+        // rows are BLOCKS and a ring could move without the column hearing.
+        // This column's rows are NOTES, and every road that makes a note's
+        // block live already selects that note: the row's own tap does, and a
+        // landing runs through `landOrSeed`, which selects the revealed note
+        // before the pane makes its block live. A follow added here was
+        // therefore HOLLOW — and worse than hollow: writing the selection from
+        // inside the observation update that made the pane live tore the
+        // index's own state down and the live pane vanished
+        // (`theReadClickLandsInIndexAtThatBlock` read ZERO editable panes,
+        // isolated and reproducible, with and without a next-turn deferral).
         .onChange(of: edit.livePostID) { _, live in model.noteIndexLive(live) }
         // Leaving the index releases its ring (the one live pane), flushing
         // whatever it held — the same discipline every pane host follows.
@@ -469,7 +509,15 @@ struct BookIndexView<Masthead: View>: View {
             entry: entry,
             nested: nested,
             selected: selectedPostID == entry.postID,
-            onSelect: { select(entry.postID, scrollPane: true) },
+            onSelect: {
+                // **A COLUMN CLICK IS NAVIGATION** (13u2 UNIT B, her item 19 —
+                // PROVISIONAL, QUESTIONS #110; the note surface's twin rule).
+                // A row naming a DIFFERENT note than the live pane's releases
+                // the ring, so the column's mark and the editing cursor can
+                // never point at two different notes.
+                if let live = edit.livePostID, live != entry.postID { edit.blur() }
+                select(entry.postID, scrollPane: true)
+            },
             menu: { AnyView(chapterFilingMenu(entry.postID)) })
             .id("bix-\(entry.postID)")
     }
@@ -663,6 +711,25 @@ private struct BookIndexNoteRow: View {
 /// (`BookIndexEditModel`, one authority for the whole book), every other
 /// block stays `Text`. Locked takes stay read.
 private struct BookIndexPaneNote: View {
+    /// This surface's resting padding (13u2 UNIT B) — what both tiers used to
+    /// pad on every side, and still the trailing/bottom measure.
+    static let resting = IndexProseColumn.bookIndexResting
+    static let restingTop = IndexProseColumn.bookIndexRestingTop
+    @MainActor static var readTierLeading: CGFloat {
+        IndexProseColumn.readTierLeading(
+            resting: resting, paneInset: PaneTextView.proseLeadingInset)
+    }
+    @MainActor static var livePaneLeading: CGFloat {
+        IndexProseColumn.livePaneLeading(
+            resting: resting, paneInset: PaneTextView.proseLeadingInset)
+    }
+    @MainActor static var readTierTop: CGFloat {
+        IndexProseColumn.readTierTop(resting: restingTop, paneInset: PaneTextView.proseTopInset)
+    }
+    @MainActor static var livePaneTop: CGFloat {
+        IndexProseColumn.livePaneTop(resting: restingTop, paneInset: PaneTextView.proseTopInset)
+    }
+
     let session: AppSession
     let tokens: VoiceTokens
     /// 17o batch c (her U-7): carried to the note's live pane.
@@ -707,6 +774,24 @@ private struct BookIndexPaneNote: View {
                         .foregroundStyle(tokens.muted)
                 }
             }
+            // **THE SELECTED NOTE'S MARK — its HEADER, never its body**
+            // (13u2 UNIT B, her item 19, verbatim: *"in index, even when I
+            // have a color mode on I don't want the whole note i'm editing to
+            // be that color, it's too much."*)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(
+                selected ? AnyShapeStyle(tokens.wash) : AnyShapeStyle(.clear),
+                in: RoundedRectangle(cornerRadius: 6))
+            #if DEBUG
+            .onGeometryChange(for: BookIndexWashReport.self) {
+                BookIndexWashReport(height: $0.size.height, selected: selected)
+            } action: { report in
+                if report.selected {
+                    BookIndexGeometry.paneSelectionWashHeights[entry.postID] = report.height
+                }
+            }
+            #endif
             .contentShape(Rectangle())
             .onTapGesture { onTap() }
             ForEach(rows, id: \.blockID) { row in
@@ -720,9 +805,11 @@ private struct BookIndexPaneNote: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            selected ? AnyShapeStyle(tokens.wash) : AnyShapeStyle(.clear),
-            in: RoundedRectangle(cornerRadius: 8))
+        #if DEBUG
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+            BookIndexGeometry.paneNoteHeights[entry.postID] = height
+        }
+        #endif
         .environment(\.openURL, OpenURLAction { url in
             MarkdownLink.open(url.absoluteString) ? .handled : .discarded
         })
@@ -774,15 +861,22 @@ private struct BookIndexPaneNote: View {
                         postID: entry.postID, variantID: variantID,
                         oldText: row.text ?? "", newText: newText)
                 })
-                .padding(6)
-                // 17o batch c (row 6): the book index's own live frame
-                // consumes the ONE rule (see `ReadEditPane`).
-                .overlay(
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(
-                            PaneDecoration.hostRing(
-                                indicator: indicator, tokens: tokens) ?? .clear,
-                            lineWidth: 1))
+                #if DEBUG
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                    BookIndexGeometry.paneProseLeading[row.blockID] =
+                        frame.minX + PaneTextView.proseLeadingInset
+                }
+                #endif
+                // 13u2 UNIT B (her item 19): the live pane's PROSE lands where
+                // the read tier's did — the host pays back only the remainder
+                // of the pane's own inset, so clicking into a block does not
+                // step the text sideways (it stepped ~11 pt here, measured).
+                .padding(.leading, Self.livePaneLeading)
+                .padding(.trailing, Self.resting)
+                .padding(.top, Self.livePaneTop)
+                .padding(.bottom, Self.restingTop)
+                // (17o batch c's host ring RETIRED at 13u2 UNIT B — the pane
+                //  draws the indicator itself, so this was a second ring.)
         } else {
             let paragraphs = FlowParagraph.paragraphs(of: text, codeTint: tokens.codeTint)
             VStack(alignment: .leading, spacing: 8) {
@@ -798,7 +892,17 @@ private struct BookIndexPaneNote: View {
                     Text(" ").font(tokens.body)
                 }
             }
-            .padding(6)
+            #if DEBUG
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                BookIndexGeometry.paneProseLeading[row.blockID] = frame.minX
+            }
+            #endif
+            // 13u2 UNIT B: the read tier's prose sits at the SAME column as
+            // the live pane's (`IndexProseColumn`).
+            .padding(.leading, Self.readTierLeading)
+            .padding(.trailing, Self.resting)
+            .padding(.top, Self.readTierTop)
+            .padding(.bottom, Self.restingTop)
             .contentShape(Rectangle())
             .onTapGesture {
                 guard let variantID = row.variantID, !row.variantLocked else { return }

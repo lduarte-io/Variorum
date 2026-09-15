@@ -94,7 +94,9 @@ struct PagedReadView: View {
                 spread
             }
         }
-        .background(tokens.room)
+        // 13u2 UNIT B (her item 19): the leaves' room is the voice's own,
+        // never a palette's.
+        .background(ReadingPageTokens.room(voice: tokens.voice, dark: scheme == .dark))
         .safeAreaInset(edge: .bottom) { flipBar }
         .task {
             pages.appearance = appearance

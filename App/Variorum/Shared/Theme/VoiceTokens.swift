@@ -448,6 +448,29 @@ struct ReadingPageTokens {
         codeTint: Color(hex: 0x241F18),
         serif: .system(size: 16, design: .serif),
         serifTitle: .system(size: 25, weight: .semibold, design: .serif))
+
+    /// **THE ROOM AROUND THE PAGE — the VOICE's own, never a palette's**
+    /// (13u2 UNIT B, her item 19 / R-13u-10, verbatim: *"I also don't want
+    /// the color background behind the cream read page - leave that white so
+    /// that the cream read page isn't on a colorful background."*).
+    ///
+    /// It REFINES #107/R-Q26 rather than reversing it. That ruling kept the
+    /// PAGE cream under every palette (*"Keep the page cream"*); this keeps
+    /// the room the page sits in quiet too, which is the same reason said of
+    /// the other half of the rectangle — a cream page floating on a bold
+    /// pastel is exactly the thing the page's voice-independence exists to
+    /// avoid. R2's sentence (*"only the ROOM around the page follows the
+    /// voice"*) is untouched and is what this returns: the voice's own room,
+    /// resolved through the PALETTE-LESS road, so Terminal keeps its
+    /// near-white and Study its warm white, and dark stays fully black (R51).
+    ///
+    /// The four hosts that draw a cream page consume it — the note's Read
+    /// (continuous and pages) and the book's Read (Scroll and Pages) — and
+    /// `NoLiteralColourTests`' companion pin fails the suite if one of them
+    /// goes back to `tokens.room`.
+    static func room(voice: ThemeVoice, dark: Bool) -> Color {
+        VoiceTokens.resolve(voice: voice, dark: dark).room
+    }
 }
 
 extension Color {

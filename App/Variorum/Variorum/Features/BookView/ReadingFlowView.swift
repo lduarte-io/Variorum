@@ -228,7 +228,10 @@ struct ReadingFlowView: View {
             }
             .frame(maxWidth: .infinity)
         }
-        .background(tokens.room)
+        // 13u2 UNIT B (her item 19): the room around the CREAM PAGE is the
+        // voice's own, never a palette's — a page floating on a bold pastel is
+        // exactly what the page's voice-independence exists to avoid.
+        .background(ReadingPageTokens.room(voice: tokens.voice, dark: scheme == .dark))
     }
 
     @ViewBuilder
