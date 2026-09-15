@@ -90,6 +90,14 @@ nonisolated enum CrossBlockRefusal {
     /// cannot contribute a fan/unshown answer, and the geometry answers
     /// instead.
     ///
+    /// **Precondition, relied on rather than re-checked (13u1 ladder,
+    /// round 2):** `range` lies inside the document the index describes.
+    /// The one production road here is the gate's `.crossesBlockBoundary`
+    /// arm, and `BlockRangeIndex.verdict` fences an out-of-document range
+    /// upstream as `.indexDesync` before any refusal can diagnose. A test
+    /// that hand-feeds a range past `documentLength` is asking a question
+    /// no production caller can ask.
+    ///
     /// The order is most-specific-first, and each step names the guard it
     /// mirrors:
     ///
@@ -148,9 +156,17 @@ nonisolated enum CrossBlockRefusal {
         // "between two blocks", and the far side here is not a block yet.
         // The tail outranking step 3 is the plan's own order: contiguity
         // declines before the run's locks and gaps are ever read.
+        //
+        // (An earlier `tail.length == 0 && range.upperBound > tail.location`
+        // arm was DELETED at the 13u1 ladder, round 2, as provably dead: with
+        // an empty tail, `tail.location` IS `documentLength` — the document
+        // ends at the tail separator — so no in-document range (the
+        // precondition above) can end past it; and the separator arm below
+        // subsumes it anyway (`tail.location = tailSeparatorOffset + 1`).
+        // Without this sentence the arm reads as an uncovered case and comes
+        // back.)
         if let tail = index.tailRange,
            NSIntersectionRange(range, tail).length > 0
-            || (tail.length == 0 && range.upperBound > tail.location)
             || (index.tailSeparatorOffset.map { range.upperBound > $0 } ?? false) {
             return .openTail
         }
