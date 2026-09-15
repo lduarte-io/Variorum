@@ -1,15 +1,27 @@
 //
 //  FlowParagraph.swift
-//  Variorum (Mac) — Core/Views (the shared Mac-chrome home)
+//  Variorum — App/Variorum/Shared (BOTH platforms)
 //
-//  HOISTED from Features/BookView/ReadingFlowView.swift at pre-13u Act 10
-//  wave 2c (the hoist-at-next-touch rule, CLAUDE.md): the note READ mode
-//  (item 16, W8-1 direction B) is this brain's second consumer, so it
-//  moves to the shared home — the address changed, not a byte of the
-//  behavior; ReadRenderingTests/FormattingSurfacesTests ride unmodified.
-//  (The PHONE keeps its deliberate MIRROR in MobileReadPage.swift — that
-//  fork is recorded there and in the forked-brains KnownIssues row; this
-//  hoist is Mac-side sharing only and changes nothing about it.)
+//  HOISTED HERE at 13u1 UNIT 1 (the 2026-08-30 tech-debt sweep's **P41**).
+//  It lived Mac-app-local — `Features/BookView/ReadingFlowView.swift`, then
+//  `Core/Views/` at pre-13u Act 10 wave 2c — while the phone carried a
+//  byte-identical MIRROR in `MobileReadPage.swift` whose own header recorded
+//  the fork and the drift risk out loud: *"a Mac-side change to
+//  FlowParagraph does not compile into this file."* That is MobileSoul §3's
+//  drift class, and `KnownIssuesAndTechDebt.md`'s forked-brain row says the
+//  fix is always a HOIST, never a patch.
+//
+//  **What moved and what did NOT.** The paragraph TRANSFORM moved — the
+//  blank-line drop, the concatenation walk over the transform's ascending
+//  disjoint runs, the emphasis→`InlinePresentationIntent` mapping, the code
+//  chip, the link guard's application, and the drawn-clamped list indent.
+//  `font(_:)` did NOT: the two platforms deliberately disagree about its
+//  base size (15 pt on the Mac, 16 pt on the phone — phone type is bigger),
+//  so each target adds its own extension. That is the hoist rule read
+//  correctly: the BRAIN is shared, the FACE is not.
+//
+//  The hoist's proof is that both platforms' pins ride UNMODIFIED — the 3C
+//  parity pattern, a zero-test-edit suite on both sides.
 //
 
 import SwiftUI
@@ -17,7 +29,7 @@ import VariorumCore
 
 /// One display line of a post, ready for `Text`. Built from the pure
 /// transform, so nothing about markdown is decided here.
-struct FlowParagraph: Equatable {
+nonisolated struct FlowParagraph: Equatable {
     var text: AttributedString
     var style: MarkdownRendering.LineStyle
     /// 13k K8: the list line's nesting level (0 elsewhere) — the leading
@@ -91,16 +103,6 @@ struct FlowParagraph: Equatable {
         // ordinary text.
         if let raw = run.url, let url = MarkdownLink.openable(raw) { attributes.link = url }
         return attributes
-    }
-
-    func font(_ page: ReadingPageTokens) -> Font {
-        switch style {
-        case .heading(let level):
-            let scale: CGFloat = level == 1 ? 1.6 : (level == 2 ? 1.35 : 1.15)
-            return .system(size: (15 * scale).rounded(), weight: .semibold, design: .serif)
-        case .body, .bullet, .checkbox:
-            return page.serif
-        }
     }
 
     /// A list line sits in a little, so a list reads as a list — and one

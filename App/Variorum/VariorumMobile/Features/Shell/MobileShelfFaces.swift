@@ -43,14 +43,11 @@ nonisolated enum MobileShelfFaces {
     static func tagPaths(
         for book: Queries.ShelfBook, curatedTags: [String: [String]]
     ) -> [String] {
-        if book.reading.kind == .smart {
-            guard let json = book.reading.querySpec,
-                  let spec = try? JSONDecoder().decode(
-                      Queries.SmartQuerySpec.self, from: Data(json.utf8))
-            else { return [] }
-            return (spec.tagsAll ?? []) + (spec.tags ?? [])
-        }
-        return curatedTags[book.reading.id] ?? []
+        // 13u1 UNIT 1 (the sweep's P40): the smart-book rule is shared now
+        // (`Shared/ShelfOrder.swift`) — this was a byte-identical copy of
+        // the Mac's `ShelfViewModel.tagsColumn`, differing only in where the
+        // curated aggregate came from. The face stays here; the brain does not.
+        ShelfOrder.smartQueryTagPaths(of: book.reading) ?? curatedTags[book.reading.id] ?? []
     }
 
     /// The row's NAME text — the stored name plus the finished STATE
@@ -95,24 +92,15 @@ nonisolated enum MobileShelfFaces {
         pinned ? "Unpin from Shelf Top" : "Pin to Shelf Top"
     }
 
-    /// Shelf order — the Mac `ShelfViewModel.ordered` SEMANTICS mirrored
-    /// (pinned books first in pin order (R38), then journal-profile books
-    /// by name, then the rest by name).
+    /// Shelf order — **the Mac's own rule, not a mirror of it, since 13u1
+    /// UNIT 1** (the sweep's P40 hoisted the two byte-identical copies into
+    /// `Shared/ShelfOrder.swift`): pinned books first in pin order (R38),
+    /// then journal-profile books by name, then the rest by name. A
+    /// forwarder, so every phone caller and pin reads as it did.
     static func ordered(
         books: [Queries.ShelfBook], pins: [String]
     ) -> [Queries.ShelfBook] {
-        var pinned: [Queries.ShelfBook] = []
-        for pin in pins {
-            if let book = books.first(where: { $0.reading.id == pin }) {
-                pinned.append(book)
-            }
-        }
-        let rest = books.filter { !pins.contains($0.reading.id) }
-        let journals = rest.filter { $0.reading.profile == "journal" }
-            .sorted { $0.reading.name < $1.reading.name }
-        let others = rest.filter { $0.reading.profile != "journal" }
-            .sorted { $0.reading.name < $1.reading.name }
-        return pinned + journals + others
+        ShelfOrder.ordered(books: books, pins: pins)
     }
 
     // MARK: - Today's Entry (round 2, batch 5 — R26.2)

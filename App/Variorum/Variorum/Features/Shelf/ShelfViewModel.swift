@@ -78,21 +78,13 @@ final class ShelfViewModel {
         Self.ordered(books: books, pins: pins)
     }
 
+    /// 13u1 UNIT 1 (the sweep's P40): the RULE moved to
+    /// `Shared/ShelfOrder.swift` — the phone carried a byte-identical copy.
+    /// A forwarder, so every Mac caller and pin reads as it did.
     nonisolated static func ordered(
         books: [Queries.ShelfBook], pins: [String]
     ) -> [Queries.ShelfBook] {
-        var pinned: [Queries.ShelfBook] = []
-        for pin in pins {
-            if let book = books.first(where: { $0.reading.id == pin }) {
-                pinned.append(book)
-            }
-        }
-        let rest = books.filter { !pins.contains($0.reading.id) }
-        let journals = rest.filter { $0.reading.profile == "journal" }
-            .sorted { $0.reading.name < $1.reading.name }
-        let others = rest.filter { $0.reading.profile != "journal" }
-            .sorted { $0.reading.name < $1.reading.name }
-        return pinned + journals + others
+        ShelfOrder.ordered(books: books, pins: pins)
     }
 
     /// The ls-line's numbers ("~/shelf · 6 books · 2 finished").
@@ -102,14 +94,9 @@ final class ShelfViewModel {
     /// query tags (the spec IS its identity); a curated book shows its
     /// member posts' most-applied paths (the core aggregate).
     func tagsColumn(for book: Queries.ShelfBook) -> [String] {
-        if book.reading.kind == .smart {
-            guard let json = book.reading.querySpec,
-                  let spec = try? JSONDecoder().decode(
-                      Queries.SmartQuerySpec.self, from: Data(json.utf8))
-            else { return [] }
-            return (spec.tagsAll ?? []) + (spec.tags ?? [])
-        }
-        return bookTags[book.reading.id] ?? []
+        // 13u1 UNIT 1 (P40): the smart-book half is `ShelfOrder`'s now — the
+        // phone asked the identical question of the identical spec.
+        ShelfOrder.smartQueryTagPaths(of: book.reading) ?? bookTags[book.reading.id] ?? []
     }
 
     /// Bounded progress for the meta column ("62% of 10,000w" — the

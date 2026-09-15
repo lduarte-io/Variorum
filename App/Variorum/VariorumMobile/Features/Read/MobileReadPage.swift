@@ -7,26 +7,24 @@
 //  + centered page meta). Sibling types beside the view; nothing here
 //  touches a store or a view.
 //
-//  THE PARAGRAPH TRANSFORM is a deliberate MIRROR of the Mac's
-//  `FlowParagraph` (ReadingFlowView.swift) over the ONE shared law
-//  (`MarkdownRendering.render`, core Domain) — the `MobileShelfFaces`
-//  precedent: mirror the SEMANTICS, never port the chrome. Mirrored
-//  exactly: blank display lines DROP (the flow's own paragraph rule — the
-//  paged reader is the face that keeps stored spacing byte for byte);
-//  composition walks the transform's ascending/disjoint runs by
-//  CONCATENATION (no AttributedString.Index arithmetic against UTF-16
+//  THE PARAGRAPH TRANSFORM AND THE LINK GUARD USED TO LIVE HERE as a
+//  deliberate MIRROR of the Mac's `FlowParagraph` and `MarkdownLink` —
+//  statement for statement, over the ONE shared law
+//  (`MarkdownRendering.render`, core Domain) — and this header recorded the
+//  drift risk in its own words: *"a Mac-side change to FlowParagraph does
+//  not compile into this file."* **Both HOISTED to `App/Variorum/Shared/`
+//  at 13u1 UNIT 1** (the 2026-08-30 sweep's P41), so a Mac-side change now
+//  compiles into this file by construction. What remains below is three
+//  forwarders and the phone's own type scale; what the shared brain
+//  guarantees, unchanged, is: blank display lines DROP (the flow's own
+//  paragraph rule — the paged reader is the face that keeps stored spacing
+//  byte for byte); composition walks the transform's ascending/disjoint runs
+//  by CONCATENATION (no AttributedString.Index arithmetic against UTF-16
 //  offsets); bold/italic/strikethrough/code map to inline presentation
 //  intents; the code run wears the reading page's own chip (13k K10 — the
 //  page is voice-independent, R2); links carry `.link` ONLY where the
 //  openable guard passes (inert addresses read as plain text); list lines
-//  sit in per nesting level, drawn-clamped (13k K8). Drift risk recorded
-//  for the ladder: a Mac-side change to FlowParagraph does not compile
-//  into this file — the pins hold the mirror to the shared law's output.
-//
-//  THE LINK GUARD mirrors `MarkdownLink.openable` (Mac-side, AppKit file —
-//  its rule is pure and tiny): http/https only, trimmed, host required.
-//  Inert links render as ordinary text; SwiftUI's default OpenURLAction
-//  opens the ones that carry the attribute (only openable ones do).
+//  sit in per nesting level, drawn-clamped (13k K8).
 //
 //  CALLOUT FRAMES deliberately do NOT render here — the Mac's own Read
 //  flow renders none (renderPost → joinRenderedTexts carries no
@@ -39,104 +37,28 @@ import SwiftUI
 import VariorumCore
 
 nonisolated enum MobileReadPage {
-    // MARK: - The per-line reading transform (the FlowParagraph mirror)
+    // MARK: - The per-line reading transform (13u1 UNIT 1: the fork HOISTED)
 
-    struct Paragraph: Equatable {
-        var text: AttributedString
-        var style: MarkdownRendering.LineStyle
-        var indentLevel: Int = 0
+    /// **The mirror is gone.** The transform and the link guard moved to
+    /// `App/Variorum/Shared/` at 13u1 UNIT 1 (the 2026-08-30 sweep's P41):
+    /// this file used to carry `FlowParagraph.paragraphs`/`container`/
+    /// `indent` and `MarkdownLink.openable`/`openableSchemes`
+    /// statement-for-statement, and its own header recorded the drift risk
+    /// out loud — *"a Mac-side change to FlowParagraph does not compile into
+    /// this file."* Now it does.
+    ///
+    /// These three are FORWARDERS, kept so every phone call site and every
+    /// phone pin reads exactly as it did (the hoist's zero-test-edit proof).
+    typealias Paragraph = FlowParagraph
 
-        /// The line's font on the reading page — the Mac flow's own scale
-        /// shape at the page's serif size.
-        func font(_ page: ReadingPageTokens) -> Font {
-            switch style {
-            case .heading(let level):
-                let scale: CGFloat = level == 1 ? 1.6 : (level == 2 ? 1.35 : 1.15)
-                return .system(size: (16 * scale).rounded(), weight: .semibold, design: .serif)
-            case .body, .bullet, .checkbox:
-                return page.serif
-            }
-        }
-
-        /// A list line sits in a little, one step per nesting level,
-        /// drawn-clamped (13k K8 — the Mac flow's exact rule).
-        var indent: CGFloat {
-            switch style {
-            case .bullet, .checkbox:
-                16 + 16 * CGFloat(min(indentLevel, MarkdownRendering.maxDrawnIndentLevel))
-            case .body, .heading: 0
-            }
-        }
+    static func paragraphs(of source: String, codeTint: Color? = nil) -> [FlowParagraph] {
+        FlowParagraph.paragraphs(of: source, codeTint: codeTint)
     }
 
-    /// Rendered display lines of one note's rendered text. Blank display
-    /// lines drop (the flow's paragraph rule); every surviving line
-    /// arrives with its markdown applied and markers hidden (Read is a
-    /// reading surface — the F-5 rule).
-    static func paragraphs(of source: String, codeTint: Color? = nil) -> [Paragraph] {
-        let rendered = MarkdownRendering.render(source)
-        let ns = rendered.text as NSString
-        var result: [Paragraph] = []
-        for line in rendered.lines {
-            let raw = ns.substring(
-                with: NSRange(location: line.range.lowerBound, length: line.range.count))
-            guard !raw.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
-            var attributed = AttributedString()
-            var cursor = line.range.lowerBound
-            for run in rendered.runs
-            where run.range.lowerBound >= line.range.lowerBound
-                && run.range.upperBound <= line.range.upperBound {
-                if run.range.lowerBound > cursor {
-                    attributed += AttributedString(ns.substring(with: NSRange(
-                        location: cursor, length: run.range.lowerBound - cursor)))
-                }
-                attributed += AttributedString(
-                    ns.substring(with: NSRange(
-                        location: run.range.lowerBound, length: run.range.count)),
-                    attributes: container(for: run, codeTint: codeTint))
-                cursor = run.range.upperBound
-            }
-            if cursor < line.range.upperBound {
-                attributed += AttributedString(ns.substring(with: NSRange(
-                    location: cursor, length: line.range.upperBound - cursor)))
-            }
-            result.append(Paragraph(
-                text: attributed, style: line.style, indentLevel: line.indentLevel))
-        }
-        return result
-    }
+    /// The link guard — ONE rule now, not a mirror of one.
+    static var openableSchemes: Set<String> { MarkdownLink.openableSchemes }
 
-    private static func container(
-        for run: MarkdownRendering.Run, codeTint: Color?
-    ) -> AttributeContainer {
-        var attributes = AttributeContainer()
-        var intent: InlinePresentationIntent = []
-        if run.emphasis.contains(.bold) { intent.insert(.stronglyEmphasized) }
-        if run.emphasis.contains(.italic) { intent.insert(.emphasized) }
-        if run.emphasis.contains(.strikethrough) { intent.insert(.strikethrough) }
-        if run.emphasis.contains(.code) {
-            intent.insert(.code)
-            if let codeTint { attributes.backgroundColor = codeTint }
-        }
-        if !intent.isEmpty { attributes.inlinePresentationIntent = intent }
-        if let raw = run.url, let url = openableLink(raw) { attributes.link = url }
-        return attributes
-    }
-
-    /// The link guard — `MarkdownLink.openable`'s rule, mirrored (http/
-    /// https only, trimmed, host required). An address the guard refuses
-    /// carries no `.link` attribute and reads as ordinary text.
-    static let openableSchemes: Set<String> = ["http", "https"]
-
-    static func openableLink(_ raw: String) -> URL? {
-        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, let url = URL(string: trimmed),
-              let scheme = url.scheme?.lowercased(),
-              openableSchemes.contains(scheme),
-              url.host?.isEmpty == false
-        else { return nil }
-        return url
-    }
+    static func openableLink(_ raw: String) -> URL? { MarkdownLink.openable(raw) }
 
     // MARK: - LK9's chrome strings (chapter caption + centered page meta)
 
@@ -231,5 +153,23 @@ nonisolated enum MobileReadPage {
             chapters.append(Chapter(caption: caption, notes: notes))
         }
         return chapters
+    }
+}
+
+// MARK: - The phone's FACE on the shared brain (13u1 UNIT 1)
+
+/// The reading page's type scale, which the two platforms deliberately
+/// disagree about: 16 pt base here against the Mac's 15 — phone type is
+/// bigger. The BRAIN is shared; the FACE is not, which is the hoist rule
+/// read correctly rather than flattened.
+extension FlowParagraph {
+    func font(_ page: ReadingPageTokens) -> Font {
+        switch style {
+        case .heading(let level):
+            let scale: CGFloat = level == 1 ? 1.6 : (level == 2 ? 1.35 : 1.15)
+            return .system(size: (16 * scale).rounded(), weight: .semibold, design: .serif)
+        case .body, .bullet, .checkbox:
+            return page.serif
+        }
     }
 }
