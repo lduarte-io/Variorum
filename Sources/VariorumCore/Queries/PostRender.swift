@@ -173,6 +173,78 @@ extension Queries {
         }
     }
 
+    // MARK: - The LEADING blocks (13u2 UNIT A2 — the book cards' preview prime)
+
+    /// The SQL behind `leadingBlockTexts`, held as one constant so a pin can
+    /// `EXPLAIN QUERY PLAN` **exactly the statement that ships** rather than a
+    /// hand-copied twin of it. The resolution is `renderPost`'s, verbatim —
+    /// chosen-if-live-and-active-and-same-block, else default-if-live — minus
+    /// the three counting subqueries, which a preview has no use for.
+    static let leadingBlockTextsSQL = """
+        SELECT COALESCE(chosen.working_text, dflt.working_text) AS text
+        FROM container_block cb
+        LEFT JOIN block b
+          ON b.id = cb.block_id AND b.deleted_at IS NULL
+        LEFT JOIN variant chosen
+          ON chosen.id = cb.chosen_variant_id
+         AND chosen.block_id = b.id
+         AND chosen.deleted_at IS NULL
+         AND chosen.status = 'active'
+        LEFT JOIN variant dflt
+          ON dflt.id = b.default_variant_id
+         AND dflt.deleted_at IS NULL
+        WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+        ORDER BY cb.position, cb.id
+        LIMIT ?
+        """
+
+    /// **The first `blocks` slots of a container, rendered — and nothing
+    /// else.** A container's opening text for a caller that needs an opening:
+    /// the book Outline's collapsed card, whose preview is at most ~forty
+    /// words (`BookOutlineRows.cardPreview`, which also skips a lone heading
+    /// or numeral at the front, hence a small constant rather than one block).
+    /// Gaps contribute nothing (`renderPost`'s rule — render gaps, never
+    /// crash), so the result may be shorter than `blocks`.
+    ///
+    /// **Why it exists, and why it is not `renderPost(...).prefix(k)` (P1 is
+    /// the law here).** The card used to derive its preview from a WHOLE-note
+    /// render — one `renderPost` per realized row, cost ∝ the note's text, for
+    /// forty words. Measured on a synthetic note of 20,000 blocks: this read
+    /// **0.017 ms**, the whole render **20.5 ms**; and this read costs the SAME
+    /// 0.018 ms on a ten-block note, i.e. it is FLAT in the note's length,
+    /// because `ORDER BY cb.position` rides `idx_cblock_order` and the `LIMIT`
+    /// stops the scan (pinned by the query-plan test, not by a stopwatch).
+    /// Derived at read time, never stored (the snippet doctrine).
+    ///
+    /// The one bounded consequence, stated rather than hidden: a note whose
+    /// first `blocks` slots are all gaps or blank takes previews as empty
+    /// where a whole-note render would have found text further down. Sync-race
+    /// states and a note that opens with several empty blocks; the card is a
+    /// preview, and the cure — an unbounded read per card — is the defect.
+    public static func leadingBlockTexts(
+        _ db: Database, containerID: String, blocks: Int
+    ) throws -> [String] {
+        guard blocks > 0 else { return [] }
+        return try String.fetchAll(
+            db, sql: leadingBlockTextsSQL, arguments: [containerID, blocks])
+    }
+
+    /// Several containers' leading slots in ONE read — the book's card-preview
+    /// prime (13u2 UNIT A2). Cost is ∝ `containerIDs.count × blocks`, never ∝
+    /// the book's text: each container takes its own bounded, index-ordered
+    /// `LIMIT` seek rather than one big scan the planner would have to sort.
+    /// Containers with no live slots are simply absent from the result.
+    public static func leadingBlockTexts(
+        _ db: Database, containerIDs: [String], blocks: Int
+    ) throws -> [String: [String]] {
+        var result: [String: [String]] = [:]
+        result.reserveCapacity(containerIDs.count)
+        for id in containerIDs where result[id] == nil {
+            result[id] = try leadingBlockTexts(db, containerID: id, blocks: blocks)
+        }
+        return result
+    }
+
     /// The default blocks-join separator used by `renderedText` — the
     /// rendering join that re-creates stored-nothing separators (block text
     /// never stores its trailing separator; SegmentationRules doctrine).

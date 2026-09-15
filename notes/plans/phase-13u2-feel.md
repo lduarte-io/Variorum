@@ -743,7 +743,7 @@ mount: `editorHeight == 24` after 200 turns).
 | piece | state |
 |---|---|
 | the record opened + TRACE 2 re-verified on the post-revert tree | **DONE** — reproduced on the real Sherlock book, three runs (see TRACE 2 RE-VERIFIED below) |
-| the bounded core read (`Queries.leadingBlockTexts`) + its pins | **PENDING** |
+| the bounded core read (`Queries.leadingBlockTexts`) + its pins | **DONE** — 5 pins green; the cost shape MEASURED FLAT (below) |
 | the app-side priming (`BookViewModel` · `OutlinePostRow`) + the red-on-old card pin | **PENDING** |
 | the GATE: the 3-expanded fixture 3/3 isolated, beside the card pin 3/3 | **PENDING** |
 | the WALK: before/after landing stories on the real Sherlock book + captures | **PENDING** |
@@ -797,6 +797,39 @@ of that change is spent on a page that has already arrived.
    no drift at all; at 120 ms the cards that realize DURING the scroll still arrive at 46. That is
    her own report's shape — *"I click on a chapter or note that's far down"*, right after opening the
    book — and it is why the after-walk uses the same 120 ms.
+
+## THE BOUNDED READ — `Queries.leadingBlockTexts`, and its cost MEASURED (constraint 1)
+
+`Sources/VariorumCore/Queries/PostRender.swift`, beside `renderPost` because it is `renderPost`'s
+resolution verbatim — chosen-if-live-and-active-and-on-the-block, else default-if-live, gaps dropped —
+minus the three counting subqueries a preview has no use for. Two doors: one note, and MANY notes in
+one read (the book's prime). The SQL is a named constant so the P1 pin can `EXPLAIN QUERY PLAN`
+**the statement that ships** rather than a hand-copied twin.
+
+**The cost, measured through the real GRDB/SQLCipher stack** (50 iterations each, in-memory store,
+the temporary harness deleted in the same commit that recorded these):
+
+| a note of | `leadingBlockTexts(blocks: 4)` | `renderPost` (what the card used to call) |
+|---|---|---|
+| 10 blocks | **0.1549 ms** | 0.2439 ms |
+| 200 blocks | **0.1563 ms** | 1.7376 ms |
+| 2,000 blocks | **0.1593 ms** | 16.2042 ms |
+
+**FLAT: +2.8 % across a 200× size range**, against a whole-note render that grows 66×. That is
+constraint 1's letter — cost ∝ entries × a small constant, never ∝ the book's text. (A synthetic
+20,000-block note measured 0.017 ms vs 20.5 ms on a bare SQLite harness before the query was written;
+the table above is the real stack.) On Sherlock — 13 notes at ~215 blocks — the prime is ~2 ms for the
+whole book where the old per-card reads were ~1.7 ms EACH, re-paid every time a row re-realized.
+
+**Pinned as SHAPE, never as a stopwatch** (`ReadLayerP1Tests`' own discipline, which this file follows
+and cites): `Tests/VariorumCoreTests/LeadingBlockTextsTests.swift`, 5 tests —
+the query plan must `SEARCH cb USING INDEX idx_cblock_order`, must never `SCAN cb`, and must never
+`USE TEMP B-TREE FOR ORDER BY` (SQLite's partial sorter for the `cb.id` tiebreak is fine and is what
+keeps the LIMIT early-terminating; a FULL sort would mean reading every placement first — that is the
+regression the pin catches) · the cap returns the leading texts and equals `renderPost`'s prefix · the
+many-note read costs one bounded SELECT per note, each carrying `LIMIT` · the fallback matrix
+(fanned chosen take · a chosen take ARCHIVED after the fact falling back to the default · a tombstoned
+block as a gap) resolves identically to `renderPost` · degenerate asks answer empty rather than throw.
 
 ---
 
