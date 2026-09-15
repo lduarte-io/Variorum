@@ -2333,13 +2333,13 @@ alternative proof it ran instead.
 | the record opened | **DONE** |
 | **item 1** — row 56: the status seam's rename + the single writer | **DONE** — steps (1) and (2) built; step (3) recorded as the row's residual with its reason, and its cheap checkable half shipped (`StatusSeamVocabularyTests`). 40 files; the 18i classification pins green with assertions unmodified (55 tests / 5 suites); a literal-by-literal diff found **exactly one string changed in the whole rename — a test's failure message** |
 | **item 2** — row 50: the DEBUG-oracle keying sweep | **DONE** — all six scoped by the mounting SESSION (a stronger key than the row asked for, and the measurement that forced it is recorded); `TakeCardGeometry` bounded too (row 47's second oracle item); 156 read sites moved with every assertion byte-unchanged; the construction pinned as arithmetic (7 tests) and the 18 reading suites GREEN (78 tests) |
-| **item 3** — row 48: ⌘A in a live take pane (WALK first) | PENDING |
+| **item 3** — row 48: ⌘A in a live take pane (WALK first) | **VERDICT RECORDED — it does NOT reproduce.** Four arms walked and captured: the entry pane · a pane made live by a click (the previous pane's selection going GREY is the visible proof first responder moved) · the Edit ▸ Select All MENU road · a bloomed take CARD's pane. Nothing built; the row is resolved-as-not-reproducible with the probe a re-report should start from |
 | **item 4** — row 59: the masthead pin's settle | **DONE** — both fixed turn budgets replaced by an until-clause on the oracle's REPORT COUNT (quiet for 4 consecutive turns, ceiling 200, loud on never-quiet); the row's stated mechanism CORRECTED by measurement (a field-open moves no card on a quiet machine — 0/5, both voices); falsifiability DEMONSTRATED with a synthetic 200-pt overlap that failed loud in 0.73 s. 3/3 isolated green |
 | **item 5** — row 47's PARK half | **DONE** — `park` is `private` to the router's new ONE adoption door (`ShellRouter.adopt`, `RootView.adopt`'s two statements moved onto it); all seven pin calls folded onto that door with their arithmetic byte-unchanged; RULE ONE reworded to what actually holds AND to name the one road the fence cannot reach. 7 tests / 3 suites GREEN |
-| **item 6** — row 51: the `TakesArticleScroll` split + the structural arm | **SPLIT DONE** (876 lines out of `TakesBoardLayout`, every pre-move name forwarded, **ZERO test edits** — 81 tests / 7 suites green) · the structural arm at `adopt` PENDING |
-| the WALK + captures (60 onward) | PENDING |
+| **item 6** — row 51: the `TakesArticleScroll` split + the structural arm | **DONE** — the split (876 lines, every pre-move name forwarded, **ZERO test edits**) and the ONE structural arm at `adopt` (red-on-old by behavioural revert: 3 of 5 pins red with the body emptied). Walked on the real 262-block story: the restore is **byte-identical**, and a structural act does not haul the page. QUESTIONS #113 |
+| the WALK + captures (60 onward) | **DONE — 7 captures (60–66)** on the dev-store Debug build: ⌘A on three surfaces · the Takes article left, re-entered and restored **BYTE-IDENTICALLY** (`cmp` on the two PNGs) · a structural act on the 262-block story leaving the page exactly where it was |
 | tests (core · FULL Mac · iOS build · mobile if `Shared/` moved) | PENDING |
-| PROVISIONALs → `notes/QUESTIONS.md` (next free **#113**) | PENDING |
+| PROVISIONALs → `notes/QUESTIONS.md` (next free **#113**) | **DONE — ONE: #113**, the structural arm's chosen behaviour (a metadata-only arrival ends a landing too). The marker moved to **#114** |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
 
@@ -2623,6 +2623,72 @@ BEEPS, because Write's structural refusals beep and a board's speak), `speakCere
 `speakCeremonyError`. It is a PROTOCOL with two conformers carrying a recorded distinction between
 two refusal doors, and renaming it well is the registry-walk design's work rather than a sweep's.
 Recorded on row 56 with the residual.
+
+
+
+## ITEM 3 — ROW 48's ⌘A, WALKED (the row's own evidence class), AND IT DOES NOT REPRODUCE
+
+**Why a walk and not a read:** the 17o c/d/e ladder exhausted static analysis on this row — no app
+shortcut claims ⌘A, no `CommandGroup(replacing:)` removes the Edit menu, `PaneTextView` overrides
+neither `selectAll(_:)` nor `performKeyEquivalent`, its `keyDown` forwards everything but the soft
+newline, and the pane is selectable in every mode. The row's own words: *"if the pane holds first
+responder the menu's Select All should reach it… the evidence class is a walk."*
+
+**Four arms, on the dev-store Debug build, each captured.**
+
+| arm | what happened |
+|---|---|
+| the ENTRY pane (the ring where Takes opened it) | ⌘A selects that pane's whole text — the blue wash across all three lines, and nothing else on the page |
+| a pane made live by a CLICK on ANOTHER block | ⌘A selects THAT pane. **The previous pane's selection goes GREY** — AppKit's inactive-selection rendering, which is the visible proof that first responder moved with the ring (capture `62`) |
+| **Edit ▸ Select All** — the MENU road the row names | reaches the live pane (capture `61`). The Edit menu's items were enumerated first, which also shows unit D's *Paste Without Line Breaks* standing in it |
+| a bloomed TAKE CARD's pane (the block fanned with `+ take`) | selects its own take and leaves the sibling card untouched — the selection is scoped to the live pane, which is what P3 promises (capture `63`) |
+
+**So: nothing intercepts ⌘A, and when the pane holds first responder both the chord and the menu
+land.** Nothing was built.
+
+**What this walk CANNOT say, stated rather than glossed:** why the 17o batch-c walk saw otherwise.
+No probe was left in that tree, and a first-responder instrument was not needed here because every
+arm worked — instrumenting a road that is behaving would have measured nothing. The row's own
+hypothesis (the pane did not hold first responder at that moment) remains the likeliest reading; a
+smaller possibility is that something between 17o and now fixed it incidentally, since 13u1 rewrote
+the input path and 13u2 UNIT B changed which editor claims `EditorRouter.active`. **The row is
+resolved as NOT REPRODUCIBLE, with the next step named for a re-report:** log
+`window?.firstResponder` at the chord.
+
+**One thing the walk explained on the way, recorded so no reader wonders:** after a `+ take`, Edit ▸
+**Undo Structural Change** is DISABLED. That is correct, not a defect — AppSpec §9's structural-undo
+list is divide · merge · extract · newBlock · deleteBlock · deleteVariant · archiveVariant ·
+moveBlock · reorder · poolDragCopy, and **`branchVariant` is not on it**. The menu is telling the
+truth.
+
+## ITEM 6's WALK — the article's landing on the REAL 262-block story
+
+The split's parity proof is a zero-test-edit suite; the ROW's own caution is sharper than that, and
+it is why this walk exists: *"this ladder twice saw a mounted pin green while the app was wrong — a
+pin is evidence of the rule, only a walk of the surface."*
+
+**The protocol:** dev-store Debug build · ⌘K → *A Scandal in Bohemia* (262 blocks, 8,605 words) ·
+⌘2 into Takes · scroll the article down to a named place · ⌘1 to Write · ⌘2 back.
+
+| moment | what the page showed |
+|---|---|
+| Takes on entry | mid-story at the note's current block — the entry landing doing its job |
+| after a 40-line scroll | *"I can't imagine. I suppose that you have been watching the habits…"* at the top (capture `64`) |
+| **⌘1 away, ⌘2 back** | **the same page** (capture `65`) |
+
+**`cmp` on the two captures reports them BYTE-IDENTICAL.** The restore, the sub-row anchor and the
+hold all survive the move, measured on the surface rather than on a model of it.
+
+**And a STRUCTURAL ACT does not haul the page** (capture `66`): `+ take` on block 239/262 — the fan
+opens (the bar's *close all* un-greys, the take count moves) and the page stays exactly where it
+was. The arm ran with it: the projection changed, so any pending landing or hold ended silently,
+which on a settled page is invisible — which is the point.
+
+**What this walk did NOT exercise, named honestly:** the row's R2-3 PAGE-TALL STRADDLER shape (a row
+taller than the viewport sitting at the fold — a bloomed fan on a long block). It needs a note whose
+bloomed card exceeds the window, and staging it by synthetic clicks was beyond this unit's walk
+budget. It remains the row's own residue, and the row still says its mounted pin is the whole of its
+evidence.
 
 
 ---
