@@ -360,7 +360,7 @@ on the standing rails, zero-instance pgrep first, record-instead-of-kill if her 
 | A — pane stability trace + landing/settle | **CLOSED 2026-09-15** — item 1 TRACED (her hands owed, never claimed closed) · row 100 FIXED + walked · row 98 DISMISSED AS HOLLOW · M12 VERIFIED · item 18's Outline half TRACED, built, and REVERTED on a 3-vs-3 measurement, with its designed successor recorded · 54/92/94 DEFERRED with reasons. Finals = baseline: core 1562/170 · Mac 2668/445 · iOS green |
 | A2 — item 18's successor: preview priming (RULING A-1) | **CLOSED 2026-09-15 — RULING A-2: the priming SHIPS** — item 18's card drift FIXED (red-on-old; no `h=46` on the real book, 3 runs) · the bounded core read MEASURED FLAT · the gate arm ADJUDICATED: hard-bounded at the residual's magnitude + the ≤ 4 aspiration in `withKnownIssue` (the scale-mix residual; unit B re-examines its closed cure beside the shadow fix) · finals: core 1567/171 · Mac 2670/446 GREEN with 1 known issue · iOS green · item 18 field acceptance: **her hands owed** |
 | B — book-Index presentation + shadow editor | **CLOSED 2026-09-15** — item 19's five ruled behaviours BUILT (one of the intended fixes DISMISSED AS HOLLOW, with its evidence) · the double editing ring removed · **KnownIssues row 49's ROUTER half FIXED** (red-on-old + verified in the app) and the row NARROWED to the surviving double realization, which is traced with three causes eliminated · scope 4 RE-EXAMINED: the run-scale split stays CLOSED, its evidence downgraded, the successor's measurement named · 3 PROVISIONALs (QUESTIONS #110) · finals: core **1567/171** · Mac **2682/449** (1 known issue + 1 load-flaky red, recorded with paired numbers, the product road walked clean) · iOS **green** |
-| C — #109 boundary-clamp law | NOT-STARTED |
+| C — #109 boundary-clamp law | **RUNNING (opened 2026-09-15)** — the UNIT C RECORD below carries its LIVE STATUS |
 | D — the singles (+ TRACE 1a, routed by RULING A-1) | NOT-STARTED |
 | E — the mechanical sweeps | NOT-STARTED |
 | LADDER | NOT-STARTED |
@@ -1401,6 +1401,40 @@ are exactly the discipline the guard asks for.
    is why both measurements are true and why the row stood a week. Row 49 is correctly NARROWED,
    not closed: the router half is fixed (the open-tail loss window closed), the double realization
    survives with three causes eliminated.
+
+---
+
+# UNIT C RECORD — the #109 BOUNDARY-CLAMP LAW, both shapes (opened 2026-09-15, `opus-implementer`, the overnight run)
+
+**WHAT THIS UNIT DID NOT DO — the record's first line, per the brief.** *(filled at the close; PENDING
+while the unit runs.)*
+
+**What it is:** roster item 10 — her ruling of 2026-09-15 at the 13u1 checkpoint, whose binding text is
+`notes/QUESTIONS.md` #109's RULED block. **ONE uniform law: a selection edge sitting on a block
+boundary CLAMPS to block text — separators are structure, never deletable content — and NO
+boundary-anchored selection refuses.** Shape (i) (the span touching ONE block's characters plus the
+separator) clamps and edits in place; shape (ii) (the span reaching TWO OR MORE blocks' characters
+while opening or closing ON a separator) takes the (d) TRIM road. The TAIL FENCE binds: a trim never
+absorbs the open tail's separator, and the tail's two causes stand untouched.
+
+## LIVE STATUS
+
+| piece | state |
+|---|---|
+| the record opened | **DONE** |
+| the family ENUMERATED (the sweep table) | PENDING |
+| the law BUILT — the shared clamp brain | PENDING |
+| shape (i) — clamp and edit (the Mac's road) | PENDING |
+| shape (ii) — the trim (the shared compound; both platforms) | PENDING |
+| the tail fence — the two causes still refuse | PENDING |
+| `.partialBlockAcrossSeam` — retired to what survives | PENDING |
+| the flipped pins, RED ON OLD | PENDING |
+| the phone's consumer (or the parity row, with the reason) | PENDING |
+| tests (core · FULL Mac · iOS build) | PENDING |
+| the WALK + captures | PENDING |
+| PROVISIONALs → `notes/QUESTIONS.md` | PENDING |
+
+*(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
 
 ---
 
