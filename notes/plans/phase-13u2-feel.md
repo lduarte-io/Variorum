@@ -358,9 +358,10 @@ on the standing rails, zero-instance pgrep first, record-instead-of-kill if her 
 | unit | status |
 |---|---|
 | A — pane stability trace + landing/settle | **CLOSED 2026-09-15** — item 1 TRACED (her hands owed, never claimed closed) · row 100 FIXED + walked · row 98 DISMISSED AS HOLLOW · M12 VERIFIED · item 18's Outline half TRACED, built, and REVERTED on a 3-vs-3 measurement, with its designed successor recorded · 54/92/94 DEFERRED with reasons. Finals = baseline: core 1562/170 · Mac 2668/445 · iOS green |
+| A2 — item 18's successor: preview priming (RULING A-1) | NOT-STARTED |
 | B — book-Index presentation + shadow editor | NOT-STARTED |
 | C — #109 boundary-clamp law | NOT-STARTED |
-| D — the singles | NOT-STARTED |
+| D — the singles (+ TRACE 1a, routed by RULING A-1) | NOT-STARTED |
 | E — the mechanical sweeps | NOT-STARTED |
 | LADDER | NOT-STARTED |
 | CLOSEOUT | NOT-STARTED |
@@ -580,6 +581,41 @@ byte-identical to today's settled geometry, and there is nothing for the landing
 ∝ entries × a small constant, not ∝ the book's text (not the `bookWordCounts` class). It needs a
 new read in `VariorumCore/Queries` plus `BookViewModel` plumbing — **a batch, not a tail-end edit**,
 which is exactly why this unit recorded it instead of starting it at the end of a session.
+
+## ORCHESTRATOR ADJUDICATION — UNIT A (2026-09-15, the same night)
+
+**Spot-check verdict: the record's claims VERIFY.** Seven commits pushed, tree clean; the diff
+shape matches the record exactly (three code files + `.gitignore`); the captures exist (20 files
+in the gitignored dir); the revert is committed WITH the 3-vs-3 measurement that forced it
+(`96e2821a`) — the checkpoint protocol's "commit before you revert" honoured to the letter. The
+revert call was RIGHT: shipping a fix that relocates her defect from the one-expanded case she
+reported to the three-expanded case she also uses fails the phase's own bar ("the app feels good
+in the hands"), and the 0/3 measurement is recorded and reproducible.
+
+**RULING A-1 (the architect rules on the implementer's proposal — the 4E pattern): the
+preview-priming successor is ADOPTED and runs as UNIT A2, next.** The design follows from the
+trace rather than taste: every failed route changed a card's SIZE; the defect is that a card's
+height depends on WHEN an async read returns; priming removes the timing dependence and leaves
+the settled column byte-identical. Constraints that bind the build:
+1. **The `Queries` read is bounded per entry** — the leading two-or-three blocks' text only,
+   cost ∝ entries × a small constant, NEVER ∝ the book's text (explicitly not the
+   `bookWordCounts` class; P1 is the law here). Derived at read time, never stored (item 4's
+   snippet doctrine).
+2. **The revert's own fixture is the gate:**
+   `openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded` with the realistic fixture must
+   stay 3/3 green BESIDE the card pin (cards constant from first frame) — both cases, isolated ×3.
+3. **The Outline card:heading scale-mix finding rides with A2** (its recorded owner is "item 18's
+   successor batch") — as a MEASURE-then-decide item, not an obligation to fix: if priming alone
+   settles the landing on the real book, record the scale-mix as residual with the measurement.
+4. The 13l lesson stands: no lazy-run restructuring (the run-scale split broke the live editor's
+   mount — recorded above, 1 pass / 2 fails).
+
+**Routing decisions, recorded:** TRACE 1a (the pane's foreign-string compare) → **unit D's
+singles** (a bounded fix with a measurement; pane authority, so the phase-end Fable round covers
+it). Rows 54 · 92 · 94 stay DEFERRED as the record states; their final owners land at the
+closeout (54 → a later 13u2 unit reaches it or it re-owns to 13u3; 92 → her walk decides, the rig
+class stays owner 12's; 94 → re-own at close). **#88(c)'s strike goes in the morning ratify
+bundle** — the evidence is TRACE 2; her question file is not edited overnight.
 
 ## TRACE 3 — ROW 100, REPRODUCED AND FIXED (the reading flow's landing)
 
