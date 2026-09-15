@@ -481,6 +481,23 @@ nonisolated enum OpsRefusalCopy {
             // guarantee one), which is exactly why the words describe the
             // state it really means — text that has not arrived here yet —
             // rather than blaming her for a block she can see.
+            // **13u1 UNIT 2 (item 8's U-3, the Mac half of the gap
+            // fence's missing face).** The mobile round created this
+            // Mac-side gap and the handback row names it: a span covering
+            // an interior block that has NOT ARRIVED renders that block
+            // with zero length, so the old planner ran straight past it and
+            // the merge chain refused across it — and `operationMessage`
+            // had no case, so she met the RAW `blocksNotAdjacent(first:
+            // second:)` enum dump. The compound's run now fences the gap
+            // before any op runs (it is an index RANGE, not the intersected
+            // set), so this is the belt behind that brace: the ordinary
+            // race, a block landing or leaving between a plan and its
+            // write. The phone has said this sentence since M22; the Mac
+            // says it now, and the two are the same reading.
+            case .blocksNotAdjacent:
+                return "Something sits between these blocks — a block that hasn't "
+                    + "arrived yet, or one that landed since you selected. "
+                    + "Nothing was changed."
             case .noRenderableVariant:
                 return "That block has no text here yet — it may still be "
                     + "arriving from another device. Nothing was changed; "
@@ -574,4 +591,67 @@ nonisolated enum SplitAtNewlinesCopy {
     static let noteAlreadyWhole = "Every block is already one paragraph."
     static let blockAlreadyWhole = "This block is already one paragraph."
     static let pickedAlreadyWhole = "Every picked block is already one paragraph."
+}
+
+// MARK: - The cross-block compound (13u1 UNIT 2 — her item 5)
+
+/// **What the cross-block compound SAYS when it lands.** Her legibility
+/// mandate is the whole reason this file gained an entry: *"receipts name
+/// where every block went"*, and her worked example is the shape —
+/// *"2 blocks to the Trash; A and C merged — originals in the new block's
+/// History."*
+///
+/// **Why a gesture that used to be silent speaks now, and why that is not
+/// the noise she declined.** The merge-then-edit road said nothing, on
+/// purpose — a message on every join would have been chatter, and the
+/// tutorial's "the two exits" lesson made a virtue of it. Two things
+/// changed. First, this gesture now moves blocks to the TRASH, which is a
+/// place she has to be told about (the J8(a) lesson: a delete whose receipt
+/// names no road reads as permanent). Second, 18i made a RECEIPT quiet by
+/// default (her R-Q5: toast · quiet · off, quiet the default) — so this line
+/// is a muted line at the bottom bar's trailing end, not a toast in front of
+/// her prose. The receipt she declined and the receipt she mandated are not
+/// the same object.
+///
+/// ONE home, beside its neighbours, because the compound has two hosts (the
+/// note editor and the scraps editor, which is why `home` is a parameter)
+/// and because the DELETION clause must be the same sentence the bulk bar
+/// speaks — one grammar, never two (her item 5: *"composes with the Blocks
+/// workbench's bulk grammar"*).
+nonisolated enum CrossBlockEditCopy {
+    /// The receipt, built from what the compound ACTUALLY did — never from
+    /// what the plan hoped (the 13e receipt rule: counts come from the
+    /// operation's own results).
+    static func receipt(
+        _ outcome: CrossBlockCompound.Outcome, home: ContainerKind = .post
+    ) -> String {
+        var line: String
+        if outcome.deletedCount > 0 {
+            // The SAME sentence the ⌘-click multi-delete and the whole-block
+            // selection speak, including its two roads (⌥⌘Z now, the tray
+            // afterwards) — so a block that left this way is found exactly
+            // where a block that left the other way is found.
+            line = BlockSelectionCopy.deletedNote(outcome.deletedCount, home: home)
+        } else {
+            // Nothing left the note, but a STRUCTURAL act landed from an
+            // ordinary keystroke and ⌘Z — the text stack — cannot take it
+            // back (the rewrite clears it by design). Naming the door that
+            // can is load-bearing, not chatter (A7's carve set this shape).
+            line = "Edited across blocks \u{2014} \u{2325}\u{2318}Z undoes it."
+        }
+        if outcome.merged {
+            // Her condition on the join ruling, in the receipt: *the previous
+            // blocks must be EASY TO SEE in lineage.* The line names the
+            // door and says the thing that distinguishes this exit from the
+            // other one — nothing is counting down.
+            line += " The two ends joined into one block \u{2014} both originals are kept, "
+                + "with no countdown, under \(BlockHistoryPath.cameFromPath)."
+        } else if outcome.joinSuppressedByFan {
+            // #11a's standing rule, said out loud instead of left to be
+            // noticed: the halves join only where no fan hangs on the seam.
+            line += " The ends kept their own blocks \u{2014} one of them has takes, "
+                + "and a keystroke won't fold a fan away."
+        }
+        return line
+    }
 }

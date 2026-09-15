@@ -183,7 +183,6 @@ final class EditorViewModel {
     typealias StructuralOutcome = EditorSurfaceController.StructuralOutcome
     typealias CrossBlockMakeState = EditorSurfaceController.CrossBlockMakeState
     typealias CrossBlockEdit = EditorSurfaceController.CrossBlockEdit
-    typealias VisibleTakeEdit = EditorSurfaceController.VisibleTakeEdit
 
     struct BlockBadge: Equatable, Identifiable {
         let blockID: String
@@ -938,19 +937,23 @@ final class EditorViewModel {
         case .refuse(.crossesBlockBoundary):
             // Phase 11, A9: the keystroke is refused HERE (the storage must
             // not half-apply it) and a compound reproduces its exact intent
-            // through the structural door. Single×single → MERGE-THEN-EDIT
-            // (ratified 2026-07-09: a cross-seam delete just works — the
-            // halves join). A FANNED span → the VISIBLE-TAKE edit (the #11a
-            // sitting ruling, 2026-07-13: each touched block's visible take
-            // loses its piece; fan, seam, and structure untouched — the
-            // ruled deviation: two blocks, NOT a join). Locked/gap/tail
-            // spans keep the speaking refusal.
+            // through the structural door. **13u1 UNIT 2 — her item 5:**
+            // the two roads that used to split by fan arity are ONE
+            // cross-block compound now (`planCrossBlockEdit` ▸
+            // `CrossBlockCompound`), which takes fanned and unfanned spans
+            // alike: blocks the selection covers WHOLE ride `deleteBlock`
+            // (the Trash/tray road), the surviving ends take their chosen
+            // takes' edits, and the ends join only where both cuts sit
+            // mid-paragraph and no fan hangs on either (R-13u-2 + #11a).
+            // Only two things still refuse: a sealed note (above, before any
+            // plan runs) and a LOCKED take anywhere in the run — refuse
+            // whole, naming the lock (R-13u-1). The gap fence and the tail
+            // keep their own refusals, which are not about the gesture.
             pendingEdit = nil
             bulkPending = false
             // QoL batch 3 (L6) — THE SAFETY CORE, and it runs before every
             // planner: a FIND-DRIVEN replacement never restructures the post.
-            // Below this line a cross-block edit MERGES blocks
-            // (`planCrossBlockEdit`, the ratified 2026-07-09 merge-then-edit)
+            // Below this line a cross-block edit can DELETE and MERGE blocks
             // — ratified for a deliberate hand-made selection, never for a
             // machine-driven sweep. `EditorFind` pre-checks every range, so
             // reaching here under the flag means the text moved underneath a
@@ -988,19 +991,20 @@ final class EditorViewModel {
                 // `wholeBlockRun` excludes by construction — so A7's
                 // no-fan/nothing-unshown authorization and #34's fan refusal
                 // keep every case they ruled, and this road can never route
-                // around them. It sits ABOVE merge-then-edit because a run of
+                // around them. It sits ABOVE the compound because a run of
                 // whole paragraphs plus Delete means "these paragraphs go",
-                // not "join them and leave the join empty".
+                // and that road keeps its OWN ruling — #33(a)'s unrestricted
+                // delete, which takes a locked take's block, where the
+                // compound refuses whole for one (R-13u-1). Two gestures,
+                // two rulings, in her stated order.
                 scheduleCrossBlockCompound { [weak self] in
                     await self?.runWholeBlockDeletion(whole)
                 }
             } else if let compound = planCrossBlockEdit(range: range, replacement: replacement) {
+                // **THE CROSS-BLOCK COMPOUND** (13u1 UNIT 2 — item 5). One
+                // gesture, one structural compound, one ⌥⌘Z entry.
                 scheduleCrossBlockCompound { [weak self] in
                     await self?.runCrossBlockEdit(compound)
-                }
-            } else if let visible = planVisibleTakeEdit(range: range, replacement: replacement) {
-                scheduleCrossBlockCompound { [weak self] in
-                    await self?.runVisibleTakeEdit(visible)
                 }
             } else {
                 // 13j J8(b): the refusal DIAGNOSES. Every road above declined
@@ -1793,7 +1797,7 @@ final class EditorViewModel {
         await structural.confirmCrossBlockMakeBlock(state)
     }
 
-    /// The merge-then-edit plan (the controller's).
+    /// The cross-block compound's plan (the controller's).
     func planCrossBlockEdit(range: NSRange, replacement: String) -> CrossBlockEdit? {
         structural.planCrossBlockEdit(range: range, replacement: replacement)
     }
@@ -1859,23 +1863,17 @@ final class EditorViewModel {
         await structural.runSeamMerge(plan)
     }
 
-    /// The merge-then-edit compound (the controller's).
+    /// The cross-block compound (the controller's).
     func runCrossBlockEdit(_ edit: CrossBlockEdit) async {
         await structural.runCrossBlockEdit(edit)
     }
 
     // MARK: - Phase 11, A9 — the #11 sitting rulings — forwards
     // (execution in `EditorSurfaceController`, 13b Stage 3, N10)
-
-    /// The visible-take edit plan (the controller's).
-    func planVisibleTakeEdit(range: NSRange, replacement: String) -> VisibleTakeEdit? {
-        structural.planVisibleTakeEdit(range: range, replacement: replacement)
-    }
-
-    /// The visible-take compound (the controller's).
-    func runVisibleTakeEdit(_ edit: VisibleTakeEdit) async {
-        await structural.runVisibleTakeEdit(edit)
-    }
+    //
+    // #11a's visible-take road retired at 13u1 UNIT 2 — the compound above
+    // answers every cross-block span and carries #11a's rule at the ends
+    // (see `EditorSurfaceController`'s note where the road stood).
 
     /// #11b — "Delete in Every Take" (the controller's; the deliberate,
     /// NAMED command — apply-and-report, her ruling).

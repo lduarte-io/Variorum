@@ -692,10 +692,24 @@ final class MobileStructuralController {
     /// different blocks is more annoying than it's worth"*).
     ///
     /// The DECISION and the ARITHMETIC are the shared brain's
-    /// (`CrossBlockEditPlanner.plan` / `.apply`, hoisted out of Mac app code
-    /// by this batch — MobileSoul §3); this door is the phone's face on it:
-    /// the flight latch, the pre-op flush, the caret write, and the words a
-    /// refusal speaks.
+    /// (`CrossBlockCompound.plan` / `.apply`, hoisted out of Mac app code at
+    /// mobile round 2 and REBUILT to her item 5 rulings at 13u1 UNIT 2 —
+    /// MobileSoul §3); this door is the phone's face on it: the flight
+    /// latch, the pre-op flush, the caret write, and the words a refusal
+    /// speaks.
+    ///
+    /// **What 13u1 UNIT 2 changed under this door, and what the phone still
+    /// OWES.** The semantics are ruled once for both platforms (her item 5's
+    /// own coordination flag), so the phone inherits them here rather than
+    /// re-deciding them: blocks the selection covers WHOLE go to the
+    /// Trash/tray, the surviving ends take their chosen takes' edits, the
+    /// ends join only mid-paragraph and only with no fan on either, a locked
+    /// take refuses the whole gesture, and the seventh quiet auto-commit
+    /// occasion lands first. What is NOT built here is the phone's FACE for
+    /// it — a receipt naming where every block went (the Mac's
+    /// `CrossBlockEditCopy`) and its own walk. That is the mobile project's,
+    /// recorded in the 13u1 closeout's parity row rather than guessed at
+    /// from the Mac side.
     ///
     /// **No re-verify after the flush, deliberately — the compound carries a
     /// stronger guard.** The divide/merge doors re-check their caret pair
@@ -708,7 +722,7 @@ final class MobileStructuralController {
     /// **NO CONFIRM**, for the same reason its sibling delete door asks
     /// nothing (R13): this is a keystroke, and it is the gesture that makes
     /// her text behave like text.
-    func runCrossBlockEdit(_ edit: CrossBlockEditPlanner.Edit) async {
+    func runCrossBlockEdit(_ edit: CrossBlockCompound.Plan) async {
         guard let model else { return }
         guard !structuralInFlight else {
             model.report("Another structural change is still landing.")
@@ -724,8 +738,20 @@ final class MobileStructuralController {
         guard await flushPendingText() else { return }
         let stack = session.undoStack
         do {
-            let landing = try await session.runner.run { ops in
-                try CrossBlockEditPlanner.apply(edit, ops: ops, undoStack: stack)
+            let database = session.database
+            let outcome = try await session.runner.run { ops in
+                try CrossBlockCompound.apply(
+                    edit, ops: ops, undoStack: stack,
+                    liveActiveTakeCount: { blockID in
+                        // The fan question, from the STORE at run time — the
+                        // 13c R3-1 law the Mac states at its own door:
+                        // never authorize from stale state.
+                        try database.read { db in
+                            try Queries.blockFan(db, blockID: blockID)
+                                .filter { $0.deletedAt == nil && $0.status == .active }
+                                .count
+                        }
+                    })
             }
             // Nothing to announce: the paragraphs joined and the selection
             // vanished, which is exactly what she asked the keystroke for
@@ -742,7 +768,7 @@ final class MobileStructuralController {
             // Undo is the whole affordance.
             model.report(nil, action: .undo)
             await model.refreshTakesFromStore()
-            landCaret((blockID: landing.blockID, offset: landing.caretOffset))
+            landCaret((blockID: outcome.caretBlockID, offset: outcome.caretOffset))
         } catch {
             model.report(Self.refusalMessage(
                 error, act: "join these blocks", nothingWas: "changed"))

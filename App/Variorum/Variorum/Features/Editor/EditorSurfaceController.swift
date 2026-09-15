@@ -2039,12 +2039,13 @@ final class EditorSurfaceController {
     /// instead (the #11a sitting ruling, 2026-07-13); locked/gap/tail
     /// spans keep the speaking refusal.
     ///
-    /// **The type and both halves of the act HOISTED** to
-    /// `Shared/EditorBrain/CrossBlockEditPlanner` at mobile round 2, batch 3
-    /// (M22), where the phone inherits them instead of copying them
-    /// (MobileSoul §3). The name survives here because it is what this
-    /// controller's callers and pins have always said.
-    typealias CrossBlockEdit = CrossBlockEditPlanner.Edit
+    /// **The type and both halves of the act live in
+    /// `Shared/EditorBrain/CrossBlockCompound`** — hoisted at mobile round 2,
+    /// batch 3 (M22) and REBUILT to her item 5 rulings at 13u1 UNIT 2, where
+    /// the phone inherits them instead of copying them (MobileSoul §3). The
+    /// name survives here because it is what this controller's callers and
+    /// pins have always said.
+    typealias CrossBlockEdit = CrossBlockCompound.Plan
 
     /// A7 (13c 1B): the narrow carve out of the cross-block refusal — a
     /// backspace/forward-delete of the ONE separator beside an EMPTY block
@@ -2285,129 +2286,80 @@ final class EditorSurfaceController {
         }
     }
 
-    /// The Mac's face on the shared plan (M22's hoist): the index, the
-    /// per-entry fan arities beside it, and the live surface text.
+    /// **The Mac's face on the shared cross-block compound** (her item 5,
+    /// 13u1 UNIT 2). The plan is GEOMETRY plus the two fences the surface
+    /// itself can answer — it takes NO fan arity, deliberately: the fan
+    /// question decides whether the ends JOIN, and a decision read from
+    /// `model.slots` would be read from an array the projection engine
+    /// freezes for the length of a typing burst. That is U-1's whole finding
+    /// (item 8's first), and its correctness half is a law rather than a
+    /// preference: **never authorize from stale state.** `runCrossBlockEdit`
+    /// asks the STORE instead.
     func planCrossBlockEdit(range: NSRange, replacement: String) -> CrossBlockEdit? {
-        CrossBlockEditPlanner.plan(
+        CrossBlockCompound.plan(
             replacing: range, with: replacement,
             index: model.index,
-            fanArities: model.slots.map(\.activeVariantCount),
             surfaceText: { [model] range in model.viewText(range) })
     }
 
-    /// The Mac's face on the shared compound (M22's hoist): this door owns
-    /// the flight (`runStructural` — the latch, the pre-op flush, the
-    /// re-render and the caret write); the merge chain and the merged-range
-    /// arithmetic are `CrossBlockEditPlanner.apply`'s, so the phone runs the
-    /// same rule rather than a second copy of it.
+    /// The Mac's face on the shared compound: this door owns the flight
+    /// (`runStructural` — the latch, the pre-op flush, the re-render and the
+    /// caret write) and the WORDS; the ordering, the arithmetic and the
+    /// rulings are `CrossBlockCompound.apply`'s, so the phone runs the same
+    /// rule rather than a second copy of it.
+    ///
+    /// **The fan read is SYNCHRONOUS and inside the flight** (U-1's
+    /// correctness half): `runStructural` has already flushed the buffer and
+    /// holds the one-flight latch, and the body runs on the serialized
+    /// operations runner — so this read sits as close to the merge as a read
+    /// outside its transaction can. The remaining window is the recorded
+    /// ms-window sync-apply residual, the W drift check's class, and it is
+    /// strictly narrower than the projection's whole typing burst.
+    /// **The receipt rides `StructuralOutcome.note`** — 18i's one structural
+    /// receipt seam — because it is built from what the compound ACTUALLY
+    /// did (how many blocks went to the Trash; whether the ends really
+    /// joined), which only exists inside the flight. Her legibility mandate
+    /// is exactly this: *receipts name where every block went.*
     func runCrossBlockEdit(_ edit: CrossBlockEdit) async {
         let stack = model.session.undoStack
+        let database = model.session.database
+        let home = homeKind
         _ = await runStructural { ops in
-            let landing = try CrossBlockEditPlanner.apply(edit, ops: ops, undoStack: stack)
+            let result = try CrossBlockCompound.apply(
+                edit, ops: ops, undoStack: stack,
+                liveActiveTakeCount: { blockID in
+                    try database.read { db in
+                        try Queries.blockFan(db, blockID: blockID)
+                            .filter { $0.deletedAt == nil && $0.status == .active }
+                            .count
+                    }
+                })
             return StructuralOutcome(
-                caretBlockID: landing.blockID, caretOffset: landing.caretOffset, seam: nil)
+                caretBlockID: result.caretBlockID, caretOffset: result.caretOffset,
+                seam: nil, note: CrossBlockEditCopy.receipt(result, home: home))
         }
     }
 
     // MARK: - Phase 11, A9 — the #11 sitting rulings (2026-07-13)
 
-    /// #11a — the VISIBLE-TAKE cross-block edit: the plain gesture's
-    /// everyday behavior on a FANNED span (supersedes the shipped refusal).
-    /// Each touched block's VISIBLE take loses exactly its piece of the
-    /// selection (the replacement, if any, lands where typing started —
-    /// the first block's cut point); fan, seam, and block structure stay
-    /// UNTOUCHED — the ruled deviation from basic text: the result is two
-    /// blocks, NOT a join; the fan hangs on the seam. Never guesses:
-    /// nothing is touched in unseen takes.
-    struct VisibleTakeEdit: Sendable, Equatable {
-        struct Piece: Sendable, Equatable {
-            let variantID: String
-            /// The piece's intra-take range in the take's CURRENT text.
-            let intraRange: NSRange
-            /// The take's surface text at plan time (flushed = store text).
-            let text: String
-        }
-        let pieces: [Piece]
-        let replacement: String
-        /// Caret identity after the compound.
-        let caretBlockID: String
-        let caretOffset: Int
-    }
-
-    /// Nil = not eligible (gap/locked visible take, tail overlap, or a
-    /// single-block range) — the remaining refusal speaks.
-    ///
-    /// **ONE tiling walk (13u1 UNIT 1 — this is `KnownIssuesAndTechDebt`'s
-    /// own named O(N²) site, the surviving twin of the one mobile round 2
-    /// fixed).** It asked `model.index.range(ofEntryAt: i)` once per entry
-    /// over the whole note plus four more times for the edges, and that
-    /// accessor walks from zero: Σi ≈ N²/2, on the cross-block KEYSTROKE
-    /// road, on the main actor. Measured at 8,000 blocks: **3.84 s → 4.2 ms**
-    /// (the record's table). The conditions below are untouched.
-    func planVisibleTakeEdit(range: NSRange, replacement: String) -> VisibleTakeEdit? {
-        let entries = model.index.entries
-        let ranges = model.index.entryRanges()
-        var touched: [Int] = []
-        for i in entries.indices {
-            if NSIntersectionRange(range, ranges[i]).length > 0 {
-                touched.append(i)
-            }
-        }
-        guard touched.count >= 2, let first = touched.first, let last = touched.last else {
-            return nil
-        }
-        guard range.location >= ranges[first].location,
-              range.upperBound <= ranges[last].upperBound
-        else { return nil }
-        var pieces: [VisibleTakeEdit.Piece] = []
-        for i in touched {
-            guard let variantID = entries[i].variantID, entries[i].editable else { return nil }
-            let entryRange = ranges[i]
-            let intersection = NSIntersectionRange(range, entryRange)
-            let intraRange = NSRange(
-                location: intersection.location - entryRange.location,
-                length: intersection.length)
-            pieces.append(VisibleTakeEdit.Piece(
-                variantID: variantID,
-                intraRange: intraRange,
-                text: model.viewText(entryRange)))
-        }
-        // The replacement (if any) rides the FIRST piece — placed by
-        // `runVisibleTakeEdit`, which empties every later piece's slot.
-        return VisibleTakeEdit(
-            pieces: pieces,
-            replacement: replacement,
-            caretBlockID: entries[first].blockID,
-            caretOffset: max(0, range.location - ranges[first].location)
-                + (replacement as NSString).length)
-    }
-
-    /// The compound: ONE `editTakesAtomically` (one transaction, one undo
-    /// entry, dirty targets insurance-committed) through the structural
-    /// door — the flush-first fence keeps a pending autosave of the
-    /// pre-delete surface from resurrecting the deleted span.
-    func runVisibleTakeEdit(_ edit: VisibleTakeEdit) async {
-        _ = await runStructural { ops in
-            var edits: [Operations.TakeEdit] = []
-            for (i, piece) in edit.pieces.enumerated() {
-                let text = piece.text as NSString
-                guard piece.intraRange.upperBound <= text.length else {
-                    throw OperationError.invalidCut(
-                        variantID: piece.variantID, cut: piece.intraRange.location)
-                }
-                let replacement = i == 0 ? edit.replacement : ""
-                let newText = text.replacingCharacters(in: piece.intraRange, with: replacement)
-                edits.append(Operations.TakeEdit(
-                    variantID: piece.variantID,
-                    newText: newText,
-                    charDelta: piece.intraRange.length + (replacement as NSString).length,
-                    expectedText: piece.text))
-            }
-            _ = try ops.editTakesAtomically(edits, undoLabel: "Delete Across Blocks")
-            return StructuralOutcome(
-                caretBlockID: edit.caretBlockID, caretOffset: edit.caretOffset, seam: nil)
-        }
-    }
+    // **#11a's VISIBLE-TAKE cross-block edit RETIRED at 13u1 UNIT 2**, and
+    // what it ruled is kept rather than dropped.
+    //
+    // It was the plain gesture's everyday behaviour on a FANNED span: each
+    // touched block's visible take lost exactly its piece, and fan, seam and
+    // block structure stayed untouched — *two blocks, NOT a join; the fan
+    // hangs on the seam.* Item 5's compound now answers every cross-block
+    // span, fanned or not, and it carries #11a's rule forward at the ENDS:
+    // a fanned surviving end takes its chosen take's edit and NOTHING else,
+    // and a fan on either end suppresses the join (read from the store, not
+    // from the projection).
+    //
+    // **What deliberately CHANGED, because she ruled it** (master plan item
+    // 5): a FANNED MIDDLE block — one the selection covers WHOLE — now
+    // deletes whole to the Trash/tray, *"recoverable, family intact"*, where
+    // #11a emptied its shown take and left a blank block with a fan hanging
+    // on it. That is the one place this supersedes the 2026-07-13 ruling,
+    // and it supersedes it in her own words.
 
     /// #11b — "Delete in Every Take": the deliberate, NAMED command. The
     /// selection's per-block piece (the visible take's text) is located in

@@ -1267,11 +1267,22 @@ final class MobileEditorViewModel {
             // thought we added cross block edits on the mac app when there
             // are no takes, where it just auto merges?"*) and is now the
             // same shared brain on both platforms
-            // (`CrossBlockEditPlanner`), never a copy. Its conditions are
-            // unchanged and each is a ruling: no takes on any touched block
-            // (a fan routes to the Mac's visible-take edit — #11a,
-            // 2026-07-13, which stays Mac-side), no gaps, no locks, no tail,
-            // contiguous.
+            // (`CrossBlockCompound`), never a copy.
+            //
+            // **13u1 UNIT 2 REBUILT that brain to her item 5 rulings, and
+            // the phone inherits the semantics with it** (her own
+            // coordination flag: *"the semantics are ruled HERE, once, for
+            // both platforms"*). The conditions are no longer "no takes
+            // anywhere": a span may be FANNED. Blocks the selection covers
+            // WHOLE ride `deleteBlock` — the Trash/tray road, takes
+            // preserved, Put back real, a fanned middle included; the
+            // surviving ends take their CHOSEN takes' edits; the ends JOIN
+            // only where both cuts sit mid-paragraph (R-13u-2) and no fan
+            // hangs on either (#11a, read from the store at run time). What
+            // still refuses: a locked take anywhere in the run — refuse
+            // whole, naming the lock (R-13u-1) — plus the standing gap and
+            // tail fences. The phone's own FACE for the receipt is the
+            // mobile project's, recorded in the 13u1 closeout's parity row.
             //
             // Ranges of exactly one character are excluded inside the
             // whole-block brain, so the seam keystrokes keep every case they
@@ -1327,7 +1338,19 @@ final class MobileEditorViewModel {
                     await self?.structural.runCrossBlockEdit(compound)
                 }
             } else {
-                refuse(message(for: .crossesBlockBoundary))
+                // **U-5, the wording half** (13u1 UNIT 2): the phone used to
+                // speak ONE line for every cross-block decline — *"This edit
+                // spans more than one block — edit inside one block for
+                // now"* — carrying an unexecuted instruction in its own doc
+                // comment to re-narrow itself when merge-then-edit landed.
+                // It landed; the line never moved; and after item 5 it would
+                // be false besides (a cross-block edit is the ordinary
+                // gesture now). The hoisted diagnosis names WHICH of its
+                // real causes declined — the same brain the Mac speaks, in
+                // the phone's own roads.
+                refuse(CrossBlockRefusal.message(
+                    range: range, index: index, slots: slots,
+                    fanRoads: Self.fanFoldRoads))
             }
             return false
         case .refuse(let refusal):
@@ -1358,21 +1381,24 @@ final class MobileEditorViewModel {
         index.wholeBlockDeletion(covering: range, replacement: replacement)
     }
 
-    /// M22 — the phone's face on the shared merge-then-edit plan (the Mac's
+    /// M22 — the phone's face on the shared cross-block plan (the Mac's
     /// `EditorSurfaceController.planCrossBlockEdit` twin, over the same
-    /// `CrossBlockEditPlanner`). The arities come from `slots`, which may lag
-    /// `entries` during a mint window — a missing arity DECLINES inside the
-    /// brain, which is the shipped Mac rule and the safe one: this road
-    /// merges blocks, so an unknown fan is not a fan it may assume away.
+    /// `CrossBlockCompound`).
+    ///
+    /// **It takes no fan arity since 13u1 UNIT 2** (item 8's U-1): the fan
+    /// decides whether the ends JOIN, and `slots` is the projection — held
+    /// stale while the buffer is dirty, and short of `entries` during a mint
+    /// window. A decision read from it would be an authorization read from a
+    /// snapshot, which is exactly the class the 13c R3-1 finding closed. The
+    /// run-time read lives in `MobileStructural.runCrossBlockEdit`.
     /// Exposed (not private) so pins can assert what declines without
     /// driving a store write.
     func planCrossBlockEdit(
         range: NSRange, replacement: String
-    ) -> CrossBlockEditPlanner.Edit? {
-        CrossBlockEditPlanner.plan(
+    ) -> CrossBlockCompound.Plan? {
+        CrossBlockCompound.plan(
             replacing: range, with: replacement,
             index: index,
-            fanArities: slots.map(\.activeVariantCount),
             surfaceText: { [weak self] range in self?.viewText(range) ?? "" })
     }
 
@@ -1953,6 +1979,15 @@ final class MobileEditorViewModel {
     static let lockedTakeRefusal =
         "This take is locked — branch it, or unlock it from its card in the takes sheet (⑂)."
 
+    /// **The phone's fan roads** — the one platform-shaped sentence the
+    /// hoisted `CrossBlockRefusal` takes as a parameter (13u1 UNIT 2, U-5),
+    /// because a shared home must not name a door one platform does not have
+    /// (MobileSoul §4.4, read from the other side). The Mac's sentence names
+    /// two chords; the phone names the menu row it actually has.
+    static let fanFoldRoads =
+        "Merge the blocks deliberately instead (\u{22EF} \u{2192} "
+        + "\(MobileBlockMenu.mergeTitle)), which brings every take along."
+
     private func refuse(_ message: String) {
         statusMessage = message
     }
@@ -1960,18 +1995,20 @@ final class MobileEditorViewModel {
     func message(for refusal: BlockRangeIndex.Refusal) -> String {
         switch refusal {
         case .crossesBlockBoundary:
-            // PROVISIONAL copy, NARROWED at round 2 batch 1b: the
-            // whole-block-selection DELETE road now lands (R18 ≡ M11), so
-            // this line no longer speaks for her commonest cross-block
-            // gesture — it speaks for what remains, which is a span
-            // covering some block only PARTIALLY, and a type-over of a
-            // whole-block span. For both the sentence is still literally
-            // true, and it promises no machinery that isn't here — the
-            // Mac's other cross-block compounds (merge-then-edit,
-            // visible-take) are LATER rows on this phone (M22 for the
-            // first). When merge-then-edit lands, this line loses the
-            // partial-span case too and must be re-narrowed again.
-            "This edit spans more than one block — edit inside one block for now."
+            // **RE-NARROWED at 13u1 UNIT 2, which is the instruction this
+            // comment used to carry and never executed** (item 8's U-5: *"so
+            // the phone's cross-block refusal names NONE of its four real
+            // causes"*). Merge-then-edit landed at M22 and item 5's compound
+            // has now taken every partially-covered span as well, so the old
+            // sentence — *"This edit spans more than one block — edit inside
+            // one block for now"* — named a limitation the app no longer
+            // has. The live door DIAGNOSES (see the cross-block arm above);
+            // what remains here is the range-less fallback for any future
+            // caller that has neither a range nor the slots, and it says the
+            // residual geometry and guesses nothing. ONE brain with the
+            // Mac's, in the phone's own roads.
+            CrossBlockRefusal.message(
+                for: .partialBlockAcrossSeam, fanRoads: Self.fanFoldRoads)
         case .readOnlySlot:
             "This block hasn't fully synced; it is read-only for now."
         case .lockedVariant:
