@@ -1,7 +1,8 @@
 # Phase 13u2 — FEEL (EXECUTION PLAN)
 
-**Status: RUNNING — THE OVERNIGHT RUN OPENED 2026-09-15 at her word (`/architect-phase`; Fable
-orchestrator; the ORCHESTRATION RECORD below is the run's live section).** THE CURRENT PHASE since
+**Status: ✅ CLOSED 2026-09-15 — the overnight run (`/architect-phase`, Fable orchestrator; opened
+and closed the same night at her word; the ORCHESTRATION RECORD below is the run's record and the
+PHASE CLOSEOUT section carries the finals, the ladder tally and the morning bundle).** THE CURRENT PHASE since
 2026-09-15 (13u1 CLOSED that day; the baselines and the
 "what changed under you" section below were refreshed at its closeout). Authored 2026-09-14 at
 the 13u1 kickoff (the R-cor-12 four-way split executed; the shared sitting's rulings live in
@@ -376,7 +377,7 @@ registers behaving as her sentences describe) beside the dark pass already owed.
 | D — the singles (+ TRACE 1a, routed by RULING A-1) | **CLOSED 2026-09-15** — item 2 FIXED at the ONE shared brain with red-on-old on BOTH trees · item 10 BUILT and pinned but **it cannot fire until she rules the star cap** (#112(b), the item's headline) · item 11 BUILT (⇧⌘V, the rule shared; the phone owes the door) · item 13 MEASURED and VERIFIED HEALED + row 93 FIXED · P39a/P39b FIXED with zero behaviour change and pins unmodified · roster item 8 VERIFIED (2 moot, 2 return) · **row 57 TRACED and it does NOT reproduce — nothing built, the row narrowed** · TRACE 1a FIXED and measured (0.42 ms → 0.00009 ms, flat where it was linear) · 8 captures · 3 PROVISIONALs (QUESTIONS #112) · finals: core **1567/171** · Mac **2730/456** (+28/+6; 1 known issue + the load-flaky red, PAIRED as unchanged) · iOS **green** · mobile **626/106 with 4 known** |
 | E — the mechanical sweeps | **CLOSED 2026-09-15** — all six dispositioned: row 56 steps 1+2 BUILT (step 3 deferred with its reason, its grep half shipped) · row 50's six oracles SWEPT with a stronger key than asked, and the measurement that forced it · row 48 WALKED and **NOT REPRODUCIBLE** (four arms) · row 59 FIXED with falsifiability demonstrated, and its arm comes OFF the flake list · row 47's park half DONE · row 51's split (**ZERO test edits**) + the ONE structural arm (red-on-old). 7 captures · 1 PROVISIONAL (#113) · finals: core **1567/171** · Mac **2744/459** (+14/+3; 1 known issue + the load-flaky red, PAIRED as unchanged) · iOS **green** · mobile **626/106 with 4 known** |
 | LADDER | **CLOSED 2026-09-15 — round 1 (fable-reviewer, cold): 0 BLOCKER · 0 MAJOR · 1 no-action MINOR · 2 NIT; one confirmed NIT fixed at adjudication (one doc word), one recorded deliberately unchanged; round 2 ruled NOT OWED with the reasoning in the ladder section (zero behaviour fixes to re-review; R-cor-14 satisfied by round 1 itself)** |
-| CLOSEOUT | NOT-STARTED |
+| CLOSEOUT | **DONE 2026-09-15** — the walk, the closeout section, the KnownIssues pass, the master plan flips, the parity row, the 13u3 refresh, the /Applications refresh, the handoff LAST |
 
 ---
 
@@ -2837,6 +2838,100 @@ at least one FABLE pass over the whole phase, mandatory where the diff touches t
 pane authority — is satisfied by round 1 itself, which was Fable, cold, and over the combined
 diff. **If she wants a round 2 anyway, it runs at her word on the final tree; nothing about this
 ruling forecloses it.**
+
+## THE ORCHESTRATOR'S ACCEPTANCE WALK (2026-09-15, after the ladder, on a fresh Debug build at the final code tree; dev store; the rose palette ON; persisted captures `notes/plans/13u2-screens/67–69`)
+
+The two items the run owed the orchestrator's own hands, walked with the WalkKit road:
+
+1. **The 110a/110b composition (her mid-run rulings' verification clause):** in the Sherlock
+   book's Index — the selected note's mark is its TITLE LINE only, the body stays paper, the
+   column's row agrees (110a as ratified); a click into a body paragraph makes the block LIVE
+   with the R14/R22 ring showing during editing (the setting's `outline` value — her 110b
+   refinement working: the initial mark always, the setting governing the during-editing mark),
+   the note box flips to *editing*, and the left column keeps marking the note the cursor is in.
+   **The indent defect is gone** — the live pane's prose left edge aligns with the read tier's
+   from the first frame. *One honest residual for her eye (bundled in the handoff): the live
+   block wraps ~one character narrower than its read rendering (the editing ring's trailing
+   inset), visible as a wrap difference on one line — the left edge she reported is fixed; the
+   width nuance is a 13u3-class taste item if she wants it.*
+2. **The DARK pass unit B could not reach (the Settings fold):** toggled at the SYSTEM (the app
+   follows system by default — the road the rig missed). In dark, under the palette: the room is
+   FULLY BLACK in both surfaces walked (R51 holding under a palette), the paper carries the
+   rose's whisper only, the prose ink is the dynamic light ink (no black-on-black anywhere), the
+   title-line mark / ring / editing badge all legible; the book's READ page renders its own dark
+   reading treatment on the black room with ZERO palette bleed behind it. In light, the cream
+   page sits with no palette behind it. Appearance restored to light after; my walk instance
+   quit; zero instances confirmed.
+
+Also confirmed in passing: the primed cards (no growth on open — capture 67's navigator), her
+chapter-name LIKE (one row), and the 18d note-box states (no-note · selected+`edit here` ·
+`editing`). **Item 1 and item 18 remain HER HANDS' to accept** — this walk verifies the ruled
+behaviours and the dark gap, never the feel.
+
+## ✅ PHASE CLOSEOUT — 13u2, FEEL (2026-09-15, the overnight run)
+
+**What the phase was, in one sentence:** the app stops fighting her hands — the long-book landing
+settles (item 18, the primed cards), a typed space survives a pause on BOTH platforms (item 2, the
+one shared brain), boundary-anchored selections stop refusing (#109's law, both shapes), the
+book's Index presents as she ruled (item 19 + the shadow editor's router fixed), paste-plain and
+the singles land, and the pane/status/oracle machinery under it all is made mechanically honest.
+
+### THE FINALS (the full Mac run at `a22745e8`, unit E's close; the only later code change is one
+doc comment at `bdc00230` — behaviourally identical, verified isolated where touched)
+
+| suite | result | baseline at open |
+|---|---|---|
+| core `swift test` | **1567 / 171 GREEN** | 1562 / 170 |
+| the FULL Mac suite | **2744 / 459** — green with the expected **1 known issue** (the wrapped far-below arm, `abs(below) → 73.0`) and **1 recorded environment red** (`theReadClickLandsInIndexAtThatBlock`, the KnownIssues row — 3/3 red isolated on every tree measured tonight incl. two zero-code scratch worktrees; the product road walked clean twice) | 2668 / 445 ALL GREEN |
+| iOS build | **green** (every unit) | green |
+| the FULL mobile suite | **626 / 106 PASSED with 4 known issues** (run twice: units D and E — `Shared/` moved in both) | 622 / 105 w/ 4 known |
+| lockstep marker | **8**, untouched | 8 |
+
+**Fences, verified by diff over the whole phase range (`13e84c02..bdc00230`, 57 commits):**
+`Sources/VariorumCore/Sync/` **zero** · `Persistence/` **zero** · `Server/` **zero** · schema
+**zero** · migrations **zero** · the ONE core change is `Queries/PostRender.swift` (+72, the
+bounded preview read) · no commit trailers · pushed throughout.
+
+**FLAKE-LIST UPDATE (unit E's evidence, executed here):** `MastheadLayoutTests`' open-field arm
+comes **OFF** the carry-forward flake list (the settle is an until-clause on the oracle's
+monotonic report counter, falsifiability demonstrated loud in 0.73 s; green isolated ×3 AND in
+the 2744-test run). The list is now: the differential-latency pin ·
+`CanvasDragTrackingTests` · `BlocksWorkbenchFaceTests`' single-click budget (all owner 12) ·
+plus `theReadClickLandsInIndexAtThatBlock` (its own row, owner 12).
+
+### THE LADDER TALLY
+
+| round | findings | outcome |
+|---|---|---|
+| **R1** (fable-reviewer, cold, over the combined diff) | **0 BLOCKER · 0 MAJOR · 1 MINOR (no-action observation) · 2 NIT** | both NITs CONFIRMED — one fixed at adjudication (a doc word), one recorded deliberately unchanged with the taste half bundled for her; the MINOR adopted into #112(b)'s text |
+| **R2** | — | **ruled NOT OWED** (zero behaviour fixes to re-review; the reasoning in the ladder section; hers to overrule) |
+
+**Nothing was dismissed as hollow anywhere in the phase.** Every bug-class fix landed red-on-old
+(six units' worth: the card pin at its own commit; the space-eater on BOTH platforms' pre-fix
+trees; the boundary law's 10-of-14 on a scratch worktree with the 4 both-green NAMED; the
+highlight-follow; the structural arm by behavioural revert; the shadow's two router arms) — and
+the phase also produced three honest NEGATIVES (row 98 dismissed with its mechanism; row 57
+not-reproducing with the probe evidence; ⌘A not-reproducing on a four-arm walk) and one honest
+REVERT (unit A's card fix, measured 0/3 before the successor design shipped as A2).
+
+### HER RULINGS DURING THE RUN (the mid-run check-in) AND THE MORNING BUNDLE
+
+Ruled in-run: **#88(c) STRUCK · RULING A-2 ratified · #110(a) ratified-for-the-book with the
+rider verified by the orchestrator's walk · #110(b) ratified with her refinement verified · the
+fold issue → 13u4.** Awaiting her (the handoff's ratify list): **#110(c)'s one consequence ·
+#111(a)–(c) · #112(a)–(c) — (b) the STAR CAP is the one that unblocks built work · #113 · the
+⇧⌘V grey-vs-refuse taste call · the no-round-2 ruling and the wrapped gate arm (both hers to
+overrule) · item 1 + item 18's field acceptance, HER HANDS.**
+
+### WHAT THIS PHASE DID NOT DO
+
+Item 10's scroll cannot fire until she rules the star cap (#112(b)). Item 1 is TRACED with its
+two measured mechanisms fixed (the cards; the pane compare) but closes only in her hands. The
+run-scale split stays closed (evidence downgraded, successor instruction recorded). Row 56's
+step 3 (the registry walk) and the ceremony quartet are deferred with owners. The phone's paste
+DOOR, word-screen COPY ALL doors, title width, seam carves, and the compound's face remain the
+mobile catch-up's (each a named row). **Zero canon deltas — AppSpec/OverallModel untouched; §14
+carries no 13u2 entry and 13u1's delta stays in place per the lean-docs rule.**
 
 # CARRIED VERBATIM AT THE SPLIT (2026-09-14) — from `phase-13u-feel-and-polish.md` (P39's section, per its banner: "The file split must carry that section to 13u2")
 
