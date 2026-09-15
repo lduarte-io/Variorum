@@ -297,7 +297,7 @@ zero. Lockstep marker: 8, untouched.
 | C | The door-await chain loop (KnownIssues row 44) + the round-3 record's designed pin | DONE(`a84542e5`) |
 | D | Item 7 — `MarkdownActs`' arm-then-hand-off rewrite (the ONE input-path door) + the grep pin | DONE(`5de0a4d2`) |
 | E | P40 + P41 hoists (zero-test-edit proof) + the KnownIssues eight-brain enumeration amendment | DONE(`c4e8a4ee`) |
-| F | Close — suites green, KnownIssues rows resolved/re-owned, the seven verdicted | IN-PROGRESS |
+| F | Close — suites green, KnownIssues rows resolved/re-owned, the seven verdicted | DONE |
 
 *(Measurements, verdicts, pins and PROVISIONALs are filled in below as each piece lands.)*
 
@@ -595,6 +595,109 @@ claim is worse than no claim, because the next session trusts it.** The row is a
 the four are recorded as discharged, and the rule now reads that the list is **the KNOWN forks,
 never the proven-complete set** — a fork's absence from it is not evidence it does not exist, and
 the honest way to ask "are there others?" is a fresh grep. Which is exactly what P40 and P41 were.
+
+---
+
+### F — THE CLOSE
+
+#### The seven sweep items, each verdicted explicitly (the carried section's obligation 1)
+
+| # | verdict | evidence |
+|---|---|---|
+| **P16** — `seamPair` O(N²) on the caret/keystroke road | **FIXED** | `EditorSeamCostTests.theMergeEnablementRoadStaysCheapAtTwentyThousandBlocks` — **29.24 s → 3.30 ms**, red on the real pre-fix code |
+| **P17** — `applyDifferential` O(N²), both platforms | **FIXED** | `EditorSeamMountedCostTests…` **4.41 s → 56.6 ms** (Mac) · `MobileEditorSeamCostTests…` **3.73 s → 30.6 ms** (phone) · `ReadPostViewModel`'s third site swept with them |
+| **P22** — `replaceInEveryTake` O(matches × blocks²) | **FIXED** | the walk hoisted out of BOTH loops; correctness by the shared equivalence pin, behaviour by `FindAndReplaceTests` + `TakesFindReplaceTests` riding unmodified. **No road measurement:** the find bar's plan is a summoned gesture over ONE note's blocks and the honest fixture would be a 100k-word single note — the escape-hatch case AppSpec §4 parks. Said rather than implied |
+| **P24 + P25** — churn from the widened report | **FIXED** | `EditorChurnCostTests`, three pins on the REAL typed path — **9 → 1**, **8 → 6**, and a stamped-and-rebaselined major revision → stamp unmoved |
+| **P40** — the shelf's two forked brains | **FIXED** | hoisted to `Shared/ShelfOrder.swift`; both platforms' pins ride unmodified (zero test edits) |
+| **P41** — Read's paragraph brain + the link guard forked | **FIXED** | hoisted to `Shared/FlowParagraph.swift` + `Shared/MarkdownLink.swift`; zero test edits |
+| the KnownIssues `planVisibleTakeEdit` row | **FIXED** | **4.31 s → 1.57 ms** at 8,000 blocks, and the CLASS swept to completion as the row's own remedy demanded |
+| item 7 — the `MarkdownActs` arming residual | **CLOSED, and NOT as a bug** | traced first: no site armed and abandoned. Closed structurally by `OrdinaryInputEdit` + `OneInputPathTests` |
+| the door-await chain loop (row 44) | **FIXED** | `TypedReturnKeyTests.theQuitDoorAwaitsEveryLinkOfTheCompoundChain`, red on old at the two expectations the round-3 record predicted |
+
+**Nothing was DISMISSED AS HOLLOW.** One pin was caught *being* hollow before it was believed and
+is recorded rather than quietly rewritten: the first draft of the `separatorPair` cost pin selected
+a one-character range INSIDE a block, which `.mergeBlocks` answers `.notASeam` three guards before
+the walk — it read green on both trees. The rewritten pin selects the document's last SEPARATOR
+and measures **24.05 s → 8.4 ms**. A cost pin that never reaches its road is exactly the shape the
+hallucination guard exists to catch, and it caught this one on this side of the fence.
+
+#### The carried section's other three obligations
+
+2. **The O(N²) class swept to completion** — done, both platforms, 14 FIXED + 24 provably SAFE,
+   enumerated in section A. The KnownIssues row is RESOLVED in place with its measurement (the
+   phase's closeout removes it, per that file's rule).
+3. **The forked-brain row's eight-brain enumeration AMENDED**, not left claiming completeness —
+   section E. That correction was P40's real finding.
+4. **Nothing declined into the sweep artifact.** The two things this unit deliberately did not
+   take are both `KnownIssuesAndTechDebt.md` rows with named owners: the MENU-flight door-await
+   neighbour (13u1 UNIT 2) and the phone's tutorial teaching the retired duplicate-divide default
+   (the mobile project row).
+
+#### Finals
+
+| suite | result | baseline |
+|---|---|---|
+| core `swift test` | **1551 / 168 green** | 1551 / 168 — exact |
+| the FULL Mac suite | **2,644 / 441 suites, ALL green** | 2,630 of 2,631 in 437 |
+| iOS build | **green** | green |
+| the FULL mobile suite | **622 / 105, ONE failure + the 2 standing known issues** | 621 / 104 |
+
+The Mac's +13 are this unit's pins (`EditorSeamCostTests` 5 · `EditorSeamMountedCostTests` 3 ·
+`EditorChurnCostTests` 3 · `OneInputPathTests` 1 · the R3-1 pin 1) in +4 suites, and **the
+baseline's one red did not fire** — the 17o-era masthead latency flake (KnownIssues, owner 13u2)
+stayed green through a 719 s full run.
+
+**THE MOBILE RED IS NOT THIS UNIT'S, and it is not a stale pin either.**
+`MobileTutorialStructureWalkTests.theFannedDivideLessonLandsTheDuplicateShape` fails — reproducibly
+in isolation, so not a load flake — and it fails **byte-identically on a scratch worktree at this
+unit's FIRST commit, before any of its code**. Traced: her **U-2** ruling (2026-09-06, the
+use-report round's 18c) made a fanned divide **keep-on-top** on BOTH platforms, and 18c flipped the
+phone's behaviour in lockstep — but the phone's tutorial lesson still *teaches* the retired rule in
+its own prose (*"copied onto both halves… the extra copies are quick to delete"*), where the Mac's
+lesson was rewritten. So the pin is doing its job: the app no longer does what the lesson promises.
+**Left for its owner deliberately** (rewriting a lesson's promise is the phone's product work, not
+the editor seam's correctness floor) and recorded as a new `KnownIssuesAndTechDebt.md` row —
+**with a note that it is worth her eye on priority, since a friends-beta reader would be taught a
+rule the app does not follow.**
+
+**The struck agenda item's check, answered rather than assumed:** this unit RAN the mobile suites,
+so it owed a look at the simulator-fleet re-baselining. `notes/plans/mobile-app-plan.md:478`
+already names `iPhone 17 Pro, OS=26.2` as the destination — **the re-baselining has happened; no
+one-commit act is owed.** Every mobile run in this unit used it.
+
+#### PROVISIONAL calls made: NONE
+
+No decision in this unit needed one. Every change either follows a rule already written down — the
+KnownIssues row's prescribed accumulation remedy, TEXTKIT2_NOTES §3's clamp rule, the 18c ladder's
+designed fix and pin, the forked-brain row's hoist-never-patch rule — or is a structural
+rearrangement with no behaviour to decide (item 7). **Nothing was appended to `notes/QUESTIONS.md`,
+and nothing in this unit is waiting on the author.**
+
+#### Canon: zero deltas owed
+
+`Sources/VariorumCore/Sync/`: **zero lines.** Schema: **zero.** Migrations: **zero.** Lockstep
+marker: **8**, untouched. No AppSpec/OverallModel/SyncSpec text is superseded by anything here —
+AppSpec §10's churn definition is unchanged and is now what the Mac actually records. Two **code**
+comments that had gone stale against measurements taken after they were written are corrected in
+place: `ArmedEdit.exactCost`'s *"Platforms that derive cost from the report simply never read it
+(the Mac)"* and `applyDifferential`'s *"Cost ∝ changed blocks, never the post."*
+
+#### What UNIT 2 inherits from this unit
+
+- **`BlockRangeIndex.entryRanges()` exists** and is the sweep's one brain — the compound's own
+  tiling reads should use it rather than minting a fourth walk.
+- **`OrdinaryInputEdit.apply` is the one input-path door**, and `OneInputPathTests` will fail the
+  suite if the compound's work adds a second gate call site. That is deliberate: the compound is
+  exactly the kind of work that grows one.
+- **`finalizeWork` now awaits the whole chain** — the compound's flights are awaited by every door
+  through the one call, so a cross-block compound scheduled from a keystroke is quit-safe by
+  construction. **The MENU flight is still not** (its own KnownIssues row, owner UNIT 2).
+- **The churn road takes the gate's `exactCost`**: a compound that edits takes through
+  `editTakesAtomically` passes its own exact `charDelta` already, so it composes; a compound that
+  ever routes an edge edit through `storageDidEdit` inherits the corrected arithmetic for free.
+- **Row 43's two halves are untouched and still UNIT 2's** — the ⌘Z-across-a-break directive
+  judgment and `newBlock`'s structural undo (R-13u-3), with AppSpec §9's delta owed at the phase's
+  closeout.
 
 ## UNIT 2 RECORD (LIVE STATUS)
 
