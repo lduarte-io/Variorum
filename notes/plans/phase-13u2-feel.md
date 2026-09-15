@@ -358,7 +358,7 @@ on the standing rails, zero-instance pgrep first, record-instead-of-kill if her 
 | unit | status |
 |---|---|
 | A — pane stability trace + landing/settle | **CLOSED 2026-09-15** — item 1 TRACED (her hands owed, never claimed closed) · row 100 FIXED + walked · row 98 DISMISSED AS HOLLOW · M12 VERIFIED · item 18's Outline half TRACED, built, and REVERTED on a 3-vs-3 measurement, with its designed successor recorded · 54/92/94 DEFERRED with reasons. Finals = baseline: core 1562/170 · Mac 2668/445 · iOS green |
-| A2 — item 18's successor: preview priming (RULING A-1) | NOT-STARTED |
+| A2 — item 18's successor: preview priming (RULING A-1) | **RUNNING 2026-09-15** — the record is open below; pieces flip there |
 | B — book-Index presentation + shadow editor | NOT-STARTED |
 | C — #109 boundary-clamp law | NOT-STARTED |
 | D — the singles (+ TRACE 1a, routed by RULING A-1) | NOT-STARTED |
@@ -713,6 +713,44 @@ whole text against the projection's — cost ∝ (panes on screen × take length
 nothing has changed at all. On the Takes margin grid that is the board. It is not the storm's cause, but
 it is the storm's amplifier and a standing P1-shaped waste on the one line the 13l walk happened to
 sample. (The fix and its red-on-old measurement are below.)
+
+---
+
+# UNIT A2 RECORD — item 18's successor: PRIMING THE CARD PREVIEWS (opened 2026-09-15, `opus-implementer`, the overnight run; RULING A-1's build)
+
+**WHAT THIS UNIT DID NOT DO — the record's first line.** *(PENDING — written at the close, when it is
+true.)*
+
+**What it is:** RULING A-1's adopted successor to the card fix UNIT A built and reverted. The traced
+defect is TRACE 2's, unchanged: **a collapsed card's height depended on WHEN its preview read
+returned**, so every card above a landing target grew `h=46 → h=103` at an arbitrary moment AFTER the
+page had arrived — 854 pt of drift on the real Sherlock book, her *"stutter … once I've already
+arrived"*, and the 854-pt recovery hop a second later, her *"moved down to where the note started"*.
+UNIT A's routes all failed the same way because each **changed a card's SIZE**. This one does not
+touch the card's size at all: it puts the excerpt **in hand before the card's first frame**, so the
+settled column is byte-identical to today's and there is nothing for the landing to fight.
+
+**RULING A-1's four constraints, which bind this build:** (1) the `VariorumCore/Queries` read is
+BOUNDED per entry — the leading blocks' text only, cost ∝ entries × a small constant, never ∝ the
+book's text (P1 is the law); derived at read time, never stored. (2) The revert's own fixture is the
+GATE: `openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded` stays 3/3 green isolated BESIDE
+the new card pin. (3) The Outline card:heading scale-mix finding rides here as MEASURE-then-decide,
+not an obligation to fix. (4) No lazy-run restructuring (the run-scale split broke the live editor's
+mount: `editorHeight == 24` after 200 turns).
+
+## LIVE STATUS
+
+| piece | state |
+|---|---|
+| the record opened + TRACE 2 re-verified on the post-revert tree | **PENDING** |
+| the bounded core read (`Queries.leadingBlockTexts`) + its pins | **PENDING** |
+| the app-side priming (`BookViewModel` · `OutlinePostRow`) + the red-on-old card pin | **PENDING** |
+| the GATE: the 3-expanded fixture 3/3 isolated, beside the card pin 3/3 | **PENDING** |
+| the WALK: before/after landing stories on the real Sherlock book + captures | **PENDING** |
+| the card:heading scale-mix — MEASURE then decide | **PENDING** |
+| tests (core · FULL Mac · iOS build) | **PENDING** |
+
+*(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
 
 ---
 
