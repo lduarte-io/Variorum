@@ -360,7 +360,7 @@ on the standing rails, zero-instance pgrep first, record-instead-of-kill if her 
 | A — pane stability trace + landing/settle | **CLOSED 2026-09-15** — item 1 TRACED (her hands owed, never claimed closed) · row 100 FIXED + walked · row 98 DISMISSED AS HOLLOW · M12 VERIFIED · item 18's Outline half TRACED, built, and REVERTED on a 3-vs-3 measurement, with its designed successor recorded · 54/92/94 DEFERRED with reasons. Finals = baseline: core 1562/170 · Mac 2668/445 · iOS green |
 | A2 — item 18's successor: preview priming (RULING A-1) | **CLOSED 2026-09-15 — RULING A-2: the priming SHIPS** — item 18's card drift FIXED (red-on-old; no `h=46` on the real book, 3 runs) · the bounded core read MEASURED FLAT · the gate arm ADJUDICATED: hard-bounded at the residual's magnitude + the ≤ 4 aspiration in `withKnownIssue` (the scale-mix residual; unit B re-examines its closed cure beside the shadow fix) · finals: core 1567/171 · Mac 2670/446 GREEN with 1 known issue · iOS green · item 18 field acceptance: **her hands owed** |
 | B — book-Index presentation + shadow editor | **CLOSED 2026-09-15** — item 19's five ruled behaviours BUILT (one of the intended fixes DISMISSED AS HOLLOW, with its evidence) · the double editing ring removed · **KnownIssues row 49's ROUTER half FIXED** (red-on-old + verified in the app) and the row NARROWED to the surviving double realization, which is traced with three causes eliminated · scope 4 RE-EXAMINED: the run-scale split stays CLOSED, its evidence downgraded, the successor's measurement named · 3 PROVISIONALs (QUESTIONS #110) · finals: core **1567/171** · Mac **2682/449** (1 known issue + 1 load-flaky red, recorded with paired numbers, the product road walked clean) · iOS **green** |
-| C — #109 boundary-clamp law | **RUNNING (opened 2026-09-15)** — the UNIT C RECORD below carries its LIVE STATUS |
+| C — #109 boundary-clamp law | **CLOSED 2026-09-15** — her law BUILT, both shapes, BOTH platforms (the phone got the trim free and shape (i) with three mirrors of the Mac's road) · the family ENUMERATED in an 18-cell sweep table · 10 of 14 behaviour pins RED on the pre-fix tree · `.partialBlockAcrossSeam` retired by SPLITTING into two causes whose roads differ (forced by a finding: the phone has no seam carves — new KnownIssues row) · walked with 11 captures incl. both undo grammars · 1 PROVISIONAL (QUESTIONS #111) · finals: core **1567/171** · Mac **2702/450** (+20 pins; 1 known issue + the load-flaky red, PAIRED-measured as unchanged by this diff) · iOS **green** · mobile cross-block suites **67/6** |
 | D — the singles (+ TRACE 1a, routed by RULING A-1) | NOT-STARTED |
 | E — the mechanical sweeps | NOT-STARTED |
 | LADDER | NOT-STARTED |
@@ -1406,8 +1406,19 @@ are exactly the discipline the guard asks for.
 
 # UNIT C RECORD — the #109 BOUNDARY-CLAMP LAW, both shapes (opened 2026-09-15, `opus-implementer`, the overnight run)
 
-**WHAT THIS UNIT DID NOT DO — the record's first line, per the brief.** *(filled at the close; PENDING
-while the unit runs.)*
+**WHAT THIS UNIT DID NOT DO — the record's first line, per the brief.** It did **not pin the PHONE's
+shape-(i) LANDING**: that road ends in `MobileMarkdownActs.inputReplace`, which needs a real
+`UITextView`, and the mobile harness attaches storage only — making it work without a view would mean
+a SECOND input path on the phone, which is the exact thing that door exists to prevent. The phone
+pins the PLAN and the gate's routing instead; the landing is pinned on the Mac over the same shared
+brain, and the phone's hands-on walk is the mobile catch-up's (PL-23). It did **not walk the TWO TAIL
+CASES**, because since U-1 made the Return key structural they are no longer hand-reachable on the
+Mac at all (the walk's own evidence and the reasoning are in THE WALK's note 2); they are pinned at
+the app's own seam instead, and green on both trees. It did **not build any phone UI**. It did **not
+touch** `Sources/VariorumCore/` at all — **zero `Sync/`, zero `Persistence/`, zero `Server/`, zero
+schema, zero migrations, marker 8**. And it did **not** re-litigate the RULED block: one genuine
+edge the ruling does not speak to (a selection of exactly the line break, typed over) is built
+PROVISIONAL and recorded as QUESTIONS #111(a).
 
 **What it is:** roster item 10 — her ruling of 2026-09-15 at the 13u1 checkpoint, whose binding text is
 `notes/QUESTIONS.md` #109's RULED block. **ONE uniform law: a selection edge sitting on a block
@@ -1430,7 +1441,7 @@ absorbs the open tail's separator, and the tail's two causes stand untouched.
 | `.partialBlockAcrossSeam` — retired to what survives | **DONE** — SPLIT into `.seamKeystrokeDeclined` + `.surfaceNotSettled` (their roads differ), both enumerated and pinned |
 | the flipped pins, RED ON OLD | **DONE** — 10 of 14 behaviour pins fail on the pre-fix tree (20 issues); the 4 that pass on both are named |
 | the phone's consumer (or the parity row, with the reason) | **DONE** — shape (ii) inherited with no arm; shape (i) given one (3 mirrors, zero new brain); the LANDING pin is the catch-up's, with the harness reason |
-| tests (core · FULL Mac · iOS build) | PENDING |
+| tests (core · FULL Mac · iOS build) | **DONE** — core **1567 / 171 GREEN** (baseline exactly) · the FULL Mac suite **2702 / 450** (+20 pins, +1 suite) with the expected 1 known issue + the recorded load-flaky red, PAIRED-measured as unchanged by this diff · iOS build **GREEN** · the six mobile cross-block suites **67 / 6 GREEN** (+2) |
 | the WALK + captures | **DONE** — 11 captures (41–51) on the dev-store Debug build: both shape (i) mirrors, shape (ii)'s trim with its receipt, BOTH undo grammars, the locked-take refusal on a trimmed span, and a type-over beside a locked neighbour |
 | PROVISIONALs → `notes/QUESTIONS.md` | **DONE** — **#111** (a) BUILT PROVISIONAL · (b) the retired cause's new words · (c) the phone's missing seam carves, a FINDING with a KnownIssues row; the marker moved to #112 |
 
@@ -1634,6 +1645,56 @@ than a pixel guess (click the line, ⌘←/⌘→ to its edge, then ⇧← / ⇧
    seam instead — `BoundaryClampTests`' two tail pins drive `insertText` through the real gate on a
    real `EditorTextView` and read the status line — and they are GREEN ON BOTH TREES, so the fence
    is preserved behaviour rather than something this diff could have broken silently.
+
+## DISPOSITIONS — every row this unit was given
+
+| the brief's row | verdict | evidence |
+|---|---|---|
+| **#109 shape (i) — CLAMP AND EDIT** | **BUILT with red-on-old** | `clampedInBlockEdit` + the Mac and phone arms; cells 2/3/4/6 of the sweep table; captures 43/46/51; four behaviour pins red on the pre-fix tree |
+| **#109 shape (ii) — the (d) TRIM** | **BUILT with red-on-old** | four lines inside `plan` (the run from the span she made, the CUTS from the clamped one); cells 7/8/9/11; capture 48 with its tray receipt; five behaviour pins red on the pre-fix tree |
+| **the TAIL FENCE binds the trim** | **BUILT — and it is the contiguity guard itself** | the clamp's `ranges.count - 1` bound never offers the tail's separator, so a span reaching it still fails contiguity and `.openTail` / `.emptyTailAtSpanEnd` speak unchanged; cells 15/16, green on both trees (PRESERVED, not claimed as a fix) |
+| **the flipped pins** | **FLIPPED, all three sites** | `CrossBlockCompoundTests.aSpanOpeningOnTheBoundaryRefusesWithTheTrueGeometry` → `…IsTakenByTheTrim` (the plan now returns the trim, `b1` deleted, no join) · `WholeBlockDeleteTests`' two TRACE tests keep their geometry characterization and gain TRACE 4, the flip · `UndoHintAndRefusalTests`' three cause references |
+| **`.partialBlockAcrossSeam` retires** | **SPLIT into two causes, both enumerated and pinned** | the section above; the split was forced by a FINDING (the phone has no seam carves), not chosen for taste |
+| **BOTH PLATFORMS** | **DONE — the brain is `Shared/`; the phone got shape (ii) free and shape (i) with three mirrors** | the BOTH PLATFORMS section; iOS build green; six mobile cross-block suites 67/6 green |
+| **a locked take still refuses whole (R-13u-1)** | **PRESERVED, verified in the app** | capture 50, on a TRIMMED span: *"A take in this selection is locked — nothing was changed."* |
+| **one undo grammar** | **PRESERVED, verified in the app** | capture 49: the Edit menu's item reads **"Undo Edit Across Blocks"** for the trim (one entry, the standing label) while plain Undo is disabled; capture 44: shape (i) is AppKit's own text undo |
+
+**DEFERRED, with owners, found by this unit:**
+
+- **The iPhone has NO SEAM CARVES** — neither A7's empty-block backspace nor #34's texted-seam merge
+  is built there (grep-verified). Both geometries already live in the shared `BlockRangeIndex`, so
+  the phone needs the two roads and their authorizations, never new rules. **KnownIssues row added;
+  owner: the mobile app (the catch-up round, beside PL-23).** Until then its refusal is honest and
+  its road opens (`.seamKeystrokeDeclined`).
+- **The phone's shape-(i) LANDING pin** — blocked by the mobile harness's storage-only editor, as
+  above. **Owner: the mobile catch-up (PL-23).**
+
+## FINALS
+
+| gate | result | baseline (UNIT B's finals) |
+|---|---|---|
+| core `swift test` | **1567 / 171 GREEN**, 53 s | 1567 / 171 — identical |
+| the FULL Mac suite | **2702 / 450**, 740 s — **+20 tests, +1 suite** (`BoundaryClampTests`), with exactly the expected **1 known issue** (`openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded`, A2's `withKnownIssue` arm) and **1 load-flaky red** (`theReadClickLandsInIndexAtThatBlock`) | 2682 / 449 with the same two |
+| iOS build | **GREEN** | green |
+| the six mobile cross-block suites | **67 / 6 GREEN** (+2: the phone's two #109 pins) | 65 / 6 |
+| lockstep marker | untouched — **8** | 8 |
+
+**THE LOAD-FLAKY RED, MEASURED IN PAIRS rather than assumed** (the flake rules' own protocol):
+`theReadClickLandsInIndexAtThatBlock` failed **3 of 3 isolated runs on the post-C tree** — and
+**3 of 3 on a scratch worktree at `c14ad2ed`, this unit's record-only opening commit with zero code
+in it**, with a byte-identical signature (`live.count → 0`, the pane identifier nil). **This diff
+changes nothing about it.** Worth the next owner's eye: today's isolated rate is worse than the
+2-of-9 unit B recorded, on BOTH trees, which points at the environment/load axis rather than at
+either unit's diff — appended to the row.
+
+**No other failure in the full run**, so none of the four load-flaky siblings fired (the
+differential-latency pin, `CanvasDragTrackingTests`, `MastheadLayoutTests`' open-field arm,
+`BlocksWorkbenchFaceTests`' single-click budget).
+
+**Commits** (each pushed as it landed, per the checkpoint protocol): `c14ad2ed` (the record opened) ·
+`cff7537b` (the law built, both shapes, with the sweep table and the 10-of-14 red-on-old) ·
+`7f1c1c9e` (the cause split + the phone's arm) · `98b14068` (QUESTIONS #111 + the KnownIssues row) ·
+`c42404f7` (the walk) · this commit (the dispositions and the finals).
 
 ---
 
