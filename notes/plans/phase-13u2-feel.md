@@ -357,13 +357,91 @@ on the standing rails, zero-instance pgrep first, record-instead-of-kill if her 
 
 | unit | status |
 |---|---|
-| A — pane stability trace + landing/settle | NOT-STARTED |
+| A — pane stability trace + landing/settle | **RUNNING** (opened 2026-09-15; the UNIT A RECORD below is live) |
 | B — book-Index presentation + shadow editor | NOT-STARTED |
 | C — #109 boundary-clamp law | NOT-STARTED |
 | D — the singles | NOT-STARTED |
 | E — the mechanical sweeps | NOT-STARTED |
 | LADDER | NOT-STARTED |
 | CLOSEOUT | NOT-STARTED |
+
+---
+
+# UNIT A RECORD — item 1's TRACE + the landing/settle family (opened 2026-09-15, `opus-implementer`, the overnight run)
+
+**WHAT THIS UNIT DID NOT DO (the record's first line, per the brief):** *(filled at close — see the
+DISPOSITIONS table.)*
+
+## LIVE STATUS
+
+| piece | state |
+|---|---|
+| the 13l hang lead — trace | IN PROGRESS (the capture read; the analysis is TRACE 1 below) |
+| item 1 — the pane-stability trace | NOT-STARTED |
+| item 18 — the long-book landing & settle | NOT-STARTED |
+| row 54 — read tier's provisional-width first measure | NOT-STARTED |
+| row 92 — canvas silhouette click lands mid-board | NOT-STARTED |
+| row 94 — Blocks' ~0.2–0.3 s residual arrival | NOT-STARTED |
+| row 98 — paged reader's paragraph over-count | NOT-STARTED |
+| row 100 — the flow's landing off after a content creep | NOT-STARTED |
+| M12 — `desyncRecoveryCount` oracles | NOT-STARTED |
+| row 51 — the `TakesArticleScroll` split (CONDITIONAL) | NOT-TAKEN so far (this unit has touched no article-scroll machinery) |
+| tests | NOT-STARTED |
+| walk + captures | NOT-STARTED |
+
+*(Every line above starts PENDING and is flipped in the same commit as the piece it names.)*
+
+## TRACE 1 — THE 13l HANG LEAD, READ AT LAST (`hang-sample-takes-margin-grid.txt`, 7,874 lines)
+
+The lead was recorded as *"`PaneSurfaceRepresentable.updateNSView` RE-ENTERING (`PaneSurface.swift:832`)"*.
+**Both halves of that sentence are wrong, and the capture says so.** Reconstructing the ancestor chain of
+the named frame mechanically (indentation → parent, from the root down) gives **exactly ONE**
+`updateNSView` frame on the path:
+
+```
+… NSHostingView.beginTransaction → Update.ensure → ViewGraphRootValueUpdater.updateGraph
+→ GraphHost.flushTransactions (2183 of 2551) → GraphHost.runTransaction (2016)
+→ AG::Subgraph::update (1907) → AG::Graph::UpdateStack::update (1759)
+→ PlatformViewChild.updateValue (93) → ViewRendererHost.performExternalUpdate (85)
+→ PlatformViewRepresentableAdaptor.updateViewProvider (81)
+→ protocol witness … PaneSurfaceRepresentable.updateNSView (81)
+→ PaneSurfaceRepresentable.updateNSView + 3060  [PaneSurface.swift:832]  (51)
+→ _stringCompareSlow  (51)   ← THE LEAF
+```
+
+It is not recursion — the several `updateNSView` lines the original grep saw are SIBLING call sites in the
+same function's subtree, at different `+ offset`s, which the flat text makes look nested. And the inclusive
+cost of the whole representable is **81 / 2551 samples = 3.2 %**, so `updateNSView` is not the hang either.
+
+**What the hang actually is** (self-time aggregation over the whole capture, children subtracted):
+`AG::Graph::propagate_dirty` 154 · `AG::Graph::UpdateStack::update` 151 · `AG::Subgraph::update` 101 ·
+`LayoutEngineBox.sizeThatFits` 74 · `LayoutEngineBox/UnaryLayoutEngine.explicitAlignment` 128 ·
+`_swift_getGenericMetadata` + the generic-metadata cache 300+ · retain/release traffic ~370. The main
+thread spends the whole 2.55 s window inside **ONE `GraphHost.flushTransactions`** — a SwiftUI
+invalidate → layout → invalidate storm, not TK2 geometry (`usageBoundsForTextContainer`, `ensureLayout`,
+`NSTextLayoutManager` and `BlockRangeIndex` are **0 samples each**, as is every take-board type).
+**TEXTKIT2 §2 is exonerated for this capture** — which is exactly what "the suspect, never the verdict"
+asked us to establish rather than assume.
+
+**The real finding the leaf hands us (TRACE 1a — a genuine defect, fixed below).** `PaneSurface.swift:832`
+in the 13l tree is today's line 1192:
+
+```swift
+if !isLive, view.string != text {
+```
+
+`view.string` on an `NSTextView` returns the text storage's `NSString`, **lazily bridged** — a foreign
+`__NSCFString`, never a native Swift string. Swift's `==` cannot take its memcmp fast path against a
+foreign operand, so it drops to `_stringCompareSlow` → `_StringGutsSlice._slowCompare` → full **NFC
+normalization of both sides, one `-[__NSCFString characterAtIndex:]` ObjC message per UTF-16 unit** (all
+of that is visible in the capture's subtree under the leaf). And the **EQUAL case is the worst case**:
+proving equality requires scanning to the end.
+
+So every SwiftUI update pass, for every read pane on screen, re-normalizes and re-compares the pane's
+whole text against the projection's — cost ∝ (panes on screen × take length), paid most heavily when
+nothing has changed at all. On the Takes margin grid that is the board. It is not the storm's cause, but
+it is the storm's amplifier and a standing P1-shaped waste on the one line the 13l walk happened to
+sample. (The fix and its red-on-old measurement are below.)
 
 ---
 
