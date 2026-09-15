@@ -657,12 +657,23 @@ final class MobileEditorViewModel {
 
     /// Same block sequence, changed texts: replace only changed slots,
     /// last-to-first so earlier ranges stay valid (the Mac executor's
-    /// shape). Cost ∝ changed blocks, never the post.
+    /// shape).
+    ///
+    /// **Cost, stated honestly (13u1 UNIT 1 — P17's phone half, the Mac
+    /// twin's wording mirrored).** The STORAGE WRITES are ∝ the changed
+    /// blocks; the COMPARISON is ∝ the note's text. What was wrong beyond
+    /// the wording was the tiling walk: this asked `index.range(ofEntryAt:)`
+    /// once per slot and that accessor walks from zero, so the loop cost
+    /// Σi ≈ N²/2 in the BLOCK COUNT — P1's one prohibition, on the main
+    /// actor. The tiling is now read ONCE. The ranges stay correct across
+    /// the descending loop for the same reason it descends at all:
+    /// replacing slot `j` cannot move the prefix sum of any entry below it.
     private func applyDifferential(_ new: [Queries.RenderedBlock]) {
         var edited = false
+        let ranges = index.entryRanges()
         for i in stride(from: new.count - 1, through: 0, by: -1) {
             let newText = new[i].text ?? ""
-            let range = index.range(ofEntryAt: i)
+            let range = ranges[i]
             if viewText(range) != newText {
                 programmaticReplace(range, with: newText, blockID: new[i].blockID)
                 edited = true
@@ -1772,8 +1783,13 @@ final class MobileEditorViewModel {
             remainingTailLength: outcome.newTail?.utf16.count)
         tailText = outcome.newTail ?? ""
         let firstNew = index.entries.count - outcome.applied.count
+        // ONE tiling walk for the whole mint (13u1 UNIT 1 — the Mac twin's
+        // fix, mirrored): the accessor walks from zero, so stamping M
+        // freshly-minted paragraphs over a note of N blocks cost O(M·N),
+        // and a bulk paste or an import makes M large.
+        let ranges = index.entryRanges()
         for (offset, block) in outcome.applied.enumerated() {
-            let range = index.range(ofEntryAt: firstNew + offset)
+            let range = ranges[firstNew + offset]
             if range.length > 0 {
                 setBlockAttribute(block.blockID, over: range)
             }
