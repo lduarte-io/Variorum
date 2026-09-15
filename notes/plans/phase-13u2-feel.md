@@ -2273,6 +2273,36 @@ same owner. Items 10 · 13-Mac · P39a/b · roster item 8 · row 57 · TRACE 1a 
 verification) · `83dda2a7` (the walk + row 57's trace) · this one (the dispositions, the finals, the
 KnownIssues rows). No history was rewritten and nothing was reverted.
 
+## ORCHESTRATOR ADJUDICATION — UNIT D (2026-09-15, the same night)
+
+**Spot-check verdict: VERIFIES.** Nine commits pushed, tree clean; the diff shape matches
+(17 files, zero `Sources/` lines — item 2's fix in `Shared/EditorBrain`, item 11's rule a new
+`Shared/` file); #112 appended with the marker moved to #113; the full mobile suite run and green
+with its 4 known issues (owed, since `Shared/` moved — correctly taken per-unit rather than
+deferred). The star-cap STOP (#112(b)) is exactly right — `Operations.starLimit = 5` is her 13f
+ruling and raising it is hers alone; the built scrolling waits on her word.
+
+**Rulings and routings:**
+1. **The P39b deviation is ACCEPTED** (moving `WriteTakesPanel` into the Takes feature rather
+   than threading a factory from `RootView`): the measurement at the file's head — `EditorView`
+   constructed at five sites in four features, none `RootView` — shows the literal remedy would
+   have minted a new composition pattern the codebase doesn't have; the MOVE removes the
+   violation (a feature no longer constructs a SIBLING's view model — the panel is now inside
+   the feature whose view model it builds) rather than relocating it. The refined rule's letter
+   is satisfied; flagged for the ladder as the record already does.
+2. **Roster item 8's two RETURNS get owners** (executed at the closeout's KnownIssues pass):
+   **#86(c)** (the typed near-empty confirmation — `RekeyRecencyProbe` has zero app consumers) →
+   **17l**, which owns this surface's two siblings; **COPY ALL** → split — the Mac's dead
+   "Copied" branch on the shared enrollment page → **17l**; the phone's three word screens'
+   missing door → **the mobile catch-up** (beside PL-23).
+3. **Row 57's narrowing is ACCEPTED with the fold connection recorded:** the two unexercised
+   occasions (inline comments, paragraph gap) are unreachable for the same reason the appearance
+   control was — the Settings fold (owner 13u4 at her word). When 13u4 fixes the fold, those
+   occasions become walkable; the narrowed row's residual verdict lands then.
+4. **The pane-compare fix (TRACE 1a → D-3) is the night's quiet win** — linear → flat, ~4,600×
+   at 200 blocks, per read pane per update pass; with A2's priming this is item 1's two measured
+   mechanisms both closed. Item 1 itself still closes only in her hands.
+
 ---
 
 # CARRIED VERBATIM AT THE SPLIT (2026-09-14) — from `phase-13u-feel-and-polish.md` (P39's section, per its banner: "The file split must carry that section to 13u2")
