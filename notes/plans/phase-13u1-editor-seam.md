@@ -1173,7 +1173,51 @@ middle riding the tray with its family.
 
 ## CLOSEOUT (findings → dispositions; filled at the ladder's end)
 
-*(empty at kickoff)*
+### LADDER ROUND 1 — 2026-09-14/15 (fable-reviewer, cold, over the phase's combined diff `4f712ac9^..312679a5`; the cross-model flow ran whole: 7 findings → the implementer's responses 7 AGREE (with precisions, two adopted below) → the reviewer confirmed ALL SEVEN and implemented its confirmed fixes ITSELF, each under the hallucination guard)
+
+**0 BLOCKER · 2 MAJOR · 1 MINOR · 4 NIT.** No finding was dismissed as hollow; both bug-class
+fixes landed red-on-old, one of them with a sharper measured mechanism than the review predicted.
+No `Sources/VariorumCore/Sync/` line, no schema, marker 8; no behaviour changed anywhere except
+F-1's door wait and F-2's refusal sentence.
+
+| # | severity | finding → final call → what landed |
+|---|---|---|
+| **F-1** | **MAJOR** | **`finalizeWork`'s two waits did not compose** — a menu-born flight's `defer` clears the latch and then DRAINS the stash in the same main-actor slice; a replayed ⏎ schedules a compound, re-populating a handle the chain check had already found nil; the door proceeded. CONFIRMED, and the pre-fix pin run SHARPENED the mechanism beyond the review's prediction: in-process the door does not merely leave the act pending — its own `flushNow` RACES the forged act's flight, whose dirty-guard then REFUSES (*"Unsaved changes couldn't be written…"*), and the typed ⏎ is SWALLOWED: `y ⏎ z` during a menu flight read **`["alpha","yz"]`** with a refusal on screen for keys typed cleanly (measured, `/tmp` log quoted in the pin's doc). At quit the same shape ends the process over an unstarted act; at teardown the forged body's `[weak self]` no-ops it outright (the implementer's precision, adopted). **FIX `45f5c956`:** the chain wait and the latch wait are ONE loop — each re-asks the other until both are quiet; round 3's completed-handle belt kept via an `awaited` marker (no spin possible on an uncleared handle). **PIN (red on old):** `TypedReturnKeyTests.theDoorAwaitsACompoundForgedByAMenuFlightsOwnDrain`; the 24 sibling door pins rode unmodified. This also closes the RECORD defect the implementer named: rows 44 and 63 were both marked RESOLVED while their composition survived un-owned — row 44's cell now carries the closure (see below). |
+| **F-2** | **MAJOR** | **The boundary-edge residual's wording lied for its wider member, and three records claimed the residual was only the touch-one-block shape.** A span anchored at a paragraph's END and ⇧-extended two paragraphs down (separator + B whole + part of C) is refused by the compound's contiguity guard — the standing pre-item-5 refusal, verified identical in the retired planner — but the UNIT 2 re-narrowed sentence claimed it *"without reaching into the next block"* (false: it reaches two) with a road (*"reach a little further"*) that changed nothing; and the `Cause` doc, QUESTIONS #109's opening, and the UNIT 2 record's first bullet all stated the too-narrow scope the author would have ruled #109 on. CONFIRMED. **FIX `715381de`:** the sentence now says what every residual member shares — *"One end of this selection sits on the boundary between two blocks."* — with an orientation-neutral road (*"Nudge that end one character either way, or select the whole paragraphs."*); the three scope records corrected in place; **#109 gains part (d)** naming the wider member with the trim-into-the-run road (the implementer's precision, adopted: the two sizes are NOT one call — trimming is clean for the multi-block member under R-13u-2, and ruling it does not decide the one-block shape) — **HERS to rule, nothing behavioural changed**; the stale *"next free #109"* marker corrected to #110. **PIN (red on old):** `CrossBlockCompoundTests.aSpanOpeningOnTheBoundaryRefusesWithTheTrueGeometry` — the old sentence, verbatim, produced at the refused two-block shape. |
+| **F-3** | MINOR (doc) | `applyDifferential`'s comment cited *"the record's table"* for numbers the table does not hold (3.94 s → 5.7 ms; the table says 4.41 s → 56.6 ms). CONFIRMED — the stale-claim-citing-its-source class. **FIX `3d3ace49`:** the record's numbers, with the authority named. No pin (clarity class; the traced degradation is a reader trusting a wrong constant). |
+| **F-4** | NIT | The latch wait is a busy `Task.yield()` spin during a flight's DB awaits. CONFIRMED, **recorded-only** (the implementer's precision agreed: removing it means a Task handle per `runStructural` — wider than a ladder fix; the merged F-1 loop keeps the yield for the handle-less flight, converges, quit-time only). |
+| **F-5** | NIT | The deliberately-red mobile tutorial pin normalizes a red suite. The COORDINATOR's disposition, executed: **`0af79a38`** converts it to the mobile suite's standing `withKnownIssue` pattern citing KnownIssues row 64 — verified on the simulator: the suite passes with exactly the TWO known issues (the keep-on-top facts), stays visible on every run, and trips loud on a regression to the duplicate shape or a rewrite that forgets the wrapper. Wrapped whole, knowingly, said at the pin and in the row. |
+| **F-6** | NIT | The gap pin's name and the handback row's sentence claimed the refusal "names the block" — the copy deliberately names the CAUSE (a block id would be the enum-dump class). CONFIRMED. **FIX `b88a54ae`:** pin renamed `…AndNamesTheCause`; handback U-3 and the plan's pin table say the same. Zero behaviour. |
+| **F-7** | NIT, SPECULATIVE | `OrdinaryInputEdit.apply(underFindReplace: true)` on a non-`EditorTextView` silently drops the bracket (never the edit — the implementer's precision). Unreachable today (the find bar operates only on `EditorTextView`); **recorded-only**, a shape hazard with no mechanism to a wrong outcome. |
+
+**The reviewer's clean bill (round 1)** — checked and found solid, in brief: the canon deltas
+(AppSpec §9 `newBlock` + OverallModel §3's seventh occasion) present in their claimed commits with
+coherent arithmetic; the O(N²) sweep's equivalence and early-exit rewrites traced byte-identical
+and the class verified closed by the reviewer's own grep over all three roots; the churn fix
+traced gate→binding→`recordAutosave` with the fallback honestly scoped; the compound's plan
+geometry and apply order traced against the rulings (R-13u-1/2, #11a, #33(a), I10, S1-shaped
+writes, touch-without-churn, churn-as-the-edit's-cost); `editTakesAtomically`'s CAS verified
+writeless; the U-1 store-read inside the flight at both platforms' doors; `insureTakes` and
+`NewBlockUndoTests` run green by the reviewer; the crystallizers' `registeringUndo: false` at all
+three call sites with seeders on `Operations(undoStack: nil)`; `OneInputPathTests` a real
+allow-listed grep pin over eight byte-preserving conversions; the P40/P41 hoists with genuinely-
+platform halves and zero test edits; KnownIssues rows 43/44/63 resolved with evidence and row 64
+added with an owner; zero Sync/ lines, zero schema, marker 8, no commit trailers, branch pushed;
+the 16-capture walk present with the continuity round trip; the mobile handback rows flipped and
+quoted. No "Review foci" section exists in this plan or the parent file (checked).
+
+**Suite runs after the reviewer's fix pass (baselines: core 1562/170 · Mac 2664/445 all green ·
+iOS build green · mobile 622/105 with the one owned red):**
+
+| suite | result |
+|---|---|
+| core `swift test` | PENDING |
+| the FULL Mac suite | PENDING |
+| iOS build | PENDING |
+| the FULL mobile suite | PENDING |
+
+*(Round 2 anchors here: a fresh cold reviewer re-reviews the fixes and what they touched —
+commits `45f5c956` · `715381de` · `3d3ace49` · `b88a54ae` · `0af79a38` and this block.)*
 
 ---
 
