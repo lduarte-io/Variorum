@@ -293,8 +293,8 @@ zero. Lockstep marker: 8, untouched.
 | A2 | The O(N²) sweep — the MAC app's loop sites + pins | DONE(`e689db54`) |
 | A3 | The O(N²) sweep — the PHONE's loop sites + pins | DONE(`0c96edcd`) |
 | A4 | The sweep's verdict table — EVERY production `range(ofEntryAt:)` caller enumerated and verdicted | DONE (the record's A section) |
-| B | The churn pair P24/P25 — the Mac adopts `ArmedEdit.exactCost` + red-on-old pin on the REAL typed path | IN-PROGRESS |
-| C | The door-await chain loop (KnownIssues row 44) + the round-3 record's designed pin | NOT-STARTED |
+| B | The churn pair P24/P25 — the Mac adopts `ArmedEdit.exactCost` + red-on-old pin on the REAL typed path | DONE(`1146594a`) |
+| C | The door-await chain loop (KnownIssues row 44) + the round-3 record's designed pin | IN-PROGRESS |
 | D | Item 7 — `MarkdownActs`' arm-then-hand-off rewrite (the ONE input-path door) + the grep pin | NOT-STARTED |
 | E | P40 + P41 hoists (zero-test-edit proof) + the KnownIssues eight-brain enumeration amendment | NOT-STARTED |
 | F | Close — suites green, KnownIssues rows resolved/re-owned, the seven verdicted | NOT-STARTED |
@@ -408,6 +408,59 @@ the tail transfer · `MobileStructural` (three, each once per gesture) · `Canva
 **THE CLASS IS CLOSED:** after this sweep no production caller of `range(ofEntryAt:)` sits inside
 a loop over the entries, on either platform. `IdentityProjectionAudit` already accumulated (its
 own comment names the same reason) and needed nothing.
+
+---
+
+### B — THE CHURN PAIR (P24 + P25): the cost is the EDIT's, never the REPORT's
+
+**The mechanism, traced here before a line moved.** `EditorViewModel.recordAutosave` computed
+`charDelta = (editedRange.length − delta) + editedRange.length` from the RAW `NSTextStorage`
+edited-range report. macOS 26's attribute fixing WIDENS that report to the paragraph's end
+including its terminator — a fact this repo already measures and pins two files away
+(`IdentityProjectionAuditTests.appKitWidensAnInsertionsReportedRangeToTheParagraph`: one
+character typed at offset 2 of "Alpha" reports `{2, 5}`), and which `notes/TEXTKIT2_NOTES.md` §3
+records as the measurement that FALSIFIED the earlier "AppKit does not widen" belief. 13l applied
+that section's own rule — **clamp to the VERDICT's range, never the report's** — to
+`stampProjection`, two lines above, and not to the arithmetic beneath it.
+
+The corrected value already existed and was already hoisted for both platforms at mobile round 2:
+`ArmedEdit.exactCost` = `range.length + replacementLength`, known at the GATE, before anything
+reaches storage. Only the phone ever read it.
+
+**THE FIX:** `bound?.exactCost` rides from `storageDidEdit` (where the arming is already bound to
+the report) down into `recordAutosave`, which keeps the old arithmetic as its fallback for the one
+case where it is the honest answer — an arming that did NOT bind, i.e. a system path outside the
+policed ones, where `fallbackVerdict` recomputes and the report is all there is. The phone's exact
+shape (`charDelta: exactCost ?? (oldLength + editedRange.length)`), adopted verbatim.
+
+**PINS — `VariorumTests/EditorChurnCostTests`, three, every one driving the REAL AppKit typed
+path** (which is P25's own statement of what was missing: *"No test in VariorumTests asserts a
+charDelta recorded from the real typed path"*), each measured RED on the pre-fix tree:
+
+| Pin | PRE-FIX | POST-FIX |
+|---|---|---|
+| `aTypedCharacterRecordsItsExactCostNotTheWidenedReport` — one character mid-paragraph | **9** | 1 |
+| `aDeletionAndAReplacementRecordTheirExactCosts` — a 4-for-2 replacement | **8** | 6 |
+| …the same pin's deletion half (5 characters out) | 5 | 5 |
+| `threeTypoKeystrokesInALongParagraphDoNotStampAMajorRevision` | **stamped + rebaselined 1,600 → 2,003** | stamp unmoved, baseline unmoved, churn +3 |
+
+**A finding of this batch that neither P24 nor P25 had:** the widening is **not
+insertions-only** — the replacement half measured 8 for a true cost of 6. Both sweep entries
+reasoned exclusively from the insertion measurement; the fix covers both because it replaces the
+report with the gate's own arithmetic rather than correcting a report case by case.
+
+**What the third pin proves is the PRODUCT consequence**, which is why it is worth its fixture:
+`last_major_revision_at` is what `reading.sort_field = 'last_major_revision'`, the Library sort
+and the Timeline read, and CoreDescription pillar 7 is *"Fixing one typo must never reshuffle the
+library."* On the pre-fix tree three keystrokes near the start of a 400-character paragraph did
+exactly that. The pin also holds the other half honest: `last_touched_at` still moves, because a
+typo fix IS a touch — only the MEANINGFUL stamp stays put.
+
+**Canon note (no doc change owed):** AppSpec §10's definition of churn — *"characters inserted +
+characters deleted, equal weight"* — is unchanged and is now what the Mac actually records. The
+stale sentence corrected in code is `ArmedEdit.exactCost`'s own (*"Platforms that derive cost from
+the report simply never read it (the Mac)"*), written before 13l's measurement and therefore
+documenting the Mac's non-use as though the report were exact there.
 
 ## UNIT 2 RECORD (LIVE STATUS)
 
