@@ -749,6 +749,64 @@ struct TypedReturnKeyTests {
         }
     }
 
+    // MARK: 13u1 ladder round 1 — the two waits compose: a MENU flight's drain can forge a chain link
+
+    /// **RED-ON-OLD (the 13u1 ladder, round 1 — the composition of the two
+    /// fixes above and in `MenuFlightDoorAwaitTests`).** The door waited the
+    /// chain and THEN the latch, with no back-edge. A menu-born flight (no
+    /// handle, only the latch) defers keystrokes; its `defer` clears the
+    /// latch and then DRAINS the stash in the same main-actor slice — and a
+    /// replayed ⏎ schedules a compound, re-populating a handle the chain
+    /// loop had already found nil. The door's latch wait then resumed, saw
+    /// the latch down, and proceeded over the forged, un-awaited compound.
+    /// Rows 44 and 63 were each fixed alone; this is their composition, and
+    /// it reaches every door — quit, lock, seal, and TEARDOWN, where the
+    /// forged act's `[weak self]` makes it a no-op outright.
+    ///
+    /// **What the pre-fix run MEASURED (this pin's own red):** in-process
+    /// the race does not merely delay the act, it CORRUPTS it — the door's
+    /// own `flushNow` was mid-flight when the forged act's `runStructural`
+    /// read its dirty-guard, so the act refused ("Unsaved changes couldn't
+    /// be written…") and the typed ⏎ was swallowed: the store read
+    /// `["alpha", "yz"]`, one block, no newline, with a refusal on screen
+    /// for keys she typed cleanly. At quit the same shape ends the process
+    /// over an unstarted act.
+    @Test func theDoorAwaitsACompoundForgedByAMenuFlightsOwnDrain() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            // A MENU flight: ⌘⇧⏎'s door, straight into `runStructural` —
+            // no compound handle, only the one-flight latch.
+            let flight = Task { @MainActor in await h.model.insertBlockBelowCaret() }
+            await Task.yield()
+            #expect(h.model.structuralInFlight, "the flight is up")
+            #expect(h.textView.isDeferringKeystrokes,
+                    "keys stash from the flight's first slice")
+            // Typed during the flight's window: a character, a ⏎ that will
+            // re-arm when the drain replays it, and a character stashed
+            // behind that ⏎ for the act the ⏎ schedules.
+            characterKey(h, window.window, "y")
+            returnKey(h, window.window)
+            characterKey(h, window.window, "z")
+            #expect(h.model.pendingCrossBlockTask == nil, "a menu gesture arms no handle")
+
+            // The quit/lock/seal/teardown door's own road, verbatim.
+            await h.model.finalizeWork()?.value
+
+            #expect(h.model.pendingCrossBlockTask == nil,
+                    "RED ON OLD: the door left the drain-forged compound un-awaited")
+            #expect(!h.textView.isDeferringKeystrokes,
+                    "RED ON OLD: keys were still stashed when the door said done")
+
+            await flight.value
+            await h.flush()
+            #expect(try h.storeSlots().compactMap(\.text) == ["alpha", "y", "z"],
+                    "y ⏎ z during a menu flight: both letters kept, the ⏎'s block made")
+        }
+    }
+
     // MARK: 18c ladder round 2, R2-1 — the stash drains when the surface is IDLE, never "at the newest arming"
 
     /// **RED-ON-OLD (round 2, R2-1):** ⏎ ⌫ ⏎ x in one burst — the keys a

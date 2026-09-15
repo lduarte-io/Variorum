@@ -598,15 +598,9 @@ final class EditorViewModel {
             // permanently lost. The harness's `flush()` has looped for
             // exactly this reason since 18c; the production doors had not.
             //
-            // The loop terminates: each iteration awaits a task that has
-            // COMPLETED by the time it returns, and it exits either on a
-            // nil handle (the tail cleared it and armed nothing) or on the
-            // same handle it just awaited. All four doors — quit, lock,
-            // seal, teardown — inherit this through the one call.
-            while let pending = self.pendingCrossBlockTask {
-                await pending.value
-                if pending == self.pendingCrossBlockTask { break }
-            }
+            // All four doors — quit, lock, seal, teardown — inherit the
+            // await through the one call.
+            //
             // **THE MENU FLIGHT** (13u1 UNIT 2). A keystroke-born compound
             // has a Task handle to await; a menu-born one has only the
             // one-flight latch, so this waits on the latch the way the mint
@@ -619,8 +613,36 @@ final class EditorViewModel {
             // projection, the stash drain. It yields rather than spinning,
             // and it converges because `runStructural`'s `defer` clears the
             // latch on every road, throw included.
-            while self.structuralInFlight {
-                await Task.yield()
+            //
+            // **AND THE TWO WAITS ARE ONE LOOP** (13u1 ladder, round 1 —
+            // the composition of the two fixes above). Waiting the chain
+            // and THEN the latch left a back-edge unhandled: a menu-born
+            // flight's `defer` clears the latch and then DRAINS the stash
+            // in the same main-actor slice, and a replayed ⏎ schedules a
+            // compound — re-populating a handle the chain check had already
+            // found nil. The door then proceeded, and its own `flushNow`
+            // RACED the forged act's flight: the act's dirty-guard refused
+            // ("Unsaved changes couldn't be written…") and the typed ⏎ was
+            // swallowed — measured, y ⏎ z during a menu flight read "yz" in
+            // one block. At quit the same race ends the process over an
+            // unstarted act; at teardown the forged body's `[weak self]`
+            // makes it a no-op outright. So each wait re-asks the other
+            // until BOTH are quiet. `awaited` keeps round 3's belt without
+            // its loop hazard: a completed handle nothing cleared (a
+            // torn-down controller) is remembered rather than re-awaited,
+            // so the loop can never spin on it.
+            var awaited: Task<Void, Never>?
+            while true {
+                if let pending = self.pendingCrossBlockTask, pending != awaited {
+                    await pending.value
+                    awaited = pending
+                    continue
+                }
+                if self.structuralInFlight {
+                    await Task.yield()
+                    continue
+                }
+                break
             }
             await self.autosave.flushNow()
             // Let the in-flight mint (and any round it chains) reconcile.
