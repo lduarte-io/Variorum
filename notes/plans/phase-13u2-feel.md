@@ -375,7 +375,7 @@ registers behaving as her sentences describe) beside the dark pass already owed.
 | C — #109 boundary-clamp law | **CLOSED 2026-09-15** — her law BUILT, both shapes, BOTH platforms (the phone got the trim free and shape (i) with three mirrors of the Mac's road) · the family ENUMERATED in an 18-cell sweep table · 10 of 14 behaviour pins RED on the pre-fix tree · `.partialBlockAcrossSeam` retired by SPLITTING into two causes whose roads differ (forced by a finding: the phone has no seam carves — new KnownIssues row) · walked with 11 captures incl. both undo grammars · 1 PROVISIONAL (QUESTIONS #111) · finals: core **1567/171** · Mac **2702/450** (+20 pins; 1 known issue + the load-flaky red, PAIRED-measured as unchanged by this diff) · iOS **green** · mobile cross-block suites **67/6** |
 | D — the singles (+ TRACE 1a, routed by RULING A-1) | **CLOSED 2026-09-15** — item 2 FIXED at the ONE shared brain with red-on-old on BOTH trees · item 10 BUILT and pinned but **it cannot fire until she rules the star cap** (#112(b), the item's headline) · item 11 BUILT (⇧⌘V, the rule shared; the phone owes the door) · item 13 MEASURED and VERIFIED HEALED + row 93 FIXED · P39a/P39b FIXED with zero behaviour change and pins unmodified · roster item 8 VERIFIED (2 moot, 2 return) · **row 57 TRACED and it does NOT reproduce — nothing built, the row narrowed** · TRACE 1a FIXED and measured (0.42 ms → 0.00009 ms, flat where it was linear) · 8 captures · 3 PROVISIONALs (QUESTIONS #112) · finals: core **1567/171** · Mac **2730/456** (+28/+6; 1 known issue + the load-flaky red, PAIRED as unchanged) · iOS **green** · mobile **626/106 with 4 known** |
 | E — the mechanical sweeps | **CLOSED 2026-09-15** — all six dispositioned: row 56 steps 1+2 BUILT (step 3 deferred with its reason, its grep half shipped) · row 50's six oracles SWEPT with a stronger key than asked, and the measurement that forced it · row 48 WALKED and **NOT REPRODUCIBLE** (four arms) · row 59 FIXED with falsifiability demonstrated, and its arm comes OFF the flake list · row 47's park half DONE · row 51's split (**ZERO test edits**) + the ONE structural arm (red-on-old). 7 captures · 1 PROVISIONAL (#113) · finals: core **1567/171** · Mac **2744/459** (+14/+3; 1 known issue + the load-flaky red, PAIRED as unchanged) · iOS **green** · mobile **626/106 with 4 known** |
-| LADDER | NOT-STARTED |
+| LADDER | **ROUND 1 RUNNING** (fable-reviewer, cold, over `13e84c02..a22745e8`) |
 | CLOSEOUT | NOT-STARTED |
 
 ---
@@ -2772,6 +2772,31 @@ back and hand-deleting them would have been motion. Recorded so the next walker 
 
 
 ---
+
+## ORCHESTRATOR ADJUDICATION — UNIT E (2026-09-15, the same night)
+
+**Spot-check verdict: VERIFIES.** Nine commits pushed, tree clean; 59 files / +2907 −1487 with
+the mechanical halves in their own commits as briefed; the split's parity proof is the zero-test-
+edit form (81/7 green unmodified); the structural arm's red-on-old is the behavioural-revert form
+(3 of 5 red with the body emptied, the 2 both-green named). The ⌘A row resolves as
+not-reproducible on a four-arm walk with captures — the honest verdict the row itself asked for.
+The masthead settle's falsifiability was DEMONSTRATED (loud in 0.73 s on a synthetic overlap),
+which is better evidence than the row asked for.
+
+**Rulings and routings:** (1) **`MastheadLayoutTests`' open-field arm comes OFF the carry-forward
+flake list** — the closeout executes the list update. (2) The deliberate omissions are ACCEPTED
+with their reasons (the registry walk is a design, not a rename; the gesture arms' timing is
+pinned behaviour a parity refactor must not move; the ceremony quartet is the registry walk's
+work) — each gets its owner at the closeout's KnownIssues pass per the unit's own FOR THE
+CLOSEOUT list. (3) The two dev-store stray takes from the walk are recorded and left (the dev
+store is a test fixture, not her data; `branchVariant` has no structural undo by ruling).
+(4) The oracle sweep's STRONGER key (session identity over subject id, because eight suites mint
+`.incrementing` uuids) is a measurement-driven improvement on the row's sketch — accepted; the
+ladder should eye `DebugProbeScope` as new shared DEBUG machinery.
+
+## THE LADDER — round 1 (fable-reviewer, cold, `notes/REVIEW_PROMPT.md` verbatim, over the phase's combined diff `13e84c02..a22745e8`)
+
+Opened 2026-09-15 after unit E's close. Findings land here verbatim when the round returns.
 
 # CARRIED VERBATIM AT THE SPLIT (2026-09-14) — from `phase-13u-feel-and-polish.md` (P39's section, per its banner: "The file split must carry that section to 13u2")
 
