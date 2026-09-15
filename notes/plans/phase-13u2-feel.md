@@ -1764,7 +1764,7 @@ foreign-string compare).
 | item 2 — the eager space-eater (BOTH platforms) | **TRACED + FIXED** — the durability mint's edge trim; red-on-old on the Mac (5 of 9 pins, 8 issues); the phone inherits the shared brain and has its own landing pin (TRACE D-1) |
 | item 10 — starred items scroll past ~7 | **BUILT + pinned (red-on-old: the section drew 360 pt where the window is 225)** — with the item's headline FINDING handed up: `Operations.starLimit = 5`, so the scroll cannot engage in the shipped app. QUESTIONS #112(b) |
 | item 11 — paste without newlines (+ the phone's rule) | PENDING |
-| item 13 — the note title's room · row 93 — the nameless prompt | PENDING |
+| item 13 — the note title's room · row 93 — the nameless prompt | **item 13's FIRST half: HEALED by row 11 and MEASURED (585.5 pt of room, ending at the icon row where the scraps door is); row 93: FIXED with an open mark, pinned in both voices** (TRACE D-4) |
 | P39a — Pool stops holding `LibraryViewModel` | PENDING |
 | P39b — `WriteTakesPanel` stops constructing `TakesViewModel` | PENDING |
 | roster item 8 — the four protection items VERIFIED | PENDING |
@@ -1935,6 +1935,77 @@ still adopted (and then asks nothing); and the one road that still asks (the fir
 liveness) asks once and settles back to silence. The counter is `PaneSurfaceAudit`, `#if DEBUG`.
 `TakePaneMeasureTests` — the pane's own measure suite, 11 tests — rides **UNMODIFIED** and green,
 which is this surface's no-drift proof.
+
+## TRACE D-4 — ITEM 13: the title's room (already healed) and row 93's open mark (fixed)
+
+Her report, 2026-08-23: *"the title is way too cut off for no reason? it cuts off at 30 characters
+but it should go to the right at least until close to the scraps button."* The master plan already
+records that **no literal 30-character cap exists on either platform** and tells a session not to go
+hunting for a magic number. So the first duty was to MEASURE the room.
+
+**MEASURED, on the real mounted masthead, at two window widths:**
+
+```
+ITEM13 window=1100 band=[210.0…795.5] room=585.5 icons=[807.5…890.0]
+ITEM13 window=1600 band=[460.0…1045.5] room=585.5 icons=[1057.5…1140.0]
+```
+
+**The title's band is 585.5 pt**, it starts exactly where row two's path chip starts, and it ends
+**12 pt before the icon row — which is where the SCRAPS door lives** (`PostDetailView.inspectorDoors`:
+tray · scraps · references). Her floor, in her own landmark, is met. At the Terminal voice's 19-pt
+monospaced title that is roughly fifty characters, not thirty.
+
+**So item 13's first half is HEALED, and by work that landed AFTER she wrote the report:** ledger row
+11 (17o batch d, 2026-09-08 — her ruling U-8, *"it should be aligned to the left again … and it
+should be able to extend at least as far as the middle centered title can extend right now"*)
+retired the 380-pt CENTERED measure her "30 characters" was an observation of. What bounds the band
+now is the ARTICLE's own measure (680 — her sacred margins, R9) less the icon row, which is why the
+room is 585.5 at a 1100-pt window and 585.5 at a 1600-pt one. That is a designed bound, not a
+"reason-less" cut, and widening it would move the masthead off the article's left edge she asked
+for. **Verdict: VERIFIED HEALED, not re-fixed** — with the numbers pinned
+(`theTitlesRoomIsTheArticleMeasureLessTheIconRow`, both widths) so no future reader re-derives them.
+
+**The PHONE, given one look** (the master plan's own aside — she was on her phone when she wrote the
+report): `MobileWriteView`'s title is `Text(displayTitle).lineLimit(1)` in an HStack with a
+12-pt minimum gap and the three-glyph note-tool corner beside it, so at a phone's width it gets
+roughly 290 pt — **about thirty characters at the title face.** That is very likely where her count
+came from. There is no artificial cap there either: the screen is the constraint and the tool corner
+is its neighbour, so giving the phone's title more room is a FACE question (wrap to two lines? move
+the corner?) and belongs to the mobile catch-up, not to a Mac unit. Recorded, not built.
+
+### Row 93 — the nameless note's rename prompt (FIXED)
+
+The Act 10 round's walk recorded row 93 as an observation and handed the nit here: *"on a note NAMED
+BY ITS DAY the open rename field shows the day as its PROMPT in the label's own place, so a click can
+read as 'nothing happened'; the door works. A visible open state (a field border, or the caret
+placed) is a nit for 13u2 item 13."*
+
+Traced: `PostTitleLabel.beginEditing` sets `draft = title` — the STORED name, `""` on a nameless note
+(13g batch 7's R6-3, deliberately: typing must NAME the note, not rename it after itself) — and the
+field is `TextField(displayed, text: $draft)`, so the day rides as the PROMPT. Prompt and resting
+label are the same words, the same font, the same place, and the resting label for a nameless note is
+`tokens.muted`. Nothing else changed on screen. The caret is already placed (`.task { fieldFocused =
+true }`), so the remaining half of row 93's own remedy is the border.
+
+**Built:** a 1-pt ACCENT RULE under the title band while the field is open — the tag field's own
+open-state vocabulary (`TagInlineField` strokes in the accent while focused) at a masthead's
+restraint, rather than a box around a 585-pt title. It hangs on the BAND beside the face, so it
+cannot resize anything and **row 12's "one box, nothing shifts on click" is untouched**.
+
+**Pinned** in both voices (`theOpenRenameFieldIsVisiblyOpenOnANamelessNote`): nothing marked at rest,
+a mark drawn when the door opens. **RED ON OLD by construction** — the open field drew no mark of any
+kind, which is the whole of row 93's observation.
+
+**A harness finding, measured on the way and recorded because it changes what a pin there can
+claim:** under the mounted detail the rename field **opens and then closes itself** — the hosted
+`TextField` never holds the key window's focus, so `onChange(of: fieldFocused)` commits and closes
+it. The frame oracles beside it (`titleFieldFrame`, `titleLabelFrame`) keep their LAST values and
+therefore read as though the field were still open; a presence flag correctly read false. So this
+pin counts APPEARANCES (monotonic) rather than presence, and says the true thing: the mark WAS drawn
+when the field opened. Two further things were measured and are recorded so nobody repeats them:
+`onGeometryChange` never fired for this leaf in any of three shapes (a filled `Rectangle`, a `Color`,
+inside the overlay or on the band) while `onAppear` fired every time; the mark's LOOK is therefore
+the walk's evidence, not the pin's.
 
 ---
 

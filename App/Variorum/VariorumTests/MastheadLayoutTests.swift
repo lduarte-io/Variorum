@@ -130,6 +130,81 @@ struct MastheadLayoutTests {
         }
     }
 
+    /// **13u2 UNIT D — item 13's SECOND half, Act 10 ledger row 93.** The
+    /// correction round's walk recorded an observation rather than a defect:
+    /// on a note named by its DAY, clicking the title opens the rename field
+    /// whose PROMPT is that same day, in the same font, in the same place —
+    /// so the click reads as *"nothing happened"* although the door worked.
+    /// Its own nit named the remedy: *"a visible open state (a field border,
+    /// or the caret placed)"*. The caret is already placed; this is the
+    /// border.
+    ///
+    /// RED ON OLD: `titleOpenMarkFrame` had nothing to publish — the open
+    /// field drew no mark of any kind, which is the whole observation.
+    @Test func theOpenRenameFieldIsVisiblyOpenOnANamelessNote() async throws {
+        for voice in [ThemeVoice.terminal, .study] {
+            try await withMountedDetail(
+                width: 1100, title: "", tags: [], voice: voice
+            ) { _, _, _, _ in
+                #if DEBUG
+                await settle(until: { MastheadGeometry.titleFrame != nil })
+                await settle(until: { false }, maxTurns: 6)
+                #expect(MastheadGeometry.titleOpenMarkAppearances == 0,
+                        "(\(voice)) nothing is marked while the title rests")
+
+                PostDetailOracle.beginTitleEditing?()
+                await settle(until: { MastheadGeometry.titleOpenMarkAppearances > 0 })
+                #expect(MastheadGeometry.titleOpenMarkAppearances > 0,
+                        "(\(voice)) the open field carried a visible mark")
+                #endif
+            }
+        }
+    }
+
+    /// **13u2 UNIT D — item 13's FIRST half, MEASURED rather than assumed.**
+    /// Her report (2026-08-23): *"the title is way too cut off for no reason?
+    /// it cuts off at 30 characters but it should go to the right at least
+    /// until close to the scraps button."* The master plan already records
+    /// that NO literal 30-character cap exists; this pin records what the
+    /// real constraint is, in points, so the next reader does not re-derive
+    /// it: the band runs from the masthead's leading edge to the icon row's
+    /// gap, and the icon row is where the SCRAPS door lives — so "close to
+    /// the scraps button" is exactly where it ends.
+    ///
+    /// It is a MEASUREMENT pin, not a new claim: `theTitleLeadsWith…` above
+    /// already holds the two edges. What this adds is the ROOM the two
+    /// edges leave, and the fact that the room is bounded by the ARTICLE's
+    /// measure (680 — her sacred margins, R9) rather than by the window.
+    @Test func theTitlesRoomIsTheArticleMeasureLessTheIconRow() async throws {
+        for width in [1100.0, 1600.0] {
+            try await withMountedDetail(
+                width: width,
+                title: "A title long enough to need every point of room the masthead has",
+                tags: []
+            ) { _, _, _, _ in
+                #if DEBUG
+                await settle(until: {
+                    MastheadGeometry.titleFrame != nil && MastheadGeometry.iconRowFrame != nil
+                })
+                await settle(until: { false }, maxTurns: 6)
+                let band = try #require(MastheadGeometry.titleFrame)
+                let icons = try #require(MastheadGeometry.iconRowFrame)
+                print(String(
+                    format: "ITEM13 window=%.0f band=[%.1f…%.1f] room=%.1f icons=[%.1f…%.1f]",
+                    width, band.minX, band.maxX, band.width, icons.minX, icons.maxX))
+                let chip = try #require(MastheadGeometry.pathChipFrame)
+                #expect(abs(band.minX - chip.minX) <= 1,
+                        "the band starts where row two's path chip does")
+                #expect(band.maxX + MastheadTitleInsets.gap <= icons.minX + 0.5,
+                        "…and ends at the icon row, where the scraps door is")
+                // The room is real, not a 30-character stub: well past the
+                // ~380-pt centered measure item 13 was written against.
+                #expect(band.width > 380, "room \(band.width) at a \(width)-pt window")
+                #endif
+            }
+        }
+    }
+
     // **RETIRED (17o batch d, row 11): `theTitleBlockCentersOnTheMastheadIn
     // EveryMode`.** Its claim — the title block's midX on the masthead's
     // midX in all eight modes — is precisely what her ruling U-8 undid

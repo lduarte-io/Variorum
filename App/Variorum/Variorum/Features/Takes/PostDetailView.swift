@@ -642,6 +642,49 @@ struct PostDetailView: View {
                 }
                 #endif
                 .overlay(alignment: .leading) { face }
+                // **Act 10 ledger row 93 (13u2 UNIT D, item 13's second
+                // half) — THE OPEN MARK.** The round's walk recorded it as
+                // an observation: on a note named by its DAY, clicking the
+                // title opens a rename field whose PROMPT is that same day,
+                // in the title's own font, in the label's own place — so the
+                // click reads as *"nothing happened"* although the door
+                // worked. (The prompt is deliberate: 13g batch 7's R6-3
+                // rides the date there so the line still reads as it did,
+                // and the DRAFT is the stored name, so typing NAMES the note
+                // rather than renaming it after itself.) Row 93's own nit
+                // named the remedy — *"a field border, or the caret placed"*
+                // — and the caret is already placed, so this is the border:
+                // a 1-pt ACCENT RULE under the band while the field is open,
+                // the tag field's own open-state vocabulary
+                // (`TagInlineField` strokes in the accent while focused) at
+                // a masthead's restraint, instead of a box around a 585-pt
+                // title.
+                //
+                // It hangs on the BAND, beside the face rather than inside
+                // it, so it cannot resize anything: row 12's "one box,
+                // nothing shifts on click" is untouched and the words do not
+                // move by a point when the mark appears.
+                .overlay(alignment: .bottom) {
+                    if editing {
+                        Rectangle()
+                            .fill(tokens.accent)
+                            .frame(height: 1)
+                            .accessibilityHidden(true)
+                            #if DEBUG
+                            // The oracle is PRESENCE, not a rectangle, and
+                            // that is measured rather than preferred:
+                            // `onGeometryChange` was tried here first and
+                            // never fired for this leaf in three shapes
+                            // (a filled `Rectangle`, a `Color`, either
+                            // inside the overlay or on the band), while
+                            // `onAppear` fires every time — so the pin asks
+                            // the question the oracle can actually answer,
+                            // and the VISUAL half is the walk's (item 13's
+                            // capture).
+                            .onAppear { MastheadGeometry.titleOpenMarkAppearances += 1 }
+                            #endif
+                    }
+                }
                 .task(id: postID) { await watch() }
                 #if DEBUG
                 .onAppear { PostDetailOracle.beginTitleEditing = { beginEditing() } }
@@ -696,6 +739,13 @@ struct PostDetailView: View {
                         // U-8: it LEADS, and fills the band it is given.
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
+                        // Row 93's oracle is cleared HERE, by the face whose
+                        // presence means the field is closed — never by the
+                        // mark's own `onDisappear`, which SwiftUI does not
+                        // order against a successor's appearance
+                        // (KnownIssues row 55's `CatalogStampOracle` class,
+                        // met here: the mark published and was then wiped by
+                        // the departing instance of itself).
                         .onTapGesture { beginEditing() }
                         .help("The note's name — click to rename it right here")
                 }
@@ -949,6 +999,20 @@ enum MastheadGeometry {
     static var titleFieldFrame: CGRect?
     /// …and the RESTING face's, so row 12 compares like with like.
     static var titleLabelFrame: CGRect?
+    /// **Act 10 row 93 (13u2 UNIT D):** whether the OPEN MARK under the
+    /// title band is drawn. "A click on a nameless note's title looks like
+    /// nothing happened" is a claim about whether ANYTHING is drawn, so the
+    /// oracle COUNTS APPEARANCES; the mark's look is the walk's evidence.
+    ///
+    /// Appearances rather than presence, and the reason is measured: under
+    /// the mounted harness the rename field opens and then closes again on
+    /// its own (the hosted `TextField` never holds the key window's focus,
+    /// so `onChange(of: fieldFocused)` commits and closes it). A presence
+    /// flag therefore read FALSE by the time a pin could look — while the
+    /// frame oracles beside it kept their last values and read as though the
+    /// field were still open. A monotonic count says the true thing: the
+    /// mark WAS drawn when the field opened.
+    static var titleOpenMarkAppearances = 0
     static var iconRowFrame: CGRect?
     /// Row 59: the ＃ door's frame — its hit target.
     static var doorFrame: CGRect?
@@ -993,6 +1057,7 @@ enum MastheadGeometry {
         titleFrame = nil
         titleFieldFrame = nil
         titleLabelFrame = nil
+        titleOpenMarkAppearances = 0
         iconRowFrame = nil
     }
 }
