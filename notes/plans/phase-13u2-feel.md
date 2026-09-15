@@ -205,9 +205,15 @@ jump (the INK half was carved at 18j), the Outline's SHADOW editor, the DEBUG-or
 > stops and reports. TK2 rules bind (clamp to the verdict's range; the identity oracle kills on
 > corruption; the A47c guard stays byte-unchanged; anything sizing a surface reads the fragments'
 > bottom, never the high-water property). Never touch `/Applications/Variorum.app`, her real
-> store, or anything she created. **NO install refresh this round without her word** — her
-> morning walk is of the 13u1 refresh she has not taken yet; end instead with the checkpoint
-> naming the built state as ready-to-refresh, and she authorizes the window. Tests at the END
+> store, or anything she created. **The `/Applications` refresh IS AUTHORIZED at this phase's
+> close (her word, 2026-09-15, before starting this session: "the applications refresh is
+> allowed - either i'll review the two phases together or i'll get a chance to review tonight's
+> first, but it's fine to review them together too")** — run it on the standing rails: verify
+> ZERO instances by `pgrep` first (if the app is running when the close arrives, do NOT quit or
+> kill it — record ready-to-refresh and leave the window to her), A1 backup of the store folder
+> first (byte-verified `cmp`, header ciphertext), Release from a clean worktree at the final
+> commit, `codesign --verify --deep --strict`, both hashes recorded in the handoff, worktree
+> removed. Tests at the END
 > per unit/phase (baselines above); the flake list above governs any red; iOS build green per
 > unit, the FULL mobile suite at phase end if `Shared/` moved (expect the 4 known issues,
 > including row 64's wrapped pin — do not "fix" it).
@@ -216,8 +222,9 @@ jump (the INK half was carved at 18j), the Outline's SHADOW editor, the DEBUG-or
 > pointer/log/archives per the lean-docs rule · AppSpec §14 delta if any canon moved ·
 > KnownIssues zero-orphans · the MOBILE PARITY LINE, a real row — items 2 and 11 are
 > both-platform · `notes/handoffs/phase-13u2-handoff.md` LAST, her checklist at the top, the
-> ratify bundle incl. every overnight PROVISIONAL, #103 carried, and the ready-to-refresh
-> state) · the 13u3 kickoff refreshed atop `notes/plans/phase-13u3-faces.md` · commit + push.
+> ratify bundle incl. every overnight PROVISIONAL, #103 carried, and the refresh evidence —
+> or the ready-to-refresh state if her app was running at the window) · the 13u3 kickoff
+> refreshed atop `notes/plans/phase-13u3-faces.md` · commit + push.
 > Hard stop; she kicks off 13u3.
 
 ---
