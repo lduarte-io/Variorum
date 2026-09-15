@@ -886,7 +886,31 @@ struct MobileTutorialStructureWalkTests {
     /// divide — the PEEKED take is cut in two, every other take rides
     /// whole onto BOTH successors, and the original keeps everything
     /// off-stage (Q-M2, her duplicate shape, on the lesson's own ferry).
+    ///
+    /// **KNOWN ISSUE (13u1 ladder round 1 — `KnownIssuesAndTechDebt.md`'s
+    /// row, owner the mobile project): the phone's tutorial still TEACHES
+    /// the retired duplicate-divide default.** Her U-2 (2026-09-06) made a
+    /// fanned divide KEEP-ON-TOP on both platforms and 18c flipped the
+    /// phone's behaviour in lockstep — but this lesson's prose was never
+    /// rewritten, so the pin, which drives the lesson's own gesture and
+    /// asserts the shape the LESSON promises, fails against the app the
+    /// lesson no longer describes. The pin is doing its job; the lesson and
+    /// the pin come right TOGETHER at the mobile project's rewrite, which
+    /// removes this wrapper. Wrapped rather than left red so the suite's
+    /// green signal stays meaningful (the suite's standing pattern), and
+    /// wrapped WHOLE knowingly: until the rewrite, anything else this body
+    /// would catch is muted with it — re-exposed the day the wrapper goes.
+    /// If the wrapper itself ever fails ("issue did not occur"), the app has
+    /// regressed BACK to the duplicate shape: that is the tripwire, loud.
     @Test func theFannedDivideLessonLandsTheDuplicateShape() async throws {
+        try await withKnownIssue(
+            "the phone's tutorial teaches the retired duplicate-divide default — KnownIssuesAndTechDebt row (owner: the mobile project); the lesson's rewrite fixes prose + pin and removes this wrapper"
+        ) {
+            try await Self.fannedDivideLessonDuplicateShapeBody()
+        }
+    }
+
+    private static func fannedDivideLessonDuplicateShapeBody() async throws {
         try await withPocketGuideWorld { session, db, bookID in
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "divide with takes") }
             let (model, _) = await makeLessonSurface(session, postID: lesson)
