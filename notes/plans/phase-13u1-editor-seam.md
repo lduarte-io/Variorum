@@ -1,6 +1,9 @@
 # Phase 13u1 — THE EDITOR SEAM (EXECUTION PLAN)
 
-**Status: OPEN — kicked off 2026-09-14 by the author under `/run-phase 13u1` (Fable coordinator).**
+**Status: ✅ CLOSED 2026-09-15** (kicked off 2026-09-14 by the author under `/run-phase 13u1`,
+Fable coordinator). Two acceptance units, a two-round ladder, the walk, the closeout ritual and the
+`/Applications` refresh are all done; **the PHASE CLOSEOUT block sits at the end of the CLOSEOUT
+section below**, and the author handoff is `notes/handoffs/phase-13u1-handoff.md`.
 The four-way file split (R-cor-12) was EXECUTED at this kickoff: this file · `phase-13u2-feel.md` ·
 `phase-13u3-faces.md` · `phase-13u4-restyle.md`. The parent plan
 (`notes/plans/phase-13u-feel-and-polish.md`) is now HISTORY/raw material behind its split banner.
@@ -1274,7 +1277,106 @@ iOS build green · mobile 622/105 with 4 known issues):**
 | iOS build | **green** (BUILD SUCCEEDED — the shared diagnosis compiles into the phone) |
 | the FULL mobile suite | **not re-run** — the shared diagnosis compiled into the phone changes one refusal sentence on a shape no mobile pin asserts (grep-verified: the phone's tail-refusal pins assert `MobileStructural`'s own sentences, not `CrossBlockRefusal`'s); the iOS build is the gate |
 
-*(Round 3 is not owed; the phase closeout proceeds on the coordinator's word once the counts flip.)*
+*(Round 3 is not owed; the phase closeout proceeded on the coordinator's word once the counts
+flipped — the block below.)*
+
+---
+
+## ✅ PHASE CLOSEOUT — 13u1, THE EDITOR SEAM (2026-09-15)
+
+**What the phase was, in one sentence:** her **item 5** — *"obvious and intuitive operations like
+selecting a bunch of visible text and deleting should be allowed"* — built as ONE structural
+compound to the kickoff sitting's rulings, with **item 7** and **item 8**'s backlog, the
+2026-08-30 sweep's seven P-items and the two use-report KnownIssues rows closed around it.
+
+### THE FINALS (at `d81bf588`, the ladder's last commit)
+
+| suite | result | baseline at kickoff |
+|---|---|---|
+| core `swift test` | **1562 / 170, all green** | 1551 / 168 |
+| the FULL Mac suite | **2668 / 445, ALL GREEN** (726 s; neither load-flaky suite fired, so no isolated re-runs were owed) | 2,630 of 2,631 in 437 |
+| iOS build | **green** | green |
+| the FULL mobile suite | **622 / 105 PASSED with 4 known issues** (the 2 standing + the converted tutorial pin's 2) | 621 / 104 |
+
+**Fences held phase-wide, verified by diff over the whole range:** `Sources/VariorumCore/Sync/`
+**zero lines** · `Sources/VariorumCore/Persistence/` **zero lines** · schema **zero** · migrations
+**zero** · lockstep marker **8**, untouched · `Server/` **zero** · no commit trailers · branch
+pushed throughout.
+
+### THE LADDER TALLY
+
+| round | findings | outcome |
+|---|---|---|
+| **R1** (fable-reviewer, cold, over both units' combined diff) | **0 BLOCKER · 2 MAJOR · 1 MINOR · 4 NIT**, plus the implementer's sanity pass raising **3** more | all 7 CONFIRMED (7 AGREE, two precisions adopted into the final calls); the 3 sanity items confirmed, **one of them bug-class on the reviewer's own trace** |
+| **R2** (a FRESH cold reviewer, over R1's fixes) | **0 BLOCKER · 0 MAJOR · 0 MINOR · 2 NIT** | both CONFIRMED (2 AGREE, both precisions adopted); **no round 3 owed** — the trigger is a new BLOCKER/MAJOR and round 2 surfaced none |
+
+**Nothing was dismissed as hollow in either round.** Every bug-class fix landed with a **red-on-old
+pin**, measured on the real pre-fix code: the unit's six on a scratch worktree at the unit's first
+commit, the ladder's three in place. Two of them sharpened their own finding under measurement —
+F-1's door race turned out to SWALLOW the typed ⏎ rather than merely delay it (`["alpha","yz"]`),
+and R2-1's regression direction proved sharper than raised (the ladder had traded a road that
+works for one that cannot).
+
+### WHAT SHIPPED
+
+- **The cross-block compound** (`Shared/EditorBrain/CrossBlockCompound.swift`) — one gesture, one
+  structural compound, ONE ⌥⌘Z entry with the exact-row redo: blocks covered WHOLE ride
+  `deleteBlock` (the 13j Trash/tray road; a fanned middle included, family intact), partially
+  covered ends keep their identity and edit the CHOSEN take only, the ends join exactly when both
+  cuts sit mid-paragraph (**R-13u-2**, one pure function for both ends) and no fan hangs on either
+  (#11a carried forward, read from the STORE inside the flight). Refusals shrink to a sealed note
+  and a **locked take — refuse whole, naming the lock (R-13u-1)**, plus the standing gap and tail
+  fences. Receipts name where every block went.
+- **The SEVENTH quiet auto-commit occasion** (`Operations.insureTakes`) — her own insurance idea.
+- **Item 8's five and item 7** — all landed; the mobile handback checklist's U-1…U-5 and U-7 are
+  flipped and quoted, so the phone inherits a decision rather than a discovery.
+- **The correctness floor (UNIT 1)** — the O(N²) class swept to completion on both platforms (14
+  FIXED, 24 verdicted provably SAFE; the hottest measured **29.2 s → 3.3 ms** at 20,000 blocks),
+  the churn pair (a typo fix no longer stamps a major revision), the door-await chain loop, the
+  one-input-path door, two forked-brain hoists.
+- **The refusal grammar** — `CrossBlockRefusal` hoisted to `Shared/` with the platform chord as a
+  parameter; its causes now include the boundary-edge residual and `.emptyTailAtSpanEnd`, each
+  with a road that actually opens.
+- **The tutorial's TWO-EXITS lesson** grown to the fanned matrix, taught by doing.
+
+### THE ONE PROVISIONAL
+
+**QUESTIONS #109 — a selection with an end sitting on a block boundary.** (a) SHIPPED (the
+pre-item-5 refusal, truthfully worded for every member); (b) and (c) recorded with their costs;
+**(d)** names the wider member and the trim-into-the-run road, fenced away from the tail's
+doorstep. Hers to rule; nothing is built past (a). *(The round-2 split — `.emptyTailAtSpanEnd` —
+is behaviour that shipped, not a question: it changes only which true road the refusal names.)*
+
+### CANON DELTAS — TWO, both hers, each recorded in the same commit as its build
+
+1. **AppSpec §9** — `newBlock` joins the structural-undo list (**R-13u-3**), with the tombstone-flip
+   inverse she named, the exact-row redo, the two riding behaviours and the ONE named exception
+   (type-time crystallization).
+2. **OverallModel §3** — the **seventh** quiet auto-commit occasion, with her words, its reason,
+   and the two things it deliberately does not insure.
+
+### OBLIGATIONS, TICKED
+
+1. **KnownIssues rows resolved or re-owned, none orphaned** — the `planVisibleTakeEdit` O(N²) row,
+   row 43 (both halves), row 44 and row 63 all RESOLVED with their evidence; row 64 (the phone's
+   tutorial) opened with the mobile project as owner. ✅
+2. **AppSpec §9's `newBlock` delta** recorded with the build. ✅
+3. **The handback checklist (§2b)** — U-1…U-5 and U-7 flipped and QUOTED; what mobile still owes is
+   recorded as a FACE, not a fix. ✅
+4. **MOBILE PARITY LINE** — a real row in `notes/MobileSoul.md`'s ledger (PL-23). ✅
+5. **The carried sweep section's four obligations** — the seven P-items each verdicted, the O(N²)
+   class swept to completion, the forked-brain row's completeness claim amended, nothing declined
+   back into the dated sweep artifact. ✅ *(UNIT 1 RECORD, section F.)*
+6. **The closeout ritual** — master plan table + pointer + closeout paragraph, both archives rolled
+   verbatim, AppSpec §14's new delta, the 13u2 kickoff refreshed, item 12's own row filed, the
+   author handoff written LAST, the `/Applications` refresh after the walk. ✅
+
+### WHAT THIS PHASE DID NOT DO
+
+Items 9 and 12 build nothing here (R-13u-4 ruled the capture model — the Mac face is 13u3's, the
+phone's the mobile catch-up's; R-13u-5 gave item 12 its own row after the seam settled). Nothing of
+13u2/13u3/13u4. The phone's FACE for the compound and its tutorial lesson are the mobile project's,
+both named. #109 stays at (a) until her word.
 
 ---
 
