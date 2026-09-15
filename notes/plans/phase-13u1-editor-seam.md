@@ -725,13 +725,13 @@ place: `ArmedEdit.exactCost`'s *"Platforms that derive cost from the report simp
 | B | The shared compound brain (`CrossBlockCompound`): the plan (geometry + the paragraph-break rule + the fates) and the compound body over `Operations` | DONE(`c76dcd60`, `85a92be2`) |
 | C | `CrossBlockRefusal` HOISTED to `Shared/` (U-5) with item 5 writing what it says; the gap fence's Mac face (U-3); the empty-block-in-a-span plan (U-4); the fan fence's policy half on a RUN-TIME read (U-1) | DONE(`c76dcd60`) |
 | D | The Mac's face: the routing arm, the receipts that name where every block went, the refusals shrunk to sealed note + locked take | DONE(`c76dcd60`) |
-| E | The PHONE's consumer carried to the new brain (the semantics are ruled for both platforms; the face stays the mobile project's) | DONE(`c76dcd60`) — mobile suite PENDING |
-| F | `newBlock` registers structural undo (R-13u-3) + the AppSpec §9 canon delta in the SAME commit | DONE(`4ead90ff`, follow-through `a4a…`/`5dc…` era commits) |
+| E | The PHONE's consumer carried to the new brain (the semantics are ruled for both platforms; the face stays the mobile project's) | DONE(`c76dcd60`, `9c35033d`, `eac4c158`) |
+| F | `newBlock` registers structural undo (R-13u-3) + the AppSpec §9 canon delta in the SAME commit | DONE(`4ead90ff`; the fixture follow-through `48613c6f`, `d6ed707f`, `eac4c158`) |
 | G | The MENU-flight door-await neighbour (KnownIssues row 63) | DONE(`1b2eb7f0`) |
 | H | Row 43 half (1) — the ⌘Z-across-a-break directive: the judgment, made and RECORDED with its traced mechanism | DONE(`1b2eb7f0`) |
 | I | The tutorial's TWO-EXITS lesson updated to the fanned matrix (the Mac lesson only) | DONE(`b229d681`) |
-| J | The WALK — the gesture matrix hands-on on the dev-store Debug build, captures in `notes/plans/13u1-screens/` — and the landing/mode-continuity re-walk (her praise) | DONE (16 captures) |
-| K | Close — suites green, KnownIssues rows resolved/re-owned, the handback rows flipped, the mobile parity facts | DONE(`5dc6e474` + this record) |
+| J | The WALK — the gesture matrix hands-on on the dev-store Debug build, captures in `notes/plans/13u1-screens/` — and the landing/mode-continuity re-walk (her praise) | DONE(`765016c1`, 16 captures) |
+| K | Close — suites green, KnownIssues rows resolved/re-owned, the handback rows flipped, the mobile parity facts | DONE(`5dc6e474`, `674089e2`); QUESTIONS #109 `bd394f75` |
 
 *(Traces, pins, PROVISIONALs and measurements are filled in below as each piece lands.)*
 
