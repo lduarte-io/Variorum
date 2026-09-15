@@ -899,6 +899,10 @@ struct CompareBoardView: View {
         .background(tokens.surface)
         .coordinateSpace(name: Self.boardSpace)
         .compareGeometryProbe(.board)
+        // Row 50: ABOVE `.board`'s own probe, so the board's frame reports
+        // into this session's scope too — an environment set below a
+        // modifier does not reach it.
+        .debugProbeScope(session)
         .task { await model.start() }
         .onAppear {
             // 13b 4D (the 4C handoff): ⌘S acts where it's advertised — the
@@ -1445,18 +1449,46 @@ enum CompareProbeSlot: Hashable {
 }
 
 #if DEBUG
+/// **SCOPED BY THE MOUNTING SESSION** (13u2 UNIT E — KnownIssues row 50).
+/// Swift Testing runs SUITES IN PARALLEL, so a process-global static here
+/// lets another suite's mounted board answer this pin's question — a green
+/// pin that proved nothing. The scope travels by environment
+/// (`DebugProbeScope.swift`); a pin reads its own session's.
 @MainActor
 enum CompareGeometry {
-    static var frames: [CompareProbeSlot: CGRect] = [:]
+    private static var worlds: [String: [CompareProbeSlot: CGRect]] = [:]
 
-    static func record(_ slot: CompareProbeSlot, _ frame: CGRect) {
-        frames[slot] = frame
+    static func record(_ slot: CompareProbeSlot, _ frame: CGRect, in scope: String) {
+        worlds[scope, default: [:]][slot] = frame
     }
 
-    /// A pin resets before its mount, so a stale report from an earlier
-    /// mount (or a door that is no longer rendered) can never satisfy it.
-    static func reset() {
-        frames = [:]
+    /// A pin's OWN board — every read below is this session's mount.
+    @MainActor
+    struct Reader {
+        let scope: String
+
+        var frames: [CompareProbeSlot: CGRect] { CompareGeometry.worlds[scope] ?? [:] }
+
+        /// A pin resets before its mount, so a stale report from an earlier
+        /// mount (or a door that is no longer rendered) can never satisfy
+        /// it — and it clears ITS OWN scope and no other, which is what the
+        /// 18d ladder's MINOR-2 learned about whole-oracle wipes.
+        func reset() { CompareGeometry.worlds[scope] = nil }
+    }
+
+    static func reader(_ scope: String) -> Reader { Reader(scope: scope) }
+}
+
+/// The probe, as a modifier rather than a bare `onGeometryChange`, because it
+/// must READ the environment for its scope.
+private struct CompareGeometryProbe: ViewModifier {
+    let slot: CompareProbeSlot
+    @Environment(\.debugProbeScope) private var scope
+
+    func body(content: Content) -> some View {
+        content.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(CompareBoardView.boardSpace))
+        } action: { CompareGeometry.record(slot, $0, in: scope) }
     }
 }
 #endif
@@ -1467,9 +1499,7 @@ extension View {
     @ViewBuilder
     func compareGeometryProbe(_ slot: CompareProbeSlot) -> some View {
         #if DEBUG
-        self.onGeometryChange(for: CGRect.self) {
-            $0.frame(in: .named(CompareBoardView.boardSpace))
-        } action: { CompareGeometry.record(slot, $0) }
+        self.modifier(CompareGeometryProbe(slot: slot))
         #else
         self
         #endif

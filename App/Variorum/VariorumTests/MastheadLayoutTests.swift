@@ -74,16 +74,17 @@ struct MastheadLayoutTests {
                 tags: [], voice: voice
             ) { session, post, _, _ in
                 #if DEBUG
+                let oracle = MastheadGeometry.reader(session.debugProbeScope)
                 for mode in PostMode.allCases {
                     #expect(session.commandRouter.requestMode(mode, postID: post))
                     await settle(until: { session.commandRouter.activeMode == mode })
                     await settle(until: { false }, maxTurns: 6)
-                    let title = try #require(MastheadGeometry.titleFrame,
+                    let title = try #require(oracle.titleFrame,
                                              "the masthead reported its title in \(mode.rawValue)")
-                    let chip = try #require(MastheadGeometry.pathChipFrame,
+                    let chip = try #require(oracle.pathChipFrame,
                                             "…and row two reported its leading chip")
-                    let icons = try #require(MastheadGeometry.iconRowFrame)
-                    let centre = try #require(MastheadGeometry.contentMidX)
+                    let icons = try #require(oracle.iconRowFrame)
+                    let centre = try #require(oracle.contentMidX)
                     #expect(abs(title.minX - chip.minX) <= 1,
                             "\(voice) \(mode.rawValue): title starts at \(title.minX), chip at \(chip.minX)")
                     #expect(title.maxX >= centre + 190 - 1,
@@ -107,17 +108,17 @@ struct MastheadLayoutTests {
                 width: 1100, title: "", tags: [], voice: voice
             ) { session, _, _, _ in
                 #if DEBUG
-                await settle(until: { MastheadGeometry.titleFrame != nil })
+                let oracle = MastheadGeometry.reader(session.debugProbeScope)
+                await settle(until: { oracle.titleFrame != nil })
                 await settle(until: { false }, maxTurns: 6)
-                let resting = try #require(MastheadGeometry.titleFrame)
+                let resting = try #require(oracle.titleFrame)
                 _ = session
 
-                MastheadGeometry.titleFrame = nil
-                MastheadGeometry.titleFieldFrame = nil
+                oracle.forgetTitleFaces()
                 PostDetailOracle.beginTitleEditing?()
-                await settle(until: { MastheadGeometry.titleFieldFrame != nil })
+                await settle(until: { oracle.titleFieldFrame != nil })
                 await settle(until: { false }, maxTurns: 8)
-                let editing = try #require(MastheadGeometry.titleFieldFrame,
+                let editing = try #require(oracle.titleFieldFrame,
                                            "(\(voice)) the editing face reported its frame")
                 #expect(abs(editing.midY - resting.midY) <= 0.5,
                         "(\(voice)) one baseline: field \(editing) vs label \(resting)")
@@ -145,16 +146,17 @@ struct MastheadLayoutTests {
         for voice in [ThemeVoice.terminal, .study] {
             try await withMountedDetail(
                 width: 1100, title: "", tags: [], voice: voice
-            ) { _, _, _, _ in
+            ) { session, _, _, _ in
                 #if DEBUG
-                await settle(until: { MastheadGeometry.titleFrame != nil })
+                let oracle = MastheadGeometry.reader(session.debugProbeScope)
+                await settle(until: { oracle.titleFrame != nil })
                 await settle(until: { false }, maxTurns: 6)
-                #expect(MastheadGeometry.titleOpenMarkAppearances == 0,
+                #expect(oracle.titleOpenMarkAppearances == 0,
                         "(\(voice)) nothing is marked while the title rests")
 
                 PostDetailOracle.beginTitleEditing?()
-                await settle(until: { MastheadGeometry.titleOpenMarkAppearances > 0 })
-                #expect(MastheadGeometry.titleOpenMarkAppearances > 0,
+                await settle(until: { oracle.titleOpenMarkAppearances > 0 })
+                #expect(oracle.titleOpenMarkAppearances > 0,
                         "(\(voice)) the open field carried a visible mark")
                 #endif
             }
@@ -181,18 +183,19 @@ struct MastheadLayoutTests {
                 width: width,
                 title: "A title long enough to need every point of room the masthead has",
                 tags: []
-            ) { _, _, _, _ in
+            ) { session, _, _, _ in
                 #if DEBUG
+                let oracle = MastheadGeometry.reader(session.debugProbeScope)
                 await settle(until: {
-                    MastheadGeometry.titleFrame != nil && MastheadGeometry.iconRowFrame != nil
+                    oracle.titleFrame != nil && oracle.iconRowFrame != nil
                 })
                 await settle(until: { false }, maxTurns: 6)
-                let band = try #require(MastheadGeometry.titleFrame)
-                let icons = try #require(MastheadGeometry.iconRowFrame)
+                let band = try #require(oracle.titleFrame)
+                let icons = try #require(oracle.iconRowFrame)
                 print(String(
                     format: "ITEM13 window=%.0f band=[%.1f…%.1f] room=%.1f icons=[%.1f…%.1f]",
                     width, band.minX, band.maxX, band.width, icons.minX, icons.maxX))
-                let chip = try #require(MastheadGeometry.pathChipFrame)
+                let chip = try #require(oracle.pathChipFrame)
                 #expect(abs(band.minX - chip.minX) <= 1,
                         "the band starts where row two's path chip does")
                 #expect(band.maxX + MastheadTitleInsets.gap <= icons.minX + 0.5,
@@ -315,11 +318,11 @@ struct MastheadLayoutTests {
     /// with no report at all; `maxTurns` is the ceiling that keeps a wedged
     /// layout from hanging the suite.
     private func settleMastheadGeometry(
-        _ window: NSWindow, _ hosting: NSView,
+        _ window: NSWindow, _ hosting: NSView, _ oracle: MastheadGeometry.Reader,
         quietTurns: Int = 4, maxTurns: Int = 200
     ) async -> Bool {
         #if DEBUG
-        var last = MastheadGeometry.reports
+        var last = oracle.reports
         var quiet = 0
         for _ in 0..<maxTurns {
             hosting.layoutSubtreeIfNeeded()
@@ -328,7 +331,7 @@ struct MastheadLayoutTests {
             pump()
             await Task.yield()
             try? await Task.sleep(for: .milliseconds(20))
-            let now = MastheadGeometry.reports
+            let now = oracle.reports
             if now == last {
                 quiet += 1
                 if quiet >= quietTurns { return true }
@@ -385,7 +388,9 @@ struct MastheadLayoutTests {
                 }
 
                 #if DEBUG
-                MastheadGeometry.resetRowTwo()
+                // Row 50: this pin's OWN masthead, named by its own session.
+                let oracle = MastheadGeometry.reader(session.debugProbeScope)
+                oracle.resetRowTwo()
                 #endif
                 let window = NSWindow(
                     contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),
@@ -408,14 +413,14 @@ struct MastheadLayoutTests {
 
                 #if DEBUG
                 await settle(window, hosting, until: {
-                    MastheadGeometry.pathChipFrame != nil && MastheadGeometry.cardFrames.count == 5
+                    oracle.pathChipFrame != nil && oracle.cardFrames.count == 5
                 })
-                #expect(await settleMastheadGeometry(window, hosting),
+                #expect(await settleMastheadGeometry(window, hosting, oracle),
                         "(\(voice)) the masthead's geometry went quiet at rest, so every rectangle below is from ONE layout state")
                 let gap = PostDetailView.rowTwoGap
-                let chip = try #require(MastheadGeometry.pathChipFrame, "the path chip reported its frame (\(voice))")
-                let width = try #require(MastheadGeometry.contentMidX).magnitude * 2
-                let cards = MastheadGeometry.cardFrames
+                let chip = try #require(oracle.pathChipFrame, "the path chip reported its frame (\(voice))")
+                let width = try #require(oracle.contentMidX).magnitude * 2
+                let cards = oracle.cardFrames
                 #expect(cards.count == 5, "five cards reported (\(voice)), got \(cards.count)")
                 for (id, card) in cards {
                     #expect(!chip.intersects(card),
@@ -425,31 +430,31 @@ struct MastheadLayoutTests {
                     #expect(card.minX >= -0.5 && card.maxX <= width + 0.5,
                             "(\(voice)) card \(id) \(card) stays inside the masthead (0…\(width))")
                 }
-                let titleClosed = try #require(MastheadGeometry.titleFrame)
+                let titleClosed = try #require(oracle.titleFrame)
                 #expect(abs(titleClosed.minX - chip.minX) <= 1,
                         "\(voice), five tags: title \(titleClosed.minX) vs chip \(chip.minX)")
 
                 // ⌘⇧I's road opens the field.
                 #expect(session.commandRouter.requestTagField(), "the router reaches this masthead's field")
-                await settle(window, hosting, until: { MastheadGeometry.fieldFrame != nil })
+                await settle(window, hosting, until: { oracle.fieldFrame != nil })
                 // Row 59: NOT a blind pump. The field's arrival is the START
                 // of the row's re-layout, not the end of it — the cards move
                 // to make room, and under load their reports land after the
                 // field's. Wait for the whole masthead to stop moving.
-                #expect(await settleMastheadGeometry(window, hosting),
+                #expect(await settleMastheadGeometry(window, hosting, oracle),
                         "(\(voice)) the masthead's geometry went quiet after the field opened — the field and the cards below are from ONE layout state")
-                let field = try #require(MastheadGeometry.fieldFrame, "the open field reported its frame (\(voice))")
+                let field = try #require(oracle.fieldFrame, "the open field reported its frame (\(voice))")
                 #expect(!chip.intersects(field),
                         "(\(voice)) the open field \(field) is drawn clear of the path chip \(chip)")
                 #expect(field.minX - chip.maxX >= gap - 0.5,
                         "(\(voice)) the field sits right of the chip by the row's gap: \(field.minX - chip.maxX)")
-                for (id, card) in MastheadGeometry.cardFrames {
+                for (id, card) in oracle.cardFrames {
                     #expect(!field.intersects(card), "(\(voice)) the field \(field) covers no card (\(id) \(card))")
                 }
-                let chipOpen = try #require(MastheadGeometry.pathChipFrame)
+                let chipOpen = try #require(oracle.pathChipFrame)
                 #expect(abs(chipOpen.minX - chip.minX) <= 0.5 && abs(chipOpen.minY - chip.minY) <= 0.5,
                         "(\(voice)) opening the field moved nothing: the chip stayed at \(chip.origin), now \(chipOpen.origin)")
-                let titleOpen = try #require(MastheadGeometry.titleFrame)
+                let titleOpen = try #require(oracle.titleFrame)
                 #expect(abs(titleOpen.minX - chip.minX) <= 1,
                         "(\(voice)) …and with the tag field open: \(titleOpen.minX) vs \(chip.minX)")
                 #endif
@@ -488,15 +493,16 @@ struct MastheadLayoutTests {
         try await withMountedDetail(
             width: 340, title: "The Boscombe Valley Mystery — a title long enough to truncate here",
             tags: []
-        ) { _, _, _, _ in
+        ) { session, _, _, _ in
             #if DEBUG
+            let oracle = MastheadGeometry.reader(session.debugProbeScope)
             await settle(until: {
-                MastheadGeometry.titleFrame != nil && MastheadGeometry.iconRowFrame != nil
+                oracle.titleFrame != nil && oracle.iconRowFrame != nil
             })
             await settle(until: { false }, maxTurns: 6)
-            let title = try #require(MastheadGeometry.titleFrame, "the title reported its frame")
-            let icons = try #require(MastheadGeometry.iconRowFrame, "the icon row reported its frame")
-            let width = try #require(MastheadGeometry.contentMidX).magnitude * 2
+            let title = try #require(oracle.titleFrame, "the title reported its frame")
+            let icons = try #require(oracle.iconRowFrame, "the icon row reported its frame")
+            let width = try #require(oracle.contentMidX).magnitude * 2
             #expect(title.width > 0 && icons.width > 0)
             #expect(title.maxX + MastheadTitleInsets.gap <= icons.minX + 0.5,
                     "the title's words end the gap before the icons begin: title \(title) vs icons \(icons) (masthead \(width))")
@@ -510,11 +516,12 @@ struct MastheadLayoutTests {
     /// two points from the ＃. RED ON OLD: the door's frame was the ~10-pt
     /// symbol plus 3 × 2 pt of padding.
     @Test func theTagDoorsHitTargetIsTheRowsHeightNotTheGlyphs() async throws {
-        try await withMountedDetail(width: 1100, title: "a note with a tag", tags: ["walked"]) { _, _, _, _ in
+        try await withMountedDetail(width: 1100, title: "a note with a tag", tags: ["walked"]) { session, _, _, _ in
             #if DEBUG
-            await settle(until: { MastheadGeometry.doorFrame != nil })
+            let oracle = MastheadGeometry.reader(session.debugProbeScope)
+            await settle(until: { oracle.doorFrame != nil })
             await settle(until: { false }, maxTurns: 6)
-            let door = try #require(MastheadGeometry.doorFrame, "the ＃ door reported its frame")
+            let door = try #require(oracle.doorFrame, "the ＃ door reported its frame")
             let target = MastheadTagCluster.doorTarget
             #expect(door.width >= target - 0.5 && door.height >= target - 0.5,
                     "the door's target is at least \(target) × \(target): \(door)")
@@ -564,20 +571,21 @@ struct MastheadLayoutTests {
             try await withMountedDetail(
                 width: width, title: "The Boscombe Valley Mystery", tags: tags,
                 book: "the adventures of sherlock holmes", voice: voice
-            ) { _, _, _, _ in
+            ) { session, _, _, _ in
                 #if DEBUG
+                let oracle = MastheadGeometry.reader(session.debugProbeScope)
                 await settle(until: {
-                    MastheadGeometry.pathChipFrame != nil
-                        && MastheadGeometry.cardFrames.count == tags.count
-                        && MastheadGeometry.doorFrame != nil
-                        && MastheadGeometry.stampFrame != nil
+                    oracle.pathChipFrame != nil
+                        && oracle.cardFrames.count == tags.count
+                        && oracle.doorFrame != nil
+                        && oracle.stampFrame != nil
                 })
                 await settle(until: { false }, maxTurns: 6)
-                let chip = try #require(MastheadGeometry.pathChipFrame, "(\(voice) \(width) \(tags.count) tags) the chip reported")
-                let door = try #require(MastheadGeometry.doorFrame, "(\(voice) \(width)) the door reported")
-                let cards = MastheadGeometry.cardFrames
+                let chip = try #require(oracle.pathChipFrame, "(\(voice) \(width) \(tags.count) tags) the chip reported")
+                let door = try #require(oracle.doorFrame, "(\(voice) \(width)) the door reported")
+                let cards = oracle.cardFrames
                 #expect(cards.count == tags.count, "(\(voice) \(width)) every card reported")
-                let masthead = try #require(MastheadGeometry.contentMidX).magnitude * 2
+                let masthead = try #require(oracle.contentMidX).magnitude * 2
                 for (id, card) in cards {
                     #expect(!chip.intersects(card),
                             "(\(voice) \(width) \(tags.count) tags) the chip \(chip) is never covered by card \(id) \(card)")
@@ -595,7 +603,7 @@ struct MastheadLayoutTests {
                 // that row two HOLDS at narrow widths, so the stamp is held to
                 // it too. (The chip yields a little room to it and ellipsizes
                 // sooner; that is row 80b's own ruled yield, not a collision.)
-                let stamp = try #require(MastheadGeometry.stampFrame, "(\(voice) \(width)) the stamp reported")
+                let stamp = try #require(oracle.stampFrame, "(\(voice) \(width)) the stamp reported")
                 #expect(stamp.maxX <= masthead + 0.5,
                         "(\(voice) \(width)) the stamp stays inside the masthead: \(stamp)")
                 #expect(!stamp.intersects(chip), "(\(voice) \(width)) the stamp never covers the chip")
@@ -655,8 +663,11 @@ struct MastheadLayoutTests {
                     #expect(store.settings.voice == .study, "the Study voice took")
                 }
                 #if DEBUG
-                MastheadGeometry.resetRowTwo()
-                MastheadGeometry.resetTitleRow()
+                // Row 50: this mount's OWN masthead, named by its own
+                // session — and a reset that clears its scope alone.
+                let oracle = MastheadGeometry.reader(session.debugProbeScope)
+                oracle.resetRowTwo()
+                oracle.resetTitleRow()
                 #endif
                 let window = NSWindow(
                     contentRect: NSRect(x: 80, y: 80, width: width, height: 750),

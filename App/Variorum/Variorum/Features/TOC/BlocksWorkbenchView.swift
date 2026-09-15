@@ -260,6 +260,7 @@ struct BlocksWorkbenchView: View {
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { totalWidth = $0 }
         }
         .coordinateSpace(name: Self.space)
+        .debugProbeScope(session)
         .background(tokens.surface)
         // Row 83: the rows are PRIMED by one bounded read before the
         // observation starts, and the four sibling observations wait for
@@ -275,12 +276,12 @@ struct BlocksWorkbenchView: View {
         .onDisappear { model.teardown() }
         .onChange(of: focusedBlockID) { _, new in
             #if DEBUG
-            BlocksWorkbenchOracle.focusedBlockID = new
+            BlocksWorkbenchOracle.recordFocus(new, in: session.debugProbeScope)
             #endif
         }
         .onChange(of: panelShown, initial: true) { _, shown in
             #if DEBUG
-            BlocksWorkbenchOracle.panelMounted = shown
+            BlocksWorkbenchOracle.recordPanel(shown, in: session.debugProbeScope)
             #endif
         }
         .onChange(of: model.rows) { _, rows in
@@ -1066,6 +1067,26 @@ enum BlocksWorkbenchProbeSlot: Hashable {
     //  frame reaches a pin through `WorkbenchSeam.onFrame`, its own closure.)
 }
 
+#if DEBUG
+/// The probe, as a modifier rather than a bare `onGeometryChange`, because it
+/// must READ the environment for its scope (13u2 UNIT E — row 50).
+private struct BlocksWorkbenchProbe: ViewModifier {
+    let slot: BlocksWorkbenchProbeSlot
+    @Environment(\.debugProbeScope) private var scope
+
+    func body(content: Content) -> some View {
+        content.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(BlocksWorkbenchView.space))
+        } action: { frame in
+            switch slot {
+            case .row(let id):
+                BlocksWorkbenchOracle.recordRow(id, frame, in: scope)
+            }
+        }
+    }
+}
+#endif
+
 extension View {
     /// The workbench oracle's DEBUG frame write, in the workbench's own
     /// named space (a `.global` read inside a macOS `ScrollView` answers in
@@ -1073,18 +1094,7 @@ extension View {
     @ViewBuilder
     func blocksWorkbenchProbe(_ slot: BlocksWorkbenchProbeSlot) -> some View {
         #if DEBUG
-        self.onGeometryChange(for: CGRect.self) {
-            $0.frame(in: .named(BlocksWorkbenchView.space))
-        } action: { frame in
-            switch slot {
-            case .row(let id):
-                BlocksWorkbenchOracle.rowFrames[id] = frame
-                // Row 83's measure: the FIRST row's paint.
-                if BlocksWorkbenchOracle.firstRowPaintedAt == nil {
-                    BlocksWorkbenchOracle.firstRowPaintedAt = Date()
-                }
-            }
-        }
+        self.modifier(BlocksWorkbenchProbe(slot: slot))
         #else
         self
         #endif
@@ -1096,20 +1106,54 @@ extension View {
 /// the mounted workbench's focused row (row 39), whether its context panel
 /// stands (row 27), and its rows' and divider's frames (rows 18/25 — so a
 /// pin can click and drag them for real).
+///
+/// **SCOPED BY THE MOUNTING SESSION** (13u2 UNIT E — KnownIssues row 50):
+/// Swift Testing runs SUITES IN PARALLEL, and `rowFrames` was keyed by block
+/// id, which `.incrementing` uuids make identical in every test world at
+/// once. The scope travels by environment (`DebugProbeScope.swift`); a pin
+/// reads its own session's.
 @MainActor
 enum BlocksWorkbenchOracle {
-    static var focusedBlockID: String?
-    static var panelMounted = false
-    static var rowFrames: [String: CGRect] = [:]
-    /// Row 83: when the list's first row was laid out (the arrival's
-    /// first painted row) — nil until then.
-    static var firstRowPaintedAt: Date?
-
-    static func reset() {
-        focusedBlockID = nil
-        panelMounted = false
-        rowFrames = [:]
-        firstRowPaintedAt = nil
+    private struct World {
+        var focusedBlockID: String?
+        var panelMounted = false
+        var rowFrames: [String: CGRect] = [:]
+        /// Row 83: when the list's first row was laid out (the arrival's
+        /// first painted row) — nil until then.
+        var firstRowPaintedAt: Date?
     }
+
+    private static var worlds: [String: World] = [:]
+
+    static func recordFocus(_ blockID: String?, in scope: String) {
+        worlds[scope, default: World()].focusedBlockID = blockID
+    }
+
+    static func recordPanel(_ shown: Bool, in scope: String) {
+        worlds[scope, default: World()].panelMounted = shown
+    }
+
+    static func recordRow(_ blockID: String, _ frame: CGRect, in scope: String) {
+        worlds[scope, default: World()].rowFrames[blockID] = frame
+        if worlds[scope]?.firstRowPaintedAt == nil {
+            worlds[scope]?.firstRowPaintedAt = Date()
+        }
+    }
+
+    /// A pin's OWN workbench — every read below is this session's mount.
+    @MainActor
+    struct Reader {
+        let scope: String
+
+        var focusedBlockID: String? { BlocksWorkbenchOracle.worlds[scope]?.focusedBlockID }
+        var panelMounted: Bool { BlocksWorkbenchOracle.worlds[scope]?.panelMounted ?? false }
+        var rowFrames: [String: CGRect] { BlocksWorkbenchOracle.worlds[scope]?.rowFrames ?? [:] }
+        var firstRowPaintedAt: Date? { BlocksWorkbenchOracle.worlds[scope]?.firstRowPaintedAt }
+
+        /// A pin resets before its mount — its OWN scope and no other.
+        func reset() { BlocksWorkbenchOracle.worlds[scope] = nil }
+    }
+
+    static func reader(_ scope: String) -> Reader { Reader(scope: scope) }
 }
 #endif

@@ -89,8 +89,10 @@ struct MastheadStamp: View {
             // PREVIOUS note's three entries and its `stampFrames` row
             // survived it. They are cleared here, where the old id is still
             // in hand.
-            .onChange(of: postID) { old, _ in PostDetailOracle.resetStamp(old) }
-            .onDisappear { PostDetailOracle.resetStamp(postID) }
+            .onChange(of: postID) { old, _ in
+                PostDetailOracle.resetStamp(old, in: session.debugProbeScope)
+            }
+            .onDisappear { PostDetailOracle.resetStamp(postID, in: session.debugProbeScope) }
             #endif
     }
 

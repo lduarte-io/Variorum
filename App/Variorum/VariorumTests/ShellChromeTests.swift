@@ -194,7 +194,9 @@ struct ShellChromeTests {
             let post = try session.operations.createPost(title: "a tab")
             let router = ShellRouter()
             #if DEBUG
-            SidebarGeometry.openRowHeight = nil
+            // Row 50: this pin's OWN column, named by its own session.
+            let column = SidebarGeometry.headers(session.debugProbeScope)
+            column.resetHeaders()
             #endif
 
             let window = NSWindow(
@@ -219,11 +221,11 @@ struct ShellChromeTests {
             // The strip: visit a note, let the column lay its row out.
             router.workspace.visit(.post(post.id))
             #if DEBUG
-            for _ in 0..<200 where SidebarGeometry.openRowHeight == nil {
+            for _ in 0..<200 where column.openRowHeight == nil {
                 await Task.yield()
                 try? await Task.sleep(for: .milliseconds(5))
             }
-            let drawn = try #require(SidebarGeometry.openRowHeight,
+            let drawn = try #require(column.openRowHeight,
                                      "the strip drew its row for the visited note")
             #expect(drawn == SidebarLayout.generousRowHeight,
                     "an Open-strip row at an ordinary height is the generous 30 pt row (the pre-round strip drew ~21)")
@@ -260,7 +262,10 @@ struct ShellChromeTests {
             _ = try session.operations.newBlock(in: post.id, text: "so the rail has a note.")
             let router = ShellRouter()
             #if DEBUG
-            SidebarGeometry.resetHeaders()
+            // Row 50: this pin's OWN column, named by its own session —
+            // and a reset that clears its scope alone.
+            let column = SidebarGeometry.headers(session.debugProbeScope)
+            column.resetHeaders()
             #endif
 
             let window = NSWindow(
@@ -284,7 +289,7 @@ struct ShellChromeTests {
             router.workspace.visit(.post(post.id))
             _ = router.workspace.select(.post(post.id))
             #if DEBUG
-            for _ in 0..<400 where SidebarGeometry.headerTextFrames.count < 2 {
+            for _ in 0..<400 where column.headerTextFrames.count < 2 {
                 hosting.layoutSubtreeIfNeeded()
                 window.displayIfNeeded()
                 await Task.yield()
@@ -296,13 +301,13 @@ struct ShellChromeTests {
                 await Task.yield()
                 try? await Task.sleep(for: .milliseconds(10))
             }
-            print("[17o d row 13 keys] headers \(SidebarGeometry.headerTextFrames.keys.sorted()) · rows \(SidebarGeometry.firstRowContentFrames.keys.sorted())")
+            print("[17o d row 13 keys] headers \(column.headerTextFrames.keys.sorted()) · rows \(column.firstRowContentFrames.keys.sorted())")
             for title in ["this note", WorkspaceNaming.openSectionHeader] {
-                let words = try #require(SidebarGeometry.headerTextFrames[title],
+                let words = try #require(column.headerTextFrames[title],
                                          "the \(title) header drew")
-                let row = try #require(SidebarGeometry.firstRowContentFrames[title],
+                let row = try #require(column.firstRowContentFrames[title],
                                        "…and its first row drew")
-                let box = try #require(SidebarGeometry.firstRowBoxFrames[title])
+                let box = try #require(column.firstRowBoxFrames[title])
                 print("[17o d row 13] \(title): words \(words) · row \(row) · box \(box)")
                 #expect(abs(words.minX - row.minX) <= 0.5,
                         "\(title): the header's words start where its rows' do — \(words.minX) vs \(row.minX)")

@@ -234,7 +234,10 @@ struct NoteBoxGeometryTests {
                 window.close()
             }
 #if DEBUG
-            SidebarGeometry.resetHeaders()
+            // Row 50: this pin's OWN column, named by its own session —
+            // and a reset that clears its scope alone.
+            let column = SidebarGeometry.headers(session.debugProbeScope)
+            column.resetHeaders()
 #endif
             let workspace = WorkspaceModel()
             workspace.visit(.post(post.id))
@@ -250,14 +253,14 @@ struct NoteBoxGeometryTests {
 #if DEBUG
             await settle(window, hosting, until: {
                 SidebarGeometry.noteBoxHeaderFrames[book.id] != nil
-                    && SidebarGeometry.firstRowContentFrames[
+                    && column.firstRowContentFrames[
                         WorkspaceNaming.openSectionHeader] != nil
             })
             let words = try #require(SidebarGeometry.noteBoxHeaderFrames[book.id])
             // The Open strip's first row is the column's own row-text edge —
             // the same rectangle row 13 measured the rail's header against.
             let row = try #require(
-                SidebarGeometry.firstRowContentFrames[WorkspaceNaming.openSectionHeader])
+                column.firstRowContentFrames[WorkspaceNaming.openSectionHeader])
             #expect(abs(words.minX - row.minX) <= 1.5,
                     "the box's header starts where the column's rows do — \(words.minX) vs \(row.minX)")
 #endif

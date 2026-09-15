@@ -121,7 +121,9 @@ struct BlockHistoryHostTests {
                 session.commandRouter.unregisterDetail(token)
             }
             #if DEBUG
-            BlocksWorkbenchOracle.reset()
+            // Row 50: this pin's OWN workbench, named by its own session.
+            let workbench = BlocksWorkbenchOracle.reader(session.debugProbeScope)
+            workbench.reset()
             #endif
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: width, height: 750),
@@ -172,14 +174,16 @@ struct BlockHistoryHostTests {
 
     @Test func fromBlocksThePaneIsTheOneRightRegionAndNothingRunsPastTheWindow() async throws {
         try await mounted(mode: .blocks, currentBlock: true) { session, post, blocks, variants, window, hosting in
-            #expect(await Self.settle(window, hosting) { BlocksWorkbenchOracle.panelMounted },
+            // Row 50: this pin's OWN workbench, named by its own session.
+            let workbench = BlocksWorkbenchOracle.reader(session.debugProbeScope)
+            #expect(await Self.settle(window, hosting) { workbench.panelMounted },
                     "Blocks arrived on the current block with its context panel open")
             #expect(session.commandRouter.requestBlockHistory(
                 BlockHistoryRequest(postID: post, blockID: blocks[1], focusedVariantID: variants[1])))
             #expect(await Self.settle(window, hosting) {
                 Self.historyOpen() && Self.inspectorColumnMounted(hosting)
             }, "the history pane opened")
-            #expect(await Self.settle(window, hosting) { !BlocksWorkbenchOracle.panelMounted },
+            #expect(await Self.settle(window, hosting) { !workbench.panelMounted },
                     "…and the workbench's own panel YIELDED — one right region at a time")
             // Give the columns a layout pass, then read every frame.
             _ = await Self.settle(window, hosting, timeout: 0.5) { false }
@@ -203,7 +207,7 @@ struct BlockHistoryHostTests {
             #expect(session.commandRouter.requestMode(.write, postID: post))
             #expect(await Self.settle(window, hosting) { !Self.historyOpen() })
             #expect(session.commandRouter.requestMode(.blocks, postID: post))
-            #expect(await Self.settle(window, hosting) { BlocksWorkbenchOracle.panelMounted },
+            #expect(await Self.settle(window, hosting) { workbench.panelMounted },
                     "back in Blocks with no inspector, the context panel stands again")
         }
     }

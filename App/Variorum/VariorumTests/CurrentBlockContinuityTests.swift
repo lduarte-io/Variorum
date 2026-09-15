@@ -135,7 +135,9 @@ struct CurrentBlockContinuityTests {
             UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
             #if DEBUG
             ReadModeOracle.reset()
-            BlocksWorkbenchOracle.focusedBlockID = nil
+            // Row 50: this pin's OWN workbench, named by its own session.
+            let workbench = BlocksWorkbenchOracle.reader(session.debugProbeScope)
+            workbench.reset()
             #endif
             let slots = try await db.read { [id = post.id] db in
                 try Queries.renderPost(db, containerID: id)
@@ -200,7 +202,7 @@ struct CurrentBlockContinuityTests {
 
             // 4. BLOCKS enters on it: block 2 is the focused row (its panel).
             #expect(router.requestMode(.blocks, postID: post.id))
-            #expect(await Self.settle(window, hosting) { BlocksWorkbenchOracle.focusedBlockID == blocks[1] },
+            #expect(await Self.settle(window, hosting) { workbench.focusedBlockID == blocks[1] },
                     "Blocks focuses block 2's row")
 
             // 5. WRITE again: the caret is back WHERE IT WAS in block 2 —
@@ -268,7 +270,9 @@ struct CurrentBlockContinuityTests {
             UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
             #if DEBUG
             ReadModeOracle.reset()
-            BlocksWorkbenchOracle.focusedBlockID = nil
+            // Row 50: this pin's OWN workbench, named by its own session.
+            let workbench = BlocksWorkbenchOracle.reader(session.debugProbeScope)
+            workbench.reset()
             #endif
             let slots = try await db.read { [id = post.id] db in
                 try Queries.renderPost(db, containerID: id)
@@ -413,7 +417,9 @@ struct CurrentBlockContinuityTests {
             UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
             #if DEBUG
             ReadModeOracle.reset()
-            BlocksWorkbenchOracle.focusedBlockID = nil
+            // Row 50: this pin's OWN workbench, named by its own session.
+            let workbench = BlocksWorkbenchOracle.reader(session.debugProbeScope)
+            workbench.reset()
             #endif
             let slots = try await db.read { [id = post.id] db in
                 try Queries.renderPost(db, containerID: id)

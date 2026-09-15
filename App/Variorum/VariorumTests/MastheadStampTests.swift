@@ -77,26 +77,29 @@ struct MastheadStampTests {
     /// with the old two-subview layout handed three subviews, `plan` refused
     /// and row two laid nothing out at all.
     @Test func theStampSitsAtRowTwosTrailingEndAndCoversNothing() async throws {
-        try await withMountedDetail(width: 1100, tags: ["walked", "tutorial"]) { _, postID in
+        try await withMountedDetail(width: 1100, tags: ["walked", "tutorial"]) { session, postID in
             #if DEBUG
+            // Row 50: this pin's OWN masthead, named by its own session —
+            // the per-note key rides UNDER the session's scope.
+            let oracle = MastheadGeometry.reader(session.debugProbeScope)
             await settle(until: {
-                MastheadGeometry.stampFrames[postID] != nil && MastheadGeometry.pathChipFrame != nil
-                    && MastheadGeometry.cardFrames.count == 2
-                    && MastheadGeometry.doorFrame != nil
+                oracle.stampFrames[postID] != nil && oracle.pathChipFrame != nil
+                    && oracle.cardFrames.count == 2
+                    && oracle.doorFrame != nil
             })
             await settle(until: { false }, maxTurns: 6)
             // Keyed by the NOTE since the ladder's R1-14 — the pin names
             // whose masthead it is reading, rather than whichever mounted last.
-            let stamp = try #require(MastheadGeometry.stampFrames[postID],
+            let stamp = try #require(oracle.stampFrames[postID],
                                      "this note's stamp reported its frame")
-            let chip = try #require(MastheadGeometry.pathChipFrame)
-            let door = try #require(MastheadGeometry.doorFrame)
-            let masthead = try #require(MastheadGeometry.contentMidX).magnitude * 2
+            let chip = try #require(oracle.pathChipFrame)
+            let door = try #require(oracle.doorFrame)
+            let masthead = try #require(oracle.contentMidX).magnitude * 2
             #expect(stamp.width > 0 && stamp.height > 0, "it is drawn: \(stamp)")
             #expect(stamp.maxX <= masthead + 0.5, "it stays inside the masthead: \(stamp) of \(masthead)")
             #expect(!stamp.intersects(chip), "it never covers the path chip: \(stamp) vs \(chip)")
             #expect(!stamp.intersects(door), "…nor the ＃ door: \(stamp) vs \(door)")
-            for (id, card) in MastheadGeometry.cardFrames {
+            for (id, card) in oracle.cardFrames {
                 #expect(!stamp.intersects(card), "…nor tag card \(id) \(card)")
                 #expect(card.maxX <= stamp.minX + 0.5,
                         "the cards reflow INSIDE the stamp's edge (\(card) vs \(stamp))")
@@ -202,8 +205,9 @@ struct MastheadStampTests {
             UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
             defer { UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)") }
             try await withAdoptedTheme(session: session) { store in
-                MastheadGeometry.resetRowTwo()
-                PostDetailOracle.resetStamp(post.id)
+                let oracle = MastheadGeometry.reader(session.debugProbeScope)
+                oracle.resetRowTwo()
+                PostDetailOracle.resetStamp(post.id, in: session.debugProbeScope)
                 let window = NSWindow(
                     contentRect: NSRect(x: 80, y: 80, width: width, height: 750),
                     styleMask: [.titled], backing: .buffered, defer: false)
@@ -241,7 +245,7 @@ struct MastheadStampTests {
                         "the closure is not retained past the masthead")
                 #expect(PostDetailOracle.stampShown[post.id] == nil)
                 #expect(PostDetailOracle.stampEditedAt[post.id] == nil)
-                #expect(MastheadGeometry.stampFrames[post.id] == nil)
+                #expect(oracle.stampFrames[post.id] == nil)
                 #endif
             }
         }

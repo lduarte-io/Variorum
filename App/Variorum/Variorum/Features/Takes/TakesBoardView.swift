@@ -181,6 +181,7 @@ struct TakesBoardView: View {
         // handle below is the one gesture that needs it, and any future
         // board drag inherits the fix by being born here.
         .coordinateSpace(.named(Self.surfaceSpace))
+        .debugProbeScope(session)
         .task { await model.start() }
         // 13b Stage 3 (3D — N1): the archived listing is its own read
         // (the fans query stays active-only), refreshed at projection
@@ -1578,29 +1579,78 @@ enum TakeCardProbeSlot: Hashable {
 }
 
 #if DEBUG
+/// **SCOPED BY THE MOUNTING SESSION, AND BOUNDED** (13u2 UNIT E —
+/// KnownIssues row 50, and row 47's second oracle-hygiene item).
+///
+/// Two defects, one rewrite. **(1) Parallel suites:** a process-global list
+/// here took every board's cards in the process, so a pin's `tallest` could
+/// be another suite's card — a green pin that proved nothing. The scope
+/// travels by environment (`DebugProbeScope.swift`); a pin reads its own
+/// session's. **(2) Append-only:** the list was pruned only by two `reset()`
+/// calls in one suite and otherwise grew for a DEBUG process's whole life.
+/// It is bounded now, per scope, dropping the OLDEST — and a scope's row
+/// goes when the pin that owns it resets.
 @MainActor
 enum TakeCardGeometry {
-    /// EVERY report, in arrival order — a board draws many cards, and a
-    /// last-one-wins dictionary would let a short card's numbers stand in
-    /// for the long one the pin is about.
-    static var reports: [(slot: TakeCardProbeSlot, frame: CGRect)] = []
+    /// Per scope: EVERY report, in arrival order — a board draws many cards,
+    /// and a last-one-wins dictionary would let a short card's numbers stand
+    /// in for the long one the pin is about.
+    private static var worlds: [String: [(slot: TakeCardProbeSlot, frame: CGRect)]] = [:]
 
-    static func record(_ slot: TakeCardProbeSlot, _ frame: CGRect) {
-        reports.append((slot, frame))
+    /// The bound. A board reports tens of times, not hundreds; this is big
+    /// enough that no pin can reach it and small enough that a DEBUG process
+    /// left running cannot grow without end. Oldest out, because the
+    /// questions asked here are about the CURRENT board.
+    static let reportLimit = 512
+
+    static func record(_ slot: TakeCardProbeSlot, _ frame: CGRect, in scope: String) {
+        worlds[scope, default: []].append((slot, frame))
+        if var row = worlds[scope], row.count > reportLimit {
+            row.removeFirst(row.count - reportLimit)
+            worlds[scope] = row
+        }
     }
 
-    static func latest(_ slot: TakeCardProbeSlot) -> CGRect? {
-        reports.last { $0.slot == slot }?.frame
+    /// A pin's OWN board — every read below is this session's mount.
+    @MainActor
+    struct Reader {
+        let scope: String
+
+        var reports: [(slot: TakeCardProbeSlot, frame: CGRect)] {
+            TakeCardGeometry.worlds[scope] ?? []
+        }
+
+        func latest(_ slot: TakeCardProbeSlot) -> CGRect? {
+            reports.last { $0.slot == slot }?.frame
+        }
+
+        /// The TALLEST card reported, and the tallest bar — a board pin asks
+        /// about the long card, whichever order SwiftUI reported them in.
+        func tallest(_ slot: TakeCardProbeSlot) -> CGRect? {
+            reports.filter { $0.slot == slot }.map(\.frame).max { $0.height < $1.height }
+        }
+
+        /// A pin resets before its mount, so a stale report can never satisfy
+        /// it — its OWN scope and no other.
+        func reset() { TakeCardGeometry.worlds[scope] = nil }
     }
 
-    /// The TALLEST card reported, and the tallest bar — a board pin asks
-    /// about the long card, whichever order SwiftUI reported them in.
-    static func tallest(_ slot: TakeCardProbeSlot) -> CGRect? {
-        reports.filter { $0.slot == slot }.map(\.frame).max { $0.height < $1.height }
-    }
+    static func reader(_ scope: String) -> Reader { Reader(scope: scope) }
+}
 
-    /// A pin resets before its mount, so a stale report can never satisfy it.
-    static func reset() { reports = [] }
+/// The probe, as a modifier rather than a bare `onGeometryChange`, because it
+/// must READ the environment for its scope — which is also why the sweep did
+/// not have to thread an argument through `TakeCardFrame`, a generic value
+/// view with dozens of construction sites and no session of its own.
+private struct TakeCardGeometryProbe: ViewModifier {
+    let slot: TakeCardProbeSlot
+    @Environment(\.debugProbeScope) private var scope
+
+    func body(content: Content) -> some View {
+        content.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(TakeCardProbeSlot.space))
+        } action: { TakeCardGeometry.record(slot, $0, in: scope) }
+    }
 }
 #endif
 
@@ -1611,9 +1661,7 @@ extension View {
     @ViewBuilder
     func takeCardGeometryProbe(_ slot: TakeCardProbeSlot) -> some View {
         #if DEBUG
-        self.onGeometryChange(for: CGRect.self) {
-            $0.frame(in: .named(TakeCardProbeSlot.space))
-        } action: { TakeCardGeometry.record(slot, $0) }
+        self.modifier(TakeCardGeometryProbe(slot: slot))
         #else
         self
         #endif

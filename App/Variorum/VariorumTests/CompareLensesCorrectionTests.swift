@@ -287,7 +287,10 @@ struct CompareLensesAlignmentTests {
             model.setPeer(slotID: model.peerSlots[0].id, postID: nil)
 
             #if DEBUG
-            CompareGeometry.reset()
+            // Row 50: this pin's OWN board, named by its own session — a
+            // concurrent suite's mount cannot answer for it.
+            let compare = CompareGeometry.reader(session.debugProbeScope)
+            compare.reset()
             #endif
             let size = NSSize(width: 1000, height: 700)
             let window = window(size)
@@ -304,18 +307,18 @@ struct CompareLensesAlignmentTests {
 
             #if DEBUG
             await settle(window, hosting, until: {
-                CompareGeometry.frames[.toolbarLead] != nil
-                    && CompareGeometry.frames[.anchorCard] != nil
-                    && CompareGeometry.frames[.offerCard] != nil
+                compare.frames[.toolbarLead] != nil
+                    && compare.frames[.anchorCard] != nil
+                    && compare.frames[.offerCard] != nil
             })
-            let toolbar = try #require(CompareGeometry.frames[.toolbarLead], "the toolbar reported")
-            let anchorCard = try #require(CompareGeometry.frames[.anchorCard], "the anchor card reported")
-            let offer = try #require(CompareGeometry.frames[.offerCard], "the offer card reported")
+            let toolbar = try #require(compare.frames[.toolbarLead], "the toolbar reported")
+            let anchorCard = try #require(compare.frames[.anchorCard], "the anchor card reported")
+            let offer = try #require(compare.frames[.offerCard], "the offer card reported")
             #expect(abs(toolbar.minX - anchorCard.minX) <= 1,
                     "the toolbar (\(toolbar.minX)) and the header cards (\(anchorCard.minX)) share one left edge")
             #expect(abs(offer.minX - anchorCard.minX) <= 1,
                     "the offer cards (\(offer.minX)) lead at the same edge, never centered")
-            #expect(CompareGeometry.frames[.addNote] == nil,
+            #expect(compare.frames[.addNote] == nil,
                     "no add door while an empty slot stands — the dashed slot is the door")
 
             // A peer opens: the add door appears at the strip's END, at the
@@ -324,14 +327,14 @@ struct CompareLensesAlignmentTests {
             model.setPeer(slotID: model.peerSlots[0].id, postID: world.twin)
             try await adoptFresh(model, db, anchor: world.anchor, peers: [world.twin])
             await settle(window, hosting, until: {
-                CompareGeometry.frames[.addNote] != nil
-                    && CompareGeometry.frames[.peerCard(0)] != nil
-                    && CompareGeometry.frames[.anchorCard] != nil
+                compare.frames[.addNote] != nil
+                    && compare.frames[.peerCard(0)] != nil
+                    && compare.frames[.anchorCard] != nil
             })
-            let board = try #require(CompareGeometry.frames[.board], "the board reported its bounds")
-            let addNote = try #require(CompareGeometry.frames[.addNote], "the add door reported")
-            let peerCard = try #require(CompareGeometry.frames[.peerCard(0)], "the peer card reported")
-            let anchorAgain = try #require(CompareGeometry.frames[.anchorCard])
+            let board = try #require(compare.frames[.board], "the board reported its bounds")
+            let addNote = try #require(compare.frames[.addNote], "the add door reported")
+            let peerCard = try #require(compare.frames[.peerCard(0)], "the peer card reported")
+            let anchorAgain = try #require(compare.frames[.anchorCard])
             #expect(abs(addNote.minY - anchorAgain.minY) <= 1,
                     "the add door's top (\(addNote.minY)) sits on the header cards' top (\(anchorAgain.minY))")
             #expect(addNote.minX >= peerCard.maxX, "…at the strip's end, past the last card")
@@ -366,7 +369,9 @@ struct CompareLensesAlignmentTests {
             }
 
             #if DEBUG
-            LensesGeometry.reset()
+            // Row 50: this pin's OWN board (see the compare arms above).
+            let lenses = LensesGeometry.reader(session.debugProbeScope)
+            lenses.reset()
             #endif
             let size = NSSize(width: 1000, height: 700)
             let window = window(size)
@@ -384,12 +389,12 @@ struct CompareLensesAlignmentTests {
             #if DEBUG
             // ONE column: the stub is a header-height door at the strip's end.
             await settle(window, hosting, until: {
-                LensesGeometry.frames[.stub] != nil
-                    && LensesGeometry.frames[.headerCard(0)] != nil
-                    && LensesGeometry.frames[.firstCell] != nil
+                lenses.frames[.stub] != nil
+                    && lenses.frames[.headerCard(0)] != nil
+                    && lenses.frames[.firstCell] != nil
             })
-            let stub = try #require(LensesGeometry.frames[.stub], "the ＋ column door reported")
-            let header = try #require(LensesGeometry.frames[.headerCard(0)], "the header card reported")
+            let stub = try #require(lenses.frames[.stub], "the ＋ column door reported")
+            let header = try #require(lenses.frames[.headerCard(0)], "the header card reported")
             #expect(abs(stub.minY - header.minY) <= 1,
                     "the door's top (\(stub.minY)) sits on the header card's top (\(header.minY))")
             #expect(stub.height <= header.height + 60,
@@ -401,15 +406,15 @@ struct CompareLensesAlignmentTests {
             // card and the pane DO move and re-report.)
             model.addScratchColumn()
             await settle(window, hosting, until: {
-                LensesGeometry.frames[.toolbarLead] != nil
-                    && LensesGeometry.frames[.headerCard(0)] != nil
-                    && LensesGeometry.frames[.firstCell] != nil
-                    && LensesGeometry.frames[.rowLead] != nil
+                lenses.frames[.toolbarLead] != nil
+                    && lenses.frames[.headerCard(0)] != nil
+                    && lenses.frames[.firstCell] != nil
+                    && lenses.frames[.rowLead] != nil
             })
-            let card = try #require(LensesGeometry.frames[.headerCard(0)], "the first header card reported")
-            let cell = try #require(LensesGeometry.frames[.firstCell], "the first pane reported")
-            let toolbar = try #require(LensesGeometry.frames[.toolbarLead], "the toolbar reported")
-            let rowLead = try #require(LensesGeometry.frames[.rowLead], "the first row's handle reported")
+            let card = try #require(lenses.frames[.headerCard(0)], "the first header card reported")
+            let cell = try #require(lenses.frames[.firstCell], "the first pane reported")
+            let toolbar = try #require(lenses.frames[.toolbarLead], "the toolbar reported")
+            let rowLead = try #require(lenses.frames[.rowLead], "the first row's handle reported")
             #expect(abs(card.minX - cell.minX) <= 1,
                     "the header card (\(card.minX)) sits over its pane (\(cell.minX))")
             #expect(abs(toolbar.minX - rowLead.minX) <= 1,
@@ -435,7 +440,10 @@ extension CompareLensesAlignmentTests {
             try await adoptFresh(model, db, anchor: world.anchor, peers: [world.twin])
 
             #if DEBUG
-            CompareGeometry.reset()
+            // Row 50: this pin's OWN board, named by its own session — a
+            // concurrent suite's mount cannot answer for it.
+            let compare = CompareGeometry.reader(session.debugProbeScope)
+            compare.reset()
             #endif
             let size = NSSize(width: 1000, height: 700)
             let window = window(size)
@@ -452,12 +460,12 @@ extension CompareLensesAlignmentTests {
 
             #if DEBUG
             await settle(window, hosting, until: {
-                CompareGeometry.frames[.anchorCard] != nil
-                    && CompareGeometry.frames[.peerCard(0)] != nil
+                compare.frames[.anchorCard] != nil
+                    && compare.frames[.peerCard(0)] != nil
             })
             await settle(window, hosting, until: { false }, maxTurns: 6)
-            let anchorCard = try #require(CompareGeometry.frames[.anchorCard], "the anchor card reported")
-            let peerCard = try #require(CompareGeometry.frames[.peerCard(0)], "the peer card reported")
+            let anchorCard = try #require(compare.frames[.anchorCard], "the anchor card reported")
+            let peerCard = try #require(compare.frames[.peerCard(0)], "the peer card reported")
             #expect(abs(anchorCard.minY - peerCard.minY) <= 1,
                     "the cards share one top edge: \(anchorCard.minY) vs \(peerCard.minY)")
             #expect(abs(anchorCard.maxY - peerCard.maxY) <= 1,

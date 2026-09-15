@@ -2332,7 +2332,7 @@ alternative proof it ran instead.
 |---|---|
 | the record opened | **DONE** |
 | **item 1** — row 56: the status seam's rename + the single writer | PENDING |
-| **item 2** — row 50: the DEBUG-oracle keying sweep | PENDING |
+| **item 2** — row 50: the DEBUG-oracle keying sweep | **DONE** — all six scoped by the mounting SESSION (a stronger key than the row asked for, and the measurement that forced it is recorded); `TakeCardGeometry` bounded too (row 47's second oracle item); 156 read sites moved with every assertion byte-unchanged; the construction pinned as arithmetic (7 tests) and the 18 reading suites GREEN (78 tests) |
 | **item 3** — row 48: ⌘A in a live take pane (WALK first) | PENDING |
 | **item 4** — row 59: the masthead pin's settle | **DONE** — both fixed turn budgets replaced by an until-clause on the oracle's REPORT COUNT (quiet for 4 consecutive turns, ceiling 200, loud on never-quiet); the row's stated mechanism CORRECTED by measurement (a field-open moves no card on a quiet machine — 0/5, both voices); falsifiability DEMONSTRATED with a synthetic 200-pt overlap that failed loud in 0.73 s. 3/3 isolated green |
 | **item 5** — row 47's PARK half | **DONE** — `park` is `private` to the router's new ONE adoption door (`ShellRouter.adopt`, `RootView.adopt`'s two statements moved onto it); all seven pin calls folded onto that door with their arithmetic byte-unchanged; RULE ONE reworded to what actually holds AND to name the one road the fence cannot reach. 7 tests / 3 suites GREEN |
@@ -2452,6 +2452,86 @@ rules stand.
 **Probes removed.** Both the report probe and the synthetic overlap were reverted; the shipped diff
 is the oracle's counter, its two `didSet`/`record` bumps, `settleMastheadGeometry`, and the two call
 sites.
+
+
+
+## ITEM 2 — ROW 50's DEBUG-ORACLE KEYING SWEEP (six oracles, and a key the row did not ask for)
+
+**The row's remedy, verbatim:** *"key every oracle by its subject's id and give each suite a live
+generator."* The first half shipped. **The second half did not, and the reason is a measurement, not
+a preference.**
+
+**Why the row's own key would not have worked.** The remedy's second half is a property of the
+TEST. Of the ten suites that read these six oracles, **EIGHT mint `.incrementing` uuids** —
+`MastheadLayoutTests`, `MastheadStampTests`, `TakesCardHeightTests`,
+`CompareLensesCorrectionTests`, `ShellChromeTests`, `CurrentBlockContinuityTests`,
+`BlockHistoryHostTests`, `BlocksArrivalMeasureTests` — so every post, block and tag in them is
+`00000000-0000-0000-0000-000000000000` **in every test world at once**, and keying by the subject's
+id would have separated nothing. Flipping those eight to live uuids would move every seeded
+expectation they carry, which is a large behaviour-shaped edit made to serve a DEBUG oracle.
+
+**What shipped instead — the scope is the MOUNTING SESSION, by object identity.**
+`AppSession.debugProbeScope` (DEBUG-only) names a world two live sessions cannot share whatever the
+uuid dependency says, and **a pin always holds its own session**. Per-subject keys ride UNDER it, so
+a mount holding several of a thing (tag cards, per-note stamps, workbench rows) still says which one
+it means. This is strictly stronger than the row's key and needs no test flipped.
+
+**It travels by ENVIRONMENT, and that is what made the sweep cheap** — the one design decision worth
+a reviewer's eye. `TakeCardFrame` is a generic value view with **no session and dozens of
+construction sites**; threading a scope argument to each would have been a refactor of shipped view
+code in service of a DEBUG oracle. Instead each surface sets the scope once at its own root
+(`.debugProbeScope(session)`, a no-op outside DEBUG) and every probe under it reads
+`@Environment(\.debugProbeScope)`. The probes became `ViewModifier`s for exactly that reason — a
+bare `onGeometryChange` in a `View` extension cannot read the environment.
+
+**A surface that forgets is LOUD, not silent.** Its reports land under `unscoped`, which no pin
+reads, so the pin goes red instead of quietly reading a stranger's rectangle. That is the direction
+this defect class should fail in, and it caught two of my own mistakes during the build (below).
+
+**The six, and what each got:**
+
+| oracle | before | after |
+|---|---|---|
+| `MastheadGeometry` | 12 process-global fields; `cardFrames` keyed by TAG id, `stampFrames` by note id — both `.incrementing` | one `World` per scope; the two subject keys ride under it; row 59's `reports` counter per scope too |
+| `TakeCardGeometry` | ONE append-only array for every board in the process, pruned by two `reset()` calls in one suite | per scope, and **BOUNDED at 512, oldest out** — row 47's second oracle-hygiene item, taken here because this row's enumeration names the oracle |
+| `CompareGeometry` | one `[Slot: CGRect]` | one per scope |
+| `LensesGeometry` | one `[Slot: CGRect]` | one per scope |
+| `SidebarGeometry`'s older four | `openRowHeight` global; the three frame maps keyed by a TITLE **every window shares** (`"this note"`, the Open header) | one `HeaderWorld` per scope, the title under it — and `resetHeaders()`, a whole-oracle wipe that could clear a frame another suite was polling for, is now per scope |
+| `BlocksWorkbenchOracle` | 4 globals, `rowFrames` by block id | one `World` per scope |
+
+**The read sites: ~156, and every ASSERTION is byte-unchanged.** Each oracle exposes a
+`Reader(scope:)` whose members carry the pre-sweep names, so a test's edit is one `let` and a prefix
+substitution (`MastheadGeometry.titleFrame` → `oracle.titleFrame`). That is the 3C parity pattern
+applied to a harness: the address moved, not the claim. Test-side WRITES (`titleFrame = nil`,
+`resetRowTwo()`, `resetHeaders()`) became named doors on the reader, which is how the whole-oracle
+wipe stopped being expressible.
+
+**TWO REAL BUGS THE LOUD-FAILURE DESIGN CAUGHT, recorded because they are what a reviewer should
+look for in this diff:**
+
+1. **`CompareGeometry.frames[.board] → nil`.** `.board`'s probe was applied to the board view
+   ABOVE `.debugProbeScope`, and an environment set below a modifier does not reach it. Fixed by
+   putting the scope above the probe, with the reason at the line. Every other surface was
+   re-checked for the same ordering.
+2. **`TakeCardGeometry.tallest(.card) → nil` on the real stack board.** My first cut moved the
+   pin's `reset()` INSIDE the mount closure, which wiped the reports the mount had already made —
+   and on a board that is not moving, nothing re-reports. The reset moved into `withBoard`, BEFORE
+   the mount, with the reason written at the line.
+
+**PROOF.** (a) **The construction, as arithmetic:** `DebugOracleScopingTests` — 7 tests, one per
+oracle plus the session property, asserting that two scopes are two worlds *under identical subject
+ids*, that a neighbour's reset is not ours, that a neighbour's layout never moves row 59's settle,
+that the take-card list is bounded and drops the OLDEST, and that two live sessions name two scopes.
+**7/7 green.** (b) **The behaviour is unchanged:** the eighteen suites that read these oracles ran
+**78 tests / 18 suites GREEN** (40.1 s), assertions unmodified. (c) **There is no red-on-old and
+there could not be** — the defect is two SUITES racing, which a pin inside one suite cannot stage,
+and before the sweep the oracles had no scope to name, so the claim could not be written down. The
+file's own header says this rather than implying a stronger proof than exists.
+
+**NOT TAKEN, deliberately:** `ShellRouter.blockNamingDoor` — row 47's other oracle-hygiene item, and
+the brief fences that row's oracle items to 13u4; it is not in row 50's enumeration either.
+`PostDetailOracle`'s own statics were left as the 18h ladder's R1-14 keyed them (by note), except
+`resetStamp`, which gained the scope it needs to reach `MastheadGeometry.forgetStamp`.
 
 
 ---

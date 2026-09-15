@@ -162,6 +162,12 @@ struct TakesCardHeightTests {
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: seed))
         } operation: { @MainActor in
             let session = AppSession(database: db)
+            #if DEBUG
+            // Row 50: this mount's OWN card reports, cleared BEFORE the
+            // mount so a stale one cannot satisfy a pin and a fresh one is
+            // never wiped.
+            TakeCardGeometry.reader(session.debugProbeScope).reset()
+            #endif
             let fixture = try makeFixture(
                 session: session, style: style, takes: takes, paragraphs: paragraphs,
                 text: text)
@@ -591,7 +597,11 @@ struct TakesCardHeightTests {
     /// the component itself, and because a future card composition that
     /// never reaches a board still owes it.
     @Test func theChosenBarRunsTheWholeHeightOfALongCard() async throws {
-        TakeCardGeometry.reset()
+        // Row 50: a COMPONENT mount has no session, so it names its own
+        // world — a live uuid, which no concurrent suite can mint.
+        let scope = UUID().uuidString
+        let cards = TakeCardGeometry.reader(scope)
+        cards.reset()
         let text = (1...40).map {
             "Line \($0) of an honest take that keeps flowing along the measure and wraps."
         }.joined(separator: "\n")
@@ -605,6 +615,7 @@ struct TakesCardHeightTests {
                     }
                 }
                 .frame(width: 420)
+                .debugProbeScope(scope)
             })
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 460, height: 1600),
@@ -614,8 +625,8 @@ struct TakesCardHeightTests {
         defer { window.contentViewController = nil }
         await settle(window, host.view, until: { false }, maxTurns: 10)
 
-        let card = try #require(TakeCardGeometry.tallest(.card))
-        let bar = try #require(TakeCardGeometry.tallest(.chosenBar))
+        let card = try #require(cards.tallest(.card))
+        let bar = try #require(cards.tallest(.chosenBar))
         #expect(card.height > 600,
                 "non-vacuity: a forty-line take really does make a tall card (\(card.height))")
         #expect(abs(bar.height - card.height) < 1,
@@ -631,11 +642,15 @@ struct TakesCardHeightTests {
     /// height arrives over several publishes while the card is already laid
     /// out, which is the state her screenshot caught.
     @Test func theChosenBarRunsTheWholeCardOnTheRealStackBoard() async throws {
-        TakeCardGeometry.reset()
-        try await withBoard(style: .stack, takes: 2, paragraphs: 14) { hosting, window, _, _ in
+        try await withBoard(style: .stack, takes: 2, paragraphs: 14) { hosting, window, model, _ in
+            // Row 50: this pin's OWN board, named by its own session. The
+            // RESET lives in `withBoard`, before the mount — resetting here
+            // would wipe the reports the mount already made, and on a board
+            // that is not moving nothing re-reports.
+            let cards = TakeCardGeometry.reader(model.session.debugProbeScope)
             await settle(window, hosting, until: { false }, maxTurns: 12)
-            let card = try #require(TakeCardGeometry.tallest(.card))
-            let bar = try #require(TakeCardGeometry.tallest(.chosenBar))
+            let card = try #require(cards.tallest(.card))
+            let bar = try #require(cards.tallest(.chosenBar))
             #expect(card.height > 400,
                     "non-vacuity: the stack board really drew a tall card (\(card.height))")
             // Compared as MAXIMA: a board draws several cards and the

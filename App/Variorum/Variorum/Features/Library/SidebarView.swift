@@ -369,7 +369,7 @@ struct SidebarView: View {
             .lineLimit(1)
             #if DEBUG
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                SidebarGeometry.headerTextFrames[title] = $0
+                SidebarGeometry.recordHeaderText(title, $0, in: session.debugProbeScope)
             }
             #endif
             .padding(.horizontal, Self.rowPadding)
@@ -595,7 +595,8 @@ struct SidebarView: View {
                             // what the header above it must sit on.
                             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
                                 if m == PostDetailView.Mode.allCases.first {
-                                    SidebarGeometry.firstRowContentFrames["this note"] = $0
+                                    SidebarGeometry.recordFirstRowContent(
+                                        "this note", $0, in: session.debugProbeScope)
                                 }
                             }
                             #endif
@@ -603,7 +604,8 @@ struct SidebarView: View {
                         #if DEBUG
                         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { box in
                             if m == PostDetailView.Mode.allCases.first {
-                                SidebarGeometry.firstRowBoxFrames["this note"] = box
+                                SidebarGeometry.recordFirstRowBox(
+                                    "this note", box, in: session.debugProbeScope)
                             }
                         }
                         #endif
@@ -725,19 +727,20 @@ struct SidebarView: View {
             // "Open" header above it must sit on.
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
                 if ordinal == 1 {
-                    SidebarGeometry.firstRowContentFrames[
-                        WorkspaceNaming.openSectionHeader] = $0
+                    SidebarGeometry.recordFirstRowContent(
+                        WorkspaceNaming.openSectionHeader, $0, in: session.debugProbeScope)
                 }
             }
             #endif
         }
         #if DEBUG
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
-            SidebarGeometry.openRowHeight = height
+            SidebarGeometry.recordOpenRowHeight(height, in: session.debugProbeScope)
         }
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { box in
             if ordinal == 1 {
-                SidebarGeometry.firstRowBoxFrames[WorkspaceNaming.openSectionHeader] = box
+                SidebarGeometry.recordFirstRowBox(
+                    WorkspaceNaming.openSectionHeader, box, in: session.debugProbeScope)
             }
         }
         #endif
@@ -778,7 +781,63 @@ struct SidebarView: View {
 /// the view might not consult.
 @MainActor
 enum SidebarGeometry {
-    static var openRowHeight: CGFloat?
+    /// **THE HEADER ORACLES, SCOPED BY THEIR HOST** (13u2 UNIT E —
+    /// KnownIssues row 50; the `resetHeaders` doc below named this exact
+    /// remedy and this is it). These four are keyed by a TITLE every window
+    /// shares — `"this note"`, the Open header, each group's words — so
+    /// before the sweep a concurrent suite's mounted column answered this
+    /// pin's question, and its `resetHeaders()` could wipe a frame another
+    /// suite was polling for. The host's scope sits ABOVE the title now, so
+    /// neither can happen; a pin reads its own session's.
+    private struct HeaderWorld {
+        var openRowHeight: CGFloat?
+        var headerTextFrames: [String: CGRect] = [:]
+        var firstRowContentFrames: [String: CGRect] = [:]
+        var firstRowBoxFrames: [String: CGRect] = [:]
+    }
+
+    private static var headerWorlds: [String: HeaderWorld] = [:]
+
+    static func recordOpenRowHeight(_ height: CGFloat, in scope: String) {
+        headerWorlds[scope, default: HeaderWorld()].openRowHeight = height
+    }
+
+    static func recordHeaderText(_ title: String, _ frame: CGRect, in scope: String) {
+        headerWorlds[scope, default: HeaderWorld()].headerTextFrames[title] = frame
+    }
+
+    static func recordFirstRowContent(_ title: String, _ frame: CGRect, in scope: String) {
+        headerWorlds[scope, default: HeaderWorld()].firstRowContentFrames[title] = frame
+    }
+
+    static func recordFirstRowBox(_ title: String, _ frame: CGRect, in scope: String) {
+        headerWorlds[scope, default: HeaderWorld()].firstRowBoxFrames[title] = frame
+    }
+
+    /// A pin's OWN column — every read below is this session's mount.
+    @MainActor
+    struct HeaderReader {
+        let scope: String
+
+        var openRowHeight: CGFloat? { SidebarGeometry.headerWorlds[scope]?.openRowHeight }
+        var headerTextFrames: [String: CGRect] {
+            SidebarGeometry.headerWorlds[scope]?.headerTextFrames ?? [:]
+        }
+        var firstRowContentFrames: [String: CGRect] {
+            SidebarGeometry.headerWorlds[scope]?.firstRowContentFrames ?? [:]
+        }
+        var firstRowBoxFrames: [String: CGRect] {
+            SidebarGeometry.headerWorlds[scope]?.firstRowBoxFrames ?? [:]
+        }
+
+        /// A pin resets before its mount — ITS OWN scope and no other, which
+        /// is what the round-end Fable pass's MINOR-2 learned about
+        /// whole-oracle wipes and what the shared TITLE key made impossible
+        /// until the scope went above it.
+        func resetHeaders() { SidebarGeometry.headerWorlds[scope] = nil }
+    }
+
+    static func headers(_ scope: String) -> HeaderReader { HeaderReader(scope: scope) }
     /// KEPT AND PUBLISHED for 18d batch 1, which puts a note BOX where the
     /// rail stands, at the rail's height — the header rule this batch settles
     /// (row 13) is the one that box inherits. **Keyed by the note the rail
@@ -817,9 +876,6 @@ enum SidebarGeometry {
     /// first row's content edge and box under it — "the header sits on its
     /// rows' text edge, with air before the first wash" is a claim about
     /// rectangles, keyed by the header's own title.
-    static var headerTextFrames: [String: CGRect] = [:]
-    static var firstRowContentFrames: [String: CGRect] = [:]
-    static var firstRowBoxFrames: [String: CGRect] = [:]
 
     /// **The round-end Fable pass, MAJOR-1:** how many times a column's
     /// `body` has been evaluated, keyed by the workspace it renders — so a
@@ -868,20 +924,10 @@ enum SidebarGeometry {
         noteBoxWhereLines[subject] = nil
     }
 
-    /// The HEADER oracles — keyed by a TITLE every window shares
-    /// (`"this note"`, the Open header, each group's words), so this is
-    /// still a whole wipe of those three, and it stays one: the KEY is the
-    /// shared thing, and a shared key cannot be scoped by its callers. That
-    /// residue is KnownIssues row 53's shape (`SidebarGeometry`'s older
-    /// fields — 13u2's sweep keys them by host); until then a suite that
-    /// calls this can wipe a header frame another suite is polling for. The
-    /// box's subject-keyed statics LEFT this door at the round-end Fable
-    /// pass's round 2 (MINOR-2): they have `forgetBox(subject:)`, and the
-    /// name describes the body again.
-    static func resetHeaders() {
-        headerTextFrames = [:]
-        firstRowContentFrames = [:]
-        firstRowBoxFrames = [:]
-    }
+    // (`resetHeaders()` RETIRED at 13u2 UNIT E — the whole-oracle wipe it
+    //  was is now `HeaderReader.resetHeaders()`, which clears one scope. The
+    //  door the round-end Fable pass's MINOR-2 removed from the box's
+    //  statics is removed from these four the same way, and for the same
+    //  reason: a suite must not be able to wipe what another is polling.)
 }
 #endif

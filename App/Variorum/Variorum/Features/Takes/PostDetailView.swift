@@ -340,12 +340,17 @@ struct PostDetailView: View {
             .padding(.bottom, 8)
             .background(tokens.surface)
             .coordinateSpace(name: Self.mastheadSpace)
+            // Row 50: every masthead probe under here — the chip, the tag
+            // cards, the open field, the ＃ door, the stamp — reports into
+            // THIS session's scope, so a concurrent suite's masthead cannot
+            // answer a pin's question.
+            .debugProbeScope(session)
             // The inline tag field's suggestion list hangs below the
             // masthead's bottom edge; the masthead draws above the page.
             .zIndex(1)
             #if DEBUG
             .onGeometryChange(for: CGFloat.self) { $0.size.width / 2 } action: {
-                MastheadGeometry.contentMidX = $0
+                MastheadGeometry.recordContentMidX($0, in: session.debugProbeScope)
             }
             #endif
             Divider().overlay(tokens.line)
@@ -637,8 +642,7 @@ struct PostDetailView: View {
                 .onGeometryChange(for: CGRect.self) {
                     $0.frame(in: .named(PostDetailView.mastheadSpace))
                 } action: {
-                    MastheadGeometry.titleMidX = $0.midX
-                    MastheadGeometry.titleFrame = $0
+                    MastheadGeometry.recordTitle($0, in: session.debugProbeScope)
                 }
                 #endif
                 .overlay(alignment: .leading) { face }
@@ -681,7 +685,10 @@ struct PostDetailView: View {
                             // the question the oracle can actually answer,
                             // and the VISUAL half is the walk's (item 13's
                             // capture).
-                            .onAppear { MastheadGeometry.titleOpenMarkAppearances += 1 }
+                            .onAppear {
+                                MastheadGeometry.noteTitleOpenMark(
+                                    in: session.debugProbeScope)
+                            }
                             #endif
                     }
                 }
@@ -717,7 +724,7 @@ struct PostDetailView: View {
                         .onGeometryChange(for: CGRect.self) {
                             $0.frame(in: .named(PostDetailView.mastheadSpace))
                         } action: {
-                            MastheadGeometry.titleFieldFrame = $0
+                            MastheadGeometry.recordTitleField($0, in: session.debugProbeScope)
                         }
                         #endif
                         .task { fieldFocused = true }
@@ -733,7 +740,7 @@ struct PostDetailView: View {
                         .onGeometryChange(for: CGRect.self) {
                             $0.frame(in: .named(PostDetailView.mastheadSpace))
                         } action: {
-                            MastheadGeometry.titleLabelFrame = $0
+                            MastheadGeometry.recordTitleLabel($0, in: session.debugProbeScope)
                         }
                         #endif
                         // U-8: it LEADS, and fills the band it is given.
@@ -898,6 +905,22 @@ nonisolated enum MastheadTitleInsets {
     }
 }
 
+#if DEBUG
+/// The probe, as a modifier rather than a bare `onGeometryChange`, because it
+/// must READ the environment for its scope (13u2 UNIT E — row 50).
+private struct MastheadGeometryProbe: ViewModifier {
+    let slot: MastheadProbeSlot
+    let space: String
+    @Environment(\.debugProbeScope) private var scope
+
+    func body(content: Content) -> some View {
+        content.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(space))
+        } action: { MastheadGeometry.record(slot, $0, in: scope) }
+    }
+}
+#endif
+
 extension View {
     /// Row 58's DEBUG oracle write: report this view's frame, in the named
     /// coordinate space `space` (the masthead's own), under `slot`. A no-op
@@ -906,9 +929,7 @@ extension View {
     func mastheadGeometryProbe(_ slot: MastheadProbeSlot, in space: String?) -> some View {
         #if DEBUG
         if let space {
-            self.onGeometryChange(for: CGRect.self) {
-                $0.frame(in: .named(space))
-            } action: { MastheadGeometry.record(slot, $0) }
+            self.modifier(MastheadGeometryProbe(slot: slot, space: space))
         } else {
             self
         }
@@ -965,14 +986,14 @@ enum PostDetailOracle {
     /// time, and the staleness the keying closed came back in the other
     /// direction — a later pin that forgot to reset could be answered by an
     /// earlier mount's words).
-    static func resetStamp(_ postID: String) {
+    static func resetStamp(_ postID: String, in scope: String) {
         stampShown[postID] = nil
         stampEditedAt[postID] = nil
         flipStamp[postID] = nil
         // …and the GEOMETRY oracle clears its own row (the ladder's R3-10):
         // one call site for a pin, but neither oracle reaches into the
         // other's storage.
-        MastheadGeometry.forgetStamp(postID)
+        MastheadGeometry.forgetStamp(postID, in: scope)
     }
 }
 
@@ -984,111 +1005,174 @@ enum PostDetailOracle {
 /// open field — so a pin asserts "these never intersect" as rectangles.
 @MainActor
 enum MastheadGeometry {
-    static var titleMidX: CGFloat?
-    static var contentMidX: CGFloat?
-    static var pathChipFrame: CGRect?
-    static var cardFrames: [String: CGRect] = [:]
-    static var fieldFrame: CGRect?
-    /// Row 80: the title TEXT's frame and the icon row's, both in the
-    /// masthead's space — "the title never runs under the icons" is a
-    /// claim about two rectangles.
-    static var titleFrame: CGRect? {
-        // 13u2 UNIT E (KnownIssues row 59): the title's band is read in the
-        // same breath as row two's rectangles, so its report counts as one
-        // of them.
-        didSet { reports &+= 1 }
+    /// **SCOPED BY THE MOUNTING SESSION** (13u2 UNIT E — KnownIssues row 50).
+    /// Swift Testing runs SUITES IN PARALLEL, so a process-global static here
+    /// let another suite's mounted masthead answer this pin's question — a
+    /// green pin that proved nothing. The scope travels by environment
+    /// (`DebugProbeScope.swift`); a pin reads its own session's. The
+    /// per-subject keys (tag cards, per-note stamps) ride UNDER it, so a
+    /// mount holding several of a thing still says which one it means.
+    private struct World {
+        var titleMidX: CGFloat?
+        var contentMidX: CGFloat?
+        var pathChipFrame: CGRect?
+        var cardFrames: [String: CGRect] = [:]
+        var fieldFrame: CGRect?
+        /// Row 80: the title TEXT's frame and the icon row's, both in the
+        /// masthead's space — "the title never runs under the icons" is a
+        /// claim about two rectangles.
+        var titleFrame: CGRect?
+        /// Row 12 (17o batch d): the EDITING face's frame, in the same space
+        /// — "the placeholder shifts upwards when you click the title" is a
+        /// claim about two rectangles, exactly as row 80's is.
+        var titleFieldFrame: CGRect?
+        /// …and the RESTING face's, so row 12 compares like with like.
+        var titleLabelFrame: CGRect?
+        /// **Act 10 row 93 (13u2 UNIT D):** whether the OPEN MARK under the
+        /// title band is drawn. "A click on a nameless note's title looks
+        /// like nothing happened" is a claim about whether ANYTHING is drawn,
+        /// so the oracle COUNTS APPEARANCES; the mark's look is the walk's
+        /// evidence.
+        ///
+        /// Appearances rather than presence, and the reason is measured:
+        /// under the mounted harness the rename field opens and then closes
+        /// again on its own (the hosted `TextField` never holds the key
+        /// window's focus, so `onChange(of: fieldFocused)` commits and closes
+        /// it). A presence flag therefore read FALSE by the time a pin could
+        /// look — while the frame oracles beside it kept their last values
+        /// and read as though the field were still open. A monotonic count
+        /// says the true thing: the mark WAS drawn when the field opened.
+        var titleOpenMarkAppearances = 0
+        var iconRowFrame: CGRect?
+        /// Row 59: the ＃ door's frame — its hit target.
+        var doorFrame: CGRect?
+        /// 18h batch 1: the time stamp's frame, so "it sits at the row's
+        /// trailing end and covers nothing" is a claim about rectangles —
+        /// **per note** since the ladder's R1-14.
+        var stampFrames: [String: CGRect] = [:]
+        /// **A MONOTONIC COUNT OF EVERY MASTHEAD GEOMETRY REPORT** (13u2
+        /// UNIT E — KnownIssues row 59's fix).
+        ///
+        /// The flake it exists to end: a pin opened the tag field, waited for
+        /// the FIELD's frame, then pumped a fixed number of run-loop turns
+        /// and read the row's rectangles — which, under full-suite load, were
+        /// not all from the same layout pass. The comparison grazed by
+        /// ~1.5 pt and the app was right in both voices.
+        ///
+        /// A count makes the honest predicate expressible: *the masthead's
+        /// geometry has stopped moving*, so every rectangle a pin then reads
+        /// comes from ONE layout state. It is falsifiable in the way a blind
+        /// pump is not — a real overlap survives quiescence and fails loudly,
+        /// and a masthead that never goes quiet fails with its own sentence
+        /// instead of silently handing over stale frames.
+        ///
+        /// `&+` because it is a tripwire, not an arithmetic fact: a DEBUG
+        /// process that somehow reported `Int.max` times should wrap, never
+        /// trap.
+        var reports = 0
     }
 
-    /// **A MONOTONIC COUNT OF EVERY MASTHEAD GEOMETRY REPORT** (13u2 UNIT E
-    /// — KnownIssues row 59's fix).
-    ///
-    /// The flake it exists to end: a pin opened the tag field, waited for the
-    /// FIELD's frame, then pumped a fixed number of run-loop turns and read
-    /// the CARD frames — which, under full-suite load, were still the ones
-    /// from before the open. The field was compared against a layout state
-    /// that no longer existed, and the comparison grazed by ~1.5 pt. The app
-    /// was right in both voices; the pin was reading two different moments.
-    ///
-    /// A count makes the honest predicate expressible: *the masthead's
-    /// geometry has stopped moving*, so every rectangle a pin then reads
-    /// comes from ONE layout state. It is falsifiable in the way a blind pump
-    /// is not — a real overlap survives quiescence and fails loudly, and a
-    /// masthead that never goes quiet fails with its own sentence instead of
-    /// silently handing over stale frames.
-    ///
-    /// `&+` because it is a tripwire, not an arithmetic fact: a DEBUG process
-    /// that somehow reported `Int.max` times should wrap, never trap.
-    private(set) static var reports = 0
-    /// Row 12 (17o batch d): the EDITING face's frame, in the same space —
-    /// "the placeholder shifts upwards when you click the title" is a claim
-    /// about two rectangles, exactly as row 80's is.
-    static var titleFieldFrame: CGRect?
-    /// …and the RESTING face's, so row 12 compares like with like.
-    static var titleLabelFrame: CGRect?
-    /// **Act 10 row 93 (13u2 UNIT D):** whether the OPEN MARK under the
-    /// title band is drawn. "A click on a nameless note's title looks like
-    /// nothing happened" is a claim about whether ANYTHING is drawn, so the
-    /// oracle COUNTS APPEARANCES; the mark's look is the walk's evidence.
-    ///
-    /// Appearances rather than presence, and the reason is measured: under
-    /// the mounted harness the rename field opens and then closes again on
-    /// its own (the hosted `TextField` never holds the key window's focus,
-    /// so `onChange(of: fieldFocused)` commits and closes it). A presence
-    /// flag therefore read FALSE by the time a pin could look — while the
-    /// frame oracles beside it kept their last values and read as though the
-    /// field were still open. A monotonic count says the true thing: the
-    /// mark WAS drawn when the field opened.
-    static var titleOpenMarkAppearances = 0
-    static var iconRowFrame: CGRect?
-    /// Row 59: the ＃ door's frame — its hit target.
-    static var doorFrame: CGRect?
-    /// 18h batch 1: the time stamp's frame, so "it sits at the row's
-    /// trailing end and covers nothing" is a claim about rectangles — **per
-    /// note** since the ladder's R1-14.
-    static var stampFrames: [String: CGRect] = [:]
+    private static var worlds: [String: World] = [:]
 
-    /// The one-window read, for a pin that mounted exactly one detail.
-    static var stampFrame: CGRect? { stampFrames.values.first }
+    // MARK: - The writes (each one bumps `reports`, so quiescence is readable)
+
+    static func record(_ slot: MastheadProbeSlot, _ frame: CGRect, in scope: String) {
+        worlds[scope, default: World()].reports &+= 1
+        switch slot {
+        case .pathChip: worlds[scope]?.pathChipFrame = frame
+        case .card(let id): worlds[scope]?.cardFrames[id] = frame
+        case .field: worlds[scope]?.fieldFrame = frame
+        case .iconRow: worlds[scope]?.iconRowFrame = frame
+        case .door: worlds[scope]?.doorFrame = frame
+        case .stamp(let postID): worlds[scope]?.stampFrames[postID] = frame
+        }
+    }
+
+    static func recordTitle(_ frame: CGRect, in scope: String) {
+        worlds[scope, default: World()].reports &+= 1
+        worlds[scope]?.titleMidX = frame.midX
+        worlds[scope]?.titleFrame = frame
+    }
+
+    static func recordContentMidX(_ midX: CGFloat, in scope: String) {
+        worlds[scope, default: World()].contentMidX = midX
+    }
+
+    static func recordTitleField(_ frame: CGRect, in scope: String) {
+        worlds[scope, default: World()].titleFieldFrame = frame
+    }
+
+    static func recordTitleLabel(_ frame: CGRect, in scope: String) {
+        worlds[scope, default: World()].titleLabelFrame = frame
+    }
+
+    static func noteTitleOpenMark(in scope: String) {
+        worlds[scope, default: World()].titleOpenMarkAppearances += 1
+    }
 
     /// Forget ONE note's stamp frame — this oracle's own door, called by
     /// `PostDetailOracle.resetStamp` when a masthead's note goes away (the
     /// 18h ladder's R3-10: that function used to assign into `stampFrames`
     /// directly, so one oracle owned another's storage lifetime).
-    static func forgetStamp(_ postID: String) { stampFrames[postID] = nil }
+    static func forgetStamp(_ postID: String, in scope: String) {
+        worlds[scope]?.stampFrames[postID] = nil
+    }
 
-    static func record(_ slot: MastheadProbeSlot, _ frame: CGRect) {
-        // Row 59: ONE bump for every row-two slot, because `record` is the
-        // one door they all arrive through. `onGeometryChange` is already
-        // change-gated, so a report here is a real move.
-        reports &+= 1
-        switch slot {
-        case .pathChip: pathChipFrame = frame
-        case .card(let id): cardFrames[id] = frame
-        case .field: fieldFrame = frame
-        case .iconRow: iconRowFrame = frame
-        case .door: doorFrame = frame
-        case .stamp(let postID): stampFrames[postID] = frame
+    // MARK: - The reads
+
+    /// A pin's OWN masthead — every read below is this session's mount.
+    @MainActor
+    struct Reader {
+        let scope: String
+
+        var titleMidX: CGFloat? { MastheadGeometry.worlds[scope]?.titleMidX }
+        var contentMidX: CGFloat? { MastheadGeometry.worlds[scope]?.contentMidX }
+        var pathChipFrame: CGRect? { MastheadGeometry.worlds[scope]?.pathChipFrame }
+        var cardFrames: [String: CGRect] { MastheadGeometry.worlds[scope]?.cardFrames ?? [:] }
+        var fieldFrame: CGRect? { MastheadGeometry.worlds[scope]?.fieldFrame }
+        var titleFrame: CGRect? { MastheadGeometry.worlds[scope]?.titleFrame }
+        var titleFieldFrame: CGRect? { MastheadGeometry.worlds[scope]?.titleFieldFrame }
+        var titleLabelFrame: CGRect? { MastheadGeometry.worlds[scope]?.titleLabelFrame }
+        var titleOpenMarkAppearances: Int {
+            MastheadGeometry.worlds[scope]?.titleOpenMarkAppearances ?? 0
+        }
+        var iconRowFrame: CGRect? { MastheadGeometry.worlds[scope]?.iconRowFrame }
+        var doorFrame: CGRect? { MastheadGeometry.worlds[scope]?.doorFrame }
+        var stampFrames: [String: CGRect] { MastheadGeometry.worlds[scope]?.stampFrames ?? [:] }
+        var reports: Int { MastheadGeometry.worlds[scope]?.reports ?? 0 }
+
+        /// The one-window read, for a pin that mounted exactly one detail.
+        var stampFrame: CGRect? { stampFrames.values.first }
+
+        /// A pin resets the second row's frames before its mount, so a stale
+        /// report from an earlier mount can never satisfy it — ITS OWN scope
+        /// and no other.
+        func resetRowTwo() {
+            MastheadGeometry.worlds[scope]?.pathChipFrame = nil
+            MastheadGeometry.worlds[scope]?.cardFrames = [:]
+            MastheadGeometry.worlds[scope]?.fieldFrame = nil
+            MastheadGeometry.worlds[scope]?.doorFrame = nil
+            MastheadGeometry.worlds[scope]?.stampFrames = [:]
+        }
+
+        /// Row 80's pin resets the title row's frames the same way.
+        func resetTitleRow() {
+            MastheadGeometry.worlds[scope]?.titleMidX = nil
+            MastheadGeometry.worlds[scope]?.titleFrame = nil
+            MastheadGeometry.worlds[scope]?.titleFieldFrame = nil
+            MastheadGeometry.worlds[scope]?.titleLabelFrame = nil
+            MastheadGeometry.worlds[scope]?.titleOpenMarkAppearances = 0
+            MastheadGeometry.worlds[scope]?.iconRowFrame = nil
+        }
+
+        /// Row 12's pin clears the two TITLE FACE frames alone, so the
+        /// editing face's arrival is a fact rather than a leftover.
+        func forgetTitleFaces() {
+            MastheadGeometry.worlds[scope]?.titleFrame = nil
+            MastheadGeometry.worlds[scope]?.titleFieldFrame = nil
         }
     }
 
-    /// A pin resets the second row's frames before its mount, so a stale
-    /// report from an earlier mount can never satisfy it.
-    static func resetRowTwo() {
-        pathChipFrame = nil
-        cardFrames = [:]
-        fieldFrame = nil
-        doorFrame = nil
-        stampFrames = [:]
-    }
-
-    /// Row 80's pin resets the title row's frames the same way.
-    static func resetTitleRow() {
-        titleMidX = nil
-        titleFrame = nil
-        titleFieldFrame = nil
-        titleLabelFrame = nil
-        titleOpenMarkAppearances = 0
-        iconRowFrame = nil
-    }
+    static func reader(_ scope: String) -> Reader { Reader(scope: scope) }
 }
 #endif

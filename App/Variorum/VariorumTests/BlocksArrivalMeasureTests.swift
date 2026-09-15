@@ -58,7 +58,9 @@ struct BlocksArrivalMeasureTests {
                     in: post.id, text: "Block \(i): a sentence of the story, long enough to read as prose.")
             }
             #if DEBUG
-            BlocksWorkbenchOracle.reset()
+            // Row 50: this pin's OWN workbench, named by its own session.
+            let workbench = BlocksWorkbenchOracle.reader(session.debugProbeScope)
+            workbench.reset()
             #endif
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: 1200, height: 800),
@@ -77,14 +79,14 @@ struct BlocksArrivalMeasureTests {
             window.makeKeyAndOrderFront(nil)
             #if DEBUG
             let deadline = Date().addingTimeInterval(6)
-            while Date() < deadline, BlocksWorkbenchOracle.firstRowPaintedAt == nil {
+            while Date() < deadline, workbench.firstRowPaintedAt == nil {
                 hosting.layoutSubtreeIfNeeded()
                 window.layoutIfNeeded()
                 window.displayIfNeeded()
                 pump(0.005)
                 await Task.yield()
             }
-            let painted = try #require(BlocksWorkbenchOracle.firstRowPaintedAt, "the list painted a row")
+            let painted = try #require(workbench.firstRowPaintedAt, "the list painted a row")
             let elapsed = painted.timeIntervalSince(mountedAt)
             print("[batch-g row 83] Blocks: mount → first painted row in \(elapsed) s (ceiling \(Self.ceiling) s)")
             #expect(elapsed <= Self.ceiling,

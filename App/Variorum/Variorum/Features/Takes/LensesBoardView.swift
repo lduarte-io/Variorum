@@ -147,6 +147,7 @@ struct LensesBoardView: View {
         }
         .background(tokens.surface)
         .coordinateSpace(name: Self.boardSpace)
+        .debugProbeScope(session)
         .task { await model.start() }
         .onAppear {
             model.host = .lenses
@@ -889,18 +890,43 @@ enum LensesProbeSlot: Hashable {
 }
 
 #if DEBUG
+/// **SCOPED BY THE MOUNTING SESSION** (13u2 UNIT E — KnownIssues row 50).
+/// Swift Testing runs SUITES IN PARALLEL, so a process-global static here
+/// lets another suite's mounted board answer this pin's question — a green
+/// pin that proved nothing. The scope travels by environment
+/// (`DebugProbeScope.swift`); a pin reads its own session's.
 @MainActor
 enum LensesGeometry {
-    static var frames: [LensesProbeSlot: CGRect] = [:]
+    private static var worlds: [String: [LensesProbeSlot: CGRect]] = [:]
 
-    static func record(_ slot: LensesProbeSlot, _ frame: CGRect) {
-        frames[slot] = frame
+    static func record(_ slot: LensesProbeSlot, _ frame: CGRect, in scope: String) {
+        worlds[scope, default: [:]][slot] = frame
     }
 
-    /// A pin resets before its mount, so a stale report from an earlier
-    /// mount can never satisfy it.
-    static func reset() {
-        frames = [:]
+    /// A pin's OWN board — every read below is this session's mount.
+    @MainActor
+    struct Reader {
+        let scope: String
+
+        var frames: [LensesProbeSlot: CGRect] { LensesGeometry.worlds[scope] ?? [:] }
+
+        /// A pin resets before its mount — its OWN scope and no other.
+        func reset() { LensesGeometry.worlds[scope] = nil }
+    }
+
+    static func reader(_ scope: String) -> Reader { Reader(scope: scope) }
+}
+
+/// The probe, as a modifier rather than a bare `onGeometryChange`, because it
+/// must READ the environment for its scope.
+private struct LensesGeometryProbe: ViewModifier {
+    let slot: LensesProbeSlot
+    @Environment(\.debugProbeScope) private var scope
+
+    func body(content: Content) -> some View {
+        content.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(LensesBoardView.boardSpace))
+        } action: { LensesGeometry.record(slot, $0, in: scope) }
     }
 }
 #endif
@@ -913,9 +939,7 @@ extension View {
     func lensesGeometryProbe(_ slot: LensesProbeSlot?) -> some View {
         #if DEBUG
         if let slot {
-            self.onGeometryChange(for: CGRect.self) {
-                $0.frame(in: .named(LensesBoardView.boardSpace))
-            } action: { LensesGeometry.record(slot, $0) }
+            self.modifier(LensesGeometryProbe(slot: slot))
         } else {
             self
         }
