@@ -361,7 +361,7 @@ on the standing rails, zero-instance pgrep first, record-instead-of-kill if her 
 | A2 — item 18's successor: preview priming (RULING A-1) | **CLOSED 2026-09-15 — RULING A-2: the priming SHIPS** — item 18's card drift FIXED (red-on-old; no `h=46` on the real book, 3 runs) · the bounded core read MEASURED FLAT · the gate arm ADJUDICATED: hard-bounded at the residual's magnitude + the ≤ 4 aspiration in `withKnownIssue` (the scale-mix residual; unit B re-examines its closed cure beside the shadow fix) · finals: core 1567/171 · Mac 2670/446 GREEN with 1 known issue · iOS green · item 18 field acceptance: **her hands owed** |
 | B — book-Index presentation + shadow editor | **CLOSED 2026-09-15** — item 19's five ruled behaviours BUILT (one of the intended fixes DISMISSED AS HOLLOW, with its evidence) · the double editing ring removed · **KnownIssues row 49's ROUTER half FIXED** (red-on-old + verified in the app) and the row NARROWED to the surviving double realization, which is traced with three causes eliminated · scope 4 RE-EXAMINED: the run-scale split stays CLOSED, its evidence downgraded, the successor's measurement named · 3 PROVISIONALs (QUESTIONS #110) · finals: core **1567/171** · Mac **2682/449** (1 known issue + 1 load-flaky red, recorded with paired numbers, the product road walked clean) · iOS **green** |
 | C — #109 boundary-clamp law | **CLOSED 2026-09-15** — her law BUILT, both shapes, BOTH platforms (the phone got the trim free and shape (i) with three mirrors of the Mac's road) · the family ENUMERATED in an 18-cell sweep table · 10 of 14 behaviour pins RED on the pre-fix tree · `.partialBlockAcrossSeam` retired by SPLITTING into two causes whose roads differ (forced by a finding: the phone has no seam carves — new KnownIssues row) · walked with 11 captures incl. both undo grammars · 1 PROVISIONAL (QUESTIONS #111) · finals: core **1567/171** · Mac **2702/450** (+20 pins; 1 known issue + the load-flaky red, PAIRED-measured as unchanged by this diff) · iOS **green** · mobile cross-block suites **67/6** |
-| D — the singles (+ TRACE 1a, routed by RULING A-1) | NOT-STARTED |
+| D — the singles (+ TRACE 1a, routed by RULING A-1) | **RUNNING 2026-09-15** — the record opened (UNIT D RECORD below); eight items, each traced and dispositioned on its own |
 | E — the mechanical sweeps | NOT-STARTED |
 | LADDER | NOT-STARTED |
 | CLOSEOUT | NOT-STARTED |
@@ -1727,6 +1727,42 @@ unit B's recorded 2-of-9 under load on both, so the axis is ENVIRONMENT (a machi
 deep into an overnight run), not either unit's diff. The KnownIssues row carries the paired
 numbers; owner 12 stands. If the phase-end acceptance walk reproduces any product-side landing
 miss, that verdict re-opens — the walk, not the harness, is the authority on the shipped road.
+
+---
+
+# UNIT D RECORD — THE SINGLES (opened 2026-09-15, `opus-implementer`, the overnight run)
+
+**WHAT THIS UNIT DID NOT DO — the record's first line, per the brief.** *(PENDING — this line is
+written last, when the unit knows what it did not reach. Nothing is claimed here until then.)*
+
+**What it is:** eight independent items, each traced on its own and dispositioned on its own — her
+item **2** (the eager space-eater, BOTH platforms) · item **10** (starred items scroll past ~7) ·
+item **11** (paste without newlines, the rule decided for both platforms) · item **13** (the note
+title's room) + Act 10 ledger row **93** (the nameless note's rename prompt) · **P39a** / **P39b**
+(the cross-feature rule's two real defects, carried verbatim at the file's end) · roster item **8**
+(a VERIFICATION duty over the four re-homed protection items) · KnownIssues row **57**'s RE-FONT
+road (the INK half was carved at 18j) · and **TRACE 1a**, routed here by RULING A-1 (the pane's
+foreign-string compare).
+
+## LIVE STATUS
+
+| piece | state |
+|---|---|
+| the record opened | **DONE** |
+| item 2 — the eager space-eater (BOTH platforms) | PENDING |
+| item 10 — starred items scroll past ~7 | PENDING |
+| item 11 — paste without newlines (+ the phone's rule) | PENDING |
+| item 13 — the note title's room · row 93 — the nameless prompt | PENDING |
+| P39a — Pool stops holding `LibraryViewModel` | PENDING |
+| P39b — `WriteTakesPanel` stops constructing `TakesViewModel` | PENDING |
+| roster item 8 — the four protection items VERIFIED | PENDING |
+| row 57 — the RE-FONT road | PENDING |
+| TRACE 1a — the pane's projection compare | PENDING |
+| tests (core · FULL Mac · iOS build · mobile if `Shared/` moved) | PENDING |
+| the WALK + captures (52 onward) | PENDING |
+| PROVISIONALs → `notes/QUESTIONS.md` (next free **#112**) | PENDING |
+
+*(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
 
 ---
 
