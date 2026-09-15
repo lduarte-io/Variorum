@@ -598,7 +598,10 @@ private func withBoard<T>(
         let session = AppSession(database: db)
         let post = try session.operations.createPost(title: "13e batch 4")
         for text in seedBlocks {
-            _ = try session.operations.newBlock(in: post.id, text: text)
+            // A fixture mint is not a gesture (13u1 UNIT 2 — the
+            // `withEditor` harness's own rule, stated there).
+            _ = try session.operations.newBlock(
+                in: post.id, text: text, registeringUndo: false)
         }
         let world = TakesBoardWorld(
             session: session, database: db,
