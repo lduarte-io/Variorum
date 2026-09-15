@@ -359,7 +359,7 @@ on the standing rails, zero-instance pgrep first, record-instead-of-kill if her 
 |---|---|
 | A — pane stability trace + landing/settle | **CLOSED 2026-09-15** — item 1 TRACED (her hands owed, never claimed closed) · row 100 FIXED + walked · row 98 DISMISSED AS HOLLOW · M12 VERIFIED · item 18's Outline half TRACED, built, and REVERTED on a 3-vs-3 measurement, with its designed successor recorded · 54/92/94 DEFERRED with reasons. Finals = baseline: core 1562/170 · Mac 2668/445 · iOS green |
 | A2 — item 18's successor: preview priming (RULING A-1) | **CLOSED 2026-09-15 — RULING A-2: the priming SHIPS** — item 18's card drift FIXED (red-on-old; no `h=46` on the real book, 3 runs) · the bounded core read MEASURED FLAT · the gate arm ADJUDICATED: hard-bounded at the residual's magnitude + the ≤ 4 aspiration in `withKnownIssue` (the scale-mix residual; unit B re-examines its closed cure beside the shadow fix) · finals: core 1567/171 · Mac 2670/446 GREEN with 1 known issue · iOS green · item 18 field acceptance: **her hands owed** |
-| B — book-Index presentation + shadow editor | **RUNNING** (opened 2026-09-15) — the UNIT B RECORD below carries its LIVE STATUS |
+| B — book-Index presentation + shadow editor | **CLOSED 2026-09-15** — item 19's five ruled behaviours BUILT (one of the intended fixes DISMISSED AS HOLLOW, with its evidence) · the double editing ring removed · **KnownIssues row 49's ROUTER half FIXED** (red-on-old + verified in the app) and the row NARROWED to the surviving double realization, which is traced with three causes eliminated · scope 4 RE-EXAMINED: the run-scale split stays CLOSED, its evidence downgraded, the successor's measurement named · 3 PROVISIONALs (QUESTIONS #110) · finals: core **1567/171** · Mac **2682/449** (1 known issue + 1 load-flaky red, recorded with paired numbers, the product road walked clean) · iOS **green** |
 | C — #109 boundary-clamp law | NOT-STARTED |
 | D — the singles (+ TRACE 1a, routed by RULING A-1) | NOT-STARTED |
 | E — the mechanical sweeps | NOT-STARTED |
@@ -1123,7 +1123,7 @@ evidence either way.
 | row 49 — the Outline SHADOW editor: traced | **DONE** — reproduced in the app on a LONG note (and NOT on a short one); three candidate causes eliminated by measurement; the orphan's discriminator MEASURED (TRACE B-1) |
 | row 49 — fixed | **DONE** — `active` is claimed again when a text view reaches a WINDOW; red-on-old on 2 of 4 arms (`EditorRouterActiveTests`), `NoteBoxCompositionTests` rides unmodified (9/2 green) |
 | scope 4 — the run-scale split, re-measured after the shadow fix | **RE-EXAMINED — the road stays CLOSED**, and the evidence is now stronger than the one A2 questioned (THE SCOPE-4 VERDICT below) |
-| tests (core · FULL Mac · iOS build) | PENDING |
+| tests (core · FULL Mac · iOS build) | **DONE** — core **1567 / 171 GREEN** (baseline exactly) · the FULL Mac suite **2682 / 449** with the expected known issue and ONE load-flaky red (743 s) · iOS build **GREEN** |
 | the WALK + captures (both voices, a palette on) | **DONE** — 14 captures (26–39), Terminal and Study, the Rose & moss bold palette on; the DARK half is pinned rather than walked, with the reason (THE WALK below) |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
@@ -1308,6 +1308,15 @@ a palette ruling.
 | **(b)** the cream read page | `32`/`33` — the page floating on a pink field | `37`/`38` — the room behind it neutral, the page cream; `36` the book's Read the same |
 | both voices | Terminal throughout 26–38 | `39` — Study, the Index's title-line wash and the un-indented prose in the serif voice |
 
+**AND THE READ-CLICK LANDING WAS WALKED TOO, deliberately** (capture
+`40-b-after-read-click-lands-in-index-live`): Sherlock ▸ Read ▸ Scroll ▸ a click on a sentence lands
+in **Index at that block, LIVE** — the block ringed, the column marking its note, the sidebar box
+reading *editing*. That road's PIN
+(`BookIndexEditingTests.theReadClickLandsInIndexAtThatBlock`) is LOAD-FLAKY and reds about half the
+time on this tree, so the walk is what says the shipped behaviour is right. The measurement, the
+paired numbers and the honest statement that UNIT B's diff makes the flake likelier are in the new
+KnownIssues row (owner 12).
+
 **DARK was not walked, and that is stated rather than implied.** The 18j appearance control
 (follow system · light · dark) renders below the Settings pane's visible area at the shipped window
 size — three scroll attempts did not reach it — and the remaining walk budget went to verifying the
@@ -1317,6 +1326,52 @@ page's room in BOTH voices × BOTH appearances; every colour this unit touched i
 prose column is geometry, which no appearance changes. **The Settings pane's own fold is worth
 someone's eye** — an appearance dial you cannot reach without knowing it is there is a face finding,
 not this unit's, and it is recorded here for 13u3/13u4 rather than acted on.
+
+## DISPOSITIONS
+
+| item | verdict | evidence |
+|---|---|---|
+| **item 19 (a)** — no whole-note palette wash in Index | **FIXED, pinned, walked** | The wash marks the note's TITLE LINE: 25.0 pt of a 152.0-pt note, measured by two rectangles the view itself reports; the old wash covered all 152. Captures `26` → `34`, and `39` in the Study voice. |
+| **item 19 (b)** — the cream page's backdrop | **FIXED, pinned ×2, walked** | `ReadingPageTokens.room(voice:dark:)` — the palette-LESS road — at the four hosts that draw a cream page. Pins: the rule (a palette moves the app's room and never this one; both voices × both appearances) and a source walk that fails if a host goes back to `tokens.room`. Captures `32`/`33` → `36`/`37`/`38`. |
+| **item 19 (c)** — the click-into-a-block indent | **TRACED, FIXED, pinned, walked** | TRACE B-2. The pane's own 11-pt prose inset (6 container + 5 AppKit), paid back by the host through ONE number per surface. Mounted: prose x `451.5` at rest, `451.5` live. Captures `27` → `35`. |
+| **item 19 (d)** — the index highlight follows the cursor | **REPRODUCED, FIXED at the note surface (red-on-old); the BOOK Index's half DISMISSED AS HOLLOW** | Capture `31` is the defect exactly as she described it. `ReadModeTests.theIndexColumnMarksTheBlockTheCursorIsIn` is red on old. The book Index's column already follows by every road (`landOrSeed` selects the revealed note; the row tap selects) — its pin passed on the pre-fix tree, so it is not fixed and not shipped. |
+| **item 19 (e)** — the editing highlight as a setting | **BUILT on the R14/R22 family, PROVISIONAL** | No rival minted (her ruling's own words). The left highlight and the first-click wash are outside it. QUESTIONS #110(c). |
+| **the DOUBLE editing RING** | **REMOVED** (not in her list; found by the walk) | Both index surfaces drew a ring around the live pane while the pane drew its own — two concentric rings in captures `27`, `30`, `31`; one ring in `35`. |
+| **KnownIssues row 49** — the Outline's shadow | **ROUTER HALF FIXED (red-on-old + verified in the app); the DOUBLE REALIZATION survives and the row is NARROWED to it** | TRACE B-1: the reproduction (long note yes, short note no), the orphan's measured discriminator (window-nil, 0 entries, at +2 s), three eliminated causes, and the `ROUTERPROBE` line from the app. |
+| **scope 4** — the run-scale split | **RE-EXAMINED; the road stays CLOSED with its evidence DOWNGRADED** | THE SCOPE-4 VERDICT. The closing measurement cannot tell "the split broke the mount" from "the probe read the shadow", because the shadow is real in the app — but no split run exists to re-test, and rebuilding it is a lazy-run restructuring this unit will not start at its end. The successor's exact measurement is named. |
+| **`theReadClickLandsInIndexAtThatBlock`** | **LOAD-FLAKY on BOTH trees, likelier on this one — recorded with the paired numbers; the PRODUCT road walked clean** | KnownIssues, owner 12. 3/4 pass pre-B, 2/9 post-B; every failure exhausts the settle with zero live panes and a 200-turn budget does not help. Capture `40` shows the shipped landing working. |
+| **1,989 `Modifying state during view update` warnings in one Mac suite run** | **RECORDED, not swept** | The same KnownIssues row. A standing app-wide condition, not 13u2's, and the most likely root of both the shadow's double realization and the landing race. |
+| **a PROVISIONAL** | **THREE, all inside item 19** | QUESTIONS **#110** (a) the selected note's mark · (b) a column click releasing the ring · (c) the editing highlight being the existing family. The marker moved to **#111**. |
+
+## FINALS
+
+| gate | result | baseline (A2's) |
+|---|---|---|
+| core `swift test` | **1567 / 171 GREEN** | 1567 / 171 — identical |
+| the FULL Mac suite | **2682 / 449**, 743 s — the expected **1 known issue** (the wrapped far-below arm, `abs(below) → 73.0`) plus **ONE load-flaky red** (`theReadClickLandsInIndexAtThatBlock`, KnownIssues, owner 12; the product road walked clean) | 2670 / 446, green with 1 known issue — **+12 tests, +3 suites**, exactly this unit's pins |
+| iOS build (`VariorumMobile`) | **GREEN** — owed, because `App/Variorum/Shared/Theme/VoiceTokens.swift` is a shared file | green |
+| lockstep marker | untouched — **8** | 8 |
+
+Neither of the other load-flaky suites fired (the differential-latency pin, `CanvasDragTrackingTests`,
+`MastheadLayoutTests`' open-field arm, `BlocksWorkbenchFaceTests`' single-click budget). The FULL
+mobile suite is **not owed**: `VoiceTokens.swift` gained a static function and no `Shared/` file moved
+— the phone compiles it (the iOS build proves it) and its behaviour is untouched, since the phone
+draws no cream reading page and has neither index surface.
+
+**Zero `Sources/VariorumCore/` lines. Zero `Sync/`. Zero schema. Zero migrations. Marker 8.**
+
+**The MOBILE PARITY question, answered rather than skipped:** nothing here is owed to the phone. Item
+19's five behaviours are the Mac's index surfaces (the book's Index and the note's Read ▸ edit), which
+the phone does not have; the read page's room is a Mac host's; the shadow is the Mac's
+`InlineEditorSurface`. The one shared file this unit touched gained a function no phone surface calls.
+
+**Commits**, each pushed as it landed: `fca7fec0` (the record opened) · `a8f6bf18` (row 49's fix, with
+its trace in the message) · `cfe53bb5` (TRACE B-1) · `7d44eda6` (item 19's five behaviours + #110) ·
+`3eff282d` (the walk, the app verification, TRACE B-2, the scope-4 verdict) · this one (the
+dispositions, the finals, the KnownIssues rows). No history was rewritten; nothing was reverted.
+
+**Captures** (gitignored, `notes/plans/13u2-screens/`, continuing A2's numbering): `26`–`33` the
+befores, `34`–`40` the afters.
 
 ---
 
