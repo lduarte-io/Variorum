@@ -378,7 +378,7 @@ DISPOSITIONS table.)*
 |---|---|
 | the 13l hang lead — trace | IN PROGRESS (the capture read; the analysis is TRACE 1 below) |
 | item 1 — the pane-stability trace | NOT-STARTED |
-| item 18 — the long-book landing & settle | **TRACED + FIRST FIX IN** (the card-height drift; pin green, red-on-old measurement next) |
+| item 18 — the long-book landing & settle | **FIXED + WALKED** (TRACE 2: before/after landing stories on the real Sherlock book — 1 hop of 854 pt → 0 hops, the stutter gone; pins green, red-on-old 46→103) |
 | row 54 — read tier's provisional-width first measure | NOT-STARTED |
 | row 92 — canvas silhouette click lands mid-board | NOT-STARTED |
 | row 94 — Blocks' ~0.2–0.3 s residual arrival | NOT-STARTED |
@@ -390,6 +390,64 @@ DISPOSITIONS table.)*
 | walk + captures | NOT-STARTED |
 
 *(Every line above starts PENDING and is flipped in the same commit as the piece it names.)*
+
+## TRACE 2 — ITEM 18, MEASURED ON THE REAL SHERLOCK BOOK (dev-store Debug build)
+
+Her two complaints turned out to be **one mechanism**, and it is neither TK2 geometry nor the
+landing's arithmetic. The production DEBUG landing story (`NSLog "BookOutline landing"`) for the
+navigator's 11th-chapter click, **before**:
+
+```
+page-E1483921 LAND | h=861 | top=1718 | content=2942 | top=1735 | top=1749
+| chapter-D9C87 h=51 | chapter-0B558 h=51 | page-EE7D2FA5 h=46 | top=0.0 hops=0   ← ARRIVES
+| page-4EBE2134 h=103 | page-D5AA052C h=103 | … | page-9E7CE825 h=46 | page-E1483921 h=85
+| top=12 | content=2063 | top=-117 | top=588 | … | top=683 | … | top=854          ← THE STUTTER
+| content=21009 | page-E1483921 h=18680
+| HOP 1 at 457 ms (top was 854.0) | top=0.0 hops=1                                ← THE 2nd STAGE
+| DONE: settled at top=0.0 after 1 hops, 1011 ms
+```
+
+Read it in three beats. **(1)** The landing scrolls and the target reaches `top=0.0` — the page
+*arrives*, correctly. **(2)** Then every collapsed card above it grows **`h=46` → `h=103`** as its
+preview read returns — twelve of them on this book, +57 pt each — and the target is pushed from 0
+to **854 pt below the fold**, bouncing through `12 · −117 · 588 · 683 · 854` as the reads land in
+whatever order the store answers. That bouncing IS her *"my screen starts to stutter repeatedly
+once I've already arrived, even though it eventually settles down."* **(3)** A full second later
+the landing's `landingMinimumHold` expires and it takes ONE **854-pt hop** to recover — her
+*"navigated to the chapter and then moved down to where the note started."* The hop's size is not
+chosen, it is whatever the drift happened to total, which is exactly why *"sometimes I was moved
+too far."*
+
+**The defect, stated:** a collapsed card's HEIGHT DEPENDED ON WHEN ITS READ RETURNED.
+
+**AFTER the fix, the same click on the same book:**
+
+```
+page-E1483921 LAND | page-E1483921 h=18680 | top=1898.0 hops=0 | top=0.0 hops=0
+| chapter-41599 h=51 | page-67DB6BCA h=103 | chapter-2CA40 h=51 | page-C96ED04F h=103
+| chapter-06C77 h=51 | page-F1EEA894 h=103 | chapter-EE0B1 h=51 | page-4EBE2134 h=103
+| chapter-36D84 h=51 | page-D5AA052C h=103 | chapter-21238 h=51
+| DONE: settled at top=0.0 after 0 hops, 1036 ms
+```
+
+**Not one `h=46`** — every card reports 103 on its first report. **`top` reaches 0 and never moves
+again** (the whole `12 · −117 · 588 · 683 · 854` sequence is gone). **Zero hops** (was one, of 854
+pt, 457 ms after arrival). **Not one `content=` line** — the column's height never changed during
+the landing, where before it changed nine times.
+
+**What it cost visually: nothing.** Sherlock's previews are three lines already, so the reserved
+slot is exactly what the card was going to be — capture `05-cards-after` beside the pre-fix
+`01-sherlock-open`. Her LIKE is untouched: a chapter whose one note says its name still shows ONE
+navigator row (`noteLineCollapsesIntoChapter`, row 8) — visible in every capture.
+
+**#88(c) — ANSWERED WITHOUT BUILDING IT.** Her trigger for persist-per-story-measured-heights was
+"only if you notice a shift after a chapter click in your own use". She did; the trace names the
+shift; and the shift was **not** a story's measured height being unknown — the stories' heights
+were already remembered and honest (`page-E1483921 h=18680` on the FIRST report after the fix, out
+of `SurfaceSizeMemory`, 18d's U-12 work). It was the CARDS. So option 2 is **not the fix for what
+she reported**, and building it would have been motion without a mechanism. Recorded as the reason
+rather than done. *(The Outline is the surface her report names; the flow's own per-story
+persistence already exists and is what makes the `h=18680` first report possible.)*
 
 ## TRACE 1 — THE 13l HANG LEAD, READ AT LAST (`hang-sample-takes-margin-grid.txt`, 7,874 lines)
 
