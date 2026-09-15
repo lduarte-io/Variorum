@@ -706,6 +706,15 @@ place: `ArmedEdit.exactCost`'s *"Platforms that derive cost from the report simp
   block's characters (a drag released exactly where the next paragraph begins) keeps its
   pre-item-5 refusal, now worded for what it actually is. PROVISIONAL, logged with three options,
   because widening it either CONTRADICTS R-13u-2 or leaves the selected newline visibly standing.
+  *(CORRECTED at the ladder, round 1: the refused residual is WIDER than this bullet said — a span
+  that opens or closes ON a boundary separator while reaching into TWO OR MORE blocks' characters
+  (anchor at a paragraph's end, ⇧-extend two paragraphs down) also keeps the refusal, by the same
+  contiguity guard, and the UNIT 2 wording mis-described exactly that member ("without reaching
+  into the next block" — false there). The sentence now says what every member shares — an end
+  sitting on the boundary between two blocks — #109 names the wider member as its own part (d)
+  with the trim-into-the-run road for her to rule, and the ladder's pin is
+  `CrossBlockCompoundTests.aSpanOpeningOnTheBoundaryRefusesWithTheTrueGeometry`. Nothing
+  behavioural changed at the ladder — the words and the records did.)*
 - **The PHONE's FACE for the compound is not built** — no receipt naming where every block went,
   and no hands-on walk on a device. The phone inherits the ruled SEMANTICS through the shared
   brain (her own coordination flag: *"the semantics are ruled HERE, once, for both platforms"*)

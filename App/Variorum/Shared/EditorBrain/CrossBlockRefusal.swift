@@ -68,11 +68,18 @@ nonisolated enum CrossBlockRefusal {
         /// nothing.** Before item 5 this covered every cross-block selection
         /// with a partially covered block in it — her commonest gesture, and
         /// the refusal she called *"more annoying than it's worth"*. The
-        /// compound now takes all of those. What is left is the span that
-        /// crosses a seam while touching the characters of only ONE block —
-        /// a selection ending exactly where the next block begins, or
-        /// starting exactly where the previous one ends (QUESTIONS #109,
-        /// PROVISIONAL: it keeps its pre-item-5 refusal).
+        /// compound now takes all of those. **What is left is the span with
+        /// an end SITTING ON a boundary separator** (the ladder's round-1
+        /// correction — the first wording claimed only the one-block case):
+        /// a selection ending exactly where the next block begins or
+        /// starting exactly where the previous one ends, touching one
+        /// block's characters — AND its wider sibling, a span that reaches
+        /// into two or more blocks while opening or closing ON the
+        /// separator (anchor at a paragraph's end, ⇧-extend two paragraphs
+        /// down). All of it keeps the pre-item-5 refusal — the compound's
+        /// contiguity guard — and whether the compound should instead trim
+        /// the boundary separator into the run is QUESTIONS #109 (a) and
+        /// (d), PROVISIONAL, hers.
         case partialBlockAcrossSeam
     }
 
@@ -92,7 +99,9 @@ nonisolated enum CrossBlockRefusal {
     /// 2. **the open tail** — the span overlaps the tail region, which the
     ///    compound excludes by its contiguity guard;
     /// 3. **not editable** — an entry IN THE RUN is locked, or is a gap;
-    /// 4. **partial coverage** — everything left.
+    /// 4. **the boundary-edge residual** — everything left: a span end
+    ///    sitting on a boundary separator (either orientation, one block's
+    ///    characters or several).
     ///
     /// **Step 3 walks the RUN, not the intersected entries** (13u1 UNIT 2,
     /// with the compound that shares the rule): a zero-length entry — an
@@ -160,8 +169,9 @@ nonisolated enum CrossBlockRefusal {
             }
         }
 
-        // 4. The residual: a boundary crossed with only one block's
-        // characters inside the span.
+        // 4. The residual: an end of the span sits ON a boundary separator
+        // (whether the span touches one block's characters or reaches into
+        // several — the ladder's round-1 correction).
         return .partialBlockAcrossSeam
     }
 
@@ -188,12 +198,16 @@ nonisolated enum CrossBlockRefusal {
         case .openTail:
             "The end of this selection isn't a block yet."
         case .partialBlockAcrossSeam:
-            // 13u1 UNIT 2: the compound took every span that covers a block
-            // in part, so this line no longer speaks for her commonest
-            // gesture. What is left is the span that crosses a seam while
-            // touching only ONE block's characters, and the sentence says
-            // exactly that instead of the old, wider claim.
-            "This selection stops right at a block boundary without reaching into the next block."
+            // 13u1 UNIT 2 re-narrowed this line; the LADDER's round 1
+            // corrected it — the first sentence here claimed the selection
+            // did not reach the next block, which is FALSE for the residual's
+            // wider member (a span reaching into two blocks while opening ON
+            // the separator: anchor at a paragraph's end, ⇧-extend two
+            // paragraphs down). What every residual shape shares is an end
+            // sitting ON the boundary between two blocks, so that is what
+            // the sentence says — true in both orientations and at both
+            // span widths.
+            "One end of this selection sits on the boundary between two blocks."
         }
     }
 
@@ -224,7 +238,12 @@ nonisolated enum CrossBlockRefusal {
         case .openTail:
             "It becomes one moments after you pause typing, and then it can go with the rest."
         case .partialBlockAcrossSeam:
-            "Reach a little further into the next block, or select the whole paragraphs."
+            // The road must work for every residual shape: extending helps
+            // the trailing cases, retracting helps the leading ones, so the
+            // sentence names the MOVE (off the boundary) rather than one
+            // direction — and the whole-paragraphs road (J9's delete) works
+            // for all of them.
+            "Nudge that end one character either way, or select the whole paragraphs."
         }
     }
 

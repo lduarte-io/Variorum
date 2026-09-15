@@ -356,6 +356,44 @@ struct CrossBlockCompoundTests {
         }
     }
 
+    /// **The residual's TRUE geometry, spoken truthfully (the 13u1 ladder,
+    /// round 1).** A span can open (or close) ON the boundary separator
+    /// while reaching into TWO OR MORE blocks' characters — anchor the
+    /// selection at a paragraph's END (the offset before the newline) and
+    /// ⇧-extend into the paragraph after next. The compound refuses it (the
+    /// run's contiguity guard — the standing pre-item-5 refusal; whether it
+    /// should instead trim the boundary separator into the run is QUESTIONS
+    /// #109(d), hers to rule), and the diagnosis must describe THAT shape.
+    ///
+    /// **RED ON OLD:** the re-narrowed sentence claimed the selection did
+    /// not reach the next block — false here (it reaches two) — and its
+    /// road ("reach a little further into the next block") changed nothing,
+    /// since she already had.
+    @Test func aSpanOpeningOnTheBoundaryRefusesWithTheTrueGeometry() async throws {
+        try await withEditor { h in
+            h.model.applyProjection([
+                slot("b0", text: "Alpha one."),   //  0..10, separator at 10
+                slot("b1", text: "Beta two."),    // 11..20, separator at 20
+                slot("b2", text: "Gamma three."), // 21..33
+            ])
+            // From the END of b0 (offset 10 — ON the separator) through
+            // "Gamma " — b1 covered whole, b2 in part, b0's characters
+            // untouched.
+            let span = NSRange(location: 10, length: 17)
+            #expect(h.model.planCrossBlockEdit(range: span, replacement: "") == nil,
+                    "the separator-edge span keeps its refusal — #109's family")
+
+            let cause = CrossBlockRefusal.diagnose(
+                range: span, index: h.model.index, slots: h.model.slots)
+            #expect(cause == .partialBlockAcrossSeam)
+            let message = CrossBlockRefusal.message(for: cause)
+            #expect(!message.contains("without reaching into the next block"),
+                    "the sentence denied a reach the selection made: \(message)")
+            #expect(message.contains("sits on the boundary"),
+                    "the sentence says the true geometry: \(message)")
+        }
+    }
+
     /// A lone separator can never reach the compound — which is what makes
     /// the A7 carve and #34's seam merge safe to run before it. Walked over
     /// EVERY separator of an empty-heavy document, because 13u1 UNIT 2
