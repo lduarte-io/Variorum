@@ -1056,6 +1056,7 @@ struct BookView: View {
     ) {
         #if DEBUG
         BookOutlineGeometry.anchorTops[anchorID] = top
+        BookOutlineGeometry.rowHeights[anchorID] = height
         if outlineLanding != nil {
             let known = landingBox.rowHeights[anchorID]
             if known == nil || abs((known ?? 0) - height) > 0.5 {
@@ -1706,6 +1707,15 @@ enum BookOutlineFactsReads {
 @MainActor
 enum BookOutlineGeometry {
     static var anchorTops: [String: CGFloat] = [:]
+    /// **13u2 UNIT A2: each anchor row's CURRENT height**, recorded on the
+    /// same report as its top and keyed the same way (the anchor id carries
+    /// the post/section id, so this is subject-keyed like `anchorTops` beside
+    /// it — never "the row"). What item 18's pin reads: a card whose height
+    /// MOVES when its preview read returns is the drift TRACE 2 measured on
+    /// the real Sherlock book. The landing's own `landingBox.rowHeights`
+    /// below is untouched — that one is a per-landing change LOG, and this is
+    /// the current fact.
+    static var rowHeights: [String: CGFloat] = [:]
     /// The pending landing's report sequence (id · top · hop) — what a pin
     /// prints when a landing does not converge.
     static var trace: [String] = []

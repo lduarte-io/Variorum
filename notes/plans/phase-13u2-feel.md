@@ -744,7 +744,8 @@ mount: `editorHeight == 24` after 200 turns).
 |---|---|
 | the record opened + TRACE 2 re-verified on the post-revert tree | **DONE** — reproduced on the real Sherlock book, three runs (see TRACE 2 RE-VERIFIED below) |
 | the bounded core read (`Queries.leadingBlockTexts`) + its pins | **DONE** — 5 pins green; the cost shape MEASURED FLAT (below) |
-| the app-side priming (`BookViewModel` · `OutlinePostRow`) + the red-on-old card pin | **PENDING** |
+| the card pin, landed RED FIRST on the unfixed tree | **DONE** — 8 cards `46 → 103`, the mechanism's own words (below) |
+| the app-side priming (`BookViewModel` · `OutlinePostRow`) | **PENDING** |
 | the GATE: the 3-expanded fixture 3/3 isolated, beside the card pin 3/3 | **PENDING** |
 | the WALK: before/after landing stories on the real Sherlock book + captures | **PENDING** |
 | the card:heading scale-mix — MEASURE then decide | **PENDING** |
@@ -830,6 +831,36 @@ regression the pin catches) · the cap returns the leading texts and equals `ren
 many-note read costs one bounded SELECT per note, each carrying `LIMIT` · the fallback matrix
 (fanned chosen take · a chosen take ARCHIVED after the fact falling back to the default · a tombstoned
 block as a gap) resolves identically to `renderPost` · degenerate asks answer empty rather than throw.
+
+## THE PIN, LANDED RED FIRST (the hallucination guard's own order)
+
+`App/Variorum/VariorumTests/BookCardHeightStabilityTests.swift` went in BEFORE the fix, and was run
+against the unfixed tree. It mounts the real `BookView` on a curated book of eight collapsed cards
+with REALISTIC prose behind them (UNIT A's fixture correction — a one-line preview is a shape no book
+has, and it is what made this family invisible to the suite for a year), lays out ONCE synchronously
+— no suspension point between the mount and the measurement, so a per-row async read cannot have
+returned — records every row's height through the production geometry road, lets the run loop turn,
+and measures again.
+
+**RED ON OLD, verbatim from the run:**
+
+```
+✘ Expectation failed: (moved → ["page-00000000 46→103", "page-00000000 46→103",
+   "page-00000000 46→103", "page-00000000 46→103", "page-00000000 46→103",
+   "page-00000000 46→103", "page-00000000 46→103", "page-00000000 46→103"]).isEmpty → false
+✘ Test run with 1 test in 1 suite failed after 1.435 seconds with 1 issue.
+```
+
+Eight cards, every one of them `46 → 103` — the same 57 pt the real Sherlock book drifts by, per card.
+**The settle is TURN-BASED, not read-counted, and that is deliberate:** the fix DELETES the per-row
+read, so a pin that waited on a read counter would pass vacuously afterwards. This one waits on turns
+of the run loop — true on both trees — and asks only whether a card moved.
+
+The oracle it reads is `BookOutlineGeometry.rowHeights`, added in the same commit: each anchor row's
+CURRENT height, recorded on the same report as its top and keyed the same way (the anchor id carries
+the subject's id — subject-keyed like `anchorTops` beside it, never "the row", the DEBUG-oracle keying
+rule). The landing's own `landingBox.rowHeights` is untouched: that is a per-landing change LOG, this
+is the current fact.
 
 ---
 
