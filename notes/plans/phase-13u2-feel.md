@@ -1085,8 +1085,19 @@ brief.
 
 # UNIT B RECORD — item 19's book-Index presentation set + the Outline SHADOW editor (opened 2026-09-15, `opus-implementer`, the overnight run)
 
-**WHAT THIS UNIT HAS NOT DONE — the record's first line, kept current.** *(Opened; nothing built yet.
-This line is rewritten at the close with the honest list.)*
+**WHAT THIS UNIT DID NOT DO — the record's first line.** It did **not remove the Outline's second
+`InlineEditorSurface`**. The double realization is real, reproduced, and traced (TRACE B-1), and
+three candidate causes were eliminated by measurement — but the cause is a SwiftUI node-identity
+behaviour at an unchanged structural position, and what shipped is the row's SECOND remedy: `active`
+now names the editor that is in a WINDOW, so the doors that were wrong are right and the orphan is
+inert. The KnownIssues row is NARROWED to that residual rather than removed. It did **not build the
+run-scale split** (the scope-4 verdict below says why, and exactly what a successor needs). It did
+**not walk DARK** — the appearance control sits below the Settings pane's fold at the shipped window
+size and the walk's remaining budget went to verifying the shadow fix in the app; the dark half is
+carried by pins instead (`ReadPageRoomTests` runs both voices × both appearances, and nothing this
+unit added is a literal colour, which `NoLiteralColourTests` fails the suite over). And it
+**dismissed one of its own intended fixes as HOLLOW** — a selection-follow for the BOOK Index's
+column, whose pin passed on the pre-fix tree.
 
 **What it is:** R-13u-10's five ruled behaviours (the master plan's item 19 carries her words verbatim)
 plus `KnownIssuesAndTechDebt` row 49 — the book Outline's SECOND, projection-less
@@ -1104,16 +1115,16 @@ evidence either way.
 | piece | state |
 |---|---|
 | the record opened | **DONE** |
-| (a) no whole-note palette wash in Index | PENDING |
-| (b) neutral backdrop behind the cream read page | PENDING |
-| (c) the click-into-a-block INDENT defect — traced | PENDING |
-| (d) the highlight grammar (left follows the cursor · right first-click stays) | PENDING |
-| (e) the editing highlight as a SETTING (the R14/R22 family) | PENDING |
+| (a) no whole-note palette wash in Index | **DONE** — the wash moves to the note's TITLE LINE; pinned at two measured rectangles (25.0 pt of a 152.0-pt note; the old wash covered all 152) · walked |
+| (b) neutral backdrop behind the cream read page | **DONE** — `ReadingPageTokens.room(voice:dark:)`, the palette-less road, at the four hosts; two pins (the rule, both voices × both appearances; a source walk over the hosts) · walked |
+| (c) the click-into-a-block INDENT defect — traced | **TRACED + FIXED** — the pane's own 11-pt prose inset, paid back by the host; mounted pin: 451.5 at rest, 451.5 live (~11 pt apart before) · walked |
+| (d) the highlight grammar (left follows the cursor · right first-click stays) | **DONE** — reproduced in the walk (capture 31), fixed at the note surface, red-on-old in `ReadModeTests`; the BOOK Index's half DISMISSED AS HOLLOW with its evidence |
+| (e) the editing highlight as a SETTING (the R14/R22 family) | **DONE** — the existing family, no rival minted; the left highlight and the first-click wash sit outside it. PROVISIONAL, QUESTIONS #110(c) |
 | row 49 — the Outline SHADOW editor: traced | **DONE** — reproduced in the app on a LONG note (and NOT on a short one); three candidate causes eliminated by measurement; the orphan's discriminator MEASURED (TRACE B-1) |
 | row 49 — fixed | **DONE** — `active` is claimed again when a text view reaches a WINDOW; red-on-old on 2 of 4 arms (`EditorRouterActiveTests`), `NoteBoxCompositionTests` rides unmodified (9/2 green) |
-| scope 4 — the run-scale split, re-measured after the shadow fix | PENDING |
+| scope 4 — the run-scale split, re-measured after the shadow fix | **RE-EXAMINED — the road stays CLOSED**, and the evidence is now stronger than the one A2 questioned (THE SCOPE-4 VERDICT below) |
 | tests (core · FULL Mac · iOS build) | PENDING |
-| the WALK + captures (both voices, both appearances, a palette on) | PENDING |
+| the WALK + captures (both voices, a palette on) | **DONE** — 14 captures (26–39), Terminal and Study, the Rose & moss bold palette on; the DARK half is pinned rather than walked, with the reason (THE WALK below) |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
 
@@ -1209,6 +1220,103 @@ the two that pin the fix — `active !== real` after the real view reaches the s
 again after an orphan attaches beside it (line 172) — while the two that pin the PRESERVED behaviour
 (a bare attach still claims at once; teardown still clears and a released model never returns) pass
 on BOTH trees. Green after: **9 tests / 2 suites**, `NoteBoxCompositionTests` included and unmodified.
+
+**AND IT IS VERIFIED IN THE APP, not only in the pin.** The same walk gesture on the dev-store Debug
+build with a probe reading the router two seconds after each mount:
+
+```
+ROUTERPROBE model=…c19cde00 inWindow=Y entries=262 active=…c19cde00 editing=…c19cde00
+ROUTERPROBE model=…c256de00 inWindow=N entries=0   active=…c19cde00 editing=…c19cde00
+```
+
+Both realizations still happen (the double is the residual). **`active` names the editor she is
+looking at** — the one in a window holding 262 blocks — where before it named the orphan.
+
+## TRACE B-2 — THE INDENT, MEASURED (item 19 (c))
+
+Her words: *"the text indents in index mode where you're editing it, which should not be happening
+the second you click into a block."* Reproduced on the dev store under the Rose & moss palette
+(captures `26`/`27` and `29`/`30`): in the book's Index the text steps **~11 pt** right the moment a
+block goes live; in the note's Read ▸ edit, **~7**.
+
+**The mechanism is the pane's own inset, and it was invisible because both tiers were padded the
+same.** A `PaneSurfaceView`'s first glyph does not sit at its SwiftUI frame's edge — the text
+container is inset by `PaneTextView.takeSurfaceInset` (6) and AppKit's container adds its own
+`lineFragmentPadding` (5) on top, so a pane's prose starts 11 pt inside its frame. The book Index
+padded BOTH tiers 6; the note's Read ▸ edit padded the read tier 10 and the live one 6. A `Text` has
+no inset, so the live tier always started 11 pt further right than the host's padding suggested.
+
+**The fix is one number per surface, both tiers derived** (`Surface/IndexProseColumn.swift`): the
+prose column is `max(the surface's resting padding, the pane's inset)`; the read tier pads the whole
+distance and the live host pays back only the remainder, on BOTH axes, so the first LINE also sits at
+the same height. The read tier never moves left of where it sat and the live pane is never pushed
+outside its row (both pinned). The two terms are named rather than assumed, and
+`IndexProseColumnTests` constructs a real surface and fails if AppKit's padding or ours ever stops
+describing it — a TEXTKIT2 §5 point-release fact held where a pin can see it.
+
+**Mounted pin, in the book Index:** the prose's leading x, reported by BOTH tiers the same way —
+`451.5` at rest, `451.5` live. Before: ~11 pt apart.
+
+**AND THE DOUBLE RING CAME OFF WITH IT.** Both index surfaces drew their own ring around the live
+pane (17o batch c's `PaneDecoration.hostRing`) while the pane drew its own, in the same token and
+almost the same rectangle — two concentric rings, plainly visible in captures `27`, `30` and `31`.
+The hosts' overlays are gone; the pane's decoration stands alone, which is also what makes item 19
+(e)'s setting legible (`.off` now really means no mark).
+
+## THE SCOPE-4 VERDICT — the run-scale split stays CLOSED, and its closing evidence is downgraded
+
+The ORCHESTRATOR ADJUDICATION — UNIT A2 routed this here: UNIT A closed the run-scale split (one row
+scale per lazy run — the structural cure for the Outline's card:heading estimate swing) on the
+evidence *"`editorHeight == 24` after 200 settle turns"*, and A2 traced that same symptom to the
+harness's double realization plus `firstEditor(in:)`'s assumption.
+
+**What this unit adds, measured: the double realization is REAL IN THE APP, not only in the pumped
+harness.** TRACE B-1's numbers — two `makeNSView` calls ~40 ms apart on a long note, no
+`dismantleNSView`, the second view window-nil with zero entries at +2 s. So a probe that reads "the
+first `EditorTextView` in the tree" can read a view whose height is the empty-line 24 and whose text
+is empty — **which is exactly the value that closed the road.** The closing evidence therefore cannot
+distinguish *"the split broke the live editor's mount"* from *"the probe read the shadow"*.
+
+**And that is not enough to re-open it.** The brief's own condition is a bounded re-test showing the
+live editor mounting correctly in the REAL APP **under a split run** — and no split run exists to
+test: UNIT A built it, reverted it, and A2's constraint 4 forbade rebuilding. This unit did not
+rebuild it either, deliberately: it is a lazy-run restructuring of the surface UNIT A was burned by
+twice, at the end of a long session, to settle a residual that has never appeared on her corpus (the
+scale-mix offset is a synthetic-fixture extreme; the same shape on her real Sherlock book settles at
+−2 pt). **So: CLOSED, with its reason downgraded from "measured failure" to "a measurement that
+cannot tell the two apart".**
+
+**What a successor needs, exactly:** rebuild the split; then measure the mount with a WINDOW
+discriminator — `textView.window != nil` and `index.entries.count` — never "the first editor in the
+tree" (`writingEditor(in:)` is A2's corrected helper and asks the right question). If a
+window-resident editor with entries mounts under a split run, the road re-opens and the wrapped
+`withKnownIssue` arm in `BookOutlineLandingTests.openingACollapsedStoryLandsAtItsTopWithThreeStories`
+`Expanded` comes right (unwrap it then, and remove the interim `abs(below) <= 90` bound with it).
+
+## THE WALK — the dev-store Debug build, the Rose & moss BOLD palette on
+
+`io.lduarte.Variorum.debug`, never `/Applications`; the instance check ran first and found none of
+hers. Captures in `notes/plans/13u2-screens/` (gitignored), continuing A2's numbering: **26–33 the
+BEFORES**, **34–39 the AFTERS**. A bold palette throughout, because every one of her wash rulings is
+a palette ruling.
+
+| | before | after |
+|---|---|---|
+| **(a)** the Index's selected note | `26` — the WHOLE note a saturated pink slab, prose read through it | `34` — the wash on the title line alone; the body is the paper |
+| **(c)** clicking into a block | `27` — the live text ~11 pt right of `I.` above it, inside TWO concentric rings | `35` — the live text at the same x as `I.`, ONE ring |
+| **(d)** the index highlight | `31` — block **02** live with the caret in it while `▸ 04` is highlighted on the left, exactly her report | (the fix is pinned red-on-old; the column now follows the ring, and a column click releases it) |
+| **(b)** the cream read page | `32`/`33` — the page floating on a pink field | `37`/`38` — the room behind it neutral, the page cream; `36` the book's Read the same |
+| both voices | Terminal throughout 26–38 | `39` — Study, the Index's title-line wash and the un-indented prose in the serif voice |
+
+**DARK was not walked, and that is stated rather than implied.** The 18j appearance control
+(follow system · light · dark) renders below the Settings pane's visible area at the shipped window
+size — three scroll attempts did not reach it — and the remaining walk budget went to verifying the
+shadow fix in the app (which it did). What carries dark instead: `ReadPageRoomTests` asserts the
+page's room in BOTH voices × BOTH appearances; every colour this unit touched is a token
+(`tokens.wash`, the voice's room), and `NoLiteralColourTests` fails the suite if one is not; and the
+prose column is geometry, which no appearance changes. **The Settings pane's own fold is worth
+someone's eye** — an appearance dial you cannot reach without knowing it is there is a face finding,
+not this unit's, and it is recorded here for 13u3/13u4 rather than acted on.
 
 ---
 
