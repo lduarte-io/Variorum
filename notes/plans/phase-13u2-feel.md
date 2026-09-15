@@ -146,13 +146,79 @@ the status seam's audit surface (~150 sites, the 18i ladder's MAJOR), the re-fon
 jump (the INK half was carved at 18j), the Outline's SHADOW editor, the DEBUG-oracle keying sweep,
 ⌘A in a live pane, M12, and the two harness-calibration siblings above.
 
-## Kickoff sketch (refresh at open)
+## KICKOFF MESSAGE (paste-ready — written 2026-09-15 at her ask, for the OVERNIGHT session; supersedes the earlier sketch, whose #109 line predated her ruling)
 
-Unit A — item 1's trace + the landing/settle family (incl. item 18) with measured evidence.
-Unit B — item 19's presentation set + the shadow-editor fix. Unit C — the singles (2 · 10 · 11 ·
-13 · P39a/b · the audit-surface rename). Ladder at phase end. The #88(b) book-opens-in-Outline
-question, **#103 and 13u1's #109 (parts (a)–(d), incl. (d) which is hers to rule)** ride the
-nearest sitting.
+> You are the ORCHESTRATOR for **Variorum Phase 13u2 — FEEL**, running OVERNIGHT while the
+> author sleeps. **Her instruction, verbatim: "i'll be going to sleep so it'll be running
+> overnight and using provisional judgement along the way."** That is the standing autonomous
+> mandate: ambiguity that does not gate a unit's core → 2–3 options recorded, the most
+> spec-defensible built, marked **PROVISIONAL**, appended to `notes/QUESTIONS.md` (next free
+> **#110**) and bundled for her morning; ambiguity that gates a core, or any author-only call
+> (inventing product behaviour, invariants I1–I10/P1–P3/S1–S5, new dependencies, her accounts,
+> deleting/overwriting anything she made, history rewrites) → STOP that thread, record it,
+> continue elsewhere. Her one touchpoint is the MORNING: she wakes to your checkpoint report +
+> handoff and takes her walk then. Item 1's final acceptance is HER HANDS — overnight you walk
+> with captures and flag "her hands owed" honestly; you never close item 1 as felt-good on a
+> capture alone.
+>
+> READ IN FULL FIRST, yourself: `CLAUDE.md` + the canon it loads · THIS FILE WHOLE (the roster,
+> the baselines, WHAT 13u1 CHANGED UNDER YOU, the carried P39 section) · the master plan's
+> `### 13u` section (items 1 · 2 · 10 · 11 · 13 · 18 · 19, her words verbatim) ·
+> `notes/plans/phase-13u1-editor-seam.md`'s SITTING RECORD (R-13u-7/R-13u-10 rule items 18/19)
+> + its PHASE CLOSEOUT · `notes/handoffs/phase-13u1-handoff.md` · `notes/QUESTIONS.md` #109's
+> RULED block (roster item 10's binding text), #88(b)/(c), #103 (hers — do NOT decide it) ·
+> `notes/KnownIssuesAndTechDebt.md`'s 13u2-owned rows · `notes/TEXTKIT2_NOTES.md` IN FULL (item
+> 1 is the TK2 geometry family; §2's viewport/height instability, §3's measured findings and the
+> usage-bounds high-water mark are your suspects' rap sheet) · `notes/SessionResiliencyProtocol.md`
+> (an overnight run is exactly its subject) · `notes/PhaseSizingGuidance.md`.
+>
+> **CAST (her word at this kickoff: "generally Opus implementers, Fable cold review at the end
+> and/or when needed, Opus cold review the rest of the time"):** `opus-implementer`, ONE
+> acceptance unit per session, strictly sequential · cold review as a ladder at phase end over
+> the combined diff — **`fable-reviewer` MANDATORY for any round whose diff touches the editor
+> seam or pane authority** (`Shared/EditorBrain/`, `PaneTextView`/`PaneSurface`,
+> `PaneTextAuthority` — roster item 10's #109 builds and the shadow-editor fix WILL) — and
+> `opus-reviewer` where it does not; if you ladder per-batch instead, the same rule per batch,
+> with at least ONE Fable pass over the whole phase before close (R-cor-14). Cross-model flow
+> as CLAUDE.md states it; fresh reviewer per round; cap three rounds; hallucination guard
+> absolute (trace + red-on-old, or dismissed as hollow and recorded).
+>
+> **UNIT SHAPE (yours to reshape; one unit per implementer session):**
+> **A** — item 1's TRACE + the landing/settle family (item 18, rows 54/92/94/98/100, M12,
+> #88(c)'s persist-heights option now evidence-backed) — measure-first, mechanism before fix;
+> **B** — item 19's presentation set + the Outline SHADOW editor fix (they share the book's
+> Index/Outline surface); **C** — roster item 10, the #109 boundary-clamp law + trim road
+> (seam — Fable review binds); **D** — the singles (item 2 the space-eater BOTH platforms ·
+> 10 · 11 incl. the phone's paste rule decided here · 13 + row 93 · P39a/P39b · roster item 8's
+> pre-13x verification); **E** — the mechanical sweeps (the status seam's ~150-site audit
+> rename · the DEBUG-oracle keying sweep · ⌘A in a live pane · the `TakesArticleScroll` split
+> if its next touch lands here anyway). Batches close on USE evidence (walks with captures on
+> the dev-store Debug build, both voices, both appearances), never a pin alone.
+>
+> **DISCIPLINE, restated (the overnight run's rails):** start `caffeinate -dims` as its own
+> detached process at kickoff. The checkpoint protocol binds every session from its FIRST
+> commit — commit per coherent piece, push immediately (`git push origin main`, NO trailers),
+> LIVE STATUS in this file per unit, counts PENDING until runs complete, synchronous foreground
+> poll-loop waits only, no revert without a committed pre-revert state; implementer briefs
+> RESTATE these rules. One agent at a time; one Sonnet lookup max, external facts only. Zero
+> `Sources/VariorumCore/Sync/` lines, zero schema, marker stays 8 — a fix that wants either
+> stops and reports. TK2 rules bind (clamp to the verdict's range; the identity oracle kills on
+> corruption; the A47c guard stays byte-unchanged; anything sizing a surface reads the fragments'
+> bottom, never the high-water property). Never touch `/Applications/Variorum.app`, her real
+> store, or anything she created. **NO install refresh this round without her word** — her
+> morning walk is of the 13u1 refresh she has not taken yet; end instead with the checkpoint
+> naming the built state as ready-to-refresh, and she authorizes the window. Tests at the END
+> per unit/phase (baselines above); the flake list above governs any red; iOS build green per
+> unit, the FULL mobile suite at phase end if `Shared/` moved (expect the 4 known issues,
+> including row 64's wrapped pin — do not "fix" it).
+>
+> **AT CLOSE:** the full closeout ritual (this plan's closeout with dispositions · master plan
+> pointer/log/archives per the lean-docs rule · AppSpec §14 delta if any canon moved ·
+> KnownIssues zero-orphans · the MOBILE PARITY LINE, a real row — items 2 and 11 are
+> both-platform · `notes/handoffs/phase-13u2-handoff.md` LAST, her checklist at the top, the
+> ratify bundle incl. every overnight PROVISIONAL, #103 carried, and the ready-to-refresh
+> state) · the 13u3 kickoff refreshed atop `notes/plans/phase-13u3-faces.md` · commit + push.
+> Hard stop; she kicks off 13u3.
 
 ---
 
