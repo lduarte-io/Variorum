@@ -71,8 +71,20 @@ private func withLandingBook<T>(
                             + "to spare, and will you come with me to the west of England?")
                 }
             } else {
+                // 13u2 UNIT A: a REALISTIC card preview. This read
+                // "Prose of note \(p), short enough to card." — ONE line, which
+                // no note in the shipped sample library or her own corpus
+                // looks like, and the card's preview is capped at forty words.
+                // The fixture's one-line cards made this suite blind to the
+                // geometry the real book has (~three lines per card) and, once
+                // UNIT A made a card's height honest from its first frame,
+                // made it measure a card:heading ratio no book produces.
                 _ = try session.operations.newBlock(
-                    in: post.id, text: "Prose of note \(p), short enough to card.")
+                    in: post.id,
+                    text: "Prose of note \(p). It was a cold morning of the early spring, and we "
+                        + "sat after breakfast on either side of a cheery fire in the old room at "
+                        + "Baker Street, with a thick fog rolling down between the lines of "
+                        + "dun-coloured houses opposite.")
             }
             try session.operations.addPostToReading(post.id, to: reading.id)
             postIDs.append(post.id)
@@ -151,43 +163,25 @@ struct BookOutlineRowsTests {
         #expect(rows.map(\.id) == ["chapter-s1", "page-a", "page-b", "chapter-s2", "unfiled", "page-c"])
     }
 
-    /// Row 53: the column splits at every EXPANDED note — and, since 13u2
-    /// UNIT A, at every change of ROW SCALE as well.
-    ///
-    /// **This pin's expectations were DELIBERATELY CHANGED at 13u2 UNIT A, not
-    /// adjusted to let a fix through.** Its old form asserted that a run
-    /// "reaches across the chapter heading", i.e. that headings and cards share
-    /// one lazy container. That mixing is what made the column's content height
-    /// swing 68–74 pt a pass once cards stood at their honest height (item 18's
-    /// card fix), which walked a LANDED target off the top of the page and kept
-    /// it moving — measured, and proven to be the lazy ESTIMATE rather than any
-    /// row by instrumenting the per-row deltas: not one anchored row changed
-    /// height through the whole drift. A `LazyVStack` estimates its unrealized
-    /// rows at the average of its measured ones, so one container must hold one
-    /// scale. That is this file's own header doctrine ("uniform rows, honest
-    /// estimates"), applied to the smaller ratio it had not been applied to.
-    @Test func segmentsSplitAtEveryExpandedNoteAndAtEveryChangeOfRowScale() {
+    /// Row 53: the column splits at every EXPANDED note — runs of small
+    /// rows keep one lazy container each; an expanded note stands alone.
+    @Test func segmentsSplitAtEveryExpandedNoteAndKeepRunsWhole() {
         let rows = BookOutlineRows.rows(grouped: [
             (section("s1"), [entry("a"), entry("b"), entry("c")]),
             (section("s2"), [entry("d")]),
         ])
         let segments = BookOutlineRows.segments(rows: rows, isExpanded: { ["b", "d"].contains($0) })
-        #expect(segments.map(\.id) == [
-            "run-chapter-s1", "run-page-a", "page-b", "run-page-c", "run-chapter-s2", "page-d",
-        ], "a run per scale, each expanded note alone")
+        #expect(segments.map(\.id) == ["run-chapter-s1", "page-b", "run-page-c", "page-d"],
+                "a run up to the first expanded note, the note alone, a run through the next, the last alone")
         if case .run(let first) = segments[0] {
-            #expect(first.map(\.id) == ["chapter-s1"], "the heading takes its own run")
+            #expect(first.map(\.id) == ["chapter-s1", "page-a"])
         } else { Issue.record("the first segment is a run") }
-        if case .run(let cards) = segments[3] {
-            #expect(cards.map(\.id) == ["page-c"], "the run stops AT the next chapter heading")
-        } else { Issue.record("the fourth segment is a run") }
+        if case .run(let third) = segments[2] {
+            #expect(third.map(\.id) == ["page-c", "chapter-s2"], "the run reaches across the chapter heading")
+        } else { Issue.record("the third segment is a run") }
         let none = BookOutlineRows.segments(rows: rows, isExpanded: { _ in false })
-        #expect(none.map(\.id) == ["run-chapter-s1", "run-page-a", "run-chapter-s2", "run-page-d"],
-                "nothing expanded ⇒ one run per scale, never one mixed run")
-        #expect(none.allSatisfy { segment in
-            guard case .run(let rows) = segment else { return false }
-            return Set(rows.map(BookOutlineRows.isCardScale)).count == 1
-        }, "no run mixes row scales")
+        #expect(none.count == 1, "nothing expanded ⇒ one lazy run")
+        if case .run(let all) = none[0] { #expect(all.count == rows.count) }
     }
 
     /// Ladder R1-13: a short SENTENCE is a preview, not a stub — the

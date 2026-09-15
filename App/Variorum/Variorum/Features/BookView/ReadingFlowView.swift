@@ -357,17 +357,30 @@ struct ReadingFlowView: View {
         ReadingFlowGeometry.trace.append(
             "top=\(Int(top)) offset=\(Int(landing.lastOffset)) corrections=\(landing.corrections)")
         #endif
-        if abs(top) > Self.landingTolerance, landing.corrections < Self.landingCorrectionBudget {
-            landing.corrections += 1
-            #if DEBUG
-            ReadingFlowGeometry.trace.append("RE-LAND \(landing.corrections) (top was \(Int(top)))")
-            #endif
-            // Next turn, never inside the layout pass that reported.
-            DispatchQueue.main.async {
-                guard landing.anchor == rowID else { return }
-                proxy.scrollTo(rowID, anchor: .top)
-            }
-        }
+        // **13u2 UNIT A, ledger row 100 — THE REPORT NO LONGER RE-LANDS.** It
+        // records and re-arms; the decision is the quiet interval's
+        // (`checkLanding`), which is the book Outline's own discipline and the
+        // reason the Outline converges where this surface did not.
+        //
+        // REPRODUCED AND TRACED (dev store, Sherlock, a ~950 pt window, the
+        // eleventh chapter clicked after the ninth had landed — the record's
+        // TRACE 3 has the log): the content SHRINKS 2-3 pt a report for about a
+        // second as the stories above trade their estimates for real heights,
+        // and each shrink moves the target with **the scroll offset CONSTANT**
+        // (`offset=225936` across `top=-4 … -16`). A re-land issued from inside
+        // that storm DOES move the offset (225920) and the very next report
+        // shows it RESTORED (225936, the target back at -16): SwiftUI's
+        // `ScrollView` re-applies its own offset on a content-size change and
+        // undoes a proxy `scrollTo` made during it. So all six corrections were
+        // spent on 2-pt drifts, and when the real transient arrived
+        // (`content=306460`, `top=-77`, then `top=1857`) there was no budget
+        // left: `gave up at top=1857.0 after 6 re-lands, 4218 ms` — two
+        // paragraphs into the wrong story, which is the defect she can meet.
+        //
+        // A correction issued from QUIET sticks, and the budget now buys six of
+        // those instead of six undone ones. Progress is still guaranteed under a
+        // storm because `armCheck`'s ceiling (`BookView.landingMaxWait`) fires
+        // the check whether or not the column ever goes quiet.
         armCheck(proxy)
     }
 
@@ -437,6 +450,20 @@ struct ReadingFlowView: View {
         if elapsed > BookView.landingTimeBudget {
             finish("gave up at top=\(landing.lastTop.map { "\($0)" } ?? "unreported") after \(landing.corrections) re-lands, \(Int(elapsed * 1000)) ms")
             return
+        }
+        // Row 100: the re-land is the INTERVAL's, issued from quiet, so the
+        // scroll sticks instead of being undone by the next content change.
+        // Only a target that is genuinely off the top spends a correction —
+        // a target at the top that is merely waiting on the hold, or on the
+        // stories above it settling, spends none.
+        if let top = landing.lastTop, abs(top) > Self.landingTolerance,
+           landing.corrections < Self.landingCorrectionBudget {
+            landing.corrections += 1
+            #if DEBUG
+            ReadingFlowGeometry.trace.append(
+                "RE-LAND \(landing.corrections) (top was \(Int(top)))")
+            #endif
+            if let anchor = landing.anchor { proxy.scrollTo(anchor, anchor: .top) }
         }
         landing.lastDecision = Date()
         armCheck(proxy, after: max(BookView.landingSettleInterval,

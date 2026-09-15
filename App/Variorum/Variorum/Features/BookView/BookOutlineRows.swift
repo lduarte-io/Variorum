@@ -114,52 +114,20 @@ nonisolated enum BookOutlineRows {
         }
     }
 
-    /// Split the flat row list at every expanded note — **and at every change
-    /// of ROW SCALE** (13u2 UNIT A). Pure — pinned.
-    ///
-    /// **Why the second split** (measured, 13u2 UNIT A; it is this file's own
-    /// doctrine applied one level down): a `LazyVStack` estimates every row it
-    /// has not realized at the AVERAGE of the rows it HAS measured, so a
-    /// container holding two different row scales reports a content height
-    /// that swings as the scroll changes WHICH kind is realized. A run mixing
-    /// chapter headings (~51 pt) with note cards (~103 pt) swung the column by
-    /// 68–74 pt per pass — enough to walk a landed target off the top of the
-    /// page and keep it moving (`openingACollapsedStoryLandsAtItsTopWith
-    /// ThreeStoriesExpanded` never converged, 13 hops and still 74 pt out).
-    /// Proven by elimination: with the deltas instrumented, NOT ONE anchored
-    /// row changed height during the drift — every point of it was the lazy
-    /// estimate for rows that had not been realized.
-    ///
-    /// The header above already says why stories leave the lazy containers
-    /// ("uniform rows, honest estimates"); headings and cards are the same
-    /// claim at a smaller ratio, and the ratio is what decides. A run is now
-    /// all-headings or all-cards, so its average IS its rows.
+    /// Split the flat row list at every expanded note. Pure — pinned.
     static func segments(rows: [Row], isExpanded: (String) -> Bool) -> [Segment] {
         var result: [Segment] = []
         var run: [Row] = []
-        func flush() {
-            if !run.isEmpty { result.append(.run(run)); run = [] }
-        }
         for row in rows {
             if case .note(let entry) = row, isExpanded(entry.postID) {
-                flush()
+                if !run.isEmpty { result.append(.run(run)); run = [] }
                 result.append(.expanded(entry))
-                continue
+            } else {
+                run.append(row)
             }
-            if let last = run.last, isCardScale(last) != isCardScale(row) { flush() }
-            run.append(row)
         }
-        flush()
+        if !run.isEmpty { result.append(.run(run)) }
         return result
-    }
-
-    /// The two row SCALES a run may hold: a collapsed note's card, or one of
-    /// the headings. Only the distinction matters, never the numbers — a
-    /// container of one scale estimates its unrealized rows correctly whatever
-    /// that scale turns out to be.
-    static func isCardScale(_ row: Row) -> Bool {
-        if case .note = row { return true }
-        return false
     }
 
     // MARK: - The card's preview (row 45) and the gutter's line (row 13)

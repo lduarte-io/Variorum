@@ -378,13 +378,13 @@ DISPOSITIONS table.)*
 |---|---|
 | the 13l hang lead — trace | IN PROGRESS (the capture read; the analysis is TRACE 1 below) |
 | item 1 — the pane-stability trace | NOT-STARTED |
-| item 18 — the long-book landing & settle | **FIXED + WALKED** (TRACE 2: before/after landing stories on the real Sherlock book — 1 hop of 854 pt → 0 hops, the stutter gone; pins green, red-on-old 46→103) |
+| item 18 — the long-book landing & settle | **TRACED (fully) · the card fix REVERTED and DEFERRED with its designed successor** — see TRACE 2 and its REVERT section; the flow half (row 100) is FIXED |
 | row 54 — read tier's provisional-width first measure | NOT-STARTED |
 | row 92 — canvas silhouette click lands mid-board | NOT-STARTED |
 | row 94 — Blocks' ~0.2–0.3 s residual arrival | NOT-STARTED |
-| row 98 — paged reader's paragraph over-count | NOT-STARTED |
-| row 100 — the flow's landing off after a content creep | NOT-STARTED |
-| M12 — `desyncRecoveryCount` oracles | NOT-STARTED |
+| row 98 — paged reader's paragraph over-count | **DISMISSED AS HOLLOW** (traced — see the row) |
+| row 100 — the flow's landing off after a content creep | **REPRODUCED + FIXED** (TRACE 3; walk pending) |
+| M12 — `desyncRecoveryCount` oracles | **VERIFIED** — every oracle suite green (52 tests / 8 suites) |
 | row 51 — the `TakesArticleScroll` split (CONDITIONAL) | NOT-TAKEN so far (this unit has touched no article-scroll machinery) |
 | tests | NOT-STARTED |
 | walk + captures | NOT-STARTED |
