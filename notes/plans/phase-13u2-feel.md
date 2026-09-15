@@ -358,7 +358,7 @@ on the standing rails, zero-instance pgrep first, record-instead-of-kill if her 
 | unit | status |
 |---|---|
 | A — pane stability trace + landing/settle | **CLOSED 2026-09-15** — item 1 TRACED (her hands owed, never claimed closed) · row 100 FIXED + walked · row 98 DISMISSED AS HOLLOW · M12 VERIFIED · item 18's Outline half TRACED, built, and REVERTED on a 3-vs-3 measurement, with its designed successor recorded · 54/92/94 DEFERRED with reasons. Finals = baseline: core 1562/170 · Mac 2668/445 · iOS green |
-| A2 — item 18's successor: preview priming (RULING A-1) | **BUILT + WALKED 2026-09-15, ONE OPEN CALL FOR THE ORCHESTRATOR** — item 18's card drift FIXED (red-on-old; no `h=46` on the real book, 3 runs) · the bounded core read MEASURED FLAT · **constraint 2's gate arm is RED at 73 pt (the only failure in the Mac suite) while the SAME scenario on her real book improves from "gave up at 61 pt after 12 hops" to "settled after 2"** — the letter vs the purpose, recorded in full · finals: core 1567/171 · Mac 2670/446 (1 failure = that arm) · iOS green |
+| A2 — item 18's successor: preview priming (RULING A-1) | **CLOSED 2026-09-15 — RULING A-2: the priming SHIPS** — item 18's card drift FIXED (red-on-old; no `h=46` on the real book, 3 runs) · the bounded core read MEASURED FLAT · the gate arm ADJUDICATED: hard-bounded at the residual's magnitude + the ≤ 4 aspiration in `withKnownIssue` (the scale-mix residual; unit B re-examines its closed cure beside the shadow fix) · finals: core 1567/171 · Mac 2670/446 GREEN with 1 known issue · iOS green · item 18 field acceptance: **her hands owed** |
 | B — book-Index presentation + shadow editor | NOT-STARTED |
 | C — #109 boundary-clamp law | NOT-STARTED |
 | D — the singles (+ TRACE 1a, routed by RULING A-1) | NOT-STARTED |
@@ -1042,6 +1042,44 @@ and nothing was reverted.
 · `20-a2-after-sherlock-open` · `21-a2-after-ch11-landed` · `22-a2-before-ch11-landed` ·
 `23-a2-after-three-expanded` · `24-a2-before-three-expanded` · `25-a2-after-study-voice`, plus the raw
 landing logs `a2-before3.log` · `a2-before-run4.log` · `a2-before-run5.log`.
+
+## ORCHESTRATOR ADJUDICATION — UNIT A2 (2026-09-15, the same night)
+
+**Spot-check verdict: the record's claims VERIFY** — nine commits pushed, the diff shape matches
+(the core read + tests, the model, the view, the pins; zero `Sync/`, zero schema), the record's gate
+section states the disagreement plainly, and the pin landed RED first at its own commit
+(`4f3aac99`), exactly as the guard demands.
+
+**RULING A-2: THE PRIMING SHIPS.** The phase's acceptance evidence for this kind is USE, and the
+walk on her real book improved BOTH landing cases — the ordinary landing (no `h=46` in any run,
+1 hop each) and the fixture's own three-expanded shape (`gave up at 61 pt / 12 hops / 4.08 s` →
+`settled at −2 pt / 2 hops / 1.04 s`). The gate's PURPOSE — do not break the three-expanded case
+she also uses — is met and then some; and A2's trace shows the gate's LETTER was unmeetable
+honestly: the fixture's baseline green depended on the defect's own timing (46 pt cards ≈ 51 pt
+headings homogenized the lazy run, so the estimate barely moved). A gate whose green requires the
+defect is not a gate on the fix. Reverting would trade measured production improvements in both
+cases for a synthetic fixture — refused.
+
+**The red arm's disposition (the orchestrator's own edit, the small-code allowance):** the far-below
+arm now carries TWO layers, both committed with this adjudication — a HARD bound outside the wrap
+(`abs(below) <= 90`: the residual is a stable offset bounded by the scale-mix swing's own measured
+magnitude; further off, or an oscillation/give-up, is a NEW defect and fails loud) and the ≤ 4 pt
+aspiration wrapped in `withKnownIssue` (the row-64 pattern: visible on every run — the suite
+reports "passed with 1 known issue" — and it trips as an UNEXPECTED PASS the day the residual comes
+right, at which point it is unwrapped). Verified: the isolated suite runs 6/6,
+`openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded` passes with exactly the one known
+issue (`abs(below) → 73.0`). **This amends RULING A-1's constraint 2 with the reason recorded —
+never silently.** The Mac suite's expected shape from here: green with 1 known issue.
+
+**THE SCALE-MIX RESIDUAL now needs a permanent home at the closeout** (the KnownIssues zero-orphans
+pass): the Outline's card:heading estimate swing leaves a deterministic ~73 pt landing offset in
+the synthetic far-below extreme (never reproduced on her real corpus, where the same shape settles
+at −2 pt). Its structural cure — one scale per lazy run — was closed by UNIT A on evidence
+(`editorHeight == 24`) that A2 has now traced to a HARNESS artifact (the double realization under
+the pumped run loop; the real app mounts ONCE, measured both trees). **Unit B, which owns the
+shadow-editor row, re-examines that closed road beside its fix** — if the shadow fix changes the
+picture, the structural cure may become viable and the wrapped arm comes right. Routed into B's
+brief.
 
 ---
 

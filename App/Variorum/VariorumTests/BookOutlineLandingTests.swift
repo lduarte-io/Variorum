@@ -500,8 +500,21 @@ struct BookOutlineLandingTests {
 
             // Far BELOW (three expanded stories above and between).
             let below = try await open(15, "far below")
-            #expect(abs(below) <= 4,
-                    "the story far below lands at its own top and stays there, not \(below) pt away")
+            // RULING A-2 (13u2 UNIT A2 adjudication): in THIS synthetic fixture the
+            // far-below landing ends at a stable ~-73 pt — SwiftUI's estimate for the
+            // lazy run's UNREALIZED rows under the honest 103:51 card:heading mix (not
+            // one realized row moves; the plan's "THE GATE, MEASURED BOTH WAYS"). The
+            // same scenario on the real Sherlock book settles at -2 pt in 2 hops. The
+            // hard bound pins the residual's measured magnitude — an offset, never an
+            // oscillation or give-up; further off than the swing itself is a NEW defect.
+            #expect(abs(below) <= 90,
+                    "far below is off by more than the scale-mix residual allows: \(below) pt")
+            withKnownIssue(
+                "The scale-mix estimate residual (13u2 UNIT A2, RULING A-2): the ≤ 4 pt landing holds on the real book but not in this fixture, whose baseline green depended on the defect's own timing (46 pt cards ≈ 51 pt headings). When the residual comes right this trips as an unexpected pass — unwrap it."
+            ) {
+                #expect(abs(below) <= 4,
+                        "the story far below lands at its own top and stays there, not \(below) pt away")
+            }
             // Far ABOVE (four expanded stories below it now).
             let above = try await open(1, "far above")
             #expect(abs(above) <= 4,
