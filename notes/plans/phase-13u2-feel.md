@@ -1431,7 +1431,7 @@ absorbs the open tail's separator, and the tail's two causes stand untouched.
 | the flipped pins, RED ON OLD | **DONE** — 10 of 14 behaviour pins fail on the pre-fix tree (20 issues); the 4 that pass on both are named |
 | the phone's consumer (or the parity row, with the reason) | **DONE** — shape (ii) inherited with no arm; shape (i) given one (3 mirrors, zero new brain); the LANDING pin is the catch-up's, with the harness reason |
 | tests (core · FULL Mac · iOS build) | PENDING |
-| the WALK + captures | PENDING |
+| the WALK + captures | **DONE** — 11 captures (41–51) on the dev-store Debug build: both shape (i) mirrors, shape (ii)'s trim with its receipt, BOTH undo grammars, the locked-take refusal on a trimmed span, and a type-over beside a locked neighbour |
 | PROVISIONALs → `notes/QUESTIONS.md` | **DONE** — **#111** (a) BUILT PROVISIONAL · (b) the retired cause's new words · (c) the phone's missing seam carves, a FINDING with a KnownIssues row; the marker moved to #112 |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
@@ -1598,6 +1598,42 @@ a PRESERVED behaviour, never a fix): the two tail fences (cells 15/16), the lock
 (cell 17), and `aClampedSpanInsideALockedTakeRefusesInTheTakesOwnWords` — which refused before
 through `diagnose`'s run walk and refuses now through the in-block verdict, saying "locked" either
 way. It is kept because it pins that the clamp road does **not** swallow a lock.
+
+## THE WALK — the dev-store Debug build, by hand (captures 41–51)
+
+A fresh note typed in Write — `Alpha one.` ⏎ `Beta two.` ⏎ `Gamma three.`, three blocks (the bar
+reads *block 3/3*) — then the gesture matrix, each by keyboard selection so the span is EXACT rather
+than a pixel guess (click the line, ⌘←/⌘→ to its edge, then ⇧← / ⇧→ counted).
+
+| # | capture | the gesture | what the app did |
+|---|---|---|---|
+| 41 | `41-c-note-seeded` | the seeded note | three blocks, no tail |
+| 42 | `42-c-shape-i-trailing-selection` | from B's start, ⇧← ×5 | the selection is `one.` **plus the paragraph break** — the trailing wash past the line's last glyph IS the selected newline |
+| 43 | `43-c-shape-i-trailing-after` | ⌫ | **`Alpha ` · `Beta two.` · `Gamma three.`** — the block lost its tail, the break STANDS, all three identities kept, **no refusal** |
+| 44 | `44-c-shape-i-cmdz-restores` | Edit ▸ Undo | **`Alpha one.` comes back, with `one.` re-selected** — AppKit's own text undo, which is the whole reason shape (i) is not a compound |
+| 45 | `45-c-shape-i-leading-selection` | from A's end, ⇧→ ×6 | the break **plus** `Beta ` — the mirror |
+| 46 | `46-c-shape-i-leading-after` | ⌫ | **`Alpha one.` · `two.` · `Gamma three.`** — the next block lost its head, the break stands |
+| 47 | `47-c-shape-ii-selection` | from A's end, ⇧→ ×12 | the break + `two.` WHOLE + the break + `Gamma ` |
+| 48 | `48-c-shape-ii-after-trim` | ⌫ | **`Alpha one.` · `three.`**, *block 2/2*, and the receipt: **“1 block to This Note's Tray. ⌥⌘Z und…”** — the trim, the tray, and her legibility mandate in one line. A's characters were never in the span and A is untouched; **no join** (R-13u-2) |
+| 49 | `49-c-shape-ii-structural-undo` | Edit ▸ **“Undo Edit Across Blocks”** | all three blocks back, exact rows. The menu item's NAME is the evidence for the undo grammar: one entry, `CrossBlockCompound.undoLabel`, and plain “Undo” was disabled beside it |
+| 50 | `50-c-locked-take-refuses-whole` | lock B's take (take ▸ context ▸ *Lock this take*), then the same shape (ii) span + ⌫ | **“A take in this selection is locked — nothing was changed. Branch it or unlock it, then try again.”**, *block 1/3* — R-13u-1 binds a TRIMMED run exactly as before |
+| 51 | `51-c-typeover-beside-a-locked-neighbour` | with B still LOCKED: shape (i) on A, typed `X` | **`Alpha X`** — the typed text lands inside the one block, and the locked NEIGHBOUR does not refuse a gesture that never touched it (cell 18, in the app) |
+
+**TWO honest notes from the walk.**
+
+1. **⌘Z via `cliclick` never reached the app** — neither for the clamped edit nor for a plain typed
+   character (the control). The Edit menu showed **Undo ENABLED** the whole time, and clicking
+   Edit ▸ Undo undid both. So capture 44 is the menu road, and the finding is about the WALK RIG
+   (cliclick's `t:` typing does not carry ⌘ for every letter), not about the app. Recorded so the
+   next walk does not re-derive it.
+2. **The TAIL cases could not be summoned by hand, and the reason is itself the finding.** Since
+   U-1 made the Return KEY structural, ⏎ never opens the tail — the walk's own `block 3/3` says so —
+   so an open tail beside blocks now arises only from a newline arriving as TEXT, and bulk entry
+   segments a paste on entry and closes it. The open tail with blocks beside it is therefore not a
+   hand-reachable state in ordinary Mac use any more. Its two causes are pinned at the app's own
+   seam instead — `BoundaryClampTests`' two tail pins drive `insertText` through the real gate on a
+   real `EditorTextView` and read the status line — and they are GREEN ON BOTH TREES, so the fence
+   is preserved behaviour rather than something this diff could have broken silently.
 
 ---
 
