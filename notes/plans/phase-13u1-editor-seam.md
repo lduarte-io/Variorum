@@ -291,15 +291,123 @@ zero. Lockstep marker: 8, untouched.
 |---|---|---|
 | A1 | The O(N²) sweep — the SHARED brain (`BlockRangeIndex.entryRanges()` + `StructuralGesturePlanner`'s two walks) + pins | DONE(`e689db54`) |
 | A2 | The O(N²) sweep — the MAC app's loop sites + pins | DONE(`e689db54`) |
-| A3 | The O(N²) sweep — the PHONE's loop sites + pins | IN-PROGRESS |
-| A4 | The sweep's verdict table — EVERY production `range(ofEntryAt:)` caller enumerated and verdicted | NOT-STARTED |
-| B | The churn pair P24/P25 — the Mac adopts `ArmedEdit.exactCost` + red-on-old pin on the REAL typed path | NOT-STARTED |
+| A3 | The O(N²) sweep — the PHONE's loop sites + pins | DONE(`0c96edcd`) |
+| A4 | The sweep's verdict table — EVERY production `range(ofEntryAt:)` caller enumerated and verdicted | DONE (the record's A section) |
+| B | The churn pair P24/P25 — the Mac adopts `ArmedEdit.exactCost` + red-on-old pin on the REAL typed path | IN-PROGRESS |
 | C | The door-await chain loop (KnownIssues row 44) + the round-3 record's designed pin | NOT-STARTED |
 | D | Item 7 — `MarkdownActs`' arm-then-hand-off rewrite (the ONE input-path door) + the grep pin | NOT-STARTED |
 | E | P40 + P41 hoists (zero-test-edit proof) + the KnownIssues eight-brain enumeration amendment | NOT-STARTED |
 | F | Close — suites green, KnownIssues rows resolved/re-owned, the seven verdicted | NOT-STARTED |
 
 *(Measurements, verdicts, pins and PROVISIONALs are filled in below as each piece lands.)*
+
+---
+
+### A — THE O(N²) CLASS, SWEPT TO COMPLETION
+
+**The mechanism, traced in this session before a line was changed.**
+`BlockRangeIndex.range(ofEntryAt:)` (`App/Variorum/Shared/EditorBrain/BlockRangeIndex.swift:74`)
+walks `entries` from index ZERO on every call — it is O(i), and `entries` is a plain stored
+array with no memoization. A caller that asks it once per entry inside a loop therefore pays
+Σi ≈ N²/2 **on the main actor**. That is cost proportional to the DOCUMENT, which is P1's one
+prohibition; the already-fixed twin in the same family (`CrossBlockEditPlanner.plan`, mobile
+round 2) measured **23.8 s for a single plan at 20,000 entries** before it accumulated instead.
+
+**The remedy is the one the KnownIssues row prescribes, and it is arithmetic, never policy.**
+Entry `i` starts at `Σ_{j<i}(length_j + 1)` **by definition** — this file's own tiling invariant —
+which is exactly what the accessor computes one call at a time. So one accumulating pass answers
+identically. It is now ONE brain, `BlockRangeIndex.entryRanges()`, consumed by every loop caller
+on both platforms; the accessor stays for the single-lookup callers, where O(i) once is the
+honest cost of the question. The two callers inside `StructuralGesturePlanner` accumulate
+*inline* instead — deliberately, because that file's own "Tiling geometry" section already holds
+two accumulating walks (`entryTouching`, `entriesIntersecting`) and a third hand-rolled one there
+reads as the file's idiom rather than as a fork; both shapes are the same arithmetic and the
+equivalence pin covers the arithmetic, not the address.
+
+**PIN (the equivalence the whole sweep rests on):**
+`VariorumTests/EditorSeamCostTests.theEntryRangesWalkAgreesWithTheIndexsOwnAccessor` — the walk
+compared against `range(ofEntryAt:)` itself on an irregular tiling with **empty entries at both
+edges and in the middle** (`[0, 7, 0, 0, 13, 1, 0]`, plus `[5]`, `[0]`, `[]`, `[3, 0]`, `[0, 4]`),
+which is exactly the shape the row names and where an off-by-one hides; plus
+`theWalkLandsTheLastEntryAtTheDocumentEnd`. **One pin on one shared type — deliberately NOT
+copied into the mobile target**, since a second copy of an equivalence proof is the drift class
+this sweep exists inside.
+
+#### The measurements — RED ON THE REAL PRE-FIX CODE
+
+Every number below was taken on this box. The pre-fix column is a **scratch `git worktree` at
+`6b8be0bd`** (the unit's first commit, zero code changes in it) with the new pin files copied in
+and the two `entryRanges()` equivalence pins stripped (they exercise API that does not exist
+there); its own DerivedData, outside the working tree. **These are not load-flaky latency pins:**
+every budget clears its post-fix number by ≥100× and is blown by two to four orders of magnitude
+on the old code, so no machine-load story changes any verdict.
+
+| Road | N | PRE-FIX | POST-FIX | budget | ratio |
+|---|---|---|---|---|---|
+| merge enablement, ordinary in-block caret (**P16**) | 20,000 | **29.24 s · 24.91 s** | 3.17–3.30 ms | 50 ms | ~8,000× |
+| merge enablement, caret at the LAST seam (**P16**) | 20,000 | **29.29 s · 24.88 s** | 3.58–3.78 ms | 50 ms | ~7,500× |
+| `separatorPair` (a selected separator) | 20,000 | **24.05 s** | 8.4 ms | 50 ms | ~2,860× |
+| `CrossBlockRefusal.diagnose` | 20,000 | **29.13 s · 23.89 s** | 3.58–3.91 ms | 50 ms | ~7,400× |
+| `applyDifferential`, Mac, mounted (**P17**) | 8,000 | **4.41 s** | 56.6 ms | 400 ms | ~78× |
+| `applyDifferential`, phone, headless (**P17**) | 8,000 | **3.73 s** | 30.6 ms | 400 ms | ~122× |
+| `planVisibleTakeEdit`, mounted (**the KnownIssues row's own site**) | 8,000 | **4.31 s** | 1.57 ms | 100 ms | ~2,750× |
+
+Two numbers deserve their own sentence. **P16's is the sweep's real finding:** that road runs on
+EVERY caret move and EVERY keystroke (`textViewDidChangeSelection` → `updateCaretContext` →
+`refreshGestureAvailability` → `enabled(.mergeBlocks)` → `plan(.mergeBlocks)` → `seamPair`, and
+`storageDidEdit` ends in `updateCaretContext` too), and a caret anywhere but a seam — essentially
+always — ran the whole walk. **`applyDifferential`'s ratio is the smallest because its residue is
+honest:** the per-slot `viewText` comparison is inherently ∝ the note's text, and its doc comment
+now says so instead of promising *"Cost ∝ changed blocks, never the post"* for the whole method
+(the 2026-08-30 verifier's "bonus the reviewer missed", adopted).
+
+**Behavioural equivalence was also demonstrated on the OLD code:** the geometry assertions beside
+those clocks (the last seam names the pair `19,998 / 19,999`; the separator selection plans the
+same merge; the visible-take plan's pieces, intra-ranges and caret offset) passed on BOTH trees.
+The walk answers what the accessor answered.
+
+#### The verdict table — EVERY production caller of `range(ofEntryAt:)`, both platforms
+
+*(Test-target callers are excluded by construction: a pin that asks the accessor is asking the
+oracle, which is the point. The sweep is over `App/Variorum/Shared`, `App/Variorum/Variorum`,
+`App/Variorum/VariorumMobile`.)*
+
+**FIXED — inside a loop, now reading the tiling ONCE (14 sites):**
+
+| Site | Road | Named by |
+|---|---|---|
+| `StructuralGesturePlanner.seamPair` | every caret move · every keystroke | **P16** (MAJOR) |
+| `StructuralGesturePlanner.separatorPair` | the pure-seam merge gesture | P16's sibling |
+| `EditorSurfaceController.applyDifferential` | take switch · `restoreCommit` · sync landing | **P17** |
+| `MobileEditorViewModel.applyDifferential` | the same, on the phone | **P17** |
+| `ReadPostViewModel.applyDifferential` | the read tier's projection | **P17**'s third site |
+| `EditorSurfaceController.planVisibleTakeEdit` | the cross-block KEYSTROKE road | **the KnownIssues row** |
+| `EditorSurfaceController.deleteInEveryTake` | Delete in Every Take | unnamed — found by the sweep rule |
+| `EditorSurfaceController.replaceInEveryTake` | Replace All in Every Take | **P22** (hoisted out of BOTH loops) |
+| `EditorSurfaceController.verifyDifferentialOracle` | every differential structural apply, DEBUG | unnamed |
+| `EditorViewModel` crystallization attribute stamp | every mint; O(M·N) with M = minted paragraphs | unnamed |
+| `MobileEditorViewModel` crystallization attribute stamp | the same, on the phone | unnamed |
+| `EditorViewModel.refreshBadges` | every scroll · every projection, O(fans × blocks) | unnamed |
+| `ReadPostViewModel` badge pass | the read tier's twin | unnamed |
+| `CrossBlockRefusal.diagnose` | diagnosing a refused cross-block edit | unnamed |
+
+**PROVABLY SAFE — a single lookup, or a bounded constant number of them (24 sites), each read:**
+`BlockRangeIndex.tailRange` + `.tailSeparatorOffset` (one call each; and **every one of their own
+16 callers was checked — none sits in a loop over entries**) · `StructuralGesturePlanner.span`
+(one), `.crossBlockMakeBlock` (two) · `EditorSurfaceController` `renderFull`'s caret restore,
+`.extract`'s base, `.makeBlock`'s entry range, `edgeSnapshot` (×2), `runPlainDivide`,
+`runFannedDivide`, `applyStructuralResult`, `applyDifferentialStructural`'s `oldTextAt` closure
+(called ≤2× per derive) · `EditorViewModel` `storageDidEdit`'s clamped entry range, the tail
+transfer, `gestureWorld`'s and `typedReturnAct`'s lazy `textAt` closures (the planner consults
+them a bounded number of times — that laziness is the documented P1 design),
+`rememberedArrivalLanding`, `applyWriteIntent`, `jumpToAdjacentBlock` · `StructuralSeamEdit.derive`
+(1–2 per switch case) · `MobileEditorViewModel` `rangeOfBlock`, `recordAutosave`, `displaySlot`,
+the tail transfer · `MobileStructural` (three, each once per gesture) · `CanvasView.jump` and
+`PostDetailView.jump` (one each, off-main inside a database read).
+
+**THE CLASS IS CLOSED:** after this sweep no production caller of `range(ofEntryAt:)` sits inside
+a loop over the entries, on either platform. `IdentityProjectionAudit` already accumulated (its
+own comment names the same reason) and needed nothing.
 
 ## UNIT 2 RECORD (LIVE STATUS)
 
