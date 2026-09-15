@@ -802,6 +802,24 @@ final class EditorTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
         withPasteFlag { pasteAsPlainText(sender) } // plain text: never import foreign styling
     }
 
+    /// **13u2 item 11 — ⇧⌘V, "Paste Without Line Breaks."** Her ask:
+    /// *"i want a way to paste without new lines … it's a quality of life
+    /// issue."* The RULE is `PlainPaste.flattened` in `Shared/`, so the
+    /// phone's own door will consume the same one; this is the Mac's hand
+    /// on it.
+    ///
+    /// It lands through `insertText(_:replacementRange:)` — the same door an
+    /// ordinary paste uses — INSIDE the paste flag, so a drop into the open
+    /// tail is still BULK ENTRY (it just has no newline left to split on,
+    /// which is the whole point: a paste-time transform, never a change to
+    /// segmentation). Nothing here knows about blocks.
+    @objc func pasteWithoutNewlines(_ sender: Any?) {
+        guard let raw = NSPasteboard.general.string(forType: .string) else { return }
+        let flattened = PlainPaste.flattened(raw)
+        guard !flattened.isEmpty else { return }
+        withPasteFlag { insertText(flattened, replacementRange: selectedRange()) }
+    }
+
     /// Runs `body` with the paste flag raised — the paste path itself, and a
     /// seam for tests to drive bulk entry without the global pasteboard.
     func withPasteFlag<T>(_ body: () -> T) -> T {

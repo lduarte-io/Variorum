@@ -1763,7 +1763,7 @@ foreign-string compare).
 | the record opened | **DONE** |
 | item 2 — the eager space-eater (BOTH platforms) | **TRACED + FIXED** — the durability mint's edge trim; red-on-old on the Mac (5 of 9 pins, 8 issues); the phone inherits the shared brain and has its own landing pin (TRACE D-1) |
 | item 10 — starred items scroll past ~7 | **BUILT + pinned (red-on-old: the section drew 360 pt where the window is 225)** — with the item's headline FINDING handed up: `Operations.starLimit = 5`, so the scroll cannot engage in the shipped app. QUESTIONS #112(b) |
-| item 11 — paste without newlines (+ the phone's rule) | PENDING |
+| item 11 — paste without newlines (+ the phone's rule) | **BUILT — ⇧⌘V on the Mac, the RULE in `Shared/` for both platforms, 10 pins; the phone's DOOR recorded as owed** (TRACE D-5) |
 | item 13 — the note title's room · row 93 — the nameless prompt | **item 13's FIRST half: HEALED by row 11 and MEASURED (585.5 pt of room, ending at the icon row where the scraps door is); row 93: FIXED with an open mark, pinned in both voices** (TRACE D-4) |
 | P39a — Pool stops holding `LibraryViewModel` | PENDING |
 | P39b — `WriteTakesPanel` stops constructing `TakesViewModel` | PENDING |
@@ -1772,7 +1772,7 @@ foreign-string compare).
 | TRACE 1a — the pane's projection compare | **FIXED + MEASURED** — 0.42 ms → 0.00009 ms per read pane per update pass at 200 blocks, and FLAT in the text's length where it was linear (TRACE D-3) |
 | tests (core · FULL Mac · iOS build · mobile if `Shared/` moved) | PENDING |
 | the WALK + captures (52 onward) | PENDING |
-| PROVISIONALs → `notes/QUESTIONS.md` (next free **#112**) | PENDING |
+| PROVISIONALs → `notes/QUESTIONS.md` (next free **#112**) | **DONE — #112 (a) the space-eater's scope · (b) the STAR CAP, which stops item 10 firing · (c) the paste chord + rule; the marker moved to #113** |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
 
@@ -2006,6 +2006,66 @@ when the field opened. Two further things were measured and are recorded so nobo
 `onGeometryChange` never fired for this leaf in any of three shapes (a filled `Rectangle`, a `Color`,
 inside the overlay or on the band) while `onAppear` fired every time; the mark's LOOK is therefore
 the walk's evidence, not the pin's.
+
+## TRACE D-5 — ITEM 11: paste without line breaks
+
+Her ask, verbatim: *"i want a way to paste without new lines (some kind of command shift v or
+command option v or whatever isn't taken, but it's a quality of life issue)."* QoL by her own
+framing, so there is no defect to trace — what this item owes is a CHORD chosen from what is free,
+a RULE that is one rule for both platforms, and a door that obeys P-2.
+
+**THE CHORD: ⇧⌘V, chosen by measurement.** `grep -rn 'keyboardShortcut("v"' App/Variorum/` returns
+NOTHING — the app claims no "v" chord at all — and macOS's own *Paste and Match Style* is ⌥⇧⌘V, so
+⇧⌘V is genuinely free here rather than conventionally free. Her named alternative ⌥⌘V is one
+modifier away; recorded for her as QUESTIONS #112(c).
+
+**THE RULE, decided for BOTH platforms** (the master plan's own platform call: *"the phone's
+equivalent is a long-press/edit-menu item, not a chord, but the RULE … should be one rule"*). It is
+ONE pure function, `PlainPaste.flattened`, in `App/Variorum/Shared/` — the forked-brains rule applied
+before the fork could happen:
+
+1. `\r\n` and a bare `\r` normalize to `\n` first (a Windows or classic-Mac clipboard is the same
+   text, and a rule that only knew `\n` would leave those breaks standing).
+2. Every line break becomes a SINGLE SPACE; a whitespace-only line is a separator and adds no
+   second space.
+3. The join trims only at the SEAM, so a clipboard whose lines already end in a space does not land
+   a double one.
+4. **The first line's leading whitespace and the last line's trailing whitespace are KEPT** — what
+   she copied at the edges is hers. (Item 2's doctrine one door over, in the same batch.)
+5. A clipboard with no line break passes through BYTE-IDENTICAL: the chord over ordinary text is an
+   ordinary paste.
+
+**It is a PASTE-TIME TRANSFORM, never a segmentation change** — the master plan's own words — and
+the pins prove that rather than assert it: the same clipboard through ⇧⌘V lands ONE block, and
+through an ordinary ⌘V still lands THREE (with the blank line riding as the middle block's trailing
+content, the k−1 spacing rule untouched).
+
+**THE DOORS.** `EditorTextView.pasteWithoutNewlines` lands the flattened text through
+`insertText(_:replacementRange:)` — the same input door an ordinary paste uses, inside the paste
+flag, so a drop into the open tail is still bulk entry (it simply has no newline left to split on).
+`PaneTextView` gets the same method for the reason the typed-arrow trio is there: a live take/lens
+pane is a writing surface, and a chord that works in Write and not in Takes is the privilege R118
+forbids; a READ pane refuses it (pinned). The menu item sits in `CommandGroup(after: .pasteboard)`,
+beside Find.
+
+**It is deliberately NOT registry-declared, and the exception is stated rather than taken** (P-1 asks
+for a declaration, so silence would be the drift): Cut, Copy and Paste are not declared either — they
+are AppKit's standard Edit menu, validated by the RESPONDER CHAIN — and this is a member of that
+family. Its availability is "a text view has the keyboard", which `CapabilityContext` cannot see and
+the responder chain answers exactly. P-2 is honoured the way a menu item can honour it: `sendAction`
+reports whether anything took the act, and where nothing did the door speaks a real refusal naming
+the road (*"Click into some text first — this pastes into a note you are writing in."*).
+
+**Pins:** `PlainPasteRuleTests` (6 — the rule, including the foreign line endings and the
+byte-identical pass-through) + `PlainPasteDoorTests` (4 — the Write editor end to end through the
+real input path, the ordinary-paste control, the live pane, the read pane's refusal). **Red on old
+by construction**: neither platform had such a door (grep-verified, and the master plan says so).
+
+**THE PHONE has the rule and OWES the door.** `Shared/PlainPaste.swift` compiles into the iOS target
+(the build gate proves it); what is missing is the face — an edit-menu item on the phone's text view,
+which is the mobile catch-up's work and is recorded as a MOBILE PARITY row rather than guessed at
+here. Putting the rule in shared code is exactly what makes that build a face and not a second
+decision.
 
 ---
 

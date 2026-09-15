@@ -428,6 +428,20 @@ final class PaneTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
         MarkdownActs.substituteTypedArrow(afterTyping: string, in: self)
     }
 
+    /// **13u2 item 11 — ⇧⌘V here too**, for the reason the arrow trio is
+    /// here: a live take/lens pane is a writing surface, and a chord she can
+    /// use in Write and not in Takes is exactly the privilege R118 forbids.
+    /// The RULE is `PlainPaste.flattened` in `Shared/` — the same one the
+    /// full editor and, when its face lands, the phone consume. A pane has
+    /// no open tail, so there is no bulk flag to raise: the flattened text
+    /// is ordinary content here.
+    @objc func pasteWithoutNewlines(_ sender: Any?) {
+        guard isEditable, let raw = NSPasteboard.general.string(forType: .string) else { return }
+        let flattened = PlainPaste.flattened(raw)
+        guard !flattened.isEmpty else { return }
+        insertText(flattened, replacementRange: selectedRange())
+    }
+
     /// **13k K5 — ⏎ continues a list**, through the one shared door. A
     /// pane's newline is ordinary text (no open tail, no crystallization),
     /// so the only thing this adds is the lead — and it adds it exactly the

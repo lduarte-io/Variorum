@@ -380,6 +380,38 @@ struct EditorCommands: Commands {
         // detail's own editor (the book/spread/pool inline editors have no
         // bar of their own to show).
         CommandGroup(after: .pasteboard) {
+            // **13u2 item 11 — her QoL ask, verbatim:** *"i want a way to
+            // paste without new lines (some kind of command shift v or
+            // command option v or whatever isn't taken, but it's a quality
+            // of life issue)."*
+            //
+            // **THE CHORD: ⇧⌘V**, and the reason is measurement rather than
+            // convention — a grep of the whole app finds NO `keyboardShortcut`
+            // on "v" at all, and macOS's own "Paste and Match Style" is
+            // ⌥⇧⌘V, so ⇧⌘V is genuinely free here. Her named alternative
+            // ⌥⌘V is one modifier away if she prefers it.
+            //
+            // **It is NOT registry-declared, deliberately, and this is the
+            // reason** (P-1 asks for one, so an exception is stated rather
+            // than taken): Cut, Copy and Paste are not declared either —
+            // they are AppKit's standard Edit menu, validated by the
+            // RESPONDER CHAIN, and this is a member of that family. Its
+            // availability is "a text view has the keyboard", which
+            // `CapabilityContext` cannot see and the responder chain answers
+            // exactly. So it goes down the chain like its siblings, and P-2
+            // is honoured the way a menu item can honour it: `sendAction`
+            // reports whether anything took it, and where nothing did the
+            // door says so instead of failing silently.
+            Button("Paste Without Line Breaks") {
+                let took = NSApp.sendAction(
+                    #selector(EditorTextView.pasteWithoutNewlines(_:)), to: nil, from: nil)
+                if !took {
+                    session?.status.say(
+                        "Click into some text first — this pastes into a note you are writing in.",
+                        refusing: true)
+                }
+            }
+            .keyboardShortcut("v", modifiers: [.command, .shift])
             Menu("Find") {
                 Button(verb(.findInPost)) { actions?.dispatch(.find(.show)) }
                     .keyboardShortcut("f", modifiers: .command)
