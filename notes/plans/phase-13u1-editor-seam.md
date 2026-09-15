@@ -296,8 +296,8 @@ zero. Lockstep marker: 8, untouched.
 | B | The churn pair P24/P25 — the Mac adopts `ArmedEdit.exactCost` + red-on-old pin on the REAL typed path | DONE(`1146594a`) |
 | C | The door-await chain loop (KnownIssues row 44) + the round-3 record's designed pin | DONE(`a84542e5`) |
 | D | Item 7 — `MarkdownActs`' arm-then-hand-off rewrite (the ONE input-path door) + the grep pin | DONE(`5de0a4d2`) |
-| E | P40 + P41 hoists (zero-test-edit proof) + the KnownIssues eight-brain enumeration amendment | IN-PROGRESS |
-| F | Close — suites green, KnownIssues rows resolved/re-owned, the seven verdicted | NOT-STARTED |
+| E | P40 + P41 hoists (zero-test-edit proof) + the KnownIssues eight-brain enumeration amendment | DONE(`c4e8a4ee`) |
+| F | Close — suites green, KnownIssues rows resolved/re-owned, the seven verdicted | IN-PROGRESS |
 
 *(Measurements, verdicts, pins and PROVISIONALs are filled in below as each piece lands.)*
 
@@ -545,6 +545,56 @@ formatting, find, list and seam suites ride unmodified and green.
 half, experiment E1, is ANSWERED and closed): UIKit has no `shouldChangeText` on `UITextView`, so
 `MobileMarkdownActs` calls the MODEL's gate directly and the pair has a different shape entirely.
 Recorded so nobody reads the Mac's new door as a parity debt.
+
+---
+
+### E — THE TWO FORKED BRAINS (P40, P41) — and the canon correction that was the real finding
+
+**The fix for a forked brain is always a HOIST, never a patch** (`KnownIssuesAndTechDebt.md`'s
+forked-brain row; MobileSoul §3), and the proof of a hoist is that **both platforms' pins ride
+unmodified** — a zero-test-edit suite is what tells a moved address from a changed behaviour (the
+3C parity pattern). Both hoists below meet that standard exactly: not one test file was touched.
+
+**P40 — the shelf.** `ShelfViewModel.ordered(books:pins:)` and `MobileShelfFaces.ordered` were the
+same statements in the same order; `ShelfViewModel.tagsColumn` and `MobileShelfFaces.tagPaths`
+were the same `SmartQuerySpec` decode and the same `(tagsAll ?? []) + (tags ?? [])`, differing
+only in where the curated aggregate came from. Neither delegated; neither lived in a shared home.
+Hoisted to `Shared/ShelfOrder.swift` (`ordered`, and `smartQueryTagPaths(of:)` which answers
+**nil** for a non-smart book — "not smart" and "smart with no tags" are different answers and the
+callers act differently on each). Both platforms' methods are forwarders.
+**The divergence this closes is not hypothetical:** the master plan's 13i row carries her ruling
+*"CUSTOM SHELF ORDER MUST BE ADDED"* — a phase editing the Mac's `ordered` would have left the
+phone on R38's pin-then-journal-then-name rule, and the two shelves would have disagreed about the
+order of the same books with a green suite on both sides.
+
+**P41 — the Read page.** `FlowParagraph.paragraphs`/`container`/`indent` and
+`MarkdownLink.openableSchemes`/`openable` each lived twice. Both forks were already CONFESSED in
+the code: `MobileReadPage`'s header said *"a Mac-side change to FlowParagraph does not compile
+into this file"*, and `MarkdownLink`'s said *"Three surfaces open links and they must agree… One
+rule, one guard, one door"* over what were by then four surfaces and two rules — with QUESTIONS
+#50 describing widening the scheme set as *"one line"*, a line that would have moved the Mac's
+three surfaces and left the same stored note's link inert on the phone. Both hoisted to
+`Shared/FlowParagraph.swift` and `Shared/MarkdownLink.swift`.
+
+**What deliberately did NOT move, because it is genuinely platform and not brain:** the reading
+page's type scale (15 pt base on the Mac, **16 pt on the phone** — phone type is bigger, a real
+difference that flattening would have broken), so each target adds its own `font(_:)` extension on
+the shared type; and `NSWorkspace.open`, which is the only half that needs AppKit. The two Mac
+files are renamed to the job they now do — `Core/Views/FlowParagraphFace.swift` and
+`Features/Formatting/MarkdownLinkOpening.swift` — because **one target may not hold two files of
+the same basename** (the first build attempt's `Multiple commands produce … .stringsdata`), and
+both shared types are declared `nonisolated` (the `BlockRangeIndex` pattern) because the app
+targets' default isolation is `@MainActor` and the phone's consumer is a `nonisolated enum` (the
+iOS build's own lesson, recorded so the next hoist starts there).
+
+**THE CANON CORRECTION, which is what P40 actually found.** The forked-brain row presented its
+*"eight-brain table"* as **"every symbol grep-verified 2026-08-21"** — a completeness claim. It is
+not complete: its own source scopes itself (*"Building the faces above adds these"* — the brains
+**that round's faces** would need), and these four symbols sit outside it. **A stale completeness
+claim is worse than no claim, because the next session trusts it.** The row is amended in place:
+the four are recorded as discharged, and the rule now reads that the list is **the KNOWN forks,
+never the proven-complete set** — a fork's absence from it is not evidence it does not exist, and
+the honest way to ask "are there others?" is a fresh grep. Which is exactly what P40 and P41 were.
 
 ## UNIT 2 RECORD (LIVE STATUS)
 
