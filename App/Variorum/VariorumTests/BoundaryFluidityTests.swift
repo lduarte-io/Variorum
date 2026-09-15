@@ -87,8 +87,18 @@ struct BoundaryFluidityTests {
                 try Queries.renderPost(db, containerID: harness.postID).compactMap(\.text)
             }
             #expect(texts == ["Alpha two."])
-            #expect(harness.model.statusMessage == nil,
-                    "eligible cross-block edits never show the refusal")
+            // **The claim is unchanged; the assertion moved with 13u1 UNIT
+            // 2.** An eligible cross-block edit still never shows a REFUSAL
+            // — that is what this line has always been about. What it now
+            // shows is a RECEIPT naming where every block went (her item 5
+            // legibility mandate), and 18i made a receipt quiet by default,
+            // so it is a muted line at the bottom bar's trailing end rather
+            // than a toast in front of her prose. Reading the KIND is what
+            // keeps the original promise checkable.
+            let spoken = try #require(harness.session.status.spoken)
+            #expect(spoken.kind == .receipt, "a receipt, never a refusal: \(spoken.text)")
+            #expect(harness.session.status.current == nil,
+                    "and under her default it is the QUIET line, not the toast")
         }
     }
 
@@ -425,14 +435,14 @@ struct BoundaryFluidityTests {
             }
             try harness.reload()
 
-            let visible = try #require(harness.model.planVisibleTakeEdit(
+            let visible = try #require(harness.model.planCrossBlockEdit(
                 range: NSRange(location: 11, length: 16), replacement: ""))
             // The world moves inside the scheduling window (the soak's
             // exact interleaving, made deterministic).
             harness.type("INTERLOPER ", at: 0)
             await harness.model.autosave.flushNow()
 
-            await harness.model.runVisibleTakeEdit(visible)
+            await harness.model.runCrossBlockEdit(visible)
 
             #expect(harness.model.statusMessage?.contains("changed while") == true,
                     "the refusal speaks: \(harness.model.statusMessage ?? "nil")")

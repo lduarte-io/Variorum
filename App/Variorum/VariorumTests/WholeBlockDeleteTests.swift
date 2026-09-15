@@ -32,11 +32,14 @@ struct WholeBlockDeleteTests {
     ///
     /// - the index's verdict is `.crossesBlockBoundary` — the separator is
     ///   owned by NO entry, so containment fails in both directions;
-    /// - `planCrossBlockEdit` and `planVisibleTakeEdit` BOTH decline, and
-    ///   they decline on the SAME two guards: `touched.count >= 2` (the
-    ///   selection intersects exactly ONE entry's characters) and the
-    ///   contiguity guard `range.upperBound <= last-entry.upperBound` (the
-    ///   trailing separator sits one past it);
+    /// - `planCrossBlockEdit` declines on the SAME two guards it has
+    ///   always declined on: at least two entries in the run (the selection
+    ///   reaches exactly ONE entry's characters) and the contiguity guard
+    ///   `range.upperBound <= last-entry.upperBound` (the trailing
+    ///   separator sits one past it). *(13u1 UNIT 2: the second planner —
+    ///   #11a's visible-take edit — retired into that one compound, so this
+    ///   trace now names one road where it named two; the guards are the
+    ///   same guards.)*
     /// - so `shouldChangeText` falls to the final `else` and speaks.
     ///
     /// The open tail is NOT the decliner — the same decline happens without
@@ -72,9 +75,9 @@ struct WholeBlockDeleteTests {
             #expect(selection.upperBound == last.upperBound + 1,
                     "TRACE 2b: the span ends one past the last touched entry — the contiguity guard declines")
 
-            // TRACE 3: both planners return nil, so the refusal is what runs.
+            // TRACE 3: the cross-block plan returns nil, so the refusal is
+            // what runs (before J9 built the road above it).
             #expect(harness.model.planCrossBlockEdit(range: selection, replacement: "") == nil)
-            #expect(harness.model.planVisibleTakeEdit(range: selection, replacement: "") == nil)
         }
     }
 
@@ -89,7 +92,6 @@ struct WholeBlockDeleteTests {
                 replacing: selection, replacementIsSingleNewline: false,
                 segmentation: .paragraph) == .refuse(.crossesBlockBoundary))
             #expect(harness.model.planCrossBlockEdit(range: selection, replacement: "") == nil)
-            #expect(harness.model.planVisibleTakeEdit(range: selection, replacement: "") == nil)
         }
     }
 

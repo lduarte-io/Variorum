@@ -336,17 +336,22 @@ struct BlockDeletionAndRedoTests {
 
     @Test func theCarveAndTheTwoCrossBlockPlansAreMUTUALLYEXCLUSIVE() async throws {
         // The carve runs FIRST in `shouldChangeText`; this is why that is
-        // safe. Both cross-block plans collect their targets by INTERSECTION
-        // (`length > 0`), and a lone separator intersects nothing — so they
-        // can never see the carve's range, and every range they DO see has
-        // no carve. Surface: "\nalpha\nbeta".
+        // safe. The cross-block compound needs TWO entries in its run, and a
+        // lone separator can reach at most one (the entry before it, and
+        // only when that entry is empty) — so it can never see the carve's
+        // range, and every range it DOES see has no carve.
+        // *(13u1 UNIT 2 re-derived this: the run is no longer the
+        // intersected set — a zero-length entry INSIDE the span joins it, so
+        // "a separator intersects nothing" stopped being the whole argument.
+        // `EditorSeamCompoundTests.aLoneSeparatorCanNeverReachTheCompound`
+        // walks every separator of an empty-heavy document and proves the
+        // count never reaches two.)* Surface: "\nalpha\nbeta".
         try await withEditor(seedBlocks: ["", "alpha", "beta"]) { harness in
             #expect(harness.documentText == "\nalpha\nbeta")
             let separator = NSRange(location: 0, length: 1)
             #expect(harness.model.planEmptyBlockDeletion(
                 range: separator, replacement: "") != nil)
             #expect(harness.model.planCrossBlockEdit(range: separator, replacement: "") == nil)
-            #expect(harness.model.planVisibleTakeEdit(range: separator, replacement: "") == nil)
 
             // A genuine cross-block span ("pha\nbe"): the plans fire, the
             // carve doesn't.

@@ -249,13 +249,20 @@ struct EditorSeamMountedCostTests {
         }
     }
 
-    /// **The KnownIssues row's own named site.** `planVisibleTakeEdit` runs
-    /// on the cross-block KEYSTROKE road (`shouldChangeText`'s cross-block
-    /// arm, after `verdict` answers `.crossesBlockBoundary`), and it asked
-    /// the accessor once per entry over the WHOLE note plus four more times
-    /// for the edges. Its already-fixed sibling in the same family measured
-    /// 23.8 s at 20,000 entries.
-    @Test func theVisibleTakeEditPlanStaysCheapAtEightThousandBlocks() async throws {
+    /// **The KnownIssues row's own named site — carried to the road that
+    /// replaced it.** The cross-block KEYSTROKE plan (`shouldChangeText`'s
+    /// cross-block arm, after `verdict` answers `.crossesBlockBoundary`) used
+    /// to ask the accessor once per entry over the WHOLE note plus four more
+    /// times for the edges; its already-fixed sibling in the same family
+    /// measured 23.8 s at 20,000 entries.
+    ///
+    /// *(13u1 UNIT 2 retired `planVisibleTakeEdit` into the ONE cross-block
+    /// compound — same road, same keystroke, same question — so the pin
+    /// moved with it rather than being deleted with the method. The
+    /// compound's plan reads the tiling ONCE and its `surfaceText` closure
+    /// at most TWICE, which is the stronger statement: cost ∝ the EDIT, not
+    /// the note.)*
+    @Test func theCrossBlockPlanStaysCheapAtEightThousandBlocks() async throws {
         try await withEditor { h in
             h.model.applyProjection(Self.bigSlots())
             let ranges = Self.ranges(h.model.index)
@@ -266,22 +273,31 @@ struct EditorSeamMountedCostTests {
             let span = NSRange(location: from, length: to - from)
 
             let clock = ContinuousClock()
-            var plan: EditorViewModel.VisibleTakeEdit?
+            var plan: EditorViewModel.CrossBlockEdit?
             let cost = clock.measure {
-                plan = h.model.planVisibleTakeEdit(range: span, replacement: "")
+                plan = h.model.planCrossBlockEdit(range: span, replacement: "")
             }
-            #expect(plan?.pieces.count == 2, "two blocks' visible takes")
+            #expect(plan?.leading?.blockID == "b7000")
+            #expect(plan?.trailing?.blockID == "b7001")
+            #expect(plan?.deletedBlockIDs.isEmpty == true, "no whole block is covered")
             #expect(plan?.caretBlockID == "b7000")
             #expect(cost < .milliseconds(100))
-            print("PERF[13u1] planVisibleTakeEdit @\(Self.blockCount) blocks — \(cost)")
+            print("PERF[13u1] planCrossBlockEdit @\(Self.blockCount) blocks — \(cost)")
         }
     }
 
-    /// The plan's GEOMETRY is unchanged by the accumulation — the piece
-    /// ranges and the caret offset are computed from the same numbers the
-    /// accessor produced. Pinned on a small, hand-checkable tiling so a
+    /// The plan's GEOMETRY on a small, hand-checkable tiling, so a
     /// regression reads as an arithmetic error rather than a timing one.
-    @Test func theVisibleTakeEditPlanKeepsItsGeometry() async throws {
+    ///
+    /// **And it is item 8's U-4 pin** (13u1 UNIT 2): the EMPTY block sitting
+    /// between the two ends is INSIDE the span and is covered whole, so it
+    /// rides `deleteBlock` with the rest. The retired planner collected by
+    /// intersection, so a zero-length entry was invisible to it — the plan
+    /// it built then tried to merge ACROSS the empty block and the
+    /// operations layer refused (`blocksNotAdjacent`), which is exactly the
+    /// backlog row *"an EMPTY block inside a span yields a plan that can
+    /// never execute"*.
+    @Test func theCrossBlockPlanTakesAnEmptyBlockInsideTheSpan() async throws {
         try await withEditor { h in
             h.model.applyProjection([
                 slot("b0", text: "Alpha one."),     //  0..10, separator at 10
@@ -294,14 +310,16 @@ struct EditorSeamMountedCostTests {
             #expect(ranges.map(\.length) == [10, 0, 9, 12])
 
             // From "one." in b0 through "Beta " in b2.
-            let plan = try #require(h.model.planVisibleTakeEdit(
+            let plan = try #require(h.model.planCrossBlockEdit(
                 range: NSRange(location: 6, length: 11), replacement: ""))
-            #expect(plan.pieces.map(\.variantID) == ["v-b0", "v-b2"],
-                    "the empty block between them is intersected by nothing")
-            #expect(plan.pieces[0].intraRange == NSRange(location: 6, length: 4))
-            #expect(plan.pieces[1].intraRange == NSRange(location: 0, length: 5))
+            #expect(plan.deletedBlockIDs == ["b1"], "the empty block is in the run, covered whole")
+            #expect(plan.leading?.variantID == "v-b0")
+            #expect(plan.leading?.newText == "Alpha ")
+            #expect(plan.trailing?.variantID == "v-b2")
+            #expect(plan.trailing?.newText == "two.")
             #expect(plan.caretBlockID == "b0")
             #expect(plan.caretOffset == 6)
+            #expect(plan.joinsEnds, "both cuts sit mid-paragraph")
         }
     }
 }

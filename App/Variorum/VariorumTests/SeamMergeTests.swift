@@ -136,18 +136,20 @@ struct SeamMergeTests {
     }
 
     @Test func theSeamPlanIsInvisibleToTheTwoCrossBlockPlans() async throws {
-        // Which is why `shouldChangeText` can run them in sequence: both
-        // cross-block plans collect targets by INTERSECTION (`length > 0`),
-        // and a lone separator intersects nothing.
+        // Which is why `shouldChangeText` can run them in sequence: the
+        // cross-block compound collects its run from entries the span
+        // genuinely overlaps (plus zero-length entries INSIDE it), and a
+        // lone separator between two texted blocks is neither.
+        // *(13u1 UNIT 2: the second cross-block plan — #11a's visible-take
+        // edit — retired into the one compound; the assertion it carried is
+        // the compound's line below.)*
         try await withEditor(seedBlocks: ["alpha", "beta"]) { harness in
             let separator = NSRange(location: 5, length: 1)
             #expect(harness.model.planSeamMerge(range: separator, replacement: "") != nil)
             #expect(harness.model.planEmptyBlockDeletion(range: separator, replacement: "") == nil)
             #expect(harness.model.planCrossBlockEdit(range: separator, replacement: "") == nil)
-            #expect(harness.model.planVisibleTakeEdit(range: separator, replacement: "") == nil)
 
-            // A genuine cross-block span still routes to the ratified
-            // merge-then-edit compound, untouched by this batch.
+            // A genuine cross-block span still routes to the compound.
             let span = NSRange(location: 3, length: 4)  // "ha\nb"
             #expect(harness.model.planSeamMerge(range: span, replacement: "") == nil)
             #expect(harness.model.planCrossBlockEdit(range: span, replacement: "") != nil)
