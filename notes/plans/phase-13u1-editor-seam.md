@@ -1235,9 +1235,46 @@ iOS build green · mobile 622/105 with the one owned red):**
 *(Core untouched by the pass — `CrossBlockRefusal` is App-`Shared/`, not the core package; the
 round's core run above stands.)*
 
-*(Round 2 anchors here: a fresh cold reviewer re-reviews the fixes and what they touched —
-commits `45f5c956` · `715381de` · `3d3ace49` · `b88a54ae` · `0af79a38` · `f0b758f5` and this
-block, the sanity-pass table included.)*
+### LADDER ROUND 2 — 2026-09-15 (a FRESH fable-reviewer, cold, over round 1's six fix commits + the sanity pass and what they touched; the cross-model flow ran whole: 2 findings → the implementer's responses 2 AGREE (with precisions, both adopted) → the reviewer confirmed BOTH and implemented its fixes ITSELF, each under the hallucination guard)
+
+**0 BLOCKER · 0 MAJOR · 0 MINOR · 2 NIT — NO ROUND 3 OWED** (the ladder's round-3 trigger is
+a NEW BLOCKER/MAJOR, and round 2 surfaced none). Both findings sit in the ONE condition SP-2
+touched (`CrossBlockRefusal.diagnose` step 2); nothing else round 1 changed drew a finding.
+Zero `Sources/VariorumCore/Sync/` lines, zero schema, marker 8; no behaviour changed anywhere
+except R2-1's refusal sentence for the one empty-tail shape.
+
+| # | severity | finding → final call → what landed |
+|---|---|---|
+| **R2-1** | **NIT (raised copy-class; bug-class on the confirmed trace)** | **SP-2's deliberate empty-tail widening paired `.openTail`'s cause with a road that is FALSE there.** A span from mid-block through the EMPTY tail's separator (⏎ at the note's end, nothing typed, ⇧⌘↓, ⌫) refuses with *"It becomes one moments after you pause typing…"* — but an empty tail NEVER mints: every crystallizer guards `!tail.allSatisfy(\.isWhitespace)`, which an empty string satisfies vacuously (the implementer verified all four sites independently and SHARPENED the regression direction: pre-SP-2 this shape spoke the residual's nudge road, which WORKS here — the ladder had traded a true road for a false one). The implementer's precision, adopted as the final call: scoping the crystallization sentence alone would leave the shape a cause with NO road (the P-2 dead end); the true fix names the two roads that exist. **FIX `541f670e`:** the diagnosis splits the one declining guard by the tail's emptiness — the `seamBesideArchivedTake` doctrine, one guard, split causes, because the true roads differ: `.emptyTailAtSpanEnd` says *"The end of this selection is the empty line at the note's end. Nudge that end back one character, or delete the empty line on its own."* (both roads platform-neutral; the delete is `BlockRangeIndex.verdict`'s `.closeTail`); a tail WITH text keeps `.openTail` and its true waiting road. #109(d)'s parenthetical carries the split. **PIN (red on old, measured in-place):** `UndoHintAndRefusalTests.aSpanReachingTheEmptyTailLineGetsARoadThatOpens` — all three message assertions failed pre-fix with the crystallization sentence quoted verbatim; the no-guessing pin's cause list gains the new case. |
+| **R2-2** | NIT (cleanliness) | **`diagnose` step 2's second disjunct (`tail.length == 0 && range.upperBound > tail.location`) was provably dead** — with an empty tail, `tail.location` IS `documentLength` (the document ends at the tail separator), so no in-document range can end past it, and `diagnose`'s one production road is the gate's `.crossesBlockBoundary` arm, which `BlockRangeIndex.verdict` fences out-of-document ranges away from as `.indexDesync`; SP-2's live separator arm subsumed it besides. The implementer's two precisions, both adopted: the WHY is recorded AT the line (without it the arm reads as an uncovered case and comes back), and the out-of-document belt is a stated PRECONDITION at `diagnose`'s head — a comment, never a disjunct that reads like live policy. **FIX `30842957`:** the arm deleted with its WHY; SP-2's disjunct untouched. Zero behaviour (the two diagnosis suites rode unmodified, 29/2 green); no pin owed (dead code has no red to pin). |
+
+**The round-2 reviewer's verification of round 1's fixes (its clean bill, in brief):** F-1's
+merged loop traced against the real machinery (the drain's one rule, the token-guarded tail, all
+four doors through the one call; the break requires both waits quiet in one synchronous slice; the
+`awaited` belt cannot spin) with the pin run green and the old code's chain-then-latch back-edge
+confirmed in the removed lines; F-2's pin geometry re-derived by hand and the residual
+characterization verified exhaustive for in-document refused spans; SP-2's arm verified against
+`BlockRangeIndex`'s geometry and the plan's contiguity-before-locks order (the cause names the
+actual decliner); F-3's numbers match the UNIT 1 table; F-5's `withKnownIssue` conversion carries
+the correct both-ways tripwire; F-6/SP-1/SP-3's records consistent (#110 marker included); no
+stale copy of any corrected sentence in source; diagnose step 3's walk clause-for-clause the
+plan's run rule; fences and rituals held (zero Sync/Persistence/Server lines phase-wide, no
+trailers, branch pushed, 16 captures, both canon deltas present). Suites re-run by the round-2
+reviewer before its findings: the three round-1 pins individually, the three touched suites whole
+(53/53), `MenuFlightDoorAwaitTests`, `OneInputPathTests` + `EditorChurnCostTests` +
+`ReturnKeyUndoSignTests` (5/5), core `InsureTakesTests` + `NewBlockUndoTests` (11/11) — all green.
+
+**Suite runs after the round-2 fix pass (baselines: core 1562/170 · Mac 2667/445 all green ·
+iOS build green · mobile 622/105 with 4 known issues):**
+
+| suite | result |
+|---|---|
+| core `swift test` | **untouched by this round** — `CrossBlockRefusal` is App-`Shared/`, not the core package; round 1's run stands |
+| the FULL Mac suite | **2668 / 445, ALL GREEN** in 726 s (+1 on round 1's 2667 = R2-1's pin; zero failures in the run, so NEITHER load-flaky suite fired and no isolated re-runs were owed) |
+| iOS build | **green** (BUILD SUCCEEDED — the shared diagnosis compiles into the phone) |
+| the FULL mobile suite | **not re-run** — the shared diagnosis compiled into the phone changes one refusal sentence on a shape no mobile pin asserts (grep-verified: the phone's tail-refusal pins assert `MobileStructural`'s own sentences, not `CrossBlockRefusal`'s); the iOS build is the gate |
+
+*(Round 3 is not owed; the phase closeout proceeds on the coordinator's word once the counts flip.)*
 
 ---
 
