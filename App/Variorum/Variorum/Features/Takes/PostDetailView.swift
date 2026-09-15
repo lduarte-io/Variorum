@@ -992,7 +992,33 @@ enum MastheadGeometry {
     /// Row 80: the title TEXT's frame and the icon row's, both in the
     /// masthead's space — "the title never runs under the icons" is a
     /// claim about two rectangles.
-    static var titleFrame: CGRect?
+    static var titleFrame: CGRect? {
+        // 13u2 UNIT E (KnownIssues row 59): the title's band is read in the
+        // same breath as row two's rectangles, so its report counts as one
+        // of them.
+        didSet { reports &+= 1 }
+    }
+
+    /// **A MONOTONIC COUNT OF EVERY MASTHEAD GEOMETRY REPORT** (13u2 UNIT E
+    /// — KnownIssues row 59's fix).
+    ///
+    /// The flake it exists to end: a pin opened the tag field, waited for the
+    /// FIELD's frame, then pumped a fixed number of run-loop turns and read
+    /// the CARD frames — which, under full-suite load, were still the ones
+    /// from before the open. The field was compared against a layout state
+    /// that no longer existed, and the comparison grazed by ~1.5 pt. The app
+    /// was right in both voices; the pin was reading two different moments.
+    ///
+    /// A count makes the honest predicate expressible: *the masthead's
+    /// geometry has stopped moving*, so every rectangle a pin then reads
+    /// comes from ONE layout state. It is falsifiable in the way a blind pump
+    /// is not — a real overlap survives quiescence and fails loudly, and a
+    /// masthead that never goes quiet fails with its own sentence instead of
+    /// silently handing over stale frames.
+    ///
+    /// `&+` because it is a tripwire, not an arithmetic fact: a DEBUG process
+    /// that somehow reported `Int.max` times should wrap, never trap.
+    private(set) static var reports = 0
     /// Row 12 (17o batch d): the EDITING face's frame, in the same space —
     /// "the placeholder shifts upwards when you click the title" is a claim
     /// about two rectangles, exactly as row 80's is.
@@ -1031,6 +1057,10 @@ enum MastheadGeometry {
     static func forgetStamp(_ postID: String) { stampFrames[postID] = nil }
 
     static func record(_ slot: MastheadProbeSlot, _ frame: CGRect) {
+        // Row 59: ONE bump for every row-two slot, because `record` is the
+        // one door they all arrive through. `onGeometryChange` is already
+        // change-gated, so a report here is a real move.
+        reports &+= 1
         switch slot {
         case .pathChip: pathChipFrame = frame
         case .card(let id): cardFrames[id] = frame

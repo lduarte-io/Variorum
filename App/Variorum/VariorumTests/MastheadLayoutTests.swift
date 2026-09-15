@@ -287,6 +287,62 @@ struct MastheadLayoutTests {
         }
     }
 
+    /// **THE MASTHEAD'S GEOMETRY HAS STOPPED MOVING** (13u2 UNIT E —
+    /// KnownIssues row 59's fix; DEBUG-only, like the oracle it reads).
+    ///
+    /// The flake this replaces: the pin pumped a FIXED number of run-loop
+    /// turns (`maxTurns: 6` at rest, `8` after ⌘⇧I opened the tag field) and
+    /// then read row two's rectangles. Under full-suite load that budget did
+    /// not reach the row's final layout, so the frames it compared came from
+    /// DIFFERENT layout passes — ~1.5 pt phantom grazes, twice in a row at
+    /// the 18j close, 3/3 green isolated. The app was right in both voices;
+    /// the pin was reading a row mid-flight.
+    ///
+    /// *(Measured while building this, and recorded because row 59's own
+    /// sentence guessed at the mechanism: on a quiet machine the field's
+    /// arrival moves NO card — the open produces exactly one report, the
+    /// field's own, and `cardsMoved` reads 0 of 5 in both voices. So the
+    /// staleness is not "the cards lag the field"; it is that neither side is
+    /// guaranteed final when a fixed budget expires. The fix is the same
+    /// either way, and it is the true statement that belongs at the code.)*
+    ///
+    /// **Why an until-clause on the REPORTS and not on the outcome:** a
+    /// clause like "until nothing overlaps" would mask exactly the defect
+    /// this pin exists to catch. Quiescence does not: a REAL overlap survives
+    /// it and fails loudly, and a masthead that never settles returns `false`
+    /// here and fails with its own sentence rather than silently handing over
+    /// stale frames. `quietTurns` is how many consecutive turns must pass
+    /// with no report at all; `maxTurns` is the ceiling that keeps a wedged
+    /// layout from hanging the suite.
+    private func settleMastheadGeometry(
+        _ window: NSWindow, _ hosting: NSView,
+        quietTurns: Int = 4, maxTurns: Int = 200
+    ) async -> Bool {
+        #if DEBUG
+        var last = MastheadGeometry.reports
+        var quiet = 0
+        for _ in 0..<maxTurns {
+            hosting.layoutSubtreeIfNeeded()
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            pump()
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(20))
+            let now = MastheadGeometry.reports
+            if now == last {
+                quiet += 1
+                if quiet >= quietTurns { return true }
+            } else {
+                last = now
+                quiet = 0
+            }
+        }
+        return false
+        #else
+        return true
+        #endif
+    }
+
     private func assertRowTwoNeverCollides(voice: ThemeVoice) async throws {
         let db = try AppDatabase.inMemory()
         let start = Date(timeIntervalSince1970: 1_782_864_000)
@@ -354,7 +410,8 @@ struct MastheadLayoutTests {
                 await settle(window, hosting, until: {
                     MastheadGeometry.pathChipFrame != nil && MastheadGeometry.cardFrames.count == 5
                 })
-                await settle(window, hosting, until: { false }, maxTurns: 6)
+                #expect(await settleMastheadGeometry(window, hosting),
+                        "(\(voice)) the masthead's geometry went quiet at rest, so every rectangle below is from ONE layout state")
                 let gap = PostDetailView.rowTwoGap
                 let chip = try #require(MastheadGeometry.pathChipFrame, "the path chip reported its frame (\(voice))")
                 let width = try #require(MastheadGeometry.contentMidX).magnitude * 2
@@ -375,7 +432,12 @@ struct MastheadLayoutTests {
                 // ⌘⇧I's road opens the field.
                 #expect(session.commandRouter.requestTagField(), "the router reaches this masthead's field")
                 await settle(window, hosting, until: { MastheadGeometry.fieldFrame != nil })
-                await settle(window, hosting, until: { false }, maxTurns: 8)
+                // Row 59: NOT a blind pump. The field's arrival is the START
+                // of the row's re-layout, not the end of it — the cards move
+                // to make room, and under load their reports land after the
+                // field's. Wait for the whole masthead to stop moving.
+                #expect(await settleMastheadGeometry(window, hosting),
+                        "(\(voice)) the masthead's geometry went quiet after the field opened — the field and the cards below are from ONE layout state")
                 let field = try #require(MastheadGeometry.fieldFrame, "the open field reported its frame (\(voice))")
                 #expect(!chip.intersects(field),
                         "(\(voice)) the open field \(field) is drawn clear of the path chip \(chip)")

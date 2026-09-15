@@ -2334,7 +2334,7 @@ alternative proof it ran instead.
 | **item 1** — row 56: the status seam's rename + the single writer | PENDING |
 | **item 2** — row 50: the DEBUG-oracle keying sweep | PENDING |
 | **item 3** — row 48: ⌘A in a live take pane (WALK first) | PENDING |
-| **item 4** — row 59: the masthead pin's settle | PENDING |
+| **item 4** — row 59: the masthead pin's settle | **DONE** — both fixed turn budgets replaced by an until-clause on the oracle's REPORT COUNT (quiet for 4 consecutive turns, ceiling 200, loud on never-quiet); the row's stated mechanism CORRECTED by measurement (a field-open moves no card on a quiet machine — 0/5, both voices); falsifiability DEMONSTRATED with a synthetic 200-pt overlap that failed loud in 0.73 s. 3/3 isolated green |
 | **item 5** — row 47's PARK half | **DONE** — `park` is `private` to the router's new ONE adoption door (`ShellRouter.adopt`, `RootView.adopt`'s two statements moved onto it); all seven pin calls folded onto that door with their arithmetic byte-unchanged; RULE ONE reworded to what actually holds AND to name the one road the fence cannot reach. 7 tests / 3 suites GREEN |
 | **item 6** — row 51: the `TakesArticleScroll` split + the structural arm | PENDING |
 | the WALK + captures (60 onward) | PENDING |
@@ -2387,6 +2387,71 @@ in the same order with the same arguments, one stack frame deeper.
 oracle items to 13u4 and that one is not in row 50's enumeration either, so it stays where its owner
 sits. `TakeCardGeometry`, the row's SECOND oracle item, IS in row 50's enumeration and is therefore
 taken by item 2 below; the row records that split.
+
+
+
+## ITEM 4 — ROW 59's SETTLE (and the row's own mechanism, corrected by measurement)
+
+**The row's ask:** *"The settle wants an until-clause on the CARDS' re-report after the open —
+falsifiable, since a real overlap persists — not a blind pump."*
+
+**What the pin did.** `assertRowTwoNeverCollides` pumped a FIXED number of run-loop turns twice —
+`maxTurns: 6` at rest, then `maxTurns: 8` after ⌘⇧I opened the tag field — and read row two's
+rectangles from the DEBUG oracle after each. Under full-suite load that budget did not reach the
+row's final layout, so the frames it compared came from different layout passes: ~1.5 pt phantom
+grazes, twice consecutively at the 18j close (Study then Terminal), 3/3 green isolated. **The app is
+right** — the tag door was walked in both voices at 18j.
+
+**THE ROW'S STATED MECHANISM IS WRONG IN ITS DETAIL, and the measurement is why this item did not
+build what the row literally asked for.** A temporary probe captured the card frames and the report
+count either side of the open:
+
+```
+ROW59 terminal   reports 89 -> 90    cardsMoved=0/5
+ROW59 study      reports 103 -> 104  cardsMoved=0/5
+```
+
+**The field's arrival moves NO card**, in either voice, on a quiet machine: the open produces
+exactly ONE report — the field's own. So *"wait until the cards re-report"* would have been a wait
+for an event that does not reliably happen, and a pin built on it would hang and then fail on a
+correct app. The true statement is the weaker and more useful one: **neither side is guaranteed
+final when a fixed budget expires.**
+
+**What shipped instead — the same shape, one level up.** The oracle gained a monotonic
+`MastheadGeometry.reports`, bumped inside `record(_:_:)` (the ONE door every row-two slot arrives
+through — one line covers chip, cards, field, icon row, ＃ door and stamp) and by `titleFrame`'s
+`didSet` (the title is read in the same breath). The pin's two fixed budgets became
+`settleMastheadGeometry`: **settle until the masthead's geometry has been QUIET for four consecutive
+turns**, ceiling 200 turns, returning `false` — with its own `#expect` sentence — if it never goes
+quiet. Both call sites now assert that quiescence before reading a rectangle.
+
+**FALSIFIABILITY DEMONSTRATED rather than asserted** (the row's own condition, and the brief's
+"if cheap to demonstrate" — it was). With the field↔chip gap requirement temporarily inflated by
+200 pt — a synthetic real overlap — the pin failed **LOUD and FAST after the settle**, not by
+timeout:
+
+```
+✘ …InTerminal: (field.minX - chip.maxX → 68.5)  >= (gap + 200 - 0.5 → 215.5)   failed after 0.734 s
+✘ …InStudy:    (field.minX - chip.maxX → 206.0) >= (gap + 200 - 0.5 → 215.5)   failed after 0.743 s
+```
+
+A quiescence clause cannot mask a geometry claim, because a real overlap survives quiescence. (An
+until-clause on the OUTCOME — "settle until nothing overlaps" — would have been exactly the
+unfalsifiable form the row warns against; it is not what shipped.)
+
+**Why red-on-old is impractical here, stated rather than skipped:** the defect is a load-dependent
+race that is 3/3 GREEN isolated by the row's own measurement, so a pin that fails on the pre-fix
+tree cannot be written without manufacturing the load. The alternative proof, named by the brief and
+run: the synthetic-overlap demonstration above, plus **3/3 isolated green (16.590 / 16.481 / 16.287
+s, 13 tests)** and the unit's full-suite run at the end.
+
+**The flake list:** if the unit's full Mac suite run is clean, `MastheadLayoutTests`' open-field arm
+comes OFF the carry-forward flake list — recorded here for the closeout to execute. The other three
+rules stand.
+
+**Probes removed.** Both the report probe and the synthetic overlap were reverted; the shipped diff
+is the oracle's counter, its two `didSet`/`record` bumps, `settleMastheadGeometry`, and the two call
+sites.
 
 
 ---
