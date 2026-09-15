@@ -1690,9 +1690,7 @@ final class EditorViewModel {
             with: NSRange(location: previousStart, length: caret - 1 - previousStart))
         guard MarkdownSyntax.isListLead(previousLine) else { return }
         let range = NSRange(location: caret - 1, length: 1)
-        guard textView.shouldChangeText(in: range, replacementString: "") else { return }
-        textView.replaceCharacters(in: range, with: "")
-        textView.didChangeText()
+        OrdinaryInputEdit.apply("", over: range, in: textView)
     }
 
     /// **18c ladder R1-1 — the ONE tail-opening predicate, asked before a
@@ -1729,11 +1727,8 @@ final class EditorViewModel {
               let separator = index.tailSeparatorOffset
         else { return }
         let range = NSRange(location: separator, length: 1)
-        guard range.upperBound <= (textView.string as NSString).length,
-              textView.shouldChangeText(in: range, replacementString: "")
-        else { return }
-        textView.replaceCharacters(in: range, with: "")
-        textView.didChangeText()
+        guard range.upperBound <= (textView.string as NSString).length else { return }
+        OrdinaryInputEdit.apply("", over: range, in: textView)
     }
 
     // The three doors' entry points (menu bar, context menu, shortcut all

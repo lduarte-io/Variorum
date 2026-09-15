@@ -197,10 +197,8 @@ enum MarkdownActs {
 
         var applied = 0
         for edit in plan.edits.reversed() {
-            guard textView.shouldChangeText(in: edit.range, replacementString: edit.replacement)
+            guard OrdinaryInputEdit.apply(edit.replacement, over: edit.range, in: textView)
             else { continue }
-            textView.replaceCharacters(in: edit.range, with: edit.replacement)
-            textView.didChangeText()
             applied += 1
         }
         guard applied == plan.edits.count else { return applied > 0 }
@@ -243,21 +241,14 @@ enum MarkdownActs {
         // already spoken through the delegate; the click is still consumed,
         // because it landed on a box and moving the caret there instead would
         // be answering a different gesture.
-        if textView.shouldChangeText(in: edit.range, replacementString: edit.replacement) {
-            // Act 10 item 11: this is a CLICK's edit, not typing — with the
-            // caret elsewhere (the end of the note, after a writing session),
-            // β1's caret clearance in `didChangeText` scrolled the view to
-            // the caret's line at the absolute bottom. Suppressed for exactly
-            // this mutation; the trace and the pin are `CheckboxScrollTests`.
-            let mutate = {
-                textView.replaceCharacters(in: edit.range, with: edit.replacement)
-                textView.didChangeText()
-            }
-            if let editor = textView as? EditorTextView {
-                editor.withoutCaretFollow(mutate)
-            } else {
-                mutate()
-            }
+        // Act 10 item 11: this is a CLICK's edit, not typing — with the
+        // caret elsewhere (the end of the note, after a writing session),
+        // β1's caret clearance in `didChangeText` scrolled the view to the
+        // caret's line at the absolute bottom. `followingCaret: false`
+        // suppresses that for exactly this mutation; the trace and the pin
+        // are `CheckboxScrollTests`.
+        if OrdinaryInputEdit.apply(
+            edit.replacement, over: edit.range, in: textView, followingCaret: false) {
             // The replacement is the same length as what it replaces, so the
             // caret can simply go back where it was.
             textView.setSelectedRange(selection)
@@ -335,10 +326,7 @@ enum MarkdownActs {
         // keystroke starts its own run rather than joining across the arrow.
         textView.breakUndoCoalescing()
         defer { textView.breakUndoCoalescing() }
-        guard textView.shouldChangeText(in: range, replacementString: sub.replacement)
-        else { return }
-        textView.replaceCharacters(in: range, with: sub.replacement)
-        textView.didChangeText()
+        OrdinaryInputEdit.apply(sub.replacement, over: range, in: textView)
         // AppKit shifts any caret past the edit by the length delta itself;
         // a caret exactly at the pair's end lands after the arrow, which is
         // where typing continues.
@@ -393,11 +381,8 @@ enum MarkdownActs {
             ordinary()
             guard (textView.string as NSString).length == before + 1 else { return }
             let caret = textView.selectedRange()
-            guard caret.length == 0, caret.location != NSNotFound,
-                  textView.shouldChangeText(in: caret, replacementString: lead)
-            else { return }
-            textView.replaceCharacters(in: caret, with: lead)
-            textView.didChangeText()
+            guard caret.length == 0, caret.location != NSNotFound else { return }
+            OrdinaryInputEdit.apply(lead, over: caret, in: textView)
         }
     }
 
@@ -405,11 +390,9 @@ enum MarkdownActs {
     /// the shape both consuming ⏎ verdicts take.
     private static func deleteWithoutNewline(_ range: Range<Int>, in textView: NSTextView) {
         let ns = NSRange(location: range.lowerBound, length: range.count)
-        guard ns.length > 0, ns.upperBound <= (textView.string as NSString).length,
-              textView.shouldChangeText(in: ns, replacementString: "")
+        guard ns.length > 0, ns.upperBound <= (textView.string as NSString).length
         else { return }
-        textView.replaceCharacters(in: ns, with: "")
-        textView.didChangeText()
+        OrdinaryInputEdit.apply("", over: ns, in: textView)
     }
 
     // MARK: - K8: Tab indents a list line, ⇧Tab outdents it

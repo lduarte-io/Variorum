@@ -540,16 +540,15 @@ extension EditorViewModel {
                 moved += 1
                 continue
             }
-            let allowed = textView.withFindReplace {
-                textView.shouldChangeText(in: item.range, replacementString: item.replacement)
-            }
-            guard allowed else {
+            // 13u1 UNIT 1 (item 7): the ONE input-path door, with the find
+            // bar's own `withFindReplace` bracket as a PARAMETER rather than
+            // an exemption — so the gate and the mutation can no longer be
+            // separated here either, and "one input path" needs no footnote.
+            guard OrdinaryInputEdit.apply(
+                item.replacement, over: item.range, in: textView, underFindReplace: true)
+            else {
                 blocked += 1
                 continue
-            }
-            textView.withFindReplace {
-                textView.replaceCharacters(in: item.range, with: item.replacement)
-                textView.didChangeText()
             }
             applied += 1
         }
