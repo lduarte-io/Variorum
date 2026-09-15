@@ -577,8 +577,25 @@ final class EditorViewModel {
             || pendingCrossBlockTask != nil
         else { return nil }
         return Task { // strong self, deliberately
-            if let pending = self.pendingCrossBlockTask {
+            // **AWAIT THE WHOLE CHAIN, not one link of it** (13u1 UNIT 1 —
+            // the 18c ladder's R3-1, recorded at that ladder's cap and owned
+            // here). This captured the handle ONCE: under the deferred-
+            // keystroke seam a stashed ⏎ or seam ⌫ replayed by the awaited
+            // task's TAIL schedules a NEW compound and re-populates the
+            // handle, so ⏎ x ⏎ y ⌘Q returned with the second act unstarted
+            // and `y` still in `deferredKeyEvents` — keys ending with the
+            // process, against 18c's own doctrine that nothing typed can be
+            // permanently lost. The harness's `flush()` has looped for
+            // exactly this reason since 18c; the production doors had not.
+            //
+            // The loop terminates: each iteration awaits a task that has
+            // COMPLETED by the time it returns, and it exits either on a
+            // nil handle (the tail cleared it and armed nothing) or on the
+            // same handle it just awaited. All four doors — quit, lock,
+            // seal, teardown — inherit this through the one call.
+            while let pending = self.pendingCrossBlockTask {
                 await pending.value
+                if pending == self.pendingCrossBlockTask { break }
             }
             await self.autosave.flushNow()
             // Let the in-flight mint (and any round it chains) reconcile.

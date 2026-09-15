@@ -705,6 +705,50 @@ struct TypedReturnKeyTests {
         }
     }
 
+    // MARK: 18c ladder round 3, R3-1 — the doors await the WHOLE chain (13u1 UNIT 1)
+
+    /// **RED-ON-OLD (the 18c ladder's R3-1, recorded at the cap and owned by
+    /// 13u1; `KnownIssuesAndTechDebt.md`'s door-await row).**
+    ///
+    /// `finalizeWork` captured `pendingCrossBlockTask` ONCE and awaited it.
+    /// Under the deferred-keystroke seam a stashed ⏎ replayed by that task's
+    /// TAIL schedules a NEW compound and re-populates the handle — a link the
+    /// door never re-read. So ⏎ `x` ⏎ `y` then ⌘Q: the door returned, the
+    /// delegate replied `terminate`, and `y` was still sitting in
+    /// `deferredKeyEvents` with its act unstarted. **Keys she typed ended
+    /// with the process**, one seam past where R1-2 closed it — against that
+    /// round's own doctrine that nothing typed can be permanently lost.
+    ///
+    /// The pin drives THE DOOR'S OWN CALL (`finalizeWork()?.value`), never
+    /// `h.flush()` — the harness's flush has looped over the chain since 18c
+    /// precisely because *"a chained schedule replaced the handle"*, and the
+    /// production doors did not. On the pre-fix tree the first two
+    /// expectations read A2 still pending and the stash still up.
+    @Test func theQuitDoorAwaitsEveryLinkOfTheCompoundChain() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)
+            characterKey(h, window.window, "x")
+            returnKey(h, window.window)
+            characterKey(h, window.window, "y")  // four real key events, one turn
+
+            // The quit/lock/seal door's own road, verbatim.
+            await h.model.finalizeWork()?.value
+
+            #expect(h.model.pendingCrossBlockTask == nil,
+                    "the door left a link of the chain un-awaited")
+            #expect(!h.textView.isDeferringKeystrokes,
+                    "keys were still stashed when the door said done")
+
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "x", "y"],
+                    "⏎ x ⏎ y: two blocks made, both letters kept")
+        }
+    }
+
     // MARK: 18c ladder round 2, R2-1 — the stash drains when the surface is IDLE, never "at the newest arming"
 
     /// **RED-ON-OLD (round 2, R2-1):** ⏎ ⌫ ⏎ x in one burst — the keys a
