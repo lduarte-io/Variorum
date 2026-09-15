@@ -305,7 +305,7 @@ struct BookOutlineLandingTests {
         try await withLandingBook(posts: 18, longAt: [4], chapters: true) { session, db, readingID, postIDs, sectionIDs in
             let longPostID = postIDs[4]
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
             })
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
@@ -355,7 +355,7 @@ struct BookOutlineLandingTests {
     @Test func anOffScreenCollapsedNoteIsRevealedAtTheTop() async throws {
         try await withLandingBook(posts: 40, longAt: [], chapters: false) { session, db, readingID, postIDs, _ in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
             })
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
@@ -396,7 +396,7 @@ struct BookOutlineLandingTests {
         try await withLandingBook(posts: 6, longAt: [2], chapters: true) { session, db, readingID, postIDs, _ in
             let longPostID = postIDs[2]
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
             })
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
@@ -435,7 +435,7 @@ struct BookOutlineLandingTests {
     @Test func openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded() async throws {
         try await withLandingBook(posts: 18, longAt: [1, 3, 7, 11, 15], chapters: true) { session, db, readingID, postIDs, _ in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
             })
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
@@ -494,21 +494,37 @@ struct BookOutlineLandingTests {
 // MARK: - The Act 10 correction round, batch G — row 73
 
 extension BookOutlineLandingTests {
-    /// **Ladder R1-10:** an EXPANDED row renders neither the card's excerpt
-    /// nor the gutter line the whole-note facts read feeds — so it performs
-    /// no `renderPost`. "Expand all" on a five-story book mounts with ZERO
-    /// facts reads; collapsing them all reads once per card. RED ON OLD:
-    /// five reads at the mount (every expanded row is a direct, never-lazy
-    /// child now, and each ran the read).
-    @Test func anExpandedRowPerformsNoFactsRead() async throws {
+    /// **Ladder R1-10, RESTATED AT 13u2 UNIT A2 — and the claim got
+    /// stronger.** R1-10's fact was *"an expanded row performs no whole-note
+    /// `renderPost`"*, which was true because the per-row read had been
+    /// narrowed to collapsed rows after "expand all" on Sherlock was measured
+    /// reading twelve full stories for nothing rendered.
+    ///
+    /// The per-row read is GONE (item 18: a card whose words arrive late is a
+    /// card whose HEIGHT arrives late). The book primes every entry's opening
+    /// in ONE bounded read as the entries arrive, so the fact to pin now is:
+    /// **no row reads anything, ever — the book read each note's opening
+    /// once, before the rows existed, and mounting, expanding and collapsing
+    /// them all costs nothing more.** That covers R1-10's case and the one it
+    /// could not state (a card scrolled away and back used to re-read the
+    /// whole note every time).
+    @Test func theBookPrimesEachNoteOnceAndNoRowEverReadsAgain() async throws {
         try await withLandingBook(posts: 5, longAt: [], chapters: false) { session, db, readingID, postIDs, _ in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            BookCardPreviewReads.reset()
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
+            // The prime: ONE read, five notes — before any row exists.
+            #expect(BookCardPreviewReads.reads == 1, "one bounded read for the book")
+            #expect(BookCardPreviewReads.notes == 5, "five notes in it")
+            for id in postIDs {
+                #expect(!model.cardPreview(id).isEmpty,
+                        "every entry's words are in hand before its first frame")
+            }
+
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
             model.expandAll()
-            BookOutlineFactsReads.count = 0
             let watchdog = MainThreadWatchdog()
             defer { watchdog.stop() }
             let (window, hosting) = mounted(
@@ -518,13 +534,20 @@ extension BookOutlineLandingTests {
                 window.close()
             }
             await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 12)
-            #expect(BookOutlineFactsReads.count == 0,
-                    "expanded rows read no facts: \(BookOutlineFactsReads.count) reads")
+            #expect(BookCardPreviewReads.reads == 1, "mounting five expanded stories reads nothing")
+
+            // Collapsing DOES re-read the notes that were open — deliberately:
+            // a note edited while open must not show its old opening words.
+            // The cards keep the words they have while it runs, so no card is
+            // ever empty and no height arrives late.
             model.collapseAll()
             await settle(window, hosting, watchdog: watchdog, until: {
-                BookOutlineFactsReads.count >= 5
+                BookCardPreviewReads.reads > 1
             }, maxTurns: 40)
-            #expect(BookOutlineFactsReads.count >= 5, "collapsed cards read their facts once each")
+            #expect(BookCardPreviewReads.reads == 2, "one refresh read for the notes that closed")
+            #expect(BookCardPreviewReads.notes == 10, "five primed, five refreshed")
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 10)
+            #expect(BookCardPreviewReads.reads == 2, "and nothing reads again once they settle")
         }
     }
 

@@ -166,7 +166,7 @@ struct BookIndexEditingTests {
     @Test func theChapterCountAndTheRowMenuEndInOneTrailingColumn() async throws {
         try await withIndexBook { session, db, readingID, _, _ in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
             })
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
@@ -206,7 +206,7 @@ struct BookIndexEditingTests {
     @Test func aLandingMakesTheNamedBlockTheOneLivePaneAndASecondMigratesIt() async throws {
         try await withIndexBook { session, db, readingID, postIDs, blocks in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
             })
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
@@ -247,7 +247,7 @@ struct BookIndexEditingTests {
     @Test func theReadClickLandsInIndexAtThatBlock() async throws {
         try await withIndexBook { session, db, readingID, postIDs, blocks in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
             })
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)

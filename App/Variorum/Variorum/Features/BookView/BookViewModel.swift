@@ -69,7 +69,7 @@ final class BookViewModel {
                 readingID, limit: Self.entryWindow + 1,  // +1: the truncation probe
                 order: viewOrder
             ) {
-                adopt(value)
+                await adopt(value)
             }
         } catch is CancellationError {
         } catch {
@@ -81,6 +81,26 @@ final class BookViewModel {
     /// content ARE the view's (internal so tests pin exactly that); the
     /// +1 probe row is consumed into `truncated`, never rendered.
     ///
+    /// **13u2 UNIT A2 — WHY THIS IS `async` (item 18, RULING A-1).** The
+    /// cards' previews are PRIMED here, before the entries are published, so
+    /// that the invariant below holds with no timing in it:
+    ///
+    ///   > an entry is never published without its card preview in hand.
+    ///
+    /// The traced defect it closes: a collapsed card used to fetch its own
+    /// preview from a `.task` on the row, so its HEIGHT depended on when that
+    /// read returned — every card above a landing target grew 46 → 103 pt at
+    /// an arbitrary moment AFTER the page had arrived (854 pt of drift on the
+    /// real Sherlock book; her *"stutter … once I've already arrived"* and
+    /// the recovery hop a second later, *"moved down to where the note
+    /// started"*). Nothing about the card's SIZE changes here — that is what
+    /// the reverted first attempt did, and it relocated the defect rather
+    /// than closing it. The settled column is byte-identical to before.
+    ///
+    /// The suspension sits BEFORE the state mutation, never inside it:
+    /// `applyEntries` below is the old synchronous body, untouched, so the
+    /// spread-anchor reasoning it carries still runs in one turn.
+    ///
     /// **The spread survives by IDENTITY, not by index (13c K6 review,
     /// K1).** `spreadLeftIndex` is a position in `entries`, so a membership
     /// insertion or an order flip used to shift the indices and silently
@@ -91,7 +111,12 @@ final class BookViewModel {
     /// spread (the page under her hands keeps its side), else the left
     /// page; the clamp remains only for a post that left the book, and
     /// focus is released exactly when its post is no longer visible.
-    func adopt(_ new: [Queries.ReadingEntry]) {
+    func adopt(_ new: [Queries.ReadingEntry]) async {
+        await primeCardPreviews(for: new)
+        applyEntries(new)
+    }
+
+    private func applyEntries(_ new: [Queries.ReadingEntry]) {
         let anchor: (postID: String, wasRight: Bool)? = {
             guard let indices = Self.spreadIndices(
                 leftIndex: spreadLeftIndex, count: entries.count)
@@ -127,6 +152,104 @@ final class BookViewModel {
         guard let focused = focusedPostID,
               !entries.contains(where: { $0.postID == focused }) else { return }
         focus(nil)
+    }
+
+    // MARK: - 13u2 UNIT A2 — THE CARDS' PREVIEWS, PRIMED WITH THE ENTRIES
+    //
+    // The Outline's collapsed card shows the note's opening words. It used to
+    // fetch them itself, per realized row, from a WHOLE-note render — which
+    // made two things true at once: the read cost ∝ the note's text for forty
+    // words of it (P1), and, worse, the card's HEIGHT arrived late. Item 18
+    // is the second one: a card that grows after a landing has arrived moves
+    // the page under her, and the landing then spends a hop recovering.
+    //
+    // Priming closes it by removing the timing, not by reserving room: the
+    // book reads every entry's leading blocks in ONE bounded read as the
+    // entries arrive, so a card's first frame already knows its words. No
+    // card changes height, no card changes SIZE either, and the settled
+    // column is exactly what it was.
+
+    /// How many leading blocks the preview reads per note.
+    ///
+    /// Four, not one: `BookOutlineRows.cardPreview` skips a lone heading or
+    /// numeral at the front (`I.`, `# Part One`) and reads ACROSS block
+    /// breaks until it has ~forty words, and a note may well open with an
+    /// empty block since Return started minting them (18c's U-1). One stub
+    /// plus three blocks of prose overshoots forty words in every shape the
+    /// sample library and her corpus have. It is a SMALL CONSTANT, which is
+    /// the property that matters: cost ∝ entries × 4 slots, never ∝ the
+    /// book's text.
+    static let cardPreviewBlocks = 4
+
+    /// Each entry's card preview, derived at read time and never stored.
+    /// Observed (a refresh re-renders the cards); the dictionary is the
+    /// book's, so it is evicted down to the entries in hand on every
+    /// adoption.
+    private(set) var cardPreviews: [String: String] = [:]
+
+    /// What a card shows. `""` covers both "this note has nothing to preview"
+    /// and "not primed" — the card renders no excerpt either way, and the
+    /// priming invariant (`adopt`) is what makes the second case impossible
+    /// for an entry the view can see.
+    func cardPreview(_ postID: String) -> String {
+        cardPreviews[postID] ?? ""
+    }
+
+    /// Read the previews the incoming entries do not have yet, and forget the
+    /// ones whose notes have left the book. Runs BEFORE `applyEntries`, so an
+    /// entry never reaches the view without its words.
+    ///
+    /// Steady state costs NOTHING: the entries re-deliver on every container
+    /// write (an autosave stamps `last_touched_at`), and a delivery whose
+    /// notes are all primed does not open the database at all.
+    private func primeCardPreviews(for incoming: [Queries.ReadingEntry]) async {
+        let wanted = incoming.prefix(Self.entryWindow).map(\.postID)
+        let missing = wanted.filter { cardPreviews[$0] == nil }
+        if !missing.isEmpty {
+            await readCardPreviews(missing)
+        }
+        evictCardPreviews(keeping: wanted)
+    }
+
+    /// The one read. A failure leaves the ids UNSET rather than writing an
+    /// empty preview, so the next delivery tries again — an empty string here
+    /// means "read, and there is nothing to show", and the two must not be
+    /// confused (the same distinction the reverted attempt needed a separate
+    /// `factsLoaded` flag for).
+    private func readCardPreviews(_ postIDs: [String]) async {
+        let blocks = Self.cardPreviewBlocks
+        guard let texts = try? await session.database.read({ db in
+            try Queries.leadingBlockTexts(db, containerIDs: postIDs, blocks: blocks)
+        }) else { return }
+        #if DEBUG
+        BookCardPreviewReads.reads += 1
+        BookCardPreviewReads.notes += postIDs.count
+        #endif
+        for id in postIDs {
+            cardPreviews[id] = BookOutlineRows.cardPreview(blocks: texts[id] ?? [])
+        }
+    }
+
+    private func evictCardPreviews(keeping ids: [String]) {
+        let live = Set(ids)
+        guard cardPreviews.contains(where: { !live.contains($0.key) }) else { return }
+        cardPreviews = cardPreviews.filter { live.contains($0.key) }
+    }
+
+    /// **A note that was OPEN may have been edited, so its card re-reads when
+    /// it closes.** This is the freshness the per-row `.task` used to give for
+    /// free (its id carried the expansion, so collapsing re-read), kept
+    /// deliberately rather than dropped: without it a note edited in the book
+    /// would show its old opening words until the book was reopened.
+    ///
+    /// It cannot re-open item 18: the card keeps the words it has while the
+    /// re-read runs (never an empty slot, never a 46-pt card), and a collapse
+    /// is not a landing. A height change here would mean her own edit really
+    /// did change the note's opening — which is the card telling the truth.
+    private func refreshCardPreviews(_ postIDs: [String]) {
+        let ids = postIDs.filter { cardPreviews[$0] != nil }
+        guard !ids.isEmpty else { return }
+        Task { [weak self] in await self?.readCardPreviews(ids) }
     }
 
     /// The section header to show ABOVE entry `i`, if any: grouping is
@@ -487,16 +610,21 @@ final class BookViewModel {
             caretSeed = nil
             fanSeed = nil
         }
+        // 13u2 UNIT A2: the card is about to show again, and the note may
+        // have been edited while it was open.
+        refreshCardPreviews([postID])
     }
 
     /// D1's collapse-all half: everything back to cards, focus released —
     /// which under #43(a) is the surface's own default state, reached in one
     /// click from anywhere.
     func collapseAll() {
+        let wereOpen = Array(expandedPosts)
         expandedPosts.removeAll()
         focusedPostID = nil
         caretSeed = nil
         fanSeed = nil
+        refreshCardPreviews(wereOpen)
     }
 
     /// Open the whole book at once. Scoped to the entries in hand — a post
@@ -641,3 +769,25 @@ final class BookViewModel {
         pendingChapterReveal = nil
     }
 }
+
+#if DEBUG
+/// 13u2 UNIT A2's oracle: how many bounded card-preview reads the book has
+/// performed, and over how many notes. It replaces `BookOutlineFactsReads`,
+/// which counted WHOLE-note renders done per realized row — machinery this
+/// unit deletes, and a counter with no incrementer is a pin that cannot
+/// fail. The claim these numbers carry is stronger than the one they
+/// replace: the book reads each entry's opening ONCE, whatever the rows do
+/// afterwards.
+@MainActor
+enum BookCardPreviewReads {
+    /// Database round trips.
+    static var reads = 0
+    /// Notes read across them.
+    static var notes = 0
+
+    static func reset() {
+        reads = 0
+        notes = 0
+    }
+}
+#endif

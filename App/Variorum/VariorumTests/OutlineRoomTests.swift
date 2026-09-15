@@ -186,7 +186,7 @@ struct OutlineRoomTests {
                 }
             }
             let model = BookViewModel(session: session, readingID: reading.id)
-            model.adopt(entries)
+            await model.adopt(entries)
             let structure = BookStructureModel(session: session, readingID: reading.id)
             structure.adopt(.init(
                 reading: try await db.read { [id = reading.id] in try Queries.reading($0, id: id) },

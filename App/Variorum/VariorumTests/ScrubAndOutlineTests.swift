@@ -77,7 +77,7 @@ struct ScrubAndOutlineTests {
                 return reading.id
             }
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { try Queries.assembleReading($0, readingID: readingID) })
+            await model.adopt(try await db.read { try Queries.assembleReading($0, readingID: readingID) })
             #expect(model.entries.count == 5)
             #expect(model.scrubTarget(fraction: 0)?.title == "chapter 1")
             #expect(model.scrubTarget(fraction: 1)?.title == "chapter 5")

@@ -145,7 +145,7 @@ struct BookRedesignMountTests {
     @Test func theIndexBookViewMountsChapteredWithZeroLiveEditors() async throws {
         try await withChapteredBook(posts: 4) { session, db, readingID, _ in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
             })
             let structure = try await loadedStructure(
@@ -173,7 +173,7 @@ struct BookRedesignMountTests {
     @Test func theOutlineGutterMountsTheOneSideBarEditor() async throws {
         try await withChapteredBook(posts: 3) { session, db, readingID, postIDs in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
             })
             let structure = try await loadedStructure(

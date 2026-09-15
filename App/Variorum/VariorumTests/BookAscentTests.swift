@@ -105,7 +105,7 @@ struct BookAnchorTests {
 @MainActor
 @Suite("The mode click-over carries your place (13f W21)")
 struct BookCarryTests {
-    private func model(entries: [String]) -> BookViewModel {
+    private func model(entries: [String]) async -> BookViewModel {
         let db = try! AppDatabase.inMemory()
         // 13j batch 6: the session snapshots a READ-side clock at
         // construction (the 30-day Trash window is a required argument
@@ -118,15 +118,15 @@ struct BookCarryTests {
             $0.date = DateGenerator { harnessNow }
         } operation: { AppSession(database: db) }
         let model = BookViewModel(session: session, readingID: "book")
-        model.adopt(entries.map {
+        await model.adopt(entries.map {
             Queries.ReadingEntry(postID: $0, title: nil, entryDate: nil, sectionPath: nil)
         })
         return model
     }
 
     /// Leaving OUTLINE carries the focused post.
-    @Test func leavingOutlineCarriesTheFocusedPost() {
-        let model = model(entries: ["p0", "p1", "p2"])
+    @Test func leavingOutlineCarriesTheFocusedPost() async {
+        let model = await model(entries: ["p0", "p1", "p2"])
         model.focus("p2")
         model.carryPlace(from: .outline, readForm: .flow)
         #expect(model.pendingReveal == "p2")
@@ -135,8 +135,8 @@ struct BookCarryTests {
 
     /// Leaving BOOK carries the spread's left page — NOT the focus, which
     /// may be a post the spread is not showing. (Revert W21-A's arm.)
-    @Test func leavingTheSpreadCarriesThePageOnScreen() {
-        let model = model(entries: ["p0", "p1", "p2", "p3"])
+    @Test func leavingTheSpreadCarriesThePageOnScreen() async {
+        let model = await model(entries: ["p0", "p1", "p2", "p3"])
         model.focus("p0")          // an outline focus from earlier
         model.openSpread(leftIndex: 2)  // …and the spread moved away from it
         #expect(model.focusedPostID == nil, "flipping released the ring (the standing rule)")
@@ -146,8 +146,8 @@ struct BookCarryTests {
 
     /// Leaving READ ▸ PAGES carries the reader's reported address. (Revert
     /// W21-A's second arm.)
-    @Test func leavingPagedReadCarriesTheReportedAddress() {
-        let model = model(entries: ["p0", "p1", "p2"])
+    @Test func leavingPagedReadCarriesTheReportedAddress() async {
+        let model = await model(entries: ["p0", "p1", "p2"])
         model.focus("p0")
         model.notePagedAnchor("p1")
         model.carryPlace(from: .read, readForm: .pages)
@@ -156,8 +156,8 @@ struct BookCarryTests {
 
     /// Leaving READ ▸ SCROLL carries where she ARRIVED — the recorded gap,
     /// pinned as behaviour so it can never become a silent surprise.
-    @Test func leavingTheReadingFlowCarriesWhereSheArrived() {
-        let model = model(entries: ["p0", "p1", "p2"])
+    @Test func leavingTheReadingFlowCarriesWhereSheArrived() async {
+        let model = await model(entries: ["p0", "p1", "p2"])
         model.focus("p2")
         model.carryPlace(from: .outline, readForm: .flow)   // outline → read
         model.consumeReveal()                               // the flow landed
@@ -169,8 +169,8 @@ struct BookCarryTests {
     /// Leaving INDEX carries the column's reported selection (wave 2c —
     /// the `notePagedAnchor` pattern, same reason: the selection is the
     /// index's own fact, traveled one step to be readable here).
-    @Test func leavingTheIndexCarriesItsSelection() {
-        let model = model(entries: ["p0", "p1", "p2"])
+    @Test func leavingTheIndexCarriesItsSelection() async {
+        let model = await model(entries: ["p0", "p1", "p2"])
         model.focus("p0")
         model.noteIndexAnchor("p2")
         model.carryPlace(from: .index, readForm: .flow)
@@ -180,8 +180,8 @@ struct BookCarryTests {
 
     /// A book with no place at all carries NOTHING — and does not wipe the
     /// standing anchor on the way (the "leaves both slots alone" clause).
-    @Test func aBookWithNoPlaceCarriesNothing() {
-        let model = model(entries: ["p0"])
+    @Test func aBookWithNoPlaceCarriesNothing() async {
+        let model = await model(entries: ["p0"])
         model.carryPlace(from: .read, readForm: .flow)
         #expect(model.pendingReveal == nil)
         #expect(model.standingAnchorPostID == nil)
@@ -195,8 +195,8 @@ struct BookCarryTests {
     /// The landing is consumed EXACTLY ONCE — the surfaces all consume, and
     /// a second surface mounting must not re-land an old request.
     /// (Revert W21-B's arm.)
-    @Test func theLandingIsConsumedExactlyOnce() {
-        let model = model(entries: ["p0", "p1"])
+    @Test func theLandingIsConsumedExactlyOnce() async {
+        let model = await model(entries: ["p0", "p1"])
         model.requestReveal("p1")
         #expect(model.pendingReveal == "p1")
         model.consumeReveal()
@@ -207,8 +207,8 @@ struct BookCarryTests {
 
     /// The SPREAD really lands (the one landing that is model-level on both
     /// sides): a reveal for an off-spread post moves the spread onto it.
-    @Test func theSpreadLandsOnTheRevealedPost() {
-        let model = model(entries: ["p0", "p1", "p2", "p3"])
+    @Test func theSpreadLandsOnTheRevealedPost() async {
+        let model = await model(entries: ["p0", "p1", "p2", "p3"])
         model.requestReveal("p3")
         // What `SpreadBookView.landReveal` does, exactly.
         let landing = model.pendingReveal

@@ -316,7 +316,7 @@ struct BookOrderConversionTests {
             try session.operations.addPostToReading(post.id, to: reading.id)
 
             let model = BookViewModel(session: session, readingID: reading.id)
-            model.adopt(try await db.read { [id = reading.id] in
+            await model.adopt(try await db.read { [id = reading.id] in
                 try Queries.assembleReading($0, readingID: id)
             })
             let structure = BookStructureModel(session: session, readingID: reading.id)

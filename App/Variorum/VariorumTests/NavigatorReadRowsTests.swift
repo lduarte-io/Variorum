@@ -107,7 +107,7 @@ struct NavigatorReadRowsTests {
             #expect(model.pendingReveal == fourth.postID)
             // …and from the spread the note row page-jumps, never leaving the Book tab.
             structure.mode = .spread
-            model.adopt(entries)
+            await model.adopt(entries)
             BookNavigatorDoor.noteRowClicked(entries[2], model: model, structure: structure)
             #expect(structure.mode == .spread, "the spread's row is a page-jump, not a jump into Outline")
         }

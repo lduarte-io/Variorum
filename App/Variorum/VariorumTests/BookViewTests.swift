@@ -104,7 +104,7 @@ struct BookViewTests {
                 try Queries.assembleReading($0, readingID: readingID)
             }
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(assembled)
+            await model.adopt(assembled)
             #expect(model.entries == assembled)
             #expect(model.entries.map(\.postID).contains(postIDs[2]) == false,
                     "archived posts are out of ambient view — the query's call, rendered")
@@ -120,10 +120,10 @@ struct BookViewTests {
             func entry(_ i: Int) -> Queries.ReadingEntry {
                 Queries.ReadingEntry(postID: "p\(i)", title: nil, entryDate: nil, sectionPath: nil)
             }
-            model.adopt((0..<BookViewModel.entryWindow).map(entry))
+            await model.adopt((0..<BookViewModel.entryWindow).map(entry))
             #expect(!model.truncated)
             #expect(model.entries.count == BookViewModel.entryWindow)
-            model.adopt((0..<(BookViewModel.entryWindow + 1)).map(entry))
+            await model.adopt((0..<(BookViewModel.entryWindow + 1)).map(entry))
             #expect(model.truncated)
             #expect(model.entries.count == BookViewModel.entryWindow,
                     "the probe row is consumed into the flag, never rendered")
@@ -136,7 +136,7 @@ struct BookViewTests {
             func entry(_ id: String, section: String?) -> Queries.ReadingEntry {
                 Queries.ReadingEntry(postID: id, title: nil, entryDate: nil, sectionPath: section)
             }
-            model.adopt([
+            await model.adopt([
                 entry("a", section: nil),
                 entry("b", section: "life/goals"),
                 entry("c", section: "life/goals"),
@@ -156,7 +156,7 @@ struct BookViewTests {
             // lifecycles DO run — the read surfaces' observations start
             // from makeNSView by design).
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
             let window = NSWindow(
@@ -207,7 +207,7 @@ struct BookViewTests {
         func firstLayoutMS(posts: Int) async throws -> Double {
             try await withBookWorld(posts: posts) { session, db, readingID, _ in
                 let model = BookViewModel(session: session, readingID: readingID)
-                model.adopt(try await db.read { [readingID] in
+                await model.adopt(try await db.read { [readingID] in
                     try Queries.assembleReading($0, readingID: readingID, limit: 300)
                 })
                 let window = NSWindow(
@@ -300,7 +300,7 @@ struct BookViewTests {
             #expect(rendered[0].isGap)
 
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
             let window = NSWindow(
@@ -369,7 +369,7 @@ struct BookFocusFoldTests {
     @Test func focusImpliesExpansionAndCollapseReleasesFocus() async throws {
         try await withBookWorld(posts: 3) { session, db, readingID, postIDs in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
 
@@ -425,7 +425,7 @@ struct BookFocusFoldTests {
             let assembled = try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             }
-            model.adopt(assembled)
+            await model.adopt(assembled)
             model.expandAll()
             #expect(postIDs.allSatisfy { model.isExpanded($0) })
 
@@ -434,7 +434,7 @@ struct BookFocusFoldTests {
             let fresh = try session.operations.createPost(title: "born inside")
             _ = try session.operations.newBlock(in: fresh.id, text: "written straight into the book.")
             try session.operations.addPostToReading(fresh.id, to: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
 
@@ -448,7 +448,7 @@ struct BookFocusFoldTests {
     @Test func collapsingTheFocusedPostUnmountsTheLiveEditor() async throws {
         try await withBookWorld(posts: 3) { session, db, readingID, postIDs in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
             let window = NSWindow(
@@ -536,7 +536,7 @@ struct OutlineWritingSurfaceTests {
     ) async throws -> T {
         try await withBookWorld(posts: posts) { session, db, readingID, postIDs in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
             if expanded { model.expandAll() }
@@ -654,7 +654,7 @@ struct OutlineWritingSurfaceTests {
     @Test func outlineVirtualizesItsRowsEvenWithEveryPostExpanded() async throws {
         try await withBookWorld(posts: 1) { session, _, readingID, _ in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt((0..<150).map {
+            await model.adopt((0..<150).map {
                 Queries.ReadingEntry(
                     postID: "p\($0)", title: "t\($0)", entryDate: nil, sectionPath: nil)
             })
@@ -762,7 +762,7 @@ struct SpreadBookViewTests {
     ) async throws -> T {
         try await withBookWorld(posts: posts) { session, db, readingID, postIDs in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
             let structure = BookStructureModel(session: session, readingID: readingID)
@@ -805,7 +805,7 @@ struct SpreadBookViewTests {
     @Test func theSpreadBrainPairsTurnsNudgesAndClamps() async throws {
         try await withBookWorld(posts: 5) { session, db, readingID, postIDs in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
 
@@ -868,7 +868,7 @@ struct SpreadBookViewTests {
 
             // Adoption clamps a stale left index (a shrunk book).
             model.openSpread(leftIndex: 4)
-            model.adopt(Array(model.entries.prefix(2)))
+            await model.adopt(Array(model.entries.prefix(2)))
             #expect(model.spreadLeftIndex == 1)
 
             // The scrub brain (kept; 2C's) is untouched by the rename.
@@ -895,7 +895,7 @@ struct SpreadBookViewTests {
             let entries = try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             }
-            model.adopt(entries)
+            await model.adopt(entries)
             model.openSpread(leftIndex: 1)  // p1 · p2
             #expect(model.leftPage?.postID == postIDs[1])
 
@@ -904,7 +904,7 @@ struct SpreadBookViewTests {
             let landed = Queries.ReadingEntry(
                 postID: "landed-mid-read", title: "today's entry",
                 entryDate: nil, sectionPath: nil)
-            model.adopt([landed] + entries)
+            await model.adopt([landed] + entries)
             #expect(model.leftPage?.postID == postIDs[1],
                     "an insertion re-anchors the spread — the left page is the same post")
             #expect(model.rightPage?.postID == postIDs[2])
@@ -912,7 +912,7 @@ struct SpreadBookViewTests {
             // Her caret on the RIGHT page: an order flip keeps that post
             // visible AND keeps its ring (the page under her hands).
             model.focus(postIDs[2])
-            model.adopt(([landed] + entries).reversed())
+            await model.adopt(([landed] + entries).reversed())
             #expect(model.isOnSpread(postIDs[2]),
                     "a reorder keeps the focused post on the spread")
             #expect(model.focusedPostID == postIDs[2], "…and its ring")
@@ -920,7 +920,7 @@ struct SpreadBookViewTests {
             // The focused post REMOVED from the book: focus releases (the
             // stale-focus half — no editor can mount for a post with no
             // row, and withdrawn arrows would otherwise serve nothing).
-            model.adopt(entries.filter { $0.postID != postIDs[2] })
+            await model.adopt(entries.filter { $0.postID != postIDs[2] })
             #expect(model.focusedPostID == nil,
                     "focus releases when its post leaves the book")
         }
@@ -1017,7 +1017,7 @@ struct SpreadBookViewTests {
     @Test func theSpreadScrubberRidesThePostListAndRoundTrips() async throws {
         try await withBookWorld(posts: 5) { session, db, readingID, postIDs in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
 
@@ -1064,7 +1064,7 @@ struct SpreadBookViewTests {
             #expect(model.focusedPostID == nil, "scrubbing away releases the ring")
 
             // An empty book scrubs nowhere.
-            model.adopt([])
+            await model.adopt([])
             model.scrubSpread(fraction: 0.5)
             #expect(model.spreadLeftIndex == 0)
             #expect(model.spreadScrubFraction == 0)

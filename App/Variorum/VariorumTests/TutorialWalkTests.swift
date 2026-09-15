@@ -1841,7 +1841,7 @@ struct TutorialLibraryActsTests {
             // PAGES: the page brain flips the guide post by post (the
             // model-driven domain — the entry list).
             let model = BookViewModel(session: session, readingID: bookID)
-            model.adopt(try await db.read { [bookID] in
+            await model.adopt(try await db.read { [bookID] in
                 try Queries.assembleReading($0, readingID: bookID, limit: 300)
             })
             #expect(model.leftPage != nil)

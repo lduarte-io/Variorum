@@ -745,7 +745,7 @@ mount: `editorHeight == 24` after 200 turns).
 | the record opened + TRACE 2 re-verified on the post-revert tree | **DONE** — reproduced on the real Sherlock book, three runs (see TRACE 2 RE-VERIFIED below) |
 | the bounded core read (`Queries.leadingBlockTexts`) + its pins | **DONE** — 5 pins green; the cost shape MEASURED FLAT (below) |
 | the card pin, landed RED FIRST on the unfixed tree | **DONE** — 8 cards `46 → 103`, the mechanism's own words (below) |
-| the app-side priming (`BookViewModel` · `OutlinePostRow`) | **PENDING** |
+| the app-side priming (`BookViewModel` · `OutlinePostRow`) | **BUILT — the card pin is GREEN; the landing suite shows TWO failures under an ISOLATED suite run and the BASELINE for that shape is being measured before anything is concluded** |
 | the GATE: the 3-expanded fixture 3/3 isolated, beside the card pin 3/3 | **PENDING** |
 | the WALK: before/after landing stories on the real Sherlock book + captures | **PENDING** |
 | the card:heading scale-mix — MEASURE then decide | **PENDING** |

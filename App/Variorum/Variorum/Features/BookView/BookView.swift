@@ -1689,15 +1689,12 @@ enum BookOutlineMaterialization {
     static var count = 0
 }
 
-#if DEBUG
-/// Ladder R1-10's DEBUG counter: how many whole-note facts reads
-/// (`Queries.renderPost`) the Outline's rows performed — an expanded row
-/// performs none.
-@MainActor
-enum BookOutlineFactsReads {
-    static var count = 0
-}
-#endif
+// (Ladder R1-10's `BookOutlineFactsReads` counter RETIRED at 13u2 UNIT A2
+//  with the thing it counted: the Outline's rows perform no whole-note facts
+//  read at all now — the book primes the cards' openings in one bounded read
+//  (`BookViewModel`), and `BookCardPreviewReads` beside it counts THOSE. A
+//  counter whose incrementer has been deleted is a pin that cannot fail, so
+//  it goes rather than standing as reassurance.)
 
 /// The correction round's landing oracle: where every REALIZED Outline
 /// anchor (`page-<postID>` · `chapter-<sectionID>`) sits, in the scroll's
@@ -1876,8 +1873,18 @@ private struct OutlinePostRow: View {
 
     /// 13f W11: this row's drop indicator (a chapter or a post is hovering).
     @State private var dropTargeted = false
-    /// The card's preview (fetched once per realized row).
-    @State private var excerpt = ""
+
+    /// The card's preview — **the BOOK's, in hand before this row's first
+    /// frame** (13u2 UNIT A2, item 18). It used to be this row's own `@State`,
+    /// filled by a `.task` that rendered the WHOLE note; the card therefore
+    /// grew from 46 pt to 103 pt whenever that read happened to return, which
+    /// on the real Sherlock book meant 854 pt of column drift AFTER a landing
+    /// had already arrived — her *"stutter … once I've already arrived"* and
+    /// the second, separate hop that followed it. The model primes every
+    /// entry's opening words in one bounded read as the entries arrive
+    /// (`BookViewModel.adopt`), so there is no moment at which this row knows
+    /// less than it will know.
+    private var excerpt: String { model.cardPreview(entry.postID) }
 
     var body: some View {
         Group {
@@ -1965,17 +1972,18 @@ private struct OutlinePostRow: View {
                     .onAppear { materialized() }
             }
         }
-        // Ladder R1-10: the facts (one `renderPost` over the WHOLE note) feed
-        // the COLLAPSED card's excerpt alone since 18d batch 1 retired the
-        // gutter line with the gutter (U-17) — an expanded
-        // row renders neither, and every expanded row is a direct child of
-        // the outer VStack now (never lazy), so "expand all" on Sherlock
-        // used to read twelve full stories for nothing rendered. The task's
-        // id carries the form, so a row collapsing later reads then.
-        .task(id: "\(entry.postID)|\(model.isExpanded(entry.postID))") {
-            guard !model.isExpanded(entry.postID) else { return }
-            await loadFacts()
-        }
+        // (13u2 UNIT A2 — THE PER-ROW READ IS GONE. What stood here was a
+        //  `.task` that rendered the WHOLE note to get the card's forty
+        //  words, once per realized row, keyed so that a row collapsing later
+        //  re-read. Ladder R1-10 had already narrowed it to collapsed rows
+        //  because "expand all" on Sherlock otherwise read twelve full
+        //  stories for nothing rendered — the narrowing was right and the
+        //  read was still the wrong shape twice over: it cost ∝ the note's
+        //  text (0.24 → 16 ms as a note grows; the bounded read is a flat
+        //  0.16), and it delivered the card's HEIGHT late, which is item 18.
+        //  The book now primes every entry's opening in ONE bounded read as
+        //  the entries arrive, and the freshness the task's id used to buy —
+        //  a re-read when a note closes — rides `BookViewModel.collapse`.)
     }
 
     /// The far expanded row's stand-in: exactly the surface's remembered
@@ -2020,20 +2028,6 @@ private struct OutlinePostRow: View {
     //  the note box's second state says it for whichever note the book is
     //  pointing at, beside its words, its blocks and its two stamps. One
     //  place, more facts, and no rail reserved down the right of every card.)
-
-    /// One fetch per realized row (LazyVStack — cost ∝ what's on screen,
-    /// P1; the PostCardExcerpt cadence).
-    private func loadFacts() async {
-        #if DEBUG
-        BookOutlineFactsReads.count += 1
-        #endif
-        let slots = (try? await session.database.read { [postID = entry.postID] db in
-            try Queries.renderPost(db, containerID: postID)
-        }) ?? []
-        // Row 45: the preview reads ACROSS the leading blocks and skips a
-        // lone heading/numeral ("I.").
-        excerpt = BookOutlineRows.cardPreview(blocks: slots.compactMap(\.text))
-    }
 
     /// 13f W11 — the row's own drag/drop contract, shared by both forms
     /// (collapsed card and expanded header) through `bookDropRow`.

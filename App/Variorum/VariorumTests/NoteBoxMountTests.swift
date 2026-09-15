@@ -328,7 +328,7 @@ struct NoteBoxCompositionTests {
         session: AppSession, db: AppDatabase, readingID: String
     ) async throws -> (BookViewModel, BookStructureModel) {
         let model = BookViewModel(session: session, readingID: readingID)
-        model.adopt(try await db.read { [readingID] in
+        await model.adopt(try await db.read { [readingID] in
             try Queries.assembleReading($0, readingID: readingID)
         })
         let structure = BookStructureModel(session: session, readingID: readingID)

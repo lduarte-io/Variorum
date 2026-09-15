@@ -184,4 +184,34 @@ struct BookCardHeightStabilityTests {
                     "no card's height may change after its first frame — every point of change is drift under a landing that has already arrived (item 18). Moved: \(report)")
         }
     }
+
+    /// **The INVARIANT the fix rests on, stated where it can be read without
+    /// a window:** an entry is never published without its card preview in
+    /// hand. `adopt` primes before it publishes, so this holds at the instant
+    /// `entries` is non-empty — no layout, no settle, no waiting.
+    ///
+    /// (This one cannot exist on the pre-fix tree by construction — the
+    /// property it reads is the fix. Its sibling above is the red-on-old pin;
+    /// this is the statement of what replaced the defect.)
+    @Test func everyEntrysPreviewIsInHandTheMomentTheEntriesArrive() async throws {
+        try await withCardBook(posts: 6) { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            #expect(model.entries.isEmpty, "the premise: nothing has arrived yet")
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            #expect(model.entries.count == 6)
+            for id in postIDs {
+                #expect(model.cardPreview(id).hasPrefix("Prose of note"),
+                        "the entry arrived with its words: \(model.cardPreview(id))")
+            }
+
+            // And a note that LEAVES the book takes its preview with it — the
+            // map is the book's entries', never a growing cache.
+            let shorter = model.entries.dropLast().map { $0 }
+            await model.adopt(shorter)
+            #expect(model.cardPreview(postIDs[5]).isEmpty, "the departed note's preview is forgotten")
+            #expect(!model.cardPreview(postIDs[0]).isEmpty, "the survivors keep theirs")
+        }
+    }
 }

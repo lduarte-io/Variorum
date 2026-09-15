@@ -493,7 +493,7 @@ struct PagedReadViewTests {
         try await withPagedWorld(posts: posts, blocksPerPost: blocksPerPost) {
             session, db, readingID, postIDs in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
             let structure = BookStructureModel(session: session, readingID: readingID)
@@ -602,7 +602,7 @@ struct PagedReadViewTests {
         try await withPagedWorld(posts: 3, blocksPerPost: 1, blockText: { _, _ in long }) {
             session, db, readingID, postIDs in
             let model = BookViewModel(session: session, readingID: readingID)
-            model.adopt(try await db.read { [readingID] in
+            await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID, limit: 300)
             })
             let pages = PagedReadModel(session: session)
