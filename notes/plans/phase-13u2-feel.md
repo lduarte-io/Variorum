@@ -1373,6 +1373,35 @@ dispositions, the finals, the KnownIssues rows). No history was rewritten; nothi
 **Captures** (gitignored, `notes/plans/13u2-screens/`, continuing A2's numbering): `26`–`33` the
 befores, `34`–`40` the afters.
 
+## ORCHESTRATOR ADJUDICATION — UNIT B (2026-09-15, the same night)
+
+**Spot-check verdict: VERIFIES.** Five commits pushed, tree clean; the diff shape matches the
+record (16 files — the seam pieces, the pane surface, the book/read surfaces, and exactly the +12
+pins); QUESTIONS #110 (a)–(c) appended with the marker moved to #111; the new flake row lands with
+its paired numbers and a named owner. The hollow dismissal and the honest "post-B passed 2 of 9"
+are exactly the discipline the guard asks for.
+
+**Four routings, recorded:**
+1. **The DARK walk was not done** (the 18j appearance control sits below the Settings pane's fold
+   at the shipped window size — three scroll attempts failed). Dark is carried by pins
+   (`ReadPageRoomTests`, both voices × both appearances). **The orchestrator's end-of-phase
+   acceptance walk ADDS a dark pass over unit B's surfaces** (the system-appearance toggle is the
+   road the rig missed — the app follows system by default). The Settings-fold finding itself is
+   REAL and face-shaped: **recorded for the closeout to own** (13u4's restyle or a 17 entry at her
+   word).
+2. **The `theReadClickLandsInIndexAtThatBlock` flake** (pre-B 3/4 → post-B 2/9): the row is
+   honest that B's diff makes the race likelier, and B's diff is squarely seam + pane authority —
+   **flagged for the Fable ladder's round 1 explicitly** (does any of B's Index-row reshaping
+   change a REAL landing's realization, or only the harness's?).
+3. **The 1,989 SwiftUI update-warnings** (the probable family root of both the flake and the
+   shadow's surviving double realization): a standing app-wide condition, never swept — it rides
+   the new KnownIssues row (owner 12) as its own item; nothing more tonight.
+4. **The A2/B measurement divergence, resolved:** A2 measured ONE mount on its gesture; B
+   reproduced the double on a LONG note (262 blocks) and not a short one — the length dependence
+   is why both measurements are true and why the row stood a week. Row 49 is correctly NARROWED,
+   not closed: the router half is fixed (the open-tail loss window closed), the double realization
+   survives with three causes eliminated.
+
 ---
 
 # CARRIED VERBATIM AT THE SPLIT (2026-09-14) — from `phase-13u-feel-and-polish.md` (P39's section, per its banner: "The file split must carry that section to 13u2")
