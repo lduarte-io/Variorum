@@ -294,9 +294,9 @@ zero. Lockstep marker: 8, untouched.
 | A3 | The O(N²) sweep — the PHONE's loop sites + pins | DONE(`0c96edcd`) |
 | A4 | The sweep's verdict table — EVERY production `range(ofEntryAt:)` caller enumerated and verdicted | DONE (the record's A section) |
 | B | The churn pair P24/P25 — the Mac adopts `ArmedEdit.exactCost` + red-on-old pin on the REAL typed path | DONE(`1146594a`) |
-| C | The door-await chain loop (KnownIssues row 44) + the round-3 record's designed pin | IN-PROGRESS |
-| D | Item 7 — `MarkdownActs`' arm-then-hand-off rewrite (the ONE input-path door) + the grep pin | NOT-STARTED |
-| E | P40 + P41 hoists (zero-test-edit proof) + the KnownIssues eight-brain enumeration amendment | NOT-STARTED |
+| C | The door-await chain loop (KnownIssues row 44) + the round-3 record's designed pin | DONE(`a84542e5`) |
+| D | Item 7 — `MarkdownActs`' arm-then-hand-off rewrite (the ONE input-path door) + the grep pin | DONE(`5de0a4d2`) |
+| E | P40 + P41 hoists (zero-test-edit proof) + the KnownIssues eight-brain enumeration amendment | IN-PROGRESS |
 | F | Close — suites green, KnownIssues rows resolved/re-owned, the seven verdicted | NOT-STARTED |
 
 *(Measurements, verdicts, pins and PROVISIONALs are filled in below as each piece lands.)*
@@ -461,6 +461,90 @@ characters deleted, equal weight"* — is unchanged and is now what the Mac actu
 stale sentence corrected in code is `ArmedEdit.exactCost`'s own (*"Platforms that derive cost from
 the report simply never read it (the Mac)"*), written before 13l's measurement and therefore
 documenting the Mac's non-use as though the report were exact there.
+
+---
+
+### C — THE DOOR-AWAIT CHAIN LOOP (`KnownIssuesAndTechDebt.md`'s door-await row; the 18c ladder's R3-1)
+
+**The mechanism, re-traced here rather than taken on the record's word.**
+`EditorViewModel.finalizeWork` captured `pendingCrossBlockTask` ONCE and awaited it. Under 18c's
+deferred-keystroke seam, keys typed during a structural flight are stashed and replayed by the
+ONE idle-gated drain — and a stashed ⏎ (or a seam ⌫) replayed by the awaited task's TAIL
+**schedules a new compound and re-populates the handle**, which the door never re-read. So
+⏎ `x` ⏎ `y` then ⌘Q: the door returned, `applicationShouldTerminate` replied `terminate`, and the
+second act was unstarted with `y` still in `deferredKeyEvents`. Keys she typed ending with the
+process — one seam past where the same ladder's R1-2 closed it, against that round's own doctrine
+that *nothing typed in either app can be permanently lost*. The harness's `flush()` has looped
+over the chain since 18c, with a comment saying exactly why (*"a chained schedule replaced the
+handle"*); the production doors had not.
+
+**THE FIX** is the one loop the round-3 record designed, ahead of `flushNow`, so all four doors —
+quit, lock, seal, teardown — inherit it through the one call. **It terminates by construction:**
+each iteration awaits a task that has completed by the time the await returns, and it exits either
+on a nil handle (the tail cleared it and armed nothing) or on the same handle it just awaited. No
+arming site, no draining site and no idle gate moved.
+
+**PIN — the round-3 record's own designed pin, built verbatim:**
+`TypedReturnKeyTests.theQuitDoorAwaitsEveryLinkOfTheCompoundChain` — four real key events in one
+turn, then **THE DOOR'S OWN CALL** (`finalizeWork()?.value`, deliberately never `h.flush()`).
+**RED ON OLD, and on exactly the two expectations the record predicted:**
+`pendingCrossBlockTask` non-nil and `isDeferringKeystrokes` still true at the moment the door said
+it was done. Post-fix both hold and the store reads `["alpha", "x", "y"]`. The 22 sibling U-1 key
+pins ride unmodified.
+
+**The neighbour R3-1 named and this batch did NOT take** (recorded, never silently skipped): a
+MENU flight up at quit is awaited by no door — `finalizeWork`'s guard reads the dirty flags and
+the handle, never `structuralInFlight`. Older than U-1, a different guard, and widening the guard
+is a door-semantics change rather than a loop; it belongs with UNIT 2's compound work, where the
+flight and the compound are one subject. **Re-owned in `KnownIssuesAndTechDebt.md` rather than
+dropped.**
+
+---
+
+### D — ITEM 7: the arm-then-hand-off residual, closed by making the gap unexpressible
+
+**What was actually there, read before anything changed.** The editor's protocol arms a verdict at
+`shouldChangeText` (against the PRE-edit index) and consumes it at `storageDidEdit`.
+`storageDidEdit`'s own comment has named the hazard since mobile round 2: any of the
+arm-then-hand-off sites *"is one refactor away from separating an arming from its
+`replaceCharacters`; the binding makes that harmless."* I read all eight Mac call sites:
+**every one put the gate as the LAST condition of its guard with the mutation on the next line,
+so nothing armed and abandoned.** The finding is therefore **structural, not live** — and saying
+so is the point, because a fix that claimed to repair a live bug here would be exactly the
+invention the hallucination guard exists to catch. `ArmedEdit.describes` — the binding that made
+an abandoned arming harmless — is untouched; it is mobile round 2's crash fix and it stays.
+
+**THE REWRITE:** `OrdinaryInputEdit.apply` (`Features/Editor/OrdinaryInputEdit.swift`) is the one
+door — gate, mutation and notification as a single call, answering whether the edit landed. Eight
+sites fold onto it: `MarkdownActs`' five (`apply`, `toggleCheckbox`,
+`applyTypedArrowSubstitution`, `insertNewlineContinuingLists`, `deleteWithoutNewline`),
+`EditorViewModel`'s two (`retractListContinuationNewline` and `closeEmptyTailSeparator`, whose own
+doc already pointed at `deleteWithoutNewline`'s shape), and `EditorFind.applyFindReplace`.
+**`TypedArrows` is carried as a CONSUMER, never merged** — the plan's own instruction.
+
+**The two disciplines that used to justify their own call sites are PARAMETERS, not exemptions:**
+`followingCaret: false` (the checkbox click's Act 10 item 11 carve — a click's edit must not let
+`didChangeText`'s caret clearance scroll the page, the measured 6,103 pt jump) and
+`underFindReplace: true` (the find bar's `withFindReplace` bracket, which the delegate reads to
+tell a hand-written 1:1 replacement from typing). An exemption living in an allow-list is a rule
+with a footnote; a parameter is a rule without one.
+
+**PIN:** `OneInputPathTests` — a source walk over the three app roots asserting AppKit's
+`shouldChangeText(in:replacementString:)` is called in **exactly one file**, in the form
+`NoLiteralColourTests` established at 18j (a named allow-list, cheap to add to and impossible to
+add to silently). Matched by the `replacementString:` label so it cannot catch the DELEGATE method
+`textView(_:shouldChangeTextIn:replacementString:)` or `EditorViewModel.shouldChangeText(in:replacement:)`,
+the model's own forwarded answer. **It can fail:** run against the pre-fix worktree it named all
+eight offending sites across three files and flagged the missing door.
+
+**Behaviour change: none, and the proof is the zero-test-edit standard** — the piece's whole diff
+adds one source file and one test file and edits four source files; 151 tests across the
+formatting, find, list and seam suites ride unmodified and green.
+
+**The phone's twin is NOT in scope and is not owed** (item 7 is explicitly the Mac half; the iOS
+half, experiment E1, is ANSWERED and closed): UIKit has no `shouldChangeText` on `UITextView`, so
+`MobileMarkdownActs` calls the MODEL's gate directly and the pair has a different shape entirely.
+Recorded so nobody reads the Mac's new door as a parity debt.
 
 ## UNIT 2 RECORD (LIVE STATUS)
 
