@@ -701,9 +701,21 @@ place: `ArmedEdit.exactCost`'s *"Platforms that derive cost from the report simp
 
 ## UNIT 2 RECORD (LIVE STATUS — the implementer creates and maintains this from its first commit)
 
-**WHAT THIS UNIT DID NOT DO (the record's first line, per the closing rule):** *(filled at the close;
-PENDING while the unit runs)*. `Sources/VariorumCore/Sync/`: **zero lines**. Schema: **zero**.
-Migrations: **zero**. Lockstep marker: **8**, untouched.
+**WHAT THIS UNIT DID NOT DO (the record's first line, per the closing rule):**
+- **QUESTIONS #109's shape is NOT built** — a span that crosses a seam while touching only ONE
+  block's characters (a drag released exactly where the next paragraph begins) keeps its
+  pre-item-5 refusal, now worded for what it actually is. PROVISIONAL, logged with three options,
+  because widening it either CONTRADICTS R-13u-2 or leaves the selected newline visibly standing.
+- **The PHONE's FACE for the compound is not built** — no receipt naming where every block went,
+  and no hands-on walk on a device. The phone inherits the ruled SEMANTICS through the shared
+  brain (her own coordination flag: *"the semantics are ruled HERE, once, for both platforms"*)
+  and its suite is green; the face is the mobile project's, and the parity row says so.
+- **The phone's tutorial is untouched** — its `fannedDivide` lesson still teaches the retired
+  duplicate-divide default (UNIT 1's new KnownIssues row, the mobile project's owner). The ONE
+  standing mobile red is that pin, and it is not this unit's to fix.
+- **Nothing of 13u2/13u3/13u4** — no pane stability, no gutter rework, no restyle.
+- **`Sources/VariorumCore/Sync/`: zero lines.** Schema: **zero**. Migrations: **zero**. Lockstep
+  marker: **8**, untouched.
 
 ### LIVE STATUS (flipped per piece)
 
@@ -714,12 +726,12 @@ Migrations: **zero**. Lockstep marker: **8**, untouched.
 | C | `CrossBlockRefusal` HOISTED to `Shared/` (U-5) with item 5 writing what it says; the gap fence's Mac face (U-3); the empty-block-in-a-span plan (U-4); the fan fence's policy half on a RUN-TIME read (U-1) | DONE(`c76dcd60`) |
 | D | The Mac's face: the routing arm, the receipts that name where every block went, the refusals shrunk to sealed note + locked take | DONE(`c76dcd60`) |
 | E | The PHONE's consumer carried to the new brain (the semantics are ruled for both platforms; the face stays the mobile project's) | DONE(`c76dcd60`) — mobile suite PENDING |
-| F | `newBlock` registers structural undo (R-13u-3) + the AppSpec §9 canon delta in the SAME commit | NOT-STARTED |
-| G | The MENU-flight door-await neighbour (KnownIssues row 63) | NOT-STARTED |
-| H | Row 43 half (1) — the ⌘Z-across-a-break directive: the judgment, made and RECORDED with its traced mechanism | NOT-STARTED |
-| I | The tutorial's TWO-EXITS lesson updated to the fanned matrix (the Mac lesson only) | NOT-STARTED |
-| J | The WALK — the gesture matrix hands-on on the dev-store Debug build, captures in `notes/plans/13u1-screens/` — and the landing/mode-continuity re-walk (her praise) | NOT-STARTED |
-| K | Close — suites green, KnownIssues rows resolved/re-owned, the handback rows flipped, the mobile parity facts | NOT-STARTED |
+| F | `newBlock` registers structural undo (R-13u-3) + the AppSpec §9 canon delta in the SAME commit | DONE(`4ead90ff`, follow-through `a4a…`/`5dc…` era commits) |
+| G | The MENU-flight door-await neighbour (KnownIssues row 63) | DONE(`1b2eb7f0`) |
+| H | Row 43 half (1) — the ⌘Z-across-a-break directive: the judgment, made and RECORDED with its traced mechanism | DONE(`1b2eb7f0`) |
+| I | The tutorial's TWO-EXITS lesson updated to the fanned matrix (the Mac lesson only) | DONE(`b229d681`) |
+| J | The WALK — the gesture matrix hands-on on the dev-store Debug build, captures in `notes/plans/13u1-screens/` — and the landing/mode-continuity re-walk (her praise) | DONE (16 captures) |
+| K | Close — suites green, KnownIssues rows resolved/re-owned, the handback rows flipped, the mobile parity facts | DONE(`5dc6e474` + this record) |
 
 *(Traces, pins, PROVISIONALs and measurements are filled in below as each piece lands.)*
 
@@ -884,6 +896,271 @@ geometry pin, now asserting U-4's empty-block fix), `BoundaryFluidityTests`' CAS
 span the old road sent to #11a), and its routing pin — whose CLAIM (*"eligible cross-block edits
 never show the refusal"*) is unchanged and whose ASSERTION now reads the status KIND, since the
 gesture speaks a RECEIPT and 18i made a receipt quiet by default.
+
+
+---
+
+### F — `newBlock` JOINS AppSpec §9's STRUCTURAL-UNDO LIST (her R-13u-3) — `4ead90ff`
+
+**Her ruling, and the ask under it:** *"⌥⌘Z removes an empty block just minted by ⏎"*
+(`KnownIssuesAndTechDebt.md`'s row, half (2)). `newBlock` had registered nothing since Phase 2 —
+**by omission, not by ruling**, harmless while ⌘⇧⏎ was the only door onto it and newly common the
+moment U-1 made the Return key mint blocks. Her words for the inverse: **a tombstone flip**.
+
+Built with the exact-row redo beside it (13c A10's required `redo:` — a mint that could not be
+re-applied would end the redo future, which a new registration must never do silently), through
+`revertStructural`/`reapplyStructural`, which is the shape `merge` already uses for its own mint.
+**Two behaviours ride in for free and both are right, because they are that function's own:** an
+untouched mint VANISHES, and one she has typed into TRAYS (the standing insurance doctrine — the
+inverse compares the block's takes against their BIRTH texts); a sealed note refuses the undo and
+KEEPS the entry (the resolvable bucket).
+
+**THE ONE NAMED EXCEPTION, and why a default of `true` needed one.** `newBlock` is also the road
+TYPE-TIME CRYSTALLIZATION takes — a paragraph becomes a block because she typed past it (AppSpec
+§7: it *"silently becomes a block as you type"*). Registering that would put an entry on her stack
+per paragraph AND clear the redo future on every one, which is the opposite of what ⌥⌘Z is for. So
+the two Mac crystallizers and the phone's pass `registeringUndo: false`, at their own call sites,
+with that reason at the line. The seeders never reach the question — they already run on
+`Operations(undoStack: nil)` by construction, which is why the tutorial and sample libraries do not
+flood her stack at first launch.
+
+**PINS:** `Tests/VariorumCoreTests/NewBlockUndoTests.swift`, 4 — the entry and its tombstone-flip
+inverse · exact-row redo (the SAME block id comes back) · an edited mint TRAYS · crystallization
+registers nothing AND keeps the redo future alive.
+
+**CANON DELTA, in the same commit as the build** (the ruling's own instruction): `notes/AppSpec.md`
+§9's structural-undo list now reads *"divide, merge, extract, **newBlock**, deleteBlock, …"*, with a
+parenthesis carrying her ruling, its date, the inverse she named, the two riding behaviours and the
+one exception. `notes/OverallModel.md` §3 gained the seventh occasion at piece A.
+
+**THE FOLLOW-THROUGH, and it is worth its own paragraph because it is the whole cost of the
+ruling.** A mint that registers changes stack ARITHMETIC everywhere, and 42 core pins + 47 Mac pins
+were counting `depth` after a FIXTURE built a three-block note. Two roads were open: edit ~90
+assertions to accommodate a fixture side effect (which buries the next real regression in noise), or
+say out loud that **a fixture mint is not a gesture** and seed quietly. The second is what shipped —
+`Tests/VariorumCoreTests/Support/OperationsHarness.swift`'s `seedBlock`, `withEditor`'s seed, and
+the six suite-local worlds — so **every depth assertion in both targets reads exactly as it did
+before the ruling**. That is the zero-test-edit standard applied to the numbers rather than to the
+lines, and it is the honest one: those suites assert something about the OPERATION under test, not
+about how its fixture came to exist.
+
+---
+
+### G — THE MENU FLIGHT EVERY DOOR REPLIED "DONE" OVER (KnownIssues row 63) — `1b2eb7f0`
+
+**The neighbour UNIT 1 traced and deliberately left.** The 18c ladder's R3-1 named it as NOT its
+finding; UNIT 1 fixed the keystroke CHAIN and re-traced this one rather than folding it in, on the
+stated reason that widening the guard changes what the quit door WAITS FOR — door semantics, not a
+loop — and that the flight and the compound are one subject here.
+
+**The mechanism, re-traced in this session.** `EditorViewModel.finalizeWork`'s guard read
+`autosave.isDirty || mintInFlight || hasTailText || pendingCrossBlockTask != nil` — and **never
+`structuralInFlight`**. A divide, merge or ceremony launched from a MENU arms no compound handle
+(there was no refused keystroke to arm one) and dirties nothing, so all four doors — quit, lock,
+seal, teardown — read three false flags and replied "done" with the operation still in the writer
+queue.
+
+**THE FIX:** the guard admits `structuralInFlight`, and the Task waits the latch out the way the
+SAME METHOD already waits `mintInFlight` — one shape, one reason, one place. It converges because
+`runStructural`'s `defer` clears the latch on every road, throw included. What is unknown without it
+is not the OPERATION (one transaction through the runner; the store is truth) but the flight's own
+post-landing bookkeeping: the caret landing, the deferred projection, the stash drain.
+
+**RED ON OLD at the DOOR'S OWN CALL**, measured on the scratch worktree: with a menu-born flight up,
+`structuralInFlight = true`, `isDirty = false`, `pendingCrossBlockTask = false`, **`finalizeWork()`
+returned `nil`**. **PIN:** `MenuFlightDoorAwaitTests.theQuitDoorAwaitsAMenuBornStructuralFlight` —
+it drives ⌘⇧⏎'s door, asserts the three-false-flags state, then calls the door itself.
+
+---
+
+### H — THE ⌘Z-ACROSS-A-BREAK JUDGMENT (row 43, half (1)) — `1b2eb7f0`
+
+**THE JUDGMENT: the directive STANDS.** Every structural rewrite clears the text-undo stack
+(`applyDifferentialStructural`, `applyDifferential` and `renderFull` each carry it), so with the
+chip ON, ⌘Z after a paragraph break stops at the break.
+
+**The mechanism, traced here rather than taken on the row's word.** `NSTextView`'s undo
+registrations are RANGE-based against `NSTextStorage`. A structural rewrite moves every offset after
+the seam — a ⏎-mint inserts one separator, a compound removes a span and may tombstone blocks — so a
+replay applies its recorded replacement at a range the storage no longer means. That is not a
+cosmetic miss: the editor's identity attributes and `BlockRangeIndex` are rebuilt from the store at
+the rewrite, so a stale replay arrives as an edit the gate routes into SOME entry and the autosave
+writes into the wrong variant. Corruption, not inconvenience.
+
+**Why a narrower rule is not available, which is the load-bearing half.** The obvious narrowing —
+drop only the entries whose ranges lie at or after the rewrite's first changed offset — has no API:
+`NSUndoManager` offers `removeAllActions()` and `removeAllActions(withTarget:)` and nothing that
+inspects or removes a SUFFIX, and `NSTextView`'s own registrations are opaque grouped objects. Nor
+can a registration be REBASED across a storage whose offsets moved. So the alternative to clearing
+is a custom undo stack over the storage — a redesign of the single riskiest subsystem in the project
+(AppSpec §15 risk 1) and exactly the bespoke subsystem OverallModel §9 warns about. **Relaxing it
+was never one line; it is a phase.**
+
+**WHAT SOFTENS THE COST — and half (2) of the same row turns out to be most of it.** Before this
+unit a ⏎-mint left NO structural entry, so after a paragraph break the text stack was cleared AND
+the structural stack had nothing from the ⏎: 13j J7's sign at the junction needs a structural label
+to speak (`EditorUndoHint.message` returns nil without one), so ⌘Z did nothing and **said nothing**.
+With R-13u-3 built, it says *"Nothing to undo in the text — your last change was structural: ⌥⌘Z
+undoes it, ⇧⌥⌘Z redoes"*, and ⌥⌘Z really removes the block. Beside that, the seventh quiet
+auto-commit occasion and `editTakesAtomically`'s insurance mean the pre-gesture buffer survives as a
+savepoint BEYOND the session — a durable road the text stack never offered.
+
+**PIN (the softener, end to end through the real key path):**
+`ReturnKeyUndoSignTests.afterAReturnMintTheSignSpeaksAndTheStructuralUndoRemovesTheBlock` — types,
+presses a real ⏎ in a real key window, asserts the text stack is EMPTY (the directive, unchanged),
+that the sign now speaks with the mint's own label, and that ⌥⌘Z restores the note.
+
+---
+
+### I — THE TUTORIAL'S TWO-EXITS LESSON, GROWN TO THE MATRIX — `b229d681`
+
+**Row 27's deferred half, and it named this phase.** The post-13l polish round wrote the lesson and
+recorded in its own ledger: *"the fanned cross-block matrix is 13u's — its sitting + its own lesson
+update"*. Her item 5 mandate is why it could not stay deferred past this unit: **teachability is a
+design constraint**, and after this build the gesture has more than one answer.
+
+**Three cards added** (the lesson stays three lessons; the chapter's titles pin is untouched): the
+WHOLE/PART fork and what each fate means for takes · **R-13u-2 in her own shape**, naming BOTH kinds
+of paragraph break including *"a line break inside one"* · #11a's rule at the ends (*"a keystroke
+will never fold a fan away"*). Then **taught by doing**, her method for this chapter: an EXIT THREE
+trio staged with a REAL FAN on the middle block — the cell her ruling actually changed.
+
+**One stale claim corrected against the build.** The lesson said *"Nothing announced itself at the
+time, on purpose: a message on every join would be noise"*. It does announce itself now — quietly,
+at the bottom bar's trailing end, under the setting 18i gave her. The card says that instead, and
+points at the panel the line points at.
+
+**PINS:** `TutorialFannedMatrixTests` (2) — the prose holds the three answers by their own words,
+and the lesson's own gesture lands where the cards say (the middle trays with BOTH takes; the ends
+join; Came from names both).
+
+---
+
+### J — THE WALK (16 captures, `notes/plans/13u1-screens/`)
+
+Hands-on on the **DEV-STORE Debug build** (`io.lduarte.Variorum.debug`, launched from
+`DerivedData/13u1u2`; her `/Applications` copy untouched and never quit), driven with `cliclick` +
+`Tools/WalkKit`. A fresh note, four typed paragraphs, then the matrix:
+
+| # | capture | what the surface did |
+|---|---|---|
+| 01–02 | `01-midtomid-selection` · `02-midtomid-joined` | mid-Alpha → mid-Gamma, ⌫: **"Alpha two three."** — one block, no space at the join, caret after "Alpha"; Beta gone |
+| 02 | (the bar) | the receipt: **"1 block to This Note's Tray; the ends joined — originals under Came from. ⌥⌘Z undoes it."** |
+| 03–04 | `03-undo-restored` · `04-redo-exact-rows` | the Edit menu read **"Undo Edit Across Blocks"** — ONE entry for the whole gesture; one undo restored all four paragraphs; **"Redo Edit Across Blocks"** returned the post-do state |
+| 05–06 | `05-seam-cut-selection` · `06-seam-cut-no-join` | a span OPENING at a block's start: **two blocks to the tray, the remainder keeps its own block** — R-13u-2's block-seam half, and the receipt says *"2 blocks to This Note's Tray."* |
+| 07–09 | `07-fanned-middle-staged` · `08-fanned-middle-to-tray` · `09-tray-put-back-real` | a FANNED middle (⑂2) covered whole: the ends joined and the middle rows in **This Note's Tray** with **Put back** and *"30 days left"* — her *"recoverable, family intact"* on screen |
+| 10 | `10-fanned-edge-no-join` | a fan on the LEADING end: **two blocks stay two**, the fan intact, the receipt *"the ends kept their own blocks — one h…"* |
+| 11 | `11-sealed-note-refuses` | sealed: the surface reads **"sealed note — read-only"**, the ⌫ changed nothing |
+| 12 | `12-locked-take-refuses-whole` | a LOCKED chosen take: **"A take in this selection is locked — nothing was changed. Branch it or unlock it, then try again."** — R-13u-1, and it TOASTS (a refusal always shows) |
+| 13–16 | `13-…-write-before` → `16-…-write-after` | **her praise, protected**: Write → Takes → Blocks → Write with the caret in the last block read **block 2/2** at every stop |
+
+**THE WALK'S ONE FINDING, and it changed the build.** The first receipt composed
+`BlockSelectionCopy.deletedNote` whole and appended the join clause — one grammar with the bulk bar
+— and on the 1728 pt window it **TRUNCATED at *"…the tray icon at the top of the note…"***, which is
+exactly where the join clause began. `QuietReceiptLine` truncates by design (one line, tail, the
+whole sentence one hover away), so nothing was broken — but a receipt whose SECOND destination falls
+off the end does not keep her mandate. The receipt was rewritten to name both destinations by their
+NOUNS first and spend what is left on the road out; the re-walk shows it whole. Pinned so it cannot
+grow back: `CrossBlockCompoundTests.theReceiptNamesBothDestinationsAndStaysShortEnoughToRead`.
+
+**Two observations recorded rather than acted on.** (1) ⌥⌘Z sent through `cliclick` did not reach
+the app while the Edit-menu item did — a harness limitation, not a defect (the menu carried the
+right label, and the chord is pinned in the suite). (2) Undoing a compound that MERGED leaves the
+merged block in the tray: it diverged from its birth text when the compound wrote over it, so
+`revertStructural` stamps `last_container_id` and it trays rather than vanishing. That is the
+standing insurance doctrine and the shipped merge-then-edit behaviour, already pinned by
+`BoundaryFluidityTests` — unchanged by this unit, noted because the walk shows it.
+
+---
+
+### K — THE CLOSE
+
+#### Finals
+
+| suite | result | baseline (UNIT 1's close) |
+|---|---|---|
+| core `swift test` | **1562 / 170, all green** | 1551 / 168 |
+| the FULL Mac suite | **2664 / 445, ALL GREEN** | 2,644 / 441 all green |
+| iOS build | **green** | green |
+| the FULL mobile suite | **622 / 105, the ONE owned red + the 2 standing known issues** | 622 / 105, same red |
+
+The core's +11 are `InsureTakesTests` (7) and `NewBlockUndoTests` (4) in +2 suites. The Mac's +20 are
+`CrossBlockCompoundTests` (16, one of them the receipt pin), `MenuFlightDoorAwaitTests` (1),
+`ReturnKeyUndoSignTests` (1) and `TutorialFannedMatrixTests` (2) in +4 suites; the two displaced
+`EditorSeamCostTests` pins moved onto the compound rather than being deleted with the method they
+measured.
+
+**THE MOBILE RED IS THE ONE UNIT 1 FILED AND IT IS NOT THIS UNIT'S:**
+`MobileTutorialStructureWalkTests.theFannedDivideLessonLandsTheDuplicateShape` — the phone's
+tutorial still TEACHES the retired duplicate-divide default (her U-2, 2026-09-06). Proven
+pre-existing at UNIT 1 on a scratch worktree, owned by the mobile project row, and deliberately not
+fixed here: rewriting a lesson's promise is the phone's product work.
+
+**A LOAD-FLAKE MET ONCE AND CLEARED, recorded:** `BlocksWorkbenchFaceTests
+.aSingleClickOnARowActsWithinTheBudgetAndADoubleStillOpens` failed a full-suite run on a poll
+timeout and passed 4/4 isolated immediately after; it is the standing real-click-rig harness family
+(KnownIssues, owner 12). The final full run was green including it.
+
+#### Every row dispositioned
+
+| row | verdict | evidence |
+|---|---|---|
+| **item 5** — the cross-block compound | **BUILT to the rulings** | `CrossBlockCompound` + 16 pins + the 16-capture walk; six red-on-old measurements on the pre-fix worktree |
+| **item 8 · U-1** — the frozen-projection fan fence | **FIXED** (both halves) | the plan takes no arity; the store is read inside the flight; `aTakeArrivingDuringTheTypingBurstStopsTheJoin`, red on old |
+| **item 8 · U-3** — the gap fence's Mac face | **FIXED at the root** | the run is an index RANGE; `.unsyncedBlock` diagnosed; `blocksNotAdjacent` worded as the belt. Red on old: the raw enum dump with two UUIDs |
+| **item 8 · U-4** — an empty block in a span | **FIXED** | the same change from the other side; `theCrossBlockPlanTakesAnEmptyBlockInsideTheSpan` |
+| **item 8 · U-5** — `CrossBlockRefusal`'s hoist + wording | **FIXED** | hoisted to `Shared/` with `fanRoads` as the one platform parameter; zero Mac test edits; the phone's single line retired |
+| **row 43 half (1)** — the ⌘Z-across-a-break directive | **JUDGED: the directive STANDS**, with the traced mechanism and what softens it | section H; `ReturnKeyUndoSignTests` |
+| **row 43 half (2)** — `newBlock`'s structural undo | **BUILT (R-13u-3)** + the AppSpec §9 delta in the same commit | `NewBlockUndoTests` (4) |
+| **row 63** — the MENU flight no door awaited | **FIXED** | `MenuFlightDoorAwaitTests`, red on old at the door's own call |
+| **the tutorial's TWO-EXITS lesson** | **UPDATED to the matrix** | three cards + a staged fanned trio; `TutorialFannedMatrixTests` (2) |
+| **her praise — cross-mode continuity** | **PROTECTED** | zero landing pins modified; walked Write → Takes → Blocks → Write at block 2/2 |
+
+#### PROVISIONAL calls: ONE
+
+**QUESTIONS #109 — a selection that stops exactly at a block boundary.** (a) SHIPPED: it keeps its
+pre-item-5 refusal, now worded for the geometry it actually is. The alternatives are recorded
+because neither is a batch's call: (b) delete the separator too and JOIN — the plain-editor reading,
+but it CONTRADICTS R-13u-2 as written; (c) take the span, honour R-13u-2, leave the blocks apart —
+rule-faithful, but the separator she selected visibly survives, and the widened run would apply the
+lock and gap fences to a block the gesture never touches.
+
+#### Canon deltas: TWO, both hers, both recorded with the build
+
+1. **`notes/AppSpec.md` §9** — `newBlock` joins the structural-undo list (R-13u-3), with the
+   inverse she named, the two riding behaviours, and the one exception.
+2. **`notes/OverallModel.md` §3** — the SEVENTH quiet auto-commit occasion, with her words for it,
+   the reason (the gesture mixes the two undo worlds), and the two things it deliberately does not
+   insure.
+
+`Sources/VariorumCore/Sync/`: **zero lines.** Schema: **zero.** Migrations: **zero.** Lockstep
+marker: **8**, untouched.
+
+#### THE MOBILE PARITY FACTS (for the closeout's ledger row)
+
+**What the phone HAS today, through the shared brain, with no work owed:** the whole ruled semantics
+— whole blocks to the tray (a fanned middle included), partial ends edited in the chosen take only,
+R-13u-2's join rule, the fan read from the STORE at run time, R-13u-1's refuse-whole lock, the
+seventh quiet auto-commit occasion, ONE undo entry with the exact-row redo, and the hoisted
+`CrossBlockRefusal` speaking its four real causes in the phone's own roads. Pinned on the phone:
+`MobileCrossBlockEditBrainTests` (11) + `MobileCrossBlockEditTests`' face pins, including the fanned
+middle riding the tray with its family.
+
+**What the phone OWES, and it is a FACE, not a fix:**
+
+1. **A receipt naming where every block went** — the Mac's `CrossBlockEditCopy` has no phone twin;
+   the phone's door currently reports wordlessly with a bare Undo action (M20's shape). Her item 5
+   legibility mandate is platform-neutral, and the phone's tray/lineage nouns are its own.
+2. **A hands-on walk of the matrix on a device** — the Mac's 16 captures are the Mac's.
+3. **`newBlock`'s structural undo at the phone's own doors** — it registers there through the same
+   op today (its insert-block door mints through `newBlock`), so the phone's undo sheet will show
+   "Undo New Block"; nothing is owed for correctness, but the phone should decide whether that row
+   is worth rendering for a mint.
+4. Beside them, **UNIT 1's standing row**: the phone's tutorial teaches the retired
+   duplicate-divide default, and a friends-beta reader would be taught a rule the app does not
+   follow.
+
+---
 
 ## CLOSEOUT (findings → dispositions; filled at the ladder's end)
 
