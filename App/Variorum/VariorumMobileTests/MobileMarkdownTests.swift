@@ -48,7 +48,11 @@ func makePost(
     let post = try await session.runner.run { ops in
         let post = try ops.createPost(title: "md", profile: .blog)
         for text in blocks {
-            _ = try ops.newBlock(in: post.id, text: text, at: .end)
+            // A FIXTURE MINT IS NOT A GESTURE (13u1 UNIT 2): `newBlock`
+            // joined AppSpec §9's structural-undo list at her ruling
+            // R-13u-3, and a harness laying down blocks before the act a
+            // test is about must not put entries on the stack it counts.
+            _ = try ops.newBlock(in: post.id, text: text, at: .end, registeringUndo: false)
         }
         if locked { try ops.lockPost(post.id) }
         return post

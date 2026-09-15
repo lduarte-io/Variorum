@@ -145,12 +145,21 @@ struct MobileUndoDoorTests {
                 session, blocks: ["Alpha one.", "Beta two.", "Gamma three."])
             let (model, storage) = makeEditor(session, postID: postID)
             await model.loadOnce()
-            // A fanned block makes the cross-block span REFUSE at the gate
-            // rather than route to merge-then-edit.
-            try await session.runner.run { [blockID = model.index.entries[1].blockID] ops in
-                _ = try ops.newBlankVariant(blockID)
+            // **A LOCKED take makes the cross-block span REFUSE at the gate**
+            // rather than route to the compound. *(13u1 UNIT 2: this used to
+            // be a FANNED block, which refused before her item 5 ruling made
+            // a fanned span the compound's ordinary road. A lock is now one
+            // of the only two things a cross-block edit refuses for —
+            // R-13u-1, refuse whole, naming the lock — so it is what this
+            // pin drives; the pin's own subject, the receipt's stale Undo,
+            // is untouched.)*
+            try await session.runner.run { [slot = model.slots[1]] ops in
+                try ops.lockVariant(slot.variantID!)
             }
             await model.refreshTakesFromStore()
+            model.applyProjection(try await session.database.read {
+                [postID] db in try Queries.renderPost(db, containerID: postID)
+            })
 
             // A structural act leaves a receipt WITH its Undo.
             await model.structural.deleteBlock(blockID: model.index.entries[2].blockID)
@@ -162,8 +171,9 @@ struct MobileUndoDoorTests {
             // road: the sentence changes, and the stale Undo goes with it.
             typeEdit(model, storage, range: NSRange(location: 6, length: 10), replacement: "")
             await model.pendingGestureTask?.value
-            #expect(model.statusMessage
-                == model.message(for: BlockRangeIndex.Refusal.crossesBlockBoundary))
+            #expect(model.statusMessage == CrossBlockRefusal.message(
+                for: .lockedTake, fanRoads: MobileEditorViewModel.fanFoldRoads),
+                    "the refusal DIAGNOSES: \(model.statusMessage ?? "nil")")
             #expect(model.statusAction == nil, "the action never outlives its sentence")
         }
     }

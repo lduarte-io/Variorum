@@ -32,13 +32,19 @@
 //     delete road), a sealed note. Regression guards on the new road, never
 //     evidence that it works.
 //
-//  THE FENCE, stated where a later session will read it: a span touching a
-//  block that HAS TAKES is not this road's. The Mac routes it to its own
-//  visible-take edit (the #11a sitting ruling of 2026-07-13 — the halves
-//  JOIN only where no fan hangs on the seam), which is Mac-app code and
-//  stays there; the author is handling the fanned case herself.
-//  `aFannedSpanIsNotThisRoad` and `aFannedSpanStillRefusesOnThePhone` are
-//  that fence in both layers.
+//  **THE FENCE IS GONE — 13u1 UNIT 2, her item 5.** This header used to
+//  say that a span touching a block with TAKES was not this road's, that
+//  the Mac routed it to its own visible-take edit (#11a, 2026-07-13), and
+//  that the author was handling the fanned case herself. She handled it,
+//  and the brain was rebuilt to her rulings: a block the selection covers
+//  WHOLE rides `deleteBlock` — the Trash/tray road, a fanned one included,
+//  family intact — while a block covered in PART keeps its identity and its
+//  CHOSEN take takes an ordinary buffer edit. The ends JOIN only when both
+//  cuts sit mid-paragraph (R-13u-2) and no fan hangs on either (#11a's rule,
+//  carried forward and asked of the STORE at run time, never of the
+//  editor's projection). A LOCKED take anywhere in the run refuses the
+//  WHOLE gesture (R-13u-1). The pins below say which of them changed with
+//  the ruling and which are boundary characterizations that did not.
 //
 
 import Foundation
@@ -57,7 +63,11 @@ private func seedThreeParagraphs(
 ) async throws -> (postID: String, blockIDs: [String]) {
     try await session.runner.run { ops in
         let post = try ops.createPost(title: "merge-then-edit", profile: .blog)
-        let ids = try texts.map { try ops.newBlock(in: post.id, text: $0, at: .end).block.id }
+        // A fixture mint is not a gesture (13u1 UNIT 2 — `makePost`'s own
+        // rule, stated there).
+        let ids = try texts.map {
+            try ops.newBlock(in: post.id, text: $0, at: .end, registeringUndo: false).block.id
+        }
         return (post.id, ids)
     }
 }
@@ -77,7 +87,7 @@ private func editSpan(
 
 // MARK: - The shared brain (the hoist's own pins)
 
-@Suite("The shared merge-then-edit brain (M22's hoist)")
+@Suite("The shared cross-block compound brain (M22's hoist, rebuilt at 13u1 UNIT 2)")
 @MainActor
 struct MobileCrossBlockEditBrainTests {
 
@@ -104,95 +114,143 @@ struct MobileCrossBlockEditBrainTests {
         (document as NSString).substring(with: range)
     }
 
+    /// Filler of the RIGHT LENGTH: the plan compares the surface text it is
+    /// handed against the index's own tiling and refuses a mismatch as a
+    /// desync (13u1 UNIT 2), so a probe that returns `""` is not a probe,
+    /// it is a desync.
+    private static func filler(_ range: NSRange) -> String {
+        String(repeating: "x", count: range.length)
+    }
+
     private static func plan(
         _ range: NSRange, _ replacement: String = "",
-        index: BlockRangeIndex = index(), arities: [Int] = [1, 1, 1]
-    ) -> CrossBlockEditPlanner.Edit? {
-        CrossBlockEditPlanner.plan(
-            replacing: range, with: replacement,
-            index: index, fanArities: arities, surfaceText: text)
+        index: BlockRangeIndex = index()
+    ) -> CrossBlockCompound.Plan? {
+        CrossBlockCompound.plan(
+            replacing: range, with: replacement, index: index, surfaceText: text)
     }
 
-    /// The plan names the touched run and the two intra offsets that anchor
-    /// the edit inside the MERGED text — the arithmetic `apply` reads.
-    @Test func thePlanNamesTheRunAndTheIntraOffsets() {
+    /// **THE FATES, and the geometry that decides them** (13u1 UNIT 2, her
+    /// item 5). A block covered in PART keeps its identity and its chosen
+    /// take takes an ordinary buffer edit; the two surviving ends JOIN when
+    /// both cuts sit mid-paragraph.
+    ///
+    /// *(This pin's ancestor read `blockIDs` / `intraStart` /
+    /// `intraEndInLast` / `lastPieceLength` off the retired merge-then-edit
+    /// plan, which merged the WHOLE run into one block. Same road, same
+    /// question, the answers her ruling changed.)*
+    @Test func thePlanNamesTheEndsItKeepsAndTheFatesOfTheRest() {
         // 6..16: "one." + the separator + "Beta " — mid-block 0 to mid-block 1.
         let edit = try? #require(Self.plan(NSRange(location: 6, length: 10)))
-        #expect(edit?.blockIDs == ["b0", "b1"])
-        #expect(edit?.pieces.map(\.variantID) == ["v0", "v1"])
-        #expect(edit?.pieces.map(\.text) == ["Alpha one.", "Beta two."],
-                "the PLAN-TIME surface texts — the compound's compare-and-set inputs")
-        #expect(edit?.intraStart == 6, "intra the FIRST block")
-        #expect(edit?.intraEndInLast == 5, "intra the LAST block")
-        #expect(edit?.lastPieceLength == 9)
-        #expect(edit?.replacement == "")
+        #expect(edit?.deletedBlockIDs.isEmpty == true, "no block is covered whole")
+        #expect(edit?.leading?.blockID == "b0")
+        #expect(edit?.leading?.variantID == "v0")
+        #expect(edit?.leading?.oldText == "Alpha one.",
+                "the PLAN-TIME surface text — the compound's compare-and-set input")
+        #expect(edit?.leading?.newText == "Alpha ")
+        #expect(edit?.trailing?.blockID == "b1")
+        #expect(edit?.trailing?.oldText == "Beta two.")
+        #expect(edit?.trailing?.newText == "two.")
+        #expect(edit?.joinsEnds == true, "both cuts sit mid-paragraph — R-13u-2")
+        #expect(edit?.caretBlockID == "b0")
+        #expect(edit?.caretOffset == 6)
     }
 
-    /// A run of THREE, and a replacement riding along.
-    @Test func aRunOfThreeBlocksPlansWithItsReplacement() {
+    /// A run of THREE: the MIDDLE is covered whole, so it rides
+    /// `deleteBlock` — the Trash/tray road, her ruling's first clause — and
+    /// the two ends keep their identities. A replacement rides the first end.
+    @Test func aWhollyCoveredMiddleRidesTheTrayAndTheEndsSurvive() {
         let edit = try? #require(Self.plan(NSRange(location: 6, length: 20), "X"))
-        #expect(edit?.blockIDs == ["b0", "b1", "b2"])
-        #expect(edit?.intraStart == 6)
-        #expect(edit?.intraEndInLast == 5, "6 + 20 = 26, which is 5 into block 2")
-        #expect(edit?.lastPieceLength == 12)
-        #expect(edit?.replacement == "X")
+        #expect(edit?.deletedBlockIDs == ["b1"], "the middle goes whole")
+        #expect(edit?.leading?.blockID == "b0")
+        #expect(edit?.leading?.newText == "Alpha X", "the typed text lands where the span opened")
+        #expect(edit?.trailing?.blockID == "b2")
+        #expect(edit?.trailing?.newText == " three.", "6 + 20 = 26, which is 5 into block 2")
+        #expect(edit?.caretOffset == 7, "6 + the replacement's length")
     }
 
-    /// **THE FENCE, in the brain.** A touched block with TAKES declines —
-    /// merge-then-edit stays the single×single behaviour (the #11a sitting
-    /// ruling, 2026-07-13). The Mac routes that span to its visible-take
-    /// edit; the phone has no such road and refuses. Neither is this
-    /// function's business, and this pin is here so it never becomes it.
-    ///
-    /// BOUNDARY CHARACTERIZATION: green on both trees.
-    @Test func aFannedSpanIsNotThisRoad() {
+    /// **R-13u-2, in the brain.** A cut at a paragraph break of EITHER kind
+    /// — the block's own edge, or an internal newline — suppresses the join.
+    @Test func aCutAtAParagraphBreakSuppressesTheJoin() {
+        // The span OPENS at block 0's start: a block seam.
+        #expect(Self.plan(NSRange(location: 0, length: 16))?.joinsEnds == false)
+        // …and the mirror: a span CLOSING at the last block's end covers it
+        // whole, so there is no second remainder to join to.
+        #expect(Self.plan(NSRange(location: 6, length: 14))?.joinsEnds == false)
+        // The internal-newline half, on a two-paragraph first block.
+        let internalNewline = "Alpha\nmore.\nBeta two."
+        let index = BlockRangeIndex(
+            entries: [
+                .init(blockID: "b0", variantID: "v0", length: 11, editable: true),
+                .init(blockID: "b1", variantID: "v1", length: 9, editable: true),
+            ],
+            tailLength: nil)
+        let surface: (NSRange) -> String = { (internalNewline as NSString).substring(with: $0) }
+        // Opening at offset 6 — immediately AFTER the internal newline.
+        #expect(CrossBlockCompound.plan(
+            replacing: NSRange(location: 6, length: 11), with: "",
+            index: index, surfaceText: surface)?.joinsEnds == false)
+        // …while opening one character later is mid-paragraph and joins.
+        #expect(CrossBlockCompound.plan(
+            replacing: NSRange(location: 7, length: 10), with: "",
+            index: index, surfaceText: surface)?.joinsEnds == true)
+    }
+
+    /// **THE FENCE IS GONE, and that is her ruling** (item 5, built at 13u1
+    /// UNIT 2). Merge-then-edit declined any span touching a FANNED block
+    /// (the Mac routed it to its own visible-take edit, which the phone
+    /// never had). The compound takes fanned spans on both platforms now:
+    /// a fanned block covered WHOLE goes to the tray with its family, a
+    /// fanned END takes its chosen take's edit only, and the FAN decides
+    /// the JOIN — asked of the STORE at run time, never of the plan, which
+    /// is why this function no longer takes an arity at all (U-1's
+    /// correctness half: never authorize from stale state).
+    @Test func aFannedSpanIsThisRoadNowAndTheFanDecidesTheJoinElsewhere() {
         let span = NSRange(location: 6, length: 10)
-        #expect(Self.plan(span, arities: [1, 1, 1]) != nil, "the control")
-        #expect(Self.plan(span, arities: [2, 1, 1]) == nil, "a fan on the FIRST touched block")
-        #expect(Self.plan(span, arities: [1, 2, 1]) == nil, "…or on the second")
-        #expect(Self.plan(span, arities: [1, 1, 5]) != nil,
-                "a fan OUTSIDE the touched run is nobody's business here")
+        let edit = try? #require(Self.plan(span))
+        #expect(edit?.leading?.blockID == "b0")
+        #expect(edit?.joinsEnds == true,
+                "the GEOMETRY says join; whether it really does is the store's answer")
     }
 
-    /// A missing arity DECLINES — deliberately stricter than
-    /// `StructuralGesturePlanner.World.fanArity`, which reads a missing
-    /// entry as 1. `slots` lags `entries` during a crystallization window,
-    /// and this road MERGES blocks: an unknown fan is not a fan it may
-    /// assume away. The shipped Mac rule, preserved by the hoist.
-    @Test func aMissingArityDeclinesRatherThanAssumingNoFan() {
-        let span = NSRange(location: 6, length: 10)
-        #expect(Self.plan(span, arities: [1]) == nil, "block 1's arity is unknown")
-        #expect(Self.plan(span, arities: []) == nil)
-    }
-
-    /// A gap slot (its variant has not arrived) has nothing to merge.
-    /// BOUNDARY CHARACTERIZATION: green on both trees.
-    @Test func aGapInTheSpanHasNoPlan() {
+    /// **A gap slot fences the span — and the run is an index RANGE, so it
+    /// fences an INTERIOR gap too** (13u1 UNIT 2, item 8's U-3). A gap
+    /// renders with zero length, so the retired planner ran straight past
+    /// one and planned a merge ACROSS it; the operations layer then refused
+    /// with a raw `blocksNotAdjacent`. Tombstoning a block whose text has
+    /// never arrived would delete a peer's paragraph under tombstone-wins.
+    @Test func aGapInTheRunHasNoPlan() {
         #expect(Self.plan(NSRange(location: 6, length: 10), index: Self.index(gap: 1)) == nil)
         #expect(Self.plan(NSRange(location: 6, length: 10), index: Self.index(gap: 0)) == nil)
         #expect(Self.plan(NSRange(location: 6, length: 10), index: Self.index(gap: 2)) != nil,
-                "a gap OUTSIDE the touched run does not fence the span")
+                "a gap OUTSIDE the run does not fence the span")
+        // The INTERIOR zero-length gap the old walk could not see.
+        let interior = Self.index([10, 0, 12], gap: 1)
+        #expect(CrossBlockCompound.plan(
+            replacing: NSRange(location: 6, length: 10), with: "",
+            index: interior, surfaceText: Self.filler) == nil,
+                "the gap sits inside the span and renders nothing — it is IN the run")
     }
 
-    /// A LOCKED take's buffer is frozen: no road edits it.
-    /// BOUNDARY CHARACTERIZATION: green on both trees.
-    @Test func aLockedTakeInTheSpanHasNoPlan() {
+    /// **R-13u-1: a LOCKED take anywhere in the run refuses the WHOLE
+    /// gesture.** One gesture, one answer.
+    @Test func aLockedTakeInTheRunHasNoPlan() {
         #expect(Self.plan(NSRange(location: 6, length: 10), index: Self.index(locked: 1)) == nil)
+        #expect(Self.plan(NSRange(location: 6, length: 10), index: Self.index(locked: 0)) == nil)
     }
 
     /// A span reaching the OPEN TAIL is refused by the contiguity guard —
     /// the tail is not a block yet (idle-mint makes it one within seconds).
-    /// BOUNDARY CHARACTERIZATION: green on both trees.
     @Test func aSpanReachingTheOpenTailHasNoPlan() {
         let withTail = Self.index([10, 9], tail: 4)
         // Entries (0,10) and (11,9); the tail's text starts at 21.
-        #expect(CrossBlockEditPlanner.plan(
+        #expect(CrossBlockCompound.plan(
             replacing: NSRange(location: 6, length: 17), with: "",
-            index: withTail, fanArities: [1, 1], surfaceText: Self.text) == nil,
+            index: withTail, surfaceText: Self.text) == nil,
                 "the span runs past the last entry's end, into the tail")
-        #expect(CrossBlockEditPlanner.plan(
+        #expect(CrossBlockCompound.plan(
             replacing: NSRange(location: 6, length: 10), with: "",
-            index: withTail, fanArities: [1, 1], surfaceText: Self.text) != nil,
+            index: withTail, surfaceText: Self.text) != nil,
                 "…while a span that stops inside the blocks is fine")
     }
 
@@ -203,46 +261,41 @@ struct MobileCrossBlockEditBrainTests {
 
     /// **A SEAM KEYSTROKE can never reach this road**, and that is what
     /// keeps A7's empty-block carve and #34's texted-seam merge owning the
-    /// geometry they were ruled on: a lone separator intersects NO entry, so
-    /// the touched run is empty. Pinned on both platforms' behalf — the
-    /// Mac's routing arm relies on exactly this.
-    ///
-    /// BOUNDARY CHARACTERIZATION: green on both trees.
+    /// geometry they were ruled on. *(13u1 UNIT 2 re-derived it: the run now
+    /// admits zero-length entries INSIDE the span, so "a separator
+    /// intersects nothing" stopped being the whole argument — but a
+    /// one-character separator range can reach at most the entry BEFORE it,
+    /// and only when that entry is empty, so the count never reaches two.)*
     @Test func aSeamKeystrokeIsNotACrossBlockEdit() {
         #expect(Self.plan(NSRange(location: 10, length: 1)) == nil, "the separator after block 0")
         #expect(Self.plan(NSRange(location: 20, length: 1)) == nil, "…and the one after block 1")
+        // The empty-heavy tiling, walked at every separator.
+        let empties = Self.index([0, 5, 0, 0, 4])
+        for offset in 0..<empties.documentLength {
+            #expect(CrossBlockCompound.plan(
+                replacing: NSRange(location: offset, length: 1), with: "",
+                index: empties, surfaceText: Self.filler) == nil,
+                    "a one-character range reached the compound at \(offset)")
+        }
     }
 
-    /// **A CARET NEVER PLANS A MERGE — traced, not assumed.** The collection
-    /// loop has a zero-length arm (a caret counts as touching an entry whose
-    /// CLOSED range contains it), and reading the code it looks as though a
-    /// caret at a seam might touch both neighbours. It cannot: entries are
-    /// separated by exactly one character, so the seam's left side is inside
-    /// entry i's closed range only and its right side inside entry i+1's
-    /// only — the touched count is always 1, and the run guard declines.
-    /// (A zero-length entry does not change this; it still starts one past
-    /// the previous separator.)
-    ///
-    /// Recorded as behaviour because it is what makes the arm harmless: the
-    /// zero-length clause is unreachable-as-a-plan on any legal tiling, and
-    /// it is preserved verbatim by the hoist rather than "cleaned up" on a
-    /// reading. If a future tiling ever put two entries at one offset, this
-    /// pin is where the surprise would land.
-    @Test func aCaretAtASeamNeverPlansAMerge() {
+    /// **A CARET NEVER PLANS A COMPOUND.** A zero-length range overlaps
+    /// nothing and encloses no entry, so the run is empty on every legal
+    /// tiling — an empty neighbour included.
+    @Test func aCaretAtASeamNeverPlansACompound() {
         #expect(Self.plan(NSRange(location: 10, length: 0)) == nil, "the seam's left side")
         #expect(Self.plan(NSRange(location: 11, length: 0)) == nil, "…and its right side")
-        #expect(CrossBlockEditPlanner.plan(
+        #expect(CrossBlockCompound.plan(
             replacing: NSRange(location: 11, length: 0), with: "",
-            index: Self.index([10, 0, 9]), fanArities: [1, 1, 1],
-            surfaceText: Self.text) == nil,
+            index: Self.index([10, 0, 9]), surfaceText: Self.filler) == nil,
                 "…and beside an EMPTY block, which is the one shape worth checking")
     }
 
     /// **THE ONE-PASS WALK ANSWERS EXACTLY WHAT THE INDEX'S OWN ACCESSOR
-    /// DOES** — the equivalence the perf fix below rests on. `range(ofEntryAt:)`
-    /// walks from zero each call; the plan accumulates the same sum once.
-    /// Checked on an IRREGULAR tiling with empty entries at both edges and in
-    /// the middle, which is where an off-by-one would hide.
+    /// DOES** — the equivalence the perf fix rests on. `range(ofEntryAt:)`
+    /// walks from zero each call; the plan reads the tiling once. Checked on
+    /// an IRREGULAR tiling with empty entries at both edges and in the
+    /// middle, which is where an off-by-one would hide.
     @Test func theWalkAgreesWithTheIndexsOwnAccessor() {
         let lengths = [0, 7, 0, 0, 13, 1, 0]
         let index = Self.index(lengths)
@@ -254,52 +307,43 @@ struct MobileCrossBlockEditBrainTests {
         }
         // …and the plan built on it still answers the geometry the same way:
         // a span from inside entry 1 to inside entry 4.
-        let edit = try? #require(CrossBlockEditPlanner.plan(
+        let edit = try? #require(CrossBlockCompound.plan(
             replacing: NSRange(location: 4, length: 15), with: "",
-            index: index, fanArities: Array(repeating: 1, count: lengths.count),
-            surfaceText: { _ in "" }))
-        #expect(edit?.blockIDs == ["b1", "b4"],
-                "the zero-length entries between them are touched by nothing")
-        #expect(edit?.intraStart == 3, "4 - entry 1's start (1)")
-        #expect(edit?.intraEndInLast == 8, "19 - entry 4's start (11)")
-        #expect(edit?.lastPieceLength == 13)
+            index: index, surfaceText: Self.filler))
+        #expect(edit?.leading?.blockID == "b1")
+        #expect(edit?.trailing?.blockID == "b4")
+        #expect(edit?.deletedBlockIDs == ["b2", "b3"],
+                "the zero-length entries between them are IN the run and covered whole")
+        #expect(edit?.caretOffset == 3, "4 - entry 1's start (1)")
+        #expect(edit?.trailing?.newText.count == 5, "13 - 8, the trailing keep")
     }
 
     /// **THE COST, measured rather than argued (P1/P-8) — and RED ON THE
-    /// PRE-FIX WALK.** The hoisted loop asked `index.range(ofEntryAt: i)`
+    /// PRE-FIX WALK.** The original loop asked `index.range(ofEntryAt: i)`
     /// per entry, and that accessor walks from zero every call: O(N²) in the
     /// note's BLOCK COUNT, on a main-actor keystroke road. This pin measured
     /// **23.8 s for one plan at 20,000 entries** on the pre-fix walk, which
     /// is ~100 ms of freeze at her own 100k-word bar (~1,400 paragraphs) —
-    /// cost proportional to the DOCUMENT, the one thing P1 forbids. One pass
-    /// over the tiling answers identically (`theWalkAgreesWithTheIndexsOwnAccessor`)
-    /// and the same measurement lands in single-digit milliseconds.
+    /// cost proportional to the DOCUMENT, the one thing P1 forbids.
     ///
-    /// The fix rides the SHARED brain, so the Mac inherits it: this walk has
-    /// been quadratic there since 2026-07-09.
-    ///
-    /// What is measured: the plan walks the entry TILING — block count,
-    /// never character count — at GESTURE cadence (it is reached only after
-    /// `verdict` has answered `.crossesBlockBoundary`), and BOTH shapes that
-    /// get there are under the clock: a real three-block gesture, and the
-    /// seam keystroke that finds no touched entry. 20,000 entries is the
-    /// ceiling batch 1b's sibling pin adopted — an order of magnitude past
-    /// her own bar, so a re-quadratic walk cannot hide inside the headroom.
+    /// *(13u1 UNIT 2 makes the claim STRONGER: the plan reads the tiling
+    /// once and calls `surfaceText` at most TWICE — once per surviving end —
+    /// so its cost is the EDIT's, not the note's, at both scales.)*
     @Test func thePlanStaysCheapAtTwentyThousandBlocks() {
         let index = Self.index(Array(repeating: 40, count: 20_000))
-        let arities = Array(repeating: 1, count: 20_000)
         let clock = ContinuousClock()
         let text: (NSRange) -> String = { String(repeating: "x", count: $0.length) }
 
         // A real gesture: mid-block 100 to mid-block 102.
         let span = NSRange(location: 100 * 41 + 20, length: 2 * 41)
-        var planned: CrossBlockEditPlanner.Edit?
+        var planned: CrossBlockCompound.Plan?
         let gestureCost = clock.measure {
-            planned = CrossBlockEditPlanner.plan(
-                replacing: span, with: "", index: index,
-                fanArities: arities, surfaceText: text)
+            planned = CrossBlockCompound.plan(
+                replacing: span, with: "", index: index, surfaceText: text)
         }
-        #expect(planned?.blockIDs.count == 3)
+        #expect(planned?.leading?.blockID == "b100")
+        #expect(planned?.trailing?.blockID == "b102")
+        #expect(planned?.deletedBlockIDs == ["b101"])
         #expect(gestureCost < .milliseconds(50),
                 "a re-quadratic walk measured 23.8 SECONDS here")
 
@@ -307,14 +351,13 @@ struct MobileCrossBlockEditBrainTests {
         let seam = NSRange(location: 40, length: 1)
         var seamCost = Duration.zero
         seamCost = clock.measure {
-            #expect(CrossBlockEditPlanner.plan(
-                replacing: seam, with: "", index: index,
-                fanArities: arities, surfaceText: text) == nil)
+            #expect(CrossBlockCompound.plan(
+                replacing: seam, with: "", index: index, surfaceText: text) == nil)
         }
         #expect(seamCost < .milliseconds(50),
                 "…and 23.3 s for the keystroke that plans nothing at all")
 
-        print("PERF[plan] crossBlockEdit @20k blocks — gesture \(gestureCost) · seam \(seamCost)")
+        print("PERF[plan] crossBlockCompound @20k blocks — gesture \(gestureCost) · seam \(seamCost)")
     }
 }
 
@@ -402,7 +445,7 @@ struct MobileCrossBlockEditTests {
                 == ["Alpha two.", "Gamma three."])
 
             let stack = session.undoStack
-            #expect(stack.topLabel == "Merge & Edit")
+            #expect(stack.topLabel == CrossBlockCompound.undoLabel)
             try await session.runner.run { ops in _ = try stack.undo(with: ops) }
             #expect(try await storedBlockTexts(db, postID: seed.postID)
                 == ["Alpha one.", "Beta two.", "Gamma three."],
@@ -410,15 +453,20 @@ struct MobileCrossBlockEditTests {
         }
     }
 
-    /// **THE FENCE, at the gesture.** A span touching a block that HAS TAKES
-    /// still refuses on the phone: the Mac routes it to the visible-take
-    /// edit (#11a), which is Mac-app code and stays there — the author is
-    /// handling the fanned case herself. Nothing is merged, nothing is
-    /// deleted, and the refusal speaks.
+    /// **THE FENCE IS GONE, AT THE GESTURE — and that is her ruling** (item
+    /// 5, built at 13u1 UNIT 2). This pin used to hold the opposite: a span
+    /// touching a FANNED block refused on the phone, because the Mac routed
+    /// it to the visible-take edit (#11a) and the author was handling the
+    /// fanned case herself. She handled it: a fanned block covered WHOLE
+    /// goes to the tray with its family, and a fanned END takes its chosen
+    /// take's edit and nothing else.
     ///
-    /// BOUNDARY CHARACTERIZATION: green on both trees. It exists so this
-    /// road can never quietly grow onto fanned blocks.
-    @Test func aFannedSpanStillRefusesOnThePhone() async throws {
+    /// Here the fan is on the MIDDLE block, covered whole — so it leaves the
+    /// page with both its takes, and the two ends join because neither of
+    /// them carries a fan.
+    ///
+    /// RED ON OLD: the plan answered nil and the store kept three blocks.
+    @Test func aFannedMiddleRidesTheTrayAndTheEndsJoinOnThePhone() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedThreeParagraphs(session)
             try await session.runner.run { [blockID = seed.blockIDs[1]] ops in
@@ -428,33 +476,40 @@ struct MobileCrossBlockEditTests {
             await model.loadOnce()
             #expect(model.slots[1].activeVariantCount == 2, "block 1 carries a fan")
 
-            let span = NSRange(location: 6, length: 10)
-            #expect(model.planCrossBlockEdit(range: span, replacement: "") == nil)
+            // Mid-block 0 through mid-block 2: block 1 is covered WHOLE.
+            let span = NSRange(location: 6, length: 21)
+            #expect(model.planCrossBlockEdit(range: span, replacement: "") != nil,
+                    "a fanned span is THIS road now")
             await editSpan(model, storage, span)
 
             #expect(try await storedBlockTexts(db, postID: seed.postID)
-                == ["Alpha one.", "Beta two.", "Gamma three."],
-                    "a fanned span is untouched by this road")
-            #expect(model.statusMessage
-                == model.message(for: BlockRangeIndex.Refusal.crossesBlockBoundary))
+                == ["Alpha three."],
+                    "the ends joined; the fanned middle left the page whole")
+            // Its takes rode with it — the block is tombstoned, not emptied.
+            let takes = try await db.read { [blockID = seed.blockIDs[1]] db in
+                try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM variant WHERE block_id = ?",
+                    arguments: [blockID]) ?? -1
+            }
+            #expect(takes == 2, "both takes are preserved on the tombstoned block")
         }
     }
 
     /// **A SPAN RUNNING PAST A NOT-YET-ARRIVED BLOCK: nothing merges, and
-    /// the refusal says why — traced, and its shape is a finding, not a
-    /// design.** A gap slot renders with ZERO length (its text is nil), so
-    /// the selection never intersects its characters and the plan names the
-    /// two blocks she CAN read, skipping it. That plan is doomed by
-    /// construction: the gap's placement still sits between them, so
-    /// `ops.merge` refuses on adjacency inside the one transaction and
-    /// nothing changes.
+    /// the refusal says why.**
     ///
-    /// **This is the Mac's behaviour, preserved verbatim by M22's hoist**
-    /// (the same span plans and fails there today), which is why this batch
-    /// did not fence it: the plan's conditions are a ratified rule, and
-    /// narrowing them is a change to a Mac road, not a hoist. What the batch
-    /// DID fix is the words — the door used to answer a raw
-    /// `blocksNotAdjacent(first:second:)` enum dump.
+    /// **13u1 UNIT 2 CLOSED THE FINDING THIS PIN RECORDED.** It used to read:
+    /// a gap slot renders with ZERO length, so the selection never
+    /// intersects its characters, and the plan named the two blocks she
+    /// could read and skipped it — a plan doomed by construction, since the
+    /// gap's placement still sat between them and `ops.merge` refused on
+    /// adjacency inside the one transaction. The round left it because
+    /// narrowing the plan's conditions was a change to a ratified Mac road
+    /// rather than a hoist. Item 8's U-3 made that change: the run is an
+    /// index RANGE now, so the gap is IN it and the plan FENCES rather than
+    /// planning something the ops layer must refuse. The outcome she meets
+    /// is the same and better sourced — the refusal names the block that
+    /// has not arrived, and no operation is attempted at all.
     ///
     /// RED ON OLD for the sentence (the ladder MINOR 2 class); the
     /// nothing-merged half is green on both trees.
@@ -476,14 +531,18 @@ struct MobileCrossBlockEditTests {
             // into the block below it.
             let span = NSRange(location: 6, length: 10)
             let planned = model.planCrossBlockEdit(range: span, replacement: "")
-            #expect(planned?.blockIDs == [seed.blockIDs[0], seed.blockIDs[2]],
-                    "the plan skips the gap — it has no characters to touch")
+            #expect(
+                planned == nil,
+                """
+                the gap is IN the run, so the plan FENCES it (U-3) instead of \
+                planning a merge the ops layer must refuse
+                """)
             await editSpan(model, storage, span)
 
             let status = try #require(model.statusMessage)
             #expect(!status.contains("blocksNotAdjacent"), "never the raw enum")
             #expect(status.contains("hasn't arrived yet"))
-            #expect(status.contains("Nothing was changed"))
+            #expect(status.lowercased().contains("nothing was changed"))
             let live = try await db.read { [postID = seed.postID] db in
                 try Int.fetchOne(
                     db,
