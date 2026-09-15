@@ -1076,7 +1076,13 @@ final class EditorViewModel {
             stampProjection(index.entries[i].blockID, reported: editedRange, within: entryRange)
             recordAutosave(
                 entryIndex: i, entryRange: entryRange,
-                editedRange: editedRange, delta: delta)
+                editedRange: editedRange, delta: delta,
+                // 13u1 UNIT 1 (the sweep's P24 + P25): the GATE's exact
+                // cost where the gate answered — the other half of the
+                // clamp rule applied one line above. Nil only where the
+                // arming did not bind (a system path outside the policed
+                // ones), which is exactly where the report is all there is.
+                exactCost: bound?.exactCost)
         case .tail:
             guard index.applyTailEdit(lengthDelta: delta) else {
                 desyncRecovery()
@@ -1172,8 +1178,38 @@ final class EditorViewModel {
         return NSRange(location: separator, length: tail.upperBound - separator)
     }
 
+    /// **The churn cost is the EDIT's, never the REPORT's** (13u1 UNIT 1 —
+    /// the 2026-08-30 sweep's P24 + P25, one mechanism found by two lenses).
+    ///
+    /// `container.last_major_revision_at` exists so that *fixing one typo
+    /// never reshuffles the library* (CoreDescription pillar 7; the math is
+    /// AppSpec §10). This derived its cost from the RAW `NSTextStorage`
+    /// edited-range report — and macOS 26's attribute fixing WIDENS that
+    /// report to the paragraph's end INCLUDING the terminator, which this
+    /// repo measures and pins two files away
+    /// (`IdentityProjectionAuditTests.appKitWidensAnInsertionsReportedRangeToTheParagraph`:
+    /// one character at offset 2 of "Alpha" reports `{2, 5}`). So a single
+    /// typed character recorded **nine** — `(5 − 1) + 5` — and in general
+    /// ≈ 2 × the distance from the caret to the paragraph's end. Measured
+    /// here too: a 4-for-2 replacement recorded 8.
+    ///
+    /// 13l applied TEXTKIT2_NOTES §3's rule — *clamp to the VERDICT's range,
+    /// never the report's* — to `stampProjection` and not to this
+    /// arithmetic. `exactCost` is the same rule at the same seam: the gate
+    /// knew `range.length + replacementLength` before anything reached
+    /// storage, and the value was hoisted for both platforms at mobile round
+    /// 2 with only the phone ever reading it.
+    ///
+    /// **`exactCost` is nil only when the arming did not BIND** — a system
+    /// path outside the policed ones, where `fallbackVerdict` recomputes and
+    /// the report genuinely is all there is. The old arithmetic stays as
+    /// that fallback, unchanged and now honestly scoped.
+    ///
+    /// Pinned by `EditorChurnCostTests` (three pins, red on old: 9 vs 1,
+    /// 8 vs 6, and a stamped major revision after three typo keystrokes).
     private func recordAutosave(
-        entryIndex: Int, entryRange: NSRange, editedRange: NSRange, delta: Int
+        entryIndex: Int, entryRange: NSRange, editedRange: NSRange, delta: Int,
+        exactCost: Int?
     ) {
         let entry = index.entries[entryIndex]
         guard let variantID = entry.variantID else {
@@ -1188,7 +1224,7 @@ final class EditorViewModel {
         let oldLength = editedRange.length - delta
         autosave.record(
             variantID: variantID, text: text,
-            charDelta: oldLength + editedRange.length)
+            charDelta: exactCost ?? (oldLength + editedRange.length))
     }
 
     // MARK: - The DEBUG identity audit (13l L-a — the phone's oracle, hoisted)

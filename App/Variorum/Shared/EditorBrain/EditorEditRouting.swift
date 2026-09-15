@@ -56,9 +56,21 @@ nonisolated struct ArmedEdit {
     let replacementLength: Int
 
     /// The policed edit's EXACT churn cost — old + new UTF-16 lengths,
-    /// known at the gate and therefore immune to the report widening iOS
-    /// applies (measured: a 5→6 replacement reported length 7). Platforms
-    /// that derive cost from the report simply never read it (the Mac).
+    /// known at the gate and therefore immune to the report widening
+    /// **BOTH platforms apply** (measured on iOS: a 5→6 replacement
+    /// reported length 7; measured on macOS 26: a one-character insertion
+    /// at offset 2 of "Alpha" reports `{2, 5}`, so the old
+    /// report-derived arithmetic recorded 9 for a true cost of 1).
+    ///
+    /// **This sentence used to read "Platforms that derive cost from the
+    /// report simply never read it (the Mac)", and it was written before
+    /// 13l measured the macOS widening** — so it documented the Mac's
+    /// non-use as though the report were exact there. It is not: the Mac
+    /// adopted this value at 13u1 UNIT 1 (the 2026-08-30 sweep's P24 +
+    /// P25), and BOTH `recordAutosave`s now read it, falling back to the
+    /// report only where the arming did not bind. TEXTKIT2_NOTES §3's rule
+    /// — clamp to the VERDICT's range, never the report's — applied to the
+    /// arithmetic as well as to the attribute stamp.
     var exactCost: Int { range.length + replacementLength }
 
     init(
