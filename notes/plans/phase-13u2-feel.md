@@ -1,7 +1,9 @@
 # Phase 13u2 — FEEL (EXECUTION PLAN)
 
-**Status: READY — THE CURRENT PHASE since 2026-09-15 (13u1 CLOSED that day; the baselines and the
-"what changed under you" section below were refreshed at its closeout).** Authored 2026-09-14 at
+**Status: RUNNING — THE OVERNIGHT RUN OPENED 2026-09-15 at her word (`/architect-phase`; Fable
+orchestrator; the ORCHESTRATION RECORD below is the run's live section).** THE CURRENT PHASE since
+2026-09-15 (13u1 CLOSED that day; the baselines and the
+"what changed under you" section below were refreshed at its closeout). Authored 2026-09-14 at
 the 13u1 kickoff (the R-cor-12 four-way split executed; the shared sitting's rulings live in
 `phase-13u1-editor-seam.md`'s SITTING RECORD and **bind here** — 13u2 needs no sitting of its own
 to start: R-13u-7 placed her feedback as items 18/19 and R-13u-10 ruled the book-Index set).
@@ -226,6 +228,142 @@ jump (the INK half was carved at 18j), the Outline's SHADOW editor, the DEBUG-or
 > or the ready-to-refresh state if her app was running at the window) · the 13u3 kickoff
 > refreshed atop `notes/plans/phase-13u3-faces.md` · commit + push.
 > Hard stop; she kicks off 13u3.
+
+---
+
+# ORCHESTRATION RECORD — THE OVERNIGHT RUN (opened 2026-09-15; Fable orchestrator under `/architect-phase`)
+
+**Her instruction, verbatim: "i'll be going to sleep so it'll be running overnight and using
+provisional judgement along the way."** The autonomous mandate is the kickoff message's: PROVISIONAL
+where it does not gate a core (2–3 options recorded, most spec-defensible built, QUESTIONS.md next
+free number, bundled for her morning); STOP the thread and continue elsewhere where it does, or
+where a call is author-only. Item 1's final acceptance is HER HANDS — flagged honestly at close,
+never claimed felt-good on a capture alone.
+
+## Cast (her word at this kickoff)
+
+Orchestrator **Fable** (this session) · implementer **`opus-implementer`** (xhigh), ONE acceptance
+unit per session, strictly sequential · cold review as a ladder at PHASE END over the combined diff
+— **`fable-reviewer`** round 1 (the diff touches the editor seam and pane authority: units A/B/C;
+this also satisfies R-cor-14's at-least-one-Fable-pass) · `opus-reviewer` only for any later round
+whose open findings touch neither seam nor pane authority. Cross-model flow as CLAUDE.md states it
+(findings verbatim to the implementer → agree/dispute → the reviewer's final call → the reviewer
+implements its confirmed fixes → suite green → implementer sanity pass). Fresh reviewer per round;
+hard cap three; hallucination guard absolute.
+
+## The binding principles (the 13b constitution, P-1…P-9 — copied per the `/architect-phase` skill; phase-specific names inside them are provenance, the rules bind)
+
+- **P-1 — One capability registry.** Every user-facing act is declared exactly once: verb, scope
+  (block/take/post/book), per-mode availability rule, its doors (menu / context / bar / shortcut /
+  palette), and its refusal copy. Surfaces render their doors FROM the registry; gating is data,
+  never per-view if-statements. A registry-walk test asserts every declared door exists and every
+  rendered door is declared. This kills the D3/D4 class structurally — the capability matrix stays
+  green by construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act — including any mode-switch
+  choreography, done visibly for the user — or delivers the operations layer's real refusal. A door
+  that can never act in its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface component (live + read modes;
+  one measurement brain — the width-gated remeasure; the shared canary) that every pane composes;
+  the live editor core's identity machinery (`BlockRangeIndex`, crystallization) becomes its live
+  mode, not a sibling implementation. "What text does this pane show, and is it live" is answered by
+  ONE pure, unit-tested authority (`PaneTextAuthority`); views never re-derive it. Its invariants
+  stated as code: exactly one live pane; the live pane is buffer-authoritative; read panes are
+  projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter may announce that
+  something happened (mode changed, post opened); no listener derives business state or availability
+  from a broadcast, and no flow's correctness depends on broadcast ordering. Cross-feature flows
+  route through composition. (Stage 0's survey enumerates today's notification bus; Stage 1
+  disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule marks an
+  under-architected feature. The response is never another patch: write the feature's DESIGN MEMO —
+  intended behavior whole, edge cases enumerated on paper, refusal wordings, undo story — get the
+  author's rulings on the product-flavored edges, then build to the memo. Happy path ships first,
+  but the edges are *decided at design time*, not discovered by the author. First two memos owed:
+  **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial flow is the contract for
+  every happy path. It stays green — automated where the harness allows, screenshot-walked otherwise
+  — and any change that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive harness: the ops-layer soaks
+  (exist), the board/view-model invariant soak (Stage 1), the registry walk (P-1), the per-batch
+  scripted screenshot walkthrough. Red-on-old stays absolute: no bug-class fix without a pin that
+  fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind the rebuilt layer exactly
+  as they bind the substrate (invalidation ∝ realized rows; one live editor; virtualized long
+  views). Overlays, never rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit`
+  (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary. Complexity lives in the
+  store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing board layout, text authority,
+  and gesture routing splits by concern (`TakesViewModel` at 890 lines is the standing
+  counterexample). Same hygiene rule as the substrate, applied where it was being waived.
+
+*(The skill's application notes bind with them: P-1's scope is the ROUTED vocabulary grown
+incrementally; P-3 keeps TWO deliberate surface kinds — the full-document editor is never absorbed
+into the pane surface; storage-coupled code stays feature-side; parity refactors keep pre-move names
+as forwards, zero test edits the proof; every equality-gated sink delivers stored state AT WIRE
+TIME and overlay geometry refreshes on EVERY input axis; the sweep table is the closing form for a
+recurring fixed class.)*
+
+## Units (the kickoff's shape, adopted with one adjustment: the re-font road rides unit D, not A — it is the full-document editor's own trace, a different surface from A's landing family)
+
+| unit | scope (roster mapping) | acceptance evidence |
+|---|---|---|
+| **A** | **Item 1's TRACE + the landing/settle family**: the 13l hang lead (`PaneSurfaceRepresentable.updateNSView` re-entering) · **item 18** (the long-book landing stutter + the two-stage/overshoot jump; **#88(c)'s persist-per-story-measured-heights option is on the table, evidence-backed** — her LIKE to preserve: a chapter sharing the book's name shows once) · rows **54** (read tier's provisional-width first measure) · **92** (canvas silhouette click mid-board) · **94** (Blocks' ~0.2–0.3 s residual arrival) · **98** (paged reader's paragraph over-count) · **100** (flow landing off after content creep) · **M12** (KnownIssues row 30 — verify the wired `desyncRecoveryCount`, record) · row 51's CONDITIONAL: if the work touches `TakesBoardLayout`'s article-scroll machinery, the `TakesArticleScroll` split is owed IN this unit (hoist-at-next-touch; else it stays unit E's) | measure-first: a traced mechanism per row BEFORE any fix (TK2 geometry is the SUSPECT, never the verdict); red-on-old pin per bug-class fix; a hands-on walk with captures on the dev-store Debug build (the Sherlock book for item 18; both voices, both appearances) — **item 1 closes only as "her hands owed", never felt-good on captures** |
+| **B** | **Item 19's presentation set** (R-13u-10's five rulings: no whole-note palette wash in Index; neutral backdrop behind the cream read page under every palette; the click-into-a-block INDENT defect — live pane geometry matches the read tier's from the first frame; left index highlight FOLLOWS the editing cursor always; right-pane first-click highlight STAYS; editor-side editing highlight is a SETTING composed with the R14/R22 family, never a rival) **+ the Outline SHADOW editor fix** (KnownIssues row 49 — find why the representable realizes twice under Outline's `StableSurface` + `NearViewportObserver` row, or make `attach` refuse `active` for a projection-less model; the open-tail crystallization loss window is the sharpest reason) | red-on-old pins (the shadow's attach-twice trace; the indent's first-frame geometry); the setting lands in the R14/R22 family; walk with captures — book Index/Outline, both voices, both appearances, palette on |
+| **C** | **Roster item 10 — the #109 boundary-clamp law, BOTH shapes** (the RULED block in QUESTIONS.md is the binding text): shape (i) clamp-and-edit; shape (ii) the (d) trim road; ONE uniform law — a selection edge on a boundary clamps to block text, separators are structure, no boundary-anchored selection refuses; **the tail fence binds** (a trim never absorbs the open tail's separator; `.openTail`/`.emptyTailAtSpanEnd` stand); `.partialBlockAcrossSeam` retires to whatever residual genuinely survives | red-on-old: the pins #109's "the line" names flip (`WholeBlockDeleteTests`' two TRACE tests, `CrossBlockCompoundTests.aSpanOpeningOnTheBoundaryRefusesWithTheTrueGeometry`) + the taken shapes' own pins; a walk of the boundary gestures with captures; **the seam — the phase-end ladder's round 1 is `fable-reviewer` partly for this diff** |
+| **D** | **The singles**: **item 2** the eager space-eater, BOTH platforms (trace the mechanism FIRST — autosave/render trim? crystallization? text-checking? — fix likely in core/`Shared`) · **item 10** starred scroll past ~7 (bounded-list fix only, placement stays) · **item 11** paste without newlines (a paste-time transform, never a segmentation change; chord from what is free — ⌘⇧V if free, else ⌘⌥V; DECIDE the phone's rule here too, one rule for a multi-paragraph clipboard) · **item 13** the note-title cutoff + row 93 (no literal 30-char cap exists — find the real constraint; her floor: rightwards at least until close to the scraps button; note the 13u3 card-identity touchpoint) · **P39a** (Pool stops holding `LibraryViewModel`; closures from `RootView`) · **P39b** (`Editor/WriteTakesPanel.swift:51` stops constructing `TakesViewModel`) · **roster item 8** — VERIFY the four re-homed protection items (built / moot-by-construction / returns to roster; record the verdict per item) · **row 57's re-font road** (the full-document editor's whole-storage jump on voice/comment-chrome changes; the INK road is already carved — do the same for the re-font half, or record why not with the trace) | trace per defect; red-on-old per bug-class fix; the space fix verified on BOTH platforms (Mac walk + iOS build; phone behaviour via simulator or pinned shared-brain tests); walks with captures for the visible fixes |
+| **E** | **The mechanical sweeps**: the status seam's audit surface (row 56 — the ~150-site rename `showStatus`→`refuse`/`direct` etc., `TakesViewModel.status` `private(set)`, the registry-walk shape if it fits) · the DEBUG-oracle keying sweep (row 50 — every oracle keyed by subject id + live per-suite generator; the unexamined six) · **⌘A in a live pane** (row 48 — the evidence class is a walk: first-responder at the chord; then fix or record) · the masthead pin's settle fix (row 59 — an until-clause on the cards' re-report, falsifiable, never a blind pump) · row 47's park half (`ShellRouter.park` made private to the adoption door or the pins folded onto it; RULE ONE reworded) · the `TakesArticleScroll` split (row 51) IF unit A did not already take it | zero-behaviour proofs where mechanical (suite green with pins unmodified where the claim is a rename/move); red-on-old where a fix changes behaviour (row 59's settle); the ⌘A walk recorded either way |
+
+Then the LADDER at phase end over the combined diff (round 1 `fable-reviewer`), then the closeout
+ritual per the kickoff message (the `/Applications` refresh IS authorized — her word 2026-09-15 —
+on the standing rails, zero-instance pgrep first, record-instead-of-kill if her app is running).
+
+## Environment & discipline (RESTATED — briefs copy from here, never point)
+
+- **Checkpoint protocol** (binding from the FIRST commit): commit per coherent piece, push
+  immediately (`git push origin main`, NO Co-Authored-By / Claude-Session trailers); the unit's
+  LIVE STATUS line in this file flipped in the same commit as each piece; counts land PENDING and
+  flip when runs complete; **synchronous foreground waits only** — poll with
+  `grep -q '<EXIT LINE>' <log> && break; sleep 5` loops repeated past the Bash timeout, never
+  `tail -f | grep -m1`, never end-of-turn background waits; **no revert without a committed
+  pre-revert state** (commit before you revert; pre-revert copies inside the worktree, gitignored,
+  uniquely named — never the scratchpad).
+- **No subagents** from implementers, except at most ONE Sonnet lookup at a time for external facts
+  only (never repo reading).
+- **TK2 discipline:** never TK1 APIs; clamp every attribute stamp to the VERDICT's range, never the
+  report's; the identity oracle kills on corruption — that is the point; anything sizing a surface
+  reads the laid-out fragments' bottom, never `usageBoundsForTextContainer` (the high-water mark);
+  the A47c guard machinery stays byte-unchanged.
+- **Zero `Sources/VariorumCore/Sync/` lines, zero schema, marker stays 8** — a fix that wants
+  either STOPS and reports to the orchestrator.
+- **Never touch** `/Applications/Variorum.app`, her real store, or anything she created. Walks use
+  the DEV-STORE Debug build (`io.lduarte.Variorum.debug`) + `Tools/WalkKit`/cliclick; instance
+  checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` and discriminate by PATH; screenshots in
+  gitignored dirs; never a custom build configuration (the 4G trap); Mac tests from `App/Variorum/`,
+  suite-level `-only-testing` only, confirm the "Test run with N tests" line (skipped tests COUNT —
+  read the `skipped:` lines); zsh `pipestatus`.
+- **Tests at the END of a unit/phase, never at a session's start.** Baselines are this file's table
+  (13u1's finals: core 1562/170 · Mac 2668/445 · iOS build green · mobile 622/105 w/ 4 known ·
+  marker 8). Flake rules: the differential-latency pin and `CanvasDragTrackingTests` are LOAD-FLAKY
+  (isolated re-runs before any conclusion; paired interleaved protocol for perf adjudication), plus
+  `MastheadLayoutTests`' open-field arm and `BlocksWorkbenchFaceTests`' single-click budget.
+  **Neither load-flaky suite fired in 13u1's finals — a red is news, not weather.**
+- **Mobile:** the iOS BUILD is the per-unit gate; the FULL mobile suite once at phase end if
+  `Shared/` moved (expect the 4 known issues incl. row 64's `withKnownIssue` pin — do NOT "fix" it).
+- **PROVISIONALs:** the implementer records options + choice in its unit record AND appends the
+  entry to `notes/QUESTIONS.md` at the next free number (currently **#110**; update the marker
+  line) in the same commit. Author-only calls STOP the thread: record in the unit record, move on.
+
+## LIVE STATUS (the run ledger — flipped per unit, PENDING until runs complete)
+
+| unit | status |
+|---|---|
+| A — pane stability trace + landing/settle | NOT-STARTED |
+| B — book-Index presentation + shadow editor | NOT-STARTED |
+| C — #109 boundary-clamp law | NOT-STARTED |
+| D — the singles | NOT-STARTED |
+| E — the mechanical sweeps | NOT-STARTED |
+| LADDER | NOT-STARTED |
+| CLOSEOUT | NOT-STARTED |
 
 ---
 
