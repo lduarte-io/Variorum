@@ -23,11 +23,47 @@ extension Operations {
     /// closes both of Phase 8's documented idle-sweep residual gaps: a
     /// mint-only burst and an idle-/teardown-minted tail now re-enter the
     /// sweep's touch window like any other edit.
+    /// **STRUCTURAL UNDO (author ruling R-13u-3, the 13u1 kickoff sitting —
+    /// a canon extension of AppSpec §9's list, hers).** Her ask, through the
+    /// `KnownIssuesAndTechDebt.md` row 18c's ladder opened: *"⌥⌘Z removes an
+    /// empty block just minted by ⏎"*. `newBlock` had registered nothing
+    /// since Phase 2 — not by ruling but by omission, harmless while the
+    /// only door onto it was ⌘⇧⏎ and newly common the moment U-1 made the
+    /// Return key mint blocks. **The inverse is a tombstone flip** (her
+    /// words), so it costs exactly what every other structural inverse
+    /// costs, and the redo is the exact-row mirror (13c A10's required
+    /// `redo:` — a mint that could not be re-applied would end the redo
+    /// future, which is the one thing a new registration must not do
+    /// silently).
+    ///
+    /// Two behaviours ride in for free, and both are the right ones because
+    /// they are `revertStructural`'s own:
+    ///
+    /// - **an untouched mint VANISHES; an EDITED one TRAYS.** The inverse
+    ///   compares the block's takes against their BIRTH texts, and a
+    ///   diverged one is stamped with `last_container_id` on the way out —
+    ///   so undoing a ⏎-minted block she then typed into leaves her words in
+    ///   the note's tray rather than dropping them. That is the standing
+    ///   insurance doctrine, not a new rule.
+    /// - **a sealed note refuses the undo and keeps the entry** (the
+    ///   resolvable bucket): unseal, press again.
+    ///
+    /// `registeringUndo` exists for ONE class and names it rather than
+    /// guessing: **type-time crystallization**, where a paragraph becomes a
+    /// block *because she typed past it* (AppSpec §7: it "silently becomes a
+    /// block as you type"). That is not a gesture she made, and registering
+    /// it would put an entry on her stack per paragraph AND clear the redo
+    /// future on every one — so the crystallizers pass `false`, at their own
+    /// call sites, with that reason at the line. Every other door — ⌘⇧⏎, the
+    /// Return key's act, the take↔block doors, a new snippet — is a gesture,
+    /// and gestures undo. (The seeders never reach this question: they run
+    /// on `Operations(undoStack: nil)` by construction.)
     @discardableResult
     public func newBlock(
-        in containerID: String, text: String, at insert: InsertPosition = .end
+        in containerID: String, text: String, at insert: InsertPosition = .end,
+        registeringUndo: Bool = true
     ) throws -> NewBlockResult {
-        try database.write { db in
+        let result: NewBlockResult = try database.write { db in
             let container = try liveContainer(db, containerID)
             try ensureUnlocked(container)
 
@@ -39,6 +75,21 @@ extension Operations {
             return NewBlockResult(
                 block: minted.block, variant: minted.variant, placement: minted.placement)
         }
+        guard registeringUndo else { return result }
+        let minted = MintedPreImage(result.block.id, [result.variant])
+        undoStack?.register(
+            label: "New Block",
+            inverse: {
+                try $0.revertStructural(
+                    restoringTexts: [], tombstoningBlocks: [minted],
+                    revivingPlacementRows: [])
+            },
+            redo: {
+                try $0.reapplyStructural(
+                    restoringTexts: [], untombstoningBlocks: [minted],
+                    releasingPlacementRows: [])
+            })
+        return result
     }
 
     /// Sets (or clears) the block's optional name (Phase 11, v1_6 — the

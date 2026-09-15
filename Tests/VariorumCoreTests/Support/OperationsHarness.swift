@@ -64,6 +64,30 @@ func withOperationsAsync<T>(
     }
 }
 
+// MARK: - Fixture seeding (13u1 UNIT 2)
+
+extension Operations {
+    /// **A FIXTURE MINT IS NOT A GESTURE.** `newBlock` joined AppSpec §9's
+    /// structural-undo list at the author's ruling R-13u-3 (13u1 UNIT 2), so
+    /// every mint now registers an entry — which is right for the doors she
+    /// presses and wrong for the blocks a test seeds before the act it is
+    /// actually about. A suite that counts `stack.depth` after building a
+    /// three-block note is asserting something about the OPERATION under
+    /// test, not about how its fixture came to exist.
+    ///
+    /// So the suites seed through here, with the same `registeringUndo:
+    /// false` the type-time crystallizers use and for the same stated
+    /// reason. Every depth assertion in those suites therefore reads exactly
+    /// as it did before the ruling — the zero-test-edit standard applied to
+    /// the numbers rather than to the lines.
+    @discardableResult
+    func seedBlock(
+        in containerID: String, text: String, at insert: InsertPosition = .end
+    ) throws -> NewBlockResult {
+        try newBlock(in: containerID, text: text, at: insert, registeringUndo: false)
+    }
+}
+
 // MARK: - Row-level assertions
 
 extension AppDatabase {

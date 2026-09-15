@@ -14,10 +14,10 @@ struct StructuralMergeCeremonyTests {
     @Test func ceremonyExactRows() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let before = try ops.newBlock(in: post.id, text: "before")
-            let b = try ops.newBlock(in: post.id, text: "First half.")
-            let c = try ops.newBlock(in: post.id, text: "Second half.")
-            let after = try ops.newBlock(in: post.id, text: "after")
+            let before = try ops.seedBlock(in: post.id, text: "before")
+            let b = try ops.seedBlock(in: post.id, text: "First half.")
+            let c = try ops.seedBlock(in: post.id, text: "Second half.")
+            let after = try ops.seedBlock(in: post.id, text: "after")
             let bAlt = try ops.branchVariant(b.block.id, from: b.variant.id)
             try ops.autosave(bAlt.id, text: "Alt first.", charDelta: 0)
             try ops.setTakeLabel(bAlt.id, label: "the alternate")
@@ -85,7 +85,7 @@ struct StructuralMergeCeremonyTests {
     @Test func divideWThenPairBackRoundTripsBothTakesWhole() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One alpha. One omega.")
+            let a = try ops.seedBlock(in: post.id, text: "One alpha. One omega.")
             let alt = try ops.branchVariant(a.block.id, from: a.variant.id)
             try ops.autosave(alt.id, text: "Two alpha. Two omega.", charDelta: 0)
 
@@ -128,8 +128,8 @@ struct StructuralMergeCeremonyTests {
     @Test func pairingsHonorTheExplicitJoin() throws {
         try withOperations { ops, _ in
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "line one")
-            let c = try ops.newBlock(in: post.id, text: "line two")
+            let b = try ops.seedBlock(in: post.id, text: "line one")
+            let c = try ops.seedBlock(in: post.id, text: "line two")
             _ = try ops.branchVariant(c.block.id, from: c.variant.id)
 
             let result = try ops.mergeCeremony(
@@ -140,8 +140,8 @@ struct StructuralMergeCeremonyTests {
                 carries: [])
             #expect(result.variants[0].workingText == "line one\nline two")
 
-            let d = try ops.newBlock(in: post.id, text: "bare")
-            let e = try ops.newBlock(in: post.id, text: "concatenation")
+            let d = try ops.seedBlock(in: post.id, text: "bare")
+            let e = try ops.seedBlock(in: post.id, text: "concatenation")
             _ = try ops.branchVariant(d.block.id, from: d.variant.id)
             let joined = try ops.mergeCeremony(
                 d.block.id, e.block.id,
@@ -158,10 +158,10 @@ struct StructuralMergeCeremonyTests {
     @Test func theRenderedPairingIsChosenWhereverItSits() throws {
         try withOperations { ops, _ in
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "B rendered")
+            let b = try ops.seedBlock(in: post.id, text: "B rendered")
             let bAlt = try ops.branchVariant(b.block.id, from: b.variant.id)
             try ops.autosave(bAlt.id, text: "B alt", charDelta: 0)
-            let c = try ops.newBlock(in: post.id, text: "C rendered")
+            let c = try ops.seedBlock(in: post.id, text: "C rendered")
             let cAlt = try ops.branchVariant(c.block.id, from: c.variant.id)
             try ops.autosave(cAlt.id, text: "C alt", charDelta: 0)
             let a = try ops.mergeCeremony(
@@ -182,10 +182,10 @@ struct StructuralMergeCeremonyTests {
     @Test func chosenRuleWithoutTheRenderedPairing() throws {
         try withOperations { ops, _ in
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "B rendered")
+            let b = try ops.seedBlock(in: post.id, text: "B rendered")
             let bAlt = try ops.branchVariant(b.block.id, from: b.variant.id)
             try ops.autosave(bAlt.id, text: "B alt", charDelta: 0)
-            let c = try ops.newBlock(in: post.id, text: "C rendered")
+            let c = try ops.seedBlock(in: post.id, text: "C rendered")
             let cAlt = try ops.branchVariant(c.block.id, from: c.variant.id)
             try ops.autosave(cAlt.id, text: "C alt", charDelta: 0)
 
@@ -201,10 +201,10 @@ struct StructuralMergeCeremonyTests {
             #expect(paired.placement.chosenVariantId == paired.variants[0].id)
 
             // (c) carries only → the first carry (mechanical order).
-            let d = try ops.newBlock(in: post.id, text: "D rendered")
+            let d = try ops.seedBlock(in: post.id, text: "D rendered")
             let dAlt = try ops.branchVariant(d.block.id, from: d.variant.id)
             try ops.autosave(dAlt.id, text: "D alt", charDelta: 0)
-            let e = try ops.newBlock(in: post.id, text: "E rendered")
+            let e = try ops.seedBlock(in: post.id, text: "E rendered")
             _ = try ops.branchVariant(e.block.id, from: e.variant.id)
             let carried = try ops.mergeCeremony(
                 d.block.id, e.block.id,
@@ -224,10 +224,10 @@ struct StructuralMergeCeremonyTests {
     @Test func ceremonyRefusals() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "b")
+            let b = try ops.seedBlock(in: post.id, text: "b")
             let bAlt = try ops.branchVariant(b.block.id, from: b.variant.id)
-            let c = try ops.newBlock(in: post.id, text: "c")
-            let x = try ops.newBlock(in: post.id, text: "x")
+            let c = try ops.seedBlock(in: post.id, text: "c")
+            let x = try ops.seedBlock(in: post.id, text: "x")
 
             // Zero pairings + zero carries: the merged block would be born
             // takeless — I10 at confirm.
@@ -315,8 +315,8 @@ struct StructuralMergeCeremonyTests {
     @Test func ceremonyRefusesUnderASealedPost() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "b")
-            let c = try ops.newBlock(in: post.id, text: "c")
+            let b = try ops.seedBlock(in: post.id, text: "b")
+            let c = try ops.seedBlock(in: post.id, text: "c")
             _ = try ops.branchVariant(b.block.id, from: b.variant.id)
             try ops.lockPost(post.id)
             #expect(throws: OperationError.lockedPost(id: post.id)) {
@@ -337,12 +337,12 @@ struct StructuralMergeCeremonyTests {
     @Test func lockedTakesPairAndCarryByCopy() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "Locked head.")
+            let b = try ops.seedBlock(in: post.id, text: "Locked head.")
             try ops.lockVariant(b.variant.id)
             let bAlt = try ops.branchVariant(b.block.id, from: b.variant.id)
             try ops.autosave(bAlt.id, text: "Also locked.", charDelta: 0)
             try ops.lockVariant(bAlt.id)
-            let c = try ops.newBlock(in: post.id, text: "Free tail.")
+            let c = try ops.seedBlock(in: post.id, text: "Free tail.")
 
             let result = try ops.mergeCeremony(
                 b.block.id, c.block.id,
@@ -366,9 +366,9 @@ struct StructuralMergeCeremonyTests {
     @Test func ceremonyCarriesCommentsAndAgreedPresentation() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "b")
+            let b = try ops.seedBlock(in: post.id, text: "b")
             _ = try ops.branchVariant(b.block.id, from: b.variant.id)
-            let c = try ops.newBlock(in: post.id, text: "c")
+            let c = try ops.seedBlock(in: post.id, text: "c")
             _ = try ops.addBlockComment(to: b.block.id, text: "left note")
             _ = try ops.addBlockComment(to: c.block.id, text: "right note")
             let frame = BlockPresentation(color: "accent")
@@ -388,9 +388,9 @@ struct StructuralMergeCeremonyTests {
                     "both sources agree on the frame — it survives")
 
             // Disagreeing frames mint PLAIN.
-            let d = try ops.newBlock(in: post.id, text: "d")
+            let d = try ops.seedBlock(in: post.id, text: "d")
             _ = try ops.branchVariant(d.block.id, from: d.variant.id)
-            let e = try ops.newBlock(in: post.id, text: "e")
+            let e = try ops.seedBlock(in: post.id, text: "e")
             try ops.setBlockPresentation(d.block.id, frame)
             let plain = try ops.mergeCeremony(
                 d.block.id, e.block.id,
@@ -405,9 +405,9 @@ struct StructuralMergeCeremonyTests {
     @Test func ceremonyTouchesThePostWithoutReshuffling() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "b")
+            let b = try ops.seedBlock(in: post.id, text: "b")
             _ = try ops.branchVariant(b.block.id, from: b.variant.id)
-            let c = try ops.newBlock(in: post.id, text: "c")
+            let c = try ops.seedBlock(in: post.id, text: "c")
             let touchedBefore = try db.fetchString(
                 "SELECT last_touched_at FROM container WHERE id = ?", [post.id])
             let majorBefore = try db.fetchString(
@@ -432,13 +432,13 @@ struct StructuralMergeCeremonyTests {
         try withOperations { _, db in
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let before = try ops.newBlock(in: post.id, text: "before")
-            let b = try ops.newBlock(in: post.id, text: "First half.")
+            let before = try ops.seedBlock(in: post.id, text: "before")
+            let b = try ops.seedBlock(in: post.id, text: "First half.")
             let bAlt = try ops.branchVariant(b.block.id, from: b.variant.id)
             try ops.autosave(bAlt.id, text: "Alt first.", charDelta: 0)
             try ops.chooseVariant(b.block.id, variantID: bAlt.id)
-            let c = try ops.newBlock(in: post.id, text: "Second half.")
-            let after = try ops.newBlock(in: post.id, text: "after")
+            let c = try ops.seedBlock(in: post.id, text: "Second half.")
+            let after = try ops.seedBlock(in: post.id, text: "after")
             let bPlacementBefore = try db.snapshotRow("container_block", b.placement.id)
             let cPlacementBefore = try db.snapshotRow("container_block", c.placement.id)
 
@@ -478,10 +478,10 @@ struct StructuralMergeCeremonyTests {
     @Test func aLoneCanonPairingOfTheRenderedTakesMatchesInstantMerge() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "First half.")
+            let b = try ops.seedBlock(in: post.id, text: "First half.")
             let bAlt = try ops.branchVariant(b.block.id, from: b.variant.id)
             try ops.autosave(bAlt.id, text: "Alt first.", charDelta: 0)
-            let c = try ops.newBlock(in: post.id, text: "Second half.")
+            let c = try ops.seedBlock(in: post.id, text: "Second half.")
 
             let result = try ops.mergeCeremony(
                 b.block.id, c.block.id,

@@ -616,7 +616,16 @@ final class EditorViewModel {
             do {
                 let minted = try await self.session.runner.run { ops in
                     try plan.mints.map { text -> CrystallizationReconciler.MintedBlock in
-                        let result = try ops.newBlock(in: post, text: text, at: .end)
+                        // **R-13u-3's ONE named exception** (13u1 UNIT 2):
+                        // type-time crystallization is not a gesture she
+                        // made — a paragraph becomes a block because she
+                        // typed past it (AppSpec §7's "silently becomes a
+                        // block as you type") — so it registers NO undo
+                        // entry. Registering here would put one on her stack
+                        // per paragraph AND clear the redo future on every
+                        // one, which is the opposite of what ⌥⌘Z is for.
+                        let result = try ops.newBlock(
+                            in: post, text: text, at: .end, registeringUndo: false)
                         return .init(
                             blockID: result.block.id,
                             variantID: result.variant.id,
@@ -1457,7 +1466,16 @@ final class EditorViewModel {
             do {
                 let minted = try await session.runner.run { ops in
                     try plan.mints.map { text -> CrystallizationReconciler.MintedBlock in
-                        let result = try ops.newBlock(in: post, text: text, at: .end)
+                        // **R-13u-3's ONE named exception** (13u1 UNIT 2):
+                        // type-time crystallization is not a gesture she
+                        // made — a paragraph becomes a block because she
+                        // typed past it (AppSpec §7's "silently becomes a
+                        // block as you type") — so it registers NO undo
+                        // entry. Registering here would put one on her stack
+                        // per paragraph AND clear the redo future on every
+                        // one, which is the opposite of what ⌥⌘Z is for.
+                        let result = try ops.newBlock(
+                            in: post, text: text, at: .end, registeringUndo: false)
                         return .init(
                             blockID: result.block.id,
                             variantID: result.variant.id,

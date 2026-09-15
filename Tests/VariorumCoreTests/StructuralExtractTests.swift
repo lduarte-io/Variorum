@@ -22,7 +22,7 @@ struct RenderedVariantTests {
     @Test func chosenVariantWinsOverDefault() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "take one")
+            let a = try ops.seedBlock(in: post.id, text: "take one")
             let take2 = try ops.branchVariant(a.block.id, from: a.variant.id)
             try ops.chooseVariant(a.block.id, variantID: take2.id)
             let rendered = try db.read { try ops.renderedVariant($0, blockID: a.block.id) }
@@ -33,7 +33,7 @@ struct RenderedVariantTests {
     @Test func archivedChosenFallsBackToDefault() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "take one")
+            let a = try ops.seedBlock(in: post.id, text: "take one")
             let take2 = try ops.branchVariant(a.block.id, from: a.variant.id)
             try ops.chooseVariant(a.block.id, variantID: take2.id)
             try ops.archiveVariant(take2.id)
@@ -45,7 +45,7 @@ struct RenderedVariantTests {
     @Test func tombstonedChosenFallsBackToDefault() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "take one")
+            let a = try ops.seedBlock(in: post.id, text: "take one")
             let take2 = try ops.branchVariant(a.block.id, from: a.variant.id)
             try ops.chooseVariant(a.block.id, variantID: take2.id)
             // A sync race can tombstone a chosen variant under the slot
@@ -66,8 +66,8 @@ struct RenderedVariantTests {
         // must never let a structural op rewrite that other block's text.
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "mine")
-            let b = try ops.newBlock(in: post.id, text: "someone else's")
+            let a = try ops.seedBlock(in: post.id, text: "mine")
+            let b = try ops.seedBlock(in: post.id, text: "someone else's")
             try db.write { db in
                 try db.execute(
                     sql: "UPDATE container_block SET chosen_variant_id = ? WHERE id = ?",
@@ -81,7 +81,7 @@ struct RenderedVariantTests {
     @Test func nullChosenAndUnplacedBlocksRenderTheDefault() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "take one")
+            let a = try ops.seedBlock(in: post.id, text: "take one")
             try db.write { db in
                 try db.execute(
                     sql: "UPDATE container_block SET chosen_variant_id = NULL WHERE id = ?",
@@ -105,7 +105,7 @@ struct StructuralExtractTests {
     @Test func suffixExtractExactRows() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            let a = try ops.seedBlock(in: post.id, text: "First sentence. Second sentence.")
             let result = try ops.extract(a.block.id, span: 16..<32)
 
             // Source survives: identity kept, buffer = remainder, seam trimmed.
@@ -136,7 +136,7 @@ struct StructuralExtractTests {
     @Test func prefixExtractInsertsBefore() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            let a = try ops.seedBlock(in: post.id, text: "First sentence. Second sentence.")
             let result = try ops.extract(a.block.id, span: 0..<15)
 
             #expect(result.variant.workingText == "First sentence.")
@@ -150,7 +150,7 @@ struct StructuralExtractTests {
         try withOperations { ops, db in
             let post = try ops.createPost()
             // "Intro 👩‍👩‍👧‍👦 emoji." occupies UTF-16 offsets 0–23; the tail starts at 25.
-            let a = try ops.newBlock(in: post.id, text: "Intro 👩‍👩‍👧‍👦 emoji. Tail here.")
+            let a = try ops.seedBlock(in: post.id, text: "Intro 👩‍👩‍👧‍👦 emoji. Tail here.")
             let result = try ops.extract(a.block.id, span: 25..<35)
             #expect(result.variant.workingText == "Tail here.")
             #expect(try db.fetchString(
@@ -168,7 +168,7 @@ struct StructuralExtractTests {
         try withOperations { _, db in
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            let a = try ops.seedBlock(in: post.id, text: "First sentence. Second sentence.")
 
             #expect(throws: OperationError.spanNotExtractable(blockID: a.block.id)) {
                 try ops.extract(a.block.id, span: 6..<15)  // middle span → that's a divide
@@ -194,7 +194,7 @@ struct StructuralExtractTests {
         try withOperations { ops, db in
             let post = try ops.createPost()
             let full = "Shared opening. Divergent conclusion."
-            let a = try ops.newBlock(in: post.id, text: full)
+            let a = try ops.seedBlock(in: post.id, text: full)
             let take2 = try ops.branchVariant(a.block.id, from: a.variant.id)
 
             let result = try ops.extract(a.block.id, span: 16..<37)  // rendered = chosen = take 1
@@ -218,7 +218,7 @@ struct StructuralExtractTests {
     @Test func extractRefusals() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            let a = try ops.seedBlock(in: post.id, text: "First sentence. Second sentence.")
 
             // Sealed post: structure is frozen.
             try ops.lockPost(post.id)
@@ -247,7 +247,7 @@ struct StructuralExtractTests {
     @Test func extractFeedsChurnAndTouchStamps() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            let a = try ops.seedBlock(in: post.id, text: "First sentence. Second sentence.")
             // The mint crossed the fresh-baseline threshold (QUESTIONS #5
             // (a)): baseline is now the rendered length (32), accumulator 0.
             let before = try db.fetchString(
@@ -278,7 +278,7 @@ struct StructuralExtractTests {
         try withOperations { _, db in
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            let a = try ops.seedBlock(in: post.id, text: "First sentence. Second sentence.")
             let sourceBefore = try db.snapshotRow("variant", a.variant.id)
 
             let result = try ops.extract(a.block.id, span: 16..<32)
@@ -310,7 +310,7 @@ struct StructuralExtractTests {
         try withOperations { _, db in
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            let a = try ops.seedBlock(in: post.id, text: "First sentence. Second sentence.")
             _ = try ops.extract(a.block.id, span: 16..<32)
             try ops.autosave(a.variant.id, text: "Rewritten first.", charDelta: 0)
 
@@ -337,7 +337,7 @@ struct StructuralExtractTests {
         try withOperations { _, db in
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            let a = try ops.seedBlock(in: post.id, text: "First sentence. Second sentence.")
             let result = try ops.extract(a.block.id, span: 16..<32)
             try ops.autosave(result.variant.id, text: "Polished for twenty minutes.", charDelta: 0)
 
@@ -361,7 +361,7 @@ struct StructuralExtractTests {
         try withOperations { _, db in
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            let a = try ops.seedBlock(in: post.id, text: "First sentence. Second sentence.")
             _ = try ops.extract(a.block.id, span: 16..<32)
 
             try stack.undo(with: ops)
@@ -376,7 +376,7 @@ struct StructuralExtractTests {
         try withOperations { _, db in
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First sentence. Second sentence.")
+            let a = try ops.seedBlock(in: post.id, text: "First sentence. Second sentence.")
             _ = try ops.extract(a.block.id, span: 16..<32)
 
             try ops.lockPost(post.id)

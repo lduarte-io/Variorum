@@ -31,7 +31,7 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First half. Second half.")
+            let a = try ops.seedBlock(in: post.id, text: "First half. Second half.")
 
             let divided = try ops.divide(a.block.id, cut: 13)
             let watched: [(String, String)] = [
@@ -64,8 +64,8 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "left")
-            let c = try ops.newBlock(in: post.id, text: "right")
+            let b = try ops.seedBlock(in: post.id, text: "left")
+            let c = try ops.seedBlock(in: post.id, text: "right")
 
             let merged = try ops.merge(b.block.id, c.block.id)
             let live: [(String, String)] = [
@@ -106,7 +106,7 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One here. Two here.")
+            let a = try ops.seedBlock(in: post.id, text: "One here. Two here.")
             let second = try ops.branchVariant(a.block.id, from: a.variant.id)
             try ops.autosave(second.id, text: "Alt one. Alt two.", charDelta: 4)
 
@@ -137,7 +137,7 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let made = try ops.newBlock(in: post.id, text: "original")
+            let made = try ops.seedBlock(in: post.id, text: "original")
 
             _ = try ops.editTakesAtomically(
                 [.init(variantID: made.variant.id, newText: "edited", charDelta: 8)],
@@ -158,8 +158,8 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            _ = try ops.newBlock(in: post.id, text: "keeper")
-            let victim = try ops.newBlock(in: post.id, text: "victim")
+            _ = try ops.seedBlock(in: post.id, text: "keeper")
+            let victim = try ops.seedBlock(in: post.id, text: "victim")
 
             try ops.deleteBlock(victim.block.id)
             try stack.undo(with: ops)
@@ -180,7 +180,7 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let blocks = try (0..<3).map { try ops.newBlock(in: post.id, text: "\($0)") }
+            let blocks = try (0..<3).map { try ops.seedBlock(in: post.id, text: "\($0)") }
 
             try ops.reorder(blocks[2].block.id, to: .start)
             let afterDo = try db.snapshotRow("container_block", blocks[2].placement.id)
@@ -200,8 +200,8 @@ struct RedoStackTests {
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
             let pool = try ops.createPool()
-            let made = try ops.newBlock(in: post.id, text: "wanderer")
-            _ = try ops.newBlock(in: post.id, text: "neighbor")
+            let made = try ops.seedBlock(in: post.id, text: "wanderer")
+            _ = try ops.seedBlock(in: post.id, text: "neighbor")
 
             try ops.moveBlock(made.block.id, to: pool.id)
             let afterDo = try db.snapshotRow("container_block", made.placement.id)
@@ -220,8 +220,8 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost(title: "source")
-            _ = try ops.newBlock(in: post.id, text: "one")
-            _ = try ops.newBlock(in: post.id, text: "two")
+            _ = try ops.seedBlock(in: post.id, text: "one")
+            _ = try ops.seedBlock(in: post.id, text: "two")
 
             let copy = try ops.duplicateAsVersion(post.id)
             let copiedBlocks = try liveBlockOrder(db, in: copy.post.id)
@@ -241,7 +241,7 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let made = try ops.newBlock(in: post.id, text: "chosen")
+            let made = try ops.seedBlock(in: post.id, text: "chosen")
             let other = try ops.branchVariant(made.block.id, from: made.variant.id)
             let lens = try ops.createLens(post: post.id, name: "alt")
             try ops.setLensChoice(lens: lens.id, block: made.block.id, variant: other.id)
@@ -283,7 +283,7 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "one")
+            let a = try ops.seedBlock(in: post.id, text: "one")
             let second = try ops.branchVariant(a.block.id, from: a.variant.id)
             let third = try ops.branchVariant(a.block.id, from: a.variant.id)
             // The slot must not be pointing at the doomed take (the ops
@@ -331,7 +331,7 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "one")
+            let a = try ops.seedBlock(in: post.id, text: "one")
             let second = try ops.branchVariant(a.block.id, from: a.variant.id)
 
             // Archiving the block's DEFAULT (and chosen — legal, unlike
@@ -376,7 +376,7 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First half. Second half.")
+            let a = try ops.seedBlock(in: post.id, text: "First half. Second half.")
             let divided = try ops.divide(a.block.id, cut: 13)
 
             let watched: [(String, String)] = [
@@ -421,8 +421,8 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            _ = try ops.newBlock(in: post.id, text: "keeper")
-            let victim = try ops.newBlock(in: post.id, text: "victim")
+            _ = try ops.seedBlock(in: post.id, text: "keeper")
+            let victim = try ops.seedBlock(in: post.id, text: "victim")
 
             try ops.deleteBlock(victim.block.id)
             try stack.undo(with: ops)
@@ -442,8 +442,8 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First half. Second half.")
-            let b = try ops.newBlock(in: post.id, text: "another")
+            let a = try ops.seedBlock(in: post.id, text: "First half. Second half.")
+            let b = try ops.seedBlock(in: post.id, text: "another")
 
             _ = try ops.divide(a.block.id, cut: 13)
             try stack.undo(with: ops)
@@ -465,7 +465,7 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First half. Second half.")
+            let a = try ops.seedBlock(in: post.id, text: "First half. Second half.")
             _ = try ops.divide(a.block.id, cut: 13)
 
             #expect(stack.depth == 1 && stack.redoDepth == 0)
@@ -483,8 +483,8 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let made = try ops.newBlock(in: post.id, text: "x")
-            _ = try ops.newBlock(in: post.id, text: "y")
+            let made = try ops.seedBlock(in: post.id, text: "x")
+            _ = try ops.seedBlock(in: post.id, text: "y")
             try ops.deleteBlock(made.block.id)
             try stack.undo(with: ops)
             try db.clearOutbox()
@@ -506,7 +506,7 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First half. Second half.")
+            let a = try ops.seedBlock(in: post.id, text: "First half. Second half.")
             let divided = try ops.divide(a.block.id, cut: 13)
             try stack.undo(with: ops)
 
@@ -535,8 +535,8 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            _ = try ops.newBlock(in: post.id, text: "keeper")
-            let victim = try ops.newBlock(in: post.id, text: "x")
+            _ = try ops.seedBlock(in: post.id, text: "keeper")
+            let victim = try ops.seedBlock(in: post.id, text: "x")
 
             try ops.deleteBlock(victim.block.id)
             try stack.undo(with: ops)
@@ -559,7 +559,7 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First half. Second half.")
+            let a = try ops.seedBlock(in: post.id, text: "First half. Second half.")
             _ = try ops.divide(a.block.id, cut: 13)
             try stack.undo(with: ops)
             #expect(stack.redoDepth == 1)
@@ -586,7 +586,7 @@ struct RedoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(
+            let a = try ops.seedBlock(
                 in: post.id, text: "Intro clause. Middle stays here. Tail sentence.")
 
             let minted: (middle: String, suffix: String) = try stack.withCompound(

@@ -14,9 +14,9 @@ struct UndoStackTests {
             let ops = Operations(undoStack: stack)
 
             let post = try ops.createPost()
-            let before = try ops.newBlock(in: post.id, text: "before")
-            let target = try ops.newBlock(in: post.id, text: "the victim")
-            let after = try ops.newBlock(in: post.id, text: "after")
+            let before = try ops.seedBlock(in: post.id, text: "before")
+            let target = try ops.seedBlock(in: post.id, text: "the victim")
+            let after = try ops.seedBlock(in: post.id, text: "after")
             let branch = try ops.branchVariant(target.block.id, from: target.variant.id)
             try ops.chooseVariant(target.block.id, variantID: branch.id)
             let tag = try ops.createTag(name: "kept")
@@ -71,7 +71,7 @@ struct UndoStackTests {
             let ops = Operations(undoStack: stack)
 
             let post = try ops.createPost()
-            let made = try ops.newBlock(in: post.id, text: "take one")
+            let made = try ops.seedBlock(in: post.id, text: "take one")
             let branch = try ops.branchVariant(made.block.id, from: made.variant.id)
             try ops.chooseVariant(made.block.id, variantID: branch.id)
 
@@ -97,7 +97,7 @@ struct UndoStackTests {
             let ops = Operations(undoStack: stack)
 
             let post = try ops.createPost()
-            let made = try ops.newBlock(in: post.id, text: "take one")
+            let made = try ops.seedBlock(in: post.id, text: "take one")
             _ = try ops.branchVariant(made.block.id, from: made.variant.id)
 
             let variantBefore = try db.snapshotRow("variant", made.variant.id)
@@ -119,8 +119,8 @@ struct UndoStackTests {
 
             let post = try ops.createPost()
             let pool = try ops.createPool()
-            let made = try ops.newBlock(in: post.id, text: "wanderer")
-            _ = try ops.newBlock(in: post.id, text: "neighbor")
+            let made = try ops.seedBlock(in: post.id, text: "wanderer")
+            _ = try ops.seedBlock(in: post.id, text: "neighbor")
 
             let placementBefore = try db.snapshotRow("container_block", made.placement.id)
 
@@ -137,7 +137,7 @@ struct UndoStackTests {
             let ops = Operations(undoStack: stack)
 
             let post = try ops.createPost()
-            let blocks = try (0..<3).map { try ops.newBlock(in: post.id, text: "\($0)") }
+            let blocks = try (0..<3).map { try ops.seedBlock(in: post.id, text: "\($0)") }
             let placementBefore = try db.snapshotRow("container_block", blocks[2].placement.id)
 
             try ops.reorder(blocks[2].block.id, to: .start)
@@ -156,8 +156,8 @@ struct UndoStackTests {
 
             let post = try ops.createPost()
             let pool = try ops.createPool()
-            let made = try ops.newBlock(in: post.id, text: "x")
-            _ = try ops.newBlock(in: post.id, text: "y")
+            let made = try ops.seedBlock(in: post.id, text: "x")
+            _ = try ops.seedBlock(in: post.id, text: "y")
 
             try ops.reorder(made.block.id, to: .end)
             try ops.moveBlock(made.block.id, to: pool.id)
@@ -177,7 +177,7 @@ struct UndoStackTests {
             // Text editing, commits, locks, tags, containers, readings — all
             // excluded from structural undo by design.
             let post = try ops.createPost(title: "t")
-            let made = try ops.newBlock(in: post.id, text: "text")
+            let made = try ops.seedBlock(in: post.id, text: "text")
             try ops.autosave(made.variant.id, text: "text2", charDelta: 1)
             try ops.commit(made.variant.id)
             try ops.lockVariant(made.variant.id)
@@ -199,7 +199,7 @@ struct UndoStackTests {
             let ops = Operations(undoStack: stack)
 
             let post = try ops.createPost()
-            let made = try ops.newBlock(in: post.id, text: "x")
+            let made = try ops.seedBlock(in: post.id, text: "x")
             try ops.deleteBlock(made.block.id)
             try db.clearOutbox()
 
@@ -223,9 +223,9 @@ struct UndoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let earlier = try ops.newBlock(in: post.id, text: "reachable again")
+            let earlier = try ops.seedBlock(in: post.id, text: "reachable again")
             try ops.reorder(earlier.block.id, to: .end) // an older entry beneath
-            let made = try ops.newBlock(in: post.id, text: "x")
+            let made = try ops.seedBlock(in: post.id, text: "x")
             try ops.deleteBlock(made.block.id)
             try ops.restoreBlock(made.block.id)
 
@@ -246,7 +246,7 @@ struct UndoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let made = try ops.newBlock(in: post.id, text: "v1")
+            let made = try ops.seedBlock(in: post.id, text: "v1")
             _ = try ops.branchVariant(made.block.id, from: made.variant.id)
             let spare = try ops.branchVariant(made.block.id, from: made.variant.id)
             try ops.deleteVariant(spare.id)
@@ -275,7 +275,7 @@ struct UndoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let made = try ops.newBlock(in: post.id, text: "v1")
+            let made = try ops.seedBlock(in: post.id, text: "v1")
             let deleted = try ops.branchVariant(made.block.id, from: made.variant.id)
             let archived = try ops.branchVariant(made.block.id, from: made.variant.id)
             try ops.deleteVariant(deleted.id)
@@ -300,7 +300,7 @@ struct UndoStackTests {
 
             let post = try ops.createPost()
             let pool = try ops.createPool()
-            let made = try ops.newBlock(in: post.id, text: "x")
+            let made = try ops.seedBlock(in: post.id, text: "x")
             try ops.moveBlock(made.block.id, to: pool.id)
 
             // The undo target (the source post) got sealed after the move.
@@ -324,7 +324,7 @@ struct UndoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "Intro clause. Middle stays here. Tail sentence.")
+            let a = try ops.seedBlock(in: post.id, text: "Intro clause. Middle stays here. Tail sentence.")
             let sourceBefore = try db.snapshotRow("variant", a.variant.id)
 
             // Two divides as ONE undoable action (the ratified contract).
@@ -356,7 +356,7 @@ struct UndoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "Intro clause. Middle stays here. Tail sentence.")
+            let a = try ops.seedBlock(in: post.id, text: "Intro clause. Middle stays here. Tail sentence.")
             let sourceBefore = try db.snapshotRow("variant", a.variant.id)
 
             // The second divide fails (cut 0 is invalid): the compound is
@@ -379,7 +379,7 @@ struct UndoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "Intro clause. Middle stays here. Tail sentence.")
+            let a = try ops.seedBlock(in: post.id, text: "Intro clause. Middle stays here. Tail sentence.")
 
             let fired = LockIsolated(0)
             stack.setChangeObserver { fired.withValue { $0 += 1 } }
@@ -407,7 +407,7 @@ struct UndoStackTests {
             }
 
             let post = try ops.createPost()
-            let made = try ops.newBlock(in: post.id, text: "x")
+            let made = try ops.seedBlock(in: post.id, text: "x")
             try ops.deleteBlock(made.block.id)          // register → fires
             #expect(seen.value.last == "Delete Block")
 
@@ -445,7 +445,7 @@ struct UndoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First half. Second half.")
+            let a = try ops.seedBlock(in: post.id, text: "First half. Second half.")
 
             try ops.divide(a.block.id, cut: 12)
             // Nothing edited since: the undo would restore a buffer that is
@@ -480,8 +480,8 @@ struct UndoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "alpha")
-            let b = try ops.newBlock(in: post.id, text: "beta")
+            let a = try ops.seedBlock(in: post.id, text: "alpha")
+            let b = try ops.seedBlock(in: post.id, text: "beta")
 
             // A merge RESTORES no buffer (its sources are released whole),
             // so it can discard nothing — silent by construction, even with
@@ -490,7 +490,7 @@ struct UndoStackTests {
             #expect(stack.pendingUndoWarning(with: ops) == nil)
 
             // The same for the delete/move/reorder family.
-            let c = try ops.newBlock(in: post.id, text: "gamma")
+            let c = try ops.seedBlock(in: post.id, text: "gamma")
             try ops.deleteBlock(c.block.id)
             #expect(stack.pendingUndoWarning(with: ops) == nil)
 
@@ -508,7 +508,7 @@ struct UndoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "one. two. three.")
+            let a = try ops.seedBlock(in: post.id, text: "one. two. three.")
 
             // The SECOND leg's restore target is the block the FIRST leg
             // minted (it is the one whose buffer that divide truncated) —
@@ -542,7 +542,7 @@ struct UndoStackTests {
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "First half. Second half.")
+            let a = try ops.seedBlock(in: post.id, text: "First half. Second half.")
             try ops.divide(a.block.id, cut: 12)
             try ops.autosave(a.variant.id, text: "First half, rewritten.", charDelta: 6)
 

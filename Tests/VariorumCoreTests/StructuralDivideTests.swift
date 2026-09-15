@@ -16,9 +16,9 @@ struct WWorld {
 
     init(_ ops: Operations) throws {
         post = try ops.createPost()
-        before = try ops.newBlock(in: post.id, text: "before")
-        a = try ops.newBlock(in: post.id, text: "One alpha. One omega.")
-        after = try ops.newBlock(in: post.id, text: "after")
+        before = try ops.seedBlock(in: post.id, text: "before")
+        a = try ops.seedBlock(in: post.id, text: "One alpha. One omega.")
+        after = try ops.seedBlock(in: post.id, text: "after")
         v1 = a.variant.id
         let take2 = try ops.branchVariant(a.block.id, from: v1)
         try ops.autosave(take2.id, text: "Two intact.", charDelta: 0)
@@ -34,9 +34,9 @@ struct StructuralDivideTests {
     @Test func divideExactRows() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let before = try ops.newBlock(in: post.id, text: "before")
-            let a = try ops.newBlock(in: post.id, text: "Para one.\n\nPara two.")
-            let after = try ops.newBlock(in: post.id, text: "after")
+            let before = try ops.seedBlock(in: post.id, text: "before")
+            let a = try ops.seedBlock(in: post.id, text: "Para one.\n\nPara two.")
+            let after = try ops.seedBlock(in: post.id, text: "after")
 
             let result = try ops.divide(a.block.id, cut: 11)
 
@@ -70,7 +70,7 @@ struct StructuralDivideTests {
         try withOperations { ops, db in
             let post = try ops.createPost()
             let full = "Para one.\n\nPara two."
-            let a = try ops.newBlock(in: post.id, text: full)
+            let a = try ops.seedBlock(in: post.id, text: full)
             let savepoint = try ops.commit(a.variant.id)
 
             let result = try ops.divide(a.block.id, cut: 11)
@@ -96,7 +96,7 @@ struct StructuralDivideTests {
         try withOperations { ops, db in
             let post = try ops.createPost()
             // Emoji occupies UTF-16 offsets 3–13; the sentence boundary is 16.
-            let a = try ops.newBlock(in: post.id, text: "Hi 👩‍👩‍👧‍👦. Done.")
+            let a = try ops.seedBlock(in: post.id, text: "Hi 👩‍👩‍👧‍👦. Done.")
 
             #expect(throws: OperationError.invalidCut(variantID: a.variant.id, cut: 5)) {
                 try ops.divide(a.block.id, cut: 5)
@@ -114,7 +114,7 @@ struct StructuralDivideTests {
         try withOperations { _, db in
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "Para one.\n\nPara two.")
+            let a = try ops.seedBlock(in: post.id, text: "Para one.\n\nPara two.")
 
             // Edge cuts and cuts that trim to an empty half.
             for cut in [0, 20, 99, -1] {
@@ -125,7 +125,7 @@ struct StructuralDivideTests {
             // Cut inside the separator run still yields two halves — but one
             // inside leading text whitespace would not; covered by Domain
             // tests, asserted at the op layer via the whitespace-only text.
-            let padded = try ops.newBlock(in: post.id, text: "   Hello there")
+            let padded = try ops.seedBlock(in: post.id, text: "   Hello there")
             #expect(throws: OperationError.invalidCut(variantID: padded.variant.id, cut: 2)) {
                 try ops.divide(padded.block.id, cut: 2)
             }
@@ -173,7 +173,7 @@ struct StructuralDivideTests {
         try withOperations { ops, db in
             let post = try ops.createPost()
             let full = "Para one.\n\nPara two."
-            let a = try ops.newBlock(in: post.id, text: full)
+            let a = try ops.seedBlock(in: post.id, text: full)
             #expect(try db.read { try Queries.renderedText($0, containerID: post.id) } == full)
 
             let result = try ops.divide(a.block.id, cut: 11)
@@ -191,7 +191,7 @@ struct StructuralDivideTests {
     @Test func aDivideAtAPlainNewlineIsUnchangedByTheBlankLineRule() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "Para one.\nPara two.")
+            let a = try ops.seedBlock(in: post.id, text: "Para one.\nPara two.")
 
             let result = try ops.divide(a.block.id, cut: 10)
 
@@ -206,7 +206,7 @@ struct StructuralDivideTests {
     @Test func theCeremonysPerTakeCutsInheritTheBlankLineRule() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "Take one A.\n\nTake one B.")
+            let a = try ops.seedBlock(in: post.id, text: "Take one A.\n\nTake one B.")
             let second = try ops.branchVariant(a.block.id, from: a.variant.id)
             try ops.autosave(second.id, text: "Take two A.\n\n\nTake two B.", charDelta: 0)
 
@@ -224,7 +224,7 @@ struct StructuralDivideTests {
     @Test func divideFeedsChurn() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "Para one.\n\nPara two.")
+            let a = try ops.seedBlock(in: post.id, text: "Para one.\n\nPara two.")
             // The mint crossed (QUESTIONS #5 (a)): baseline 20, accumulator 0.
             let touchedAtMint = try db.fetchString(
                 "SELECT last_touched_at FROM container WHERE id = ?", [post.id])
@@ -715,7 +715,7 @@ struct StructuralDivideTests {
         try withOperations { _, db in
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "Para one.\n\nPara two.")
+            let a = try ops.seedBlock(in: post.id, text: "Para one.\n\nPara two.")
             let sourceBefore = try db.snapshotRow("variant", a.variant.id)
 
             let result = try ops.divide(a.block.id, cut: 11)

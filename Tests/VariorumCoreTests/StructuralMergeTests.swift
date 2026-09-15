@@ -8,10 +8,10 @@ struct StructuralMergeTests {
     @Test func mergeExactRows() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let before = try ops.newBlock(in: post.id, text: "before")
-            let b = try ops.newBlock(in: post.id, text: "First half.")
-            let c = try ops.newBlock(in: post.id, text: "Second half.")
-            let after = try ops.newBlock(in: post.id, text: "after")
+            let before = try ops.seedBlock(in: post.id, text: "before")
+            let b = try ops.seedBlock(in: post.id, text: "First half.")
+            let c = try ops.seedBlock(in: post.id, text: "Second half.")
+            let after = try ops.seedBlock(in: post.id, text: "after")
             let savepoint = try ops.commit(b.variant.id)
 
             let result = try ops.merge(b.block.id, c.block.id)
@@ -56,8 +56,8 @@ struct StructuralMergeTests {
         // what joins; both fans stay whole on the released sources.
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "Original first.")
-            let c = try ops.newBlock(in: post.id, text: "Second half.")
+            let b = try ops.seedBlock(in: post.id, text: "Original first.")
+            let c = try ops.seedBlock(in: post.id, text: "Second half.")
             let alt = try ops.branchVariant(b.block.id, from: b.variant.id)
             try ops.autosave(alt.id, text: "Alt first.", charDelta: 0)
             try ops.chooseVariant(b.block.id, variantID: alt.id)
@@ -77,13 +77,13 @@ struct StructuralMergeTests {
         // sentence exactly (the seam space divide trimmed comes back).
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One alpha. One omega.")
+            let a = try ops.seedBlock(in: post.id, text: "One alpha. One omega.")
             let divided = try ops.divide(a.block.id, cut: 11)
             let restored = try ops.merge(a.block.id, divided.block.id)
             #expect(restored.variant.workingText == "One alpha. One omega.")
 
-            let b = try ops.newBlock(in: post.id, text: "Trailing space ")
-            let c = try ops.newBlock(in: post.id, text: "already separated")
+            let b = try ops.seedBlock(in: post.id, text: "Trailing space ")
+            let c = try ops.seedBlock(in: post.id, text: "already separated")
             let joined = try ops.merge(b.block.id, c.block.id)
             #expect(joined.variant.workingText == "Trailing space already separated")
         }
@@ -92,8 +92,8 @@ struct StructuralMergeTests {
     @Test func mergeTouchesThePostWithoutReshuffling() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "b")
-            let c = try ops.newBlock(in: post.id, text: "c")
+            let b = try ops.seedBlock(in: post.id, text: "b")
+            let c = try ops.seedBlock(in: post.id, text: "c")
             // The mints stamped both (QUESTIONS #5 (a)); the point under
             // test is that the MERGE touches without reshuffling.
             let touchedBefore = try db.fetchString(
@@ -113,11 +113,11 @@ struct StructuralMergeTests {
     @Test func mergeRefusesNonAdjacentPairs() throws {
         try withOperations { ops, _ in
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "b")
-            let x = try ops.newBlock(in: post.id, text: "x")
-            let c = try ops.newBlock(in: post.id, text: "c")
+            let b = try ops.seedBlock(in: post.id, text: "b")
+            let x = try ops.seedBlock(in: post.id, text: "x")
+            let c = try ops.seedBlock(in: post.id, text: "c")
             let otherPost = try ops.createPost()
-            let elsewhere = try ops.newBlock(in: otherPost.id, text: "far")
+            let elsewhere = try ops.seedBlock(in: otherPost.id, text: "far")
 
             // A block between them, reversed order, self, cross-container.
             #expect(throws: OperationError.blocksNotAdjacent(first: b.block.id, second: c.block.id)) {
@@ -138,8 +138,8 @@ struct StructuralMergeTests {
     @Test func mergeRefusesUnderASealedPost() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let b = try ops.newBlock(in: post.id, text: "b")
-            let c = try ops.newBlock(in: post.id, text: "c")
+            let b = try ops.seedBlock(in: post.id, text: "b")
+            let c = try ops.seedBlock(in: post.id, text: "c")
             try ops.lockPost(post.id)
             #expect(throws: OperationError.lockedPost(id: post.id)) {
                 try ops.merge(b.block.id, c.block.id)
@@ -152,10 +152,10 @@ struct StructuralMergeTests {
     @Test func mergeReversibleByRePointingAtTheSources() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let before = try ops.newBlock(in: post.id, text: "before")
-            let b = try ops.newBlock(in: post.id, text: "First half.")
-            let c = try ops.newBlock(in: post.id, text: "Second half.")
-            let after = try ops.newBlock(in: post.id, text: "after")
+            let before = try ops.seedBlock(in: post.id, text: "before")
+            let b = try ops.seedBlock(in: post.id, text: "First half.")
+            let c = try ops.seedBlock(in: post.id, text: "Second half.")
+            let after = try ops.seedBlock(in: post.id, text: "after")
 
             let result = try ops.merge(b.block.id, c.block.id)
             try ops.deleteBlock(result.block.id)
@@ -172,10 +172,10 @@ struct StructuralMergeTests {
         try withOperations { _, db in
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let before = try ops.newBlock(in: post.id, text: "before")
-            let b = try ops.newBlock(in: post.id, text: "First half.")
-            let c = try ops.newBlock(in: post.id, text: "Second half.")
-            let after = try ops.newBlock(in: post.id, text: "after")
+            let before = try ops.seedBlock(in: post.id, text: "before")
+            let b = try ops.seedBlock(in: post.id, text: "First half.")
+            let c = try ops.seedBlock(in: post.id, text: "Second half.")
+            let after = try ops.seedBlock(in: post.id, text: "after")
             let bPlacementBefore = try db.snapshotRow("container_block", b.placement.id)
             let cPlacementBefore = try db.snapshotRow("container_block", c.placement.id)
 

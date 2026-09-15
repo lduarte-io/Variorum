@@ -31,7 +31,7 @@ struct FanOrderTests {
 
         init(_ ops: Operations) throws {
             post = try ops.createPost()
-            a = try ops.newBlock(in: post.id, text: "Take one.")
+            a = try ops.seedBlock(in: post.id, text: "Take one.")
             v2 = try ops.branchVariant(a.block.id, from: a.variant.id)
             try ops.autosave(v2.id, text: "Take two.", charDelta: 0)
             v3 = try ops.newBlankVariant(a.block.id)
@@ -158,7 +158,7 @@ struct FanOrderTests {
     @Test func anAnchorThatIsNotATakeOfThisBlockRefuses() throws {
         try withOperations { ops, db in
             let world = try FanWorld(ops)
-            let other = try ops.newBlock(in: world.post.id, text: "Elsewhere.")
+            let other = try ops.seedBlock(in: world.post.id, text: "Elsewhere.")
             #expect(throws: OperationError.variantNotFound(id: other.variant.id)) {
                 try ops.reorderTake(world.v2.id, to: .after(other.variant.id))
             }
@@ -239,7 +239,7 @@ struct ReorderedFanCopyTests {
         try withOperations { ops, db in
             let pool = try ops.createPool()
             let post = try ops.createPost()
-            let p = try ops.newBlock(in: pool.id, text: "Parent take.")
+            let p = try ops.seedBlock(in: pool.id, text: "Parent take.")
             let child = try ops.branchVariant(p.block.id, from: p.variant.id)
             try ops.autosave(child.id, text: "Child take.", charDelta: 0)
             // The parent now sits AFTER its child in fan order.
@@ -267,7 +267,7 @@ struct ReorderedFanCopyTests {
         // compose it). Same red-on-old mechanism.
         try withOperations { ops, db in
             let post = try ops.createPost(title: "Source")
-            let a = try ops.newBlock(in: post.id, text: "Parent take.")
+            let a = try ops.seedBlock(in: post.id, text: "Parent take.")
             let child = try ops.branchVariant(a.block.id, from: a.variant.id)
             try ops.autosave(child.id, text: "Child take.", charDelta: 0)
             try ops.reorderTake(a.variant.id, to: .after(child.id))

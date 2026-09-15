@@ -31,9 +31,9 @@ struct StructuralSplitAtNewlinesTests {
     @Test func aThreeParagraphBlockBecomesThreeBlocksInOrderKeepingAsIdentity() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let before = try ops.newBlock(in: post.id, text: "before")
-            let a = try ops.newBlock(in: post.id, text: "One.\nTwo.\nThree.")
-            let after = try ops.newBlock(in: post.id, text: "after")
+            let before = try ops.seedBlock(in: post.id, text: "before")
+            let a = try ops.seedBlock(in: post.id, text: "One.\nTwo.\nThree.")
+            let after = try ops.seedBlock(in: post.id, text: "after")
 
             let result = try ops.splitBlockAtNewlines(a.block.id)
 
@@ -53,7 +53,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func everyMintedBlockCarriesItsLineageEdgeAndAsPresentation() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One.\nTwo.\nThree.")
+            let a = try ops.seedBlock(in: post.id, text: "One.\nTwo.\nThree.")
             let frame = BlockPresentation(kind: BlockPresentation.calloutKind, color: "sand")
             try ops.setBlockPresentation(a.block.id, frame)
 
@@ -80,7 +80,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func splittingAtABlankLineKeepsHerSpacingExactly() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One.\n\nTwo.\n\n\nThree.")
+            let a = try ops.seedBlock(in: post.id, text: "One.\n\nTwo.\n\n\nThree.")
             let rendered = try db.read { try Queries.renderedText($0, containerID: post.id) }
 
             let result = try ops.splitBlockAtNewlines(a.block.id)
@@ -95,7 +95,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func aListStaysWholeInsideItsOwnBlock() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(
+            let a = try ops.seedBlock(
                 in: post.id, text: "Intro line\n- one\n  - nested\n- two\nOutro line")
 
             let result = try ops.splitBlockAtNewlines(a.block.id)
@@ -111,7 +111,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func aBlockWithNoBreakIsANoOpDownToTheOutboxRow() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "Already one paragraph.")
+            let a = try ops.seedBlock(in: post.id, text: "Already one paragraph.")
             let containerBefore = try #require(try db.snapshotRow("container", post.id, excluding: []))
             let variantBefore = try #require(try db.snapshotRow("variant", a.variant.id, excluding: []))
             try db.clearOutbox()
@@ -134,7 +134,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func aBlockThatIsAllBlankLinesIsANoOp() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "\n\nOnly one.\n\n")
+            let a = try ops.seedBlock(in: post.id, text: "\n\nOnly one.\n\n")
             #expect(try ops.splitBlockAtNewlines(a.block.id).isNoOp)
             #expect(try texts(db, in: post.id) == ["\n\nOnly one.\n\n"])
         }
@@ -147,7 +147,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func aFannedBlockLeavesEveryTakeOnTheTopParagraph() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One.\nTwo.\nThree.")
+            let a = try ops.seedBlock(in: post.id, text: "One.\nTwo.\nThree.")
             let take2 = try ops.branchVariant(a.block.id, from: a.variant.id)
             try ops.autosave(take2.id, text: "Take two, whole.", charDelta: 0)
             let take3 = try ops.branchVariant(a.block.id, from: take2.id)
@@ -177,7 +177,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func aRiddenTakeKeepsItsName() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One.\nTwo.")
+            let a = try ops.seedBlock(in: post.id, text: "One.\nTwo.")
             let spare = try ops.branchVariant(a.block.id, from: a.variant.id)
             try ops.autosave(spare.id, text: "The spare.", charDelta: 0)
             try ops.setTakeLabel(spare.id, label: "the spare")
@@ -196,7 +196,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func anEmptyOtherTakeStaysOnTheOriginalAndIsCounted() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One.\nTwo.")
+            let a = try ops.seedBlock(in: post.id, text: "One.\nTwo.")
             let blank = try ops.newBlankVariant(a.block.id)
 
             let result = try ops.splitBlockAtNewlines(a.block.id)
@@ -213,7 +213,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func onlyTheDisplayedTakesNewlinesDecideTheBreaks() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One.\nTwo.")
+            let a = try ops.seedBlock(in: post.id, text: "One.\nTwo.")
             let take2 = try ops.branchVariant(a.block.id, from: a.variant.id)
             // A take with FIVE paragraphs of its own — it rides whole, and
             // its newlines are nobody's business (§5.1: the breaks come from
@@ -230,7 +230,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func theChosenTakeIsTheOneThatSplitsEvenWhenItIsNotTheFirst() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "no breaks here")
+            let a = try ops.seedBlock(in: post.id, text: "no breaks here")
             let take2 = try ops.branchVariant(a.block.id, from: a.variant.id)
             try ops.autosave(take2.id, text: "One.\nTwo.", charDelta: 0)
             try ops.chooseVariant(a.block.id, variantID: take2.id)
@@ -253,7 +253,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func aSealedPostRefusesTheWholeSplit() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One.\nTwo.")
+            let a = try ops.seedBlock(in: post.id, text: "One.\nTwo.")
             try ops.lockPost(post.id)
 
             #expect(throws: OperationError.self) { try ops.splitBlockAtNewlines(a.block.id) }
@@ -264,7 +264,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func aLockedSingleTakeRefusesAndLeavesNoHalfSplit() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One.\nTwo.\nThree.")
+            let a = try ops.seedBlock(in: post.id, text: "One.\nTwo.\nThree.")
             try ops.lockVariant(a.variant.id)
 
             #expect(throws: OperationError.self) { try ops.splitBlockAtNewlines(a.block.id) }
@@ -276,8 +276,8 @@ struct StructuralSplitAtNewlinesTests {
     @Test func anUnplacedBlockRefuses() throws {
         try withOperations { ops, _ in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One.\nTwo.")
-            let b = try ops.newBlock(in: post.id, text: "second")
+            let a = try ops.seedBlock(in: post.id, text: "One.\nTwo.")
+            let b = try ops.seedBlock(in: post.id, text: "second")
             _ = try ops.merge(a.block.id, b.block.id)  // releases both to lineage
             #expect(throws: OperationError.self) { try ops.splitBlockAtNewlines(a.block.id) }
         }
@@ -290,9 +290,9 @@ struct StructuralSplitAtNewlinesTests {
         try withOperations { _, db in
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let before = try ops.newBlock(in: post.id, text: "before")
-            let a = try ops.newBlock(in: post.id, text: "One.\n\nTwo.\nThree.")
-            let after = try ops.newBlock(in: post.id, text: "after")
+            let before = try ops.seedBlock(in: post.id, text: "before")
+            let a = try ops.seedBlock(in: post.id, text: "One.\n\nTwo.\nThree.")
+            let after = try ops.seedBlock(in: post.id, text: "after")
 
             let result = try ops.splitBlockAtNewlines(a.block.id)
             #expect(stack.depth == 1, "ONE entry for the block, not one per divide")
@@ -324,7 +324,7 @@ struct StructuralSplitAtNewlinesTests {
         try withOperations { _, db in
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One.\nTwo.\nThree.")
+            let a = try ops.seedBlock(in: post.id, text: "One.\nTwo.\nThree.")
             let take2 = try ops.branchVariant(a.block.id, from: a.variant.id)
             try ops.autosave(take2.id, text: "Take two.", charDelta: 0)
 
@@ -349,9 +349,9 @@ struct StructuralSplitAtNewlinesTests {
         try withOperations { _, db in
             let ops = Operations(undoStack: stack)
             let post = try ops.createPost()
-            let one = try ops.newBlock(in: post.id, text: "A one.\nA two.")
-            let two = try ops.newBlock(in: post.id, text: "Already whole.")
-            let three = try ops.newBlock(in: post.id, text: "C one.\nC two.\nC three.")
+            let one = try ops.seedBlock(in: post.id, text: "A one.\nA two.")
+            let two = try ops.seedBlock(in: post.id, text: "Already whole.")
+            let three = try ops.seedBlock(in: post.id, text: "C one.\nC two.\nC three.")
 
             let results = try stack.withCompound(label: "Split at Newlines", operations: ops) {
                 try [one, two, three].map { try ops.splitBlockAtNewlines($0.block.id) }
@@ -380,7 +380,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func everyRowItWritesIsAnOrdinaryOutboxedRow() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One.\nTwo.")
+            let a = try ops.seedBlock(in: post.id, text: "One.\nTwo.")
             try db.clearOutbox()
 
             let result = try ops.splitBlockAtNewlines(a.block.id)
@@ -401,7 +401,7 @@ struct StructuralSplitAtNewlinesTests {
     @Test func theSuccessorsGetCopiesOfTheBlocksComments() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let a = try ops.newBlock(in: post.id, text: "One.\nTwo.\nThree.")
+            let a = try ops.seedBlock(in: post.id, text: "One.\nTwo.\nThree.")
             _ = try ops.addBlockComment(to: a.block.id, text: "a working note")
 
             let result = try ops.splitBlockAtNewlines(a.block.id)

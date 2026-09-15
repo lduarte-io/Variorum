@@ -25,7 +25,7 @@ private struct FanWorld {
 
     init(_ ops: Operations) throws {
         post = try ops.createPost()
-        a = try ops.newBlock(in: post.id, text: "One.")
+        a = try ops.seedBlock(in: post.id, text: "One.")
         v2 = try ops.branchVariant(a.block.id, from: a.variant.id)
         try ops.autosave(v2.id, text: "Two.", charDelta: 0)
         v3 = try ops.newBlankVariant(a.block.id)
@@ -166,7 +166,7 @@ struct TakeToBlockBelowTests {
     @Test func theRefusalsAreI10TheBlankTakeTheSealAndAForeignTake() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let lone = try ops.newBlock(in: post.id, text: "The only take.")
+            let lone = try ops.seedBlock(in: post.id, text: "The only take.")
             // I10: a take moves out when there is another left behind.
             #expect(throws: OperationError.lastActiveVariant(id: lone.variant.id)) {
                 try ops.takeToBlockBelow(lone.block.id, variantID: lone.variant.id)
@@ -180,7 +180,7 @@ struct TakeToBlockBelowTests {
             }
 
             // A take of ANOTHER block is not among this block's takes.
-            let other = try ops.newBlock(in: post.id, text: "Elsewhere.")
+            let other = try ops.seedBlock(in: post.id, text: "Elsewhere.")
             #expect(throws: OperationError.variantNotFound(id: other.variant.id)) {
                 try ops.takeToBlockBelow(lone.block.id, variantID: other.variant.id)
             }
@@ -310,7 +310,7 @@ struct TakesToBlocksTests {
     @Test func aBlockWithNoOtherTakesWithProseRefusesAndMintsNothing() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let lone = try ops.newBlock(in: post.id, text: "Just me.")
+            let lone = try ops.seedBlock(in: post.id, text: "Just me.")
             #expect(throws: OperationError.noConvertibleTakes(blockID: lone.block.id)) {
                 try ops.takesToBlocks(lone.block.id)
             }
@@ -366,7 +366,7 @@ struct BlockTakesProjectionTests {
     @Test func aLoneTakeIsOneTakeAndTheTextIsJustItsProse() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let block = try ops.newBlock(in: post.id, text: "Only take.")
+            let block = try ops.seedBlock(in: post.id, text: "Only take.")
             let copy = try db.read { try Queries.blockTakes($0, blockID: block.block.id) }
             #expect(copy.markdown == "Only take.")
             #expect(copy.takeCount == 1)
@@ -379,7 +379,7 @@ struct BlockTakesProjectionTests {
         // different shape than the export she already knows.
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let block = try ops.newBlock(in: post.id, text: "Shown take.")
+            let block = try ops.seedBlock(in: post.id, text: "Shown take.")
             let second = try ops.branchVariant(block.block.id, from: block.variant.id)
             try ops.autosave(second.id, text: "Second take.", charDelta: 0)
             try ops.setTakeLabel(second.id, label: "bolder")
@@ -401,7 +401,7 @@ struct BlockTakesProjectionTests {
     @Test func blankAndArchivedTakesAreOutOfTheCountAsTheyAreOutOfTheExport() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let block = try ops.newBlock(in: post.id, text: "Shown take.")
+            let block = try ops.seedBlock(in: post.id, text: "Shown take.")
             let blank = try ops.newBlankVariant(block.block.id)          // no text
             let archived = try ops.branchVariant(block.block.id, from: block.variant.id)
             try ops.autosave(archived.id, text: "Was a contender.", charDelta: 0)
@@ -422,12 +422,12 @@ struct BlockTakesProjectionTests {
     @Test func anEmptyShownTakeCountsNothingAndADeadBlockProjectsNothing() throws {
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let empty = try ops.newBlock(in: post.id, text: "")
+            let empty = try ops.seedBlock(in: post.id, text: "")
             let emptyCopy = try db.read { try Queries.blockTakes($0, blockID: empty.block.id) }
             #expect(emptyCopy.markdown.isEmpty)
             #expect(emptyCopy.takeCount == 0)
 
-            let block = try ops.newBlock(in: post.id, text: "Doomed.")
+            let block = try ops.seedBlock(in: post.id, text: "Doomed.")
             try ops.deleteBlock(block.block.id)
             let deadCopy = try db.read { try Queries.blockTakes($0, blockID: block.block.id) }
             #expect(deadCopy.markdown.isEmpty)
@@ -441,7 +441,7 @@ struct BlockTakesProjectionTests {
         // exports fine).
         try withOperations { ops, db in
             let post = try ops.createPost()
-            let block = try ops.newBlock(in: post.id, text: "Sealed prose.")
+            let block = try ops.seedBlock(in: post.id, text: "Sealed prose.")
             try ops.lockPost(post.id)
             let copy = try db.read { try Queries.blockTakes($0, blockID: block.block.id) }
             #expect(copy.markdown == "Sealed prose.")
