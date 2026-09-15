@@ -358,7 +358,7 @@ on the standing rails, zero-instance pgrep first, record-instead-of-kill if her 
 | unit | status |
 |---|---|
 | A — pane stability trace + landing/settle | **CLOSED 2026-09-15** — item 1 TRACED (her hands owed, never claimed closed) · row 100 FIXED + walked · row 98 DISMISSED AS HOLLOW · M12 VERIFIED · item 18's Outline half TRACED, built, and REVERTED on a 3-vs-3 measurement, with its designed successor recorded · 54/92/94 DEFERRED with reasons. Finals = baseline: core 1562/170 · Mac 2668/445 · iOS green |
-| A2 — item 18's successor: preview priming (RULING A-1) | **RUNNING 2026-09-15** — the record is open below; pieces flip there |
+| A2 — item 18's successor: preview priming (RULING A-1) | **BUILT + WALKED 2026-09-15, ONE OPEN CALL FOR THE ORCHESTRATOR** — item 18's card drift FIXED (red-on-old; no `h=46` on the real book, 3 runs) · the bounded core read MEASURED FLAT · **constraint 2's gate arm is RED at 73 pt (the only failure in the Mac suite) while the SAME scenario on her real book improves from "gave up at 61 pt after 12 hops" to "settled after 2"** — the letter vs the purpose, recorded in full · finals: core 1567/171 · Mac 2670/446 (1 failure = that arm) · iOS green |
 | B — book-Index presentation + shadow editor | NOT-STARTED |
 | C — #109 boundary-clamp law | NOT-STARTED |
 | D — the singles (+ TRACE 1a, routed by RULING A-1) | NOT-STARTED |
@@ -718,8 +718,17 @@ sample. (The fix and its red-on-old measurement are below.)
 
 # UNIT A2 RECORD — item 18's successor: PRIMING THE CARD PREVIEWS (opened 2026-09-15, `opus-implementer`, the overnight run; RULING A-1's build)
 
-**WHAT THIS UNIT DID NOT DO — the record's first line.** *(PENDING — written at the close, when it is
-true.)*
+**WHAT THIS UNIT DID NOT DO — the record's first line.** It did **not meet RULING A-1's constraint 2**:
+the gate fixture's *far below* arm lands **73 pt** off and stays there, 3/3 isolated and once more
+under full-suite load, where the pre-fix tree measured 6/6 green. It is the ONLY failure in the whole
+Mac suite. Its mechanism is traced to the lazy run's card:heading ESTIMATE (constraint 3's own deferred
+finding, ±70 pt, with every realized row constant through the swing), and the only structural cure —
+one scale per lazy run — is what constraint 4 forbids, so **nothing was restructured and the arm was
+left red rather than papered over**. The same scenario measured **on her real Sherlock book runs the
+other way**: `gave up at top=61.0 after 12 hops, 4060 ms` before, `settled at top=-2.0 after 2 hops,
+1038 ms` after. The gate's purpose is met; its letter is not; **the call is the orchestrator's.**
+It also did not touch the shadow-editor row it diagnosed (unit B's), did not restructure the lazy runs,
+and made no PROVISIONAL — `notes/QUESTIONS.md` is untouched and #110 is still free.
 
 **What it is:** RULING A-1's adopted successor to the card fix UNIT A built and reverted. The traced
 defect is TRACE 2's, unchanged: **a collapsed card's height depended on WHEN its preview read
@@ -749,7 +758,7 @@ mount: `editorHeight == 24` after 200 turns).
 | the GATE: the 3-expanded fixture 3/3 isolated, beside the card pin 3/3 | **NOT MET IN THE FIXTURE, and the reason is measured** — the far-below arm lands 73 pt off (3/3, deterministic); the mechanism is constraint 3's own scale-mix; **the SAME scenario on her real book goes from "gave up at 61 pt after 12 hops, 4.08 s" to "settled at 0 after 2 hops, 1.02 s"** (THE GATE, MEASURED BOTH WAYS below) — the orchestrator's call |
 | the WALK: before/after landing stories on the real Sherlock book + captures | **DONE** — 6 captures, both voices, the before/after logs, the three-expanded case both ways |
 | the card:heading scale-mix — MEASURE then decide | **MEASURED — and it DECIDED ITSELF**: it is not a residual here, it is what blocks the fixture's far-below arm (±70 pt, realized rows constant) |
-| tests (core · FULL Mac · iOS build) | **PENDING** |
+| tests (core · FULL Mac · iOS build) | **DONE** — core **1567 / 171 GREEN** (+5 pins over the 1562/170 baseline) · the FULL Mac suite **2670 / 446, ONE failure — the gate arm and nothing else** (721.8 s; neither load-flaky suite fired) · iOS build **GREEN** |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
 
@@ -1007,6 +1016,27 @@ evidence that closed that road deserves a second look from whoever takes the sha
 | **constraint 4 — no lazy-run restructuring** | **HONOURED** | Nothing in `BookOutlineRows.segments` or the column's containers was touched; the diff is the model, the row's excerpt source, and the core read. |
 | **the harness's double editor** | **DIAGNOSED · the product measured CLEAN · the helper corrected** | One mount in the real app on both trees (cliclick walk + `NSLog` probe); four probes isolating the cause to the suspension. |
 | **a PROVISIONAL** | **NONE, deliberately** | Every call here was technical with a measurement behind it — the block bound, the freshness refresh, the helper. None decided product behaviour, so `notes/QUESTIONS.md` is untouched and the next free number stays **#110**. |
+
+## FINALS
+
+| gate | result | baseline |
+|---|---|---|
+| core `swift test` | **1567 / 171 GREEN** | 1562 / 170 — **+5 tests, +1 suite**, exactly the new bounded-read pins |
+| the FULL Mac suite | **2670 / 446 — ONE failure, the gate arm and nothing else**, 721.8 s | 2668 / 445 ALL GREEN, 726 s — **+2 tests, +1 suite** (the card-height pin) |
+| iOS build | **GREEN** | green |
+| lockstep marker | untouched — **8** | 8 |
+
+Neither load-flaky suite fired (the differential-latency pin, `CanvasDragTrackingTests`,
+`MastheadLayoutTests`' open-field arm, `BlocksWorkbenchFaceTests`' single-click budget), so the one red
+is news exactly as the flake rules promise. The full mobile suite is **not owed**: no `Shared/` file
+moved.
+
+**Commits**, each pushed as it landed: `865f24d9` (the record opened) · `23d69ac4` (TRACE 2 re-verified
+on the post-revert tree) · `9862a504` (the bounded core read + 5 pins + the flat measurement) ·
+`4f3aac99` (**the pin, landed RED**) · `d925e965` (the priming, with the landing suite's two reds
+recorded rather than hidden) · `207cd4d8` (the editor helper, after the production mount measurement) ·
+`d7bfb264` (the walk + the gate measured both ways) · this one (the finals). No history was rewritten
+and nothing was reverted.
 
 **Captures** (gitignored, `notes/plans/13u2-screens/`, continuing UNIT A's numbering): `19-a2-before-arrival`
 · `20-a2-after-sherlock-open` · `21-a2-after-ch11-landed` · `22-a2-before-ch11-landed` ·
