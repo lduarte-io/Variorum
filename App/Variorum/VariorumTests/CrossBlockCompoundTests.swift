@@ -337,7 +337,11 @@ struct CrossBlockCompoundTests {
     /// **RED ON OLD:** the retired planner collected by intersection, never
     /// saw the gap, planned a merge ACROSS it, and the operations layer
     /// refused with a raw `blocksNotAdjacent(first:second:)` enum dump.
-    @Test func aGapInsideTheSpanRefusesAndNamesTheBlockThatHasNotArrived() async throws {
+    /// *(Renamed at the 13u1 ladder, round 1 — it was
+    /// `…AndNamesTheBlockThatHasNotArrived`, but the sentence deliberately
+    /// names the CAUSE, never a block: naming rows is the enum-dump class
+    /// this whole family exists to end.)*
+    @Test func aGapInsideTheSpanRefusesAndNamesTheCause() async throws {
         try await withEditor { h in
             h.model.applyProjection([
                 slot("b0", text: "Alpha one."),

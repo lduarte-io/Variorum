@@ -894,7 +894,7 @@ reading the STORE:
 | `aTakeArrivingDuringTheTypingBurstStopsTheJoin` | **U-1's red-on-old**: the projection still says one take, the store says two, the join stands down |
 | `aLockedTakeInTheRunRefusesTheWholeGestureNamingTheLock` | R-13u-1, refuse whole, nothing changed |
 | `aSealedNoteRefusesTheGestureBeforeAnyPlanRuns` | the seal, at the surface and at the gate |
-| `aGapInsideTheSpanRefusesAndNamesTheBlockThatHasNotArrived` | **U-3's red-on-old**: the cause is `.unsyncedBlock`, never the raw enum |
+| `aGapInsideTheSpanRefusesAndNamesTheCause` *(renamed at the ladder, round 1 — the sentence names the CAUSE, deliberately never a block id)* | **U-3's red-on-old**: the cause is `.unsyncedBlock`, never the raw enum |
 | `aLoneSeparatorCanNeverReachTheCompound` | walked over EVERY separator of an empty-heavy document — what keeps A7's carve and #34's seam merge safe to run first |
 | `theCompoundLeavesAQuietSavepointOfEveryTakeItEdits` | the seventh occasion at the gesture it was invented for |
 | `typingOverAWholeParagraphRunLeavesOneBlockHoldingWhatYouTyped` | the type-over shape |
