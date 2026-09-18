@@ -811,9 +811,9 @@ fixed** — the hallucination guard's own rule, and it binds here exactly as it 
 | THE AUTHORITY — hoisted from `BookView`, parameterized, the story built in | **DONE** — `Surface/LandingAuthority.swift`: the PURE decision (`LandingSettle.decide`) + the runner + the policies + the signpost |
 | the Outline consumes it BYTE-IDENTICALLY (its suites green, ZERO test edits) | **DONE** — `BookOutlineLandingTests` + `BookOutlineRowsTests` **13/13 green, zero test edits, zero known issues** |
 | THE FLOW adopts the authority AND the manifest (row-100 pins unmodified) | **DONE** — all seven shipped flow pins green UNMODIFIED; **PIN B now settles at 0 hops in 1,017 ms** where it spent 4,211 ms and gave up; the four suites together **29 tests / 4 suites GREEN** |
-| THE SIGNPOST — content-free, ships in Release, emitted by the authority | NOT-STARTED |
-| the signpost verified content-free (a capture + the Release binary's own strings) | NOT-STARTED |
-| the dev-store WALK — a far landing in Read ▸ Scroll, both directions, on Sherlock | NOT-STARTED |
+| THE SIGNPOST — content-free, ships in Release, emitted by the authority | **DONE** — `LandingSignpost`; pinned by `LandingSignpostTests` (10 tests / 2 suites green, including the landing discipline's own truth tables — the hoist's dividend) |
+| the signpost verified content-free (a capture + the Release binary's own strings) | **DONE** — both ways, below: eleven real lines captured from the dev-store walk, and the Release binary's own strings |
+| the dev-store WALK — a far landing in Read ▸ Scroll, both directions, on Sherlock | **DONE** — her exact gesture, **5 consecutive landings at `hops=0 content=0 top=0`** across a 290,000-pt column; 6 captures |
 | tests: the touched suites · the FULL Mac suite | NOT-STARTED |
 
 *(Every line starts NOT-STARTED and is flipped in the same commit as the piece it names; an
@@ -879,3 +879,69 @@ rows can still cause one.
 The first line is the small rows' lazy estimate retiring; the second is the manifest proving itself
 against the real column; the fourth is the SEED, which the flow gets *because* the authority is
 shared — it was built for the Outline at UNIT 1 and this surface never had it.
+
+## THE WALK — her own gesture in READ ▸ SCROLL, on the real Sherlock book
+
+Dev-store Debug build (`DerivedData/13u2b`, the binary of 06:22), zero instances verified before and
+after, WalkKit + cliclick, the signpost read from the unified log
+(`/usr/bin/log show --predicate 'eventMessage CONTAINS "landing surface"'` — note the full path:
+zsh's own `log` builtin swallows the command otherwise, which cost this walk two attempts).
+
+Her report is the protocol, on the surface it was filed about — *"I clicked a far away chapter, that
+was fine, then I clicked one that was much higher and I watched it stutter ~10 times, every time I
+did it."* So: Sherlock ▸ Read ▸ Scroll, click the LAST chapter, then **the man with the twisted lip**
+far above, and again, and again. **Every line below is the app's own, unedited:**
+
+```
+landing surface=ReadingFlow rows=28 target=25 offset=263135 total=289968 derived=9 exact=0 hops=1 content=2 ms=1021 end=settled top=0
+landing surface=ReadingFlow rows=28 target=13 offset=116266 total=289603 derived=7 exact=0 hops=0 content=0 ms=1003 end=settled top=0
+landing surface=ReadingFlow rows=28 target=25 offset=263016 total=289603 derived=7 exact=0 hops=0 content=0 ms=1003 end=settled top=0
+landing surface=ReadingFlow rows=28 target=13 offset=116266 total=289603 derived=7 exact=0 hops=0 content=0 ms=1005 end=settled top=0
+landing surface=ReadingFlow rows=28 target=25 offset=263016 total=289603 derived=7 exact=0 hops=0 content=0 ms=1014 end=settled top=0
+landing surface=ReadingFlow rows=28 target=13 offset=116266 total=289603 derived=7 exact=0 hops=0 content=0 ms=1013 end=settled top=0
+landing surface=ReadingFlow rows=28 target=13 offset=116266 total=289603 derived=7 exact=0 hops=0 content=0 ms=1007 end=settled top=0   ← the ALREADY-THERE landing
+landing surface=BookOutline rows=26 target=13 offset=1105  total=2252   derived=13 exact=0 hops=0 content=0 ms=1016 end=settled top=0
+landing surface=BookOutline rows=26 target=11 offset=931   total=21261  derived=12 exact=0 hops=0 content=0 ms=1033 end=settled top=0
+```
+
+**Read the numbers.** A 290,000-pt column; the far chapter DOWN costs one hop the first time it is
+visited (a story above it trades its estimate for its real height — AR-1's rider 4, and the line
+SAYS so with `derived=9 content=2`); **every landing after that is `hops=0 content=0`, settled at
+`top=0`, in ~1,005 ms** — including the stutter case itself and including the repeat clicks her
+report describes as *"every time."* The last line of the flow's run is the ALREADY-THERE landing,
+which before this unit spent its whole 4-s watchdog (`gave up at top=unreported after 0 re-lands,
+4211 ms`, measured twice on the pre-fix tree). And `derived` FALLS as she reads — 26 → 11 → 9 → 7 —
+which is the column learning its own geometry; the two BookOutline lines beneath prove the Outline
+emits the same signpost with its behaviour unchanged.
+
+Captures (gitignored, `notes/plans/13u2b-screens/`): `u2-01-launch` · `u2-02-read-scroll` ·
+`u2-03-flow-last-chapter` · `u2-04-flow-twisted-lip-far-up` · `u2-05-flow-already-there` ·
+`u2-06-outline-unchanged`, with the raw signpost capture beside them as `u2-signpost-capture.log`.
+
+**One walk note, no action owed:** two of my early clicks fell in the gap between navigator rows and
+landed nothing — the same operator error UNIT 1's walk recorded, not a product finding. (One of them
+fell in the PAGE instead and took the scrolled-open door into Index, which worked exactly as R-cor-5
+says it should.)
+
+## THE SIGNPOST, VERIFIED CONTENT-FREE — BOTH WAYS
+
+**1. By reading the real output** (the eleven lines above, and the twelve in
+`u2-signpost-capture.log`): every value is an integer except `surface=` and `end=`, and nothing in
+them names a book, a chapter, a note or an id. Sherlock's chapters are called *The Man with the
+Twisted Lip*; the line that landed on one says `target=13`.
+
+**2. By the Release binary's own strings** — the honest half, because the walk ran a Debug build.
+`xcodebuild build -configuration Release` into a private `derivedDataPath` (built, never launched,
+never copied — `/Applications` untouched, and the standard Release configuration, never a custom
+one):
+
+| in `strings Variorum.app/Contents/MacOS/Variorum` | present? | |
+|---|---|---|
+| `landing surface=`, ` rows=`, ` target=`, ` offset=`, ` total=`, ` derived=`, ` exact=`, ` hops=`, ` content=`, ` ms=`, ` end=`, ` top=` | **YES** | the signpost's whole format ships |
+| `BookOutline`, `ReadingFlow` | **YES** | the two enum cases the line can name |
+| `manifest rows=`, `DONE: `, ` h=`, `BookOutline landing` | **NO** | the verbose DEBUG story does not ship |
+| `RE-LAND` | yes | **recorded rather than removed:** it is `LandingPolicy.readingFlow.correctionWord`, a plain field of a shipped struct whose only use sits inside `#if DEBUG`. Gating the FIELD would make the policy's shape differ between configurations, which is worse than a nine-byte constant nothing reads. |
+
+The reason-strings (`settled at top=…`) are likewise reachable in the binary as literals but never
+BUILT in Release: `finish(_:why:)` takes its sentence as an `@autoclosure` and only the DEBUG
+storyboard calls it, so a landing that ends in her build costs exactly the one signpost line.

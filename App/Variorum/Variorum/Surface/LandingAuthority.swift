@@ -515,11 +515,14 @@ final class LandingAuthority {
         }
     }
 
-    private func finish(_ outcome: LandingOutcome, why: String) {
+    /// `why` is the DEBUG story's sentence and nothing else, so it is an
+    /// `@autoclosure`: in a Release build it is never built, and a landing
+    /// that ends costs exactly the one signpost line.
+    private func finish(_ outcome: LandingOutcome, why: @autoclosure () -> String) {
         let elapsed = Date().timeIntervalSince(began)
         #if DEBUG
         if anchor != nil {
-            storyboard?.note("\(anchor ?? "") DONE: \(why)")
+            storyboard?.note("\(anchor ?? "") DONE: \(why())")
             if let dump = storyboard?.dump() {
                 // The dev build's verbose story, readable from outside the
                 // process: `log show --process Variorum --predicate
