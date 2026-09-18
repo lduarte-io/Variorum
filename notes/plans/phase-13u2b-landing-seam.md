@@ -325,9 +325,43 @@ NOT-STARTED. UNIT 3 — NOT-STARTED. Ladder — not yet owed.
 
 # UNIT 1 RECORD — the book HEIGHT MANIFEST, and the Outline lands once (opened 2026-09-18, `opus-implementer`)
 
-**WHAT THIS UNIT HAS NOT DONE — the record's first line, flipped as the unit closes.** *(At open:
-everything. No product code is written yet; what stands below is the BASELINE measurement and the
-mechanism trace the build must answer.)*
+**WHAT THIS UNIT DID NOT DO — the record's first line.** It did **not** build the plan's letter
+(*feed the manifest to the AIM and scroll once*): it measured that shape failing its own gate and
+raised the fork instead, and what shipped is the architect's ruling AR-1 — the manifest reaching the
+ROWS. It did **not** touch the expanded notes' virtualization, the live editor, any scroll
+mechanism, or `NearViewportObserver`'s behaviour (its rule was hoisted to `NearBand` and shared; the
+modifier calls the same two functions and `StableSurfaceTests` rides unmodified). It did **not**
+reopen the closed one-scale-per-lazy-run road — it ran that road's own successor MEASUREMENT instead
+(rider 1) so the ambiguity is retired rather than inherited. It did **not** relax
+`SurfaceSizeMemory`'s per-width refusal (the estimate arm is what covers a refused width — that is
+the whole reason the refusal can stay). It did **not** adopt the FLOW or the Takes/Index
+compensators (UNIT 2's and their next touch's). It did **not** edit any test's CLAIM: one PREMISE
+line was restated under architect ruling AR-2 and is named below. And it leaves **one red it caused**
+undecided — `offViewportPostsNeverInstantiate`, traced and reported under rider 3, not touched.
+
+## DISPOSITIONS
+
+| item | verdict | evidence |
+|---|---|---|
+| **the gate — row 64's far-below arm** | **MET, and the arm UNWRAPPED with its interim bound dropped** | `settled at top=0.0 after 0 hops` (was `gave up at top=-73.0 after 13 hops, 4.2 s`, 3/3). The suite's known-issue count fell 1 → 0. |
+| **the three-expanded arm (≤2 hops)** | **MET at 0 hops** | Same run; every arm of that test now reads 0 hops. |
+| **the plan's UNIT 1 letter** | **SUPERSEDED IN MECHANISM by AR-1, on a measurement** | THE MECHANISM, TRACED, above: the aim was already exact; the −73 arrives after arrival. PROBE A (hop budget 1) decays with zero hops spent. |
+| **rider 1 — the closed road's guard** | **MEASURED in row 64's own terms and PINNED** | `window=Y entries=215 height=16134.0` (`theLiveEditorStillReachesTheScreenWithEveryBlockUnderTheNewRuns`). The road itself stays closed and unrebuilt. |
+| **rider 2 — P1/P3 cost** | **A/B'd; it holds, with the number recorded** | Steady-state layout 0.562 ms vs the lazy column's 0.702 (CHEAPER); mount +143 ms at the 300-row cap, ∝ rows, ~9 ms at Sherlock's 26. Three P1 sentences pinned. |
+| **rider 3 — zero test-mechanism churn** | **HELD, with ONE premise line ruled at AR-2** | `anOffScreenCollapsedNoteIsRevealedAtTheTop`'s premise said "unrealized" as "absent from the geometry oracle" — a lazy-column artifact. Its CLAIM is untouched and green. |
+| **rider 4 — the DERIVED-row one-time shift** | **RECORDED as the compensator's honest job, and MEASURED** | A far row whose derived height is off shifts once when it enters the near band and is learned thereafter. In the walk this is the single hop that appears in 5 of 24 landings; `exactAbove=N` in the story names exactly when it can happen. |
+| **the walk's two defects** | **BOTH FIXED, red-on-old, and one of them was MINE** | The card/expanded height confusion (`103.0` where `20 000` was due) and the already-there landing spinning 15 hops for 4.2 s (`gave up at top=unrealized`, reproduced byte for byte). |
+| **`offViewportPostsNeverInstantiate`** | **RED, TRACED, REPORTED — not touched** | THE TWO REDS, above. |
+| **row 58's read-click red** | **the recorded environment condition** | Byte-identical signature; this diff touches the Outline, not the Index. |
+| **a PROVISIONAL** | **ONE — QUESTIONS #115** | What the Outline KEEPS when the width changes. Built: the row that was at the top. |
+
+**KnownIssues row 64 is UNLOCKED — for the closeout to remove, with this evidence:** its own
+instruction was *"unwrap it and drop the interim bound then"*, and both are done; its successor
+instruction (*"rebuild the split, measure with `textView.window != nil` + `index.entries.count`"*)
+was answered by MEASUREMENT rather than by rebuilding — the guard is pinned and green, so the
+closed road's ambiguity no longer rides on this row. The scale-mix residual the row describes is
+gone because the estimate that produced it is gone.
+
 
 ## LIVE STATUS
 
