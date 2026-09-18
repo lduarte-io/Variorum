@@ -335,9 +335,9 @@ reopen the closed one-scale-per-lazy-run road — it ran that road's own success
 (rider 1) so the ambiguity is retired rather than inherited. It did **not** relax
 `SurfaceSizeMemory`'s per-width refusal (the estimate arm is what covers a refused width — that is
 the whole reason the refusal can stay). It did **not** adopt the FLOW or the Takes/Index
-compensators (UNIT 2's and their next touch's). It did **not** edit any test's CLAIM: one PREMISE
-line was restated under architect ruling AR-2 and is named below. And it leaves **one red it caused**
-undecided — `offViewportPostsNeverInstantiate`, traced and reported under rider 3, not touched.
+compensators (UNIT 2's and their next touch's). It did **not** edit any test's CLAIM. It made exactly
+TWO test edits, each ruled before it was made and each named below: AR-2's PREMISE restatement, and
+AR-3's FIXTURE lengthening for the one red this unit caused.
 
 ## DISPOSITIONS
 
@@ -351,7 +351,7 @@ undecided — `offViewportPostsNeverInstantiate`, traced and reported under ride
 | **rider 3 — zero test-mechanism churn** | **HELD, with ONE premise line ruled at AR-2** | `anOffScreenCollapsedNoteIsRevealedAtTheTop`'s premise said "unrealized" as "absent from the geometry oracle" — a lazy-column artifact. Its CLAIM is untouched and green. |
 | **rider 4 — the DERIVED-row one-time shift** | **RECORDED as the compensator's honest job, and MEASURED** | A far row whose derived height is off shifts once when it enters the near band and is learned thereafter. In the walk this is the single hop that appears in 5 of 24 landings; `exactAbove=N` in the story names exactly when it can happen. |
 | **the walk's two defects** | **BOTH FIXED, red-on-old, and one of them was MINE** | The card/expanded height confusion (`103.0` where `20 000` was due) and the already-there landing spinning 15 hops for 4.2 s (`gave up at top=unrealized`, reproduced byte for byte). |
-| **`offViewportPostsNeverInstantiate`** | **RED, TRACED, REPORTED — not touched** | THE TWO REDS, above. |
+| **`offViewportPostsNeverInstantiate`** | **TRACED, REPORTED, and RESOLVED at AR-3 by fixing the FIXTURE** | Green 2/2 isolated and red only under load — the load-flaky class a budget resting on a lie produces. The fixture now has the real book's shape (~1,000 pt a note); 4 surfaces of 60, 3/3 isolated, against a derived `< 12`. |
 | **row 58's read-click red** | **the recorded environment condition** | Byte-identical signature; this diff touches the Outline, not the Index. |
 | **a PROVISIONAL** | **ONE — QUESTIONS #115** | What the Outline KEEPS when the width changes. Built: the row that was at the top. |
 
@@ -377,7 +377,7 @@ gone because the estimate that produced it is gone.
 | rider 1 — the closed-road mount guard (row 64's own instruction) | **DONE** — `window=Y entries=215 height=16134.0`, pinned |
 | the dev-store WALK (her gesture both directions, two widths, one cold) | **DONE** — 24 landings on the real Sherlock book, **every one settled at `top=0.0`**, never more than ONE hop; the walk found TWO defects, both fixed with red-on-old; 9 captures |
 | the manifest's cost ∝ entries, measured (rider 2) | **DONE, A/B'd against the pre-fix tree** — the table below; steady-state layout ends up CHEAPER than the lazy column, mount costs +143 ms at the 300-note cap, a collapsed book runs ZERO lengths queries (pinned) |
-| tests: the touched suites · core (if core changed) · the FULL Mac suite | **RUN** — core NOT OWED (zero `Sources/` lines); FULL Mac **2767 / 462, ZERO known issues** (−1, the unwrap) with **2 reds**: row 58's recorded environment condition, and ONE of mine reported to the architect under rider 3 (below) |
+| tests: the touched suites · core (if core changed) · the FULL Mac suite | **DONE** — core NOT OWED (zero `Sources/` lines); FULL Mac **2767 / 462, ZERO known issues** (−1, the unwrap); of its 2 reds one is row 58's environment condition and the other was MINE, resolved at AR-3 by fixing the fixture (4 surfaces, 3/3 isolated) |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
 
@@ -600,7 +600,7 @@ stands: no scroll mechanism, anchor road, or reveal path changed in any test. Ri
 | gate | result | baseline |
 |---|---|---|
 | core `swift test` | **NOT OWED — zero `Sources/` lines in the diff** | 1567 / 171 |
-| the FULL Mac suite | **2767 tests / 462 suites**, 733.8 s, **ZERO known issues**, 2 reds (below) | 2744 / 459 GREEN with 1 known issue |
+| the FULL Mac suite | **2767 tests / 462 suites**, 733.8 s, **ZERO known issues** — by composition **1 environment red** (row 58) once AR-3's fixture recalibration is counted, re-verified 3× isolated | 2744 / 459 GREEN with 1 known issue |
 | iOS build | **not owed** — no `Shared/` file moved, nothing mobile-visible | green |
 | lockstep marker | untouched — **8** | 8 |
 
@@ -615,18 +615,45 @@ measured it 3/3 red isolated on zero-code trees, and this unit's diff touches th
 Index. Treated as that condition, as the brief instructs.
 
 **RED 2 — `BookViewTests.offViewportPostsNeverInstantiate`** (`instantiated → 33`, budget `< 30`):
-**mine, traced, and reported to the architect rather than touched** (rider 3). The pin mounts a
-60-post book ALL EXPANDED in a 700×800 window and counts live READ SURFACES — it is about the
-EXPANDED rows' virtualization at its 2,500-pt band, which this unit did not touch. What changed is
-the column's HONESTY: a far expanded row's placeholder was `remembered ?? 800` and is now
-`remembered-at-this-width → the lengths estimate → remembered-at-any-width → 800`, and the fixture's
-notes are a few sentences each, so the estimate says ~50 pt where the old fallback said 800. With
-the lie gone the column is 16× shorter through those rows, so the same ±2,500-pt band genuinely
-spans more of them. The pin's INTENT holds (33 of 60 — the extent is not instantiated); its NUMBER
-was calibrated against a column that lied. The architect's call; the options put to it were
-re-budgeting the pin with the mechanism at the line, shrinking the shipped band (re-tuning a real
-surface to satisfy a fixture — the class the plan's WHAT-NOT-TO-DO names), or making the band
-viewport-relative (right, and beyond this unit).
+**mine, traced, reported under rider 3, and RESOLVED BY FIXING THE FIXTURE** (architect ruling
+AR-3). The pin mounts a 60-post book ALL EXPANDED in a 700×800 window and counts live READ SURFACES
+— it is about the EXPANDED rows' virtualization at its 2,500-pt band, which this unit did not
+touch. What changed is the column's HONESTY: a far expanded row's placeholder was `remembered ?? 800`
+and is now `remembered-at-this-width → the lengths estimate → remembered-at-any-width → 800`, and the
+fixture's notes were a few sentences each, so the estimate says ~50 pt where the old fallback said
+800. With the lie gone the column is ~4× shorter through those rows and the same band genuinely
+spans more of them.
+
+**One more fact, measured before the fix and worth the record:** the pin was **green 2/2 isolated**
+and red only under full-suite load — the load-flaky geometry class (rows 19/20/58), which is exactly
+what a budget resting on a lie produces.
+
+**AR-3's ruling, and why it is better than re-budgeting:** under an honest column any re-budgeted
+number in this fixture is a weak assertion, because 200-pt notes make the ±2,500-pt band span
+twenty-odd rows however the number is set. So the FIXTURE gets the real book's shape — twenty blocks
+a note, ~1,000 pt of column each — and the band then covers a HANDFUL. **Measured after: 4 live read
+surfaces of 60 posts, 3/3 isolated, deterministic** (8 on a cold-cache first run), against a budget
+of `< 12` stated with its derivation at the line (≈6 rows can honestly be near — 2,500 above, 2,500
+below, an 800-pt viewport — plus a boundary row at each end). Tight enough that a virtualization
+failure cannot hide under it, and load cannot flip it. Option (b), shrinking the shipped band, was
+rejected outright — re-tuning a real surface to satisfy a fixture is the class the plan's
+WHAT-NOT-TO-DO names; option (c), a viewport-relative band, is recorded for UNIT 2's design notes
+and not built.
+
+**THE UNIT'S TWO TEST EDITS, both ruled, listed together** (the zero-test-mechanism-churn promise
+stands because neither touched a CLAIM): **AR-2** restated
+`anOffScreenCollapsedNoteIsRevealedAtTheTop`'s PREMISE (off-screen-ness said positively, against the
+harness window's own height, instead of as absence from the geometry oracle — a lazy-column
+artifact); **AR-3** lengthened `offViewportPostsNeverInstantiate`'s FIXTURE to the real book's shape
+and tightened its budget from a number the old lie had calibrated. Both tests' claims are unchanged
+and green.
+
+**The re-verification AR-3 asked for** (zero instances, nothing else running): `BookViewTests` 3×
+isolated — **7/7 green each, 4 surfaces each**; and the unit's four suites together —
+**29 tests / 4 suites GREEN**, twelve landings in them all reading `after 0 hops`, with rider 1's
+guard (`window=Y entries=215 height=16134.0`) and rider 2's numbers (layout pass 0.469 ms, manifest
+1.003 ms, `lengthsReads=0`) re-measured in the same run. The full suite is NOT re-run for a
+test-only recalibration — the ladder's round re-verifies it.
 
 **AR-3 (2026-09-18, overnight — the off-viewport pin, ruled on the implementer's stop-and-report).**
 *(Provenance: this block landed in commit `74c1dd4b` — the implementer's #115 commit swept the

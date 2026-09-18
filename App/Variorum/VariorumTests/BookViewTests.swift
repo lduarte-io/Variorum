@@ -149,8 +149,32 @@ struct BookViewTests {
         }
     }
 
+    /// **13u2b UNIT 1 — the fixture's notes are LONG now, and that is the
+    /// point of the pin rather than a detail of it** (architect ruling AR-3).
+    ///
+    /// The claim has always been "a 60-post reading must not instantiate its
+    /// whole extent", and the mechanism it guards is the row-53
+    /// virtualization: an expanded row far from the viewport renders a
+    /// placeholder, not a text surface. The BAND is expressed in POINTS of
+    /// column (`OutlinePostRow.nearMargin`, 2,500 above and below), so what
+    /// the pin measures depends entirely on how tall the fixture's notes are.
+    ///
+    /// With three-block notes they were ~200 pt each, so the band spanned
+    /// twenty-odd of them and the budget could only ever be loose — and it
+    /// was loose against a column that LIED: before this unit a far row stood
+    /// at a flat 800 pt whatever its note held, which stretched a 200-pt note
+    /// 4× and pushed rows out of the band for the wrong reason. Once the
+    /// placeholder became the note's own honest estimate the same band
+    /// covered more rows, and the pin read 33 against a budget of 30 — a
+    /// number calibrated on the lie.
+    ///
+    /// So the fixture is fixed rather than the number: twenty blocks a note
+    /// is ~1,000 pt of column each — the shape a real book has — and the
+    /// ±2,500-pt band then covers a HANDFUL. The budget below is stated with
+    /// its derivation, and it is tight enough that a virtualization failure
+    /// cannot hide under it.
     @Test func offViewportPostsNeverInstantiate() async throws {
-        try await withBookWorld(posts: 60) { session, db, readingID, postIDs in
+        try await withBookWorld(posts: 60, blocksPerPost: 20) { session, db, readingID, postIDs in
             // The model is injected and hand-driven: the test host never
             // fires SwiftUI's `.task` appearance callbacks (representable
             // lifecycles DO run — the read surfaces' observations start
@@ -183,8 +207,13 @@ struct BookViewTests {
             await settle(window, hosting, until: { false }, maxTurns: 8)
 
             let instantiated = countReadSurfaces(in: hosting)
+            print("VIRTUALIZATION (13u2b): \(instantiated) live read surfaces of 60 posts")
             #expect(instantiated > 0, "the visible posts rendered")
-            #expect(instantiated < 30,
+            // The derivation: each note is ~1,000 pt of column, the band is
+            // 2,500 pt above and below the viewport, and the viewport itself
+            // is 800 pt — so about six rows can honestly be near, and the
+            // budget is that with room for a boundary row at each end.
+            #expect(instantiated < 12,
                     "a 60-post reading must not instantiate its whole extent: \(instantiated) live read surfaces")
             // And the surfaces carry REAL content — the coordinator-started
             // observations delivered (the projection reached the surface).
