@@ -628,7 +628,10 @@ re-budgeting the pin with the mechanism at the line, shrinking the shipped band 
 surface to satisfy a fixture — the class the plan's WHAT-NOT-TO-DO names), or making the band
 viewport-relative (right, and beyond this unit).
 
-**AR-3 (2026-09-18, overnight — the off-viewport pin, ruled on the implementer's stop-and-report):**
+**AR-3 (2026-09-18, overnight — the off-viewport pin, ruled on the implementer's stop-and-report).**
+*(Provenance: this block landed in commit `74c1dd4b` — the implementer's #115 commit swept the
+architect's then-uncommitted edit off the shared tree; content verified intact against the
+architect's copy. Machinery note, both writers: pathspec-limited `git add` only, from here on.)*
 `BookViewTests.offViewportPostsNeverInstantiate` reads `instantiated → 33` against a `< 30` budget.
 The traced mechanism is accepted: the pin's fixture (60 expanded posts of a FEW SENTENCES each) was
 calibrated against the column's LIE — far expanded rows used to claim `remembered ?? 800` where the
