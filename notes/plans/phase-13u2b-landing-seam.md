@@ -320,10 +320,10 @@ finishes the phase from it.)*
 
 **LIVE STATUS:** UNIT 1 — **CLOSED, WALKED, ACCEPTED** (the record below; gate MET and UNWRAPPED,
 24/24 real-book landings at `top=0.0`, finals in; the orchestrator's walk passed). UNIT 2 —
-**BUILT AND RECORDED, pending the orchestrator's walk** (its record is the last section of this
-file; the authority hoisted and both surfaces adopting, PIN B fixed red-on-old, the signpost
-shipping and verified content-free, her gesture walked at `hops=0` five times running, finals in).
-UNIT 3 — NOT-STARTED. Ladder — not yet owed.
+**CLOSED, WALKED, ACCEPTED** (its record is in this file; the authority hoisted and both surfaces
+adopting, PIN B fixed red-on-old, the signpost shipping and verified content-free, her gesture
+walked at `hops=0` five times running). UNIT 3 — **OPEN 2026-09-18** (its record is the last
+section of this file). Ladder — not yet owed.
 
 ---
 
@@ -1047,3 +1047,76 @@ walk) · this commit (the finals).
    1.0 s, where its old floor was the quiet interval). Strictly more responsive, and stated because
    "byte-identical" was this unit's promise and this is the one place it is only "identical or
    better".
+
+---
+
+# UNIT 3 RECORD — the MODE-SWITCH viewport-fraction carry (opened 2026-09-18, `opus-implementer`)
+
+**WHAT THIS UNIT IS NOT DOING — the record's first line, written at the open.** It does **not**
+touch **Takes** (her own 17q ruling R-Q20/R-Q21 outranks this rule — QUESTIONS #114(b); its suites
+must ride UNMODIFIED and its round trip must be byte-identical, which this unit proves rather than
+assumes). It does **not** touch the **book's word-tabs** (Outline · Index · Book · Read — #114(a):
+chapter-shaped landings, not the note's mode row), nor **Lenses · Compare · Canvas · Blocks**
+(#114(b)'s recorded default: untouched). It does **not** change any SETTLE — UNIT 2's
+`LandingAuthority` is not touched at all; this is aim-time only, and it composes beside it. It does
+**not** persist anything: the carry is IN-MEMORY session state on the router beside
+`CurrentBlockMemory`'s dictionary, never a new `UserDefaults` key (KnownIssues row 44's per-note
+defaults hazard class). It does **not** change the meaning of a `LandingTarget` arriving from the
+book's click-through roads, the fan-panel door, or `PostDetailView.jump(to:)` — those name their own
+block and keep their standing landings; the fraction applies ONLY on a mode switch, decided at the
+mode-switch call site and never inferred from timing. Zero `Sources/VariorumCore/`, zero `Sync/`,
+zero `Persistence/`, zero schema, zero migrations, marker stays 8, no `Shared/` file moved.
+
+## THE RED-ON-OLD PIN SHAPE — STATED BEFORE A LINE OF PRODUCT CODE
+
+The behaviour this unit changes is *where a mode switch puts the carried block*, so the pin has to
+perform a REAL mode switch and measure a REAL screen position — and it must COMPILE AND RUN on the
+pre-fix tree, which rules out any pin that speaks through the new seam. The rig exists:
+`CurrentBlockContinuityTests` already mounts the real `PostDetailView` in a real window and drives
+`router.requestMode(…)` through the app's own road.
+
+**PIN A — READ → WRITE (the one the brief names).** A long note; the caret put in a block in the
+middle of it; `requestMode(.read)`, whose `edit` face lands the carried block at
+`anchor: .center` (`ReadEditPane.land` — the shipped policy, so the block sits at viewport
+fraction ≈ 0.5 BY CONSTRUCTION, no synthetic scrolling needed); then `requestMode(.write)` and
+measure, in Write's own exact AppKit geometry, where that block's first line sits:
+`f = (blockTop − visible.minY) / (visible.height − blockHeight)`.
+**Predicted pre-fix:** `f ≈ 0` — Write's cold mount restores its own session scroll anchor and then
+reveals the caret through `JumpPrimitive.jump`, which lands the line at the viewport TOP (the
+trace's §6 finding: "same block, four reveal policies"). **Claim after:** `|f − 0.5| ≤ 0.08`, i.e.
+the block holds the screen height it had in Read to within a line.
+
+**PIN B — WRITE → READ (the other direction, so the carry is proven both ways).** The same note;
+Write scrolled by `JumpPrimitive` so the carried block sits at a known off-centre height; then
+`requestMode(.read)` and measure the block's frame against the pane's viewport through the DEBUG
+Read oracle. **Predicted pre-fix:** the block lands CENTRED whatever height it had (`.center` is
+the shipped anchor), so a block left near the top comes back at 0.5. **Claim after:** the pane's
+fraction matches the one Write reported, within ≈ a line of the viewport.
+
+**PIN C — the PURE brain, both directions and every clamp** (capture → fraction → apply →
+the original place, and the degenerate cases named at the code). Not red-on-old and not claimed as
+such: it is new pure arithmetic.
+
+**PIN D — TAKES IS BYTE-IDENTICAL.** Its suites run UNMODIFIED, and a Takes round trip is walked.
+
+Both A and B are measured on the pre-fix tree FIRST, each lands in the same commit as its fix with
+its measured red quoted at the test, and **a pin green on both sides is recorded as hollow and not
+fixed** — the hallucination guard's own rule.
+
+## LIVE STATUS
+
+| piece | state |
+|---|---|
+| the record opened + the red-on-old pin shapes stated | **DONE** — this section, before any product code |
+| PIN A / PIN B measured on the pre-fix tree | NOT-STARTED |
+| the PURE brain + its pins (PIN C) | NOT-STARTED |
+| the CAPTURE seam (the router's carry + the mode-switch funnel) | NOT-STARTED |
+| WRITE captures and consumes | NOT-STARTED |
+| READ (both faces) captures and consumes | NOT-STARTED |
+| PIN D — Takes byte-identical (suites unmodified + a walk capture) | NOT-STARTED |
+| the dev-store WALK — her round trips, both faces | NOT-STARTED |
+| tests: the touched suites · the FULL Mac suite | NOT-STARTED |
+| **UNIT 3 — CLOSED, pending the orchestrator's walk** | NOT-STARTED |
+
+*(Every line starts NOT-STARTED and is flipped in the same commit as the piece it names; an
+unverified claim reads PENDING.)*
