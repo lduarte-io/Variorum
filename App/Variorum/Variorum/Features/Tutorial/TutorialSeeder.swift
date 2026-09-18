@@ -405,7 +405,7 @@ enum TutorialSeeder {
             + "from anywhere in the note.",
 
             "Two more, for keeping and catching. Right-click any note or book \u{25B8} "
-            + "\u{201C}\(StarCopy.verb)\u{201D} pins it to the sidebar's top \u{2014} up to five, "
+            + "\u{201C}\(StarCopy.verb)\u{201D} pins it to the sidebar's top \u{2014} up to fifteen, "
             + "meant for what you are in right now rather than as a filing system. And "
             // 13g cold review R1-2: batch 7 (R6-4) moved the quick note's
             // landing — tagged, into the smart Quicknotes book — and this

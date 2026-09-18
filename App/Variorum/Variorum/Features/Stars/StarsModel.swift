@@ -4,10 +4,12 @@
 //
 //  Phase 13f, W4 — STARS (her sitting ruling, round 3: *"stars = a synced
 //  `setting` list + a Starred sidebar section … up to 5 notes or books,
-//  star/unstar via context menu + ⌘K, section at the sidebar's top"*).
+//  star/unstar via context menu + ⌘K, section at the sidebar's top"*; the
+//  cap is 15 since her 2026-09-18 #112(b) ruling — `Operations.starLimit`
+//  is the number's one home).
 //
 //  A star is STORE state, not window state — it is synced, it outlives the
-//  session, and both windows show the same five. So unlike the Open strip
+//  session, and both windows show the same list. So unlike the Open strip
 //  (which hangs off the window's `WorkspaceModel`) this model observes the
 //  core's one `setting` row and writes through the runner. Every DECISION
 //  is the core's (`Operations.setStarred`'s order, cap and self-heal); this

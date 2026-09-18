@@ -13,14 +13,10 @@
 //  exist — Starred rendered every row and pushed the column into its compact
 //  pitch. This is that precedent made real, in both directions.)
 //
-//  **THE FINDING THIS ITEM HANDS UP, and it is the headline rather than a
-//  footnote:** `Operations.starLimit` is FIVE (her own 13f round-3 ruling,
-//  "up to 5 notes or books"), so in the shipped app the sixth star REFUSES
-//  and this window can never engage. The bound below is correct and ready;
-//  whether the cap rises so her sentence can be true is HERS — it overturns a
-//  recorded ruling and rewrites product copy in three places on two platforms
-//  (the Mac tutorial, the Mac helper, the phone's tutorial). QUESTIONS
-//  #112(b).
+//  The finding this item handed up (QUESTIONS #112(b)) is RULED: the cap
+//  rose 5 → 15 at her 2026-09-18 word ("scroll should be allowed, maybe 15
+//  items max"), so past seven stars this window really engages in the
+//  shipped app. The copy sites were re-worded in the same change.
 //
 
 import AppKit
@@ -110,11 +106,11 @@ struct StarredScrollMountTests {
     /// window (+ the half row that says there is more), never twelve rows.
     ///
     /// **Why the fixture writes the `setting` row directly** and not through
-    /// `Operations.setStarred`: that door refuses past `starLimit` (5), and
-    /// this pin is about the SECTION'S GEOMETRY when the list outgrows the
-    /// window — not about the cap. Writing the stored value is the only way
-    /// to ask the question at all today, and it is exactly the value the door
-    /// would write (`StarTarget.key`s, JSON, in star order).
+    /// `Operations.setStarred`: this pin is about the SECTION'S GEOMETRY when
+    /// the list outgrows the window — not about the cap — so the fixture must
+    /// stay independent of `starLimit`'s number (5 when this pin was born,
+    /// 15 since her 2026-09-18 #112(b) ruling). It writes exactly the value
+    /// the door would write (`StarTarget.key`s, JSON, in star order).
     @Test func twelveStarredRowsScrollInsideTheWindowInsteadOfGrowingTheColumn() async throws {
         let db = try AppDatabase.inMemory()
         try await withDependencies {

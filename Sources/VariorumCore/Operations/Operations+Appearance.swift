@@ -206,10 +206,13 @@ extension Operations {
 
     // MARK: - Stars (13f W4)
 
-    /// How many things may be starred at once — her ruling's number.
+    /// How many things may be starred at once — her ruling's number
+    /// (raised 5 → 15 at her 2026-09-18 ruling on QUESTIONS #112(b),
+    /// "scroll should be allowed, maybe 15 items max" — superseding 13f
+    /// W4's "up to 5"; the Starred section scrolls past its window of 7).
     /// Public so a face can name it without re-stating it (and so the
     /// refusal below carries it rather than hard-coding a word).
-    public static let starLimit = 5
+    public static let starLimit = 15
 
     /// Star or un-star a note or a book (13f W4 — her round-3 ruling).
     /// Stars are a synced `setting` list in STAR ORDER, exactly the

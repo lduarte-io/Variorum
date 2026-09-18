@@ -2904,7 +2904,7 @@ plus `theReadClickLandsInIndexAtThatBlock` (its own row, owner 12).
 | round | findings | outcome |
 |---|---|---|
 | **R1** (fable-reviewer, cold, over the combined diff) | **0 BLOCKER · 0 MAJOR · 1 MINOR (no-action observation) · 2 NIT** | both NITs CONFIRMED — one fixed at adjudication (a doc word), one recorded deliberately unchanged with the taste half bundled for her; the MINOR adopted into #112(b)'s text |
-| **R2** | — | **ruled NOT OWED** (zero behaviour fixes to re-review; the reasoning in the ladder section; hers to overrule) |
+| **R2** | — | **ruled NOT OWED** (zero behaviour fixes to re-review; the reasoning in the ladder section; hers to overrule) — **AUTHOR ACCEPTED 2026-09-18** (*"if there was only a change to a comment, i don't think a new review is needed"*), the ruling stands ratified |
 
 **Nothing was dismissed as hollow anywhere in the phase.** Every bug-class fix landed red-on-old
 (six units' worth: the card pin at its own commit; the space-eater on BOTH platforms' pre-fix

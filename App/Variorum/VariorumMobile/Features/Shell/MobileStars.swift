@@ -6,8 +6,10 @@
 //  "CROSS — act + starred face, exact shape at the batch"). The storage
 //  mechanism is the Mac's own, found in code and reused THROUGH CORE
 //  (13f W4, her ruling: "stars = a synced `setting` list … up to 5
-//  notes or books"): `Operations.setStarred` owns the append-order
-//  list, the honest cap, and the self-heal; `Queries.starred` is the
+//  notes or books"; the cap is 15 since her 2026-09-18 #112(b) ruling —
+//  `Operations.starLimit` is the number's one home): `Operations.
+//  setStarred` owns the append-order list, the honest cap, and the
+//  self-heal; `Queries.starred` is the
 //  ONE read rule (live targets only). Nothing star-shaped is decided
 //  here — this model observes, toggles, and speaks the op's refusal in
 //  phone words.

@@ -189,7 +189,7 @@ struct HelperView: View {
             ("File ▸ New Window", "a second full window; right-click a note row ▸ "
                 + "Open in New Window for a note on its own"),
             ("right-click ▸ \(StarCopy.verb)", "star a note or book — the Starred "
-                + "section sits at the sidebar's top (up to five); \u{2318}K has the "
+                + "section sits at the sidebar's top (up to fifteen); \u{2318}K has the "
                 + "same row"),
         ]),
         // 13g batch 7 (R6-1/R6-2): the two things that MOVED. Her round-1
@@ -386,8 +386,8 @@ struct HelperView: View {
         ("star",
          "A shortcut to a note or a book, pinned at the sidebar's top under "
          + "\u{201C}\(StarCopy.sectionHeader)\u{201D}. Right-click anything ▸ "
-         + "\(StarCopy.verb), or the same row in ⌘K. Up to five: stars are meant to be "
-         + "the few things you're in right now, not a filing system."),
+         + "\(StarCopy.verb), or the same row in ⌘K. Up to fifteen: stars are meant to "
+         + "be the things you're in right now, not a filing system."),
         // 13g batch 3 (L8/L9): the formatting vocabulary. Storage is
         // markdown-as-content (F-1), so the words she needs are the ones the
         // TEXT uses — not a set of hidden styles.

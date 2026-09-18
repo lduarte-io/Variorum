@@ -267,7 +267,7 @@ enum MobileTutorialSeeder {
             + "bookless note and drops you straight into writing; + new book, "
             + "at the list's end, starts a fresh book — hand-picked, a dated "
             + "journal, or a smart book collecting by tags. A long press "
-            + "also STARS a note or a book (up to five) — starred things "
+            + "also STARS a note or a book (up to fifteen) — starred things "
             + "sit above everything at the shelf's very top, and the same "
             + "press takes the star back off.",
 

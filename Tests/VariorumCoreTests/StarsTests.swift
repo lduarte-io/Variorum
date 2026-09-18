@@ -97,10 +97,16 @@ struct StarsTests {
             }
             try ops.deleteContainer(ids[2])
 
-            let sixth = try ops.createPost(title: "sixth", profile: .generic)
-            try ops.setStarred(.post(sixth.id), starred: true)
+            let next = try ops.createPost(title: "one past the cap", profile: .generic)
+            try ops.setStarred(.post(next.id), starred: true)
+            // Symbolic over the cap (it was 5 at this pin's birth, 15 since
+            // her 2026-09-18 #112(b) ruling): the live survivors in star
+            // order, then the newcomer in the freed slot.
+            var expected = ids
+            expected.remove(at: 2)
+            expected.append(next.id)
             #expect(try db.read { try Queries.starred($0) }.map(\.target.id)
-                    == [ids[0], ids[1], ids[3], ids[4], sixth.id],
+                    == expected,
                     "the dead star freed its slot — the cap counts the live list")
         }
     }
