@@ -134,6 +134,12 @@ private func writingEditor(in view: NSView) -> EditorTextView? {
     return found.max(by: { $0.string.count < $1.string.count })
 }
 
+/// The harness window the book is mounted in — named rather than repeated so
+/// a premise about being BELOW THE FOLD is measured against the fold itself
+/// (13u2b UNIT 1).
+private let landingWindowWidth: CGFloat = 1200
+private let landingWindowHeight: CGFloat = 760
+
 /// The livelock guard: a foreign thread that ends the run when the main
 /// thread stops yielding. `beat()` is called from every settle turn.
 private final class MainThreadWatchdog: @unchecked Sendable {
@@ -288,13 +294,15 @@ struct BookOutlineLandingTests {
         model: BookViewModel, structure: BookStructureModel
     ) -> (NSWindow, NSHostingView<BookView>) {
         let window = NSWindow(
-            contentRect: NSRect(x: 60, y: 60, width: 1200, height: 760),
+            contentRect: NSRect(
+                x: 60, y: 60, width: landingWindowWidth, height: landingWindowHeight),
             styleMask: [.titled], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         let hosting = NSHostingView(
             rootView: BookView(
                 session: session, readingID: readingID, model: model, structure: structure))
-        hosting.frame = NSRect(x: 0, y: 0, width: 1200, height: 760)
+        hosting.frame = NSRect(
+            x: 0, y: 0, width: landingWindowWidth, height: landingWindowHeight)
         window.contentView = hosting
         window.makeKeyAndOrderFront(nil)
         return (window, hosting)
@@ -392,10 +400,25 @@ struct BookOutlineLandingTests {
             await settle(window, hosting, watchdog: watchdog, until: {
                 anchorTop(BookOutlineRows.Row.noteAnchor(postIDs[0])) != nil
             })
-            // The premise: the first card is on screen; the 26th is not
-            // realized at all (a 40-card book realizes a viewport + slack).
+            // The premise: the first card is on screen and the 26th is far
+            // BELOW THE FOLD, so the reveal really does have to travel.
+            //
+            // **13u2b UNIT 1 — this line was restated, and it is this unit's
+            // only test edit** (architect ruling AR-2). It used to read
+            // `anchorTop(last) == nil` — "the target card starts unrealized" —
+            // which expressed off-screen-ness as ABSENCE FROM THE GEOMETRY
+            // ORACLE. That was an artifact of the lazy column: a `LazyVStack`
+            // never built a far row, so the row reported nothing. Every row
+            // exists now (a placeholder at a known height — that is the fix),
+            // so the premise is stated positively instead, which is what it
+            // always meant and is strictly stronger: the old form also passed
+            // when a row was missing for some unrelated reason, while this one
+            // says the target really is below the fold (measured: 2,922 pt).
+            // The test's CLAIM — the revealed card lands at the top — is
+            // untouched below and green.
             let last = BookOutlineRows.Row.noteAnchor(postIDs[25])
-            #expect(anchorTop(last) == nil, "the target card starts unrealized, off-screen")
+            #expect((anchorTop(last) ?? 0) > landingWindowHeight,
+                    "the target card starts far below the fold, off-screen")
 
             model.requestReveal(postIDs[25])
             await settle(window, hosting, watchdog: watchdog, until: {
@@ -621,6 +644,73 @@ extension BookOutlineLandingTests {
             print("LANDING TRACE (parked reveal):", BookOutlineGeometry.trace, scrollFacts(hosting))
             #expect(abs(top) <= 4, "the ascent's note sits at the top of the page, not \(top) pt away")
             #expect(model.pendingReveal == nil, "the landing was consumed — after the entries arrived")
+        }
+    }
+}
+
+// MARK: - 13u2b UNIT 1 — THE CLOSED ROAD'S GUARD (architect ruling AR-1, rider 1)
+
+extension BookOutlineLandingTests {
+    /// **The measurement `KnownIssuesAndTechDebt` row 64 asks a successor to
+    /// make, made — because this unit builds BESIDE the road that row closed,
+    /// and building beside a closed road means retiring its ambiguity rather
+    /// than inheriting it.**
+    ///
+    /// The history in one paragraph: 13u2 UNIT A tried to stabilise the
+    /// Outline by splitting the lazy runs BY SCALE, and closed that road on
+    /// the evidence *"`editorHeight == 24` after 200 settle turns"* — a live
+    /// editor that mounted empty and stayed empty. UNIT A2 then traced that
+    /// symptom to a HARNESS artifact (the representable realizes twice under a
+    /// pumped run loop, and "the first `EditorTextView` in the tree" returned
+    /// the shadow), so the evidence was downgraded and row 64 wrote the
+    /// successor's exact instruction: **measure with `textView.window != nil`
+    /// and `index.entries.count`, never "the first editor"**.
+    ///
+    /// This unit did NOT rebuild that split — it leaves the expanded notes and
+    /// the ONE live editor exactly where they were, as direct children of the
+    /// column, and changes only the runs of headings and cards. So this pin is
+    /// the guard on that claim, in row 64's own terms: with a 215-block story
+    /// expanded and focused in the Outline, the editor she is writing in is ON
+    /// SCREEN, it holds the note's blocks, and it is really laid out.
+    @Test func theLiveEditorStillReachesTheScreenWithEveryBlockUnderTheNewRuns() async throws {
+        try await withLandingBook(posts: 18, longAt: [4], chapters: true) { session, db, readingID, postIDs, _ in
+            let longPostID = postIDs[4]
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 4)
+
+            model.focus(longPostID)
+            await settle(window, hosting, watchdog: watchdog, until: {
+                (writingEditor(in: hosting)?.frame.height ?? 0) > 3000
+            }, maxTurns: 120)
+
+            let editor = try #require(writingEditor(in: hosting), "the story's editor mounted")
+            // Row 64's first term: the view REACHES A WINDOW. (It is also what
+            // `EditorRouter.active` has meant since 13u2 UNIT B — the view that
+            // reaches the screen claims it — so the two say the same thing here
+            // and the pin says both out loud.)
+            #expect(editor.window != nil, "the live editor is on screen, not an orphan off it")
+            #expect(session.editorRouter.active != nil, "the router names an editor")
+            // Row 64's second term: it holds the note's BLOCKS.
+            let entries = session.editorRouter.active?.index.entries.count ?? 0
+            #expect(entries == 215,
+                    "the on-screen editor holds the story's 215 blocks, not \(entries)")
+            // And it is laid out — the symptom the closed road was closed on.
+            #expect(editor.frame.height > 3000,
+                    "the editor is really laid out, not standing at a placeholder: \(editor.frame.height) pt")
+            print("MOUNT GUARD (13u2b rider 1): window=\(editor.window != nil ? "Y" : "N") "
+                + "entries=\(entries) height=\(editor.frame.height)")
         }
     }
 }
