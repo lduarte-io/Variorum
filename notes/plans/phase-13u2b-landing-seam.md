@@ -806,7 +806,7 @@ fixed** — the hallucination guard's own rule, and it binds here exactly as it 
 | piece | state |
 |---|---|
 | the record opened + the red-on-old pin shapes stated | **DONE** — this section, before any product code |
-| PIN A / PIN B measured on the pre-fix tree | NOT-STARTED |
+| PIN A / PIN B measured on the pre-fix tree | **DONE** — PIN B **RED** (`gave up at top=unreported after 0 re-lands, 4211 ms`, 2/2 runs); PIN A **GREEN on both sides — HOLLOW as a red-on-old pin**, and its trace measured something else that is real (below) |
 | the PURE hoists (`ProseHeightModel`; the learned-heights box if the measurement wants it) | NOT-STARTED |
 | THE AUTHORITY — hoisted from `BookView`, parameterized, the story built in | NOT-STARTED |
 | the Outline consumes it BYTE-IDENTICALLY (its suites green, ZERO test edits) | NOT-STARTED |
@@ -818,3 +818,51 @@ fixed** — the hallucination guard's own rule, and it binds here exactly as it 
 
 *(Every line starts NOT-STARTED and is flipped in the same commit as the piece it names; an
 unverified claim reads PENDING.)*
+
+## THE PRE-FIX MEASUREMENT — what the two stated pins actually found (2026-09-18, zero instances verified)
+
+Both pins were run against the tree as UNIT 1 left it (`262a3d6b`), isolated
+(`-only-testing:VariorumTests/ReadingFlowLandingTests`), the other seven pins of that suite green in
+the same runs.
+
+**PIN B — RED, exactly as predicted, twice:**
+
+```
+flow-…792 LAND | 00000000 DONE: gave up at top=unreported after 0 re-lands, 4211 ms
+```
+
+One LAND, no report, no correction, and the whole 4-s watchdog spent. (The first run of this pin
+read the oracle under the wrong key — a STORY row's report is keyed by its POST id while a chapter
+heading's is keyed by the row id — so it recorded four issues instead of two; the key was corrected
+and the measurement re-run. The DONE line was byte-identical in both runs: the defect is not the
+key's.) This is UNIT 1's own walk-found defect, on the surface UNIT 1 did not touch, reached by the
+same mechanism: `FlowLanding.begin` sets `lastTop = nil`, nothing seeds it, and
+`onGeometryChange` reports a CHANGE — so a scroll that moves nothing says nothing.
+
+**PIN A — GREEN on the pre-fix tree. Its CLAIM is therefore hollow and is recorded as such; it stays
+as a REGRESSION GUARD** (the chaptered flow — the shape the book really hands this surface — had no
+landing pin at all before it, which is worth having whatever this unit changes). **But its TRACE is
+the unit's real measurement**, and it says the flow's remaining residual is not the one the pin was
+aimed at:
+
+```
+top=0 offset=194141 | content=260196 | top=-4 | content=261865 | top=1665 | top=1675
+| RE-LAND 1 (top was 1675) | top=0 offset=195805 | DONE: settled at top=0.0 after 1 re-lands, 1140 ms
+```
+
+A story ABOVE the landed target enters the near band, renders its real text, and turns out
+**~1,670 pt taller than the estimate it was standing at** (`content=` 258,530 → 265,201 across the
+run, in ~1,670-pt steps, one per story realized). The target is pushed down by exactly that, the
+landing spends ONE correction, and the page comes back. Measured on both directions of her gesture
+(far below, far above): `settled at top=0.0 after 1 re-lands`, 1,140 ms and 1,153 ms.
+
+**Read it honestly, because it decides what this unit builds:** the flow's heavy rows have stood at
+honest heights since batch H (row 95) — *the plan's "the 306k-pt column is the largest absolute win"
+was banked there, before this phase* — so what is left on this surface is (1) the SMALL rows, which
+are still a lazy run's average (measured: the first aim of a chapter landing arrives 24 pt off and
+settles itself), (2) the DERIVED-story residual above — **AR-1's rider 4 at the flow's scale**: a
+row whose derived height is off shifts once when it enters the near band, and is learned thereafter
+(`SurfaceSizeMemory`) — and (3) PIN B's spin. (1) and (3) are this unit's; (2) is structural, is the
+compensator's honest job by AR-1's own ruling, and is exactly what the SIGNPOST is for: a landing
+that reports `derived=N exactAbove=N` says in her own store that a shift is expected and how many
+rows can still cause one.
