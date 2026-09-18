@@ -116,7 +116,7 @@ no longer the orchestrator's reading of a condition; her direct ruling.
 | # | item | status → owner |
 |---|---|---|
 | 1 | UNIT 1 — the height manifest + the Outline lands once (gate: row 64's arm ≤4, UNWRAPPED) | **DONE 2026-09-18 — gate MET (0 hops, arm unwrapped), record closed at `f66d1dc5`, THE ORCHESTRATOR'S WALK PASSED (below)** |
-| 2 | UNIT 2 — one landing authority + the flow + the Release signpost | NOT-STARTED (follows U1) |
+| 2 | UNIT 2 — one landing authority + the flow + the Release signpost | **DONE 2026-09-18 — record closed at `77f0f09c`, THE ORCHESTRATOR'S WALK PASSED (below)** |
 | 3 | UNIT 3 — the mode-switch viewport-fraction carry (#114's defaults) | NOT-STARTED (follows U2) |
 | 4 | QUESTIONS #114 (a)/(b) — U3's scope edges | LOGGED — hers |
 | 5 | The ladder — `fable-reviewer` over the combined diff, standing rounds | not yet owed |
@@ -588,6 +588,25 @@ Also exercised on the way: the first-of-session cold landing (`derived=12 exactA
 note, no action owed: the navigator's generous row spacing swallowed two of my early clicks into
 the gap between rows — operator error, not product (the rows hit fine when actually hit).
 **VERDICT: UNIT 1 ACCEPTED — ledger row 1 DONE.**
+
+## THE ORCHESTRATOR'S WALK — UNIT 2 (2026-09-18, overnight)
+
+Same rig (the rebuilt `13u2b` Debug binary of 06:30, stderr + `/usr/bin/log` as instruments, zero
+instances before and after). **Her gesture in Read ▸ Scroll on the 289,594-pt column:** down to the
+LAST chapter — `target=25 offset=263007 · top=0.0, 0 hops, 1009 ms` — then **far UP to Twisted Lip**
+(a ~147,000-pt upward jump): `target=13 offset=116257 · top=0.0, 0 hops, 1003 ms`. The repeat click
+(already-there — PIN B's fix): `top=0.0, 0 hops`. A mid-list chapter (five pips): 1 hop
+(`derived`), the AR-1 rider-4 residual exactly as priced. **The SIGNPOST verified from MY OWN run**
+via `/usr/bin/log`: `landing surface=ReadingFlow rows=28 target=25 offset=263007 total=289594
+derived=6 exact=0 hops=0 content=0 ms=1010 end=settled top=0` — every value an integer, no prose.
+Capture: `13u2b-screens/u2-07-orch-walk.png`. **Two walk notes, neither a product defect:** my
+coordinate estimates twice fell in the navigator's 20-pt inter-row gaps (AX enumeration showed the
+real 30-pt buttons on a 50-pt pitch — operator error, resolved by reading the frames); and macOS
+`System Events` `click at` does not reach these SwiftUI rows at all (it lands on the scroll area —
+cliclick's CG events do reach them; recorded for future walks in WalkKit's spirit). **The two
+recorded residuals are ACCEPTED as recorded** (the flow's eager small rows — reasoned bound with
+the placeholder as the named ready answer, the ladder may weigh it; the ≤0.25-s-sooner look —
+identical-or-better). **VERDICT: UNIT 2 ACCEPTED — ledger row 2 DONE.**
 
 ## ADJUDICATIONS (the architect's rulings)
 
