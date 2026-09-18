@@ -1110,9 +1110,9 @@ fixed** — the hallucination guard's own rule.
 | the record opened + the red-on-old pin shapes stated | **DONE** — this section, before any product code |
 | PIN A / PIN B measured on the pre-fix tree | **PIN A DONE — RED 2/2, byte-identical** (`fraction 0.0`, below); PIN B's instrument arrives with the capture |
 | the PURE brain + its pins (PIN C) | **DONE** — `Surface/ViewportCarry.swift`; **11 pins green** (`ViewportCarryTests`), both applies and the round trip |
-| the CAPTURE seam (the router's carry + the mode-switch funnel) | NOT-STARTED |
-| WRITE captures and consumes | NOT-STARTED |
-| READ (both faces) captures and consumes | NOT-STARTED |
+| the CAPTURE seam (the router's carry + the mode-switch funnel) | **DONE** — `CommandRouter`'s probe registry + one-shot slot; `PostDetailView.switchMode(to:)` and the `applyMode` closure are the two doors, with the roads that deliberately do NOT come through them named at the code |
+| WRITE captures and consumes | **DONE** — the probe answers from live AppKit geometry; the apply is `JumpPrimitive`'s new `landingInset` (default 0, every existing caller byte-unchanged) parked for the N14 settle hop. **PIN A: `fraction 0.0` → `fraction 0.5`, red-on-old** |
+| READ (both faces) captures and consumes | **DONE** — the carried row and the face report into an unobserved box; the arrival's landing passes the carried anchor to the `scrollTo` it already ran |
 | PIN D — Takes byte-identical (suites unmodified + a walk capture) | NOT-STARTED |
 | the dev-store WALK — her round trips, both faces | NOT-STARTED |
 | tests: the touched suites · the FULL Mac suite | NOT-STARTED |

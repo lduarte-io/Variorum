@@ -101,10 +101,16 @@ struct ReadModeView: View {
     /// One-shot scroll requests, one per consumer: the column and the
     /// mounted face each consume their own (two consumers of one nil-after-
     /// scroll request race each other — the wave-2c walk caught it).
-    @State private var paneTarget: String?
-    @State private var pageTarget: String?
+    @State private var paneTarget: ReadLanding?
+    @State private var pageTarget: ReadLanding?
     @State private var columnTarget: String?
     @State private var seeded = false
+    /// 13u2b UNIT 3: what this surface knows about where the carried block
+    /// sits — written at geometry cadence by the carried row and the face,
+    /// read once at a mode switch. Unobserved on purpose (see the class).
+    @State private var carryGeometry = ReadCarryGeometry()
+    /// The registration behind that probe.
+    @State private var placeProbeToken: UUID?
     /// A `read` click's landing, consumed by the `edit` face as it arrives.
     @State private var pendingLanding: LandingTarget?
     /// The registry's `readEditAttached` token while `edit` is on screen.
@@ -155,6 +161,11 @@ struct ReadModeView: View {
                 minimum: NoteIndexColumn.minimumWidth
             ) {
                 faceView
+                    // 13u2b UNIT 3: the face IS the viewport the carried row's
+                    // fraction is measured against — one rectangle, same space.
+                    .onGeometryChange(for: CGRect.self) {
+                        $0.frame(in: .named(Self.probeSpace))
+                    } action: { carryGeometry.noteViewport($0) }
             } panel: {
                 NoteIndexColumn(
                     session: session, model: model, tokens: tokens,
@@ -200,6 +211,18 @@ struct ReadModeView: View {
         .onAppear {
             face = Self.rememberedFace(postID: postID)
             syncAttachment()
+            // 13u2b UNIT 3: this surface can answer "where is the carried
+            // block on your screen?" while it is mounted. The closure reads
+            // the BOX, never this view's `@State` — an escaping closure holds
+            // a snapshot of a struct's state, and a snapshot of where the page
+            // was when Read mounted is exactly the wrong answer.
+            if placeProbeToken == nil {
+                let geometry = carryGeometry
+                let id = postID
+                placeProbeToken = session.commandRouter.registerBlockPlaceProbe {
+                    geometry.place(postID: id)
+                }
+            }
             report()
         }
         .onDisappear {
@@ -207,6 +230,10 @@ struct ReadModeView: View {
             if let editToken {
                 session.commandRouter.detachReadEdit(editToken)
                 self.editToken = nil
+            }
+            if let placeProbeToken {
+                session.commandRouter.unregisterBlockPlaceProbe(placeProbeToken)
+                self.placeProbeToken = nil
             }
         }
         .onChange(of: model.rows) { _, rows in
@@ -217,7 +244,15 @@ struct ReadModeView: View {
             let fact = session.commandRouter.focusedBlock
             let landing = (fact?.postID == postID ? fact?.blockID : nil)
                 .flatMap { id in rows.contains { $0.blockID == id } ? id : nil }
-            select(landing ?? rows[0].blockID, scrollFace: true, report: false)
+            let target = landing ?? rows[0].blockID
+            // 13u2b UNIT 3: **and at the HEIGHT she left it at**, when a mode
+            // switch carried one for this very block. Nothing else takes it:
+            // a column click, the `read` → `edit` click-through and a first
+            // mount all keep this face's own standing anchor.
+            let anchor = session.commandRouter
+                .takeCarriedFraction(postID: postID, blockID: target)
+                .map(ViewportCarry.anchor)
+            select(target, scrollFace: true, report: false, anchor: anchor)
         }
         .onChange(of: face) { _, new in
             Self.remember(new, postID: postID)
@@ -331,6 +366,7 @@ struct ReadModeView: View {
                 indicator: ThemeStore.editingIndicator(of: themeStore),
                 selectedBlockID: selectedBlockID,
                 paneTarget: $paneTarget,
+                carryGeometry: carryGeometry,
                 onSelect: { blockID in select(blockID, scrollFace: false) })
         case .read:
             switch form {
@@ -340,6 +376,8 @@ struct ReadModeView: View {
                     page: page, tokens: tokens, typeScale: typeScale,
                     dark: scheme == .dark,
                     pageTarget: $pageTarget,
+                    carriedBlockID: selectedBlockID,
+                    carryGeometry: carryGeometry,
                     onOpenInEdit: { row in openInEdit(row) })
             case .pages:
                 // Row 82: a page's paragraph is the same door as the
@@ -353,11 +391,16 @@ struct ReadModeView: View {
 
     // MARK: - The current block (row 39) + the landing (row 38)
 
-    private func select(_ blockID: String, scrollFace: Bool, report: Bool = true) {
+    private func select(
+        _ blockID: String, scrollFace: Bool, report: Bool = true, anchor: UnitPoint? = nil
+    ) {
         selectedBlockID = blockID
+        // 13u2b UNIT 3: the carried row is the selected one; what was measured
+        // for another row is not a fact about this one.
+        carryGeometry.expect(blockID)
         if scrollFace {
-            paneTarget = blockID
-            pageTarget = blockID
+            paneTarget = ReadLanding(blockID: blockID, anchor: anchor)
+            pageTarget = ReadLanding(blockID: blockID, anchor: anchor)
             columnTarget = blockID
         }
         if report {
@@ -448,6 +491,62 @@ enum ReadModeOracle {
 }
 #endif
 
+/// **What Read knows about where the carried block sits** (13u2b UNIT 3) —
+/// the geometry the mode-switch carry's CAPTURE half reads.
+///
+/// Two rectangles in the host's own named space: the face's own frame (the
+/// viewport) and the CARRIED row's frame. Only the carried row reports, so
+/// this is one write per scroll frame, not one per realized row.
+///
+/// Not observed, deliberately — it is written at geometry cadence and read
+/// once, at a mode switch, by a closure. An observed property here would
+/// re-render the note on every scroll frame, which is the 7 Hz loop row 53
+/// already paid for once (`FlowRowHeights` carries the same note).
+@MainActor
+final class ReadCarryGeometry {
+    private var viewport: CGRect = .zero
+    private var carried: (blockID: String, frame: CGRect)?
+
+    func noteViewport(_ frame: CGRect) { viewport = frame }
+
+    func noteRow(_ blockID: String, _ frame: CGRect) { carried = (blockID, frame) }
+
+    /// The selection moved: what was measured is about another row now. (The
+    /// carry is also blockID-checked when it is consumed, so this is belt and
+    /// braces — but a box that can hold a fact about a row nobody is on is a
+    /// box the next reader has to reason about.)
+    func expect(_ blockID: String?) {
+        guard let blockID else {
+            carried = nil
+            return
+        }
+        if carried?.blockID != blockID { carried = nil }
+    }
+
+    /// The place, in the one sense `ViewportCarry` means — nil when nothing
+    /// has been measured yet, or the row is off screen.
+    func place(postID: String) -> ViewportCarry.Place? {
+        guard let carried, viewport.height > 0 else { return nil }
+        guard let fraction = ViewportCarry.fraction(
+            blockTop: Double(carried.frame.minY - viewport.minY),
+            blockHeight: Double(carried.frame.height),
+            viewportHeight: Double(viewport.height))
+        else { return nil }
+        return ViewportCarry.Place(
+            postID: postID, blockID: carried.blockID, fraction: fraction)
+    }
+}
+
+/// **Where a face's landing means to put a block** (13u2b UNIT 3): the block,
+/// and — when a mode switch carried one — the viewport fraction it had in the
+/// mode she left. `nil` is each face's own standing anchor, which is what
+/// every other road onto a landing keeps (a column click, the `read` → `edit`
+/// click-through, a first mount).
+struct ReadLanding: Equatable {
+    let blockID: String
+    var anchor: UnitPoint?
+}
+
 /// What a Read geometry probe reports — the slot a frame belongs to.
 /// Always compiled (the modifier's signature names it); the oracle that
 /// stores the frames is DEBUG-only.
@@ -495,7 +594,11 @@ private struct ReadPageColumn: View {
     let tokens: VoiceTokens
     let typeScale: Double
     let dark: Bool
-    @Binding var pageTarget: String?
+    @Binding var pageTarget: ReadLanding?
+    /// 13u2b UNIT 3: the block the mode-switch carry is about (the note's
+    /// current one) — only that row measures itself.
+    let carriedBlockID: String?
+    let carryGeometry: ReadCarryGeometry
     let onOpenInEdit: (Queries.TOCRow) -> Void
 
     private var totalWords: Int {
@@ -515,6 +618,8 @@ private struct ReadPageColumn: View {
                             page: page, typeScale: typeScale,
                             blockID: row.blockID,
                             text: row.text ?? "", ordinal: i + 1,
+                            carried: row.blockID == carriedBlockID,
+                            carryGeometry: carryGeometry,
                             onOpenInEdit: { onOpenInEdit(row) })
                     }
                     Text("· · ·")
@@ -556,12 +661,19 @@ private struct ReadPageColumn: View {
 }
 
 extension ReadPageColumn {
+    /// This page's own standing anchor: near the top, with a little air above.
+    static let restingAnchor = UnitPoint(x: 0.5, y: 0.08)
+
     /// The landing: the block's row identity (its placement id), unanimated,
-    /// anchored near the top of the page.
-    private func land(_ blockID: String, _ proxy: ScrollViewProxy) {
-        guard let placementID = model.rows.first(where: { $0.blockID == blockID })?.placementID
+    /// anchored near the top of the page — or, when a mode switch carried a
+    /// height for this block, at that fraction of the viewport instead
+    /// (13u2b UNIT 3; `scrollTo`'s anchor IS the fraction, so nothing about
+    /// the landing's mechanism changes).
+    private func land(_ target: ReadLanding, _ proxy: ScrollViewProxy) {
+        guard let placementID = model.rows
+            .first(where: { $0.blockID == target.blockID })?.placementID
         else { return }
-        proxy.scrollTo(placementID, anchor: UnitPoint(x: 0.5, y: 0.08))
+        proxy.scrollTo(placementID, anchor: target.anchor ?? Self.restingAnchor)
     }
 }
 
@@ -605,6 +717,10 @@ private struct ReadPageBlock: View {
     let blockID: String
     let text: String
     let ordinal: Int
+    /// 13u2b UNIT 3: this is the note's current block, so its frame is what a
+    /// mode switch asks about. Only this row pays for a geometry report.
+    let carried: Bool
+    let carryGeometry: ReadCarryGeometry
     let onOpenInEdit: () -> Void
 
     @State private var hovering = false
@@ -648,6 +764,11 @@ private struct ReadPageBlock: View {
         .onHover { hovering = $0 }
         .onTapGesture { onOpenInEdit() }
         .readModeGeometryProbe(.pageBlock(blockID))
+        .onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(ReadModeView.probeSpace))
+        } action: { frame in
+            if carried { carryGeometry.noteRow(blockID, frame) }
+        }
         .help("Click to edit this paragraph — the page turns to edit with this block live")
         .environment(\.openURL, OpenURLAction { url in
             MarkdownLink.open(url.absoluteString) ? .handled : .discarded

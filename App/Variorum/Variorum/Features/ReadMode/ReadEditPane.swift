@@ -37,7 +37,14 @@ struct ReadEditPane: View {
     /// The ONE-shot scroll request — the host sets it on a column click, a
     /// seed or a landing; the pane lands and clears it. A pane click never
     /// sets it (clicking what you can see must not move it under you).
-    @Binding var paneTarget: String?
+    ///
+    /// 13u2b UNIT 3: it carries an ANCHOR when a mode switch brought a height
+    /// with it; `nil` is this pane's own standing landing, which every other
+    /// road keeps.
+    @Binding var paneTarget: ReadLanding?
+    /// 13u2b UNIT 3: where the carried block sits, measured by that row alone
+    /// and read at a mode switch (the host owns the box).
+    let carryGeometry: ReadCarryGeometry
     /// A block was clicked: the host selects it (and reports the fact); the
     /// pane makes it live.
     let onSelect: (String) -> Void
@@ -56,6 +63,7 @@ struct ReadEditPane: View {
                             model: model, tokens: tokens, indicator: indicator,
                             row: row, ordinal: i + 1,
                             selected: selectedBlockID == row.blockID,
+                            carryGeometry: carryGeometry,
                             onTap: {
                                 onSelect(row.blockID)
                                 if let variantID = row.variantID, !row.variantLocked {
@@ -95,12 +103,21 @@ struct ReadEditPane: View {
 }
 
 extension ReadEditPane {
+    /// This pane's own standing anchor. CENTER, deliberately: a landed block
+    /// sits mid-viewport with room above it, so its ring is never clipped at
+    /// the pane's top edge (batch B's nit on the book's flush landing).
+    static let restingAnchor = UnitPoint.center
+
     /// The landing: the block's ROW IDENTITY (its placement id) is what the
-    /// scroll reader lands on, unanimated (the Outline lesson).
-    private func land(_ blockID: String, _ proxy: ScrollViewProxy) {
-        guard let placementID = model.rows.first(where: { $0.blockID == blockID })?.placementID
+    /// scroll reader lands on, unanimated (the Outline lesson) — at this
+    /// pane's resting anchor, or at the viewport fraction a mode switch
+    /// carried for this very block (13u2b UNIT 3). `scrollTo`'s anchor IS
+    /// that fraction, so the landing's mechanism is untouched.
+    private func land(_ target: ReadLanding, _ proxy: ScrollViewProxy) {
+        guard let placementID = model.rows
+            .first(where: { $0.blockID == target.blockID })?.placementID
         else { return }
-        proxy.scrollTo(placementID, anchor: .center)
+        proxy.scrollTo(placementID, anchor: target.anchor ?? Self.restingAnchor)
     }
 }
 
@@ -137,6 +154,10 @@ private struct ReadEditBlock: View {
     let row: Queries.TOCRow
     let ordinal: Int
     let selected: Bool
+    /// 13u2b UNIT 3: the host's box — only the row the carry is about (the
+    /// selected or live one) writes into it, so this is one report a scroll
+    /// frame rather than one a realized row.
+    let carryGeometry: ReadCarryGeometry
     let onTap: () -> Void
 
     /// The block's DISPLAY text — the authority's overlay over the store
@@ -240,6 +261,11 @@ private struct ReadEditBlock: View {
             }
         }
         .readModeGeometryProbe(.editBlock(row.blockID))
+        .onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(ReadModeView.probeSpace))
+        } action: { frame in
+            if selected || isLive { carryGeometry.noteRow(row.blockID, frame) }
+        }
         .environment(\.openURL, OpenURLAction { url in
             MarkdownLink.open(url.absoluteString) ? .handled : .discarded
         })

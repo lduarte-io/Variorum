@@ -158,14 +158,27 @@ enum JumpPrimitive {
         return (span.top + origin, span.bottom + origin)
     }
 
-    /// Lands the LINE containing `offset` (UTF-16) at the viewport top.
+    /// Lands the LINE containing `offset` (UTF-16) at the viewport top —
+    /// or, with `landingInset`, that many points BELOW the viewport top.
     ///
     /// 13c 1A (A4): this was "lands the FRAGMENT", which for a block taller
     /// than the viewport means "lands the block's first line" — see
     /// `FragmentLines`. Single-line fragments are byte-unchanged (the line's
     /// local minY is 0), so every existing caller — block-TOC jumps, scrub,
     /// caret restore — behaves exactly as before.
-    static func jump(toOffset offset: Int, textView: NSTextView, scrollView: NSScrollView?) {
+    ///
+    /// **`landingInset` (13u2b UNIT 3)** is the whole of the mode-switch
+    /// carry's AppKit half, and it needs no new scroll machinery: the
+    /// correction loop converges `top` to whatever its closure reports, so a
+    /// closure reporting `minY − inset` converges to a scroll offset that
+    /// leaves exactly `inset` points between the viewport's top and the line.
+    /// It defaults to 0, where every existing caller is byte-unchanged, and it
+    /// may be NEGATIVE (a block taller than the viewport, scrolled past its
+    /// top — `ViewportCarry.topInset` says when).
+    static func jump(
+        toOffset offset: Int, textView: NSTextView, scrollView: NSScrollView?,
+        landingInset: Double = 0
+    ) {
         guard let scrollView,
               let layoutManager = textView.textLayoutManager,
               let contentManager = layoutManager.textContentManager
@@ -218,7 +231,7 @@ enum JumpPrimitive {
         // 1. Proportional estimate → 2. single-fragment ensureLayout →
         // 3. bounded scroll correction. The closure scrolls to the loop's
         // proposed top, then measures the target fragment there.
-        let estimate = Double(clamped) / Double(docLength) * textHeight
+        let estimate = Double(clamped) / Double(docLength) * textHeight - landingInset
         _ = JumpCorrectionLoop.run(
             initialTop: estimate,
             maxScroll: maxScroll
@@ -247,7 +260,10 @@ enum JumpPrimitive {
                 }
                 return false
             }
-            return minY
+            // The loop steers `top` toward what this reports, so reporting the
+            // line's own minY lands it at the viewport top and reporting
+            // `minY − inset` lands it `inset` points below (0 by default).
+            return minY.map { $0 - landingInset }
         }
     }
 }

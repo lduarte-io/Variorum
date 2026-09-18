@@ -71,6 +71,8 @@ final class CommandRouter {
             var identity = restored
             identity?.utf16Offset = nil
             focusedBlockIdentity = identity
+            // 13u2b UNIT 3: a place on ANOTHER note's screen means nothing here.
+            carriedPlace = nil
         }
         activePostID = postID
         activeMode = mode
@@ -124,6 +126,9 @@ final class CommandRouter {
         pendingTrayRequest = nil
         focusedBlockIdentity = nil
         focusedOffset = nil
+        // 13u2b UNIT 3: the detail is gone, so any place captured for a mode
+        // switch inside it has no arrival left to consume it.
+        carriedPlace = nil
     }
 
     // MARK: - Where the caret is (the post-13l polish round, ledger row 33)
@@ -245,6 +250,74 @@ final class CommandRouter {
             focusedBlockIdentity = nil
             focusedOffset = nil
         }
+    }
+
+    // MARK: - The mode switch's viewport carry (13u2b UNIT 3)
+
+    /// **Where the carried block sits on the mounted surface's screen**, asked
+    /// at the moment a mode switch is made and handed to the surface that
+    /// arrives — so the same block keeps the same viewport fraction across the
+    /// switch (the architectural trace's §6; the rule itself is the pure
+    /// `ViewportCarry`).
+    ///
+    /// A registry rather than one closure, and LIFO like `handlers`, for the
+    /// same reason: mount order is SwiftUI's, and an arriving surface's
+    /// `onAppear` can precede the departing one's `onDisappear`. The answer is
+    /// filtered by `activePostID`, so a surface in another window or another
+    /// pane can never answer for the note this switch is about.
+    @ObservationIgnored
+    private var placeProbes: [(token: UUID, probe: () -> ViewportCarry.Place?)] = []
+
+    func registerBlockPlaceProbe(_ probe: @escaping () -> ViewportCarry.Place?) -> UUID {
+        let token = UUID()
+        placeProbes.append((token, probe))
+        return token
+    }
+
+    func unregisterBlockPlaceProbe(_ token: UUID) {
+        placeProbes.removeAll { $0.token == token }
+    }
+
+    /// The one slot the carry lives in: in-memory, session-scoped, one-shot.
+    ///
+    /// Deliberately NOT persisted — a per-note `UserDefaults` key is the
+    /// hazard class `KnownIssuesAndTechDebt`'s per-note-defaults row already
+    /// owns (a fact that outlives its note), and where the page happened to
+    /// stand during one mode switch is worth far less than that leak. A fresh
+    /// session therefore starts with no carried fractions, which is right:
+    /// nothing was on screen to carry.
+    @ObservationIgnored private var carriedPlace: ViewportCarry.Place?
+
+    /// **The mode is about to change — ask the mounted surface where the
+    /// carried block sits.** Called by the mode-switch road BEFORE the mode
+    /// changes (the outgoing surface is still mounted and still knows its own
+    /// geometry); never by a landing, a click-through or a remount, because
+    /// those name their own block and keep their standing reveals.
+    ///
+    /// Every switch re-decides, **nil included**: a switch away from a surface
+    /// that does not participate (Takes — her own 17q ruling outranks this
+    /// rule — Lenses, Compare, Canvas, Blocks) CLEARS the slot rather than
+    /// leaving a stale place for some later arrival to consume.
+    func carryPlaceAcrossModeSwitch() {
+        guard let postID = activePostID else {
+            carriedPlace = nil
+            return
+        }
+        carriedPlace = placeProbes.reversed().lazy
+            .compactMap { $0.probe() }
+            .first { $0.postID == postID }
+    }
+
+    /// The arriving surface takes the carry — ONCE, and only for the block it
+    /// is actually landing on. A different block (the current block moved
+    /// between the switch and the arrival, or the block is gone) gets nil and
+    /// the surface's own standing reveal, which is the honest answer.
+    func takeCarriedFraction(postID: String, blockID: String) -> Double? {
+        guard let place = carriedPlace,
+              place.postID == postID, place.blockID == blockID
+        else { return nil }
+        carriedPlace = nil
+        return place.fraction
     }
 
     /// The detail reports its mode truth (its own `@State` changed).

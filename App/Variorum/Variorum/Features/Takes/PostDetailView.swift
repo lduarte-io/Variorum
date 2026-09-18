@@ -260,7 +260,11 @@ struct PostDetailView: View {
                                 // disagree.
                                 VoicedMenu(tokens: tokens, label: mode.rawValue, role: .quiet) {
                                     ForEach(Mode.allCases, id: \.self) { m in
-                                        Button(m.rawValue) { mode = m }
+                                        // 13u2b UNIT 3: the carry is captured
+                                        // by the SWITCH, never inferred from a
+                                        // mount — `switchMode` is the one door
+                                        // this and `applyMode` share.
+                                        Button(m.rawValue) { switchMode(to: m) }
                                     }
                                 }
                                 .help("This note's mode — Write · Takes · Read · "
@@ -474,9 +478,19 @@ struct PostDetailView: View {
             let binding = $mode
             let panel = $inspectorPanel
             let tagField = $tagFieldOpen
+            let router = session.commandRouter
             routerToken = session.commandRouter.registerDetail(
                 postID: postID, mode: mode,
-                applyMode: { binding.wrappedValue = $0 },
+                // 13u2b UNIT 3: every routed mode switch (⌘1–⌘7, the sidebar
+                // rail, ⌘K, the bars' "write" doors) comes through here, so
+                // the carry is captured HERE — before the mode changes, while
+                // the outgoing surface is still mounted and still knows where
+                // the carried block sits. A request for the mode already
+                // showing captures nothing: it is not a switch.
+                applyMode: { m in
+                    if binding.wrappedValue != m { router.carryPlaceAcrossModeSwitch() }
+                    binding.wrappedValue = m
+                },
                 // Row 15: ⌘⇧I and the ⌘K row reach THIS masthead's tag field
                 // by composition — the same seam the tray uses (P-4).
                 openTagField: { tagField.wrappedValue = true },
@@ -829,6 +843,30 @@ struct PostDetailView: View {
                 }
             }
         }
+    }
+
+    /// **THE mode-switch door** (13u2b UNIT 3): ask the mounted surface where
+    /// the carried block sits, then change the mode — so the arriving surface
+    /// can put that block at the same viewport fraction it had (the
+    /// architectural trace's §6; the rule is the pure `ViewportCarry`).
+    ///
+    /// The capture is HERE, at the act, and not in `onChange(of: mode)`,
+    /// because by then the outgoing surface may already be torn down and its
+    /// geometry gone — and because the distinction this unit rests on is
+    /// "this entry is a mode switch", which has to be a fact about the call
+    /// site rather than a guess from timing.
+    ///
+    /// **Which roads deliberately do NOT come through here**, each because it
+    /// names its own block and carries its own standing landing: `jump(to:)`
+    /// below (Blocks' *open in write*, the index column's jump, Read's
+    /// `onJump`, the canvas card — a click-through to a DIFFERENT block, where
+    /// carrying the height of the one she was looking at would be meaningless);
+    /// `onAppear`'s remembered mode (a mount, not a switch); and the blockless
+    /// guard's `mode = .write` (a correction, with nothing on screen to carry).
+    private func switchMode(to new: Mode) {
+        guard new != mode else { return }
+        session.commandRouter.carryPlaceAcrossModeSwitch()
+        mode = new
     }
 
     private func jump(to blockID: String) {

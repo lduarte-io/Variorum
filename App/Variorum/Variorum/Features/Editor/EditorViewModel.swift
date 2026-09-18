@@ -365,6 +365,15 @@ final class EditorViewModel {
     func attach(textView: EditorTextView, scrollView: NSScrollView?) {
         self.textView = textView
         self.scrollView = scrollView
+        // 13u2b UNIT 3: the DETAIL editor answers "where is the carried block
+        // on your screen?" when a mode switch asks. The inline book/pool
+        // editor does not — it scrolls inside its host's scroll view and owns
+        // no viewport of its own (the `revealLanding` rule, one door over).
+        if scrollView != nil, placeProbeToken == nil {
+            placeProbeToken = session.commandRouter.registerBlockPlaceProbe {
+                [weak self] in self?.carriedBlockPlace()
+            }
+        }
         // N14: a fresh surface is a fresh geometry world — whatever the
         // overlays computed against the old one is stale until this view's
         // first layout pass delivers real frames.
@@ -560,6 +569,12 @@ final class EditorViewModel {
     func teardown() -> Task<Void, Never>? {
         if let anchor = topVisibleOffset() {
             session.editorRouter.scrollAnchors[postID] = anchor
+        }
+        // 13u2b UNIT 3: the probe goes with the surface whose geometry it
+        // reads (a torn-down editor has no viewport to answer about).
+        if let placeProbeToken {
+            session.commandRouter.unregisterBlockPlaceProbe(placeProbeToken)
+            self.placeProbeToken = nil
         }
         if session.editorRouter.active === self {
             session.editorRouter.active = nil
@@ -2169,6 +2184,11 @@ final class EditorViewModel {
             if remembered != nil {
                 revealLanding(landing, textView: textView)
             }
+            // 13u2b UNIT 3: and if she arrived here by a MODE SWITCH that
+            // carried this block's place, that place outranks both landings —
+            // parked for the same hop, taken from the router now so no other
+            // editor rendering in this beat can consume it.
+            parkCarriedPlacement(fact: arrivalFact)
             updateCaretContext()
             let claim = { [weak textView, weak self] in
                 guard let textView, let window = textView.window else { return false }
@@ -2283,6 +2303,100 @@ final class EditorViewModel {
             }
         }
         JumpPrimitive.jump(toOffset: offset, textView: textView, scrollView: scrollView)
+    }
+
+    // MARK: - The mode switch's viewport carry (13u2b UNIT 3)
+
+    /// The registration behind the probe below; nil for the inline editors.
+    @ObservationIgnored private var placeProbeToken: UUID?
+
+    /// **Where the carried block sits on THIS editor's screen** — the CAPTURE
+    /// half, asked by `CommandRouter.carryPlaceAcrossModeSwitch` at the moment
+    /// a mode switch is made, while this surface is still mounted.
+    ///
+    /// The block, not the caret's line: the carry is about the block she is
+    /// working in, which is the one thing every mode agrees it is showing
+    /// (Read has rows, Write has paragraphs, and only the block is common to
+    /// both). Its span runs the first line's top to the last line's bottom,
+    /// because a block may hold internal newlines (I4) and is then several TK2
+    /// fragments. Two bounded single-fragment layouts, the `JumpPrimitive`
+    /// pattern — never a document-wide `ensureLayout` (P1; TEXTKIT2 §2).
+    private func carriedBlockPlace() -> ViewportCarry.Place? {
+        guard let textView, let scrollView, let blockID = caretBlockID,
+              let i = index.entries.firstIndex(where: { $0.blockID == blockID })
+        else { return nil }
+        let range = index.range(ofEntryAt: i)
+        guard let first = JumpPrimitive.lineSpan(ofOffset: range.location, in: textView),
+              let last = JumpPrimitive.lineSpan(
+                ofOffset: range.location + max(0, range.length - 1), in: textView)
+        else { return nil }
+        let visible = scrollView.contentView.bounds
+        guard let fraction = ViewportCarry.fraction(
+            blockTop: first.top - Double(visible.minY),
+            blockHeight: max(1, last.bottom - first.top),
+            viewportHeight: Double(visible.height))
+        else { return nil }
+        return ViewportCarry.Place(postID: postID, blockID: blockID, fraction: fraction)
+    }
+
+    /// The APPLY half's park. Like the reveal and the anchor restore it waits
+    /// for the N14 settle hop, and for exactly their reason: at the moment an
+    /// arrival runs, the text view's frame is still the pre-fill height, so
+    /// any scroll computed here clamps a couple of dozen points down.
+    ///
+    /// The carry is TAKEN from the router here rather than at the hop, so a
+    /// second editor rendering in the same beat (the book-inline one, a
+    /// background pane) can never consume the place this arrival is for.
+    private func parkCarriedPlacement(fact: FocusedBlock?) {
+        guard scrollView != nil, let fact, fact.postID == postID else { return }
+        guard let fraction = session.commandRouter.takeCarriedFraction(
+            postID: postID, blockID: fact.blockID) else { return }
+        pendingCarriedPlacement = (fact.blockID, fraction)
+        pendingCarriedGeneration = overlayGeometryGeneration
+    }
+
+    @ObservationIgnored private var pendingCarriedPlacement: (blockID: String, fraction: Double)?
+    @ObservationIgnored private var pendingCarriedGeneration = 0
+
+    /// **The mode switch's landing**: put the carried block back at the
+    /// viewport fraction it had in the mode she left.
+    ///
+    /// It REPLACES the two landings that would otherwise decide this arrival —
+    /// the session scroll anchor (Write's own memory of where IT stood, which
+    /// is older than the switch) and the caret reveal (whose contract is "the
+    /// line at the viewport top") — and it keeps the reveal's promise anyway:
+    /// a caret left off screen by the placement (a block taller than the
+    /// viewport) is revealed afterwards, because a landing that hides the
+    /// caret she is about to type at is worse than one that moves the page.
+    private func consumePendingCarriedPlacement(deliveredBy generation: Int) {
+        guard let placement = pendingCarriedPlacement else { return }
+        guard generation >= pendingCarriedGeneration else { return }  // a stale hop leaves it (R1-5's rule)
+        pendingCarriedPlacement = nil
+        guard let textView, let scrollView,
+              let i = index.entries.firstIndex(where: { $0.blockID == placement.blockID })
+        else { return }
+        let range = index.range(ofEntryAt: i)
+        guard let first = JumpPrimitive.lineSpan(ofOffset: range.location, in: textView),
+              let last = JumpPrimitive.lineSpan(
+                ofOffset: range.location + max(0, range.length - 1), in: textView)
+        else { return }
+        let inset = ViewportCarry.topInset(
+            fraction: placement.fraction,
+            blockHeight: max(1, last.bottom - first.top),
+            viewportHeight: Double(scrollView.contentView.bounds.height))
+        pendingAnchorRestore = nil
+        let caret = pendingRevealOffset
+        pendingRevealOffset = nil
+        JumpPrimitive.jump(
+            toOffset: range.location, textView: textView, scrollView: scrollView,
+            landingInset: inset)
+        guard let caret,
+              let span = JumpPrimitive.lineSpan(ofOffset: caret, in: textView)
+        else { return }
+        let visible = scrollView.contentView.bounds
+        if span.top < Double(visible.minY) - 1 || span.bottom > Double(visible.maxY) + 1 {
+            JumpPrimitive.jump(toOffset: caret, textView: textView, scrollView: scrollView)
+        }
     }
 
     /// The bare arrival's landing offset (rows 39/49): this post's current
@@ -3245,6 +3359,12 @@ final class EditorViewModel {
             // (for the generation this hop saw — R1-5). Round 2, RAISE-M1:
             // the session anchor lands FIRST, so the reveal's guard judges
             // "already on screen" against the view she left.
+            // 13u2b UNIT 3: the mode switch's carry lands FIRST and, when it
+            // fires, stands the other two down — it is the newer fact than
+            // either (the session anchor is where Write stood last time; the
+            // reveal's rule is "the line at the top", which is the very policy
+            // clash the carry exists to end).
+            consumePendingCarriedPlacement(deliveredBy: generation)
             consumePendingAnchorRestore(deliveredBy: generation)
             consumePendingReveal(deliveredBy: generation)
             // A generation bumped between schedule and run re-arms on its
