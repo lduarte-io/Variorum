@@ -59,9 +59,13 @@ nonisolated enum ViewportCarry {
     struct Place: Equatable, Sendable {
         /// The note the place is about — a place in another note means nothing.
         let postID: String
-        /// The block the place is about. The arriving surface consumes the
-        /// carry only for THIS block: if the current block changed between the
-        /// switch and the arrival, the standing reveal is the honest answer.
+        /// The block the place is about. The carry is only ever APPLIED to
+        /// this block: a surface that lands by its own fact (Write's caret
+        /// arrival) refuses a place naming a different block, and a surface
+        /// that lands ON the carry (Read's seed — 13u2b ladder round 1,
+        /// MAJOR 2) lands this very block, refusing the whole place when its
+        /// rows cannot show it. Either way the ask is one-shot: the slot is
+        /// spent by the arrival's ask, matched or not.
         let blockID: String
         /// Where it sat, in the sense the file header defines.
         let fraction: Double

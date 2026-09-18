@@ -244,20 +244,38 @@ struct ReadModeView: View {
         .onChange(of: model.rows) { _, rows in
             guard !seeded, !rows.isEmpty else { return }
             seeded = true
+            // **13u2b ladder round 1 (MAJOR 2): the switch's own capture
+            // OUTRANKS the router's observed identity here.** The
+            // orchestrator's walk found the FIRST Read mount after a
+            // note-open landing on the NOTE-OPEN's block: the capture (the
+            // outgoing editor's own `caretBlockID`, read at the switch) was
+            // fresh while the router's fact lagged, and this seed — keyed on
+            // the fact — dropped the carry for a block she had already left.
+            // The carried place is the newer fact (#116(b)'s own doctrine),
+            // and it already names the block the switch was ABOUT; a carry
+            // naming a block this face cannot show is refused whole and the
+            // standing road runs. Red-on-old: `ModeSwitchCarryTests`.
+            let carried = session.commandRouter.takeCarriedPlace(postID: postID)
+                .flatMap { place in
+                    rows.contains { $0.blockID == place.blockID } ? place : nil
+                }
             // Arrive where she was (row 39: the ONE current block — Write's
-            // caret, Takes' live pane, Blocks' focused row).
+            // caret, Takes' live pane, Blocks' focused row) when nothing was
+            // carried.
             let fact = session.commandRouter.focusedBlock
             let landing = (fact?.postID == postID ? fact?.blockID : nil)
                 .flatMap { id in rows.contains { $0.blockID == id } ? id : nil }
-            let target = landing ?? rows[0].blockID
-            // 13u2b UNIT 3: **and at the HEIGHT she left it at**, when a mode
-            // switch carried one for this very block. Nothing else takes it:
-            // a column click, the `read` → `edit` click-through and a first
-            // mount all keep this face's own standing anchor.
-            let anchor = session.commandRouter
-                .takeCarriedFraction(postID: postID, blockID: target)
-                .map(ViewportCarry.anchor)
-            select(target, scrollFace: true, report: false, anchor: anchor)
+            let target = carried?.blockID ?? landing ?? rows[0].blockID
+            // …and at the HEIGHT she left it at (UNIT 3's rule). Nothing
+            // else takes the carry: a column click, the `read` → `edit`
+            // click-through and a carry-less mount all keep this face's own
+            // standing anchor. A CARRIED landing reports (the fact was the
+            // lagging half, and the landed block heals it — so a return to
+            // Write finds the caret's note-fact where she actually is); a
+            // fact-derived landing stays report-free as it always was (no
+            // news to file).
+            select(target, scrollFace: true, report: carried != nil,
+                   anchor: carried.map { ViewportCarry.anchor($0.fraction) })
         }
         .onChange(of: face) { _, new in
             Self.remember(new, postID: postID)

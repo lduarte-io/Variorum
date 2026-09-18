@@ -263,3 +263,28 @@ consumed (the traced chain in the finding). The drop is the same one-shot rule a
 and rides under the router pin's red-on-old; no separate UI pin is owed for one defensive line
 whose mechanism the router pin already asserts. The existing carry pins re-run green (7 tests / 2
 suites with `ModeSwitchCarryTests`).
+
+### MAJOR 2 — CONFIRMED · FIXED, red-on-old, with the instrument's answer recorded
+
+**The instrument (the responses file's ask), answered:** in the rig the caret report is
+SYNCHRONOUS — `focusedBlock immediately after putCaret: FRESH` — so the field staleness does NOT
+come from notification coalescing; it comes from the guard/overwrite asymmetry the UNIT 3
+implementer named (`noteFocusedBlock`'s `activePostID` guard dropping a report, or
+`registerDetail`'s note-change overwrite restoring the remembered block over a fresher fact).
+Either link produces exactly the capture-fresh/router-stale pair the walk observed.
+
+**Pin, measured red first** (`ModeSwitchCarryTests.aReadMountWhoseRouterFactWentStaleLandsTheSwitchsCarriedBlock`):
+the deciding pair is staged deterministically through the router's own public door — caret at B₂
+(fact settled fresh), the block put flush with Write's top (`wrote ≤ 0.02`), then
+`noteFocusedBlock(B₁)` stales the fact while the editor's `caretBlockID` stays B₂ — and the switch
+runs with NO settle-wait re-added. Red on the unfixed tree: `selectedBlockID → B₁` (the stale
+block, at the pane's standing centre — the walk's wash, byte-for-byte in shape). Green after.
+
+**Fix:** the router gains the block-agnostic consume-once `takeCarriedPlace(postID:)` (the
+implementer's named shape) and Read's seed PREFERS the carried place's block — the switch-time
+capture is the newer fact (#116(b)'s own doctrine) — still filtering through `rows.contains`
+(a carry naming a block the face cannot show is refused whole; the standing road runs). A CARRIED
+landing now reports (`select(report: true)`): the fact was the lagging half and the landed block
+heals it, so a return to Write finds the note's current-block fact where she actually is; a
+fact-derived landing stays report-free as before. `ViewportCarry.Place`'s doc amended to the new
+consume rule. Existing PIN A/B green untouched beside the new pin (8 tests / 2 suites).

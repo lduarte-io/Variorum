@@ -323,3 +323,114 @@ extension ModeSwitchCarryTests {
         }
     }
 }
+
+// MARK: - The first-mount defect (13u2b ladder round 1, MAJOR 2)
+
+extension ModeSwitchCarryTests {
+    /// **The orchestrator's walk-flagged defect, pinned.** In the field: open
+    /// a note via ⌘K (Write lands at the remembered block B₁) → click a
+    /// different block B₂ → ⌘3 immediately; Read's FIRST mount put the wash
+    /// on B₁ at the pane's standing centre — the switch's capture was fresh
+    /// (the editor's own `caretBlockID`) while the router's observed identity
+    /// lagged, and the seed — keyed on the fact — dropped the carry for a
+    /// block she had already left. Every subsequent switch honored it.
+    ///
+    /// The pin stages the DECIDING PAIR deterministically (capture-fresh /
+    /// router-stale) through the router's own public door, so it does not
+    /// depend on reproducing whichever upstream link lagged in the field —
+    /// and, unlike PIN A/B, it does NOT settle-wait the fact fresh before
+    /// switching: that wait is exactly what her hands don't take.
+    ///
+    /// RED ON OLD: the seed selected the STALE block (the wash on B₁, the
+    /// carry dropped, the standing centre).
+    @Test func aReadMountWhoseRouterFactWentStaleLandsTheSwitchsCarriedBlock() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 73))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "the long note")
+            let target = 60
+            var targetBlock = ""
+            var staleBlock = ""
+            for i in 1...120 {
+                let minted = try session.operations.newBlock(
+                    in: post.id,
+                    text: "Paragraph \(i): a sentence of the story, long enough to read as prose "
+                        + "and to take a line or two of the column at this width.")
+                if i == target + 1 { targetBlock = minted.block.id }
+                if i == 21 { staleBlock = minted.block.id }
+            }
+            let targetBlockID = targetBlock
+            let staleBlockID = staleBlock
+            let postID = post.id
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: postID)
+            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(postID)")
+            ReadModeOracle.reset()
+            defer {
+                UserDefaults.standard.removeObject(forKey: "postMode.\(postID)")
+                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(postID))
+                router.forgetCurrentBlock(for: postID)
+            }
+            let slots = try await db.read { [id = postID] db in
+                try Queries.renderPost(db, containerID: id)
+            }
+            let index = BlockRangeIndex(slots: slots, tail: nil)
+            let targetRange = index.range(ofEntryAt: target)
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(
+                rootView: PostDetailView(session: session, postID: postID)
+                    .environment(ThemeStore(session: session)))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+
+            #expect(await Self.settle(window, hosting) {
+                guard let view = Self.views(EditorTextView.self, in: hosting).first,
+                      view.window != nil else { return false }
+                return view.string.count >= index.documentLength && router.activeMode == .write
+            }, "Write mounts and fills")
+            #expect(Self.putCaret(in: hosting, at: targetRange.location + 5))
+            // The deciding one-line instrument (the responses file's ask):
+            // which link lags in THIS rig, read before any pumping.
+            print("[13u2b MAJOR2] focusedBlock immediately after putCaret: "
+                + (router.focusedBlock?.blockID == targetBlockID ? "FRESH"
+                   : router.focusedBlock?.blockID == nil ? "NIL" : "STALE"))
+            #expect(await Self.settle(window, hosting) {
+                router.focusedBlock?.blockID == targetBlockID
+            }, "the caret's report lands (the capture's freshness is not in question)")
+            // Her page: the block flush with the top of Write's viewport.
+            #expect(Self.topWrite(in: hosting, at: targetRange.location))
+            _ = await Self.settle(window, hosting, timeout: 0.6) { false }
+            let wrote = try #require(
+                Self.writeFraction(in: hosting, block: targetRange), "the block is laid out")
+            #expect(wrote <= 0.02, "the block really is at the top of Write: \(wrote)")
+
+            // THE FIELD PAIR: the router's observed identity lags at the
+            // note-open's block while the editor's caret fact stays fresh.
+            router.noteFocusedBlock(staleBlockID, variantID: nil, postID: postID)
+
+            #expect(router.requestMode(.read, postID: postID))
+            #expect(await Self.settle(window, hosting) {
+                ReadModeOracle.selectedBlockID != nil
+            }, "Read's edit face seeded")
+            #expect(ReadModeOracle.selectedBlockID == targetBlockID,
+                    "the seed lands the switch's carried block, never the stale fact — red-on-old: the stale block, at the pane's standing centre")
+            _ = await Self.settle(window, hosting, timeout: 1.5) { false }
+            if let read = Self.readFraction(postID: postID, block: targetBlockID) {
+                #expect(abs(read - wrote) <= 0.06,
+                        "…and at the height Write had it: \(read) against \(wrote)")
+            }
+            window.orderOut(nil)
+            window.close()
+        }
+    }
+}

@@ -327,6 +327,23 @@ final class CommandRouter {
         return place.fraction
     }
 
+    /// **The arriving surface takes the WHOLE place — block-agnostic,
+    /// consume-once** (13u2b ladder round 1, MAJOR 2 — red-on-old in
+    /// `ModeSwitchCarryTests`). Read's seed lands ON the carried block, so it
+    /// cannot key its ask by a block it has not yet chosen: the switch-time
+    /// capture (the outgoing editor's own `caretBlockID`) is the NEWER fact
+    /// than the router's observed identity — the orchestrator's walk caught
+    /// the first Read mount landing on the note-open's block because the
+    /// seed keyed itself off a fact that had gone stale while the capture
+    /// was fresh. The one ask spends the slot, exactly as
+    /// `takeCarriedFraction`'s rule above; the caller still refuses a place
+    /// naming a block it cannot show and falls back to its standing road.
+    func takeCarriedPlace(postID: String) -> ViewportCarry.Place? {
+        guard let place = carriedPlace, place.postID == postID else { return nil }
+        carriedPlace = nil
+        return place
+    }
+
     /// **A click-through road that names its OWN block drops the carry as it
     /// changes the mode** (13u2b ladder round 1, MINOR 1's second door — the
     /// same one-shot rule where the re-decide cannot run). The `jump(to:)`
