@@ -288,3 +288,19 @@ landing now reports (`select(report: true)`): the fact was the lagging half and 
 heals it, so a return to Write finds the note's current-block fact where she actually is; a
 fact-derived landing stays report-free as before. `ViewportCarry.Place`'s doc amended to the new
 consume rule. Existing PIN A/B green untouched beside the new pin (8 tests / 2 suites).
+
+### MINOR 2 — CONFIRMED · RECORDED, NOT FIXED (the reviewer's call, stated with its reasons)
+
+The mechanism stands traced (the voice road drops every learned height without re-landing the top
+row — the width road's own relocation class, strictly stronger) and the implementer's mount
+asymmetry is adopted as load-bearing: `tokens` flips ONCE at mount on a Study store, so a bare
+re-land would fire during `landOutlineReveal`'s in-flight landing and override her navigation —
+the fix MUST carry both guards (re-land only when `stand(at:)` reports movement AND no landing is
+pending). **Why recorded rather than fixed:** the red-on-old pin cannot be built honestly today —
+the landing rig mounts `BookView` without a `ThemeStore` (the real `.onChange(of: tokens)` road
+means touching the helper seven tests share — the zero-test-mechanism-churn class this phase
+held), and a live voice flip runs `EditorTypography.adopt`, a GLOBAL type change under parallel
+suites (the repo's own load-flaky-red generator). Under the hallucination guard (no bug-class fix
+without red-on-old) the arm is RECORDED: QUESTIONS #115 gains **(b) the voice-change arm**,
+carrying the guards verbatim so the eventual builder inherits them. One line plus its pin whenever
+the rig gains a voice-flip road; the implementer's own preference matched this call.
