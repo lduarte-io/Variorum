@@ -86,9 +86,33 @@ struct ReadingFlowView: View {
     /// The page column's width (the measure the estimate wraps at, and the
     /// width a remembered size must match to apply).
     @State private var columnWidth: CGFloat?
-    /// The pending landing's bookkeeping — a reference box: no `@State`
-    /// write per geometry report (the Outline landing's own lesson).
+    /// The pending landing's ABOVE-TARGET bookkeeping — a reference box: no
+    /// `@State` write per geometry report (the Outline landing's own lesson).
+    /// **13u2b UNIT 2:** the landing's own half of this box (the anchor, the
+    /// corrections, the timer, the target's last top) is the ONE authority's
+    /// now; what stays is what only this surface knows — which stories are
+    /// near, and which of those have said they settled.
     @State private var landing = FlowLanding()
+    /// **THE ONE LANDING AUTHORITY** (`Surface/LandingAuthority.swift`): the
+    /// aim/hold/quiet/correct discipline this surface used to carry as a
+    /// hand-copy of the book Outline's, parameterized instead
+    /// (`LandingPolicy.readingFlow` — the same numbers, one place).
+    #if DEBUG
+    @State private var authority = LandingAuthority(
+        policy: .readingFlow,
+        storyboard: LandingStoryboard(
+            note: { ReadingFlowGeometry.trace.append($0) },
+            dump: {
+                let start = ReadingFlowGeometry.trace
+                    .lastIndex(where: { $0.hasSuffix(" LAND") }) ?? 0
+                return ReadingFlowGeometry.trace[start...].joined(separator: " | ")
+            }))
+    #else
+    @State private var authority = LandingAuthority(policy: .readingFlow)
+    #endif
+    /// What this column's rows REPORTED while rendering real content — the
+    /// manifest's `measured` arm (13u2b UNIT 2).
+    @State private var heights = FlowRowHeights()
 
     private var page: ReadingPageTokens {
         scheme == .dark ? .dark : .light
@@ -101,13 +125,27 @@ struct ReadingFlowView: View {
     /// The flow's own coordinate space — the viewport's top is 0 there; the
     /// near/far observers and the landing's anchor reports read it.
     static let flowSpace = "reading-flow"
+    /// **The flow's landing policy** — the batch-H + row-100 numbers,
+    /// unchanged by 13u2b UNIT 2's hoist and now stated in one place with
+    /// the reasoning for each (`LandingPolicy.readingFlow`). The two names
+    /// below stay as this surface's word for them (the pins speak them).
+    static let landingPolicy = LandingPolicy.readingFlow
     /// Within this many points of the top, a landing is DONE — and within
     /// this many the pins accept it (ONE number, ladder R2-7: at 2 pt the
     /// finisher re-landed on 3-pt drifts the pin would have accepted — the
     /// field guide's own log spent two of six corrections on `top=5`,
     /// `top=3`; a book of many short notes above the target could exhaust
     /// the budget on drifts and give up a few points short).
-    static let landingTolerance: CGFloat = 4
+    static var landingTolerance: CGFloat { landingPolicy.tolerance }
+    /// The gap the column puts between rows, at BOTH levels (the segments'
+    /// and each run's) — so the manifest's offsets are the column's own
+    /// arithmetic and not a second number.
+    static let rowSpacing: CGFloat = 28
+    /// Everything above the first row: the page column's own top padding.
+    /// The flow's title is a ROW (unlike the Outline's title block), so this
+    /// is the whole of the lead — which is what makes this surface the first
+    /// consumer of an ABSOLUTE offset in the column's content space.
+    static let columnLead: CGFloat = 40
     /// How far beyond the viewport a story still counts as near — this far
     /// above it, twice this far below (`NearViewportObserver`'s band: a row
     /// is near while its distance from the top-edge region is under the
@@ -171,7 +209,10 @@ struct ReadingFlowView: View {
                 // itself against a dead proxy for the whole time budget and
                 // write a DONE into whatever flow mounts next (the harness's
                 // own oracle read the previous test's landing).
-                .onDisappear { landing.end() }
+                .onDisappear {
+                    landing.end()
+                    authority.end()
+                }
                 .task(id: grouped.flatMap { $0.entries.map(\.postID) }) {
                     await loadExtents()
                 }
@@ -188,11 +229,23 @@ struct ReadingFlowView: View {
                 // a DIRECT child at an honest height (`FlowStoryRow`), so the
                 // column's geometry is exact and a built row's `.id` is
                 // always known to the scroll reader.
-                VStack(spacing: 28) {
+                VStack(spacing: Self.rowSpacing) {
                     ForEach(FlowRows.segments(rows)) { segment in
                         switch segment {
                         case .run(let small):
-                            LazyVStack(spacing: 28) {
+                            // **13u2b UNIT 2: the runs are no longer LAZY.**
+                            // A lazy container answers "how tall is a row I
+                            // have not realized" with the average of the ones
+                            // it has — and the one row a CHAPTER landing aims
+                            // at is a heading, which lives here. The Outline
+                            // had to virtualize its runs at manifest heights
+                            // (400 rows at the window's cap); this column's
+                            // small rows are a title, a closing mark and one
+                            // heading per chapter — fifteen cheap `Text`s on
+                            // Sherlock — so they simply all exist, which is
+                            // strictly more exact than any placeholder and
+                            // needs no manifest arm at all.
+                            VStack(spacing: Self.rowSpacing) {
                                 ForEach(small) { row in
                                     smallRow(row)
                                 }
@@ -210,8 +263,13 @@ struct ReadingFlowView: View {
                                 onSettled: { storySettled(entry.postID) },
                                 onLoaded: { })
                                 .id(segment.id)
-                                .flowAnchor(segment.id) { top in
-                                    anchorMoved(segment.id, top: top)
+                                .flowAnchor(segment.id) { top, _ in
+                                    // A story's own measured height needs no
+                                    // second store: `SurfaceSizeMemory` IS
+                                    // it, and the manifest reads it as the
+                                    // REMEMBERED arm (18d's U-12 memory, per
+                                    // note × surface × width).
+                                    rowMoved(segment.id, top: top, height: nil)
                                 }
                         }
                     }
@@ -234,6 +292,12 @@ struct ReadingFlowView: View {
         .background(ReadingPageTokens.room(voice: tokens.voice, dark: scheme == .dark))
     }
 
+    /// A small row — the title, a chapter heading, the closing mark. **Every
+    /// one of them carries its anchor and reports its geometry since 13u2b
+    /// UNIT 2**: the anchor so a landing can address it (a chapter heading is
+    /// what a chapter landing aims AT), and the report so the column knows
+    /// what it is tall and a landing on a row the page is already at can
+    /// terminate.
     @ViewBuilder
     private func smallRow(_ row: FlowRows.Row) -> some View {
         switch row {
@@ -242,18 +306,26 @@ struct ReadingFlowView: View {
                 .font(page.serifTitle)
                 .foregroundStyle(page.ink)
                 .padding(.top, 56)
+                .flowAnchor(row.id) { top, height in
+                    rowMoved(row.id, top: top, height: height)
+                }
         case .chapter(let section):
             Text(section.name.uppercased())
                 .font(.system(size: 12, weight: .medium, design: .serif))
                 .tracking(3)
                 .foregroundStyle(page.chapterInk)
                 .padding(.top, 22)
-                .flowAnchor(row.id) { top in anchorMoved(row.id, top: top) }
+                .flowAnchor(row.id) { top, height in
+                    rowMoved(row.id, top: top, height: height)
+                }
         case .end:
             Text("· · ·")
                 .font(page.serif)
                 .foregroundStyle(page.pageMeta)
                 .padding(.vertical, 40)
+                .flowAnchor(row.id) { top, height in
+                    rowMoved(row.id, top: top, height: height)
+                }
         case .post:
             // Never in a run — `FlowRows.segments` makes every post a story
             // segment; the switch is exhaustive for the compiler's sake.
@@ -274,6 +346,57 @@ struct ReadingFlowView: View {
             extents: extents[postID] ?? [],
             metrics: FlowHeightEstimate.metrics(
                 columnWidth: columnWidth ?? FlowHeightEstimate.defaultColumnWidth))
+    }
+
+    // MARK: - 13u2b UNIT 2 — the column's own geometry, as a manifest
+
+    /// **What this column is tall, row by row, at this width** — the same
+    /// `BookHeightManifest` the book Outline builds, over the flow's rows.
+    ///
+    /// Its consumer here is the LANDING STORY and the Release SIGNPOST rather
+    /// than the rows (the rows have stood at honest heights since batch H —
+    /// every story a direct child at its remembered or estimated height, and
+    /// since this unit every small row simply exists), so what it buys is the
+    /// ANSWER to the question her stutter report could not answer: how much of
+    /// the geometry above the thing she clicked was still arithmetic.
+    ///
+    /// The three sources are the manifest's own, read off the surfaces that
+    /// already own them: **measured** — what a small row reported while
+    /// rendering real content; **remembered** — a story's `SurfaceSizeMemory`
+    /// record, but only at THIS width (18d's per-width refusal, never
+    /// relaxed); **derived** — a story's estimate from its blocks' lengths,
+    /// and a small row's first-frame constant.
+    ///
+    /// Offsets are ABSOLUTE in the column's content space: the lead is the
+    /// page column's own top padding (`columnLead`) and the title is a ROW, so
+    /// unlike the Outline's there is nothing unmeasured above the first row.
+    private var heightManifest: BookHeightManifest {
+        let width = columnWidth ?? FlowHeightEstimate.defaultColumnWidth
+        let inputs: [BookHeightManifest.Input] = rows.map { row in
+            switch row {
+            case .title:
+                BookHeightManifest.Input(
+                    id: row.id, measured: heights.height(of: row.id),
+                    derived: FlowRowHeights.title)
+            case .chapter:
+                BookHeightManifest.Input(
+                    id: row.id, measured: heights.height(of: row.id),
+                    derived: FlowRowHeights.chapter)
+            case .end:
+                BookHeightManifest.Input(
+                    id: row.id, measured: heights.height(of: row.id),
+                    derived: FlowRowHeights.end)
+            case .post(let entry):
+                BookHeightManifest.Input(
+                    id: row.id,
+                    remembered: memory.size(entry.postID).flatMap {
+                        FlowHeightEstimate.remembered($0, appliesAt: width) ? $0.height : nil
+                    },
+                    derived: estimate(for: entry.postID))
+            }
+        }
+        return BookHeightManifest(
+            width: width, spacing: Self.rowSpacing, leading: Self.columnLead, inputs: inputs)
     }
 
     /// The extents for this entry set: from the book's cache when it holds
@@ -312,7 +435,7 @@ struct ReadingFlowView: View {
     /// per such story; the extents landing is another). Each time the
     /// target REPORTS itself off the top while the landing is pending, the
     /// flow re-lands it on the next turn — one frame of shift, never a
-    /// second — bounded by `landingCorrectionBudget`; the quiet-interval
+    /// second — bounded by the policy's correction budget; the quiet-interval
     /// check then ends the landing once the near rows above have loaded
     /// and the page has held still. Never a hop into an unrealized void:
     /// there is none — a built row's identity is always known.
@@ -321,32 +444,29 @@ struct ReadingFlowView: View {
         onRevealLanded?()
         let anchor = FlowRows.landingAnchor(for: reveal, grouped: grouped)
         landing.begin(anchor: anchor, target: reveal, storiesInOrder: storyIDs)
-        #if DEBUG
-        ReadingFlowGeometry.trace.append("\(anchor) LAND")
-        #endif
-        proxy.scrollTo(anchor, anchor: .top)
-        armCheck(proxy)
+        authority.land(
+            anchor,
+            // What this column KNOWS about the landing — its rows, the
+            // target's computed offset, and how much of the geometry above it
+            // is still arithmetic. Numbers only, and they ship (the SIGNPOST).
+            facts: LandingFacts(manifest: heightManifest, anchor: anchor),
+            // The flow's own veto: every near story above the target has SAID
+            // it settled (`StableSurface.settled` — geometry, never a clock).
+            mayFinish: { landing.aboveTargetSettled() }
+        ) { id in
+            proxy.scrollTo(id, anchor: .top)
+        }
     }
-
-    /// The most re-lands one landing may take. The events that can move a
-    /// landed target are few by construction — the extents arriving (every
-    /// placeholder above it re-sized at once), the story above it loading,
-    /// the title's run realizing — three in the pin's own trace, each a
-    /// single frame; the budget is twice that, so a slow load can never
-    /// strand a landing one event short, and past it the landing ends
-    /// wherever it is (never the row-44 loop: every re-land targets a
-    /// built row whose position is known).
-    static let landingCorrectionBudget = 6
 
     private var storyIDs: [String] {
         grouped.flatMap { $0.entries.map(\.postID) }
     }
 
-    /// A story row reported where its top sits. Every report feeds the
-    /// DEBUG oracle; the pending TARGET's report is the anchoring signal —
-    /// off the top ⇒ re-land next turn (within the budget) — and re-arms
-    /// the quiet interval either way.
-    private func anchorMoved(_ rowID: String, top: CGFloat) {
+    /// A row reported where its top sits (and, for a SMALL row, what it is
+    /// tall). Every report feeds the DEBUG oracle and the authority's seed;
+    /// the pending TARGET's also re-arms the quiet interval — the decision is
+    /// the interval's, never the report's.
+    private func rowMoved(_ rowID: String, top: CGFloat, height: CGFloat?) {
         #if DEBUG
         if let postID = FlowRows.postID(ofAnchor: rowID) {
             ReadingFlowGeometry.anchorTops[postID] = top
@@ -354,15 +474,22 @@ struct ReadingFlowView: View {
             ReadingFlowGeometry.anchorTops[rowID] = top
         }
         #endif
-        guard landing.anchor == rowID, let proxy = landing.proxy else { return }
-        landing.lastTop = top
+        // A SMALL row's height is a fact about this column at this width (it
+        // always renders real content); a story's is `SurfaceSizeMemory`'s.
+        if let height {
+            heights.learn(
+                rowID, height: height,
+                at: columnWidth ?? FlowHeightEstimate.defaultColumnWidth)
+        }
         #if DEBUG
-        ReadingFlowGeometry.trace.append(
-            "top=\(Int(top)) offset=\(Int(landing.lastOffset)) corrections=\(landing.corrections)")
+        if authority.anchor == rowID {
+            ReadingFlowGeometry.trace.append(
+                "top=\(Int(top)) offset=\(Int(landing.lastOffset)) corrections=\(authority.corrections)")
+        }
         #endif
         // **13u2 UNIT A, ledger row 100 — THE REPORT NO LONGER RE-LANDS.** It
         // records and re-arms; the decision is the quiet interval's
-        // (`checkLanding`), which is the book Outline's own discipline and the
+        // (`LandingAuthority`), which is the book Outline's own discipline and the
         // reason the Outline converges where this surface did not.
         //
         // REPRODUCED AND TRACED (dev store, Sherlock, a ~950 pt window, the
@@ -382,19 +509,20 @@ struct ReadingFlowView: View {
         //
         // A correction issued from QUIET sticks, and the budget now buys six of
         // those instead of six undone ones. Progress is still guaranteed under a
-        // storm because `armCheck`'s ceiling (`BookView.landingMaxWait`) fires
-        // the check whether or not the column ever goes quiet.
-        armCheck(proxy)
+        // storm because the authority's own ceiling (`LandingPolicy.maxWait`)
+        // fires the look whether or not the column ever goes quiet.
+        //
+        // **13u2b UNIT 2:** every row's report goes to the authority, not only
+        // the target's — that is the SEED that makes a landing on the row the
+        // page is already at terminate (measured RED here before this unit:
+        // `gave up at top=unrealized after 0 re-lands, 4211 ms`, twice).
+        authority.noteTop(rowID, top)
     }
 
     /// The column's content height changed (a story loaded, the extents
     /// landed): the layout is still settling — re-arm the interval.
     private func contentResized(_ height: CGFloat, _ proxy: ScrollViewProxy) {
-        guard landing.target != nil else { return }
-        #if DEBUG
-        ReadingFlowGeometry.trace.append("content=\(Int(height))")
-        #endif
-        armCheck(proxy)
+        authority.contentChanged(height)
     }
 
     /// A story's surface settled (R2-2): recorded for the finisher, and —
@@ -403,115 +531,44 @@ struct ReadingFlowView: View {
     /// has laid out (never inside the turn that flipped it).
     private func storySettled(_ postID: String) {
         landing.rowSettled(postID)
-        guard landing.target != nil, let proxy = landing.proxy else { return }
-        armCheck(proxy)
+        // An event the authority cannot see: look again a turn later, so the
+        // look that reads the settle runs AFTER the reservation's drop has
+        // laid out (never inside the turn that flipped it).
+        authority.nudge()
     }
 
     /// The user scrolled while a landing was pending: she took over — the
     /// landing ends where she put the page, never fighting her.
     private func userScrolled() {
-        guard landing.target != nil else { return }
-        finish("the user scrolled")
+        authority.userTookOver()
     }
 
-    /// (Re)arm the quiet interval — the Outline landing's constants, reused:
-    /// an event re-arm is capped by the ceiling measured from the last
-    /// decision (so a busy column cannot starve the check); a decision
-    /// passes its own delay.
-    private func armCheck(_ proxy: ScrollViewProxy, after decided: TimeInterval? = nil) {
-        landing.proxy = proxy
-        landing.check?.cancel()
-        let delay: TimeInterval
-        if let decided {
-            delay = decided
-        } else {
-            let sinceDecision = Date().timeIntervalSince(landing.lastDecision)
-            delay = min(BookView.landingSettleInterval,
-                        max(0.01, BookView.landingMaxWait - sinceDecision))
-        }
-        let check = DispatchWorkItem { checkLanding(proxy) }
-        landing.check = check
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: check)
-    }
-
-    /// The quiet interval passed: the landing is DONE when the target sits
-    /// at the top, the hold is over and the near stories above it have
-    /// SETTLED — each surface has SAID so (`StableSurface.settled`: it held
-    /// one real size for its settle interval, adopted it and dropped its
-    /// reservation — nothing left in it that could move the target; ladder
-    /// R2-2/R2-3 retired the wall-clock guess that stood here); it ends
-    /// wherever it is at the time budget. In between it simply looks again
-    /// — the re-lands are the reports' (`anchorMoved`), never the interval's.
-    private func checkLanding(_ proxy: ScrollViewProxy) {
-        guard landing.target != nil else { return }
-        let elapsed = Date().timeIntervalSince(landing.began)
-        let atTop = landing.lastTop.map { abs($0) <= Self.landingTolerance } ?? false
-        if atTop, elapsed >= BookView.landingMinimumHold, landing.aboveTargetSettled() {
-            finish("settled at top=\(landing.lastTop ?? 0) after \(landing.corrections) re-lands, \(Int(elapsed * 1000)) ms")
-            return
-        }
-        if elapsed > BookView.landingTimeBudget {
-            finish("gave up at top=\(landing.lastTop.map { "\($0)" } ?? "unreported") after \(landing.corrections) re-lands, \(Int(elapsed * 1000)) ms")
-            return
-        }
-        // Row 100: the re-land is the INTERVAL's, issued from quiet, so the
-        // scroll sticks instead of being undone by the next content change.
-        // Only a target that is genuinely off the top spends a correction —
-        // a target at the top that is merely waiting on the hold, or on the
-        // stories above it settling, spends none.
-        if let top = landing.lastTop, abs(top) > Self.landingTolerance,
-           landing.corrections < Self.landingCorrectionBudget {
-            landing.corrections += 1
-            #if DEBUG
-            ReadingFlowGeometry.trace.append(
-                "RE-LAND \(landing.corrections) (top was \(Int(top)))")
-            #endif
-            if let anchor = landing.anchor { proxy.scrollTo(anchor, anchor: .top) }
-        }
-        landing.lastDecision = Date()
-        armCheck(proxy, after: max(BookView.landingSettleInterval,
-                                   BookView.landingMinimumHold - elapsed))
-    }
-
-    private func finish(_ why: String) {
-        #if DEBUG
-        if let target = landing.target {
-            ReadingFlowGeometry.trace.append("\(target.prefix(8)) DONE: \(why)")
-            let start = ReadingFlowGeometry.trace.lastIndex(where: { $0.hasSuffix(" LAND") }) ?? 0
-            // The dev build's story, readable from outside the process:
-            // `log show --process Variorum --predicate 'eventMessage CONTAINS "ReadingFlow landing"'`.
-            NSLog("ReadingFlow landing — %@", ReadingFlowGeometry.trace[start...].joined(separator: " | "))
-        }
-        #endif
-        landing.end()
-    }
 }
 
-/// The scroll's facts the landing listens to (R2-7): the content offset
-/// (logged) and the content height (re-arms the quiet interval).
 nonisolated struct FlowScrollFacts: Equatable, Sendable {
     var offset: CGFloat
     var height: CGFloat
 }
 
-/// The pending landing's state — one box per flow, mutated from geometry
-/// reports and timer checks without a `@State` write per report.
+/// **What only this surface knows about a pending landing** — which stories
+/// are near the viewport and which of those have said they settled, so the
+/// authority can be told whether it may finish.
+///
+/// **13u2b UNIT 2:** the landing's own bookkeeping (the anchor's last top, the
+/// corrections, the timer, the proxy) left this box for `LandingAuthority`;
+/// what remains is this list and the page's scroll offset for the story. The
+/// type's shape — `begin` / `end` / `rowNear` / `rowSettled` /
+/// `aboveTargetSettled` — is untouched, and so is the pin that drives it
+/// (`theFinisherWaitsOnTheSurfacesWordNeverOnAClock`).
 @MainActor
 final class FlowLanding {
     /// The row the landing scrolls to (a story's, or its chapter heading's).
     private(set) var anchor: String?
     /// The story the reveal named.
     private(set) var target: String?
-    var lastTop: CGFloat?
     /// The page's scroll offset at the last geometry report (R2-7: logged
     /// beside every `top=` so row 99's class is self-identifying).
     var lastOffset: CGFloat = 0
-    var began = Date()
-    var lastDecision = Date()
-    /// Re-lands taken so far (`ReadingFlowView.landingCorrectionBudget`).
-    var corrections = 0
-    var check: DispatchWorkItem?
-    var proxy: ScrollViewProxy?
     /// The stories in page order, and which of them are near / SETTLED —
     /// so the check can tell whether the rows ABOVE the target that will
     /// realize have finished trading their estimates for real heights.
@@ -524,22 +581,14 @@ final class FlowLanding {
     private var settled: Set<String> = []
 
     func begin(anchor: String, target: String, storiesInOrder: [String]) {
-        check?.cancel()
         self.anchor = anchor
         self.target = target
         order = storiesInOrder
-        lastTop = nil
-        began = Date()
-        lastDecision = Date()
-        corrections = 0
     }
 
     func end() {
-        check?.cancel()
-        check = nil
         anchor = nil
         target = nil
-        proxy = nil
     }
 
     func rowNear(_ postID: String, _ isNear: Bool) {
@@ -831,6 +880,59 @@ nonisolated enum FlowHeightEstimate {
     }
 }
 
+/// **What the flow's SMALL rows reported** (13u2b UNIT 2) — the manifest's
+/// `measured` arm for the title, the chapter headings and the closing mark.
+///
+/// Why there is no shape generalization here, where the book Outline's
+/// `BookOutlineHeights` has one: the Outline learns BY SHAPE because a book of
+/// 400 rows can never have them all realized, so one measured card must teach
+/// every card that looks like it. This column's small rows are a title, a
+/// closing mark and one heading per chapter — fifteen on Sherlock — and since
+/// this unit they are all always realized, so a per-row measurement is
+/// COMPLETE and a shape is a generalization of nothing. A story's own measured
+/// height is not here either: `SurfaceSizeMemory` is that store, and the
+/// manifest reads it as the remembered arm.
+///
+/// Not observed, deliberately: written at geometry cadence, read in a body.
+@MainActor
+final class FlowRowHeights {
+    private var measured: [String: CGFloat] = [:]
+    private var width: CGFloat = 0
+
+    /// A row rendered real content at this height. A width change drops
+    /// everything learned at the old measure — the page's serif title wraps
+    /// differently at another one, exactly as `SurfaceSizeMemory` refuses a
+    /// record from another width.
+    func learn(_ id: String, height: CGFloat, at width: CGFloat) {
+        guard height.isFinite, height > 0 else { return }
+        if abs(width - self.width) > stableSurfaceWidthTolerance {
+            self.width = width
+            measured = [:]
+        }
+        // Only a real change is written: a row re-reporting the same height
+        // during a scroll costs one comparison and no write.
+        if let known = measured[id], abs(known - height) <= 0.5 { return }
+        measured[id] = height
+    }
+
+    func height(of id: String) -> CGFloat? { measured[id] }
+
+    /// The first-frame constants, before a row has reported: the page's own
+    /// declared type and padding, which are voice-INDEPENDENT (the flow's
+    /// page is a fixed system serif — `FlowHeightEstimate.fingerprint`'s own
+    /// reason). Each is superseded by that row's own report within a frame,
+    /// so they are a first-frame answer and never a claim.
+    ///
+    /// - title: `ReadingPageTokens.serifTitle` (25 pt semibold serif ≈ 30 pt
+    ///   of line) under 56 pt of top padding.
+    /// - chapter: a 12-pt serif line (≈ 14) under 22 pt of top padding.
+    /// - end: the closing mark at the page serif (16 pt ≈ 19) between two
+    ///   40-pt paddings.
+    static let title: CGFloat = 86
+    static let chapter: CGFloat = 36
+    static let end: CGFloat = 99
+}
+
 /// The book's block extents for the flow's estimate, cached for the BOOK
 /// (ladder R2-4 — `BookViewModel.flowExtents`): `Queries.blockExtents` is
 /// one lengths-only statement per 400 entries, but its work is `LENGTH()`
@@ -874,14 +976,23 @@ enum ReadingFlowGeometry {
 }
 #endif
 
+/// What a flow row reports: where its top sits in the flow's space, and how
+/// tall it is (13u2b UNIT 2 — the height is the manifest's `measured` arm for
+/// the small rows, which always render real content).
+nonisolated private struct FlowRowGeometry: Equatable, Sendable {
+    var top: CGFloat
+    var height: CGFloat
+}
+
 private extension View {
-    /// A story row's landing anchor report: where its top sits in the
-    /// flow's space, to the landing (and, in DEBUG, the oracle).
-    func flowAnchor(_ postID: String, report: @escaping (CGFloat) -> Void) -> some View {
-        self.onGeometryChange(for: CGFloat.self) {
-            $0.frame(in: .named(ReadingFlowView.flowSpace)).minY
-        } action: { top in
-            report(top)
+    /// A row's landing anchor report: to the authority's seed, to the
+    /// column's own heights, and (in DEBUG) to the oracle.
+    func flowAnchor(_ id: String, report: @escaping (CGFloat, CGFloat) -> Void) -> some View {
+        self.onGeometryChange(for: FlowRowGeometry.self) {
+            let frame = $0.frame(in: .named(ReadingFlowView.flowSpace))
+            return FlowRowGeometry(top: frame.minY, height: frame.height)
+        } action: { geometry in
+            report(geometry.top, geometry.height)
         }
     }
 }

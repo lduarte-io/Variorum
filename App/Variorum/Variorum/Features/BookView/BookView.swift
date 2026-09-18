@@ -958,29 +958,21 @@ struct BookView: View {
     // laid out: the target's own growth is downward and leaves its top
     // where it is, and any neighbour's growth is one more report.
 
-    /// One pending landing: the anchor id, the hops taken, when it began,
-    /// and the anchor's last reported top (nil until the target realizes).
-    private struct OutlineLanding {
-        var anchorID: String
-        var hops = 0
-        let began = Date()
-        /// When the landing last DECIDED (began, hopped, or chose to wait
-        /// out the hold) — the ceiling below is measured from here.
-        var lastDecision = Date()
-        var lastTop: CGFloat?
-    }
-    /// The landing's bookkeeping — NOT render state. Nothing in the body
-    /// reads it, so it lives in a reference box that `@State` merely holds:
-    /// its mutations never invalidate the view. (The second cut of the
+    /// The Outline's own page bookkeeping — NOT render state. Nothing in the
+    /// body reads it, so it lives in a reference box that `@State` merely
+    /// holds: its mutations never invalidate the view. (The second cut of the
     /// row-53 fix wrote a `@State` slot on every content report; every
     /// such write re-laid the lazy column out, every relayout re-estimated
     /// the unrealized rows and moved the content height, which was one
     /// more report — a loop of the landing's own making, at ~7 Hz.)
+    ///
+    /// **13u2b UNIT 2:** the LANDING's own bookkeeping left this box for the
+    /// one authority (`LandingAuthority`, `Surface/`) — the pending anchor,
+    /// the hops, the quiet interval's timer and the seed of where every row
+    /// last said it was. What stays here is what belongs to this PAGE rather
+    /// than to any landing: which row is at the top (the width change's
+    /// anchor) and, in DEBUG, the per-landing height log.
     @MainActor private final class OutlineLandingBox {
-        var landing: OutlineLanding?
-        /// The pending quiet-interval check (re-armed by every report and
-        /// every hop; cancelled when the landing finishes).
-        var check: DispatchWorkItem?
         /// **13u2b UNIT 1: the row at the top of the page right now** — the
         /// one thing about the current scroll offset worth keeping across a
         /// WIDTH change, which changes every row's height and so makes the
@@ -993,79 +985,52 @@ struct BookView: View {
         /// the next row below can take it (without that last clause the
         /// holder's own receding top would out-rank every candidate forever).
         var topRow: (id: String, top: CGFloat)?
-        /// **Where every row last said it was** — and this is not a
-        /// convenience, it is what makes a landing on a row that is ALREADY
-        /// at the top terminate.
-        ///
-        /// Found on this unit's cold walk: `gave up at top=unrealized after
-        /// 15 hops, 4200 ms`, three times, on a click whose target was the
-        /// row the page was already showing. A landing learns where its
-        /// target is from geometry reports, and `onGeometryChange` reports a
-        /// CHANGE — so when the scroll does not move (the page is already
-        /// there) no report arrives, `lastTop` stays nil, and the loop reads
-        /// that as "the target never realized" and hops until the watchdog
-        /// stops it. Nothing moved on screen, so she would not see a stutter;
-        /// she would have a landing spinning for four seconds and a scroll of
-        /// her own fighting its hops.
-        ///
-        /// It could not happen before this unit, and that is the honest
-        /// reason it is new: a far row did not EXIST in a lazy container, so
-        /// every landing's target really did realize during the landing and
-        /// really did send its first report. Now every row exists, and a row
-        /// that has not moved has nothing to report.
-        var tops: [String: CGFloat] = [:]
         #if DEBUG
         /// Realized row heights, for the trace's "who grew" line.
         var rowHeights: [String: CGFloat] = [:]
         #endif
     }
     @State private var landingBox = OutlineLandingBox()
-    private var outlineLanding: OutlineLanding? {
-        get { landingBox.landing }
-        nonmutating set { landingBox.landing = newValue }
-    }
-    private var landingCheck: DispatchWorkItem? {
-        get { landingBox.check }
-        nonmutating set { landingBox.check = newValue }
-    }
+
+    /// **THE ONE LANDING AUTHORITY** (13u2b UNIT 2 — `Surface/LandingAuthority.swift`).
+    /// The aim/hold/quiet/hop discipline that grew here at row 53 lives there
+    /// now, parameterized; this surface keeps the policy's numbers (below,
+    /// unchanged) and hands the authority its one act — an unanimated
+    /// `scrollTo` — its manifest facts, and every row's geometry report.
+    #if DEBUG
+    @State private var landing = LandingAuthority(
+        policy: .bookOutline,
+        storyboard: LandingStoryboard(
+            note: { BookOutlineGeometry.trace.append($0) },
+            dump: {
+                // A landing's story is only this landing's: print from the
+                // last line that ENDS in " LAND". (Measured the hard way on
+                // UNIT 1's own walk, when every landing printed the whole
+                // session's trace.)
+                let start = BookOutlineGeometry.trace
+                    .lastIndex(where: { $0.hasSuffix(" LAND") }) ?? 0
+                return BookOutlineGeometry.trace[start...].joined(separator: " | ")
+            }))
+    #else
+    @State private var landing = LandingAuthority(policy: .bookOutline)
+    #endif
+
     /// The scroll's named space — anchor frames read in it are visible-
     /// relative, so "at the top" is `minY ≈ 0`.
     static let outlineSpace = "book-outline-scroll"
-    /// Within this many points of the top, a landing is DONE.
-    static let landingTolerance: CGFloat = 2
-    /// The quiet interval: this long with no event — no anchor report, no
-    /// change in the column's content height, no hop — decides the
-    /// landing: done if the last report was at the top, one more hop if it
-    /// was not (or if the target never reported). Long enough for the lazy
-    /// layout to absorb a size change before the next hop reads it.
-    static let landingSettleInterval: TimeInterval = 0.25
-    /// The minimum hold: a landing may not finish before this much time
-    /// has passed since it began, however quiet the column looks. The
-    /// rows the landing realizes load their heights ASYNCHRONOUSLY (a DB
-    /// read, then a projection fill — hundreds of milliseconds on the
-    /// encrypted on-disk store, where the in-memory harness takes tens),
-    /// and a quiet interval alone races that load: the anchor sat at the
-    /// top, the interval passed, the neighbour above then grew by 9,000 pt
-    /// and pushed the page into it (the walk's step 5, reproduced on the
-    /// first cut of this fix). The hold keeps the landing armed through
-    /// that window; a real scroll by the user ends it early (below).
-    static let landingMinimumHold: TimeInterval = 1.0
-    /// The ceiling on waiting: a check runs no later than this after the
-    /// landing's last decision, however busy the column is. Without it the
-    /// quiet interval can be STARVED — a 9k-word read-cheap neighbour
-    /// re-reports its height again and again as TK2 lays it out, every
-    /// report pushes the check further out, and the landing never hops
-    /// and never finishes (the second cut of this fix, on the dev store:
-    /// the page sat inside the wrong story with the landing still pending
-    /// and nothing ever written to the log).
-    static let landingMaxWait: TimeInterval = 0.6
-    /// The most hops one landing may take. Generous on purpose — the time
-    /// budget is the real fence; this one only guards a pathological loop.
-    static let landingHopBudget = 40
-    /// The watchdog: a landing older than this stops hopping wherever it
-    /// is. Loading a 9k-word story's height takes well under a second; a
-    /// target that has not settled by now will not.
-    static let landingTimeBudget: TimeInterval = 4
+
+    /// **The Outline's landing policy** — the row-53 numbers, unchanged by
+    /// the hoist and now stated in one place with the reasoning for each
+    /// (`LandingPolicy.bookOutline`). The five names below are kept as
+    /// aliases because the suites and the flow already speak them: the
+    /// address moved, not the behaviour.
+    static let landingPolicy = LandingPolicy.bookOutline
+    static var landingTolerance: CGFloat { landingPolicy.tolerance }
+    static var landingSettleInterval: TimeInterval { landingPolicy.settleInterval }
+    static var landingMinimumHold: TimeInterval { landingPolicy.minimumHold }
+    static var landingMaxWait: TimeInterval { landingPolicy.maxWait }
+    static var landingHopBudget: Int { landingPolicy.correctionBudget }
+    static var landingTimeBudget: TimeInterval { landingPolicy.timeBudget }
     /// **13u2b UNIT 1: how far beyond the viewport a SMALL row still draws
     /// real content** (`OutlineRunRow`). Smaller than the expanded rows'
     /// 2,500 because a heading or a card is ~50–100 pt, so this is already
@@ -1075,34 +1040,25 @@ struct BookView: View {
     static let runRowNearMargin: CGFloat = 1200
 
     /// Put an Outline anchor at the top of the page (no animation — see the
-    /// mark above), and watch it settle.
+    /// mark above), and watch it settle. **13u2b UNIT 2: the watching is the
+    /// authority's**; what stays here is this surface's own act (the scroll)
+    /// and what only this surface knows (its manifest's facts about the
+    /// column, and the per-landing height log).
     private func landOutline(_ anchorID: String, _ proxy: ScrollViewProxy) {
-        landingCheck?.cancel()
-        var landing = OutlineLanding(anchorID: anchorID)
-        // Seed from what the target last said (see `tops`): a landing whose
-        // scroll moves nothing — because the page is already there — would
-        // otherwise never hear from its target at all.
-        landing.lastTop = landingBox.tops[anchorID]
-        outlineLanding = landing
         #if DEBUG
         landingBox.rowHeights = [:]
-        // The story's first line must END in " LAND": `finishLanding` prints
-        // from the last entry that does, and a landing's story is only this
-        // landing's. (Measured the hard way during this unit's own walk — the
-        // manifest's numbers were first appended to that same string, and
-        // every landing then printed the whole session's trace.)
-        BookOutlineGeometry.trace.append("\(anchorID) LAND")
-        let manifest = outlineHeightManifest
-        BookOutlineGeometry.trace.append(
-            "manifest w=\(Int(manifest.width)) rows=\(manifest.rows.count) "
-            + "expanded=\(model.expandedCount) "
-            + "derived=\(manifest.derivedCount) "
-            + "exactAbove=\(manifest.isExactAbove(anchorID) ? "Y" : "N") "
-            + "offset=\(Int(manifest.offset(of: anchorID) ?? -1)) "
-            + "total=\(Int(manifest.totalHeight))")
         #endif
-        proxy.scrollTo(anchorID, anchor: .top)
-        armLandingCheck(proxy)
+        landing.land(
+            anchorID,
+            // Built on every landing rather than only in DEBUG since this
+            // unit: the SIGNPOST is what they are for, and it ships. It is
+            // arithmetic over the rows in hand — ∝ entries, measured at
+            // 1.16 ms for the 400-row window cap and ~0.08 ms at Sherlock's
+            // 26 — paid once per click.
+            facts: LandingFacts(manifest: outlineHeightManifest, anchor: anchorID)
+        ) { id in
+            proxy.scrollTo(id, anchor: .top)
+        }
     }
 
     /// A realized anchor reported where it sits. Every report feeds the
@@ -1112,9 +1068,8 @@ struct BookView: View {
     fileprivate func outlineAnchorMoved(
         _ anchorID: String, top: CGFloat, height: CGFloat, _ proxy: ScrollViewProxy
     ) {
-        // 13u2b UNIT 1: where this row is, and who is at the top (the width
-        // change's anchor).
-        landingBox.tops[anchorID] = top
+        // 13u2b UNIT 1: who is at the top (the width change's anchor). Where
+        // EVERY row is — the landing's seed — is the authority's, below.
         if landingBox.topRow?.id == anchorID {
             landingBox.topRow = top >= -Self.landingTolerance ? (anchorID, top) : nil
         } else if top >= -Self.landingTolerance,
@@ -1124,108 +1079,31 @@ struct BookView: View {
         #if DEBUG
         BookOutlineGeometry.anchorTops[anchorID] = top
         BookOutlineGeometry.rowHeights[anchorID] = height
-        if outlineLanding != nil {
+        if landing.isPending {
             let known = landingBox.rowHeights[anchorID]
             if known == nil || abs((known ?? 0) - height) > 0.5 {
                 BookOutlineGeometry.trace.append("\(anchorID.prefix(13)) h=\(Int(height))")
             }
             landingBox.rowHeights[anchorID] = height
         }
-        if outlineLanding?.anchorID == anchorID {
-            BookOutlineGeometry.trace.append("\(anchorID) top=\(top) hops=\(outlineLanding?.hops ?? -1)")
+        if landing.anchor == anchorID {
+            BookOutlineGeometry.trace.append("\(anchorID) top=\(top) hops=\(landing.corrections)")
         }
         #endif
-        guard var landing = outlineLanding, landing.anchorID == anchorID else { return }
-        landing.lastTop = top
-        outlineLanding = landing
-        armLandingCheck(proxy)
-    }
-
-    /// (Re)arm the quiet interval; when it passes untouched, decide. An
-    /// EVENT re-arm (a report, a content change) is capped by the ceiling
-    /// measured from the landing's last decision; a decision passes its
-    /// own delay.
-    private func armLandingCheck(_ proxy: ScrollViewProxy, after decided: TimeInterval? = nil) {
-        landingCheck?.cancel()
-        let delay: TimeInterval
-        if let decided {
-            delay = decided
-        } else {
-            let sinceDecision = Date().timeIntervalSince(outlineLanding?.lastDecision ?? Date())
-            delay = min(Self.landingSettleInterval, max(0.01, Self.landingMaxWait - sinceDecision))
-        }
-        let check = DispatchWorkItem { checkLanding(proxy) }
-        landingCheck = check
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: check)
+        landing.noteTop(anchorID, top)
     }
 
     /// The column's content height changed (a realized row loaded its
     /// text, a card its excerpt, a story its editor): the layout is still
     /// settling, whatever the anchor last said — re-arm the interval.
     fileprivate func outlineContentResized(_ height: CGFloat, _ proxy: ScrollViewProxy) {
-        guard outlineLanding != nil else { return }
-        #if DEBUG
-        BookOutlineGeometry.trace.append("content=\(Int(height))")
-        #endif
-        armLandingCheck(proxy)
+        landing.contentChanged(height)
     }
 
     /// The user scrolled while a landing was pending: she took over — the
     /// landing ends where she put the page, never fighting her.
     fileprivate func outlineUserScrolled() {
-        guard outlineLanding != nil else { return }
-        finishLanding("the user scrolled")
-    }
-
-    /// The quiet interval passed: at the top (and past the hold) ⇒ landed;
-    /// away from it (or never reported) ⇒ one hop, unless a fence says stop.
-    private func checkLanding(_ proxy: ScrollViewProxy) {
-        guard var landing = outlineLanding else { return }
-        let elapsed = Date().timeIntervalSince(landing.began)
-        if let top = landing.lastTop, abs(top) <= Self.landingTolerance {
-            if elapsed >= Self.landingMinimumHold {
-                finishLanding("settled at top=\(top) after \(landing.hops) hops, \(Int(elapsed * 1000)) ms")
-            } else {
-                // At the top, but the neighbours may still be loading —
-                // look again when the hold is over (an event before then
-                // re-arms as usual).
-                landing.lastDecision = Date()
-                outlineLanding = landing
-                armLandingCheck(proxy, after: Self.landingMinimumHold - elapsed)
-            }
-            return
-        }
-        if elapsed > Self.landingTimeBudget || landing.hops >= Self.landingHopBudget {
-            finishLanding("gave up at top=\(landing.lastTop.map { "\($0)" } ?? "unrealized") "
-                + "after \(landing.hops) hops, \(Int(elapsed * 1000)) ms")
-            return
-        }
-        landing.hops += 1
-        landing.lastDecision = Date()
-        outlineLanding = landing
-        #if DEBUG
-        BookOutlineGeometry.trace.append("\(landing.anchorID) HOP \(landing.hops) at \(Int(elapsed * 1000)) ms"
-            + (landing.lastTop.map { " (top was \($0))" } ?? " (unreported)"))
-        #endif
-        proxy.scrollTo(landing.anchorID, anchor: .top)
-        // A hop that moves nothing (the target unrealized, or the layout
-        // unchanged) produces no report — the interval decides again.
-        armLandingCheck(proxy)
-    }
-
-    private func finishLanding(_ why: String) {
-        #if DEBUG
-        if let landing = outlineLanding {
-            BookOutlineGeometry.trace.append("\(landing.anchorID) DONE: \(why)")
-            // The dev build's story, readable from outside the process:
-            // `log show --process Variorum --predicate 'eventMessage CONTAINS "BookOutline landing"'`.
-            let start = BookOutlineGeometry.trace.lastIndex(where: { $0.hasSuffix(" LAND") }) ?? 0
-            NSLog("BookOutline landing — %@", BookOutlineGeometry.trace[start...].joined(separator: " | "))
-        }
-        #endif
-        landingCheck?.cancel()
-        landingCheck = nil
-        outlineLanding = nil
+        landing.userTookOver()
     }
 
     /// The navigator's note-row click in Outline (the correction round,
@@ -1534,7 +1412,7 @@ struct BookView: View {
             }
             .onScrollPhaseChange { _, phase in
                 #if DEBUG
-                if outlineLanding != nil { BookOutlineGeometry.trace.append("phase=\(phase)") }
+                if landing.isPending { BookOutlineGeometry.trace.append("phase=\(phase)") }
                 #endif
                 if phase == .interacting { outlineUserScrolled() }
             }

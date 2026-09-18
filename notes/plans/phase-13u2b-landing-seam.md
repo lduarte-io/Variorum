@@ -808,9 +808,9 @@ fixed** — the hallucination guard's own rule, and it binds here exactly as it 
 | the record opened + the red-on-old pin shapes stated | **DONE** — this section, before any product code |
 | PIN A / PIN B measured on the pre-fix tree | **DONE** — PIN B **RED** (`gave up at top=unreported after 0 re-lands, 4211 ms`, 2/2 runs); PIN A **GREEN on both sides — HOLLOW as a red-on-old pin**, and its trace measured something else that is real (below) |
 | the PURE hoist — `ProseHeightModel`, ONE prose model for both consumers | **DONE** — `Surface/ProseHeightModel.swift`; `BookOutlineHeightModel.ProseMetrics` is now a typealias for it and both `expandedHeight` and `FlowHeightEstimate.height` call it; **21 tests / 2 suites green with ZERO test edits** (`ReadingFlowEstimateTests` + `BookHeightManifestTests`) |
-| THE AUTHORITY — hoisted from `BookView`, parameterized, the story built in | NOT-STARTED |
-| the Outline consumes it BYTE-IDENTICALLY (its suites green, ZERO test edits) | NOT-STARTED |
-| THE FLOW adopts the authority AND the manifest (row-100 pins unmodified) | NOT-STARTED |
+| THE AUTHORITY — hoisted from `BookView`, parameterized, the story built in | **DONE** — `Surface/LandingAuthority.swift`: the PURE decision (`LandingSettle.decide`) + the runner + the policies + the signpost |
+| the Outline consumes it BYTE-IDENTICALLY (its suites green, ZERO test edits) | **DONE** — `BookOutlineLandingTests` + `BookOutlineRowsTests` **13/13 green, zero test edits, zero known issues** |
+| THE FLOW adopts the authority AND the manifest (row-100 pins unmodified) | **DONE** — all seven shipped flow pins green UNMODIFIED; **PIN B now settles at 0 hops in 1,017 ms** where it spent 4,211 ms and gave up; the four suites together **29 tests / 4 suites GREEN** |
 | THE SIGNPOST — content-free, ships in Release, emitted by the authority | NOT-STARTED |
 | the signpost verified content-free (a capture + the Release binary's own strings) | NOT-STARTED |
 | the dev-store WALK — a far landing in Read ▸ Scroll, both directions, on Sherlock | NOT-STARTED |
@@ -866,3 +866,16 @@ row whose derived height is off shifts once when it enters the near band, and is
 compensator's honest job by AR-1's own ruling, and is exactly what the SIGNPOST is for: a landing
 that reports `derived=N exactAbove=N` says in her own store that a shift is expected and how many
 rows can still cause one.
+
+## WHAT THE FLOW'S ADOPTION ACTUALLY CHANGED — measured, before and after
+
+| the chaptered flow's far landing (PIN A's trace) | before | after |
+|---|---|---|
+| the FIRST aim's error | `top=-24` (the lazy run's estimate for the heading's own row) | **`top=0`** — the aim is exact on the first report, both directions |
+| the manifest's computed offset vs the column's own | — | **`offset=192496` computed, `offset=192496` scrolled** — the arithmetic and the column agree exactly |
+| the derived-story residual | `content` 258,530 → 265,201 in ~1,670-pt steps; ONE correction | unchanged, and now SAID: `derived=12 exactAbove=N` |
+| landing again on the row the page is at (PIN B) | `gave up at top=unreported after 0 re-lands, 4211 ms` | **`settled at top=0.0 after 0 hops, 1017 ms`** |
+
+The first line is the small rows' lazy estimate retiring; the second is the manifest proving itself
+against the real column; the fourth is the SEED, which the flow gets *because* the authority is
+shared — it was built for the Outline at UNIT 1 and this surface never had it.

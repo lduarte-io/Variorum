@@ -40,6 +40,28 @@ final class FlowRevealBox {
     var landedCount = 0
 }
 
+/// **13u2b UNIT 2 — the host the BOOK really gives this surface when the
+/// book has chapters** (`BookView` passes `structure.grouped(entries:)`
+/// whenever `chaptersActive`): the same flow, grouped. The flat `FlowHost`
+/// below is unchanged and every pre-existing pin still mounts through it.
+private struct ChapteredFlowHost: View {
+    let session: AppSession
+    let grouped: [(section: ReadingSection?, entries: [Queries.ReadingEntry])]
+    let box: FlowRevealBox
+
+    var body: some View {
+        ReadingFlowView(
+            session: session, readingName: "the flow",
+            grouped: grouped,
+            onWake: { _, _ in },
+            reveal: box.reveal,
+            onRevealLanded: {
+                box.landedCount += 1
+                box.reveal = nil
+            })
+    }
+}
+
 /// The host the app gives the flow, reduced to its landing half: the
 /// reveal slot set after the mount, consumed through `onRevealLanded`.
 private struct FlowHost: View {
@@ -431,6 +453,177 @@ struct ReadingFlowLandingTests {
             #expect(realized > 0, "the first story rendered")
             #expect(realized <= 2,
                     "only the near stories are surfaces — the far ones are placeholders at their estimated heights, and none mounts before its height is known: \(realized) realized")
+        }
+    }
+}
+
+// MARK: - 13u2b UNIT 2 — the Outline's far-below arm's pattern, applied to the FLOW
+
+extension ReadingFlowLandingTests {
+    /// Three notes to a chapter — Sherlock's own shape, and the shape
+    /// `BookView` hands this surface whenever a book has chapters.
+    private func inChapters(
+        _ entries: [Queries.ReadingEntry], of size: Int = 3
+    ) -> [(section: ReadingSection?, entries: [Queries.ReadingEntry])] {
+        stride(from: 0, to: entries.count, by: size).map { start in
+            let id = "chapter-\(start / size)"
+            return (
+                section: ReadingSection(
+                    id: id, readingId: "book", name: "Chapter \(start / size + 1)",
+                    position: id,
+                    createdAt: Date(timeIntervalSince1970: 0),
+                    updatedAt: Date(timeIntervalSince1970: 0)),
+                entries: Array(entries[start..<min(start + size, entries.count)]))
+        }
+    }
+
+    /// **PIN A — a far CHAPTER landing in Read ▸ Scroll, her own gesture's
+    /// shape** (*"I clicked a far away chapter, that was fine, then I clicked
+    /// one that was much higher"*), and the Outline far-below arm's pattern
+    /// applied to this surface: a long column, a target far from the viewport,
+    /// the claim read TWICE — at the settle and a second later — with the
+    /// corrections bounded.
+    ///
+    /// **The mechanism it guards, named before it was measured (13u2b UNIT 2's
+    /// record):** the flow's landing anchor for the first note of a chapter is
+    /// the CHAPTER HEADING's row (`FlowRows.landingAnchor`), and a heading is a
+    /// SMALL row — which lived inside a `LazyVStack` run until this unit. So
+    /// the one row a chapter landing aims at was the one row the column might
+    /// not have built, and an unbuilt row sends no geometry report: the
+    /// landing's `lastTop` stayed nil, the flow spends no correction on an
+    /// unreported target (row 100's own rule, deliberately), and the landing
+    /// ran out its watchdog wherever the lazy estimate had put the page.
+    ///
+    /// **MEASURED RED ON THE PRE-FIX TREE (2026-09-18, zero instances):** the
+    /// numbers are in the UNIT 2 RECORD.
+    @Test func aRevealOfAFarChaptersFirstStoryLandsAtThatChaptersHeading() async throws {
+        try await withStories(count: 12, seed: 61) { session, entries in
+            #if DEBUG
+            ReadingFlowGeometry.anchorTops = [:]
+            ReadingFlowGeometry.trace = []
+            #endif
+            let grouped = inChapters(entries)
+            let box = FlowRevealBox()
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 1000, height: 760),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: AnyView(
+                ChapteredFlowHost(session: session, grouped: grouped, box: box)
+                    .environment(ThemeStore(session: session))))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1000, height: 760)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            #expect(await settle(window, hosting, timeout: 20) {
+                Self.documentHeight(hosting) >= 3 * 11_000
+            }, "the flow mounted at its honest height (\(Self.scrollFacts(hosting)))")
+
+            /// Reveal a chapter's first story — which lands at that chapter's
+            /// HEADING — and read the claim twice.
+            @MainActor func openChapter(_ index: Int, _ what: String) async -> (CGFloat?, CGFloat?, Int) {
+                let target = grouped[index].entries[0].postID
+                let anchor = FlowRows.landingAnchor(for: target, grouped: grouped)
+                #if DEBUG
+                ReadingFlowGeometry.trace = []
+                #endif
+                box.reveal = target
+                _ = await settle(window, hosting, timeout: 12) {
+                    ReadingFlowGeometry.anchorTops[anchor]
+                        .map { abs($0) <= Self.landingTolerance } ?? false
+                }
+                let first = ReadingFlowGeometry.anchorTops[anchor]
+                _ = await settle(window, hosting, timeout: 1.5) { false }
+                let held = ReadingFlowGeometry.anchorTops[anchor]
+                let relands = ReadingFlowGeometry.trace.filter { $0.hasPrefix("RE-LAND") }.count
+                print("[13u2b U2 PIN A] \(what): anchor \(anchor) settled at \(String(describing: first)) · a second later \(String(describing: held)) · re-lands \(relands); \(Self.scrollFacts(hosting))")
+                print("[13u2b U2 PIN A] \(what) trace: \(ReadingFlowGeometry.trace.suffix(24))")
+                return (first, held, relands)
+            }
+
+            // FAR BELOW: the last chapter of four, eleven stories down.
+            let below = await openChapter(3, "the last chapter (far below)")
+            #expect(below.1.map { abs($0) <= Self.landingTolerance } ?? false,
+                    "the last chapter's heading is at the top of the page a second later — \(String(describing: below.1))")
+            // FAR ABOVE: the second chapter — her gesture's other half.
+            let above = await openChapter(1, "the second chapter (far above)")
+            #expect(above.1.map { abs($0) <= Self.landingTolerance } ?? false,
+                    "the second chapter's heading is at the top of the page a second later — \(String(describing: above.1))")
+            #expect(below.2 <= 3 && above.2 <= 3,
+                    "the corrections stayed at the recorded worst case + 1: \(below.2) / \(above.2)")
+        }
+    }
+
+    /// **PIN B — landing again on the row the page is ALREADY at.** UNIT 1
+    /// found this on the Outline's own walk and fixed it there; the flow has
+    /// the same mechanism and was never touched: `FlowLanding.begin` sets
+    /// `lastTop = nil` and nothing seeds it, while `onGeometryChange` reports a
+    /// CHANGE — so a scroll that moves nothing produces no report, the landing
+    /// reads that as "the target never realized", and it runs out its whole
+    /// 4-s watchdog with nothing visible happening (and her own scroll
+    /// fighting it for that long).
+    ///
+    /// **MEASURED RED ON THE PRE-FIX TREE (2026-09-18, zero instances):** the
+    /// numbers are in the UNIT 2 RECORD.
+    @Test func landingAgainOnTheStoryThePageIsAlreadyAtSettlesInsteadOfSpinning() async throws {
+        try await withFiveStories(seed: 67) { session, entries in
+            #if DEBUG
+            ReadingFlowGeometry.anchorTops = [:]
+            ReadingFlowGeometry.trace = []
+            #endif
+            let box = FlowRevealBox()
+            let (window, hosting) = mount(session: session, entries: entries, box: box)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            _ = await settle(window, hosting, timeout: 20) {
+                Self.documentHeight(hosting) >= 3 * 11_000
+            }
+            // A STORY row's report is keyed by its POST id (`anchorMoved`
+            // maps the anchor back through `FlowRows.postID(ofAnchor:)`); a
+            // chapter heading's is keyed by the row id. PIN A reads the
+            // second, this one the first.
+            let target = entries[3].postID
+            box.reveal = target
+            let landed = await settle(window, hosting, timeout: 12) {
+                ReadingFlowGeometry.anchorTops[target].map { abs($0) <= Self.landingTolerance } ?? false
+            }
+            #expect(landed, "the first landing arrived — top \(String(describing: ReadingFlowGeometry.anchorTops[target]))")
+            _ = await settle(window, hosting, timeout: 2) {
+                ReadingFlowGeometry.trace.contains { $0.contains(" DONE: ") }
+            }
+
+            // Ask for the SAME story again: the page is already there, so the
+            // scroll moves nothing and no row reports.
+            #if DEBUG
+            ReadingFlowGeometry.trace = []
+            #endif
+            box.reveal = target
+            _ = await settle(window, hosting, timeout: 8) {
+                ReadingFlowGeometry.trace.contains { $0.contains(" DONE: ") }
+            }
+            let story = ReadingFlowGeometry.trace.joined(separator: " | ")
+            print("[13u2b U2 PIN B] already there: \(story)")
+            #expect(story.contains(" DONE: "), "the second landing finished at all: \(story)")
+            // Stated POSITIVELY, because the shipped word for an unreported
+            // target differed between the two surfaces before the authority
+            // ("unreported" here, "unrealized" in the book Outline, whose own
+            // pin asserts its absence) and a pin that turns on which word a
+            // landing prints would have lost its teeth the moment one name
+            // won. What is red on old is the OUTCOME: `gave up at
+            // top=unreported after 0 re-lands, 4211 ms`.
+            #expect(story.contains("settled at top="),
+                    "the landing SETTLED — it knew where its target was: \(story)")
+            #expect(!story.contains("gave up"),
+                    "…rather than spending its whole budget: \(story)")
+            #expect(!story.contains("unrealized"),
+                    "and it never reported its target missing: \(story)")
+            #expect(abs(ReadingFlowGeometry.anchorTops[target] ?? 999) <= Self.landingTolerance,
+                    "and the page is still there")
         }
     }
 }
