@@ -8,6 +8,10 @@
 
 ## The pointer thread (superseded "Current phase" pointers)
 
+## Rolled at the 13u2b kickoff (2026-09-18) — the post-13u2 "NEXT AT HER WORD" pointer paragraph, verbatim
+
+**→ NEXT AT HER WORD — 13u2 CLOSED 2026-09-15 (the overnight run; the closeout log below has its paragraph, the record `notes/plans/phase-13u2-feel.md`, the handoff `notes/handoffs/phase-13u2-handoff.md`).** The active order (R-13u-11): **13u3 — FACES** is the next 13u phase (its kickoff is refreshed atop `notes/plans/phase-13u3-faces.md`); the two grouped standing-fix runs (`notes/plans/pre-beta-standing-fix-runs.md`) and the stress pass stand beside it at her word — she picks. **Her morning bundle from the overnight run:** QUESTIONS #110(c) · #111 · #112 (the STAR CAP, (b), unblocks built work) · #113, the ⇧⌘V taste call, the no-round-2 and wrapped-gate-arm rulings to sanity-check, and items 1 + 18's field acceptance — HER HANDS (the handoff's checklist leads with the walk).
+
 ## Rolled at the 13u2 closeout (2026-09-15) — the 13u2-current pointer block, verbatim
 
 **→ 13u2 — FEEL & FACES — THE CURRENT PHASE (13u1 CLOSED 2026-09-15 — the closeout log below has its paragraph, the record `notes/plans/phase-13u1-editor-seam.md`, the handoff `notes/handoffs/phase-13u1-handoff.md`): THE SEAM IS SOLID; NOW THE APP FEELS GOOD IN THE HANDS.**
