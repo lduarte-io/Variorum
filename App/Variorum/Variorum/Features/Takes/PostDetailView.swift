@@ -487,8 +487,12 @@ struct PostDetailView: View {
                 // the outgoing surface is still mounted and still knows where
                 // the carried block sits. A request for the mode already
                 // showing captures nothing: it is not a switch.
-                applyMode: { m in
-                    if binding.wrappedValue != m { router.carryPlaceAcrossModeSwitch() }
+                // (`[weak router]`: the router STORES this closure, so a strong
+                // capture would be a cycle for as long as the detail is
+                // registered — broken at `unregisterDetail`, but a cycle a
+                // reader has to reason about is one worth not making.)
+                applyMode: { [weak router] m in
+                    if binding.wrappedValue != m { router?.carryPlaceAcrossModeSwitch() }
                     binding.wrappedValue = m
                 },
                 // Row 15: ⌘⇧I and the ⌘K row reach THIS masthead's tag field
