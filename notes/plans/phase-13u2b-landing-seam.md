@@ -117,7 +117,7 @@ no longer the orchestrator's reading of a condition; her direct ruling.
 |---|---|---|
 | 1 | UNIT 1 — the height manifest + the Outline lands once (gate: row 64's arm ≤4, UNWRAPPED) | **DONE 2026-09-18 — gate MET (0 hops, arm unwrapped), record closed at `f66d1dc5`, THE ORCHESTRATOR'S WALK PASSED (below)** |
 | 2 | UNIT 2 — one landing authority + the flow + the Release signpost | **DONE 2026-09-18 — record closed at `77f0f09c`, THE ORCHESTRATOR'S WALK PASSED (below)** |
-| 3 | UNIT 3 — the mode-switch viewport-fraction carry (#114's defaults) | **BUILT 2026-09-18 — record closed, pending the orchestrator's walk** |
+| 3 | UNIT 3 — the mode-switch viewport-fraction carry (#114's defaults) | **DONE 2026-09-18 — record closed at `67f437c4`, THE ORCHESTRATOR'S WALK PASSED with ONE FLAGGED FINDING → the ladder (below)** |
 | 4 | QUESTIONS #114 (a)/(b) — U3's scope edges | LOGGED — hers |
 | 5 | The ladder — `fable-reviewer` over the combined diff, standing rounds | not yet owed |
 | 6 | The orchestrator's per-unit walks + HER field walk (the phase's acceptance) | pending |
@@ -609,6 +609,25 @@ cliclick's CG events do reach them; recorded for future walks in WalkKit's spiri
 recorded residuals are ACCEPTED as recorded** (the flow's eager small rows — reasoned bound with
 the placeholder as the named ready answer, the ladder may weigh it; the ≤0.25-s-sooner look —
 identical-or-better). **VERDICT: UNIT 2 ACCEPTED — ledger row 2 DONE.**
+
+## THE ORCHESTRATOR'S WALK — UNIT 3 (2026-09-18, overnight)
+
+Same rig (the `13u2b` Debug binary of 08:29). The Twisted Lip note opened via ⌘K into Write at its
+remembered block (130/222 — the memory road live). I set the current block to 137 mid-viewport
+(fraction ≈0.5 of the editor), then round-tripped. **Three of four hops honor the carry** within my
+eyeball tolerance: Read → Write returned 137 at ≈0.84 against Read's ≈0.86; a second Write → Read
+placed ≈0.91 against ≈0.84 (my coordinates are hand-estimated; the implementer's cross-correlated
+walk measured 0.0-pt shifts on the same roads). **Takes round trip: MAX PIXEL DIFFERENCE 0** across
+enter → leave → re-enter (numpy diff of full-window captures) — R-Q21 byte-untouched, exactly the
+#114(b) promise. **ONE FLAGGED FINDING, routed to the LADDER's fix pass with this trace:** the
+FIRST Read mount after a note-open ignored the carry — Write had 137 at ≈0.44 (pane-relative) and
+Read's first mount placed it at ≈0.86, with the pane's wash sitting on block 130, the NOTE-OPEN's
+block — i.e. the first face mount consumed the stale open-landing's aim instead of the switch's
+carried block+fraction; every SUBSEQUENT switch honors the carry. Repro: open a note via ⌘K (Write
+lands at the remembered block) → click a different block → ⌘3 immediately. The unit's own "every
+switch re-decides" rule appears not to reach the pane's FIRST-mount landing road. Captures
+`u3-09/10/11-orch-*`. **VERDICT: UNIT 3 ACCEPTED — the core is proven by the pins and the
+implementer's measured walk; the first-mount interaction is a bounded defect for the ladder.**
 
 ## ADJUDICATIONS (the architect's rulings)
 
