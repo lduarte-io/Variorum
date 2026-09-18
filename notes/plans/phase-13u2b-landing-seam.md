@@ -463,6 +463,25 @@ computes from known heights and lands once — the heights now live in the colum
 authority hoist should expect the compensator's role as shrunk by this ruling: the net under
 DERIVED rows, and the flow until it adopts.
 
+**AR-2 (2026-09-18, overnight — the one test edit rider 3 fenced; ruled on the implementer's
+stop-and-report, exactly the discipline the rider asked for):** the gate is MET (far below: `top=0.0,
+0 hops, 1004 ms`, zero `content=` churn during the landing where the pre-fix trace moved every
+~60 ms; every other landing 0 hops; the arm UNWRAPPED on its unexpected pass per row 64's own unlock
+instruction; the manifest's 14 pure pins green). One PREMISE line in
+`BookOutlineLandingTests.anOffScreenCollapsedNoteIsRevealedAtTheTop` broke by design:
+`anchorTop(last) == nil` encoded "unrealized" as "absent from the geometry oracle" — an artifact of
+the lazy column this unit retired; every row now exists as a placeholder and honestly reports its
+anchor. **RULING: restate the premise as proposed** — `(anchorTop(last) ?? 0) > <the mounted
+window's height>` ("starts far below the fold, off-screen") — which is the intent measured
+DIRECTLY, and STRONGER than the old line (the old form also passed if the row was simply never
+built for an unrelated reason; the new form asserts the hard case positively; measured 2922 against
+the 760 window). Two small conditions: prefer the mounted height's existing symbol over a bare
+literal where one is already in reach (a literal with its derivation stated at the line is
+acceptable); and the UNIT 1 RECORD lists this as the unit's ONE test edit with this why — the
+test's CLAIM (`abs(top) <= 4`) is untouched and green, so the zero-test-mechanism-churn promise
+stands: no scroll mechanism, anchor road, or reveal path changed in any test. Riders 1–2
+(the closed-road mount guard; the P1/P3 cost measurements) remain owed before the unit closes.
+
 ## CLOSEOUT (the ritual, so nothing is forgotten)
 
 Record results per unit here; mark complete; master plan table + pointer flip (the superseded
