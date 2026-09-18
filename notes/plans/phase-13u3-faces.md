@@ -101,3 +101,36 @@ should get a quick walk — the 13u2 ladder's note); the ⇧⌘V grey-vs-refuse 
 13u4/13s-class item unless she routes it here); #110(c)'s `off`-value consequence. The
 lane-reserves-measure residuals row (KnownIssues) dissolves into item 3's rework exactly as the
 roster says.
+
+## REFRESHED AT THE 13u2b CLOSEOUT (2026-09-18 — the landing-seam overnight run; kickoff-ready)
+
+**BASELINES SUPERSEDE the 13u2 block above:** the FULL Mac suite is now **2794 / 466** — green with
+**ZERO known issues** (row 64's wrapped far-below arm is GONE: unwrapped, ≤4, green under full-suite
+load — do NOT re-add it on rumor; its harness-timing note lives in KnownIssues row 49) and **1
+recorded environment red** (`theReadClickLandsInIndexAtThatBlock`, row 58, unchanged) · core
+1567/171 (the star-cap commit's symbolic pin edit; counts unchanged) · mobile 626/106 w/4 known
+(untouched — nothing mobile-visible shipped) · marker 8 · `/Applications/Variorum.app` = the 13u2b
+Release (hashes in `notes/handoffs/phase-13u2b-handoff.md`; includes the star cap 5→15).
+
+**WHAT 13u2b CHANGED UNDER YOU — read before touching the book columns, landings, or mode switches:**
+1. **The Outline's small-row runs are EXACT-GEOMETRY plain stacks** (placeholders from
+   `Surface/BookHeightManifest.swift`; near-viewport realization via the row-53 pattern). NO lazy
+   estimate remains in the book columns — a new row kind must supply a height source (constant,
+   remembered, or lengths-derived) or realize eagerly. Item 3's gutter rework must keep decorations
+   OUT of the height model or TEACH the manifest about them — a decoration that changes a row's
+   height without the manifest knowing reintroduces the drift class this phase killed.
+2. **`Surface/LandingAuthority.swift` is THE settle discipline** (pure `LandingSettle.decide` +
+   per-surface `LandingPolicy`; the DEBUG story and the content-free RELEASE SIGNPOST come free
+   with adoption). Outline and the Read▸Scroll flow consume it; Takes/Index adopt at their next
+   touch — **never fork a new aim/hold/hop loop.**
+3. **Mode switches carry a viewport fraction** (`Surface/ViewportCarry.swift`; in-memory one-shot
+   slot on the router with three doors — take/take-place/drop). Write and Read consume; Takes is
+   OUTRANKED by R-Q20/21 by ruling. **A new mode-writing road must join the re-decide or the drop**
+   (the excluded-roads comment at `PostDetailView.switchMode` names the rule).
+4. **Open PROVISIONALs on this seam:** QUESTIONS #114 (U3's scope edges) · #115 (the width-change
+   keep; (b) the VOICE re-land RECORDED UNBUILT with two load-bearing guards — item 3's rework may
+   adopt it if it touches that road) · #116 (the fraction's three sub-calls). The Write-direction
+   carry mirror is a KnownIssues row, owner 12 — do not fix it casually; the honest fix heals the
+   router's fact-staleness asymmetry and both directions come right for free.
+5. **`ProseHeightModel` is the ONE prose height model** (Outline + flow). The re-font/typography
+   work this phase's items touch must go through it, never a second estimate.
