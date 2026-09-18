@@ -107,6 +107,32 @@ struct ModeSwitchCarryTests {
         return true
     }
 
+    /// Write's page is scrolled so the block at `location` sits FLUSH WITH THE
+    /// TOP — the shipped `JumpPrimitive.jump`'s own contract, so this stages
+    /// the pre-fix state with no new API.
+    private static func topWrite(in hosting: NSView, at location: Int) -> Bool {
+        guard let editor = views(EditorTextView.self, in: hosting).first,
+              let scrollView = editor.enclosingScrollView else { return false }
+        JumpPrimitive.jump(toOffset: location, textView: editor, scrollView: scrollView)
+        return true
+    }
+
+    /// Where the carried block sits in READ's `edit` pane, as the same
+    /// fraction — the row's frame and the face's own, both read from the DEBUG
+    /// geometry oracle in the host's one coordinate space.
+    private static func readFraction(postID: String, block blockID: String) -> Double? {
+        guard let row = ReadModeOracle.editBlockFrames[blockID],
+              let face = ReadModeOracle.faceFrames[postID]
+        else { return nil }
+        let f = ViewportCarry.fraction(
+            blockTop: Double(row.minY - face.minY),
+            blockHeight: Double(row.height),
+            viewportHeight: Double(face.height))
+        print("[13u2b U3] read row \(row.minY)…\(row.maxY) · face \(face.minY)…\(face.maxY) "
+              + "· fraction \(String(describing: f))")
+        return f
+    }
+
     // MARK: - PIN A — READ → WRITE
 
     /// **The carried block keeps its screen height across Read → Write.**
@@ -198,6 +224,100 @@ struct ModeSwitchCarryTests {
                 Self.writeFraction(in: hosting, block: targetRange), "the block is laid out")
             #expect(abs(f - 0.5) <= 0.08,
                     "the block holds the height Read gave it — red-on-old: the viewport top. \(f)")
+            window.orderOut(nil)
+            window.close()
+        }
+    }
+}
+
+// MARK: - PIN B — WRITE → READ
+
+extension ModeSwitchCarryTests {
+    /// **The carry works in the other direction too.** Write's page is
+    /// scrolled so the carried block sits FLUSH WITH THE TOP (the shipped
+    /// `JumpPrimitive.jump`'s own contract — no new API stages this), and Read
+    /// should then show it at the top rather than at the `.center` its own
+    /// landing has always used.
+    ///
+    /// **Red on the pre-fix tree:** measured with the Read apply neutered back
+    /// to `.center` (a probe, run and reverted — the instrument it reads, the
+    /// face's own frame in the oracle, arrived with this unit and the pin
+    /// cannot otherwise run on a tree without it). The record carries the
+    /// number.
+    @Test func aBlockAtTheTopOfWriteArrivesAtTheTopOfRead() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 72))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "the long note")
+            let target = 60
+            var targetBlock = ""
+            for i in 1...120 {
+                let minted = try session.operations.newBlock(
+                    in: post.id,
+                    text: "Paragraph \(i): a sentence of the story, long enough to read as prose "
+                        + "and to take a line or two of the column at this width.")
+                if i == target + 1 { targetBlock = minted.block.id }
+            }
+            let targetBlockID = targetBlock
+            let postID = post.id
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: postID)
+            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(postID)")
+            ReadModeOracle.reset()
+            defer {
+                UserDefaults.standard.removeObject(forKey: "postMode.\(postID)")
+                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(postID))
+                router.forgetCurrentBlock(for: postID)
+            }
+            let slots = try await db.read { [id = postID] db in
+                try Queries.renderPost(db, containerID: id)
+            }
+            let index = BlockRangeIndex(slots: slots, tail: nil)
+            let targetRange = index.range(ofEntryAt: target)
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(
+                rootView: PostDetailView(session: session, postID: postID)
+                    .environment(ThemeStore(session: session)))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+
+            #expect(await Self.settle(window, hosting) {
+                guard let view = Self.views(EditorTextView.self, in: hosting).first,
+                      view.window != nil else { return false }
+                return view.string.count >= index.documentLength && router.activeMode == .write
+            }, "Write mounts and fills")
+            #expect(Self.putCaret(in: hosting, at: targetRange.location + 5))
+            #expect(await Self.settle(window, hosting) {
+                router.focusedBlock?.blockID == targetBlockID
+            }, "Write reports the caret's block as the ONE carried fact")
+            // Her page: the block flush with the top of Write's viewport.
+            #expect(Self.topWrite(in: hosting, at: targetRange.location))
+            _ = await Self.settle(window, hosting, timeout: 0.6) { false }
+            let wrote = try #require(
+                Self.writeFraction(in: hosting, block: targetRange), "the block is laid out")
+            #expect(wrote <= 0.02, "the block really is at the top of Write: \(wrote)")
+
+            // READ — the carried height, not this pane's standing centre.
+            #expect(router.requestMode(.read, postID: postID))
+            #expect(await Self.settle(window, hosting) {
+                ReadModeOracle.selectedBlockID == targetBlockID
+            }, "Read's edit face stands at the carried block")
+            _ = await Self.settle(window, hosting, timeout: 1.5) { false }
+            let read = try #require(
+                Self.readFraction(postID: postID, block: targetBlockID),
+                "the carried row and the face both measured")
+            #expect(abs(read - wrote) <= 0.06,
+                    "Read keeps the height Write had — red-on-old: 0.5, its standing centre. \(read)")
             window.orderOut(nil)
             window.close()
         }

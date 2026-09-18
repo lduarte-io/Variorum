@@ -165,7 +165,12 @@ struct ReadModeView: View {
                     // fraction is measured against — one rectangle, same space.
                     .onGeometryChange(for: CGRect.self) {
                         $0.frame(in: .named(Self.probeSpace))
-                    } action: { carryGeometry.noteViewport($0) }
+                    } action: { frame in
+                        carryGeometry.noteViewport(frame)
+                        #if DEBUG
+                        ReadModeOracle.faceFrames[postID] = frame
+                        #endif
+                    }
             } panel: {
                 NoteIndexColumn(
                     session: session, model: model, tokens: tokens,
@@ -471,6 +476,11 @@ enum ReadModeOracle {
     /// Ladder R1-9: when the `edit` face painted its FIRST row (the Blocks
     /// arrival measure's shape).
     static var firstEditRowPaintedAt: Date?
+    /// 13u2b UNIT 3: the FACE's own frame in the host's space — the viewport a
+    /// carried block's fraction is measured against, so a pin can state where
+    /// a block landed as a fraction rather than as a raw offset. Keyed by the
+    /// NOTE's id, like the column's frames beside it (suites run in parallel).
+    static var faceFrames: [String: CGRect] = [:]
     /// 18d batch 3 (her U-13): what the CONTENTS COLUMN actually drew. "It
     /// is the width she left it at" is a claim about a rectangle, so the pin
     /// reads the rectangle, never `NoteIndexColumn.width`. Keyed by the
@@ -487,6 +497,7 @@ enum ReadModeOracle {
         pageTurns = 0
         firstEditRowPaintedAt = nil
         indexColumnFrames = [:]
+        faceFrames = [:]
     }
 }
 #endif
