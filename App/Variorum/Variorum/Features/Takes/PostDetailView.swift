@@ -867,6 +867,15 @@ struct PostDetailView: View {
     /// carrying the height of the one she was looking at would be meaningless);
     /// `onAppear`'s remembered mode (a mount, not a switch); and the blockless
     /// guard's `mode = .write` (a correction, with nothing on screen to carry).
+    ///
+    /// Of those, the BLOCKLESS GUARD is the one road covered by NEITHER rule —
+    /// no re-decide here, no `dropCarriedPlace` like `jump(to:)`'s — and that
+    /// is safe by construction rather than by luck (ladder round 1's sanity
+    /// note): it fires only when the note has no blocks, a capture needs an
+    /// on-screen block of THIS note, and the slot is note-scoped and cleared
+    /// on a note change — so no carry can exist for the state that road runs
+    /// in. If the guard ever grows a second trigger, it joins one of the two
+    /// rules rather than staying bare.
     private func switchMode(to new: Mode) {
         guard new != mode else { return }
         session.commandRouter.carryPlaceAcrossModeSwitch()

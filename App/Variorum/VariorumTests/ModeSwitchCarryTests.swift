@@ -337,9 +337,15 @@ extension ModeSwitchCarryTests {
     ///
     /// The pin stages the DECIDING PAIR deterministically (capture-fresh /
     /// router-stale) through the router's own public door, so it does not
-    /// depend on reproducing whichever upstream link lagged in the field —
-    /// and, unlike PIN A/B, it does NOT settle-wait the fact fresh before
-    /// switching: that wait is exactly what her hands don't take.
+    /// depend on reproducing whichever upstream link lagged in the field.
+    /// **Its scope, stated honestly (sanity pass U3-1):** it pins the seed's
+    /// PREFERENCE — the carry outranking the fact — not the field's
+    /// end-to-end timing: it settle-waits the caret's report and then stages
+    /// the staleness synthetically, so a future change that made the CAPTURE
+    /// the lagging half would keep this pin green while the wash returned.
+    /// End-to-end coverage of the field race would need the upstream link
+    /// (the `activePostID` guard / `registerDetail` overwrite asymmetry)
+    /// staged as such.
     ///
     /// RED ON OLD: the seed selected the STALE block (the wash on B₁, the
     /// carry dropped, the standing centre).

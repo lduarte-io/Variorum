@@ -378,7 +378,7 @@ gone because the estimate that produced it is gone.
 | `BookHeightManifest` — the pure brain + its pins | **DONE** — 14 pins green (`BookHeightManifestTests`); `Surface/BookHeightManifest.swift`, beside `PaneTextAuthority` |
 | the Outline's rows consume the manifest | **DONE** — `OutlineRunRow` (plain `VStack` runs, manifest-height placeholders, anchors kept) + `surfacePlaceholder`'s estimate arm |
 | the landing consumes it (ONE aim, the compensator as the net) | **DONE** — nothing left for it to catch: **0 hops**, and not one `content=` change during a landing |
-| the WIDTH-CHANGE recompute | **DONE** — the heights re-stand at the new width (and on a voice change), and the column re-lands the row that was at the top |
+| the WIDTH-CHANGE recompute | **DONE** — the heights re-stand at the new width (and on a voice change), and **on the WIDTH road** the column re-lands the row that was at the top. *(Qualified at the ladder's round 1: the VOICE road re-stands only — its re-land is recorded UNBUILT at QUESTIONS #115(b) with the two guards the fix must wear.)* |
 | THE GATE: the far-below arm ≤4, UNWRAPPED, the interim bound dropped | **MET and UNWRAPPED** — the two landing suites **21/21 GREEN, zero known issues**; every landing `settled at top=0.0 after 0 hops`; the ONE premise line restated under AR-2 |
 | rider 1 — the closed-road mount guard (row 64's own instruction) | **DONE** — `window=Y entries=215 height=16134.0`, pinned |
 | the dev-store WALK (her gesture both directions, two widths, one cold) | **DONE** — 24 landings on the real Sherlock book, **every one settled at `top=0.0`**, never more than ONE hop; the walk found TWO defects, both fixed with red-on-old; 9 captures |

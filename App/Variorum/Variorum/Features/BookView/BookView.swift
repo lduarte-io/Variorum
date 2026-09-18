@@ -1456,8 +1456,15 @@ struct BookView: View {
             // The VOICE moved: the type the heights were measured in is gone
             // (Study's 16-pt Iowan is not Terminal's 14-pt monospace), so the
             // column re-measures and forgets what it learned. The rows
-            // re-render anyway — the tokens are what changed — so nothing
-            // else is needed here.
+            // re-render anyway — the tokens are what changed. **What is OWED
+            // here and recorded UNBUILT — QUESTIONS #115(b) (13u2b ladder
+            // round 1, MINOR 2):** the width road above also RE-LANDS the row
+            // that was at the top; this road does not yet, so a voice change
+            // mid-book silently relocates the page (the same class, strictly
+            // stronger). #115(b) carries the two load-bearing guards the fix
+            // must wear (re-land only when `stand` reports movement AND no
+            // landing is in flight — `tokens` flips once at mount on a Study
+            // store) and why the pin could not be built honestly yet.
             .onChange(of: tokens) { _, _ in model.restandOutlineHeights() }
             // 13c 2A (her item A6, RULED 2026-07-24): Outline's ENTIRE
             // bottom inset is gone — the `Slider` jump control ("it makes

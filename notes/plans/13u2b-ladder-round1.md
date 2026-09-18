@@ -348,3 +348,60 @@ RECORDED (NIT 1 — the token keying named, not the one-line class). Nothing dis
 Commits: `a98ea4aa` (MAJOR 1 + the two record corrections) · `48b5d80f` (MINOR 1 + the jump-door
 drop) · `01272f20` (MAJOR 2 + the instrument's answer) · `6a820a03` (MINOR 2 recorded) ·
 `761dcd02` (NIT 1 + NIT 2), each pushed as it landed.**
+
+---
+
+## THE SANITY PASSES — the reviewer's FINAL WORD (closes round 1)
+
+Verdicts received: UNIT 2 CLEAN (byte-shape verification of the restored at-top order, the
+Outline's unreachability proven on the general case, the signpost's `end=gaveup top=0` semantics
+right) · UNIT 1 code CLEAN in depth (the cache fix proven equivalent per cache state, both hot
+roads covered, the manifest build measurably faster: 0.675 ms vs the recorded 1.0–1.2) · UNIT 3
+NOT CLEAN — three items + one note, none blocking. All six raised items CONFIRMED; each call:
+
+- **U3-1 — CONFIRMED, scope stated.** The new pin settle-waits and stages the staleness
+  synthetically: it pins the seed's PREFERENCE (carry over fact), deterministically — NOT the
+  field's end-to-end timing. If a future change made the CAPTURE the lagging half, the pin stays
+  green while the wash returns; end-to-end coverage needs the upstream asymmetry staged as such.
+  The scope sentence now lives at the pin's own doc AND here.
+- **U3-2 — CONFIRMED · RECORD-AND-LEAVE (my call, the implementer's lean adopted).** The Write
+  mirror is real: a lagging fact on Read → Write spends the slot and returns nil — the mirrored
+  wash with the carry burned. Not fixed, for the implementer's reason plus mine: the symmetric fix
+  splits the page from the caret in precisely the case it exists for, against Write's
+  caret-anchored doctrine (#116(c) trades the carried height away to KEEP the caret visible) —
+  product-shaped, not a ladder's call. Recorded as a NEW `KnownIssuesAndTechDebt` row, owner
+  **12 (Hardening), the landing/settle family** — with the honest note that healing the
+  fact-staleness asymmetry itself fixes both directions for free.
+- **U3-3 — CONFIRMED.** The seed's healing report is offset-safe only via
+  `CurrentBlockMemory.remember`'s nil-means-UNKNOWN rule (U-20) in another file; the load-bearing
+  cross-file dependency is now stated at the seed's code.
+- **U3-note — CONFIRMED.** The blockless guard is the one mode-writing road covered by neither the
+  re-decide nor the drop; `switchMode`'s excluded-roads comment now states it and WHY it is safe by
+  construction (no blocks ⇒ no capture; the slot is note-scoped), with the rule that a second
+  trigger joins one of the two doors.
+- **U1-A — CONFIRMED.** `BookView`'s voice-road comment no longer ends "nothing else is needed
+  here": it points at #115(b), the recorded-unbuilt re-land, and the two guards the fix must wear —
+  the same class this pass fixed at NIT 1.
+- **U1-B — CONFIRMED.** The plan's UNIT 1 LIVE STATUS width-change line is qualified: the re-land
+  is the WIDTH road's; the voice road re-stands only, its re-land recorded unbuilt at #115(b).
+
+All six were sentence-class except U3-2's decision; no behaviour changed in this closing pass
+(comments, records, one KnownIssues row), so no suite re-run is owed beyond the compile check and
+the touched test suite.
+
+**ROUND 1 CLOSED. FINAL TALLY: 0 BLOCKER · 2 MAJOR · 2 MINOR · 2 NIT — 4 fixed (3 red-on-old
+measured red first · 1 behaviour-free), 1 recorded-not-fixed (#115(b)), 1 comment-corrected +
+recorded; plus 1 new KnownIssues row (the Write mirror, owner 12) and the six sanity items closed
+above. Nothing dismissed as hollow.**
+
+**ROUND 2 ANCHOR STATE (for the fresh reviewer, per the ladder rules):** the fix diff is
+`aecf0b52..HEAD` (fixes `a98ea4aa` · `48b5d80f` · `01272f20` · `6a820a03` · `761dcd02`, the
+sanity-close commit after `cce9d3d8`); this file is the round's record — findings, dispositions,
+the responses file (`13u2b-ladder-round1-responses.md`), and the sanity-pass calls above. Baseline
+at close: the FULL Mac suite **2794 / 466 with ONE red — row 58's byte-identical environment
+condition**; zero known issues; tutorial suites green; the four landing/carry suites green under
+full-suite load. Round 2 re-reviews the fixes and what they touched: `LandingSettle.decide`'s new
+at-top budget branch · the router's carry doors (`takeCarriedFraction` / `takeCarriedPlace` /
+`dropCarriedPlace`) and Read's seed · the two new pins + the new truth-table cell · the record
+amendments (residual 2, #115(b), the KnownIssues row). New BLOCKER/MAJOR there earns round 3;
+row 64's closeout disposition carries the load-flaky-arm note unchanged.

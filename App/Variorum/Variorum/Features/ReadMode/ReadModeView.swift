@@ -273,7 +273,13 @@ struct ReadModeView: View {
             // lagging half, and the landed block heals it — so a return to
             // Write finds the caret's note-fact where she actually is); a
             // fact-derived landing stays report-free as it always was (no
-            // news to file).
+            // news to file). The healing report carries a nil offset and is
+            // SAFE for a non-obvious reason that lives in another file
+            // (sanity pass U3-3): `CurrentBlockMemory.remember`'s
+            // nil-means-UNKNOWN rule (17o batch b, U-20) keeps a known
+            // offset for the SAME block rather than erasing it — and in the
+            // lagging case the carried block's offset was never held, so
+            // there is nothing to lose either way.
             select(target, scrollFace: true, report: carried != nil,
                    anchor: carried.map { ViewportCarry.anchor($0.fraction) })
         }
