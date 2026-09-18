@@ -91,3 +91,48 @@ the real road, record it under #115 as an unbuilt arm rather than pinning a DIFF
 expanded row per body pass and per expanded row per manifest build). Two small fixes; **prefer
 `matches(_:)` comparing element-wise without allocating** (count + `zip`) — it removes the
 allocation for every caller, and the flow is the cache's other reader.
+
+---
+
+# SANITY PASSES over the reviewer's fix diff (`aecf0b52..cce9d3d8`)
+
+## UNIT 3's implementer — NOT CLEAN: three items + one NIT-level note, none blocking, all for the reviewer's final word
+
+**Verified itself (not on trust):** exactly three carry sites as claimed; `EditorViewModel.swift` and
+`LandingOffsetTests.swift` untouched by the pass (0 lines — Write's park and its 12 pins
+byte-unchanged); `rows.contains` survives and a refused carry still SPENDS before falling back;
+PIN A/PIN B untouched (+111/−0 on the pin file) and re-run green; 41 tests / 6 suites green locally;
+the capture doors and `carryPlaceAcrossModeSwitch` unchanged (drop is a SECOND clearing door);
+one-shot holds under the peek (one slot, first asker spends, one mode branch mounts, the inline
+editors excluded by `scrollView != nil`, a dying Write runs no second `.initialRender`); the
+instrument re-run answered FRESH.
+
+**Item 1 — the new pin's description overstates.** The pin DOES settle-wait, then stages the
+staleness synthetically (`noteFocusedBlock(staleBlockID …)` after the wait) — a legitimate, MORE
+deterministic rig, but it pins the seed's PREFERENCE (carry over fact), not the field's timing: if
+a future change made the CAPTURE the lagging half, the pin stays green while the wash returns. Owed:
+a scope sentence in the round-1 file so nobody reads it as end-to-end coverage of the field race.
+
+**Item 2 — the Write direction's MIRROR is open, and spend-on-any-ask now burns the carry when it
+bites.** `parkCarriedPlacement(fact:)` (untouched) asks with `fact.blockID` = the router's observed
+identity at `.initialRender`; if the identity lags on a Read → Write switch as it did on
+Write → Read, the ask spends the slot AND returns nil — the mirrored wash with the carry silently
+consumed. Reachability genuinely lower (Read's `select()` reports synchronously in the body that
+moves the selection, ReadModeView:412), but the router's own new doc — "the switch-time capture is
+the NEWER fact" — now holds on only one of the two surfaces. Options: record-and-leave (Write's
+arrival keying is rows-39/49 + U-20 territory; moving WHERE THE CARET lands is product-shaped and
+outside this ladder), or Write asks `takeCarriedPlace(postID:)` and applies the fraction when the
+place's block is in the index while leaving the caret's landing exactly as is. **The implementer
+leans record-and-leave** — the alternative puts the page and the caret on different blocks in
+precisely the case it exists for.
+
+**Item 3 — the seed's `report: carried != nil` is safe for a NON-OBVIOUS reason the record should
+state:** it does not lose her caret offset only because `CurrentBlockMemory.remember`'s
+nil-means-UNKNOWN rule (17o batch b, U-20) keeps a known offset for the SAME block, and in the
+lagging case the new block's offset was never held. Both traced, fine — but the comment explains
+the healing, not the offset, and the safety is load-bearing on a rule in a different file. One
+sentence owed at the code.
+
+**NIT-level note:** `PostDetailView`'s blockless guard (`.task(id: postID)` → `mode = .write`) is
+now the only mode-writing road covered by neither the re-decide nor the drop — harmless (nothing to
+carry), but it belongs in the comment that names the excluded roads.
