@@ -322,3 +322,29 @@ allocation — and the hot caller (`outlineSurfaceAnswer`, per far expanded row 
 consumes it; the two callers that already hold a built id list (the fetch paths, which need it for
 `store` anyway) keep `lookup(_:)`. Cleanliness class: no behaviour changes, so no red-on-old is
 owed; the cost, view and landing suites re-run green over it (18 tests / 3 suites).
+
+---
+
+## FIX-PASS END VERIFICATION (2026-09-18)
+
+**Per-fix suites:** re-run green at each commit (each fix's disposition names its runs). **The FULL
+Mac suite, foreground-waited, zero instances verified before the run, nothing else running:**
+**2794 tests / 466 suites, 752.3 s — ONE red:**
+`BookIndexEditingTests.theReadClickLandsInIndexAtThatBlock` (`live.count → 0`, the pane identifier
+nil) — **KnownIssues row 58's recorded environment condition, byte-identical** to the three unit
+runs' own; this fix pass touches no book-Index code. Zero known issues; the only skips are the two
+standing opt-in drills (the iCloud key round-trip and the Connect drill, both env-gated by
+design). The tutorial suites are green in the same run (P-6). **+2 tests over the units' 2792
+baseline = the fix pass's two new pins** (the router one-shot pin; the first-mount carry pin);
+the third red-on-old landed as a new cell inside an existing truth-table test. The four 13u2b
+landing/carry suites all pass under full-suite load in this run — the load-flaky gate arm
+(UNIT 3's finals, run 2) did not recur here; its carried-forward closeout note stands unchanged.
+
+**FIX-PASS TALLY: 6 findings → 4 FIXED (3 with red-on-old pins measured red first: MAJOR 1 pure ·
+MAJOR 2 through the real rig · MINOR 1 router-level; NIT 2 behaviour-free with the suites green
+over it) · 1 RECORDED-NOT-FIXED (MINOR 2 → QUESTIONS #115(b), the guard's own rule — no bug-class
+fix without an honest pin; guards recorded verbatim for the builder) · 1 COMMENT-CORRECTED +
+RECORDED (NIT 1 — the token keying named, not the one-line class). Nothing dismissed as hollow.
+Commits: `a98ea4aa` (MAJOR 1 + the two record corrections) · `48b5d80f` (MINOR 1 + the jump-door
+drop) · `01272f20` (MAJOR 2 + the instrument's answer) · `6a820a03` (MINOR 2 recorded) ·
+`761dcd02` (NIT 1 + NIT 2), each pushed as it landed.**
