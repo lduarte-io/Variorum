@@ -52,8 +52,20 @@ final class BookOutlineHeights {
     private var stamp = ""
     private(set) var width: CGFloat = 0
     private(set) var metrics = BookOutlineHeightModel.Metrics()
-    /// What each ROW reported while rendering real content.
-    private var measured: [String: CGFloat] = [:]
+    /// What each ROW reported while rendering real content — **with the
+    /// SHAPE it was wearing at the time**, because a row's height is a fact
+    /// about its shape and not only about its id.
+    ///
+    /// Found on this unit's own walk, by the landing story's `expanded=2
+    /// derived=1` line: a note's anchor is `page-<id>` whether it is a card
+    /// or an open story, so a note measured at 103 pt as a CARD kept that
+    /// height in the manifest after she opened it — a 20,000-pt story
+    /// standing at a card's height in the column's arithmetic, and
+    /// `isExactAbove` answering Y about it. (The COLUMN was never wrong: an
+    /// expanded row's placeholder comes from `outlineSurfaceHeight`, not from
+    /// here. What was wrong was the manifest's offsets and its own account of
+    /// how exact it is — which is the thing a landing decides on.)
+    private var measured: [String: (shape: Shape, height: CGFloat)] = [:]
     /// What each SHAPE reported — a heading, a card of N preview lines.
     private var byShape: [Shape: CGFloat] = [:]
     /// Each note's card shape, derived once (see `cardShape`).
@@ -86,8 +98,10 @@ final class BookOutlineHeights {
         // Only a real change is written: the guard is what keeps this off the
         // hot path — a row re-reporting the same height during a scroll costs
         // two comparisons and no write.
-        if let known = measured[id], abs(known - height) <= 0.5 { return }
-        measured[id] = height
+        if let known = measured[id], known.shape == shape, abs(known.height - height) <= 0.5 {
+            return
+        }
+        measured[id] = (shape, height)
         if case .expandedNote = shape { return }  // every note is its own length
         if let known = byShape[shape], abs(known - height) <= 0.5 { return }
         byShape[shape] = height
@@ -111,7 +125,8 @@ final class BookOutlineHeights {
     ) -> BookHeightManifest.Input {
         BookHeightManifest.Input(
             id: id,
-            measured: measured[id],
+            // Only if it was measured in THIS shape (see `measured`).
+            measured: measured[id].flatMap { $0.shape == shape ? $0.height : nil },
             // A sibling of the same shape is a measurement too — of this
             // column, at this width, this session — so it sits in the
             // REMEMBERED tier rather than the derived one, above a persisted

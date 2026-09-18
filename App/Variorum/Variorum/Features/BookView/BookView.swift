@@ -1060,12 +1060,20 @@ struct BookView: View {
         outlineLanding = OutlineLanding(anchorID: anchorID)
         #if DEBUG
         landingBox.rowHeights = [:]
+        // The story's first line must END in " LAND": `finishLanding` prints
+        // from the last entry that does, and a landing's story is only this
+        // landing's. (Measured the hard way during this unit's own walk — the
+        // manifest's numbers were first appended to that same string, and
+        // every landing then printed the whole session's trace.)
+        BookOutlineGeometry.trace.append("\(anchorID) LAND")
         let manifest = outlineHeightManifest
         BookOutlineGeometry.trace.append(
-            "\(anchorID) LAND | manifest w=\(Int(manifest.width)) rows=\(manifest.rows.count) "
+            "manifest w=\(Int(manifest.width)) rows=\(manifest.rows.count) "
+            + "expanded=\(model.expandedCount) "
             + "derived=\(manifest.derivedCount) "
             + "exactAbove=\(manifest.isExactAbove(anchorID) ? "Y" : "N") "
-            + "offset=\(Int(manifest.offset(of: anchorID) ?? -1))")
+            + "offset=\(Int(manifest.offset(of: anchorID) ?? -1)) "
+            + "total=\(Int(manifest.totalHeight))")
         #endif
         proxy.scrollTo(anchorID, anchor: .top)
         armLandingCheck(proxy)

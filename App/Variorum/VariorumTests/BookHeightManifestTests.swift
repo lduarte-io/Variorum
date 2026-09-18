@@ -223,3 +223,69 @@ struct BookHeightManifestTests {
         #expect(blank == metrics.expandedEmpty)
     }
 }
+
+// MARK: - The LEARNING half (13u2b UNIT 1 — found on the unit's own walk)
+
+@Suite("What the Outline's column learns (13u2b UNIT 1)", .serialized)
+@MainActor
+struct BookOutlineHeightsTests {
+    private func heights(at width: CGFloat = 696) -> BookOutlineHeights {
+        let heights = BookOutlineHeights()
+        heights.stand(at: width)
+        return heights
+    }
+
+    /// **RED ON OLD, and the walk is where it came from.** A note's landing
+    /// anchor is `page-<id>` whether the row is a card or an open story, so
+    /// keying a measurement by the id alone let a note measured at 103 pt as a
+    /// CARD keep that height in the manifest after it was expanded — the
+    /// landing story said `expanded=2 derived=1`, and a 20,000-pt story was
+    /// standing at a card's height in the column's arithmetic while
+    /// `isExactAbove` answered Y about it. A measurement is a fact about a
+    /// SHAPE.
+    @Test func aHeightMeasuredAsACardIsNotReusedOnceTheNoteIsOpen() {
+        let heights = heights()
+        let anchor = "page-abc"
+        heights.learn(anchor, shape: .card(lines: 3), height: 103)
+        #expect(heights.height(anchor, shape: .card(lines: 3)) == 103)
+        // The same row, now an open story: the card's 103 pt must not answer.
+        let open = heights.height(anchor, shape: .expandedNote, derived: 20_000)
+        #expect(open == 20_000,
+                "an expanded row must not inherit its own card's height: \(open)")
+    }
+
+    /// One measured row teaches its twins — that is what keeps the first
+    /// frames of a book honest without measuring every row.
+    @Test func oneMeasuredRowTeachesEveryRowOfTheSameShape() {
+        let heights = heights()
+        heights.learn("chapter-1", shape: .chapterHeading, height: 51)
+        #expect(heights.height("chapter-2", shape: .chapterHeading) == 51)
+        // A different shape learns nothing from it.
+        let card = heights.height("page-x", shape: .card(lines: 3))
+        #expect(card == BookOutlineHeightModel.modelled(
+            .card(lines: 3), metrics: heights.metrics))
+    }
+
+    /// A width or voice change drops everything learned under the old one —
+    /// a card wraps differently at another measure.
+    @Test func standingAtANewWidthForgetsWhatWasLearnedAtTheOldOne() {
+        let heights = heights(at: 696)
+        heights.learn("chapter-1", shape: .chapterHeading, height: 51)
+        #expect(heights.height("chapter-1", shape: .chapterHeading) == 51)
+        #expect(heights.stand(at: 500), "a real width change re-stands")
+        #expect(heights.height("chapter-1", shape: .chapterHeading)
+                == BookOutlineHeightModel.modelled(.chapterHeading, metrics: heights.metrics))
+        #expect(!heights.stand(at: 500), "standing at the same width again changes nothing")
+    }
+
+    /// A placeholder's height is never learned — the row reports it, but the
+    /// caller only teaches from real content (and this is the door that
+    /// rejects the nonsense).
+    @Test func nothingLearnsFromANonsenseReport() {
+        let heights = heights()
+        heights.learn("chapter-1", shape: .chapterHeading, height: 0)
+        heights.learn("chapter-1", shape: .chapterHeading, height: -5)
+        #expect(heights.height("chapter-1", shape: .chapterHeading)
+                == BookOutlineHeightModel.modelled(.chapterHeading, metrics: heights.metrics))
+    }
+}

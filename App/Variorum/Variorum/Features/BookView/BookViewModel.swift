@@ -491,6 +491,11 @@ final class BookViewModel {
         expandedPosts.contains(postID)
     }
 
+    /// How many of this book's notes are open — the DEBUG landing story's
+    /// "what shape is this column in" number (13u2b UNIT 1), and the thing a
+    /// walk has to be able to state rather than infer from the screen.
+    var expandedCount: Int { expandedPosts.count }
+
     // MARK: - Row 53 (the Act 10 correction round): the expanded surfaces'
     // REMEMBERED SIZES
 
