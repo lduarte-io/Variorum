@@ -334,7 +334,7 @@ mechanism trace the build must answer.)*
 | piece | state |
 |---|---|
 | the record opened + the RED-ON-OLD re-measured on this tree | **DONE** — 3/3 `gave up at top=-73.0 after 13 hops` + one anomalous run, below |
-| the mechanism TRACE (why −73, measured not reasoned) | **IN PROGRESS** — the hop-driven cycle is visible in the trace; two probes owed (no-hop, and who moves the content) |
+| the mechanism TRACE (why −73, measured not reasoned) | **DONE** — it is NOT hop-driven (PROBE A); `top = 0` is not a fixpoint of the lazy column |
 | `BookHeightManifest` — the pure brain + its pins | NOT-STARTED |
 | the Outline's rows consume the manifest | NOT-STARTED |
 | the landing consumes it (ONE aim, the compensator as the net) | NOT-STARTED |
@@ -365,6 +365,59 @@ isolated (`-only-testing:VariorumTests/BookOutlineLandingTests`), on `8180605e`:
 smoothed over, because it is the row-58 class and because a session that sees only that run would
 wrongly conclude the row had come right. Machine state is recorded beside every number in this
 record for exactly this reason.
+
+## THE MECHANISM, TRACED (not reasoned) — and it is NOT what the plan's model assumes
+
+The plan's UNIT 1 model is: *the landing aims before the heights are known, so it aims wrong; give it
+the heights and it aims right and scrolls once.* **The measurement says the aim is only half of it,
+and the smaller half.** Here is the r1 far-below trace's repeating unit, verbatim, one cycle per hop:
+
+```
+… HOP 13 … | top=0.0 hops=13          ← the hop lands the target EXACTLY at the top
+| content=66920 | top=70.0 hops=13     ← the content GROWS ~70 above it; the target is pushed down
+|              | top=0.0 hops=13       ← SwiftUI's own offset compensation puts it back
+| content=66919 | top=-1.0 hops=13
+| content=66847 | top=-73.0 hops=13    ← the content SHRINKS ~73 above it; NOTHING compensates
+| DONE: gave up at top=-73.0 after 13 hops, 4154 ms
+```
+
+**Every hop lands at 0.0 correctly.** The page then decays, by the column's content height changing
+ABOVE the target: growth is compensated by the ScrollView, shrinkage is not. The realized rows do
+not move (A2 measured `rows=38 sum=99998` constant through the whole swing) — what changes is
+SwiftUI's ESTIMATE for the lazy runs' UNREALIZED rows, and it changes *because the landing arrived*:
+at `top=0` the rows above the target are outside the lazy container's realization band, their real
+heights (103-pt cards, 51-pt headings) are replaced by the run's average, and the average is ~70 pt
+short over that stretch.
+
+**PROBE A — is the cycle hop-driven? NO.** `landingHopBudget` cut 40 → 1 (a temporary edit, measured,
+reverted, never committed), same suite, zero instances:
+
+```
+top=0.0 hops=0 | content=66889 | top=-39.0        ← decays BEFORE any hop is spent
+| HOP 1 | top=0.0 hops=1 | content=66930 | top=40.0 | top=0.0 | content=66870 | top=-60.0
+| DONE: gave up at top=-60.0 after 1 hops, 597 ms
+```
+
+The decay happens on the FIRST arrival, with zero hops spent. So the hops are not the disease — they
+are the symptom she watches (each is a visible jump) and they never converge because **`top = 0` is
+not a fixpoint of this column**: arriving there de-realizes the rows above, which shrinks the content
+above, which moves the page off. The only stable state is the one the give-up leaves her in (−73,
+stable across 24 samples — A2's measurement, re-confirmed here).
+
+**What follows, and it is the load-bearing conclusion of this unit:** an aim that computes the
+target's offset from a manifest and scrolls ONCE lands exactly — and then decays exactly as today,
+because the decay is downstream of the aim. **The manifest must reach the ROWS, not only the aim.**
+A column whose every row's height is known and *asserted* (never estimated by the lazy container)
+cannot shrink above a landed target, and then — this is the whole prize — the aim is right, the
+decay is gone, and the compensator has nothing left to do.
+
+## THE DESIGN FORK, RAISED TO THE ARCHITECT (2026-09-18, mid-unit)
+
+**The fork:** making the rows' heights exact means the runs of small rows (chapter headings +
+collapsed cards) can no longer be `LazyVStack`s that estimate their unrealized rows. That is inside
+the neighbourhood of the plan's *"No lazy-run restructuring"* line, so it is not mine to take alone.
+The proposal, the alternatives and the reason the plan's letter cannot meet its own gate are in the
+message to the architect; the adjudication lands below.
 
 ## CLOSEOUT (the ritual, so nothing is forgotten)
 
