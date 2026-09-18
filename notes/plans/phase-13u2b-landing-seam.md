@@ -1113,8 +1113,8 @@ fixed** — the hallucination guard's own rule.
 | the CAPTURE seam (the router's carry + the mode-switch funnel) | **DONE** — `CommandRouter`'s probe registry + one-shot slot; `PostDetailView.switchMode(to:)` and the `applyMode` closure are the two doors, with the roads that deliberately do NOT come through them named at the code |
 | WRITE captures and consumes | **DONE** — the probe answers from live AppKit geometry; the apply is `JumpPrimitive`'s new `landingInset` (default 0, every existing caller byte-unchanged) parked for the N14 settle hop. **PIN A: `fraction 0.0` → `fraction 0.5`, red-on-old** |
 | READ (both faces) captures and consumes | **DONE** — the carried row and the face report into an unobserved box; the arrival's landing passes the carried anchor to the `scrollTo` it already ran |
-| PIN D — Takes byte-identical (suites unmodified + a walk capture) | PENDING |
-| the dev-store WALK — her round trips, both faces | NOT-STARTED |
+| PIN D — Takes byte-identical (suites unmodified + a walk capture) | **DONE** — its landing suites **58 tests green, ZERO edits**; and the walk's Takes round trip is **PIXEL-IDENTICAL** (max diff 0) |
+| the dev-store WALK — her round trips, both faces | **DONE** — Write ⇄ Read(edit) returns at **0.0 pt**, Write → Read(page) lands the block at the same fraction (0.667 → 0.666), Takes and Blocks round trips unchanged; 8 captures |
 | tests: the touched suites · the FULL Mac suite | NOT-STARTED |
 | **UNIT 3 — CLOSED, pending the orchestrator's walk** | NOT-STARTED |
 
@@ -1160,3 +1160,30 @@ always used), the pin re-run, the line reverted. The pre-probe state was committ
 
 PIN A stayed GREEN throughout the probe, which is its own small proof that the probe neutered only
 Read's landing: PIN A's direction is Read → Write, and Write's half was untouched by it.
+
+## THE WALK — her own gesture, on the real Sherlock corpus (dev-store Debug build, zero instances verified before and after)
+
+`DerivedData/13u2b`'s Debug build (`io.lduarte.Variorum.debug`), WalkKit + cliclick, a 980×1000
+window. The note is **The Man with the Twisted Lip** — 222 blocks, 9,297 words. The gesture is the
+one her report is about: stand somewhere in the middle of a long note and change mode.
+
+Scrolled deep into the note, clicked into **block 130** (*"I have seen too much not to know…"*) so
+it sat about two thirds down the viewport — deliberately NOT centred and NOT at the top, so neither
+surface's standing policy could produce the right answer by accident.
+
+| the round trip | what happened |
+|---|---|
+| **Write → Read(`edit`) → Write** | the page came back **pixel-aligned: best vertical shift 0.0 pt** (measured, not eyeballed: the two captures' row-darkness profiles cross-correlated over ±30 pt; the 4,253 differing pixels of 2.2 M are the caret and the ring). In Read the block stood at fraction **0.70** against Write's **0.667** — a third of a line apart on a 548-pt viewport, where its shipped landing would have centred it. |
+| **Write → Read(the calm page)** | block 130 landed at fraction **0.666** against Write's **0.667**, where the page's own standing anchor is 0.08 — near the top. (Entered by a mode switch with the `read` face remembered, which is the in-scope road: a face FLIP is not a mode switch and keeps its standing behaviour.) |
+| **Takes → away → Takes** | **PIXEL-IDENTICAL, max difference 0.** Her 17q memory (R-Q20/R-Q21) restores exactly as before: Takes registers no probe, consumes no carry, and its entry landing put the live pane where its own rule says — visibly NOT at the carried fraction. |
+| **Write → Blocks → Write** | **0.0 pt**, by Write's own session anchor — the carry is nil there (Blocks answers no probe), so the standing behaviour is what ran, which is the point of clearing the slot at every switch. |
+
+Captures (gitignored, `notes/plans/13u2b-screens/`): `u3-01-write-before` · `u3-02-read-edit` ·
+`u3-03-write-back` · `u3-04-write-before-page` · `u3-05-read-page` · `u3-06-takes-left-here` ·
+`u3-07-takes-restored` · `u3-08-write-after-blocks`.
+
+**One walk note, no action owed:** flipping Read's own `edit`/`read` switch keeps whatever scroll
+offset the host had rather than re-landing the current block — pre-existing behaviour this unit
+does not touch (a face flip is not a mode switch; #114's scope is the note's mode row). It is
+recorded because a reader of the captures will see the page hold its place across that flip and
+might otherwise credit it to this unit.
