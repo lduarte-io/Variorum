@@ -107,7 +107,9 @@ this session's cache.
 don't mean 13u3 faces? … if it isn't a separate 13u3 plan, then do it even if you're above that
 context window."* Resolved: U3 here is UNIT 3 of THIS phase (the fraction carry), not 13u3 FACES —
 it runs in a fresh implementer session like every unit, the orchestrator is far under her line, so
-by her own condition **U3 PROCEEDS**. 13u3 FACES stays a separate phase at her word.
+by her own condition **U3 PROCEEDS**. 13u3 FACES stays a separate phase at her word. **RATIFIED by
+her follow-up, verbatim: *"oh - include U3 tonight, ratified. 13u3 remains a separate stage."*** —
+no longer the orchestrator's reading of a condition; her direct ruling.
 
 ## THE LEDGER (every row owned; statuses flip in the same commit as the work)
 
