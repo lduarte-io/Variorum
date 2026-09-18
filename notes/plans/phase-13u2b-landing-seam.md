@@ -117,7 +117,7 @@ no longer the orchestrator's reading of a condition; her direct ruling.
 |---|---|---|
 | 1 | UNIT 1 — the height manifest + the Outline lands once (gate: row 64's arm ≤4, UNWRAPPED) | **DONE 2026-09-18 — gate MET (0 hops, arm unwrapped), record closed at `f66d1dc5`, THE ORCHESTRATOR'S WALK PASSED (below)** |
 | 2 | UNIT 2 — one landing authority + the flow + the Release signpost | **DONE 2026-09-18 — record closed at `77f0f09c`, THE ORCHESTRATOR'S WALK PASSED (below)** |
-| 3 | UNIT 3 — the mode-switch viewport-fraction carry (#114's defaults) | NOT-STARTED (follows U2) |
+| 3 | UNIT 3 — the mode-switch viewport-fraction carry (#114's defaults) | **BUILT 2026-09-18 — record closed, pending the orchestrator's walk** |
 | 4 | QUESTIONS #114 (a)/(b) — U3's scope edges | LOGGED — hers |
 | 5 | The ladder — `fable-reviewer` over the combined diff, standing rounds | not yet owed |
 | 6 | The orchestrator's per-unit walks + HER field walk (the phase's acceptance) | pending |
@@ -322,8 +322,10 @@ finishes the phase from it.)*
 24/24 real-book landings at `top=0.0`, finals in; the orchestrator's walk passed). UNIT 2 —
 **CLOSED, WALKED, ACCEPTED** (its record is in this file; the authority hoisted and both surfaces
 adopting, PIN B fixed red-on-old, the signpost shipping and verified content-free, her gesture
-walked at `hops=0` five times running). UNIT 3 — **OPEN 2026-09-18** (its record is the last
-section of this file). Ladder — not yet owed.
+walked at `hops=0` five times running). UNIT 3 — **BUILT AND RECORDED, pending the
+orchestrator's walk** (its record is the last section of this file; the rule is ONE pure brain,
+both pins red-on-old, Takes proved byte-identical twice, the walk returns her page at 0.0 pt,
+finals in). Ladder — owed next, over the combined diff.
 
 ---
 
@@ -1115,8 +1117,8 @@ fixed** — the hallucination guard's own rule.
 | READ (both faces) captures and consumes | **DONE** — the carried row and the face report into an unobserved box; the arrival's landing passes the carried anchor to the `scrollTo` it already ran |
 | PIN D — Takes byte-identical (suites unmodified + a walk capture) | **DONE** — its landing suites **58 tests green, ZERO edits**; and the walk's Takes round trip is **PIXEL-IDENTICAL** (max diff 0) |
 | the dev-store WALK — her round trips, both faces | **DONE** — Write ⇄ Read(edit) returns at **0.0 pt**, Write → Read(page) lands the block at the same fraction (0.667 → 0.666), Takes and Blocks round trips unchanged; 8 captures |
-| tests: the touched suites · the FULL Mac suite | NOT-STARTED |
-| **UNIT 3 — CLOSED, pending the orchestrator's walk** | NOT-STARTED |
+| tests: the touched suites · the FULL Mac suite | **DONE** — core NOT OWED (zero `Sources/` lines); iOS NOT OWED (no `Shared/` file moved); the FULL Mac suite **2792 tests / 466 suites, ZERO known issues, ONE red — row 58's recorded environment condition, byte-identical and re-verified ISOLATED** |
+| **UNIT 3 — CLOSED, pending the orchestrator's walk** | **READY** |
 
 *(Every line starts NOT-STARTED and is flipped in the same commit as the piece it names; an
 unverified claim reads PENDING.)*
@@ -1187,3 +1189,93 @@ offset the host had rather than re-landing the current block — pre-existing be
 does not touch (a face flip is not a mode switch; #114's scope is the note's mode row). It is
 recorded because a reader of the captures will see the page hold its place across that flip and
 might otherwise credit it to this unit.
+
+## FINALS, AND THE ONE RED
+
+| gate | result | baseline (UNIT 2's finals) |
+|---|---|---|
+| core `swift test` | **NOT OWED — zero `Sources/` lines in the diff** | 1567 / 171 |
+| the FULL Mac suite | **2792 tests / 466 suites**, 742.8 s, **ZERO known issues**, **1 red** (below) — zero instances verified before and after, nothing else running | 2779 / 464, zero known issues, 1 environment red |
+| iOS build | **not owed** — no `Shared/` file moved, nothing mobile-visible | green |
+| lockstep marker | untouched — **8** | 8 |
+
++13 tests / +2 suites are this unit's: `ViewportCarryTests` (11) and `ModeSwitchCarryTests` (2).
+
+**THE RED — `BookIndexEditingTests.theReadClickLandsInIndexAtThatBlock`** (`live.count → 0`, the
+pane identifier nil): **`KnownIssuesAndTechDebt` row 58's recorded condition, byte-identical to
+UNIT 1's and UNIT 2's own runs** — and re-verified **ISOLATED** on this tree (7 tests, the same two
+issues, the same values), which is the row's own measurement ("3/3 red isolated on zero-code
+trees"). This diff does not touch the book Index: it has no mode row, registers no place probe, and
+consumes no carry.
+
+## WHAT SHIPPED — seven files, and where each piece lives
+
+- **`App/Variorum/Variorum/Surface/ViewportCarry.swift`** (NEW, pure): the rule — `Place` (the
+  one-shot value a switch carries), `fraction` (CAPTURE, with every clamp and its reason),
+  `anchor` (the SwiftUI APPLY — a `UnitPoint` for `scrollTo`) and `topInset` (the AppKit APPLY).
+  No SwiftUI view, no AppKit, no store: every number is handed in.
+- **`App/Variorum/Variorum/Registry/CommandRouter.swift`**: the SEAM — a LIFO registry of place
+  probes (the `handlers` shape, filtered by `activePostID`), the ONE in-memory one-shot slot beside
+  `CurrentBlockMemory`, `carryPlaceAcrossModeSwitch()` (called by the switch, and CLEARING when the
+  outgoing surface does not participate) and `takeCarriedFraction(postID:blockID:)`. Cleared on a
+  note change and on the detail's teardown. **Never persisted** (row 44's class).
+- **`App/Variorum/Variorum/Features/Takes/PostDetailView.swift`**: the two doors every mode switch
+  comes through — `switchMode(to:)` (the masthead's ▾) and the `applyMode` closure (⌘1–⌘7, the
+  sidebar rail, ⌘K, the bars' "write" doors) — with the roads that deliberately do NOT come through
+  them named at the code: `jump(to:)`, the remembered-mode mount, the blockless guard.
+- **`App/Variorum/Variorum/Features/Editor/JumpPrimitive.swift`**: `landingInset` on `jump`,
+  defaulted to 0 so every existing caller is byte-unchanged. The correction loop already converges
+  `top` to whatever its closure reports, so reporting `minY − inset` lands the line that far below
+  the viewport top — the whole AppKit apply, with no new scroll machinery.
+- **`App/Variorum/Variorum/Features/Editor/EditorViewModel.swift`**: Write's CAPTURE
+  (`carriedBlockPlace`, two bounded single-fragment layouts — never a document-wide `ensureLayout`)
+  and its APPLY (parked at the arrival, spent at the N14 settle hop where the frame is first
+  honest, standing the session anchor and the ordinary reveal down, and revealing the caret
+  afterwards if the placement left it off screen).
+- **`App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift`**: `ReadCarryGeometry` (the
+  unobserved box — the carried row's frame and the face's own, written at geometry cadence and read
+  once), `ReadLanding` (a landing is a block AND, when carried, an anchor), the probe registration,
+  and the seeding that takes the carry. The DEBUG oracle gains the face's frame so a pin can state
+  a landing as a fraction.
+- **`App/Variorum/Variorum/Features/ReadMode/ReadEditPane.swift`**: the pane's resting anchor named
+  (`.center`, its shipped one), the landing honouring a carried anchor, and the carried row's
+  geometry report.
+
+**Zero `Sources/VariorumCore/` lines. Zero `Sync/`. Zero `Persistence/`. Zero schema. Zero
+migrations. Marker stays 8.** No `Shared/` file moved, so the phone inherits nothing and no mobile
+suite is owed; the closeout's parity line still reads *nothing mobile-visible*.
+
+**Commits**, each pushed as it landed: `65da53b5` (the record + the pin shapes) · `ff519c3c` (PIN
+A's pre-fix measurement) · `448c4237` (the pure rule + 11 pins) · `90f94939` (the carry, both ends,
+PIN A green) · `123b4f8d` (PIN B) · `6f4d5fae` (PIN B's red under a stated probe) · `de0c462f`
+(the walk) · this commit (the finals, the dispositions, QUESTIONS #116).
+
+## DISPOSITIONS
+
+| item | verdict | evidence |
+|---|---|---|
+| **the rule** | **BUILT as ONE pure brain, both directions** | `ViewportCarry`; 11 pins including the round trip and every clamp |
+| **PIN A — Read → Write** | **FIXED, red-on-old** | `fraction 0.0` on the pre-fix tree (2/2, byte-identical) → `fraction 0.5` |
+| **PIN B — Write → Read** | **FIXED, red-on-old under a stated probe** | `Write 0.0 / Read 0.5` with the fix neutered → `0.0 / 0.0`; the probe never committed, the pre-probe state committed first |
+| **PIN C — the pure clamps** | **PINNED, and not claimed as red-on-old** | new arithmetic; 11 pins |
+| **PIN D — Takes byte-identical** | **PROVED TWICE** | its landing suites **58 tests green with ZERO edits**, and the walk's Takes round trip is **pixel-identical, max difference 0** |
+| **Write's standing landings when nothing is carried** | **BYTE-UNCHANGED** | `LandingOffsetTests` (12 pins over the anchor restore, the reveal and its guard) green UNMODIFIED; `JumpPrimitive`'s new parameter defaults to 0 |
+| **the walk** | **PASSED on the real 222-block note** | Write ⇄ Read(edit) at **0.0 pt**; the calm page at **0.666 against 0.667**; Blocks round trip 0.0 pt |
+| **row 58's red** | **the recorded environment condition** | byte-identical, and red ISOLATED on this tree as the row itself measured |
+| **PROVISIONALs** | **THREE, all on QUESTIONS #116** | (a) the fraction is the ANCHOR reading, not the distance-from-the-top one; (b) the carried height outranks Write's own session scroll anchor on a mode switch; (c) a block taller than the viewport keeps the CARET (the reveal runs after the placement) rather than the height |
+
+### THREE RESIDUALS, STATED RATHER THAN SMOOTHED OVER
+
+1. **The carry can only carry a block that is ON SCREEN.** If she scrolls the outgoing surface away
+   from the current block and then switches, the capture returns nil (the clamp, pinned) and the
+   arriving surface keeps its standing reveal. That is the honest answer — a fraction for something
+   off screen would place it off screen — but it means the calm page, which never changes the
+   current block as she reads, carries nothing once she has scrolled past the block she arrived on.
+   Changing what the page REPORTS as the current block is product behaviour and not this unit's.
+2. **Read's `edit`/`read` face flip is not a mode switch** and keeps whatever scroll the host had,
+   which on the walk looked like continuity but is not this unit's doing. Recorded so the captures
+   are not misread; #114's scope is the note's mode row.
+3. **One report a scroll frame on Read's carried row.** Only the selected/live row measures itself
+   (plus the face once), so this is not the per-row observer cost UNIT 1 measured at 400 rows — but
+   it is a write per geometry frame while she scrolls, into an unobserved box. If it ever matters,
+   the box is one object and the report is one modifier.
