@@ -120,8 +120,8 @@ no longer the orchestrator's reading of a condition; her direct ruling.
 | 3 | UNIT 3 — the mode-switch viewport-fraction carry (#114's defaults) | **DONE 2026-09-18 — record closed at `67f437c4`, THE ORCHESTRATOR'S WALK PASSED with ONE FLAGGED FINDING → the ladder (below)** |
 | 4 | QUESTIONS #114 (a)/(b) — U3's scope edges | LOGGED — hers |
 | 5 | The ladder — `fable-reviewer` over the combined diff, standing rounds | **ROUND 1 DONE 2026-09-18** (`notes/plans/13u2b-ladder-round1.md`, `b9567148`): **0 BLOCKER · 2 MAJOR · 2 MINOR · 2 NIT** — M1 the authority's at-top branch never consults `timeBudget` (a veto that never clears waits forever); M2 the orchestrator's flagged first-Read-mount defect CONFIRMED with trace; m1 a mismatched carry leaves the one-shot slot loaded + `jump(to:)` bypasses the re-decide; m2 the VOICE-change road misses the width road's re-land (#115's class); n1 two windows on one note can cross-carry; n2 a cost-shape note. The four routed items dispositioned in the file (AR-3's walk fixes SOUND; eager-rows ACCEPTED; the gate arm 8/8 green isolated — row 64's removal wording must keep the harness-timing caveat; the U3 flag = M2). **CROSS-MODEL FLOW:** responses recorded (`13u2b-ladder-round1-responses.md`, 6/6 AGREE) → **FIX PASS DONE** (commits `a98ea4aa`·`48b5d80f`·`01272f20`·`6a820a03`·`761dcd02`; dispositions per finding in the findings file at `cce9d3d8`): **4 FIXED** (3 red-on-old measured red FIRST — M1's new truth-table cell, M2's no-settle-wait pin reproducing the wash byte-for-byte with the INSTRUMENT's answer recorded (rig-synchronous ⇒ the field staleness is the guard/overwrite asymmetry), m1's spend-on-any-ask + the `jump(to:)` belt; NIT 2 behaviour-free in the implementer's preferred `matching:` shape) · **1 RECORDED-NOT-FIXED under the guard's own rule** (m2's voice arm → QUESTIONS **#115(b) UNBUILT** with both load-bearing guards recorded verbatim — the honest pin was unreachable without the seven-test helper or the load-flaky generator class; matches the U1 implementer's stated preference) · **1 comment-corrected** (n1; the token keying recorded as the eventual fix, not genuinely-small). **END VERIFICATION: FULL Mac 2794/466, ONE red = row 58's byte-identical environment condition, zero known issues, tutorial suites green in-run (P-6), and all four landing/carry suites passed UNDER full-suite load — the flaky gate arm did not recur.** Sanity passes DONE (three of three; six raised items all CONFIRMED and landed at `39e06428` — the pin-scope sentence, the Write-mirror RECORD-AND-LEAVE as a NEW KnownIssues row owner 12, the U-20 offset-safety sentence, the excluded-roads comment, U1-A/U1-B) → **ROUND 1 CLOSED**; ROUND 2 (fresh cold reviewer over `aecf0b52..39e06428` + what it touched) SPAWNED |
-| 6 | The orchestrator's per-unit walks + HER field walk (the phase's acceptance) | pending |
-| 7 | Closeout ritual + the `/Applications` refresh (delivers the star cap `edb4ae94` too) | pending |
+| 6 | The orchestrator's per-unit walks + HER field walk (the phase's acceptance) | **Orchestrator walks: ALL THREE PASSED.** HER FIELD WALK REMAINS — the handoff's checklist leads with it |
+| 7 | Closeout ritual + the `/Applications` refresh (delivers the star cap `edb4ae94` too) | **DONE 2026-09-18** — this closeout; the refresh evidence in the PHASE CLOSEOUT below |
 
 ## KICKOFF (self-contained for a fresh session)
 
@@ -1326,3 +1326,44 @@ PIN A green) · `123b4f8d` (PIN B) · `6f4d5fae` (PIN B's red under a stated pro
    (plus the face once), so this is not the per-row observer cost UNIT 1 measured at 400 rows — but
    it is a write per geometry frame while she scrolls, into an unobserved box. If it ever matters,
    the box is one object and the report is one modifier.
+
+
+## ✅ PHASE CLOSEOUT — 13u2b, THE LANDING SEAM (2026-09-18, the overnight run)
+
+**What the phase was, in one sentence:** the far-chapter stutter closed at its architectural root —
+heights are KNOWN before any landing aims, one authority settles the converted surfaces, the
+Release signpost makes her next report carry its own trace, and mode switches keep her place.
+
+**THE LADDER, WHOLE:** R1 `0 BLOCKER · 2 MAJOR · 2 MINOR · 2 NIT` (findings + dispositions:
+`13u2b-ladder-round1.md`; responses + three sanity passes: `13u2b-ladder-round1-responses.md`) —
+the full cross-model flow: 6/6 AGREE with sharpenings that improved every fix; 4 FIXED (3 red-first,
+1 behaviour-free), 1 RECORDED-NOT-FIXED under the guard (#115(b), guards verbatim), 1
+comment-corrected; three sanity passes (one CLEAN, one CLEAN-in-depth + two one-sentence record
+items, one NOT-CLEAN with three items) — all six raised items CONFIRMED and landed at `39e06428`
+(the Write-direction mirror RECORD-AND-LEAVE → a NEW KnownIssues row, owner 12). **R2 (a fresh cold
+reviewer): ZERO findings — no round 3 owed; the ladder closed at `66fcc013`.** Nothing dismissed as
+hollow anywhere; one finding recorded HOLLOW by its own reviewer (U2's PIN A) under the guard's rule.
+
+**FINALS:** FULL Mac **2794 tests / 466 suites** — ONE red = KnownIssues row 58's byte-identical
+environment condition; **ZERO known issues** (row 64's wrapped arm is GONE — unwrapped, green, and
+green UNDER full-suite load in the fix pass's run); tutorial suites green in-run (P-6) · core
+`swift test` untouched since the star-cap commit's 9/9 (zero core lines in the phase beyond it) ·
+iOS build green at the units · the mobile suite not owed (no `Shared/` file moved). **Fences: zero
+`Sync/` · zero `Persistence/` · zero schema · zero migrations · marker 8 · ZERO canon deltas**
+(AppSpec §14 untouched; 13u1's delta stays per the lean-docs rule). **MOBILE PARITY LINE: nothing
+mobile-visible** — Mac scroll geometry and Mac mode switches only; the phone's board keeps its own
+ruled policies.
+
+**KnownIssues at close:** row 64 REMOVED at its own unlock (evidence: the arm ≤4, unwrapped, green
+under load; its HARNESS-TIMING residual honestly preserved in row 49's landing/settle family — the
+arm went green·red·green over identical code once under U3's full-suite load, 8/8 green isolated at
+the R1 review, and did not recur in the fix pass); ONE row ADDED (the Write-direction carry mirror,
+owner 12, with the healing note that fixing the fact-staleness asymmetry fixes both directions).
+
+**Awaiting her (the handoff leads with these):** the FIELD WALK (items 1/18's acceptance — her
+hands, now with the signpost watching) · QUESTIONS **#114** (a)/(b) · **#115** (a)/(b) · **#116**
+(a)–(c) · the overnight adjudications AR-1…AR-3 and the ladder's two record-and-leave calls, all
+hers to overrule · the carried bundle #110(c) · #111 · #112(a)/(c) · #113 · #103.
+
+**THE `/Applications` REFRESH (her overnight pre-authorization):** evidence recorded below this
+line when the rails complete.
