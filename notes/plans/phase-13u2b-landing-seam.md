@@ -310,8 +310,53 @@ whatever her store does that the dev store will not.
 dispositions. The orchestration record below is the phase's running memory; a fresh session
 finishes the phase from it.)*
 
-**LIVE STATUS:** UNIT 1 — NOT-STARTED (design settled: this plan + the trace memo §5). UNIT 2 —
+**LIVE STATUS:** UNIT 1 — IN PROGRESS (record below). UNIT 2 —
 NOT-STARTED. UNIT 3 — NOT-STARTED. Ladder — not yet owed.
+
+---
+
+# UNIT 1 RECORD — the book HEIGHT MANIFEST, and the Outline lands once (opened 2026-09-18, `opus-implementer`)
+
+**WHAT THIS UNIT HAS NOT DONE — the record's first line, flipped as the unit closes.** *(At open:
+everything. No product code is written yet; what stands below is the BASELINE measurement and the
+mechanism trace the build must answer.)*
+
+## LIVE STATUS
+
+| piece | state |
+|---|---|
+| the record opened + the RED-ON-OLD re-measured on this tree | **DONE** — 3/3 `gave up at top=-73.0 after 13 hops` + one anomalous run, below |
+| the mechanism TRACE (why −73, measured not reasoned) | **IN PROGRESS** — the hop-driven cycle is visible in the trace; two probes owed (no-hop, and who moves the content) |
+| `BookHeightManifest` — the pure brain + its pins | NOT-STARTED |
+| the Outline's rows consume the manifest | NOT-STARTED |
+| the landing consumes it (ONE aim, the compensator as the net) | NOT-STARTED |
+| the WIDTH-CHANGE recompute | NOT-STARTED |
+| THE GATE: the far-below arm ≤4, UNWRAPPED, the interim bound dropped | NOT-STARTED |
+| the dev-store WALK (her gesture both directions, two widths, one cold) | NOT-STARTED |
+| the manifest's cost ∝ entries, measured | NOT-STARTED |
+| tests: the touched suites · core (if core changed) · the FULL Mac suite | NOT-STARTED (the full suite runs at the END, never at the start) |
+
+*(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
+
+## THE BASELINE, RE-MEASURED ON THIS TREE (2026-09-18, before a line of product code)
+
+The brief's red-on-old is pre-written — `BookOutlineLandingTests.openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded`'s
+**far below** arm, hard-bounded at ≤90 with the ≤4 aspiration in `withKnownIssue`. The
+hallucination guard's first duty is to confirm it is red on MY tree, so it was run four times,
+isolated (`-only-testing:VariorumTests/BookOutlineLandingTests`), on `8180605e`:
+
+| run | machine state | far-below result |
+|---|---|---|
+| baseline-1 (02:39) | **her real-store instance LIVE** (pid 21755), first run after a cold build | `settled at top=-1.0 after 1 hops, 1003 ms` → the known issue **did not record** (an unexpected pass; suite FAILED for that reason) |
+| r1 | zero instances | `gave up at top=-73.0 after 13 hops, 4154 ms` |
+| r2 | zero instances | `gave up at top=-73.0 after 13 hops, 4142 ms` |
+| r3 | zero instances | `gave up at top=-73.0 after 13 hops, 4109 ms` |
+
+**So the arm is RED 3/3 in the steady state, byte-identically to RULING A-2's recorded measurement
+(−73.0 / 13 hops / ~4.1 s), and it has ONE recorded load-dependent green** — noted rather than
+smoothed over, because it is the row-58 class and because a session that sees only that run would
+wrongly conclude the row had come right. Machine state is recorded beside every number in this
+record for exactly this reason.
 
 ## CLOSEOUT (the ritual, so nothing is forgotten)
 
