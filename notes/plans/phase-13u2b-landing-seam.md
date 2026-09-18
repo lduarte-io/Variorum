@@ -419,6 +419,50 @@ the neighbourhood of the plan's *"No lazy-run restructuring"* line, so it is not
 The proposal, the alternatives and the reason the plan's letter cannot meet its own gate are in the
 message to the architect; the adjudication lands below.
 
+## ADJUDICATIONS (the architect's rulings)
+
+**AR-1 (2026-09-18, overnight — UNIT 1's design fork; the implementer's trace is the UNIT 1 RECORD
+at `f049af48`, adjudicated within the architect mandate; PROVISIONAL under the overnight
+authorization, bundled for her handoff):** the implementer measured that the plan's letter — feed
+the manifest to the AIM, scroll once — **cannot meet its own gate**: every hop already lands at
+exactly `top=0.0`, and the −73 arrives AFTERWARD, because arrival de-realizes the rows ABOVE the
+target and SwiftUI's lazy estimate replaces their real heights with the run average (~70 pt short
+over that stretch); the ScrollView compensates content growth above but not shrinkage, so `top=0`
+is not a fixpoint of the column — −73 is. Probe: hop budget 1 still decays with zero hops spent.
+**RULING: build the proposal — the manifest reaches the ROWS.** The small-row runs (chapter
+headings + collapsed cards) stop being lazy: plain `VStack`s whose far rows render manifest-height
+placeholders (`Color.clear.frame(height:)`) and realize real content near the viewport — the
+row-53 virtualization pattern the expanded notes already ship, extended downward. Anchors are KEPT
+(`scrollTo(id:.top)` unchanged — no scroll-mechanism churn); heights are LEARNED > DERIVED for
+small rows and `SurfaceSizeMemory` > `blockExtents`-estimate > any-width > fallback for expanded
+notes, the extents read staying lazy so a collapsed book pays nothing. **Why this does not violate
+the WHAT-NOT-TO-DO fence, stated so the ladder can check the reasoning:** the CLOSED road split
+runs BY SCALE and moved the expanded notes/live editor between runs — the thing that (ambiguously)
+broke the mount. Here the expanded notes and the live editor keep their exact identity and
+position; only heading/card runs change form, and no liveness mechanism is touched (P-3's fence).
+"Offset-addressed, never estimate-resolved" is satisfied in substance: no estimate remains to
+resolve against. **FOUR RIDERS, binding:** **(1) the closed-road guard** — after the restructure,
+run row 64's own successor measurement (`textView.window != nil` + `index.entries.count`, never
+"the first editor") on a long note under Outline and record the numbers, so the road built beside
+the closed one retires its ambiguity instead of inheriting it; **(2) P1/P3 gate the ship** —
+measure mount and scroll cost at the 300-row window cap on the Sherlock corpus and confirm typing
+cost untouched (nothing rebuilds at autosave rate); if the placeholder+observer cost does not hold,
+REPORT, don't ship (option (c), windowed spacers, is the named O(visible) fallback — a bigger unit,
+mine to re-scope); **(3) the gate is unchanged and the zero-test-mechanism-churn promise is
+load-bearing** — ≤4, arm UNWRAPPED, three-expanded ≤2 hops; if test mechanisms need edits after
+all, stop and report; **(4) the DERIVED-row residual is the compensator's honest job now** — a far
+row whose derived height is slightly off shifts once when it enters the near band and is LEARNED
+thereafter; record the class in the UNIT 1 RECORD and carry it into row 64's closeout disposition.
+**Alternatives dispositioned:** (a) the plan's letter — REJECTED as the unit (measured to fail the
+gate; a knowingly-partial ship is the class this phase exists to end), though its aim half rides
+free inside the proposal; (b) the closed one-scale-per-run road — stays closed (the plan's own
+line; still inexact by preview-line count); (c) windowed spacers — rejected for scope, kept as the
+named fallback under rider 2. **The plan's UNIT 1 steps are AMENDED by this ruling** (the section's
+"compute offset → ONE scroll" letter is superseded in mechanism, not in outcome: the landing still
+computes from known heights and lands once — the heights now live in the column itself). U2's
+authority hoist should expect the compensator's role as shrunk by this ruling: the net under
+DERIVED rows, and the flow until it adopts.
+
 ## CLOSEOUT (the ritual, so nothing is forgotten)
 
 Record results per unit here; mark complete; master plan table + pointer flip (the superseded
