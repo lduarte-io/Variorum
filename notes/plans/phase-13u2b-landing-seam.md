@@ -320,8 +320,10 @@ finishes the phase from it.)*
 
 **LIVE STATUS:** UNIT 1 — **CLOSED, WALKED, ACCEPTED** (the record below; gate MET and UNWRAPPED,
 24/24 real-book landings at `top=0.0`, finals in; the orchestrator's walk passed). UNIT 2 —
-**IN-PROGRESS** (its record is the last section of this file). UNIT 3 — NOT-STARTED. Ladder — not
-yet owed.
+**BUILT AND RECORDED, pending the orchestrator's walk** (its record is the last section of this
+file; the authority hoisted and both surfaces adopting, PIN B fixed red-on-old, the signpost
+shipping and verified content-free, her gesture walked at `hops=0` five times running, finals in).
+UNIT 3 — NOT-STARTED. Ladder — not yet owed.
 
 ---
 
@@ -814,7 +816,8 @@ fixed** — the hallucination guard's own rule, and it binds here exactly as it 
 | THE SIGNPOST — content-free, ships in Release, emitted by the authority | **DONE** — `LandingSignpost`; pinned by `LandingSignpostTests` (10 tests / 2 suites green, including the landing discipline's own truth tables — the hoist's dividend) |
 | the signpost verified content-free (a capture + the Release binary's own strings) | **DONE** — both ways, below: eleven real lines captured from the dev-store walk, and the Release binary's own strings |
 | the dev-store WALK — a far landing in Read ▸ Scroll, both directions, on Sherlock | **DONE** — her exact gesture, **5 consecutive landings at `hops=0 content=0 top=0`** across a 290,000-pt column; 6 captures |
-| tests: the touched suites · the FULL Mac suite | NOT-STARTED |
+| tests: the touched suites · the FULL Mac suite | **DONE** — core NOT OWED (zero `Sources/` lines); iOS NOT OWED (no `Shared/` file moved); the FULL Mac suite **2779 tests / 464 suites, ZERO known issues, ONE red — row 58's recorded environment condition, byte-identical** |
+| **UNIT 2 — CLOSED, pending the orchestrator's walk** | **READY** |
 
 *(Every line starts NOT-STARTED and is flipped in the same commit as the piece it names; an
 unverified claim reads PENDING.)*
@@ -945,3 +948,83 @@ one):
 The reason-strings (`settled at top=…`) are likewise reachable in the binary as literals but never
 BUILT in Release: `finish(_:why:)` takes its sentence as an `@autoclosure` and only the DEBUG
 storyboard calls it, so a landing that ends in her build costs exactly the one signpost line.
+
+## FINALS, AND THE ONE RED
+
+| gate | result | baseline (UNIT 1's finals) |
+|---|---|---|
+| core `swift test` | **NOT OWED — zero `Sources/` lines in the diff** | 1567 / 171 |
+| the FULL Mac suite | **2779 tests / 464 suites**, 747.0 s, **ZERO known issues**, **1 red** (below) — zero instances, nothing else running | 2767 / 462, zero known issues, 1 environment red |
+| iOS build | **not owed** — no `Shared/` file moved, nothing mobile-visible | green |
+| lockstep marker | untouched — **8** | 8 |
+
++12 tests / +2 suites are this unit's: `LandingAuthorityTests` (7) and `LandingSignpostTests` (3)
+are new; PIN A and PIN B joined the flow's existing landing suite.
+
+**THE RED — `BookIndexEditingTests.theReadClickLandsInIndexAtThatBlock`** (`live.count → 0`, the pane
+identifier nil): **`KnownIssuesAndTechDebt` row 58's recorded condition, byte-identical to UNIT 1's
+own run and to the row's own measurement** (3/3 red isolated on zero-code trees). This unit's diff
+touches the reading flow and the Outline's landing; it does not touch the book Index, which has not
+adopted the authority and will not until its next touch.
+
+## WHAT SHIPPED — four files, and where each piece lives
+
+- **`App/Variorum/Variorum/Surface/LandingAuthority.swift`** (NEW): `LandingSurface` (a closed type,
+  so the signpost's vocabulary cannot grow a name) · `LandingPolicy` + the two surfaces' shipped
+  numbers · `LandingSettle.decide`, the PURE decision · `LandingFacts` (a manifest's numbers about
+  one landing) · `LandingSignpost` (the content-free line AND the proof of it) ·
+  `LandingAuthority`, the runner that owns the timer, the seed, the DEBUG story and the Release
+  signpost.
+- **`App/Variorum/Variorum/Surface/ProseHeightModel.swift`** (NEW): the prose arithmetic UNIT 1
+  marked for this unit to hoist — one model, both consumers, each keeping its own empty answer,
+  calibration, rounding and floor.
+- **`App/Variorum/Variorum/Features/BookView/BookView.swift`**: the landing loop (`OutlineLanding`,
+  `armLandingCheck`, `checkLanding`, `finishLanding`, the constants) retires into the authority; the
+  Outline keeps its own act (the scroll), its own facts (the manifest) and the page bookkeeping that
+  was never the landing's (which row is at the top, the per-landing height log).
+- **`App/Variorum/Variorum/Features/BookView/ReadingFlowView.swift`**: the same retirement, plus the
+  small-row runs becoming plain `VStack`s, every small row carrying its anchor and reporting its
+  height, `FlowRowHeights` (what those rows reported), and the flow's own `heightManifest`.
+  `FlowLanding` slims to what only this surface knows — which stories are near and which have
+  settled — with its `begin`/`end`/`rowNear`/`rowSettled`/`aboveTargetSettled` shape untouched.
+
+**Zero `Sources/VariorumCore/` lines. Zero `Sync/`. Zero `Persistence/`. Zero schema. Zero
+migrations. Marker stays 8.** No `Shared/` file moved, so the phone inherits nothing and no mobile
+suite is owed; the closeout's parity line still reads *nothing mobile-visible*.
+
+**Commits**, each pushed as it landed: `81893e3c` (the record + the two pin shapes, before any
+product code) · `c31898cd` (the PRE-FIX MEASUREMENT) · `8a271370` (the prose-model hoist) ·
+`51052f86` (the authority + both adoptions + the two pins) · `ce8298e6` (the signpost, its pins, the
+walk) · this commit (the finals).
+
+## DISPOSITIONS
+
+| item | verdict | evidence |
+|---|---|---|
+| **the authority** | **BUILT, and the Outline consumes it BYTE-IDENTICALLY** | its landing suites 13/13 green with ZERO test edits — the 3C proof the brief asked for |
+| **the flow adopts it** | **BUILT** — all seven shipped flow pins green UNMODIFIED | `aRevealOfTheTwelfthStory…`'s re-land bound, `theFinisherWaitsOnTheSurfacesWord…`, R2-12's teardown pin, the virtualization pin: all untouched and green |
+| **PIN B — the already-there landing** | **FIXED, red-on-old, and walked** | `gave up at top=unreported after 0 re-lands, 4211 ms` (2/2 pre-fix) → `settled at top=0.0 after 0 hops, 1017 ms`; in the field, 1,007 ms |
+| **PIN A — the far chapter landing** | **HOLLOW as a red-on-old pin, and said so** | green on the pre-fix tree; KEPT as the chaptered flow's first landing guard (it had none), and its trace is what measured the real residual |
+| **the derived-story residual** | **RECORDED, not fixed — AR-1's rider 4 at this surface's scale** | a story above a landed target realizes ~1,670 pt taller than its estimate, costs ONE correction, and is learned thereafter; the walk shows it once (`hops=1 derived=9`) and never again (`hops=0 derived=7`) |
+| **the prose-model hoist** | **DONE, behaviour-free** | 21 tests / 2 suites green, zero test edits |
+| **THE SIGNPOST** | **SHIPS, and is content-free by construction** | the walk's eleven real lines + the Release binary's strings + `LandingSignpost.isContentFree` pinned against a column whose every row id is prose |
+| **the Outline's unreachable hop fence** | **RETIRED, with the arithmetic** | at a 0.25-s pause its 40 corrections need 10 s and its watchdog fires at 4, so `hops >= budget` could never fire; the unified rule (the budget stops CORRECTING, the watchdog stops the landing) changes nothing that can happen — pinned |
+| **row 58's red** | **the recorded environment condition** | byte-identical; the diff touches the flow and the Outline, not the Index |
+| **PROVISIONALs** | **NONE** | no product behaviour was invented: the signpost's existence and shape are the plan's own instruction, and every policy value is a surface's shipped number |
+
+### TWO RESIDUALS, STATED RATHER THAN SMOOTHED OVER
+
+1. **The flow's small rows are now EAGER, and that is a bound worth naming.** They are the title,
+   the closing mark and one heading per chapter — fifteen on Sherlock, and at the observation
+   window's 300-note cap a book filed three notes to a chapter would build ~102 of them. They are
+   short `Text`s with one geometry observer each, against the Outline's measured +143 ms for 400
+   rows carrying a placeholder AND an observer, so the order is tens of milliseconds once per book
+   open — but it is reasoned, not measured, and it is stated here for that reason. **If a book with
+   hundreds of chapters ever makes this matter, the answer is already built and needs no design:
+   `OutlineRunRow`'s manifest-height placeholder, applied to these rows.**
+2. **The at-top wait's one unified rule** (*look again when the hold is over; if the hold is
+   already over and something else is blocking, after the quiet interval*) is byte-exact for the
+   Outline and makes the flow look up to 0.25 s SOONER in one window (elapsed between 0.75 s and
+   1.0 s, where its old floor was the quiet interval). Strictly more responsive, and stated because
+   "byte-identical" was this unit's promise and this is the one place it is only "identical or
+   better".
