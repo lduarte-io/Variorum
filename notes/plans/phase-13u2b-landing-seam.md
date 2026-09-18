@@ -318,7 +318,8 @@ whatever her store does that the dev store will not.
 dispositions. The orchestration record below is the phase's running memory; a fresh session
 finishes the phase from it.)*
 
-**LIVE STATUS:** UNIT 1 — IN PROGRESS (record below). UNIT 2 —
+**LIVE STATUS:** UNIT 1 — **BUILT AND RECORDED, pending the orchestrator's walk** (the record
+below; gate MET and UNWRAPPED, 24/24 real-book landings at `top=0.0`, finals in). UNIT 2 —
 NOT-STARTED. UNIT 3 — NOT-STARTED. Ladder — not yet owed.
 
 ---
