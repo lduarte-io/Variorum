@@ -683,7 +683,9 @@ final class BookViewModel {
            abs(remembered.width - outlineContentWidth) <= stableSurfaceWidthTolerance {
             return (remembered.height, true)
         }
-        if let extents = flowExtents.lookup(entries.map(\.postID))?[postID], !extents.isEmpty {
+        // Element-wise against the entries (no per-ask id-list build — this
+        // runs per far expanded row per body pass; 13u2b ladder NIT 2).
+        if let extents = flowExtents.lookup(matching: entries)?[postID], !extents.isEmpty {
             return (BookOutlineHeightModel.expandedHeight(
                 extents: extents, metrics: outlineHeights.metrics), false)
         }

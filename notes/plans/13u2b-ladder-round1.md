@@ -304,3 +304,21 @@ suites (the repo's own load-flaky-red generator). Under the hallucination guard 
 without red-on-old) the arm is RECORDED: QUESTIONS #115 gains **(b) the voice-change arm**,
 carrying the guards verbatim so the eventual builder inherits them. One line plus its pin whenever
 the rig gains a voice-flip road; the implementer's own preference matched this call.
+
+### NIT 1 — CONFIRMED · the overclaiming comment CORRECTED; the keying recorded, not built
+
+The probe registry's doc no longer claims "another window … can never answer": it now states
+exactly what the `activePostID` filter discriminates (another NOTE) and what it does not (the same
+note in two windows — the LIFO pick can carry the other window's geometry, the recorded
+two-windows keying family), naming the eventual fix (keying by the detail's registration token)
+and why it is not built here: it needs a window discriminator plumbed through both registration
+sites and the capture path — not the one-line class the responses file's own bar set ("only if it
+is genuinely small"). Comment-only; no pin owed (no behaviour changed).
+
+### NIT 2 — CONFIRMED · FIXED in the implementer's preferred shape (no pin owed — behaviour-free)
+
+`FlowExtentsCache` gains `lookup(matching entries:)` — count + `zip`, element-wise, zero
+allocation — and the hot caller (`outlineSurfaceAnswer`, per far expanded row per body pass)
+consumes it; the two callers that already hold a built id list (the fetch paths, which need it for
+`store` anyway) keep `lookup(_:)`. Cleanliness class: no behaviour changes, so no red-on-old is
+owed; the cost, view and landing suites re-run green over it (18 tests / 3 suites).

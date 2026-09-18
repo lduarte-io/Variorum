@@ -951,6 +951,19 @@ final class FlowExtentsCache {
         self.postIDs == postIDs ? extents : nil
     }
 
+    /// The same answer, compared element-wise against the ENTRIES themselves
+    /// (count + `zip`, no allocation) — for the hot callers that would
+    /// otherwise build an id list per ask (13u2b ladder round 1, NIT 2: the
+    /// Outline's expanded-row placeholder asks per row per body pass, so an
+    /// `entries.map(\.postID)` there was O(expanded × entries) of pure
+    /// key-building at the window's 300-note cap).
+    func lookup(matching entries: [Queries.ReadingEntry]) -> [String: [Queries.BlockExtent]]? {
+        guard postIDs.count == entries.count,
+              zip(postIDs, entries).allSatisfy({ $0 == $1.postID })
+        else { return nil }
+        return extents
+    }
+
     func store(_ extents: [String: [Queries.BlockExtent]], for postIDs: [String]) {
         self.postIDs = postIDs
         self.extents = extents

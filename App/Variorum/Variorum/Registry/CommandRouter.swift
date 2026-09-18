@@ -263,8 +263,15 @@ final class CommandRouter {
     /// A registry rather than one closure, and LIFO like `handlers`, for the
     /// same reason: mount order is SwiftUI's, and an arriving surface's
     /// `onAppear` can precede the departing one's `onDisappear`. The answer is
-    /// filtered by `activePostID`, so a surface in another window or another
-    /// pane can never answer for the note this switch is about.
+    /// filtered by `activePostID`, so a surface showing ANOTHER NOTE can never
+    /// answer for the one this switch is about. **What the filter does NOT
+    /// discriminate (13u2b ladder round 1, NIT 1 — recorded, accepted):** the
+    /// SAME note open in two windows registers two probes, and the LIFO pick
+    /// can then carry the other window's geometry — a cosmetic misplacement
+    /// in the recorded two-windows keying family. The eventual fix is keying
+    /// the probe by the detail's registration token; not built here because
+    /// it needs a window discriminator plumbed through both registration
+    /// sites and the capture path — not the one-line class.
     @ObservationIgnored
     private var placeProbes: [(token: UUID, probe: () -> ViewportCarry.Place?)] = []
 
