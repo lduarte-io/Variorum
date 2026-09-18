@@ -115,7 +115,7 @@ no longer the orchestrator's reading of a condition; her direct ruling.
 
 | # | item | status → owner |
 |---|---|---|
-| 1 | UNIT 1 — the height manifest + the Outline lands once (gate: row 64's arm ≤4, UNWRAPPED) | **IN FLIGHT** — implementer spawned 2026-09-18 |
+| 1 | UNIT 1 — the height manifest + the Outline lands once (gate: row 64's arm ≤4, UNWRAPPED) | **DONE 2026-09-18 — gate MET (0 hops, arm unwrapped), record closed at `f66d1dc5`, THE ORCHESTRATOR'S WALK PASSED (below)** |
 | 2 | UNIT 2 — one landing authority + the flow + the Release signpost | NOT-STARTED (follows U1) |
 | 3 | UNIT 3 — the mode-switch viewport-fraction carry (#114's defaults) | NOT-STARTED (follows U2) |
 | 4 | QUESTIONS #114 (a)/(b) — U3's scope edges | LOGGED — hers |
@@ -569,6 +569,22 @@ collapsed cards) can no longer be `LazyVStack`s that estimate their unrealized r
 the neighbourhood of the plan's *"No lazy-run restructuring"* line, so it is not mine to take alone.
 The proposal, the alternatives and the reason the plan's letter cannot meet its own gate are in the
 message to the architect; the adjudication lands below.
+
+## THE ORCHESTRATOR'S WALK — UNIT 1 (2026-09-18, overnight; gates the record per the sizing guidance)
+
+Dev-store Debug build (`DerivedData/13u2b`, binary of 05:04), launched with stderr as the
+instrument, zero instances verified before and after, WalkKit + cliclick. **Her exact gesture,
+verified independently of the implementer's 24:** open Sherlock ▸ Outline, click the LAST chapter —
+`offset=25990 total=43882 · settled at top=0.0 after 1 hop, 1012 ms` (the one hop = `derived=1`,
+the AR-1 rider-4 residual class, exactly as recorded) — then click **"the man with the twisted
+lip" far UP**, the stutter case itself: `offset=1105 total=50559 derived=0 exactAbove=Y · settled
+at top=0.0 after 0 hops, 1033 ms`. One clean motion where her report had ~10 stutters every time.
+Also exercised on the way: the first-of-session cold landing (`derived=12 exactAbove=N` → still
+`top=0.0, 0 hops`) and the **already-there landing** (the unit's own introduced-and-fixed defect:
+0 hops where it had spun 15). Capture: `13u2b-screens/11-orch-walk-twisted-lip.png`. One walk
+note, no action owed: the navigator's generous row spacing swallowed two of my early clicks into
+the gap between rows — operator error, not product (the rows hit fine when actually hit).
+**VERDICT: UNIT 1 ACCEPTED — ledger row 1 DONE.**
 
 ## ADJUDICATIONS (the architect's rulings)
 
