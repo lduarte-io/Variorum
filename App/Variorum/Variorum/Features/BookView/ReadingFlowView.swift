@@ -793,34 +793,40 @@ nonisolated enum FlowHeightEstimate {
     /// counts `newlines + 1` and absorbs the difference in its runtime
     /// calibration; measured here against Sherlock, `+ 1` over-read every
     /// story by ~39 % — the batch record has the table.)
-    static func paragraphs(newlines: Int) -> Int { max(1, newlines) }
+    ///
+    /// **13u2b UNIT 2:** the rule itself is `ProseHeightModel`'s now — ONE
+    /// model for this surface and the Outline's expanded rows (UNIT 1 marked
+    /// the hoist and left it standing for the moment the second consumer
+    /// arrived). These two names stay as the flow's word for it.
+    static func paragraphs(newlines: Int) -> Int {
+        ProseHeightModel.paragraphs(newlines: newlines)
+    }
 
     /// The lines one block occupies (the paged reader's rule, restated over
     /// the rendered paragraph count).
     static func lines(characters: Int, newlines: Int, metrics: Metrics) -> Double {
-        guard characters > 0 else { return 0 }
-        let paragraphs = Double(Self.paragraphs(newlines: newlines))
-        let full = Double(characters) / metrics.charsPerLine
-        return max(paragraphs, full + paragraphs * 0.5)
+        ProseHeightModel.lines(
+            characters: characters, newlines: newlines, metrics: prose(metrics))
     }
 
-    /// One story's height from its blocks' extents.
+    /// The page's own type facts, as the shared model asks for them: the
+    /// measured chars-per-line and pitch, plus the page's FIXED spacing
+    /// constants (`lineSpacing` between a paragraph's lines; the column's
+    /// 13-pt gap between paragraphs and between blocks — measured on
+    /// Sherlock: the pitch alone over-read every story by ~8 %, and this is
+    /// the whole of it).
+    static func prose(_ metrics: Metrics) -> ProseHeightModel.Metrics {
+        ProseHeightModel.Metrics(
+            charsPerLine: metrics.charsPerLine, linePitch: metrics.linePitch,
+            lineSpacing: lineSpacing, paragraphGap: paragraphGap)
+    }
+
+    /// One story's height from its blocks' extents. The page's own half of
+    /// the sentence — its blank line, its calibration and its rounding — stays
+    /// here; the arithmetic is the shared model's.
     static func height(extents: [Queries.BlockExtent], metrics: Metrics) -> CGFloat {
-        let rendered = extents.filter { $0.characters > 0 }
-        guard !rendered.isEmpty else { return emptyNoteHeight }
-        var total: CGFloat = 0
-        for extent in rendered {
-            let lines = lines(
-                characters: extent.characters, newlines: extent.newlines, metrics: metrics)
-            let paragraphs = CGFloat(Self.paragraphs(newlines: extent.newlines))
-            // `lineSpacing` sits only BETWEEN a paragraph's lines, never
-            // after its last — one pitch's spacing less per paragraph
-            // (measured on Sherlock: the pitch alone over-read every story
-            // by ~8 %; this is the whole of it).
-            total += CGFloat(lines) * metrics.linePitch - paragraphs * lineSpacing
-                + (paragraphs - 1) * paragraphGap
-        }
-        total += CGFloat(rendered.count - 1) * paragraphGap
+        guard let total = ProseHeightModel.height(extents: extents, metrics: prose(metrics))
+        else { return emptyNoteHeight }
         return (total * calibration).rounded()
     }
 }

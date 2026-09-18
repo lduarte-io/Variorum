@@ -245,19 +245,14 @@ nonisolated enum BookOutlineHeightModel {
         var prose: ProseMetrics = ProseMetrics()
     }
 
-    /// The prose model's inputs — the flow's own shape
-    /// (`FlowHeightEstimate`), restated here at the OUTLINE's measure and
-    /// type rather than shared, because the flow is UNIT 2's to adopt and a
-    /// shared brain minted while one consumer is out of scope is a refactor
-    /// nobody measured. **The hoist belongs to UNIT 2**, where the flow
-    /// becomes the second consumer of this file (the hoist-at-next-touch
-    /// rule's own moment).
-    struct ProseMetrics: Equatable {
-        var charsPerLine: Double = 80
-        var linePitch: CGFloat = 19
-        var lineSpacing: CGFloat = 0
-        var paragraphGap: CGFloat = 7
-    }
+    /// The prose model's inputs. **13u2b UNIT 2 — THE HOIST FIRED:** this was
+    /// a struct here, restated from the flow's own shape because *"the flow is
+    /// UNIT 2's to adopt and a shared brain minted while one consumer is out
+    /// of scope is a refactor nobody measured."* The flow is now the second
+    /// consumer, so both read ONE model (`ProseHeightModel`) and this name
+    /// stays as the Outline's word for it — every call site and every pin is
+    /// untouched.
+    typealias ProseMetrics = ProseHeightModel.Metrics
 
     /// What kind of row this is — the only thing the model needs to know to
     /// answer, and the key the caller learns heights under.
@@ -313,26 +308,18 @@ nonisolated enum BookOutlineHeightModel {
     /// computes the lengths in SQL and no text crosses the boundary). The
     /// whole ROW is this plus `expandedChrome`.
     ///
-    /// The paragraph model is the flow's, measured there against the real
-    /// Sherlock library: a block is its own paragraph, its internal newlines
-    /// are content (I4), each paragraph ends mid-line (half a line wasted on
-    /// average), `lineSpacing` sits only BETWEEN a paragraph's lines.
+    /// The paragraph model is the ONE model (`ProseHeightModel` — 13u2b UNIT
+    /// 2's hoist), measured against the real Sherlock library: a block is its
+    /// own paragraph, its internal newlines are content (I4), each paragraph
+    /// ends mid-line (half a line wasted on average), `lineSpacing` sits only
+    /// BETWEEN a paragraph's lines. What stays HERE is the Outline's own half
+    /// of the sentence — its empty answer and its floor, which are facts
+    /// about the editor's surface and not about prose.
     static func expandedHeight(
         extents: [Queries.BlockExtent], metrics: Metrics
     ) -> CGFloat {
-        let prose = metrics.prose
-        let rendered = extents.filter { $0.characters > 0 }
-        guard !rendered.isEmpty, prose.charsPerLine > 0 else { return metrics.expandedEmpty }
-        var total: CGFloat = 0
-        for extent in rendered {
-            let paragraphs = Double(max(1, extent.newlines))
-            let full = Double(extent.characters) / prose.charsPerLine
-            let lines = max(paragraphs, full + paragraphs * 0.5)
-            total += CGFloat(lines) * prose.linePitch
-                - CGFloat(paragraphs) * prose.lineSpacing
-                + CGFloat(paragraphs - 1) * prose.paragraphGap
-        }
-        total += CGFloat(rendered.count - 1) * prose.paragraphGap
+        guard let total = ProseHeightModel.height(extents: extents, metrics: metrics.prose)
+        else { return metrics.expandedEmpty }
         return max(metrics.expandedEmpty, total.rounded())
     }
 }

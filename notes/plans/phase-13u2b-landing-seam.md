@@ -807,7 +807,7 @@ fixed** — the hallucination guard's own rule, and it binds here exactly as it 
 |---|---|
 | the record opened + the red-on-old pin shapes stated | **DONE** — this section, before any product code |
 | PIN A / PIN B measured on the pre-fix tree | **DONE** — PIN B **RED** (`gave up at top=unreported after 0 re-lands, 4211 ms`, 2/2 runs); PIN A **GREEN on both sides — HOLLOW as a red-on-old pin**, and its trace measured something else that is real (below) |
-| the PURE hoists (`ProseHeightModel`; the learned-heights box if the measurement wants it) | NOT-STARTED |
+| the PURE hoist — `ProseHeightModel`, ONE prose model for both consumers | **DONE** — `Surface/ProseHeightModel.swift`; `BookOutlineHeightModel.ProseMetrics` is now a typealias for it and both `expandedHeight` and `FlowHeightEstimate.height` call it; **21 tests / 2 suites green with ZERO test edits** (`ReadingFlowEstimateTests` + `BookHeightManifestTests`) |
 | THE AUTHORITY — hoisted from `BookView`, parameterized, the story built in | NOT-STARTED |
 | the Outline consumes it BYTE-IDENTICALLY (its suites green, ZERO test edits) | NOT-STARTED |
 | THE FLOW adopts the authority AND the manifest (row-100 pins unmodified) | NOT-STARTED |
