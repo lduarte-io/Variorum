@@ -594,6 +594,32 @@ re-budgeting the pin with the mechanism at the line, shrinking the shipped band 
 surface to satisfy a fixture — the class the plan's WHAT-NOT-TO-DO names), or making the band
 viewport-relative (right, and beyond this unit).
 
+**AR-3 (2026-09-18, overnight — the off-viewport pin, ruled on the implementer's stop-and-report):**
+`BookViewTests.offViewportPostsNeverInstantiate` reads `instantiated → 33` against a `< 30` budget.
+The traced mechanism is accepted: the pin's fixture (60 expanded posts of a FEW SENTENCES each) was
+calibrated against the column's LIE — far expanded rows used to claim `remembered ?? 800` where the
+honest lengths estimate says ~50 pt — so the honest column is far shorter and the same ±2500-pt
+near band GENUINELY covers 33 rows. Nothing regressed in the mechanism the pin guards.
+**RULING — the AR-2 class, taken one step further than option (a): fix the FIXTURE, not just the
+number.** The fixture's discriminating power ALSO leaned on the lie (tiny notes only made a long
+column because far rows over-claimed 16×); under the honest column a 60×~50-pt fixture barely
+exceeds the band, so any re-budgeted number would be a weak assertion. **Preferred form: lengthen
+the fixture's notes** (enough blocks that honest estimates put the column ≫ the band — a few
+thousand points per note is the real-Sherlock shape) so the band covers only a handful of rows and
+the budget returns TIGHT, its derivation stated at the line (rows-within-band + the hysteresis
+margin). **Fallback, if other assertions in the same test depend on the small notes:** option (a) —
+re-budget with the mechanism written at the line, PLUS one companion assertion that the
+beyond-band rows are placeholders (the far-row half asserted positively), so the pin cannot pass on
+a partial virtualization failure. **Option (b) is REJECTED outright** — re-tuning the shipped near
+band to satisfy a fixture is the exact class the WHAT-NOT-TO-DO names. **Option (c) (a
+viewport-relative band) is RECORDED-not-built:** a real design idea, out of this unit's scope; it
+rides the UNIT 2 authority's design notes as a consideration, not an obligation. Either form is the
+unit's SECOND test edit — listed in the record beside AR-2's with its why. **Also accepted from the
+same report:** RED 1 treated as row 58's environment condition (byte-identical signature, the diff
+touches the Outline not the Index — per the brief); the two walk-found fixes (the card-height
+shape, and the no-op-scroll landing spin — a unit-INTRODUCED defect, honestly stated and fixed
+red-on-old; FLAGGED for the ladder to examine specifically); the 24/24 real-book walk at `top=0.0`.
+
 ## CLOSEOUT (the ritual, so nothing is forgotten)
 
 Record results per unit here; mark complete; master plan table + pointer flip (the superseded

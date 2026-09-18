@@ -1425,4 +1425,17 @@ block wears no in-pane mark — the caret is the mark).
 
 #114 — **TWO SCOPE EDGES OF 13u2b UNIT 3 — the mode-switch viewport-fraction carry (2026-09-18; both PROVISIONAL, built to the defaults below unless you say otherwise).** The rule you approved at the 13u2b kickoff ("do that piece now"): on a NOTE mode switch, the carried block lands at the same VIEWPORT FRACTION it occupied in the outgoing mode — a fraction, never a pixel (your pre-accepted ≈one-line tolerance: "if this is very difficult bc of the different visual elements of takes & stuff, I do think that's fine"). **(a) The book's word-tabs (Outline · Index · Book · Read) are NOT covered** — their landings are chapter-shaped (`LandingTarget` lands at the top, an Act 10 ruling) and your report's sentence was about the note's modes; one word extends the fraction rule there. **(b) Takes is deliberately OUTRANKED-and-untouched** — its entry-landing/memory policy is your own 17q ruling (R-Q20/R-Q21: the memory restores and holds; an entry landing outranks it only when the note's current block changed), so the fraction rule defers to it; Lenses/Compare/Canvas/Blocks likewise keep their standing policies. Reversing either is one condition.
 
-*(Next free number: **#115**.)*
+#115 — **THE BOOK OUTLINE KEEPS YOUR PLACE WHEN THE WINDOW'S WIDTH CHANGES — and "your place" means the row that was at the top (2026-09-18, 13u2b UNIT 1; the record is `notes/plans/phase-13u2b-landing-seam.md`'s UNIT 1 RECORD).** PROVISIONAL, one line to change either way.
+
+**The background.** The architectural trace measured this directly while staging your stutter report: *"after a settled landing, a WIDTH change alone silently relocated the page mid-story."* It has to move, and that is not a bug in itself — every row's height changes with the measure, so a scroll offset kept through a resize points at different prose. What was missing was any decision about what to keep. UNIT 1 makes the column's heights known, so keeping something is now possible; this is the choice of WHAT.
+
+**What was built:** when the Outline's content width really changes (the window resized, the sidebar or the navigator dragged), the column RE-LANDS the row that was at the top of the page — the same landing road a chapter click takes, so it settles the same way and costs the same nothing. Walked: 696 → 518 pt mid-story, `settled at top=-0.11 after 0 hops`, the page still showing the story it was showing.
+
+**(a) THE ROW AT THE TOP, or something else?** The candidates, all buildable:
+- **(i) the row at the top** *(BUILT)* — what you were reading is what stays put; it is also the only thing the old offset unambiguously meant.
+- **(ii) the note you are EDITING** — the caret's note, wherever it sat on the page. Kinder if you are typing near the bottom of a long story and drag the sidebar; stranger if you are reading somewhere else in the book while a note stays focused far away.
+- **(iii) nothing** — today's behaviour before this unit, i.e. the page relocates silently. Recorded as an option only because it is the one you have actually lived with.
+
+Nothing about the manifest depends on this; the re-land is one call at one `onChange`. If you want (ii) it is the same call with a different anchor.
+
+*(Next free number: **#116**.)*
