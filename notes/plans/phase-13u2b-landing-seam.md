@@ -103,6 +103,12 @@ handoff** (`notes/handoffs/phase-13u2b-handoff.md`) is written LAST, self-contai
 at the top — including the field walk she owes and every overnight judgment call, so nothing needs
 this session's cache.
 
+**Her remote check-in (2026-09-18, overnight):** *"only do U3 if your context is <600k … unless you
+don't mean 13u3 faces? … if it isn't a separate 13u3 plan, then do it even if you're above that
+context window."* Resolved: U3 here is UNIT 3 of THIS phase (the fraction carry), not 13u3 FACES —
+it runs in a fresh implementer session like every unit, the orchestrator is far under her line, so
+by her own condition **U3 PROCEEDS**. 13u3 FACES stays a separate phase at her word.
+
 ## THE LEDGER (every row owned; statuses flip in the same commit as the work)
 
 | # | item | status → owner |
