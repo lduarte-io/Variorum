@@ -318,9 +318,10 @@ whatever her store does that the dev store will not.
 dispositions. The orchestration record below is the phase's running memory; a fresh session
 finishes the phase from it.)*
 
-**LIVE STATUS:** UNIT 1 — **BUILT AND RECORDED, pending the orchestrator's walk** (the record
-below; gate MET and UNWRAPPED, 24/24 real-book landings at `top=0.0`, finals in). UNIT 2 —
-NOT-STARTED. UNIT 3 — NOT-STARTED. Ladder — not yet owed.
+**LIVE STATUS:** UNIT 1 — **CLOSED, WALKED, ACCEPTED** (the record below; gate MET and UNWRAPPED,
+24/24 real-book landings at `top=0.0`, finals in; the orchestrator's walk passed). UNIT 2 —
+**IN-PROGRESS** (its record is the last section of this file). UNIT 3 — NOT-STARTED. Ladder — not
+yet owed.
 
 ---
 
@@ -750,3 +751,70 @@ narrowed only if this phase's evidence genuinely narrows them; the 13u3 kickoff 
 instances, Release from a clean worktree, codesign verified, hashes recorded — this refresh also
 delivers the star-cap 5→15 already on main); the author handoff written LAST
 (`notes/handoffs/phase-13u2b-handoff.md`, her checklist at the top).
+
+---
+
+# UNIT 2 RECORD — ONE landing authority + the flow adopts + the Release SIGNPOST (opened 2026-09-18, `opus-implementer`)
+
+**WHAT THIS UNIT IS NOT DOING — the record's first line, written at the open and re-stated at the
+close.** It does **not** touch Takes or the book Index (their ~15 timing pins and row 49's residues
+stay theirs — owner 12 / next touch; adopting four surfaces in one phase is the over-scope the
+sizing guidance names). It does **not** change any scroll MECHANISM — `proxy.scrollTo(id:.top)`
+stays the one act on both surfaces, exactly as AR-1 kept it. It does **not** reopen the closed
+one-scale-per-lazy-run road, and it extends NO liveness mechanism (P-3's fence — this unit is
+scroll geometry beside the pane/editor split). It does **not** relax `SurfaceSizeMemory`'s per-width
+refusal. It does **not** edit an existing test's CLAIM or mechanism (the hoist moves an address, not
+a behaviour: the Outline's landing suites and the flow's row-100 pins must ride UNMODIFIED, which is
+this unit's own 3C proof).
+
+## THE RED-ON-OLD PIN SHAPES — STATED BEFORE A LINE OF PRODUCT CODE (the brief's own order)
+
+The Outline's far-below arm's pattern is: *a long column, a target far from the viewport, rows above
+it the column has not measured, the claim read TWICE (at the settle and a second later), and the
+correction count bounded.* Applied to the FLOW, in her own gesture's shape (*"I clicked a far away
+chapter, that was fine, then I clicked one that was much higher"* — and Read ▸ Scroll is a book's
+mode too), that is **two** pins, and each names a mechanism I can point at in the shipped code
+BEFORE measuring it:
+
+**PIN A — a far CHAPTER landing in Read ▸ Scroll.** The flow's landing anchor for the first note of
+a chapter is the CHAPTER HEADING's row (`FlowRows.landingAnchor`), and a chapter heading is a SMALL
+row — which in the shipped flow lives inside a `LazyVStack` run (`FlowRows.segments`: every story is
+a direct child at an honest height, everything else stays lazy). So the one row a chapter landing
+aims at is the one row the column may not have built. Predicted mechanism, to be measured not
+assumed: an unrealized heading sends no geometry report, so `landing.lastTop` stays nil, the flow
+(deliberately — row 100) spends NO correction on an unreported target, and the landing runs out its
+4-s watchdog as `gave up at top=unreported`, wherever the lazy estimate put the page. **Fixture:**
+twelve Sherlock-shaped stories (215 blocks each) in four chapters of three — the flow's own
+`aRevealOfTheTwelfthStory…` fixture plus chapters. **Claim:** reveal the first note of the LAST
+chapter, then the first note of the SECOND (far ABOVE — her gesture's second half); each time the
+chapter heading's top is within the flow's tolerance and STILL there a second later.
+
+**PIN B — landing again on the row the page is ALREADY at.** `FlowLanding.begin` sets `lastTop =
+nil` and nothing seeds it; `onGeometryChange` reports a CHANGE, so a scroll that moves nothing
+produces no report. Predicted: the second reveal of the same target spins to the watchdog (`gave up
+at top=unreported after 0 re-lands, ~4000 ms`) with nothing visible happening — **the exact defect
+UNIT 1's walk found in the Outline and fixed there**, present in the flow by the same mechanism and
+unfixed because UNIT 1 did not touch this surface. **Claim:** the second landing writes a `DONE:`
+that says neither `unreported` nor `gave up`.
+
+Both are measured on the pre-fix tree first; each lands in the SAME commit as its fix with its
+measured red quoted at the test. **A pin that is green on both sides is recorded as hollow and not
+fixed** — the hallucination guard's own rule, and it binds here exactly as it bound UNIT 1.
+
+## LIVE STATUS
+
+| piece | state |
+|---|---|
+| the record opened + the red-on-old pin shapes stated | **DONE** — this section, before any product code |
+| PIN A / PIN B measured on the pre-fix tree | NOT-STARTED |
+| the PURE hoists (`ProseHeightModel`; the learned-heights box if the measurement wants it) | NOT-STARTED |
+| THE AUTHORITY — hoisted from `BookView`, parameterized, the story built in | NOT-STARTED |
+| the Outline consumes it BYTE-IDENTICALLY (its suites green, ZERO test edits) | NOT-STARTED |
+| THE FLOW adopts the authority AND the manifest (row-100 pins unmodified) | NOT-STARTED |
+| THE SIGNPOST — content-free, ships in Release, emitted by the authority | NOT-STARTED |
+| the signpost verified content-free (a capture + the Release binary's own strings) | NOT-STARTED |
+| the dev-store WALK — a far landing in Read ▸ Scroll, both directions, on Sherlock | NOT-STARTED |
+| tests: the touched suites · the FULL Mac suite | NOT-STARTED |
+
+*(Every line starts NOT-STARTED and is flipped in the same commit as the piece it names; an
+unverified claim reads PENDING.)*
