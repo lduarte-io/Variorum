@@ -982,7 +982,27 @@ storyboard calls it, so a landing that ends in her build costs exactly the one s
 +12 tests / +2 suites are this unit's: `LandingAuthorityTests` (7) and `LandingSignpostTests` (3)
 are new; PIN A and PIN B joined the flow's existing landing suite.
 
-**THE RED — `BookIndexEditingTests.theReadClickLandsInIndexAtThatBlock`** (`live.count → 0`, the pane
+**THE FULL SUITE WAS RUN THREE TIMES**, because the one-line `[weak router]` capture landed after
+the first run and the second run then showed a SECOND red — recorded in full rather than re-run
+until it agreed:
+
+| run | tree | result |
+|---|---|---|
+| 1 | before the weak capture | 2792 / 466 · **1 red** (row 58) |
+| 2 | the shipped tree | 2792 / 466 · **2 reds** — row 58, and `BookOutlineLandingTests.openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded`'s "story 3 opens at its top" arm at `abs(top) → 3424.0` |
+| 3 | the shipped tree | 2792 / 466 · **1 red** (row 58) |
+
+**The second red is UNIT 1's gate suite under full-suite LOAD, and it is not this unit's:** that
+suite is **3/3 GREEN ISOLATED on the shipped tree** (8 tests, 13.6–13.8 s each), it contains no
+reference to `requestMode`, `PostDetailView` or `applyMode` — it mounts the book view directly — and
+nothing in this diff touches the book Outline (it registers no place probe, consumes no carry, and
+does not use `JumpPrimitive`). Green · red · green across three runs of the same code is the
+load-flaky geometry class this repo has measured before (KnownIssues rows 19/20/58; UNIT 1's own
+record carries a load-dependent anomaly on this very suite). **Carried forward for row 64's closeout
+disposition and for the ladder**: the arm UNIT 1 unwrapped can still miss under full-suite load —
+its residual is gone, its harness timing is not.
+
+**THE STANDING RED — `BookIndexEditingTests.theReadClickLandsInIndexAtThatBlock`** (`live.count → 0`, the pane
 identifier nil): **`KnownIssuesAndTechDebt` row 58's recorded condition, byte-identical to UNIT 1's
 own run and to the row's own measurement** (3/3 red isolated on zero-code trees). This unit's diff
 touches the reading flow and the Outline's landing; it does not touch the book Index, which has not
@@ -1195,7 +1215,7 @@ might otherwise credit it to this unit.
 | gate | result | baseline (UNIT 2's finals) |
 |---|---|---|
 | core `swift test` | **NOT OWED — zero `Sources/` lines in the diff** | 1567 / 171 |
-| the FULL Mac suite | **2792 tests / 466 suites**, 742.8 s, **ZERO known issues**, **1 red** (below) — zero instances verified before and after, nothing else running | 2779 / 464, zero known issues, 1 environment red |
+| the FULL Mac suite | **2792 tests / 466 suites**, 742–748 s, **ZERO known issues**, **1 red** (below; run THREE times — the table below) — zero instances verified before and after, nothing else running | 2779 / 464, zero known issues, 1 environment red |
 | iOS build | **not owed** — no `Shared/` file moved, nothing mobile-visible | green |
 | lockstep marker | untouched — **8** | 8 |
 
