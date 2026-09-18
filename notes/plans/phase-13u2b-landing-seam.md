@@ -1108,12 +1108,12 @@ fixed** — the hallucination guard's own rule.
 | piece | state |
 |---|---|
 | the record opened + the red-on-old pin shapes stated | **DONE** — this section, before any product code |
-| PIN A / PIN B measured on the pre-fix tree | **PIN A DONE — RED 2/2, byte-identical** (`fraction 0.0`, below); PIN B's instrument arrives with the capture |
+| PIN A / PIN B measured on the pre-fix tree | **BOTH DONE** — PIN A **RED 2/2** on the pre-fix tree itself (`fraction 0.0`); PIN B **RED under the stated probe** (`fraction 0.5` — the pane's standing centre) |
 | the PURE brain + its pins (PIN C) | **DONE** — `Surface/ViewportCarry.swift`; **11 pins green** (`ViewportCarryTests`), both applies and the round trip |
 | the CAPTURE seam (the router's carry + the mode-switch funnel) | **DONE** — `CommandRouter`'s probe registry + one-shot slot; `PostDetailView.switchMode(to:)` and the `applyMode` closure are the two doors, with the roads that deliberately do NOT come through them named at the code |
 | WRITE captures and consumes | **DONE** — the probe answers from live AppKit geometry; the apply is `JumpPrimitive`'s new `landingInset` (default 0, every existing caller byte-unchanged) parked for the N14 settle hop. **PIN A: `fraction 0.0` → `fraction 0.5`, red-on-old** |
 | READ (both faces) captures and consumes | **DONE** — the carried row and the face report into an unobserved box; the arrival's landing passes the carried anchor to the `scrollTo` it already ran |
-| PIN D — Takes byte-identical (suites unmodified + a walk capture) | NOT-STARTED |
+| PIN D — Takes byte-identical (suites unmodified + a walk capture) | PENDING |
 | the dev-store WALK — her round trips, both faces | NOT-STARTED |
 | tests: the touched suites · the FULL Mac suite | NOT-STARTED |
 | **UNIT 3 — CLOSED, pending the orchestrator's walk** | NOT-STARTED |
@@ -1143,3 +1143,20 @@ parks the caret reveal; the settle hop restores the anchor first, the caret at b
 below the viewport, and `consumePendingReveal`'s guard therefore fires `JumpPrimitive.jump`, whose
 whole contract is *"lands the LINE containing `offset` at the viewport top"*. Nothing is broken —
 the two surfaces simply never agreed on a rule, which is what this unit gives them.
+
+## PIN B's RED — measured under a stated probe, and reverted (2026-09-18)
+
+PIN B reads the FACE's own frame to state its claim as a fraction on both surfaces, and that
+instrument arrived with this unit — so unlike PIN A it cannot be run on a tree that predates it.
+The behaviour was therefore measured with the instrument in place and the FIX neutered: one line in
+`ReadEditPane.land` put back to the shipped `anchor: Self.restingAnchor` (the `.center` it has
+always used), the pin re-run, the line reverted. The pre-probe state was committed first
+(`123b4f8d`), the probe was never committed, and `git status` is clean after it.
+
+| | Write held it at | Read showed it at |
+|---|---|---|
+| **with the fix neutered (the shipped behaviour)** | `fraction 0.0` (row `2204.0…2238.0`, viewport `2204.0…2853.0`) | **`fraction 0.5`** — row `333.0…383.0` against a face at `36.0…680.0`: the pane's standing centre |
+| **with the fix** | `fraction 0.0` | **`fraction 0.0`** — row `36.0…86.0`, flush with the face's top |
+
+PIN A stayed GREEN throughout the probe, which is its own small proof that the probe neutered only
+Read's landing: PIN A's direction is Read → Write, and Write's half was untouched by it.
