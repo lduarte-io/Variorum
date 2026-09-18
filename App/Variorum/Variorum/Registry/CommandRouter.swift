@@ -312,12 +312,30 @@ final class CommandRouter {
     /// is actually landing on. A different block (the current block moved
     /// between the switch and the arrival, or the block is gone) gets nil and
     /// the surface's own standing reveal, which is the honest answer.
+    ///
+    /// **ONE-SHOT MEANS ONE ASK (13u2b ladder round 1, MINOR 1 — red-on-old
+    /// in `CommandRouterTests`):** the ask SPENDS the slot, matched or not.
+    /// The first cut cleared only on a match, so a mismatched take left the
+    /// place loaded — and `jump(to:)` sets the mode outside the switch's
+    /// re-decide, so a later jump-road arrival naming the carried block
+    /// consumed a minutes-old fraction where those roads are promised their
+    /// standing landings. The switch's one arrival gets one chance.
     func takeCarriedFraction(postID: String, blockID: String) -> Double? {
-        guard let place = carriedPlace,
-              place.postID == postID, place.blockID == blockID
-        else { return nil }
+        guard let place = carriedPlace, place.postID == postID else { return nil }
         carriedPlace = nil
+        guard place.blockID == blockID else { return nil }
         return place.fraction
+    }
+
+    /// **A click-through road that names its OWN block drops the carry as it
+    /// changes the mode** (13u2b ladder round 1, MINOR 1's second door — the
+    /// same one-shot rule where the re-decide cannot run). The `jump(to:)`
+    /// family sets the mode directly, by design; without this, Write → Canvas
+    /// parks a place nothing consumes and the canvas card's jump back to the
+    /// same block would land it at the parked fraction instead of the jump's
+    /// own landing.
+    func dropCarriedPlace() {
+        carriedPlace = nil
     }
 
     /// The detail reports its mode truth (its own `@State` changed).

@@ -883,6 +883,12 @@ struct PostDetailView: View {
                 return BlockRangeIndex(slots: slots, tail: nil).range(ofEntryAt: i).location
             }
             pendingCaret = offset ?? 0
+            // 13u2b ladder round 1 (MINOR 1's second door): this road names
+            // its own block and keeps its standing landing — and it changes
+            // the mode OUTSIDE `switchMode`'s re-decide, so any place parked
+            // by an earlier switch is dropped here rather than left for this
+            // arrival to consume.
+            session.commandRouter.dropCarriedPlace()
             mode = .write
         }
     }

@@ -146,6 +146,40 @@ struct CommandRouterTests {
             session.commandRouter.unregisterHandler(bottom)
         }
     }
+
+    /// **13u2b ladder round 1, MINOR 1 — the mode-switch carry slot is
+    /// one-shot even when the arrival's ask mismatches.** The shipped
+    /// `takeCarriedFraction` cleared the slot only on a MATCH, so a
+    /// mismatched take (the first-mount defect's own shape) left the place
+    /// loaded — and `jump(to:)` sets the mode directly, outside the
+    /// switch's re-decide, so a later jump-road arrival naming the carried
+    /// block consumed a minutes-old fraction where the record promises those
+    /// roads "name their own block and keep their standing landings".
+    ///
+    /// RED ON OLD: the second ask below answered `0.4` on the pre-fix tree.
+    @Test func theCarrySlotIsOneShotEvenWhenTheFirstAskMismatches() async throws {
+        try await withSessionWorld { session, _ in
+            let router = session.commandRouter
+            let token = router.registerDetail(postID: "p1", mode: .write) { _ in }
+            defer { router.unregisterDetail(token) }
+            let probe = router.registerBlockPlaceProbe {
+                ViewportCarry.Place(postID: "p1", blockID: "B", fraction: 0.4)
+            }
+            defer { router.unregisterBlockPlaceProbe(probe) }
+
+            router.carryPlaceAcrossModeSwitch()
+            // The arrival's ONE ask names a different block: not for it…
+            #expect(router.takeCarriedFraction(postID: "p1", blockID: "other") == nil)
+            // …and the ask SPENT the slot, matched or not.
+            #expect(router.takeCarriedFraction(postID: "p1", blockID: "B") == nil,
+                    "one-shot means one ask: a mismatched take still spends the slot")
+
+            // A fresh switch re-decides, and a matched take answers exactly once.
+            router.carryPlaceAcrossModeSwitch()
+            #expect(router.takeCarriedFraction(postID: "p1", blockID: "B") == 0.4)
+            #expect(router.takeCarriedFraction(postID: "p1", blockID: "B") == nil)
+        }
+    }
 }
 
 // MARK: - N4 + AD-14

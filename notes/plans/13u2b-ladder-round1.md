@@ -249,3 +249,17 @@ there); green after the fix (10/2 suites re-run). **The two owed corrections lan
 truth-table pin's "veto or no veto" comment now states both cells (off the top AND at it), and the
 UNIT 2 RECORD's residual 2 is amended — the "one behaviour delta" sentence corrected with the
 undisclosed second delta and the fix's evidence.
+
+### MINOR 1 — CONFIRMED · FIXED, red-on-old, with the belt-and-braces second door
+
+**Fix:** `takeCarriedFraction` spends the slot on ANY ask whose postID matches — one-shot restored
+to meaning (the switch's one arrival gets one chance). **Pin, measured red first:**
+`CommandRouterTests.theCarrySlotIsOneShotEvenWhenTheFirstAskMismatches` — the mismatched-then-
+matched ask answered `0.4` on the unfixed tree, nil after. **Belt-and-braces (my call, taken):**
+`jump(to:)` calls the new `CommandRouter.dropCarriedPlace()` before setting the mode — the jump
+family bypasses the switch's re-decide by design, and without the drop a Write → Canvas switch
+parks a place nothing consumes, which the canvas card's jump back to the same block would have
+consumed (the traced chain in the finding). The drop is the same one-shot rule at the second door
+and rides under the router pin's red-on-old; no separate UI pin is owed for one defensive line
+whose mechanism the router pin already asserts. The existing carry pins re-run green (7 tests / 2
+suites with `ModeSwitchCarryTests`).
