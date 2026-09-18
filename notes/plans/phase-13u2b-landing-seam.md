@@ -15,6 +15,93 @@ was much higher and I watched it stutter ~10 times, every time I did it. I manag
 on the last chapter and then The Man with the Twisted... in sherlock."*). It runs BEFORE 13u3 at her
 word this morning.
 
+**GOVERNANCE (2026-09-18, after the kickoff commit `93cb4d02`): the author invoked `/architect-phase`
+for this phase — her cast, verbatim: *"this phase that we've discussed, Opus builders, Fable
+orchestrator + reviewer."*** So: the orchestrating session holds the ARCHITECT MANDATE (the R117
+shape; `.claude/skills/architect-phase/SKILL.md` governs beside CLAUDE.md — CLAUDE.md wins on
+conflict); implementers are **`opus-implementer`**, one FRESH session per unit; the ladder's cold
+reviewer is **`fable-reviewer`**; the 13b constitution below is BINDING; the skill's application
+notes (P-1's routed-vocabulary scope, P-3's two deliberate surface kinds, the layer-placement and
+overlay/sink laws) bind by reference. This matches the kickoff's cast exactly — nothing about the
+units, the gate, or UNIT 1's running brief changes.
+
+## BINDING PRINCIPLES (the 13b constitution, P-1…P-9 — copied verbatim per the skill's rule)
+
+- **P-1 — One capability registry.** Every user-facing act is declared
+  exactly once: verb, scope (block/take/post/book), per-mode availability
+  rule, its doors (menu / context / bar / shortcut / palette), and its
+  refusal copy. Surfaces render their doors FROM the registry; gating is
+  data, never per-view if-statements. A registry-walk test asserts every
+  declared door exists and every rendered door is declared. This kills the
+  D3/D4 class structurally — the capability matrix stays green by
+  construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act —
+  including any mode-switch choreography, done visibly for the user — or
+  delivers the operations layer's real refusal. A door that can never act in
+  its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface
+  component (live + read modes; one measurement brain — the width-gated
+  remeasure; the shared canary) that every pane composes; the live editor
+  core's identity machinery (`BlockRangeIndex`, crystallization) becomes its
+  live mode, not a sibling implementation. "What text does this pane show,
+  and is it live" is answered by ONE pure, unit-tested authority
+  (`PaneTextAuthority`); views never re-derive it. Its invariants stated as
+  code: exactly one live pane; the live pane is buffer-authoritative; read
+  panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter
+  may announce that something happened (mode changed, post opened); no
+  listener derives business state or availability from a broadcast, and no
+  flow's correctness depends on broadcast ordering. Cross-feature flows
+  route through composition. (Stage 0's survey enumerates today's
+  notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule
+  marks an under-architected feature. The response is never another patch:
+  write the feature's DESIGN MEMO — intended behavior whole, edge cases
+  enumerated on paper, refusal wordings, undo story — get the author's
+  rulings on the product-flavored edges, then build to the memo. Happy path
+  ships first, but the edges are *decided at design time*, not discovered by
+  the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial
+  flow is the contract for every happy path. It stays green — automated
+  where the harness allows, screenshot-walked otherwise — and any change
+  that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive
+  harness: the ops-layer soaks (exist), the board/view-model invariant soak
+  (Stage 1), the registry walk (P-1), the per-batch scripted screenshot
+  walkthrough. Red-on-old stays absolute: no bug-class fix without a pin
+  that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind
+  the rebuilt layer exactly as they bind the substrate (invalidation ∝
+  realized rows; one live editor; virtualized long views). Overlays, never
+  rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit`
+  (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary.
+  Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing
+  board layout, text authority, and gesture routing splits by concern
+  (`TakesViewModel` at 890 lines is the standing counterexample). Same
+  hygiene rule as the substrate, applied where it was being waived.
+
+**How the constitution bites HERE (application, not modification):** P-8 is the phase's spine (the
+manifest and the authority are the rebuilt layer; invalidation ∝ realized rows; the manifest read is
+lengths-only ∝ entries). P-7's red-on-old is the gate itself (row 64's arm). P-3 is a FENCE: this
+phase is scroll geometry — it composes beside the pane/editor split and extends NO liveness
+mechanism. P-9 binds the UNIT 2 hoist (the authority is one concern: aim/settle; it does not absorb
+board layout or text authority). P-6 rides every full-suite run (`TutorialWalkTests` green is part
+of every unit's end verification). P-1/P-2 should not fire (no new doors); if a door appears, it is
+declared in the registry, never inline.
+
+## THE LEDGER (every row owned; statuses flip in the same commit as the work)
+
+| # | item | status → owner |
+|---|---|---|
+| 1 | UNIT 1 — the height manifest + the Outline lands once (gate: row 64's arm ≤4, UNWRAPPED) | **IN FLIGHT** — implementer spawned 2026-09-18 |
+| 2 | UNIT 2 — one landing authority + the flow + the Release signpost | NOT-STARTED (follows U1) |
+| 3 | UNIT 3 — the mode-switch viewport-fraction carry (#114's defaults) | NOT-STARTED (follows U2) |
+| 4 | QUESTIONS #114 (a)/(b) — U3's scope edges | LOGGED — hers |
+| 5 | The ladder — `fable-reviewer` over the combined diff, standing rounds | not yet owed |
+| 6 | The orchestrator's per-unit walks + HER field walk (the phase's acceptance) | pending |
+| 7 | Closeout ritual + the `/Applications` refresh (delivers the star cap `edb4ae94` too) | pending |
+
 ## KICKOFF (self-contained for a fresh session)
 
 Read, in order: this file · the trace memo (in full — it is the design) · the 13u2 plan's UNIT A and
@@ -160,6 +247,31 @@ UNCHANGED (one capture proving R-Q21's restore still wins).
   here is mobile-visible (these are Mac surfaces; the phone's board has its own ruled policy) — the
   parity line at closeout is expected to read "nothing mobile-visible", and any `Shared/` file
   moved makes the mobile suite owed per the standing convention.
+
+## ENVIRONMENT TRAPS (every batch brief carries this section verbatim — the skill's rule)
+
+- **Instance checks:** `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH (the test
+  host matches mid-run). Real-store instances are identified by STORE, not path — **NEVER quit or
+  kill one**; no Release builds or `/Applications` refreshes while one lives; install refreshes only
+  at sanctioned zero-instance windows (this phase's is the closeout's).
+- **Builds/tests:** Mac tests run from `App/Variorum/`, suite-level `-only-testing` only; confirm
+  the "Test run with N tests" line (Swift Testing COUNTS skipped tests — read the `skipped:` lines);
+  `xcodebuild build-for-testing` compiles without the runner; **NEVER add a custom build
+  configuration** (any configuration not named exactly "Debug" builds SPM dependencies RELEASE and
+  silently strips VariorumCore's DEBUG-gated oracles); zsh `pipestatus` for pipeline exit codes.
+- **Suites beside a live session flash the test host's windows** — prefer zero-instance windows for
+  timing-sensitive measurements (this phase's landing measurements ARE timing-sensitive: note the
+  machine state beside any number you record; the differential-latency and read-click rows are the
+  precedent for load-dependent reds).
+- **Walks:** dev-store Debug build only (`io.lduarte.Variorum.debug`), `Tools/WalkKit/` + `cliclick`;
+  screenshots in gitignored dirs (`notes/plans/13u2b-screens/`); the Debug domain's `surfaceSize.*`
+  keys may be wiped to stage cold-heights runs (they regenerate) — NEVER the real store's.
+- **Git:** never `git checkout` over uncommitted work; commit per piece and **PUSH after every
+  commit** — the skill's 13b-era "never push" line is SUPERSEDED by CLAUDE.md's 2026-08-03 push rule
+  and the resiliency protocol (CLAUDE.md wins on conflict; recorded here so no brief inherits the
+  stale line). No commit trailers.
+- **Backups:** any act near the real store takes the A1 rail first (WAL-safe, UTC-named) — this
+  phase should never touch it before the closeout refresh.
 
 ## CAST & DISCIPLINE
 
