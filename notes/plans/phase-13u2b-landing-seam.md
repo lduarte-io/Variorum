@@ -1365,5 +1365,17 @@ hands, now with the signpost watching) · QUESTIONS **#114** (a)/(b) · **#115**
 (a)–(c) · the overnight adjudications AR-1…AR-3 and the ladder's two record-and-leave calls, all
 hers to overrule · the carried bundle #110(c) · #111 · #112(a)/(c) · #113 · #103.
 
-**THE `/Applications` REFRESH (her overnight pre-authorization):** evidence recorded below this
-line when the rails complete.
+**THE `/Applications` REFRESH (her overnight pre-authorization) — DONE 2026-09-18, the standing rails:**
+| | |
+|---|---|
+| A1 backup (FIRST) | `~/dev/variorum-store-backups/13u2b-refresh-20260918T164921Z/` — the WHOLE store folder: sqlite, -wal, -shm, all three `variorum-keys*.json`, the 88-entry `Backups/` |
+| Backup verified | `cmp` byte-identical on all six files; the sqlite header is CIPHERTEXT (`1799 8efb 28ec 84e2 …`, not `SQLite format 3`) |
+| Built from | commit `86b874ba` (closeout (d)), clean throwaway worktree `~/dev/variorum-13u2b-release` (since removed), standard `-configuration Release`, DerivedData in `/tmp` (removed) |
+| Old binary SHA-256 | `185c6cf1ed872a8892669229456ba0ff6d8936ceb35dc4fb43b748b496cd9d5f` (= 13u2's recorded new hash — chain of custody clean) |
+| New binary SHA-256 | `a5ea943e4f6d3073af1b9987af3bc1348732e5447c89a7d99af809d009ee2350` (installed copy HASH IDENTICAL) |
+*[removed for publication]*
+*[removed for publication]*
+| Zero instances | verified before the backup, before the copy, and after; her store never opened, the app never launched |
+| One machinery note | the first build attempt was KILLED by system memory pressure (~58 MB free; eight SourceKitService residents cleared, simulators shut down); the retry ran foreground at `-jobs 4` and succeeded — recorded for future overnight refreshes on a loaded box |
+
+This refresh also DELIVERS the star cap 5→15 (`edb4ae94`, her 2026-09-18 ruling).
