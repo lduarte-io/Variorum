@@ -1109,7 +1109,7 @@ fixed** — the hallucination guard's own rule.
 |---|---|
 | the record opened + the red-on-old pin shapes stated | **DONE** — this section, before any product code |
 | PIN A / PIN B measured on the pre-fix tree | **PIN A DONE — RED 2/2, byte-identical** (`fraction 0.0`, below); PIN B's instrument arrives with the capture |
-| the PURE brain + its pins (PIN C) | NOT-STARTED |
+| the PURE brain + its pins (PIN C) | **DONE** — `Surface/ViewportCarry.swift`; **11 pins green** (`ViewportCarryTests`), both applies and the round trip |
 | the CAPTURE seam (the router's carry + the mode-switch funnel) | NOT-STARTED |
 | WRITE captures and consumes | NOT-STARTED |
 | READ (both faces) captures and consumes | NOT-STARTED |
