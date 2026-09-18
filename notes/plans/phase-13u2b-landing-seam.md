@@ -341,7 +341,7 @@ mechanism trace the build must answer.)*
 | the WIDTH-CHANGE recompute | **DONE** — the heights re-stand at the new width (and on a voice change), and the column re-lands the row that was at the top |
 | THE GATE: the far-below arm ≤4, UNWRAPPED, the interim bound dropped | **MET and UNWRAPPED** — the two landing suites **21/21 GREEN, zero known issues**; every landing `settled at top=0.0 after 0 hops`; the ONE premise line restated under AR-2 |
 | rider 1 — the closed-road mount guard (row 64's own instruction) | **DONE** — `window=Y entries=215 height=16134.0`, pinned |
-| the dev-store WALK (her gesture both directions, two widths, one cold) | NOT-STARTED |
+| the dev-store WALK (her gesture both directions, two widths, one cold) | **DONE** — 24 landings on the real Sherlock book, **every one settled at `top=0.0`**, never more than ONE hop; the walk found TWO defects, both fixed with red-on-old; 9 captures |
 | the manifest's cost ∝ entries, measured (rider 2) | **DONE, A/B'd against the pre-fix tree** — the table below; steady-state layout ends up CHEAPER than the lazy column, mount costs +143 ms at the 300-note cap, a collapsed book runs ZERO lengths queries (pinned) |
 | tests: the touched suites · core (if core changed) · the FULL Mac suite | NOT-STARTED (the full suite runs at the END, never at the start) |
 
@@ -366,6 +366,51 @@ isolated (`-only-testing:VariorumTests/BookOutlineLandingTests`), on `8180605e`:
 smoothed over, because it is the row-58 class and because a session that sees only that run would
 wrongly conclude the row had come right. Machine state is recorded beside every number in this
 record for exactly this reason.
+
+## THE WALK — her own gesture on the real Sherlock book (dev-store Debug build, zero instances)
+
+Her report is the protocol: *"I clicked a far away chapter, that was fine, then I clicked one that
+was much higher and I watched it stutter ~10 times, every time I did it. I managed this by clicking
+on the last chapter and then The Man with the Twisted... in sherlock."* So: open the book, click the
+LAST chapter, click **The Man with the Twisted Lip** (7th of 13, far above), and again, and again.
+
+| run | state | landings | result |
+|---|---|---|---|
+| **A · warm, 1500-pt window (column 696)** | all cards collapsed, then 2 → 6 stories open | 12 | **every one `settled at top=0.0`**; 7 at ZERO hops, 5 at one |
+| **B · the WIDTH change** | 696 → 518 mid-story, six stories open | 1 | `settled at top=-0.11 after 0 hops` — and the page still shows the story it was showing (`09-after-width-change`) |
+| **C · COLD, 980-pt window (column 518)** | every `surfaceSize.*` record deleted, a width never seen | 9 | **every one `settled at top=0.0`**; 7 at ZERO hops, 2 at one |
+
+**24 landings, not one of them off its target, and never more than a single hop.** Against the
+thirteen the fixture used to spend before giving up 73 pt short, and her own *"~10 times, every
+time."* The landing story tells the same thing from inside: the first landing of a session reads
+`derived=13 exactAbove=N` (the column has measured nothing yet, so the model carries it) and every
+landing after it reads `derived=0 exactAbove=Y` — **the column knows every one of its rows**, across
+a 118,000-pt page with six open stories. And the `content=` line that used to appear every ~60 ms
+during a landing appears not at all: the column's height does not change while a page lands.
+
+**The model's cold numbers turned out to be exactly right on her book**, which is worth recording
+because it is luck earned rather than luck: the traced constants (46 pt bare + 19 a line) predict
+Sherlock's three-line cards at 103 pt, and the first landing of a cold session shows every card
+reporting 103 on its first frame.
+
+**THE WALK FOUND TWO DEFECTS, and both are fixed with red-on-old** — which is the argument for
+walking rather than trusting a green suite:
+1. **A note measured as a CARD kept that height after it was opened** (the manifest's own
+   arithmetic, not the column's). Seen as `expanded=2 derived=1` — a number that could not be true.
+   A measurement now carries the shape it was taken in. Pin: `BookOutlineHeightsTests`; red-on-old
+   measured `103.0` where `20 000` was due.
+2. **A landing on the row the page was ALREADY at spun for 4.2 seconds** — `gave up at
+   top=unrealized after 15 hops`, three times. `onGeometryChange` reports a CHANGE, so a scroll that
+   moves nothing produces no report and the landing concluded its target had never realized. THIS
+   UNIT INTRODUCED IT (before it, a far row did not exist, so a target always realized during its
+   landing) and the fix is a seed from where the rows last said they were. Pin:
+   `landingAgainOnTheRowThePageIsAlreadyAtSettlesInsteadOfSpinning`; red-on-old reproduces the walk's
+   line byte for byte (`gave up at top=unrealized after 15 hops, 4199 ms`).
+
+Captures (gitignored, `notes/plans/13u2b-screens/`): `01-launch` · `02-sherlock-open` ·
+`03-last-chapter` · `04-twisted-lip-upward` · `05-after-expansions` · `06-top` ·
+`08-six-expanded-landed` · `09-after-width-change` · `10-cold-narrow-landed`, with the raw landing
+stories `walk-warm.log` and `walk-cold.log` beside them.
 
 ## RIDER 2 — WHAT THE EXACT COLUMN COSTS (A/B against the pre-fix tree)
 
