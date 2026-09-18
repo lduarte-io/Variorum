@@ -343,7 +343,7 @@ mechanism trace the build must answer.)*
 | rider 1 — the closed-road mount guard (row 64's own instruction) | **DONE** — `window=Y entries=215 height=16134.0`, pinned |
 | the dev-store WALK (her gesture both directions, two widths, one cold) | **DONE** — 24 landings on the real Sherlock book, **every one settled at `top=0.0`**, never more than ONE hop; the walk found TWO defects, both fixed with red-on-old; 9 captures |
 | the manifest's cost ∝ entries, measured (rider 2) | **DONE, A/B'd against the pre-fix tree** — the table below; steady-state layout ends up CHEAPER than the lazy column, mount costs +143 ms at the 300-note cap, a collapsed book runs ZERO lengths queries (pinned) |
-| tests: the touched suites · core (if core changed) · the FULL Mac suite | NOT-STARTED (the full suite runs at the END, never at the start) |
+| tests: the touched suites · core (if core changed) · the FULL Mac suite | **RUN** — core NOT OWED (zero `Sources/` lines); FULL Mac **2767 / 462, ZERO known issues** (−1, the unwrap) with **2 reds**: row 58's recorded environment condition, and ONE of mine reported to the architect under rider 3 (below) |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
 
@@ -560,6 +560,39 @@ acceptable); and the UNIT 1 RECORD lists this as the unit's ONE test edit with t
 test's CLAIM (`abs(top) <= 4`) is untouched and green, so the zero-test-mechanism-churn promise
 stands: no scroll mechanism, anchor road, or reveal path changed in any test. Riders 1–2
 (the closed-road mount guard; the P1/P3 cost measurements) remain owed before the unit closes.
+
+## FINALS, AND THE TWO REDS
+
+| gate | result | baseline |
+|---|---|---|
+| core `swift test` | **NOT OWED — zero `Sources/` lines in the diff** | 1567 / 171 |
+| the FULL Mac suite | **2767 tests / 462 suites**, 733.8 s, **ZERO known issues**, 2 reds (below) | 2744 / 459 GREEN with 1 known issue |
+| iOS build | **not owed** — no `Shared/` file moved, nothing mobile-visible | green |
+| lockstep marker | untouched — **8** | 8 |
+
+The known-issue count fell from 1 to 0, which is the gate's own arithmetic: the wrapped far-below
+arm is gone because the residual it described is gone. +23 tests / +3 suites are this unit's
+(`BookHeightManifestTests` 14, `BookOutlineHeightsTests` 4, `BookOutlineCostTests` 3, and two new
+landing pins).
+
+**RED 1 — `BookIndexEditingTests.theReadClickLandsInIndexAtThatBlock`** (`live.count → 0`, the pane
+identifier nil): **`KnownIssuesAndTechDebt` row 58's recorded condition, byte-identical** — the row
+measured it 3/3 red isolated on zero-code trees, and this unit's diff touches the Outline, not the
+Index. Treated as that condition, as the brief instructs.
+
+**RED 2 — `BookViewTests.offViewportPostsNeverInstantiate`** (`instantiated → 33`, budget `< 30`):
+**mine, traced, and reported to the architect rather than touched** (rider 3). The pin mounts a
+60-post book ALL EXPANDED in a 700×800 window and counts live READ SURFACES — it is about the
+EXPANDED rows' virtualization at its 2,500-pt band, which this unit did not touch. What changed is
+the column's HONESTY: a far expanded row's placeholder was `remembered ?? 800` and is now
+`remembered-at-this-width → the lengths estimate → remembered-at-any-width → 800`, and the fixture's
+notes are a few sentences each, so the estimate says ~50 pt where the old fallback said 800. With
+the lie gone the column is 16× shorter through those rows, so the same ±2,500-pt band genuinely
+spans more of them. The pin's INTENT holds (33 of 60 — the extent is not instantiated); its NUMBER
+was calibrated against a column that lied. The architect's call; the options put to it were
+re-budgeting the pin with the mechanism at the line, shrinking the shipped band (re-tuning a real
+surface to satisfy a fixture — the class the plan's WHAT-NOT-TO-DO names), or making the band
+viewport-relative (right, and beyond this unit).
 
 ## CLOSEOUT (the ritual, so nothing is forgotten)
 
