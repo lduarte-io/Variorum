@@ -90,6 +90,19 @@ board layout or text authority). P-6 rides every full-suite run (`TutorialWalkTe
 of every unit's end verification). P-1/P-2 should not fire (no new doors); if a door appears, it is
 declared in the registry, never inline.
 
+**OVERNIGHT AUTHORIZATION (2026-09-18, her words verbatim):** *"I'll be stepping away overnight -
+use the standard method of recording judgement calls and not stopping for questions unless
+absolutely necessary. my app is now closed & when you finish, you can refresh it. write a handoff
+for me in the case that you're done before i wake, so I don't have to wake a large cold cache for
+handoff issues + walk."* So: **PROVISIONAL-and-continue** binds the whole run (judgment calls
+recorded here + QUESTIONS, never stop-and-ask except the standing author-only hard stops); the
+**`/Applications` refresh is PRE-AUTHORIZED at the phase's finish** (her app is closed — the
+zero-instance window is open; the standing rails still bind: A1 backup first, zero instances
+verified at every step, Release from a clean worktree, codesign + hashes recorded); the **author
+handoff** (`notes/handoffs/phase-13u2b-handoff.md`) is written LAST, self-contained, her checklist
+at the top — including the field walk she owes and every overnight judgment call, so nothing needs
+this session's cache.
+
 ## THE LEDGER (every row owned; statuses flip in the same commit as the work)
 
 | # | item | status → owner |
