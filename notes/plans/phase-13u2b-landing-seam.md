@@ -335,7 +335,7 @@ mechanism trace the build must answer.)*
 |---|---|
 | the record opened + the RED-ON-OLD re-measured on this tree | **DONE** — 3/3 `gave up at top=-73.0 after 13 hops` + one anomalous run, below |
 | the mechanism TRACE (why −73, measured not reasoned) | **DONE** — it is NOT hop-driven (PROBE A); `top = 0` is not a fixpoint of the lazy column |
-| `BookHeightManifest` — the pure brain + its pins | NOT-STARTED |
+| `BookHeightManifest` — the pure brain + its pins | **DONE** — 14 pins green (`BookHeightManifestTests`); `Surface/BookHeightManifest.swift`, beside `PaneTextAuthority` |
 | the Outline's rows consume the manifest | NOT-STARTED |
 | the landing consumes it (ONE aim, the compensator as the net) | NOT-STARTED |
 | the WIDTH-CHANGE recompute | NOT-STARTED |
