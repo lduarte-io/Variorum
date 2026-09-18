@@ -136,3 +136,18 @@ sentence owed at the code.
 **NIT-level note:** `PostDetailView`'s blockless guard (`.task(id: postID)` → `mode = .write`) is
 now the only mode-writing road covered by neither the re-decide nor the drop — harmless (nothing to
 carry), but it belongs in the comment that names the excluded roads.
+
+## UNIT 2's implementer — CLEAN, nothing raised
+
+Verified byte-shape not spirit: the restored at-top order IS the pre-hoist flow body (same
+predicate, same order, same strict `>`); the Outline's unreachability holds on the exact code and
+the GENERAL case (the guard reduces to `elapsed < 1.0 ∧ elapsed > 4.0` — empty for any policy with
+`minimumHold ≤ timeBudget`; both shipped rows satisfy by 4×; the invariant being implicit is an
+observation, explicitly not a finding, with the policy-table pin covering every shipped value); the
+corrected pin comment states both cells truthfully; the amended residual 2 discloses both deltas
+without softening; and the signpost FILES on the new give-up road with the right semantics
+(`end=gaveup top=0` = "arrived but never certified settled", distinguishable at a glance).
+Re-ran 27 tests / 4 suites green including both `!contains("gave up")` pins, as the unreachability
+argument predicts. Fix 5/6's cache overload verified additive and exactly equivalent on its
+predicate. Scope check: only three of its files moved in the whole pass; BookView / ProseHeightModel
+/ BookHeightManifest / ReadingFlowLandingTests 0 lines.
