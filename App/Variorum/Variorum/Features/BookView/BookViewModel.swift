@@ -227,6 +227,10 @@ final class BookViewModel {
         #endif
         for id in postIDs {
             cardPreviews[id] = BookOutlineRows.cardPreview(blocks: texts[id] ?? [])
+            // 13u2b UNIT 1: the words changed, so the card's shape may have
+            // too — and the height learned for the old shape was the old
+            // card's.
+            outlineHeights.forgetCardShape(id)
         }
     }
 
@@ -612,6 +616,13 @@ final class BookViewModel {
     /// computed in SQL, no prose crossing the boundary), cached for the book
     /// beside the flow's, and never re-run while it holds this entry set.
     func ensureOutlineExtents() {
+        // **Nothing expanded ⇒ nothing to estimate.** This guard is the P1
+        // sentence itself, and it was written after the pin caught its
+        // absence: `reportOutlineContentWidth` calls this, and the column
+        // reports its width on every mount, so without it EVERY book paid for
+        // the lengths on open — including the all-cards book her own gesture
+        // opens. (Pinned: `BookOutlineCostTests`.)
+        guard !expandedPosts.isEmpty else { return }
         let ids = entries.map(\.postID)
         guard !ids.isEmpty, !outlineExtentsInFlight, flowExtents.lookup(ids) == nil else { return }
         outlineExtentsInFlight = true
@@ -626,7 +637,7 @@ final class BookViewModel {
             for id in ids where byPost[id] == nil { byPost[id] = [] }
             flowExtents.store(byPost, for: ids)
             #if DEBUG
-            BookOutlineExtentReads.count += 1
+            BookOutlineExtentReads.byBook[readingID, default: 0] += 1
             #endif
             outlineExtentsGeneration += 1
         }
@@ -697,7 +708,46 @@ final class BookViewModel {
     /// The card's shape at this width — its preview's wrapped line count, so
     /// one measured card teaches every card that looks like it.
     func outlineCardShape(_ postID: String) -> BookOutlineHeights.Shape {
-        outlineHeights.cardShape(excerpt: cardPreview(postID))
+        outlineHeights.cardShape(postID, excerpt: cardPreview(postID))
+    }
+
+    /// **The whole column, as heights and offsets** — the view hands in the
+    /// row list (it is the view that knows the book's grouping) and the
+    /// arithmetic happens here, through the same per-row brain the rows
+    /// themselves ask, so the two can never disagree.
+    ///
+    /// Built on demand: it is arithmetic over the rows in hand — no read, no
+    /// layout, ∝ entries — and building it fresh is cheaper than keeping it
+    /// correct. The landing's own story reads it; UNIT 2's flow is the next
+    /// consumer.
+    ///
+    /// The row SPACING is the column's own `VStack(spacing: 10)`, at both
+    /// levels; the `leading` is 0, so offsets are from the FIRST ROW rather
+    /// than from the top of the scroll's content (the column's lead — the
+    /// book's title block and the vertical padding — is voice- and
+    /// width-dependent, and nothing consumes an absolute offset yet: the
+    /// landing addresses rows by anchor, which is exact now that no row's
+    /// height is estimated).
+    func outlineHeightManifest(rows: [BookOutlineRows.Row]) -> BookHeightManifest {
+        let inputs: [BookHeightManifest.Input] = rows.map { row in
+            switch row {
+            case .chapter:
+                outlineRowInput(row.id, shape: .chapterHeading)
+            case .unfiledHeading:
+                outlineRowInput(row.id, shape: .unfiledHeading)
+            case .tagHeading:
+                outlineRowInput(row.id, shape: .tagHeading)
+            case .note(let entry):
+                outlineRowInput(
+                    row.id,
+                    shape: isExpanded(entry.postID)
+                        ? .expandedNote
+                        : outlineCardShape(entry.postID))
+            }
+        }
+        return BookHeightManifest(
+            width: outlineContentWidth, spacing: BookOutlineHeights.rowSpacing,
+            leading: 0, inputs: inputs)
     }
 
     /// The VOICE changed: re-measure the type and drop what was learned under

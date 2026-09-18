@@ -1291,7 +1291,7 @@ struct BookView: View {
             ScrollView {
                 HStack(alignment: .top, spacing: 0) {
                 clickOutMargin
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: BookOutlineHeights.rowSpacing) {
                     // Batch 12 (her mockup reference): the book's TITLE
                     // heads the content column, aligned with the posts —
                     // never floating in rail-side dead space.
@@ -1338,7 +1338,7 @@ struct BookView: View {
                             // lazy container's average estimate for its
                             // unrealized rows is what moved the page out from
                             // under a landing that had already arrived.
-                            VStack(alignment: .leading, spacing: 10) {
+                            VStack(alignment: .leading, spacing: BookOutlineHeights.rowSpacing) {
                                 ForEach(rows) { row in
                                     switch row {
                                     case .chapter(let section):
@@ -1763,24 +1763,7 @@ struct BookView: View {
     /// the first consumer that may want the absolute number, and measuring
     /// the lead is its own small piece of work when it does.
     var outlineHeightManifest: BookHeightManifest {
-        let inputs: [BookHeightManifest.Input] = outlineRows.map { row in
-            switch row {
-            case .chapter:
-                model.outlineRowInput(row.id, shape: .chapterHeading)
-            case .unfiledHeading:
-                model.outlineRowInput(row.id, shape: .unfiledHeading)
-            case .tagHeading:
-                model.outlineRowInput(row.id, shape: .tagHeading)
-            case .note(let entry):
-                model.outlineRowInput(
-                    row.id,
-                    shape: model.isExpanded(entry.postID)
-                        ? .expandedNote
-                        : model.outlineCardShape(entry.postID))
-            }
-        }
-        return BookHeightManifest(
-            width: model.outlineContentWidth, spacing: 10, leading: 0, inputs: inputs)
+        model.outlineHeightManifest(rows: outlineRows)
     }
 
     /// Batch 12: kind + extent at a glance under the title.

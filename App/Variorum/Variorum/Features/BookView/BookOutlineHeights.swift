@@ -56,6 +56,8 @@ final class BookOutlineHeights {
     private var measured: [String: CGFloat] = [:]
     /// What each SHAPE reported — a heading, a card of N preview lines.
     private var byShape: [Shape: CGFloat] = [:]
+    /// Each note's card shape, derived once (see `cardShape`).
+    private var cardShapes: [String: Shape] = [:]
 
     /// Stand at this width (and the voice now in force), re-measuring the
     /// type and dropping what was learned elsewhere. Idempotent: the same
@@ -72,6 +74,7 @@ final class BookOutlineHeights {
         self.metrics = Self.metrics(columnWidth: width)
         measured = [:]
         byShape = [:]
+        cardShapes = [:]
         return true
     }
 
@@ -117,9 +120,28 @@ final class BookOutlineHeights {
             derived: derived ?? BookOutlineHeightModel.modelled(shape, metrics: metrics))
     }
 
-    /// The card's shape at this width (its preview's wrapped line count).
-    func cardShape(excerpt: String) -> Shape {
-        BookOutlineHeightModel.cardShape(excerpt: excerpt, metrics: metrics)
+    /// The card's shape at this width (its preview's wrapped line count),
+    /// **memoized per note** — the column asks for every note's shape on
+    /// every one of its own body evaluations, and deriving it means counting
+    /// the preview's characters, so the uncached form is ∝ the book's
+    /// previews per pass (P1's own shape of wrong). A preview is read once
+    /// per note per book and refreshed only when a note that was open closes,
+    /// which is where the cache is dropped (`forgetCardShape`); a width or
+    /// voice change drops all of them with everything else learned.
+    ///
+    /// The excerpt is an `@autoclosure` so the cached path does not even ask
+    /// the model for the string.
+    func cardShape(_ postID: String, excerpt: @autoclosure () -> String) -> Shape {
+        if let cached = cardShapes[postID] { return cached }
+        let shape = BookOutlineHeightModel.cardShape(excerpt: excerpt(), metrics: metrics)
+        cardShapes[postID] = shape
+        return shape
+    }
+
+    /// This note's preview has been re-read — its shape may have changed with
+    /// it, and its old row measurement was taken at the old shape.
+    func forgetCardShape(_ postID: String) {
+        cardShapes[postID] = nil
     }
 
     /// How many rows the column has actually measured — the DEBUG story's
@@ -167,6 +189,10 @@ final class BookOutlineHeights {
     /// The card's own horizontal padding (`collapsedPostCard`), so the
     /// preview's measure is the text's measure and not the row's.
     static let cardHorizontalPadding: CGFloat = 16
+    /// The gap the Outline's column puts between rows — its `VStack(spacing:)`
+    /// at both levels (the segments' and each run's), so the manifest's
+    /// offsets are the column's own arithmetic and not a second number.
+    static let rowSpacing: CGFloat = 10
 }
 
 #if DEBUG
@@ -175,8 +201,14 @@ final class BookOutlineHeights {
 /// at all — a card's height has nothing to do with its note's length — and a
 /// book whose stories are opened runs it ONCE (the read is cached for the
 /// book, beside the flow's).
+///
+/// **Keyed by the BOOK** (the 18d batch-3 rule, and `DebugProbeScope`'s own
+/// reason): Swift Testing runs suites in parallel, so a counter that says
+/// "the Outline" rather than "MY Outline" is a pin that can go red because
+/// someone else opened a book.
 @MainActor
 enum BookOutlineExtentReads {
-    static var count = 0
+    static var byBook: [String: Int] = [:]
+    static func count(_ readingID: String) -> Int { byBook[readingID] ?? 0 }
 }
 #endif

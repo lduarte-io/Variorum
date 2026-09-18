@@ -342,7 +342,7 @@ mechanism trace the build must answer.)*
 | THE GATE: the far-below arm ≤4, UNWRAPPED, the interim bound dropped | **MET and UNWRAPPED** — the two landing suites **21/21 GREEN, zero known issues**; every landing `settled at top=0.0 after 0 hops`; the ONE premise line restated under AR-2 |
 | rider 1 — the closed-road mount guard (row 64's own instruction) | **DONE** — `window=Y entries=215 height=16134.0`, pinned |
 | the dev-store WALK (her gesture both directions, two widths, one cold) | NOT-STARTED |
-| the manifest's cost ∝ entries, measured | NOT-STARTED |
+| the manifest's cost ∝ entries, measured (rider 2) | **DONE** — at the 300-note cap (400 rows): manifest **1.06 ms / 0.0026 ms per row**, one layout pass **0.84 ms**, adopt 64.7 ms; a collapsed book runs **ZERO** lengths queries (pinned), a re-delivery costs nothing, the first expansion reads once for the book |
 | tests: the touched suites · core (if core changed) · the FULL Mac suite | NOT-STARTED (the full suite runs at the END, never at the start) |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
