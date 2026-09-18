@@ -167,7 +167,10 @@ struct BookHeightManifestTests {
         #expect(BookOutlineHeightModel.modelled(.card(lines: 0), metrics: metrics) == 46)
         #expect(BookOutlineHeightModel.modelled(.card(lines: 3), metrics: metrics) == 103)
         #expect(BookOutlineHeightModel.modelled(.chapterHeading, metrics: metrics) == 51)
-        #expect(BookOutlineHeightModel.modelled(.expandedNote, metrics: metrics) == 800)
+        // An expanded ROW is its unmeasured surface plus the header and the
+        // padding around it.
+        #expect(BookOutlineHeightModel.modelled(.expandedNote, metrics: metrics)
+                == metrics.expandedUnknown + metrics.expandedChrome)
     }
 
     @Test func aCardsShapeIsItsWrappedLineCountSoOneMeasuredCardTeachesItsTwins() {
@@ -197,7 +200,7 @@ struct BookHeightManifestTests {
         let one = BookOutlineHeightModel.expandedHeight(extents: [extent(800)], metrics: metrics)
         let two = BookOutlineHeightModel.expandedHeight(
             extents: [extent(800), extent(800, newlines: 2)], metrics: metrics)
-        #expect(one > metrics.expandedChrome)
+        #expect(one > metrics.expandedEmpty)
         #expect(two > one)
         // A 215-block Sherlock story lands in the right order of magnitude —
         // thousands of points, not the 800-pt unmeasured stand-in it replaces.
@@ -207,13 +210,16 @@ struct BookHeightManifestTests {
         #expect(storyHeight < 40_000)
     }
 
-    @Test func aNoteWithNothingRenderableIsItsChromeAndNeverNegative() {
+    /// The estimate answers the SURFACE's height (the row is this plus its
+    /// chrome), and a note with nothing renderable is its one blank line —
+    /// never zero, which would collapse the row it stands in.
+    @Test func aNoteWithNothingRenderableIsOneBlankLineAndNeverZero() {
         let metrics = BookOutlineHeightModel.Metrics()
         let empty = BookOutlineHeightModel.expandedHeight(extents: [], metrics: metrics)
         let blank = BookOutlineHeightModel.expandedHeight(
             extents: [Queries.BlockExtent(containerID: "p", blockID: "b", characters: 0, newlines: 0)],
             metrics: metrics)
-        #expect(empty == metrics.expandedChrome)
-        #expect(blank == metrics.expandedChrome)
+        #expect(empty == metrics.expandedEmpty)
+        #expect(blank == metrics.expandedEmpty)
     }
 }

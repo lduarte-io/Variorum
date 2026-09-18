@@ -500,21 +500,20 @@ struct BookOutlineLandingTests {
 
             // Far BELOW (three expanded stories above and between).
             let below = try await open(15, "far below")
-            // RULING A-2 (13u2 UNIT A2 adjudication): in THIS synthetic fixture the
-            // far-below landing ends at a stable ~-73 pt — SwiftUI's estimate for the
-            // lazy run's UNREALIZED rows under the honest 103:51 card:heading mix (not
-            // one realized row moves; the plan's "THE GATE, MEASURED BOTH WAYS"). The
-            // same scenario on the real Sherlock book settles at -2 pt in 2 hops. The
-            // hard bound pins the residual's measured magnitude — an offset, never an
-            // oscillation or give-up; further off than the swing itself is a NEW defect.
-            #expect(abs(below) <= 90,
-                    "far below is off by more than the scale-mix residual allows: \(below) pt")
-            withKnownIssue(
-                "The scale-mix estimate residual (13u2 UNIT A2, RULING A-2): the ≤ 4 pt landing holds on the real book but not in this fixture, whose baseline green depended on the defect's own timing (46 pt cards ≈ 51 pt headings). When the residual comes right this trips as an unexpected pass — unwrap it."
-            ) {
-                #expect(abs(below) <= 4,
-                        "the story far below lands at its own top and stays there, not \(below) pt away")
-            }
+            // **UNWRAPPED at 13u2b UNIT 1, exactly as `KnownIssuesAndTechDebt`
+            // row 64 instructed it to be.** From RULING A-2 (2026-09-15) until
+            // then this arm carried a hard ≤ 90 bound and the ≤ 4 aspiration
+            // inside `withKnownIssue`, because the column's lazy runs answered
+            // "how tall is a row I have not realized" with the AVERAGE of the
+            // ones they had: arriving here de-realized the rows above, the
+            // estimate for them was ~70 pt short, the content shrank and the
+            // page slid off the story it had just landed on — 13 hops, 4.2 s,
+            // a stable -73 pt, 3/3. The rows now stand at heights the column
+            // KNOWS (`BookHeightManifest` / `OutlineRunRow`), so nothing above
+            // a landed target can move: measured at 0 hops, and not one
+            // content-height change during the landing.
+            #expect(abs(below) <= 4,
+                    "the story far below lands at its own top and stays there, not \(below) pt away")
             // Far ABOVE (four expanded stories below it now).
             let above = try await open(1, "far above")
             #expect(abs(above) <= 4,

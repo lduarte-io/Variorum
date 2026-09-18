@@ -336,10 +336,10 @@ mechanism trace the build must answer.)*
 | the record opened + the RED-ON-OLD re-measured on this tree | **DONE** — 3/3 `gave up at top=-73.0 after 13 hops` + one anomalous run, below |
 | the mechanism TRACE (why −73, measured not reasoned) | **DONE** — it is NOT hop-driven (PROBE A); `top = 0` is not a fixpoint of the lazy column |
 | `BookHeightManifest` — the pure brain + its pins | **DONE** — 14 pins green (`BookHeightManifestTests`); `Surface/BookHeightManifest.swift`, beside `PaneTextAuthority` |
-| the Outline's rows consume the manifest | NOT-STARTED |
-| the landing consumes it (ONE aim, the compensator as the net) | NOT-STARTED |
-| the WIDTH-CHANGE recompute | NOT-STARTED |
-| THE GATE: the far-below arm ≤4, UNWRAPPED, the interim bound dropped | NOT-STARTED |
+| the Outline's rows consume the manifest | **DONE** — `OutlineRunRow` (plain `VStack` runs, manifest-height placeholders, anchors kept) + `surfacePlaceholder`'s estimate arm |
+| the landing consumes it (ONE aim, the compensator as the net) | **DONE** — nothing left for it to catch: **0 hops**, and not one `content=` change during a landing |
+| the WIDTH-CHANGE recompute | **DONE** — the heights re-stand at the new width (and on a voice change), and the column re-lands the row that was at the top |
+| THE GATE: the far-below arm ≤4, UNWRAPPED, the interim bound dropped | **MET and UNWRAPPED** — `settled at top=0.0 after 0 hops`; ONE premise line reported to the architect under rider 3 (below), not yet touched |
 | the dev-store WALK (her gesture both directions, two widths, one cold) | NOT-STARTED |
 | the manifest's cost ∝ entries, measured | NOT-STARTED |
 | tests: the touched suites · core (if core changed) · the FULL Mac suite | NOT-STARTED (the full suite runs at the END, never at the start) |

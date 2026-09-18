@@ -981,6 +981,18 @@ struct BookView: View {
         /// The pending quiet-interval check (re-armed by every report and
         /// every hop; cancelled when the landing finishes).
         var check: DispatchWorkItem?
+        /// **13u2b UNIT 1: the row at the top of the page right now** — the
+        /// one thing about the current scroll offset worth keeping across a
+        /// WIDTH change, which changes every row's height and so makes the
+        /// offset itself meaningless (the trace watched a width change
+        /// relocate a settled page mid-story).
+        ///
+        /// Kept by the reports the rows already send, in two lines: a report
+        /// for the row we are holding updates it; any other row closer to the
+        /// top takes it; a holder that has scrolled off the top lets go, so
+        /// the next row below can take it (without that last clause the
+        /// holder's own receding top would out-rank every candidate forever).
+        var topRow: (id: String, top: CGFloat)?
         #if DEBUG
         /// Realized row heights, for the trace's "who grew" line.
         var rowHeights: [String: CGFloat] = [:]
@@ -1033,6 +1045,13 @@ struct BookView: View {
     /// is. Loading a 9k-word story's height takes well under a second; a
     /// target that has not settled by now will not.
     static let landingTimeBudget: TimeInterval = 4
+    /// **13u2b UNIT 1: how far beyond the viewport a SMALL row still draws
+    /// real content** (`OutlineRunRow`). Smaller than the expanded rows'
+    /// 2,500 because a heading or a card is ~50–100 pt, so this is already
+    /// a dozen rows of slack above and below — and the hysteresis triples it
+    /// before a row lets go again. Bigger would keep a hundred cards' text,
+    /// their drop targets and their context menus alive for nothing (P3).
+    static let runRowNearMargin: CGFloat = 1200
 
     /// Put an Outline anchor at the top of the page (no animation — see the
     /// mark above), and watch it settle.
@@ -1041,7 +1060,12 @@ struct BookView: View {
         outlineLanding = OutlineLanding(anchorID: anchorID)
         #if DEBUG
         landingBox.rowHeights = [:]
-        BookOutlineGeometry.trace.append("\(anchorID) LAND")
+        let manifest = outlineHeightManifest
+        BookOutlineGeometry.trace.append(
+            "\(anchorID) LAND | manifest w=\(Int(manifest.width)) rows=\(manifest.rows.count) "
+            + "derived=\(manifest.derivedCount) "
+            + "exactAbove=\(manifest.isExactAbove(anchorID) ? "Y" : "N") "
+            + "offset=\(Int(manifest.offset(of: anchorID) ?? -1))")
         #endif
         proxy.scrollTo(anchorID, anchor: .top)
         armLandingCheck(proxy)
@@ -1054,6 +1078,13 @@ struct BookView: View {
     fileprivate func outlineAnchorMoved(
         _ anchorID: String, top: CGFloat, height: CGFloat, _ proxy: ScrollViewProxy
     ) {
+        // 13u2b UNIT 1: who is at the top (the width change's anchor).
+        if landingBox.topRow?.id == anchorID {
+            landingBox.topRow = top >= -Self.landingTolerance ? (anchorID, top) : nil
+        } else if top >= -Self.landingTolerance,
+                  top < landingBox.topRow?.top ?? .greatestFiniteMagnitude {
+            landingBox.topRow = (anchorID, top)
+        }
         #if DEBUG
         BookOutlineGeometry.anchorTops[anchorID] = top
         BookOutlineGeometry.rowHeights[anchorID] = height
@@ -1301,32 +1332,59 @@ struct BookView: View {
                     ForEach(outlineSegments) { segment in
                         switch segment {
                         case .run(let rows):
-                            LazyVStack(alignment: .leading, spacing: 10) {
+                            // 13u2b UNIT 1: a plain `VStack`, and each row
+                            // virtualizes ITSELF at a height the manifest
+                            // knows (`OutlineRunRow` carries the trace). A
+                            // lazy container's average estimate for its
+                            // unrealized rows is what moved the page out from
+                            // under a landing that had already arrived.
+                            VStack(alignment: .leading, spacing: 10) {
                                 ForEach(rows) { row in
                                     switch row {
                                     case .chapter(let section):
-                                        chapterHeader(section)
-                                            .outlineAnchor(row.id, in: self, proxy)
+                                        OutlineRunRow(
+                                            anchorID: row.id, shape: .chapterHeading,
+                                            book: self, model: model, proxy: proxy
+                                        ) {
+                                            chapterHeader(section)
+                                        }
                                     case .unfiledHeading:
                                         // UNFILED trails the chapters (ratified,
                                         // QUESTIONS #26(b)) — the grouping brain's
                                         // order, rendered, never re-decided here.
-                                        Text(tokens.chromeLabel("unfiled"))
-                                            .font(tokens.heading)
-                                            .foregroundStyle(tokens.muted)
-                                            .padding(.top, 28)
-                                            .outlineAnchor(row.id, in: self, proxy)
+                                        OutlineRunRow(
+                                            anchorID: row.id, shape: .unfiledHeading,
+                                            book: self, model: model, proxy: proxy
+                                        ) {
+                                            Text(tokens.chromeLabel("unfiled"))
+                                                .font(tokens.heading)
+                                                .foregroundStyle(tokens.muted)
+                                                .padding(.top, 28)
+                                        }
                                     case .tagHeading(let path, _):
                                         // Smart books keep tag-path sectioning
                                         // (`grouping_tag_id`) — same heading voice.
-                                        Text(path)
-                                            .font(tokens.title)
-                                            .foregroundStyle(tokens.accent)
-                                            .padding(.top, 28)
-                                            .outlineAnchor(row.id, in: self, proxy)
+                                        OutlineRunRow(
+                                            anchorID: row.id, shape: .tagHeading,
+                                            book: self, model: model, proxy: proxy
+                                        ) {
+                                            Text(path)
+                                                .font(tokens.title)
+                                                .foregroundStyle(tokens.accent)
+                                                .padding(.top, 28)
+                                        }
                                     case .note(let entry):
-                                        postRow(entry)
-                                            .outlineAnchor(row.id, in: self, proxy)
+                                        // A note inside a RUN is collapsed by
+                                        // construction (`segments` splits at
+                                        // every expanded one), so its shape is
+                                        // its card's.
+                                        OutlineRunRow(
+                                            anchorID: row.id,
+                                            shape: model.outlineCardShape(entry.postID),
+                                            book: self, model: model, proxy: proxy
+                                        ) {
+                                            postRow(entry)
+                                        }
                                     }
                                 }
                             }
@@ -1402,6 +1460,19 @@ struct BookView: View {
                 // gutter retired, left-anchoring would leave exactly the
                 // *"bizarrely open on the right"* she reported at wave 2c.
                 .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                // 13u2b UNIT 1: the measure the manifest's heights stand at.
+                // A card wraps differently at another width and a story
+                // reflows, so everything learned under the old one is dropped
+                // when this moves (`BookOutlineHeights.stand`). Written only
+                // on a real change (the app's one 1-pt tolerance), and on the
+                // next turn — a geometry action can arrive inside a layout
+                // pass, and a state write there is the class that doubled a
+                // mounted editor.
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+                    guard abs(width - model.outlineContentWidth) > stableSurfaceWidthTolerance
+                    else { return }
+                    DispatchQueue.main.async { model.reportOutlineContentWidth(width) }
+                }
                 // The column claims its measure BEFORE the margins flex —
                 // the same device the retired gutter's row used, and the
                 // reason it is needed here: `maxWidth` only CAPS, so three
@@ -1456,6 +1527,24 @@ struct BookView: View {
             // stays parked, and the entries' arrival lands it.
             .onChange(of: model.entries.map(\.postID)) { _, _ in landOutlineReveal(proxy) }
             .onChange(of: structure.sections.map(\.id)) { _, _ in landOutlineReveal(proxy) }
+            // **13u2b UNIT 1 — A WIDTH CHANGE KEEPS HER PLACE.** The trace
+            // measured it directly: after a settled landing, a width change
+            // alone silently relocated the page mid-story. It has to — every
+            // row's height changes with the measure, so a scroll offset
+            // kept through it points at different prose. The column re-lands
+            // on the row that was at the top, which is the only thing about
+            // the old offset worth keeping. (The FIRST report is not a
+            // change: `previous == 0` is the column arriving.)
+            .onChange(of: model.outlineContentWidth) { previous, _ in
+                guard previous > 0, let top = landingBox.topRow?.id else { return }
+                landOutline(top, proxy)
+            }
+            // The VOICE moved: the type the heights were measured in is gone
+            // (Study's 16-pt Iowan is not Terminal's 14-pt monospace), so the
+            // column re-measures and forgets what it learned. The rows
+            // re-render anyway — the tokens are what changed — so nothing
+            // else is needed here.
+            .onChange(of: tokens) { _, _ in model.restandOutlineHeights() }
             // 13c 2A (her item A6, RULED 2026-07-24): Outline's ENTIRE
             // bottom inset is gone — the `Slider` jump control ("it makes
             // no sense to have a horizontal scrollbar on a vertical page")
@@ -1660,6 +1749,40 @@ struct BookView: View {
         BookOutlineRows.segments(rows: outlineRows, isExpanded: model.isExpanded)
     }
 
+    /// **13u2b UNIT 1: the whole column, as heights and offsets.** Built on
+    /// demand — it is arithmetic over the rows in hand (∝ entries, no read,
+    /// no layout), and building it fresh is cheaper than keeping it correct.
+    /// The rows themselves ask the same brain one row at a time
+    /// (`BookViewModel.outlineRowHeight`), so the two can never disagree.
+    ///
+    /// Offsets are from the FIRST ROW, not from the top of the scroll's
+    /// content: the column's own lead (the book's title block and the
+    /// vertical padding) is voice- and width-dependent, and nothing here
+    /// consumes an absolute offset — the landing addresses rows by anchor,
+    /// which is exact now that no row's height is estimated. UNIT 2's flow is
+    /// the first consumer that may want the absolute number, and measuring
+    /// the lead is its own small piece of work when it does.
+    var outlineHeightManifest: BookHeightManifest {
+        let inputs: [BookHeightManifest.Input] = outlineRows.map { row in
+            switch row {
+            case .chapter:
+                model.outlineRowInput(row.id, shape: .chapterHeading)
+            case .unfiledHeading:
+                model.outlineRowInput(row.id, shape: .unfiledHeading)
+            case .tagHeading:
+                model.outlineRowInput(row.id, shape: .tagHeading)
+            case .note(let entry):
+                model.outlineRowInput(
+                    row.id,
+                    shape: model.isExpanded(entry.postID)
+                        ? .expandedNote
+                        : model.outlineCardShape(entry.postID))
+            }
+        }
+        return BookHeightManifest(
+            width: model.outlineContentWidth, spacing: 10, leading: 0, inputs: inputs)
+    }
+
     /// Batch 12: kind + extent at a glance under the title.
     private var bookMetaLine: String {
         var parts: [String] = [structure.reading?.kind == .smart ? "smart book" : "book"]
@@ -1813,15 +1936,74 @@ private extension View {
     /// it — an unrealized lazy row's inner views do not exist yet, so an id
     /// on the card or the header was invisible to `scrollTo` until the row
     /// happened to be on screen (row 47's "the page did not move").
-    func outlineAnchor(_ id: String, in book: BookView, _ proxy: ScrollViewProxy) -> some View {
+    ///
+    /// **13u2b UNIT 1 — the same report also TEACHES the column.** `learn` is
+    /// non-nil exactly when this row is drawing real content, so the height it
+    /// reports is a fact about the surface rather than about the placeholder
+    /// the manifest guessed. One observer, two readers: the landing converges
+    /// on the top, the manifest learns the height.
+    func outlineAnchor(
+        _ id: String, in book: BookView, _ proxy: ScrollViewProxy,
+        learn: ((CGFloat) -> Void)? = nil
+    ) -> some View {
         self
             .id(id)
             .onGeometryChange(for: OutlineAnchorGeometry.self) { geometry in
                 let frame = geometry.frame(in: .named(BookView.outlineSpace))
                 return OutlineAnchorGeometry(top: frame.minY, height: frame.height)
             } action: { geometry in
+                learn?(geometry.height)
                 book.outlineAnchorMoved(id, top: geometry.top, height: geometry.height, proxy)
             }
+    }
+}
+
+/// **One small row of Outline's column (13u2b UNIT 1): real near the
+/// viewport, a manifest-height placeholder far from it — and its landing
+/// anchor either way.**
+///
+/// This is the row-53 virtualization the expanded notes have shipped since
+/// the Act 10 correction round, extended downward to the headings and cards,
+/// and it is here for a measured reason rather than for symmetry. The runs
+/// used to be `LazyVStack`s, and a lazy container answers "how tall is a row
+/// I have not realized" with the AVERAGE of the ones it has — so arriving at
+/// a landing target de-realized the rows above it, the column shrank ~70 pt
+/// above the target, and the page slid off the thing it had just landed on
+/// (the plan's UNIT 1 RECORD has the trace and the probe: thirteen hops, four
+/// seconds, and `top = 0` is not a fixpoint of such a column). A height the
+/// column ASSERTS cannot do that.
+///
+/// **What it is NOT:** it is not the closed "one row scale per lazy run"
+/// road. The expanded notes — and therefore the ONE live editor — keep their
+/// exact identity and position as direct children of the column (P-3's
+/// fence); only runs of headings and collapsed cards change form, and no
+/// liveness mechanism is touched. Anchors are kept on every row, realized or
+/// not, so `scrollTo(id:)` is unchanged and no landing pin's mechanism moves.
+private struct OutlineRunRow<Content: View>: View {
+    let anchorID: String
+    let shape: BookOutlineHeights.Shape
+    let book: BookView
+    let model: BookViewModel
+    let proxy: ScrollViewProxy
+    @ViewBuilder let content: () -> Content
+    /// Starts false so a far row never draws real content for one frame; the
+    /// row's own first geometry report decides (`OutlinePostRow`'s rule).
+    @State private var near = false
+
+    var body: some View {
+        Group {
+            if near {
+                content()
+            } else {
+                Color.clear.frame(height: model.outlineRowHeight(anchorID, shape: shape))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .modifier(NearViewportObserver(
+            near: $near, margin: BookView.runRowNearMargin, space: BookView.outlineSpace))
+        .outlineAnchor(anchorID, in: book, proxy, learn: near
+            ? { model.learnOutlineRowHeight(anchorID, shape: shape, height: $0) }
+            : nil)
     }
 }
 
@@ -2005,10 +2187,19 @@ private struct OutlinePostRow: View {
     /// persisted record). The reading flow makes the same split for the same
     /// reason through one brain (`FlowHeightEstimate.honestHeight`, R2-1),
     /// where it has an estimate to fall back to and the Outline has none.
+    /// **13u2b UNIT 1 — and the ESTIMATE arm arrived here.** The order is
+    /// now remembered-at-this-width → the lengths estimate → a remembered
+    /// size from another width → the unmeasured constant
+    /// (`BookViewModel.outlineSurfaceHeight` states each step's reason). The
+    /// paragraph above still holds for the third step, which is the one it
+    /// was written about; what changed is that a width her memories were NOT
+    /// taken at now falls to an estimate built from this note's own block
+    /// lengths instead of straight to 800 pt — the case the architectural
+    /// trace measured at 20,848 pt of first-aim error. 18d's per-width
+    /// refusal in `StableSurface.reserved` is untouched: covering that case
+    /// is exactly what this arm is for.
     private var surfacePlaceholder: some View {
-        Color.clear
-            .frame(height: model.rememberedSurfaceSize(entry.postID)?.height
-                ?? Self.unmeasuredSurfaceHeight)
+        Color.clear.frame(height: model.outlineSurfaceHeight(entry.postID))
     }
 
     /// 13c 2A's virtualization count (`BookOutlineMaterialization`): a row

@@ -230,13 +230,17 @@ nonisolated enum BookOutlineHeightModel {
         /// A smart book's tag-path heading.
         var tagHeading: CGFloat = 51
         /// An expanded note's chrome: its header row and the padding under
-        /// the surface — everything but the prose.
+        /// the surface — everything but the prose. The ROW is the surface
+        /// plus this; the PLACEHOLDER inside the row is the surface alone.
         var expandedChrome: CGFloat = 60
-        /// What an expanded note stands at when NOTHING is known about it —
-        /// no remembered size, no extents yet. The Outline's own shipped
-        /// fallback (`OutlinePostRow.unmeasuredSurfaceHeight`), kept to the
-        /// point so the cold case is no worse than it was.
+        /// What an expanded note's SURFACE stands at when nothing is known
+        /// about it — no remembered size, no lengths yet. The Outline's own
+        /// shipped fallback (`OutlinePostRow.unmeasuredSurfaceHeight`), kept
+        /// to the point so the cold case is never worse than it was.
         var expandedUnknown: CGFloat = 800
+        /// A note with nothing renderable: the surface's one blank line (the
+        /// flow's `emptyNoteHeight` at the editor's own pitch).
+        var expandedEmpty: CGFloat = 24
         /// The prose metrics the expanded estimate wraps text at.
         var prose: ProseMetrics = ProseMetrics()
     }
@@ -287,7 +291,10 @@ nonisolated enum BookOutlineHeightModel {
             lines > 0
                 ? metrics.cardChrome + metrics.cardExcerptGap + CGFloat(lines) * metrics.cardLineHeight
                 : metrics.cardChrome
-        case .expandedNote: metrics.expandedUnknown
+        // A whole ROW: the unknown surface plus the header and padding
+        // around it. (The row's placeholder inside it is the surface alone —
+        // `BookViewModel.outlineSurfaceHeight`.)
+        case .expandedNote: metrics.expandedUnknown + metrics.expandedChrome
         }
     }
 
@@ -301,9 +308,10 @@ nonisolated enum BookOutlineHeightModel {
         return min(max(1, lines), max(1, metrics.cardLineLimit))
     }
 
-    /// An expanded note's height from its blocks' stored LENGTHS — never its
-    /// prose (AppSpec §4's designed fallback; `Queries.blockExtents` computes
-    /// the lengths in SQL and no text crosses the boundary).
+    /// An expanded note's TEXT SURFACE from its blocks' stored LENGTHS —
+    /// never its prose (AppSpec §4's designed fallback; `Queries.blockExtents`
+    /// computes the lengths in SQL and no text crosses the boundary). The
+    /// whole ROW is this plus `expandedChrome`.
     ///
     /// The paragraph model is the flow's, measured there against the real
     /// Sherlock library: a block is its own paragraph, its internal newlines
@@ -314,7 +322,7 @@ nonisolated enum BookOutlineHeightModel {
     ) -> CGFloat {
         let prose = metrics.prose
         let rendered = extents.filter { $0.characters > 0 }
-        guard !rendered.isEmpty, prose.charsPerLine > 0 else { return metrics.expandedChrome }
+        guard !rendered.isEmpty, prose.charsPerLine > 0 else { return metrics.expandedEmpty }
         var total: CGFloat = 0
         for extent in rendered {
             let paragraphs = Double(max(1, extent.newlines))
@@ -325,6 +333,6 @@ nonisolated enum BookOutlineHeightModel {
                 + CGFloat(paragraphs - 1) * prose.paragraphGap
         }
         total += CGFloat(rendered.count - 1) * prose.paragraphGap
-        return (total + metrics.expandedChrome).rounded()
+        return max(metrics.expandedEmpty, total.rounded())
     }
 }

@@ -551,7 +551,163 @@ final class BookViewModel {
     /// Ladder R2-4: the flow's block extents (the estimate's input), cached
     /// for the book beside the sizes — a return to Read ▸ Scroll re-reads
     /// no lengths (the flow itself is re-created per mode).
+    ///
+    /// **13u2b UNIT 1: the Outline is its second reader** — the same lengths
+    /// answer "how tall is this note going to be" for an expanded row the
+    /// column has never measured, and one cache serves both surfaces (a
+    /// return to Read ▸ Scroll after opening a story in Outline re-reads
+    /// nothing).
     @ObservationIgnored let flowExtents = FlowExtentsCache()
+
+    // MARK: - 13u2b UNIT 1 — THE OUTLINE'S HEIGHTS
+    //
+    // The column's rows stand at KNOWN heights instead of at a lazy
+    // container's average, so nothing above a landed target can move under
+    // her (the plan's UNIT 1 RECORD has the trace: arriving at `top = 0`
+    // de-realized the rows above, the estimate for them was ~70 pt short, the
+    // content shrank and the page slid off the thing it had just landed on —
+    // thirteen times, four seconds, her *"stutter ~10 times"*).
+    //
+    // What lives here is only the PLUMBING: the width the column stands at
+    // (observed, because a change must re-render the rows), the lazy lengths
+    // read, and the three thin doors the rows and the landing ask through.
+    // The arithmetic is `BookHeightManifest` (pure) and the learning is
+    // `BookOutlineHeights` (unobserved, geometry cadence).
+
+    /// The learned heights and the measured type. Unobserved on purpose —
+    /// see the file's own note.
+    @ObservationIgnored let outlineHeights = BookOutlineHeights()
+
+    /// The width the Outline's content column is really drawing at. Observed
+    /// (a width change must re-render every row's placeholder), written ONLY
+    /// when it really moves — the same 1-pt tolerance `StableSurface` and the
+    /// flow compare with, so "the same width" is one number in the app.
+    private(set) var outlineContentWidth: CGFloat = 0
+
+    /// The column reported its measure.
+    func reportOutlineContentWidth(_ width: CGFloat) {
+        guard width > 0, abs(width - outlineContentWidth) > stableSurfaceWidthTolerance else { return }
+        outlineContentWidth = width
+        outlineHeights.stand(at: width)
+        // A width the memories were not taken at leaves the expanded notes
+        // with no remembered size (18d's deliberate refusal — never relaxed
+        // here): the lengths estimate is what covers them, so it is wanted
+        // now rather than at the next expansion.
+        ensureOutlineExtents()
+    }
+
+    /// Bumped when the lengths land, so a row standing on the estimate
+    /// re-renders with it. Observed and read by `outlineSurfaceHeight`.
+    private(set) var outlineExtentsGeneration = 0
+    @ObservationIgnored private var outlineExtentsInFlight = false
+
+    /// **The lengths read, LAZILY.** A book opened and read with everything
+    /// collapsed — her own gesture, and the default since #43(a) — never
+    /// reaches this at all: a card's height has nothing to do with its note's
+    /// length. It is wanted only when an EXPANDED note has no remembered size
+    /// at this width, which is the cold case the trace measured at 20,848 pt
+    /// of first-aim error.
+    ///
+    /// One bounded statement for the book (`Queries.blockExtents` — lengths
+    /// computed in SQL, no prose crossing the boundary), cached for the book
+    /// beside the flow's, and never re-run while it holds this entry set.
+    func ensureOutlineExtents() {
+        let ids = entries.map(\.postID)
+        guard !ids.isEmpty, !outlineExtentsInFlight, flowExtents.lookup(ids) == nil else { return }
+        outlineExtentsInFlight = true
+        Task { [weak self] in
+            guard let self else { return }
+            defer { self.outlineExtentsInFlight = false }
+            guard let rows = try? await session.database.read({ db in
+                try Queries.blockExtents(db, containerIDs: ids)
+            }) else { return }
+            var byPost: [String: [Queries.BlockExtent]] = [:]
+            for row in rows { byPost[row.containerID, default: []].append(row) }
+            for id in ids where byPost[id] == nil { byPost[id] = [] }
+            flowExtents.store(byPost, for: ids)
+            #if DEBUG
+            BookOutlineExtentReads.count += 1
+            #endif
+            outlineExtentsGeneration += 1
+        }
+    }
+
+    /// What an EXPANDED note's text surface stands at before it is measured
+    /// here — the far row's placeholder, and the height the manifest gives
+    /// that row's prose.
+    ///
+    /// The order, and every step of it is a rule that already existed:
+    /// 1. the remembered size **taken at this width** (18d's U-12 memory);
+    /// 2. the estimate from this note's blocks' LENGTHS (AppSpec §4's
+    ///    designed fallback) — this is the arm that covers the width her
+    ///    memories were not taken at, which is exactly why 18d's per-width
+    ///    refusal is not relaxed to make room for it;
+    /// 3. a remembered size taken at ANOTHER width — the pre-existing
+    ///    behaviour of this placeholder, kept as the last guess before the
+    ///    unmeasured constant, because a note's height at 696 pt is a better
+    ///    guess for it at 500 than 800 pt is;
+    /// 4. the unmeasured constant.
+    func outlineSurfaceHeight(_ postID: String) -> CGFloat {
+        // Read so a row standing on the estimate re-renders when the lengths
+        // land (the Observation dependency IS the mechanism here).
+        _ = outlineExtentsGeneration
+        let remembered = outlineSurfaceSizes.size(postID)
+        if let remembered,
+           abs(remembered.width - outlineContentWidth) <= stableSurfaceWidthTolerance {
+            return remembered.height
+        }
+        if let extents = flowExtents.lookup(entries.map(\.postID))?[postID], !extents.isEmpty {
+            return BookOutlineHeightModel.expandedHeight(
+                extents: extents, metrics: outlineHeights.metrics)
+        }
+        if let remembered { return remembered.height }
+        return outlineHeights.metrics.expandedUnknown
+    }
+
+    /// What a WHOLE row stands at — the small rows' placeholder, and the
+    /// manifest's per-row answer.
+    func outlineRowHeight(_ anchorID: String, shape: BookOutlineHeights.Shape) -> CGFloat {
+        BookHeightManifest.resolve(outlineRowInput(anchorID, shape: shape)).0
+    }
+
+    /// The same question as a manifest input (one precedence brain).
+    func outlineRowInput(
+        _ anchorID: String, shape: BookOutlineHeights.Shape
+    ) -> BookHeightManifest.Input {
+        switch shape {
+        case .expandedNote:
+            // A whole expanded row is its surface plus the header and the
+            // padding around it.
+            let postID = String(anchorID.dropFirst("page-".count))
+            return outlineHeights.input(
+                anchorID, shape: shape,
+                derived: outlineSurfaceHeight(postID) + outlineHeights.metrics.expandedChrome)
+        default:
+            return outlineHeights.input(anchorID, shape: shape)
+        }
+    }
+
+    /// A row reported its height while rendering real content.
+    func learnOutlineRowHeight(
+        _ anchorID: String, shape: BookOutlineHeights.Shape, height: CGFloat
+    ) {
+        outlineHeights.learn(anchorID, shape: shape, height: height)
+    }
+
+    /// The card's shape at this width — its preview's wrapped line count, so
+    /// one measured card teaches every card that looks like it.
+    func outlineCardShape(_ postID: String) -> BookOutlineHeights.Shape {
+        outlineHeights.cardShape(excerpt: cardPreview(postID))
+    }
+
+    /// The VOICE changed: re-measure the type and drop what was learned under
+    /// the old one (Study's 16-pt Iowan is not Terminal's 14-pt monospace, and
+    /// a card's wrapped line count moves with it). The width is unchanged, so
+    /// this goes through the same one door — `stand` compares a stamp that
+    /// carries both facts, which is why there is no second rule here.
+    func restandOutlineHeights() {
+        outlineHeights.stand(at: outlineContentWidth)
+    }
 
     /// 13f batch 4 (the MOUNT rule): whether this book's PANE is the
     /// focused one. A book in an unfocused pane mounts no live surface —
@@ -591,13 +747,20 @@ final class BookViewModel {
         caretSeed = postID == nil ? nil : (caret ?? 0)
         fanSeed = fanBlock
         focusedPostID = postID
-        if let postID { expandedPosts.insert(postID) }
+        if let postID {
+            expandedPosts.insert(postID)
+            ensureOutlineExtents()
+        }
     }
 
     /// Unfold a collapsed post (the card's disclosure) — the deliberate act
     /// this surface opens needing (#43(a)).
     func expand(_ postID: String) {
         expandedPosts.insert(postID)
+        // 13u2b UNIT 1: an expanded note is the ONLY row whose height needs
+        // its note's length, so the lengths read is wanted here and nowhere
+        // else — a book read entirely in cards never runs it.
+        ensureOutlineExtents()
     }
 
     /// D1: collapsing a post collapses it — focused included. Focus is
@@ -633,6 +796,7 @@ final class BookViewModel {
     /// carry, and the reason the set tracks this side; see `expandedPosts`).
     func expandAll() {
         expandedPosts = Set(entries.map(\.postID))
+        ensureOutlineExtents()
     }
 
     // MARK: - W21 — the book's PLACE, carried across a mode switch
