@@ -35,6 +35,33 @@ import SwiftUI
 /// surface swap moves the column, and without the band that move flipped
 /// its neighbours back and forth (traced on the dev store as `861 ↔ 221`
 /// and `21054 ↔ 94` row heights).
+/// **The near/far band's arithmetic and its decision, as pure functions**
+/// (13u2b UNIT 1). They were the body of `NearViewportObserver` below and
+/// still are — not a byte of its behaviour changed — but the book Outline's
+/// small rows need the SAME rule from inside their own geometry report (one
+/// report per row instead of two: at the window's 300-note cap that is 400
+/// observers rather than 800, and P-8 is this phase's spine). A rule copied
+/// is a rule that drifts, so it lives here once and both readers call it.
+nonisolated enum NearBand {
+    /// How far a row sits from the viewport's top-edge region — 0 while any
+    /// part of it overlaps `[0, margin)`.
+    static func distance(top: CGFloat, height: CGFloat, margin: CGFloat) -> CGFloat {
+        let bottom = top + height
+        if bottom < 0 { return -bottom }
+        if top > margin { return top - margin }
+        return 0
+    }
+
+    /// The hysteresis: a row becomes near within `margin` and far again only
+    /// beyond three times that. nil = no change (the common answer, and the
+    /// reason nothing is written per scroll tick).
+    static func decide(distance: CGFloat, near: Bool, margin: CGFloat) -> Bool? {
+        if !near, distance < margin { return true }
+        if near, distance > margin * 3 { return false }
+        return nil
+    }
+}
+
 struct NearViewportObserver: ViewModifier {
     @Binding var near: Bool
     let margin: CGFloat
@@ -65,24 +92,18 @@ struct NearViewportObserver: ViewModifier {
                 // (0 while any part of it overlaps [0, margin) — a viewport
                 // is at most a couple of thousand points tall).
                 let frame = geometry.frame(in: .named(space))
-                let distance: CGFloat
-                if frame.maxY < 0 {
-                    distance = -frame.maxY
-                } else if frame.minY > margin {
-                    distance = frame.minY - margin
-                } else {
-                    distance = 0
-                }
-                return Report(distance: distance, armed: armed)
+                return Report(
+                    distance: NearBand.distance(
+                        top: frame.minY, height: frame.height, margin: margin),
+                    armed: armed)
             } action: { report in
                 guard report.armed else { return }
                 // Decided on the next turn: a geometry report can arrive
                 // inside a layout pass, and a state write there is the
                 // "modifying state during view update" class (it doubled
                 // the mounted editor in the harness).
-                let becomesNear = !near && report.distance < margin
-                let becomesFar = near && report.distance > farMargin
-                guard becomesNear || becomesFar else { return }
+                guard let becomesNear = NearBand.decide(
+                    distance: report.distance, near: near, margin: margin) else { return }
                 DispatchQueue.main.async { near = becomesNear }
             }
     }

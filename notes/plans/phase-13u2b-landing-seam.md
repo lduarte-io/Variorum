@@ -342,7 +342,7 @@ mechanism trace the build must answer.)*
 | THE GATE: the far-below arm ≤4, UNWRAPPED, the interim bound dropped | **MET and UNWRAPPED** — the two landing suites **21/21 GREEN, zero known issues**; every landing `settled at top=0.0 after 0 hops`; the ONE premise line restated under AR-2 |
 | rider 1 — the closed-road mount guard (row 64's own instruction) | **DONE** — `window=Y entries=215 height=16134.0`, pinned |
 | the dev-store WALK (her gesture both directions, two widths, one cold) | NOT-STARTED |
-| the manifest's cost ∝ entries, measured (rider 2) | **DONE** — at the 300-note cap (400 rows): manifest **1.06 ms / 0.0026 ms per row**, one layout pass **0.84 ms**, adopt 64.7 ms; a collapsed book runs **ZERO** lengths queries (pinned), a re-delivery costs nothing, the first expansion reads once for the book |
+| the manifest's cost ∝ entries, measured (rider 2) | **DONE, A/B'd against the pre-fix tree** — the table below; steady-state layout ends up CHEAPER than the lazy column, mount costs +143 ms at the 300-note cap, a collapsed book runs ZERO lengths queries (pinned) |
 | tests: the touched suites · core (if core changed) · the FULL Mac suite | NOT-STARTED (the full suite runs at the END, never at the start) |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
@@ -366,6 +366,39 @@ isolated (`-only-testing:VariorumTests/BookOutlineLandingTests`), on `8180605e`:
 smoothed over, because it is the row-58 class and because a session that sees only that run would
 wrongly conclude the row had come right. Machine state is recorded beside every number in this
 record for exactly this reason.
+
+## RIDER 2 — WHAT THE EXACT COLUMN COSTS (A/B against the pre-fix tree)
+
+Both trees measured three times each, alternating, zero instances, nothing else running; the
+pre-fix tree is `8180605e` in a throwaway worktree with the same measurement copied in (trimmed to
+what it can compile). The fixture is the observation window's own CAP — 300 notes with realistic
+previews, filed three to a chapter: **400 rows**, the largest column the Outline can produce.
+
+| at the 300-note cap | pre-fix (`LazyVStack`) | UNIT 1, two observers a row | UNIT 1, ONE observer a row (shipped) |
+|---|---|---|---|
+| `adopt` (the entries + their previews) | 59.0 ms | 60.3 | **60.3** |
+| mount + 8 settle turns | 616.7 ms | 786.5 | **760.1** |
+| ONE full layout pass | 0.702 ms | 0.960 | **0.562** |
+| the whole-column manifest | — | 1.11 ms | **1.16 ms** (0.0029 ms a row) |
+| lengths queries, book read in cards | — | 0 | **0** |
+
+**Read it in three lines.** (1) **Steady-state layout is CHEAPER than the lazy column it replaced**
+— 0.562 ms against 0.702, which is the number that matters while she scrolls, and it is 3 % of a
+60 Hz frame. That is not a free lunch: it is what the third column bought. The first cut of this
+unit put TWO geometry observers on every row (the near/far band's and the landing anchor's); merging
+them into one report with three readers — the band's rule hoisted to `NearBand` and shared rather
+than copied — took the layout pass from 0.960 to 0.562 and the mount from 786 to 760.
+(2) **Mount costs +143 ms at the CAP**, and the cap is the worst case the window allows; the cost is
+∝ rows, so Sherlock's 26 rows pay about 9 ms of it. That is the price of the column knowing its own
+geometry, paid once when a book opens. **My judgment: it holds** — 143 ms once, on the largest book
+possible, against a landing that never stutters; the windowed-spacer fallback (AR-1's named option
+(c)) stays available and unbuilt, and nothing about this diff makes it harder to reach.
+(3) **The P1 sentences are PINNED, not just measured**: a book read in cards never runs the lengths
+query, an entries re-delivery (what every keystroke produces through `last_touched_at`) costs no
+read of any kind, and the first expansion reads the book's lengths exactly once with every further
+expansion free. **The first of those three went RED and was right** — `reportOutlineContentWidth`
+called `ensureOutlineExtents`, and a column reports its width on every mount, so every book was
+paying for the lengths on open. The guard is now the sentence itself.
 
 ## THE MECHANISM, TRACED (not reasoned) — and it is NOT what the plan's model assumes
 

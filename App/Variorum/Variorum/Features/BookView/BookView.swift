@@ -1920,22 +1920,17 @@ private extension View {
     /// on the card or the header was invisible to `scrollTo` until the row
     /// happened to be on screen (row 47's "the page did not move").
     ///
-    /// **13u2b UNIT 1 — the same report also TEACHES the column.** `learn` is
-    /// non-nil exactly when this row is drawing real content, so the height it
-    /// reports is a fact about the surface rather than about the placeholder
-    /// the manifest guessed. One observer, two readers: the landing converges
-    /// on the top, the manifest learns the height.
-    func outlineAnchor(
-        _ id: String, in book: BookView, _ proxy: ScrollViewProxy,
-        learn: ((CGFloat) -> Void)? = nil
-    ) -> some View {
+    /// **13u2b UNIT 1:** this is now the EXPANDED rows' anchor only — a small
+    /// row carries the same report inside `OutlineRunRow`, where one
+    /// observation serves the landing, the height learning and the near/far
+    /// decision at once.
+    func outlineAnchor(_ id: String, in book: BookView, _ proxy: ScrollViewProxy) -> some View {
         self
             .id(id)
             .onGeometryChange(for: OutlineAnchorGeometry.self) { geometry in
                 let frame = geometry.frame(in: .named(BookView.outlineSpace))
                 return OutlineAnchorGeometry(top: frame.minY, height: frame.height)
             } action: { geometry in
-                learn?(geometry.height)
                 book.outlineAnchorMoved(id, top: geometry.top, height: geometry.height, proxy)
             }
     }
@@ -1982,11 +1977,29 @@ private struct OutlineRunRow<Content: View>: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .modifier(NearViewportObserver(
-            near: $near, margin: BookView.runRowNearMargin, space: BookView.outlineSpace))
-        .outlineAnchor(anchorID, in: book, proxy, learn: near
-            ? { model.learnOutlineRowHeight(anchorID, shape: shape, height: $0) }
-            : nil)
+        .id(anchorID)
+        // ONE geometry report, three readers — the landing converges on the
+        // top, the manifest learns the height, and the row decides near or
+        // far. The band's rule is `NearBand`'s, shared with
+        // `NearViewportObserver` rather than copied: at the window's 300-note
+        // cap a second observer per row would be 400 more of them, and P-8 is
+        // this phase's spine.
+        .onGeometryChange(for: OutlineAnchorGeometry.self) { geometry in
+            let frame = geometry.frame(in: .named(BookView.outlineSpace))
+            return OutlineAnchorGeometry(top: frame.minY, height: frame.height)
+        } action: { geometry in
+            if near { model.learnOutlineRowHeight(anchorID, shape: shape, height: geometry.height) }
+            book.outlineAnchorMoved(
+                anchorID, top: geometry.top, height: geometry.height, proxy)
+            let distance = NearBand.distance(
+                top: geometry.top, height: geometry.height, margin: BookView.runRowNearMargin)
+            guard let becomesNear = NearBand.decide(
+                distance: distance, near: near, margin: BookView.runRowNearMargin)
+            else { return }
+            // Never inside the layout pass that reported (the
+            // state-during-update class — `NearViewportObserver`'s own rule).
+            DispatchQueue.main.async { near = becomesNear }
+        }
     }
 }
 
