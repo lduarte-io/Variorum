@@ -379,7 +379,44 @@ gone because the estimate that produced it is gone.
 | the manifest's cost ∝ entries, measured (rider 2) | **DONE, A/B'd against the pre-fix tree** — the table below; steady-state layout ends up CHEAPER than the lazy column, mount costs +143 ms at the 300-note cap, a collapsed book runs ZERO lengths queries (pinned) |
 | tests: the touched suites · core (if core changed) · the FULL Mac suite | **DONE** — core NOT OWED (zero `Sources/` lines); FULL Mac **2767 / 462, ZERO known issues** (−1, the unwrap); of its 2 reds one is row 58's environment condition and the other was MINE, resolved at AR-3 by fixing the fixture (4 surfaces, 3/3 isolated) |
 
+| the two walk-found defects, FIXED with red-on-old | **DONE** — the card/expanded height confusion, and the already-there landing spinning 15 hops |
+| AR-3's fixture fix + its 3× isolated re-verification | **DONE** — 4 surfaces of 60, deterministic; the unit's four suites 29/29 green |
+| **UNIT 1 — CLOSED, pending the orchestrator's walk** | **READY** |
+
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
+
+## WHAT SHIPPED — five files, and where each piece lives
+
+- **`App/Variorum/Variorum/Surface/BookHeightManifest.swift`** (NEW, pure): the manifest value —
+  three sources in precedence (MEASURED > REMEMBERED > DERIVED), the cumulative-offset arithmetic,
+  the width gate, `isExactAbove`; and `BookOutlineHeightModel`, the derived arm, whose constants are
+  the 13u2 traces' own readings off the real book rather than invented numbers.
+- **`App/Variorum/Variorum/Features/BookView/BookOutlineHeights.swift`** (NEW, `@MainActor`,
+  unobserved): what the column LEARNS — by row and by shape, each measurement carrying the shape it
+  was taken in — plus the type measured off the real font per width, and the memoized card shape.
+- **`App/Variorum/Variorum/Features/BookView/BookView.swift`**: `OutlineRunRow` (the runs' plain
+  `VStack` + per-row virtualization at a manifest height, anchors kept, ONE geometry report with
+  three readers), `surfacePlaceholder`'s estimate arm, the landing's seed from where rows last
+  reported, the width-change re-land, the DEBUG story's manifest line.
+- **`App/Variorum/Variorum/Features/BookView/BookViewModel.swift`**: the plumbing — the observed
+  content width, the LAZY lengths read and its generation, `outlineSurfaceAnswer`,
+  `outlineRowInput`, `outlineHeightManifest(rows:)`.
+- **`App/Variorum/Variorum/Core/Views/StableSurface.swift`**: `NearBand` — the band's arithmetic and
+  hysteresis hoisted to two pure functions so the Outline's rows share the rule instead of copying
+  it. `NearViewportObserver` calls them; not a byte of its behaviour changed.
+
+**Zero `Sources/VariorumCore/` lines. Zero `Sync/`. Zero `Persistence/`. Zero schema. Zero
+migrations. Marker stays 8.** No `Shared/` file moved, so the phone inherits nothing and no mobile
+suite is owed; the closeout's parity line reads *nothing mobile-visible*.
+
+**Commits**, each pushed as it landed: `71b3791c` (the record + the baseline) · `f049af48` (the
+mechanism traced, PROBE A) · `e6e7abb0` (the pure brain, 14 pins) · `f8610cb9` (the rows consume it
+— 0 hops) · `36018e0e` (the gate unwrapped, AR-2's premise, rider 1's guard) · `4c50e33f` (rider 2's
+cost pins + the P1 hole they caught) · `a6d87dd8` (one observer a row) · `1399b67a` (a measurement
+is a fact about a SHAPE) · `3521bc5c` (the already-there landing) · `e9c7815e` (the walk) ·
+`b18d6cae` (the finals) · `74c1dd4b` (QUESTIONS #115) · `4ba93fba` (the dispositions) · `cb58eb5a`
+(AR-3's fixture). Two red-on-old probes were run and reverted without being committed, each with the
+pre-probe state committed first.
 
 ## THE BASELINE, RE-MEASURED ON THIS TREE (2026-09-18, before a line of product code)
 
