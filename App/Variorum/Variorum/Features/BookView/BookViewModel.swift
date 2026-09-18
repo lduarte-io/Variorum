@@ -664,20 +664,34 @@ final class BookViewModel {
     ///    guess for it at 500 than 800 pt is;
     /// 4. the unmeasured constant.
     func outlineSurfaceHeight(_ postID: String) -> CGFloat {
+        outlineSurfaceAnswer(postID).height
+    }
+
+    /// The same answer, plus WHICH arm gave it — so the manifest can say
+    /// honestly whether a row's height is a remembered fact or arithmetic.
+    /// (Without this every expanded row read as arithmetic, and
+    /// `isExactAbove` was pessimistic about a column whose stories it
+    /// actually knew: seen on this unit's walk as `expanded=5 derived=5
+    /// exactAbove=N` over a book every one of whose stories had been
+    /// measured.)
+    func outlineSurfaceAnswer(_ postID: String) -> (height: CGFloat, remembered: Bool) {
         // Read so a row standing on the estimate re-renders when the lengths
         // land (the Observation dependency IS the mechanism here).
         _ = outlineExtentsGeneration
         let remembered = outlineSurfaceSizes.size(postID)
         if let remembered,
            abs(remembered.width - outlineContentWidth) <= stableSurfaceWidthTolerance {
-            return remembered.height
+            return (remembered.height, true)
         }
         if let extents = flowExtents.lookup(entries.map(\.postID))?[postID], !extents.isEmpty {
-            return BookOutlineHeightModel.expandedHeight(
-                extents: extents, metrics: outlineHeights.metrics)
+            return (BookOutlineHeightModel.expandedHeight(
+                extents: extents, metrics: outlineHeights.metrics), false)
         }
-        if let remembered { return remembered.height }
-        return outlineHeights.metrics.expandedUnknown
+        // A record from ANOTHER width is a guess, not a fact — it sizes the
+        // placeholder (better than the unmeasured constant by the width
+        // ratio) but it does not let the column claim exactness.
+        if let remembered { return (remembered.height, false) }
+        return (outlineHeights.metrics.expandedUnknown, false)
     }
 
     /// What a WHOLE row stands at — the small rows' placeholder, and the
@@ -695,9 +709,12 @@ final class BookViewModel {
             // A whole expanded row is its surface plus the header and the
             // padding around it.
             let postID = String(anchorID.dropFirst("page-".count))
+            let answer = outlineSurfaceAnswer(postID)
+            let height = answer.height + outlineHeights.metrics.expandedChrome
             return outlineHeights.input(
                 anchorID, shape: shape,
-                derived: outlineSurfaceHeight(postID) + outlineHeights.metrics.expandedChrome)
+                remembered: answer.remembered ? height : nil,
+                derived: height)
         default:
             return outlineHeights.input(anchorID, shape: shape)
         }

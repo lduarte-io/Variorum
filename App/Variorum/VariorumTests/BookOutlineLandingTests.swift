@@ -714,3 +714,74 @@ extension BookOutlineLandingTests {
         }
     }
 }
+
+// MARK: - 13u2b UNIT 1 — a landing on the row the page is ALREADY at
+
+extension BookOutlineLandingTests {
+    /// **Found on the unit's own dev-store walk, and it is a defect this unit
+    /// introduced:** `gave up at top=unrealized after 15 hops, 4200 ms`,
+    /// three times, on a click whose target was the row the page was already
+    /// showing.
+    ///
+    /// The mechanism: a landing learns where its target is from geometry
+    /// reports, and `onGeometryChange` reports a CHANGE. When the scroll moves
+    /// nothing — because the page is already there — no report arrives, the
+    /// landing's `lastTop` stays nil, and the loop reads that as "the target
+    /// never realized" and hops until the watchdog stops it. Nothing moves on
+    /// screen, so there is no visible stutter; there is a landing spinning for
+    /// four seconds, and her own scroll would have been fighting its hops.
+    ///
+    /// It could not happen before this unit: a far row did not exist in a lazy
+    /// container, so a landing's target always realized DURING the landing and
+    /// always sent a first report. Now every row exists, and a row that has
+    /// not moved has nothing to say.
+    ///
+    /// RED ON OLD: without the seed the landing ends `gave up … unrealized`.
+    @Test func landingAgainOnTheRowThePageIsAlreadyAtSettlesInsteadOfSpinning() async throws {
+        try await withLandingBook(posts: 40, longAt: [], chapters: false) { session, db, readingID, postIDs, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            BookOutlineGeometry.anchorTops = [:]
+            BookOutlineGeometry.trace = []
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let target = BookOutlineRows.Row.noteAnchor(postIDs[25])
+            await settle(window, hosting, watchdog: watchdog, until: {
+                anchorTop(BookOutlineRows.Row.noteAnchor(postIDs[0])) != nil
+            })
+
+            // Land there once, the ordinary way.
+            model.requestReveal(postIDs[25])
+            await settle(window, hosting, watchdog: watchdog, until: {
+                if let top = anchorTop(target) { return abs(top) <= BookView.landingTolerance }
+                return false
+            }, maxTurns: 120)
+            #expect(abs(try #require(anchorTop(target))) <= 4, "the first landing arrived")
+
+            // Now ask for the SAME row again: the page is already there, so
+            // the scroll moves nothing and no row reports.
+            BookOutlineGeometry.trace = []
+            model.requestReveal(postIDs[25])
+            await settle(window, hosting, watchdog: watchdog, until: {
+                BookOutlineGeometry.trace.contains { $0.contains("DONE:") }
+            }, maxTurns: 160)
+            let story = BookOutlineGeometry.trace.joined(separator: " | ")
+            print("LANDING TRACE (already there):", story)
+            #expect(story.contains("DONE:"), "the second landing finished at all: \(story)")
+            #expect(!story.contains("unrealized"),
+                    "the landing knew where its target was: \(story)")
+            #expect(!story.contains("gave up"),
+                    "the landing settled rather than spending its whole budget: \(story)")
+            #expect(abs(try #require(anchorTop(target))) <= 4, "and the page is still there")
+        }
+    }
+}

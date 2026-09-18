@@ -993,6 +993,27 @@ struct BookView: View {
         /// the next row below can take it (without that last clause the
         /// holder's own receding top would out-rank every candidate forever).
         var topRow: (id: String, top: CGFloat)?
+        /// **Where every row last said it was** — and this is not a
+        /// convenience, it is what makes a landing on a row that is ALREADY
+        /// at the top terminate.
+        ///
+        /// Found on this unit's cold walk: `gave up at top=unrealized after
+        /// 15 hops, 4200 ms`, three times, on a click whose target was the
+        /// row the page was already showing. A landing learns where its
+        /// target is from geometry reports, and `onGeometryChange` reports a
+        /// CHANGE — so when the scroll does not move (the page is already
+        /// there) no report arrives, `lastTop` stays nil, and the loop reads
+        /// that as "the target never realized" and hops until the watchdog
+        /// stops it. Nothing moved on screen, so she would not see a stutter;
+        /// she would have a landing spinning for four seconds and a scroll of
+        /// her own fighting its hops.
+        ///
+        /// It could not happen before this unit, and that is the honest
+        /// reason it is new: a far row did not EXIST in a lazy container, so
+        /// every landing's target really did realize during the landing and
+        /// really did send its first report. Now every row exists, and a row
+        /// that has not moved has nothing to report.
+        var tops: [String: CGFloat] = [:]
         #if DEBUG
         /// Realized row heights, for the trace's "who grew" line.
         var rowHeights: [String: CGFloat] = [:]
@@ -1057,7 +1078,12 @@ struct BookView: View {
     /// mark above), and watch it settle.
     private func landOutline(_ anchorID: String, _ proxy: ScrollViewProxy) {
         landingCheck?.cancel()
-        outlineLanding = OutlineLanding(anchorID: anchorID)
+        var landing = OutlineLanding(anchorID: anchorID)
+        // Seed from what the target last said (see `tops`): a landing whose
+        // scroll moves nothing — because the page is already there — would
+        // otherwise never hear from its target at all.
+        landing.lastTop = landingBox.tops[anchorID]
+        outlineLanding = landing
         #if DEBUG
         landingBox.rowHeights = [:]
         // The story's first line must END in " LAND": `finishLanding` prints
@@ -1086,7 +1112,9 @@ struct BookView: View {
     fileprivate func outlineAnchorMoved(
         _ anchorID: String, top: CGFloat, height: CGFloat, _ proxy: ScrollViewProxy
     ) {
-        // 13u2b UNIT 1: who is at the top (the width change's anchor).
+        // 13u2b UNIT 1: where this row is, and who is at the top (the width
+        // change's anchor).
+        landingBox.tops[anchorID] = top
         if landingBox.topRow?.id == anchorID {
             landingBox.topRow = top >= -Self.landingTolerance ? (anchorID, top) : nil
         } else if top >= -Self.landingTolerance,
