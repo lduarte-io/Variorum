@@ -151,3 +151,28 @@ Re-ran 27 tests / 4 suites green including both `!contains("gave up")` pins, as 
 argument predicts. Fix 5/6's cache overload verified additive and exactly equivalent on its
 predicate. Scope check: only three of its files moved in the whole pass; BookView / ProseHeightModel
 / BookHeightManifest / ReadingFlowLandingTests 0 lines.
+
+## UNIT 1's implementer — code CLEAN; two RECORD/COMMENT items raised (both one sentence, both originally its own)
+
+**NIT 2's fix VERIFIED CLEAN in depth:** predicate equivalence proven on every state the cache can
+hold (fresh/other-set/this-set; "partially loaded" is not a constructible state; the empty-book nil
+preserved); BOTH hot roads consume the one changed site (the per-body-pass road via
+`outlineSurfaceHeight`'s delegation, the manifest build via `outlineRowInput`); the standing list
+form correct where kept (both callers build the list anyway, neither per-pass); the three cost pins
+still measure what they claim (`BookOutlineExtentReads` untouched); re-run 36/36 green — and the
+manifest build MEASURABLY IMPROVED: 0.675 ms / 0.0017 ms a row against the recorded 1.0–1.2 /
+0.0026. One note, not an item: the fix removes the allocation, not the asymptote (comparisons take
+the pointer-identity fast path; the code comment is precisely true). **#115(b) verified:** both
+guards VERBATIM with the hazard; the wording promises nothing unbuilt. **Scope confirmed:** its
+side of the pass is 2 lines in `BookViewModel.swift` + 13 in `ReadingFlowView.swift`, all its other
+files 0.
+
+**ITEM A (comment):** `BookView.swift:1456-1461` still ends *"nothing else is needed here"* — now
+known false, at the site of the recorded-unbuilt defect, with no pointer to #115(b). The same class
+the pass itself fixed for NIT 1. Suggested: the last clause becomes the pointer (the re-land owed
+here, recorded unbuilt at #115(b) with its two guards). Comment-only.
+
+**ITEM B (record):** the plan's UNIT 1 LIVE STATUS width-change line states the re-land unqualified
+after naming both re-stand roads, so it parses as "the voice road re-lands too" — the one sentence
+that can accidentally promise the fix exists, in the record the handoff points at. Suggested:
+qualify the re-land to the width road, name (b) unbuilt. Record-only.
