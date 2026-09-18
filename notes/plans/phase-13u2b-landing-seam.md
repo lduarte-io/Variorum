@@ -1108,7 +1108,7 @@ fixed** — the hallucination guard's own rule.
 | piece | state |
 |---|---|
 | the record opened + the red-on-old pin shapes stated | **DONE** — this section, before any product code |
-| PIN A / PIN B measured on the pre-fix tree | NOT-STARTED |
+| PIN A / PIN B measured on the pre-fix tree | **PIN A DONE — RED 2/2, byte-identical** (`fraction 0.0`, below); PIN B's instrument arrives with the capture |
 | the PURE brain + its pins (PIN C) | NOT-STARTED |
 | the CAPTURE seam (the router's carry + the mode-switch funnel) | NOT-STARTED |
 | WRITE captures and consumes | NOT-STARTED |
@@ -1120,3 +1120,26 @@ fixed** — the hallucination guard's own rule.
 
 *(Every line starts NOT-STARTED and is flipped in the same commit as the piece it names; an
 unverified claim reads PENDING.)*
+
+## THE PRE-FIX MEASUREMENT — PIN A, on the tree as UNIT 2 left it (2026-09-18, zero instances verified before and after)
+
+Run twice against `65da53b5`, isolated (`-only-testing:VariorumTests/ModeSwitchCarryTests`), through
+the real mounted `PostDetailView` and the app's own `requestMode` road. **RED both times, byte for
+byte:**
+
+```
+[13u2b U3] block top 2204.0 bottom 2238.0 · visible 2204.0…2853.0 · fraction 0.0
+✘ Expectation failed: (abs(f - 0.5) → 0.5) <= 0.08
+```
+
+The block's first line sits **exactly at the viewport top** — `blockTop == visible.minY` to the
+point — where the Read pane it just came from had it CENTRED. That is not a near miss or a settle
+artifact: it is the second reveal policy doing precisely what it says, and it is the trace's §6
+finding measured in one number. The mechanism, traced rather than reasoned (the code, not a guess):
+Write's mode entry mints a COLD editor, so `EditorSurfaceController.renderFull` parks
+`editorRouter.scrollAnchors[postID]` (the top of the note, where the page stood when she left Write
+— she had moved the caret with `setSelectedRange`, which scrolls nothing) and `applyFocusSeeds`
+parks the caret reveal; the settle hop restores the anchor first, the caret at block 60 is then far
+below the viewport, and `consumePendingReveal`'s guard therefore fires `JumpPrimitive.jump`, whose
+whole contract is *"lands the LINE containing `offset` at the viewport top"*. Nothing is broken —
+the two surfaces simply never agreed on a rule, which is what this unit gives them.
