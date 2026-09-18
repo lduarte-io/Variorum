@@ -230,3 +230,22 @@ note, not a measured regression. Hoist the key once per pass if the cap fixture 
   archive roll, and #112(b) closure are consistent.
 
 **Tally: 0 BLOCKER · 2 MAJOR · 2 MINOR · 2 NIT.**
+
+---
+
+## FIX-PASS DISPOSITIONS (the reviewer's final calls; cross-model flow — 6 findings, 6 implementer AGREEs, 0 disputes)
+
+### MAJOR 1 — CONFIRMED · FIXED, red-on-old
+
+The implementer's provenance adopted (the hoist unified on the Outline's shape and deleted the
+flow's unconditional budget check — the only termination path a VETOED landing had; the
+consequence sharpened to a perpetual 4 Hz re-arm). **Fix:** `LandingSettle.decide` consults the
+time budget inside the at-top branch, after `done` and before `wait` — the pre-hoist flow body
+restored; the Outline provably cannot reach the new line (`mayFinish ≡ true`, hold 1 s < budget
+4 s), so its byte-identical promise survives. **Pin, measured red first on the unfixed tree:**
+`decide(top: 0, corrections: 0, elapsed: 4.5, mayFinish: false, policy: .readingFlow)` answered
+`.wait(0.25)` (the new cell in `aSurfaceThatSaysItIsNotReadyHoldsTheLandingOpen` failed exactly
+there); green after the fix (10/2 suites re-run). **The two owed corrections landed with it:** the
+truth-table pin's "veto or no veto" comment now states both cells (off the top AND at it), and the
+UNIT 2 RECORD's residual 2 is amended — the "one behaviour delta" sentence corrected with the
+undisclosed second delta and the fix's evidence.

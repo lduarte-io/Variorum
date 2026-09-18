@@ -172,6 +172,24 @@ nonisolated enum LandingSettle {
     ) -> LandingDecision {
         if let top, abs(top) <= policy.tolerance {
             if elapsed >= policy.minimumHold, mayFinish { return .done(top: top) }
+            // THE WATCHDOG BINDS HERE TOO (13u2b ladder round 1, MAJOR 1 —
+            // red-on-old in `LandingAuthorityTests`): a target AT the top
+            // whose surface still vetoes the finish ends at the time budget
+            // rather than waiting forever. The pre-hoist flow ran its budget
+            // check UNCONDITIONALLY — which is what made a veto safe, and the
+            // flow is the only surface with one — while the pre-hoist Outline
+            // checked it below its at-top early-return (safe there because
+            // its `mayFinish` is constant true); the hoist's first cut
+            // unified on the Outline's shape and deleted the flow's only
+            // termination path for a vetoed landing: a near story above the
+            // target that never announces `settled` left a perpetual 4 Hz
+            // re-arm and NO signpost — the stuck case the signpost exists
+            // for. The Outline provably cannot reach this line (veto-less,
+            // and its 1-s hold is inside the 4-s budget), so its
+            // byte-identical promise survives. A give-up at the top leaves
+            // the page exactly where it should be; what this buys is
+            // termination, and the line in her Console.
+            if elapsed > policy.timeBudget { return .giveUp(top: top) }
             // At the top and waiting — for the hold, or (past it) for the
             // surface's own word that the rows above have stopped moving.
             return .wait(elapsed < policy.minimumHold

@@ -1087,7 +1087,15 @@ walk) · this commit (the finals).
    Outline and makes the flow look up to 0.25 s SOONER in one window (elapsed between 0.75 s and
    1.0 s, where its old floor was the quiet interval). Strictly more responsive, and stated because
    "byte-identical" was this unit's promise and this is the one place it is only "identical or
-   better".
+   better". **CORRECTED at the ladder's round 1 (MAJOR 1): this was NOT the one delta.** The hoist
+   also deleted the flow's UNCONDITIONAL time-budget check (the pre-hoist `checkLanding` ran
+   `elapsed > timeBudget → gave up` even with the target at the top), so an at-top landing under a
+   standing veto — a near story above the target that never announces settled — waited FOREVER on a
+   4 Hz re-arm and filed no signpost, where the old code ended it at 4 s. Undisclosed here until the
+   ladder found it; fixed at the ladder's fix pass with a pure red-on-old pin
+   (`LandingAuthorityTests` — the shipped code answered `.wait(0.25)` at
+   `top: 0, elapsed: 4.5, mayFinish: false`), the Outline provably unreachable on the new branch
+   (veto-less; the 1-s hold sits inside the 4-s budget).
 
 ---
 

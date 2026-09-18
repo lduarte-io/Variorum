@@ -91,11 +91,20 @@ struct LandingAuthorityTests {
         #expect(isNear(waited(LandingSettle.decide(
             top: 0, corrections: 0, elapsed: 0.4, mayFinish: false, policy: flow)), 0.6),
             "inside the hold it is the hold that is being waited out")
-        // …and the watchdog still ends it, veto or no veto: a target AT the
-        // top is done, so the only way past the budget is to be off it.
+        // …and the watchdog still ends it, veto or no veto — OFF the top…
         #expect(LandingSettle.decide(
             top: 900, corrections: 0, elapsed: 4.5, mayFinish: false, policy: flow)
             == .giveUp(top: 900))
+        // …and AT it. (13u2b ladder round 1, MAJOR 1 — red-on-old: the
+        // hoist's first cut returned `.wait(0.25)` here forever, because its
+        // at-top branch never consulted the budget; the pre-hoist flow ran
+        // the budget check unconditionally, and the flow is the only surface
+        // with a veto. A giving-up landing at the top leaves the page exactly
+        // where it should be — what it buys is termination and the signpost.)
+        #expect(LandingSettle.decide(
+            top: 0, corrections: 0, elapsed: 4.5, mayFinish: false, policy: flow)
+            == .giveUp(top: 0),
+            "an at-top landing the veto has held open past the budget still ends")
     }
 
     /// **Off the top ⇒ ONE correction, then a pause whose length is the
