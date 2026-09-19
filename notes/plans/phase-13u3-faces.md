@@ -1247,3 +1247,34 @@ capture in BOTH surfaces, file each, verify the blocks in the note; the caret-in
 case; both voices, both appearances; captures to `notes/plans/13u3-screens/`. Record: **UNIT C
 RECORD** appended here, LIVE STATUS from the first commit, UNIT CLOSED banner, ledger row 4
 flipped in the same commit.
+
+---
+
+## UNIT C RECORD — THE QUICK-CAPTURE MAC FACE (opus-implementer, 2026-09-19)
+
+**WHAT THIS UNIT DOES NOT DO (the record's first line):** it does not touch the PHONE's capture
+face (R-13u-4 rules both platforms; the phone's face is the mobile catch-up's and is named as a
+parity row below, not built here). It does not touch `Sources/VariorumCore/` behaviour —
+`importPost`, `SegmentationRules.bulkSegments` and the spacing ruling are consumed byte-unchanged;
+this unit changes what a capture SURFACE owns, never how text segments. Zero `Sync/`, zero
+`Persistence/`, zero schema, zero migrations, the marker stays 8. It does not claim ⇧⌘V (taken —
+`Shared/PlainPaste.swift`), does not touch the gutter (A1), the comments panel (A2) or B's Library
+card work, and it leaves `TitleSuggestionChip` and `NoteCardFace.suggestedTitle` exactly as UNIT B
+built them (consumed, never rebuilt). No new app-wide chord is claimed: ⏎ and ⇧⏎ act only inside a
+capture box that has the caret.
+
+### LIVE STATUS (written at the start; flipped in the same commit as each piece)
+
+| # | piece | status |
+|---|---|---|
+| 0 | the record + LIVE STATUS | **DONE** |
+| 1 | `CaptureKeys` — the ONE pure ⏎/⇧⏎ rule + its pins | PENDING |
+| 2 | `CaptureTextView` — the ONE Mac capture surface (both hosts compose it) + its hosted-window key pins | PENDING |
+| 3 | the QUICK NOTE pad on the one rule (⏎ files · ⇧⏎ paragraph; the refusal that keeps her text) | PENDING |
+| 4 | the SHELF/LIBRARY quick-entry bar on the same rule (the 13l text-preserving refusal byte-preserved) | PENDING |
+| 5 | the red-on-old measurement (the one defect-shaped row: a refused quick-note filing destroyed the capture) | PENDING |
+| 6 | the copy that teaches the keys — the helper dictionary + the tutorial's workspace lesson, with pins | PENDING |
+| 7 | QUESTIONS #120 (the PROVISIONAL calls) + the marker moved | PENDING |
+| 8 | the walk + captures, the full Mac suite, the tutorial spine, iOS build | PENDING |
+
+*(Nothing below this line is claimed until its row says DONE.)*
