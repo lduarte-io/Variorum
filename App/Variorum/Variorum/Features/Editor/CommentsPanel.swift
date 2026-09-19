@@ -6,11 +6,29 @@
 //  letter): every comment face (margin card, inline strip, count badge,
 //  Block menu) opens here. Working notes on a BLOCK, never per-take; CRUD
 //  through the Stage A operations; and the DELETED section — visible and
-//  resurrectable ("the feature shouldn't be excessively skimpy"). Refusals
-//  surface as plain status text (the operations layer enforces; the panel
-//  renders what it says).
+//  resurrectable ("the feature shouldn't be excessively skimpy").
+//
+//  ── 13u3 UNIT A2: THE PANEL BECAME A TEXT EDITOR ─────────────────────────
+//  The gutter memo's §2 D, from her item 3: *"the comment add box is so
+//  small and it doesn't make sense given how big the overall comment box is
+//  that the whole thing isn't more of the text editor that you can write and
+//  click on."* So the `List` of rows with a one-line `TextField` stapled
+//  underneath is gone: the panel is ONE scrolling writing surface — every
+//  comment an editable area in place, the add area owning every point they
+//  leave, ⌘⏎ committing what you are writing and ⎋ undoing the most local
+//  thing, ⏎ a newline everywhere (a comment is free prose).
+//
+//  Three things that did NOT change, deliberately: the OPERATIONS (add,
+//  edit, delete, restore, their seal refusals and their travel rules are
+//  core's, byte-untouched), the deleted fold and its restore door, and the
+//  page — the margin card in the gutter stays a read face and a door, which
+//  is her ruling R-13u3-6, so a comment has ONE live-text home.
+//
+//  Messages are CLASSED at the door they come from (refusal · receipt, the
+//  status seam's law) and rendered in the voice's own registers.
 //
 
+import AppKit
 import Foundation
 import GRDB // AsyncValueObservation iteration
 import Observation
@@ -51,10 +69,13 @@ final class CommentsPanelModel {
     var statusMessage: String? { status?.text }
 
     /// **THE DRAFTS.** Edit-in-place means the panel holds unsaved prose, and
-    /// it holds it HERE rather than in per-row view state for one concrete
-    /// reason: the rows are lazy, so a row scrolled out of sight is torn
-    /// down, and a draft living in its `@State` would go with it. An entry
-    /// exists only for a comment she has actually typed into.
+    /// it holds it HERE rather than in per-row view state for three concrete
+    /// reasons: a row is rebuilt on every projection arrival (its own
+    /// `@State` is one identity change away from going with it), the panel
+    /// itself is a sheet or a popover that can leave while a draft is dirty
+    /// (`onDisappear` commits what the model holds), and a draft in a view
+    /// body cannot be pinned — the rules below are the FACE, not pixels.
+    /// An entry exists only for a comment she has actually typed into.
     private(set) var drafts: [String: String] = [:]
 
     /// The add area's draft. Settable — the add editor binds straight to it.
@@ -120,6 +141,27 @@ final class CommentsPanelModel {
     }
 
     var isAddDraftFilable: Bool { CommentComposition.filing(addDraft) != .nothing }
+
+    /// Every comment with unsaved changes, in the panel's own order. The
+    /// panel commits these when it closes or otherwise leaves.
+    var dirtyCommentIDs: [String] {
+        comments.map(\.id).filter { isDirty($0) }
+    }
+
+    /// **WHAT THE PANEL IS WRITING**, as the brain's own value — so the view
+    /// hands the rule its inputs rather than re-deriving them, and ⎋'s
+    /// meaning is a pinnable function of (focus, drafts, store).
+    func writing(_ focus: CommentPanelFocus?) -> CommentComposition.Writing {
+        switch focus {
+        case .add:
+            return .addDraft(addDraft)
+        case .comment(let id):
+            guard let stored = stored(id) else { return .nothing }
+            return .comment(id: id, draft: draft(for: id), stored: stored)
+        case nil:
+            return .nothing
+        }
+    }
 
     private func stored(_ id: String) -> String? {
         comments.first { $0.id == id }?.text
@@ -234,17 +276,139 @@ enum CommentsPanelCopy {
     static let restored = "Comment restored."
     static let addPlaceholder = "Write a comment…"
     static let unsavedMark = "unsaved · ⌘⏎"
-    static let fileHint = "⌘⏎ files it · ⎋ clears"
+    /// The foot's standing line — it teaches all three keys at once and
+    /// never changes, so nothing under her hands moves as she types.
+    static let keysHint = "⏎ new line · ⌘⏎ saves · ⎋ undoes"
 }
 
+// MARK: - Where the caret is (13u3 UNIT A2)
+
+/// **WHAT THE PANEL IS WRITING**, as a value the model and the keys can both
+/// read. It is a top-level type rather than the view's own `@State` enum for
+/// one reason: ⌘⏎ and ⎋ MEAN different things depending on it, and a meaning
+/// that lives only inside a view body cannot be pinned.
+nonisolated enum CommentPanelFocus: Hashable {
+    case add
+    case comment(String)
+}
+
+// MARK: - The keys (13u3 UNIT A2)
+
+/// **⌘⏎ AND ⎋, DECIDED AS A VALUE.**
+///
+/// The panel is a writing surface now, so ⏎ belongs to the text (a comment is
+/// free prose — `text` holds paragraphs) and the two acts need chords:
+/// **⌘⏎ commits what you are writing** — files the add draft, saves the
+/// comment — and **⎋ undoes the most local thing** (see
+/// `CommentComposition.escape`).
+nonisolated enum CommentPanelKeys {
+    enum Act: Equatable {
+        /// ⌘⏎ — file or save whatever is focused.
+        case commit
+        /// ⎋ — the escape ladder.
+        case escape
+    }
+
+    static let returnKeyCode: UInt16 = 36
+    /// The keypad's Enter, so a full-size keyboard behaves like the laptop's.
+    static let enterKeyCode: UInt16 = 76
+    static let escapeKeyCode: UInt16 = 53
+
+    /// nil for every key the panel does NOT claim — and a key it does not
+    /// claim must reach the text view untouched, which is why this says "no"
+    /// loudly rather than swallowing near-misses: plain ⏎ types a newline,
+    /// ⇧⏎ types a newline, ⌥⌘⏎ is nobody's.
+    static func act(keyCode: UInt16, modifiers: NSEvent.ModifierFlags) -> Act? {
+        let chord = modifiers.intersection([.command, .option, .control, .shift])
+        switch keyCode {
+        case returnKeyCode, enterKeyCode:
+            return chord == [.command] ? .commit : nil
+        case escapeKeyCode:
+            return chord.isEmpty ? .escape : nil
+        default:
+            return nil
+        }
+    }
+}
+
+/// The door: a zero-size view owning a local `keyDown` monitor for the window
+/// it lives in — `PageTurnKeyMonitor`'s shape, adopted for its stated reason
+/// (R1-5): SwiftUI resolves a `.keyboardShortcut` in `performKeyEquivalent`
+/// BEFORE the first responder's `keyDown`, so a Button carrying ⌘⏎ would
+/// claim the chord for the whole panel no matter which area the caret is in —
+/// and a key the panel does not claim must reach the text view exactly as if
+/// the panel were not there. The monitor sees the event first, asks the pure
+/// rule, and consumes only what it actually handled.
+struct CommentPanelKeyMonitor: NSViewRepresentable {
+    /// Returns whether the act was handled — an unhandled key is passed on,
+    /// so ⎋ with nothing to undo still closes the sheet or popover by the
+    /// host's own standard road.
+    let onAct: (CommentPanelKeys.Act) -> Bool
+
+    func makeNSView(context: Context) -> MonitorView {
+        let view = MonitorView()
+        view.onAct = onAct
+        return view
+    }
+
+    func updateNSView(_ nsView: MonitorView, context: Context) {
+        nsView.onAct = onAct
+    }
+
+    final class MonitorView: NSView {
+        var onAct: ((CommentPanelKeys.Act) -> Bool)?
+        private var monitor: Any?
+
+        override var isFlipped: Bool { true }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if let monitor {
+                NSEvent.removeMonitor(monitor)
+                self.monitor = nil
+            }
+            guard window != nil else { return }
+            monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+                guard let self, let window = self.window, event.window === window else {
+                    return event
+                }
+                guard let act = CommentPanelKeys.act(
+                    keyCode: event.keyCode, modifiers: event.modifierFlags) else { return event }
+                return (self.onAct?(act) ?? false) ? nil : event
+            }
+        }
+        // (No `deinit`: the view leaves its window before it dies and
+        // `viewDidMoveToWindow` removes the monitor then — the
+        // `PageTurnKeyMonitor` note, same reason.)
+    }
+}
+
+// MARK: - The panel
+
+/// **THE COMMENTS PANEL AS A TEXT EDITOR** (13u3 UNIT A2 — the gutter memo's
+/// §2 D, her item 3: *"the comment add box is so small and it doesn't make
+/// sense given how big the overall comment box is that the whole thing isn't
+/// more of the text editor that you can write and click on"*).
+///
+/// One scrolling writing surface: every comment is an editable text area IN
+/// PLACE (no bordered-field swap, no Edit button — click it and type), a
+/// hairline and a muted stamp line separate them, and below the last one the
+/// ADD AREA owns every point the comments leave. The deleted fold and its
+/// restore door keep their place at the foot ("never skimpy"), outside the
+/// writing surface so the add area's space is never theirs.
+///
+/// **R-13u3-6 is why this exists:** comment editing lives in the panel ONLY —
+/// the margin card in the gutter is a read face and a door. One live-text
+/// home for a comment, exactly as the page has one live editor.
 struct CommentsPanel: View {
     let session: AppSession
     let blockID: String
     @State private var model: CommentsPanelModel
-    @State private var draft = ""
-    @State private var editingID: String?
-    @State private var editDraft = ""
     @State private var deletedShown = false
+    /// The comments' own measured height, which is what decides how much
+    /// space is left for the add area.
+    @State private var commentsHeight: CGFloat = 0
+    @FocusState private var focus: CommentPanelFocus?
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -260,129 +424,372 @@ struct CommentsPanel: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(tokens.chromeLabel("Comments — block \(String(blockID.prefix(8)))"))
-                    .font(tokens.heading)
-                    .foregroundStyle(tokens.ink)
-                Spacer()
-                Button("Close") { dismiss() }
-            }
-            if let status = model.statusMessage {
-                Text(status)
-                    .font(tokens.small)
-                    .alarmVoice()
-                    .textSelection(.enabled)
-            }
-            List {
-                ForEach(model.comments, id: \.id) { comment in
-                    row(comment)
-                }
-                if model.comments.isEmpty {
-                    Text(tokens.chromeLabel("No comments on this block yet."))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                }
-                if !model.deleted.isEmpty {
-                    Section {
-                        if deletedShown {
-                            ForEach(model.deleted, id: \.id) { comment in
-                                deletedRow(comment)
-                            }
-                        }
-                    } header: {
-                        Button {
-                            deletedShown.toggle()
-                        } label: {
-                            Text(tokens.chromeLabel(
-                                "\(deletedShown ? "▾" : "▸") deleted (\(model.deleted.count))"))
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            HStack(spacing: 8) {
-                TextField(
-                    tokens.chromeLabel("Add a comment…"), text: $draft, axis: .vertical)
-                    .textFieldStyle(.roundedBorder)
-                    .lineLimit(1...4)
-                    .onSubmit(addDraft)
-                Button("Add") { addDraft() }
-                    .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            }
-        }
-        .padding(12)
-        .frame(minWidth: 440, minHeight: 320)
-        .background(tokens.surface)
-        .task { await model.start() }
+    /// The panel's taste numbers, in one place. **PROVISIONAL** — chosen
+    /// against the real surfaces on the walk, in both voices.
+    private enum Metrics {
+        /// The add area never shrinks below this, however many comments there
+        /// are: a writing box you cannot write two lines in is the complaint
+        /// this unit answers.
+        static let addFloor: CGFloat = 132
+        /// A comment's own area, at one line.
+        static let rowMinHeight: CGFloat = 19
+        static let rowAir: CGFloat = 7
+        static let inset: CGFloat = 12
+        static let deletedListMaxHeight: CGFloat = 132
     }
 
-    private func addDraft() {
-        let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return }
-        draft = ""
-        Task { await model.add(text) }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            header
+            if let status = model.status { statusLine(status) }
+            hairline
+            writingSurface
+            footer
+        }
+        .frame(minWidth: 440, minHeight: 320)
+        .background(tokens.surface)
+        .background(CommentPanelKeyMonitor(onAct: handle))
+        .task {
+            // The panel opens ready to write — the add area is the act it is
+            // usually opened for, and ⎋ (nothing typed) still closes it.
+            focus = .add
+            await model.start()
+        }
+        .onChange(of: focus) { old, _ in
+            // **Focus loss SAVES an in-place edit** (the brief's rule). It
+            // deliberately does NOT file the add draft: saving keeps prose
+            // that already exists, while filing MINTS a comment, and a click
+            // somewhere else is not an act of minting. (QUESTIONS #118(a).)
+            if case .comment(let id)? = old {
+                Task { await model.commitEdit(id) }
+            }
+        }
+        .onDisappear {
+            // The panel can also leave without a focus change — a popover
+            // dismissed by a click outside it. Every dirty row is committed
+            // the same way; a commit that would write nothing writes nothing,
+            // so this is idempotent beside `close()`.
+            let model = model
+            for id in model.dirtyCommentIDs {
+                Task { await model.commitEdit(id) }
+            }
+        }
+    }
+
+    // MARK: Chrome
+
+    private var header: some View {
+        HStack(spacing: 8) {
+            Text(tokens.chromeLabel("Comments"))
+                .font(tokens.heading)
+                .foregroundStyle(tokens.ink)
+                .lineLimit(1)
+            Text("\(model.comments.count)")
+                .font(tokens.small)
+                .foregroundStyle(tokens.faint)
+                .lineLimit(1)
+            Spacer(minLength: 8)
+            Button(tokens.chromeLabel("Close")) { close() }
+                .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
+        }
+        .padding(.horizontal, Metrics.inset)
+        .padding(.top, Metrics.inset)
+        .padding(.bottom, 8)
+    }
+
+    /// The panel's ONE message slot, in the class its door gave it: a refusal
+    /// in the voice's alarm, a receipt in its muted ink.
+    private func statusLine(_ status: RecoveryStatus) -> some View {
+        ChromeNotice(
+            tokens: tokens, text: status.text,
+            ink: status.isRefusal ? tokens.alarm : tokens.muted, lines: 3)
+            .padding(.horizontal, Metrics.inset)
+            .padding(.bottom, 8)
+    }
+
+    private var hairline: some View {
+        Rectangle().fill(tokens.line).frame(height: 1)
+    }
+
+    // MARK: The writing surface
+
+    /// Comments, then the add area filling whatever they leave — ONE scroll,
+    /// so the whole thing reads and behaves like a document rather than a
+    /// list with a field stapled underneath.
+    private var writingSurface: some View {
+        GeometryReader { geo in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(Array(model.comments.enumerated()), id: \.element.id) { pair in
+                            commentRow(pair.element)
+                            hairline
+                        }
+                    }
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
+                        commentsHeight = $0
+                    }
+                    addArea(
+                        height: max(Metrics.addFloor, geo.size.height - commentsHeight))
+                }
+            }
+        }
+    }
+
+    private func addArea(height: CGFloat) -> some View {
+        PanelTextArea(
+            text: $model.addDraft, font: tokens.body, ink: tokens.ink,
+            placeholder: tokens.chromeLabel(CommentsPanelCopy.addPlaceholder),
+            placeholderInk: tokens.faint, minHeight: height)
+            .focused($focus, equals: .add)
+            .padding(.horizontal, Metrics.inset - 5)  // the editor's own 5 pt
+            .padding(.vertical, Metrics.rowAir)
     }
 
     @ViewBuilder
-    private func row(_ comment: BlockComment) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            if editingID == comment.id {
-                TextField("Comment", text: $editDraft, axis: .vertical)
-                    .textFieldStyle(.roundedBorder)
-                    .lineLimit(1...6)
-                HStack {
-                    Button("Save") {
-                        let text = editDraft
-                        editingID = nil
-                        Task { await model.edit(comment.id, text: text) }
-                    }
-                    .disabled(editDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    Button("Cancel") { editingID = nil }
+    private func commentRow(_ comment: BlockComment) -> some View {
+        let dirty = model.isDirty(comment.id)
+        VStack(alignment: .leading, spacing: 1) {
+            HStack(alignment: .top, spacing: 0) {
+                // The voice's own comment mark (R1's idiom slot — "// " in
+                // Terminal, nothing in Study). It is a LABEL beside the area,
+                // never part of the text: the shipped row concatenated it
+                // into the string it rendered, which an editable area cannot
+                // do without writing the idiom into her prose.
+                if !tokens.commentPrefix.isEmpty {
+                    Text(tokens.commentPrefix)
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.commentInk.opacity(0.75))
+                        .padding(.top, PanelTextArea.topInset)
                 }
-                .controlSize(.small)
-            } else {
-                Text(tokens.commentPrefix + comment.text)
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.commentInk)
-                    .textSelection(.enabled)
-                HStack(spacing: 8) {
-                    Text(comment.createdAt.formatted(date: .abbreviated, time: .shortened))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.faint)
-                    Button("Edit") {
-                        editDraft = comment.text
-                        editingID = comment.id
-                    }
-                    Button("Delete", role: .destructive) {
-                        Task { await model.delete(comment.id) }
-                    }
-                }
-                .controlSize(.small)
-                .buttonStyle(.borderless)
+                PanelTextArea(
+                    text: binding(for: comment), font: tokens.body,
+                    ink: tokens.commentInk, placeholder: nil,
+                    placeholderInk: tokens.faint, minHeight: Metrics.rowMinHeight)
+                    .focused($focus, equals: .comment(comment.id))
             }
+            stampLine(comment, dirty: dirty)
         }
-        .padding(.vertical, 3)
+        .padding(.horizontal, Metrics.inset - 5)
+        .padding(.vertical, Metrics.rowAir)
     }
 
-    private func deletedRow(_ comment: BlockComment) -> some View {
-        HStack(spacing: 8) {
-            Text(comment.text)
+    /// The muted line under a comment: when it was written, whether it holds
+    /// unsaved changes, and its doors.
+    private func stampLine(_ comment: BlockComment, dirty: Bool) -> some View {
+        HStack(spacing: 6) {
+            Text(comment.createdAt.formatted(date: .abbreviated, time: .shortened))
                 .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .strikethrough()
-                .lineLimit(2)
-            Spacer()
-            Button(tokens.chromeLabel("Restore")) {
-                Task { await model.restore(comment.id) }
+                .foregroundStyle(tokens.faint)
+                .lineLimit(1)
+            if dirty {
+                Text(tokens.chromeLabel(CommentsPanelCopy.unsavedMark))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+                    .lineLimit(1)
             }
-            .controlSize(.small)
+            Spacer(minLength: 8)
+            if dirty {
+                Button(tokens.chromeLabel("Save")) {
+                    Task { await model.commitEdit(comment.id) }
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                Button(tokens.chromeLabel("Revert")) { model.revertEdit(comment.id) }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+            }
+            Button(tokens.chromeLabel("Delete")) {
+                Task { await model.delete(comment.id) }
+            }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
         }
-        .padding(.vertical, 2)
+        .padding(.leading, 5)
+    }
+
+    // MARK: The foot — the keys, the deleted fold, the add door
+
+    private var footer: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if deletedShown && !model.deleted.isEmpty {
+                hairline
+                deletedList
+            }
+            hairline
+            HStack(spacing: 10) {
+                Text(tokens.chromeLabel(CommentsPanelCopy.keysHint))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                Spacer(minLength: 8)
+                if !model.deleted.isEmpty {
+                    Button(tokens.chromeLabel(
+                        "\(deletedShown ? "▾" : "▸") deleted (\(model.deleted.count))")) {
+                        deletedShown.toggle()
+                    }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                }
+                Button(tokens.chromeLabel("Add")) { Task { await model.fileAddDraft() } }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
+                    .disabled(!model.isAddDraftFilable)
+            }
+            .padding(.horizontal, Metrics.inset)
+            .padding(.vertical, 8)
+        }
+    }
+
+    /// Deleted comments stay VISIBLE and RESURRECTABLE (the never-skimpy
+    /// rule, her 2026-07-17 word) — and they live at the foot, outside the
+    /// writing surface, so the add area's space is never theirs.
+    private var deletedList: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(model.deleted, id: \.id) { comment in
+                    HStack(alignment: .top, spacing: 8) {
+                        Text(comment.text)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .strikethrough()
+                            .lineLimit(3)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 8)
+                        Button(tokens.chromeLabel("Restore")) {
+                            Task { await model.restore(comment.id) }
+                        }
+                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .padding(.horizontal, Metrics.inset)
+            .padding(.vertical, 4)
+        }
+        .frame(maxHeight: Metrics.deletedListMaxHeight)
+    }
+
+    // MARK: Doors
+
+    private func binding(for comment: BlockComment) -> Binding<String> {
+        Binding(
+            get: { model.draft(for: comment.id) },
+            set: { model.setDraft($0, for: comment.id) })
+    }
+
+    /// ⌘⏎ and ⎋, routed by what is focused. Returns whether the panel handled
+    /// the key — an unhandled ⎋ falls through to the host's own close.
+    private func handle(_ act: CommentPanelKeys.Act) -> Bool {
+        switch act {
+        case .commit:
+            switch focus {
+            case .add:
+                Task { await model.fileAddDraft() }
+                return true
+            case .comment(let id):
+                Task { await model.commitEdit(id) }
+                return true
+            case nil:
+                return false
+            }
+        case .escape:
+            switch CommentComposition.escape(writing: model.writing(focus)) {
+            case .clearDraft:
+                model.clearAddDraft()
+                return true
+            case .revert(let id):
+                model.revertEdit(id)
+                return true
+            case .close:
+                // Nothing is being written: let the sheet or the popover
+                // close itself the way every other one does.
+                return false
+            }
+        }
+    }
+
+    private func close() {
+        let model = model
+        for id in model.dirtyCommentIDs {
+            Task { await model.commitEdit(id) }
+        }
+        dismiss()
+    }
+}
+
+// MARK: - The panel's one writing control
+
+/// **A VOICED, SELF-SIZING TEXT AREA** — the only control in the panel, used
+/// for every comment and for the add draft, so "the whole thing is the text
+/// editor" is true by construction rather than by resemblance.
+///
+/// It grows with its text and never scrolls on its own: the PANEL scrolls.
+/// That is what makes a click anywhere in the add area land the caret (the
+/// area really is that big) and a growing draft push the page rather than
+/// scroll inside a box.
+private struct PanelTextArea: View {
+    @Binding var text: String
+    let font: Font
+    let ink: Color
+    var placeholder: String?
+    var placeholderInk: Color
+    /// The floor — a row's one line, or, for the add area, every point the
+    /// comments left.
+    var minHeight: CGFloat
+
+    @State private var measured: CGFloat = 0
+
+    /// SwiftUI's `TextEditor` lays its text out inside these insets on macOS
+    /// (the same numbers `QuickNoteView`'s placeholder overlay has used since
+    /// it shipped).
+    static let topInset: CGFloat = 8
+    static let leadingInset: CGFloat = 5
+    /// The ruler measures a little NARROWER than the editor's own text area,
+    /// deliberately: a line that would wrap at the very edge wraps in the
+    /// ruler FIRST, so the measurement errs tall. Over-measuring costs a
+    /// line of air; under-measuring would clip her last line, because the
+    /// editor does not scroll.
+    static let rulerSlack: CGFloat = 4
+
+    var body: some View {
+        TextEditor(text: $text)
+            .font(font)
+            .foregroundStyle(ink)
+            .scrollContentBackground(.hidden)
+            .scrollDisabled(true)
+            .frame(height: max(minHeight, measured))
+            .background(alignment: .topLeading) { ruler }
+            .overlay(alignment: .topLeading) { placeholderLabel }
+    }
+
+    /// The same string, in the same font, free in height — `fixedSize`
+    /// vertical means it takes its IDEAL height at the proposed width however
+    /// tall the frame around it is, which is exactly the number the editor
+    /// needs and cannot report itself.
+    private var ruler: some View {
+        Text(rulerString)
+            .font(font)
+            .padding(.horizontal, Self.leadingInset + Self.rulerSlack)
+            .padding(.vertical, Self.topInset)
+            .fixedSize(horizontal: false, vertical: true)
+            .opacity(0)
+            .allowsHitTesting(false)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { measured = $0 }
+    }
+
+    /// A trailing newline lays out as nothing at all, so ⏎ at the end of a
+    /// draft would not grow the box until the next character arrived. The
+    /// ruler gives that line something to be.
+    private var rulerString: String {
+        if text.isEmpty { return " " }
+        return text.hasSuffix("\n") ? text + " " : text
+    }
+
+    @ViewBuilder
+    private var placeholderLabel: some View {
+        if let placeholder, text.isEmpty {
+            Text(placeholder)
+                .font(font)
+                .foregroundStyle(placeholderInk)
+                .padding(.top, Self.topInset)
+                .padding(.leading, Self.leadingInset)
+                .allowsHitTesting(false)
+        }
     }
 }

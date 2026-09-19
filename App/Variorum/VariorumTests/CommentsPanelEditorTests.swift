@@ -18,6 +18,7 @@
 //  — so the view's job is reduced to handing the brain what is focused.
 //
 
+import AppKit
 import Foundation
 import Testing
 import VariorumCore
@@ -76,6 +77,41 @@ struct CommentCompositionTests {
     }
 }
 
+// MARK: - The keys
+
+@Suite("The comments panel's two keys (13u3 UNIT A2)")
+struct CommentPanelKeysTests {
+    @Test func onlyCommandReturnAndBareEscapeAreClaimed() {
+        #expect(CommentPanelKeys.act(
+            keyCode: CommentPanelKeys.returnKeyCode, modifiers: .command) == .commit)
+        #expect(CommentPanelKeys.act(
+            keyCode: CommentPanelKeys.enterKeyCode, modifiers: .command) == .commit,
+            "the keypad's Enter behaves like the laptop's")
+        #expect(CommentPanelKeys.act(
+            keyCode: CommentPanelKeys.escapeKeyCode, modifiers: []) == .escape)
+    }
+
+    @Test func everyOtherKeyReachesTheTextUntouched() {
+        // ⏎ and ⇧⏎ are the TEXT's — a comment holds paragraphs.
+        #expect(CommentPanelKeys.act(
+            keyCode: CommentPanelKeys.returnKeyCode, modifiers: []) == nil)
+        #expect(CommentPanelKeys.act(
+            keyCode: CommentPanelKeys.returnKeyCode, modifiers: .shift) == nil)
+        // A chord the panel does not own must not be swallowed by a
+        // near-miss (⌥⌘⏎, ⌃⏎, ⌘⎋).
+        #expect(CommentPanelKeys.act(
+            keyCode: CommentPanelKeys.returnKeyCode,
+            modifiers: [.command, .option]) == nil)
+        #expect(CommentPanelKeys.act(
+            keyCode: CommentPanelKeys.returnKeyCode, modifiers: .control) == nil)
+        #expect(CommentPanelKeys.act(
+            keyCode: CommentPanelKeys.escapeKeyCode, modifiers: .command) == nil)
+        // An ordinary letter (keyCode 0 = "a") is never the panel's.
+        #expect(CommentPanelKeys.act(keyCode: 0, modifiers: []) == nil)
+        #expect(CommentPanelKeys.act(keyCode: 0, modifiers: .command) == nil)
+    }
+}
+
 // MARK: - The model, through the real operations
 
 @MainActor
@@ -108,6 +144,8 @@ struct CommentsPanelModelEditorTests {
             try await adopt(panel, h)
             #expect(panel.comments.map(\.text) == ["the polite ending belongs in ch. III"])
             #expect(panel.addDraft == "", "a filed draft leaves the add area empty")
+            #expect(panel.status == nil,
+                    "a filed comment says nothing — it is right there on the page")
         }
     }
 
@@ -127,7 +165,13 @@ struct CommentsPanelModelEditorTests {
             #expect(!panel.isDirty(id), "a freshly adopted comment is clean")
             panel.setDraft("  quieter ending \n", for: id)
             #expect(panel.isDirty(id))
+            #expect(panel.dirtyCommentIDs == [id])
             await panel.commitEdit(id)
+            // The mark goes out the moment the write LANDS, not when the
+            // observation echoes: a row that says "unsaved" after a
+            // successful save says the opposite of what just happened.
+            #expect(!panel.isDirty(id))
+            #expect(panel.dirtyCommentIDs.isEmpty)
             try await adopt(panel, h)
             #expect(panel.comments.map(\.text) == ["quieter ending"])
             #expect(!panel.isDirty(id), "the saved draft stops claiming unsaved changes")
@@ -236,6 +280,30 @@ struct CommentsPanelModelEditorTests {
             await panel.delete(first)
             try await adopt(panel, h)
             #expect(panel.drafts[first] == nil)
+        }
+    }
+
+    @Test func escapesMeaningIsAFunctionOfFocusDraftsAndTheStore() async throws {
+        // The keyboard ROUTING is the walk's; what each key MEANS is this.
+        try await withEditor(seedBlocks: ["First block."]) { h in
+            let blockID = try h.storeSlots()[0].blockID
+            let panel = CommentsPanelModel(session: h.session, blockID: blockID)
+            await panel.add("as written")
+            try await adopt(panel, h)
+            let id = panel.comments[0].id
+
+            #expect(CommentComposition.escape(writing: panel.writing(nil)) == .close)
+            #expect(CommentComposition.escape(writing: panel.writing(.add)) == .close)
+            panel.addDraft = "half a thought"
+            #expect(CommentComposition.escape(writing: panel.writing(.add)) == .clearDraft)
+
+            #expect(CommentComposition.escape(writing: panel.writing(.comment(id))) == .close)
+            panel.setDraft("second thoughts", for: id)
+            #expect(CommentComposition.escape(writing: panel.writing(.comment(id)))
+                == .revert(id))
+            // A comment that is gone is not something ⎋ can put back.
+            #expect(CommentComposition.escape(writing: panel.writing(.comment("nope")))
+                == .close)
         }
     }
 
