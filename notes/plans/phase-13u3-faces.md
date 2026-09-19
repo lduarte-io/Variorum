@@ -2890,7 +2890,7 @@ line is rewritten in the closing commit.
 | 2 · the DOOR — one `TakeCardMenu` component rendered by the board's live cards (all four fan styles) and by Write's panel, with the registry declaration and the rendered-door oracle | **DONE** — this commit; 5 of the 8 cells green (2 door cells RED on old, the per-surface declaration cell RED on old); 104 neighbour tests in 12 suites green |
 | 3 · the refusal the new door will meet most — `variantIsChosen` — gets words (it falls to `default:` and dumps the raw enum with a UUID in it today) | **DONE** — this commit; RED on old in two cells (the copy table and the model door, the latter printing `Refused: variantIsChosen(id: "00000000-…-000000000002")`) |
 | 4 · the WORDS — the takes lesson's two sentences + the ⋯ sweep of the seeder, held to the door by a pin that reads the row's own title | **DONE** — this commit; the takes-delete lesson + the practice take's own words, and the sweep's OTHER find (the trio lesson named a ⋯ row *"Move out to a pool"* — a name the menu dropped at the Snippets ruling — while a shipped pin asserted that literal string and called it "verbatim"). Tutorial spine 83/13 green |
-| 5 · the walk (dev-store Debug, both voices, both appearances) with captures | PENDING |
+| 5 · the walk (dev-store Debug, both voices, both appearances) with captures | **DONE** — 17 captures, `notes/plans/13u3-screens/uh-00…uh-16`; the LESSON'S OWN EXPERIMENT executed on the board it now names; both voices, both appearances, three of the four fan styles; zero instances at the end, her store never launched |
 | 6 · finals (FULL Mac · tutorial spine · core · iOS build) | PENDING |
 | 7 · close — ledger row 8b flipped + UNIT CLOSED banner + QUESTIONS | PENDING |
 
