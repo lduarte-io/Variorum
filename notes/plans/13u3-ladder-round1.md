@@ -283,3 +283,84 @@ red-on-old, the four production files carrying the R1-3 guards (`EditorViewModel
 `TakesViewModel.swift` · `CanvasViewModel.swift` · `CompareBoardView.swift`) are checked out to
 the PRE-GUARD commit (the R1-2 findings-note commit), the suite run, and the four files restored
 by `git checkout` against the R1-3 fix commit. Pre-revert state committed (the R1-3 commit).
+
+### DISPOSITIONS (the reviewer's final call per finding, under the cross-model flow)
+
+**R1-1 — CONFIRMED (implementer AGREE + three strengthening facts adopted into the record: the
+:3337 arm is the ONLY storage-edit-reachable `refreshDecorations` call site of the ten; the
+sample's frames prove the indicator arm specifically fired; `EditorView.swift`'s re-measure
+observer states the broken rule in the project's own words). Severity stays MAJOR with the
+implementer's calibration RECORDED: the arm is gated on the editing indicator, whose default is
+`off` — she has it on, and the mechanism was met in a real walk, so MAJOR-not-BLOCKER is exactly
+right.** FIXED (commit `13u3 ladder R1-1…`): `storageDidEdit` marks its whole body as the storage-
+edit transaction (`inStorageEditTransaction`); `updateCaretContext`'s indicator arm defers its
+decoration refresh while the flag is up (the settle hop the same edit armed delivers post-layout —
+N14's stated design); the selection-change road keeps its synchronous refresh (caution 1 honored:
+only the `:1279` reach is gated, the settle hop untouched; caution 2 honored: the caret-staleness
+read is left exactly as it was). DEBUG oracle `decorLayoutQueriesInEditTransaction` + 2 pins in
+`EditorDecorTransactionTests`. **Red-on-old, measured through the real delegate pipeline:** with
+the shipped synchronous arm restored in place, the oracle counted **1** (both assertions red —
+the stale-selection caret hop to block 2 fires the arm inside `processEditing`, and its
+in-transaction refresh delivered, confirming the whole mechanism); 2/2 green with the fix;
+ProseGutterTests 15/15 green beside it. *(A measurement note, honestly: the temp restore for this
+red ran between the fix's edit and its commit — pin-first order, same as R1-2's core pin — so no
+committed-state revert was needed; the log lines are in the session record.)*
+
+**R1-2 — CONFIRMED (implementer AGREE; the existing seal pin proven blind to the order by its own
+fixture). FIXED in two halves (commit `13u3 ladder R1-2…`):** the op's guards now outrank the
+no-op short-circuit (`liveVariant` + `ensurePlacementUnlocked` first — `setTakeLabel`'s letter,
+restored), and the ADJACENT OBSERVATION the implementer offered is ADOPTED as the face half: the
+op returns whether it WROTE (`@discardableResult -> Bool`) and `BlockHistoryModel.rename` speaks
+its receipt from that answer — chosen over comparing the pane's row value, which a stale row
+would get wrong (the first draft did exactly that and the shipped
+`renamingASavepointSetsAndClearsItsNameAndSaysSo` cell caught it before it ever ran: its second
+rename compares against a deliberately stale `CommitPoint` value). **Red-on-old:** core
+`theGuardsOutrankTheNoOpShortCircuit` — 2 issues on the pre-fix tree ("an error was expected but
+none was thrown", both arms); Mac `aRenameThatWritesNothingSpeaksNoReceipt` — 2 issues under the
+announced behavioural revert (`.receipt("Name cleared — the saved moment itself is untouched.")`
+about a name that never existed; `.receipt("Saved moment named “kept”.")` re-spoken for a no-op),
+restored and re-verified 5/5. Core `SavepointNameTests` 12/12. **Recorded residual, not fixed
+(scope):** the PANE's rename door still OPENS its field under a sealed note and refuses at ⏎ —
+the same P-2 grain R1-3 closes at the ⌘S doors; with the op fix the refusal is now correct and
+consistent on both the changed and unchanged roads, and gating the pane door's OFFER under seal
+is a face call left for the round-2 reviewer or a row.
+
+**R1-3 — CONFIRMED; THE SCOPING DISPUTE RULED A WIDEN (the implementer is right, and my
+"the siblings are clean" sentence was wrong — verified in code myself before ruling:
+`TakesViewModel.focusedPane` IS the raw `authority.livePane` (`:101`), `focus` carries no seal
+test, nothing blurs on seal (`toggleSeal` at `:1650` doesn't), and Canvas (`focus` at `:670`) and
+Compare (`focus` at `:372`) read the same raw member with their seal facts at hand.** FIXED AT
+ALL FOUR DOORS (commit `13u3 ladder R1-3…`): Write guards `header?.locked` · Takes/Lenses guard
+`projection.sealed` · Canvas guards `sealed` · Compare guards the PANE'S OWN post's face
+(`face(for: pane.context)?.sealed` — Compare crosses posts, so the board-level fact would be the
+wrong one), each speaking the exact `lockedPost` sentence the post-⏎ road speaks. **Red-on-old,
+measured under the announced behavioural revert #2 (the four files checked out to the pre-guard
+commit):** all four `SavepointSealedDoorTests` cells RED — **9 issues, each showing
+`savepointAsk → SavepointNameAsk(…)` opening under a seal on every door** — so the widen is not
+merely traced but measured on all four; restored and re-verified 10/10 across the three door
+suites.
+
+**R1-4 — CONFIRMED (implementer AGREE). FIXED (commit `13u3 ladder R1-4…`):** `variantNotFound`
+("That take isn't there any more — … The block's History lists deleted takes, with Put back.")
+and `commitNotFound` ("That saved moment isn't there any more.") worded in `OpsRefusalCopy`.
+**Red-on-old, pin-first:** `theRenameDoorsRaceRefusalsSpeakInsteadOfDumpingTheEnum` — 6 issues on
+the pre-fix copy, both raw dumps verbatim. No shipped pin asserted the old dumps (grepped).
+TakeCardDoorTests 10/10 green.
+
+**R1-5 — CONFIRMED (implementer AGREE; its trace adds the `ops.merge` store-read line numbers).
+FIXED, doc-only (commit `13u3 ladder R1-5 + R1-6…`):** the `displayed:` parameter now states
+exactly what it binds (the carry-all road), what protects the plain road (the drift check + the
+pinned resolver equivalence, modulo the recorded sub-ms window), and warns the future reader off
+weakening the check. The closed UNIT G record is left as history; this comment is the living
+truth at the code.
+
+**R1-6 — CONFIRMED AS SPECULATIVE (both sides agree the cause is unproven); the hardening BUILT
+as a decision, no red claimed (the finding's own framing):** adopting or un-adopting the chip
+bumps the capture box's counted `focusRequest` on both hosts (the pad grew the `@State` its
+literal `1` was hiding), and `takeFocus()` gains the already-first-responder guard the
+implementer's caution asked for (no resign/become cycle when the box never lost keys). Toggling
+OFF also returns the caret — the behaviour choice the caution named, taken deliberately: she is
+returning to the words either way. Chip/capture suites green.
+
+**Also adopted from the responses:** R1-1's three strengthening facts and severity calibration
+(above); R1-2's adjacent observation (above). Nothing in the responses was dismissed.
