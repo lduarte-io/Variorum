@@ -402,3 +402,53 @@ tree and the suites run RED, then restored by `git checkout`: (a) the indicator 
 unreachable in-transaction (the hollow world S-1 exists to catch — oracle 0 AND witness 0);
 (b) Compare's guard swapped to the REJECTED board-level `projection.anchor.sealed` (S-2's two
 directions). Pre-variant state committed (the sanity-pass fix commit, made after the green run).
+
+### THE SANITY PASS'S FOUR ITEMS — DISPOSITIONS (the reviewer's final word; fix commit: the S-1…S-4 commit above)
+
+- **S-1 — ACCEPTED, BUILT (pin strength):** `deferredIndicatorRefreshes`, a DEBUG witness counted
+  at the deferral branch itself; cell 1 asserts `== 1` (the arm FIRED in-transaction and was
+  deferred) beside the oracle's `== 0`; cell 2 asserts `== 0` (no transaction, nothing deferred).
+  **Shown to discriminate (announced measurement #3, variant (a) — the arm gated unreachable
+  in-transaction, the hollow world):** witness → 0, RED, while the oracle line stayed green at 0 —
+  exactly the world the absence alone could not see. The by-hand red-on-old now has a permanent
+  home, and a Tahoe point-release ordering change turns this pin red-and-loud.
+- **S-2 — ACCEPTED, BUILT (pin strength):** the Compare discriminating pair —
+  `compareDoorRefusesASealedPeersPane` (unsealed anchor · sealed peer · peer pane live → refuses)
+  and `compareDoorAllowsAnUnsealedPeerUnderASealedAnchor` (sealed anchor · unsealed peer → the
+  field OPENS; the worse direction, a commit she is entitled to make). **Shown to discriminate
+  (variant (b) — the guard swapped to the REJECTED `projection.anchor.sealed`):** BOTH cells RED,
+  5 issues total — the sealed-peer cell's field opened (wrongly-allow) and the sealed-anchor
+  cell's ask stayed nil (wrongly-refuse). The judgment the disposition made is now held per
+  direction.
+- **S-3 — ACCEPTED, THE DEPTH COUNTER TAKEN (the can't-get-it-wrong form, plus the sentence):**
+  `inStorageEditTransaction` is now derived from `storageEditDepth` with one named writer pair
+  (`enterStorageEditTransaction`/`exit…`), and the property's doc names the single-entry premise
+  and what a re-entrant inner frame would have done to a Bool. Behaviour-identical today, by the
+  sanity pass's own verification that no re-entrant path exists.
+- **S-4 — ACCEPTED AS A STATED CHOICE, RECORDED AT THE GUARD (no behaviour change):** Compare's
+  nil-face FAIL-OPEN is deliberate — a door never refuses on ignorance, the filer still refuses
+  if the post really is sealed, and the three sibling doors have no unknown state — said in the
+  guard's own comment where the next reader will look.
+
+Both wrong variants were applied on the committed tree per the announcement, measured, and
+restored by `git checkout`; the restored set re-verified **44/7 green** across the seven affected
+suites.
+
+### ROUND-1 FINALS, RESTATED AFTER THE SANITY-PASS FIXES (round 2's baseline)
+
+- core `swift test` — **1604 / 174 green** (unchanged by this piece: S-1…S-4 are App-side only).
+- the FULL Mac suite — **Test run with 2899 tests in 484 suites failed after 762.447 seconds with
+  3 issues**: `theReadClickLandsInIndexAtThatBlock` (2 issues — row 58's recorded environment
+  red, the single tolerated one) and `openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded`
+  (`abs(top) → 3424.0` — row 49's recorded load-flake arm at its standing number, **adjudicated by
+  the paired protocol: 1 red / 2 green over three ISOLATED runs**, synthetic fixture, unreachable
+  by this piece's diff). Baseline 2897/484 + the 2 Compare cells = 2899/484, exactly.
+- tutorial spine green in-run · iOS build green (prior leg; no shared/mobile files touched since)
+  · mobile untouched by this piece (no `Shared/`, no `Sources/`) — its owed run stands at
+  **626/106 w/4 known** from the fix pass's finals.
+- Marker **8**; zero `Sync/`, zero `Persistence/`, zero schema, zero migrations.
+
+**ROUND 1 IS CLOSED REVIEWER-SIDE.** The round-2 anchor is this file whole: the six findings and
+their dispositions, the four sanity items and theirs, R1-2's pane-door residual (the offer under
+seal — a face call, deliberately not taken), R1-6 a decision not a pin, and the two standing reds
+above with their adjudications.
