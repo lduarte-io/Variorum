@@ -204,8 +204,10 @@ nonisolated enum BlockDecor {
 
     /// Below this a count badge cannot be read at all, so nothing is drawn —
     /// the block keeps every other door to its comments (the block menu,
-    /// ⌘⇧', the panel) and the page keeps its measure.
-    static let commentBadgeMinWidth: CGFloat = 16
+    /// ⌘⇧', the panel) and the page keeps its measure. Chosen ON THE WALK:
+    /// "#1" at 10 pt semibold inside `CommentCardView`'s badge insets needs
+    /// ~19 pt, and a badge that shows only "#" is not a count.
+    static let commentBadgeMinWidth: CGFloat = 19
 
     /// The air between two stacked decorations in the gutter — the glyph and
     /// the comment face beneath it (R-13u3-3's stack).
@@ -223,11 +225,14 @@ nonisolated enum BlockDecor {
     /// The minimum air between two stacked margin CARDS, so two commented
     /// blocks' cards never abut (her *"the comments still also aren't spaced
     /// well"*; memo §2 B's rhythm).
-    static let cardRhythmAir: CGFloat = 8
+    static let cardRhythmAir: CGFloat = 6
 
     /// Below this a clamped card is not a card — the block shows its badge
-    /// instead.
-    static let cardMinHeight: CGFloat = 26
+    /// instead. One 11-pt line inside `CommentCardView`'s own insets is
+    /// ~19 pt, so this is the smallest card that still says a WORD rather
+    /// than a count; the walk chose it against two adjacent commented
+    /// blocks (PROVISIONAL, a taste number).
+    static let cardMinHeight: CGFloat = 19
 
     /// **THE LEADING GLYPH — ONE GRAPHEME** (her ruling R-13u3-4, the memo
     /// §3 edge 2). Whatever is stored (a multi-glyph answer typed before the
@@ -1050,7 +1055,10 @@ final class CommentCardView: NSView {
             label.frame = bounds.insetBy(dx: 4, dy: 1).offsetBy(dx: 5, dy: 0)
                 .intersection(bounds.insetBy(dx: 1, dy: 1))
         } else {
-            label.frame = bounds.insetBy(dx: 6, dy: 1)
+            // 13u3 UNIT A1: a BADGE may be narrower than the shipped 32 (it
+            // yields to the gutter rather than standing on prose), so its
+            // inset yields with it — a "#1" squeezed to "#" is not a count.
+            label.frame = bounds.insetBy(dx: min(6, max(2, (bounds.width - 16) / 2)), dy: 1)
         }
     }
 

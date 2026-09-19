@@ -452,17 +452,19 @@ struct ProseGutterTests {
         // A contained surface's 8 pt is no gutter at all: no face, and the
         // text keeps every point of its measure.
         #expect(BlockDecor.commentBadgeRect(textLeft: 8, top: 0) == nil)
+        #expect(BlockDecor.commentBadgeRect(textLeft: 24, top: 0) == nil,
+                "below the width that can show a count, no badge")
     }
 
     /// **TWO COMMENTED BLOCKS' CARDS NEVER ABUT** (memo §2 B's rhythm; her
     /// *"the comments still also aren't spaced well"*).
     @Test func twoCommentedBlocksCardsNeverAbut() throws {
-        // Adjacent short blocks, 46 pt apart: the ideal card (30 + 24 = 54)
+        // Adjacent short blocks, 40 pt apart: the ideal card (30 + 24 = 54)
         // would reach into its neighbour's, so it is clamped.
         let first = try #require(BlockDecor.leftCardRect(
-            textLeft: 300, top: 0, blockHeight: 30, roomBelow: 46))
+            textLeft: 300, top: 0, blockHeight: 30, roomBelow: 40))
         let second = try #require(BlockDecor.leftCardRect(
-            textLeft: 300, top: 46, blockHeight: 30, roomBelow: nil))
+            textLeft: 300, top: 40, blockHeight: 30, roomBelow: nil))
         #expect(first.maxY <= second.minY - BlockDecor.cardRhythmAir,
                 "the rhythm's air: \(first) vs \(second)")
         // Far apart, nothing is clamped — the shipped card, byte for byte.
@@ -473,6 +475,10 @@ struct ProseGutterTests {
         // its badge instead (the render's own fallback).
         #expect(BlockDecor.leftCardRect(
             textLeft: 300, top: 0, blockHeight: 30, roomBelow: 20) == nil)
+        // …and 27 pt of room — two adjacent one-line commented blocks with a
+        // glyph above the first face — still IS a card (the walk's own case).
+        #expect(BlockDecor.leftCardRect(
+            textLeft: 300, top: 0, blockHeight: 30, roomBelow: 27)?.height == 21)
     }
 
     /// **NOTHING IN THE GUTTER EVER COVERS PROSE** — mounted, at a wide
