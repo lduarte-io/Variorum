@@ -1883,3 +1883,50 @@ bundle (#121). Zero schema, zero migrations, zero `Sync/`, marker 8. Suites and 
 4. **Canvas's missing focused-block wire** → a KnownIssues row, owner **17e** (a door acting on
    the wrong target — the correctness-singles class). **The quiet-receipt cost on Canvas/Compare**
    → an evidence line appended to QUESTIONS **#106** (her open call; no change built).
+
+---
+
+## UNIT E BRIEF — THE #80(e) TWO FACES (item 15; self-contained; read in this order)
+
+**Read first, in full:** (1) this file's Status banner · roster item 5 · GOVERNANCE + the
+constitution (P-6: the tutorial is the executable spec — you are EDITING it deliberately, with
+its pins, never breaking a step) · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the walker facts.
+(2) The master plan's `### 13u` **item (15)** — her instruction verbatim ((a) the restore
+confirm NAMES what it takes — the set-aside originals and their never-traveled takes — and may
+point at PROMOTE as the zero-loss alternative; (b) the tutorial's versions-copy-placed-only
+lesson: *"you're only saving the placed notes - not the history that rides with it"*; copies
+never carry commits — one lesson covers both). (3) AppSpec §9's `saveNoteVersion` /
+`restoreNoteVersion` / `promoteNoteVersion` (the restore's Delete Now road and the exact-stamp
+revive — what the confirm must speak truthfully about) and KnownIssues row "A note's saved
+VERSIONS ride a BLOCK-level anchor" (context only — NOT yours to fix). (4) The code: the
+Versions face (Note ▸ Versions — the restore confirm's home) · `Features/Tutorial/TutorialSeeder.swift`
++ `TutorialWalkTests` (the lesson's home and its spine).
+
+**Scope (ONE acceptance unit — the ratification's two faces; ops byte-untouched):**
+1. **(a) The restore confirm names what it takes:** at confirm time, a bounded read counts the
+   outgoing blocks' set-aside originals and never-traveled takes the Delete Now road will take;
+   the confirm speaks them concretely (numbers, not categories, where cheap) and offers PROMOTE
+   as the zero-loss road (promote mints the past as a first-class note; deletes nothing).
+   Wording through the classed doors' grammar; a confirm is a refusal-class surface (always
+   shows). If the counts' read cannot stay bounded (∝ the note, never the corpus), STOP and
+   report the arithmetic.
+2. **(b) The tutorial lesson:** the versions chapter gains the copies-are-placed-only lesson
+   (versions AND copies: no history, no commits ride a copy — one lesson, both rules, her words
+   honoured). Pins in the spine (`TutorialWalkTests`) hold the words to the acts (the R3-2
+   lesson-pin precedent: pin the prose AND the act's shape). **The re-seed consequence is the
+   CLOSEOUT's:** a lesson edit stales her REAL store's seeded field guide — record the delta in
+   your UNIT E RECORD for the closeout's re-seed list; touch nothing real-store yourself.
+3. **Fences:** zero ops changes · zero schema · zero `Sync/` · the Versions semantics untouched
+   (the confirm DESCRIBES; it never changes what restore does).
+
+**Pins:** the confirm's counts against a staged note (versions with stranded ancestors — the
+#80(e) shape); the lesson pins; existing Versions pins ride unmodified. Red-on-old only where
+defect-shaped (a missing sentence is a missing face, not a bug — no manufactured reds; but if
+the confirm today says something FALSE, that cell is defect-shaped and gets the revert).
+
+**End verification:** FULL Mac suite (row 58 tolerated) · tutorial spine green WITH the new
+lesson's pins · iOS build green · YOUR walk with captures: stage a note with versions whose
+restore strands ancestors, read the confirm in the flow, take PROMOTE once and RESTORE once;
+walk the new lesson in the tutorial; both voices, both appearances. Record: **UNIT E RECORD**,
+LIVE STATUS from the first commit, UNIT CLOSED banner, ledger row 6 flipped in the same commit.
+
