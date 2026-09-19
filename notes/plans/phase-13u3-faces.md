@@ -3202,3 +3202,13 @@ mechanism in the chip's focus handling, it is real; otherwise environment); (b) 
 ADOPTED title equals its first words repeats them in the preview line — the carries-on dedupe
 covers the derived lead, and no ruling covers explicit-title-equals-opening; logged beside #119
 for her taste pass, not a defect.
+
+## THE MORNING CHECK-IN (2026-09-19 — author present; one ruling)
+
+- **R-13u3-7 — #122(a) RULED "AS BUILT".** Her word at the check-in (*"ask me #122a as a
+  question, but I think it sounds like it's fine"* → she selected "As built (Recommended)"):
+  the restore confirm names the REAL cost (savepoints · deleted takes · deleted comments, in
+  numbers) and keeps computing the set-aside-originals count as a TRIPWIRE that speaks only if
+  a future change ever makes that loss real. The #80(e) analysis is corrected by E's
+  measurement; her original keep-as-built ruling stands on the corrected ground. #122(b)–(f)
+  remain PROVISIONAL on her ordinary ratify list.
