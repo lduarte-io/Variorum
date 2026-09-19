@@ -985,18 +985,6 @@ struct CompareBoardView: View {
         // Row 16: ONE baseline across the toolbar's controls; the board's
         // one inset (the chips sat at 16 while the cards sat at 12).
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            // 13u3 UNIT D (item 14): the commit door's optional name hangs
-            // at the header's leading edge — ⌘S is this board's only commit
-            // door, so the field needs a home with a place on screen. A
-            // zero-size anchor, so nothing in the header moves for it.
-            Color.clear
-                .frame(width: 0, height: 0)
-                .savepointNameAsk(
-                    Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
-                    tokens: tokens, arrowEdge: .bottom
-                ) { _, name in
-                    Task { await model.fileSavepoint(named: name) }
-                }
             VoicedChip(
                 tokens: tokens,
                 text: model.followAnchorOrder ? "follow this note's order: on" : "follow this note's order: off",
@@ -1046,6 +1034,26 @@ struct CompareBoardView: View {
         .controlSize(.small)
         .padding(.horizontal, Self.boardInset)
         .padding(.vertical, 8)
+        // 13u3 UNIT D (item 14): the commit door's optional name hangs at
+        // the header's leading edge — ⌘S is this board's only commit door,
+        // so the field needs a home with a place on screen.
+        //
+        // **AN OVERLAY, NOT A CHILD — and the suite is why.** The first
+        // version put a zero-SIZE `Color.clear` at the head of this HStack,
+        // and a zero-width child still takes the stack's SPACING: the
+        // toolbar's left edge moved 8 pt and `CompareLensesCorrectionTests`
+        // caught it (the row-16 one-left-edge pin, measured). An overlay
+        // takes no space at all, and anchors in exactly the same corner.
+        .overlay(alignment: .topLeading) {
+            Color.clear
+                .frame(width: 0, height: 0)
+                .savepointNameAsk(
+                    Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
+                    tokens: tokens, arrowEdge: .bottom
+                ) { _, name in
+                    Task { await model.fileSavepoint(named: name) }
+                }
+        }
     }
 
     // MARK: Column headers

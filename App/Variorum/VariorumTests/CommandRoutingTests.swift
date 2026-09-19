@@ -742,6 +742,17 @@ struct MoveAndExecuteTests {
 
             ShellActions(session: session, shell: ShellRouter()).commitTake()
 
+            // 13u3 UNIT D (item 14): ⌘S now SUMMONS the optional name at the
+            // board it reaches, and ⏎ files it. The routed command's job is
+            // unchanged — reach the mounted surface — so this pin drives the
+            // whole two-key road and still asserts the savepoint lands on
+            // the focused take. Updated deliberately: the single-keystroke
+            // form asserted a door that no longer exists.
+            await poll { model.savepointAsk != nil }
+            #expect(model.savepointAsk?.targetID == minted.variant.id,
+                    "the routed ⌘S opened the field on the FOCUSED take")
+            await model.fileSavepoint(named: nil)
+
             await poll {
                 ((try? db.read { db in
                     try Int.fetchOne(

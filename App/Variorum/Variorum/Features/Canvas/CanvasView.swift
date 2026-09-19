@@ -279,18 +279,6 @@ struct CanvasView: View {
     /// bottom line).
     private var topStrip: some View {
         HStack(spacing: 10) {
-            // 13u3 UNIT D (item 14): the commit door's optional name hangs
-            // at the strip's leading edge — this board's only commit door is
-            // ⌘S itself, so the field needs a home with a place on screen.
-            // A zero-size anchor, so nothing in the strip moves for it.
-            Color.clear
-                .frame(width: 0, height: 0)
-                .savepointNameAsk(
-                    Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
-                    tokens: tokens, arrowEdge: .bottom
-                ) { _, name in
-                    Task { await model.fileSavepoint(named: name) }
-                }
             // 13b 4D (N32(b) — S4-8b): the filter NAMES itself a tag
             // filter and its help de-blurs the model — a LABEL filter,
             // never a container switch.
@@ -364,6 +352,22 @@ struct CanvasView: View {
         .padding(.vertical, 8)
         .background(tokens.card)
         .overlay(alignment: .bottom) { Divider().overlay(tokens.line) }
+        // 13u3 UNIT D (item 14): the commit door's optional name hangs at
+        // the strip's leading edge — this board's only commit door is ⌘S
+        // itself, so the field needs a home with a place on screen. An
+        // OVERLAY, never a child: a zero-WIDTH child still takes the
+        // stack's spacing, which moved Compare's toolbar 8 pt and was caught
+        // by its one-left-edge pin (the same mistake, one file over).
+        .overlay(alignment: .topLeading) {
+            Color.clear
+                .frame(width: 0, height: 0)
+                .savepointNameAsk(
+                    Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
+                    tokens: tokens, arrowEdge: .bottom
+                ) { _, name in
+                    Task { await model.fileSavepoint(named: name) }
+                }
+        }
         // 13b 1b (AD-14): outcomes speak through the ONE shell toast.
     }
 
