@@ -463,6 +463,175 @@ struct MergeArrangementTests {
         }
     }
 
+    // MARK: - The OPEN-time read (13u3 UNIT G — the 18f ladder's R3-6)
+
+    /// **R3-6, RED ON `25638746`.** The pair's rendered ids were captured from
+    /// the PROJECTION at open while the drift check compares the STORE — so in
+    /// the sub-delivery window AT OPEN (a re-point already landed in the
+    /// store, the surface not yet caught up) the first ⏎ refreshed and said
+    /// *"The takes changed while the sheet was open"* when nothing had changed
+    /// while it was open: the store was ahead when it opened. Honest — a
+    /// refresh, never a wrong join — and a one-truth cleanliness point: the
+    /// pair's shown ids are read in the same store read as the fans now, which
+    /// is the raise's own rule applied at open.
+    @Test func openingReadsTheShownPairFromTheStoreSoNothingRefreshesSpuriously() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { h in
+            let slots = try h.storeSlots()
+            let head = try #require(slots[0].variantID)
+            let spare = try h.session.operations.branchVariant(slots[0].blockID, from: head)
+            try h.session.operations.autosave(spare.id, text: "Alpha spare.", charDelta: 0)
+            try h.reload()
+
+            // The store moves BEFORE the sheet opens; the surface does not
+            // adopt it (no reload) — the open-time lag window.
+            try h.session.operations.chooseVariant(slots[0].blockID, variantID: spare.id)
+            #expect(h.model.index.entries[0].variantID == head,
+                    "non-vacuity: the surface still shows the head")
+
+            selectAcross(h, 0, 1)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            let opened = try #require(h.model.mergeCeremony)
+            #expect(opened.firstRenderedID == spare.id,
+                    "the sheet marks the STORE's shown take (on old: the projection's head)")
+
+            // Nothing changes while it is open — so one press lands it.
+            await h.model.confirmMergeCeremony()
+            #expect(h.model.mergeCeremony == nil,
+                    "one press, landed — no spurious refresh")
+            #expect(h.model.statusMessage?.contains("changed while the sheet was open") != true,
+                    "…and nothing claimed a change: \(h.model.statusMessage ?? "nil")")
+            let landed = try h.storeSlots()
+            #expect(landed.count == 1)
+            let merged = try fan(h, landed[0].blockID)
+            #expect(merged.first { $0.id == landed[0].variantID }?.workingText
+                        == "Alpha spare. Beta two.",
+                    "the pair the sheet marked is the pair that joined")
+        }
+    }
+
+    // MARK: - The RUN arm's drift check (13u3 UNIT G — the 18f ladder's R3-5)
+
+    /// **R3-5's own pin — RED ON `25638746`.** R2-2 gave the PAIR's preset
+    /// roads a drift check and the dispatcher fenced it to a pair
+    /// (`if !state.isRun`), on the reading that "a run's sheet marks a list of
+    /// blocks, not a pair". Figure B's amendment had already made that false:
+    /// the run's list SHOWS each block's shown take, over its text. So the
+    /// same promise was open on the rarer surface — `MergeRunBlock` carried
+    /// text and no variant id, and "Only the shown ones" resolves each side
+    /// through `ops.merge`, i.e. from the STORE's chosen at act time. A
+    /// re-point landed under the open sheet and the first ⏎ joined a take the
+    /// list never showed.
+    ///
+    /// On the pre-fix tree this fails at its FIRST assertion: the run is
+    /// already merged to one block.
+    @Test func aRunsShownTakeRePointedUnderTheOpenSheetRefreshesInsteadOfJoiningIt() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two.", "Gamma three."]) { h in
+            try seedRun(h)
+            let slots = try h.storeSlots()
+            let middle = slots[1].blockID
+            let shown = try #require(slots[1].variantID)
+            let spare = try #require(
+                try fan(h, middle).first { $0.id != shown })
+            #expect(spare.workingText == "The spare take.", "non-vacuity: the spare is the other one")
+
+            selectAcross(h, 0, 2)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            let opened = try #require(h.model.mergeCeremony)
+            #expect(opened.isRun, "non-vacuity: this is the RUN sheet")
+            h.model.setMergeArrangement(.onlyTheShownOnes)
+            #expect(opened.runBlocks.map(\.shownText) == ["Alpha one.", "Beta two.", "Gamma three."],
+                    "non-vacuity: the list shows the middle's ORIGINAL take")
+
+            // A sync apply re-points the middle block's chosen take under the
+            // open sheet; the surface adopts it.
+            try h.session.operations.chooseVariant(middle, variantID: spare.id)
+            try h.reload()
+
+            await h.model.confirmMergeCeremony()
+
+            #expect(try h.storeSlots().count == 3,
+                    "nothing joined from a take the list never showed")
+            let refreshed = try #require(h.model.mergeCeremony, "the sheet refreshed")
+            #expect(refreshed.runBlocks.map(\.shownText)
+                        == ["Alpha one.", "The spare take.", "Gamma three."],
+                    "the list re-marks what the blocks show now")
+            #expect(refreshed.arrangement == .onlyTheShownOnes, "the row she chose survives")
+            #expect(refreshed.blockIDs == slots.map(\.blockID), "…and the run's ids")
+            #expect(refreshed.id == opened.id, "…and the sheet's identity")
+            #expect(h.model.statusMessage?.contains("changed while the sheet was open") == true,
+                    "\(h.model.statusMessage ?? "nil")")
+
+            // Confirming the refreshed sheet joins exactly what it shows.
+            await h.model.confirmMergeCeremony()
+            let landed = try h.storeSlots()
+            #expect(landed.map(\.text) == ["Alpha one. The spare take. Gamma three."],
+                    "the chain joined the list's own takes")
+            #expect(try fan(h, landed[0].blockID).count == 1, "only the shown ones came")
+        }
+    }
+
+    /// **The run's OTHER preset, and the `displayed` source** (R3-5's fix
+    /// shape's third clause: *"`runMergeChain` takes the state's shown ids as
+    /// `displayed`"* — R2-2's pattern on `runCarryAllMerge`). Staged in the
+    /// SUB-DELIVERY window, exactly as the pair's raise pin is: the re-point
+    /// is in the STORE and the surface has not adopted it. The first ⏎
+    /// refreshes; the second — with the surface STILL stale — must seed the
+    /// carry-all from what the sheet now marks, not from the projection.
+    ///
+    /// RED ON `25638746` at the first assertion (no check ran at all, so the
+    /// chain landed), and red at the last one if only the check were added
+    /// and `displayed` left reading the projection.
+    @Test func aRunsCarryAllSeedsFromTheSheetsShownTakesNotTheProjection() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two.", "Gamma three."]) { h in
+            try seedRun(h)
+            let slots = try h.storeSlots()
+            let middle = slots[1].blockID
+            let shown = try #require(slots[1].variantID)
+            let spare = try #require(try fan(h, middle).first { $0.id != shown })
+
+            selectAcross(h, 0, 2)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            #expect(h.model.mergeCeremony?.arrangement == .bringEveryTake,
+                    "non-vacuity: the carry-all is the open row")
+
+            // The re-point lands in the STORE; the surface has NOT adopted it.
+            try h.session.operations.chooseVariant(middle, variantID: spare.id)
+            #expect(h.model.index.entries[1].variantID == shown,
+                    "non-vacuity: the surface still shows the original take")
+
+            await h.model.confirmMergeCeremony()
+            #expect(try h.storeSlots().count == 3, "nothing joined from a stale list")
+            let refreshed = try #require(h.model.mergeCeremony, "the sheet refreshed")
+            #expect(refreshed.runBlocks[1].shownText == "The spare take.",
+                    "re-marked from the store's truth")
+
+            // The surface is STILL stale; the confirm must read the sheet.
+            #expect(h.model.index.entries[1].variantID == shown, "…still stale")
+            await h.model.confirmMergeCeremony()
+            let landed = try h.storeSlots()
+            #expect(landed.count == 1, "the run merged")
+            #expect(landed.map(\.text) == ["Alpha one. The spare take. Gamma three."],
+                    "the carry-all seeded from the sheet's shown takes")
+            #expect(try fan(h, landed[0].blockID).count == 2,
+                    "…and the other take came along whole")
+        }
+    }
+
+    /// A run with NO drift confirms on the FIRST ⏎ — the check is a guard,
+    /// never a toll. (Green on both trees by construction; it is here so a
+    /// future over-eager comparison cannot make every run take two presses.)
+    @Test func anUndriftedRunStillConfirmsOnTheFirstPress() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two.", "Gamma three."]) { h in
+            try seedRun(h)
+            selectAcross(h, 0, 2)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            h.model.setMergeArrangement(.onlyTheShownOnes)
+            await h.model.confirmMergeCeremony()
+            #expect(h.model.mergeCeremony == nil, "one press, landed")
+            #expect(try h.storeSlots().count == 1)
+        }
+    }
+
     // MARK: - The sentence
 
     @Test func theSentenceUnderTheMergeRowSaysWhatComesAlong() {

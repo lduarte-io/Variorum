@@ -411,4 +411,57 @@ struct MergeCeremonySheetTests {
                     "the rendered tail stayed in lineage, and the sheet said so: \(h.model.statusMessage ?? "nil")")
         }
     }
+
+    /// **13u3 UNIT G — the 18f ladder's R3-7, RED ON `25638746`.** Under a
+    /// PRESET the pre-pair is invisible (the preview columns mark the shown
+    /// pair), so a drift refresh re-marked the shown pair and left the
+    /// OPEN-time pre-pair standing behind it, surviving only by liveness. Pick
+    /// "Pair by hand…" afterwards and the Pairings section offered the pair
+    /// the sheet no longer marks as shown — and S4-23 ruling 4's promise
+    /// ("⏎ reproduces the instant outcome") no longer held after a refresh.
+    /// The refresh re-seeds the pre-pair from the freshly-read shown pair now,
+    /// exactly as opening does; under `.pairByHand` hers are kept untouched
+    /// (the R2-1 pin above rides on that and is unchanged).
+    @Test func aPresetRefreshReSeedsThePrePairFromWhatTheSheetNowShows() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { h in
+            let slots = try h.storeSlots()
+            let head = try #require(slots[0].variantID)
+            let spare = try h.session.operations.branchVariant(slots[0].blockID, from: head)
+            try h.session.operations.autosave(spare.id, text: "Alpha spare.", charDelta: 0)
+            try h.reload()
+
+            selectAcross(h, 0, 1)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            let opened = try #require(h.model.mergeCeremony)
+            #expect(opened.arrangement == .bringEveryTake, "non-vacuity: a PRESET row")
+            #expect(opened.pairings.map(\.firstVariantID) == [head],
+                    "non-vacuity: the open-time pre-pair is the head")
+
+            // A re-point lands under the open sheet; the surface adopts it.
+            try h.session.operations.chooseVariant(slots[0].blockID, variantID: spare.id)
+            try h.reload()
+            await h.model.confirmMergeCeremony()
+
+            let refreshed = try #require(h.model.mergeCeremony, "the sheet refreshed")
+            #expect(refreshed.firstRenderedID == spare.id, "the shown pair is re-marked")
+            #expect(refreshed.pairings.map(\.firstVariantID) == [spare.id],
+                    "…and the pre-pair moved with it (on old: the stale head)")
+            #expect(refreshed.pairings.map(\.secondVariantID) == [slots[1].variantID],
+                    "the tail side is the shown one too")
+
+            // The promise the re-seed exists for: switching to "Pair by hand…"
+            // offers the pair the sheet MARKS, so ⏎ still reproduces the
+            // instant outcome after a refresh.
+            h.model.setMergeArrangement(.pairByHand)
+            await h.model.confirmMergeCeremony()
+            let landed = try h.storeSlots()
+            #expect(landed.count == 1, "the pair merged")
+            let fan = try await h.database.read { db in
+                try Queries.blockFan(db, blockID: landed[0].blockID)
+                    .filter { $0.deletedAt == nil && $0.status == .active }
+            }
+            #expect(fan.map(\.workingText) == ["Alpha spare. Beta two."],
+                    "the hand road joined the SHOWN pair: \(fan.map(\.workingText))")
+        }
+    }
 }

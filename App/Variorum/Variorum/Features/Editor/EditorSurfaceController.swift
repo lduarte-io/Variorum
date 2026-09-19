@@ -739,8 +739,16 @@ final class EditorSurfaceController {
     /// whole and never receives the other blocks' text, so in a chain the
     /// alternates end up standing alone beside a fully-joined chosen take —
     /// the pair road's own consequence, applied twice ("quick to delete").
+    ///
+    /// `displayed`: the shown take per block. Nil (⌘⇧M and the bulk doors) =
+    /// whatever the surface shows at act time; the SHEET passes the ids its
+    /// list marks (13u3 UNIT G, R3-5 — R2-2's pattern on `runCarryAllMerge`),
+    /// so what she was shown is what joins.
     @discardableResult
-    private func runMergeChain(blockIDs: [String], bringEveryTake: Bool = true) async -> Bool {
+    private func runMergeChain(
+        blockIDs: [String], bringEveryTake: Bool = true,
+        displayed displayedOverride: [String: String?]? = nil
+    ) async -> Bool {
         // By id, at act time (R1-2): the run's leading block, wherever the
         // surface tiles it now.
         guard let first = blockIDs.first, let leadingIndex = entryIndex(of: first) else {
@@ -767,7 +775,7 @@ final class EditorSurfaceController {
             model.showOperationError(error)
             return false
         }
-        let displayed = Dictionary(
+        let displayed = displayedOverride ?? Dictionary(
             uniqueKeysWithValues: model.index.entries
                 .filter { blockIDs.contains($0.blockID) }
                 .map { ($0.blockID, $0.variantID) })
@@ -1339,8 +1347,21 @@ final class EditorSurfaceController {
 
     /// One block of a RUN, as the sheet shows it (18f batch 2): the take that
     /// is currently shown there, and how many takes the block carries.
+    ///
+    /// **`shownVariantID` joined it at 13u3 UNIT G (the 18f ladder's R3-5).**
+    /// The row used to carry TEXT and no id, which is what left the run arm
+    /// with no drift check to run: the list showed a take, both confirm roads
+    /// resolved the shown takes afresh at act time, and a re-point landed
+    /// under the open sheet joined a take the list never showed. With the id
+    /// here the row IS the comparison — read in the same store read as the
+    /// fans, compared against that same read before the chain runs, and handed
+    /// to `runMergeChain` as its `displayed` so what she was shown is what
+    /// joins (R2-2's pattern on the pair, on the rarer surface).
     struct MergeRunBlock: Equatable, Identifiable {
         let blockID: String
+        /// The take the block renders — the STORE's answer, never the
+        /// surface's (the projection only ever lags it).
+        let shownVariantID: String?
         let shownText: String
         let takeCount: Int
         var id: String { blockID }
@@ -1375,16 +1396,23 @@ final class EditorSurfaceController {
         }
         do {
             // The threshold read, shared with the seam keystroke since 13d
-            // batch 2 — ONE fan rule, one place (#34's point 2).
-            let (firstFan, secondFan) = try await liveActiveFans(leadingID, trailingID)
+            // batch 2 — ONE fan rule, one place (#34's point 2) — and, since
+            // 13u3 UNIT G (the 18f ladder's R3-6), the shown pair rides in the
+            // SAME read. The ids used to come from the projection while the
+            // drift check compared the store, so opening inside the
+            // sub-delivery window (a re-point landed, the surface not yet
+            // caught up) made the first ⏎ refresh and say "the takes changed
+            // while the sheet was open" about a change that predated the open.
+            // The raise's rule — the store is the one truth both confirm roads
+            // act on, the projection only lags it — applied at open too.
+            let (firstFan, secondFan, rendered) = try await liveActiveFansAndRendered(
+                leadingID, trailingID)
             guard firstFan.count > 1 || secondFan.count > 1 else {
                 await runInstantMerge(leadingID: leadingID, trailingID: trailingID)
                 return
             }
-            let firstRenderedID = model.index.entries
-                .first { $0.blockID == leadingID }?.variantID
-            let secondRenderedID = model.index.entries
-                .first { $0.blockID == trailingID }?.variantID
+            let firstRenderedID = rendered.first
+            let secondRenderedID = rendered.second
             var state = MergeCeremonyState(
                 firstBlockID: leadingID, secondBlockID: trailingID,
                 blockIDs: [leadingID, trailingID],
@@ -1401,17 +1429,32 @@ final class EditorSurfaceController {
             // exact outcome in a FRESH session — no join memory set; once
             // a session memory exists the pre-pair joins by the MEMORY,
             // not canon (ruling 3's letter).
-            if let head = firstFan.first(where: { $0.id == firstRenderedID }),
-               let tail = secondFan.first(where: { $0.id == secondRenderedID }) {
-                state.pairings = [MergePairingDraft(
-                    firstVariantID: head.id, secondVariantID: tail.id,
-                    join: model.session.mergeJoinMemory
-                        ?? MergeJoin.canon(head: head.workingText, tail: tail.workingText))]
-            }
+            state.pairings = prePairing(
+                firstFan: firstFan, secondFan: secondFan, rendered: rendered)
             mergeCeremony = state
         } catch {
             model.showOperationError(error)
         }
+    }
+
+    /// **The default pre-pairing, in ONE place** (S4-23 ruling 4: ⏎ = today's
+    /// exact outcome when no session join memory is set; a remembered join
+    /// seeds the pre-pair instead — ruling 3's letter). Hoisted at 13u3 UNIT G
+    /// (the 18f ladder's R3-7) because the REFRESH owes the same seed: under a
+    /// preset the pre-pair is invisible, so an open-time pre-pair used to
+    /// survive a shown-pair refresh by liveness alone and "Pair by hand…"
+    /// afterwards offered the pair the sheet no longer marked. Two expressions
+    /// of one rule is exactly what that costs; this is the one expression.
+    private func prePairing(
+        firstFan: [Variant], secondFan: [Variant], rendered: (first: String?, second: String?)
+    ) -> [MergePairingDraft] {
+        guard let head = firstFan.first(where: { $0.id == rendered.first }),
+              let tail = secondFan.first(where: { $0.id == rendered.second })
+        else { return [] }
+        return [MergePairingDraft(
+            firstVariantID: head.id, secondVariantID: tail.id,
+            join: model.session.mergeJoinMemory
+                ?? MergeJoin.canon(head: head.workingText, tail: tail.workingText))]
     }
 
     /// **U-16's two-option door over a RUN of three or more.** No columns,
@@ -1430,43 +1473,63 @@ final class EditorSurfaceController {
             model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return
         }
-        let fans: [String: [Variant]]
+        let read: RunRead
         do {
-            fans = try await model.session.database.read { db in
-                var result: [String: [Variant]] = [:]
-                for id in blockIDs {
-                    result[id] = try Queries.blockFan(db, blockID: id)
-                        .filter { $0.deletedAt == nil && $0.status == .active }
-                }
-                return result
-            }
+            read = try await runFansAndRendered(blockIDs)
         } catch {
             model.showOperationError(error)
             return
         }
-        let others = blockIDs.reduce(0) { $0 + max(0, (fans[$1]?.count ?? 1) - 1) }
-        guard others > 0 else {
+        guard read.otherTakes > 0 else {
             model.refuseFeedback(FannedDefaultsCopy.mergeCeremonyNeedsAFan)
             return
         }
-        // The run's blocks as the sheet SHOWS them (18f batch 2, figure B's
-        // amendment) — display only, read from the same fans the count came
-        // from, with each block's currently-shown take named by the index.
-        let shown = blockIDs.map { id in
-            let fan = fans[id] ?? []
-            let displayed = model.index.entries.first { $0.blockID == id }?.variantID
-            let take = fan.first { $0.id == displayed } ?? fan.first
-            return MergeRunBlock(
-                blockID: id, shownText: take?.workingText ?? "",
-                takeCount: max(1, fan.count))
-        }
         mergeCeremony = MergeCeremonyState(
             firstBlockID: blockIDs[0], secondBlockID: blockIDs[1],
-            blockIDs: blockIDs, otherTakes: others,
-            runBlocks: shown,
+            blockIDs: blockIDs, otherTakes: read.otherTakes,
+            runBlocks: read.blocks,
             arrangement: .bringEveryTake,
             firstRenderedID: nil, secondRenderedID: nil,
             firstTakes: [], secondTakes: [], pairings: [])
+    }
+
+    /// The run sheet's ONE store read — the fans, the count under the
+    /// sentence, and each block's shown take, all from one snapshot (13u3
+    /// UNIT G). Open builds the list from it; the confirm compares against it.
+    /// Two reads for one question is how the open-time lag window was born on
+    /// the pair (R3-6), so the run gets one from the start.
+    private struct RunRead {
+        let blocks: [MergeRunBlock]
+        let otherTakes: Int
+    }
+
+    private func runFansAndRendered(_ blockIDs: [String]) async throws -> RunRead {
+        let (fans, rendered) = try await model.session.database.read {
+            db -> ([String: [Variant]], [String: String]) in
+            var fans: [String: [Variant]] = [:]
+            for id in blockIDs {
+                fans[id] = try Queries.blockFan(db, blockID: id)
+                    .filter { $0.deletedAt == nil && $0.status == .active }
+            }
+            // R3-9's reader: the rendered take of exactly these blocks, at the
+            // cost of these blocks — `renderPost` would have loaded the whole
+            // note's texts to answer it.
+            return (fans, try Queries.renderedVariantIDs(db, blockIDs: blockIDs))
+        }
+        // The run's blocks as the sheet SHOWS them (18f batch 2, figure B's
+        // amendment): the shown take named by the STORE, its text taken from
+        // the same fans the count came from.
+        let blocks = blockIDs.map { id -> MergeRunBlock in
+            let fan = fans[id] ?? []
+            let shownID = rendered[id]
+            let take = fan.first { $0.id == shownID } ?? fan.first
+            return MergeRunBlock(
+                blockID: id, shownVariantID: take?.id, shownText: take?.workingText ?? "",
+                takeCount: max(1, fan.count))
+        }
+        return RunRead(
+            blocks: blocks,
+            otherTakes: blockIDs.reduce(0) { $0 + max(0, (fans[$1]?.count ?? 1) - 1) })
     }
 
     /// Switches the merge row. Nothing is written — the sheet has touched no
@@ -1566,20 +1629,33 @@ final class EditorSurfaceController {
                 model.refuse(FannedDefaultsCopy.blocksChangedMerge)
                 return
             }
-            // A PAIR's preset roads confirm what the sheet SHOWED (18f ladder
-            // round 2, R2-2): the same drift check the pairing branch runs,
-            // widened to the shown pair — a chosen re-point under the open
-            // sheet refreshes it onto what the surface shows now, for her to
-            // review, instead of joining a pair she was never shown. A run has
-            // no shown pair to hold to; its roads read the store afresh.
-            if !state.isRun {
-                guard await refreshMergeSheetIfDrifted(state) == .current else { return }
-            }
+            // The preset roads confirm what the sheet SHOWED (18f ladder round
+            // 2, R2-2): the same drift check the pairing branch runs, widened
+            // to the shown takes — a chosen re-point under the open sheet
+            // refreshes it onto what the blocks show now, for her to review,
+            // instead of joining takes she was never shown.
+            //
+            // **The `if !state.isRun` fence retired at 13u3 UNIT G (R3-5).**
+            // It rested on "a run's sheet marks a list of blocks, not a pair",
+            // which figure B's amendment had already made false — the run's
+            // list shows each block's shown take over its text, and both run
+            // roads resolve those takes at act time. The check runs on every
+            // preset road now; `refreshMergeSheetIfDrifted` dispatches to the
+            // pair's arm or the run's.
+            guard await refreshMergeSheetIfDrifted(state) == .current else { return }
             let bringEvery = state.arrangement == .bringEveryTake
             let landed: Bool
             if state.isRun {
+                // The ids the LIST marks are the run's `displayed` (R2-2's
+                // pattern on `runCarryAllMerge`) — so the carry-all seeds from
+                // what she was shown rather than from a projection that only
+                // ever lags the store.
                 landed = await runMergeChain(
-                    blockIDs: state.blockIDs, bringEveryTake: bringEvery)
+                    blockIDs: state.blockIDs, bringEveryTake: bringEvery,
+                    displayed: Dictionary(
+                        uniqueKeysWithValues: state.runBlocks.map {
+                            ($0.blockID, $0.shownVariantID)
+                        }))
             } else if bringEvery {
                 // Composed from the STATE's rendered ids — the promise the
                 // sheet's "＋ pairs with →" makes, literal by construction (a
@@ -1673,19 +1749,62 @@ final class EditorSurfaceController {
     /// (`Queries.renderPost`, pinned equivalent to `Operations.renderedVariant`),
     /// one truth for both roads.
     private func refreshMergeSheetIfDrifted(_ state: MergeCeremonyState) async -> MergeSheetDrift {
+        state.isRun
+            ? await refreshMergeRunIfDrifted(state)
+            : await refreshMergePairIfDrifted(state)
+    }
+
+    /// **The RUN's drift check** (13u3 UNIT G — the 18f ladder's R3-5; the
+    /// pair arm's promise on the rarer surface). Round 2 fenced the check to a
+    /// pair on the reading that *"a run's sheet marks a list of blocks, not a
+    /// pair"* — true of the sheet it was written against, and false since
+    /// figure B's amendment made the list SHOW each block's shown take over
+    /// its text. Both run roads resolve the shown takes at act time (the plain
+    /// chain through `ops.merge`, i.e. the store's chosen; the carry-all
+    /// through `displayed`), so a re-point landed under the open sheet joined
+    /// a take the list never showed, and `mergedChain`'s receipt then said
+    /// *"the takes you were looking at joined"*.
+    ///
+    /// The comparison is the whole row — shown id, shown TEXT and take count,
+    /// which are the pair arm's own three arms (a take's text, the fan's size,
+    /// which take a block shows) read off the list the sheet draws. One read,
+    /// the same one `openMergeRunChoice` built the list from.
+    private func refreshMergeRunIfDrifted(_ state: MergeCeremonyState) async -> MergeSheetDrift {
         do {
-            let (firstFan, secondFan, rendered) = try await model.session.database.read {
-                [postID = model.postID] db
-                -> ([Variant], [Variant], (first: String?, second: String?)) in
-                let slots = try Queries.renderPost(db, containerID: postID)
-                return (
-                    try Queries.blockFan(db, blockID: state.firstBlockID)
-                        .filter { $0.deletedAt == nil && $0.status == .active },
-                    try Queries.blockFan(db, blockID: state.secondBlockID)
-                        .filter { $0.deletedAt == nil && $0.status == .active },
-                    (slots.first { $0.blockID == state.firstBlockID }?.variantID,
-                     slots.first { $0.blockID == state.secondBlockID }?.variantID))
+            let read = try await runFansAndRendered(state.blockIDs)
+            guard read.blocks != state.runBlocks else { return .current }
+            // Every fan folded to a single (or a block dissolved): the two
+            // roads are now byte-identically `merge`, so the question has one
+            // answer and the ceremony no longer applies — the pair arm's own
+            // response when a side dissolves, in the same words. Re-invoke and
+            // the door re-decides against truth.
+            guard read.otherTakes > 0, read.blocks.allSatisfy({ $0.shownVariantID != nil })
+            else {
+                mergeCeremony = nil
+                model.refuse("These blocks' takes changed — try the merge again.")
+                return .refreshed
             }
+            var next = state
+            next.runBlocks = read.blocks
+            next.otherTakes = read.otherTakes
+            mergeCeremony = next
+            model.direct("The takes changed while the sheet was open — review before merging.")
+            return .refreshed
+        } catch {
+            model.showOperationError(error)
+            return .failed
+        }
+    }
+
+    private func refreshMergePairIfDrifted(_ state: MergeCeremonyState) async -> MergeSheetDrift {
+        do {
+            // R3-9: the two ids come from the two-block reader now, in the
+            // same read as the fans. `Queries.renderPost` answered this by
+            // loading every slot's rendered TEXT of the whole note — inside
+            // the app's cost model, but ∝ the note where ∝ the pair was
+            // available, on a deliberate confirm.
+            let (firstFan, secondFan, rendered) = try await liveActiveFansAndRendered(
+                state.firstBlockID, state.secondBlockID)
             let snapshot = Dictionary(uniqueKeysWithValues:
                 (state.firstTakes + state.secondTakes).map { ($0.id, $0.variant.workingText) })
             let current = firstFan + secondFan
@@ -1739,10 +1858,25 @@ final class EditorSurfaceController {
             firstTakes: firstFan.map { MergeTake(variant: $0, carried: carried.contains($0.id)) },
             secondTakes: secondFan.map { MergeTake(variant: $0, carried: carried.contains($0.id)) },
             pairings: [])
-        let firstIDs = Set(firstFan.map(\.id))
-        let secondIDs = Set(secondFan.map(\.id))
-        next.pairings = state.pairings.filter {
-            firstIDs.contains($0.firstVariantID) && secondIDs.contains($0.secondVariantID)
+        if state.arrangement == .pairByHand {
+            // HERS survive by identity, where both sides still live (R2-1).
+            let firstIDs = Set(firstFan.map(\.id))
+            let secondIDs = Set(secondFan.map(\.id))
+            next.pairings = state.pairings.filter {
+                firstIDs.contains($0.firstVariantID) && secondIDs.contains($0.secondVariantID)
+            }
+        } else {
+            // **Under a PRESET the pre-pair is invisible** — the preview
+            // columns mark the shown pair — so the open-time pre-pair used to
+            // survive this refresh by liveness alone while the marking moved
+            // (18f ladder R3-7). Pick "Pair by hand…" afterwards and the
+            // Pairings section offered head ＋ tail, the pair the sheet no
+            // longer marks, so S4-23 ruling 4's "⏎ reproduces the instant
+            // outcome" stopped holding after a refresh. It re-seeds from the
+            // freshly-read shown pair, exactly as opening does — one rule,
+            // `prePairing`.
+            next.pairings = prePairing(
+                firstFan: firstFan, secondFan: secondFan, rendered: rendered)
         }
         mergeCeremony = next
         // A DIRECTION (row 56's class, named): the sheet REFRESHED itself —
@@ -2288,6 +2422,30 @@ final class EditorSurfaceController {
                 .filter { $0.deletedAt == nil && $0.status == .active },
              try Queries.blockFan(db, blockID: trailingID)
                 .filter { $0.deletedAt == nil && $0.status == .active })
+        }
+    }
+
+    /// The same read plus **which take each side RENDERS** — the pair sheet's
+    /// one snapshot (13u3 UNIT G; R3-6 at open, R3-9's reader for the ids).
+    /// Open builds the sheet from it and the drift check compares against it,
+    /// so the two can never be answering different questions; and the ids come
+    /// from `Queries.renderedVariantIDs`, whose rule is pinned equal to
+    /// `renderPost`'s and `Operations.renderedVariant`'s, at the cost of the
+    /// TWO blocks named rather than the note around them.
+    private func liveActiveFansAndRendered(
+        _ leadingID: String, _ trailingID: String
+    ) async throws -> (
+        leading: [Variant], trailing: [Variant], rendered: (first: String?, second: String?)
+    ) {
+        try await model.session.database.read { db in
+            let rendered = try Queries.renderedVariantIDs(
+                db, blockIDs: [leadingID, trailingID])
+            return (
+                try Queries.blockFan(db, blockID: leadingID)
+                    .filter { $0.deletedAt == nil && $0.status == .active },
+                try Queries.blockFan(db, blockID: trailingID)
+                    .filter { $0.deletedAt == nil && $0.status == .active },
+                (rendered[leadingID], rendered[trailingID]))
         }
     }
 

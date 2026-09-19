@@ -2603,9 +2603,9 @@ ledger row 8 flipped in the same commit.
 |---|---|
 | 0 · read the brief's named sections (plan banner · roster 7 · GOVERNANCE + constitution · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the walker facts · the 18f round-3 record R3-5…R3-9 · KnownIssues row 42 · the code the findings name) | **DONE** |
 | 1 · R3-9 — core `Queries.renderedVariantID` (+ the plural), with the equivalence pin | **DONE** — `Queries.renderedVariantIDs`/`renderedVariantID` in `Sources/VariorumCore/Queries/PostRender.swift`; 4 new cells in `PostRenderQueryTests` (the three-resolver equivalence over the same fallback matrix · the gap/unplaced conventions · the foreign-chosen guard · the EXPLAIN-plan seek pin); suite 28/1 green |
-| 2 · R3-6 — the pair's rendered ids read from the STORE at open, in the same read as the fans | PENDING |
-| 3 · R3-5 — `MergeRunBlock.shownVariantID`; the RUN arm's drift check; `runMergeChain` takes the state's shown ids (RED-ON-OLD owed) | PENDING |
-| 4 · R3-7 — the pre-pair re-seeds from `rendered` on a preset refresh; hers kept under `.pairByHand` (RED-ON-OLD owed) | PENDING |
+| 2 · R3-6 — the pair's rendered ids read from the STORE at open, in the same read as the fans | **DONE** — `liveActiveFansAndRendered`; pin `openingReadsTheShownPairFromTheStoreSoNothingRefreshesSpuriously` RED on `25638746` (5 issues), green now |
+| 3 · R3-5 — `MergeRunBlock.shownVariantID`; the RUN arm's drift check; `runMergeChain` takes the state's shown ids (RED-ON-OLD owed) | **DONE** — `refreshMergeRunIfDrifted` + the retired `if !state.isRun` fence; 2 pins RED on `25638746` (the run merged on the first press in both), 1 guard pin green on both sides and recorded as such |
+| 4 · R3-7 — the pre-pair re-seeds from `rendered` on a preset refresh; hers kept under `.pairByHand` (RED-ON-OLD owed) | **DONE** — `prePairing` hoisted and consumed at both open and refresh; pin `aPresetRefreshReSeedsThePrePairFromWhatTheSheetNowShows` RED on `25638746` (the stale head survived and then joined) |
 | 5 · R3-8 — `renderedTakeID` hoisted to a `FanHalf` extension, consumed on all three roads (NO pin — hollow by the finding's own words) | PENDING |
 | 6 · item 6 — the three disagreeing opening-take reads: consume or verdict | PENDING |
 | 7 · the walk (dev-store Debug, both voices) with captures | PENDING |
