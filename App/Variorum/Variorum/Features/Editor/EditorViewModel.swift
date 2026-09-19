@@ -1168,6 +1168,16 @@ final class EditorViewModel {
     /// characters only). `editedRange` is the NEW characters' range; the old
     /// length is `editedRange.length - delta`.
     func storageDidEdit(_ editedRange: NSRange, changeInLength delta: Int) {
+        // 13u3 ladder round 1, R1-1: this method IS the storage's edit
+        // transaction (`didProcessEditing` calls it before the edit closes),
+        // and a layout-forcing geometry query in here is TEXTKIT2 §2's own
+        // estimation hazard — sampled once for real as a whole-app spin in
+        // `_estimatedTextLocationForVerticalOffset` (the UNIT B record's
+        // frames). The flag is what `updateCaretContext`'s indicator arm
+        // consults to defer its decoration refresh onto the settle hop this
+        // same method arms one line below.
+        inStorageEditTransaction = true
+        defer { inStorageEditTransaction = false }
         // N14: EVERY storage character edit dirties overlay geometry — the
         // suppressed programmatic writes included (renderFull's
         // setSurfaceContent is exactly the cold-mount path). The refresh
@@ -3341,7 +3351,26 @@ final class EditorViewModel {
         // The editing indicator follows the caret (R14): refresh only when
         // it is on and the caret changed blocks (the decor pass is
         // viewport-bounded; off costs nothing).
-        if appearance.indicator != .off, caretBlockID != previousCaretBlock {
+        //
+        // **NEVER SYNCHRONOUSLY INSIDE THE STORAGE'S EDIT TRANSACTION**
+        // (13u3 ladder round 1, R1-1). `refreshDecorations` opens with a
+        // layout-FORCING fragment query (`textLayoutFragment(for:)`), and
+        // run from `storageDidEdit` — i.e. inside `processEditing`, against
+        // storage whose edit is not laid out — that is TEXTKIT2 §2's
+        // estimation class, sampled once as a permanent 99% spin
+        // (`_estimatedTextLocationForVerticalOffset`, the UNIT B record).
+        // The sibling road on the same notification already hops for
+        // exactly this reason (`EditorView`'s re-measure observer: "geometry
+        // reads must wait for it to close"). Deferring costs nothing here:
+        // `storageDidEdit` bumped `overlayGeometryGeneration` at its top, so
+        // the settle hop (`overlayLayoutDidSettle`, armed by the edit's own
+        // draw pass) delivers `refreshBadges` → `refreshDecorations` against
+        // laid-out frames one turn later — the latency every edit-driven
+        // decoration on this surface already has (N14's design). The
+        // selection-change road (arrow keys — no edit transaction) keeps the
+        // synchronous refresh.
+        if appearance.indicator != .off, caretBlockID != previousCaretBlock,
+           !inStorageEditTransaction {
             refreshDecorations()
         }
         // Ledger row 33 — the Block History pane's jump door reads this fact.
@@ -3382,6 +3411,23 @@ final class EditorViewModel {
     @ObservationIgnored private(set) var overlayGeometryGeneration = 0
     @ObservationIgnored private var overlayGenerationDelivered = -1
     @ObservationIgnored private var overlaySettleScheduled = false
+
+    /// **TRUE WHILE `storageDidEdit` IS ON THE STACK** — i.e. inside
+    /// `NSTextStorage.processEditing`, where the edit is not laid out and a
+    /// layout-forcing geometry query is TEXTKIT2 §2's estimation hazard
+    /// (13u3 ladder round 1, R1-1; the sampled deleteBackward spin). The
+    /// caret arm in `updateCaretContext` consults it to defer the indicator's
+    /// decoration refresh onto the settle hop.
+    @ObservationIgnored private(set) var inStorageEditTransaction = false
+
+    #if DEBUG
+    /// **The R1-1 oracle:** how many times the decoration pass's
+    /// layout-forcing walk ran while the storage-edit transaction was open.
+    /// Any count above zero is the spin's precondition, reintroduced; the
+    /// pin (`EditorDecorTransactionTests`) holds it at zero through the real
+    /// delegate pipeline.
+    @ObservationIgnored private(set) var decorLayoutQueriesInEditTransaction = 0
+    #endif
 
     /// Internal (not private) so the ladder's R1-5 pin can schedule a hop
     /// for one generation and deliver a projection under the next.
@@ -3550,6 +3596,13 @@ final class EditorViewModel {
             send(BlockDecor.State())
             return
         }
+        #if DEBUG
+        // The R1-1 oracle: everything below this line forces layout
+        // (`textLayoutFragment(for:)`, `enumerateTextLayoutFragments`), and
+        // inside the storage-edit transaction that is the sampled spin's
+        // precondition. Counted, never fatal — the pin reads it.
+        if inStorageEditTransaction { decorLayoutQueriesInEditTransaction += 1 }
+        #endif
         let visible = viewportBounds(of: textView)
         let docStart = contentManager.documentRange.location
         // TK2 fragment geometry is CONTAINER-relative; the viewport and the
