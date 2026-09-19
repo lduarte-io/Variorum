@@ -921,3 +921,62 @@ walk in both voices and both appearances that found four things the desk could n
 fixed in the same session. One new PROVISIONAL bundle (#118). Suites and finals above.
 
 ---
+
+---
+
+## UNIT B BRIEF — NOTE-LIST SKIMMABILITY (self-contained; read in this order)
+
+**Read first, in full:** (1) this file's Status banner · roster item 2 · GOVERNANCE + the
+constitution · THE KICKOFF SITTING RECORD · both "REFRESHED AT THE …" blocks (the 13u2 one's
+items 3 and 8 bind directly: `BookViewModel.adopt` PRIMES card previews via
+`Queries.leadingBlockTexts` and your card family CONSUMES that road, never re-derives per row;
+the title room is HEALED at ~48 chars and your work settles WITH it) · ENVIRONMENT TRAPS · CAST
+& DISCIPLINE. (2) The master plan's `### 13u` **item (4)** — the RULED design, her words verbatim
+(the derived display-name shape adopted; *"it can't be the whole first sentence if that sentence
+is super long"*; journal cards stay date-led; the title-suggestion chip at capture — *"a
+suggestion, never an action taken for her"*; STORED auto-title definitively rejected — *"what I
+hate is battling the apple notes title"*), and item (13)'s note that title room and card identity
+settle together. (3) QUESTIONS **#103/#104/#105** (the Library stamps' built arrangement — your
+cards must not disturb it) and the 18h Library machinery (`LibraryTimeFace`/`TimeStampFace` —
+the stamps are the ONE words brain; your snippet is a SECOND brain beside it, never a rival
+stamp). (4) The code: `Features/Library/LibraryCatalogView.swift` (`NoteCards`, the List rows,
+`LibraryCatalogModel`) · the Pool card preview (Act 10 row 87 — BUILT; find its brain and
+CONSUME/align, never fork) · `Sources/VariorumCore/Queries/ShelfQueries.swift`'s search-row
+`snippet` (row CONTEXT under a search — a DIFFERENT thing from your display name; do not merge
+them; its own doc says titles stay as they are).
+
+**Scope (ONE acceptance unit — the note-list card identity):**
+1. **ONE pure Domain brain** (`Sources/VariorumCore/Domain/` — e.g. `DisplayName.swift`): given
+   an explicit title and the note's first words, answer what a card LEADS with — explicit title
+   where set, else a length-capped snippet of the first words (cap + word-boundary trim +
+   ellipsis; pick the cap against the healed ~48-char title room and record it PROVISIONAL),
+   derived at read time, NEVER stored, nothing ever renamed. Edge-case tests (empty note,
+   whitespace-only, one long word, markdown lead-in — strip syntax? decide, record PROVISIONAL —
+   emoji/grapheme boundaries).
+2. **The Mac consumers:** the Library's Notes cards + List rows (untitled notes lead with the
+   snippet; the date demotes to the metadata line; JOURNAL-profile notes stay date-led — a daily
+   entry's date IS its identity); the Pool/bookless cards align to the same brain; the book
+   Outline's `OutlinePostRow.excerpt` road stays as-is unless it already disagrees with the brain
+   (then consume it — one brain). The 18h stamps arrangement (#103/#105) byte-unharmed, pinned.
+3. **The title-suggestion chip at quick-note/capture:** first words offered as a CHIP, one tap
+   adopts it as the explicit title, ignorable forever — never applied for her. Build it on the
+   capture surfaces' EXISTING shape (QuickNoteView + QuickEntryBar) WITHOUT reworking their
+   ⏎/⇧⏎ model — that is UNIT C's; if the chip cannot land without touching the filing model,
+   STOP and hand the chip to C with a note instead of building C's half.
+4. **Mobile:** the brain is core Domain — the phone CONSUMES it at its catch-up (a parity note
+   in your record; do not build phone faces).
+5. **Data cost (P1):** the snippet's source is bounded (first block's leading text — the primed
+   previews road on the book side; a bounded read on the Library side). No per-row query storms:
+   if the Library needs a new read, it is ONE bounded query for the visible window, measured.
+
+**Pins:** the brain's edge cases; the journal/date-led split; the never-stored rule (no schema,
+no writes — assert the card path performs zero writes); the stamps-arrangement pins ride
+unmodified (#103/#105's two-width pins green untouched). Red-on-old only where defect-shaped.
+
+**End verification:** FULL Mac suite (row 58's environment red the one tolerated) · tutorial
+spine green in-run · iOS build green · YOUR walk with captures: the Library over her-shaped
+fixtures (titled · untitled · journal · a note whose first sentence is very long · an empty
+note), List AND Notes modes, both voices, both appearances; captures to
+`notes/plans/13u3-screens/`. Record: **UNIT B RECORD** appended here, LIVE STATUS from the first
+commit, UNIT CLOSED banner, ledger row 3 flipped in the same commit.
+

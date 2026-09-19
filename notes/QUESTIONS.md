@@ -1450,7 +1450,7 @@ Nothing about the manifest depends on this; the re-land is one call at one `onCh
 
 *Scope note, not a question:* the calm page's **pages** form (real leaves, no scroll offset) is outside the rule by its geometry, as `#114(b)` already says of Lenses/Compare/Canvas/Blocks; and flipping Read's own `edit`/`read` switch is not a mode switch, so it keeps whatever the host's scroll had — pre-existing, untouched.
 
-*(Next free number: **#118**.)*
+*(Next free number: **#119**.)*
 
 ---
 
