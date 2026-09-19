@@ -1272,7 +1272,7 @@ capture box that has the caret.
 | 2 | `CaptureTextView` — the ONE Mac capture surface (both hosts compose it) + its hosted-window key pins | **DONE** (5 cells green, real `NSEvent`s through production `keyDown`) |
 | 3 | the QUICK NOTE pad on the one rule (⏎ files · ⇧⏎ paragraph; the refusal that keeps her text) | **DONE** |
 | 4 | the SHELF/LIBRARY quick-entry bar on the same rule (the 13l text-preserving refusal byte-preserved) | **DONE** (29 cells green across 5 suites: the 3 new + the 2 they must not disturb) |
-| 5 | the red-on-old measurement (the one defect-shaped row: a refused quick-note filing destroyed the capture) | **NAMED, pre-revert state committed at this row's commit — measuring next** |
+| 5 | the red-on-old measurement (the one defect-shaped row: a refused quick-note filing destroyed the capture) | **DONE** — measured, restored, re-verified (the table below) |
 | 6 | the copy that teaches the keys — the helper dictionary + the tutorial's workspace lesson, with pins | PENDING |
 | 7 | QUESTIONS #120 (the PROVISIONAL calls) + the marker moved | PENDING |
 | 8 | the walk + captures, the full Mac suite, the tutorial spine, iOS build | PENDING |
@@ -1306,3 +1306,13 @@ have): restore the clear-before-the-mint pair at the top of `take()`. Nothing el
   rather than a blanket:** every other cell in the three new suites. They pin what this unit
   DECIDED (which key does what, what the box measures, what the hand-off segments to, what both
   doors teach) — a new capability is not a bug pin.
+
+**RED-ON-OLD, MEASURED (2026-09-19).** Pre-revert state committed at `a0b1957d`. The revert
+applied to that tree, the five suites run, the revert undone and the tree re-verified: **29/29
+green** before · **29 tests, 3 issues, 1 cell red** under the revert · **29/29 green** after
+(`git status` clean against `a0b1957d` + the record's own edit).
+
+| pin | under the revert | what the measurement showed |
+|---|---|---|
+| `aRefusedQuickNoteFilingKeepsTheCaptureInThePad` | **RED**, 3 issues | `pad.text` came back `""` where she had typed three paragraphs; `titleFromFirstWords` came back `false`, so the name she had chosen was gone too; and the RETRY (`close()` after the refusal) minted **nothing** — `postID → nil` — because there was nothing left in the pad to file. That third issue is the defect's real shape: the refusal did not merely fail to save, it removed the last road back |
+| the other 28 cells | green under the revert, by construction | they pin what this unit DECIDED — which key files and which makes a paragraph, what the box measures and where it stops, what three typed paragraphs segment to at both doors, what both doors teach. A missing capability is not a bug pin, and the brief says not to manufacture reds for one |
