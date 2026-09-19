@@ -712,3 +712,28 @@ door claims a shortcut outside the panel's own key window.
 | 5 | QUESTIONS #118 (the PROVISIONAL calls) | PENDING |
 | 6 | the walk + captures, the full Mac suite, the tutorial spine, iOS build | PENDING |
 
+### THE RED-ON-OLD VERIFICATION — NAMED BEFORE IT RUNS (the checkpoint protocol)
+
+Pre-revert state COMMITTED at `c9129b0d`. **This unit is a FACE REDESIGN, and a face redesign is
+not a bug pin** — the brief says so and I am not manufacturing reds for it. Exactly ONE cell here
+is defect-shaped, and it is the one I traced while reading the shipped panel:
+
+> **The add road trimmed and the edit road did not.** `CommentsPanel.addDraft()` filed
+> `draft.trimmingCharacters(in: .whitespacesAndNewlines)`; the edit row's Save button handed
+> `editDraft` to `editBlockComment` RAW. So the same keystrokes stored different text depending on
+> which box they were typed in, and a comment saved with a trailing newline then rendered with a
+> dangling blank line wherever it is shown (the panel, the margin card, the inline strip). Two
+> rules for one thing — F-0's drift class, in eight characters of difference.
+
+The revert is a **behavioural revert of that one mechanism**, applied to the current tree and then
+undone (the standing method — the pre-13u3 tree cannot compile pins that name types it does not
+have): `CommentComposition.commit` returns `.save(draft)` — the RAW draft — instead of
+`.save(text)`. That restores exactly what the shipped Save button did, and nothing else: the
+comparison arm (`trimmed(draft) == stored` ⇒ `.unchanged`) is untouched, and the ADD road's own
+trim is untouched, so only the edit road's payload moves.
+
+Expected red: `aCommentEditsInPlaceAndStoresTheTrimmedText`. Expected GREEN under the same revert
+(and recorded as such, so the measurement is honest rather than a blanket): the add-road cell, the
+no-write cell, the emptied cell, the escape cell, the receipts cell, the drafts-survive cell, the
+seal cell, and all five brain cells — they pin what the redesign DECIDED, not a defect.
+
