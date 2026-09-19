@@ -2540,3 +2540,53 @@ never arrive white on white. 10 new cells in one suite (6 of 8 of the first draf
 shipped exporter, 31 issues), 9 walk captures including BEFORE/AFTER pairs for both a note and a
 book in both voices and both appearances, one new PROVISIONAL bundle (#123). Zero core lines, zero
 schema, zero migrations, zero `Sync/`, marker 8. Suites and finals above.
+
+---
+
+## UNIT G BRIEF — THE CEREMONY-SHEET RESIDUALS (KnownIssues row 42; self-contained; read in this order)
+
+**Read first, in full:** (1) this file's Status banner · roster item 7 · GOVERNANCE + the
+constitution · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the walker facts. (2) **THE FIX SHAPES
+ARE ALREADY WRITTEN:** `notes/plans/use-report-round-2026-09-06.md`, the section titled
+"### 18f LADDER — ROUND 3 FINDINGS" — findings **R3-5 · R3-6 · R3-7 · R3-8 · R3-9**, each with
+its mechanism, fix shape and pin shape. Read them verbatim; they are your design. (3)
+`notes/KnownIssuesAndTechDebt.md` row 42 (the row you resolve). (4) The code the findings name:
+`Features/Editor/EditorSurfaceController.swift` (`openMergeCeremony` / `openMergeRunChoice` /
+`refreshMergeCeremony` / `refreshMergeSheetIfDrifted` / `runMergeChain` / `MergeRunBlock`) ·
+`Features/Takes/TakesStructureController.swift` (the instant road's park) ·
+`Sources/VariorumCore/Queries/` (R3-9's new reader's home) + `Operations.renderedVariant` (the
+rule it mirrors).
+
+**Scope (ONE acceptance unit — the merge/divide sheets' drift family):**
+1. **R3-5 (the core item):** `MergeRunBlock` gains `shownVariantID` read in the SAME store read
+   as the fans; the RUN arm's drift check before running (compare store-rendered id + takeCount
+   per block; on drift, rebuild `runBlocks` + `otherTakes` and speak the refresh line);
+   `runMergeChain` takes the state's shown ids as `displayed`. **Pin red-on-old** exactly as the
+   finding writes it (a run of three, fanned middle, `.onlyTheShownOnes`, re-point the middle's
+   chosen through ops under the open sheet → the first ⏎ REFRESHES; today it joins).
+2. **R3-6:** the pair's rendered ids read at open from the same store read as the fans (the
+   raise's rule applied at open); the open-time-lag spurious refresh retires.
+3. **R3-7:** after a shown-pair refresh under a PRESET, the pre-pair re-seeds from `rendered`
+   exactly as open does; under `.pairByHand` hers are kept (R2-1's pin rides). Pin per the
+   finding.
+4. **R3-8:** `renderedTakeID(of:)` hoisted to a `FanHalf` extension, consumed on all three
+   roads. **NO pin — the finding itself states a pin would pass on both sides; record it as
+   cleanliness, never claim a red.**
+5. **R3-9:** core `Queries.renderedVariantID(db, blockID:)`, public, mirroring
+   `Operations.renderedVariant`'s rule with the SAME equivalence pin shape
+   (`PostRenderQueryTests.renderAgreesWithOperationsRenderedVariant` is the precedent); the
+   drift checks consume it (the confirm ∝ 2 blocks, never the note).
+6. **UNIT B's handed-up find, folded here:** three reads of a note's opening disagree on take
+   resolution (`NoteCards.load`'s COALESCE(chosen, default) · the note picker's default-only
+   snippet · neither is `renderPost`'s full rule). Where the new R3-9 reader (or the COALESCE
+   rule it mirrors) is trivially consumable at those sites, consume it; where not, VERDICT each
+   site in your record (aligned / recorded-with-reason). No visual redesign — resolution only.
+7. **KnownIssues row 42 RESOLVED** in the same commit as the last fix.
+8. **Fences:** zero schema · zero `Sync/` · the ceremony sheets' FACES (18f's presets, figures
+   A/B grammar) untouched — this is drift correctness, not restyle; `BlockRangeIndex` untouched.
+
+**End verification:** FULL Mac suite (row 58 tolerated) · tutorial spine green · iOS build
+green · YOUR walk with captures: the merge sheet on a fanned run of three, drift staged through
+ops under the open sheet (the refresh line speaks; confirm joins what the list shows), both
+voices. Record: **UNIT G RECORD**, LIVE STATUS from the first commit, UNIT CLOSED banner,
+ledger row 8 flipped in the same commit.
