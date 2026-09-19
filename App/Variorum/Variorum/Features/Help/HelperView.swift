@@ -80,7 +80,10 @@ struct HelperView: View {
                 + "block keeps showing what it showed; the originals are archived on it"),
         ]),
         ShortcutGroup(title: "Writing", items: [
-            ("⌘S", "commit — an immutable savepoint of the take you're in"),
+            // 13u3 UNIT D (item 14): the two-key road, said in the two
+            // keys — ⏎ on the empty field is the fast one.
+            ("⌘S", "commit — an immutable savepoint of the take you're in; "
+                + "name it or press ⏎ to save it unnamed"),
             // The post-13l polish round (rows 16/23): the pairing IS the
             // lesson — this take's moment, and this note's.
             ("⌘⇧S", "save a version — the whole note as it is, in Versions"),
@@ -326,8 +329,10 @@ struct HelperView: View {
          + "Make Block (⌘⇧K) does the same for a middle span. Both work from Takes — "
          + "select in your take, and the app carries the selection to Write and acts."),
         ("commit",
-         "An immutable savepoint of one take (⌘S). Commits are append-only — "
-         + "restoring one never erases another."),
+         "An immutable savepoint of one take (⌘S). It can carry a NAME — ⌘S "
+         + "offers a field, ⏎ saves it named or not — and the name is editable "
+         + "afterwards from Block History. Commits are append-only: restoring "
+         + "one never erases another, and a name never touches the text."),
         ("seal",
          "A note marked complete: everything under it refuses edits until unsealed. "
          + "Reversible; nothing is ever locked away for good."),
@@ -467,6 +472,6 @@ enum HelperCheatSheet {
         ⌘⇧T open/close takes · ⎋ close all
         ⌘T new take · ⌥⌘T blank · ⇧⌥⌘T blank & choose
         ⌘⏎ choose · ⌃⌘←/→ step takes · ⌘⇧A archive
-        ⌘⇧L save as lens · ⌘S commit · ⌘/ full list + dictionary
+        ⌘⇧L save as lens · ⌘S commit (⏎ saves it unnamed) · ⌘/ full list
         """
 }

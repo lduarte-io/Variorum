@@ -382,6 +382,28 @@ struct TutorialBookShapeTests {
         }
     }
 
+    /// **13u3 UNIT D (item 14): the saving lesson teaches the NAME.** ⌘S
+    /// opens a field now, so a lesson that said "press ⌘S" and stopped was
+    /// leaving her at an unexplained box — and the fast road (⏎) is exactly
+    /// the half she must be told about, or the door reads as slower than it
+    /// was. RED ON OLD: the shipped lesson had no ⏎ and no name anywhere.
+    @Test func theSavingLessonTeachesTheNameAndTheSkipKey() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "keeping takes safe")
+            }
+            let stored = try await db.read {
+                try Queries.renderedText($0, containerID: lesson)
+            }
+            #expect(stored.contains("type a name for the moment"),
+                    "the field is explained where the keystroke is taught")
+            #expect(stored.contains("press \u{23CE} to save it unnamed"),
+                    "…and so is the two-key fast road (her enter-to-skip)")
+            #expect(stored.contains("the name is always editable, the saved text never is"),
+                    "R-13u3-1 and I5, in one sentence")
+        }
+    }
+
     /// The Act 10 correction round, batch G — **row 85 (A's residue):** the
     /// lesson taught the RETIRED masthead fold ("＃ folds the note's tag
     /// cards away and back") and a four-door bar. It teaches the ＃ door's

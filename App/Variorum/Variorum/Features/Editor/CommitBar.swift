@@ -517,7 +517,8 @@ struct CommitBar: View {
         Button(tokens.chromeLabel("commit ⌘S")) { model.commitCaretVariant() }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
             .disabled(model.caretVariantID == nil || model.header?.locked == true)
-            .help("An immutable savepoint of the take under the caret")
+            .help("An immutable savepoint of the take under the caret — name it, "
+            + "or press ⏎ to save it unnamed")
     }
 
     /// Ledger row 17 — THE PAIR. It is never disabled: unlike commit,

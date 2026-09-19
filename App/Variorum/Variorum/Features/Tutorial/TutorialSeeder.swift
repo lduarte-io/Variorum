@@ -612,11 +612,18 @@ enum TutorialSeeder {
             + "can always come back to, no matter what you type over it. Commits "
             + "append; nothing ever overwrites one.",
 
+            // 13u3 UNIT D (item 14): the lesson teaches the two keys, because
+            // the door asks for a name now. The fast road is still two keys,
+            // and saying so here is what keeps ⌘S from feeling slower.
             "Try it here: click into this paragraph, change a few words, press "
-            + "\u{2318}S, then press history in the bottom bar, right beside "
-            + "commit. Your savepoint is listed under this take; Restore loads "
-            + "any savepoint back into the take — and committing again just "
-            + "adds another.",
+            + "\u{2318}S. A small field appears: type a name for the moment — "
+            + "\u{201C}before the rewrite\u{201D} — or just press \u{23CE} to "
+            + "save it unnamed. Then press history in the bottom bar, right "
+            + "beside commit. Your savepoint is listed under this take, its name "
+            + "first where it has one; Restore loads any savepoint back into the "
+            + "take, Name (or Rename) changes what it is called — the name is "
+            + "always editable, the saved text never is — and committing again "
+            + "just adds another.",
 
             "The block below has a spare take to practice ARCHIVING on. Click "
             + "into the second take and press \u{2318}\u{21E7}A — it leaves the board, out "

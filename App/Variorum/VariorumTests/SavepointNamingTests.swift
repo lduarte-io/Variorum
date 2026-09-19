@@ -425,3 +425,27 @@ struct SavepointRenameDoorTests {
 // side). A probe that cannot see what it claims is not evidence, so the
 // rename door's PRESENCE is walk evidence (capture `d-05`…`d-08`) and its
 // decisions and its act are pinned above as values and through the model.
+
+@MainActor
+@Suite("The copy that teaches the name (13u3 UNIT D)")
+struct SavepointNameCopyTests {
+    /// **THE HELPER TEACHES THE TWO KEYS AND THE EDITABILITY.** ⌘S opens a
+    /// field now; a dictionary entry and a shortcut row that stopped at
+    /// "commit" would leave her at an unexplained box. RED ON OLD: neither
+    /// carried ⏎ or the word "name".
+    @Test func theHelperTeachesTheNameAndTheSkipKey() throws {
+        let entry = try #require(HelperView.entries.first { $0.term == "commit" })
+        #expect(entry.definition.contains("NAME"))
+        #expect(entry.definition.contains("\u{23CE} saves it named or not"),
+                "the two-key fast road, where someone looks up the word")
+        #expect(entry.definition.contains("editable"),
+                "her R-13u3-1 — a name is editable after the fact")
+        #expect(entry.definition.contains("a name never touches the text"), "I5")
+
+        let row = try #require(
+            HelperView.groups.flatMap { $0.items }.first { $0.keys == "\u{2318}S" })
+        #expect(row.does.contains("\u{23CE}"), "the shortcuts tab names the skip key too")
+        #expect(HelperCheatSheet.summary.contains("\u{2318}S commit"),
+                "the hover sheet still names the chord")
+    }
+}

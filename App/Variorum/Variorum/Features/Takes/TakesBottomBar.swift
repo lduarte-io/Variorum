@@ -360,7 +360,8 @@ struct TakesBottomBar: View {
         }
         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
         .disabled(model.projection.sealed)
-        .help("An immutable savepoint of the take you're in")
+        .help("An immutable savepoint of the take you're in — name it, or "
+            + "press ⏎ to save it unnamed")
         // Ledger row 17 — the pair, Write's bar's twin. Never disabled: a
         // sealed note's history is still readable (the seal freezes writing,
         // not looking), and with no block in reach the act SPEAKS (P-2).
