@@ -52,11 +52,19 @@ nonisolated enum MarkdownReadingFace {
         /// typography is 13m's).
         var lineSpacing: CGFloat
         /// The prose ink, which a strikethrough's rule also wears.
-        var ink: NSColor
+        ///
+        /// **`nil` means "write no colour at all"** — the PDF's posture, and
+        /// the strongest form of appearance-independence there is: a page
+        /// that carries no colour attribute cannot resolve one against
+        /// whatever appearance the app happened to wear, so the ink is the
+        /// drawing context's own black. (18j's grep pin would rightly refuse
+        /// a literal `NSColor.black` here, and it is right: the answer is not
+        /// a different literal, it is no colour.)
+        var ink: NSColor?
         /// A link's TEXT colour. A screen gives it the system link colour; a
-        /// page of paper gives it the ink and keeps the underline, which is
+        /// page of paper gives it `nil` and keeps the UNDERLINE, which is
         /// print's own affordance (a PDF carries no link annotations).
-        var link: NSColor
+        var link: NSColor?
         /// The inline-code chip (13k K10). `nil` ⇒ monospace with no tint.
         var codeTint: NSColor?
     }
@@ -74,9 +82,8 @@ nonisolated enum MarkdownReadingFace {
     /// line-scoped, so the two roads produce the same face.
     static func attributed(_ source: String, style: Style) -> NSAttributedString {
         let rendered = MarkdownRendering.render(source)
-        var attributes: [NSAttributedString.Key: Any] = [
-            .font: style.body, .foregroundColor: style.ink,
-        ]
+        var attributes: [NSAttributedString.Key: Any] = [.font: style.body]
+        if let ink = style.ink { attributes[.foregroundColor] = ink }
         if style.lineSpacing > 0 {
             let paragraph = NSMutableParagraphStyle()
             paragraph.lineSpacing = style.lineSpacing
@@ -179,13 +186,19 @@ nonisolated enum MarkdownReadingFace {
         if run.emphasis.contains(.strikethrough) {
             string.addAttribute(
                 .strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: range)
-            string.addAttribute(.strikethroughColor, value: style.ink, range: range)
+            if let ink = style.ink {
+                string.addAttribute(.strikethroughColor, value: ink, range: range)
+            }
         }
         if run.url != nil {
-            string.addAttribute(.foregroundColor, value: style.link, range: range)
+            // The RULE is written either way — it is the affordance on paper
+            // and the underline on a screen; only the colour is optional.
             string.addAttribute(
                 .underlineStyle, value: NSUnderlineStyle.single.rawValue, range: range)
-            string.addAttribute(.underlineColor, value: style.link, range: range)
+            if let link = style.link {
+                string.addAttribute(.foregroundColor, value: link, range: range)
+                string.addAttribute(.underlineColor, value: link, range: range)
+            }
         }
     }
 }

@@ -178,17 +178,37 @@ struct PDFExportFaceTests {
         #expect(prose[.paragraphStyle] == nil)
     }
 
-    /// Paper, not a screen: the ink is BLACK whatever appearance the app is
-    /// wearing when the panel is dismissed, and the code run carries no chip
-    /// tint (a colour on paper is 13m's typographic call, not this unit's).
+    /// **Paper, not a screen — and the pin is an ABSENCE.** The exported
+    /// document carries no colour attribute anywhere, which is the strongest
+    /// form of appearance-independence there is: nothing in it can resolve
+    /// against whatever appearance the app wore when the panel was dismissed,
+    /// so a PDF exported in dark mode cannot arrive white on white paper.
+    /// (A literal black would dodge that too — and trip 18j's grep pin,
+    /// correctly. The answer is no colour, not a different literal.)
+    ///
+    /// A link therefore prints as that ink under a RULE, and an inline-code
+    /// run is monospaced with no chip: a colour on paper is 13m's
+    /// typographic call, not this unit's.
     @Test func theExportedDocumentIsPaperAndNotAScreen() throws {
-        let document = PDFExporter.attributedDocument(title: nil, body: vocabularyBody)
-        let prose = try #require(attributes(for: "A paragraph with", in: document))
-        #expect(prose[.foregroundColor] as? NSColor == .black)
+        let document = PDFExporter.attributedDocument(title: "My Note", body: vocabularyBody)
+        var colourful: [String] = []
+        document.enumerateAttributes(
+            in: NSRange(location: 0, length: document.length), options: []
+        ) { attributes, range, _ in
+            for key in [
+                NSAttributedString.Key.foregroundColor, .backgroundColor,
+                .underlineColor, .strikethroughColor,
+            ] where attributes[key] != nil {
+                colourful.append("\(key.rawValue) at \(range)")
+            }
+        }
+        #expect(colourful.isEmpty, "the page must write no colour: \(colourful)")
+
+        // The affordances that do NOT need a colour are still written.
         let link = try #require(attributes(for: "link to somewhere", in: document))
-        #expect(link[.foregroundColor] as? NSColor == .black)
-        let code = try #require(attributes(for: "let code = 1", in: document))
-        #expect(code[.backgroundColor] == nil)
+        #expect(link[.underlineStyle] as? Int == NSUnderlineStyle.single.rawValue)
+        let struck = try #require(attributes(for: "a struck phrase", in: document))
+        #expect(struck[.strikethroughStyle] as? Int == NSUnderlineStyle.single.rawValue)
     }
 
     /// The whole road end to end: real PDF bytes whose extracted text carries

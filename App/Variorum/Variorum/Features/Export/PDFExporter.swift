@@ -28,11 +28,16 @@
 //  is still 13m's, so this is the same 12 pt system body it has always been
 //  with the face on top.
 //
-//  **A page is paper, not a screen.** The ink is black and a link's text is
-//  ink-with-an-underline, deliberately: a dynamic colour would resolve
-//  against whatever appearance the app happened to wear when she hit Save,
-//  and a PDF written in dark mode would arrive white-on-white. (It carries
-//  no link annotations either — print's affordance is the underline.)
+//  **A page is paper, not a screen — so it writes NO COLOUR AT ALL.** A
+//  dynamic colour would resolve against whatever appearance the app happened
+//  to wear when she hit Save, and a PDF written in dark mode would arrive
+//  white on white paper; a literal `NSColor.black` would dodge that and trip
+//  18j's grep pin, correctly, because a literal is not the answer either.
+//  The answer is that a page with no colour attribute cannot depend on an
+//  appearance in the first place: the ink is the PDF context's own black,
+//  exactly as it has been since 11b. A link is therefore that ink under a
+//  rule — print's own affordance, and a PDF carries no link annotations
+//  anyway. `PDFExportFaceTests` pins the absence.
 //
 
 import AppKit
@@ -50,12 +55,12 @@ enum PDFExporter {
     static let bodyFont = NSFont.systemFont(ofSize: 12)
     static let titleFont = NSFont.boldSystemFont(ofSize: 16)
 
-    /// Paper's own values (see the header): black ink, a link in that ink
-    /// under a rule, no code chip, and no vertical rhythm of the face's own —
-    /// the stored blank lines are this page's paragraph spacing exactly as
-    /// they have been since 11b.
+    /// Paper's own values (see the header): NO colour — neither ink nor link
+    /// — no code chip, and no vertical rhythm of the face's own, since the
+    /// stored blank lines are this page's paragraph spacing exactly as they
+    /// have been since 11b.
     static let paperStyle = MarkdownReadingFace.Style(
-        body: bodyFont, lineSpacing: 0, ink: .black, link: .black, codeTint: nil)
+        body: bodyFont, lineSpacing: 0, ink: nil, link: nil, codeTint: nil)
 
     /// The exported document as attributed text: optional bold title line,
     /// then the body RENDERED FOR READING — markdown-as-content read by the
@@ -70,7 +75,7 @@ enum PDFExporter {
         if let title, !title.isEmpty {
             result.append(NSAttributedString(
                 string: "\(title)\n\n",
-                attributes: [.font: titleFont, .foregroundColor: NSColor.black]))
+                attributes: [.font: titleFont]))
         }
         result.append(MarkdownReadingFace.attributed(body, style: paperStyle))
         return result
