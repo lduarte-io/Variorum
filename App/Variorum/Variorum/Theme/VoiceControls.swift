@@ -85,17 +85,28 @@ struct VoicedChip: View {
     /// its own words; `text` stays the plain-string answer for tooltips and
     /// accessibility.
     var content: Text?
+    /// **How many lines this chip's label may take.** nil is the shipped
+    /// behaviour — unlimited, which is what every chip in the app has always
+    /// had and what several of them are measured at.
+    ///
+    /// 13u3 UNIT B tried to make ONE line the rule here (P-8's chrome class),
+    /// because `TitleSuggestionChip` can be handed a 48-character name and a
+    /// 300 pt pad to draw it in. **The book Outline's landing suite caught
+    /// it**: some chip inside an expanded story wraps today, so clamping the
+    /// family changed a book row's height and a landing that had settled
+    /// moved 3,424 pt during its hold (`BookOutlineLandingTests.
+    /// openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded`, green on
+    /// the pre-change tree and red with the clamp — measured both ways).
+    /// A row height the book's manifest does not know about is the drift
+    /// class 13u2b closed, so the clamp is OPT-IN and only the new chip takes
+    /// it. The wrapping chip itself is recorded for that owner.
+    var lines: Int?
 
     var body: some View {
         Button { action?() } label: {
             (content ?? Text(tokens.chromeLabel(text)))
                 .font(tokens.small)
-                // A chip is a state WORD — one line, always (P-8's chrome
-                // class rule, the same one `VoicedButtonStyle` carries).
-                // Added at 13u3 UNIT B, when the first chip whose text is a
-                // note's own words arrived: `TitleSuggestionChip` can be
-                // handed a 48-character name and a 300 pt pad to draw it in.
-                .lineLimit(1)
+                .lineLimit(lines)
                 .foregroundStyle(on ? tokens.accent : tokens.muted)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 1)

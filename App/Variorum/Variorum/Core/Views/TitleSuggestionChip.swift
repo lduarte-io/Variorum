@@ -37,7 +37,13 @@ struct TitleSuggestionChip: View {
     var body: some View {
         VoicedChip(
             tokens: tokens, text: label, on: adopted, action: onToggle,
-            content: Self.voiced(segments, tokens: tokens))
+            content: Self.voiced(segments, tokens: tokens),
+            // ONE line, for THIS chip only (the chrome class rule, scoped):
+            // a 48-character name in a 300 pt pad truncates rather than
+            // wrapping, and what she adopts is the whole name whatever the
+            // chip had room to draw. `VoicedChip.lines` carries why it is not
+            // the family's rule.
+            lines: 1)
             .help(adopted ? Self.adoptedHelp : Self.offerHelp)
             .accessibilityLabel(label)
     }
