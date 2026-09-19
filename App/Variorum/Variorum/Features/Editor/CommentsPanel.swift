@@ -81,6 +81,12 @@ final class CommentsPanelModel {
     /// The add area's draft. Settable — the add editor binds straight to it.
     var addDraft: String = ""
 
+    /// How many comments this panel has filed — the view's cue to reveal the
+    /// newest one (a filed comment that lands below the fold was not visibly
+    /// done). A counter rather than an id because the id arrives with the
+    /// projection, not with the write.
+    private(set) var filedCount = 0
+
     /// Ids whose save has LANDED and whose echo has not arrived yet. Without
     /// this the row wears its "unsaved" mark for the milliseconds between the
     /// write committing and the observation delivering — a mark that says the
@@ -181,6 +187,7 @@ final class CommentsPanelModel {
                 _ = try ops.addBlockComment(to: blockID, text: text)
             }) {
                 addDraft = ""
+                filedCount += 1
             }
         }
     }
@@ -368,6 +375,17 @@ struct CommentPanelKeyMonitor: NSViewRepresentable {
                 self.monitor = nil
             }
             guard window != nil else { return }
+            // **THE PANEL ASKS FOR THE KEYBOARD** (the walk's fourth find).
+            // The panel opens focused on the add area, so a caret blinks
+            // there — but a sheet or popover that comes up NON-KEY (measured:
+            // reopening the panel right after closing it) swallows every
+            // keystroke while still drawing that caret. A caret you cannot
+            // type into is worse than no caret, and the one honest fix is to
+            // ask for key status once, after the presentation settles.
+            DispatchQueue.main.async { [weak self] in
+                guard let window = self?.window, !window.isKeyWindow else { return }
+                window.makeKey()
+            }
             monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
                 guard let self, let window = self.window, event.window === window else {
                     return event
@@ -408,6 +426,9 @@ struct CommentsPanel: View {
     /// The comments' own measured height, which is what decides how much
     /// space is left for the add area.
     @State private var commentsHeight: CGFloat = 0
+    /// The open deleted fold's measured height — it takes what it holds, not
+    /// the whole cap.
+    @State private var deletedHeight: CGFloat = 0
     @FocusState private var focus: CommentPanelFocus?
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
@@ -446,7 +467,11 @@ struct CommentsPanel: View {
             writingSurface
             footer
         }
-        .frame(minWidth: 440, minHeight: 320)
+        // The shipped panel was 440 × 320 — a list with a one-line field. A
+        // writing surface needs room to be one: this is the size at which
+        // two or three comments still leave a real add area on the walk.
+        // **PROVISIONAL** (a taste number, chosen against the surface).
+        .frame(minWidth: 460, minHeight: 440)
         .background(tokens.surface)
         .background(CommentPanelKeyMonitor(onAct: handle))
         .task {
@@ -513,34 +538,73 @@ struct CommentsPanel: View {
 
     // MARK: The writing surface
 
-    /// Comments, then the add area filling whatever they leave — ONE scroll,
-    /// so the whole thing reads and behaves like a document rather than a
-    /// list with a field stapled underneath.
+    /// **Comments, then the add area owning every point they leave.**
+    ///
+    /// The comments take exactly the height they need and scroll once they
+    /// would take more than the panel can spare; the add area takes the rest
+    /// and is NEVER less than its floor. The floor is why the two are
+    /// separate boxes rather than one long scroll: the walk built three
+    /// comments in the shipped 320 pt panel and the one-scroll version put
+    /// the add area entirely below the fold — a writing surface you have to
+    /// go looking for is the complaint this unit answers, not an answer to
+    /// it.
     private var writingSurface: some View {
         GeometryReader { geo in
+            let room = max(0, geo.size.height - 1)  // the hairline between them
+            let cap = max(0, room - Metrics.addFloor)
+            // Before the first measurement the list takes its whole cap —
+            // otherwise nothing mounts, nothing measures, and the panel
+            // renders no comments at all (the walk's second find: "comments
+            // 3" above an empty page).
+            let listHeight = model.comments.isEmpty
+                ? 0 : (commentsHeight > 0 ? min(commentsHeight, cap) : cap)
+            VStack(alignment: .leading, spacing: 0) {
+                if listHeight > 0 {
+                    commentsList
+                        .frame(height: listHeight)
+                    hairline
+                }
+                addArea(height: max(Metrics.addFloor, room - listHeight))
+            }
+        }
+    }
+
+    private var commentsList: some View {
+        ScrollViewReader { scroller in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        ForEach(Array(model.comments.enumerated()), id: \.element.id) { pair in
-                            commentRow(pair.element)
-                            hairline
-                        }
+                    ForEach(Array(model.comments.enumerated()), id: \.element.id) { pair in
+                        commentRow(pair.element)
+                            .id(pair.element.id)
+                        if pair.offset < model.comments.count - 1 { hairline }
                     }
-                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
-                        commentsHeight = $0
-                    }
-                    addArea(
-                        height: max(Metrics.addFloor, geo.size.height - commentsHeight))
+                }
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
+                    commentsHeight = $0
+                }
+            }
+            .onChange(of: model.filedCount) { _, _ in
+                // A filed comment must be VISIBLE (P-2: a door performs the
+                // act, done visibly). With a full list the newest one lands
+                // below the fold otherwise.
+                guard let last = model.comments.last?.id else { return }
+                withAnimation(.easeOut(duration: 0.15)) {
+                    scroller.scrollTo(last, anchor: .bottom)
                 }
             }
         }
     }
 
+    /// The add area is a FIXED box the size of the room left over, and the
+    /// only text area in the panel that keeps its own scrolling: a draft
+    /// longer than the room has to follow the caret, which is exactly what
+    /// the text view does by itself and what no outer scroll view would do.
     private func addArea(height: CGFloat) -> some View {
         PanelTextArea(
             text: $model.addDraft, font: tokens.body, ink: tokens.ink,
             placeholder: tokens.chromeLabel(CommentsPanelCopy.addPlaceholder),
-            placeholderInk: tokens.faint, minHeight: height)
+            placeholderInk: tokens.faint, minHeight: height - 2 * Metrics.rowAir,
+            growsWithText: false)
             .focused($focus, equals: .add)
             .padding(.horizontal, Metrics.inset - 5)  // the editor's own 5 pt
             .padding(.vertical, Metrics.rowAir)
@@ -661,8 +725,15 @@ struct CommentsPanel: View {
             }
             .padding(.horizontal, Metrics.inset)
             .padding(.vertical, 4)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
+                deletedHeight = $0
+            }
         }
-        .frame(maxHeight: Metrics.deletedListMaxHeight)
+        // A scroll view takes every point it is offered, so the fold would
+        // eat 132 pt of the writing surface to show ONE struck-through line
+        // (the walk's third find: opening it clipped the live comments).
+        // It takes what it holds, up to the cap.
+        .frame(height: min(max(deletedHeight, 1), Metrics.deletedListMaxHeight))
     }
 
     // MARK: Doors
@@ -732,6 +803,12 @@ private struct PanelTextArea: View {
     /// The floor — a row's one line, or, for the add area, every point the
     /// comments left.
     var minHeight: CGFloat
+    /// A comment ROW grows with its text and never scrolls (the list
+    /// scrolls). The ADD area is the opposite: it is exactly the size of the
+    /// room it was given and scrolls itself, because a draft longer than the
+    /// room must follow the caret — which a text view does and an outer
+    /// scroll view does not.
+    var growsWithText: Bool = true
 
     @State private var measured: CGFloat = 0
 
@@ -752,9 +829,9 @@ private struct PanelTextArea: View {
             .font(font)
             .foregroundStyle(ink)
             .scrollContentBackground(.hidden)
-            .scrollDisabled(true)
-            .frame(height: max(minHeight, measured))
-            .background(alignment: .topLeading) { ruler }
+            .scrollDisabled(growsWithText)
+            .frame(height: growsWithText ? max(minHeight, measured) : max(0, minHeight))
+            .background(alignment: .topLeading) { if growsWithText { ruler } }
             .overlay(alignment: .topLeading) { placeholderLabel }
     }
 
