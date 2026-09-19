@@ -300,7 +300,7 @@ touches her real store outside the pre-authorized refresh.**
 | 2b | UNIT A2 — the comments panel as a text editor (item 3's panel half, memo §2 D) | **DONE 2026-09-18** — `52cd0cc4`…`afc108ee` + this record's close; the UNIT A2 RECORD is at the end of this file (the writing semantics as one brain · 16 pins with the red-on-old table · the walk's four finds and 19 captures · finals). QUESTIONS #118 opened |
 | 3 | UNIT B — note-list skimmability (item 4) | **DONE 2026-09-19** — `2d083439`…`7aac721c` + this record's close; the UNIT B RECORD is at the end of this file (the contract as built · 27 pins in 4 suites · the walk's 18 captures and its one defect · the suite find traced on two trees · three things handed up · finals). QUESTIONS #119 opened |
 | 4 | UNIT C — the quick-capture Mac face (item 9 / R-13u-4) | **DONE 2026-09-19** — `cf3d86c2`…`9da5bec3` + this record's close; the UNIT C RECORD is at the end of this file (the contract as built and why the box is AppKit · the traced refusal defect with its red-on-old · 18 pins in 3 new suites · the walk's 16 captures in both voices and both appearances and the two things it found · three things handed up). QUESTIONS #120 opened |
-| 5 | UNIT D — named commits (item 14 / R-13u3-1) | NOT STARTED |
+| 5 | UNIT D — named commits (item 14 / R-13u3-1) | **DONE 2026-09-19** — `203a722c`…`a2c5ede0` + this record's close; the UNIT D RECORD is at the end of this file (the contract as built · the three traced mechanisms, two found by the walk and one real regression found by the suite · 18 pins in 6 suites + 4 shipped suites amended · the walk's 16 captures in both voices and both appearances · the mobile-parity note · three things handed up). QUESTIONS #121 opened |
 | 6 | UNIT E — the #80(e) two faces (item 15) | NOT STARTED |
 | 7 | UNIT F — PDF renders formatting (item 16) | NOT STARTED |
 | 8 | UNIT G — the ceremony-sheet residuals (KnownIssues row 42) | NOT STARTED |
@@ -1607,7 +1607,7 @@ chord (⇧⌘V stays `PlainPaste`'s): ⏎ and ⎋ act only inside a name field t
 | 5 | the RENAME door in Block History, on manual AND quiet savepoints + pins | **DONE** (4 cells; the whole family + the pane's shipped suite 35/35 green) |
 | 6 | the copy that teaches (the helper dictionary, the cheat sheet, the tutorial lesson) + pins | **DONE** (2 cells, both red on the shipped copy; the two tutorial suites 14/14 green) |
 | 7 | QUESTIONS #121 (the PROVISIONAL calls) + the next-free marker moved | **DONE** — six lettered calls; the marker moved to #122 at the file's end |
-| 8 | the walk + captures, the FULL Mac suite, tutorial spine, iOS build, the FULL mobile suite | **WALK DONE** (16 captures, both voices, both appearances, all four commit doors driven; two finds fixed in this commit) · suites PENDING |
+| 8 | the walk + captures, the FULL Mac suite, tutorial spine, iOS build, the FULL mobile suite | **DONE** — 16 captures; finals below (the full Mac suite run THREE times, the deciding one alone) |
 
 *(Nothing below this line is claimed until its row says DONE.)*
 
@@ -1623,3 +1623,222 @@ traced, measured red-on-old and recorded in this section; if none does, this sec
 core **1580 / 172** green · the FULL Mac suite **2841 / 474** with ONLY row 58's recorded
 environment red (`theReadClickLandsInIndexAtThatBlock`) · the FULL mobile suite **626 / 106 with 4
 known issues** · iOS build green · marker **8**.
+
+### WHAT A SAVEPOINT IS NOW (the contract, in her words where they exist)
+
+**A SAVED MOMENT CAN CARRY A NAME, AND THE NAME IS ALWAYS EDITABLE** (item 14 · R-13u3-1).
+`commit_point.message` has existed since v1 and §9's signature already read
+`commit(variant, kind=manual, message?)`; what never existed was a door. Now:
+
+- **⌘S opens a small focused field; ⏎ files the savepoint.** Empty means unnamed, so the fast
+  road is *"enter-to-skip keeps ⌘S instant"* exactly as she wrote it — two keys, and the savepoint
+  she has always got. ⎋ (or a click outside, or the window going) cancels the whole gesture and
+  writes nothing.
+- **Every Mac commit door answers the same gesture:** Write's bar and its chord, the Takes/Lenses
+  bar, Canvas and Compare (whose only commit door is the chord itself). ONE component
+  (`Core/Views/SavepointNameField.swift`), ONE pure rule (`SavepointName`, core), five hosts.
+- **The name LEADS the row in Block History**, in the accent register, with *when · how it was
+  saved* muted beneath it; **Name / Rename** sits beside **Restore** on EVERY savepoint — manual
+  and quiet alike (her unqualified *"Editable"*). Clearing the field removes the name.
+- **A renamed quiet savepoint is still quiet.** The rename writes `message` and nothing else, so
+  the occasion stays visible wherever a face tells the two kinds apart — her ruling's own note,
+  pinned twice (as a value and through the store).
+- **The snapshot's TEXT is untouched by every road here.** I5 is not merely respected, it is
+  unreachable: no door in this family can write `commit_point.text`, and the op's own pin asserts
+  the text is byte-identical after a rename of a take that has since moved on.
+
+**Why a popover and not a sheet** (#121(d)): a sheet takes the window for a one-line optional
+name, and her ruling's whole point is that the fast road stays fast. The field hangs at the door
+that summoned it, takes the keyboard on appear (the ⌘K palette's idiom — `.task { focused = true }`,
+verified on the walk in all four surfaces and both voices), and gives it back when it goes.
+
+**What the sync fence cost: nothing.** `message` was already classified ENCRYPTED in `SyncSchema`
+(it is her prose), the shipped `commit_point` outbox triggers carry the UPDATE, and `Merge.swift`
+applies the row server-version-wins like every other table. ZERO `Sync/` lines, and the wire's
+disclosure envelope does not move.
+
+### THE TRACED MECHANISMS (what was actually wrong, and where each was caught)
+
+**This unit is a MISSING CAPABILITY**, and the brief says not to manufacture reds for one. Nothing
+was wrong with savepoints; there was simply no door. So there is no red-on-old table here, and the
+three things that WERE wrong were all found by driving the thing rather than by reading it:
+
+1. **THE PLACEHOLDER TRUNCATED AT THE DOOR (the walk).** The first wording was *"name this moment
+   (optional)"* and it cut to *"name this moment (optional"* at the field's own width in the
+   Terminal voice's monospace — the door's one sentence, unreadable at the one width the field
+   actually opens at. The optionality belongs to the hint (*"an empty name is fine — the moment is
+   saved either way"*), so the prompt is now just *"name this moment"*, the field is 260 pt, and
+   the rename door's placeholder says **"no name"** — which is exactly what ⏎ leaves behind after
+   a clear.
+2. **THE RENAME HINT RAN TO FOUR LINES AND CUT MID-WORD (the walk).** *"…the moment's text never
+   chang…"* at the field's width. What I5 says is now the DOOR's `help` sentence, where there is
+   room for it, and the hint is two lines.
+3. **A ZERO-SIZE ANCHOR STILL TOOK THE STACK'S SPACING (the full Mac suite).** Canvas and Compare
+   render no commit door, so I hung the field off a zero-size `Color.clear` at the head of their
+   strips — and a zero-WIDTH child still takes an `HStack`'s spacing: Compare's toolbar moved 8 pt
+   off the one left edge its row-16 pin holds, and `CompareLensesAlignmentTests` caught it on the
+   first full run. Both anchors are `.overlay(alignment: .topLeading)` now, which takes no layout
+   at all and anchors in the same corner. **This is the unit's one real regression, found by the
+   suite, fixed and re-measured** (`a2c5ede0`).
+
+*(A fourth thing the walk had to settle rather than assume: after the first ⏎ the live take pane
+showed a caret on a second line, which reads exactly like a stray newline leaking into the buffer.
+Three more ⏎ presses added no further lines, the savepoint texts were identical across all four,
+and the pane came back one line tall after a relaunch — TK2's own trailing line fragment
+(TEXTKIT2 §3), not a newline. Recorded because the next reader will see it too.)*
+
+### THE PINS (18 new cells in 6 suites + 4 shipped suites amended)
+
+| cell | what it holds | red-on-old |
+|---|---|---|
+| `theNameRuleTrimsTheEndsAndKeepsTheInsideWhole` (core) | the ONE rule: ends trimmed, nothing left means no name, the inside kept whole | not bug-class (a new rule) |
+| `renamingSetsClearsAndNormalizes` (core) | set · re-set · clear by whitespace · clear by nil, read back from the store | not bug-class |
+| `renamingNeverTouchesTheSnapshotOrItsKind` (core) | **I5**: the text is byte-identical after a rename; a renamed quiet savepoint stays `auto` | not bug-class |
+| `namingIsMetadataNeverATouchStampOrChurn` (core) | no touch, no churn, no major-revision stamp (the `setTakeLabel` conventions) | not bug-class |
+| `aNoOpRenameWritesNothingAtAll` (core) | the same name again, and a clear on an unnamed savepoint: no row, no outbox entry | not bug-class |
+| `renamingRidesTheExistingCommitPointOutboxTriggers` (core) | the brief's sync fact, **verified rather than assumed** | not bug-class |
+| `aSealedPostRefusesRenaming` (core) | the seal's letter (PROVISIONAL #121(c)) | not bug-class |
+| `aLockedTakeStillTakesASavepointName` (core) | the lock freezes the BUFFER; the snapshot is immutable anyway (#121(c)) | not bug-class |
+| `anArchivedTakesSavepointStillTakesAName` (core) | naming never resurrects | not bug-class |
+| `aMissingSavepointAndADeadTakeBothRefuse` (core) | the two honest throws | not bug-class |
+| `aSavepointCanBeBornNamedAndTheNameIsNormalizedThere` (core) | the commit door's shipped parameter: named · skipped · one savepoint per press | not bug-class |
+| `theNameIsTheFirstThingTheRowSays` | the name LEADS `meta`, details follow whole | not bug-class |
+| `anUnnamedSavepointReadsExactlyAsItAlwaysHas` | the ordering change costs the shipped rows nothing | not bug-class |
+| `aNamedQuietSavepointStillSaysQuiet` | her ruling's own note, as a value | not bug-class |
+| `theFaceReadsTheSameNameRuleTheStoreWritesBy` | a face can never show a name the store would normalise away | not bug-class |
+| `theRenameDoorWordsItselfToItsRow` | Name vs Rename, the two helps, the two receipts | not bug-class |
+| `theAskSeedsItselfFromWhatItIsNaming` | the commit door opens EMPTY, the rename door on what is there | not bug-class |
+| `theFieldTeachesItsTwoKeys` | the hint says ⏎ and ⎋ and that an empty name is fine; I5 at the door's help | not bug-class |
+| `commandSThenReturnFilesOneUnnamedSavepoint` | **the skip road:** the door writes nothing, ⏎ files exactly one savepoint, message NULL, kind manual, the buffer exact | not bug-class |
+| `aTypedNameRidesTheSavepointAndTheReceiptSaysIt` | the named road end to end, receipt included | not bug-class |
+| `cancellingTheFieldFilesNothingAtAll` | ⎋ is no savepoint, not a savepoint with no name (#121(b)) | not bug-class |
+| `theDoorRefusesBeforeItOpensAFieldItCannotFile` | P-2: the caret in the open tail refuses where it always did, and no field opens | not bug-class |
+| `theNamedSavepointReadsBackNameFirst` | the store half and the face half meeting on one savepoint | not bug-class |
+| `theTakesDoorOpensTheFieldAndFilesWhatItIsGiven` | the boards' door: named, then the skip road on the same take | not bug-class |
+| `renamingASavepointSetsAndClearsItsNameAndSaysSo` | the pane's act and both receipts | not bug-class |
+| `aQuietSavepointCanBeNamedAndStaysQuiet` | the same claim through the REAL store and the real model | not bug-class |
+| `renamingNeverChangesWhatTheMomentHolds` | I5 asserted where the door is, with the take moved on | not bug-class |
+| `aSealedNoteRefusesTheRenameAndSaysWhy` | the refusal arrives in the pane's own register, worded | not bug-class |
+| `theHelperTeachesTheNameAndTheSkipKey` | the dictionary entry, the ⌘S row, the hover sheet | **RED on the shipped copy** (neither carried ⏎ or the word "name") |
+| `theSavingLessonTeachesTheNameAndTheSkipKey` (`TutorialWalkTests`) | the tutorial lesson through the real seeded store | **RED on the shipped lesson** |
+
+*(Amended, not replaced: `TutorialWherePlacesActsTests`' ⌘S arm, `CommandRoutingTests`' routed-⌘S
+pin, `TakeToBlockDoorTests`' no-ring arm and the Canvas/Compare no-focus arms now drive the DOOR —
+`askSavepointName` — and, where they assert a savepoint, file it with ⏎. Four deliberate updates;
+nothing deleted to pass. Every other shipped cell on these roads rides byte-unmodified, because
+the FILER kept its guard, its flush ordering and its refusal word for word.)*
+
+**A MOUNTED PIN I WROTE, MEASURED VACUOUS AND DELETED** (its reason is in the test file, where the
+next reader will look): a probe that mounts the real pane twice — a block with no savepoint and one
+with one — and counts `KeyViewProxy` controls, to hold "a savepoint row draws TWO doors now". It
+measured **1 control in both mounts**: in this headless host the pane's ScrollView rows never
+realize and the model's observation lands after the mount without rebuilding the tree (the pane's
+own batch-4 finding, met from the other side). A probe that cannot see what it claims is not
+evidence, so the rename door's PRESENCE is walk evidence (`d-04`…`d-08`).
+
+### THE WALK (mine — `io.lduarte.Variorum.debug`, dev store, 2026-09-19; `cliclick` + `Tools/WalkKit`)
+
+16 captures in `notes/plans/13u3-screens/` (gitignored), `d-01`…`d-16`.
+
+| capture | what it shows |
+|---|---|
+| `d-01` · `d-02` · `d-03` | **the headline, in Takes:** ⌘S opens the focused field over the live take; *"before the AI edit"* typed; ⏎ files it and the bar's quiet slot reads **Committed "before the AI edit" — an immutable savepoint of this take.** |
+| `d-04` | **Block History with names:** four savepoints on the take she is in — the named one leading its row in the accent, the others unchanged, and **Name / Rename · Restore** on every row including the **quiet** one |
+| `d-05` · `d-06` | the rename door: the field opens SEEDED with the current name (selected), the hint says what ⏎ and ⎋ do; a new name typed and filed — the row reads *"the ending I kept"* and the pane says **Saved moment named "the ending I kept".** |
+| `d-07` · `d-08` | **the quiet savepoint named** — *"the one before I left"* — and its row still says **quiet**, her ruling's letter on screen; its door has flipped from Name to Rename |
+| `d-09` · `d-10` | Write's own door: ⌘S over the full-document editor opens the same field above the bar; ⎋ closes it with no receipt and no savepoint |
+| `d-11` (Terminal dark) · `d-12` (Study dark) · `d-13` (Study light) | both voices, both appearances: the field in the voice's own face, the hint legible, the caret the palette's accent, the room fully black in dark (R51) |
+| `d-14` · `d-15` | **Canvas**, which renders no commit door at all: ⌘S hangs the field at the strip's leading edge, the live card ringed behind it; filed — and the workbench then reads **2 savepoints** on that block where it read 1 |
+| `d-16` | **Compare**, the same composition at its header's leading edge |
+
+**WALK VERDICT: ⌘S means one thing on every Mac surface — it asks for a name and ⏎ files it — a
+savepoint's name leads it wherever it is listed, and a name is editable afterwards from the door
+her ruling put beside it.** Also driven and confirmed: ⌘S at the shelf (no take) opens nothing;
+the field takes the keyboard on appear in all four surfaces and both voices; three successive
+skip-road commits leak no newline into the take.
+
+**The walk found TWO things the desk could not**, both fixed and re-walked (`5f40e5b3`): the
+truncated placeholder and the four-line rename hint (traced above).
+
+### FINALS (2026-09-19)
+
+- core `swift test` — **Test run with 1591 tests in 173 suites passed after 52.078 seconds.**
+- the FULL Mac suite — **Test run with 2859 tests in 480 suites failed after 755.816 seconds with
+  2 issues.** Both issues are ONE test: `theReadClickLandsInIndexAtThatBlock`, the recorded
+  environment red (KnownIssues row 58, owner 12) the brief names as the single tolerated one.
+  **Run three times, and the arithmetic of the other two is recorded rather than hidden:** run 1
+  carried this red plus `BookOutlineLandingTests`' collapsed-story arm (`abs(top) → 3424.0`) and
+  the two my diff really broke (fixed at `a2c5ede0`); run 2 carried this red plus two TIMING pins
+  (`initReturnsBeforeTheStoreIsOpen`, `ModeSwitchCarryTests`) because I ran the iOS build beside
+  it — my own load, the trap the ENVIRONMENT section warns about; run 3 was run ALONE and is the
+  final. The landing arm is KnownIssues row 49's recorded load-flake class, adjudicated by the
+  paired protocol rather than by assertion: **8/8 green isolated, twice, and green in runs 2 and 3.**
+- the TUTORIAL SPINE — green in-run (all 11 `Tutorial…` suites passed, including the lesson this
+  unit edited).
+- iOS build — **BUILD SUCCEEDED**.
+- the FULL mobile suite — **Test run with 626 tests in 106 suites failed after 146.741 seconds
+  with 9 issues (including 4 known issues).** The 4 known issues are the baseline's. The other 5
+  are TWO tests, both in `MobileStarsTests`, both asserting a star cap of **5** against core's
+  `Operations.starLimit = 15` — **measured PRE-EXISTING on a scratch worktree at this unit's start
+  point (`858dcbd6`): byte-identical failures there.** Handed up below; not mine, and not fixed
+  here.
+- lockstep marker — **8**, untouched. Schema: ZERO. Migrations: ZERO. `Sync/`: ZERO.
+  `Persistence/`: ZERO. `Server/`: ZERO.
+
+*(Suite arithmetic, stated rather than rounded: the 2841/474 baseline + this unit's 18 new cells in
+6 suites + the tutorial's 1 new cell comes to 2860/480 by hand, and all three runs counted
+2859/480. The six new suites are each named PASSED in the log and the tutorial cell is named
+PASSED; I did not chase the single-cell difference between the baseline's recorded arithmetic and
+the runner's count.)*
+
+### MOBILE PARITY (a note, not a build — the brief's fence)
+
+**The phone's Block History listing gains savepoint names for free**, because the shared brain
+`SavepointRowFace.meta` now leads with the name and `MobileBlockHistorySheetView` renders exactly
+that line (`App/Variorum/VariorumMobile/Features/Takes/MobileBlockHistorySheetView.swift:418`). No
+phone chrome was built and none is owed for READING a name. What the phone does NOT have is the
+two DOORS: its commit button (`MobileBlockHistory`, ⌘S has no phone equivalent) files unnamed, and
+it offers no rename. The RULE travels — a name is optional at the door and editable afterwards —
+and the phone's answer to "where does the field live on a sheet" is the mobile catch-up's to
+design, not this unit's to invent. **A parity row is the orchestrator's to file.**
+
+### FOUND, NOT MINE (handed up rather than carried)
+
+1. **The phone's `MobileStarsTests` have been red since the star cap went 5 → 15** (13u2b). Two
+   tests hard-code the old cap; core says 15. Measured pre-existing on a worktree at this unit's
+   start point. 13u2b's closeout recorded mobile as *"untouched — nothing mobile-visible shipped"*,
+   which was true of its FACES and false of the shared constant its Mac work moved: the mobile
+   suite was not re-run there. A one-line fix each, and the deeper lesson is the one UNIT B already
+   wrote down — **a change to a shared core constant is a change to every platform that reads it.**
+2. **Canvas reports no focused block to the router**, so the ⌘K "Block History" row opens the pane
+   for whatever block the LAST surface reported (I watched it open a Write block while a canvas
+   card was live). Shipped behaviour, older than this unit; it made confirming the canvas commit
+   take three extra steps. The honest fix is for the canvas's live pane to report focus like the
+   other surfaces do.
+3. **A receipt spoken on Canvas or Compare is invisible under her `quiet` default** — the five
+   doors #106 already names, met in the wild: the canvas commit landed (the workbench read 2
+   savepoints where it read 1) and said nothing. Recorded, not changed: that is her ruling.
+
+### DEFERRED / NOT MINE (stated rather than done)
+
+- **QUESTIONS #121** — the six calls this unit had to make inside her two rulings (⌘S opens a
+  field · ⎋ cancels the whole commit · the seal refuses a rename while a locked take allows one ·
+  a popover at the door, and where the two boards have no door · the name leads the row, which is
+  the unit's one mobile-visible change · the rename door on quiet savepoints). All PROVISIONAL.
+- **The phone's two doors** (above) — the mobile catch-up's.
+- **Not touched, as the brief fences:** UNIT A1's gutter, UNIT A2's comments panel, UNIT B's card
+  family, UNIT C's capture boxes, ⇧⌘V (`PlainPaste`), every other unit in this phase,
+  `Sources/VariorumCore/Sync/`, `Persistence/`, `Server/`, the schema and the marker.
+
+---
+
+## UNIT D CLOSED — 2026-09-19
+
+A saved moment can be named at the door that writes it and renamed at the door that lists it —
+item 14 and R-13u3-1 built to their letter, with ONE field, ONE pure rule and ONE shared face
+brain serving five doors across four Mac surfaces and (for reading) the phone. ⌘S stays two keys;
+⎋ writes nothing; a quiet savepoint takes a name and stays quiet; and the snapshot's text is
+unreachable from every road in the family (I5). 18 new cells in 6 suites with 2 copy cells red on
+the shipped words, a 16-capture walk in both voices and both appearances that found two truncations
+the desk could not, one real regression found by the suite and fixed, and one new PROVISIONAL
+bundle (#121). Zero schema, zero migrations, zero `Sync/`, marker 8. Suites and finals above.
