@@ -1930,3 +1930,37 @@ restore strands ancestors, read the confirm in the flow, take PROMOTE once and R
 walk the new lesson in the tutorial; both voices, both appearances. Record: **UNIT E RECORD**,
 LIVE STATUS from the first commit, UNIT CLOSED banner, ledger row 6 flipped in the same commit.
 
+
+---
+
+## UNIT E RECORD — THE #80(e) TWO FACES (opus-implementer, 2026-09-19)
+
+**WHAT THIS UNIT DOES NOT DO (the record's first line):** it does not change what RESTORE,
+PROMOTE or SAVE A VERSION *do* — every operation in `Operations+NoteVersions.swift` is byte
+untouched, the Delete Now road still takes exactly what her #80(e) ratification said to keep
+taking, and no undo/redo entry changes. ZERO schema, ZERO migrations, ZERO
+`Sources/VariorumCore/Sync/` lines (`PurgeFamily` is READ ABOUT and pinned against, never
+edited), the marker stays **8**. It does not touch UNIT A1's gutter, UNIT A2's comments panel,
+UNIT B's card family, UNIT C's capture boxes or UNIT D's savepoint names. It builds NO phone
+face (the phone still has no Versions surface — a parity note below). It does not fix the
+KnownIssues row *"A note's saved VERSIONS ride a BLOCK-level anchor"* (owner 13w, context only).
+
+### LIVE STATUS (written at the start; flipped in the same commit as each piece)
+
+| # | piece | status |
+|---|---|---|
+| 0 | the record + LIVE STATUS | **DONE** |
+| 1 | THE PROBE — does the restore actually strand an ancestor? (traced, measured, recorded) | PENDING |
+| 2 | core — the bounded read + its pins (incl. the anti-drift pin against `PurgeFamily`) | PENDING |
+| 3 | the confirm — the copy + the ask road + pins (red-on-old where the shipped words are false) | PENDING |
+| 4 | the tutorial lesson (b) + its spine pins | PENDING |
+| 5 | QUESTIONS #122 + the next-free marker moved | PENDING |
+| 6 | the walk + captures, the FULL Mac suite, tutorial spine, iOS build, the mobile suite | PENDING |
+
+*(Nothing below this line is claimed until its row says DONE.)*
+
+**BASELINES AT OPEN** (UNIT D's recorded finals; never re-run at a start): core **1591 / 173**
+green · the FULL Mac suite **2859 / 480** with ONLY row 58's recorded environment red
+(`theReadClickLandsInIndexAtThatBlock`) · tutorial spine green · iOS build green · the FULL
+mobile suite **626 / 106 with 4 known issues** (`MobileStarsTests`' two star-cap reds were fixed
+by the orchestrator after D) · marker **8**.
