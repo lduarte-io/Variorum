@@ -304,7 +304,8 @@ touches her real store outside the pre-authorized refresh.**
 | 6 | UNIT E — the #80(e) two faces (item 15) | **DONE 2026-09-19** — `1031135b`…`e24318ce` + this record's close; the UNIT E RECORD is at the end of this file (the PROBE that falsified #80(e)'s premise with its mechanism · the bounded read with its anti-drift pin against `PurgeFamily` · 8 new cells in 3 suites with the one defect-shaped cell red on the shipped words · the walk's 14 captures and what it proved · the re-seed note for the closeout). QUESTIONS #122 opened |
 | 7 | UNIT F — PDF renders formatting (item 16) | NOT STARTED |
 | 8 | UNIT G — the ceremony-sheet residuals (KnownIssues row 42) | NOT STARTED |
-| 9 | The ladder — `fable-reviewer`, combined diff, standing rounds | NOT STARTED |
+| 8b | UNIT H — the Takes board's live-card delete door + the lesson's truth (the E hand-up, adjudication 2 above) | NOT STARTED — after G |
+| 9 | The ladder — `fable-reviewer`, combined diff, standing rounds | NOT STARTED — named foci: UNIT B's one-time editor SPIN on deleteBackward (the frames in the UNIT B RECORD; the decoration pass is A1's neighbourhood); A1's geometry across the five host cells |
 | 10 | The orchestrator's walks + closeout ritual + the pre-authorized `/Applications` refresh (R-13u3-2) | NOT STARTED |
 
 ## ENVIRONMENT TRAPS (every unit brief carries this section verbatim — the skill's rule)
@@ -2201,3 +2202,68 @@ her rule and ending at that confirm. 8 new cells in 3 suites (one red on the shi
 walk captures in both voices and both appearances, one re-seed note for the closeout, one new
 PROVISIONAL bundle (#122). Ops byte-untouched; zero schema, zero migrations, zero `Sync/`; marker
 8. Suites and finals above.
+
+## ORCHESTRATOR ADJUDICATIONS AFTER UNIT E (2026-09-19)
+
+1. **#80(e)'s falsified premise:** E's probe measured that `restoreNoteVersion` strands NO
+   ancestors (every outgoing block gains a live descendant in the version of NOW via
+   `copyPlacements`' edges, so `joinStrandedOriginals` never fires) — the confirm now names the
+   REAL cost (savepoints · waiting deleted takes · deleted comments). Nothing to fix; QUESTIONS
+   **#122(a)** puts the re-read in front of her, and the handoff bundles it prominently. The
+   anti-drift equality pin against `PurgeFamily` keeps the confirm honest if the op ever changes.
+2. **The take-delete door, traced by the orchestrator after E's hand-up:** the door EXISTS on
+   Write's fan panel (`WriteTakesPanel`, both live and archived cards) and on the BOARD's
+   archived cards — a LIVE take card on the Takes board has none, while the tutorial's takes
+   lesson teaches *"⋯ menu ▸ Delete"* there (`TutorialSeeder` ~:1056/:1080). The ⋯ card menu
+   retired at a restyle; the spine stayed green because its pins invoke the act, not the door
+   (the R3-2 gap's twin). **A P-6 copy-truth defect found in-phase → UNIT H joins the ledger**
+   (the board's live-card delete door + the lesson's truth + a pin that holds the words to a
+   door that exists). Product risk low: the door's semantics are settled (I10's last-take
+   refusal; Write's panel is the precedent).
+3. **The AppKit-modal Restore Tutorial confirm** → a KnownIssues row, owner 13u4 (the one
+   inconsistent confirm chrome; also walker-hostile — the WalkKit fact E filed).
+4. **Mobile parity for the closeout list:** the shared `VersionsCopy`/`VersionActs` halves are
+   correct for the phone (no Versions face exists there); the pocket-guide question is the
+   catch-up's.
+
+---
+
+## UNIT F BRIEF — THE PDF EXPORT RENDERS FORMATTING (item 16; self-contained; read in this order)
+
+**Read first, in full:** (1) this file's Status banner · roster item 6 · GOVERNANCE + the
+constitution · ENVIRONMENT TRAPS · CAST & DISCIPLINE. (2) The master plan's `### 13u` **item
+(16)** — her words (*"the export as pdf is not rendering the markdown formatting you just see
+the markdown in the text and that should be fixed at some point pre v1 release"*; the road:
+reuse the Mac's own markdown display brain; a projection change ONLY; the TYPOGRAPHIC pass
+stays 13m's). (3) AppSpec §9's export notes (a callout maps to a blockquote form — a
+presentation transform only; `renderedText` and the join brain never map) and the 11b export
+shape (posts/readings/blocks; `joinRenderedTexts`; the attributed-string/CTFramesetter PDF
+path). (4) The code: the export family (`Features/` export or `Shared/` — find the 11b PDF
+path) · the Mac's markdown DISPLAY brain (13g's markdown-as-content rendering — find where
+Write/read tiers style syntax and reuse THAT, never a second parser).
+
+**Scope (ONE acceptance unit — the PDF projection):**
+1. The PDF path's attributed strings are built through the SAME markdown display brain the app
+   renders with (bold, italic, headings, lists, the code chip's monospace, links as styled
+   text) — no second parser, no new formatting rules. Whatever the display brain does not
+   style, the PDF does not style (one truth).
+2. **Byte-fences, PINNED:** `renderedText` untouched · the `.md` export byte-identical
+   before/after on a fixture corpus (a pin that exports both ways and compares) · the callout→
+   blockquote mapping preserved as-is.
+3. **Not yours:** fonts/layout/print polish (13m's typographic pass); EPUB/annotation anything
+   (permanently out); the export's granularity or file shapes.
+4. **Fences:** zero schema · zero `Sync/` · zero ops · marker 8.
+
+**Pins:** the .md byte-identity pin; attributed-run assertions on a fixture (a heading run
+carries the heading font attribute; raw `**` absent from the rendered string); the fan
+"Alternates" sections still export (the ratified shape untouched). Red-on-old IS owed here —
+the defect is real (raw syntax in shipped PDFs): a pin asserting no literal markdown syntax
+leaks into the PDF's attributed string fails on the pre-fix code.
+
+**End verification:** FULL Mac suite (row 58 tolerated) · tutorial spine green · iOS build
+green · YOUR walk: export a formatted note AND a book to PDF from the app, open both captures
+(screenshot the PDFs), verify headings/bold/lists render and no raw syntax shows; export the
+same note as `.md` and diff against a pre-unit export (byte-identical). Record: **UNIT F
+RECORD**, LIVE STATUS from the first commit, UNIT CLOSED banner, ledger row 7 flipped in the
+same commit.
+
