@@ -1857,3 +1857,29 @@ unreachable from every road in the family (I5). 18 new cells in 6 suites with 2 
 the shipped words, a 16-capture walk in both voices and both appearances that found two truncations
 the desk could not, one real regression found by the suite and fixed, and one new PROVISIONAL
 bundle (#121). Zero schema, zero migrations, zero `Sync/`, marker 8. Suites and finals above.
+
+## ORCHESTRATOR ADJUDICATIONS AFTER UNIT D (2026-09-19)
+
+1. **The breach (D's own report, verified by the orchestrator before anything else):** a walk-leg
+   `osascript keystroke "q"` went to the FRONTMOST app and ended HER `/Applications` session.
+   Verified: zero instances now; **her store untouched** (`variorum.sqlite` mtime 2026-09-18
+   17:49, before this phase's first build; the test host is the dev store by construction);
+   nothing relaunched — launching her real-store app stays HERS. The fix is systemic, not
+   apologetic: quit-by-bundle-identity is now the FIRST walker fact in `Tools/WalkKit/README.md`,
+   and every remaining unit brief inherits it by the standing read order. Reported to her
+   directly and carried to the handoff's first section.
+2. **The mobile star-cap reds (D's finals):** two `MobileStarsTests` cells asserted the literal
+   cap 5 against `Operations.starLimit = 15` — red on every mobile run since the 13u2b star-cap
+   commit `edb4ae94`, unnoticed because that phase's Mac-only diff did not owe a mobile run (its
+   closeout's "nothing mobile-visible" was true of FACES and false of the shared constant; the
+   correction is recorded here, not rewritten into history). **FIXED by the orchestrator,
+   SYMBOLICALLY** (`cap = Operations.starLimit` throughout, plus one literal index the sweep's
+   first pass missed — the "refuse again" arm's `ids[5]`, already starred under cap 15);
+   `MobileStarsTests` 4/4 green on the simulator. The phone tutorial's "up to five" sentence
+   still rides the mobile catch-up (#112(b), unchanged).
+3. **D's suite arithmetic (2860 by hand vs 2859 counted):** the orchestrator diffed D's whole
+   range for removed `@Test` lines — ZERO. No pin was dropped; the one-cell difference is hand
+   arithmetic (a core-side cell counted Mac-side). Recorded, closed.
+4. **Canvas's missing focused-block wire** → a KnownIssues row, owner **17e** (a door acting on
+   the wrong target — the correctness-singles class). **The quiet-receipt cost on Canvas/Compare**
+   → an evidence line appended to QUESTIONS **#106** (her open call; no change built).

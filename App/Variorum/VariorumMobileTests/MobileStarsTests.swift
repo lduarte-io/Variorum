@@ -70,21 +70,28 @@ struct MobileStarsTests {
     /// never the Mac's sidebar), and nothing is evicted.
     @Test func theCapRefusalSpeaksPhoneWords() async throws {
         try await withEditorWorld { session, db in
+            // SYMBOLIC on core's cap (13u3: these two tests were the only
+            // pins in either suite still asserting the literal 5 after her
+            // #112(b) ruling raised `Operations.starLimit` to 15 — red on
+            // every mobile run since 13u2b, unnoticed because that phase's
+            // Mac-only diff didn't owe a mobile run. The phone TUTORIAL's
+            // "up to five" sentence rides the mobile catch-up, #112(b).)
+            let cap = Operations.starLimit
             let ids = try await session.runner.run { ops -> [String] in
-                try (0..<6).map { try ops.createPost(title: "Note \($0)").id }
+                try (0..<(cap + 1)).map { try ops.createPost(title: "Note \($0)").id }
             }
             let model = MobileStarsModel(session: session)
-            for id in ids.prefix(5) {
+            for id in ids.prefix(cap) {
                 await model.toggle(.post(id), from: .shelf)
             }
-            #expect(model.items.count == 5)
+            #expect(model.items.count == cap)
             #expect(model.lastError == nil)
 
-            await model.toggle(.post(ids[5]), from: .shelf)
-            #expect(model.items.count == 5, "the cap evicts nothing")
-            #expect(!model.isStarred(.post(ids[5])))
+            await model.toggle(.post(ids[cap]), from: .shelf)
+            #expect(model.items.count == cap, "the cap evicts nothing")
+            #expect(!model.isStarred(.post(ids[cap])))
             let refusal = try #require(model.lastError)
-            #expect(refusal == MobileStarsModel.capRefusal(limit: 5))
+            #expect(refusal == MobileStarsModel.capRefusal(limit: cap))
             #expect(refusal.contains("top of the shelf"), "the phone's own road is named")
             #expect(!refusal.contains("sidebar"), "never the Mac's surface")
             #expect(!refusal.contains("Mac"))
@@ -134,20 +141,22 @@ struct MobileStarsTests {
     /// auto-clears — pinned so the gating can't over-reach.
     @Test func aRefusalSpeaksAtItsOwnDoorAndClearsAfterABeat() async throws {
         try await withEditorWorld { session, db in
+            // Symbolic on core's cap — see the sibling test's note (13u3).
+            let cap = Operations.starLimit
             let ids = try await session.runner.run { ops -> [String] in
-                try (0..<6).map { try ops.createPost(title: "Note \($0)").id }
+                try (0..<(cap + 1)).map { try ops.createPost(title: "Note \($0)").id }
             }
             let model = MobileStarsModel(session: session)
             model.errorClearDelay = .milliseconds(40)
-            for id in ids.prefix(5) {
+            for id in ids.prefix(cap) {
                 await model.toggle(.post(id), from: .shelf)
             }
             #expect(model.lastError == nil)
 
-            // The sixth star, fired from the LIBRARY's door: the
+            // The over-cap star, fired from the LIBRARY's door: the
             // refusal renders there and ONLY there.
-            await model.toggle(.post(ids[5]), from: .library)
-            #expect(model.error(on: .library) == MobileStarsModel.capRefusal(limit: 5))
+            await model.toggle(.post(ids[cap]), from: .library)
+            #expect(model.error(on: .library) == MobileStarsModel.capRefusal(limit: cap))
             #expect(model.error(on: .shelf) == nil,
                     "the refusal speaks where its door fired — never on the other root")
 
@@ -159,7 +168,7 @@ struct MobileStarsTests {
             // A success clears immediately (no stale ghost): refuse
             // again, then un-star one — the refusal is gone at once.
             model.errorClearDelay = .seconds(60) // the cadence must not be what clears it
-            await model.toggle(.post(ids[5]), from: .library)
+            await model.toggle(.post(ids[cap]), from: .library)
             #expect(model.error(on: .library) != nil)
             await model.toggle(.post(ids[0]), from: .shelf)
             #expect(model.lastError == nil, "a successful toggle clears the refusal at once")
