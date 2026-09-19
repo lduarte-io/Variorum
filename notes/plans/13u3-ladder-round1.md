@@ -277,3 +277,9 @@ R1-6 is optional hardening, honestly labelled speculative.
 in place on the committed tree (BlockHistoryPane.rename's receipt made unconditional again — the
 shipped shape) with the OP fix left standing, the suite run, and the file restored by
 `git checkout` against the R1-2 fix commit. Pre-revert state committed (the R1-2 commit).
+
+**ANNOUNCED BEHAVIOURAL REVERT #2:** to measure the four `SavepointSealedDoorTests` cells
+red-on-old, the four production files carrying the R1-3 guards (`EditorViewModel.swift` ·
+`TakesViewModel.swift` · `CanvasViewModel.swift` · `CompareBoardView.swift`) are checked out to
+the PRE-GUARD commit (the R1-2 findings-note commit), the suite run, and the four files restored
+by `git checkout` against the R1-3 fix commit. Pre-revert state committed (the R1-3 commit).
