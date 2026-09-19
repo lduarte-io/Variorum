@@ -1607,7 +1607,7 @@ chord (⇧⌘V stays `PlainPaste`'s): ⏎ and ⎋ act only inside a name field t
 | 5 | the RENAME door in Block History, on manual AND quiet savepoints + pins | **DONE** (4 cells; the whole family + the pane's shipped suite 35/35 green) |
 | 6 | the copy that teaches (the helper dictionary, the cheat sheet, the tutorial lesson) + pins | **DONE** (2 cells, both red on the shipped copy; the two tutorial suites 14/14 green) |
 | 7 | QUESTIONS #121 (the PROVISIONAL calls) + the next-free marker moved | **DONE** — six lettered calls; the marker moved to #122 at the file's end |
-| 8 | the walk + captures, the FULL Mac suite, tutorial spine, iOS build, the FULL mobile suite | PENDING |
+| 8 | the walk + captures, the FULL Mac suite, tutorial spine, iOS build, the FULL mobile suite | **WALK DONE** (16 captures, both voices, both appearances, all four commit doors driven; two finds fixed in this commit) · suites PENDING |
 
 *(Nothing below this line is claimed until its row says DONE.)*
 

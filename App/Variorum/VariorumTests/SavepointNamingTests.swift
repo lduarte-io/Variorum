@@ -130,7 +130,14 @@ struct SavepointNameAskTests {
         #expect(new.lowercased().contains("empty name is fine"))
         let rename = SavepointNameCopy.hint(.rename)
         #expect(rename.contains("Clearing the field removes the name"))
-        #expect(rename.contains("never changes"), "I5, said at the door")
+        // I5 is the DOOR's help sentence, not the field's hint: the hint ran
+        // to four lines at the field's width on the walk and truncated
+        // mid-word, and the help is where there is room to say it.
+        let when = Date(timeIntervalSince1970: 1_782_864_000)
+        let named = CommitPoint(
+            id: "c1", variantId: "v1", text: "x", kind: .manual,
+            message: "a name", createdAt: when)
+        #expect(BlockHistoryCopy.nameHelp(named).contains("never editable"), "I5, at the door")
         #expect(SavepointNameCopy.prompt(.newSavepoint) != SavepointNameCopy.prompt(.rename))
         #expect(SavepointNameCopy.filed("before the AI edit").contains("before the AI edit"))
     }

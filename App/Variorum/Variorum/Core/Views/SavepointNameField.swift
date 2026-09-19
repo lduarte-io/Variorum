@@ -72,13 +72,25 @@ nonisolated struct SavepointNameAsk: Identifiable, Equatable {
 /// KEY, and the shared face's own rule is that a sentence naming one
 /// platform's chord does not live in the shared home.
 nonisolated enum SavepointNameCopy {
-    static let newPrompt = "name this moment (optional)"
-    static let renamePrompt = "name this moment"
+    // **MEASURED ON THE WALK, NOT GUESSED** (13u3 UNIT D): the first
+    // wording was *"name this moment (optional)"* and it TRUNCATED at the
+    // field's own width in the Terminal voice's monospace — the door's
+    // placeholder cut mid-word at the one width the field actually opens at.
+    // The optionality is the hint's sentence to carry, not the prompt's.
+    static let newPrompt = "name this moment"
+    /// At the RENAME door the field opens on the current name, so the
+    /// placeholder is only ever seen after she CLEARS it — and then it says
+    /// exactly what ⏎ will leave behind.
+    static let renamePrompt = "no name"
 
     static let newHint = "\u{23CE} saves it \u{00B7} \u{238B} cancels. An empty name is fine — "
         + "the moment is saved either way."
-    static let renameHint = "\u{23CE} saves the name \u{00B7} \u{238B} leaves it as it was. "
-        + "Clearing the field removes the name; the moment's text never changes."
+    // Also measured on the walk: the first rename hint ran to four lines at
+    // the field's width and the third one truncated mid-word. What I5 says
+    // — the moment's TEXT is never editable — is the door's `help` sentence
+    // (`BlockHistoryCopy.nameHelp`), where there is room for it.
+    static let renameHint = "\u{23CE} saves it \u{00B7} \u{238B} leaves it as it was. "
+        + "Clearing the field removes the name."
 
     static func prompt(_ kind: SavepointNameAsk.Kind) -> String {
         kind == .rename ? renamePrompt : newPrompt
@@ -113,7 +125,7 @@ struct SavepointNameField: View {
 
     /// Room for a real phrase — *"before the AI edit"* — never a search bar
     /// (`TagInlineField.width`'s reasoning, one field over).
-    static let width: CGFloat = 240
+    static let width: CGFloat = 260
 
     init(
         tokens: VoiceTokens, ask: SavepointNameAsk,
