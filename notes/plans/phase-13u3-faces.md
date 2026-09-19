@@ -301,7 +301,7 @@ touches her real store outside the pre-authorized refresh.**
 | 3 | UNIT B — note-list skimmability (item 4) | **DONE 2026-09-19** — `2d083439`…`7aac721c` + this record's close; the UNIT B RECORD is at the end of this file (the contract as built · 27 pins in 4 suites · the walk's 18 captures and its one defect · the suite find traced on two trees · three things handed up · finals). QUESTIONS #119 opened |
 | 4 | UNIT C — the quick-capture Mac face (item 9 / R-13u-4) | **DONE 2026-09-19** — `cf3d86c2`…`9da5bec3` + this record's close; the UNIT C RECORD is at the end of this file (the contract as built and why the box is AppKit · the traced refusal defect with its red-on-old · 18 pins in 3 new suites · the walk's 16 captures in both voices and both appearances and the two things it found · three things handed up). QUESTIONS #120 opened |
 | 5 | UNIT D — named commits (item 14 / R-13u3-1) | **DONE 2026-09-19** — `203a722c`…`a2c5ede0` + this record's close; the UNIT D RECORD is at the end of this file (the contract as built · the three traced mechanisms, two found by the walk and one real regression found by the suite · 18 pins in 6 suites + 4 shipped suites amended · the walk's 16 captures in both voices and both appearances · the mobile-parity note · three things handed up). QUESTIONS #121 opened |
-| 6 | UNIT E — the #80(e) two faces (item 15) | NOT STARTED |
+| 6 | UNIT E — the #80(e) two faces (item 15) | **DONE 2026-09-19** — `1031135b`…`e24318ce` + this record's close; the UNIT E RECORD is at the end of this file (the PROBE that falsified #80(e)'s premise with its mechanism · the bounded read with its anti-drift pin against `PurgeFamily` · 8 new cells in 3 suites with the one defect-shaped cell red on the shipped words · the walk's 14 captures and what it proved · the re-seed note for the closeout). QUESTIONS #122 opened |
 | 7 | UNIT F — PDF renders formatting (item 16) | NOT STARTED |
 | 8 | UNIT G — the ceremony-sheet residuals (KnownIssues row 42) | NOT STARTED |
 | 9 | The ladder — `fable-reviewer`, combined diff, standing rounds | NOT STARTED |
@@ -1955,7 +1955,7 @@ KnownIssues row *"A note's saved VERSIONS ride a BLOCK-level anchor"* (owner 13w
 | 3 | the confirm — the copy + the ask road + pins (red-on-old where the shipped words are false) | **DONE** (3 cells; the red-on-old measured on the shipped words first — the log line is in the record; the suite 15/15 green after) |
 | 4 | the tutorial lesson (b) + its spine pins | **DONE** (the chapter's 4th lesson + 5 pin blocks in 2 suites; the whole spine + the pane's suite 106/106 green in 15 suites) |
 | 5 | QUESTIONS #122 + the next-free marker moved | **DONE** — six lettered calls, led by the measured correction to #80(e)'s premise; the marker moved to #123 |
-| 6 | the walk + captures, the FULL Mac suite, tutorial spine, iOS build, the mobile suite | PENDING |
+| 6 | the walk + captures, the FULL Mac suite, tutorial spine, iOS build, the mobile suite | **DONE** — 14 captures in both voices and both appearances; finals below |
 
 *(Nothing below this line is claimed until its row says DONE.)*
 
@@ -1964,3 +1964,240 @@ green · the FULL Mac suite **2859 / 480** with ONLY row 58's recorded environme
 (`theReadClickLandsInIndexAtThatBlock`) · tutorial spine green · iOS build green · the FULL
 mobile suite **626 / 106 with 4 known issues** (`MobileStarsTests`' two star-cap reds were fixed
 by the orchestrator after D) · marker **8**.
+
+### THE PROBE THAT CAME FIRST (and what it found — read this before the rest)
+
+**The brief sent me to build a confirm that names "the set-aside originals and their
+never-traveled takes" a restore takes. I measured the restore first, and it takes NEITHER.**
+
+The probe drove the real operation on three staged shapes (a divide-W's preserved original with
+an unshown take; the same with every moment deleted; a merge's two released sources), then ran
+the janitor's own physical removal over the standing purge intents (`PurgeFamily.expand` +
+`deleteLocal`, the technique `NoteVersionsTests` already uses) and asked the store what survived:
+
+- **the preserved original SURVIVED every time**, kept its takes, and still listed in the note's
+  tray afterwards (`Queries.preservedOriginals` returned it);
+- **`PurgeFamily`'s own `strandedOriginals` was EMPTY** for the restore's family, so the purge
+  agrees with the survival rather than merely postponing it.
+
+**The mechanism, traced rather than guessed:** `restoreNoteVersion` step 1 saves the version of
+NOW, which copies EVERY outgoing block, and `copyPlacements` mints a `derived_from` edge from
+each copy back to the block it copied. So the moment the restore's transaction commits, every
+outgoing block has a LIVE descendant OUTSIDE the purge family — which is exactly the condition
+`joinStrandedOriginals` (her round-8b rule) requires to be ABSENT before an ancestor may join.
+The probe printed it directly: each outgoing block had exactly ONE descendant, and that
+descendant's container was the version of NOW. **#80(e)'s premise cannot hold while step 1
+exists**, and step 1 is the thing that makes restore repeatable — it is not going anywhere.
+
+**So what DOES the Delete Now road take that no version holds?** The probe answered that too, on
+a note worked in since its moment: **3 savepoints on its takes → gone; 1 deleted take waiting in
+its Block History → gone; 1 deleted comment → gone.** The version of NOW carried the words of
+both live takes and **two savepoints that are not hers** — one insurance auto-commit per copied
+take, the seal's own occasion at the version's mint. A copy carries words, never the past.
+
+**What I did with that** (all PROVISIONAL, all in QUESTIONS #122): the confirm names what the
+road MEASURABLY takes, in numbers; it still computes and words the set-aside originals, because
+her ruling names that population and the zero is ONE line of the copy loop away from being a
+number again; and both facts are pinned at both ends in core, so a future change to either says
+so out loud instead of quietly making the confirm wrong.
+
+### THE RED-ON-OLD VERIFICATION (the one defect-shaped cell, measured before the fix)
+
+**A missing sentence is a missing face — but a FALSE one is a defect, and there was one.** The
+shipped confirm read *"Where the note is right now is saved as a new version first, so this is
+never a one-way door."* True of the note's WORDS; false of the savepoints, the deleted takes and
+the deleted comments the same act destroys with no road back.
+
+`NoteVersionsPaneTests.theRestoreConfirmNeverPromisesMoreThanTheRestoreKeeps` was written
+FIRST and run against the shipped copy:
+
+```
+✘ Test theRestoreConfirmNeverPromisesMoreThanTheRestoreKeeps() recorded an issue at
+  NoteVersionsPaneTests.swift:246:9: Expectation failed:
+  !((detail.lowercased() → "where the note is right now is saved as a new version first, so this
+  is never a one-way door. …").contains("one-way door") → true)
+✘ … :251:9: Expectation failed: (detail → "…").contains("none of its words are lost")
+✘ Test run with 13 tests in 1 suite failed after 1.402 seconds with 2 issues.
+```
+
+RED on the pre-fix tree (the suite's other 12 cells green), GREEN after — and the pane's standing
+EXPLAINER, which made the same promise two inches above the button, is corrected in the same pin.
+No other cell here is a manufactured red: the counts and the lesson are new faces, and they are
+pinned as behaviour, not as bugs.
+
+### WHAT THE CONFIRM SAYS NOW (the contract, in her grain)
+
+- **Nothing to name ⇒ not one word changes.** A note nobody has worked in since its moment gets
+  the sentence it has always had (walked: capture `E07`).
+- **Something to name ⇒ one more short paragraph**, in numbers rather than categories:
+  *"A version holds the words, not the history. Going with these paragraphs, and held by no
+  version: 2 saved moments and 1 deleted comment. Nothing puts them back. Promote instead keeps
+  everything — it makes this moment a note of its own and deletes nothing."*
+- **The counts are read at ASK time** (`VersionActs.restoreCost` → `Queries.restoreCost`), the
+  `versionCount` precedent: a confirm is a pause, and the pause is about the note as it IS.
+- **The read is the NOTE's, never the corpus's (P1):** every statement is scoped to this note's
+  own live placements and their lineage — pinned by a cell that adds 24 savepoints and 8 deleted
+  takes to OTHER notes and asserts the answer does not move by one.
+- **Promote is pointed at in WORDS, not offered as a second button** (#122(c)): her #80(c)
+  ratification kept Promote fast on the reasoning that *"one mis-click beside Restore"* is the
+  risk it carries, and a promote trigger inside the destructive confirm is that mis-click.
+
+### THE LESSON (item 15(b) — her instruction, both halves in one lesson)
+
+**"what a copy carries" joins `where things go` as its fourth lesson**, between the two saves and
+the two exits. Her words: *"you're only saving the placed notes - not the history that rides with
+it"* — so the lesson teaches the WORDS/PAST rule over every copying gesture (⌘⇧S, duplicate, a
+drag out of Snippets), says where the past she is NOT copying actually lives (the block's
+History, the came-from region, the tray), and ends at the confirm: Restore asks because the past
+of the paragraphs it replaces goes with them, and Promote is the road that takes nothing.
+
+Two neighbouring sentences were corrected in the same pass: *"every block, every take"* (a
+version copies the PLACED blocks) and the same one-way-door promise the confirm made.
+
+**Pinned as prose AND as acts** (the R3-2 precedent): the chapter's contract cell now asserts the
+new lesson's six claims against the app's OWN words (`BlockHistoryPath.name`, `.doorLabel`,
+`.cameFromSection`, `TrayPath.menuLabel`, both chords, `Promote`), and two new act cells DRIVE
+it — the PRACTICE COPY act (⌘S then ⌘⇧S: the version holds every word and not one manual
+savepoint, while the moment stays on the take she pressed it on) and a merge whose two set-aside
+sources stay with the NOTE while the version holds only the page.
+
+### THE PINS (8 new cells; 5 core + 3 Mac, plus 2 tutorial act cells inside the Mac count)
+
+| pin | suite | what it holds |
+|---|---|---|
+| `theCostNamesTheHistoryTheRoadTakesAndTheVersionDoesNotHold` | `RestoreCostTests` (core) | 3 savepoints + 1 deleted take + 1 deleted comment counted, then destroyed by the real op + a physical sweep; the version keeps both takes' words and TWO insurance savepoints, never her three |
+| `anUntouchedNoteTakesNothingAVersionDoesNotAlreadyHold` | ″ | the empty cost, so the confirm stays the sentence it was |
+| `theCostIsScopedToItsNoteAndNeverToTheCorpus` | ″ | P1: 24 savepoints and 8 deleted takes elsewhere move nothing |
+| `theSetAsideReadAgreesWithThePurgeFamilyItMirrors` | ″ | **the anti-drift pin**: the mirrored predicate == `PurgeFamily.expand(...).strandedOriginals` on the fixpoint shape (an original behind an original) |
+| `aRestoreStrandsNoAncestorBecauseTheVersionOfNowIsTheirSurvivingDescendant` | ″ | the probe's finding, pinned at BOTH ends — the ancestor survives a full sweep AND each outgoing block's one descendant lives in the version of NOW |
+| `theRestoreConfirmNeverPromisesMoreThanTheRestoreKeeps` | `NoteVersionsPaneTests` | **RED on the shipped words** (above); the promise, narrowed, in the confirm and the explainer |
+| `theRestoreConfirmCountsWhatTheRoadTakesAndOffersPromote` | ″ | the ask through the real model: empty cost ⇒ byte-identical sentence; 2 moments + 1 deleted take ⇒ numbers, "Nothing puts them back", and Promote by its own verb |
+| `theCostSentenceSaysExactlyWhatIsThereAndNothingElse` | ″ | the sentence's grammar: singular/plural, the three-item list, the set-aside phrasing for the day it is real |
+| `everyPlaceTheChapterNamesIsAPlaceTheAppHas` (extended) | `TutorialWherePlacesActsTests` | the 4-lesson plan + the new lesson's six claims in the app's own words + the corrected neighbour |
+| `theMapsChapterIsStagedForItsActs` (extended) | ″ | PRACTICE COPY staged, with paragraphs either side for the merge act |
+| `theCopyLessonsPracticeKeepsTheWordsAndLeavesTheMoment` | ″ | the lesson's own act: every word travels, not one manual savepoint does, and the moment is still on the take |
+| `aVersionHoldsThePlacedParagraphsAndNotTheSetAsideOnes` | ″ | her sentence's other half: a merge's sources stay with the note; nothing in the moment came from them |
+
+### THE WALK (mine — `io.lduarte.Variorum.debug`, dev store, 2026-09-19; `cliclick` + `Tools/WalkKit`)
+
+A note typed in the shelf's quick-entry box (three paragraphs, ⇧⏎), a version saved, then WORKED
+IN: two named ⌘S savepoints, a second take, a comment added and deleted. Captures in
+`notes/plans/13u3-screens/` (gitignored):
+
+| capture | what it shows |
+|---|---|
+| `E01-versions-pane-corrected-explainer-terminal-light.png` | the pane, its explainer now ending *"so none of its words are lost"* |
+| `E02-restore-confirm-names-what-it-takes-terminal-light.png` · `E03-restore-confirm-closeup.png` | **the headline:** the confirm naming *"2 saved moments and 1 deleted comment"* and pointing at Promote |
+| `E04-promote-the-zero-loss-road-taken.png` | PROMOTE taken: *"This moment is a note of its own now, in the Library. It has left Versions."* — and the listing empty |
+| `E05-restore-taken-receipt-and-two-moments.png` | RESTORE taken: the note says the past again, and where it was a moment ago is in Versions |
+| `E06-after-the-restore-the-history-really-went.png` | **the confirm told the truth:** Block History after the restore reads *take 1 of 2 · 0* and *take 2 of 2 · 0* — *"no saved moments yet"* |
+| `E07-plain-confirm-when-nothing-is-owed.png` | the same door on a note with nothing to lose: the sentence it has always been, not one word added |
+| `E08-confirm-terminal-dark.png` · `E09-confirm-study-dark-pane-and-dialog.png` · `E10-confirm-study-light-pane-and-dialog.png` | the confirm in the other three voice/appearance cells (the counts read live: *4 saved moments* by then) |
+| `E11-the-new-lesson-in-its-chapter-study-light.png` | the re-seeded field guide — **34 notes, 9 chapters** — with *what a copy carries* third in `where things go` |
+| `E12-…-study-light.png` · `E13-…-terminal-light.png` · `E14-…-terminal-dark.png` | the lesson READ, all six paragraphs, in both voices and both appearances |
+
+**WALK VERDICT: both faces do in the app exactly what the pins say, and the walk proved the
+confirm's honesty rather than assuming it** — the sentence promised the history would go, and
+Block History afterwards showed it gone. Promote and Restore were each taken once for real.
+Nothing about the Versions semantics changed: save · read · restore · promote · delete all
+behaved exactly as before, with only the words different.
+
+**What the walk cost, and the fact it produced:** `Help ▸ Restore Tutorial…` puts up an APP-MODAL
+AppKit alert that `walk-cap` cannot see and that swallows every click and keystroke — the app
+looked normal in captures and simply stopped responding, and a `tell application id … to quit`
+was REFUSED (-128) while it was up, which briefly left two dev instances on the dev store (the
+extra was killed by PID, never by a keystroke; her `/Applications` copy was never running at any
+point in this session — `pgrep` verified before, during and after). All four facts are now the
+first entries of `Tools/WalkKit/README.md`'s UNIT E section.
+
+### FINALS (2026-09-19)
+
+- core `swift test` — **Test run with 1596 tests in 174 suites passed after 51.521 seconds.**
+  (1591 + this unit's 5 core cells.)
+- the FULL Mac suite — **Test run with 2864 tests in 480 suites failed after 763.572 seconds with
+  3 issues.** (2859 + this unit's 5 Mac cells.) **TWO of the three are ONE test** —
+  `theReadClickLandsInIndexAtThatBlock`, the recorded environment red (KnownIssues row 58, owner
+  12) the brief names as the single tolerated one. **The third is
+  `BookOutlineLandingTests.openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded`
+  (`abs(top) → 3424.0`), adjudicated by the paired protocol rather than by assertion:** 1 red / 2
+  green over three ISOLATED runs, and its fixture is `withLandingBook(posts: 18, …)` — synthetic,
+  not the tutorial — so nothing in this diff can reach it. That is KnownIssues row 49's recorded
+  load-flake class, the same arm UNIT D's run 1 carried.
+- the TUTORIAL SPINE — green: one run over all 11 `Tutorial…` suites plus the Encryption/NewModes
+  seeder consumers and the Versions pane, **106 tests in 15 suites passed**, including the new
+  lesson's four pins.
+- iOS build — **BUILD SUCCEEDED** (owed: `Shared/VersionsCopy.swift` and `Shared/VersionActs.swift`
+  compile into the phone too).
+- the FULL mobile suite — **Test run with 626 tests in 106 suites passed after 143.610 seconds
+  with 4 known issues.** The 4 are the baseline's; the two star-cap reds the orchestrator fixed
+  after UNIT D are green.
+- lockstep marker — **8**, untouched. Schema: ZERO. Migrations: ZERO. `Sync/`: ZERO.
+  `Persistence/`: ZERO. `Server/`: ZERO. Eleven files changed in all, 1064 insertions.
+
+### THE RE-SEED CONSEQUENCE (the closeout's, recorded here as the brief asks)
+
+**A lesson edit stales her REAL store's seeded field guide.** The tutorial book in her library is
+the copy seeded when she last pressed it; it has 33 notes and the old `saving a moment` wording.
+`Help ▸ Restore Tutorial…` in the refreshed build replaces the tutorial book with the current
+lessons — 34 notes, `what a copy carries` third in `where things go`, and the two corrected
+sentences. **I touched nothing real-store; this is the closeout's re-seed list item**, and it
+joins the one still owed from #80(f) (the 13p privacy chapter's own re-seed). The dev store was
+re-seeded by my walk, deliberately and only there.
+
+### MOBILE PARITY (a note, not a build — the brief's fence)
+
+The phone has **no Versions face at all**, so nothing of (a) is visible there yet — but both
+halves of the decision layer it will need are already shared and now correct:
+`VersionsPath.restoreConfirmDetail(_:)` / `restoreCostLine` (`App/Variorum/Shared/VersionsCopy.swift`)
+and `VersionActs.restoreCost` (`App/Variorum/Shared/VersionActs.swift`), over a core read every
+platform can call. When the phone builds its Versions surface it inherits the honest confirm for
+free and must not re-word it. The phone's POCKET GUIDE is a different book (`ProtectionCopy`'s
+lessons are shared; the field guide is the Mac's), so item 15(b) owes the phone nothing here —
+whether the phone's guide should carry the copies-are-placed-only rule is the mobile catch-up's
+call. **A parity row is the orchestrator's to file.**
+
+### FOUND, NOT MINE (handed up rather than carried)
+
+1. **#80(e)'s premise is false, and the ratification that rests on it should be re-read** — not
+   because the ruling was wrong (she chose "keep as built", which is exactly what shipped) but
+   because the thing she accepted losing is not what the act loses. QUESTIONS #122(a) puts the
+   measurement in front of her; the confirm now names the real cost either way.
+2. **The Versions pane has no take-level delete door I could find from the board** — the walk
+   wanted a deleted take and neither the take card, its header, nor the block ▾ menu in Takes
+   offers one (the ⋯ the tutorial's takes chapter names is not on those cards). Either the door
+   moved and the lesson's wording is stale, or it is missing; not this unit's to decide, and the
+   deleted-take COUNT is pinned in core regardless.
+3. **`Help ▸ Restore Tutorial…`'s modal is an AppKit alert while every other confirm in the app is
+   a SwiftUI `.alert`** — invisible to the walk harness and unreachable by coordinates. Worth one
+   line of consistency work in a faces batch; recorded in WalkKit either way.
+
+### DEFERRED / NOT MINE (stated rather than done)
+
+- **QUESTIONS #122** — six PROVISIONAL calls (the falsified premise and what the confirm names
+  instead · the narrowed promise · Promote in words rather than a button · the sentence only when
+  there is something to say · deleted comments counted beside deleted takes · a new lesson rather
+  than paragraphs, with its re-seed).
+- **The KnownIssues row "A note's saved VERSIONS ride a BLOCK-level anchor"** (owner 13w) — read
+  as context, untouched, as the brief fences.
+- **Not touched:** UNIT A1's gutter, UNIT A2's comments panel, UNIT B's card family, UNIT C's
+  capture boxes, UNIT D's savepoint names, every other unit in this phase,
+  `Sources/VariorumCore/Sync/`, `Persistence/`, `Server/`, the schema, the marker, and every
+  operation in `Operations+NoteVersions.swift` — byte-identical.
+
+---
+
+## UNIT E CLOSED — 2026-09-19
+
+Item 15's two faces are built, and the unit's first finding is that the ratified analysis behind
+face (a) described a loss the operation does not cause: **a restore strands no ancestor**, because
+step 1's own copy is every outgoing block's surviving descendant — measured through the real op
+and the janitor's physical sweep, and pinned at both ends. What the Delete Now road DOES take is
+the history of the paragraphs it replaces — the savepoints, the deleted takes, the deleted
+comments — and the confirm now counts those and names them in numbers, points at PROMOTE as the
+zero-loss road, and keeps the set-aside wording ready for the day that count is real. The promise
+it used to make (*"never a one-way door"*) was false and is now exactly true (*"none of its words
+are lost"*), red-on-old. The field guide gains **what a copy carries**, teaching both halves of
+her rule and ending at that confirm. 8 new cells in 3 suites (one red on the shipped words), 14
+walk captures in both voices and both appearances, one re-seed note for the closeout, one new
+PROVISIONAL bundle (#122). Ops byte-untouched; zero schema, zero migrations, zero `Sync/`; marker
+8. Suites and finals above.
