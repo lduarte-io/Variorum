@@ -409,6 +409,144 @@ struct PostRenderQueryTests {
         }
     }
 
+    // MARK: - The named-blocks reader (13u3 UNIT G — the 18f ladder's R3-9)
+
+    /// **The SAME equivalence pin shape as the precedent above, run over the
+    /// SAME fallback matrix** (the finding's own words: "mirroring
+    /// `Operations.renderedVariant`'s rule with the same equivalence pin").
+    /// Three resolvers, one world, every shape — they agree block for block,
+    /// or the drift check the merge sheet confirms against is answering a
+    /// different question from the operation that then acts.
+    @Test func renderedVariantIDAgreesWithBothResolvers() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let plain = try ops.newBlock(in: post.id, text: "plain")
+            let chosenWins = try ops.newBlock(in: post.id, text: "default")
+            let cw2 = try ops.branchVariant(chosenWins.block.id, from: chosenWins.variant.id)
+            try ops.chooseVariant(chosenWins.block.id, variantID: cw2.id)
+            // An ARCHIVED chosen falls back to the default (archive hides a
+            // take from the fan, not a slot from its text).
+            let archivedChosen = try ops.newBlock(in: post.id, text: "default2")
+            let ac2 = try ops.branchVariant(archivedChosen.block.id, from: archivedChosen.variant.id)
+            try ops.chooseVariant(archivedChosen.block.id, variantID: ac2.id)
+            try ops.archiveVariant(ac2.id)
+            // A TOMBSTONED chosen does too (the sync-race shape).
+            let deadChosen = try ops.newBlock(in: post.id, text: "default3")
+            let dc2 = try ops.branchVariant(deadChosen.block.id, from: deadChosen.variant.id)
+            try ops.chooseVariant(deadChosen.block.id, variantID: dc2.id)
+            try db.write { db in try Fixture.tombstone(db, table: "variant", id: dc2.id) }
+
+            let rendered = try db.read { try Queries.renderPost($0, containerID: post.id) }
+            #expect(rendered.count == 4, "non-vacuity: all four shapes are in the matrix")
+            let ids = try db.read { db in
+                try Queries.renderedVariantIDs(db, blockIDs: rendered.map(\.blockID))
+            }
+            try db.read { db in
+                for slot in rendered {
+                    #expect(ids[slot.blockID] == slot.variantID,
+                            "renderPost and renderedVariantIDs disagree on \(slot.blockID)")
+                    let opsAnswer = try ops.renderedVariant(db, blockID: slot.blockID)
+                    #expect(ids[slot.blockID] == opsAnswer.id,
+                            "the operations layer disagrees on \(slot.blockID)")
+                }
+            }
+            // The singular form is the plural form (one rule, two doors).
+            let single = try db.read { db in
+                (try Queries.renderedVariantID(db, blockID: plain.block.id),
+                 try Queries.renderedVariantID(db, blockID: chosenWins.block.id))
+            }
+            #expect(single.0 == plain.variant.id)
+            #expect(single.1 == cw2.id)
+        }
+    }
+
+    /// The read-layer conventions, said out loud so a caller can rely on them:
+    /// gaps are ABSENCE (never a throw — SyncSpec §5's render-gaps rule), an
+    /// UNPLACED live block still answers by its default (the one question the
+    /// pointer-driven `renderPost` cannot be asked — a block released to
+    /// lineage by divide-W or merge), and a caller may ask about ids that do
+    /// not exist.
+    @Test func renderedVariantIDGapsInsteadOfThrowingAndAnswersForUnplacedBlocks() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "one")
+            let b = try ops.newBlock(in: post.id, text: "two")
+            let merged = try ops.merge(a.block.id, b.block.id)
+            // `merge` releases BOTH sources to lineage: live blocks, no
+            // placement. `renderPost` cannot see them at all.
+            let placed = try db.read { try Queries.renderPost($0, containerID: post.id) }
+            #expect(placed.map(\.blockID) == [merged.block.id], "non-vacuity: the sources are unplaced")
+
+            let answers = try db.read { db in
+                try Queries.renderedVariantIDs(
+                    db, blockIDs: [a.block.id, b.block.id, merged.block.id, "no-such-block"])
+            }
+            #expect(answers[a.block.id] == a.variant.id, "a released block still renders its take")
+            #expect(answers[b.block.id] == b.variant.id)
+            #expect(answers[merged.block.id] == merged.variant.id)
+            #expect(answers["no-such-block"] == nil, "an unknown id is absent, not an error")
+
+            // A tombstoned block is absent too.
+            try ops.deleteBlock(merged.block.id)
+            let afterDeath = try db.read { db in
+                try Queries.renderedVariantIDs(db, blockIDs: [merged.block.id])
+            }
+            #expect(afterDeath.isEmpty)
+            let nothing = try db.read { try Queries.renderedVariantIDs($0, blockIDs: []) }
+            #expect(nothing.isEmpty, "an empty ask reads nothing at all")
+        }
+    }
+
+    /// A chosen pointer aimed at ANOTHER block's variant never lets this block
+    /// render that text — the `chosen.block_id = b.id` guard `renderPost` and
+    /// `Operations.renderedVariant` both carry ("a foreign chosen must never
+    /// let an op rewrite another block's text"), which is exactly the guard a
+    /// plain `COALESCE(cb.chosen_variant_id, b.default_variant_id)` drops.
+    @Test func renderedVariantIDRefusesAForeignChosenPointer() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "mine")
+            let b = try ops.newBlock(in: post.id, text: "yours")
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE container_block SET chosen_variant_id = ? WHERE block_id = ?",
+                    arguments: [b.variant.id, a.block.id])
+            }
+            let id = try db.read { try Queries.renderedVariantID($0, blockID: a.block.id) }
+            #expect(id == a.variant.id, "the foreign pointer falls back to this block's default")
+            let slot = try db.read { try Queries.renderPost($0, containerID: post.id) }[0]
+            #expect(slot.variantID == id, "…and renderPost says the same")
+        }
+    }
+
+    /// **THE POINT OF THE READER, pinned** (R3-9's whole motivation): the
+    /// statement SEEKS the blocks it was handed — never scans `block`, never
+    /// scans `container_block`. The plan is read off the SHIPPED constant, so
+    /// a rewrite that turned the seek into a scan would fail here rather than
+    /// quietly making a confirm cost the corpus.
+    @Test func theNamedBlocksReadSeeksAndNeverScans() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let a = try ops.newBlock(in: post.id, text: "one")
+            let b = try ops.newBlock(in: post.id, text: "two")
+            for i in 0..<40 { _ = try ops.newBlock(in: post.id, text: "filler \(i)") }
+            let sql = Queries.renderedVariantIDsSQL.replacingOccurrences(
+                of: "%%MARKS%%", with: databaseQuestionMarks(count: 2))
+            let plan = try db.read { database in
+                try Row.fetchAll(
+                    database, sql: "EXPLAIN QUERY PLAN \(sql)",
+                    arguments: StatementArguments([a.block.id, b.block.id]))
+                    .map { ($0["detail"] as String?) ?? "" }
+                    .joined(separator: "\n")
+            }
+            #expect(!plan.contains("SCAN block"), "the blocks are SEEKED by id:\n\(plan)")
+            #expect(!plan.contains("SCAN container_block"),
+                    "the placement joins through uq_cblock_ownership:\n\(plan)")
+            #expect(plan.contains("uq_cblock_ownership"),
+                    "…by name, so a dropped index shows up here:\n\(plan)")
+        }
+    }
+
     // MARK: - renderedText
 
     @Test func renderedTextJoinsBlocksWithBlankLine() throws {

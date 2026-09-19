@@ -2602,7 +2602,7 @@ ledger row 8 flipped in the same commit.
 | piece | status |
 |---|---|
 | 0 · read the brief's named sections (plan banner · roster 7 · GOVERNANCE + constitution · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the walker facts · the 18f round-3 record R3-5…R3-9 · KnownIssues row 42 · the code the findings name) | **DONE** |
-| 1 · R3-9 — core `Queries.renderedVariantID` (+ the plural), with the equivalence pin | PENDING |
+| 1 · R3-9 — core `Queries.renderedVariantID` (+ the plural), with the equivalence pin | **DONE** — `Queries.renderedVariantIDs`/`renderedVariantID` in `Sources/VariorumCore/Queries/PostRender.swift`; 4 new cells in `PostRenderQueryTests` (the three-resolver equivalence over the same fallback matrix · the gap/unplaced conventions · the foreign-chosen guard · the EXPLAIN-plan seek pin); suite 28/1 green |
 | 2 · R3-6 — the pair's rendered ids read from the STORE at open, in the same read as the fans | PENDING |
 | 3 · R3-5 — `MergeRunBlock.shownVariantID`; the RUN arm's drift check; `runMergeChain` takes the state's shown ids (RED-ON-OLD owed) | PENDING |
 | 4 · R3-7 — the pre-pair re-seeds from `rendered` on a preset refresh; hers kept under `.pairByHand` (RED-ON-OLD owed) | PENDING |

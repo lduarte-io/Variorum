@@ -173,6 +173,83 @@ extension Queries {
         }
     }
 
+    // MARK: - The rendered take of NAMED blocks (13u3 UNIT G — the 18f ladder's R3-9)
+
+    /// The SQL behind `renderedVariantIDs`, held as one constant for the same
+    /// reason `leadingBlockTextsSQL` is: the rule ships once. The resolution is
+    /// `renderPost`'s, verbatim — chosen-if-live-and-active-and-same-block,
+    /// else default-if-live — with the traversal turned around: it is driven
+    /// by the BLOCK rows named, not by a container's pointer list, and the
+    /// placement joins in beside them. `uq_cblock_ownership` (live-unique on
+    /// `block_id`, I2) makes that join at most one row per block, so nothing
+    /// multiplies and the seek is indexed.
+    ///
+    /// The `%%MARKS%%` placeholder is substituted with `?`s by the caller —
+    /// GRDB's own `databaseQuestionMarks`, the `notePickerNotes(ids:)` pattern.
+    static let renderedVariantIDsSQL = """
+        SELECT b.id AS block_id, COALESCE(chosen.id, dflt.id) AS variant_id
+        FROM block b
+        LEFT JOIN container_block cb
+          ON cb.block_id = b.id AND cb.deleted_at IS NULL
+        LEFT JOIN variant chosen
+          ON chosen.id = cb.chosen_variant_id
+         AND chosen.block_id = b.id
+         AND chosen.deleted_at IS NULL
+         AND chosen.status = 'active'
+        LEFT JOIN variant dflt
+          ON dflt.id = b.default_variant_id
+         AND dflt.deleted_at IS NULL
+        WHERE b.id IN (%%MARKS%%) AND b.deleted_at IS NULL
+        """
+
+    /// **Which take do THESE blocks render — for a caller that holds block
+    /// ids and has no use for the note around them** (13u3 UNIT G, the 18f
+    /// ladder's R3-9). The merge sheet's drift check is the first caller: it
+    /// compares two ids (a pair) or the run's handful against what the sheet
+    /// SHOWED, on a deliberate confirm, and used to reach that answer through
+    /// `Queries.renderPost` — which loads every slot's rendered TEXT of the
+    /// whole note to read two ids. Inside the app's cost model (the editor's
+    /// own projection is that query at every change) and so never a P1 breach,
+    /// but ∝ the note where ∝ the blocks named is available; this keeps the
+    /// confirm's cost the size of the gesture.
+    ///
+    /// **One rule, not a second one.** The resolution is `renderPost`'s and
+    /// `Operations.renderedVariant`'s — chosen while it is live, active and on
+    /// this block, else the block's default while it is live (the default may
+    /// be ARCHIVED and still render: archive hides a take from the fan, not
+    /// from a slot with nothing else to show). The equivalence with BOTH is
+    /// pinned over the same fallback matrix
+    /// (`PostRenderQueryTests.renderedVariantIDAgreesWithBothResolvers`).
+    ///
+    /// Read-layer conventions, deliberately unlike the operations layer's:
+    /// a dead block, an unknown id, and a block with nothing renderable are
+    /// simply ABSENT from the result (render gaps, never crash — SyncSpec §5),
+    /// where `Operations.renderedVariant` throws. An UNPLACED live block
+    /// resolves by its default, exactly as the operations layer's optional
+    /// placement does — this is the one read that can be asked about a block
+    /// released to lineage, and it answers.
+    public static func renderedVariantIDs(
+        _ db: Database, blockIDs: [String]
+    ) throws -> [String: String] {
+        let ids = Array(Set(blockIDs))
+        guard !ids.isEmpty else { return [:] }
+        let sql = renderedVariantIDsSQL.replacingOccurrences(
+            of: "%%MARKS%%", with: databaseQuestionMarks(count: ids.count))
+        var result: [String: String] = [:]
+        result.reserveCapacity(ids.count)
+        for row in try Row.fetchAll(db, sql: sql, arguments: StatementArguments(ids)) {
+            guard let variantID = row["variant_id"] as String? else { continue }
+            result[row["block_id"] as String] = variantID
+        }
+        return result
+    }
+
+    /// The single-block form — the shape the finding named. `nil` is a gap
+    /// (dead, unknown, or nothing renderable), never an error.
+    public static func renderedVariantID(_ db: Database, blockID: String) throws -> String? {
+        try renderedVariantIDs(db, blockIDs: [blockID])[blockID]
+    }
+
     // MARK: - The LEADING blocks (13u2 UNIT A2 — the book cards' preview prime)
 
     /// The SQL behind `leadingBlockTexts`, held as one constant so a pin can
