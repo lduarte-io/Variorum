@@ -98,17 +98,30 @@ extension Operations {
     /// A savepoint whose take is tombstoned refuses (`variantNotFound`): no
     /// face offers one — Block History lists the savepoints of LIVE takes —
     /// so the throw is a caller bug's honest answer, not a road she can walk.
-    public func renameCommitPoint(_ commitID: String, message: String?) throws {
+    /// Returns whether anything was WRITTEN — false is the no-op (the same
+    /// name again, or a clear on an unnamed savepoint), so a face can speak
+    /// its receipt from the op's own answer rather than from a row value
+    /// that may be stale (13u3 ladder round 1, R1-2's face half: a receipt
+    /// reports an act that landed).
+    @discardableResult
+    public func renameCommitPoint(_ commitID: String, message: String?) throws -> Bool {
         try database.write { db in
             guard var commitPoint = try CommitPoint.fetchOne(db, key: commitID) else {
                 throw OperationError.commitNotFound(id: commitID)
             }
-            let normalized = SavepointName.normalized(message)
-            guard commitPoint.message != normalized else { return }
+            // GUARDS FIRST, the no-op short-circuit second — `setTakeLabel`'s
+            // own order, restored at the 13u3 ladder (round 1, R1-2): with
+            // the no-op checked first, a SAME-NAME rename under a sealed post
+            // (or on a dead take) returned silent success where a changed one
+            // refused — one door, two answers under one seal, decided by
+            // whether she touched the text.
             let variant = try liveVariant(db, commitPoint.variantId)
             try ensurePlacementUnlocked(db, blockID: variant.blockId)
+            let normalized = SavepointName.normalized(message)
+            guard commitPoint.message != normalized else { return false }
             commitPoint.message = normalized
             try commitPoint.update(db)
+            return true
         }
     }
 

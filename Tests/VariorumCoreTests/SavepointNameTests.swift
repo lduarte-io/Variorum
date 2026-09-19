@@ -227,6 +227,41 @@ struct SavepointNameTests {
         }
     }
 
+    @Test func theGuardsOutrankTheNoOpShortCircuit() throws {
+        // **13u3 ladder round 1, R1-2 (red-on-old).** The op's own doc claims
+        // the `setTakeLabel` conventions "to the letter", and `setTakeLabel`
+        // checks liveness and the seal BEFORE its no-op guard — so a
+        // SAME-NAME rename under a sealed post refuses exactly as a changed
+        // one does, and a same-name rename of a dead take refuses too. The
+        // shipped order short-circuited on the no-op FIRST and returned
+        // silent success on both, which is what let the Block History door
+        // speak a receipt under a seal (one door, two answers under one
+        // seal, decided by whether she touched the text).
+        try withOperations { ops, db in
+            let (postID, _, commitID) = try fixture(ops)
+            try ops.renameCommitPoint(commitID, message: "settled")
+            try ops.lockPost(postID)
+            #expect(throws: OperationError.lockedPost(id: postID)) {
+                try ops.renameCommitPoint(commitID, message: "settled")
+            }
+            #expect(try db.fetchString(
+                "SELECT message FROM commit_point WHERE id = ?", [commitID]) == "settled")
+
+            // The dead-take arm of the same rule: the documented refusal
+            // ("a savepoint whose take is tombstoned refuses") must hold for
+            // the same-name case too.
+            let post = try ops.createPost(title: "second", profile: .generic)
+            let minted = try ops.newBlock(in: post.id, text: "Some prose.", at: .end)
+            let spare = try ops.branchVariant(minted.block.id, from: minted.variant.id)
+            let spareCommit = try ops.commit(spare.id)
+            try ops.renameCommitPoint(spareCommit.id, message: "kept")
+            try ops.deleteVariant(spare.id)
+            #expect(throws: OperationError.variantNotFound(id: spare.id)) {
+                try ops.renameCommitPoint(spareCommit.id, message: "kept")
+            }
+        }
+    }
+
     // MARK: - The commit door's own parameter
 
     @Test func aSavepointCanBeBornNamedAndTheNameIsNormalizedThere() throws {

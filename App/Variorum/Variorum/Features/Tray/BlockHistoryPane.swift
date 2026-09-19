@@ -297,9 +297,15 @@ final class BlockHistoryModel {
     func rename(_ commit: CommitPoint, to name: String?) async {
         status = nil
         do {
-            try await session.runner.run { ops in
+            let wrote = try await session.runner.run { ops in
                 try ops.renameCommitPoint(commit.id, message: name)
             }
+            // A receipt reports an act that LANDED (18i's grammar), and the
+            // OP's own answer says whether one did: ⏎ with the seed unedited
+            // writes nothing, so the pane says nothing — an unnamed
+            // savepoint's empty ⏎ used to speak "Name cleared…" about a name
+            // that never existed (13u3 ladder round 1, R1-2's face half).
+            guard wrote else { return }
             status = .receipt(BlockHistoryCopy.renamed(SavepointName.normalized(name)))
         } catch let error as OperationError {
             status = .refusal(TrayRefusalCopy.message(for: error))

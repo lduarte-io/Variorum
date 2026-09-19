@@ -367,6 +367,34 @@ struct SavepointRenameDoorTests {
         }
     }
 
+    /// **A ⏎ THAT WRITES NOTHING SAYS NOTHING** (13u3 ladder round 1, R1-2's
+    /// face half — a receipt reports an act that LANDED, 18i's grammar). An
+    /// unnamed savepoint's empty ⏎ used to speak *"Name cleared — …"* about a
+    /// name that never existed, and the same name again re-spoke *"Saved
+    /// moment named …"*; the receipt now rides the op's own did-write answer.
+    @Test func aRenameThatWritesNothingSpeaksNoReceipt() async throws {
+        try await withEditor(seedBlocks: ["The sea took the boat."]) { h in
+            let w = try await world(h)
+            #expect(w.commit.message == nil)
+
+            // Empty ⏎ on an UNNAMED savepoint: no write, no words.
+            await w.model.rename(w.commit, to: "")
+            #expect(try await message(h, w.commit.id) == nil)
+            #expect(w.model.status == nil,
+                    "no \u{201C}Name cleared\u{201D} about a name that never existed")
+
+            // The real write speaks…
+            await w.model.rename(w.commit, to: "kept")
+            #expect(w.model.status?.isRefusal == false)
+
+            // …and the SAME name again (normalisation included) does not.
+            await w.model.rename(w.commit, to: "  kept  ")
+            #expect(try await message(h, w.commit.id) == "kept")
+            #expect(w.model.status == nil,
+                    "the same name again writes nothing and says nothing")
+        }
+    }
+
     /// **A QUIET SAVEPOINT TAKES A NAME TOO** (her unqualified "Editable"),
     /// and stays quiet — the occasion is not overwritten by the name.
     @Test func aQuietSavepointCanBeNamedAndStaysQuiet() async throws {
