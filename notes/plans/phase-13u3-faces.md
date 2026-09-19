@@ -304,7 +304,7 @@ touches her real store outside the pre-authorized refresh.**
 | 6 | UNIT E — the #80(e) two faces (item 15) | **DONE 2026-09-19** — `1031135b`…`e24318ce` + this record's close; the UNIT E RECORD is at the end of this file (the PROBE that falsified #80(e)'s premise with its mechanism · the bounded read with its anti-drift pin against `PurgeFamily` · 8 new cells in 3 suites with the one defect-shaped cell red on the shipped words · the walk's 14 captures and what it proved · the re-seed note for the closeout). QUESTIONS #122 opened |
 | 7 | UNIT F — PDF renders formatting (item 16) | **DONE 2026-09-19** — `0003bac1`…`261cae8a` + this record's close; the UNIT F RECORD is at the end of this file (the trace · the red-on-old at 6-of-8 cells / 31 issues · the ONE hoist with its two collapsed duplicate rules · 10 pins incl. two anti-drift guards and the `.md` byte-fence · the walk's 9 captures with BEFORE/AFTER pairs and the two-build `.md` SHA match · the literal-colour regression the suite caught in my own diff and the better fix that answered it · three things handed up). QUESTIONS #123 opened
 | 8 | UNIT G — the ceremony-sheet residuals (KnownIssues row 42) | **DONE 2026-09-19** — `c79860b0`…`91209567` + this record's close; the UNIT G RECORD is at the end of this file (the traced mechanisms · the red-on-old table, 11 issues across 4 cells on `25638746` · 13 pins incl. an anti-drift net over SIX rendered-take readers and an EXPLAIN seek pin · the walk's 14 captures in both voices, with the drift staged BY HAND through two dev instances on one store · both full-suite reds adjudicated on two trees · item 6's five verdicts). KnownIssues row 42 RESOLVED; QUESTIONS #124 opened |
-| 8b | UNIT H — the Takes board's live-card delete door + the lesson's truth (the E hand-up, adjudication 2 above) | NOT STARTED — after G |
+| 8b | UNIT H — the Takes board's live-card delete door + the lesson's truth (the E hand-up, adjudication 2 above) | **DONE 2026-09-19** — `14ae400c`…this record's close; the UNIT H RECORD is at the end of this file (the traced mechanisms, incl. a CORRECTION to the adjudication — the board's cards never had a ⋯, the F1 pass reached its article cell instead · the red-on-old table, 12 issues across 6 of 8 cells on `4f069b1b` · 9 pins in one new suite, incl. the PER-SURFACE declared⇔rendered guard the union walk could never make · the ⋯ sweep's second find, a row renamed at the Snippets ruling with a shipped pin holding the old name "verbatim" · the walk's 17 captures running the LESSON'S OWN experiment in both voices and both appearances · both full-suite reds adjudicated, one of them a NEW flake-list member · one breach of the green-per-commit rule, stated). QUESTIONS #125 opened |
 | 9 | The ladder — `fable-reviewer`, combined diff, standing rounds | NOT STARTED — named foci: UNIT B's one-time editor SPIN on deleteBackward (the frames in the UNIT B RECORD; the decoration pass is A1's neighbourhood); A1's geometry across the five host cells |
 | 10 | The orchestrator's walks + closeout ritual + the pre-authorized `/Applications` refresh (R-13u3-2) | NOT STARTED |
 
@@ -2878,8 +2878,17 @@ same commit. The lesson edit joins the closeout's re-seed list (state it in your
 
 ## UNIT H RECORD — THE TAKES BOARD'S LIVE-CARD DELETE DOOR + THE LESSON'S TRUTH (opus-implementer, 2026-09-19)
 
-**WHAT I DID NOT DO, stated first (the record's own rule).** — PENDING until the unit closes; this
-line is rewritten in the closing commit.
+**WHAT I DID NOT DO, stated first (the record's own rule).** I did not restyle the take card — not
+the chosen bar, not the choose band, not the reorder arrows, not the pane; the card gained ONE
+control and lost nothing. I did not touch the ceremony sheets (UNIT G's surface), `Sources/`,
+`Sync/`, `Persistence/`, `Server/`, the schema, a migration or `BlockRangeIndex`; the marker stays
+8 and core is byte-untouched. I did not add a RECEIPT to the take delete — it has never had one on
+either surface, and inventing one is product behaviour the brief did not ask for (QUESTIONS
+#125(b) puts it to her). I did not re-word `.lastActiveVariant`, whose sentence was written for
+the take→block-below door and reads oddly for a delete — it is unreachable from this door, because
+the chosen check fires first, and re-wording a shipped string for a path she cannot take is the
+drift class. I did not fix the Snippets-vocabulary drift OUTSIDE the ⋯ sweep the brief ordered
+(handed up below). I did not carry the two things the full suite and the walk handed up.
 
 ### LIVE STATUS (written at the start; flipped in the same commit as each piece)
 
@@ -2891,8 +2900,8 @@ line is rewritten in the closing commit.
 | 3 · the refusal the new door will meet most — `variantIsChosen` — gets words (it falls to `default:` and dumps the raw enum with a UUID in it today) | **DONE** — this commit; RED on old in two cells (the copy table and the model door, the latter printing `Refused: variantIsChosen(id: "00000000-…-000000000002")`) |
 | 4 · the WORDS — the takes lesson's two sentences + the ⋯ sweep of the seeder, held to the door by a pin that reads the row's own title | **DONE** — this commit; the takes-delete lesson + the practice take's own words, and the sweep's OTHER find (the trio lesson named a ⋯ row *"Move out to a pool"* — a name the menu dropped at the Snippets ruling — while a shipped pin asserted that literal string and called it "verbatim"). Tutorial spine 83/13 green |
 | 5 · the walk (dev-store Debug, both voices, both appearances) with captures | **DONE** — 17 captures, `notes/plans/13u3-screens/uh-00…uh-16`; the LESSON'S OWN EXPERIMENT executed on the board it now names; both voices, both appearances, three of the four fan styles; zero instances at the end, her store never launched |
-| 6 · finals (FULL Mac · tutorial spine · core · iOS build) | PENDING |
-| 7 · close — ledger row 8b flipped + UNIT CLOSED banner + QUESTIONS | PENDING |
+| 6 · finals (FULL Mac · tutorial spine · core · iOS build) | **DONE** — below; FULL Mac **2889/482** (baseline 2880/481 + 9 new cells in 1 new suite, exactly), both reds adjudicated |
+| 7 · close — ledger row 8b flipped + UNIT CLOSED banner + QUESTIONS | **DONE** — this commit; QUESTIONS **#125** opened (two PROVISIONAL calls) |
 
 *(No death so far. Baselines at open, from the brief: FULL Mac **2880/481** with row 58's
 environment red tolerated (warm-DerivedData covariate noted by UNIT G) and row 49's landing arm by
@@ -2914,3 +2923,248 @@ with NO production line changed:
    (`TakeCardMenuCopy.deleteTake`) and name where the ⋯ lives. RED on old: the lesson says
    "⋯ menu ▸ Delete" with no place, and the board it sends a reader to has no ⋯.
 
+### THE RED-ON-OLD TABLE — MEASURED ON `4f069b1b` BEFORE A PRODUCTION LINE CHANGED
+
+The whole pin batch ran against the pre-unit tree in ONE pass (`DerivedData/13u3h-redonold.log`):
+**12 issues across 6 of 8 cells.** The only production code present at that run was the
+instrumentation (`TakeCardMenu` + its oracle), which nothing rendered — so the door pins failed for
+the reason they exist to catch.
+
+| pin | RED on `4f069b1b` — the exact failure |
+|---|---|
+| `theBoardsLiveTakeCardCarriesTheFourActs` (stack) | 2 issues. `doors.rendered → []` — a live card recorded NOTHING, with two panes mounted (the fan really bloomed) |
+| `theOtherLiveCardShapeCarriesThemToo` (carousel → `takeMiniPane`) | 1 issue. `doors.rendered → []` in the other card shape too |
+| `bothTakesSurfacesDeclareTheOneCardGrammar` | 1 issue. `TakesBoardView.surfaceCapabilities` held `deleteTake` (the ARCHIVED card's) and none of `archiveTake`/`labelTake`/`lockTake` |
+| `theChosenTakesRefusalSpeaksInsteadOfDumpingTheEnum` | 4 issues. `"Refused: variantIsChosen(id: \"8C4A1E32-DEAD-BEEF-0000-000000000001\")"` — the raw enum, the UUID, no road, no answer for the one-take block |
+| `theBoardSpeaksThatRefusalWhenTheShownTakeIsDeleted` | 1 issue. The SAME dump through the real model door: `Refused: variantIsChosen(id: "00000000-0000-0000-0000-000000000002")` |
+| `theLessonNamesTheRowByItsOwnTitleAndSaysWhereTheMenuLives` | 3 issues. The seeded prose contained neither `"Delete this take"` nor `"Takes"`, and the practice take's words did not say `card` |
+| `theTrioLessonNamesTheMoveOutRowTheMenuActuallyHas` (the ⋯ sweep's other find) | RED on old by construction — the seeded trio said *"Move out to a pool"* and did not contain `SnippetsCopy.moveOutRow` (the constant did not exist; the two menus hand-typed the title) |
+
+**Green on both sides, and said so rather than claimed:** `theCardMenuIsOneListWithTheRegistrysOwnWords`
+(a pure-value law over new code — it states the anti-drift rule, it does not catch the defect) and
+`theDeleteRowRunsTheModelDoorAndTheSpareTakeGoes` (the MODEL door has worked since Phase 2; what
+was missing was the card's door, so this cell pins fire-and-DO rather than the gap).
+
+### THE TRACED MECHANISMS (what was actually wrong, in the code, before anything changed)
+
+1. **The board's live take card had no act vocabulary at all — and it never had one.** A live card
+   is `TakeCardFrame` → `TakeChooseHeader` (a choose band, the take's label, the ◀ ▶ arrows) +
+   `PaneSurfaceView` **with `menuItems: nil`**, so there was no ⋯ button and no Variorum
+   context menu on the card's pane either: the card's whole vocabulary was *choose* and *reorder*.
+   The board's ARCHIVED cards (`archivedCard`) have carried Unarchive + Delete since 13b 3D, and
+   Write's panel has carried the four acts on every card since Phase 7. **A correction to the
+   adjudication that opened this unit:** it read "the ⋯ card menu retired at a restyle" — I checked,
+   and `git log -S` over `TakesBoardView.swift` finds the board's cards never carried one. What the
+   post-13l F1 pass actually did was give the four acts to the board's ARTICLE cell
+   (`TakesCellView.menuSpecs`), which acts on the take the note SHOWS, not on the card you pointed
+   at. So the gesture the tutorial teaches — *point at the spare card, delete that take* — had no
+   door on the board in any fan style.
+2. **The registry walk could not see it, by construction.** `.deleteTake` was already in
+   `TakesBoardView.surfaceCapabilities` for the archived card's button, and
+   `theSurfacesRenderExactlyTheDeclaredSurfaceActs` asserts the UNION of every surface — which
+   `WriteTakesPanel` alone satisfies for all four ids. This is the 18f ladder's R3-3 shape exactly:
+   a union walk proves nothing per surface. The pin that bites is per-surface, and it is the first
+   thing in this unit's suite.
+3. **The refusal that door meets most often printed a raw enum.** `performDeleteVariant` checks the
+   CHOSEN pointer before `ensureNotLastActive`, so pressing Delete on the take the note shows — and
+   on a one-take block, the only take there is — raises `variantIsChosen`, which had no case in
+   `OpsRefusalCopy.message` and fell to `default: "Refused: \(error)"`. Reachable on the shipped
+   tree from Write's panel; measured through the real model door, not inferred.
+4. **The lesson sent a reader to a door without a place, and a shipped pin locked in a second stale
+   name.** The takes-delete sentence said *"use the spare card's ⋯ menu ▸ Delete"* — true of Write's
+   panel, which it names, but the reader who has just finished the takes chapter is standing in
+   Takes, where there was no ⋯; and the practice take's own words said *"the ⋯ menu"* with no place
+   at all. The ⋯ sweep then found the trio lesson naming its Blocks-mode row *"Move out to a pool"*,
+   a name the row lost at the Snippets vocabulary ruling (pre-13u, W8-1) — **and
+   `TutorialWalkTests` asserted that literal string with the comment "the Blocks-mode row,
+   verbatim"**, so the pin that should have caught it was holding it in place. Both renderers of
+   that row hand-typed the title, so there was nothing for the lesson to quote.
+
+### WHAT THE CARD IS NOW (the contract)
+
+- **One component, two surfaces.** `TakeCardMenu` (in `TakesShared.swift`, beside
+  `TakeCardMenuCopy`) renders the ⋯ from ONE `rows` list — Archive this take (⌘⇧A) · Label take… ·
+  Lock/Unlock this take · Delete this take — with the registry's own titles, the lock row pointing
+  the way the TAKE points, and the delete row `destructive`. Write's panel's four inline buttons
+  were replaced by it; the chrome (`.borderlessButton`, `.fixedSize()`, `.controlSize(.mini)`) is
+  that panel's own, unchanged to the byte, so the board inherits the grammar rather than a second
+  one being invented for it.
+- **It reaches all four fan styles through ONE addition.** `TakeChooseHeader` gained an optional
+  `acts:` (nil by default, exactly like `reorder:`), and both live-card compositions compose that
+  header — `takeMiniPane` (carousel · slot split · the margin-grid rail) and `CollapsibleTakeCard`
+  (stack). Nothing else on the card moved.
+- **The targets are NAMED, never routed** (`unarchiveTake`'s reason and 13k K6's): the act belongs
+  to the card you pointed at, and pointing at a card never moves the keyboard. The label sheet is
+  hosted by `TakesBottomBar`, which rides this board, so `requestTakeLabel` opens from a board card
+  exactly as it does from Write's panel.
+- **Every refusal is the operations layer's own, and every one speaks** (P-2): a sealed note, a
+  locked take, the take the note shows, the block's last take. The one that had no words has them.
+- **P-2 holds at the other end too, by construction rather than by a guard:** in stack, carousel
+  and slot split an UNFANNED block blooms into the growth doors alone — there is no card, so there
+  is no door that cannot act. The margin-grid rail does draw a one-take block's card, and that is
+  where the refusal's parenthesis earns its place (walked, capture 13–14).
+- **What did NOT change:** the archived cards (their own Unarchive + Delete buttons), the article
+  cell's right-click vocabulary, the ⑂ badge, the growth doors, the pager, the card frame.
+- **The registry:** `TakesBoardView.surfaceCapabilities` gains `.archiveTake`, `.labelTake`,
+  `.lockTake` (it already declared `.deleteTake` for the archived card). The union walk's result is
+  unchanged — which is the point — and the new per-surface pin is what holds it.
+
+### THE WORDS AS THEY NOW READ
+
+- **The takes-delete lesson** (`what a block leaves behind`): *"…open its takes — ⌘⇧T in Write, or
+  the Takes tab (⌘2), where every take card carries the same menu — and on the spare card use
+  `TakeCardMenuCopy.menuGlyph` ▸ `TakeCardMenuCopy.deleteTake`. Then press history: …"* — the glyph
+  and the row are INTERPOLATED from the menu's own constants, so a rename moves the lesson with it.
+- **The practice take's own words:** *"the spare take — delete me from my own card's ⋯ menu (every
+  take card has one, in Takes and in Write's takes panel), then put me back from the block's history
+  panel."* (Its `hasPrefix("the spare take")` locator is preserved — the shipped walk pin finds it.)
+- **The trio lesson:** the conceptual line reads MOVE OUT TO SNIPPETS and the instruction quotes
+  `SnippetsCopy.moveOutRow` — the row's one constant, which both renderers (`BlocksWorkbenchView`,
+  `NoteIndexColumn`) now consume.
+- **The refusal:** *"The note shows this take — choose another take first, and then this one can go.
+  (If it's the block's only take, it's the block you want to delete.)"* One error serves two states,
+  so the sentence answers both readers.
+
+### THE PINS (9 new cells in one new suite + 1 shipped cell amended)
+
+`App/Variorum/VariorumTests/TakeCardDoorTests.swift` — **the door:**
+`theBoardsLiveTakeCardCarriesTheFourActs` · `theOtherLiveCardShapeCarriesThemToo` (the two live-card
+shapes, mounted on the REAL board with the fan bloomed, read through a scoped DEBUG oracle —
+`TakeCardDoors`, keyed by `AppSession.debugProbeScope` per row 50, because a Takes board is exactly
+the kind of surface two suites mount at once). **Declared ⇔ rendered, PER SURFACE:**
+`bothTakesSurfacesDeclareTheOneCardGrammar` (the R3-3 shape — the union walk could never see this).
+**The one list:** `theCardMenuIsOneListWithTheRegistrysOwnWords` (ids, titles from the registry, the
+lock row's direction, the destructive row, and every row's closure actually firing). **Fire-and-DO:**
+`theDeleteRowRunsTheModelDoorAndTheSpareTakeGoes` (the row's own act, through the model, to a
+tombstone, with the shown take left standing — I10). **The refusal:**
+`theChosenTakesRefusalSpeaksInsteadOfDumpingTheEnum` + `theBoardSpeaksThatRefusalWhenTheShownTakeIsDeleted`
+(no `Refused:` prefix, no UUID, the road named, the one-take answer present, classed as a refusal,
+and nothing deleted). **The words:** `theLessonNamesTheRowByItsOwnTitleAndSaysWhereTheMenuLives` +
+`theTrioLessonNamesTheMoveOutRowTheMenuActuallyHas`. **Amended:** `TutorialWalkTests`'
+`everyDoorTheChapterNamesIsADoorTheAppHas` arm now reads `SnippetsCopy.moveOutRow` instead of a hand-typed
+literal — a JUSTIFIED EDIT whose reason is in place: the claim is unchanged, and its source is now
+what "verbatim" was supposed to mean.
+
+### THE WALK (mine — `io.lduarte.Variorum.debug`, dev store, 2026-09-19; `cliclick` + `Tools/WalkKit`)
+
+**The walk IS the lesson's own experiment.** I re-seeded the tutorial through `Help ▸ Restore
+Tutorial…` (the AppKit modal — pressed by BUTTON NAME through System Events, the UNIT E fact), read
+the new words in the field guide, and then did exactly what they say.
+
+| # | capture | what it shows |
+|---|---|---|
+| 00 | `uh-00-launch.png` | the dev store at rest (Terminal voice, Rose & moss palette) — the state I found and restored |
+| 01 | `uh-01-lesson-new-words-terminal-light.png` | the re-seeded lesson: *"open its takes — ⌘⇧T in Write, or the Takes tab (⌘2), where every take card carries the same menu — and on the spare card use ⋯ ▸ Delete this take"* |
+| 02 | `uh-02-live-cards-carry-the-menu-terminal-light.png` | the Takes board, the lesson's own block bloomed: BOTH live cards wear `✓ chosen ◀ ▶ ⋯` / `choose ◀ ▶ ⋯` |
+| 03 | `uh-03-the-four-rows-terminal-light.png` | the spare card's ⋯ open: Archive this take (⌘⇧A) · Label take… · Lock this take · Delete this take |
+| 04 | `uh-04-spare-take-deleted-terminal-light.png` | pressed: the fan collapses ⑂2 → ⑂+, the card is gone, the shown take stands |
+| 05 | `uh-05-deleted-take-waits-with-put-back-terminal-light.png` | history: *deleted takes* lists it, *deleted sep 19, 2026 · 30 days left*, **Put back** beside it — the lesson's promise, met |
+| 06 | `uh-06-put-back-terminal-light.png` | **Put back**: *"Take put back — it's in this block's fan again."*, ⑂2, its label and place intact |
+| 07 | `uh-07-chosen-take-refusal-speaks-terminal-light.png` | ⋯ ▸ Delete on the **chosen** card: *"The note shows this take — choose another take first, and then this one can go. (If it's the block's only take, it's the block you want to delete.)"* — and ⑂2 still, nothing deleted |
+| 08–09 | `uh-08-live-cards-carry-the-menu-study-dark.png` · `uh-09-the-four-rows-study-dark.png` | the same two frames in the **STUDY voice, DARK appearance** (a fully black room, R51) |
+| 10–11 | `uh-10-spare-take-deleted-study-dark.png` · `uh-11-structural-undo-brings-it-back-study-dark.png` | deleted there too, then **⌥⌘Z** — *"Undid: Delete Variant"* in the bar's trailing end and the fan back at ⑂2 (the road 13j's no-confirm rule promises) |
+| 12 | `uh-12-margin-grid-rail-card-study-dark.png` | the **margin-grid rail**'s 250-pt card: `✓ chosen ◀ ▶ ⋯` fits at the tightest width the board has |
+| 13–14 | `uh-13-one-take-card-menu-study-dark.png` · `uh-14-one-take-refusal-study-dark.png` | the rail's **one-take** card (no reorder arrows — a one-take fan draws none): ⋯ ▸ Delete, and the refusal's parenthesis answering the block with nothing else to show |
+| 15–16 | `uh-15-writes-panel-unchanged-terminal-light.png` · `uh-16-one-grammar-writes-panel-terminal-light.png` | **⌘⇧T** — Write's panel, the surface the component was extracted from: byte-identical chrome, and the identical four rows |
+
+Three of the four fan styles were exercised (carousel · margin grid incl. the one-take rail card ·
+and the panel's own card shape); the stack shape is pinned rather than walked. Voice restored to
+Terminal, style restored to carousel, `appearanceChoice` restored to `system`, every quit by bundle
+identity with `pgrep` after it, **zero instances at the end**, and her `/Applications` app was never
+launched, quit or touched.
+
+### THE TWO REDS IN THE FULL SUITE, ADJUDICATED (the paired protocol, not assertion)
+
+1. **`BookIndexEditingTests.theReadClickLandsInIndexAtThatBlock` (`live.count → 0`)** — **row 58's
+   recorded environment red**, named in this phase's baselines. RED isolated on my tree too, which
+   is the condition the row describes; UNIT G proved it red on the PRE-UNIT tree across six runs in
+   warm DerivedData, and this run reused that same warm `13u3f`. Not mine.
+2. **`ModeSwitchCarryTests.aBlockAtTheTopOfWriteArrivesAtTheTopOfRead` (`wrote → 3.5106` vs `≤ 0.02`)**
+   — **GREEN isolated on my tree** (2.816 s), together with its two neighbours in the same suite.
+   A load flake of the row-49 family, and my diff cannot reach it: the only file I touched anywhere
+   near Read is `NoteIndexColumn.swift`, where one `Menu("…")` label was replaced by the constant
+   holding the byte-identical string. **New member of the flake list — handed up, not carried.**
+
+### FINALS (2026-09-19)
+
+- the FULL Mac suite — **Test run with 2889 tests in 482 suites failed after 737.191 seconds with 4
+  issues** — the 4 issues are the 2 suites adjudicated above (2 issues each). Baseline 2880/481 + 9
+  new cells in 1 new suite = exactly 2889/482.
+- the TUTORIAL SPINE — **green in the full run** (all 11 `Tutorial…` suites passed; neither failing
+  suite is one of them) and green again in an isolated 83/13 run against the edited lesson.
+- core `swift test` — **Test run with 1603 tests in 174 suites passed after 54.842 seconds.**
+  (Baseline 1603/174, unchanged — core is byte-untouched.)
+- iOS build — **BUILD SUCCEEDED** (`VariorumMobile`, iPhone 17 Pro simulator).
+- lockstep marker — **8**, untouched. Schema: ZERO. Migrations: ZERO. `Sync/`: ZERO.
+  `Persistence/`: ZERO. `Server/`: ZERO. `Sources/`: ZERO. `BlockRangeIndex`: ZERO.
+
+### MOBILE PARITY (a note, not a build — the brief's rule)
+
+**Nothing mobile-visible shipped, and the phone owes nothing here.** Every line is Mac-side
+(`App/Variorum/Variorum/**`) — no `Shared/`, no `Sources/`. The phone has no Takes board and no
+takes panel of this shape; its own take surface is the mobile catch-up's. One row for that catch-up
+if it ever wants it: the take-card grammar is now a COMPONENT on the Mac, so the phone's equivalent
+should compose one list rather than copy four buttons — the drift this unit closed is exactly the
+one two hand-typed copies produce.
+
+### THE RE-SEED CONSEQUENCE (the closeout's list, as the brief asks)
+
+**This unit edits three seeded lesson texts and one seeded take**, so her installed store's field
+guide still carries the OLD words until it is re-seeded: the takes-delete paragraph, the practice
+take's own text, and the trio lesson's two sentences. `Help ▸ Restore Tutorial… ▸ Replace` is the
+door (I used it in the walk and it worked cleanly). This joins UNIT E's re-seed note on the
+closeout's list — one re-seed covers both.
+
+### FOUND, NOT MINE (handed up rather than carried)
+
+1. **A new member of the load-flake family:** `ModeSwitchCarryTests.aBlockAtTheTopOfWriteArrivesAtTheTopOfRead`
+   fails under full-suite load and passes isolated (measured both ways above). It is not on the
+   recorded flake list; it should be, beside rows 49 and 58. **Owner: the landing/settle family
+   (KnownIssues 12).**
+2. **The Snippets vocabulary is stale in prose OUTSIDE the ⋯ sweep.** The *"pool & scraps"* lesson
+   says *"the Snippets area's pool menu switches between pools"*, while the shipped surface speaks
+   **groups** (`SnippetsCopy.groupsHeader` / `newGroup` / `bulkMove`, and `SnippetsCopy.groupCreated`
+   is its receipt). I did not touch it — no ⋯ sentence names it, and one unit is one surface — but
+   it is the same copy-truth class this unit just closed twice, and a sweep of that chapter against
+   `SnippetsCopy` would settle it. **Owner: a faces batch or a 17 entry.**
+3. **A stale comment in the tutorial walk suite:** `TutorialWalkTests:2472` says *"MOVE OUT — Blocks
+   (⌘5), the row's ⋯ menu"* while the mode is ⌘6 (the lesson itself says ⌘6). A comment only; not
+   worth a commit of its own, and stating it is cheaper than leaving it for a reader to trip on.
+
+### ONE THING I GOT WRONG, STATED PLAINLY (the checkpoint protocol, breached)
+
+**Piece 2's commit `17257f35` carried a RED suite.** I wrote all nine pins in one file before
+measuring — which is what gave the clean 12-issue red-on-old table — and then committed the door's
+fix while the refusal and words cells in that same file were still red, because their fixes were
+pieces 3 and 4. The tree was green again two commits later (`8be360f2`), so the window is
+`17257f35`…`c86e7f40`, but "commit per piece" means a GREEN tree per commit and I should have split
+the pin file by piece or held the commit. Recorded rather than hidden; no history was rewritten.
+
+### DEFERRED / NOT MINE (stated rather than done)
+
+- **A receipt for a landed take delete** — QUESTIONS #125(b), hers. The shipped behaviour (silence)
+  is what I left, on both surfaces.
+- **`.lastActiveVariant`'s wording**, which reads as the take→block-below door's sentence. It is
+  unreachable from this door (the chosen check fires first) and re-wording a shipped string for a
+  path she cannot take would be the drift class, not a fix.
+- **The Blocks-mode and Read-index row menus' other rows** — I touched exactly one label there, and
+  only to give the lesson a constant to quote.
+- **Not touched:** UNIT A1's gutter, A2's comments panel, B's card family, C's capture boxes, D's
+  savepoint names, E's confirm, F's PDF, G's ceremony sheets, every operation in
+  `Operations+Deletion.swift`, the schema, the marker, and the whole of `Sources/`.
+
+---
+
+## UNIT H CLOSED — 2026-09-19
+
+The board's take cards can act on their own takes. `TakeCardMenu` is ONE component with ONE row
+list, rendered by Write's panel — whose four buttons it was extracted from byte-for-byte — and by
+every live take card on the Takes board, in all four fan styles, through a single optional on the
+header both card shapes already composed. The board declares the three acts it had never declared,
+and a PER-SURFACE pin holds it where the union walk structurally could not. The refusal that door
+meets most often stopped printing a raw enum with a UUID in it and now names both roads out. The
+lesson that sends a reader to that door names the row by the row's own title and says where the
+menu is; the ⋯ sweep found a second stale sentence — a row renamed at the Snippets ruling with a
+shipped pin holding the old name in place "verbatim" — and that row is one constant now, quoted by
+the lesson and consumed by both menus that render it. **Ledger row 8b flipped in this commit.**
+Commits `14ae400c` → this one. QUESTIONS **#125** carries the two PROVISIONALs.
