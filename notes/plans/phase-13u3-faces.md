@@ -2283,7 +2283,7 @@ same commit.
 | 2 | the ONE reading face: `PageComposer`'s attributed applications hoisted to a shared brain, its duplicate heading/trait rules collapsed onto `MarkdownFace` | **DONE** — `Theme/MarkdownReadingFace.swift`; the paged reader's own 3 suites 16/16 green beside it |
 | 3 | the PDF path built through that brain + its pins (no raw syntax; heading/bold/list/code runs) | **DONE** — 10/10 green in the new suite |
 | 4 | the BYTE-FENCES pinned (`.md` export byte-identity on a fixture corpus · `renderedText` untouched · the Alternates section · the callout→blockquote mapping) | **DONE** — the two fence cells were GREEN on both sides, which is what a fence is |
-| 5 | QUESTIONS — the PROVISIONAL calls + the next-free marker moved | NOT STARTED |
+| 5 | QUESTIONS — the PROVISIONAL calls + the next-free marker moved | **DONE** — **#123**, five lettered calls (the reading face · the callout's surviving `> ` · paper's values · nothing re-fonted · the title is not markdown); the marker moved to **#124** |
 | 6 | the walk + captures (both PDFs opened and screenshotted; the `.md` diff), the FULL Mac suite, tutorial spine, iOS build | NOT STARTED |
 
 *(Nothing below this line is claimed until its row says DONE.)*
