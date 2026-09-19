@@ -303,7 +303,7 @@ touches her real store outside the pre-authorized refresh.**
 | 5 | UNIT D — named commits (item 14 / R-13u3-1) | **DONE 2026-09-19** — `203a722c`…`a2c5ede0` + this record's close; the UNIT D RECORD is at the end of this file (the contract as built · the three traced mechanisms, two found by the walk and one real regression found by the suite · 18 pins in 6 suites + 4 shipped suites amended · the walk's 16 captures in both voices and both appearances · the mobile-parity note · three things handed up). QUESTIONS #121 opened |
 | 6 | UNIT E — the #80(e) two faces (item 15) | **DONE 2026-09-19** — `1031135b`…`e24318ce` + this record's close; the UNIT E RECORD is at the end of this file (the PROBE that falsified #80(e)'s premise with its mechanism · the bounded read with its anti-drift pin against `PurgeFamily` · 8 new cells in 3 suites with the one defect-shaped cell red on the shipped words · the walk's 14 captures and what it proved · the re-seed note for the closeout). QUESTIONS #122 opened |
 | 7 | UNIT F — PDF renders formatting (item 16) | **DONE 2026-09-19** — `0003bac1`…`261cae8a` + this record's close; the UNIT F RECORD is at the end of this file (the trace · the red-on-old at 6-of-8 cells / 31 issues · the ONE hoist with its two collapsed duplicate rules · 10 pins incl. two anti-drift guards and the `.md` byte-fence · the walk's 9 captures with BEFORE/AFTER pairs and the two-build `.md` SHA match · the literal-colour regression the suite caught in my own diff and the better fix that answered it · three things handed up). QUESTIONS #123 opened
-| 8 | UNIT G — the ceremony-sheet residuals (KnownIssues row 42) | NOT STARTED |
+| 8 | UNIT G — the ceremony-sheet residuals (KnownIssues row 42) | **DONE 2026-09-19** — `c79860b0`…`<close>` + this record's close; the UNIT G RECORD is at the end of this file (the traced mechanisms · the red-on-old table, 11 issues across 4 cells on `25638746` · 13 pins incl. an anti-drift net over SIX rendered-take readers and an EXPLAIN seek pin · the walk's 14 captures in both voices, with the drift staged BY HAND through two dev instances on one store · both full-suite reds adjudicated on two trees · item 6's five verdicts). KnownIssues row 42 RESOLVED; QUESTIONS #124 opened |
 | 8b | UNIT H — the Takes board's live-card delete door + the lesson's truth (the E hand-up, adjudication 2 above) | NOT STARTED — after G |
 | 9 | The ladder — `fable-reviewer`, combined diff, standing rounds | NOT STARTED — named foci: UNIT B's one-time editor SPIN on deleteBackward (the frames in the UNIT B RECORD; the decoration pass is A1's neighbourhood); A1's geometry across the five host cells |
 | 10 | The orchestrator's walks + closeout ritual + the pre-authorized `/Applications` refresh (R-13u3-2) | NOT STARTED |
@@ -2595,7 +2595,16 @@ ledger row 8 flipped in the same commit.
 
 ## UNIT G RECORD — THE CEREMONY-SHEET RESIDUALS (opus-implementer, 2026-09-19)
 
-**WHAT I DID NOT DO, stated first (the record's own rule).** *(filled at close)*
+**WHAT I DID NOT DO, stated first (the record's own rule).** I did not touch the ceremony sheets'
+FACES — not one preset, not one word of the arrangement row, not figure A or B's grammar; this is
+drift correctness, and the sheets look exactly as 18f left them. I did not touch `Sync/`,
+`Persistence/`, the schema, a migration, or `BlockRangeIndex`; the marker stays 8. I claimed **no
+red for R3-8** — the finding says a pin would pass on both sides and it is right, so it is recorded
+as cleanliness. I did not rewrite the statements that already carry the rendered-take resolution
+correctly (`renderPost`, `leadingBlockTextsSQL`, `Export.blockTakes`, `PageExtents`, the two
+word-count reads) — re-typing a shipped load-bearing query for tidiness is the risk, not the cure;
+they are verdicted below and held by an anti-drift pin instead. I did not build UNIT H (the E
+hand-up), and I did not carry the two things the walk and the suite handed up.
 
 ### LIVE STATUS (written at the start; flipped in the same commit as each piece)
 
@@ -2609,7 +2618,214 @@ ledger row 8 flipped in the same commit.
 | 5 · R3-8 — `renderedTakeID` hoisted to a `FanHalf` extension, consumed on all three roads (NO pin — hollow by the finding's own words) | **DONE** — `Features/Takes/FanHalfRendering.swift`; the two sheet roads and the board's instant road read it; NO pin claimed, and the file says why in its own header |
 | 6 · item 6 — the three disagreeing opening-take reads: consume or verdict | **DONE** — the rule ships as `Queries.renderedTakeJoinSQL` + `renderedTakeTextSQL`; `NoteCards.load` and BOTH `notePickerNotes` overloads consume it; 4 pins (3 RED on `25638746` at the card's three divergences, 2 red at the picker's), plus an anti-drift net walking SIX readers over one world; the other `default_variant_id` reads verdicted in the record |
 | 7 · the walk (dev-store Debug, both voices) with captures | **DONE** — 14 captures, `notes/plans/13u3-screens/ug-01…ug-14`; the drift staged BY HAND through the app's own doors using TWO dev instances on one store (the new WalkKit fact); both voices; zero instances at the end, her store never touched |
-| 8 · finals (core · FULL Mac · tutorial spine · iOS build) | PENDING |
-| 9 · close — KnownIssues row 42 RESOLVED + ledger row 8 flipped + UNIT CLOSED banner | PENDING |
+| 8 · finals (core · FULL Mac · tutorial spine · iOS build) | **DONE** — below |
+| 9 · close — KnownIssues row 42 RESOLVED + ledger row 8 flipped + UNIT CLOSED banner | **DONE** — this commit; QUESTIONS #124 opened |
 
 *(No death so far. Baselines at open, from the brief: FULL Mac **2874/481** with row 58's environment red the single tolerated one; core **1596/174**; tutorial spine green; marker 8.)*
+
+### THE RED-ON-OLD VERIFICATION — NAMED BEFORE IT RAN (the checkpoint protocol)
+
+Every defect-shaped row was traced first, then pinned, then watched fail on the PRE-UNIT tree
+`25638746`, then fixed. The whole batch of pins was run against that tree in ONE pass before a
+line of production code changed (`/tmp/ug-redonold.log`): **11 issues across 4 cells.**
+
+| pin | row | RED on `25638746` — the exact failure |
+|---|---|---|
+| `openingReadsTheShownPairFromTheStoreSoNothingRefreshesSpuriously` (`MergeArrangementTests`) | **R3-6** | 5 issues. `opened.firstRenderedID` = the PROJECTION's head (`…002`) while the store already rendered the spare (`…007`); the first ⏎ then refreshed, said *"the takes changed while the sheet was open"*, and did NOT land (2 blocks still) |
+| `aRunsShownTakeRePointedUnderTheOpenSheetRefreshesInsteadOfJoiningIt` (`MergeArrangementTests`) | **R3-5**, plain road | `try h.storeSlots().count == 3` failed and `mergeCeremony` was nil — the run MERGED on the first press, joining a take the list never showed |
+| `aRunsCarryAllSeedsFromTheSheetsShownTakesNotTheProjection` (`MergeArrangementTests`) | **R3-5**, carry-all + `displayed` | same two failures — merged on the first press |
+| `aPresetRefreshReSeedsThePrePairFromWhatTheSheetNowShows` (`MergeCeremonySheetTests`) | **R3-7** | the refreshed pre-pair kept the stale head (`…002` where `…007` was now marked), and "Pair by hand…" afterwards joined `"Alpha one. Beta two."` — the pair the sheet no longer marked |
+| `aCardPreviewsTheTakeTheNoteShows` (`LibraryCardNameTests`) | **item 6**, the card | 3 issues, one per divergence: the ARCHIVED chosen previewed `"The archived take."`, the TOMBSTONED chosen previewed `""` (a blank card), the FOREIGN pointer previewed `"Another block's words."` |
+| `thePickerPreviewsTheTakeTheNoteShows` (`SnippetsAndPickerQueryTests`) | **item 6**, the picker | both overloads returned `"The default take."` where the note shows `"The take I chose."` |
+
+**Green on both sides, and said so rather than claimed:** `anUndriftedRunStillConfirmsOnTheFirstPress`
+(a guard — the check must not become a toll), `thePickerFallsBackExactlyAsTheNoteDoes` (default-only
+happens to agree on the two fallback shapes), and every cell of **R3-8**, whose finding states the
+equivalence itself.
+
+### THE TRACED MECHANISMS (what was actually wrong, in the code, before anything changed)
+
+1. **R3-5 — the RUN arm had no drift check, and the reason it didn't was true when it was written
+   and false by the time it shipped.** Round 2 fenced the check with `if !state.isRun`
+   (`EditorSurfaceController.confirmMergeCeremony`) on the reading *"a run's sheet marks a list of
+   blocks, not a pair"*. Figure B's amendment, landed in the same letter, made the run's list show
+   **each block's shown take over its text** — so the sheet was making the pair's exact promise on
+   a surface with no check behind it. `MergeRunBlock` carried `shownText` and **no variant id**, so
+   there was nothing to compare even if the fence had come off: the plain chain resolves each side
+   inside `ops.merge` from the store's chosen, and the carry-all took `displayed` from
+   `model.index.entries` — the projection, which only ever lags the store. Either road could join a
+   take the list never drew, and `mergedChain`'s receipt then said *"the takes you were looking at
+   joined"*.
+2. **R3-6 — the pair read its shown ids from a different place than its check compared.** `open`
+   took them from `model.index.entries`; `refreshMergeSheetIfDrifted` compared the STORE (round 2's
+   raise). Open inside the sub-delivery window and the two disagreed on arrival, so the first ⏎
+   refreshed and blamed a change that predated the open. Honest but wrong in the mouth.
+3. **R3-7 — the pre-pair survived a refresh by liveness while the marking moved.**
+   `refreshMergeCeremony` filtered `state.pairings` to those whose both sides still live. Under a
+   PRESET the pre-pair is invisible (the columns mark `firstRenderedID`), so the OPEN-time pair sat
+   there unseen; pick "Pair by hand…" after a refresh and the Pairings section offered head ＋ tail
+   — the pair the sheet no longer marked — and S4-23 ruling 4's *"⏎ reproduces the instant
+   outcome"* stopped holding.
+4. **item 6 — two reads of a note's opening, two different rules, neither the note's.**
+   `NoteCards.load` joined `COALESCE(cb.chosen_variant_id, b.default_variant_id)`, which agrees
+   with the note only while the chosen take is live, active and this block's — and parts company in
+   three reachable shapes (measured above). `ShelfQueries.notePickerNotes` (both overloads) read
+   `b.default_variant_id` ALONE, and `chooseVariant` writes only the placement's chosen
+   (`Operations+Placement.swift:25`) — so the picker previewed the wrong take for **every block
+   whose take she has switched**, which is the everyday case, not a race.
+
+### WHAT THE SHEETS DO NOW (the contract)
+
+- **One drift check, both shapes.** `refreshMergeSheetIfDrifted` dispatches to the pair's arm or
+  the run's; the `if !state.isRun` fence is gone, so every preset road checks. The RUN's arm
+  compares the whole row it drew — shown id, shown TEXT, take count — against one fresh store read
+  (`runFansAndRendered`, the same read `open` built the list from), rebuilds `runBlocks` and
+  `otherTakes` on drift, keeps the row she chose and the sheet's identity, and speaks the standing
+  line. Every fan folding to a single (the two roads become byte-identical `merge`) or a block
+  dissolving dismisses in the pair arm's own words.
+- **The list's ids are the merge's `displayed`.** `MergeRunBlock` carries `shownVariantID`, read in
+  the same store read as the fans, and `runMergeChain` takes those ids instead of the projection's
+  (R2-2's pattern, applied to the run). What the list marks is what joins.
+- **The pair reads the store at open too** (`liveActiveFansAndRendered`), so the open-time lag
+  window no longer produces a refresh that blames the wrong moment.
+- **The pre-pair is ONE function** (`prePairing`), consumed at open AND at a preset refresh; under
+  `.pairByHand` hers are kept untouched (R2-1's pin rides unchanged).
+- **Cost:** both drift checks read `Queries.renderedVariantIDs` — the blocks the gesture names,
+  never the note around them. `renderPost` loaded every slot's rendered TEXT of the whole note to
+  answer two ids.
+
+### THE NEW CORE READER, AND THE FOUR READS I DID NOT REWRITE (item 6's verdicts)
+
+`Queries.renderedVariantIDs(db, blockIDs:)` / `renderedVariantID(db, blockID:)` are
+`renderPost`'s resolution with the traversal turned around — driven by the BLOCK rows named, the
+live placement joining in beside them through `uq_cblock_ownership` (live-unique on `block_id`, so
+nothing multiplies). Read-layer conventions, pinned: a gap is ABSENCE, never a throw; an **unplaced
+live block still answers by its default**, which is the one question the pointer-driven `renderPost`
+cannot be asked and which a released-to-lineage block needs. The rule also ships as text
+(`renderedTakeJoinSQL` + `renderedTakeTextSQL`) for statements that resolve an opening inside a
+bigger question.
+
+| read | verdict |
+|---|---|
+| `NoteCards.load` (`LibraryCatalogView.swift`) | **ALIGNED** — consumes the fragment; red-on-old at all three divergences |
+| `ShelfQueries.notePickerNotes` ×2 | **ALIGNED** — both consume the fragment; red-on-old on the everyday case |
+| `Queries.renderPost` · `leadingBlockTextsSQL` · `Export.blockTakes` · `PageExtents`' slot read | **ALREADY THE RULE, own copy KEPT** — byte-identical joins; re-typing four shipped, load-bearing statements for tidiness buys nothing and risks the class this unit exists to fix. Held by `everyRenderedTakeReaderAgreesOnOneWorld` instead |
+| `ShelfQueries`' two word-count reads (`:74`, `:100`) | **ALREADY THE RULE, own copy KEPT** — a correlated chosen subquery carrying every guard; not an opening read |
+| `PoolAndTray`'s tray/released/unplaced reads · `Trash`'s block rows | **CORRECT BY CONSTRUCTION** — every one is about a block with NO live placement, where `default_variant_id` alone IS the rule (`renderedVariant`'s own fallback). Not a divergence |
+
+### THE PINS (13 new cells: 7 core + 6 Mac)
+
+**Core (`PostRenderQueryTests`, 5):** `renderedVariantIDAgreesWithBothResolvers` (three resolvers,
+the precedent's own fallback matrix) · `renderedVariantIDGapsInsteadOfThrowingAndAnswersFor
+UnplacedBlocks` · `renderedVariantIDRefusesAForeignChosenPointer` ·
+`everyRenderedTakeReaderAgreesOnOneWorld` (the anti-drift net over SIX readers) ·
+`theNamedBlocksReadSeeksAndNeverScans` (EXPLAIN over the SHIPPED constant — the reader's whole
+point). **Core (`SnippetsAndPickerQueryTests`, 2):** `thePickerPreviewsTheTakeTheNoteShows` (red) ·
+`thePickerFallsBackExactlyAsTheNoteDoes` (green both sides, said so).
+**Mac (`MergeArrangementTests`, 4):** the R3-6 open-time pin · the two R3-5 pins · the
+undrifted-run guard. **Mac (`MergeCeremonySheetTests`, 1):** the R3-7 re-seed pin, which also
+follows through to the hand road's actual outcome. **Mac (`LibraryCardNameTests`, 1):**
+`aCardPreviewsTheTakeTheNoteShows`, all three divergences in one world.
+
+### THE WALK (mine — `io.lduarte.Variorum.debug`, dev store, 2026-09-19; `cliclick` + `Tools/WalkKit`)
+
+**The drift was staged BY HAND, through the app's own doors — not simulated.** Two facts made that
+possible and both are now in `Tools/WalkKit/README.md`: the dev store is SQLCipher-encrypted, so no
+external `sqlite3` writer can re-point a take; and while her J16 ruling says a second WINDOW
+cancels the sheet, a second **PROCESS** does not — two dev instances (`open -n` twice) share the
+store and one can write while the other's sheet is open, which is exactly the shape a sync apply
+has. Fixture typed through the shelf quick-entry bar (three paragraphs, ⇧⏎ between), the middle
+block fanned through the Takes board.
+
+| # | capture | what it shows |
+|---|---|---|
+| 01 | `ug-01-fixture-fanned-middle-terminal.png` | the fixture: 3 blocks, the middle fanned (`Beta two.` chosen · `SPARE`) |
+| 02 | `ug-02-run-sheet-open-terminal.png` | the RUN sheet: *3 blocks · 1 take beyond the shown ones*, the two presets, the list with block 2 marked *2 takes — all coming along* over `Beta two.` |
+| 03 | `ug-03-drift-staged-instance2-terminal.png` | instance 2 re-points block 2's chosen to `SPARE` — the store moves under the open sheet |
+| 04 | `ug-04-drift-refresh-terminal.png` | **the fix**: ⏎ under "Only the shown ones" did NOT merge — the list re-marked `SPARE` (*2 takes — only this one comes*), the line spoke *"The takes changed while the sheet was open — review before merging."*, three blocks intact behind it |
+| 05 | `ug-05-second-press-joins-what-the-list-showed-terminal.png` | the second ⏎ landed `"Alpha one. SPARE Gamma three."` — the list's own takes |
+| 06–08 | `ug-06-run-sheet-open-study.png` · `ug-07-drift-refresh-study.png` · `ug-08-carry-all-landed-study.png` | the same in the STUDY voice on the OTHER preset ("Bring every take"): refreshed, re-marked `Beta two.`, then landed `"Alpha one. Beta two. Gamma three."` with the other take whole (⑂2) |
+| 09–11 | `ug-09-pair-sheet-open-study.png` · `ug-10-pair-drift-refresh-study.png` · `ug-11-pair-by-hand-after-refresh-study.png` | the PAIR: opened with the shown pair marked, refreshed on a re-point (the *shown here* badge MOVED to `SPARE`, `Beta two.` became *carried whole*), and **"Pair by hand…" afterwards offered `"Alpha one…." ＋ "SPARE…"`** — R3-7's whole point, with the preview `Alpha one. SPARE` |
+| 12–13 | `ug-12-card-previews-chosen-take-study.png` · `ug-13-card-falls-back-past-archived-chosen-study.png` | item 6: the Library card previewed `SPARE Gamma three.`, then — after archiving that chosen take through Write's fan panel — `Beta two. Gamma three.`, the take the note now shows |
+| 14 | `ug-14-instant-keep-on-top-divide-ring-study.png` | R3-8: ⌘⇧D on the board split at the word edge, the other take stayed whole on the TOP block (⑂2), and the ring landed on the SECOND successor's rendered take |
+
+⌥⌘Z put every structural act back. The voice was restored to Terminal (the state I found), both
+instances quit — the extra by PID, the last by bundle identity — and `pgrep` confirmed **zero
+instances**. Her `/Applications` app was never launched or quit.
+
+### THE TWO REDS IN THE FULL SUITE, ADJUDICATED BY MEASUREMENT (not by assertion)
+
+1. **`BookOutlineLandingTests.openingACollapsedStoryLandsAtItsTop WithThreeStoriesExpanded`
+   (`abs(top) → 3424.0`)** — the recorded load flake (KnownIssues rows 49/66, and UNIT B's own
+   trace of the same number). **Paired protocol: GREEN isolated on my tree.** Not mine.
+2. **`BookIndexEditingTests.theReadClickLandsInIndexAtThatBlock` (`live.count → 0`)** — this is
+   **row 58's recorded environment red**, named verbatim in UNIT E's own baseline block above. I
+   did not take that on faith: I built the PRE-UNIT tree `25638746` in a worktree and ran the suite
+   there under identical conditions. **Six runs settle it:** base cold (fresh DerivedData) 7/7
+   GREEN in 2.878 s; then, in that same warm DerivedData — my HEAD RED, my first commit
+   `ffec8485` RED (a purely ADDITIVE core commit that cannot reach a book-index pane), **the base
+   commit itself RED**, base RED again after wiping the Debug domain's 178 `surfaceSize.*` keys
+   (sanctioned by ENVIRONMENT TRAPS; they regenerate — 5 were back after the next run), and base
+   RED running that ONE test alone. The control is the verdict: **the red reproduces on the tree
+   with none of my work in it.** The one green reading was the first run in a cold DerivedData and
+   has not reproduced since — the nearest thing to a covariate this unit found, and worth one line
+   to whoever owns row 58. Row 58's twin (`BlocksWorkbenchFaceTests`' read-click) passed in my full
+   run, so the family is not even reliably red together.
+
+### FINALS (2026-09-19)
+
+- core `swift test` — **Test run with 1603 tests in 174 suites passed after 51.778 seconds.**
+  (Baseline 1596/174 + 7 new cells in existing suites = exactly this.)
+- the FULL Mac suite — **Test run with 2880 tests in 481 suites failed after 743.375 seconds with
+  3 issues** — the 3 issues are the 2 suites adjudicated above (row 58's environment red, 2 issues;
+  the row-49 load flake, 1 issue, green isolated). Baseline 2874/481 + 6 new cells, no new suites.
+- the TUTORIAL SPINE — green in-run (all 13 `Tutorial…` suites passed; the only two failing suites
+  in the whole run are the two named above).
+- iOS build — **BUILD SUCCEEDED** (`VariorumMobile`, iPhone 17 Pro simulator).
+- lockstep marker — **8**, untouched. Schema: ZERO. Migrations: ZERO. `Sync/`: ZERO.
+  `Persistence/`: ZERO. `Server/`: ZERO. `BlockRangeIndex`: ZERO.
+
+### MOBILE PARITY (a note, not a build — the brief's rule)
+
+`Queries.renderedVariantIDs` / `renderedVariantID` and the `renderedTakeJoinSQL` fragment are core
+and platform-free, so the phone inherits them the moment it wants them. **The phone owes nothing
+here**: it has no merge ceremony sheet and no Library card of this shape. One row for the catch-up
+if its own opening-preview reads are ever audited: they were not in this unit's scope, and the
+anti-drift net (`everyRenderedTakeReaderAgreesOnOneWorld`) only walks the readers core ships.
+
+### FOUND, NOT MINE (handed up rather than carried)
+
+1. **The remembered-note-length store writes into the SHARED Debug defaults domain under
+   DETERMINISTIC fixture UUIDs.** `defaults read io.lduarte.Variorum.debug` held **178**
+   `surfaceSize.flow.<uuid>` keys whose uuids are the test harnesses' `.incrementing` ids
+   (`…000000000001`, `…00000000000C`) — so two suites that both mint a fixture note as id 1 share a
+   remembered height across runs, and a mounted-flow test can read a height another suite wrote.
+   18d's store is deliberately LOCAL-ONLY and never synced, which is right; what it lacks is a test
+   seam. I wiped them (sanctioned) and it did NOT fix the row-58 red, so this is not that bug — but
+   it is a real test-isolation hazard sitting under every mounted book/flow suite. **Owner: the
+   landing/settle family (KnownIssues 12), beside rows 49/58/66.**
+2. **Row 58's red has a candidate covariate worth one experiment:** it passed only in the FIRST run
+   after a clean build into a fresh DerivedData, and failed in all five subsequent runs across both
+   trees (including alone). If that reproduces, the row stops being "environment" and becomes
+   "warm-build", which is a thing a fix can bite on.
+
+### DEFERRED / NOT MINE (stated rather than done)
+
+- **UNIT H** (the Takes board's live-card delete door + the lesson's truth) — the ledger's row 8b,
+  untouched.
+- **The 18f ladder's R3-1…R3-4** (the board's sheet receipt, the field guide's deleting chapter,
+  the two bars' ceremony rows and the Divide help) — routed to 17o batch d as ledger rows 43–46 at
+  the letter's close; not this unit's, and I left them alone.
+- **The ceremony sheets' typography and layout** — 18f's face is the design; this unit changed
+  nothing anyone can see except the words the refresh speaks and the takes the list marks.
+
+---
+
+## UNIT G CLOSED — 2026-09-19
+
+The merge sheets' drift family is closed: the RUN arm checks what it showed you before it joins,
+the pair reads the store at open as well as at confirm, the pre-pair moves with the marking, the
+board's instant divide speaks the one rendered-take rule, the confirm costs the blocks it names
+rather than the note around them, and two reads of a note's opening now show the take the note
+shows. **KnownIssues row 42 is RESOLVED** in this commit; ledger row 8 flipped with it.
+Commits `c79860b0` → this one. QUESTIONS **#124** carries the one PROVISIONAL.
