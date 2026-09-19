@@ -46,3 +46,21 @@ swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
 - A fresh launch shows a **40 pt phantom window** in `walk-cap`'s listing — skip it.
 - `cliclick` keystrokes go to the FRONTMOST app: re-activate the target after every capture before typing.
 - Synthetic typing into the full-document TK2 editor drops most characters even at 150 ms spacing, and ⌘V never lands there; the quick-entry bar and the quick-note pad take full strings fine — stage editor prose through the store, not the keyboard.
+
+## Walker facts from the 13u3 UNIT C walk (2026-09-19)
+
+- **The quick-note pad is a FLOATING window (CG layer 19)**, so `walk-cap` — which filters to layer 0 —
+  never lists or captures it. List every layer (a 12-line `CGWindowListCopyWindowInfo` dump) and capture it
+  by id: `screencapture -x -o -l <id> out.png`.
+- **`walk-cap` writes `w0.png`, `w1.png`… by INDEX, and never cleans up**: a run that finds fewer windows
+  than the previous one leaves STALE files under the old names, which reads as "the app did not change".
+  Prefer capturing by window id once you know it.
+- The dev window comes back at **1700×1000 at Y=33** after a quit/relaunch (not the 1728×1084 of a first
+  launch) — read the bounds from the listing every time rather than reusing a note's numbers.
+- A sidebar row click right after `open -n` + activate can be swallowed while the workspace restores;
+  **⌘K → type the destination → ⏎** is the reliable navigation road.
+- `osascript -e 'set frontmost of (first application process whose unix id is <pid>) to true'` is a SYNTAX
+  ERROR on its own — it needs `tell application "System Events" to …`.
+- **The appearance (follow system · light · dark) is a LOCAL `UserDefaults` preference**, so a walk can stage
+  it without touching the UI: `defaults write io.lduarte.Variorum.debug appearanceChoice dark|light|system`
+  then relaunch (restore it afterwards). The VOICE is a synced store setting and must be clicked in Settings.

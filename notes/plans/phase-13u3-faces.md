@@ -299,7 +299,7 @@ touches her real store outside the pre-authorized refresh.**
 | 2 | UNIT A1 — the gutter geometry rework (item 3's page half + KnownIssues row 50) | **DONE 2026-09-18** — `bb31912e`…`3263a1e6`; the UNIT A1 RECORD is at the end of this file (host table · traced mechanisms · 15 pins with red-on-old · 12 walk captures · finals). Row 50 RESOLVED; QUESTIONS #117 opened |
 | 2b | UNIT A2 — the comments panel as a text editor (item 3's panel half, memo §2 D) | **DONE 2026-09-18** — `52cd0cc4`…`afc108ee` + this record's close; the UNIT A2 RECORD is at the end of this file (the writing semantics as one brain · 16 pins with the red-on-old table · the walk's four finds and 19 captures · finals). QUESTIONS #118 opened |
 | 3 | UNIT B — note-list skimmability (item 4) | **DONE 2026-09-19** — `2d083439`…`7aac721c` + this record's close; the UNIT B RECORD is at the end of this file (the contract as built · 27 pins in 4 suites · the walk's 18 captures and its one defect · the suite find traced on two trees · three things handed up · finals). QUESTIONS #119 opened |
-| 4 | UNIT C — the quick-capture Mac face (item 9 / R-13u-4) | NOT STARTED |
+| 4 | UNIT C — the quick-capture Mac face (item 9 / R-13u-4) | **DONE 2026-09-19** — `cf3d86c2`…`9da5bec3` + this record's close; the UNIT C RECORD is at the end of this file (the contract as built and why the box is AppKit · the traced refusal defect with its red-on-old · 18 pins in 3 new suites · the walk's 16 captures in both voices and both appearances and the two things it found · three things handed up). QUESTIONS #120 opened |
 | 5 | UNIT D — named commits (item 14 / R-13u3-1) | NOT STARTED |
 | 6 | UNIT E — the #80(e) two faces (item 15) | NOT STARTED |
 | 7 | UNIT F — PDF renders formatting (item 16) | NOT STARTED |
@@ -1275,7 +1275,7 @@ capture box that has the caret.
 | 5 | the red-on-old measurement (the one defect-shaped row: a refused quick-note filing destroyed the capture) | **DONE** — measured, restored, re-verified (the table below) |
 | 6 | the copy that teaches the keys — the helper dictionary + the tutorial's workspace lesson, with pins | **DONE** (2 new cells; `TutorialBookShapeTests` + `NodSetTests` + the quick-note word suite green) |
 | 7 | QUESTIONS #120 (the PROVISIONAL calls) + the marker moved | **DONE** — six lettered calls; the stale mid-file marker retired and the live one moved to the file's end (#121) |
-| 8 | the walk + captures, the full Mac suite, the tutorial spine, iOS build | PENDING |
+| 8 | the walk + captures, the full Mac suite, the tutorial spine, iOS build | **DONE** — 16 captures; finals below |
 
 *(Nothing below this line is claimed until its row says DONE.)*
 
@@ -1316,3 +1316,202 @@ green** before · **29 tests, 3 issues, 1 cell red** under the revert · **29/29
 |---|---|---|
 | `aRefusedQuickNoteFilingKeepsTheCaptureInThePad` | **RED**, 3 issues | `pad.text` came back `""` where she had typed three paragraphs; `titleFromFirstWords` came back `false`, so the name she had chosen was gone too; and the RETRY (`close()` after the refusal) minted **nothing** — `postID → nil` — because there was nothing left in the pad to file. That third issue is the defect's real shape: the refusal did not merely fail to save, it removed the last road back |
 | the other 28 cells | green under the revert, by construction | they pin what this unit DECIDED — which key files and which makes a paragraph, what the box measures and where it stops, what three typed paragraphs segment to at both doors, what both doors teach. A missing capability is not a bug pin, and the brief says not to manufacture reds for one |
+
+### WHAT THE TWO CAPTURE DOORS ARE NOW (the contract, in her words where they exist)
+
+**ONE RULE, BOTH DOORS: ⏎ FILES WHAT YOU HAVE WRITTEN · ⇧⏎ ADDS A PARAGRAPH** (R-13u-4). Both
+Mac capture surfaces — the shelf/Library quick-entry bar (R3) and the floating quick-note pad
+(13f W5) — compose ONE view, `CaptureTextView` (`Core/Views/`, the Mac-only shared home beside
+UNIT B's chip), whose `keyDown` asks ONE pure rule, `CaptureKeys.act`. A capture holds as many
+paragraphs as she types; the hand-off carries the whole thing through `importPost`'s bulk rule,
+untouched.
+
+**What "file" MEANS is the host's, deliberately** (QUESTIONS #120(a)/(b)): the pad files and
+CLOSES (its three doors — ⏎, ⌘⏎, "File It" — are one act, and "one summon = one note" is its
+shipped grammar); the bar files and OPENS the note (R3's own grammar; its placeholder has always
+said *"⏎ opens it"*). The rule says which KEY, never what the host does with the note.
+
+**Before this unit the two doors disagreed in the deepest possible way:** the bar's ⏎ filed
+(`.onSubmit`) and the pad's ⏎ typed a newline — its own header said so, from her round-14.2. So a
+multi-paragraph capture could only be PASTED into the bar, never typed, and the pad could not be
+filed from the keyboard at all without a chord. R-13u-4 settles both; round-14.2's "⏎ IS A
+NEWLINE" is superseded **for this pad only**, and the half of it her ruling keeps — the pad holds
+many paragraphs — is untouched.
+
+**Why an AppKit box** (and why it is not a second text surface in P-3's sense): AppKit gives ⇧⏎ no
+binding of its own — both keys dispatch `insertNewline:` and both type a plain LF (measured and
+pinned in `ReturnKeyTraceTests`; `EditorTextView.isSoftNewlineKey` carries the same lesson for the
+editor's gesture) — so the ONLY place the two can be told apart is the key event, which neither
+`TextEditor` nor `TextField` hands over. SwiftUI's `TextEditor` IS an `NSTextView`, so nothing new
+is mounted; what changed is who owns `keyDown`. The box carries no block identity, no
+`BlockRangeIndex`, no `PaneTextAuthority`, no `EditorRouter` claim and no liveness ring — P-3's
+invariants are not extended here, they are still simply not engaged.
+
+**The caret can no longer change what a key means.** `CaptureKeys.act` takes an event and nothing
+else; `.paragraph` is deliberately NOT consumed, so the newline is AppKit's own `insertNewline:`
+AT THE CARET. A surface that inserted the newline itself would have to know where the caret is —
+and "where the caret is" is exactly what the phone's lost-prose defect was made of.
+
+**Everything else the box does, and where it came from:** it grows with its paragraphs to a bound
+and then scrolls (160 pt in the bar ≈ eight lines — #120(c); the pad takes its window); its font
+and ink come from `EditorTypography` (the SAME face `VoiceTokens.body` renders in both voices) and
+its ink is 18j's ONE dynamic per-voice colour, so an appearance change costs no write; its caret
+is the palette's accent through the tokens road; spelling follows the app's one this-Mac
+`SpellcheckLevel` (ships `off`); it arms the `FallbackCanary` (TEXTKIT2 §4's third practice) and
+opts into TK2 explicitly at init; and its style writes are gated (the A47c lesson).
+
+**UNIT B's title-suggestion chip is consumed, not rebuilt** — both hosts still raise it, one click
+still adopts, and a capture she never clicks still files untitled.
+
+### THE TRACED MECHANISM (what was actually wrong, before anything was changed)
+
+**A REFUSED QUICK-NOTE FILING DESTROYED THE CAPTURE.** `QuickNotePad.take()` cleared `text` and
+`titleFromFirstWords` BEFORE calling `QuickNoteMint.file`, which `try`s `importPost` and CATCHES:
+on any throw the note does not exist and her words are already gone from the only place they
+lived. `fileAndClose()` dismissed the window in the same breath, and the refusal was spoken into
+`session.status` — the MAIN window's status line, not the pad she was looking at. **This is 13l's
+L-b defect one file over**, and the shipped comment explaining why the pad was exempt — *"that pad
+mints as you type, so the text is already a note by the time it files"* — describes a pad that has
+not existed since 13f W5 shipped mint-on-close/⌘⏎/quit.
+
+**Now:** the text leaves the pad only when a note exists to hold it; the refusal is spoken ON the
+pad (`lastError`, the bar's 13l shape, in the alarm register); the window stays open so the next
+⏎ tries again; and the mint RETURNS its outcome instead of only speaking it, so the two lifecycle
+triggers that have no pad left (close, quit) hand it to the status seam themselves — one message
+per event, spoken where she is. "One summon = one note" is preserved on every path, because a
+refusal mints nothing.
+
+### THE PINS (18 cells in 3 new suites + 2 shipped suites amended)
+
+| cell | what it holds | red-on-old |
+|---|---|---|
+| `plainReturnFilesAndShiftReturnMakesAParagraph` | her ruling, as the two lines it is (keypad Enter included) | not bug-class (a new rule) |
+| `capsLockAndTheKeypadAreNotMeaning` | the 13d F-2 mask lesson inherited: caps lock is state, the keypad is hardware | not bug-class |
+| `everyOtherKeyIsNobodysHere` | ⌥⏎ · ⌃⏎ · ⌘⏎ · ⌘⇧⏎ · letters reach the text untouched | not bug-class |
+| `theCaptureRuleAndTheEditorsSoftNewlineAgree` | the app's two Return masks agree, pinned rather than one reaching into the other | not bug-class |
+| `theBoxGrowsWithItsParagraphsAndStopsAtItsBound` | the growth arithmetic, floor and ceiling, and a nonsensical bound losing to the floor | not bug-class |
+| `returnFilesTheWholeCaptureWhereverTheCaretIs` | **the lost-prose twin:** four caret positions, including inside paragraph one; every ⏎ hands over all three paragraphs | not bug-class (the class is impossible by construction, which is what it asserts) |
+| `anEditToAnEarlierParagraphRidesTheFiling` | her report's second half — the edit to the first line rides too | not bug-class |
+| `shiftReturnTypesAParagraphAtTheCaretAndFilesNothing` | the break lands AT the caret, is a plain LF (not U+2028), files nothing, and moves the caret | not bug-class |
+| `aThreeParagraphCaptureCanBeTypedAndThenFiled` | the whole gesture through real key events: ⇧⏎ ⇧⏎ ⏎ | not bug-class |
+| `theMeasuredBoxGrowsAsParagraphsArrive` | growth through the app's ONE measurement brain at a fixed width | not bug-class |
+| `aThreeParagraphPadFilesThreeBlocks` | the pad's hand-off: exact block count AND exact texts through the real `importPost` | not bug-class |
+| `aThreeParagraphBarEntryFilesThreeBlocks` | the bar's hand-off: the same three blocks, because both doors ride the same bulk rule | not bug-class |
+| `theCaretInParagraphOneChangesNothingAboutWhatIsFiled` | **end to end:** real key events → the real pad → the store holds all three paragraphs INCLUDING the edit | not bug-class |
+| `aRefusedQuickNoteFilingKeepsTheCaptureInThePad` | her words, her adopted name, the refusal's sentence, nothing minted, and the retry that works | **RED**, 3 issues |
+| `aRefusedBarEntryKeepsTheCaptureInTheBox` | 13l's fix byte-preserved on the new road (the pair to the pad's, read side by side) | not bug-class (13l's own cells ride unmodified in `QuickEntryBarTests`) |
+| `bothCaptureDoorsTeachTheSameTwoKeys` | the pad's hint and the bar's placeholder, and that the retired model is gone from both | not bug-class |
+| `theHelperDictionaryTeachesTheCaptureKeys` (`QuickNoteWordTests`) | the dictionary entry + the shortcuts tab's own row | **RED on the shipped copy** (it taught *"Return makes a new line, not a new note"*) |
+| `theWorkspaceLessonTeachesTheCaptureKeys` (`TutorialBookShapeTests`) | the tutorial lesson through the real seeded store | **RED on the shipped lesson** (same retired sentence) |
+
+*(Amended, not replaced: `QuickNoteTests`' three mint-trigger cells, `NodSetTests`' two, and
+`TitleSuggestionChipTests`' pad cell now read the mint's `Outcome` instead of a bare id — the same
+assertions, through the door that now reports. `QuickEntryBarTests`' five 13l cells are
+byte-unmodified and green.)*
+
+**Why so few reds, said plainly:** the single-paragraph limitation was a MISSING CAPABILITY, not a
+bug — the brief says so and tells me not to manufacture reds for one. Three cells here are
+defect-shaped: the pad's refusal (measured above) and the two copy surfaces that taught the model
+her ruling replaced.
+
+### THE WALK (mine — `io.lduarte.Variorum.debug`, dev store, 2026-09-19; `cliclick` + `Tools/WalkKit`)
+
+16 captures in `notes/plans/13u3-screens/` (gitignored), `c-01`…`c-16`.
+
+| capture | what it shows |
+|---|---|
+| `c-01` · `c-02` | **the headline:** three paragraphs TYPED into the shelf bar with ⇧⏎ (the box grown to hold them, UNIT B's chip beneath), then ⏎ — the note opens and the bar reads **`block 1/3`** |
+| `c-03` · `c-04` · `c-05` | the same in the floating pad: three typed paragraphs, ⏎ files AND closes it (the quiet receipt *"Filed in Quicknotes — tagged #quicknote."*, the main window never navigating), and the filed note is **`block 1/3`** in the Quicknotes book |
+| `c-06` · `c-07` | **the lost-prose case, on the real app:** the caret clicked INTO paragraph one, `(EDITED IN PARAGRAPH ONE)` typed there, then ⏎ — the note holds all three paragraphs WITH the edit, `block 1/3`. No mode, no frozen prefix, nothing dropped |
+| `c-08` · `c-09` (Terminal light) · `c-10` · `c-11` (Study light) · `c-12` · `c-13` (Study dark) · `c-14` · `c-15` (Terminal dark) | both surfaces in both voices and both appearances: the voice's own writing font in the box, the dynamic ink readable on a fully black room (R51), the palette's accent as the caret, the chip and the hint in the voice's register |
+| `c-16` | the bound: eleven typed paragraphs — the box stops growing and SCROLLS, the caret's line visible, the chip still offering the FIRST words; ⏎ then filed it as **`block 1/11`** |
+
+**WALK VERDICT: both capture doors answer the same two keys, a typed multi-paragraph capture
+survives the hand-off exactly, and the phone's lost-prose case cannot be constructed on the Mac.**
+Also driven and confirmed: ⌘⏎ still files and closes the pad; ⌘W (closing) still files it; ⏎ on an
+EMPTY pad does nothing and leaves it open (#120(d)); the box keeps its text across a voice change.
+
+**The walk found TWO things the desk could not, both fixed in the same session** (`9da5bec3`):
+
+1. **The typed words moved sideways.** `NSTextContainer` ships a 5 pt `lineFragmentPadding`, so
+   the text sat a few points right of the placeholder drawn behind it — visible the instant she
+   typed the first character. Set to 0, and re-measured: the placeholder's and the typed text's
+   left ink columns now land on the SAME pixel (abs x = 460 in both captures).
+2. **The pad's hint truncated mid-rule.** At the pad's own 340 pt the one-line hint read
+   *"⏎ files it · ⇧⏎ new paragraph · c…"* — the third clause unreadable at the width the window
+   actually opens at. Two lines now, and the whole rule reads (`c-09`…`c-15`). The pad's box also
+   gained the host inset both the text and the placeholder share, since the pad draws the box's
+   surface itself and 0 padding put the prose against its edge.
+
+**What the walk could NOT stage:** a store-level refusal (the pad's and the bar's
+text-preserving behaviour is the harness's, through the endorsed defaulted-seam — measured
+red-on-old above).
+
+### FINALS (2026-09-19)
+
+- core `swift test` — **Test run with 1580 tests in 172 suites passed after 53.746 seconds.**
+- the FULL Mac suite — **Test run with 2841 tests in 474 suites failed after 768.914 seconds with
+  2 issues.** Both issues are ONE test: `theReadClickLandsInIndexAtThatBlock`, the recorded
+  environment red (KnownIssues row 58, owner 12) the brief names as the single tolerated one.
+  Nothing else failed. (Baseline 2823/471 + 18 cells in 3 suites = 2841/474, exactly.)
+- the TUTORIAL SPINE — green in-run (every `Tutorial…` suite passed, including the lesson this
+  unit edited).
+- iOS build — **BUILD SUCCEEDED**.
+- lockstep marker — **8**, untouched. Schema: ZERO. Migrations: ZERO. `Sync/`: ZERO.
+  `Persistence/`: ZERO. `Sources/VariorumCore/`: ZERO. `App/Variorum/Shared/`: ZERO.
+
+### MOBILE PARITY (a note, not a build — the brief's fence)
+
+**R-13u-4 rules BOTH platforms and the phone's face is the mobile catch-up's** (the master plan
+item (9)'s own fence: *"Mobile batch 4.6 builds the phone's face to this ruling and does NOT
+re-decide it"*). The phone still ships the A5-2 ONE-BLOCK rule that produced her 2026-08-23
+lost-prose report; nothing here changes it. What the Mac now has that the phone owes: the two
+keys, a capture box that holds many typed paragraphs, a bound with scrolling, the hand-off through
+`importPost`'s bulk rule, and the refusal that keeps the capture. `CaptureKeys` is deliberately
+Mac-shaped (it reads an `NSEvent`); the phone's answer is UIKit's, and the RULE — file vs
+paragraph — is what travels, not the type. A parity row is the orchestrator's to file.
+
+### FOUND, NOT MINE (handed up rather than carried)
+
+1. **`ShelfViewModel.quickEntry` is a dead parallel road.** It mints a post through `importPost`
+   exactly as `QuickEntryModel` does, and NOTHING calls it but `ShelfAndPaletteTests`. It predates
+   13l's L-b extraction (which moved the bar's rule into `QuickEntryModel`) and was left behind.
+   Two mint roads for one door is the drift class; retiring it is a one-line delete plus a test
+   edit, and it is a second surface, so I did not take it.
+2. **The pad's close/quit refusal still loses the capture** — deliberately recorded rather than
+   invented around. If the store refuses at the moment the window is going (`onDisappear`) or at
+   app quit, there is no pad left to keep the words in, and the status seam gets the sentence. The
+   honest fix is a one-slot unfiled-capture parking spot the next summon restores, which is
+   product behaviour nobody has ruled. QUESTIONS #120(e) carries the shape of the decision.
+3. **A walker fact that cost me twenty minutes, now in `Tools/WalkKit/README.md`:** the quick-note
+   pad is a FLOATING window (CG layer 19), so `walk-cap`'s layer-0 filter skips it entirely — and
+   because `walk-cap` writes `w0.png`, `w1.png`… by INDEX, a run that finds fewer windows than the
+   last one leaves STALE files behind with the old names. Capture floating windows by id
+   (`screencapture -l <id>`), and read the id from a listing that does not filter by layer.
+
+### DEFERRED / NOT MINE (stated rather than done)
+
+- **QUESTIONS #120** — the six calls this unit had to make inside her ruling (what ⏎ closes · what
+  it opens · the 160 pt bound · the empty-pad ⏎ · where a refusal speaks · the two visible
+  consequences of the box being the app's own). All PROVISIONAL, each one line to change.
+- **The phone's face** (above) — the mobile catch-up's, by the master plan's own fence.
+- **Not touched, as the brief fences:** UNIT A1's gutter, UNIT A2's comments panel, UNIT B's
+  Library card work and its `NoteCardFace` brain (consumed, never rebuilt), ⇧⌘V (`PlainPaste`),
+  every other unit in this phase, `Sources/VariorumCore/`, `Shared/`, `Sync/`, `Persistence/`,
+  the schema and the marker.
+
+---
+
+## UNIT C CLOSED — 2026-09-19
+
+The Mac's two capture doors answer ONE rule — **⏎ files it · ⇧⏎ adds a paragraph** — through ONE
+box and ONE pure key decision; a capture holds as many paragraphs as she types and hands every one
+of them to `importPost`'s bulk rule; the caret cannot change what a key means, so the phone's
+2026-08-23 lost-prose class is impossible here by construction; and a refusal now keeps her words
+in the box that is still in front of her (the one defect-shaped row, measured red-on-old). The
+copy that taught the retired model — the tutorial's workspace lesson and the helper's quick-note
+entry — teaches the ruling instead, each with its pin. 18 pins in three new suites, a walk in both
+voices and both appearances that found two things the desk could not, and one new PROVISIONAL
+bundle (#120). Suites and finals above.
+
+---
