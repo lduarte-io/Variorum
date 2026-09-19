@@ -174,6 +174,12 @@ struct CaptureTextView: NSViewRepresentable {
             width: CGFloat.greatestFiniteMagnitude,
             height: CGFloat.greatestFiniteMagnitude)
         view.textContainerInset = NSSize(width: 0, height: 2)
+        // WALK FIND 1: `NSTextContainer` ships a 5 pt `lineFragmentPadding`,
+        // so the typed text sat a few points right of the placeholder the
+        // host draws behind it — the words moved sideways the moment she
+        // started typing. The host owns this box's insets; the container
+        // owns none.
+        view.textContainer?.lineFragmentPadding = 0
         view.textContainer?.widthTracksTextView = true
         view.textContainer?.size = NSSize(
             width: 0, height: CGFloat.greatestFiniteMagnitude)

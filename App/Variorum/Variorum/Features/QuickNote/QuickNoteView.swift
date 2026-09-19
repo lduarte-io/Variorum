@@ -210,13 +210,21 @@ struct QuickNoteView: View {
                 maxHeight: nil,  // the pad IS a window: it takes the space
                 focusRequest: 1,  // the caret lands here when the pad opens
                 onFile: { fileAndClose() })
+                // WALK FIND 2: the pad draws the box's surface itself, so the
+                // inset is the HOST's — and it has to be the same one the
+                // placeholder wears, or the words move sideways when she
+                // starts typing (the same class the container padding caused
+                // one file over).
+                .padding(.horizontal, 6)
+                .padding(.vertical, 4)
                 .background(tokens.surface)
                 .overlay(alignment: .topLeading) {
                     if pad.text.isEmpty {
                         Text(tokens.chromeLabel(QuickNoteCopy.placeholder))
                             .font(tokens.body)
                             .foregroundStyle(tokens.faint)
-                            .padding(.top, 2)
+                            .padding(.horizontal, 6)
+                            .padding(.top, 6)
                             .allowsHitTesting(false)
                     }
                 }
@@ -242,11 +250,15 @@ struct QuickNoteView: View {
             }
             HStack {
                 // `lineLimit` beside a hint in non-scrolling chrome — P-8's
-                // b6dae25 class.
+                // b6dae25 class. TWO lines since 13u3 UNIT C's walk: at the
+                // pad's own 340 pt the one-line hint truncated mid-rule
+                // ("⏎ files it · ⇧⏎ new paragraph · c…"), so the third
+                // clause — closing files it too — could not be read at the
+                // width the pad actually opens at.
                 Text(tokens.chromeLabel(QuickNoteCopy.hint))
                     .font(tokens.small)
                     .foregroundStyle(tokens.faint)
-                    .lineLimit(1)
+                    .lineLimit(2)
                 Spacer(minLength: 8)
                 Button(QuickNoteCopy.fileVerb) { fileAndClose() }
                     .keyboardShortcut(.return, modifiers: .command)
