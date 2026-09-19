@@ -1954,7 +1954,7 @@ KnownIssues row *"A note's saved VERSIONS ride a BLOCK-level anchor"* (owner 13w
 | 2 | core — the bounded read + its pins (incl. the anti-drift pin against `PurgeFamily`) | **DONE** (5 cells green; the versions/purge/tray neighbours 76/76 green beside them) |
 | 3 | the confirm — the copy + the ask road + pins (red-on-old where the shipped words are false) | **DONE** (3 cells; the red-on-old measured on the shipped words first — the log line is in the record; the suite 15/15 green after) |
 | 4 | the tutorial lesson (b) + its spine pins | **DONE** (the chapter's 4th lesson + 5 pin blocks in 2 suites; the whole spine + the pane's suite 106/106 green in 15 suites) |
-| 5 | QUESTIONS #122 + the next-free marker moved | PENDING |
+| 5 | QUESTIONS #122 + the next-free marker moved | **DONE** — six lettered calls, led by the measured correction to #80(e)'s premise; the marker moved to #123 |
 | 6 | the walk + captures, the FULL Mac suite, tutorial spine, iOS build, the mobile suite | PENDING |
 
 *(Nothing below this line is claimed until its row says DONE.)*
