@@ -58,6 +58,14 @@ final class QuickNotePad {
     @ObservationIgnored let session: AppSession
     var text = ""
 
+    /// **13u3 UNIT B — her item 4's capture half**, the same offer the
+    /// quick-entry bar makes: has she taken the suggested name? Off until she
+    /// clicks it; a pad she ignores files untitled exactly as it always did.
+    var titleFromFirstWords = false
+
+    /// The words the chip offers — one brain with the Library's cards.
+    var suggestedTitle: String? { NoteCardFace.suggestedTitle(forTypedText: text) }
+
     init(session: AppSession) { self.session = session }
 
     /// Is there anything to file? The button's grey reads this, so it can
@@ -90,8 +98,14 @@ final class QuickNotePad {
     /// One line, on the one shared body, so all three triggers inherit it.
     private func take() async -> String? {
         let text = self.text
+        // The name is read from what is being FILED, before the pad clears.
+        let title = titleFromFirstWords
+            ? NoteCardFace.suggestedTitle(forTypedText: text)
+            : nil
         self.text = ""
-        guard let postID = await QuickNoteMint.file(text, session: session) else { return nil }
+        titleFromFirstWords = false
+        guard let postID = await QuickNoteMint.file(text, title: title, session: session)
+        else { return nil }
         await session.savepointOnLeaving(postID)
         return postID
     }
@@ -142,6 +156,15 @@ struct QuickNoteView: View {
                             .allowsHitTesting(false)
                     }
                 }
+            // 13u3 UNIT B — the OFFER (her item 4): the first words, one
+            // click to take them as this note's title, ignorable forever.
+            if let suggestion = pad.suggestedTitle {
+                TitleSuggestionChip(
+                    tokens: tokens, suggestion: suggestion, adopted: pad.titleFromFirstWords
+                ) {
+                    pad.titleFromFirstWords.toggle()
+                }
+            }
             HStack {
                 // `lineLimit` beside a hint in non-scrolling chrome — P-8's
                 // b6dae25 class.
@@ -228,8 +251,12 @@ enum QuickNoteMint {
     ///
     /// The undo entry says **"Quick Note"** — the label parameter this item
     /// added to `importPost`, so the menu says what she did.
+    ///
+    /// **`title` is her own adoption** (13u3 UNIT B): nil unless she clicked
+    /// the offered name, which keeps "untitled" the pad's default exactly as
+    /// this doc says it is.
     @discardableResult
-    static func file(_ text: String, session: AppSession) async -> String? {
+    static func file(_ text: String, title: String? = nil, session: AppSession) async -> String? {
         guard mints(text) else { return nil }
         do {
             // 13g batch 7 (her R6-4): the mint and the FILING ride ONE runner
@@ -240,7 +267,7 @@ enum QuickNoteMint {
             // the shelf's bookkeeping.
             let (result, filing) = try await session.runner.run { ops in
                 let result = try ops.importPost(
-                    title: nil, text: text, undoLabel: QuickNoteCopy.undoLabel)
+                    title: title, text: text, undoLabel: QuickNoteCopy.undoLabel)
                 return (result, ops.fileAsQuicknote(result.container.id))
             }
             // Her round-14.3: STAY QUIET. One line naming where it went —

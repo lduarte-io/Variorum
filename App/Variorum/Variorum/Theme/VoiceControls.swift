@@ -81,6 +81,12 @@ struct VoicedChip: View {
         Button { action?() } label: {
             Text(tokens.chromeLabel(text))
                 .font(tokens.small)
+                // A chip is a state WORD — one line, always (P-8's chrome
+                // class rule, the same one `VoicedButtonStyle` carries).
+                // Added at 13u3 UNIT B, when the first chip whose text is a
+                // note's own words arrived: `TitleSuggestionChip` can be
+                // handed a 48-character name and a 300 pt pad to draw it in.
+                .lineLimit(1)
                 .foregroundStyle(on ? tokens.accent : tokens.muted)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 1)

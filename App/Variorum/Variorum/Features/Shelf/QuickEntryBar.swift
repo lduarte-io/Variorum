@@ -40,12 +40,28 @@ final class QuickEntryModel {
     var text = ""
     private(set) var lastError: String?
 
+    /// **13u3 UNIT B — her item 4's capture half.** Has she taken the offered
+    /// name? Off until she clicks, and off again after a note is filed: a
+    /// suggestion is about the words in the box, and the box is now empty.
+    /// Nothing is ever applied for her (*"a suggestion, never an action taken
+    /// for her"*).
+    var titleFromFirstWords = false
+
+    /// The words the chip offers — the ONE brain the Library's cards lead
+    /// with, asked of the buffer instead of a note. Nil when there is nothing
+    /// to offer, and then no chip is drawn (a door that cannot act is not
+    /// rendered).
+    var suggestedTitle: String? { NoteCardFace.suggestedTitle(forTypedText: text) }
+
     @ObservationIgnored private let session: AppSession
     /// The endorsed defaulted-seam pattern (`tailIdleSleep`, the canary
     /// handlers, `teardown(afterDisarm:)` — mobile round 2 §20(b)):
     /// production never sets this, and a refusal is otherwise not reachable
     /// from a test without breaking the store underneath it.
-    @ObservationIgnored var mint: ((String) async throws -> String)?
+    ///
+    /// It carries the TITLE beside the text since 13u3 UNIT B, so a pin can
+    /// read what the mint was actually asked for.
+    @ObservationIgnored var mint: ((String, String?) async throws -> String)?
 
     init(session: AppSession) {
         self.session = session
@@ -60,28 +76,40 @@ final class QuickEntryModel {
             // with it.
             text = ""
             lastError = nil
+            titleFromFirstWords = false
             return nil
         }
         lastError = nil
+        // The name is read from what is being FILED, not from what the box
+        // holds now — the same discipline `submitted` already has.
+        let title = titleFromFirstWords
+            ? NoteCardFace.suggestedTitle(forTypedText: submitted)
+            : nil
         do {
-            let postID = try await mintNow(submitted)
+            let postID = try await mintNow(submitted, title: title)
             // **Only what was actually minted is cleared.** Keystrokes that
             // landed during the flight are not in that note — the mint read
             // `submitted` — so clearing them wholesale would lose them for
             // the sake of tidiness. She sees them still there, and a second
             // ⏎ makes them a second note.
-            if text == submitted { text = "" }
+            if text == submitted {
+                text = ""
+                titleFromFirstWords = false
+            }
             return postID
         } catch {
+            // A refusal keeps her text AND her decision about its name: both
+            // are still in front of her, and a second ⏎ must do what the
+            // first one was asked to.
             lastError = QuickEntryCopy.refusal(for: error)
             return nil
         }
     }
 
-    private func mintNow(_ submitted: String) async throws -> String {
-        if let mint { return try await mint(submitted) }
+    private func mintNow(_ submitted: String, title: String?) async throws -> String {
+        if let mint { return try await mint(submitted, title) }
         return try await session.runner.run { ops in
-            try ops.importPost(title: nil, text: submitted).container.id
+            try ops.importPost(title: title, text: submitted).container.id
         }
     }
 }
@@ -175,6 +203,15 @@ struct QuickEntryBar: View {
                     .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
             .contentShape(Rectangle())
             .onTapGesture { entryFocused = true }
+            // 13u3 UNIT B — the OFFER (her item 4): the first words, one
+            // click to take them as the note's title, ignorable forever.
+            if let suggestion = box.suggestedTitle {
+                TitleSuggestionChip(
+                    tokens: tokens, suggestion: suggestion, adopted: box.titleFromFirstWords
+                ) {
+                    box.titleFromFirstWords.toggle()
+                }
+            }
             if let lastError = box.lastError {
                 // lineLimit is LOAD-BEARING beside fixedSize — an unlimited
                 // fixedSize text in non-scrolling chrome inflates the WINDOW

@@ -152,11 +152,22 @@ public enum NoteCardFace {
         return Card(lead: .untitled, preview: "")
     }
 
-    /// The card a **typed buffer** would get — the capture surfaces' chip and
-    /// any surface holding text that is not a note yet. Same rule, same
-    /// bound; the text is treated as one leading block.
+    /// **The title a capture surface OFFERS** — her item 4's other half: the
+    /// first words *"offered, one tap to adopt, ignorable forever — a
+    /// suggestion, never an action taken for her"*. Same rule and same bound
+    /// as a card's lead; the text is treated as one leading block.
+    ///
+    /// **With one difference, and it is deliberate: no ellipsis.** A lead's
+    /// ellipsis says *there is more of this sentence*, which is true of a
+    /// card's first line and false of a NAME she has chosen — the words stop
+    /// at the same word edge either way, and a stored title reading
+    /// `Garden plans…` would be the app putting its own truncation mark into
+    /// her prose. (PROVISIONAL, QUESTIONS #119(d).)
     public static func suggestedTitle(forTypedText text: String, cap: Int = leadCap) -> String? {
-        firstWords([text], cap: cap)?.lead
+        guard let lead = firstWords([text], cap: cap)?.lead else { return nil }
+        let name = (lead.hasSuffix(ellipsis) ? String(lead.dropLast()) : lead)
+            .trimmingCharacters(in: .whitespaces)
+        return name.isEmpty ? nil : name
     }
 
     // MARK: - The words

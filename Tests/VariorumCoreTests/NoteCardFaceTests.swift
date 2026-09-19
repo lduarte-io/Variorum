@@ -236,8 +236,15 @@ struct NoteCardFaceTests {
 
         let long = "The lighthouse keeper counted the storms and wrote none of them down, ever."
         let suggestion = try #require(NoteCardFace.suggestedTitle(forTypedText: long))
-        #expect(suggestion.count <= NoteCardFace.leadCap + 1)
-        #expect(suggestion.hasSuffix(NoteCardFace.ellipsis))
+        #expect(suggestion.count <= NoteCardFace.leadCap)
+        // **A NAME IS NOT A TRUNCATION.** The card's lead carries the
+        // ellipsis (there is more of this sentence); the title she adopts
+        // does not — the app must not put its own truncation mark into her
+        // prose. Same words, same word edge.
+        #expect(!suggestion.hasSuffix(NoteCardFace.ellipsis))
+        #expect(long.hasPrefix(suggestion))
+        let lead = try #require(NoteCardFace.firstWords([long])).lead
+        #expect(lead == suggestion + NoteCardFace.ellipsis, "one rule, two marks")
     }
 
     // MARK: - The fact the rows had to start carrying

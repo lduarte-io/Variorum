@@ -39,7 +39,7 @@ struct QuickEntryBarTests {
     /// because the box was cleared before the store was ever asked.
     @Test func aRefusedMintKeepsHerText() async throws {
         try await withBox { box, _, _ in
-            box.mint = { _ in throw OperationError.lockedPost(id: "c1") }
+            box.mint = { _, _ in throw OperationError.lockedPost(id: "c1") }
             box.text = "the paragraph she just wrote"
 
             let opened = await box.submit()
@@ -53,7 +53,7 @@ struct QuickEntryBarTests {
 
     @Test func aRefusalSpeaksInWords() async throws {
         try await withBox { box, _, _ in
-            box.mint = { _ in throw OperationError.lockedPost(id: "c1") }
+            box.mint = { _, _ in throw OperationError.lockedPost(id: "c1") }
             box.text = "hello"
             await box.submit()
 
@@ -71,7 +71,7 @@ struct QuickEntryBarTests {
     @Test func aStoreFailureIsNamedRatherThanDumped() async throws {
         struct Cutoff: Error { let detail = "NSCocoaErrorDomain 257" }
         try await withBox { box, _, _ in
-            box.mint = { _ in throw Cutoff() }
+            box.mint = { _, _ in throw Cutoff() }
             box.text = "hello"
             await box.submit()
 
@@ -110,7 +110,7 @@ struct QuickEntryBarTests {
             // Staged from INSIDE the mint, which is the only place the
             // window really is: `submitted` has been read, the note does not
             // hold these keystrokes, and the clear is still ahead.
-            box.mint = { _ in
+            box.mint = { _, _ in
                 box.text = "first and then some more"
                 return "post-1"
             }
@@ -127,7 +127,7 @@ struct QuickEntryBarTests {
     /// drops a stale error with it.
     @Test func anEmptyBoxFilesNothingAndClearsItsStaleError() async throws {
         try await withBox { box, _, _ in
-            box.mint = { _ in throw OperationError.lockedPost(id: "c1") }
+            box.mint = { _, _ in throw OperationError.lockedPost(id: "c1") }
             box.text = "hello"
             await box.submit()
             #expect(box.lastError != nil)
