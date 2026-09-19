@@ -443,7 +443,7 @@ not touched; the inline-comments SETTING's tinted strips are unchanged (R-13u3-5
 | 4 | the R-13u3-4 one-grapheme guard | **DONE** (`CalloutMenu.firstGrapheme` at the door, `BlockDecor.leadingGlyph` at the renderer; pinned incl. family/skin-tone/flag clusters) |
 | 5 | pins (one-law · stack · rhythm · grapheme), `BlockDecorLaneTests` retired INTO successors | **DONE** — 15 cells, red-on-old measured on 10 of them (the table below); zero orphaned test names |
 | 6 | KnownIssues row 50 RESOLVED + QUESTIONS #117 | PENDING |
-| 7 | the walk + captures, the full Mac suite, iOS build | PENDING |
+| 7 | the walk + captures, the full Mac suite, iOS build | **DONE** — 12 captures in `notes/plans/13u3-screens/`; finals below |
 
 ### THE HOST TABLE (the sweep — every host of `BlockDecorOverlayController`, plus every host of a contained surface)
 
@@ -515,3 +515,127 @@ Cell by cell — no pin passed on both sides, and no pin is hollow:
 | `theStackPutsTheGlyphFirstAndTheCommentFaceUnderIt` | **RED** | `rect.maxX 34 > textLeft 28` |
 | `twoCommentedBlocksCardsNeverAbut` | **RED** (revert 5), 2 | `first.maxY 54` where the next card's top is `46` — an 8 pt OVERLAP between two commented blocks' cards, which is the measured shape of her *"the comments still also aren't spaced well"* |
 | `theProseColumnIsAPureFunctionOfTheSurfacesWidth` · `theGutterMovesOnlyWithTheSurfacesOwnWidth` · `everyTextSurfaceCarriesTheOneGutterRule` · `theTwoContainedSurfacesPlaceTheirProseIdentically` · `aLeadingGlyphIsExactlyOneGrapheme` | green under the reverts, by construction | they pin the NEW rule's own arithmetic and the grapheme guard, which the reverts do not touch; they are not bug-class pins and are not claimed as such |
+
+### THE TRACED MECHANISMS (what was actually wrong, measured before it was fixed)
+
+1. **A decoration could WRITE the prose column.** `BlockDecorOverlayController.render` asked its
+   surface `setDecorLane(needed:)` — and `needed` was `BlockDecor.needsLane(state)`, i.e. "does
+   this note carry a comment or a callout glyph". A true answer moved `textContainerInset` by
+   64 pt and overrode `textContainerOrigin`, so the note's prose started at 72 where an
+   undecorated note's started at 8. Measured on the current tree with the lane restored:
+   `proseLeft 72` against `160` at a 1000-pt surface and against `28` at 620, with every
+   fragment's origin moving with it, through the REAL wiring on both contained hosts (the
+   operations-layer comment → the model's decor observation → the controller's render).
+   *The fix is structural, not a patch:* the placement is now a pure function of the view's own
+   width (`ProseGutter.insets`), and there is no door for a decoration to write through.
+2. **The gutter a decoration needed was OUTSIDE the view.** Each contained surface was sized BY
+   ITS HOST to the prose column itself (`BookView.proseColumn` = 696 for the Outline and the
+   spread page; `paneWidth − 40` for the workspace pane and the note window), so the view's own
+   bounds held 8 pt of margin — which is why 17p batch b had to move text to make room. The fix
+   grows the FRAME into the host's whitespace (`.padding(.horizontal, -bleed)` around the text
+   surface alone) and puts the container back on the same point, so the gutter that was always
+   on screen is now INSIDE the view where an overlay can stand in it.
+3. **Every gutter face aimed at `max(2, …)`.** The badge's rect was a fixed 32 pt clamped at the
+   view's edge and the glyph sat inside the callout wash's leading pad, also clamped — so at any
+   gutter narrower than the face, the face stood ON the words. Measured: at Write's own
+   `minGutter` (28) the badge occupied `[2, 34]` with the prose beginning at 28 (KnownIssues row
+   50's first residual, as a number); at a contained surface's 8 pt the glyph drew at
+   `(6, 0, 18, 17)` — her image 11. Now each face asks `gutterRoom` first and YIELDS: the badge
+   narrows to the room and disappears below a legible width, the glyph is not drawn where it
+   would touch prose, and the prose keeps every point of its measure.
+4. **Two commented blocks' cards overlapped.** `leftCardRect`'s height was `min(blockHeight + 24,
+   96)` from the block's own top, with no knowledge of the next commented block. Measured on
+   adjacent 30-pt blocks 40 pt apart: the first card's bottom at 54 against the next card's top
+   at 40 — an 8 pt overlap, which is the measured shape of her *"the comments still also aren't
+   spaced well"*. Now a card's room reaches to the next face's top less the rhythm's air, and a
+   card clamped below a card's worth of height falls back to the badge.
+
+### THE PINS (15 cells in `ProseGutterTests`; the lane suite retired INTO them, zero orphaned names)
+
+| cell | what it holds | red-on-old |
+|---|---|---|
+| `theProseColumnIsAPureFunctionOfTheSurfacesWidth` | the host table's arithmetic at ten widths, per preset | not bug-class (the new rule's own arithmetic) |
+| `theGutterMovesOnlyWithTheSurfacesOwnWidth` | the placement's change-gate, the zero-width guard, the exact unrounded mean | not bug-class |
+| `everyTextSurfaceCarriesTheOneGutterRule` | the sweep: Write · inline editor · read tier · take pane | not bug-class |
+| `theTwoContainedSurfacesPlaceTheirProseIdentically` | one brain, two surfaces | not bug-class |
+| `aGutteredSurfaceStaysOnTextKit2` | the `textContainerOrigin` override is no downgrade trigger, driven through a real edit | RED (`proseLeft 72` vs `160`) |
+| `noDecorationMovesTheProseColumnOnAnySurface` | THE ONE LAW, four decoration combinations × two widths, fragment origins included | RED, 12 issues |
+| `theReadTiersProseIsUnmovedByACommentThroughTheProductionLoop` | the law through the REAL read-tier wiring | RED |
+| `theContainedEditorsProseIsUnmovedByACommentThroughTheProductionLoop` | the law through the REAL inline-editor wiring | RED |
+| `theCalloutWashHugsTheProseColumn` | memo §2 C; R17's vertical rule untouched | RED, 2 |
+| `theGlyphSitsInTheGutterAndYieldsWhereThereIsNone` | memo §2 C + §3 edge 1 | RED, 3 |
+| `theStackPutsTheGlyphFirstAndTheCommentFaceUnderIt` | her R-13u3-3, at three gutter widths | RED |
+| `theBadgeNeverStandsOnProse` | row 50's first residual; the shipped 32 pt rect unmoved where it fits | RED, 2 |
+| `twoCommentedBlocksCardsNeverAbut` | the rhythm; the shipped card byte-identical where there is room | RED (revert 5), 2 |
+| `nothingInTheGutterEverCoversProse` | mounted, two presets × three widths, faces and wash | RED, 9 |
+| `aLeadingGlyphIsExactlyOneGrapheme` | her R-13u3-4, door and renderer, incl. family/skin-tone/flag clusters | not bug-class (a new rule) |
+
+### THE WALK (mine — `io.lduarte.Variorum.debug`, dev store, 2026-09-18; `cliclick` + `Tools/WalkKit`)
+
+A note with three blocks: block 2 wears a SAND callout with a glyph AND a comment; block 3 wears
+a comment. Walked in Write (wide and at `minGutter`), the book Outline's read tier, the
+spread/paged book's page, and the note window's read face — in BOTH voices and BOTH appearances.
+Captures in `notes/plans/13u3-screens/` (gitignored):
+
+| capture | what it shows |
+|---|---|
+| `02-emoji-prompt-one-grapheme.png` | the prompt with "💡🔥🔥" typed and the field saying *"Just the first one is kept."* — R-13u3-4 at the door |
+| `03-write-callout-glyph-in-gutter.png` | ONE glyph stored (the two 🔥 dropped), in the gutter at the block's first line; the wash HUGGING the prose column |
+| `04-write-terminal-light-stack-and-cards.png` | Write wide: the glyph, the `#1` badge stacked under it, block 3's margin card |
+| `05-write-narrow-mingutter-badge-yields.png` | Write at `minGutter` 28: both badges narrowed to 22 pt, reading "#1", CLEAR of the words — row 50's first residual, gone |
+| `06-book-outline-read-tier-cards.png` | **the headline:** the Outline's read tier with a real margin CARD for the first time, and the decorated note's prose starting on exactly the same x as the undecorated note above it |
+| `07-spread-book-page-badges.png` | the spread page: the leading anchor unmoved, badges in its 28 pt gutter |
+| `08-note-window-read-face.png` | the note window's READ face (`.pane`): stack in the gutter, prose at 28, full measure |
+| `09-study-dark-note-window.png` | Study voice, DARK: a fully black room, the glyph and both badges in the gutter |
+| `10-book-outline-study-dark.png` | Study + dark Outline: TWO margin cards, stacked with air, never abutting — the rhythm |
+| `11-book-outline-study-light-two-cards.png` · `12-…-terminal-light-after-voice-round-trip.png` | the same after a light flip and a voice round trip |
+
+**WALK VERDICT: the memo's one law holds on every surface I could reach, and the gutter buys what
+it was meant to buy.** Three things the walk decided rather than the desk (all PROVISIONAL, all
+recorded at their lines): the rhythm's air and a card's minimum height (two adjacent commented
+blocks kept their cards in Study where they had fallen to badges), and the badge's own label
+inset (a 22 pt badge read "#" with the count clipped).
+
+**What the walk could NOT stage:** the workspace's SPLIT read-cheap pane — `View ▸ Open Beside`
+opened the note in place rather than beside on this store, so that cell is covered by its pin and
+by the note window, which mounts the same `ReadPostView` under the same `.pane` preset. Recorded
+rather than claimed.
+
+### FINALS (2026-09-18)
+
+- core `swift test` — **Test run with 1567 tests in 171 suites passed after 56.099 seconds.**
+- the FULL Mac suite — **Test run with 2794 tests in 466 suites failed after 768.677 seconds with
+  2 issues.** The two issues are ONE test: `theReadClickLandsInIndexAtThatBlock`, the recorded
+  environment red (KnownIssues row 58, owner 12) the brief names as the single tolerated one.
+  Nothing else failed; `Suite "The prose gutter — the one law (13u3 UNIT A1)" passed`.
+- the TUTORIAL SPINE — green in-run (every `Tutorial…` suite passed).
+- iOS build — **BUILD SUCCEEDED** (zero shared/mobile/core files touched; the diff is Mac-only).
+- lockstep marker — **8**, untouched. Schema: ZERO. Migrations: ZERO. `Sync/`: ZERO.
+  `Persistence/`: ZERO.
+
+### DEFERRED / NOT MINE (handed up, not done)
+
+- **QUESTIONS #117** — the workspace read pane and the note window run prose at the pane's full
+  width where every other surface caps at 680, so a note re-wraps completely when that pane goes
+  live. PROVISIONAL, a face call; the conversion kept both measures exactly as they were.
+- **The three taste numbers** (`cardRhythmAir` 6 · `cardMinHeight` 19 · the badge's yielding
+  label inset + `commentBadgeMinWidth` 19) are the walk's, not a ruling's.
+- **A recorded consequence, deliberately not softened:** where the page has NO gutter — a
+  contained surface at a window narrow enough to leave 8 pt — a comment's margin face is not
+  drawn at all, because the alternative is standing on her words. Every other door to that
+  comment stays (the block menu, ⌘⇧', the panel, and the inline-strip setting she keeps under
+  R-13u3-5). It is the one law's other side, and it is new behaviour.
+- **The editing indicator's ring overhangs the prose by 8 pt** (`indicatorRect`), so on the caret
+  block the ring's left edge crosses the gutter glyph. Pre-existing (`indicatorRect` is
+  unchanged since Phase 13 C1) and outside this unit's surface; noted for whoever owns the
+  indicator's geometry next.
+- **UNIT A2** (the comments PANEL as a text editor, memo §2 D) is untouched, as the brief fences.
+
+---
+
+## UNIT A1 CLOSED — 2026-09-18
+
+The gutter geometry rework is built to `notes/plans/phase-13u3-memo-gutter.md` §2 A/B/C and her
+rulings R-13u3-3 (the stack at every width) and R-13u3-4 (one grapheme). 17p batch b's decoration
+lane is retired WHOLE — no dormant machinery — and with it QUESTIONS #102's entire option space.
+KnownIssues row 50 is RESOLVED. One new PROVISIONAL (#117). Suites and walk above.
