@@ -639,3 +639,51 @@ The gutter geometry rework is built to `notes/plans/phase-13u3-memo-gutter.md` �
 rulings R-13u3-3 (the stack at every width) and R-13u3-4 (one grapheme). 17p batch b's decoration
 lane is retired WHOLE — no dormant machinery — and with it QUESTIONS #102's entire option space.
 KnownIssues row 50 is RESOLVED. One new PROVISIONAL (#117). Suites and walk above.
+
+---
+
+## UNIT A2 BRIEF — THE COMMENTS PANEL AS A TEXT EDITOR (self-contained; read in this order)
+
+**Read first, in full:** (1) this file's Status banner · roster item 1 · GOVERNANCE + the
+constitution · THE KICKOFF SITTING RECORD (R-13u3-1…6) · both "REFRESHED AT THE …" blocks (item 1
+of the 13u2 block — the status seam's classed doors — binds your strings directly) · ENVIRONMENT
+TRAPS · CAST & DISCIPLINE · the UNIT A1 RECORD's "handed up" list (context: the page half is
+DONE; the margin card is a read face and a door — R-13u3-6). (2) **`notes/plans/phase-13u3-memo-gutter.md`
+IN FULL** — §2 D is your design; §1's item 4 is the surface you replace; R-13u3-6 (panel-only
+editing) is binding law. (3) The code: `Features/Editor/CommentsPanel.swift` (the whole file —
+view + `CommentsPanelModel`), the comment ops it calls (`addBlockComment` family — semantics
+UNTOUCHED, seal refusals intact), `Theme/VoiceControls.swift` (P-8: THE chrome vocabulary — the
+row-46 lesson: an unvoiced sheet is a defect class; this panel must read as the voice in both
+voices and both appearances).
+
+**Scope (ONE acceptance unit — the panel, nothing page-side):** the panel re-forms as ONE writing
+surface per memo §2 D — her words the north star (*"the comment add box is so small and it
+doesn't make sense given how big the overall comment box is that the whole thing isn't more of
+the text editor that you can write and click on"*):
+1. Each comment renders as an editable text area IN PLACE — click it, type; no bordered-field
+   swap; a hairline + a muted stamp line separate comments (the panel-side answer to *"the
+   comments still also aren't spaced well"* — one vertical rhythm, real padding).
+2. Below the last comment, the ADD AREA owns ALL remaining space: click anywhere in it → the
+   caret lands there; the draft grows as you type; **⌘⏎ and the Add button file it; Esc clears**;
+   plain ⏎ inside the draft is a newline (a comment can hold paragraphs — `text` is free prose).
+   Decide edit-commit semantics the same way (⌘⏎ / focus-loss saves an in-place edit; Esc
+   reverts) and record the choice PROVISIONAL.
+3. The deleted fold + restore stay ("never skimpy"); every refusal/receipt speaks through the
+   status seam's classed doors (refuse/offer/receipt — trivially classifiable).
+4. Voice + appearance: `VoiceTokens` throughout, both voices, both appearances — no system-chrome
+   `List`/`.roundedBorder` residue.
+5. Comment OPERATION semantics byte-unchanged (add/edit/delete/restore; refuse under seal; the
+   travel rules are core's and untouched). Zero `Sync/`, zero schema.
+
+**Pins:** the model's flows unchanged (existing `CommentsPanelModel` coverage rides; extend where
+your edit-in-place path adds states); red-on-old ONLY where a cell is defect-shaped (a face
+redesign is not a bug pin — do not manufacture reds); a keyboard-contract pin for ⌘⏎/Esc if the
+harness can drive it, else the walk covers it and says so.
+
+**End verification:** FULL Mac suite (row 58's environment red is the one tolerated); tutorial
+spine green in-run; iOS build green; YOUR walk with captures on the dev-store Debug build — a
+multi-comment block: click-anywhere, grow, file with ⌘⏎, edit in place, delete + restore, both
+voices, both appearances; captures to `notes/plans/13u3-screens/`. Record: a **UNIT A2 RECORD**
+appended to this file (LIVE STATUS from the first commit; PENDING until verified; UNIT CLOSED
+banner), ledger row 2b flipped in the same commit. The checkpoint protocol binds from your first
+commit (CAST & DISCIPLINE restates it).
