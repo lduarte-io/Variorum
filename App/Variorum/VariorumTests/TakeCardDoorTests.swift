@@ -292,6 +292,26 @@ struct TakeCardDoorTests {
                 "…and the road for a block with only this take (\(words))")
     }
 
+    /// **The rename door's two race refusals speak too** (13u3 ladder round
+    /// 1, R1-4 — the same enum-dump class, the two stragglers
+    /// `renameCommitPoint` can reach when the take dies or the moment is
+    /// purged under the open ask): a sentence, never `Refused: …(id: "…")`.
+    @Test func theRenameDoorsRaceRefusalsSpeakInsteadOfDumpingTheEnum() {
+        let deadTake = OpsRefusalCopy.message(
+            for: OperationError.variantNotFound(id: "8C4A1E32-DEAD-BEEF-0000-000000000002"))
+        #expect(!deadTake.hasPrefix("Refused:"), "a sentence, not the raw enum (\(deadTake))")
+        #expect(!deadTake.contains("8C4A1E32"), "never a UUID in her face (\(deadTake))")
+        #expect(deadTake.lowercased().contains("take"), "it names what went (\(deadTake))")
+
+        let deadMoment = OpsRefusalCopy.message(
+            for: OperationError.commitNotFound(id: "8C4A1E32-DEAD-BEEF-0000-000000000003"))
+        #expect(!deadMoment.hasPrefix("Refused:"),
+                "a sentence, not the raw enum (\(deadMoment))")
+        #expect(!deadMoment.contains("8C4A1E32"), "never a UUID in her face (\(deadMoment))")
+        #expect(deadMoment.lowercased().contains("moment"),
+                "it names what went in the savepoint family's own word (\(deadMoment))")
+    }
+
     /// The refusal reaches the surface through the model's own door, worded —
     /// not just in the copy table.
     @Test func theBoardSpeaksThatRefusalWhenTheShownTakeIsDeleted() async throws {

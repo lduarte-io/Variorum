@@ -375,6 +375,16 @@ nonisolated enum OpsRefusalCopy {
                 return "The note shows this take \u{2014} choose another take first, and then "
                     + "this one can go. (If it's the block's only take, it's the block "
                     + "you want to delete.)"
+            // 13u3 ladder round 1, R1-4 — the enum-dump class's two
+            // stragglers, first reachable from a face at UNIT D's rename
+            // door (race-only: the take dying or the moment purged under the
+            // open ask). Worded generically, because `variantNotFound` is
+            // every op's honest answer to a take that is gone.
+            case .variantNotFound:
+                return "That take isn't there any more \u{2014} it may have just been "
+                    + "deleted. The block's History lists deleted takes, with Put back."
+            case .commitNotFound:
+                return "That saved moment isn't there any more."
             case .versionLinkNotFound:
                 return "These two notes aren't marked as versions — nothing to unmark."
             // 17o batch d (ledger row 27, J8): the mark door's own refusal
