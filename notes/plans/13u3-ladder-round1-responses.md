@@ -358,3 +358,171 @@ stating in the disposition rather than discovering.
   the claim.
 - **No suite run.** Nothing in this pass changes behaviour, so there is nothing to keep green; the
   phase's finals stand as each unit recorded them.
+
+---
+
+# THE IMPLEMENTER'S SANITY PASS OVER THE FIX DIFF (opus, 2026-09-19)
+
+**Scope:** the six dispositions and the five fix commits — `262ef925` (R1-2) · `ede79958` (R1-3) ·
+`5cceee24` (R1-4) · `d42a3440` (R1-5 + R1-6) · `43f420b4` (R1-1) — read against the code they
+landed in. Same rules as the responses above: **I fixed nothing**; anything raised here returns to
+the reviewer for the final word.
+
+**Verdict: the fix pass is sound. Four items raised, none BLOCKER-class — two are pin-strength
+(the pins can go hollow or already do not discriminate the fix's own judgment), two are one-line
+statements of a premise the code now depends on.** Everything the coordinator named as a sanity
+question checked out; the list of what I verified is at the end so round 2 knows what is already
+walked.
+
+---
+
+## S-1 · [pin strength] · R1-1's cell 1 has no WITNESS that the deferral path was taken — it can go hollow at the next point release, silently
+
+`theIndicatorRefreshNeverForcesLayoutInsideTheEditTransaction` asserts an **absence**
+(`decorLayoutQueriesInEditTransaction == 0`). That absence is equally true in two different
+worlds: the fix working, and **the arm never being reached at all**.
+
+Reaching it depends on an AppKit ordering fact the cell relies on but never checks — that during
+`didProcessEditing` the text view's selection is still the PRE-edit one while `index` has already
+shrunk, so the in-transaction caret read maps to block 2. The cell's own comment says this is the
+mechanism; nothing asserts it happened. By the time the cell can look, AppKit's post-edit fixup
+has put `caretBlockID` back in block 1 (the comment records that too), so there is no post-hoc
+witness available.
+
+**Why it matters more than usual here:** that ordering is exactly the class TEXTKIT2 §5's matrix
+says to re-verify after every macOS point release. If Tahoe changes it, this pin goes green-and-
+hollow on the one axis it exists to guard, and the next reader has no way to tell.
+
+**The cheap close (the reviewer's call):** a second DEBUG counter incremented at the deferral
+branch itself — `if appearance.indicator != .off, caretBlockID != previousCaretBlock { if
+inStorageEditTransaction { deferredIndicatorRefreshes += 1 } else { refreshDecorations() } }` —
+asserted `== 1` in cell 1. That turns the pin from "nothing bad happened" into "the arm fired and
+was deferred", which is the fix's actual contract, and it fails loudly rather than quietly if the
+ordering ever moves. It also gives the red-on-old measurement a permanent home instead of a
+once-by-hand log line.
+
+## S-2 · [pin strength] · the Compare seal cell does not discriminate the fact the fix deliberately chose
+
+`compareDoorRefusesASealedPanesOwnPost` seals the **anchor** and focuses an **anchor** pane. A
+guard written the wrong way — `projection.anchor.sealed`, the board-level fact the disposition
+explicitly rejected because "Compare crosses posts" — passes that cell **identically**. So the one
+place in the R1-3 widen that needed judgment is the one place no pin holds.
+
+Two cells would hold it, and they are the two directions:
+
+- **unsealed anchor + SEALED PEER, the peer's pane live → must refuse** (the anchor-fact
+  implementation would wrongly allow);
+- **SEALED anchor + unsealed peer, the peer's pane live → must NOT refuse** (the anchor-fact
+  implementation would wrongly refuse — and this is the worse direction: it blocks a commit she is
+  entitled to make, on a note that is not sealed).
+
+`face(for:)` already answers peers (`projection.peers[postID]`), and both pane-key construction
+sites set `context: postID` (`CompareBoardView.swift:1636–1638` and `:1718–1720`), so both cells
+are ordinary to write. The second one is the one I would not ship without.
+
+## S-3 · [premise, one line] · `inStorageEditTransaction` is a Bool, and it is correct only because `storageDidEdit` cannot re-enter — nothing says so
+
+I verified the premise holds **today**: one production caller (`EditorView.swift:674`, guarded by
+`editedMask.contains(.editedCharacters)`); the function is non-`async`, so the flag cannot leak
+across a suspension; `MarkdownStyling.restyle` inside it produces attribute-only edits the
+delegate's guard filters out; and `desyncRecovery` defers its re-render into a `Task` rather than
+writing storage synchronously. So there is no re-entrant path.
+
+But the failure mode if that ever changes is silent and is exactly the bug we just fixed: a
+synchronous re-render inside `storageDidEdit` would run an inner `defer { inStorageEditTransaction
+= false }` while the OUTER frame is still inside `processEditing`, and the arm would go back to
+forcing layout in the transaction — with the oracle reading zero for the outer frame's own work.
+A depth **counter** (`+= 1` / `-= 1`, same two lines) cannot be got wrong; failing that, one
+sentence at the property naming the single-entry premise and what breaks it. I would take the
+sentence at minimum, since the whole point of the flag is that a future reader must not reopen the
+hole by accident.
+
+## S-4 · [stated choice, one line] · Compare's guard fails OPEN on a missing face
+
+`guard face(for: pane.context)?.sealed != true` — a `nil` face (a peer dropped from the board
+while its `livePane` pointer lingers, or a pane read during a projection swap) passes the guard and
+opens the field. On an unknown post that is arguably the right direction (never refuse on
+ignorance, and the filer still refuses if the post really is sealed), but the three sibling doors
+have no equivalent unknown state, so this one door's fail-open should be a **stated** choice rather
+than a spelling. One clause in the existing comment. Lowest severity of the four; record-or-fix.
+
+---
+
+## WHAT I CHECKED AND FOUND SOLID (so round 2 does not re-walk it)
+
+**The coordinator's four named questions, answered:**
+
+1. **The R1-1 flag's scope covers the transaction exactly, with no road that leaves it stuck up.**
+   `inStorageEditTransaction = true` + `defer { … = false }` open the method, and `defer` fires on
+   every exit: the `suppressEditProcessing` early return, all four `desyncRecovery()` returns
+   (`.block` · `.tail` · `.openTail` · `.closeTail`) and the `.refuse` return. Non-throwing and
+   non-`async`, so neither a throw nor a suspension can strand it. (The one premise worth writing
+   down is S-3's.)
+2. **The deferred refresh is structurally delivered.** Four independent legs, each verified:
+   (a) `storageDidEdit` bumps `overlayGeometryGeneration` at `:1176` **before** every early
+   return, so the settle hop's gate (`overlayGenerationDelivered != overlayGeometryGeneration`) is
+   open for the exact edit that deferred; (b) a storage character edit always dirties the view, so
+   `viewWillDraw` → `onLayoutSettle` fires — and the contrast is written in the code itself at
+   `onWidthReflow`, which calls the hop DIRECTLY precisely because a width reflow has no guaranteed
+   display pass, while a storage edit does; (c) `refreshBadges`' `defer { refreshDecorations() }`
+   sits above its own early return, so the hop delivers the decor pass even when the badge walk
+   bails; (d) `caretBlockID` is a member of `BlockDecor.State`, so the `lastDecorState` equality
+   gate passes the block change through rather than swallowing it. **Belt beside the braces:** on
+   most real edits `textViewDidChangeSelection` re-runs `updateCaretContext` immediately after the
+   transaction closes, where the arm is ungated — so the settle-hop-only case is narrowly the one
+   where the in-transaction read was already correct. No uncovered shape found; the residual is a
+   surface with no draw pass at all (hidden/occluded), which delivers on its next draw.
+3. **The four seal guards read the right fact on each surface.** Write → `header?.locked`, the
+   same fact `CommitBar`'s own `.disabled` reads. Takes/Lenses → `projection.sealed`, which is
+   exactly the `frozen` term `isPaneLive` uses (it omits `structuralInFlight`, correctly — the
+   filer does not refuse for that, and a door must not refuse where the filer would not). Canvas →
+   `sealed`, set from `Queries.containerHeader(db, containerID:)?.locked` for its OWN container
+   (`CanvasViewModel.swift:144`). **Compare → `face(for: pane.context)?.sealed`, and `context` is
+   really populated:** both pane keys are built with `context: postID` (`:1636–1638`, `:1718–1720`),
+   so the pane's own post's face is what answers. That is the right fact; S-2 is only that no pin
+   holds it.
+4. **The did-write answer is consumed at every caller that speaks.** `renameCommitPoint` has
+   exactly one production caller — `BlockHistoryModel.rename` (`BlockHistoryPane.swift:300–308`) —
+   and it consumes the Bool before speaking. There is no mobile caller (`renameCommitPoint` does
+   not appear anywhere under `VariorumMobile`; the shared `BlockHistoryFace` only names it in a doc
+   comment), which is why the phone needed no half. The `@discardableResult` is needed by the core
+   cells that call it as a statement; the residual — a future face dropping the answer and speaking
+   a wrong receipt — is held only by the Mac cell, which is proportionate.
+
+**The hollow-pin sweep (the coordinator's fifth question) — nothing found beyond S-1/S-2:**
+
+- **No shipped decoration pin drives its state through a storage edit.** All seven suites that
+  touch decorations (`Phase13SurfaceTests` · `BlockManagementTests` · `ProseGutterTests` ·
+  `TintRegistrationTests` · `CommentsAndTagsTests` · `TutorialWalkTests` · the new one) reach the
+  decor pass through explicit calls — `refreshDecorations()`, `pushDecorationsToSink()`,
+  `pickBlock`, `noteHover` — so the deferral hollows none of them. (It could not have gone the
+  other way either: in a harness there is no draw pass, so a pin that had relied on the
+  synchronous refresh would have gone RED, not hollow, and the full suite is green.)
+- **No shipped pin asserted the old enum dumps** — `TakeCardDoorTests:280` names the class in a
+  comment only. R1-4's two cases therefore strengthen every face that can raise them, not just the
+  rename door; the generic `variantNotFound` wording is correct for the ops that actually throw it.
+- **`TutorialWalkTests:3136`'s ⌘S cell** drives `commitCaretVariant()` on an unsealed practice note,
+  so the new seal guard does not change why it passes.
+- **`renamingASavepointSetsAndClearsItsNameAndSaysSo`** renames to two DIFFERENT values, so `wrote`
+  is true on both legs and the receipt change does not hollow it — and the reviewer's note is
+  right that it is the cell that would have caught a row-value implementation (its second leg
+  compares against a deliberately stale `CommitPoint`).
+- **R1-6's counter bookkeeping is safe:** `updateNSView` assigns `lastFocusRequest = focusRequest`
+  **before** calling `takeFocus()`, so the new already-first-responder early return cannot
+  desynchronise the counter or re-fire; and `QuickNoteView`'s new `@State focusRequest = 1`
+  reproduces the open-time behaviour byte-for-byte (`wantsInitialFocus = focusRequest > 0`).
+
+**Two things I checked that nobody asked about, both clean:**
+
+- **The oracle sits on the right road and needs no extension.** `refreshDecorations`' `offsetAt` →
+  `textLayoutFragment(for:)` is the ONLY layout-FORCING call in the overlay family; `refreshBadges`
+  and `refreshDecorations`' own `fragmentFrame` both enumerate with `options: []`, which does not
+  ensure layout (and the badge pass's doc says so). The counter's placement — after the
+  `needsFrames` guard, before the first geometry read — is exactly the forcing boundary.
+- **There is no mobile twin of R1-1.** `MobileEditorViewModel` contains no
+  `textLayoutFragment(for:)` and no `ensureLayout` anywhere, so the phone's `storageDidEdit` has no
+  forcing road to defer. No parity row is owed by this fix.
+
+**What I did not do here:** no fixes, no pins, no app run, no suite run — the same contract as the
+responses above. S-1 and S-2 are pin work the reviewer owns; S-3 and S-4 are one-liners it may
+take or record.
