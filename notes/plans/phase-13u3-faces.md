@@ -687,3 +687,28 @@ voices, both appearances; captures to `notes/plans/13u3-screens/`. Record: a **U
 appended to this file (LIVE STATUS from the first commit; PENDING until verified; UNIT CLOSED
 banner), ledger row 2b flipped in the same commit. The checkpoint protocol binds from your first
 commit (CAST & DISCIPLINE restates it).
+
+## UNIT A2 RECORD — THE COMMENTS PANEL AS A TEXT EDITOR (opus-implementer, 2026-09-18)
+
+**WHAT THIS UNIT DOES NOT DO (the record's first line):** nothing page-side — UNIT A1's gutter
+geometry, the margin card, the count badge, the callout glyph and the inline-comments setting are
+untouched (R-13u3-6: the margin card stays a READ face and a door; editing has ONE home, and this
+unit is that home). Comment OPERATION semantics are byte-unchanged (`addBlockComment` /
+`editBlockComment` / `deleteBlockComment` / `restoreBlockComment`, the seal refusals, the travel
+rules): zero `Sources/VariorumCore/` behaviour change, zero `Sync/`, zero `Persistence/`, zero
+schema, zero migrations, the marker stays 8. The PHONE's comments sheet (`MobileComments`) is not
+touched — it owes a version of this face (a mobile-parity row, the orchestrator's to file). No new
+door claims a shortcut outside the panel's own key window.
+
+### LIVE STATUS (written at the start; flipped in the same commit as each piece)
+
+| # | piece | status |
+|---|---|---|
+| 0 | the record + LIVE STATUS | **DONE** |
+| 1 | `CommentComposition` — the pure edit/file/escape brain + its pins | PENDING |
+| 2 | the model: per-comment drafts, the classed status slot, the receipt/refusal doors + pins | PENDING |
+| 3 | the view: ONE writing surface (edit in place · the add area owns the rest · ⌘⏎/Esc · deleted fold) | PENDING |
+| 4 | the red-on-old measurement (the one defect-shaped cell) | PENDING |
+| 5 | QUESTIONS #118 (the PROVISIONAL calls) | PENDING |
+| 6 | the walk + captures, the full Mac suite, the tutorial spine, iOS build | PENDING |
+
