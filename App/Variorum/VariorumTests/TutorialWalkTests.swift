@@ -2901,7 +2901,9 @@ struct TutorialWherePlacesActsTests {
         try await withTutorialWorld { _, db, bookID in
             let titles = try #require(
                 TutorialSeeder.plan.first { $0.chapter == placesChapter }?.lessons)
-            #expect(titles == ["the five places", "saving a moment", "the two exits"])
+            #expect(titles == ["the five places", "saving a moment",
+                               "what a copy carries", "the two exits"],
+                    "13u3 UNIT E (item 15(b)) added the copy lesson after ⌘⇧S's")
             let prose = try await db.read { db -> [String: String] in
                 var out: [String: String] = [:]
                 for title in titles {
@@ -2944,8 +2946,32 @@ struct TutorialWherePlacesActsTests {
                     "the bottom-chrome pairing IS the teaching moment (her G4 words)")
             #expect(saving.contains(VersionsPath.restoreVerb)
                 && saving.contains(VersionsPath.promoteVerb))
+            #expect(!saving.lowercased().contains("one-way door"),
+                    """
+                    13u3 UNIT E: the confirm's over-promise was corrected at \
+                    its own door, and the lesson may not go on making it
+                    """)
 
-            // THREE — the two exits (row 27), and the rule in her own shape.
+            // THREE — what a copy carries (13u3 UNIT E, item 15(b)): her
+            // sentence, both halves, in the words the app itself uses.
+            let copies = try #require(prose["what a copy carries"])
+            #expect(copies.contains("carries the WORDS, not the past"),
+                    "the rule, in one clause")
+            #expect(copies.contains("only what the note PLACES"),
+                    "her words: \"you're only saving the placed notes\"")
+            #expect(copies.contains(BlockHistoryPath.name)
+                && copies.contains(BlockHistoryPath.doorLabel),
+                    "…and where the past she is NOT copying actually lives")
+            #expect(copies.contains(BlockHistoryPath.cameFromSection)
+                && copies.contains(TrayPath.menuLabel),
+                    "the two populations a version leaves with the note")
+            #expect(copies.contains(VersionsPath.promoteVerb)
+                && copies.contains("takes nothing"),
+                    "the zero-loss road the confirm points at, taught here too")
+            #expect(copies.contains("\u{2318}\u{21E7}S") && copies.contains("\u{2318}S"),
+                    "both grains, because the rule is true of both")
+
+            // FOUR — the two exits (row 27), and the rule in her own shape.
             let exits = try #require(prose["the two exits"])
             #expect(exits.contains("DELETION GOES TO THE TRASH")
                 && exits.contains("TRANSFORMATION GOES TO LINEAGE"),
@@ -2975,6 +3001,18 @@ struct TutorialWherePlacesActsTests {
             #expect(try await slots(db, saving).compactMap(\.text)
                 .contains { $0.hasPrefix("PRACTICE TAKE") },
                     "a take to commit")
+
+            let copies = try await db.read {
+                try lessonID($0, bookID: bookID, "what a copy carries")
+            }
+            let copySlots = try await slots(db, copies).compactMap(\.text)
+            #expect(copySlots.contains { $0.hasPrefix("PRACTICE COPY") },
+                    "a block to save a moment of, then copy the note around")
+            #expect(copySlots.count >= 3,
+                    """
+                    …and paragraphs either side of it, so the lesson's own \
+                    merge act has two adjacent blocks to work on
+                    """)
 
             let exits = try await db.read { try lessonID($0, bookID: bookID, "the two exits") }
             let exitProjection = try await projection(db, exits)
@@ -3116,6 +3154,109 @@ struct TutorialWherePlacesActsTests {
             #expect(CapabilityRegistry.capability(.commitTake).shortcutLabel == "\u{2318}S")
             #expect(CapabilityRegistry.capability(.saveNoteVersion).shortcutLabel
                 == "\u{2318}\u{21E7}S")
+        }
+    }
+
+    /// **13u3 UNIT E (item 15(b)) — A COPY CARRIES THE WORDS AND LEAVES THE
+    /// MOMENTS BEHIND**, her instruction walked rather than asserted: *"when
+    /// you make a version of a block or copy it or save it as a version …
+    /// you're only saving the placed notes - not the history that rides with
+    /// it."*
+    ///
+    /// The lesson's own PRACTICE COPY act, driven: save a moment of the take,
+    /// save the whole note, then ask the store which of the two the copy got.
+    @Test func theCopyLessonsPracticeKeepsTheWordsAndLeavesTheMoment() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "what a copy carries")
+            }
+            let practice = try #require(try await slots(db, lesson)
+                .first { $0.text?.hasPrefix("PRACTICE COPY") == true })
+            let take = try #require(practice.variantID)
+
+            // ⌘S — the moment the lesson tells her to save.
+            try await session.runner.run { ops in
+                _ = try ops.commit(take, message: "the moment the lesson asks for")
+            }
+            // ⌘⇧S — the copy.
+            _ = try await VersionActs.save(session: session, postID: lesson)
+            let moment = try #require(try await db.read {
+                try Queries.noteVersions($0, of: lesson)
+            }.first)
+
+            let (here, there) = try await db.read { db in
+                (try Queries.renderedText(db, containerID: lesson),
+                 try Queries.renderedText(db, containerID: moment.postID))
+            }
+            #expect(here == there, "\"every word is there\" — the lesson's own claim")
+
+            let carried = try await db.read { db in
+                try Int.fetchOne(
+                    db,
+                    sql: """
+                        SELECT COUNT(*) FROM commit_point c
+                        JOIN variant v ON v.id = c.variant_id
+                        JOIN container_block cb ON cb.block_id = v.block_id
+                        WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+                          AND c.kind = 'manual'
+                        """,
+                    arguments: [moment.postID]) ?? 0
+            }
+            #expect(carried == 0, "…and not one moment she wrote rode with them")
+            #expect(try await db.read {
+                try Queries.commitHistory($0, variantID: take)
+            }.count == 1, "the moment is still here, on the take she pressed it on")
+        }
+    }
+
+    /// **…AND A VERSION HOLDS ONLY WHAT THE NOTE PLACES** — the other half of
+    /// her sentence, walked on the lesson's own paragraphs: a merge sets both
+    /// sources aside WHOLE, and the version saved afterwards holds the page,
+    /// never the things standing beside it.
+    @Test func aVersionHoldsThePlacedParagraphsAndNotTheSetAsideOnes() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "what a copy carries")
+            }
+            let blocks = try await slots(db, lesson)
+            #expect(blocks.count >= 3)
+            let left = blocks[blocks.count - 2].blockID
+            let right = blocks[blocks.count - 1].blockID
+            try await session.runner.run { ops in _ = try ops.merge(left, right) }
+
+            let setAside = try await db.read {
+                try Queries.preservedOriginals($0, postID: lesson).map(\.blockID)
+            }
+            #expect(Set(setAside) == Set([left, right]),
+                    "the merge kept both sources whole, beside the page")
+
+            _ = try await VersionActs.save(session: session, postID: lesson)
+            let moment = try #require(try await db.read {
+                try Queries.noteVersions($0, of: lesson)
+            }.first)
+
+            let placed = try await slots(db, lesson).count
+            #expect(moment.blockCount == placed,
+                    "the version holds the note's placed paragraphs, one for one")
+            for original in [left, right] {
+                let copiedFrom = try await db.read { db in
+                    try Int.fetchOne(
+                        db,
+                        sql: """
+                            SELECT COUNT(*) FROM edge e
+                            JOIN container_block cb
+                              ON cb.block_id = e.source_block_id
+                             AND cb.container_id = ? AND cb.deleted_at IS NULL
+                            WHERE e.target_block_id = ? AND e.type = 'derived_from'
+                            """,
+                        arguments: [moment.postID, original]) ?? 0
+                }
+                #expect(copiedFrom == 0, "nothing in the moment came from a set-aside original")
+            }
+            #expect(try await db.read {
+                try Queries.preservedOriginals($0, postID: lesson).map(\.blockID)
+            }.sorted() == setAside.sorted(),
+                    "…and they are still where the lesson says they are: with the NOTE")
         }
     }
 

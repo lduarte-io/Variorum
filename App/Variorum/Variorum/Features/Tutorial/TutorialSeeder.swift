@@ -101,8 +101,14 @@ enum TutorialSeeder {
         // else go" — including the two places the round built (a note's
         // Versions, a block's History) and the one the app never had to build
         // (where you left it).
+        // 13u3 UNIT E (item 15(b)) — "what a copy carries" joins the map
+        // chapter, on the far side of ⌘⇧S: the previous lesson tells her the
+        // chord copies the note, and this one is what makes that sentence
+        // true rather than nearly true (her words: *"you're only saving the
+        // placed notes - not the history that rides with it"*).
         ("where things go",
-         ["the five places", "saving a moment", "the two exits"]),
+         ["the five places", "saving a moment", "what a copy carries",
+          "the two exits"]),
         // PHASE 13p, knot 6 — **THE PRIVACY CHAPTER**. Her ruling,
         // verbatim: *"yes, short chapter, and make the options that are in
         // settings clear (require lock every time to open, don't, what you
@@ -1172,13 +1178,20 @@ enum TutorialSeeder {
             + "the whole promise of a savepoint here \u{2014} you can always "
             + "come back, including from the coming back.",
 
+            // 13u3 UNIT E: *"every block, every take"* over-claimed by one
+            // word — a version copies the note's PLACED blocks, which is the
+            // next lesson's whole subject — and the one-way-door promise was
+            // the confirm's own (corrected there in the same batch: the WORDS
+            // come back, the history does not).
             "\u{2318}\u{21E7}S is the same idea one size up. It copies the "
-            + "whole note as it stands \u{2014} every block, every take "
-            + "\u{2014} and keeps it under \(VersionsPath.menuLabel) in the "
-            + "note \u{25BE} menu. Restore makes the note say that again, and "
-            + "it saves where the note is NOW first, so it is never a one-way "
-            + "door. Promote turns a moment into a note of its own, if you'd "
-            + "rather work with it than go back to it.",
+            + "whole note as it stands \u{2014} every paragraph on the page, "
+            + "every take on them \u{2014} and keeps it under "
+            + "\(VersionsPath.menuLabel) in the note \u{25BE} menu. Restore "
+            + "makes the note say that again, and it saves where the note is "
+            + "NOW first, so none of its words are lost. Promote turns a "
+            + "moment into a note of its own, if you'd rather work with it "
+            + "than go back to it. What a copy carries \u{2014} and what it "
+            + "leaves behind \u{2014} is the next lesson.",
 
             "Which one to reach for? \u{2318}S when one paragraph is about to "
             + "change and you might want this wording back. \u{2318}\u{21E7}S "
@@ -1189,6 +1202,69 @@ enum TutorialSeeder {
             + "for you.",
         ])
         _ = saving
+
+        // **13u3 UNIT E — item 15(b), her instruction verbatim:** *"It should
+        // be made clear in the tutorial that when you make a version of a
+        // block or copy it or save it as a version, that you're only saving
+        // the placed notes - not the history that rides with it. it's worth
+        // making sure that's clear in the tutorial anyway."*
+        //
+        // ONE lesson for BOTH halves of the rule, as the brief asks: a copy
+        // carries the words (placed blocks and their takes) and never the
+        // past (no savepoint has ever ridden a copy — the standing pool-drag
+        // rule, true of every copying gesture the app has). It sits HERE, on
+        // the far side of ⌘⇧S, because the previous lesson just told her the
+        // chord copies the note and this is the sentence that makes that true
+        // rather than nearly true — and it is the reason RESTORE's confirm
+        // counts what it takes (13u3 UNIT E's other half).
+        let copies = try lesson(places, "what a copy carries", [
+            "A copy carries the WORDS, not the past. One rule, and it covers "
+            + "every gesture that makes a second thing out of a first: saving "
+            + "a version of this note (\u{2318}\u{21E7}S), duplicating a note, "
+            + "dragging a piece out of Snippets into a draft. What "
+            + "arrives is the text and every take on it \u{2014} and nothing "
+            + "standing behind them.",
+
+            "So the MOMENTS do not travel. Savepoints stay on the take you "
+            + "pressed \u{2318}S on, in that block's \(BlockHistoryPath.name); "
+            + "a copy's takes are born with one fresh moment of the instant "
+            + "they were made and nothing before it. When you want the run of "
+            + "moments, you go back to the block that has them \u{2014} which "
+            + "is what the \(BlockHistoryPath.doorLabel) door is for, and why "
+            + "it is worth knowing where the original is.",
+
+            "And a copy holds only what the note PLACES \u{2014} the "
+            + "paragraphs on the page, in their order. A note keeps things "
+            + "beside its page that are not on it: blocks a divide or a merge "
+            + "set aside whole (\(BlockHistoryPath.cameFromSection)), blocks "
+            + "you archived, blocks on their way out in "
+            + "\(TrayPath.menuLabel). None of those are in a saved version. "
+            + "They belong to the NOTE and they stay with it \u{2014} exactly "
+            + "where the map two lessons ago says they are.",
+
+            "PRACTICE COPY: put your cursor in me and press \u{2318}S to save "
+            + "a moment of this take. Now press \u{2318}\u{21E7}S to save the "
+            + "whole note. Open note \u{25BE} \u{25B8} \(VersionsPath.menuLabel) "
+            + "and \(VersionsPath.openVerb) the new moment: every word is "
+            + "there, mine included. The moment you just saved is NOT "
+            + "\u{2014} it is still here, in my history, where you left it.",
+
+            "This is why \(VersionsPath.restoreVerb) asks before it acts. It "
+            + "replaces the note's paragraphs with the moment's, and the past "
+            + "of the paragraphs it replaces goes with them: their saved "
+            + "moments, any take you deleted from them, any comment you "
+            + "deleted. The confirm counts them and says so before you press "
+            + "it. \(VersionsPath.promoteVerb) is the road that takes nothing "
+            + "\u{2014} it makes the moment a note of its own and leaves "
+            + "everything where it is.",
+
+            "None of this contradicts the map; it is the map applied to "
+            + "copies. A copy is a NEW thing in the place you made it, and "
+            + "the past of the thing you copied stays exactly where it "
+            + "already was \u{2014} which is the same reason nothing in this "
+            + "app is ever in two places at once.",
+        ])
+        _ = copies
 
         // Row 27, her eleventh-sitting mandate — TAUGHT BY DOING (her idea):
         // the reader deletes a whole block and finds it, then makes an edit
