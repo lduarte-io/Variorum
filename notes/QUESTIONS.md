@@ -1451,3 +1451,15 @@ Nothing about the manifest depends on this; the re-land is one call at one `onCh
 *Scope note, not a question:* the calm page's **pages** form (real leaves, no scroll offset) is outside the rule by its geometry, as `#114(b)` already says of Lenses/Compare/Canvas/Blocks; and flipping Read's own `edit`/`read` switch is not a mode switch, so it keeps whatever the host's scroll had — pre-existing, untouched.
 
 *(Next free number: **#117**.)*
+
+---
+
+#117 — **THE WORKSPACE READ PANE AND THE NOTE WINDOW RUN PROSE AT THE PANE'S FULL WIDTH, WHERE EVERY OTHER SURFACE CAPS AT 680 (2026-09-18, 13u3 UNIT A1; the record is `notes/plans/phase-13u3-faces.md`'s UNIT A1 RECORD, its host table).** PROVISIONAL — one line, and it is a FACE call, not a mechanism one.
+
+Found while converting the five host cells to the gutter geometry. Write's editor, the book Outline and the spread book's page all put prose on `EditorTypography.maxColumnWidth` (680 — "≈68ch of body prose, the mockups' measure", R9). The workspace's READ-CHEAP pane (`RootView.readCheapProse`) and the note window's read face have never capped it at all: they hand the surface the whole pane and it runs prose edge to edge. On a 1200-pt pane that is a 1144-pt measure — and clicking into that pane mounts Write's own editor at 680, so **the note re-wraps completely the moment it goes live**. That inconsistency predates this unit by a long way; it became visible because the gutter rework has to state each surface's column out loud.
+
+This unit did NOT change it (the brief's fence: a rule that narrows a measure no ruling capped is the architect's fork, never the implementer's). Both pages keep their exact measure and only their 20 pt padding became gutter — enough for a count badge that no longer stands on the words, never enough for a margin card.
+
+- **(a) CAP THEM AT 680, like everything else** *(recommended by consistency)* — one line each (`ProseGutter.pane` gains `maxColumn: EditorTypography.maxColumnWidth`). The read face and the live editor would then wrap identically, so focusing a pane would move nothing, and a wide pane would have a real gutter — margin comment cards on both surfaces for the first time. Cost: a deliberate narrowing of two pages you have been reading at full width, and on a wide window the prose would sit centred with a lot of air either side.
+- **(b) LEAVE THEM UNCAPPED** *(BUILT — the shipped behaviour, unchanged)* — the read pane fills its column. Cost: the re-wrap on focus stays, and those two pages can never show a margin comment card (a 28 pt gutter holds the badge and nothing more).
+- **(c) CAP ONLY THE NOTE WINDOW** — its whole purpose is reading one note, so the measure matters most there, while a workspace pane is often narrow anyway. Cost: two rules where there were two, just differently drawn.
