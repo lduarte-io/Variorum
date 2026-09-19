@@ -256,18 +256,24 @@ struct PoolPostsView: View {
     }
 
     private func row(_ item: Queries.TimelineItem) -> some View {
-        CalmCard(tokens: tokens) {
+        // 13u3 UNIT B (her item 4): the ONE brain the Library's rows ask —
+        // her name where she typed one, a daily entry's day, else the note's
+        // own first words.
+        let name = PoolCardFace.card(item, snippet: model.snippets[item.postID])
+        return CalmCard(tokens: tokens) {
             HStack(alignment: .firstTextBaseline, spacing: 10) {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text(item.displayTitle)
+                        Text(name.lead.text)
                             .font(tokens.body)
                             .foregroundStyle(tokens.ink)
                             .lineLimit(1)
-                        // The quiet day — suppressed when the title already
-                        // IS the day (the picker's one detail rule).
+                        // The quiet day — suppressed when the lead already IS
+                        // the day (the picker's one detail rule). Under item
+                        // 4 this is where a words-led card's date lives: the
+                        // metadata line, as her ruling says.
                         if let day = NotePickerRanking.detail(
-                            title: item.displayTitle,
+                            title: name.lead.text,
                             day: DisplayTitle.day(fromStamp: item.stamp))
                         {
                             Text(tokens.chromeLabel(day))
@@ -277,11 +283,9 @@ struct PoolPostsView: View {
                         }
                     }
                     // Row 87: a titleless card is a wall of bare dates
-                    // without this — its first words, under the day, the
+                    // without this — the words the lead did not take, the
                     // picker's own two-line preview.
-                    if let preview = PoolCardFace.preview(
-                        title: item.title, snippet: model.snippets[item.postID])
-                    {
+                    if let preview = PoolCardFace.preview(name) {
                         Text(preview)
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
@@ -349,19 +353,33 @@ struct PoolPostsView: View {
     }
 }
 
-/// **Row 87's rule, pure (pinned):** a Pool card shows the note's first
-/// words ONLY when it has no stored title — a titled card already says what
-/// it is (her ruling R-cor-11(2): "a derived line under a titleless card's
-/// date"); the words are the note picker's own snippet, never a second
-/// derivation.
+/// **The Pool card's two lines.**
+///
+/// Row 87's rule stands exactly as she gave it (R-cor-11(2): *"a derived line
+/// under a titleless card's date"* — a titled card already says what it is);
+/// what changed at **13u3 UNIT B** is what the card LEADS with. A titleless
+/// card no longer leads with its day and previews its words — it leads with
+/// the WORDS (her item 4), the day steps down to the quiet slot beside them,
+/// and this line carries on from where the lead stopped. One rule, one brain
+/// (`NoteCardFace`), shared with the Library's two renderers; the words are
+/// still the note picker's own snippet, never a second derivation.
 nonisolated enum PoolCardFace {
-    static func preview(title: String?, snippet: String?) -> String? {
-        guard title?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true else {
-            return nil
-        }
-        guard let snippet = snippet?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !snippet.isEmpty
-        else { return nil }
-        return snippet
+    /// What the row's card shows, from the listing's row and the snippet
+    /// read beside it.
+    static func card(_ item: Queries.TimelineItem, snippet: String?) -> NoteCardFace.Card {
+        NoteCardFace.card(
+            storedTitle: item.title,
+            leadingTexts: [snippet ?? ""],
+            isJournal: item.isJournalEntry,
+            entryDate: item.entryDate,
+            createdAt: item.createdAt)
+    }
+
+    /// The line UNDER the lead — nothing at all under a card she named (her
+    /// rule), the continuation under a card leading with its own words, and
+    /// the words under a card leading with its day.
+    static func preview(_ card: NoteCardFace.Card) -> String? {
+        guard card.lead.isDerived else { return nil }
+        return card.preview.isEmpty ? nil : card.preview
     }
 }

@@ -20,15 +20,45 @@ import VariorumCore
 
 @Suite("The Pool card's first-words preview (correction round, row 87)")
 struct PoolCardPreviewTests {
-    @Test func theRuleShowsTheSnippetUnderATitlelessCardOnly() {
-        #expect(PoolCardFace.preview(title: nil, snippet: "The first words of the note.")
-            == "The first words of the note.")
-        #expect(PoolCardFace.preview(title: "", snippet: "The first words.") == "The first words.")
-        #expect(PoolCardFace.preview(title: "   ", snippet: "The first words.") == "The first words.")
-        #expect(PoolCardFace.preview(title: "A titled note", snippet: "The first words.") == nil,
-                "a titled card already says what it is")
-        #expect(PoolCardFace.preview(title: nil, snippet: nil) == nil)
-        #expect(PoolCardFace.preview(title: nil, snippet: "  \n") == nil, "no words, no line")
+    /// **Row 87's rule, re-expressed over 13u3 UNIT B's lead.** Her
+    /// R-cor-11(2) is untouched — a titled card shows no derived line, a
+    /// titleless one does — but what the card LEADS with moved (item 4), so
+    /// the rule is now asked of the card rather than of the raw title:
+    /// a titleless card leads with its WORDS and this line carries on from
+    /// them; a day-led card (a daily entry) shows them whole underneath.
+    @Test func theRuleShowsTheDerivedLineUnderATitlelessCardOnly() {
+        func card(title: String?, snippet: String?, journal: Bool = false) -> NoteCardFace.Card {
+            PoolCardFace.card(
+                Queries.TimelineItem(
+                    postID: "p", title: title, entryDate: "2026-01-15",
+                    createdAt: "2026-01-15T09:00:00.000Z", stamp: "2026-01-15T09:00:00.000Z",
+                    profile: journal ? "journal" : nil),
+                snippet: snippet)
+        }
+
+        // Titleless: the words LEAD, so the line under them is what is left
+        // (nothing here — the note is one short sentence).
+        let bare = card(title: nil, snippet: "The first words of the note.")
+        #expect(bare.lead == .words("The first words of the note."))
+        #expect(PoolCardFace.preview(bare) == nil, "it has already said the whole note")
+
+        // …and a longer note's line carries on rather than repeating.
+        let long = card(
+            title: "",
+            snippet: "The lighthouse keeper counted the storms and wrote none of them down.")
+        #expect(PoolCardFace.preview(long)?.hasPrefix("wrote") == true)
+
+        // A DAILY entry keeps its day and shows its words underneath.
+        let entry = card(title: "   ", snippet: "Frost, and a fox.", journal: true)
+        #expect(entry.lead == .day("2026-01-15"))
+        #expect(PoolCardFace.preview(entry) == "Frost, and a fox.")
+
+        // A titled card: her rule, unchanged.
+        #expect(PoolCardFace.preview(card(title: "A titled note", snippet: "The first words."))
+                == nil, "a titled card already says what it is")
+        #expect(PoolCardFace.preview(card(title: nil, snippet: nil)) == nil)
+        #expect(PoolCardFace.preview(card(title: nil, snippet: "  \n")) == nil,
+                "no words, no line")
     }
 
     @MainActor
@@ -68,9 +98,16 @@ struct PoolCardPreviewTests {
             #expect(model.posts.map(\.postID).contains(bare.id), "the bare note is in the Pool")
             #expect(model.snippets[bare.id]?.hasPrefix("The lighthouse keeper counted") == true,
                     "the picker's snippet rode in for the bare note: \(model.snippets[bare.id] ?? "nil")")
-            #expect(PoolCardFace.preview(title: nil, snippet: model.snippets[bare.id]) != nil,
-                    "…and the card shows it under its day")
-            #expect(PoolCardFace.preview(title: "a titled note", snippet: model.snippets[titled.id]) == nil,
+            // …and the card LEADS with those words (13u3 UNIT B), rather
+            // than with the bare day it used to show.
+            let bareItem = try #require(model.posts.first { $0.postID == bare.id })
+            let bareCard = PoolCardFace.card(bareItem, snippet: model.snippets[bare.id])
+            #expect(bareCard.lead.text.hasPrefix("The lighthouse keeper counted"),
+                    "the card leads with the note's own words: \(bareCard.lead.text)")
+            let titledItem = try #require(model.posts.first { $0.postID == titled.id })
+            let titledCard = PoolCardFace.card(titledItem, snippet: model.snippets[titled.id])
+            #expect(titledCard.lead == .title("a titled note"))
+            #expect(PoolCardFace.preview(titledCard) == nil,
                     "the titled card keeps its title alone")
         }
     }
