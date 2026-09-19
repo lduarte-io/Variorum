@@ -1,9 +1,13 @@
 # Phase 13u3 — FACES (EXECUTION PLAN)
 
-**Status: READY — THE NEXT 13u PHASE since 2026-09-15 (13u2 CLOSED that night; the baselines and
-the "what 13u2 changed under you" section at this file's end were refreshed at its closeout).
-Authored 2026-09-14 at the 13u1 kickoff (the R-cor-12 four-way split; the shared sitting's rulings
-live in `phase-13u1-editor-seam.md`'s SITTING RECORD and bind here). Opens at her word.**
+**Status: OPEN 2026-09-18, at her word** (*"hello fable! you'll be the orchestrator for this
+session. /architect-phase 13u3 - the faces phase. I believe that's what we're on, let me know if
+any questions come up. Standard Opus implementer Fable cold review standards should apply."* —
+confirmed at the kickoff preflight: 13u2b closed the same day and the master plan's pointer names
+13u3 next). Authored 2026-09-14 at the 13u1 kickoff (the R-cor-12 four-way split; the shared
+sitting's rulings live in `phase-13u1-editor-seam.md`'s SITTING RECORD and bind here). **The
+running record is the GOVERNANCE / SITTING RECORD / UNIT PLAN / LEDGER sections below the
+closeout-refresh blocks.**
 **The binding item record is the master plan's `### 13u` section** (items 3 · 4 · 14 · 15 · 16,
 item 9's Mac face, plus the 2026-09-14 item 20). Where this file and that section disagree, that
 section wins.
@@ -134,3 +138,159 @@ Release (hashes in `notes/handoffs/phase-13u2b-handoff.md`; includes the star ca
    router's fact-staleness asymmetry and both directions come right for free.
 5. **`ProseHeightModel` is the ONE prose height model** (Outline + flow). The re-font/typography
    work this phase's items touch must go through it, never a second estimate.
+
+---
+
+## GOVERNANCE (2026-09-18, the kickoff)
+
+**The author invoked `/architect-phase 13u3` — her cast, from her kickoff message: *"Standard Opus
+implementer Fable cold review standards should apply."*** So: the orchestrating session holds the
+ARCHITECT MANDATE (the R117 shape; `.claude/skills/architect-phase/SKILL.md` governs beside
+CLAUDE.md — CLAUDE.md wins on conflict); implementers are **`opus-implementer`**, one FRESH session
+per unit, ONE acceptance unit per session (the sizing guidance's rule 1); the ladder's cold
+reviewer is **`fable-reviewer`**. *(The roster's earlier "expected: opus-reviewer, with
+fable-reviewer if the seam is reached" is superseded by her kickoff word — and item 3's gutter
+rework likely reaches the read-tier factory anyway, so Fable review was the right call under the
+old wording too.)* The 13b constitution below is BINDING; the skill's application notes (P-1's
+routed-vocabulary scope, P-3's two deliberate surface kinds, the layer-placement and overlay/sink
+laws) bind by reference.
+
+## BINDING PRINCIPLES (the 13b constitution, P-1…P-9 — copied verbatim per the skill's rule)
+
+- **P-1 — One capability registry.** Every user-facing act is declared
+  exactly once: verb, scope (block/take/post/book), per-mode availability
+  rule, its doors (menu / context / bar / shortcut / palette), and its
+  refusal copy. Surfaces render their doors FROM the registry; gating is
+  data, never per-view if-statements. A registry-walk test asserts every
+  declared door exists and every rendered door is declared. This kills the
+  D3/D4 class structurally — the capability matrix stays green by
+  construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act —
+  including any mode-switch choreography, done visibly for the user — or
+  delivers the operations layer's real refusal. A door that can never act in
+  its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface
+  component (live + read modes; one measurement brain — the width-gated
+  remeasure; the shared canary) that every pane composes; the live editor
+  core's identity machinery (`BlockRangeIndex`, crystallization) becomes its
+  live mode, not a sibling implementation. "What text does this pane show,
+  and is it live" is answered by ONE pure, unit-tested authority
+  (`PaneTextAuthority`); views never re-derive it. Its invariants stated as
+  code: exactly one live pane; the live pane is buffer-authoritative; read
+  panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter
+  may announce that something happened (mode changed, post opened); no
+  listener derives business state or availability from a broadcast, and no
+  flow's correctness depends on broadcast ordering. Cross-feature flows
+  route through composition. (Stage 0's survey enumerates today's
+  notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule
+  marks an under-architected feature. The response is never another patch:
+  write the feature's DESIGN MEMO — intended behavior whole, edge cases
+  enumerated on paper, refusal wordings, undo story — get the author's
+  rulings on the product-flavored edges, then build to the memo. Happy path
+  ships first, but the edges are *decided at design time*, not discovered by
+  the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial
+  flow is the contract for every happy path. It stays green — automated
+  where the harness allows, screenshot-walked otherwise — and any change
+  that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive
+  harness: the ops-layer soaks (exist), the board/view-model invariant soak
+  (Stage 1), the registry walk (P-1), the per-batch scripted screenshot
+  walkthrough. Red-on-old stays absolute: no bug-class fix without a pin
+  that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind
+  the rebuilt layer exactly as they bind the substrate (invalidation ∝
+  realized rows; one live editor; virtualized long views). Overlays, never
+  rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit`
+  (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary.
+  Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing
+  board layout, text authority, and gesture routing splits by concern
+  (`TakesViewModel` at 890 lines is the standing counterexample). Same
+  hygiene rule as the substrate, applied where it was being waived.
+
+
+**How the constitution bites HERE (application, not modification):** **P-5 FIRES on item 3** — the
+comments area has the friction doctrine's exact signature (the small-add-box complaint → 17p-b's
+lane build to R-Q4 → her 2026-09-14 reversal, item 20: *"I approved comments moving all of the text
+to the right but now that I see it, I think it's ugly and weirdly spaced"*), so the gutter rework
+gets a DESIGN MEMO before its build (`notes/plans/phase-13u3-memo-gutter.md`): behavior whole,
+edges enumerated (narrow widths, Write's minGutter, the multi-glyph callout — KnownIssues row 50's
+residuals dissolve or re-verdict here — the add-box-as-editor, her "not spaced well"), her rulings
+on the product edges, then the build follows the memo. **P-8 + the 13u2b manifest rule bind the
+gutter's geometry:** decorations stay OUT of the book columns' height model or TEACH
+`BookHeightManifest` about them (the 13u2b closeout's own warning); overlays, never rendering
+attributes; the text's measure and left edge NEVER move (R-13u-9's letter). **P-3 is a FENCE:** the
+rework composes on the read tier / pane surface and Write's full editor; it extends NO liveness
+mechanism, and any touch of `PaneTextAuthority` / the read-tier factory is exactly why the ladder
+is Fable. **P-2/P-1:** the new doors (the commit-name field, the rename door, ⇧⏎ in capture) fire
+and DO, speak through the status seam's three classed doors (13u2's rename — refuse/offer/receipt,
+trivially classifiable), and declare registry entries where they route through shared doors.
+**P-6:** the tutorial spine rides every unit's end verification — and item 15(b) EDITS a lesson
+deliberately (a content change WITH its pins, never a broken step; the closeout's re-seed note
+applies). **P-9:** item 4's snippet brain is ONE pure Domain function; no card derives its own.
+
+## THE KICKOFF SITTING RECORD (2026-09-18 — author present at kickoff; rulings verbatim-faithful)
+
+The ONE shared 13u sitting (2026-09-14, R-13u-1…R-13u-11) already rules this phase's substance;
+today's kickoff added the cast (GOVERNANCE above) and two calls:
+
+- **R-13u3-1 — NAMED COMMITS ARE EDITABLE AFTER THE FACT.** Asked as item 14's reserved sitting
+  detail ("should a savepoint's name be editable after the fact?"); she chose **"Editable
+  (Recommended)"** — a rename door in Block History beside the savepoint; the snapshot TEXT stays
+  immutable (I5 untouched); `message` is metadata under server-version-wins CAS, so sync is
+  trivial either way. (The offered alternatives — frozen once written; editable-manual-only — were
+  declined by the selection. The recommended option's description, which she selected, includes
+  the auto-commit question implicitly: the door renames; auto-commits keep their occasion label as
+  the DEFAULT display, and a rename applies to `message` wherever the door is offered. Whether the
+  rename door is offered on AUTO savepoints too is a build-time detail — the unit brief says offer
+  it everywhere `message` exists, since her selection was the unqualified "Editable" over the
+  manual-only alternative.)
+- **R-13u3-2 — STANDARD METHOD + THE REFRESH PRE-AUTHORIZED.** She chose **"Standard + refresh
+  pre-authorized (Recommended)"**: PROVISIONAL-and-continue binds the run (judgment calls recorded
+  here + QUESTIONS; no stop-and-ask except the standing author-only hard stops and item 3's memo
+  edges, which she is present to rule); the **`/Applications` refresh is PRE-AUTHORIZED** at the
+  phase's finish on the standing rails (A1 backup FIRST, zero instances verified at every step,
+  Release from a clean worktree, codesign + hashes recorded, her store never opened); the author
+  handoff written LAST, her checklist at the top.
+
+## THE UNIT PLAN (acceptance units + evidence, named at plan time per the sizing guidance)
+
+ONE phase-sized unit (A) + six batch-sized units, one implementer session each, strictly
+sequential. Every unit: red-on-old for defect-shaped rows; the standing suites + the tutorial
+spine green at its end; the implementer walks and captures on the dev-store Debug build (both
+voices, both appearances where chrome changes); the orchestrator verifies by record and walks the
+phase's acceptance before the ladder (the C-rules shape she amended at the first use-report round).
+
+| unit | scope | acceptance evidence |
+|---|---|---|
+| **A — the GUTTER rework (item 3 + row 50)** | Comments + callouts render in the whitespace gutter OUTSIDE the text area on every surface the lane reached (`reservesDecorLane` retired); the text's measure/left edge never moves; the add box grows into the area it owns; the comment surface behaves like a text editor; spacing per the memo; row 50's two residuals dissolved or re-verdicted. **Builds only AFTER the memo's edges are ruled.** | USE: the orchestrator's hands-on walk — a commented note, a callout note, a multi-glyph callout, Write + book Outline + Read tier + note window + spread book, both voices, both appearances, narrow + wide windows; the #102 sweep pin cells re-verdicted; book-column landings still land (13u2b's suites green under load) |
+| **B — note-list skimmability (item 4)** | ONE pure Domain snippet brain (cap + word-boundary trim; explicit title wins; journal cards stay date-led); the Library List + Notes cards + Pool card family consume it (and `BookViewModel.adopt`'s primed previews, never per-row derivation); the title-suggestion chip at quick-note/capture (offered, one tap, ignorable; never an action taken for her); detail residue (snippet length / ellipsis / typography) built PROVISIONAL | USE: Library walk over her-shaped fixtures (titled, untitled, journal, long-first-sentence notes); the brain's edge-case tests; stamps/#103 arrangement unharmed at both widths |
+| **C — the quick-capture Mac face (item 9, R-13u-4)** | ⏎ files · ⇧⏎ adds a paragraph; many-paragraph capture TYPED, not only pasted; hand-off segments via `importPost`'s bulk rule; both Mac capture surfaces (the shelf quick-entry bar + the system-wide quick note) to ONE rule; ⇧⌘V untouched (taken) | USE: type a three-paragraph capture in both surfaces, file it, verify the blocks; the lost-prose class from her 2026-08-23 report cannot reproduce (caret into an earlier paragraph, then ⏎ — files, drops nothing) |
+| **D — named commits (item 14, R-13u3-1)** | Optional name at the manual-commit door, enter-to-skip keeps ⌘S instant; names in Block History savepoint runs + listings; the RENAME door beside the savepoint (editable per R-13u3-1); auto-commits keep their occasion as the default label; zero schema (`message` has existed since v1) | USE: ⌘S skip-fast, ⌘S with a name, rename after the fact, an auto savepoint's label untouched; state-transition tests for the op's `message` writes |
+| **E — the #80(e) two faces (item 15)** | (a) the restore confirm NAMES what it takes (set-aside originals + never-traveled takes) and points at PROMOTE as the zero-loss road; (b) the tutorial's versions-copy-placed-only lesson (copies carry neither history nor commits — one lesson covers both) | USE: the confirm read in the flow it interrupts; the tutorial spine green WITH the new lesson's pins; the closeout re-seed note recorded for her store |
+| **F — the PDF export renders formatting (item 16)** | The export's attributed strings built from the Mac's own markdown display brain; projection change ONLY (`renderedText` / bridge / `.md`-export semantics byte-untouched, pinned); typographic pass stays 13m's | USE: export a formatted note + a book to PDF, open both — bold/italic/headings/lists render, no raw syntax; `.md` export byte-identical before/after |
+| **G — the ceremony-sheet residuals (row 42)** | The merge sheet's RUN arm gains the shown-take drift check (the pair arm's class); the four 18f-ladder NITs per the round-3 record's fix shapes (open-time projection read; the stale pre-pair under "Pair by hand…"; the board's instant road's `variants[0]` park; `renderPost`'s two-id read) | Red-on-old for the drift check (a store write between open and confirm); the sheet walked on a fanned run; the 18f pins green |
+
+**Order: memo → A → B → C → D → E → F → G → the ladder (fable-reviewer, combined diff) → walks →
+closeout + refresh.** A is first (deep surgery before polish — the 13u split's own reasoning);
+D/E/F/G are independent and may reorder if a death makes that cheaper. Fences phase-wide: **zero
+`Sync/` · zero `Persistence/` · zero schema · zero migrations · the marker stays 8 · nothing
+touches her real store outside the pre-authorized refresh.**
+
+## THE LEDGER (every row owned; statuses flip in the same commit as the work)
+
+| # | item | status → owner |
+|---|---|---|
+| 1 | The gutter DESIGN MEMO (P-5) + her edge rulings | OPEN — the orchestrator, next act |
+| 2 | UNIT A — the gutter rework (item 3 + KnownIssues row 50) | NOT STARTED — gated on row 1 |
+| 3 | UNIT B — note-list skimmability (item 4) | NOT STARTED |
+| 4 | UNIT C — the quick-capture Mac face (item 9 / R-13u-4) | NOT STARTED |
+| 5 | UNIT D — named commits (item 14 / R-13u3-1) | NOT STARTED |
+| 6 | UNIT E — the #80(e) two faces (item 15) | NOT STARTED |
+| 7 | UNIT F — PDF renders formatting (item 16) | NOT STARTED |
+| 8 | UNIT G — the ceremony-sheet residuals (KnownIssues row 42) | NOT STARTED |
+| 9 | The ladder — `fable-reviewer`, combined diff, standing rounds | NOT STARTED |
+| 10 | The orchestrator's walks + closeout ritual + the pre-authorized `/Applications` refresh (R-13u3-2) | NOT STARTED |
