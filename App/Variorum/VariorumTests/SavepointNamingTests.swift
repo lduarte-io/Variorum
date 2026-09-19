@@ -86,3 +86,48 @@ struct SavepointNameFaceTests {
         #expect(BlockHistoryCopy.renamed(nil) == BlockHistoryCopy.savepointNameCleared)
     }
 }
+
+@Suite("The name field's value (13u3 UNIT D)")
+struct SavepointNameAskTests {
+    /// **THE COMMIT DOOR OPENS EMPTY; THE RENAME DOOR OPENS ON WHAT IS
+    /// THERE.** The seeding IS the difference between the two gestures: one
+    /// offers a name, the other edits one — and clearing the seeded field is
+    /// how a name is removed (the op's clear road, reached with ⌫ and ⏎).
+    @Test func theAskSeedsItselfFromWhatItIsNaming() {
+        let ask = SavepointNameAsk.naming(variantID: "v1")
+        #expect(ask.kind == .newSavepoint)
+        #expect(ask.seed.isEmpty)
+        #expect(ask.targetID == "v1")
+
+        let when = Date(timeIntervalSince1970: 1_782_864_000)
+        let named = CommitPoint(
+            id: "c9", variantId: "v1", text: "words", kind: .manual,
+            message: "before the AI edit", createdAt: when)
+        let rename = SavepointNameAsk.renaming(named)
+        #expect(rename.kind == .rename)
+        #expect(rename.targetID == "c9")
+        #expect(rename.seed == "before the AI edit")
+
+        let unnamed = CommitPoint(
+            id: "c8", variantId: "v1", text: "words", kind: .auto, createdAt: when)
+        #expect(SavepointNameAsk.renaming(unnamed).seed.isEmpty,
+                "a quiet savepoint takes a name from empty — its occasion is not its name")
+        // Two asks about different rows are different presentations; the two
+        // kinds about the same id are too (a host can only hold one anyway).
+        #expect(SavepointNameAsk.naming(variantID: "v1").id != rename.id)
+    }
+
+    /// The field's two roads say what they are, and the prompt/hint differ by
+    /// gesture (the commit door's says the empty name is fine — that IS the
+    /// enter-to-skip promise, written where she can read it).
+    @Test func theFieldTeachesItsTwoKeys() {
+        let new = SavepointNameCopy.hint(.newSavepoint)
+        #expect(new.contains("\u{23CE}") && new.contains("\u{238B}"))
+        #expect(new.lowercased().contains("empty name is fine"))
+        let rename = SavepointNameCopy.hint(.rename)
+        #expect(rename.contains("Clearing the field removes the name"))
+        #expect(rename.contains("never changes"), "I5, said at the door")
+        #expect(SavepointNameCopy.prompt(.newSavepoint) != SavepointNameCopy.prompt(.rename))
+        #expect(SavepointNameCopy.filed("before the AI edit").contains("before the AI edit"))
+    }
+}
