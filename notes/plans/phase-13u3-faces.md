@@ -255,6 +255,15 @@ today's kickoff added the cast (GOVERNANCE above) and two calls:
   phase's finish on the standing rails (A1 backup FIRST, zero instances verified at every step,
   Release from a clean worktree, codesign + hashes recorded, her store never opened); the author
   handoff written LAST, her checklist at the top.
+- **R-13u3-3…R-13u3-6 — THE GUTTER MEMO'S FOUR EDGES, all ruled the same sitting** (the memo's §3
+  carries them in full, her words verbatim): **R-13u3-3** the callout glyph and the comment face
+  STACK VERTICALLY AT EVERY WIDTH (her words: *"stack them at any width, I think it would look
+  better."* — stronger than the memo's proposed narrow-only stacking; `commentClearance`'s
+  horizontal-clearance arithmetic retires); **R-13u3-4** a callout's leading glyph is ONE GRAPHEME
+  (the prompt keeps the first and says so; row 50's clip residual dissolves); **R-13u3-5** the
+  inline-comments setting SURVIVES as her explicit opt-in (the law governs the default margin
+  presentation); **R-13u3-6** comment editing lives in the PANEL ONLY (the margin card stays a
+  read face and a door; one live-text home).
 
 ## THE UNIT PLAN (acceptance units + evidence, named at plan time per the sizing guidance)
 
@@ -266,7 +275,9 @@ phase's acceptance before the ladder (the C-rules shape she amended at the first
 
 | unit | scope | acceptance evidence |
 |---|---|---|
-| **A — the GUTTER rework (item 3 + row 50)** | Comments + callouts render in the whitespace gutter OUTSIDE the text area on every surface the lane reached (`reservesDecorLane` retired); the text's measure/left edge never moves; the add box grows into the area it owns; the comment surface behaves like a text editor; spacing per the memo; row 50's two residuals dissolved or re-verdicted. **Builds only AFTER the memo's edges are ruled.** | USE: the orchestrator's hands-on walk — a commented note, a callout note, a multi-glyph callout, Write + book Outline + Read tier + note window + spread book, both voices, both appearances, narrow + wide windows; the #102 sweep pin cells re-verdicted; book-column landings still land (13u2b's suites green under load) |
+| **A1 — the GUTTER geometry rework (item 3's page half + row 50)** | Comments + callouts render in the whitespace gutter OUTSIDE the text area on every surface the lane reached (`reservesDecorLane`/`DecorLaneReservation` retired); the text's measure/left edge never moves (the memo's one law); the R-13u3-3 stack at every width; the R-13u3-4 one-grapheme guard; margin-card spacing rhythm; row 50's two residuals dissolved. **Built to the memo — its §2/§3 are the design.** | USE: the orchestrator's hands-on walk — a commented note, a callout note, a multi-comment block, Write + book Outline + Read tier + note window + spread book, both voices, both appearances, narrow + wide windows; the #102 sweep pin cells re-verdicted; book-column landings still land (13u2b's suites green under load) |
+| **A2 — the comments PANEL as a text editor (item 3's panel half, memo §2 D)** | The panel re-formed as ONE writing surface: comments edit in place (no bordered-field swap), the add area owns all remaining space (click anywhere → caret; grows; ⌘⏎/Add files; Esc clears), deleted fold + restore kept, status-seam classed doors; R-13u3-6 (panel-only editing) binds | USE: the panel exercised as an editor on a multi-comment block (click-anywhere, grow, file, edit in place, delete/restore), both voices, both appearances |
+*(The plan's original single "UNIT A" split at plan time per the sizing guidance's one-unit-per-session rule — item 3 holds two acceptance units, said out loud rather than bundled.)*
 | **B — note-list skimmability (item 4)** | ONE pure Domain snippet brain (cap + word-boundary trim; explicit title wins; journal cards stay date-led); the Library List + Notes cards + Pool card family consume it (and `BookViewModel.adopt`'s primed previews, never per-row derivation); the title-suggestion chip at quick-note/capture (offered, one tap, ignorable; never an action taken for her); detail residue (snippet length / ellipsis / typography) built PROVISIONAL | USE: Library walk over her-shaped fixtures (titled, untitled, journal, long-first-sentence notes); the brain's edge-case tests; stamps/#103 arrangement unharmed at both widths |
 | **C — the quick-capture Mac face (item 9, R-13u-4)** | ⏎ files · ⇧⏎ adds a paragraph; many-paragraph capture TYPED, not only pasted; hand-off segments via `importPost`'s bulk rule; both Mac capture surfaces (the shelf quick-entry bar + the system-wide quick note) to ONE rule; ⇧⌘V untouched (taken) | USE: type a three-paragraph capture in both surfaces, file it, verify the blocks; the lost-prose class from her 2026-08-23 report cannot reproduce (caret into an earlier paragraph, then ⏎ — files, drops nothing) |
 | **D — named commits (item 14, R-13u3-1)** | Optional name at the manual-commit door, enter-to-skip keeps ⌘S instant; names in Block History savepoint runs + listings; the RENAME door beside the savepoint (editable per R-13u3-1); auto-commits keep their occasion as the default label; zero schema (`message` has existed since v1) | USE: ⌘S skip-fast, ⌘S with a name, rename after the fact, an auto savepoint's label untouched; state-transition tests for the op's `message` writes |
@@ -284,8 +295,9 @@ touches her real store outside the pre-authorized refresh.**
 
 | # | item | status → owner |
 |---|---|---|
-| 1 | The gutter DESIGN MEMO (P-5) + her edge rulings | OPEN — the orchestrator, next act |
-| 2 | UNIT A — the gutter rework (item 3 + KnownIssues row 50) | NOT STARTED — gated on row 1 |
+| 1 | The gutter DESIGN MEMO (P-5) + her edge rulings | **DONE 2026-09-18** — `notes/plans/phase-13u3-memo-gutter.md` (`73a6ea17` + the rulings commit); all four edges RULED at the sitting (R-13u3-3…6) |
+| 2 | UNIT A1 — the gutter geometry rework (item 3's page half + KnownIssues row 50) | OPEN — the memo is the design; brief below |
+| 2b | UNIT A2 — the comments panel as a text editor (item 3's panel half, memo §2 D) | NOT STARTED — after A1 |
 | 3 | UNIT B — note-list skimmability (item 4) | NOT STARTED |
 | 4 | UNIT C — the quick-capture Mac face (item 9 / R-13u-4) | NOT STARTED |
 | 5 | UNIT D — named commits (item 14 / R-13u3-1) | NOT STARTED |
@@ -294,3 +306,118 @@ touches her real store outside the pre-authorized refresh.**
 | 8 | UNIT G — the ceremony-sheet residuals (KnownIssues row 42) | NOT STARTED |
 | 9 | The ladder — `fable-reviewer`, combined diff, standing rounds | NOT STARTED |
 | 10 | The orchestrator's walks + closeout ritual + the pre-authorized `/Applications` refresh (R-13u3-2) | NOT STARTED |
+
+## ENVIRONMENT TRAPS (every unit brief carries this section verbatim — the skill's rule)
+
+- **Instance checks:** `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH (the test
+  host matches mid-run). Real-store instances are identified by STORE, not path — **NEVER quit or
+  kill one**; no Release builds or `/Applications` refreshes while one lives; install refreshes only
+  at sanctioned zero-instance windows (this phase's is the closeout's, pre-authorized R-13u3-2).
+- **Builds/tests:** Mac tests run from `App/Variorum/`, suite-level `-only-testing` only; confirm
+  the "Test run with N tests" line (Swift Testing COUNTS skipped tests — read the `skipped:` lines);
+  `xcodebuild build-for-testing` compiles without the runner; **NEVER add a custom build
+  configuration** (any configuration not named exactly "Debug" builds SPM dependencies RELEASE and
+  silently strips VariorumCore's DEBUG-gated oracles); zsh `pipestatus` for pipeline exit codes.
+- **Suites beside a live session flash the test host's windows** — prefer zero-instance windows for
+  timing-sensitive measurements; the differential-latency, `CanvasDragTrackingTests`,
+  `BlocksWorkbenchFaceTests` single-click and read-click (row 58) reds are the load-flake list —
+  adjudicate by the paired protocol, never a single isolated run.
+- **Walks:** dev-store Debug build only (`io.lduarte.Variorum.debug`), `Tools/WalkKit/` + `cliclick`;
+  screenshots in gitignored dirs (`notes/plans/13u3-screens/`); the Debug domain's `surfaceSize.*`
+  keys may be wiped to stage cold runs (they regenerate) — NEVER the real store's.
+- **Git:** never `git checkout` over uncommitted work; commit per piece and **PUSH after every
+  commit** (CLAUDE.md's 2026-08-03 push rule; the skill's 13b-era "never push" line is superseded —
+  CLAUDE.md wins). No commit trailers.
+- **Backups:** any act near the real store takes the A1 rail first (WAL-safe, UTC-named) — this
+  phase should never touch it before the closeout refresh.
+
+## CAST & DISCIPLINE
+
+**Orchestrator: Fable — this session** (her kickoff word; writes no feature code beyond
+adjudication/record acts). **Implementer: `opus-implementer`, a FRESH session per unit, strictly
+sequential, one at a time, ONE acceptance unit each.** **Cold review: `fable-reviewer`** over the
+combined diff at the phase's end (her kickoff word; the standing ladder — fresh reviewer per
+round, the cross-model flow since the implementers are Opus, cap three rounds). The hallucination
+guard binds every fix (trace the mechanism yourself; red-on-old pins, behavioral-revert verified;
+a pin green on both sides is DISMISSED as hollow and recorded). PROVISIONALs log to
+`notes/QUESTIONS.md` (next free **#117**). Author-only calls are hard stops. **Session resiliency
+(the checkpoint protocol, RESTATED in every brief):** commit per coherent piece + push after every
+commit · the unit record's LIVE STATUS section written at the START and flipped in the same commit
+as each piece, unverified claims marked PENDING · synchronous foreground waits only, via the
+grep-poll loop (`grep -q '<EXIT LINE>' <log> && break; sleep 5` — never `tail -f | grep -m1`,
+never a backgrounded run you end your turn on) · never spawn subagents · no revert starts until
+the record names it and the pre-revert state is COMMITTED (never scratchpad copies) · every death
+and resume noted in the record.
+
+**The walk vs. her walk.** The IMPLEMENTER walks and captures each unit on the dev-store Debug
+build (both voices, both appearances where chrome changes); the ORCHESTRATOR verifies by record
+and walks the phase's acceptance before the ladder (the C-rules shape she amended at the first
+use-report round); HER one walk rides the refreshed install at the end.
+
+---
+
+## UNIT A1 BRIEF — THE GUTTER GEOMETRY REWORK (self-contained; read in this order)
+
+**Read first, in full:** (1) this file's Status banner · roster item 1 · GOVERNANCE + the
+constitution + "how the constitution bites here" · THE KICKOFF SITTING RECORD (R-13u3-1…6) · both
+"REFRESHED AT THE …" closeout blocks (the 13u2b one's item 1 — the height-manifest warning — and
+item 5 — `ProseHeightModel` — bind your geometry directly; the 13u2 one's items 1/2/6 name the
+status seam, the Outline's double realization, and the indicator grammar you compose with) · the
+ENVIRONMENT TRAPS and CAST & DISCIPLINE sections above. (2) **`notes/plans/phase-13u3-memo-gutter.md`
+IN FULL — it is the design; you build to it.** §2 A is your mechanism, §3's rulings R-13u3-3/4 are
+binding product law. (3) `notes/TEXTKIT2_NOTES.md` §3–§4 (overlays never rendering attributes; no
+TK1 APIs; the 17o `usageBoundsForTextContainer` ratchet — `PaneMeasurement` reads fragments) and
+the macOS-26 attribute-fixing note (clamp to the verdict's range, never the report's). (4) The
+code the memo §1 traces: `Surface/DecorLane.swift` · `Features/Editor/BlockDecor.swift` (geometry
++ `BlockDecorOverlayController`) · `Features/Editor/EditorTextView.swift` (`updateGutters`,
+`reservesDecorLane`, the contained factory) · `Surface/PaneSurface.swift` (the read factory + the
+measurement brain and its width gate) · `Theme/EditorTypography.swift` (the constants) ·
+`VariorumTests/BlockDecorLaneTests.swift` (the cells you re-verdict) and the #102 sweep pin.
+
+**Scope (ONE acceptance unit — the page-side geometry; the PANEL is unit A2's, not yours):**
+1. **The one law** (memo §2, opening): no decoration moves the prose column's measure or left
+   edge, on any surface, ever. Contained surfaces adopt Write's own gutter shape — the text
+   view's frame absorbs the host row's whitespace; the container origin is computed so
+   `containerWidth = min(maxColumnWidth, viewWidth − 16)`, **byte-identical to today's
+   clamp-then-inset at every window width** (prove it: heights unchanged ⇒ `BookHeightManifest`
+   learns nothing; if you find ANY width where the measure would differ, STOP and return to the
+   orchestrator with the arithmetic — the in-batch design fork is the architect's, never yours).
+   Enumerate the HOSTS by sweep (the #102 pin's cells + a fresh grep — the known cells: the book
+   Outline's inline editor and read tier, the workspace read-cheap pane, the note window's read
+   face, the spread/paged book): a per-cell table in your record, each cell CONVERTED or provably
+   N/A. `DecorLaneReservation`, `reservesDecorLane`, `onProseColumnChanged` and `updateGutters`'
+   laned-surface precondition retire dead — no dormant machinery.
+2. **The stack (R-13u3-3, at every width):** glyph at the block's first line, the comment face
+   (card ≥ 150, badge below that) directly under it; one block with one decoration shows it at
+   the first line; below badge room the badge clamps to the page edge, never over prose.
+   `commentClearance`'s horizontal arithmetic retires.
+3. **The callout wash hugs the prose column** (no leading extension into the gutter); the glyph
+   moves fully into the gutter (memo §2 C).
+4. **The one-grapheme guard (R-13u3-4)** at `promptEmoji`, with the field saying so.
+5. **Margin-card spacing rhythm** (memo §2 B): first-line top alignment, fixed inner pad, minimum
+   air between stacked neighbours (two commented blocks' cards never abut), the drag-handle lane
+   respected. Taste details PROVISIONAL with captures.
+6. **The mechanism riders:** the width-gated remeasure gates on CONTAINER width, not frame width;
+   `SurfaceSizeMemory`'s old-width entries read absent once (record it, harmless); DEBUG geometry
+   oracles follow the `DebugProbeScope` pattern (13u2's item 4 — never a bare static).
+7. **Pins:** the one-law pin (same note ± comment ± glyphed callout on every surface kind —
+   `textLeft`/`textRight`/fragment origins byte-identical); the stack geometry pin at wide AND
+   `minGutter`; the card-rhythm pin; the one-grapheme guard pin; the #102 sweep pin cells
+   re-verdicted to the new law; red-on-old (behavioral revert) for every defect-shaped cell
+   (row 50's collision and clip are defect-shaped: show them red on the pre-fix tree). Retire
+   `BlockDecorLaneTests`' lane cells INTO the successor pins — zero orphaned test names.
+8. **KnownIssues row 50:** rewrite it RESOLVED at your close (both residuals dissolved by
+   R-13u3-3/4), in the same commit as the work that resolves it.
+9. **Fences:** zero `Sync/` · zero `Persistence/` · zero schema · the marker stays 8 · the full
+   editor's identity machinery (`BlockRangeIndex`, crystallization, the reconciler) untouched —
+   your diff is geometry and overlay code; if you find yourself editing the identity seam, stop
+   and report. iOS build must stay green (shared files you touch compile there).
+
+**End verification (yours, before the record closes):** the FULL Mac suite (expect 2794/466 ±
+your additions; the ONE tolerated red is row 58's environment condition — anything else is
+yours); the tutorial spine green in-run; iOS build green; YOUR walk with captures on the
+dev-store Debug build — the memo §4 walk (both voices, both appearances, wide + `minGutter`
+windows), captures to `notes/plans/13u3-screens/` (gitignored). Record: a **UNIT A1 RECORD**
+section appended to this file — LIVE STATUS from the first commit, the host table, the traced
+mechanisms, pin list with red-on-old evidence, walk notes + capture names, finals, and a UNIT
+CLOSED banner when done.

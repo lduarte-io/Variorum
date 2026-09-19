@@ -72,7 +72,8 @@ geometry is uniform: gutter ≥ 150 → the margin CARD (block-top aligned); bel
 BADGE; the panel is every face's door (unchanged). Consequence worth saying out loud: the read
 tier and book Outline gain real margin cards at wide windows for the first time — that is what
 "make use of the whitespace gutter" buys. **Spacing (her "still aren't spaced well"):** cards get
-one vertical rhythm — top-aligned to the block's FIRST LINE (not the frame's top), a fixed inner
+one vertical rhythm — top-aligned to the block's FIRST LINE (not the frame's top; BELOW the
+callout glyph where the block wears one — §3's R-13u3-3 stack, at every width), a fixed inner
 pad, a minimum air between stacked neighbours so two commented blocks' cards never abut; the
 card stops short of the drag-handle lane as today. Built to captures; taste details PROVISIONAL.
 
@@ -91,23 +92,25 @@ restore) and speaks through the status seam's classed doors. Margin cards stay R
 open the panel — comment editing has ONE home (no second live-text mechanism beside the page;
 P-3's spirit).
 
-## §3 The edges (each decided here or asked below)
+## §3 The edges — RULED 2026-09-18 (all four asked at the kickoff sitting; her answers verbatim)
 
-1. **The narrow gutter — what yields, in what order?** When the gutter cannot hold a card
-   (< 150): the badge. When it cannot hold the badge BESIDE a glyphed callout (Write at
-   `minGutter` = 28 — row 50's first residual): **proposed — the badge and the glyph STACK
-   vertically** (glyph at the first line, badge just below it), so nothing is suppressed and
-   nothing touches text at any width. Below even that (a gutter under the badge's own 36):
-   badge alone, clamped to the page edge, never over prose. → **HER CALL (Q1).**
-2. **The multi-glyph callout answer** (row 50's second residual — "what does 'a leading glyph'
-   mean" is hers): **proposed — one grapheme**: `promptEmoji` keeps the first grapheme and the
-   field says so; the box stays fixed and the gutter arithmetic stays constant. The alternative
-   (a measured box) makes the card change shape with the glyph. → **HER CALL (Q2).**
-3. **The inline-comments SETTING (R7's tinted strips)** widens the inter-block gap — it moves
-   text VERTICALLY by design. Reading of her law: it governs the DEFAULT presentation; the
-   inline setting is a deliberate opt-in and survives unchanged. → **HER CALL (Q3).**
-4. **In-place editing on the margin card itself:** NOT built — the card is a read face and a
-   door; editing lives in the panel (§2 D). One live-text home. → **HER CALL (Q4).**
+1. **The gutter arrangement — RULED, and STRONGER than proposed (R-13u3-3, her words verbatim:
+   *"stack them at any width, I think it would look better."*).** When a block carries BOTH a
+   callout glyph and a comment face, they STACK VERTICALLY AT EVERY WIDTH — the glyph at the
+   block's first line, the comment face (card where ≥ 150, badge below that) directly under it —
+   one uniform arrangement, never side-by-side jockeying, never anything over text. A block with
+   only one decoration shows it at the first line. Below even badge room, the badge alone clamps
+   to the page edge, never over prose. *(This supersedes the memo's proposed narrow-only
+   stacking and retires `commentClearance`'s horizontal-clearance arithmetic — the faces no
+   longer compete for the same row.)*
+2. **The multi-glyph callout answer — RULED "One grapheme (Recommended)" (R-13u3-4):**
+   `promptEmoji` keeps the first grapheme and the field says so; the box stays fixed and the
+   gutter arithmetic stays constant. (Row 50's second residual DISSOLVES.)
+3. **The inline-comments SETTING — RULED "Survives as opt-in (Recommended)" (R-13u3-5):** the
+   law governs the DEFAULT (margin) presentation; the inline-tinted strips are her explicit
+   opt-in and stay unchanged, vertical gap and all.
+4. **Comment editing — RULED "Panel only (Recommended)" (R-13u3-6):** the margin card stays a
+   read face and a door; editing lives in the panel (§2 D). One live-text home.
 5. **Refusals/undo:** unchanged — comment CRUD is the existing ops (`addBlockComment` family,
    seal refusals intact); nothing structural, no undo story changes. The panel's editor look
    changes no semantics.
