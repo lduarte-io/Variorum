@@ -1268,8 +1268,8 @@ capture box that has the caret.
 | # | piece | status |
 |---|---|---|
 | 0 | the record + LIVE STATUS | **DONE** |
-| 1 | `CaptureKeys` — the ONE pure ⏎/⇧⏎ rule + its pins | PENDING |
-| 2 | `CaptureTextView` — the ONE Mac capture surface (both hosts compose it) + its hosted-window key pins | PENDING |
+| 1 | `CaptureKeys` — the ONE pure ⏎/⇧⏎ rule + its pins | **DONE** (5 cells green) |
+| 2 | `CaptureTextView` — the ONE Mac capture surface (both hosts compose it) + its hosted-window key pins | **DONE** (5 cells green, real `NSEvent`s through production `keyDown`) |
 | 3 | the QUICK NOTE pad on the one rule (⏎ files · ⇧⏎ paragraph; the refusal that keeps her text) | PENDING |
 | 4 | the SHELF/LIBRARY quick-entry bar on the same rule (the 13l text-preserving refusal byte-preserved) | PENDING |
 | 5 | the red-on-old measurement (the one defect-shaped row: a refused quick-note filing destroyed the capture) | PENDING |
