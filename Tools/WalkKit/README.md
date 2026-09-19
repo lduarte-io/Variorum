@@ -64,3 +64,20 @@ swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
 - **The appearance (follow system · light · dark) is a LOCAL `UserDefaults` preference**, so a walk can stage
   it without touching the UI: `defaults write io.lduarte.Variorum.debug appearanceChoice dark|light|system`
   then relaunch (restore it afterwards). The VOICE is a synced store setting and must be clicked in Settings.
+
+## Walker facts from the 13u3 UNIT D walk (2026-09-19)
+
+- **NEVER quit your dev instance with a blind `⌘Q` keystroke.** `osascript … keystroke "q" using
+  command down` goes to whatever is FRONTMOST, and during this walk one of those presses ended the
+  author's own `/Applications/Variorum.app` session (her container's hourly backups stop between
+  04:19 and 05:19; no crash report; her store file untouched). Quit YOUR instance by identity:
+  `osascript -e 'tell application id "io.lduarte.Variorum.debug" to quit'`, and re-check
+  `pgrep -fl 'Variorum.app/Contents/MacOS'` after every quit — the standing rule is that her
+  instance is never quit, and a keystroke cannot tell two windows apart.
+- A SwiftUI `.popover` IS captured by `screencapture -l <window id>` of the MAIN window: it draws
+  inside the window's frame here, so no separate layer hunt is needed (unlike the quick-note pad).
+- `sips --cropOffset <Y> <X>` takes the offsets in that order (top, then left) — the opposite of
+  the (x, y) reflex — and a crop that lands outside the image returns a blank PNG rather than an
+  error, which reads exactly like "the surface drew nothing".
+- The dev app's Settings window opens at **560 × 548 at (200, 120)** and its voice control sits at
+  window-relative (486, 160) / (414, 160) for Study / Terminal — click points, not pixels.
