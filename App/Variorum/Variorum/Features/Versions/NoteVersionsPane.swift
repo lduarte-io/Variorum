@@ -59,9 +59,19 @@ final class NoteVersionsModel {
     /// classed where the message is produced, never guessed from its text.
     private(set) var status: TrayViewModel.Status?
 
+    /// **The restore's ask, with what the road would take** (13u3 UNIT E,
+    /// item 15(a)): the moment she pressed, and the note's cost READ AT ASK
+    /// TIME — so the confirm's numbers are the note's as it stands, never a
+    /// listing's memory of it.
+    struct PendingRestore: Equatable, Identifiable {
+        let item: Queries.NoteVersionItem
+        let cost: Queries.RestoreCost
+        var id: String { item.postID }
+    }
+
     /// The restore's ask. A VALUE the dialog PRESENTS, never a flag it reads
     /// back (13l Act 2's rule, stated at `NoteDeleteConfirm`).
-    var pendingRestore: Queries.NoteVersionItem?
+    var pendingRestore: PendingRestore?
     /// …and the delete's, for the same reason.
     var pendingDelete: Queries.NoteVersionItem?
 
@@ -106,6 +116,15 @@ final class NoteVersionsModel {
 
     func save() async {
         await run { try await VersionActs.save(session: $0, postID: $1) }
+    }
+
+    /// **The ask** — one bounded read, then the dialog. The cost is the
+    /// NOTE's, so pressing Restore on any row asks the same question of the
+    /// store (`VersionActs.restoreCost`).
+    func askRestore(_ item: Queries.NoteVersionItem) async {
+        pendingRestore = PendingRestore(
+            item: item,
+            cost: await VersionActs.restoreCost(session: session, postID: postID))
     }
 
     func restore(_ item: Queries.NoteVersionItem) async {
@@ -243,11 +262,11 @@ struct NoteVersionsPane: View {
             presenting: model.pendingRestore
         ) { pending in
             Button(VersionsPath.restoreVerb, role: .destructive) {
-                Task { await model.restore(pending) }
+                Task { await model.restore(pending.item) }
             }
             Button("Cancel", role: .cancel) { model.pendingRestore = nil }
-        } message: { _ in
-            Text(VersionsPath.restoreConfirmDetail)
+        } message: { pending in
+            Text(VersionsPath.restoreConfirmDetail(pending.cost))
         }
         .confirmationDialog(
             RecoveryCopy.deleteNoteConfirmTitle,
@@ -292,9 +311,11 @@ struct NoteVersionsPane: View {
                     .controlSize(.small)
                     .help("Reads this moment here, without changing the note")
                 Spacer(minLength: 8)
-                Button(VersionsPath.restoreVerb) { model.pendingRestore = item }
-                    .controlSize(.small)
-                    .help(VersionsPath.restoreHelp)
+                Button(VersionsPath.restoreVerb) {
+                    Task { await model.askRestore(item) }
+                }
+                .controlSize(.small)
+                .help(VersionsPath.restoreHelp)
                 Button(VersionsPath.promoteVerb) { Task { await model.promote(item) } }
                     .controlSize(.small)
                     .help(VersionsPath.promoteHelp)

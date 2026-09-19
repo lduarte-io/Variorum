@@ -1952,7 +1952,7 @@ KnownIssues row *"A note's saved VERSIONS ride a BLOCK-level anchor"* (owner 13w
 | 0 | the record + LIVE STATUS | **DONE** |
 | 1 | THE PROBE — does the restore actually strand an ancestor? (traced, measured, recorded) | **DONE** — it does NOT, and the mechanism is step 1's own copy (below) |
 | 2 | core — the bounded read + its pins (incl. the anti-drift pin against `PurgeFamily`) | **DONE** (5 cells green; the versions/purge/tray neighbours 76/76 green beside them) |
-| 3 | the confirm — the copy + the ask road + pins (red-on-old where the shipped words are false) | PENDING |
+| 3 | the confirm — the copy + the ask road + pins (red-on-old where the shipped words are false) | **DONE** (3 cells; the red-on-old measured on the shipped words first — the log line is in the record; the suite 15/15 green after) |
 | 4 | the tutorial lesson (b) + its spine pins | PENDING |
 | 5 | QUESTIONS #122 + the next-free marker moved | PENDING |
 | 6 | the walk + captures, the FULL Mac suite, tutorial spine, iOS build, the mobile suite | PENDING |

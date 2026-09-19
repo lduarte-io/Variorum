@@ -226,6 +226,123 @@ struct NoteVersionsPaneTests {
                 "the save-first promise is readable BEFORE the press, not only after")
     }
 
+    // MARK: - 13u3 UNIT E (item 15(a)): the confirm names what it takes
+
+    /// **THE CONFIRM MAY NOT PROMISE MORE THAN A RESTORE KEEPS** — the
+    /// defect-shaped half of item 15(a), and the one cell here that is RED on
+    /// the shipped words.
+    ///
+    /// The sentence said *"so this is never a one-way door"*, which is true of
+    /// the note's WORDS (the version of NOW holds every one of them) and false
+    /// of everything else the Delete Now road takes: the savepoints on the
+    /// outgoing takes, the takes deleted from them still waiting in Block
+    /// History, the comments deleted from them. Those have no road back —
+    /// measured, not argued (`RestoreCostTests`, core). A confirm that calls
+    /// that "never a one-way door" is the kind of sentence her #80(e) ruling
+    /// asked this unit to correct.
+    @Test func theRestoreConfirmNeverPromisesMoreThanTheRestoreKeeps() {
+        let detail = VersionsPath.restoreConfirmDetail
+        #expect(detail.contains("saved as a new version first"))
+        #expect(!detail.lowercased().contains("one-way door"),
+                """
+                the history the road takes has no way back, so the confirm may \
+                not promise there is one
+                """)
+        #expect(detail.contains("none of its words are lost"),
+                "the true promise, said as narrowly as it is true")
+        #expect(!VersionsPath.explainer.lowercased().contains("one-way door"),
+                """
+                …and the pane's standing sentence made the same promise two \
+                inches above the button, so it is corrected with it
+                """)
+    }
+
+    /// **THE CONFIRM NAMES WHAT IT TAKES, IN NUMBERS, AND POINTS AT PROMOTE**
+    /// (item 15(a), her ruling's letter). The ask runs the note's own bounded
+    /// read and the dialog speaks it — so the pause she already ratified now
+    /// carries the one fact it was missing.
+    @Test func theRestoreConfirmCountsWhatTheRoadTakesAndOffersPromote()
+        async throws
+    {
+        try await mounted { session, post, _, _ in
+            let model = NoteVersionsModel(session: session, postID: post)
+            await model.save()
+            let listed = try await session.database.read {
+                try Queries.noteVersions($0, of: post)
+            }
+            model.adopt(listed)
+            let moment = try #require(model.versions.first)
+
+            // Nothing worked in yet ⇒ the confirm is what it always was.
+            await model.askRestore(moment)
+            var pending = try #require(model.pendingRestore)
+            #expect(pending.item.postID == moment.postID)
+            #expect(pending.cost.isEmpty)
+            #expect(VersionsPath.restoreConfirmDetail(pending.cost)
+                == VersionsPath.restoreConfirmDetail,
+                    "an ordinary restore's confirm gains not one word")
+            model.pendingRestore = nil
+
+            // Now she works in the note: two savepoints and a deleted take.
+            let rendered = try #require(try await session.database.read {
+                try Queries.renderPost($0, containerID: post)
+            }.first)
+            let blockID = rendered.blockID
+            let takeID = try #require(rendered.variantID)
+            try await session.runner.run { ops in
+                _ = try ops.commit(takeID, message: "the good wording")
+                _ = try ops.commit(takeID, kind: .auto)
+                let spare = try ops.branchVariant(blockID, from: takeID)
+                try ops.autosave(spare.id, text: "A spare take.", charDelta: 13)
+                try ops.deleteVariant(spare.id)
+            }
+
+            await model.askRestore(moment)
+            pending = try #require(model.pendingRestore)
+            #expect(pending.cost.savedMoments == 2)
+            #expect(pending.cost.deletedTakes == 1)
+            let spoken = VersionsPath.restoreConfirmDetail(pending.cost)
+            #expect(spoken.contains("2 saved moments") && spoken.contains("1 deleted take"),
+                    "numbers, not categories")
+            #expect(spoken.contains("Nothing puts them back."))
+            #expect(spoken.contains(VersionsPath.promoteVerb),
+                    "…and the zero-loss road, by its own verb")
+            #expect(spoken.hasPrefix(VersionsPath.restoreConfirmDetail),
+                    "the promise she ratified still leads the ask")
+        }
+    }
+
+    /// The cost sentence's own grammar, over values rather than a store: one
+    /// of a thing reads as one, several read as several, and the list joins
+    /// the way the app's listings join.
+    @Test func theCostSentenceSaysExactlyWhatIsThereAndNothingElse() {
+        func cost(
+            moments: Int = 0, takes: Int = 0, comments: Int = 0,
+            originals: [String] = [], originalTakes: Int = 0
+        ) -> Queries.RestoreCost {
+            Queries.RestoreCost(
+                outgoingBlocks: 3, savedMoments: moments, deletedTakes: takes,
+                deletedComments: comments, setAsideOriginals: originals,
+                setAsideTakes: originalTakes)
+        }
+
+        #expect(VersionsPath.restoreCostLine(cost()) == nil, "nothing to say")
+        #expect(VersionsPath.restoreCostLine(cost(moments: 1))?
+            .contains("1 saved moment.") == true, "singular, and the list ends there")
+        let three = try? #require(VersionsPath.restoreCostLine(
+            cost(moments: 4, takes: 2, comments: 1)))
+        #expect(three?.contains("4 saved moments, 2 deleted takes and 1 deleted comment")
+            == true, "the app's own listing grain")
+        let stranded = try? #require(VersionsPath.restoreCostLine(
+            cost(originals: ["a", "b"], originalTakes: 5)))
+        #expect(stranded?.contains("2 set-aside originals and their 5 takes") == true,
+                """
+                her ruling's named population — empty for a restore today, and \
+                worded for the day it is not (the mechanism is pinned in core)
+                """)
+        #expect(VersionsPath.restorePromoteInstead.contains("deletes nothing"))
+    }
+
     // MARK: - V2: the confirm's one honest line
 
     /// **THE NOTE-DELETE CONFIRM GAINS ONE LINE, AND NOT A DIALOG** (V2,

@@ -73,6 +73,23 @@ enum VersionActs {
         return VersionsPath.deleted
     }
 
+    /// **What a restore would take that no version holds** — read at ASK time,
+    /// for `versionCount`'s reason below: a confirm is a pause, and the pause
+    /// is about the note as it IS, not as a listing remembered it.
+    ///
+    /// The answer is a property of the NOTE (its outgoing blocks), not of the
+    /// moment being restored, so one read serves whichever row she pressed.
+    /// A read that cannot answer costs nothing rather than blocking the ask —
+    /// the same `?? 0` the count below has always taken, and for the same
+    /// reason: a confirm must still open.
+    static func restoreCost(
+        session: AppSession, postID: String
+    ) async -> Queries.RestoreCost {
+        (try? await session.database.read { db in
+            try Queries.restoreCost(db, of: postID)
+        }) ?? .none
+    }
+
     /// **How many moments go with a note** — read at ASK time, so the confirm's
     /// one honest line is about the note as it is rather than as a listing
     /// remembered it (the R3-1 lesson; a confirm is a pause).

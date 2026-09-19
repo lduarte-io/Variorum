@@ -37,10 +37,14 @@ nonisolated enum VersionsPath {
     /// How copy elsewhere points at the door.
     static let doorPhrase = "Versions in the note menu"
 
+    /// The pane's standing sentence. It made the confirm's own over-promise
+    /// two inches above the button — *"so nothing is ever a one-way door"* —
+    /// and is corrected with it (13u3 UNIT E): the words come back, the
+    /// history does not.
     static let explainer =
         "Whole moments of this note, saved by hand. Opening one reads it; "
         + "restoring makes the note say that again — and saves where it is "
-        + "now first, so nothing is ever a one-way door."
+        + "now first, so none of its words are lost."
 
     static let empty =
         "No saved moments yet. \u{2318}\u{21E7}S saves the whole note as it is "
@@ -109,10 +113,83 @@ nonisolated enum VersionsPath {
     /// blocks and takes do not) — and the ask is where the save-first promise
     /// is readable BEFORE the press rather than only after it.
     static let restoreConfirmTitle = "Make the note say this again?"
+
+    /// **The promise, said as narrowly as it is true** (13u3 UNIT E, item
+    /// 15(a)). This sentence used to end *"so this is never a one-way door"*,
+    /// which is true of the note's WORDS — the version of NOW holds every one
+    /// of them — and false of everything else the Delete Now road takes with
+    /// the outgoing blocks: the savepoints on their takes, the takes deleted
+    /// from them, the comments deleted from them. A copy carries words, never
+    /// the past (the standing rule the tutorial now teaches), so the promise
+    /// says WORDS and the sentence below names the rest.
     static let restoreConfirmDetail =
-        "Where the note is right now is saved as a new version first, so this "
-        + "is never a one-way door. The note keeps its name, its books and "
+        "Where the note is right now is saved as a new version first, so none "
+        + "of its words are lost. The note keeps its name, its books and "
         + "everything that points at it."
+
+    /// **…and what the road takes that no version holds** (item 15(a), her
+    /// #80(e) ratification: *"keep as built — defensible, and the confirm can
+    /// name it"*). Counted at ask time by `Queries.restoreCost`, spoken in
+    /// numbers rather than categories, and pointing at PROMOTE — the zero-loss
+    /// road she confirmed at the sitting: promoting the moment mints it as a
+    /// note of its own and deletes nothing.
+    ///
+    /// Nothing to name ⇒ the confirm is EXACTLY the sentence it has always
+    /// been, which is what keeps the everyday restore unchanged.
+    static func restoreConfirmDetail(_ cost: Queries.RestoreCost) -> String {
+        guard let line = restoreCostLine(cost) else { return restoreConfirmDetail }
+        return restoreConfirmDetail + "\n\n" + line + " " + restorePromoteInstead
+    }
+
+    /// The zero-loss road, named where the loss is named.
+    static let restorePromoteInstead =
+        "Promote instead keeps everything \u{2014} it makes this moment a note "
+        + "of its own and deletes nothing."
+
+    /// The loss itself, in her own grain: what is going, and that nothing
+    /// brings it back. Nil when there is nothing to say.
+    static func restoreCostLine(_ cost: Queries.RestoreCost) -> String? {
+        var pieces: [String] = []
+        if cost.savedMoments > 0 {
+            pieces.append(cost.savedMoments == 1
+                ? "1 saved moment" : "\(cost.savedMoments) saved moments")
+        }
+        if cost.deletedTakes > 0 {
+            pieces.append(cost.deletedTakes == 1
+                ? "1 deleted take" : "\(cost.deletedTakes) deleted takes")
+        }
+        if cost.deletedComments > 0 {
+            pieces.append(cost.deletedComments == 1
+                ? "1 deleted comment" : "\(cost.deletedComments) deleted comments")
+        }
+        // Population 4 — the set-aside originals. Measured empty for a restore
+        // today (the version of NOW's own copy is every outgoing block's
+        // surviving descendant, so nothing strands — `RestoreCost.swift`'s
+        // header carries the mechanism), and named here anyway because her
+        // ruling names it and the zero is one line of the copy loop away from
+        // being a number again.
+        if !cost.setAsideOriginals.isEmpty {
+            let count = cost.setAsideOriginals.count
+            pieces.append(count == 1
+                ? "1 set-aside original and its \(takesPhrase(cost.setAsideTakes))"
+                : "\(count) set-aside originals and their \(takesPhrase(cost.setAsideTakes))")
+        }
+        guard !pieces.isEmpty else { return nil }
+        return "A version holds the words, not the history. Going with these "
+            + "paragraphs, and held by no version: \(list(pieces)). Nothing "
+            + "puts them back."
+    }
+
+    private static func takesPhrase(_ count: Int) -> String {
+        count == 1 ? "1 take" : "\(count) takes"
+    }
+
+    /// "a", "a and b", "a, b and c" — the app's own listing grain.
+    private static func list(_ pieces: [String]) -> String {
+        guard pieces.count > 1 else { return pieces.first ?? "" }
+        return pieces.dropLast().joined(separator: ", ")
+            + " and " + (pieces.last ?? "")
+    }
 
     // MARK: The Trash's version rows (FOUND-ITEM 1)
 
