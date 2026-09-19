@@ -980,3 +980,34 @@ note), List AND Notes modes, both voices, both appearances; captures to
 `notes/plans/13u3-screens/`. Record: **UNIT B RECORD** appended here, LIVE STATUS from the first
 commit, UNIT CLOSED banner, ledger row 3 flipped in the same commit.
 
+
+---
+
+## UNIT B RECORD — NOTE-LIST SKIMMABILITY (opus-implementer, 2026-09-19)
+
+**WHAT I DID NOT DO (the record's first line, per the contract):** I did not touch the gutter
+surfaces or the comments panel (UNITS A1/A2, closed); I did not rework either capture surface's
+⏎/⇧⏎ filing model (UNIT C's); I did not change the 18h/17q stamps arrangement (#103/#104/#105 —
+byte-unharmed, their pins green untouched); I did not build phone faces (the brain is core Domain,
+the phone consumes it at its catch-up); zero `Sync/`, zero `Persistence/`, zero schema, zero
+migrations, marker stays 8.
+
+### LIVE STATUS (written at the start; flipped in the same commit as each piece)
+
+| # | piece | status |
+|---|---|---|
+| 0 | This record + LIVE STATUS | **DONE** |
+| 1 | The BRAIN — `Sources/VariorumCore/Domain/DisplayName.swift` + its edge-case pins | PENDING |
+| 2 | The two facts the card needs — `CatalogHit.profile` · `TimelineItem.profile` (additive, nil-defaulted) | PENDING |
+| 3 | The Library consumers — Notes cards + List rows (one composition, `LibraryCardName`) | PENDING |
+| 4 | The Pool card aligns to the same brain (`PoolCardFace` retires into it) | PENDING |
+| 5 | The title-suggestion chip at capture (QuickEntryBar + QuickNote pad) — or handed to UNIT C with a note | PENDING |
+| 6 | THE WALK (dev-store Debug, both voices, both appearances, her-shaped fixtures) + captures | PENDING |
+| 7 | FINALS (core · FULL Mac suite · tutorial spine · iOS build) + QUESTIONS + ledger row 3 | PENDING |
+
+**The design, decided before the code (so the record is not written backwards):**
+a card LEADS with the explicit title where set; else a JOURNAL-profile note leads with its day (a
+daily entry's date IS its identity); else the note's FIRST WORDS, length-capped at a word edge with
+an ellipsis; else the day; else "Untitled". The words are the app's own markdown DISPLAY text (no
+raw `#`/`**` in a name), the preview line under the lead is the CONTINUATION (nothing said twice),
+and nothing is ever stored or renamed — derived at read time, every time.
