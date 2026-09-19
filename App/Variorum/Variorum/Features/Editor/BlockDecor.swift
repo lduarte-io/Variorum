@@ -291,15 +291,6 @@ nonisolated enum BlockDecor {
         hasCallout ? max(own, calloutLeadingPad(hasGlyph: hasGlyph) + decorAir) : own
     }
 
-    /// **Does this surface need the decoration lane?** (her R-Q4's trigger:
-    /// *"whenever the note has a comment or a callout emoji"*.) Asked of the
-    /// decoration state, which already carries both projections — so the lane
-    /// has no second source of truth.
-    static func needsLane(_ state: State) -> Bool {
-        !state.comments.isEmpty
-            || state.presentations.values.contains { hasLeadingGlyph($0) }
-    }
-
     /// The editing indicator's rect (outline ring or background wash):
     /// the block's lines with the round-2 mockup's air (outline-offset).
     static func indicatorRect(block: CGRect, textLeft: CGFloat, textRight: CGFloat) -> CGRect {
@@ -448,14 +439,6 @@ final class BlockDecorOverlayController {
     /// The drop door: (fromEntry, toBoundary). nil = no handles at all.
     private let onMoveBlock: ((Int, Int) -> Void)?
 
-    /// **The host's "compute the decorations again" door** (17p batch b, the
-    /// walk's finding W-1): called after the decoration lane moves this
-    /// surface's prose column, because every rect this controller drew was
-    /// computed from where the text used to begin. Each of the three hosts
-    /// wires its own model's refresh; a host that reserves no lane never
-    /// sees it called.
-    var onProseColumnChanged: (() -> Void)?
-
     private var seamViews: [SeamLineView] = []
     private var calloutViews: [DecorRectView] = []
     private var emojiLabels: [NSTextField] = []
@@ -476,11 +459,6 @@ final class BlockDecorOverlayController {
                 Task { await model?.moveBlock(fromEntry: from, toBoundary: to) }
             })
         model.decorSink = { [weak self] state in self?.render(state) }
-        // The lane's second pass (W-1): the prose column moved without the
-        // view's frame changing, which is the same consequence as a width
-        // reflow — the decoration geometry is stale and the settle hop's
-        // generation gate must open.
-        onProseColumnChanged = { [weak model] in model?.proseColumnDidChange() }
         // 13e E7: the pointer's presence reaches the model, so the calm
         // page grows geometry exactly while she is pointing at it (and the
         // hover faces — the handle AND the comment invitation — can exist
@@ -561,26 +539,14 @@ final class BlockDecorOverlayController {
     func render(_ state: BlockDecor.State) {
         self.state = state
         guard let textView else { return }
-        // **THE DECORATION LANE** (17p batch b, rows 5–6, her R-Q4). The
-        // surfaces that reserve one are the two CONTAINED ones — the book's
-        // editor and the read tier — and both adopt `DecorLaneSurface`, so
-        // this asks ONE question of whichever it is driving. The question is
-        // answered by the state this render is already holding, so the lane
-        // has no second source of truth and no second trigger.
-        //
-        // **AND WHEN THE COLUMN MOVES, THE DECORATIONS ARE ASKED AGAIN** —
-        // the walk's finding W-1. This render computed every rect from the
-        // OLD `textLeft`; reserving the lane moved it, so without a second
-        // pass the badge stays exactly where it was, on the words. The
-        // refresh is the HOST's (each model has its own door), scheduled for
-        // the next turn so nothing re-enters this render, and it fires only
-        // on a real change — so the second pass writes nothing and the loop
-        // closes after exactly one extra cycle.
-        if let surface = textView as? any DecorLaneSurface,
-           surface.setDecorLane(needed: BlockDecor.needsLane(state)) {
-            let refresh = onProseColumnChanged
-            DispatchQueue.main.async { refresh?() }
-        }
+        // **13u3 UNIT A1 — THE ONE LAW.** There is no door here any more.
+        // 17p batch b's decoration lane stood at exactly this line: a render
+        // asked its surface to MOVE THE PROSE to make room, which needed a
+        // second pass (the W-1 finding) and moved her text (item 20's
+        // reversal). The prose column is now a pure function of the
+        // surface's own width (`ProseGutter`), so a decoration has nothing
+        // to reserve, nothing to release, and no second pass to ask for —
+        // it draws in the room the page already owns.
         let tokens = state.appearance.tokens
         renderCallouts(state, tokens: tokens, in: textView)
         renderSelection(state, tokens: tokens, in: textView)

@@ -171,26 +171,20 @@ final class ReadPostSurfaceCoordinator {
         model.decorSink = { [weak decorController] state in
             decorController?.render(state)
         }
-        // The decoration lane's second pass (17p batch b, the walk's finding
-        // W-1; the door corrected at the ladder's R1-1): the lane moves this
-        // surface's prose column without changing its frame, so
-        // `onWidthChange` never fires — and a lane IS a width reflow, so it
-        // takes the reflow's road (`proseColumnDidChange` → `remeasure`:
-        // the re-wrapped height published, the badges re-read, the
-        // decorations re-sent against the new edge), never the wiring's
-        // re-push door. `pushOverlaysToSinks` re-sent the decorations only
-        // and pushed the badges from stored pre-lane state, so a note that
-        // re-wrapped under the narrower column kept its pre-lane height and
-        // its last lines fell outside the frame.
-        decorController.onProseColumnChanged = { [weak model] in
-            model?.proseColumnDidChange()
-        }
         // Width reflows change wrapping, so height must re-measure —
         // the SHARED width-gated layout hook (13b 1a: the batch-12
         // brain, one copy for every pane surface; replaces this
-        // surface's private frame-notification trigger).
+        // surface's private frame-notification trigger). 13u3 UNIT A1: the
+        // gate is the prose CONTAINER's width now, so a window resize at a
+        // capped column costs no layout here.
         textView.onWidthChange = { [weak model] in
             model?.viewWidthChanged()
+        }
+        // …and when only the GUTTER moved, every decoration's rect is stale
+        // (they are all computed from `textLeft`) while the wrapping is not.
+        // Badges and decorations are re-read; nothing is re-measured.
+        textView.onGutterChange = { [weak model] in
+            model?.proseColumnDidChange()
         }
         // Wiring DELIVERS (MAJOR-C — the read tier's twin of the editor's
         // `pushDecorationsToSink` walk fix): state computed before this

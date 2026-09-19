@@ -437,7 +437,7 @@ not touched; the inline-comments SETTING's tinted strips are unchanged (R-13u3-5
 | # | piece | status |
 |---|---|---|
 | 0 | the record + `13u3-screens/` gitignored | **DONE** |
-| 1 | `ProseGutter` — the ONE gutter brain; both contained surfaces + Write adopt it; `DecorLane` retires | PENDING |
+| 1 | `ProseGutter` — the ONE gutter brain; both contained surfaces + Write adopt it; `DecorLane` retires | **DONE** (`ProseGutterTests` 20/20 green with its two neighbours; `BlockDecorLaneTests` retired INTO it) |
 | 2 | the four HOST cells converted (bleed + preset), the host table proved byte-identical | PENDING |
 | 3 | the decoration geometry: wash hugs the prose, the R-13u3-3 stack, the badge that never covers prose, the card rhythm | PENDING |
 | 4 | the R-13u3-4 one-grapheme guard | PENDING |

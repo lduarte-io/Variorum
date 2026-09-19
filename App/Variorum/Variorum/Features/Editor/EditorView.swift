@@ -534,18 +534,11 @@ struct InlineEditorSurface: NSViewRepresentable {
             self.reportHeight = reportHeight
             badges = BadgeOverlayController(model: model, textView: textView)
             decor = BlockDecorOverlayController(model: model, textView: textView)
-            // The decoration lane's second pass (17p batch b ladder round 1,
-            // R1-1): the model's own door re-reads the decorations against
-            // the moved prose column; the HEIGHT is this coordinator's to
-            // re-report, exactly as on every other trigger here — a lane
-            // narrows the container with no storage edit, and the model's
-            // decoration projections are `@ObservationIgnored`, so no other
-            // road re-measures the re-wrapped text until her next keystroke.
-            let modelDoor = decor?.onProseColumnChanged
-            decor?.onProseColumnChanged = { [weak self] in
-                modelDoor?()
-                self?.remeasure()
-            }
+            // (13u3 UNIT A1: the decoration lane's second pass is GONE with
+            // the lane — a decoration can no longer move this surface's
+            // prose column, so there is no re-report to compose here. A real
+            // WIDTH reflow still re-measures, through `onWidthReflow`.)
+            //
             // Every storage change (typing, projections, structural
             // rewrites) can change the content height; re-measure after
             // the edit settles. Cost: layout validation over a warm

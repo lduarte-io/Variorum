@@ -291,7 +291,7 @@ final class PanePublisher {
 
 // MARK: - The text view
 
-final class PaneTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
+final class PaneTextView: NSTextView, MarkdownFormattable, ProseGutterSurface {
     /// A click that created no selection — the click-to-focus gesture, with
     /// the clicked UTF-16 offset (the read tier seeds the editor's caret
     /// from it; take panes ignore the value).
@@ -567,56 +567,70 @@ final class PaneTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
     @objc private func enclosingScrollDidEndLiveScroll(_ note: Notification) {
         fireConvergenceOccasion()
     }
-    // MARK: - The decoration lane (17p batch b, rows 5-6 - her ruling R-Q4)
+    // MARK: - The prose gutter (13u3 UNIT A1 — her R-13u-9 / item 20)
 
-    /// The lane's own state and arithmetic - the SAME brain the contained
-    /// editor holds (`Surface/DecorLane.swift`), because the batch's walk
-    /// found that the book Outline shows an expanded-but-unfocused note
-    /// through THIS surface (`makeReadSurface`), not through the editor - so
-    /// this is the surface her screenshots were of, and two copies of the
-    /// arithmetic would be the drift class.
+    /// **THIS SURFACE'S HORIZONTAL PLACEMENT — the SAME rule the editor
+    /// holds** (`Surface/ProseGutter.swift`), because the book Outline shows
+    /// an expanded-but-unfocused note through THIS surface
+    /// (`makeReadSurface`) and the focused one through the editor, and two
+    /// copies of the arithmetic would be the drift class.
     ///
-    /// `reserves` is set by `makeReadSurface` alone: a TAKE pane
-    /// (`makeTakeSurface`) hosts no `BlockDecorOverlayController` at all
-    /// (grepped - there are exactly three hosts), so it has no decoration to
-    /// make room for and the whole mechanism stays inert there.
-    private var lane = DecorLaneReservation()
-
-    var reservesDecorLane: Bool {
-        get { lane.reserves }
-        set { lane.reserves = newValue }
+    /// Written by the HOST (`ReadPostView`'s `gutter`, handed down through
+    /// `PaneSurfaceView`), because only the host knows what whitespace it is
+    /// handing the frame. A TAKE pane hosts no decoration controller at all,
+    /// so it simply carries its own shipped 6 pt.
+    var proseGutter: ProseGutter = .contained {
+        didSet {
+            guard proseGutter != oldValue else { return }
+            applyProseGutter()
+        }
     }
 
-    @discardableResult
-    func setDecorLane(needed: Bool) -> Bool {
-        guard let mean = lane.reserve(
-            needed: needed, trailing: EditorTypography.inlineSurfaceInset)
-        else { return false }
-        if abs(textContainerInset.width - mean) > 0.5 {
+    private var placement = ProseGutterPlacement()
+
+    func applyProseGutter() {
+        guard let mean = placement.place(gutter: proseGutter, viewWidth: bounds.width)
+        else { return }
+        if abs(textContainerInset.width - mean) > 0.01 {
             textContainerInset = NSSize(width: mean, height: textContainerInset.height)
         }
-        return true
     }
 
-    /// Overridden only while a lane is reserved (see the editor's twin for
-    /// why this is not a TextKit 1 downgrade trigger).
+    /// Overridden once a real width has been placed (see the editor's twin
+    /// for why this is not a TextKit 1 downgrade trigger).
     override var textContainerOrigin: NSPoint {
-        guard let x = lane.originX else { return super.textContainerOrigin }
-        return NSPoint(x: x, y: super.textContainerOrigin.y)
+        guard placement.isPlaced else { return super.textContainerOrigin }
+        return NSPoint(x: placement.originX, y: super.textContainerOrigin.y)
     }
 
-    /// The prose column - ONE derivation, identical to the shipped
-    /// arithmetic on a surface with no lane.
+    /// The prose column — ONE derivation, and a pure function of the view's
+    /// width since 13u3: no decoration can move either edge.
     var proseLeft: CGFloat { textContainerOrigin.x }
 
     var proseRight: CGFloat {
-        lane.proseRight(bounds: bounds.width, symmetricInset: textContainerInset.width)
+        placement.isPlaced
+            ? placement.proseRight(bounds: bounds.width)
+            : bounds.width - textContainerInset.width
     }
 
-    /// Fires when layout gives the view a NEW width (batch 12 — the
-    /// clipped-take fix's trigger; width-gated so height publishes can't
-    /// loop through it).
+    /// Fires when layout gives the view a NEW MEASURE — the prose
+    /// CONTAINER's width, not the view's frame (batch 12 — the clipped-take
+    /// fix's trigger; width-gated so height publishes can't loop through it).
+    ///
+    /// **13u3 UNIT A1 — the gate moved from the frame to the container**
+    /// (the memo §2 A rider). A gutter-placed surface's frame now spans its
+    /// host's whole width while the prose column is capped, so at any window
+    /// wider than the column a resize moves the FRAME and not the MEASURE:
+    /// gating on the frame would re-measure (a full `ensureLayout` over the
+    /// post) on every drag of a window edge for text that cannot have
+    /// re-wrapped. What such a resize DOES move is where the prose starts —
+    /// that is `onGutterChange` below, which costs no layout.
     var onWidthChange: (() -> Void)?
+    /// Fires when the prose column MOVED without changing width — the
+    /// gutter grew or shrank around an unchanged measure. Every decoration's
+    /// rect is computed from `textLeft`, so they must be re-read; nothing
+    /// re-wrapped, so nothing is re-measured.
+    var onGutterChange: (() -> Void)?
     /// Fires on every SAME-WIDTH layout pass (13c 1F — A47, the take-card
     /// gap): the frame must hug the pane's CURRENT measurement from BOTH
     /// sides, and before this hook nothing ever re-checked it — every
@@ -632,7 +646,9 @@ final class PaneTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
     /// the loop terminates by construction: a corrective publish reframes
     /// the view to the measurement, and the next pass measures equal.
     var onLayoutPass: (() -> Void)?
-    private var lastLaidOutWidth: CGFloat = -1
+    /// The prose column this view last laid out at — `(leading edge, width)`
+    /// in the view's own space. `-1` is "never laid out".
+    private var lastLaidOutColumn: (left: CGFloat, width: CGFloat) = (-1, -1)
     /// Observation seams (13c 1G — A47b): how many layout passes this view
     /// has actually received, by branch. The 1F fix's trigger question is
     /// "does production ever deliver a same-width pass to an idle card?" —
@@ -651,13 +667,24 @@ final class PaneTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
     }
 
     override func layout() {
+        // 13u3 UNIT A1: the container is placed for THIS width before the
+        // pass lays anything out, so the pass never measures against a
+        // stale column. Change-gated inside the placement.
+        applyProseGutter()
         super.layout()
-        if bounds.width != lastLaidOutWidth {
-            lastLaidOutWidth = bounds.width
+        let column = (left: proseLeft, width: max(0, proseRight - proseLeft))
+        if abs(column.width - lastLaidOutColumn.width) > 0.01 {
+            lastLaidOutColumn = column
             widthPassesRun += 1
             onWidthChange?()
+        } else if abs(column.left - lastLaidOutColumn.left) > 0.01 {
+            // The gutter moved around an unchanged measure: the decorations
+            // are stale, the wrapping is not (13u3 UNIT A1).
+            lastLaidOutColumn = column
+            sameWidthPassesRun += 1
+            onGutterChange?()
         } else {
-            // Same width: the divergence check (A47). A width pass already
+            // Same column: the divergence check (A47). A measure pass already
             // remeasures unconditionally, so the two branches never double
             // a measurement in one pass.
             sameWidthPassesRun += 1
@@ -709,6 +736,10 @@ final class PaneTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
     static func makeSurface(inset: CGFloat, allowsUndo: Bool) -> PaneTextView {
         let view = PaneTextView(usingTextLayoutManager: true)
         precondition(view.textLayoutManager != nil, "TK2 opt-in failed at construction")
+        // 13u3 UNIT A1: the shipped symmetric inset, expressed as the one
+        // rule — byte-identical for every surface this factory makes, and
+        // the host overwrites it where it has whitespace to hand over.
+        view.proseGutter = ProseGutter(maxColumn: nil, minGutter: inset, centred: false)
         view.isEditable = false
         view.isSelectable = true
         view.isRichText = false
@@ -758,15 +789,10 @@ extension PaneTextView {
     /// The read tier's configuration (non-editable always; the container
     /// sizes it; selection + plain-click per the ratified read contract).
     static func makeReadSurface() -> PaneTextView {
-        let view = makeSurface(inset: EditorTypography.inlineSurfaceInset, allowsUndo: false)
-        // 17p batch b (rows 5-6, her R-Q4): the read tier is a CONTAINED
-        // surface - its prose starts 8 pt from its own edge and it hosts the
-        // shared decoration controller, so it is one of the two surfaces
-        // whose badge and callout glyph had nowhere to stand. The batch's
-        // WALK found it: an expanded-but-unfocused note in the book Outline
-        // renders THIS view, which is what her screenshots showed.
-        view.reservesDecorLane = true
-        return view
+        // 13u3 UNIT A1: born `.contained` (the shipped 8 pt each side); the
+        // HOST hands it a placement with real gutter room where it has
+        // whitespace to give — `ReadPostView`'s `gutter`, per host cell.
+        makeSurface(inset: EditorTypography.inlineSurfaceInset, allowsUndo: false)
     }
 
     /// How far a take pane insets its text from its own frame. **Named

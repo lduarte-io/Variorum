@@ -13,7 +13,7 @@ import AppKit
 import VariorumCore
 
 @MainActor
-final class EditorTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
+final class EditorTextView: NSTextView, MarkdownFormattable, ProseGutterSurface {
     /// Set while a bulk-entry-classed insertion is being applied — a
     /// clipboard PASTE or a text DROP (author-ratified contract item 7,
     /// Phase 9: a drop into the open tail is bulk entry exactly like paste —
@@ -390,75 +390,60 @@ final class EditorTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
         onLayoutSettle?()
     }
 
-    /// Phase 13, C1 (R9 — margins are sacred): the detail editor centers a
-    /// bounded prose column by widening `textContainerInset` with the
-    /// window; nil (the inline editor) keeps the fixed inset — its column
-    /// is bounded by the book view's SwiftUI frame instead.
-    var maxColumnWidth: CGFloat? {
-        didSet { updateGutters() }
+    // MARK: - The prose gutter (13u3 UNIT A1 — her R-13u-9 / item 20)
+
+    /// **THIS SURFACE'S HORIZONTAL PLACEMENT — the ONE rule**
+    /// (`Surface/ProseGutter.swift`, whose doc carries the whole design and
+    /// the per-host proofs). Write's full editor holds `.write`; the
+    /// contained (book) editor holds whatever its host hands it. It replaces
+    /// BOTH of this class's former horizontal authorities — `maxColumnWidth`
+    /// + `updateGutters` (Write's centring rule) and 17p batch b's
+    /// `DecorLaneReservation` (the decoration lane she reversed) — so the
+    /// "two writers of one inset" precondition that used to stand here has
+    /// nothing left to guard: there is one writer, and no decoration can
+    /// reach it.
+    var proseGutter: ProseGutter = .contained {
+        didSet {
+            guard proseGutter != oldValue else { return }
+            applyProseGutter()
+        }
     }
 
-    // MARK: - The decoration lane (17p batch b, rows 5–6 — her ruling R-Q4)
+    private var placement = ProseGutterPlacement()
 
-    /// The lane's own state and arithmetic — ONE brain, shared with the read
-    /// tier's `PaneTextView` (`Surface/DecorLane.swift`, whose doc carries
-    /// the whole design and the three-surface sweep). `reserves` is set by
-    /// `makeInlineEditor`: the CONTAINED editor is the surface whose prose
-    /// starts 8 pt from its own edge, and 8 pt is where the decorations were
-    /// landing on the words. The full-document editor leaves it false, so
-    /// every line below is inert there.
-    private var lane = DecorLaneReservation()
-
-    /// The opt-in — written by the factory (`makeInlineEditor` alone), read
-    /// by the pins and the sweep table.
-    var reservesDecorLane: Bool {
-        get { lane.reserves }
-        set { lane.reserves = newValue }
-    }
-
-    /// Reserve (or release) the lane. Returns true when the prose column
-    /// actually moved — the caller's cue to have the decorations computed
-    /// again (the walk's finding W-1: the render that reserves the lane is
-    /// working from the OLD `textLeft`, so without a second pass the badge
-    /// stays exactly where it was, on the words).
-    @discardableResult
-    func setDecorLane(needed: Bool) -> Bool {
-        guard let mean = lane.reserve(
-            needed: needed, trailing: EditorTypography.inlineSurfaceInset)
-        else { return false }
-        if abs(textContainerInset.width - mean) > 0.5 {
+    /// Re-place the container for the current bounds. Change-gated inside
+    /// `ProseGutterPlacement.place`, so a settled surface writes nothing on
+    /// a layout pass that did not move it.
+    private func applyProseGutter() {
+        guard let mean = placement.place(gutter: proseGutter, viewWidth: bounds.width)
+        else { return }
+        if abs(textContainerInset.width - mean) > 0.01 {
             textContainerInset = NSSize(width: mean, height: textContainerInset.height)
         }
-        return true
     }
 
-    /// The container's origin — overridden ONLY while a lane is reserved, so
-    /// the prose sits at the leading inset rather than at the symmetric mean.
+    /// The container's origin — the placement's leading edge.
     ///
     /// This is `NSTextView`'s documented customization point for exactly this
     /// (an asymmetric text container placement) and it is not a TextKit 1
     /// API — no `NSLayoutManager`, no TK1-era drawing override, so it is not
     /// a silent-downgrade trigger (TEXTKIT2_NOTES §4.2). The fallback canary
-    /// is asserted silent over a laned surface in
-    /// `BlockDecorLaneTests.aLanedSurfaceStaysOnTextKit2`.
+    /// is asserted silent over a gutter-placed surface in
+    /// `ProseGutterTests.aGutteredSurfaceStaysOnTextKit2`.
     override var textContainerOrigin: NSPoint {
-        guard let x = lane.originX else { return super.textContainerOrigin }
-        return NSPoint(x: x, y: super.textContainerOrigin.y)
+        guard placement.isPlaced else { return super.textContainerOrigin }
+        return NSPoint(x: placement.originX, y: super.textContainerOrigin.y)
     }
 
-    /// **THE PROSE COLUMN, in this view's own space — ONE derivation.**
-    ///
-    /// The decoration pass used to read `textContainerOrigin.x` and
-    /// `bounds.width - textContainerInset.width` separately; the second is
-    /// wrong the moment the insets are asymmetric. On a symmetric surface
-    /// these two are IDENTICAL to what it read before — `textContainerOrigin
-    /// .x == textContainerInset.width`, and the trailing inset IS that same
-    /// number — so every shipped decoration geometry is unchanged by
-    /// identity rather than by luck.
+    /// **THE PROSE COLUMN, in this view's own space — ONE derivation**, and
+    /// since 13u3 a pure function of the view's width: no decoration can
+    /// move either edge (the memo's one law, made structural).
     var proseLeft: CGFloat { textContainerOrigin.x }
 
     var proseRight: CGFloat {
-        lane.proseRight(bounds: bounds.width, symmetricInset: textContainerInset.width)
+        placement.isPlaced
+            ? placement.proseRight(bounds: bounds.width)
+            : bounds.width - textContainerInset.width
     }
 
     /// **TYPEWRITER ROOM — A22, rebuilt (QoL round 2026-07-29, L5).** The
@@ -507,7 +492,7 @@ final class EditorTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
         guard typewriterRoom > 0 else {
             let widthChanged = width != frame.size.width
             super.setFrameSize(NSSize(width: width, height: proposedHeight))
-            updateGutters()
+            applyProseGutter()
             if widthChanged { onWidthReflow?() }
             return
         }
@@ -522,7 +507,7 @@ final class EditorTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
         let widthChanged = size.width != frame.size.width
         appliedHeight = size.height
         super.setFrameSize(size)
-        updateGutters()
+        applyProseGutter()
         if widthChanged { onWidthReflow?() }
     }
 
@@ -602,26 +587,6 @@ final class EditorTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
         // the view to the caret — β1's clearance is typing's alone.
         guard !suppressesCaretFollow else { return }
         (enclosingScrollView as? TypewriterScrollView)?.keepCaretClearance(in: self)
-    }
-
-    private func updateGutters() {
-        guard let maxColumnWidth else { return }
-        // The gutter rule and the decoration lane are TWO writers of one
-        // inset, and a surface takes exactly one (17p batch b ladder round
-        // 1, the sanity pass's observation (a)): the lane brain answers
-        // `originX`/`proseRight` from its own state and never reads the
-        // view's inset back, so a laned surface whose gutter rule moved the
-        // container would keep its decorations self-consistent with the
-        // TEXT somewhere else. Today no surface has both (`maxColumnWidth`
-        // is assigned only in `makeEditor`, which reserves no lane); this
-        // makes that a fact by construction rather than by census.
-        precondition(!lane.reserves,
-                     "a laned surface's inset is the decoration lane's — it cannot also carry a gutter rule")
-        let inset = EditorTypography.gutterInset(
-            viewWidth: bounds.width, maxColumn: maxColumnWidth)
-        if abs(textContainerInset.width - inset) > 0.5 {
-            textContainerInset = NSSize(width: inset, height: textContainerInset.height)
-        }
     }
 
     /// The pool-drag pasteboard type (Phase 10 Step 7): the payload is the
@@ -899,9 +864,9 @@ final class EditorTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
         precondition(textView.textLayoutManager != nil, "TK2 opt-in failed at construction")
 
         // R9 (Phase 13 C1): generous top air + the centered bounded column
-        // (the horizontal inset is dynamic — updateGutters).
+        // (the horizontal inset is dynamic — `ProseGutter.write`).
         textView.textContainerInset = NSSize(width: EditorTypography.minGutter, height: 24)
-        textView.maxColumnWidth = EditorTypography.maxColumnWidth
+        textView.proseGutter = .write
         textView.isEditable = true
         textView.isSelectable = true
         textView.isRichText = false
@@ -969,11 +934,12 @@ final class EditorTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
         textView.textContainerInset = NSSize(
             width: EditorTypography.inlineSurfaceInset,
             height: EditorTypography.inlineSurfaceInset)
-        // 17p batch b (rows 5–6, her R-Q4): THIS is the surface whose prose
-        // starts 8 pt from its own edge, so this is the surface whose block
-        // decorations had nowhere to stand. The lane is reserved only while
-        // the note carries a comment or a callout glyph (`setDecorLane`).
-        textView.reservesDecorLane = true
+        // 13u3 UNIT A1: a CONTAINED editor's placement is its HOST's to
+        // choose (`InlineEditorSurface`'s `gutter`), because only the host
+        // knows what whitespace it is handing the frame. Born `.contained` —
+        // the shipped 8 pt each side — so a host that hands it nothing
+        // behaves exactly as it always did.
+        textView.proseGutter = .contained
         textView.isEditable = true
         textView.isSelectable = true
         textView.isRichText = false

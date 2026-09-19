@@ -269,38 +269,39 @@ final class ReadPostViewModel {
     func remeasure() {
         guard let textView else { return }
         let height = PaneMeasurement.height(of: textView)
-        lastMeasuredWidth = textView.bounds.width
+        // 13u3 UNIT A1: the MEASURE is the prose container's width, not the
+        // view's frame — the frame now spans the host's whole pane while the
+        // column is capped, and only the column can change the wrapping.
+        lastMeasuredWidth = max(0, textView.proseRight - textView.proseLeft)
         if abs(contentHeight - max(height, 1)) > 0.5 {
             contentHeight = max(height, 1)
         }
         refreshBadges()
     }
 
-    /// Re-measures when the container reflowed the view's width (the
-    /// height depends on wrapping).
+    /// Re-measures when the container reflowed the prose column's WIDTH (the
+    /// height depends on wrapping, and nothing else here does).
     func viewWidthChanged() {
-        guard let textView, textView.bounds.width != lastMeasuredWidth else { return }
+        guard let textView else { return }
+        let column = max(0, textView.proseRight - textView.proseLeft)
+        guard abs(column - lastMeasuredWidth) > 0.5 else { return }
         remeasure()
     }
 
-    /// **THE PROSE COLUMN MOVED WITHOUT THE FRAME CHANGING** (17p batch b
-    /// ladder round 1, R1-1): the decoration lane reserved or released its
-    /// room, which narrows or widens the CONTAINER while the view's bounds
-    /// stay put — so `viewWidthChanged` never fires, yet the text has
-    /// re-wrapped exactly as it does under a width reflow. A lane IS a
-    /// reflow (the batch's own W-1 finding), so it takes a reflow's whole
-    /// road: `remeasure` publishes the new height AND re-reads the ⑂
-    /// badges' fragment positions AND re-sends the decoration state against
-    /// the new edge (`remeasure` → `refreshBadges` → `refreshDecor`; the
-    /// decor gate opens on its own because the state's `textLeft` moved).
-    /// The door this replaced — `pushOverlaysToSinks` — re-sent the
-    /// decorations only, and pushed the badges from STORED pre-lane state,
-    /// so a note whose paragraphs re-wrap under the 64 pt-narrower column
-    /// kept its pre-lane `contentHeight` and its last lines fell outside
-    /// the frame (`ReadPostView` frames the surface at `contentHeight`).
-    /// Pinned through the production loop in `BlockDecorLaneTests`.
+    /// **THE PROSE COLUMN MOVED WITHOUT ITS WIDTH CHANGING** (13u3 UNIT A1 —
+    /// the gutter grew or shrank around an unchanged measure, which is what
+    /// a window resize does to a capped column). Every decoration's rect is
+    /// computed from `textLeft`, so the badges and the decoration state are
+    /// re-read against the new edge; nothing re-wrapped, so no height is
+    /// measured and no layout is asked for.
+    ///
+    /// *(It replaces 17p batch b's door of the same name, which existed
+    /// because the decoration LANE moved the container under a fixed frame.
+    /// The lane is retired — a decoration cannot move this column at all
+    /// now — and what is left is the honest other half: the frame moved and
+    /// the column did not.)*
     func proseColumnDidChange() {
-        remeasure()
+        refreshBadges()
     }
 
     /// Badges for fanned blocks — the whole post (a read view is fully laid

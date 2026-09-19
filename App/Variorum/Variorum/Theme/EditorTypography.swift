@@ -252,62 +252,28 @@ nonisolated enum EditorTypography {
     /// and that arithmetic was previously a literal in three places.
     static let inlineSurfaceInset: CGFloat = 8
 
-    /// **THE DECORATION LANE** — 17p batch b, rows 5–6, her ruling **R-Q4**
-    /// (*"the callout goes on top of the comment badge which is on top of the
-    /// text. not good it should move it. and in book view the comment thing
-    /// needs to be moved or only accessible on the left because it's blocking
-    /// the text"*; she picked *"Reserve a left lane; emoji inside the
-    /// frame"*).
-    ///
-    /// A CONTAINED surface's prose starts `inlineSurfaceInset` (8) from its
-    /// own left edge, and every block decoration places itself LEFT of that
-    /// edge and clamps at 2 — so in the book's editor the comment badge and
-    /// the callout's glyph both landed on the first characters, and on each
-    /// other. The lane is the room they need, reserved on the LEFT only
-    /// (the trailing inset is untouched: the measure narrows by the lane,
-    /// which is the point — the margins stay sacred).
-    ///
-    /// **THE ARITHMETIC, so a future edit can check it rather than guess**
-    /// (all four numbers are `BlockDecor`'s, named there):
-    /// ```
-    ///    2  the view's own edge margin (every decoration's clamp)
-    ///   32  commentBadgeSize.width      — the count badge, a real target
-    ///    4  decorAir                    — badge → callout card
-    ///   12  calloutGutterPad            — the card's shipped horizontal air
-    ///    4  calloutGlyphPad             — the glyph's inset inside the card
-    ///   18  calloutGlyphBox.width       — the leading glyph's own room
-    ///   ——
-    ///   72  the prose's left edge on a commented callout carrying a glyph
-    ///  - 8  inlineSurfaceInset (the surface's own)
-    ///   ——
-    ///   64  commentLane
-    /// ```
-    /// It is bigger than the *"~40 pt"* her ruling estimates because that
-    /// estimate counted the BADGE alone (32 + air); the same ruling also says
-    /// the glyph moves inside the frame and *"the frame widens to hold it"*,
-    /// and the widened frame's leading pad stands between the badge and the
-    /// text. 64 is the smallest width at which all three of her clauses are
-    /// true at once — badge in the lane, glyph inside the frame, nothing over
-    /// the text — and it is reserved only while the note carries a comment or
-    /// a callout glyph.
-    static let commentLane: CGFloat = 64
-
-    /// **THE ONE DECISION** (review focus F-3): a contained surface's LEADING
-    /// prose inset. `needsLane` is true when the note carries anything that
-    /// decorates a block's left margin — a comment or a callout glyph — which
-    /// is exactly her ruling's trigger.
-    static func inlineInset(needsLane: Bool) -> CGFloat {
-        needsLane ? inlineSurfaceInset + commentLane : inlineSurfaceInset
-    }
+    // (**THE DECORATION LANE is RETIRED** — 13u3 UNIT A1. 17p batch b's
+    //  `commentLane` (64) and `inlineInset(needsLane:)` made a CONTAINED
+    //  surface's prose start 72 pt in whenever the note carried a comment or
+    //  a callout glyph, which is the measure-moving she reversed on
+    //  2026-09-14 (the master plan's item 20 / R-13u-9; QUESTIONS #102's
+    //  whole option space went with it). The room a decoration needs is the
+    //  page's own whitespace now, reached by growing the surface's FRAME
+    //  rather than by narrowing her text — `Surface/ProseGutter.swift`.)
 
     /// The horizontal text-container inset that centers a `maxColumn`-wide
     /// prose column in `viewWidth`, never dropping below `minGutter`.
+    ///
+    /// 13u3 UNIT A1: the arithmetic moved to `ProseGutter` (the one rule for
+    /// every surface); this stays as the name Write's own geometry has been
+    /// called by since Phase 13 C1, and forwards.
     static func gutterInset(
         viewWidth: CGFloat,
         maxColumn: CGFloat = maxColumnWidth,
         minGutter: CGFloat = minGutter
     ) -> CGFloat {
-        max(minGutter, ((viewWidth - maxColumn) / 2).rounded(.down))
+        ProseGutter(maxColumn: maxColumn, minGutter: minGutter, centred: true)
+            .insets(viewWidth: viewWidth).leading
     }
 }
 
