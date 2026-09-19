@@ -91,7 +91,10 @@ struct NoteWindowView: View {
                     .id(postID)
             } else {
                 ScrollView {
-                    ReadPostView(session: session, postID: postID)
+                    // 13u3 UNIT A1: the workspace pane's twin — the 20 pt
+                    // padding becomes the surface's gutter, the prose does
+                    // not move.
+                    ReadPostView(session: session, postID: postID, gutter: .pane)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 14)

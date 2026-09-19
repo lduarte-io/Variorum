@@ -438,7 +438,7 @@ not touched; the inline-comments SETTING's tinted strips are unchanged (R-13u3-5
 |---|---|---|
 | 0 | the record + `13u3-screens/` gitignored | **DONE** |
 | 1 | `ProseGutter` — the ONE gutter brain; both contained surfaces + Write adopt it; `DecorLane` retires | **DONE** (`ProseGutterTests` 20/20 green with its two neighbours; `BlockDecorLaneTests` retired INTO it) |
-| 2 | the four HOST cells converted (bleed + preset), the host table proved byte-identical | PENDING |
+| 2 | the four HOST cells converted (bleed + preset), the host table proved byte-identical | **DONE** (the table below; `theProseColumnIsAPureFunctionOfTheSurfacesWidth` pins every cell at ten widths) |
 | 3 | the decoration geometry: wash hugs the prose, the R-13u3-3 stack, the badge that never covers prose, the card rhythm | PENDING |
 | 4 | the R-13u3-4 one-grapheme guard | PENDING |
 | 5 | pins (one-law · stack · rhythm · grapheme), `BlockDecorLaneTests` retired INTO successors | PENDING |
@@ -447,5 +447,33 @@ not touched; the inline-comments SETTING's tinted strips are unchanged (R-13u3-5
 
 ### THE HOST TABLE (the sweep — every host of `BlockDecorOverlayController`, plus every host of a contained surface)
 
-*(filled as each cell is converted — the arithmetic proof lives here)*
+The sweep found **three** production hosts of `BlockDecorOverlayController` (`grep`ped —
+`EditorSurface`, `InlineEditorSurface`, `ReadPostSurface`) and **five** host CELLS, because the
+read tier is mounted by four different pages. Every cell is CONVERTED; nothing is N/A.
+
+`W` = the host PANE's width. "was" = today's clamp-then-inset; "now" = the frame's bleed + the
+placement. `C = min(W − 40, BookView.proseColumn)` is the host's clamped column.
+
+| # | cell | host | was (left · measure) | now (bleed · preset) | verdict |
+|---|---|---|---|---|---|
+| 1 | book Outline, FOCUSED — `InlineEditorSurface` | `BookView` → `OutlinePostRow` → `EditorView(inline:)` | `(W − C)/2 + 8` · `C − 16` | bleed `max(20, (W − 696)/2)` · `.outline` (centred, cap 680, floor 28) | **CONVERTED** — identical at every width: for `W ≥ 736` both read `(W − 680)/2` · `680`; below it both read `28` · `W − 56` |
+| 2 | book Outline, EXPANDED-UNFOCUSED — the read tier | same row, `ReadPostView` | as above | as above | **CONVERTED** — the same numbers by the same rule (one brain) |
+| 3 | spread/paged book — both tiers | `SpreadBookView.pageBody` | `28` · `min(W − 56, 680)` | bleed `20` · `.page` (leading, cap 680, floor 28) | **CONVERTED** — the page's LEADING anchor kept deliberately (its whitespace has always been trailing; re-centring it is a face change nobody ruled) |
+| 4 | workspace read-cheap pane | `RootView.readCheapProse` | `28` · `W − 56` | bleed `20` · `.pane` (no cap, floor 28) | **CONVERTED** — NO cap, deliberately: capping this page's measure to 680 is the one thing the memo's quoted formula would have done and the one thing no ruling makes (QUESTIONS #117) |
+| 5 | note window's read face | `NoteWindowView` | `28` · `W − 56` | bleed `20` · `.pane` | **CONVERTED** — cell 4's twin |
+| — | Write's full-document editor | `EditorSurface` | `gutterInset` | `.write`, bleed 0 | **UNMOVED** — `gutterInset` forwards to the same rule; its LEFT edge is identical at every width. ONE recorded difference: at an ODD view width the container is now exactly 680 where the symmetric inset made it 681 (the odd half-point goes to the trailing gutter). ≤ 1 pt, and 680 is the designed measure |
+| — | take panes (`makeTakeSurface`) | every board | inset 6 | `.contained`-shaped, floor 6, bleed 0 | **N/A, proved** — a take pane hosts no decoration controller at all (the grep above); it carries the one rule so no second arithmetic exists |
+
+**THE FORK I DID NOT TAKE (the brief's stop-and-report clause), recorded rather than decided:**
+the memo §2 A's formula `containerWidth = min(maxColumnWidth, viewWidth − 16)` is byte-identical
+for the CENTRED clamp-then-inset cells (1 · 2) *only once the host's 20 pt pane padding is
+absorbed too* — with the padding left outside, it puts the prose at 8–10 pt where the host puts
+it at 28 on any pane under 736. Absorbing BOTH gives **Write's own rule** (`min(680, W − 56)`),
+which is what the memo's own sentence asks for ("contained surfaces adopt WRITE'S OWN SHAPE") and
+what 13c 2A has always claimed the Outline renders. Applied to cells 4 · 5 the quoted formula
+would NARROW a measure that has never been capped (a 1200-pt pane: 1144 → 680), which is a face
+ruling; those cells therefore keep `maxColumn: nil` and only their padding becomes gutter. That
+leaves a standing inconsistency that is NOT this unit's: the workspace pane's READ face runs the
+full measure while the same pane's LIVE editor (Write) caps at 680, so focusing it re-wraps the
+whole note. Logged as **QUESTIONS #117**, PROVISIONAL, for her.
 

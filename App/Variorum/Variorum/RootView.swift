@@ -899,6 +899,12 @@ struct RootView: View {
         ScrollView {
             ReadPostView(
                 session: session, postID: containerID,
+                // 13u3 UNIT A1: the pane's own 20 pt padding becomes the
+                // surface's GUTTER — the prose lands on the same point and
+                // keeps the same measure (this pane has never capped it),
+                // and a comment's face finally has somewhere to stand that
+                // is not on the words.
+                gutter: .pane,
                 onFocusRequest: { _ in router.workspace.focus(pane) },
                 onBadgeTap: { _ in router.workspace.focus(pane) })
                 .frame(maxWidth: .infinity, alignment: .leading)

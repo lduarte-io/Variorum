@@ -89,6 +89,14 @@ struct BookView: View {
     @State private var chapterNameField = ""
     @State private var renameChapterTarget: ReadingSection?
     @State private var settingsShown = false
+    /// **13u3 UNIT A1 — the Outline PANE's width**, which is the only thing
+    /// its text surfaces need that the prose column itself cannot tell them:
+    /// how much whitespace stands beside the column. Read from the scroll
+    /// view (the pane), written on a real change only, on the next turn (a
+    /// geometry action can arrive inside a layout pass). Zero until the
+    /// first pass, where `outlineGutter` answers `.contained` — the shipped
+    /// geometry, so the first frame is unchanged.
+    @State private var outlinePaneWidth: CGFloat = 0
     /// 13c 2D: the smart→curated offer, what it finishes afterwards, and the
     /// derived count it promises will stay.
     @State private var conversionOffer = false
@@ -104,6 +112,23 @@ struct BookView: View {
     /// itself lands on exactly `EditorTypography.maxColumnWidth`.
     static let proseColumn =
         EditorTypography.maxColumnWidth + 2 * EditorTypography.inlineSurfaceInset
+
+    /// **THE OUTLINE'S PROSE PLACEMENT** (13u3 UNIT A1, her R-13u-9). The
+    /// column above is still the CHROME's measure — the masthead, the cards,
+    /// the headings all stand on it — but the text surfaces now span the
+    /// whole pane and place their prose back on exactly the point the
+    /// centred column put it, so the whitespace beside it is theirs to
+    /// decorate in.
+    ///
+    /// The bleed, term by term: the pane is padded 20 and two flexible
+    /// margins centre a `min(pane − 40, proseColumn)` column, so the
+    /// whitespace on each side is `(pane − column) / 2`, which is
+    /// `max(20, (pane − proseColumn) / 2)` — 20 exactly while the column is
+    /// squeezed, and the centring leftover plus the padding once it is not.
+    private var outlineGutter: ProseGutter {
+        guard outlinePaneWidth > 0 else { return .contained }
+        return .outline(bleed: max(20, (outlinePaneWidth - BookView.proseColumn) / 2))
+    }
 
     // (Wave 2c's DETAILS GUTTER — `outlineGutterWidth` · `outlineGutterSpacing`
     //  · `outlineFocusedRowWidth` — RETIRED at 18d batch 1, her U-17: *"the
@@ -1402,6 +1427,13 @@ struct BookView: View {
                 .padding(.horizontal, 20)
             }
             .coordinateSpace(name: Self.outlineSpace)
+            // 13u3 UNIT A1: the PANE's width — what the text surfaces need
+            // to know to absorb the whitespace beside the column.
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+                guard abs(width - outlinePaneWidth) > stableSurfaceWidthTolerance
+                else { return }
+                DispatchQueue.main.async { outlinePaneWidth = width }
+            }
             // Row 53: the landing listens to the WHOLE column, not only its
             // anchor — any content-height change re-arms its quiet
             // interval, and a scroll by the user ends it.
@@ -1701,7 +1733,7 @@ struct BookView: View {
     private func postRow(_ entry: Queries.ReadingEntry) -> some View {
         OutlinePostRow(
             session: session, model: model, structure: structure,
-            entry: entry, tokens: tokens)
+            entry: entry, tokens: tokens, gutter: outlineGutter)
     }
 }
 
@@ -1942,16 +1974,20 @@ private struct OutlinePostRow: View {
     let structure: BookStructureModel
     let entry: Queries.ReadingEntry
     let tokens: VoiceTokens
+    /// 13u3 UNIT A1: the Outline's prose placement, handed down from the
+    /// pane that knows its own width (`BookView.outlineGutter`).
+    let gutter: ProseGutter
 
     init(
         session: AppSession, model: BookViewModel, structure: BookStructureModel,
-        entry: Queries.ReadingEntry, tokens: VoiceTokens
+        entry: Queries.ReadingEntry, tokens: VoiceTokens, gutter: ProseGutter
     ) {
         self.session = session
         self.model = model
         self.structure = structure
         self.entry = entry
         self.tokens = tokens
+        self.gutter = gutter
     }
 
     /// Row 53: is this row near the viewport? An EXPANDED row far from it
@@ -2013,7 +2049,8 @@ private struct OutlinePostRow: View {
                                 EditorView(
                                     session: session, postID: entry.postID, inline: true,
                                     caretSeed: model.caretSeed, fanSeed: model.fanSeed,
-                                    barPlacement: .inSidebarBox)
+                                    barPlacement: .inSidebarBox,
+                                    gutter: gutter)
                             }
                             .id(entry.postID)
                             .onAppear { materialized() }
@@ -2043,6 +2080,7 @@ private struct OutlinePostRow: View {
                             ) {
                                 ReadPostView(
                                     session: session, postID: entry.postID,
+                                    gutter: gutter,
                                     onFocusRequest: { offset in
                                         model.focus(entry.postID, caret: offset)
                                     },

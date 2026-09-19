@@ -355,11 +355,16 @@ private struct SpreadPage: View {
                         EditorView(
                             session: session, postID: entry.postID, inline: true,
                             caretSeed: model.caretSeed, fanSeed: model.fanSeed,
-                            barPlacement: .inSidebarBox)
+                            barPlacement: .inSidebarBox,
+                            // 13u3 UNIT A1: the page's 20 pt padding becomes
+                            // the surface's gutter; the prose keeps this
+                            // page's leading anchor and its measure exactly.
+                            gutter: .page)
                             .id(entry.postID)
                     } else {
                         ReadPostView(
                             session: session, postID: entry.postID,
+                            gutter: .page,
                             onFocusRequest: { offset in
                                 model.focus(entry.postID, caret: offset)
                             },

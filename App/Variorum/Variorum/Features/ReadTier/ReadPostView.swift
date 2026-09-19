@@ -25,6 +25,15 @@ struct ReadPostView: View {
     /// A badge tap: interpretation 1 (PROVISIONAL) — the container focuses
     /// the post FIRST, then opens the fan panel for this block.
     var onBadgeTap: ((String) -> Void)?
+    /// **13u3 UNIT A1 — WHERE THIS PAGE'S PROSE SITS, and how much of the
+    /// host's whitespace the surface may absorb** (`Surface/ProseGutter`).
+    /// The host knows both, so the host says: the book Outline hands over
+    /// its centring leftover AND its pane padding (Write's own rule at the
+    /// pane's width), the spread book's page and the workspace's read pane
+    /// hand over their 20 pt padding. `.contained` — the shipped 8 pt each
+    /// side, no bleed — is the default, so a host this unit did not convert
+    /// renders exactly as it always did.
+    var gutter: ProseGutter = .contained
     @State private var model: ReadPostViewModel
     // Phase 13 C1: the voice reaches the read tier (optional environment,
     // terminal fallback in test hosts).
@@ -34,11 +43,13 @@ struct ReadPostView: View {
     init(
         session: AppSession,
         postID: String,
+        gutter: ProseGutter = .contained,
         onFocusRequest: ((Int) -> Void)? = nil,
         onBadgeTap: ((String) -> Void)? = nil
     ) {
         self.session = session
         self.postID = postID
+        self.gutter = gutter
         self.onFocusRequest = onFocusRequest
         self.onBadgeTap = onBadgeTap
         _model = State(initialValue: ReadPostViewModel(session: session, postID: postID))
@@ -70,9 +81,17 @@ struct ReadPostView: View {
                     .textSelection(.enabled)
             }
             ReadPostSurface(
-                model: model, chrome: chrome,
+                model: model, chrome: chrome, gutter: gutter,
                 onFocusRequest: onFocusRequest, onBadgeTap: onBadgeTap)
                 .frame(height: model.contentHeight)
+                // **THE BLEED** (13u3 UNIT A1): the surface's FRAME reaches
+                // into the host's whitespace on each side while THIS view's
+                // reported geometry stays exactly what it was — so every
+                // remembered surface length (`SurfaceSizeMemory`), every
+                // `BookHeightManifest` row and every `StableSurface`
+                // reservation is untouched, and the prose inside lands back
+                // on the same point it always did.
+                .padding(.horizontal, -gutter.bleed)
         }
         .onAppear { model.appearance = EditorAppearance(themeSettings, dark: scheme == .dark) }
         .onChange(of: themeSettings) { _, new in
@@ -93,6 +112,7 @@ struct ReadPostView: View {
 private struct ReadPostSurface: NSViewRepresentable {
     let model: ReadPostViewModel
     let chrome: EditorSurfaceChrome
+    let gutter: ProseGutter
     let onFocusRequest: ((Int) -> Void)?
     let onBadgeTap: ((String) -> Void)?
 
@@ -102,6 +122,7 @@ private struct ReadPostSurface: NSViewRepresentable {
 
     func makeNSView(context: Context) -> ReadPostTextView {
         let textView = ReadPostTextView.makeReadSurface()
+        textView.proseGutter = gutter
         context.coordinator.applyChrome(chrome, to: textView)
         model.attach(textView: textView)
         context.coordinator.install(textView: textView)
@@ -117,6 +138,7 @@ private struct ReadPostSurface: NSViewRepresentable {
         // Projection-driven; the callbacks and the VOICE refresh here.
         context.coordinator.onFocusRequest = onFocusRequest
         context.coordinator.onBadgeTap = onBadgeTap
+        nsView.proseGutter = gutter
         context.coordinator.applyChrome(chrome, to: nsView)
     }
 

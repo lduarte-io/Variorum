@@ -41,6 +41,13 @@ struct EditorView: View {
     ///   it won't be at the bottom when you're in that book editing mode."*
     enum BarPlacement { case bottom, inSidebarBox }
     var barPlacement: BarPlacement = .bottom
+    /// **13u3 UNIT A1 — the INLINE surface's prose placement** (the read
+    /// tier's twin; `Surface/ProseGutter`). Ignored by the full-document
+    /// editor, which carries `.write` from its own factory. The BLEED is
+    /// applied around the text surface ALONE, so this view's banners (the
+    /// canary, the seal line, the block-selection banner) keep the host's
+    /// own measure and only the prose reaches into the whitespace.
+    var gutter: ProseGutter = .contained
     @State private var model: EditorViewModel
     @State private var inlineHeight: CGFloat = 24
     /// 13b 4D (S4-19, her ruling): drag handles reveal on hover — a
@@ -57,12 +64,14 @@ struct EditorView: View {
     init(
         session: AppSession, postID: String, inline: Bool = false,
         caretSeed: Int? = nil, fanSeed: String? = nil,
-        barPlacement: BarPlacement = .bottom
+        barPlacement: BarPlacement = .bottom,
+        gutter: ProseGutter = .contained
     ) {
         self.session = session
         self.postID = postID
         self.inline = inline
         self.barPlacement = barPlacement
+        self.gutter = gutter
         let model = EditorViewModel(session: session, postID: postID)
         model.pendingCaretSeed = caretSeed
         model.pendingFanSeed = fanSeed
@@ -110,8 +119,13 @@ struct EditorView: View {
             }
             blockSelectionBanner
             if inline {
-                InlineEditorSurface(model: model, height: $inlineHeight, chrome: chrome)
+                InlineEditorSurface(
+                    model: model, height: $inlineHeight, chrome: chrome, gutter: gutter)
                     .frame(height: inlineHeight)
+                    // THE BLEED (13u3 UNIT A1) — see `ReadPostView`'s twin:
+                    // the frame reaches into the host's whitespace while
+                    // this view's reported geometry is unmoved.
+                    .padding(.horizontal, -gutter.bleed)
             } else {
                 EditorSurface(model: model, chrome: chrome)
             }
@@ -474,6 +488,8 @@ struct InlineEditorSurface: NSViewRepresentable {
     let model: EditorViewModel
     @Binding var height: CGFloat
     var chrome = EditorSurfaceChrome(tokens: Queries.ThemeSettings(), dark: false)
+    /// 13u3 UNIT A1: the host's prose placement (see `EditorView.gutter`).
+    var gutter: ProseGutter = .contained
 
     func makeCoordinator() -> Coordinator {
         Coordinator(model: model)
@@ -481,6 +497,7 @@ struct InlineEditorSurface: NSViewRepresentable {
 
     func makeNSView(context: Context) -> EditorTextView {
         let textView = EditorTextView.makeInlineEditor()
+        textView.proseGutter = gutter
         context.coordinator.surfaceDelegate.wire(to: textView)
         context.coordinator.applyChrome(chrome, to: textView)
         model.attach(textView: textView, scrollView: nil)
@@ -497,6 +514,7 @@ struct InlineEditorSurface: NSViewRepresentable {
 
     func updateNSView(_ nsView: EditorTextView, context: Context) {
         // Projection-driven through the model; the width is SwiftUI's.
+        nsView.proseGutter = gutter
         context.coordinator.applyChrome(chrome, to: nsView)
         context.coordinator.remeasure()
     }
