@@ -39,3 +39,10 @@ swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
 - `cliclick` 5.1 IS INSTALLED (she ran `brew install cliclick`, 2026-09-04): the one-binary road for
   click/type/drag/scroll — `cliclick c:x,y` (click at points), `kd:cmd t:j ku:cmd` (⌘J), `t:text` (type),
   `dd:x,y du:x,y` (drag), `w:ms` (wait). Prefer it over the osascript keystroke road for typing into fields.
+
+## Walker facts from the 13u3 UNIT B walk (2026-09-19)
+
+- The dev-store window comes up **1728×1084 at Y=33** on this machine (any older size note is stale).
+- A fresh launch shows a **40 pt phantom window** in `walk-cap`'s listing — skip it.
+- `cliclick` keystrokes go to the FRONTMOST app: re-activate the target after every capture before typing.
+- Synthetic typing into the full-document TK2 editor drops most characters even at 150 ms spacing, and ⌘V never lands there; the quick-entry bar and the quick-note pad take full strings fine — stage editor prose through the store, not the keyboard.

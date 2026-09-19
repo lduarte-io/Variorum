@@ -1195,3 +1195,55 @@ offering the first words as a name without ever taking one, and nothing stored o
 found and fixed red-on-old, one suite find traced on two trees and fixed, three things found and
 handed up rather than carried. New PROVISIONAL bundle: QUESTIONS **#119** (six calls). Suites and
 finals above.
+
+---
+
+## UNIT C BRIEF — THE QUICK-CAPTURE MAC FACE (R-13u-4; self-contained; read in this order)
+
+**Read first, in full:** (1) this file's Status banner · roster item 3 · GOVERNANCE + the
+constitution · THE KICKOFF SITTING RECORD · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the 13u2
+block's item 7 (**⇧⌘V is TAKEN** — your face must not claim it). (2) The 13u1 SITTING RECORD's
+**R-13u-4 verbatim** (`notes/plans/phase-13u1-editor-seam.md`): *"the capture surface holds MANY
+paragraphs; ⏎ FILES the note, ⇧⏎ adds a paragraph; the hand-off segments through `importPost`'s
+bulk rule."* (3) The master plan's `### 13u` **item (9)** IN FULL — the phone's lost-prose
+evidence and the ownership question this ruling answered (the capture surface owns MANY
+paragraphs; the phone's face is the mobile catch-up's, built to the same ruling — you build the
+MAC's only). (4) The code: `Features/QuickNote/QuickNoteView.swift` (note its deliberate
+no-`.onSubmit` comment — the current model) · `Features/Shelf/QuickEntryBar.swift` +
+`ShelfViewModel` (the shelf's bottom bar, R3) · `importPost`'s bulk segmentation rule (core) ·
+the UNIT B RECORD if B landed a title-suggestion chip or handed it to you (consume B's brain
+either way).
+
+**Scope (ONE acceptance unit — the Mac's capture surfaces to ONE rule):**
+1. **⏎ FILES · ⇧⏎ adds a paragraph**, on BOTH Mac capture surfaces (the shelf's quick-entry bar
+   and the system-wide quick note window) — one rule, one shared brain where the two surfaces
+   would otherwise fork (the forked-brains lesson; hoist to `App/Variorum/Shared/` if both need
+   it and it is not platform chrome).
+2. **Many-paragraph capture TYPED, not only pasted:** the box grows with its paragraphs (bounded
+   — pick a sane max height and record it PROVISIONAL); the hand-off carries EVERYTHING through
+   `importPost`'s bulk rule (segmentation on entry — the surface's ownership model, not a
+   segmentation change).
+3. **The lost-prose class must be impossible by construction:** moving the caret INTO an earlier
+   paragraph must not change what ⏎ means or what the hand-off carries (the phone's 2026-08-23
+   disaster — *"complete disaster, lost prose class of bug"* — is the anti-spec; write its Mac
+   twin as a pin: caret into paragraph 1 of 3, ⏎ → the note files with ALL THREE paragraphs,
+   nothing dropped).
+4. **The title-suggestion chip** (item 4's, if B handed it to you): first words offered, one tap
+   adopts, ignorable — on both capture surfaces, consuming B's Domain brain.
+5. **Refusals/receipts** through the status seam's classed doors; the QuickEntryBar's
+   text-preserving refusal behaviour (13l's fix) byte-preserved — a refusal NEVER destroys the
+   typed capture (pin it if not already pinned on the new road).
+6. **Keys:** ⇧⏎ is the paragraph; ⏎ files; ⇧⌘V stays PlainPaste's; no new chord claims without
+   checking the registry + a grep (P-1: new doors declared).
+
+**Pins:** the ⏎/⇧⏎ contract on both surfaces; the three-paragraph hand-off (segmented per bulk
+rule — exact block count + texts); the caret-position independence pin (the lost-prose twin);
+the refusal-preserves-text pin. Red-on-old where defect-shaped (the single-paragraph limitation
+is a missing capability, not a bug — no manufactured reds).
+
+**End verification:** FULL Mac suite (row 58 the one tolerated red) · tutorial spine green ·
+iOS build green (shared files compile there) · YOUR walk with captures: type a three-paragraph
+capture in BOTH surfaces, file each, verify the blocks in the note; the caret-into-paragraph-1
+case; both voices, both appearances; captures to `notes/plans/13u3-screens/`. Record: **UNIT C
+RECORD** appended here, LIVE STATUS from the first commit, UNIT CLOSED banner, ledger row 4
+flipped in the same commit.
