@@ -101,3 +101,29 @@ swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
   so "the dialog is missing from the screenshot" is itself the signal that it is an AppKit modal.
 - The Library list's row heights differ between the two voices, so a row's click point measured in
   Terminal misses in Study — re-read the row's y from a capture after every voice flip.
+
+## Walker facts from the 13u3 UNIT F walk (2026-09-19)
+
+- **A `.pdf` the app exported is read back by OPENING it in Preview and capturing Preview's own
+  window id** — `open -a Preview <file>`, then `walk-cap $(pgrep -x Preview | head -1) <dir>`.
+  `qlmanage -t` thumbnails lose the type rendering, and a thumbnail is not evidence that the page
+  draws. Preview stacks windows, so `walk-cap` lists the newest FIRST (`w0.png` is the one you
+  just opened) — read the names it prints rather than trusting the index.
+- **Driving `NSSavePanel` with `cliclick`:** `kd:cmd,shift t:g ku:cmd,shift` → type the folder path
+  → `kp:return` → `kd:cmd t:a ku:cmd` (select the name field) → type the base name → `kp:return`.
+  The powerbox honours a path under the user's home; the app is sandboxed but the pick grants it.
+- **The shelf quick-entry bar takes markdown characters cleanly** through `cliclick t:` (`*`, `#`,
+  `~`, backtick, `[`, `(` all land; no smart-quote mangling) and it does **NOT** auto-continue a
+  list on ⇧⏎ — so a typed `- first item` followed by ⇧⏎ leaves an empty paragraph, not a second
+  lead. This is the reliable road for staging a markdown fixture; the full-document TK2 editor is
+  still not (the UNIT B fact).
+- **A block click point measured in one voice misses in the other by about one block**, because
+  the two voices' line heights differ — and the miss is silent, so `⌥⌘C` lands a callout on the
+  WRONG block and the only way you find out is by exporting the `.md`. Re-read the block's `y`
+  from a fresh capture after every voice or appearance flip, and verify a per-block act by its
+  projection rather than by the screenshot's wash.
+- **A pre-unit build for a before/after pair:** `git worktree add /tmp/<name> <commit>` +
+  `xcodebuild build -scheme Variorum -destination platform=macOS -derivedDataPath <dd>` gives a
+  second Debug app on the SAME dev store (same bundle id, same container). Run them STRICTLY one
+  at a time — `tell application id …` cannot tell two instances apart (the UNIT E fact) — and
+  `git worktree remove --force` afterwards.

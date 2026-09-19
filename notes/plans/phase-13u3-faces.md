@@ -302,7 +302,7 @@ touches her real store outside the pre-authorized refresh.**
 | 4 | UNIT C — the quick-capture Mac face (item 9 / R-13u-4) | **DONE 2026-09-19** — `cf3d86c2`…`9da5bec3` + this record's close; the UNIT C RECORD is at the end of this file (the contract as built and why the box is AppKit · the traced refusal defect with its red-on-old · 18 pins in 3 new suites · the walk's 16 captures in both voices and both appearances and the two things it found · three things handed up). QUESTIONS #120 opened |
 | 5 | UNIT D — named commits (item 14 / R-13u3-1) | **DONE 2026-09-19** — `203a722c`…`a2c5ede0` + this record's close; the UNIT D RECORD is at the end of this file (the contract as built · the three traced mechanisms, two found by the walk and one real regression found by the suite · 18 pins in 6 suites + 4 shipped suites amended · the walk's 16 captures in both voices and both appearances · the mobile-parity note · three things handed up). QUESTIONS #121 opened |
 | 6 | UNIT E — the #80(e) two faces (item 15) | **DONE 2026-09-19** — `1031135b`…`e24318ce` + this record's close; the UNIT E RECORD is at the end of this file (the PROBE that falsified #80(e)'s premise with its mechanism · the bounded read with its anti-drift pin against `PurgeFamily` · 8 new cells in 3 suites with the one defect-shaped cell red on the shipped words · the walk's 14 captures and what it proved · the re-seed note for the closeout). QUESTIONS #122 opened |
-| 7 | UNIT F — PDF renders formatting (item 16) | NOT STARTED |
+| 7 | UNIT F — PDF renders formatting (item 16) | **DONE 2026-09-19** — `0003bac1`…`261cae8a` + this record's close; the UNIT F RECORD is at the end of this file (the trace · the red-on-old at 6-of-8 cells / 31 issues · the ONE hoist with its two collapsed duplicate rules · 10 pins incl. two anti-drift guards and the `.md` byte-fence · the walk's 9 captures with BEFORE/AFTER pairs and the two-build `.md` SHA match · the literal-colour regression the suite caught in my own diff and the better fix that answered it · three things handed up). QUESTIONS #123 opened
 | 8 | UNIT G — the ceremony-sheet residuals (KnownIssues row 42) | NOT STARTED |
 | 8b | UNIT H — the Takes board's live-card delete door + the lesson's truth (the E hand-up, adjudication 2 above) | NOT STARTED — after G |
 | 9 | The ladder — `fable-reviewer`, combined diff, standing rounds | NOT STARTED — named foci: UNIT B's one-time editor SPIN on deleteBackward (the frames in the UNIT B RECORD; the decoration pass is A1's neighbourhood); A1's geometry across the five host cells |
@@ -2272,7 +2272,18 @@ same commit.
 
 ## UNIT F RECORD — THE PDF EXPORT RENDERS FORMATTING (opus-implementer, 2026-09-19)
 
-**WHAT THIS UNIT DOES NOT DO (the record's first line):** PENDING — filled at the close.
+**WHAT THIS UNIT DOES NOT DO (the record's first line):** it does not change one byte of what the
+`.md` export writes — `Queries.renderedText`, `exportPost`, `exportReading`, `exportBlock`, the
+bulk manifest, the callout→blockquote mapping and the fan's "Alternates" shape are all byte
+untouched, PINNED against goldens, and PROVED byte-identical by exporting the same note from the
+PRE-UNIT BUILD and this one and diffing the files (same SHA-256, below). It does not re-font or
+re-space the PDF (the typographic pass is 13m's — the page is the same 12 pt system body it has
+been since 11b, with the face on top). It does not touch `Sources/` at all — ZERO core lines,
+ZERO schema, ZERO migrations, ZERO `Sync/`, ZERO `Persistence/`, ZERO `Server/`, the marker stays
+**8**. It changes NO behaviour of the paged reader (the hoist is byte-identical and its three
+suites say so). It builds no phone face and ships nothing mobile-visible. It does not teach the
+markdown vocabulary anything new — a blockquote is still not in it, which is why a callout's
+`> ` leads still print (QUESTIONS #123(b)).
 
 ### LIVE STATUS (written at the start; flipped in the same commit as each piece)
 
@@ -2284,7 +2295,7 @@ same commit.
 | 3 | the PDF path built through that brain + its pins (no raw syntax; heading/bold/list/code runs) | **DONE** — 10/10 green in the new suite |
 | 4 | the BYTE-FENCES pinned (`.md` export byte-identity on a fixture corpus · `renderedText` untouched · the Alternates section · the callout→blockquote mapping) | **DONE** — the two fence cells were GREEN on both sides, which is what a fence is |
 | 5 | QUESTIONS — the PROVISIONAL calls + the next-free marker moved | **DONE** — **#123**, five lettered calls (the reading face · the callout's surviving `> ` · paper's values · nothing re-fonted · the title is not markdown); the marker moved to **#124** |
-| 6 | the walk + captures (both PDFs opened and screenshotted; the `.md` diff), the FULL Mac suite, tutorial spine, iOS build | NOT STARTED |
+| 6 | the walk + captures (both PDFs opened and screenshotted; the `.md` diff), the FULL Mac suite, tutorial spine, iOS build | **DONE** — 9 captures incl. the BEFORE/AFTER pairs for both the note and the book, the `.md` proved byte-identical across two builds, and ONE REAL REGRESSION the suite found in my own diff and I fixed (below); finals at the end |
 
 *(Nothing below this line is claimed until its row says DONE.)*
 
@@ -2293,3 +2304,233 @@ green · the FULL Mac suite **2864 / 480** with row 58's recorded environment re
 (`theReadClickLandsInIndexAtThatBlock`) the single tolerated one and the row-49 landing arm a
 recorded load flake (adjudicate by the paired protocol, never one run) · tutorial spine green ·
 iOS build green · the FULL mobile suite **626 / 106 with 4 known issues** · marker **8**.
+
+### THE TRACE (the mechanism, named before anything was written)
+
+`ExportModel.pdfData(forPost:)` reads `Queries.exportPost` — which returns the note's
+**markdown-as-content**, because since 13g the stored text IS the markdown (her F-1). It handed
+that string to `PDFExporter.attributedDocument`, which appended it **verbatim** under one
+`NSFont.systemFont(ofSize: 12)`, and `CTFramesetterCreateWithAttributedString` drew the
+characters it was given. So every `#`, `**`, `~~`, backtick, `- ` and `](url)` she had typed
+landed on the page. The 11b path is a phase OLDER than the markdown vocabulary: it was written
+when the stored text was prose, and nothing has re-read it since.
+
+**The road, and the one road it is not.** The app already has two faces for that vocabulary, and
+which one a surface wears is her own F-5 rule: an EDITING surface keeps the markers on the glass
+(`MarkdownStyling` → `Shared/MarkdownFace` — display == stored byte for byte, because a click has
+to land on the right character); a READ-ONLY surface with no gesture mapping a click to an offset
+may hide them (`MarkdownRendering`, core, pure — display text + semantic runs + line styles, and
+deliberately no fonts). A PDF is the purest read-only surface in the app: it has no gestures at
+all. So the page takes the READING face, and the pin `theExportedDocumentShowsNoRawMarkdownSyntax`
+is exactly that decision made falsifiable.
+
+The attributed half of that transform — runs → fonts, line styles → paragraph facts — already
+existed, and this is the part that made the bug possible: **it lived PRIVATELY inside
+`PageComposer`** (`Features/BookView/PagePaginator.swift`, two `private static func`s), so the
+paged reader could reach it and the export could not.
+
+### THE RED-ON-OLD VERIFICATION (measured on the shipped rendering, before the fix)
+
+The suite was written first and run against the shipped exporter (the only edit on that tree was
+naming its two font literals `bodyFont`/`titleFont` — no behaviour):
+
+```
+✘ Test theExportedDocumentShowsNoRawMarkdownSyntax() … Expectation failed:
+  !((text → "My Note\n\n# Chapter One\n\nA paragraph with **bold words**, *italic ones*, …
+  ~~a struck phrase~~ and `let code = 1` inline.\n\n## A smaller heading\n\n- first item…")
+  .contains(syntax → "**") → true)   ↳ raw markdown leaked into the PDF: **
+✘ Test theExportedRunsCarryTheAppsOwnFace() … (heading.pointSize → 12.0) > (body.pointSize → 12.0)
+✘ Test listLinesIndentAndNestExactlyAsTheReadingPageDoes() … [.paragraphStyle] → nil
+✘ Test theRenderedPDFItselfCarriesTheWordsAndNoneOfTheSyntax() … (text).contains("**") → true
+✘ Test thePDFDoorExportsTheSameProjectionTheMarkdownDoorWrites() … (text).contains("**") → true
+✘ Test run with 8 tests in 1 suite failed after 0.065 seconds with 31 issues.
+```
+
+**6 of 8 cells RED, 31 issues.** The two that were GREEN on both sides are the BYTE-FENCES
+(`everyMarkdownProjectionIsByteIdentical`, `theAlternatesSectionReachesThePageUnchanged`) — which
+is what a fence is: it must not move, and a fence that went red would mean the unit had broken
+its own promise. Nothing here is a manufactured red.
+
+### WHAT WAS BUILT (one hoist, zero new rules)
+
+**`App/Variorum/Variorum/Theme/MarkdownReadingFace.swift`** — the reading face's attributed half,
+lifted out of `PageComposer` **byte-identically** and given a `Style` (body font · line spacing ·
+ink · link · code tint) so each medium supplies its own VALUES while the RULES exist once. It
+lives beside `Theme/MarkdownStyling.swift`, the editing face's Mac host, which is where a reader
+looking for "how does markdown look here" will find both.
+
+Two duplicate rules collapsed in the move, both verified identical line by line first:
+
+- a heading's SIZE — `PageComposer` had written out the same 1.6/1.35/1.15 scales, the same bold
+  union and the same fallback chain that `MarkdownFace.headingFont(level:base:)` already held.
+  It now CALLS it, and `theReadingFacesHeadingIsTheEditingFacesHeading` pins the two equal at
+  every level and both base fonts.
+- a bold/italic TRAIT union — now `MarkdownFace.adding(_:to:)`, the same function the editing
+  face calls. The cheap "did the traits actually change" guard is kept.
+
+**`PDFExporter`** consumes the face through one new door, `MarkdownReadingFace.attributed(_:style:)`.
+The title line is deliberately NOT read as markdown (it is a stored name, shown the way the
+masthead shows it — a book's own `# <name>` travels inside the body and renders as a heading
+there; QUESTIONS #123(e)).
+
+### THE REGRESSION MY OWN DIFF INTRODUCED — FOUND BY THE SUITE, FIXED, AND THE FIX IS BETTER
+
+The first full Mac run came back with a red that was **mine**:
+
+```
+✘ Test noViewPaintsALiteralColour() recorded an issue at NoLiteralColourTests.swift:176:9:
+  Expectation failed: (offenders → ["Features/Export/PDFExporter.swift:73 — Color.black"]).isEmpty
+```
+
+18j's grep pin refused `NSColor.black`, and it was **right to**. My reasoning for the literal was
+sound — a dynamic ink would resolve against whatever appearance the app wore when she hit Save,
+and a PDF exported in dark mode would arrive white on white paper — but the pin's own header says
+the thing I had missed: *"a literal colour … is the same value on black paper as on white."*
+
+I did not add an allow-list entry. **The honest answer is no colour at all:** `Style.ink` and
+`Style.link` became optional, the PDF passes `nil` for both, and the exported document now carries
+**no `.foregroundColor`, `.backgroundColor`, `.underlineColor` or `.strikethroughColor` anywhere**.
+That is byte-for-byte what 11b drew (a `CGContext`'s own fill is black — which is exactly why the
+old PDF was readable), and it is a STRONGER guarantee than a literal: a page with no colour cannot
+resolve one against an appearance, ever. The underline and the strikethrough RULE are still
+written — only their colour was optional. `theExportedDocumentIsPaperAndNotAScreen` became an
+absence-walk over the whole document, and QUESTIONS #123(c) was rewritten to say what shipped.
+
+**The page's own values are untouched by this**: `PageComposer` still passes the voice's ink, the
+system link colour and its code tint, so the reader is byte-identical.
+
+### THE PINS (10 new cells, one new suite — `PDFExportFaceTests`)
+
+| pin | what it holds |
+|---|---|
+| `theExportedDocumentShowsNoRawMarkdownSyntax` | **RED on the shipped exporter** (above): every word survives; `**` `~~` `` ` `` `](` `# ` `## ` `- ` `[ ]` `[x]` `_underscored` and the URL are all gone; the substituted leads are the ONE transform's own (`•`, ☐, ☑) |
+| `theExportedRunsCarryTheAppsOwnFace` | headings are SIZES and bold, `#` bigger than `##`; bold/italic/`_italic_` carry traits; code is monospaced; a struck phrase is struck; a link is underlined; **ordinary prose is exactly the body font** |
+| `listLinesIndentAndNestExactlyAsTheReadingPageDoes` | a list line is a HANGING indent, a nested item sits one step further in, and prose gets no paragraph style at all |
+| `theExportedDocumentIsPaperAndNotAScreen` | **the absence-walk**: no colour attribute of any kind in the whole document; the underline and strikethrough rules still written |
+| `theRenderedPDFItselfCarriesTheWordsAndNoneOfTheSyntax` | real `%PDF` bytes whose EXTRACTED text has the words and none of the syntax |
+| `theAlternatesSectionReachesThePageUnchanged` | the ratified fan section is prose and reaches the page verbatim |
+| `theReadingFacesHeadingIsTheEditingFacesHeading` | **anti-drift**: the reading face's heading == `MarkdownFace.headingFont` at every level, both base fonts |
+| `thePageAndThePDFMakeTheSameFaceDecisions` | **the hoist's own guard**: same display string, and the same trait/size/indent RELATIONS on both media |
+| `everyMarkdownProjectionIsByteIdentical` | **the `.md` FENCE**: `renderedText`, `exportPost`, `exportPost(includeVariants:)` pinned to goldens over a fixture with markdown, a callout (its `> ` mapping) and a fan |
+| `thePDFDoorExportsTheSameProjectionTheMarkdownDoorWrites` | the PDF door hands the exporter EXACTLY the `.md` string — the markdown file still carries the syntax, the PDF built from it carries none |
+
+### THE WALK (mine — `io.lduarte.Variorum.debug`, dev store, 2026-09-19; `cliclick` + `Tools/WalkKit`)
+
+**The strongest leg first: I built the PRE-UNIT app and exported the same note from both.** A
+`git worktree` at `fd598ea6` (the UNIT F brief's commit) built a Debug app, launched ALONE on the
+dev store (verified zero instances before and after every launch and quit, always by bundle
+identity), and exported the fixture note as `.md` and as PDF; then the current build did the same.
+
+- **`.md`: BYTE-IDENTICAL, proved by two real exports through the real door** — `diff` silent,
+  `shasum -a 256` equal on both files (`4b074e79…03047`), and again after the colour fix
+  (`F-final-md.md`, same hash). The projection is untouched in practice, not only on paper.
+- **PDF: the defect and its fix, side by side.**
+
+A fixture note typed into the shelf's quick-entry bar (8 paragraphs via ⇧⏎, then ⏎ to file),
+titled in the masthead, carrying every vocabulary item F-3 names plus row 84's `_italic_`.
+Captures in `notes/plans/13u3-screens/` (gitignored):
+
+| capture | what it shows |
+|---|---|
+| `F01-write-shows-the-editing-face-markers-dimmed-terminal-light.png` | the note in Write: the EDITING face, markers dimmed but present — the other half of the two-face rule, and proof the stored text really is markdown |
+| `F02-BEFORE-the-note-pdf-shows-raw-markdown.png` | **the defect, in a real exported PDF from the pre-unit build**: `# Chapter One`, `**bold words**`, `~~a struck phrase~~`, `- [ ]`, backticks, `](https://…)` — her report, exactly |
+| `F03-AFTER-the-note-pdf-renders-the-formatting.png` | **the headline**: the same note, same door, shipped build — a big bold *Chapter One*, a smaller *A smaller heading*, **bold**, *italic*, ~~struck~~, `•` bullets, ☐/☑ boxes, monospaced code, an underlined link, and not one marker |
+| `F04-AFTER-exported-from-study-DARK-still-black-on-white-paper.png` | the same export taken with the app in **Study voice + DARK appearance**: black on white paper (the #123(c) decision, walked rather than argued) |
+| `F05-AFTER-the-book-pdf-renders-its-heading-hierarchy.png` | the BOOK PDF (Encryption Explained, 6 pages): `# book` → `## chapter` → `### note` as three real heading sizes |
+| `F06-BEFORE-the-book-pdf-showed-hash-marks.png` | the same book from the pre-unit build: `# Encryption Explained`, `## about this book`, `### About this book` |
+| `F07-write-editing-face-study-dark.png` | the note in Write in the other voice and appearance — the editing face unchanged by this unit |
+| `F08-a-callout-still-prints-its-blockquote-lead-QUESTIONS-123b.png` | **the one place syntax survives**: a callout block's `> ` lead prints, while the bold/italic/strikethrough INSIDE that same line render — the exact shape #123(b) puts to her |
+| `F09-the-apps-own-read-surface-is-the-same-reading-study-dark.png` | the app's own Read surface beside it: the page is the same reading, printed — the one-truth claim, visible |
+
+**Every PDF was OPENED in Preview and read**, not merely written. F03/F04/F05/F08 were re-taken on
+the SHIPPED build after the colour fix, so no capture here shows code that is not in the commit.
+
+**WALK VERDICT: her item 16 is done, and the fence held under a real test rather than an argument.**
+Both doors (Library ▸ Export ▸ PDF…, Shelf ▸ Export PDF…) produce a page that reads as formatting
+rather than as syntax, in both voices and both appearances; the `.md` written by the door beside
+it is the same bytes the pre-unit build wrote; and the one remaining marker — a callout's
+blockquote lead — is recorded for her with the two roads out rather than papered over.
+
+**Walker facts** (appended to `Tools/WalkKit/README.md`): the shelf quick-entry bar takes markdown
+characters cleanly through `cliclick t:` and does NOT auto-continue a list on ⇧⏎; an `NSSavePanel`
+is driven with ⌘⇧G → path → ⏎ → ⌘A → name → ⏎; and a PDF is best read back by opening it in
+Preview and capturing Preview's own window id (`walk-cap <preview pid>`), since `qlmanage`
+thumbnails lose the type. Her `/Applications` copy was never running at any point in this session —
+`pgrep` verified before and after every launch and every quit, and every quit was
+`tell application id "io.lduarte.Variorum.debug" to quit`, never a keystroke.
+
+### FINALS (2026-09-19)
+
+- core `swift test` — **Test run with 1596 tests in 174 suites passed after 55.716 seconds.**
+  (Unchanged: this unit touches ZERO core lines.)
+- the FULL Mac suite — **Test run with 2874 tests in 481 suites failed after 741.156 seconds with
+  2 issues.** (2864 + this unit's 10 cells.) **The 2 issues are ONE test** —
+  `theReadClickLandsInIndexAtThatBlock`, the recorded environment red (KnownIssues row 58, owner
+  12) the brief names as the single tolerated one. The row-49 landing arm was green. *(The run
+  BEFORE it carried a third issue — the literal-colour pin's refusal of my own diff, recorded
+  above and fixed; this run is the shipped tree.)*
+- the TUTORIAL SPINE — green: one run over all 11 `Tutorial…` suites plus the
+  Encryption/NewModes/Snippets/IA seeder consumers, **113 tests in 15 suites passed**.
+- iOS build — **BUILD SUCCEEDED**.
+- the FULL mobile suite — **not run, and not owed**: the diff is Mac-only
+  (`App/Variorum/Variorum/` + `VariorumTests/`), with ZERO lines in `Shared/`, `Sources/` or
+  `VariorumMobile/`. The iOS build above is the owed check. Nothing mobile-visible.
+- lockstep marker — **8**, untouched. Schema: ZERO. Migrations: ZERO. `Sync/`: ZERO.
+  `Persistence/`: ZERO. `Server/`: ZERO. `Sources/`: ZERO. Four files changed in all (two app
+  files edited, one added, one test suite added), 727 insertions / 98 deletions.
+
+### MOBILE PARITY (a note, not a build)
+
+**The phone has no PDF export at all**, so item 16 owes it nothing today. If one is ever built,
+the shape to copy is this unit's and not a port of this file: the phone already has the reading
+transform (`MarkdownRendering`, core) and its own reading face in SwiftUI (`Shared/FlowParagraph`,
+`MobileReadPage`); what is Mac-only here is the AppKit/CoreText *attributed* end of it
+(`Theme/MarkdownReadingFace.swift`), which is why it sits in the Mac target rather than in
+`Shared/`. **A parity row is the orchestrator's to file, if she wants one.**
+
+### FOUND, NOT MINE (handed up rather than carried)
+
+1. **A callout's `> ` leads are the one syntax left on the page**, because the blockquote form is
+   not in F-3's v1 vocabulary and the display brain has therefore never known what one is. Two
+   roads out, both recorded in QUESTIONS #123(b): teach the vocabulary `>` (a canon addition that
+   would reach EVERY surface including the editing face she types into), or give the PDF a body
+   projection without the blockquote mapping (a second projection for one medium — the drift
+   class). I implemented neither; the current behaviour is the one-truth default.
+2. **`PageComposer` still owns a callout's INDENT rule privately** (`firstLineHeadIndent = 22` at
+   `PagePaginator.swift`), and the PDF has no equivalent because its callouts arrive as `> ` text
+   instead. If (1) is ever ruled, that indent is the second thing that wants hoisting beside the
+   face — noted, not done.
+3. **The `.md` and the PDF now disagree about what a callout IS** (blockquote characters vs an
+   indented passage on the page, and neither on the screen where Read draws a wash). That is
+   three transforms of one presentation, each defensible on its own medium; whether they should
+   converge is a design question above this unit.
+
+### DEFERRED / NOT MINE (stated rather than done)
+
+- **QUESTIONS #123** — five PROVISIONAL calls (the reading face rather than the editing one · the
+  callout's surviving `> ` · the page writing no colour at all · nothing re-fonted · the title not
+  read as markdown). The marker moved to **#124**.
+- **The typographic pass stays 13m's** — no font, measure, margin, running head or line-spacing
+  decision was made here, deliberately.
+- **Not touched:** UNIT A1's gutter, UNIT A2's comments panel, UNIT B's card family, UNIT C's
+  capture boxes, UNIT D's savepoint names, UNIT E's version faces, `Sources/VariorumCore/` in
+  full, `Persistence/`, `Sync/`, `Server/`, the schema, the marker, `Shared/`, and the whole
+  mobile target.
+
+---
+
+## UNIT F CLOSED — 2026-09-19
+
+Her item 16 is built. The PDF export was a phase older than the markdown vocabulary it was
+printing, so it drew the characters she typed; it now draws what the app draws, because the
+attributed half of the app's own READING face stopped living privately inside `PageComposer` and
+became `Theme/MarkdownReadingFace` — one brain, two media, no second parser and no new formatting
+rule (the two rules that HAD been written out twice, a heading's size and a trait union, now call
+the editing face's own). The `.md` road is untouched and was proved so the hard way: the same note
+exported from a build of the pre-unit commit and from this one produced files with the same
+SHA-256. The suite then caught a literal colour I had introduced, and the fix that answered it is
+better than the literal was — the page writes NO colour at all, so a PDF exported in dark can
+never arrive white on white. 10 new cells in one suite (6 of 8 of the first draft red on the
+shipped exporter, 31 issues), 9 walk captures including BEFORE/AFTER pairs for both a note and a
+book in both voices and both appearances, one new PROVISIONAL bundle (#123). Zero core lines, zero
+schema, zero migrations, zero `Sync/`, marker 8. Suites and finals above.
