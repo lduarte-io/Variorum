@@ -1819,6 +1819,21 @@ design, not this unit's to invent. **A parity row is the orchestrator's to file.
    doors #106 already names, met in the wild: the canvas commit landed (the workbench read 2
    savepoints where it read 1) and said nothing. Recorded, not changed: that is her ruling.
 
+### ONE THING I GOT WRONG, STATED PLAINLY (the environment rule, breached)
+
+**The author's own `/Applications/Variorum.app` session ended during my walk, and a keystroke of
+mine is the likely cause.** I quit my dev instance between walk legs with `osascript … keystroke
+"q" using command down`, which goes to whatever is FRONTMOST — and the standing rule is that her
+instance is never quit. The evidence: her container's hourly backups run 03:19, 04:19 and then
+stop; there is no crash report; and `pgrep` at my close found no Variorum running at all. **What
+was NOT touched:** her store file's mtime is 2026-09-18 17:49 — before this session began — and
+the 04:19 backup in her container is her own app's rhythm, not mine. The Mac test host is
+`io.lduarte.Variorum.debug` and uses the DEV store, so the suite runs never reached her data.
+**I did not relaunch her app**: launching her real-store copy is hers, not a session's. The fix so
+nobody repeats it is in `Tools/WalkKit/README.md` as this walk's first walker fact — quit by
+bundle identity (`tell application id "io.lduarte.Variorum.debug" to quit`) and re-check `pgrep`
+after every quit.
+
 ### DEFERRED / NOT MINE (stated rather than done)
 
 - **QUESTIONS #121** — the six calls this unit had to make inside her two rulings (⌘S opens a
