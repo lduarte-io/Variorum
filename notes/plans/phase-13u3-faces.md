@@ -297,7 +297,7 @@ touches her real store outside the pre-authorized refresh.**
 |---|---|---|
 | 1 | The gutter DESIGN MEMO (P-5) + her edge rulings | **DONE 2026-09-18** — `notes/plans/phase-13u3-memo-gutter.md` (`73a6ea17` + the rulings commit); all four edges RULED at the sitting (R-13u3-3…6) |
 | 2 | UNIT A1 — the gutter geometry rework (item 3's page half + KnownIssues row 50) | **DONE 2026-09-18** — `bb31912e`…`3263a1e6`; the UNIT A1 RECORD is at the end of this file (host table · traced mechanisms · 15 pins with red-on-old · 12 walk captures · finals). Row 50 RESOLVED; QUESTIONS #117 opened |
-| 2b | UNIT A2 — the comments panel as a text editor (item 3's panel half, memo §2 D) | NOT STARTED — after A1 |
+| 2b | UNIT A2 — the comments panel as a text editor (item 3's panel half, memo §2 D) | **DONE 2026-09-18** — `52cd0cc4`…`afc108ee` + this record's close; the UNIT A2 RECORD is at the end of this file (the writing semantics as one brain · 16 pins with the red-on-old table · the walk's four finds and 19 captures · finals). QUESTIONS #118 opened |
 | 3 | UNIT B — note-list skimmability (item 4) | NOT STARTED |
 | 4 | UNIT C — the quick-capture Mac face (item 9 / R-13u-4) | NOT STARTED |
 | 5 | UNIT D — named commits (item 14 / R-13u3-1) | NOT STARTED |
@@ -709,8 +709,8 @@ door claims a shortcut outside the panel's own key window.
 | 2 | the model: per-comment drafts, the classed status slot, the receipt/refusal doors + pins | **DONE** (13 cells in 2 suites green: `CommentCompositionTests` · `CommentsPanelModelEditorTests`) |
 | 3 | the view: ONE writing surface (edit in place · the add area owns the rest · ⌘⏎/Esc · deleted fold) | **DONE** (29 cells green across the panel's 3 new suites + the 3 they must not disturb) |
 | 4 | the red-on-old measurement (the one defect-shaped cell) | **DONE** — named, measured, restored (the table below) |
-| 5 | QUESTIONS #118 (the PROVISIONAL calls) | PENDING |
-| 6 | the walk + captures, the full Mac suite, the tutorial spine, iOS build | PENDING |
+| 5 | QUESTIONS #118 (the PROVISIONAL calls) | **DONE** — four lettered calls + the taste numbers |
+| 6 | the walk + captures, the full Mac suite, the tutorial spine, iOS build | **DONE** — 19 captures; finals below |
 
 ### THE RED-ON-OLD VERIFICATION — NAMED BEFORE IT RUNS (the checkpoint protocol)
 
@@ -749,3 +749,175 @@ listed above as the redesign's own decisions and are not claimed as reds.
 | `aCommitWritesOnlyWhatWouldChange` | **RED** | the brain's own cell: `.save(" new ")` vs `.save("new")` |
 | the other 11 cells | green under the revert, by construction | they pin what this redesign DECIDED (what ⌘⏎ files, what an emptied comment means, what ⎋ undoes, which drafts survive an arrival, which class each message carries, what the seal does) — a face redesign is not a bug pin, and none of them is claimed as one |
 
+### THE TRACED MECHANISMS (what the shipped panel actually did, before anything was changed)
+
+1. **The add box could not be written in.** `CommentsPanel`'s add door was a ONE-LINE
+   `TextField(axis: .vertical)` capped at four lines, with `.onSubmit(addDraft)` on it — so ⏎
+   FILED the comment instead of making a paragraph, and a comment with two paragraphs was
+   impossible to TYPE (only to paste). Under it sat a `List` of rows that took every point of the
+   440 × 320 panel, which is the measured shape of her *"the comment add box is so small and it
+   doesn't make sense given how big the overall comment box is."*
+2. **Editing swapped the row for a bordered field.** A row's Edit button replaced the text with a
+   second `TextField` plus Save/Cancel — a different control, a different geometry, and a
+   different place for the caret than where she had just been reading. That is the "not a text
+   editor" half of the same complaint.
+3. **Two rules for one thing (the defect-shaped cell).** The add road trimmed
+   (`draft.trimmingCharacters(in: .whitespacesAndNewlines)`); the edit road handed `editDraft` to
+   `editBlockComment` RAW. Same keystrokes, different stored text, depending on which box she
+   typed them in — and a trailing newline then rendered as a dangling blank line wherever the
+   comment shows. Measured red-on-old above: the store held `"  quieter ending \n"`.
+4. **One status slot, one register.** `statusMessage` was a bare `String?` painted
+   `.alarmVoice()` — so any message the panel ever spoke would read as a refusal. The panel spoke
+   only refusals, so nothing was wrong ON SCREEN; what was wrong was that a receipt had nowhere
+   to go, which is why delete and restore said nothing at all. (This is the tray panel's own
+   ledger-row-6 defect, one file over, in its dormant form.)
+
+### WHAT THE PANEL IS NOW (the contract, in her words where they exist)
+
+ONE scrolling writing surface. **Every comment is an editable area in place** — click it and
+type; no Edit button, no field swap; a hairline and a muted stamp line (when it was written, its
+doors) separate them. **Below them the ADD AREA owns every point they leave** and never less than
+its floor, so there is always somewhere to write; click anywhere in it and the caret lands there.
+**⏎ is a newline everywhere** (a comment is free prose and holds paragraphs). **⌘⏎ commits what
+you are writing** — files the add draft, saves the comment. **⎋ undoes the most local thing** —
+clears the draft, puts a comment back, else closes. Moving away from a changed comment SAVES it;
+moving away from a half-written new one does not file it (#118(a)). Emptying a comment puts it
+back and says which door removes it (#118(b)). The deleted fold and its restore door keep their
+place at the FOOT, outside the writing surface, so the add area's space is never theirs. Delete
+and restore speak RECEIPTS in the voice's muted ink; refusals speak in its alarm; the class is
+decided at the door (`RecoveryStatus`, the tray panel's precedent — a sheet's refusal cannot live
+in a toast behind it). `VoiceTokens` throughout, both voices, both appearances; no `List`, no
+`.roundedBorder`, no system-chrome residue.
+
+**Operations: byte-unchanged.** `addBlockComment` / `editBlockComment` / `deleteBlockComment` /
+`restoreBlockComment` are called exactly as before, with their seal refusals and travel rules
+intact. Zero `Sources/VariorumCore/` change, zero `Sync/`, zero `Persistence/`, zero schema, zero
+migrations, marker 8.
+
+### THE PINS (16 cells in three suites; the shipped `CommentsAndReorderTests` coverage rides unmodified)
+
+| cell | what it holds | red-on-old |
+|---|---|---|
+| `theAddDoorFilesTrimmedProseAndIsSilentOnNothing` | ⌘⏎ on nothing is silent; the ends trim; inner paragraphs survive | not bug-class (a new rule) |
+| `aCommitWritesOnlyWhatWouldChange` | unchanged · emptied · save, by the one trim rule | **RED** (`.save(" new ")` vs `.save("new")`) |
+| `dirtyMeansCommittingWouldDoSomething` | the mark says exactly what a commit would do | not bug-class |
+| `escapeIsALadderMostLocalFirst` | #118(c), all five shapes | not bug-class |
+| `aProjectionArrivalKeepsHerProseAndDropsWhatIsSettled` | her typing survives an arrival; a settled draft and a dead comment's draft go | not bug-class |
+| `onlyCommandReturnAndBareEscapeAreClaimed` | the two keys, keypad Enter included | not bug-class |
+| `everyOtherKeyReachesTheTextUntouched` | ⏎ · ⇧⏎ · ⌥⌘⏎ · ⌃⏎ · ⌘⎋ · letters — the panel claims NONE of them | not bug-class |
+| `theAddAreaFilesWithTheOneTrimRuleAndClearsItself` | the add road end to end, and its silence | not bug-class |
+| `aCommentEditsInPlaceAndStoresTheTrimmedText` | the edit road end to end + the no-flicker rule | **RED** (the store held `"  quieter ending \n"`) |
+| `aCommitThatWouldWriteNothingWritesNothing` | the row's stamp untouched, nothing said | not bug-class |
+| `anEmptiedCommentRefusesAndGoesBackToWhatIsStored` | #118(b), and the refusal NAMES Delete | not bug-class |
+| `escapeRevertsAnEditAndClearsTheAddDraft` | the ladder through the model's own doors | not bug-class |
+| `deleteAndRestoreSpeakReceiptsThatNameTheRoad` | the receipt CLASS (not the words), both doors | not bug-class |
+| `aDraftSurvivesAProjectionArrivalAndASavedOneStopsBeingDirty` | the drafts' lifetime through the real ops | not bug-class |
+| `escapesMeaningIsAFunctionOfFocusDraftsAndTheStore` | the keyboard contract as a VALUE: focus + drafts + store → the act | not bug-class |
+| `theSealRefusesEveryWriteAndKeepsWhatSheTyped` | the seal refuses both roads and throws away nothing | not bug-class |
+
+**Why so few reds, said plainly:** this unit is a FACE REDESIGN. The brief says a face redesign is
+not a bug pin and tells me not to manufacture reds; the one defect-shaped cell I traced is the
+two-trim-rules drift, and it is measured above. Everything else above pins a decision the
+redesign had to MAKE — which is what a later reader needs, and what a reviewer can hold me to.
+
+**What is NOT pinned, and why:** the keyboard ROUTING (⌘⏎ / ⎋ actually reaching the focused area
+through a live window) is AppKit key dispatch into a focused `TextEditor`, which this harness has
+no honest way to drive. It is the walk's, and the walk drove it (below). What the pins hold is
+what each key MEANS, as a value.
+
+### THE WALK (mine — `io.lduarte.Variorum.debug`, dev store, 2026-09-18; `cliclick` + `Tools/WalkKit`)
+
+Walked the panel as an editor on a multi-comment block in BOTH voices and BOTH appearances:
+click-anywhere-and-write, a two-paragraph draft, file with ⌘⏎, edit in place, save with ⌘⏎, ⎋ to
+put it back, delete, the deleted fold, restore, and focus-loss saving. 19 captures in
+`notes/plans/13u3-screens/` (gitignored), `a2-01`…`a2-19`.
+
+| capture | what it shows |
+|---|---|
+| `a2-17-the-empty-panel-is-all-writing-area.png` | **the headline:** "comments 0" and then nothing but writing area — the whole panel IS the box she asked for |
+| `a2-18-a-two-paragraph-draft-typed-straight-in.png` | ⏎ making a paragraph inside the draft, typed (not pasted) |
+| `a2-19-filed-with-cmd-return-paragraphs-kept.png` | ⌘⏎ files it as ONE comment with its paragraph break, the add area cleared and still owning the rest |
+| `a2-04-three-comments-and-the-add-area-terminal-light.png` | three comments, each an area in place with its stamp line, and a real add area under them |
+| `a2-05-…-the-unsaved-mark-and-its-doors.png` · `a2-06-saved-in-place-…` | typing into a comment raises `unsaved · ⌘⏎` + save/revert; ⌘⏎ saves and the mark goes out, silently |
+| `a2-07-before-escape.png` · `a2-08-escape-put-it-back.png` | ⎋ putting a changed comment back |
+| `a2-09-delete-speaks-a-receipt-and-the-fold-appears.png` | the delete receipt in MUTED ink (not alarm) + `▸ deleted (1)` at the foot |
+| `a2-10-the-deleted-fold-takes-only-what-it-holds.png` · `a2-11-restore-speaks-a-receipt.png` | the open fold, the restore door, the restore receipt |
+| `a2-12`…`a2-14` (Study · dark) | the panel, an in-place edit with its mark, and **focus-loss saving it** |
+| `a2-15` (Terminal · dark) · `a2-16` (Study · light) | the remaining two voice × appearance cells; dark is a fully black room in both (R51) |
+| `a2-01`…`a2-03` | the first pass, kept for the record: the panel as it looked before the walk's two layout fixes |
+
+**WALK VERDICT: the panel reads and behaves as one writing surface in both voices and both
+appearances, and every door on it does what it says.** The walk also FOUND FOUR THINGS the desk
+could not, three of which were defects in what I had just built:
+
+1. **The add area fell BELOW THE FOLD.** One scroll (comments then the add area) put a real
+   writing box under three comments in a 320 pt panel — she would have had to scroll to find the
+   thing the unit exists to give her. Fixed by splitting the surface in two: the comments take
+   what they need and scroll past it; the add area takes the rest and never less than 132 pt.
+2. **The comments never rendered.** The list's height came from measuring its content, and the
+   measuring view only mounted once the list HAD a height — so the panel drew "comments 3" over
+   an empty page. Fixed by giving the unmeasured list its whole cap for one frame.
+3. **The deleted fold ate the page.** A `ScrollView` takes every point it is offered, so opening
+   the fold to show ONE struck-through line stole 132 pt from the writing surface and clipped the
+   live comments. Fixed: the fold takes what it holds, up to the cap.
+4. **The panel could come up NON-KEY** — its auto-focused caret blinking while every keystroke
+   went nowhere (measured: ten characters typed at 150 ms intervals, none landed; one click in
+   the area and everything landed). A caret you cannot type into is worse than no caret, so the
+   panel now asks for key status once, when it lands. Re-walked after the fix: two full
+   paragraphs typed straight into a freshly opened panel with no click at all (`a2-18`).
+
+**What the walk could NOT stage:** nothing in the panel. (Two staging notes, both mine and
+neither an app defect: `cliclick` keystrokes go to the frontmost app, so a capture that steals
+focus must be followed by a re-activate before typing; and a ⏎ typed with the caret at a block's
+START mints an empty block ABOVE it — U-1's own rule — which is what left the walk note with an
+empty first block.)
+
+### FINALS (2026-09-18)
+
+- core `swift test` — **Test run with 1567 tests in 171 suites passed after 59.497 seconds.**
+- the FULL Mac suite — **Test run with 2810 tests in 469 suites failed after 757.068 seconds with
+  2 issues.** Both issues are ONE test: `theReadClickLandsInIndexAtThatBlock`, the recorded
+  environment red (KnownIssues row 58, owner 12) the brief names as the single tolerated one.
+  Nothing else failed; all three of this unit's suites passed, and so did
+  `StatusSeamVocabularyTests` and `ChromeMinHeightTests`. (Baseline 2794/466 + 16 cells in 3
+  suites = 2810/469, exactly.)
+- the TUTORIAL SPINE — green in-run (every `Tutorial…` suite passed; zero failures).
+- iOS build — **BUILD SUCCEEDED**.
+- lockstep marker — **8**, untouched. Schema: ZERO. Migrations: ZERO. `Sync/`: ZERO.
+  `Persistence/`: ZERO. `Sources/VariorumCore/`: ZERO.
+
+### DEFERRED / NOT MINE (handed up, not done)
+
+- **QUESTIONS #118** — the four rules the redesign had to decide (focus-loss saves an edit but
+  never files the add draft · an emptied comment goes back rather than deleting · ⎋'s ladder ·
+  the one trim rule), plus the two taste numbers (the panel's 460 × 440 minimum, the add area's
+  132 pt floor). All PROVISIONAL, each one line to change.
+- **The PHONE owes this face.** `MobileComments` mirrors the Mac panel's shipped semantics
+  (list + a draft field, edit through the field) and is untouched here. A mobile-parity row is
+  the orchestrator's to file; when the phone builds it, `CommentComposition` hoists to
+  `App/Variorum/Shared/` rather than being copied (the hoist-at-next-touch rule; said at the
+  file's head).
+- **A comment ROW is a live text area whenever it is on screen**, so a block with very many
+  comments mounts very many small text views. Bounded by her own writing on ONE block (not by
+  corpus size, so P1 is untouched) and the panel scrolls, but the rows are NOT lazy — a later
+  touch that wants them lazy must move the drafts' survival story with it (they already live on
+  the model, which is half of that work).
+- **The panel's status line has no clock** (the tray panel's shape): a message stays until the
+  next act clears it. The shell's 6 s dismissal belongs to `StatusCenter`, which a sheet cannot
+  use. Recorded rather than invented.
+- **Not touched, as the brief fences:** the page-side gutter (UNIT A1's), the margin card, the
+  count badge, the callout glyph, the inline-comments setting (R-13u3-5), and every other unit
+  in this phase.
+
+---
+
+## UNIT A2 CLOSED — 2026-09-18
+
+The comments panel is a text editor: the memo's §2 D built, her item 3 answered, R-13u3-6's
+one-live-text-home honoured (the margin card stays a read face and a door). The writing semantics
+are ONE pure brain; the panel's messages are classed at the door; the operations are
+byte-unchanged. 16 pins in three suites with the one defect-shaped cell measured red-on-old; a
+walk in both voices and both appearances that found four things the desk could not, three of them
+fixed in the same session. One new PROVISIONAL bundle (#118). Suites and finals above.
+
+---

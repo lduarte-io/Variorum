@@ -1450,7 +1450,7 @@ Nothing about the manifest depends on this; the re-land is one call at one `onCh
 
 *Scope note, not a question:* the calm page's **pages** form (real leaves, no scroll offset) is outside the rule by its geometry, as `#114(b)` already says of Lenses/Compare/Canvas/Blocks; and flipping Read's own `edit`/`read` switch is not a mode switch, so it keeps whatever the host's scroll had — pre-existing, untouched.
 
-*(Next free number: **#117**.)*
+*(Next free number: **#118**.)*
 
 ---
 
@@ -1463,3 +1463,16 @@ This unit did NOT change it (the brief's fence: a rule that narrows a measure no
 - **(a) CAP THEM AT 680, like everything else** *(recommended by consistency)* — one line each (`ProseGutter.pane` gains `maxColumn: EditorTypography.maxColumnWidth`). The read face and the live editor would then wrap identically, so focusing a pane would move nothing, and a wide pane would have a real gutter — margin comment cards on both surfaces for the first time. Cost: a deliberate narrowing of two pages you have been reading at full width, and on a wide window the prose would sit centred with a lot of air either side.
 - **(b) LEAVE THEM UNCAPPED** *(BUILT — the shipped behaviour, unchanged)* — the read pane fills its column. Cost: the re-wrap on focus stays, and those two pages can never show a margin comment card (a 28 pt gutter holds the badge and nothing more).
 - **(c) CAP ONLY THE NOTE WINDOW** — its whole purpose is reading one note, so the measure matters most there, while a workspace pane is often narrow anyway. Cost: two rules where there were two, just differently drawn.
+
+---
+
+#118 — **THE COMMENTS PANEL IS A TEXT EDITOR NOW, AND FOUR SMALL RULES CAME WITH IT (2026-09-18, 13u3 UNIT A2; the record is `notes/plans/phase-13u3-faces.md`'s UNIT A2 RECORD).** All four PROVISIONAL, each one or two lines to change, none of them touching what a comment IS.
+
+**The background.** Your item 3: *"the comment add box is so small and it doesn't make sense given how big the overall comment box is that the whole thing isn't more of the text editor that you can write and click on."* So the panel is one writing surface now — every comment an editable area in place, the add area owning every point the comments leave, ⏎ a newline (a comment can hold paragraphs), ⌘⏎ committing what you are writing. That meant deciding four things the old bordered-field swap never had to answer.
+
+- **(a) MOVING AWAY SAVES AN EDIT — but never FILES the add draft.** Click from a comment you have changed into anything else and the change is SAVED (closing the panel saves every changed comment too). Click away from a half-written NEW comment and it just sits there, unfiled, waiting. **Why the asymmetry:** saving keeps prose that already exists, while filing MINTS a comment, and a click somewhere else is not an act of minting. The other reading — a click away files it too — is one line; it would make the add area behave like the rest of the surface at the cost of minting things you had not finished.
+- **(b) EMPTYING A COMMENT PUTS IT BACK, it does not delete it.** Select all, delete, move away: the comment returns to what is stored and the panel says *"A comment needs some text — Delete removes it."* **Why:** "empty it to remove it" is a gesture nobody ruled, and it would be the one road in this panel that destroys something. Delete is on the same row, one click, and the deleted fold below is the way back. The alternative — an emptied comment deletes itself — is a real option, and cheap; it is just not one I would choose for you without asking.
+- **(c) ⎋ IS A LADDER, most local first:** with a draft in the add area, it clears the draft; in a comment you have changed, it puts that comment back; with nothing being written, it closes the panel. Two presses therefore always leave. The alternative is ⎋ = close, always (and no keyboard road to undo a draft).
+- **(d) THE ENDS ARE TRIMMED, THE PARAGRAPHS ARE KEPT.** A comment saves without the whitespace hanging off either end, and keeps every newline inside it. This also FIXED a small inconsistency: the shipped panel trimmed on the add road and not on the edit road, so the same keystrokes stored different text depending on which box you typed them in, and a trailing newline then showed as a dangling blank line in the margin card (measured red-on-old in the record).
+
+*Taste numbers, also PROVISIONAL and also one line each:* the panel's minimum is now 460 × 440 (it was 440 × 320 — a list with a one-line field), and the add area never shrinks below 132 pt however many comments there are, so there is always somewhere to write.
