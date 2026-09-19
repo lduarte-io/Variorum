@@ -2267,3 +2267,29 @@ same note as `.md` and diff against a pre-unit export (byte-identical). Record: 
 RECORD**, LIVE STATUS from the first commit, UNIT CLOSED banner, ledger row 7 flipped in the
 same commit.
 
+
+---
+
+## UNIT F RECORD — THE PDF EXPORT RENDERS FORMATTING (opus-implementer, 2026-09-19)
+
+**WHAT THIS UNIT DOES NOT DO (the record's first line):** PENDING — filled at the close.
+
+### LIVE STATUS (written at the start; flipped in the same commit as each piece)
+
+| # | piece | status |
+|---|---|---|
+| 0 | the record + LIVE STATUS | **DONE** |
+| 1 | THE TRACE — the shipped PDF path, mechanism named, and the RED-ON-OLD measured on it | NOT STARTED |
+| 2 | the ONE reading face: `PageComposer`'s attributed applications hoisted to a shared brain, its duplicate heading/trait rules collapsed onto `MarkdownFace` | NOT STARTED |
+| 3 | the PDF path built through that brain + its pins (no raw syntax; heading/bold/list/code runs) | NOT STARTED |
+| 4 | the BYTE-FENCES pinned (`.md` export byte-identity on a fixture corpus · `renderedText` untouched · the Alternates section · the callout→blockquote mapping) | NOT STARTED |
+| 5 | QUESTIONS — the PROVISIONAL calls + the next-free marker moved | NOT STARTED |
+| 6 | the walk + captures (both PDFs opened and screenshotted; the `.md` diff), the FULL Mac suite, tutorial spine, iOS build | NOT STARTED |
+
+*(Nothing below this line is claimed until its row says DONE.)*
+
+**BASELINES AT OPEN** (UNIT E's recorded finals; never re-run at a start): core **1596 / 174**
+green · the FULL Mac suite **2864 / 480** with row 58's recorded environment red
+(`theReadClickLandsInIndexAtThatBlock`) the single tolerated one and the row-49 landing arm a
+recorded load flake (adjudicate by the paired protocol, never one run) · tutorial spine green ·
+iOS build green · the FULL mobile suite **626 / 106 with 4 known issues** · marker **8**.
