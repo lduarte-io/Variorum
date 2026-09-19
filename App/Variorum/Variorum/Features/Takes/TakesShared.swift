@@ -298,7 +298,7 @@ struct TakesCellView: View {
             },
             // 13b Stage 3 (3D — N6): the 3B `setTakeLabel` op's card door;
             // the bar hosts the sheet on both boards.
-            .init(title: "Label take\u{2026}") {
+            .init(title: TakeCardMenuCopy.labelTake) {
                 model.requestTakeLabel(variantID: resolved.variantID)
             },
             // **Ledger row 14 (F1): the grammar made uniform.** Write's takes
@@ -502,12 +502,158 @@ nonisolated enum TakeCardMenuCopy {
         CapabilityRegistry.capability(.deleteTake).menuTitle("Delete this take")
     }
 
+    /// The label row's words — ONE spelling now (13u3 UNIT H). Write's panel
+    /// hand-typed `"Label…"` while the card context menu hand-typed
+    /// `"Label take…"`, so the two card menus the F1 ruling called one
+    /// grammar did not even agree on this row's name. The context menu's
+    /// spelling is the one kept, because it says what it acts on.
+    static var labelTake: String {
+        CapabilityRegistry.capability(.labelTake).menuTitle("Label take\u{2026}")
+    }
+
+    /// The glyph the card's act menu wears — and the one the tutorial's prose
+    /// names. It lives here so the words and the door cannot drift: the
+    /// lesson interpolates this constant, `TakeCardMenu` renders it, and
+    /// `TakeCardDoorTests` reads both.
+    static let menuGlyph = "\u{22EF}"
+
     /// Every chorded row on the card, paired with the capability that
     /// declares its key — what the drift guard walks.
     static var chorded: [(id: CapabilityID, title: String)] {
         [(.newTake, newTake), (.blankTake, blankTake), (.archiveTake, archiveTake),
          (.copyAllTakes, copyAllTakes), (.takeToBlockBelow, takeToBlockBelow),
          (.takesToBlocks, takesToBlocks)]
+    }
+}
+
+// MARK: - The take card's ⋯ menu (13u3 UNIT H — the E hand-up)
+
+/// **THE CARD'S FOUR ACTS, AS ONE COMPONENT.**
+///
+/// Her F1 ruling (the post-13l polish round, ledger row 14) is that the take
+/// card menus MATCH — *"Write's panel ⋯ carries Archive · Label · Lock ·
+/// Delete — Takes mode's card grammar must match."* That pass gave the four
+/// acts to the Takes board's ARTICLE cell (its right-click), and the board's
+/// take CARDS were left with a choose band and two reorder arrows: a spare
+/// take seen on the board could not be deleted, archived, labelled or locked
+/// where it was seen. The tutorial meanwhile teaches a reader to delete a
+/// spare take *from the card's ⋯ menu*.
+///
+/// So the menu is a component rather than a second copy of Write's four
+/// buttons. Both surfaces build from ONE `rows` list, which is also what the
+/// DEBUG oracle reports — so "what this menu renders" has exactly one answer,
+/// and a fifth act cannot reach one surface and miss the other.
+struct TakeCardActs {
+    /// The take's own lock state, so the row can say which way it points
+    /// (Write's panel has always worded it that way — a row reading "Lock"
+    /// on a locked take is the small dishonesty `lockVerb` exists to end).
+    let locked: Bool
+    let archive: () -> Void
+    let label: () -> Void
+    let toggleLock: () -> Void
+    let delete: () -> Void
+}
+
+struct TakeCardMenu: View {
+    let acts: TakeCardActs
+
+    /// One row: the capability that declares it, its words, and its act.
+    struct Row: Identifiable {
+        let id: CapabilityID
+        let title: String
+        let destructive: Bool
+        let act: () -> Void
+    }
+
+    /// **THE list** — rendered by the menu, reported by the oracle, asserted
+    /// by the per-surface pin. Never two lists.
+    static func rows(_ acts: TakeCardActs) -> [Row] {
+        [
+            .init(id: .archiveTake, title: TakeCardMenuCopy.archiveTake,
+                  destructive: false, act: acts.archive),
+            .init(id: .labelTake, title: TakeCardMenuCopy.labelTake,
+                  destructive: false, act: acts.label),
+            .init(id: .lockTake, title: TakeCardMenuCopy.lockVerb(locked: acts.locked),
+                  destructive: false, act: acts.toggleLock),
+            // Takes do NOT confirm (13j's confirmation-consistency principle,
+            // second clause): ⌥⌘Z is right there and the block's History
+            // lists what went, with Put back beside it.
+            .init(id: .deleteTake, title: TakeCardMenuCopy.deleteTake,
+                  destructive: true, act: acts.delete),
+        ]
+    }
+
+    /// The capability ids this menu declares — what the per-surface registry
+    /// pin compares against each host's `surfaceCapabilities`.
+    static let capabilities: [CapabilityID] = [.archiveTake, .labelTake, .lockTake, .deleteTake]
+
+    var body: some View {
+        let rows = Self.rows(acts)
+        // The chrome is Write's panel's, unchanged to the byte — this
+        // component was extracted from it, and the board inherits the
+        // grammar rather than a second one being invented for it.
+        Menu(TakeCardMenuCopy.menuGlyph) {
+            ForEach(rows) { row in
+                Button(row.title, role: row.destructive ? .destructive : nil, action: row.act)
+            }
+        }
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+        .controlSize(.mini)
+        .recordTakeCardDoors(rows.map(\.id))
+    }
+}
+
+#if DEBUG
+/// **The rendered-door oracle** (13u3 UNIT H; the `TakesEmptyStateDoors`
+/// pattern, scoped per row 50's rule because a Takes board is exactly the
+/// kind of surface two suites mount at once).
+///
+/// Why an oracle rather than a click: a SwiftUI `Menu` on a whole board is
+/// not an `NSView` a pin can find, and a hosted board builds no accessibility
+/// tree in the test host (measured at 17p batch a). The menu reports the list
+/// it actually built, on the real board, in the real mount — and the press
+/// itself is walked.
+@MainActor
+enum TakeCardDoors {
+    private static var byScope: [String: Set<CapabilityID>] = [:]
+
+    static func record(_ ids: [CapabilityID], in scope: String) {
+        byScope[scope, default: []].formUnion(ids)
+    }
+
+    struct Reader {
+        let scope: String
+
+        var rendered: Set<CapabilityID> { TakeCardDoors.byScope[scope] ?? [] }
+
+        func reset() { TakeCardDoors.byScope[scope] = [] }
+    }
+
+    static func reader(_ scope: String) -> Reader { Reader(scope: scope) }
+}
+
+/// A modifier rather than a bare `onAppear`, because it must READ the
+/// environment for its scope (`TakeCardGeometryProbe`'s own reason).
+private struct TakeCardDoorsProbe: ViewModifier {
+    let ids: [CapabilityID]
+    @Environment(\.debugProbeScope) private var scope
+
+    func body(content: Content) -> some View {
+        content.onAppear { TakeCardDoors.record(ids, in: scope) }
+    }
+}
+#endif
+
+extension View {
+    /// The DEBUG oracle write (a no-op outside DEBUG).
+    @ViewBuilder
+    func recordTakeCardDoors(_ ids: [CapabilityID]) -> some View {
+        #if DEBUG
+        self.modifier(TakeCardDoorsProbe(ids: ids))
+        #else
+        self
+        #endif
     }
 }
 

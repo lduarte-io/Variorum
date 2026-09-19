@@ -69,6 +69,13 @@ struct TakesBoardView: View {
     /// selection banner (E3/A18).
     static let surfaceCapabilities: [CapabilityID] = [
         .unarchiveTake, .moveTakeEarlier, .moveTakeLater, .mergeSelectedBlocks,
+        // 13u3 UNIT H: the LIVE take card's ⋯ menu — the F1 card grammar,
+        // which reached this board's ARTICLE cell at the post-13l polish
+        // round and never reached its cards. `.deleteTake` was already
+        // declared here for the ARCHIVED card's own button, which is exactly
+        // why the union walk could never see the gap; the per-surface pin in
+        // `TakeCardDoorTests` is what holds it now.
+        .archiveTake, .labelTake, .lockTake,
         // 18f batch 1 (her U-4/U-16): "Merge choosing takes…" beside Merge —
         // the two roads over the SAME picked run, never the pairing surface.
         .mergeWithCeremony,
@@ -973,7 +980,9 @@ struct TakesBoardView: View {
                     onChoose: { Task { await model.choose(blockID: slot.blockID, variantID: take.id) } },
                     // 13e E4: the stack lays its cards out VERTICALLY, so
                     // earlier/later read as ▲ ▼ here.
-                    reorder: reorderDoors(take: take, slot: slot, axis: .vertical))
+                    reorder: reorderDoors(take: take, slot: slot, axis: .vertical),
+                    // 13u3 UNIT H: the same four acts as every other card.
+                    acts: cardActs(take: take))
             }
             fanFooter(slot: slot)
         }
@@ -1390,7 +1399,9 @@ struct TakesBoardView: View {
                     },
                     // 13e E4: carousel, slot split and the rail all lay their
                     // cards out HORIZONTALLY, so earlier/later read as ◀ ▶.
-                    reorder: reorderDoors(take: take, slot: slot, axis: .horizontal))
+                    reorder: reorderDoors(take: take, slot: slot, axis: .horizontal),
+                    // 13u3 UNIT H: the card's four acts, where the take is seen.
+                    acts: cardActs(take: take))
                 if capped {
                     ScrollView(.vertical) {
                         miniPaneSurface(take: take, slot: slot, reportsHeight: reportsHeight)
@@ -1432,6 +1443,27 @@ struct TakesBoardView: View {
         case .marginGrid: return "margin grid"
         case .slotSplit: return "slot split"
         }
+    }
+
+    /// **13u3 UNIT H — the live card's four acts** (her F1 rule: *"Write's
+    /// panel ⋯ carries Archive · Label · Lock · Delete — Takes mode's card
+    /// grammar must match"*). The targets are NAMED here rather than routed,
+    /// for `unarchiveTake`'s reason and 13k K6's: the act belongs to the card
+    /// you pointed at, and pointing at a card never moves the keyboard. The
+    /// label sheet is hosted by `TakesBottomBar`, which rides this board, so
+    /// `requestTakeLabel` opens it from here exactly as it does from Write's
+    /// panel. Every refusal — a sealed note, a locked take, the take the note
+    /// shows, the block's last take — comes from the operations layer through
+    /// `model.run` and speaks (P-2).
+    private func cardActs(take: Variant) -> TakeCardActs {
+        TakeCardActs(
+            locked: take.locked,
+            archive: { Task { await model.archiveTake(take.id) } },
+            label: { model.requestTakeLabel(variantID: take.id) },
+            toggleLock: {
+                Task { await model.setTakeLocked(take.id, locked: !take.locked) }
+            },
+            delete: { Task { await model.deleteTake(take.id) } })
     }
 
     /// 13e E4 (her A19): the card's fan-order doors, or nil where the act
@@ -1480,6 +1512,11 @@ struct TakeChooseHeader: View {
     /// and a one-take fan draws no arrows at all (P-2: a door that could
     /// never act isn't rendered).
     var reorder: ReorderDoors?
+    /// **13u3 UNIT H — the card's ⋯ act menu.** nil by default for the same
+    /// reason as `reorder`: a host that passes nothing renders exactly what
+    /// it did before. Every live-card composition on the Takes board passes
+    /// it, which is how one addition reaches all four fan styles.
+    var acts: TakeCardActs?
 
     /// What the card needs to offer the two moves: which way its strip runs,
     /// whether each direction can act (the FIRST card cannot move earlier —
@@ -1527,6 +1564,10 @@ struct TakeChooseHeader: View {
                     .help(CapabilityRegistry.capability(.moveTakeLater).verb
                         + " — one place \(reorder.axis == .vertical ? "down" : "right") in this "
                         + "block's fan (⌥⌘Z undoes)")
+            }
+            if let acts {
+                TakeCardMenu(acts: acts)
+                    .help("This take's own acts — archive, label, lock, delete")
             }
         }
     }
@@ -1688,6 +1729,9 @@ private struct CollapsibleTakeCard: View {
     let onChoose: () -> Void
     /// 13e E4: the fan-order doors, forwarded to the header.
     var reorder: TakeChooseHeader.ReorderDoors?
+    /// 13u3 UNIT H: the card's four acts, forwarded the same way — the stack
+    /// style's card is the one live-card shape that is not `takeMiniPane`.
+    var acts: TakeCardActs?
     @State private var collapsed = false
 
     var body: some View {
@@ -1701,7 +1745,7 @@ private struct CollapsibleTakeCard: View {
                     // header band here too — one checkmark, ever.
                     TakeChooseHeader(
                         tokens: tokens, isChosen: isChosen, label: take.label,
-                        onChoose: onChoose, reorder: reorder)
+                        onChoose: onChoose, reorder: reorder, acts: acts)
                 }
                 if collapsed {
                     Text(text.split(separator: "\n").first.map(String.init) ?? "(empty)")

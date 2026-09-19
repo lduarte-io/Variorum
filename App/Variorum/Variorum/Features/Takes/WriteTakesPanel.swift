@@ -210,25 +210,24 @@ struct WriteTakesPanel: View {
                     .controlSize(.mini)
                     .disabled(isChosen)
                     .help("Choose this take — the note shows it (everywhere); ⌘⏎")
-                    Menu("⋯") {
-                        Button(TakeCardMenuCopy.archiveTake) {
-                            Task { await model.archiveTake(take.id) }
-                        }
-                        Button("Label…") {
-                            // 13b Stage 3 (3D — N6): the label door rides
-                            // Write's panel too (one grammar everywhere).
-                            model.requestTakeLabel(variantID: take.id)
-                        }
-                        Button(TakeCardMenuCopy.lockVerb(locked: take.locked)) {
+                    // 13u3 UNIT H: the four rows this panel has carried since
+                    // Phase 7 are a COMPONENT now (`TakeCardMenu`), so the
+                    // Takes board's live cards render the same list rather
+                    // than a second copy of it — her F1 rule made structural.
+                    // The chrome is this panel's own, unchanged to the byte;
+                    // the one word that moved is the label row, which said
+                    // "Label…" here and "Label take…" on the card context
+                    // menu, i.e. the two "matching" menus did not agree on it.
+                    TakeCardMenu(acts: TakeCardActs(
+                        locked: take.locked,
+                        archive: { Task { await model.archiveTake(take.id) } },
+                        // 13b Stage 3 (3D — N6): the label door rides
+                        // Write's panel too (one grammar everywhere).
+                        label: { model.requestTakeLabel(variantID: take.id) },
+                        toggleLock: {
                             Task { await model.setTakeLocked(take.id, locked: !take.locked) }
-                        }
-                        Button(TakeCardMenuCopy.deleteTake, role: .destructive) {
-                            Task { await model.deleteTake(take.id) }
-                        }
-                    }
-                    .menuStyle(.borderlessButton)
-                    .fixedSize()
-                    .controlSize(.mini)
+                        },
+                        delete: { Task { await model.deleteTake(take.id) } }))
                 }
                 PaneSurfaceView(
                     text: model.liveText(take),
