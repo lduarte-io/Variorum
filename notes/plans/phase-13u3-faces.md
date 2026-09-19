@@ -1515,3 +1515,67 @@ voices and both appearances that found two things the desk could not, and one ne
 bundle (#120). Suites and finals above.
 
 ---
+
+---
+
+## UNIT D BRIEF — NAMED COMMITS (item 14, R-13u3-1; self-contained; read in this order)
+
+**Read first, in full:** (1) this file's Status banner · roster item 4 · GOVERNANCE + the
+constitution · THE KICKOFF SITTING RECORD (**R-13u3-1 is your law**: names EDITABLE after the
+fact — a rename door in Block History; the snapshot TEXT immutable, I5 untouched; the door
+offered everywhere `message` exists, auto-commits keeping their occasion as the DEFAULT label) ·
+the 13u2 block's items 1 (the status seam's classed doors) and 7 (**⇧⌘V is taken** — your name
+field claims no chord without a registry check) · ENVIRONMENT TRAPS · CAST & DISCIPLINE ·
+`Tools/WalkKit/README.md`'s walker facts. (2) The master plan's `### 13u` **item (14)** — her
+words verbatim (*"optional name at the manual-commit door, enter-to-skip keeps ⌘S instant"*;
+names in Block History + listings; her 13n motivation). (3) AppSpec §7's `commit_point` DDL +
+§9's `commit` op (the `message` column has existed since v1 — **ZERO schema**). (4) The code:
+the ⌘S road (`CommitBar` / `EditorViewModel`'s commit path) · `Features/Editor/SavepointHistory.swift`
+· `App/Variorum/Shared/BlockHistoryFace.swift` (**shared with the phone** — `SavepointRowFace`;
+extending the shared brain is the non-forking road, and the phone's history listing gaining
+names for free is a MOBILE-VISIBLE change: record it as a parity note, do not build phone chrome)
+· `Sources/VariorumCore/Operations/` (the commit family, for your new op's home and conventions).
+
+**A sync fact, checked by the orchestrator so you do not re-derive it:** `Merge.swift` applies
+EVERY table server-version-wins (the §6 matrix's "insert-if-absent" for `commit_point` describes
+the rows' natural immutability, not an engine arm), and outbox triggers fire on UPDATE — so a
+message rename propagates as ordinary metadata CAS with **zero `Sync/` lines**. Touch nothing
+under `Sources/VariorumCore/Sync/`. The SyncSpec §6 one-line annotation is the CLOSEOUT's delta
+under R-13u3-1, not yours.
+
+**Scope (ONE acceptance unit — the savepoint-name family):**
+1. **Core op** `renameCommitPoint(commit, message?)` (or the conventions' natural name): set/clear
+   `message`; nil clears; a no-op writes nothing (no outbox row); identity-level metadata — NO
+   touch, NO churn (the `setBlockName` class). Refusal edges, both PROVISIONAL one-liners logged
+   to QUESTIONS: refuses under a SEALED post (the seal's letter — "everything under the post");
+   ALLOWED on a locked variant (the lock guards the buffer; a label is not the buffer — the
+   variant-label parallel). Exact state-transition tests.
+2. **The manual-commit door:** ⌘S summons a minimal focused name field — **⏎ empty files the
+   savepoint unnamed (two keys, instant); text + ⏎ files it named; ⎋ cancels the commit whole**
+   (PROVISIONAL — the least-surprising reading; log it). The field is voiced, claims no global
+   chord, and speaks through the classed doors. The commit op itself is untouched (`message`
+   rides the existing parameter).
+3. **Names shown:** Block History's savepoint runs + commit listings lead with the name where
+   set; auto-commits show their occasion as today (the occasion is the default label, never
+   overwritten by the display); extend the SHARED face brain (`SavepointRowFace`) so both
+   platforms stay one-brained — the phone COMPILES and its listing may gain names (parity note).
+4. **The rename door:** in Block History beside the savepoint (R-13u3-1) — offered on manual AND
+   auto savepoints (her unqualified "Editable"); renaming an auto savepoint sets `message` while
+   `kind` stays `auto` (the occasion remains visible where the display distinguishes kinds).
+5. **Fences:** zero schema · zero migrations · zero `Sync/` · marker 8 · I5 untouched (TEXT never
+   editable) · the gutter/panel/card surfaces untouched.
+
+**Pins:** the op's transitions (set · clear · no-op · seal refusal · locked-variant allowance);
+the ⌘S skip road = exactly one `commit_point`, message NULL, kind manual (and the old
+single-keystroke pins updated deliberately, never deleted to pass); the named road; the rename
+road (red-on-old is not owed — a new capability, not a defect — but any behaviour you FIX on the
+way is). The history face's name display pinned on both kinds.
+
+**End verification:** FULL Mac suite (row 58 the one tolerated red) · tutorial spine green ·
+iOS build green (the shared face compiles) · the FULL mobile suite if `Shared/` changed
+(expected: yes — run it, record the count against 626/106 w/4 known) · YOUR walk with captures:
+⌘S ⏎ (instant, unnamed) · ⌘S "before the AI edit" ⏎ · rename it · an auto savepoint's occasion
+label untouched · both voices, both appearances; captures to `notes/plans/13u3-screens/`.
+Record: **UNIT D RECORD** appended here, LIVE STATUS from the first commit, UNIT CLOSED banner,
+ledger row 5 flipped in the same commit.
+
