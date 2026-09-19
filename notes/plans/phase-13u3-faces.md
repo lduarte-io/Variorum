@@ -477,3 +477,22 @@ leaves a standing inconsistency that is NOT this unit's: the workspace pane's RE
 full measure while the same pane's LIVE editor (Write) caps at 680, so focusing it re-wraps the
 whole note. Logged as **QUESTIONS #117**, PROVISIONAL, for her.
 
+
+### THE RED-ON-OLD VERIFICATION — NAMED BEFORE IT RUNS (the checkpoint protocol)
+
+Pre-revert state COMMITTED at `620998c1`. The revert is a **behavioural revert of the pre-fix
+mechanism**, applied to the current tree and then undone — the standing method, because the
+pre-13u3 tree cannot compile these pins (they name types that did not exist). Four edits, each
+restoring exactly what the 17p batch b / 13 C1 code did:
+
+1. **the lane** — `BlockDecorOverlayController.render` moves the surface's prose column when the
+   note carries a comment or a callout glyph (the `setDecorLane` door, in its one-line form);
+2. **the wash** — `calloutRect` spreads `12` into each gutter again (`calloutGutterPad`);
+3. **the glyph** — drawn inside the wash's leading pad, clamped at 2, never yielding;
+4. **the badge** — the fixed 32 pt rect clamped at `max(2, textLeft − 4 − 32)`, never narrowing.
+
+Expected red: `noDecorationMovesTheProseColumnOnAnySurface`, both production-loop cells,
+`nothingInTheGutterEverCoversProse`, `theCalloutWashHugsTheProseColumn`,
+`theGlyphSitsInTheGutterAndYieldsWhereThereIsNone`, `theBadgeNeverStandsOnProse`,
+`theStackPutsTheGlyphFirstAndTheCommentFaceUnderIt`. Measurements recorded below; the tree is
+restored by `git checkout` of the four files against `620998c1` and re-verified green.
