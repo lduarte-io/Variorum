@@ -14,7 +14,7 @@ KnownIssues deltas. Targeted verification run: the phase's five new/extended cor
 `SnippetsAndPickerQueryTests`) — **71 tests in 5 suites, all green** (no full suite run at review
 start, per the standing rule).
 
-**STATUS: COMPLETE.**
+**STATUS: COMPLETE — round 1 findings AND the reviewer's fix pass (dispositions + finals at the end of this file).**
 
 ---
 
@@ -364,3 +364,34 @@ returning to the words either way. Chip/capture suites green.
 
 **Also adopted from the responses:** R1-1's three strengthening facts and severity calibration
 (above); R1-2's adjacent observation (above). Nothing in the responses was dismissed.
+
+### FIX-PASS FINALS (2026-09-19, run strictly sequentially, nothing beside them)
+
+- core `swift test` — **Test run with 1604 tests in 174 suites passed after 56.852 seconds.**
+  (Baseline 1603/174 + the R1-2 core cell = exactly this.)
+- the FULL Mac suite — **Test run with 2897 tests in 484 suites failed after 755.606 seconds with
+  2 issues.** Both issues are ONE test: `theReadClickLandsInIndexAtThatBlock` — row 58's recorded
+  environment red, the single tolerated one. Nothing else failed. (Baseline 2889/482 + this
+  pass's 8 Mac cells in 2 new suites — `SavepointSealedDoorTests` · `EditorDecorTransactionTests`
+  — = 2897/484, exactly.)
+- the TUTORIAL SPINE — green in-run (every `Tutorial…` suite passed; the one failing suite in the
+  whole run is the row-58 book-Index suite).
+- iOS build — **BUILD SUCCEEDED**.
+- the FULL mobile suite (owed: `Sources/VariorumCore/Operations/Operations+Variant.swift` was
+  touched) — **Test run with 626 tests in 106 suites passed after 146.952 seconds with 4 known
+  issues** — the baseline's exact four.
+- lockstep marker — **8**, untouched. Schema: ZERO. Migrations: ZERO. `Sync/`: ZERO.
+  `Persistence/`: ZERO. `Server/`: ZERO.
+
+**The fix commits, in order:** R1-2 (op guard order + the did-write receipt) → the revert-note
+commit → R1-3 (the four seal guards + 4 pins) → the revert-#2 note → R1-4 (the two worded
+refusals) → R1-5+R1-6 (the `displayed:` doc + the chip focus hardening + the takeFocus guard) →
+R1-1 (the transaction flag + the deferred indicator refresh + the oracle and its 2 pins) → the
+dispositions → these finals. Every commit pushed as it landed; no trailers; no history rewritten;
+both behavioural reverts announced here before they ran, measured, and restored with their
+re-verification recorded.
+
+**Handed to round 2 (the fresh reviewer's anchor):** the six dispositions above; R1-2's recorded
+residual (the PANE's rename door still opens its field under a sealed note and refuses at ⏎ —
+the offer-gating is a face call); R1-6 stays a decision, not a pin (SPECULATIVE cause, hardening
+built); the implementer's sanity pass over this diff is owed next per the cross-model flow.
