@@ -907,9 +907,9 @@ enum TutorialSeeder {
             + "difference between them is the thing to learn once. ARCHIVE "
             + "keeps it forever — out of the note, in this note's tray, with "
             + "no countdown. DELETE starts the 30-day clock: it waits in the "
-            + "Trash, and then it really is gone. MOVE OUT TO A POOL cuts the "
-            + "tie to this note altogether and leaves the block as a scrap you "
-            + "can drag into anything.",
+            + "Trash, and then it really is gone. MOVE OUT TO SNIPPETS cuts "
+            + "the tie to this note altogether and leaves the block as a scrap "
+            + "you can drag into anything.",
 
             "ARCHIVE ME: I'm worth keeping and I don't belong in this note "
             + "today. Put your cursor in me and use Block \u{25B8} Archive "
@@ -923,9 +923,14 @@ enum TutorialSeeder {
             + "\(TrayPath.leavingTab) view with a countdown on me, and to the Trash in the "
             + "Library, and in 30 days I'm gone for real.",
 
+            // 13u3 UNIT H (the ⋯ sweep): this row was renamed by the Snippets
+            // vocabulary ruling and the sentence kept the old name, so a
+            // reader looked in the menu for a row that is not there. The row
+            // is interpolated from its own constant now.
             "MOVE ME OUT: I'm a decent line in the wrong note. Open Blocks "
-            + "(\u{2318}6), find my row, and use its \u{22EF} menu \u{25B8} Move "
-            + "out to a pool (leaves this note). I become a scrap in that pool "
+            + "(\u{2318}6), find my row, and use its \u{22EF} menu \u{25B8} "
+            + "\(SnippetsCopy.moveOutRow) — it opens onto your groups, pick "
+            + "one. I become a scrap there "
             + "— material for anywhere — and \u{2325}\u{2318}Z brings me back if "
             + "that wasn't what you meant.",
 
@@ -1049,11 +1054,19 @@ enum TutorialSeeder {
             + "deleted, so nothing is counting down; the next chapter has you "
             + "do it and find them.",
 
+            // 13u3 UNIT H: the row is named by the ROW's own title and the
+            // glyph by the menu's own constant, so a rename moves this
+            // sentence with it — and the sentence now says WHERE the menu is.
+            // It used to send a reader to "the ⋯ menu" without a place, and
+            // the surface she is most likely standing on after the takes
+            // chapter — the Takes board — had no ⋯ on its cards at all.
             "Deleted TAKES wait in the same panel, under "
             + "\(BlockPastCopy.deletedTakesHeader), each with the days it has "
             + "left. This paragraph carries a spare take for the experiment: "
-            + "open its takes (\u{2318}\u{21E7}T in Write), use the spare card's "
-            + "\u{22EF} menu \u{25B8} Delete, then press history — the take is "
+            + "open its takes — \u{2318}\u{21E7}T in Write, or the Takes tab "
+            + "(\u{2318}2), where every take card carries the same menu — and "
+            + "on the spare card use \(TakeCardMenuCopy.menuGlyph) \u{25B8} "
+            + "\(TakeCardMenuCopy.deleteTake). Then press history: the take is "
             + "listed with Put back, and it comes back with its label, its "
             + "place in the fan and its savepoints intact. (A saved lens "
             + "pointing at a take you archived or deleted says so right in its "
@@ -1077,7 +1090,9 @@ enum TutorialSeeder {
         // count of fanned blocks, and `theDeletedSpareTakeWaitsInTheBlocksPast`
         // finds this one by its prose — both caught the shift.)
         try take(on: past.blocks[4],
-            "the spare take — delete me from the \u{22EF} menu, then put me back from the block's history panel.")
+            "the spare take — delete me from my own card's \u{22EF} menu (every take "
+            + "card has one, in Takes and in Write's takes panel), then put me back "
+            + "from the block's history panel.")
 
         // ————————————————————————— where things go ——————————————————————————
         //

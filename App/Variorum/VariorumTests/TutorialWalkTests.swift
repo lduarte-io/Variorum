@@ -2210,7 +2210,18 @@ struct TutorialDeletionActsTests {
             #expect(trio.contains("\(TrayPath.leavingTab) view"),
                     "and the one delete's row lands in")
             #expect(trio.contains(TrayPath.archivedForever), "archive's own promise, in its own words")
-            #expect(trio.contains("Move out to a pool"), "the Blocks-mode row, verbatim")
+            // **A JUSTIFIED EDIT (13u3 UNIT H) — and the pin that should have
+            // caught this instead LOCKED IT IN.** It asserted the literal
+            // string `"Move out to a pool"` and called it "verbatim", but the
+            // Blocks-mode row has read *"Move out to snippets (leaves this
+            // note)"* since the Snippets vocabulary ruling (pre-13u, W8-1) —
+            // so a reader following the lesson looked in the menu for a row
+            // that is not in it, and a green pin said the words were right.
+            // The claim is unchanged; its source is the ROW's own constant
+            // now, which is what "verbatim" was supposed to mean. RED ON OLD:
+            // the seeded trio at `4f069b1b` does not contain the row's text.
+            #expect(trio.contains(SnippetsCopy.moveOutRow),
+                    "the Blocks-mode row, from the row's own constant")
             #expect(trio.contains("\(TrashWindow.days) days"), "the ruled window, not a number of its own")
 
             let trash = try #require(prose["the tray & the Trash"])

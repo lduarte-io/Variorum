@@ -59,6 +59,14 @@ nonisolated enum SnippetsCopy {
     static let openRow = "Open this snippet in its editor"
     static let tagsRow = "Tags…"
     static let moveRow = "Move to Group"
+    /// **The BLOCK-side row that sends a block out of its note** — rendered
+    /// by Blocks mode's row ⋯ and by Read ▸ edit's index column ⋯, and named
+    /// by the tutorial's deleting chapter. ONE spelling since 13u3 UNIT H:
+    /// the two menus hand-typed it identically and the lesson still called it
+    /// *"Move out to a pool"*, the name it carried before the Snippets
+    /// vocabulary ruling (pre-13u, W8-1) — a reader following that sentence
+    /// looked for a row that is not in the menu.
+    static let moveOutRow = "Move out to snippets (leaves this note)"
     static let archiveRow = "Archive Snippet"
     static let deleteRow = "Delete Snippet"
 

@@ -371,7 +371,7 @@ struct NoteIndexColumn: View {
             moveTarget = row
         }
         Divider()
-        Menu("Move out to snippets (leaves this note)") {
+        Menu(SnippetsCopy.moveOutRow) {
             ForEach(model.pools, id: \.id) { pool in
                 Button(PoolNaming.title(pool)) {
                     Task {

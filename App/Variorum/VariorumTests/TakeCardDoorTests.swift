@@ -49,7 +49,7 @@ import VariorumCore
 @testable import Variorum
 
 @MainActor
-@Suite("The take card's act menu (13u3 UNIT H)", .serialized)
+@Suite("The take card's act menu, and the words that name it (13u3 UNIT H)", .serialized)
 struct TakeCardDoorTests {
     // MARK: - Harness
 
@@ -366,6 +366,52 @@ struct TakeCardDoorTests {
             #expect(spare.workingText.contains(TakeCardMenuCopy.menuGlyph))
             #expect(spare.workingText.contains("card"),
                     "the practice take names the CARD's menu, not a menu somewhere (\(spare.workingText))")
+        }
+    }
+
+    /// **THE ⋯ SWEEP'S OTHER FIND** (the brief's R3-2 rule: no single-string
+    /// grep finds prose variants — walk the chapter's cards). Four sentences
+    /// in the seeder name a ⋯ menu; three were true, and this one named its
+    /// row *"Move out to a pool"*, the name it carried before the Snippets
+    /// vocabulary ruling. Both renderers of that row hand-typed the title, so
+    /// there was nothing for a lesson to quote; it quotes the one constant
+    /// now, and the conceptual sentence above it says the same word.
+    @Test func theTrioLessonNamesTheMoveOutRowTheMenuActuallyHas() async throws {
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_782_950_400)
+        let tick = LockIsolated(0)
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 13))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let bookID = try await TutorialSeeder.restore(session: session)
+            let lesson = try #require(try await db.read { db -> String? in
+                try String.fetchOne(
+                    db,
+                    sql: """
+                        SELECT c.id FROM reading_post rp
+                        JOIN container c ON c.id = rp.post_id AND c.deleted_at IS NULL
+                        WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND c.title = ?
+                        """,
+                    arguments: [bookID, "archive \u{B7} delete \u{B7} scraps"])
+            })
+            let prose = (try await db.read { try Queries.renderPost($0, containerID: lesson) })
+                .compactMap(\.text).joined(separator: "\n")
+            #expect(prose.contains(SnippetsCopy.moveOutRow),
+                    "the row is quoted from its own constant")
+            #expect(!prose.contains("Move out to a pool"),
+                    "and the name the menu dropped is gone from the lesson")
+            #expect(!prose.contains("MOVE OUT TO A POOL"),
+                    "…including the sentence that sets the act up")
         }
     }
 
