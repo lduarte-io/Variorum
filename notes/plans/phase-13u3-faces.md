@@ -1579,3 +1579,47 @@ label untouched · both voices, both appearances; captures to `notes/plans/13u3-
 Record: **UNIT D RECORD** appended here, LIVE STATUS from the first commit, UNIT CLOSED banner,
 ledger row 5 flipped in the same commit.
 
+
+---
+
+## UNIT D RECORD — NAMED COMMITS (opus-implementer, 2026-09-19)
+
+**WHAT THIS UNIT DOES NOT DO (the record's first line):** it does not touch the PHONE's commit
+door or build any phone chrome — the shared face brain gains names and the phone's Block History
+listing therefore shows them for free (a MOBILE-VISIBLE change, recorded as a parity note below,
+not built). It changes NOTHING about what a savepoint IS: the snapshot text stays immutable (I5),
+`commit_point.message` has existed since v1, so ZERO schema, ZERO migrations, the marker stays 8,
+and `Sources/VariorumCore/Sync/` gets ZERO lines (the rename rides the shipped `commit_point`
+UPDATE outbox trigger and server-version-wins CAS; `message` was already classified ENCRYPTED in
+`SyncSchema`, so no disclosure envelope moves either). It does not touch UNIT A1's gutter, UNIT
+A2's comments panel, UNIT B's card family or UNIT C's capture boxes, and it claims no new global
+chord (⇧⌘V stays `PlainPaste`'s): ⏎ and ⎋ act only inside a name field that has the keyboard.
+
+### LIVE STATUS (written at the start; flipped in the same commit as each piece)
+
+| # | piece | status |
+|---|---|---|
+| 0 | the record + LIVE STATUS | **DONE** |
+| 1 | core — `SavepointName` (the one normalisation) + `renameCommitPoint` + its state-transition pins | PENDING |
+| 2 | the SHARED face — a savepoint's name LEADS its quiet line (`SavepointRowFace`) + pins | PENDING |
+| 3 | the Mac name field — one component, one pure key rule, voiced | PENDING |
+| 4 | the commit doors summon it (Write · Takes/Lenses · Canvas · Compare) + pins | PENDING |
+| 5 | the RENAME door in Block History, on manual AND quiet savepoints + pins | PENDING |
+| 6 | the copy that teaches (the helper dictionary, the cheat sheet, the tutorial lesson) + pins | PENDING |
+| 7 | QUESTIONS #121 (the PROVISIONAL calls) + the next-free marker moved | PENDING |
+| 8 | the walk + captures, the FULL Mac suite, tutorial spine, iOS build, the FULL mobile suite | PENDING |
+
+*(Nothing below this line is claimed until its row says DONE.)*
+
+### THE RED-ON-OLD VERIFICATION — NAMED BEFORE IT RUNS (the checkpoint protocol)
+
+**This unit is a MISSING CAPABILITY and the brief says so** (*"the rename road (red-on-old is not
+owed — a new capability, not a defect — but any behaviour you FIX on the way is)"*). A face that
+never offered a name was not a bug, and I am not manufacturing reds for the op's transitions, the
+field's key rule or the display. If a defect turns up while I read the shipped commit roads it is
+traced, measured red-on-old and recorded in this section; if none does, this section says so.
+
+**BASELINES AT OPEN** (UNIT C's recorded finals, this session's start — never re-run at a start):
+core **1580 / 172** green · the FULL Mac suite **2841 / 474** with ONLY row 58's recorded
+environment red (`theReadClickLandsInIndexAtThatBlock`) · the FULL mobile suite **626 / 106 with 4
+known issues** · iOS build green · marker **8**.
