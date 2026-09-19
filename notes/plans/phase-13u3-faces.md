@@ -2590,3 +2590,26 @@ green · YOUR walk with captures: the merge sheet on a fanned run of three, drif
 ops under the open sheet (the refresh line speaks; confirm joins what the list shows), both
 voices. Record: **UNIT G RECORD**, LIVE STATUS from the first commit, UNIT CLOSED banner,
 ledger row 8 flipped in the same commit.
+
+---
+
+## UNIT G RECORD — THE CEREMONY-SHEET RESIDUALS (opus-implementer, 2026-09-19)
+
+**WHAT I DID NOT DO, stated first (the record's own rule).** *(filled at close)*
+
+### LIVE STATUS (written at the start; flipped in the same commit as each piece)
+
+| piece | status |
+|---|---|
+| 0 · read the brief's named sections (plan banner · roster 7 · GOVERNANCE + constitution · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the walker facts · the 18f round-3 record R3-5…R3-9 · KnownIssues row 42 · the code the findings name) | **DONE** |
+| 1 · R3-9 — core `Queries.renderedVariantID` (+ the plural), with the equivalence pin | PENDING |
+| 2 · R3-6 — the pair's rendered ids read from the STORE at open, in the same read as the fans | PENDING |
+| 3 · R3-5 — `MergeRunBlock.shownVariantID`; the RUN arm's drift check; `runMergeChain` takes the state's shown ids (RED-ON-OLD owed) | PENDING |
+| 4 · R3-7 — the pre-pair re-seeds from `rendered` on a preset refresh; hers kept under `.pairByHand` (RED-ON-OLD owed) | PENDING |
+| 5 · R3-8 — `renderedTakeID` hoisted to a `FanHalf` extension, consumed on all three roads (NO pin — hollow by the finding's own words) | PENDING |
+| 6 · item 6 — the three disagreeing opening-take reads: consume or verdict | PENDING |
+| 7 · the walk (dev-store Debug, both voices) with captures | PENDING |
+| 8 · finals (core · FULL Mac · tutorial spine · iOS build) | PENDING |
+| 9 · close — KnownIssues row 42 RESOLVED + ledger row 8 flipped + UNIT CLOSED banner | PENDING |
+
+*(No death so far. Baselines at open, from the brief: FULL Mac **2874/481** with row 58's environment red the single tolerated one; core **1596/174**; tutorial spine green; marker 8.)*
