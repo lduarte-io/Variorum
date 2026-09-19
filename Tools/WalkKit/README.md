@@ -127,3 +127,28 @@ swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
   second Debug app on the SAME dev store (same bundle id, same container). Run them STRICTLY one
   at a time — `tell application id …` cannot tell two instances apart (the UNIT E fact) — and
   `git worktree remove --force` afterwards.
+
+## Walker facts from the 13u3 UNIT G walk (2026-09-19)
+
+- **TWO DEV INSTANCES ON ONE DEV STORE is the road for staging a sync-shaped race by hand.**
+  `open -n <app>` twice gives two PIDs on the same store (WAL, both hold the same SQLCipher key),
+  and a ceremony sheet open in instance A **SURVIVES** instance B being activated and writing.
+  Her J16 ruling ("the sheet dismisses when another window is raised — it's just cancelled") is
+  about another WINDOW of the same app; another PROCESS does not cancel it. This is what makes
+  "a row changed in the store while the sheet was open" walkable at all.
+- **The dev store is ENCRYPTED** (SQLCipher since 13p — `head -c 16 …/Variorum-dev/variorum.sqlite`
+  shows no `SQLite format 3` header), so an external `sqlite3` writer cannot stage a row change.
+  Two instances are the substitute; don't waste time looking for the plaintext road.
+- Quit the EXTRA instance by **PID** (`kill -TERM <pid>` on a pid `pgrep` proved is yours), then
+  the last one by identity (`tell application id "io.lduarte.Variorum.debug" to quit`) — never a
+  keystroke (the UNIT D rule). Verify `pgrep -fl 'Variorum.app/Contents/MacOS'` after each.
+- **A second instance does NOT pick up a voice change made in the first** (the voice is a synced
+  store `setting`; the second process kept rendering Terminal while the first went Study). Read
+  each instance's voice from its own capture rather than assuming they match.
+- Settings ▸ Appearance at `(200,120) 560×548`: **Terminal = (614, 280), Study = (686, 280)** in
+  SCREEN points. Restore the voice you found when you are done — it is her dev store's state.
+- **The Library ▸ Notes cards mode is the cheapest place to verify a take-RESOLUTION change**: the
+  card's second line is the note's opening blocks, so archiving/re-pointing a chosen take shows up
+  there without opening the note.
+- `walk-cap` refuses silently-ish if the outdir does not exist (`screencapture: cannot write file`)
+  — `mkdir -p` it first.

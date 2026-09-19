@@ -2608,7 +2608,7 @@ ledger row 8 flipped in the same commit.
 | 4 · R3-7 — the pre-pair re-seeds from `rendered` on a preset refresh; hers kept under `.pairByHand` (RED-ON-OLD owed) | **DONE** — `prePairing` hoisted and consumed at both open and refresh; pin `aPresetRefreshReSeedsThePrePairFromWhatTheSheetNowShows` RED on `25638746` (the stale head survived and then joined) |
 | 5 · R3-8 — `renderedTakeID` hoisted to a `FanHalf` extension, consumed on all three roads (NO pin — hollow by the finding's own words) | **DONE** — `Features/Takes/FanHalfRendering.swift`; the two sheet roads and the board's instant road read it; NO pin claimed, and the file says why in its own header |
 | 6 · item 6 — the three disagreeing opening-take reads: consume or verdict | **DONE** — the rule ships as `Queries.renderedTakeJoinSQL` + `renderedTakeTextSQL`; `NoteCards.load` and BOTH `notePickerNotes` overloads consume it; 4 pins (3 RED on `25638746` at the card's three divergences, 2 red at the picker's), plus an anti-drift net walking SIX readers over one world; the other `default_variant_id` reads verdicted in the record |
-| 7 · the walk (dev-store Debug, both voices) with captures | PENDING |
+| 7 · the walk (dev-store Debug, both voices) with captures | **DONE** — 14 captures, `notes/plans/13u3-screens/ug-01…ug-14`; the drift staged BY HAND through the app's own doors using TWO dev instances on one store (the new WalkKit fact); both voices; zero instances at the end, her store never touched |
 | 8 · finals (core · FULL Mac · tutorial spine · iOS build) | PENDING |
 | 9 · close — KnownIssues row 42 RESOLVED + ledger row 8 flipped + UNIT CLOSED banner | PENDING |
 
