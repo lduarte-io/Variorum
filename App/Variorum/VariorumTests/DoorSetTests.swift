@@ -393,7 +393,9 @@ struct CalloutEmojiPickerTests {
         #expect(accessory.field.frame.minX >= -0.5)
         #expect(accessory.pickerButton.frame.maxX <= accessory.view.frame.width + 0.5)
         // And typing lands: the field is editable and the prompt reads it
-        // back (`promptEmoji` returns `accessory.field.stringValue`).
+        // back (`promptEmoji` returns `firstGrapheme(accessory.field
+        // .stringValue)` since her R-13u3-4 — the guard is pinned in
+        // `ProseGutterTests.aLeadingGlyphIsExactlyOneGrapheme`).
         #expect(accessory.field.isEditable)
         accessory.field.stringValue = "\u{1f4a1}"
         #expect(accessory.field.stringValue == "\u{1f4a1}")

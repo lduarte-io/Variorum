@@ -253,15 +253,39 @@ enum CalloutMenu {
     static func promptEmoji() -> String? {
         let alert = NSAlert()
         alert.messageText = "Callout Emoji"
+        // 13u3 UNIT A1, her ruling **R-13u3-4** ("One grapheme"): the field
+        // SAYS SO, and `firstGrapheme` below keeps the answer. The gutter's
+        // glyph box is fixed (`BlockDecor.calloutGlyphBox`) so that the
+        // gutter's arithmetic is one constant rather than a measured label,
+        // and a multi-glyph answer used to CLIP inside it — KnownIssues row
+        // 50's second residual, which her ruling dissolves by deciding what
+        // "a leading glyph" means instead of growing the box.
         alert.informativeText =
             "A leading glyph for this callout — type or paste one, or pick from "
-            + "Emoji & Symbols (leave empty for none)."
+            + "Emoji & Symbols (leave empty for none). Just the first one is kept."
         let accessory = emojiAccessory()
         alert.accessoryView = accessory.view
         alert.addButton(withTitle: "Set")
         alert.addButton(withTitle: "Cancel")
         guard alert.runModal() == .alertFirstButtonReturn else { return nil }
-        return accessory.field.stringValue
+        return firstGrapheme(accessory.field.stringValue)
+    }
+
+    /// **ONE GRAPHEME** (her ruling R-13u3-4) — pure, so the rule is pinned
+    /// rather than observed, and so the door and the renderer
+    /// (`BlockDecor.leadingGlyph`, which keeps the first grapheme of
+    /// whatever is STORED — a value typed before this guard, or one arriving
+    /// from another device) can never disagree about what a leading glyph
+    /// is. An EMPTY answer stays empty: that is the real "no glyph", which
+    /// `CalloutEditRule` already reads as removing it.
+    ///
+    /// Swift's `Character` IS a grapheme cluster, so a family emoji, a
+    /// skin-toned thumb and a flag each count as one — which is the whole
+    /// point of choosing graphemes over scalars.
+    static func firstGrapheme(_ raw: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let first = trimmed.first else { return "" }
+        return String(first)
     }
 
     /// The context-menu item both TEXT SURFACE kinds insert beside Format —

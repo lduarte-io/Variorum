@@ -526,6 +526,44 @@ struct ProseGutterTests {
         }
     }
 
+    // MARK: - The one-grapheme guard (her ruling R-13u3-4)
+
+    /// **ONE GRAPHEME, AT THE DOOR AND AT THE RENDERER** — her ruling
+    /// R-13u3-4, which dissolves KnownIssues row 50's second residual (a
+    /// multi-glyph answer CLIPPING inside the fixed box) by deciding what a
+    /// leading glyph is rather than growing the box.
+    ///
+    /// **RED ON OLD** (behavioral revert, verified): with
+    /// `CalloutMenu.promptEmoji` returning `field.stringValue` and
+    /// `renderCallouts` drawing `presentation.emoji`, a "🔥🔥🔥" answer was
+    /// stored and drawn whole into an 18 pt box.
+    @Test func aLeadingGlyphIsExactlyOneGrapheme() {
+        // The DOOR keeps the first, trims, and leaves "no glyph" alone.
+        #expect(CalloutMenu.firstGrapheme("\u{1f525}\u{1f525}\u{1f525}") == "\u{1f525}")
+        #expect(CalloutMenu.firstGrapheme("  \u{1f4a1} ") == "\u{1f4a1}")
+        #expect(CalloutMenu.firstGrapheme("") == "")
+        #expect(CalloutMenu.firstGrapheme("   ") == "")
+        // A grapheme CLUSTER is one glyph: a family, a skin tone, a flag.
+        #expect(CalloutMenu.firstGrapheme("\u{1f469}\u{200d}\u{1f467}\u{200d}\u{1f466}x")
+            == "\u{1f469}\u{200d}\u{1f467}\u{200d}\u{1f466}")
+        #expect(CalloutMenu.firstGrapheme("\u{1f44d}\u{1f3fd}\u{1f44d}") == "\u{1f44d}\u{1f3fd}")
+        #expect(CalloutMenu.firstGrapheme("\u{1f1e8}\u{1f1e6}\u{1f1e8}\u{1f1e6}")
+            == "\u{1f1e8}\u{1f1e6}")
+        // The RENDERER keeps the first of whatever is STORED — a value
+        // typed before this guard, or one arriving from another device.
+        #expect(BlockDecor.leadingGlyph(
+            BlockPresentation(color: "sand", emoji: "\u{1f525}\u{1f525}\u{1f525}"))
+            == "\u{1f525}")
+        #expect(BlockDecor.leadingGlyph(BlockPresentation(color: "sand", emoji: "")) == nil)
+        #expect(BlockDecor.leadingGlyph(BlockPresentation(color: "sand")) == nil)
+        #expect(BlockDecor.leadingGlyph(nil) == nil)
+        // A glyph on a NON-callout presentation is not a callout glyph.
+        #expect(BlockDecor.leadingGlyph(
+            BlockPresentation(kind: "future", emoji: "\u{1f4a1}")) == nil)
+        #expect(!BlockDecor.hasLeadingGlyph(
+            BlockPresentation(kind: "future", emoji: "\u{1f4a1}")))
+    }
+
     // MARK: - Fixtures
 
     /// A real contained (book) editor in a real window.
