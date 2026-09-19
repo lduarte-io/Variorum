@@ -1623,6 +1623,15 @@ final class TakesViewModel {
             setRefusal("Click into a take first — ⌘S commits the take you're in.")  // J38
             return
         }
+        // 13u3 ladder round 1, R1-3 (the implementer's widen, confirmed):
+        // `focusedPane` is the RAW `authority.livePane` — a click under a
+        // seal still sets it (`focus` has no seal test; `isPaneLive` is where
+        // the seal lives) — so without this the field opened over a commit
+        // the filer refuses. Same sentence as the post-⏎ road's.
+        guard !projection.sealed else {
+            setRefusal(OpsRefusalCopy.message(for: OperationError.lockedPost(id: postID)))
+            return
+        }
         savepointAsk = .naming(variantID: variantID)
     }
 

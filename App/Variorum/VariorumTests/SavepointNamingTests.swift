@@ -317,6 +317,107 @@ struct SavepointTakesDoorTests {
     }
 }
 
+/// **A SEALED NOTE'S ⌘S REFUSES AT THE DOOR — ON ALL FOUR ASK DOORS** (13u3
+/// ladder round 1, R1-3, the implementer's widen confirmed: P-2's letter).
+/// The shipped doors guarded their no-target state (open tail · no focused
+/// pane · no live pane) and not the SEAL — and the boards' target facts are
+/// the RAW `authority.livePane`, which a click under a seal still sets — so
+/// on a sealed note the field opened over a commit the filer refuses, where
+/// the pre-D road refused at the keypress. Each cell drives the real door
+/// under a real seal: no field, and the seal's own sentence.
+@MainActor
+@Suite("The ask doors refuse under a seal (13u3 ladder R1-3)")
+struct SavepointSealedDoorTests {
+    private var sealedSentence: String {
+        OpsRefusalCopy.message(for: OperationError.lockedPost(id: "x"))
+    }
+
+    @Test func writesDoorRefusesASealedNoteBeforeOpeningTheField() async throws {
+        try await withEditor(seedBlocks: ["draft text"]) { h in
+            h.textView.setSelectedRange(NSRange(location: 3, length: 0))
+            h.model.updateCaretContext()
+            try h.session.operations.lockPost(h.postID)
+            try h.reload()  // the header's seal reaches the model
+            #expect(h.model.header?.locked == true)
+
+            h.model.commitCaretVariant()
+
+            #expect(h.model.savepointAsk == nil, "no field over a sealed commit")
+            #expect(h.model.statusMessage == sealedSentence,
+                    "the same sentence the post-\u{23CE} road speaks")
+        }
+    }
+
+    @Test func takesDoorRefusesASealedNoteBeforeOpeningTheField() async throws {
+        try await withSavepointTakesWorld { model, db, postID in
+            let slot = try #require(model.projection.slots.first)
+            let variantID = try #require(slot.variantID)
+            // The widen's own mechanism: a click under a seal still sets the
+            // RAW livePane (focus has no seal test; isPaneLive is where the
+            // seal lives), so the target guard alone cannot refuse this.
+            model.focus(TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesMainColumnID,
+                blockID: slot.blockID, variantID: variantID))
+            try model.session.operations.lockPost(postID)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: postID) })
+            #expect(model.projection.sealed)
+            #expect(model.focusedPane != nil, "the raw pointer survives the seal")
+
+            model.askSavepointName()
+
+            #expect(model.savepointAsk == nil, "no field over a sealed commit")
+            #expect(model.status?.isRefusal == true)
+            #expect(model.status?.text == sealedSentence)
+        }
+    }
+
+    @Test func canvasDoorRefusesASealedNoteBeforeOpeningTheField() async throws {
+        try await withSavepointTakesWorld { takes, db, _ in
+            let session = takes.session
+            let post = try session.operations.createPost(title: "canvas world")
+            let minted = try session.operations.newBlock(in: post.id, text: "A card.")
+            let model = CanvasViewModel(session: session, containerID: post.id)
+            let projection = try await db.read {
+                try Queries.canvasProjection($0, container: post.id)
+            }
+            model.adopt(projection)
+            model.focus(blockID: minted.block.id, variantID: minted.variant.id)
+            #expect(model.authority.livePane != nil)
+            try session.operations.lockPost(post.id)
+            model.adopt(CanvasFace(projection: projection, sealed: true))
+
+            model.askSavepointName()
+
+            #expect(model.savepointAsk == nil, "no field over a sealed commit")
+            #expect(model.statusMessage == sealedSentence)
+        }
+    }
+
+    @Test func compareDoorRefusesASealedPanesOwnPost() async throws {
+        try await withSavepointTakesWorld { takes, db, _ in
+            let session = takes.session
+            let anchor = try session.operations.createPost(title: "the piece")
+            let minted = try session.operations.newBlock(
+                in: anchor.id, text: "First block of the piece.")
+            let model = CompareViewModel(session: session, anchorPostID: anchor.id)
+            model.focus(PaneTextAuthority.PaneKey(
+                columnID: "compare-\(anchor.id)", blockID: minted.block.id,
+                variantID: minted.variant.id, context: anchor.id))
+            try session.operations.lockPost(anchor.id)
+            model.adopt(try await db.read { db in
+                try CompareViewModel.read(db, anchor: anchor.id, peers: [])
+            })
+            #expect(model.projection.anchor.sealed)
+            #expect(model.authority.livePane != nil)
+
+            model.askSavepointName()
+
+            #expect(model.savepointAsk == nil, "no field over a sealed commit")
+            #expect(model.statusMessage == sealedSentence)
+        }
+    }
+}
+
 @MainActor
 @Suite("Block History's rename door (13u3 UNIT D — R-13u3-1)", .serialized)
 struct SavepointRenameDoorTests {

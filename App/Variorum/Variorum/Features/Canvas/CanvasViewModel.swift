@@ -720,6 +720,15 @@ final class CanvasViewModel {
             statusMessage = "Click into a card first — ⌘S commits the take you're editing."
             return
         }
+        // 13u3 ladder round 1, R1-3 (the widen): `livePane` is the raw
+        // pointer and `focus` has no seal test, so a card clicked under a
+        // seal would open a field the filer refuses. Same sentence as the
+        // post-⏎ road's.
+        guard !sealed else {
+            statusMessage = OpsRefusalCopy.message(
+                for: OperationError.lockedPost(id: containerID))
+            return
+        }
         savepointAsk = .naming(variantID: pane.variantID)
     }
 

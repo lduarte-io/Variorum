@@ -3073,6 +3073,14 @@ final class EditorViewModel {
             refuse("Place the caret in a block to commit.")
             return
         }
+        // 13u3 ladder round 1, R1-3 (P-2's letter): a SEALED note's ⌘S used
+        // to refuse at the keypress; the door must not open a field over a
+        // gesture the filer will refuse. Same sentence the post-⏎ road
+        // speaks, so the two moments cannot disagree.
+        guard header?.locked != true else {
+            refuse(OpsRefusalCopy.message(for: OperationError.lockedPost(id: postID)))
+            return
+        }
         savepointAsk = .naming(variantID: variantID)
     }
 

@@ -777,6 +777,16 @@ final class CompareViewModel {
             statusMessage = "Click into a pane first — ⌘S commits the take you're in."
             return
         }
+        // 13u3 ladder round 1, R1-3 (the widen): `livePane` is the raw
+        // pointer, and Compare crosses posts — the seal that matters is the
+        // PANE's own post's (`pane.context`), read off the face this board
+        // already renders "sealed — read-only" from. Same sentence as the
+        // post-⏎ road's.
+        guard face(for: pane.context)?.sealed != true else {
+            statusMessage = OpsRefusalCopy.message(
+                for: OperationError.lockedPost(id: pane.context))
+            return
+        }
         savepointAsk = .naming(variantID: pane.variantID)
     }
 
