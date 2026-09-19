@@ -705,8 +705,8 @@ door claims a shortcut outside the panel's own key window.
 | # | piece | status |
 |---|---|---|
 | 0 | the record + LIVE STATUS | **DONE** |
-| 1 | `CommentComposition` — the pure edit/file/escape brain + its pins | PENDING |
-| 2 | the model: per-comment drafts, the classed status slot, the receipt/refusal doors + pins | PENDING |
+| 1 | `CommentComposition` — the pure edit/file/escape brain + its pins | **DONE** |
+| 2 | the model: per-comment drafts, the classed status slot, the receipt/refusal doors + pins | **DONE** (13 cells in 2 suites green: `CommentCompositionTests` · `CommentsPanelModelEditorTests`) |
 | 3 | the view: ONE writing surface (edit in place · the add area owns the rest · ⌘⏎/Esc · deleted fold) | PENDING |
 | 4 | the red-on-old measurement (the one defect-shaped cell) | PENDING |
 | 5 | QUESTIONS #118 (the PROVISIONAL calls) | PENDING |
