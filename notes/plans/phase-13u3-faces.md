@@ -1274,7 +1274,7 @@ capture box that has the caret.
 | 4 | the SHELF/LIBRARY quick-entry bar on the same rule (the 13l text-preserving refusal byte-preserved) | **DONE** (29 cells green across 5 suites: the 3 new + the 2 they must not disturb) |
 | 5 | the red-on-old measurement (the one defect-shaped row: a refused quick-note filing destroyed the capture) | **DONE** — measured, restored, re-verified (the table below) |
 | 6 | the copy that teaches the keys — the helper dictionary + the tutorial's workspace lesson, with pins | **DONE** (2 new cells; `TutorialBookShapeTests` + `NodSetTests` + the quick-note word suite green) |
-| 7 | QUESTIONS #120 (the PROVISIONAL calls) + the marker moved | PENDING |
+| 7 | QUESTIONS #120 (the PROVISIONAL calls) + the marker moved | **DONE** — six lettered calls; the stale mid-file marker retired and the live one moved to the file's end (#121) |
 | 8 | the walk + captures, the full Mac suite, the tutorial spine, iOS build | PENDING |
 
 *(Nothing below this line is claimed until its row says DONE.)*

@@ -1450,7 +1450,7 @@ Nothing about the manifest depends on this; the re-land is one call at one `onCh
 
 *Scope note, not a question:* the calm page's **pages** form (real leaves, no scroll offset) is outside the rule by its geometry, as `#114(b)` already says of Lenses/Compare/Canvas/Blocks; and flipping Read's own `edit`/`read` switch is not a mode switch, so it keeps whatever the host's scroll had — pre-existing, untouched.
 
-*(Next free number: **#120**.)*
+*(The next-free marker moved to the FILE'S END at 13u3 UNIT C — #117…#120 were appended after this line's old position, which is how a marker in the middle goes stale.)*
 
 ---
 
@@ -1494,3 +1494,21 @@ This unit did NOT change it (the brief's fence: a rule that narrows a measure no
 **(f) THE LIBRARY LIST ROW'S NAME IS NOW ONE LINE.** It had no line limit, so a long name wrapped and broke the row's single baseline (the row is a title, a day, the tag chips and a stamp on ONE baseline); the Notes card's title has always been one line. Consequence beyond item 4: a long TITLE now truncates in the List row where it used to wrap.
 
 *Two things this unit found and did NOT fix, recorded for their owners rather than carried:* the full-document editor SPUN on a `deleteBackward` during the walk (`EditorViewModel.refreshDecorations` → `NSTextLayoutManager.ensureLayoutForBounds` — TEXTKIT2 §2's class, forcing layout from inside a text-storage callback; a full `sample` stack is in the UNIT B RECORD, seen once, not reproduced), and some chip inside an expanded book story WRAPS today, which is a row height the book's manifest does not know about (found because clamping the shared chip to one line moved a settled Outline landing by 3,424 pt).
+
+---
+
+#120 — **THE MAC'S TWO CAPTURE BOXES NOW ANSWER ONE RULE, AND SIX SMALL CALLS CAME WITH IT (2026-09-19, 13u3 UNIT C; the record is `notes/plans/phase-13u3-faces.md`'s UNIT C RECORD).** Your R-13u-4 is built to its letter on both Mac capture doors — **⏎ files what you have written · ⇧⏎ adds a paragraph**, a capture holds as many paragraphs as you type, and the hand-off goes through `importPost`'s bulk rule exactly as the ruling says. These six are the details the ruling leaves to the build. All PROVISIONAL, each one line to change, none of them touching what the rule IS.
+
+**(a) ⏎ IN THE PAD FILES *AND CLOSES* IT.** The floating quick note has three doors onto one act — the key, ⌘⏎, and the "File It" button — and all three now file the note and put the pad away, which is what the button and the chord already did. **The alternative:** ⏎ files and the pad stays open, empty, ready for a second thought (one summon, several notes). I built the closing one because "one summon = one note" is the pad's shipped grammar (your round-14.2) and a window that stays open after it has filed is a window you then have to close. The shelf's box is the opposite by design — see (b).
+
+**(b) THE SHELF'S BOX STILL FILES *AND OPENS* THE NOTE; THE PAD FILES AND CLOSES.** The two doors mean different things by "file", deliberately: the shelf bar is R3's type-and-go-there door (its own placeholder has always said *"⏎ opens it"*) and the pad is a sticky you throw a thought at without leaving what you were doing (your round-14.3: *"a sticky that yanks her out of what she was doing is the opposite of a quick note"*). **The alternative:** make them identical in that half too — which would mean either the shelf stops navigating or the pad starts.
+
+**(c) THE SHELF BOX GROWS TO ABOUT EIGHT LINES AND THEN SCROLLS (160 pt).** It used to stop at four and could not be typed past in paragraphs at all. It lives in a busy window, so an unbounded box would push the shelf's own content down as you type. **The alternatives:** a taller bound, or no bound at all (the box takes the window). The note it becomes has no limit either way — this is only about how much of a long capture you can see while typing it.
+
+**(d) ⏎ ON AN EMPTY PAD DOES NOTHING.** Not a file (there is nothing), not a close. The "File It" button is already grey in that state, so the key matches it. **The alternative:** treat it as "I'm done here" and close the pad — quick, but it makes ⏎ mean two different things depending on what is in the box, which is the shape of the phone defect this unit exists to make impossible.
+
+**(e) A REFUSAL KEEPS THE PAD OPEN, AND SPEAKS ON THE PAD.** If the store refuses the note (it can: a failure mid-round, the store unreachable), the pad keeps your words, says so in its own line — *"…Your text is still here — try again in a moment."* — and does NOT close; the next ⏎ tries again. **This half is a real fix, not a taste call:** the pad used to empty itself BEFORE asking the store, so a refusal took the capture with it and spoke into the main window's status line, one window away (the red-on-old measurement is in the record). What is PROVISIONAL is only the wording and the place: the alternative is the shell's toast, which is where every other refusal in the app speaks. I put it on the pad because that is the window you are looking at when it happens.
+
+**(f) TWO SMALL CONSEQUENCES OF THE BOX BEING THE APP'S OWN, worth your eye once.** The capture boxes are now the app's own text surface rather than SwiftUI's stock one (the only place ⏎ and ⇧⏎ can be told apart — AppKit gives shift-Return no binding of its own). Two visible effects: **(i)** spell checking in a capture box now follows **Settings ▸ spell check**, which ships OFF, exactly like every other writing surface in Variorum — if the old box underlined typos for you and this one does not, that setting is the door, and it is one line to make capture always check; **(ii)** the refusal line under the shelf's box is painted in the alarm register now instead of the accent/positive one it used to wear (a refusal that reads green is a refusal that reads like a receipt). Neither changes what a capture DOES.
+
+*(Next free number: **#121**.)*
