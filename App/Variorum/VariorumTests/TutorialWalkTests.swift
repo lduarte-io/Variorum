@@ -2480,7 +2480,7 @@ struct TutorialDeletionActsTests {
             await harness.model.deleteCaretBlock()
             await harness.flush()
 
-            // MOVE OUT — Blocks (⌘5), the row's ⋯ menu.
+            // MOVE OUT — Blocks (⌘6, the one mode order — this comment said ⌘5 until 13u3; the lesson itself was always right), the row's ⋯ menu.
             let pool = try await db.read { db in
                 try Queries.pools(db).first { $0.title == TutorialSeeder.scrapPoolTitle }
             }
