@@ -141,9 +141,13 @@ struct CaptureTextView: NSViewRepresentable {
     /// The box is never shorter than this, so an empty capture still reads
     /// as somewhere to write.
     var minHeight: CGFloat = 22
-    /// Raised by the host to put the caret here (the shelf's autofocus, a
-    /// click on the box's padding). Lowering it never takes focus away.
-    var wantsFocus = false
+    /// A one-shot focus REQUEST, counted rather than flagged: 0 is "never
+    /// asked", and any change puts the caret here. A counter rather than a
+    /// Bool because the two askers are different in kind — the shelf asks
+    /// once when the bar appears, and a click on the box's padding asks
+    /// again later — and a Bool would have to be lowered by the host
+    /// between them, which is a second piece of state to get wrong.
+    var focusRequest = 0
     /// Whether the caret is in this box, for the host's own chrome (the
     /// Terminal voice's blinking block cursor stands down when it is).
     var onFocusChange: ((Bool) -> Void)?
@@ -174,6 +178,8 @@ struct CaptureTextView: NSViewRepresentable {
         view.textContainer?.size = NSSize(
             width: 0, height: CGFloat.greatestFiniteMagnitude)
         view.drawsBackground = false
+        view.wantsInitialFocus = focusRequest > 0
+        context.coordinator.lastFocusRequest = focusRequest
         // Spelling follows the app's ONE this-Mac setting (default `off`,
         // the shipped behaviour) rather than a second answer invented here.
         SpellcheckLevel.current.apply(to: view)
@@ -207,7 +213,10 @@ struct CaptureTextView: NSViewRepresentable {
                 NSRange(location: min(selected.location, end), length: 0))
         }
         context.coordinator.apply(style, to: view)
-        if wantsFocus { context.coordinator.takeFocus() }
+        if focusRequest != context.coordinator.lastFocusRequest {
+            context.coordinator.lastFocusRequest = focusRequest
+            context.coordinator.takeFocus()
+        }
     }
 
     func sizeThatFits(
@@ -248,8 +257,8 @@ struct CaptureTextView: NSViewRepresentable {
         var parent: CaptureTextView
         weak var view: CaptureNSTextView?
         let canary = FallbackCanary()
+        var lastFocusRequest = 0
         private var appliedStyle: CaptureTextStyle?
-        private var tookFocus = false
 
         init(_ parent: CaptureTextView) { self.parent = parent }
 
@@ -264,8 +273,7 @@ struct CaptureTextView: NSViewRepresentable {
         }
 
         func takeFocus() {
-            guard !tookFocus, let view, let window = view.window else { return }
-            tookFocus = true
+            guard let view, let window = view.window else { return }
             window.makeFirstResponder(view)
         }
 
@@ -279,7 +287,6 @@ struct CaptureTextView: NSViewRepresentable {
         }
 
         func textDidEndEditing(_ notification: Notification) {
-            tookFocus = false
             parent.onFocusChange?(false)
         }
     }
@@ -294,6 +301,23 @@ struct CaptureTextView: NSViewRepresentable {
 final class CaptureNSTextView: NSTextView {
     /// Plain ⏎ — what filing means belongs to the host.
     var onFile: (() -> Void)?
+
+    /// The caret lands here when the box reaches a window (the shelf's
+    /// autofocus). Asked ONCE, on arrival, and deferred by one turn so the
+    /// window has become key first — the A2 walk's fourth find, one unit
+    /// over: a caret that blinks in a non-key window swallows every
+    /// keystroke, and a caret you cannot type into is worse than no caret.
+    var wantsInitialFocus = false
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        guard wantsInitialFocus, window != nil else { return }
+        DispatchQueue.main.async { [weak self] in
+            guard let self, let window = self.window,
+                  window.firstResponder !== self else { return }
+            window.makeFirstResponder(self)
+        }
+    }
 
     override func keyDown(with event: NSEvent) {
         switch CaptureKeys.act(for: event) {

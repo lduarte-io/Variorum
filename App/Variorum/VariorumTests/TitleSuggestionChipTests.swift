@@ -146,17 +146,18 @@ struct TitleSuggestionChipTests {
             quiet.text = "A thought I had on the stairs."
             #expect(quiet.suggestedTitle == "A thought I had on the stairs.")
             #expect(!quiet.titleFromFirstWords)
-            let untitled = try #require(await quiet.fileExplicitly())
+            let untitled = try #require(await quiet.fileExplicitly().postID)
             #expect(try await self.storedTitle(db, untitled) == nil)
 
             let adopted = QuickNotePad(session: session)
             adopted.text = "Frost on the window, and a fox in the lane."
             adopted.titleFromFirstWords = true
-            let named = try #require(await adopted.close())
+            let named = try #require(await adopted.close().postID)
             #expect(try await self.storedTitle(db, named)
                     == "Frost on the window, and a fox in the lane.")
             #expect(!adopted.titleFromFirstWords, "the pad cleared itself, decision and all")
-            #expect(await adopted.close() == nil, "one summon, one note — unchanged")
+            #expect(await adopted.close() == .nothingToFile,
+                    "one summon, one note — unchanged")
         }
     }
 

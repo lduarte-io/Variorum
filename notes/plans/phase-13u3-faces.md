@@ -1270,11 +1270,39 @@ capture box that has the caret.
 | 0 | the record + LIVE STATUS | **DONE** |
 | 1 | `CaptureKeys` — the ONE pure ⏎/⇧⏎ rule + its pins | **DONE** (5 cells green) |
 | 2 | `CaptureTextView` — the ONE Mac capture surface (both hosts compose it) + its hosted-window key pins | **DONE** (5 cells green, real `NSEvent`s through production `keyDown`) |
-| 3 | the QUICK NOTE pad on the one rule (⏎ files · ⇧⏎ paragraph; the refusal that keeps her text) | PENDING |
-| 4 | the SHELF/LIBRARY quick-entry bar on the same rule (the 13l text-preserving refusal byte-preserved) | PENDING |
-| 5 | the red-on-old measurement (the one defect-shaped row: a refused quick-note filing destroyed the capture) | PENDING |
+| 3 | the QUICK NOTE pad on the one rule (⏎ files · ⇧⏎ paragraph; the refusal that keeps her text) | **DONE** |
+| 4 | the SHELF/LIBRARY quick-entry bar on the same rule (the 13l text-preserving refusal byte-preserved) | **DONE** (29 cells green across 5 suites: the 3 new + the 2 they must not disturb) |
+| 5 | the red-on-old measurement (the one defect-shaped row: a refused quick-note filing destroyed the capture) | **NAMED, pre-revert state committed at this row's commit — measuring next** |
 | 6 | the copy that teaches the keys — the helper dictionary + the tutorial's workspace lesson, with pins | PENDING |
 | 7 | QUESTIONS #120 (the PROVISIONAL calls) + the marker moved | PENDING |
 | 8 | the walk + captures, the full Mac suite, the tutorial spine, iOS build | PENDING |
 
 *(Nothing below this line is claimed until its row says DONE.)*
+
+### THE RED-ON-OLD VERIFICATION — NAMED BEFORE IT RUNS (the checkpoint protocol)
+
+**This unit is mostly a MISSING CAPABILITY, and the brief says so:** a capture box that could not
+type a second paragraph was never a bug, and I am not manufacturing reds for the ⏎/⇧⏎ contract,
+the growth bound or the hand-off. Exactly ONE row here is defect-shaped, and I traced it while
+reading the shipped pad rather than looking for something to pin:
+
+> **A REFUSED QUICK-NOTE FILING DESTROYED THE CAPTURE.** `QuickNotePad.take()` wrote
+> `self.text = ""` and `titleFromFirstWords = false` **before** calling `QuickNoteMint.file`,
+> which then `try`s `importPost` and CATCHES: on any throw the note does not exist, and her words
+> are already gone from the only place they lived. `fileAndClose()` dismissed the window in the
+> same breath, and the refusal was spoken into `session.status` — the MAIN window's status line,
+> not the pad she was looking at. **This is 13l's L-b defect, one file over**, and the shipped
+> comment explaining why the pad was left out of that fix — *"that pad mints as you type, so the
+> text is already a note by the time it files"* — describes a pad that has not existed since 13f
+> W5 shipped mint-on-close/⌘⏎/quit.
+
+**The revert is a BEHAVIOURAL revert of that one mechanism**, applied to the current tree and then
+undone (the standing method — the pre-13u3 tree cannot compile pins naming types it does not
+have): restore the clear-before-the-mint pair at the top of `take()`. Nothing else moves.
+
+- **Expected RED:** `aRefusedQuickNoteFilingKeepsTheCaptureInThePad` (its first two expectations —
+  the text and the adopted name).
+- **Expected GREEN under the same revert, and recorded as such so the measurement is honest
+  rather than a blanket:** every other cell in the three new suites. They pin what this unit
+  DECIDED (which key does what, what the box measures, what the hand-off segments to, what both
+  doors teach) — a new capability is not a bug pin.

@@ -117,6 +117,15 @@ final class QuickEntryModel {
 /// The bar's own words, in one place so a pin can read the sentence rather
 /// than a rendering of it (13l L-b).
 enum QuickEntryCopy {
+    /// **The box's one teaching line** (13u3 UNIT C — her R-13u-4). It used
+    /// to live as a literal inside the view and to say only half the rule
+    /// ("new note — just start typing · ⏎ opens it"); the other key now has
+    /// to be said, and a sentence a pin can read is a sentence that stays
+    /// true. "Opens" rather than "files" is R3's own grammar, kept: this
+    /// door files the note AND navigates to it, which is what the bar has
+    /// always done and what distinguishes it from the pad.
+    static let placeholder = "new note — just start typing · ⏎ opens it · ⇧⏎ new paragraph"
+
     /// The refusal names the act, hands the reason to the app's ONE
     /// operations vocabulary — never the raw `\(error)` dump this printed
     /// until now — and ends with the half that is load-bearing: her text is
@@ -143,8 +152,24 @@ struct QuickEntryBar: View {
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     @State private var box: QuickEntryModel
-    @FocusState private var entryFocused: Bool
+    /// Plain state rather than `@FocusState` since 13u3 UNIT C: the caret
+    /// lives in an AppKit box now, and the one honest report of where it is
+    /// comes from that box's own begin/end editing (the block-cursor idiom
+    /// is the only reader).
+    @State private var entryFocused = false
+    /// A counted focus REQUEST, the capture box's own door: raised once when
+    /// the shelf wants the caret here, and again whenever she clicks the
+    /// box's padding rather than its text.
+    @State private var focusRequest = 0
     @State private var cursorOn = true
+
+    /// **The box's bound** (13u3 UNIT C — the brief's "pick a sane max
+    /// height and record it PROVISIONAL"; QUESTIONS #120(c)). Her ruling
+    /// gives this box many paragraphs, and an unbounded one in a busy
+    /// window would push the shelf's own content off the bottom as she
+    /// types. 160 pt is about eight lines in either voice — past that it
+    /// scrolls, and the note it becomes has no such limit.
+    private static let maxBoxHeight: CGFloat = 160
 
     init(
         session: AppSession,
@@ -170,9 +195,10 @@ struct QuickEntryBar: View {
             ZStack(alignment: .topLeading) {
                 if box.text.isEmpty {
                     HStack(spacing: 6) {
-                        Text(tokens.chromeLabel("new note — just start typing · ⏎ opens it"))
+                        Text(tokens.chromeLabel(QuickEntryCopy.placeholder))
                             .font(tokens.body)
                             .foregroundStyle(tokens.faint)
+                            .lineLimit(1)
                         if tokens.showsBlockCursor && !entryFocused {
                             Rectangle()
                                 .fill(tokens.accent)
@@ -188,13 +214,17 @@ struct QuickEntryBar: View {
                     }
                     .allowsHitTesting(false)
                 }
-                TextField("", text: $box.text, axis: .vertical)
-                    .textFieldStyle(.plain)
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.ink)
-                    .focused($entryFocused)
-                    .lineLimit(1...4)
-                    .onSubmit { submit() }
+                // 13u3 UNIT C — THE ONE CAPTURE BOX (R-13u-4): ⏎ files it
+                // (and opens it, R3's grammar), ⇧⏎ makes a paragraph, and
+                // the floating quick-note pad answers the same two keys
+                // through this same component.
+                CaptureTextView(
+                    text: $box.text,
+                    style: CaptureTextStyle(tokens: tokens),
+                    maxHeight: Self.maxBoxHeight,
+                    focusRequest: focusRequest,
+                    onFocusChange: { entryFocused = $0 },
+                    onFile: { submit() })
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
@@ -202,7 +232,7 @@ struct QuickEntryBar: View {
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
             .contentShape(Rectangle())
-            .onTapGesture { entryFocused = true }
+            .onTapGesture { focusRequest += 1 }
             // 13u3 UNIT B — the OFFER (her item 4): the first words, one
             // click to take them as the note's title, ignorable forever.
             if let suggestion = box.suggestedTitle {
@@ -217,17 +247,22 @@ struct QuickEntryBar: View {
                 // fixedSize text in non-scrolling chrome inflates the WINDOW
                 // minimum during the near-zero-width min-size probe (the
                 // wedged-window root cause; see SyncStatusRow).
+                // 13u3 UNIT C: the ALARM register, not the accent. A refusal
+                // painted in the voice's positive/accent colour read as a
+                // receipt; A2 settled the vocabulary one unit earlier
+                // ("refusals speak in its alarm") and the pad's line beside
+                // this one wears the same.
                 Text(lastError)
                     .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
+                    .alarmVoice()
             }
         }
         .padding(.horizontal, 28)
         .padding(.vertical, 10)
         .task {
-            if autofocus { entryFocused = true }
+            if autofocus { focusRequest += 1 }
         }
     }
 

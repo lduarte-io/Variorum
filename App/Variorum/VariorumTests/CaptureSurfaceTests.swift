@@ -12,7 +12,11 @@
 //
 
 import AppKit
+import Dependencies
+import Foundation
+import GRDB
 import Testing
+import VariorumCore
 @testable import Variorum
 
 // MARK: - The rule, as a value
@@ -255,5 +259,181 @@ struct CaptureTextViewKeyTests {
 
         #expect(oneLine > 0)
         #expect(threeLines > oneLine, "three paragraphs measure taller than one")
+    }
+}
+
+// MARK: - The hand-off, through the real operation
+
+@MainActor
+@Suite("The capture doors keep her words (13u3 UNIT C)")
+struct CaptureHandOffTests {
+    /// Three paragraphs as she would type them with ⇧⏎.
+    static let threeParagraphs = "First paragraph.\nSecond paragraph.\nThird paragraph."
+
+    private func withCapture<T>(
+        _ body: @MainActor (AppSession, AppDatabase) async throws -> T
+    ) async throws -> T {
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
+        return try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 13))
+        } operation: { @MainActor in
+            try await body(AppSession(database: db), db)
+        }
+    }
+
+    private func blocks(_ db: AppDatabase, _ postID: String) async throws -> [String] {
+        try await db.read { try Queries.renderPost($0, containerID: postID) }
+            .compactMap(\.text)
+    }
+
+    /// **THE PAD'S HAND-OFF: three paragraphs in, three blocks out** — the
+    /// `importPost` bulk rule her ruling names, asserted as an exact block
+    /// count and exact texts rather than a trimmed shape.
+    @Test func aThreeParagraphPadFilesThreeBlocks() async throws {
+        try await withCapture { session, db in
+            let pad = QuickNotePad(session: session)
+            pad.text = Self.threeParagraphs
+            let postID = try #require(await pad.fileExplicitly().postID)
+
+            #expect(try await self.blocks(db, postID)
+                    == ["First paragraph.", "Second paragraph.", "Third paragraph."])
+            #expect(pad.text.isEmpty, "a completed hand-off clears the pad")
+            #expect(pad.lastError == nil)
+        }
+    }
+
+    /// …and the BAR's hand-off is the same three blocks, because both doors
+    /// ride the same `importPost` bulk rule. One ruling, one outcome.
+    @Test func aThreeParagraphBarEntryFilesThreeBlocks() async throws {
+        try await withCapture { session, db in
+            let box = QuickEntryModel(session: session)
+            box.text = Self.threeParagraphs
+            let postID = try #require(await box.submit())
+
+            #expect(try await self.blocks(db, postID)
+                    == ["First paragraph.", "Second paragraph.", "Third paragraph."])
+            #expect(box.text.isEmpty)
+        }
+    }
+
+    /// **THE LOST-PROSE CLASS, END TO END** (the phone's 2026-08-23 report:
+    /// *"my second line was NOT in the new note and neither were the edits
+    /// to the first line"*). The caret is put INSIDE paragraph one, an edit
+    /// is typed there, ⏎ is pressed on the real surface, and what the store
+    /// ends up holding is all three paragraphs INCLUDING that edit.
+    @Test func theCaretInParagraphOneChangesNothingAboutWhatIsFiled() async throws {
+        try await withCapture { session, db in
+            let pad = QuickNotePad(session: session)
+            let view = CaptureTextViewKeyTests.box(Self.threeParagraphs)
+            var handed: String?
+            view.onFile = { handed = view.string }
+            let hosted = CaptureTextViewKeyTests.host(view)
+            defer { hosted.teardown() }
+
+            // Her exact gesture: click back into the first paragraph, fix a
+            // word, then press Return.
+            view.setSelectedRange(NSRange(location: 5, length: 0))
+            view.insertText(" (fixed)", replacementRange: view.selectedRange())
+            view.keyDown(with: CaptureKeysTests.returnEvent(
+                windowNumber: hosted.window.windowNumber))
+
+            pad.text = try #require(handed)
+            let postID = try #require(await pad.fileExplicitly().postID)
+
+            #expect(try await self.blocks(db, postID) == [
+                "First (fixed) paragraph.", "Second paragraph.", "Third paragraph.",
+            ], "the tail and the edit both landed — neither is droppable here")
+        }
+    }
+
+    /// **RED ON OLD — a refusal used to take the capture with it.** The pad
+    /// cleared its text BEFORE asking the store, so anything `importPost`
+    /// could throw left her with an empty pad, a dismissed window and a
+    /// refusal spoken one window away. 13l fixed exactly this in the
+    /// quick-entry bar and left it standing here.
+    ///
+    /// DISCRIMINATING REVERT (verified): in `QuickNotePad.take()`, clear
+    /// `text`/`titleFromFirstWords` before the mint again (the shipped
+    /// pre-13u3 body) — the first two expectations fail.
+    @Test func aRefusedQuickNoteFilingKeepsTheCaptureInThePad() async throws {
+        try await withCapture { session, db in
+            let pad = QuickNotePad(session: session)
+            pad.mint = { _, _ in
+                .refused(QuickNoteCopy.refusal(for: OperationError.lockedPost(id: "c1")))
+            }
+            pad.text = Self.threeParagraphs
+            pad.titleFromFirstWords = true
+
+            let outcome = await pad.fileExplicitly()
+
+            #expect(pad.text == Self.threeParagraphs,
+                    "her words live nowhere else — the pad keeps them")
+            #expect(pad.titleFromFirstWords, "…and the decision she made about the name")
+            guard case .refused = outcome else {
+                Issue.record("the refusal must reach the caller, which keeps the window open")
+                return
+            }
+            let message = try #require(pad.lastError)
+            #expect(message.contains("Your text is still here"),
+                    "the load-bearing half of the sentence, and it is TRUE")
+            #expect(!message.contains("lockedPost"), "never a raw enum dump")
+            let notes = try await db.read {
+                try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM container") ?? -1
+            }
+            #expect(notes == 0, "nothing was minted, so one summon is still one note")
+
+            // And the retry is real: the next trigger files exactly what she
+            // typed, with the name she had chosen.
+            pad.mint = nil
+            let postID = try #require(await pad.close().postID)
+            #expect(try await self.blocks(db, postID).count == 3)
+            let title = try await db.read {
+                try String.fetchOne(
+                    $0, sql: "SELECT title FROM container WHERE id = ?", arguments: [postID])
+            }
+            #expect(title == "First paragraph.", "the adopted name survived the refusal")
+        }
+    }
+
+    /// The bar's own text-preserving refusal, re-asserted on the NEW road —
+    /// the brief's rule that 13l's fix is byte-preserved rather than
+    /// re-litigated. (`QuickEntryBarTests` holds the 13l cells unchanged;
+    /// this one is the pair to the pad's, so the two doors are read side by
+    /// side.)
+    @Test func aRefusedBarEntryKeepsTheCaptureInTheBox() async throws {
+        try await withCapture { session, _ in
+            let box = QuickEntryModel(session: session)
+            box.mint = { _, _ in throw OperationError.lockedPost(id: "c1") }
+            box.text = Self.threeParagraphs
+
+            #expect(await box.submit() == nil)
+            #expect(box.text == Self.threeParagraphs)
+            #expect(box.lastError?.contains("Your text is still here") == true)
+        }
+    }
+
+    /// **BOTH DOORS TEACH THE SAME TWO KEYS.** The hint under the pad and
+    /// the bar's placeholder are the only places the rule is said out loud,
+    /// and a surface that teaches the retired model is worse than one that
+    /// teaches nothing.
+    @Test func bothCaptureDoorsTeachTheSameTwoKeys() {
+        #expect(QuickNoteCopy.hint.contains("⏎ files it"))
+        #expect(QuickNoteCopy.hint.contains("⇧⏎"))
+        #expect(!QuickNoteCopy.hint.contains("⏎ new line"),
+                "the retired model is no longer taught")
+        #expect(QuickEntryCopy.placeholder.contains("⏎ opens it"),
+                "the bar files AND opens — R3's own grammar, kept")
+        #expect(QuickEntryCopy.placeholder.contains("⇧⏎"))
     }
 }

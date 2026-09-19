@@ -256,7 +256,7 @@ struct NodSetTests {
     @Test func oneSummonOfTheQuickPadFilesItselfUnderItsTag() async throws {
         try await withStore { db, session in
             let id = try #require(
-                await QuickNoteMint.file("Jotted in a hurry.", session: session))
+                await QuickNoteMint.file("Jotted in a hurry.", session: session).postID)
 
             let (tags, bookID) = try await db.read { database in
                 (try Queries.postTags(database, postID: id).map(\.path),
@@ -286,7 +286,7 @@ struct NodSetTests {
     /// still mints nothing, so no stray tag or book is ever created by one.
     @Test func anEmptySummonStillMintsNothingAndCreatesNoBook() async throws {
         try await withStore { db, session in
-            #expect(await QuickNoteMint.file("   \n ", session: session) == nil)
+            #expect(await QuickNoteMint.file("   \n ", session: session) == .nothingToFile)
             let (posts, book) = try await db.read { database in
                 (try Int.fetchOne(
                     database, sql: "SELECT COUNT(*) FROM container WHERE deleted_at IS NULL"),

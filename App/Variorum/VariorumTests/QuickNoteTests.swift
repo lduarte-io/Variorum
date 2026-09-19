@@ -46,7 +46,7 @@ struct QuickNoteMintTests {
             let session = AppSession(database: db)
             let id = await QuickNoteMint.file(
                 "A thought worth keeping.", session: session)
-            let noteID = try #require(id)
+            let noteID = try #require(id.postID)
 
             let (header, pool, books, curated) = try await db.read { db in
                 (try Queries.containerHeader(db, containerID: noteID),
@@ -93,11 +93,12 @@ struct QuickNoteMintTests {
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 3))
         } operation: { @MainActor in
             let session = AppSession(database: db)
-            // ⏎ is a NEWLINE here (her round-14.2), so a multi-paragraph pad
-            // is the ordinary case rather than the exotic one.
+            // The pad holds MANY paragraphs (her round-14.2, and R-13u-4's
+            // own half of the ruling — only the KEY that makes one moved),
+            // so a multi-paragraph pad is the ordinary case.
             let typed = "First thought.\n\nSecond thought."
             let noteID = try #require(
-                await QuickNoteMint.file(typed, session: session))
+                await QuickNoteMint.file(typed, session: session).postID)
             let rendered = try await db.read { db in
                 try Queries.renderedText(db, containerID: noteID)
             }
@@ -120,7 +121,7 @@ struct QuickNoteMintTests {
             let session = AppSession(database: db)
             for pad in ["", "   ", "\n\n", " \n \t "] {
                 #expect(!QuickNoteMint.mints(pad), "the button is grey for \(pad.debugDescription)")
-                #expect(await QuickNoteMint.file(pad, session: session) == nil)
+                #expect(await QuickNoteMint.file(pad, session: session) == .nothingToFile)
             }
             let posts = try await db.read { db in
                 try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM container") ?? -1
@@ -144,7 +145,7 @@ struct QuickNoteMintTests {
         } operation: { @MainActor in
             let session = AppSession(database: db)
             let noteID = try #require(
-                await QuickNoteMint.file("Jotted.", session: session))
+                await QuickNoteMint.file("Jotted.", session: session).postID)
             #expect(session.undoStack.topLabel == QuickNoteCopy.undoLabel)
             #expect(EditorCommands.undoMenuTitle(for: session.undoStack.topLabel)
                     == "Undo Quick Note")
@@ -163,8 +164,8 @@ struct QuickNoteMintTests {
         }
     }
 
-    /// **THE THREE MINT TRIGGERS, each driven directly** (her round-14.2:
-    /// ⏎ is a newline; closing files it; ⌘⏎ files it explicitly) — and the
+    /// **THE THREE MINT TRIGGERS, each driven directly** (her round-14.2 as
+    /// R-13u-4 amended it: ⏎ AND ⌘⏎ file it; closing files it) — and the
     /// property that makes them compose: ONE SUMMON = ONE NOTE.
     ///
     /// This pin exists because revert W5-B passed green without it: with
@@ -199,7 +200,7 @@ struct QuickNoteMintTests {
             // CLOSING FILES IT.
             let closed = QuickNotePad(session: session)
             closed.text = "Closed without filing."
-            #expect(await closed.close() != nil)
+            #expect(await closed.close().postID != nil)
             var count = try await noteCount()
             #expect(count == 1)
 
@@ -207,18 +208,19 @@ struct QuickNoteMintTests {
             // is what "one summon = one note" means in practice.
             let filed = QuickNotePad(session: session)
             filed.text = "Filed on purpose."
-            #expect(await filed.fileExplicitly() != nil)
+            #expect(await filed.fileExplicitly().postID != nil)
             count = try await noteCount()
             #expect(count == 2)
             #expect(!filed.mints, "the pad cleared itself")
-            #expect(await filed.close() == nil, "closing after ⌘⏎ mints no second note")
+            #expect(await filed.close() == .nothingToFile,
+                    "closing after ⏎/⌘⏎ mints no second note")
             count = try await noteCount()
             #expect(count == 2)
 
             // An abandoned EMPTY summon leaves nothing behind at any door.
             let empty = QuickNotePad(session: session)
-            #expect(await empty.close() == nil)
-            #expect(await empty.fileExplicitly() == nil)
+            #expect(await empty.close() == .nothingToFile)
+            #expect(await empty.fileExplicitly() == .nothingToFile)
             count = try await noteCount()
             #expect(count == 2, "an abandoned empty summon leaves nothing behind")
         }

@@ -26,12 +26,28 @@
 //  what a sticky IS — the minted note opens in the full editor the moment
 //  she wants more of it.
 //
-//  ── WHEN IT MINTS (her round-14.2 ruling) ───────────────────────────────
-//  **⏎ IS A NEWLINE** — the pad is free-typing and multi-line. The note
-//  mints on **CLOSE**, on **⌘⏎** (filing it explicitly), and at **QUIT**
-//  (the architect's ruling (c): the capture-scale analog of the open tail's
-//  teardown backstop — loss is bounded by one summon, and this is what
-//  bounds it). ONE SUMMON = ONE NOTE, and an empty sticky mints nothing.
+//  ── WHEN IT MINTS (her round-14.2 ruling, AMENDED BY R-13u-4) ───────────
+//  **⏎ FILES IT · ⇧⏎ ADDS A PARAGRAPH** — 13u3 UNIT C, her 13u1 sitting
+//  ruling R-13u-4, which settled the capture model for BOTH platforms: *"the
+//  capture surface holds MANY paragraphs; ⏎ FILES the note, ⇧⏎ adds a
+//  paragraph; the hand-off segments through `importPost`'s bulk rule."*
+//  **This supersedes round-14.2's "⏎ IS A NEWLINE" for this pad** — the pad
+//  still holds many paragraphs (that half is untouched and is exactly what
+//  her ruling keeps), but the key that makes one is now ⇧⏎, and the shelf's
+//  quick-entry bar answers the same two keys through the same box
+//  (`CaptureTextView`). The note still mints on **CLOSE**, on **⌘⏎** and at
+//  **QUIT** (the architect's ruling (c): the capture-scale analog of the
+//  open tail's teardown backstop — loss is bounded by one summon, and this
+//  is what bounds it). ONE SUMMON = ONE NOTE, and an empty sticky mints
+//  nothing.
+//
+//  ── AND A REFUSAL NEVER TAKES HER WORDS (13u3 UNIT C) ───────────────────
+//  The pad used to clear BEFORE the mint, so anything `importPost` could
+//  throw took the capture with it — 13l's L-b defect, which was fixed in
+//  the quick-entry bar and left standing here on a justification that had
+//  stopped being true. The text now leaves the pad only when a note exists
+//  to hold it, the refusal is spoken IN the pad (the window she is looking
+//  at), and the pad stays open so the next ⏎ can try again.
 //
 //  ── AND IT STAYS QUIET (her round-14.3) ─────────────────────────────────
 //  The note lands in the smart Quicknotes book (13g batch 7, R6-4 — tagged
@@ -66,48 +82,94 @@ final class QuickNotePad {
     /// The words the chip offers — one brain with the Library's cards.
     var suggestedTitle: String? { NoteCardFace.suggestedTitle(forTypedText: text) }
 
+    /// **13u3 UNIT C — the refusal, where she can see it.** The quick-entry
+    /// bar's shape (13l L-b): her text lives NOWHERE but this pad until a
+    /// note exists, so the sentence that says it is still here has to be on
+    /// the pad itself and not in a status line one window away.
+    private(set) var lastError: String?
+
+    /// The endorsed defaulted-seam pattern, adopted from `QuickEntryModel`
+    /// for its stated reason (mobile round 2 §20(b)): production never sets
+    /// this, and a REFUSAL is otherwise not reachable from a test without
+    /// breaking the store underneath it. It carries the title beside the
+    /// text so a pin can read what the mint was actually asked for.
+    @ObservationIgnored
+    var mint: ((String, String?) async -> QuickNoteMint.Outcome)?
+
     init(session: AppSession) { self.session = session }
 
     /// Is there anything to file? The button's grey reads this, so it can
     /// never fire into `emptyImport`.
     var mints: Bool { QuickNoteMint.mints(text) }
 
-    /// ⌘⏎ — file it explicitly. The pad clears, so the `close` that follows
-    /// finds nothing and ONE SUMMON STILL MINTS ONE NOTE (her round-14.2).
+    /// ⏎ and ⌘⏎ — file it explicitly. The pad clears on success, so the
+    /// `close` that follows finds nothing and ONE SUMMON STILL MINTS ONE
+    /// NOTE (her round-14.2).
     @discardableResult
-    func fileExplicitly() async -> String? { await take() }
+    func fileExplicitly() async -> QuickNoteMint.Outcome { await take() }
 
     /// CLOSING FILES IT (her round-14.2). Idempotent by the same clearing.
     @discardableResult
-    func close() async -> String? { await take() }
+    func close() async -> QuickNoteMint.Outcome { await take() }
 
     /// QUIT (the architect's ruling (c)): a non-empty pad at app quit files
     /// itself — the capture-scale analog of the open tail's teardown
     /// backstop, and what bounds the loss to one summon.
     @discardableResult
-    func finalizeAtQuit() async -> String? { await take() }
+    func finalizeAtQuit() async -> QuickNoteMint.Outcome { await take() }
 
-    /// The one body all three share: take the text, clear the pad, file it.
-    /// Clearing FIRST is what makes the three triggers compose — close
-    /// follows ⌘⏎, and quit can follow either, and none of them can mint a
-    /// second note from the same summon.
+    /// The one body all three share: take the text, file it, and clear the
+    /// pad ONLY when a note exists to hold it.
+    ///
+    /// **Clearing on SUCCESS is what makes the three triggers compose** —
+    /// close follows ⏎/⌘⏎, and quit can follow either, and none of them can
+    /// mint a second note from the same summon. It used to clear FIRST, for
+    /// the same composition, and that cost her the capture on any refusal
+    /// (13u3 UNIT C's traced defect; 13l L-b one file over). A refusal now
+    /// leaves the words in the pad, so the next trigger tries again — and
+    /// since nothing was minted, one summon is still one note either way.
+    ///
+    /// **Keystrokes that land DURING the mint are not in that note** (the
+    /// bar's own rule, adopted here so the two capture doors behave the
+    /// same): the mint read `submitted`, so only `submitted` is cleared.
     ///
     /// **13j J11:** filing IS the pad's leaving — the note it mints is not
     /// open in any pane, so no other road would ever reach it, and a captured
     /// thought with no savepoint is exactly the thin history she reported.
     /// One line, on the one shared body, so all three triggers inherit it.
-    private func take() async -> String? {
-        let text = self.text
-        // The name is read from what is being FILED, before the pad clears.
+    private func take() async -> QuickNoteMint.Outcome {
+        let submitted = text
+        guard QuickNoteMint.mints(submitted) else {
+            text = ""
+            titleFromFirstWords = false
+            lastError = nil
+            return .nothingToFile
+        }
+        // The name is read from what is being FILED, not from what the pad
+        // holds now — the same discipline `submitted` already has.
         let title = titleFromFirstWords
-            ? NoteCardFace.suggestedTitle(forTypedText: text)
+            ? NoteCardFace.suggestedTitle(forTypedText: submitted)
             : nil
-        self.text = ""
-        titleFromFirstWords = false
-        guard let postID = await QuickNoteMint.file(text, title: title, session: session)
-        else { return nil }
-        await session.savepointOnLeaving(postID)
-        return postID
+        lastError = nil
+        let outcome = await mintNow(submitted, title: title)
+        switch outcome {
+        case .filed(let postID):
+            if text == submitted {
+                text = ""
+                titleFromFirstWords = false
+            }
+            await session.savepointOnLeaving(postID)
+        case .refused(let message):
+            lastError = message
+        case .nothingToFile:
+            break
+        }
+        return outcome
+    }
+
+    private func mintNow(_ submitted: String, title: String?) async -> QuickNoteMint.Outcome {
+        if let mint { return await mint(submitted, title) }
+        return await QuickNoteMint.file(submitted, title: title, session: session)
     }
 }
 
@@ -139,20 +201,22 @@ struct QuickNoteView: View {
             Text(tokens.chromeLabel(QuickNoteCopy.header))
                 .font(tokens.small)
                 .foregroundStyle(tokens.accent)
-            // A plain multi-line field: ⏎ types a newline (her ruling), so
-            // this deliberately carries NO `.onSubmit`.
-            TextEditor(text: $pad.text)
-                .font(tokens.body)
-                .foregroundStyle(tokens.ink)
-                .scrollContentBackground(.hidden)
+            // 13u3 UNIT C — THE ONE CAPTURE BOX (R-13u-4): ⏎ files it, ⇧⏎
+            // makes a paragraph, and the shelf's quick-entry bar answers the
+            // same two keys through this same component.
+            CaptureTextView(
+                text: $pad.text,
+                style: CaptureTextStyle(tokens: tokens),
+                maxHeight: nil,  // the pad IS a window: it takes the space
+                focusRequest: 1,  // the caret lands here when the pad opens
+                onFile: { fileAndClose() })
                 .background(tokens.surface)
                 .overlay(alignment: .topLeading) {
                     if pad.text.isEmpty {
                         Text(tokens.chromeLabel(QuickNoteCopy.placeholder))
                             .font(tokens.body)
                             .foregroundStyle(tokens.faint)
-                            .padding(.top, 8)
-                            .padding(.leading, 5)
+                            .padding(.top, 2)
                             .allowsHitTesting(false)
                     }
                 }
@@ -164,6 +228,17 @@ struct QuickNoteView: View {
                 ) {
                     pad.titleFromFirstWords.toggle()
                 }
+            }
+            if let lastError = pad.lastError {
+                // `lineLimit` is LOAD-BEARING beside `fixedSize` — an
+                // unlimited fixedSize text in non-scrolling chrome inflates
+                // the WINDOW minimum during the near-zero-width min-size
+                // probe (the b6dae25 wedged-window class, P-8).
+                Text(lastError)
+                    .font(tokens.small)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .alarmVoice()
             }
             HStack {
                 // `lineLimit` beside a hint in non-scrolling chrome — P-8's
@@ -209,17 +284,30 @@ struct QuickNoteView: View {
             // CLOSING FILES IT (her ruling). The window is already going, so
             // this rides the pad rather than this view's lifetime.
             let pad = self.pad
-            Task { @MainActor in await pad.close() }
+            let status = session.status
+            Task { @MainActor in
+                // There is no pad left to draw a refusal on, so this is the
+                // one path that hands it to the status seam (13u3 UNIT C).
+                if case .refused(let message) = await pad.close() {
+                    status.refuse(message)
+                }
+            }
         }
     }
 
     private func fileAndClose() {
-        // ⌘⏎ files explicitly. `onDisappear` runs next, finds an empty pad,
-        // and mints nothing — one summon, one note.
+        // ⏎ and ⌘⏎ file explicitly, and the window goes with the thought —
+        // one act, three doors (the key, the chord, the button).
+        //
+        // **A REFUSAL KEEPS THE WINDOW OPEN** (13u3 UNIT C): dismissing on a
+        // refusal would close a pad that is still holding her words, and
+        // `onDisappear`'s retry would then be the last thing standing
+        // between the capture and nothing. `onDisappear` runs after a
+        // SUCCESSFUL file, finds an empty pad, and mints nothing — one
+        // summon, one note.
         let pad = self.pad
         Task { @MainActor in
-            await pad.fileExplicitly()
-            dismiss()
+            if case .filed = await pad.fileExplicitly() { dismiss() }
         }
     }
 }
@@ -231,6 +319,24 @@ struct QuickNoteView: View {
 /// can keep (the `MembershipChip.ascend` lesson, W20).
 @MainActor
 enum QuickNoteMint {
+    /// What a filing did — **returned rather than only spoken** (13u3 UNIT
+    /// C). The caller knows where she is looking: the pad shows a refusal on
+    /// its own face and stays open; `close`/quit, which have no pad left to
+    /// draw on, hand it to the status seam's refusal door instead. Speaking
+    /// it in both places would be one event said twice.
+    enum Outcome: Equatable {
+        case filed(String)
+        case refused(String)
+        /// An empty (or whitespace-only) pad. Files nothing, says nothing —
+        /// the button is grey for exactly this case.
+        case nothingToFile
+
+        var postID: String? {
+            if case .filed(let id) = self { return id }
+            return nil
+        }
+    }
+
     /// Whether this pad has anything to file. The same rule `importPost`
     /// enforces (`emptyImport` on whitespace-only text), stated here so the
     /// button can be honestly grey rather than firing into a refusal.
@@ -256,8 +362,10 @@ enum QuickNoteMint {
     /// the offered name, which keeps "untitled" the pad's default exactly as
     /// this doc says it is.
     @discardableResult
-    static func file(_ text: String, title: String? = nil, session: AppSession) async -> String? {
-        guard mints(text) else { return nil }
+    static func file(
+        _ text: String, title: String? = nil, session: AppSession
+    ) async -> Outcome {
+        guard mints(text) else { return .nothingToFile }
         do {
             // 13g batch 7 (her R6-4): the mint and the FILING ride ONE runner
             // turn, so nothing can interleave between the note existing and
@@ -283,11 +391,14 @@ enum QuickNoteMint {
             case .refused(let reason):
                 session.status.refuse(QuickNoteCopy.refusedFilingLine(reason))
             }
-            return result.container.id
+            return .filed(result.container.id)
         } catch {
-            session.status.refuse(
-                "\(QuickNoteCopy.refusedPrefix) \(OpsRefusalCopy.message(for: error))")
-            return nil
+            // **RETURNED, not spoken** (13u3 UNIT C): the note does NOT
+            // exist, her words are still in the pad, and the sentence that
+            // says so belongs on the pad's own face. The two lifecycle
+            // triggers that have no pad left (close, quit) hand it to the
+            // status seam themselves.
+            return .refused(QuickNoteCopy.refusal(for: error))
         }
     }
 }
@@ -326,9 +437,12 @@ nonisolated enum QuickNoteCopy {
     static let summonVerb = "New Quick Note"
     static let header = "quick note"
     static let placeholder = "jot it down — it lands in Quicknotes"
-    /// ⏎ is a NEWLINE here (her ruling), so the hint says the two things
-    /// that are not obvious: how to file, and where it goes.
-    static let hint = "⏎ new line · ⌘⏎ files it · closing files it too"
+    /// **R-13u-4's two keys, in her own order** (13u3 UNIT C — this line
+    /// used to read "⏎ new line · ⌘⏎ files it · closing files it too", which
+    /// is the model her ruling replaced). The paragraph key comes second
+    /// because filing is what ⏎ now does and that is the surprise for
+    /// anyone who knew the old pad.
+    static let hint = "⏎ files it · ⇧⏎ new paragraph · closing files it too"
     static let fileVerb = "File It"
     /// The undo entry's words — "Undo Quick Note", never "Undo Import".
     static let undoLabel = "Quick Note"
@@ -352,4 +466,18 @@ nonisolated enum QuickNoteCopy {
         "Kept as a note in the Pool — the Quicknotes filing didn't take: \(reason)."
     }
     static let refusedPrefix = "The quick note wasn't filed:"
+
+    /// **The MINT's refusal — the one whose load-bearing half is the last
+    /// sentence** (13u3 UNIT C; the quick-entry bar's `QuickEntryCopy`
+    /// wording, deliberately, because it is the same event on the app's
+    /// other capture door and two sentences for one thing is the drift
+    /// class). Nothing was created, so this line's job is to say where her
+    /// words are: still here.
+    static func refusal(for error: Error) -> String {
+        let reason = error is OperationError
+            ? OpsRefusalCopy.message(for: error)
+            : "The store couldn't take it just now."
+        return "\(refusedPrefix) \(reason) "
+            + "Your text is still here — try again in a moment."
+    }
 }
