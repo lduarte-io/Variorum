@@ -57,6 +57,61 @@ extension Operations {
         }
     }
 
+    /// **NAMING A SAVED MOMENT AFTER THE FACT** (13u3 UNIT D — item 14, her
+    /// ruling **R-13u3-1**, asked as the item's reserved sitting detail and
+    /// answered *"Editable"*: a rename door in Block History beside the
+    /// savepoint).
+    ///
+    /// **I5 is untouched, and that is the whole point of the boundary this
+    /// op draws:** `text` is the snapshot and is never editable by anything,
+    /// ever; `message` is the NAME she gave the moment, which is metadata
+    /// about the snapshot rather than the snapshot. Under sync it is plain
+    /// server-version-wins CAS with no uniqueness and no §7 repair class —
+    /// the shipped `commit_point` outbox triggers carry the UPDATE, and the
+    /// column is already classified ENCRYPTED in `SyncSchema` (it is her
+    /// prose), so naming a savepoint moves nothing on the wire's disclosure
+    /// envelope.
+    ///
+    /// Identity-level metadata on the `setTakeLabel` / `setBlockName`
+    /// conventions, which this follows to the letter so the three cannot
+    /// drift:
+    /// - **no touch stamp, no churn** — naming a moment is not working on
+    ///   the prose, and it must never reshuffle the library's sort (§10);
+    /// - **a no-op writes nothing** — no row, no outbox entry (the same name
+    ///   typed again, or a clear on an unnamed savepoint);
+    /// - **nil / whitespace-only CLEARS**, through the one `SavepointName`
+    ///   rule the field consults;
+    /// - **no undo entry** — the metadata class (`setTakeLabel`,
+    ///   `renameTag`, the locks): the door IS the recovery, since typing the
+    ///   old name back is the inverse and nothing was destroyed.
+    ///
+    /// The edges, both PROVISIONAL and both recorded at QUESTIONS #121:
+    /// - **a SEALED post refuses** (`lockedPost`, via the placement guard) —
+    ///   the seal's ratified letter is that it refuses everything under the
+    ///   post, and `setTakeLabel` reads the same way one grain over;
+    /// - **a LOCKED take is ALLOWED** — the lock freezes the BUFFER, and a
+    ///   name is not the buffer (`setTakeLabel`'s ratified precedent, and
+    ///   the stronger argument here: the snapshot a lock protects is
+    ///   literally immutable, so naming it cannot reach what the lock
+    ///   guards). An ARCHIVED take is allowed for the same reason.
+    ///
+    /// A savepoint whose take is tombstoned refuses (`variantNotFound`): no
+    /// face offers one — Block History lists the savepoints of LIVE takes —
+    /// so the throw is a caller bug's honest answer, not a road she can walk.
+    public func renameCommitPoint(_ commitID: String, message: String?) throws {
+        try database.write { db in
+            guard var commitPoint = try CommitPoint.fetchOne(db, key: commitID) else {
+                throw OperationError.commitNotFound(id: commitID)
+            }
+            let normalized = SavepointName.normalized(message)
+            guard commitPoint.message != normalized else { return }
+            let variant = try liveVariant(db, commitPoint.variantId)
+            try ensurePlacementUnlocked(db, blockID: variant.blockId)
+            commitPoint.message = normalized
+            try commitPoint.update(db)
+        }
+    }
+
     /// Loads a commit's text back into the working buffer. Old commits
     /// remain — committing again appends, never truncates (I5). Note the
     /// documented restores-pre-split-text behavior (AppSpec §9): after Phase
@@ -454,9 +509,12 @@ extension Operations {
     func insertCommit(
         _ db: Database, variant: Variant, kind: CommitKind, message: String?, now: Date
     ) throws -> CommitPoint {
+        // 13u3 UNIT D: the name arrives through the ONE rule here too, so a
+        // savepoint born at the commit door and one renamed afterwards can
+        // never be stored differently ("  " is no name on both roads).
         let commitPoint = CommitPoint(
             id: newID(), variantId: variant.id, text: variant.workingText,
-            kind: kind, message: message, createdAt: now)
+            kind: kind, message: SavepointName.normalized(message), createdAt: now)
         try commitPoint.insert(db)
         return commitPoint
     }
