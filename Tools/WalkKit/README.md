@@ -81,3 +81,23 @@ swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
   error, which reads exactly like "the surface drew nothing".
 - The dev app's Settings window opens at **560 × 548 at (200, 120)** and its voice control sits at
   window-relative (486, 160) / (414, 160) for Study / Terminal — click points, not pixels.
+
+## Walker facts from the 13u3 UNIT E walk (2026-09-19)
+
+- **An APP-MODAL alert is invisible to `walk-cap` and swallows every click and keystroke.**
+  `Help ▸ Restore Tutorial…` puts up a real modal dialog (AppKit, its own window) which
+  `walk-cap`'s layer-0 filter does not list — so the app looks normal in the capture and simply
+  stops responding to `cliclick`. **Diagnose it, don't retry:**
+  `osascript -e 'tell application "System Events" to tell process "Variorum" to get properties of window 1'`
+  → `subrole:AXDialog`, and the `position`/`size` it prints are the frame to capture with
+  `screencapture -x -R x,y,w,h out.png`. Press its button by name through System Events
+  (`click button "Replace" of window 1`), never by coordinates.
+- **`tell application id … to quit` can be REFUSED while that modal is up** (`execution error: …
+  User canceled. (-128)`), and a walk that then runs `open -n` ends up with TWO dev instances on
+  one dev store — at which point `tell application id` is ambiguous about which one it quits.
+  Kill the extra by **PID** (`kill -TERM <pid>` on a pid `pgrep` proved is yours), and re-check
+  `pgrep -fl 'Variorum.app/Contents/MacOS'`. Never a keystroke (the UNIT D rule).
+- A SwiftUI `.alert` (the restore confirm) DOES draw inside the main window and captures fine —
+  so "the dialog is missing from the screenshot" is itself the signal that it is an AppKit modal.
+- The Library list's row heights differ between the two voices, so a row's click point measured in
+  Terminal misses in Study — re-read the row's y from a capture after every voice flip.
