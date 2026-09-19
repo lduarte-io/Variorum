@@ -2567,18 +2567,10 @@ extension TakesViewModel: DivideWCeremonyHost {
 
     var structuralFlightInProgress: Bool { structuralInFlight }
 
-    /// **The take a fresh successor RENDERS** — the op's own answer (the
-    /// placement's chosen, else the block's default; `mintFanBlock` sets both
-    /// from the anchor's index). This is where the ring lands after the
-    /// sheet's confirm (18f ladder round 2, R2-4 — R1-13's one caret rule
-    /// made literal: C's CHOSEN, the take she divided). It is also the ONLY
-    /// take the ring CAN land on: `parkFocus` is consumed by matching a slot's
-    /// rendered take, so parking on `variants[0]` — the first contributor in
-    /// fan order — silently parked nowhere whenever another take stood ahead
-    /// of the seed's half (keep-on-bottom with the seed second in the fan).
-    private static func renderedTakeID(of half: Operations.FanHalf) -> String? {
-        half.placement.chosenVariantId ?? half.block.defaultVariantId ?? half.variants.first?.id
-    }
+    /// *(The rule this used to hold — "the take a fresh successor RENDERS" —
+    /// moved to `Operations.FanHalf.renderedTakeID` at 13u3 UNIT G, the 18f
+    /// ladder's R3-8, so the board's INSTANT road reads it too. Behaviour
+    /// byte-identical; the reasoning lives beside the rule now.)*
 
     /// The confirm's act — its OWN flight, exactly as `runStructural` is
     /// Write's (the ceremony's pre-await guard reads the latch and this
@@ -2597,7 +2589,7 @@ extension TakesViewModel: DivideWCeremonyHost {
                 try ops.divideW(
                     blockID, cuts: cuts, displayedVariantID: displayedVariantID)
             }
-            if let landing = Self.renderedTakeID(of: result.second) {
+            if let landing = result.second.renderedTakeID {
                 choreography.parkFocus(onVariant: landing)
             }
             // The receipt counts from the OP's OWN result — and from the
@@ -2645,7 +2637,7 @@ extension TakesViewModel: DivideWCeremonyHost {
                 try ops.divideDuplicating(
                     blockID, displayedVariantID: displayedVariantID, cut: cut)
             }
-            if let landing = Self.renderedTakeID(of: result.second) {
+            if let landing = result.second.renderedTakeID {
                 choreography.parkFocus(onVariant: landing)
             }
             setReceipt(FannedDefaultsCopy.divided(kept: 0))

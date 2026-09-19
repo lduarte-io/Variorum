@@ -589,9 +589,17 @@ final class TakesStructureController {
                         displayedVariantID: composition.displayedID)
                 }
             }
-            // The ring goes to the SECOND successor's leading take — Write's
-            // caret rule for this shape, in this board's vocabulary.
-            model.choreography.parkFocus(onVariant: result.second.variants[0].id)
+            // The ring goes to the SECOND successor's RENDERED take — Write's
+            // caret rule for this shape, in this board's vocabulary, through
+            // the one expression of it (13u3 UNIT G, the 18f ladder's R3-8).
+            // `variants[0]` was provably the same take HERE — `KeepOnTopDivide
+            // .compose` parks every other take at its END, so `second.variants`
+            // is exactly the seed's tail — which is why this is a cleanliness
+            // move with no pin behind it: two expressions of one rule on one
+            // board, and the other expression is the one R2-4 had to fix.
+            if let landing = result.second.renderedTakeID {
+                model.choreography.parkFocus(onVariant: landing)
+            }
             model.setReceipt(FannedDefaultsCopy.divided(
                 kept: max(0, result.first.variants.count - 1),
                 stayedBehind: composition.unparkable.count))

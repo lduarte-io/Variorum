@@ -2606,7 +2606,7 @@ ledger row 8 flipped in the same commit.
 | 2 · R3-6 — the pair's rendered ids read from the STORE at open, in the same read as the fans | **DONE** — `liveActiveFansAndRendered`; pin `openingReadsTheShownPairFromTheStoreSoNothingRefreshesSpuriously` RED on `25638746` (5 issues), green now |
 | 3 · R3-5 — `MergeRunBlock.shownVariantID`; the RUN arm's drift check; `runMergeChain` takes the state's shown ids (RED-ON-OLD owed) | **DONE** — `refreshMergeRunIfDrifted` + the retired `if !state.isRun` fence; 2 pins RED on `25638746` (the run merged on the first press in both), 1 guard pin green on both sides and recorded as such |
 | 4 · R3-7 — the pre-pair re-seeds from `rendered` on a preset refresh; hers kept under `.pairByHand` (RED-ON-OLD owed) | **DONE** — `prePairing` hoisted and consumed at both open and refresh; pin `aPresetRefreshReSeedsThePrePairFromWhatTheSheetNowShows` RED on `25638746` (the stale head survived and then joined) |
-| 5 · R3-8 — `renderedTakeID` hoisted to a `FanHalf` extension, consumed on all three roads (NO pin — hollow by the finding's own words) | PENDING |
+| 5 · R3-8 — `renderedTakeID` hoisted to a `FanHalf` extension, consumed on all three roads (NO pin — hollow by the finding's own words) | **DONE** — `Features/Takes/FanHalfRendering.swift`; the two sheet roads and the board's instant road read it; NO pin claimed, and the file says why in its own header |
 | 6 · item 6 — the three disagreeing opening-take reads: consume or verdict | PENDING |
 | 7 · the walk (dev-store Debug, both voices) with captures | PENDING |
 | 8 · finals (core · FULL Mac · tutorial spine · iOS build) | PENDING |
