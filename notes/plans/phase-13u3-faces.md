@@ -2829,3 +2829,47 @@ board's instant divide speaks the one rendered-take rule, the confirm costs the 
 rather than the note around them, and two reads of a note's opening now show the take the note
 shows. **KnownIssues row 42 is RESOLVED** in this commit; ledger row 8 flipped with it.
 Commits `c79860b0` → this one. QUESTIONS **#124** carries the one PROVISIONAL.
+
+---
+
+## UNIT H BRIEF — THE TAKES BOARD'S LIVE-CARD DELETE DOOR + THE LESSON'S TRUTH (the E hand-up; self-contained; read in this order)
+
+**Read first, in full:** (1) this file's Status banner · GOVERNANCE + the constitution (P-1, P-2
+and P-6 all bite here) · ENVIRONMENT TRAPS · CAST & DISCIPLINE · **ORCHESTRATOR ADJUDICATIONS
+AFTER UNIT E, item 2** — the trace this unit builds to, and AFTER UNIT D, item 1 — the walk
+rule (quit by bundle identity ONLY; `pgrep` after every quit; her real-store app never touched).
+(2) The code: `Features/Takes/TakesBoardView.swift` (the LIVE take cards — the door's home; the
+ARCHIVED card's direct delete button ~:1331 is the board's own precedent) ·
+`Features/Takes/WriteTakesPanel.swift` (`TakeCardMenuCopy.deleteTake` — the vocabulary
+precedent; archive/label/lock/delete on its cards) · `Features/Tutorial/TutorialSeeder.swift`
+~:1056 and ~:1080 (the lesson teaching *"⋯ menu ▸ Delete"* — the stale copy) ·
+`CapabilityRegistry` (`.deleteTake` is already in the board's declared list, `TakesBoardView.swift:77`
+— find how it is declared (`.surface`?) and make the rendered door match the declaration; the
+18f R3-3 per-surface pin pattern is the shape). (3) `Tools/WalkKit/README.md`'s walker facts.
+
+**Scope (ONE acceptance unit — the door and the words):**
+1. **The door:** a LIVE take card on the Takes board offers Delete (and, if the same gesture
+   family is where it naturally lives, the WriteTakesPanel card menu's set — but ONLY delete is
+   owed; do not restyle the card). Compose the existing `model.deleteTake(take.id)` road — the
+   op's semantics are settled (I10: the last live active take refuses and the refusal speaks;
+   a CHOSEN take's delete refuses at the RESTRICT class through the ops layer's check — whatever
+   the existing model road already speaks). Match the board's card grammar (the archived card's
+   button style, or a context menu mirroring `WriteTakesPanel` — pick what the v2 card grammar
+   supports and record the choice PROVISIONAL).
+2. **The words:** the takes lesson's two sentences corrected to the door that EXISTS (name the
+   real gesture, not "⋯"); any sibling sentence naming the retired ⋯ swept (`grep` the seeder
+   for the glyph — the R3-2 lesson: no single-string grep can find prose variants, walk the
+   chapter's cards).
+3. **The pin that holds words to doors:** the lesson's prose names a door; a pin asserts the
+   board RENDERS that door (the declared-vs-rendered equality the R3-3 pattern pins per
+   surface). Red-on-old BOTH ways: the door pin red on the pre-fix board (no delete door on a
+   live card), the words pin red on the pre-fix lesson (the ⋯ claim).
+4. **Fences:** zero core (the op exists) · zero schema · zero `Sync/` · the ceremony sheets
+   (UNIT G's surface) untouched · nothing else on the card restyled.
+
+**End verification:** FULL Mac suite (row 58 tolerated; row 49's arm by the paired protocol) ·
+tutorial spine green WITH the corrected lesson's pins · iOS build green · YOUR walk with
+captures: delete a spare take from a live board card (the receipt speaks), the last-take refusal
+speaks, the lesson read in the tutorial, both voices, both appearances. Record: **UNIT H
+RECORD**, LIVE STATUS from the first commit, UNIT CLOSED banner, ledger row 8b flipped in the
+same commit. The lesson edit joins the closeout's re-seed list (state it in your record).
