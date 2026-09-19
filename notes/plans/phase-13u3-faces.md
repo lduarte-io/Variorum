@@ -421,3 +421,31 @@ windows), captures to `notes/plans/13u3-screens/` (gitignored). Record: a **UNIT
 section appended to this file — LIVE STATUS from the first commit, the host table, the traced
 mechanisms, pin list with red-on-old evidence, walk notes + capture names, finals, and a UNIT
 CLOSED banner when done.
+
+---
+
+## UNIT A1 RECORD — THE GUTTER GEOMETRY REWORK (opus-implementer, 2026-09-18)
+
+**WHAT THIS UNIT DOES NOT DO (the record's first line):** the comments PANEL is untouched
+(unit A2's, memo §2 D); no `Sync/`, no `Persistence/`, no schema, no migration, the marker stays
+8; the full editor's identity machinery (`BlockRangeIndex`, crystallization, the reconciler) is
+not touched; the inline-comments SETTING's tinted strips are unchanged (R-13u3-5); item 3's
+"add box grows / whole comment surface is a text editor" is A2's half.
+
+### LIVE STATUS (written at the start; flipped in the same commit as each piece)
+
+| # | piece | status |
+|---|---|---|
+| 0 | the record + `13u3-screens/` gitignored | **DONE** |
+| 1 | `ProseGutter` — the ONE gutter brain; both contained surfaces + Write adopt it; `DecorLane` retires | PENDING |
+| 2 | the four HOST cells converted (bleed + preset), the host table proved byte-identical | PENDING |
+| 3 | the decoration geometry: wash hugs the prose, the R-13u3-3 stack, the badge that never covers prose, the card rhythm | PENDING |
+| 4 | the R-13u3-4 one-grapheme guard | PENDING |
+| 5 | pins (one-law · stack · rhythm · grapheme), `BlockDecorLaneTests` retired INTO successors | PENDING |
+| 6 | KnownIssues row 50 RESOLVED + QUESTIONS #117 | PENDING |
+| 7 | the walk + captures, the full Mac suite, iOS build | PENDING |
+
+### THE HOST TABLE (the sweep — every host of `BlockDecorOverlayController`, plus every host of a contained surface)
+
+*(filled as each cell is converted — the arithmetic proof lives here)*
+
