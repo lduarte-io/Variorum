@@ -1450,7 +1450,7 @@ Nothing about the manifest depends on this; the re-land is one call at one `onCh
 
 *Scope note, not a question:* the calm page's **pages** form (real leaves, no scroll offset) is outside the rule by its geometry, as `#114(b)` already says of Lenses/Compare/Canvas/Blocks; and flipping Read's own `edit`/`read` switch is not a mode switch, so it keeps whatever the host's scroll had — pre-existing, untouched.
 
-*(Next free number: **#119**.)*
+*(Next free number: **#120**.)*
 
 ---
 
@@ -1476,3 +1476,21 @@ This unit did NOT change it (the brief's fence: a rule that narrows a measure no
 - **(d) THE ENDS ARE TRIMMED, THE PARAGRAPHS ARE KEPT.** A comment saves without the whitespace hanging off either end, and keeps every newline inside it. This also FIXED a small inconsistency: the shipped panel trimmed on the add road and not on the edit road, so the same keystrokes stored different text depending on which box you typed them in, and a trailing newline then showed as a dangling blank line in the margin card (measured red-on-old in the record).
 
 *Taste numbers, also PROVISIONAL and also one line each:* the panel's minimum is now 460 × 440 (it was 440 × 320 — a list with a one-line field), and the add area never shrinks below 132 pt however many comments there are, so there is always somewhere to write.
+
+---
+
+#119 — **THE NOTE-LIST CARD'S NAME: SIX SMALL CALLS INSIDE HER RULING (2026-09-19, 13u3 UNIT B; the record is `notes/plans/phase-13u3-faces.md`'s UNIT B RECORD).** Her item 4 is RULED and built to its letter — a card leads with the explicit title where set, else a length-capped snippet of the note's first words (*"it can't be the whole first sentence if that sentence is super long"*), journal cards stay date-led, nothing is ever stored or renamed. These six are the details the ruling leaves to the build. All PROVISIONAL, each one line to change, none of them touching what the rule IS.
+
+**(a) THE CAP IS 48 CHARACTERS**, cut at a word edge with an ellipsis (`NoteCardFace.leadCap`). Reason: 48 is the note title's own measured room on the Mac (item 13's cutoff was found HEALED at ~48 chars at 13u2, pinned at two widths), so a derived name reads like a name rather than like a paragraph; wider and the List row's tags and stamps start yielding to it (the title is that row's compressible member, #105); narrower and *"a little snippet of what the post starts with"* stops being a sentence. The alternatives are 56/64, or a WORD count instead of characters.
+
+**(b) THE MARKDOWN IS RENDERED, NOT PRINTED.** A note that opens `# Garden plans` is called *Garden plans*, through the app's own display brain (`MarkdownRendering`) — never a second stripper — and a leading list glyph (`• `, `☐ `) is dropped as structure rather than words. Reason: the name is what the note LOOKS like, and `# Garden plans` is not what it looks like anywhere else in the app. Cost: a note that opens with a code fence or a blockquote (which the renderer does not transform) still shows its marker.
+
+**(c) THE PREVIEW LINE CARRIES ON FROM THE LEAD.** Where the card leads with the note's own words, the line under it starts where the lead stopped — so one card never says the same words twice — and where nothing is left it shows NOTHING (not *"No text yet"*, which would be the card calling a note empty right after quoting it). A titled or date-led card previews the opening as before. The alternative is the simpler one: always show the opening words, repeated lead and all.
+
+**(d) THE TITLE SHE ADOPTS DROPS THE LEAD'S ELLIPSIS.** The chip offers *Garden plans for the spring, and what to do* where the card's lead would read *…and what to do…* — same words, same word edge, no truncation mark. Reason: an ellipsis says *there is more of this sentence*, which is true of a card's first line and false of a name she has chosen, and the app must not put its own punctuation into her prose. The alternative is to store exactly what the lead shows.
+
+**(e) THE CHIP IS A TOGGLE THAT TRACKS WHAT SHE HAS TYPED, AND IT RESETS WHEN THE BOX CLEARS.** Clicking it means *name this after its first words*, so if she keeps typing the offered name follows the words (and the chip always shows what will be stored); filing resets it, because the next capture is a fresh decision; a REFUSAL keeps both her text and her decision. The alternative is to freeze the words at the click.
+
+**(f) THE LIBRARY LIST ROW'S NAME IS NOW ONE LINE.** It had no line limit, so a long name wrapped and broke the row's single baseline (the row is a title, a day, the tag chips and a stamp on ONE baseline); the Notes card's title has always been one line. Consequence beyond item 4: a long TITLE now truncates in the List row where it used to wrap.
+
+*Two things this unit found and did NOT fix, recorded for their owners rather than carried:* the full-document editor SPUN on a `deleteBackward` during the walk (`EditorViewModel.refreshDecorations` → `NSTextLayoutManager.ensureLayoutForBounds` — TEXTKIT2 §2's class, forcing layout from inside a text-storage callback; a full `sample` stack is in the UNIT B RECORD, seen once, not reproduced), and some chip inside an expanded book story WRAPS today, which is a row height the book's manifest does not know about (found because clamping the shared chip to one line moved a settled Outline landing by 3,424 pt).

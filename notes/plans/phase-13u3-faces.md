@@ -298,7 +298,7 @@ touches her real store outside the pre-authorized refresh.**
 | 1 | The gutter DESIGN MEMO (P-5) + her edge rulings | **DONE 2026-09-18** — `notes/plans/phase-13u3-memo-gutter.md` (`73a6ea17` + the rulings commit); all four edges RULED at the sitting (R-13u3-3…6) |
 | 2 | UNIT A1 — the gutter geometry rework (item 3's page half + KnownIssues row 50) | **DONE 2026-09-18** — `bb31912e`…`3263a1e6`; the UNIT A1 RECORD is at the end of this file (host table · traced mechanisms · 15 pins with red-on-old · 12 walk captures · finals). Row 50 RESOLVED; QUESTIONS #117 opened |
 | 2b | UNIT A2 — the comments panel as a text editor (item 3's panel half, memo §2 D) | **DONE 2026-09-18** — `52cd0cc4`…`afc108ee` + this record's close; the UNIT A2 RECORD is at the end of this file (the writing semantics as one brain · 16 pins with the red-on-old table · the walk's four finds and 19 captures · finals). QUESTIONS #118 opened |
-| 3 | UNIT B — note-list skimmability (item 4) | NOT STARTED |
+| 3 | UNIT B — note-list skimmability (item 4) | **DONE 2026-09-19** — `2d083439`…`7aac721c` + this record's close; the UNIT B RECORD is at the end of this file (the contract as built · 27 pins in 4 suites · the walk's 18 captures and its one defect · the suite find traced on two trees · three things handed up · finals). QUESTIONS #119 opened |
 | 4 | UNIT C — the quick-capture Mac face (item 9 / R-13u-4) | NOT STARTED |
 | 5 | UNIT D — named commits (item 14 / R-13u3-1) | NOT STARTED |
 | 6 | UNIT E — the #80(e) two faces (item 15) | NOT STARTED |
@@ -997,13 +997,13 @@ migrations, marker stays 8.
 | # | piece | status |
 |---|---|---|
 | 0 | This record + LIVE STATUS | **DONE** |
-| 1 | The BRAIN — `Sources/VariorumCore/Domain/NoteCardFace.swift` + its edge-case pins | **DONE** — 12 cells green (`NoteCardFaceTests`) |
-| 2 | The two facts the card needs — `CatalogHit.profile` · `TimelineItem.profile` (additive, nil-defaulted) | **DONE** — 13 cells green; adjacent core suites green |
-| 3 | The Library consumers — Notes cards + List rows (one composition, `LibraryCardName`) | **DONE** — 6 new cells green; the stamps/#103/#105 pins green UNMODIFIED |
-| 4 | The Pool card aligns to the same brain (`PoolCardFace` retires into it) | **DONE** — row 87's rule re-expressed over the lead; 2 cells green |
-| 5 | The title-suggestion chip at capture (QuickEntryBar + QuickNote pad) | **DONE** — BUILT (the ⏎/⇧⏎ filing model untouched; 6 cells green) |
-| 6 | THE WALK (dev-store Debug, both voices, both appearances, her-shaped fixtures) + captures | PENDING |
-| 7 | FINALS (core · FULL Mac suite · tutorial spine · iOS build) + QUESTIONS + ledger row 3 | PENDING |
+| 1 | The BRAIN — `Sources/VariorumCore/Domain/NoteCardFace.swift` + its edge-case pins | **DONE** `f466995d` — 12 cells green |
+| 2 | The two facts the card needs — `CatalogHit.profile` · `TimelineItem.profile` (additive, nil-defaulted) | **DONE** `ddbd6407` — 13 cells green; adjacent core suites green |
+| 3 | The Library consumers — Notes cards + List rows (one composition, `LibraryCardName`) | **DONE** `b7cd8f10` — 6 new cells green; the stamps/#103/#105 pins green UNMODIFIED |
+| 4 | The Pool card aligns to the same brain (`PoolCardFace` retires into it) | **DONE** `96a0607c` — row 87's rule re-expressed over the lead; 2 cells green |
+| 5 | The title-suggestion chip at capture (QuickEntryBar + QuickNote pad) | **DONE** `9aa2970e` — BUILT (the ⏎/⇧⏎ filing model untouched; 6 cells green) |
+| 6 | THE WALK (dev-store Debug, both voices, both appearances, her-shaped fixtures) + captures | **DONE** — 18 captures; ONE defect found and fixed (`abb79b12`) |
+| 7 | FINALS (core · FULL Mac suite · tutorial spine · iOS build) + QUESTIONS #119 + ledger row 3 | **DONE** — one suite find fixed (`7aac721c`); finals below |
 
 **The design, decided before the code (so the record is not written backwards):**
 a card LEADS with the explicit title where set; else a JOURNAL-profile note leads with its day (a
@@ -1011,3 +1011,187 @@ daily entry's date IS its identity); else the note's FIRST WORDS, length-capped 
 an ellipsis; else the day; else "Untitled". The words are the app's own markdown DISPLAY text (no
 raw `#`/`**` in a name), the preview line under the lead is the CONTINUATION (nothing said twice),
 and nothing is ever stored or renamed — derived at read time, every time.
+
+### WHAT THE CARD IS NOW (the contract, in her words where they exist)
+
+**ONE pure Domain brain** — `Sources/VariorumCore/Domain/NoteCardFace.swift` — answers what a
+note-list card LEADS with, and every note renderer asks it:
+
+1. **The title she typed**, exactly as stored — journal or not, long or short.
+2. else **a journal-profile note's day** (her rule, riding with item 4: *a daily entry's date IS
+   its identity*). The marker is `container.profile`, the daily mint's own, never "this note has a
+   date" — a note she merely dated is not a diary entry.
+3. else **the note's own FIRST WORDS**, capped at 48 characters, cut at a word edge, with an
+   ellipsis (*"it can't be the whole first sentence if that sentence is super long"*).
+4. else **the day**, exactly as every other surface names the note (`DisplayTitle`'s own chain).
+5. else **"Untitled"**.
+
+The words are the app's own markdown DISPLAY text, so a note that opens `# Garden plans` is called
+*Garden plans*; the line under the lead **carries on from where it stopped**, so no card says the
+same words twice; and **nothing is stored, nothing is renamed, ever** — derived at read time, every
+time (her *"what I hate is battling the apple notes title"*).
+
+**Why this is not `DisplayTitle`** (the question a cold reader asks first): `DisplayTitle.note`
+answers *what a note is CALLED* — its title, else its date — and that answer is load-bearing far
+outside any list (the masthead, export headings, the bulk manifest's filenames, every picker). It
+is untouched. This answers a different question that only a LIST asks: *what does a card lead with
+when it has a row to spend and fifty neighbours to be told apart from.* A date is a fine name for a
+note and a poor way to tell fifty notes apart, which is the report item 4 came from.
+
+**The consumers, one composition each:** the Library's Notes cards and List rows through
+`LibraryCardName` (one function, both renderers — the `LibrarySortFace` shape, so the two modes can
+never call a note two different things); the Pool's cards through `PoolCardFace`, whose row-87 rule
+(*no derived line under a card she NAMED*) is re-expressed over the lead rather than the raw title.
+The book Outline's `cardPreview` was left alone: it answers *what does this note SAY* (forty words
+across blocks, skipping a lone heading) — a different question from *what is it called*, and it
+does not disagree with the brain.
+
+**What each mode pays for (P1):** `LibraryCardRead.plan` is a pure rule — Notes reads every listed
+note's leading blocks plus its book names (13g's shape, unchanged); **List reads the words only for
+the rows that would otherwise be a bare date, and never the memberships**, so a library of named
+notes pays nothing at all; Timeline pays nothing. One bounded statement over the window on screen
+(`NoteCards.load`, the shipped window-function read, now keeping every leading block instead of
+throwing all but the first away).
+
+**The capture half** — her *"first words offered, one tap to adopt, ignorable forever — a
+suggestion, never an action taken for her"*: both Mac capture surfaces (the shelf/Library
+quick-entry bar and the floating Quick Note) show `TitleSuggestionChip`; one click takes the words
+as the note's title; a capture she never clicks files UNTITLED exactly as it always did. **The
+⏎/⇧⏎ filing model is UNIT C's and is untouched** — the chip rides beside it and adds one optional
+argument to the mint.
+
+### THE PINS (27 cells in 4 suites + 2 shipped suites amended)
+
+| suite | cells | what they hold |
+|---|---|---|
+| `NoteCardFaceTests` (core) | 13 | the precedence (title · journal day · words · day · Untitled); a blank title is no title; the cap cut at a word edge with its ellipsis; a short opening left whole and unmarked; ONE long word cut where the cap falls; **graphemes never split** (a family emoji survives whole); markdown rendered not printed (headings, emphasis, links, list glyphs); the lead is the first LINE and the preview is what follows; the 400-character bound whatever it is handed; the typed suggestion is the same rule **without** the ellipsis; and the journal marker riding the catalog + Pool rows |
+| `LibraryCardNameTests` (Mac) | 6 | the Library asks the one rule with its own row's facts; a heading-led card still has prose to preview; the second line carries on or stands down; **each mode reads what it draws** (and the model obeys the plan); the words-only read leaves the books alone; and **drawing a card writes NOTHING** — no title, the note's `updated_at` unmoved, the sync outbox unchanged, the rename door still seeded from the stored title |
+| `TitleSuggestionChipTests` (Mac) | 7 | an offer is not an act (filing untouched files untitled); one click makes the first words the title through the REAL operation; the decision rides the text, survives a refusal and resets with the box; an emptied box forgets it; the pad makes the same offer with the same default; **the chip draws her words verbatim and folds only the app's** (the walk's find, red-on-old below); a long opening offered and stored without the ellipsis |
+| `PoolCardPreviewTests` (amended) | 2 | row 87's rule re-expressed over the lead: a titleless card leads with its words and the line under carries on; a daily entry keeps its day and shows its words; a card she named shows no derived line |
+| `QuickEntryBarTests` (amended) | 5 | unchanged in substance — the mint seam gained the title parameter, so its five closures did |
+| `LibraryCardStampsTests` · `LibraryRowAlignmentTests` · `MorningListTests` | — | **green UNMODIFIED** — #103/#105's arrangement and 13g's card facts are byte-unharmed (the brief's standing requirement) |
+
+**RED ON OLD, where the row was defect-shaped.** Item 4 is a FACE, so most cells are construction
+rather than red-on-old. The one defect-shaped row is the walk's find, and it was measured both
+ways: with the name segment marked as the app's words (the pre-fix composition, one line), the
+Terminal voice draws `name it “garden plans for the spring”?` and
+`theChipDrawsHerWordsVerbatimAndOnlyFoldsItsOwn` fails on BOTH arms (offer and adopted); with the
+fix it passes. The suite find below was measured the same way, on two trees.
+
+### THE WALK (mine — `io.lduarte.Variorum.debug`, dev store, 2026-09-19; `cliclick` + `Tools/WalkKit`)
+
+Walked the Library over her-shaped fixtures in **both voices and both appearances**, List AND Notes
+modes, plus the Pool and both capture surfaces. 18 captures in `notes/plans/13u3-screens/`
+(gitignored), `b-01`…`b-18`.
+
+| capture | what it shows |
+|---|---|
+| `b-07-library-notes-terminal-light.png` | **the headline:** every untitled note now says what it starts with — *The lighthouse keeper counted the storms that…* over its own continuation, *Garden fence options* (a `# heading` note, rendered), and an empty note still reading `2026-09-15 · No text yet` |
+| `b-06-library-list-terminal-light.png` | the same names one line each in List mode, with the 18h stamps and the tag `+` untouched beside them |
+| `b-01-the-offer-terminal-light.png` · `b-02-one-click-adopts-it.png` | the chip: `name it “Garden plans for the spring, and what to do”?` → `✓ title: …` in accent ink |
+| `b-03-filed-and-opened.png` | ⏎ files it and the note opens **titled** — the whole typed text still its first block |
+| `b-12-pool-terminal-dark.png` | the Pool, which was a wall of bare dates: the words lead and the day steps down to the quiet slot beside them |
+| `b-13-quick-note-pad-offers-the-name.png` · `b-14-quick-note-pad-name-taken.png` | the floating pad makes the same offer in a 300 pt window — truncating the drawn name, storing the whole one |
+| `b-15-the-filed-quick-note-is-named.png` | the filed quick note in the Library, named, tagged `#quicknote` |
+| `b-08` (Study light) · `b-09` (Study dark) · `b-10` (Terminal dark) | the Notes cards in the other three voice × appearance cells; dark is a fully black room in both voices (R51) |
+| `b-11` (Terminal dark) · `b-16` (Study dark) · `b-17` (Study light) | the List rows in the other three cells |
+| `b-04` · `b-05` | the heading note being made (its second block is the walk's own mangled typing — see the staging note) |
+| `b-18-restored-terminal-follow-system.png` | the dev store left as I found it: Terminal voice, appearance following the system |
+
+**WALK VERDICT: the note lists read as she asked — a card leads with what the note starts with,
+the date steps down, a daily entry stays its day, and the capture surfaces offer a name without
+ever taking one.** The walk FOUND ONE DEFECT in what I had just built, fixed and re-walked:
+
+1. **The chip showed a name she would not get.** `VoicedChip` draws its label through
+   `chromeLabel`, which LOWERCASES in the Terminal voice — right for the chrome vocabulary, wrong
+   for a chip quoting her prose: the offer read *name it “garden plans for the spring, and what to
+   do”?* over a note that would be titled *“Garden plans…”*. The label is now SEGMENTS (the app's
+   words voiced, hers verbatim), pinned red-on-old (`abb79b12`).
+
+**What the walk could NOT stage** (mine, not the app's): synthetic typing into the full-document
+TK2 editor drops most characters even at 150 ms spacing, and `⌘V` never landed there at all, so the
+heading note's second block reads `B s  t Bs t.` instead of the sentence I meant — the Library
+captures show the cards over that text rather than over prose. The quick-entry bar and the pad took
+full strings reliably. Two geometry notes for the next walker: the dev-store window is **1728×1084
+at Y=33** (the WalkKit README's 1700×1000 is stale), and the app's own **40 pt phantom window**
+appears in `walk-cap`'s listing on a fresh launch.
+
+### FOUND, NOT MINE (handed up rather than carried)
+
+1. **THE FULL-DOCUMENT EDITOR SPUN ON A `deleteBackward`.** Mid-walk the dev build stopped
+   responding (99% CPU, AppleEvents timing out). `sample` caught it with **1,839 of 1,839 samples
+   in one stack**: `EditorTextView.keyDown` → `NSTextView.deleteBackward:` →
+   `NSTextStorage.processEditing` → `EditorSurfaceDelegate.textStorage(_:didProcessEditing:…)`
+   (`EditorView.swift:655`) → `EditorViewModel.storageDidEdit` (`:1273`) → `updateCaretContext`
+   (`:3303`) → **`refreshDecorations` (`:3527`) → `offsetAt(y:)` (`:3520`) →
+   `NSTextLayoutManager.textLayoutFragmentForPosition` → `ensureLayoutForBounds:` →
+   `_estimatedTextLocationForVerticalOffset:`** — i.e. TEXTKIT2 §2's own class, forcing layout from
+   inside a text-storage callback. Seen ONCE, not reproduced (I killed my instance and relaunched);
+   nothing in this unit's diff is on that path, and the decoration road is A1's neighbourhood. The
+   full sample is at `/tmp/13u3b-editor-hang-sample.txt` for as long as that survives; the frames
+   above are the record. **Owner: the editor-seam/decoration owner (A1's ladder round, or
+   KnownIssues owner 12).**
+2. **A chip inside an expanded book story WRAPS today** — which is a row height the book's manifest
+   does not know about (13u2b's own warning). Found because clamping the shared chip to one line
+   moved a settled Outline landing by 3,424 pt. **Owner: the manifest/landing owner.**
+3. **Two reads of a note's opening disagree about which take they render:** `NoteCards.load` uses
+   `COALESCE(cb.chosen_variant_id, b.default_variant_id)` while the note picker's snippet uses
+   `b.default_variant_id` alone, and neither is `renderPost`'s full resolution (chosen-if-live-and-
+   active-and-same-block, else default). Pre-existing, cosmetic (a preview), untouched here.
+
+### THE SUITE FIND (traced on two trees, not guessed)
+
+The full Mac suite red-flagged `BookOutlineLandingTests.openingACollapsedStoryLandsAtItsTop
+WithThreeStoriesExpanded` (`abs(top) → 3424.0 <= 4`) — a suite the 13u2b baseline calls green with
+zero known issues. It reproduced ISOLATED, so it was not the load-flake class. Traced properly:
+**green on a scratch worktree at this unit's start point (`4f7af04c`), red on mine, green again
+with the one modifier removed** — my `.lineLimit(1)` on the SHARED `VoicedChip`. Some chip inside
+an expanded story wraps today, so clamping the family changed a book row's height and a landing
+that had settled moved during its hold. The clamp is now OPT-IN (`VoicedChip.lines`) and only the
+title-suggestion chip takes it (`7aac721c`); the wrapping chip is recorded above for its owner.
+*(The lesson, stated for the next unit: P-8's chrome rule is right, and applying it to a shared
+control is a GEOMETRY change to every surface that control stands on.)*
+
+### FINALS (2026-09-19)
+
+- core `swift test` — **Test run with 1580 tests in 172 suites passed after 52.611 seconds.**
+  (Baseline 1567/171 + 13 cells in 1 new suite = exactly this.)
+- the FULL Mac suite — **Test run with 2823 tests in 471 suites failed after 763.099 seconds with
+  2 issues.** Both issues are ONE test: `theReadClickLandsInIndexAtThatBlock`, the recorded
+  environment red (KnownIssues row 58, owner 12) the brief names as the single tolerated one.
+  Nothing else failed. (Baseline 2810/469 + 13 cells in 2 new suites = 2823/471, exactly.)
+- the TUTORIAL SPINE — green in-run (every `Tutorial…` suite passed; zero failures).
+- iOS build — **BUILD SUCCEEDED**.
+- lockstep marker — **8**, untouched. Schema: ZERO. Migrations: ZERO. `Sync/`: ZERO.
+  `Persistence/`: ZERO. `Server/`: ZERO.
+
+### MOBILE PARITY (a note, not a build — the brief's rule)
+
+The brain is core `Domain` and the phone can consume it as-is at its catch-up: `NoteCardFace.card`
++ `suggestedTitle` are pure and platform-free, and `TimelineItem.profile` (the journal marker) now
+rides the shared listing row. What the phone owes: its note lists leading with the same answer, and
+the capture chip on `MobileQuickNote`. **The cap is the one number to re-decide there** — 48 is
+measured against the MAC's title room, and PL-24(b) records the phone's own as ~30.
+
+### DEFERRED / NOT MINE (stated rather than done)
+
+- **The title-suggestion chip's phone face** — the mobile catch-up's, per the parity note above.
+- **Surfaces I did not align**, deliberately, because the brief names the Library + Pool card
+  family and one unit is one surface: the Library's TIMELINE mode (a time-ordered surface where a
+  date IS the organizing fact), the Trash/Archived listings, the note picker (a picker, not a note
+  list — its snippet is row context under a search, and its own doc says titles stay as they are),
+  and the shelf's book rows. The brain is ready for any of them.
+- **The three "found, not mine" rows above.**
+
+---
+
+## UNIT B CLOSED — 2026-09-19
+
+Item 4 built to her ruling and walked on the dev-store Debug build in both voices and both
+appearances: ONE pure Domain brain for what a note-list card leads with, the Library's two
+renderers and the Pool's cards consuming it through one composition each, the capture surfaces
+offering the first words as a name without ever taking one, and nothing stored or renamed anywhere.
+27 pins across four suites, the shipped stamps/#103/#105 arrangement byte-unharmed, one walk defect
+found and fixed red-on-old, one suite find traced on two trees and fixed, three things found and
+handed up rather than carried. New PROVISIONAL bundle: QUESTIONS **#119** (six calls). Suites and
+finals above.
