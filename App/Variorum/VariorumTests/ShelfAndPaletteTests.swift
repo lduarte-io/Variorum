@@ -60,18 +60,11 @@ struct ShelfModelTests {
                 "pins first in PIN order (R38), then journal books, then the rest by name")
     }
 
-    @Test func quickEntryMintsASegmentedPostAndReturnsItsID() async throws {
-        try await withShellSession { session, db in
-            let model = ShelfViewModel(session: session)
-            let id = await model.quickEntry("First paragraph.\n\nSecond paragraph.")
-            let postID = try #require(id)
-            let rendered = try await db.read { db in try Queries.renderPost(db, containerID: postID) }
-            #expect(rendered.count == 2,
-                    "Enter opens the typed text as a WHOLE post — bulk entry, segmented (R3)")
-            // Whitespace-only never mints.
-            #expect(await model.quickEntry("   \n ") == nil)
-        }
-    }
+    // `quickEntryMintsASegmentedPostAndReturnsItsID` retired with
+    // `ShelfViewModel.quickEntry` (13u3 — the dead parallel mint road).
+    // Its two assertions live on the REAL road's suite: segmentation via
+    // `importPost` in `QuickEntryBarTests.aMintedNoteClearsTheBoxAndIsHandedBack`,
+    // whitespace-files-nothing in `.anEmptyBoxFilesNothingAndClearsItsStaleError`.
 
     @Test func dragAPostOntoABookAddsMembershipIdempotently() async throws {
         try await withShellSession { session, db in

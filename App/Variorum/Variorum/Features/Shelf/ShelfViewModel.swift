@@ -109,22 +109,12 @@ final class ShelfViewModel {
 
     // MARK: - Actions
 
-    /// The quick-entry bar (R3): typed text becomes a WHOLE post — bulk
-    /// entry through the import pipeline (segmentation + the spacing
-    /// ruling ride free). Returns the new post's id for selection.
-    func quickEntry(_ text: String) async -> String? {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-        do {
-            let result = try await session.runner.run { ops in
-                try ops.importPost(title: nil, text: text)
-            }
-            return result.container.id
-        } catch {
-            lastError = String(describing: error)
-            return nil
-        }
-    }
+    // The bar's mint road lives in `QuickEntryModel.submit()` (13l's
+    // extraction; 13u3 UNIT C's two-key rule rides it). A parallel
+    // `quickEntry(_:)` mint survived here test-only until 13u3 — deleted
+    // at the orchestrator's adjudication of UNIT C's hand-up: two mint
+    // roads for one door is the forked-brains class, and every behaviour
+    // its one test asserted is pinned on the live road (QuickEntryBarTests).
 
     func setPinned(_ readingID: String, pinned: Bool) async {
         await run { try $0.setShelfPinned(readingID, pinned: pinned) }
