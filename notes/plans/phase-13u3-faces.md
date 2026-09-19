@@ -1601,7 +1601,7 @@ chord (⇧⌘V stays `PlainPaste`'s): ⏎ and ⎋ act only inside a name field t
 |---|---|---|
 | 0 | the record + LIVE STATUS | **DONE** |
 | 1 | core — `SavepointName` (the one normalisation) + `renameCommitPoint` + its state-transition pins | **DONE** (11 cells green; the 39 commit/variant/savepoint suites 129/129 green beside them) |
-| 2 | the SHARED face — a savepoint's name LEADS its quiet line (`SavepointRowFace`) + pins | PENDING |
+| 2 | the SHARED face — a savepoint's name LEADS its quiet line (`SavepointRowFace`) + pins | **DONE** (5 cells; with `BlockHistoryPaneTests` 23/23 green) |
 | 3 | the Mac name field — one component, one pure key rule, voiced | PENDING |
 | 4 | the commit doors summon it (Write · Takes/Lenses · Canvas · Compare) + pins | PENDING |
 | 5 | the RENAME door in Block History, on manual AND quiet savepoints + pins | PENDING |

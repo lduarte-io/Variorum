@@ -158,6 +158,44 @@ nonisolated enum BlockHistoryCopy {
 
     static let archivedExplainer = "Set aside, out of the fan — kept, with no clock."
 
+    // MARK: - Naming a saved moment (13u3 UNIT D — item 14, her R-13u3-1)
+
+    /// The rename door's verb, WORDED TO THE ROW — the door says what it
+    /// does, which is `BlockPastCopy.putBackHelp`'s rule one region up (a
+    /// button whose label is true of some rows and false of others is the
+    /// small dishonesty this family of surfaces exists to end).
+    ///
+    /// Shared rather than Mac-local because neither word names a platform's
+    /// door or chord: it is the act, and the phone's Block History is the
+    /// same listing with the same rows (`BlockHistoryFace`'s own rule for
+    /// what may live here).
+    static let nameSavepointVerb = "Name"
+    static let renameSavepointVerb = "Rename"
+
+    static func nameVerb(_ commit: CommitPoint) -> String {
+        SavepointRowFace.name(commit) == nil ? nameSavepointVerb : renameSavepointVerb
+    }
+
+    static func nameHelp(_ commit: CommitPoint) -> String {
+        SavepointRowFace.name(commit) == nil
+            ? "Give this saved moment a name — what it was, so you can find it "
+                + "again. The moment's text is never editable; only its name is"
+            : "Change this saved moment's name, or clear it. The moment's text "
+                + "is never editable; only its name is"
+    }
+
+    /// The receipts. The named one quotes the name back, because the whole
+    /// point of a name is that she recognises it.
+    static func savepointNamed(_ name: String) -> String {
+        "Saved moment named \u{201C}\(name)\u{201D}."
+    }
+
+    static let savepointNameCleared = "Name cleared — the saved moment itself is untouched."
+
+    static func renamed(_ name: String?) -> String {
+        name.map(savepointNamed) ?? savepointNameCleared
+    }
+
     /// **The deleted region's explainer, LEAD HALF — and the whole of the
     /// promise this face makes: NO PURGE DOOR HERE** (her evolved rule, the
     /// polish round's ledger row 21: Delete Now lives on TRASH SURFACES, never
@@ -193,19 +231,48 @@ nonisolated enum BlockHistoryExpansion {
     }
 }
 
-/// **A SAVEPOINT ROW'S QUIET LINE, AS A VALUE** — when it was saved, whether
-/// it was deliberate or quiet, its message, and the pre-split warning. Pure,
-/// so a pin holds what the row says without rendering it (`TrayRowFace`'s
-/// shape and its reason).
+/// **A SAVEPOINT ROW'S QUIET LINE, AS A VALUE** — its name where she gave it
+/// one, when it was saved, whether it was deliberate or quiet, and the
+/// pre-split warning. Pure, so a pin holds what the row says without
+/// rendering it (`TrayRowFace`'s shape and its reason).
+///
+/// **13u3 UNIT D — the NAME LEADS** (item 14, her ruling R-13u3-1). The
+/// shipped order put the message third, after the stamp and the kind, which
+/// was the right shape while nothing could write it: a message was a rarity
+/// the line mentioned. Now the commit door offers one at every ⌘S, so the
+/// name is what identifies the row — *"before the AI edit"* is why she is
+/// looking at this savepoint and not the one above it — and a name she has
+/// to read past a date to find is a name the row is hiding.
+///
+/// The two slots are additive beside `meta`, which now DERIVES from them
+/// (`DeletedTakeFace`'s lead/clock split, same reason): a face with room can
+/// draw the name in its own register and the details muted beneath it, while
+/// a face with one line reads the joined form and gets the ordering for free.
+/// **The occasion is never overwritten by the name** — a renamed quiet
+/// savepoint still says *quiet* beside its name, because `renameCommitPoint`
+/// writes `message` and leaves `kind` alone (her ruling's own note).
 nonisolated enum SavepointRowFace {
-    static func meta(_ commit: CommitPoint, predatesSplit: Bool) -> [String] {
+    /// The name she gave this moment, or nil. Read through the ONE rule the
+    /// operations layer stores it by, so a face can never show a name the
+    /// store would have normalised away.
+    static func name(_ commit: CommitPoint) -> String? {
+        SavepointName.normalized(commit.message)
+    }
+
+    /// Everything the row says ABOUT the moment, in one place: when, whether
+    /// it was deliberate or quiet, and the pre-split warning.
+    static func details(_ commit: CommitPoint, predatesSplit: Bool) -> [String] {
         var pieces = [
             commit.createdAt.formatted(date: .abbreviated, time: .shortened),
             commit.kind == .auto ? "quiet" : "saved by hand",
         ]
-        if let message = commit.message, !message.isEmpty { pieces.append(message) }
         if predatesSplit { pieces.append(BlockHistoryCopy.predatesSplitMark) }
         return pieces
+    }
+
+    /// The whole quiet line — the NAME first where there is one.
+    static func meta(_ commit: CommitPoint, predatesSplit: Bool) -> [String] {
+        (name(commit).map { [$0] } ?? []) + details(commit, predatesSplit: predatesSplit)
     }
 }
 
