@@ -20,17 +20,28 @@ extension Queries {
         /// The value of the ordering stamp for this row — feeds the next
         /// page's cursor.
         public let stamp: String
+        /// **The note's `container.profile`, raw** (13u3 UNIT B — item 4's
+        /// journal split: a daily entry's card stays date-led because its
+        /// date IS its identity). Carried by the listings whose rows draw a
+        /// CARD (the Pool's); nil-defaulted, so every other listing and every
+        /// existing caller is unchanged and simply has no opinion.
+        public let profile: String?
 
         public init(
             postID: String, title: String?, entryDate: String?,
-            createdAt: String? = nil, stamp: String
+            createdAt: String? = nil, stamp: String, profile: String? = nil
         ) {
             self.postID = postID
             self.title = title
             self.entryDate = entryDate
             self.createdAt = createdAt
             self.stamp = stamp
+            self.profile = profile
         }
+
+        /// Is this note a DAILY ENTRY? (`profile='journal'` — the mint's own
+        /// marker, never "it has a date".)
+        public var isJournalEntry: Bool { profile == Profile.journal.rawValue }
 
         /// What this note is CALLED on screen (13g batch 7, R6-3) — the one
         /// brain, asked lazily so a listing pays only for the rows it draws

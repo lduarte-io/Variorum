@@ -199,7 +199,7 @@ extension Queries {
         return try Row.fetchAll(
             db,
             sql: """
-                SELECT id, title, entry_date, created_at,
+                SELECT id, title, entry_date, created_at, profile,
                        COALESCE(last_touched_at, created_at) AS stamp
                 FROM container c
                 WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL
@@ -212,7 +212,7 @@ extension Queries {
             TimelineItem(
                 postID: $0["id"], title: $0["title"],
                 entryDate: $0["entry_date"], createdAt: $0["created_at"],
-                stamp: $0["stamp"])
+                stamp: $0["stamp"], profile: $0["profile"])
         }
     }
 
@@ -355,12 +355,21 @@ extension Queries {
         /// nil-defaulted so every existing caller compiles unchanged.
         public let createdAt: String?
         public let lastTouchedAt: String?
+        /// **The note's `container.profile`, raw** (13u3 UNIT B — item 4's
+        /// journal split: *journal cards stay date-led, a daily entry's date
+        /// IS its identity*). The DAILY MINT's own marker, carried rather
+        /// than inferred: "has an `entry_date`" is a different fact and a
+        /// note she merely dated is not a diary entry. nil for book and block
+        /// hits, and nil-defaulted so every existing caller compiles
+        /// unchanged.
+        public let profile: String?
 
         public init(
             kind: Kind, id: String, title: String, detail: String?,
             storedTitle: String? = nil,
             homeContainerID: String? = nil, homeIsPool: Bool = false,
-            createdAt: String? = nil, lastTouchedAt: String? = nil
+            createdAt: String? = nil, lastTouchedAt: String? = nil,
+            profile: String? = nil
         ) {
             self.kind = kind
             self.id = id
@@ -371,7 +380,12 @@ extension Queries {
             self.homeIsPool = homeIsPool
             self.createdAt = createdAt
             self.lastTouchedAt = lastTouchedAt
+            self.profile = profile
         }
+
+        /// Is this note a DAILY ENTRY? (`profile='journal'` — the mint's
+        /// marker.) Said here, once, so no face spells the string.
+        public var isJournalEntry: Bool { profile == Profile.journal.rawValue }
     }
 
     /// Title/name/handle search across books, posts, and blocks — "all
@@ -473,7 +487,8 @@ extension Queries {
                 detail: $0["entry_date"],
                 storedTitle: DisplayTitle.isAbsent($0["title"]) ? nil : $0["title"],
                 createdAt: $0["created_at"],
-                lastTouchedAt: $0["touched_at"])
+                lastTouchedAt: $0["touched_at"],
+                profile: $0["profile"])
         }
 
         // Blocks: named blocks anywhere + pool scraps by first-line handle.
@@ -520,7 +535,7 @@ extension Queries {
         let dir = direction == .desc ? "DESC" : "ASC"
         let day = editedOn == nil ? "" : "\n  AND \(editedOnClause)"
         return """
-            SELECT id, title, entry_date, created_at,
+            SELECT id, title, entry_date, created_at, profile,
                    COALESCE(last_touched_at, created_at) AS touched_at
             FROM container
             WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NULL

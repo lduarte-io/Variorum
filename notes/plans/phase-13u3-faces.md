@@ -998,7 +998,7 @@ migrations, marker stays 8.
 |---|---|---|
 | 0 | This record + LIVE STATUS | **DONE** |
 | 1 | The BRAIN — `Sources/VariorumCore/Domain/NoteCardFace.swift` + its edge-case pins | **DONE** — 12 cells green (`NoteCardFaceTests`) |
-| 2 | The two facts the card needs — `CatalogHit.profile` · `TimelineItem.profile` (additive, nil-defaulted) | PENDING |
+| 2 | The two facts the card needs — `CatalogHit.profile` · `TimelineItem.profile` (additive, nil-defaulted) | **DONE** — 13 cells green; adjacent core suites green |
 | 3 | The Library consumers — Notes cards + List rows (one composition, `LibraryCardName`) | PENDING |
 | 4 | The Pool card aligns to the same brain (`PoolCardFace` retires into it) | PENDING |
 | 5 | The title-suggestion chip at capture (QuickEntryBar + QuickNote pad) — or handed to UNIT C with a note | PENDING |

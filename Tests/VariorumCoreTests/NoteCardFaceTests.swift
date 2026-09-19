@@ -13,7 +13,9 @@
 //  one rule, both note renderers).
 //
 
+import Dependencies
 import Foundation
+import GRDB
 import Testing
 @testable import VariorumCore
 
@@ -236,5 +238,39 @@ struct NoteCardFaceTests {
         let suggestion = try #require(NoteCardFace.suggestedTitle(forTypedText: long))
         #expect(suggestion.count <= NoteCardFace.leadCap + 1)
         #expect(suggestion.hasSuffix(NoteCardFace.ellipsis))
+    }
+
+    // MARK: - The fact the rows had to start carrying
+
+    /// **The daily mint's marker rides the rows a CARD is drawn from** — the
+    /// catalog's note hits and the Pool's listing — so the journal split is
+    /// read off the row rather than guessed from "it has a date". Both are
+    /// nil-defaulted additions: every other listing and caller is unchanged
+    /// and simply has no opinion.
+    @Test func theJournalMarkerRidesTheRowsACardIsDrawnFrom() throws {
+        try withOperations { ops, db in
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-01-15")
+            let dated = try ops.createPost(title: nil, entryDate: "2026-01-16")
+            _ = try ops.createReading(name: "the field guide", kind: .curated)
+
+            let hits = try db.read { try Queries.searchCatalog($0, query: "") }
+            let byID = Dictionary(
+                hits.filter { $0.kind == .post }.map { ($0.id, $0) },
+                uniquingKeysWith: { first, _ in first })
+            #expect(byID[entry.container.id]?.isJournalEntry == true)
+            #expect(byID[dated.id]?.profile == nil,
+                    "a note she merely DATED is not a diary entry")
+            #expect(byID[dated.id]?.isJournalEntry == false)
+            #expect(hits.first { $0.kind == .book }?.isJournalEntry == false,
+                    "a book hit has no profile at all")
+
+            // The Pool's listing carries it too (a journal entry whose book
+            // membership was removed is bookless like any other note).
+            let pool = try db.read { try Queries.poolPosts($0, limit: 50) }
+            let poolByID = Dictionary(
+                uniqueKeysWithValues: pool.map { ($0.postID, $0) })
+            #expect(poolByID[entry.container.id]?.isJournalEntry == true)
+            #expect(poolByID[dated.id]?.isJournalEntry == false)
+        }
     }
 }
