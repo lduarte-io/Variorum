@@ -296,7 +296,7 @@ touches her real store outside the pre-authorized refresh.**
 | # | item | status → owner |
 |---|---|---|
 | 1 | The gutter DESIGN MEMO (P-5) + her edge rulings | **DONE 2026-09-18** — `notes/plans/phase-13u3-memo-gutter.md` (`73a6ea17` + the rulings commit); all four edges RULED at the sitting (R-13u3-3…6) |
-| 2 | UNIT A1 — the gutter geometry rework (item 3's page half + KnownIssues row 50) | OPEN — the memo is the design; brief below |
+| 2 | UNIT A1 — the gutter geometry rework (item 3's page half + KnownIssues row 50) | **DONE 2026-09-18** — `bb31912e`…`3263a1e6`; the UNIT A1 RECORD is at the end of this file (host table · traced mechanisms · 15 pins with red-on-old · 12 walk captures · finals). Row 50 RESOLVED; QUESTIONS #117 opened |
 | 2b | UNIT A2 — the comments panel as a text editor (item 3's panel half, memo §2 D) | NOT STARTED — after A1 |
 | 3 | UNIT B — note-list skimmability (item 4) | NOT STARTED |
 | 4 | UNIT C — the quick-capture Mac face (item 9 / R-13u-4) | NOT STARTED |
