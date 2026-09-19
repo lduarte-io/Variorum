@@ -178,117 +178,137 @@ nonisolated enum BlockDecor {
         return max(0, min(ideal, (gap - minWhiteGap) / 2))
     }
 
-    // MARK: - The gutter's numbers (17p batch b, rows 5–6 — her ruling R-Q4)
+    // MARK: - THE GUTTER'S NUMBERS (13u3 UNIT A1 — her R-13u-9 / item 20)
+    //
+    // Everything below draws in the WHITESPACE the page already owns, to the
+    // LEFT of the prose (R5-3's margin) or behind it. Nothing here may reach
+    // the prose column: the one law says the text's measure and left edge
+    // are the surface width's alone, and R9 says the margins are sacred, so
+    // a decoration with no room YIELDS rather than borrowing a point of
+    // either. (17p batch b's answer — reserve a lane, move the text — is
+    // what she reversed; `calloutGutterPad`, `calloutGlyphPad`,
+    // `calloutLeadingPad` and `commentClearance` retired with it.)
 
-    /// The callout card's shipped horizontal air into each gutter — a literal
-    /// since 13 C1, NAMED here because the lane's arithmetic
-    /// (`EditorTypography.commentLane`) is built from it and the badge's
-    /// clearance has to know it.
-    static let calloutGutterPad: CGFloat = 12
+    /// The view's own edge margin — every decoration's clamp, named.
+    static let edgeMargin: CGFloat = 2
 
-    /// The leading glyph's inset INSIDE the callout card (her R-Q4: *"the
-    /// emoji moves inside the callout frame's leading inset"*).
-    static let calloutGlyphPad: CGFloat = 4
-
-    /// The room a leading glyph gets. FIXED rather than measured, for two
-    /// reasons: a card whose leading pad depended on a measured label width
-    /// would change shape with the glyph, and `promptEmoji` returns whatever
-    /// she typed — a multi-glyph answer would otherwise push the card left
-    /// past the badge. One emoji at 13 pt measures ~17; more clips, which is
-    /// honest and bounded (before this batch a long answer clamped at 2 and
-    /// sat on the words).
+    /// The room a leading glyph gets. FIXED rather than measured: a box that
+    /// changed shape with the glyph would move the gutter's arithmetic per
+    /// block. One emoji at 13 pt measures ~17, and since R-13u3-4 a glyph is
+    /// exactly ONE grapheme (`leadingGlyph`), so the box always holds it.
     static let calloutGlyphBox = CGSize(width: 18, height: 17)
 
-    /// The narrow-gutter comment badge's own size (the shipped 32 × 16).
+    /// The comment badge's own size (the shipped 32 × 16) — its WIDTH is a
+    /// maximum now, because a badge may never stand on prose (below).
     static let commentBadgeSize = CGSize(width: 32, height: 16)
 
-    /// The air a comment face leaves between itself and a callout card.
+    /// Below this a count badge cannot be read at all, so nothing is drawn —
+    /// the block keeps every other door to its comments (the block menu,
+    /// ⌘⇧', the panel) and the page keeps its measure.
+    static let commentBadgeMinWidth: CGFloat = 16
+
+    /// The air between two stacked decorations in the gutter — the glyph and
+    /// the comment face beneath it (R-13u3-3's stack).
     static let decorAir: CGFloat = 4
 
-    /// The narrow-gutter badge's own air to the TEXT — the shipped `textLeft
-    /// − 36` for a 32-wide badge, stated as the number it always was. The
-    /// same 4 as `decorAir` by coincidence, not by rule: that one is the
-    /// badge → card gap in the lane's arithmetic, this one the badge → prose
-    /// gap when nothing else claims the gutter (the ladder's NIT-3).
+    /// The badge's air to the TEXT — the shipped `textLeft − 36` for a
+    /// 32-wide badge, stated as the number it always was.
     static let commentBadgeAir: CGFloat = 4
 
-    /// Does this presentation put a GLYPH in its card's leading inset? The
-    /// one question the card's width, the glyph's rect and the comment
-    /// faces' clearance all ask, so they cannot disagree.
-    static func hasLeadingGlyph(_ presentation: BlockPresentation?) -> Bool {
+    /// The glyph's air to the TEXT. The same 4 as the badge's, deliberately:
+    /// the two stack in one lane and a shared air is what makes them read as
+    /// one column rather than two.
+    static let calloutGlyphAir: CGFloat = 4
+
+    /// The minimum air between two stacked margin CARDS, so two commented
+    /// blocks' cards never abut (her *"the comments still also aren't spaced
+    /// well"*; memo §2 B's rhythm).
+    static let cardRhythmAir: CGFloat = 8
+
+    /// Below this a clamped card is not a card — the block shows its badge
+    /// instead.
+    static let cardMinHeight: CGFloat = 26
+
+    /// **THE LEADING GLYPH — ONE GRAPHEME** (her ruling R-13u3-4, the memo
+    /// §3 edge 2). Whatever is stored (a multi-glyph answer typed before the
+    /// guard, or one arriving from another device), what the gutter draws is
+    /// the FIRST grapheme, so the fixed box above always holds it and row
+    /// 50's clip residual cannot recur. nil = this block wears no glyph.
+    static func leadingGlyph(_ presentation: BlockPresentation?) -> String? {
         guard let presentation,
               presentation.kind == BlockPresentation.calloutKind,
-              let emoji = presentation.emoji
-        else { return false }
-        return !emoji.isEmpty
+              let emoji = presentation.emoji,
+              let first = emoji.first
+        else { return nil }
+        return String(first)
     }
 
-    /// **The card's LEADING pad** — its shipped air, plus the glyph's room
-    /// where it carries one (her R-Q4: *"the glyph is the frame's, so the
-    /// frame widens to hold it"*). The frame grows LEFTWARD; the block's text
-    /// is never moved, which is why this fix touches no text attribute and no
-    /// paragraph style (TEXTKIT2_NOTES §3 — and `exclusionPaths` is forbidden
-    /// outright).
-    static func calloutLeadingPad(hasGlyph: Bool) -> CGFloat {
-        hasGlyph
-            ? calloutGutterPad + calloutGlyphPad + calloutGlyphBox.width
-            : calloutGutterPad
+    /// Does this presentation put a glyph in the gutter?
+    static func hasLeadingGlyph(_ presentation: BlockPresentation?) -> Bool {
+        leadingGlyph(presentation) != nil
     }
 
-    /// The callout card's rect: the block's lines padded into a rounded
-    /// frame — horizontal air into the gutters, vertical air capped by the
-    /// white-gap rule against BOTH neighbors.
-    ///
-    /// `hasGlyph` widens the LEADING pad only (rows 5–6). Defaulted false, so
-    /// every shipped call and pin reads exactly as before.
+    /// **The gutter room a decoration of `air` clearance can occupy** — from
+    /// the view's edge margin to `air` short of the prose. Zero or less means
+    /// the page has no gutter here and the decoration yields.
+    static func gutterRoom(textLeft: CGFloat, air: CGFloat) -> CGFloat {
+        max(0, textLeft - air - edgeMargin)
+    }
+
+    /// **The callout's WASH — it HUGS THE PROSE COLUMN** (memo §2 C). It is a
+    /// background, so it never moves text and it stays the callout's identity
+    /// (R16/R17) — but it no longer extends into the gutter on either side,
+    /// because the gutter is the decorations' now and a tint under the glyph
+    /// would read as the old frame-with-an-emoji-in-it. Vertical air is
+    /// untouched: R17's white-gap rule, capped against BOTH neighbours.
     static func calloutRect(
         block: CGRect, gapAbove: CGFloat?, gapBelow: CGFloat?,
-        textLeft: CGFloat, textRight: CGFloat, hasGlyph: Bool = false
+        textLeft: CGFloat, textRight: CGFloat
     ) -> CGRect {
         let top = verticalPad(gap: gapAbove)
         let bottom = verticalPad(gap: gapBelow)
-        let left = max(2, textLeft - calloutLeadingPad(hasGlyph: hasGlyph))
-        let right = textRight + calloutGutterPad
         return CGRect(
-            x: left, y: block.minY - top,
-            width: right - left, height: block.height + top + bottom)
+            x: textLeft, y: block.minY - top,
+            width: max(0, textRight - textLeft), height: block.height + top + bottom)
     }
 
-    /// **The leading glyph's rect — INSIDE its own card.** One rule, and the
-    /// same one in Write and in the book's editor, so the two surfaces cannot
-    /// disagree about where a callout's glyph lives (review focus F-3).
-    ///
-    /// Before this batch the glyph placed itself at
-    /// `max(2, textLeft - width - 8)` — i.e. OUTSIDE the card, in the bare
-    /// margin, and clamped onto the first characters wherever the gutter was
-    /// narrow. It now sits in the card's top-leading corner, in the room the
-    /// card grew for it.
-    static func calloutGlyphRect(card: CGRect, blockTop: CGFloat) -> CGRect {
-        CGRect(
-            x: card.minX + calloutGlyphPad, y: blockTop,
+    /// **The leading glyph's rect — IN THE GUTTER, at the block's first
+    /// line** (memo §2 C). nil where the gutter cannot hold it without
+    /// touching the prose: at a narrow window the glyph yields before the
+    /// text does (memo §3 edge 1).
+    static func calloutGlyphRect(textLeft: CGFloat, blockTop: CGFloat) -> CGRect? {
+        guard gutterRoom(textLeft: textLeft, air: calloutGlyphAir)
+            >= calloutGlyphBox.width
+        else { return nil }
+        return CGRect(
+            x: textLeft - calloutGlyphAir - calloutGlyphBox.width, y: blockTop,
             width: calloutGlyphBox.width, height: calloutGlyphBox.height)
     }
 
-    /// **The narrow-gutter comment badge's rect.** `clearance` is how much of
-    /// the gutter belongs to something else: a callout card's leading pad
-    /// where the block carries one, and the badge's own breathing room
-    /// otherwise — so the badge never stands on a card it cannot be read
-    /// against, which is the half of her *"the callout goes on top of the
-    /// comment badge"* that the lane alone would not have fixed.
-    static func commentBadgeRect(
-        textLeft: CGFloat, blockTop: CGFloat, clearance: CGFloat
-    ) -> CGRect {
-        CGRect(
-            x: max(2, textLeft - clearance - commentBadgeSize.width), y: blockTop,
-            width: commentBadgeSize.width, height: commentBadgeSize.height)
+    /// **THE STACK (her ruling R-13u3-3, verbatim: *"stack them at any
+    /// width, I think it would look better."*)** — where a block's COMMENT
+    /// face sits: directly UNDER the callout glyph where the block wears one
+    /// in the gutter, at the block's first line otherwise. One uniform
+    /// arrangement at every width, never side-by-side jockeying — which is
+    /// why `commentClearance`'s horizontal arithmetic is retired.
+    static func commentFaceTop(blockTop: CGFloat, glyph: CGRect?) -> CGFloat {
+        guard let glyph else { return blockTop }
+        return glyph.maxY + decorAir
     }
 
-    /// How much gutter a comment face must leave to the block's right-hand
-    /// neighbours — its own air, or the callout card's leading pad plus air
-    /// where this block wears a card. ONE answer for the badge and the
-    /// margin card alike.
-    static func commentClearance(hasCallout: Bool, hasGlyph: Bool, own: CGFloat) -> CGFloat {
-        hasCallout ? max(own, calloutLeadingPad(hasGlyph: hasGlyph) + decorAir) : own
+    /// **The comment count BADGE — and it never stands on prose.** Its width
+    /// is the shipped 32 wherever the gutter holds it (byte-identical), and
+    /// yields to the room where it does not; below `commentBadgeMinWidth`
+    /// there is no badge at all. *(Row 50's first residual — Write at
+    /// `minGutter` 28 — dissolves here: the badge is 22 pt wide there and
+    /// clear of the words, where it used to clamp at 2 and sit on them.)*
+    static func commentBadgeRect(textLeft: CGFloat, top: CGFloat) -> CGRect? {
+        let room = gutterRoom(textLeft: textLeft, air: commentBadgeAir)
+        guard room >= commentBadgeMinWidth else { return nil }
+        let width = min(commentBadgeSize.width, room)
+        return CGRect(
+            x: textLeft - commentBadgeAir - width, y: top,
+            width: width, height: commentBadgeSize.height)
     }
 
     /// The editing indicator's rect (outline ring or background wash):
@@ -333,20 +353,26 @@ nonisolated enum BlockDecor {
     /// The drag handles own the lane at `textLeft - 22` (see
     /// `renderHandles`), so a card stops short of it rather than under it.
     ///
-    /// **`clearance` — 17p batch b, rows 5–6.** Defaulted to `leftCardLane`,
-    /// so a plain commented block's card rect is BYTE-IDENTICAL to what
-    /// shipped (the parity claim, pinned). A block wearing a callout card
-    /// that has grown a glyph lane hands a bigger clearance, and the comment
-    /// card stops short of the card rather than sitting on its tinted
-    /// extension.
+    /// **13u3 UNIT A1 — the RHYTHM (memo §2 B; her *"the comments still also
+    /// aren't spaced well"*).** Two new inputs, and nothing else moved: `top`
+    /// is the STACK's answer (the block's first line, or under its callout
+    /// glyph — R-13u3-3), and `roomBelow` is how far this card may reach
+    /// before the NEXT commented block's face begins, so two cards can never
+    /// abut. A card with too little room to be one answers nil and its block
+    /// shows the badge instead. With no glyph and no neighbour the rect is
+    /// BYTE-IDENTICAL to what shipped (the parity claim, pinned).
     static func leftCardRect(
-        textLeft: CGFloat, blockTop: CGFloat, blockHeight: CGFloat,
-        clearance: CGFloat = leftCardLane
-    ) -> CGRect {
-        let width = min(210, max(0, textLeft - clearance))
+        textLeft: CGFloat, top: CGFloat, blockHeight: CGFloat,
+        roomBelow: CGFloat? = nil
+    ) -> CGRect? {
+        let width = min(210, max(0, textLeft - leftCardLane))
+        guard width > 0 else { return nil }
+        let ideal = min(blockHeight + 24, 96)
+        let height = min(ideal, roomBelow.map { max(0, $0 - cardRhythmAir) } ?? ideal)
+        guard height >= cardMinHeight else { return nil }
         return CGRect(
-            x: max(0, textLeft - clearance - width), y: blockTop,
-            width: width, height: min(blockHeight + 24, 96))
+            x: max(0, textLeft - leftCardLane - width), y: top,
+            width: width, height: height)
     }
 
     /// The clearance a left card leaves for the drag-handle lane.
@@ -580,14 +606,19 @@ final class BlockDecorOverlayController {
             }
         }
         pool(&calloutViews, count: rects.count, in: textView, below: true) { DecorRectView() }
-        pool(&emojiLabels,
-             count: rects.filter { BlockDecor.hasLeadingGlyph($0.presentation) }.count,
-             in: textView, below: false) {
+        // 13u3 UNIT A1: a glyph is drawn only where the GUTTER holds it —
+        // at a narrow window the glyph yields before the text does (memo §3
+        // edge 1), so the pool counts the ones that will actually fit.
+        let glyphed = rects.filter {
+            BlockDecor.hasLeadingGlyph($0.presentation)
+                && BlockDecor.calloutGlyphRect(
+                    textLeft: state.textLeft, blockTop: $0.frame.frame.minY) != nil
+        }
+        pool(&emojiLabels, count: glyphed.count, in: textView, below: false) {
             let label = NSTextField(labelWithString: "")
             label.font = .systemFont(ofSize: 13)
-            // The glyph lives in a FIXED box (17p batch b): a pathological
-            // multi-glyph answer clips instead of pushing the card past the
-            // comment badge beside it.
+            // ONE grapheme by rule (R-13u3-4), so the fixed box always holds
+            // it; clipping stays as the last resort for a wide glyph.
             label.lineBreakMode = .byClipping
             return label
         }
@@ -596,30 +627,27 @@ final class BlockDecorOverlayController {
             let index = item.frame.entryIndex
             let above = state.frames.first { $0.entryIndex == index - 1 }
             let below = state.frames.first { $0.entryIndex == index + 1 }
-            let hasGlyph = BlockDecor.hasLeadingGlyph(item.presentation)
-            let card = BlockDecor.calloutRect(
+            view.frame = BlockDecor.calloutRect(
                 block: item.frame.frame,
                 gapAbove: above.map { item.frame.frame.minY - $0.frame.maxY },
                 gapBelow: below.map { $0.frame.minY - item.frame.frame.maxY },
-                textLeft: state.textLeft, textRight: state.textRight,
-                hasGlyph: hasGlyph)
-            view.frame = card
+                textLeft: state.textLeft, textRight: state.textRight)
             view.configure(
                 fill: CalloutPalette.color(item.presentation.color, dark: state.appearance.dark),
                 border: nil, cornerRadius: 8)
-            // 17p batch b (rows 5–6, her R-Q4): the glyph sits INSIDE its own
-            // card's leading inset — the room the card grew for it — instead
-            // of floating in the bare margin to the card's LEFT, where it
-            // clamped at 2 and landed on the first characters in the book's
-            // editor (her image 11) and read as a loose glyph beside its
-            // frame everywhere else.
-            if hasGlyph, let emoji = item.presentation.emoji,
+            // 13u3 UNIT A1 (her R-13u-9 / memo §2 C): the glyph is the
+            // FRAME's accent, not the text's — it moves fully into the
+            // gutter beside the block's first line. It used to sit inside
+            // the wash's own leading pad, which is what made the wash grow
+            // into the margin in the first place.
+            if let glyph = BlockDecor.leadingGlyph(item.presentation),
+               let rect = BlockDecor.calloutGlyphRect(
+                   textLeft: state.textLeft, blockTop: item.frame.frame.minY),
                emojiIndex < emojiLabels.count {
                 let label = emojiLabels[emojiIndex]
                 emojiIndex += 1
-                label.stringValue = emoji
-                label.frame = BlockDecor.calloutGlyphRect(
-                    card: card, blockTop: item.frame.frame.minY)
+                label.stringValue = glyph
+                label.frame = rect
             }
         }
     }
@@ -690,20 +718,27 @@ final class BlockDecorOverlayController {
         let inline = state.appearance.inlineComments
         // 13g R5-3: the LEFT gutter is the comment margin now.
         let fitsCards = BlockDecor.gutterFitsCards(width: state.textLeft)
+        // **THE STACK (R-13u3-3), resolved for the whole pass.** Each face's
+        // TOP is the block's first line, or just under its callout glyph
+        // where the gutter is holding one; and each card's room reaches to
+        // the NEXT face's top, so two commented blocks' cards never abut
+        // (the rhythm, memo §2 B).
+        let tops: [CGFloat] = items.map { item in
+            BlockDecor.commentFaceTop(
+                blockTop: item.frame.frame.minY,
+                glyph: BlockDecor.hasLeadingGlyph(state.presentations[item.frame.blockID])
+                    ? BlockDecor.calloutGlyphRect(
+                        textLeft: state.textLeft, blockTop: item.frame.frame.minY)
+                    : nil)
+        }
         pool(&commentCards, count: items.count, in: textView, below: false) {
             CommentCardView()
         }
-        for (card, item) in zip(commentCards, items) {
+        for (index, (card, item)) in zip(commentCards, items).enumerated() {
             let text = item.briefs.map(\.text).joined(separator: "  ·  ")
             let blockID = item.frame.blockID
-            // 17p batch b (rows 5–6): what this block's OWN callout card
-            // claims of the left gutter — nothing where it wears none. Her
-            // *"the callout goes on top of the comment badge"* is this half,
-            // and the lane alone would not have fixed it: a card and a badge
-            // both aiming at the same corner collide at any gutter width.
-            let presentation = state.presentations[blockID]
-            let hasCallout = presentation?.kind == BlockPresentation.calloutKind
-            let hasGlyph = BlockDecor.hasLeadingGlyph(presentation)
+            let top = tops[index]
+            let roomBelow = index + 1 < tops.count ? tops[index + 1] - top : nil
             card.onClick = onOpenComments.map { open in { open(blockID) } }
             if inline {
                 // The inline strip (R7's setting): the tinted line in the
@@ -716,36 +751,38 @@ final class BlockDecorOverlayController {
                     x: state.textLeft, y: item.frame.frame.maxY + 3,
                     width: max(40, state.textRight - state.textLeft),
                     height: EditorTypography.inlineCommentSpacing - 4)
-            } else if fitsCards {
+                card.isHidden = false
+            } else if fitsCards, let rect = BlockDecor.leftCardRect(
+                textLeft: state.textLeft, top: top,
+                blockHeight: item.frame.frame.height, roomBelow: roomBelow) {
                 // The margin card (R7's ruling — the round-2 mockup's
-                // mcmt), moved to the LEFT margin by her R5-3 ruling and
-                // aligned to the block's top. The fan-badge Y NUDGE goes
-                // with the move: the badge holds the block's top-RIGHT
-                // corner, which is the collision she reported, and there is
-                // nothing to dodge on this side.
+                // mcmt), on the LEFT by her R5-3 ruling, at the STACK's top
+                // and with the rhythm's room (13u3 UNIT A1).
                 card.present(
                     text: tokens.commentPrefix + text,
                     tint: .clear, ink: NSColor(tokens.commentInk),
                     style: .marginCard(rule: NSColor(tokens.commentTint)))
-                card.frame = BlockDecor.leftCardRect(
-                    textLeft: state.textLeft,
-                    blockTop: item.frame.frame.minY,
-                    blockHeight: item.frame.frame.height,
-                    clearance: BlockDecor.commentClearance(
-                        hasCallout: hasCallout, hasGlyph: hasGlyph,
-                        own: BlockDecor.leftCardLane))
-            } else {
+                card.frame = rect
+                card.isHidden = false
+            } else if let rect = BlockDecor.commentBadgeRect(
+                textLeft: state.textLeft, top: top) {
                 // Narrow gutter: the count badge — still a door, and now on
                 // the same side as the cards it stands in for.
                 card.present(
                     text: "#\(item.briefs.count)",
                     tint: NSColor(tokens.commentTint), ink: NSColor(tokens.commentInk),
                     style: .badge)
-                card.frame = BlockDecor.commentBadgeRect(
-                    textLeft: state.textLeft, blockTop: item.frame.frame.minY,
-                    clearance: BlockDecor.commentClearance(
-                        hasCallout: hasCallout, hasGlyph: hasGlyph,
-                        own: BlockDecor.commentBadgeAir))
+                card.frame = rect
+                card.isHidden = false
+            } else {
+                // **NO GUTTER, NO FACE** (13u3 UNIT A1, the one law's other
+                // side). At a window narrow enough that even a clamped badge
+                // would stand on her words, the decoration yields: the text
+                // keeps every point of its measure, and the comment keeps
+                // every other door it has (the block menu, ⌘⇧', the panel,
+                // and the inline-strip setting — R-13u3-5).
+                card.isHidden = true
+                card.frame = .zero
             }
         }
     }

@@ -367,6 +367,165 @@ struct ProseGutterTests {
         }
     }
 
+    // MARK: - The gutter's own faces (the lane suite's geometry cells, re-verdicted)
+
+    /// **THE CALLOUT'S WASH HUGS THE PROSE COLUMN** (memo §2 C) — it no
+    /// longer extends into either gutter, so the gutter belongs wholly to
+    /// the stack and a tint can never read as the old frame-with-a-glyph.
+    /// R17's white-gap rule on the VERTICAL axis is untouched.
+    ///
+    /// The successor to `theCardWidensToHoldItsGlyphAndTheGlyphSitsInside`,
+    /// whose whole subject — a card that GREW LEFTWARD to hold its glyph —
+    /// is what her ruling retired.
+    @Test func theCalloutWashHugsTheProseColumn() {
+        let block = CGRect(x: 0, y: 100, width: 400, height: 40)
+        let wash = BlockDecor.calloutRect(
+            block: block, gapAbove: nil, gapBelow: nil, textLeft: 300, textRight: 700)
+        #expect(wash.minX == 300 && wash.maxX == 700, "the prose column exactly: \(wash)")
+        // A glyph changes nothing about it (it is the gutter's now).
+        #expect(BlockDecor.calloutRect(
+            block: block, gapAbove: nil, gapBelow: nil,
+            textLeft: 300, textRight: 700) == wash)
+        // R17's vertical rule, unmoved.
+        let capped = BlockDecor.calloutRect(
+            block: block, gapAbove: 8, gapBelow: nil, textLeft: 28, textRight: 428)
+        #expect(capped.minY == 99 && capped.height == 46)
+        #expect(capped.minX == 28 && capped.maxX == 428)
+    }
+
+    /// **THE GLYPH LIVES IN THE GUTTER — and yields before the text does.**
+    @Test func theGlyphSitsInTheGutterAndYieldsWhereThereIsNone() throws {
+        let glyph = try #require(
+            BlockDecor.calloutGlyphRect(textLeft: 300, blockTop: 40))
+        #expect(glyph.maxX == 300 - BlockDecor.calloutGlyphAir, "beside the prose")
+        #expect(glyph.minX >= BlockDecor.edgeMargin, "inside the page")
+        #expect(glyph.minY == 40, "at the block's first line")
+        #expect(glyph.size == BlockDecor.calloutGlyphBox)
+        // Write's own floor still holds it…
+        #expect(BlockDecor.calloutGlyphRect(textLeft: 28, blockTop: 0) != nil)
+        // …a contained surface's 8 pt does not, and the glyph YIELDS rather
+        // than clamping onto her first characters (memo §3 edge 1).
+        #expect(BlockDecor.calloutGlyphRect(textLeft: 8, blockTop: 0) == nil)
+        #expect(BlockDecor.calloutGlyphRect(textLeft: 20, blockTop: 0) == nil)
+    }
+
+    /// **THE STACK, AT EVERY WIDTH** (her ruling R-13u3-3, verbatim: *"stack
+    /// them at any width, I think it would look better."*): the glyph at the
+    /// block's first line, the comment face DIRECTLY UNDER it — a card where
+    /// the gutter holds one, the badge below that. The successor to
+    /// `theCommentFacesYieldTheGutterACalloutCardClaims`, whose horizontal
+    /// clearance arithmetic her ruling retired.
+    @Test func theStackPutsTheGlyphFirstAndTheCommentFaceUnderIt() throws {
+        for textLeft in [300.0, 160, 28] as [CGFloat] {
+            let glyph = BlockDecor.calloutGlyphRect(textLeft: textLeft, blockTop: 40)
+            let top = BlockDecor.commentFaceTop(blockTop: 40, glyph: glyph)
+            #expect(top == (glyph?.maxY ?? 40) + (glyph == nil ? 0 : BlockDecor.decorAir),
+                    "at \(textLeft): the face begins under the glyph")
+            let face = BlockDecor.gutterFitsCards(width: textLeft)
+                ? BlockDecor.leftCardRect(textLeft: textLeft, top: top, blockHeight: 30)
+                : BlockDecor.commentBadgeRect(textLeft: textLeft, top: top)
+            let rect = try #require(face, "a face at \(textLeft)")
+            #expect(rect.minY == top, "at \(textLeft): the face is where the stack says")
+            #expect(rect.maxX <= textLeft, "at \(textLeft): never on the prose")
+            if let glyph {
+                #expect(!rect.intersects(glyph),
+                        "at \(textLeft): stacked, never side by side")
+            }
+        }
+        // One decoration alone sits at the first line.
+        #expect(BlockDecor.commentFaceTop(blockTop: 40, glyph: nil) == 40)
+    }
+
+    /// **THE BADGE YIELDS RATHER THAN STAND ON PROSE** — and where the
+    /// gutter holds it whole, it is BYTE-IDENTICAL to what shipped.
+    /// *(KnownIssues row 50's first residual — Write at `minGutter` 28 — is
+    /// this cell's middle line.)*
+    @Test func theBadgeNeverStandsOnProse() {
+        // Shipped, unmoved.
+        #expect(BlockDecor.commentBadgeRect(textLeft: 60, top: 10)
+            == CGRect(x: 24, y: 10, width: 32, height: 16))
+        // Write's 28 pt floor: 32 will not fit beside the words, so the
+        // badge narrows to the room — it used to clamp at 2 and cover them.
+        let floored = BlockDecor.commentBadgeRect(textLeft: EditorTypography.minGutter, top: 0)
+        #expect(floored?.width == 22 && floored?.maxX == 24)
+        #expect((floored?.maxX ?? .infinity) <= EditorTypography.minGutter)
+        // A contained surface's 8 pt is no gutter at all: no face, and the
+        // text keeps every point of its measure.
+        #expect(BlockDecor.commentBadgeRect(textLeft: 8, top: 0) == nil)
+    }
+
+    /// **TWO COMMENTED BLOCKS' CARDS NEVER ABUT** (memo §2 B's rhythm; her
+    /// *"the comments still also aren't spaced well"*).
+    @Test func twoCommentedBlocksCardsNeverAbut() throws {
+        // Adjacent short blocks, 46 pt apart: the ideal card (30 + 24 = 54)
+        // would reach into its neighbour's, so it is clamped.
+        let first = try #require(BlockDecor.leftCardRect(
+            textLeft: 300, top: 0, blockHeight: 30, roomBelow: 46))
+        let second = try #require(BlockDecor.leftCardRect(
+            textLeft: 300, top: 46, blockHeight: 30, roomBelow: nil))
+        #expect(first.maxY <= second.minY - BlockDecor.cardRhythmAir,
+                "the rhythm's air: \(first) vs \(second)")
+        // Far apart, nothing is clamped — the shipped card, byte for byte.
+        #expect(BlockDecor.leftCardRect(
+            textLeft: 300, top: 40, blockHeight: 30, roomBelow: 400)
+            == CGRect(x: 62, y: 40, width: 210, height: 54))
+        // Too little room to be a card at all ⇒ nil, and the block shows
+        // its badge instead (the render's own fallback).
+        #expect(BlockDecor.leftCardRect(
+            textLeft: 300, top: 0, blockHeight: 30, roomBelow: 20) == nil)
+    }
+
+    /// **NOTHING IN THE GUTTER EVER COVERS PROSE** — mounted, at a wide
+    /// window and at Write's own floor, over all four decoration
+    /// combinations. The successor to
+    /// `aCommentedCalloutWithAGlyphCoversNoTextAndNothingElseEither` and
+    /// `theLaneHoldsAtANarrowBookColumnToo`, which proved the same thing by
+    /// MOVING the text.
+    ///
+    /// **RED ON OLD** (17p batch b's tree, with the lane defeated — which is
+    /// what a contained surface at 8 pt was before the lane existed): the
+    /// badge sat at [2, 34] and the glyph at [6, 24] inside a prose column
+    /// starting at 8.
+    @Test func nothingInTheGutterEverCoversProse() {
+        for gutter in [ProseGutter.outline(bleed: 152), ProseGutter.pane] {
+            for width in [1000.0, 760, 620] as [CGFloat] {
+                let (view, window) = inlineSurface(width: width)
+                defer {
+                    window.orderOut(nil)
+                    window.close()
+                }
+                view.proseGutter = gutter
+                view.layoutSubtreeIfNeeded()
+                let controller = BlockDecorOverlayController(
+                    textView: view, onOpenComments: { _ in }, onMoveBlock: { _, _ in })
+                defer { controller.uninstall() }
+                let framed = BlockPresentation(color: "sand", emoji: "\u{1f4a1}")
+                let settled = state(for: view, comment: true, presentation: framed)
+                controller.render(settled)
+                view.layoutSubtreeIfNeeded()
+
+                let prose = CGRect(
+                    x: settled.textLeft, y: settled.frames[0].frame.minY,
+                    width: Swift.max(0, settled.textRight - settled.textLeft),
+                    height: settled.frames[0].frame.height)
+                let faces = view.subviews.filter {
+                    !$0.isHidden && ($0 is CommentCardView || $0 is NSTextField)
+                }
+                for face in faces {
+                    #expect(face.frame.maxX <= prose.minX + 0.01,
+                            "\(gutter.minGutter)@\(width): \(type(of: face)) \(face.frame) reaches \(prose)")
+                }
+                // The WASH is the one decoration that may sit behind prose —
+                // it is a background, and it hugs the column exactly.
+                for wash in view.subviews.compactMap({ $0 as? DecorRectView }) {
+                    #expect(wash.frame.minX >= settled.textLeft - 0.01
+                        && wash.frame.maxX <= settled.textRight + 0.01,
+                            "the wash hugs: \(wash.frame) vs \(prose)")
+                }
+            }
+        }
+    }
+
     // MARK: - Fixtures
 
     /// A real contained (book) editor in a real window.

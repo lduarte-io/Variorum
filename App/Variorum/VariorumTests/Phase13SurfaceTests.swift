@@ -111,8 +111,14 @@ struct BlockDecorGeometryTests {
             block: block, gapAbove: 8, gapBelow: nil, textLeft: 28, textRight: 428)
         #expect(rect.minY == 99, "gapAbove 8 → pad (8-6)/2 = 1")
         #expect(rect.maxY == 145, "no neighbor below → the ideal 5")
-        #expect(rect.minX == 16, "horizontal air into the gutter")
-        #expect(rect.maxX == 440)
+        // 13u3 UNIT A1 (her R-13u-9, memo §2 C): the wash HUGS the prose
+        // column — the 12 pt it used to spread into each gutter is the
+        // decorations' room now, and a background that reaches into the
+        // margin is exactly the "it can exist outside the text area but
+        // it's ugly and weird" half of her reversal. R17's VERTICAL rule
+        // above is untouched, which is what this cell is really about.
+        #expect(rect.minX == 28, "the prose column's left edge exactly")
+        #expect(rect.maxX == 428, "…and its right")
     }
 
     @Test func adjacentCalloutsAlwaysKeepBreathingRoom() {
@@ -164,20 +170,22 @@ struct BlockDecorGeometryTests {
     /// 13g batch 6 (R5-3), her ruling: comments live in the LEFT margin.
     /// The card stops short of the drag-handle lane rather than sitting
     /// under it (`renderHandles` puts handles at `textLeft - 22`).
-    @Test func aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane() {
-        let rect = BlockDecor.leftCardRect(textLeft: 300, blockTop: 40, blockHeight: 30)
+    @Test func aMarginCommentCardSitsInTheLEFTGutterClearOfTheHandleLane() throws {
+        let rect = try #require(
+            BlockDecor.leftCardRect(textLeft: 300, top: 40, blockHeight: 30))
         #expect(rect.maxX <= 300 - 22, "never under the drag handle")
         #expect(rect.minX >= 0, "never off the left edge")
         #expect(rect.maxX < 300, "left of the text, not over it")
         #expect(rect.origin.y == 40, "aligned to the block's top")
         // A generous margin gets the full card; a tight one shrinks rather
         // than overflowing (the badge takes over below `gutterFitsCards`).
-        #expect(BlockDecor.leftCardRect(textLeft: 900, blockTop: 0, blockHeight: 20).width == 210)
-        let tight = BlockDecor.leftCardRect(textLeft: 160, blockTop: 0, blockHeight: 20)
+        #expect(BlockDecor.leftCardRect(textLeft: 900, top: 0, blockHeight: 20)?.width == 210)
+        let tight = try #require(
+            BlockDecor.leftCardRect(textLeft: 160, top: 0, blockHeight: 20))
         #expect(tight.width < 210 && tight.minX >= 0)
         // Tall blocks cap, so one comment never becomes a column.
         #expect(
-            BlockDecor.leftCardRect(textLeft: 300, blockTop: 0, blockHeight: 800).height == 96)
+            BlockDecor.leftCardRect(textLeft: 300, top: 0, blockHeight: 800)?.height == 96)
     }
 
     @MainActor
