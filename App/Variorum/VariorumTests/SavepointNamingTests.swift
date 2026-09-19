@@ -18,6 +18,8 @@
 import AppKit
 import Dependencies
 import Foundation
+import GRDB
+import SwiftUI
 import Testing
 import VariorumCore
 @testable import Variorum
@@ -307,3 +309,119 @@ struct SavepointTakesDoorTests {
         }
     }
 }
+
+@MainActor
+@Suite("Block History's rename door (13u3 UNIT D — R-13u3-1)", .serialized)
+struct SavepointRenameDoorTests {
+    /// Builds a note with one block, one take and one savepoint, and returns
+    /// the pane's model already holding the block's history.
+    private func world(
+        _ h: EditorHarness, quiet: Bool = false
+    ) async throws -> (model: BlockHistoryModel, commit: CommitPoint, variantID: String) {
+        let ops = h.session.operations
+        let slot = try h.storeSlots()[0]
+        let variantID = try #require(slot.variantID)
+        let commit: CommitPoint
+        if quiet {
+            try ops.autosave(variantID, text: "changed, unsaved", charDelta: 6)
+            commit = try #require(try ops.idleAutoCommit(h.postID).first)
+        } else {
+            commit = try ops.commit(variantID)
+        }
+        let model = BlockHistoryModel(
+            session: h.session, postID: h.postID, blockID: slot.blockID)
+        model.adopt(try await h.session.database.read { [now = h.session.now] db in
+            try Queries.blockHistory(db, blockID: slot.blockID, now: now)
+        })
+        return (model, commit, variantID)
+    }
+
+    private func message(_ h: EditorHarness, _ commitID: String) async throws -> String? {
+        try await h.session.database.read { db in
+            try CommitPoint.fetchOne(db, key: commitID)?.message
+        }
+    }
+
+    /// **THE DOOR SHE RULED** — a savepoint's name is editable after the
+    /// fact, and clearing the field removes it.
+    @Test func renamingASavepointSetsAndClearsItsNameAndSaysSo() async throws {
+        try await withEditor(seedBlocks: ["The sea took the boat."]) { h in
+            let w = try await world(h)
+            #expect(w.commit.message == nil)
+
+            await w.model.rename(w.commit, to: "before the AI edit")
+            #expect(try await message(h, w.commit.id) == "before the AI edit")
+            #expect(w.model.status?.isRefusal == false)
+            #expect(w.model.status?.text.contains("before the AI edit") == true)
+
+            await w.model.rename(w.commit, to: "   ")
+            #expect(try await message(h, w.commit.id) == nil, "clearing the field clears it")
+            #expect(w.model.status?.text == BlockHistoryCopy.savepointNameCleared)
+        }
+    }
+
+    /// **A QUIET SAVEPOINT TAKES A NAME TOO** (her unqualified "Editable"),
+    /// and stays quiet — the occasion is not overwritten by the name.
+    @Test func aQuietSavepointCanBeNamedAndStaysQuiet() async throws {
+        try await withEditor(seedBlocks: ["The sea took the boat."]) { h in
+            let w = try await world(h, quiet: true)
+            #expect(w.commit.kind == .auto)
+
+            await w.model.rename(w.commit, to: "the one before I left")
+
+            let stored = try await h.session.database.read { [id = w.commit.id] db in
+                try CommitPoint.fetchOne(db, key: id)
+            }
+            #expect(stored?.message == "the one before I left")
+            #expect(stored?.kind == .auto, "the occasion stands")
+            #expect(SavepointRowFace.details(try #require(stored), predatesSplit: false)
+                .contains("quiet"))
+        }
+    }
+
+    /// **THE SNAPSHOT IS NEVER TOUCHED** (I5), asserted where the door is.
+    @Test func renamingNeverChangesWhatTheMomentHolds() async throws {
+        try await withEditor(seedBlocks: ["The sea took the boat."]) { h in
+            let w = try await world(h)
+            let textBefore = w.commit.text
+            // The take moves on AFTER the savepoint was written.
+            try h.session.operations.autosave(
+                w.variantID, text: "The sea gave it back.", charDelta: 6)
+
+            await w.model.rename(w.commit, to: "the first ending")
+
+            let stored = try await h.session.database.read { [id = w.commit.id] db in
+                try CommitPoint.fetchOne(db, key: id)
+            }
+            #expect(stored?.text == textBefore, "the snapshot is the snapshot (I5)")
+        }
+    }
+
+    /// A sealed note refuses the rename, in the pane's own refusal register
+    /// — the seal refuses everything under the post (PROVISIONAL, #121).
+    @Test func aSealedNoteRefusesTheRenameAndSaysWhy() async throws {
+        try await withEditor(seedBlocks: ["The sea took the boat."]) { h in
+            let w = try await world(h)
+            try h.session.operations.lockPost(h.postID)
+
+            await w.model.rename(w.commit, to: "too late")
+
+            #expect(try await message(h, w.commit.id) == nil)
+            #expect(w.model.status?.isRefusal == true)
+            #expect(w.model.status?.text.isEmpty == false,
+                    "a refusal that says nothing is not a refusal")
+        }
+    }
+}
+
+// **A MOUNTED PIN THIS UNIT TRIED AND DELETED, recorded rather than left
+// passing vacuously.** I wrote a probe that mounts the real pane twice — a
+// block with no savepoint and a block with one — and counts `KeyViewProxy`
+// controls, to assert that a savepoint row now draws TWO doors (Name AND
+// Restore) where it drew one. It measured **1 control in both mounts**: in
+// this headless host the pane's ScrollView rows never realize, and the
+// model's observation lands after the mount without rebuilding the tree
+// (the pane's own batch-4 finding, one file over, met again from the other
+// side). A probe that cannot see what it claims is not evidence, so the
+// rename door's PRESENCE is walk evidence (capture `d-05`…`d-08`) and its
+// decisions and its act are pinned above as values and through the model.

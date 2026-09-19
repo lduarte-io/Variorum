@@ -281,6 +281,33 @@ final class BlockHistoryModel {
         await restore(pending.commit, of: pending.variantID, confirmed: true)
     }
 
+    /// **NAMING A SAVED MOMENT AFTER THE FACT** (13u3 UNIT D — her ruling
+    /// R-13u3-1: *"Editable"*, a rename door in Block History beside the
+    /// savepoint).
+    ///
+    /// Offered on MANUAL AND QUIET savepoints alike — her selection was the
+    /// unqualified "Editable", and a quiet moment is exactly the one she is
+    /// most likely to want to label ("the one before I left"). The `kind` is
+    /// untouched, so a renamed quiet savepoint still reads as quiet and its
+    /// occasion stays visible.
+    ///
+    /// No flush here, unlike `restore`: this writes METADATA on an immutable
+    /// snapshot, so there is no buffer race to lose — the whole reason the
+    /// rename is cheap is that it cannot reach any text.
+    func rename(_ commit: CommitPoint, to name: String?) async {
+        status = nil
+        do {
+            try await session.runner.run { ops in
+                try ops.renameCommitPoint(commit.id, message: name)
+            }
+            status = .receipt(BlockHistoryCopy.renamed(SavepointName.normalized(name)))
+        } catch let error as OperationError {
+            status = .refusal(TrayRefusalCopy.message(for: error))
+        } catch {
+            status = .refusal(DeletionRefusal.fallback(error))
+        }
+    }
+
     // MARK: - Region 2: unarchive
 
     func unarchive(_ variantID: String) async {
@@ -387,6 +414,8 @@ struct BlockHistoryPane: View {
     @State private var seededExpansion = false
     /// Which quiet savepoint runs are open (13j J11's collapse, per take).
     @State private var expandedRuns: Set<String> = []
+    /// 13u3 UNIT D: which savepoint's name is being edited (R-13u3-1).
+    @State private var renameAsk: SavepointNameAsk?
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -583,6 +612,18 @@ struct BlockHistoryPane: View {
 
     private func savepointRow(_ commit: CommitPoint, of take: Variant) -> some View {
         VStack(alignment: .leading, spacing: 2) {
+            // 13u3 UNIT D (item 14): **the NAME leads the row**, in the ink
+            // the row's own words wear — it is what tells this moment from
+            // the one above it. The shared brain decides whether there is
+            // one (`SavepointRowFace.name`), so the phone's listing reads the
+            // same savepoint the same way.
+            if let name = SavepointRowFace.name(commit) {
+                Text(name)
+                    .font(tokens.small.weight(.semibold))
+                    .foregroundStyle(tokens.accent)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Text(String(commit.text.prefix(120)))
                 .font(tokens.body)
                 .foregroundStyle(commit.text.isEmpty ? tokens.muted : tokens.ink)
@@ -592,7 +633,10 @@ struct BlockHistoryPane: View {
                 // moments can share a day), so instead of a second slot the
                 // line may WRAP once — "saved by hand" was truncating to
                 // "saved by h…" beside the Restore button at the pane's width.
-                Text(tokens.chromeLabel(SavepointRowFace.meta(
+                // (13u3 UNIT D: the NAME left this line for its own one
+                // above, so what is joined here is the DETAILS — when, how,
+                // and the pre-split mark.)
+                Text(tokens.chromeLabel(SavepointRowFace.details(
                     commit, predatesSplit: model.predatesSplit(commit))
                     .joined(separator: " \u{B7} ")))
                     .font(tokens.small)
@@ -600,6 +644,25 @@ struct BlockHistoryPane: View {
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 8)
+                // **THE RENAME DOOR** (R-13u3-1), beside Restore and on
+                // EVERY savepoint — manual and quiet alike. Its verb says
+                // what it does on THIS row.
+                Button(BlockHistoryCopy.nameVerb(commit)) {
+                    renameAsk = .renaming(commit)
+                }
+                .controlSize(.small)
+                .help(BlockHistoryCopy.nameHelp(commit))
+                // One binding PER ROW, reading nil unless this row is the
+                // target: a single `@State` bound by every row would put up
+                // one popover per savepoint.
+                .savepointNameAsk(
+                    Binding(
+                        get: { renameAsk?.targetID == commit.id ? renameAsk : nil },
+                        set: { if $0 == nil { renameAsk = nil } }),
+                    tokens: tokens
+                ) { _, name in
+                    Task { await model.rename(commit, to: name) }
+                }
                 Button(BlockHistoryCopy.restoreVerb) {
                     Task { await model.restore(commit, of: take.id) }
                 }
