@@ -139,7 +139,25 @@ struct EditorView: View {
                 // 18d batch 1: no bar here at all — the doors are in the
                 // sidebar's note box, built by the shell from the registered
                 // live editor. The prose gets the whole measure back.
+                //
+                // 13u3 UNIT D: which is why the commit door's name field is
+                // presented HERE in this placement and on the bar in the
+                // other — exactly one presentation per placement, decided by
+                // the same switch that decides the bar, so two fields can
+                // never be up for one ask. The box's bar is built from the
+                // LIVE editor's model, and ⌘S in a book reaches whichever
+                // editor's handler consumes it, so an ask hung only off the
+                // box could land on a model the box is not showing. Anchored
+                // on the prose, it is also nearer where she typed.
                 surfaceColumn
+                    .savepointNameAsk(
+                        Binding(
+                            get: { model.savepointAsk },
+                            set: { model.savepointAsk = $0 }),
+                        tokens: chromeTokens
+                    ) { _, name in
+                        Task { await model.fileSavepoint(named: name) }
+                    }
             } else {
                 VStack(spacing: 0) {
                     surfaceColumn

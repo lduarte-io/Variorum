@@ -3056,7 +3056,15 @@ struct TutorialWherePlacesActsTests {
                 NSRange(location: try entryRange(harness, practice.blockID).location, length: 0))
             harness.model.updateCaretContext()
             let take = try #require(harness.model.caretVariantID)
+            // 13u3 UNIT D (item 14): the door now SUMMONS the optional
+            // name and ⏎ files it — so this pin drives the whole two-key
+            // road (⌘S, then ⏎ on an empty field), which is exactly what the
+            // lesson tells her to press. Updated deliberately: the old
+            // single-keystroke form would have asserted a door that no
+            // longer exists.
             harness.model.commitCaretVariant()
+            #expect(harness.model.savepointAsk != nil, "⌘S opens the name field")
+            await harness.model.fileSavepoint(named: nil)
             var committed = 0
             for _ in 0..<200 {
                 committed = (try? await db.read { db in

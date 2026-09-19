@@ -195,6 +195,18 @@ struct CommitBar: View {
         ) {
             NoteVersionsPane(session: model.session, postID: model.postID)
         }
+        // 13u3 UNIT D (item 14): the commit door's optional name. ONE
+        // binding on the bar, so the two arrangements and the three
+        // width tiers cannot put up two fields; the popover hangs off the
+        // bar's own bounds, which is where the commit door is in every tier
+        // (in `.compact` it is inside `more ▾`, and the bar is still the
+        // thing she pressed).
+        .savepointNameAsk(
+            Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
+            tokens: tokens
+        ) { _, name in
+            Task { await model.fileSavepoint(named: name) }
+        }
     }
 
     /// **THE BOX'S BAR** (18d batch 1, her U-10: *"The block menu should move

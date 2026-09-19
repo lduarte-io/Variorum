@@ -238,7 +238,9 @@ struct CanvasView: View {
             commandToken = session.commandRouter.registerHandler { command in
                 switch command {
                 case .commit:
-                    Task { await model.commitFocusedTake() }
+                    // 13u3 UNIT D: ⌘S summons the optional name (the strip
+                    // hosts the field — this board renders no commit door).
+                    model.askSavepointName()
                     return true
                 case .takes(.stepPrev), .takes(.stepNext), .takes(.choose):
                     guard let open = switcherBlockID else {
@@ -277,6 +279,18 @@ struct CanvasView: View {
     /// bottom line).
     private var topStrip: some View {
         HStack(spacing: 10) {
+            // 13u3 UNIT D (item 14): the commit door's optional name hangs
+            // at the strip's leading edge — this board's only commit door is
+            // ⌘S itself, so the field needs a home with a place on screen.
+            // A zero-size anchor, so nothing in the strip moves for it.
+            Color.clear
+                .frame(width: 0, height: 0)
+                .savepointNameAsk(
+                    Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
+                    tokens: tokens, arrowEdge: .bottom
+                ) { _, name in
+                    Task { await model.fileSavepoint(named: name) }
+                }
             // 13b 4D (N32(b) — S4-8b): the filter NAMES itself a tag
             // filter and its help de-blurs the model — a LABEL filter,
             // never a container switch.

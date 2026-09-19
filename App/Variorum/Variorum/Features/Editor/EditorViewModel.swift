@@ -142,6 +142,12 @@ final class EditorViewModel {
     /// its two neighbours have one — this editor is also composed where no
     /// post detail exists.
     var versionsRequested = false
+    /// **THE COMMIT DOOR'S PENDING NAME** (13u3 UNIT D — item 14: *"an
+    /// optional name at the manual-commit door, enter-to-skip keeps ⌘S
+    /// instant"*). Non-nil while the field is up; the bar presents it at the
+    /// commit door. Nil-ing it without filing IS the cancel (the one road —
+    /// ⎋, a click outside, a window going away).
+    var savepointAsk: SavepointNameAsk?
     /// Per-command gesture enablement (Phase 9) — recomputed on every caret/
     /// selection change from THE planner, so the menu bar, context menu, and
     /// shortcuts all read one brain's verdicts.
@@ -3051,11 +3057,37 @@ final class EditorViewModel {
 
     // MARK: - Commit + history (Step 5)
 
+    /// **⌘S AND THE COMMIT BUTTON — the door** (13u3 UNIT D, item 14).
+    ///
+    /// The door now SUMMONS the name field instead of writing the savepoint
+    /// itself: ⏎ on the empty field files it unnamed, so the fast road is
+    /// two keys and the savepoint she has always got is the savepoint she
+    /// still gets. Where the caret can commit nothing the door refuses HERE,
+    /// before a field opens over a gesture that cannot land (P-2).
     func commitCaretVariant() {
-        Task { await commitCaret() }
+        askSavepointName()
     }
 
-    func commitCaret() async {
+    func askSavepointName() {
+        guard let variantID = caretVariantID else {
+            refuse("Place the caret in a block to commit.")
+            return
+        }
+        savepointAsk = .naming(variantID: variantID)
+    }
+
+    /// ⏎ in the field. The name is already through the one rule; nil is the
+    /// skip road and files exactly what ⌘S has always filed.
+    func fileSavepoint(named name: String?) async {
+        savepointAsk = nil
+        await commitCaret(named: name)
+    }
+
+    /// The filing itself — unchanged in every respect but the optional name
+    /// it now carries (the flush-then-commit ordering, the caret guard and
+    /// the refusal road are byte-identical, which is why the shipped pins on
+    /// this road ride unmodified).
+    func commitCaret(named name: String? = nil) async {
         guard let variantID = caretVariantID else {
             statusMessage = "Place the caret in a block to commit."
             return
@@ -3063,9 +3095,11 @@ final class EditorViewModel {
         await autosave.flushNow()
         do {
             _ = try await session.runner.run { ops in
-                try ops.commit(variantID, kind: .manual)
+                try ops.commit(variantID, kind: .manual, message: name)
             }
-            showReceipt("Committed.")  // 18i: the savepoint landed
+            // 18i: the savepoint landed — a receipt. The named form says the
+            // name back, because the name is the news.
+            showReceipt(name.map(SavepointNameCopy.filed) ?? "Committed.")
         } catch {
             showOperationError(error)
         }

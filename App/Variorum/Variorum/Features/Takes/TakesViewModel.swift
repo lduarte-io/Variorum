@@ -1609,16 +1609,41 @@ final class TakesViewModel {
 
     // MARK: - Post-level doors (R63: the bottom bar's options ride along)
 
-    /// Commit the FOCUSED take's buffer (⌘S in takes surfaces).
-    func commitFocusedTake() async {
+    /// **THE COMMIT DOOR'S PENDING NAME** (13u3 UNIT D — item 14). The bar
+    /// presents it at the commit door; Takes and Lenses share this model, so
+    /// one slot serves both surfaces exactly as one bar does.
+    var savepointAsk: SavepointNameAsk?
+
+    /// ⌘S and the bar's commit button — the DOOR. It summons the optional
+    /// name; ⏎ on the empty field files what ⌘S has always filed. Where no
+    /// take is focused the door refuses HERE, before a field opens over a
+    /// gesture that cannot land (P-2).
+    func askSavepointName() {
+        guard let variantID = focusedPane?.variantID else {
+            setRefusal("Click into a take first — ⌘S commits the take you're in.")  // J38
+            return
+        }
+        savepointAsk = .naming(variantID: variantID)
+    }
+
+    func fileSavepoint(named name: String?) async {
+        savepointAsk = nil
+        await commitFocusedTake(named: name)
+    }
+
+    /// Commit the FOCUSED take's buffer (⌘S in takes surfaces), optionally
+    /// named. Everything but the name is byte-unchanged, which is why the
+    /// shipped pins on this road ride unmodified.
+    func commitFocusedTake(named name: String? = nil) async {
         guard let variantID = focusedPane?.variantID else {
             setRefusal("Click into a take first — ⌘S commits the take you're in.")  // J38
             return
         }
         await autosave.flushNow()
-        await run { ops in _ = try ops.commit(variantID) }
+        await run { ops in _ = try ops.commit(variantID, message: name) }
         if status == nil {
-            setReceipt("Committed — an immutable savepoint of this take.")
+            setReceipt(name.map(SavepointNameCopy.filed)
+                ?? "Committed — an immutable savepoint of this take.")
         }
     }
 

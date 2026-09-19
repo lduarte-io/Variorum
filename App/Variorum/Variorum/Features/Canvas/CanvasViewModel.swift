@@ -707,10 +707,31 @@ final class CanvasViewModel {
         return slot.text
     }
 
+    /// **THE COMMIT DOOR'S PENDING NAME** (13u3 UNIT D — item 14): the top
+    /// strip presents it, since this board renders no commit door of its own
+    /// (⌘S is its whole commit road).
+    var savepointAsk: SavepointNameAsk?
+
+    /// ⌘S — the DOOR. It summons the optional name; ⏎ on the empty field
+    /// files what it has always filed. No live pane refuses HERE, before a
+    /// field opens over a gesture that cannot land (P-2).
+    func askSavepointName() {
+        guard let pane = authority.livePane else {
+            statusMessage = "Click into a card first — ⌘S commits the take you're editing."
+            return
+        }
+        savepointAsk = .naming(variantID: pane.variantID)
+    }
+
+    func fileSavepoint(named name: String?) async {
+        savepointAsk = nil
+        await commitFocusedTake(named: name)
+    }
+
     /// ⌘S in canvas (the Phase-1 ruling's (c)(2) — the 4D compare
     /// precedent, third surface): commit the LIVE pane's take; no focus
     /// speaks instead of guessing.
-    func commitFocusedTake() async {
+    func commitFocusedTake(named name: String? = nil) async {
         guard let pane = authority.livePane else {
             statusMessage = "Click into a card first — ⌘S commits the take you're editing."
             return
@@ -719,9 +740,10 @@ final class CanvasViewModel {
         statusMessage = nil
         do {
             try await session.runner.run { ops in
-                _ = try ops.commit(pane.variantID)
+                _ = try ops.commit(pane.variantID, message: name)
             }
-            showReceipt("Committed — an immutable savepoint of this take.")
+            showReceipt(name.map(SavepointNameCopy.filed)
+                ?? "Committed — an immutable savepoint of this take.")
         } catch {
             statusMessage = OpsRefusalCopy.message(for: error)
         }

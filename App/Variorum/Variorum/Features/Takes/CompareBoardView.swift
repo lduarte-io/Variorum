@@ -765,7 +765,27 @@ final class CompareViewModel {
     /// through the authority (the N5 letter extended to the new editable
     /// surface). The flush routes through the pane's OWN post's
     /// coordinator (the cross-context handback's rule); no focus speaks.
-    func commitFocusedTake() async {
+    /// **THE COMMIT DOOR'S PENDING NAME** (13u3 UNIT D — item 14): the
+    /// board's header presents it, since this board renders no commit door
+    /// of its own (⌘S is its whole commit road).
+    var savepointAsk: SavepointNameAsk?
+
+    /// ⌘S — the DOOR. It summons the optional name; ⏎ on the empty field
+    /// files what it has always filed; no live pane refuses HERE (P-2).
+    func askSavepointName() {
+        guard let pane = authority.livePane else {
+            statusMessage = "Click into a pane first — ⌘S commits the take you're in."
+            return
+        }
+        savepointAsk = .naming(variantID: pane.variantID)
+    }
+
+    func fileSavepoint(named name: String?) async {
+        savepointAsk = nil
+        await commitFocusedTake(named: name)
+    }
+
+    func commitFocusedTake(named name: String? = nil) async {
         guard let pane = authority.livePane else {
             statusMessage = "Click into a pane first — ⌘S commits the take you're in."
             return
@@ -775,9 +795,10 @@ final class CompareViewModel {
         statusMessage = nil
         do {
             try await session.runner.run { ops in
-                _ = try ops.commit(pane.variantID)
+                _ = try ops.commit(pane.variantID, message: name)
             }
-            showReceipt("Committed — an immutable savepoint of this take.")
+            showReceipt(name.map(SavepointNameCopy.filed)
+                ?? "Committed — an immutable savepoint of this take.")
         } catch {
             statusMessage = OpsRefusalCopy.message(for: error)
         }
@@ -912,7 +933,9 @@ struct CompareBoardView: View {
             commandToken = session.commandRouter.registerHandler { command in
                 switch command {
                 case .commit:
-                    Task { await model.commitFocusedTake() }
+                    // 13u3 UNIT D: ⌘S summons the optional name (the header
+                    // hosts the field — this board renders no commit door).
+                    model.askSavepointName()
                     return true
                 case .callout(let edit):
                     // 13c R2-2 (A13(a) named Compare): the focused pane's
@@ -962,6 +985,18 @@ struct CompareBoardView: View {
         // Row 16: ONE baseline across the toolbar's controls; the board's
         // one inset (the chips sat at 16 while the cards sat at 12).
         HStack(alignment: .firstTextBaseline, spacing: 8) {
+            // 13u3 UNIT D (item 14): the commit door's optional name hangs
+            // at the header's leading edge — ⌘S is this board's only commit
+            // door, so the field needs a home with a place on screen. A
+            // zero-size anchor, so nothing in the header moves for it.
+            Color.clear
+                .frame(width: 0, height: 0)
+                .savepointNameAsk(
+                    Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
+                    tokens: tokens, arrowEdge: .bottom
+                ) { _, name in
+                    Task { await model.fileSavepoint(named: name) }
+                }
             VoicedChip(
                 tokens: tokens,
                 text: model.followAnchorOrder ? "follow this note's order: on" : "follow this note's order: off",

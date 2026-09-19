@@ -474,8 +474,11 @@ struct CompareViewModelTests {
             }
 
             // No focus: speaks, commits nothing.
-            await model.commitFocusedTake()
+            // 13u3 UNIT D: through the ⌘S DOOR (it summons the optional
+            // name), which refuses before presenting a field.
+            model.askSavepointName()
             #expect(model.statusMessage?.contains("Click into a pane") == true)
+            #expect(model.savepointAsk == nil)
 
             // Focus a PEER pane — pending text flushes through the twin's
             // own pipeline and the commit lands on that take.

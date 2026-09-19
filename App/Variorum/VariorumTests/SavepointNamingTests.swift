@@ -15,6 +15,8 @@
 //  defect-shaped names itself.
 //
 
+import AppKit
+import Dependencies
 import Foundation
 import Testing
 import VariorumCore
@@ -129,5 +131,179 @@ struct SavepointNameAskTests {
         #expect(rename.contains("never changes"), "I5, said at the door")
         #expect(SavepointNameCopy.prompt(.newSavepoint) != SavepointNameCopy.prompt(.rename))
         #expect(SavepointNameCopy.filed("before the AI edit").contains("before the AI edit"))
+    }
+}
+
+@MainActor
+@Suite("The commit door asks for a name (13u3 UNIT D)")
+struct SavepointCommitDoorTests {
+    private func savepoints(_ h: EditorHarness) throws -> [CommitPoint] {
+        let variantID = try #require(try h.storeSlots().first?.variantID)
+        return try h.database.read { try Queries.commitHistory($0, variantID: variantID) }
+    }
+
+    /// **THE SKIP ROAD — TWO KEYS, ONE SAVEPOINT** (her words: *"enter-to-skip
+    /// keeps ⌘S instant"*). ⌘S opens the field; ⏎ on it empty files exactly
+    /// what ⌘S filed before this unit existed.
+    @Test func commandSThenReturnFilesOneUnnamedSavepoint() async throws {
+        try await withEditor(seedBlocks: ["draft text"]) { h in
+            h.textView.setSelectedRange(NSRange(location: 3, length: 0))
+            h.model.updateCaretContext()
+
+            h.model.commitCaretVariant()  // the door: ⌘S and the bar's button
+            let ask = try #require(h.model.savepointAsk)
+            #expect(ask.kind == .newSavepoint)
+            let variantID = try #require(try h.storeSlots()[0].variantID)
+            #expect(ask.targetID == variantID)
+            #expect(ask.seed.isEmpty, "the commit door opens on an empty field")
+            #expect(try savepoints(h).isEmpty)  // the door itself writes nothing
+
+            await h.model.fileSavepoint(named: nil)  // ⏎, empty
+
+            #expect(h.model.savepointAsk == nil)
+            let saved = try savepoints(h)
+            #expect(saved.count == 1)
+            #expect(saved[0].message == nil)
+            #expect(saved[0].kind == .manual)
+            #expect(saved[0].text == "draft text", "exactly the buffer, as always")
+        }
+    }
+
+    /// **THE NAMED ROAD** — her motivating case, the 13n AI-edit story.
+    @Test func aTypedNameRidesTheSavepointAndTheReceiptSaysIt() async throws {
+        try await withEditor(seedBlocks: ["draft text"]) { h in
+            h.textView.setSelectedRange(NSRange(location: 3, length: 0))
+            h.model.updateCaretContext()
+
+            h.model.commitCaretVariant()
+            await h.model.fileSavepoint(named: "before the AI edit")
+
+            let saved = try savepoints(h)
+            #expect(saved.count == 1)
+            #expect(saved[0].message == "before the AI edit")
+            #expect(saved[0].kind == .manual)
+            #expect(h.model.statusMessage == SavepointNameCopy.filed("before the AI edit"))
+        }
+    }
+
+    /// **⎋ CANCELS THE COMMIT WHOLE** (PROVISIONAL, #121): the ask goes away
+    /// and nothing was written — which is also what a click outside and a
+    /// closing window do, because they are all the same road.
+    @Test func cancellingTheFieldFilesNothingAtAll() async throws {
+        try await withEditor(seedBlocks: ["draft text"]) { h in
+            h.textView.setSelectedRange(NSRange(location: 3, length: 0))
+            h.model.updateCaretContext()
+
+            h.model.commitCaretVariant()
+            #expect(h.model.savepointAsk != nil)
+            h.model.savepointAsk = nil  // ⎋ / a click outside / the window going
+
+            let after = try savepoints(h)
+            #expect(after.isEmpty,
+                    "a cancelled ask is not a savepoint with no name — it is no savepoint")
+        }
+    }
+
+    /// **A FIELD NEVER OPENS OVER A GESTURE THAT CANNOT LAND** (P-2): the
+    /// caret in the open tail has no take, so the door refuses where it
+    /// always refused — before anything is presented.
+    @Test func theDoorRefusesBeforeItOpensAFieldItCannotFile() async throws {
+        try await withEditor(seedBlocks: ["block"]) { h in
+            h.type("\n", at: 5)
+            h.model.updateCaretContext()
+            #expect(h.model.caretVariantID == nil)
+
+            h.model.commitCaretVariant()
+
+            #expect(h.model.savepointAsk == nil)
+            #expect(h.model.statusMessage == "Place the caret in a block to commit.")
+        }
+    }
+
+    /// The name reaches the STORE through the shipped parameter, and the row
+    /// reads back with its name leading — the two halves of this unit meeting
+    /// on one savepoint.
+    @Test func theNamedSavepointReadsBackNameFirst() async throws {
+        try await withEditor(seedBlocks: ["draft text"]) { h in
+            h.textView.setSelectedRange(NSRange(location: 3, length: 0))
+            h.model.updateCaretContext()
+            h.model.commitCaretVariant()
+            await h.model.fileSavepoint(named: "  before the AI edit  ")
+
+            let saved = try #require(try savepoints(h).first)
+            #expect(saved.message == "before the AI edit", "normalised on the way in")
+            #expect(SavepointRowFace.meta(saved, predatesSplit: false).first
+                == "before the AI edit")
+        }
+    }
+}
+
+/// A takes board over a one-block note. (The two shipped `withTakesWorld`
+/// helpers are `private` to their own files; this is the same shape, local.)
+@MainActor
+private func withSavepointTakesWorld<T>(
+    _ body: @MainActor (TakesViewModel, AppDatabase, String) async throws -> T
+) async throws -> T {
+    let db = try AppDatabase.inMemory()
+    let start = Date(timeIntervalSince1970: 1_782_864_000)
+    let tick = LockIsolated(0)
+    return try await withDependencies {
+        $0.database = db
+        $0.uuid = .incrementing
+        $0.date = DateGenerator {
+            let seconds = tick.withValue { value -> Int in
+                defer { value += 1 }
+                return value
+            }
+            return start.addingTimeInterval(Double(seconds))
+        }
+        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 13))
+    } operation: { @MainActor in
+        let session = AppSession(database: db)
+        let post = try session.operations.createPost(title: "named commits")
+        _ = try session.operations.newBlock(in: post.id, text: "Shown take.")
+        let model = TakesViewModel(session: session, postID: post.id)
+        model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+        return try await body(model, db, post.id)
+    }
+}
+
+@MainActor
+@Suite("The takes board's commit door asks too (13u3 UNIT D)")
+struct SavepointTakesDoorTests {
+    /// The takes surfaces' ⌘S is the SAME gesture — one door, one field, one
+    /// rule. Takes and Lenses share this model, so this pin covers both.
+    @Test func theTakesDoorOpensTheFieldAndFilesWhatItIsGiven() async throws {
+        try await withSavepointTakesWorld { model, db, _ in
+            let slot = try #require(model.projection.slots.first)
+            let variantID = try #require(slot.variantID)
+            model.focus(TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesMainColumnID,
+                blockID: slot.blockID, variantID: variantID))
+
+            model.askSavepointName()
+            let ask = try #require(model.savepointAsk)
+            #expect(ask.targetID == variantID)
+            #expect(ask.kind == .newSavepoint)
+
+            await model.fileSavepoint(named: "before the AI edit")
+            #expect(model.savepointAsk == nil)
+
+            let saved = try await db.read { db in
+                try Queries.commitHistory(db, variantID: variantID)
+            }
+            #expect(saved.count == 1)
+            #expect(saved[0].message == "before the AI edit")
+            #expect(saved[0].kind == .manual)
+
+            // And the skip road, on the same take: one more savepoint, no name.
+            model.askSavepointName()
+            await model.fileSavepoint(named: nil)
+            let both = try await db.read { db in
+                try Queries.commitHistory(db, variantID: variantID)
+            }
+            #expect(both.count == 2)
+            #expect(both.contains { $0.message == nil })
+        }
     }
 }

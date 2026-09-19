@@ -191,8 +191,14 @@ struct TakeToBlockDoorTests {
             world.session.status.receiptStyle = .off
 
             // (1) ⌘S with no pane focused — a guard-else that returns.
+            // 13u3 UNIT D: the ⌘S DOOR is `askSavepointName` now (it
+            // summons the optional name), and a door that cannot act must
+            // refuse BEFORE it presents a field — so this pin drives the
+            // door itself rather than the filing it would have led to.
             #expect(world.model.focusedPane == nil, "no ring — the door cannot act")
-            await world.model.commitFocusedTake()
+            world.model.askSavepointName()
+            #expect(world.model.savepointAsk == nil,
+                    "no field opens over a gesture that cannot land (P-2)")
             #expect(world.session.status.current?.text
                     == "Click into a take first — \u{2318}S commits the take you're in.")
             #expect(world.session.status.current?.kind == .refusal,

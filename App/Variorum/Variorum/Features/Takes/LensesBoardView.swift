@@ -201,7 +201,8 @@ struct LensesBoardView: View {
             model.moveToWriteAndRun(.deleteInEveryTake)
             return true
         case .commit:
-            Task { await model.commitFocusedTake() }
+            // 13u3 UNIT D: the same door as Takes — one model, one bar.
+            model.askSavepointName()
             return true
         case .addBlockAtEnd:
             Task { await model.addBlockAtEnd() }

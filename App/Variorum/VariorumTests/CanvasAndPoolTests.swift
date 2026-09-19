@@ -690,8 +690,11 @@ struct CanvasRealizationTests {
             model.adopt(try await db.read { try Queries.canvasProjection($0, container: world.post) })
 
             // No focus: speaks instead of guessing (the 4D letter).
-            await model.commitFocusedTake()
+            // 13u3 UNIT D: through the ⌘S DOOR, which must refuse before it
+            // presents a name field it could not file.
+            model.askSavepointName()
             #expect(model.statusMessage?.contains("Click into a card") == true)
+            #expect(model.savepointAsk == nil)
 
             model.focus(blockID: world.block, variantID: world.take)
             model.paneEdited(

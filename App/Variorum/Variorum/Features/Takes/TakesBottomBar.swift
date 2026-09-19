@@ -317,6 +317,15 @@ struct TakesBottomBar: View {
         ) {
             NoteVersionsPane(session: model.session, postID: model.postID)
         }
+        // 13u3 UNIT D (item 14): the commit door's optional name. ONE
+        // binding on the bar — Takes and Lenses compose this same bar, so
+        // one presentation serves both surfaces exactly as one model does.
+        .savepointNameAsk(
+            Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
+            tokens: tokens
+        ) { _, name in
+            Task { await model.fileSavepoint(named: name) }
+        }
     }
 
     /// 18i: the ONE quiet slot this bar composes, reading the ONE centre.
@@ -345,7 +354,9 @@ struct TakesBottomBar: View {
         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
         .help("A new take on the block you're in, branched from what's shown (⌘T)")
         Button(tokens.chromeLabel("commit ⌘S")) {
-            Task { await model.commitFocusedTake() }
+            // 13u3 UNIT D (item 14): the door summons the optional name;
+            // ⏎ on the empty field files what it has always filed.
+            model.askSavepointName()
         }
         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
         .disabled(model.projection.sealed)

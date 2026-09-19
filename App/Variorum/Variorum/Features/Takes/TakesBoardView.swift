@@ -267,7 +267,9 @@ struct TakesBoardView: View {
             model.moveToWriteAndRun(.deleteInEveryTake)
             return true
         case .commit:
-            Task { await model.commitFocusedTake() }
+            // 13u3 UNIT D: ⌘S summons the optional name at the bar's commit
+            // door; ⏎ files it (empty = unnamed, the two-key road).
+            model.askSavepointName()
             return true
         case .addBlockAtEnd:
             Task { await model.addBlockAtEnd() }
