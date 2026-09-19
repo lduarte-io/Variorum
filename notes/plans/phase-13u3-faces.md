@@ -2873,3 +2873,44 @@ captures: delete a spare take from a live board card (the receipt speaks), the l
 speaks, the lesson read in the tutorial, both voices, both appearances. Record: **UNIT H
 RECORD**, LIVE STATUS from the first commit, UNIT CLOSED banner, ledger row 8b flipped in the
 same commit. The lesson edit joins the closeout's re-seed list (state it in your record).
+
+---
+
+## UNIT H RECORD — THE TAKES BOARD'S LIVE-CARD DELETE DOOR + THE LESSON'S TRUTH (opus-implementer, 2026-09-19)
+
+**WHAT I DID NOT DO, stated first (the record's own rule).** — PENDING until the unit closes; this
+line is rewritten in the closing commit.
+
+### LIVE STATUS (written at the start; flipped in the same commit as each piece)
+
+| piece | status |
+|---|---|
+| 0 · read the brief's named sections (plan banner · GOVERNANCE + P-1/P-2/P-6 · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the two adjudications · the code the brief names · `Tools/WalkKit/README.md`) | **DONE** — this commit |
+| 1 · the TRACE, measured on the pre-unit tree before a line changes (what the board's live card renders; where the delete door does and does not exist; what each refusal actually says) | PENDING |
+| 2 · the DOOR — one `TakeCardMenu` component rendered by the board's live cards (all four fan styles) and by Write's panel, with the registry declaration and the rendered-door oracle | PENDING |
+| 3 · the refusal the new door will meet most — `variantIsChosen` — gets words (it falls to `default:` and dumps the raw enum with a UUID in it today) | PENDING |
+| 4 · the WORDS — the takes lesson's two sentences + the ⋯ sweep of the seeder, held to the door by a pin that reads the row's own title | PENDING |
+| 5 · the walk (dev-store Debug, both voices, both appearances) with captures | PENDING |
+| 6 · finals (FULL Mac · tutorial spine · core · iOS build) | PENDING |
+| 7 · close — ledger row 8b flipped + UNIT CLOSED banner + QUESTIONS | PENDING |
+
+*(No death so far. Baselines at open, from the brief: FULL Mac **2880/481** with row 58's
+environment red tolerated (warm-DerivedData covariate noted by UNIT G) and row 49's landing arm by
+the paired protocol; core **1603/174**; mobile 626/106 w/4 known; tutorial spine green; marker 8.
+Mac DerivedData `App/Variorum/DerivedData/13u3f` is reused warm — 15 GiB free on this disk — and
+iOS `13u3g-ios`.)*
+
+### THE RED-ON-OLD VERIFICATION — NAMED BEFORE IT RUNS (the checkpoint protocol)
+
+Three cells, named here before they are written, each measured on the pre-unit tree `4f069b1b`
+with NO production line changed:
+
+1. **the door pin** — mount the real Takes board on a fanned note with the fan bloomed and read the
+   rendered-door oracle: `.deleteTake` (and the rest of the take-card grammar) must be recorded by a
+   LIVE card. RED on old: the live card renders a choose band and two reorder arrows and nothing else.
+2. **the refusal pin** — `OpsRefusalCopy.message(for: OperationError.variantIsChosen(id:))` must be
+   a sentence, not `Refused: variantIsChosen(id: "…")`. RED on old: it falls to `default:`.
+3. **the words pin** — the takes-delete lesson's prose must name the row by the row's OWN title
+   (`TakeCardMenuCopy.deleteTake`) and name where the ⋯ lives. RED on old: the lesson says
+   "⋯ menu ▸ Delete" with no place, and the board it sends a reader to has no ⋯.
+
