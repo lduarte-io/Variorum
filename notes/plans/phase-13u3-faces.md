@@ -439,9 +439,9 @@ not touched; the inline-comments SETTING's tinted strips are unchanged (R-13u3-5
 | 0 | the record + `13u3-screens/` gitignored | **DONE** |
 | 1 | `ProseGutter` — the ONE gutter brain; both contained surfaces + Write adopt it; `DecorLane` retires | **DONE** (`ProseGutterTests` 20/20 green with its two neighbours; `BlockDecorLaneTests` retired INTO it) |
 | 2 | the four HOST cells converted (bleed + preset), the host table proved byte-identical | **DONE** (the table below; `theProseColumnIsAPureFunctionOfTheSurfacesWidth` pins every cell at ten widths) |
-| 3 | the decoration geometry: wash hugs the prose, the R-13u3-3 stack, the badge that never covers prose, the card rhythm | **DONE** (pins green; red-on-old evidence PENDING — piece 5) |
+| 3 | the decoration geometry: wash hugs the prose, the R-13u3-3 stack, the badge that never covers prose, the card rhythm | **DONE** |
 | 4 | the R-13u3-4 one-grapheme guard | **DONE** (`CalloutMenu.firstGrapheme` at the door, `BlockDecor.leadingGlyph` at the renderer; pinned incl. family/skin-tone/flag clusters) |
-| 5 | pins (one-law · stack · rhythm · grapheme), `BlockDecorLaneTests` retired INTO successors | PENDING |
+| 5 | pins (one-law · stack · rhythm · grapheme), `BlockDecorLaneTests` retired INTO successors | **DONE** — 15 cells, red-on-old measured on 10 of them (the table below); zero orphaned test names |
 | 6 | KnownIssues row 50 RESOLVED + QUESTIONS #117 | PENDING |
 | 7 | the walk + captures, the full Mac suite, iOS build | PENDING |
 
@@ -496,3 +496,22 @@ Expected red: `noDecorationMovesTheProseColumnOnAnySurface`, both production-loo
 `theGlyphSitsInTheGutterAndYieldsWhereThereIsNone`, `theBadgeNeverStandsOnProse`,
 `theStackPutsTheGlyphFirstAndTheCommentFaceUnderIt`. Measurements recorded below; the tree is
 restored by `git checkout` of the four files against `620998c1` and re-verified green.
+
+**RED-ON-OLD, MEASURED (2026-09-18).** The five reverts applied to the tree at `620998c1`, the
+suite run, the tree restored by `git checkout` of `BlockDecor.swift` and re-verified: **15/15
+green** before, **15 tests / 36 issues, 9 cells red** under the reverts, **15/15 green** after.
+Cell by cell — no pin passed on both sides, and no pin is hollow:
+
+| pin | under the revert | the number |
+|---|---|---|
+| `noDecorationMovesTheProseColumnOnAnySurface` | **RED**, 12 issues | `proseLeft 72` vs `160` at 1000 pt and vs `28` at 620 — a comment or a glyph moved her text 64 pt, four combinations × two widths |
+| `theReadTiersProseIsUnmovedByACommentThroughTheProductionLoop` | **RED** | `proseLeft 72` vs `160` — through the REAL wiring: the operations-layer comment, the model's decor observation, the controller's render |
+| `theContainedEditorsProseIsUnmovedByACommentThroughTheProductionLoop` | **RED** | the same, one host over |
+| `aGutteredSurfaceStaysOnTextKit2` | **RED** | `proseLeft 72` vs `160` (the canary stayed silent either way — the override was never a downgrade trigger) |
+| `nothingInTheGutterEverCoversProse` | **RED**, 9 issues | the badge's `maxX 34` over prose beginning at `28`; the wash reaching into the gutter at all six cells |
+| `theCalloutWashHugsTheProseColumn` | **RED**, 2 | `minX 288` vs `300`, `16` vs `28` — the 12 pt spread |
+| `theGlyphSitsInTheGutterAndYieldsWhereThereIsNone` | **RED**, 3 | `maxX 288` vs `296`; and at `textLeft` 8 and 20 it drew at `(6, 0, 18, 17)` — **on her first characters**, which is her image 11 |
+| `theBadgeNeverStandsOnProse` | **RED**, 2 | at Write's `minGutter`: `maxX 34` where the prose starts at `28` — KnownIssues row 50's first residual, measured |
+| `theStackPutsTheGlyphFirstAndTheCommentFaceUnderIt` | **RED** | `rect.maxX 34 > textLeft 28` |
+| `twoCommentedBlocksCardsNeverAbut` | **RED** (revert 5), 2 | `first.maxY 54` where the next card's top is `46` — an 8 pt OVERLAP between two commented blocks' cards, which is the measured shape of her *"the comments still also aren't spaced well"* |
+| `theProseColumnIsAPureFunctionOfTheSurfacesWidth` · `theGutterMovesOnlyWithTheSurfacesOwnWidth` · `everyTextSurfaceCarriesTheOneGutterRule` · `theTwoContainedSurfacesPlaceTheirProseIdentically` · `aLeadingGlyphIsExactlyOneGrapheme` | green under the reverts, by construction | they pin the NEW rule's own arithmetic and the grapheme guard, which the reverts do not touch; they are not bug-class pins and are not claimed as such |
