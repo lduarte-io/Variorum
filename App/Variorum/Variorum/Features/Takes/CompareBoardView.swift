@@ -782,6 +782,13 @@ final class CompareViewModel {
         // PANE's own post's (`pane.context`), read off the face this board
         // already renders "sealed — read-only" from. Same sentence as the
         // post-⏎ road's.
+        //
+        // A nil face FAILS OPEN, deliberately (the sanity pass's S-4): a
+        // pane whose post has left the board (or is mid-projection-swap) is
+        // an UNKNOWN, and a door never refuses on ignorance — the filer
+        // still refuses if the post really is sealed, which is the shipped
+        // post-⏎ road unchanged. The three sibling doors have no unknown
+        // state, so this clause is this door's alone.
         guard face(for: pane.context)?.sealed != true else {
             statusMessage = OpsRefusalCopy.message(
                 for: OperationError.lockedPost(id: pane.context))

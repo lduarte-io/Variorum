@@ -1176,8 +1176,8 @@ final class EditorViewModel {
         // frames). The flag is what `updateCaretContext`'s indicator arm
         // consults to defer its decoration refresh onto the settle hop this
         // same method arms one line below.
-        inStorageEditTransaction = true
-        defer { inStorageEditTransaction = false }
+        enterStorageEditTransaction()
+        defer { exitStorageEditTransaction() }
         // N14: EVERY storage character edit dirties overlay geometry — the
         // suppressed programmatic writes included (renderFull's
         // setSurfaceContent is exactly the cold-mount path). The refresh
@@ -3369,9 +3369,17 @@ final class EditorViewModel {
         // decoration on this surface already has (N14's design). The
         // selection-change road (arrow keys — no edit transaction) keeps the
         // synchronous refresh.
-        if appearance.indicator != .off, caretBlockID != previousCaretBlock,
-           !inStorageEditTransaction {
-            refreshDecorations()
+        if appearance.indicator != .off, caretBlockID != previousCaretBlock {
+            if inStorageEditTransaction {
+                // Deferred onto the settle hop (R1-1) — and WITNESSED (S-1):
+                // the pin asserts this branch fired, not only that the
+                // forcing walk did not.
+                #if DEBUG
+                deferredIndicatorRefreshes += 1
+                #endif
+            } else {
+                refreshDecorations()
+            }
         }
         // Ledger row 33 — the Block History pane's jump door reads this fact.
         // 17o batch b (her ruling U-20): the report now rides EVERY caret
@@ -3418,7 +3426,22 @@ final class EditorViewModel {
     /// (13u3 ladder round 1, R1-1; the sampled deleteBackward spin). The
     /// caret arm in `updateCaretContext` consults it to defer the indicator's
     /// decoration refresh onto the settle hop.
-    @ObservationIgnored private(set) var inStorageEditTransaction = false
+    ///
+    /// A DEPTH, not a Bool (the sanity pass's S-3): today `storageDidEdit`
+    /// cannot re-enter — one production caller, non-`async`, its inner
+    /// attribute-only restyle filtered by the delegate's `.editedCharacters`
+    /// guard, `desyncRecovery` deferring its re-render into a Task — but a
+    /// Bool encodes that premise silently, and if a future road ever DID
+    /// re-enter, an inner frame's `defer` would drop the flag while the
+    /// outer frame was still inside `processEditing`, reopening the exact
+    /// hole R1-1 closed. A counter cannot be got wrong that way.
+    var inStorageEditTransaction: Bool { storageEditDepth > 0 }
+    @ObservationIgnored private var storageEditDepth = 0
+
+    /// The one writer (`storageDidEdit`'s entry/exit), named so no second
+    /// site ever mutates the depth ad hoc.
+    func enterStorageEditTransaction() { storageEditDepth += 1 }
+    func exitStorageEditTransaction() { storageEditDepth -= 1 }
 
     #if DEBUG
     /// **The R1-1 oracle:** how many times the decoration pass's
@@ -3427,6 +3450,14 @@ final class EditorViewModel {
     /// pin (`EditorDecorTransactionTests`) holds it at zero through the real
     /// delegate pipeline.
     @ObservationIgnored private(set) var decorLayoutQueriesInEditTransaction = 0
+
+    /// **The WITNESS beside the absence (the sanity pass's S-1):** how many
+    /// times the indicator arm fired inside the transaction and was
+    /// DEFERRED. The zero above is equally true when the arm was never
+    /// reached — an AppKit ordering fact TEXTKIT2 §5 says to re-verify per
+    /// point release — so the pin asserts this too: the arm fired, and took
+    /// the deferral branch. Green-and-hollow becomes red-and-loud.
+    @ObservationIgnored private(set) var deferredIndicatorRefreshes = 0
     #endif
 
     /// Internal (not private) so the ladder's R1-5 pin can schedule a hop

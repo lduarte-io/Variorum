@@ -393,6 +393,76 @@ struct SavepointSealedDoorTests {
         }
     }
 
+    /// **THE DISCRIMINATING PAIR (the sanity pass's S-2):** Compare crosses
+    /// posts, so its guard reads the PANE's own post's seal — the fact the
+    /// R1-3 disposition chose over the board-level `projection.anchor.sealed`
+    /// it rejected. The anchor-only cell below cannot tell the two apart;
+    /// these two can, one per direction. The second is the worse direction:
+    /// a board-fact guard would refuse a commit she is entitled to make, on
+    /// a note that is not sealed.
+    @Test func compareDoorRefusesASealedPeersPane() async throws {
+        try await withSavepointTakesWorld { takes, db, _ in
+            let session = takes.session
+            let (anchorID, twinID) = try await session.runner.run {
+                ops -> (String, String) in
+                let anchor = try ops.createPost(title: "the piece")
+                _ = try ops.newBlock(in: anchor.id, text: "First block of the piece.")
+                let twin = try ops.duplicateAsVersion(anchor.id)
+                try ops.lockPost(twin.post.id)  // the PEER is sealed
+                return (anchor.id, twin.post.id)
+            }
+            let model = CompareViewModel(session: session, anchorPostID: anchorID)
+            model.peerSlots = [.init(postID: twinID)]
+            model.adopt(try await db.read { db in
+                try CompareViewModel.read(db, anchor: anchorID, peers: [twinID])
+            })
+            #expect(model.projection.anchor.sealed == false, "the ANCHOR is not sealed")
+            let twinSlot = try #require(model.face(for: twinID)?.slots.first)
+            model.focus(PaneTextAuthority.PaneKey(
+                columnID: "compare-\(twinID)", blockID: twinSlot.blockID,
+                variantID: try #require(twinSlot.variantID), context: twinID))
+
+            model.askSavepointName()
+
+            #expect(model.savepointAsk == nil,
+                    "the PANE's post is sealed — a board-level fact would wrongly allow this")
+            #expect(model.statusMessage == sealedSentence)
+        }
+    }
+
+    @Test func compareDoorAllowsAnUnsealedPeerUnderASealedAnchor() async throws {
+        try await withSavepointTakesWorld { takes, db, _ in
+            let session = takes.session
+            let (anchorID, twinID) = try await session.runner.run {
+                ops -> (String, String) in
+                let anchor = try ops.createPost(title: "the piece")
+                _ = try ops.newBlock(in: anchor.id, text: "First block of the piece.")
+                let twin = try ops.duplicateAsVersion(anchor.id)
+                try ops.lockPost(anchor.id)  // the ANCHOR is sealed; the peer is not
+                return (anchor.id, twin.post.id)
+            }
+            let model = CompareViewModel(session: session, anchorPostID: anchorID)
+            model.peerSlots = [.init(postID: twinID)]
+            model.adopt(try await db.read { db in
+                try CompareViewModel.read(db, anchor: anchorID, peers: [twinID])
+            })
+            #expect(model.projection.anchor.sealed == true)
+            let twinSlot = try #require(model.face(for: twinID)?.slots.first)
+            model.focus(PaneTextAuthority.PaneKey(
+                columnID: "compare-\(twinID)", blockID: twinSlot.blockID,
+                variantID: try #require(twinSlot.variantID), context: twinID))
+
+            model.askSavepointName()
+
+            // The WORSE direction (S-2): the pane's post is NOT sealed, so
+            // the field must open — a guard on the board-level fact would
+            // refuse a commit she is entitled to make.
+            #expect(model.savepointAsk != nil,
+                    "an unsealed peer's commit is hers whatever the anchor's seal says")
+            #expect(model.savepointAsk?.targetID == twinSlot.variantID)
+        }
+    }
+
     @Test func compareDoorRefusesASealedPanesOwnPost() async throws {
         try await withSavepointTakesWorld { takes, db, _ in
             let session = takes.session

@@ -59,6 +59,17 @@ struct EditorDecorTransactionTests {
 
             #expect(h.model.decorLayoutQueriesInEditTransaction == 0,
                     "no layout-forcing decoration walk inside the storage-edit transaction — the sampled spin's precondition (R1-1)")
+            // **THE WITNESS (the sanity pass's S-1):** the zero above is
+            // equally true if the arm was never reached — an AppKit ordering
+            // fact TEXTKIT2 §5 says to re-verify per point release. This
+            // asserts the arm FIRED, in-transaction, and took the deferral
+            // branch: if Tahoe ever changes the mid-transaction selection
+            // staleness this construction rides, the pin goes red-and-loud
+            // instead of green-and-hollow. It is also the by-hand red-on-old
+            // measurement's permanent home (the shipped arm counted the
+            // oracle at 1 here; the fix counts this witness at 1 instead).
+            #expect(h.model.deferredIndicatorRefreshes == 1,
+                    "the indicator arm fired inside the transaction and was deferred")
 
             // NON-STARVATION: deferred is not dropped. In THIS construction
             // the caret ends back in block 1 (AppKit's post-edit fixup) and
@@ -104,6 +115,8 @@ struct EditorDecorTransactionTests {
             #expect(delivered.contains { $0.caretBlockID == blocks[1] },
                     "the indicator followed the caret with no hop needed")
             #expect(h.model.decorLayoutQueriesInEditTransaction == 0)
+            #expect(h.model.deferredIndicatorRefreshes == 0,
+                    "nothing was deferred — no transaction was open")
         }
     }
 }

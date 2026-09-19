@@ -395,3 +395,10 @@ re-verification recorded.
 residual (the PANE's rename door still opens its field under a sealed note and refuses at ⏎ —
 the offer-gating is a face call); R1-6 stays a decision, not a pin (SPECULATIVE cause, hardening
 built); the implementer's sanity pass over this diff is owed next per the cross-model flow.
+
+**ANNOUNCED DELIBERATELY-WRONG-VARIANT MEASUREMENT #3 (the sanity-pass items S-1/S-2):** to show
+the strengthened pins DISCRIMINATE, two wrong variants are applied in place on the committed
+tree and the suites run RED, then restored by `git checkout`: (a) the indicator arm gated
+unreachable in-transaction (the hollow world S-1 exists to catch — oracle 0 AND witness 0);
+(b) Compare's guard swapped to the REJECTED board-level `projection.anchor.sealed` (S-2's two
+directions). Pre-variant state committed (the sanity-pass fix commit, made after the green run).
