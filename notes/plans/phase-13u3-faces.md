@@ -2442,6 +2442,12 @@ Captures in `notes/plans/13u3-screens/` (gitignored):
 | `F08-a-callout-still-prints-its-blockquote-lead-QUESTIONS-123b.png` | **the one place syntax survives**: a callout block's `> ` lead prints, while the bold/italic/strikethrough INSIDE that same line render — the exact shape #123(b) puts to her |
 | `F09-the-apps-own-read-surface-is-the-same-reading-study-dark.png` | the app's own Read surface beside it: the page is the same reading, printed — the one-truth claim, visible |
 
+**The exported ARTIFACTS themselves** — 11 PDFs and 6 `.md` files from both builds, including the
+two whose SHA-256 match is the fence's proof — are kept beside the captures in
+`notes/plans/13u3-screens/F-exports/` (gitignored), so the evidence can be re-opened rather than
+only read about. *(They were written to `~/Documents/13u3f/` by the save panels during the walk
+and moved here afterwards; that folder is gone.)*
+
 **Every PDF was OPENED in Preview and read**, not merely written. F03/F04/F05/F08 were re-taken on
 the SHIPPED build after the colour fix, so no capture here shows code that is not in the commit.
 
