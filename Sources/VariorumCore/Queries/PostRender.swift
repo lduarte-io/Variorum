@@ -173,6 +173,43 @@ extension Queries {
         }
     }
 
+    // MARK: - The resolution as a fragment (13u3 UNIT G — UNIT B's hand-up)
+
+    /// **`renderPost`'s two joins, for a statement that resolves an opening
+    /// take inside a bigger question.** Three reads of a note's opening were
+    /// found disagreeing about which take they render (13u3 UNIT B's hand-up):
+    /// the Library card's `COALESCE(cb.chosen_variant_id, b.default_variant_id)`
+    /// — which previews an ARCHIVED chosen take, blanks on a TOMBSTONED one
+    /// and shows another block's prose through a FOREIGN pointer — and the
+    /// note picker's `b.default_variant_id` alone, which previews the wrong
+    /// take for every block whose take she has switched, since `chooseVariant`
+    /// writes only the placement's chosen. Neither was the rule the note
+    /// itself renders by, so the rule ships as text a statement can paste in.
+    ///
+    /// **Contract (a fragment, not a query):** the statement must alias
+    /// `container_block` as `cb` and `block` as `b`, and reads its text
+    /// through `renderedTakeTextSQL`. A reader that wants the ANSWER rather
+    /// than a fragment calls `renderedVariantIDs` below; `renderPost` and
+    /// `leadingBlockTextsSQL` keep their own copies of these lines
+    /// deliberately — re-typing a shipped, load-bearing statement for
+    /// tidiness is the risk, and their agreement is pinned by behaviour
+    /// instead (`renderAgreesWithOperationsRenderedVariant`,
+    /// `renderedVariantIDAgreesWithBothResolvers`).
+    public static let renderedTakeJoinSQL = """
+        LEFT JOIN variant chosen
+          ON chosen.id = cb.chosen_variant_id
+         AND chosen.block_id = b.id
+         AND chosen.deleted_at IS NULL
+         AND chosen.status = 'active'
+        LEFT JOIN variant dflt
+          ON dflt.id = b.default_variant_id
+         AND dflt.deleted_at IS NULL
+        """
+
+    /// The text those joins resolve — chosen while it renders, else the
+    /// block's default. NULL is a gap (the caller decides what a gap reads as).
+    public static let renderedTakeTextSQL = "COALESCE(chosen.working_text, dflt.working_text)"
+
     // MARK: - The rendered take of NAMED blocks (13u3 UNIT G — the 18f ladder's R3-9)
 
     /// The SQL behind `renderedVariantIDs`, held as one constant for the same

@@ -958,15 +958,20 @@ enum NoteCards {
             sql: """
                 SELECT post_id, text FROM (
                   SELECT cb.container_id AS post_id,
-                         substr(COALESCE(v.working_text, ''), 1, \(snippetLimit)) AS text,
+                         substr(COALESCE(\(Queries.renderedTakeTextSQL), ''), 1, \(snippetLimit))
+                           AS text,
                          ROW_NUMBER() OVER (
                            PARTITION BY cb.container_id ORDER BY cb.position, cb.id
                          ) AS n
                   FROM container_block cb
                   JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
-                  LEFT JOIN variant v
-                    ON v.id = COALESCE(cb.chosen_variant_id, b.default_variant_id)
-                   AND v.deleted_at IS NULL
+                  -- 13u3 UNIT G (UNIT B's hand-up): the ONE resolution the
+                  -- note itself renders by. This read used to be a bare
+                  -- `COALESCE(cb.chosen_variant_id, b.default_variant_id)`,
+                  -- which previewed an ARCHIVED chosen take's words, blanked
+                  -- the card on a TOMBSTONED one, and showed another block's
+                  -- prose through a FOREIGN pointer.
+                  \(Queries.renderedTakeJoinSQL)
                   WHERE cb.deleted_at IS NULL
                     AND cb.container_id IN (SELECT value FROM json_each(?))
                 ) WHERE n <= \(blockWindow)

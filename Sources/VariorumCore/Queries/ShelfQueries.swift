@@ -624,7 +624,10 @@ extension Queries {
     /// One row of the searchable note picker: enough context that five
     /// notes all displaying "2026-08-01" are tellable apart — the display
     /// title, the day, and a SNIPPET of the note's opening words, derived
-    /// at read time from the first block's representative take and NEVER
+    /// at read time from the first block's RENDERED take — `renderPost`'s own
+    /// rule, shared as `renderedTakeJoinSQL` since 13u3 UNIT G, where this
+    /// read was found resolving `b.default_variant_id` ALONE and so previewing
+    /// the wrong take for every block whose take she had switched — and NEVER
     /// stored (the 13u item-4 display-NAME rule is deliberately not built
     /// here — titles stay as they are; the snippet is row context only).
     public struct NotePickerHit: Equatable, Sendable, Identifiable {
@@ -634,7 +637,7 @@ extension Queries {
         public let entryDate: String?
         /// When the note was last touched (canonical ISO-8601 text).
         public let touchedStamp: String
-        /// The note's opening words (the first block's default take,
+        /// The note's opening words (the first block's RENDERED take,
         /// capped) — nil when the note is empty.
         public let snippet: String?
     }
@@ -690,11 +693,10 @@ extension Queries {
                 )
                 SELECT h.id AS id, h.title AS title, h.entry_date AS entry_date,
                        h.created_at AS created_at, h.stamp AS stamp,
-                       (SELECT SUBSTR(COALESCE(v.working_text, ''), 1, 160)
+                       (SELECT SUBSTR(COALESCE(\(Queries.renderedTakeTextSQL), ''), 1, 160)
                           FROM container_block cb
                           JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
-                          LEFT JOIN variant v
-                            ON v.id = b.default_variant_id AND v.deleted_at IS NULL
+                          \(Queries.renderedTakeJoinSQL)
                          WHERE cb.container_id = h.id AND cb.deleted_at IS NULL
                          ORDER BY cb.position, cb.id
                          LIMIT 1) AS snippet
@@ -732,11 +734,10 @@ extension Queries {
                 SELECT c.id AS id, c.title AS title, c.entry_date AS entry_date,
                        c.created_at AS created_at,
                        COALESCE(c.last_touched_at, c.created_at) AS stamp,
-                       (SELECT SUBSTR(COALESCE(v.working_text, ''), 1, 160)
+                       (SELECT SUBSTR(COALESCE(\(Queries.renderedTakeTextSQL), ''), 1, 160)
                           FROM container_block cb
                           JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
-                          LEFT JOIN variant v
-                            ON v.id = b.default_variant_id AND v.deleted_at IS NULL
+                          \(Queries.renderedTakeJoinSQL)
                          WHERE cb.container_id = c.id AND cb.deleted_at IS NULL
                          ORDER BY cb.position, cb.id
                          LIMIT 1) AS snippet

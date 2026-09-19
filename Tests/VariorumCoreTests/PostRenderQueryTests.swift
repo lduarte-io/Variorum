@@ -519,6 +519,63 @@ struct PostRenderQueryTests {
         }
     }
 
+    /// **THE ANTI-DRIFT NET over every copy of the resolution** (13u3 UNIT G).
+    /// The rule now ships as a fragment (`renderedTakeJoinSQL`), but several
+    /// statements keep their own copies of those lines on purpose — re-typing
+    /// a shipped, load-bearing query for tidiness is the risk, not the cure.
+    /// What holds them together is this: every reader that answers "what does
+    /// this block show" is walked over ONE world carrying every fallback
+    /// shape, and they must all say the same thing. A copy that drifts fails
+    /// here by name.
+    @Test func everyRenderedTakeReaderAgreesOnOneWorld() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "one world")
+            // 1 · plain · 2 · a chosen take · 3 · an archived chosen (falls
+            // back) · 4 · a tombstoned chosen (falls back).
+            _ = try ops.newBlock(in: post.id, text: "Plain block.")
+            let chosen = try ops.newBlock(in: post.id, text: "Its default.")
+            let cSpare = try ops.branchVariant(chosen.block.id, from: chosen.variant.id)
+            try ops.autosave(cSpare.id, text: "The chosen one.", charDelta: 0)
+            try ops.chooseVariant(chosen.block.id, variantID: cSpare.id)
+            let archived = try ops.newBlock(in: post.id, text: "Archived's default.")
+            let aSpare = try ops.branchVariant(archived.block.id, from: archived.variant.id)
+            try ops.autosave(aSpare.id, text: "Archived take.", charDelta: 0)
+            try ops.chooseVariant(archived.block.id, variantID: aSpare.id)
+            try ops.archiveVariant(aSpare.id)
+            let dead = try ops.newBlock(in: post.id, text: "Dead's default.")
+            let dSpare = try ops.branchVariant(dead.block.id, from: dead.variant.id)
+            try ops.autosave(dSpare.id, text: "Doomed take.", charDelta: 0)
+            try ops.chooseVariant(dead.block.id, variantID: dSpare.id)
+            try db.write { db in try Fixture.tombstone(db, table: "variant", id: dSpare.id) }
+
+            let slots = try db.read { try Queries.renderPost($0, containerID: post.id) }
+            let truth = slots.map { $0.text ?? "" }
+            #expect(truth == ["Plain block.", "The chosen one.",
+                              "Archived's default.", "Dead's default."],
+                    "non-vacuity: every fallback shape is in the world")
+
+            // Every other reader, against that truth.
+            let ids = try db.read { db in
+                try Queries.renderedVariantIDs(db, blockIDs: slots.map(\.blockID))
+            }
+            #expect(slots.map { ids[$0.blockID] } == slots.map(\.variantID),
+                    "the named-blocks reader")
+            let leading = try db.read { db in
+                try Queries.leadingBlockTexts(db, containerID: post.id, blocks: 4)
+            }
+            #expect(leading == truth, "the card-preview prime")
+            let exported = try db.read { db in
+                try slots.map { try Queries.blockTakes(db, blockID: $0.blockID).markdown }
+            }
+            #expect(exported.map { $0.components(separatedBy: "\n\n")[0] } == truth,
+                    "the export's per-block projection (its alternates section aside)")
+            let picked = try db.read { try Queries.notePickerNotes($0, ids: [post.id]) }
+            #expect(picked.first?.snippet == truth[0], "the note picker's snippet")
+            let opening = try db.read { try Queries.renderedText($0, containerID: post.id) }
+            #expect(opening.hasPrefix(truth[0]), "the whole-document projection")
+        }
+    }
+
     /// **THE POINT OF THE READER, pinned** (R3-9's whole motivation): the
     /// statement SEEKS the blocks it was handed — never scans `block`, never
     /// scans `container_block`. The plan is read off the SHIPPED constant, so

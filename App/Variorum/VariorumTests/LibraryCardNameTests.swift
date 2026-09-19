@@ -104,6 +104,74 @@ struct LibraryCardNameTests {
         }
     }
 
+    /// **13u3 UNIT G (UNIT B's hand-up) — RED ON `25638746`.** The card's read
+    /// resolved its opening through a bare
+    /// `COALESCE(cb.chosen_variant_id, b.default_variant_id)`, which agrees
+    /// with the note only while the chosen take is live, active and this
+    /// block's. It isn't `renderPost`'s rule, and the three shapes where it
+    /// parts company are all reachable: an ARCHIVED chosen take previewed the
+    /// archived text (the note shows the default), a TOMBSTONED one previewed
+    /// a BLANK card (the note shows the default), and a FOREIGN chosen pointer
+    /// — the sync-race class the operations layer guards with "a foreign
+    /// chosen must never let an op rewrite another block's text" — previewed
+    /// another block's prose. The read is `renderPost`'s rule verbatim now.
+    @Test func aCardPreviewsTheTakeTheNoteShows() async throws {
+        try await withLibrary { session, db in
+            let ops = session.operations
+
+            // Archived chosen → the note falls back to the default.
+            let archived = try ops.createPost(title: "archived chosen")
+            let a = try ops.newBlock(in: archived.id, text: "The default take.")
+            let aSpare = try ops.branchVariant(a.block.id, from: a.variant.id)
+            try ops.autosave(aSpare.id, text: "The archived take.", charDelta: 0)
+            try ops.chooseVariant(a.block.id, variantID: aSpare.id)
+            try ops.archiveVariant(aSpare.id)
+
+            // Tombstoned chosen → the note falls back; the card went blank.
+            let dead = try ops.createPost(title: "dead chosen")
+            let d = try ops.newBlock(in: dead.id, text: "The surviving take.")
+            let dSpare = try ops.branchVariant(d.block.id, from: d.variant.id)
+            try ops.autosave(dSpare.id, text: "The doomed take.", charDelta: 0)
+            try ops.chooseVariant(d.block.id, variantID: dSpare.id)
+            try await db.write { database in
+                try database.execute(
+                    sql: "UPDATE variant SET deleted_at = ? WHERE id = ?",
+                    arguments: ["2026-09-19T00:00:00Z", dSpare.id])
+            }
+
+            // A FOREIGN chosen pointer (the sync-race shape).
+            let foreign = try ops.createPost(title: "foreign chosen")
+            let f = try ops.newBlock(in: foreign.id, text: "My own words.")
+            let elsewhere = try ops.newBlock(in: foreign.id, text: "Another block's words.")
+            try await db.write { database in
+                try database.execute(
+                    sql: "UPDATE container_block SET chosen_variant_id = ? WHERE block_id = ?",
+                    arguments: [elsewhere.variant.id, f.block.id])
+            }
+
+            // What each note actually SHOWS — the rule the card owes.
+            let shown = try await db.read { database in
+                [archived.id: try Queries.renderPost(database, containerID: archived.id),
+                 dead.id: try Queries.renderPost(database, containerID: dead.id),
+                 foreign.id: try Queries.renderPost(database, containerID: foreign.id)]
+            }
+            #expect(shown[archived.id]?.first?.text == "The default take.",
+                    "non-vacuity: the note falls back past the archived take")
+            #expect(shown[dead.id]?.first?.text == "The surviving take.")
+            #expect(shown[foreign.id]?.first?.text == "My own words.")
+
+            let model = LibraryCatalogModel(session: session, defaults: try self.scrubbed("take"))
+            model.mode = .notes
+            await model.search()
+            #expect(model.noteCards[archived.id]?.snippet == "The default take.",
+                    "on old: the archived take's own words")
+            #expect(model.noteCards[dead.id]?.snippet == "The surviving take.",
+                    "on old: a blank card")
+            #expect(model.noteCards[foreign.id]?.snippet == "My own words.",
+                    "on old: another block's words")
+        }
+    }
+
     /// **A card that leads with a HEADING has the prose under it to preview**
     /// — the reason the read stopped throwing every block but the first away.
     @Test func aHeadingLedCardStillHasSomethingToPreview() async throws {

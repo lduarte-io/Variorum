@@ -126,6 +126,72 @@ struct SnippetsAndPickerQueryTests {
         }
     }
 
+    // MARK: - Which take the picker previews (13u3 UNIT G — UNIT B's hand-up)
+
+    /// **RED ON `25638746`.** Both picker overloads resolved their snippet
+    /// through `b.default_variant_id` ALONE, and `chooseVariant` writes only
+    /// the PLACEMENT's chosen — so every block whose take she had switched
+    /// previewed the take the note does NOT show. The everyday case, not a
+    /// race. Both now resolve exactly as `renderPost` does (chosen while it is
+    /// live, active and on this block, else the block's default while it is
+    /// live), which is the same rule the note itself renders by.
+    @Test func thePickerPreviewsTheTakeTheNoteShows() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "switched")
+            let opening = try ops.newBlock(in: post.id, text: "The default take.")
+            let spare = try ops.branchVariant(opening.block.id, from: opening.variant.id)
+            try ops.autosave(spare.id, text: "The take I chose.", charDelta: 0)
+            try ops.chooseVariant(opening.block.id, variantID: spare.id)
+
+            let shown = try db.read { try Queries.renderedText($0, containerID: post.id) }
+            #expect(shown == "The take I chose.", "non-vacuity: the note shows the chosen take")
+
+            let hits = try db.read { try Queries.notePickerNotes($0, query: "switched") }
+            #expect(hits.map(\.snippet) == ["The take I chose."],
+                    "the query overload previews what the note shows")
+            let byID = try db.read { try Queries.notePickerNotes($0, ids: [post.id]) }
+            #expect(byID.map(\.snippet) == ["The take I chose."],
+                    "…and so does the ids overload")
+        }
+    }
+
+    /// The fallback half of the same rule, in the shapes `renderPost` is
+    /// pinned on: an ARCHIVED chosen take falls back to the default (archive
+    /// hides a take from the fan, not a slot from its text) and a TOMBSTONED
+    /// one does too — where a bare `COALESCE(chosen, default)` would preview
+    /// the archived text and a blank line respectively.
+    @Test func thePickerFallsBackExactlyAsTheNoteDoes() throws {
+        try withOperations { ops, db in
+            let archived = try ops.createPost(title: "archived chosen")
+            let a = try ops.newBlock(in: archived.id, text: "The default take.")
+            let aSpare = try ops.branchVariant(a.block.id, from: a.variant.id)
+            try ops.autosave(aSpare.id, text: "The archived take.", charDelta: 0)
+            try ops.chooseVariant(a.block.id, variantID: aSpare.id)
+            try ops.archiveVariant(aSpare.id)
+
+            let dead = try ops.createPost(title: "dead chosen")
+            let d = try ops.newBlock(in: dead.id, text: "The surviving take.")
+            let dSpare = try ops.branchVariant(d.block.id, from: d.variant.id)
+            try ops.autosave(dSpare.id, text: "The doomed take.", charDelta: 0)
+            try ops.chooseVariant(d.block.id, variantID: dSpare.id)
+            try db.write { db in try Fixture.tombstone(db, table: "variant", id: dSpare.id) }
+
+            let rendered = try db.read { db in
+                (try Queries.renderedText(db, containerID: archived.id),
+                 try Queries.renderedText(db, containerID: dead.id))
+            }
+            #expect(rendered.0 == "The default take.", "non-vacuity: the note falls back")
+            #expect(rendered.1 == "The surviving take.")
+
+            let hits = try db.read { db in
+                try Queries.notePickerNotes(db, ids: [archived.id, dead.id])
+            }
+            let byID = Dictionary(uniqueKeysWithValues: hits.map { ($0.id, $0.snippet) })
+            #expect(byID[archived.id] == "The default take.")
+            #expect(byID[dead.id] == "The surviving take.")
+        }
+    }
+
     // MARK: - The Trash's snippet-group arm (item 17's delete-group honesty)
 
     @Test func aDeletedSnippetGroupRowsInTheTrashAndPutBackRevivesItWhole() throws {
