@@ -447,16 +447,25 @@ final class LibraryCatalogModel {
     /// `loadTagChips` shape exactly, generation guard included, because a
     /// second suspension point can otherwise land a stale query's cards
     /// (the round-3 MINOR that taught this file the rule).
+    /// **13u3 UNIT B widened it to the List mode** — her item 4: an untitled
+    /// row leads with the note's own first words, so the List mode needs
+    /// those words too. It asks for LESS than the Notes mode does, and the
+    /// plan says how much (`LibraryCardRead.plan`): only the rows that would
+    /// otherwise be a bare date, and never the book memberships, which that
+    /// row does not draw. A library of named notes pays nothing.
     func loadNoteCards(for postIDs: [String], generation: Int) async {
-        guard mode == .notes, !postIDs.isEmpty else {
-            if generation == searchGeneration, mode != .notes || postIDs.isEmpty {
-                noteCards = [:]
-            }
+        let plan = LibraryCardRead.plan(mode: mode, hits: hits)
+        // The passed ids remain the listing's own (the generation's subject);
+        // the plan narrows them, and can never widen past them.
+        let wanted = plan.ids.filter(Set(postIDs).contains)
+        guard !wanted.isEmpty else {
+            if generation == searchGeneration { noteCards = [:] }
             return
         }
         do {
+            let books = plan.books
             let cards = try await session.database.read { db in
-                try NoteCards.load(db, postIDs: postIDs)
+                try NoteCards.load(db, postIDs: wanted, includingBooks: books)
             }
             guard generation == searchGeneration else { return }
             noteCards = cards
@@ -467,7 +476,8 @@ final class LibraryCatalogModel {
     }
 
     /// The view calls this when the MODE changes (a mode switch does not
-    /// re-run the search, and switching INTO notes must fill the cards).
+    /// re-run the search, and switching INTO a mode that draws words must
+    /// fill them).
     func refreshNoteCards() async {
         await loadNoteCards(
             for: hits.filter { $0.kind == .post }.map(\.id),

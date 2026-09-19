@@ -43,6 +43,11 @@ nonisolated enum LibraryCopy {
     static func showingTheFirst(_ page: Int) -> String {
         "showing the first \(page) \u{2014} narrow the search"
     }
+
+    /// A note with no words in it yet — the Notes card's quiet second line
+    /// (13g's own literal, moved here at 13u3 UNIT B when the card's second
+    /// line stopped being "whatever the snippet was").
+    static let noTextYet = "No text yet"
 }
 
 

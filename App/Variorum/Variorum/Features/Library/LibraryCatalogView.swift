@@ -632,9 +632,13 @@ struct LibraryCatalogView: View {
 
     private func noteCard(_ hit: Queries.CatalogHit) -> some View {
         let card = model.noteCards[hit.id] ?? NoteCards.Card()
+        // 13u3 UNIT B (her item 4): what the card LEADS with — her title
+        // where she typed one, a daily entry's day, else the note's own
+        // first words. Derived at read time, never stored, nothing renamed.
+        let name = LibraryCardName.card(for: hit, leadingTexts: card.leadingTexts)
         return VStack(alignment: .leading, spacing: 2) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(hit.title)
+                Text(name.lead.text)
                     .font(tokens.body)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
@@ -657,11 +661,18 @@ struct LibraryCatalogView: View {
                         .lineLimit(1)
                 }
             }
-            Text(card.snippet.isEmpty ? "No text yet" : card.snippet)
-                .font(tokens.small)
-                .foregroundStyle(card.snippet.isEmpty ? tokens.faint : tokens.muted)
-                .lineLimit(2)
-                .multilineTextAlignment(.leading)
+            // The second line CARRIES ON from the lead (13u3 UNIT B): a card
+            // that leads with the note's own words never repeats them here,
+            // and never claims the note is empty when it has just said what
+            // is in it.
+            if let preview = LibraryCardName.previewLine(name) {
+                let empty = preview == LibraryCopy.noTextYet
+                Text(preview)
+                    .font(tokens.small)
+                    .foregroundStyle(empty ? tokens.faint : tokens.muted)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+            }
             // 13e E8: the same tags face the List row wears. Quiet on an
             // untagged card until the pointer arrives, so her
             // Apple-Notes-shaped list stays what it is at rest.
@@ -723,8 +734,14 @@ struct LibraryCatalogView: View {
             // `date` sort where the trailing stamp already says that day) and
             // the trailing stamp, which IS the sort's own (`sorted`).
             let stamps = LibrarySortFace.rowStamps(model.sort, for: hit)
+            // 13u3 UNIT B: the row leads with the same answer the card does —
+            // ONE composition, so the two modes can never call a note two
+            // different things (`LibrarySortFace`'s own reason, applied to
+            // the name).
+            let name = LibraryCardName.card(
+                for: hit, leadingTexts: model.noteCards[hit.id]?.leadingTexts ?? [])
             CatalogNoteLine(
-                tokens: tokens, title: hit.title,
+                tokens: tokens, title: name.lead.text,
                 date: stamps.listDay,
                 tags: model.postTags[hit.id] ?? [], allTags: tags.tags,
                 onTitleTap: { openHit(hit) },
@@ -899,8 +916,24 @@ struct LibraryCatalogView: View {
 ///     derived reads to the DRAWN window rather than to the answer.
 enum NoteCards {
     struct Card: Equatable {
-        var snippet: String = ""
+        /// **The note's opening blocks' text, in order** (13u3 UNIT B): the
+        /// ONE fact both of the card's lines are derived from — its LEAD
+        /// (`NoteCardFace`, when the note has no name of its own) and the
+        /// preview under it. Raw as the read returned them, because the
+        /// rendering, the trimming and the cap are the brain's and a
+        /// pre-chewed string would be a second rule.
+        var leadingTexts: [String] = []
         var books: [String] = []
+
+        /// **The first block with text in it** — the shape 13g shipped and
+        /// what the 13g pins still hold. A computed answer now rather than a
+        /// stored second fact, so the card's words and this one can never
+        /// disagree.
+        var snippet: String {
+            leadingTexts.lazy
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .first { !$0.isEmpty } ?? ""
+        }
     }
 
     /// How many leading blocks a snippet may consult before giving up.
@@ -908,8 +941,12 @@ enum NoteCards {
     /// How much text a snippet may carry (the row shows ~2 lines).
     nonisolated static let snippetLimit = 220
 
+    /// `includingBooks: false` reads the WORDS only — the List mode's shape
+    /// (13u3 UNIT B): its row has no book-names slot, so a listing that is
+    /// not drawing one must not pay for the membership reads (the smart walk
+    /// included). One flag rather than a second loader.
     nonisolated static func load(
-        _ db: Database, postIDs: [String]
+        _ db: Database, postIDs: [String], includingBooks: Bool = true
     ) throws -> [String: Card] {
         let json = String(
             decoding: (try? JSONEncoder().encode(postIDs)) ?? Data("[]".utf8),
@@ -938,15 +975,15 @@ enum NoteCards {
             arguments: [json])
         for row in snippets {
             let postID: String = row["post_id"]
-            guard result[postID]?.snippet.isEmpty ?? true else { continue }
-            let text = (row["text"] as String? ?? "")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !text.isEmpty else {
-                result[postID, default: Card()].snippet = ""
-                continue
-            }
-            result[postID, default: Card()].snippet = text
+            // Every leading slot the window returned, in its own order — the
+            // brain decides which of them is a name and which is the preview
+            // (13u3 UNIT B; this used to keep the first non-empty one and
+            // throw the rest away, which left a card that LEADS with a
+            // heading nothing to say underneath it).
+            result[postID, default: Card()].leadingTexts.append(row["text"] as String? ?? "")
         }
+
+        guard includingBooks else { return result }
 
         let books = try Row.fetchAll(
             db,
@@ -1094,6 +1131,12 @@ struct CatalogNoteLine: View {
             Text(title)
                 .font(tokens.body)
                 .foregroundStyle(tokens.ink)
+                // ONE line, as the Notes card's title has always been (13u3
+                // UNIT B): the row IS a single baseline — a title, a day, the
+                // chips and the stamp all sit on it — so a wrapped name would
+                // break the alignment those pins measure. It also makes the
+                // two modes agree about a long name: both truncate.
+                .lineLimit(1)
                 .baselineProbe("note.title", in: Self.probeSpace)
                 .onTapGesture(perform: onTitleTap)
             if let date {
