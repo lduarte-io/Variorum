@@ -360,6 +360,21 @@ nonisolated enum OpsRefusalCopy {
                 return "That isn't something the Trash can delete for good."
             case .lockedVariant:
                 return "That take is locked — unlock it or branch a new take."
+            // 13u3 UNIT H (the enum-dump straggler this unit's own door
+            // walked straight into). `deleteVariant` checks the CHOSEN
+            // pointer before the last-active guard, so the commonest press
+            // on a take card's Delete — the take the note is showing, and on
+            // a one-take block the ONLY take — raises this; it fell to
+            // `default:` and printed `Refused: variantIsChosen(id: "…")`,
+            // a raw enum with a UUID in it, on a door Write's panel has
+            // offered since Phase 7. The words answer BOTH readers, because
+            // one error serves both states: "choose another first" is the
+            // road on a fan, and on a block with nothing else to show the
+            // thing she means to delete is the block.
+            case .variantIsChosen:
+                return "The note shows this take \u{2014} choose another take first, and then "
+                    + "this one can go. (If it's the block's only take, it's the block "
+                    + "you want to delete.)"
             case .versionLinkNotFound:
                 return "These two notes aren't marked as versions — nothing to unmark."
             // 17o batch d (ledger row 27, J8): the mark door's own refusal

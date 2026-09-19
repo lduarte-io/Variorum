@@ -2888,7 +2888,7 @@ line is rewritten in the closing commit.
 | 0 · read the brief's named sections (plan banner · GOVERNANCE + P-1/P-2/P-6 · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the two adjudications · the code the brief names · `Tools/WalkKit/README.md`) | **DONE** — this commit |
 | 1 · the TRACE, measured on the pre-unit tree before a line changes (what the board's live card renders; where the delete door does and does not exist; what each refusal actually says) | **DONE** — the whole pin batch run against `4f069b1b` with NO production line changed (`DerivedData/13u3h-redonold.log`): **12 issues across 6 of 8 cells**; the table below |
 | 2 · the DOOR — one `TakeCardMenu` component rendered by the board's live cards (all four fan styles) and by Write's panel, with the registry declaration and the rendered-door oracle | **DONE** — this commit; 5 of the 8 cells green (2 door cells RED on old, the per-surface declaration cell RED on old); 104 neighbour tests in 12 suites green |
-| 3 · the refusal the new door will meet most — `variantIsChosen` — gets words (it falls to `default:` and dumps the raw enum with a UUID in it today) | PENDING |
+| 3 · the refusal the new door will meet most — `variantIsChosen` — gets words (it falls to `default:` and dumps the raw enum with a UUID in it today) | **DONE** — this commit; RED on old in two cells (the copy table and the model door, the latter printing `Refused: variantIsChosen(id: "00000000-…-000000000002")`) |
 | 4 · the WORDS — the takes lesson's two sentences + the ⋯ sweep of the seeder, held to the door by a pin that reads the row's own title | PENDING |
 | 5 · the walk (dev-store Debug, both voices, both appearances) with captures | PENDING |
 | 6 · finals (FULL Mac · tutorial spine · core · iOS build) | PENDING |
