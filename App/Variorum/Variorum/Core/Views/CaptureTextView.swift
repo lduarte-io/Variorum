@@ -280,6 +280,12 @@ struct CaptureTextView: NSViewRepresentable {
 
         func takeFocus() {
             guard let view, let window = view.window else { return }
+            // Re-asserting focus the box already holds is a no-op by guard,
+            // not by trust (13u3 ladder round 1, R1-6's caution): the
+            // resign/become cycle is the family where focus surprises live,
+            // and the third asker — the title chip handing the caret back —
+            // fires exactly when the box often still has it.
+            guard window.firstResponder !== view else { return }
             window.makeFirstResponder(view)
         }
 

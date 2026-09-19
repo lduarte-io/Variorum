@@ -240,6 +240,12 @@ struct QuickEntryBar: View {
                     tokens: tokens, suggestion: suggestion, adopted: box.titleFromFirstWords
                 ) {
                     box.titleFromFirstWords.toggle()
+                    // 13u3 ladder round 1, R1-6 (SPECULATIVE hardening — the
+                    // acceptance walk's unreproduced first-⏎ miss): deciding
+                    // about the name hands the caret straight back to the
+                    // words, so ⏎ files whatever held keys during the click.
+                    // A no-op when the box never lost them (takeFocus guards).
+                    focusRequest += 1
                 }
             }
             if let lastError = box.lastError {

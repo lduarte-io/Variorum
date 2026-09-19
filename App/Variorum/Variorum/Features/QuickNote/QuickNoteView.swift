@@ -183,6 +183,10 @@ struct QuickNoteView: View {
     @State private var windowID = UUID()
     @State private var theme: ThemeStore
     @State private var pad: QuickNotePad
+    /// The capture box's counted focus ask: 1 when the pad opens (the caret
+    /// lands in the words), bumped when the title chip hands it back (13u3
+    /// ladder round 1, R1-6).
+    @State private var focusRequest = 1
     /// The quit-finalize registration (the architect's ruling (c)).
     @State private var quitToken: UUID?
     @Environment(\.colorScheme) private var scheme
@@ -208,7 +212,7 @@ struct QuickNoteView: View {
                 text: $pad.text,
                 style: CaptureTextStyle(tokens: tokens),
                 maxHeight: nil,  // the pad IS a window: it takes the space
-                focusRequest: 1,  // the caret lands here when the pad opens
+                focusRequest: focusRequest,  // 1 at open; the chip bumps it
                 onFile: { fileAndClose() })
                 // WALK FIND 2: the pad draws the box's surface itself, so the
                 // inset is the HOST's — and it has to be the same one the
@@ -235,6 +239,11 @@ struct QuickNoteView: View {
                     tokens: tokens, suggestion: suggestion, adopted: pad.titleFromFirstWords
                 ) {
                     pad.titleFromFirstWords.toggle()
+                    // 13u3 ladder round 1, R1-6 (SPECULATIVE hardening — the
+                    // acceptance walk's unreproduced first-⏎ miss): deciding
+                    // about the name hands the caret straight back to the
+                    // words. A no-op when the box never lost them.
+                    focusRequest += 1
                 }
             }
             if let lastError = pad.lastError {

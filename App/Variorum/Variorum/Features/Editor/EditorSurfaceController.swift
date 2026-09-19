@@ -742,8 +742,20 @@ final class EditorSurfaceController {
     ///
     /// `displayed`: the shown take per block. Nil (⌘⇧M and the bulk doors) =
     /// whatever the surface shows at act time; the SHEET passes the ids its
-    /// list marks (13u3 UNIT G, R3-5 — R2-2's pattern on `runCarryAllMerge`),
-    /// so what she was shown is what joins.
+    /// list marks (13u3 UNIT G, R3-5 — R2-2's pattern on `runCarryAllMerge`).
+    ///
+    /// **What `displayed` binds, said exactly (13u3 ladder round 1, R1-5):**
+    /// only the CARRY-ALL road consumes it (`CarryAllMerge.compose` — which
+    /// take seeds each join, which ride whole). The PLAIN road
+    /// (`bringEveryTake: false`) joins through `ops.merge`, which resolves
+    /// each side from the STORE's rendered take at op time and never reads
+    /// this dictionary — its "what she was shown is what joins" promise is
+    /// held by the sheet's drift check (`refreshMergeRunIfDrifted`, run on
+    /// every preset confirm) plus the pinned equivalence of
+    /// `Queries.renderedVariantIDs` with `Operations.renderedVariant`,
+    /// modulo the recorded sub-ms confirm-to-transaction window. Do not
+    /// weaken that check on the belief that `displayed` fences the plain
+    /// road; it does not.
     @discardableResult
     private func runMergeChain(
         blockIDs: [String], bringEveryTake: Bool = true,
