@@ -306,7 +306,7 @@ touches her real store outside the pre-authorized refresh.**
 | 8 | UNIT G — the ceremony-sheet residuals (KnownIssues row 42) | **DONE 2026-09-19** — `c79860b0`…`91209567` + this record's close; the UNIT G RECORD is at the end of this file (the traced mechanisms · the red-on-old table, 11 issues across 4 cells on `25638746` · 13 pins incl. an anti-drift net over SIX rendered-take readers and an EXPLAIN seek pin · the walk's 14 captures in both voices, with the drift staged BY HAND through two dev instances on one store · both full-suite reds adjudicated on two trees · item 6's five verdicts). KnownIssues row 42 RESOLVED; QUESTIONS #124 opened |
 | 8b | UNIT H — the Takes board's live-card delete door + the lesson's truth (the E hand-up, adjudication 2 above) | **DONE 2026-09-19** — `14ae400c`…this record's close; the UNIT H RECORD is at the end of this file (the traced mechanisms, incl. a CORRECTION to the adjudication — the board's cards never had a ⋯, the F1 pass reached its article cell instead · the red-on-old table, 12 issues across 6 of 8 cells on `4f069b1b` · 9 pins in one new suite, incl. the PER-SURFACE declared⇔rendered guard the union walk could never make · the ⋯ sweep's second find, a row renamed at the Snippets ruling with a shipped pin holding the old name "verbatim" · the walk's 17 captures running the LESSON'S OWN experiment in both voices and both appearances · both full-suite reds adjudicated, one of them a NEW flake-list member · one breach of the green-per-commit rule, stated). QUESTIONS #125 opened |
 | 9 | The ladder — `fable-reviewer`, combined diff, standing rounds | NOT STARTED — named foci: UNIT B's one-time editor SPIN on deleteBackward (the frames in the UNIT B RECORD; the decoration pass is A1's neighbourhood); A1's geometry across the five host cells |
-| 10 | The orchestrator's walks + closeout ritual + the pre-authorized `/Applications` refresh (R-13u3-2) | NOT STARTED |
+| 10 | The orchestrator's walks + closeout ritual + the pre-authorized `/Applications` refresh (R-13u3-2) | WALK DONE 2026-09-19 (the acceptance-walk section below; spine PASSES) — closeout + refresh after the ladder |
 
 ## ENVIRONMENT TRAPS (every unit brief carries this section verbatim — the skill's rule)
 
@@ -3168,3 +3168,37 @@ menu is; the ⋯ sweep found a second stale sentence — a row renamed at the Sn
 shipped pin holding the old name in place "verbatim" — and that row is one constant now, quoted by
 the lesson and consumed by both menus that render it. **Ledger row 8b flipped in this commit.**
 Commits `14ae400c` → this one. QUESTIONS **#125** carries the two PROVISIONALs.
+
+## THE ORCHESTRATOR'S PHASE ACCEPTANCE WALK (2026-09-19 — hands-on, the dev-store Debug build at 13u3f/HEAD; captures `orch-01`…`orch-12` in `notes/plans/13u3-screens/`; quit by bundle identity, zero instances verified after)
+
+**VERDICT: THE PHASE'S SPINE PASSES IN USE.** One pass over the core flows, on top of the
+implementers' per-unit walks (each verified by record at its close):
+
+1. **C** — the shelf bar TEACHES its two keys on screen; a two-paragraph capture TYPED with ⇧⏎
+   filed on ⏎ and opened as **block 1/2** (the bulk rule) with the adopted title on the masthead
+   (`orch-02`…`orch-05`).
+2. **B** — the title-suggestion CHIP offered the first words, one click adopted (`orch-03`); the
+   Library's List and Notes cards lead per the rule with the 18h stamps intact (`orch-11/12`).
+3. **D** — ⌘S opened the name field (its two-key teaching line legible), a typed name filed, and
+   the quiet-bar receipt spoke it: *Committed "before the walk edit" — an immutable savepoint of
+   this take.* (`orch-06/07`).
+4. **A2** — the comments panel opened as ONE writing surface (the empty panel is all writing
+   area, caret live, ⏎/⌘⏎/⎋ taught in the footer); a comment typed straight in and filed with
+   ⌘⏎ (`orch-08/09`).
+5. **A1** — the filed comment rendered as a margin card IN THE GUTTER at the block's first line,
+   and the prose column's left edge is pixel-identical across `orch-05/07/10` — the one law,
+   watched happening.
+6. **F** — verified by the KEPT ARTIFACT read directly (`F-exports/F-after-callout-note.pdf`):
+   headings/bold/italic/strike/lists/code/links all RENDER; the one syntax survivor is exactly
+   #123(b)'s `> ` lead.
+7. **E · G · H** — accepted on their implementers' walk evidence + my record verification (E's
+   14 captures incl. the confirm-told-the-truth pair; G's hand-staged two-instance drift race;
+   H's 17 captures incl. the refusal and put-back), not re-staged: E/G need staged stores my
+   pass would only re-create, and H's door was traced by me at adjudication.
+
+**Two walk notes, recorded not fixed:** (a) after adopting the chip, my FIRST ⏎ did not file
+(the retry filed normally; ambiguous focus-vs-app, unreproduced — if the ladder finds a
+mechanism in the chip's focus handling, it is real; otherwise environment); (b) a card whose
+ADOPTED title equals its first words repeats them in the preview line — the carries-on dedupe
+covers the derived lead, and no ruling covers explicit-title-equals-opening; logged beside #119
+for her taste pass, not a defect.
