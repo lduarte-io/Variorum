@@ -160,6 +160,39 @@ struct TitleSuggestionChipTests {
         }
     }
 
+    /// **THE CHIP SHOWS THE NAME SHE WILL GET** — the walk's find: the whole
+    /// label went through `chromeLabel`, which lowercases in the Terminal
+    /// voice, so the chip read *name it “garden plans…”* over a note that
+    /// would be titled *“Garden plans…”*. Only the app's own words are
+    /// case-folded now; her prose is drawn verbatim.
+    ///
+    /// RED ON OLD (behavioural revert, verified): render the label as one
+    /// `chromeLabel` string again — i.e. drop `voicedLabel` and let
+    /// `VoicedChip` fold the whole thing — and the first expectation fails
+    /// under the Terminal voice.
+    @Test func theChipDrawsHerWordsVerbatimAndOnlyFoldsItsOwn() {
+        let suggestion = "Garden plans for the spring"
+        let terminal = VoiceTokens.terminalLight
+        #expect(terminal.chromeLabel(suggestion) != suggestion,
+                "premise: this voice WOULD fold her words — that was the defect")
+
+        for adopted in [false, true] {
+            let segments = TitleSuggestionChip.segments(
+                suggestion: suggestion, adopted: adopted)
+            let drawn = TitleSuggestionChip.rendered(segments, tokens: terminal)
+            #expect(drawn.contains(suggestion),
+                    "\(adopted): the chip shows the name she will actually get: \(drawn)")
+            // …and the app's own words still speak the voice.
+            #expect(segments.filter(\.voiced).allSatisfy {
+                drawn.contains(terminal.chromeLabel($0.text))
+            })
+        }
+
+        let chip = TitleSuggestionChip(
+            tokens: terminal, suggestion: suggestion, adopted: false, onToggle: {})
+        #expect(chip.label == "\(TitleSuggestionChip.offerLead)\u{201C}\(suggestion)\u{201D}?")
+    }
+
     /// **A NAME IS NOT A TRUNCATION.** A long opening is offered — and
     /// stored — whole to its word edge, without the card lead's ellipsis.
     @Test func aLongOpeningIsOfferedWithoutTheEllipsis() async throws {

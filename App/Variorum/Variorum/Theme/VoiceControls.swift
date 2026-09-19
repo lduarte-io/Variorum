@@ -76,10 +76,19 @@ struct VoicedChip: View {
     let text: String
     var on: Bool = false
     var action: (() -> Void)?
+    /// **A label built by the caller, for a chip whose words are not all the
+    /// app's** (13u3 UNIT B): `chromeLabel` LOWERCASES in the Terminal voice,
+    /// which is right for the chrome vocabulary and wrong for a chip that
+    /// quotes the author's own prose — a suggested title drawn
+    /// `name it “garden plans…”` would not be the title she gets. A caller
+    /// with prose in its label composes the `Text` itself and case-folds only
+    /// its own words; `text` stays the plain-string answer for tooltips and
+    /// accessibility.
+    var content: Text?
 
     var body: some View {
         Button { action?() } label: {
-            Text(tokens.chromeLabel(text))
+            (content ?? Text(tokens.chromeLabel(text)))
                 .font(tokens.small)
                 // A chip is a state WORD — one line, always (P-8's chrome
                 // class rule, the same one `VoicedButtonStyle` carries).

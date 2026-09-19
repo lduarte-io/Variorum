@@ -35,20 +35,65 @@ struct TitleSuggestionChip: View {
     let onToggle: () -> Void
 
     var body: some View {
-        VoicedChip(tokens: tokens, text: label, on: adopted, action: onToggle)
+        VoicedChip(
+            tokens: tokens, text: label, on: adopted, action: onToggle,
+            content: Self.voiced(segments, tokens: tokens))
             .help(adopted ? Self.adoptedHelp : Self.offerHelp)
             .accessibilityLabel(label)
     }
 
-    /// The chip's words. The name is shown in her own quotation marks so a
-    /// multi-word suggestion reads as one thing; the line truncates rather
-    /// than wrapping (the chrome class rule), and what she adopts is the
-    /// whole name whatever the chip had room to draw.
-    private var label: String {
-        adopted
-            ? "\u{2713} title: \u{201C}\(suggestion)\u{201D}"
-            : "name it \u{201C}\(suggestion)\u{201D}?"
+    // MARK: - The words
+
+    /// **One piece of the chip's label, and whose words it is.**
+    ///
+    /// The walk found this: the chip drew its whole label through
+    /// `chromeLabel`, which LOWERCASES in the Terminal voice — so the offer
+    /// read *name it “garden plans for the spring…”* over a note that would
+    /// be titled *“Garden plans…”*. The voice's rule is right for the app's
+    /// own words and wrong for hers, and a chip that shows a different name
+    /// from the one it will apply is worse than no chip.
+    ///
+    /// Split as data rather than assembled inline so the rule is pinnable: a
+    /// `Text` built by `+` is not something a test can read back.
+    struct Segment: Equatable {
+        let text: String
+        /// True ⇒ the app's own words, which the voice may case-fold.
+        let voiced: Bool
     }
+
+    var segments: [Segment] { Self.segments(suggestion: suggestion, adopted: adopted) }
+
+    static func segments(suggestion: String, adopted: Bool) -> [Segment] {
+        let name = Segment(text: "\u{201C}\(suggestion)\u{201D}", voiced: false)
+        return adopted
+            ? [Segment(text: adoptedLead, voiced: true), name]
+            : [Segment(text: offerLead, voiced: true), name,
+               Segment(text: offerTrail, voiced: true)]
+    }
+
+    /// What the chip actually DRAWS, as a string — the app's half through the
+    /// voice, hers untouched. (The `Text` the view uses is the same walk over
+    /// the same segments.)
+    static func rendered(_ segments: [Segment], tokens: VoiceTokens) -> String {
+        segments.map { $0.voiced ? tokens.chromeLabel($0.text) : $0.text }.joined()
+    }
+
+    private static func voiced(_ segments: [Segment], tokens: VoiceTokens) -> Text {
+        segments.reduce(Text("")) { whole, segment in
+            whole + Text(segment.voiced ? tokens.chromeLabel(segment.text) : segment.text)
+        }
+    }
+
+    /// The plain-string answer, unvoiced — the tooltip's and the
+    /// accessibility label's. The name is in her own quotation marks so a
+    /// multi-word suggestion reads as one thing; the chip's line truncates
+    /// rather than wrapping (the chrome class rule), and what she adopts is
+    /// the whole name whatever it had room to draw.
+    var label: String { segments.map(\.text).joined() }
+
+    static let offerLead = "name it "
+    static let offerTrail = "?"
+    static let adoptedLead = "\u{2713} title: "
 
     static let offerHelp =
         "Use these first words as the note's title. Nothing is applied unless you click \u{2014} "
