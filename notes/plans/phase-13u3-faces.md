@@ -737,3 +737,15 @@ Expected red: `aCommentEditsInPlaceAndStoresTheTrimmedText`. Expected GREEN unde
 no-write cell, the emptied cell, the escape cell, the receipts cell, the drafts-survive cell, the
 seal cell, and all five brain cells — they pin what the redesign DECIDED, not a defect.
 
+**RED-ON-OLD, MEASURED (2026-09-18).** The revert applied to the tree at `7bf2a7ed`, the two
+suites run, the tree restored by `git checkout` of `CommentComposition.swift` and re-verified:
+**13/13 green** before, **13 tests / 2 issues, 2 cells red** under the revert, **13/13 green**
+after. No cell passed on both sides *and* claims to be a bug pin; the eleven that stayed green are
+listed above as the redesign's own decisions and are not claimed as reds.
+
+| pin | under the revert | the number |
+|---|---|---|
+| `aCommentEditsInPlaceAndStoresTheTrimmedText` | **RED** | through the REAL op: the store held `"  quieter ending \n"` where the add road would have stored `"quieter ending"` — her own keystrokes, two different rows, depending only on which box she typed them in |
+| `aCommitWritesOnlyWhatWouldChange` | **RED** | the brain's own cell: `.save(" new ")` vs `.save("new")` |
+| the other 11 cells | green under the revert, by construction | they pin what this redesign DECIDED (what ⌘⏎ files, what an emptied comment means, what ⎋ undoes, which drafts survive an arrival, which class each message carries, what the seal does) — a face redesign is not a bug pin, and none of them is claimed as one |
+
