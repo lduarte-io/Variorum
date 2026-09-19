@@ -267,3 +267,13 @@ with their pins), and round 2 re-reviews the fixes. R1-1's fix wants care at the
 settle-hop routing must not starve the arrow-key indicator path); R1-2 and R1-3 are three-line
 fixes with clean red-on-old pins as specified; R1-4 is two worded cases; R1-5 is one sentence;
 R1-6 is optional hardening, honestly labelled speculative.
+
+---
+
+## FIX PASS (this reviewer, 2026-09-19 — dispositions + evidence appended per piece)
+
+**ANNOUNCED BEHAVIOURAL REVERT (the checkpoint protocol):** to measure
+`aRenameThatWritesNothingSpeaksNoReceipt` red-on-old, the pane half of the R1-2 fix is reverted
+in place on the committed tree (BlockHistoryPane.rename's receipt made unconditional again — the
+shipped shape) with the OP fix left standing, the suite run, and the file restored by
+`git checkout` against the R1-2 fix commit. Pre-revert state committed (the R1-2 commit).
