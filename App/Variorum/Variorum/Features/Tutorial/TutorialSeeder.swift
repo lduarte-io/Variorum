@@ -413,9 +413,15 @@ enum TutorialSeeder {
             // lesson WT-1 minted.
             + "\u{2318}\u{21E7}N pops the QUICK NOTE: a small floating pad that stays above "
             + "your writing, also reachable from the \u{270F}\u{FE0E} in the system menu bar "
-            + "while you are in another app entirely. Return there makes a new line, not "
-            + "a new note; close it (or \u{2318}\u{23CE}) and what you wrote is kept as a "
-            + "note, tagged \u{201C}quicknote\u{201D} \u{2014} the smart Quicknotes book on "
+            // 13u3 UNIT C (her R-13u-4): this sentence taught the model the
+            // ruling replaced — "Return there makes a new line, not a new
+            // note". Both capture boxes answer the same two keys now.
+            + "while you are in another app entirely. \u{23CE} there FILES what you wrote "
+            + "and closes the pad; \u{21E7}\u{23CE} adds another paragraph, so a capture "
+            + "can be as long as the thought is \u{2014} the same two keys the new-note "
+            + "box on the shelf answers. Closing the pad (or \u{2318}\u{23CE}) files it "
+            + "too, and what you wrote is kept as a note, tagged "
+            + "\u{201C}quicknote\u{201D} \u{2014} the smart Quicknotes book on "
             + "the shelf collects it, and taking the tag off sends it back to the Pool.",
 
             "\u{2318}/ opens the Shortcuts & Dictionary helper, and its \u{201C}Windows & "

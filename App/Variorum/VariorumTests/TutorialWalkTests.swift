@@ -361,6 +361,27 @@ struct TutorialBookShapeTests {
         }
     }
 
+    /// **13u3 UNIT C (her R-13u-4):** the lesson taught the capture model
+    /// this ruling replaced — *"Return there makes a new line, not a new
+    /// note"* — which is now exactly backwards on both Mac capture boxes.
+    /// RED ON OLD: the new-line sentence.
+    @Test func theWorkspaceLessonTeachesTheCaptureKeys() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let workspace = try await db.read {
+                try lessonID($0, bookID: bookID, "the workspace")
+            }
+            let stored = try await db.read {
+                try Queries.renderedText($0, containerID: workspace)
+            }
+            #expect(stored.contains("\u{23CE} there FILES what you wrote"),
+                    "⏎ files the capture (R-13u-4)")
+            #expect(stored.contains("\u{21E7}\u{23CE} adds another paragraph"),
+                    "…and ⇧⏎ is the paragraph key")
+            #expect(!stored.contains("makes a new line, not a new note"),
+                    "the retired model is no longer taught")
+        }
+    }
+
     /// The Act 10 correction round, batch G — **row 85 (A's residue):** the
     /// lesson taught the RETIRED masthead fold ("＃ folds the note's tag
     /// cards away and back") and a four-door bar. It teaches the ＃ door's

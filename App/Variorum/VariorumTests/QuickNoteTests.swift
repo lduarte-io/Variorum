@@ -449,6 +449,23 @@ struct QuickNoteWordTests {
         #expect(QuickNoteCopy.filedNote.contains("Quicknotes"))
     }
 
+
+    /// **13u3 UNIT C (her R-13u-4):** the same entry taught the capture
+    /// model the ruling replaced. RED ON OLD: the new-line sentence.
+    @Test func theHelperDictionaryTeachesTheCaptureKeys() throws {
+        let entry = try #require(
+            HelperView.entries.first { $0.term == "quick note" })
+        #expect(entry.definition.contains("\u{23CE} files what you wrote"))
+        #expect(entry.definition.contains("\u{21E7}\u{23CE} adds another paragraph"))
+        #expect(!entry.definition.contains("makes a new line"),
+                "the retired model is no longer taught")
+        // …and the KEY list carries the pair too, since that tab is where
+        // someone looks for a key rather than for a word.
+        #expect(HelperView.groups.flatMap(\.items).contains {
+            $0.keys.contains("\u{21E7}\u{23CE}") && $0.does.contains("paragraph")
+        }, "the shortcuts tab names ⇧⏎ in a capture box")
+    }
+
     /// DISCRIMINATING REVERT (verified): restore the pre-fix entry text
     /// ("…keeps what you wrote as a new note in the Pool.") — this fails on
     /// the "Quicknotes" expectation. Restored, checksum-matched.

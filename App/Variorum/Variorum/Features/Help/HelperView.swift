@@ -183,6 +183,14 @@ struct HelperView: View {
             // outside the app is exactly the key she most needs written down.
             ("⌃⌥⌘N", "the quick note from ANY app — Variorum need not be in front "
                 + "(the menu-bar \u{25FB} does the same with a click)"),
+            // 13u3 UNIT C (her R-13u-4): the two keys INSIDE a capture box —
+            // the quick-note pad and the shelf/Library new-note box answer
+            // the same pair, which is the whole point of the ruling.
+            ("\u{23CE} / \u{21E7}\u{23CE} in a capture box",
+             "\u{23CE} files what you have written \u{2014} the quick note keeps it and "
+                + "closes; the new-note box on the shelf files it and opens it. "
+                + "\u{21E7}\u{23CE} adds another paragraph instead, so a capture can be "
+                + "as long as the thought is"),
             ("View ▸ Open Beside", "put a second note beside this one (right-click a "
                 + "note row for that note; the menu takes the most recent other one)"),
             ("View ▸ Close Split", "fold the window back to one pane"),
@@ -416,10 +424,14 @@ struct HelperView: View {
         ("quick note",
          "A small floating pad for catching a thought — ⌘⇧N, File ▸ Quick Note, the "
          + "✏︎ in the system menu bar, or \u{2303}\u{2325}\u{2318}N, which reaches you "
-         + "from any app without a click. Return makes a "
-         + "new line, not a new note; closing it (or ⌘⏎) keeps what you wrote as a new "
-         + "note, tagged \u{201C}quicknote\u{201D} — the smart Quicknotes book on the "
-         + "shelf collects it, and taking the tag off sends it back to the Pool."),
+         // 13u3 UNIT C (her R-13u-4): this sentence taught the model the
+         // ruling replaced — "Return makes a new line, not a new note".
+         + "from any app without a click. \u{23CE} files what you wrote and closes the "
+         + "pad; \u{21E7}\u{23CE} adds another paragraph, so a capture can hold as many "
+         + "as the thought needs; closing it (or \u{2318}\u{23CE}) files it too. What you "
+         + "wrote is kept as a new note, tagged \u{201C}quicknote\u{201D} — the smart "
+         + "Quicknotes book on the shelf collects it, and taking the tag off sends it "
+         + "back to the Pool."),
     ]
 
     private var dictionaryTab: some View {
