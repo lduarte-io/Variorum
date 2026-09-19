@@ -2279,10 +2279,10 @@ same commit.
 | # | piece | status |
 |---|---|---|
 | 0 | the record + LIVE STATUS | **DONE** |
-| 1 | THE TRACE — the shipped PDF path, mechanism named, and the RED-ON-OLD measured on it | NOT STARTED |
-| 2 | the ONE reading face: `PageComposer`'s attributed applications hoisted to a shared brain, its duplicate heading/trait rules collapsed onto `MarkdownFace` | NOT STARTED |
-| 3 | the PDF path built through that brain + its pins (no raw syntax; heading/bold/list/code runs) | NOT STARTED |
-| 4 | the BYTE-FENCES pinned (`.md` export byte-identity on a fixture corpus · `renderedText` untouched · the Alternates section · the callout→blockquote mapping) | NOT STARTED |
+| 1 | THE TRACE — the shipped PDF path, mechanism named, and the RED-ON-OLD measured on it | **DONE** — 6 of 8 cells RED with 31 issues on the shipped rendering; the log lines are in the record |
+| 2 | the ONE reading face: `PageComposer`'s attributed applications hoisted to a shared brain, its duplicate heading/trait rules collapsed onto `MarkdownFace` | **DONE** — `Theme/MarkdownReadingFace.swift`; the paged reader's own 3 suites 16/16 green beside it |
+| 3 | the PDF path built through that brain + its pins (no raw syntax; heading/bold/list/code runs) | **DONE** — 10/10 green in the new suite |
+| 4 | the BYTE-FENCES pinned (`.md` export byte-identity on a fixture corpus · `renderedText` untouched · the Alternates section · the callout→blockquote mapping) | **DONE** — the two fence cells were GREEN on both sides, which is what a fence is |
 | 5 | QUESTIONS — the PROVISIONAL calls + the next-free marker moved | NOT STARTED |
 | 6 | the walk + captures (both PDFs opened and screenshotted; the `.md` diff), the FULL Mac suite, tutorial spine, iOS build | NOT STARTED |
 

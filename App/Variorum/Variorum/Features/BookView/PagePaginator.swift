@@ -232,13 +232,20 @@ enum PageComposer {
         // The rendered face: paragraph facts first (a heading's size, a list
         // line's hanging indent), then the character runs on top, so a bold
         // word inside a heading keeps the heading's size.
+        //
+        // 13u3 UNIT F: the two appliers MOVED to `Theme/MarkdownReadingFace`
+        // — byte-identical, and now reachable by the PDF exporter, which is a
+        // reading surface with even less gesture than this one and had been
+        // drawing her markdown raw. The page's values are unchanged: the
+        // voice's ink, the system link colour, this page's own code tint.
+        let face = MarkdownReadingFace.Style(
+            body: typography.body, lineSpacing: typography.lineSpacing,
+            ink: ink, link: .linkColor, codeTint: codeTint)
         for (range, line) in lineStyles {
-            applyLineStyle(line, to: bodyString, range: range, typography: typography)
+            MarkdownReadingFace.applyLineStyle(line, to: bodyString, range: range, style: face)
         }
         for (range, run) in runs {
-            applyRun(
-                run, to: bodyString, range: range, typography: typography, ink: ink,
-                codeTint: codeTint)
+            MarkdownReadingFace.applyRun(run, to: bodyString, range: range, style: face)
         }
         result.append(bodyString)
         // Shifted past the chrome, and BOUNDS-GUARDED for the same reason the
@@ -268,93 +275,17 @@ enum PageComposer {
     }
 
     // MARK: - The rendered face (13g batch 4 — L11)
-
-    /// A heading is a SIZE (F-3), a list line is a hanging indent so a
-    /// wrapped item lines up under its own words. Both are paragraph facts,
-    /// which is exactly how the transform models them.
-    private static func applyLineStyle(
-        _ line: MarkdownRendering.Line, to string: NSMutableAttributedString,
-        range: NSRange, typography: PageTypography
-    ) {
-        let style = line.style
-        guard range.length > 0, range.upperBound <= string.length else { return }
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.setParagraphStyle(
-            string.attribute(.paragraphStyle, at: range.location, effectiveRange: nil)
-                as? NSParagraphStyle ?? .default)
-        switch style {
-        case .body:
-            return
-        case .heading(let level):
-            let scale: CGFloat = level == 1 ? 1.6 : (level == 2 ? 1.35 : 1.15)
-            let size = (typography.body.pointSize * scale).rounded()
-            let descriptor = typography.body.fontDescriptor.withSymbolicTraits(
-                typography.body.fontDescriptor.symbolicTraits.union(.bold))
-            let font = NSFont(descriptor: descriptor, size: size)
-                ?? NSFont(descriptor: typography.body.fontDescriptor, size: size)
-                ?? typography.body
-            string.addAttribute(.font, value: font, range: range)
-            paragraph.paragraphSpacingBefore = typography.lineSpacing * 2
-        case .bullet, .checkbox:
-            let space = (" " as NSString)
-                .size(withAttributes: [.font: typography.body]).width
-            // 13k K8: a NESTED item sits in one step per level. The step is
-            // the width of the `- ` lead the transform removed, so the page
-            // reproduces the nesting the stored text describes — and it is
-            // CLAMPED (ruled) so a runaway nest cannot push words off a
-            // fixed page, while the stored text stays uncapped.
-            let level = min(line.indentLevel, MarkdownRendering.maxDrawnIndentLevel)
-            let nest = space * 2 * CGFloat(level)
-            let indent = space * 2.5
-            paragraph.firstLineHeadIndent += indent + nest
-            paragraph.headIndent += indent * 2 + nest
-        }
-        string.addAttribute(.paragraphStyle, value: paragraph, range: range)
-    }
-
-    private static func applyRun(
-        _ run: MarkdownRendering.Run, to string: NSMutableAttributedString,
-        range: NSRange, typography: PageTypography, ink: NSColor,
-        codeTint: NSColor?
-    ) {
-        guard range.length > 0, range.upperBound <= string.length else { return }
-        let existing = string.attribute(.font, at: range.location, effectiveRange: nil)
-            as? NSFont ?? typography.body
-        var traits = existing.fontDescriptor.symbolicTraits
-        if run.emphasis.contains(.bold) { traits.insert(.bold) }
-        if run.emphasis.contains(.italic) { traits.insert(.italic) }
-        if run.emphasis.contains(.code) {
-            string.addAttribute(
-                .font,
-                value: NSFont.monospacedSystemFont(ofSize: existing.pointSize, weight: .regular),
-                range: range)
-            // 13k K10: the chip, hugging exactly the code run. Read hides the
-            // backticks (F-5), so here the run IS the span — which is why the
-            // editing face tints markers and this one has none to tint.
-            if let codeTint {
-                string.addAttribute(.backgroundColor, value: codeTint, range: range)
-            }
-        } else if traits != existing.fontDescriptor.symbolicTraits {
-            let descriptor = existing.fontDescriptor.withSymbolicTraits(traits)
-            string.addAttribute(
-                .font, value: NSFont(descriptor: descriptor, size: existing.pointSize) ?? existing,
-                range: range)
-        }
-        if run.emphasis.contains(.strikethrough) {
-            string.addAttribute(
-                .strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: range)
-            string.addAttribute(.strikethroughColor, value: ink, range: range)
-        }
-        if run.url != nil {
-            // A page is drawn by CoreText, which has no link handling of its
-            // own — the colour is the affordance and `ComposedPost.links` is
-            // the hit map (`PageFrameNSView.mouseDown`).
-            string.addAttribute(.foregroundColor, value: NSColor.linkColor, range: range)
-            string.addAttribute(
-                .underlineStyle, value: NSUnderlineStyle.single.rawValue, range: range)
-            string.addAttribute(.underlineColor, value: NSColor.linkColor, range: range)
-        }
-    }
+    //
+    // MOVED at 13u3 UNIT F to `Theme/MarkdownReadingFace.swift`, byte for
+    // byte, because the PDF exporter needed the same translation and a second
+    // copy of it would have been the drift class this file's own header
+    // argues against ("two layout engines asked the same question at
+    // different times are two chances to disagree"). The page's call site
+    // above supplies exactly the values these functions used to read off
+    // `PageTypography` + `ink` + `codeTint`; a link is still `NSColor
+    // .linkColor` here, because a page is drawn by CoreText, which has no
+    // link handling of its own — the colour is the affordance and
+    // `ComposedPost.links` is the hit map (`PageFrameNSView.mouseDown`).
 }
 
 /// One post's pages, sliced lazily and cached.
