@@ -1216,7 +1216,7 @@ the HOISTED brain underneath its existing face, unchanged in behaviour.
 | 4 | The hand-off on BOTH Mac capture doors + the integration pins | DONE (this commit) — **42 tests in 4 suites passed** (the 25 new door pins + `QuickEntryBarTests` and `QuickNoteMintTests` riding UNMODIFIED) |
 | 5 | QUESTIONS #127 (the PROVISIONALs — seven lettered calls) | DONE (this commit) |
 | 4b | **THE WALK'S FIRST FINDING, fixed before the walk finished** — the capture boxes substitute typed quotes, so a hand-typed `{t:"…"}` arrived CURLY and never parsed | DONE (this commit) — measured by hexdump, `isQuote` accepts `"` · `“` · `”`, **31 tests in 2 suites** green |
-| 6 | The walk on the dev-store Debug build, captured | IN-PROGRESS — the smart book is staged and the shelf capture landed tagged and collected; re-walking the title half on the fixed build |
+| 6 | The walk on the dev-store Debug build, captured | DONE (this commit) — 34 captures + 23 crops, BOTH doors, both voices and both appearances, the table below |
 | 7 | Closing suites + iOS build + the ledger's C1 row | NOT-STARTED |
 
 ### THE PARSE RULE'S EDGE TABLE
@@ -1325,3 +1325,61 @@ never by a row. That pin is how "no routing machinery" is stated in behaviour ra
 | `thePadFilesATitledTaggedNoteWithTheTokensGone` | pad | the same rule at the other door — her tag rides BESIDE the pad's standing `quicknote` filing |
 | `thePadsCaptureOfNothingButTokensFilesNothing` | pad | the pad's own empty branch |
 | `aRefusedPadKeepsTheWholeCaptureTokensIncluded` | pad | a refusal keeps her capture BYTE-INTACT, tokens and all — the parse never touched the box |
+
+### EVIDENCE — THE WALK (the unit closes on USE, not on pins)
+
+**Build:** `App/Variorum/DerivedData/13u4c1/Build/Products/Debug/Variorum.app`
+(`io.lduarte.Variorum.debug`, the fenced dev store). `pgrep -fl 'Variorum.app/Contents/MacOS'`
+was checked at the start — **ZERO instances; hers was not running at any point** — and each dev
+instance was quit **by identity** (`tell application id "io.lduarte.Variorum.debug" to quit`),
+never by a keystroke (the 13u3 breach's walker law), with `pgrep` re-checked after every quit and
+at the end. `/Applications/Variorum.app` was never touched. Captures:
+`notes/plans/13u4-screens/c1/` (gitignored) — 34 window captures plus `c1/crops/` with the 23
+read crops named below.
+
+**Staged first, so the book could not be accused of following the capture:** a `dream` tag
+(Settings ▸ Tags ▸ New Tag) and a SMART book **dream journal** (Shelf ▸ + new book ▸ Create Smart
+Book ▸ Edit Filter… ▸ Tagged any of: dream). The shelf row then read `dream journal  #dream ·
+smart` with no notes in it.
+
+| # | Step | What the app did | Capture |
+|---|---|---|---|
+| 1 | The smart book staged and keyed on `#dream`, empty | the shelf row shows the key it collects by | `crops/11-book-keyed-on-dream.png` |
+| 2 | **The shelf's quick-entry bar**, typed: `{t:"Ocean dream"} Had a weird dream about the ocean {#dream}` | the box holds exactly what she typed — **and the title chip offers the RAW opening**, the seam #127(e) records | `crops/20-TYPED-BOTH-TOKENS.png` |
+| 3 | **⏎** | **THE UNIT, IN USE**: the note opens **titled "Ocean dream"**, its body reads `Had a weird dream about the ocean` — both tokens gone, no stray space — the tag chip reads `dream ×`, and the masthead's book line reads **`~/dream journal`** | `crops/21-TITLED-TAGGED-TOKENS-GONE.png` |
+| 4 | The membership chip | *"This note appears in 1 book: dream journal"* | `22-book-collects.png` |
+| 5 | The book itself | **dream journal · smart book · 2 notes** — and this one capture carries the walk's finding AND its fix side by side: the PRE-FIX note (`2026-09-20`, whose body still reads `{t:”Ocean dream”} Had a weird dream about the ocean` — the title token filed as text) beside the POST-FIX one (`Ocean dream`, body clean). Both were collected, because both tags applied | `crops/23-book-listing.png` |
+| 6 | **The quick-note pad** (⌘⇧N), typed `{t:"Leg day"} squats and a long walk {#health/workout}`, ⏎ | the pad filed and closed; ⌘K finds the note by the name the token gave it | `24-pad-typed.png`, `crops/26-palette.png` |
+| 7 | That note | **Leg day**, `~/quicknotes`, chips **`workout ×`** (the leaf, K3's grammar) **and `quicknote ×`** — her token rides BESIDE the pad's standing filing — body `squats and a long walk` | `crops/27-PAD-NOTE-TITLED-AND-TAGGED.png` |
+| 8 | A malformed brace and a bare hashtag: `a thought {#unclosed and a bare #hashtag` | files **byte-intact**, no tag applied, *in no book* | `crops/28-MALFORMED-AND-BARE-HASHTAG-FILE-AS-TEXT.png` |
+| 9 | **STUDY voice** (Settings ▸ Appearance), the same capture shape | **Second dream** · in dream journal · `dream ×` · `the sea again` — identical in the second voice | `crops/31-STUDY-VOICE.png`, `crops/32-study-typed.png`, `crops/33-STUDY-VOICE-LANDED.png` |
+| 10 | **DARK** (`appearanceChoice dark`, relaunch), Study voice | **Dark dream** · in dream journal · `dream ×` · `the black sea` — the same on the black room | `crops/35-DARK-STUDY-LANDED.png` |
+| 11 | **THE POSTURE**: `a thought worth keeping {#///}` | **the note filed** (`a thought worth keeping`, block 1/1, 4w) and the toast reads *"The note was filed — the tag “///” didn't apply. Type a tag name — “/” makes a hierarchy (life/goals)."* — filing never blocked on the token | `crops/36-REFUSAL-NOTE-STILL-FILED.png` |
+
+**THE WALK'S FINDING, which no pin could have caught** (piece 4b, fixed and re-walked above):
+step 3 on the FIRST pass landed the note tagged and collected but **untitled**, its body still
+carrying `{t:”Ocean dream”}` as visible text. The Mac capture boxes apply AppKit's automatic
+quote substitution, so the token she types arrives with U+201D curly quotes — measured, not
+inferred: `osascript … get value of text areas …` piped through `xxd` printed
+`7b 74 3a e2 80 9d 58 e2 80 9d 7d` for a typed `{t:"X"}`. A pin types the characters it means, so
+the suite was green on a rule the door could never satisfy. The brain now accepts `"` · `“` · `”`
+(opener and closer independently); the phone will need nothing extra when its face lands, since
+iOS substitutes the same way. Turning substitution OFF in the boxes was the alternative and was
+rejected: it would change what HER PROSE looks like in every capture to make one token work.
+
+**Dev-store state left as found:** voice back to **Terminal** (verified in Settings ▸ Appearance,
+`37-voice-restored.png`), `appearanceChoice` back to **system** (verified by `defaults read`),
+zero instances. Left in the dev store as this walk's fixtures, as every walk's are: the `dream`
+tag, the **dream journal** smart book, and five notes (`Ocean dream`, `Second dream`,
+`Dark dream`, `Leg day`, and two dated `2026-09-20` notes — the pre-fix one and the malformed-brace
+one). One accidental edit was made and **undone**: a mis-measured sidebar click in the Study voice
+opened her starred fixture note and `{t:"X"} hello` was typed into it; three ⌘Z presses returned
+it to `the quick brown foxone line. two line. three.`, verified by reading the block's
+accessibility value afterwards. Recorded rather than papered over.
+
+**A walker fact for the next session** (`Tools/WalkKit/README.md` at its next touch): **the
+capture boxes substitute typed quotes** (U+201D), so a walk that types a quoted token and reads
+the screenshot cannot tell straight from curly — read the box's AX value and `xxd` it. And the
+shelf's row heights differ enough between the voices that the quick-entry bar's y moves by ~70
+screen points between Terminal and Study: re-read it from a capture after every voice flip (the
+13u3 UNIT F fact, met again the hard way).
