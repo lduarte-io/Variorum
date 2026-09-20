@@ -401,3 +401,63 @@ your FIRST commit (per-piece lines: DONE (hash) · IN-PROGRESS — exactly what 
 NOT-STARTED; unverified claims marked PENDING), flip the ledger's E1 row in your closing commit,
 and name every seam file your diff touches (the ladder's Fable reviewer reads that list). The
 checkpoint protocol in CAST & DISCIPLINE binds you from the first commit.
+
+---
+
+## UNIT E1 RECORD — EMPTY BLOCKS CHAIN (item 3, R-13u4-2)
+
+**WHAT THIS UNIT DID NOT DO (the record's first line):** nothing outside the typed Return's
+empty-block arm. No other unit's work (E2's ⌘⌫ seam defect, E3's merge join, the restyle spine)
+was touched; `Sources/VariorumCore/` is untouched (zero operations-layer change — the mint rides
+the shipped `newBlock` door); `Sources/VariorumCore/Sync/` is untouched; no schema, no migration;
+no lesson copy edited (see "Judgment calls" below for why); the phone's Return model is unchanged
+(a MOBILE PARITY candidate, named below for the closeout).
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The record + the traced mechanism + `.gitignore` for `13u4-screens/` | IN-PROGRESS |
+| 2 | The pins written to the ruling (RED on the pre-change tree, recorded) | NOT-STARTED |
+| 3 | The brain change (`TypedReturn`) + the dispatch + the canon delta (AppSpec §7) | NOT-STARTED |
+| 4 | The walk on the dev-store Debug build, captured | NOT-STARTED |
+| 5 | Closing suites + the ledger's E1 row | NOT-STARTED |
+
+### THE MECHANISM, TRACED (read before the diff — what changes and what cannot)
+
+**The shipped arm.** `TypedReturn.act` (`App/Variorum/Shared/EditorBrain/TypedReturn.swift`)
+walks the tiling for the caret's entry and answers `.nothing` at `if entry.length == 0` — U-1's
+"nothing in an empty block", which R-13u4-2 supersedes. `.nothing` is consumed silently by
+`EditorSurfaceController.runTypedReturnAct`'s `case .content, .nothing:` and no store write
+happens. The decision is read TWICE per keystroke (at the key, `EditorViewModel.runTypedReturn`,
+to answer "is this key mine?"; and again at the act's own turn, re-derived) — one function, so
+the two readings cannot drift.
+
+**The change.** That one arm answers `.emptyBlock(edge: .below, entryIndex: i, blockID:
+entry.blockID, closingEmptyTail: false)` instead — the SAME verdict the end-of-a-block caret
+already produces, so the act runs through the shipped body `insertEmptyBlock(edge:.below)` →
+`ops.newBlock(in: postID, text: "", at: .after(blockID))` → the `.divide` seam. Chaining is free:
+the act re-derives at its own turn, so the second ⏎ sees the block the first one made and mints
+below THAT one, caret in it.
+
+**Why no Operations-layer change is needed (the brief's STOP condition, checked):** the road is
+already live and shipped — ⌘⇧⏎ (`insertBlockBelowCaret`) mints from an empty block today through
+exactly this body; an empty block holds one live take with `working_text = ''` (legal since
+Phase 1, I10 satisfied); and `StructuralSeamEdit.derive`'s `.divide` arm is arithmetically total
+over a zero-length source (`prefixLength 0 <= oldRange.length 0`; the retained-bytes check reads
+`"" == ""`), so the differential road lands and `applySeamEdit` skips the zero-length attribute
+run (identity for an empty block lives in the index, exactly as for every other empty block the
+app already mints). The DEBUG identity oracle re-checks the landed surface either way.
+
+**`.nothing` becomes unreachable** — the only site that returned it is the arm being changed. It
+is REMOVED rather than left dead, per this repo's own recorded doctrine ("a case that can never
+be returned is the drift class", the `noDailyBook` retirement, AppSpec §9); the switch in
+`runTypedReturnAct` loses its arm with it.
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
+
+PENDING until piece 3 lands.
+
+### EVIDENCE
+
+PENDING.
