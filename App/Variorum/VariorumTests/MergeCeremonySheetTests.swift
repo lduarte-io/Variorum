@@ -71,12 +71,15 @@ struct MergeCeremonySheetTests {
             #expect(state.secondBlockID == slots[1].blockID)
             #expect(state.firstTakes.count == 1)
             #expect(state.secondTakes.count == 2)
-            // Pre-paired: the two RENDERED takes, canon join (bare edges
-            // here ⇒ a single space).
+            // Pre-paired: the two RENDERED takes, on the DOOR's default
+            // join — the rendering join since her R-13u4-3 (this read
+            // `.space`, "bare edges here ⇒ a single space", before 13u4
+            // UNIT E3). `space` and `nothing` stay one click away in the
+            // pairing row's control, which is the ruling's own escape.
             #expect(state.pairings.count == 1)
             #expect(state.pairings[0].firstVariantID == slots[0].variantID)
             #expect(state.pairings[0].secondVariantID == slots[1].variantID)
-            #expect(state.pairings[0].join == .space)
+            #expect(state.pairings[0].join == .newline)
             #expect(state.canConfirm, "⏎ works out of the box — the default guarantees I10")
         }
     }
@@ -108,7 +111,7 @@ struct MergeCeremonySheetTests {
 
             #expect(h.model.mergeCeremony == nil, "the sheet dismisses on landing")
             let merged = try h.storeSlots()
-            #expect(merged.map(\.text) == ["Alpha one. Beta two."])
+            #expect(merged.map(\.text) == ["Alpha one.\nBeta two."])
             #expect(merged[0].activeVariantCount == 1)
             // The spare take stays with its released source, alive.
             let spareCount = try await h.database.read { db in
@@ -146,7 +149,7 @@ struct MergeCeremonySheetTests {
             let merged = try h.storeSlots()
             #expect(merged.count == 1)
             #expect(merged[0].activeVariantCount == 2, "the pairing's take + the carry")
-            #expect(merged[0].text == "Alpha one. Beta two.", "chosen = the rendered pairing")
+            #expect(merged[0].text == "Alpha one.\nBeta two.", "chosen = the rendered pairing")
             // No stay-behind takes ⇒ no lineage toast is owed; the board
             // shows both takes right there.
 
@@ -170,7 +173,7 @@ struct MergeCeremonySheetTests {
             await h.model.invokeGesture(.mergeBlocks)
             #expect(h.model.mergeCeremony == nil, "no fan, no ceremony")
             let joined = try h.storeSlots()
-            #expect(joined.map(\.text) == ["One two. Three four."])
+            #expect(joined.map(\.text) == ["One two.\nThree four."])
             #expect(h.session.undoStack.topLabel == "Merge")
         }
     }
@@ -197,7 +200,7 @@ struct MergeCeremonySheetTests {
 
             #expect(h.model.mergeCeremony == nil, "chains stay OUT of the ceremony")
             let chained = try h.storeSlots()
-            #expect(chained.map(\.text) == ["One two. Three four. Five six."])
+            #expect(chained.map(\.text) == ["One two.\nThree four.\nFive six."])
             #expect(chained[0].activeVariantCount == 2, "the spare rode the chain")
             let status = try #require(h.model.statusMessage)
             #expect(status.contains("Merged 3 blocks"),
@@ -405,7 +408,7 @@ struct MergeCeremonySheetTests {
                 try Queries.blockFan(db, blockID: landed[0].blockID)
                     .filter { $0.deletedAt == nil && $0.status == .active }
             }
-            #expect(fan.map(\.workingText) == ["Alpha one. Spare take."],
+            #expect(fan.map(\.workingText) == ["Alpha one.\nSpare take."],
                     "ONE joined take, hers — on old the carry-all's two: \(fan.map(\.workingText))")
             #expect(h.model.statusMessage?.contains("1 take stays with the released blocks") == true,
                     "the rendered tail stayed in lineage, and the sheet said so: \(h.model.statusMessage ?? "nil")")
@@ -460,7 +463,7 @@ struct MergeCeremonySheetTests {
                 try Queries.blockFan(db, blockID: landed[0].blockID)
                     .filter { $0.deletedAt == nil && $0.status == .active }
             }
-            #expect(fan.map(\.workingText) == ["Alpha spare. Beta two."],
+            #expect(fan.map(\.workingText) == ["Alpha spare.\nBeta two."],
                     "the hand road joined the SHOWN pair: \(fan.map(\.workingText))")
         }
     }

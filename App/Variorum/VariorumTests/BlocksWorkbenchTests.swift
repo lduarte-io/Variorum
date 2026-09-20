@@ -138,7 +138,10 @@ struct BlocksWorkbenchTests {
                 try Queries.renderPost(db, containerID: world.postID)
                     .first { $0.blockID == id }?.text
             }
-            #expect(merged == "one. two.", "the canon single-space join")
+            // The door join (R-13u4-3, 13u4 UNIT E3): this bulk bar is a
+            // merge DOOR, so the run keeps its newline. Read "one. two."
+            // — "the canon single-space join" — before the ruling.
+            #expect(merged == "one.\ntwo.", "the canon rendering join")
             #expect(model.picked.isEmpty)
         }
     }

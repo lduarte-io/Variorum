@@ -557,7 +557,13 @@ struct MergeGestureTests {
             #expect(h.model.gestureAvailability.merge)
             await h.model.invokeGesture(.mergeBlocks)
             let slots = try h.storeSlots()
-            #expect(slots.map(\.text) == ["One two. Three four.", "Five six."])
+            // The DOOR join (R-13u4-3, 13u4 UNIT E3 — this read "One two.
+            // Three four."). `expectStoreMatchesView` below is the ruling's
+            // own claim, asserted: the surface still reads byte-identically
+            // what it read before the merge, because the block separator
+            // the differential edit replaced is the byte it replaced it
+            // with.
+            #expect(slots.map(\.text) == ["One two.\nThree four.", "Five six."])
             try expectStoreMatchesView(h)
         }
     }
@@ -575,7 +581,7 @@ struct MergeGestureTests {
             await h.model.invokeGesture(.mergeBlocks)
 
             let merged = try h.storeSlots()
-            #expect(merged.map(\.text) == ["One two. Three four. Five six."])
+            #expect(merged.map(\.text) == ["One two.\nThree four.\nFive six."])
             try expectStoreMatchesView(h)
 
             // ONE compound entry: a single structural undo restores all
@@ -621,7 +627,7 @@ struct MergeGestureTests {
             #expect(h.model.gestureAvailability.merge)
             await h.model.invokeGesture(.mergeBlocks)
             let slots = try h.storeSlots()
-            #expect(slots.map(\.text) == ["One two. Three four.", "Five six."])
+            #expect(slots.map(\.text) == ["One two.\nThree four.", "Five six."])
         }
     }
 }

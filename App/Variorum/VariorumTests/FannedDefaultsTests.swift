@@ -466,7 +466,9 @@ struct FannedDefaultsTests {
             #expect(h.model.mergeCeremony == nil, "the default no longer asks")
             let after = try h.storeSlots()
             #expect(after.count == 1, "one block stands where two stood")
-            #expect(after[0].text == "Alpha one. Beta two.", "the join is the canon rule")
+            // R-13u4-3 (13u4 UNIT E3): the canon rule IS the rendering
+            // join now — this read "Alpha one. Beta two." before it.
+            #expect(after[0].text == "Alpha one.\nBeta two.", "the join is the canon rule")
             #expect(after[0].activeVariantCount == 2,
                     "the joined take + the trailing block's other take, carried whole")
         }
@@ -492,7 +494,7 @@ struct FannedDefaultsTests {
             #expect(carried.label == "spare", "a carried take rides with its name")
             #expect(carried.id != spare.id, "a fresh row on the merged block")
             let chosen = try #require(takes.first { $0.id == merged.variantID })
-            #expect(chosen.workingText == "Alpha one. Beta two.",
+            #expect(chosen.workingText == "Alpha one.\nBeta two.",
                     "the CHOSEN take is the joined one — the core's rendered×rendered rule")
         }
     }
@@ -525,7 +527,7 @@ struct FannedDefaultsTests {
             #expect(h.model.mergeCeremony == nil)
             let after = try h.storeSlots()
             #expect(after.count == 1)
-            #expect(after[0].text == "Alpha one. Beta two.")
+            #expect(after[0].text == "Alpha one.\nBeta two.")
             #expect(after[0].activeVariantCount == 1, "one take, exactly as before")
         }
     }
@@ -617,7 +619,7 @@ struct FannedDefaultsTests {
 
             let after = try h.storeSlots()
             #expect(after.count == 1, "the whole run became one block")
-            #expect(after[0].text == "Alpha one. Beta two. Gamma three.")
+            #expect(after[0].text == "Alpha one.\nBeta two.\nGamma three.")
             #expect(after[0].activeVariantCount == 2,
                     "the joined take + the first block's other take, carried through the chain")
             #expect(h.session.undoStack.topLabel == "Merge Blocks")
@@ -633,7 +635,9 @@ struct FannedDefaultsTests {
 
             let after = try h.storeSlots()
             #expect(after.count == 1)
-            #expect(after[0].text == "Alpha one. Beta two. Gamma three.")
+            // "Its shipped behaviour" is the CHAIN's shape — one block,
+            // one take; the join moved with the ruling on every link.
+            #expect(after[0].text == "Alpha one.\nBeta two.\nGamma three.")
             #expect(after[0].activeVariantCount == 1, "one take, as it has always been")
         }
     }
@@ -738,9 +742,12 @@ struct FannedDefaultsTests {
 
             #expect(composition.pairing.firstVariantID == slots[0].variantID)
             #expect(composition.pairing.secondVariantID == slots[1].variantID)
-            #expect(composition.pairing.join == MergeJoin.canon(
+            #expect(composition.pairing.join == MergeJoinRule.door.join(
                 head: "Alpha one.", tail: "Beta two."),
-                    "the join is merge's own canon rule, never a guess")
+                    "the join is merge's own door rule, never a guess")
+            // …which is the rendering join since her R-13u4-3 (this pin
+            // read `.space` through `MergeJoin.canon` before 13u4 UNIT E3).
+            #expect(composition.pairing.join == .newline)
             #expect(Set(composition.carries) == [spareA.id, spareB.id],
                     "every OTHER active take, both sides")
         }

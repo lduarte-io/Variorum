@@ -167,8 +167,9 @@ struct SeamMergeTests {
             await harness.flush()
 
             let texts = try harness.storeSlots().compactMap(\.text)
-            #expect(texts == ["alpha beta"],
-                    "ONE block, joined by the canon merge rule (a single space at the join)")
+            // Joined by the DELETE keystrokes' rule — a single space at the
+            // join, which R-13u4-3 deliberately left alone.
+            #expect(texts == ["alpha beta"], "ONE block")
             #expect(harness.documentText == "alpha beta")
             #expect(harness.model.index.entries.count == 1)
 
@@ -366,6 +367,59 @@ struct SeamMergeTests {
             #expect(harness.model.shouldChangeText(
                 in: NSRange(location: 5, length: 1), replacement: "") == false)
             #expect(harness.model.statusMessage?.contains("sealed") == true)
+        }
+    }
+
+    // MARK: - R-13u4-3's classification, at the seam (13u4 UNIT E3)
+
+    /// **The two classes, on one fixture, side by side.** Her ruling made
+    /// every merge DOOR join with the rendering newline; the seam keystroke
+    /// is a DELETE and keeps the shipped space-unless-edged join, because a
+    /// backspace that put back the newline it had just removed would visibly
+    /// do nothing. This pin is a GUARD — green on both sides of the ruling
+    /// by design — and its second half is the non-vacuity: the SAME pair,
+    /// through the ⌘⇧M door, joins the other way.
+    @Test func theSeamKeystrokeKeepsItsShippedJoinWhileTheDoorTakesTheNewline() async throws {
+        try await withEditor(seedBlocks: ["alpha", "beta"]) { harness in
+            harness.replace(NSRange(location: 5, length: 1), with: "")
+            await harness.flush()
+            let byKeystroke = try harness.storeSlots().compactMap(\.text)
+            #expect(byKeystroke == ["alpha beta"],
+                    "the DELETE class: the shipped join, byte-unchanged")
+            #expect(harness.documentText == "alpha beta")
+        }
+
+        try await withEditor(seedBlocks: ["alpha", "beta"]) { harness in
+            harness.textView.setSelectedRange(NSRange(location: 2, length: 6))
+            harness.model.updateCaretContext()
+            await harness.model.invokeGesture(.mergeBlocks)
+            let byDoor = try harness.storeSlots().compactMap(\.text)
+            #expect(byDoor == ["alpha\nbeta"], "the DOOR class: the rendering join")
+        }
+    }
+
+    /// **Why "the page reads byte-identical before and after a merge" is
+    /// literally true** — the door's join IS the byte the editor surface
+    /// puts between two blocks (`EditorDocument.separator`, the
+    /// author-confirmed 2a doctrine). Core pins the separator's value; this
+    /// pins the IDENTITY, which is what the claim rests on, and then reads
+    /// the surface before and after a door merge to prove it on screen.
+    @Test func aDoorMergeLeavesThePageByteIdentical() async throws {
+        #expect(MergeJoinRule.door.join(head: "a", tail: "b").separator
+                == EditorDocument.separator)
+
+        try await withEditor(seedBlocks: ["Paragraph one.", "Paragraph two."]) { harness in
+            let before = harness.documentText
+            #expect(before == "Paragraph one.\nParagraph two.")
+
+            harness.textView.setSelectedRange(NSRange(location: 2, length: 20))
+            harness.model.updateCaretContext()
+            await harness.model.invokeGesture(.mergeBlocks)
+
+            #expect(harness.documentText == before,
+                    "not one byte moved on the page — only the block identity under it")
+            let landed = try harness.storeSlots()
+            #expect(landed.count == 1, "…and it really did merge")
         }
     }
 

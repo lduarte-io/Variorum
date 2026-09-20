@@ -1518,14 +1518,15 @@ struct TutorialStructureActsTests {
                     pairings: [.init(
                         firstVariantID: above.variantID!,
                         secondVariantID: rendered.id,
-                        join: MergeJoin.canon(
+                        join: MergeJoinRule.door.join(
                             head: above.text ?? "", tail: rendered.workingText))],
                     carries: [spare.id])
             }
             #expect(result.variants.count == 2, "one joined take + the carried spare")
+            // The pairing joins exactly what was shown, on the door's
+            // rendering join (R-13u4-3; this read `+ " " +` before E3).
             #expect(result.variants[0].workingText
-                == (above.text ?? "") + " " + rendered.workingText,
-                "the pairing joins exactly what was shown")
+                == (above.text ?? "") + "\n" + rendered.workingText)
             #expect(result.variants[1].workingText == spare.workingText,
                     "the spare rides whole — pair me, carry me, the prose says")
 

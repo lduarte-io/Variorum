@@ -587,8 +587,18 @@ nonisolated enum CrossBlockCompound {
 
             // 5 — the ends join. Merge FIRST with both texts whole: the
             // originals are preserved and edged, and the join character the
-            // canon merge mints falls inside what the gesture removed.
-            let result = try ops.merge(leading.blockID, trailing.blockID)
+            // merge mints falls inside what the gesture removed.
+            //
+            // **R-13u4-3's DELETE class** (13u4 UNIT E3): this is a delete
+            // that happens to join two surviving ends mid-paragraph, not a
+            // merge door, so it keeps the shipped join. It is belt AND
+            // braces — the autosave one line down overwrites the merged
+            // buffer with the two cut ends concatenated directly, so the
+            // join character never survives this compound at all (pinned
+            // both ways) — but the class is stated at the call rather than
+            // left to be re-derived from that accident.
+            let result = try ops.merge(
+                leading.blockID, trailing.blockID, joining: .deleteKeystroke)
             let joined = leading.newText + trailing.newText
             // The merge itself stamps touch without churn (restructuring must
             // never reshuffle the meaningful sort, AppSpec §9); the GESTURE's

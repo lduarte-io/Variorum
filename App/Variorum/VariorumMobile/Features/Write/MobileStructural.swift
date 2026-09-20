@@ -294,11 +294,16 @@ final class MobileStructuralController {
                 model.report("This block's takes changed — try the merge again.")
                 return
             }
-            // The canon join resolved on the post-flush store texts —
-            // the plain merge's exact rule, through the ONE join brain.
+            // The DOOR join resolved on the post-flush store texts — the
+            // plain merge's exact rule, through the ONE join brain. Since
+            // her ruling R-13u4-3 (2026-09-20) that rule is the rendering
+            // join, and the phone flips WITH the Mac because the rule is
+            // core-side (the U-2 keep-on-top precedent): "Merge with
+            // Previous" is a door.
             let pairing = Operations.MergePairing(
                 firstVariantID: head.id, secondVariantID: tail.id,
-                join: MergeJoin.canon(head: head.workingText, tail: tail.workingText))
+                join: MergeJoinRule.door.join(
+                    head: head.workingText, tail: tail.workingText))
             let carries = (fans.leading + fans.trailing)
                 .map(\.id).filter { $0 != head.id && $0 != tail.id }
             body = { ops in

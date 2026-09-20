@@ -90,17 +90,24 @@ struct MergeArrangementTests {
                 == [.bringEveryTake, .onlyTheShownOnes, .pairByHand])
             #expect(state.otherTakes == 1, "the spare, counted for the sentence")
             #expect(state.confirmBlocker == nil, "a preset is confirmable as it stands")
-            // 18f ladder R1-12: "Alpha one." + "Beta two." — no edge carries
-            // whitespace, so the canon join is a space and the sentence says
-            // so; a head ending in a space would read "join directly".
-            #expect(state.canonJoin == .space)
-            #expect(state.arrangementSentence.contains("join with a space"))
+            // 18f ladder R1-12 asked the sentence to speak the OPERATION's
+            // join rather than the mockup's word, and it still does — the
+            // operation's join is just the rendering one now (R-13u4-3,
+            // 13u4 UNIT E3; this read `.space` / "join with a space").
+            #expect(state.canonJoin == .newline)
+            #expect(state.arrangementSentence.contains("join on a new line"))
         }
     }
 
-    /// The sentence follows the operation's join, read off the shown takes'
-    /// STORED texts (18f ladder R1-12): a head that already ends in a space
-    /// joins directly, and the row says so.
+    /// The sentence follows the operation's join (18f ladder R1-12), and
+    /// since **R-13u4-3** the door rule has no conditionals left for it to
+    /// follow: the same fixture that used to make the sentence read "join
+    /// directly" — a head already ending in a space — now reads the
+    /// rendering join like every other door, because nothing is trimmed and
+    /// nothing is conditional. *(This test asserted `.nothing` and "join
+    /// directly" before 13u4 UNIT E3; it is kept, pointed at the ruling,
+    /// because the edge-whitespace fixture is exactly the shape a
+    /// re-introduced conditional would break.)*
     @Test func thePairSentenceReadsTheCanonJoinOffTheShownTakes() async throws {
         try await withEditor(seedBlocks: ["Alpha one. ", "Beta two."]) { h in
             let slots = try h.storeSlots()
@@ -110,9 +117,9 @@ struct MergeArrangementTests {
             selectAcross(h, 0, 1)
             await h.model.invokeGesture(.mergeBlocks, ceremony: true)
             let state = try #require(h.model.mergeCeremony)
-            #expect(state.canonJoin == .nothing, "non-vacuity: the head ends in a space")
-            #expect(state.arrangementSentence.contains("join directly"))
-            #expect(!state.arrangementSentence.contains("join with a space"))
+            #expect(state.canonJoin == .newline, "non-vacuity: the head ends in a space")
+            #expect(state.arrangementSentence.contains("join on a new line"))
+            #expect(!state.arrangementSentence.contains("join directly"))
         }
     }
 
@@ -170,7 +177,7 @@ struct MergeArrangementTests {
 
             #expect(h.model.mergeCeremony == nil, "it landed")
             let merged = try h.storeSlots()
-            #expect(merged.map(\.text) == ["Alpha one. Beta two."])
+            #expect(merged.map(\.text) == ["Alpha one.\nBeta two."])
             #expect(merged[0].activeVariantCount == 1, "nothing else came along")
             let released = try fan(h, secondID)
             #expect(released.count == 2, "the spare stayed with its released block")
@@ -325,7 +332,7 @@ struct MergeArrangementTests {
             await h.model.confirmMergeCeremony()
             #expect(h.model.mergeCeremony == nil, "it landed")
             let merged = try h.storeSlots()
-            #expect(merged.map(\.text) == ["Beta two. Gamma three.", "Delta four."],
+            #expect(merged.map(\.text) == ["Beta two.\nGamma three.", "Delta four."],
                     "the PAIR merged — by id, not by the open-time index")
             // The caret sits at the JOIN, right where the trailing half
             // begins — the trailing block's own length, resolved by id.
@@ -412,7 +419,8 @@ struct MergeArrangementTests {
             let landed = try h.storeSlots()
             #expect(landed.count == 1, "the pair merged")
             let merged = try fan(h, landed[0].blockID)
-            #expect(merged.first { $0.id == landed[0].variantID }?.workingText == "Alpha spare. Beta two.",
+            #expect(merged.first { $0.id == landed[0].variantID }?.workingText
+                        == "Alpha spare.\nBeta two.",
                     "the shown pair joined")
             #expect(merged.count == 2, "the head came along whole")
         }
@@ -458,7 +466,7 @@ struct MergeArrangementTests {
             try h.reload()
             await h.model.confirmMergeCeremony()
             let landed = try h.storeSlots()
-            #expect(landed.map(\.text) == ["Alpha spare. Beta two."])
+            #expect(landed.map(\.text) == ["Alpha spare.\nBeta two."])
             #expect(try fan(h, landed[0].blockID).count == 1, "only the shown ones came")
         }
     }
@@ -504,7 +512,7 @@ struct MergeArrangementTests {
             #expect(landed.count == 1)
             let merged = try fan(h, landed[0].blockID)
             #expect(merged.first { $0.id == landed[0].variantID }?.workingText
-                        == "Alpha spare. Beta two.",
+                        == "Alpha spare.\nBeta two.",
                     "the pair the sheet marked is the pair that joined")
         }
     }
@@ -564,7 +572,7 @@ struct MergeArrangementTests {
             // Confirming the refreshed sheet joins exactly what it shows.
             await h.model.confirmMergeCeremony()
             let landed = try h.storeSlots()
-            #expect(landed.map(\.text) == ["Alpha one. The spare take. Gamma three."],
+            #expect(landed.map(\.text) == ["Alpha one.\nThe spare take.\nGamma three."],
                     "the chain joined the list's own takes")
             #expect(try fan(h, landed[0].blockID).count == 1, "only the shown ones came")
         }
@@ -610,7 +618,7 @@ struct MergeArrangementTests {
             await h.model.confirmMergeCeremony()
             let landed = try h.storeSlots()
             #expect(landed.count == 1, "the run merged")
-            #expect(landed.map(\.text) == ["Alpha one. The spare take. Gamma three."],
+            #expect(landed.map(\.text) == ["Alpha one.\nThe spare take.\nGamma three."],
                     "the carry-all seeded from the sheet's shown takes")
             #expect(try fan(h, landed[0].blockID).count == 2,
                     "…and the other take came along whole")
@@ -637,7 +645,9 @@ struct MergeArrangementTests {
     @Test func theSentenceUnderTheMergeRowSaysWhatComesAlong() {
         let pairEvery = MergeArrangementCopy.sentence(
             .bringEveryTake, blocks: 2, otherTakes: 3)
-        #expect(pairEvery.contains("The two takes you were looking at join with a space."))
+        // The DEFAULT join the sentence speaks moved with the ruling
+        // (R-13u4-3): this read "join with a space." before 13u4 UNIT E3.
+        #expect(pairEvery.contains("The two takes you were looking at join on a new line."))
         #expect(pairEvery.contains("3 other takes come along whole"))
 
         // 18f ladder R1-3 (fable-reviewer): the singular is CONJUGATED (this
@@ -657,8 +667,10 @@ struct MergeArrangementTests {
         #expect(runEvery.contains("The 4 takes you were looking at join in order."))
 
         // 18f ladder R1-12: the pair's join word is the operation's, not the
-        // mockup's — `MergeJoin.canon` answers `.nothing` when an edge already
-        // carries whitespace.
+        // mockup's — the rule answered `.nothing` when an edge already
+        // carried whitespace, and since R-13u4-3 a door always answers
+        // `.newline`. The parameter still carries all three because the
+        // ceremony's per-pairing control still offers all three.
         let direct = MergeArrangementCopy.sentence(
             .bringEveryTake, blocks: 2, otherTakes: 1, join: .nothing)
         #expect(direct.contains("The two takes you were looking at join directly."))

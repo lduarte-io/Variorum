@@ -72,10 +72,13 @@ nonisolated enum CarryAllMerge {
     /// would join a take she was never looking at, so the caller refuses and
     /// speaks instead.
     ///
-    /// The join is the CANON rule resolved on the two takes' stored texts —
+    /// The join is the DOOR rule resolved on the two takes' stored texts —
     /// `merge`'s own rule, through the one join brain — so a carry-all over
     /// two single-take blocks would produce byte-identically what the
-    /// instant merge produces.
+    /// instant merge produces. (Since R-13u4-3 that rule is the rendering
+    /// join; this line read `MergeJoin.canon` and produced a space before
+    /// 13u4 UNIT E3. The equality with the instant road is the point and is
+    /// pinned — both are doors.)
     static func compose(
         leadingDisplayedID: String?, leadingFan: [Variant],
         trailingDisplayedID: String?, trailingFan: [Variant]
@@ -89,7 +92,8 @@ nonisolated enum CarryAllMerge {
         return Composition(
             pairing: Operations.MergePairing(
                 firstVariantID: head.id, secondVariantID: tail.id,
-                join: MergeJoin.canon(head: head.workingText, tail: tail.workingText)),
+                join: MergeJoinRule.door.join(
+                    head: head.workingText, tail: tail.workingText)),
             carries: carries)
     }
 

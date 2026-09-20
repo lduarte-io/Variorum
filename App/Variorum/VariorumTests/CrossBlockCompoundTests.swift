@@ -44,7 +44,15 @@ struct CrossBlockCompoundTests {
             await h.flush()
 
             let texts = try h.storeSlots().compactMap(\.text)
+            // **R-13u4-3's DELETE class, guarded** (13u4 UNIT E3): this road
+            // passes `.deleteKeystroke` to `merge`, and the compound's own
+            // autosave then overwrites the merged buffer with the two cut
+            // ends concatenated — so NEITHER the shipped space NOR the
+            // doors' new newline can appear here. Green on both sides of
+            // the ruling, by construction and by intent.
             #expect(texts == ["Alpha two."], "ONE block: the remainders joined, with no space minted")
+            #expect(!(texts.first ?? "").contains("\n"),
+                    "and certainly not the doors' rendering join — this is a delete")
             #expect(h.documentText == "Alpha two.")
 
             // Both originals are in the new block's lineage, preserved whole.

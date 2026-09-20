@@ -424,8 +424,19 @@ final class EditorSurfaceController {
     /// pairs and the stale-projection fallthrough land here). Entries are
     /// resolved by id here (R1-2); a block gone from the surface refuses in
     /// the refresh road's own voice and touches nothing.
+    ///
+    /// **`joining` is R-13u4-3's classification, at the one body two
+    /// classes share** (13u4 UNIT E3). Every DOOR that lands here takes the
+    /// default — the rendering join. The SEAM KEYSTROKE (`runSeamMerge`)
+    /// passes `.deleteKeystroke` and keeps the shipped join byte-unchanged,
+    /// because a backspace that put back the newline it just removed would
+    /// visibly do nothing. Two doors on one act share the body or they
+    /// drift (13e/13j's standing rule), so the difference is an argument
+    /// rather than a second copy of this function.
     @discardableResult
-    private func runInstantMerge(leadingID: String, trailingID: String) async -> Bool {
+    private func runInstantMerge(
+        leadingID: String, trailingID: String, joining: MergeJoinRule = .door
+    ) async -> Bool {
         guard let leadingIndex = entryIndex(of: leadingID),
               let trailingIndex = entryIndex(of: trailingID)
         else {
@@ -437,7 +448,7 @@ final class EditorSurfaceController {
         // SPEAKS about what it does to the fan.
         let otherTakes = mergedAwayTakes([leadingIndex, trailingIndex])
         let landed = await runStructural { ops in
-            let result = try ops.merge(leadingID, trailingID)
+            let result = try ops.merge(leadingID, trailingID, joining: joining)
             // Caret at the join: right where the trailing half begins.
             let join = max(0, result.variant.workingText.utf16.count - trailingLength)
             return StructuralOutcome(
@@ -1313,11 +1324,14 @@ final class EditorSurfaceController {
         }
         /// The pair's canon join on the two SHOWN takes' stored texts — what
         /// both preset roads will actually join with (18f ladder R1-12).
+        /// Since R-13u4-3 the canon rule IS the door rule, so the sentence
+        /// says "join on a new line"; the former `.space` fallback for an
+        /// unresolvable pair is gone because the rule answers the same for
+        /// any texts, empty ones included.
         var canonJoin: MergeJoin {
-            guard let head = firstTakes.first(where: { $0.id == firstRenderedID })?.variant,
-                  let tail = secondTakes.first(where: { $0.id == secondRenderedID })?.variant
-            else { return .space }
-            return MergeJoin.canon(head: head.workingText, tail: tail.workingText)
+            let head = firstTakes.first { $0.id == firstRenderedID }?.variant.workingText ?? ""
+            let tail = secondTakes.first { $0.id == secondRenderedID }?.variant.workingText ?? ""
+            return MergeJoinRule.door.join(head: head, tail: tail)
         }
         var arrangementSentence: String {
             MergeArrangementCopy.sentence(
@@ -1472,7 +1486,7 @@ final class EditorSurfaceController {
         return [MergePairingDraft(
             firstVariantID: head.id, secondVariantID: tail.id,
             join: model.session.mergeJoinMemory
-                ?? MergeJoin.canon(head: head.workingText, tail: tail.workingText))]
+                ?? MergeJoinRule.door.join(head: head.workingText, tail: tail.workingText))]
     }
 
     /// **U-16's two-option door over a RUN of three or more.** No columns,
@@ -1575,7 +1589,7 @@ final class EditorSurfaceController {
         state.pairings.append(MergePairingDraft(
             firstVariantID: firstID, secondVariantID: secondID,
             join: model.session.mergeJoinMemory
-                ?? MergeJoin.canon(
+                ?? MergeJoinRule.door.join(
                     head: head.variant.workingText, tail: tail.variant.workingText)))
         mergeCeremony = state
     }
@@ -2142,6 +2156,15 @@ final class EditorSurfaceController {
                 }
                 var mergedID = pieces[0]
                 for next in pieces.dropFirst() {
+                    // R-13u4-3's DOOR class, stated (13u4 UNIT E3): Make
+                    // Block is a deliberate gesture behind a confirm, and
+                    // its whole promise is that the SPAN she selected
+                    // becomes one block — her ruling's own sentence ("all
+                    // newlines within the selected portion part of a single
+                    // block"). So the pieces join with the rendering join
+                    // and the minted block reads byte-identical to the
+                    // selection; under the old space join a span crossing a
+                    // paragraph break came back with the break replaced.
                     mergedID = try ops.merge(mergedID, next).block.id
                 }
                 return StructuralOutcome(caretBlockID: mergedID, caretOffset: 0, seam: nil)
@@ -2396,7 +2419,12 @@ final class EditorSurfaceController {
             return
         }
         let landed = await runInstantMerge(
-            leadingID: plan.leadingBlockID, trailingID: plan.trailingBlockID)
+            leadingID: plan.leadingBlockID, trailingID: plan.trailingBlockID,
+            // R-13u4-3's DELETE class: this is a keystroke that removed the
+            // separator, so the join stays what it has always been. The
+            // ruling's rendering join belongs to the doors — here it would
+            // put back the exact byte the keystroke deleted.
+            joining: .deleteKeystroke)
         if landed {
             // Load-bearing, not chatter (A7's carve set the shape): a
             // structural act landed from an ordinary keystroke, and ⌘Z — the

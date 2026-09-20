@@ -914,7 +914,8 @@ question, the restyle spine), no `Sync/`, no schema, no migration.
 |---|---|---|
 | 1 | The record + the READING + the DOORS-vs-DELETES enumeration (every road traced, not assumed) | DONE (7b60f043 + this commit) — the table below |
 | 2 | The core rule (`MergeJoinRule` + `Operations.merge`) + the core pins rewritten to the ruling + the canon delta | DONE (this commit) — core **1609/174 green**, below |
-| 3 | The Mac consumers (the seam differential, the carry-all/ceremony defaults, the two DELETE roads' guards) + the Mac pins | NOT-STARTED |
+| 3 | The Mac consumers (the seam differential, the carry-all/ceremony defaults, the two DELETE roads' guards) + the Mac pins | DONE (this commit) — the merge family **140/14 green**, below |
+| 3b | The two tutorials' merge sentence (my change falsified it) + their pins | NOT-STARTED |
 | 4 | The phone's door (core-side flip) + the mobile pins + the iOS build | NOT-STARTED |
 | 5 | The walk on the dev-store Debug build, captured | NOT-STARTED |
 | 6 | Closing suites + the ledger's E3 row | NOT-STARTED |

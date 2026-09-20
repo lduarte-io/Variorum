@@ -84,14 +84,18 @@ nonisolated enum MergeArrangement: String, CaseIterable, Equatable, Sendable, Id
 nonisolated enum MergeArrangementCopy {
     /// `otherTakes` is what would come along BEYOND the shown ones: the sum
     /// over the run of (live active takes − 1).
-    /// `join` is the pair's CANON join (`MergeJoin.canon` on the two shown
-    /// takes' texts — 18f ladder R1-12: "join with a space" was the mockup's
-    /// sentence, and the operation answers `.nothing` when an edge already
-    /// carries whitespace). A run joins "in order"; the join word is the
-    /// pair's alone.
+    /// `join` is the pair's CANON join (`MergeJoinRule.door` on the two
+    /// shown takes' texts — 18f ladder R1-12: "join with a space" was the
+    /// mockup's sentence, and the operation answered `.nothing` when an edge
+    /// already carried whitespace). Since her ruling R-13u4-3 the door rule
+    /// is the rendering join, so the everyday sentence reads "join on a new
+    /// line" and the default here moved with it; `space` and `nothing` stay
+    /// reachable through the ceremony's per-pairing control, which is what
+    /// still makes the parameter worth carrying. A run joins "in order"; the
+    /// join word is the pair's alone.
     static func sentence(
         _ arrangement: MergeArrangement, blocks: Int, otherTakes: Int,
-        join: MergeJoin = .space
+        join: MergeJoin = .newline
     ) -> String {
         let joined = switch join {
         case .space: "join with a space"

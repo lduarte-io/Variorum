@@ -335,7 +335,9 @@ struct MergeSelectionTests {
 
             let after = try world.storeSlots()
             #expect(after.count == 2)
-            #expect(after.map(\.text) == ["First half. Second half.", "Untouched."])
+            // The board's ⌘-click merge is a DOOR: the rendering join
+            // (R-13u4-3; this read "First half. Second half." before E3).
+            #expect(after.map(\.text) == ["First half.\nSecond half.", "Untouched."])
             #expect(after[0].blockID != slots[0].blockID, "merge mints a fresh block")
             #expect(world.model.mergeSelection.isEmpty, "the selection did its job")
             #expect(world.session.undoStack.depth == 1)
@@ -354,7 +356,8 @@ struct MergeSelectionTests {
 
             await world.model.mergeSelectedBlocks()
 
-            #expect(try world.storeSlots().map(\.text) == ["One. Two. Three."])
+            // Every seam in the run joins the same way (R-13u4-3).
+            #expect(try world.storeSlots().map(\.text) == ["One.\nTwo.\nThree."])
             #expect(world.session.undoStack.depth == 1)
             #expect(world.model.statusMessage?.contains("Merged 3 blocks") == true)
 
@@ -426,7 +429,7 @@ struct MergeSelectionTests {
             #expect(modes.isEmpty, "and no mode switch was performed")
             let after = try world.storeSlots()
             #expect(after.count == 1)
-            #expect(after[0].text == "First half. Second half.")
+            #expect(after[0].text == "First half.\nSecond half.")
             #expect(after[0].activeVariantCount == 2,
                     "the joined take + the spare, carried whole")
             #expect(world.session.undoStack.depth == 1)
@@ -455,7 +458,7 @@ struct MergeSelectionTests {
             await world.model.mergeSelectedBlocks()
 
             let after = try world.storeSlots()
-            #expect(after.map(\.text) == ["One. Two. Three."])
+            #expect(after.map(\.text) == ["One.\nTwo.\nThree."])
             #expect(after[0].activeVariantCount == 2,
                     "the middle block's spare rode the whole chain")
             let spoken = try #require(world.model.statusMessage)

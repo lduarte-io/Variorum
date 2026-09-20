@@ -221,17 +221,28 @@ nonisolated enum StructuralSeamEdit {
             // Retained bytes: the merged text must be the two old halves
             // VERBATIM around the join — byte equality decides the join
             // kind (and subsumes the former length arithmetic).
+            //
+            // **Every join the brain can make is a candidate** (13u4 UNIT
+            // E3, her ruling R-13u4-3): the two DELETE roads still produce a
+            // space or nothing, and every merge DOOR now produces the
+            // RENDERING join — so the arm tries `MergeJoin.allCases` rather
+            // than the two strings it knew. The cases are mutually exclusive
+            // by construction (their separators differ in the first byte
+            // after `leadText`), so the first match is the only match. Left
+            // at two, a door merge would have failed this check and fallen
+            // back to a full re-render on every ⌘⇧M — the ruling working at
+            // P1's expense, silently.
             let merged = fresh[i].text ?? ""
-            let join: String
-            if merged == leadText + " " + trailText {
-                join = " "
-            } else if merged == leadText + trailText {
-                join = ""
-            } else {
-                return nil
-            }
-            // The 1-char separator becomes the join (a space, or nothing);
-            // both halves' text stays put but changes identity to A'.
+            guard let join = MergeJoin.allCases
+                .map(\.separator)
+                .first(where: { merged == leadText + $0 + trailText })
+            else { return nil }
+            // The 1-char separator becomes the join. For the door's newline
+            // that is the byte ALREADY there — a zero-byte text edit
+            // carrying only the identity run, which is exactly why the page
+            // reads byte-identical before and after a merge. For a delete
+            // keystroke's space or nothing the separator is replaced. Both
+            // halves' text stays put but changes identity to A'.
             return Edit(
                 replaceRange: NSRange(location: lead.upperBound, length: 1),
                 replacement: join,
