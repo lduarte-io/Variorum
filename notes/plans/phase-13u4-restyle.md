@@ -1,6 +1,8 @@
 # Phase 13u4 — THE RESTYLE CONTINUATION (EXECUTION PLAN)
 
-**Status: READY — KICKOFF-REFRESHED at the 13u3 closeout (2026-09-19). Opens at her word.**
+**Status: OPEN — kicked off 2026-09-20 at her word. The SIZING-AND-RULINGS SITTING ran at kickoff
+(she attended); its record below is BINDING. Nine units, order E1→E2→E3→C1→C2→F1→S1→S2→S3; one
+end ladder (`fable-reviewer`); the ledger below is the running record.**
 Authored 2026-09-14 at the 13u1 kickoff (the R-cor-12 four-way split); grown at the 13u3 morning
 sitting by HER ELEVEN ADDITIONS (the dated section below — two of them her own ruling changes).
 
@@ -34,6 +36,142 @@ regardless: any diff reaching `BlockRangeIndex` / `EditorTextView` / `TypedRetur
 **Verify at open (never run the full suite at a session's start — these ARE the baselines):**
 the closeout-refresh block below carries them; the previous close's recorded result is the
 baseline per the standing rule.
+
+---
+
+## THE SIZING-AND-RULINGS SITTING RECORD (2026-09-20 — she attended; rulings verbatim-faithful; BINDING)
+
+**R-13u4-1 (item 2 — the capture microsyntax).** Her ruling, verbatim: *"what i meant by that is
+the tag would be applied when within the curly brackets and if there's a smart book based on that
+tag, it would go in that smart book based on standard tag rules. so {#dream} may land in a dream
+journal and {#workout} might go in a smart workout book if I have one of those, for example."*
+So: **`{#tag/path}` APPLIES the tag, and membership follows by the STANDING smart-book tag rules —
+no routing machinery of any kind, no journal special case.** `{t:"my title"}` sets the title. Only
+the braced forms parse; a bare #hashtag is never touched; malformed braces pass through as typed
+text (the syntax as proposed at the sitting, unobjected). **Tokens DISAPPEAR once parsed** (her
+pick of the offered pair). The RULE lands SHARED (the `CaptureKeys`/`PlainPaste` pattern); both
+Mac capture doors face it this phase; the phone's face is filed as a MOBILE PARITY row at the
+closeout. **The `applyTypedPath` hoist rides C1** (the KnownIssues forked-brains row's touch rule —
+the tag-application road IS that brain; hoist to `Shared/`, never copy).
+
+**R-13u4-2 (item 3 — EMPTY BLOCKS CHAIN; her ruling change, confirmed at the sitting).**
+**Allow many empty blocks** — ⏎ with the caret in an empty block (chip ON) mints a fresh empty
+block below through the one structural door and the caret moves into it; chains indefinitely
+(*"You should be able to go down the list typing whatever you want in a series of empty
+blocks"*). **SUPERSEDES U-1's "nothing in an empty block" arm**; the canon delta (AppSpec §7's
+segmentation-trigger paragraph) lands WITH E1's build. Unchanged, stated: chip OFF stays
+Return-as-content; abandoned empties STAY (U-19 (2)); ⌥⌘Z removes one mint per press (R-13u-3);
+#92(c)'s empty-tail close-and-mint composes AHEAD of the chain.
+
+**R-13u4-3 (item 8 — MERGE KEEPS THE NEWLINES; her ruling change, scope confirmed at the
+sitting).** Scope: **EVERY merge door.** The join becomes the RENDERING join — merged text =
+top + `"\n"` + bottom, byte-exact, no trimming, no conditionals — so the page reads
+byte-identical before and after every merge; N-way chains join each seam the same way; the
+ceremony's per-pairing DEFAULT flips to newline (space · nothing stay choosable per pairing).
+The cross-block DELETE gesture's mid-paragraph edge-join is a delete, not a merge door — it
+keeps its ruled normal-editor join. **SUPERSEDES the 2026-07-06 single-space join.** The traded
+cost, stated and accepted at the sitting: a mid-sentence divide-then-merge returns `one⏎two`,
+not `one two` (the ceremony's space option remains the road back). The canon delta (AppSpec §9's
+merge bullet · OverallModel §7's merge line · the ceremony sentences citing the old join) lands
+WITH E3's build. Pins asserting the space join are REWRITTEN to the ruled behaviour (a ruled
+change, not a bug — no red-on-old owed; the state-transition suite updates in the same commit).
+
+**R-13u4-4 (item 9 — SELECTION → TAKE).** Her ruling, verbatim: *"move alone should be fine -
+the fact that there'll be a savepoint/commit of the current take right before moving is enough
+to cover the case that someone wants it to stay - they can just revert it to that point if they
+want."* So: **MOVE alone — and the quiet insurance savepoint of the current take is
+LOAD-BEARING** (it is her stated cover for the stay case, not optional plumbing). Shape: ONE
+transaction — insurance savepoint of the current take · the span leaves the current take's
+buffer · a new take mints at the fan's END holding the span (branched from the current take,
+NOT chosen) · ONE undo entry.
+
+**R-13u4-5 (P-8's 27 `.fixedSize()` sites).** **Sweep the 27** with a deliberate per-site
+`lineLimit` under UNIT S3, plus a grep pin so the class stays closed by construction (the 18j
+literal-colour pin's form). The constitution stands as written; the KnownIssues row closes at
+the sweep.
+
+**R-13u4-6 (phase shape + cast).** **ONE phase, NINE units**, order E1→E2→E3→C1→C2→F1→S1→S2→S3
+(seam surgery before polish — the restyle's closing walks catch seam regressions). ONE end
+ladder over the combined diff, `fable-reviewer` (her kickoff word — *"Standard Opus implementer
+Fable cold review standards apply"* — and the seam rider on items 3/8/11 regardless); cast
+confirmed by her in-session: *"your cast sounds good."* The sizing statement was made out loud
+per the guidance (nine units; ONE phase-sized among them — the restyle spine, decomposed
+S1–S3; the 13d/13u3 collector shape) and she ruled one phase.
+
+**BINDING PRINCIPLES:** the architect-phase constitution **P-1…P-9** (byte-verbatim in
+`.claude/skills/architect-phase/SKILL.md`, preserved from 13b) binds every unit, with its
+application notes; deviations are recorded with reasons, never silent. The closeout-refresh
+block's seven what-changed items bind every chrome-touching unit (the gutter law · the
+transaction-gated decoration refresh · the panel-as-one-surface · the status-seam vocabulary ·
+`TakeCardMenu.rows` · the owner rows · lesson-copy pins). PROVISIONALs log to
+`notes/QUESTIONS.md` — next free **#126**.
+
+## THE LEDGER (one row per unit; every row owned; statuses flip in the same commit as the work)
+
+| # | Unit | Contents (short) | Evidence | Status |
+|---|---|---|---|---|
+| E1 | Empty blocks chain (item 3, R-13u4-2) | `TypedReturn`'s empty-block arm → the chain; canon delta rides the build | pins + walk | NOT-STARTED |
+| E2 | ⌘⌫ checkbox-seam defect (item 11) | trace the mechanism first; red-on-old owed | red-on-old + walk on her verbatim repro | NOT-STARTED |
+| E3 | Merge keeps the newlines (item 8, R-13u4-3) | the rendering join, every door; ceremony default; canon delta rides | state-transition suite + walk | NOT-STARTED |
+| C1 | Capture microsyntax (item 2, R-13u4-1) | shared rule + both Mac doors; `applyTypedPath` hoist; phone face → parity row | pins + capture walk | NOT-STARTED |
+| C2 | Selection → take (item 9, R-13u4-4) | the MOVE op + Write door; insurance savepoint load-bearing | state-transition + walk | NOT-STARTED |
+| F1 | Index chapter-click lands low (item 10) | trace first — the un-adopted `LandingAuthority` is the recorded hypothesis | red-on-old if confirmed + walk | NOT-STARTED |
+| S1 | The Settings shape (items 4/5/6/7 + row 59 + the 2a Settings fork) | tabs · search · fold fix · card grammar · ⌘[/unindent audit · merge-shortcut face; then walk row 53's two re-font occasions once reachable | walk both voices + appearances, captured | NOT-STARTED |
+| S2 | Library & masthead faces (item 1 + rows 50/51/54) | click-to-cycle stamp + word-counter condense (word-target offer preserved) · `FlippingStamp` hoist + oracle edges · F-0 residue · Timeline voice | walk, captured | NOT-STARTED |
+| S3 | Chrome singles + the conformance sweep (rows 44/45/46/63/67/68/69 + the Trash fork) | 27-site sweep + grep pin · tag sheet voiced · indicator ring · Restore Tutorial confirm · "pools" lesson sweep (re-seed consequence recorded) · seal-blind rename field · `blockNamingDoor` hygiene · Trash cards · closing conformance walk against the reference artifact | walk, captured | NOT-STARTED |
+
+## ENVIRONMENT TRAPS (every unit brief carries this section verbatim — the skill's rule)
+
+- **Instance checks:** `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH (the test
+  host matches mid-run). Real-store instances are identified by STORE, not path — **NEVER quit or
+  kill one** (quit-by-bundle-identity is walker law since 13u3's breach); no Release builds or
+  `/Applications` refreshes while one lives; the install refresh follows the closeout's walk, at a
+  sanctioned zero-instance window (her app quit by HER, never by a session).
+- **Builds/tests:** Mac tests run from `App/Variorum/`, suite-level `-only-testing` only; confirm
+  the "Test run with N tests" line (Swift Testing COUNTS skipped tests — read the `skipped:` lines);
+  `xcodebuild build-for-testing` compiles without the runner; **NEVER add a custom build
+  configuration** (any configuration not named exactly "Debug" builds SPM dependencies RELEASE and
+  silently strips VariorumCore's DEBUG-gated oracles); zsh `pipestatus` for pipeline exit codes.
+- **Suites beside a live session flash the test host's windows** — prefer zero-instance windows for
+  timing-sensitive measurements. The flake list (adjudicate by the paired interleaved protocol,
+  never a single isolated run): the differential-latency pin · `CanvasDragTrackingTests` ·
+  `BlocksWorkbenchFaceTests`' single-click · row 58's read-click (warm-DerivedData covariate — it
+  passed only on a fresh-DerivedData first run) · the row-49 landing arm (`BookOutlineLandingTests`'
+  collapsed-story cell) · `ModeSwitchCarryTests`' top-of-Write arm.
+- **Walks:** dev-store Debug build only (`io.lduarte.Variorum.debug`), `Tools/WalkKit/` + `cliclick`;
+  screenshots in gitignored dirs (`notes/plans/13u4-screens/`); the Debug domain's `surfaceSize.*`
+  keys may be wiped to stage cold runs (they regenerate) — NEVER the real store's.
+- **Git:** never `git checkout` over uncommitted work; commit per piece and **PUSH after every
+  commit** (CLAUDE.md's 2026-08-03 push rule; the skill's 13b-era "never push" line is superseded —
+  CLAUDE.md wins). **No commit trailers** (her 2026-09-04 rule).
+- **Backups:** any act near the real store takes the A1 rail first (WAL-safe, UTC-named) — this
+  phase should never touch it before the closeout refresh.
+
+## CAST & DISCIPLINE
+
+**Orchestrator: Fable — this session** (her kickoff word; writes no feature code beyond
+adjudication/record acts). **Implementer: `opus-implementer`, a FRESH session per unit, strictly
+sequential, one at a time, ONE acceptance unit each.** **Cold review: `fable-reviewer`** over the
+combined diff at the phase's end (the standing ladder — fresh reviewer per round, the cross-model
+flow since the implementers are Opus, cap three rounds; the seam rider makes Fable mandatory —
+E1/E2/E3 touch `TypedReturn`/`EditorTextView`/the seam roads). The hallucination guard binds every
+fix (trace the mechanism yourself; red-on-old pins, behavioural-revert verified; a pin green on
+both sides is DISMISSED as hollow and recorded). RULED BEHAVIOUR CHANGES (R-13u4-2/3) are not
+bugs — their pins are rewritten to the ruling, no red-on-old owed; DEFECTS (E2, F1 if confirmed)
+owe red-on-old. The acceptance spine (`TutorialWalkTests`) rides every unit's closing run.
+PROVISIONALs log to `notes/QUESTIONS.md` (next free **#126**). Author-only calls are hard stops.
+**Session resiliency (the checkpoint protocol, RESTATED in every brief):** commit per coherent
+piece + push after every commit · the unit record's LIVE STATUS section written at the START and
+flipped in the same commit as each piece, unverified claims marked PENDING · synchronous
+foreground waits only, via the grep-poll loop (`grep -q '<EXIT LINE>' <log> && break; sleep 5` —
+never `tail -f | grep -m1`, never a backgrounded run you end your turn on) · never spawn
+subagents · no revert starts until the record names it and the pre-revert state is COMMITTED
+(never scratchpad copies) · every death and resume noted in the record.
+
+**The walk vs. her walk.** The IMPLEMENTER walks and captures each unit on the dev-store Debug
+build (both voices, both appearances where chrome changes); the ORCHESTRATOR verifies by record
+and walks the phase's acceptance before the ladder; HER one walk rides the refreshed install at
+the end.
 
 ---
 
@@ -217,3 +355,49 @@ lesson copy:**
    the surface renders it). A restyle that renames or moves a door updates the lesson AND its
    pin together, and the re-seed consequence rides every lesson edit (record it for the
    closeout's list).
+
+---
+
+## UNIT E1 BRIEF — EMPTY BLOCKS CHAIN (item 3, R-13u4-2; self-contained — read in this order)
+
+**Read first, in full:** (1) this file's Status banner · HER ADDITIONS item 3 (her verbatim
+words — the ruling's motivation) · THE SIZING-AND-RULINGS SITTING RECORD (R-13u4-2 is yours;
+R-13u4-6 is the cast) · THE LEDGER · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the closeout-refresh
+block's seven what-changed items (item 2 — the transaction-gated decoration refresh — binds any
+editor-refresh work; item 1's gutter law binds nothing you should touch, but know it exists).
+(2) **AppSpec §7's segmentation-trigger paragraph** (the U-1 ruling this unit supersedes ONE arm
+of) and **§9's structural-undo paragraph** (R-13u-3 — `newBlock` registers undo since 13u1;
+your mint rides that road). (3) **QUESTIONS #92** — the three built PROVISIONAL Return edges;
+(c)'s empty-tail close-and-mint composes AHEAD of your chain (an empty tail's first ⏎ closes the
+tail and mints the block; subsequent ⏎ presses are your chain). (4) The code:
+`App/Variorum/Shared/EditorBrain/TypedReturn.swift` (the pure decision brain — consulted at the
+key, re-derived at the act) and its test suite; `EditorTextView.insertNewline(_:)` (the key
+intercept, after the list door). Do your own reading — never from a summary.
+
+**The build.** U-1's "nothing in an empty block" arm is SUPERSEDED (R-13u4-2): with the chip ON,
+⏎ with the caret in an EMPTY block mints a fresh empty block below through the one structural
+door and the caret lands in it — chains indefinitely. Unchanged, verify each: chip OFF stays
+Return-as-content · abandoned empties STAY, never auto-removed (U-19 (2)) · ⌥⌘Z removes one mint
+per press (R-13u-3's entry — verify your mint road registers; it should, it is `newBlock`
+through the structural door) · ⇧⏎ stays the in-block newline · the #92(c) empty-tail arm
+composes ahead. I10 note: an empty block holds one live take with `working_text=''` — legal
+since Phase 1; if you find yourself needing an Operations-layer change, STOP and report to the
+orchestrator (in-batch design forks are the architect's to rule).
+
+**The canon delta rides YOUR build** (the standing rule — deltas land with the build, exactly as
+ruled, never beyond): AppSpec §7's segmentation paragraph — the U-1 sentence's "nothing in an
+empty block" arm is replaced by the chain rule, citing R-13u4-2 (2026-09-20). Touch nothing else
+in the canonical docs.
+
+**Evidence (the unit closes on this, not on pins alone):** the `TypedReturn` arm pins (the new
+chain arm; the chip-OFF guard; the ⌥⌘Z per-press round-trip; the #92(c) composition) + a
+hands-on WALK on the dev-store Debug build: in a chip-ON note, ⏎⏎⏎ down a run of empties, type
+into several mid-run, ⌥⌘Z back one at a time; capture to `notes/plans/13u4-screens/`. Run the
+suites your diff touches + the acceptance spine (`TutorialWalkTests`) at the unit's end — NEVER
+the full suite at the start (the closeout-refresh block's baselines are the baseline).
+
+**Your record:** append a `## UNIT E1 RECORD` section to THIS file with a LIVE STATUS table from
+your FIRST commit (per-piece lines: DONE (hash) · IN-PROGRESS — exactly what remains ·
+NOT-STARTED; unverified claims marked PENDING), flip the ledger's E1 row in your closing commit,
+and name every seam file your diff touches (the ladder's Fable reviewer reads that list). The
+checkpoint protocol in CAST & DISCIPLINE binds you from the first commit.
