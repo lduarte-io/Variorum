@@ -3224,7 +3224,7 @@ note honored: round 1's R1-3 disposition sentence — "each speaking the exact `
 sentence the post-⏎ road speaks" — was FALSIFIED at the Write door and corrected by round 2's
 R2-1; quote it only with that correction).
 
-**Finals:** core `swift test` **1604/174** green · the FULL Mac suite **[FINAL-MAC]** (the
+**Finals:** core `swift test` **1604/174** green · the FULL Mac suite **2900/484 — green with ONLY row 58's recorded environment red (both issues one test, the byte-identical condition; the row-49-family arms did not recur in the closing run)** (the
 closing run; the tolerated reds are row 58's environment condition — now carrying G's
 warm-DerivedData covariate — and the row-49-family load arms under the paired protocol) ·
 tutorial spine green in-run · iOS build green · the FULL mobile suite **626/106 PASSED with 4

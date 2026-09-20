@@ -172,7 +172,7 @@ short rulings before build; the rest are direct fix/face rows.)*
 
 ## REFRESHED AT THE 13u3 CLOSEOUT (2026-09-19 — kickoff-ready)
 
-**BASELINES AT OPEN:** core `swift test` **1604/174** green · the FULL Mac suite **[FINAL-MAC]**
+**BASELINES AT OPEN:** core `swift test` **1604/174** green · the FULL Mac suite **2900/484 — green with ONLY row 58's recorded environment red (both issues one test, the byte-identical condition; the row-49-family arms did not recur in the closing run)**
 — green with **1 recorded environment red** (`theReadClickLandsInIndexAtThatBlock`, row 58 —
 NOW CARRYING UNIT G's warm-DerivedData covariate: it passed only on a fresh-DerivedData first
 run, on two trees, and failed all five warm runs including alone; treat a red there as that
