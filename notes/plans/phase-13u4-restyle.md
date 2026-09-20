@@ -110,7 +110,7 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 
 | # | Unit | Contents (short) | Evidence | Status |
 |---|---|---|---|---|
-| E1 | Empty blocks chain (item 3, R-13u4-2) | `TypedReturn`'s empty-block arm → the chain; canon delta rides the build | pins + walk | NOT-STARTED |
+| E1 | Empty blocks chain (item 3, R-13u4-2) | `TypedReturn`'s empty-block arm → the chain; canon delta rides the build | pins + walk | **DONE** — 9 pins (7 red-first) · walked both voices + dark · AppSpec §7 delta landed · record below |
 | E2 | ⌘⌫ checkbox-seam defect (item 11) | trace the mechanism first; red-on-old owed | red-on-old + walk on her verbatim repro | NOT-STARTED |
 | E3 | Merge keeps the newlines (item 8, R-13u4-3) | the rendering join, every door; ceremony default; canon delta rides | state-transition suite + walk | NOT-STARTED |
 | C1 | Capture microsyntax (item 2, R-13u4-1) | shared rule + both Mac doors; `applyTypedPath` hoist; phone face → parity row | pins + capture walk | NOT-STARTED |
@@ -420,8 +420,8 @@ no lesson copy edited (see "Judgment calls" below for why); the phone's Return m
 | 1 | The record + the traced mechanism + `.gitignore` for `13u4-screens/` | DONE (bc362f6a) |
 | 2 | The pins written to the ruling (RED on the pre-change tree, recorded) | DONE (40e1fc92) — the red run below |
 | 3 | The brain change (`TypedReturn`) + the dispatch + the canon delta (AppSpec §7) | DONE (6e111199) — 78/7 green, below |
-| 4 | The walk on the dev-store Debug build, captured | IN-PROGRESS — building the Debug app |
-| 5 | Closing suites + the ledger's E1 row | NOT-STARTED |
+| 4 | The walk on the dev-store Debug build, captured | DONE (pending hash) — 21 crops + 12 full captures |
+| 5 | Closing suites + the ledger's E1 row | DONE (this commit) — 174/20 + 14/2 + iOS, below |
 
 ### THE MECHANISM, TRACED (read before the diff — what changes and what cannot)
 
@@ -516,6 +516,78 @@ already carry distinct offsets by the separator rule) · `runStructural` and its
 `Operations` · `PaneTextAuthority` · every list door (`MarkdownActs`), whose intercept still runs
 FIRST.
 
-### EVIDENCE
+### EVIDENCE — THE WALK (the unit closes on this, not on pins)
 
-PENDING — the walk.
+**Build:** `App/Variorum/DerivedData/13u4e1/Build/Products/Debug/Variorum.app`
+(`io.lduarte.Variorum.debug`, the fenced dev store; `/Applications/Variorum.app` was never
+touched and no instance of hers existed at any point — `pgrep -fl 'Variorum.app/Contents/MacOS'`
+checked at the start, before every quit and at the end). Captures:
+`notes/plans/13u4-screens/e1/` (gitignored) — the full window per step, plus `e1/crops/` with the
+21 read crops named in order. Seams were ON (⌘⇧B) for the whole walk, because an empty block is
+otherwise invisible; the bottom bar's `block N/M` is the second witness at every step.
+
+| # | Step | What the app did | Capture |
+|---|---|---|---|
+| 1 | New note via the shelf's quick-entry bar (`alpha`), Write, caret at the block's end, ⏎ | an empty block below, caret in it — **block 2/2** | `crops/01-*` |
+| 2 | **⏎ again, in that EMPTY block** — the unit | **block 3/3**: another empty below, caret in it. *(On the pre-change build this was the ruled no-op and the bar stayed 2/2.)* | `crops/02-bar-block-3of3-THE-CHAIN.png` |
+| 3 | ⏎ a third time | a run of three empties under `alpha`, seams drawn for each — her *"a series of empty blocks"* | `crops/03-*` |
+| 4 | Click into the MIDDLE empty (**block 3/4**) and type `two` | the words land there; the empties above AND below STAY (U-19 (2)); `1w block · 2w in note` | `crops/04-*`, `crops/05-*` |
+| 5 | ⌥⌘Z | receipt **"Undid: New Block"**, **block 3/3** — ONE mint per press (R-13u-3's road) | `crops/06-*` |
+| 6 | ⌥⌘Z again | **block 2/2** — the second mint back too; the block she had typed into went to the tray rather than vanishing (the standing insurance behaviour, not this unit's change) | `crops/07-*` |
+| 7 | Aa ▸ **newlines make blocks: on → off**, then ⏎ ⏎ in the empty block | **block 2/2, unchanged** — the newlines are content; the chip's own receipt speaks. Chip turned back ON afterwards | `crops/08-*`, `09`, `10`, `11` |
+| 8 | **Study voice** (Settings ▸ Appearance), ⏎ at `alpha`'s end then ⏎ in the empty it made | **block 3/4** — identical chain in the second voice; voice restored to Terminal afterwards | `crops/12-*` |
+| 9 | **DARK** (`appearanceChoice dark`, relaunch), Terminal voice, ⏎ in an empty block | **block 3/4 → 4/5**, caret in the new one; seams legible on the black room | `crops/13-*`, `crops/14-*` |
+
+**Dev-store state left as found:** voice back to **Terminal**, `appearanceChoice` back to
+**system**, the note's chip back **ON**, the app QUIT BY IDENTITY
+(`tell application id "io.lduarte.Variorum.debug" to quit`, never a ⌘Q keystroke — the 13u3
+breach's walker law). The walk's own note (`2026-09-20`, in no book) is left in the dev store, as
+every walk's fixtures are. Block seams (⌘⇧B) were left ON — a per-window toggle, not a stored
+setting.
+
+**Both appearances AND both voices were walked**, though this diff contains **zero view or chrome
+code** (the change is one arm of a pure decision brain plus a switch arm) — so the appearance is
+not a variable for it; the dark pass is recorded because the plan's bar asks for it and it was a
+minute's work.
+
+### CLOSING RUNS (at the unit's END — never the full suite at the start)
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| The Return family + the neighbours it shares the key with + **the acceptance spine** | `xcodebuild test -scheme Variorum -destination platform=macOS` with `-only-testing:` for `TypedReturnTests` · `TypedReturnKeyTests` · `ReturnKeyTraceTests` · `SoftNewlineTests` · `ReturnKeyUndoSignTests` · `ListContinuationTests` · `NestedListDoorTests` · `CrossBlockCompoundTests` · `MenuFlightDoorAwaitTests` + the ELEVEN `Tutorial*` types | **174 tests in 20 suites passed** (exit 0, no skips) |
+| The edit-routing pair (re-run under their real TYPE names — the `-only-testing` file-name trap: `VariorumTests/EditRoutingTests` matched NOTHING in the run above and was silently ignored, exactly the documented class; the file holds `ArmedEditTests` + `MacEditRoutingTests`) | `-only-testing:VariorumTests/ArmedEditTests -only-testing:VariorumTests/MacEditRoutingTests` | **14 tests in 2 suites passed** |
+| **iOS build** — `Shared/EditorBrain/` compiles into `VariorumMobile` too, so a Shared edit owes it | `xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS -derivedDataPath DerivedData/13u4e1-ios` | **BUILD SUCCEEDED** |
+
+No full-suite run was made at this unit's start; the plan's closeout-refresh baselines stand as
+the baseline (the standing rule).
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **`case nothing` removed rather than left dead.** Nothing returns it after the ruling. Left in
+   place it would be a case citing a superseded ruling that no code path can produce — the drift
+   class this repo has retired twice by name (`noDailyBook`; AppSpec §9). Reversing costs one enum
+   case and one `case .content, .nothing:`.
+2. **A GAP SLOT's empty entry chains like any other empty block.** A gap slot (a missing block or
+   no renderable variant — a sync-race state) renders as a zero-length entry, so the new arm
+   answers `.emptyBlock` there too and the mint's refusal, if the op refuses, is spoken by the
+   door (P-2). Deliberate, and it is exactly what ⌘⇧⏎ has always done from the same caret — the
+   two doors share the body precisely so they cannot answer one gesture two ways. No new refusal
+   was invented (that would be product invention).
+3. **The tutorial's Return lesson was NOT edited.** Its sentence names the two positions it
+   teaches (*"at the end of a paragraph, a new empty block below it; in the middle of one, a
+   divide at the cursor"*) and never taught the superseded arm, so nothing in it became false.
+   Adding "…and in an empty one, another below" would be new copy — and every lesson edit carries
+   the re-seed consequence, which is a cost with no correction behind it here. Named for the
+   closeout in case the phase wants the sentence widened at S-something.
+4. **The phone is untouched.** AppSpec §7 says the phone's Return model is unchanged and no mobile
+   code consults `TypedReturn.act`; **a MOBILE PARITY row is owed at the closeout** — the phone's
+   empty-block Return should chain too, and that is the mobile catch-up's call, not this unit's.
+5. **No `notes/QUESTIONS.md` entry was opened.** R-13u4-2 settles the arm; the three neighbours
+   (#92 (a)/(b)/(c)) are untouched and still say what they said — (c) is now pinned as composing
+   AHEAD of the chain.
+
+### WHAT A FRESH SESSION WOULD NEED TO FINISH THIS (nothing — but for the record)
+
+Everything is committed and pushed: the pins (`TypedReturnTests`, `ReturnKeyTraceTests`), the
+brain (`TypedReturn.swift`), the dispatch (`EditorSurfaceController.runTypedReturnAct`), the
+canon delta (AppSpec §7), the walk captures (gitignored, listed above), this record.
