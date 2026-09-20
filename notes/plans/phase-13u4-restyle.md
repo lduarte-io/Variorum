@@ -638,15 +638,7 @@ Debug build reproducing her exact two lines, ⌘⌫ at the second line's end, be
 to `notes/plans/13u4-screens/e2/`. Run the suites your diff touches + the acceptance spine
 (`TutorialWalkTests`) at the unit's end — NEVER the full suite at the start.
 
-**Your record:** append a `## UNIT E2 RECORD` section to THIS file with a LIVE STATUS table from
-your FIRST commit (unverified claims PENDING), the traced mechanism stated as inputs → wrong
-state, the red-run evidence, the class-sweep table, and the seam-file list; flip the ledger's E2
-row in your closing commit. The checkpoint protocol in CAST & DISCIPLINE binds you from the
-first commit.
-
----
-
-## UNIT E2 RECORD — THE ⌘⌫ CHECKBOX-SEAM DEFECT (item 11)
+**Your record:** append a `## UNIT E2 RECORD — THE ⌘⌫ CHECKBOX-SEAM DEFECT (item 11)
 
 **WHAT THIS UNIT DID NOT DO (the record's first line):** PENDING — written at the close.
 
@@ -654,13 +646,97 @@ first commit.
 
 | # | Piece | Status |
 |---|---|---|
-| 1 | The record skeleton + the reading | DONE (this commit) |
-| 2 | THE TRACE — what ⌘⌫ proposes, measured in AppKit and through the app's road | NOT-STARTED |
-| 3 | The red-on-old pin on her verbatim fixture (or the HOLLOW verdict + stop) | NOT-STARTED |
-| 4 | The fix at the traced site + the delete-family class sweep | NOT-STARTED |
-| 5 | The walk on the dev-store Debug build, captured | NOT-STARTED |
-| 6 | Closing suites + the ledger's E2 row | NOT-STARTED |
+| 1 | The record skeleton + the reading | DONE (572afc70) |
+| 2 | THE TRACE — what each delete chord proposes, measured in bare AppKit, on a TK2 view, and through the app's own road | DONE (this commit) — 10 pins, all GREEN on the shipped tree |
+| 3 | The brief's stated pin, written and run → **the HOLLOW verdict** (no fix; the stop rule) | DONE (this commit) — the two ⌘⌫ pins are it |
+| 4 | The delete-family class sweep, each chord verdicted | DONE (this commit) — the table below |
+| 5 | The walk on the dev-store Debug build, captured (her exact two lines, both chords) | NOT-STARTED |
+| 6 | QUESTIONS #126 (her call, nothing implemented) + closing suites + the ledger's E2 row | NOT-STARTED |
 
-### THE MECHANISM, TRACED
+### THE VERDICT IN ONE LINE
 
-PENDING — piece 2. Nothing is claimed here until it is measured.
+**The finding AS STATED is HOLLOW — ⌘⌫ cannot reach through a newline, measured five ways —
+and her reported OBSERVABLE is REAL and reproduces byte-for-byte under the neighbouring chord
+⌥⌫, where it is AppKit's own word-delete rule.** Per the brief's stop rule (*"If the pin runs
+GREEN on the shipped code, the finding is hollow as stated — STOP, record what you measured, and
+report to the orchestrator instead of fixing something else"*), **no product code was changed by
+this unit.** What ⌥⌫ should do at a seam is a product call: logged as QUESTIONS #126, not
+implemented.
+
+### THE MECHANISM, TRACED (measured, never assumed — `CommandDeleteLineTests.swift`)
+
+**Inputs → what the KEY proposes.** Her two lines are 95 + 1 + 6 UTF-16 units
+(`- [ ] Create carousel … to start?)` · `\n` · `- [ ] ` — the second line is
+`MarkdownEditing.continuedCheckboxLead`, which is what 13k K5's ⏎ actually types). With the caret
+at the document end (the end of her second line), driven as REAL key events through
+`keyDown` → `interpretKeyEvents` → the standard key bindings:
+
+| Chord | Selector dispatched | Range proposed | What it takes |
+|---|---|---|---|
+| ⌫ | `deleteBackward:` | `{101, 1}` | the trailing space |
+| **⌥⌫** | **`deleteWordBackward:`** | **`{88, 14}`** | **`start?)⏎- [ ] ` — HER SENTENCE, byte for byte** |
+| **⌘⌫** | **`deleteToBeginningOfLine:`** | **`{96, 6}`** | **exactly the second line; the first survives byte-intact** |
+| ⌦ | `deleteForward:` | — | nothing (the caret is at the document end) |
+| ⌥⌦ | `deleteWordForward:` | — | nothing |
+| ⌘⌦ | `noop:` | — | nothing — **the chord is bound to nothing on this layout** |
+
+**Why ⌘⌫ is STRUCTURALLY incapable of the reported gesture, not merely observed not to do it.**
+Two independent facts, both pinned:
+
+1. **`deleteToBeginningOfLine:` means the PARAGRAPH on macOS 26, not the visual line.** Measured
+   on a 300 pt-wide view where her first line wraps onto three fragments: ⌘⌫ at its end proposes
+   `{0, 95}` — the whole paragraph, not the last fragment
+   (`commandDeleteResolvesToTheParagraphNotTheVisualLine`). Its unit therefore *stops* at a
+   newline by definition; there is no wrap-related off-by-a-fragment for it to have.
+2. **The editor's block separator IS a newline** — `EditorDocumentCore.separator = "\n"`
+   (author-confirmed interpretation 2a). So a paragraph-scoped deletion cannot reach through a
+   block seam either: the seam is the paragraph's own stopping character.
+
+Measured five ways, all agreeing: bare `NSTextView` · an explicit TEXTKIT 2 view built the way
+`EditorTextView` builds its stack (TEXTKIT2_NOTES §3's selection family was the live suspect —
+it is not implicated) · the app's real editor in **her own one-block repro shape** · the app's
+real editor in the **two-block shape** · a wrapped single paragraph as the control.
+
+**Which shape her note is in — the brief's question, answered by the pin rather than assumed.**
+She *typed* the list, and 13k K5's list door claims ⏎ inside a list (`insertNewline` consults
+`MarkdownActs.listReturn` BEFORE `claimTypedReturn`), so the newline is CONTENT and **both items
+live in ONE block** — asserted in `herNote`, which drives the real ⏎ key and then checks
+`index.entries.count == 1`. So in her own repro there is no seam at that newline at all, and no
+seam guard (`emptyBlockDeletion`, `textedSeamPair`, the cross-block planners) is even consulted:
+the verdict is `.block(0)` and the edit is an ordinary in-block one. **The two-block shape is
+real too** (a PASTED or imported checklist segments on entry — one block per item), so both are
+pinned; ⌘⌫ is correct in both.
+
+**What DOES reproduce her sentence.** ⌥⌫ takes `start?)⏎- [ ] ` — and it takes it in a bare
+`NSTextView` with nothing of Variorum's wired to it
+(`optionDeleteIsTheChordThatTakesHerContent`). In her one-block note the app therefore does
+byte-for-byte what TextEdit does with that keystroke, across a newline that is content (I4). In
+the two-block shape the same span crosses a seam and takes the ruled cross-block road (R-13u-2 /
+item 5): the block the span covers WHOLE rides `deleteBlock` (the Trash/tray road, recoverable,
+receipt spoken) and the surviving end keeps its cut text.
+
+### THE CLASS SWEEP — every delete-family chord at that caret, verdicted
+
+Each row is measured, not reasoned: the trace suite drives the chord and the editor suite checks
+what the store holds afterwards.
+
+| Chord | At the second line's END | At the seam's LEADING side (end of block 1) | Verdict |
+|---|---|---|---|
+| ⌫ | one character of the caret's own block | the ruled seam keystroke — A7's empty-block carve / #34's texted-seam merge | **provably safe** (its range is ≤ 1 char; the seam carves own that geometry whole) |
+| ⌥⌫ | `start?)⏎- [ ] ` — crosses a content newline (one block) or a seam (two blocks) | n/a (backward) | **REAL, and it is the reported observable** — AppKit's own rule in one block; the ruled cross-block road across a seam. **PRODUCT CALL, QUESTIONS #126 — deliberately NOT fixed** |
+| ⌘⌫ | the second line only | n/a (backward) | **provably safe** — paragraph-scoped, and the separator is a newline |
+| ⌦ | nothing (document end) | joins the two blocks with the ruled merge join (` `) | **ruled behaviour**, and E3 is the unit that changes that join (R-13u4-3) — untouched here |
+| ⌥⌦ | nothing | takes block 2's first word; the span covers block 2 whole, so it rides the cross-block road | **same class as ⌥⌫**, same product call |
+| ⌘⌦ | nothing — `noop:` | nothing — `noop:` | **provably safe** — unbound on this layout |
+
+**The pane surfaces** (`PaneTextView`, Takes/Lenses) are outside the class by construction: a
+pane holds ONE take's buffer with no separators in it, so no delete chord there can reach a seam.
+The INLINE (book) editor is the same `EditorTextView` subclass with the same bindings and is
+covered by the same pins.
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
+
+**NONE.** `BlockRangeIndex`, `EditorTextView`, `TypedReturn`, `PaneTextAuthority`,
+`EditorViewModel`, `EditorSurfaceController`, `MarkdownActs`, `Sources/VariorumCore/` — all
+untouched. The unit's whole diff is ONE new test file
+(`App/Variorum/VariorumTests/CommandDeleteLineTests.swift`) and this record.
