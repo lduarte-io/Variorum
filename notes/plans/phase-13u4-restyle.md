@@ -640,7 +640,15 @@ Debug build reproducing her exact two lines, ⌘⌫ at the second line's end, be
 to `notes/plans/13u4-screens/e2/`. Run the suites your diff touches + the acceptance spine
 (`TutorialWalkTests`) at the unit's end — NEVER the full suite at the start.
 
-**Your record:** append a `## UNIT E2 RECORD — THE ⌘⌫ CHECKBOX-SEAM DEFECT (item 11)
+**Your record:** append a `## UNIT E2 RECORD` section to THIS file with a LIVE STATUS table from
+your FIRST commit (unverified claims PENDING), the traced mechanism stated as inputs → wrong
+state, the red-run evidence, the class-sweep table, and the seam-file list; flip the ledger's E2
+row in your closing commit. The checkpoint protocol in CAST & DISCIPLINE binds you from the
+first commit.
+
+---
+
+## UNIT E2 RECORD — THE ⌘⌫ CHECKBOX-SEAM DEFECT (item 11)
 
 **WHAT THIS UNIT DID NOT DO (the record's first line): IT CHANGED NO PRODUCT CODE AT ALL.** No
 fix was made, because the finding as stated does not reproduce — the brief's own stop rule
@@ -657,11 +665,11 @@ unit's whole diff is one new test file and this record.
 | # | Piece | Status |
 |---|---|---|
 | 1 | The record skeleton + the reading | DONE (572afc70) |
-| 2 | THE TRACE — what each delete chord proposes, measured in bare AppKit, on a TK2 view, and through the app's own road | DONE (this commit) — 10 pins, all GREEN on the shipped tree |
-| 3 | The brief's stated pin, written and run → **the HOLLOW verdict** (no fix; the stop rule) | DONE (this commit) — the two ⌘⌫ pins are it |
-| 4 | The delete-family class sweep, each chord verdicted | DONE (this commit) — the table below |
-| 5 | The walk on the dev-store Debug build, captured (her exact two lines, both chords) | DONE (this commit) — 8 captures + 4 named crops |
-| 6 | QUESTIONS #126 (her call, nothing implemented) + closing suites + the ledger's E2 row | DONE (this commit) — 122/11 + the spine 78/11, below |
+| 2 | THE TRACE — what each delete chord proposes, measured in bare AppKit, on a TK2 view, and through the app's own road | DONE (2ec16d26) — 10 pins, all GREEN on the shipped tree |
+| 3 | The brief's stated pin, written and run → **the HOLLOW verdict** (no fix; the stop rule) | DONE (2ec16d26) — the two ⌘⌫ pins are it |
+| 4 | The delete-family class sweep, each chord verdicted | DONE (2ec16d26) — the table below |
+| 5 | The walk on the dev-store Debug build, captured (her exact two lines, both chords) | DONE (ceaeaabe) — 8 captures + 4 named crops |
+| 6 | QUESTIONS #126 (her call, nothing implemented) + closing suites + the ledger's E2 row | DONE (94ffb4cc) — 122/11 + the spine 78/11, below |
 
 ### THE VERDICT IN ONE LINE
 
