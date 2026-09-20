@@ -96,7 +96,12 @@ struct StructuralMergeCeremonyTests {
             #expect(divided.second.variants.map(\.workingText)
                 == ["One omega.", "Two omega."])
 
-            // Pair 1+1 and 2+2 (canon join = a single space here).
+            // Pair 1+1 and 2+2. The DOOR default is the ceremony's default
+            // join, and since R-13u4-3 that is the newline (the pairings
+            // read `MergeJoin.canon` and the texts joined with a space
+            // until E3 rewrote this to the ruling); a SENTENCE cut that
+            // wants its space back chooses `space` in the sheet, which is
+            // the pin below this one.
             let firstFan = divided.first.variants
             let secondFan = divided.second.variants
             let restored = try ops.mergeCeremony(
@@ -104,19 +109,19 @@ struct StructuralMergeCeremonyTests {
                 pairings: [
                     .init(firstVariantID: firstFan[0].id,
                           secondVariantID: secondFan[0].id,
-                          join: MergeJoin.canon(
+                          join: MergeJoinRule.door.join(
                             head: firstFan[0].workingText,
                             tail: secondFan[0].workingText)),
                     .init(firstVariantID: firstFan[1].id,
                           secondVariantID: secondFan[1].id,
-                          join: MergeJoin.canon(
+                          join: MergeJoinRule.door.join(
                             head: firstFan[1].workingText,
                             tail: secondFan[1].workingText)),
                 ],
                 carries: [])
 
             #expect(restored.variants.map(\.workingText)
-                == ["One alpha. One omega.", "Two alpha. Two omega."],
+                == ["One alpha.\nOne omega.", "Two alpha.\nTwo omega."],
                 "divide-then-pair-back restores the takes whole — nothing cartesian")
             #expect(restored.variants.count == 2)
         }
@@ -487,10 +492,11 @@ struct StructuralMergeCeremonyTests {
                 b.block.id, c.block.id,
                 pairings: [.init(
                     firstVariantID: b.variant.id, secondVariantID: c.variant.id,
-                    join: MergeJoin.canon(head: "First half.", tail: "Second half."))],
+                    join: MergeJoinRule.door.join(
+                        head: "First half.", tail: "Second half."))],
                 carries: [])
 
-            #expect(result.variants.map(\.workingText) == ["First half. Second half."])
+            #expect(result.variants.map(\.workingText) == ["First half.\nSecond half."])
             #expect(try db.fetchInt(
                 "SELECT COUNT(*) FROM variant WHERE block_id = ?", [result.block.id]) == 1)
             #expect(result.block.defaultVariantId == result.variants[0].id)

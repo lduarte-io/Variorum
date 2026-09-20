@@ -16,9 +16,11 @@ struct StructuralMergeTests {
 
             let result = try ops.merge(b.block.id, c.block.id)
 
-            // A': one variant, joined with a single space (author decision
-            // 2026-07-06 — a raw no-space join was more annoying than helpful).
-            #expect(result.variant.workingText == "First half. Second half.")
+            // A': one variant, joined with the RENDERING join — exactly one
+            // newline (author ruling R-13u4-3, 2026-09-20; this pin read
+            // "First half. Second half." until 13u4 UNIT E3 rewrote it to
+            // the ruling, which supersedes the 2026-07-06 single space).
+            #expect(result.variant.workingText == "First half.\nSecond half.")
             #expect(try db.fetchInt(
                 "SELECT COUNT(*) FROM variant WHERE block_id = ?", [result.block.id]) == 1)
             #expect(result.block.defaultVariantId == result.variant.id)
@@ -64,28 +66,84 @@ struct StructuralMergeTests {
 
             let result = try ops.merge(b.block.id, c.block.id)
 
-            #expect(result.variant.workingText == "Alt first. Second half.")
+            #expect(result.variant.workingText == "Alt first.\nSecond half.")
             #expect(try db.fetchInt(
                 "SELECT COUNT(*) FROM variant WHERE block_id = ? AND deleted_at IS NULL",
                 [b.block.id]) == 2)
         }
     }
 
-    @Test func mergeNeverDoublesExistingEdgeWhitespace() throws {
-        // The joining space appears only when neither side's edge already
-        // carries whitespace — and a divide→merge round trip restores the
-        // sentence exactly (the seam space divide trimmed comes back).
+    @Test func aDoorMergeJoinsWithoutTrimmingOrCondition() throws {
+        // **R-13u4-3 (2026-09-20) — the ruled behaviour, replacing this
+        // test's own former subject.** It used to be
+        // `mergeNeverDoublesExistingEdgeWhitespace`: the space appeared only
+        // when neither edge already carried whitespace, and a MID-SENTENCE
+        // divide→merge round trip restored the sentence exactly. The door
+        // rule has no conditionals left, so what it asserts now is the pair
+        // her ruling names — the trade she accepted, and the gain.
         try withOperations { ops, db in
             let post = try ops.createPost()
+
+            // THE TRADE (stated at the sitting, accepted): a mid-sentence
+            // cut comes back with a newline, not the space it was cut at.
             let a = try ops.seedBlock(in: post.id, text: "One alpha. One omega.")
             let divided = try ops.divide(a.block.id, cut: 11)
             let restored = try ops.merge(a.block.id, divided.block.id)
-            #expect(restored.variant.workingText == "One alpha. One omega.")
+            #expect(restored.variant.workingText == "One alpha.\nOne omega.")
 
+            // NOTHING IS TRIMMED: an edge that already carries whitespace
+            // keeps it AND gets the newline — "byte-exact, no trimming, no
+            // conditionals" (this line asserted "Trailing space already
+            // separated" before the ruling).
             let b = try ops.seedBlock(in: post.id, text: "Trailing space ")
             let c = try ops.seedBlock(in: post.id, text: "already separated")
             let joined = try ops.merge(b.block.id, c.block.id)
-            #expect(joined.variant.workingText == "Trailing space already separated")
+            #expect(joined.variant.workingText == "Trailing space \nalready separated")
+        }
+    }
+
+    @Test func aParagraphCutNowRoundTripsByteExactly() throws {
+        // **THE GAIN her ruling buys** (her words: *"Merging should not
+        // remove a newlines in the middle of the merge selected area, it
+        // should just make all newlines within the selected portion part of
+        // a single block"*): what the page showed as two paragraphs comes
+        // back as the same bytes it started as — impossible under the space
+        // join, which is the whole reason the rule changed.
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let a = try ops.seedBlock(in: post.id, text: "Paragraph one.")
+            let b = try ops.seedBlock(in: post.id, text: "Paragraph two.")
+            let c = try ops.seedBlock(in: post.id, text: "Paragraph three.")
+
+            // The page (the editor surface joins blocks with one "\n").
+            let page = "Paragraph one.\nParagraph two.\nParagraph three."
+
+            let first = try ops.merge(a.block.id, b.block.id)
+            let whole = try ops.merge(first.block.id, c.block.id)
+            #expect(whole.variant.workingText == page,
+                    "a run merged block by block reads byte-identical to the page")
+        }
+    }
+
+    @Test func aDeleteKeystrokesMergeKeepsTheShippedJoin() throws {
+        // **The DELETES half of R-13u4-3's classification, at the operation
+        // itself.** The seam carve and the cross-block compound pass
+        // `.deleteKeystroke`, and they must keep the pre-ruling join byte
+        // for byte — a delete that produced the newline it had just removed
+        // would visibly do nothing. This pin is a GUARD, green on both sides
+        // of the ruling by design.
+        try withOperations { ops, db in
+            let post = try ops.createPost()
+            let b = try ops.seedBlock(in: post.id, text: "First half.")
+            let c = try ops.seedBlock(in: post.id, text: "Second half.")
+            let joined = try ops.merge(b.block.id, c.block.id, joining: .deleteKeystroke)
+            #expect(joined.variant.workingText == "First half. Second half.")
+
+            // …including its one conditional, which the door rule dropped.
+            let d = try ops.seedBlock(in: post.id, text: "Trailing space ")
+            let e = try ops.seedBlock(in: post.id, text: "already separated")
+            let bare = try ops.merge(d.block.id, e.block.id, joining: .deleteKeystroke)
+            #expect(bare.variant.workingText == "Trailing space already separated")
         }
     }
 

@@ -912,8 +912,8 @@ question, the restyle spine), no `Sync/`, no schema, no migration.
 
 | # | Piece | Status |
 |---|---|---|
-| 1 | The record + the READING + the DOORS-vs-DELETES enumeration (every road traced, not assumed) | IN-PROGRESS |
-| 2 | The core rule (`MergeJoinRule` + `Operations.merge`) + the core pins rewritten to the ruling + the canon delta | NOT-STARTED |
+| 1 | The record + the READING + the DOORS-vs-DELETES enumeration (every road traced, not assumed) | DONE (7b60f043 + this commit) — the table below |
+| 2 | The core rule (`MergeJoinRule` + `Operations.merge`) + the core pins rewritten to the ruling + the canon delta | DONE (this commit) — core **1609/174 green**, below |
 | 3 | The Mac consumers (the seam differential, the carry-all/ceremony defaults, the two DELETE roads' guards) + the Mac pins | NOT-STARTED |
 | 4 | The phone's door (core-side flip) + the mobile pins + the iOS build | NOT-STARTED |
 | 5 | The walk on the dev-store Debug build, captured | NOT-STARTED |
@@ -921,7 +921,47 @@ question, the restyle spine), no `Sync/`, no schema, no migration.
 
 ### THE CLASSIFICATION — EVERY ROAD THAT REACHES THE MERGE JOIN
 
-*(the architect's application note, built to; each row traced by reading the road, never assumed —
-filled in as the pieces land)*
+*(the architect's application note, built to. Every row was traced by reading the road end to end —
+door → view model → controller → the op — never inferred from a name. `grep -rn "MergeJoin"` +
+`grep -rn "\.merge(\|mergeCeremony\|mergeChain\|mergeSelected\|mergePicked"` over `Sources/` and
+`App/` are the enumeration's two sweeps; every hit is in this table.)*
 
-PENDING — piece 1.
+| # | Road (the door she touches) | Reaches the join via | CLASS | What it does after E3 |
+|---|---|---|---|---|
+| 1 | Write's block ▾ **Merge** / **⌘⇧M** / context menu / ⌘K palette, unfanned pair | `EditorViewModel.mergeBlocks` → `StructuralGesturePlanner.plan(.mergeBlocks)` → `.merge` → `runInstantMerge` → `ops.merge` | **DOOR** | `top + "\n" + bottom` |
+| 2 | The same door on a **fanned** pair (J4b's carry-all) | → `runCarryAllMerge` → `CarryAllMerge.compose` → `ops.mergeCeremony` (one pairing + carries) | **DOOR** | the pairing's default join is the door rule |
+| 3 | The same door over a **run of 3+** (the N-way chain) | → `.mergeChain` → `runMergeChain` → `MergeChainRun.run` → `ops.merge` per plain link, `ops.mergeCeremony` per carry-all link | **DOOR** | every seam in the run |
+| 4 | **Merge choosing takes… / ⌥⌘⇧M** — the ceremony sheet's per-pairing default (and a ＋ placed by hand) | `openMergeCeremony` → `prePairing` / `pairMergeTakes` → `MergePairingDraft.join` → `ops.mergeCeremony` | **DOOR** | default newline; **space · nothing still choosable per pairing** (unchanged control, unchanged preview) |
+| 5 | The ceremony sheet's **preset row** (Bring every take · Only the shown ones) at 2 blocks | `confirmMergeCeremony` → `runCarryAllMerge` / `runInstantMerge` | **DOOR** | as rows 1–2 |
+| 6 | The **run choice sheet** (U-16, 3+ blocks: Bring every take · Only the shown ones) | `openMergeRunChoice` → `runMergeChain(bringEveryTake:)` | **DOOR** | as row 3 |
+| 7 | The **Takes board's** ⌘-click bulk bar | `TakesStructureController.mergeSelectedBlocks` → `MergeChainRun.run` | **DOOR** | as row 3 (one shared body) |
+| 8 | The **Blocks workbench's** bulk bar | `BlockTOCView.mergePicked` → `MergeChainRun.run` | **DOOR** | as row 3 (one shared body) |
+| 9 | The **phone's** ⋯ **Merge with Previous** | `MobileStructural.mergeWithPrevious` → `ops.merge` / `ops.mergeCeremony` | **DOOR** | flips with the Mac (the rule is core-side — the U-2 keep-on-top precedent) |
+| 10 | **Make Block across blocks** (⌘⇧K over a span that crosses seams) | `confirmCrossBlockMakeBlock` → divides at the edges, then `ops.merge` per piece | **DOOR** — *see the note below; this road is NOT in the brief's enumeration and the classification is mine* | the span becomes one block reading byte-identical to what she selected |
+| 11 | **The seam carve** — ⌫ at a block's start / ⌦ at the previous block's end / deleting the separator (#34's texted-seam merge) | `planSeamMerge` → `runSeamMerge` → `runInstantMerge(joining: .deleteKeystroke)` → `ops.merge` | **DELETE** | **byte-unchanged**: the shipped space-unless-edged join |
+| 12 | **The cross-block compound's edge-join** — a delete/replace whose span crosses seams and joins the surviving ends | `CrossBlockCompound.apply` → `ops.merge(joining: .deleteKeystroke)` → `ops.autosave` overwrites with `leading.newText + trailing.newText` | **DELETE** | **byte-unchanged** — and doubly so: the join character never survives the compound's own autosave (pinned) |
+
+**Row 10, said out loud, because the brief's enumeration did not name it.** Make Block across
+blocks is a deliberate gesture behind a confirm — never a keystroke that deletes something — and
+its whole promise is that the span she selected becomes one block. Her ruling's own sentence is
+literally about that shape: *"it should just make all newlines within the selected portion part of
+a single block."* Under the old join a span crossing two paragraphs came back with the paragraph
+break replaced by a space; under the door rule it is byte-identical to what she selected. So it
+fits the DOORS class on the ruling's own words rather than fitting neither — which is why it was
+built rather than returned to the orchestrator. **Reversible in one argument** (`joining:
+.deleteKeystroke` at `confirmCrossBlockMakeBlock`'s loop) if the architect reads it the other way.
+
+**Roads that touch the join brain but mint no text** (checked, listed so the sweep is complete):
+the ceremony sheet's per-pairing **picker** and **preview** (`MergeCeremonySheet`) read
+`MergeJoin` and are unchanged — the preview joins through the same brain the op uses, so it
+cannot lie by a byte; `AppSession.mergeJoinMemory` (ruling 3's remembered choice) is unchanged and
+still outranks the default when set; `MergeArrangementCopy.sentence` speaks the join's WORD and
+already had "join on a new line".
+
+**One consumer outside the doors, which had to move with the rule:**
+`StructuralSeamEdit.derive`'s `.merge` arm decides the differential text edit by BYTE EQUALITY
+against the candidate joins (it knew `" "` and `""` only). Left alone, every door merge would have
+failed its byte check and fallen back to a full re-render — the ruling would have worked and
+silently cost P1. It now tries every `MergeJoin` case, and for the door join the replacement is
+the separator that is already there (a zero-byte text edit carrying only the identity run) — which
+is the mechanism by which "the page reads byte-identical" is literally true on screen.

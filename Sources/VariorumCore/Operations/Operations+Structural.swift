@@ -871,19 +871,34 @@ extension Operations {
     }
 
     /// AppSpec §9: combining two adjacent blocks mints a fresh block A'
-    /// whose one variant is `rendered(first) + " " + rendered(second)` — a
-    /// single space at the join unless either side's edge already carries
-    /// whitespace (author decision 2026-07-06: a raw no-space join was more
-    /// annoying than helpful). Note the space is the join even for
-    /// paragraph-shaped halves — dividing at a paragraph break and merging
-    /// back turns the break into a space; the author adjusts in the editor.
+    /// whose one variant is `rendered(first)` joined to `rendered(second)`.
+    ///
+    /// **WHICH join is `joining`'s answer — author ruling R-13u4-3,
+    /// 2026-09-20** (13u4 UNIT E3; SUPERSEDES the 2026-07-06 single-space
+    /// join). Every merge DOOR (`.door`, the default) makes the RENDERING
+    /// join — `top + "\n" + bottom`, byte-exact, no trimming, no
+    /// conditionals — so the page reads byte-identical before and after the
+    /// merge, and a run of blocks merged together keeps every newline
+    /// inside it (her words: *"it should just make all newlines within the
+    /// selected portion part of a single block"*). The two DELETE roads
+    /// (`.deleteKeystroke`: the seam carve, the cross-block compound's
+    /// edge-join) keep the shipped space-unless-edged join, because a
+    /// delete that produced the newline it just removed would visibly do
+    /// nothing. The consequence, stated: dividing at a PARAGRAPH break and
+    /// merging back now round-trips byte-exactly, while a MID-SENTENCE cut
+    /// comes back with a newline (the ceremony's per-pairing `space` is the
+    /// road back).
+    ///
     /// Fans are NOT cartesian-producted: A' gets exactly one variant. Both
     /// sources release their placements and remain live as lineage
     /// (reversible by re-pointing, like W). The blocks must be placed
     /// adjacently in one container, `first` immediately before `second`.
     /// Rendered variants are copied, never edited — locks don't refuse.
     @discardableResult
-    public func merge(_ firstBlockID: String, _ secondBlockID: String) throws -> MergeResult {
+    public func merge(
+        _ firstBlockID: String, _ secondBlockID: String,
+        joining: MergeJoinRule = .door
+    ) throws -> MergeResult {
         let result: MergeResult = try database.write { db in
             let first = try placedContext(db, blockID: firstBlockID)
             let second = try placedContext(db, blockID: secondBlockID)
@@ -931,10 +946,11 @@ extension Operations {
 
             let head = first.rendered.workingText
             let tail = second.rendered.workingText
-            // The canon join, through the ONE join brain (13b 4B —
-            // `MergeJoin.canon` IS this rule; the ceremony's previews and
-            // pairings share it, so they can never disagree about a byte).
-            let joined = MergeJoin.canon(head: head, tail: tail).joined(head, tail)
+            // The join, through the ONE join brain (13b 4B; R-13u4-3 gave it
+            // its two rules). Resolved HERE — inside the transaction, on the
+            // store's rendered texts — so no caller can decide it from a
+            // projection that only ever lags the store.
+            let joined = joining.join(head: head, tail: tail).joined(head, tail)
             // Phase 13 (A2): A' keeps the frame only when BOTH sources
             // agree on it (both-nil included) — merging a callout with
             // plain prose mints a plain block rather than silently picking
@@ -987,8 +1003,9 @@ extension Operations {
 
     /// One hand-placed ＋ pairing: the merged block gets a take that is the
     /// first block's take joined with the second block's take. `join` is
-    /// explicit — the sheet resolves the canon default (`MergeJoin.canon`)
-    /// or the author's three-way choice; the operation never guesses.
+    /// explicit — the sheet resolves the door default
+    /// (`MergeJoinRule.door`, a newline since R-13u4-3) or the author's
+    /// three-way choice; the operation never guesses.
     public struct MergePairing: Equatable, Sendable {
         /// A take of the FIRST (earlier-placed) block.
         public let firstVariantID: String
