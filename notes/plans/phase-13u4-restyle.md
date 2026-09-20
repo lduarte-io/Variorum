@@ -918,7 +918,7 @@ question, the restyle spine), no `Sync/`, no schema, no migration.
 | 3b | The two tutorials' merge sentence (my change falsified it) + their pins | DONE (this commit) |
 | 4 | The phone's door (core-side flip) + the mobile pins + the iOS build | DONE (this commit) — the four mobile suites **50/4 green** (2 pre-existing known issues); the standalone iOS build line is PENDING until the closing runs |
 | 4b | The FULL-suite sweep for stragglers (three found: two on the Make Block road — row 10 — and one door pin) | DONE (this commit) — 2917/486 with 5 issues, of which 3 were these and 2 are row 58's ONE recorded environment red; the three now green in a 52/5 re-run |
-| 5 | The walk on the dev-store Debug build, captured | NOT-STARTED |
+| 5 | The walk on the dev-store Debug build, captured | DONE (this commit) — 13 captures + 25 crops, both voices AND both appearances, the table below |
 | 6 | Closing suites + the ledger's E3 row | NOT-STARTED |
 
 ### THE CLASSIFICATION — EVERY ROAD THAT REACHES THE MERGE JOIN
@@ -959,6 +959,41 @@ the ceremony sheet's per-pairing **picker** and **preview** (`MergeCeremonySheet
 cannot lie by a byte; `AppSession.mergeJoinMemory` (ruling 3's remembered choice) is unchanged and
 still outranks the default when set; `MergeArrangementCopy.sentence` speaks the join's WORD and
 already had "join on a new line".
+
+### EVIDENCE — THE WALK (the unit closes on USE, not on pins)
+
+**Build:** `App/Variorum/DerivedData/13u4e3/Build/Products/Debug/Variorum.app`
+(`io.lduarte.Variorum.debug`, the fenced dev store). `pgrep -fl 'Variorum.app/Contents/MacOS'`
+was checked at the start (ZERO instances — hers was not running at any point), and each dev
+instance was quit **by identity** (`tell application id "io.lduarte.Variorum.debug" to quit`),
+never by a keystroke (the 13u3 breach's walker law); zero instances after each quit and at the
+end. `/Applications/Variorum.app` was never touched. Captures:
+`notes/plans/13u4-screens/e3/` (gitignored) with `e3/crops/` holding the read crops.
+
+| # | Step | What the app did | Capture |
+|---|---|---|---|
+| 1 | A three-paragraph note staged through the shelf's quick-entry bar (⇧⏎ between paragraphs, ⏎ to file), seams on | three blocks — the bottom bar reads **block 1/3**, `2w block · 6w in note` | `01-before-three-blocks.png`, `crops/01-bar-1of3.png` |
+| 2 | Caret at the END of paragraph one, **⌘⇧M** — the everyday merge DOOR | **THE RULING, IN USE: not one byte of the page moved.** The three lines read exactly as before; what changed is the editing ring, which now encloses lines 1 AND 2, and the bar — **block 1/2**, `4w block`. Under the old join the two lines would have collapsed onto one | `02-after-door-merge.png`, `crops/02-after-door-merge-PAGE-IDENTICAL.png`, `crops/02-bar-1of2.png` |
+| 3 | Caret at the START of "Paragraph three.", **⌫** — the seam carve (#34), a DELETE | the two lines **joined onto ONE line with a space**: `Paragraph two. Paragraph three.` — the shipped join, byte-unchanged, and visibly different from the door one line above it. Receipt: *"Blocks joined — ⌥⌘Z undoes it."*, bar **block 1/1** | `03-after-seam-backspace.png`, `crops/03-seam-backspace-SPACE-JOIN.png`, `crops/03-bar-receipt.png` |
+| 4 | ⌥⌘Z ×2 | back to **block 3/3**, *"Undid: Merge"* | `crops/04-bar.png` |
+| 5 | ⌘A (all three blocks selected), **⌘⇧M** — the N-way chain over a RUN | ONE block (**block 1/1**), receipt *"Merged 3 blocks — ⌥⌘Z undoes it."*, and **every newline inside the run survived**: the page still reads three lines. Her sentence, literally — *"all newlines within the selected portion part of a single block"* | `06-after-three-block-chain.png`, `crops/06-chain-PAGE-IDENTICAL.png`, `crops/06-bar.png` |
+| 6 | ⌥⌘Z; ⌘T on the last block (a take), caret at the seam, **⌥⌘⇧M** — *Merge choosing takes* | the sheet opens on **Bring every take** and its sentence reads **"The two takes you were looking at join on a new line."** | `09-merge-ceremony-sheet.png`, `crops/09-sentence-JOIN-ON-A-NEW-LINE.png` |
+| 7 | **Pair by hand…** | the pairing row's three-way control shows **`new line` SELECTED**, with `space` and `nothing` beside it, and the preview below renders the joined take on TWO lines | `10-pair-by-hand.png`, `crops/10-pairing-NEWLINE-DEFAULT.png` |
+| 8 | Click **`space`** | still choosable, as ruled: the preview collapses to one line, `Paragraph two. Paragraph three.` | `11-space-still-choosable.png`, `crops/11-pairing-SPACE-CHOSEN.png` |
+| 9 | **STUDY voice** (Settings ▸ Appearance): the ceremony re-opened, then a door merge at the 1\|2 seam | the same sentence, the same byte-identical page in the second voice | `13-study-ceremony.png`, `crops/13-study-sentence-and-row.png`, `14-study-door-merge.png`, `crops/14-study-page-identical.png` |
+| 10 | **DARK** (`appearanceChoice dark`, relaunch): the note re-opened, the ceremony re-opened, then the voice flipped back to Terminal | the merged block reads identically on the black room in BOTH voices; the ceremony's sentence is the ruled one there too | `16-dark-note.png`, `crops/16-dark-page.png`, `17-dark-ceremony.png`, `crops/17-dark-ceremony-sentence.png`, `crops/18-restored-terminal.png` |
+
+**Dev-store state left as found:** voice back to **Terminal**, `appearanceChoice` back to **system**
+(both verified after the fact), zero instances. The walk's note (`2026-09-20`, in no book) and one
+mangled earlier draft are left in the dev store, as every walk's fixtures are.
+
+**A walker fact for the next session (added to the pattern `Tools/WalkKit/README.md` records):**
+`cliclick -w <ms> t:"…"` **drops characters in the shelf's quick-entry bar** (a string typed at
+70 ms spacing lost the last one or two characters, repeatably), and `⌘A` does not select that
+field's contents. `osascript -e 'tell application "System Events" to keystroke "…"'` typed every
+string faithfully, and `key code 36 using shift down` is a reliable ⇧⏎ there — that is the road
+for staging a multi-paragraph fixture. Every cliclick/keystroke burst must be preceded by an
+explicit re-activation: a capture steals focus, and the keystrokes then go to the terminal host.
 
 **One consumer outside the doors, which had to move with the rule:**
 `StructuralSeamEdit.derive`'s `.merge` arm decides the differential text edit by BYTE EQUALITY
