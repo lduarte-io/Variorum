@@ -1192,3 +1192,40 @@ green. PROVISIONALs to `notes/QUESTIONS.md` from **#127**.
 FIRST commit (PENDING marks), the parse rule's edge table, the hoist's zero-test-edit evidence,
 and the seam-file list (expected: NONE — say so explicitly); flip the ledger's C1 row in your
 closing commit. The checkpoint protocol in CAST & DISCIPLINE binds you from the first commit.
+
+---
+
+## UNIT C1 RECORD — THE CAPTURE MICROSYNTAX (item 2, R-13u4-1)
+
+**WHAT THIS UNIT DID NOT DO (the record's first line):** *(PENDING until the unit closes — this
+line is written at the first commit and made exact at the last.)* No routing machinery of any
+kind — `shelveInDailyJournalBook`, smart-book assembly and every membership road are untouched
+(a smart book picks the note up because a tag applied, full stop). No other unit's work (E1's
+Return chain, E2's ⌥⌫ product call, E3's merge join, the restyle spine). `Sources/VariorumCore/
+Sync/`, schema, migrations and `Server/` — zero lines. No editor-seam file. The phone's FACE is
+not this unit's (the parity row is carried at the phase closeout); what the phone gets here is
+the HOISTED brain underneath its existing face, unchanged in behaviour.
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The record + the READING (the brief's three reading lists, in order) | IN-PROGRESS — this commit |
+| 2 | The pure brain (`Shared/CaptureMicrosyntax.swift`) + its arm pins, one per R-13u4-1 clause | NOT-STARTED |
+| 3 | The `applyTypedPath` HOIST to `Shared/` (the 3C parity pattern — zero test edits, both platforms) + the KnownIssues row | NOT-STARTED |
+| 4 | The hand-off on BOTH Mac capture doors + the integration pins | NOT-STARTED |
+| 5 | QUESTIONS #127 (the PROVISIONALs) | NOT-STARTED |
+| 6 | The walk on the dev-store Debug build, captured | NOT-STARTED |
+| 7 | Closing suites + iOS build + the ledger's C1 row | NOT-STARTED |
+
+### THE PARSE RULE'S EDGE TABLE
+
+*(PENDING — written with piece 2.)*
+
+### THE HOIST'S ZERO-TEST-EDIT EVIDENCE
+
+*(PENDING — written with piece 3.)*
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
+
+*(PENDING — expected NONE; stated explicitly at the close.)*
