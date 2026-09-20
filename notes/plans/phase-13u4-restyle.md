@@ -134,3 +134,51 @@ pre-13u closeout will say which.
 *(Routing note: items 3, 8 and 11 touch the editor seam or its brains — the 13u4 ladder takes a
 `fable-reviewer` if any of their diffs land there, per the standing rider. Items 2 and 9 want
 short rulings before build; the rest are direct fix/face rows.)*
+
+## REFRESHED AT THE 13u3 CLOSEOUT (2026-09-19 — kickoff-ready)
+
+**BASELINES AT OPEN:** core `swift test` **1604/174** green · the FULL Mac suite **[FINAL-MAC]**
+— green with **1 recorded environment red** (`theReadClickLandsInIndexAtThatBlock`, row 58 —
+NOW CARRYING UNIT G's warm-DerivedData covariate: it passed only on a fresh-DerivedData first
+run, on two trees, and failed all five warm runs including alone; treat a red there as that
+condition unless your diff touches the book Index) · iOS build **green** · the FULL mobile
+suite **626/106 PASSED with 4 known issues** · lockstep marker **8** · `/Applications` = the
+13u3 Release (hashes in `notes/handoffs/phase-13u3-handoff.md`). **Flake list:** the
+differential-latency pin · `CanvasDragTrackingTests` · `BlocksWorkbenchFaceTests`' single-click
+· row 58 · the row-49 landing arm (`BookOutlineLandingTests`' collapsed-story cell) ·
+`ModeSwitchCarryTests`' top-of-Write arm (joined at 13u3 UNIT H, measured both ways).
+
+**WHAT 13u3 CHANGED UNDER YOU — read before touching chrome, the editor's decorations, or any
+lesson copy:**
+1. **`Surface/ProseGutter.swift` is THE one horizontal-placement brain** — a surface's prose
+   position is a pure function of its own width; `DecorLane` is GONE; decorations render in
+   the gutter and STACK vertically at every width (R-13u3-3); `ProseGutterTests` pins the one
+   law per surface. A restyle that moves a measure or left edge for a decoration re-opens her
+   R-13u-9 reversal — don't.
+2. **The editor's decoration refresh is transaction-gated** (`storageEditTransactionDepth`, a
+   depth counter with one private writer pair + the deferral-witness oracle;
+   `EditorDecorTransactionTests`) — new decoration work routes through the settle hop, never a
+   synchronous refresh inside `storageDidEdit` (the R1-1 class, now pinned).
+3. **The comments panel is ONE writing surface** (`CommentComposition` + the rebuilt
+   `CommentsPanel`); the margin card is a READ face (R-13u3-6). Restyle its chrome freely; the
+   drafts live on the MODEL (a lazy pass must carry their survival story — the A2 record).
+4. **The status seam gained words:** `OpsRefusalCopy` now carries `variantIsChosen` ·
+   `variantNotFound` · `commitNotFound`; the Write ⌘S door deliberately speaks the FILER's
+   sentence, not the registry's (the R2-1 equality pin's doc says why and scopes itself to
+   that door — do not widen or delete it).
+5. **`TakeCardMenu.rows` is THE take-card act list** (Write's panel + the board compose it);
+   the ceremony sheets carry drift checks — restyle their chrome, never the check order.
+6. **Your rows, grown this phase:** the indicator ring's 8 pt overhang crossing the gutter
+   glyphs · the AppKit-modal Restore Tutorial confirm · the "pools" lesson vocabulary · Block
+   History's seal-blind rename field — beside the standing set (the Settings fold · the 27
+   `fixedSize` sites or P-8's narrowing, hers · the unvoiced tag sheet · Library F-0 +
+   Timeline sans · `FlippingStamp` · the re-font road's two unexercised occasions, walkable
+   once the fold fix lands) — **and HER ELEVEN ADDITIONS above** (the section before this
+   one), two of which are her own RULING CHANGES (empty blocks chain; merge keeps newlines)
+   and three of which are seam-adjacent (3 · 8 · 11): **the ladder takes a `fable-reviewer`
+   if any of their diffs reach `BlockRangeIndex`/`EditorTextView`/`TypedReturn` — the
+   standing rider.**
+7. **Lesson copy is pinned to doors now** (the H pattern: prose names a door ⇒ a pin asserts
+   the surface renders it). A restyle that renames or moves a door updates the lesson AND its
+   pin together, and the re-seed consequence rides every lesson edit (record it for the
+   closeout's list).

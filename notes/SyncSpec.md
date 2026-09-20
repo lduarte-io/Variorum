@@ -57,7 +57,7 @@ Debounced/periodic: read outbox → load current rows → send `{table, row, bas
 
 | Class | Rows/fields | Rule |
 |---|---|---|
-| Append-only inserts | `commit_point`, `edge`, tag creations, new blocks/variants/placements | Insert-if-absent by PK; natural-key duplicates → §7 |
+| Append-only inserts | `commit_point`, `edge`, tag creations, new blocks/variants/placements | Insert-if-absent by PK; natural-key duplicates → §7. *(One field bends since 13u3, R-13u3-1: `commit_point.message` is EDITABLE metadata — the engine's server-wins baseline already carries an updated row like any metadata CAS, so a savepoint rename propagates with zero engine lines; the row's TEXT and kind stay append-only, I5 untouched.)* |
 | The one mutable text | `variant.working_text` | **Conflict-as-variant (S5):** server text wins the row; the losing local text becomes a new variant on the same block, `label='conflict'`, branched from the same parent. Nothing is ever clobbered. |
 | Metadata fields | titles, labels, locks, chosen_variant_id, entry_date, floating_notes, … | Server-version-wins on reject (CAS rebase): re-apply local intent on top if still meaningful, else accept |
 | Positions | `position`, `fan_position` | CAS like metadata; ties impossible in practice (jittered fractional keys, §8) and broken deterministically by `(position, id)` |
