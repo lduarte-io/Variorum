@@ -306,7 +306,7 @@ touches her real store outside the pre-authorized refresh.**
 | 8 | UNIT G — the ceremony-sheet residuals (KnownIssues row 42) | **DONE 2026-09-19** — `c79860b0`…`91209567` + this record's close; the UNIT G RECORD is at the end of this file (the traced mechanisms · the red-on-old table, 11 issues across 4 cells on `25638746` · 13 pins incl. an anti-drift net over SIX rendered-take readers and an EXPLAIN seek pin · the walk's 14 captures in both voices, with the drift staged BY HAND through two dev instances on one store · both full-suite reds adjudicated on two trees · item 6's five verdicts). KnownIssues row 42 RESOLVED; QUESTIONS #124 opened |
 | 8b | UNIT H — the Takes board's live-card delete door + the lesson's truth (the E hand-up, adjudication 2 above) | **DONE 2026-09-19** — `14ae400c`…this record's close; the UNIT H RECORD is at the end of this file (the traced mechanisms, incl. a CORRECTION to the adjudication — the board's cards never had a ⋯, the F1 pass reached its article cell instead · the red-on-old table, 12 issues across 6 of 8 cells on `4f069b1b` · 9 pins in one new suite, incl. the PER-SURFACE declared⇔rendered guard the union walk could never make · the ⋯ sweep's second find, a row renamed at the Snippets ruling with a shipped pin holding the old name "verbatim" · the walk's 17 captures running the LESSON'S OWN experiment in both voices and both appearances · both full-suite reds adjudicated, one of them a NEW flake-list member · one breach of the green-per-commit rule, stated). QUESTIONS #125 opened |
 | 9 | The ladder — `fable-reviewer`, combined diff, standing rounds | **CLOSED 2026-09-19** — TWO rounds + a final clean sanity pass, full cross-model flow both rounds (R1 0B/1M/2m/3N: the MAJOR = the editor spin's precondition, fixed at its mechanism; the R1-3 dispute ruled a WIDEN — all four doors; S-1…S-4 all taken. R2 0B/0M/1m/1N: both fixed, the MINOR's red measured first. No round 3 owed; one Fable budget death cost ZERO commits). Records: `13u3-ladder-round1.md` · `-round1-responses.md` · `-round2.md` |
-| 10 | The orchestrator's walks + closeout ritual + the pre-authorized `/Applications` refresh (R-13u3-2) | WALK DONE (spine PASSES); notes-side closeout DONE (`9832175e`); the closing full-suite run + the refresh: **the refresh WAITS on a zero-instance window — her app is running and is never touched; she quits at her convenience, then the refresh runs on the standing rails** |
+| 10 | The orchestrator's walks + closeout ritual + the pre-authorized `/Applications` refresh (R-13u3-2) | **DONE 2026-09-19/20** — walk PASSED; closeout (a)/(b)/(c) committed; the refresh ran at her quit on the standing rails (A1 backup `13u3-refresh-20260920T022937Z`, 149 files cmp-identical, ciphertext header; `a5ea943e…` → `0c9ebcb4…`, installed identical; codesign + both access groups; zero instances throughout) — evidence in the handoff; the handoff written LAST |
 
 ## ENVIRONMENT TRAPS (every unit brief carries this section verbatim — the skill's rule)
 
@@ -3248,7 +3248,9 @@ highest-value on her own lost-prose evidence.
 **HER RE-SEED (one act):** `Help ▸ Restore Tutorial… ▸ Replace` in the refreshed build delivers
 E's new lesson + H's corrected takes lesson (+ the 18f-era corrections already owed).
 
-**THE REFRESH (R-13u3-2, pre-authorized):** WAITS on a zero-instance window — her app was
-relaunched during the closeout and is NEVER touched by a session; at her word/quit, the standing
-rails run (A1 backup first · Release from a clean worktree · hashes + codesign recorded · zero
-instances verified at every step). Evidence lands in the handoff when it runs.
+**THE REFRESH (R-13u3-2, pre-authorized): DONE at her quit, 2026-09-20T02:29Z** — the standing
+rails ran whole (A1 backup `~/dev/variorum-store-backups/13u3-refresh-20260920T022937Z/`, 149
+files cmp-identical, ciphertext header · Release from a clean worktree at `b2197741` ·
+`a5ea943e…` → `0c9ebcb41717b53c9f017fabad98cf4bbc76af5dec7fe6bd226fa19be85ca910`, installed copy
+identical · codesign OK before and after, both keychain access groups · zero instances at every
+step, her store never opened). The full evidence table is the handoff's.
