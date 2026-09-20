@@ -101,61 +101,38 @@ final class MobileTagsModel {
 
     // MARK: - The typed-path create brain (FIX-C3a — ONE create rule)
 
-    /// The typed-path CREATE walk, shared: the note-tags sheet's typing
-    /// field and the manager's "+ new tag" door both resolve a typed
-    /// "life/goals" through THESE brains — one rule everywhere, reused
-    /// and never copied (the six-copied-brains KnownIssues row is the
-    /// anti-pattern; a third copy inside one target would be its worst
-    /// form).
-
-    /// Slash noise collapses forgivingly ("/a//b/" is a/b) — pure.
+    /// The typed-path CREATE walk: the note-tags sheet's typing field and
+    /// the manager's "+ new tag" door both resolve a typed "life/goals"
+    /// through THESE brains — one rule everywhere, reused and never copied
+    /// (the six-copied-brains KnownIssues row is the anti-pattern; a third
+    /// copy inside one target would be its worst form).
+    ///
+    /// **HOISTED 13u4 UNIT C1 — the rule now lives in
+    /// `Shared/TypedTagPath.swift`**, once, for both apps. It was born on
+    /// the Mac (`TagAssignmentViewModel.applyTypedPath`, 13b 3D's N24) and
+    /// MIRRORED here at C3, which is exactly the forked-brains row's drift
+    /// class; the Mac phase that touched it hoisted it, per that row's own
+    /// rule. **Every pre-move name below is kept as a forwarder** so not one
+    /// pin on either platform had to move (the 3C parity pattern — the
+    /// zero-test-edit run is the proof the hoist moved an address and not a
+    /// behaviour).
     nonisolated static func typedSegments(_ raw: String) -> [String] {
-        raw.split(separator: "/")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.isEmpty }
+        TypedTagPath.segments(raw)
     }
 
-    /// The empty-type hint — ONE sentence for both typing surfaces.
-    static let emptyTypedPathMessage =
-        "Type a tag name — “/” makes a hierarchy (life/goals)."
+    /// The empty-type hint — ONE sentence for both typing surfaces, and
+    /// since the hoist, for both apps.
+    static let emptyTypedPathMessage = TypedTagPath.emptyMessage
 
-    /// A typed path resolved against the live taxonomy: the deepest
-    /// existing live prefix anchors creation; the missing remainder
-    /// creates on the way.
-    struct TypedPathPlan: Equatable, Sendable {
-        /// The deepest existing prefix's id — the create anchor (nil ⇒
-        /// creation starts at the root).
-        var parentID: String?
-        /// The segments still to create, in order.
-        var missing: [String]
-        /// Non-nil when the WHOLE path already exists (nothing to create).
-        var existingLeafID: String?
-        /// The full path the walk lands on.
-        var leafPath: String
-    }
+    /// A typed path resolved against the live taxonomy.
+    typealias TypedPathPlan = TypedTagPath.Plan
 
     /// The resolution half — pure over a taxonomy read (nil on empty
     /// segments; the caller speaks `emptyTypedPathMessage`).
     nonisolated static func typedPathPlan(
         segments: [String], live: [Tag]
     ) -> TypedPathPlan? {
-        guard !segments.isEmpty else { return nil }
-        var parentID: String?
-        var missing: [String] = []
-        var existingLeafID: String?
-        var path = ""
-        for (i, segment) in segments.enumerated() {
-            path = path.isEmpty ? segment : "\(path)/\(segment)"
-            if missing.isEmpty, let existing = live.first(where: { $0.path == path }) {
-                parentID = existing.id
-                if i == segments.count - 1 { existingLeafID = existing.id }
-            } else {
-                missing.append(segment)
-            }
-        }
-        return TypedPathPlan(
-            parentID: parentID, missing: missing,
-            existingLeafID: existingLeafID, leafPath: path)
+        TypedTagPath.plan(segments: segments, live: live)
     }
 
     /// The create half, run INSIDE one serialized runner turn (a racing
@@ -165,11 +142,7 @@ final class MobileTagsModel {
     nonisolated static func createMissing(
         _ plan: TypedPathPlan, ops: Operations
     ) throws -> String? {
-        var parent = plan.parentID
-        for segment in plan.missing {
-            parent = try ops.createTag(parent: parent, name: segment).id
-        }
-        return plan.existingLeafID ?? parent
+        try TypedTagPath.createMissing(plan, ops: ops)
     }
 
     /// Refusal copy in phone words (no platform names) — the Mac

@@ -1212,7 +1212,7 @@ the HOISTED brain underneath its existing face, unchanged in behaviour.
 |---|---|---|
 | 1 | The record + the READING (the brief's three reading lists, in order) | DONE (163ec318) |
 | 2 | The two shared brains — `Shared/CaptureMicrosyntax.swift` (the parse) + `Shared/TypedTagPath.swift` (the hoist's new home) — and the parse's arm pins, one per R-13u4-1 clause | DONE (this commit) — **17 tests in 1 suite passed** |
-| 3 | The `applyTypedPath` HOIST to `Shared/` (the 3C parity pattern — zero test edits, both platforms) + the KnownIssues row | NOT-STARTED |
+| 3 | The `applyTypedPath` HOIST to `Shared/` (the 3C parity pattern — zero test edits, both platforms) + the KnownIssues row | DONE (this commit) — Mac **46/8**, mobile **6/2**, zero test files touched |
 | 4 | The hand-off on BOTH Mac capture doors + the integration pins | NOT-STARTED |
 | 5 | QUESTIONS #127 (the PROVISIONALs) | NOT-STARTED |
 | 6 | The walk on the dev-store Debug build, captured | NOT-STARTED |
@@ -1247,7 +1247,39 @@ QUESTIONS #127 under the letters given.)*
 
 ### THE HOIST'S ZERO-TEST-EDIT EVIDENCE
 
-*(PENDING — written with piece 3.)*
+**What moved.** `TagAssignmentViewModel.applyTypedPath`'s walk — the segment split, the
+deepest-existing-prefix plan, and the creates + the apply inside ONE serialized runner turn with
+`alreadyTagged` swallowed — is now `App/Variorum/Shared/TypedTagPath.swift`, once, for both apps.
+It was the FIRST of the original six forked brains (the C3 ladder's list), mirrored onto the
+phone at the parity round and split there into pure halves; the KnownIssues row's own touch rule
+(*"any Mac phase touching one of these brains hoists it THEN"*) fired on this unit, because a
+`{#tag}` token IS a typed path and its application had to ride that brain.
+
+**The four consumers after the hoist** — one brain, four doors:
+
+| Consumer | Before | After |
+|---|---|---|
+| `TagAssignmentViewModel.applyTypedPath` (Mac: the tag sheet, the masthead `#` door, the Library and Pool rows' chip adders) | the whole walk, inline | `TypedTagPath.apply` + this face's own two lines (`load()`, `TagsViewModel.message`) |
+| `MobileNoteTagsModel.applyTypedPath` (phone: the note-tags sheet) | the walk, re-composed from `MobileTagsModel`'s pure halves | `TypedTagPath.apply` + `refresh()` + `MobileTagsModel.refusal` |
+| `MobileTagsModel.createTypedPath` (phone: the manager's "+ new tag") | its own composition over those halves | unchanged body over the FORWARDED halves (its duplicate-path refusal is its own, deliberately — see the judgment calls) |
+| The two Mac capture doors (`{#tag}`) | did not exist | `CaptureMicrosyntax.applyTags` → `TypedTagPath.apply`, one token at a time |
+
+**Every pre-move name is forwarded**, which is what makes the proof possible:
+`MobileTagsModel.typedSegments` · `.emptyTypedPathMessage` · `.TypedPathPlan` (a typealias) ·
+`.typedPathPlan` · `.createMissing` all still answer, to the shared brain.
+
+**THE PROOF — zero test edits on BOTH platforms** (`git status` over the hoist commit shows three
+source files and NOT ONE test file):
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| Mac, every tag-touching suite, all UNMODIFIED | `-only-testing:` `TagAndFolderTests` · `FreeTypedTagTests` · `LibraryTagFaceTests` · `NoteTagDeclarationTests` · `NodSetTests` · `MastheadTagDoorTests` · `TagChipFitTests` (+ the new `CaptureMicrosyntaxTests`) | **46 tests in 8 suites passed** |
+| Phone, both tag suites, UNMODIFIED | `-only-testing:VariorumMobileTests/MobileTagManagerTests -only-testing:VariorumMobileTests/MobileNoteTagsTests` | **6 tests in 2 suites passed** |
+
+What deliberately did NOT move: the REFUSAL COPY (`TagsViewModel.message` on the Mac,
+`MobileTagsModel.refusal` on the phone). It is its own line in the original six, and MobileSoul
+§4.4 read from the other side says why — a shared home must not hold words that name a platform's
+own doors. `TypedTagPath.Outcome` therefore carries the ERROR out and each face words it.
 
 ### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
 

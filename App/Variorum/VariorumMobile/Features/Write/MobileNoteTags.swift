@@ -95,39 +95,29 @@ final class MobileNoteTagsModel {
     /// a/b); an already-applied leaf no-ops politely. Returns the leaf's
     /// path on success (the field clears on it).
     ///
-    /// Since FIX-C3a the segments/resolution/create walk is
-    /// `MobileTagsModel`'s ONE typed-path brain — the manager's
-    /// "+ new tag" door walks the same rule, so the two typing surfaces
-    /// cannot drift (this road keeps its apply half and its one-turn
-    /// composition byte-identical).
+    /// Since FIX-C3a the segments/resolution/create walk is ONE typed-path
+    /// brain — the manager's "+ new tag" door walks the same rule, so the
+    /// two typing surfaces cannot drift.
+    ///
+    /// **HOISTED 13u4 UNIT C1:** that brain — the whole walk, its order
+    /// included — is `Shared/TypedTagPath.apply` now, shared with the Mac's
+    /// own typed-path face (and with the Mac capture doors' `{#tag}`
+    /// microsyntax, which is a typed path like any other). What stays here
+    /// is this face's own two lines: the refresh, and the phone's refusal
+    /// words.
     @discardableResult
     func applyTypedPath(_ raw: String) async -> String? {
-        let segments = MobileTagsModel.typedSegments(raw)
-        guard !segments.isEmpty else {
+        switch await TypedTagPath.apply(raw, toPost: postID, session: session) {
+        case .nothingTyped:
             status = MobileTagsModel.emptyTypedPathMessage
             return nil
-        }
-        do {
-            let post = postID
-            let live = try await session.database.read { try Queries.allTags($0) }
-            guard let plan = MobileTagsModel.typedPathPlan(segments: segments, live: live)
-            else { return nil }
-            try await session.runner.run { [plan] ops in
-                guard let leafID = try MobileTagsModel.createMissing(plan, ops: ops)
-                else { return }
-                do {
-                    _ = try ops.applyTag(leafID, toPost: post)
-                } catch OperationError.alreadyTagged {
-                    // Already wearing it — typing it again is a no-op,
-                    // never an error.
-                }
-            }
-            await refresh()
-            status = nil
-            return plan.leafPath
-        } catch {
+        case .refused(let error):
             status = MobileTagsModel.refusal(error)
             return nil
+        case .applied(let leafPath):
+            await refresh()
+            status = nil
+            return leafPath
         }
     }
 

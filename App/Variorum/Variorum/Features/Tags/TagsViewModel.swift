@@ -136,62 +136,27 @@ final class TagAssignmentViewModel {
     /// duplicate refuses through the op's own guard. Already-applied
     /// leaves no-op politely. Returns the leaf's path on success (the
     /// field clears on it).
+    ///
+    /// **THE RULE ITSELF NOW LIVES IN `Shared/TypedTagPath.swift`** (13u4
+    /// UNIT C1 — the KnownIssues forked-brains row's touch rule: *"any Mac
+    /// phase touching one of these brains hoists it THEN"*, and the fix is
+    /// always a HOIST, never a patch). It was mirrored onto the phone at
+    /// the parity round's C3 and was therefore living twice; both platforms
+    /// consume the one brain now. What stays HERE is exactly what belongs
+    /// to this face: the sheet's re-sync and the Mac's own refusal copy.
     @discardableResult
     func applyTypedPath(_ raw: String) async -> String? {
-        let segments = raw.split(separator: "/")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.isEmpty }
-        guard !segments.isEmpty else {
-            lastError = "Type a tag name — “/” makes a hierarchy (life/goals)."
+        switch await TypedTagPath.apply(raw, toPost: postID, session: session) {
+        case .nothingTyped:
+            lastError = TypedTagPath.emptyMessage
             return nil
-        }
-        // No per-segment validity guard: `split(separator: "/")` can never
-        // yield a segment containing "/" and the filter above drops the
-        // empties, so slash noise collapses forgivingly ("/a//b/" is a/b —
-        // pinned by `typedEdgesAreForgivingAndRefusalsSpeak`). A guard here
-        // was dead code with unreachable refusal copy (Stage 3 ladder
-        // round 1, NIT-1 — deleted).
-        do {
-            let post = postID
-            // Resolve the deepest existing live prefix from a read; the
-            // creates + apply then run in one serialized runner turn. A
-            // create racing between the two refuses through the op's own
-            // duplicate-path guard (surfaced, retypable) — the ops layer
-            // stays the only integrity authority.
-            let live = try await session.database.read { try Queries.allTags($0) }
-            var parentID: String?
-            var missing: [String] = []
-            var existingLeafID: String?
-            var path = ""
-            for (i, segment) in segments.enumerated() {
-                path = path.isEmpty ? segment : "\(path)/\(segment)"
-                if missing.isEmpty, let existing = live.first(where: { $0.path == path }) {
-                    parentID = existing.id
-                    if i == segments.count - 1 { existingLeafID = existing.id }
-                } else {
-                    missing.append(segment)
-                }
-            }
-            let leafPath = path
-            try await session.runner.run { [parentID, missing, existingLeafID] ops in
-                var parent = parentID
-                for segment in missing {
-                    parent = try ops.createTag(parent: parent, name: segment).id
-                }
-                guard let leafID = existingLeafID ?? parent else { return }
-                do {
-                    _ = try ops.applyTag(leafID, toPost: post)
-                } catch OperationError.alreadyTagged {
-                    // Already wearing it — typing it again is a no-op,
-                    // never an error.
-                }
-            }
+        case .refused(let error):
+            lastError = TagsViewModel.message(error)
+            return nil
+        case .applied(let leafPath):
             await load()  // re-sync the sheet's rows (the new tag + check)
             lastError = nil
             return leafPath
-        } catch {
-            lastError = TagsViewModel.message(error)
-            return nil
         }
     }
 
