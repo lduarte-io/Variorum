@@ -3454,13 +3454,18 @@ final class EditorViewModel {
     /// re-enter, an inner frame's `defer` would drop the flag while the
     /// outer frame was still inside `processEditing`, reopening the exact
     /// hole R1-1 closed. A counter cannot be got wrong that way.
-    var inStorageEditTransaction: Bool { storageEditDepth > 0 }
+    private var inStorageEditTransaction: Bool { storageEditDepth > 0 }
     @ObservationIgnored private var storageEditDepth = 0
 
-    /// The one writer (`storageDidEdit`'s entry/exit), named so no second
-    /// site ever mutates the depth ad hoc.
-    func enterStorageEditTransaction() { storageEditDepth += 1 }
-    func exitStorageEditTransaction() { storageEditDepth -= 1 }
+    /// The one writer (`storageDidEdit`'s entry/exit) — and since the round-2
+    /// ladder (R2-2) the claim is a COMPILER fact, not a doc line: the pair
+    /// and the flag are `private` (file-scoped), so no second site can bump
+    /// the depth ad hoc. A stray `enter` would suppress the indicator
+    /// refresh forever; a stray `exit` would drive the depth negative and
+    /// un-suppress mid-transaction — R1-1's hole, reopened in the one state
+    /// it exists to close.
+    private func enterStorageEditTransaction() { storageEditDepth += 1 }
+    private func exitStorageEditTransaction() { storageEditDepth -= 1 }
 
     #if DEBUG
     /// **The R1-1 oracle:** how many times the decoration pass's
