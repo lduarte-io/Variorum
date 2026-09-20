@@ -1214,7 +1214,7 @@ the HOISTED brain underneath its existing face, unchanged in behaviour.
 | 2 | The two shared brains — `Shared/CaptureMicrosyntax.swift` (the parse) + `Shared/TypedTagPath.swift` (the hoist's new home) — and the parse's arm pins, one per R-13u4-1 clause | DONE (this commit) — **17 tests in 1 suite passed** |
 | 3 | The `applyTypedPath` HOIST to `Shared/` (the 3C parity pattern — zero test edits, both platforms) + the KnownIssues row | DONE (this commit) — Mac **46/8**, mobile **6/2**, zero test files touched |
 | 4 | The hand-off on BOTH Mac capture doors + the integration pins | DONE (this commit) — **42 tests in 4 suites passed** (the 25 new door pins + `QuickEntryBarTests` and `QuickNoteMintTests` riding UNMODIFIED) |
-| 5 | QUESTIONS #127 (the PROVISIONALs) | NOT-STARTED |
+| 5 | QUESTIONS #127 (the PROVISIONALs — seven lettered calls) | DONE (this commit) |
 | 6 | The walk on the dev-store Debug build, captured | NOT-STARTED |
 | 7 | Closing suites + iOS build + the ledger's C1 row | NOT-STARTED |
 
