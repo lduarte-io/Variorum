@@ -1,7 +1,42 @@
 # Phase 13u4 — THE RESTYLE CONTINUATION (EXECUTION PLAN)
 
-**Status: READY — authored 2026-09-14 at the 13u1 kickoff (the R-cor-12 four-way split executed).
-Runs after 13u3 at her word; refresh baselines at open.**
+**Status: READY — KICKOFF-REFRESHED at the 13u3 closeout (2026-09-19). Opens at her word.**
+Authored 2026-09-14 at the 13u1 kickoff (the R-cor-12 four-way split); grown at the 13u3 morning
+sitting by HER ELEVEN ADDITIONS (the dated section below — two of them her own ruling changes).
+
+## KICKOFF (self-contained — what a fresh orchestrator reads, does first, and verifies)
+
+**Read, in order:** CLAUDE.md + the canonical docs (auto-loaded) · `notes/DetailedPlanForPhases.md`
+(the pointer + the `### 13u` section) · `notes/KnownIssuesAndTechDebt.md` (the owner-13u4 rows —
+there are NINE now, enumerated in the closeout-refresh section below) · `notes/QUESTIONS.md`'s
+open bundle (#117–#125 + carried; what she has ratified by kickoff day governs) ·
+`notes/SessionResiliencyProtocol.md` · `notes/PhaseSizingGuidance.md` · THIS FILE IN FULL — the
+original restyle roster, **HER ELEVEN ADDITIONS (2026-09-19, verbatim-faithful)**, and the
+closeout-refresh block (baselines + what 13u3 changed under you, incl. the seam rider on her
+items 3 · 8 · 11).
+
+**Do first — the SIZING-AND-RULINGS SITTING** (she attends or rules async; bundle ≤4 per ask):
+(1) items 2 and 9 want their rulings BEFORE any build (the capture microsyntax's exact rule and
+the journal question her example implies; selection→take's semantics); (2) item 3's exact arm
+(her lean: just allow many empty blocks — confirm, then it supersedes U-1's empty-block arm as a
+recorded canon delta with the build); (3) item 8's scope (every merge vs the selected-run shape;
+what the ceremony's per-pairing default does — the canon delta lands with the build); (4) the
+phase's unit list + order named at plan time (the sizing guidance: one unit per implementer
+session; this roster holds roughly a restyle spine + the eleven + nine owner rows — say so out
+loud if it wants a split). **P-8's 27-site question is HERS** (narrow the constitution note or
+sweep the sites) — bundle it.
+
+**Cast:** her kickoff word governs; the standing default is Fable orchestrator ·
+`opus-implementer` per unit · `fable-reviewer` on the ladder — and the SEAM RIDER binds
+regardless: any diff reaching `BlockRangeIndex` / `EditorTextView` / `TypedReturn` /
+`PaneTextAuthority` (her items 3 · 8 · 11 are the candidates) takes a Fable cold review.
+
+**Verify at open (never run the full suite at a session's start — these ARE the baselines):**
+the closeout-refresh block below carries them; the previous close's recorded result is the
+baseline per the standing rule.
+
+---
+
 **~~+ DARK MODE (item 6)~~ — SHIPPED 2026-09-14 at 18j** (the 2026-09-12 use-report round pulled
 it forward at her word; the appearance choice, the every-surface dark walk in both voices, the
 dynamic prose ink). What remains of this phase is the RESTYLE CONTINUATION alone — one surface
