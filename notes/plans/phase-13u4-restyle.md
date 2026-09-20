@@ -420,8 +420,8 @@ no lesson copy edited (see "Judgment calls" below for why); the phone's Return m
 | 1 | The record + the traced mechanism + `.gitignore` for `13u4-screens/` | DONE (bc362f6a) |
 | 2 | The pins written to the ruling (RED on the pre-change tree, recorded) | DONE (40e1fc92) — the red run below |
 | 3 | The brain change (`TypedReturn`) + the dispatch + the canon delta (AppSpec §7) | DONE (6e111199) — 78/7 green, below |
-| 4 | The walk on the dev-store Debug build, captured | DONE (pending hash) — 21 crops + 12 full captures |
-| 5 | Closing suites + the ledger's E1 row | DONE (this commit) — 174/20 + 14/2 + iOS, below |
+| 4 | The walk on the dev-store Debug build, captured | DONE (db1e93ea) — 21 crops + the full captures |
+| 5 | Closing suites + the ledger's E1 row | DONE (db1e93ea) — 174/20 + 14/2 + iOS, below |
 
 ### THE MECHANISM, TRACED (read before the diff — what changes and what cannot)
 
