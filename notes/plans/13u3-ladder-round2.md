@@ -34,9 +34,8 @@ didProcessEditing).
   green**: EditorDecorTransactionTests (2) · SavepointSealedDoorTests (6, the S-2 pair
   included) · SavepointRenameDoorTests (5) · TakeCardDoorTests (10).
 
-**STATUS: ROUND 2 FINDINGS COMPLETE — the fix pass follows the cross-model flow (findings to
-the implementer verbatim; responses return to this reviewer for the final call; confirmed
-fixes implemented reviewer-side with their pins). Fix-pass record appended below when run.**
+**STATUS: COMPLETE — findings, the implementer's responses adjudicated, and the reviewer's fix
+pass (dispositions + finals at the end of this file). ROUND 2 IS CLOSED; NO ROUND 3 OWED.**
 
 ---
 
@@ -209,6 +208,86 @@ their fixes ride this round without opening another.
 
 ---
 
-## FIX PASS (this reviewer — appended after the implementer's responses)
+## FIX PASS (this reviewer, 2026-09-19 — the implementer's ROUND 2 RESPONSES adjudicated; both
+findings AGREED, `notes/plans/13u3-ladder-round1-responses.md` §"ROUND 2 RESPONSES", commit
+`f43a0061`)
 
-*(pending)*
+**Every fact the responses added was verified in code before ruling** (the guard binds both
+ways): the two gesture-worded sibling doors read at their lines (`shouldChangeText:992`
+"unlock it to edit." · `poolDrop:2949` "unlock it to add to it."), the duplicated no-caret
+literal at `:3083`/`:3110` with its three shipped test assertions, and R2-2's five-uses count
+(whole-module grep — definitions, the one call pair, two same-file flag reads, zero test
+callers).
+
+### R2-1 — CONFIRMED; THE FORK RULED: shape (A), the implementer's recommendation adopted with
+all three cautions honored (commit `6d4433a1`)
+
+The responses' two new facts changed the finding's FRAME without changing its answer: door ==
+filer is NOT a Write-wide rule (two shipped doors are gesture-worded, rightly — their doors
+consume the gesture outright, so the door is those gestures' only worded refusal), but THIS
+door's gesture has TWO refusal moments — the guard, or the filer under the stale-header race
+the fail-open design deliberately leaves — and one gesture must not speak two sentences on
+header freshness. Shape (A) restores the exact pre-D words at that keypress and keeps the race
+pair honest; the guard's comment now says precisely why this door differs from its two siblings
+(caution: the next reader must not "fix" it toward the `:2949` grammar).
+
+- **The fix:** `refuse(operationMessage(OperationError.lockedPost(id: postID)))` — the
+  surface's own filer sentence, *"This note is sealed — unlock it first."*
+- **Red-on-old, measured pin-first:** `writesDoorAndFilerSpeakOneSealSentence` (the
+  equality-form contract — drive the door AND the filer under one seal, `#expect` the two
+  sentences equal) — **1 issue on the pre-fix tree, both sentences verbatim in the failure**:
+  `(atTheDoor → "This note is sealed — unseal it to change takes or choices.") == (atTheFiler
+  → "This note is sealed — unlock it first.")`. Green with the fix.
+- **Caution 1 honored:** the pin's doc is SCOPED to this door — it names the two shipped
+  gesture-worded siblings as deliberately outside the contract, so no reader widens it into a
+  surface-wide law or deletes it as one.
+- **Caution 2 honored:** the pin's doc states the future cost — gesture-wording this door later
+  means changing `operationMessage`'s shared `lockedPost` case with it, or redding the cell
+  honestly.
+- **Caution 3 honored:** ONLY the Write cell's expectation changed (to the surface sentence,
+  with the reason in place); the other three `SavepointSealedDoorTests` cells keep the registry
+  compare their own surfaces' filers genuinely speak.
+- **The offered adjacent TAKEN** (same commit): the no-caret sentence hoisted to ONE literal
+  (`Self.noCaretToCommit`) consumed by the door and the filer — the same finding class one
+  guard up, byte-identical string, the three shipped assertions of it ride unchanged. No pin
+  (structural; no behaviour moved).
+
+### R2-2 — CONFIRMED + FIXED (commit `034cdd73`)
+
+`enterStorageEditTransaction` / `exitStorageEditTransaction` AND the computed
+`inStorageEditTransaction` are now `private` (file-scoped) — the "one writer" doc is a compiler
+fact. The doc names both hazards with the responses' sharper one first (a stray `exit` drives
+the depth negative and un-suppresses mid-transaction — R1-1's hole reopened in the one state it
+closes). **The completion note's call, taken:** the getter carries the same fence — the risk
+lives in the writes, but no out-of-file reader exists and a future one should reopen visibility
+deliberately, not find it lying open. No pin (the compile is the enforcement).
+
+### FIX-PASS FINALS
+
+- `SavepointNamingTests.swift`'s SIX suites — **25 cells green** across two targeted runs
+  (sealed-door 7 including the new equality pin · rename-door 5 · takes-door 1 ·
+  commit-door/face/ask 12).
+- `EditorDecorTransactionTests` — **2/2 green** after the visibility change (the pins read the
+  DEBUG counters, never the flag — untouched by the fence).
+- **The full Mac suite was NOT re-run, deliberately, and here is the judgment stated:** this
+  pass's diff is one refusal string at one door, a byte-identical literal hoist, and access
+  narrowing with zero out-of-file users — the two `xcodebuild test` runs COMPILED the whole app
+  target (a stray reference to the now-private members would be a build error, and there was
+  none), the greps swept every shipped assertion of both affected strings (the only pin
+  asserting the Write door's sealed sentence is the cell this pass updated; the three no-caret
+  assertions compare a byte-identical string; `TutorialWalkTests:2059`'s registry-sentence pin
+  is a Takes-board door, untouched), and zero `Sources/` files changed, so core and mobile are
+  not owed runs. Round 1's finals (core 1604/174 · Mac 2899/484 with the two recorded reds ·
+  mobile 626/106 w/4 known) stand as the phase's suite baseline, +1 Mac cell from this pass.
+- Fences: zero `Sync/`, zero `Persistence/`, zero schema, zero migrations, zero `Server/`;
+  marker 8; no trailers on either fix commit; every commit pushed as it landed.
+
+**The fix commits, in order:** `6d4433a1` (R2-1: the surface-sentence guard + the scoped
+equality pin measured red first + the Write cell's expectation + the literal hoist) →
+`034cdd73` (R2-2: the private fence, flag included). 
+
+**ROUND 2 IS CLOSED. NO ROUND 3 IS OWED** — round 2 raised no NEW BLOCKER/MAJOR (1 MINOR ·
+1 NIT, both now fixed with the MINOR's red-on-old measured). Standing for the closeout, carried
+from this round: the R1-2 pane residual's named row candidate (Block History gaining seal
+awareness — a 17-entry/13u4-sized face change, disposition item 5 above), and round 1's open
+closeout obligations (the MOBILE PARITY rows · the re-seed list · the SyncSpec §6 annotation).
