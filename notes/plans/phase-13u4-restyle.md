@@ -1127,3 +1127,68 @@ the consumers (the differential seam arm, the carry-all and ceremony defaults, t
 the two DELETE roads' explicit class + guard pins, the rewritten door pins across 12 suites, both
 tutorials' copy and their pins, the canon delta, the walk captures (gitignored, listed above), and
 this record.
+
+---
+
+**ORCHESTRATOR ADJUDICATION (2026-09-20, post-E3):** E3's Make Block-across-blocks
+classification (a DOOR) is **SUSTAINED** — ⌘⇧K over a span is the most literal referent of her
+item-8 sentence (*"make all newlines within the selected portion part of a single block"*), and
+a deliberate gesture behind a confirm is a door, not a delete. It remains flagged in the
+CARRIED block for her, reversible in one argument (`joining: .deleteKeystroke` + two pins).
+
+## UNIT C1 BRIEF — THE CAPTURE MICROSYNTAX (item 2, R-13u4-1; self-contained — read in this order)
+
+**Read first, in full:** (1) this file's Status banner · HER ADDITIONS item 2 (her verbatim
+words) · THE SIZING-AND-RULINGS SITTING RECORD (**R-13u4-1 is yours and BINDING**: `{#tag/path}`
+applies the tag and STANDING smart-book rules do the rest — no routing machinery, no journal
+special case; `{t:"my title"}` sets the title; ONLY the braced forms parse, a bare #hashtag is
+never touched, malformed braces pass through as typed text; tokens DISAPPEAR once parsed) ·
+THE LEDGER · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the prior UNIT RECORDs (E3's walker fact:
+`cliclick t:` drops characters in the shelf's quick-entry bar — use the osascript keystroke
+road with re-activation per burst). (2) **QUESTIONS #120** (the Mac's two capture boxes answer
+ONE rule — ⏎ files · ⇧⏎ adds a paragraph · the hand-off segments via `importPost`; your parse
+composes with that shape, never changes it) and the KnownIssues forked-brains row's
+`applyTypedPath` entry (the hoist rule: move to `Shared/`, zero test edits, the 3C parity
+pattern — pre-move names forwarded). (3) The code: both Mac capture doors (the shelf
+quick-entry bar · the quick-note pad incl. the system-wide hotkey) and their filing road ·
+`App/Variorum/Shared/PlainPaste.swift` (the pattern your brain follows: ONE pure function in
+`Shared/`, pinned on the Mac, compiled into the iOS target) · `TagAssignmentViewModel.applyTypedPath`
+(the brain you HOIST — its validation, hierarchy-depth and refusal rules are the standing tag
+law your applications ride) · `importPost`. Do your own reading.
+
+**The build.**
+- **ONE pure shared brain** (`Shared/CaptureMicrosyntax.swift` or similar): parse(text) →
+  (cleanText, tagPaths, title). Tokens stripped wherever they appear in the capture; every
+  `{#…}` applies (several are legal); the FIRST `{t:"…"}` wins (later ones: your call, recorded
+  as PROVISIONAL); malformed braces are TEXT and pass through byte-intact; a capture that is
+  ONLY tokens still files whatever cleanText remains (even empty → the doors' standing
+  empty-capture behaviour, unchanged).
+- **Parse at the HAND-OFF (the filing act), never live while typing** — her words were about
+  the note once made; the box's text stays exactly what she typed until ⏎ files it.
+- **Application AFTER the mint, through the standing ops:** the tag applications ride the
+  HOISTED `applyTypedPath` brain (its creation/validation/refusal rules unchanged); the title
+  lands through the standing title road. **Filing never blocks on a token:** a tag that fails
+  validation must not lose the capture — the note files, the failure speaks on the status seam
+  (the `shelveInDailyJournalBook` posture: never throw, report what happened; 18i's kind
+  grammar — a receipt for what landed, a refusal only from a door that did nothing).
+- **The hoist:** `applyTypedPath` moves to `Shared/` on the 3C parity pattern — every pre-move
+  name forwarded, ZERO test edits on both platforms (the zero-test-edit run IS the proof).
+  Update the KnownIssues forked-brains row's remaining-list in the same commit.
+- **NO routing machinery:** do not touch `shelveInDailyJournalBook`, smart-book assembly, or
+  any membership code — smart books pick the note up because a tag applied, full stop.
+- The phone's face is NOT yours (the parity row is already carried); but the brain must compile
+  into the iOS target (the `PlainPaste` precedent — the build gate proves it).
+
+**Evidence:** the brain's arm pins (each R-13u4-1 clause: braced-only · bare-hashtag-never ·
+malformed-pass-through · disappear · multi-tag · title) + the hand-off integration pins on BOTH
+Mac doors + the hoist's zero-test-edit proof + a hands-on WALK on the dev-store Debug build:
+stage a smart book keyed on a tag, type a capture with `{#that-tag}` and `{t:"…"}` into EACH
+door — the note lands titled, tagged, tokens gone, and appears in the smart book by the
+standing rules; a malformed brace files as text. Captures to `notes/plans/13u4-screens/c1/`.
+Suites your diff touches + the acceptance spine (REAL TYPE NAMES) at the unit's end; iOS build
+green. PROVISIONALs to `notes/QUESTIONS.md` from **#127**.
+
+**Your record:** append a `## UNIT C1 RECORD` section to THIS file with LIVE STATUS from the
+FIRST commit (PENDING marks), the parse rule's edge table, the hoist's zero-test-edit evidence,
+and the seam-file list (expected: NONE — say so explicitly); flip the ledger's C1 row in your
+closing commit. The checkpoint protocol in CAST & DISCIPLINE binds you from the first commit.
