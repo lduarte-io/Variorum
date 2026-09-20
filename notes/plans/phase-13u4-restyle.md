@@ -643,3 +643,24 @@ your FIRST commit (unverified claims PENDING), the traced mechanism stated as in
 state, the red-run evidence, the class-sweep table, and the seam-file list; flip the ledger's E2
 row in your closing commit. The checkpoint protocol in CAST & DISCIPLINE binds you from the
 first commit.
+
+---
+
+## UNIT E2 RECORD — THE ⌘⌫ CHECKBOX-SEAM DEFECT (item 11)
+
+**WHAT THIS UNIT DID NOT DO (the record's first line):** PENDING — written at the close.
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The record skeleton + the reading | DONE (this commit) |
+| 2 | THE TRACE — what ⌘⌫ proposes, measured in AppKit and through the app's road | NOT-STARTED |
+| 3 | The red-on-old pin on her verbatim fixture (or the HOLLOW verdict + stop) | NOT-STARTED |
+| 4 | The fix at the traced site + the delete-family class sweep | NOT-STARTED |
+| 5 | The walk on the dev-store Debug build, captured | NOT-STARTED |
+| 6 | Closing suites + the ledger's E2 row | NOT-STARTED |
+
+### THE MECHANISM, TRACED
+
+PENDING — piece 2. Nothing is claimed here until it is measured.
