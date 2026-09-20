@@ -305,8 +305,8 @@ touches her real store outside the pre-authorized refresh.**
 | 7 | UNIT F — PDF renders formatting (item 16) | **DONE 2026-09-19** — `0003bac1`…`261cae8a` + this record's close; the UNIT F RECORD is at the end of this file (the trace · the red-on-old at 6-of-8 cells / 31 issues · the ONE hoist with its two collapsed duplicate rules · 10 pins incl. two anti-drift guards and the `.md` byte-fence · the walk's 9 captures with BEFORE/AFTER pairs and the two-build `.md` SHA match · the literal-colour regression the suite caught in my own diff and the better fix that answered it · three things handed up). QUESTIONS #123 opened
 | 8 | UNIT G — the ceremony-sheet residuals (KnownIssues row 42) | **DONE 2026-09-19** — `c79860b0`…`91209567` + this record's close; the UNIT G RECORD is at the end of this file (the traced mechanisms · the red-on-old table, 11 issues across 4 cells on `25638746` · 13 pins incl. an anti-drift net over SIX rendered-take readers and an EXPLAIN seek pin · the walk's 14 captures in both voices, with the drift staged BY HAND through two dev instances on one store · both full-suite reds adjudicated on two trees · item 6's five verdicts). KnownIssues row 42 RESOLVED; QUESTIONS #124 opened |
 | 8b | UNIT H — the Takes board's live-card delete door + the lesson's truth (the E hand-up, adjudication 2 above) | **DONE 2026-09-19** — `14ae400c`…this record's close; the UNIT H RECORD is at the end of this file (the traced mechanisms, incl. a CORRECTION to the adjudication — the board's cards never had a ⋯, the F1 pass reached its article cell instead · the red-on-old table, 12 issues across 6 of 8 cells on `4f069b1b` · 9 pins in one new suite, incl. the PER-SURFACE declared⇔rendered guard the union walk could never make · the ⋯ sweep's second find, a row renamed at the Snippets ruling with a shipped pin holding the old name "verbatim" · the walk's 17 captures running the LESSON'S OWN experiment in both voices and both appearances · both full-suite reds adjudicated, one of them a NEW flake-list member · one breach of the green-per-commit rule, stated). QUESTIONS #125 opened |
-| 9 | The ladder — `fable-reviewer`, combined diff, standing rounds | NOT STARTED — named foci: UNIT B's one-time editor SPIN on deleteBackward (the frames in the UNIT B RECORD; the decoration pass is A1's neighbourhood); A1's geometry across the five host cells |
-| 10 | The orchestrator's walks + closeout ritual + the pre-authorized `/Applications` refresh (R-13u3-2) | WALK DONE 2026-09-19 (the acceptance-walk section below; spine PASSES) — closeout + refresh after the ladder |
+| 9 | The ladder — `fable-reviewer`, combined diff, standing rounds | **CLOSED 2026-09-19** — TWO rounds + a final clean sanity pass, full cross-model flow both rounds (R1 0B/1M/2m/3N: the MAJOR = the editor spin's precondition, fixed at its mechanism; the R1-3 dispute ruled a WIDEN — all four doors; S-1…S-4 all taken. R2 0B/0M/1m/1N: both fixed, the MINOR's red measured first. No round 3 owed; one Fable budget death cost ZERO commits). Records: `13u3-ladder-round1.md` · `-round1-responses.md` · `-round2.md` |
+| 10 | The orchestrator's walks + closeout ritual + the pre-authorized `/Applications` refresh (R-13u3-2) | WALK DONE (spine PASSES); notes-side closeout DONE (`9832175e`); the closing full-suite run + the refresh: **the refresh WAITS on a zero-instance window — her app is running and is never touched; she quits at her convenience, then the refresh runs on the standing rails** |
 
 ## ENVIRONMENT TRAPS (every unit brief carries this section verbatim — the skill's rule)
 
@@ -3212,3 +3212,43 @@ for her taste pass, not a defect.
   a future change ever makes that loss real. The #80(e) analysis is corrected by E's
   measurement; her original keep-as-built ruling stands on the corrected ground. #122(b)–(f)
   remain PROVISIONAL on her ordinary ratify list.
+
+
+## PHASE CLOSEOUT (2026-09-19)
+
+**Every ledger row is DONE or owned; nothing deferred silently.** Eight units (A1 · A2 · B · C ·
+D · E · F · G + the in-phase H), each closed on its own record with LIVE STATUS, red-on-old
+where defect-shaped, and its implementer's walk; the orchestrator's acceptance walk passed the
+spine in use; a two-round ladder with the full cross-model flow closed clean (the record-hygiene
+note honored: round 1's R1-3 disposition sentence — "each speaking the exact `lockedPost`
+sentence the post-⏎ road speaks" — was FALSIFIED at the Write door and corrected by round 2's
+R2-1; quote it only with that correction).
+
+**Finals:** core `swift test` **1604/174** green · the FULL Mac suite **[FINAL-MAC]** (the
+closing run; the tolerated reds are row 58's environment condition — now carrying G's
+warm-DerivedData covariate — and the row-49-family load arms under the paired protocol) ·
+tutorial spine green in-run · iOS build green · the FULL mobile suite **626/106 PASSED with 4
+known issues** (its two star-cap reds fixed in-phase, pre-existing since 13u2b) · lockstep
+marker **8** · **zero `Sync/` · zero `Persistence/` · zero schema · zero migrations · zero
+`Server/`**.
+
+**Canon deltas applied (exactly her rulings, `9832175e`):** AppSpec §9 `renameCommitPoint`
+(R-13u3-1) · SyncSpec §6's one-field bend (`commit_point.message` = editable metadata CAS) ·
+AppSpec §12's gutter law (R-13u-9 built; R-13u3-3…6) · §14's 13u3 block, 13u1's rolled verbatim.
+
+**KnownIssues:** rows 42 + 50 RESOLVED and removed. Filed this phase, each owned: the indicator
+ring (13u4) · the AppKit-modal confirm (13u4) · the "pools" lesson vocabulary (13u4) · Block
+History's seal-blind rename field (13u4) · the pad's close-loss (17b) · Canvas's focus wire
+(17e) · the chip-wrap manifest sensitivity (12) · row 43's 178-key member + row 49's new flake
+member + row 58's warm-build covariate (12, cell extensions).
+
+**MOBILE PARITY:** PL-25…PL-30 (`notes/MobileSoul.md`) — the capture row PL-27 flagged
+highest-value on her own lost-prose evidence.
+
+**HER RE-SEED (one act):** `Help ▸ Restore Tutorial… ▸ Replace` in the refreshed build delivers
+E's new lesson + H's corrected takes lesson (+ the 18f-era corrections already owed).
+
+**THE REFRESH (R-13u3-2, pre-authorized):** WAITS on a zero-instance window — her app was
+relaunched during the closeout and is NEVER touched by a session; at her word/quit, the standing
+rails run (A1 backup first · Release from a clean worktree · hashes + codesign recorded · zero
+instances verified at every step). Evidence lands in the handoff when it runs.
