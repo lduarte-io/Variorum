@@ -111,7 +111,7 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 | # | Unit | Contents (short) | Evidence | Status |
 |---|---|---|---|---|
 | E1 | Empty blocks chain (item 3, R-13u4-2) | `TypedReturn`'s empty-block arm → the chain; canon delta rides the build | pins + walk | **DONE** — 9 pins (7 red-first) · walked both voices + dark · AppSpec §7 delta landed · record below |
-| E2 | ⌘⌫ checkbox-seam defect (item 11) | trace the mechanism first; red-on-old owed | red-on-old + walk on her verbatim repro | NOT-STARTED |
+| E2 | ⌘⌫ checkbox-seam defect (item 11) | trace the mechanism first; red-on-old owed | red-on-old + walk on her verbatim repro | **CLOSED — DISMISSED AS HOLLOW AS STATED** (no product code changed): ⌘⌫ is `deleteToBeginningOfLine:` = the PARAGRAPH on macOS 26, and the block separator IS a newline — the reported gesture is structurally incapable of it. Measured five ways + WALKED. Her observable is real and belongs to **⌥⌫**; the product call is hers — **QUESTIONS #126**. 10 pins + the class sweep in the record below |
 | E3 | Merge keeps the newlines (item 8, R-13u4-3) | the rendering join, every door; ceremony default; canon delta rides | state-transition suite + walk | NOT-STARTED |
 | C1 | Capture microsyntax (item 2, R-13u4-1) | shared rule + both Mac doors; `applyTypedPath` hoist; phone face → parity row | pins + capture walk | NOT-STARTED |
 | C2 | Selection → take (item 9, R-13u4-4) | the MOVE op + Write door; insurance savepoint load-bearing | state-transition + walk | NOT-STARTED |
@@ -123,7 +123,9 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 **CARRIED TO CLOSEOUT (grows as units close; nothing here may be lost):** MOBILE PARITY rows —
 (1) the phone's empty-block Return should CHAIN too (E1's report: AppSpec §7 still says the
 phone's Return model is unchanged; no mobile code consults `TypedReturn.act`); (2) the phone's
-capture-microsyntax face (R-13u4-1, files when C1 closes).
+capture-microsyntax face (R-13u4-1, files when C1 closes). **OPEN PRODUCT CALLS** — (1) **QUESTIONS #126**
+(E2): should ⌥⌫ stop at a line break, and at a block seam? Her report's real chord; nothing was
+implemented, by the brief's stop rule.
 
 ## ENVIRONMENT TRAPS (every unit brief carries this section verbatim — the skill's rule)
 
@@ -640,7 +642,15 @@ to `notes/plans/13u4-screens/e2/`. Run the suites your diff touches + the accept
 
 **Your record:** append a `## UNIT E2 RECORD — THE ⌘⌫ CHECKBOX-SEAM DEFECT (item 11)
 
-**WHAT THIS UNIT DID NOT DO (the record's first line):** PENDING — written at the close.
+**WHAT THIS UNIT DID NOT DO (the record's first line): IT CHANGED NO PRODUCT CODE AT ALL.** No
+fix was made, because the finding as stated does not reproduce — the brief's own stop rule
+(*"a pin green on both sides … STOP … do not fix something adjacent"*). Untouched, therefore:
+`BlockRangeIndex` · `EditorTextView` · `EditorViewModel` · `EditorSurfaceController` ·
+`TypedReturn` · `PaneTextAuthority` · `MarkdownActs` · `Sources/VariorumCore/` (and `Sync/`,
+schema, migrations) · every view and every lesson string. No other unit's work (E1's Return
+chain, E3's merge join, the restyle spine) was touched, and the ⌥⌫ behaviour her report actually
+describes was **deliberately not changed** — it is a product call, logged as QUESTIONS #126. The
+unit's whole diff is one new test file and this record.
 
 ### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
 
@@ -651,7 +661,7 @@ to `notes/plans/13u4-screens/e2/`. Run the suites your diff touches + the accept
 | 3 | The brief's stated pin, written and run → **the HOLLOW verdict** (no fix; the stop rule) | DONE (this commit) — the two ⌘⌫ pins are it |
 | 4 | The delete-family class sweep, each chord verdicted | DONE (this commit) — the table below |
 | 5 | The walk on the dev-store Debug build, captured (her exact two lines, both chords) | DONE (this commit) — 8 captures + 4 named crops |
-| 6 | QUESTIONS #126 (her call, nothing implemented) + closing suites + the ledger's E2 row | NOT-STARTED |
+| 6 | QUESTIONS #126 (her call, nothing implemented) + closing suites + the ledger's E2 row | DONE (this commit) — 122/11 + the spine 78/11, below |
 
 ### THE VERDICT IN ONE LINE
 
@@ -776,3 +786,48 @@ quick-entry bar dropped characters on that pass) and it is a fixture, not a find
 **Both voices / both appearances were NOT walked, and the reason is structural:** this unit's
 diff contains ZERO product code — no view, no chrome, no brain, no operation. There is nothing
 for a voice or an appearance to render differently.
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **The unit STOPPED instead of fixing ⌥⌫.** The brief's stop rule is explicit, and the
+   substance backs it: in her own note the two lines are ONE block, the newline between them is
+   content (I4), and the app does byte-for-byte what a bare `NSTextView` does with that
+   keystroke — so "fixing" it means overriding a system chord's system meaning, which is
+   product behaviour the spec does not define. QUESTIONS #126 carries it with three options per
+   half. Reversing this costs a ruling, not a re-trace.
+2. **The trace pins were KEPT rather than deleted once they came up green.** A green pin here is
+   the finding's disposition — and the two ⌘⌫ ones are exactly the shape the brief asked for
+   ("⌘⌫ … never through its newline"), which is worth owning as a regression guard now that the
+   answer is written down. They cost 0.5 s.
+3. **The ⌥⌫ pins are named CHARACTERIZATION in their own doc comments**, not approval: if she
+   rules (a)(ii) or (b)(ii) on #126, those two pins are rewritten to the ruling (a ruled change,
+   no red-on-old owed — the 13u4 CAST & DISCIPLINE rule), and the ⌘⌫ pins beside them do not
+   move. The repo's own precedent for pinning a behaviour you do not endorse is SyncSpec §7's
+   documented concurrent-divide outcome.
+4. **The TWO-BLOCK shape was pinned but not walked** — the staging roads available to a walker
+   could not lay that fixture down faithfully (named in the walk section with the measured
+   reason). The pins for it drive REAL key events through the whole production road, which is
+   the same pipeline the walk exercises.
+5. **No `KnownIssuesAndTechDebt.md` row was opened.** There is no deferred WORK here: there is a
+   question for her (#126) and a measured non-defect. A row whose owner is "a ruling" would be
+   the drift class.
+
+### CLOSING RUNS (at the unit's END — never the full suite at the start)
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| The new pins + every suite that shares the key, the seam or the delete roads | `xcodebuild test -scheme Variorum -destination platform=macOS` with `-only-testing:` for `CommandDeleteLineTraceTests` · `CommandDeleteInEditorTests` · `TypedReturnTests` · `TypedReturnKeyTests` · `ReturnKeyTraceTests` · `ListContinuationTests` · `NestedListDoorTests` · `WholeBlockDeleteTests` · `CrossBlockCompoundTests` · `ArmedEditTests` · `MacEditRoutingTests` | **122 tests in 11 suites passed** (exit 0, no skips) |
+| **The acceptance spine** (`TutorialWalkTests`) — run under its ELEVEN REAL TYPE NAMES: the `-only-testing` FILE-name trap again (`VariorumTests/TutorialWalkTests` matches nothing and is silently ignored — E1 met the same trap on `EditRoutingTests`) | `-only-testing:` for `TutorialBookShapeTests` · `TutorialDoorTests` · `TutorialWritingActsTests` · `TutorialTakesActsTests` · `TutorialStructureActsTests` · `TutorialLookingActsTests` · `TutorialLibraryActsTests` · `TutorialDeletionActsTests` · `TutorialWherePlacesActsTests` · `TutorialPrivacyChapterTests` · `TutorialFannedMatrixTests` | **78 tests in 11 suites passed** (exit 0) |
+
+No full-suite run was made at this unit's start; the plan's closeout-refresh baselines stand as
+the baseline (the standing rule). **No iOS build was owed** — nothing under `Shared/` was
+touched.
+
+### WHAT A FRESH SESSION WOULD NEED TO FINISH THIS
+
+Nothing. The unit is closed on a verdict, not on a fix. What is OPEN is hers: **QUESTIONS #126**
+(should ⌥⌫ stop at a line break · at a block seam), with the options written out and the
+measurements behind them in this record. If she rules a clamp, the build is small and its home
+is `EditorTextView` (an intercept of `deleteWordBackward:`/`deleteWordForward:` that clamps the
+proposed range to the caret's own line, through the ordinary input path — the `MarkdownActs`
+shape), and it WOULD be a seam diff, so the Fable rider would apply to it.
