@@ -120,6 +120,11 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 | S2 | Library & masthead faces (item 1 + rows 50/51/54) | click-to-cycle stamp + word-counter condense (word-target offer preserved) · `FlippingStamp` hoist + oracle edges · F-0 residue · Timeline voice | walk, captured | NOT-STARTED |
 | S3 | Chrome singles + the conformance sweep (rows 44/45/46/63/67/68/69 + the Trash fork) | 27-site sweep + grep pin · tag sheet voiced · indicator ring · Restore Tutorial confirm · "pools" lesson sweep (re-seed consequence recorded) · seal-blind rename field · `blockNamingDoor` hygiene · Trash cards · closing conformance walk against the reference artifact | walk, captured | NOT-STARTED |
 
+**CARRIED TO CLOSEOUT (grows as units close; nothing here may be lost):** MOBILE PARITY rows —
+(1) the phone's empty-block Return should CHAIN too (E1's report: AppSpec §7 still says the
+phone's Return model is unchanged; no mobile code consults `TypedReturn.act`); (2) the phone's
+capture-microsyntax face (R-13u4-1, files when C1 closes).
+
 ## ENVIRONMENT TRAPS (every unit brief carries this section verbatim — the skill's rule)
 
 - **Instance checks:** `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH (the test
@@ -591,3 +596,50 @@ the baseline (the standing rule).
 Everything is committed and pushed: the pins (`TypedReturnTests`, `ReturnKeyTraceTests`), the
 brain (`TypedReturn.swift`), the dispatch (`EditorSurfaceController.runTypedReturnAct`), the
 canon delta (AppSpec §7), the walk captures (gitignored, listed above), this record.
+
+---
+
+## UNIT E2 BRIEF — THE ⌘⌫ CHECKBOX-SEAM DEFECT (item 11; self-contained — read in this order)
+
+**Read first, in full:** (1) this file's Status banner · HER ADDITIONS item 11 (her verbatim
+repro — it is your fixture) · THE SIZING-AND-RULINGS SITTING RECORD (R-13u4-6 is the cast; no
+ruling pre-decides this unit — it is a DEFECT, trace-first) · THE LEDGER · ENVIRONMENT TRAPS ·
+CAST & DISCIPLINE · the closeout-refresh block's what-changed items (item 2 — the
+transaction-gated decoration refresh — binds any editor-refresh work) · **the UNIT E1 RECORD
+above** (the empty-block arm of `TypedReturn.act` changed under you on this branch — know it
+before reading traces). (2) The code, tracing rather than assuming: `EditorTextView`'s
+delete-family intercepts and their seam roads · `Shared/EditorBrain/BlockRangeIndex.swift` (the
+seam guards: `emptyBlockDeletion`, `textedSeamPair`, and the plan/authorize split) ·
+`MarkdownActs`' list machinery (the checkbox lead is the bullet shape — 13k K8's law). Do your
+own reading — never from a summary.
+
+**The defect, her report verbatim (the fixture):** on the lines
+`- [ ] Create carousel format for blog posts (maybe just screenshots of personal blog to start?)`
+/ `- [ ]`, *"Command delete at the end of the second line deletes this content: start?) ⏎ - [ ]"*
+— deleteToBeginningOfLine reaching through the newline into the previous line's tail. The
+expected shape (the pin's assertion): ⌘⌫ at the end of a line deletes to THAT line's beginning
+and never through its newline — the previous line's tail survives byte-intact.
+
+**Discipline, in order:** (1) REPRODUCE her exact two lines in a pin FIRST — this is a defect,
+so **red-on-old is owed**: the pin must fail on the pre-fix tree (behavioural-revert verified)
+and pass after. If the pin runs GREEN on the shipped code, the finding is hollow as stated —
+STOP, record what you measured, and report to the orchestrator instead of fixing something else.
+(2) TRACE the concrete mechanism (inputs → wrong range → wrong store state) yourself before any
+fix — candidate roads above, but the trace decides, not the list; note whether the two lines
+live in ONE block (a list stays whole — the newline is content) or two, because it changes which
+guard should have caught it. (3) Fix at the traced site, smallest true fix; sweep the CLASS
+(the other delete-family chords at the same position — ⌘⌫'s siblings — each verdicted fixed or
+provably safe, one line each in the record). (4) If the fix touches `BlockRangeIndex`/
+`EditorTextView`'s seam roads, say so in the record's seam-file list — the ladder's Fable
+reviewer reads it.
+
+**Evidence:** the red-on-old pin (+ any class-sweep pins) + a hands-on WALK on the dev-store
+Debug build reproducing her exact two lines, ⌘⌫ at the second line's end, before/after captures
+to `notes/plans/13u4-screens/e2/`. Run the suites your diff touches + the acceptance spine
+(`TutorialWalkTests`) at the unit's end — NEVER the full suite at the start.
+
+**Your record:** append a `## UNIT E2 RECORD` section to THIS file with a LIVE STATUS table from
+your FIRST commit (unverified claims PENDING), the traced mechanism stated as inputs → wrong
+state, the red-run evidence, the class-sweep table, and the seam-file list; flip the ledger's E2
+row in your closing commit. The checkpoint protocol in CAST & DISCIPLINE binds you from the
+first commit.
