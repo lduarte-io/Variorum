@@ -663,3 +663,65 @@ getter left internal is harmless. Reviewer's preference; the two mutators are th
 **What I did not do:** no fixes, no pins, no app run, no suite run — the same contract as the
 round-1 responses and the sanity pass. R2-1's fork is the reviewer's call; R2-2 is a one-word
 change.
+
+---
+
+# FINAL SANITY — the round-2 fix pass (opus, 2026-09-19)
+
+**CLEAN PASS. The ladder closes from my side.** I verified `6d4433a1` and `034cdd73` as full
+diffs and then in the current tree, against the four things the coordinator named. No fixes, no
+pins, no app run. One record-hygiene note at the end — an observation for the closeout, not a
+raise.
+
+**The three cautions — all honored, verbatim where it counts:**
+
+1. **The pin's doc is scoped to this door.** `writesDoorAndFilerSpeakOneSealSentence`'s comment
+   names the two shipped gesture-worded siblings, says they *"are NOT in breach of this contract
+   and must not be widened into it"*, gives the reason (their doors consume the gesture outright,
+   so the door is those gestures' only worded refusal), and states *"this pin is not a
+   surface-wide law."* The production comment at the guard carries the same distinction, so a
+   reader who never opens the test file still gets it.
+2. **The gesture-wording cost is stated:** *"gesture-wording THIS door later means changing
+   `operationMessage`'s shared `lockedPost` case with it, or redding this cell honestly."*
+3. **Only the Write cell changed.** The test diff touches exactly one `#expect` (the Write cell's,
+   now the surface sentence, with the reason inline) and adds the new cell; the other cells have
+   no hunks, and in the current file `sealedSentence` still answers at `:413` (Takes) · `:435`
+   (Canvas) · `:472` (Compare anchor) · `:529` (the S-2 sealed-peer cell) — correct for all four,
+   since those surfaces' filers genuinely speak the registry.
+
+**The literal hoist is byte-identical and the three assertions ride:** `noCaretToCommit`
+(`:3084`) is `"Place the caret in a block to commit."`, consumed at both production sites
+(`:3088` door, `:3129` filer) and character-identical to the two literals it replaced. A
+repo-wide grep finds exactly **three** shipped assertions of that string —
+`ConfirmationsSettingTests:148` · `SavepointNamingTests:228` · `EditorSessionTests:640` — none
+touched by the diff (the test hunks start at `:343`), and each still compares the same bytes.
+
+**The private fence has zero out-of-file users — verified independently, repo-wide.** A grep over
+all of `App/` and `Sources/` returns **five** uses of the transaction machinery, every one inside
+`EditorViewModel.swift`: `storageDidEdit`'s entry/`defer` (`:1179–1180`), the deferral branch's
+read (`:3392`), the definitions (`:3457–3468`), and the DEBUG oracle's read (`:3659`). Zero test
+callers — the pins read the DEBUG counters, never the flag — so the fence costs nothing. Both
+`storageDidEdit` and the members sit in the same `final class EditorViewModel` body in one file
+(the diff hunk headers show it), so file-scoped `private` is sound however the file's extensions
+are arranged, and both targeted runs compiled the whole app target.
+
+**Beyond the four, checked because the pass deliberately skipped a full Mac run:** I swept every
+shipped assertion of BOTH affected sentences repo-wide. The registry's seal sentence is asserted
+in exactly one test — `TutorialWalkTests:2059` — and I read its body: it drives
+`TakesViewModel.commitFocusedTake()`, the Takes **filer**, whose error road is `OpsRefusalCopy`,
+so it is untouched and still correct. `CommandRoutingTests:306–308` uses the surface sentence but
+constructs it itself and round-trips it through the status centre — unaffected. That is the whole
+blast radius of a one-string change, and the no-full-suite judgment holds.
+
+**Two details I checked and found right rather than raised:** the Write cell pins the WORDS (a
+hard literal) while the new cell pins the CONTRACT (equality) — the right pairing, since comparing
+the cell against `operationMessage` would have made it tautological with the equality cell; and
+the equality cell guards its own hollowness with `#expect(atTheDoor != nil)` and
+`#expect(savepointAsk == nil)`, so a future removal of the door's guard reds it instead of
+passing it.
+
+**Record-hygiene note for the closeout (not a raise):** round 1's R1-3 disposition still reads
+*"each speaking the exact `lockedPost` sentence the post-⏎ road speaks"*, which round 2 falsified
+and fixed. The correction lives in the round-2 file, which round 1's hand-off points at, so the
+thread is followable — but if the closeout quotes round 1's dispositions anywhere, that clause is
+the one to quote with its round-2 correction attached.
