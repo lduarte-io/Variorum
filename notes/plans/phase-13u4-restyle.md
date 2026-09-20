@@ -917,6 +917,7 @@ question, the restyle spine), no `Sync/`, no schema, no migration.
 | 3 | The Mac consumers (the seam differential, the carry-all/ceremony defaults, the two DELETE roads' guards) + the Mac pins | DONE (this commit) — the merge family **140/14 green**, below |
 | 3b | The two tutorials' merge sentence (my change falsified it) + their pins | DONE (this commit) |
 | 4 | The phone's door (core-side flip) + the mobile pins + the iOS build | DONE (this commit) — the four mobile suites **50/4 green** (2 pre-existing known issues); the standalone iOS build line is PENDING until the closing runs |
+| 4b | The FULL-suite sweep for stragglers (three found: two on the Make Block road — row 10 — and one door pin) | DONE (this commit) — 2917/486 with 5 issues, of which 3 were these and 2 are row 58's ONE recorded environment red; the three now green in a 52/5 re-run |
 | 5 | The walk on the dev-store Debug build, captured | NOT-STARTED |
 | 6 | Closing suites + the ledger's E3 row | NOT-STARTED |
 

@@ -138,7 +138,15 @@ struct BoundaryFluidityTests {
             let after = try await harness.database.read { db in
                 try Queries.renderPost(db, containerID: harness.postID).compactMap(\.text)
             }
-            #expect(after == ["Aa one.", "Aa two. Middle block. Zz one.", "Zz two."],
+            // **R-13u4-3, row 10 of E3's classification.** Make Block
+            // across blocks joins its pieces through `merge`, and it is a
+            // DOOR — a deliberate gesture behind a confirm whose whole
+            // promise is that the SPAN she selected becomes one block. Her
+            // ruling's own sentence is that shape ("all newlines within the
+            // selected portion part of a single block"), so the minted
+            // block reads byte-identical to what she selected. This pin
+            // read "Aa two. Middle block. Zz one." before 13u4 UNIT E3.
+            #expect(after == ["Aa one.", "Aa two.\nMiddle block.\nZz one.", "Zz two."],
                     "the in-span pieces became ONE block; the out-of-span edges survive")
 
             // ONE undo restores the original three blocks byte-identically
@@ -204,7 +212,10 @@ struct BoundaryFluidityTests {
             #expect(slots[0].text == "One prefix here. COMMON MIDDLE IS LONG.")
             #expect(slots[1].activeVariantCount == 1,
                     "the middle mints single-variant (merge's standing semantics)")
-            #expect(slots[1].text == "COMMON END HERE. Second block text goes on.")
+            // The in-span piece is a merge product, so it carries the door
+            // join (R-13u4-3; this read "COMMON END HERE. Second block…").
+            // `slots[0]` is a DIVIDE product and is byte-unchanged.
+            #expect(slots[1].text == "COMMON END HERE.\nSecond block text goes on.")
             // The other take's out-of-span half rode the fan too.
             let outFan = try await harness.database.read { db in
                 try Queries.blockFan(db, blockID: slots[0].blockID)

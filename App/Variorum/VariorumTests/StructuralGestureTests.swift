@@ -104,7 +104,7 @@ struct StructuralRewriteDoorTests {
             await h.model.invokeGesture(.mergeBlocks)
 
             let slots = try h.storeSlots()
-            #expect(slots.map(\.text) == ["One two. Three four."])  // the space join
+            #expect(slots.map(\.text) == ["One two.\nThree four."])  // the door join
             try expectStoreMatchesView(h)
             // Caret at the join: where the trailing half begins.
             #expect(h.textView.selectedRange() == NSRange(location: 9, length: 0))
