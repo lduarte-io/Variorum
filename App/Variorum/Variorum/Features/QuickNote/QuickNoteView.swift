@@ -139,21 +139,40 @@ final class QuickNotePad {
     /// One line, on the one shared body, so all three triggers inherit it.
     private func take() async -> QuickNoteMint.Outcome {
         let submitted = text
-        guard QuickNoteMint.mints(submitted) else {
+        // **13u4 UNIT C1 — THE CAPTURE MICROSYNTAX PARSES HERE** (her ruling
+        // R-13u4-1), at the HAND-OFF and nowhere else, through the same
+        // shared rule the shelf's box uses. A capture of NOTHING BUT TOKENS
+        // has nothing to file and takes the pad's standing empty branch
+        // unchanged (PROVISIONAL, QUESTIONS #127(f)).
+        let capture = CaptureMicrosyntax.parse(submitted)
+        guard QuickNoteMint.mints(capture.text) else {
             text = ""
             titleFromFirstWords = false
             lastError = nil
             return .nothingToFile
         }
         // The name is read from what is being FILED, not from what the pad
-        // holds now — the same discipline `submitted` already has.
-        let title = titleFromFirstWords
-            ? NoteCardFace.suggestedTitle(forTypedText: submitted)
-            : nil
+        // holds now — the same discipline `submitted` already has. A
+        // `{t:"…"}` token outranks the offered first words, and the offer
+        // itself reads the CLEANED text so a token can never land inside the
+        // stored name (#127(e)).
+        let title = capture.title
+            ?? (titleFromFirstWords
+                ? NoteCardFace.suggestedTitle(forTypedText: capture.text)
+                : nil)
         lastError = nil
-        let outcome = await mintNow(submitted, title: title)
+        let outcome = await mintNow(capture.text, title: title)
         switch outcome {
         case .filed(let postID):
+            // The note exists; the tokens act on it now, and a tag that does
+            // not land speaks a refusal without undoing anything — filing
+            // never blocks on a token.
+            for refusal in await CaptureMicrosyntax.applyTags(
+                capture, toPost: postID, session: session,
+                wording: TagsViewModel.message
+            ) {
+                session.status.refuse(refusal)
+            }
             if text == submitted {
                 text = ""
                 titleFromFirstWords = false

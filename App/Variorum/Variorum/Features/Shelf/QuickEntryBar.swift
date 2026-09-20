@@ -68,12 +68,22 @@ final class QuickEntryModel {
     }
 
     /// Returns the note to open, or nil when nothing was minted.
+    ///
+    /// **13u4 UNIT C1 — THE CAPTURE MICROSYNTAX PARSES HERE** (her ruling
+    /// R-13u4-1), at the HAND-OFF and nowhere else: the box holds exactly
+    /// what she typed until ⏎ files it, and only then do `{#tag}` and
+    /// `{t:"title"}` stop being text. Filing NEVER blocks on a token — the
+    /// note is minted first and the tags are applied to it after, so nothing
+    /// a token can do costs her the capture.
     @discardableResult
     func submit() async -> String? {
         let submitted = text
-        guard !submitted.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+        let capture = CaptureMicrosyntax.parse(submitted)
+        guard !capture.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             // Nothing to keep and nothing to file — and the stale error goes
-            // with it.
+            // with it. A capture of NOTHING BUT TOKENS lands here too: there
+            // is no note for a tag to go on, so the door takes its standing
+            // empty branch unchanged (PROVISIONAL, QUESTIONS #127(f)).
             text = ""
             lastError = nil
             titleFromFirstWords = false
@@ -81,12 +91,25 @@ final class QuickEntryModel {
         }
         lastError = nil
         // The name is read from what is being FILED, not from what the box
-        // holds now — the same discipline `submitted` already has.
-        let title = titleFromFirstWords
-            ? NoteCardFace.suggestedTitle(forTypedText: submitted)
-            : nil
+        // holds now — the same discipline `submitted` already has. A
+        // `{t:"…"}` token outranks the offered first words, and when she
+        // HAS taken the offer the words are read from the CLEANED text, so
+        // a token can never end up inside the stored name (#127(e)).
+        let title = capture.title
+            ?? (titleFromFirstWords
+                ? NoteCardFace.suggestedTitle(forTypedText: capture.text)
+                : nil)
         do {
-            let postID = try await mintNow(submitted, title: title)
+            let postID = try await mintNow(capture.text, title: title)
+            // The note exists; the tokens act on it now. A tag that does not
+            // land speaks a refusal (18i: a door that did nothing says so)
+            // and NOTHING is undone.
+            for refusal in await CaptureMicrosyntax.applyTags(
+                capture, toPost: postID, session: session,
+                wording: TagsViewModel.message
+            ) {
+                session.status.refuse(refusal)
+            }
             // **Only what was actually minted is cleared.** Keystrokes that
             // landed during the flight are not in that note — the mint read
             // `submitted` — so clearing them wholesale would lose them for

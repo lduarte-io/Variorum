@@ -1213,7 +1213,7 @@ the HOISTED brain underneath its existing face, unchanged in behaviour.
 | 1 | The record + the READING (the brief's three reading lists, in order) | DONE (163ec318) |
 | 2 | The two shared brains — `Shared/CaptureMicrosyntax.swift` (the parse) + `Shared/TypedTagPath.swift` (the hoist's new home) — and the parse's arm pins, one per R-13u4-1 clause | DONE (this commit) — **17 tests in 1 suite passed** |
 | 3 | The `applyTypedPath` HOIST to `Shared/` (the 3C parity pattern — zero test edits, both platforms) + the KnownIssues row | DONE (this commit) — Mac **46/8**, mobile **6/2**, zero test files touched |
-| 4 | The hand-off on BOTH Mac capture doors + the integration pins | NOT-STARTED |
+| 4 | The hand-off on BOTH Mac capture doors + the integration pins | DONE (this commit) — **42 tests in 4 suites passed** (the 25 new door pins + `QuickEntryBarTests` and `QuickNoteMintTests` riding UNMODIFIED) |
 | 5 | QUESTIONS #127 (the PROVISIONALs) | NOT-STARTED |
 | 6 | The walk on the dev-store Debug build, captured | NOT-STARTED |
 | 7 | Closing suites + iOS build + the ledger's C1 row | NOT-STARTED |
@@ -1284,3 +1284,43 @@ own doors. `TypedTagPath.Outcome` therefore carries the ERROR out and each face 
 ### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
 
 *(PENDING — expected NONE; stated explicitly at the close.)*
+
+### THE HAND-OFF — WHAT EACH DOOR DOES NOW (piece 4)
+
+Both Mac capture doors run the SAME four steps, in this order, and the order is the posture:
+
+1. **Parse at the hand-off** (`CaptureMicrosyntax.parse(submitted)`) — never while she types. The
+   box holds exactly what she typed right up to the ⏎ that files it, so a token is ordinary text
+   until the note is being made. Her ask was about the note once it exists; this is that, and
+   nothing more.
+2. **The empty check moves onto the CLEANED text.** A capture of nothing but tokens has no note
+   for a tag to go on, so each door takes its own STANDING empty-capture branch, unchanged
+   (PROVISIONAL #127(f)).
+3. **MINT with the cleaned text and the token's title** — `importPost(title:text:)`, the standing
+   title road, byte-unchanged. A `{t:"…"}` outranks the first-words chip; when the chip is the
+   only source, its words are read from the CLEANED text so a token can never land inside the
+   stored name (#127(e)).
+4. **THEN the tags, on the note that now exists** (`CaptureMicrosyntax.applyTags` →
+   `TypedTagPath.apply`, one token at a time). This step cannot throw and undoes nothing: every
+   token that fails comes back as a sentence the door speaks as a REFUSAL (18i's grammar — the
+   tag door did nothing), and the note is already safe. **Filing never blocks on a token.**
+
+**No routing machinery of any kind was written** — no `shelveInDailyJournalBook`, no smart-book
+assembly, no membership code. The smart book in the pin
+`aSmartBookKeyedOnTheTagCollectsTheNoteByTheStandingRules` collects the note because a tag
+applied, and the same pin asserts `reading_post` has ZERO rows for it: collected by a predicate,
+never by a row. That pin is how "no routing machinery" is stated in behaviour rather than prose.
+
+| Pin | Door | What it holds |
+|---|---|---|
+| `theShelfBoxFilesATitledTaggedNoteWithTheTokensGone` | shelf | her own example, end to end through the real ops |
+| `aSmartBookKeyedOnTheTagCollectsTheNoteByTheStandingRules` | shelf | R-13u4-1's promise: the book collects it, zero membership rows |
+| `aTokenMayNameATagThatDoesNotExistYet` | shelf | the hoisted brain's create walk, reached through a token |
+| `severalTokensAllApply` · `aBareHashtagFilesAsTextAndTagsNothing` · `aMalformedBraceFilesAsTypedText` | shelf | the ruled clauses at the door |
+| `aTokenThatCannotApplyNeverCostsHerTheNote` | shelf | **the posture** — note filed, tags none, one refusal naming the token |
+| `aCaptureOfNothingButTokensFilesNothing` | shelf | the standing empty branch (#127(f)) |
+| `aTitleTokenOutranksTheOfferedFirstWords` | shelf | both title sources, and the name never carries a token (#127(e)) |
+| `theMintIsAskedForTheCleanedTextAndTheTokensTitle` | shelf | the seam reads what the store was actually asked for |
+| `thePadFilesATitledTaggedNoteWithTheTokensGone` | pad | the same rule at the other door — her tag rides BESIDE the pad's standing `quicknote` filing |
+| `thePadsCaptureOfNothingButTokensFilesNothing` | pad | the pad's own empty branch |
+| `aRefusedPadKeepsTheWholeCaptureTokensIncluded` | pad | a refusal keeps her capture BYTE-INTACT, tokens and all — the parse never touched the box |
