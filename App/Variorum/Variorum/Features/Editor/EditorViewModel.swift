@@ -1809,8 +1809,9 @@ final class EditorViewModel {
     /// two text-undo registrations for one keystroke, against K5's
     /// one-group rule for the continuation. Unreachable today — the act
     /// that follows a retraction is always a structural flight (the block
-    /// is non-empty, so `.nothing` is unreachable, and R1-4's line-end rule
-    /// excludes `.content`), and every structural rewrite clears the
+    /// holds the list it just exited, and R1-4's line-end rule excludes
+    /// `.content`; the empty block's old no-op arm retired with R-13u4-2 and
+    /// would mint here too), and every structural rewrite clears the
     /// text-undo stack (R-2 residual 1) — and live the day 13u1 relaxes
     /// that directive: group the two then.
     private func retractListContinuationNewline() {

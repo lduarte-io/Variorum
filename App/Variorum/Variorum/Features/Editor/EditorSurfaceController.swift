@@ -927,9 +927,15 @@ final class EditorSurfaceController {
         // claim's own generation; a compound queued AHEAD of this act by a
         // replayed seam ⌫ drained the act's keys first — see the gate.)
         switch model.typedReturnAct() {
-        case .content, .nothing:
-            // `.nothing` is the empty block's ruled no-op (U-19 (2)):
-            // consumed, deliberately not spoken.
+        case .content:
+            // Re-derived to `.content`: the surface moved under the claim (a
+            // replayed key, a flight's landing) and this keystroke is not
+            // the gesture after all. Consumed, deliberately not spoken.
+            //
+            // **`.nothing` RETIRED here with the brain's own arm (R-13u4-2,
+            // 13u4 UNIT E1):** the empty block's no-op is superseded — that
+            // caret now mints through `insertEmptyBlock` below, like every
+            // other end-of-block caret, and chains.
             return
         case .divideAtCaret:
             await invokeGesture(.divideAtCursor)

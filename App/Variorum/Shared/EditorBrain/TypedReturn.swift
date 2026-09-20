@@ -8,6 +8,19 @@
 //  the middle of Write, so I had paragraphs above and below. I want it to
 //  work on newlines even when you're in the middle of write."*
 //
+//  **ONE ARM SUPERSEDED — her ruling R-13u4-2 (the 13u4 sizing-and-rulings
+//  sitting, 2026-09-20): EMPTY BLOCKS CHAIN.** U-1 ended "…nothing in an
+//  empty block"; she reversed that arm herself: *"This is driving me insane -
+//  on an empty block, you can't keep making new lines and spawning more empty
+//  blocks. Direct violation of 'works how you'd expect a text editor to
+//  work'… You should be able to go down the list typing whatever you want in
+//  a series of empty blocks."* An empty block now answers the same verdict a
+//  block's END answers, so the key chains indefinitely. Everything else U-1
+//  and U-19 settled stands: the chip OFF is content, the abandoned empties
+//  STAY, ⇧⏎ is the in-block newline, and #92(c)'s empty-tail close-and-mint
+//  composes ahead of the chain (the tail is answered before the entries are
+//  walked at all).
+//
 //  This file is the DECISION and nothing else — pure, `nonisolated`, no
 //  AppKit, no store: given the caret, the tiling index, the note's
 //  segmentation chip and a way to read one entry's live text, it says which
@@ -69,12 +82,13 @@ nonisolated enum TypedReturn {
         /// applies. Single-take: in place, A keeps identity. Fanned: the
         /// keep-on-top default 18c batch 1 built.
         case divideAtCaret(entryIndex: Int, blockID: String)
-        /// The caret sits in an EMPTY block: nothing happens — never a
-        /// second empty block (U-19 (2): *"the eager deleting of whitespace
-        /// has already been an annoyance and we won't reintroduce it with
-        /// paragraphs disappearing"* — the one that exists stays, and a
-        /// second would be noise). Consumed, and deliberately not spoken.
-        case nothing
+        // **`case nothing` RETIRED (R-13u4-2, 13u4 UNIT E1).** It was the
+        // empty block's ruled no-op under U-1; her ruling change makes that
+        // caret mint like every other end-of-block caret, so nothing returns
+        // it any more — and a case that can never be returned is the drift
+        // class (this app's own doctrine, the `noDailyBook` retirement,
+        // AppSpec §9). U-19 (2) is untouched: nothing vanishes; the empties
+        // she leaves behind stay exactly where she left them.
     }
 
     /// The one rule. `textAt` reads entry i's LIVE surface text (the buffer
@@ -121,7 +135,24 @@ nonisolated enum TypedReturn {
         for (i, entry) in index.entries.enumerated() {
             if caret >= location, caret <= location + entry.length {
                 let intra = caret - location
-                if entry.length == 0 { return .nothing }
+                // **THE CHAIN (her ruling R-13u4-2, 2026-09-20 — it
+                // SUPERSEDES U-1's "nothing in an empty block" arm).** Her
+                // words: *"on an empty block, you can't keep making new lines
+                // and spawning more empty blocks. Direct violation of 'works
+                // how you'd expect a text editor to work'… You should be able
+                // to go down the list typing whatever you want in a series of
+                // empty blocks."* An empty block answers exactly what a
+                // block's END answers — an empty block BELOW, the caret in
+                // it — so ⏎⏎⏎ walks down a run of them. It chains for free
+                // because the act RE-DERIVES on its own turn: the second
+                // Return sees the block the first one made and mints below
+                // THAT. Checked before `textAt`, so an empty block costs no
+                // text read at all. U-19 (2) is untouched — the empties stay.
+                if entry.length == 0 {
+                    return .emptyBlock(
+                        edge: .below, entryIndex: i, blockID: entry.blockID,
+                        closingEmptyTail: false)
+                }
                 let text = textAt(i) as NSString
                 let clamped = min(intra, text.length)
                 // A block that is NOTHING but whitespace has no text to

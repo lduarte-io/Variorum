@@ -418,8 +418,8 @@ no lesson copy edited (see "Judgment calls" below for why); the phone's Return m
 | # | Piece | Status |
 |---|---|---|
 | 1 | The record + the traced mechanism + `.gitignore` for `13u4-screens/` | DONE (bc362f6a) |
-| 2 | The pins written to the ruling (RED on the pre-change tree, recorded) | DONE (pending hash) — the red run below |
-| 3 | The brain change (`TypedReturn`) + the dispatch + the canon delta (AppSpec §7) | NOT-STARTED |
+| 2 | The pins written to the ruling (RED on the pre-change tree, recorded) | DONE (40e1fc92) — the red run below |
+| 3 | The brain change (`TypedReturn`) + the dispatch + the canon delta (AppSpec §7) | DONE (pending hash) — 78/7 green, below |
 | 4 | The walk on the dev-store Debug build, captured | NOT-STARTED |
 | 5 | Closing suites + the ledger's E1 row | NOT-STARTED |
 
@@ -476,10 +476,46 @@ pins below red, every other arm of both suites green (the U-1 family is otherwis
 | `eachReturnInTheChainIsItsOwnStructuralUndo` (new — R-13u-3's road) | `TypedReturnKeyTests` | one entry on the stack, not two |
 | `herS1ScenarioMakesABlockAndNeverALooseNewline` (re-pointed arm) | `TypedReturnKeyTests` | `["alpha", "beta", ""]` — "no second empty block", the superseded arm |
 
+### THE BUILD (piece 3 — one arm, one retired case, one canon sentence)
+
+1. **`App/Variorum/Shared/EditorBrain/TypedReturn.swift`** — the empty-block arm answers
+   `.emptyBlock(edge: .below, …, closingEmptyTail: false)`; `case nothing` retired from `Act`
+   (nothing returns it any more — the drift class); the file header carries her ruling and what
+   it does NOT change. The arm still sits ahead of `textAt`, so an empty block costs no text read.
+2. **`EditorSurfaceController.runTypedReturnAct`** — the switch loses `.nothing`; `case .content`
+   keeps its own reason (a re-derivation that is no longer this gesture) and names the retirement.
+3. **`EditorViewModel.retractListContinuationNewline`'s doc** — its R2-3 "unreachable today"
+   argument cited `.nothing`; re-worded to the same conclusion on the standing reason (the block
+   holds the list it just exited; R1-4's line-end rule excludes `.content`).
+4. **`notes/AppSpec.md` §7's segmentation-trigger paragraph** — the canon delta, exactly as ruled
+   and no further: the U-1 sentence's *"nothing in an empty block"* arm is replaced by the chain,
+   citing R-13u4-2 (2026-09-20) with her words, and U-19 (2)'s "the empties STAY" kept beside it.
+   Nothing else in the canonical docs is touched.
+
+**ZERO changes to:** `Sources/VariorumCore/` (the mint is the shipped `ops.newBlock` through
+`insertEmptyBlock`, the one structural door) · `Sync/` · schema/migrations · the phone.
+
+**Green after the change:** the same command plus the whole Return family —
+`TypedReturnTests` · `TypedReturnKeyTests` · `ReturnKeyTraceTests` · `SoftNewlineTests` ·
+`ReturnKeyUndoSignTests` · `ListContinuationTests` · `NestedListDoorTests` → **78 tests in 7
+suites passed** (exit 0, no skips). The list family (K5/K8) and ⇧⏎ (A15) are in that run on
+purpose: they share the key and its intercept order, and none of them moved.
+
 ### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
 
-PENDING until piece 3 lands.
+- `App/Variorum/Shared/EditorBrain/TypedReturn.swift` — **the editor seam's decision brain** (the
+  pure rule; consulted at the key AND re-derived at the act). The one arm + the retired case.
+- `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift` — the dispatch's switch
+  arm only (`runTypedReturnAct`). No new road: the act routes to the SHIPPED
+  `insertEmptyBlock(edge:entryIndex:blockID:)` body, which is also ⌘⇧⏎'s.
+- `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift` — a doc comment only (no code).
+
+**NOT touched, deliberately:** `BlockRangeIndex` (no tiling change — consecutive empty entries
+already carry distinct offsets by the separator rule) · `runStructural` and its seam derivation
+(`StructuralSeamEdit`, unchanged: the `.divide` arm is already total over a zero-length source) ·
+`Operations` · `PaneTextAuthority` · every list door (`MarkdownActs`), whose intercept still runs
+FIRST.
 
 ### EVIDENCE
 
-PENDING.
+PENDING — the walk.
