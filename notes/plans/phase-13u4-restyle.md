@@ -1210,8 +1210,8 @@ the HOISTED brain underneath its existing face, unchanged in behaviour.
 
 | # | Piece | Status |
 |---|---|---|
-| 1 | The record + the READING (the brief's three reading lists, in order) | IN-PROGRESS — this commit |
-| 2 | The pure brain (`Shared/CaptureMicrosyntax.swift`) + its arm pins, one per R-13u4-1 clause | NOT-STARTED |
+| 1 | The record + the READING (the brief's three reading lists, in order) | DONE (163ec318) |
+| 2 | The two shared brains — `Shared/CaptureMicrosyntax.swift` (the parse) + `Shared/TypedTagPath.swift` (the hoist's new home) — and the parse's arm pins, one per R-13u4-1 clause | DONE (this commit) — **17 tests in 1 suite passed** |
 | 3 | The `applyTypedPath` HOIST to `Shared/` (the 3C parity pattern — zero test edits, both platforms) + the KnownIssues row | NOT-STARTED |
 | 4 | The hand-off on BOTH Mac capture doors + the integration pins | NOT-STARTED |
 | 5 | QUESTIONS #127 (the PROVISIONALs) | NOT-STARTED |
@@ -1220,7 +1220,30 @@ the HOISTED brain underneath its existing face, unchanged in behaviour.
 
 ### THE PARSE RULE'S EDGE TABLE
 
-*(PENDING — written with piece 2.)*
+*(The rule is `CaptureMicrosyntax.parse` — ONE pure function in `Shared/`, on the `PlainPaste`
+pattern, compiled into both targets. Every row below is a pin in `CaptureMicrosyntaxTests`. The
+ruled clauses are marked **R**; the rest are the build's calls and are PROVISIONAL in
+QUESTIONS #127 under the letters given.)*
+
+| # | Input | Text filed | Tags | Title | Why |
+|---|---|---|---|---|---|
+| **R** | `Had a weird dream about the ocean {#dream}` | `Had a weird dream about the ocean` | `dream` | — | her own example; the token disappears |
+| **R** | `{t:"Ocean dream"} Had a weird dream` | `Had a weird dream` | — | `Ocean dream` | the title form |
+| **R** | `#dream about the ocean` | byte-identical | — | — | a BARE hashtag is never touched |
+| **R** | `{#dream} again {#sea} {#journal}` | `again` | `dream`,`sea`,`journal` | — | several are legal; every one applies, in order |
+| **R** | `leg day {#health/workout}` | `leg day` | `health/workout` | — | a token is a typed PATH — it rides the hoisted brain |
+| **R** | `{#}` · `{#dream` · `{ #dream}` · `{t:my title}` · `{t:""}` · `{t:"unterminated}` · `{tag:"x"}` · `a { b } c` · `{#dream⏎and more}` | byte-identical | — | — | malformed braces pass through as typed text (a token lives on ONE line and its value must be non-empty) |
+| (a) | `{t:"First"} words {t:"Second"}` | `words` | — | `First` | the FIRST title wins; the later one is still a token and still disappears |
+| (b) | `{T:"Ocean dream"} the sea` | `the sea` | — | `Ocean dream` | the `t` is read case-insensitively — iOS capitalizes the first letter of a capture, and this is her phone-first ask |
+| (b) | `{t:"she said "hi""} and left` | `and left` | — | `she said "hi"` | the scan runs to the first `"}`, so a title may carry quotes |
+| (c) | `Had a dream {#dream}` · `{#dream} Had a dream` · `Had {#dream} a dream` | `Had a dream` (all three) | `dream` | — | a token takes its SEAM whitespace with it — the space before it, or the space after it when it opens the line |
+| (c) | `   {#dream} indented` | `   indented` | `dream` | — | her own indentation is not a seam |
+| (c) | `{t:"Ocean dream"}⏎Had a weird dream.⏎⏎It was blue.` | `Had a weird dream.⏎⏎It was blue.` | — | `Ocean dream` | a line that held nothing but tokens goes with them, newline included — otherwise `bulkSegments` stores the blank line as content and every capture titled this way opens with a blank paragraph |
+| (c) | `One.⏎⏎{#dream} Two.` | `One.⏎⏎Two.` | `dream` | — | a blank line SHE typed is not a token line and never moves |
+| (d) | `{#a{#b}` | `{#a` | `b` | — | a malformed opener resumes the scan one character on: the malformed half stays hers byte-for-byte and the good token inside it still parses |
+| (f) | `{t:"Title"} {#dream}` | *(empty)* | `dream` | `Title` | a capture of nothing but tokens leaves nothing to file — the doors take their standing empty-capture branch |
+| — | `words {#///}` | `words` | `///` | — | a well-formed token whose value is all separators parses and then names NO tag — the one shape that reaches `applyTags`' `nothingTyped` arm (pinned so the arm is known reachable, not defensive) |
+| — | any text with no `{` | byte-identical (fast path) | — | — | the capture is hers and the app does not tidy it (`PlainPaste`'s doctrine, one door over) |
 
 ### THE HOIST'S ZERO-TEST-EDIT EVIDENCE
 
