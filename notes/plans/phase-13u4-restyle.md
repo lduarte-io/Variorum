@@ -839,3 +839,65 @@ measurements behind them in this record. If she rules a clamp, the build is smal
 is `EditorTextView` (an intercept of `deleteWordBackward:`/`deleteWordForward:` that clamps the
 proposed range to the caret's own line, through the ordinary input path — the `MarkdownActs`
 shape), and it WOULD be a seam diff, so the Fable rider would apply to it.
+
+---
+
+## UNIT E3 BRIEF — MERGE KEEPS THE NEWLINES (item 8, R-13u4-3; self-contained — read in this order)
+
+**Read first, in full:** (1) this file's Status banner · HER ADDITIONS item 8 (her verbatim
+words) · THE SIZING-AND-RULINGS SITTING RECORD (**R-13u4-3 is yours and BINDING** — every merge
+door; the rendering join, byte-exact, no trimming, no conditionals; the ceremony default flips;
+the cross-block DELETE keeps its join; the traded cost is accepted and recorded) · THE LEDGER ·
+ENVIRONMENT TRAPS · CAST & DISCIPLINE · the UNIT E1 and E2 RECORDs above (E2's class-sweep
+table names ⌦-at-the-seam as riding the merge join — that finding is why the classification
+below exists). (2) **AppSpec §9's merge bullet + the mergeCeremony bullet** (the 2026-07-06
+space-join parenthetical you supersede; the ceremony's "defaulting to the canon rule above"
+sentence — note it survives verbatim once the canon rule changes) and **OverallModel §7's MERGE
+paragraph**. (3) The code: `Sources/VariorumCore/Operations/Operations+Structural.swift` (the
+join comment ~line 875 and `merge`; `mergeCeremony`'s per-pairing default; find where the
+default join derives) · the 9d N-way merge chain · the bulk bars' `mergeSelectedBlocks`/
+`mergePicked` roads · every consumer of the join (grep, don't assume). Do your own reading.
+
+**THE ARCHITECT'S APPLICATION NOTE (flagged to her, reversible in a line — build to it):**
+R-13u4-3's own distinction is DOORS vs DELETES. Enumerate EVERY road that reaches the merge
+join and classify each in a table in your record:
+- **MERGE DOORS** (the menu/context/palette merge, ⌘⇧M, the N-way chain, the bulk bars' two
+  run options, the ceremony's per-pairing DEFAULT): the join becomes the RENDERING join —
+  merged text = top + `"\n"` + bottom, byte-exact, no trimming, no conditionals. The page reads
+  byte-identical before and after the merge.
+- **DELETE KEYSTROKES** (the seam ⌦/backspace carves — #34's texted-seam merge — and the
+  cross-block compound's mid-paragraph edge-join): a delete that kept the newline would visibly
+  do NOTHING; these keep their SHIPPED join byte-unchanged. Pin that they still do.
+- A road that fits neither class comes BACK to the orchestrator before you build it (in-batch
+  design forks are the architect's to rule).
+
+**The build.** The core join rule + the ceremony default + whatever each door needs so the
+classification holds. The ceremony keeps space · nothing choosable per pairing. This is a RULED
+BEHAVIOUR CHANGE, not a bug: pins asserting the space join are REWRITTEN to the ruling in the
+same commit (no red-on-old owed); the delete-keystroke pins are guards and stay. Check the
+ceremony sheets' drift checks still hold once plain merge and the ceremony default flip
+together (restyle nothing there; never reorder the checks). The rule is CORE-side, so the phone
+flips with the Mac wherever it calls the shared op (the U-2 keep-on-top precedent) — check for
+mobile pins on the space join and rewrite them too; the iOS build must stay green.
+
+**The canon delta rides YOUR build, exactly as ruled, never beyond:** AppSpec §9's merge
+bullet — the 2026-07-06 space-join parenthetical superseded by R-13u4-3 (2026-09-20), citing
+her words; state the new consequence honestly (a PARAGRAPH cut now round-trips divide-then-
+merge byte-exactly; a mid-sentence cut comes back with a newline — the recorded trade, the
+ceremony's space option the road back); OverallModel §7's merge line if and only if it names
+the join. Touch nothing else in canon.
+
+**Evidence:** the rewritten state-transition suite (merge · mergeCeremony · the chain · the
+bulk roads · the delete-keystroke guards) + a hands-on WALK on the dev-store Debug build:
+merge a two-paragraph pair by a door — the page reads byte-identical; a three-block bulk run;
+the ceremony's default pairing shows newline with space still choosable; a seam backspace
+still joins exactly as shipped. Captures to `notes/plans/13u4-screens/e3/`. Core `swift test`
+for the Operations diff + the Mac suites your diff touches + the acceptance spine
+(`TutorialWalkTests` — run under its REAL TYPE NAMES; the file-name `-only-testing` trap is
+recorded in both prior unit records) at the unit's end. iOS build green.
+
+**Your record:** append a `## UNIT E3 RECORD` section to THIS file with LIVE STATUS from the
+FIRST commit (PENDING marks on unverified claims), the classification table, and the seam-file
+list (if your diff reaches `BlockRangeIndex`/`EditorTextView`'s seam roads, say so — the
+ladder's Fable reviewer reads it); flip the ledger's E3 row in your closing commit. The
+checkpoint protocol in CAST & DISCIPLINE binds you from the first commit.
