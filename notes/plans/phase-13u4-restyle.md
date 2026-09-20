@@ -1002,14 +1002,14 @@ question for her.
 
 | # | Piece | Status |
 |---|---|---|
-| 1 | The record + the READING + the DOORS-vs-DELETES enumeration (every road traced, not assumed) | DONE (7b60f043 + this commit) — the table below |
-| 2 | The core rule (`MergeJoinRule` + `Operations.merge`) + the core pins rewritten to the ruling + the canon delta | DONE (this commit) — core **1609/174 green**, below |
-| 3 | The Mac consumers (the seam differential, the carry-all/ceremony defaults, the two DELETE roads' guards) + the Mac pins | DONE (this commit) — the merge family **140/14 green**, below |
-| 3b | The two tutorials' merge sentence (my change falsified it) + their pins | DONE (this commit) |
-| 4 | The phone's door (core-side flip) + the mobile pins + the iOS build | DONE (this commit) — the four mobile suites **50/4 green** (2 pre-existing known issues); the standalone iOS build line is PENDING until the closing runs |
-| 4b | The FULL-suite sweep for stragglers (three found: two on the Make Block road — row 10 — and one door pin) | DONE (this commit) — 2917/486 with 5 issues, of which 3 were these and 2 are row 58's ONE recorded environment red; the three now green in a 52/5 re-run |
-| 5 | The walk on the dev-store Debug build, captured | DONE (this commit) — 13 captures + 25 crops, both voices AND both appearances, the table below |
-| 6 | Closing suites + the ledger's E3 row | DONE (this commit) — core **1609/174** · Mac **373/39** (incl. the acceptance spine's eleven types) · mobile **71/6** · iOS build green |
+| 1 | The record + the READING + the DOORS-vs-DELETES enumeration (every road traced, not assumed) | DONE (7b60f043 + 000ba056) — the table below |
+| 2 | The core rule (`MergeJoinRule` + `Operations.merge`) + the core pins rewritten to the ruling + the canon delta | DONE (000ba056) — core **1609/174 green**, below |
+| 3 | The Mac consumers (the seam differential, the carry-all/ceremony defaults, the two DELETE roads' guards) + the Mac pins | DONE (5fdd8703) — the merge family **140/14 green**, below |
+| 3b | The two tutorials' merge sentence (my change falsified it) + their pins | DONE (a489a176) |
+| 4 | The phone's door (core-side flip) + the mobile pins + the iOS build | DONE (a489a176) — the mobile suites green; the standalone iOS build gate ran at the close, **BUILD SUCCEEDED** |
+| 4b | The FULL-suite sweep for stragglers (three found: two on the Make Block road — row 10 — and one door pin) | DONE (96f79045) — 2917/486 with 5 issues, of which 3 were these and 2 are row 58's ONE recorded environment red; the three now green in a 52/5 re-run |
+| 5 | The walk on the dev-store Debug build, captured | DONE (8babfbc9) — 13 captures + 25 crops, both voices AND both appearances, the table below |
+| 6 | Closing suites + the ledger's E3 row | DONE (1d8d4877 + this commit) — core **1609/174** · Mac **373/39** (incl. the acceptance spine's eleven types) · mobile **71/6** · iOS build green |
 
 ### THE CLASSIFICATION — EVERY ROAD THAT REACHES THE MERGE JOIN
 
