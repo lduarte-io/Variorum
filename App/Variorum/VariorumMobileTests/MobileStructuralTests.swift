@@ -423,7 +423,7 @@ struct MobileStructuralTests {
 
     // MARK: Merge with previous
 
-    @Test func mergeJoinsFanlessNeighborsWithTheCanonSpace() async throws {
+    @Test func mergeJoinsFanlessNeighborsWithTheCanonJoin() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedProsePost(
                 session, first: "First half.", second: "Second half.")
@@ -443,9 +443,12 @@ struct MobileStructuralTests {
             #expect(placements.count == 1)
             let merged = placements[0]
             #expect(merged != seed.blockA && merged != seed.blockB)
-            // The canon join: a single space at the seam.
+            // The canon join — the RENDERING join since her R-13u4-3
+            // (2026-09-20): "Merge with Previous" is a DOOR, and the rule
+            // is core-side, so the phone flipped with the Mac at 13u4 UNIT
+            // E3 (this read "First half. Second half.").
             #expect(try await liveBlockTexts(db, postID: seed.postID)
-                == ["First half. Second half."])
+                == ["First half.\nSecond half."])
             // Both sources released to lineage, live.
             #expect(try await blockIsLive(db, blockID: seed.blockA))
             #expect(try await blockIsLive(db, blockID: seed.blockB!))
@@ -501,7 +504,7 @@ struct MobileStructuralTests {
             // The fan: the joined take FIRST (chosen — the core's
             // rendered×rendered rule), the carried take whole behind it.
             #expect(try await activeFanTexts(db, blockID: merged) == [
-                "Alpha beta. Gamma delta. Second block prose.",
+                "Alpha beta. Gamma delta.\nSecond block prose.",
                 "The other way entirely.",
             ])
             let carried = try await db.read { db -> (id: String, label: String?)? in
@@ -528,7 +531,7 @@ struct MobileStructuralTests {
                         """,
                     arguments: [merged])
             }
-            #expect(chosenText == "Alpha beta. Gamma delta. Second block prose.")
+            #expect(chosenText == "Alpha beta. Gamma delta.\nSecond block prose.")
             // The archived take did NOT ride — it stays on the released
             // source, which keeps its WHOLE fan in lineage.
             let archivedHome = try await db.read { db in
@@ -578,7 +581,7 @@ struct MobileStructuralTests {
             #expect(placements.count == 1)
             // The PEEKED take joined; the chosen take rode whole.
             #expect(try await activeFanTexts(db, blockID: placements[0]) == [
-                "Peeked words instead. Trailing prose.",
+                "Peeked words instead.\nTrailing prose.",
                 "Chosen words here.",
             ])
             // A released whole — chosen pointer and both takes untouched.
@@ -612,7 +615,7 @@ struct MobileStructuralTests {
             #expect(model.statusMessage == nil)
             let placements = try await livePlacementBlockIDs(db, postID: seed.postID)
             #expect(try await activeFanTexts(db, blockID: placements[0]) == [
-                "First half. Second half. Typed tail.",
+                "First half.\nSecond half. Typed tail.",
                 "The spare way.",
             ])
         }

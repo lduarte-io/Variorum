@@ -1419,7 +1419,10 @@ struct TutorialStructureActsTests {
         }
     }
 
-    @Test func mergeJoinsTheWaitingPairWithASingleSpace() async throws {
+    /// Renamed at 13u4 UNIT E3 — it was `…WithASingleSpace`, and her
+    /// ruling R-13u4-3 made the door join the rendering newline. The
+    /// lesson's own sentence moved in the same commit.
+    @Test func mergeJoinsTheWaitingPairWithTheRenderingJoin() async throws {
         try await withTutorialWorld { session, db, bookID in
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "merge") }
             let before = try await slots(db, lesson)
@@ -1433,9 +1436,9 @@ struct TutorialStructureActsTests {
                 try ops.merge(first.blockID, second.blockID)
             }
             #expect(result.variant.workingText
-                    == "These two short blocks are really one thought. "
+                    == "These two short blocks are really one thought.\n"
                     + "They have been waiting for your \u{2318}\u{21E7}M since the day they were seeded.",
-                    "a single space at the seam — nothing else invented")
+                    "one newline at the seam — nothing else invented")
         }
     }
 

@@ -847,9 +847,15 @@ struct MobileTutorialTakesWalkTests {
 @MainActor
 @Suite("Mobile tutorial walk — structure")
 struct MobileTutorialStructureWalkTests {
-    /// The divide lesson's staged cut, and merge as the road back — a
-    /// sentence cut merges back to exactly the sentence you started
-    /// with (the canon join's promise, byte-checked).
+    /// The divide lesson's staged cut, and merge as the road back.
+    ///
+    /// **Rewritten at 13u4 UNIT E3 to her ruling R-13u4-3.** It used to
+    /// assert that a SENTENCE cut merged back to exactly the sentence you
+    /// started with — the old single-space join's promise, and the lesson
+    /// said so. The door join is the rendering newline now, so the road
+    /// back returns the two halves as ONE block holding a line break: the
+    /// blocks are back, the bytes are the sentence plus that break, and
+    /// the lesson's own prose moved in the same commit.
     @Test func theDivideLessonCutsAndMergeIsTheRoadBack() async throws {
         try await withPocketGuideWorld { session, db, bookID in
             let lesson = try await db.read { try lessonID($0, bookID: bookID, "divide") }
@@ -877,8 +883,15 @@ struct MobileTutorialStructureWalkTests {
             await model.structural.mergeWithPrevious(
                 atSurfaceCaret: successorRange.location + 2)
             #expect(model.statusMessage == nil)
-            #expect(try await storedBlockTexts(db, postID: lesson) == before,
-                    "divide a sentence and merge it back — exactly the sentence you started with")
+            let roundTripped = try await storedBlockTexts(db, postID: lesson)
+            #expect(roundTripped.count == before.count, "the block count is back")
+            let stagedIndex = try #require(before.firstIndex(of: stagedText))
+            // Merge is the road back — the halves rejoin, the cut leaving
+            // the line break her ruling asked for.
+            #expect(
+                roundTripped[stagedIndex]
+                    == stagedText.replacingOccurrences(
+                        of: ". Put the cursor", with: ".\nPut the cursor"))
         }
     }
 
@@ -975,8 +988,9 @@ struct MobileTutorialStructureWalkTests {
         }
     }
 
-    /// The merge lesson: the staged neighbors join with a single space,
-    /// byte-exact — and merging the fanned tail CARRIES the spare take
+    /// The merge lesson: the staged neighbors join with the rendering
+    /// join (R-13u4-3; it was a single space until 13u4 UNIT E3, and the
+    /// lesson's prose moved with it), byte-exact — and merging the fanned tail CARRIES the spare take
     /// along whole (parity C5's ruled carry-all: the two displayed takes
     /// join; every other take rides onto the merged block), exactly as
     /// the prose promises. The tail's text and its spare take are the
@@ -999,9 +1013,9 @@ struct MobileTutorialStructureWalkTests {
             #expect(model.statusMessage == nil)
             let joined = try await storedBlockTexts(db, postID: lesson)
             #expect(joined.contains(
-                "These two short blocks are really one thought. "
+                "These two short blocks are really one thought.\n"
                 + "They have been waiting for a merge since the day they were seeded."),
-                "a single space at the seam — nothing else invented")
+                "one newline at the seam — nothing else invented")
 
             // The fanned tail: the spare take rides the merge whole.
             let countBefore = joined.count
@@ -1027,8 +1041,8 @@ struct MobileTutorialStructureWalkTests {
             let after = try await storedBlockTexts(db, postID: lesson)
             #expect(after.count == countBefore - 1, "two blocks became one")
             let mergedText = try #require(
-                after.first { $0.hasSuffix(" " + tailText) },
-                "the displayed takes joined with the canon space")
+                after.first { $0.hasSuffix("\n" + tailText) },
+                "the displayed takes joined with the canon rendering join")
             // The merged block wears BOTH takes: the joined text chosen,
             // the spare take riding whole behind it as a FRESH row (the
             // source keeps its original in lineage).

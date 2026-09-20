@@ -532,10 +532,13 @@ enum MobileTutorialSeeder {
             + "the cursor right before this second sentence and choose "
             + "Divide Block from the bottom bar's ⋯.",
 
+            // 13u4 UNIT E3 (her ruling R-13u4-3, core-side so the phone
+            // flips with the Mac): this promised a sentence cut restored
+            // exactly, which merge no longer does.
             "The two halves are both blocks now, each free to grow its own "
-            + "takes. Divide a sentence at its seam and merge it back, and "
-            + "you get exactly the sentence you started with — merge is the "
-            + "road back.",
+            + "takes. Merge is the road back: the seam becomes a line break "
+            + "inside the merged block, so a paragraph you divided comes "
+            + "back exactly as you wrote it.",
 
             "Two more knives live on the SELECTION menu — select some words "
             + "and look: Extract Selection lifts a run at a block's start or "
@@ -567,10 +570,12 @@ enum MobileTutorialSeeder {
             + "coat pockets, unmentioned.")
 
         let merging = try lesson(structure, "merge", [
+            // 13u4 UNIT E3 (R-13u4-3) — see the divide lesson above.
             "Merge is divide's opposite: the block you're in joins the one "
-            + "above it. The joined text gets a single space at the seam — "
-            + "divide a sentence and merge it back, and you get exactly the "
-            + "sentence you started with.",
+            + "above it. The seam between them becomes a line break inside the "
+            + "merged block, so the page reads exactly as it did — divide at a "
+            + "paragraph break and merge it back and you get precisely what "
+            + "you started with.",
 
             "These two short blocks are really one thought.",
 

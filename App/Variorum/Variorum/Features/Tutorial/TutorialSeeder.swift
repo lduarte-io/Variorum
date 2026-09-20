@@ -762,10 +762,14 @@ enum TutorialSeeder {
         ])
 
         let merging = try lesson(structure, "merge", [
-            "Merge is divide's opposite: neighboring blocks become one. The "
-            + "joined text gets a single space at the seam — divide a sentence "
-            + "and merge it back, and you get exactly the sentence you started "
-            + "with.",
+            // 13u4 UNIT E3 (her ruling R-13u4-3): this sentence promised a
+            // single space at the seam and a sentence cut restored exactly.
+            // The ruling made both false, so it says what merge does now —
+            // lesson and pin moved together (the standing rule).
+            "Merge is divide's opposite: neighboring blocks become one. The seam "
+            + "between them becomes a line break inside the merged block, so the "
+            + "page reads exactly as it did — divide at a paragraph break and "
+            + "merge it back and you get precisely what you started with.",
 
             "These two short blocks are really one thought.",
 
