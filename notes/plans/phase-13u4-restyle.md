@@ -112,7 +112,7 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 |---|---|---|---|---|
 | E1 | Empty blocks chain (item 3, R-13u4-2) | `TypedReturn`'s empty-block arm → the chain; canon delta rides the build | pins + walk | **DONE** — 9 pins (7 red-first) · walked both voices + dark · AppSpec §7 delta landed · record below |
 | E2 | ⌘⌫ checkbox-seam defect (item 11) | trace the mechanism first; red-on-old owed | red-on-old + walk on her verbatim repro | **CLOSED — DISMISSED AS HOLLOW AS STATED** (no product code changed): ⌘⌫ is `deleteToBeginningOfLine:` = the PARAGRAPH on macOS 26, and the block separator IS a newline — the reported gesture is structurally incapable of it. Measured five ways + WALKED. Her observable is real and belongs to **⌥⌫**; the product call is hers — **QUESTIONS #126**. 10 pins + the class sweep in the record below |
-| E3 | Merge keeps the newlines (item 8, R-13u4-3) | the rendering join, every door; ceremony default; canon delta rides | state-transition suite + walk | NOT-STARTED |
+| E3 | Merge keeps the newlines (item 8, R-13u4-3) | the rendering join, every door; ceremony default; canon delta rides | state-transition suite + walk | **DONE** — `MergeJoinRule` makes the DOORS-vs-DELETES classification structural (12 door roads flipped, the 2 delete roads byte-unchanged with guard pins); the differential seam arm had to learn the new join or every merge would have cost a full re-render; ~30 door pins rewritten to the ruling across 12 suites + 3 the ruling earns; both tutorials' falsified sentence fixed with their pins; canon delta in AppSpec §9 + OverallModel §7. Walked in both voices AND both appearances — a door merge moves not one byte of the page, the next seam's backspace still collapses to a space. Core 1609/174 · Mac 373/39 · mobile 71/6 · iOS green. Record below |
 | C1 | Capture microsyntax (item 2, R-13u4-1) | shared rule + both Mac doors; `applyTypedPath` hoist; phone face → parity row | pins + capture walk | NOT-STARTED |
 | C2 | Selection → take (item 9, R-13u4-4) | the MOVE op + Write door; insurance savepoint load-bearing | state-transition + walk | NOT-STARTED |
 | F1 | Index chapter-click lands low (item 10) | trace first — the un-adopted `LandingAuthority` is the recorded hypothesis | red-on-old if confirmed + walk | NOT-STARTED |
@@ -123,9 +123,17 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 **CARRIED TO CLOSEOUT (grows as units close; nothing here may be lost):** MOBILE PARITY rows —
 (1) the phone's empty-block Return should CHAIN too (E1's report: AppSpec §7 still says the
 phone's Return model is unchanged; no mobile code consults `TypedReturn.act`); (2) the phone's
-capture-microsyntax face (R-13u4-1, files when C1 closes). **OPEN PRODUCT CALLS** — (1) **QUESTIONS #126**
+capture-microsyntax face (R-13u4-1, files when C1 closes). *(E3 owes NO parity row — the merge
+join is core-side, so the phone flipped with the Mac; its tutorial copy moved in the same commit.)*
+**OPEN PRODUCT CALLS** — (1) **QUESTIONS #126**
 (E2): should ⌥⌫ stop at a line break, and at a block seam? Her report's real chord; nothing was
-implemented, by the brief's stop rule.
+implemented, by the brief's stop rule. **CLOSEOUT DUTIES from E3** — (a) AppSpec §14's phase delta
+(the unit landed §9 + OverallModel §7 only); (b) the tutorial RE-SEED consequence: her seeded
+field guide keeps the old merge sentence until Restore Tutorial; (c) tell her, if she cares, the
+export consequence: a merged block's internal newline exports as one newline inside a paragraph
+where the two blocks exported as a blank line; (d) **the one architect call E3 made rather than
+stopping for**: Make Block across blocks is classified a DOOR (the row-10 note in the E3 record),
+reversible in one argument.
 
 ## ENVIRONMENT TRAPS (every unit brief carries this section verbatim — the skill's rule)
 
@@ -759,6 +767,78 @@ covered by the same pins.
 untouched. The unit's whole diff is ONE new test file
 (`App/Variorum/VariorumTests/CommandDeleteLineTests.swift`) and this record.
 
+### THE BUILD (what moved, and why each line had to)
+
+1. **`Sources/VariorumCore/Domain/MergeJoin.swift`** — `MergeJoin.canon(head:tail:)` is REPLACED by
+   **`MergeJoinRule`**, one brain with two members (`.door` · `.deleteKeystroke`) and one resolver
+   `join(head:tail:)`. The ruling is made STRUCTURAL rather than conditional: `.door` answers
+   `.newline` for any texts, by ruling ("byte-exact, no trimming, no conditionals" — her words), and
+   `.deleteKeystroke` holds the pre-ruling space-unless-edged rule VERBATIM. Replacing `canon`
+   rather than re-pointing it means a grep for the old name proves no site kept the old rule (it
+   returns only doc comments quoting the history).
+2. **`Operations.merge(_:_:joining:)`** — the rule arrives as a parameter defaulting to `.door`, and
+   is resolved INSIDE the transaction on the store's rendered texts, so no caller can decide the
+   join from a projection that only ever lags the store (the R1-2 doctrine). `mergeCeremony` needed
+   no change at all: its joins were already explicit per pairing.
+3. **The door sites** (all now `MergeJoinRule.door.join(…)`): `CarryAllMerge.compose` (the carry-all
+   pairing), `prePairing` + `pairMergeTakes` (the ceremony's default and a hand-placed ＋),
+   `MergeCeremonyState.canonJoin` (the sheet's sentence — its former `.space` fallback collapsed
+   away, since the rule answers the same for empty texts), `MergeArrangementCopy.sentence`'s default,
+   and the phone's `MobileStructural.mergeWithPrevious` pairing.
+4. **The delete sites** (`joining: .deleteKeystroke`): `runSeamMerge` → `runInstantMerge`, which
+   gained the parameter so the two classes keep SHARING one body (two doors on one act share the
+   body or they drift), and `CrossBlockCompound.apply`'s edge-join.
+5. **`StructuralSeamEdit.derive`'s `.merge` arm** — the differential road, described above.
+6. **The two tutorials' merge lesson** (and the phone's divide lesson) — my own change falsified
+   their sentence; lesson and pin moved together, per the standing rule.
+7. **The canon delta**: AppSpec §9's merge bullet (the full rule, her words, the DELETE exception,
+   the honest new consequence) and OverallModel §7's merge line (one clause + a pointer).
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
+
+- `App/Variorum/Shared/EditorBrain/CrossBlockCompound.swift` — **the editor seam's cross-block
+  compound**: ONE argument at its `ops.merge` call (`joining: .deleteKeystroke`), plus the comment
+  that says why. No road, no guard, no ordering changed.
+- `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift` — the merge roads only
+  (`runInstantMerge` gains `joining:`; `runSeamMerge` passes `.deleteKeystroke`; three ceremony
+  defaults move to the rule brain; one comment at the Make Block loop). `runStructural` itself,
+  the caret arithmetic, the flush-first order, the fan threshold reads and the drift checks are
+  untouched.
+- `App/Variorum/Variorum/Features/Editor/StructuralSeamEdit.swift` — the `.merge` arm's join
+  candidates (two strings → every `MergeJoin` case). The retained-byte checks, the
+  `nonSeamAligned` guard and every other arm are untouched.
+
+**NOT touched, deliberately:** `BlockRangeIndex` (no tiling or guard change — the seam pair the
+keystroke plans is the same pair) · `TypedReturn` · `PaneTextAuthority` · `runStructural`'s
+identity oracle · `MarkdownActs` · `Sources/VariorumCore/Sync/` · schema/migrations.
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **`MergeJoin.canon` was REPLACED, not re-pointed.** A resolver that ignores its inputs is the
+   drift class this repo has retired twice by name; a rule ENUM says out loud that there are two
+   classes and which one a call site is in. Cost of reversing: one static back on `MergeJoin`.
+2. **Make Block across blocks was classified as a DOOR (row 10) rather than returned to the
+   orchestrator.** The brief's stop rule is for a road that fits NEITHER class; this one fits the
+   doors on her ruling's own sentence (a deliberate gesture behind a confirm; the span she selected
+   becomes one block). Two pins now assert it. Reversing: `joining: .deleteKeystroke` at
+   `confirmCrossBlockMakeBlock`'s merge loop, and those two pins back to the space join.
+3. **The tutorial copy was fixed rather than deferred.** My own change made "a single space at the
+   seam — divide a sentence and merge it back and you get exactly the sentence you started with"
+   false on both platforms, and copy naming behaviour the app no longer has is the J8 defect class.
+   **The re-seed consequence, recorded for the closeout:** an already-seeded tutorial (hers) keeps
+   the OLD sentence until `Help ▸ Restore Tutorial…` re-seeds it.
+4. **The cross-block compound passes the rule explicitly even though its join never survives.** The
+   autosave one line later overwrites the merged buffer with the two cut ends concatenated, so the
+   class is satisfied by outcome either way; stating it at the call keeps the classification
+   readable instead of resting on that accident. Pinned both ways.
+5. **`Queries.joinRenderedTexts`' doc comment was left alone.** It cites the 2026-07-06 merge join
+   as the PRECEDENT its own `"\n\n"` export rule was shaped on — which remains true as history.
+   The export projection's behaviour is ruled elsewhere (QUESTIONS #12) and is not this unit's.
+   Worth knowing: a merged block's internal newline now exports as ONE newline inside a paragraph
+   where two blocks exported as `"\n\n"` — the ruling's honest consequence, on the export side.
+6. **The phone flipped with the Mac and no MOBILE PARITY row is owed for the RULE** (it is
+   core-side — the U-2 keep-on-top precedent), though its tutorial copy and six pins moved here.
+
 ### EVIDENCE — THE WALK (the unit closes on USE, not on pins)
 
 **Build:** `App/Variorum/DerivedData/13u4e2/Build/Products/Debug/Variorum.app`
@@ -904,9 +984,19 @@ checkpoint protocol in CAST & DISCIPLINE binds you from the first commit.
 
 ## UNIT E3 RECORD — MERGE KEEPS THE NEWLINES (item 8, R-13u4-3)
 
-**WHAT THIS UNIT DID NOT DO (the record's first line):** *(filled at close — PENDING while the
-unit runs)*. Nothing outside the merge join: no other unit's work (E1's Return chain, E2's ⌥⌫
-question, the restyle spine), no `Sync/`, no schema, no migration.
+**WHAT THIS UNIT DID NOT DO (the record's first line):** it changed **nothing outside the merge
+join and what the join's own words claim**. `Sources/VariorumCore/Sync/` · schema · migrations ·
+`Server/` — **ZERO lines** (verified by name over the whole unit diff). No other unit's work was
+touched (E1's Return chain, E2's ⌥⌫ product call, the restyle spine, the Settings shape). The
+ceremony sheets were NOT restyled and **not one drift check moved or changed order** (the brief's
+explicit fence — `refreshMergeSheetIfDrifted` / `refreshMergeRunIfDrifted` and their tests are
+byte-untouched and green). The ceremony's per-pairing control still offers `space` · `newline` ·
+`nothing` and its preview brain is unchanged. The DELETE roads' behaviour is byte-unchanged by
+construction and by guard pin. `BlockRangeIndex`, `TypedReturn`, `PaneTextAuthority`,
+`runStructural` and the editor's identity oracle were not touched at all. **No `QUESTIONS.md`
+entry was opened** — R-13u4-3 settles the join, and the one classification call I had to make
+(row 10 below) is an architect call recorded here with its one-line reversal, not a product
+question for her.
 
 ### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
 
@@ -919,7 +1009,7 @@ question, the restyle spine), no `Sync/`, no schema, no migration.
 | 4 | The phone's door (core-side flip) + the mobile pins + the iOS build | DONE (this commit) — the four mobile suites **50/4 green** (2 pre-existing known issues); the standalone iOS build line is PENDING until the closing runs |
 | 4b | The FULL-suite sweep for stragglers (three found: two on the Make Block road — row 10 — and one door pin) | DONE (this commit) — 2917/486 with 5 issues, of which 3 were these and 2 are row 58's ONE recorded environment red; the three now green in a 52/5 re-run |
 | 5 | The walk on the dev-store Debug build, captured | DONE (this commit) — 13 captures + 25 crops, both voices AND both appearances, the table below |
-| 6 | Closing suites + the ledger's E3 row | NOT-STARTED |
+| 6 | Closing suites + the ledger's E3 row | DONE (this commit) — core **1609/174** · Mac **373/39** (incl. the acceptance spine's eleven types) · mobile **71/6** · iOS build green |
 
 ### THE CLASSIFICATION — EVERY ROAD THAT REACHES THE MERGE JOIN
 
@@ -1002,3 +1092,38 @@ failed its byte check and fallen back to a full re-render — the ruling would h
 silently cost P1. It now tries every `MergeJoin` case, and for the door join the replacement is
 the separator that is already there (a zero-byte text edit carrying only the identity run) — which
 is the mechanism by which "the page reads byte-identical" is literally true on screen.
+
+### CLOSING RUNS (at the unit's END — never the full suite at the start)
+
+| Run | Command | Result |
+|---|---|---|
+| **Core** — the Operations diff (`swift test`, the whole core package) | `swift test` from the repo root | **1609 tests in 174 suites passed** (exit 0). Baseline was 1604/174; +5 net from the ruling's new pins |
+| **Mac** — every suite this diff touches, the merge/seam/structural neighbourhood, AND the acceptance spine under its ELEVEN REAL TYPE NAMES (the `-only-testing` file-name trap, met by both prior units) | `xcodebuild test -scheme Variorum -destination platform=macOS` with `-only-testing:` for `SeamMergeTests` · the four `SeamEdit*` suites · `StructuralRewriteDoorTests` · `MergeGestureTests` · `MakeBlockGestureTests` · `DivideExtractGestureTests` · `DivideWCeremonyTests` · `MergeArrangementTests` · `MergeCeremonySheetTests` · `FannedDefaultsTests` · `FannedDefaultsBoardTests` · `MergeSelectionTests` · `BlocksWorkbenchTests` · `CrossBlockCompoundTests` · `BoardMergeDiagnosisTests` · `BoundaryFluidityTests` · `PlannerMergeTests` · `EditorSeamCostTests` · `EditorWindowSmokeTests` · `GestureSoakTests` · `ConfirmationsSettingTests` · `BlockHistoryPaneTests` · `NoteTrayTests` · `TrashSurfaceTests` · `WholeBlockDeleteTests` + the eleven `Tutorial*` types | **373 tests in 39 suites passed** (exit 0, no skips) |
+| **Mac, the whole suite** — run MID-UNIT as the straggler sweep (not at the start), recorded because it is the honest baseline statement | same, no `-only-testing` | **2917 tests in 486 suites, 5 issues**: three door pins this unit then rewrote (re-run green above) and **row 58's recorded environment red** (`theReadClickLandsInIndexAtThatBlock`, two issues in one test, the warm-DerivedData covariate; this diff does not touch the book Index) |
+| **Mobile** — the merge-bearing simulator suites | `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` with `-only-testing:` for `MobileStructuralTests` · `MobileTutorialStructureWalkTests` · `MobileCrossBlockEditTests` · `MobileBlockHistoryTests` · `MobileTutorialBookShapeTests` · `MobileWholeBlockDeleteTests` | **71 tests in 6 suites PASSED** (exit 0) with the **2 pre-existing known issues** (`theFannedDivideLessonLandsTheDuplicateShape`, the recorded 13u1-ladder row — untouched by this diff) |
+| **iOS build gate** — `Shared/EditorBrain/` and `VariorumCore` both compile into the phone | `xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS` | **BUILD SUCCEEDED** |
+
+No full-suite run was made at this unit's START; the plan's closeout-refresh baselines stand as the
+baseline (the standing rule).
+
+### CARRIED TO THE PHASE CLOSEOUT (from this unit)
+
+1. **AppSpec §14's phase delta** is the CLOSEOUT's to write (a unit edits the operative sections
+   only — E1's precedent): this unit's canon deltas are §9's merge bullet and OverallModel §7's
+   merge line, both citing R-13u4-3 (2026-09-20).
+2. **The tutorial re-seed consequence** (judgment call 3): her already-seeded field guide keeps the
+   old merge sentence until `Help ▸ Restore Tutorial…`.
+3. **The export consequence** (judgment call 5), for her if she cares: a merged block's internal
+   newline exports as one newline inside a paragraph, where the two blocks exported as `"\n\n"`.
+4. **A walker fact** for `Tools/WalkKit/README.md` at the next touch: `cliclick t:` drops
+   characters in the shelf's quick-entry bar and `⌘A` does not select there; System Events
+   `keystroke` + `key code 36 using shift down` is the reliable staging road, and every burst needs
+   an explicit re-activation first.
+
+### WHAT A FRESH SESSION WOULD NEED TO FINISH THIS
+
+Nothing. Everything is committed and pushed: the core rule (`MergeJoinRule`, `Operations.merge`),
+the consumers (the differential seam arm, the carry-all and ceremony defaults, the phone's door),
+the two DELETE roads' explicit class + guard pins, the rewritten door pins across 12 suites, both
+tutorials' copy and their pins, the canon delta, the walk captures (gitignored, listed above), and
+this record.
