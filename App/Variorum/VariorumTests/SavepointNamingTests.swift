@@ -343,8 +343,51 @@ struct SavepointSealedDoorTests {
             h.model.commitCaretVariant()
 
             #expect(h.model.savepointAsk == nil, "no field over a sealed commit")
-            #expect(h.model.statusMessage == sealedSentence,
+            // Round 2, R2-1: the SURFACE's own sentence — Write's filer
+            // (`operationMessage`), the exact pre-D words of this keypress —
+            // never the registry's, which this surface's filer does not
+            // speak. The other three cells' `sealedSentence` compare stays
+            // correct for THEM: their surfaces' filers genuinely speak the
+            // registry. The equality cell below holds the contract itself.
+            #expect(h.model.statusMessage == "This note is sealed — unlock it first.",
                     "the same sentence the post-\u{23CE} road speaks")
+        }
+    }
+
+    /// **THE DOOR AND THE FILER SPEAK ONE SENTENCE — THIS DOOR ONLY** (13u3
+    /// ladder round 2, R2-1, the equality-form contract). Write's ⌘S is the
+    /// one seal-refusing door whose GESTURE has two refusal moments: the
+    /// door's guard, or — when the seal lands under a stale `header` (the
+    /// fail-open the design deliberately leaves to the filer) — the op road
+    /// after ⏎. One gesture must not speak two sentences depending on header
+    /// freshness. **Scoped to THIS door, deliberately:** Write's two shipped
+    /// gesture-worded seal refusals (`shouldChangeText`'s "unlock it to
+    /// edit." and `poolDrop`'s "unlock it to add to it.") are NOT in breach
+    /// of this contract and must not be widened into it — their doors
+    /// consume the gesture outright, so the door is the gesture's only
+    /// worded refusal; this pin is not a surface-wide law. Consequence,
+    /// stated: gesture-wording THIS door later means changing
+    /// `operationMessage`'s shared `lockedPost` case with it, or redding
+    /// this cell honestly.
+    @Test func writesDoorAndFilerSpeakOneSealSentence() async throws {
+        try await withEditor(seedBlocks: ["draft text"]) { h in
+            h.textView.setSelectedRange(NSRange(location: 3, length: 0))
+            h.model.updateCaretContext()
+            try h.session.operations.lockPost(h.postID)
+            try h.reload()
+
+            h.model.commitCaretVariant()  // the door's moment
+            let atTheDoor = h.model.statusMessage
+            #expect(h.model.savepointAsk == nil, "no field over a sealed commit")
+
+            // The filer's moment — the same gesture reached through the
+            // stale-header race's road (⏎ meeting the op).
+            await h.model.commitCaret()
+            let atTheFiler = h.model.statusMessage
+
+            #expect(atTheDoor != nil)
+            #expect(atTheDoor == atTheFiler,
+                    "one \u{2318}S, one sentence, whichever moment refuses (R2-1: door \u{201C}\(atTheDoor ?? "")\u{201D} vs filer \u{201C}\(atTheFiler ?? "")\u{201D})")
         }
     }
 

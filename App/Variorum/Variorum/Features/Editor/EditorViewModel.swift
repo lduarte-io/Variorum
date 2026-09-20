@@ -3078,17 +3078,36 @@ final class EditorViewModel {
         askSavepointName()
     }
 
+    /// The no-caret refusal, ONE literal for the door and the filer (13u3
+    /// ladder round 2 — the R2-1 class one guard up: two hand-kept copies of
+    /// a sentence that must match are one typo from diverging).
+    private static let noCaretToCommit = "Place the caret in a block to commit."
+
     func askSavepointName() {
         guard let variantID = caretVariantID else {
-            refuse("Place the caret in a block to commit.")
+            refuse(Self.noCaretToCommit)
             return
         }
         // 13u3 ladder round 1, R1-3 (P-2's letter): a SEALED note's ⌘S used
         // to refuse at the keypress; the door must not open a field over a
-        // gesture the filer will refuse. Same sentence the post-⏎ road
-        // speaks, so the two moments cannot disagree.
+        // gesture the filer will refuse.
+        //
+        // **THE SURFACE'S OWN SENTENCE, deliberately — not the registry's**
+        // (round 2, R2-1: the registry's "unseal it to change takes or
+        // choices" answers a takes door, and it is NOT what this surface's
+        // filer speaks). This door is the one seal refusal in Write whose
+        // GESTURE has two refusal moments — here, or at the op after ⏎ when
+        // the seal landed under a stale `header` (the fail-open this guard
+        // deliberately leaves to the filer) — so the two moments must speak
+        // identically, and `operationMessage` is where the filer's words
+        // live. These are also the exact pre-D words of this keypress. The
+        // two gesture-worded siblings ("unlock it to edit." / "unlock it to
+        // add to it.") are NOT this rule's: their doors consume the gesture
+        // outright, so the door is those gestures' only worded refusal.
+        // The equality pin (`writesDoorAndFilerSpeakOneSealSentence`) holds
+        // this door alone.
         guard header?.locked != true else {
-            refuse(OpsRefusalCopy.message(for: OperationError.lockedPost(id: postID)))
+            refuse(operationMessage(OperationError.lockedPost(id: postID)))
             return
         }
         savepointAsk = .naming(variantID: variantID)
@@ -3107,7 +3126,7 @@ final class EditorViewModel {
     /// this road ride unmodified).
     func commitCaret(named name: String? = nil) async {
         guard let variantID = caretVariantID else {
-            statusMessage = "Place the caret in a block to commit."
+            statusMessage = Self.noCaretToCommit
             return
         }
         await autosave.flushNow()
