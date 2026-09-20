@@ -526,3 +526,140 @@ than a spelling. One clause in the existing comment. Lowest severity of the four
 **What I did not do here:** no fixes, no pins, no app run, no suite run — the same contract as the
 responses above. S-1 and S-2 are pin work the reviewer owns; S-3 and S-4 are one-liners it may
 take or record.
+
+---
+
+# ROUND 2 RESPONSES (opus, 2026-09-19)
+
+Round 2's two findings (`notes/plans/13u3-ladder-round2.md`, commit `880ee9d2`), each traced
+independently in the current tree before answering. **No fixes in this pass** — the reviewer makes
+the final call and implements.
+
+| # | Sev | Verdict |
+|---|-----|---------|
+| R2-1 | MINOR | **AGREE the divergence is real and must close** — confirmed at both ends, plus two facts the finding did not have that make it stronger AND fork its fix shape. **One caution on the proposed equality pin** (it would put two SHIPPED Write doors in nominal breach of a contract nothing has ever held). |
+| R2-2 | NIT | **AGREE** — internal vs the doc's "one writer"; `private` compiles (all five uses are in one file, zero test callers). One completion note. |
+
+---
+
+## R2-1 · [MINOR] · the Write door's seal sentence ≠ the Write filer's
+
+**AGREE on the finding.** Both sentences verified at their sources, and the fix's own comment is
+falsified by the line directly beneath it.
+
+### My independent trace
+
+- The door (`EditorViewModel.swift:3090–3092`): `guard header?.locked != true else { refuse(
+  OpsRefusalCopy.message(for: OperationError.lockedPost(id: postID))) }` →
+  **"This note is sealed — unseal it to change takes or choices."** (`OpsRefusalCopy.swift:340`).
+- The filer: `fileSavepoint` → `commitCaret(named:)` → `catch { showOperationError(error) }`
+  (`:4015`) → `operationMessage` (`:4019`) → `case .lockedPost:` →
+  **"This note is sealed — unlock it first."** (`:4024`).
+- The comment three lines above the guard says *"Same sentence the post-⏎ road speaks, so the two
+  moments cannot disagree."* It is false as written.
+- **`:3091` is the ONLY `OpsRefusalCopy` reference in the whole Write model** (grepped) — so the
+  R1-3 guard is the single place Write reaches past its own table to the registry. That confirms
+  the finding's "reached past it" characterisation rather than my having to take it.
+- The three boards are clean exactly as claimed, verified at each filer: Takes/Lenses
+  `run` → `setRefusal(Self.message(for:))` → `OpsRefusalCopy` (`TakesViewModel.swift:2529`,
+  `:2551–2553`); Canvas `statusMessage = OpsRefusalCopy.message(for: error)`
+  (`CanvasViewModel.swift:757`); Compare the same (`CompareBoardView.swift:821`).
+- **The KIND is not part of this** (checked, since 18i decides kind at the door): `refuse` sets
+  `.refusal` explicitly and a bare `statusMessage =` defaults to refusal through `StatusForwarder`,
+  so both roads are the same always-shown class. This is purely a words divergence.
+- **Aggravation 1 verified:** pre-D, `commitCaretVariant()` was `Task { await commitCaret() }` →
+  the op threw → `operationMessage` → *"unlock it first."* So the fix restored the timing and
+  changed the words at that keypress.
+- **Aggravation 2 verified and it is the sharper half:** "unseal it to change takes or choices"
+  answers a takes/choices door; the gesture refused here is a commit. That is wrong under *any*
+  option, including leaving the timing alone.
+
+### Two facts the finding did not have — and they fork the fix
+
+**Write already has a HOUSE IDIOM for a door-level seal refusal on this exact fact, at two
+shipped doors, and both are GESTURE-WORDED rather than equal to the filer:**
+
+- `:990–993` — `shouldChangeText` (typing into a sealed note):
+  `refuseFeedback("This note is sealed — unlock it to edit.")`
+- `:2948–2951` — `poolDrop`, the same `guard header?.locked != true else { … }` shape two doors
+  away: `refuseFeedback("This note is sealed — unlock it to add to it.")`
+
+Neither equals `operationMessage`'s *"unlock it first."*, and neither has ever been called a
+defect — because a door refusal and an op refusal are different moments carrying different
+information. So the contract the finding's fix asserts (**door sentence == filer sentence**) is
+**not** a rule this surface has ever kept; it is a rule the R1-3 comment invented and then broke.
+
+That leaves a genuine fork, and the reviewer owns it:
+
+- **(A) the finding's shape** — `refuse(operationMessage(OperationError.lockedPost(id: postID)))`
+  → *"unlock it first."* Door and filer agree; it restores the **exact pre-D words** at that
+  keypress (the regression frame R1-3 was raised under); one line; `operationMessage` is
+  `private` but same-file, so it compiles.
+- **(B) the house idiom** — `refuse("This note is sealed — unlock it to save a moment.")`, the
+  `:992`/`:2949` grammar. Door ≠ filer verbatim, both Write's own voice, and the door says the
+  more useful thing.
+
+**I would take (A)**, on two grounds that (B) cannot match: it restores the words she has actually
+seen at ⌘S since the seal existed, and it keeps the pair honest for the one race the fail-open
+design deliberately leaves to the filer (a seal landing under an open field). But (A) must then
+say in its comment **why this door differs from its two gesture-worded siblings**, or the next
+reader "fixes" the wording toward `:2949` and reds the pin.
+
+### The caution on the proposed pin
+
+The equality cell — drive door and filer under one seal, `#expect` the two sentences equal — is
+the right *form* (it asserts the contract rather than a constant, which is why the shipped cell
+was blind). Two things to decide with eyes open:
+
+1. **It makes equality a rule on a surface where two shipped doors break it.** Under the pin's
+   logic `:992` and `:2949` are in nominal breach. They are not in this ladder's scope and I am
+   not raising them — but the pin's doc should say the contract is scoped to **this** door (the
+   one whose fix comment claims it), or the next reader reads the pin as a surface-wide law and
+   either widens it or deletes it.
+2. **It forbids gesture-wording this door later** without also changing `operationMessage`'s
+   `lockedPost` case — which every other Write refusal of that class shares. That is a real, if
+   small, future cost, and it is the kind of thing worth one clause rather than a rediscovery.
+
+### One scoping note for the fix pass
+
+Only the **Write** cell's expectation changes. `SavepointSealedDoorTests`' other three cells
+compare against `sealedSentence` (= the registry's) at `:370`, `:392`, `:416`, and that is
+**correct** for them — those surfaces' filers genuinely speak the registry. An over-broad fix that
+re-pointed all four would make three cells assert a sentence their own surfaces do not speak.
+
+### Adjacent observation (offered, not raised)
+
+The door's no-caret refusal (`:3083`) and the filer's (`:3110`) are the same sentence as two
+**separate literals** — *"Place the caret in a block to commit."* They agree today; they are one
+typo apart from being this same finding one guard up. If (A) lands, a shared constant for that
+pair is the cheap companion. Not a finding — stated because the fix is already in that file.
+
+---
+
+## R2-2 · [NIT] · the depth counter's "one writer" is documented, not enforced
+
+**AGREE.** Verified, and `private` genuinely compiles.
+
+- `enterStorageEditTransaction()` / `exitStorageEditTransaction()` (`:3443–3444`) carry no access
+  modifier — internal to the whole `Variorum` module — while their doc says *"The one writer
+  (`storageDidEdit`'s entry/exit), named so no second site ever mutates the depth ad hoc."*
+- **Whole-module grep — five uses, all in `EditorViewModel.swift`:** the pair's definitions
+  (`:3443`, `:3444`), their one call site (`:1179–1180`, `storageDidEdit`'s entry + `defer`), and
+  two reads of the computed flag (`:3373` the deferral branch, `:3635` the oracle). **Zero test
+  callers, zero other files** — so `private` costs nothing and turns the doc's claim into a
+  compiler fact. (Swift's `private` is file-scoped across same-file extensions, so it holds however
+  this file's extensions are arranged.)
+- **The stated hazard is right:** a stray `enter` would suppress the indicator refresh
+  indefinitely, and a stray `exit` would drive the depth negative and *un*-suppress mid-transaction
+  — reopening R1-1's hole in the one state it exists to close. No pin owed; no reachable wrong
+  state today.
+
+**Completion note:** `inStorageEditTransaction` (`:3438`) is likewise internal with no out-of-file
+reader, so it can carry the same fence — though the risk lives in the **writes**, so a read-only
+getter left internal is harmless. Reviewer's preference; the two mutators are the ones that matter.
+
+---
+
+**What I did not do:** no fixes, no pins, no app run, no suite run — the same contract as the
+round-1 responses and the sanity pass. R2-1's fork is the reviewer's call; R2-2 is a one-word
+change.
