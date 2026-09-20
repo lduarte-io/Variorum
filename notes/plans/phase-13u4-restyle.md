@@ -901,3 +901,27 @@ FIRST commit (PENDING marks on unverified claims), the classification table, and
 list (if your diff reaches `BlockRangeIndex`/`EditorTextView`'s seam roads, say so — the
 ladder's Fable reviewer reads it); flip the ledger's E3 row in your closing commit. The
 checkpoint protocol in CAST & DISCIPLINE binds you from the first commit.
+
+## UNIT E3 RECORD — MERGE KEEPS THE NEWLINES (item 8, R-13u4-3)
+
+**WHAT THIS UNIT DID NOT DO (the record's first line):** *(filled at close — PENDING while the
+unit runs)*. Nothing outside the merge join: no other unit's work (E1's Return chain, E2's ⌥⌫
+question, the restyle spine), no `Sync/`, no schema, no migration.
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The record + the READING + the DOORS-vs-DELETES enumeration (every road traced, not assumed) | IN-PROGRESS |
+| 2 | The core rule (`MergeJoinRule` + `Operations.merge`) + the core pins rewritten to the ruling + the canon delta | NOT-STARTED |
+| 3 | The Mac consumers (the seam differential, the carry-all/ceremony defaults, the two DELETE roads' guards) + the Mac pins | NOT-STARTED |
+| 4 | The phone's door (core-side flip) + the mobile pins + the iOS build | NOT-STARTED |
+| 5 | The walk on the dev-store Debug build, captured | NOT-STARTED |
+| 6 | Closing suites + the ledger's E3 row | NOT-STARTED |
+
+### THE CLASSIFICATION — EVERY ROAD THAT REACHES THE MERGE JOIN
+
+*(the architect's application note, built to; each row traced by reading the road, never assumed —
+filled in as the pieces land)*
+
+PENDING — piece 1.
