@@ -652,8 +652,17 @@ struct TypedReturnKeyTests {
     /// round 2's R2-1 — the generation token it replaced is gone): the
     /// first act's tail drains ⏎₂, which claims and re-arms; ⏎₂'s own tail
     /// drains the text once no flight is pending — so the text lands in the
-    /// one block the Returns made.
-    @Test func twoFastReturnsThenTypingLandTheTextInTheOneBlockTheyMade() async throws {
+    /// block the LAST Return made.
+    ///
+    /// **RE-POINTED (R-13u4-2, 13u4 E1):** the second ⏎ now falls in an EMPTY
+    /// block and chains, so the run is `["alpha", "", "x"]` where it was
+    /// `["alpha", "x"]`. **This is also the compose-not-race pin** — and the
+    /// chain is what gives it teeth: had ⏎₂ acted on its own claim-time
+    /// decision instead of re-deriving, its mint would have gone `.after`
+    /// ALPHA (between alpha and the first empty) and the store would read
+    /// `["alpha", "x", ""]`. The two shapes differ in the store, which is the
+    /// whole point of the pin.
+    @Test func twoFastReturnsThenTypingLandTheTextInTheBlockTheLastOneMade() async throws {
         try await withEditor(seedBlocks: ["alpha"]) { h in
             let window = try hosted(h)
             defer { window.teardown() }
@@ -664,10 +673,10 @@ struct TypedReturnKeyTests {
             characterKey(h, window.window, "x")  // all three in one turn
             await h.flush()
 
-            #expect(try h.storeSlots().map(\.text) == ["alpha", "x"],
-                    "⏎ ⏎ x: one new block, the text in it, nothing after it")
-            #expect(h.model.index.entries.count == 2)
-            #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", "x"],
+                    "⏎ ⏎ x: two blocks made, the text in the second — never above the first")
+            #expect(h.model.index.entries.count == 3)
+            #expect(h.model.caretBlockID == h.model.index.entries[2].blockID)
         }
     }
 
@@ -971,14 +980,19 @@ struct TypedReturnKeyTests {
         }
     }
 
-    // MARK: (5) the empty block — U-19 (2)
+    // MARK: (5) the empty block CHAINS — R-13u4-2 (13u4 E1); U-19 (2) stands
 
-    /// Two Returns in one breath make ONE empty block: the act re-derives on
-    /// its own turn, so the second one sees the block the first one made and
-    /// takes the ruled no-op there (*"we won't reintroduce it with
-    /// paragraphs disappearing"* cuts both ways — nothing vanishes, and
-    /// nothing piles up). This is also the compose-not-race pin.
-    @Test func twoQuickReturnsMakeOneEmptyBlockNotTwo() async throws {
+    /// **HER RULING CHANGE (R-13u4-2, 2026-09-20):** *"on an empty block, you
+    /// can't keep making new lines and spawning more empty blocks. Direct
+    /// violation of 'works how you'd expect a text editor to work'."* Two
+    /// Returns in one breath now make TWO empty blocks — and the act still
+    /// re-derives on its own turn, so the second one mints below the block
+    /// the first one made rather than beside it. **SUPERSEDES** this pin's
+    /// U-1 shape (`twoQuickReturnsMakeOneEmptyBlockNotTwo`, `["alpha", "",
+    /// "gamma"]`): a ruled change, rewritten to the ruling, no red-on-old
+    /// owed. The compose-not-race half moved to the pin below, where a stale
+    /// decision is visible in the store.
+    @Test func twoQuickReturnsMakeTwoEmptyBlocksTheSecondBelowTheFirst() async throws {
         try await withEditor(seedBlocks: ["alpha", "gamma"]) { h in
             let window = try hosted(h)
             defer { window.teardown() }
@@ -988,8 +1002,67 @@ struct TypedReturnKeyTests {
             returnKey(h, window.window)
             await h.flush()
 
-            #expect(try h.storeSlots().map(\.text) == ["alpha", "", "gamma"])
-            #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", "", "gamma"])
+            #expect(h.model.caretBlockID == h.model.index.entries[2].blockID,
+                    "the caret went down the run, into the one it just made")
+        }
+    }
+
+    /// **HER SENTENCE, as a walk in one test** (R-13u4-2): *"You should be
+    /// able to go down the list typing whatever you want in a series of empty
+    /// blocks."* Three Returns make a run of three empties; she then clicks
+    /// into the middle one and types, and the run keeps its shape around the
+    /// words — no empty is swept, none is merged, nothing moves.
+    @Test func aRunOfReturnsMakesARunSheCanTypeDownThrough() async throws {
+        try await withEditor(seedBlocks: ["alpha", "gamma"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)
+            returnKey(h, window.window)
+            returnKey(h, window.window)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", "", "", "gamma"],
+                    "⏎⏎⏎ on an empty block: a run, not one block and two no-ops")
+
+            // She clicks into the MIDDLE empty and writes there.
+            caret(h, entry: 2, offset: 0)
+            h.textView.insertText("two", replacementRange: h.textView.selectedRange())
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", "two", "", "gamma"],
+                    "the words land in the one she clicked; the empties around it STAY (U-19 (2))")
+        }
+    }
+
+    /// **⌥⌘Z removes ONE mint per press, down the chain** (R-13u-3 — the
+    /// 13u1 ruling that put `newBlock` on AppSpec §9's structural-undo list,
+    /// which is why a chain is reversible at all). Each Return is one entry;
+    /// the empties are untouched, so `revertStructural`'s standing behaviour
+    /// takes them clean away (a mint she had typed into would tray instead —
+    /// the insurance doctrine, not this pin's case).
+    @Test func eachReturnInTheChainIsItsOwnStructuralUndo() async throws {
+        try await withEditor(seedBlocks: ["alpha", "gamma"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)
+            returnKey(h, window.window)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", "", "gamma"])
+            #expect(h.session.undoStack.depth == 2, "one entry per press, never one for the run")
+            #expect(h.session.undoStack.topLabel == "New Block")
+
+            let stack = h.session.undoStack
+            try await h.session.runner.run { ops in _ = try stack.undo(with: ops) }
+            try h.reload()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", "gamma"],
+                    "one press back")
+            try await h.session.runner.run { ops in _ = try stack.undo(with: ops) }
+            try h.reload()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "gamma"],
+                    "…and the other: the run is gone the way it was made")
         }
     }
 
@@ -1171,9 +1244,16 @@ struct TypedReturnKeyTests {
 
     /// *⏎, pause, click at the end of the last line, ⏎, type.* Every step
     /// ends with a real block and never a loose newline: the first key makes
-    /// the block, the pause has no tail left to mint, the second key finds
-    /// an empty block and does nothing, and the words land in that block —
-    /// never appended to "beta", never "several new lines".
+    /// the block, the pause has no tail left to mint, the second key finds an
+    /// empty block and — since R-13u4-2 (13u4 E1) — makes the NEXT one, and
+    /// the words land in that block. Never appended to "beta", never "several
+    /// new lines".
+    ///
+    /// **RE-POINTED (R-13u4-2):** the middle assertion was `"no second empty
+    /// block"` (`["alpha", "beta", ""]` after the second ⏎) — exactly the arm
+    /// her ruling superseded. What her S1 scenario was ABOUT is untouched and
+    /// still pinned here: no keystroke ever leaves a loose newline, and the
+    /// words land in a real block.
     @Test func herS1ScenarioMakesABlockAndNeverALooseNewline() async throws {
         try await withEditor(seedBlocks: ["alpha", "beta"]) { h in
             let window = try hosted(h)
@@ -1194,12 +1274,13 @@ struct TypedReturnKeyTests {
             h.model.updateCaretContext()
             returnKey(h, window.window)
             await h.flush()
-            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta", ""],
-                    "no second empty block")
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta", "", ""],
+                    "the empty block chains (R-13u4-2) — and neither is a loose newline")
 
             h.textView.insertText("new", replacementRange: h.textView.selectedRange())
             await h.flush()
-            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta", "new"])
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta", "", "new"],
+                    "the words land in the block the key just made")
             #expect(!h.model.hasOpenTail)
         }
     }

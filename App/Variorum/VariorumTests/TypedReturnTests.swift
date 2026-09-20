@@ -152,16 +152,78 @@ struct TypedReturnTests {
                            closingEmptyTail: false))
     }
 
-    // MARK: - The empty block (U-19 (2))
+    // MARK: - The empty block CHAINS (R-13u4-2 — her ruling change, 13u4 E1)
 
-    /// An abandoned empty block STAYS, and a Return in it makes no second
-    /// one: her *"we won't reintroduce it with paragraphs disappearing"*
-    /// cuts both ways — nothing vanishes, and nothing piles up either.
-    @Test func aReturnInAnEmptyBlockDoesNothing() {
+    /// **HER RULING CHANGE (R-13u4-2, the 13u4 sizing-and-rulings sitting,
+    /// 2026-09-20), verbatim:** *"This is driving me insane - on an empty
+    /// block, you can't keep making new lines and spawning more empty blocks.
+    /// Direct violation of 'works how you'd expect a text editor to work'…
+    /// You should be able to go down the list typing whatever you want in a
+    /// series of empty blocks."*
+    ///
+    /// So an empty block's Return is now the SAME verdict a block's end
+    /// gives — an empty block below, the caret in it — and it chains.
+    /// **SUPERSEDES U-1's "nothing in an empty block" arm**, which this pin
+    /// held as `aReturnInAnEmptyBlockDoesNothing` (`== .nothing`). A ruled
+    /// change, not a defect: the pin is rewritten to the ruling, and no
+    /// red-on-old is owed (13u4 CAST & DISCIPLINE). What U-19 (2) still says
+    /// is untouched — nothing vanishes; the empties she leaves behind STAY.
+    @Test func aReturnInAnEmptyBlockMintsAnotherBelowIt() {
         let index = BlockRangeIndex(
             slots: [slot("a", text: "alpha"), slot("b", text: ""), slot("c", text: "delta")],
             tail: nil)
-        #expect(act(index, caret: 6, texts: ["alpha", "", "delta"]) == .nothing)
+        #expect(act(index, caret: 6, texts: ["alpha", "", "delta"])
+            == .emptyBlock(edge: .below, entryIndex: 1, blockID: "b",
+                           closingEmptyTail: false))
+    }
+
+    /// …and it chains at the caret's OWN empty block, never at the run's
+    /// first one: consecutive empty entries carry distinct offsets (the
+    /// separator between two of them belongs to neither), so the caret one
+    /// character along answers with the next block's mint. This is what makes
+    /// ⏎⏎⏎ a run rather than three mints in one place.
+    @Test func theChainAnswersAtTheCaretsOwnEmptyBlock() {
+        let index = BlockRangeIndex(
+            slots: [slot("a", text: "alpha"), slot("b", text: ""),
+                    slot("c", text: ""), slot("d", text: "delta")],
+            tail: nil)
+        let texts = ["alpha", "", "", "delta"]
+        #expect(act(index, caret: 6, texts: texts)
+            == .emptyBlock(edge: .below, entryIndex: 1, blockID: "b",
+                           closingEmptyTail: false))
+        #expect(act(index, caret: 7, texts: texts)
+            == .emptyBlock(edge: .below, entryIndex: 2, blockID: "c",
+                           closingEmptyTail: false))
+    }
+
+    /// The chip OFF is still the whole note's answer, the empty block
+    /// included (U-19 (3)): R-13u4-2 changes what the key does when it ACTS,
+    /// never whether it acts at all.
+    @Test func theChipOffKeepsAnEmptyBlocksReturnAsContent() {
+        let index = BlockRangeIndex(
+            slots: [slot("a", text: "alpha"), slot("b", text: ""), slot("c", text: "delta")],
+            tail: nil)
+        #expect(act(index, caret: 6, mode: .oneBlock, texts: ["alpha", "", "delta"])
+            == .content)
+    }
+
+    /// **#92(c) composes AHEAD of the chain** (R-13u4-2's own sentence). With
+    /// an EMPTY TAIL open below an empty last block the two caret positions
+    /// are one apart and answer differently, deliberately: in the BLOCK it is
+    /// the chain (nothing to close — the tail is not where she is), in the
+    /// TAIL it is the trap's close-and-mint, which was never the empty
+    /// block's arm and is untouched by this ruling.
+    @Test func theEmptyTailClosesAndMintsAheadOfTheChain() {
+        let index = BlockRangeIndex(
+            slots: [slot("a", text: "alpha"), slot("b", text: "")], tail: "")
+        #expect(act(index, caret: 6, texts: ["alpha", ""])
+            == .emptyBlock(edge: .below, entryIndex: 1, blockID: "b",
+                           closingEmptyTail: false),
+                "the caret is in the empty BLOCK: the chain")
+        #expect(act(index, caret: 7, texts: ["alpha", ""])
+            == .emptyBlock(edge: .below, entryIndex: 1, blockID: "b",
+                           closingEmptyTail: true),
+                "the caret is in the empty TAIL: #92(c)'s close-and-mint")
     }
 
     // MARK: - The cases that stay content

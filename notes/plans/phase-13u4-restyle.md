@@ -417,8 +417,8 @@ no lesson copy edited (see "Judgment calls" below for why); the phone's Return m
 
 | # | Piece | Status |
 |---|---|---|
-| 1 | The record + the traced mechanism + `.gitignore` for `13u4-screens/` | IN-PROGRESS |
-| 2 | The pins written to the ruling (RED on the pre-change tree, recorded) | NOT-STARTED |
+| 1 | The record + the traced mechanism + `.gitignore` for `13u4-screens/` | DONE (bc362f6a) |
+| 2 | The pins written to the ruling (RED on the pre-change tree, recorded) | DONE (pending hash) — the red run below |
 | 3 | The brain change (`TypedReturn`) + the dispatch + the canon delta (AppSpec §7) | NOT-STARTED |
 | 4 | The walk on the dev-store Debug build, captured | NOT-STARTED |
 | 5 | Closing suites + the ledger's E1 row | NOT-STARTED |
@@ -453,6 +453,28 @@ app already mints). The DEBUG identity oracle re-checks the landed surface eithe
 is REMOVED rather than left dead, per this repo's own recorded doctrine ("a case that can never
 be returned is the drift class", the `noDailyBook` retirement, AppSpec §9); the switch in
 `runTypedReturnAct` loses its arm with it.
+
+### THE PINS, AND THEIR RED RUN (piece 2 — the ruling's shape, before the brain moved)
+
+R-13u4-2 is a RULED BEHAVIOUR CHANGE, so **no red-on-old is owed** (13u4 CAST & DISCIPLINE) — the
+pins are rewritten to the ruling. They were nonetheless written and RUN FIRST, against the
+unchanged brain, so the record carries what the old shape actually was rather than a claim about
+it. Run: `xcodebuild test -scheme Variorum -destination platform=macOS
+-only-testing:VariorumTests/TypedReturnTests -only-testing:VariorumTests/TypedReturnKeyTests`
+from `App/Variorum/` → **43 tests in 2 suites, 13 issues, TEST FAILED (exit 65)** — the seven
+pins below red, every other arm of both suites green (the U-1 family is otherwise untouched).
+
+| Pin | Suite | What the OLD tree answered |
+|---|---|---|
+| `aReturnInAnEmptyBlockMintsAnotherBelowIt` (was `aReturnInAnEmptyBlockDoesNothing`) | `TypedReturnTests` | `.nothing` |
+| `theChainAnswersAtTheCaretsOwnEmptyBlock` (new) | `TypedReturnTests` | `.nothing` at both carets |
+| `theChipOffKeepsAnEmptyBlocksReturnAsContent` (new) | `TypedReturnTests` | GREEN on both sides — the chip guard sits ahead of the arm (recorded as such, not as evidence of the change) |
+| `theEmptyTailClosesAndMintsAheadOfTheChain` (new) | `TypedReturnTests` | block arm `.nothing`; TAIL arm already green (#92(c) is untouched) |
+| `twoQuickReturnsMakeTwoEmptyBlocksTheSecondBelowTheFirst` (was `twoQuickReturnsMakeOneEmptyBlockNotTwo`) | `TypedReturnKeyTests` | `["alpha", "", "gamma"]`, caret in entry 1 |
+| `twoFastReturnsThenTypingLandTheTextInTheBlockTheLastOneMade` (was `…InTheOneBlockTheyMade`) | `TypedReturnKeyTests` | `["alpha", "x"]`, 2 entries |
+| `aRunOfReturnsMakesARunSheCanTypeDownThrough` (new — her sentence) | `TypedReturnKeyTests` | `["alpha", "", "gamma"]` after ⏎⏎⏎ |
+| `eachReturnInTheChainIsItsOwnStructuralUndo` (new — R-13u-3's road) | `TypedReturnKeyTests` | one entry on the stack, not two |
+| `herS1ScenarioMakesABlockAndNeverALooseNewline` (re-pointed arm) | `TypedReturnKeyTests` | `["alpha", "beta", ""]` — "no second empty block", the superseded arm |
 
 ### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
 
