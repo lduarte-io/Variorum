@@ -74,8 +74,32 @@ struct CaptureMicrosyntaxTests {
         #expect(parsed.text == "the sea")
     }
 
-    /// Scanning to the first `"}` rather than the first `"` is what lets a
-    /// title carry quotes of its own.
+    /// **THE WALK'S FINDING, pinned** (13u4 UNIT C1, 2026-09-20): the Mac
+    /// capture boxes substitute typed quotes, so a title token she types by
+    /// hand arrives CURLY — measured by hexdump of the box's own
+    /// accessibility value (`e2 80 9d` = U+201D), not inferred. Under a
+    /// straight-quote-only rule her title filed as visible text and did
+    /// nothing, while the `{#tag}` beside it worked. No pin could have
+    /// caught it — a pin types the characters it means.
+    @Test func aTitleTokenParsesWithCURLYQuotesTheCaptureBoxSubstitutes() {
+        // Both curly, as the box actually produced them.
+        let boxed = CaptureMicrosyntax.parse("{t:\u{201D}Ocean dream\u{201D}} the sea")
+        #expect(boxed.title == "Ocean dream")
+        #expect(boxed.text == "the sea")
+
+        // The typographic pair, which is what a substitution around a word
+        // normally gives, and the mixed case for good measure.
+        let paired = CaptureMicrosyntax.parse("{t:\u{201C}Ocean dream\u{201D}} the sea")
+        #expect(paired.title == "Ocean dream")
+        let mixed = CaptureMicrosyntax.parse("{t:\"Ocean dream\u{201D}} the sea")
+        #expect(mixed.title == "Ocean dream")
+
+        // And the straight form still parses — nothing was traded away.
+        #expect(CaptureMicrosyntax.parse("{t:\"Ocean dream\"} the sea").title == "Ocean dream")
+    }
+
+    /// Scanning to the first quote FOLLOWED BY `}` rather than to the first
+    /// quote is what lets a title carry quotes of its own.
     @Test func aTitleMayCarryItsOwnQuotes() {
         let parsed = CaptureMicrosyntax.parse("{t:\"she said \"hi\"\"} and left")
         #expect(parsed.title == "she said \"hi\"")

@@ -1215,7 +1215,8 @@ the HOISTED brain underneath its existing face, unchanged in behaviour.
 | 3 | The `applyTypedPath` HOIST to `Shared/` (the 3C parity pattern — zero test edits, both platforms) + the KnownIssues row | DONE (this commit) — Mac **46/8**, mobile **6/2**, zero test files touched |
 | 4 | The hand-off on BOTH Mac capture doors + the integration pins | DONE (this commit) — **42 tests in 4 suites passed** (the 25 new door pins + `QuickEntryBarTests` and `QuickNoteMintTests` riding UNMODIFIED) |
 | 5 | QUESTIONS #127 (the PROVISIONALs — seven lettered calls) | DONE (this commit) |
-| 6 | The walk on the dev-store Debug build, captured | NOT-STARTED |
+| 4b | **THE WALK'S FIRST FINDING, fixed before the walk finished** — the capture boxes substitute typed quotes, so a hand-typed `{t:"…"}` arrived CURLY and never parsed | DONE (this commit) — measured by hexdump, `isQuote` accepts `"` · `“` · `”`, **31 tests in 2 suites** green |
+| 6 | The walk on the dev-store Debug build, captured | IN-PROGRESS — the smart book is staged and the shelf capture landed tagged and collected; re-walking the title half on the fixed build |
 | 7 | Closing suites + iOS build + the ledger's C1 row | NOT-STARTED |
 
 ### THE PARSE RULE'S EDGE TABLE

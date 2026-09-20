@@ -74,8 +74,10 @@ nonisolated enum CaptureMicrosyntax {
     ///    exactly: `{#` … `}` and `{t:"` … `"}` (the `t` is read
     ///    case-insensitively — PROVISIONAL #127(b) — because iOS
     ///    capitalizes the first letter of a capture and her own use for
-    ///    this is phone-first). Anything else that happens to contain a
-    ///    brace is TEXT.
+    ///    this is phone-first; and the title's quotes may be straight or
+    ///    CURLY, because the capture boxes substitute them as she types —
+    ///    the walk's measured finding, `isQuote` below). Anything else that
+    ///    happens to contain a brace is TEXT.
     /// 2. **A token lives on ONE line.** The scan for a closing brace never
     ///    crosses a newline, so an unclosed `{#` cannot swallow the rest of
     ///    the capture.
@@ -200,17 +202,43 @@ nonisolated enum CaptureMicrosyntax {
         let afterT = line.index(after: afterBrace)
         guard afterT < line.endIndex, line[afterT] == ":" else { return nil }
         let afterColon = line.index(after: afterT)
-        guard afterColon < line.endIndex, line[afterColon] == "\"" else { return nil }
+        guard afterColon < line.endIndex, isQuote(line[afterColon]) else { return nil }
         let contentStart = line.index(after: afterColon)
-        guard contentStart <= line.endIndex,
-              let close = line.range(of: "\"}", range: contentStart..<line.endIndex)
-        else { return nil }
-        // Scanning to the first `"}` rather than the first `"` is what lets a
-        // title carry quotes of its own: {t:"say "hi""} is `say "hi"`.
-        let name = String(line[contentStart..<close.lowerBound])
+        // Scanning to the first QUOTE FOLLOWED BY `}` rather than to the
+        // first quote is what lets a title carry quotes of its own:
+        // {t:"say "hi""} is `say "hi"`.
+        var cursor = contentStart
+        var close: String.Index?
+        while cursor < line.endIndex {
+            let next = line.index(after: cursor)
+            if isQuote(line[cursor]), next < line.endIndex, line[next] == "}" {
+                close = cursor
+                break
+            }
+            cursor = next
+        }
+        guard let close else { return nil }
+        let name = String(line[contentStart..<close])
             .trimmingCharacters(in: .whitespaces)
         guard !name.isEmpty else { return nil }
-        return Token(value: .title(name), end: close.upperBound)
+        return Token(value: .title(name), end: line.index(after: line.index(after: close)))
+    }
+
+    /// **THE WALK'S OWN FINDING, 13u4 UNIT C1 (2026-09-20).** The Mac capture
+    /// boxes apply AppKit's automatic quote substitution, so a title token
+    /// typed by hand arrives as `{t:”Ocean dream”}` — U+201D, measured by
+    /// hexdump of the box's own accessibility value, not inferred. Under a
+    /// straight-quote-only rule her title token filed as visible text and
+    /// silently did nothing, while the `{#tag}` beside it worked; the pins
+    /// could never have caught it, because a pin types the characters it
+    /// means. The phone will do the same (iOS substitutes too).
+    ///
+    /// So the rule accepts all three: `"` · `“` · `”`, opener and closer
+    /// independently. The alternative — turning substitution OFF in the
+    /// capture boxes — would change what HER PROSE looks like everywhere in
+    /// them to make one token work, which is the tail wagging the dog.
+    private static func isQuote(_ character: Character) -> Bool {
+        character == "\"" || character == "\u{201C}" || character == "\u{201D}"
     }
 
     private static func isHorizontal(_ character: Character) -> Bool {
