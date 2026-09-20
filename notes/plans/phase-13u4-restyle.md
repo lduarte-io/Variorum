@@ -650,7 +650,7 @@ to `notes/plans/13u4-screens/e2/`. Run the suites your diff touches + the accept
 | 2 | THE TRACE — what each delete chord proposes, measured in bare AppKit, on a TK2 view, and through the app's own road | DONE (this commit) — 10 pins, all GREEN on the shipped tree |
 | 3 | The brief's stated pin, written and run → **the HOLLOW verdict** (no fix; the stop rule) | DONE (this commit) — the two ⌘⌫ pins are it |
 | 4 | The delete-family class sweep, each chord verdicted | DONE (this commit) — the table below |
-| 5 | The walk on the dev-store Debug build, captured (her exact two lines, both chords) | NOT-STARTED |
+| 5 | The walk on the dev-store Debug build, captured (her exact two lines, both chords) | DONE (this commit) — 8 captures + 4 named crops |
 | 6 | QUESTIONS #126 (her call, nothing implemented) + closing suites + the ledger's E2 row | NOT-STARTED |
 
 ### THE VERDICT IN ONE LINE
@@ -740,3 +740,39 @@ covered by the same pins.
 `EditorViewModel`, `EditorSurfaceController`, `MarkdownActs`, `Sources/VariorumCore/` — all
 untouched. The unit's whole diff is ONE new test file
 (`App/Variorum/VariorumTests/CommandDeleteLineTests.swift`) and this record.
+
+### EVIDENCE — THE WALK (the unit closes on USE, not on pins)
+
+**Build:** `App/Variorum/DerivedData/13u4e2/Build/Products/Debug/Variorum.app`
+(`io.lduarte.Variorum.debug`, the fenced dev store). `pgrep -fl 'Variorum.app/Contents/MacOS'`
+was checked at the start (ZERO instances — hers was not running at any point), and the dev
+instance was quit **by identity** at the end (`tell application id "io.lduarte.Variorum.debug" to
+quit`; zero instances after — the 13u3 breach's walker law). `/Applications/Variorum.app` was
+never touched. Captures: `notes/plans/13u4-screens/e2/` (gitignored), with `e2/crops/` holding
+the four read crops below.
+
+| # | Step | What the app did | Capture |
+|---|---|---|---|
+| 1 | Her first line typed into the shelf's quick-entry bar, ⏎ to file and open | the note opens in Write; the line WRAPS onto two visual lines — her picture exactly | `01-note-opened.png` |
+| 2 | Caret to the document end (⌘↓), **⏎** | 13k K5 continues the checklist: `- [ ] ` on a second line, **inside the SAME block** — one editing ring around both lines, the newline content (I4) | `crops/02-her-two-lines.png` |
+| 3 | **⌘⌫ at the end of the second line — HER GESTURE** | the `- [ ] ` goes and **NOTHING ELSE**: `start?)` and the whole first line survive byte-intact, the caret on the now-empty second line. **The reported defect does not reproduce in USE either.** | `crops/03-after-cmd-delete-FIRST-LINE-INTACT.png` |
+| 4 | ⌫ then ⏎ (the app's own doors) to re-stage her two lines | back to the step-2 picture, byte-exact | `crops/04-restaged-two-lines.png` |
+| 5 | **⌥⌫ at the same caret** | `start?)⏎- [ ] ` **GONE** — the note reads `…personal blog to `. **This is her report, reproduced exactly, by the neighbouring chord.** | `crops/05-after-opt-delete-HER-CONTENT-GONE.png` |
+
+**Not walked, stated:** the TWO-BLOCK shape's two chords (⌘⌫ takes only the second block; ⌥⌫
+rides the cross-block road and the second block leaves for the Trash). Both are pinned through
+the REAL key-event pipeline — `keyDown` → AppKit's bindings → `shouldChangeText` → the planners →
+the operations — in `CommandDeleteInEditorTests`, which is the production road end to end; the
+walk's own staging roads (the quick-entry bar's ⇧⏎, which makes one block here, and synthetic
+typing into the TK2 editor, which drops characters — the standing UNIT B walker fact) could not
+lay that fixture down reliably, and a fixture typed wrong is worse evidence than a pin driven
+right. Recorded rather than papered over.
+
+**Dev-store state left as found:** voice **Terminal**, appearance **system** (neither was
+touched — this unit changed no chrome and no setting). Two walk notes dated `2026-09-20` are
+left in the dev store, as every walk's fixtures are; the second one's prose is mangled (the
+quick-entry bar dropped characters on that pass) and it is a fixture, not a finding.
+
+**Both voices / both appearances were NOT walked, and the reason is structural:** this unit's
+diff contains ZERO product code — no view, no chrome, no brain, no operation. There is nothing
+for a voice or an appearance to render differently.
