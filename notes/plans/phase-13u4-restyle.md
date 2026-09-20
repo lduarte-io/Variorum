@@ -113,7 +113,7 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 | E1 | Empty blocks chain (item 3, R-13u4-2) | `TypedReturn`'s empty-block arm → the chain; canon delta rides the build | pins + walk | **DONE** — 9 pins (7 red-first) · walked both voices + dark · AppSpec §7 delta landed · record below |
 | E2 | ⌘⌫ checkbox-seam defect (item 11) | trace the mechanism first; red-on-old owed | red-on-old + walk on her verbatim repro | **CLOSED — DISMISSED AS HOLLOW AS STATED** (no product code changed): ⌘⌫ is `deleteToBeginningOfLine:` = the PARAGRAPH on macOS 26, and the block separator IS a newline — the reported gesture is structurally incapable of it. Measured five ways + WALKED. Her observable is real and belongs to **⌥⌫**; the product call is hers — **QUESTIONS #126**. 10 pins + the class sweep in the record below |
 | E3 | Merge keeps the newlines (item 8, R-13u4-3) | the rendering join, every door; ceremony default; canon delta rides | state-transition suite + walk | **DONE** — `MergeJoinRule` makes the DOORS-vs-DELETES classification structural (12 door roads flipped, the 2 delete roads byte-unchanged with guard pins); the differential seam arm had to learn the new join or every merge would have cost a full re-render; ~30 door pins rewritten to the ruling across 12 suites + 3 the ruling earns; both tutorials' falsified sentence fixed with their pins; canon delta in AppSpec §9 + OverallModel §7. Walked in both voices AND both appearances — a door merge moves not one byte of the page, the next seam's backspace still collapses to a space. Core 1609/174 · Mac 373/39 · mobile 71/6 · iOS green. Record below |
-| C1 | Capture microsyntax (item 2, R-13u4-1) | shared rule + both Mac doors; `applyTypedPath` hoist; phone face → parity row | pins + capture walk | NOT-STARTED |
+| C1 | Capture microsyntax (item 2, R-13u4-1) | shared rule + both Mac doors; `applyTypedPath` hoist; phone face → parity row | pins + capture walk | **DONE** — ONE pure `Shared/CaptureMicrosyntax.parse` on the `PlainPaste` pattern, run at the HAND-OFF only, on BOTH Mac doors; the `applyTypedPath` HOIST landed with it (`Shared/TypedTagPath`, four consumers, every pre-move name forwarded, **zero test edits on both platforms** — the KnownIssues row's `applyTypedPath` entry is DISCHARGED). **The walk caught what no pin could**: the capture boxes substitute typed quotes, so a hand-typed `{t:"…"}` arrived CURLY and silently filed as text — measured by hexdump, fixed in the brain, re-walked. ZERO routing machinery (the smart-book pin asserts the note joined with no `reading_post` row). Mac **191/31** · mobile **40/3** · iOS green · 34 captures. PROVISIONALs: **QUESTIONS #127** (a)–(g). Record below |
 | C2 | Selection → take (item 9, R-13u4-4) | the MOVE op + Write door; insurance savepoint load-bearing | state-transition + walk | NOT-STARTED |
 | F1 | Index chapter-click lands low (item 10) | trace first — the un-adopted `LandingAuthority` is the recorded hypothesis | red-on-old if confirmed + walk | NOT-STARTED |
 | S1 | The Settings shape (items 4/5/6/7 + row 59 + the 2a Settings fork) | tabs · search · fold fix · card grammar · ⌘[/unindent audit · merge-shortcut face; then walk row 53's two re-font occasions once reachable | walk both voices + appearances, captured | NOT-STARTED |
@@ -123,7 +123,14 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 **CARRIED TO CLOSEOUT (grows as units close; nothing here may be lost):** MOBILE PARITY rows —
 (1) the phone's empty-block Return should CHAIN too (E1's report: AppSpec §7 still says the
 phone's Return model is unchanged; no mobile code consults `TypedReturn.act`); (2) the phone's
-capture-microsyntax face (R-13u4-1, files when C1 closes). *(E3 owes NO parity row — the merge
+capture-microsyntax face (R-13u4-1) — **FILED BY C1**: the RULE is shared and already compiles
+into the iOS target (`Shared/CaptureMicrosyntax`), so the phone owes only the two lines at its own
+capture hand-off (`MobileQuickNoteModel` / the phone's shelf capture): parse at the filing act,
+mint with the cleaned text + the token's title, then `CaptureMicrosyntax.applyTags(…, wording:
+MobileTagsModel.refusal)` and speak the refusals in the phone's own seam. The curly-quote
+tolerance the Mac walk earned is in the shared brain, so iOS's own substitution needs nothing
+extra. *(C1 also hoisted `applyTypedPath` into `Shared/`, which the phone now consumes — the
+KnownIssues forked-brains row records the discharge.)* *(E3 owes NO parity row — the merge
 join is core-side, so the phone flipped with the Mac; its tutorial copy moved in the same commit.)*
 **OPEN PRODUCT CALLS** — (1) **QUESTIONS #126**
 (E2): should ⌥⌫ stop at a line break, and at a block seam? Her report's real chord; nothing was
@@ -133,7 +140,12 @@ field guide keeps the old merge sentence until Restore Tutorial; (c) tell her, i
 export consequence: a merged block's internal newline exports as one newline inside a paragraph
 where the two blocks exported as a blank line; (d) **the one architect call E3 made rather than
 stopping for**: Make Block across blocks is classified a DOOR (the row-10 note in the E3 record),
-reversible in one argument.
+reversible in one argument. **CLOSEOUT DUTIES from C1** — (e) her ratify bundle gains
+**QUESTIONS #127** (a)–(g), the capture microsyntax's seven calls; (f) a WALKER FACT for
+`Tools/WalkKit/README.md` at its next touch: the capture boxes substitute typed quotes (U+201D),
+so a quoted token read from a screenshot cannot be trusted — read the box's accessibility value
+and `xxd` it; (g) nothing in `notes/KnownIssuesAndTechDebt.md` was opened by C1 — one row was
+CLOSED (`applyTypedPath`).
 
 ## ENVIRONMENT TRAPS (every unit brief carries this section verbatim — the skill's rule)
 
@@ -1197,27 +1209,32 @@ closing commit. The checkpoint protocol in CAST & DISCIPLINE binds you from the 
 
 ## UNIT C1 RECORD — THE CAPTURE MICROSYNTAX (item 2, R-13u4-1)
 
-**WHAT THIS UNIT DID NOT DO (the record's first line):** *(PENDING until the unit closes — this
-line is written at the first commit and made exact at the last.)* No routing machinery of any
-kind — `shelveInDailyJournalBook`, smart-book assembly and every membership road are untouched
-(a smart book picks the note up because a tag applied, full stop). No other unit's work (E1's
-Return chain, E2's ⌥⌫ product call, E3's merge join, the restyle spine). `Sources/VariorumCore/
-Sync/`, schema, migrations and `Server/` — zero lines. No editor-seam file. The phone's FACE is
-not this unit's (the parity row is carried at the phase closeout); what the phone gets here is
-the HOISTED brain underneath its existing face, unchanged in behaviour.
+**WHAT THIS UNIT DID NOT DO (the record's first line):** it wrote **NO ROUTING MACHINERY OF ANY
+KIND** — `shelveInDailyJournalBook`, smart-book assembly and every membership road are untouched
+by name; a smart book picks the note up because a tag applied, full stop, and the pin
+`aSmartBookKeyedOnTheTagCollectsTheNoteByTheStandingRules` says so in behaviour by asserting the
+note joined its book with ZERO `reading_post` rows. **`Sources/` — ZERO FILES**
+(verified over the whole unit diff), so core, `Sync/`, schema, migrations and `Server/` are
+untouched by construction and no core run was owed. **No editor-seam file** (the seam list below
+is empty, deliberately said out loud). No other unit's work (E1's Return chain, E2's ⌥⌫ product
+call, E3's merge join, the restyle spine) was touched, and no canonical doc was edited — R-13u4-1
+adds a capture FACE, not a rule AppSpec states, and inventing a canon sentence for it would be
+the author's call, not mine. The phone's FACE is not this unit's (the parity row is filed at the
+phase closeout, with the two lines it owes named); what the phone gets here is the HOISTED brain
+underneath its existing face, behaviour-identical and pinned so.
 
 ### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
 
 | # | Piece | Status |
 |---|---|---|
 | 1 | The record + the READING (the brief's three reading lists, in order) | DONE (163ec318) |
-| 2 | The two shared brains — `Shared/CaptureMicrosyntax.swift` (the parse) + `Shared/TypedTagPath.swift` (the hoist's new home) — and the parse's arm pins, one per R-13u4-1 clause | DONE (this commit) — **17 tests in 1 suite passed** |
-| 3 | The `applyTypedPath` HOIST to `Shared/` (the 3C parity pattern — zero test edits, both platforms) + the KnownIssues row | DONE (this commit) — Mac **46/8**, mobile **6/2**, zero test files touched |
-| 4 | The hand-off on BOTH Mac capture doors + the integration pins | DONE (this commit) — **42 tests in 4 suites passed** (the 25 new door pins + `QuickEntryBarTests` and `QuickNoteMintTests` riding UNMODIFIED) |
-| 5 | QUESTIONS #127 (the PROVISIONALs — seven lettered calls) | DONE (this commit) |
-| 4b | **THE WALK'S FIRST FINDING, fixed before the walk finished** — the capture boxes substitute typed quotes, so a hand-typed `{t:"…"}` arrived CURLY and never parsed | DONE (this commit) — measured by hexdump, `isQuote` accepts `"` · `“` · `”`, **31 tests in 2 suites** green |
-| 6 | The walk on the dev-store Debug build, captured | DONE (this commit) — 34 captures + 23 crops, BOTH doors, both voices and both appearances, the table below |
-| 7 | Closing suites + iOS build + the ledger's C1 row | NOT-STARTED |
+| 2 | The two shared brains — `Shared/CaptureMicrosyntax.swift` (the parse) + `Shared/TypedTagPath.swift` (the hoist's new home) — and the parse's arm pins, one per R-13u4-1 clause | DONE (72caf8ac) — **17 tests in 1 suite passed** |
+| 3 | The `applyTypedPath` HOIST to `Shared/` (the 3C parity pattern — zero test edits, both platforms) + the KnownIssues row | DONE (53c77ec2) — Mac **46/8**, mobile **6/2**, zero test files touched |
+| 4 | The hand-off on BOTH Mac capture doors + the integration pins | DONE (fb10af91) — **42 tests in 4 suites passed** (the 25 new door pins + `QuickEntryBarTests` and `QuickNoteMintTests` riding UNMODIFIED) |
+| 4b | **THE WALK'S FIRST FINDING, fixed before the walk finished** — the capture boxes substitute typed quotes, so a hand-typed `{t:"…"}` arrived CURLY and never parsed | DONE (d30c4fb0) — measured by hexdump, `isQuote` accepts `"` · `“` · `”`, **31 tests in 2 suites** green |
+| 5 | QUESTIONS #127 (the PROVISIONALs — seven lettered calls) | DONE (8582f628) |
+| 6 | The walk on the dev-store Debug build, captured | DONE (8fc45f7e) — 34 captures + 23 crops, BOTH doors, both voices and both appearances, the table below |
+| 7 | Closing suites + iOS build + the ledger's C1 row | DONE (this commit) — Mac **191/31** · mobile **40/3** · iOS **BUILD SUCCEEDED** · core not owed (zero `Sources/` files) |
 
 ### THE PARSE RULE'S EDGE TABLE
 
@@ -1284,7 +1301,65 @@ own doors. `TypedTagPath.Outcome` therefore carries the ERROR out and each face 
 
 ### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
 
-*(PENDING — expected NONE; stated explicitly at the close.)*
+**NONE — said explicitly, as the brief asks.** `BlockRangeIndex`, `EditorTextView`,
+`TypedReturn`, `PaneTextAuthority`, `EditorViewModel`, `EditorSurfaceController`, `runStructural`
+and its identity oracle, `StructuralSeamEdit`, `MarkdownActs` — not one of them is in the diff.
+Neither is `Sources/VariorumCore/` (zero files), so `Sync/`, the schema, the migrations and
+`Server/` are untouched by construction. **The whole unit is seven source files**: two new shared
+brains, the three faces that consume them (`TagsViewModel`, `QuickEntryBar`, `QuickNoteView`),
+and the two phone models the hoist re-pointed (`MobileTagManager`, `MobileNoteTags`) — plus two
+new test files and three notes files.
+
+### CLOSING RUNS (at the unit's END — never the full suite at the start)
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| **Mac** — the two new suites, every suite the two capture doors own, every tag-touching suite the hoist passes under, AND the acceptance spine under its ELEVEN REAL TYPE NAMES (the `-only-testing` file-name trap, met by all three prior units) | `xcodebuild test -scheme Variorum -destination platform=macOS` with `-only-testing:` for `CaptureMicrosyntaxTests` · `CaptureMicrosyntaxDoorTests` · `QuickEntryBarTests` · `QuickNoteMintTests` · `QuickNoteDoorTests` · `QuickNoteWindowTests` · `QuickNoteWordTests` · `CaptureKeysTests` · `CaptureTextViewKeyTests` · `CaptureHandOffTests` · `TitleSuggestionChipTests` · `ShelfModelTests` · `PromoteAndPaletteTests` · `TagAndFolderTests` · `FreeTypedTagTests` · `LibraryTagFaceTests` · `NoteTagDeclarationTests` · `NodSetTests` · `MastheadTagDoorTests` · `TagChipFitTests` + the eleven `Tutorial*` types | **191 tests in 31 suites passed** (exit 0, no skips) |
+| **Mobile** — the two tag suites the hoist re-pointed, plus the phone's own capture suite, ALL UNMODIFIED | `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` with `-only-testing:` for `MobileTagManagerTests` · `MobileNoteTagsTests` · `MobileQuickNoteTests` | **40 tests in 3 suites passed** (exit 0) |
+| **iOS build gate** — the two new `Shared/` brains must compile into the phone (the `PlainPaste` precedent) | `xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS` | **BUILD SUCCEEDED** |
+| **Core** — NOT RUN, and owed nothing: `git diff --name-only` over the whole unit lists **zero files under `Sources/`** | — | n/a |
+
+No full-suite run was made at this unit's start; the plan's closeout-refresh baselines stand as
+the baseline (the standing rule).
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **The parse accepts CURLY quotes** (the walk's finding). The alternative was
+   `isAutomaticQuoteSubstitutionEnabled = false` on the capture boxes, which fixes one token by
+   changing what her prose looks like in every capture she ever types. Reversing costs one
+   predicate (`isQuote`) and one pin.
+2. **The `{t:` opener is read case-insensitively.** Her ask is phone-first and iOS capitalizes the
+   first letter of a capture, which is exactly where a title token goes. Strict spelling is one
+   character away and is recorded as #127(b)'s alternative.
+3. **A line that held nothing but tokens is removed whole.** Without it, a title token on its own
+   line leaves a blank first paragraph in every note captured that way (`bulkSegments` stores the
+   blank line as content, by the 2026-07-12 spacing ruling). The alternative — strip only the
+   token's own characters — is #127(c).
+4. **The empty-capture branch was NOT changed**, per the brief's letter: when the cleaned text is
+   blank the door takes its standing empty branch, which CLEARS the box. So a capture of nothing
+   but tokens loses the tokens silently. I followed the brief rather than invent a refusal
+   sentence, and recorded the alternative as #127(f) — it is one `else` away.
+5. **The refusal sentence is new copy, and it is a REFUSAL by 18i's grammar** — the tag door did
+   nothing, so it always shows. It names what DID happen first ("The note was filed —") because
+   the note is already safe and that is the half she needs. The alternatives (silence; a receipt,
+   which `quiet`/`off` would govern) are #127(g).
+6. **`MobileNoteTagsModel.applyTypedPath` was re-pointed at the shared act**, not just at the
+   shared parts. Leaving it composing the walk itself would have left the ORDER of the walk
+   written twice, which is the fork the hoist exists to close; its pins rode unmodified.
+   `MobileTagsModel.createTypedPath` keeps its own body deliberately — it has a different
+   outcome (a fully-existing path refuses as a duplicate), which is a door's rule and not the
+   walk's.
+7. **No canonical doc was edited.** R-13u4-1 adds a capture FACE; AppSpec states no capture
+   grammar for it to contradict (§7's segmentation note is about what a newline does, untouched
+   here). If she wants the microsyntax written into canon, that is a sentence for her, not for me.
+
+### WHAT A FRESH SESSION WOULD NEED TO FINISH THIS
+
+Nothing. Everything is committed and pushed: the two shared brains, the hoist and its four
+consumers, both doors' hand-off, the two test files (30 pins), QUESTIONS #127, the KnownIssues
+discharge, the walk captures (gitignored, listed above), and this record. What is OPEN is hers:
+**#127 (a)–(g)**. What is owed elsewhere: the phone's capture face (the CARRIED block's parity
+row (2), with the two lines it needs named there).
 
 ### THE HAND-OFF — WHAT EACH DOOR DOES NOW (piece 4)
 
