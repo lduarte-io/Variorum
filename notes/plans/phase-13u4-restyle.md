@@ -5330,3 +5330,25 @@ defect IT caught, the 13 cold and 16 warm app trials, the walk's 52 captures (gi
 this record. What is OPEN is hers: **#135**, and **#129** which this unit deliberately left alone.
 What is owed elsewhere: **the orchestrator's five cold Read-mode clicks** (R-13u4-7), which this
 unit did not reach for.
+
+---
+
+## THE PRE-LADDER ACCEPTANCE WALK (the orchestrator's own hands, 2026-09-21 — the C-2/C-3 gate before the ladder)
+
+**LIVE STATUS (flips as each leg lands):**
+| leg | what | status |
+|---|---|---|
+| W1 | THE OWED MEASUREMENT (R-13u4-7/8): five COLD deep-chapter clicks in the book's READ mode — quit · relaunch · open Sherlock · Read word-tab · deep chapter within the first seconds; landing correct = the chapter's top | NOT-STARTED |
+| W2 | F3 confirm on the final tree: two cold INDEX deep clicks | NOT-STARTED |
+| W3 | E1 in hand: chip-ON ⏎-chain ×3, type mid-run, ⌥⌘Z back | NOT-STARTED |
+| W4 | C1 in hand: a `{#tag}` + `{t:"…"}` capture through the shelf bar | NOT-STARTED |
+| W5 | S2 in hand: the masthead stamp cycle · the counter cycle | NOT-STARTED |
+| W6 | F2 in hand: caret at a long note's end · inline comments OFF → the page draws whole, no ⌘↑ | NOT-STARTED |
+| W7 | S1/S3 spot: ⌘, → the tabs + search "callout" + appearance on screen · Help ▸ Restore Tutorial shows the ALERT (cancelled, not pressed) | NOT-STARTED |
+| W8 | E3/C2 spot: a door merge moves no byte of the page · Move Selection into a New Take from a mid-block selection | NOT-STARTED |
+
+Store state at open and close recorded; the dev store only (`io.lduarte.Variorum.debug`, the
+fresh `DerivedData/13u4walk` build of the final tree); her `/Applications` app never touched;
+captures to `notes/plans/13u4-screens/orch-walk/` (gitignored). Each unit's own richer walk
+stands as its evidence — this pass is the orchestrator's verification cross-section plus the
+one measurement OWED to her.
