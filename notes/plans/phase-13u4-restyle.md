@@ -1804,16 +1804,32 @@ your closing commit. The checkpoint protocol binds from the first commit.
 
 ## UNIT F1 RECORD — THE INDEX CHAPTER-CLICK LANDS LOW (item 10)
 
-**WHAT THIS UNIT IS NOT DOING (the record's first line, written at the open and re-stated at the
-close):** it is not adopting Takes' compensator (13u2b left Takes and Index to their next touch;
-this is INDEX's touch, not Takes'), not touching `Sources/VariorumCore/` (no core change is
-expected — if one appears necessary the brief says STOP and report), not touching the book
-Outline or the reading flow (13u2b converted both; their suites must ride unmodified), not
-touching `BlockRangeIndex` / `EditorTextView` / `TypedReturn` / `PaneTextAuthority` / the
-editor's seam roads, and not re-opening any of the roads 13u2b's "WHAT NOT TO DO" closed (no
-lazy-run restructuring, no per-row `.task` reads, no `@State` writes on content reports, no
-`ensureLayout` over full documents, no compensator constant-tuning). No other 13u4 unit's work
-is touched.
+**WHAT THIS UNIT DID NOT DO (the record's first line, written at the open and RE-STATED AT THE
+CLOSE against what actually shipped):**
+
+- **It did not build the heights half, and that is the unit's stop-and-report line.** The trace
+  found a 13u2b-class problem bigger than the adoption the brief prescribed — the Index pane's
+  rows have no honest heights, so a cold column moves under a landing faster than any compensator
+  can aim — and the brief's own rule sends that to the architect. What it is, what it costs and
+  what it would consume are in the KnownIssues row this unit opened and in the CARRIED block below.
+- **It did not adopt Takes' compensator** (13u2b left Takes and Index to their next touch; this is
+  INDEX's touch, not Takes').
+- **It did not change one line of the shared authority's behaviour.** `LandingAuthority.swift` IS
+  in the diff, additively — a `LandingSurface` case and a new `LandingPolicy` — and nothing else in
+  that file moved: the pure decision, the runner, the seed, the signpost and BOTH shipped policies
+  are byte-identical, and the Outline's and the flow's landing suites ride UNMODIFIED and green.
+- **It did not touch `Sources/VariorumCore/` at all** (zero files — so `Sync/`, the schema, the
+  migrations and `Server/` are untouched by construction; the marker stays 8), and no `Shared/`
+  file moved.
+- **It did not touch the editor seam** — `BlockRangeIndex` / `EditorTextView` / `TypedReturn` /
+  `PaneTextAuthority` / `runStructural` and its oracle are all absent from the diff.
+- **It did not re-open any road 13u2b's "WHAT NOT TO DO" closed**: no lazy-run restructuring, no
+  per-row `.task` reads, no `@State` writes on content reports, no `ensureLayout` over full
+  documents, and no tuning of a SHIPPED surface's compensator constants (the numbers this unit
+  chose are its own surface's, each measured before it was written down).
+- **It did not fix row 56**, and did not wave it off either: it adjudicated it by the paired
+  interleaved protocol and left it exactly where it found it.
+- No other 13u4 unit's work was touched.
 
 ### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
 
