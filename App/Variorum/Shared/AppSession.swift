@@ -464,6 +464,14 @@ final class AppSession {
     /// construction.)
     let quitFinalize = QuitFinalizeRegistry()
 
+    /// **17b row 65 (RUN A batch A1) — where a REFUSED capture waits.**
+    /// Session-scoped and in memory, beside `quitFinalize` because it has
+    /// the same shape: one of it, however many pad windows come and go.
+    /// The pad is a singleton `Window`, so closing it tears down its
+    /// `@State` — which is why the words had nowhere to live once a
+    /// refusal reached a road that had no pad left.
+    let quickNotePark = QuickNotePark()
+
     /// Phase 13b Stage 1b (P-1/P-4): the ONE command-routing brain — the
     /// menu bar/palette/bars route surface commands and mode switches
     /// through this; surfaces register handlers by composition. Replaces
@@ -638,4 +646,82 @@ final class QuitFinalizeRegistry {
         }
     }
 }
+/// **THE QUICK-NOTE PARK — a refused capture, and nothing else** (17b row
+/// 65, RUN A batch A1; the orchestrator's ruling, Option 1 + the 1b rider,
+/// both PROVISIONAL — QUESTIONS #137).
+///
+/// The pad's words live in `QuickNotePad.text` and NOWHERE else until a
+/// note holds them. 13u3 UNIT C made a refusal KEEP them, which is right on
+/// the ⏎/⌘⏎ road where the pad stays open — and empty on the two roads that
+/// have no pad left afterwards: CLOSING it (the `@State` pad dies with the
+/// singleton window) and QUITTING (the outcome was discarded outright).
+///
+/// **It holds REFUSED captures only** (binding 1). A close with nothing
+/// refused still FILES, exactly as her round-14.2 grammar says, and an
+/// empty pad still keeps nothing — so this can never quietly widen into a
+/// general draft-keeper. A guard pin asserts that.
+///
+/// **It is MEMORY-ONLY, deliberately** (binding 6's ratify note): her prose
+/// never lands in plaintext beside the encrypted store, and the refusal's
+/// commonest cause — a locked or unreachable store — is exactly the state
+/// in which no key exists to seal a persisted park, so a disk-backed one
+/// would fail precisely when it was needed. The cost is stated rather than
+/// hidden: a crash or a forced second quit still loses the capture, bounded
+/// by one summon, which is the pad's own cost model.
+@MainActor
+@Observable
+final class QuickNotePark {
+    /// What a refusal left behind.
+    struct Held: Equatable {
+        var text: String
+        var titleFromFirstWords: Bool
+        /// The sentence the refusal spoke — re-spoken if a quit is declined
+        /// with no pad on screen to carry it.
+        var message: String
+    }
+
+    private(set) var held: Held?
+    /// The 1b rider's one-shot (binding 4). Spent by a decline; re-armed
+    /// whenever a capture is parked afresh, so a refusal resolved and later
+    /// arising again gets its own single decline.
+    private var declineSpent = false
+    /// Set by the pad's own lifetime, so a declined quit knows whether a
+    /// window is on screen to speak the refusal (binding 4's "leaves the
+    /// pad on screen speaking its refusal line").
+    var isPadShowing = false
+
+    init() {}
+
+    /// A refusal that reached a road with no pad left.
+    func park(text: String, titleFromFirstWords: Bool, message: String) {
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        held = Held(text: text, titleFromFirstWords: titleFromFirstWords, message: message)
+        declineSpent = false
+    }
+
+    /// The next summon takes it — and the park lets go in the same breath
+    /// (binding 2): the pad becomes the only home again, so there is no
+    /// ghost copy and no double restore. A re-refusal re-parks.
+    func restore() -> Held? {
+        defer { clear() }
+        return held
+    }
+
+    /// Filed, or nothing to file: the park holds nothing (binding 2).
+    func clear() {
+        held = nil
+        declineSpent = false
+    }
+
+    /// **The 1b rider.** `true` exactly once while a refused capture
+    /// stands — macOS's unsaved-work grammar, bounded so she can never be
+    /// trapped by a store that will not take it: a second consecutive ⌘Q
+    /// always proceeds.
+    func declineQuitOnce() -> Bool {
+        guard held != nil, !declineSpent else { return false }
+        declineSpent = true
+        return true
+    }
+}
+
 #endif

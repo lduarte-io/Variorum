@@ -77,13 +77,44 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
         let pendingEditor = session?.editorRouter.active?.finalizeWork()
         let registry = session?.quitFinalize
         if pendingEditor == nil, registry?.isEmpty != false {
-            return .terminateNow
+            // 17b row 65's rider: a refusal can stand with the pad CLOSED
+            // (its quit closure went with the window), so this road consults
+            // the park too — otherwise the one case the park exists for
+            // would quit straight past it.
+            return declineQuitIfACaptureStands() ? .terminateCancel : .terminateNow
         }
         Task { @MainActor in
             if let pendingEditor { await pendingEditor.value }
+            // The pad's own quit closure runs in here, and a refusal inside
+            // it is what ARMS the park — so the decision below must come
+            // after `finalizeAll`, never before it.
             if let registry { await registry.finalizeAll() }
-            sender.reply(toApplicationShouldTerminate: true)
+            sender.reply(
+                toApplicationShouldTerminate: !self.declineQuitIfACaptureStands())
         }
         return .terminateLater
+    }
+
+    /// **17b row 65's 1b RIDER — the one-shot quit decline** (the
+    /// orchestrator's ruling, binding 4; PROVISIONAL, QUESTIONS #137).
+    ///
+    /// The park is memory-only by design, so a quit is the one road that
+    /// can still take a refused capture — and macOS already has a grammar
+    /// for "you have unsaved work": decline the termination once and leave
+    /// it on screen. **Bounded so she can never be trapped by a store that
+    /// will not take it: a second consecutive ⌘Q always proceeds**, and a
+    /// refusal that is resolved and later arises again re-arms its own
+    /// single decline (`QuickNotePark.park` clears the spent flag).
+    ///
+    /// When the pad is on screen it is already speaking its refusal line
+    /// (its `finalizeAtQuit` just ran), so nothing is said twice; when it is
+    /// not, the status seam carries the same sentence the close road speaks,
+    /// because a quit that quietly refuses to quit is its own defect.
+    private func declineQuitIfACaptureStands() -> Bool {
+        guard let session, session.quickNotePark.declineQuitOnce() else { return false }
+        if !session.quickNotePark.isPadShowing {
+            session.status.refuse(QuickNoteCopy.parkedOnClose)
+        }
+        return true
     }
 }

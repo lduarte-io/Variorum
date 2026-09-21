@@ -304,7 +304,7 @@ OverallModel §3 and AppSpec §9's structural-undo/REDO paragraphs (auto-loaded 
 | Row | Item | Status |
 |---|---|---|
 | 0 | Record skeleton + `run-a-screens/` gitignored | **DONE** — this commit |
-| 7 | **row 65** — the pad's close/quit-while-refused loss: TRACE + the parking-mechanism PROPOSAL (design fork; the orchestrator rules before any build) | **PROPOSED — awaiting the ruling** (trace + three options + recommendation below; nothing built) |
+| 7 | **row 65** — the pad's close/quit-while-refused loss | **FIXED to the ruling** — Option 1 + the 1b rider, both PROVISIONAL (QUESTIONS #137). Pin `QuickNoteParkTests` (4); revert check follows |
 | 1 | **P4** — the phone's comments sheet clears the draft before the write | **FIXED** — pin `MobileCommentDraftTests` (3), the door driven for real on a mounted sheet in a key window; behavioural revert verified after the commit (the field read `""` against her typed paragraph, nothing landed, and `editingID` went nil) |
 | 2 | **P5** — `promotePicks` copies an ARCHIVED pick as a block's only take | **FIXED** — pin `PromotePicksArchivedPickTests` (3), red-on-old measured on the pre-fix tree (4 issues; the guard arm green) |
 | 3 | **P6** — `restoreNoteVersion`/`deleteContainer` leave the redo future uncleared | **FIXED** — pin `ContentReplacementRedoTests` (5), red-on-old measured (3 defect arms red, 2 guards green); ONE residue pinned as documented behaviour (the undo side) and recorded below |

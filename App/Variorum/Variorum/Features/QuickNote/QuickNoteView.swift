@@ -88,6 +88,13 @@ final class QuickNotePad {
     /// the pad itself and not in a status line one window away.
     private(set) var lastError: String?
 
+    /// **17b row 65 — why this box is not empty** (binding 3). Set when a
+    /// summon takes a capture back out of the park; cleared the moment she
+    /// files again, because by then it is answering a question nobody is
+    /// asking. Its own line rather than `lastError`'s: nothing is being
+    /// refused here, so it must not wear the alarm register.
+    private(set) var restoredNote: String?
+
     /// The endorsed defaulted-seam pattern, adopted from `QuickEntryModel`
     /// for its stated reason (mobile round 2 §20(b)): production never sets
     /// this, and a REFUSAL is otherwise not reachable from a test without
@@ -97,6 +104,17 @@ final class QuickNotePad {
     var mint: ((String, String?) async -> QuickNoteMint.Outcome)?
 
     init(session: AppSession) { self.session = session }
+
+    /// **17b row 65 — THE SUMMON TAKES IT BACK** (bindings 2 and 3). The
+    /// park lets go in the same breath, so this pad is the only home again
+    /// and abandoning it from here is her ordinary abandon; a re-refusal
+    /// re-parks. Idempotent: a second call finds an empty park.
+    func restoreParkedCapture() {
+        guard let held = session.quickNotePark.restore() else { return }
+        text = held.text
+        titleFromFirstWords = held.titleFromFirstWords
+        restoredNote = QuickNoteCopy.restoredCapture
+    }
 
     /// Is there anything to file? The button's grey reads this, so it can
     /// never fire into `emptyImport`.
@@ -149,6 +167,10 @@ final class QuickNotePad {
             text = ""
             titleFromFirstWords = false
             lastError = nil
+            restoredNote = nil
+            // 17b row 65 (binding 2): nothing to file — the park holds
+            // nothing either, so an emptied pad never leaves a ghost.
+            session.quickNotePark.clear()
             return .nothingToFile
         }
         // The name is read from what is being FILED, not from what the pad
@@ -161,6 +183,7 @@ final class QuickNotePad {
                 ? NoteCardFace.suggestedTitle(forTypedText: capture.text)
                 : nil)
         lastError = nil
+        restoredNote = nil
         let outcome = await mintNow(capture.text, title: title)
         switch outcome {
         case .filed(let postID):
@@ -177,9 +200,22 @@ final class QuickNotePad {
                 text = ""
                 titleFromFirstWords = false
             }
+            // 17b row 65 (binding 2): filed — the park holds nothing.
+            session.quickNotePark.clear()
             await session.savepointOnLeaving(postID)
         case .refused(let message):
             lastError = message
+            // **17b row 65 — THE PARK** (binding 1: refused captures ONLY).
+            // On the ⏎/⌘⏎ road this is belt-and-braces: the pad stays open
+            // and IS the home. On `close()` and `finalizeAtQuit()` it is the
+            // whole fix — the words are about to become unreachable, because
+            // this object's last strong reference is the task that called us.
+            // Parked from `submitted`, never from `text`: keystrokes that
+            // landed during the mint are not part of what was refused (the
+            // discipline `submitted` already carries).
+            session.quickNotePark.park(
+                text: submitted, titleFromFirstWords: titleFromFirstWords,
+                message: message)
         case .nothingToFile:
             break
         }
@@ -265,6 +301,17 @@ struct QuickNoteView: View {
                     focusRequest += 1
                 }
             }
+            // 17b row 65 (binding 3): why this box is not empty. Its own
+            // register — nothing is being refused here — and `lineLimit`
+            // beside `fixedSize` for the b6dae25 class (P-8), like its
+            // neighbour below.
+            if let restoredNote = pad.restoredNote {
+                Text(tokens.chromeLabel(restoredNote))
+                    .font(tokens.small)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .foregroundStyle(tokens.accent)
+            }
             if let lastError = pad.lastError {
                 // `lineLimit` is LOAD-BEARING beside `fixedSize` — an
                 // unlimited fixedSize text in non-scrolling chrome inflates
@@ -312,6 +359,11 @@ struct QuickNoteView: View {
             windows.register(windowID, router: router, kind: .quickNote)
             let status = session.status
             router.refuse = { status.refuse($0) }
+            // **17b row 65 — THE SUMMON TAKES BACK A REFUSED CAPTURE**
+            // (bindings 2/3). Before the quit registration, so the pad that
+            // registers is the one holding her words.
+            pad.restoreParkedCapture()
+            session.quickNotePark.isPadShowing = true
             // THE QUIT PATH: a non-empty pad at app quit files itself.
             let pad = self.pad
             quitToken = session.quitFinalize.register { @MainActor in
@@ -321,6 +373,7 @@ struct QuickNoteView: View {
         .onDisappear {
             windows.unregister(windowID)
             if let quitToken { session.quitFinalize.unregister(quitToken) }
+            session.quickNotePark.isPadShowing = false
             // CLOSING FILES IT (her ruling). The window is already going, so
             // this rides the pad rather than this view's lifetime.
             let pad = self.pad
@@ -328,8 +381,13 @@ struct QuickNoteView: View {
             Task { @MainActor in
                 // There is no pad left to draw a refusal on, so this is the
                 // one path that hands it to the status seam (13u3 UNIT C).
-                if case .refused(let message) = await pad.close() {
-                    status.refuse(message)
+                //
+                // **17b row 65:** and the sentence it hands over is the
+                // PARKED one — `refusal(for:)`'s *"Your text is still here"*
+                // was false the moment this window went, and the words are
+                // now somewhere it can honestly name.
+                if case .refused = await pad.close() {
+                    status.refuse(QuickNoteCopy.parkedOnClose)
                 }
             }
         }
@@ -520,4 +578,24 @@ nonisolated enum QuickNoteCopy {
         return "\(refusedPrefix) \(reason) "
             + "Your text is still here — try again in a moment."
     }
+
+    /// **17b row 65, binding 3 — THE CLOSE/QUIT ROAD'S OWN SENTENCE, and it
+    /// is now TRUE.** Those two roads spoke `refusal(for:)` above, whose
+    /// load-bearing half is *"Your text is still here"* — a promise about a
+    /// pad that has just been torn down, said into a status line one window
+    /// away. The words really are kept now (the park), so the sentence says
+    /// where they are instead of where they aren't.
+    ///
+    /// **It deliberately carries no REASON**, unlike its pad twin: she is
+    /// not looking at the pad on this road, and the reason is actionable
+    /// only where the retry is — the next summon brings the words back and
+    /// the next ⏎ speaks the reason on the pad if it still applies. Stated
+    /// rather than slipped in; PROVISIONAL wording (13s owns her voice),
+    /// and the trade rides QUESTIONS #137.
+    static let parkedOnClose =
+        "The quick note wasn't filed. Your words are kept — the next quick note opens with them."
+
+    /// **The restored pad's own line** (17b row 65, binding 3): why this box
+    /// is not empty. PROVISIONAL wording (13s).
+    static let restoredCapture = "the capture that couldn't be filed — ⏎ tries again"
 }
