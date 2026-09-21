@@ -347,6 +347,25 @@ final class AppSession {
     /// the family arriving at the same rule rather than growing a second
     /// copy of it.
     ///
+    /// **THE FAMILY GREW AT 17b P7 (RUN A, batch A1): a BRANCH is a copy.**
+    /// 13e's sweep table was drawn around doors that copy a POST, so the
+    /// doors that copy a TAKE — the boards' ⌘T / ＋ new take / diverge-here
+    /// and the three whole-post "write new takes" doors — were never in it,
+    /// and they ran on the bare runner while Write's identical gesture
+    /// (`EditorViewModel.mintCaretTake`) flushed first. `branchVariant` and
+    /// `branchAllFans` read `working_text` ROWS exactly as `copyPost` does,
+    /// so the same half-second window minted a take without the sentence
+    /// she had just typed — and OverallModel §3 says a branch inherits the
+    /// CURRENT buffer. They now ride this entry.
+    ///
+    /// **Where the line sits, and why it is not "flush before every ops
+    /// call":** a door that READS stored text to mint from it is a member;
+    /// a door that mints EMPTY (`newBlankVariant` — the blank-take family)
+    /// is not, because there is nothing for a stale row to spoil, and its
+    /// pending keystrokes still land on the take she typed them into. That
+    /// negative half is pinned too (`BranchDoorFlushTests`), so the line is
+    /// visible rather than assumed.
+    ///
     /// **It flushes the EXISTING coordinator and never mints one** (13l, the
     /// ladder's R2-1). The line here used to read *"`flushNow()` on a post
     /// that is not open is a no-op with nothing pending, so the entry is safe

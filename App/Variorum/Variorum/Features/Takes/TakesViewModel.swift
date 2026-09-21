@@ -858,7 +858,10 @@ final class TakesViewModel {
         guard columns.count < 4 else { return }
         clearStatus()
         do {
-            let picks: [String: String] = try await session.runner.run { [postID] ops in
+            // 17b P7 — `branchAllFans` mints each block's take from the
+            // SHOWN take's `working_text` row, so the whole-post write
+            // doors carry the same hazard as ⌘T and take the same road.
+            let picks: [String: String] = try await session.runCopying(from: postID) { [postID] ops in
                 try ops.branchAllFans(post: postID)
             }
             guard columns.count < 4 else { return }
@@ -905,7 +908,10 @@ final class TakesViewModel {
         guard columns.contains(where: { $0.id == columnID }) else { return }
         clearStatus()
         do {
-            let picks: [String: String] = try await session.runner.run { [postID] ops in
+            // 17b P7 — `branchAllFans` mints each block's take from the
+            // SHOWN take's `working_text` row, so the whole-post write
+            // doors carry the same hazard as ⌘T and take the same road.
+            let picks: [String: String] = try await session.runCopying(from: postID) { [postID] ops in
                 try ops.branchAllFans(post: postID)
             }
             guard let i = columns.firstIndex(where: { $0.id == columnID }) else { return }
@@ -1039,7 +1045,10 @@ final class TakesViewModel {
         let kind = columns[index].kind
         clearStatus()
         do {
-            let take: Variant = try await session.runner.run { ops in
+            // 17b P7 — the Lenses-side branch mints a copy too (see
+            // `branchTake`): flush the pane's keystrokes before the row is
+            // read.
+            let take: Variant = try await session.runCopying(from: postID) { ops in
                 let take = try ops.branchVariant(blockID, from: fromVariantID)
                 if case .lens(let lensID) = kind {
                     // Named lenses are LIVE-edited: the thread's pick
@@ -1234,7 +1243,10 @@ final class TakesViewModel {
     func writeNewTakesEverywhere() async {
         clearStatus()
         do {
-            let picks: [String: String] = try await session.runner.run { [postID] ops in
+            // 17b P7 — `branchAllFans` mints each block's take from the
+            // SHOWN take's `working_text` row, so the whole-post write
+            // doors carry the same hazard as ⌘T and take the same road.
+            let picks: [String: String] = try await session.runCopying(from: postID) { [postID] ops in
                 try ops.branchAllFans(post: postID)
             }
             // J38's milder sibling, the J37 class: `branchAllFans` returns
@@ -1303,7 +1315,16 @@ final class TakesViewModel {
     func branchTake(blockID: String, from variantID: String) async -> Variant? {
         clearStatus()
         do {
-            return try await session.runner.run { ops in
+            // **17b P7 — FLUSH FIRST.** `branchVariant` copies the source's
+            // `working_text` ROW inside its transaction, and a live pane
+            // holds keystrokes in the autosave debounce for up to 500 ms —
+            // so a ⌘T pressed mid-sentence used to mint a copy of the text
+            // as it stood before it, and the ring then moved onto that
+            // card. OverallModel §3 says branching inherits the CURRENT
+            // buffer, and Write's twin (`EditorViewModel.mintCaretTake`)
+            // has always awaited `flushNow()` first; this is the same
+            // gesture meaning the same thing on the boards.
+            return try await session.runCopying(from: postID) { ops in
                 try ops.branchVariant(blockID, from: variantID)
             }
         } catch {

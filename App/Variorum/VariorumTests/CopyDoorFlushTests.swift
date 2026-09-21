@@ -253,3 +253,212 @@ struct CopyDoorFlushTests {
         }
     }
 }
+
+// MARK: - 17b P7 (RUN A, batch A1) — THE BRANCH DOORS
+
+/// **17b P7 — the boards' branch / ＋ new take / ⌘T doors copied the STORE
+/// past a dirty buffer, while Write's identical gesture flushed first.**
+///
+/// THE MECHANISM (traced, then reproduced by the revert named on each
+/// test): a live take pane is buffer-authoritative — `paneEdited` writes to
+/// the authority and `AutosaveCoordinator.record`, whose debounce is 500 ms
+/// — so the `variant` row lags the screen for up to half a second. ⌘T
+/// routes to `branchTakeRevealed` → `branchTake` → a bare
+/// `session.runner.run { ops.branchVariant(...) }`, and `branchVariant`
+/// copies the SOURCE ROW's `working_text` inside the transaction. So the
+/// minted take was a copy of the text as it stood before the last
+/// sentence, the ring then moved onto that card, and the two takes
+/// diverged permanently on words she never chose to drop.
+///
+/// This contradicts OverallModel §3 — *"Branching a variant INHERITS the
+/// current buffer's text"* — and the app's own flush-first doctrine:
+/// `EditorViewModel.mintCaretTake` awaits `autosave.flushNow()` before the
+/// same operation, and the phone's `branchDisplayed` was given the same
+/// flush at the mobile Stage-2 ladder for this exact mechanism. One
+/// gesture meant two different things depending on which surface issued it.
+///
+/// The fix is the copy family's ONE entry (`AppSession.runCopying`), which
+/// already exists for exactly this hazard — a branch mints a copy, so it
+/// belongs to the family the 13e E10 sweep drew the line around.
+@Suite("17b P7 — the branch doors flush first", .serialized)
+@MainActor
+struct BranchDoorFlushTests {
+    /// The fan's takes, oldest first.
+    private func fanTexts(_ db: AppDatabase, blockID: String) async throws -> [String] {
+        try await db.read { database in
+            try String.fetchAll(
+                database,
+                sql: """
+                    SELECT working_text FROM variant
+                     WHERE block_id = ? AND deleted_at IS NULL
+                     ORDER BY fan_position, id
+                    """,
+                arguments: [blockID])
+        }
+    }
+
+    private func blockID(_ db: AppDatabase, postID: String) async throws -> String {
+        try await db.read { try Queries.renderPost($0, containerID: postID).first?.blockID ?? "" }
+    }
+
+    /// **RED ON OLD** (restore `try await session.runner.run { ops in try
+    /// ops.branchVariant(...) }` in `TakesViewModel.branchTake`): the
+    /// minted take read `"Alpha beta."` while the pane showed
+    /// `"Alpha beta. NEW"`.
+    @Test func newTakeBranchCarriesThePendingKeystrokes() async throws {
+        try await withCopyWorld { session, db in
+            let post = try dirtyPost(session)
+            let blockID = try await self.blockID(db, postID: post.postID)
+            let model = TakesViewModel(
+                session: session, postID: post.postID,
+                defaults: UserDefaults(suiteName: "BranchDoorFlushTests.\(UUID().uuidString)")!)
+
+            let minted = try #require(await model.branchTake(
+                blockID: blockID, from: post.variantID))
+
+            let texts = try await self.fanTexts(db, blockID: blockID)
+            #expect(texts.contains("Alpha beta. NEW"),
+                    "the branch inherits the CURRENT buffer (OverallModel §3)")
+            let mintedText = try await db.read { database in
+                try String.fetchOne(
+                    database, sql: "SELECT working_text FROM variant WHERE id = ?",
+                    arguments: [minted.id])
+            }
+            #expect(mintedText == "Alpha beta. NEW", "and it is the MINT that carries it")
+            #expect(model.statusMessage == nil, "no refusal spoken")
+        }
+    }
+
+    /// ⌘T's real route on the Takes board — the door the keyboard presses.
+    @Test func theRoutedCommandTakesTheSameRoad() async throws {
+        try await withCopyWorld { session, db in
+            let post = try dirtyPost(session)
+            let blockID = try await self.blockID(db, postID: post.postID)
+            let model = TakesViewModel(
+                session: session, postID: post.postID,
+                defaults: UserDefaults(suiteName: "BranchDoorFlushTests.\(UUID().uuidString)")!)
+            model.host = .takes
+
+            let minted = try #require(await model.branchTakeRevealed(
+                blockID: blockID, from: post.variantID))
+
+            let mintedText = try await db.read { database in
+                try String.fetchOne(
+                    database, sql: "SELECT working_text FROM variant WHERE id = ?",
+                    arguments: [minted.id])
+            }
+            #expect(mintedText == "Alpha beta. NEW")
+        }
+    }
+
+    /// The LENSES board's "diverge here" core — the same mint into a
+    /// column's pick. **RED ON OLD** (the bare runner in
+    /// `branchIntoColumn`).
+    @Test func theLensesColumnBranchCarriesThePendingKeystrokes() async throws {
+        try await withCopyWorld { session, db in
+            let post = try dirtyPost(session)
+            let blockID = try await self.blockID(db, postID: post.postID)
+            let model = TakesViewModel(
+                session: session, postID: post.postID,
+                defaults: UserDefaults(suiteName: "BranchDoorFlushTests.\(UUID().uuidString)")!)
+            model.host = .lenses
+            model.addScratchColumn()
+            let columnID = try #require(model.columns.last?.id)
+
+            let minted = try #require(await model.branchTakeRevealed(
+                blockID: blockID, from: post.variantID, preferredColumnID: columnID))
+
+            let mintedText = try await db.read { database in
+                try String.fetchOne(
+                    database, sql: "SELECT working_text FROM variant WHERE id = ?",
+                    arguments: [minted.id])
+            }
+            #expect(mintedText == "Alpha beta. NEW")
+        }
+    }
+
+    /// "+ Column → write new takes" and its two siblings all ride
+    /// `branchAllFans`, which mints a per-block branch from the SHOWN
+    /// take's `working_text`. **RED ON OLD** (the bare runner in
+    /// `addWriteColumn`).
+    @Test func writingNewTakesOnEveryBlockCarriesThePendingKeystrokes() async throws {
+        try await withCopyWorld { session, db in
+            let post = try dirtyPost(session)
+            let blockID = try await self.blockID(db, postID: post.postID)
+            let model = TakesViewModel(
+                session: session, postID: post.postID,
+                defaults: UserDefaults(suiteName: "BranchDoorFlushTests.\(UUID().uuidString)")!)
+
+            await model.addWriteColumn()
+
+            let texts = try await self.fanTexts(db, blockID: blockID)
+            #expect(texts.contains("Alpha beta. NEW"),
+                    "the whole-post write door inherits the buffer too")
+        }
+    }
+
+    @Test func theTakesTabsWriteNewTakesEverywhereDoorCarriesThemToo() async throws {
+        try await withCopyWorld { session, db in
+            let post = try dirtyPost(session)
+            let blockID = try await self.blockID(db, postID: post.postID)
+            let model = TakesViewModel(
+                session: session, postID: post.postID,
+                defaults: UserDefaults(suiteName: "BranchDoorFlushTests.\(UUID().uuidString)")!)
+
+            await model.writeNewTakesEverywhere()
+
+            let texts = try await self.fanTexts(db, blockID: blockID)
+            #expect(texts.contains("Alpha beta. NEW"))
+        }
+    }
+
+    @Test func replacingAColumnWithANewWriteCarriesThemToo() async throws {
+        try await withCopyWorld { session, db in
+            let post = try dirtyPost(session)
+            let blockID = try await self.blockID(db, postID: post.postID)
+            let model = TakesViewModel(
+                session: session, postID: post.postID,
+                defaults: UserDefaults(suiteName: "BranchDoorFlushTests.\(UUID().uuidString)")!)
+            let columnID = try #require(model.columns.first?.id)
+
+            await model.replaceColumnWithNewWrite(columnID)
+
+            let texts = try await self.fanTexts(db, blockID: blockID)
+            #expect(texts.contains("Alpha beta. NEW"))
+        }
+    }
+
+    /// **THE SWEEP'S NEGATIVE HALF, pinned so the line is visible:** a
+    /// BLANK take reads no stored text at all (`newBlankVariant` mints
+    /// `''`), so it is not in this class and deliberately keeps the bare
+    /// runner — flushing before every board door would make every gesture
+    /// pay for a hazard only the copying ones carry (`runCopying`'s own
+    /// stated reason). The pending keystrokes still reach their OWN take,
+    /// which is what matters: nothing is lost either way.
+    @Test func aBlankTakeMintsEmptyAndLeavesThePendingTextOnItsOwnTake() async throws {
+        try await withCopyWorld { session, db in
+            let post = try dirtyPost(session)
+            let blockID = try await self.blockID(db, postID: post.postID)
+            let model = TakesViewModel(
+                session: session, postID: post.postID,
+                defaults: UserDefaults(suiteName: "BranchDoorFlushTests.\(UUID().uuidString)")!)
+
+            let minted = try #require(await model.newBlankTake(blockID: blockID))
+
+            let mintedText = try await db.read { database in
+                try String.fetchOne(
+                    database, sql: "SELECT working_text FROM variant WHERE id = ?",
+                    arguments: [minted.id])
+            }
+            #expect(mintedText == "", "a blank take is blank — it copies nothing")
+
+            await session.autosave(forPost: post.postID).flushNow()
+            let sourceText = try await db.read { database in
+                try String.fetchOne(
+                    database, sql: "SELECT working_text FROM variant WHERE id = ?",
+                    arguments: [post.variantID])
+            }
+            #expect(sourceText == "Alpha beta. NEW", "her keystrokes landed where she typed them")
+        }
+    }
+}

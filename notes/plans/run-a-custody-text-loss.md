@@ -302,7 +302,7 @@ OverallModel §3 and AppSpec §9's structural-undo/REDO paragraphs (auto-loaded 
 | 1 | **P4** — the phone's comments sheet clears the draft before the write | NOT-STARTED |
 | 2 | **P5** — `promotePicks` copies an ARCHIVED pick as a block's only take | **FIXED** — pin `PromotePicksArchivedPickTests` (3), red-on-old measured on the pre-fix tree (4 issues; the guard arm green) |
 | 3 | **P6** — `restoreNoteVersion`/`deleteContainer` leave the redo future uncleared | **FIXED** — pin `ContentReplacementRedoTests` (5), red-on-old measured (3 defect arms red, 2 guards green); ONE residue pinned as documented behaviour (the undo side) and recorded below |
-| 4 | **P7** — the boards' branch/＋new take/⌘T doors copy the STORE past a dirty buffer | NOT-STARTED |
+| 4 | **P7** — the boards' branch/＋new take/⌘T doors copy the STORE past a dirty buffer | **FIXED** — pin `BranchDoorFlushTests` (7), red-on-old measured on the pre-fix tree (6 defect arms red with the stale row in hand, the blank-take guard green); ONE arm's revert re-verified after the commit (below) |
 | 5 | **P14** — the phone quick note's `try?` folds a read failure into "nothing to save yet" | NOT-STARTED |
 | 6 | **P36** — `applyPendingIfClean` discards the deferred projection on a thrown re-read | NOT-STARTED |
 | — | Closing evidence: targeted suites green · `TutorialWalkTests` · mobile suites + `generic/platform=iOS` build · the WalkKit walk (pad road + board-branch road) → `notes/plans/run-a-screens/a1/` | NOT-STARTED |
@@ -337,6 +337,34 @@ pressing `deleteContainer` between an undo and a redo — the exact behaviour th
 (one of them asserted it in words: *"an unregistered op leaves the redo future alone"*). Each keeps its
 own subject and moves its vehicle to a tombstone arriving BELOW the operations layer — a sync apply's
 shape, which registers nothing and clears nothing, and is the road that can still produce the state.
+
+### ROW 4 (17b P7) — THE SWEEP TABLE (the constitution's closing form)
+
+Every door in the tree that mints from STORED take text, verdicted. The rule the table applies: a
+door that READS stored text to mint from it is a member of the copy family and rides
+`AppSession.runCopying`; a door that mints EMPTY is not, because no stale row can spoil it and her
+pending keystrokes still land on the take she typed them into.
+
+| Door | Site | Reads stored text? | Verdict |
+|---|---|---|---|
+| `branchTake` (＋ new take, ⌘T, the block ▾ menu, the card menu, `WriteTakesPanel`'s growth door) | `TakesViewModel:1327` | yes — `branchVariant` copies the row | **FIXED** (`runCopying`) |
+| `branchTakeRevealed` → takes arm | `TakesViewModel:2390` | via `branchTake` | **FIXED** (by the above) |
+| `branchIntoColumn` (Lenses' diverge-here) | `TakesViewModel:1051` | yes | **FIXED** |
+| `addWriteColumn` (+ Column → write new takes) | `TakesViewModel:864` | yes — `branchAllFans` mints from the shown take's row | **FIXED** |
+| `replaceColumnWithNewWrite` | `TakesViewModel:914` | yes | **FIXED** |
+| `writeNewTakesEverywhere` (the Takes tab's door) | `TakesViewModel:1249` | yes | **FIXED** |
+| `newBlankTake` / `blankIntoColumn` / `newBlankTakeRevealed` | `TakesViewModel:1343`, `:1080` | **no** — `newBlankVariant` mints `''` | SAFE, and pinned as such (`aBlankTakeMintsEmptyAndLeavesThePendingTextOnItsOwnTake`) |
+| `newBlankTakeAsChosen` (⇧⌥⌘T) | `TakesViewModel:2239` | no — blank; `chooseVariant` moves a pointer, and a pending flush still lands on the take she typed in | SAFE |
+| `EditorViewModel.mintCaretTake` (Write's ⌘T twin) | `EditorViewModel:3337` | yes — and it has ALWAYS awaited `flushNow()` first | SAFE (the pattern the fix adopts) |
+| `duplicateAsVersion` · `promoteLens` · `promotePicks` · `poolDragCopy` · `divergePostForReading` | various | yes | SAFE — already the 13e E10 family |
+| `saveNoteVersion` / `restoreNoteVersion` (⌘⇧S and the Versions door) | `VersionActs` | yes — a full family copy | SAFE — the composition flushes (*"a moment missing the keystroke that summoned it is not the moment she asked for"*) |
+| `MobileTakesBrowser.branchDisplayed` (the phone) | `MobileTakesBrowser:367` | yes | SAFE — flushed at the mobile Stage-2 ladder, for this exact mechanism |
+| `MobileTakesBrowser` blank door | `:389` | no | SAFE |
+| `TutorialSeeder` / `MobileTutorialSeeder` / `MobilePerfFixtureSeeder` | various | yes, but from rows they just wrote | SAFE — no surface, no buffer |
+
+The family's ONE entry (`AppSession.runCopying`) carries the widened rule in its doc, including where
+the line sits and why it is not "flush before every ops call" (that reason was already written there;
+what is new is that a BRANCH is a copy).
 
 ### ROW 7 (KnownIssues 65) — THE TRACE, AND THE PARKING MECHANISM PROPOSED (the design fork; NOT built)
 
