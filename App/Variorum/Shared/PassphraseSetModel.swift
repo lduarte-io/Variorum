@@ -121,6 +121,48 @@ struct VaultTie {
     }
 }
 
+// MARK: - RUN A batch A3 (17m): ONE passphrase check for the key acts
+
+/// **The passphrase, verified where the design says** (§5's authorization
+/// column): against the VAULT's current copy when an account constrains this
+/// library — so a word retired elsewhere is refused here even if it still
+/// opened the lobby (§3.6) — else against this library's own key file.
+///
+/// Hoisted from `PostureSwitchModel.verifyPassphrase` VERBATIM when 17m's
+/// re-link door needed the same rule: the row-12 lesson (one switch, four
+/// copies, differing in one arm) says a second key act must not carry a second
+/// copy of this. The ceremony delegates to it and words the outcome into its
+/// own `lastError` exactly as before — same arms, same sentences, same order.
+@MainActor
+enum KeyActPassphrase {
+    enum Outcome: Equatable {
+        case verified
+        case refused(String)
+    }
+
+    /// `nil` from the store's own check means NO WRAP EXISTS to check
+    /// against — the ceremony's shipped arm ("the passphrase is being set")
+    /// and the one place this answers `verified` without checking anything.
+    static func verify(
+        _ typed: String, against vaultTie: VaultTie?, orStore controller: ProtectionController
+    ) async -> Outcome {
+        if let vaultTie {
+            switch await vaultTie.verifyPassphrase(typed) {
+            case .match: return .verified
+            case .mismatch: return .refused(ProtectionCopy.passphraseNotTheLibrarys)
+            case .couldNotCheck(let reason):
+                return .refused("Couldn't verify against your account (\(reason)).")
+            }
+        }
+        switch await controller.verifyPassphraseAgainstStore(typed) {
+        case true?: return .verified
+        case false?:
+            return .refused(ProtectionCopy.message(for: StoreKeyEnvelopeError.wrongPassphrase))
+        case nil: return .verified
+        }
+    }
+}
+
 // MARK: - The set-sheet's model (knot 4: one moment, two artifacts)
 
 @MainActor

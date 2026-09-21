@@ -385,20 +385,16 @@ final class PostureSwitchModel: Identifiable {
     /// The passphrase, verified where the design says: the VAULT's current
     /// copy when enrolled (a retired word is refused there — §3.6), else
     /// this library's key file.
+    ///
+    /// RUN A batch A3 (17m): the rule itself now lives in `KeyActPassphrase`
+    /// — hoisted VERBATIM so the re-link door checks the passphrase the same
+    /// way rather than carrying a second copy of it (row 12's lesson). This
+    /// model still words the outcome into its own `lastError`, so every
+    /// caller and every pin sees exactly what it always did.
     private func verifyPassphrase(_ typed: String) async -> Bool {
-        if let vaultTie {
-            switch await vaultTie.verifyPassphrase(typed) {
-            case .match: return true
-            case .mismatch: lastError = ProtectionCopy.passphraseNotTheLibrarys; return false
-            case .couldNotCheck(let reason):
-                lastError = "Couldn't verify against your account (\(reason))."
-                return false
-            }
-        }
-        switch await controller.verifyPassphraseAgainstStore(typed) {
-        case true?: return true
-        case false?: lastError = ProtectionCopy.message(for: StoreKeyEnvelopeError.wrongPassphrase); return false
-        case nil: return true  // no wrap to check against — the passphrase is being set
+        switch await KeyActPassphrase.verify(typed, against: vaultTie, orStore: controller) {
+        case .verified: return true
+        case .refused(let message): lastError = message; return false
         }
     }
 

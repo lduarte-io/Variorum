@@ -512,6 +512,90 @@ nonisolated extension ProtectionCopy {
     static let rotationRowsStillSettling =
         "The server is still settling a few rows written just before the switch. Nothing is lost — "
         + "sync stays paused; finish from Settings ▸ Protection in a moment, and it picks up exactly where it stopped."
+
+    // MARK: - RUN A batch A3 (17m) — THE RE-LINK YOUR APPLE ACCOUNT DOOR
+    //
+    // Her ruling on QUESTIONS #90's item 10 (2026-09-07 ~02:05): *"I think we
+    // do need a re-link your apple account door."* What it closes is MINOR-N1:
+    // the heal fires only on a key READ (F3's option A — a mint proves
+    // nothing), so after an iCloud Keychain RESET, or the establishing device
+    // signing into another Apple ID, the account's Apple-held copy is ORPHANED
+    // under a key nobody reads any more and new Apple devices lose Standard's
+    // nothing-typed enroll. Standard only: in Castle no copy is owed.
+    //
+    // THE REGISTER (the copy file's head): Settings is an EVERYDAY surface, so
+    // these sentences name no key by its technical name — *your Apple account ·
+    // your account's key · your passphrase · your twelve words · sync*. The
+    // Encryption book's Chapter 2 is where "the iCloud key" and "the master
+    // key" are named, and it carries this door's sentence there.
+    //
+    // Every sentence here is PROVISIONAL; 13s re-voices (QUESTIONS #139).
+
+    static let relinkSectionTitle = "Your Apple account"
+    static let relinkDoor = "Re-link Your Apple Account…"
+    static let relinkExplainer =
+        "In Standard your Apple account holds a key, and that is what lets your other "
+        + "Apple devices join your sync with nothing typed. If you reset iCloud Keychain, "
+        + "or the Apple account that set sync up isn't the one on this \(deviceName) any "
+        + "more, the key on file stops matching: your writing is safe and sync keeps "
+        + "running, but a new device has to enter your passphrase or twelve words. "
+        + "Re-linking puts the key your Apple account holds NOW on file instead."
+    static let relinkTitle = "Re-link your Apple account"
+    /// THE CONSENT SENTENCE — it names WHICH Apple account will hold the key.
+    /// The client stores no iCloud-account identity (the MAJOR-3 REFINED
+    /// paragraph: no identity is kept, and the ubiquity token needs an
+    /// entitlement the app does not carry), so the only honest naming is *the
+    /// Apple account signed into this device* plus the key it hands back —
+    /// which is exactly what tells a different-Apple-ID device's door apart
+    /// from the account on file.
+    static func relinkConsent(appleKeyID: String) -> String {
+        "From now on your account's key is held by the Apple account signed into this "
+        + "\(deviceName) (the key it holds: \(shortAppleKeyID(appleKeyID))). Every device "
+        + "signed into that same Apple account then joins your sync with nothing typed — "
+        + "and so could anyone with full access to it. Nothing you have written changes, "
+        + "and your passphrase and twelve words keep working exactly as they do now."
+    }
+    /// The second line when the account currently has a DIFFERENT key on file
+    /// — what stops working the moment this lands (decision 30's honesty).
+    static func relinkReplaces(recordedKeyID: String) -> String {
+        "The key on file now (\(shortAppleKeyID(recordedKeyID))) stops opening your "
+        + "account: a device that was joining through it asks for your passphrase or "
+        + "twelve words instead. Copies and backups you already have are untouched."
+    }
+    /// The same door pressed when the key on file is already this Apple
+    /// account's — it still acts (the write is the same key, re-landed), and
+    /// says so rather than pretending something changed.
+    static let relinkAlreadyThisAccount =
+        "The key on file is already the one this \(deviceName)'s Apple account holds. "
+        + "Re-linking writes that same key again and changes nothing."
+    static let relinkAuthorizeLine = "Type your encryption passphrase to confirm."
+    static let relinkConfirmDoor = "Re-link"
+    /// The refusal when iCloud Keychain hands this \(deviceName) NO key at
+    /// all: there is nothing to re-link to. **NIT-N8's WAITING vocabulary,
+    /// reused whole rather than a sibling sentence** — and its second half is
+    /// true here in its own right: while the account's key is orphaned, the
+    /// passphrase and the twelve words ARE how a device joins. Refused AT THE
+    /// DOOR, before any screen (MINOR-N4 (1)'s pattern).
+    static let relinkAppleKeyUnreadable = waitingTitle + " " + waitingBody
+    /// The key read at the act is not the key the consent named — consent was
+    /// given for an account, so another key is not consented to.
+    static let relinkAppleKeyChanged =
+        "The key your Apple account holds changed while this was open, so nothing was "
+        + "written. Open this door again to see what it holds now."
+    /// The vault write did not land (offline; the keys not in hand here; the
+    /// server refusing while a key replacement is still finishing). The road
+    /// answers landed-or-not, so the sentence names what is true either way.
+    static let relinkWriteRefused =
+        "Your account's key couldn't be updated just now, and nothing was changed. This "
+        + "needs to be online with your keys on this \(deviceName) — try again in a moment."
+    static let relinkDone =
+        "The Apple account signed into this \(deviceName) now holds your account's key. "
+        + "Devices signed into it join your sync with nothing typed; your passphrase and "
+        + "your twelve words are unchanged."
+    /// A key id, shortened for a sentence (the log convention's eight).
+    static func shortAppleKeyID(_ id: String) -> String {
+        id.count > 8 ? String(id.prefix(8)) + "…" : id
+    }
 }
 
 // MARK: - pre-13x 2c — THE FOLLOW'S NOTICES (copy §5, verbatim; the device

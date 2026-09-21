@@ -1298,7 +1298,7 @@ Apple arm, the heal's wire, `openSwitch`/`ceremony(for:)`), `PostureSwitch` (`ch
 | # | Piece | Status |
 |---|---|---|
 | 0 | Record skeleton + `run-a-screens/a3/` | **DONE** |
-| 1 | The copy constants + the door's brain (`AppleRelinkModel`, shared) + the one passphrase-verification brain | **NOT-STARTED** — the settled design is below |
+| 1 | The copy constants + the door's brain (`AppleRelinkModel`, shared) + the one passphrase-verification brain | **DONE** — `App/Variorum/Shared/AppleRelinkModel.swift` (new, in `Shared/` so the phone can compose it), the copy block in `PostureCopy.swift`, and `KeyActPassphrase` hoisted VERBATIM out of `PostureSwitchModel.verifyPassphrase` (row 12's lesson: a second key act must not carry a second copy of the rule). Mac build green; pins are piece 3 |
 | 2 | The Mac face: Settings ▸ Protection's Apple-account section + its sheet | **NOT-STARTED** |
 | 3 | The pins (the door's state-transition suite: (i) the orphaned state → a new device enrolls with nothing typed · (ii) the consent names THIS device's account · (iii) the refusal arm writes nothing) | **NOT-STARTED** |
 | 4 | The book's Chapter 2 + the FAQ brief's entry (content; the re-seed consequence recorded) | **NOT-STARTED** |
