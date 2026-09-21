@@ -1824,7 +1824,7 @@ is touched.
 | 3 | THE MECHANISM, TRACED (inputs → wrong scroll target → the landing below) — the `LandingAuthority` hypothesis TESTED, never assumed | DONE (this commit) — the two measured experiments below |
 | 4 | The red-on-old pin (behavioural-revert verified) + the fix | **THE FIX IS IN** (this commit) — the Index adopts `LandingAuthority`; pins red 3/3 pre-fix · the pin's first shape was HOLLOW and is recorded as such · the paired behavioural-revert measurement is piece 4b |
 | 4b | The BEHAVIOURAL REVERT — is the improvement the AUTHORITY's, or the probe's? (a worktree at the probe-only commit, the same trials + the same pins) | DONE (this commit) — **the authority's**: 3 of 4 trials miss and both pins are RED on the reverted tree |
-| 5 | Row 56's PAIRED INTERLEAVED adjudication (`theReadClickLandsInIndexAtThatBlock`, both trees) | NOT-STARTED |
+| 5 | Row 56's PAIRED INTERLEAVED adjudication (`theReadClickLandsInIndexAtThatBlock`, both trees) | DONE (this commit) — **6 runs, 3 rounds, alternating: RED on BOTH trees, byte-identical, every round** |
 | 6 | The WALK — chapter clicks at several depths, before/after, captured | NOT-STARTED |
 | 7 | Closing suites + the ledger's F1 row | NOT-STARTED |
 
@@ -2100,3 +2100,29 @@ runs — the cold-column residual named above — and both trees fail, which is 
 anything. At 40 the column settles inside the landing's own hold, which is the state the app is in
 whenever she has been reading a book for a few seconds, and the two trees separate cleanly. The
 100-block measurements are kept in this record because they are how the residual was found.)*
+
+### ROW 56, ADJUDICATED BY THE PAIRED INTERLEAVED PROTOCOL (piece 5) — not waved off
+
+`BookIndexEditingTests.theReadClickLandsInIndexAtThatBlock` is `KnownIssuesAndTechDebt` row 56's
+load-flaky test, and the phase's baselines say to treat a red there as that condition **unless the
+diff touches the book Index. THIS ONE DOES** — so the brief makes the paired protocol mandatory,
+and it was run before any claim was made about it, in either direction.
+
+**How:** a worktree at this unit's OPENING COMMIT (`79509c57` — the brief's own commit, zero of
+this unit's code) beside this tree, each built into its own DerivedData, the suite run ALTERNATING
+base → mine → base → mine → base → mine, nothing else running.
+
+| round | the opening commit | this tree |
+|---|---|---|
+| 1 | **RED** — `(live.count → 0) == 1`, the pane identifier nil | **RED** — byte-identical |
+| 2 | **RED** — same | **RED** — same |
+| 3 | **RED** — same | **RED** — same |
+
+Six runs, 7 tests each; the OTHER SIX tests of the suite passed in every run on both trees. The
+failure signature is byte-identical to the one row 56 records (*"every failure exhausts the budget
+with ZERO editable panes"*), and it is identical on a tree that contains not one line of this
+unit's work. **VERDICT: row 56's recorded condition, unchanged by this diff — neither caused by it
+nor fixed by it.** (Row 56's own warm-DerivedData covariate is consistent with these runs: all six
+ran against warm DerivedData, where the row says it fails. The fresh-DerivedData first-run arm was
+NOT re-run here — it is row 56's own experiment, measured at 13u3 UNIT G on two trees, and
+re-running it costs a full clean build per tree without changing this adjudication.)
