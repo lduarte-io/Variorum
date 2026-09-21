@@ -4233,6 +4233,7 @@ Nothing. Everything is committed and pushed: the 34-site sweep and its class-clo
 ring's gutter yield with its behavioural-revert red, the shell's confirm channel and the
 tutorial's two doors, the seal-gated rename door and its watch, the voiced tag sheet with its
 per-surface noun, the swept lesson and its H-pattern pin, the Trash's calm cards, the shell
-door's ownership, 25 new pins in six files, QUESTIONS #133, the walk captures (gitignored, 19
-crops) and this record. What is OPEN is hers: **#133**. What is owed elsewhere: the **eight-row
+door's ownership, **27 new pins — 26 in six new files (1 · 8 · 4 · 5 · 4 · 4) plus the lesson's
+own in `TutorialWalkTests`** — QUESTIONS #133, the walk captures (gitignored, 19 crops) and this
+record. What is OPEN is hers: **#133**. What is owed elsewhere: the **eight-row
 conformance remainder list**, which this unit deliberately did not start.
