@@ -144,7 +144,7 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 | F1 | Index chapter-click lands low (item 10) | trace first — the un-adopted `LandingAuthority` is the recorded hypothesis | red-on-old if confirmed + walk | **DONE — THE DEFECT IS REAL, THE HYPOTHESIS CONFIRMED BY MEASUREMENT, THE ADOPTION SHIPPED, AND ONE RESIDUAL STOP-AND-REPORTED.** Reproduced first: **11 misses in 20 chapter clicks** on Sherlock and the field guide (five landing in a DIFFERENT story, one on a blank page, none self-correcting in 6 s); the trace found the book Index had never adopted `Surface/LandingAuthority` (13u2b's own *"at their next touch"*) and a six-aim hand experiment proved a watched landing converges. Shipped: the adoption, with a `LandingPolicy.bookIndex` whose every number was measured (two earlier policies retired by measurement — 12 blind hops FLING the page 45k → 95k). Red-on-old **behavioural-revert verified** in a worktree: the reverted tree misses 3 of 4 gestures and both pins are red (8667 pt · 4077 pt · the block never reported) where this tree lands them at 0.04 and 0.24. Walked in both voices AND both appearances: a chapter click lands the heading at the top and HOLDS it (captured at 1.5 s and 6 s). **Row 56 adjudicated by the paired interleaved protocol** (6 runs, RED on both trees, byte-identical) and the row-49 Outline arm too (green on both, isolated and under load). **THE RESIDUAL, reported rather than smoothed over:** a COLD column still climbing can defeat any compensator (its height oscillates 39k → 143k → 80k pt in six seconds; 2 of 5 cold first deep clicks stall, `end=gaveup` in the signpost) — the remedy is 13u2b UNIT 1's manifest half on this surface, which this brief's stop rule makes the architect's. KnownIssues row opened; QUESTIONS **#129**. Record below |
 | S1 | The Settings shape (items 4/5/6/7 + row 59 + the 2a Settings fork) | tabs · search · fold fix · card grammar · ⌘[/unindent audit · merge-shortcut face; then walk row 53's two re-font occasions once reachable | walk both voices + appearances, captured | **DONE** — Settings is NINE panes beside a search field (her item 6, read together with 4 and 5 as ONE ask: what she looks for in Settings is *what the app can do*). **Item 4**: one pure brain over the catalog PLUS the ⌘/ helper's own two lists read-not-copied, so her literal case works — "callout" answers with the word *and* ⌥⌘C. **Item 7 answered at the CLASS**: three menus rendered the four plain structural rows from hard-coded literals beside chorded ceremony rows, teaching that only the ⌥ variant had a key; all six now come from the registry through the ONE formatter, red-on-old measured in a worktree (**5 of 7 pins red, 2 guards green**, and the revert's own dump IS the defect printed). **Item 5**: an audit first — ⌘[ *was* Back, and 13f W16's stated reason (*"the platform's own back/forward idiom"*) measured TRUE of Finder/Safari and FALSE of Apple Notes, Pages, Xcode and VS Code; so ⌘[ outdents and back/forward moved to ⌥⌘[ / ⌥⌘], which is Apple Notes' own resolution of the same collision — PROVISIONAL, **#130**, swept, and said truthfully by the registry, both menu rows, the ⌘/ helper and the tooltips (which now READ the declared chord instead of typing one). **KnownIssues row 59 CLOSED** — and it took TWO moves, the second found by the walk: the nine-pane split alone left the fold alive, because the palette row still stood between the voice and Light & dark. **Row 53 REPRODUCES on BOTH occasions and is REPORTED, not built** (the brief's rule): a re-font that SHRINKS the document strands the surface, one that GROWS it does not; the store is untouched and ⌘↑ heals it. **The walk caught a word no pin could**: typing "unindent" — her own word — found nothing, because every pin typed the app's word "outdent". Mac **357/47**; core and iOS not owed. PROVISIONALs: **#130**, **#131** (a)–(f). Record below |
 | S2 | Library & masthead faces (item 1 + rows 50/51/54) | click-to-cycle stamp + word-counter condense (word-target offer preserved) · `FlippingStamp` hoist + oracle edges · F-0 residue · Timeline voice | walk, captured | **DONE** — **her item 1 is a CLICK on both faces and a Settings toggle on neither**: the masthead cycles edited → created → *a little clock icon* and the bottom bar's counter full → only the note → only this block → *just an icon*, each remembered as ONE local choice, so **a note she has never opened arrives wearing it** (walked). **Her keep survives where it mattered most:** her click took the gesture the word-target setter had, so the setter is on the counter's context menu in EVERY face — the walk opened it from the bare icon and set 500w, which then rides the condensed faces. **Rows 50 and 54 CLOSED, row 51 narrowed to its midnight-rollover note alone**: the two mechanical extractions landed with **zero test edits** (81/14), the `FlippingStamp` hoist likewise (34/5), and both DEBUG-oracle edges were fixed as ONE defect — the two-window one **measured RED first**. Row 54 turned out to be two defects: the system sans AND a raw stored stamp column, the 18h ladder's R3-2 met a third time. Mac **328/47** incl. the spine's eleven types; core and iOS NOT owed (zero `Sources/`, zero `Shared/`), the marker stays 8. PROVISIONALs: **QUESTIONS #132** (a)–(h). Record below |
-| S3 | Chrome singles + the conformance sweep (rows 44/45/46/63/67/68/69 + the Trash fork) | 27-site sweep + grep pin · tag sheet voiced · indicator ring · Restore Tutorial confirm · "pools" lesson sweep (re-seed consequence recorded) · seal-blind rename field · `blockNamingDoor` hygiene · Trash cards · closing conformance walk against the reference artifact | walk, captured | NOT-STARTED |
+| S3 | Chrome singles + the conformance sweep (rows 44/45/46/63/67/68/69 + the Trash fork) | 27-site sweep + grep pin · tag sheet voiced · indicator ring · Restore Tutorial confirm · "pools" lesson sweep (re-seed consequence recorded) · seal-blind rename field · `blockNamingDoor` hygiene · Trash cards · closing conformance walk against the reference artifact | walk, captured | **DONE — all SEVEN rows CLOSED plus the 2a Trash fork.** The sweep was **re-measured first** (the tree moved: **45 bare sites, 34 without a limit**, not the row's 27-of-35) and every one is verdicted in a per-site table; the class-closing pin's own predicate reports **34 offenders on the pre-sweep blobs and 0 here**. Row 63 is the unit's one bug class and it is **behavioural-revert verified — 3 of 8 pins RED, `rect.minX 192.0` vs `glyph.maxX 196.0`: the 4 pt of ring drawn through the glyph, printed** — fixed under the GUTTER LAW (the ring yields; the prose column never moves), with the comment-face decision MOVED to one pure rule rather than copied. Row 67 built the shell's own confirm channel (`ShellRouter.ask`) and moved BOTH tutorial doors; the old modal was **unpinnable by construction** (a headless `runModal()` waits forever), so the new road's pin drives the real door with no seam. Row 69 watches the seal and gates the FIELD while the door still acts-and-speaks. Row 45 voiced the sheet three surfaces render and gave it a per-surface noun; row 46 put the DEBUG door on S2's ownership idea; row 68 swept the lesson with the H pattern as this suite practises it (plain prose, constants in the PIN). **The walk: 19 crops, all four voice/appearance combinations, every row in use** — and it says what it changed in the dev store (it pressed Replace, which is the only way to see a swept lesson). **The conformance remainder list is EIGHT rows**, each with its cost, including the walk's own find: one act with TWO vocabularies. Mac **417/65 + 17/7**; core and iOS NOT owed (zero `Sources/`, zero `Shared/`), the marker stays 8. PROVISIONALs: **QUESTIONS #133** (a)–(h). Record below |
 | F2 | The shrink-re-font strand (KnownIssues row 53, pulled in at R-13u4-7) | the full-document editor's blank-below-the-last-line after a SHRINKING re-font; ⌘↑ heals — the trace's relayout/anchor hint; S1's record has the reproduction | red-on-old + walk on both occasions | NOT-STARTED (runs after S3, before the ladder) |
 | F3 | The Index cold-column heights (F1's residual, pulled in at R-13u4-8) | the Index pane's note rows stand at length-derived heights (`ProseHeightModel`/`FlowHeightEstimate` over cached `blockExtents` — 13u2b UNIT 1's shape on this surface), so the column's geometry is known before the aim; F1's record has the oscillation measurements | cold-click trial table red-on-old + walk | NOT-STARTED (runs after F2, before the ladder) |
 
@@ -3520,20 +3520,29 @@ binds from the first commit.
 **WHAT THIS UNIT DID NOT DO (the record's first line, written at the OPEN; RE-STATED AT THE
 CLOSE against what actually shipped):**
 
-- **It did not touch `Sources/VariorumCore/`** — no core, no `Sync/`, no schema, no migration,
-  no `Server/`; the lockstep marker stays **8**. *(PENDING — re-verified at the close over the
-  whole unit diff.)*
+- **It did not touch `Sources/VariorumCore/` — ZERO FILES**, and **no `App/Variorum/Shared/`
+  file moved either** (both verified at the close over the whole unit diff,
+  `git diff --name-only d20c0d7a..HEAD`). No core, no `Sync/`, no schema, no migration, no
+  `Server/`; the lockstep marker stays **8**; no core run and no iOS build were owed.
 - **It did not touch the EDITOR SEAM.** `BlockRangeIndex` · `EditorTextView` · `TypedReturn` ·
   `PaneTextAuthority` · `StructuralSeamEdit` · `StructuralGesturePlanner` · `runStructural` and
   its identity oracle · `MarkdownActs` — none of them. Row 63 touches the editor's DECORATION
   geometry (`BlockDecor`, the pure rect brain + its overlay controller), which is not the seam;
-  the seam-file list below says so by name for the ladder. *(PENDING at the close.)*
+  the seam-file list below says so by name for the ladder, with why it is not the seam.
+  *(Verified at the close: not one seam file is in the diff.)*
 - **It did not narrow P-8** — a constitution edit is the author's (KnownIssues row 44 states
   both options and she ruled the SWEEP at R-13u4-5).
 - **It did not re-word the ring's R14/R22 setting semantics** (off · outline · background), and
   it did not move the prose column's measure or left edge for any decoration (the gutter law).
 - **It did not restyle the POST tag sheet** (`TagAssignmentSheet`) — row 45 names the BLOCK one.
   The post sheet is unvoiced too and is named in the conformance walk's honest remainder list.
+- **It did not OPEN a `KnownIssuesAndTechDebt.md` row.** Seven were CLOSED; the eight things it
+  found or left non-conforming are the conformance remainder list, which the closeout routes —
+  a row whose owner is "someone should" is the drift class that file forbids.
+- **It did not sweep the app's remaining two `NSAlert`s** (the destructive-undo warning and the
+  callout emoji prompt), **the note's "Scraps" door**, **the POST tag sheet**, or **the registry
+  verbs that say "Scrap" where `SnippetsCopy` says "Snippet"** — all four are named, with their
+  costs, in the remainder list.
 - It did not do F2's or F3's newly-pulled-in work, and no other 13u4 unit's work was touched.
 
 ### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
@@ -3550,8 +3559,8 @@ CLOSE against what actually shipped):**
 | 8 | **Row 69** — Block History's rename field no longer OPENS under a seal | DONE (this commit) — the seal WATCHED for as long as the pane is up; the branch a fact on the model; 4 pins; **28 tests in 4 suites green** |
 | 9 | **The Trash fork** — the 2a taste fork's card restyle | DONE (this commit) — calm rows in the voice, **zero structural decisions moved**; the Trash suites ride unmodified |
 | 10 | QUESTIONS #133 (the PROVISIONALs) | DONE (this commit) — (a)–(h); next free moves to **#134** |
-| 11 | THE CLOSING CONFORMANCE WALK — both voices AND both appearances, captured, against the reference artifact; the honest remainder list | NOT-STARTED |
-| 12 | Closing suites + the ledger's S3 row + the seven KnownIssues rows' cells | NOT-STARTED |
+| 11 | THE CLOSING CONFORMANCE WALK — both voices AND both appearances, captured, against the reference artifact; the honest remainder list | DONE — 19 crops, all four voice/appearance combinations; the remainder list is **8 rows**, each with its cost |
+| 12 | Closing suites + the ledger's S3 row + the seven KnownIssues rows' cells | DONE (this commit) — **417/65 + 17/7 = 434 tests in 72 suites passed**, the acceptance spine's eleven types included; core and iOS NOT owed |
 
 ### THE READING (done in this session's own context, in the brief's order)
 
@@ -4120,3 +4129,110 @@ the schema, the migrations and `Server/` are untouched by construction, **no cor
 
 **The whole unit is 29 source files and 8 test files** — 19 of the source files are the
 `fixedSize` sweep (one modifier each), and the rest are the six rows and the fork.
+
+### CLOSING RUNS (at the unit's END — never the full suite at the start)
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| **Mac** — the six NEW suites, every suite that renders a swept `fixedSize` site, the whole decoration family, both Trash families, the snippets/canvas/tag families, the shell landing and Block History families, the registry walk, the two grep pins (`NoLiteralColourTests`, `CopyRegisterPinTests`), **`ChromeMinHeightTests` deliberately** (the OTHER `fixedSize` form's own pin — this sweep must not disturb it) — AND the acceptance spine under its ELEVEN REAL TYPE NAMES | `xcodebuild test-without-building -scheme Variorum -destination platform=macOS` with `-only-testing:` for the 68 names listed in this unit's commits | **417 tests in 65 suites passed** (exit 0, no skips) |
+| The **THREE names that matched NOTHING**, re-run under their real types (the `-only-testing` FILE-name trap, met by every unit of this phase): `SnippetsDoorsTests` → `SnippetFilterTests` · `SnippetOpenTargetTests` · `SnippetTagDoorTests`; `SnippetsRefreshTests` → `SnippetsLandingTests`; `ShellLandingTests` → `ShellLandingDoorTests` · `ShellLandingMountTests` · `ShellLandingRuleTests` | the same command with those seven | **17 tests in 7 suites passed** — including `ShellLandingMountTests`, the MOUNTED shell road row 46 touched |
+| The piece runs, in order, each recorded above | the sweep **140/23** · row 63 **67/9** · rows 46 + 63's revert **14/3** · row 69 **28/4** · row 67 **26/4** · rows 45 + the fork **41/8** · row 68 **28/5** | all green |
+| **The behavioural revert** (row 63's red-on-old), in a worktree at this unit's own fix commit | `-only-testing:VariorumTests/IndicatorGutterTests` on the reverted tree | **3 of 8 RED, 4 issues**; the 5 guards green |
+| **Core** — NOT OWED: the whole unit diff lists **zero files under `Sources/`** | — | n/a |
+| **iOS** — NOT OWED: **zero files under `App/Variorum/Shared/`**, and nothing here is mobile-visible | — | n/a |
+
+**A trap worth its own line, because it cost two runs and reads exactly like a green suite:** a
+`for s in $SUITES` over a SPACE-SEPARATED STRING does not split in zsh, so the whole list became
+ONE `-only-testing` argument that matched nothing — and the run reported **`Test Suite 'Selected
+tests' passed … Executed 0 tests`** with `** TEST EXECUTE SUCCEEDED **`. A zsh ARRAY is the fix
+(the ENVIRONMENT TRAPS section says so; this is what it looks like when you forget). And a plain
+`xcodebuild build` AFTER a `build-for-testing` replaces the app product WITHOUT its test bundle,
+so the next `test-without-building` dies at *"Unable to initialize test bundle"* — build for
+testing again after any walk build.
+
+No full-suite run was made at this unit's START; the plan's closeout-refresh baselines stand as
+the baseline (the standing rule).
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **The sweep's TABLE answers today's 45 sites, not the row's 27.** The row counted on
+   2026-09-08 and the tree moved; a table of the old line numbers would have been a sweep of a
+   tree that no longer exists. Every one of the row's 27 is in it, and the 18 that moved or were
+   added since are named where they went.
+2. **`.lineLimit(1)` at every swept site, none `nil`.** Each is a chrome LABEL, a menu, a
+   segmented picker or a one-line door row. `.lineLimit(nil)` is the deliberate-unlimited answer
+   and satisfies the pin on purpose — S1's four `nil`s are the precedent — and no site here
+   wanted it. Reversing any one is one word.
+3. **The ring stops at the gutter face's TRAILING EDGE (4 pt of overhang), not at 8 with the
+   glyph moved.** The gutter law decides it: the prose column and its margins never move for a
+   decoration. **#133(a)** carries it.
+4. **The comment-face decision MOVED rather than being copied for the ring.** A second "card or
+   badge?" in the ring is the drift `indicatorRect`'s own note has warned about since 13e E2.
+   Reversing: re-derive it inside `gutterTrailingX` and put the arithmetic back in the renderer.
+5. **Row 46 is fixed with NO red pin, and the mechanism is written out instead** — the brief's
+   own allowance for a latent architectural finding. The four pins hold the two rules the fix
+   introduces; what they cannot hold is the shipped defect, which was an ordering accident.
+6. **The tutorial's `confirmReplace` became `async`**, which reaches `openTutorial` too. A
+   synchronous closure still satisfies that type, so no caller and no pin moved — and leaving
+   the second door on the modal would have closed row 67 by half.
+7. **The tag sheet's system `Toggle` became a ✓ ROW.** A checkbox cannot wear a voice. The
+   accessibility value says on/off so nothing is lost. **#133(b)**; reversing is the old `List`.
+8. **A per-surface NOUN, and the canvas keeps the default.** One parameter was the brief's bar;
+   the canvas is opened on a note OR the scraps area and holds no fact saying which. **#133(c)**.
+9. **Her PROSE and her TITLES never take the voice's chrome-case.** The tag sheet's title quotes
+   her block; the Trash's "from ‹note›" quotes her title. The app's own labels around them do.
+10. **The Trash took the card grammar and NOT one structural decision.** Act 10's fork left it
+    *"rather than risking pinned rendering for look alone"*; the Trash suites riding unmodified
+    is that fence stated as evidence. **#133(d)**.
+11. **Under a seal the rename door REFUSES rather than disappearing.** The pane's grammar is
+    act-then-worded-refusal under a seal — Restore does exactly this. **#133(e)**.
+12. **The seal fact is a WATCH, not a one-shot read**, and its cost is named (KnownIssues row
+    13's class at its cheapest end) rather than slipped in. A one-shot read leaves a door hidden
+    after an unseal, which is the same lie pointing the other way.
+13. **Three words in the lesson were left unswept**, each with its reason at the code: the note's
+    panel door (a vocabulary fix of its own), the chapter title (the phone holds the same
+    string), and `scrapPoolTitle` (a RESERVED IDENTITY the restore door filters on). **#133(g)**.
+14. **The lesson's prose is PLAIN and the pin holds it to the constants** — this suite's own
+    stated rule, which my first draft broke by interpolating. Recorded because the wrong version
+    would have looked more rigorous.
+15. **No `KnownIssuesAndTechDebt.md` row was OPENED.** The conformance remainder list is eight
+    named items, and each of them either has an owner already (the phone's, a vocabulary sweep)
+    or is a candidate the closeout routes — a row whose owner is "someone should" is the drift
+    class this file forbids. The closeout's carried block names them for the architect.
+
+### CARRIED TO THE PHASE CLOSEOUT (from this unit)
+
+1. **QUESTIONS #133 (a)–(h)** joins her ratify bundle; next free moves to **#134**.
+2. **THE RE-SEED CONSEQUENCE, and it is ONE act for her:** her seeded field guide keeps E3's old
+   merge sentence AND this unit's old pool-menu sentence until `Help ▸ Restore Tutorial…` is
+   pressed once. (On the DEV store the walk already pressed it.)
+3. **THE CONFORMANCE REMAINDER LIST (8 rows above) is the closeout's to route.** The cheapest
+   two, named: **item 1** — the destructive-undo confirm can adopt this unit's shell channel in
+   about five lines — and **item 4**, the walk's own find: one act with TWO vocabularies
+   (`Archive Scrap`/`Delete Scrap` in the registry vs `Archive Snippet`/`Delete Snippet` in
+   `SnippetsCopy`), which wants ONE sweep with item 3 (the note's "Scraps" door).
+4. **A MOBILE PARITY CANDIDATE, named rather than assumed:** nothing in this unit compiles into
+   the phone (zero `Shared/`, zero `Sources/`). What the phone MIGHT owe is the tutorial's
+   CHAPTER name, which its own seeder holds identically — and that is the mobile catch-up's
+   call, beside row 55's lesson.
+5. **WALKER FACTS** for `Tools/WalkKit/README.md` at its next touch, one of which RETIRES an
+   existing entry: (a) `Help ▸ Restore Tutorial…` is a SwiftUI `.alert` now and DOES capture —
+   the UNIT E entry about it is superseded, though its general rule stands with two live
+   examples left (`confirmDiscardingUndo`, `promptEmoji`); (b) `cliclick t:` **cannot type an
+   emoji at all** (`Unable to get key code`) — put it on the pasteboard and ⌘V through System
+   Events; (c) a `for s in $SUITES` over a space-separated string **does not split in zsh**, and
+   the resulting run reports *"Executed 0 tests"* under `** TEST EXECUTE SUCCEEDED **`; (d) a
+   plain `xcodebuild build` after a `build-for-testing` replaces the app WITHOUT its test
+   bundle, so the next `test-without-building` dies at *"Unable to initialize test bundle"*.
+6. **Nothing in `notes/KnownIssuesAndTechDebt.md` was OPENED**; **seven rows were CLOSED**
+   (44 · 45 · 46 · 63 · 67 · 68 · 69).
+
+### WHAT A FRESH SESSION WOULD NEED TO FINISH THIS
+
+Nothing. Everything is committed and pushed: the 34-site sweep and its class-closing pin, the
+ring's gutter yield with its behavioural-revert red, the shell's confirm channel and the
+tutorial's two doors, the seal-gated rename door and its watch, the voiced tag sheet with its
+per-surface noun, the swept lesson and its H-pattern pin, the Trash's calm cards, the shell
+door's ownership, 25 new pins in six files, QUESTIONS #133, the walk captures (gitignored, 19
+crops) and this record. What is OPEN is hers: **#133**. What is owed elsewhere: the **eight-row
+conformance remainder list**, which this unit deliberately did not start.
