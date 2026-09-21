@@ -1525,6 +1525,19 @@ future-compound hazard, honestly unpinnable today). NIT-2: `park()`'s dead white
 responses return to the reviewer for the final call + its fix pass; then the implementer's sanity
 pass over the reviewer's diff.**
 
+**The implementer's responses (2026-09-21, nothing edited):** the MAJOR — **AGREE in full** (every
+step re-confirmed; the pin miss owned; one implementation note: `held` still assigns on a re-park —
+newest text wins — only the flag reset moves inside the emptiness check). The MINOR — **AGREE the
+doc comment must be fixed; DISPUTE the premise and the behaviour change**: `QuickNotePad.take` does
+NOT prefix-strip (it is the same `text == submitted` all-or-nothing gate), and the family's
+original (`QuickEntryBar.swift:113–121`) records the rule deliberately — clearing wholesale would
+lose the tail; the double-post is the family's chosen consequence; prefix-stripping would fork the
+phone's comment door from the three capture doors and is the author's call if wanted at all.
+NIT-1 — **AGREE** (the R1-10 class reaching a second door; a sentence at both call sites, no pin
+owed). NIT-2 — **AGREE** (unreachable, and a silent return is the wrong failure mode — delete or
+assert loud). **Responses to the reviewer for the final call; fix pass authorized in the same
+message.**
+
 ---
 
 ## CLOSEOUT DUTIES (the standing ritual, run-shaped — nothing here runs until the ladder ends)
