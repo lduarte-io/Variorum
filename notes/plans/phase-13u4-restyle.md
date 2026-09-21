@@ -1458,3 +1458,67 @@ the screenshot cannot tell straight from curly — read the box's AX value and `
 shelf's row heights differ enough between the voices that the quick-entry bar's y moves by ~70
 screen points between Terminal and Study: re-read it from a capture after every voice flip (the
 13u3 UNIT F fact, met again the hard way).
+
+---
+
+## UNIT C2 BRIEF — SELECTION → A TAKE ON THE SAME BLOCK (item 9, R-13u4-4; self-contained — read in this order)
+
+**Read first, in full:** (1) this file's Status banner · HER ADDITIONS item 9 (her verbatim
+words) · THE SIZING-AND-RULINGS SITTING RECORD (**R-13u4-4 is yours and BINDING**: MOVE alone;
+the quiet insurance savepoint of the current take is LOAD-BEARING — her stated cover for the
+stay case; ONE transaction — savepoint · the span leaves the current take's buffer · a new take
+mints at the fan's END holding the span, branched from the current take, NOT chosen · ONE undo
+entry) · THE LEDGER · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the four prior UNIT RECORDs
+(E3's walker facts bind any walk staging). (2) **OverallModel §3's seventh quiet occasion +
+AppSpec §9's cross-block-edit machinery** (`Operations.insureTakes`, 13u1 UNIT 2 — the
+insurance shape you compose or mirror) and **§9's structural undo/redo paragraphs** (compound
+entries; `redo:` required, never defaulted; exact-row re-applies). (3) The constitution's
+**P-1/P-2** (the act declares in the capability registry — verb, scope, availability rule,
+doors, refusal copy; a rendered door acts or delivers the real refusal; the registry-walk test
+asserts it). (4) The code: `Sources/VariorumCore/Operations/` (the compound infrastructure —
+`withCompound`, the 13u1 cross-block compound's registration shape; `branchVariant`; `commit`;
+the lock/seal guard conventions) · the Write selection plumbing (`EditorViewModel`'s selection
+facts; the block ▾ / context-menu door homes; the capability registry). Do your own reading.
+
+**The build.**
+- **A new core operation** (ONE transaction, the R-13u4-4 shape verbatim): refuse under a
+  sealed post; refuse on a locked current take NAMING the lock (the buffer is what the lock
+  guards, and the span leaving it is a buffer edit). The insurance savepoint is `kind='auto'`,
+  deduped against the take's last commit (the standing insurance conventions — reuse
+  `insureTakes`' shape if it fits one take, else the lockVariant one-quiet-commit pattern; say
+  which in the record). The new take: minted at the fan's END (`fan_position` after the last),
+  `parent_variant_id` = the current take, working_text = the span EXACTLY as selected (no
+  snapping — `BoundarySnapping` serves CUTS, and this mints no block boundary; no whitespace
+  trimming — U-19 (2), never eat what she typed; a doubled space left at the removal seam is
+  hers to tidy, recorded as a PROVISIONAL if you think it wants a rule), label nil
+  (PROVISIONAL), never chosen, never locked. Registers ONE compound undo entry (inverse:
+  tombstone-flip the mint + restore the current take's buffer from the pre-image; redo:
+  exact-row re-apply — the do-time-pre-images law).
+- **AppSpec §9 gains the op's bullet WITH your build** (the `renameCommitPoint` precedent):
+  exactly the ruled shape, citing R-13u4-4 and her words, the seventh-occasion insurance named.
+  Nothing else in canon.
+- **The Write door, registry-declared (P-1):** available when the selection is non-empty and
+  lies within ONE block on the live editor (a cross-block selection is NOT this gesture — the
+  door does not render there, P-2; the standing cross-block roads own that population). Homes:
+  the selection context menu + the block ▾ row (and the ⌘K palette if the registry gives it
+  one for free). The refusal copy through the standing status-seam vocabulary (18i kinds). A
+  keybind ONLY if a free, conventional one exists — check the registry/shortcuts helper;
+  otherwise no chord, doors suffice (record the check).
+- The phone gets nothing (not asked; the op compiles into iOS via core — the build gate).
+
+**Evidence:** the op's state-transition suite (rows read/written; the savepoint present AND
+deduped; refusals; undo→redo round-trips to the same rows; I10 untouched — the current take
+keeps its remainder, even empty: an empty buffer is legal, the E1 precedent) + the registry
+walk covering the new door + a hands-on WALK on the dev-store Debug build: highlight
+mid-block, invoke — the span leaves, the fan badge appears, Takes shows the new card at the
+fan's end unchosen, Block History shows the insurance savepoint, ⌥⌘Z reverts the whole gesture
+and ⇧⌥⌘Z re-applies it. Captures to `notes/plans/13u4-screens/c2/`. Core `swift test` + the
+touched Mac suites + the acceptance spine (REAL TYPE NAMES) at the end; iOS build green.
+PROVISIONALs from **#128**.
+
+**Your record:** append a `## UNIT C2 RECORD` section to THIS file with LIVE STATUS from the
+FIRST commit (PENDING marks), the op's transition table, the door's registry row, and the
+seam-file list (the selection facts likely come from `EditorViewModel` — if the diff reaches
+`BlockRangeIndex`/`EditorTextView`/`TypedReturn`/`PaneTextAuthority`, say so for the ladder);
+flip the ledger's C2 row in your closing commit. The checkpoint protocol binds from the first
+commit.
