@@ -2379,3 +2379,121 @@ and the seam-file list (expected NONE — say so); flip the ledger's S1 row and 
 resolution note in your closing commit (KnownIssues row 59 closes here if the walk proves it;
 row 53 closes or narrows per what the walk shows). The checkpoint protocol binds from the
 first commit.
+
+## UNIT S1 RECORD — THE SETTINGS SHAPE (items 4 · 5 · 6 · 7 + row 59 + the 2a Settings fork + row 53's walk)
+
+**WHAT THIS UNIT DID NOT DO (the record's first line, written at the open and RE-STATED at the
+close against what actually shipped):** *(opening statement — the closing re-statement rides the
+last commit)*
+
+- It does not touch `Sources/VariorumCore/` — no core, no `Sync/`, no schema, no migration, no
+  `Server/`; the lockstep marker stays **8**. Settings is chrome over settings that already exist.
+- It does not touch the EDITOR SEAM — `BlockRangeIndex` · `EditorTextView` · `TypedReturn` ·
+  `PaneTextAuthority` · `runStructural` and its identity oracle are all outside this unit.
+- It does not move `ThemeStore`'s HOME (the recorded waiver — KnownIssues' forked-brains row, the
+  18g ladder's R1-3: a hoist there is a DESIGN, not a move, and the mobile parity row carries it).
+  Its CHROME is fair game; its address is not.
+- It does not sweep the 27 old chrome `.fixedSize()` sites (R-13u4-5 gave them to **UNIT S3**).
+  Every NEW chrome `fixedSize` text this unit writes carries a `lineLimit` (P-8).
+- It does not build row 53's re-font carve. The brief's rule is WALK-and-REPORT: the two
+  unexercised occasions are exercised once this unit's shape makes their controls reachable, and
+  what the walk shows is recorded either way. The carve's design is 13u2 UNIT D's record's.
+- It does not do S2's or S3's rows (the Library/masthead faces; the chrome singles).
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The record + the READING + the two AUDITS (⌘[ · the merge chord), traced in the code rather than assumed | DONE (this commit) — the tables below |
+| 2 | The Settings SHAPE: her tab sketch built, the card grammar, **row 59's fold dead** | NOT-STARTED |
+| 3 | Item 4 — the SEARCH: one pure brain + the catalog it reads + the results face + pins | NOT-STARTED |
+| 4 | Item 7 — the merge chord (and its four hard-coded siblings) SAID on the faces + truth pins | NOT-STARTED |
+| 5 | Item 5 — the ⌘[ answer (PROVISIONAL) + QUESTIONS #130 | NOT-STARTED |
+| 6 | The WALK on the dev-store Debug build, both voices AND both appearances, captured — **including row 53's two re-font occasions** | NOT-STARTED |
+| 7 | Closing suites + the ledger's S1 row + the KnownIssues rows (59 · 53) | NOT-STARTED |
+
+### THE READING (done in this session's own context, in the brief's order)
+
+1. This file's **Status banner** · **HER ADDITIONS items 4, 5, 6 and 7** verbatim · **THE
+   SIZING-AND-RULINGS SITTING RECORD** (R-13u4-5 hands the 27 `fixedSize` sites to S3; R-13u4-6 is
+   the cast and the order; no ruling pre-decides items 4/5/6/7 — they are face rows) · **THE
+   LEDGER** · **ENVIRONMENT TRAPS** · **CAST & DISCIPLINE** · the **six prior UNIT RECORDs**
+   (E1 · E2 · E3 · C1 · C2 · F1) in full. The walker facts that bind this unit:
+   - `cliclick -w <ms> t:"…"` **drops characters** in the shelf's quick-entry bar, and ⌘A does not
+     select there; `osascript … keystroke` + `key code 36 using shift down` is the staging road,
+     and **every burst needs an explicit re-activation** because a capture steals focus (E3).
+   - The capture boxes **substitute typed quotes** (U+201D) — a quoted string read from a
+     screenshot cannot be trusted; read the AX value and `xxd` it (C1).
+   - The shelf's row heights differ between the voices, so the quick-entry bar's y moves ~70
+     screen points on a voice flip — re-read it from a capture after every flip (C1).
+   - A full-screen `screencapture -x -o` is in SCREEN PIXELS with no window offset (point = px/2);
+     `walk-cap`'s WINDOW capture needs the window's Y added back (point = px/2 + 33). Mixing the
+     two puts a click a bar-height off, silently (C2).
+   - A single `cliclick` click into the dev window is **sometimes swallowed by the activation** —
+     click TWICE (`c:x,y w:400 c:x,y`) on any row whose act is idempotent (F1).
+   - Quit **by identity** (`tell application id "io.lduarte.Variorum.debug" to quit`), never ⌘Q
+     (the 13u3 breach's walker law); kill a SECOND dev instance by a `pgrep`-proven PID only.
+2. **The restyle mandate:** roster item 1 + the carried 2026-08-31 addendum (her ruling that
+   `notes/plans/pre-13u-mockups/blocks-and-snippets.html` is *"an actual guide"*), and
+   `Theme/CalmGrammar.swift` — `CalmCard` (radius 10, 14×11 padding, `card` on `line`),
+   `CalmSectionHeader` (a quiet small-type header, never a `List` section header, whose fixed
+   height is what clipped the tray), `CalmButtonStyle` (radius 7, squarish-rounded, generous).
+3. **KnownIssues rows 59 and 53**, in full, with their provenance (59 is her own owner
+   assignment: *"you can add the fold issue to 13u4"*; 53 is 13u2 UNIT D's narrowed claim —
+   *the voice-switch occasion does not reproduce*, and the inline-comments and paragraph-gap
+   occasions were NOT exercised because their controls sit below the fold).
+4. The constitution's **P-1** (doors render FROM the registry; gating is data, never per-view
+   if-statements; the registry walk asserts declared ⇔ rendered) and **P-8** (every chrome
+   `fixedSize` text carries a `lineLimit`), plus P-1's application note (the registry's scope is
+   the ROUTED vocabulary, grown incrementally).
+5. The code: `Features/Settings/AppSettingsView.swift` (the `TabView` and its five tabs; the
+   `AppearancePane` `Form` and its five sections), `AppearanceChoiceRow.swift`,
+   `PaletteSettingsRow.swift`, `VariorumApp.swift`'s `Settings` scene,
+   `Features/Help/HelperView.swift` (the hand-maintained `groups` + `entries` and their drift
+   guard), `Registry/Capability.swift` (`menuTitle()` — the ONE chord formatter),
+   `Registry/CapabilityRegistry.swift`, `EditorCommands.swift` (`keyEquivalent(for:)` — the ONE
+   key wiring, and the Block menu), `CommitBar.blockMenu`, `EditorViewModel.contextMenuItems()`,
+   `TakesBottomBar.structuralBar`.
+
+### AUDIT 1 — WHAT ⌘[ IS BOUND TO TODAY, AND WHERE UNINDENT LIVES (item 5, the brief's AUDIT FIRST)
+
+*(Her report, verbatim: "command [ is moving me between my different open notes ? is that supposed
+to do that? I thought it unindented things. related - how are things unindented? that's further
+proof that I need a better formatting shortcut menu.")*
+
+| Question | Measured answer (file:line) |
+|---|---|
+| What is ⌘[ bound to? | **`.navigateBack`** — `EditorCommands.keyEquivalent(for:)` `case .navigateBack: ("[", .command)` (`EditorCommands.swift:223`), wired at the View menu's row (`EditorCommands.swift:728–730`). ⌘] is `.navigateForward`. |
+| Is that "moving me between my different open notes"? | **Yes, exactly.** It is the PANE's back/forward trail (13f batch 3, W16), so pressing it while writing walks her back to the note she came from. Her description is accurate, not a misreading. |
+| Was the binding swept? | **Yes, and recorded at the line** (`EditorCommands.swift:216–222`): *"⌘[ and ⌘] are FREE — swept across this table, every `.keyboardShortcut(` call site in `Variorum/` and `Shared/`, every `NSMenuItem` keyEquivalent (all empty strings), and the one `performKeyEquivalent` override (⌘S only). No bracket character is bound anywhere in the app, and they are the platform's own back/forward idiom."* |
+| Where does unindent live? | **`.formatOutdent`** — `Format ▸ Outdent` (`EditorCommands.swift:711`) and **⇧Tab inside a list** (13k K8). `.formatIndent` is `Format ▸ Indent` and Tab. |
+| Does unindent have a chord? | **No, DELIBERATELY** — `Capability.swift:598–604`: *"declared like the keyless five, and deliberately WITHOUT a `shortcutLabel`: Tab is not a menu key equivalent and must never become one (⇥ as a menu chord would steal Tab from every control in the app), so the keys live where ⏎'s does — in the surfaces' own `insertTab`/`insertBacktab` overrides."* |
+| Is the pair findable today? | **Only in the ⌘/ helper**, as one prose row in the Formatting group (`HelperView.swift:138–140`): *"Tab / ⇧Tab in a list — indent / outdent the list item you're in (Format ▸ Indent and Format ▸ Outdent do the same); outside a list, Tab is the key it always was."* It is the ONE written line, and the registry's drift guard structurally cannot see it (Tab has no `shortcutLabel`), which is why only prose carries it. |
+
+*(The two Mac conventions, the PROVISIONAL and its alternatives: piece 5's section below.)*
+
+### AUDIT 2 — WHERE THE MERGE CHORD IS SAID, AND WHERE IT IS NOT (item 7)
+
+*(Her report, verbatim: "where is the merge shortcut said ?? I don't see it in the shortcuts list
+or in the menu. it only shows up as shift command M if you try merging w takes on blocks that
+don't have takes - then the command shortcut shows up & is helpful.")*
+
+**The registry knows it:** `.merge` declares `shortcutLabel "⌘⇧M"`, and
+`EditorCommands.keyEquivalent(for:)` wires `("m", [.command, .shift])` — one act, one key, one
+place to collide (P-1).
+
+| Face | Says ⌘⇧M today? | Mechanism |
+|---|---|---|
+| The ⌘/ helper, Structure group | **YES** — `("⌘⇧M", "merge blocks — every take comes along")` (`HelperView.swift:105`), and it has said so since the helper was born (2db2a0b3, Sitting 9). | Hand-maintained prose held to the registry by `everyDeclaredShortcutIsFindableInTheHelper`. |
+| Menu bar ▸ Block ▸ Merge | **YES** — `.keyboardShortcut("m", modifiers: [.command, .shift])` (`EditorCommands.swift:475`); AppKit renders "⇧⌘M" on the item. | SwiftUI's own chord rendering. |
+| **Write's bottom bar `block ▾` ▸ Merge** | **NO** | `CommitBar.blockMenu` renders the four plain structural rows from **hard-coded literals** — `Button("Divide")`, `Button("Extract")`, `Button("Make Block")`, `Button("Merge")` — while the two ceremony rows beside them are built from `CapabilityRegistry.capability(…).menuTitle()`, which APPENDS the chord. |
+| **Write's right-click context menu ▸ Merge Blocks** | **NO** | `EditorViewModel.contextMenuItems()` — same shape: `item("Merge Blocks", .mergeBlocks)` is a literal; `.divideWithCeremony`/`.mergeWithCeremony` beside it use `menuTitle()`. |
+| **The Takes bar's `block ▾` ▸ Merge** | **NO** | `TakesBottomBar.structuralBar` — same shape again: `("Merge", .merge, …)` is a literal beside `CapabilityRegistry.capability(.mergeWithCeremony).menuTitle()`. |
+| The fanned-merge note | **YES** — `FannedDefaults.ceremonyUnfannedNote`: *"These blocks have one take each — ⌘⇧M joins them."* | **This is her one sighting, named exactly:** *"it only shows up as shift command M if you try merging w takes on blocks that don't have takes."* |
+
+**The mechanism, stated as a defect rather than an absence.** On the three menus she actually
+uses while writing, the row that says a chord is the **⌥ variant** and the row that says nothing
+is the **plain act** — so those menus read as *"Merge choosing takes… has a key; Merge does
+not."* That is worse than silence: it is a face that teaches the opposite of the registry. The
+class is exactly P-1's (*doors render FROM the registry*), and the four literals are the whole
+of it — `Divide`, `Extract`, `Make Block`, `Merge` — so the fix is the class, not the one row.
