@@ -182,7 +182,19 @@ new `moveSpanToNewTake` bullet; (k) a WALKER FACT for `Tools/WalkKit/README.md`:
 `screencapture` is in screen pixels with NO window offset (point = px/2) while `walk-cap`'s window
 capture needs the window's Y added back (point = px/2 + 33) — mixing the two puts a click a
 bar-height off, silently; (l) nothing in `notes/KnownIssuesAndTechDebt.md` was opened or closed
-by C2.
+by C2. **CLOSEOUT DUTIES from F3** — (m) her ratify bundle gains **QUESTIONS #135** (a)–(d), the
+Index cold-column's four calls (next free: **#136**); (n) **TWO KnownIssues rows CLOSED** (F1's
+cold-column residual and **row 56**) and NONE opened — but **row 56's other half stays open** under
+owner 12 (the standing 1,989 `Modifying state during view update` warnings), said plainly in the
+row so nothing is quietly counted as closed; (o) **the orchestrator's R-13u4-7 measurement is still
+owed** — five cold deep-chapter clicks in the book's READ mode — and F3's result is the
+architecture's prediction confirmed on the surface that lacked the heights, so the walk verifies
+rather than decides; (p) a WALKER FACT for `Tools/WalkKit/README.md`: the SHELF's book rows move
+between voices (Sherlock at screen y 349 Terminal / 384 Study on a 1700 × 1000 window), so a
+hard-coded shelf point opens the WRONG BOOK after a voice flip — the landing signpost's `rows=` is
+the tell — and a fresh launch always lands on `~/shelf` with a book always opening in **Outline**
+(the mode is session state, never remembered across launches); (q) **F3 owes NO parity row** —
+zero `Shared/`, zero `Sources/`, and the phone has no book Index.
 
 ## ENVIRONMENT TRAPS (every unit brief carries this section verbatim — the skill's rule)
 
