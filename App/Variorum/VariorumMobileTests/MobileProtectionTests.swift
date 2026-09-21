@@ -647,6 +647,26 @@ struct MobilePhoneProtectionCopyTests {
         #expect(!ProtectionCopy.joinStandardConsent.contains("Mac") && ProtectionCopy.joinStandardConsent.contains("Use Castle…"))
     }
 
+    /// **RUN A batch A2, row 14 (17n) — the phone's twin of the floor.**
+    /// The phone reaches `PassphraseSetModel` from TWO doors (the nudge's
+    /// offer and the Protection sheet), so the shared model's floor is the
+    /// phone's floor; the refusal sentence is the one both platforms speak.
+    @MainActor
+    @Test func theEncryptionPassphraseFloorAndItsSentenceAreThePhonesToo() {
+        #expect(ProtectionCopy.passphraseFloor == 12)
+        #expect(ProtectionCopy.passphraseTooShort
+                == "Your passphrase needs at least 12 characters.")
+        #expect(ProtectionCopy.passphraseSubline.hasPrefix("At least 12 characters."))
+        // The tutorial's short chapter says the floor once, in the phone's
+        // edition too (the same shared paragraphs).
+        let saidTheFloor = ProtectionCopy.privacyLessonTwoParagraphs.filter {
+            $0.contains("at least 12 characters")
+        }
+        #expect(saidTheFloor.count == 1, "said once: \(saidTheFloor.count)")
+        #expect(try! #require(saidTheFloor.first).contains("keeps working whatever its length"),
+                "and says the other half — an existing word is never refused at unlock")
+    }
+
     /// **RUN A batch A2, row 12 (17l item 6) — the phone's twin:** the
     /// preparing line before the first pulled window, and the follow
     /// sheet's own *picking up* arm (the phone has both sheets too).

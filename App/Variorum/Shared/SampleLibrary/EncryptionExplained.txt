@@ -18,6 +18,8 @@ The iCloud key. A random key that Variorum places in your iCloud Keychain the fi
 
 Your account password. It signs you in and can delete your account. It wraps nothing and opens nothing.
 
+Your passphrase, and its one rule. Wherever you SET it — turning sync on, changing it, replacing all your keys — it must be at least 12 characters, because it is the one secret an offline attacker with a stolen copy of the server could guess against. A passphrase you already have keeps opening your library whatever its length; the change-passphrase door is where a longer one is asked for.
+
 %%% Chapter 3 — Standard, step by step
 
 The first time Variorum opens, it makes a library key and a key file, places an iCloud key in your iCloud Keychain if one isn't there, and writes a copy of the library key wrapped under it into the key file. From then on your Mac opens the library silently, and any Mac signed into your iCloud can open a copy of it with nothing typed.

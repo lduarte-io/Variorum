@@ -440,7 +440,7 @@ final class KeyDoorModel: Identifiable {
     // MARK: - Helpers
 
     private func validated(_ new: String, confirmation: String) -> String? {
-        guard new.count >= 12 else {
+        guard new.count >= ProtectionCopy.passphraseFloor else {
             lastError = ProtectionCopy.passphraseTooShort
             return nil
         }

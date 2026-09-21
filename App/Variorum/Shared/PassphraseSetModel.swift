@@ -169,6 +169,16 @@ final class PassphraseSetModel {
             lastError = "Type a passphrase first."
             return
         }
+        // RUN A batch A2, row 14 (17n): THE FLOOR. This sheet is the
+        // Settings ▸ Protection set door on the Mac AND the phone's two
+        // (the nudge's offer and the Protection sheet) — four door sites,
+        // one model — and it was the one SETTING road with no length rule
+        // at all, so a five-character passphrase could become the secret an
+        // offline attacker guesses against at the shipped KDF floor.
+        guard passphrase.count >= ProtectionCopy.passphraseFloor else {
+            lastError = ProtectionCopy.passphraseTooShort
+            return
+        }
         guard passphrase == confirmation else {
             lastError = "The two entries don't match."
             return

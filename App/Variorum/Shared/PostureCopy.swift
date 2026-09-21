@@ -336,6 +336,15 @@ nonisolated extension ProtectionCopy {
     static let passphraseSubline =
         "At least 12 characters. Four or more random words work well. This is the one "
         + "thing a stolen copy of the server could be guessed against, so make it long."
+    /// **RUN A batch A2, row 14 (17n — her ruling 2026-09-07 ~02:30: *"we
+    /// can make the encryption passphrase requirement 12 characters as
+    /// well"*).** The floor, named ONCE so every SETTING door reads the
+    /// same number and a new door cannot quietly ship without one. It binds
+    /// where a passphrase is SET and nowhere else: an existing shorter word
+    /// still opens the library at unlock, and the change door is where a
+    /// longer one is asked for (17n's letter). `passphraseTooShort` is its
+    /// one refusal sentence on both platforms; 13s re-voices.
+    static let passphraseFloor = 12
     static let passphraseTooShort = "Your passphrase needs at least 12 characters."
     static let passphraseMismatch = "The two entries don't match."
     static let passphraseAlreadyOnAccount =
@@ -689,6 +698,13 @@ nonisolated extension ProtectionCopy {
         + "\(biometryName) opens this \(deviceName) for you; your passphrase is what lets a new device "
         + "in. Lose every enrolled device and both secrets, and your writing is gone — nobody can help. "
         + "That is the point.",
+        // RUN A batch A2, row 14 (17n): the floor, said ONCE in the
+        // tutorial — it is a rule she meets at a door, so the chapter names
+        // it rather than letting the refusal be the first she hears of it.
+        "Wherever you SET that passphrase, it must be at least "
+        + "\(passphraseFloor) characters — it is the one secret a stolen copy of the server could be "
+        + "guessed against. A passphrase you already have keeps working whatever its length; the "
+        + "change-passphrase door is where a longer one is asked for.",
         "The whole story — every key, where it lives, what happens when you switch, why an old backup "
         + "behaves the way it does — is in the book \u{201C}\(encryptionBookName)\u{201D} on this shelf.",
     ]

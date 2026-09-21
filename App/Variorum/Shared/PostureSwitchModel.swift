@@ -217,7 +217,7 @@ final class PostureSwitchModel: Identifiable {
     func commitPassphrase(_ passphrase: String, confirmation: String) async {
         guard case .setPassphrase = phase, !busy else { return }
         lastError = nil
-        guard passphrase.count >= 12 else {
+        guard passphrase.count >= ProtectionCopy.passphraseFloor else {
             lastError = ProtectionCopy.passphraseTooShort
             return
         }
@@ -434,7 +434,7 @@ final class PostureSwitchModel: Identifiable {
     func commitNewPassphrase(_ new: String, confirmation: String) async {
         guard case .newPassphrase = phase, !busy, mode == .replaceKeys else { return }
         lastError = nil
-        guard new.count >= 12 else {
+        guard new.count >= ProtectionCopy.passphraseFloor else {
             lastError = ProtectionCopy.passphraseTooShort
             return
         }

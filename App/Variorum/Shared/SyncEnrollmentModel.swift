@@ -146,11 +146,17 @@ final class SyncEnrollmentModel: Identifiable {
                 lastError = ProtectionCopy.passphraseNotTheLibrarys
                 return
             case nil:
-                // No wrap after all (the facts moved under us): set it.
+                // No wrap after all (the facts moved under us): set it —
+                // and row 14's floor binds HERE too, because this arm SETS
+                // rather than verifies (17n: the floor is about setting).
+                guard typed.count >= ProtectionCopy.passphraseFloor else {
+                    lastError = ProtectionCopy.passphraseTooShort
+                    return
+                }
                 if let refusal = await tie.setPassphrase(typed) { lastError = refusal; return }
             }
         } else {
-            guard typed.count >= 12 else {
+            guard typed.count >= ProtectionCopy.passphraseFloor else {
                 lastError = ProtectionCopy.passphraseTooShort
                 return
             }

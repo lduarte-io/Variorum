@@ -818,6 +818,62 @@ struct Phase13pControllerTests {
     private static let newerVaultReason =
         "your account's vault was written by a newer Variorum — update the app"
 
+    // MARK: - RUN A batch A2, row 14 — the encryption passphrase's floor (17n)
+
+    /// **THE FLOOR AT THE SETTING DOORS, AND NEVER AT UNLOCK** (her ruling
+    /// 2026-09-07 ~02:30: *"we can make the encryption passphrase
+    /// requirement 12 characters as well"*). The 12-character floor shipped
+    /// at pre-13x 3b was the ACCOUNT password's; three encryption-passphrase
+    /// doors picked one up along the way and are pinned in their own suites
+    /// (`KeyDoorTests` · `PostureSwitchTests` · `SyncEnrollmentTests`). This
+    /// pin holds the two that had NONE and the two that must never have one.
+    ///
+    /// `PassphraseSetModel` is FOUR door sites — Settings ▸ Protection and
+    /// the nudge's offer on the Mac, the nudge's offer and the Protection
+    /// sheet on the phone — so its gap was the widest, and one model closes
+    /// it on both platforms.
+    ///
+    /// **RED ON OLD: a five-character passphrase was accepted and landed.**
+    @Test func theEncryptionPassphraseFloorBindsWhereItIsSetAndNowhereElse() async throws {
+        let short = "sesame"  // six
+        #expect(short.count < ProtectionCopy.passphraseFloor)
+
+        // (1) THE SET SHEET — the gap this row closes.
+        let w = try world()
+        let sheet = PassphraseSetModel(controller: w.controller, vaultTie: nil)
+        await sheet.commit(passphrase: short, confirmation: short)
+        #expect(sheet.lastError == ProtectionCopy.passphraseTooShort)
+        #expect(sheet.phase == .enterPassphrase, "nothing advanced")
+        #expect(!w.controller.hasPassphraseWrap, "and nothing landed on the key file")
+        // The same door with a long enough word goes through.
+        await sheet.commit(passphrase: "a-long-enough-passphrase", confirmation: "a-long-enough-passphrase")
+        #expect(sheet.lastError == nil)
+        #expect(w.controller.hasPassphraseWrap)
+
+        // (2) NEVER AT UNLOCK: a word already on the key file keeps opening
+        // the library whatever its length. The primitive has no floor by
+        // design — the doors do — so a short word set before this build (or
+        // by the migration's re-wrap) is not locked out by it.
+        let old = try world()
+        #expect(await old.controller.setPassphrase(short) == nil, "the primitive sets it")
+        #expect(await old.controller.verifyPassphraseAgainstStore(short) == true,
+                "and it still opens — the floor is about SETTING, never about opening")
+
+        // (3) THE MIGRATION'S CONFIRM is not a setting door: it verifies an
+        // EXISTING passphrase against the vault and re-wraps under it, so a
+        // floor there would refuse her own shorter word at the one moment
+        // she must not be refused.
+        let rewrapped = LockIsolated<String?>(nil)
+        let confirm = MigrationConfirmModel(
+            verify: { _ in (kdf: PassphraseKDF.Descriptor.v1(salt: PassphraseKDF.randomSalt()),
+                            corpusKeyID: "corpus-1", recoveryWrapDigest: nil) },
+            rewrap: { passphrase, _, _, _ in rewrapped.setValue(passphrase); return nil },
+            clearPending: {})
+        await confirm.confirm(passphrase: short)
+        #expect(confirm.lastError == nil && confirm.done)
+        #expect(rewrapped.value == short, "the short existing word was re-wrapped, not refused")
+    }
+
     // MARK: - RUN A batch A2, row 11 — the ceremony's root presenter (KnownIssues 40)
 
     /// **THE DEAD REPLACE-ALL-KEYS DOOR, and the two presenters that
