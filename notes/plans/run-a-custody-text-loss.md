@@ -960,7 +960,13 @@ where it could not be (the unreadable-vault world), with the residual named hone
 whose vault was born wrap-free by a **14b-era build** and that has never generated words would still
 reach the mint; no build in the tree can create such a vault, and hers is not one (her words exist).
 
-**Reverts:** NO REVERT IN FLIGHT. Every behavioural revert is announced HERE before it starts, taken
+**Reverts:** **REVERT R1 STARTING (row 11, from the COMMITTED state `d46f4c07`)** —
+`App/Variorum/Shared/ProtectionController.swift`, `ceremony(for:)` put back to the pre-row-11 world
+(only the Settings pane ever presents: `host == .pane ? activeSwitch : nil`, and `openSwitch` no
+longer decides a host), which is exactly the shape KnownIssues 40 describes. Expected: arms 1, 2 and
+4 of `theCeremonyHasARootPresenterWhenNoProtectionPaneIsMounted` red, arm 3 (Settings' own road)
+green. To be restored by `git checkout --` from the REPO ROOT with `git diff` empty before
+"restored" is written. Every behavioural revert is announced HERE before it starts, taken
 from a COMMITTED state, and restored by `git checkout --` from the REPO ROOT with `git diff` empty
 before "restored" is written. If a later session reads "revert starting" here with no "restored"
 after it, check `git diff` first: an uncommitted diff in a mechanism file is a revert in flight —
