@@ -4661,3 +4661,55 @@ mechanism with both traces, the fix, the class sweep, the walk's 18 captures (gi
 `notes/plans/13u4-screens/f2/`), QUESTIONS #134, the KnownIssues row-53 close, the ledger row, and
 this record. What is OPEN is hers: **#134**. What is owed elsewhere: **the phone's parity row**,
 which this unit deliberately did not reach for.
+
+---
+
+## UNIT F3 BRIEF — THE INDEX COLD-COLUMN HEIGHTS (F1's residual, pulled in at R-13u4-8; the LAST build unit; self-contained — read in this order)
+
+**Read first, in full:** (1) this file's Status banner · THE SIZING-AND-RULINGS SITTING RECORD
+(**R-13u4-8 is why you exist** — her verbatim bar: *"after 13u's sessions i'd like to be able
+to click around everywhere with no issues"*; R-13u4-6 the cast) · THE LEDGER's F3 row ·
+ENVIRONMENT TRAPS · CAST & DISCIPLINE **+ the ORCHESTRATOR NOTE (pathspec-limited staging)** ·
+the ten prior UNIT RECORDs' walker facts (F2's four are the freshest). (2) **UNIT F1's RECORD
+in full — your foundation:** the adoption you build on, the oscillation measurements
+(39k → 56k → 143k → 80k → 115k pt inside six seconds), the 2-of-5 cold-stall rate (your
+red-on-old baseline), the retired policies and why (12 blind hops FLING the page), the shipped
+policy's honest `gaveup`, and the harness fixture with delayed TOC realization. (3) **The
+KnownIssues residual row's full text** (the remedy is named IN the row: the pane's note rows
+stand at heights derived from their blocks' lengths — `ProseHeightModel`/`FlowHeightEstimate`
+over the already-cached `Queries.blockExtents` / `BookViewModel.flowExtents` — the brains the
+Outline and the reading flow already consume). (4) **13u2b UNIT 1's RECORD** in
+`notes/plans/phase-13u2b-landing-seam.md` — the outline-heights shape you are porting to this
+surface. (5) The code: `BookIndexView` (the `LazyVStack`, F1's adoption, the ~40 pt
+placeholder rows) · `BookViewModel.flowExtents` (cached, keyed by the entry-ID list) ·
+`ProseHeightModel`/`FlowHeightEstimate` · Act 10 batch H's flow-estimate consumption. Do your
+own reading.
+
+**The build.** The Index pane's unrealized note rows stand at LENGTH-DERIVED estimated heights
+from the first frame — placeholder frames sized by the estimate, replaced by real heights as
+`observeBlockTOC` returns — so the column's geometry is approximately honest before any text
+arrives and a cold landing's aim survives realization. Constraints: (a) **P1** — the estimate
+consult is ∝ the book, once per book model (the `flowExtents` cache is the road; state the
+cost shape in the record; nothing new at autosave rate); (b) the estimate is a STAND-IN, never
+a cap — realization replaces it and the manifest learns the real height (row 64's chip-wrap
+lesson: heights the model doesn't know about are the drift class — say how yours can't); (c)
+F1's landing policy may then relax where measurement says the column is honest now — but keep
+`gaveup` as the net (a landing that still cannot arrive stops honestly; #129's product half
+stays HERS, build no words for it); (d) not the editor seam — say so in the seam list.
+
+**Evidence — the trial table is the red-on-old:** the cold scenario staged exactly as F1
+staged it (quit, reopen the book, deep chapter click within the first seconds) — **the pre-fix
+baseline is F1's measured 2-of-5 stall; run ≥8 cold trials on your tree and the stall rate is
+the verdict**, alongside the harness pin on F1's delayed-realization fixture (red on the
+pre-fix tree by behavioural revert). Warm must not regress: several warm trials against F1's
+21-of-21. The walk captures cold and warm, both voices not required (geometry), one
+appearance capture set. Captures to `notes/plans/13u4-screens/f3/`. The touched Mac suites +
+the acceptance spine (REAL TYPE NAMES; the file-name and zsh-split traps are in the records)
+at the end. Core/iOS not expected (App-side only — if a `Sources/` or `Shared/` change
+appears necessary, stop and report). PROVISIONALs from **#135**. Stage pathspec-limited.
+
+**Your record:** append a `## UNIT F3 RECORD` section to THIS file with LIVE STATUS from the
+FIRST commit (PENDING marks), the cold-trial table (pre/post), the estimate's cost-shape
+statement, the drift-class answer (how a wrong estimate corrects), and the seam-file list;
+flip the ledger's F3 row and the KnownIssues residual row's cell in your closing commit. The
+checkpoint protocol binds from the first commit.
