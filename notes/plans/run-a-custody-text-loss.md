@@ -721,6 +721,50 @@ resumes.
 
 ---
 
+## BATCH A2 RECORD — 17l items 1–4/6–7 + 17n + the phrase-transit pin
+
+**WHAT I DID NOT DO (this record's first line, per the standing rule):** *(written at the skeleton;
+flipped to the true statement as the batch proceeds.)* At this line's first writing: nothing built
+yet. Standing fences honoured throughout and re-stated so the closing line can be checked against
+them — zero `Sources/VariorumCore/Sync/` lines (17l item 5's `CorpusRotation.swift` is RUN B's), zero
+schema, zero migration (the marker stays 8), nothing touched in `/Applications` or her real store,
+no write or delete anywhere in her login keychain (row 9's confirmation is a READ-ONLY `security`
+inventory, never `-w`), no author-only call taken.
+
+**Session opened 2026-09-21.** Implementer: `opus-implementer` (fresh session, batch A2 only).
+Read before any code, in the brief's order: the run file's Status banner · FENCES · BINDING
+PRINCIPLES · LEDGER rows 8–15 + the kickoff scope rulings on rows 13 and 15 · ENVIRONMENT TRAPS ·
+CAST & DISCIPLINE · the BATCH A1 RECORD; `notes/plans/phase-17-standing-fixes.md` § 17l (items 1–4,
+6–7; item 5 read only to know its fence) and § 17n; `notes/QUESTIONS.md` #90 whole incl. HER
+RULINGS block; `notes/KnownIssuesAndTechDebt.md` rows 32 · 38 · 39 · 40 (+ 41, the fenced one);
+`notes/plans/pre-13x-postures-design.md` §16, THE LADDER's rows MINOR-N1 · N3 · N4 · NIT-N8 ·
+MAJOR-3 and the F3 record's eight items; the copy constants' homes; the named code.
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims marked PENDING)
+
+| Row | Item | Status |
+|---|---|---|
+| 0 | Record skeleton + `run-a-screens/a2/` | **DONE** — this commit |
+| 8 | **17l item 1** — the seeder's discover-then-mint latch + the ensure's purge consult | NOT-STARTED |
+| 9 | **17l item 2** — the migration drill's escrow leg + her-Mac READ-ONLY confirmation | NOT-STARTED |
+| 10 | **17l item 3** — her four ruled #90 wording changes, both platforms | NOT-STARTED |
+| 11 | **17l item 4** — the dead Replace-All-Keys door: present from the root | NOT-STARTED |
+| 12 | **17l item 6** — the ceremony's *(0 of 0)* → *preparing…* face | NOT-STARTED |
+| 13 | **17l item 7** — NIT-N8's face VERIFIED post-13u4 + MINOR-N4 (2)'s copy PROVISIONAL | NOT-STARTED |
+| 14 | **17n** — the encryption passphrase's 12-character floor at every SETTING door | NOT-STARTED |
+| 15 | **KnownIssues 32** — the phrase-transit one-arm VERIFICATION pin | NOT-STARTED |
+| — | Closing evidence | NOT-STARTED |
+
+**Deaths and resumes:** none yet.
+
+**Reverts:** NO REVERT IN FLIGHT. Every behavioural revert is announced HERE before it starts, taken
+from a COMMITTED state, and restored by `git checkout --` from the REPO ROOT with `git diff` empty
+before "restored" is written. If a later session reads "revert starting" here with no "restored"
+after it, check `git diff` first: an uncommitted diff in a mechanism file is a revert in flight —
+restore it from git, never adopt it.
+
+---
+
 ## BATCH A3 BRIEF — 17m, the Re-link-your-Apple-account door (self-contained; read in this order)
 
 **Read first, in full:** (1) this file's Status banner · FENCES · BINDING PRINCIPLES · THE LEDGER
