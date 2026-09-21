@@ -1636,6 +1636,23 @@ surface, its own pins) — the class must not be recorded into a third adjacency
 materially different in grammar, record it with an owner and the reason. #137(b)'s sentence may be
 extended to stay true (a record-truth edit, flagged as such).
 
+**THE ROUND-2 FINAL CALLS + FIX PASS (the reviewer's; the full record is its file's own; head
+`2327a355`):** MAJOR **CONFIRMED, BUILT BOTH PLATFORMS** — the binding-5 sweep CONFIRMED the Mac
+panel as a real loss road on BOTH arms and fixed it in the same pass (no third adjacency): ONE
+brain `Shared/CommentDraftPark.swift`, the phone's instance on `MobileCommentsController` with the
+`DraftOutcome` funnel parking at refusal time, the Mac's on `AppSession` beside `quickNotePark`
+(the home that outlives the per-presentation model), both restoring at the same block's next open
+with the one spoken line. Pins: `MobileCommentParkTests` (5) + `CommentPanelParkTests` (5), the
+restore arms RED on old; reverts R2-A (8 issues, guard green) and R2-B (10 issues, guard green)
+both discriminating in binding 1's direction. NIT **CONFIRMED, FIXED** `40939923` — the cost-model
+sentence names the close-road flight window as its own class; #137(b) extended, flagged as a
+record-truth edit. **QUESTIONS #140** logged (six ratify items; next free #141). Closing runs: Mac
+90/13 with the eleven-suite spine inside · mobile 11/3, all green; zero `Sources/` lines in the
+pass. **Orchestrator verification: the five commits spot-checked, `Sources/` diff-empty over the
+pass confirmed, `CommentPanelParkTests` + `QuickNoteParkTests` re-run directly — 11/2 green.
+Next: the implementer's sanity pass over `b5e229b3..40939923`; then ROUND 3 (fresh reviewer over
+this round's fixes — owed, the MAJOR was new; the ladder's cap).**
+
 ---
 
 ## CLOSEOUT DUTIES (the standing ritual, run-shaped — nothing here runs until the ladder ends)
