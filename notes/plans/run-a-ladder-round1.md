@@ -9,14 +9,18 @@ three adjudications) + `notes/plans/phase-17-standing-fixes.md` §§17b/17l/17m/
 are traced; the round's final list is the FINDINGS section when the STATUS line below says
 COMPLETE.**
 
-**STATUS: IN PROGRESS — production diff read whole; findings below are traced and final unless
-marked; targeted-suite verification and the remaining test-file reads still running.**
+**STATUS: COMPLETE — round 1's findings are final.** Production diff read whole (core + app +
+tests + notes); all 16 ledger rows checked against their pins and the code; run by my own hands:
+the FULL core suite (**1639 tests in 177 suites — ALL GREEN**, matching the record) and the two
+new core suites in isolation (`ContentReplacementRedoTests` + `PromotePicksArchivedPickTests`,
+8/2 green). Zero commit trailers across the run's 57 commits (grep-verified). Findings: **1
+MAJOR · 1 MINOR · 2 NIT**; six suspicions traced to NOT-findings and recorded below.
 
 ---
 
 ## FINDINGS (severity-ranked)
 
-### [MAJOR] · App/Variorum/Shared/AppSession.swift:132–136 (`QuickNotePark.park`) + App/Variorum/Variorum/VariorumAppDelegate.swift:80–92 · The 1b rider's "a second consecutive ⌘Q always proceeds" is FALSE whenever the pad is OPEN — every ⌘Q re-parks and re-arms the one-shot, so a store that keeps refusing declines the quit indefinitely
+### [MAJOR] · App/Variorum/Shared/AppSession.swift:717–721 (`QuickNotePark.park`) + App/Variorum/Variorum/VariorumAppDelegate.swift:84/93/118 · The 1b rider's "a second consecutive ⌘Q always proceeds" is FALSE whenever the pad is OPEN — every ⌘Q re-parks and re-arms the one-shot, so a store that keeps refusing declines the quit indefinitely
 
 **What's wrong.** The recorded ruling (run plan, ROW 7 RULING binding 4: *"a second consecutive
 ⌘Q always proceeds"*; QUESTIONS #137(c), the author-facing text: *"Press ⌘Q again and it quits,
@@ -28,8 +32,8 @@ violated on exactly the road the pin describes as covered.
    registered) → `Task { … await registry.finalizeAll() … }` → the pad's closure runs
    `pad.finalizeAtQuit()` = `take()` (QuickNoteView.swift:137, :159).
 2. `take()`'s `.refused` arm calls `session.quickNotePark.park(text:…)`
-   (QuickNoteView.swift:~208), and `park()` sets `held` **and unconditionally
-   `declineSpent = false`** (AppSession.swift:135).
+   (QuickNoteView.swift:216), and `park()` sets `held` **and unconditionally
+   `declineSpent = false`** (AppSession.swift:720).
 3. `reply(toApplicationShouldTerminate: !declineQuitIfACaptureStands())` →
    `declineQuitOnce()` → held ≠ nil, declineSpent == false → **declined** (spent = true). Correct.
 4. ⌘Q #2 → the SAME path: `finalizeAll()` runs again → `take()` refused again → `park()` again →
@@ -97,7 +101,7 @@ so no red-on-old pin exists — recorded as a hazard note, not a defect. The exi
 registration machinery has the same property (the run plan's own R1-10 precedent records the
 class), so this is at most a comment's worth of work.
 
-### [NIT] · App/Variorum/Shared/AppSession.swift:133 (`QuickNotePark.park`) · The whitespace guard is dead code
+### [NIT] · App/Variorum/Shared/AppSession.swift:718 (`QuickNotePark.park`) · The whitespace guard is dead code
 
 `take()` only reaches `.refused` after `QuickNoteMint.mints(capture.text)` passed, so
 `park(text:…)` is never called with whitespace-only text; the
@@ -137,6 +141,94 @@ assertion. No pin possible (unreachable); cleanliness only.
   cross-device launch remainder is the new KnownIssues row (owner 17e, #138(f)) and is correctly
   out of scope here.
 
-## CLEAN BILL — checked and found solid
+## CLEAN BILL — load-bearing things specifically checked and found solid
 
-*(final list in the round's closing report)*
+1. **Core suite, my own hands:** `swift test` → **1639 tests in 177 suites, ALL GREEN** — the
+   record's claim exactly. The two new core suites isolated: 8 tests in 2 suites, green.
+2. **P5 (`promotePicks`)** — the fix traced through all four livePick × carryFans arms plus the
+   dangling-chosen corner: I10-at-birth is impossible through the pick leg on every arm, the copy
+   carries exactly what the column showed, `sourceChosenID`'s duplicate semantics are preserved,
+   and the pins drive the archived-pick world both ways (chosen-only and carry-fans) plus the
+   live-pick and unknown-pick guards.
+3. **P6 (`clearRedoFuture`)** — AppSpec §9's rule applied at exactly the two recovery-door acts;
+   every production `deleteContainer` call site checked (VersionActs:71, NoteDeletion:180,
+   SnippetsSurface:363, TutorialSeeder:241/244) — all are genuine new structural acts and none
+   sits inside an undo-inverse or redo-reapply closure, so undo↔redo ping-pong is untouched; the
+   clear runs post-write so a refusal changes nothing; the guard pin proves the undo history is
+   untouched; both rewritten pins (`RedoStackTests` / `SmartConversionTests`) had genuinely staged
+   their state via the now-outlawed behavior and correctly moved to below-ops tombstones; the
+   undo-side residue is measured, pinned as documented behaviour, and owned (17e, #136(b)).
+4. **P7 (flush-first branches)** — all six doors verified riding `AppSession.runCopying`
+   (branchTake, branchTakeRevealed both hosts, branchIntoColumn, addWriteColumn,
+   replaceColumnWithNewWrite, writeNewTakesEverywhere); the sweep table's SAFE verdicts
+   spot-checked (`newBlankVariant` mints `''`; `mintCaretTake` always flushed; the phone's
+   `branchDisplayed` already flushed; WriteTakesPanel's growth door calls `model.branchTake`);
+   `flushExistingAutosave` flushes the existing coordinator and never mints one (13l R2-1 kept);
+   the negative half is its own pin.
+5. **P4 (comments draft)** — clear-only-on-landed with the edit target surviving; the
+   latch-turned-away arm returns false with no refusal spoken; the pins drive the real UIKit
+   door (mounted sheet, key window, a real seal). The one corner that remains is the MINOR above.
+6. **P14 (quick-note read failure)** — identity owned first, the thrown read distinguished from
+   the empty result through the endorsed defaulted seam, the double-mint killed at
+   `armMintClock`'s own guard, and the `.saved` + `handoffHold` hold matching the in-file A1-19
+   precedent; the ordinary road guarded by its own pin.
+7. **P36** — the marker restore matches its two sibling guards; restoring the stale value is
+   safe because every application path re-reads fresh before applying.
+8. **Row 7 (the park, minus the MAJOR)** — refused-captures-only with the guard pin; restore
+   clears in the same breath (no ghost, idempotent); `.filed`/`.nothingToFile` clear; the close
+   road's false sentence replaced with one that is true; parked from `submitted`, never `text`.
+9. **Row 8 (seeder latch + the decision that outlives the tombstone)** — the latch is
+   `@MainActor`-isolated with no suspension between check and insert, keyed (session, book),
+   waiters always resumed by the holder's `defer`, the deciding re-discovery INSIDE the latch;
+   the purge-consult substitution's premise verified myself at
+   `Server/supabase/10_phase13j_purge.sql` (the ledger is ids-only by design — the entry's named
+   consult is unbuildable without a disclosure regression); the mark's write leaf injected in
+   every test world that reaches the roads (grep across both test targets); the launch-seeder
+   residual correctly recorded, not fixed, with owner 17e and her options at #138(f).
+10. **Row 9 (drill escrow leg)** — the override touches only the throwaway store-id's item; the
+    real-scope inertness pin (corner 47) stands beside it; the her-Mac negative honestly framed
+    as corroboration (a flagless `security` search cannot see a synchronizable item) with
+    `migrated2a = 1` as the strong answer.
+11. **Row 10 (her four wordings)** — all four landed as constants with pins on BOTH platforms;
+    the ledger-46 order pinned as an order; `followAsksNothing` is byte-equivalent to the old
+    model predicate (checked against `50e581fa`'s PostureFollowModel:63–74); the Chapter 7 pin
+    reads the shipped resource itself.
+12. **Row 11 (root presenter)** — two presenters, one model, host decided once at `openSwitch`;
+    `PostureSwitchSheet` runs `.task { await model.start() }` itself so the root-hosted ceremony
+    starts exactly as the pane-hosted one; the phone binds `activeSwitch` directly and is
+    untouched by the host machinery; the count cannot go negative.
+13. **Row 12 (*(0 of 0)*)** — the gate is `total > 0` (first window), never done==0; the
+    one-brain refactor byte-preserves all four sheets' arms (minting/picking-up kept as the
+    parameter); the grep pin bans a fifth copy.
+14. **Row 13** — NIT-N8's face re-verified with the PANE mounted at 13u4's 720×552 and read two
+    honest ways; `WordsCeremony.regenerated` set only after a generate that succeeded; the tail
+    rides only the instance `wording` (the post-screens failure set) with the typed-words guard.
+15. **Row 14 (the floor)** — `passphraseFloor` named once; the call-site sweep run myself
+    (`setPassphrase`/`setLocalPassphrase`/`validated` across Shared + both apps): every SETTING
+    door floors, and the two deliberate negatives (the unlock primitive; the migration's
+    confirm re-wrap) are pinned as negatives.
+16. **Row 15 (phrase transit)** — `VaultTie.make`'s arms traced; `unreadableReason` set only in
+    `.newerFormat`; `PhraseOffer.take` refuses before the mint with nothing on the store or key
+    file; the passphrase door already refused on `.couldNotCheck` before the phrase half; arms
+    1–2 green-either-side as the row's own verification criterion, arm 3 red-on-old.
+17. **Row 16 (the re-link door)** — reads and never mints (R1 discriminated exactly that);
+    the consented-id guard at the act (R2 discriminated exactly that); all five refusal arms
+    leave the vault's revision unmoved, pinned over the REAL `EncryptionSession` + RPC emulation
+    enforcing proof, CAS and whole-row replace; `relandAppleHeldCopy` read myself — CAS on the
+    fetched revision + `KeyProof.wireToken(master:)`, no mint anywhere; the posture/follow races
+    at confirm time are backstopped by the server's key proof (traced; recorded in the
+    not-findings list); the pane's render gate matches P-2; `KeyActPassphrase` is a verbatim
+    hoist (old `verifyPassphrase` compared line-by-line) and the ceremony's wording is
+    preserved through its own `lastError`; keeping the `healAppleHeldCopy` name with two callers
+    is CONCURRED with (the doc is widened, authorization lives at the callers, and a rename
+    churns four shipped pins for a word — the adjudication's invitation considered, declined).
+18. **Fences** — zero `Sources/VariorumCore/Sync/` lines in the combined diff (the core diff is
+    Operations+Container/NoteVersions/Versions + UndoStack only); zero schema, marker 8; nothing
+    tracks word-level change, nothing copies text across entities outside the deliberate copy
+    ops, and no new road scales with corpus size (the latch's re-discovery is one indexed read
+    per seed act).
+19. **Records** — QUESTIONS #136–#139 present and accurate to the code (with the one exception
+    the MAJOR names in #137(c)); the two new KnownIssues rows carry owners (17e); the PL-37
+    parity row; the FAQ + book edits match their batch records; `run-a-screens/` gitignored;
+    test-count arithmetic consistent across all three batches (core +8/+2, Mac +14/+3 → +10/0 →
+    +8/+1, mobile +6/+2 → +3/0 → 0); **zero commit trailers** across the run's 57 commits.
