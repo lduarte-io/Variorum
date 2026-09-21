@@ -3386,6 +3386,13 @@ and `barCountsFace` (`CountsFace.key`).
 11. **Every new chrome `fixedSize` text carries a deliberate `lineLimit`** (P-8): the two new
     faces' labels are `lineLimit(1)`, and `FlippingStamp`'s own doc says why the LABEL must
     carry it when the component is `fixedSize`. The 27 OLD sites are S3's (R-13u4-5).
+12. **The restyle conformance was taken where this unit's work touched a surface, and no
+    further.** The Timeline was the real one — it had no `VoiceTokens` at all, so conforming it
+    meant the voice's type and inks, `tokens.surface` under its list, and its *Load More* on the
+    calm button style. The Library's List and Notes modes were only moved OUT of, never
+    restyled: their grammar is already the voice's, and a restyle there with no row asking for
+    it would be a second change hiding inside two mechanical moves whose whole proof is that
+    nothing changed.
 
 ### CLOSING RUNS (at the unit's END — never the full suite at the start)
 
