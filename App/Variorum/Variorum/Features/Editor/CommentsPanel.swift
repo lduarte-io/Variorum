@@ -44,6 +44,27 @@ final class CommentsPanelModel {
     init(session: AppSession, blockID: String) {
         self.session = session
         self.blockID = blockID
+        // **RUN A ladder round 2 (the MAJOR, binding 5's sweep) — the open
+        // of the SAME block's panel takes a REFUSED draft back.** This
+        // model dies with its presentation (Close, a click outside the
+        // popover, ⎋⎋), so a draft the store refused used to die with it —
+        // row 65's class on the Mac's own comment surface. The park clears
+        // in the same breath (the panel is the only home again; a
+        // re-refusal re-parks): the add draft back into the add area, a
+        // refused in-place edit back onto its row. One recorded corner
+        // (QUESTIONS #140): a parked EDIT draft whose comment was deleted
+        // elsewhere while parked is pruned by the first snapshot's
+        // `survivingDrafts` — over-preservation everywhere else, never loss.
+        if let heldDraft = session.commentDraftPark.take(forBlock: blockID) {
+            if let id = heldDraft.commentID {
+                drafts[id] = heldDraft.text
+            } else {
+                addDraft = heldDraft.text
+            }
+            // The receipt register, deliberately — nothing is being
+            // refused; the line says why the box is not empty.
+            status = .receipt(CommentDraftPark.restoredNote)
+        }
     }
 
     private(set) var comments: [BlockComment] = []
@@ -188,6 +209,21 @@ final class CommentsPanelModel {
             }) {
                 addDraft = ""
                 filedCount += 1
+                // A landed submit of the parked block clears the park — a
+                // draft with a row must never come back as a ghost (any
+                // refused draft still standing lives in this OPEN panel
+                // and re-parks at its own next refusal).
+                session.commentDraftPark.clearIfHeld(blockID: blockID)
+            } else {
+                // **Parked at REFUSAL time, from the SUBMITTED text** (RUN
+                // A ladder round 2, the MAJOR — binding 5's sweep): this
+                // model dies with its presentation, and the add draft is
+                // deliberately never filed on leaving (#118(a)), so the
+                // refusal was one Close from gone. An UNSUBMITTED draft
+                // still parks nothing — her ⎋-clear and close stay her
+                // ordinary abandon (the guard pin).
+                session.commentDraftPark.park(
+                    blockID: blockID, text: text, commentID: nil)
             }
         }
     }
@@ -209,6 +245,17 @@ final class CommentsPanelModel {
             if await perform({ ops in try ops.editBlockComment(id, text: text) }) {
                 drafts[id] = text
                 justSaved.insert(id)
+                session.commentDraftPark.clearIfHeld(blockID: blockID)
+            } else {
+                // The refused in-place edit rides the park WITH its row
+                // (the phone's editingID arm, in the Mac's grammar). The
+                // `onDisappear` net's close-time retry is exactly this
+                // call, so the refusal at close parks with zero close-site
+                // changes (binding 2) — and ONE held draft, newest wins,
+                // is the ruled bounded trade when several dirty rows
+                // refuse at once (QUESTIONS #140).
+                session.commentDraftPark.park(
+                    blockID: blockID, text: text, commentID: id)
             }
         }
     }

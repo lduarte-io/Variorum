@@ -490,6 +490,16 @@ final class AppSession {
     /// refusal reached a road that had no pad left.
     let quickNotePark = QuickNotePark()
 
+    /// **RUN A ladder round 2 (the MAJOR, binding 5's sweep) — where a
+    /// REFUSED comment draft waits on the Mac.** Session-scoped beside the
+    /// quick-note park and for the same reason: `CommentsPanelModel` is
+    /// minted per presentation and dies with its sheet or popover, so a
+    /// draft the store refused died with it. The phone's park lives on its
+    /// comments CONTROLLER (the ruling's letter — that controller outlives
+    /// its sheet); the BRAIN is the one shared type either way, so the two
+    /// doors cannot drift. PROVISIONAL, QUESTIONS #140.
+    let commentDraftPark = CommentDraftPark()
+
     /// Phase 13b Stage 1b (P-1/P-4): the ONE command-routing brain — the
     /// menu bar/palette/bars route surface commands and mode switches
     /// through this; surfaces register handlers by composition. Replaces
