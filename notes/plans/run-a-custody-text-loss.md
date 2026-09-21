@@ -746,7 +746,7 @@ MAJOR-3 and the F3 record's eight items; the copy constants' homes; the named co
 |---|---|---|
 | 0 | Record skeleton + `run-a-screens/a2/` | **DONE** — this commit |
 | 8 | **17l item 1** — the seeder's discover-then-mint latch + the ensure's purge consult | **FIXED** — pins `EncryptionBookDoorTests` (3 new), RED measured on the pre-fix tree TWICE (5 issues across the 3; the 5 standing tests green), green after at 24/2. The purge consult is NOT the ledger — the ledger is content-free by design; the trace and the substitution are recorded below |
-| 9 | **17l item 2** — the migration drill's escrow leg + her-Mac READ-ONLY confirmation | NOT-STARTED |
+| 9 | **17l item 2** — the migration drill's escrow leg + her-Mac READ-ONLY confirmation | **FIXED** — the drill RED first with its expectation quoted, then green under `TEST_RUNNER_VARIORUM_MIGRATION_DRILL=1` (**5 tests in 2 suites**, the leg's own line firing). The her-Mac confirmation run READ-ONLY, commands + verbatim answers below, with the caveat that makes the negative honest |
 | 10 | **17l item 3** — her four ruled #90 wording changes, both platforms | NOT-STARTED |
 | 11 | **17l item 4** — the dead Replace-All-Keys door: present from the root | NOT-STARTED |
 | 12 | **17l item 6** — the ceremony's *(0 of 0)* → *preparing…* face | NOT-STARTED |
@@ -832,6 +832,77 @@ Measured RED on the pre-fix tree **twice** (the `markSeededBook` leaf existed bu
 so the red is a true pre-fix measurement, not a revert): 5 issues across the 3 new tests, the suite's
 5 standing tests green both times. Green after the fix: `EncryptionBookDoorTests` +
 `SampleLibraryTests` **24 tests in 2 suites, ALL GREEN**.
+
+### ROW 9 (17l item 2 / KnownIssues 39) — THE DRILL'S ESCROW LEG, AND HER MAC'S READ-ONLY CONFIRMATION
+
+**RED FIRST, from the drill's own inventory** (run under
+`TEST_RUNNER_VARIORUM_MIGRATION_DRILL=1`, pre-fix):
+
+```
+MIGRATION-DRILL| dress: escrow add 0 (No error.)
+MIGRATION-DRILL| migration 2a: no legacy iCloud escrow item
+✘ … ProtectionMigrationDrillTests.swift:254:9: Expectation failed:
+   (after["legacy ESCROW (synchronizable, raw key)"] → true) == false
+```
+
+**The mechanism**, confirmed in the code rather than assumed: `LegacyLegs.forScope` hands every
+scope but the REAL one an INERT set (`ProtectionMigration.swift` — corner 47's fix: on iOS the dev
+build shares the Release build's keychain, and Q3's early run watched a dev store's migration delete
+the real store's legacy item), and the drill runs under `drill-<uuid>` by the tripwire's law. The
+drill already overrode the two PLAIN-item leaves (`legacyPlainMaterial`, `deleteLegacyItems`) for
+exactly this reason and never the escrow pair — so leg 2 read "nothing" and its expectation could not
+fire by construction. **The drill was the drift; the production rule is right.**
+
+**The fix (drill-side only, no production line):** `leaves.loadLegacyEscrow` /
+`leaves.removeLegacyEscrow` overridden onto `StoreKeyGuardKeychain`'s real functions, with the reason
+at the line — the escrow item is keyed by STORE ID alone (`legacyEscrowQuery(storeID:)`, service
+`io.lduarte.Variorum.store-key-escrow`), and this store id belongs to a key file minted seconds
+earlier in a temporary directory, so the two leaves can only ever see the throwaway item the drill
+itself added. The ownership guard stays the migration's own (`escrowed == facts.key`).
+
+**GREEN, the leg firing** (same env var, `ProtectionMigrationDrillTests` + `SessionTokenBindingTests`):
+
+```
+MIGRATION-DRILL|   PRESENT — legacy ESCROW (synchronizable, raw key)     ← BEFORE
+MIGRATION-DRILL| migration 2a: legacy iCloud escrow item removed → true
+MIGRATION-DRILL|   absent  — legacy ESCROW (synchronizable, raw key)     ← AFTER
+✔ Test run with 5 tests in 2 suites passed after 0.220 seconds.
+```
+
+The REAL scope's live road keeps its own pin beside it in the same run
+(`SessionTokenBindingTests.theLegacyLegsAreInertForADevScopeAndLiveForTheRealScopeOnly`), so the
+drill's override cannot be mistaken for a relaxation of corner 47.
+
+**HER MAC — the READ-ONLY confirmation, commands and answers verbatim.** No `-w`, no `-g`, no write,
+no delete, nothing in her login keychain touched:
+
+```
+$ security find-generic-password -s "io.lduarte.Variorum.store-key-escrow"
+security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.   (exit 44)
+
+$ security find-generic-password -s "io.lduarte.Variorum.store-key-escrow" \
+      *[removed for publication]*
+security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.   (exit 44)
+
+$ defaults read io.lduarte.Variorum | grep migrat
+    *[removed for publication]*
+    *[removed for publication]*
+```
+
+**What that is worth, said exactly.** The third answer is the strong one: her REAL store
+(scope `Variorum`, store id `854b8c49-…`) carries `migrated2a = 1` with the confirm no longer
+pending — the §11 migration ran to completion under the one scope where `LegacyLegs` is LIVE, so
+leg 2 ran its real road there (and the drill above is now the standing proof of what that road does).
+**The two `security` answers are corroboration, not proof, and the reason is in the code:** the
+legacy escrow item carries `kSecAttrSynchronizable`, and a search that does not carry that attribute
+does not match synchronizable items (`StoreKeyGuard.swift`'s own measured note: *"a flagless delete
+is a silent no-op"*) — the `security` CLI sets no such flag, so "could not be found" cannot by itself
+distinguish "gone" from "invisible to this tool". I did not manufacture a calibration for it, because
+the only ways to get one are a WRITE to her login keychain or a signed probe carrying the app's
+keychain access group — the first is forbidden by this run's own fence and the second is not
+something a session can produce. The unified log, which would have carried the window's own
+`migration 2a: legacy iCloud escrow item removed → …` line, has rotated (the KnownIssues row said so
+at the closeout). Recorded as it is rather than dressed up.
 
 **Reverts:** NO REVERT IN FLIGHT. Every behavioural revert is announced HERE before it starts, taken
 from a COMMITTED state, and restored by `git checkout --` from the REPO ROOT with `git diff` empty
