@@ -53,6 +53,22 @@ struct PostDetailView: View {
         let help: String
     }
 
+    /// **The scraps door's word, named rather than typed** (13u4 UNIT S3 —
+    /// KnownIssues row 68's H pattern: prose that names a door quotes the
+    /// door). The tutorial's "pool & snippets" lesson sends her to this
+    /// button, and a lesson that types the word instead of asking for it is
+    /// exactly how that lesson came to name a "pool menu" no surface had.
+    ///
+    /// **It still says "Scraps", and that is recorded rather than swept
+    /// here:** the pre-13u vocabulary ruling (W8-1) says the scrap area
+    /// speaks as SNIPPETS in every UI string, and this door does not — but
+    /// renaming a door she uses is a vocabulary fix of its own, not row 68's,
+    /// and it would move this door's help, its pins and the phone's twin with
+    /// it. It is in UNIT S3's conformance remainder list. What the constant
+    /// buys meanwhile: the lesson is TRUE today and follows the door the day
+    /// someone sweeps it.
+    static let scrapsDoorTitle = "Scraps"
+
     static let inspectorDoors: [InspectorDoor] = [
         InspectorDoor(
             panel: .tray(revealBlockID: nil), title: TrayPath.menuLabel,
@@ -61,7 +77,8 @@ struct PostDetailView: View {
                 + "everything of its own that is on the \(TrashWindow.days)-day "
                 + "clock, and the originals a divide or a merge kept whole"),
         InspectorDoor(
-            panel: .scraps, title: "Scraps", symbol: "square.on.square.dashed",
+            panel: .scraps, title: Self.scrapsDoorTitle,
+            symbol: "square.on.square.dashed",
             help: "Show the scraps beside the draft — drag one into the page "
                 + "(⌥ carries its whole fan)"),
         InspectorDoor(

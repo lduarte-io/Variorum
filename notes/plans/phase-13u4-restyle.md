@@ -3546,7 +3546,7 @@ CLOSE against what actually shipped):**
 | 4 | **Row 46** — `ShellRouter.blockNamingDoor` on S2's ownership idea | DONE (this commit) — the registrant names itself (the shell's own `windowID`); 4 pins; the mechanism traced below (latent, the architectural arm) |
 | 5 | **Row 63** — the indicator ring respects the gutter's faces (red-on-old owed) | DONE (this commit) — 8 pins; **67 tests in 9 suites green**. The BEHAVIOURAL REVERT is **DONE** — 3 of 8 pins RED on the reverted tree (4 issues), the 5 guards green |
 | 6 | **Row 67** — `Help ▸ Restore Tutorial…` joins the SwiftUI `.alert` grammar | DONE (this commit) — the shell's own confirm channel; 5 pins incl. the door driven with NO seam; **26 tests in 4 suites green** |
-| 7 | **Row 68** — the "pool & scraps" lesson swept against `SnippetsCopy` (H pattern; re-seed consequence recorded) | NOT-STARTED |
+| 7 | **Row 68** — the "pool & scraps" lesson swept against `SnippetsCopy` (H pattern; re-seed consequence recorded) | DONE (this commit) — the prose swept, one H-pattern pin over every door it names; **28 tests in 5 suites green** |
 | 8 | **Row 69** — Block History's rename field no longer OPENS under a seal | DONE (this commit) — the seal WATCHED for as long as the pane is up; the branch a fact on the model; 4 pins; **28 tests in 4 suites green** |
 | 9 | **The Trash fork** — the 2a taste fork's card restyle | DONE (this commit) — calm rows in the voice, **zero structural decisions moved**; the Trash suites ride unmodified |
 | 10 | QUESTIONS #133 (the PROVISIONALs) | NOT-STARTED |
@@ -3959,3 +3959,62 @@ own suites ride UNMODIFIED** — which is the fork's fence stated as evidence.
 `ChromeLineLimitTests` · `CopyRegisterPinTests` → **41 tests in 8 suites passed** (the two grep
 pins deliberately in the run: a restyle is exactly when a literal colour or a limitless
 `fixedSize` slips in).
+
+### ROW 68 — THE "POOL & SCRAPS" LESSON SPEAKS THE SURFACE'S VOCABULARY (piece 7)
+
+**What it said, and why it was worse than out of date:** *"the Snippets area's pool menu switches
+between pools"* — a control **no surface has**. A reader following that sentence looks for a menu
+that is not in the app, which is the copy-truth class 13u3 UNIT H closed twice on the takes lesson
+(and the class whose own pin once LOCKED IN the wrong words by asserting a literal). The whole
+chapter also called the items SCRAPS where every UI string says SNIPPET (the pre-13u vocabulary
+ruling, W8-1).
+
+**Swept, card by card**, against `SnippetsCopy`: the *groups column* and *"all snippets"* replace
+the pool menu; the items are SNIPPETS; a GROUP is the container in the groups-vs-tags card, and
+the door that moves one is named (*Move to Group*); the dashed box's promise is worded as the
+box's own (*a standalone snippet*); *Tags…* is named. **The POOL keeps its name** in the first
+card — R29's bookless-notes room was never part of the Snippets ruling, and sweeping it too would
+have taught her a room that is not there.
+
+**The H pattern as THIS suite practises it, which is the opposite of the obvious thing.**
+`TutorialWherePlacesActsTests`' own doc is explicit: *"the prose is written plainly (never
+interpolated from a constant it means to assert)"* — because a lesson assembled from the constant
+makes the pin vacuous. So the prose is plain and **the pin** ties each door to its own constant:
+`SnippetsCopy.groupsHeader` · `.allGroups` · `.tagsRow` · `.moveRow` ·
+`PostDetailView.scrapsDoorTitle` · `TutorialSeeder.scrapPoolTitle`, plus the two retired forms
+banned by name. *(My first draft DID interpolate; it was rewritten when the suite's rule was read
+at the source. Recorded because the wrong version would have looked more rigorous.)*
+
+**ONE small hoist so the pattern can reach the last door:** the note's inspector button was a
+literal `"Scraps"` inside `PostDetailView.inspectorDoors`; it is `PostDetailView.scrapsDoorTitle`
+now, so the lesson's claim about that button is held to the button.
+
+**THREE words deliberately NOT swept, each with its reason at the code:**
+
+1. **The note's panel door still says "Scraps"**, and that is against W8-1's letter. Renaming a
+   door she uses moves its help, its pins and the phone's twin with it — a vocabulary fix of its
+   own, not row 68's. **It is in the conformance remainder list**; the constant above means the
+   lesson follows it for free the day someone sweeps it.
+2. **The chapter's TITLE** ("pool & scraps"): the phone's seeder holds the same string, and
+   renaming it here alone puts the two tutorials' chapters out of step — the mobile catch-up's,
+   on row 55's own precedent.
+3. **`scrapPoolTitle` ("tutorial scraps")** is a **RESERVED IDENTITY** the restore door's
+   discovery filters on (`discover` → `.filter { $0.title == scrapPoolTitle }`) and the replace
+   confirm names out loud. Renaming it would orphan every already-seeded store's group from
+   Restore Tutorial — a behaviour change wearing a copy change's clothes.
+
+**THE RE-SEED CONSEQUENCE, recorded for the closeout (it joins E3's):** her already-seeded field
+guide keeps the OLD pool-menu sentence until `Help ▸ Restore Tutorial…` re-seeds it. **E3's
+merge-lesson consequence and this one are ONE act for her** — a single Restore Tutorial at the
+closeout brings both current.
+
+**The pin** (`TutorialLibraryActsTests.thePoolAndScrapsLessonSpeaksTheSurfacesVocabulary`):
+"pool menu" and "between pools" banned by name, "a scrap" banned as the item's noun, every door
+asserted from its own constant, the dashed box's promise tied to `SnippetsCopy.entryCue` rather
+than quoted into the prose, and the POOL's own name kept. **RED ON OLD, verified rather than
+claimed:** the seeded text at `bcd34d04` contains "pool menu" once and the word "snippet" zero
+times in that lesson.
+
+**Run:** `TutorialLibraryActsTests` · `TutorialBookShapeTests` · `TutorialWherePlacesActsTests` ·
+`SnippetsDoorsTests` · `SnippetsVocabularyTests` · `PaneMountTests` → **28 tests in 5 suites
+passed**.

@@ -1668,35 +1668,61 @@ enum TutorialSeeder {
             + "notes die is deleting the notes.",
         ])
 
+        // **13u4 UNIT S3 — KnownIssues row 68: this chapter's prose swept
+        // against `SnippetsCopy`'s own vocabulary.** It said *"the Snippets
+        // area's pool menu switches between pools"* while the surface speaks
+        // GROUPS, and called the items SCRAPS where every UI string says
+        // SNIPPET (the pre-13u vocabulary ruling, W8-1: the scrap area speaks
+        // as Snippets, with GROUPS as the container noun; the bookless-notes
+        // POOL keeps its name, which is why the first card's "POOL (sidebar)"
+        // is untouched).
+        //
+        // **The H pattern, as this suite practises it:** the prose is written
+        // PLAINLY — never interpolated from the constant it means to assert,
+        // which would make the pin vacuous (`TutorialWherePlacesActsTests`'
+        // own doc says exactly this) — and `TutorialWherePlacesActsTests`
+        // ties every door named here to the surface's constant, so the next
+        // rename makes the lesson RED rather than merely wrong.
+        //
+        // Two words deliberately NOT swept, both recorded in the unit record:
+        // the CHAPTER'S TITLE (the phone's seeder holds the same string, and
+        // renaming it here alone would put the two tutorials' chapters out of
+        // step — the mobile catch-up's, on row 55's own precedent), and the
+        // seeded group's name `scrapPoolTitle`, which is a RESERVED IDENTITY
+        // the restore door's discovery filters on: renaming it would orphan
+        // every already-seeded store's group from Restore Tutorial, which is
+        // a behaviour change wearing a copy change's clothes.
         let scraps = try lesson(library, "pool & scraps", [
             "Not everything starts as a note. The POOL (sidebar) holds notes "
-            + "that belong to no book yet — drafts in waiting. SNIPPETS (sidebar) "
-            + "holds SCRAPS: loose blocks that aren't notes at all — "
-            + "overheard lines, stray sentences, one-liners you'll want later.",
+            + "that belong to no book yet \u{2014} drafts in waiting. SNIPPETS "
+            + "(sidebar) holds exactly that: loose blocks that aren't notes at "
+            + "all \u{2014} overheard lines, stray sentences, one-liners you'll "
+            + "want later.",
 
-            "A pool named \u{201C}tutorial scraps\u{201D} was seeded for you with two "
-            + "scraps — the Snippets area's pool menu switches between pools, so "
-            + "look for it there. To drag one into a note: open any lesson in "
-            + "Write (\u{2318}1) and press the scraps button in the note's top-right "
-            + "corner (beside References). The scraps sit beside the page — "
-            + "drag one in, and it lands as a COPY with lineage back to the "
-            + "scrap, which stays in its pool. Hold \u{2325} while dragging and the "
-            + "whole fan rides the copy, takes and all (the second scrap has "
-            + "two, to try exactly that).",
+            "A group named \u{201C}tutorial scraps\u{201D} was seeded for you with "
+            + "two snippets \u{2014} the Snippets area's groups column switches "
+            + "between groups, and \u{201C}all snippets\u{201D} at its top shows "
+            + "every one at once. To drag a snippet into a note: open any "
+            + "lesson in Write (\u{2318}1) and press the Scraps button in the "
+            + "note's top-right corner (beside References). They sit beside "
+            + "the page \u{2014} drag one in, and it lands as a COPY with lineage "
+            + "back to the snippet, which stays in its group. Hold \u{2325} while "
+            + "dragging and the whole fan rides the copy, takes and all (the "
+            + "second snippet has two, to try exactly that).",
 
-            "The Snippets area's own dashed box mints scraps: type, \u{23CE}, and the "
-            + "line is kept as a standalone block. Drag pieces out as your "
-            + "drafts want them — copy out is the only direction, so the pool "
-            + "never tangles with your notes.",
+            "The Snippets area's own dashed box mints them: start typing in "
+            + "it, press \u{23CE}, and the line is kept as a standalone snippet. "
+            + "Drag pieces out as your drafts want them \u{2014} copy out is the "
+            + "only direction, so the snippets never tangle with your notes.",
 
-            // 13b 4D (N32(b)/(c) — S4-8/S4-15): scraps are individual
-            // items; the pools-vs-tags distinction said plainly.
-            "Each scrap is its own item and can wear TAGS: right-click a "
-            + "scrap row — here, in the side panel, or on a canvas card — "
-            + "and Tags\u{2026} opens its tag sheet. Worth keeping straight: a "
-            + "POOL is a container (a scrap lives in exactly one; moving it "
-            + "moves it), while a TAG is a label (a scrap can wear many, and "
-            + "filtering by tag never moves anything).",
+            // 13b 4D (N32(b)/(c) \u{2014} S4-8/S4-15): snippets are individual
+            // items; the groups-vs-tags distinction said plainly.
+            "Each snippet is its own item and can wear TAGS: right-click a "
+            + "snippet row \u{2014} here, in the side panel, or on a canvas card "
+            + "\u{2014} and Tags\u{2026} opens its tag sheet. Worth keeping "
+            + "straight: a GROUP is a container (a snippet lives in exactly "
+            + "one; Move to Group moves it), while a TAG is a label (a snippet "
+            + "can wear many, and filtering by tag never moves anything).",
         ])
         _ = scraps
         let scrapPool = try ops.createPool(title: scrapPoolTitle)

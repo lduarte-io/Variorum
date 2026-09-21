@@ -2009,6 +2009,60 @@ struct TutorialLibraryActsTests {
         }
     }
 
+    /// **13u4 UNIT S3 — KnownIssues row 68: the chapter's prose against the
+    /// surface's own vocabulary.** It taught *"the Snippets area's pool menu
+    /// switches between pools"* — a control no surface has — and called the
+    /// items SCRAPS where every UI string says SNIPPET (the pre-13u
+    /// vocabulary ruling, W8-1). That is the copy-truth class 13u3 UNIT H
+    /// closed twice on the takes lesson, and the H pattern is its remedy:
+    /// **the prose is written plainly and every door it names is asserted
+    /// from that door's own constant here**, so the next rename makes this
+    /// lesson RED rather than merely wrong.
+    ///
+    /// **RED ON OLD:** the seeded text at `bcd34d04` contains "pool menu"
+    /// and "switches between pools", and contains neither "groups column"
+    /// nor the word "snippet" at all.
+    @Test func thePoolAndScrapsLessonSpeaksTheSurfacesVocabulary() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let prose = try await db.read { db in
+                try Queries.renderedText(
+                    db, containerID: lessonID(db, bookID: bookID, "pool & scraps"))
+            }
+
+            // The retired control, and the retired noun for the ITEM.
+            #expect(!prose.localizedCaseInsensitiveContains("pool menu"),
+                    "no surface has a pool menu — the groups column is what switches")
+            #expect(!prose.localizedCaseInsensitiveContains("between pools"))
+            #expect(!prose.localizedCaseInsensitiveContains("a scrap"),
+                    "the item's word is SNIPPET everywhere the app says it")
+
+            // The words the SURFACE uses, each read from its own home.
+            #expect(prose.contains(SnippetsCopy.groupsHeader),
+                    "the column that switches, by its own name")
+            #expect(prose.contains(SnippetsCopy.allGroups),
+                    "…and the row at its top that shows every group at once")
+            #expect(prose.contains(SnippetsCopy.tagsRow), "the tag door's own words")
+            #expect(prose.contains(SnippetsCopy.moveRow), "and the move door's")
+            #expect(prose.contains(PostDetailView.scrapsDoorTitle),
+                    "the note's panel door, from the door's own constant")
+            #expect(prose.contains(TutorialSeeder.scrapPoolTitle),
+                    "the seeded group is named by the reserved identity itself")
+            #expect(prose.localizedCaseInsensitiveContains("snippet"))
+
+            // The dashed box's promise is the surface's promise — tied here
+            // rather than quoted into the prose, which would make this line
+            // assert nothing (this suite's own rule, one chapter over).
+            #expect(prose.contains("standalone snippet"))
+            #expect(SnippetsCopy.entryCue.contains("standalone snippet"),
+                    "…and that is what the box itself says")
+
+            // The POOL keeps its name (R29): the bookless-notes room was
+            // never part of the Snippets vocabulary ruling, and a sweep that
+            // took it too would have taught her a room that is not there.
+            #expect(prose.contains("POOL (sidebar)"))
+        }
+    }
+
     @Test func exportsShowTheFansAndTheChapters() async throws {
         try await withTutorialWorld { _, db, bookID in
             let choosing = try await db.read { try lessonID($0, bookID: bookID, "choosing & the board") }
