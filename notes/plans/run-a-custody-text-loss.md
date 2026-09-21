@@ -1275,11 +1275,20 @@ resumes.
 
 ## BATCH A3 RECORD — 17m, the Re-link-your-Apple-account door
 
-**WHAT I DID NOT DO (this record's first line, per the standing rule):** *(PENDING — written in full at the
-batch's close; the running list so far)* no `Sources/VariorumCore/Sync/` line, no `Sources/` line at all, no
-schema, no migration (the marker stays 8), nothing touched in `/Applications` or her real store, no author-only
-call taken, and **no door built for the phone** (17m's entry names Settings, Mac-first; the parity question is
-recorded rather than built).
+**WHAT I DID NOT DO (this record's first line, per the standing rule).** **The door's FACE was never walked** — the
+dev store is in Castle with no account, so the consent screen, the passphrase field and the Done line cannot be put
+on screen there without a real key act on her store, and live iCloud Keychain is not exercisable by an agent at
+all; the face and all five of its refusals are carried by their pins and by two discrimination reverts, and the
+walk photographs the door's ABSENCE in Castle instead (which is its own rule's evidence). **No door was built for
+the phone** — 17m's entry names Settings, Mac-first; the parity question is recorded (QUESTIONS #139(f)), not
+answered. **I did not rename `healAppleHeldCopy`** although it now has two callers, and I did not widen
+`relandAppleHeldCopy` to carry its refusal's reason — both are judgment calls stated at the row below rather than
+taken quietly. **I did not make the door hide itself when the two key ids agree**, and I did not make it mint an
+iCloud key in any arm. Beyond that: **zero `Sources/VariorumCore/Sync/` lines** (the road's engine seams are
+CONSUMED, not edited), **zero `Sources/` lines at all**, no schema, no migration (the marker stays 8), nothing
+touched in `/Applications` or her real store, nothing written to any keychain, no author-only call taken. Nothing
+was dismissed as hollow — row 16 is NEW CAPABILITY, so there was no defect claim to dismiss; what stands in for
+red-on-old is recorded under Reverts.
 
 **Session opened 2026-09-21.** Implementer: `opus-implementer` (fresh session, batch A3 only). Read before any
 code, in the brief's order: this file's Status banner · FENCES · BINDING PRINCIPLES · LEDGER row 16 + its scope
@@ -1302,9 +1311,9 @@ Apple arm, the heal's wire, `openSwitch`/`ceremony(for:)`), `PostureSwitch` (`ch
 | 2 | The Mac face: Settings ▸ Protection's Apple-account section + its sheet | **DONE** — a *Your Apple account* section between the posture cards and Castle's switches (explainer + the door), rendered under P-2's letter (Standard · `.enrolled` · the road wired) and disabled while a ceremony or a follow is on screen; `AppleRelinkSheet` beside `PostureSwitchSheet`. Held in the PANE's `@State`, not on the controller — this door reopens nothing, so row 11's two-presenter rule has nothing to say about it. Mac build green |
 | 3 | The pins (the door's state-transition suite: (i) the orphaned state → a new device enrolls with nothing typed · (ii) the consent names THIS device's account · (iii) the refusal arm writes nothing) | **DONE, green (8/1)** — `VariorumTests/AppleRelinkDoorTests`, the two harnesses joined: a scripted-gate `ProtectionController` (no Keychain, no prompts) + a REAL `EncryptionSession` over the emulated `key_vault` RPC, wired by `wireOneSecretHooks`' own line. The DISCRIMINATION checks (the red-on-old equivalent for new capability) RAN — R1 3 issues, R2 2 issues, each only in the pin whose mechanism was taken away; see Reverts |
 | 4 | The book's Chapter 2 + the FAQ brief's entry (content; the re-seed consequence recorded) | **DONE** — *Encryption Explained* Chapter 2 gains a **"Re-linking your Apple account"** paragraph (the book's register, where keys are named); `notes/stargazing-help-faq-brief-pre13x.md` gains the entry *"I reset my iCloud Keychain — now a new device asks for my passphrase"* with its facts and the Mac-only note. Chapter COUNT unchanged (the drills' 8/9 hold); the manifest hashes the bundled text at runtime, so nothing is stale by construction. **THE RE-SEED CONSEQUENCE joins A2's bundle** — a store that already holds the book keeps the OLD text until her one `Help ▸ Restore "Encryption Explained"` press |
-| — | Closing evidence (targeted suites · `TutorialWalkTests` · the full Mac suite · iOS build · the walk) | **DONE except the walk** — targeted custody/copy **141/11 green** · the book + the ELEVEN Tutorial suites **109/15 green** · the FULL Mac suite **3077 tests in 508 suites, ALL GREEN, ZERO ISSUES** (A2's close 3069/507; +8/+1 = this batch's one suite) · mobile **635/108 with exactly the 4 known issues** (unchanged) · iOS **BUILD SUCCEEDED**. The WALK is next |
+| — | Closing evidence (targeted suites · the Tutorial spine · the full Mac suite · iOS build · the walk) | **DONE** — targeted custody/copy **141/11 green** · the book + the ELEVEN Tutorial suites **109/15 green** · the FULL Mac suite **3077 tests in 508 suites, ALL GREEN, ZERO ISSUES** (A2's close 3069/507; +8/+1 = this batch's one suite, nothing else moved) · mobile **635/108 with exactly the 4 known issues** · iOS **BUILD SUCCEEDED** · the walk captured (3 shots; the door's ABSENCE in Castle is the walkable acceptance, and what cannot be staged is named) |
 
-**Deaths and resumes:** none yet.
+**Deaths and resumes:** NONE — one session, every commit pushed.
 
 **Reverts:** **NO REVERT IN FLIGHT. R1 and R2 RAN from the committed `64a41818` and both DISCRIMINATED** — they are
 the stand-in for red-on-old where the capability is new (there is no pre-fix tree in which this door refuses
@@ -1336,6 +1345,72 @@ the heal (`ProtectionController.healAppleHeldCopy` → `EncryptionSession.reland
 device's custody, `settingAppleHeldCopy`, the CAS on the fetched revision, the key proof) → the reconcile, which
 lands this key file's own copy and re-reads the account. **No new custody semantics, no engine line, no schema.**
 
+### ROW 16 (17m) — THE DOOR AS BUILT, AND THE FIVE CALLS INSIDE IT
+
+**The mechanism, traced in the code rather than taken from the entry.** `ProtectionController.reconcileAppleKey`'s
+heal fires on `read.envelope.appleKeyID == vaultAppleKeyID && apple.id != vaultAppleKeyID && holdsMaster &&
+!read.minted` — F3's MINOR-N1 rule, where a MINT is never proof. So the orphan is reached exactly as the ladder
+says: the account's copy sits under `A₁`; iCloud Keychain is reset (or this Mac signs into another Apple ID);
+`readAppleKeyForReconcile` reads nil, mints `A′` because this device holds M, and lands `A′` on ITS OWN key file —
+`read.minted` is true, so the heal is skipped **by design** and the vault's copy stays under `A₁` forever. From a
+NEW device's side the same state reads `EnrollFacts.AppleState.differentAppleID`, and `reconcileFollow`'s silent
+Standard road (`appleState == .matched` is its gate) never runs. Both halves are pinned in
+`theOrphanedAppleHeldCopyIsReLandedAndANewDeviceThenEnrollsWithNothingTyped`, which drives the REAL roads on both
+devices over one emulated vault.
+
+**What landed, binding by binding.**
+
+- **The brain** — `AppleRelinkModel` (`App/Variorum/Shared/`, so the phone composes it rather than a copy;
+  MobileSoul §3). Phases: `checking` → `consent(Facts)` → `running` → `done` / `failed(String)`.
+- **The door refuses BEFORE any screen** (decision 32's pattern, as F3's MINOR-N4 (1) applied it): Castle (the
+  ceremony's own `wrongPosture` sentence — zero new words), a follow owed (`ProtectionCopy.pickUpKeysFirst`, the
+  sentence every key door speaks), and an iCloud Keychain that hands back NO key (NIT-N8's waiting sentence,
+  reused whole).
+- **It READS the iCloud key and never mints one** — `controller.readAppleKey()`, never `readOrMint`. This is the
+  door's single most load-bearing line: minting here would wrap the account's master under a key iCloud may never
+  keep, which is MAJOR-3 (b)'s defect and decision 30's own prohibition. Revert R1 made exactly that change and
+  the pin went red with a second key minted.
+- **The consent sentence names the Apple account** the only way the client honestly can — *the Apple account
+  signed into this Mac*, plus the key it hands back — because no iCloud-account identity is stored (the MAJOR-3
+  REFINED paragraph's own reason). A second sentence names the key on file as what it replaces, or says the key on
+  file is already this account's.
+- **The passphrase is the key act** — `KeyActPassphrase.verify`, the ceremony's rule hoisted verbatim, so the
+  vault's CURRENT copy is what a word is checked against and a word retired elsewhere is refused here.
+- **The act is ONE proof-authorized vault write** through the heal's own road (`healAppleHeldCopy` →
+  `EncryptionSession.relandAppleHeldCopy(under:)`), followed by `controller.reconcile()`, which lands this key
+  file's own copy and re-reads the account. Nothing rotates; no marker; no engine line.
+- **The face** — a *Your Apple account* section on Settings ▸ Protection with the explainer and the door, rendered
+  only in Standard on an `.enrolled` device with the road wired (P-2), disabled while a ceremony or a follow is on
+  screen; `AppleRelinkSheet` beside `PostureSwitchSheet`.
+
+**THE FIVE JUDGMENT CALLS, flagged for the orchestrator rather than buried** (all in QUESTIONS #139):
+
+1. **The name `healAppleHeldCopy` now has TWO callers** — the automatic heal (on proof of a same-account
+   duplicate) and this deliberate door (behind consent). I did NOT rename it: the rename would churn four
+   existing pins for a word, and the property is what it always was — the ONE wire onto
+   `relandAppleHeldCopy`, which "verifies nothing about the id and writes what it is handed under the proof it
+   holds" (its own doc). The authorization rule stays at each CALLER, where it belongs, and the doc now says so.
+2. **The door renders whenever Standard + `.enrolled`**, not only when the ids disagree. Gating on disagreement
+   would need a Keychain hop per render AND would hide the door in the state where the answer is unknown —
+   including the unreadable-key state the entry explicitly asks the door to SPEAK to.
+3. **The consent screen carries a key id** (eight characters). Without it "this Mac's Apple account" is
+   uncheckable by her; with it, the sentence is the one thing that tells a different-Apple-ID device apart.
+4. **The unreadable refusal is the waiting face's sentence VERBATIM**, tail included ("You can also enter your
+   passphrase or twelve words instead") — reuse over a sibling, per the brief, and the tail is true here in its
+   own right: while the copy is orphaned that IS how a device joins.
+5. **The write's refusal is ONE sentence for several causes** (offline · no keys in hand · the server refusing
+   while a rotation finishes), because `relandAppleHeldCopy` answers landed-or-not. Widening it would touch the
+   automatic heal that shares the road — a change I did not make on my own.
+
+**THE PHONE OWES A TWIN — recorded, not built.** 17m's entry names Settings and the brief fences the phone out of
+this run. The brain is already shared, so the phone's version is a face plus its own pins; the question (leave it,
+build it at the mobile catch-up, or give the phone a line naming the Mac's door) is QUESTIONS #139(f).
+
+**THE RE-SEED CONSEQUENCE joins A2's bundle:** Chapter 2's new paragraph is SEEDED content, and the seeder never
+rewrites a book it has seeded — the dev store's copy still reads the old Chapter 2 (walk capture 01: 9 notes ·
+2161w). Her one `Help ▸ Restore "Encryption Explained"` press takes it, the same press A2's Chapters 2 and 7 edits
+already wait on. **Nothing here was run against a seeded store and no seeded row was touched.**
+
 ### CLOSING EVIDENCE (all runs on the final tree)
 
 | Gate | Command | Result |
@@ -1347,6 +1422,37 @@ lands this key file's own copy and re-reads the account. **No new custody semant
 | Mobile | `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` | **635 tests in 108 suites PASSED with exactly the 4 known issues** — byte-identical to A2's close, over a `Shared/` diff the phone compiles |
 | iOS build | `xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS` | **BUILD SUCCEEDED** |
 | Core | not run — **this batch holds ZERO `Sources/` lines** (the diff is `App/Variorum/…` + notes), so A2's **1639/177** stands by construction | — |
+
+### THE WALK — dev-store Debug build (`io.lduarte.Variorum.debug`, built at `DerivedData/a3walk`)
+
+Captures in `notes/plans/run-a-screens/a3/` (gitignored). `Tools/WalkKit/README.md` read WHOLE first. **Instance
+discipline:** `pgrep -fl 'Variorum.app/Contents/MacOS'` EMPTY before the launch, ONE pid (19743, mine, at the
+`a3walk` path) during, EMPTY after, quit by identity (`tell application id "io.lduarte.Variorum.debug" to quit`),
+never a keystroke, never hers. `/Applications/Variorum.app` untouched.
+
+**THE DEV STORE'S POSTURE, READ AT THIS WALK rather than carried over from A2's:** the Protection pane says
+**"You're in Castle. Only you hold the keys."** with *This Mac — Touch ID unlocks it*, **Encryption passphrase:
+not set**, **Recovery phrase: not saved**, iCloud key *"no copy opens with it in Castle"*; the shelf's bottom bar
+says **Sync off (dev store)**. Unchanged since A2 — and it is exactly the posture that fences this door's face.
+
+1. `01-shelf-at-launch.png` — the shelf, Terminal voice, eight books (*encryption explained* at 9 notes · 9 ch ·
+   2161w — the seeded copy, still carrying the OLD Chapter 2; see the re-seed line below), *Sync off (dev store)*.
+2. `02-protection-pane-castle-top.png` — Settings ▸ **protection** at 13u4's nine-pane size (720×552 at (200,120)),
+   the Castle state line and the four *ways back in* rows.
+3. `03-no-relink-section-in-castle.png` — **THE BATCH'S WALKABLE ACCEPTANCE, and it is an ABSENCE.** The posture
+   cards' section ends at *Use Standard*, and the very next section is **Castle** — there is no *Your Apple account*
+   section between them, which is precisely where it renders in Standard. P-2's letter photographed: a door that
+   can never act in its context is not rendered. (The AX road cannot corroborate it — a SwiftUI `Form`'s reflected
+   tree carries no string from a computed `Text`, A2's own recorded fact, re-confirmed here: the deep scan of
+   `entire contents` returned zero values. The screenshot is the evidence.)
+
+**WHAT THE WALK COULD NOT STAGE, said rather than faked.** The door's FACE — the consent screen, the passphrase
+field, the Done line — needs a STANDARD library on a device that holds an ACCOUNT's current keys. This dev store is
+in Castle behind Touch ID and has **no account at all** (*Sync off*), so even leaving Castle would not render it:
+the `.enrolled` gate is what makes the write possible. Putting it in either state is a real key act on her dev
+store, which this run's fences forbid. The face and every one of its refusals are carried by
+`AppleRelinkDoorTests` (8 green, both discrimination reverts red in their own pin) — and live iCloud Keychain is
+not exercisable by an agent at all, which the ledger's own row-16 scope ruling says in advance.
 
 **AN ENVIRONMENT TRAP FOUND AND RECORDED FOR THE NEXT SESSION (the traps list's own kind).** Building the
 `-only-testing:` flags into a zsh VARIABLE and passing `$FLAGS` unquoted silently selects NOTHING: zsh does not
