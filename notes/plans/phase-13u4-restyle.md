@@ -4309,8 +4309,8 @@ at the close.)*
 | 2 | The RED-ON-OLD PIN, written and measured BEFORE a line of the fix | **DONE** — 5 of 7 red on the shipped tree, her symptom reproduced at 11 pt of prose in a 600-pt viewport |
 | 3 | The MECHANISM, traced (measured, never assumed) | **DONE** — seven-step trace below; the row's hypothesis is CORRECTED |
 | 4 | The FIX at the traced site, through the settle hop | **DONE** — all 6 pins green; the tail page goes 11 pt of prose → 269 pt with the anchor restored exactly |
-| 5 | The CLASS SWEEP — every re-font occasion × both directions, one verdict each | PENDING |
-| 6 | The WALK — S1's exact table on *Copper Beeches*, both occasions, both directions | PENDING |
+| 5 | The CLASS SWEEP — every re-font occasion × both directions, one verdict each | **DONE** — 15 rows, one verdict each |
+| 6 | The WALK — S1's exact table on *Copper Beeches*, both occasions, both directions | **DONE** — 18 captures, both voices, both appearances, tail AND mid-note |
 | 7 | Closing runs + the record complete; ledger row + KnownIssues row 53 flipped | PENDING |
 
 ### THE READING (done in this session's own context, in the brief's order)
@@ -4477,4 +4477,64 @@ in every state.
    and leaves the park** (the R1-5 rule, working as designed) — the honest hop is armed by the NEXT
    display pass. The app has a continuous display cycle; a harness has to ask for the passes, so
    `draw` marks the view dirty and displays four times.
+
+
+### THE CLASS SWEEP (piece 5) — every occasion on this road, verdicted
+
+| # | Occasion | What moves | Direction | Verdict |
+|---|---|---|---|---|
+| 1 | **Voice switch** (Terminal ⇄ Study) | the FONT and the resolved gap ⇒ `needsStorageRefresh` TRUE | Study → Terminal (**shrink**) | **FIXED** — pinned (red on old at 692.8 pt off the viewport top) and walked in light AND dark |
+| 2 | " | " | Terminal → Study (**grow**) | **FIXED** — pinned (red at 311.2 pt) and walked in light AND dark |
+| 3 | **Inline comments** toggle | the resolved gap, ±22 pt per PARAGRAPH ⇒ TRUE | ON → OFF (**shrink**) | **FIXED** — the fixture row. Pinned twice (the anchor, and the drawn prose 11 pt → 269 pt) and walked at the TAIL and MID-note |
+| 4 | " | " | OFF → ON (**grow**) | **FIXED** — pinned and walked |
+| 5 | **Paragraph gap** (Standard ⇄ a blank line's worth) | `ParagraphGap.current` → `baseParagraphStyle` ⇒ TRUE | tall → Standard (**shrink**) | **FIXED** — S1's second reproducing row, WALKED. Deliberately not harness-pinned, and the reason is stated rather than hidden: the dial is read from `UserDefaults.standard` at style-construction time (never from the chrome — `EditorTypography.laidOutParagraphSpacing`'s own doc says why), so a pin would have to write a process-global default that Swift Testing's parallel suites share. Same door, same predicate, same park as rows 1–4 |
+| 6 | " | " | Standard → tall (**grow**) | **FIXED** — walked |
+| 7 | **Colour palette** (16 presets + her own hex) | colour only since 18g's R1-1 carve ⇒ FALSE | both | **PROVABLY SAFE** — no storage write, no height change, and pinned as such (`aColourOnlyChangeMovesNothing` asserts the predicate is false AND that nothing scrolls) |
+| 8 | **Appearance** (follow system · light · dark) | colour only since 18j made the ink ONE dynamic colour ⇒ FALSE | both | **PROVABLY SAFE** — same pin (it flips `dark`), and WALKED: the page does not move by one point when the room goes black |
+| 9 | **Spellchecking level** | rides the chrome VALUE (the Equatable gate) but is not an input of `needsStorageRefresh`; sets two `NSTextView` flags | both | **DOES NOT SHRINK** — underlines draw, no metric changes |
+| 10 | **Drag handle on hover** | not on the chrome at all | — | **DOES NOT SHRINK** |
+| 11 | **The FIRST chrome application** (a surface's birth) | TRUE by definition (`from: nil` means "write everything") | — | **DELIBERATELY EXCLUDED, measured** — there is no reading position at a birth, and a park made there is spent later as a yank to the top of the note |
+| 12 | **Width reflow** (window resize · sidebar · split divider) | the SAME pixel-offset hazard, the other axis | both | **ALREADY ANSWERED** since the Phase 6 memo — `ScrollAnchorController` + `JumpPrimitive`; untouched by this unit, and the road this fix joins |
+| 13 | **The CONTAINED editors** (book · spread · pool) | a re-font changes their height, which they publish to SwiftUI | both | **NOT THIS CLASS** — `isVerticallyResizable = false` and no scroll view of their own, so there is no pixel offset to strand. The keeper is called at their door too and is inert by its own guard |
+| 14 | **The READ tier and the take panes** | same shape (`PaneTextView.makeSurface`: no scroll view, content-sized) | both | **NOT THIS CLASS**, same reason. Their host's scroll position is the 18d remembered-lengths / `flowExtents` machinery's business, not this one's |
+| 15 | **`LongBlockLayout`'s phantom heal** · **projection re-renders** (`renderFull`) | one block's estimate, debounced · a character edit | — | **NOT A RE-FONT OCCASION** — named so the sweep is honest rather than silently short. The first is 13c 1E's own bounded design; the second bumps the generation itself and has the cold-mount park as its restore |
+
+### EVIDENCE — THE WALK (piece 6; the unit closes on USE, not on pins)
+
+The dev-store Debug build (`io.lduarte.Variorum.debug`, from `DerivedData/13u4f2`), launched with no
+instance of hers running and quit by identity at the end (checked both times: none). **UNIT S1's
+exact fixture and its exact gestures** — *The Adventure of the Copper Beeches* (`block 212/212 ·
+149w block · 9,999w in note`, the bottom bar identical in every capture), Write, caret driven to the
+document END with ⌘↓. 18 captures in `notes/plans/13u4-screens/f2/` (gitignored).
+
+| # | capture | the gesture | what the app did |
+|---|---|---|---|
+| 02 | `02-caret-at-end-terminal` | ⌘↓ | the tail page drawn, last line *"Walsall, where I believe…"*, the top line `serenely.` — S1's `33-gap-before` reproduced |
+| 03 · 04 | `03-comments-ON-grow` · `…-plus2s` | inline comments **ON** (grow) | the page whole **and `serenely.` still the top line** — where S1 reported *"the viewport shifts up"*, her place is now kept |
+| **05** · 06 | **`05-comments-OFF-shrink-THE-ROW`** · `…-plus3s` | inline comments **OFF** (**shrink**) | **THE ROW. The page draws whole, `serenely.` at the top, the last paragraph where it was.** S1's capture 25 here was *"only the last line draws and the rest of the page is BLANK"*. Byte-stable at +3 s |
+| 07 | `07-gap-tall-grow` | paragraph gap → **a blank line's worth** (grow) | page whole, `serenely.` at the top |
+| **08** · 09 | **`08-gap-standard-shrink-THE-ROW`** · `…-plus3s` | gap → **Standard** (**shrink**) | **THE SECOND ROW, fixed identically** — S1's capture 38's twin, now a whole page. Stable at +3 s |
+| 10 | `10-voice-study-grow` | voice → **Study** (grow) | the page in the serif voice, the anchored paragraph at the top (Study's wider measure re-wraps it onto one line — the line-breaking difference the voice pin models with a tolerance) |
+| **11** | **`11-voice-terminal-shrink-THE-ROW`** | voice → **Terminal** (**shrink**) | the third occasion, page whole, the same paragraph at the top |
+| 12 · 13 · 14 | `12-mid-before` · `13-mid-comments-ON-grow` · `14-mid-comments-OFF-shrink` | the ORDINARY reading position (mid-note), comments ON then OFF | *"yellow-backed novel, and moving my chair…"* stands at the same place on the page in all three — the everyday case, where the defect was never dramatic but her place moved all the same |
+| 15 | `15-dark-colour-only-moves-nothing` | Appearance → **Dark** | the room goes black and **the page does not move by one point** — row 7/8's guard, in use |
+| 16 · 17 | `16-dark-study-grow` · `17-dark-terminal-shrink` | both voices, in DARK, from the mid position | both directions hold; R51's fully black room unchanged |
+
+**The caret never moved:** `block 212/212` in the bottom bar of every tail capture, before and after
+every one of the six re-fonts. ⌘↑ was never pressed in this walk — it is the symptom's healer, and
+there was no symptom to heal.
+
+**The dev store was left exactly as found:** Terminal voice · Follow system · Rose & moss palette ·
+inline comments OFF · paragraph gap Standard (verified against the Settings panes at the end).
+Nothing was typed into any note; no store row changed.
+
+**Walker facts earned here** (for `Tools/WalkKit/README.md` at its next touch): **(1)** `⌘,` does not
+open Settings when the full-document editor has key focus — the keystroke is swallowed and
+`walk-cap` shows no new window; `click menu item "Settings…" of menu 1 of menu bar item "Variorum"`
+opens it every time. **(2)** The dev Settings window is **720 × 552 at (200, 120)** since UNIT S1's
+nine-pane rebuild (the 13u3 note's 560 × 548 is stale), with the pane list at window-x ≈ 61 and the
+Editor pane's two re-font controls at screen **(871, 352)** and **(840, 390)**. **(3)** A
+`screencapture -l <window id>` of the NOTE window is unoccluded by the Settings window sitting on
+top of it, which is what makes a settings-flip walk capturable at all. **(4)** `walk-scroll`'s line
+count is **positive = down**; ±260 lines overshoots a 10k-word note end to end.
 
