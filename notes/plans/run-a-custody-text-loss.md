@@ -526,6 +526,41 @@ is the part that wants her ruling. Both land PROVISIONAL with a QUESTIONS row (n
 **STATUS: awaiting the orchestrator's ruling. Rows 1–6 continue meanwhile; nothing of row 7 is
 built.**
 
+### ROW 7 — THE ORCHESTRATOR'S RULING (2026-09-21, recorded repo-first before the build)
+
+**Build Option 1 WITH the 1b rider. Both PROVISIONAL, one QUESTIONS row (#137).** The reasoning,
+so the ratify list carries it whole: Option 1 closes the close road with zero new at-rest surface
+and makes the shipped sentence true; Option 2 is rejected on the implementer's own trace (the
+refusal's commonest cause is the state in which no key can seal the park — a mechanism that fails
+exactly when needed, plus a new disclosure-envelope surface, is not a fix); Option 3 is rejected
+as a product change to the pad's ruled grammar (round-14.2, #120(a)/(d)). The 1b rider is taken
+because row 65's title names BOTH roads — close AND quit — and 1b is the only shape that answers
+the quit half without prose on disk; it is macOS's ordinary unsaved-work grammar, and the
+second-⌘Q-always-proceeds arm keeps her un-trapped. The class rule outranks the surprise
+("nothing typed in either app can be permanently lost" — AppSpec §9's own doctrine).
+
+**Bindings on the build (the edges decided now, not discovered):**
+1. **The park holds REFUSED captures only.** The deliberate-abandon grammar is untouched: a close
+   with no refusal standing keeps nothing, exactly as ruled — and a GUARD PIN asserts that, so the
+   park can never silently widen into a general draft-keeper.
+2. **Restore makes the pad the only home again** — the park clears at restore, no ghost copy, no
+   double-restore; a re-refusal re-parks. After restore, abandoning the pad is her ruled abandon.
+3. **The restored pad says why the box is not empty** (one line; wording PROVISIONAL, 13s
+   re-voices), and the close road's status-seam sentence changes to say where the words went —
+   the current *"Your text is still here"* is false on that road today and must not stay false.
+4. **1b's one-shot semantics:** the decline fires when a refused capture with words stands at
+   quit; a second consecutive ⌘Q always proceeds; a refusal resolved and later re-arising re-arms
+   the decline. Decline leaves the pad on screen speaking its refusal line.
+5. **Pins:** (i) refused → close → fresh summon restores and speaks (red on old — the words are
+   unreachable today); (ii) `.filed`/`.nothingToFile` clear the park; (iii) refused-at-quit →
+   terminate declined once, second proceeds (red on old — `applicationShouldTerminate` replies
+   true unconditionally today); (iv) the no-refusal abandon keeps nothing (the guard).
+6. **QUESTIONS #137** carries the ratify bundle: the park's session scope (a crash or force-quit
+   still loses it — the pad's stated cost model), the 1b decline + second-⌘Q rule, the
+   clear-at-restore semantics, and both PROVISIONAL sentences.
+7. The walk's honesty rule stands: the refusal road is carried by its pins and trace; walk what
+   is walkable and say what is not.
+
 ---
 
 ## BATCH A2 BRIEF — 17l items 1–4/6–7 + 17n + the phrase-transit pin (self-contained; read in this order)
