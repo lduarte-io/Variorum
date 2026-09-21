@@ -208,6 +208,106 @@ struct BookIndexColumnHeightsTests {
         }
     }
 
+    /// **PIN 4 — P1: the lengths are read ONCE, and never again for this
+    /// entry set.**
+    ///
+    /// The cost shape this unit adds, stated as a test rather than as a
+    /// promise: ONE `Queries.blockExtents` — lengths computed in SQL, no prose
+    /// crossing the boundary — per ENTRY SET per book model, through the same
+    /// `flowExtents` cache the Outline and the reading flow read. A remount
+    /// (every mode switch is one) adds nothing, and an entries RE-DELIVERY —
+    /// which is what every keystroke eventually produces through
+    /// `last_touched_at` — adds nothing either.
+    @Test func theIndexReadsTheBooksLengthsOnceAndOnlyOnce() async throws {
+        try await withSlowIndexBook(notes: 4, blocks: 20) { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            let assembled = try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            }
+            await model.adopt(assembled)
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            structure.mode = .index
+            #if DEBUG
+            BookIndexGeometry.reset()
+            BookIndexExtentReads.byBook[readingID] = 0
+            #endif
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            #if DEBUG
+            await settle(window, hosting, until: {
+                BookIndexExtentReads.count(readingID) > 0
+            }, maxTurns: 120)
+            #expect(BookIndexExtentReads.count(readingID) == 1,
+                    "opening the book in Index reads its lengths exactly once")
+
+            // An entries RE-DELIVERY over the same set — the shape a keystroke
+            // eventually produces — reads nothing.
+            await model.adopt(assembled)
+            await settle(window, hosting, until: { false }, maxTurns: 20)
+            #expect(BookIndexExtentReads.count(readingID) == 1,
+                    "an entries re-delivery costs no read at all")
+            window.orderOut(nil)
+            window.close()
+
+            // A REMOUNT (every mode switch is one) reads nothing either — the
+            // cache belongs to the book, not to the surface.
+            let (second, secondHosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                second.orderOut(nil)
+                second.close()
+            }
+            await settle(second, secondHosting, until: { false }, maxTurns: 30)
+            #expect(BookIndexExtentReads.count(readingID) == 1,
+                    "a remount over the book's cache re-reads nothing")
+            #endif
+        }
+    }
+
+    /// **PIN 5 — P3: the plain column did not un-virtualize the pane.**
+    ///
+    /// This is the pin the fix could plausibly have broken and the reason it
+    /// is here: the pane's rows left their `LazyVStack`, so every row now
+    /// EXISTS. What must still be true is that only rows near the viewport
+    /// render a NOTE — a 105k-word book realizing every note on open is
+    /// exactly the P1/P3 shape `BookIndexMaterialization` exists to catch.
+    /// A far row is `Color.clear` at a stated height and opens no observation
+    /// of its own.
+    @Test func onlyNotesNearTheViewportMaterialize() async throws {
+        try await withSlowIndexBook(notes: 24, blocks: 40) { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            structure.mode = .index
+            #if DEBUG
+            BookIndexGeometry.reset()
+            BookIndexMaterialization.count = 0
+            #endif
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            #if DEBUG
+            await settle(window, hosting, until: {
+                BookIndexGeometry.paneAnchorTops["bip-\(postIDs[0])"] != nil
+            })
+            await settle(window, hosting, until: { false }, maxTurns: 60)
+            let materialized = BookIndexMaterialization.count
+            print("[13u4 F3] materialized \(materialized) of 24 notes")
+            // The window is 760 pt tall and the near band reaches 2,000 pt
+            // beyond it, so a handful of ~9,000-pt stories is the honest
+            // ceiling. The number that matters is that it is BOUNDED and not
+            // the book: 24 would be every note.
+            #expect(materialized < 12,
+                    "a 24-note book does not realize every note on open: \(materialized)")
+            #endif
+        }
+    }
+
     /// **PIN 3 — THE CALIBRATION: the estimate is near the truth.**
     ///
     /// The other two pins are about the column HOLDING STILL, which a

@@ -4975,6 +4975,46 @@ points because the estimate's error is proportional — it is a model of wrappin
 so every number in the trial table is the calibrated build's. The pre-calibration build measured
 `total=248341` on Sherlock where the calibrated one reads `238205`.)*
 
+### THE P1/P3 PINS, AND THE P3 DEFECT ONE OF THEM CAUGHT (piece 3c)
+
+The rows left their `LazyVStack`, so **every row now EXISTS**. That is the change most likely to
+cost something, and AR-1's rider 2 is explicit that a cost which does not hold is a REPORT rather
+than a ship — so the cost is pinned rather than promised.
+
+**THE COST SHAPE, stated:**
+- **The lengths: ONE `Queries.blockExtents` per ENTRY SET per book model.** Lengths computed in
+  SQL; no prose crosses the boundary (AppSpec §4's own designed fallback). It is shared through the
+  book's `flowExtents` cache with the Outline and the reading flow, so **a mode switch re-reads
+  nothing**, and an entries RE-DELIVERY — the shape every keystroke eventually produces through
+  `last_touched_at` — reads nothing at all. **Nothing at autosave or keystroke rate reaches it.**
+  All three are the pin.
+- **The per-row height: a dictionary lookup.** A note's derived height is MEMOIZED per note at the
+  current width and voice, so a body pass costs one lookup a row rather than a walk of that note's
+  blocks — the uncached form would be ∝ the book's BLOCKS per pass (Sherlock is ~2,700), which is
+  P1's own shape of wrong. The memo is dropped when the width or the voice moves (the stamp) and
+  when the lengths land.
+- **The manifest: arithmetic over the rows in hand, built at the LANDING only** — no read, no
+  layout, ∝ rows. Its one consumer is the landing's facts.
+- **A far row is `Color.clear` at a stated height** and opens no observation of its own.
+
+**AND THE PIN CAUGHT A REAL P3 DEFECT IN THIS UNIT'S OWN FIRST CUT — measured, not reasoned:**
+
+| | notes materialized, 24-note fixture |
+|---|---|
+| the fix as first written | **20 of 24** — very nearly the whole book |
+| with the arming gate | **6 of 24** |
+
+The mechanism, traced: on the layout pass before any height is real, **every row reports
+`height = 0`**, and a zero-height row's distance from the viewport is 0 — which is "near" — so all
+48 rows flipped near at once and 20 notes were constructed before the geometry corrected them.
+(The hysteresis then keeps them: a row goes far again only beyond three times the margin, and a
+`BookIndexPaneNote` once constructed has already opened its observation.) **This is the flow's
+own ladder R2-5 lesson** — *"a row whose height is not yet honest must not flip near on a geometry
+the truth will move"* — met here from the other direction. The gate is the flow's: a row decides
+nothing until it is ARMED (a heading always; a note once the book's lengths have landed) and has
+a real height, and `armed` rides INSIDE the observed value so the moment it flips the current
+distance is decided at once even though the geometry did not move.
+
 ### THE COLD TRIAL TABLE, POST-FIX (piece 5) — the same protocol, the same store, the same machine
 
 Build: `App/Variorum/DerivedData/13u4f3/Build/Products/Debug/Variorum.app`. Same instance

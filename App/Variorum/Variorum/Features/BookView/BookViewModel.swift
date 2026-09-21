@@ -853,6 +853,15 @@ final class BookViewModel {
         }
     }
 
+    /// **Are the book's LENGTHS in hand?** Until they are, a note row stands
+    /// on the never-measured prior, and a height that is not honest must not
+    /// be decided on (the flow's ladder R2-5 rule). Observed through the
+    /// generation, so a row re-decides the moment they land.
+    var indexExtentsKnown: Bool {
+        _ = indexExtentsGeneration
+        return flowExtents.lookup(matching: entries) != nil
+    }
+
     /// What one pane row stands at: the manifest's precedence over this
     /// surface's own answers. `postID` nil ⇒ a chapter heading.
     func indexPaneRowHeight(_ anchorID: String, postID: String?) -> CGFloat {

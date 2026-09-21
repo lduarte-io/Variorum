@@ -756,6 +756,7 @@ struct BookIndexView<Masthead: View>: View {
                     ForEach(paneRows) { row in
                         IndexPaneRow(
                             anchorID: row.id, postID: row.postID, model: model,
+                            armed: row.postID == nil || model.indexExtentsKnown,
                             onTop: { top in paneAnchorMoved(row.id, top: top) }
                         ) {
                             switch row {
@@ -919,6 +920,14 @@ private struct IndexPaneRow<Content: View>: View {
     /// nil ⇒ a chapter heading.
     let postID: String?
     let model: BookViewModel
+    /// **May this row decide near or far yet?** (The flow's ladder R2-5, whose
+    /// lesson this unit met the hard way: without it, EVERY row of a 24-note
+    /// fixture decided "near" on the layout pass before any height was real
+    /// and the whole book materialized — 20 of 24 notes, measured, which is
+    /// the P3 shape `BookIndexMaterialization` exists to catch.) A heading is
+    /// always honest; a NOTE is honest only once the book's lengths have
+    /// landed, because before that it stands on the never-measured prior.
+    let armed: Bool
     let onTop: (CGFloat) -> Void
     @ViewBuilder let content: () -> Content
 
@@ -949,7 +958,7 @@ private struct IndexPaneRow<Content: View>: View {
         // hundreds more of them.
         .onGeometryChange(for: IndexPaneRowGeometry.self) { geometry in
             let frame = geometry.frame(in: .named(BookIndexColumn.paneSpace))
-            return IndexPaneRowGeometry(top: frame.minY, height: frame.height)
+            return IndexPaneRowGeometry(top: frame.minY, height: frame.height, armed: armed)
         } action: { geometry in
             // **Learn only from REAL content.** A near HEADING always renders
             // real content, so its report is a measurement. A near NOTE may
@@ -962,6 +971,11 @@ private struct IndexPaneRow<Content: View>: View {
                 model.learnIndexPaneRowHeight(anchorID, height: geometry.height, isHeading: true)
             }
             onTop(geometry.top)
+            // A row whose height is not yet honest decides nothing — and
+            // neither does one that has not been laid out at all (a zero-height
+            // report reads as distance 0, which is "near", for every row in
+            // the book at once).
+            guard geometry.armed, geometry.height > 0 else { return }
             let distance = NearBand.distance(
                 top: geometry.top, height: geometry.height, margin: Self.nearMargin)
             guard let becomesNear = NearBand.decide(
@@ -982,6 +996,11 @@ private struct IndexPaneRow<Content: View>: View {
 nonisolated private struct IndexPaneRowGeometry: Equatable, Sendable {
     var top: CGFloat
     var height: CGFloat
+    /// Ladder R2-5's rule on this surface (`NearViewportObserver.armed`): may
+    /// this geometry be DECIDED on? It rides inside the observed value rather
+    /// than beside it, so the moment arming flips the current distance is
+    /// decided at once even though the geometry itself did not move.
+    var armed: Bool
 }
 
 // MARK: - One column note row (selection wash, hover-waking doors)
