@@ -4744,7 +4744,7 @@ against what actually shipped):**
 | 4 | The BEHAVIOURAL REVERT (red-on-old verified in a worktree) | **DONE** — the improvement is the FIX's: 4 runs on the probe-only tree, PIN 1 red 4/4 and PIN 5 red 4/4; PIN 2 red on 5 of 7 pre-fix runs and green on 7 of 7 here |
 | 5 | THE POST-FIX COLD TRIAL TABLE (≥8 trials) + the warm trials against F1's 21/21 | **DONE** (this commit) — **9 of 9 cold SETTLE at top=0**, 11 of 11 warm settle |
 | 6 | The WALK — cold and warm, captured | **DONE** (this commit) — Terminal light (held at 1.5 s AND 6 s, byte-identical), Study light, Study DARK; 52 captures |
-| 7 | Closing suites + QUESTIONS + the KnownIssues row + the ledger's F3 row | PENDING |
+| 7 | Closing suites + QUESTIONS + the KnownIssues row + the ledger's F3 row | **IN PROGRESS** — the closing runs are in (**210 tests in 33 suites, all green**); **ROW 56 RESOLVED**, paired-verified 6 runs |
 
 ### THE READING (done in this session's own context, in the brief's order)
 
@@ -5140,3 +5140,34 @@ between voices as much as the Library's do — Sherlock sits at screen y **349 i
 opens the WRONG BOOK in the other voice, and the only tell is the signpost's `rows=1` (a one-note
 book) where 26 was expected. Read every click point off a fresh capture after a voice flip, and let
 the signpost's `rows=` be the sanity check on which book you are in.
+
+### ROW 56, ADJUDICATED BY THE PAIRED INTERLEAVED PROTOCOL — AND **RESOLVED BY THIS UNIT**
+
+`BookIndexEditingTests.theReadClickLandsInIndexAtThatBlock` is `KnownIssuesAndTechDebt` row 56's
+load-flaky test, and this phase's baselines say to treat a red there as that condition **unless the
+diff touches the book Index. THIS ONE DOES** — so the paired protocol was mandatory before any
+claim was made about it, in either direction. UNIT F1 ran it yesterday and measured **RED 3/3 on
+both trees, byte-identical**.
+
+**How:** a worktree at this unit's opening commit `f2e1ac17` (zero of this unit's code) beside this
+tree, each built into its own DerivedData, the suite run ALTERNATING base → mine → base → mine →
+base → mine, nothing else running.
+
+| round | the opening commit | this tree |
+|---|---|---|
+| 1 | **RED** — `live.first?.identifier?.rawValue → nil`, the pane identifier never arrives | **GREEN** |
+| 2 | **RED** — same | **GREEN** |
+| 3 | **RED** — same | **GREEN** |
+
+Six runs, 7 tests each; the other six tests of the suite passed in every run on both trees. It is
+also green in this unit's 30-suite closing load, and green 3/3 isolated beforehand — **10 greens
+here against 3 reds a round from the base.**
+
+**VERDICT: row 56's defect is GONE, and the mechanism is this unit's.** The row's own words for the
+failure are *"every failure exhausts the budget with ZERO editable panes"* — and that is precisely
+what a lazy column does to that test: the block the Read click names is inside a note the column
+has not realized, the aim resolves against an estimate, the note never comes near, its
+`observeBlockTOC` never runs, and `takePendingLiveBlock` has no rows to take. With every row
+standing at a known height the landing is exact on the first aim, the note is inside the near band,
+it realizes, and the pane goes live. **The row is CLOSED** with this evidence; the warm-DerivedData
+covariate it records is moot because there is no red left for a covariate to explain.
