@@ -1509,7 +1509,21 @@ green and the implementer side gets one sanity pass over the reviewer's diff. Ro
 a NEW BLOCKER/MAJOR earns round 3; hard cap three rounds — anything open after round 3 is recorded
 for the author, never looped. Every finding gets a written disposition here.
 
-*(Rounds recorded here as they run.)*
+**ROUND 1 (2026-09-21) — findings file `notes/plans/run-a-ladder-round1.md` (the reviewer's own,
+committed incrementally): 0 BLOCKER · 1 MAJOR · 1 MINOR · 2 NIT, plus six suspicions traced to
+NOT-findings and a 19-item clean bill (the reviewer ran core 1639/177 itself).** The MAJOR: the 1b
+rider's one-shot is defeated on the pad-OPEN quit road — every ⌘Q re-runs `take()` → `.refused` →
+`park()`, which re-arms `declineSpent` unconditionally, so a persistently-refusing store declines
+every press, contradicting the ruling's binding 4 and #137(c)'s sentence; the pins drove the
+primitive, not the integrated door. **Orchestrator sanity-check: the mechanism CONFIRMED at
+`AppSession.swift` (`park()` re-arms unconditionally) and `QuickNoteView.swift` (the finalize road
+parks on every refusal) before routing.** The MINOR: P4's clear is gated on byte-equality, so
+mid-flight keystrokes leave `submitted + tail` standing and the doc's claimed submitted-prefix
+discipline is not what the code does. NIT-1: `clearRedoFuture()` outside the write transaction (a
+future-compound hazard, honestly unpinnable today). NIT-2: `park()`'s dead whitespace guard.
+**Cross-model flow: all four findings sent VERBATIM to the A1 implementer for agree/dispute;
+responses return to the reviewer for the final call + its fix pass; then the implementer's sanity
+pass over the reviewer's diff.**
 
 ---
 
