@@ -757,6 +757,55 @@ MAJOR-3 and the F3 record's eight items; the copy constants' homes; the named co
 
 **Deaths and resumes:** none yet.
 
+### THE WALK — dev-store Debug build (`io.lduarte.Variorum.debug`, built at `DerivedData/a2walk`)
+
+Captures in `notes/plans/run-a-screens/a2/` (gitignored). `Tools/WalkKit/README.md` read WHOLE first;
+instance discipline held throughout — `pgrep -fl 'Variorum.app/Contents/MacOS'` EMPTY before the
+launch, ONE pid (mine, at the `a2walk` path) during, EMPTY after, quit by identity
+(`tell application id "io.lduarte.Variorum.debug" to quit`), never a keystroke, never hers.
+`/Applications/Variorum.app` untouched.
+
+**THE DEV STORE'S CUSTODY POSTURE, read rather than assumed:** the Protection pane says **"You're in
+Castle. Only you hold the keys."** with *This Mac — Touch ID unlocks it*, **Encryption passphrase:
+not set**, **Recovery phrase: not saved**, iCloud key *"no copy opens with it in Castle"*; the
+bottom bar says **Sync off (dev store)**. It opened without a prompt, so the walk could proceed —
+but that posture is exactly what fences two of this batch's four walkable faces (below).
+
+1. `01-shelf-at-launch.png` — the shelf, Terminal voice, eight books (the encryption book among
+   them at 9 notes · 9 chapters). Context.
+2. `02-protection-pane-castle.png` — **Settings ▸ Protection, at 13u4's nine-pane size**, mounted
+   and drawn whole: the Castle state line and the four *ways back in* rows. This is the surface row
+   13 verifies stands after the restructure — and it does, on screen.
+3. `03-passphrase-floor-refuses-six-characters.png` — **ROW 14's ACCEPTANCE, BY HAND.** *Set a
+   Passphrase…* on this store (which has none), a **six-character** word typed into both fields, and
+   the door answers **"Your passphrase needs at least 12 characters."** in the alarm register with
+   *Not set* / *Not saved* still standing behind it. **This is the door that had no length rule at
+   all before this batch** — on the pre-fix tree that press went straight past the length to the
+   vault check. Nothing was written: the refusal is the whole act.
+4. `04-restore-door-already-whole.png` — **ROW 8's ROAD, intact.** Help ▸ Restore *"Encryption
+   Explained"* on a store that has it: the book opens and the seam speaks
+   *""Encryption Explained" is already whole — it's on your shelf."* — the discover-then-mint road
+   under its new latch, minting nothing, with the count unchanged at 9 notes · 9 chapters.
+
+**WHAT THE WALK COULD NOT STAGE, said rather than faked.** Three faces need a state this dev store
+cannot be put into without performing a real key act on her store, which this run's fences forbid:
+
+- **Row 11's root-presented ceremony.** The door that sets `activeSwitch` from the MAIN window is
+  the Account sheet's Encryption tab, and this store has **no account** — the bottom bar's *Sync
+  off (dev store)* is not a door (clicked; nothing opens), so Replace All Keys is not offered there
+  at all (P-2's own letter: a door that cannot act is not rendered). The Protection pane's own
+  switches WOULD open a ceremony, but that is the pane's presenter — the very one that already
+  worked — and pressing it would re-key her dev store. Carried by its pin and by revert R1's six
+  issues.
+- **Row 13's NIT-N8 waiting face.** It is a STANDARD device waiting for an Apple key that has not
+  arrived; this store is in Castle, and putting it into Standard is a key act. Carried by its pin —
+  which now mounts the pane at the walked size and reads what its checklist line resolves to.
+- **Rows 12 and 13's ceremony faces** (*preparing* before the first window; the failed-after-
+  Generate-New-Ones tail) need a RUNNING and then FAILING re-key. Carried by their pins.
+
+That is the honest shape the brief asks for: the walkable faces walked, the Touch-ID/key-act-gated
+ones carried by drills and pins and **said**, not faked.
+
 ### ROW 8 (17l item 1 / KnownIssues 38) — THE TRACE, THE LATCH, AND WHY THE PURGE CONSULT IS NOT THE LEDGER
 
 **The double-mint, traced in the code.** Two roads mint a seeded book, and both do the same two
