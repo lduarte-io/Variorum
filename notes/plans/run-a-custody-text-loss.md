@@ -298,7 +298,7 @@ OverallModel §3 and AppSpec §9's structural-undo/REDO paragraphs (auto-loaded 
 | Row | Item | Status |
 |---|---|---|
 | 0 | Record skeleton + `run-a-screens/` gitignored | **DONE** — this commit |
-| 7 | **row 65** — the pad's close/quit-while-refused loss: TRACE + the parking-mechanism PROPOSAL (design fork; the orchestrator rules before any build) | NOT-STARTED |
+| 7 | **row 65** — the pad's close/quit-while-refused loss: TRACE + the parking-mechanism PROPOSAL (design fork; the orchestrator rules before any build) | **PROPOSED — awaiting the ruling** (trace + three options + recommendation below; nothing built) |
 | 1 | **P4** — the phone's comments sheet clears the draft before the write | NOT-STARTED |
 | 2 | **P5** — `promotePicks` copies an ARCHIVED pick as a block's only take | NOT-STARTED |
 | 3 | **P6** — `restoreNoteVersion`/`deleteContainer` leave the redo future unclear ed | NOT-STARTED |
@@ -308,6 +308,88 @@ OverallModel §3 and AppSpec §9's structural-undo/REDO paragraphs (auto-loaded 
 | — | Closing evidence: targeted suites green · `TutorialWalkTests` · mobile suites + `generic/platform=iOS` build · the WalkKit walk (pad road + board-branch road) → `notes/plans/run-a-screens/a1/` | NOT-STARTED |
 
 **Deaths and resumes:** none yet.
+
+### ROW 7 (KnownIssues 65) — THE TRACE, AND THE PARKING MECHANISM PROPOSED (the design fork; NOT built)
+
+**The mechanism, traced in the code itself (`App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift`).**
+`QuickNotePad` is `@State` inside `QuickNoteView`, and `pad.text` is **the only place her capture
+exists** until a note holds it (the file's own header says so: *"a summon she abandons keeps nothing,
+and re-summoning gives a fresh pad rather than the last note"*; the scene is a SINGLETON `Window`,
+`VariorumApp.swift:331`, so a close tears the view and its `@State` down and the next summon
+re-runs `init`). 13u3 UNIT C made a refusal KEEP the text (`take()`'s `.refused` arm sets
+`lastError` and leaves `text` alone, :181-182) — which is exactly right on the ⏎/⌘⏎ road, where the
+pad stays open. **Two roads have no pad left afterwards:**
+
+1. **CLOSE** — `.onDisappear` (:321-335) unregisters the quit token and spawns
+   `Task { if case .refused(let message) = await pad.close() { status.refuse(message) } }`.
+   `close()` → `take()` → the store refuses → `text` is faithfully preserved **on an object whose
+   last strong reference is that task**, which returns and releases it. The words are unreachable
+   from anywhere in the app. Worse, the sentence the status seam then speaks is
+   `QuickNoteCopy.refusal(for:)` — *"Your text is still here — try again in a moment."* — which on
+   THIS road is **false**: there is no "here" left. (That sentence is the pad's own, correct where
+   it was written and reused where its premise does not hold.)
+2. **QUIT** — `.onAppear` registers `finalizeAtQuit` with `QuitFinalizeRegistry`
+   (`AppSession.swift:597-621`), whose `finalizeAll()` is `for flush in entries.values { await flush() }`
+   — the `@discardableResult` outcome is **discarded outright**, and
+   `VariorumAppDelegate.applicationShouldTerminate` replies `true` unconditionally after it
+   (`VariorumAppDelegate.swift:80-88`). A refusal at quit is not even observable; the process exits
+   with her words in a released object.
+
+Both roads are reachable exactly as #120(e) says the refusal is reachable (a mid-round failure, the
+store unreachable, a 13p re-lock closing the pool). **Nothing in the tree parks a capture today** —
+grep for "unfiled"/"held capture" finds only the book-chapter vocabulary.
+
+**THE FORK — where a refused capture may live. Three options, then the recommendation.**
+
+**Option 1 — MEMORY-ONLY PARKING, restored at the next summon (RECOMMENDED).** A tiny
+session-scoped holder (`@MainActor @Observable`, owned by `AppSession` beside `quitFinalize`, Mac-only
+like it) keeps the refused capture: her text, the name decision (`titleFromFirstWords`), and the
+refusal sentence. `take()`'s `.refused` arm parks; `.filed` and `.nothingToFile` clear it, so a
+successful retry can never leave a ghost. `QuickNoteView` restores it into the fresh pad at summon
+and says why the box is not empty.
+*What a quit does:* nothing survives the process — the loss window shrinks from "any close or quit
+after a refusal" to "a quit or a crash while a refusal is standing".
+*Disclosure:* **zero new at-rest surface.** Her prose never leaves RAM, nothing is written beside the
+encrypted store, no key is needed — which matters because the commonest cause of the refusal (a
+locked or unreachable store) is exactly the state in which no key is available to seal anything.
+*What the next summon shows:* her words back in the box, the caret in them, and one line saying the
+last capture was not filed and is still here. **It also makes the existing sentence true** — the
+close road's *"Your text is still here"* stops being a lie, because it is.
+*Cost, stated honestly:* a force-quit, a crash, or a ⌘Q while the refusal stands still loses it —
+bounded by one summon, which is the pad's stated cost model already.
+
+**Option 1b — the RIDER on the quit road (PROVISIONAL, product-flavoured, the orchestrator's call).**
+When `finalizeAtQuit` refuses and words remain, `applicationShouldTerminate` declines the
+termination **once**, leaving the pad on screen with its refusal line (at ⌘Q the pad window is still
+up — windows close after termination is approved), and a second ⌘Q proceeds so she can never be
+trapped by a store that will not take it. This is macOS's ordinary unsaved-work grammar, and it is
+the only shape that saves the capture at quit WITHOUT writing prose to disk.
+*Against:* a quit that does not quit is a surprise, and it is product behaviour the app does not
+have anywhere else today.
+
+**Option 2 — QUIT-SURVIVING, SEALED ON DISK.** Park the capture as a file in Application Support,
+AES-256-GCM under the existing key custody, deleted the moment it files.
+*Why I do not recommend it:* the refusal's commonest cause is the store being locked/unreachable,
+and that is **the same condition that makes the key unavailable** — so the park would refuse in
+precisely the case it exists for, covering only the "healthy key, failed round" arm. It also opens a
+SECOND at-rest home for her prose, which is a disclosure-envelope decision (14b's classification
+list), needs its own stale-blob lifecycle, and an unsealed fallback is forbidden by the run's own
+fence. Plaintext parking (UserDefaults/a plist) is ruled out outright by that fence.
+
+**Option 3 — MINT EARLY (the phone's model).** Arm a clock on the first keystroke and mint a real
+note, as `MobileQuickNote` does, so the text is durable from the first second.
+*Why I do not recommend it:* it changes what the pad IS. Her ruled grammar is ONE SUMMON = ONE NOTE
+and *"a summon she abandons keeps nothing"* (round-14.2, restated in #120(a)/(d)); early minting
+creates notes she abandoned and needs a withdrawal road (which is itself KnownIssues row 23's open
+product question on the phone). That is a product change, not a fix for row 65.
+
+**RECOMMENDATION: Option 1, with Option 1b offered as its rider.** Option 1 alone closes the road
+row 65 actually names (a refusal then a close) with no new at-rest surface and no product invention
+beyond "the pad gives back what it could not file"; 1b is the only honest answer to the quit half and
+is the part that wants her ruling. Both land PROVISIONAL with a QUESTIONS row (next free **#136**).
+
+**STATUS: awaiting the orchestrator's ruling. Rows 1–6 continue meanwhile; nothing of row 7 is
+built.**
 
 ---
 
