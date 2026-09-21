@@ -694,13 +694,6 @@ extension Operations {
                   block.deletedAt == nil
             else { continue }  // gap slots (SyncSpec §5) copy as nothing
 
-            // Which variant each slot of the copy CHOOSES: the source
-            // slot's own chosen (duplicate), or the lens's effective pick
-            // where one exists (promote) — the ONE difference between the
-            // two operations.
-            let sourceChosenID = chosenPicks?[block.id]
-                ?? placement.chosenVariantId
-
             let fan = try Variant.fetchAll(
                 db,
                 sql: """
@@ -712,10 +705,35 @@ extension Operations {
             // What this slot RESOLVES to (for chosen-only copies and the
             // default fallback): chosen if healthy, else block default.
             let resolved = try? renderedVariant(db, block: block, placement: placement)
-            let lensShown = chosenPicks?[block.id].flatMap { pick in
-                fan.first { $0.id == pick }
+            // **17b P5 (RUN A, batch A1) — A PICK IS HONOURED ONLY WHILE IT
+            // IS A LIVE ACTIVE TAKE**, which is what `promotePicks`' own
+            // docstring has always promised ("a pick naming a take that
+            // isn't live on its block falls through harmlessly") and what
+            // its two siblings already enforce (`effectiveLensSelection`
+            // joins `AND v.status = 'active'`; `adoptPicksPreservingChosen`
+            // validates `take.status == .active`). The fan read above
+            // filters tombstones and NOTHING ELSE, so an ARCHIVED take used
+            // to resolve here — and under `carryFans: false` it became the
+            // copy's only take: a live placed block with zero live ACTIVE
+            // variants (I10 at birth), refusing every keystroke through
+            // `editableVariant`. The words were wrong too: the board falls
+            // through to the slot's chosen the moment a pick leaves the
+            // live active fan (`TakesViewModel.resolvedTake`), so the
+            // column was showing one take while the door labelled "only
+            // what this column shows" copied another.
+            //
+            // Treating a stale pick as NO PICK — for `shownVariant` AND for
+            // the chosen pointer — is what makes the copy show exactly what
+            // the column showed, on both `carryFans` arms.
+            let livePick = chosenPicks?[block.id].flatMap { pick in
+                fan.first { $0.id == pick && $0.status == .active }
             }
-            let shownVariant = lensShown ?? resolved
+            // Which variant each slot of the copy CHOOSES: the source
+            // slot's own chosen (duplicate, and any slot whose pick went
+            // stale), or the lens's effective pick where a live one exists
+            // (promote) — the ONE difference between the two operations.
+            let sourceChosenID = livePick?.id ?? placement.chosenVariantId
+            let shownVariant = livePick ?? resolved
 
             let toCopy: [Variant]
             if carryFans {

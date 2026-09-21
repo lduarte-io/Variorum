@@ -751,3 +751,139 @@ struct CopyPostPhantomOutboxTests {
         }
     }
 }
+
+// MARK: - 17b P5 (RUN A, batch A1) — an ARCHIVED pick is not a pick
+
+/// **RED ON OLD — `promotePicks` honoured an ARCHIVED pick, which its own
+/// docstring says it does not.** The fan read inside `copyPlacements`
+/// filters `deleted_at IS NULL` and nothing else, so an archived take was
+/// a candidate for `lensShown`; under `carryFans: false` it became the
+/// copy's ONLY take (a live, placed block with zero live ACTIVE
+/// variants — **I10 at birth**), and under either flag the copy's chosen
+/// pointer landed on it, so the words the copy showed were not the words
+/// the column showed. The door says *"only what this column shows"* and
+/// the view falls through to the slot's chosen when a pick leaves the live
+/// active fan (`TakesViewModel.resolvedTake`), so the fix is the operation
+/// honouring the contract it already documents: *"a pick naming a take
+/// that isn't live on its block falls through harmlessly."*
+///
+/// DISCRIMINATING REVERT (verified): drop `&& $0.status == .active` from
+/// the pick resolution in `copyPlacements` and restore the raw
+/// `chosenPicks?[block.id] ?? placement.chosenVariantId` for
+/// `sourceChosenID` — every expectation below that names the archived take
+/// fails.
+@Suite("promotePicks treats an archived pick as no pick (17b P5)")
+struct PromotePicksArchivedPickTests {
+    /// The world the board produces: a block whose column pick was archived
+    /// from the same board afterwards (scratch picks are never pruned).
+    private struct Scene {
+        var postID: String
+        var blockID: String
+        var chosenID: String
+        var archivedID: String
+    }
+
+    private func scene(_ ops: Operations) throws -> Scene {
+        let post = try ops.createPost(title: "the article", profile: .blog)
+        let minted = try ops.newBlock(in: post.id, text: "Take one.", at: .end)
+        let alt = try ops.branchVariant(minted.block.id, from: minted.variant.id)
+        try ops.autosave(alt.id, text: "Take two, bolder.", charDelta: 8)
+        try ops.archiveVariant(alt.id)
+        return Scene(
+            postID: post.id, blockID: minted.block.id,
+            chosenID: minted.variant.id, archivedID: alt.id)
+    }
+
+    private func activeTakes(_ db: AppDatabase, ofBlock blockID: String) throws -> Int {
+        try db.fetchInt(
+            """
+            SELECT COUNT(*) FROM variant
+            WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+            """, [blockID]) ?? -1
+    }
+
+    @Test func theOnlyTakeOfACopiedBlockIsNeverAnArchivedOne() throws {
+        try withOperations { ops, db in
+            let s = try scene(ops)
+
+            // "New note, only what this column shows" — the door that made
+            // the dead block.
+            let copy = try ops.promotePicks(
+                post: s.postID, picks: [s.blockID: s.archivedID], carryFans: false)
+            let copiedBlock = try #require(copy.blockCopies.first?.copy)
+
+            #expect(try self.activeTakes(db, ofBlock: copiedBlock) >= 1,
+                    "I10 at birth: a live placed block has a live ACTIVE take")
+            let text = try db.read { try Queries.renderedText($0, containerID: copy.post.id) }
+            #expect(text == "Take one.",
+                    "the column showed the slot's chosen — the copy carries those words, not the archived pick's")
+
+            // The consequence the old shape produced, driven for real: a
+            // block whose only take is archived refuses every keystroke.
+            let copiedTake = try #require(try db.fetchString(
+                """
+                SELECT id FROM variant
+                WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                ORDER BY fan_position, id LIMIT 1
+                """, [copiedBlock]))
+            try ops.autosave(copiedTake, text: "She can type in it.", charDelta: 8)
+            #expect(try db.fetchString(
+                "SELECT working_text FROM variant WHERE id = ?", [copiedTake])
+                    == "She can type in it.")
+        }
+    }
+
+    @Test func carryingTheFanNeverPointsTheCopysChosenAtAnArchivedTake() throws {
+        try withOperations { ops, db in
+            let s = try scene(ops)
+
+            let copy = try ops.promotePicks(
+                post: s.postID, picks: [s.blockID: s.archivedID], carryFans: true)
+            let copiedBlock = try #require(copy.blockCopies.first?.copy)
+
+            let chosen = try db.fetchString(
+                """
+                SELECT chosen_variant_id FROM container_block
+                WHERE block_id = ? AND deleted_at IS NULL
+                """, [copiedBlock])
+            let chosenStatus = try chosen.flatMap { id in
+                try db.fetchString("SELECT status FROM variant WHERE id = ?", [id])
+            }
+            #expect(chosenStatus != "archived",
+                    "the slot's chosen pointer never names an archived take (the read-time fallback is a net, not a plan)")
+            let text = try db.read { try Queries.renderedText($0, containerID: copy.post.id) }
+            #expect(text == "Take one.", "and it still renders what the column showed")
+
+            // The archived take DID ride along (carryFans preserves
+            // statuses — the standing rule, untouched by this fix).
+            #expect(try db.fetchInt(
+                """
+                SELECT COUNT(*) FROM variant
+                WHERE block_id = ? AND deleted_at IS NULL AND status = 'archived'
+                """, [copiedBlock]) == 1)
+        }
+    }
+
+    /// The neighbouring arms stay exactly as they were: a LIVE pick is
+    /// still honoured, and a pick naming nothing still falls through.
+    @Test func aLivePickIsStillThePicksWholePoint() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "the article", profile: .blog)
+            let minted = try ops.newBlock(in: post.id, text: "Take one.", at: .end)
+            let alt = try ops.branchVariant(minted.block.id, from: minted.variant.id)
+            try ops.autosave(alt.id, text: "Take two, bolder.", charDelta: 8)
+
+            let copy = try ops.promotePicks(
+                post: post.id, picks: [minted.block.id: alt.id], carryFans: false)
+            let text = try db.read { try Queries.renderedText($0, containerID: copy.post.id) }
+            #expect(text == "Take two, bolder.", "the live pick IS the copy's chosen")
+
+            let lenient = try ops.promotePicks(
+                post: post.id, picks: [minted.block.id: "no-such-take"], carryFans: false)
+            let lenientText = try db.read {
+                try Queries.renderedText($0, containerID: lenient.post.id)
+            }
+            #expect(lenientText == "Take one.", "an unknown pick resolves like an un-picked slot")
+        }
+    }
+}
