@@ -2946,3 +2946,75 @@ FIRST commit (PENDING marks), the oracle-sweep table, the defaults-family note f
 key, and the seam-file list (expected NONE — say so); flip the ledger's S2 row and the
 KnownIssues rows' cells (50 · 51 · 54 close or narrow per what lands) in your closing commit.
 The checkpoint protocol binds from the first commit.
+
+---
+
+## UNIT S2 RECORD — LIBRARY & MASTHEAD FACES (item 1 + rows 50 · 51 · 54)
+
+**WHAT THIS UNIT DID NOT DO (the record's first line, written at the OPEN and re-stated at the
+CLOSE against what actually shipped):**
+
+- It did not touch `Sources/VariorumCore/` — **PENDING at the open; verified at the close**. No
+  core, no `Sync/`, no schema, no migration, no `Server/`; the lockstep marker stays **8**.
+- It did not touch the EDITOR SEAM (`BlockRangeIndex` · `EditorTextView` · `TypedReturn` ·
+  `PaneTextAuthority` · `StructuralSeamEdit` · `runStructural` and its identity oracle) —
+  **PENDING at the open**.
+- It did not build a SETTINGS TOGGLE for either condensation. Her mandate is explicit —
+  *"I don't necessarily want an appearance setting - I want these to be changed by clicking on
+  them"* — so both faces cycle on a click and nothing about them appears in Settings.
+- It did not change one WORD of what a stamp says: the words are `TimeStampFace`'s, the one
+  brain, in every state of the cycle.
+- It did not take the word-target OFFER away from any counter state (the brief's explicit keep).
+- It did not build the midnight-rollover tick (row 51's record-only note) unless it fell out of
+  the hoist for free — **stated at the close**.
+- It did not do S3's rows (the 27 `fixedSize` sites · the tag sheet · the indicator ring · the
+  Trash cards · the lesson sweeps), and no other 13u4 unit's work was touched.
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The record + the READING (the brief's five reading lists, in order) | DONE (this commit) |
+| 2 | **Row 50** — the F-0 residue: `NoteCards`/`TagChips` out of the view file, the model's tag acts out of the model file. MECHANICAL, zero test edits | NOT-STARTED |
+| 3 | **Row 51** — the `FlippingStamp` hoist to the shared home + the two DEBUG-oracle edges swept | NOT-STARTED |
+| 4 | **Item 1a** — the masthead stamp's click-cycle (edited → created → clock) + ONE remembered LOCAL choice + pins | NOT-STARTED |
+| 5 | **Item 1b** — the word counter's click-cycle (full → note → block → icon), the target offer preserved in every state + pins | NOT-STARTED |
+| 6 | **Row 54** — the Timeline rows take the voice's type + pin | NOT-STARTED |
+| 7 | QUESTIONS #132 (the PROVISIONALs) | NOT-STARTED |
+| 8 | The WALK on the dev-store Debug build — both voices AND both appearances, captured | NOT-STARTED |
+| 9 | Closing suites + the ledger's S2 row + the KnownIssues rows (50 · 51 · 54) | NOT-STARTED |
+
+### THE READING (done in this session's own context, in the brief's order)
+
+1. This file's **Status banner** · **HER ADDITIONS item 1** verbatim · **THE SIZING-AND-RULINGS
+   SITTING RECORD** (no ruling pre-decides these; R-13u4-5 hands the 27 `fixedSize` sites to S3;
+   R-13u4-6 is the cast) · **THE LEDGER** · **ENVIRONMENT TRAPS** · **CAST & DISCIPLINE** · the
+   **seven prior UNIT RECORDs** (E1 · E2 · E3 · C1 · C2 · F1 · S1). The walker facts that bind
+   this unit, carried forward from those records:
+   - `cliclick t:` **drops characters** in the shelf's quick-entry bar and ⌘A does not select
+     there; `osascript … keystroke` + `key code 36 using shift down` is the staging road, and
+     every burst needs an explicit re-activation (E3).
+   - The capture boxes **substitute typed quotes** (C1); the shelf's row heights move the
+     quick-entry bar's y by ~70 points on a voice flip (C1).
+   - A full-screen `screencapture -x -o` is in SCREEN PIXELS with no window offset
+     (point = px/2); `walk-cap`'s WINDOW capture needs the window's Y added back (C2).
+   - A single `cliclick` click is sometimes swallowed by the activation — click TWICE on any
+     row whose act is idempotent (F1).
+   - **`sips --cropOffset` did not behave as the README describes** on the S1 captures — read
+     the FULL capture, or `sips -Z` to downscale it (S1). **`cliclick t:` cannot type a
+     bracket** (S1).
+   - Quit **by identity**, never ⌘Q; a second dev instance dies by a `pgrep`-proven PID only.
+2. **KnownIssues rows 50, 51 and 54** in full, with their provenance.
+3. **Rows 42 and 43** — the per-note-defaults families (the harness pollution of the dev-store
+   app's `.standard`, and the per-note keys that outlive their note).
+4. The 18h/17q stamp family: **`TimeStampFace`** (core `Domain` — the ONE words brain, its four
+   thresholds and its formatter cache), `LibrarySortFace`/`CatalogRowStamp`/`CatalogCardStamps`
+   (`LibraryTimeFace.swift`), `MastheadStamp`, `MastheadRowTwo`'s three-subview layout, the
+   Library sort's locally-remembered direction (`LibraryCatalogModel`), and
+   `LibraryCardStampsTests` + `MastheadStampTests`, the two suites that drive them.
+5. The restyle mandate: roster item 1 + the carried 2026-08-31 addendum, the reference artifact
+   `notes/plans/pre-13u-mockups/blocks-and-snippets.html` (its voice blocks are the REAL
+   `VoiceTokens` values — which is exactly why a system-font row reads as foreign), and
+   `Theme/CalmGrammar.swift`.
+
+*(The rest of this record fills in as the pieces land.)*
