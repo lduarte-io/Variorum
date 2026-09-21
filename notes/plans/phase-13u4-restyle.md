@@ -1836,13 +1836,13 @@ CLOSE against what actually shipped):**
 | # | Piece | Status |
 |---|---|---|
 | 1 | The record + the READING (the brief's four reading lists, in order) | DONE (8d84ab22) |
-| 2 | THE REPRODUCTION — her gesture on the dev-store Debug build, a TRIAL TABLE (rate, not one run) | DONE (this commit) — **20 trials, 11 MISSES**, the table below |
-| 3 | THE MECHANISM, TRACED (inputs → wrong scroll target → the landing below) — the `LandingAuthority` hypothesis TESTED, never assumed | DONE (this commit) — the two measured experiments below |
-| 4 | The red-on-old pin (behavioural-revert verified) + the fix | **THE FIX IS IN** (this commit) — the Index adopts `LandingAuthority`; pins red 3/3 pre-fix · the pin's first shape was HOLLOW and is recorded as such · the paired behavioural-revert measurement is piece 4b |
-| 4b | The BEHAVIOURAL REVERT — is the improvement the AUTHORITY's, or the probe's? (a worktree at the probe-only commit, the same trials + the same pins) | DONE (this commit) — **the authority's**: 3 of 4 trials miss and both pins are RED on the reverted tree |
-| 5 | Row 56's PAIRED INTERLEAVED adjudication (`theReadClickLandsInIndexAtThatBlock`, both trees) | DONE (this commit) — **6 runs, 3 rounds, alternating: RED on BOTH trees, byte-identical, every round** |
-| 6 | The WALK — chapter clicks at several depths, before/after, captured, both voices AND both appearances | DONE (this commit) — the table below |
-| 7 | Closing suites + QUESTIONS #129 + the KnownIssues row + the ledger's F1 row | DONE (this commit) — **148 tests in 24 suites, 2 issues, both row 56's one adjudicated test** |
+| 2 | THE REPRODUCTION — her gesture on the dev-store Debug build, a TRIAL TABLE (rate, not one run) | DONE (feb2d5d0) — **20 trials, 11 MISSES**, the table below |
+| 3 | THE MECHANISM, TRACED (inputs → wrong scroll target → the landing below) — the `LandingAuthority` hypothesis TESTED, never assumed | DONE (feb2d5d0) — the two measured experiments below |
+| 4 | The red-on-old pin (behavioural-revert verified) + the fix | **THE FIX IS IN** (adc6bfe4, the policy's final shape at ba50ae1c; the pins' red run at feb2d5d0) — the Index adopts `LandingAuthority`; pins red 3/3 pre-fix · the pin's first shape was HOLLOW and is recorded as such · the paired behavioural-revert measurement is piece 4b |
+| 4b | The BEHAVIOURAL REVERT — is the improvement the AUTHORITY's, or the probe's? (a worktree at the probe-only commit, the same trials + the same pins) | DONE (acb0b834) — **the authority's**: 3 of 4 trials miss and both pins are RED on the reverted tree |
+| 5 | Row 56's PAIRED INTERLEAVED adjudication (`theReadClickLandsInIndexAtThatBlock`, both trees) | DONE (cddf94a6) — **6 runs, 3 rounds, alternating: RED on BOTH trees, byte-identical, every round** |
+| 6 | The WALK — chapter clicks at several depths, before/after, captured, both voices AND both appearances | DONE (a5a6de86) — the table below |
+| 7 | Closing suites + QUESTIONS #129 + the KnownIssues row + the ledger's F1 row | DONE (7bf628a4) — **148 tests in 24 suites, 2 issues, both row 56's one adjudicated test** |
 
 ### THE READING (done in this session's own context, in the brief's order)
 
