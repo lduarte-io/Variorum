@@ -374,6 +374,31 @@ the fix was COMMITTED (`2e464abe`) the three `branchAllFans` doors were reverted
 working tree and re-run: exactly those three tests red, both takes in the fan holding the stale row,
 the other four green — discriminating. Restored with `git checkout --`; tree clean.
 
+### THE CLOSING RUNS — what the first full Mac run found (and one of the two was MINE)
+
+**Full Mac suite, run 1: 3054 tests in 506 suites, 4 issues across 2 tests.** Both adjudicated at
+their mechanism, neither a defect in this batch's fixes:
+
+1. **`TakeToBlockDoorTests.aBoardDoorThatCouldNotActStillSpeaksUnderEverySetting` — MY OWN RESIDUE,
+   the row-42 class, recorded rather than quietly cleaned.** The pin drives Adopt on the column that
+   IS the note and expects a refusal; it got the ADOPT RECEIPT, because `columns.first` was not the
+   main column. `withTakesWorld` builds its `TakesViewModel` on `UserDefaults.standard` (the dev-store
+   Debug domain) under the deterministic post id `00000000-…-000000000000`, and **my own P7 pins, in
+   the runs BEFORE I isolated their defaults, had called `addWriteColumn`/`replaceColumnWithNewWrite`
+   — whose `saveMemory()` wrote four scratch columns ("Lens 1", "Lens 2", "Lens 4", picks on
+   `…-0001`) into that shared key.** Verified as test residue by reading the value (deterministic
+   block/variant ids throughout, auto-generated column names), then deleted:
+   `defaults delete io.lduarte.Variorum.debug "takesViewMemory.00000000-0000-0000-0000-000000000000"`
+   — that one key only; the two real-UUID entries beside it are the dev store's own and were left
+   alone. **Re-run after the scrub: `TakeToBlockDoorTests` GREEN.** The pins themselves have taken
+   their own `UserDefaults` suite since the P7 commit, so the class cannot recur from this batch.
+2. **`BookOutlineLandingTests.openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded`** — the
+   **row-49 landing arm**, named on this run's own ENVIRONMENT TRAPS flake list. `abs(top) = 3424`
+   under full-suite load; **green in the isolated re-run** (8/8, then 17/2 with its neighbour). This
+   batch's diff holds zero lines in any book, outline, landing or manifest file — the touched files
+   are the operations layer, `UndoStack`, `TakesViewModel`, `EditorViewModel`, `AppSession`'s doc, and
+   the two phone surfaces.
+
 ### ROW 7 (KnownIssues 65) — THE TRACE, AND THE PARKING MECHANISM PROPOSED (the design fork; NOT built)
 
 **The mechanism, traced in the code itself (`App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift`).**
