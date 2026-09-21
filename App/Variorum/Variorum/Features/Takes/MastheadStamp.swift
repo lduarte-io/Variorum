@@ -28,17 +28,93 @@
 //  is what keeps a keystroke from redrawing chrome (the same shape the
 //  title's held read already runs at).
 //
-//  ── THE FLIP IS VIEW STATE, per note, defaulting to EDITED ───────────────
-//  Her ruling says a click flips and a click returns; it does not make the
-//  choice a remembered preference, and Apple Notes' own stamp reverts too.
-//  So the flip is `@State` reset on the note (`.task(id:)`) — a glance
-//  gesture, not a setting. Recorded in the batch record as the batch's call.
+//  ── THE CLICK CYCLES THREE FACES, AND THE CHOICE IS REMEMBERED ───────────
+//  **13u4 UNIT S2 — her item 1** (2026-09-19), verbatim: *"clicking on
+//  edited date goes to created, then collapses to a little clock icon.
+//  remembers this on every note, so if you're normally in clock mode a new
+//  note would open with only a clock icon… I don't necessarily want an
+//  appearance setting - I want these to be changed by clicking on them."*
+//
+//  This SUPERSEDES 18h's own recorded call — *"the flip is `@State` reset on
+//  the note … a glance gesture, not a setting"* — in both halves: there is a
+//  THIRD face, and the choice is REMEMBERED rather than reset per note. The
+//  memory is what her second sentence asks for; the click is what her last
+//  sentence forbids Settings from doing.
+//
+//  Nothing about the WORDS changed: every face says exactly what
+//  `TimeStampFace` says, the one brain, and the collapsed face says it on
+//  hover instead of on the row.
 //
 
 import Foundation
 import GRDB  // AsyncValueObservation iteration
 import SwiftUI
 import VariorumCore
+
+/// **The masthead stamp's resting face** — her three, in her order.
+///
+/// Pure and at file scope, so the cycle is a rule a pin holds rather than a
+/// `toggle()` buried in a view body (F-0), and so the app has ONE answer to
+/// "which stamp is the masthead showing".
+nonisolated enum StampFace: String, CaseIterable, Sendable {
+    /// `edited today 1:33 PM` — the shipped resting face, and the default.
+    case edited
+    /// `created Sep 1` — her first click.
+    case created
+    /// The collapsed face: *"a little clock icon"*. The words are not lost,
+    /// they move to the hover — which is the whole idea of a collapse.
+    case clock
+
+    /// Her cycle: *"clicking on edited date goes to created, then collapses
+    /// to a little clock icon"* — and a click again brings the date back.
+    var next: StampFace {
+        switch self {
+        case .edited: .created
+        case .created: .clock
+        case .clock: .edited
+        }
+    }
+
+    /// Which stamp this face is ABOUT. The collapsed face is still the
+    /// EDITED stamp — the note's own "when did I last touch this", which is
+    /// what the masthead rests on — so the clock's tooltip says that fact
+    /// rather than the one she cycled past.
+    var subject: TimeStampFace.Subject {
+        self == .created ? .created : .edited
+    }
+
+    /// Whether the face draws the words at all.
+    var showsWords: Bool { self != .clock }
+
+    /// **LOCAL to this Mac, and GLOBAL to every note** — her sentence's own
+    /// reading: *"remembers this on every note, so if you're normally in
+    /// clock mode a new note would open with only a clock icon"* reads most
+    /// naturally as one choice governing every note, not a row per note.
+    /// (The per-note alternative is recorded as the PROVISIONAL, QUESTIONS
+    /// #132.) Never synced: the `appearanceChoice` / `readModeOutlineShown`
+    /// / `libraryCatalogSort` class — how she likes a stamp to look is this
+    /// machine's taste, not document semantics. Zero schema, zero `setting`
+    /// key, the lockstep marker stays 8.
+    ///
+    /// **Its defaults family** (`KnownIssuesAndTechDebt` rows 42/43, which
+    /// the brief asks every new key to name): it is NOT a per-note key, so
+    /// row 43's outlives-the-note family does not apply — there is one value
+    /// for the app and nothing to evict when a note dies. It DOES share row
+    /// 42's harness hazard, because the test host IS
+    /// `io.lduarte.Variorum.debug` and a suite writing `.standard` writes
+    /// the dev-store app's own domain. The seam for that is SwiftUI's own
+    /// and needs no plumbing: every pin mounts under
+    /// `.defaultAppStorage(<a scrubbed suite>)`, so no pin can read what a
+    /// walk left behind, nor leave anything behind for one.
+    static let key = "mastheadStampFace"
+
+    /// A stored value that is not one of the three reads as `.edited` — the
+    /// posture `AppearanceChoice.remembered` and `LibraryCatalogModel`'s
+    /// sort take with their own local keys.
+    static func remembered(_ defaults: UserDefaults = .standard) -> StampFace {
+        defaults.string(forKey: key).flatMap(StampFace.init(rawValue:)) ?? .edited
+    }
+}
 
 struct MastheadStamp: View {
     let session: AppSession
@@ -48,7 +124,12 @@ struct MastheadStamp: View {
     var now: Date = Date()
 
     @State private var stamps: Queries.NoteStamps?
-    @State private var showsCreated = false
+    /// **Her remembered choice** (item 1) — one face for every note, local
+    /// to this Mac, written by the click and by nothing else. `@AppStorage`
+    /// rather than a read at mount, so a click in one note window moves
+    /// every other masthead in the process at once: one choice means one
+    /// choice everywhere, which is what "normally in clock mode" means.
+    @AppStorage(StampFace.key) private var restingFace: StampFace = .edited
     #if DEBUG
     /// **This masthead's own name in the DEBUG oracle** (13u4 UNIT S2 —
     /// row 51's two-window edge). `@State`, so it is minted once per view
@@ -57,20 +138,22 @@ struct MastheadStamp: View {
     @State private var oracleOwner = UUID()
     #endif
 
-    private var subject: TimeStampFace.Subject { showsCreated ? .created : .edited }
+    private var subject: TimeStampFace.Subject { restingFace.subject }
 
     private var date: Date? {
         guard let stamps else { return nil }
-        return showsCreated ? stamps.createdAt : stamps.editedAt
+        return restingFace.subject == .created ? stamps.createdAt : stamps.editedAt
     }
 
     var body: some View {
         face
             .task(id: postID) {
-                // A different note starts on its own edited stamp — the flip
-                // is a glance at THIS note, never a mode the masthead is left
-                // in.
-                showsCreated = false
+                // A different note arrives in the face she LEFT THE APP IN —
+                // her item 1: *"remembers this on every note, so if you're
+                // normally in clock mode a new note would open with only a
+                // clock icon."* (18h reset it here, deliberately, on the
+                // reading that the flip was a glance; her ruling supersedes
+                // that, and the reset is what had to go.)
                 stamps = nil
                 #if DEBUG
                 // The flip door is registered HERE (the 17q ladder's R1-5):
@@ -129,14 +212,27 @@ struct MastheadStamp: View {
             // words, the subject and the probe stay this masthead's.
             FlippingStamp(
                 tokens: tokens,
-                help: "\(TimeStampFace.tooltip(subject, date: date)) \u{2014} "
-                    + StampFlipHint.toSee(showsCreated ? .edited : .created),
+                help: "\(TimeStampFace.tooltip(subject, date: date)) \u{2014} \(hint)",
                 flip: flip
             ) {
-                Text(tokens.chromeLabel(words))
-                    .font(tokens.small)
-                    .lineLimit(1)
+                if restingFace.showsWords {
+                    Text(tokens.chromeLabel(words))
+                        .font(tokens.small)
+                        .lineLimit(1)
+                } else {
+                    // **The collapsed face** (item 1): the glyph inside a
+                    // `Text`, so it carries the row's own text baseline —
+                    // a bare `Image` hands the stack its bottom edge
+                    // (`CatalogBookLine`'s measured note, one file over) and
+                    // `MastheadRowTwo` aligns row two on the first baseline.
+                    Text(Image(systemName: "clock"))
+                        .font(tokens.small)
+                        .lineLimit(1)
+                }
             }
+            // The words are never lost behind the icon: they are the
+            // tooltip's first half, and they are what a screen reader is
+            // told the control IS.
             .accessibilityLabel(words)
             .mastheadGeometryProbe(.stamp(postID), in: PostDetailView.mastheadSpace)
         } else {
@@ -144,8 +240,19 @@ struct MastheadStamp: View {
         }
     }
 
+    /// What a click will do NEXT, in the shared vocabulary — the third
+    /// state is the masthead's own, so its two clauses live beside
+    /// `toSee`'s table rather than in this body.
+    private var hint: String {
+        switch restingFace {
+        case .edited: StampFlipHint.toSee(.created)
+        case .created: StampFlipHint.toCollapse
+        case .clock: StampFlipHint.toShowTheDate
+        }
+    }
+
     private func flip() {
-        showsCreated.toggle()
+        restingFace = restingFace.next
         #if DEBUG
         reportShown()
         #endif
@@ -155,8 +262,14 @@ struct MastheadStamp: View {
     private func reportShown() {
         PostDetailOracle.recordStamp(
             postID,
-            words: date.map { TimeStampFace.stamp(subject, date: $0, now: now) },
+            // The collapsed face says nothing on the row, so it reports
+            // nothing — and the FACE beside it is how a pin tells that from
+            // a read that has not landed.
+            words: restingFace.showsWords
+                ? date.map { TimeStampFace.stamp(subject, date: $0, now: now) } : nil,
             owner: oracleOwner)
+        PostDetailOracle.recordStampFace(
+            postID, face: restingFace.rawValue, owner: oracleOwner)
     }
     #endif
 

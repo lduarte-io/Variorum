@@ -1043,6 +1043,12 @@ enum PostDetailOracle {
         var words: String?
         var editedAt: Date?
         var flip: (@MainActor () -> Void)?
+        /// **Which of her three faces the masthead is resting in** (13u4
+        /// UNIT S2, item 1). The words go silent in the collapsed face, so
+        /// without this a pin could not tell *"she is in clock mode"* from
+        /// *"the read has not landed yet"* — the two states a nil `words`
+        /// would otherwise share.
+        var face: String?
     }
 
     /// postID → the mastheads standing on it, oldest first (the last one is
@@ -1056,6 +1062,7 @@ enum PostDetailOracle {
     /// …and its click, so a pin flips it without simulating an AppKit click
     /// into hosted chrome (`beginTitleEditing`'s own pattern).
     static var flipStamp: [String: @MainActor () -> Void] { current(\.flip) }
+    static var stampFace: [String: String] { current(\.face) }
 
     private static func current<V>(_ field: KeyPath<StampEntry, V?>) -> [String: V] {
         var answer: [String: V] = [:]
@@ -1086,6 +1093,12 @@ enum PostDetailOracle {
     static func recordStamp(_ postID: String, words: String?, owner: UUID) {
         note(postID, owner: owner)
         stampEntries[postID, default: [:]][owner, default: StampEntry()].words = words
+    }
+
+    /// The face this masthead is RESTING in (item 1's cycle).
+    static func recordStampFace(_ postID: String, face: String, owner: UUID) {
+        note(postID, owner: owner)
+        stampEntries[postID, default: [:]][owner, default: StampEntry()].face = face
     }
 
     /// The edit stamp this masthead's held read last delivered.

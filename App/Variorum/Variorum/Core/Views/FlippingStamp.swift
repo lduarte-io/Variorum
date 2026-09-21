@@ -80,4 +80,10 @@ nonisolated enum StampFlipHint {
         case .dated: "click to see the day this note is about"
         }
     }
+
+    /// The two clauses her item-1 COLLAPSE needs (13u4 UNIT S2). Only the
+    /// note masthead has a third state today; they live here beside `toSee`
+    /// so one gesture keeps one vocabulary if anything else grows one.
+    static let toCollapse = "click to collapse it to a clock"
+    static let toShowTheDate = "click to show the date again"
 }

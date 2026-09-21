@@ -143,32 +143,169 @@ struct MastheadStampTests {
         }
     }
 
-    /// **A click flips it to *created …*, and again returns** — her ruling's
-    /// own gesture, driven through the very closure the Button calls.
-    @Test func aClickFlipsTheStampToCreatedAndBackAgain() async throws {
+    /// **A click cycles her THREE faces — edited → created → the clock —
+    /// and a click again brings the date back** (13u4 UNIT S2, her item 1:
+    /// *"clicking on edited date goes to created, then collapses to a little
+    /// clock icon"*), driven through the very closure the Button calls.
+    ///
+    /// This REPLACES 18h's two-state flip pin, which asserted that a second
+    /// click returned to *edited*. That was 18h's own recorded call and her
+    /// ruling supersedes it — a RULED behaviour change, so the pin is
+    /// rewritten to the ruling rather than owed a red-on-old (13u4's CAST &
+    /// DISCIPLINE).
+    @Test func aClickCyclesTheStampThroughHerThreeFacesAndBackToTheDate() async throws {
         try await withMountedDetail(width: 1100, tags: []) { _, postID in
             #if DEBUG
             await settle(until: { PostDetailOracle.stampShown[postID] != nil })
             let edited = try #require(PostDetailOracle.stampShown[postID])
             #expect(edited.hasPrefix("edited "), "it rests on the edit stamp: \(edited)")
+            #expect(PostDetailOracle.stampFace[postID] == StampFace.edited.rawValue)
 
             let flip = try #require(
                 PostDetailOracle.flipStamp[postID], "the stamp's click reachable")
             flip()
             await settle(until: {
-                PostDetailOracle.stampShown[postID]?.hasPrefix("created ") == true
+                PostDetailOracle.stampFace[postID] == StampFace.created.rawValue
             })
             let created = try #require(PostDetailOracle.stampShown[postID])
             #expect(created.hasPrefix("created "), "a click shows when it was created: \(created)")
 
             flip()
             await settle(until: {
+                PostDetailOracle.stampFace[postID] == StampFace.clock.rawValue
+            })
+            #expect(PostDetailOracle.stampFace[postID] == StampFace.clock.rawValue,
+                    "a second click COLLAPSES it — her clock icon")
+            #expect(PostDetailOracle.stampShown[postID] == nil,
+                    "…and the collapsed face says nothing on the row (the words are the hover's)")
+
+            flip()
+            await settle(until: {
                 PostDetailOracle.stampShown[postID]?.hasPrefix("edited ") == true
             })
             #expect(PostDetailOracle.stampShown[postID]?.hasPrefix("edited ") == true,
-                    "a click again returns")
+                    "a click again brings the date back")
+            #expect(PostDetailOracle.stampFace[postID] == StampFace.edited.rawValue)
             #endif
         }
+    }
+
+    /// **The choice is REMEMBERED, and a note she has never opened arrives
+    /// wearing it** — her item 1's second sentence, which is the whole
+    /// reason it is a preference and not a glance: *"remembers this on every
+    /// note, so if you're normally in clock mode a new note would open with
+    /// only a clock icon."*
+    ///
+    /// The memory is read through SwiftUI's own `@AppStorage` seam, so the
+    /// pin hands the mount a scrubbed suite (`defaultAppStorage`) rather
+    /// than writing the dev-store app's real domain — KnownIssues row 42's
+    /// hazard, named at the key's own declaration.
+    @Test func theRememberedFaceIsWhatANoteSheHasNeverOpenedArrivesIn() async throws {
+        let db = try AppDatabase.inMemory()
+        let suiteName = "13u4-s2-stampface-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defaults.removePersistentDomain(forName: suiteName)
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 12))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let first = try session.operations.createPost(title: "the note she was in")
+            _ = try session.operations.newBlock(in: first.id, text: "a block")
+            let second = try session.operations.createPost(title: "a note she has never opened")
+            _ = try session.operations.newBlock(in: second.id, text: "another block")
+
+            #if DEBUG
+            PostDetailOracle.resetStamp(first.id, in: session.debugProbeScope)
+            PostDetailOracle.resetStamp(second.id, in: session.debugProbeScope)
+
+            // In the first note, click twice: edited → created → clock.
+            let firstWindow = mountStamp(session: session, postID: first.id, defaults: defaults)
+            await settle(until: { PostDetailOracle.flipStamp[first.id] != nil })
+            let flip = try #require(PostDetailOracle.flipStamp[first.id])
+            flip()
+            flip()
+            await settle(until: {
+                PostDetailOracle.stampFace[first.id] == StampFace.clock.rawValue
+            })
+            #expect(StampFace.remembered(defaults) == .clock,
+                    "the click is what wrote the preference — never a settings pane")
+            closeWindow(firstWindow)
+
+            // A note she has never opened, in the same app: it opens with
+            // only the clock icon.
+            let secondWindow = mountStamp(session: session, postID: second.id, defaults: defaults)
+            defer { closeWindow(secondWindow) }
+            await settle(until: { PostDetailOracle.stampFace[second.id] != nil })
+            #expect(PostDetailOracle.stampFace[second.id] == StampFace.clock.rawValue,
+                    "her sentence, literally: a new note opens in clock mode")
+            #expect(PostDetailOracle.stampShown[second.id] == nil,
+                    "…with no date words on the row")
+            #endif
+        }
+    }
+
+    /// The cycle and the memory as PURE rules — no window, no store: her
+    /// order, the subject each face is about, which face draws words, and
+    /// the "a stored value that is not one of the three reads as edited"
+    /// posture every local key in this app takes.
+    @Test func theCycleAndItsMemoryAreOneRule() throws {
+        #expect(StampFace.edited.next == .created)
+        #expect(StampFace.created.next == .clock)
+        #expect(StampFace.clock.next == .edited)
+        #expect(StampFace.allCases.map(\.next.rawValue) == ["created", "clock", "edited"])
+
+        #expect(StampFace.edited.subject == .edited)
+        #expect(StampFace.created.subject == .created)
+        #expect(StampFace.clock.subject == .edited,
+                "the collapsed face is still the note's edit stamp — that is what the hover says")
+        #expect(StampFace.edited.showsWords && StampFace.created.showsWords)
+        #expect(!StampFace.clock.showsWords)
+
+        let suiteName = "13u4-s2-stampface-pure-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defaults.removePersistentDomain(forName: suiteName)
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        #expect(StampFace.remembered(defaults) == .edited, "the default is the shipped face")
+        defaults.set("clock", forKey: StampFace.key)
+        #expect(StampFace.remembered(defaults) == .clock)
+        defaults.set("nonsense", forKey: StampFace.key)
+        #expect(StampFace.remembered(defaults) == .edited, "a stored stranger reads as the default")
+    }
+
+    /// Mounts ONE masthead stamp in its own window, reading its remembered
+    /// face from `defaults` (SwiftUI's own `@AppStorage` seam).
+    private func mountStamp(
+        session: AppSession, postID: String, defaults: UserDefaults
+    ) -> NSWindow {
+        let window = NSWindow(
+            contentRect: NSRect(x: 60, y: 60, width: 420, height: 80),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        let hosting = NSHostingView(
+            rootView: MastheadStamp(session: session, postID: postID, tokens: .terminalLight)
+                .defaultAppStorage(defaults)
+                .frame(width: 420, height: 80, alignment: .leading))
+        hosting.frame = NSRect(x: 0, y: 0, width: 420, height: 80)
+        window.contentView = hosting
+        window.makeKeyAndOrderFront(nil)
+        for _ in 0..<12 {
+            hosting.layoutSubtreeIfNeeded()
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            pump()
+        }
+        return window
+    }
+
+    private func closeWindow(_ window: NSWindow) {
+        window.contentView = nil
+        window.orderOut(nil)
+        window.close()
     }
 
     /// Mounts the real detail with one note (a block, a book so the chip
@@ -204,6 +341,16 @@ struct MastheadStampTests {
             }
             UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
             defer { UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)") }
+            // 13u4 UNIT S2: the stamp's remembered face is read through
+            // `@AppStorage`, whose default store is the DEV-STORE app's own
+            // `.standard` (KnownIssues row 42 — the test host IS
+            // `io.lduarte.Variorum.debug`). A scrubbed suite per mount, so a
+            // walk that left the app in clock mode cannot turn these pins
+            // red and they cannot leave anything behind for a walk.
+            let suiteName = "13u4-s2-masthead-\(UUID().uuidString)"
+            let stampDefaults = UserDefaults(suiteName: suiteName) ?? .standard
+            stampDefaults.removePersistentDomain(forName: suiteName)
+            defer { stampDefaults.removePersistentDomain(forName: suiteName) }
             try await withAdoptedTheme(session: session) { store in
                 let oracle = MastheadGeometry.reader(session.debugProbeScope)
                 oracle.resetRowTwo()
@@ -218,7 +365,8 @@ struct MastheadStampTests {
                 }
                 let hosting = NSHostingView(
                     rootView: PostDetailView(session: session, postID: post.id)
-                        .environment(store))
+                        .environment(store)
+                        .defaultAppStorage(stampDefaults))
                 hosting.frame = NSRect(x: 0, y: 0, width: width, height: 750)
                 window.contentView = hosting
                 window.makeKeyAndOrderFront(nil)

@@ -2978,7 +2978,7 @@ CLOSE against what actually shipped):**
 | 2 | **Row 50** — the F-0 residue: `NoteCards`/`TagChips` out of the view file, the model's tag acts out of the model file. MECHANICAL, zero test edits | DONE (this commit) — **81 tests in 14 suites passed with ZERO test files touched**; the view 1,195 → 1,012 lines, the model 585 → 497 |
 | 3a | **Row 51** — the `FlippingStamp` hoist to the shared home (`Core/Views/`) | DONE (this commit) — **34 tests in 5 suites passed with ZERO test files touched** |
 | 3b | **Row 51** — the two DEBUG-oracle edges swept, each fixed or provably safe | DONE (this commit) — both FIXED, the two-window one **measured RED first**; 25 tests in 4 suites green, the two shipped stamp suites riding UNMODIFIED |
-| 4 | **Item 1a** — the masthead stamp's click-cycle (edited → created → clock) + ONE remembered LOCAL choice + pins | NOT-STARTED |
+| 4 | **Item 1a** — the masthead stamp's click-cycle (edited → created → clock) + ONE remembered LOCAL choice + pins | DONE (this commit) — **22 tests in 3 suites passed**; the cycle, the memory and a note-she-has-never-opened all pinned |
 | 5 | **Item 1b** — the word counter's click-cycle (full → note → block → icon), the target offer preserved in every state + pins | NOT-STARTED |
 | 6 | **Row 54** — the Timeline rows take the voice's type + pin | NOT-STARTED |
 | 7 | QUESTIONS #132 (the PROVISIONALs) | NOT-STARTED |
@@ -3086,5 +3086,49 @@ component, so a window left open across midnight still reads *"today …"* for y
 interaction. Building a timer for it would be a new behaviour nobody asked for — and it would
 have to live in the shared component, ticking for every stamp in every list. Row 51's note
 stands, unchanged, with this sentence as its re-verification.
+
+### ITEM 1a — THE MASTHEAD STAMP CYCLES, AND THE CHOICE IS REMEMBERED (piece 4)
+
+**Her words, which are the whole specification:** *"clicking on edited date goes to created, then
+collapses to a little clock icon. remembers this on every note, so if you're normally in clock
+mode a new note would open with only a clock icon… I don't necessarily want an appearance
+setting - I want these to be changed by clicking on them."*
+
+| What | How it is built |
+|---|---|
+| The three faces and their order | `StampFace` — a pure `nonisolated enum` at file scope in `MastheadStamp.swift` (the `AppearanceChoice` / `ReadModeView.Face` shape), so the cycle is a rule a pin holds rather than a `toggle()` in a view body |
+| What each face SAYS | `TimeStampFace`'s answer for that face's subject — **zero new wording**. `.clock` is still the EDITED stamp; it simply says it on hover instead of on the row |
+| The collapsed face | `Text(Image(systemName: "clock"))`, not a bare `Image` — a symbol inside a `Text` carries the row's text baseline, and row two aligns on the first baseline (`CatalogBookLine`'s measured note, one file over). `MastheadRowTwo` already measures the stamp's ideal width, so a narrower stamp needed no layout change at all |
+| The memory | `@AppStorage(StampFace.key)`, LOCAL and never synced — the `appearanceChoice` / `libraryCatalogSort` class. `@AppStorage` rather than a read at mount **on purpose**: one choice means one choice *everywhere*, so a click in one note window moves every other masthead in the process at once |
+| What a click does | `restingFace = restingFace.next` — and nothing appears in Settings, which is her last sentence's letter |
+
+**What this SUPERSEDES, said out loud:** 18h's own recorded call — *"the flip is `@State` reset on
+the note … a glance gesture, not a setting"* — in both halves (a third face; a memory instead of
+a per-note reset). A RULED behaviour change, so its pin was **rewritten to the ruling** rather
+than owed a red-on-old (13u4's CAST & DISCIPLINE), and the file header now carries her sentence
+and says what it replaced.
+
+**The tooltip in every state.** `StampFlipHint` gained the two clauses the third face needs
+(*"click to collapse it to a clock"* · *"click to show the date again"*) beside the shared
+`toSee` table. In the collapsed face the hover still carries the WHOLE fact
+(`TimeStampFace.tooltip`), and `accessibilityLabel` is still the words — an icon that hid the
+date from a screen reader would be a collapse that lost something.
+
+**The pins** (`MastheadStampTests`, `StampOracleOwnershipTests`) — **22 tests in 3 suites green**:
+the cycle through all three faces and back, driven through the very closure the Button calls;
+the collapsed face reporting NO words on the row; the memory written by the click
+(`StampFace.remembered(defaults) == .clock`); **a note she has never opened arriving in clock
+mode**, which is her second sentence literally; and the pure rule (her order, each face's
+subject, and "a stored stranger reads as the default"). A new DEBUG oracle read
+(`PostDetailOracle.stampFace`) exists for one reason: with no words on the row, *"she is in clock
+mode"* and *"the read has not landed yet"* would otherwise be the same nil.
+
+**The defaults-family note** (the brief's rule for any new key), written at the declaration:
+`mastheadStampFace` is **not** a per-note key, so row 43's outlives-the-note family does not
+apply — one value, nothing to evict. It DOES share **row 42's harness hazard** (the test host IS
+`io.lduarte.Variorum.debug`, so a suite writing `.standard` writes the dev-store app's own
+domain), and the seam for that is SwiftUI's own and needed no plumbing: **every mounted pin now
+mounts under `.defaultAppStorage(<a scrubbed suite>)`**, so no pin can read what a walk left
+behind nor leave anything behind for one.
 
 *(The rest of this record fills in as the pieces land.)*
