@@ -232,18 +232,9 @@ struct MobilePostureSwitchSheet: View {
     }
 
     private var runningLine: String {
-        switch model.runnerPhase {
-        case .reencrypting(let done, let total):
-            return ProtectionCopy.reencryptingLine(done: done, total: total)
-        case .rekeyingLibrary, .movingCustody, .snapshotting:
-            return ProtectionCopy.rekeyingLibraryLine
-        case .pullingToHead:
-            return "Catching up with the server…"
-        case .rotatingKeys:
-            return "Minting your new keys…"
-        case .idle, .done:
-            return "Working…"
-        }
+        // Row 12: the ONE brain (`ProtectionCopy.runningLine`) — the
+        // ceremony MINTS its new keys.
+        ProtectionCopy.runningLine(for: model.runnerPhase, minting: true)
     }
 
     private var wordsField: some View {
@@ -452,18 +443,9 @@ struct MobileFollowSheet: View {
     }
 
     private var runningLine: String {
-        switch model.runnerPhase {
-        case .reencrypting(let done, let total):
-            return ProtectionCopy.reencryptingLine(done: done, total: total)
-        case .rekeyingLibrary, .movingCustody, .snapshotting:
-            return ProtectionCopy.rekeyingLibraryLine
-        case .rotatingKeys:
-            return "Picking up your new keys…"
-        case .pullingToHead:
-            return "Catching up with the server…"
-        case .idle, .done:
-            return "Working…"
-        }
+        // Row 12: the ONE brain (`ProtectionCopy.runningLine`) — a FOLLOW
+        // picks up keys another device minted.
+        ProtectionCopy.runningLine(for: model.runnerPhase, minting: false)
     }
 
     private var fieldChrome: some View {

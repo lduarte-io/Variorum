@@ -63,8 +63,13 @@ final class WordsCeremony {
     func chooseGenerateNew() throws {
         guard case .existing = step else { return }
         lastError = nil
+        // RUN A batch A2, row 13: the flag is set AFTER the generate, so it
+        // means what its readers assume — fresh words were put ON SCREEN
+        // (a generate that threw showed nothing, and must not make the
+        // failure copy claim she wrote something down).
+        let fresh = try RecoveryPhrase.generate()
         regenerated = true
-        step = .show(try RecoveryPhrase.generate())
+        step = .show(fresh)
     }
 
     /// The existing words, typed: the phrase's own errors speak first

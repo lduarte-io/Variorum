@@ -569,9 +569,26 @@ final class PostureSwitchModel: Identifiable {
     /// The instance wording: a rotation refused MID-RUN (the runner's own
     /// re-read at step 1) speaks the same named sentence from the facts the
     /// door read moments before; everything else is the static table.
+    /// **RUN A batch A2, row 13 (17l item 7 / QUESTIONS #90 (11), MINOR-N4
+    /// (2)): a failure AFTER *Generate New Ones* must say the words she
+    /// just wrote down are not in use.** F3 moved MAJOR-3 (b)'s refusal to
+    /// the DOOR so the words screens never run for a ceremony whose step 2
+    /// would refuse — but every other post-screen failure (`outboxNotEmpty`,
+    /// `pullStalled`, `wordsRequired`, a vault refusal) still lands here
+    /// with twelve fresh words on paper and nothing behind them. The tail
+    /// rides the instance `wording`, which is exactly the set of failures
+    /// reachable after the screens; the door's own refusals are constants
+    /// and never pass through here. PROVISIONAL wording, in the ruled
+    /// ledger-61 sentence family; 13s re-voices (QUESTIONS #138).
     private func wording(for error: any Error) -> String {
-        if case CorpusRotationError.rotationInProgress = error { return stillFinishingSentence }
-        return Self.message(for: error)
+        let sentence: String
+        if case CorpusRotationError.rotationInProgress = error {
+            sentence = stillFinishingSentence
+        } else {
+            sentence = Self.message(for: error)
+        }
+        guard words?.regenerated == true else { return sentence }
+        return sentence + " " + ProtectionCopy.freshWordsNeverLanded
     }
 
     static func message(for error: any Error) -> String {

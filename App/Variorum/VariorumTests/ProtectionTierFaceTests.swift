@@ -115,6 +115,32 @@ struct ProtectionTierFaceTests {
         let rowShown = SurfaceComposition.text(of: row.body)
         #expect(SurfaceComposition.carries(ProtectionCopy.waitingTitle, in: rowShown), "the indicator too")
         #expect(!SurfaceComposition.carries(ProtectionCopy.exposedNudgeHeadline, in: rowShown))
+
+        // RUN A batch A2, row 13 (17l item 7): the THIRD face NIT-N8 named —
+        // the PANE's own checklist sentence — verified to still stand after
+        // 13u4 S1 split Settings into nine panes and gave Protection its
+        // own. The pane MOUNTS here (so the restructure's composition is
+        // exercised), and what it says is read two ways, because a `Form`'s
+        // reflected tree does not carry the string a computed `Text` holds:
+        // the SENTENCE it renders, and the fact that the line still renders
+        // the one brain rather than a re-derivation that could drift.
+        let pane = ProtectionPane(controller: controller, services: nil)
+        await SurfaceComposition.host(pane, size: NSSize(width: 720, height: 552))
+        #expect(controller.legs.tier == .waiting, "the pane mounted on a waiting device")
+        #expect(ProtectionCopy.nudgeSentence(for: controller.legs.tier)
+                == ProtectionCopy.waitingTitle + " " + ProtectionCopy.waitingBody,
+                "what the pane's checklist line resolves to")
+        #expect(ProtectionCopy.nudgeSentence(for: controller.legs.tier)
+                != ProtectionCopy.nudgeSentence(for: .exposed),
+                "never the exposed nudge for a device merely waiting")
+        let paneSource = try String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent()      // VariorumTests
+                .deletingLastPathComponent()      // App/Variorum
+                .appendingPathComponent("Variorum/Features/Settings/ProtectionPane.swift"),
+            encoding: .utf8)
+        #expect(paneSource.contains("Text(ProtectionCopy.nudgeSentence(for: controller.legs.tier))"),
+                "the pane still renders the one nudge brain — the face NIT-N8 built")
     }
 
     /// A COVERED nudge (a secret still to offer, but a real leg exists)

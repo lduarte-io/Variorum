@@ -647,6 +647,21 @@ struct MobilePhoneProtectionCopyTests {
         #expect(!ProtectionCopy.joinStandardConsent.contains("Mac") && ProtectionCopy.joinStandardConsent.contains("Use Castle…"))
     }
 
+    /// **RUN A batch A2, row 12 (17l item 6) — the phone's twin:** the
+    /// preparing line before the first pulled window, and the follow
+    /// sheet's own *picking up* arm (the phone has both sheets too).
+    @MainActor
+    @Test func theReencryptingLinePreparesOnThePhoneToo() {
+        #expect(ProtectionCopy.reencryptingLine(done: 0, total: 0)
+                == "Re-encrypting your library on the server… (preparing)")
+        #expect(ProtectionCopy.reencryptingLine(done: 2, total: 9)
+                == "Re-encrypting your library on the server… (2 of 9)")
+        #expect(ProtectionCopy.runningLine(for: .rotatingKeys, minting: false)
+                == "Picking up your new keys…")
+        #expect(ProtectionCopy.runningLine(for: .reencrypting(done: 0, total: 0), minting: false)
+                == ProtectionCopy.reencryptingLine(done: 0, total: 0))
+    }
+
     /// **RUN A batch A2, row 10 (17l item 3) — the phone's twin of her four
     /// ruled wordings (QUESTIONS #90's RULINGS block), in the phone's
     /// nouns.** The Mac's is `Phase13pProtectionBrainTests

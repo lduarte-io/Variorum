@@ -1320,6 +1320,81 @@ struct PostureSwitchTests {
         return controller
     }
 
+    /// **RUN A batch A2, row 13 (17l item 7 / QUESTIONS #90 (11), MINOR-N4
+    /// (2)): a ceremony that fails AFTER *Generate New Ones* says the words
+    /// she just wrote down are not in use.** F3 fixed MINOR-N4 (1) by moving
+    /// MAJOR-3 (b)'s refusal to the door, so the words screens never run for
+    /// a ceremony whose step 2 would refuse — but every other post-screen
+    /// failure still lands with twelve fresh words on paper and nothing
+    /// behind them, and the failure sentence alone never said so. The tail
+    /// rides the instance `wording`, which is exactly the set of failures
+    /// reachable after the screens.
+    ///
+    /// **RED ON OLD: the failure said only why the act failed.**
+    @Test func aCeremonyFailingAfterGenerateNewOnesSaysTheFreshWordsNeverLanded() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        arm(world, faultAt: .beforeVaultWrite)
+        let controller = makeController(for: world)
+        // The account already carries words, so the ceremony offers the
+        // choice that *Generate New Ones* is one half of.
+        let tie = VaultTie(
+            hasRecoveryWrap: true,
+            verifyPassphrase: { _ in .match },
+            verifyRecoveryWords: { _ in .match })
+        let model = PostureSwitchModel(
+            mode: .replaceKeys, runner: world.runner, controller: controller,
+            vaultTie: tie, passphraseInHand: "sesame")
+
+        await model.start()
+        #expect(model.phase == .explain, "\(model.phase)")
+        model.continueFromExplain()
+        #expect(model.phase == .wordsExisting, "words exist ⇒ the choice: \(model.phase)")
+        model.chooseGenerateNewWords()
+        guard case .wordsShow(let fresh) = model.phase else {
+            Issue.record("Generate New Ones shows twelve fresh words: \(model.phase)")
+            return
+        }
+        model.acknowledgeWordsWritten()
+        model.confirmWords(fresh.joined(separator: " "))
+        // The act runs and the injected fault fails it.
+        for _ in 0..<400 {
+            if case .failed = model.phase { break }
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+        guard case .failed(let sentence) = model.phase else {
+            Issue.record("the injected fault fails the act: \(model.phase)")
+            return
+        }
+        #expect(sentence.hasSuffix(ProtectionCopy.freshWordsNeverLanded),
+                "the words she just wrote down open nothing, and the sentence must say so: \(sentence)")
+        #expect(sentence.count > ProtectionCopy.freshWordsNeverLanded.count,
+                "the tail is a TAIL — the failure's own reason still leads")
+        #expect(try await world.vault().format.masterWrappedByRecovery != nil,
+                "and the account's existing words still stand")
+
+        // The guard: the SAME failure with her existing words typed carries
+        // no tail — nothing new was written down.
+        let typed = PostureSwitchModel(
+            mode: .replaceKeys, runner: world.runner, controller: controller,
+            vaultTie: tie, passphraseInHand: "sesame")
+        await typed.start()
+        typed.continueFromExplain()
+        typed.chooseTypeWords()
+        await typed.submitExistingWords(world.words.joined(separator: " "))
+        for _ in 0..<400 {
+            if case .failed = typed.phase { break }
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+        guard case .failed(let plain) = typed.phase else {
+            Issue.record("the injected fault fails this act too: \(typed.phase)")
+            return
+        }
+        #expect(!plain.contains(ProtectionCopy.freshWordsNeverLanded))
+    }
+
     @Test func theCeremonyWalksTheCopysOrderRefusingAWrongPassphraseAgainstTheVaultAndAWrongReEntry() async throws {
         let world = try await makeWorld()
         defer { world.tearDown() }

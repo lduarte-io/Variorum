@@ -376,10 +376,52 @@ nonisolated extension ProtectionCopy {
     static let enterCastleDoor = "Enter Castle"
 
     // §2b During / the notice / Done / the offer
+    /// **RUN A batch A2, row 12 (17l item 6 — her observation).** Between
+    /// the vault write and the first pulled window there is nothing to
+    /// count, and the line said *(0 of 0)*, which reads like a corpus of
+    /// nothing rather than a walk about to start. The gate is THE FIRST
+    /// WINDOW, never "done is zero": `done == 0` is the honest count all
+    /// through the first window, while `total == 0` means no window has
+    /// reported yet. PROVISIONAL wording; 13s re-voices (QUESTIONS #138).
     static func reencryptingLine(done: Int, total: Int) -> String {
-        "Re-encrypting your library on the server… (\(done) of \(total))"
+        guard total > 0 else { return "Re-encrypting your library on the server… (preparing)" }
+        return "Re-encrypting your library on the server… (\(done) of \(total))"
+    }
+
+    /// **The ceremony/follow sheets' RUNNING LINE — one brain (row 12).**
+    /// Four sheets (two Mac, two phone) carried byte-identical switches
+    /// over the runner's phase, differing in exactly one arm, so row 12's
+    /// fix would have had to be made four times to be true anywhere. The
+    /// one arm that differs is kept as the parameter it always was: a
+    /// CEREMONY mints the new keys, a FOLLOW picks up keys another device
+    /// minted.
+    static func runningLine(
+        for phase: PostureSwitchRunner.Phase, minting: Bool
+    ) -> String {
+        switch phase {
+        case .reencrypting(let done, let total):
+            return reencryptingLine(done: done, total: total)
+        case .rekeyingLibrary, .movingCustody, .snapshotting:
+            return rekeyingLibraryLine
+        case .rotatingKeys:
+            return minting ? "Minting your new keys…" : "Picking up your new keys…"
+        case .pullingToHead:
+            return "Catching up with the server…"
+        case .idle, .done:
+            return "Working…"
+        }
     }
     static let rekeyingLibraryLine = "Giving your library a new key…"
+    /// **RUN A batch A2, row 13 (QUESTIONS #90 (11), MINOR-N4 (2)):** the
+    /// tail on a ceremony that failed after *Generate New Ones* — the
+    /// twelve words she has just written down never landed anywhere, and
+    /// the failure sentence alone left her holding a set that opens
+    /// nothing without saying so. The ruled ledger-61 family's shape ("the
+    /// words ARE NOT …, the real ones are …"). PROVISIONAL; 13s re-voices
+    /// (QUESTIONS #138).
+    static let freshWordsNeverLanded =
+        "The twelve words you just wrote down are NOT in use: nothing changed, and your "
+        + "existing twelve words still open your account."
     static let insuranceTurnedOffNotice =
         "Your weekly unencrypted Markdown export is now off — it would have kept "
         + "writing readable copies of your library to disk. You can turn it back on "

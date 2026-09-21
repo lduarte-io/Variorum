@@ -354,6 +354,62 @@ struct ProtectionCopyTests {
                 && ProtectionCopy.enterItNowDoor == "Enter It Now…" && ProtectionCopy.followMovedToStandardDoor == "OK")
     }
 
+    /// **RUN A batch A2, row 12 (17l item 6) — *(0 of 0)* before the first
+    /// window.** Her observation: between the vault write and the first
+    /// pulled window the ceremony's line reads *(0 of 0)*, which looks like
+    /// a corpus of nothing rather than a walk about to start. The gate is
+    /// THE FIRST WINDOW (`total == 0` = nothing reported yet), never "done
+    /// is zero" — `done == 0` is the honest count all through window one.
+    @Test func theReencryptingLinePreparesUntilTheFirstWindowLands() {
+        #expect(ProtectionCopy.reencryptingLine(done: 0, total: 0)
+                == "Re-encrypting your library on the server… (preparing)")
+        // The first window HAS landed: zero done is a real count, not a gap.
+        #expect(ProtectionCopy.reencryptingLine(done: 0, total: 120)
+                == "Re-encrypting your library on the server… (0 of 120)")
+        #expect(ProtectionCopy.reencryptingLine(done: 118, total: 120)
+                == "Re-encrypting your library on the server… (118 of 120)")
+        // The running line rides the same brain, and its ONE differing arm
+        // stays what each sheet always said.
+        #expect(ProtectionCopy.runningLine(for: .reencrypting(done: 0, total: 0), minting: true)
+                == ProtectionCopy.reencryptingLine(done: 0, total: 0))
+        #expect(ProtectionCopy.runningLine(for: .rotatingKeys, minting: true) == "Minting your new keys…")
+        #expect(ProtectionCopy.runningLine(for: .rotatingKeys, minting: false) == "Picking up your new keys…")
+        #expect(ProtectionCopy.runningLine(for: .rekeyingLibrary, minting: true) == ProtectionCopy.rekeyingLibraryLine)
+        #expect(ProtectionCopy.runningLine(for: .pullingToHead, minting: false) == "Catching up with the server…")
+        #expect(ProtectionCopy.runningLine(for: .idle, minting: true) == "Working…")
+    }
+
+    /// Row 12's FACE, pinned where the face actually lives: the four
+    /// ceremony/follow sheets (two Mac, two phone) carried byte-identical
+    /// switches over the runner's phase, so the fix would have had to be
+    /// made four times to be true anywhere. No sheet re-derives it now —
+    /// they render the one brain. (The grep form is the 13u4 S3 precedent.)
+    @Test func noSheetReDerivesTheRunningLine() throws {
+        let appRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+        var offenders: [String] = []
+        for rootName in ["Variorum", "VariorumMobile", "Shared"] {
+            let root = appRoot.appendingPathComponent(rootName)
+            #expect(FileManager.default.fileExists(atPath: root.path), "root missing: \(rootName)")
+            guard let walker = FileManager.default.enumerator(
+                at: root, includingPropertiesForKeys: nil) else { continue }
+            for case let file as URL in walker where file.pathExtension == "swift" {
+                // The brain's own home is where the arm belongs.
+                if file.lastPathComponent == "PostureCopy.swift" { continue }
+                let source = try String(contentsOf: file, encoding: .utf8)
+                for (index, line) in source.split(separator: "\n", omittingEmptySubsequences: false)
+                    .map(String.init).enumerated()
+                where !line.trimmingCharacters(in: .whitespaces).hasPrefix("//")
+                    && line.contains("case .reencrypting(") {
+                    offenders.append(
+                        "\(file.lastPathComponent):\(index + 1) — \(line.trimmingCharacters(in: .whitespaces))")
+                }
+            }
+        }
+        #expect(offenders.isEmpty, "a surface re-deriving the re-encrypting line: \(offenders)")
+    }
+
     /// **RUN A batch A2, row 10 (17l item 3) — HER FOUR RULED WORDINGS on
     /// QUESTIONS #90, each a copy constant with its pin on both platforms
     /// (the phone's twin is `MobilePhoneProtectionCopyTests`). 13s
