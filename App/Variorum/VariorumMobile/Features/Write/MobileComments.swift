@@ -36,6 +36,34 @@ final class MobileCommentsController {
     /// The comment being edited through the draft field. nil = adding.
     private(set) var editingID: String?
 
+    /// **RUN A ladder round 2 (the MAJOR) — where a REFUSED draft waits.**
+    /// The sheet wiped its field on every close road — the dim-tap, Done,
+    /// and `projectionDidChange`'s auto-close — including the close the
+    /// refusal's own sentence invites (the unlock lives outside the
+    /// sheet), so the paragraph P4 had just taught the field to keep died
+    /// one gesture later. Row 65's class, one surface over; the park's
+    /// shape is the ruled fix (PROVISIONAL, QUESTIONS #140). It lives ON
+    /// THE CONTROLLER (the ruling's letter) — the controller outlives the
+    /// sheet's show/hide, and the park dies with the note's editor, which
+    /// is the same bounded cost the pad's park carries.
+    let draftPark = CommentDraftPark()
+
+    /// One-shot the sheet's render consumes: the parked text the open just
+    /// took back. The field is the VIEW's, so the controller can only
+    /// offer the words once — after the consume, the field is the only
+    /// home again (clear-at-restore, binding 3).
+    private(set) var restoredDraftText: String?
+
+    /// Why the box is not empty — its own line, never the refusal
+    /// register (nothing is being refused); cleared the moment she files
+    /// again, because by then it answers a question nobody is asking.
+    private(set) var restoredNote: String?
+
+    func takeRestoredDraftText() -> String? {
+        defer { restoredDraftText = nil }
+        return restoredDraftText
+    }
+
     /// The pixels' hook: state or content changed — re-render the sheet.
     var onChanged: (() -> Void)?
 
@@ -50,8 +78,22 @@ final class MobileCommentsController {
     func open(blockID: String) {
         guard let model, model.slot(for: blockID) != nil else { return }
         openBlockID = blockID
-        editingID = nil
         deletedShown = false
+        // RUN A ladder round 2 (the MAJOR): the open of the SAME block
+        // takes the refused draft back — the sheet becomes the only home
+        // again (clear-at-restore; a re-refusal re-parks), the edit
+        // target comes back with it, and one line says why the box is not
+        // empty. A DIFFERENT block's open shows nothing of it and leaves
+        // it held.
+        if let heldDraft = draftPark.take(forBlock: blockID) {
+            restoredDraftText = heldDraft.text
+            editingID = heldDraft.commentID
+            restoredNote = CommentDraftPark.restoredNote
+        } else {
+            restoredDraftText = nil
+            editingID = nil
+            restoredNote = nil
+        }
         onChanged?()
         Task { await refresh() }
     }
@@ -127,15 +169,45 @@ final class MobileCommentsController {
     /// here: state leaves only when the store has taken it.
     @discardableResult
     func submitDraft(_ text: String) async -> Bool {
-        if let editingID {
-            let landed = await run { ops in try ops.editBlockComment(editingID, text: text) }
-            if landed {
-                self.editingID = nil
-                onChanged?()
-            }
-            return landed
+        guard let blockID = openBlockID else { return false }
+        // Filing again — the restored line is answering a question nobody
+        // is asking now (the pad's rule for its own line).
+        restoredNote = nil
+        let editing = editingID
+        let outcome: DraftOutcome
+        if let editing {
+            outcome = await runDraft { ops in try ops.editBlockComment(editing, text: text) }
+        } else {
+            outcome = await runDraft { ops in _ = try ops.addBlockComment(to: blockID, text: text) }
         }
-        return await add(text)
+        switch outcome {
+        case .landed:
+            if editing != nil { editingID = nil }
+            // Binding 3: a landed submit of the parked block clears the
+            // park — a draft with a row must never come back as a ghost.
+            // Any refused draft still standing at this moment lives in
+            // the OPEN sheet and re-parks at its own next refusal.
+            draftPark.clearIfHeld(blockID: blockID)
+            onChanged?()
+            return true
+        case .refused:
+            // **Parked at REFUSAL time, from the SUBMITTED text** (RUN A
+            // ladder round 2, the MAJOR): every close road — the dim-tap,
+            // Done, the projection's auto-close — is covered without
+            // touching any close site, and keystrokes that land during
+            // the flight are not part of what was refused. On the open
+            // sheet this is belt-and-braces (the field keeps the text);
+            // on the close that follows, it is the whole fix.
+            draftPark.park(blockID: blockID, text: text, commentID: editing)
+            onChanged?()
+            return false
+        case .turnedAway:
+            // The latch turned it away (or the model died mid-flight):
+            // nothing was written and nothing was refused — the field
+            // holds, and the flight already in progress lands or parks
+            // in its own turn.
+            return false
+        }
     }
 
     func delete(_ id: String) async {
@@ -154,19 +226,39 @@ final class MobileCommentsController {
     /// identical comments on the block.
     private let latch = MobileWriteLatch()
 
+    /// What one write attempt became. The park must know a REFUSAL from a
+    /// latch-turned-away gesture — parking on the latter would widen the
+    /// park past refused drafts (binding 1), and nothing was written or
+    /// refused there anyway.
+    private enum DraftOutcome {
+        case landed
+        case refused
+        case turnedAway
+    }
+
     /// `true` only when the write LANDED. A gesture the latch turned away
     /// returns `false` too — nothing was written, so whatever the caller
     /// was holding must be held (it is not a refusal, and nothing reports
     /// it as one).
     @discardableResult
     private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async -> Bool {
-        await latch.run { await self.runOnce(body) } ?? false
+        await runDraft(body) == .landed
+    }
+
+    /// The draft doors' variant of `run`: the same latch, the same funnel,
+    /// with the refusal distinguishable (see `DraftOutcome`).
+    private func runDraft(
+        _ body: @escaping @Sendable (Operations) throws -> Void
+    ) async -> DraftOutcome {
+        await latch.run { await self.runOnce(body) } ?? .turnedAway
     }
 
     private func runOnce(
         _ body: @escaping @Sendable (Operations) throws -> Void
-    ) async -> Bool {
-        guard let model else { return false }
+    ) async -> DraftOutcome {
+        // A dead model is not a refusal: nothing ran and nothing spoke —
+        // the same "hold, don't park" answer the latch's turn-away gets.
+        guard let model else { return .turnedAway }
         do {
             try await session.runner.run(body)
             model.report(nil)
@@ -174,10 +266,10 @@ final class MobileCommentsController {
             // The marker follows the count (slot.commentCount rides the
             // projection): one fresh coherent read through the one door.
             await model.refreshTakesFromStore()
-            return true
+            return .landed
         } catch {
             model.report(Self.refusalMessage(error))
-            return false
+            return .refused
         }
     }
 

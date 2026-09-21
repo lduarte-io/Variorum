@@ -32,6 +32,11 @@ final class MobileCommentsSheetView: UIView {
     private let draftPlaceholder = UILabel()
     private let submitButton = UIButton(type: .custom)
     private let cancelEditButton = UIButton(type: .custom)
+    /// **RUN A ladder round 2 (the MAJOR)** — why the box is not empty:
+    /// the line a restored refused draft wears. Its own register (accent,
+    /// never the alarm) — nothing is being refused (the pad's rule for
+    /// its `restoredNote`).
+    private let restoredLabel = UILabel()
 
     private var pageWasEditable = true
     private(set) var rowViews: [UIView] = []
@@ -78,6 +83,10 @@ final class MobileCommentsSheetView: UIView {
             UIAction { [weak self] _ in self?.submitDraft() },
             for: .touchUpInside)
         sheetView.addSubview(submitButton)
+
+        restoredLabel.accessibilityIdentifier = "comments.restored"
+        restoredLabel.isHidden = true
+        sheetView.addSubview(restoredLabel)
 
         cancelEditButton.accessibilityIdentifier = "comments.cancelEdit"
         cancelEditButton.addAction(
@@ -162,6 +171,14 @@ final class MobileCommentsSheetView: UIView {
             return
         }
 
+        // RUN A ladder round 2 (the MAJOR): the open just took a refused
+        // draft back out of the park — the field is the only home again
+        // from this line on (clear-at-restore; the controller offers the
+        // words exactly once).
+        if let restored = comments.takeRestoredDraftText() {
+            draftField.text = restored
+        }
+
         layoutChrome(comments)
         renderRows(comments)
     }
@@ -219,10 +236,21 @@ final class MobileCommentsSheetView: UIView {
         cancelEditButton.frame = CGRect(
             x: draftField.frame.maxX + 8, y: draftY - 24, width: 52, height: 20)
 
+        // The restored line sits above the field, in the rows' leftover
+        // point row (the rows give it its height below), left of the
+        // editing Cancel — the two never overlap.
+        let restoredShown = comments.restoredNote != nil
+        restoredLabel.text = comments.restoredNote.map(chromeCase)
+        restoredLabel.isHidden = !restoredShown
+        restoredLabel.font = face.chrome.withSize(11.5)
+        restoredLabel.textColor = face.accent
+        restoredLabel.frame = CGRect(
+            x: 16, y: draftY - 24, width: draftField.frame.width, height: 18)
+
         rowsScroll.frame = CGRect(
             x: 16, y: 44,
             width: sheetView.bounds.width - 32,
-            height: max(draftY - 52, 0))
+            height: max(draftY - 52 - (restoredShown ? 20 : 0), 0))
     }
 
     private func renderRows(_ comments: MobileCommentsController) {
