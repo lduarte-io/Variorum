@@ -447,6 +447,11 @@ struct BookIndexView<Masthead: View>: View {
         if landing.anchor == anchorID {
             BookIndexGeometry.trace.append("\(anchorID) top=\(top) hops=\(landing.corrections)")
         } else if landing.isPending {
+            // Every OTHER row that moves while a landing is in flight, short
+            // form. This is the line that showed the column thrashing under
+            // the landing — the target silent while its neighbours slid by
+            // thousands of points — and without it the residual below would
+            // have been a guess instead of a measurement.
             BookIndexGeometry.trace.append("row \(anchorID.suffix(4)) top=\(Int(top))")
         }
         #endif
@@ -746,6 +751,14 @@ struct BookIndexView<Masthead: View>: View {
                 paneBox.contentHeight = height
                 landing.contentChanged(height)
             }
+            // **The DEBUG story's second reading, and it earned its place:** the
+            // OFFSET beside the reports. A landing that ends wrong looks the
+            // same in the story whether its corrections moved the page or did
+            // nothing at all, and telling those two apart is what decided this
+            // unit's policy (the corrections DO move it — 45k → 95k — which is
+            // why the shipped policy refuses to make them blind). Never in
+            // Release: one more observer on a scroll is not a thing to ship for
+            // a story nobody reads there, and the content-free signpost is.
             #if DEBUG
             .onScrollGeometryChange(for: CGFloat.self) { geometry in
                 geometry.contentOffset.y
