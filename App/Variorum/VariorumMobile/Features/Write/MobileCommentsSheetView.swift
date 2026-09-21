@@ -98,13 +98,28 @@ final class MobileCommentsSheetView: UIView {
         model?.comments.close()
     }
 
+    /// **17b P4 — THE FIELD EMPTIES ONLY WHEN THE STORE HAS TAKEN IT.**
+    /// It used to clear here, before the write was even attempted, so a
+    /// refusal — an ordinary one: the Comments row is offered on every
+    /// block (fire-and-DO) and `addBlockComment` refuses under a sealed
+    /// note — left her reading *"This note is locked…"* with the paragraph
+    /// she had just typed gone and no undo. Her words live NOWHERE but
+    /// this field until a row holds them, which is the quick note's own
+    /// rule (#120(e)) and the pad's shipped shape.
+    ///
+    /// Keystrokes that land DURING the write are not part of what was
+    /// submitted, so only the submitted text is cleared — the pad's
+    /// discipline, for the same reason.
     private func submitDraft() {
         guard let model else { return }
         let text = draftField.text ?? ""
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        draftField.text = ""
-        draftPlaceholder.isHidden = false
-        Task { await model.comments.submitDraft(text) }
+        Task { [weak self] in
+            guard await model.comments.submitDraft(text) else { return }
+            guard let self, self.draftField.text == text else { return }
+            self.draftField.text = ""
+            self.draftPlaceholder.isHidden = false
+        }
     }
 
     // MARK: - Render (the controller's onChanged hook)

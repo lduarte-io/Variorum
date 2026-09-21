@@ -93,9 +93,12 @@ final class MobileCommentsController {
 
     // MARK: - The verbs (CRUD + restore, the standing ops)
 
-    func add(_ text: String) async {
-        guard let blockID = openBlockID else { return }
-        await run { ops in _ = try ops.addBlockComment(to: blockID, text: text) }
+    /// Returns whether the STORE took it — the draft may only be cleared
+    /// on `true` (17b P4).
+    @discardableResult
+    func add(_ text: String) async -> Bool {
+        guard let blockID = openBlockID else { return false }
+        return await run { ops in _ = try ops.addBlockComment(to: blockID, text: text) }
     }
 
     func beginEditing(_ id: String) {
@@ -110,13 +113,29 @@ final class MobileCommentsController {
     }
 
     /// The draft field's submit: edits the comment under edit, else adds.
-    func submitDraft(_ text: String) async {
+    ///
+    /// **17b P4 — IT SAYS WHETHER THE STORE TOOK IT, and the edit target
+    /// survives a refusal.** The sheet used to empty its field before this
+    /// was ever called and this method nilled `editingID` before running,
+    /// so a refusal — reachable on an ordinary gesture, since the Comments
+    /// row is offered unconditionally (fire-and-DO) while
+    /// `addBlockComment`/`editBlockComment` refuse under a sealed note —
+    /// destroyed the comment it was protecting AND lost the row she was
+    /// editing. The project has ruled this class twice (#120(e); the quick
+    /// note's Q2 rule: *no refusal is ever reached by a road that
+    /// discarded her text*), and the pad's own fix is the shape copied
+    /// here: state leaves only when the store has taken it.
+    @discardableResult
+    func submitDraft(_ text: String) async -> Bool {
         if let editingID {
-            self.editingID = nil
-            await run { ops in try ops.editBlockComment(editingID, text: text) }
-        } else {
-            await add(text)
+            let landed = await run { ops in try ops.editBlockComment(editingID, text: text) }
+            if landed {
+                self.editingID = nil
+                onChanged?()
+            }
+            return landed
         }
+        return await add(text)
     }
 
     func delete(_ id: String) async {
@@ -135,14 +154,19 @@ final class MobileCommentsController {
     /// identical comments on the block.
     private let latch = MobileWriteLatch()
 
-    private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
-        await latch.runIfFree { await self.runOnce(body) }
+    /// `true` only when the write LANDED. A gesture the latch turned away
+    /// returns `false` too — nothing was written, so whatever the caller
+    /// was holding must be held (it is not a refusal, and nothing reports
+    /// it as one).
+    @discardableResult
+    private func run(_ body: @escaping @Sendable (Operations) throws -> Void) async -> Bool {
+        await latch.run { await self.runOnce(body) } ?? false
     }
 
     private func runOnce(
         _ body: @escaping @Sendable (Operations) throws -> Void
-    ) async {
-        guard let model else { return }
+    ) async -> Bool {
+        guard let model else { return false }
         do {
             try await session.runner.run(body)
             model.report(nil)
@@ -150,8 +174,10 @@ final class MobileCommentsController {
             // The marker follows the count (slot.commentCount rides the
             // projection): one fresh coherent read through the one door.
             await model.refreshTakesFromStore()
+            return true
         } catch {
             model.report(Self.refusalMessage(error))
+            return false
         }
     }
 
