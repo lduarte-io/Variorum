@@ -3547,7 +3547,7 @@ CLOSE against what actually shipped):**
 | 5 | **Row 63** — the indicator ring respects the gutter's faces (red-on-old owed) | DONE (this commit) — 8 pins; **67 tests in 9 suites green**. The BEHAVIOURAL REVERT is **DONE** — 3 of 8 pins RED on the reverted tree (4 issues), the 5 guards green |
 | 6 | **Row 67** — `Help ▸ Restore Tutorial…` joins the SwiftUI `.alert` grammar | NOT-STARTED |
 | 7 | **Row 68** — the "pool & scraps" lesson swept against `SnippetsCopy` (H pattern; re-seed consequence recorded) | NOT-STARTED |
-| 8 | **Row 69** — Block History's rename field no longer OPENS under a seal | NOT-STARTED |
+| 8 | **Row 69** — Block History's rename field no longer OPENS under a seal | DONE (this commit) — the seal WATCHED for as long as the pane is up; the branch a fact on the model; 4 pins; **28 tests in 4 suites green** |
 | 9 | **The Trash fork** — the 2a taste fork's card restyle | NOT-STARTED |
 | 10 | QUESTIONS #133 (the PROVISIONALs) | NOT-STARTED |
 | 11 | THE CLOSING CONFORMANCE WALK — both voices AND both appearances, captured, against the reference artifact; the honest remainder list | NOT-STARTED |
@@ -3822,3 +3822,41 @@ twice, is a no-op · re-publishing under one owner replaces rather than stacks.
 
 **Run:** `ShellDoorOwnershipTests` · `ShellLandingTests` (the mounted road's own pin, its body
 untouched) · `IndicatorGutterTests` → **14 tests in 3 suites passed**.
+
+### ROW 69 — THE RENAME FIELD NO LONGER OPENS UNDER A SEAL (piece 8)
+
+**What the row is, and what it is not.** The operation has refused correctly since the 13u3
+ladder's R1-2 fix. What remained was the FACE: the door opened a NAME FIELD, she typed into it,
+and the refusal arrived at ⏎ — a field that could never keep what she put in it. Round 2 ruled
+it recorded-not-fixed for a reason that was true (*"the pane would need the seal fact plumbed
+in"*), and this unit is where that plumbing belongs.
+
+**The fact.** `BlockHistoryModel` gains `sealed`, fed by `observeContainerHeader(postID)` in a
+`watchSeal()` the view starts beside `start()` — held only while the pane is on screen, exactly
+like the history observation it sits beside.
+
+**WHY A WATCH AND NOT A ONE-SHOT READ, said out loud because it has a cost.** She can unseal
+from the masthead with this pane open. A one-shot read at open would leave the door shut until
+the pane was closed and re-opened — *a capability she cannot find*, which is the same lie as the
+field that could not keep her name, pointing the other way. The cost is one row by primary key,
+off-main, for as long as the pane is up: it joins **KnownIssues row 13's class**
+(panes re-running bounded queries at autosave cadence while open) at that class's cheapest end,
+and it is named here rather than slipped in. *(The editor already runs this same observation for
+the same note; nothing about the class is new, only one more member of it.)*
+
+**The face, and the pane's grammar kept.** Under a seal the door still ACTS and still SPEAKS —
+which is what every other act in this pane does (Restore refuses and the pane says so). What is
+gated is the FIELD. The sentence is the standing one (`TrayRefusalCopy.sealed`, the `lockedPost`
+arm) — **no new copy** — and the hover says it too. The op's refusal stays the backstop
+underneath and is pinned as such.
+
+**The branch is a fact on the MODEL** (`renameOpensTheField`), not an `if` inside a private view
+body — UNIT S1's own reason one file over: a claim about what a door offers has to be checkable.
+
+**The pins** (`BlockHistorySealTests`, 4): the sealed note keeps the field shut and says the
+standing sentence · the unsealed note opens it exactly as before · **unsealing while the pane is
+open gives the door back** (the watch's whole justification, driven through the real store) ·
+the operation still refuses underneath.
+
+**Run:** `BlockHistorySealTests` · `BlockHistoryPaneTests` · `SavepointNameFaceTests` ·
+`SavepointNameCopyTests` → **28 tests in 4 suites passed**.

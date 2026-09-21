@@ -160,6 +160,15 @@ final class BlockHistoryModel {
     /// classed where the message is produced and never guessed from its text.
     private(set) var status: TrayViewModel.Status?
 
+    /// **Is the note this block lives in SEALED?** (13u4 UNIT S3 —
+    /// KnownIssues row 69.) The pane had no seal fact at all, so its rename
+    /// door opened a NAME FIELD under a sealed note and refused only at ⏎ —
+    /// she typed a name into a field that could never keep it. `false` until
+    /// the watch below lands, which is the safe direction: the worst a stale
+    /// `false` can do is open the field one beat early, and the op's own
+    /// refusal is still the backstop underneath.
+    private(set) var sealed = false
+
     /// The pre-split confirm (AppSpec §9's documented behaviour): a commit
     /// older than the newest live divide/extract on this block still holds
     /// the pre-split text, so restoring it resurrects both halves.
@@ -196,6 +205,33 @@ final class BlockHistoryModel {
             status = .refusal(String(describing: error))
         }
     }
+
+    /// **The seal fact, held only while the pane is on screen** (row 69).
+    ///
+    /// A WATCH rather than a one-shot read, deliberately: she can unseal from
+    /// the masthead with this pane open, and a door that stays hidden until
+    /// the pane is re-opened is a capability she cannot find — the same
+    /// lie as the field that opened and could not keep her name, pointing
+    /// the other way. It is one row by primary key, off-main, held only
+    /// while the pane is up; it joins KnownIssues row 13's
+    /// panes-re-query-at-autosave-cadence class at that class's cheapest
+    /// end, and it is named in this unit's record rather than slipped in.
+    func watchSeal() async {
+        do {
+            for try await header in session.database.observeContainerHeader(postID) {
+                sealed = header?.locked == true
+            }
+        } catch is CancellationError {
+        } catch {
+            // A seal we cannot read is not a refusal to show her: the offer
+            // stands and the operation's own guard answers (the backstop).
+            sealed = false
+        }
+    }
+
+    /// Internal so tests drive the pane deterministically (the
+    /// `TrayViewModel.adopt` seam).
+    func adoptSeal(_ sealed: Bool) { self.sealed = sealed }
 
     /// Internal so tests drive the pane deterministically (the
     /// `TrayViewModel.adopt` seam).
@@ -294,6 +330,23 @@ final class BlockHistoryModel {
     /// No flush here, unlike `restore`: this writes METADATA on an immutable
     /// snapshot, so there is no buffer race to lose — the whole reason the
     /// rename is cheap is that it cannot reach any text.
+    /// **Does the rename door open its NAME FIELD?** (row 69.) The branch is
+    /// a fact on the model rather than an `if` inside a private view body,
+    /// for UNIT S1's own reason one file over: a claim about what a door
+    /// offers has to be checkable.
+    var renameOpensTheField: Bool { !sealed }
+
+    /// **The sealed answer to the rename door** (row 69). The pane's grammar
+    /// is uniformly act-then-worded-refusal under a seal — Restore does
+    /// exactly this — so the door still ACTS and still SPEAKS; what it no
+    /// longer does is open a field she would type a name into and lose. The
+    /// sentence is the standing one (`TrayRefusalCopy`, the `lockedPost`
+    /// arm), not new copy.
+    func refuseRenameUnderSeal() {
+        status = .refusal(TrayRefusalCopy.message(
+            for: OperationError.lockedPost(id: postID)))
+    }
+
     func rename(_ commit: CommitPoint, to name: String?) async {
         status = nil
         do {
@@ -508,6 +561,8 @@ struct BlockHistoryPane: View {
         .frame(minWidth: 300, minHeight: 280)
         .background(tokens.surface)
         .task { await model.start() }
+        // Row 69: the note's seal, watched for as long as this pane is up.
+        .task { await model.watchSeal() }
         .onChange(of: model.loaded) { _, loaded in
             guard loaded, !seededExpansion else { return }
             seededExpansion = true
@@ -654,10 +709,18 @@ struct BlockHistoryPane: View {
                 // EVERY savepoint — manual and quiet alike. Its verb says
                 // what it does on THIS row.
                 Button(BlockHistoryCopy.nameVerb(commit)) {
-                    renameAsk = .renaming(commit)
+                    // Row 69: under a seal the FIELD does not open — the door
+                    // acts and speaks, like every other act in this pane.
+                    if model.renameOpensTheField {
+                        renameAsk = .renaming(commit)
+                    } else {
+                        model.refuseRenameUnderSeal()
+                    }
                 }
                 .controlSize(.small)
-                .help(BlockHistoryCopy.nameHelp(commit))
+                .help(model.renameOpensTheField
+                    ? BlockHistoryCopy.nameHelp(commit)
+                    : TrayRefusalCopy.sealed)
                 // One binding PER ROW, reading nil unless this row is the
                 // target: a single `@State` bound by every row would put up
                 // one popover per savepoint.
