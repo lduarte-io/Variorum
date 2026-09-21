@@ -1106,9 +1106,12 @@ private struct BookIndexPaneNote: View {
     /// title/date header with its padding, the body `VStack`'s gap under it,
     /// and the note's own vertical padding. The reservation is a whole-ROW
     /// height, so the placeholder that stands in for the prose owes this back.
-    /// It is the model's `noteChrome` seen from the other side, and the two
-    /// are the same measurement of the same surface.
-    static let chromeAroundProse: CGFloat = 60
+    /// It is the model's `noteChrome` seen from the other side — and since the
+    /// 13u4 ladder (round 1, R1-4) it READS the model's own number rather than
+    /// restating it: two literals for one measurement is a drift seam, and a
+    /// drift here shows as a one-time shift when a waiting note trades its
+    /// reservation for its real height (rider 4's class).
+    static let chromeAroundProse: CGFloat = BookIndexPaneHeightModel.Metrics().noteChrome
 
     let session: AppSession
     let tokens: VoiceTokens
