@@ -828,78 +828,6 @@ covered by the same pins.
 untouched. The unit's whole diff is ONE new test file
 (`App/Variorum/VariorumTests/CommandDeleteLineTests.swift`) and this record.
 
-### THE BUILD (what moved, and why each line had to)
-
-1. **`Sources/VariorumCore/Domain/MergeJoin.swift`** — `MergeJoin.canon(head:tail:)` is REPLACED by
-   **`MergeJoinRule`**, one brain with two members (`.door` · `.deleteKeystroke`) and one resolver
-   `join(head:tail:)`. The ruling is made STRUCTURAL rather than conditional: `.door` answers
-   `.newline` for any texts, by ruling ("byte-exact, no trimming, no conditionals" — her words), and
-   `.deleteKeystroke` holds the pre-ruling space-unless-edged rule VERBATIM. Replacing `canon`
-   rather than re-pointing it means a grep for the old name proves no site kept the old rule (it
-   returns only doc comments quoting the history).
-2. **`Operations.merge(_:_:joining:)`** — the rule arrives as a parameter defaulting to `.door`, and
-   is resolved INSIDE the transaction on the store's rendered texts, so no caller can decide the
-   join from a projection that only ever lags the store (the R1-2 doctrine). `mergeCeremony` needed
-   no change at all: its joins were already explicit per pairing.
-3. **The door sites** (all now `MergeJoinRule.door.join(…)`): `CarryAllMerge.compose` (the carry-all
-   pairing), `prePairing` + `pairMergeTakes` (the ceremony's default and a hand-placed ＋),
-   `MergeCeremonyState.canonJoin` (the sheet's sentence — its former `.space` fallback collapsed
-   away, since the rule answers the same for empty texts), `MergeArrangementCopy.sentence`'s default,
-   and the phone's `MobileStructural.mergeWithPrevious` pairing.
-4. **The delete sites** (`joining: .deleteKeystroke`): `runSeamMerge` → `runInstantMerge`, which
-   gained the parameter so the two classes keep SHARING one body (two doors on one act share the
-   body or they drift), and `CrossBlockCompound.apply`'s edge-join.
-5. **`StructuralSeamEdit.derive`'s `.merge` arm** — the differential road, described above.
-6. **The two tutorials' merge lesson** (and the phone's divide lesson) — my own change falsified
-   their sentence; lesson and pin moved together, per the standing rule.
-7. **The canon delta**: AppSpec §9's merge bullet (the full rule, her words, the DELETE exception,
-   the honest new consequence) and OverallModel §7's merge line (one clause + a pointer).
-
-### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
-
-- `App/Variorum/Shared/EditorBrain/CrossBlockCompound.swift` — **the editor seam's cross-block
-  compound**: ONE argument at its `ops.merge` call (`joining: .deleteKeystroke`), plus the comment
-  that says why. No road, no guard, no ordering changed.
-- `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift` — the merge roads only
-  (`runInstantMerge` gains `joining:`; `runSeamMerge` passes `.deleteKeystroke`; three ceremony
-  defaults move to the rule brain; one comment at the Make Block loop). `runStructural` itself,
-  the caret arithmetic, the flush-first order, the fan threshold reads and the drift checks are
-  untouched.
-- `App/Variorum/Variorum/Features/Editor/StructuralSeamEdit.swift` — the `.merge` arm's join
-  candidates (two strings → every `MergeJoin` case). The retained-byte checks, the
-  `nonSeamAligned` guard and every other arm are untouched.
-
-**NOT touched, deliberately:** `BlockRangeIndex` (no tiling or guard change — the seam pair the
-keystroke plans is the same pair) · `TypedReturn` · `PaneTextAuthority` · `runStructural`'s
-identity oracle · `MarkdownActs` · `Sources/VariorumCore/Sync/` · schema/migrations.
-
-### JUDGMENT CALLS (each one a reviewer can reverse in a line)
-
-1. **`MergeJoin.canon` was REPLACED, not re-pointed.** A resolver that ignores its inputs is the
-   drift class this repo has retired twice by name; a rule ENUM says out loud that there are two
-   classes and which one a call site is in. Cost of reversing: one static back on `MergeJoin`.
-2. **Make Block across blocks was classified as a DOOR (row 10) rather than returned to the
-   orchestrator.** The brief's stop rule is for a road that fits NEITHER class; this one fits the
-   doors on her ruling's own sentence (a deliberate gesture behind a confirm; the span she selected
-   becomes one block). Two pins now assert it. Reversing: `joining: .deleteKeystroke` at
-   `confirmCrossBlockMakeBlock`'s merge loop, and those two pins back to the space join.
-3. **The tutorial copy was fixed rather than deferred.** My own change made "a single space at the
-   seam — divide a sentence and merge it back and you get exactly the sentence you started with"
-   false on both platforms, and copy naming behaviour the app no longer has is the J8 defect class.
-   **The re-seed consequence, recorded for the closeout:** an already-seeded tutorial (hers) keeps
-   the OLD sentence until `Help ▸ Restore Tutorial…` re-seeds it.
-4. **The cross-block compound passes the rule explicitly even though its join never survives.** The
-   autosave one line later overwrites the merged buffer with the two cut ends concatenated, so the
-   class is satisfied by outcome either way; stating it at the call keeps the classification
-   readable instead of resting on that accident. Pinned both ways.
-5. **`Queries.joinRenderedTexts`' doc comment was left alone.** It cites the 2026-07-06 merge join
-   as the PRECEDENT its own `"\n\n"` export rule was shaped on — which remains true as history.
-   The export projection's behaviour is ruled elsewhere (QUESTIONS #12) and is not this unit's.
-   Worth knowing: a merged block's internal newline now exports as ONE newline inside a paragraph
-   where two blocks exported as `"\n\n"` — the ruling's honest consequence, on the export side.
-6. **The phone flipped with the Mac and no MOBILE PARITY row is owed for the RULE** (it is
-   core-side — the U-2 keep-on-top precedent), though its tutorial copy and six pins moved here.
-
 ### EVIDENCE — THE WALK (the unit closes on USE, not on pins)
 
 **Build:** `App/Variorum/DerivedData/13u4e2/Build/Products/Debug/Variorum.app`
@@ -1153,6 +1081,78 @@ failed its byte check and fallen back to a full re-render — the ruling would h
 silently cost P1. It now tries every `MergeJoin` case, and for the door join the replacement is
 the separator that is already there (a zero-byte text edit carrying only the identity run) — which
 is the mechanism by which "the page reads byte-identical" is literally true on screen.
+
+### THE BUILD (what moved, and why each line had to)
+
+1. **`Sources/VariorumCore/Domain/MergeJoin.swift`** — `MergeJoin.canon(head:tail:)` is REPLACED by
+   **`MergeJoinRule`**, one brain with two members (`.door` · `.deleteKeystroke`) and one resolver
+   `join(head:tail:)`. The ruling is made STRUCTURAL rather than conditional: `.door` answers
+   `.newline` for any texts, by ruling ("byte-exact, no trimming, no conditionals" — her words), and
+   `.deleteKeystroke` holds the pre-ruling space-unless-edged rule VERBATIM. Replacing `canon`
+   rather than re-pointing it means a grep for the old name proves no site kept the old rule (it
+   returns only doc comments quoting the history).
+2. **`Operations.merge(_:_:joining:)`** — the rule arrives as a parameter defaulting to `.door`, and
+   is resolved INSIDE the transaction on the store's rendered texts, so no caller can decide the
+   join from a projection that only ever lags the store (the R1-2 doctrine). `mergeCeremony` needed
+   no change at all: its joins were already explicit per pairing.
+3. **The door sites** (all now `MergeJoinRule.door.join(…)`): `CarryAllMerge.compose` (the carry-all
+   pairing), `prePairing` + `pairMergeTakes` (the ceremony's default and a hand-placed ＋),
+   `MergeCeremonyState.canonJoin` (the sheet's sentence — its former `.space` fallback collapsed
+   away, since the rule answers the same for empty texts), `MergeArrangementCopy.sentence`'s default,
+   and the phone's `MobileStructural.mergeWithPrevious` pairing.
+4. **The delete sites** (`joining: .deleteKeystroke`): `runSeamMerge` → `runInstantMerge`, which
+   gained the parameter so the two classes keep SHARING one body (two doors on one act share the
+   body or they drift), and `CrossBlockCompound.apply`'s edge-join.
+5. **`StructuralSeamEdit.derive`'s `.merge` arm** — the differential road, described above.
+6. **The two tutorials' merge lesson** (and the phone's divide lesson) — my own change falsified
+   their sentence; lesson and pin moved together, per the standing rule.
+7. **The canon delta**: AppSpec §9's merge bullet (the full rule, her words, the DELETE exception,
+   the honest new consequence) and OverallModel §7's merge line (one clause + a pointer).
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
+
+- `App/Variorum/Shared/EditorBrain/CrossBlockCompound.swift` — **the editor seam's cross-block
+  compound**: ONE argument at its `ops.merge` call (`joining: .deleteKeystroke`), plus the comment
+  that says why. No road, no guard, no ordering changed.
+- `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift` — the merge roads only
+  (`runInstantMerge` gains `joining:`; `runSeamMerge` passes `.deleteKeystroke`; three ceremony
+  defaults move to the rule brain; one comment at the Make Block loop). `runStructural` itself,
+  the caret arithmetic, the flush-first order, the fan threshold reads and the drift checks are
+  untouched.
+- `App/Variorum/Variorum/Features/Editor/StructuralSeamEdit.swift` — the `.merge` arm's join
+  candidates (two strings → every `MergeJoin` case). The retained-byte checks, the
+  `nonSeamAligned` guard and every other arm are untouched.
+
+**NOT touched, deliberately:** `BlockRangeIndex` (no tiling or guard change — the seam pair the
+keystroke plans is the same pair) · `TypedReturn` · `PaneTextAuthority` · `runStructural`'s
+identity oracle · `MarkdownActs` · `Sources/VariorumCore/Sync/` · schema/migrations.
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **`MergeJoin.canon` was REPLACED, not re-pointed.** A resolver that ignores its inputs is the
+   drift class this repo has retired twice by name; a rule ENUM says out loud that there are two
+   classes and which one a call site is in. Cost of reversing: one static back on `MergeJoin`.
+2. **Make Block across blocks was classified as a DOOR (row 10) rather than returned to the
+   orchestrator.** The brief's stop rule is for a road that fits NEITHER class; this one fits the
+   doors on her ruling's own sentence (a deliberate gesture behind a confirm; the span she selected
+   becomes one block). Two pins now assert it. Reversing: `joining: .deleteKeystroke` at
+   `confirmCrossBlockMakeBlock`'s merge loop, and those two pins back to the space join.
+3. **The tutorial copy was fixed rather than deferred.** My own change made "a single space at the
+   seam — divide a sentence and merge it back and you get exactly the sentence you started with"
+   false on both platforms, and copy naming behaviour the app no longer has is the J8 defect class.
+   **The re-seed consequence, recorded for the closeout:** an already-seeded tutorial (hers) keeps
+   the OLD sentence until `Help ▸ Restore Tutorial…` re-seeds it.
+4. **The cross-block compound passes the rule explicitly even though its join never survives.** The
+   autosave one line later overwrites the merged buffer with the two cut ends concatenated, so the
+   class is satisfied by outcome either way; stating it at the call keeps the classification
+   readable instead of resting on that accident. Pinned both ways.
+5. **`Queries.joinRenderedTexts`' doc comment was left alone.** It cites the 2026-07-06 merge join
+   as the PRECEDENT its own `"\n\n"` export rule was shaped on — which remains true as history.
+   The export projection's behaviour is ruled elsewhere (QUESTIONS #12) and is not this unit's.
+   Worth knowing: a merged block's internal newline now exports as ONE newline inside a paragraph
+   where two blocks exported as `"\n\n"` — the ruling's honest consequence, on the export side.
+6. **The phone flipped with the Mac and no MOBILE PARITY row is owed for the RULE** (it is
+   core-side — the U-2 keep-on-top precedent), though its tutorial copy and six pins moved here.
 
 ### CLOSING RUNS (at the unit's END — never the full suite at the start)
 
