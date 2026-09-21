@@ -1749,3 +1749,53 @@ Nothing. Everything is committed and pushed: the core operation and its 22 pins,
 brain and its copy, both Write doors, the registry declaration and its walk exemption, the 20 Mac
 pins, the AppSpec §9 bullet, QUESTIONS #128, the walk captures (gitignored, listed above), and
 this record.
+
+---
+
+## UNIT F1 BRIEF — THE INDEX CHAPTER-CLICK LANDS LOW (item 10; self-contained — read in this order)
+
+**Read first, in full:** (1) this file's Status banner · HER ADDITIONS item 10 (her verbatim
+report — *"clicking on the name of a chapter in a book isn't bringing you to the correct
+location, but instead a random location in the text a fair amount under it. Only seen in index
+mode. Not a huge problem"*) · THE SIZING-AND-RULINGS SITTING RECORD (no ruling pre-decides this
+unit — it is a DEFECT, trace-first) · THE LEDGER · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the
+five prior UNIT RECORDs (the walker facts bind: E3's osascript staging; C2's capture-offset
+fact — a full-screen capture is screen-pixels/2, a `walk-cap` window capture needs the window Y
+added back; mixing them puts a click a bar-height off, silently). (2) **The recorded
+hypothesis, which you TEST rather than assume:** the book Index has NOT adopted
+`Surface/LandingAuthority` — 13u2b's closeout says Takes/Index adopt "at their next touch",
+and this unit is that touch IF the trace confirms the mechanism. Read
+`notes/plans/phase-13u2b-landing-seam.md` and
+`notes/plans/navigation-landing-architecture-trace.md` (the landing architecture and its
+vocabulary) before the code. (3) The code: the book Index mode's chapter navigation road
+(`LandingTarget`, the Index word-tab's panel, wherever the chapter click aims and scrolls) ·
+`Surface/LandingAuthority` and one surface that HAS adopted it, side by side with Index's own
+road. (4) **KnownIssues row 56** (`BookIndexEditingTests.theReadClickLandsInIndexAtThatBlock`
+is LOAD-FLAKY with a warm-DerivedData covariate) — the baselines say to treat a red there as
+environment **unless your diff touches the book Index. YOURS DOES.** So for that test the
+paired interleaved protocol is MANDATORY: your tree vs your opening commit, alternating runs,
+before you claim either green or environment. Do your own reading.
+
+**Discipline, in order:** (1) REPRODUCE her scenario on the dev-store Debug build first —
+Sherlock (the long book), Index mode, click a chapter far down the panel; measure where the
+landing arrives vs the chapter's top (her "sometimes" means several trials; record the rate).
+(2) If it reproduces: TRACE the concrete mechanism (inputs → wrong scroll target → the landing
+below) — candidate axes: the un-adopted `LandingAuthority`, height-estimation drift on
+unrealized rows (the 13u2b manifest family), a stale anchor; the trace decides, not the
+hypothesis. **Red-on-old is owed** (a pin that fails on the pre-fix tree, behavioural-revert
+verified). If the fix IS the LandingAuthority adoption, that is the prescribed next-touch shape
+— adopt, don't fork. (3) If it does NOT reproduce after honest staging (several chapters,
+several depths, cold and warm mounts), the E2 stop rule applies: record what you measured,
+report to the orchestrator, fix nothing. (4) If the trace shows a 13u2b-class architectural
+problem bigger than an adoption, STOP and report — that is the architect's to rule.
+
+**Evidence:** the red-on-old pin (if confirmed) + the paired-protocol adjudication of row 56's
+test on both trees + a hands-on WALK: chapter clicks at several depths land at the chapter's
+top, captured before/after. Captures to `notes/plans/13u4-screens/f1/`. The touched Mac suites
++ the acceptance spine (REAL TYPE NAMES) at the end. No core change expected; if one appears
+necessary, stop and report. PROVISIONALs from **#129**.
+
+**Your record:** append a `## UNIT F1 RECORD` section to THIS file with LIVE STATUS from the
+FIRST commit (PENDING marks), the reproduction table (trials × landing offset), the traced
+mechanism, the row-56 paired-run table, and the seam-file list; flip the ledger's F1 row in
+your closing commit. The checkpoint protocol binds from the first commit.
