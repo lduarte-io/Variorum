@@ -4713,3 +4713,80 @@ FIRST commit (PENDING marks), the cold-trial table (pre/post), the estimate's co
 statement, the drift-class answer (how a wrong estimate corrects), and the seam-file list;
 flip the ledger's F3 row and the KnownIssues residual row's cell in your closing commit. The
 checkpoint protocol binds from the first commit.
+
+---
+
+## UNIT F3 RECORD — THE INDEX COLD-COLUMN HEIGHTS (F1's residual, pulled in at R-13u4-8)
+
+**WHAT THIS UNIT DID NOT DO (the record's first line, written at the open; RE-STATED at the close
+against what actually shipped):**
+
+- *(written at the open, PENDING the close)* It did not build a product WORD for a landing that
+  cannot arrive — #129's product half stays HERS, and `gaveup` stays as the net whatever the
+  heights buy.
+- It does not touch `Sources/VariorumCore/` or `Shared/` — the brief's stop rule. If either had
+  looked necessary this unit would have stopped and reported instead.
+- It does not touch the editor seam (`BlockRangeIndex` · `EditorTextView` · `TypedReturn` ·
+  `PaneTextAuthority` · `runStructural`).
+- It does not re-open any road 13u2b's "WHAT NOT TO DO" closed: no lazy-run restructuring beyond
+  what a measurement demands and names, no per-row `.task` reads, no `@State` writes on content
+  reports, no `ensureLayout` over full documents.
+- It does not change any OTHER surface's landing policy or heights (the Outline's and the flow's
+  are 13u2b's, measured, and are not this unit's to tune).
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The record + the READING (the brief's five reading lists, in order) | DONE (this commit) |
+| 2 | THE PRE-FIX COLD BASELINE, measured on THIS tree (not inherited) + the harness pin written RED-FIRST | PENDING |
+| 3 | THE FIX — the pane's note rows stand at length-derived heights | PENDING |
+| 4 | The BEHAVIOURAL REVERT (red-on-old verified in a worktree) | PENDING |
+| 5 | THE POST-FIX COLD TRIAL TABLE (≥8 trials) + the warm trials against F1's 21/21 | PENDING |
+| 6 | The WALK — cold and warm, captured | PENDING |
+| 7 | Closing suites + QUESTIONS + the KnownIssues row + the ledger's F3 row | PENDING |
+
+### THE READING (done in this session's own context, in the brief's order)
+
+1. This file's **Status banner** · **THE SIZING-AND-RULINGS SITTING RECORD** (R-13u4-8 is why this
+   unit exists — her verbatim bar: *"after 13u's sessions i'd like to be able to click around
+   everywhere with no issues so i can know if there are still remaining bugs by the time i get to
+   12 - if i know there's one issue, it will confuse diagnosing others"*; R-13u4-7 is the ruling it
+   supersedes on the pull-in question; R-13u4-6 the cast) · **THE LEDGER's F3 row** · **ENVIRONMENT
+   TRAPS** · **CAST & DISCIPLINE + the post-S2 ORCHESTRATOR NOTE** (pathspec-limited staging —
+   `git add <my files>`, never `git add -A`) · the ten prior UNIT RECORDs' walker facts, F2's four
+   freshest (⌘, is swallowed by the full-document editor; the Settings window is 720 × 552 at
+   (200, 120) since S1; a `screencapture -l <window id>` of the note window is unoccluded by
+   Settings on top of it; `walk-scroll`'s line count is positive = DOWN) and, binding equally,
+   F1's own two (a single `cliclick` click into the dev window is sometimes swallowed by the
+   activation — click twice on an idempotent row; the shipped signpost is read back with
+   `/usr/bin/log show --predicate 'eventMessage CONTAINS "landing surface"'`, filtered on `end=`
+   so the `log show` process's own arguments are not read as landings).
+2. **UNIT F1's RECORD in full** — the reproduction table (11 misses in 20), the traced mechanism
+   (the un-adopted `LandingAuthority`, confirmed by grep AND by the six-aim convergence
+   experiment), the adoption, the two pins and their behavioural revert, the row-56 paired
+   adjudication, **the policy measured into its final shape** (budget 12 · blind ⇒ the page FLINGS
+   45k → 95k; budget 8 · the flow's pace ⇒ slower, no better; budget 3 · `.spacedByTheHold` · NO
+   blind corrections ⇒ bounded, shipped), **the oscillation** (39k → 56k → 143k → 80k → 115k pt
+   inside six seconds) and **the residual's rate: 2 of 5 cold first deep clicks stall, 21 of 21
+   warm landings settle at `top=0`**.
+3. **The KnownIssues residual row in full** — its remedy is named IN the row: *"the pane's note
+   rows stand at heights derived from their blocks' lengths — `ProseHeightModel`/`FlowHeightEstimate`
+   over the already-cached `Queries.blockExtents` (`BookViewModel.flowExtents`), the brains the
+   Outline (13u2b UNIT 1) and the reading flow (batch H) already consume."*
+4. **13u2b UNIT 1's RECORD** in `notes/plans/phase-13u2b-landing-seam.md` — the shape being ported:
+   its baseline, its traced mechanism (*"`top = 0` is not a fixpoint of this column"*), **AR-1's
+   ruling and its four riders**, `BookHeightManifest`, `BookOutlineHeights`, `OutlineRunRow`, the
+   rider-2 cost table (steady-state layout 0.562 ms vs the lazy column's 0.702; mount +143 ms at
+   the 400-row cap; a collapsed book runs ZERO lengths queries) and the two walk-found defects.
+   Also UNIT 2's flow adoption (`FlowStoryRow`'s `near ? real : Color.clear.frame(height:)` with
+   `heightKnown` arming the observer) — the second shipped instance of the same shape.
+5. **The code**, read end to end: `BookIndexView.swift` (the `LazyVStack` pane, F1's adoption, the
+   `PaneRow` anchors, `BookIndexPaneNote`'s `observeBlockTOC` `.task` and its `Text(" ")` empty
+   body) · `BookViewModel`'s `flowExtents` / `ensureOutlineExtents` / `outlineSurfaceAnswer` /
+   `outlineHeightManifest` · `Surface/ProseHeightModel.swift` · `Surface/BookHeightManifest.swift`
+   (+ `BookOutlineHeightModel`) · `BookOutlineHeights.swift` · `ReadingFlowView.swift`'s
+   `FlowHeightEstimate` and `FlowStoryRow` (Act 10 batch H's flow-estimate consumption) ·
+   `Core/Views/StableSurface.swift`'s `NearBand`/`NearViewportObserver` ·
+   `Queries.blockExtents` (`Sources/VariorumCore/Queries/PageExtents.swift` — lengths computed in
+   SQL, chunked at 400 ids, no prose crossing the boundary) · `BookIndexLandingTests.swift`.
