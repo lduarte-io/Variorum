@@ -2884,3 +2884,65 @@ that says it, 21 new pins in two files, three drift guards rewritten to the ruli
 #130 and #131, the KnownIssues edits (59 closed, 53 re-stated), the walk captures (gitignored,
 48 of them, listed above) and this record. What is OPEN is hers: **#130** and **#131**. What is
 owed elsewhere: **row 53's carve**, which this unit deliberately did not start.
+
+---
+
+## UNIT S2 BRIEF — LIBRARY & MASTHEAD FACES (item 1 + rows 50 · 51 · 54; self-contained — read in this order)
+
+**Read first, in full:** (1) this file's Status banner · HER ADDITIONS item 1 (her verbatim
+words — the mandate: *"I don't necessarily want an appearance setting - I want these to be
+changed by clicking on them"*) · THE SIZING-AND-RULINGS SITTING RECORD (no ruling pre-decides
+these; R-13u4-6 is the cast) · THE LEDGER · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the seven
+prior UNIT RECORDs (every walker fact binds — S1's `sips --cropOffset` and bracket-chord facts
+included). (2) **KnownIssues rows 50, 51 and 54** (50: `NoteCards`/`TagChips` still live in
+`LibraryCatalogView.swift` and the 529-line model's tag acts are the next split — F-0/P-9's
+two mechanical moves; 51: the `FlippingStamp` hoist — the card's flipping stamp and the
+masthead's flip are two twelve-line buttons over one words brain — plus the two DEBUG-oracle
+edges to sweep together and the midnight-rollover note, RECORD-ONLY unless trivially free; 54:
+the Library TIMELINE rows render in a SANS face where List is monospaced — a VOICE defect,
+identical in light). (3) **Rows 42/43** (the per-note-defaults families) — any NEW remembered
+preference you mint must state which family it joins and why, at the code. (4) The 18h/17q
+stamp family: `TimeStampFace` (core Domain — the ONE words brain), the Library sort's
+locally-remembered direction, the masthead's second-row stamp. (5) The restyle mandate: the
+reference artifact `notes/plans/pre-13u-mockups/blocks-and-snippets.html`;
+`Theme/CalmGrammar.swift`; every surface you open conforms; new chrome `fixedSize` texts carry
+a `lineLimit` (P-8). Do your own reading.
+
+**The build, per item:**
+- **Item 1a (the masthead stamp's cycle):** click cycles **edited → created → a little clock
+  icon → (back to edited)**; the choice is REMEMBERED so *"if you're normally in clock mode a
+  new note would open with only a clock icon"* — her sentence reads most naturally as ONE
+  remembered choice governing every note (a LOCAL, never-synced preference, the 18h
+  sort-direction precedent), not per-note rows; implement that shape and record the
+  per-note alternative as the PROVISIONAL. The stamp's words stay `TimeStampFace`'s — one
+  brain, zero new wording.
+- **Item 1b (the word counter's condensed views):** click cycles the bottom-bar counter
+  through her named states — **full → note-only → block-only → icon-only** — with the
+  word-target OFFER PRESERVED in every state (the icon state still opens the target door; her
+  explicit keep: *"I like that it offers to set a word count target"*). Same remembered-choice
+  shape as 1a. Never a Settings toggle.
+- **Row 51 (the hoist + the oracle edges):** `FlippingStamp` hoists to the one shared home
+  (the two twelve-line buttons become one component; zero test edits is the proof); the two
+  DEBUG-oracle edges (`PostDetailOracle.resetStamp`'s two-window ownership;
+  `CatalogStampOracle.forget`'s onDisappear ordering) swept together — each FIXED or provably
+  SAFE with the mechanism stated. The midnight-rollover note stays record-only unless your
+  hoist makes a rollover tick trivially free — do not build a timer for it.
+- **Row 50 (the F-0 residue):** `NoteCards` and `TagChips` extract from
+  `LibraryCatalogView.swift`, and the model's tag acts split out — MECHANICAL moves on the 3C
+  parity pattern (pre-move names forwarded, ZERO test edits, behaviour-free by construction).
+- **Row 54 (the Timeline voice):** the Timeline rows take the voice's type — the same dates
+  monospaced in Terminal exactly as List renders them; verify in Study too.
+- The Library surfaces you open conform to the reference grammar as you touch them.
+
+**Evidence:** the walk — both voices AND both appearances, captured: both cycles clicked
+through every state (a new note opening in the remembered state), the Timeline's type in both
+voices, the extracted cards rendering byte-identically. Pins: the two cycle brains' arms · the
+hoist and extraction zero-test-edit runs · the oracle-edge sweep's verdicts. The touched Mac
+suites + the acceptance spine (REAL TYPE NAMES) at the end. Captures to
+`notes/plans/13u4-screens/s2/`. PROVISIONALs from **#132**.
+
+**Your record:** append a `## UNIT S2 RECORD` section to THIS file with LIVE STATUS from the
+FIRST commit (PENDING marks), the oracle-sweep table, the defaults-family note for any new
+key, and the seam-file list (expected NONE — say so); flip the ledger's S2 row and the
+KnownIssues rows' cells (50 · 51 · 54 close or narrow per what lands) in your closing commit.
+The checkpoint protocol binds from the first commit.
