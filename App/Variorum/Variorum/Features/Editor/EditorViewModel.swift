@@ -960,9 +960,25 @@ final class EditorViewModel {
 
     /// Internal (was private) since N10: the controller's flight exit and
     /// rewrite paths settle deferred projections through it.
+    /// **17b P36 — is a projection still waiting?** A fact on the model
+    /// rather than a private field a pin cannot see, for the reason the
+    /// house style already gives elsewhere: a branch that decides whether
+    /// an external change ever reaches the surface should be checkable.
+    var hasDeferredProjection: Bool { pendingProjection != nil }
+
     func applyPendingIfClean() {
         guard !autosave.isDirty, !mintInFlight, !structuralInFlight,
               pendingProjection != nil else { return }
+        // **17b P36: hold the marker while the re-read runs.** The two
+        // guards below both put a value BACK on their failure paths; this
+        // method's own read-failure arm returned bare, so a thrown read —
+        // the plausible trigger being a re-lock closing the keyed store
+        // while a settle is in flight (`StoreLockedError`) — dropped the
+        // deferred marker and nothing re-armed it. The externally-changed
+        // projection (a sync-applied conflict take, a chosen-variant flip
+        // from another surface) then waited on the next ValueObservation
+        // delivery, which only fires on a FURTHER store change.
+        let deferred = pendingProjection
         pendingProjection = nil
         // The deferred value was fetched BEFORE the flush that just landed —
         // applying it as-is would transiently revert the actively edited
@@ -974,7 +990,15 @@ final class EditorViewModel {
             guard let self else { return }
             guard let fresh = try? await session.database.read({ [postID] in
                 try Queries.renderPost($0, containerID: postID)
-            }) else { return }
+            }) else {
+                // The re-read failed: restore the marker, exactly as the two
+                // guards below do with theirs (17b P36). The value is a
+                // stale photograph, so what this buys is the RETRY — the
+                // next clean moment re-reads instead of the surface sitting
+                // on pre-change content until some later write happens.
+                pendingProjection = deferred
+                return
+            }
             guard !autosave.isDirty, !mintInFlight, !structuralInFlight else {
                 pendingProjection = fresh
                 return
