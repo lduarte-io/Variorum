@@ -723,13 +723,22 @@ resumes.
 
 ## BATCH A2 RECORD — 17l items 1–4/6–7 + 17n + the phrase-transit pin
 
-**WHAT I DID NOT DO (this record's first line, per the standing rule):** *(written at the skeleton;
-flipped to the true statement as the batch proceeds.)* At this line's first writing: nothing built
-yet. Standing fences honoured throughout and re-stated so the closing line can be checked against
-them — zero `Sources/VariorumCore/Sync/` lines (17l item 5's `CorpusRotation.swift` is RUN B's), zero
-schema, zero migration (the marker stays 8), nothing touched in `/Applications` or her real store,
-no write or delete anywhere in her login keychain (row 9's confirmation is a READ-ONLY `security`
-inventory, never `-w`), no author-only call taken.
+**WHAT I DID NOT DO (this record's first line, per the standing rule).** **Row 8's purge consult is
+NOT the one the entry names** — 13j's purged-ids ledger is content-free by design (ids, never
+names), so it cannot answer "was a book called this deleted?"; I recorded that trace and built the
+honest equivalent instead, and its residual (a device that ran neither door between the deletion and
+the purge still re-mints) is stated at the code. **I did NOT fix the launch seeder's own tombstone
+blindness** — the same family, a different road, and a product call about what "deletion is final"
+means across devices (recorded as a finding; QUESTIONS #138(f)). **Row 9's her-Mac confirmation is
+corroboration, not proof**, and the record says exactly why (a flagless `security` search cannot see
+a synchronizable item). **Row 11's face could not be WALKED** on a sync-off dev store, and rows 12
+and 13's ceremony faces and NIT-N8's waiting face could not be staged without a real key act on her
+dev store — all four are carried by pins and reverts, and named in the walk's own section. Beyond
+that: **zero `Sources/VariorumCore/Sync/` lines** (17l item 5's `CorpusRotation.swift` untouched —
+RUN B's), **zero `Sources/` lines at all**, no schema, no migration (the marker stays 8), nothing
+touched in `/Applications` or her real store, **no write or delete anywhere in her login keychain**
+(row 9's confirmation was a READ-ONLY `security` inventory, never `-w`), no author-only call taken.
+Nothing was dismissed as hollow: every bug-class row reproduced before it was fixed.
 
 **Session opened 2026-09-21.** Implementer: `opus-implementer` (fresh session, batch A2 only).
 Read before any code, in the brief's order: the run file's Status banner · FENCES · BINDING
@@ -753,9 +762,34 @@ MAJOR-3 and the F3 record's eight items; the copy constants' homes; the named co
 | 13 | **17l item 7** — NIT-N8 VERIFIED + MINOR-N4 (2)'s copy | **VERIFIED + FIXED** — NIT-N8's face re-run and extended to the PANE mounted at 13u4's nine-pane size (it stands); MINOR-N4 (2)'s tail landed PROVISIONAL (#138) with `PostureSwitchTests.aCeremonyFailingAfterGenerateNewOnesSaysTheFreshWordsNeverLanded` and its typed-words guard |
 | 14 | **17n** — the passphrase's 12-character floor at every SETTING door | **FIXED** — the sweep table below; two gaps closed (the set sheet = four door sites; sync setup's no-wrap arm), five sites re-based onto the one named floor, the NEGATIVES pinned. **Red-on-old by revert R2: a six-character word was accepted AND landed**; 67/4 green |
 | 15 | **KnownIssues 32** — the phrase-transit one-arm VERIFICATION pin | **VERIFIED, with ONE live world found and FIXED** — the corner has no world left that any production road can make (arms 1–2, green either side, the row's own success criterion); the single survivor is a vault this build cannot READ, where the offer minted a second secret — arm 3 RED on the pre-fix tree, fixed, `Phase13pControllerTests` + `EncryptionFlowTests` **51/2 green** |
-| — | Closing evidence | NOT-STARTED |
+| — | Closing evidence | **DONE** — core **1639/177 green** (zero `Sources/` lines this batch) · full Mac **3069/507 ALL GREEN, ZERO ISSUES** with the eleven Tutorial suites inside it · the opt-in custody drill **5/2** with row 9's leg firing · mobile **635/108 with exactly the 4 known issues** · iOS **BUILD SUCCEEDED** · the walk captured (4 shots) with the un-walkable faces said |
 
 **Deaths and resumes:** none yet.
+
+### CLOSING EVIDENCE (all runs on the final tree)
+
+| Gate | Command | Result |
+|---|---|---|
+| Core | `swift test` | **1639 tests in 177 suites — ALL GREEN** (unchanged from A1's close: this batch holds **zero `Sources/` lines**) |
+| Full Mac | `xcodebuild test -scheme Variorum -destination platform=macOS` | **3069 tests in 507 suites — ALL GREEN, ZERO ISSUES** (A1's close 3059/507; +10 = this batch's ten new Mac tests, all into existing suites) |
+| The acceptance spine | inside the full run | the ELEVEN Tutorial suites all **passed** by name (book shape · doors · writing · takes · structure · ways of looking · the library of things · deleting & getting it back · where things go · keeping it private · the fanned cross-block matrix) |
+| The opt-in custody drill | `TEST_RUNNER_VARIORUM_MIGRATION_DRILL=1 … -only-testing:VariorumTests/ProtectionMigrationDrillTests -only-testing:VariorumTests/SessionTokenBindingTests` | **5 tests in 2 suites — ALL GREEN**, with row 9's leg firing (`legacy iCloud escrow item removed → true`) |
+| Mobile | `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` | **635 tests in 108 suites PASSED with exactly the 4 known issues** (A1's close 632/108, same 4; +3 = this batch's three phone pins) |
+| iOS build | `xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS` | **BUILD SUCCEEDED** |
+
+**THE FIRST full Mac run found TWO issues; both were adjudicated at their mechanism and ONE was
+MINE.** (1) **`PostureSwitchTests.aCeremonyFailingAfterGenerateNewOnesSaysTheFreshWordsNeverLanded`
+— my own pin's over-reach.** It asserted that the world's vault still carried a recovery wrap, but
+that world's vault is born by the wrap-free 14b-era `setUp(passphrase:)` — which is row 15's own
+trace, in this same record — so the claim was never that world's to carry; it passed in isolation
+and failed under load. Replaced with the local sound fact (a failed ceremony reports no outcome, so
+nothing it would have minted took effect), then green twice. Recorded rather than quietly rewritten,
+because a pin that asserts more than its world guarantees is exactly the class this run's discipline
+exists to catch. (2) **`BookOutlineLandingTests.openingACollapsedStoryLandsAtItsTopWithThree
+StoriesExpanded`** — the **row-49 landing arm**, named on this run's own ENVIRONMENT TRAPS flake
+list, at the same `abs(top) = 3424` A1 recorded. Adjudicated by the PAIRED protocol rather than a
+single run: two identical invocations of the same two suites, **red then GREEN** (51/2 each). This
+batch's diff holds zero lines in any book, outline, landing or manifest file.
 
 ### THE WALK — dev-store Debug build (`io.lduarte.Variorum.debug`, built at `DerivedData/a2walk`)
 
