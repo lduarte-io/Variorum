@@ -166,6 +166,22 @@ sentence to publish.
   (Standard: someone at your unlocked Mac — no; Castle: your Mac's login password — yes), §1.3 (Standard's one
   Apple-held key). The lost-device entry ledger 32 asked for; the order is the design's.
 
+- **I reset my iCloud Keychain — now a new device asks for my passphrase.** *(added 2026-09-21 at RUN A batch A3,
+  with the door 17m built; the sentence is the app's own Settings copy in the FAQ's register)* *Nothing is lost and
+  sync keeps running. The copy of your key your Apple account held was wrapped under the iCloud key you just
+  replaced, so it no longer matches — and that copy is what lets a new Apple device join with nothing typed. On a Mac
+  that already has your keys, open Settings ▸ Protection ▸ Re-link Your Apple Account: it tells you which Apple
+  account will hold the key, asks for your passphrase, and writes that one copy under the key your Apple account
+  holds now. No key is replaced and nothing is re-encrypted. The same door is the answer when the Mac that turned
+  sync on has moved to a different Apple account — read the sentence before you confirm, because it names the
+  account that will hold your key from then on.*
+  — Facts: design §3.4 (Standard's iCloud key row: it is READ, never re-minted — decision 30), the ladder's
+  **MINOR-N1** (the heal keys on a key READ and never on a mint, which is precisely why a reset leaves the account's
+  Apple-held copy orphaned), **QUESTIONS #90 item 10** (her ruling: a deliberate door with a consent sentence, not an
+  automatic re-land), and **17m**, built at RUN A batch A3 — Settings ▸ Protection on the **Mac**; it refuses before
+  asking when this Mac's iCloud Keychain hands back no key at all, and it never mints one. **The phone has no twin
+  yet** (QUESTIONS #139) — word the entry for the Mac until it does.
+
 - **My other device uses a different Apple ID.** *Sync still works — that device types your passphrase once to join,
   then opens on its own. The nothing-typed road is for devices signed into the Apple account that turned on sync. In
   Standard, that device's own library then also opens through the Apple account it is signed into.*
