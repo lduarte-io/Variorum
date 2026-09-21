@@ -747,11 +747,11 @@ MAJOR-3 and the F3 record's eight items; the copy constants' homes; the named co
 | 0 | Record skeleton + `run-a-screens/a2/` | **DONE** — this commit |
 | 8 | **17l item 1** — the seeder's discover-then-mint latch + the ensure's purge consult | **FIXED** — pins `EncryptionBookDoorTests` (3 new), RED measured on the pre-fix tree TWICE (5 issues across the 3; the 5 standing tests green), green after at 24/2. The purge consult is NOT the ledger — the ledger is content-free by design; the trace and the substitution are recorded below |
 | 9 | **17l item 2** — the migration drill's escrow leg + her-Mac READ-ONLY confirmation | **FIXED** — the drill RED first with its expectation quoted, then green under `TEST_RUNNER_VARIORUM_MIGRATION_DRILL=1` (**5 tests in 2 suites**, the leg's own line firing). The her-Mac confirmation run READ-ONLY, commands + verbatim answers below, with the caveat that makes the negative honest |
-| 10 | **17l item 3** — her four ruled #90 wording changes, both platforms | NOT-STARTED |
+| 10 | **17l item 3** — her four ruled #90 wording changes, both platforms | **FIXED** — four constants with pins on BOTH platforms (`ProtectionCopyTests.herFourRuledWordingsAreWhatTheSurfacesSay` · `MobilePhoneProtectionCopyTests.herFourRuledWordingsReadAsThePhones`); two shipped verbatim pins RE-BASED as the ruled-change class. 20/3 green |
 | 11 | **17l item 4** — the dead Replace-All-Keys door: present from the root | **FIXED** — pin `Phase13pControllerTests.theCeremonyHasARootPresenterWhenNoProtectionPaneIsMounted` (4 arms + the non-negative count), **red-on-old measured by revert R1: 6 issues, all in the new pin, the 46 others green**. Green at 94/3 with the two neighbouring suites |
-| 12 | **17l item 6** — the ceremony's *(0 of 0)* → *preparing…* face | NOT-STARTED |
-| 13 | **17l item 7** — NIT-N8's face VERIFIED post-13u4 + MINOR-N4 (2)'s copy PROVISIONAL | NOT-STARTED |
-| 14 | **17n** — the encryption passphrase's 12-character floor at every SETTING door | NOT-STARTED |
+| 12 | **17l item 6** — the ceremony's *(0 of 0)* → *preparing…* face | **FIXED** — the gate is the FIRST WINDOW, and the four sheets' duplicated switches became ONE brain so the fix is true at every face; pins `theReencryptingLinePreparesUntilTheFirstWindowLands` + `noSheetReDerivesTheRunningLine` (grep) + the phone twin |
+| 13 | **17l item 7** — NIT-N8 VERIFIED + MINOR-N4 (2)'s copy | **VERIFIED + FIXED** — NIT-N8's face re-run and extended to the PANE mounted at 13u4's nine-pane size (it stands); MINOR-N4 (2)'s tail landed PROVISIONAL (#138) with `PostureSwitchTests.aCeremonyFailingAfterGenerateNewOnesSaysTheFreshWordsNeverLanded` and its typed-words guard |
+| 14 | **17n** — the passphrase's 12-character floor at every SETTING door | **FIXED** — the sweep table below; two gaps closed (the set sheet = four door sites; sync setup's no-wrap arm), five sites re-based onto the one named floor, the NEGATIVES pinned. **Red-on-old by revert R2: a six-character word was accepted AND landed**; 67/4 green |
 | 15 | **KnownIssues 32** — the phrase-transit one-arm VERIFICATION pin | **VERIFIED, with ONE live world found and FIXED** — the corner has no world left that any production road can make (arms 1–2, green either side, the row's own success criterion); the single survivor is a vault this build cannot READ, where the offer minted a second secret — arm 3 RED on the pre-fix tree, fixed, `Phase13pControllerTests` + `EncryptionFlowTests` **51/2 green** |
 | — | Closing evidence | NOT-STARTED |
 
@@ -904,6 +904,95 @@ something a session can produce. The unified log, which would have carried the w
 `migration 2a: legacy iCloud escrow item removed → …` line, has rotated (the KnownIssues row said so
 at the closeout). Recorded as it is rather than dressed up.
 
+### ROW 10 (17l item 3) — HER FOUR RULED WORDINGS
+
+Each is a copy constant with its pin on both platforms; the binding text is QUESTIONS #90's RULINGS
+block, and 13s re-voices later — so her MEANING is landed plainly rather than over-written.
+
+| # | Her ruling | What landed |
+|---|---|---|
+| (2) ledger 54 | *"Pick Up New Keys is fine as a choice"* | `followPickUpKeysDoor` + the ONE label brain `followEnterDoorLabel(asksNothing:)`, fed by ONE predicate — `ProtectionController.followAsksNothing(for:)`, which `PostureFollowModel.canFollowFromHeldKey` now delegates to, so the doors that render a label BEFORE a model exists ask the same question. Six render sites + the Encryption tab's pre-model door (through a new `EncryptionSession.followDoorAsksNothing` leaf, wired beside `followDoor` in both apps) |
+| (3) ledger 61 + 67 | *"should probably tell you why though (like look at what you just put into Castle)"* | the conflict Done now says the account's words are the ones **that device SHOWED when it entered Castle** — *"those are the set to keep"* — instead of only naming an address |
+| (4) ledger 46 | *"it should direct you to cancel, go put the standard account in castle mode and then rejoin"* | the consent sentence gives her three steps in her order, and the pin asserts the ORDER, not just the words |
+| (7) MINOR-6 | *"good to direct users to the website … i'll consider [the button] for a future round"* | the book's Chapter 7 and the FAQ entry name the stargazing.tech road and say plainly that signing in and changing the password happen on the website. **The button is NOT built** — it is her future-round candidate, and the FAQ carries that note |
+
+**Two shipped verbatim pins were RE-BASED, both the ruled-change class, neither a defect:**
+`ProtectionCopyTests.theEnrollFacesRenderCopyTwoDVerbatim` (the consent) and
+`.theReconciledStringsRenderTheCopyVerbatim` (the conflict Done) asserted the OLD sentences
+verbatim — which is what a copy pin is for. Each keeps its subject and takes her ruling's text, with
+the ruling named at the line.
+
+### ROW 12 (17l item 6) — *(0 of 0)*, AND THE FOUR COPIES OF ONE SWITCH
+
+Her observation: between the vault write and the first pulled window the ceremony reads
+*(0 of 0)*. **The gate is the FIRST WINDOW, never "done is zero"** — `done == 0` is the honest
+count all through window one, while `total == 0` means no window has reported — so
+`reencryptingLine` answers *(preparing)* only in the second case.
+
+**What the row also found:** the running line lived in FOUR byte-identical `private var runningLine`
+switches (two Mac sheets, two phone sheets), differing in exactly one arm — so the fix would have
+had to be made four times to be true anywhere. They now render ONE brain
+(`ProtectionCopy.runningLine(for:minting:)`) with the one differing arm kept as the parameter it
+always was (a ceremony MINTS its keys; a follow PICKS UP keys another device minted), and a grep pin
+(`noSheetReDerivesTheRunningLine`, the 13u4 S3 form) keeps a fifth copy from appearing.
+
+### ROW 13 (17l item 7) — NIT-N8 VERIFIED, AND MINOR-N4 (2)'s SENTENCE
+
+**NIT-N8's face STANDS post-13u4.** Its pin re-ran green unchanged, and it is now extended to the
+surface the nine-pane restructure could actually have broken: the Protection PANE, MOUNTED at
+13u4's own 720×552, read two ways — the sentence its checklist line resolves to, and the fact that
+the line still renders the ONE nudge brain rather than a re-derivation that could drift. (A `Form`'s
+reflected tree carries no string from a computed `Text`, which is why the pane is read that way and
+not by `SurfaceComposition.carries`; recorded so the next reader does not mistake it for a weaker
+assertion.)
+
+**MINOR-N4 (2) BUILT, PROVISIONAL (QUESTIONS #138).** F3 closed (1) by moving MAJOR-3 (b)'s refusal
+to the door, so the words screens never run for a ceremony whose step 2 would refuse — but every
+OTHER post-screen failure still landed with twelve fresh words on paper and nothing behind them.
+The tail (`ProtectionCopy.freshWordsNeverLanded`) rides the instance `wording(for:)`, which is
+exactly the set of failures reachable after the screens; the door's own refusals are constants and
+never pass through it. One mechanism change came with it: `WordsCeremony.regenerated` is now set
+AFTER the generate succeeds, so the flag means what its readers assume — fresh words were put ON
+SCREEN — and a generate that threw can never make the copy claim she wrote something down.
+
+### ROW 14 (17n) — THE FLOOR'S SWEEP TABLE (door × platform × pin)
+
+Her ruling: *"we can make the encryption passphrase requirement 12 characters as well."* The floor
+shipped at pre-13x 3b was the ACCOUNT password's; three encryption-passphrase doors had picked one
+up along the way and two had none. The floor is now NAMED ONCE (`ProtectionCopy.passphraseFloor`),
+so every door reads the same number and the sweep is checkable rather than remembered.
+
+| Door | Where (shared ⇒ both platforms) | Verdict |
+|---|---|---|
+| Sync setup, first device — the SET arm | `SyncEnrollmentModel.submitPassphrase`'s else-branch | already floored (3b) — pinned by `SyncEnrollmentTests`; re-based onto the named floor |
+| Sync setup — the *no wrap after all* arm | same method, `case nil` | **FIXED** — it SETS rather than verifies, and had no rule |
+| Change passphrase · forgot-passphrase · forgot-words | `KeyDoorModel.validated` (all three roads) | already floored — pinned by `KeyDoorTests`; re-based |
+| Replace All Keys' *Also choose a new passphrase* | `PostureSwitchModel.commitNewPassphrase` | already floored — pinned by `PostureSwitchTests`; re-based |
+| The ceremony's Screen 2 (set if none) | `PostureSwitchModel.commitPassphrase` | already floored — re-based; covered by the ceremony walk |
+| **Settings ▸ Protection's set sheet · the nudge's offer · the phone's nudge offer · the phone's Protection sheet** | `PassphraseSetModel.commit` — **FOUR door sites, one model** | **FIXED** — the widest gap, and it had no length rule at all |
+| The migration's confirm | `MigrationConfirmModel.confirm` | **NOT a setting door** — it VERIFIES an existing passphrase against the vault and re-wraps under it; a floor there would refuse her own shorter word at the one moment she must not be refused. Pinned as a negative |
+| Unlock (the lobby, and the primitive `ProtectionController.setPassphrase`) | `StoreLobby` / the primitive | **NOT a setting door** — the floor lives at the DOORS by design, so a word set before this build still opens. Pinned as a negative |
+
+**The negatives are the half that is easy to get wrong**, so both are pinned in the same test: an
+existing six-character word still verifies against the store, and the migration's confirm re-wraps
+it rather than refusing. Revert R2 measured the positive half red — the word was accepted AND landed
+— with both negatives green.
+
+**Said once, in her words' places:** the tutorial's *keeping it private* Lesson 2 gains one
+paragraph (the floor + its other half: an existing word keeps working, and the change door is where
+a longer one is asked for), and the book's Chapter 2 gains one. **A found honesty repair, recorded:**
+the book's Chapter 1 already said *"which is why we ask for twelve characters or more"* about the
+ENCRYPTION passphrase — a floor that did not exist at four of its doors. 17n makes the shipped
+sentence true rather than adding a new claim.
+
+**THE RE-SEED CONSEQUENCE (recorded, not acted on):** both edits are to SEEDED content —
+`ProtectionCopy.privacyLessonTwoParagraphs` (the tutorial book) and `EncryptionExplained.txt` (the
+seeded book), and row 10's MINOR-6 edit touches the same book's Chapter 7. A store that already
+holds either book keeps the OLD text: the seeder never rewrites a book it has seeded, by design.
+Her one `Help ▸ Restore Tutorial… ▸ Replace` press (plus *Restore "Encryption Explained"*) takes the
+new text, and **the closeout bundles that press with 13u4's own pending lesson edits** — nothing
+here was run against a seeded store, and no seeded row was touched by this batch.
+
 ### ROW 11 (17l item 4 / KnownIssues 40) — TWO PRESENTERS, ONE MODEL
 
 **The mechanism, read in the code.** `ProtectionController.activeSwitch` holds the ceremony (on the
@@ -985,13 +1074,14 @@ where it could not be (the unreadable-vault world), with the residual named hone
 whose vault was born wrap-free by a **14b-era build** and that has never generated words would still
 reach the mint; no build in the tree can create such a vault, and hers is not one (her words exist).
 
-**Reverts:** **REVERT R2 STARTING (row 14, from the COMMITTED state `fced50e9`)** —
-`App/Variorum/Shared/PassphraseSetModel.swift`, the floor guard removed from `commit` (the pre-17n
-shape: empty and matched, no length rule). Expected: the set-sheet arm of
-`theEncryptionPassphraseFloorBindsWhereItIsSetAndNowhereElse` red, the two NEGATIVE arms green (they
-must stay green — a floor that reached unlock would be the defect this row exists to avoid). To be
-restored by `git checkout --` from the REPO ROOT with `git diff` empty before "restored" is written.
-Previously: NO REVERT IN FLIGHT — **R1 (row 11, from the committed `d46f4c07`;
+**Reverts:** NO REVERT IN FLIGHT — **R2 (row 14, from the committed `fced50e9`;
+`App/Variorum/Shared/PassphraseSetModel.swift`, the floor guard removed from `commit`) RAN over
+`Phase13pControllerTests` and gave **2 issues, both in the new pin** — a SIX-character passphrase was
+accepted (`sheet.lastError → nil`) **and landed on the key file** (`hasPassphraseWrap → true`) —
+with the two NEGATIVE arms GREEN, which is what the row asks of them: the floor must never reach
+unlock. The 47 other tests green. RESTORED by `git checkout --` from the REPO ROOT; `git diff` empty
+and `git status` clean before this line was written. Previously: **R1 (row 11, from the committed
+`d46f4c07`;
 `App/Variorum/Shared/ProtectionController.swift`, `ceremony(for:)` put back to the pre-row-11 world
 where only the Settings pane ever presents) RAN over `Phase13pControllerTests` and gave **6 issues,
 all in the new pin** (`ceremonyHost → .pane` where `.root` is owed; the root presenting `nil` on the
