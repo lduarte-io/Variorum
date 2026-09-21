@@ -1570,6 +1570,48 @@ Its runs: the capture family 49/9 green (literal selectors), core builds, the tw
 wrong) · 2 NIT fixed · 0 disputes outstanding. ROUND 2 opens with a fresh reviewer anchored on
 `notes/plans/run-a-ladder-round1.md`.**
 
+**ROUND 2 (2026-09-21) — findings file `notes/plans/run-a-ladder-round2.md` (the fresh reviewer's
+own): 0 BLOCKER · 1 MAJOR (NEW) · 0 MINOR · 1 NIT, with all four round-1 fixes independently
+re-derived CORRECT and a clean bill across the fixes' surfaces + samples of the combined diff.**
+The NEW MAJOR: the phone comments sheet's CLOSE destroys the refused draft P4 just preserved —
+`render()`'s open→closed transition clears the field, and the refusal's own remedy (unlock) lives
+outside the sheet, so the inviting gesture is the destroying one; `projectionDidChange`'s
+auto-close wipes the same way; a refused EDIT draft dies with its target. Byte-for-byte KnownIssues
+row 65's class on a second surface; P4's binding item named only the submit road, so the run owed
+the RECORD it lacked, at minimum. The NIT: the pad close road's refusal lands asynchronously, so a
+⌘Q inside that flight window is decided before the park is armed — honestly labeled unpinnable
+under binding 4's letter; one cost-model sentence owed at most.
+
+### ROUND 2's MAJOR — THE ORCHESTRATOR'S FORK RULING (2026-09-21, recorded before the flow's fix pass)
+
+**Build the park — the row-7 ruling's shape extended to this surface, PROVISIONAL under one
+QUESTIONS row.** The class rule is the same one ("nothing typed in either app can be permanently
+lost"), the mechanism is the same (a refusal preserves, a close destroys), and the ruled family
+shape exists; a record-only disposition would leave a door this run's own title names still losing
+her text. Bindings, mirroring row 7's:
+1. **REFUSED drafts only** — parked from what was REFUSED (the submitted text, the pad's
+   `submitted` discipline), never the field's later tail; a close with no refusal standing keeps
+   nothing (the sheet's existing grammar; guard pin).
+2. **Park at REFUSAL time, on the controller, memory-only, session-scoped** — so every close road
+   (dim-tap, `projectionDidChange`'s auto-close) is covered without touching the close sites; her
+   prose never rests on disk.
+3. **ONE held draft, keyed to its block** (the edit arm parks `editingID` with it): the next open
+   of the SAME block's comments restores it — saying why the box is not empty (one line,
+   PROVISIONAL wording) — and clears at restore (the sheet becomes the only home; a re-refusal
+   re-parks). A DIFFERENT block's open shows nothing of it and leaves it held; a refusal on a
+   different block REPLACES it (newest wins — the bounded cost, recorded). A landed submit of the
+   parked block clears it.
+4. **Pins:** refused submit → close → reopen the same block → the draft AND the edit target
+   restored + spoken (red on current); a landed submit clears; the no-refusal close keeps nothing
+   (the guard); a different block's open shows nothing; the auto-close road parks the same.
+5. **The class sweep line (the constitution's closing form):** the fix session VERIFIES whether
+   the Mac's comment-editing panel (13u3's one writing surface) has the same refused-then-close
+   road, and records it FIXED or provably SAFE — the class must not recur adjacent a third time.
+6. **QUESTIONS row** (next free — check the file's end marker) carrying the ratify bundle: the
+   session scope, the one-draft-newest-wins trade, the restore sentence, and the extension of the
+   row-65 ruling's shape to this surface.
+The NIT's disposition is the flow's (the one cost-model sentence is the right size if confirmed).
+
 ---
 
 ## CLOSEOUT DUTIES (the standing ritual, run-shaped — nothing here runs until the ladder ends)
