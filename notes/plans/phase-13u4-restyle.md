@@ -4742,8 +4742,8 @@ against what actually shipped):**
 | 2 | THE PRE-FIX COLD BASELINE, measured on THIS tree (not inherited) + the harness pin written RED-FIRST | **DONE** — the pins RED 3/3 (27807580) and the app-side baseline **6 of 6 cold clicks STALL** (this commit) |
 | 3 | THE FIX — the pane's note rows stand at length-derived heights | **DONE** (this commit) — both pins GREEN 3/3, F1's two ride UNMODIFIED and green beside them; the app measurement is piece 5 |
 | 4 | The BEHAVIOURAL REVERT (red-on-old verified in a worktree) | PENDING |
-| 5 | THE POST-FIX COLD TRIAL TABLE (≥8 trials) + the warm trials against F1's 21/21 | PENDING |
-| 6 | The WALK — cold and warm, captured | PENDING |
+| 5 | THE POST-FIX COLD TRIAL TABLE (≥8 trials) + the warm trials against F1's 21/21 | **DONE** (this commit) — **9 of 9 cold SETTLE at top=0**, 11 of 11 warm settle |
+| 6 | The WALK — cold and warm, captured | **DONE** (this commit) — Terminal light (held at 1.5 s AND 6 s, byte-identical), Study light, Study DARK; 52 captures |
 | 7 | Closing suites + QUESTIONS + the KnownIssues row + the ledger's F3 row | PENDING |
 
 ### THE READING (done in this session's own context, in the brief's order)
@@ -4947,3 +4947,72 @@ do is not a pin. So it was narrowed to the sentence the residual is actually abo
 actually ends on — **while a landing is in flight the column must not be discovering its own
 geometry** — by resetting the span at the moment the landing is asked for. That window is where the
 defect lives, and there the separation is total (1.0× against 12.4×+).
+
+### THE COLD TRIAL TABLE, POST-FIX (piece 5) — the same protocol, the same store, the same machine
+
+Build: `App/Variorum/DerivedData/13u4f3/Build/Products/Debug/Variorum.app`. Same instance
+discipline as the baseline (zero instances verified before every launch; every quit by identity;
+`/Applications/Variorum.app` never touched).
+
+| # | chapter clicked (target) | the signpost | verdict |
+|---|---|---|---|
+| 1 | copper beeches, ch13 (`target=24`) | `offset=216237 total=238205 derived=6 hops=0 content=0 ms=1028 end=settled top=0` | **SETTLED** |
+| 2 | beryl coronet, ch12 (`target=22`) | `offset=195191 hops=0 content=0 end=settled top=0` | **SETTLED** |
+| 3 | copper beeches, ch13 | `offset=216237 hops=0 content=0 end=settled top=0` | **SETTLED** |
+| 4 | noble bachelor, ch11 (`target=20`) | `offset=176204 hops=0 content=0 end=settled top=0` | **SETTLED** |
+| 5 | copper beeches, ch13 | `offset=216237 hops=0 content=0 end=settled top=0` | **SETTLED** |
+| 6 | engineer's thumb, ch10 (`target=18`) | `offset=158231 hops=0 content=0 end=settled top=0` | **SETTLED** |
+| 7 | beryl coronet, ch12 | `offset=195191 hops=0 content=0 end=settled top=0` | **SETTLED** |
+| 8 | speckled band, ch9 (`target=16`) | `offset=135851 hops=0 content=0 end=settled top=0` | **SETTLED** |
+| 9 | copper beeches, ch13 | `offset=216237 hops=0 content=0 end=settled top=0` | **SETTLED** |
+
+**9 of 9, against 6 of 6 stalls before. And read the three numbers that are not the verdict:**
+`hops=0` (the compensator was never needed — the FIRST aim was right), `content=0` (**the column's
+height did not change once, at any point, during any of the nine landings** — that is the residual
+gone rather than survived), and `offset=` carrying a real number where UNIT F1 had to print −1.
+
+**The WARM trials in the same sessions — 11 of 11 settle**, every one `hops=0 content=0 top=0`:
+ch5 · ch13 · ch2 · ch11 · ch7 · ch13 · ch12 · ch6 · ch13 · ch1 · ch3. Against the pre-fix 4 of 5
+(and F1's recorded 21 of 21 on a column that had already stopped moving). **There is no warm case
+left that is worse than before, and the one pre-fix warm stall — the long jump up while the column
+was still growing — has no mechanism any more.** A twelfth warm attempt produced no landing line at
+all and was OPERATOR ERROR, recorded rather than hidden: the click point was a WINDOW y used as a
+SCREEN y, 33 pt high, and it landed in the filter field.
+
+**The column learns, and her own Console says so:** `derived=` falls 6 → 4 → 3 across a session as
+notes are realized and report their real heights, and `exact=1` appears on landings whose whole
+geometry above the target is a measured fact. Both are numbers UNIT F1 could not print.
+
+**A finding worth recording:** the pre-fix signpost's `total=171690` was the **LazyVStack's own
+estimate** of the column, and the post-fix `total=238205` is the manifest's, of which 20 of 26 rows
+are measured facts. So the lazy container was under-reading this book by about 28 % — which is the
+same error, seen from the other end, that moved the page out from under a landing.
+
+### EVIDENCE — THE WALK (piece 6; the unit closes on USE, not on pins)
+
+Captures: `notes/plans/13u4-screens/f3/` (gitignored), 52 files — a full window per trial plus the
+labelled walk steps below.
+
+| # | step | what the app did | capture |
+|---|---|---|---|
+| 1 | **Before** — the six cold trials on the pre-fix build | 6 of 6 `end=gaveup`, missing by 406 to 12,064 pt | `pre-t1…pre-t6` |
+| 2 | **Before, warm** — five more in the same session | 4 of 5 settled; the one stall is the trial whose column was still growing | `pre-w1…pre-w5` |
+| 3 | **Terminal, light: COLD ch13 copper beeches**, captured at 1.5 s AND at 6 s | **the chapter heading at the top in BOTH — and the two crops are BYTE-IDENTICAL** (`md5` equal): the landing arrives and HOLDS; `settled top=0 after 0 hops` | `W1-terminal-light-ch13-at1.5s/-at6s` |
+| 4 | Terminal, light: the other eight cold trials | every one the chapter heading at the top | `post-t1…post-t9` |
+| 5 | Terminal, light: eleven WARM chapter clicks at every depth | every one at the top, 0 hops | `post-w1…post-w11` |
+| 6 | **STUDY voice** (Settings ▸ General ▸ Design voice), COLD ch13 | the serif voice lands identically — `settled top=0 after 0 hops, content=0` — and **`total=253079` where Terminal read 238205**, which is the metrics re-measuring per voice exactly as the stamp intends | `W2-study-light-ch13-at6s` |
+| 7 | **DARK** (`appearanceChoice dark`, relaunch) in the Study voice, COLD ch11 | the black room lands the same way: the chapter heading at the top, `settled top=0 after 0 hops, content=0` | `W3-study-dark-ch11-at6s` |
+
+**Dev-store state left as found:** the voice back to **Terminal** and the appearance back to
+**Follow system**, both verified in Settings ▸ General (capture `set2`) and by
+`defaults read io.lduarte.Variorum.debug appearanceChoice` → `system`; her colour palette
+(Rose & moss) untouched; **zero instances**. No note, book, chapter or setting in the dev store was
+edited by this walk — every gesture in it is a click on a book, a mode tab or a chapter name, plus
+the voice flip that was put back.
+
+**A walker fact for `Tools/WalkKit/README.md` at its next touch:** the SHELF's book rows move
+between voices as much as the Library's do — Sherlock sits at screen y **349 in Terminal** and
+**384 in Study** on a 1700 × 1000 window — so a cold-trial script that hard-codes the shelf point
+opens the WRONG BOOK in the other voice, and the only tell is the signpost's `rows=1` (a one-note
+book) where 26 was expected. Read every click point off a fresh capture after a voice flip, and let
+the signpost's `rows=` be the sanity check on which book you are in.
