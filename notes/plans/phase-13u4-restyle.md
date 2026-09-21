@@ -4073,3 +4073,50 @@ live examples instead of three: `ShellActions.confirmDiscardingUndo` and
 `CalloutMenu.promptEmoji` (the second is how this walk set the callout's glyph — drive it with
 `click button "Set" of window 1`, and note `cliclick t:` **cannot type an emoji** at all
 (`Unable to get key code`): put it on the pasteboard and press ⌘V through System Events).
+
+### THE CLOSING CONFORMANCE WALK — AND WHAT REMAINS NON-CONFORMING (the brief's own rule: list it, never a silent pass)
+
+The walk above IS the conformance pass: every surface this unit opened was judged against the
+reference artifact (`notes/plans/pre-13u-mockups/blocks-and-snippets.html`) in both voices and
+both appearances. What conformed after this unit's touches is in that table. **What does NOT
+conform is here, each with what it would cost — this list is the deliverable, not a footnote.**
+
+| # | What | Why it is non-conforming | Why this unit did not take it |
+|---|---|---|---|
+| 1 | **`ShellActions.confirmDiscardingUndo`** — A12's destructive-undo warning | still an app-modal `NSAlert.runModal()`, the grammar row 67 is about | Row 67 names the TUTORIAL's confirm. **This one can now adopt row 67's channel in about five lines** (`await shell.ask(question:detail:verb:)`), and its `confirm:` seam means its pins would ride unmodified — it is the cheapest item on this list |
+| 2 | **`CalloutMenu.promptEmoji`** | an `NSAlert` too — with a text field and a system-picker accessory | A different question: a text-entry alert is not a confirm, and the shell's channel answers Bool. It wants its own shape (a SwiftUI prompt with the picker beside it), which is a design, not a port |
+| 3 | **The note's inspector door still says "Scraps"** (and its help says *"the scraps"*) | W8-1's ruling says the scrap area speaks as SNIPPETS in every UI string | Renaming a door she uses moves its help, its pins and the phone's twin with it. `PostDetailView.scrapsDoorTitle` now names it, so the lesson follows it for free the day someone sweeps it |
+| 4 | **THE WALK'S OWN FIND — one act, TWO vocabularies.** The snippet card's context menu reads **"Archive Scrap" / "Delete Scrap"** (from `CapabilityRegistry`'s `.archiveScrap`/`.deleteScrap` verbs) while `SnippetsCopy.archiveRow`/`deleteRow` say **"Archive Snippet" / "Delete Snippet"** | Two spellings of one act, and the one she meets on the card is the retired word — row 68's class exactly, one surface over. Captured in this walk's context-menu shots | A REGISTRY verb change reaches the menu bar, the palette and their pins. Not row 45's or 68's mandate, and worth doing as ONE sweep with item 3 |
+| 5 | **The POST tag sheet (`TagAssignmentSheet`)** is unvoiced in exactly the way row 45 describes | system `.headline`, a `List` of `Toggle`s | **Row 45 names the BLOCK sheet.** The two are twins and the fix is now copyable line for line from `BlockTagViews.swift`; it is one unit's afternoon, not this one's |
+| 6 | **The Trash's controls row** (Show ▾ · Oldest first) is still a system `Picker` and a system checkbox | the rest of that surface is now calm cards and the voice's type | UNIT S1's own precedent, kept deliberately: *"the system controls are correct as they are"* — they wear the voice's tint and small type. A row that replaced them would be inventing a control vocabulary the app does not have |
+| 7 | **The `fixedSize(horizontal:vertical:)` form is NOT in row 44's sweep** — ~200 sites | It is b6dae25's own spelling, so P-8's letter arguably reaches it | It is the WRAPPING form a paragraph wants; a blanket limit there truncates sentences (`CalmSectionHeader`'s own note). Its defence is `ErrorCauseNote`'s load-bearing limits + `ChromeMinHeightTests`, which probes real window chrome at width 1. Stated in the pin's header and here rather than implied closed |
+| 8 | **Block History's seal refusal borrows the TRAY's sentence** — *"This note is marked complete — unseal it to put this back"* — for a RENAME | the words name an act the button does not do (J8's copy-truth class). Visible in this walk's steps 9 and 10 | **It is PRE-EXISTING and it is what the OP's road already said** on this pane: the gate reproduces it exactly so the two roads cannot disagree. Changing it means giving this pane its own refusal vocabulary (Restore's seal refusal reads the same way), which is a copy design for the pane, not a line |
+
+**Not on this list, and worth saying:** every surface the unit's own touches produced was judged
+conforming in all four voice/appearance combinations — the tag sheet, the Trash, the alert, the
+ring's gutter, the swept lesson and the bar's chrome.
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder's reviewer reads this list)
+
+**NONE of the editor seam.** `BlockRangeIndex` · `EditorTextView` · `TypedReturn` ·
+`PaneTextAuthority` · `EditorViewModel` · `EditorSurfaceController` · `runStructural` and its
+identity oracle · `StructuralSeamEdit` · `StructuralGesturePlanner` · `MarkdownActs` — **not one
+of them is in the diff.**
+
+**`Features/Editor/BlockDecor.swift` IS**, and the brief asked for it to be named: it is the
+editor's **DECORATION** layer — the pure geometry brain plus the overlay controller that pools
+`NSView`s over the text view. It is not the seam: it holds no identity, no tiling, no store
+write and no text edit; it reads a `State` the view model emits and sets view frames. Row 63's
+change is the pure `indicatorRect` gaining an optional argument, one pure decision moving out of
+the renderer into `BlockDecor`, and the two renderers consuming it. **The 13u3 closeout item 2
+(the transaction-gated decoration refresh) is untouched**: no new refresh road, no synchronous
+work inside `storageDidEdit`, nothing added to the settle hop — the decision is computed inside
+the render pass that was already running.
+
+**`Sources/VariorumCore/` — ZERO FILES** and **`App/Variorum/Shared/` — ZERO FILES** (both
+verified by name over the whole unit diff, `git diff --name-only d20c0d7a..HEAD`). So `Sync/`,
+the schema, the migrations and `Server/` are untouched by construction, **no core run was owed**,
+**no iOS build was owed** (nothing here is mobile-visible), and the **lockstep marker stays 8**.
+
+**The whole unit is 29 source files and 8 test files** — 19 of the source files are the
+`fixedSize` sweep (one modifier each), and the rest are the six rows and the fork.
