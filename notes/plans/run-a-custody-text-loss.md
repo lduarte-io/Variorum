@@ -188,7 +188,11 @@ table: instance × host/path, each cell FIXED-with-named-pin or provably SAFE.
   flags built into a zsh VARIABLE and passed unquoted select NOTHING (zsh does not word-split), and
   xcodebuild then prints `Executed 0 tests` **and `** TEST SUCCEEDED **`**. Write the selectors
   literally on the command line; the only proof a run happened is Swift Testing's
-  `Test run with N tests in M suites` line with a non-zero N.
+  `Test run with N tests in M suites` line with a non-zero N. **Same family (found at the round-1
+  fix pass): `-only-testing:VariorumTests/TutorialWalkTests` selects NOTHING** — the file holds
+  eleven suite TYPES, none named after itself, and the invocation still prints green for its other
+  selectors. The spine is named by its struct names (`TutorialBookShapeTests` …
+  `TutorialFannedMatrixTests`, eleven suites, 79 tests).
 
 ---
 
@@ -1537,6 +1541,22 @@ NIT-1 — **AGREE** (the R1-10 class reaching a second door; a sentence at both 
 owed). NIT-2 — **AGREE** (unreachable, and a silent return is the wrong failure mode — delete or
 assert loud). **Responses to the reviewer for the final call; fix pass authorized in the same
 message.**
+
+**THE FINAL CALLS + FIX PASS (the reviewer's, 2026-09-21; the full record is its own file's
+§"THE FINAL CALLS + THE FIX PASS", head `096749ae`):** MAJOR **CONFIRMED, FIXED** `bfdd3bd6` — the
+one-shot re-arms only when a refusal ARISES; `held` still assigns on a re-park; pin
+`theSecondQuitsOwnReRefusalDoesNotReArmTheDecline` IS the integrated second press, revert R-L1
+discriminated exactly (1 issue, the new pin alone). MINOR **SPLIT** — the behaviour change
+**DISMISSED AS WRONG** on the reviewer's own re-check of the falsification (its premise conflated
+MobileQuickNote's frozen-prefix machinery; the family's all-or-nothing rule is recorded at the
+bar); the comment half fixed `2e3b0276`. NIT-1 fixed `385ed8c4` (the R1-10-class sentence at both
+call sites); NIT-2 fixed `662237d3` (loud debug assertion; a release blank capture parks rather
+than vanishes). Closing runs green (core 50/4 · park 6/1 · the spine 79/11 by type name · mobile
+3/1); zero `Sync/` lines, the only `Sources/` lines two comment blocks. **Orchestrator
+verification: the six commits spot-checked, tree clean, `QuickNoteParkTests` re-run directly —
+6/6 green. The TutorialWalkTests-selector trap ADOPTED into ENVIRONMENT TRAPS** (the batch gates
+are unaffected — every batch's spine claim rode the FULL suite or the eleven type names).
+**Next: the implementer's sanity pass over `f6d7b960..096749ae`; then round 2, fresh reviewer.**
 
 ---
 
