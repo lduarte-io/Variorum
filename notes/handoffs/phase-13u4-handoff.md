@@ -76,8 +76,8 @@ R-13u4-1…8, eleven unit records, the pre-ladder walk, the closeout); the ladde
 
 ## Verification
 
-Finals: core **1631/175 green** · full Mac **[PENDING-MAC]** · iOS **[PENDING-IOS]** · mobile
-**[PENDING-MOBILE]**. The ladder: R1 **0/0/1/3** (a records misfiling, two one-liners, a
+Finals: core **1631/175 green** · full Mac ****3045 tests in 504 suites — ALL GREEN, ZERO issues** (the family's FIRST fully-clean full run: row 58's environment red did not recur — F3's heights; the closing run's five issues were adjudicated at their mechanisms and fixed — four stale 13f-era ⌘[/⌘] pins rewritten to #130's ruling, one walk-residue defaults key, row 42's class)** · iOS **BUILD SUCCEEDED** · mobile
+****626/106 PASSED with exactly the 4 known issues** (one walk pin outside E3's mobile sweep asserted the superseded space join — rewritten to the ruling, its suite 8/8 green)**. The ladder: R1 **0/0/1/3** (a records misfiling, two one-liners, a
 closeout duty), the reviewer's fix pass, R2 **0/0/0/0** — the family's cleanest. Schema ZERO,
 `Sync/` ZERO, marker 8. Install refresh: **[PENDING-REFRESH — hashes here]**.
 

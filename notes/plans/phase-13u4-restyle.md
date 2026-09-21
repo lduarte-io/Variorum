@@ -5397,8 +5397,8 @@ orphans; rows 65/66 born this phase with owners at birth.
 
 **Schema ZERO · migrations ZERO · `Sync/` ZERO lines · `Server/` ZERO · the marker stays 8.**
 
-**FINALS:** core **1631/175 green** (55.5 s) · the FULL Mac suite **[FINAL-MAC]** · iOS build
-**[FINAL-IOS]** · mobile **[FINAL-MOBILE]** *(placeholders fill when the closing runs land —
+**FINALS:** core **1631/175 green** (55.5 s) · the FULL Mac suite ****3045 tests in 504 suites — ALL GREEN, ZERO issues** (the family's FIRST fully-clean full run: row 58's environment red did not recur — F3's heights; the closing run's five issues were adjudicated at their mechanisms and fixed — four stale 13f-era ⌘[/⌘] pins rewritten to #130's ruling, one walk-residue defaults key, row 42's class)** · iOS build
+**BUILD SUCCEEDED** · mobile ****626/106 PASSED with exactly the 4 known issues** (one walk pin outside E3's mobile sweep asserted the superseded space join — rewritten to the ruling, its suite 8/8 green)** *(placeholders fill when the closing runs land —
 records-before-verification, the resiliency rule)*.
 
 **The install refresh:** PENDING the closing runs — Release build → `/Applications` at the

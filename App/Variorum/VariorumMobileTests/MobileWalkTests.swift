@@ -740,14 +740,18 @@ struct MobileWalkTests {
 
             // MERGE BACK: a sentence cut restores EXACTLY (the canon
             // join's own promise — bytes byte-checked).
+            // R-13u4-3 (13u4 E3): merge DOORS take the RENDERING join — the page reads
+            // byte-identical, the seam a newline. These three pins were rewritten to the
+            // ruling at the 13u4 closeout (they asserted the superseded 2026-07-06 space
+            // join; E3's mobile sweep covered the merge suites — this walk pin sat outside).
             let successorRange = try #require(model.rangeOfBlock(successorID))
             await model.structural.mergeWithPrevious(
                 atSurfaceCaret: successorRange.location + 2)
             #expect(model.statusMessage == nil)
             #expect(try await storedBlockTexts(db, postID: seed.noteID)
-                == ["First sentence. Second sentence."])
+                == ["First sentence.\nSecond sentence."])
             #expect(model.index.entries.count == 1)
-            #expect(surface.textView.textStorage.string == "First sentence. Second sentence.")
+            #expect(surface.textView.textStorage.string == "First sentence.\nSecond sentence.")
 
             // Identity intact, canary silent; teardown lands the bytes.
             #expect(model.identityAuditFailures == 0)
@@ -755,7 +759,7 @@ struct MobileWalkTests {
             #expect(!surface.textView.canaryFired)
             await model.finish()
             #expect(try await storedBlockTexts(db, postID: seed.noteID)
-                == ["First sentence. Second sentence."])
+                == ["First sentence.\nSecond sentence."])
         }
     }
 }
