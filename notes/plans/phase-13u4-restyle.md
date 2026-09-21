@@ -112,6 +112,18 @@ this way — but nobody has measured it, and the ORCHESTRATOR'S PRE-LADDER ACCEP
 owes five cold deep-chapter clicks in Read mode, the number reported to her, the row's owner
 unchanged (12) until she rules on it.
 
+**R-13u4-8 (2026-09-21, in-run — the cold column pulled in too; supersedes R-13u4-7's
+wait-on-measurement posture for the PULL-IN question only).** Her ruling, verbatim: *"honestly,
+pull the fix into this session as well. after 13u's sessions i'd like to be able to click
+around everywhere with no issues so i can know if there are still remaining bugs by the time i
+get to 12 - if i know there's one issue, it will confuse diagnosing others."* So: **F1's
+cold-column remedy is UNIT F3** (the Index pane's note rows standing at length-derived heights —
+`ProseHeightModel`/`FlowHeightEstimate` over the cached `Queries.blockExtents`, 13u2b UNIT 1's
+shape on this surface), an eleventh unit, after F2 and before the ladder; the KnownIssues row's
+owner cell flips with this ruling. The Read-mode measurement (five cold deep-chapter clicks)
+STAYS OWED at the orchestrator's pre-ladder walk — no longer gating a decision, it verifies
+the architecture's prediction and catches a second surface if the prediction is wrong.
+
 **BINDING PRINCIPLES:** the architect-phase constitution **P-1…P-9** (byte-verbatim in
 `.claude/skills/architect-phase/SKILL.md`, preserved from 13b) binds every unit, with its
 application notes; deviations are recorded with reasons, never silent. The closeout-refresh
@@ -134,6 +146,7 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 | S2 | Library & masthead faces (item 1 + rows 50/51/54) | click-to-cycle stamp + word-counter condense (word-target offer preserved) · `FlippingStamp` hoist + oracle edges · F-0 residue · Timeline voice | walk, captured | NOT-STARTED |
 | S3 | Chrome singles + the conformance sweep (rows 44/45/46/63/67/68/69 + the Trash fork) | 27-site sweep + grep pin · tag sheet voiced · indicator ring · Restore Tutorial confirm · "pools" lesson sweep (re-seed consequence recorded) · seal-blind rename field · `blockNamingDoor` hygiene · Trash cards · closing conformance walk against the reference artifact | walk, captured | NOT-STARTED |
 | F2 | The shrink-re-font strand (KnownIssues row 53, pulled in at R-13u4-7) | the full-document editor's blank-below-the-last-line after a SHRINKING re-font; ⌘↑ heals — the trace's relayout/anchor hint; S1's record has the reproduction | red-on-old + walk on both occasions | NOT-STARTED (runs after S3, before the ladder) |
+| F3 | The Index cold-column heights (F1's residual, pulled in at R-13u4-8) | the Index pane's note rows stand at length-derived heights (`ProseHeightModel`/`FlowHeightEstimate` over cached `blockExtents` — 13u2b UNIT 1's shape on this surface), so the column's geometry is known before the aim; F1's record has the oscillation measurements | cold-click trial table red-on-old + walk | NOT-STARTED (runs after F2, before the ladder) |
 
 **CARRIED TO CLOSEOUT (grows as units close; nothing here may be lost):** MOBILE PARITY rows —
 (1) the phone's empty-block Return should CHAIN too (E1's report: AppSpec §7 still says the
