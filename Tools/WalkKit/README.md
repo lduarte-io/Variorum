@@ -152,3 +152,36 @@ swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
   there without opening the note.
 - `walk-cap` refuses silently-ish if the outdir does not exist (`screencapture: cannot write file`)
   — `mkdir -p` it first.
+
+## Walker facts from the 13u4 units + the orchestrator's own walk (2026-09-20/21)
+
+- **`cliclick t:` DROPS characters in the shelf's quick-entry bar** even at 70 ms spacing, and ⌘A
+  does not select that field (C1; met again at the orchestrator's walk). The reliable road is
+  `osascript … keystroke "…"` — with a RE-ACTIVATION before every burst (a capture steals focus).
+- **Multi-modifier `cliclick` chords are UNPROVEN** (`kd:cmd,shift t:m` silently did nothing at the
+  orchestrator's walk) — chords go through `osascript keystroke "m" using {command down, shift down}`.
+- **The capture boxes substitute typed quotes** (U+201D), so a screenshot cannot tell straight from
+  curly — read the box's AX value and `xxd` it (C1's find; the microsyntax brain now accepts both).
+- **Voice flips move the geometry**: the quick-entry bar's y moves ~70 screen points between
+  Terminal and Study (C1), and the shelf's book rows move too (Sherlock at screen y 349 Terminal /
+  384 Study at 1700×1000 — F3); the signpost's `rows=` is the tell for a wrong-book click. Re-read
+  every point from a fresh capture after a voice or appearance flip.
+- **A fresh launch always lands on `~/shelf`, and a book always opens in Outline** (mode is session
+  state — F3).
+- **Capture arithmetic** (C2): a full-screen `screencapture -x -o` is screen pixels with NO window
+  offset (point = px/2); `walk-cap`'s window capture needs the window's Y added back (point =
+  px/2 + windowY). Mixing the two conventions puts a click one bar-height off, silently.
+- **A `.contextMenu`'s rows land relative to the right-click point** — re-measure from a fresh
+  full-screen capture after every open (S2). Better: menu rows are TYPE-SELECTABLE — `keystroke
+  "<row name>"` then `key code 36` avoids coordinate risk entirely (the orchestrator's walk).
+- **`sips --cropOffset` is unreliable two ways**: S1 saw crops land mid-image; S2 saw it work
+  EXCEPT past the image's own height, which returns a blank PNG reading exactly like "the surface
+  drew nothing". Prefer reading the full capture or `sips -Z`.
+- **`cliclick t:[` fails as a zsh glob** — bracket chords via `osascript … keystroke "[" using
+  command down` (S1).
+- **⌘, is swallowed by the full-document editor** — open Settings via the app menu's item (F2).
+  The Settings window comes up 720×552 at (200,120); `screencapture -l <note window id>` is
+  unoccluded by Settings sitting on top (F2; both re-verified at the orchestrator's walk).
+- **`walk-scroll` is positive-is-down**; ±260 lines crosses a 10k-word note (F2).
+- **RETIRED: the 13u3 UNIT E fact about the Restore Tutorial door's AppKit modal** — that door is
+  a SwiftUI `.alert` since 13u4 S3 (ESC cancels; it draws inside the window and captures normally).
