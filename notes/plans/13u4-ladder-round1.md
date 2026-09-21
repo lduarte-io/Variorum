@@ -28,9 +28,9 @@ closing runs and the pre-ladder walk stand as recorded). Zero files under
 `Sources/VariorumCore/Sync/` and zero under `Server/` — verified by `git log`/`--stat` over the
 range, not by the records' claims.
 
-**STATUS: ROUND 1 FINDINGS COMPLETE — 0 BLOCKER · 0 MAJOR · 1 MINOR · 3 NIT, plus the
-walk-flagged item answered. Awaiting the implementer responses / orchestrator authorization for
-any fix pass.**
+**STATUS: COMPLETE — round 1 findings AND the reviewer's authorized fix pass (dispositions and
+the closing run at the end of this file). Implementer responses: AGREE on all four (relayed on
+the record by the orchestrator); the fix pass ran under the cross-model flow.**
 
 ---
 
@@ -235,3 +235,26 @@ red-on-old this today; it is a drift-hazard cleanliness item.
 R1-2/R1-3/R1-4 are one-liners or closeout duties. Nothing here reaches core, the seam, or any
 behaviour a pin guards — a round 2 over these fixes should be quick and must still re-check the
 plan file's heading structure after the R1-1 move.
+
+---
+
+## THE REVIEWER'S FIX PASS (authorized 2026-09-21 under the cross-model flow; implementer responses: AGREE ×4)
+
+| Finding | Disposition | Commit |
+|---|---|---|
+| **R1-1** [MINOR] | **FIXED — records-only move, byte-verbatim.** UNIT E3's `### THE BUILD` / `### SEAM FILES` / `### JUDGMENT CALLS` (71 lines) moved out of the UNIT E2 record region into `## UNIT E3 RECORD`, placed after E3's walk section so the build's "described above" reference to the differential seam arm reads TRUE (after LIVE STATUS it would have read false — the placement is the one judgment call of this pass). git's 72/72 insertion/deletion stat is the pure-move proof; not one word changed. The E2 record now reads coherently (no product code; ONE seam list saying NONE) and E3's record carries its own build and seam list where every other unit keeps them. | `608182cc` |
+| **R1-2** [NIT] | **TAKEN, as the authorized strict hit-target widening.** `.contentShape(Rectangle().inset(by: -6))` on the counter button's label — hit-testing only (`contentShape` never measures), so ZERO layout movement; the un-pinnable nature is stated at the site ("no red-on-old exists for a small-but-real target — a comfort, verified by eye"). The walk-flagged item is thereby answered in code as well as in the record. | `1d20ce25` |
+| **R1-3** [NIT] | **NOT FIXED, per the authorization** — minting the lettered 17 entry for row 51's midnight-rollover remainder is the orchestrator's closeout records act; it stays carried (the plan's post-S2 ORCHESTRATOR NOTE + this file's finding). | — |
+| **R1-4** [NIT] | **FIXED — one line.** `BookIndexPaneNote.chromeAroundProse` now reads `BookIndexPaneHeightModel.Metrics().noteChrome` (the model is the pure source; the view owes the number back), with the drift-seam reason at the site. | `b3dd6c3d` |
+
+**The closing run (the suites the fixes touch, nothing else — no full suite, per the standing
+rule):** `xcodebuild test -scheme Variorum -destination platform=macOS` from `App/Variorum/`
+(warm `DerivedData/13u4walk`) with `-only-testing:` for `BookIndexColumnHeightsTests` (R1-4's
+owed suite) · `BarCountsFaceTests` · `CommitBarLayoutTests` (R1-2's neighbourhood) →
+**17 tests in 3 suites passed** (exit 0; all three TYPE names matched — the run line counted,
+per the file-name-trap discipline). R1-1 is notes-only and owes no suite.
+
+**Handed to round 2:** the three fix commits (`608182cc` · `b3dd6c3d` · `1d20ce25`) plus this
+record. Nothing reaches core, the editor seam, `Sync/`, or any pinned behaviour; the R1-1 move
+should be re-checked as a pure move (git stat 72/72) and the two one-liners read at their sites.
+Open for the CLOSEOUT, not for round 2: R1-3's lettered 17 entry (orchestrator).
