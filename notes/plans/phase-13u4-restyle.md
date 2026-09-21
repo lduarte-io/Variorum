@@ -114,7 +114,7 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 | E2 | ⌘⌫ checkbox-seam defect (item 11) | trace the mechanism first; red-on-old owed | red-on-old + walk on her verbatim repro | **CLOSED — DISMISSED AS HOLLOW AS STATED** (no product code changed): ⌘⌫ is `deleteToBeginningOfLine:` = the PARAGRAPH on macOS 26, and the block separator IS a newline — the reported gesture is structurally incapable of it. Measured five ways + WALKED. Her observable is real and belongs to **⌥⌫**; the product call is hers — **QUESTIONS #126**. 10 pins + the class sweep in the record below |
 | E3 | Merge keeps the newlines (item 8, R-13u4-3) | the rendering join, every door; ceremony default; canon delta rides | state-transition suite + walk | **DONE** — `MergeJoinRule` makes the DOORS-vs-DELETES classification structural (12 door roads flipped, the 2 delete roads byte-unchanged with guard pins); the differential seam arm had to learn the new join or every merge would have cost a full re-render; ~30 door pins rewritten to the ruling across 12 suites + 3 the ruling earns; both tutorials' falsified sentence fixed with their pins; canon delta in AppSpec §9 + OverallModel §7. Walked in both voices AND both appearances — a door merge moves not one byte of the page, the next seam's backspace still collapses to a space. Core 1609/174 · Mac 373/39 · mobile 71/6 · iOS green. Record below |
 | C1 | Capture microsyntax (item 2, R-13u4-1) | shared rule + both Mac doors; `applyTypedPath` hoist; phone face → parity row | pins + capture walk | **DONE** — ONE pure `Shared/CaptureMicrosyntax.parse` on the `PlainPaste` pattern, run at the HAND-OFF only, on BOTH Mac doors; the `applyTypedPath` HOIST landed with it (`Shared/TypedTagPath`, four consumers, every pre-move name forwarded, **zero test edits on both platforms** — the KnownIssues row's `applyTypedPath` entry is DISCHARGED). **The walk caught what no pin could**: the capture boxes substitute typed quotes, so a hand-typed `{t:"…"}` arrived CURLY and silently filed as text — measured by hexdump, fixed in the brain, re-walked. ZERO routing machinery (the smart-book pin asserts the note joined with no `reading_post` row). Mac **191/31** · mobile **40/3** · iOS green · 34 captures. PROVISIONALs: **QUESTIONS #127** (a)–(g). Record below |
-| C2 | Selection → take (item 9, R-13u4-4) | the MOVE op + Write door; insurance savepoint load-bearing | state-transition + walk | NOT-STARTED |
+| C2 | Selection → take (item 9, R-13u4-4) | the MOVE op + Write door; insurance savepoint load-bearing | state-transition + walk | **DONE** — ONE core op (`moveSpanToNewTake`) in the ruled shape: the insurance savepoint · the span leaving EXACTLY as selected · a take at the fan's END branched-not-chosen · ONE undo entry with the exact-row redo, both halves one transaction each. The Write door is registry-declared and rendered ONLY for a single-block selection (P-2, pinned both ways); no chord, the collision sweep recorded. The AppSpec §9 bullet rides the build. **The walk caught the dedupe branch in use** — a move whose take was already saved writes nothing and the receipt drops its saved-first clause, with the four quiet savepoints behind it proving the cover held. Core **1631/175** · Mac **336/38** · iOS green · 24 captures. PROVISIONALs: **QUESTIONS #128** (a)–(e). Record below |
 | F1 | Index chapter-click lands low (item 10) | trace first — the un-adopted `LandingAuthority` is the recorded hypothesis | red-on-old if confirmed + walk | NOT-STARTED |
 | S1 | The Settings shape (items 4/5/6/7 + row 59 + the 2a Settings fork) | tabs · search · fold fix · card grammar · ⌘[/unindent audit · merge-shortcut face; then walk row 53's two re-font occasions once reachable | walk both voices + appearances, captured | NOT-STARTED |
 | S2 | Library & masthead faces (item 1 + rows 50/51/54) | click-to-cycle stamp + word-counter condense (word-target offer preserved) · `FlippingStamp` hoist + oracle edges · F-0 residue · Timeline voice | walk, captured | NOT-STARTED |
@@ -145,7 +145,16 @@ reversible in one argument. **CLOSEOUT DUTIES from C1** — (e) her ratify bundl
 `Tools/WalkKit/README.md` at its next touch: the capture boxes substitute typed quotes (U+201D),
 so a quoted token read from a screenshot cannot be trusted — read the box's accessibility value
 and `xxd` it; (g) nothing in `notes/KnownIssuesAndTechDebt.md` was opened by C1 — one row was
-CLOSED (`applyTypedPath`).
+CLOSED (`applyTypedPath`). **CLOSEOUT DUTIES from C2** — (h) her ratify
+bundle gains **QUESTIONS #128** (a)–(e), selection→take's five calls (next free: **#129**);
+(i) a MOBILE PARITY CANDIDATE — the op is core-side and already compiles into the phone, so what
+the phone owes is a DOOR, and its shape is downstream of #128(e) ("where does this act live
+besides Write" is the same question on both platforms); (j) AppSpec §14's phase delta gains §9's
+new `moveSpanToNewTake` bullet; (k) a WALKER FACT for `Tools/WalkKit/README.md`: a full-screen
+`screencapture` is in screen pixels with NO window offset (point = px/2) while `walk-cap`'s window
+capture needs the window's Y added back (point = px/2 + 33) — mixing the two puts a click a
+bar-height off, silently; (l) nothing in `notes/KnownIssuesAndTechDebt.md` was opened or closed
+by C2.
 
 ## ENVIRONMENT TRAPS (every unit brief carries this section verbatim — the skill's rule)
 
@@ -1527,12 +1536,17 @@ commit.
 
 ## UNIT C2 RECORD — SELECTION → A TAKE ON THE SAME BLOCK (item 9, R-13u4-4)
 
-**WHAT THIS UNIT DID NOT DO (the record's first line):** *(PENDING — completed at the close; the
-running intent: nothing outside the one new core operation and its ONE Write door. No other
-unit's work (E1's Return chain, E2's ⌥⌫ product call, E3's merge join, C1's capture microsyntax,
-the restyle spine) is touched; `Sources/VariorumCore/Sync/`, the schema, the migrations and
-`Server/` are untouched; the phone gets no face; no ceremony sheet, no bulk bar and no Takes-side
-door is built.)*
+**WHAT THIS UNIT DID NOT DO (the record's first line):** nothing outside **ONE new core
+operation and ONE Write door**. `Sources/VariorumCore/Sync/` · the schema · the migrations ·
+`Server/` — **ZERO lines** (verified by name over the whole unit diff: the only file under
+`Sources/` is the new `Operations+SpanToTake.swift`). **No editor-seam file** —
+`BlockRangeIndex`, `EditorTextView`, `TypedReturn`, `PaneTextAuthority`, `runStructural` itself,
+`StructuralSeamEdit`, `StructuralGesturePlanner`, `MarkdownActs` are all untouched (the seam list
+below says so by name). No other unit's work (E1's Return chain, E2's ⌥⌫ product call, E3's merge
+join, C1's capture microsyntax, the restyle spine) was touched. **The phone gets no face** and no
+mobile file is in the diff; **no Takes-side door, no bulk-bar row, no ceremony sheet and no
+keybind** was built — the first is a product call (QUESTIONS #128(e)), the last a recorded
+collision sweep (#128(d)). No `KnownIssuesAndTechDebt.md` row was opened or closed.
 
 ### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
 
@@ -1543,7 +1557,7 @@ door is built.)*
 | 3 | The Write door + its registry declaration + the registry walk | DONE (this commit) — **42 tests in 3 suites passed** (the two new suites + `CapabilityRegistryTests`) |
 | 4 | QUESTIONS #128 (the PROVISIONALs) | DONE (this commit) — (a)–(e); next free moves to #129 |
 | 5 | The walk on the dev-store Debug build, captured | DONE (this commit) — 24 captures + 26 crops, both doors, both voices AND both appearances; the table below |
-| 6 | Closing suites + iOS build + the ledger's C2 row | NOT-STARTED |
+| 6 | Closing suites + iOS build + the ledger's C2 row | DONE (this commit) — core **1631/175** · Mac **336/38** (incl. the acceptance spine's eleven types) · iOS **BUILD SUCCEEDED** |
 
 ### THE SHAPE, AS RULED (R-13u4-4 — read before the diff)
 
@@ -1595,3 +1609,143 @@ The receipt tells the truth in BOTH branches rather than claiming a write that d
 **zero instances**. Left in the dev store as this walk's fixture, as every walk's are: the note
 `The first sentence stays here.` (dated `2026-09-20`, in no book) carrying five takes — the four
 spans this walk moved out of it, plus the remainder.
+
+### THE OPERATION'S TRANSITION TABLE (rows read and written, in one transaction)
+
+`Operations.moveSpanToNewTake(from: variantID, span: Range<Int>, expectedText: String?)`
+(`Sources/VariorumCore/Operations/Operations+SpanToTake.swift`) — the whole act, in the order it
+runs. Every row below is a pin in `Tests/VariorumCoreTests/SpanToTakeTests.swift` (22 tests).
+
+| # | Reads | Writes | Rule |
+|---|---|---|---|
+| 0 | `variant` (the source take), `container_block` + `container` via the placement guard, `block` | — | `editableVariant` — the **autosave/edit class**, because the span leaving the buffer IS a buffer edit: live · active · unlocked · unsealed, plus a live BLOCK. Each refusal is the standing convention's and each has shipped words at both refusal switches |
+| 1 | the take's buffer | — | the CAS: `expectedText` mismatched ⇒ `bufferChangedSinceGesture`, the whole gesture refuses (the Phase 5 reject-path doctrine the editor's deferred gestures already ride) |
+| 2 | the buffer's length + graphemes | — | the span's own validation — bounds, non-empty, grapheme-aligned through the ONE brain (`BoundarySnapping.graphemeRange`). `invalidCut` is the caller-bug answer, not a road she can walk |
+| 3 | `commit_point` (the take's latest) | **`commit_point` INSERT** (`kind='auto'`, no message) | **THE INSURANCE SAVEPOINT — her ruled cover for the stay case.** Deduped on the standing `isDirty` rule: nil means the take's last savepoint ALREADY holds the pre-move text, never that there is nothing to restore |
+| 4 | — | **`variant` UPDATE** (`working_text` = buffer minus the span, `updated_at`) | the span leaves **EXACTLY as selected** — no snapping, no trimming (U-19 (2); #128(a)) |
+| 5 | `container_block` → `container` | **`container` UPDATE** (`last_touched_at`, churn, `updated_at`) | `registerTextChange(charDelta: the span's UTF-16 length)` — a buffer edit touches and churns like any other (§10) |
+| 6 | `variant` (`MAX(fan_position)` over the block's live rows) | **`variant` INSERT** | the mint: at the fan's **END**, `parent_variant_id` = the source take, `working_text` = the span verbatim, `label` NULL, `status` active, **`locked` 0**, and **nothing chooses it** — neither `container_block.chosen_variant_id` nor `block.default_variant_id` is written |
+| 7 | — | **`sync_outbox`** ×3, by trigger | three ordinary rows on the wire; zero engine lines, no repair class (pinned) |
+| 8 | — | ONE `UndoStack` entry, label **"Move into a New Take"** | `inverse` = the buffer's pre-image back + the mint tombstoned (one transaction); `redo` = the exact-row mirror; `insuring:` carries the pre-image so A12's destructive-undo warning can be asked BEFORE the act |
+
+**The entry's two halves** (`revertSpanToNewTake` / `reapplySpanToNewTake`, both exact-row from the
+SAME do-time images, both one transaction):
+
+| Direction | What it does | Refusal bucket |
+|---|---|---|
+| **undo** | restores the source buffer (with the FOURTH occasion's insurance when the buffer diverged since — `wouldInsure`), then tombstones the mint; `reassignDefaultIfNeeded` runs behind it | **resolvable refusals THROW and keep the entry**: a sealed note; a source take since locked, archived or dead; a mint she has since CHOSEN (`variantIsChosen` — `deleteVariant`'s own guard); an I10 violation. **Divergence is quiet**: a mint already deleted stays deleted |
+| **redo** | flips the mint's tombstone back (never a fresh mint — that would strand the inverse's captured id), voids any purge intent naming it, then sets the buffer to its post-op text | the same buckets, mirrored |
+
+**I10, by construction:** the source take keeps its remainder — **even when the span is the whole
+buffer**, in which case the take is left EMPTY and legal (pinned; #128(c)). Nothing is archived,
+nothing is tombstoned, and the block gains a take rather than losing one.
+
+### THE DOOR'S REGISTRY ROW (P-1)
+
+| Field | Value |
+|---|---|
+| id | `.moveSelectionToTake` |
+| verb | **Move Selection into a New Take** |
+| scope | `.block` (`.deleteInEveryTake`'s precedent — it addresses a span of a block and changes that block's fan) |
+| doors | `[.contextMenu, .bottomBar]` — the selection context menu and the bar's `block ▾` row, **both Write's** |
+| shortcut | **none.** The sweep: the take family's keys are all taken (⌘T · ⌥⌘T · ⇧⌥⌘T · ⌘⇧T) and so are the span gestures' (⌘⇧E · ⌘⇧K); the free neighbours left (⌥⌘E) read as *a variant of extract*, which is the collision the ⌥-means-the-deliberate-variant habit exists to avoid. A chord would also owe a `.menuBar` door and a helper row (the walk asserts both) — a third door this unit was not asked to build. Recorded at QUESTIONS #128(d) |
+| availability | `writeEditor` — **attachment only**, the `.previousBlock` family's rule: the act calls the attached full-document editor directly and enablement must never outrun it |
+| takesAccess | `nil`, with a **NAMED exemption** in the walk's `exempt` set and the reason written there (QUESTIONS #128(e)) |
+| unavailableNote | *"Moving a selection into a take happens where you write — open a note first."* |
+| per-selection rendering | **`SpanToTakeGesture.plan` — the ONE brain** both doors and the act consult. The row renders only where the selection is non-empty, lies inside ONE block, does not touch the open tail, and the block has a take. Walk-asserted (`theContextRowAppearsOnlyForASelectionInsideOneBlock`, `theBarsAvailabilityFactFollowsTheSelection`) and walked in use (rows 9–10 above) |
+
+**The `.menuBar` and `.palette` doors were deliberately NOT taken.** Both would need a
+`RoutedCommand` case, a handler on every post surface and an unhandled note (the walk asserts the
+last) — which is the Takes-side reach #128(e) asks her about, arriving by the back door. Two
+discoverable menu doors where she writes is exactly what the brief named.
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
+
+**NONE — said explicitly, as the brief asks.** `BlockRangeIndex`, `EditorTextView`,
+`TypedReturn`, `PaneTextAuthority`, `StructuralGesturePlanner`, `StructuralSeamEdit`,
+`runStructural` itself and its identity oracle, `MarkdownActs` — not one of them is in the diff.
+`Sources/VariorumCore/` contains exactly ONE new file and no edit to an existing one, so `Sync/`,
+the schema, the migrations and `Server/` are untouched by construction.
+
+**The whole unit is six source files** — one new core operation
+(`Sources/VariorumCore/Operations/Operations+SpanToTake.swift`), one new pure brain +
+copy (`App/Variorum/Variorum/Features/Editor/SpanToTakeGesture.swift`), and four edits:
+
+- `EditorSurfaceController.swift` — **ONE new method** (`moveSelectionToNewTake`), which calls the
+  SHIPPED `runStructural` with `seam: nil`. No existing road, guard, order or derivation changed.
+- `EditorViewModel.swift` — a forward, one new `GestureAvailability` field and its line in
+  `refreshGestureAvailability`, one conditional row in `contextMenuItems()`, and the id in
+  `contextMenuCapabilities`.
+- `CommitBar.swift` — one conditional row in `blockMenu` and the id in `renderedCapabilities`.
+- `Capability.swift` / `CapabilityRegistry.swift` — the new id and its declaration.
+
+### CLOSING RUNS (at the unit's END — never the full suite at the start)
+
+| Run | Command | Result |
+|---|---|---|
+| **Core** — the new operation (`swift test`, the whole core package) | `swift test` from the repo root | **1631 tests in 175 suites passed** (exit 0). Baseline was E3's 1609/174; +22 tests and +1 suite, exactly this unit's |
+| **Mac** — the two new suites, the registry walk, the structural/planner/gesture neighbourhood, the bar's layout suite, the command router and seal doors, the seam and cross-block suites, block selection, the window smoke and gesture soak, Block History, confirmations — AND the acceptance spine under its ELEVEN REAL TYPE NAMES (the `-only-testing` file-name trap, met by all four prior units) | `xcodebuild test -scheme Variorum -destination platform=macOS` with `-only-testing:` for `SpanToTakeGesturePlanTests` · `SpanToTakeDoorTests` · `CapabilityRegistryTests` · `CommitBarLayoutTests` · `StructuralRewriteDoorTests` · `DivideExtractGestureTests` · `MakeBlockGestureTests` · `MergeGestureTests` · `DivideWCeremonyTests` · the six `Planner*` types · `CommandRouterTests` · `StatusCenterTests` · `MoveAndExecuteTests` · `SealDoorTests` · `SeamMergeTests` · `CrossBlockCompoundTests` · `WriteBlockSelectionTests` · `BlockSelectionRegistryTests` · `EditorWindowSmokeTests` · `GestureSoakTests` · `BlockHistoryPaneTests` · `ConfirmationsSettingTests` + the eleven `Tutorial*` types | **336 tests in 38 suites passed** (exit 0, no skips) |
+| **iOS build gate** — `VariorumCore` compiles into the phone, so a core op owes it | `xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS` | **BUILD SUCCEEDED** |
+
+No full-suite run was made at this unit's START; the plan's closeout-refresh baselines stand as
+the baseline (the standing rule).
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **The act is NOT a `StructuralGesturePlanner.Command`, and it has its own brain.** That
+   planner is the ratified contract for acts that move a BLOCK BOUNDARY; this one moves none — a
+   block's text shrinks and its fan grows. Adding a case would put a non-structural verdict inside
+   the enum every structural switch is exhaustive over, and would OBLIGE a Takes-board door by
+   construction (`theBoardsStructuralGroupRendersEveryStructuralAct` is exhaustive over
+   `StructuralAct.allCases`) — a second surface this unit was not asked to build. Reversing: a
+   `Command`/`Plan` case pair plus that board row.
+2. **`seam: nil` — the rewrite re-renders from the store.** No `StructuralSeam` case describes
+   "one block's text shrank", and `deleteInEveryTake` / `replaceInEveryTake` take exactly this
+   posture for exactly this reason. The honest cost is a full re-render per gesture, which for a
+   deliberate, occasional act is the same trade those two doors already make. Reversing: a new
+   seam case + its derivation and three guard layers.
+3. **The op takes a VARIANT id, not a block id.** `extract` and the divides address a BLOCK and
+   resolve the rendered take inside; this one is handed the take the span actually came from, so
+   it can never edit a take other than the one on screen. It also makes the `expectedText` CAS
+   meaningful. Reversing: a `placedContext` resolve, and the CAS would have to move with it.
+4. **The doors render conditionally, which is one deliberate difference from `block ▾`'s
+   fire-and-speak posture.** That posture retires per-door DIMMING; it does not ask a menu to
+   offer a gesture whose population belongs to another act. A cross-block span is Make Block from
+   Selection's, and a row that could only ever refuse there is what P-2 forbids. Reversing: drop
+   two `if`s and let the op's refusal speak (the refusal copy already exists and is pinned).
+5. **No `.menuBar` / `.palette` door and no chord** (the registry row above says why). Each of the
+   three would be a real addition with its own obligations; the brief named two doors and this
+   built two.
+6. **`invalidCut` was reused rather than minting an `invalidSpan` case.** It is the caller-bug
+   answer for a span the door cannot produce (the door plans from the surface's own tiling), and a
+   new error case owes copy at two refusal switches for a state she cannot reach. Reversing: one
+   enum case and two sentences.
+7. **The receipt has two forms, and the difference is a fact the op returns.** The saved-first
+   clause appears only when a savepoint was actually written (the J8 copy-truth rule) — and the
+   walk's step 14 is that branch happening in use. The alternative (always claim it) would have
+   been a sentence that is sometimes false.
+8. **Nothing was written into `notes/KnownIssuesAndTechDebt.md`.** There is no deferred WORK here:
+   what is open is hers (#128), and a row whose owner is "a ruling" is the drift class (E2's own
+   precedent).
+
+### CARRIED TO THE PHASE CLOSEOUT (from this unit)
+
+1. **AppSpec §14's phase delta** is the CLOSEOUT's to write (E1/E3's precedent): this unit's canon
+   delta is §9's new `moveSpanToNewTake` bullet, citing R-13u4-4 (2026-09-20) with her words.
+2. **QUESTIONS #128 (a)–(e)** joins her ratify bundle; next free moves to **#129**.
+3. **A MOBILE PARITY candidate, named rather than assumed:** the operation is core-side and
+   already compiles into the phone (the iOS gate), so what the phone owes is a DOOR — and its
+   shape is downstream of #128(e), since "where does this act live besides Write" is the same
+   question on both platforms. Filed as a candidate for the mobile catch-up, not as an obligation
+   this unit ducked.
+4. **A walker fact** for `Tools/WalkKit/README.md` at its next touch: a `screencapture -x -o`
+   FULL-SCREEN capture is in screen pixels with NO window offset (screen point = px/2), while
+   `walk-cap`'s WINDOW capture needs the window's Y added back (point = px/2 + 33). Mixing the two
+   conventions puts a click one bar-height away from its target, silently.
+
+### WHAT A FRESH SESSION WOULD NEED TO FINISH THIS
+
+Nothing. Everything is committed and pushed: the core operation and its 22 pins, the pure gesture
+brain and its copy, both Write doors, the registry declaration and its walk exemption, the 20 Mac
+pins, the AppSpec §9 bullet, QUESTIONS #128, the walk captures (gitignored, listed above), and
+this record.
