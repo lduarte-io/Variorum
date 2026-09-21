@@ -847,6 +847,43 @@ final class ProtectionController {
     /// presents it as a sheet whenever non-nil.
     private(set) var activeSwitch: PostureSwitchModel?
 
+    // MARK: - Who presents the ceremony (RUN A batch A2, row 11 — 17l item 4 / KnownIssues 40)
+
+    /// **WHERE a ceremony is shown.** Until this row the Mac had exactly ONE
+    /// presenter of `activeSwitch` — Settings ▸ Protection — so the Account
+    /// sheet's Encryption tab, reached from the main window's bottom bar,
+    /// set a model that nothing ever put on screen: the author pressed
+    /// *Replace All Keys* and got **a standalone button, no checkbox, no
+    /// opportunity to type her existing words**, and a second press was a
+    /// no-op behind `openSwitch`'s own `activeSwitch == nil` guard. (The
+    /// FOLLOW never had this hole — `ProtectionNoticeBar` has always
+    /// presented `activeFollow` — which is exactly why only the ceremony
+    /// moves here.)
+    ///
+    /// Two presenters, one model, and **double presentation impossible by
+    /// construction**: the host is decided ONCE, when the ceremony opens,
+    /// and each presenter renders only what it owns. Deciding at open time
+    /// rather than per-frame is what keeps a Settings window opened DURING a
+    /// root-hosted ceremony from tearing the sheet out of the main window
+    /// and re-presenting it somewhere else.
+    enum CeremonyHost: Equatable { case pane, root }
+
+    /// How many Protection panes are on screen (the Settings scene may be
+    /// closed and reopened; a count, never a flag).
+    private(set) var mountedProtectionPanes = 0
+    private(set) var ceremonyHost: CeremonyHost = .root
+
+    func protectionPaneAppeared() { mountedProtectionPanes += 1 }
+    func protectionPaneDisappeared() {
+        mountedProtectionPanes = max(0, mountedProtectionPanes - 1)
+    }
+
+    /// What `host` should present — nil for the host that does not own the
+    /// ceremony in progress. Both presenters bind through this.
+    func ceremony(for host: CeremonyHost) -> PostureSwitchModel? {
+        ceremonyHost == host ? activeSwitch : nil
+    }
+
     /// Open a ceremony (Use Castle… · Use Standard · the resume door).
     /// nil runner ⇒ nothing opens (the doors do not render — P-2).
     /// pre-13x 3b: `passphraseInHand` / `wordsInHand` — the secrets a key
@@ -857,6 +894,8 @@ final class ProtectionController {
         passphraseInHand: String? = nil, wordsInHand: [String]? = nil
     ) {
         guard let switchRunner, activeSwitch == nil else { return }
+        // Row 11: the host, decided here and not looked up again.
+        ceremonyHost = mountedProtectionPanes > 0 ? .pane : .root
         activeSwitch = PostureSwitchModel(
             mode: mode, runner: switchRunner, controller: self, vaultTie: vaultTie,
             passphraseInHand: passphraseInHand, wordsInHand: wordsInHand)

@@ -818,6 +818,61 @@ struct Phase13pControllerTests {
     private static let newerVaultReason =
         "your account's vault was written by a newer Variorum — update the app"
 
+    // MARK: - RUN A batch A2, row 11 — the ceremony's root presenter (KnownIssues 40)
+
+    /// **THE DEAD REPLACE-ALL-KEYS DOOR, and the two presenters that
+    /// replace it.** The author pressed *Replace All Keys* from the main
+    /// window's *Account…* sheet and got a standalone button and no
+    /// ceremony: the door set `activeSwitch`, whose only Mac presenter was
+    /// Settings ▸ Protection, so from the main window the sheet never
+    /// appeared and a second press was a no-op behind `openSwitch`'s own
+    /// guard. Nothing was ever written (the vault was verified untouched
+    /// live), which is why this is a presenter defect and not a key one.
+    ///
+    /// The host is decided ONCE, at `openSwitch`, from whether a Protection
+    /// pane is on screen — so the main window's notice bar presents the
+    /// ceremonies opened from the main window, Settings presents its own,
+    /// and **double presentation cannot happen**, including when the
+    /// Settings window is opened DURING a root-hosted ceremony (which a
+    /// per-frame rule would answer by tearing the sheet out of the window
+    /// the author is looking at).
+    @Test func theCeremonyHasARootPresenterWhenNoProtectionPaneIsMounted() async throws {
+        let w = try world()
+        w.controller.switchRunner = PostureSwitchRunner(leaves: inertLeaves(for: w))
+
+        // 1 — the main window's road: no pane on screen.
+        #expect(w.controller.mountedProtectionPanes == 0)
+        w.controller.openSwitch(.replaceKeys, vaultTie: nil)
+        #expect(w.controller.activeSwitch != nil, "the door opened a ceremony (it always did)")
+        #expect(w.controller.ceremonyHost == .root)
+        #expect(w.controller.ceremony(for: .root) != nil, "and the ROOT presents it — red before row 11")
+        #expect(w.controller.ceremony(for: .pane) == nil, "never both")
+
+        // 2 — the Settings window opening mid-ceremony does not steal it.
+        w.controller.protectionPaneAppeared()
+        #expect(w.controller.ceremony(for: .root) != nil, "the sheet stays where she is looking")
+        #expect(w.controller.ceremony(for: .pane) == nil)
+        w.controller.closeSwitch()
+        #expect(w.controller.ceremony(for: .root) == nil && w.controller.ceremony(for: .pane) == nil)
+
+        // 3 — opened WITH a pane on screen: Settings presents, the root does not.
+        w.controller.openSwitch(.replaceKeys, vaultTie: nil)
+        #expect(w.controller.ceremonyHost == .pane)
+        #expect(w.controller.ceremony(for: .pane) != nil && w.controller.ceremony(for: .root) == nil)
+        w.controller.closeSwitch()
+
+        // 4 — the pane goes away; the next ceremony is the root's again.
+        w.controller.protectionPaneDisappeared()
+        #expect(w.controller.mountedProtectionPanes == 0)
+        w.controller.openSwitch(.replaceKeys, vaultTie: nil)
+        #expect(w.controller.ceremony(for: .root) != nil && w.controller.ceremony(for: .pane) == nil)
+        w.controller.closeSwitch()
+
+        // The count never goes negative (a pane torn down twice).
+        w.controller.protectionPaneDisappeared()
+        #expect(w.controller.mountedProtectionPanes == 0)
+    }
+
     // MARK: - The unreadable-sidecar family (pre-13u Act 9 — 17a P1/P11)
 
     /// P1: the reconcile runs on every ready launch, and an unreadable

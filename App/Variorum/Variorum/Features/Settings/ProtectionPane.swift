@@ -182,13 +182,20 @@ struct ProtectionPane: View {
         }
         .formStyle(.grouped)
         .task { await services?.encryption.refresh() }
+        // RUN A batch A2, row 11: this pane is ONE of the ceremony's two
+        // presenters now, so it says when it is on screen — the host is
+        // decided at `openSwitch` from this count.
+        .onAppear { controller.protectionPaneAppeared() }
+        .onDisappear { controller.protectionPaneDisappeared() }
         .sheet(item: $setSheetModel) { model in
             PassphraseSetSheet(model: model) { setSheetModel = nil }
         }
         // pre-13x 2b: THE CEREMONY, held on the controller (it survives the
-        // re-key's reopen — this pane does not).
+        // re-key's reopen — this pane does not). Row 11: presented here only
+        // when this pane is its host; the main window's notice bar presents
+        // the rest, and the two can never both fire.
         .sheet(item: Binding(
-            get: { controller.activeSwitch },
+            get: { controller.ceremony(for: .pane) },
             set: { if $0 == nil { controller.closeSwitch() } })
         ) { model in
             PostureSwitchSheet(model: model) { controller.closeSwitch() }
@@ -523,6 +530,19 @@ struct ProtectionNoticeBar: View {
             set: { if $0 == nil { controller.closeFollow() } })
         ) { model in
             FollowSheet(model: model) { controller.closeFollow() }
+        }
+        // RUN A batch A2, row 11 (17l item 4 / KnownIssues 40): THE
+        // CEREMONY'S ROOT PRESENTER. This bar is the main window's — the one
+        // view mounted for the whole of a ready session — and it has always
+        // presented the FOLLOW from here; the ceremony had no presenter
+        // outside Settings at all, so the Account sheet's *Replace All Keys*
+        // set a model nothing ever showed. It renders only what it owns
+        // (`ceremonyHost`), so this and the pane's sheet can never both fire.
+        .sheet(item: Binding(
+            get: { controller.ceremony(for: .root) },
+            set: { if $0 == nil { controller.closeSwitch() } })
+        ) { model in
+            PostureSwitchSheet(model: model) { controller.closeSwitch() }
         }
         .sheet(item: $accountSheetTab) { tab in
             if let services { AccountView(services: services, initialTab: tab) }
