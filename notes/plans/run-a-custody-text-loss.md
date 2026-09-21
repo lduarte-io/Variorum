@@ -985,7 +985,13 @@ where it could not be (the unreadable-vault world), with the residual named hone
 whose vault was born wrap-free by a **14b-era build** and that has never generated words would still
 reach the mint; no build in the tree can create such a vault, and hers is not one (her words exist).
 
-**Reverts:** NO REVERT IN FLIGHT — **R1 (row 11, from the committed `d46f4c07`;
+**Reverts:** **REVERT R2 STARTING (row 14, from the COMMITTED state `fced50e9`)** —
+`App/Variorum/Shared/PassphraseSetModel.swift`, the floor guard removed from `commit` (the pre-17n
+shape: empty and matched, no length rule). Expected: the set-sheet arm of
+`theEncryptionPassphraseFloorBindsWhereItIsSetAndNowhereElse` red, the two NEGATIVE arms green (they
+must stay green — a floor that reached unlock would be the defect this row exists to avoid). To be
+restored by `git checkout --` from the REPO ROOT with `git diff` empty before "restored" is written.
+Previously: NO REVERT IN FLIGHT — **R1 (row 11, from the committed `d46f4c07`;
 `App/Variorum/Shared/ProtectionController.swift`, `ceremony(for:)` put back to the pre-row-11 world
 where only the Settings pane ever presents) RAN over `Phase13pControllerTests` and gave **6 issues,
 all in the new pin** (`ceremonyHost → .pane` where `.root` is owed; the root presenting `nil` on the
