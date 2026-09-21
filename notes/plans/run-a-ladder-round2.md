@@ -151,3 +151,66 @@ quits undeclined*) so the recorded trade stays complete. No code change proposed
   only `park(` caller.
 
 *(Findings and clean bill land below as they are traced.)*
+
+---
+
+## THE FINAL CALLS (cross-model flow; the implementer's responses at `d340c5af`) + THE FIX PASS
+
+**1 · MAJOR (the comments sheet's close destroys the refused draft) — CONFIRMED; implementer
+AGREES; the fix shape is the orchestrator's fork ruling (the six bindings).** The causal history,
+recorded for round 3 per the flow: the sheet inherited the pad's PRE-row-7 shape — the A1 brief's
+P4 note said "match the pad's shipped pattern" and at P4's build time the pad had no park yet —
+so this is row 65's own shadow arriving one surface over, which is exactly why binding 5's sweep
+exists.
+
+**THE BINDING-5 SWEEP (mine to run; the implementer's pointer treated as a CLAIM TO CONFIRM):
+the Mac comments panel is CONFIRMED as a real refused-draft loss road — BOTH arms — and is fixed
+in this same pass under the same ruling.** The trace, at the code:
+- **The ADD draft** (`CommentsPanel.swift`): `fileAddDraft`'s refusal keeps `addDraft` and speaks
+  (correct), but the model is `@State`-minted per presentation at its ONE construction site
+  (CommentsPanel.init:441; the three presenters — EditorView:213, TakesBottomBar:295,
+  TakesShared:742 — construct the PANEL; TrayPanel only names the adopt seam in a comment) — so
+  Close, a click outside the popover, or ⎋⎋ tears the model down and the refused prose dies with
+  it. `onDisappear` commits only `dirtyCommentIDs`; the add draft is deliberately never filed on
+  leaving (#118(a)), so nothing saves it. Grammar-IDENTICAL to the phone's add arm: one field,
+  whole prose, no net.
+- **The in-place EDIT drafts**: focus-loss and `onDisappear` both commit (`commitEdit`), and under
+  a sealed note that commit REFUSES — the `onDisappear` retry's refusal lands on a dying model and
+  the draft goes with it. The Mac grammar differs (N simultaneous drafts; `survivingDrafts`
+  pruning; the loss is a delta over surviving stored prose) — honored inside the same ruling: ONE
+  held draft, newest wins (the ruled bounded trade), the edit arm riding with its `commentID`
+  exactly as the phone's `editingID` does; the one corner that stays is a parked edit draft whose
+  comment is deleted ELSEWHERE while parked (the first snapshot's `survivingDrafts` prunes it) —
+  recorded in the QUESTIONS row, not a third adjacency.
+
+**THE FIX AS BUILT (one brain, three homes):** `Shared/CommentDraftPark.swift` — ONE park type +
+ONE restored-line wording (two constants would be the drift class): refused-drafts-only from the
+SUBMITTED text, one held draft keyed to its block (+ the edit target), newest wins, take-at-open
+clears in the same breath, `clearIfHeld` on a landed same-block submit. The phone's instance lives
+ON THE CONTROLLER (the ruling's letter; parks in `submitDraft`'s refused arm, restores in
+`open(blockID:)` via a one-shot the sheet's render consumes, speaks through a new
+`comments.restored` line in its own register). The Mac's lives ON `AppSession` (macOS fence,
+beside `quickNotePark`, for the same reason — the model dies with its presentation): parks in
+`fileAddDraft`/`commitEdit`'s refused arms (the `onDisappear` net's refusal is `commitEdit`, so
+the close-time refusal parks with zero close-site changes — binding 2's letter), restores in
+`CommentsPanelModel.init` (add → `addDraft`; edit → `drafts[id]`), speaks through the panel's
+status slot in the RECEIPT register (nothing is being refused).
+
+**Accepted edges, recorded for #140:** (a) a refused draft she then EMPTIES by hand and closes
+still restores at the next open (the park holds what was REFUSED, never the field's later state —
+binding 1's letter; the pad's close-road parallel clears via `take()`'s nothingToFile, a hook the
+comment closes deliberately lack); (b) the Mac's ⎋-clear likewise clears the FIELD, not the park;
+(c) the pruned dead-comment corner above. All over-preservation, never loss.
+
+**2 · NIT (the pad close road's flight window) — CONFIRMED at the one-sentence size; implementer
+AGREES with two additions adopted:** the sentence lands in `QuickNotePark`'s cost-model doc and
+NAMES the close-road window as its own class (the quit road's filing is synchronous with the
+decision by construction; the optimistic park is ruled out by binding 1 itself), and QUESTIONS
+#137(b) is extended to stay true — flagged as a RECORD-TRUTH EDIT.
+
+**The build order (commit per piece, pathspec-limited, pushed; reverts announced from committed
+state):** (1) phone fix + 5 pins (`MobileCommentParkTests`); revert R2-A — remove the park call
+from `submitDraft`'s refused arm: pins (i)/(ii)/(iv)/(v) red at their park/restore arms, the
+guard (iii) green. (2) Mac fix + 5 pins (`CommentPanelParkTests`); revert R2-B — remove both
+`park(` calls: (a)/(b) red at restore, (c)/(e) red at their premises, the guard (d) green.
+(3) the NIT sentence + #137(b) + the #140 QUESTIONS row. (4) closing runs.
