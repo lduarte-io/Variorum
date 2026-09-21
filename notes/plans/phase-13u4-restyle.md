@@ -2382,23 +2382,41 @@ first commit.
 
 ## UNIT S1 RECORD — THE SETTINGS SHAPE (items 4 · 5 · 6 · 7 + row 59 + the 2a Settings fork + row 53's walk)
 
-**WHAT THIS UNIT DID NOT DO (the record's first line, written at the open and RE-STATED at the
-close against what actually shipped):** *(opening statement — the closing re-statement rides the
-last commit)*
+**WHAT THIS UNIT DID NOT DO (the record's first line, written at the open and RE-STATED AT THE
+CLOSE against what actually shipped — every bullet below verified over the whole unit diff,
+`git diff --name-only 4ab13838..HEAD`):**
 
-- It does not touch `Sources/VariorumCore/` — no core, no `Sync/`, no schema, no migration, no
-  `Server/`; the lockstep marker stays **8**. Settings is chrome over settings that already exist.
-- It does not touch the EDITOR SEAM — `BlockRangeIndex` · `EditorTextView` · `TypedReturn` ·
-  `PaneTextAuthority` · `runStructural` and its identity oracle are all outside this unit.
-- It does not move `ThemeStore`'s HOME (the recorded waiver — KnownIssues' forked-brains row, the
-  18g ladder's R1-3: a hoist there is a DESIGN, not a move, and the mobile parity row carries it).
-  Its CHROME is fair game; its address is not.
-- It does not sweep the 27 old chrome `.fixedSize()` sites (R-13u4-5 gave them to **UNIT S3**).
-  Every NEW chrome `fixedSize` text this unit writes carries a `lineLimit` (P-8).
-- It does not build row 53's re-font carve. The brief's rule is WALK-and-REPORT: the two
-  unexercised occasions are exercised once this unit's shape makes their controls reachable, and
-  what the walk shows is recorded either way. The carve's design is 13u2 UNIT D's record's.
-- It does not do S2's or S3's rows (the Library/masthead faces; the chrome singles).
+- **It did not touch `Sources/VariorumCore/` — ZERO FILES.** No core, no `Sync/`, no schema, no
+  migration, no `Server/`; **the lockstep marker stays 8**, no core run was owed, and Settings
+  remains chrome over settings that already exist. **No `Shared/` file moved either**, so the iOS
+  build was not owed and nothing here is mobile-visible (the phone has its own
+  `MobileSettingsView`; the ⌘[ swap is Mac-only by construction — a phone has no menu bar).
+- **It did not touch the EDITOR SEAM.** `BlockRangeIndex` · `EditorTextView` · `TypedReturn` ·
+  `PaneTextAuthority` · `StructuralSeamEdit` · `StructuralGesturePlanner` · `runStructural` and
+  its identity oracle · `MarkdownActs` — none is in the diff. `EditorViewModel.swift` IS, and
+  only for six row TITLES in `contextMenuItems()`: no road, guard, order or derivation moved.
+- **It did not move `ThemeStore`'s HOME** (the recorded waiver — KnownIssues' forked-brains row,
+  the 18g ladder's R1-3). One line was added — `.environment(theme)` on the Settings scene — and
+  that is its CHROME, not its address: it is why Protection's and Data Safety's `.alarmVoice()`
+  refusals stop painting in the fallback voice.
+- **It did not sweep the 27 old chrome `.fixedSize()` sites** (R-13u4-5 gave them to **UNIT S3**).
+  Every NEW chrome `fixedSize` text this unit wrote carries a deliberate `lineLimit` (P-8) —
+  including four that are `nil` with the reason written at the line, because they are prose whose
+  point must not fall off the end.
+- **It did not build row 53's re-font carve, and that is the unit's report line.** The brief's
+  rule is walk-and-report; the two occasions became reachable and were walked, **both
+  reproduce**, and what came back is a direction (shrinks strand, grows do not), a healing road
+  (⌘↑) and a named hypothesis — not a fix. The carve's design is 13u2 UNIT D's record's.
+- **It did not change one setting's behaviour, wording, binding or stored value.** Every picker,
+  toggle, help sentence, observation and setter moved as written; the only new copy anywhere is
+  the panes' own blurbs, the Takes pane's one help line, and the search's empty-result sentence.
+- **It did not invent a chord for `.moveSelectionToTake`, `.formatBold`'s neighbours, or anything
+  else** — the only key changes are item 5's four, all swept and all PROVISIONAL at #130.
+- **It did not silence a red pin.** Three drift guards held the old rulings and each was
+  REWRITTEN to the new one with the reason at it (one renamed, its still-true half kept and
+  pinned); a fourth was ADDED because of the swap.
+- It did not do S2's or S3's rows (the Library/masthead faces; the chrome singles), and no other
+  13u4 unit's work was touched.
 
 ### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
 
