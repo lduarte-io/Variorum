@@ -89,9 +89,14 @@ struct ChordLegibilityTests {
             for id in [CapabilityID.divide, .divideWithCeremony, .extract,
                        .makeBlock, .merge, .mergeWithCeremony] {
                 let capability = CapabilityRegistry.capability(id)
-                let chord = try #require(capability.shortcutLabel)
-                #expect(titles.contains { $0.contains(chord) },
-                        "the context menu says \(id)'s \(chord)")
+                // The EXACT row, not "the chord appears somewhere on this
+                // menu": ⌥⌘⇧M CONTAINS ⌘⇧M, so a loose `contains` over the
+                // whole list is satisfied by the ceremony row — which is
+                // precisely the state her report describes. Measured on the
+                // reverted tree, where the loose form found only ⌘⇧E and
+                // ⌘⇧K missing and let the two she asked about pass.
+                #expect(titles.contains(capability.menuTitle()),
+                        "the context menu renders \(id) as \"\(capability.menuTitle())\"")
             }
             #expect(titles.contains("Merge Blocks (⌘⇧M)"))
         }

@@ -2408,7 +2408,7 @@ last commit)*
 | 2 | The Settings SHAPE: her tab sketch built, the card grammar, **row 59's fold dead** | NOT-STARTED |
 | 3 | Item 4 — the SEARCH: one pure brain + the catalog it reads + the results face + pins | NOT-STARTED |
 | 4 | Item 7 — the merge chord (and its three hard-coded siblings) SAID on the faces + truth pins | DONE (this commit) — **66 tests in 4 suites passed**; the red-on-old measurement is piece 4b |
-| 4b | The BEHAVIOURAL REVERT — are the pins measuring the CHORD or the refactor? (a worktree with the four literals put back) | PENDING |
+| 4b | The BEHAVIOURAL REVERT — are the pins measuring the CHORD or the refactor? (a worktree with the four literals put back) | DONE (this commit) — **5 of 7 RED on the reverted tree, the 2 guards green**; the revert's own dump is the defect, printed |
 | 5 | Item 5 — the ⌘[ answer (PROVISIONAL) + QUESTIONS #130 | NOT-STARTED |
 | 6 | The WALK on the dev-store Debug build, both voices AND both appearances, captured — **including row 53's two re-font occasions** | NOT-STARTED |
 | 7 | Closing suites + the ledger's S1 row + the KnownIssues rows (59 · 53) | NOT-STARTED |
@@ -2541,3 +2541,40 @@ helper were already truthful (audit 2) and are unchanged; both gained a guard pi
 | `writesContextMenuSaysEveryStructuralChord` | through the REAL model (`withEditor` → `contextMenuItems()`): all six chords present, and `Merge Blocks (⌘⇧M)` exactly |
 | `theHelperListSaysTheMergeChord` | **green on both sides** — a guard, not evidence: the ⌘/ list has carried ⌘⇧M since the helper was born |
 | `theMenuBarWiresAndRendersTheMergeChord` | **green on both sides** — `.merge` is in `menuRendered` and wired `("m", [.command, .shift])`, so AppKit draws ⇧⌘M on the item |
+
+### THE RED-ON-OLD (piece 4b) — measured in a worktree, not reasoned
+
+The pre-revert state was committed first (the checkpoint rule), then
+`git worktree add /tmp/s1revert HEAD` with ONE behavioural change: the four plain rows' titles
+put back to the literals on all three menus — the static, the `ForEach`, the `run(_:)` switch and
+the test file all kept, so what is measured is the CHORD and not the refactor.
+
+| Pin | On the reverted tree |
+|---|---|
+| `theWriteBarsBlockMenuSaysEveryDeclaredChord` | **RED, 4 issues** — `"Divide"` lacks ⌘⇧D, `"Extract"` ⌘⇧E, `"Make Block"` ⌘⇧K, `"Merge"` ⌘⇧M |
+| `theWriteBarsMergeRowReadsMergeWithTheChord` | **RED** — `"Merge"` ≠ `"Merge (⌘⇧M)"` |
+| `theTakesBarsBlockMenuSaysEveryDeclaredChord` | **RED, 4 issues** — the same four |
+| `theTakesBarsMergeRowReadsMergeWithTheChord` | **RED** |
+| `writesContextMenuSaysEveryStructuralChord` | **RED, 5 issues** |
+| `theHelperListSaysTheMergeChord` | GREEN on both — recorded as a guard, not as evidence |
+| `theMenuBarWiresAndRendersTheMergeChord` | GREEN on both — same |
+
+**On this tree: 7/7 green** (and 66 tests in 4 suites with the registry walk, the bar's layout
+suite and `FannedDefaultsTests` riding beside them).
+
+**A LOOSE PIN THE REVERT CAUGHT, and it is worth its own line.** The context-menu pin first
+asked whether each chord appeared *anywhere on the menu*. On the reverted tree that form found
+only ⌘⇧E and ⌘⇧K missing and **let ⌘⇧D and ⌘⇧M pass** — because `⌥⌘⇧M` CONTAINS `⌘⇧M`, so the
+ceremony row was answering for the plain one. That is *literally the state her report
+describes*, and a pin that cannot tell the two apart is no guard at all. It now asks for the
+EXACT row (`titles.contains(capability.menuTitle())`), and the revert re-run went 3 issues → 5.
+
+**The revert's own failure dump is the defect, printed** — the menu as it shipped:
+
+```
+["Divide Block at Cursor", "Divide choosing takes… (⌥⌘⇧D)", "Extract Selection",
+ "Make Block from Selection", "Merge Blocks", "Merge choosing takes… (⌥⌘⇧M)", …]
+```
+
+Every ⌥ variant wearing its key; every plain act silent. Her *"where is the merge shortcut
+said ??"* has its answer in that line.
