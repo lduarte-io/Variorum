@@ -366,6 +366,14 @@ The family's ONE entry (`AppSession.runCopying`) carries the widened rule in its
 the line sits and why it is not "flush before every ops call" (that reason was already written there;
 what is new is that a BRANCH is a copy).
 
+**RED-ON-OLD, both ways.** On the pre-fix tree all six defect arms were red with the stale row in hand
+(`mintedText → "Alpha beta."` where the pane held `"Alpha beta. NEW"`), the blank-take guard green.
+One arm's first red was confounded (the `addWriteColumn` pin loaded a COLUMN MEMORY another test had
+saved into `UserDefaults.standard` — the row-42 class; the pins now take their own suite), so after
+the fix was COMMITTED (`2e464abe`) the three `branchAllFans` doors were reverted behaviourally in the
+working tree and re-run: exactly those three tests red, both takes in the fan holding the stale row,
+the other four green — discriminating. Restored with `git checkout --`; tree clean.
+
 ### ROW 7 (KnownIssues 65) — THE TRACE, AND THE PARKING MECHANISM PROPOSED (the design fork; NOT built)
 
 **The mechanism, traced in the code itself (`App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift`).**
