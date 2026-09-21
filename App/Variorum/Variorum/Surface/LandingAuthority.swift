@@ -143,33 +143,42 @@ nonisolated struct LandingPolicy: Equatable {
         correctionPace: .spacedByTheHold, correctsAnUnreportedTarget: false,
         correctionWord: "RE-LAND")
 
-    /// **The book INDEX pane's** (13u4 UNIT F1). Four of its seven numbers are
-    /// the Outline's, for the Outline's reasons; the three that differ were
-    /// each measured on the real Sherlock book before they were written down
-    /// (the unit's record carries the trials):
+    /// **The book INDEX pane's** (13u4 UNIT F1). Every number here was
+    /// measured on the real Sherlock book before it was written down, and the
+    /// three that differ from the Outline's differ because of what the
+    /// measurement showed — this column is not the Outline's:
     ///
-    /// - **`correctionBudget` 12, not 40.** A hand-run of this loop — the same
-    ///   anchor re-aimed by hand, 1.2 s apart — converged on the SIXTH aim
-    ///   (ch8 → blank → ch8 → ch8's end → the ch9 seam → the target, exactly).
-    ///   Twelve is that measurement with headroom; a bigger budget on this
-    ///   surface would only buy more jumping, because a correction here can
-    ///   realize a ten-thousand-word story rather than a card.
-    /// - **`timeBudget` 6 s, not 4.** Each correction on this column waits for
-    ///   a note's text to arrive from the store before the layout means
-    ///   anything, so the hold and the quiet interval are spent on real work;
-    ///   4 s stops the loop mid-convergence on a book of Sherlock's scale
-    ///   (measured: six aims of a long story's column take longer than four
-    ///   seconds even when every one of them is right).
-    /// - **`correctsAnUnreportedTarget` true**, and this one is load-bearing:
-    ///   the pin's second arm measured the pre-fix pane leaving the target so
-    ///   far away it never realized AT ALL, so a landing that refused to
-    ///   correct a silent target would refuse exactly the case she reported.
-    ///   (The Outline says true for the same reason; the flow says false
-    ///   because every row there is a direct child whose position is known.)
+    /// - **`correctionPace: .spacedByTheHold`, the flow's**, for the flow's
+    ///   own measured reason at a larger scale. This pane's rows are WHOLE
+    ///   NOTES that stand at ~40 pt until their text arrives from the store
+    ///   and at thousands afterwards, so a cold column's own height
+    ///   OSCILLATES while a landing runs — measured at 39k → 56k → 143k → 80k
+    ///   → 115k points inside six seconds. A correction issued inside that is
+    ///   issued against a layout that is about to be wrong.
+    /// - **`correctionBudget` 3, not 40.** Every landing that succeeds on this
+    ///   surface succeeds with 0 hops, and the worst honest one measured
+    ///   needed 3. A bigger budget buys nothing in the cases that work and, in
+    ///   the case that does not, buys VISIBLE JUMPING — which is the other
+    ///   half of her own report (*"I watched it stutter ~10 times"*). A
+    ///   landing that cannot arrive should stop, not thrash.
+    /// - **`correctsAnUnreportedTarget` FALSE, the flow's answer.** When this
+    ///   column's estimate is far wrong the target is not realized at all, so
+    ///   it never reports — and a correction issued blind there FLINGS the
+    ///   page (measured: offsets 45k → 59k → 63k → 80k → 95k across four blind
+    ///   hops, ending further from the target than the first aim had been).
+    ///   The first aim is usually exact (`top=0.19` measured, in the very
+    ///   landing that then went wrong); what follows is the column moving
+    ///   underneath it, and the honest response to a target that cannot be
+    ///   seen is to stop and SAY SO in the signpost, not to guess.
+    ///
+    /// The residual this policy leaves — a cold column whose height is still
+    /// climbing can still defeat a landing — is NOT fixable by any pace or
+    /// budget, and the unit's record says so with the measurements: it wants
+    /// the other half of 13u2b's answer, heights KNOWN before the aim.
     static let bookIndex = LandingPolicy(
         surface: .bookIndex, tolerance: 2, settleInterval: 0.25, minimumHold: 1.0,
-        maxWait: 0.6, correctionBudget: 12, timeBudget: 6,
-        correctionPace: .quiet, correctsAnUnreportedTarget: true,
+        maxWait: 0.6, correctionBudget: 3, timeBudget: 6,
+        correctionPace: .spacedByTheHold, correctsAnUnreportedTarget: false,
         correctionWord: "HOP")
 
     /// How long after a decision the next look runs.

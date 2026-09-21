@@ -2126,3 +2126,42 @@ nor fixed by it.** (Row 56's own warm-DerivedData covariate is consistent with t
 ran against warm DerivedData, where the row says it fails. The fresh-DerivedData first-run arm was
 NOT re-run here — it is row 56's own experiment, measured at 13u3 UNIT G on two trees, and
 re-running it costs a full clean build per tree without changing this adjudication.)
+
+### THE POLICY, MEASURED INTO ITS FINAL SHAPE — and the residual's verdict
+
+The first policy this unit wrote was the Outline's numbers with a bigger budget. **Measurement
+retired it**, and the record keeps the road because the reasoning is the finding:
+
+| what was tried | what the app did (cold Sherlock, the deepest chapter) |
+|---|---|
+| budget 12 · `.quiet` · blind corrections allowed | `gave up at top=12191 after 12 hops, 6199 ms` — and the offsets show what those hops DID: 45k → 59k → 63k → 80k → 95k. Twelve visible jumps, ending further out than the first aim |
+| budget 8 · `.spacedByTheHold` (the flow's pace) · blind allowed | `gave up at top=12191 after 8 hops, 10168 ms` — slower, no better |
+| **budget 3 · `.spacedByTheHold` · NO blind corrections** (shipped) | `gave up at top=10005 after 3 hops, 6128 ms` — **bounded**, and the good cases are untouched: every warm landing still `settled at top=0.0 after 0 hops` |
+
+**Why the third shape is the honest one.** The verbose story of a failing landing says the aim is
+not the problem:
+
+```
+LAND | content=56497 | offset=39125 | TARGET top=0.19        ← the first aim is EXACT
+| content=39273 | offset=38338 | TARGET top=787.69           ← the column SHRANK under it
+| HOP 1 | content=51243 | TARGET top=187.69 | content=39273 | TARGET top=787.69   ← and oscillates
+| content=61120 | content=143438 | … | TARGET top=12191      ← and then trebles
+```
+
+The column's own height moved 39k → 56k → 143k → 80k → 115k inside six seconds, because a row of
+this pane is a whole note that stands at ~40 pt until its text arrives from the store and at
+thousands afterwards. **No pace and no budget can win that** — which is the architectural trace's
+own §1 finding and its own §5(b) answer: *heights known before the aim*. So the policy's job is
+narrowed to what a compensator can honestly do: correct a target it can SEE, a few times, from
+quiet — and when it cannot see the target, stop and SAY SO rather than fling the page at a guess.
+
+**THE RESIDUAL, STATED PLAINLY (this is the unit's stop-and-report line):** on a COLD column — the
+first seconds after a book is opened, while the notes' text is still arriving — a deep chapter
+click can still land short, and the signpost says so (`end=gaveup`). Measured rate on the cold
+deep click: **2 of 5 stalled**; every warm landing measured (21 of 21) settled at the top. The fix
+for the residual is not more compensation: it is the OTHER half of 13u2b's answer — the book
+Index's note rows standing at heights derived from their blocks' lengths
+(`ProseHeightModel`/`FlowHeightEstimate` over `Queries.blockExtents`, the brains the Outline and
+the flow already consume), so the column stops moving under the landing. **That is 13u2b UNIT 1's
+shape on a new surface, and per this brief's own stop rule it is the architect's to rule rather
+than this unit's to start.**
