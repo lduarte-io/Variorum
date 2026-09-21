@@ -715,7 +715,15 @@ final class QuickNotePark {
 
     /// A refusal that reached a road with no pad left.
     func park(text: String, titleFromFirstWords: Bool, message: String) {
-        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        // The one call site (`take()`'s `.refused` arm) fires only after
+        // `QuickNoteMint.mints` passed, so a blank capture cannot arrive
+        // here — and the silent early-out that used to stand on this line
+        // was the wrong failure mode for an impossibility: the only thing
+        // it could ever do is quietly eat a refused capture, which is
+        // binding 1 inverted (ladder round 1, NIT). Loud in debug; parked
+        // like any capture in release.
+        assert(!text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+               "a refused capture is never blank — take() guards mints() before the mint")
         // **The 1b one-shot re-arms only when a refusal is ARISING** — the
         // park was empty (ladder round 1, MAJOR). The quit road's own
         // `finalizeAll` re-files the pad on EVERY ⌘Q, and a store that
