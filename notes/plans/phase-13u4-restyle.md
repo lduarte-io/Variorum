@@ -5401,5 +5401,7 @@ orphans; rows 65/66 born this phase with owners at birth.
 **BUILD SUCCEEDED** · mobile ****626/106 PASSED with exactly the 4 known issues** (one walk pin outside E3's mobile sweep asserted the superseded space join — rewritten to the ruling, its suite 8/8 green)** *(placeholders fill when the closing runs land —
 records-before-verification, the resiliency rule)*.
 
-**The install refresh:** PENDING the closing runs — Release build → `/Applications` at the
-verified zero-instance window, the A1 rail first, hashes to the handoff.
+**The install refresh: DONE 2026-09-21** — A1 backup first (149 files, byte-verified,
+`13u4-refresh-20260921T133135Z`), Release built from `d369c839` in a clean worktree,
+`0c9ebcb4…` → `1548f68a…` with codesign OK and both access groups identical, zero instances
+throughout; the evidence table is the handoff's. THE PHASE IS CLOSED.
