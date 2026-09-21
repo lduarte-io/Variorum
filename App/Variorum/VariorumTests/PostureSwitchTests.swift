@@ -1371,8 +1371,11 @@ struct PostureSwitchTests {
                 "the words she just wrote down open nothing, and the sentence must say so: \(sentence)")
         #expect(sentence.count > ProtectionCopy.freshWordsNeverLanded.count,
                 "the tail is a TAIL — the failure's own reason still leads")
-        #expect(try await world.vault().format.masterWrappedByRecovery != nil,
-                "and the account's existing words still stand")
+        // (The world's vault is born by the wrap-free 14b-era `setUp(passphrase:)`
+        // — see row 15's trace — so "the account's words still stand" is NOT a
+        // claim this world can carry. What IS local and sound: the ceremony
+        // reported no outcome, so nothing it would have minted took effect.)
+        #expect(model.outcome == nil, "a failed ceremony landed nothing")
 
         // The guard: the SAME failure with her existing words typed carries
         // no tail — nothing new was written down.
