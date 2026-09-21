@@ -98,6 +98,20 @@ confirmed by her in-session: *"your cast sounds good."* The sizing statement was
 per the guidance (nine units; ONE phase-sized among them — the restyle spine, decomposed
 S1–S3; the 13d/13u3 collector shape) and she ruled one phase.
 
+**R-13u4-7 (2026-09-21, in-run — row 53 pulled IN; the cold column PENDING her own question).**
+At the orchestrator's two-question ask she ruled: **(a) row 53's shrink-re-font strand is
+PULLED INTO THE PHASE as UNIT F2** (a tenth unit, after S3 and before the ladder — the defect
+became one click away the moment S1's fold fix shipped, and it must not ride the closeout's
+install refresh unfixed); **(b) on F1's cold-column residual she answered with a question,
+verbatim: *"is the deep chapter click stalling only on index mode? or also on read mode?"*** —
+so that pull-in decision WAITS on a measurement: F1's trials covered the INDEX pane only (her
+original report's own scope); the book's Read/flow surfaces already stand on length-derived
+height estimates (Act 10 batch H's `flowExtents`; 13u2b UNIT 1's outline heights), which is
+exactly the remedy the Index column lacks, so the architecture predicts Read does NOT stall
+this way — but nobody has measured it, and the ORCHESTRATOR'S PRE-LADDER ACCEPTANCE WALK now
+owes five cold deep-chapter clicks in Read mode, the number reported to her, the row's owner
+unchanged (12) until she rules on it.
+
 **BINDING PRINCIPLES:** the architect-phase constitution **P-1…P-9** (byte-verbatim in
 `.claude/skills/architect-phase/SKILL.md`, preserved from 13b) binds every unit, with its
 application notes; deviations are recorded with reasons, never silent. The closeout-refresh
@@ -119,6 +133,7 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 | S1 | The Settings shape (items 4/5/6/7 + row 59 + the 2a Settings fork) | tabs · search · fold fix · card grammar · ⌘[/unindent audit · merge-shortcut face; then walk row 53's two re-font occasions once reachable | walk both voices + appearances, captured | **DONE** — Settings is NINE panes beside a search field (her item 6, read together with 4 and 5 as ONE ask: what she looks for in Settings is *what the app can do*). **Item 4**: one pure brain over the catalog PLUS the ⌘/ helper's own two lists read-not-copied, so her literal case works — "callout" answers with the word *and* ⌥⌘C. **Item 7 answered at the CLASS**: three menus rendered the four plain structural rows from hard-coded literals beside chorded ceremony rows, teaching that only the ⌥ variant had a key; all six now come from the registry through the ONE formatter, red-on-old measured in a worktree (**5 of 7 pins red, 2 guards green**, and the revert's own dump IS the defect printed). **Item 5**: an audit first — ⌘[ *was* Back, and 13f W16's stated reason (*"the platform's own back/forward idiom"*) measured TRUE of Finder/Safari and FALSE of Apple Notes, Pages, Xcode and VS Code; so ⌘[ outdents and back/forward moved to ⌥⌘[ / ⌥⌘], which is Apple Notes' own resolution of the same collision — PROVISIONAL, **#130**, swept, and said truthfully by the registry, both menu rows, the ⌘/ helper and the tooltips (which now READ the declared chord instead of typing one). **KnownIssues row 59 CLOSED** — and it took TWO moves, the second found by the walk: the nine-pane split alone left the fold alive, because the palette row still stood between the voice and Light & dark. **Row 53 REPRODUCES on BOTH occasions and is REPORTED, not built** (the brief's rule): a re-font that SHRINKS the document strands the surface, one that GROWS it does not; the store is untouched and ⌘↑ heals it. **The walk caught a word no pin could**: typing "unindent" — her own word — found nothing, because every pin typed the app's word "outdent". Mac **357/47**; core and iOS not owed. PROVISIONALs: **#130**, **#131** (a)–(f). Record below |
 | S2 | Library & masthead faces (item 1 + rows 50/51/54) | click-to-cycle stamp + word-counter condense (word-target offer preserved) · `FlippingStamp` hoist + oracle edges · F-0 residue · Timeline voice | walk, captured | NOT-STARTED |
 | S3 | Chrome singles + the conformance sweep (rows 44/45/46/63/67/68/69 + the Trash fork) | 27-site sweep + grep pin · tag sheet voiced · indicator ring · Restore Tutorial confirm · "pools" lesson sweep (re-seed consequence recorded) · seal-blind rename field · `blockNamingDoor` hygiene · Trash cards · closing conformance walk against the reference artifact | walk, captured | NOT-STARTED |
+| F2 | The shrink-re-font strand (KnownIssues row 53, pulled in at R-13u4-7) | the full-document editor's blank-below-the-last-line after a SHRINKING re-font; ⌘↑ heals — the trace's relayout/anchor hint; S1's record has the reproduction | red-on-old + walk on both occasions | NOT-STARTED (runs after S3, before the ladder) |
 
 **CARRIED TO CLOSEOUT (grows as units close; nothing here may be lost):** MOBILE PARITY rows —
 (1) the phone's empty-block Return should CHAIN too (E1's report: AppSpec §7 still says the
