@@ -5335,17 +5335,30 @@ unit did not reach for.
 
 ## THE PRE-LADDER ACCEPTANCE WALK (the orchestrator's own hands, 2026-09-21 — the C-2/C-3 gate before the ladder)
 
-**LIVE STATUS (flips as each leg lands):**
-| leg | what | status |
+**RESULTS (walked 2026-09-21, the final tree's fresh `DerivedData/13u4walk` Debug build; captures in `13u4-screens/orch-walk/`):**
+| leg | what | result |
 |---|---|---|
-| W1 | THE OWED MEASUREMENT (R-13u4-7/8): five COLD deep-chapter clicks in the book's READ mode — quit · relaunch · open Sherlock · Read word-tab · deep chapter within the first seconds; landing correct = the chapter's top | NOT-STARTED |
-| W2 | F3 confirm on the final tree: two cold INDEX deep clicks | NOT-STARTED |
-| W3 | E1 in hand: chip-ON ⏎-chain ×3, type mid-run, ⌥⌘Z back | NOT-STARTED |
-| W4 | C1 in hand: a `{#tag}` + `{t:"…"}` capture through the shelf bar | NOT-STARTED |
-| W5 | S2 in hand: the masthead stamp cycle · the counter cycle | NOT-STARTED |
-| W6 | F2 in hand: caret at a long note's end · inline comments OFF → the page draws whole, no ⌘↑ | NOT-STARTED |
-| W7 | S1/S3 spot: ⌘, → the tabs + search "callout" + appearance on screen · Help ▸ Restore Tutorial shows the ALERT (cancelled, not pressed) | NOT-STARTED |
-| W8 | E3/C2 spot: a door merge moves no byte of the page · Move Selection into a New Take from a mid-block selection | NOT-STARTED |
+| W1 | Five COLD deep-chapter clicks in READ mode (the measurement owed to her) | **5/5 LAND at the chapter's top and HOLD** (+1.5 s and +6 s captures md5-identical per trial). **Her question answered: the stall was INDEX-only** — Read's flow stands on honest heights and never stalled; the architecture's prediction confirmed by measurement |
+| W2 | Two cold INDEX deep clicks (F3 on the final tree) | **2/2 land and hold** (md5-identical pairs); the clicked deep note's text at the pane top, the panel marking it, the note box reading its facts |
+| W3 | The ⏎ chain + ⌥⌘Z | ✓ — block 4/7 with the caret in a chained EMPTY (the E1 arm exactly); two ⌥⌘Z presses → 5/5 with the quiet receipt "Undid: New Block". A bonus: the mid-text ⏎ (divide-at-caret) and start-of-block ⏎ (empty above) arms exercised en route |
+| W4 | The microsyntax capture | ✓ IN ONE FRAME — `walk fixture words {#dream} {t:"Walk test"}` filed as a note titled **Walk test**, body clean of both tokens, chip `dream ×`, masthead `~/dream journal` (the smart book collected it by standing tag rules alone). The title chip's raw live offer visible pre-filing (#127(e)'s recorded seam, seen in use) |
+| W5 | The two click-cycles | STAMP ✓ (edited → created → clock icon, in hand). COUNTER: **not reproduced by this rig** — three synthetic clicks at the counter's text produced no cycle; per the stop rule the retries ended there. S2's own walk captured all four faces, so this is recorded as a RIG limitation OR a narrow hit target — **the ladder should eyeball `CountsFace`'s click target width** |
+| W6 | The shrink re-font | ✓ — Copper Beeches at block 212/212, scrolled to a full page; inline comments ON (grow) then OFF (shrink): **the page draws WHOLE, same passage at the top, no ⌘↑** — F2's fix in hand |
+| W7 | Settings + the confirm | ✓ — the nine panes with APPEARANCE ON SCREEN at open (row 59 dead, my own eyes); search "callout" surfaces the word's definition row AND the ⌥⌘C shortcut row; Help ▸ Restore Tutorial draws a SwiftUI alert inside the window, destructive Replace, CANCELLED by ESC (tutorial untouched) |
+| W8 | The door merge + selection → take | ✓ — ⌘A + ⌘⇧M: **"Merged 5 blocks — ⌥⌘Z undoes it."**, block 1/1, the page byte-identical (every empty line kept inside the one block, R-13u4-3 in use). Then a word selected, the registry context menu (chords SAID on the faces — item 7 in use), **Move Selection into a New Take** → the span left, the fan badge appeared, the receipt speaking the insurance: "Moved into a new take — the take it left was saved first." |
+
+**Walker facts the walk itself re-learned, honestly:** the earlier ⌘⇧M failures were MY rig, not
+the app — `cliclick t:` with multi-modifier holds is unproven (use `osascript keystroke … using
+{command down, shift down}`), and a capture steals focus so EVERY chord needs a re-activation
+first (both already-recorded facts, ignored twice, now paid for). One ⌘N went nowhere
+(recorded; not chased). **Store residue, stated:** the "Walk test" note (in dream journal) and
+the walk's block edits on it remain in the dev store (the C1-precedent walk residue); every
+setting restored as found (comments OFF · gap Standard · Terminal · Follow system); the
+tutorial NOT re-seeded (Cancel pressed); zero instances at close, quit by identity.
+
+**THE WALK'S VERDICT: the phase's acceptance is MET in use.** One item for the ladder's eye
+(the counter's hit target); one measurement delivered to her (Read never stalls — Index-only,
+and F3 killed it).
 
 Store state at open and close recorded; the dev store only (`io.lduarte.Variorum.debug`, the
 fresh `DerivedData/13u4walk` build of the final tree); her `/Applications` app never touched;
