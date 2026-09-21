@@ -1306,7 +1306,13 @@ Apple arm, the heal's wire, `openSwitch`/`ceremony(for:)`), `PostureSwitch` (`ch
 
 **Deaths and resumes:** none yet.
 
-**Reverts:** none in flight. *(Every behavioural revert is announced HERE before it starts, taken from a COMMITTED
+**Reverts:** **R1 and R2 ANNOUNCED, about to run from the committed `64a41818`** — the DISCRIMINATION checks that
+stand in for red-on-old where the capability is new (there is no pre-fix tree in which this door refuses anything,
+because there is no door; what CAN be measured is whether each pin fails when its own mechanism is taken away).
+**R1:** `AppleRelinkModel.start()`'s `controller.readAppleKey()` → `readOrMintAppleKey()` — MAJOR-3 (b)'s defect
+exactly; the unreadable-key pin must go red. **R2:** the consented-id guard removed from `confirm` — the
+key-changed pin must go red. Both restored by `git checkout --` from the REPO ROOT, with the results written below.
+*(Every behavioural revert is announced HERE before it starts, taken from a COMMITTED
 state, and restored by `git checkout --` from the REPO ROOT with `git diff` empty before "restored" is written. If a
 later session reads "revert starting" with no "restored" after it, check `git diff` first.)*
 
