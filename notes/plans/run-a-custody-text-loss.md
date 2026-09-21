@@ -1653,6 +1653,19 @@ pass confirmed, `CommentPanelParkTests` + `QuickNoteParkTests` re-run directly �
 Next: the implementer's sanity pass over `b5e229b3..40939923`; then ROUND 3 (fresh reviewer over
 this round's fixes — owed, the MAJOR was new; the ladder's cap).**
 
+**THE ROUND-2 SANITY PASS (the A1 implementer, 2026-09-21): CLEAR on all five, nothing raised,
+nothing edited.** Highlights of its re-derivation: refused-only enforced at every call site with
+the Mac's `perform` returning false only from a thrown error; the landed-clear/park race excluded
+STRUCTURALLY (the latch's one-flight rule + MainActor); the P4 pins ride unmodified; the one-shot
+restore consume proven necessary (a later render would otherwise clobber her typing); the Mac's
+unsubmitted add draft never reaches `fileAddDraft`, so #118(a)'s abandon stays hers by
+construction. **One PRECISION NOTE (not a raise), applied by the orchestrator as a record-truth
+line on #140(a):** several dirty Mac rows refusing at once at close each commit in their own task,
+so "newest wins" = whichever lands last, not a deterministic pick — inside the ruled trade,
+strictly better than shipped. **ROUND 2 CLOSES: 1 MAJOR confirmed-and-built both platforms ·
+1 NIT confirmed at the sentence size · 0 disputes outstanding. ROUND 3 opens (fresh reviewer, the
+cap): a full pass focused on round 2's fixes, anchored on both prior round files.**
+
 ---
 
 ## CLOSEOUT DUTIES (the standing ritual, run-shaped — nothing here runs until the ladder ends)
