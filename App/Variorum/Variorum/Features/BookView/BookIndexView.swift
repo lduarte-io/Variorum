@@ -78,6 +78,17 @@ enum BookIndexGeometry {
     /// hops, the content moves and the sentence it ended on. DEBUG only; the
     /// shipping build carries the content-free `LandingSignpost` line instead.
     static var trace: [String] = []
+    /// **13u4 UNIT F3: how far the whole COLUMN moved while it was loading** —
+    /// the lowest and the highest content height the pane ever reported, and
+    /// how many times it reported. F1's stop-and-reported residual IS this
+    /// span: on a cold column it measured 39k → 56k → 143k → 80k → 115k points
+    /// inside six seconds, because a pane row is a whole NOTE standing at
+    /// ~40 pt until `observeBlockTOC` returns and at thousands afterwards. So
+    /// *"the column's geometry is approximately honest before any text
+    /// arrives"* is a claim about this span, and the pin reads this span.
+    /// Keyed by the BOOK's id (the subject-keyed rule, KnownIssues row 50 —
+    /// suites run in parallel, so a pin must read ITS book's column).
+    static var paneContentSpans: [String: BookIndexContentSpan] = [:]
 
     static func reset() {
         trace = []
@@ -88,7 +99,20 @@ enum BookIndexGeometry {
         paneSelectionWashHeights = [:]
         paneNoteHeights = [:]
         paneAnchorTops = [:]
+        paneContentSpans = [:]
     }
+}
+
+/// 13u4 UNIT F3: one column's reported-height span (see `paneContentSpans`).
+nonisolated struct BookIndexContentSpan: Equatable, Sendable {
+    var low: CGFloat
+    var high: CGFloat
+    var reports: Int
+
+    /// How many times taller the column ever got than the smallest it ever
+    /// said it was — the oscillation as ONE number. 1 would be a column that
+    /// never moved; F1 measured this surface's cold column in the tens.
+    var growth: CGFloat { low > 0 ? high / low : .greatestFiniteMagnitude }
 }
 #endif
 
@@ -749,6 +773,18 @@ struct BookIndexView<Masthead: View>: View {
                 geometry.contentSize.height
             } action: { _, height in
                 paneBox.contentHeight = height
+                #if DEBUG
+                // 13u4 UNIT F3's probe: behaviour-free — it reads the value the
+                // line above already wrote, and writes only to the oracle.
+                if height > 1 {
+                    var span = BookIndexGeometry.paneContentSpans[model.readingID]
+                        ?? BookIndexContentSpan(low: height, high: height, reports: 0)
+                    span.low = min(span.low, height)
+                    span.high = max(span.high, height)
+                    span.reports += 1
+                    BookIndexGeometry.paneContentSpans[model.readingID] = span
+                }
+                #endif
                 landing.contentChanged(height)
             }
             // **The DEBUG story's second reading, and it earned its place:** the

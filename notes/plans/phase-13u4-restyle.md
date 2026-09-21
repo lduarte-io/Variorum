@@ -4739,7 +4739,7 @@ against what actually shipped):**
 | # | Piece | Status |
 |---|---|---|
 | 1 | The record + the READING (the brief's five reading lists, in order) | DONE (this commit) |
-| 2 | THE PRE-FIX COLD BASELINE, measured on THIS tree (not inherited) + the harness pin written RED-FIRST | PENDING |
+| 2 | THE PRE-FIX COLD BASELINE, measured on THIS tree (not inherited) + the harness pin written RED-FIRST | **THE PINS ARE RED 3/3** (this commit — the probe and the two pins, NO FIX); the app-side cold baseline is the next commit |
 | 3 | THE FIX — the pane's note rows stand at length-derived heights | PENDING |
 | 4 | The BEHAVIOURAL REVERT (red-on-old verified in a worktree) | PENDING |
 | 5 | THE POST-FIX COLD TRIAL TABLE (≥8 trials) + the warm trials against F1's 21/21 | PENDING |
@@ -4790,3 +4790,42 @@ against what actually shipped):**
    `Core/Views/StableSurface.swift`'s `NearBand`/`NearViewportObserver` ·
    `Queries.blockExtents` (`Sources/VariorumCore/Queries/PageExtents.swift` — lengths computed in
    SQL, chunked at 400 ids, no prose crossing the boundary) · `BookIndexLandingTests.swift`.
+
+### THE RED-ON-OLD PINS (piece 2a) — written and measured BEFORE a line of the fix
+
+`App/Variorum/VariorumTests/BookIndexColumnHeightsTests.swift` — two arms over **F1's own
+delayed-realization fixture** (8 chapters, one note each, **100 blocks a note**). That scale is not
+a choice of mine: F1's record states it directly — *"at 100 blocks the harness's column is still
+CLIMBING while the landing runs — the cold-column residual named above — and both trees fail, which
+is not evidence of anything"* — which is exactly why F1's own landing pins use 40 blocks and this
+unit's use 100. **The pin F1 could not write is the pin this unit owes.**
+
+- **PIN 1, THE MECHANISM:** the column does not grow by a large multiple while the book loads. The
+  number is `BookIndexGeometry.paneContentSpans` — the lowest and the highest content height the
+  pane ever reported during the mount, as one ratio. This is F1's oscillation (39k → 56k → 143k →
+  80k → 115k pt in six seconds) made into a number a test can read.
+- **PIN 2, THE OUTCOME:** a landing on a far note arrives at that note's top **while the book is
+  still loading** — the landing is asked for as soon as the page is real, deliberately not after
+  the column has settled, because a settled column is the WARM case F1 already measured at 21/21.
+
+**THE RED RUN, three times on the pre-fix tree** (`-only-testing:VariorumTests/BookIndexColumnHeightsTests`,
+zero instances, nothing else running):
+
+| run | PIN 1 — the column's span | PIN 2 — the far landing's top |
+|---|---|---|
+| 1 | low **1054** → high **13105** pt = **12.4×** (4 reports) | **1619.0 pt** — `gave up at top=1619.0 after 3 hops, 6210 ms` |
+| 2 | low **1054** → high **49177** pt = **46.7×** (7 reports) | **12447.5 pt** |
+| 3 | low **1054** → high **13105** pt = **12.4×** (4 reports) | **4572.5 pt** |
+
+Stable red, both arms, 3/3 — and **the harness reproduces the residual's own signature**: the
+`DONE: gave up at top=… after 3 hops` line in the trace is byte-shaped like the `end=gaveup`
+signpost F1 read out of her Console on the real Sherlock book. The `low=1054` is the same number
+every run and it is the finding in one figure: **a screenful of whole Sherlock-sized stories,
+measured by the column as one thousand points**, because each of them is a title and a blank line
+until its text arrives.
+
+**This commit contains NO FIX.** What it contains is the probe — a DEBUG-only span recorder that
+reads the value the existing line beside it already wrote, so it is behaviour-free — and the two
+red pins, so the red is on the record before the fix exists. (The same discipline F1 used, and for
+the same reason: piece 4 reverts to THIS commit in a worktree to prove the improvement is the fix's
+and not the probe's.)
