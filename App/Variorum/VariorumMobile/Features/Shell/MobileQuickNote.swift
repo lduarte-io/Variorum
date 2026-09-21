@@ -72,6 +72,18 @@ enum MobileQuickNoteCopy {
     static let boundaryHold =
         "earlier paragraphs live in the note — tap open ↵ to edit them"
 
+    /// **What the box says when the note was SAVED but the box lost its
+    /// place in it** (17b P14). `importPost` committed — the words are in
+    /// SQLite — and only the follow-up read failed (the store closing
+    /// under an `AppBootstrap.lock()` is the credible cause), so the box
+    /// can no longer name the variant it would autosave into. The truth
+    /// worth saying is therefore the opposite of the old message: nothing
+    /// is lost, and editing continues in the note. Same channel and same
+    /// shape as `boundaryHold`, for the same reason. PROVISIONAL copy
+    /// (13s owns her voice).
+    static let handoffHold =
+        "this note is saved — tap open ↵ to keep writing in it"
+
     /// The indicator's face. `nil` before the first non-whitespace
     /// character — the row does not render at all until there is something
     /// to be honest about (A5-7's "present from the first non-whitespace
@@ -283,6 +295,15 @@ final class MobileQuickNoteModel {
     /// deterministic harness needs).
     @ObservationIgnored var autosaveDebounce: Duration = .milliseconds(500)
     @ObservationIgnored var autosaveSleep: (@Sendable (Duration) async throws -> Void)?
+
+    /// **17b P14 — the mint's follow-up read, as a seam.** The endorsed
+    /// defaulted-seam pattern (`QuickNotePad.mint`'s own words, adopted
+    /// from `QuickEntryModel`): production never sets this, and a THROWN
+    /// read is otherwise unreachable from a test without breaking the
+    /// store underneath a live app — which is exactly the state this
+    /// item's defect lives in.
+    @ObservationIgnored
+    var readMintedBlocks: (@Sendable (String) async throws -> [Queries.RenderedBlock])?
 
     init(session: AppSession? = nil) {
         self.session = session
@@ -702,9 +723,43 @@ final class MobileQuickNoteModel {
         _ result: Operations.ImportResult, mintedFrom snapshot: String, session: AppSession
     ) async -> String? {
         let containerID = result.container.id
-        let blocks = (try? await session.database.read { db in
-            try Queries.renderPost(db, containerID: containerID)
-        }) ?? []
+        // **17b P14 — THE MINT'S IDENTITY IS OWNED FIRST.** `importPost`
+        // has committed by the time we are here, so the note EXISTS; every
+        // road out of this method must leave the box knowing that, or
+        // `armMintClock`'s `postID == nil` guard passes on her next
+        // keystroke and the clock mints a SECOND note holding the same
+        // words, repeatably. (It used to be set only on the happy path.)
+        postID = containerID
+
+        // **AND A FAILED READ IS NOT AN EMPTY NOTE.** This was
+        // `(try? …) ?? []`, which folded a thrown read into the identical
+        // empty result the guard below treats as "nothing was minted" —
+        // and that guard's own justification argues only about the WRITE
+        // ("it mints at least one block or throws"), so the read road was
+        // never covered by it. The consequences were all three wrong: she
+        // was told *"There's nothing to save yet"* about a note sitting in
+        // SQLite; the clock could mint it again; and `variantID` stayed
+        // nil, so everything she typed afterwards was dropped by
+        // `record(tail:)`. The failure is reachable — `AppBootstrap.lock()`
+        // closes the pool while this read can be in flight, after the
+        // write committed.
+        let blocks: [Queries.RenderedBlock]
+        do {
+            if let readMintedBlocks {
+                blocks = try await readMintedBlocks(containerID)
+            } else {
+                blocks = try await session.database.read { db in
+                    try Queries.renderPost(db, containerID: containerID)
+                }
+            }
+        } catch {
+            // The A1-19 arm's shape, for the same reason: the note holds
+            // what was minted, the box stops writing rather than guessing,
+            // and it says where the editing lives.
+            boundaryNote = MobileQuickNoteCopy.handoffHold
+            saveState = .saved
+            return containerID
+        }
         guard let owned = blocks.last, let ownedVariant = owned.variantID else {
             // Unreachable through `importPost` (it mints at least one block
             // or throws), but a box that cannot name its variant must not
@@ -714,7 +769,6 @@ final class MobileQuickNoteModel {
             return nil
         }
 
-        postID = containerID
         guard let prefix = MobileQuickNoteModel.frozenPrefix(
             of: snapshot, ownedText: owned.text ?? "", blockCount: blocks.count)
         else {

@@ -303,7 +303,7 @@ OverallModel §3 and AppSpec §9's structural-undo/REDO paragraphs (auto-loaded 
 | 2 | **P5** — `promotePicks` copies an ARCHIVED pick as a block's only take | **FIXED** — pin `PromotePicksArchivedPickTests` (3), red-on-old measured on the pre-fix tree (4 issues; the guard arm green) |
 | 3 | **P6** — `restoreNoteVersion`/`deleteContainer` leave the redo future uncleared | **FIXED** — pin `ContentReplacementRedoTests` (5), red-on-old measured (3 defect arms red, 2 guards green); ONE residue pinned as documented behaviour (the undo side) and recorded below |
 | 4 | **P7** — the boards' branch/＋new take/⌘T doors copy the STORE past a dirty buffer | **FIXED** — pin `BranchDoorFlushTests` (7), red-on-old measured on the pre-fix tree (6 defect arms red with the stale row in hand, the blank-take guard green); ONE arm's revert re-verified after the commit (below) |
-| 5 | **P14** — the phone quick note's `try?` folds a read failure into "nothing to save yet" | NOT-STARTED |
+| 5 | **P14** — the phone quick note's `try?` folds a read failure into "nothing to save yet" | **FIXED** — pin `MobileQuickNoteReadFailureTests` (3); revert check follows |
 | 6 | **P36** — `applyPendingIfClean` discards the deferred projection on a thrown re-read | **FIXED** — pin `DeferredProjectionRetryTests` (2); behavioural revert verified AFTER the commit (`else { return }` put back ⇒ the marker arm red, the guard green) |
 | — | Closing evidence: targeted suites green · `TutorialWalkTests` · mobile suites + `generic/platform=iOS` build · the WalkKit walk (pad road + board-branch road) → `notes/plans/run-a-screens/a1/` | NOT-STARTED |
 
