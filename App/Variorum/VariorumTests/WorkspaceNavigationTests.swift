@@ -316,9 +316,9 @@ struct WorkspaceNamingTests {
     /// own words.
     @Test func theTwoNavigationDoorsSpeakAndSayWhyTheyAreGrey() {
         #expect(WorkspaceNaming.backHelp(origin: "Field Notes")
-                == "Back to Field Notes (\u{2318}[)")
+                == "Back to Field Notes (\u{2325}\u{2318}[)")  // ⌥⌘[ since 13u4 S1 (#130): ⌘[ outdents; the help READS the declared chord
         #expect(WorkspaceNaming.forwardHelp(destination: "Orbit")
-                == "Forward to Orbit (\u{2318}])")
+                == "Forward to Orbit (\u{2325}\u{2318}])")  // ⌥⌘] — the mirror
         #expect(WorkspaceNaming.backHelp(origin: nil)
                 == "Nothing to go back to — this is where you started")
         #expect(WorkspaceNaming.forwardHelp(destination: nil)
@@ -582,8 +582,15 @@ struct NavigationDoorsTests {
                     "\(capability.id) collides with \(owners[chord]?.rawValue ?? "") on \(chord)")
             owners[chord] = capability.id
         }
-        #expect(owners["[|\(EventModifiers.command.rawValue)"] == .navigateBack)
-        #expect(owners["]|\(EventModifiers.command.rawValue)"] == .navigateForward)
+        // 13u4 S1 (#130, PROVISIONAL): ⌘[ / ⌘] are OUTDENT / INDENT (the text-editor
+        // convention, Apple Notes' own resolution); back/forward moved to ⌥⌘[ / ⌥⌘].
+        // These pins were rewritten to that ruling at the 13u4 closeout — the ruled-change
+        // class, no red-on-old owed (they asserted the superseded 13f assignment).
+        let optionCommand = EventModifiers([.command, .option]).rawValue
+        #expect(owners["[|\(EventModifiers.command.rawValue)"] == .formatOutdent)
+        #expect(owners["]|\(EventModifiers.command.rawValue)"] == .formatIndent)
+        #expect(owners["[|\(optionCommand)"] == .navigateBack)
+        #expect(owners["]|\(optionCommand)"] == .navigateForward)
         // The ordinal families wire per index in the menu, never here — so
         // no ⌘⇧<digit> may appear in this table at all.
         let shiftCommand = EventModifiers([.command, .shift]).rawValue
