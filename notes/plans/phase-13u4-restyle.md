@@ -1825,7 +1825,7 @@ is touched.
 | 4 | The red-on-old pin (behavioural-revert verified) + the fix | **THE FIX IS IN** (this commit) — the Index adopts `LandingAuthority`; pins red 3/3 pre-fix · the pin's first shape was HOLLOW and is recorded as such · the paired behavioural-revert measurement is piece 4b |
 | 4b | The BEHAVIOURAL REVERT — is the improvement the AUTHORITY's, or the probe's? (a worktree at the probe-only commit, the same trials + the same pins) | DONE (this commit) — **the authority's**: 3 of 4 trials miss and both pins are RED on the reverted tree |
 | 5 | Row 56's PAIRED INTERLEAVED adjudication (`theReadClickLandsInIndexAtThatBlock`, both trees) | DONE (this commit) — **6 runs, 3 rounds, alternating: RED on BOTH trees, byte-identical, every round** |
-| 6 | The WALK — chapter clicks at several depths, before/after, captured | NOT-STARTED |
+| 6 | The WALK — chapter clicks at several depths, before/after, captured, both voices AND both appearances | DONE (this commit) — the table below |
 | 7 | Closing suites + the ledger's F1 row | NOT-STARTED |
 
 ### THE READING (done in this session's own context, in the brief's order)
@@ -2165,3 +2165,41 @@ Index's note rows standing at heights derived from their blocks' lengths
 the flow already consume), so the column stops moving under the landing. **That is 13u2b UNIT 1's
 shape on a new surface, and per this brief's own stop rule it is the architect's to rule rather
 than this unit's to start.**
+
+### EVIDENCE — THE WALK (piece 6; the unit closes on USE, not on pins)
+
+**Build:** `App/Variorum/DerivedData/13u4f1/Build/Products/Debug/Variorum.app`
+(`io.lduarte.Variorum.debug`, the fenced dev store). `pgrep -fl 'Variorum.app/Contents/MacOS'` was
+checked at the start and after every quit — **ZERO instances of hers at any point; she was not
+running** — and every dev instance was quit **by identity**
+(`tell application id "io.lduarte.Variorum.debug" to quit`), never by a keystroke (the 13u3 UNIT D
+walker law). One moment produced TWO dev instances of my own (a quit refused while the ⌘K palette
+was up, then `open -n`); the extra was killed **by PID** on a pid `pgrep` proved was mine (the
+13u3 UNIT E rule), never by identity, which cannot tell two instances apart.
+`/Applications/Variorum.app` was never touched. Captures: `notes/plans/13u4-screens/f1/`
+(gitignored) — 198 files: a full window per step plus a `-top.png` crop of the pane's first inches,
+which is what each row below reads.
+
+| # | step | what the app did | capture |
+|---|---|---|---|
+| 1 | **Before** — the whole reproduction series above, on the pre-fix build | 11 misses in 20 chapter clicks; one blank page | `t01…t20` |
+| 2 | **Before, isolated** — the probe-only revert | 3 misses in 4 | `r01…r04` |
+| 3 | Terminal voice, light: **ch13 copper beeches** (warm) | **the heading at the top**, `settled at top=0.0 after 0 hops, 1142 ms` | `X01-T-ch13-top.png` |
+| 4 | Terminal, light: **ch5 the boscombe valley mystery**, captured at 1.5 s AND at 6 s | **the heading at the top in BOTH** — the landing arrives and HOLDS; nothing drifts afterwards | `Y01-T-ch05-at1.5s-top.png`, `Y01-T-ch05-at6s-top.png` |
+| 5 | Terminal, light: **ch13 again**, both captures | the heading at the top in both | `Y02-T-ch13-at1.5s/at6s` |
+| 6 | Terminal, light: ch11 · ch2 · ch10 · ch12 · ch3 | every landing `settled at top≈0 after 0 hops` | `W03…W05`, `X03`, `X04`, `p02…p07` |
+| 7 | **STUDY voice** (Settings ▸ Appearance), ch13 then ch5 | the serif voice lands identically — the chapter heading at the top, `settled top=0.24` / `top=-0.07`, 0 hops | `Z01-STUDY-ch13-at6s.png`, `Z02-STUDY-ch05-at6s.png` |
+| 8 | **DARK** (`appearanceChoice dark`, relaunch) in the Study voice | the black room lands the same way: the note's title at the top, `settled top=0.13 after 0 hops` | `D02-DARK-STUDY-ch05-at6s.png` |
+| 9 | **THE RESIDUAL, IN USE** — the COLD first deep click of a session (dark, and again in Terminal) | `gave up at top=10337 after 3 hops, 6233 ms` — the page stops short of the chapter, and the signpost SAYS so | `D01-DARK-STUDY-ch13-at6s.png`, `W01-T-ch13-top.png`, `p01-cold-ch13-conservative-top.png` |
+
+**Dev-store state left as found:** the voice back to **Terminal** (verified in Settings ▸
+Appearance, capture `restore`), `appearanceChoice` back to **system** (verified by `defaults
+read`), **zero instances**. No note, book, chapter or setting in the dev store was edited by this
+walk — every gesture in it is a click on a chapter name.
+
+**A walker fact for `Tools/WalkKit/README.md` at its next touch:** a `cliclick` click into the dev
+window is sometimes swallowed even after an explicit System Events activation — the click
+ACTIVATES and does not act, so the step silently does nothing and the next capture reads as "the
+app ignored it". Clicking TWICE (`cliclick c:x,y w:400 c:x,y`) makes a walk step reliable, and on
+a row whose act is idempotent (a chapter click re-aims at the same chapter) the second click costs
+nothing. Three of this walk's steps were lost to the single-click form before it was diagnosed.
