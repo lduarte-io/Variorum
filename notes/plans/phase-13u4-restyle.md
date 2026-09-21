@@ -4741,7 +4741,7 @@ against what actually shipped):**
 | 1 | The record + the READING (the brief's five reading lists, in order) | DONE (this commit) |
 | 2 | THE PRE-FIX COLD BASELINE, measured on THIS tree (not inherited) + the harness pin written RED-FIRST | **DONE** — the pins RED 3/3 (27807580) and the app-side baseline **6 of 6 cold clicks STALL** (this commit) |
 | 3 | THE FIX — the pane's note rows stand at length-derived heights | **DONE** (this commit) — both pins GREEN 3/3, F1's two ride UNMODIFIED and green beside them; the app measurement is piece 5 |
-| 4 | The BEHAVIOURAL REVERT (red-on-old verified in a worktree) | PENDING |
+| 4 | The BEHAVIOURAL REVERT (red-on-old verified in a worktree) | **NAMED AND STARTING** (this commit; the pre-revert state is committed at f7a7a73e and pushed) — a worktree at the PROBE-ONLY commit `27807580`, this unit's final pins copied in and trimmed to what that tree can compile |
 | 5 | THE POST-FIX COLD TRIAL TABLE (≥8 trials) + the warm trials against F1's 21/21 | **DONE** (this commit) — **9 of 9 cold SETTLE at top=0**, 11 of 11 warm settle |
 | 6 | The WALK — cold and warm, captured | **DONE** (this commit) — Terminal light (held at 1.5 s AND 6 s, byte-identical), Study light, Study DARK; 52 captures |
 | 7 | Closing suites + QUESTIONS + the KnownIssues row + the ledger's F3 row | PENDING |
@@ -5014,6 +5014,25 @@ the truth will move"* — met here from the other direction. The gate is the flo
 nothing until it is ARMED (a heading always; a note once the book's lengths have landed) and has
 a real height, and `armed` rides INSIDE the observed value so the moment it flips the current
 distance is decided at once even though the geometry did not move.
+
+### THE FINAL FOUR COLD TRIALS, AFTER THE ARMING GATE (piece 3d)
+
+The P3 gate changes which rows exist as notes, so the app was re-measured rather than assumed:
+
+| # | chapter (target) | the signpost | verdict |
+|---|---|---|---|
+| 10 | ch13 (`target=24`) | `offset=214366 total=236334 derived=9 hops=0 content=0 end=settled top=0` | **SETTLED** |
+| 11 | ch12 (`target=22`) | `offset=193320 derived=9 hops=0 content=0 end=settled top=0` | **SETTLED** |
+| 12 | ch10 (`target=18`) | `offset=156360 derived=9 hops=0 content=0 end=settled top=0` | **SETTLED** |
+| 13 | ch13 (`target=24`) | `offset=214366 derived=9 hops=0 content=0 end=settled top=0` | **SETTLED** |
+
+Plus five more warm (ch5 · ch13 · ch1 · ch11 · ch13), every one `settled top=0 hops=0 content=0`.
+`derived=` reads **9** where the pre-gate build read 6, and that is the gate WORKING rather than a
+regression: three fewer notes are materialized, so three fewer rows have measured themselves, and
+the other three stand on arithmetic the calibration pin holds to within a fifth.
+
+**RUNNING TOTAL: 13 of 13 cold, 16 of 16 warm — every one `end=settled top=0`, against 6 of 6
+cold stalls on the pre-fix build.**
 
 ### THE COLD TRIAL TABLE, POST-FIX (piece 5) — the same protocol, the same store, the same machine
 
