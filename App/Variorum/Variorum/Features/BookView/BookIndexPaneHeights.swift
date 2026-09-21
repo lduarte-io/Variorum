@@ -240,10 +240,15 @@ final class BookIndexPaneHeights {
             linePitch: lineHeight + paragraphLineSpacing,
             lineSpacing: paragraphLineSpacing,
             paragraphGap: blockGap)
+        // A block row's OWN vertical padding, and only that: the 8-pt gap
+        // BETWEEN blocks is `ProseHeightModel`'s `paragraphGap`, which it
+        // already adds once per seam. (Counting it here too was this unit's
+        // own first arithmetic error — ~8 pt × every block in the book, which
+        // on Sherlock's 2,700 blocks is 21,000 points of phantom column.)
         let blockTop = IndexProseColumn.readTierTop(
             resting: IndexProseColumn.bookIndexRestingTop,
             paneInset: PaneTextView.proseTopInset)
-        metrics.blockChrome = blockTop + IndexProseColumn.bookIndexRestingTop + blockGap
+        metrics.blockChrome = blockTop + IndexProseColumn.bookIndexRestingTop
         metrics.emptyBlockLine = lineHeight + paragraphLineSpacing
         metrics.emptyNote = lineHeight + paragraphLineSpacing
         return metrics

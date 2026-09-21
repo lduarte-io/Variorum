@@ -208,6 +208,66 @@ struct BookIndexColumnHeightsTests {
         }
     }
 
+    /// **PIN 3 — THE CALIBRATION: the estimate is near the truth.**
+    ///
+    /// The other two pins are about the column HOLDING STILL, which a
+    /// consistently wrong estimate would also satisfy — a column standing at
+    /// uniformly doubled heights does not move either, and every landing still
+    /// arrives, because a landing addresses rows by anchor. What a wrong
+    /// estimate costs is the ONE-TIME SHIFT when a far row enters the near
+    /// band and trades its arithmetic for its real height (13u2b UNIT 1's
+    /// rider-4 class, named there as the compensator's honest job). So this
+    /// pin reads a note's DERIVED height against the height that note actually
+    /// drew, and holds the model to it.
+    ///
+    /// The tolerance is stated as a RATIO rather than points because the
+    /// estimate's error is proportional: it is a model of wrapping.
+    @Test func theDerivedHeightOfANoteIsNearWhatThatNoteDraws() async throws {
+        try await withSlowIndexBook { session, db, readingID, postIDs in
+            let model = BookViewModel(session: session, readingID: readingID)
+            await model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            structure.mode = .index
+            #if DEBUG
+            BookIndexGeometry.reset()
+            #endif
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            #if DEBUG
+            // The first note realizes at the arrival seed and reports its real
+            // height once its text has arrived.
+            let first = postIDs[0]
+            await settle(window, hosting, until: {
+                (BookIndexGeometry.paneNoteHeights[first] ?? 0) > 1000
+            }, maxTurns: 120)
+
+            let drawn = try #require(
+                BookIndexGeometry.paneNoteHeights[first],
+                "the first note never reported a height")
+            // The DERIVED answer for the same note, read through the model's
+            // own door with the measurement deliberately bypassed — this is
+            // the arithmetic a FAR row stands on.
+            let extents = try await session.database.read { [first] in
+                try Queries.blockExtents($0, containerIDs: [first])
+            }
+            let derived = BookIndexPaneHeightModel.noteHeight(
+                extents: extents, metrics: model.indexPaneHeights.metrics)
+            let ratio = derived / max(drawn, 1)
+            print("[13u4 F3] calibration: derived=\(Int(derived)) drawn=\(Int(drawn)) "
+                + "ratio=\(String(format: "%.2f", ratio))")
+            let shown = String(format: "%.2f", ratio)
+            #expect(ratio > 0.8 && ratio < 1.2,
+                    "a note's length-derived height is within a fifth of what it draws: derived=\(Int(derived)) drawn=\(Int(drawn)) (\(shown)×)")
+            #endif
+        }
+    }
+
     /// **PIN 2 — THE OUTCOME.** The same claim UNIT F1 pinned, at the scale
     /// F1 measured as unwinnable: a landing on a far note arrives at that
     /// note's top even while the book's text is still arriving.

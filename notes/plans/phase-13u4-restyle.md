@@ -4948,6 +4948,33 @@ actually ends on — **while a landing is in flight the column must not be disco
 geometry** — by resetting the span at the moment the landing is asked for. That window is where the
 defect lives, and there the separation is total (1.0× against 12.4×+).
 
+### THE CALIBRATION, AND THE ARITHMETIC ERROR IT CAUGHT (piece 3b)
+
+The first two pins are about the column **holding still**, and a consistently WRONG estimate would
+satisfy both of them — a column standing at uniformly doubled heights does not move either, and
+every landing still arrives, because a landing addresses rows by anchor and not by an absolute
+offset. What a wrong estimate costs is the **one-time shift** when a far row enters the near band
+and trades its arithmetic for its real height (13u2b UNIT 1's rider-4 class, named there as the
+compensator's honest job). So a third pin reads a note's DERIVED height against the height that
+note actually DREW.
+
+**It caught a real arithmetic error on its first run, and the error was mine:** `blockChrome` was
+set to the block row's own top and bottom padding **plus the 8-pt gap between blocks** — and
+`ProseHeightModel` already adds that gap once per seam. Eight points times every block in the book
+is, on Sherlock's ~2,700 blocks, **about 21,000 points of phantom column**. Fixed, with the reason
+written at the line so the next reader does not re-add it.
+
+| | derived | drawn | ratio |
+|---|---|---|---|
+| `theDerivedHeightOfANoteIsNearWhatThatNoteDraws` | **8407 pt** | **8396 pt** | **1.00×** |
+
+The pin holds the model to within a fifth either way, and the tolerance is a RATIO rather than
+points because the estimate's error is proportional — it is a model of wrapping.
+
+*(Ordering, stated so the record is honest about it: this fix landed BEFORE the app trials below,
+so every number in the trial table is the calibrated build's. The pre-calibration build measured
+`total=248341` on Sherlock where the calibrated one reads `238205`.)*
+
 ### THE COLD TRIAL TABLE, POST-FIX (piece 5) — the same protocol, the same store, the same machine
 
 Build: `App/Variorum/DerivedData/13u4f3/Build/Products/Debug/Variorum.app`. Same instance
