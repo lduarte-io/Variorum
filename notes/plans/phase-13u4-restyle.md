@@ -4756,7 +4756,7 @@ against what actually shipped):**
 | 2 | THE PRE-FIX COLD BASELINE, measured on THIS tree (not inherited) + the harness pin written RED-FIRST | **DONE** — the pins RED 3/3 (27807580) and the app-side baseline **6 of 6 cold clicks STALL** (this commit) |
 | 3 | THE FIX — the pane's note rows stand at length-derived heights | **DONE** (this commit) — both pins GREEN 3/3, F1's two ride UNMODIFIED and green beside them; the app measurement is piece 5 |
 | 4 | The BEHAVIOURAL REVERT (red-on-old verified in a worktree) | **DONE** — the improvement is the FIX's: 4 runs on the probe-only tree, PIN 1 red 4/4 and PIN 5 red 4/4; PIN 2 red on 5 of 7 pre-fix runs and green on 7 of 7 here |
-| 5 | THE POST-FIX COLD TRIAL TABLE (≥8 trials) + the warm trials against F1's 21/21 | **DONE** (this commit) — **9 of 9 cold SETTLE at top=0**, 11 of 11 warm settle |
+| 5 | THE POST-FIX COLD TRIAL TABLE (≥8 trials) + the warm trials against F1's 21/21 | **DONE** — **13 of 13 cold SETTLE at `top=0`** and **16 of 16 warm** (9 + 11 before the P3 arming gate, 4 + 5 re-run after it — piece 3d), every one `hops=0 content=0` |
 | 6 | The WALK — cold and warm, captured | **DONE** (this commit) — Terminal light (held at 1.5 s AND 6 s, byte-identical), Study light, Study DARK; 52 captures |
 | 7 | Closing suites + QUESTIONS + the KnownIssues rows + the ledger's F3 row | **DONE** (this commit) — **210 tests in 33 suites, ALL GREEN, zero known issues**; QUESTIONS **#135** (a)–(d); **TWO KnownIssues rows CLOSED** (the residual + row 56, paired-verified) |
 
