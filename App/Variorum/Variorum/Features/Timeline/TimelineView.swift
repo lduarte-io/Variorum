@@ -9,7 +9,16 @@
 //  total surface (missing stamps COALESCE to created_at). Pagination is
 //  keyset: a page costs the page, wherever it sits (P1) — "Load more"
 //  continues from the cursor. Item affordance: open-in-editor only
-//  (interpretation 2, PROVISIONAL). Functional, unstyled.
+//  (interpretation 2, PROVISIONAL).
+//
+//  **13u4 UNIT S2 — it wears the VOICE now** (`KnownIssuesAndTechDebt`
+//  row 54, found by 18j's dark sweep and re-seen in Study at its ladder:
+//  *"the same dates are monospaced in List and sans in Timeline"*). It was
+//  the last "functional, unstyled" listing in the Library — system fonts,
+//  system ink tiers, and the RAW stored stamp column printed beside the
+//  other modes' worded ones. Now: `VoiceTokens` for every size and ink, and
+//  `TimeStampFace` for every stamp, which is the 18h ladder's R3-2 rule
+//  (one note's time, one grammar) met a third time, one mode over.
 //
 
 import Foundation
@@ -26,6 +35,25 @@ final class TimelineViewModel {
         case lastMajorRevision = "Major revision"
         case library = "All notes"
         var id: String { rawValue }
+
+        /// **Which Library sort this lens IS** (13u4 UNIT S2 — row 54).
+        /// The rows' stamps are worded by the one brain, and *which* stamp
+        /// a row is showing is a rule the Library already owns
+        /// (`LibrarySortFace.stampSubject`) — so this lens says which sort
+        /// it is rather than repeating that rule, which would be the drift
+        /// class. `.library` is the total surface ordered by last-touched.
+        nonisolated var sort: Queries.LibrarySort {
+            switch self {
+            case .entryDate: .entryDate
+            case .lastTouched, .library: .lastTouched
+            case .lastMajorRevision: .lastMajorRevision
+            }
+        }
+
+        /// What the row's trailing stamp is ABOUT under this lens.
+        nonisolated var stampSubject: TimeStampFace.Subject {
+            LibrarySortFace.stampSubject(sort)
+        }
     }
 
     @ObservationIgnored private let session: AppSession
@@ -89,10 +117,26 @@ final class TimelineViewModel {
 struct TimelineView: View {
     let session: AppSession
     var openPost: (String) -> Void
+    /// "now", for the relative rule (the `CatalogRowStamp` convention: a
+    /// default here, injected by a pin so the pin holds the rule and not
+    /// the machine's clock).
+    var now: Date = Date()
     @State private var model: TimelineViewModel
 
-    init(session: AppSession, openPost: @escaping (String) -> Void) {
+    /// The voice (13u4 UNIT S2 — `KnownIssuesAndTechDebt` row 54). The
+    /// `LibraryCatalogView` shape: optional environment, the leading
+    /// voice's tokens as the fallback, so a test host without a store still
+    /// renders.
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
+
+    init(session: AppSession, now: Date = Date(), openPost: @escaping (String) -> Void) {
         self.session = session
+        self.now = now
         self.openPost = openPost
         _model = State(initialValue: TimelineViewModel(session: session))
     }
@@ -104,44 +148,79 @@ struct TimelineView: View {
                 set: { new in Task { await model.setLens(new) } })
             ) {
                 ForEach(TimelineViewModel.Lens.allCases) { lens in
-                    Text(lens.rawValue).tag(lens)
+                    Text(tokens.chromeLabel(lens.rawValue)).tag(lens)
                 }
             }
             .pickerStyle(.segmented)
+            .font(tokens.small)
             .padding(8)
             List {
                 ForEach(model.items, id: \.postID) { item in
                     Button {
                         openPost(item.postID)
                     } label: {
-                        HStack {
-                            Text(item.displayTitle)
-                            if let date = item.entryDate {
-                                Text(date).font(.caption).foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Text(item.stamp)
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
-                        }
-                        .contentShape(Rectangle())
+                        row(item)
                     }
                     .buttonStyle(.plain)
                 }
                 if !model.exhausted {
-                    Button("Load More") {
+                    Button(tokens.chromeLabel("Load More")) {
                         Task { await model.loadMore() }
                     }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(tokens.surface)
             if let error = model.lastError {
                 Text(error)
-                    .font(.caption)
+                    .font(tokens.small)
                     .alarmVoice()
                     .textSelection(.enabled)
                     .padding(4)
             }
         }
+        .background(tokens.surface)
         .task { await model.reload() }
+    }
+
+    /// **A timeline row, in the voice's own type** (row 54): the same
+    /// monospace the List mode's rows wear in Terminal and the same serif
+    /// they wear in Study, where this list used the system sans and read as
+    /// a different app.
+    ///
+    /// …and the same WORDS: the stamps go through `TimeStampFace`, the one
+    /// brain, where this list printed the RAW stored column — a
+    /// `2026-09-20T05:11:42.318Z` beside the Library's *"edited today 1:33
+    /// PM"*. That is the 18h ladder's own R3-2 finding (one note's time in
+    /// two grammars), met a third time, one mode over.
+    @ViewBuilder private func row(_ item: Queries.TimelineItem) -> some View {
+        let subject = model.lens.stampSubject
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(item.displayTitle)
+                .font(tokens.body)
+                .foregroundStyle(tokens.ink)
+                .lineLimit(1)
+            // R3-2's rule, applied by hand because this row holds one hit
+            // and not a catalog's: under the entry-date lens the trailing
+            // stamp already SAYS the stated day, so the row never prints
+            // one day twice.
+            if subject != .dated,
+               let day = TimeStampFace.stamp(.dated, day: item.entryDate, now: now) {
+                Text(tokens.chromeLabel(day))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 4)
+            if let stamp = TimeStampFace.stamp(subject, iso: item.stamp, now: now) {
+                Text(tokens.chromeLabel(stamp))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+                    .help(TimeStampFace.tooltip(subject, iso: item.stamp) ?? stamp)
+            }
+        }
+        .contentShape(Rectangle())
     }
 }

@@ -3008,7 +3008,7 @@ CLOSE against what actually shipped):**
 | 3b | **Row 51** — the two DEBUG-oracle edges swept, each fixed or provably safe | DONE (this commit) — both FIXED, the two-window one **measured RED first**; 25 tests in 4 suites green, the two shipped stamp suites riding UNMODIFIED |
 | 4 | **Item 1a** — the masthead stamp's click-cycle (edited → created → clock) + ONE remembered LOCAL choice + pins | DONE (this commit) — **22 tests in 3 suites passed**; the cycle, the memory and a note-she-has-never-opened all pinned |
 | 5 | **Item 1b** — the word counter's click-cycle (full → note → block → icon), the target offer preserved in every state + pins | DONE (this commit) — **22 tests in 3 suites passed**; the target door pinned present in ALL FOUR faces |
-| 6 | **Row 54** — the Timeline rows take the voice's type + pin | NOT-STARTED |
+| 6 | **Row 54** — the Timeline rows take the voice's type + pin | DONE (this commit) — **10 tests in 3 suites passed**; the type AND the raw stamp column both fixed |
 | 7 | QUESTIONS #132 (the PROVISIONALs) | NOT-STARTED |
 | 8 | The WALK on the dev-store Debug build — both voices AND both appearances, captured | NOT-STARTED |
 | 9 | Closing suites + the ledger's S2 row + the KnownIssues rows (50 · 51 · 54) | NOT-STARTED |
@@ -3198,5 +3198,38 @@ every face"* has to be checkable).
 **The file moved to `Core/Views/` with the work** — two features render `WordTargetFace`, and
 CLAUDE.md's placement rule sends such a component to the shared home at the next touch. Its new
 key states its defaults family at the declaration, exactly as `mastheadStampFace` does.
+
+### ROW 54 — THE TIMELINE WEARS THE VOICE (piece 6)
+
+**The row:** *"The Library's TIMELINE rows render in a SANS face, not the voice's type — the same
+dates are monospaced in List and sans in Timeline"* (18j's dark sweep, re-seen in Study at its
+ladder; a VOICE defect, identical in the light).
+
+**What was actually there**, read rather than assumed: the last *"functional, unstyled"* listing
+in the app (its own file header said so, from Phase 10). Four system calls — `.font(.caption)`,
+`.font(.caption2)`, `.foregroundStyle(.secondary)`, `.foregroundStyle(.tertiary)` — and no
+`VoiceTokens` anywhere in the file.
+
+**And a second thing the row did not name, which the reading found:** the rows printed the **RAW
+STORED COLUMN**. `TimelineItem.stamp` is `container.last_touched_at` as SQLite holds it, so a
+Timeline row read `2026-09-20T05:11:42.318Z` where every other Library row reads *"edited today
+1:33 PM"*, and `entryDate` printed raw beside it. That is **the 18h ladder's own R3-2 finding**
+(one note's time in two grammars) met a THIRD time — the ladder fixed it between the List row
+and the Notes card, and this mode was never looked at. Fixing the typeface and leaving the ISO
+string would have made a row that wears the voice while speaking a database column, so both
+went. Recorded as a judgment call below rather than slipped in.
+
+**How, without a new rule anywhere:** each lens says which `Queries.LibrarySort` it IS, and the
+subject comes from `LibrarySortFace.stampSubject` — the Library's existing rule, ASKED rather
+than copied (a second copy is the drift class this unit closed twice already). R3-2's
+one-day-twice rule rides with it: under the entry-date lens the trailing stamp already says the
+stated day, so the beside-the-title slot stands down.
+
+**The pins** (`TimelineVoiceTests`) — **10 tests in 3 suites green**, with
+`TimelineAndReadingsTests` and `NoLiteralColourTests` riding unmodified: a GREP pin in the 18j
+literal-colour pin's own form banning the four system forms by name (and asserting the tokens
+are read), the lens→sort→subject mapping asked of the one rule for every lens, and the words
+being `TimeStampFace`'s rather than the stored column. **A typeface is a thing you SEE**, so the
+acceptance evidence is the walk, in both voices — the pins exist so it cannot come back quietly.
 
 *(The rest of this record fills in as the pieces land.)*
