@@ -2317,3 +2317,65 @@ Everything is committed and pushed: the policy and its measured reasoning, the a
 pins (red-on-old in a worktree, green here), the DEBUG oracle and story, QUESTIONS #129, the
 KnownIssues row, the walk captures (gitignored, listed above) and this record. What is OPEN is
 **the architect's**: whether the manifest half runs now, and **hers**: #129.
+
+---
+
+## UNIT S1 BRIEF — THE SETTINGS SHAPE (items 4 · 5 · 6 · 7 + row 59 + the 2a Settings fork + row 53's walk; self-contained — read in this order)
+
+**Read first, in full:** (1) this file's Status banner · HER ADDITIONS items 4, 5, 6 and 7
+(verbatim — they are the mandate) · THE SIZING-AND-RULINGS SITTING RECORD (no ruling
+pre-decides these — they are face rows; R-13u4-6 is the cast) · THE LEDGER · ENVIRONMENT
+TRAPS · CAST & DISCIPLINE · the six prior UNIT RECORDs (every walker fact binds — the
+osascript staging, the double-click-on-idempotent-rows fact, the capture-offset arithmetic).
+(2) **The restyle mandate:** roster item 1 + the carried 2026-08-31 addendum — every surface
+you open conforms to the committed reference artifact
+`notes/plans/pre-13u-mockups/blocks-and-snippets.html` (spacing scale, squarish-rounded
+controls, calm cards over hairline grids); `Theme/CalmGrammar.swift` is the vocabulary. The 2a
+fork you execute here: the Settings panes' card grammar. (3) **KnownIssues rows 59 and 53**
+(row 59: the 18j appearance control renders BELOW THE FOLD at the shipped window size — her
+own owner assignment; row 53: once your shape makes the inline-comments and paragraph-gap
+controls reachable, WALK the full-document editor's two unexercised re-font occasions — if
+either reproduces a blank region, REPORT it with the capture, do not build the carve: that
+design is 13u2 UNIT D's record's). (4) The constitution's **P-1** (doors render FROM the
+registry; the ⌘/ Shortcuts & Dictionary helper and the menus carry the legibility mandate)
+and **P-8** (every NEW chrome `fixedSize` text carries a `lineLimit` — the 27 OLD sites are
+S3's sweep, not yours). (5) The code: the Settings scene and its panes · the shortcuts
+helper + the capability registry (item 7's fix is making the faces SAY the chord the registry
+already knows) · the keybind map (item 5's audit). Do your own reading.
+
+**The build, per item:**
+- **Item 6 (the restructure):** her sketch verbatim — *"an overall one, then maybe tabs on
+  text editing shortcuts, window / reshaping shortcuts, etc."* The exact tab set is yours to
+  shape from what the panes actually hold, recorded as PROVISIONAL with the alternatives; the
+  card grammar per the reference artifact rides the same pass. Row 59's fold dies here: the
+  appearance control must be reachable at the shipped window size WITHOUT scrolling hunts —
+  prove it in the walk.
+- **Item 4 (settings search):** simple text search within Settings — her acceptance case is
+  literal: *"it's too hard to find how to make a callout"* — typing "callout" must surface the
+  callout-relevant controls/rows. One pure filter brain, pinned; no new storage.
+- **Item 5 (⌘[ + unindent):** an AUDIT first, in the record: what ⌘[ is bound to today (her
+  report says note navigation), where 13k's unindent door lives, and what the two Mac
+  conventions are (editor outdent vs back-navigation). **A rebind is a product-flavoured
+  call:** implement the most spec-defensible answer as PROVISIONAL with the alternatives in
+  QUESTIONS (from **#130**) — and whatever you pick, the registry, the menus and the ⌘/
+  helper must say it truthfully (the legibility mandate). The discoverability half —
+  formatting shortcuts findable — lands in item 6's "text editing shortcuts" tab regardless.
+- **Item 7 (the merge chord is nowhere said):** the registry knows ⌘⇧M; make the faces say
+  it — the ⌘/ helper's list and the menu rows that carry the act. A truth pin per face (the
+  H pattern: prose names a chord ⇒ a pin asserts the surface renders it).
+- **ThemeStore stays where it is** — the recorded waiver stands (a hoist is a DESIGN, the
+  mobile parity row carries it); touch its chrome, never its home.
+
+**Evidence:** the walk — both voices AND both appearances, captured: the tabs, the search
+finding "callout", the appearance control reached without a hunt, the merge chord visible in
+the helper and the menu, and row 53's two re-font occasions exercised (result recorded either
+way). Pins: the search brain's arms · the chord-truth pins · the registry walk green. The
+touched Mac suites + the acceptance spine (REAL TYPE NAMES) at the end. Captures to
+`notes/plans/13u4-screens/s1/`. PROVISIONALs from **#130**.
+
+**Your record:** append a `## UNIT S1 RECORD` section to THIS file with LIVE STATUS from the
+FIRST commit (PENDING marks), the ⌘[ audit table, the tab-set rationale, row 53's walk result,
+and the seam-file list (expected NONE — say so); flip the ledger's S1 row and the rows-59
+resolution note in your closing commit (KnownIssues row 59 closes here if the walk proves it;
+row 53 closes or narrows per what the walk shows). The checkpoint protocol binds from the
+first commit.
