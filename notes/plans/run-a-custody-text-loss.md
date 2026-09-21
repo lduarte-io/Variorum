@@ -1698,6 +1698,27 @@ restores; red on current), and the existing ghost guards re-run (a landed submit
 nothing may come back after it). **Records owed:** #140(b)/(f) re-based as record-truth edits to
 the peek semantics; F3's one symmetric sentence at #140(d) for the phone's dead-block corner.
 
+**The implementer's round-3 responses (2026-09-21, nothing edited): F1 AGREE (the primary arm not
+speculative — every link verified; under the peek the phantom can no longer EAT, so the lifecycle
+move is hygiene exactly as amended; the peek's home is the HEAD of the panel's existing `.task`,
+no new hook; `survivingDrafts` prunes only the edit map, so a restored add draft is untouched).
+F2 AGREE (premise-falsification confirmed on both platforms; the Mac's close-before-first-snapshot
+window confirmed — `dirtyCommentIDs` needs `stored(id)`, so an early close commits nothing).
+F3 AGREE (and the peek makes the sentence MORE worth saying — the park now holds for the session
+rather than being spent at the next open; it holds harmlessly).** **ONE RAISE, a precision on the
+ruled fix (the reviewer's final call): `clearIfHeld(blockID:)` is keyed by BLOCK alone, and under
+the peek a landed submit of a DIFFERENT draft kind on the same block clears insurance that never
+landed** (Mac: a landed unrelated edit clears the parked add draft; phone: Edit overwrites the
+field, lands, clears the parked add draft — both traced). Proposed: key the clear by
+`(blockID, commentID)` — the same DRAFT — with the ghost guards gaining the cross-kind arm.
+**The orchestrator's ruling-side answer, recorded for the final call: the amendment's clear-rule
+INTENDS the same draft** — the insurance clears when the thing it insures lands — so the
+draft-keyed clear is the amendment's honest reading, not a widening; the reviewer's final call
+covers the mechanics. Two peek facts confirmed from the build: the phone's one-shot render
+consume stays (orthogonal — it protects typing within an open, never the park's hold), and no
+ghost road opens on the landed path itself (both Mac sites and the phone's `.landed` arm clear
+before returning; the latch serialises flights).
+
 ---
 
 ## CLOSEOUT DUTIES (the standing ritual, run-shaped — nothing here runs until the ladder ends)
