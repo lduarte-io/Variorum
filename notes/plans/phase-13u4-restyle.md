@@ -3010,7 +3010,7 @@ CLOSE against what actually shipped):**
 | 5 | **Item 1b** — the word counter's click-cycle (full → note → block → icon), the target offer preserved in every state + pins | DONE (this commit) — **22 tests in 3 suites passed**; the target door pinned present in ALL FOUR faces |
 | 6 | **Row 54** — the Timeline rows take the voice's type + pin | DONE (this commit) — **10 tests in 3 suites passed**; the type AND the raw stamp column both fixed |
 | 7 | QUESTIONS #132 (the PROVISIONALs) | NOT-STARTED |
-| 8 | The WALK on the dev-store Debug build — both voices AND both appearances, captured | NOT-STARTED |
+| 8 | The WALK on the dev-store Debug build — both voices AND both appearances, captured | DONE (this commit) — 26 captures + 27 crops; both cycles clicked through every state, a note she has never opened arriving in the remembered one, the target door opened FROM the icon, the Timeline in all four voice/appearance combinations |
 | 9 | Closing suites + the ledger's S2 row + the KnownIssues rows (50 · 51 · 54) | NOT-STARTED |
 
 ### THE READING (done in this session's own context, in the brief's order)
@@ -3231,5 +3231,65 @@ literal-colour pin's own form banning the four system forms by name (and asserti
 are read), the lens→sort→subject mapping asked of the one rule for every lens, and the words
 being `TimeStampFace`'s rather than the stored column. **A typeface is a thing you SEE**, so the
 acceptance evidence is the walk, in both voices — the pins exist so it cannot come back quietly.
+
+### EVIDENCE — THE WALK (the unit closes on USE, not on pins)
+
+**Build:** `App/Variorum/DerivedData/13u4s2/Build/Products/Debug/Variorum.app`
+(`io.lduarte.Variorum.debug`, the fenced dev store). `pgrep -fl 'Variorum.app/Contents/MacOS'`
+was checked at the start — **ZERO instances; hers was not running at any point** — and the dev
+instance was quit **by identity** (`tell application id "io.lduarte.Variorum.debug" to quit`),
+never by a keystroke (the 13u3 UNIT D walker law), with `pgrep` re-checked after the quit.
+`/Applications/Variorum.app` was never touched. Captures:
+`notes/plans/13u4-screens/s2/` (gitignored) — **26 window captures plus `s2/crops/` with 27 read
+crops**, named by step.
+
+| # | Step | What the app did | Capture |
+|---|---|---|---|
+| 1 | Library ▸ **Timeline**, Terminal, light — **ROW 54** | the rows are **MONOSPACED**, in the voice's own type, and every stamp is WORDED: *"edited yesterday"*, *"edited sep 19"* — where this list printed the raw stored column | `01-timeline-TERMINAL-light.png` |
+| 2 | The **entry-date** lens | *"dated sep 22"* · *"dated yesterday"* · *"dated sep 19"* — worded, and **the day is said ONCE** (no beside-the-title day under this lens; R3-2's rule, in use) | `02-timeline-entrydate-lens.png` |
+| 3 | A note opened (Write) — the masthead's second row | *"edited sep 19"* at the trailing end, beside `~/journal` and the `#` door | `03-note-open.png` |
+| 4 | **Click it — ITEM 1a** | ***"created sep 19"*** — her first click | `crops/04-stamp-created.png` |
+| 5 | **Click again** | **A LITTLE CLOCK ICON**, where the date was, on the row's own baseline — *"then collapses to a little clock icon"*, literally | `crops/05-stamp-CLOCK.png` |
+| 6 | **Open a DIFFERENT note** (a tagged one, never opened this session) | **it opens with ONLY the clock icon** — her second sentence, literally: *"remembers this on every note, so if you're normally in clock mode a new note would open with only a clock icon"* | `crops/06-another-note-CLOCK.png` |
+| 7 | Click the clock | back to ***"edited yesterday"***, and the row reflows — the tag card and `#` shift to make room | `crops/07-back-to-EDITED.png` |
+| 8 | The bottom bar — **ITEM 1b** | *"3w block · 3w in note"* (the full face) | `crops/08-bar-full-counts.png` |
+| 9 | **Click** | *"3w in note"* — only the note | `crops/09-counter-NOTE-ONLY.png` |
+| 10 | **Click** | *"3w block"* — only this block | `crops/10-counter-BLOCK-ONLY.png` |
+| 11 | **Click** | **just the icon** (`text.word.spacing`) beside the `?` | `crops/11-counter-ICON-ONLY.png` |
+| 12 | **Right-click the ICON — HER KEEP** | **Set a word target…** · *(divider)* · Full counts · Only the note · Only this block · **✓ Just an icon**. The offer survives in the most collapsed face, and the four faces are legible | `crops/12-counter-context-menu.png` |
+| 13 | Click that row **from the icon face** | the target popover opens, anchored on the icon — the field, *"a measure, never a wall"*, Clear and Set | `crops/13-target-popover-from-icon.png` |
+| 14 | Set **500** | the receipt *"Word target set — 500w…"* and the counts read **"3w block · 3w in note · 1% of 500w target"** | `crops/17-full-with-PROGRESS.png` |
+| 15 | Click once | *"3w in note · 1% of 500w target"* — **the progress rides the condensed face too** | `crops/18-note-face-PROGRESS.png` |
+| 16 | **⌘2 — the Takes bar** | *"3w note · 1% of 500w target"* — **the SAME remembered face**, in the boards' own words (R118: no surface behind another) | `crops/19-takes-bar-SAME-FACE.png` |
+| 17 | **STUDY voice** (Settings ▸ General) | the counter in serif: *"3w note · 1% of 500w target"*; the Timeline's rows and stamps **in serif**, its lens chips Title-Cased — row 54 in the second voice | `crops/20-STUDY-bar.png`, `crops/21-STUDY-timeline-rows.png` |
+| 18 | **DARK** (Settings ▸ General ▸ Dark), Study | the Timeline on the fully black room — serif rows, worded stamps, legible | `22-DARK-STUDY-timeline.png` |
+| 19 | The masthead in dark, then clicked twice | *"edited today 12:20 AM"* → **the clock on the black room**, on the same baseline as the tag card and the `#` | `crops/23-DARK-masthead-stamp.png`, `crops/24-DARK-STUDY-CLOCK.png` |
+| 20 | The counter in dark, cycled to the icon | the glyph in the accent ink on black, beside the `?` | `crops/23-DARK-bar-counter.png`, `crops/25-DARK-ICON.png` |
+| 21 | Right-click it in dark **with a target set** | **Change the word target…** · **Clear the word target** · the faces — and the block row reads ***"Only this take"***, the BOARDS' own noun (Write says *"Only this block"*) | `crops/26-DARK-menu-change-and-clear.png` |
+| 22 | *Clear the word target* | the receipt *"Word target cleared."* — the fixture note is back as it was | — |
+| 23 | Library ▸ **Notes cards** (the hoist in use) | the cards' stamps are untouched: *"2026-09-20 dated yesterday edited yesterday"* (the wide pair) and *"Alpha paragraph. edited yesterday"* — `FlippingStamp` is invisible in use, which is what a hoist should be | `crops/28-cards-stamps.png` |
+
+**THE WALK'S OWN MISHAP, recorded rather than papered over.** Staging step 14 I typed `500` into
+the note instead of the popover: the context-menu click missed its row (the menu had opened at a
+different x than the one I had measured), the menu dismissed, and the keystrokes went to the
+editor — *"the black sea"* became *"the black sea500"*. **Undone with ⌘Z and verified by
+re-reading the block** (*"the black sea"*), exactly as the C1 walk's accidental edit was. Its one
+residue is a stamp: that fixture note's edit time now reads *"edited today 12:20 AM"*, because
+the touch was written before the undo. Said here because a walk that edits her store says so.
+
+**A walker fact for `Tools/WalkKit/README.md` at its next touch:** a `.contextMenu`'s rows land
+at a position that depends on the RIGHT-CLICK point, so a row's coordinates must be re-measured
+from a fresh full-screen capture after every open — and **the re-activation rule applies between
+the capture and the click** (a capture steals focus; my typing went to the note because I
+re-activated before the menu click but not before the burst after it). And `sips --cropOffset`
+behaved correctly here, contrary to UNIT S1's note, EXCEPT when the offset ran past the image's
+own height — which returns a blank PNG that reads exactly like "the surface drew nothing".
+
+**Dev-store state left as found:** voice back to **Terminal**, appearance back to **Follow
+system** (both verified in Settings, `crops/27-restored-terminal-system.png`), the walk's word
+target **cleared**, and **both new local keys deleted** (`defaults delete … mastheadStampFace` /
+`barCountsFace`) so the dev store opens in the shipped defaults exactly as it did before the
+walk — verified by `defaults read`, which now shows only the `appearanceChoice = system` it
+showed at the start. **Zero instances** after the quit.
 
 *(The rest of this record fills in as the pieces land.)*
