@@ -716,8 +716,18 @@ final class QuickNotePark {
     /// A refusal that reached a road with no pad left.
     func park(text: String, titleFromFirstWords: Bool, message: String) {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        // **The 1b one-shot re-arms only when a refusal is ARISING** — the
+        // park was empty (ladder round 1, MAJOR). The quit road's own
+        // `finalizeAll` re-files the pad on EVERY ⌘Q, and a store that
+        // keeps refusing re-parks the SAME standing capture — so an
+        // unconditional re-arm here declined the quit forever while the pad
+        // was open, binding 4 inverted ("a second consecutive ⌘Q always
+        // proceeds"). A RESOLUTION (`clear()`, at `.filed` /
+        // `.nothingToFile` / restore) resets the flag, so "a refusal
+        // resolved and later re-arising re-arms" holds byte-exactly — and
+        // the newest text still wins the park either way.
+        if held == nil { declineSpent = false }
         held = Held(text: text, titleFromFirstWords: titleFromFirstWords, message: message)
-        declineSpent = false
     }
 
     /// The next summon takes it — and the park lets go in the same breath

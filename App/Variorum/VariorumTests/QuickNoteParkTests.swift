@@ -184,6 +184,59 @@ struct QuickNoteParkTests {
         }
     }
 
+    /// **PIN (iii-c) — RED ON OLD (ladder round 1, the MAJOR).** The quit
+    /// road's own `finalizeAll` re-files the pad on EVERY ⌘Q, and a store
+    /// that keeps refusing re-parks the SAME standing capture — which used
+    /// to re-arm the one-shot unconditionally, so the second consecutive
+    /// ⌘Q was declined again, and the third, forever: binding 4 inverted on
+    /// exactly the pad-open road, and #137(c)'s sentence ("press ⌘Q again
+    /// and it quits, whatever the store is doing") false as shipped. A
+    /// re-park over a STANDING capture now keeps the spent flag — only a
+    /// refusal ARISING (parked into an empty park) re-arms — so the second
+    /// press proceeds whatever the store is doing. Pins (i)–(iv) drove the
+    /// primitive once and never re-ran the quit road between the two
+    /// presses, which is how this shipped; this pin IS that second press.
+    ///
+    /// DISCRIMINATING REVERT (verified): make `park()` reset `declineSpent`
+    /// unconditionally again — the second decline below reads true.
+    @Test func theSecondQuitsOwnReRefusalDoesNotReArmTheDecline() async throws {
+        try await withParkWorld { session in
+            let pad = refusingPad(session)
+            pad.text = Self.capture
+
+            // ⌘Q #1: finalizeAll runs the pad's quit filing — refused, parked.
+            guard case .refused = await pad.finalizeAtQuit() else {
+                Issue.record("the premise: the quit-time file was refused")
+                return
+            }
+            #expect(session.quickNotePark.declineQuitOnce(), "declined once — the 1b grammar")
+
+            // ⌘Q #2: finalizeAll runs AGAIN before the decision — the same
+            // standing capture is refused again and re-parked. The pad is
+            // open, so she may even have typed on; the newest text wins…
+            pad.text = Self.capture + " And a late thought."
+            guard case .refused = await pad.finalizeAtQuit() else {
+                Issue.record("still refused — the store has not recovered")
+                return
+            }
+            #expect(session.quickNotePark.held?.text == Self.capture + " And a late thought.",
+                    "…a re-park still ASSIGNS (the newest words are what is kept)")
+
+            // …but it does NOT re-arm: the second consecutive ⌘Q proceeds.
+            #expect(!session.quickNotePark.declineQuitOnce(),
+                    "the second consecutive ⌘Q always proceeds — binding 4's letter, true on the pad-open road too")
+            #expect(session.quickNotePark.held != nil,
+                    "and the capture stays parked right up to the exit — the ruled memory-only cost, not a new loss")
+
+            // A RESOLUTION still re-arms (binding 4's last clause, the arm
+            // pin (iii) already holds): filed/cleared, then a fresh refusal.
+            session.quickNotePark.clear()
+            _ = await pad.finalizeAtQuit()
+            #expect(session.quickNotePark.declineQuitOnce(),
+                    "a refusal resolved and later arising again gets its own single decline")
+        }
+    }
+
     /// **PIN (iii), the DELEGATE's half** — the same one-shot as the quit
     /// door actually consults it, plus binding 4's "speaks where the pad
     /// cannot": with no pad on screen the status seam carries the close
