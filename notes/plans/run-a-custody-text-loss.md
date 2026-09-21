@@ -753,7 +753,7 @@ MAJOR-3 and the F3 record's eight items; the copy constants' homes; the named co
 
 | Row | Item | Status |
 |---|---|---|
-| 0 | Record skeleton + `run-a-screens/a2/` | **DONE** — this commit |
+| 0 | Record skeleton + `run-a-screens/a2/` | **DONE** |
 | 8 | **17l item 1** — the seeder's discover-then-mint latch + the ensure's purge consult | **FIXED** — pins `EncryptionBookDoorTests` (3 new), RED measured on the pre-fix tree TWICE (5 issues across the 3; the 5 standing tests green), green after at 24/2. The purge consult is NOT the ledger — the ledger is content-free by design; the trace and the substitution are recorded below |
 | 9 | **17l item 2** — the migration drill's escrow leg + her-Mac READ-ONLY confirmation | **FIXED** — the drill RED first with its expectation quoted, then green under `TEST_RUNNER_VARIORUM_MIGRATION_DRILL=1` (**5 tests in 2 suites**, the leg's own line firing). The her-Mac confirmation run READ-ONLY, commands + verbatim answers below, with the caveat that makes the negative honest |
 | 10 | **17l item 3** — her four ruled #90 wording changes, both platforms | **FIXED** — four constants with pins on BOTH platforms (`ProtectionCopyTests.herFourRuledWordingsAreWhatTheSurfacesSay` · `MobilePhoneProtectionCopyTests.herFourRuledWordingsReadAsThePhones`); two shipped verbatim pins RE-BASED as the ruled-change class. 20/3 green |
@@ -764,7 +764,7 @@ MAJOR-3 and the F3 record's eight items; the copy constants' homes; the named co
 | 15 | **KnownIssues 32** — the phrase-transit one-arm VERIFICATION pin | **VERIFIED, with ONE live world found and FIXED** — the corner has no world left that any production road can make (arms 1–2, green either side, the row's own success criterion); the single survivor is a vault this build cannot READ, where the offer minted a second secret — arm 3 RED on the pre-fix tree, fixed, `Phase13pControllerTests` + `EncryptionFlowTests` **51/2 green** |
 | — | Closing evidence | **DONE** — core **1639/177 green** (zero `Sources/` lines this batch) · full Mac **3069/507 ALL GREEN, ZERO ISSUES** with the eleven Tutorial suites inside it · the opt-in custody drill **5/2** with row 9's leg firing · mobile **635/108 with exactly the 4 known issues** · iOS **BUILD SUCCEEDED** · the walk captured (4 shots) with the un-walkable faces said |
 
-**Deaths and resumes:** none yet.
+**Deaths and resumes:** NONE — the batch ran end to end in one session, 19 commits, every one pushed.
 
 ### CLOSING EVIDENCE (all runs on the final tree)
 
