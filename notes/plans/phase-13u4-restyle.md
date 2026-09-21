@@ -1522,3 +1522,36 @@ seam-file list (the selection facts likely come from `EditorViewModel` — if th
 `BlockRangeIndex`/`EditorTextView`/`TypedReturn`/`PaneTextAuthority`, say so for the ladder);
 flip the ledger's C2 row in your closing commit. The checkpoint protocol binds from the first
 commit.
+
+---
+
+## UNIT C2 RECORD — SELECTION → A TAKE ON THE SAME BLOCK (item 9, R-13u4-4)
+
+**WHAT THIS UNIT DID NOT DO (the record's first line):** *(PENDING — completed at the close; the
+running intent: nothing outside the one new core operation and its ONE Write door. No other
+unit's work (E1's Return chain, E2's ⌥⌫ product call, E3's merge join, C1's capture microsyntax,
+the restyle spine) is touched; `Sources/VariorumCore/Sync/`, the schema, the migrations and
+`Server/` are untouched; the phone gets no face; no ceremony sheet, no bulk bar and no Takes-side
+door is built.)*
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The record + the READING (the brief's four reading lists, in order) | DONE (this commit) |
+| 2 | The core op + its state-transition suite (rows read/written · the savepoint · the refusals · undo↔redo exact-row) + the AppSpec §9 bullet | NOT-STARTED |
+| 3 | The Write door + its registry declaration + the registry walk | NOT-STARTED |
+| 4 | QUESTIONS #128 (the PROVISIONALs) | NOT-STARTED |
+| 5 | The walk on the dev-store Debug build, captured | NOT-STARTED |
+| 6 | Closing suites + iOS build + the ledger's C2 row | NOT-STARTED |
+
+### THE SHAPE, AS RULED (R-13u4-4 — read before the diff)
+
+Her ruling, verbatim: *"move alone should be fine - the fact that there'll be a savepoint/commit
+of the current take right before moving is enough to cover the case that someone wants it to
+stay - they can just revert it to that point if they want."*
+
+ONE transaction: **insurance savepoint of the current take** (LOAD-BEARING — her stated cover for
+the stay case) · **the span leaves the current take's buffer** exactly as selected · **a new take
+mints at the fan's END** holding the span, branched from the current take, never chosen, never
+locked · **ONE undo entry** with the exact-row redo.
