@@ -743,6 +743,81 @@ struct Phase13pControllerTests {
         #expect(free.controller.hasRecoveryWrap)
     }
 
+    // MARK: - RUN A batch A2, row 15 — the phrase-transit corner (KnownIssues 32)
+
+    /// **THE VERIFICATION KnownIssues 32 ASKS FOR, and the one world it
+    /// still has.** The corner: `PhraseOffer.take` gates its fresh mint on
+    /// `vaultTie.hasRecoveryWrap` alone, so a world where a vault EXISTS but
+    /// reports no recovery wrap gets twelve STORE-ONLY words — which the
+    /// account's own generation later overwrites, retiring the first phrase
+    /// she wrote down with nothing said.
+    ///
+    /// Traced through every arm of `VaultTie.make`, that world needs a vault
+    /// whose `masterWrappedByRecovery` is nil — and after pre-13x's 3a no
+    /// production road can make one (`EncryptionSession.setUp(passphrase:
+    /// recoveryWords:)` is the only creation door the app calls, and it
+    /// births the wrap; `EncryptionFlowTests.setUpEnrollsThisDeviceAndFires
+    /// TheHealingHook` pins the birth, and core's wrap-free
+    /// `VaultEnrollment.setUp(passphrase:)` has no caller outside tests) —
+    /// **except one: `.newerFormat`**, a vault this build cannot READ, whose
+    /// tie is built with `hasRecoveryWrap: false` and verifies that refuse.
+    /// There the offer minted a second secret under a vault it could not
+    /// consult, which is exactly what the tie's own doctrine forbids for the
+    /// passphrase ("the tie refuses rather than letting a second passphrase
+    /// slip in under the unreadable one").
+    ///
+    /// The passphrase door cannot reach the corner — `commit` refuses on
+    /// `.couldNotCheck` before `advanceToPhraseHalf` runs, and that half is
+    /// private to it. The NUDGE'S DIRECT OFFER is the one door that starts
+    /// at the phrase half, which is why the fix is there and nowhere else.
+    ///
+    /// **Arms 1 and 2 are the VERIFICATION (green either side — the row's own
+    /// success criterion); arm 3 is RED ON OLD.**
+    @Test func theStoreOnlyPhraseTransitHasNoWorldLeftExceptAVaultThisBuildCannotRead() async throws {
+        // 1 — the world every road now produces: a vault WITH the words.
+        let tied = try world()
+        _ = await tied.controller.setPassphrase("sesame")
+        let carrying = VaultTie(
+            hasRecoveryWrap: true,
+            verifyPassphrase: { _ in .match }, verifyRecoveryWords: { _ in .match })
+        guard case .extend = await PhraseOffer.take(controller: tied.controller, vaultTie: carrying) else {
+            Issue.record("a vault carrying the words routes to the extend flow")
+            return
+        }
+        #expect(!tied.controller.hasRecoveryWrap, "nothing store-only was minted")
+
+        // 2 — no vault constrains: the store mints its own, as designed.
+        let free = try world()
+        _ = await free.controller.setPassphrase("sesame")
+        guard case .minted = await PhraseOffer.take(controller: free.controller, vaultTie: nil) else {
+            Issue.record("no vault ⇒ the store's own phrase, unchanged")
+            return
+        }
+        #expect(free.controller.hasRecoveryWrap)
+
+        // 3 — THE ONE REMAINING WORLD: a vault present and unreadable.
+        let blind = try world()
+        _ = await blind.controller.setPassphrase("sesame")
+        let unreadable = VaultTie(
+            hasRecoveryWrap: false,
+            verifyPassphrase: { _ in .couldNotCheck(Self.newerVaultReason) },
+            verifyRecoveryWords: { _ in .couldNotCheck(Self.newerVaultReason) },
+            unreadableReason: Self.newerVaultReason)
+        let outcome = await PhraseOffer.take(controller: blind.controller, vaultTie: unreadable)
+        guard case .refused = outcome else {
+            Issue.record("a vault this build cannot read must not get a second secret minted under it: \(outcome)")
+            return
+        }
+        #expect(!blind.controller.hasRecoveryWrap, "nothing landed on the store")
+        #expect(blind.envelopeBox.value?.recovery == nil, "and nothing on the key file")
+        #expect(blind.controller.lastError?.contains(Self.newerVaultReason) == true,
+                "and it says why: \(blind.controller.lastError ?? "nil")")
+    }
+
+    /// The `.newerFormat` tie's own reason, as `VaultTie.make` words it.
+    private static let newerVaultReason =
+        "your account's vault was written by a newer Variorum — update the app"
+
     // MARK: - The unreadable-sidecar family (pre-13u Act 9 — 17a P1/P11)
 
     /// P1: the reconcile runs on every ready launch, and an unreadable

@@ -752,7 +752,7 @@ MAJOR-3 and the F3 record's eight items; the copy constants' homes; the named co
 | 12 | **17l item 6** — the ceremony's *(0 of 0)* → *preparing…* face | NOT-STARTED |
 | 13 | **17l item 7** — NIT-N8's face VERIFIED post-13u4 + MINOR-N4 (2)'s copy PROVISIONAL | NOT-STARTED |
 | 14 | **17n** — the encryption passphrase's 12-character floor at every SETTING door | NOT-STARTED |
-| 15 | **KnownIssues 32** — the phrase-transit one-arm VERIFICATION pin | NOT-STARTED |
+| 15 | **KnownIssues 32** — the phrase-transit one-arm VERIFICATION pin | **VERIFIED, with ONE live world found and FIXED** — the corner has no world left that any production road can make (arms 1–2, green either side, the row's own success criterion); the single survivor is a vault this build cannot READ, where the offer minted a second secret — arm 3 RED on the pre-fix tree, fixed, `Phase13pControllerTests` + `EncryptionFlowTests` **51/2 green** |
 | — | Closing evidence | NOT-STARTED |
 
 **Deaths and resumes:** none yet.
@@ -903,6 +903,62 @@ keychain access group — the first is forbidden by this run's own fence and the
 something a session can produce. The unified log, which would have carried the window's own
 `migration 2a: legacy iCloud escrow item removed → …` line, has rotated (the KnownIssues row said so
 at the closeout). Recorded as it is rather than dressed up.
+
+### ROW 15 (KnownIssues 32) — THE VERIFICATION, AND THE ONE WORLD IT FOUND
+
+**What the row asks:** prove the store-only-phrase corner unreachable after pre-13x's 3a · 3b · 4a,
+or fix the few lines. The corner: `PhraseOffer.take` / `advanceToPhraseHalf` gate the fresh mint on
+`vaultTie.hasRecoveryWrap` ALONE, so a world where a vault exists but reports no recovery wrap gets
+twelve STORE-ONLY words — which the account's own generation later overwrites
+(`onRecoveryPhraseLanded` → `ProtectionController.landRecoveryWrap`), retiring the first phrase she
+wrote down with nothing said.
+
+**The trace — where that world could come from, arm by arm of `VaultTie.make`:**
+`.signedOut` / `.noVault` / `.unknown` build NO tie (no vault constrains — the store's own phrase is
+correct); `.enrolled` / `.notEnrolled` / `.keysReplaced` carry the vault's own fact
+(`hasRecovery = vault.format.masterWrappedByRecovery != nil`, `EncryptionSession.refresh`). So the
+world needs **a vault row whose `masterWrappedByRecovery` is nil** — and after 3a **no production
+road can make one**: the app's only creation door is
+`EncryptionSession.setUp(passphrase:recoveryWords:)` → `VaultEnrollment.setUp(passphrase:
+recoveryWords:appleHeldCopy:kdf:)`, which passes a real `recoveryKey` into `KeyVaultFormat.create`
+and then sets `.enrolled(hasRecoveryWrap: true)` (the shipped
+`EncryptionFlowTests.setUpEnrollsThisDeviceAndFiresTheHealingHook` already pins that birth, in those
+words); core's wrap-free `VaultEnrollment.setUp(passphrase:)` — the 14b "passphrase wrap only, the
+wrap lands later" shape 3a's own doc says retires — has **no caller outside tests** (and the test
+convenience `EncryptionTestSupport.setUp(passphrase:)` is a shim over the production door); and a
+rotation re-creates the format with `secrets.recoveryKey`, which the ceremonies always carry (the
+words step is unskippable — `PostureSwitchModel.advanceToWords`).
+
+**The one survivor: `.newerFormat`** — a vault that EXISTS and that this build cannot READ. Its tie
+is built `hasRecoveryWrap: false` with every verify refusing, and there `false` does not mean "the
+account has no words", it means "I cannot tell". The offer minted a second secret under it. That is
+precisely what the tie's own doctrine forbids for the other artifact — *"the tie refuses rather than
+letting a second passphrase slip in under the unreadable one"* — and the words deserve the same
+sentence.
+
+**Why the fix is in ONE door:** the passphrase road cannot reach the corner at all —
+`PassphraseSetModel.commit` refuses on `.couldNotCheck` before `advanceToPhraseHalf` runs, and that
+half is private to it. **The nudge's direct offer is the only door that starts at the phrase half**,
+which is why `PhraseOffer.take` is the whole diff: a `VaultTie.unreadableReason` (nil = consultable;
+defaulted, so every construction site rides unmodified) set in the `.newerFormat` arm, and a refusal
+before the mint that says why. Zero `Sync/`, zero core, zero schema.
+
+| Arm | What it holds | Result |
+|---|---|---|
+| 1 — a vault CARRYING the words | routes `.extend`; nothing store-only minted | **green either side** — the verification |
+| 2 — no vault at all | `.minted`, unchanged; the store's own phrase is right | **green either side** — the verification |
+| 3 — a vault present and UNREADABLE | refuses, nothing on the store, nothing on the key file, and it says why | **RED ON OLD** (`Issue recorded` at the `.refused` guard — the offer minted) |
+
+Pin: `Phase13pControllerTests.theStoreOnlyPhraseTransitHasNoWorldLeftExceptAVaultThisBuildCannotRead`.
+Green after: `Phase13pControllerTests` + `EncryptionFlowTests` **51 tests in 2 suites**.
+
+**The refusal sentence is PROVISIONAL** (the twin of `commit`'s shipped `couldNotCheck` line in the
+words' nouns; 13s re-voices) — QUESTIONS #138.
+
+**KnownIssues row 32's disposition at the closeout: RESOLVED** — verified where it can be, fixed
+where it could not be (the unreadable-vault world), with the residual named honestly: an account
+whose vault was born wrap-free by a **14b-era build** and that has never generated words would still
+reach the mint; no build in the tree can create such a vault, and hers is not one (her words exist).
 
 **Reverts:** NO REVERT IN FLIGHT. Every behavioural revert is announced HERE before it starts, taken
 from a COMMITTED state, and restored by `git checkout --` from the REPO ROOT with `git diff` empty

@@ -52,6 +52,13 @@ struct VaultTie {
     /// records it beside the W copy it lands, so a device that typed the
     /// account's words never owes itself the words-regenerated notice.
     var readRecoveryWrapDigest: (() async -> String?)? = nil
+    /// **RUN A batch A2, row 15 (KnownIssues 32): nil = the vault can be
+    /// consulted.** A reason here means a vault EXISTS that this build
+    /// cannot READ (`.newerFormat`) — the one world left in which
+    /// `hasRecoveryWrap` reads false while a vault stands, since after
+    /// pre-13x 3a every production road births the wrap with the vault.
+    /// Defaulted so every existing construction site rides unmodified.
+    var unreadableReason: String? = nil
 
     /// Built from the running services; nil when no vault constrains.
     static func make(services: AppServices?) -> VaultTie? {
@@ -68,12 +75,15 @@ struct VaultTie {
             // A vault EXISTS but this build cannot read it — one-secret
             // cannot verify, so the tie refuses rather than letting a
             // second passphrase slip in under the unreadable one.
-            let refusal = VaultTie.Verify.couldNotCheck(
-                "your account's vault was written by a newer Variorum — update the app")
+            let reason = "your account's vault was written by a newer Variorum — update the app"
+            let refusal = VaultTie.Verify.couldNotCheck(reason)
             return VaultTie(
                 hasRecoveryWrap: false,
                 verifyPassphrase: { _ in refusal },
-                verifyRecoveryWords: { _ in refusal })
+                verifyRecoveryWords: { _ in refusal },
+                // Row 15: `hasRecoveryWrap: false` here does NOT mean the
+                // account has no words — it means this build cannot tell.
+                unreadableReason: reason)
         case .enrolled(let hasRecovery),
              .notEnrolled(let hasRecovery), .keysReplaced(let hasRecovery):
             return VaultTie(
@@ -288,10 +298,35 @@ enum PhraseOffer {
                 controller: controller, vaultTie: vaultTie,
                 startingAt: .extendExistingPhrase))
         }
+        // RUN A batch A2, row 15 (KnownIssues 32 — the phrase-transit
+        // corner's ONE surviving world). After pre-13x 3a every production
+        // road births the vault WITH its recovery wrap, so a vault that
+        // reports none is a vault this build cannot READ — and minting
+        // twelve store-only words under it is the transit the row names:
+        // the account's own generation later overwrites the store's
+        // recovery leg and the first phrase she wrote down stops opening
+        // the library with nothing said. The tie's own doctrine for the
+        // passphrase ("refuses rather than letting a second passphrase slip
+        // in under the unreadable one") is the doctrine for the words too.
+        //
+        // The passphrase door cannot reach this — `commit` refuses on
+        // `.couldNotCheck` before `advanceToPhraseHalf`, which is private to
+        // it. This offer is the one door that starts at the phrase half.
+        if let vaultTie, let reason = vaultTie.unreadableReason {
+            controller.lastError = refusalUnderAnUnreadableVault(reason)
+            return .refused
+        }
         if let words = await controller.generateAndLandRecoveryPhrase() {
             return .minted(words)
         }
         return .refused
+    }
+
+    /// Row 15's sentence — the twin of `commit`'s own couldNotCheck line,
+    /// in the words' nouns. PROVISIONAL; 13s re-voices (QUESTIONS #138).
+    static func refusalUnderAnUnreadableVault(_ reason: String) -> String {
+        "Couldn't check your account for recovery words (\(reason)) — one set of words "
+        + "serves both, so making them waits until it can check."
     }
 }
 
