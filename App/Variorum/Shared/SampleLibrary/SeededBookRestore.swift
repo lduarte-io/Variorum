@@ -22,6 +22,32 @@
 //  `restore`. Before F3 the ensure re-minted a book the reader had
 //  deliberately deleted, on every tutorial open.
 //
+//  RUN A batch A2, row 8 (17l item 1 / KnownIssues 38) — TWO THINGS:
+//
+//    · **The latch.** Discover-then-mint is one act per book per store
+//      (`SampleLibrarySeeder.withSeedLatch`): the launch seed and this road
+//      both read the store and then mint what is missing, with awaits in
+//      between, so a tutorial open inside the launch seed's window used to
+//      leave TWO copies of the book on the shelf (and two Restore presses
+//      did the same).
+//    · **The decision outlives the tombstone.** F3's ensure declines on a
+//      tombstoned reading of the book's name — but Delete Now / Empty Trash
+//      write a purge intent and the janitor then physically REMOVES the row,
+//      and 13j's purged-ids ledger is content-free BY DESIGN (a table name
+//      and a row id; never a book's name, on the client's `purge_intent` or
+//      on the server's `purged_row`). So nothing that survives a purge can
+//      be asked "was a book called this deleted?" — the honest answer is to
+//      record the reader's decision on this device WHILE the evidence
+//      stands, in the one place the seeder already keeps it (its per-book
+//      mark; `AppSession.markSeededBook`). The explicit doors are an ask and
+//      still mint; they mark too, because a device that HAS the book must
+//      treat its later removal as the reader's word.
+//      *The recorded residual:* a device that never ran either road between
+//      the deletion and the purge holds no evidence, and re-mints. The mark
+//      is `UserDefaults` — the seeder's header records the same limit for
+//      "deletion is final" itself, and closing it wants a marker that
+//      travels with the STORE (that file's own note).
+//
 
 import Foundation
 import VariorumCore
@@ -54,7 +80,12 @@ nonisolated enum SeededBookRestore {
         let deleted = try await session.database.read { db in
             try Queries.readingTombstoneExists(db, name: book.name)
         }
-        if deleted { return .declined(.deletedByTheReader) }
+        if deleted {
+            // RUN A batch A2, row 8: RECORD the decision while the evidence
+            // stands — see the file header's note on the purge.
+            session.markSeededBook(book)
+            return .declined(.deletedByTheReader)
+        }
         return .ensured(try await restore(session: session, book: book))
     }
     enum Outcome: Equatable, Sendable {
@@ -97,14 +128,27 @@ nonisolated enum SeededBookRestore {
         let stories = try await Task.detached(priority: .utility) {
             try SampleLibrarySeeder.loadStories(for: book)
         }.value
-        let existing = try await session.database.read { db in
-            try SampleLibrarySeeder.discover(db, book: book)
+        // RUN A batch A2, row 8: the discover-then-mint runs under the
+        // seeder's latch — one at a time per book per store, so this road
+        // and the launch seed (and two Restore presses) can never each mint
+        // a copy of the same book. The discovery is INSIDE, deliberately: a
+        // road that waited and then minted from what it read BEFORE waiting
+        // is the same twin by a slower route.
+        return try await SampleLibrarySeeder.withSeedLatch(session: session, book: book) {
+            let existing = try await session.database.read { db in
+                try SampleLibrarySeeder.discover(db, book: book)
+            }
+            if existing.isComplete(for: stories.map(\.title)), let bookID = existing.bookID {
+                // This device has the book — its later removal is the
+                // reader's word, and the mark is where that word survives
+                // the tombstone's own purge (the header's note).
+                session.markSeededBook(book)
+                return .alreadyWhole(readingID: bookID)
+            }
+            let seeded = try await SampleLibrarySeeder.seed(
+                session: session, book: book, stories: stories, existing: existing)
+            session.markSeededBook(book)
+            return .restored(readingID: seeded.readingID, minted: seeded.minted)
         }
-        if existing.isComplete(for: stories.map(\.title)), let bookID = existing.bookID {
-            return .alreadyWhole(readingID: bookID)
-        }
-        let seeded = try await SampleLibrarySeeder.seed(
-            session: session, book: book, stories: stories, existing: existing)
-        return .restored(readingID: seeded.readingID, minted: seeded.minted)
     }
 }

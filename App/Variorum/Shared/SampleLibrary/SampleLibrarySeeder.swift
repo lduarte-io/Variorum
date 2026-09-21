@@ -554,6 +554,59 @@ enum SampleLibrarySeeder {
         UserDefaults.standard.set(true, forKey: seededDefaultsKey(for: storeVariant, book: book))
     }
 
+    // MARK: - The latch (RUN A batch A2, row 8 — 17l item 1 / KnownIssues 38)
+
+    /// **ONE discover-then-mint per book per store, at a time.**
+    ///
+    /// Every road that mints a seeded book does the same two things with
+    /// awaits between them — DISCOVER what the store holds, then MINT what
+    /// is missing — and the awaits are real: the ~0.5 MB resource parse on a
+    /// detached task, the database read, and one serial runner turn per
+    /// note. So two roads that each correctly saw "no book here" both mint
+    /// one, and the reader ends up with two *Encryption Explained* books on
+    /// her shelf. The two roads are the launch seed (`seedIfNeeded`) and the
+    /// restore road (`SeededBookRestore.restore`, which the tutorial door's
+    /// silent ensure, Help ▸ Restore and the phone's Settings row all ride)
+    /// — F2's question 6 and F3's question 2, and pre-existing for two
+    /// Restore presses.
+    ///
+    /// The latch WAITS rather than declining, and the body re-discovers
+    /// inside it: a second road that skipped would leave the tutorial's
+    /// Lesson 2 pointing at a book that is not there yet, and a second road
+    /// that ran with the `Existing` it read BEFORE waiting would mint the
+    /// twin anyway — the stale projection is the whole defect.
+    ///
+    /// Scoped to the SESSION (one per store) rather than to a process-wide
+    /// key, so parallel test worlds never serialize against each other, and
+    /// to the book, so Sherlock and the encryption book seed side by side.
+    /// A waiter is resumed by the holder's `defer`, so a cancelled body
+    /// still releases; a waiter itself is not cancellable (it is always
+    /// resumed, never dropped).
+    private static var seedsInFlight: Set<LatchKey> = []
+    private static var seedWaiters: [LatchKey: [CheckedContinuation<Void, Never>]] = [:]
+
+    private struct LatchKey: Hashable {
+        let store: ObjectIdentifier
+        let book: String
+    }
+
+    static func withSeedLatch<T>(
+        session: AppSession, book: Book, _ body: () async throws -> T
+    ) async rethrows -> T {
+        let key = LatchKey(store: ObjectIdentifier(session), book: book.name)
+        while seedsInFlight.contains(key) {
+            await withCheckedContinuation { continuation in
+                seedWaiters[key, default: []].append(continuation)
+            }
+        }
+        seedsInFlight.insert(key)
+        defer {
+            seedsInFlight.remove(key)
+            for waiter in seedWaiters.removeValue(forKey: key) ?? [] { waiter.resume() }
+        }
+        return try await body()
+    }
+
     /// What the seed needs to know about sync, and nothing more — the
     /// starter journal's gate, same two facts, same injection shape.
     struct SyncGate {
@@ -654,8 +707,8 @@ enum SampleLibrarySeeder {
             }.value
             let titles = stories.map(\.title)
 
-            var existing = try await session.database.read { db in try discover(db, book: book) }
-            if existing.isComplete(for: titles) {
+            let known = try await session.database.read { db in try discover(db, book: book) }
+            if known.isComplete(for: titles) {
                 save(true)
                 return .alreadyPresent
             }
@@ -666,18 +719,25 @@ enum SampleLibrarySeeder {
                     limit: firstRoundWait ?? Self.firstRoundWait,
                     poll: pollInterval)
                 else { return .awaitingFirstSync }
-                // Whatever the account holds has landed. Ask again.
-                existing = try await session.database.read { db in try discover(db, book: book) }
+            }
+
+            // THE CRITICAL SECTION (row 8): discover, then mint, with no
+            // other road doing the same for this book on this store in
+            // between. The read above stays OUTSIDE it — it is a cheap early
+            // out and, when an account owns the store, the answer it gives is
+            // stale by the length of the wait anyway; the discovery that
+            // DECIDES is this one.
+            return try await withSeedLatch(session: session, book: book) {
+                let existing = try await session.database.read { db in try discover(db, book: book) }
                 if existing.isComplete(for: titles) {
                     save(true)
                     return .alreadyPresent
                 }
+                let seeded = try await seed(
+                    session: session, book: book, stories: stories, existing: existing, pacing: pacing)
+                save(true)
+                return .seeded(readingID: seeded.readingID, stories: seeded.minted)
             }
-
-            let seeded = try await seed(
-                session: session, book: book, stories: stories, existing: existing, pacing: pacing)
-            save(true)
-            return .seeded(readingID: seeded.readingID, stories: seeded.minted)
         } catch {
             return .refused(String(describing: error))
         }

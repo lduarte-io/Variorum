@@ -745,7 +745,7 @@ MAJOR-3 and the F3 record's eight items; the copy constants' homes; the named co
 | Row | Item | Status |
 |---|---|---|
 | 0 | Record skeleton + `run-a-screens/a2/` | **DONE** — this commit |
-| 8 | **17l item 1** — the seeder's discover-then-mint latch + the ensure's purge consult | NOT-STARTED |
+| 8 | **17l item 1** — the seeder's discover-then-mint latch + the ensure's purge consult | **FIXED** — pins `EncryptionBookDoorTests` (3 new), RED measured on the pre-fix tree TWICE (5 issues across the 3; the 5 standing tests green), green after at 24/2. The purge consult is NOT the ledger — the ledger is content-free by design; the trace and the substitution are recorded below |
 | 9 | **17l item 2** — the migration drill's escrow leg + her-Mac READ-ONLY confirmation | NOT-STARTED |
 | 10 | **17l item 3** — her four ruled #90 wording changes, both platforms | NOT-STARTED |
 | 11 | **17l item 4** — the dead Replace-All-Keys door: present from the root | NOT-STARTED |
@@ -756,6 +756,82 @@ MAJOR-3 and the F3 record's eight items; the copy constants' homes; the named co
 | — | Closing evidence | NOT-STARTED |
 
 **Deaths and resumes:** none yet.
+
+### ROW 8 (17l item 1 / KnownIssues 38) — THE TRACE, THE LATCH, AND WHY THE PURGE CONSULT IS NOT THE LEDGER
+
+**The double-mint, traced in the code.** Two roads mint a seeded book, and both do the same two
+things with real awaits between them: **discover** what the store holds
+(`SampleLibrarySeeder.discover` — one database read) and then **mint** what is missing
+(`SampleLibrarySeeder.seed` — a detached ~0.5 MB resource parse, then one serial runner turn per
+note). The roads are `seedIfNeeded` → `perform` (the Mac's launch `.task`, `VariorumApp.swift:193`;
+the phone's first-write furniture) and `SeededBookRestore.restore` (which Help ▸ Restore, the
+phone's Settings row and the tutorial door's silent ensure all ride). Nothing stood between them:
+each read "no book here" correctly, and each minted one, so the reader ended with **two *Encryption
+Explained* books**. Two Restore presses did the same (`restoreSeededBook` never took
+`beginTutorialDoor`'s latch — that one guards the tutorial doors only).
+
+**The fix: `SampleLibrarySeeder.withSeedLatch(session:book:)`** — one discover-then-mint per book
+per store, at a time; the waiter WAITS and then **re-discovers inside the latch**. Both halves are
+load-bearing: a road that declined would leave Lesson 2 pointing at a book that is not there yet
+(the whole reason F2 built the ensure), and a road that waited and then minted from the `Existing`
+it had read BEFORE waiting would mint the twin by a slower route. Keyed by
+`ObjectIdentifier(session)` + the book's name, so parallel test worlds never serialize against each
+other and Sherlock and the encryption book still seed side by side; released in a `defer`, so a
+cancelled body still lets the waiters through. In `perform` the latch wraps the second, DECIDING
+discovery and the seed — the pre-gate read stays outside it as the cheap early out it already was
+(under an account it is stale by the length of the wait anyway), so the ensure never waits behind a
+20-second first-round wait.
+
+**The purge consult — the remedy as written cannot be built, and why.** KnownIssues 38 and 17l item
+1 both name "a `purged_row` consult in `SeededBookRestore.ensure`". Traced: **13j's purged-ids
+ledger is CONTENT-FREE by design, on both sides.** The client's `purge_intent` carries
+`(table_name, row_id)` and the server's `purged_row` the same (`Server/supabase/10_phase13j_purge.sql`
+§3: *"ids only, no…"*); the seeded-book road knows the book only by its NAME, and after the purge
+the `reading` row that carried the name is physically gone (the janitor tombstones the intent and
+removes the family — `PurgeJanitor.completeStaleIntents` + the local family removal). So no ledger,
+local or server, can answer *"was a book called this deleted?"* — and asking "was ANY reading
+purged?" would decline the door because she purged an unrelated book. **The consult's premise is
+wrong on the ledger's own security property**, which is exactly why it is recorded here rather than
+half-built.
+
+**What replaced it (the honest equivalent, in the ruled principle's own terms).** MINOR-N3's rule is
+that the silent ensure declines *where the reader's decision is on record*. The decision's record
+was a TOMBSTONE, which is the reader's word only while the Trash keeps it. So the roads now
+**record the decision while the evidence stands**, in the one place the seeder already keeps it —
+its per-book device mark (`AppSession.markSeededBook` → `SampleLibrarySeeder.markSeeded`, the write
+half of the `seededBookMarkIsSet` leaf F3 added): the ensure marks when it declines on the
+tombstone; `restore` marks when it mints or finds the book whole (a device that HAS the book must
+treat its later removal as the reader's word — and the launch seeder has always marked on
+`.alreadyPresent`, so this is that rule at the doors that lacked it). No schema, no new setting, no
+`Sync/` line.
+
+**The residual, stated rather than papered over:** a device that ran NEITHER road between the
+deletion and the purge holds no evidence and re-mints. And the mark is `UserDefaults` — the
+seeder's own header already records that limit for "deletion is final" itself, and says what closes
+it: a marker that travels with the STORE (the `setting` table), which needs a public write door
+`Operations` does not expose. Both are named at the code.
+
+**A FINDING I did NOT fix, and why (for the orchestrator).** The **launch seeder re-mints a book the
+reader deleted, on a device that never seeded it** — `perform` short-circuits on the device mark
+alone, so on a second device (the book arrived by sync, no mark) a deletion made anywhere is undone
+at that device's next launch, tombstone and all. It is the same family as row 8 but a different road,
+and it is **product-flavoured**: MINOR-N3 deliberately changed only the silent ensure and left "the
+explicit doors unchanged", and whether a launch seed should honour another device's deletion is a
+call about what "deletion is final" means across devices — the author's, not mine. Recorded here for
+a KnownIssues row at the run's closeout with an owner. *(Not covered by row 8's pins; not touched.)*
+
+**The pins — `EncryptionBookDoorTests` (3 new; the suite is 5 → 8).**
+
+| Pin | What it holds | Red-on-old |
+|---|---|---|
+| `aTutorialOpenInsideTheLaunchSeedsWindowLeavesOneBook` | the door-level race, staged deterministically through the seeder's own `pacing` leaf (the launch seed parked AFTER discovery, before its first turn, while the door has its whole turn) | **RED** — `after.books → 2` |
+| `theSeedLatchHoldsOneDiscoverThenMintPerBookPerStore` | the latch's contract without the door's choreography: the second road waits and re-discovers, so it answers `.alreadyWhole` instead of minting a twin | **RED** — two books; the second road answered `.restored` |
+| `aPurgedBookIsNotReMintedByTheTutorialDoor` | delete → the door declines on the tombstone → **the purge** (the intent through the real `requestPurge` door, the family removal as the janitor performs it) → the door again ⇒ still none; and the explicit door still mints, and marks | **RED** — the door re-minted the book once the tombstone was gone |
+
+Measured RED on the pre-fix tree **twice** (the `markSeededBook` leaf existed but nothing called it —
+so the red is a true pre-fix measurement, not a revert): 5 issues across the 3 new tests, the suite's
+5 standing tests green both times. Green after the fix: `EncryptionBookDoorTests` +
+`SampleLibraryTests` **24 tests in 2 suites, ALL GREEN**.
 
 **Reverts:** NO REVERT IN FLIGHT. Every behavioural revert is announced HERE before it starts, taken
 from a COMMITTED state, and restored by `git checkout --` from the REPO ROOT with `git diff` empty
