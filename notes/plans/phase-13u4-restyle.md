@@ -143,7 +143,7 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 | C2 | Selection → take (item 9, R-13u4-4) | the MOVE op + Write door; insurance savepoint load-bearing | state-transition + walk | **DONE** — ONE core op (`moveSpanToNewTake`) in the ruled shape: the insurance savepoint · the span leaving EXACTLY as selected · a take at the fan's END branched-not-chosen · ONE undo entry with the exact-row redo, both halves one transaction each. The Write door is registry-declared and rendered ONLY for a single-block selection (P-2, pinned both ways); no chord, the collision sweep recorded. The AppSpec §9 bullet rides the build. **The walk caught the dedupe branch in use** — a move whose take was already saved writes nothing and the receipt drops its saved-first clause, with the four quiet savepoints behind it proving the cover held. Core **1631/175** · Mac **336/38** · iOS green · 24 captures. PROVISIONALs: **QUESTIONS #128** (a)–(e). Record below |
 | F1 | Index chapter-click lands low (item 10) | trace first — the un-adopted `LandingAuthority` is the recorded hypothesis | red-on-old if confirmed + walk | **DONE — THE DEFECT IS REAL, THE HYPOTHESIS CONFIRMED BY MEASUREMENT, THE ADOPTION SHIPPED, AND ONE RESIDUAL STOP-AND-REPORTED.** Reproduced first: **11 misses in 20 chapter clicks** on Sherlock and the field guide (five landing in a DIFFERENT story, one on a blank page, none self-correcting in 6 s); the trace found the book Index had never adopted `Surface/LandingAuthority` (13u2b's own *"at their next touch"*) and a six-aim hand experiment proved a watched landing converges. Shipped: the adoption, with a `LandingPolicy.bookIndex` whose every number was measured (two earlier policies retired by measurement — 12 blind hops FLING the page 45k → 95k). Red-on-old **behavioural-revert verified** in a worktree: the reverted tree misses 3 of 4 gestures and both pins are red (8667 pt · 4077 pt · the block never reported) where this tree lands them at 0.04 and 0.24. Walked in both voices AND both appearances: a chapter click lands the heading at the top and HOLDS it (captured at 1.5 s and 6 s). **Row 56 adjudicated by the paired interleaved protocol** (6 runs, RED on both trees, byte-identical) and the row-49 Outline arm too (green on both, isolated and under load). **THE RESIDUAL, reported rather than smoothed over:** a COLD column still climbing can defeat any compensator (its height oscillates 39k → 143k → 80k pt in six seconds; 2 of 5 cold first deep clicks stall, `end=gaveup` in the signpost) — the remedy is 13u2b UNIT 1's manifest half on this surface, which this brief's stop rule makes the architect's. KnownIssues row opened; QUESTIONS **#129**. Record below |
 | S1 | The Settings shape (items 4/5/6/7 + row 59 + the 2a Settings fork) | tabs · search · fold fix · card grammar · ⌘[/unindent audit · merge-shortcut face; then walk row 53's two re-font occasions once reachable | walk both voices + appearances, captured | **DONE** — Settings is NINE panes beside a search field (her item 6, read together with 4 and 5 as ONE ask: what she looks for in Settings is *what the app can do*). **Item 4**: one pure brain over the catalog PLUS the ⌘/ helper's own two lists read-not-copied, so her literal case works — "callout" answers with the word *and* ⌥⌘C. **Item 7 answered at the CLASS**: three menus rendered the four plain structural rows from hard-coded literals beside chorded ceremony rows, teaching that only the ⌥ variant had a key; all six now come from the registry through the ONE formatter, red-on-old measured in a worktree (**5 of 7 pins red, 2 guards green**, and the revert's own dump IS the defect printed). **Item 5**: an audit first — ⌘[ *was* Back, and 13f W16's stated reason (*"the platform's own back/forward idiom"*) measured TRUE of Finder/Safari and FALSE of Apple Notes, Pages, Xcode and VS Code; so ⌘[ outdents and back/forward moved to ⌥⌘[ / ⌥⌘], which is Apple Notes' own resolution of the same collision — PROVISIONAL, **#130**, swept, and said truthfully by the registry, both menu rows, the ⌘/ helper and the tooltips (which now READ the declared chord instead of typing one). **KnownIssues row 59 CLOSED** — and it took TWO moves, the second found by the walk: the nine-pane split alone left the fold alive, because the palette row still stood between the voice and Light & dark. **Row 53 REPRODUCES on BOTH occasions and is REPORTED, not built** (the brief's rule): a re-font that SHRINKS the document strands the surface, one that GROWS it does not; the store is untouched and ⌘↑ heals it. **The walk caught a word no pin could**: typing "unindent" — her own word — found nothing, because every pin typed the app's word "outdent". Mac **357/47**; core and iOS not owed. PROVISIONALs: **#130**, **#131** (a)–(f). Record below |
-| S2 | Library & masthead faces (item 1 + rows 50/51/54) | click-to-cycle stamp + word-counter condense (word-target offer preserved) · `FlippingStamp` hoist + oracle edges · F-0 residue · Timeline voice | walk, captured | NOT-STARTED |
+| S2 | Library & masthead faces (item 1 + rows 50/51/54) | click-to-cycle stamp + word-counter condense (word-target offer preserved) · `FlippingStamp` hoist + oracle edges · F-0 residue · Timeline voice | walk, captured | **DONE** — **her item 1 is a CLICK on both faces and a Settings toggle on neither**: the masthead cycles edited → created → *a little clock icon* and the bottom bar's counter full → only the note → only this block → *just an icon*, each remembered as ONE local choice, so **a note she has never opened arrives wearing it** (walked). **Her keep survives where it mattered most:** her click took the gesture the word-target setter had, so the setter is on the counter's context menu in EVERY face — the walk opened it from the bare icon and set 500w, which then rides the condensed faces. **Rows 50 and 54 CLOSED, row 51 narrowed to its midnight-rollover note alone**: the two mechanical extractions landed with **zero test edits** (81/14), the `FlippingStamp` hoist likewise (34/5), and both DEBUG-oracle edges were fixed as ONE defect — the two-window one **measured RED first**. Row 54 turned out to be two defects: the system sans AND a raw stored stamp column, the 18h ladder's R3-2 met a third time. Mac **328/47** incl. the spine's eleven types; core and iOS NOT owed (zero `Sources/`, zero `Shared/`), the marker stays 8. PROVISIONALs: **QUESTIONS #132** (a)–(h). Record below |
 | S3 | Chrome singles + the conformance sweep (rows 44/45/46/63/67/68/69 + the Trash fork) | 27-site sweep + grep pin · tag sheet voiced · indicator ring · Restore Tutorial confirm · "pools" lesson sweep (re-seed consequence recorded) · seal-blind rename field · `blockNamingDoor` hygiene · Trash cards · closing conformance walk against the reference artifact | walk, captured | NOT-STARTED |
 | F2 | The shrink-re-font strand (KnownIssues row 53, pulled in at R-13u4-7) | the full-document editor's blank-below-the-last-line after a SHRINKING re-font; ⌘↑ heals — the trace's relayout/anchor hint; S1's record has the reproduction | red-on-old + walk on both occasions | NOT-STARTED (runs after S3, before the ladder) |
 | F3 | The Index cold-column heights (F1's residual, pulled in at R-13u4-8) | the Index pane's note rows stand at length-derived heights (`ProseHeightModel`/`FlowHeightEstimate` over cached `blockExtents` — 13u2b UNIT 1's shape on this surface), so the column's geometry is known before the aim; F1's record has the oscillation measurements | cold-click trial table red-on-old + walk | NOT-STARTED (runs after F2, before the ladder) |
@@ -2979,24 +2979,34 @@ The checkpoint protocol binds from the first commit.
 
 ## UNIT S2 RECORD — LIBRARY & MASTHEAD FACES (item 1 + rows 50 · 51 · 54)
 
-**WHAT THIS UNIT DID NOT DO (the record's first line, written at the OPEN and re-stated at the
-CLOSE against what actually shipped):**
+**WHAT THIS UNIT DID NOT DO (the record's first line, written at the OPEN and RE-STATED AT THE
+CLOSE against what actually shipped — every bullet verified over the whole unit diff,
+`git diff --name-only 56f85b3e..HEAD`):**
 
-- It did not touch `Sources/VariorumCore/` — **PENDING at the open; verified at the close**. No
-  core, no `Sync/`, no schema, no migration, no `Server/`; the lockstep marker stays **8**.
-- It did not touch the EDITOR SEAM (`BlockRangeIndex` · `EditorTextView` · `TypedReturn` ·
-  `PaneTextAuthority` · `StructuralSeamEdit` · `runStructural` and its identity oracle) —
-  **PENDING at the open**.
-- It did not build a SETTINGS TOGGLE for either condensation. Her mandate is explicit —
+- **It did not touch `Sources/VariorumCore/` — ZERO FILES**, and **no `Shared/` file moved**. No
+  core, no `Sync/`, no schema, no migration, no `Server/`; **the lockstep marker stays 8**, no
+  core run was owed, no iOS build was owed, and nothing here is mobile-visible.
+- **It did not touch the EDITOR SEAM.** `BlockRangeIndex` · `EditorTextView` · `TypedReturn` ·
+  `PaneTextAuthority` · `StructuralSeamEdit` · `StructuralGesturePlanner` · `runStructural` and
+  its identity oracle · `MarkdownActs` — none is in the diff, and neither is `EditorViewModel`
+  or `EditorSurfaceController`. `PostDetailView.swift` IS, and **only its DEBUG oracle**.
+- **It did not build a SETTINGS TOGGLE for either condensation.** Her mandate is explicit —
   *"I don't necessarily want an appearance setting - I want these to be changed by clicking on
-  them"* — so both faces cycle on a click and nothing about them appears in Settings.
-- It did not change one WORD of what a stamp says: the words are `TimeStampFace`'s, the one
-  brain, in every state of the cycle.
-- It did not take the word-target OFFER away from any counter state (the brief's explicit keep).
-- It did not build the midnight-rollover tick (row 51's record-only note) unless it fell out of
-  the hoist for free — **stated at the close**.
+  them"* — so both faces cycle on a click and **nothing about either appears in Settings**.
+- **It did not change one WORD of what a stamp says.** Every face speaks `TimeStampFace`'s
+  answer, the one brain; the collapsed clock says it on hover instead of on the row. The two
+  bars' counts are byte-identical to what they have always said (*"12w block"* / *"12w take"*,
+  *"in note"* / *"note"*) — the unit condensed the counter, it did not re-word it.
+- **It did not take the word-target OFFER away from any counter state** (the brief's explicit
+  keep): the context menu offers it in all four faces, and the walk opened it from the bare icon.
+- **It did not build the midnight-rollover tick** (row 51's record-only note). The hoist did not
+  make one free — there is no clock in the shared component — so the row is narrowed to it alone
+  rather than closed.
+- **It did not re-word the Library card's flip or make it a remembered cycle** (R-Q17's own
+  vocabulary, untouched); what the card gained is the shared button.
 - It did not do S3's rows (the 27 `fixedSize` sites · the tag sheet · the indicator ring · the
-  Trash cards · the lesson sweeps), and no other 13u4 unit's work was touched.
+  Trash cards · the lesson sweeps), did not start F2's or F3's newly-pulled-in work, and no
+  other 13u4 unit's work was touched.
 
 ### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
 
@@ -3011,7 +3021,7 @@ CLOSE against what actually shipped):**
 | 6 | **Row 54** — the Timeline rows take the voice's type + pin | DONE (this commit) — **10 tests in 3 suites passed**; the type AND the raw stamp column both fixed |
 | 7 | QUESTIONS #132 (the PROVISIONALs) | DONE (this commit) — (a)–(h); next free moves to **#133**. *(Written AFTER the walk, deliberately: three of the eight are calls the walk sharpened.)* |
 | 8 | The WALK on the dev-store Debug build — both voices AND both appearances, captured | DONE (this commit) — 26 captures + 27 crops; both cycles clicked through every state, a note she has never opened arriving in the remembered one, the target door opened FROM the icon, the Timeline in all four voice/appearance combinations |
-| 9 | Closing suites + the ledger's S2 row + the KnownIssues rows (50 · 51 · 54) | NOT-STARTED |
+| 9 | Closing suites + the ledger's S2 row + the KnownIssues rows (50 · 51 · 54) | DONE (this commit) — **328 tests in 47 suites passed**, the acceptance spine's eleven types included; rows 50 and 54 CLOSED, row 51 narrowed |
 
 ### THE READING (done in this session's own context, in the brief's order)
 
@@ -3292,4 +3302,134 @@ target **cleared**, and **both new local keys deleted** (`defaults delete … ma
 walk — verified by `defaults read`, which now shows only the `appearanceChoice = system` it
 showed at the start. **Zero instances** after the quit.
 
-*(The rest of this record fills in as the pieces land.)*
+### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
+
+**NONE — said explicitly, as the brief asks.** `BlockRangeIndex`, `EditorTextView`,
+`TypedReturn`, `PaneTextAuthority`, `EditorViewModel`, `EditorSurfaceController`,
+`StructuralSeamEdit`, `StructuralGesturePlanner`, `runStructural` and its identity oracle,
+`MarkdownActs` — not one of them is in the diff.
+
+**`Sources/VariorumCore/` — ZERO FILES** and **`Shared/` — ZERO FILES** (both verified by name
+over the whole unit diff, `git diff --name-only 56f85b3e..HEAD`). So `Sync/`, the schema, the
+migrations and `Server/` are untouched by construction, **no core run was owed**, **no iOS build
+was owed** (nothing here is mobile-visible: the phone has its own bar and its own note header),
+and the **lockstep marker stays 8**.
+
+**The whole unit is fourteen source files and four test files:**
+
+- **NEW: `Core/Views/FlippingStamp.swift`** (row 51's hoist + `StampFlipHint`) ·
+  **`Features/Library/LibraryListingReads.swift`** and
+  **`Features/Library/LibraryCatalogTagActs.swift`** (row 50's two moves).
+- **MOVED: `Features/Editor/WordTargetFace.swift` → `Core/Views/WordTargetFace.swift`**, and
+  rebuilt there (item 1b) — two features render it, so CLAUDE.md's placement rule sent it to the
+  shared home at this touch.
+- `Features/Takes/MastheadStamp.swift` (item 1a: `StampFace`, the cycle, the memory, the
+  collapsed face) · `Features/Takes/PostDetailView.swift` (**the DEBUG oracle only** — per-owner
+  entries, `claimStamp`/`recordStamp`/`recordStampFace`/`releaseStamp`, and the new `stampFace`
+  read; no product road in that file moved) · `Features/Takes/TakesBottomBar.swift` (the counts
+  as parts) · `Features/Editor/CommitBar.swift` (the counts as parts; `noteTotalFace` retired
+  into `countsFace(narrowed:)`) · `Features/Library/LibraryTimeFace.swift` (the hoist's two call
+  sites, the oracle's ownership, the two DEBUG modifiers) ·
+  `Features/Library/LibraryCatalogView.swift` + `LibraryCatalogModel.swift` (row 50) ·
+  `Features/Timeline/TimelineView.swift` (row 54) · `Registry/OpsRefusalCopy.swift` (the
+  counter's menu copy and its re-worded hover).
+- Tests: **NEW** `StampOracleOwnershipTests` (3) · `BarCountsFaceTests` (8) ·
+  `TimelineVoiceTests` (3); `MastheadStampTests` rewritten to the ruling (+2 pins, +the scrubbed
+  `defaultAppStorage` seam).
+
+### THE DEFAULTS-FAMILY NOTE (the brief's rule for any new key)
+
+**Two new keys, both stated at their own declarations:** `mastheadStampFace` (`StampFace.key`)
+and `barCountsFace` (`CountsFace.key`).
+
+| Question | Answer |
+|---|---|
+| Synced? | **No.** Local to this Mac, zero schema, zero `setting` key, the marker stays 8 — the `appearanceChoice` / `readModeOutlineShown` / `libraryCatalogSort` class: how she likes a stamp or a counter to LOOK is this machine's taste, not document semantics |
+| Row 43's family (per-note keys that outlive their note)? | **No** — neither is per-note. There is ONE value for the app and nothing to evict when a note dies, which is also exactly what her *"a new note would open with only a clock icon"* asks for |
+| Row 42's family (suites writing the DEV-STORE app's `.standard`)? | **Yes, and closed at the pin rather than recorded.** The test host IS `io.lduarte.Variorum.debug`, so `@AppStorage`'s default store is her dev store's own domain. The seam is SwiftUI's own and needed no plumbing: **every mounted pin mounts under `.defaultAppStorage(<a scrubbed suite>)`**, so no pin can read what a walk left behind nor leave anything behind for one. The walk then deleted both keys at its end, verified by `defaults read` |
+| A stored value that is not one of the cases? | Reads as the default (`.edited` / `.full`) — the posture every local key in this app takes, pinned both ways |
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **The counter's click CYCLES and the word-target door moved to the context menu.** The one
+   real design call, and both halves of it are hers (the click mandate; the keep). The menu
+   carries the four faces beside the target row so the cycle is legible rather than folklore.
+   **QUESTIONS #132(c)** has the two alternatives. Reversing: swap the `Button`'s action with
+   `openTarget()` and drop the face rows.
+2. **The remembered choice is ONE choice for every note** (her sentence's own reading), recorded
+   as **#132(a)** with the per-note alternative. Reversing: key both keys by post id.
+3. **The collapsed clock stands for the EDITED stamp** whatever face she cycled past, so its
+   hover never says "created" behind a clock. **#132(b)**.
+4. **The icon is `text.word.spacing`, and `number` was rejected outright** — `#` is this app's
+   TAG door, four inches above in the same window. Measured present on this OS before it was
+   written (a six-line `NSImage(systemSymbolName:)` probe), rather than assumed. **#132(e)**.
+5. **`noteTotalFace` was retired rather than kept beside the new face.** It hard-coded the
+   note's total, and a remembered face cannot live in two views that each decide what to say.
+   The width's own say is now one rule (`narrowed`) that can only shorten. Reversing: a second
+   view.
+6. **The Timeline's stamps were re-worded, not only re-typed.** Row 54 named the typeface; the
+   reading found the raw stored column beside it. Half a fix would have been a row that wears
+   the voice while speaking a database column. The 18h ladder's R3-2 is the precedent and this
+   is its third instance. **#132(h)**; reversing is two lines.
+7. **The Timeline asks `LibrarySortFace.stampSubject` rather than repeating it.** A pure rule
+   read across features is not the cross-feature prohibition's class (that binds state and
+   ownership); a second copy of a rule IS the drift class this unit closed twice elsewhere.
+8. **The two oracle edges were fixed, not waived**, although both are DEBUG-only and neither is
+   a shipped consequence — because the failure they cause is a RED pin that proves nothing,
+   which costs a future session exactly what row 56 has cost several. The two-window one was
+   measured red first anyway.
+9. **The midnight rollover was NOT built** (the brief's rule, and the hoist did not make it
+   free). Row 51 is narrowed to it alone.
+10. **The Library CARD's flip did not become a remembered cycle.** Her sentence is about the
+    note's stamp; the card's pair is a different vocabulary (the stated day ↔ the sort's own
+    stamp) that R-Q17 ruled at 17q. What the card gained is the shared button, nothing else.
+11. **Every new chrome `fixedSize` text carries a deliberate `lineLimit`** (P-8): the two new
+    faces' labels are `lineLimit(1)`, and `FlippingStamp`'s own doc says why the LABEL must
+    carry it when the component is `fixedSize`. The 27 OLD sites are S3's (R-13u4-5).
+
+### CLOSING RUNS (at the unit's END — never the full suite at the start)
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| **Mac** — the three new suites, the whole stamp family, every Library/Pool suite the two extractions pass under, both bars' suites, the registry walk, the chord-legibility pins, the copy-register and literal-colour greps, the note box, the Timeline's own suite, the window smoke — AND the acceptance spine under its ELEVEN REAL TYPE NAMES (the `-only-testing` file-name trap, met by every unit of this phase) | `xcodebuild test-without-building -scheme Variorum -destination platform=macOS` with `-only-testing:` for `BarCountsFaceTests` · `TimelineVoiceTests` · `StampOracleOwnershipTests` · `MastheadStampTests` · `MastheadLayoutTests` · `LibraryCardStampsTests` · `LibraryCardNameTests` · `LibraryRowAlignmentTests` · `LibrarySortMenuTests` · `LibraryDayFilterTests` · `LibraryPreviewBrainTests` · `LibraryPanelHostTests` · `MorningListTests` · `TagChipLeafTests` · `NoteCardSmartBooksTests` · `PoolCardPreviewTests` · `PoolPageTests` · `TagAndFolderTests` · `FreeTypedTagTests` · `LibraryTagFaceTests` · `CommitBarLayoutTests` · `ChordLegibilityTests` · `CapabilityRegistryTests` · `LifecycleFacesTests` · `ConfirmationsSettingTests` · `NoLiteralColourTests` · `CopyRegisterPinTests` · `NoteBoxCompositionTests` · `NoteBoxGeometryTests` · `TimelineAndReadingsTests` · `BlockHistoryPaneTests` · `NoteVersionsPaneTests` · `TrayPanelMoveTests` · `SideColumnTests` · `EditorWindowSmokeTests` · `BookRedesignMountTests` + the eleven `Tutorial*` types | **328 tests in 47 suites passed** (exit 0, no skips) |
+| The piece runs, in order, each recorded above | the extractions **81/14** · the hoist **34/5** · the oracle sweep **25/4** (RED first: 1 test, 2 issues, exit 65) · item 1a **22/3** · item 1b **22/3** · row 54 **10/3** | all green |
+| **Core** — NOT OWED: the whole unit diff lists **zero files under `Sources/`** | — | n/a |
+| **iOS** — NOT OWED: **no `Shared/` file moved**, and nothing here is mobile-visible | — | n/a |
+
+No full-suite run was made at this unit's START; the plan's closeout-refresh baselines stand as
+the baseline (the standing rule).
+
+### CARRIED TO THE PHASE CLOSEOUT (from this unit)
+
+1. **QUESTIONS #132 (a)–(h)** joins her ratify bundle; next free moves to **#133**.
+2. **KnownIssues rows 50 and 54 are CLOSED; row 51 is NARROWED to its midnight-rollover note
+   alone**, owner re-stated as a 17 standing-fixes entry (one shared midnight tick + a pin; the
+   door is hers to open).
+3. **A MOBILE PARITY CANDIDATE, named rather than assumed:** the phone has its own bar and its
+   own note header, and none of this unit's code compiles into it. What the phone MIGHT owe is
+   the SHAPE — a counter that condenses on a tap, a stamp that cycles — and that is the mobile
+   catch-up's call. The words would cost nothing new: `TimeStampFace` is already core.
+4. **A WALKER FACT** for `Tools/WalkKit/README.md` at its next touch: a `.contextMenu`'s rows
+   land relative to the RIGHT-CLICK point, so a row's coordinates must be re-measured from a
+   fresh full-screen capture after every open — and the re-activation rule applies between that
+   capture and the click (mine did not, and a typed `500` went into a note's text). Also:
+   `sips --cropOffset` behaved correctly here, contrary to UNIT S1's note, EXCEPT when the
+   offset ran past the image's own height, which returns a blank PNG that reads exactly like
+   *"the surface drew nothing"*.
+5. **The tutorial was NOT edited**, and nothing in it names either face, so nothing became
+   false. No re-seed consequence from this unit.
+6. **Two of this unit's commits carried ORCHESTRATOR edits** to `notes/plans/phase-13u4-restyle.md`
+   and `notes/KnownIssuesAndTechDebt.md` (the R-13u4-7 / R-13u4-8 rulings and the F2/F3 ledger
+   rows, written while this unit ran and swept up by `git add -A`). Said here so the record of
+   who wrote what is honest; nothing of theirs was overwritten — every edit this unit made to
+   those files was a targeted replacement.
+
+### WHAT A FRESH SESSION WOULD NEED TO FINISH THIS
+
+Nothing. Everything is committed and pushed: the two mechanical extractions and their
+zero-test-edit proof, the `FlippingStamp` hoist, both oracle edges (the first measured red),
+her two click-cycles with their remembered local choices, the word-target door's new home, the
+Timeline's voice and its worded stamps, 16 new pins in three files plus the rewritten masthead
+suite, QUESTIONS #132, the KnownIssues edits (50 and 54 closed, 51 narrowed), the walk captures
+(gitignored, 26 + 27 crops, listed above) and this record. What is OPEN is hers: **#132**. What
+is owed elsewhere: **row 51's midnight tick**, which this unit deliberately did not build.
