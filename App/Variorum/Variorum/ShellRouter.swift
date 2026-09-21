@@ -16,6 +16,7 @@
 //  decides what a destination means, the doors only name one).
 //
 
+import Foundation
 import Observation
 
 @MainActor
@@ -179,7 +180,54 @@ final class ShellRouter {
     /// and parks in the right order — had no way to be asserted through the
     /// real road. The mounted shell publishes its door here; the pin calls
     /// it. Nothing production reads it.
-    static var blockNamingDoor: ((SidebarSelection, String?) -> Void)?
+    ///
+    /// **13u4 UNIT S3 — KnownIssues row 46's surviving item: THE REGISTRANT
+    /// NAMES ITSELF.** It used to be one bare `static var` that every
+    /// `RootView` mount OVERWROTE and exactly one of eight test mount sites
+    /// cleared. The mechanism that makes that a defect rather than untidiness:
+    /// a shell that has been torn down leaves its closure standing in a
+    /// process-global, capturing that shell's router and session — so the
+    /// next reader drives a DEAD shell, and it was only ever green because
+    /// the pin's own mount happened to be the last publisher. That is an
+    /// ordering accident, not a guarantee, and it is exactly the shape UNIT
+    /// S2 fixed at the two stamp oracles: **a registration keyed by its
+    /// subject with no record of who registered it.** Same idea here, same
+    /// two rules — the registrant names itself, and a teardown clears only
+    /// what it still owns.
+    private static var blockNamingDoors: [UUID: (SidebarSelection, String?) -> Void] = [:]
+    /// Publication order, so the read answers from the MOST RECENT mount —
+    /// which is what a pin that just mounted a shell means by "the door".
+    private static var blockNamingOwners: [UUID] = []
+
+    /// The door of the most recently published shell, or nil when none is
+    /// standing. Read-only on purpose: the way a door goes is its owner
+    /// releasing it (or `forgetBlockNamingDoors()`, the pin's own reset —
+    /// `PostDetailOracle.resetStamp`'s precedent: a pin owns nothing, so its
+    /// door is unconditional).
+    static var blockNamingDoor: ((SidebarSelection, String?) -> Void)? {
+        blockNamingOwners.last.flatMap { blockNamingDoors[$0] }
+    }
+
+    static func publishBlockNamingDoor(
+        owner: UUID, _ door: @escaping (SidebarSelection, String?) -> Void
+    ) {
+        blockNamingDoors[owner] = door
+        blockNamingOwners.removeAll { $0 == owner }
+        blockNamingOwners.append(owner)
+    }
+
+    /// Clears ONLY this owner's registration — a shell leaving cannot take
+    /// down a shell still on screen (the second window's case).
+    static func releaseBlockNamingDoor(owner: UUID) {
+        blockNamingDoors[owner] = nil
+        blockNamingOwners.removeAll { $0 == owner }
+    }
+
+    /// The test-suite reset. Unconditional, deliberately.
+    static func forgetBlockNamingDoors() {
+        blockNamingDoors.removeAll()
+        blockNamingOwners.removeAll()
+    }
 #endif
 
     // MARK: - The navigation doors (menu + strip)

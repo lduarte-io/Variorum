@@ -410,7 +410,7 @@ struct ShellLandingDoorTests {
             defer {
                 window.orderOut(nil)
                 window.close()
-                ShellRouter.blockNamingDoor = nil
+                ShellRouter.forgetBlockNamingDoors()
                 session.commandRouter.forgetCurrentBlock(for: note.id)
                 UserDefaults.standard.removeObject(forKey: "postMode.\(note.id)")
             }

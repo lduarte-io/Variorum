@@ -3543,8 +3543,8 @@ CLOSE against what actually shipped):**
 | 1 | The record + the READING (the brief's four reading lists, in order) | DONE (this commit) |
 | 2 | **Row 44 (R-13u4-5)** — the `fixedSize` sweep: a deliberate per-site `lineLimit` + the class-closing grep pin | DONE (this commit) — **45 sites, 34 swept, 11 already deliberate; the pin's own predicate run over the PRE-sweep blobs reports 34 offenders and over this tree 0**; 140 tests in 23 suites green |
 | 3 | **Row 45** — `BlockTagAssignmentSheet` takes the voice | NOT-STARTED |
-| 4 | **Row 46** — `ShellRouter.blockNamingDoor` on S2's ownership idea | NOT-STARTED |
-| 5 | **Row 63** — the indicator ring respects the gutter's faces (red-on-old owed) | DONE (this commit) — 8 pins; **67 tests in 9 suites green**. The BEHAVIOURAL REVERT is **PENDING** (piece 5b, named below — it starts only now that this state is committed) |
+| 4 | **Row 46** — `ShellRouter.blockNamingDoor` on S2's ownership idea | DONE (this commit) — the registrant names itself (the shell's own `windowID`); 4 pins; the mechanism traced below (latent, the architectural arm) |
+| 5 | **Row 63** — the indicator ring respects the gutter's faces (red-on-old owed) | DONE (this commit) — 8 pins; **67 tests in 9 suites green**. The BEHAVIOURAL REVERT is **DONE** — 3 of 8 pins RED on the reverted tree (4 issues), the 5 guards green |
 | 6 | **Row 67** — `Help ▸ Restore Tutorial…` joins the SwiftUI `.alert` grammar | NOT-STARTED |
 | 7 | **Row 68** — the "pool & scraps" lesson swept against `SnippetsCopy` (H pattern; re-seed consequence recorded) | NOT-STARTED |
 | 8 | **Row 69** — Block History's rename field no longer OPENS under a seal | NOT-STARTED |
@@ -3765,3 +3765,60 @@ takes the same edge · the one decision's three answers (card · badge · yields
 matched NOTHING and was silently dropped — the `-only-testing` FILE-name trap every unit of this
 phase has met; the real types are `CommentCompositionTests`, `CommentPanelKeysTests` and
 `CommentsPanelModelEditorTests`, and they are in the unit's closing run.)*
+
+**THE BEHAVIOURAL REVERT (piece 5b) — measured, not reasoned.** The pre-revert state was
+COMMITTED first (the checkpoint rule), then `git worktree add /tmp/s3revert HEAD` with ONE
+behavioural line put back — `let left = ideal`, the shipped rule — and everything else (the
+`gutterTrailingX` parameter, `commentGutterFaces`, both call sites, the pins) kept, so what is
+measured is the RING'S BEHAVIOUR and not the refactor.
+
+| Pin | On the reverted tree |
+|---|---|
+| `theRingStopsAtTheCalloutGlyphItUsedToCrossBy4Points` | **RED, 2 issues** — `rect.minX → 192.0` vs `glyph.maxX → 196.0`: **the 4 pt of ring drawn through the glyph, printed** |
+| `theRingStopsAtTheCommentBadgeToo` | **RED** — `52.0` vs `56.0`, the same 4 pt at the narrow gutter |
+| `theRingOnlyEverYieldsAndNeverReachesTheProse` | **RED** — the clamp: `192.0` where the prose's own edge is `200.0` |
+| `aMarginCardNeverMovesTheRing` · `anEmptyGutterLeavesTheShippedRectByteIdentical` · `inlineCommentsLeaveTheGutterEmpty` · `theBlockHighlightTakesTheSameGutterEdge` · `theGutterDecisionIsOneRuleWithThreeAnswers` | GREEN on both — recorded as GUARDS, not as evidence |
+
+**3 of 8 red, 4 issues, `** TEST EXECUTE FAILED`; 8 of 8 green on this tree.** The worktree and
+its DerivedData were removed afterwards.
+
+### ROW 46 — THE SHELL'S DEBUG DOOR NAMES ITS OWNER (piece 4)
+
+**What survived of row 46** (its park half closed at 13u2 UNIT E): `ShellRouter.blockNamingDoor`
+— a process-global DEBUG closure **published by every `RootView` mount and cleared by ONE of
+eight test mount sites**. The row calls it latent and green in the adverse order, and the
+brief's own rule lets a structural fix stand without a red pin **if the mechanism is traced and
+stated**. It is:
+
+**THE MECHANISM.** The closure `RootView` publishes captures THAT shell's `open(_:blockID:in:)`
+— and so that shell's `router` and its `session`. A bare static means the LAST mount wins and a
+teardown takes everything, so after any shell is torn down the global still holds a closure over
+a dead one: a reader drives a router nobody is showing and parks a landing nobody will consume.
+It measured green only because the pin that reads the door mounts its own shell LAST — an
+ordering accident one test-file reshuffle from being false, not a guarantee. It is the same
+shape UNIT S2 fixed at both stamp oracles and stated in one line there: **a registration keyed
+by its subject with no record of WHO registered it.**
+
+**The fix is that unit's idea at a third site**, and it is two rules: the registrant names
+itself, and a teardown clears only what it still owns.
+
+- `ShellRouter` holds `[UUID: door]` plus a publication order; `blockNamingDoor` is now a
+  READ-ONLY computed property answering from the most recent registrant.
+- `publishBlockNamingDoor(owner:_:)` / `releaseBlockNamingDoor(owner:)` are the two doors, and
+  `forgetBlockNamingDoors()` is the pin's unconditional reset — `PostDetailOracle.resetStamp`'s
+  own precedent (*"it is the pin's door, and a pin owns nothing"*).
+- `RootView` publishes under **its own `windowID`** — the identity the window registry already
+  keys on, rather than a second `@State` UUID beside it — and releases it in the `onDisappear`
+  it already has.
+
+**ONE test line changed and it is the API's own change:** `ShellLandingTests`' teardown reads
+`ShellRouter.forgetBlockNamingDoors()` where it assigned `nil`; the pin's body, its settle and
+its two assertions are untouched and ride green.
+
+**The pins** (`ShellDoorOwnershipTests`, 4): the read answers from the most recent shell · a
+departing shell clears ONLY what it owns (the second window's door survives the first's
+teardown, and the last teardown leaves nothing standing) · releasing what you do not own, or
+twice, is a no-op · re-publishing under one owner replaces rather than stacks.
+
+**Run:** `ShellDoorOwnershipTests` · `ShellLandingTests` (the mounted road's own pin, its body
+untouched) · `IndicatorGutterTests` → **14 tests in 3 suites passed**.

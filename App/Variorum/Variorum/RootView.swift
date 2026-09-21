@@ -348,6 +348,10 @@ struct RootView: View {
         }
         .onDisappear {
             windows.unregister(windowID)
+#if DEBUG
+            // Row 46: this shell's own registration goes with this shell.
+            ShellRouter.releaseBlockNamingDoor(owner: windowID)
+#endif
             // 13j J11: closing the window is a leaving for every note its
             // panes were showing.
             SavepointOnLeave.windowClosing(workspace: router.workspace, session: session)
@@ -934,10 +938,17 @@ struct RootView: View {
 
 #if DEBUG
     /// Publishes THIS shell's block-naming door for round 2's MINOR-1 pin —
-    /// see `ShellRouter.blockNamingDoor`. Installed on appear beside the
-    /// other root wiring; the pin clears it in its own teardown.
+    /// see `ShellRouter.blockNamingDoor`.
+    ///
+    /// **13u4 UNIT S3 (row 46): it publishes under THIS shell's own
+    /// `windowID` and releases it when this shell leaves**, so a torn-down
+    /// mount can neither leave its closure standing over a live one nor
+    /// take a live one down on its way out. Before, every mount overwrote
+    /// one bare static and one of eight test mount sites cleared it. The
+    /// token is the window's own identity — the one the registry already
+    /// keys on — rather than a second `@State` UUID beside it.
     private func publishBlockNamingDoor() {
-        ShellRouter.blockNamingDoor = { destination, blockID in
+        ShellRouter.publishBlockNamingDoor(owner: windowID) { destination, blockID in
             open(destination, blockID: blockID)
         }
     }
