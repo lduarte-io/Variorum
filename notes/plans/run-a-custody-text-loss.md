@@ -1558,6 +1558,18 @@ verification: the six commits spot-checked, tree clean, `QuickNoteParkTests` re-
 are unaffected — every batch's spine claim rode the FULL suite or the eleven type names).
 **Next: the implementer's sanity pass over `f6d7b960..096749ae`; then round 2, fresh reviewer.**
 
+**THE SANITY PASS (the A1 implementer, 2026-09-21): CLEAR on all four, nothing raised, nothing
+edited.** Binding 4's three clauses + the newest-text note walked at the fixed code; two un-staged
+roads checked by hand (decline → close → ⌘Q now proceeds — the fix also closes round 1's
+"undiscoverable escape"; decline → store recovers → ⌘Q proceeds through `clear()`); the fix's
+premise verified structurally (exactly ONE production `park(` caller, so a re-park is always the
+same pad continuing the same capture); the assert's failure direction confirmed right (release
+parks rather than drops); the comment and the R1-10 sentences confirmed against their records.
+Its runs: the capture family 49/9 green (literal selectors), core builds, the two mobile pins 6/2.
+**ROUND 1 CLOSES: 1 MAJOR fixed · 1 MINOR split (comment fixed, behaviour change dismissed as
+wrong) · 2 NIT fixed · 0 disputes outstanding. ROUND 2 opens with a fresh reviewer anchored on
+`notes/plans/run-a-ladder-round1.md`.**
+
 ---
 
 ## CLOSEOUT DUTIES (the standing ritual, run-shaped — nothing here runs until the ladder ends)
