@@ -4306,8 +4306,8 @@ at the close.)*
 | # | Piece | Status |
 |---|---|---|
 | 1 | The reading, in this session's own context, in the brief's order | **DONE** |
-| 2 | The RED-ON-OLD PIN, written and measured BEFORE a line of the fix | PENDING |
-| 3 | The MECHANISM, traced (measured, never assumed) | PENDING |
+| 2 | The RED-ON-OLD PIN, written and measured BEFORE a line of the fix | **DONE** — 5 of 7 red on the shipped tree, her symptom reproduced at 11 pt of prose in a 600-pt viewport |
+| 3 | The MECHANISM, traced (measured, never assumed) | **DONE** — seven-step trace below; the row's hypothesis is CORRECTED |
 | 4 | The FIX at the traced site, through the settle hop | PENDING |
 | 5 | The CLASS SWEEP — every re-font occasion × both directions, one verdict each | PENDING |
 | 6 | The WALK — S1's exact table on *Copper Beeches*, both occasions, both directions | PENDING |
@@ -4325,4 +4325,94 @@ text** (the stated hypothesis) · **13u2 UNIT D's TRACE D-6** in `notes/plans/ph
 `EditorTypography.applyVoiceChrome` and its two coordinators, `JumpPrimitive`,
 `ScrollAnchorController`, `EditorTextView`'s frame/typewriter-room road, and the 13u3
 transaction-gated settle hop (`storageEditDepth` / `overlayLayoutDidSettle`).
+
+
+### THE RED-ON-OLD PIN, AND ITS RUN ON THE SHIPPED TREE (piece 2 — before a line of the fix)
+
+`App/Variorum/VariorumTests/RefontViewportTests.swift`, on `EditorWindowSmokeTests`' rig — a REAL
+window (900×600), a REAL `NSScrollView`, and the REAL `EditorSurface.Coordinator` — over UNIT S1's
+own fixture shape (**212 blocks · ~10k words**, *Copper Beeches*'s numbers). Two rig facts were
+earned rather than assumed, and each one changed the answer:
+
+1. **The app's ORDER is adopt-then-apply, and a pin that only applies measures a different road.**
+   `ThemeStore.start` calls `EditorTypography.adopt` when a settings value LANDS, and the surface
+   re-fonts afterwards from that adopted global; `applyVoiceChrome` writes `current` itself ONLY
+   while nothing has adopted. The first cut of this suite applied chromes without adopting — and
+   every frame came back the same height (20874.5 both directions), i.e. the suite was measuring
+   an occasion that never happened. Fixed by `adoptAndApply`, which does what the store does.
+2. **TK2 estimates what it has not laid out, and the estimate does not know about the paragraph
+   style.** With viewport-only layout the 22-pt-per-paragraph change moved the document by 274 pt
+   instead of 212 × 22 ≈ 4,664 — so the rig under-reported the defect by an order of magnitude.
+   One `ensureLayout(for: documentRange)` in the TEST (never in production — TEXTKIT2 §2's
+   "resource-intensive" is exactly why) puts the rig in the state a note she has been reading is
+   in, and her symptom appears immediately.
+
+**THE RUN, on the shipped tree at commit `1438f491` (the unit's own first commit — no product line
+changed yet): 5 of 7 issues RED across 4 tests, 2 guards green.**
+
+| Pin | Shipped tree | What it says |
+|---|---|---|
+| `aShrinkingRefontKeepsTheLineAtTheViewportTop` | **RED** — top 42056 → 42510 | mid-note, inline comments OFF: the text under the viewport moved by ~1.5 paragraphs |
+| `herFixtureGestureLeavesThePageDrawn` | **RED ×2** — top 76270 → 77178, **drawn prose 305.5 pt → 11.0 pt** | HER gesture, exactly: ⌘↓ then comments OFF. Eleven points of prose in a 600-pt viewport — row 53's capture, in a number |
+| `aGrowingRefontKeepsTheLineAtTheViewportTopToo` | **RED** — top 42056 → **nil** | the GROW direction loses her place too (no blank page; the viewport resolves no line at all mid-transition) |
+| `aVoiceSwitchKeepsHerPlaceInBothDirections` | **RED ×2** — the anchored block 692.8 pt above the viewport top (Study→Terminal), 311.2 pt above (Terminal→Study) | the THIRD occasion, both directions |
+| `aRefontNeverMovesTheCaret` | green | the brief's condition, guarded from the start: ⌘↑ is the symptom's healer, never the fix's shape |
+| `aColourOnlyChangeMovesNothing` | green | 18g's R1-1 carve stays carved — a palette/appearance click is not a re-font and must not scroll |
+
+### THE MECHANISM, TRACED (piece 3) — and the row's hypothesis is CORRECTED
+
+A seven-step trace in the same rig (`traceTheShrink`, temporary — removed at the fix commit, its
+numbers preserved here), the fixture laid out whole, the caret driven to the end, then inline
+comments OFF. Verbatim:
+
+```
+1 tall, viewport-only layout      | visibleY=0.0      frame=20963.0 usage=20355.7 gap=29 drawn=576.0 top=0      len=77199
+2 tall, WHOLE document laid out   | visibleY=0.0      frame=20963.0 usage=26196.0 gap=29 drawn=576.0 top=0      len=77199
+3 tall, caret at the end          | visibleY=25914.5  frame=26803.0 usage=26196.0 gap=29 drawn=305.5 top=76270  len=77199
+4 short, right after the re-font  | visibleY=20379.0  frame=20973.0 usage=20366.0 gap=7  drawn=11.0   top=77178  len=77199
+5 short, +0.3s                    | visibleY=20379.0  frame=20973.0 usage=20366.0 gap=7  drawn=11.0   top=77178  len=77199
+6 short, WHOLE document laid out  | visibleY=20379.0  frame=20973.0 usage=21554.0 gap=7  drawn=600.0  top=72976  len=77199
+7 short, after the ⌘↑ heal        | visibleY=0.0      frame=22161.0 usage=21554.0 gap=7  drawn=576.0  top=0      len=77199
+```
+
+**Inputs → state, in seven lines:**
+
+1. She reads a long note with the taller type (inline comments ON · the tall paragraph gap · the
+   Study voice) and drives the caret to the end. The document view's frame is the honest laid-out
+   height — **26,803 pt** — and the clip rests at **25,914.5**: the tail's last lines at the top of
+   the viewport, the typewriter room below them (step 3).
+2. She turns the setting off. `applyVoiceChrome` writes the new base attributes over the WHOLE
+   storage; TK2 invalidates the entire document's layout and the un-laid-out majority falls back
+   to ESTIMATES, so the usage bounds drop **26,196 → 20,366** — part of it the genuine shrink and
+   part of it estimate error (the true new height, step 6, is 21,554).
+3. `EditorTextView.setFrameSize` takes AppKit's much smaller proposal and re-applies the typewriter
+   room: the document rect becomes **20,973 pt**.
+4. The clip's origin (25,914.5) is now **far past the new maximum** (20,973 − 600 = 20,373), so
+   **AppKit clamps it — to 20,379** (step 4). Nothing in this app asked for that scroll; it is the
+   scroll view honouring its own document rect.
+5. Because the document carries a viewport-page of **TYPEWRITER ROOM** (583 pt) below its last
+   line, "the bottom of the document" IS "the last line at the viewport top with a page of blank
+   below it". **Eleven points of prose in a 600-pt viewport** — which is exactly the capture UNIT
+   S1 took: *only the last line draws, the rest of the page is BLANK.*
+6. Nothing re-examines it. The clamp is a legitimate scroll position, so there is no self-heal at
+   any delay (step 5 is byte-identical at +0.3 s, as her +3 s and +8 s captures were), and the
+   session scroll anchor re-captures at the clamped position on the bounds change it caused — which
+   is why a mode round trip and leave-and-return both restore the same stranded place.
+7. **⌘↑ is not a repair — it is a different destination.** It moves the caret to offset 0 and
+   scrolls there, and offset 0 has content (step 7). Any relayout aimed anywhere with prose looks
+   like a heal.
+
+**THE ROW'S HYPOTHESIS, CORRECTED BY THIS MEASUREMENT.** Row 53 offered the 17o mirror: *the
+high-water `usageBoundsForTextContainer` leaves the viewport resting past its own content.* That is
+**not** the agent here. The usage bound moved **freely in both directions** in every step above
+(26,196 → 20,366 → 21,554) — 17o's ratchet is about text being DELETED while the document keeps its
+characters, and a re-font deletes nothing. What strands her is older and plainer, and the repo has
+its name already: **the scroll offset is kept in PIXELS across a reflow that changes the geometry
+under it** — the Phase 6 spike's own measured hazard (*"NSScrollView keeps the PIXEL offset across a
+width reflow while the geometry under it changes — −79 paragraphs on a 900→600 resize"*), which the
+app answers for the WIDTH axis with `ScrollAnchorController` + `JumpPrimitive` and has never
+answered for the RE-FONT axis. The direction asymmetry her walk found falls straight out of it: a
+GROW raises the maximum so nothing is clamped (the page stays full of prose, but of DIFFERENT prose
+— pins 1, 3 and 4 measure that half), while only a SHRINK can push the offset past the new maximum,
+and only at the TAIL is that clamp the whole viewport's worth.
 

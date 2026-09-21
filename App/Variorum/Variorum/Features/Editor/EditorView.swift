@@ -415,7 +415,13 @@ extension EditorView {
 
 // MARK: - The TK2 surface
 
-private struct EditorSurface: NSViewRepresentable {
+// Internal (not private) since 13u4 UNIT F2, on `InlineEditorSurface`'s own
+// stated precedent one screen below: the re-font pins drive the REAL
+// coordinator path — a chrome VALUE in, a viewport out — because the thing
+// row 53 is about is what this coordinator does between the two, and a pin
+// against the model's door alone would prove the door works while leaving
+// "and the app's surface calls it" a claim.
+struct EditorSurface: NSViewRepresentable {
     let model: EditorViewModel
     let chrome: EditorSurfaceChrome
 
