@@ -1819,10 +1819,10 @@ is touched.
 
 | # | Piece | Status |
 |---|---|---|
-| 1 | The record + the READING (the brief's four reading lists, in order) | DONE (this commit) |
-| 2 | THE REPRODUCTION — her gesture on the dev-store Debug build, a TRIAL TABLE (rate, not one run) | NOT-STARTED |
-| 3 | THE MECHANISM, TRACED (inputs → wrong scroll target → the landing below) — the `LandingAuthority` hypothesis TESTED, never assumed | NOT-STARTED |
-| 4 | The red-on-old pin (if the defect confirms; behavioural-revert verified) + the fix | NOT-STARTED |
+| 1 | The record + the READING (the brief's four reading lists, in order) | DONE (8d84ab22) |
+| 2 | THE REPRODUCTION — her gesture on the dev-store Debug build, a TRIAL TABLE (rate, not one run) | DONE (this commit) — **20 trials, 11 MISSES**, the table below |
+| 3 | THE MECHANISM, TRACED (inputs → wrong scroll target → the landing below) — the `LandingAuthority` hypothesis TESTED, never assumed | DONE (this commit) — the two measured experiments below |
+| 4 | The red-on-old pin (behavioural-revert verified) + the fix | **PIN RED 3/3 on the pre-fix tree (this commit)** · the fix NOT-STARTED |
 | 5 | Row 56's PAIRED INTERLEAVED adjudication (`theReadClickLandsInIndexAtThatBlock`, both trees) | NOT-STARTED |
 | 6 | The WALK — chapter clicks at several depths, before/after, captured | NOT-STARTED |
 | 7 | Closing suites + the ledger's F1 row | NOT-STARTED |
@@ -1850,3 +1850,137 @@ is touched.
    warm-DerivedData covariate) — **this diff touches the book Index, so the paired interleaved
    protocol is mandatory there** — plus rows 49/64 (the landing/settle family) and row 42 (the
    shared-defaults class, which a landing measurement must not be fooled by).
+
+### THE REPRODUCTION (piece 2) — her gesture, on the dev-store Debug build
+
+**Build:** `App/Variorum/DerivedData/13u4f1/Build/Products/Debug/Variorum.app`
+(`io.lduarte.Variorum.debug`, the fenced dev store). `pgrep -fl 'Variorum.app/Contents/MacOS'`
+checked at the start — **ZERO instances; hers was not running at any point** — and every dev
+instance was quit **by identity** (`tell application id "io.lduarte.Variorum.debug" to quit`),
+never by a keystroke (the 13u3 breach's walker law). `/Applications/Variorum.app` was never
+touched. Captures: `notes/plans/13u4-screens/f1/` (gitignored), one full window per trial plus a
+`-top.png` crop of the pane's first inches, which is what the table reads.
+
+**The protocol.** Her sentence is the protocol: *"clicking on the name of a chapter in a book"* —
+so: open the book, Index mode, click a chapter row in the column, wait 2.5 s, read what the pane
+shows at its top. The target is the chapter's own heading; a hit shows that heading at the top,
+a miss shows whatever the page landed on. **The book is Sherlock** (13 chapters, 13 notes,
+105,335 words — one story per chapter, the shape her report was filed against) and, for a second
+shape, **the field guide** (9 chapters, 34 short notes). Her *"sometimes"* is a RATE, so the
+trials are numbered and every one is in the table, hits included.
+
+| # | book · chapter clicked | where the page actually landed | verdict |
+|---|---|---|---|
+| 1 | Sherlock · 13 copper beeches (first click of the session) | *"…all those birds that went to the Alpha were town bred"* — **ch8 Blue Carbuncle**, mid-story | **MISS** (5 chapters short) |
+| 2 | Sherlock · 13 again | *"'Thank you, Maggie,' says I"* — ch8, a little further | **MISS** |
+| 3 | Sherlock · 13 a third time | **the pane is BLANK — not one word on the page** | **MISS** (the worst face) |
+| 4 | Sherlock · 2 a scandal in bohemia | the heading at the top | hit |
+| 5 | Sherlock · 7 the man with the twisted lip | the heading at the top | hit |
+| 6 | Sherlock · 13 (from ch7) | *"'After all, Watson,' said Holmes, reaching up his hand for his clay pipe"* — ch8's end | **MISS** (5 short) |
+| 6b | *(no click — 6 s later, the same state re-captured)* | **byte-identical**: the page does not correct itself, ever | — |
+| 7 | Sherlock · 9 the speckled band | *"…the lens discloses a large number of hair-ends"* — ch8 | **MISS** (1 short) |
+| 8 | Sherlock · 11 the noble bachelor | *"You must lock yourself up from him to-night"* — ch9 Speckled Band | **MISS** (2 short) |
+| 9 | Sherlock · 5 the boscombe valley mystery | *"the music at St. James's Hall"* — ch3 Red-Headed League | **MISS** (2 short) |
+| 10 | Sherlock · 12 the beryl coronet | the heading at the top | hit |
+| 11 | Sherlock · 13 (from ch12's top) | *"…Twice my boy has asked her to marry him"* — ch12, mid-story | **MISS** |
+| 12 | Sherlock · 1 about this text | the heading at the top | hit |
+| 13 | Sherlock · 10 the engineer's thumb | the heading at the top | hit |
+| 14 | Sherlock · 3 the red-headed league | the heading at the top | hit |
+| 15 | Sherlock · 8 the blue carbuncle | the heading at the top | hit |
+| 16 | **COLD** (quit · relaunch · open the book · Index · FIRST click) Sherlock · 10 the engineer's thumb | *"…the lady, who had stepped from her carriage, was the centre of a little knot of flushed and struggling men"* — **ch2 A Scandal in Bohemia** | **MISS (8 chapters short — the cold case is the worst)** |
+| 17 | Sherlock · 13 (second click of the cold session) | *"you can ask the King of Proosia, for all I care"* — ch8 | **MISS** (5 short) |
+| 18 | field guide · 9 keeping it private | the heading at the top | hit |
+| 19 | field guide · 7 where things go | the heading at the top | hit |
+| 20 | field guide · 3 takes (from ch7) | *"The next paragraph can't decide what it wants to be"* — ch2 writing | **MISS** (1 short) |
+
+**THE RATE: 11 misses in 20 clicks.** Her *"sometimes"* is 55% on this store, and the misses are
+not subtle — five of them put the page in a DIFFERENT STORY, one put it on a blank page, and the
+worst (the cold first click, which is the shape she would meet on opening a book) missed by eight
+chapters. **The direction is consistent in every one of the eleven: the page lands SHORT of the
+chapter** — showing text that comes BEFORE it, which from the reader's side is *"a random
+location in the text"* exactly as she says. *(Her words are "a fair amount under it"; what is
+measured here is the mirror — the page comes to rest above the chapter, which puts her cursor's
+chapter a long way DOWN the page from where the scroll stopped. Recorded as measured rather than
+bent to fit the sentence: both are the one defect — the aim resolves against a column whose
+geometry is not yet known — and neither direction is a different bug.)*
+
+### THE MECHANISM, TRACED (piece 3) — measured twice, never assumed
+
+**The road, read end to end** (`App/Variorum/Variorum/Features/BookView/BookIndexView.swift`):
+a chapter row's `onTapGesture` sets `paneTarget = "sec-\(groupID)"`; the pane's
+`.onChange(of: paneTarget)` calls `proxy.scrollTo("bip-\(target)", anchor: .top)` **once** and
+immediately clears the channel. That is the whole landing. No settle, no report, no correction —
+the surface the architectural trace calls **compensator 4** (`notes/plans/navigation-landing-architecture-trace.md`
+§3), the one the 13u2b phase deliberately left to *"its next touch"*.
+
+**EXPERIMENT 1 — is the page wrong from the first frame, or does it drift?** A capture burst
+(five window captures, ~0.6 s apart) around one cold chapter click:
+
+| capture | ~t | what the pane showed |
+|---|---|---|
+| 1 | 0.4 s | still at the book's top (*About this book*) — the scroll had not run yet |
+| 2 | 1.0 s | ch8 Blue Carbuncle, mid-story — **the landing, already wrong** |
+| 3 | 1.6 s | **byte-identical to capture 2** |
+| 4 · 5 | 2.2 · 2.8 s | byte-identical |
+| — | +6 s (trial 6b) | byte-identical |
+
+So the page arrives wrong and STAYS wrong. There is no drift to catch and nothing to wait for:
+the single aim is final.
+
+**EXPERIMENT 2 — would a compensator converge?** The decisive one, run with zero code: click the
+SAME chapter six times, 1.2 s apart (a hand-run of exactly what a settle loop does — re-aim at
+the same anchor after the layout has had a moment), capturing after each.
+
+| aim | where the page came to rest |
+|---|---|
+| 1 | ch8, *"'Thank you, Maggie,' says I"* |
+| 2 | **blank page** |
+| 3 | ch8 (further on) |
+| 4 | ch8's last paragraphs, *"'After all, Watson,' said Holmes…"* |
+| 5 | the seam into ch9 — *the adventure of the speckled band* heading visible mid-page |
+| 6 | **the target exactly: *the adventure of the copper beeches* at the top of the page** |
+
+**What that proves, and it is the unit's whole finding:** the column's geometry is discovered
+INCREMENTALLY as rows realize, so each aim lands closer than the last and an aim repeated until
+the target reports at the top CONVERGES. The Index has everything it needs to land correctly
+except the thing that looks again. **The hypothesis the brief told me to test rather than assume
+— that the book Index has not adopted `Surface/LandingAuthority` — is CONFIRMED by reading and
+by measurement**: `grep -n LandingAuthority` over `BookIndexView.swift` is empty, and the
+behaviour is exactly the un-watched aim's. *(And the converse is disproved: this is NOT a stale
+anchor — the anchor is right, the aim reaches it, and a sixth aim at the SAME anchor lands it.)*
+
+**Why the estimate is wrong in the first place** (the same reading, stated once so the fix is not
+mistaken for a mystery): the pane is a `LazyVStack` of chapter headings and whole NOTES, and a
+note row is ~40 pt tall until `observeBlockTOC` returns and then becomes thousands — Sherlock's
+stories are eight to ten thousand words each. A lazy container answers *"how tall is a row I have
+not realized"* with the average of the ones it has, and that average is taken over rows most of
+which have not yet loaded their text. This is the trace's own cause (§1: *"every long lazy column
+in the app discovers its row heights AFTER it has aimed"*) on the one surface that never got
+either half of 13u2b's answer.
+
+### THE RED-ON-OLD PIN (piece 4a) — written and measured BEFORE a line of the fix
+
+`App/Variorum/VariorumTests/BookIndexLandingTests.swift` — two arms over a book long enough that
+one frame cannot know its geometry (8 chapters, one note each, 100 short blocks a note). The
+claim is one number: the target row's top in the pane scroll's own space, which is
+visible-relative, so a landed row reads ≈ 0. The number comes from a DEBUG oracle this commit
+adds beside the pane's existing ones (`BookIndexGeometry.paneAnchorTops`), fed by a geometry
+report installed at the LAZY ROW's level — never inside it, which is the Outline's own row-47
+lesson (`BookView.outlineAnchor`: an unrealized lazy row's inner views do not exist, so a report
+from inside one is silence exactly when a landing needs it).
+
+**THE RED RUN, three times on this tree** (`-only-testing:VariorumTests/BookIndexLandingTests`,
+zero instances, nothing else running):
+
+| run | `aLandingOnAFarNoteArrivesAtThatNotesTop` | `aLandingBringsTheChaptersHeadingIntoView` |
+|---|---|---|
+| 1 | **top = 667.9 pt** (≤ 2 owed) | **never reported at all** |
+| 2 | **top = 667.4 pt** | **never reported at all** |
+| 3 | **top = 667.4 pt** | **top = −41.2 pt** |
+
+Stable red, both arms, 3/3 — and the second arm's *"never reported"* is the harness saying what
+the app said in trial 3: the page is somewhere the target is not even realized.
+
+**This commit contains NO FIX.** What it contains is the probe (DEBUG-only writes; the geometry
+report itself is behaviour-free) and the two red pins, so the red is on the record before the fix
+exists.

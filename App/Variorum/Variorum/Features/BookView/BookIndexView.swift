@@ -66,6 +66,13 @@ enum BookIndexGeometry {
     /// pane's MEASURED internal inset (`PaneTextView.proseLeadingInset`).
     /// Keyed by the BLOCK's id (the subject-keyed rule).
     static var paneProseLeading: [String: CGFloat] = [:]
+    /// **13u4 UNIT F1 (her item 10): where every PANE ROW's top sits**, in the
+    /// pane scroll's own space — visible-relative, so a row landed at the top
+    /// reads ≈ 0 and a landing that missed reads the distance it missed by.
+    /// Keyed by the row's anchor (`PaneRow.id`, the subject-keyed rule).
+    /// The claim *"clicking a chapter brings you to that chapter"* is a claim
+    /// about one number, so the pin reads that number.
+    static var paneAnchorTops: [String: CGFloat] = [:]
 
     static func reset() {
         chapterCountFrame = nil
@@ -74,6 +81,7 @@ enum BookIndexGeometry {
         paneProseLeading = [:]
         paneSelectionWashHeights = [:]
         paneNoteHeights = [:]
+        paneAnchorTops = [:]
     }
 }
 #endif
@@ -104,6 +112,13 @@ nonisolated enum BookIndexColumn {
     /// filter field and a per-row count live here), so each remembers where
     /// she left it and dragging one never moves the other.
     static let widthKey = "bookIndexColumnWidth"
+    /// **The PANE scroll's named space** (13u4 UNIT F1; the Outline's
+    /// `outlineSpace`): a row's frame read in it is VISIBLE-relative, so "this
+    /// anchor is at the top of the page" is `minY ≈ 0` and nothing has to know
+    /// the content's own offset. It lives here rather than on the view because
+    /// `BookIndexView` is generic in its masthead and a generic type holds no
+    /// static storage.
+    static let paneSpace = "book-index-pane-scroll"
     /// Where it starts — exactly the shipped 300, so nothing moves until
     /// she drags.
     static let idealWidth: CGFloat = 300
@@ -374,6 +389,15 @@ struct BookIndexView<Masthead: View>: View {
         select(landing ?? model.entries[0].postID, scrollPane: true, report: false)
     }
 
+    /// A pane row reported where its top sits. **13u4 UNIT F1:** today this
+    /// feeds the DEBUG oracle only — the measurement behind the trace in that
+    /// unit's record — and the landing reads it next.
+    private func paneAnchorMoved(_ anchorID: String, top: CGFloat) {
+        #if DEBUG
+        BookIndexGeometry.paneAnchorTops[anchorID] = top
+        #endif
+    }
+
     private func select(_ postID: String, scrollPane: Bool, report: Bool = true) {
         selectedPostID = postID
         if scrollPane {
@@ -597,20 +621,34 @@ struct BookIndexView<Masthead: View>: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 6) {
                     ForEach(paneRows) { row in
-                        switch row {
-                        case .heading(let group):
-                            Text(tokens.chromeLabel(group.title ?? ""))
-                                .font(tokens.title)
-                                .foregroundStyle(tokens.accent)
-                                .padding(.top, 26)
-                        case .note(let entry):
-                            BookIndexPaneNote(
-                                session: session, tokens: tokens,
-                                indicator: indicator, entry: entry,
-                                edit: edit,
-                                selected: selectedPostID == entry.postID,
-                                onTap: { select(entry.postID, scrollPane: false) },
-                                onLandedBlock: { blockID in paneTarget = blockID })
+                        Group {
+                            switch row {
+                            case .heading(let group):
+                                Text(tokens.chromeLabel(group.title ?? ""))
+                                    .font(tokens.title)
+                                    .foregroundStyle(tokens.accent)
+                                    .padding(.top, 26)
+                            case .note(let entry):
+                                BookIndexPaneNote(
+                                    session: session, tokens: tokens,
+                                    indicator: indicator, entry: entry,
+                                    edit: edit,
+                                    selected: selectedPostID == entry.postID,
+                                    onTap: { select(entry.postID, scrollPane: false) },
+                                    onLandedBlock: { blockID in paneTarget = blockID })
+                            }
+                        }
+                        // **13u4 UNIT F1 — WHERE THIS ROW SITS.** At the LAZY
+                        // ROW's level, never inside it: an unrealized lazy
+                        // row's inner views do not exist, so a report from
+                        // inside one is silence exactly when a landing needs
+                        // it (the Outline's own row-47 lesson, `BookView`'s
+                        // `outlineAnchor`). Read in the pane's named space, so
+                        // "at the top" is `minY ≈ 0`.
+                        .onGeometryChange(for: CGFloat.self) { geometry in
+                            geometry.frame(in: .named(BookIndexColumn.paneSpace)).minY
+                        } action: { top in
+                            paneAnchorMoved(row.id, top: top)
                         }
                     }
                 }
@@ -619,6 +657,7 @@ struct BookIndexView<Masthead: View>: View {
                 .padding(.vertical, 26)
                 .frame(maxWidth: .infinity, alignment: .center)
             }
+            .coordinateSpace(name: BookIndexColumn.paneSpace)
             .background(tokens.surface)
             .onChange(of: paneTarget) { _, target in
                 // One address grammar: a note target is its postID, a
