@@ -408,6 +408,55 @@ their mechanism, neither a defect in this batch's fixes:
    are the operations layer, `UndoStack`, `TakesViewModel`, `EditorViewModel`, `AppSession`'s doc, and
    the two phone surfaces.
 
+### ROW 7 — THE BUILD (to the ruling; PROVISIONAL, QUESTIONS #137)
+
+**What landed, binding by binding.**
+
+- **The park** — `QuickNotePark`, a session-scoped `@Observable` on `AppSession` beside
+  `quitFinalize` (`App/Variorum/Shared/AppSession.swift`, inside the existing macOS fence), holding
+  `text` + `titleFromFirstWords` + the refusal's sentence. Memory-only by the ruling; its doc carries
+  the reason a disk-backed park would refuse in exactly the case it exists for.
+- **Binding 1 (refused captures only)** — `QuickNotePad.take()` parks in its `.refused` arm and
+  nowhere else, from `submitted` rather than `text` (keystrokes landing during the mint are not part
+  of what was refused — the discipline `submitted` already carried). Guard pin (iv) + the walk.
+- **Binding 2 (clear at restore)** — `QuickNotePark.restore()` returns the held capture and clears in
+  the same breath (`defer { clear() }`); `.filed` and `.nothingToFile` clear it too, so a landed
+  capture can never come back as a ghost. Pinned both ways.
+- **Binding 3 (both sentences)** — the restored pad shows `QuickNoteCopy.restoredCapture` in its own
+  (accent, non-alarm) register with `lineLimit` beside `fixedSize` for the P-8 b6dae25 class; the
+  close road now speaks `QuickNoteCopy.parkedOnClose` instead of `refusal(for:)`, whose
+  *"Your text is still here"* was **false** the moment that window went. The new line deliberately
+  carries no REASON — stated at the code and in #137(e) — because she is not looking at the pad on
+  that road and the reason is actionable only where the retry is.
+- **Binding 4 (the 1b rider)** — `declineQuitOnce()` on the park; consumed by the delegate's
+  `declineQuitIfACaptureStands()`, which `applicationShouldTerminate` consults on **both** of its
+  roads. The early `.terminateNow` path had to consult it too: a refusal can stand with the pad
+  CLOSED, whose quit closure went with the window, so that road would otherwise have quit straight
+  past the one case the park exists for. The decision runs AFTER `finalizeAll()`, because the pad's
+  own quit closure is what ARMS the park. With no pad on screen the status seam carries the same
+  sentence (a quit that quietly refuses to quit is its own defect); with the pad up it is already
+  speaking its refusal line, so nothing is said twice.
+
+**Pins — `QuickNoteParkTests` (5), the ruling's four with (iii) split in two.**
+
+| Pin | What it holds | Red-on-old |
+|---|---|---|
+| (i) `aRefusedCaptureComesBackAtTheNextSummon` | refused → closed → a FRESH pad restores her words, her name decision and the line saying why | **RED** — `next.text → ""` against the capture; no restored line |
+| (ii) `filingOrEmptyingClearsThePark` | `.filed` / `.nothingToFile` clear it | **RED** — nothing was ever held |
+| (iii) `aRefusedCaptureAtQuitDeclinesOnceAndThenProceeds` | the one-shot: declined once, the second consecutive ⌘Q proceeds, a re-arisen refusal re-arms | **RED** — nothing held, the decline never fires |
+| (iii-b) `theQuitDoorsOwnDecisionDeclinesOnceAndSpeaks` | the DELEGATE's decision on both arms, and that it speaks only when no pad is on screen | (same mechanism) |
+| (iv) `aCloseWithNothingRefusedKeepsNothing` | **the guard** — her ruled abandon grammar untouched | **GREEN on both sides, by design** |
+
+**The behavioural revert** (run after the build was COMMITTED at `3cd6d2cf`): the `park(...)` call
+removed from `take()`'s `.refused` arm ⇒ **8 issues across pins (i), (ii) and (iii), with (iv)
+green** — discriminating in exactly the direction binding 1 asks for. Restored with
+`git checkout --`; tree clean.
+
+**`applicationShouldTerminate` is deliberately NOT driven by a pin:** that would mean calling
+`reply(toApplicationShouldTerminate:)` on the real `NSApp` inside the test host. The decision it
+consults is what the pin drives, which is why `declineQuitIfACaptureStands()` is internal rather
+than private (the same "a fact that is checkable" move as row 6's `hasDeferredProjection`).
+
 ### CLOSING EVIDENCE (all runs on the final tree)
 
 | Gate | Command | Result |
