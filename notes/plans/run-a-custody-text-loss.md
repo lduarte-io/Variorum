@@ -301,13 +301,42 @@ OverallModel §3 and AppSpec §9's structural-undo/REDO paragraphs (auto-loaded 
 | 7 | **row 65** — the pad's close/quit-while-refused loss: TRACE + the parking-mechanism PROPOSAL (design fork; the orchestrator rules before any build) | **PROPOSED — awaiting the ruling** (trace + three options + recommendation below; nothing built) |
 | 1 | **P4** — the phone's comments sheet clears the draft before the write | NOT-STARTED |
 | 2 | **P5** — `promotePicks` copies an ARCHIVED pick as a block's only take | **FIXED** — pin `PromotePicksArchivedPickTests` (3), red-on-old measured on the pre-fix tree (4 issues; the guard arm green) |
-| 3 | **P6** — `restoreNoteVersion`/`deleteContainer` leave the redo future unclear ed | NOT-STARTED |
+| 3 | **P6** — `restoreNoteVersion`/`deleteContainer` leave the redo future uncleared | **FIXED** — pin `ContentReplacementRedoTests` (5), red-on-old measured (3 defect arms red, 2 guards green); ONE residue pinned as documented behaviour (the undo side) and recorded below |
 | 4 | **P7** — the boards' branch/＋new take/⌘T doors copy the STORE past a dirty buffer | NOT-STARTED |
 | 5 | **P14** — the phone quick note's `try?` folds a read failure into "nothing to save yet" | NOT-STARTED |
 | 6 | **P36** — `applyPendingIfClean` discards the deferred projection on a thrown re-read | NOT-STARTED |
 | — | Closing evidence: targeted suites green · `TutorialWalkTests` · mobile suites + `generic/platform=iOS` build · the WalkKit walk (pad road + board-branch road) → `notes/plans/run-a-screens/a1/` | NOT-STARTED |
 
 **Deaths and resumes:** none yet.
+
+### ROW 3 (17b P6) — THE RESIDUE I DID NOT FIX, and why
+
+The fix clears the redo FUTURE at `restoreNoteVersion` and `deleteContainer` (`UndoStack.clearRedoFuture()`,
+called after the write so a refusal changes nothing). **The UNDO side has the same shape and is left
+standing, measured and pinned as documented behaviour**
+(`ContentReplacementRedoTests.anUndoEntryOlderThanARestoreCanStillReviveIntoTheRestoredNote`): an entry
+registered BEFORE the act can still revive a block from the replaced timeline into the restored note
+(measured: 2 blocks → 3), or refuse on a take the act tombstoned (the standing failed-inverse
+behaviour — visible and retryable, not silent).
+
+**Why not clear both stacks:** the stack is SESSION-WIDE and holds acts on every note, so restoring one
+note would silently take her undo history for all the others — a bigger loss than the one it prevents,
+and canon asks only for the future (`AppSpec` §9). A guard pin asserts the undo history is untouched.
+The real answer is note-scoped entries, which is a design (entries are opaque closures today), not a
+line — and I did NOT make either op register an entry, per the brief's stop rule (that is 13j's
+Trash-is-the-recovery-door product call).
+
+**DEFERRED with an owner: 17e** (correctness & honesty singles — a standing entry; the product half,
+whether structural undo should be note-scoped at all, is the author's). A KnownIssues row lands at the
+batch's close with that owner, and the call is on her ratify list (QUESTIONS #136).
+
+**Two pre-existing pins were rewritten, both the ruled-change class, neither a defect:**
+`RedoStackTests.anObsoleteRedoPopsQuietlyInsteadOfWedgingTheStack` and
+`SmartConversionTests.aRedoWhoseMemberPostDiedLeavesThatMembershipDead` both STAGED their state by
+pressing `deleteContainer` between an undo and a redo — the exact behaviour this row calls a defect
+(one of them asserted it in words: *"an unregistered op leaves the redo future alone"*). Each keeps its
+own subject and moves its vehicle to a tombstone arriving BELOW the operations layer — a sync apply's
+shape, which registers nothing and clears nothing, and is the road that can still produce the state.
 
 ### ROW 7 (KnownIssues 65) — THE TRACE, AND THE PARKING MECHANISM PROPOSED (the design fork; NOT built)
 

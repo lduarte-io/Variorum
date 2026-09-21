@@ -189,7 +189,13 @@ extension Operations {
     public func restoreNoteVersion(
         _ postID: String, from versionID: String
     ) throws -> NoteVersionRestore {
-        try database.write { db in
+        // **AND IT CLEARS THE REDO FUTURE** (17b P6): no entry is registered
+        // here — the door IS the recovery — but replacing a note's whole
+        // content is unmistakably a new structural act, and AppSpec §9's
+        // rule has no exception for acts that happen not to be undoable. It
+        // runs AFTER the write, so a refused restore (a seal, a version that
+        // is not this note's) leaves her future exactly as it found it.
+        let restored: NoteVersionRestore = try database.write { db in
             let post = try livePost(db, postID)
             try ensureUnlocked(post)
             guard try Queries.isVersionHistory(db, versionID, of: postID) else {
@@ -279,6 +285,8 @@ extension Operations {
                 savedVersionID: savedVersionID, restoredFrom: versionID,
                 blocksRestored: landed.blockCopies.count, blocksRemoved: removed)
         }
+        undoStack?.clearRedoFuture()
+        return restored
     }
 
     // MARK: - Promote (V1's "work with it as a new note" road)

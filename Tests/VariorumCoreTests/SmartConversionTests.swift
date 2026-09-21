@@ -376,7 +376,19 @@ struct SmartConversionTests {
             let (reading, posts, _) = try smartBookWithTaggedPosts(ops, count: 2)
             try ops.convertSmartReadingToCurated(reading.id)
             try stack.undo(with: ops)
-            try ops.deleteContainer(posts[0].id)
+            // The member dies BELOW the operations layer — a remote
+            // tombstone arriving through a sync apply, which registers no
+            // undo entry and clears no redo future. (This used to press
+            // `deleteContainer`; since 17b P6 that door clears the future
+            // like every other new structural act, so it can no longer
+            // stage this state — the re-apply's liveness guard is still
+            // exactly what is under test.)
+            try db.write { database in
+                try database.execute(
+                    sql: "UPDATE container SET deleted_at = ?, updated_at = ? WHERE id = ?",
+                    arguments: ["2026-01-01T00:00:00.000Z", "2026-01-01T00:00:00.000Z",
+                                posts[0].id])
+            }
 
             try stack.redo(with: ops)
             let rows = try liveMemberships(db, reading.id)

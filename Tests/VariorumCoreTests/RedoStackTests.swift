@@ -528,9 +528,9 @@ struct RedoStackTests {
     @Test func anObsoleteRedoPopsQuietlyInsteadOfWedgingTheStack() throws {
         // The mirror of the stale-UNDO rule (`UndoStackTests`): the world
         // moved past the entry, so redo pops instead of throwing forever.
-        // The door used here is `deleteContainer`, which is deliberately
-        // NOT undo-registered (so it never clears the redo future) and
-        // whose cascade takes the block down another way.
+        // The vehicle is a tombstone arriving BELOW the operations layer
+        // (a sync apply's shape): it registers nothing and clears no redo
+        // future, so the entry is still there to be found obsolete.
         try withOperations { _, db in
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
@@ -542,8 +542,20 @@ struct RedoStackTests {
             try stack.undo(with: ops)
             #expect(stack.redoDepth == 1)
 
-            try ops.deleteContainer(post.id)              // cascade kills the block
-            #expect(stack.redoDepth == 1, "an unregistered op leaves the redo future alone")
+            // The world moves past the entry BELOW the operations layer —
+            // which is what a sync apply is: a remote tombstone arrives,
+            // registers no undo entry and clears no redo future. (This used
+            // to be driven with `deleteContainer`, on the strength of its
+            // leaving the redo future alone; 17b P6 made that a defect and
+            // the door now clears the future, so the vehicle moved to the
+            // one road that genuinely does neither.)
+            try db.write { database in
+                try database.execute(
+                    sql: "UPDATE block SET deleted_at = ?, updated_at = ? WHERE id = ?",
+                    arguments: ["2026-01-01T00:00:00.000Z", "2026-01-01T00:00:00.000Z",
+                                victim.block.id])
+            }
+            #expect(stack.redoDepth == 1, "a write below the ops layer leaves the redo future alone")
             #expect(try db.deletedAt("block", victim.block.id) != nil)
 
             // Obsolete: the transition it wants is already true. It pops
@@ -631,6 +643,193 @@ struct RedoStackTests {
     ) -> [String: [String: DatabaseValue]?] {
         snapshot.mapValues { row in
             row.map { columns in columns.filter { $0.key != "deleted_at" } }
+        }
+    }
+}
+
+// MARK: - 17b P6 (RUN A, batch A1) — content-replacing acts clear the future too
+
+/// **RED ON OLD — a content-replacing act that registers NOTHING used to
+/// leave the redo future standing.** AppSpec §9 canonises the rule without
+/// qualification (*"any new structural act clears the redo future"*), and
+/// until this batch the ONLY thing that cleared it was `UndoStack.register`
+/// — so the two acts that replace or remove a note's whole content while
+/// deliberately registering no entry (the recovery-door class:
+/// `restoreNoteVersion`, `deleteContainer`) left an abandoned timeline
+/// re-appliable.
+///
+/// Both flavours are pinned because they fail differently:
+/// **(1)** a redo whose re-apply is a bare tombstone flip SUCCEEDS, silently
+/// resurrecting a block from the timeline she replaced into the restored
+/// note; **(2)** a redo whose re-apply restores a buffer pre-image REFUSES
+/// (`variantNotFound` — the restore's Delete Now road cascade-tombstoned the
+/// take), and because redo is strictly LIFO and the entry stays on the stack
+/// for retry, every entry beneath it is unreachable for the rest of the
+/// session, with no user door able to resolve it.
+///
+/// DISCRIMINATING REVERT (verified): remove the `undoStack?.clearRedoFuture()`
+/// calls from `restoreNoteVersion` and `deleteContainer` — the resurrection
+/// test's block comes back and the wedge test's `redoDepth` stays 1.
+@Suite("A content replacement clears the redo future (17b P6)")
+struct ContentReplacementRedoTests {
+    /// (1) THE SILENT RESURRECTION — merge → undo → restore a version → redo.
+    @Test func restoringAVersionMakesTheAbandonedRedoUnreachable() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let note = try ops.createPost(title: "the note")
+            let a = try ops.seedBlock(in: note.id, text: "Alpha.")
+            let b = try ops.seedBlock(in: note.id, text: "Beta.")
+
+            // A moment to come back to, taken BEFORE the structural act.
+            let version = try ops.saveNoteVersion(note.id).post
+
+            let merged = try ops.merge(a.block.id, b.block.id)
+            try stack.undo(with: ops)
+            #expect(stack.redoDepth == 1, "the merge is sitting in the abandoned future")
+
+            let restore = try ops.restoreNoteVersion(note.id, from: version.id)
+            #expect(restore.blocksRestored == 2)
+
+            #expect(stack.redoDepth == 0,
+                    "a whole-note content replacement IS a new structural act (AppSpec §9)")
+            #expect(try stack.redo(with: ops) == nil, "there is nothing to re-apply")
+            #expect(try db.deletedAt("block", merged.block.id) != nil,
+                    "the merged block stays where the undo left it — never resurrected into the restored note")
+
+            let order = try liveBlockOrder(db, in: note.id)
+            #expect(order.count == 2, "the restored note holds exactly the version's two blocks")
+            #expect(!order.contains(merged.block.id))
+            let text = try db.read { try Queries.renderedText($0, containerID: note.id) }
+            #expect(text == "Alpha.\n\nBeta.", "the two blocks the version held, and only those")
+        }
+    }
+
+    /// (2) THE WEDGE — divide → undo → restore a version → redo. The
+    /// re-apply's `restoringTexts` names a take the restore tombstoned, so
+    /// the whole transaction rolls back and the entry sticks: LIFO means
+    /// everything beneath it is unreachable for the session.
+    @Test func restoringAVersionNeverWedgesTheSessionsRedoStack() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let note = try ops.createPost(title: "the note")
+            let a = try ops.seedBlock(in: note.id, text: "First half. Second half.")
+
+            let version = try ops.saveNoteVersion(note.id).post
+
+            // The divide is registered FIRST and undone LAST, so its
+            // re-apply is the one on TOP of the redo stack — and the
+            // unrelated act beneath it is what the wedge buries (redo is
+            // strictly LIFO, and a REFUSED re-apply stays for retry).
+            _ = try ops.divide(a.block.id, cut: 13)
+            let other = try ops.createPost(title: "another note")
+            let c = try ops.seedBlock(in: other.id, text: "Elsewhere.")
+            try ops.deleteBlock(c.block.id)
+            try stack.undo(with: ops)  // the delete
+            try stack.undo(with: ops)  // the divide, now on top of the future
+            #expect(stack.redoDepth == 2)
+            #expect(try db.deletedAt("block", c.block.id) == nil, "its undo really ran")
+
+            _ = try ops.restoreNoteVersion(note.id, from: version.id)
+
+            #expect(stack.redoDepth == 0, "the forked future is gone, not stuck")
+            #expect(try stack.redo(with: ops) == nil,
+                    "and no refusal can pin an unreachable entry on top of the stack")
+            #expect(try db.deletedAt("block", c.block.id) == nil,
+                    "the buried entry stayed undone — nothing was re-applied behind her back")
+        }
+    }
+
+    /// `deleteContainer` is the same root with the milder outcome (a live
+    /// unplaced block inside a tombstoned note), and it is reached by five
+    /// doors — so the clearing lives in the operation, exactly as the
+    /// version-ride rule does.
+    @Test func deletingANoteClearsTheRedoFutureToo() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let note = try ops.createPost(title: "the note")
+            let a = try ops.seedBlock(in: note.id, text: "First half. Second half.")
+
+            let divided = try ops.divide(a.block.id, cut: 13)
+            try stack.undo(with: ops)
+            #expect(stack.redoDepth == 1)
+
+            try ops.deleteContainer(note.id)
+
+            #expect(stack.redoDepth == 0)
+            #expect(try stack.redo(with: ops) == nil)
+            #expect(try db.deletedAt("block", divided.block.id) != nil,
+                    "the divide's minted block is not revived inside a tombstoned note")
+        }
+    }
+
+
+    /// **THE RESIDUE, PINNED AS DOCUMENTED BEHAVIOUR — not fixed here, and
+    /// said out loud rather than left to be rediscovered.** The canon rule
+    /// (AppSpec §9) names the redo FUTURE, and that is what this batch
+    /// closed. The UNDO side has the same shape and is deliberately left
+    /// standing: an entry registered BEFORE one of these acts can still
+    /// revive a block from the replaced timeline into the restored note (a
+    /// bare tombstone flip), or refuse on a take the act tombstoned (the
+    /// standing failed-inverse behaviour, which is visible and retryable).
+    ///
+    /// Why not "clear both stacks": this stack is SESSION-WIDE and holds
+    /// acts on every note, so a restore of one note would silently take her
+    /// undo history for all the others — a bigger loss than the one it
+    /// prevents, and not something canon asks for. The real answer is
+    /// note-scoped entries, which is a design (entries are opaque closures
+    /// today), not a line. Owner + the author's call: the batch record.
+    ///
+    /// A later change that makes this right will turn this pin red, which
+    /// is exactly the point of writing it down.
+    @Test func anUndoEntryOlderThanARestoreCanStillReviveIntoTheRestoredNote() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let note = try ops.createPost(title: "the note")
+            let x = try ops.seedBlock(in: note.id, text: "Alpha.")
+            _ = try ops.seedBlock(in: note.id, text: "Beta.")
+            let version = try ops.saveNoteVersion(note.id).post
+
+            try ops.deleteBlock(x.block.id)
+            _ = try ops.restoreNoteVersion(note.id, from: version.id)
+            #expect(try liveBlockOrder(db, in: note.id).count == 2,
+                    "the restore put the version's two blocks back, and only those")
+
+            try stack.undo(with: ops)  // the delete, registered before the restore
+
+            let after = try liveBlockOrder(db, in: note.id)
+            #expect(after.count == 3, "DOCUMENTED: the older entry's inverse revives into the restored note")
+            #expect(after.contains(x.block.id),
+                    "and the revived block is the one the replaced timeline held")
+        }
+    }
+
+    /// The guard: clearing the FUTURE is all it does. Her undo history is
+    /// untouched — the canon rule names the redo stack and nothing else, and
+    /// wiping a session-wide undo stack because one note was restored would
+    /// take acts on other notes with it.
+    @Test func clearingTheFutureNeverTouchesHerUndoHistory() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let other = try ops.createPost(title: "another note")
+            let c = try ops.seedBlock(in: other.id, text: "Elsewhere.")
+            try ops.deleteBlock(c.block.id)
+
+            let note = try ops.createPost(title: "the note")
+            _ = try ops.seedBlock(in: note.id, text: "Prose.")
+            let version = try ops.saveNoteVersion(note.id).post
+            let depthBefore = stack.depth
+            _ = try ops.restoreNoteVersion(note.id, from: version.id)
+
+            #expect(stack.depth == depthBefore, "not one undo entry was taken")
+            try stack.undo(with: ops)  // the version save
+            try stack.undo(with: ops)  // the unrelated delete, still there
+            #expect(try db.deletedAt("block", c.block.id) == nil,
+                    "an act on ANOTHER note is still undoable after a restore")
         }
     }
 }

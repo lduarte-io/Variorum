@@ -383,6 +383,15 @@ extension Operations {
     /// note's EXACT `deleted_at`, which is what lets `restoreContainer`
     /// recognise them as its cascade victims and lets an independently-deleted
     /// version stay dead (the 13l exact-stamp doctrine).
+    /// **AND IT CLEARS THE REDO FUTURE** (17b P6, RUN A batch A1): removing
+    /// a note's whole content is a new structural act, and AppSpec §9's rule
+    /// has no exception for the recovery-door class that registers nothing.
+    /// Without it a redo could revive a block from the abandoned timeline
+    /// into a tombstoned note, or refuse on a cascade-tombstoned take and
+    /// wedge the session's stack. It runs after the write, so a refusal
+    /// leaves the future as it found it. (13j's doctrine — the Trash is the
+    /// recovery door, not structural undo — is untouched: this gives
+    /// `deleteContainer` no inverse, it only stops an abandoned one.)
     public func deleteContainer(_ id: String) throws {
         try database.write { db in
             var container = try liveContainer(db, id)
@@ -399,6 +408,7 @@ extension Operations {
             container.updatedAt = now
             try container.update(db)
         }
+        undoStack?.clearRedoFuture()
     }
 
     /// Undo a `deleteContainer` (author decision 2026-07-05: deleted posts

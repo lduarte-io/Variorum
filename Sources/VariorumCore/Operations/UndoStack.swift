@@ -315,6 +315,37 @@ public final class UndoStack: @unchecked Sendable {
         return entry.label
     }
 
+    /// **THE ABANDONED FUTURE, CLEARED BY AN ACT THAT REGISTERS NOTHING**
+    /// (17b P6, RUN A batch A1). AppSpec §9 states the rule without
+    /// qualification — *"any new structural act clears the redo future"* —
+    /// and `register` above is how EVERY ordinary act obeys it. The
+    /// recovery-door class (`restoreNoteVersion`, `deleteContainer`)
+    /// deliberately registers no entry, so before this existed those two
+    /// acts left an abandoned timeline re-appliable: a bare tombstone-flip
+    /// re-apply SUCCEEDED and silently put a block from the replaced
+    /// timeline back into the restored note, while a re-apply carrying a
+    /// buffer pre-image REFUSED on a take the act had tombstoned and stayed
+    /// on the stack for retry — wedging every entry beneath it for the
+    /// session, with no door able to resolve it.
+    ///
+    /// It clears the FUTURE ONLY. The undo history is untouched, because the
+    /// canon rule names the redo stack and nothing else, and this stack is
+    /// session-wide: wiping it because one note was restored would take
+    /// acts on other notes with it. What that leaves standing is recorded
+    /// rather than papered over — an undo entry captured before one of these
+    /// acts can still refuse (the standing failed-inverse behaviour) or, for
+    /// a bare tombstone flip, revive a block into the note; the honest
+    /// answer to that is note-scoped entries, which is a design and not a
+    /// line (the batch record carries it).
+    public func clearRedoFuture() {
+        let hadFuture: Bool = lock.withLock {
+            let had = !redoEntries.isEmpty
+            redoEntries.removeAll()
+            return had
+        }
+        if hadFuture { notifyChange() }
+    }
+
     /// Empties BOTH stacks. **No production caller, deliberately (17f/P44):**
     /// no app road clears undo history — a session's stack dies with its
     /// process, and a "forget my undo history" door is product behaviour
