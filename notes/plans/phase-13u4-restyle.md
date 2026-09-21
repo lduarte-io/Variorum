@@ -146,7 +146,7 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 | S2 | Library & masthead faces (item 1 + rows 50/51/54) | click-to-cycle stamp + word-counter condense (word-target offer preserved) · `FlippingStamp` hoist + oracle edges · F-0 residue · Timeline voice | walk, captured | **DONE** — **her item 1 is a CLICK on both faces and a Settings toggle on neither**: the masthead cycles edited → created → *a little clock icon* and the bottom bar's counter full → only the note → only this block → *just an icon*, each remembered as ONE local choice, so **a note she has never opened arrives wearing it** (walked). **Her keep survives where it mattered most:** her click took the gesture the word-target setter had, so the setter is on the counter's context menu in EVERY face — the walk opened it from the bare icon and set 500w, which then rides the condensed faces. **Rows 50 and 54 CLOSED, row 51 narrowed to its midnight-rollover note alone**: the two mechanical extractions landed with **zero test edits** (81/14), the `FlippingStamp` hoist likewise (34/5), and both DEBUG-oracle edges were fixed as ONE defect — the two-window one **measured RED first**. Row 54 turned out to be two defects: the system sans AND a raw stored stamp column, the 18h ladder's R3-2 met a third time. Mac **328/47** incl. the spine's eleven types; core and iOS NOT owed (zero `Sources/`, zero `Shared/`), the marker stays 8. PROVISIONALs: **QUESTIONS #132** (a)–(h). Record below |
 | S3 | Chrome singles + the conformance sweep (rows 44/45/46/63/67/68/69 + the Trash fork) | 27-site sweep + grep pin · tag sheet voiced · indicator ring · Restore Tutorial confirm · "pools" lesson sweep (re-seed consequence recorded) · seal-blind rename field · `blockNamingDoor` hygiene · Trash cards · closing conformance walk against the reference artifact | walk, captured | **DONE — all SEVEN rows CLOSED plus the 2a Trash fork.** The sweep was **re-measured first** (the tree moved: **45 bare sites, 34 without a limit**, not the row's 27-of-35) and every one is verdicted in a per-site table; the class-closing pin's own predicate reports **34 offenders on the pre-sweep blobs and 0 here**. Row 63 is the unit's one bug class and it is **behavioural-revert verified — 3 of 8 pins RED, `rect.minX 192.0` vs `glyph.maxX 196.0`: the 4 pt of ring drawn through the glyph, printed** — fixed under the GUTTER LAW (the ring yields; the prose column never moves), with the comment-face decision MOVED to one pure rule rather than copied. Row 67 built the shell's own confirm channel (`ShellRouter.ask`) and moved BOTH tutorial doors; the old modal was **unpinnable by construction** (a headless `runModal()` waits forever), so the new road's pin drives the real door with no seam. Row 69 watches the seal and gates the FIELD while the door still acts-and-speaks. Row 45 voiced the sheet three surfaces render and gave it a per-surface noun; row 46 put the DEBUG door on S2's ownership idea; row 68 swept the lesson with the H pattern as this suite practises it (plain prose, constants in the PIN). **The walk: 19 crops, all four voice/appearance combinations, every row in use** — and it says what it changed in the dev store (it pressed Replace, which is the only way to see a swept lesson). **The conformance remainder list is EIGHT rows**, each with its cost, including the walk's own find: one act with TWO vocabularies. Mac **417/65 + 17/7**; core and iOS NOT owed (zero `Sources/`, zero `Shared/`), the marker stays 8. PROVISIONALs: **QUESTIONS #133** (a)–(h). Record below |
 | F2 | The shrink-re-font strand (KnownIssues row 53, pulled in at R-13u4-7) | the full-document editor's blank-below-the-last-line after a SHRINKING re-font; ⌘↑ heals — the trace's relayout/anchor hint; S1's record has the reproduction | red-on-old + walk on both occasions | **DONE — THE DEFECT IS REAL, REPRODUCED HEADLESSLY, AND THE ROW'S HYPOTHESIS IS CORRECTED BY MEASUREMENT.** The pin came first and was **RED on the shipped tree: 5 of 7 issues across 4 tests**, her own gesture reproduced as **11.0 pt of prose in a 600-pt viewport** (305.5 before). The seven-step trace says what it is, and it is NOT 17o's high-water ratchet (the usage bound moved freely in BOTH directions, 26,196 → 20,366 → 21,554): a re-font changes the geometry under a scroll offset AppKit keeps in PIXELS — the Phase 6 spike's own measured hazard, answered on the WIDTH axis since Phase 7 and never on this one — and at the tail the shortened document's clamp plus the typewriter room IS "the last line at the top and a page of blank". The fix joins that existing road: ONE model door captures the top visible LOCATION before the storage write and parks the restore for the settle hop, where `JumpPrimitive` lands it; the generation bump is the width-reflow road's own two lines. **The first-application fence was MEASURED, not reasoned** — a park made at a surface's birth is spent later as a yank to the top, which the colour-only guard caught. Walked on her exact fixture: **both shrink rows draw the page whole with the same line at the top and no ⌘↑**, both grow rows now keep her place too, a Dark flip moves the page by zero points, and the caret read `block 212/212` throughout — 18 captures, both voices, both appearances, tail AND mid-note. Class sweep: 15 rows, one verdict each. **`EditorTextView` is NOT in the diff** and the absence is the finding. Mac **365/47** across three runs; core and iOS NOT owed (zero `Sources/`, zero `Shared/`), marker stays 8. PROVISIONALs: **QUESTIONS #134** (a)–(d). Record below |
-| F3 | The Index cold-column heights (F1's residual, pulled in at R-13u4-8) | the Index pane's note rows stand at length-derived heights (`ProseHeightModel`/`FlowHeightEstimate` over cached `blockExtents` — 13u2b UNIT 1's shape on this surface), so the column's geometry is known before the aim; F1's record has the oscillation measurements | cold-click trial table red-on-old + walk | NOT-STARTED (runs after F2, before the ladder) |
+| F3 | The Index cold-column heights (F1's residual, pulled in at R-13u4-8) | the Index pane's note rows stand at length-derived heights (`ProseHeightModel` over cached `blockExtents` — 13u2b UNIT 1's shape on this surface), so the column's geometry is known before the aim; F1's record has the oscillation measurements | cold-click trial table red-on-old + walk | **DONE — THE RESIDUAL IS CLOSED, MEASURED BOTH WAYS.** The pre-fix baseline was taken on THIS tree rather than inherited: **6 of 6 cold deep chapter clicks STALLED** (`end=gaveup`, missing by 406 to 12,064 pt, `derived=26` on every line — not one row's height known). Shipped: 13u2b UNIT 1's shape ported (AR-1's *"the manifest must reach the ROWS"*) — a plain column of self-virtualizing rows at manifest heights, a reservation for a near note whose text has not arrived, the precedence `BookHeightManifest`'s, the prose arithmetic `ProseHeightModel`'s, the lengths ONE bounded statement through the book's shared `flowExtents` cache. **After: 13 of 13 cold and 16 of 16 warm SETTLE at `top=0`, every one with `hops=0` and `content=0`** — the column's height did not change once during any landing. Five pins; red-on-old **behavioural-revert verified** in a worktree at the unit's own probe-only commit (PIN 1 red 4/4, PIN 5 red 4/4, PIN 2 red on 5 of 7 pre-fix runs — the defect's own rate shape). **Two things the pins caught that no reasoning would have:** this unit's own `blockChrome` double-counted the inter-block gap (21,000 pt of phantom column on Sherlock), and its own first cut materialized **20 of 24 notes** because every row reports `height = 0` on the layout pass before any height is real — the flow's ladder R2-5 rule, met from the other direction. **P3 came out CHEAPER than the lazy page it replaced: 6 note-view constructions against 52.** Walked in both voices AND dark; the Terminal cold landing HOLDS (the 1.5 s and 6 s crops byte-identical). **KnownIssues row 56 RESOLVED too**, paired-verified 6 runs. Mac **210/33** all green; core and iOS NOT owed (zero `Sources/`, zero `Shared/`), the marker stays 8. PROVISIONALs: **QUESTIONS #135** (a)–(d). Record below |
 
 **CARRIED TO CLOSEOUT (grows as units close; nothing here may be lost):** MOBILE PARITY rows —
 (1) the phone's empty-block Return should CHAIN too (E1's report: AppSpec §7 still says the
@@ -4721,9 +4721,11 @@ checkpoint protocol binds from the first commit.
 **WHAT THIS UNIT DID NOT DO (the record's first line, written at the open; RE-STATED at the close
 against what actually shipped):**
 
-- *(written at the open, PENDING the close)* It did not build a product WORD for a landing that
-  cannot arrive — #129's product half stays HERS, and `gaveup` stays as the net whatever the
-  heights buy.
+- **It did not build a product WORD for a landing that cannot arrive** — #129's product half stays
+  HERS, `gaveup` stays as the net, and not one user-facing string changed anywhere in the diff
+  (verified by reading it: the diff contains no string literal a person can see).
+- **It did not relax F1's landing policy**, and that is a measured decision rather than an
+  omission — see the judgment calls.
 - It does not touch `Sources/VariorumCore/` or `Shared/` — the brief's stop rule. If either had
   looked necessary this unit would have stopped and reported instead.
 - It does not touch the editor seam (`BlockRangeIndex` · `EditorTextView` · `TypedReturn` ·
@@ -4744,7 +4746,7 @@ against what actually shipped):**
 | 4 | The BEHAVIOURAL REVERT (red-on-old verified in a worktree) | **DONE** — the improvement is the FIX's: 4 runs on the probe-only tree, PIN 1 red 4/4 and PIN 5 red 4/4; PIN 2 red on 5 of 7 pre-fix runs and green on 7 of 7 here |
 | 5 | THE POST-FIX COLD TRIAL TABLE (≥8 trials) + the warm trials against F1's 21/21 | **DONE** (this commit) — **9 of 9 cold SETTLE at top=0**, 11 of 11 warm settle |
 | 6 | The WALK — cold and warm, captured | **DONE** (this commit) — Terminal light (held at 1.5 s AND 6 s, byte-identical), Study light, Study DARK; 52 captures |
-| 7 | Closing suites + QUESTIONS + the KnownIssues row + the ledger's F3 row | **IN PROGRESS** — the closing runs are in (**210 tests in 33 suites, all green**); **ROW 56 RESOLVED**, paired-verified 6 runs |
+| 7 | Closing suites + QUESTIONS + the KnownIssues rows + the ledger's F3 row | **DONE** (this commit) — **210 tests in 33 suites, ALL GREEN, zero known issues**; QUESTIONS **#135** (a)–(d); **TWO KnownIssues rows CLOSED** (the residual + row 56, paired-verified) |
 
 ### THE READING (done in this session's own context, in the brief's order)
 
@@ -5171,3 +5173,148 @@ has not realized, the aim resolves against an estimate, the note never comes nea
 standing at a known height the landing is exact on the first aim, the note is inside the near band,
 it realizes, and the pane goes live. **The row is CLOSED** with this evidence; the warm-DerivedData
 covariate it records is moot because there is no red left for a covariate to explain.
+
+### THE DRIFT CLASS, ANSWERED (row 64's lesson: a height the model does not know about IS the defect)
+
+Row 64's chip-wrap lesson is that an estimate becomes a defect the moment the model can be wrong
+about something and never find out. So, plainly, **how a wrong estimate corrects here** — four
+roads, in the order they fire:
+
+1. **A row that DRAWS reports what it drew, and that outranks the arithmetic — permanently, and
+   re-taken on every layout pass.** The manifest's precedence is MEASURED > REMEMBERED > DERIVED,
+   and a note reports through its own door which fires only once its text has arrived. So **no row
+   she can see is ever standing on arithmetic**: the estimate governs exactly the rows that are off
+   screen.
+2. **A far row whose estimate is off shifts ONCE when it enters the near band, and is a measurement
+   from then on.** That is 13u2b UNIT 1's rider-4 class, named there as the compensator's honest
+   job, and it is the same class here. The calibration pin holds the size of that shift to within a
+   fifth, and measured 1.00× on a real fixture.
+3. **A width or a voice change drops everything learned and everything derived**, through one stamp
+   (`Int(width) | EditorTypography.fingerprint`) — the same shape `BookOutlineHeights` and
+   `SurfaceSizeMemory.Record` carry, for the same reason. The app measured this working: Terminal
+   reads `total=238205` on Sherlock and Study reads `253079`.
+4. **The lengths themselves land once per ENTRY SET**, and every derivation taken before them is
+   dropped when they arrive (`forgetDerived`).
+
+**The one staleness that survives, stated rather than discovered later:** the lengths cache is keyed
+by the ENTRY-ID LIST, so a note whose TEXT changes while the book stays open keeps its cached
+length until the membership changes. That is the reading flow's own recorded, bounded staleness
+(`FlowExtentsCache`'s doc: *"an unvisited one is off by the edit and corrected at its settle"*), and
+it is smaller here than there, because the note she is editing is by definition the realized one —
+and road 1 governs it. **What the model cannot be silently wrong about is anything on screen**,
+which is row 64's actual requirement.
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
+
+**NONE — said explicitly, as the brief asks.** `BlockRangeIndex`, `EditorTextView`, `TypedReturn`,
+`PaneTextAuthority`, `EditorViewModel`, `EditorSurfaceController`, `runStructural` and its identity
+oracle, `StructuralSeamEdit`, `StructuralGesturePlanner`, `MarkdownActs` — not one of them is in
+the diff. This is scroll geometry on one Mac surface.
+
+**`Sources/VariorumCore/` contains ZERO files of this unit** (verified by name over the whole diff),
+so `Sync/`, the schema, the migrations and `Server/` are untouched by construction, **no core run
+was owed**, and the lockstep marker stays **8**. **No `Shared/` file moved**, so the **iOS build is
+not owed** either (the standing convention), and nothing here is mobile-visible.
+
+**The whole unit is four source files and three notes files:**
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `App/Variorum/Variorum/Features/BookView/BookIndexPaneHeights.swift` | **NEW, 277 lines**: the pure `BookIndexPaneHeightModel` and the unobserved `BookIndexPaneHeights` | — |
+| `…/Features/BookView/BookIndexView.swift` | the pane's plain column + `IndexPaneRow`, the width report, `BookIndexPaneNote`'s reservation and measurement door, the lengths read on appear, `paneFacts` from the manifest, and the DEBUG span oracle | the COLUMN (the chapter panel) is untouched; `BookIndexColumn`'s pure brain, `BookIndexEditModel`'s liveness (P-3), the row menu, the selection wash, the prose column's placement and F1's landing adoption are all byte-unchanged |
+| `…/Features/BookView/BookViewModel.swift` | **+129 lines, all new**: the Index heights plumbing, and ONE line inside `restandOutlineHeights` so a voice change re-stands both surfaces | not one existing Outline or flow line changed |
+| `App/Variorum/VariorumTests/BookIndexColumnHeightsTests.swift` | **NEW, 5 pins** | — |
+| `notes/plans/phase-13u4-restyle.md` · `notes/QUESTIONS.md` (#135) · `notes/KnownIssuesAndTechDebt.md` (two rows closed) | — | — |
+
+**`Surface/LandingAuthority.swift` is NOT in this diff** — said because a reviewer will look for it:
+the policy was deliberately left alone (judgment call 1), and `LandingFacts`' manifest initialiser
+already existed for the Outline and the flow.
+
+### CLOSING RUNS (at the unit's END — never the full suite at the start)
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| **Mac, run 1** — this unit's suite, UNIT F1's, the whole landing/heights/Index/Outline/flow family, the mode-switch carry, the prose column, the surface memory, AND the acceptance spine under its **eleven REAL TYPE NAMES** | `-only-testing:` `BookIndexColumnHeightsTests` · `BookIndexLandingTests` · `LandingAuthorityTests` · `BookIndexColumnTests` · `BookIndexEditingTests` · `BookRedesignMountTests` · `BookOutlineLandingTests` · `BookOutlineRowsTests` · `ReadingFlowLandingTests` · `BookHeightManifestTests` · `BookOutlineCostTests` · `BookOutlineHeightsTests` · `ReadingFlowEstimateTests` · `ReadLandingTests` · `ModeSwitchCarryTests` · `IndexProseColumnTests` · `OutlineRoomTests` · `SurfaceSizeMemoryTests` + the eleven `Tutorial*` types | **187 tests in 29 suites PASSED** (exit 0, no skips) — including row 56's test |
+| **Mac, run 2** — the suite whose FILE name is not its TYPE name, caught by counting (29 started against 30 asked), plus its landing neighbours | `ShellLandingRuleTests` (the file is `ShellLandingTests.swift`) · `ArticleLandingProjectionArmTests` · `LandingOffsetTests` · `LandingSignpostTests` | **23 tests in 4 suites PASSED** |
+| **TOTAL** | | **210 tests in 33 suites, all green, zero known issues** |
+| The red-on-old measurement, on the probe-only tree in a worktree | `-only-testing:VariorumTests/BookIndexColumnHeightsTests` ×4 | **PIN 1 red 4/4 · PIN 5 red 4/4 · PIN 2 red 2/4** (5 of 7 across all pre-fix runs) |
+| Row 56's paired interleaved adjudication | base ↔ mine ×3 | **base RED 3/3 · this tree GREEN 3/3** |
+| **Core** (`swift test`) | — | **NOT OWED** — zero `Sources/VariorumCore/` files in the diff |
+| **iOS build** | — | **NOT OWED** — zero `Shared/` files in the diff |
+
+**The file-name trap, met once and recorded:** `-only-testing` takes the TYPE name, and a silent
+non-match costs nothing visible. Counting `◇ Suite "…" started` against how many were asked for is
+the only reliable check — 29 against 30 found `ShellLandingTests`, whose type is
+`ShellLandingRuleTests`.
+
+No full-suite run was made at this unit's start; the plan's closeout-refresh baselines stand.
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **F1's landing policy was NOT relaxed, and that is a measurement rather than an omission.** The
+   brief permits relaxing it *"where measurement says the column is honest now"*. Measurement says
+   there is nothing for a relaxation to buy: **every landing measured, in the harness and in the
+   app, spent ZERO corrections** — the first aim is right — so `correctionBudget`, the pace and
+   `correctsAnUnreportedTarget: false` are guards that never fire. Relaxing a guard with no measured
+   need is tuning, which is the road 13u2b's plan closes by name. `gaveup` stays as the net.
+   *Reverse by* naming a number and the measurement that wants it.
+2. **The whole pane left its `LazyVStack`, rather than only reserving a height inside each note.**
+   The smaller change was tried first in design and rejected on this measurement: a reservation
+   fixes a REALIZED row, and the lazy container's estimate for the rows it has NOT realized is the
+   other half of the same defect. AR-1 ruled exactly this for the Outline (*"the manifest must reach
+   the ROWS"*), the reading flow ships the same shape, and the cost came out CHEAPER here (6
+   note-view constructions against 52). *Reverse by* returning the rows to a lazy container and
+   keeping only the reservation — which re-opens the un-realized half.
+3. **A note learns its height through its OWN door; a heading learns through the row's.** A row
+   cannot tell a real report from a reservation, and learning a reservation would promote arithmetic
+   to a measurement — the manifest's precedence, inverted. A heading always draws real content when
+   near, so its own report is honest. *Reverse by* threading a loaded flag up into the row, which is
+   the same fact carried one level further.
+4. **The pure model sits beside its class rather than in `Surface/`**, where the Outline's twin is
+   split. `FlowHeightEstimate` is the precedent and the reason is the same: it is one surface's
+   arithmetic, `nonisolated` so a pin reads it without a window, and everything genuinely shared is
+   already hoisted (`ProseHeightModel`, `BookHeightManifest`, `NearBand`). *Reverse by* moving the
+   enum, which is a file move.
+5. **A BLOCK landing keeps `offset=-1` in the signpost.** A block inside a note is not a row of this
+   manifest, so an offset for it would be invented. *Reverse by* summing the note's blocks, which is
+   a second height model for the same surface.
+6. **The near margin is 2,000 pt** — the Outline's own number for its small rows, deliberately not
+   larger, because a pane row is heavier (it opens a TOC observation). It is stated, not measured
+   against her reading, and it is PROVISIONAL in spirit; the materialization pin is what bounds it.
+   *Reverse by* a measured number.
+7. **`BookIndexMaterialization` was left counting CONSTRUCTIONS rather than mounts**, which is why
+   the pre-fix reading is 52 for a 24-note book. Changing it to count mounts would have hidden the
+   very thing it measured. *Reverse by* moving the counter into `onAppear`, and losing the finding.
+
+### CARRIED TO THE PHASE CLOSEOUT (from this unit)
+
+1. **QUESTIONS #135 (a)–(d)** joins her ratify bundle; next free moves to **#136**.
+2. **TWO KnownIssues rows CLOSED** — F1's cold-column residual and **row 56**. **Row 56's OTHER
+   half is NOT closed and says so in the row:** the standing **1,989** `Modifying state during view
+   update` warnings across the app stay open under owner 12, and they are where the rest of that
+   family probably lives. **No row was opened.**
+3. **The orchestrator's owed READ-MODE measurement (R-13u4-7: five cold deep-chapter clicks in the
+   book's Read mode) is still owed and is NOT this unit's** — but this unit's result is the
+   architecture's prediction confirmed on the Index, which is the surface that lacked the heights.
+   Read/flow already had them (batch H) and should not stall; the walk verifies rather than decides.
+4. **A WALKER FACT** for `Tools/WalkKit/README.md` at its next touch: **the SHELF's book rows move
+   between voices** — Sherlock sits at screen y **349 in Terminal** and **384 in Study** on a
+   1700 × 1000 window — so a script that hard-codes the shelf point opens the WRONG BOOK after a
+   voice flip, silently; the landing signpost's `rows=` is the sanity check on which book you are
+   in (`rows=1` where 26 was expected). And: a fresh launch always lands on `~/shelf` and a book
+   always opens in **Outline** — the book's mode is session state, never remembered across launches
+   — so "reopen the book in Index" is two clicks.
+5. **NOTHING MOBILE-VISIBLE.** Zero `Shared/`, zero `Sources/`; this is a Mac surface. **No parity
+   row is owed.** *(The phone has no book Index.)*
+6. **The tutorial was NOT edited** and nothing in it describes this behaviour, so nothing became
+   false and there is no re-seed consequence from this unit.
+
+### WHAT A FRESH SESSION WOULD NEED TO FINISH THIS
+
+Nothing. Everything is committed and pushed: the five pins with their measured red run and the
+behavioural revert, the fix, the calibration and the arithmetic error it caught, the P3 gate and the
+defect IT caught, the 13 cold and 16 warm app trials, the walk's 52 captures (gitignored,
+`notes/plans/13u4-screens/f3/`), QUESTIONS #135, two KnownIssues rows closed, the ledger row and
+this record. What is OPEN is hers: **#135**, and **#129** which this unit deliberately left alone.
+What is owed elsewhere: **the orchestrator's five cold Read-mode clicks** (R-13u4-7), which this
+unit did not reach for.
