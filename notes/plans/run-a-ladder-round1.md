@@ -160,6 +160,13 @@ reads true again), the five shipped pins GREEN (they never re-ran the quit road,
 exactly how the defect shipped). Restore by `git checkout --` from the repo root; result
 recorded below when written.
 
+**REVERT R-L1 RAN AND DISCRIMINATED EXACTLY:** 1 issue, in the new pin alone —
+`theSecondQuitsOwnReRefusalDoesNotReArmTheDecline` red at QuickNoteParkTests.swift:226
+(`declineQuitOnce() → true` where false is owed on the second press), the five shipped pins
+GREEN — which is the defect's shipped shape reproduced: the primitive's one-shot held while
+the integrated second press re-armed it. RESTORED by `git checkout --` from the repo root;
+`git diff` empty before this line was written.
+
 **2 · MINOR (the comments sheet's clear discipline) — SPLIT: the behaviour change is DISMISSED
 AS WRONG; the comment fix is CONFIRMED.** I re-checked the implementer's falsification at both
 sites myself: `QuickNotePad.take` (QuickNoteView.swift:199 — `if text == submitted { text = ""
@@ -184,7 +191,31 @@ replaced with a loud debug assertion + unconditional park: the one call site fir
 `QuickNoteMint.mints` passed, and the only thing the silent return could ever do is eat a
 refused capture (binding 1 inverted). No pin (the arm is unreachable from production code).
 
-*(Fix-pass suite lines land at the bottom of this section when the pass closes.)*
+**THE FIX PASS'S COMMITS (each pathspec-limited, pushed, no trailers):**
+- `bfdd3bd6` — the MAJOR's fix + pin (`AppSession.swift` + `QuickNoteParkTests.swift`).
+- `73066566` — the final calls + revert announcement (this file).
+- `662237d3` — NIT: the park's dead guard → loud debug assertion (`AppSession.swift`).
+- `2e3b0276` — the MINOR's confirmed half: the comments sheet's doc comment re-worded to the
+  family's recorded rule (`MobileCommentsSheetView.swift`; behaviour DISMISSED, reason above).
+- `385ed8c4` — NIT: the R1-10 hazard sentence at both `clearRedoFuture` call sites
+  (`Operations+Container.swift`, `Operations+NoteVersions.swift`).
+
+**THE FIX PASS'S CLOSING RUNS (all on the final tree, selectors written literally):**
+
+| Gate | Result |
+|---|---|
+| Core (the touched files' suites: `ContentReplacementRedoTests` · `PromotePicksArchivedPickTests` · `RedoStackTests` · `SmartConversionTests`) | **50 tests in 4 suites — ALL GREEN** |
+| `QuickNoteParkTests` (the MAJOR's suite, now 6) | **6 tests in 1 suite — ALL GREEN** (and R-L1's revert red exactly in the new pin) |
+| THE TUTORIAL SPINE — the ELEVEN suites by their type names (`TutorialBookShapeTests` … `TutorialFannedMatrixTests`) | **79 tests in 11 suites — ALL GREEN** |
+| The phone (`MobileCommentDraftTests`, over the comment-only edit) | **3 tests in 1 suite — ALL GREEN** |
+
+*(One walk of the traps list on the way: `-only-testing:VariorumTests/TutorialWalkTests` selects
+NOTHING — the file holds eleven suite TYPES and no type of its own name — and the run still
+prints a green line for the other selector, so the spine must always be named by its struct
+names. Same family as the zsh-variable trap already in ENVIRONMENT TRAPS.)*
+
+**Fix pass CLOSED.** The implementer side's sanity pass over `bfdd3bd6..385ed8c4` is next per
+the flow; anything it raises returns here for the final word.
 
 ## CLEAN BILL — load-bearing things specifically checked and found solid
 
