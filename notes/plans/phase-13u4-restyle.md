@@ -4018,3 +4018,58 @@ times in that lesson.
 **Run:** `TutorialLibraryActsTests` · `TutorialBookShapeTests` · `TutorialWherePlacesActsTests` ·
 `SnippetsDoorsTests` · `SnippetsVocabularyTests` · `PaneMountTests` → **28 tests in 5 suites
 passed**.
+
+### EVIDENCE — THE WALK (piece 11; the unit closes on USE, not on pins)
+
+**Build:** `App/Variorum/DerivedData/13u4s3/Build/Products/Debug/Variorum.app`
+(`io.lduarte.Variorum.debug`, the fenced dev store). `pgrep -fl 'Variorum.app/Contents/MacOS'`
+was checked at the start — **ZERO instances; hers was not running at any point** — and the dev
+instance was quit **by identity** (`tell application id "io.lduarte.Variorum.debug" to quit`),
+never by a keystroke (the 13u3 UNIT D walker law), with `pgrep` re-checked after the quit (zero).
+`/Applications/Variorum.app` was never touched. Captures:
+`notes/plans/13u4-screens/s3/` (gitignored) — `crops/` holds the **19 read crops** below.
+
+| # | Step | What the app did | Capture |
+|---|---|---|---|
+| 1 | **Help ▸ Restore Tutorial…** — Terminal, light — **ROW 67** | the confirm **draws INSIDE the window and CAPTURES** (the AppKit modal never did — that was the walker's own diagnostic for it), the app dims behind it, the words are the old ones to the letter, and **Replace is marked destructive** beside Cancel | `01-restore-tutorial-ALERT-terminal-light.png` |
+| 2 | **Replace** | the tutorial re-seeded and the book OPENED (the door's own `pendingSelection`) — the confirm's accept road, end to end | `02-after-replace-top.png` |
+| 3 | ⌘K → *pool & scraps* — **ROW 68** | the swept lesson, in use: *"the Snippets area's groups column switches between groups, and “all snippets” at its top"* · *"press the Scraps button"* · *"a COPY with lineage back to the snippet, which stays in its group"* · *"a GROUP is a container (a snippet lives in exactly one; Move to Group moves it)"*. **No pool menu anywhere** | `03-lesson-SWEPT-terminal-light.png`, `03b-lesson-prose.png` |
+| 4 | ⌥⌘C, then Block ▸ Callout ▸ Emoji… 📌, caret in that block — **ROW 63** | **the pin sits in the gutter and the ring's leading edge stops clear of it.** Pre-fix the ring began 4 pt further left, through the glyph | `04-ring-stops-at-the-glyph-terminal-light.png`, `04b-ring-full.png` |
+| 5 | Sidebar ▸ **Snippets** | the surface the swept lesson now describes: the **groups** column with **all snippets** at its top, `+ new group`, and *"new snippet — start typing · ⏎ keeps it as a standalone snippet"* | `05-snippets-surface-groups-column.png` |
+| 6 | Right-click a snippet ▸ **Tags…** — **ROW 45** | the sheet in the VOICE: monospace, the title ***"tags for this snippet — “a scrap with two takes — ⌥-drag me and both come”"*** (the per-surface noun; **her prose in its own case**), calm rows inside a hairline, the accent-tinted **done** | `06-tag-sheet-VOICED-snippet-noun-terminal-light.png` |
+| 7 | Click a tag row | the applied row wears **✓** in the chosen ink with the wash under it and its text in the ink; the rest stay muted. Clicked again → it clears (the dev store left as found) | `07-tag-row-CHECKED-terminal-light.png` |
+| 8 | Library ▸ the trash icon — **THE 2a FORK** | every row a **calm card** on the card surface inside a hairline, in the voice's type; **Put back** accent-tinted, **Delete Now** and **Empty Trash…** in the alarm ink; the section header quiet above. The grouping, the stamps and the countdown are exactly what they were | `08-trash-CALM-CARDS-terminal-light.png` |
+| 9 | ⌘K → *the seal* (a sealed lesson) ▸ **history** ▸ **Name** — **ROW 69** | **the field does not open.** The pane speaks the refusal in the alarm ink — *"This note is marked complete — unseal it to put this back."* — and the savepoint row is untouched beside it | `09-sealed-rename-REFUSES-no-field-terminal-light.png` |
+| 10 | **STUDY voice** (Settings ▸ General), the same pane | the serif voice: *Block History* · *Savepoints* Title-Cased, the refusal still in alarm, the Name door still refusing | `10-sealed-rename-REFUSES-STUDY-light.png` |
+| 11 | Study: Library ▸ the Trash | the calm cards in serif — the second voice, same geometry | `11-trash-CALM-CARDS-STUDY-light.png` |
+| 12 | **DARK** (Settings ▸ General ▸ Dark), Study | the Trash's cards on the **fully black room** (R51) under her palette; Put back and Delete Now both legible | `12-trash-DARK-STUDY.png` |
+| 13 | Dark: **Help ▸ Restore Tutorial…**, then **Cancel** | the alert on the black room, Replace still destructive — and **Cancel replaced nothing** (the decline road: the Trash is still on screen, the book untouched) | `13-restore-tutorial-ALERT-DARK-study.png` |
+| 14 | Dark: Snippets ▸ right-click ▸ Tags… | the sheet in serif on black, the title *"tags for this snippet — …"* with her prose's case kept | `14-tag-sheet-DARK-STUDY.png` |
+| 15 | **TERMINAL + DARK**: the swept lesson | the prose on the black room, the ring on block 1, the bottom bar's whole chrome on ONE line | `15-lesson-DARK-TERMINAL.png` |
+| 16 | Terminal + dark: the callout glyph again — **ROW 63 in the fourth combination** | the pin in the gutter, the ring clear of it — the same 4 pt yield on black | `16-ring-stops-at-the-glyph-DARK-TERMINAL.png` |
+| 17 | The bottom bar, read close — **ROW 44's sites in use** | `block 1/4 · block ▾ · takes · commit ⌘s · history · note ▾ · comments · (aa)` — **eleven of the swept sites, every chip on one line, nothing wrapped and nothing truncated** | `17-bar-chrome-one-line-after-the-sweep.png` |
+
+**Both voices AND both appearances**, as the plan's bar asks: Terminal-light (1–9, 17),
+Study-light (10–11), Study-dark (12–14), Terminal-dark (15–16).
+
+**WHAT THIS WALK CHANGED IN THE DEV STORE, said plainly because it is more than a fixture
+note:** step 2 pressed **Replace**, so the dev store's tutorial was RE-SEEDED — the old field
+guide, its lessons and the `tutorial scraps` group are now in the dev Trash on their 30-day
+clock, and a fresh field guide stands on the shelf. That was deliberate and it was the only way
+to see the swept lesson IN USE (an already-seeded book keeps its old prose until Restore — the
+re-seed consequence this unit is recording). The callout added at step 4 and again at step 16
+was REMOVED both times (Block ▸ Callout ▸ Remove Callout); the tag applied at step 7 was
+un-applied. **Left as found:** voice **Terminal**, appearance **Follow system** (verified by
+`defaults read io.lduarte.Variorum.debug appearanceChoice` → `system`), her colour palette
+untouched, zero instances.
+
+**A walker fact for `Tools/WalkKit/README.md` at its next touch — and it retires one of its own
+entries:** the UNIT E fact *"`Help ▸ Restore Tutorial…` puts up a real modal dialog which
+`walk-cap`'s layer-0 filter does not list — so the app looks normal in the capture and simply
+stops responding"* **is now false for that door**: this unit made it a SwiftUI `.alert`, which
+draws inside the main window and captures. The README's general rule still stands (*"the dialog
+missing from the screenshot is itself the signal that it is an AppKit modal"*) and now has two
+live examples instead of three: `ShellActions.confirmDiscardingUndo` and
+`CalloutMenu.promptEmoji` (the second is how this walk set the callout's glyph — drive it with
+`click button "Set" of window 1`, and note `cliclick t:` **cannot type an emoji** at all
+(`Unable to get key code`): put it on the pasteboard and press ⌘V through System Events).
