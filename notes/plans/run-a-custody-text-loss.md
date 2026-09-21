@@ -1666,6 +1666,38 @@ strictly better than shipped. **ROUND 2 CLOSES: 1 MAJOR confirmed-and-built both
 1 NIT confirmed at the sentence size · 0 disputes outstanding. ROUND 3 opens (fresh reviewer, the
 cap): a full pass focused on round 2's fixes, anchored on both prior round files.**
 
+**ROUND 3 (2026-09-21, the cap) — findings file `notes/plans/run-a-ladder-round3.md`: 0 BLOCKER ·
+2 MAJOR · 0 MINOR · 1 NIT, with round 2's three fixes verdicted (the phone park CORRECT AS BUILT
+for every pinned road; the Mac park's sweep substance CONFIRMED; the NIT sentence TRUE at the
+code) and round 1's area re-checked in passing.** F1: the Mac restore is consumed inside
+`State(initialValue:)` — phantom view-struct constructions while the panel is presented EAT the
+park (Apple's own documented State anti-pattern; the three presenters construct inline; the
+family's pad consumes in `.onAppear`). F2: **clear-at-restore's safety premise falsified on these
+surfaces** — the pad's close FILES (so a re-refusal re-parks and the cycle closes), but the
+comment surfaces' closes never submit, so a reopen-she-closes-without-filing SPENDS the insurance
+and the second close loses the words on the very unlock road the refusal names; round 2's MAJOR
+one generation later. F3 (NIT): the phone's dead-block corner unrecorded at #140(d).
+
+### ROUND 3's F2 — THE ORCHESTRATOR'S RULING AMENDMENT (2026-09-21, recorded before the flow's fix pass)
+
+**Binding 3 is AMENDED for `CommentDraftPark` (the comment surfaces ONLY — the pad's
+`QuickNotePark` keeps clear-at-restore, whose premise HOLDS there because the pad's close files):
+the restore is a NON-CONSUMING PEEK.** The park clears on exactly three occasions: a LANDED
+same-block submit (built), replacement by a newer refusal (built), and the session's end (the
+memory-only scope). The honest costs are accepted and are ALREADY #140's recorded edges: the
+restored line reappears at every open until landed or replaced, and a hand-emptied field still
+restores — #140(b)'s over-preservation edge, now true in every generation. **F1's fix rides the
+same pass:** the Mac's restore moves to the installed lifecycle (`.task` before `model.start()`,
+the pad's shape) — with a peek the phantom can no longer EAT anything, but a side-effectful
+`State(initialValue:)` is the documented anti-pattern and goes regardless; the phone's one-shot
+render consume STAYS (it prevents clobbering her typing within an open; it never cleared the
+park's own hold under the peek). **Pins owed:** F2's two-generation pin on BOTH platforms
+(refused → close → reopen restored → close unsubmitted → reopen → STILL restored; red on
+current), F1's phantom pin (construct-and-discard a never-installed model → the reopen still
+restores; red on current), and the existing ghost guards re-run (a landed submit still clears —
+nothing may come back after it). **Records owed:** #140(b)/(f) re-based as record-truth edits to
+the peek semantics; F3's one symmetric sentence at #140(d) for the phone's dead-block corner.
+
 ---
 
 ## CLOSEOUT DUTIES (the standing ritual, run-shaped — nothing here runs until the ladder ends)
