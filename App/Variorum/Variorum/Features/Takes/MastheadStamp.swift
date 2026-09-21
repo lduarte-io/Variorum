@@ -49,6 +49,13 @@ struct MastheadStamp: View {
 
     @State private var stamps: Queries.NoteStamps?
     @State private var showsCreated = false
+    #if DEBUG
+    /// **This masthead's own name in the DEBUG oracle** (13u4 UNIT S2 —
+    /// row 51's two-window edge). `@State`, so it is minted once per view
+    /// identity and survives every body re-evaluation; DEBUG-only, so the
+    /// shipping build carries neither the field nor the mint.
+    @State private var oracleOwner = UUID()
+    #endif
 
     private var subject: TimeStampFace.Subject { showsCreated ? .created : .edited }
 
@@ -71,7 +78,7 @@ struct MastheadStamp: View {
                 // new note's door exists after `onChange(of: postID)` has
                 // cleared the old note's — `onAppear` alone never re-fired on
                 // a swap. Synchronous, before the await, so it is as prompt.
-                PostDetailOracle.flipStamp[postID] = { flip() }
+                PostDetailOracle.claimStamp(postID, owner: oracleOwner) { flip() }
                 #endif
                 await watch()
             }
@@ -89,10 +96,20 @@ struct MastheadStamp: View {
             // PREVIOUS note's three entries and its `stampFrames` row
             // survived it. They are cleared here, where the old id is still
             // in hand.
+            //
+            // **…and it takes ITS OWN entry, never the note's row** (13u4
+            // UNIT S2 — row 51's first edge): with the SAME note open in two
+            // windows, a wholesale reset here emptied the other masthead's
+            // entries while it was still drawn. Measured red before the fix
+            // (`StampOracleOwnershipTests`).
             .onChange(of: postID) { old, _ in
-                PostDetailOracle.resetStamp(old, in: session.debugProbeScope)
+                PostDetailOracle.releaseStamp(
+                    old, owner: oracleOwner, in: session.debugProbeScope)
             }
-            .onDisappear { PostDetailOracle.resetStamp(postID, in: session.debugProbeScope) }
+            .onDisappear {
+                PostDetailOracle.releaseStamp(
+                    postID, owner: oracleOwner, in: session.debugProbeScope)
+            }
             #endif
     }
 
@@ -130,11 +147,18 @@ struct MastheadStamp: View {
     private func flip() {
         showsCreated.toggle()
         #if DEBUG
-        PostDetailOracle.stampShown[postID] = date.map {
-            TimeStampFace.stamp(subject, date: $0, now: now)
-        }
+        reportShown()
         #endif
     }
+
+    #if DEBUG
+    private func reportShown() {
+        PostDetailOracle.recordStamp(
+            postID,
+            words: date.map { TimeStampFace.stamp(subject, date: $0, now: now) },
+            owner: oracleOwner)
+    }
+    #endif
 
     private func watch() async {
         do {
@@ -143,10 +167,9 @@ struct MastheadStamp: View {
             }) {
                 stamps = read
                 #if DEBUG
-                PostDetailOracle.stampEditedAt[postID] = read?.editedAt
-                PostDetailOracle.stampShown[postID] = date.map {
-                    TimeStampFace.stamp(subject, date: $0, now: now)
-                }
+                PostDetailOracle.recordStampEdited(
+                    postID, at: read?.editedAt, owner: oracleOwner)
+                reportShown()
                 #endif
             }
         } catch is CancellationError {

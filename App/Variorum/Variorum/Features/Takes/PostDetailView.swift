@@ -1026,31 +1026,109 @@ enum PostDetailOracle {
     /// which the finding believed was keyed and was not. With two note
     /// windows open in a DEBUG build the last `onAppear` won, for all of
     /// them. DEBUG-only either way; keyed now, so a pin can name its note.
-    static var stampShown: [String: String] = [:]
-    static var stampEditedAt: [String: Date] = [:]
+    ///
+    /// **…AND KEYED BY THE MASTHEAD THAT REGISTERED THEM since 13u4 UNIT S2**
+    /// (`KnownIssuesAndTechDebt` row 51's first edge, which 17q recorded and
+    /// left: *"`PostDetailOracle.resetStamp` with the SAME note open in two
+    /// windows (closing either clears the other masthead's oracle entries;
+    /// needs ownership tracking)"*). The keying by note was necessary and
+    /// not sufficient: two windows on ONE note share the key, so a teardown
+    /// in either emptied the row while the other masthead was still drawn —
+    /// measured red before this fix (`StampOracleOwnershipTests`). Now every
+    /// masthead registers under its OWN token, the reads answer from the
+    /// most recent registrant, and a teardown removes only that masthead's
+    /// entry. The public read shape is unchanged, so every pin reads as it
+    /// did.
+    private struct StampEntry {
+        var words: String?
+        var editedAt: Date?
+        var flip: (@MainActor () -> Void)?
+    }
+
+    /// postID → the mastheads standing on it, oldest first (the last one is
+    /// what the reads answer from — the most recently mounted masthead is
+    /// the one a pin means).
+    private static var stampOwners: [String: [UUID]] = [:]
+    private static var stampEntries: [String: [UUID: StampEntry]] = [:]
+
+    static var stampShown: [String: String] { current(\.words) }
+    static var stampEditedAt: [String: Date] { current(\.editedAt) }
     /// …and its click, so a pin flips it without simulating an AppKit click
     /// into hosted chrome (`beginTitleEditing`'s own pattern).
-    static var flipStamp: [String: @MainActor () -> Void] = [:]
+    static var flipStamp: [String: @MainActor () -> Void] { current(\.flip) }
+
+    private static func current<V>(_ field: KeyPath<StampEntry, V?>) -> [String: V] {
+        var answer: [String: V] = [:]
+        for (postID, owners) in stampOwners {
+            guard let owner = owners.last,
+                  let value = stampEntries[postID]?[owner]?[keyPath: field] else { continue }
+            answer[postID] = value
+        }
+        return answer
+    }
 
     /// The one-window reads, for a pin that mounted exactly one detail.
     static var stampShownAnywhere: String? { stampShown.values.first }
     static var stampEditedAtAnywhere: Date? { stampEditedAt.values.first }
 
-    /// Forget this note's stamp oracles — called before a pin's mount so a
-    /// stale report cannot satisfy it, and by the masthead itself when the
-    /// note goes away (the ladder's R2-9: the keying fix made them grow one
-    /// entry per note ever mounted, `flipStamp` retaining a closure each
-    /// time, and the staleness the keying closed came back in the other
-    /// direction — a later pin that forgot to reset could be answered by an
-    /// earlier mount's words).
+    // MARK: - The masthead's registrations (each names itself)
+
+    /// A masthead takes this note's stamp row: its click door, and its place
+    /// at the end of the note's owner list.
+    static func claimStamp(
+        _ postID: String, owner: UUID, flip: @escaping @MainActor () -> Void
+    ) {
+        note(postID, owner: owner)
+        stampEntries[postID, default: [:]][owner, default: StampEntry()].flip = flip
+    }
+
+    /// The words this masthead is SHOWING (nil clears its own words only).
+    static func recordStamp(_ postID: String, words: String?, owner: UUID) {
+        note(postID, owner: owner)
+        stampEntries[postID, default: [:]][owner, default: StampEntry()].words = words
+    }
+
+    /// The edit stamp this masthead's held read last delivered.
+    static func recordStampEdited(_ postID: String, at date: Date?, owner: UUID) {
+        note(postID, owner: owner)
+        stampEntries[postID, default: [:]][owner, default: StampEntry()].editedAt = date
+    }
+
+    /// A masthead leaves (its window closed, or its `.task(id:)` swapped to
+    /// another note). It takes ITS OWN entry and nothing else — which is the
+    /// whole of row 51's first edge. The geometry row goes only when the
+    /// last masthead on the note has gone, for the same reason.
+    static func releaseStamp(_ postID: String, owner: UUID, in scope: String) {
+        guard var owners = stampOwners[postID], owners.contains(owner) else { return }
+        owners.removeAll { $0 == owner }
+        stampEntries[postID]?[owner] = nil
+        if owners.isEmpty {
+            stampOwners[postID] = nil
+            stampEntries[postID] = nil
+            MastheadGeometry.forgetStamp(postID, in: scope)
+        } else {
+            stampOwners[postID] = owners
+        }
+    }
+
+    /// Forget this note's stamp oracles WHOLESALE — a PIN's door, called
+    /// before its mount so a stale report cannot satisfy it (the ladder's
+    /// R2-9). Deliberately unconditional: a pin owns nothing, and "start
+    /// from empty" is exactly what it is asking for.
     static func resetStamp(_ postID: String, in scope: String) {
-        stampShown[postID] = nil
-        stampEditedAt[postID] = nil
-        flipStamp[postID] = nil
+        stampOwners[postID] = nil
+        stampEntries[postID] = nil
         // …and the GEOMETRY oracle clears its own row (the ladder's R3-10):
         // one call site for a pin, but neither oracle reaches into the
         // other's storage.
         MastheadGeometry.forgetStamp(postID, in: scope)
+    }
+
+    private static func note(_ postID: String, owner: UUID) {
+        var owners = stampOwners[postID] ?? []
+        guard !owners.contains(owner) else { return }
+        owners.append(owner)
+        stampOwners[postID] = owners
     }
 }
 

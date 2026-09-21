@@ -405,9 +405,22 @@ struct CatalogCardStamps: View {
     static var shown: [String: [String: String]] = [:]
     static var flip: [String: @MainActor () -> Void] = [:]
 
-    static func record(_ key: String?, slot: String, words: String) {
+    /// **WHO wrote each slot** (13u4 UNIT S2 — `KnownIssuesAndTechDebt`
+    /// row 51's second edge: *"`CatalogStampOracle.forget` on `onDisappear`
+    /// where SwiftUI does not order a departing card's `onDisappear` before
+    /// a successor's `onAppear` (a recycled card could leave its own slot
+    /// empty)"*). SwiftUI's teardown order is not a thing a test can force,
+    /// which is why the fix is structural rather than a wait: a registrant
+    /// names itself, and `forget` clears only what that registrant still
+    /// owns. A late teardown from the card it replaced is then a no-op
+    /// instead of an empty slot under a drawn stamp.
+    private static var owners: [String: [String: UUID]] = [:]
+    private static var flipOwners: [String: UUID] = [:]
+
+    static func record(_ key: String?, slot: String, words: String, owner: UUID) {
         guard let key, !slot.isEmpty else { return }
         shown[key, default: [:]][slot] = words
+        owners[key, default: [:]][slot] = owner
     }
 
     /// Forget this note's slots — called before a pin's mount so a stale
@@ -419,15 +432,73 @@ struct CatalogCardStamps: View {
     static func reset(_ key: String) {
         shown[key] = nil
         flip[key] = nil
+        owners[key] = nil
+        flipOwners[key] = nil
     }
 
     /// One stamp leaving the screen forgets its own slot — an arrangement
     /// swap or a slot standing down clears exactly its words and leaves the
-    /// others (the 18h ladder's R3-10 hygiene, the half 17q missed).
-    static func forget(_ key: String?, slot: String) {
-        guard let key, !slot.isEmpty else { return }
+    /// others (the 18h ladder's R3-10 hygiene, the half 17q missed) — **and
+    /// only when it still OWNS that slot** (13u4 UNIT S2, row 51's second
+    /// edge: a successor that has already recorded its own words keeps
+    /// them).
+    static func forget(_ key: String?, slot: String, owner: UUID) {
+        guard let key, !slot.isEmpty, owners[key]?[slot] == owner else { return }
         shown[key]?[slot] = nil
+        owners[key]?[slot] = nil
         if shown[key]?.isEmpty == true { shown[key] = nil }
+        if owners[key]?.isEmpty == true { owners[key] = nil }
+    }
+
+    /// The small card's flip door, and its teardown — the same ownership
+    /// rule, for the same reason: a recycled card must not unwire the door
+    /// its successor just wired.
+    static func registerFlip(
+        _ key: String, owner: UUID, _ door: @escaping @MainActor () -> Void
+    ) {
+        flip[key] = door
+        flipOwners[key] = owner
+    }
+
+    static func releaseFlip(_ key: String, owner: UUID) {
+        guard flipOwners[key] == owner else { return }
+        flip[key] = nil
+        flipOwners[key] = nil
+    }
+}
+#endif
+
+#if DEBUG
+/// The two DEBUG registrations are `ViewModifier`s rather than chained
+/// closures for ONE reason (13u4 UNIT S2 — row 51's second edge): a
+/// modifier can hold `@State`, and the token that says WHO is registering
+/// has to be minted once per view identity. A chained `onAppear` has
+/// nowhere to keep one.
+private struct CatalogStampRecorder: ViewModifier {
+    let key: String?
+    let slot: String
+    let words: String
+    @State private var owner = UUID()
+
+    func body(content: Content) -> some View {
+        content
+            .onAppear { CatalogStampOracle.record(key, slot: slot, words: words, owner: owner) }
+            .onChange(of: words) { _, new in
+                CatalogStampOracle.record(key, slot: slot, words: new, owner: owner)
+            }
+            .onDisappear { CatalogStampOracle.forget(key, slot: slot, owner: owner) }
+    }
+}
+
+private struct CatalogStampFlipDoor: ViewModifier {
+    let postID: String
+    let flip: @MainActor () -> Void
+    @State private var owner = UUID()
+
+    func body(content: Content) -> some View {
+        content
+            .onAppear { CatalogStampOracle.registerFlip(postID, owner: owner, flip) }
+            .onDisappear { CatalogStampOracle.releaseFlip(postID, owner: owner) }
     }
 }
 #endif
@@ -438,12 +509,7 @@ extension View {
     @ViewBuilder
     func recordCatalogStamp(_ key: String?, slot: String, words: String) -> some View {
         #if DEBUG
-        self
-            .onAppear { CatalogStampOracle.record(key, slot: slot, words: words) }
-            .onChange(of: words) { _, new in
-                CatalogStampOracle.record(key, slot: slot, words: new)
-            }
-            .onDisappear { CatalogStampOracle.forget(key, slot: slot) }
+        modifier(CatalogStampRecorder(key: key, slot: slot, words: words))
         #else
         self
         #endif
@@ -456,9 +522,7 @@ extension View {
         _ postID: String, _ flip: @escaping @MainActor () -> Void
     ) -> some View {
         #if DEBUG
-        self
-            .onAppear { CatalogStampOracle.flip[postID] = flip }
-            .onDisappear { CatalogStampOracle.flip[postID] = nil }
+        modifier(CatalogStampFlipDoor(postID: postID, flip: flip))
         #else
         self
         #endif

@@ -2977,7 +2977,7 @@ CLOSE against what actually shipped):**
 | 1 | The record + the READING (the brief's five reading lists, in order) | DONE (this commit) |
 | 2 | **Row 50** — the F-0 residue: `NoteCards`/`TagChips` out of the view file, the model's tag acts out of the model file. MECHANICAL, zero test edits | DONE (this commit) — **81 tests in 14 suites passed with ZERO test files touched**; the view 1,195 → 1,012 lines, the model 585 → 497 |
 | 3a | **Row 51** — the `FlippingStamp` hoist to the shared home (`Core/Views/`) | DONE (this commit) — **34 tests in 5 suites passed with ZERO test files touched** |
-| 3b | **Row 51** — the two DEBUG-oracle edges swept, each fixed or provably safe | NOT-STARTED |
+| 3b | **Row 51** — the two DEBUG-oracle edges swept, each fixed or provably safe | DONE (this commit) — both FIXED, the two-window one **measured RED first**; 25 tests in 4 suites green, the two shipped stamp suites riding UNMODIFIED |
 | 4 | **Item 1a** — the masthead stamp's click-cycle (edited → created → clock) + ONE remembered LOCAL choice + pins | NOT-STARTED |
 | 5 | **Item 1b** — the word counter's click-cycle (full → note → block → icon), the target offer preserved in every state + pins | NOT-STARTED |
 | 6 | **Row 54** — the Timeline rows take the voice's type + pin | NOT-STARTED |
@@ -3047,5 +3047,44 @@ passed**, `git status` over the commit showing **four source files and no test f
 2. **Two orphan doc lines moved to the enum they describe.** *"One grouped tag-chip load shared
    by the Library and the Pool"* headed `NoteCards` and describes `TagChips` — the 18h
    extraction's own seam. They now head `TagChips`. No code.
+
+### ROW 51 — THE HOIST (piece 3a) AND THE TWO ORACLE EDGES (piece 3b)
+
+**The hoist.** `Core/Views/FlippingStamp.swift` — the quiet voiced button, its `fixedSize` and
+the em-dashed tooltip grammar, plus `StampFlipHint`, the ONE table of *what a click will show
+next* (the masthead spelled those words inline; `LibrarySortFace.flipHint` now forwards, the 3C
+pattern). Two features render it, which is what CLAUDE.md's placement rule asks at the next
+touch. **What deliberately stayed at the call sites**, because the two are not the same thing:
+the masthead's held `noteStamps` observation, its subject pair and its geometry probe; the
+card's two already-computed `RowStamp`s; and the two DEBUG doors, which report on different
+surfaces through different oracles. Proof: **34 tests in 5 suites green with zero test files
+touched.**
+
+**The two oracle edges — both were the SAME defect in two files, and both are FIXED:** a
+registration keyed by its SUBJECT with no record of WHO registered it, so a departing view tore
+down a registration belonging to a view still on screen. The fix is one idea at both sites: the
+registrant names itself (a `@State` token, DEBUG-only), and a teardown clears only what it still
+owns.
+
+| Edge | The mechanism, traced | Verdict |
+|---|---|---|
+| `PostDetailOracle.resetStamp` with the SAME note in TWO WINDOWS (17q's R-8) | `stampShown`/`stampEditedAt`/`flipStamp` were keyed by note alone; both mastheads wrote the one row, and EITHER window's `onDisappear` (or a `.task(id:)` swap) called `resetStamp`, which cleared it wholesale. A pin then read nil with a masthead drawn | **FIXED.** The note's entries are per-masthead, the reads answer from the most recent registrant, `releaseStamp(_:owner:in:)` removes one masthead's entry, and the geometry row goes only when the last masthead on the note does. `resetStamp` stays UNCONDITIONAL — it is the pin's door, and a pin owns nothing |
+| `CatalogStampOracle.forget` on `onDisappear` (the 18h ladder's R3-10) | SwiftUI does not promise a departing view's `onDisappear` runs before its successor's `onAppear`, so a recycled card — same note, same slot — could have its fresh words forgotten by the instance it replaced | **FIXED**, structurally rather than by a wait (the ordering is not forceable, which is exactly why): `record` stores an owner, `forget(_:slot:owner:)` is a no-op from anyone else, and the flip door gained the same pair. The two registrations became `ViewModifier`s for one reason — a modifier can hold the `@State` token; a chained `onAppear` has nowhere to keep one |
+
+**RED ON OLD, measured rather than reasoned.** The two-window pin COMPILES on the pre-fix tree
+and was run there first: `✘ (PostDetailOracle.flipStamp[post.id] → nil) != nil` and
+`✘ (PostDetailOracle.stampShown[post.id] → nil) != nil` — **1 test, 2 issues, exit 65**, with the
+second window's masthead on screen. After the fix: **25 tests in 4 suites passed**, and
+`MastheadStampTests` + `LibraryCardStampsTests` rode **UNMODIFIED**, because the public read
+shape (`stampShown[postID]`) never moved. The other two pins drive APIs the old tree did not
+have (`forget(_:slot:owner:)`, `recordStamp(_:words:owner:)`) — the `MastheadStampTests`
+"product row" shape of red-on-old, stated as such.
+
+**THE MIDNIGHT ROLLOVER STAYS RECORD-ONLY**, per the brief's rule. The hoist did not make a tick
+free: every stamp face still takes `now = Date()` at render and there is no clock in the
+component, so a window left open across midnight still reads *"today …"* for yesterday until any
+interaction. Building a timer for it would be a new behaviour nobody asked for — and it would
+have to live in the shared component, ticking for every stamp in every list. Row 51's note
+stands, unchanged, with this sentence as its re-verification.
 
 *(The rest of this record fills in as the pieces land.)*
