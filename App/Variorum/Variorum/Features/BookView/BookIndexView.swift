@@ -856,6 +856,10 @@ private struct BookIndexNoteRow: View {
                 // here, the control is the glyph alone (measured: 28.0 pt →
                 // 15.0 pt, inside a 22-pt column).
                 .menuIndicator(.hidden)
+                // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
+                // states its own line policy, so its IDEAL width can never be a
+                // wrapped one (the b6dae25 class's window-sizing hazard).
+                .lineLimit(1)
                 .fixedSize()
                 .controlSize(.mini)
                 .opacity(hovering || selected ? 1 : 0.25)

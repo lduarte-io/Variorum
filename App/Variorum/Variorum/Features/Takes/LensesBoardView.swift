@@ -779,6 +779,10 @@ struct LensesBoardView: View {
             }
         }
         .menuStyle(.borderlessButton)
+        // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
+        // states its own line policy, so its IDEAL width can never be a
+        // wrapped one (the b6dae25 class's window-sizing hazard).
+        .lineLimit(1)
         .fixedSize()
         .help("Replace this column with a different lens, the note itself, or a new lens")
     }
@@ -807,6 +811,7 @@ struct LensesBoardView: View {
                     }
                 }
                 .menuStyle(.borderlessButton)
+                .lineLimit(1)
                 .fixedSize()
                 .help("Copies the note exactly as it is — takes and all — into a new linked note")
             case .scratch:
@@ -824,6 +829,7 @@ struct LensesBoardView: View {
                     }
                 }
                 .menuStyle(.borderlessButton)
+                .lineLimit(1)
                 .fixedSize()
                 .help("A new linked note whose text is what this column shows — no lens required (direct promote)")
                 Button("💾") { lensNamePrompt = LensPrompt(columnID: column.id) }
@@ -840,6 +846,7 @@ struct LensesBoardView: View {
                     }
                 }
                 .menuStyle(.borderlessButton)
+                .lineLimit(1)
                 .fixedSize()
                 .help("A new linked note whose text is what this lens shows")
                 Menu("⋯") {
@@ -855,6 +862,7 @@ struct LensesBoardView: View {
                     }
                 }
                 .menuStyle(.borderlessButton)
+                .lineLimit(1)
                 .fixedSize()
             }
         }

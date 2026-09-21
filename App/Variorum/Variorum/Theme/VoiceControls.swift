@@ -141,6 +141,12 @@ struct VoicedMenu<Content: View>: View {
         .menuStyle(.button)
         .buttonStyle(.plain)
         .menuIndicator(.hidden)
+        // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
+        // states its own line policy, so its IDEAL width can never be a
+        // wrapped one (the b6dae25 class's window-sizing hazard).
+        // THE chrome vocabulary's own menu — so every VoicedMenu in the
+        // app inherits the policy from one place.
+        .lineLimit(1)
         .fixedSize()
         .padding(.horizontal, 5)
         .padding(.vertical, 2)

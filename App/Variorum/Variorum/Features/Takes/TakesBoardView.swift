@@ -1376,6 +1376,10 @@ struct TakesBoardView: View {
         .overlay(
             RoundedRectangle(cornerRadius: 6)
                 .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
+        // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
+        // states its own line policy, so its IDEAL width can never be a
+        // wrapped one (the b6dae25 class's window-sizing hazard).
+        .lineLimit(1)
         .fixedSize()
     }
 

@@ -319,6 +319,12 @@ struct CommitBar: View {
     /// "this one" in this column already looks like.
     private func boxCell<V: View>(_ content: V, emphasised: Bool = false) -> some View {
         content
+            // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
+            // states its own line policy, so its IDEAL width can never be a
+            // wrapped one (the b6dae25 class's window-sizing hazard).
+            // Every cell of this grid is one door on one line — the 24-pt
+            // `boxCellHeight` below is the same decision in the other axis.
+            .lineLimit(1)
             .fixedSize()
             .frame(maxWidth: .infinity)
             .frame(height: Self.boxCellHeight)
@@ -373,12 +379,12 @@ struct CommitBar: View {
         }
         return ViewThatFits(in: .horizontal) {
             HStack(spacing: 6) {
-                aa.fixedSize()
+                aa.lineLimit(1).fixedSize()
                 Spacer(minLength: 4)
-                newlinesChip.fixedSize()
+                newlinesChip.lineLimit(1).fixedSize()
             }
             HStack(spacing: 6) {
-                aa.fixedSize()
+                aa.lineLimit(1).fixedSize()
                 Spacer(minLength: 0)
             }
         }
@@ -402,11 +408,11 @@ struct CommitBar: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             HStack(spacing: 6) {
                 ViewThatFits(in: .horizontal) {
-                    countsFace().fixedSize()
-                    countsFace(narrowed: true).fixedSize()
+                    countsFace().lineLimit(1).fixedSize()
+                    countsFace(narrowed: true).lineLimit(1).fixedSize()
                 }
                 Spacer(minLength: 4)
-                helperDoor.fixedSize()
+                helperDoor.lineLimit(1).fixedSize()
             }
         }
     }
@@ -495,6 +501,7 @@ struct CommitBar: View {
                             presentingNoteDoors(noteMenu)
                             overflowMenu(compact: false)
                         }
+                        .lineLimit(1)
                         .fixedSize()
                         Spacer(minLength: 8)
                         quietReceipt
@@ -502,6 +509,7 @@ struct CommitBar: View {
                             countsFace(narrowed: true)
                             helperDoor
                         }
+                        .lineLimit(1)
                         .fixedSize()
                     }
                 case .compact:
@@ -511,10 +519,12 @@ struct CommitBar: View {
                             blockMenu
                             presentingNoteDoors(overflowMenu(compact: true))
                         }
+                        .lineLimit(1)
                         .fixedSize()
                         Spacer(minLength: 8)
                         quietReceipt
                         helperDoor
+                            .lineLimit(1)
                             .fixedSize()
                     }
                 }

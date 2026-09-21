@@ -347,6 +347,10 @@ struct ReadModeView: View {
             }
             .pickerStyle(.segmented)
             .controlSize(.small)
+            // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
+            // states its own line policy, so its IDEAL width can never be a
+            // wrapped one (the b6dae25 class's window-sizing hazard).
+            .lineLimit(1)
             .fixedSize()
             .help("edit: the index beside the text — click a block to write in it. "
                 + "read: the note as a page, nothing to edit")
@@ -357,6 +361,7 @@ struct ReadModeView: View {
                 }
                 .pickerStyle(.segmented)
                 .controlSize(.small)
+                .lineLimit(1)
                 .fixedSize()
                 .help("Read the note as one continuous page, or as real pages "
                     + "with the text flowing across them")

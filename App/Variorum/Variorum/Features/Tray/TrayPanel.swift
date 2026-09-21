@@ -1275,11 +1275,18 @@ struct TrayRowVerbs: View {
         HStack(spacing: 8) {
             Button(TrayPath.putBackVerb) { Task { await putBack() } }
                 .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
+                // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
+                // states its own line policy, so its IDEAL width can never be a
+                // wrapped one (the b6dae25 class's window-sizing hazard).
+                // The rider above is the same decision stated in words: a verb
+                // never truncates, and now it never wraps either.
+                .lineLimit(1)
                 .fixedSize()  // a verb never truncates (row 63's rider)
                 .help(putBackHelp)
             if let deleteNow {
                 Button(RecoveryCopy.deleteNowVerb, role: .destructive, action: deleteNow.act)
                     .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
+                    .lineLimit(1)
                     .fixedSize()
                     .help(deleteNow.help)
             }

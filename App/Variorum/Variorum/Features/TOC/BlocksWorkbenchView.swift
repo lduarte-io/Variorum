@@ -629,6 +629,10 @@ struct BlocksWorkbenchView: View {
                 rowMenu(row, ordinal: ordinal)
             }
             .menuStyle(.borderlessButton)
+            // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
+            // states its own line policy, so its IDEAL width can never be a
+            // wrapped one (the b6dae25 class's window-sizing hazard).
+            .lineLimit(1)
             .fixedSize()
         }
         .controlSize(.mini)

@@ -3541,7 +3541,7 @@ CLOSE against what actually shipped):**
 | # | Piece | Status |
 |---|---|---|
 | 1 | The record + the READING (the brief's four reading lists, in order) | DONE (this commit) |
-| 2 | **Row 44 (R-13u4-5)** — the `fixedSize` sweep: a deliberate per-site `lineLimit` + the class-closing grep pin | NOT-STARTED |
+| 2 | **Row 44 (R-13u4-5)** — the `fixedSize` sweep: a deliberate per-site `lineLimit` + the class-closing grep pin | DONE (this commit) — **45 sites, 34 swept, 11 already deliberate; the pin's own predicate run over the PRE-sweep blobs reports 34 offenders and over this tree 0**; 140 tests in 23 suites green |
 | 3 | **Row 45** — `BlockTagAssignmentSheet` takes the voice | NOT-STARTED |
 | 4 | **Row 46** — `ShellRouter.blockNamingDoor` on S2's ownership idea | NOT-STARTED |
 | 5 | **Row 63** — the indicator ring respects the gutter's faces (red-on-old owed) | NOT-STARTED |
@@ -3597,3 +3597,107 @@ CLOSE against what actually shipped):**
    consumers · `ShellActions.confirmTutorialReplace` and the app's `.alert` hosts ·
    `TutorialSeeder`'s "pool & scraps" lesson beside `SnippetsCopy` · `BlockHistoryPane`'s
    rename door and its three hosts · `RecoveryView.swift`.
+
+### ROW 44 — THE 27-SITE SWEEP (piece 2; R-13u4-5), SITE BY SITE
+
+**What the row asked, and what the measurement found.** The 17o c/d/e ladder walked every
+`.fixedSize()` in `App/Variorum/Variorum` on 2026-09-08 and reported **27 of 35** carrying no
+`lineLimit` within four lines. Re-measured at this unit's open with the same predicate, today's
+tree holds **45 sites, 34 of them without a limit** — the class grew by exactly what the units
+between added (S1's and S2's own new sites carry deliberate limits by P-8 and are among the 11
+that already passed; `CommitBar` alone went 4 → 11 as UNIT S1 rebuilt its rows and UNIT S2 made
+the counts a remembered face). **Every one of the 45 is verdicted below** — the row's 27 are all
+in it, and the eight that moved or multiplied are named where they went, because a table that
+answered only the 2026-09-08 line numbers would be a sweep of a tree that no longer exists.
+
+**THE POLICY, one sentence:** every bare `.fixedSize()` states a line policy at the site —
+`.lineLimit(1)` for a chrome label (all 34), and `.lineLimit(nil)` where a site is genuinely
+prose (none was; UNIT S1's four `nil`s with their reasons stand as the precedent that the
+deliberate-unlimited answer EXISTS and satisfies the pin).
+
+**SCOPE, and the honest half of it.** The sweep is the BARE `.fixedSize()` — the class the
+ladder counted and the row named. The `fixedSize(horizontal:vertical:)` form, which is
+b6dae25's own spelling, is deliberately NOT swept: it is the WRAPPING form a paragraph wants,
+and a blanket limit on it would truncate sentences (`CalmSectionHeader`'s own note — *"a
+sentence's own point fell off the end"* — is the standing precedent). That form keeps the
+defence it already has: `ErrorCauseNote`'s load-bearing limits and `ChromeMinHeightTests`, which
+probes the real non-scrolling window chrome at width 1. Said here, and again in the conformance
+walk's remainder list, rather than left to read as closed.
+
+| # | Site (today) | What it is | Verdict |
+|---|---|---|---|
+| 1 | `Core/Views/FlippingStamp.swift:62` | the shared flipping-stamp BUTTON (masthead + Library card) | **swept — `lineLimit(1)`**, and its own doc's claim that *"both call sites' labels carry it"* is retired: the component says it now, so a third caller cannot get it wrong |
+| 2 | `Features/BookView/BookIndexView.swift:859` | the chapter row's `⋯` menu | **swept — 1** |
+| 3 | `Features/BookView/MembershipChip.swift:128` | the *Add to Book* menu | **swept — 1** |
+| 4 | `Features/Editor/CommitBar.swift:322` | `boxCell` — one cell of the book box's grid | **swept — 1**; the 24-pt `boxCellHeight` is the same decision in the other axis |
+| 5 | `…/CommitBar.swift:379` | the formatting `Aa` chip (wide arrangement) | **swept — 1**, inline (`aa.lineLimit(1).fixedSize()`: the site is mid-expression) |
+| 6 | `…/CommitBar.swift:381` | the newlines chip | **swept — 1**, inline |
+| 7 | `…/CommitBar.swift:384` | the `Aa` chip (narrow arrangement) | **swept — 1**, inline |
+| 8 | `…/CommitBar.swift:411` | the counts face, FULL (UNIT S2's remembered face) | **swept — 1**, inline |
+| 9 | `…/CommitBar.swift:412` | the counts face, NARROWED | **swept — 1**, inline |
+| 10 | `…/CommitBar.swift:415` | the `?` helper door | **swept — 1**, inline |
+| 11 | `…/CommitBar.swift:504` | the FOLDED tier's door `Group` | **swept — 1** (a `Group`'s modifier applies to each child — the file's own note) |
+| 12 | `…/CommitBar.swift:512` | the folded tier's counts + helper `Group` | **swept — 1** |
+| 13 | `…/CommitBar.swift:522` | the COMPACT tier's door `Group` | **swept — 1** |
+| 14 | `…/CommitBar.swift:527` | the compact tier's helper door | **swept — 1** |
+| 15 | `Features/Editor/MergeCeremonySheet.swift:320` | the per-pairing join picker (`space · new line · nothing`) | **swept — 1**. CHROME ONLY: not one drift check, check ORDER or preview brain was touched (the brief's fence) |
+| 16 | `Features/Pool/BlocksAreaView.swift:303` | the group row's `⋯` menu | **swept — 1** |
+| 17 | `Features/ReadMode/NoteIndexColumn.swift:353` | the index row's `⋯` menu | **swept — 1** |
+| 18 | `Features/ReadMode/ReadModeView.swift:353` | the `edit · read` segmented picker | **swept — 1** |
+| 19 | `…/ReadModeView.swift:364` | the `continuous · pages` segmented picker | **swept — 1** |
+| 20 | `Features/TOC/BlocksWorkbenchView.swift:635` | the workbench row's `⋯` menu | **swept — 1** |
+| 21 | `Features/Tags/MastheadTagCluster.swift:291` | the tag field's SUGGESTION PANEL | **swept — 1**. Its rows already carried `lineLimit(1)` INSIDE; the panel states it too, so the class is mechanical rather than a fact four lines down the file |
+| 22 | `Features/Takes/CompareBoardView.swift:1124` | the `+ note` add-a-column door | **swept — 1** |
+| 23 | `Features/Takes/LensesBoardView.swift:785` | the column-title menu | **swept — 1** |
+| 24 | `…/LensesBoardView.swift:814` | *⧉ Duplicate as Version* | **swept — 1** |
+| 25 | `…/LensesBoardView.swift:832` | *⧉ Make this a note* (scratch column) | **swept — 1** |
+| 26 | `…/LensesBoardView.swift:849` | *⧉ Make this a note* (lens column) | **swept — 1** |
+| 27 | `…/LensesBoardView.swift:865` | the lens `⋯` menu | **swept — 1** |
+| 28 | `Features/Takes/TakesBoardView.swift:1385` | the board's dashed new-take doors row | **swept — 1**, on the ROW: three doors and two `·` separators are one dashed line |
+| 29 | `Features/Takes/TakesShared.swift:607` | the take card's `⋯` menu | **swept — 1**. `TakeCardMenu.rows` — the act list itself — is byte-untouched (the brief's fence) |
+| 30 | `Features/Takes/WriteTakesPanel.swift:312` | Write's panel's dashed new-take doors row | **swept — 1**, on the row |
+| 31 | `Features/Tray/TrayPanel.swift:1284` | the **Put back** verb | **swept — 1**. Its shipped rider already said the decision in words (*"a verb never truncates"*); now it never wraps either |
+| 32 | `…/TrayPanel.swift:1290` | the **Delete Now** verb | **swept — 1** |
+| 33 | `Registry/StatusToast.swift:42` | the toast's ACTION button | **swept — 1**. The toast's MESSAGE above it is the wrapping form and stays unlimited on purpose — it is a sentence |
+| 34 | `Theme/VoiceControls.swift:149` | `VoicedMenu` — THE chrome vocabulary's own menu | **swept — 1**, so every `VoicedMenu` in the app inherits the policy from one place |
+| 35 | `Features/BookView/BookView.swift:423` | the book masthead's mode control | already deliberate — `lineLimit(1)` |
+| 36 | `Features/Library/LibraryCopy.swift:65` | a Library chrome label | already deliberate — 1 |
+| 37 | `Features/Library/LibraryDayFilter.swift:183` | the `on day…` chip | already deliberate — 1 |
+| 38 | `Features/Library/LibraryTimeFace.swift:299` | `CatalogRowStamp` (18h/17q's stamp) | already deliberate — 1 |
+| 39 | `Features/Settings/PaletteSettingsRow.swift:183` | the palette row's swatch label | already deliberate — 1 |
+| 40 | `Features/Takes/TakesBoardView.swift:635` | a board card's chrome label | already deliberate — 1 |
+| 41 | `Features/Takes/TakesShared.swift:105` | a shared take-card label | already deliberate — 1 |
+| 42 | `Features/Tray/BlockHistoryPane.swift:706` | a savepoint row's chrome | already deliberate — 1 |
+| 43 | `…/BlockHistoryPane.swift:748` | a savepoint row's chrome | already deliberate — 1 |
+| 44 | `Features/Tray/TrayPanel.swift:1097` | a tray row's chrome | already deliberate — 1 |
+| 45 | `…/TrayPanel.swift:1207` | a tray row's chrome | already deliberate — 1 |
+
+**THE CLASS-CLOSING PIN:** `App/Variorum/VariorumTests/ChromeLineLimitTests.swift` —
+`everyBareFixedSizeStatesItsLinePolicy`, written on the 18j literal-colour pin's own form (walk
+the app's own sources; skip comment lines, because several swept sites now QUOTE `.fixedSize()`
+in their prose; assert the walk actually reached the chrome). It carries the hazard's mechanism
+in its header so the next reader does not have to find b6dae25 to know why the rule exists, and
+its failure message names both answers (`lineLimit(1)` for a label, `lineLimit(nil)` WITH the
+reason for prose).
+
+**THE PIN, MEASURED ON BOTH SIDES.** Its predicate re-run over the **pre-sweep blobs**
+(`git show HEAD:…` over the same file set, the same four-line window, the same comment rule):
+**45 sites, 34 offenders** — the full list is in this unit's commit message for piece 2 and is
+the table's rows 1–34. On this tree: **0**. *(No red-on-old is OWED here — P-8 conformance is
+an architectural finding, not a bug class — but the measurement is cheap and the row deserved
+a number rather than a claim.)*
+
+**A one-line-per-site table, and what it costs:** 34 sites × one modifier plus, at the first
+swept site in each file, a three-line note naming P-8, R-13u4-5 and the b6dae25 mechanism. The
+alternative — a bare modifier with no reason anywhere — is what made the class invisible in the
+first place.
+
+**Closing run for this piece:** `ChromeLineLimitTests` + every suite that renders a swept site
+(`CommitBarLayoutTests` · `TrayPanelShapeTests` · `TrayPanelMoveTests` ·
+`BlocksWorkbenchFaceTests` · `BlocksWorkbenchTests` · `MergeCeremonySheetTests` ·
+`MergeArrangementTests` · `ReadModeTests` · `NoteIndexOutlineTests` · `BookIndexColumnTests` ·
+`TakesBoardTests` · `WriteTakesPanelTests` · `TakesEmptyStateTests` · `CompareCompositionTests` ·
+`LensesReorderTests` · `MastheadTagDoorTests` · `LibraryCardStampsTests` · `MastheadStampTests` ·
+`StampOracleOwnershipTests` · `SnippetsGroupDoorsTests` · `StatusCenterTests`) **and
+`ChromeMinHeightTests`, deliberately — it is the OTHER form's pin and a sweep of this one must
+not disturb it** → **140 tests in 23 suites passed** (exit 0, no skips).

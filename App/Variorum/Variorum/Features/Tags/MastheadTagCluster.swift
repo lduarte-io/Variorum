@@ -285,6 +285,13 @@ struct TagInlineField: View {
                     .background(tokens.card, in: RoundedRectangle(cornerRadius: 7))
                     .overlay(RoundedRectangle(cornerRadius: 7).stroke(tokens.line, lineWidth: 1))
                     .offset(y: 26)
+                    // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
+                    // states its own line policy, so its IDEAL width can never be a
+                    // wrapped one (the b6dae25 class's window-sizing hazard).
+                    // The suggestion rows carry their own `lineLimit(1)` inside; the
+                    // PANEL states it too, so the class is mechanical rather than a
+                    // fact four lines down the file.
+                    .lineLimit(1)
                     .fixedSize()
                 }
             }

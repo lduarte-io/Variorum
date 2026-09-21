@@ -1118,6 +1118,10 @@ struct CompareBoardView: View {
             if model.addNoteDoorShows {
                 Button(tokens.chromeLabel("+ note")) { model.addPeerSlot() }
                     .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
+                    // P-8 (R-13u4-5's sweep, 13u4 UNIT S3): a `fixedSize` chrome label
+                    // states its own line policy, so its IDEAL width can never be a
+                    // wrapped one (the b6dae25 class's window-sizing hazard).
+                    .lineLimit(1)
                     .fixedSize()
                     .help("Open another note beside these (compare holds up to four)")
                     .compareGeometryProbe(.addNote)
