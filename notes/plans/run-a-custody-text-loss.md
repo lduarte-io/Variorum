@@ -1612,6 +1612,30 @@ her text. Bindings, mirroring row 7's:
    row-65 ruling's shape to this surface.
 The NIT's disposition is the flow's (the one cost-model sentence is the right size if confirmed).
 
+**The implementer's round-2 responses (2026-09-21, nothing edited): both AGREED, mechanisms
+reproduced line by line.** On the MAJOR: the field is the draft's SOLE home (no controller draft
+property); all three close roads reach the wipe; the record gap owned three ways (#136(d)'s
+sentence reads as a surface claim the close road falsifies; no KnownIssues row; zero `close` in
+the pin file). **The causal history, from context the reviewer lacked:** the A1 brief's P4 note
+said "match the pad's shipped pattern" — and at P4's build time the pad's shipped pattern had NO
+park (row 7 was still a proposal), so the sheet faithfully inherited the pre-row-7 shape, hole
+included — row 65's own shadow, which is why binding 5's sweep matters. **A binding-5 pointer for
+the fix session to CONFIRM (the sweep is its call):** the Mac panel's clear-on-success is already
+correct, but `CommentsPanelModel` is `@State`-owned and minted fresh per presentation at all three
+call sites — so the Mac panel likely carries the same residual by a different route (the model
+dies with the panel). On the NIT: agreed at the hazard-note size, with two additions — the window
+exists only on the CLOSE road (the quit road is synchronous with the decision by construction),
+and the cheap optimistic-park fix is ruled out by binding 1 itself; the cost-model sentence should
+NAME the close-road flight window rather than fold it into #137(b)'s "a crash or a forced quit",
+which this road is strictly neither.
+
+**Orchestrator authorization to the round-2 reviewer (the flow's final call + fix pass), with one
+scope extension under binding 5:** if the sweep CONFIRMS the Mac panel's residual as a real
+refused-draft loss road, fix it in the SAME pass under the SAME ruling (the six bindings, Mac
+surface, its own pins) — the class must not be recorded into a third adjacency; if the Mac road is
+materially different in grammar, record it with an owner and the reason. #137(b)'s sentence may be
+extended to stay true (a record-truth edit, flagged as such).
+
 ---
 
 ## CLOSEOUT DUTIES (the standing ritual, run-shaped — nothing here runs until the ladder ends)
