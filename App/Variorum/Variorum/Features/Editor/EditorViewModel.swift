@@ -2677,13 +2677,21 @@ final class EditorViewModel {
         // ceremony's own honest refusal is what a wrong target gets. Their
         // titles carry the chord because this menu is where a summoned door
         // is most likely to be met for the first time.
+        // 13u4 UNIT S1 (her item 7): the four PLAIN rows take their titles
+        // from the registry too. They were hard-coded literals beside the two
+        // chorded ceremony rows, so this menu said "Merge choosing takes…
+        // (⌥⌘⇧M)" directly under a silent "Merge Blocks" — which teaches the
+        // opposite of what the registry declares. Their words are unchanged
+        // (the registry's verbs ARE these four strings); what is new is the
+        // chord the one formatter appends.
         var items = [
-            item("Divide Block at Cursor", .divideAtCursor),
+            item(CapabilityRegistry.capability(.divide).menuTitle(), .divideAtCursor),
             item(CapabilityRegistry.capability(.divideWithCeremony).menuTitle(),
                  .divideAtCursor, ceremony: true),
-            item("Extract Selection", .extractSelection),
-            item("Make Block from Selection", .makeBlockFromSelection),
-            item("Merge Blocks", .mergeBlocks),
+            item(CapabilityRegistry.capability(.extract).menuTitle(), .extractSelection),
+            item(CapabilityRegistry.capability(.makeBlock).menuTitle(),
+                 .makeBlockFromSelection),
+            item(CapabilityRegistry.capability(.merge).menuTitle(), .mergeBlocks),
             item(CapabilityRegistry.capability(.mergeWithCeremony).menuTitle(),
                  .mergeBlocks, ceremony: true),
             // #11b (the sitting ruling, 2026-07-13): the deliberate, NAMED

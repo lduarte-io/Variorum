@@ -148,6 +148,52 @@ struct CommitBar: View {
         + FormatBar.renderedCapabilities
     }
 
+    /// **The `block ▾` menu's six structural rows, titles and all** (13u4
+    /// UNIT S1 — her item 7: *"where is the merge shortcut said ?? I don't
+    /// see it in the shortcuts list or in the menu"*).
+    ///
+    /// Two things this static fixes at once. (1) Every row's words come from
+    /// the registry through the ONE chord formatter (`menuTitle`), so the
+    /// plain acts wear their declared keys exactly as the two ceremony rows
+    /// already did — before this, the four plain rows were hard-coded
+    /// literals sitting beside chorded ceremony rows, which made the menu
+    /// read as *"the ⌥ variant has a key and the plain act does not."*
+    /// (2) A truth pin can READ what the menu renders: a private
+    /// `@ViewBuilder` is unreachable from a test, and a claim about a chord
+    /// being visible has to be checkable (the H pattern — prose names a
+    /// chord ⇒ a pin asserts the surface renders it).
+    ///
+    /// The bar's own SHORT words are kept (`menuTitle`'s override): this
+    /// menu has always said "Divide", not "Divide Block at Cursor", and the
+    /// chord is the thing that was missing, not the wording.
+    static var structuralRows: [(id: CapabilityID, title: String)] {
+        [
+            (.divide, CapabilityRegistry.capability(.divide).menuTitle("Divide")),
+            (.divideWithCeremony,
+             CapabilityRegistry.capability(.divideWithCeremony).menuTitle()),
+            (.extract, CapabilityRegistry.capability(.extract).menuTitle("Extract")),
+            (.makeBlock,
+             CapabilityRegistry.capability(.makeBlock).menuTitle("Make Block")),
+            (.merge, CapabilityRegistry.capability(.merge).menuTitle("Merge")),
+            (.mergeWithCeremony,
+             CapabilityRegistry.capability(.mergeWithCeremony).menuTitle()),
+        ]
+    }
+
+    /// The six rows' acts, one switch so the list above and the doors below
+    /// cannot drift into a row that fires the wrong gesture.
+    private func run(_ id: CapabilityID) {
+        switch id {
+        case .divide: model.divideAtCursor()
+        case .divideWithCeremony: model.divideAtCursorWithCeremony()
+        case .extract: model.extractSelection()
+        case .makeBlock: model.makeBlockFromSelection()
+        case .merge: model.mergeBlocks()
+        case .mergeWithCeremony: model.mergeBlocksWithCeremony()
+        default: break
+        }
+    }
+
     var body: some View {
         Group {
             if axis == .box {
@@ -598,18 +644,16 @@ struct CommitBar: View {
     /// shipped enabled-and-speaking since 13b (QUESTIONS #52).
     private var blockMenu: some View {
         VoicedMenu(tokens: tokens, label: "block") {
-            Button("Divide") { model.divideAtCursor() }
             // 18f batch 1 (U-4): *"should be a button, not just a shortcut."*
             // Titles come from the registry with their chords, so a re-picked
             // key moves in one place.
-            Button(CapabilityRegistry.capability(.divideWithCeremony).menuTitle()) {
-                model.divideAtCursorWithCeremony()
-            }
-            Button("Extract") { model.extractSelection() }
-            Button("Make Block") { model.makeBlockFromSelection() }
-            Button("Merge") { model.mergeBlocks() }
-            Button(CapabilityRegistry.capability(.mergeWithCeremony).menuTitle()) {
-                model.mergeBlocksWithCeremony()
+            // 13u4 UNIT S1 (her item 7): …and the four PLAIN rows do that too
+            // now. They were hard-coded literals beside two ceremony rows
+            // built from `menuTitle()`, so this menu said "Merge choosing
+            // takes… (⌥⌘⇧M)" next to a silent "Merge" — a face teaching the
+            // opposite of the registry. All six render from `structuralRows`.
+            ForEach(Self.structuralRows, id: \.id) { row in
+                Button(row.title) { run(row.id) }
             }
             // 13u4 UNIT C2 (her item 9, R-13u4-4): the row appears only where
             // the selection lies inside ONE block — P-2, and the one

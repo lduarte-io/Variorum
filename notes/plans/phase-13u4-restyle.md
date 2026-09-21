@@ -2407,7 +2407,8 @@ last commit)*
 | 1 | The record + the READING + the two AUDITS (⌘[ · the merge chord), traced in the code rather than assumed | DONE (this commit) — the tables below |
 | 2 | The Settings SHAPE: her tab sketch built, the card grammar, **row 59's fold dead** | NOT-STARTED |
 | 3 | Item 4 — the SEARCH: one pure brain + the catalog it reads + the results face + pins | NOT-STARTED |
-| 4 | Item 7 — the merge chord (and its four hard-coded siblings) SAID on the faces + truth pins | NOT-STARTED |
+| 4 | Item 7 — the merge chord (and its three hard-coded siblings) SAID on the faces + truth pins | DONE (this commit) — **66 tests in 4 suites passed**; the red-on-old measurement is piece 4b |
+| 4b | The BEHAVIOURAL REVERT — are the pins measuring the CHORD or the refactor? (a worktree with the four literals put back) | PENDING |
 | 5 | Item 5 — the ⌘[ answer (PROVISIONAL) + QUESTIONS #130 | NOT-STARTED |
 | 6 | The WALK on the dev-store Debug build, both voices AND both appearances, captured — **including row 53's two re-font occasions** | NOT-STARTED |
 | 7 | Closing suites + the ledger's S1 row + the KnownIssues rows (59 · 53) | NOT-STARTED |
@@ -2497,3 +2498,46 @@ is the **plain act** — so those menus read as *"Merge choosing takes… has a 
 not."* That is worse than silence: it is a face that teaches the opposite of the registry. The
 class is exactly P-1's (*doors render FROM the registry*), and the four literals are the whole
 of it — `Divide`, `Extract`, `Make Block`, `Merge` — so the fix is the class, not the one row.
+
+### THE FIX FOR ITEM 7 (piece 4) — the class, not the one row
+
+Three files, one shape each; **no new copy, no new act, no registry edit** — every row now asks
+the declaration it already had.
+
+1. **`CommitBar.swift`** — the four literals in `blockMenu` are gone. The six structural rows are
+   one static, `CommitBar.structuralRows`, built from `CapabilityRegistry.capability(id)
+   .menuTitle(words)` — the bar's own short words kept (`"Merge"`, never `"Merge Blocks"`: the
+   chord was what was missing, not the wording), the chord appended by the ONE formatter. The
+   menu renders them with a `ForEach` and one `run(_:)` switch, so the list a pin reads and the
+   doors she presses cannot drift apart. *(A static, and that is deliberate: a private
+   `@ViewBuilder` is unreachable from a test, and a claim about a chord being visible has to be
+   checkable.)*
+2. **`EditorViewModel.contextMenuItems()`** — the same four literals, replaced by
+   `menuTitle()` with NO override, because this menu's words already ARE the registry's verbs
+   ("Divide Block at Cursor" · "Extract Selection" · "Make Block from Selection" · "Merge
+   Blocks"). So the only visible change on this menu is the chord in parentheses.
+3. **`TakesBottomBar.structuralBar`** — the same, with the bar's short words (R118's parity: no
+   surface is behind another, and that includes what a row is allowed to tell her).
+
+**Why all four and not just Merge.** The defect is that a menu row's chord came from whether
+someone typed it, and the two rows where someone had was the ⌥ pair — so every one of these
+menus read *"the ⌥ variant has a key and the plain act does not."* Fixing Merge alone would
+leave "Divide" silent beside "Divide choosing takes… (⌥⌘⇧D)" — the identical false lesson, one
+row over. Reversing is per-row and costs one `menuTitle` call each.
+
+**Not touched:** the bulk bars' **Merge Selected Blocks** rows render `capability.verb`, which is
+correct — that act declares `shortcutLabel: nil` (it is a ⌘-click selection act, by design), so
+`.verb` and `menuTitle()` are the same string and the row tells no lie. The menu bar and the ⌘/
+helper were already truthful (audit 2) and are unchanged; both gained a guard pin.
+
+### THE TRUTH PINS (piece 4) — `App/Variorum/VariorumTests/ChordLegibilityTests.swift`
+
+| Pin | What it holds |
+|---|---|
+| `theWriteBarsBlockMenuSaysEveryDeclaredChord` | over `CommitBar.structuralRows`: every row's title contains its capability's DECLARED chord — generalized, because the defect was the class |
+| `theWriteBarsMergeRowReadsMergeWithTheChord` | her sentence, answered literally: the row reads exactly `Merge (⌘⇧M)` |
+| `theTakesBarsBlockMenuSaysEveryDeclaredChord` | the same over `TakesBottomBar.structuralBar` (R118 parity) |
+| `theTakesBarsMergeRowReadsMergeWithTheChord` | `Merge (⌘⇧M)` there too |
+| `writesContextMenuSaysEveryStructuralChord` | through the REAL model (`withEditor` → `contextMenuItems()`): all six chords present, and `Merge Blocks (⌘⇧M)` exactly |
+| `theHelperListSaysTheMergeChord` | **green on both sides** — a guard, not evidence: the ⌘/ list has carried ⌘⇧M since the helper was born |
+| `theMenuBarWiresAndRendersTheMergeChord` | **green on both sides** — `.merge` is in `menuRendered` and wired `("m", [.command, .shift])`, so AppKit draws ⇧⌘M on the item |

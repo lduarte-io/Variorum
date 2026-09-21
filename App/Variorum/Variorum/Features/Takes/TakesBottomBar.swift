@@ -90,18 +90,23 @@ struct TakesBottomBar: View {
         // actually does, and names the door beside it rather than a bare
         // chord — copy naming a behaviour the app no longer has is the J8
         // class, and the chord was the only way in until row 45.
-        ("Divide", .divide,
+        // 13u4 UNIT S1 (her item 7): the four PLAIN rows take their titles
+        // from the registry too, through the one chord formatter — they were
+        // literals beside two chorded ceremony rows, so this menu taught that
+        // the ⌥ variant had a key and the plain act did not. The bar's own
+        // short words are kept (`menuTitle`'s override).
+        (CapabilityRegistry.capability(.divide).menuTitle("Divide"), .divide,
          "Cut the block you're in at your cursor, right here — on a block with "
          + "several takes the take you're looking at is cut and the rest stay "
          + "whole on the top block (Divide choosing takes… to arrange them)"),
         (CapabilityRegistry.capability(.divideWithCeremony).menuTitle(), .divideWithCeremony,
          "Lay every take out in one sheet and say where each one goes — right "
          + "here, without leaving Takes"),
-        ("Extract", .extract,
+        (CapabilityRegistry.capability(.extract).menuTitle("Extract"), .extract,
          "Pull your selected span out into its own block — in Write, carried there for you"),
-        ("Make Block", .makeBlock,
+        (CapabilityRegistry.capability(.makeBlock).menuTitle("Make Block"), .makeBlock,
          "Your selected span becomes its own block — in Write, carried there for you"),
-        ("Merge", .merge,
+        (CapabilityRegistry.capability(.merge).menuTitle("Merge"), .merge,
          "Join the block you're in with the one above it, bringing every take "
          + "along — in Write, carried there for you"),
         (CapabilityRegistry.capability(.mergeWithCeremony).menuTitle(), .mergeWithCeremony,
