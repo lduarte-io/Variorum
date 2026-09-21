@@ -3542,13 +3542,13 @@ CLOSE against what actually shipped):**
 |---|---|---|
 | 1 | The record + the READING (the brief's four reading lists, in order) | DONE (this commit) |
 | 2 | **Row 44 (R-13u4-5)** — the `fixedSize` sweep: a deliberate per-site `lineLimit` + the class-closing grep pin | DONE (this commit) — **45 sites, 34 swept, 11 already deliberate; the pin's own predicate run over the PRE-sweep blobs reports 34 offenders and over this tree 0**; 140 tests in 23 suites green |
-| 3 | **Row 45** — `BlockTagAssignmentSheet` takes the voice | NOT-STARTED |
+| 3 | **Row 45** — `BlockTagAssignmentSheet` takes the voice | DONE (this commit) — the voice's type/inks/row grammar + the per-surface noun (PROVISIONAL #133); 4 pins |
 | 4 | **Row 46** — `ShellRouter.blockNamingDoor` on S2's ownership idea | DONE (this commit) — the registrant names itself (the shell's own `windowID`); 4 pins; the mechanism traced below (latent, the architectural arm) |
 | 5 | **Row 63** — the indicator ring respects the gutter's faces (red-on-old owed) | DONE (this commit) — 8 pins; **67 tests in 9 suites green**. The BEHAVIOURAL REVERT is **DONE** — 3 of 8 pins RED on the reverted tree (4 issues), the 5 guards green |
 | 6 | **Row 67** — `Help ▸ Restore Tutorial…` joins the SwiftUI `.alert` grammar | DONE (this commit) — the shell's own confirm channel; 5 pins incl. the door driven with NO seam; **26 tests in 4 suites green** |
 | 7 | **Row 68** — the "pool & scraps" lesson swept against `SnippetsCopy` (H pattern; re-seed consequence recorded) | NOT-STARTED |
 | 8 | **Row 69** — Block History's rename field no longer OPENS under a seal | DONE (this commit) — the seal WATCHED for as long as the pane is up; the branch a fact on the model; 4 pins; **28 tests in 4 suites green** |
-| 9 | **The Trash fork** — the 2a taste fork's card restyle | NOT-STARTED |
+| 9 | **The Trash fork** — the 2a taste fork's card restyle | DONE (this commit) — calm rows in the voice, **zero structural decisions moved**; the Trash suites ride unmodified |
 | 10 | QUESTIONS #133 (the PROVISIONALs) | NOT-STARTED |
 | 11 | THE CLOSING CONFORMANCE WALK — both voices AND both appearances, captured, against the reference artifact; the honest remainder list | NOT-STARTED |
 | 12 | Closing suites + the ledger's S3 row + the seven KnownIssues rows' cells | NOT-STARTED |
@@ -3905,3 +3905,57 @@ question word-for-word the modal's, and a decline leaves the book exactly where 
 
 **Run:** `ShellConfirmTests` · `TutorialDoorTests` · `TutorialBookShapeTests` ·
 `EncryptionExplainedDrillTests` → **26 tests in 4 suites passed**.
+
+### ROW 45 — THE BLOCK-TAG SHEET WEARS THE VOICE (piece 3) + THE TRASH FORK (piece 9)
+
+**Row 45, what it was:** a `.headline` title, a system `List` of system `Toggle`s, and not one
+`VoiceTokens` read — so the ONE tag sheet **three** surfaces render looked identical in both
+voices while everything around it changed.
+
+**What moved:** the title, the empty sentence and the rows take the voice's type and inks; the
+list became a calm rounded row list on `tokens.surface` inside a hairline, each row the reference
+artifact's `.a-row` (a wash under the applied one, rounded, never a list separator); the one door
+out is `CalmButtonStyle(role: .primary)`. **The system `Toggle` is the one control in that sheet
+that could never wear a voice**, so an applied tag is marked with **this app's own ✓** (the take
+cards' *"✓ chosen"*) — and the row carries `accessibilityValue` "on"/"off" so nothing a checkbox
+gave for free is lost.
+
+**What did NOT move:** the model is byte-untouched, one row is still exactly one
+`applyTag`/`removeTag`, and the empty state's sentence is the one 17o batch e wrote.
+
+**The row's second half — the noun — taken, because it is one parameter** (the brief's own bar):
+`BlockTagAssignmentSheet(… noun:)`, with the two SNIPPETS renderers passing the snippets word
+(K5's vocabulary ruling). **The CANVAS keeps the default** and the reason is at the line: it is
+opened on a note OR on the scraps area (`containerID` is either kind) and holds no fact that says
+which, so a word chosen there would be right half the time. **PROVISIONAL, QUESTIONS #133.**
+
+**A judgment call worth its own line: her PROSE never takes the voice's chrome-case.** The title
+quotes her block's first words, so it is deliberately NOT wrapped in `tokens.chromeLabel` — a
+Terminal-voice lowercasing would reach words she typed. The same rule was applied in the Trash
+(the "from ‹note›" lines keep her titles' own case; they were not chrome-cased before and are not
+now). The app's own labels around them do take it.
+
+**THE TRASH FORK (Act 10 wave 2a's taste fork 3), and its fence kept to the letter.** That wave
+judged the Trash *"ALREADY-GROUPED"* and left the card grammar to the app-wide continuation
+*"rather than risking pinned rendering for look alone"*. **Not one structural decision moved:**
+the grouping, the ids rows are identified by (never positions), the stranded-ancestors fold and
+its open-by-default, every indentation, the filter chip, the empty-vs-filtered sentence, the
+Empty Trash door's *unfiltered* visibility read and every per-row door are byte-identical. What
+changed is chrome: the section header is a quiet small-type header rather than a `List` header
+(whose fixed height is `CalmSectionHeader`'s own founding note), the list's background is
+`tokens.room` with its separators hidden, each row is a calm card
+(`tokens.card` + `tokens.line`, radius 8) carrying the voice's type and inks, and the five
+buttons are `CalmButtonStyle` — Put back primary, Delete Now and Empty Trash danger, the rest
+ordinary.
+
+**The pins** (`BlockTagSheetVoiceTests`, 4, on UNIT S2's `TimelineVoiceTests` form): the sheet's
+banned system forms by name AND the tokens it must read · the ✓ and the two accessibility lines ·
+the title's per-surface noun with its clipping and its empty case · declared ⇔ rendered at the
+two snippets surfaces, with the canvas's default asserted as the PROVISIONAL it is. **The Trash's
+own suites ride UNMODIFIED** — which is the fork's fence stated as evidence.
+
+**Run:** `BlockTagSheetVoiceTests` · `TrashSurfaceTests` · `TrashPurgeDoorsTests` ·
+`TrashPoolHonestyTests` · `SnippetsDoorsTests` · `CanvasAndPoolTests` · `NoLiteralColourTests` ·
+`ChromeLineLimitTests` · `CopyRegisterPinTests` → **41 tests in 8 suites passed** (the two grep
+pins deliberately in the run: a restyle is exactly when a literal colour or a limitless
+`fixedSize` slips in).

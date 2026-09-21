@@ -595,6 +595,25 @@ struct RecoveryView: View {
     /// is *"not collapsed by default"*, and the default must not depend on
     /// anything having been seeded.
     @State private var collapsedAncestors: Set<String> = []
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+
+    /// **13u4 UNIT S3 — the 2a taste fork's Trash half.** Act 10's wave 2a
+    /// judged this surface *"ALREADY-GROUPED"* and left the card grammar to
+    /// the app-wide continuation *"rather than risking pinned rendering for
+    /// look alone"* (its taste fork 3). This unit is that continuation, and
+    /// the fork's own fence is kept to the letter: **not one structural
+    /// decision moved.** The grouping, the ids rows are identified by, the
+    /// ancestors' fold and its default, the indentation, the filter chip,
+    /// the empty-vs-filtered sentence, the Empty Trash door's visibility
+    /// read and every per-row door are byte-identical. What changed is the
+    /// type, the inks and the row's shape — system `.caption`/`.secondary`
+    /// on a hairline `List` became the voice's own small type on calm rows,
+    /// which is the reference artifact's grammar and what every listing
+    /// beside this one already wears.
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
 
     /// 13j batch 6b (P-1): the Trash surface is the ONE renderer of the two
     /// purge acts — the walk's union names every renderer by construction,
@@ -638,18 +657,19 @@ struct RecoveryView: View {
             // surface (`ArchivedView`) at her B2 direction — *"separating
             // archive and trash more makes sense"*. What is left here is the
             // clock, which is what "Trash" means.
-            Section(RecoveryPath.trashSection) {
-                Text(RecoveryPath.windowNote)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            Section {
+                Text(tokens.chromeLabel(RecoveryPath.windowNote))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
                 controls
                 if model.trash.isEmpty {
                     // Ledger row 2: an empty VIEW is not an empty Trash, and
                     // the sentence now knows the difference.
-                    Text(RecoveryCopy.trashEmptyLine(
+                    Text(tokens.chromeLabel(RecoveryCopy.trashEmptyLine(
                         filteredBy: model.kindFilter,
-                        holdsOtherKinds: !model.trashIsEmptyUnfiltered))
-                        .foregroundStyle(.secondary)
+                        holdsOtherKinds: !model.trashIsEmptyUnfiltered)))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
                 }
                 // The ladder's LR1-10: identified by the store's ids, never by
                 // position — a Put back or a Delete Now shifts everything
@@ -661,23 +681,37 @@ struct RecoveryView: View {
                     }
                 }
                 if model.trashTruncated {
-                    Text("Showing the \(RecoveryViewModel.window) most recent — older ones aren't listed.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    Text(tokens.chromeLabel(
+                        "Showing the \(RecoveryViewModel.window) most recent — older ones aren't listed."))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
                 }
+            } header: {
+                // The section's own header, in the calm grammar (W8-3 retired
+                // the hairline-list header for a quiet small-type one — and a
+                // `List` section header's FIXED height is what clipped the
+                // tray's, which is `CalmSectionHeader`'s own founding note).
+                Text(tokens.chromeLabel(RecoveryPath.trashSection))
+                    .font(tokens.small)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(tokens.muted)
             }
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
         }
+        .scrollContentBackground(.hidden)
+        .background(tokens.room)
         .overlay(alignment: .bottom) {
             if let error = model.lastError ?? library.lastError {
                 Text(error)
-                    .font(.caption)
+                    .font(tokens.small)
                     .alarmVoice()
                     .textSelection(.enabled)
                     .padding(4)
             } else if let receipt = model.receipt {
                 Text(receipt)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
                     .textSelection(.enabled)
                     .padding(4)
             }
@@ -706,9 +740,11 @@ struct RecoveryView: View {
         if let noteRow = group.noteRow {
             trashRow(noteRow, namesItsHome: false)
         } else if let first = group.rows.first, let title = model.homeTitle(first.item) {
+            // Her note's TITLE is not chrome: no `chromeLabel` here, so a
+            // voice's lowercasing never reaches words she typed.
             Text("from \(title)")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
                 .lineLimit(1)
         }
         ForEach(group.rows, id: \.item.id) { row in
@@ -747,9 +783,10 @@ struct RecoveryView: View {
                         .padding(.leading, indent)
                 }
             } label: {
-                Text(RecoveryPath.strandedAncestorsDisclosure(row.nested.count))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(tokens.chromeLabel(
+                    RecoveryPath.strandedAncestorsDisclosure(row.nested.count)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
                     .lineLimit(1)
             }
             .padding(.leading, indent)
@@ -783,7 +820,7 @@ struct RecoveryView: View {
                 Button(RecoveryCopy.filterAppliedChip(kind)) {
                     model.kindFilter = nil
                 }
-                .controlSize(.small)
+                .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
                 .help(RecoveryCopy.filterAppliedHelp)
             }
             Toggle("Oldest first", isOn: Binding(
@@ -805,11 +842,13 @@ struct RecoveryView: View {
                 Button(RecoveryPath.emptyTrashVerb) {
                     Task { await model.requestEmptyTrash() }
                 }
-                .controlSize(.small)
+                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
                 .help("Everything in the Trash goes for good — the confirm names the full count")
             }
         }
-        .font(.caption)
+        .font(tokens.small)
+        .foregroundStyle(tokens.muted)
+        .tint(tokens.accent)
         .purgeConfirmDialog(model)
     }
 
@@ -823,6 +862,8 @@ struct RecoveryView: View {
     ) -> some View {
         HStack(spacing: 6) {
             Text(item.title ?? TrayRowPreview.line(item.text))
+                .font(tokens.body)
+                .foregroundStyle(tokens.ink)
                 .lineLimit(1)
             // Ledger row 23 (FOUND-ITEM 1): a saved version is a note-kind
             // row, and calling it "note" is the one thing that would make the
@@ -831,13 +872,13 @@ struct RecoveryView: View {
             // LR2-4's one rule, one home (batch 6a): `RecoveryCopy.rowKind(_:)`
             // is this exact ternary, shared, so the phone's accessibility
             // labels and this display line cannot drift.
-            Text(RecoveryCopy.rowKind(item))
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            Text(tokens.chromeLabel(RecoveryCopy.rowKind(item)))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
             if item.kind == .preservedOriginal {
-                Text(RecoveryPath.goesWithItsFamily)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                Text(tokens.chromeLabel(RecoveryPath.goesWithItsFamily))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
                     .lineLimit(1)
             }
             // "from ‹note›" — the context her round-5 statement asked for,
@@ -845,24 +886,25 @@ struct RecoveryView: View {
             // 13l (§8b): the NAME comes from the home's own display brain,
             // so a scrap says what the scraps area is actually called.
             if namesItsHome, let noteTitle = model.homeTitle(item) {
+                // Her title again — not chrome (see above).
                 Text(item.isVersion
                      ? VersionsPath.trashRowOf(noteTitle)
                      : item.noteIsDeleted
                      ? "from \(noteTitle) (also in the Trash)"
                      : "from \(noteTitle)")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
                     .lineLimit(1)
             }
             if let display = TrayRowPreview.stampText(item.deletedAt, verb: "deleted") {
-                Text(display)
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                Text(tokens.chromeLabel(display))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
             }
             if let days = model.daysLeft(item) {
-                Text(TrayPath.daysLeftLabel(days))
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                Text(tokens.chromeLabel(TrayPath.daysLeftLabel(days)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
             }
             Spacer()
             // The open-there door, only where the note is live (P-2: a door
@@ -881,12 +923,12 @@ struct RecoveryView: View {
                         openPost(noteID)
                     }
                 }
-                .controlSize(.small)
+                .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
             }
             Button(RecoveryPath.putBackVerb) {
                 Task { await model.putBack(item) }
             }
-            .controlSize(.small)
+            .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
             .help(putBackHelp(item))
             // 13j batch 6b (J1 — her rider): the per-row impatience door.
             // IN-TRASH ONLY, and never on a preserved original (it rides
@@ -896,10 +938,18 @@ struct RecoveryView: View {
                 Button(RecoveryPath.deleteNowVerb, role: .destructive) {
                     model.requestDeleteNow(item)
                 }
-                .controlSize(.small)
+                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
                 .help("Skips the rest of the \(TrashWindow.days) days — asked to confirm every time")
             }
         }
+        // The CALM ROW (the reference artifact's `.c-row`): content on the
+        // card surface inside a hairline, never a list separator. The row's
+        // own padding is the card's, so the indentation every nested caller
+        // applies still reads as indentation.
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(tokens.card, in: RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(tokens.line, lineWidth: 1))
     }
 
     private func putBackHelp(_ item: Queries.TrashItem) -> String {

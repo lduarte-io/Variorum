@@ -118,7 +118,9 @@ struct BlocksAreaView: View {
         .task { await area.start() }
         .sheet(item: $tagSheetBlock) { target in
             BlockTagAssignmentSheet(
-                session: session, blockID: target.id, preview: target.preview)
+                session: session, blockID: target.id, preview: target.preview,
+                // Row 45's second half: this surface speaks SNIPPETS (K5).
+                noun: BlockTagCopy.snippetNoun)
         }
         .alert(
             "Rename Group",

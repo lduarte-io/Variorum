@@ -220,6 +220,10 @@ struct CanvasView: View {
             landOnArrivalIfReady()
         }
         .sheet(item: $tagSheetBlock) { target in
+            // Row 45: the canvas keeps the DEFAULT noun deliberately — it is
+            // opened on a note or on the scraps area and holds no fact that
+            // says which, so a word chosen here would be right half the time
+            // (PROVISIONAL, QUESTIONS #133).
             BlockTagAssignmentSheet(
                 session: session, blockID: target.id, preview: target.preview)
         }
