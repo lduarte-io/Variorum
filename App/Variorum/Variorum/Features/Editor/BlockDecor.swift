@@ -316,12 +316,125 @@ nonisolated enum BlockDecor {
             width: width, height: commentBadgeSize.height)
     }
 
+    /// The air the editing indicator takes on each side of the prose — the
+    /// round-2 mockup's outline-offset, unchanged since 13 C1 and named here
+    /// so the one place it can now YIELD says what it is yielding.
+    static let indicatorOverhang: CGFloat = 8
+
     /// The editing indicator's rect (outline ring or background wash):
     /// the block's lines with the round-2 mockup's air (outline-offset).
-    static func indicatorRect(block: CGRect, textLeft: CGFloat, textRight: CGFloat) -> CGRect {
-        CGRect(
-            x: max(2, textLeft - 8), y: block.minY - 3,
-            width: (textRight + 8) - max(2, textLeft - 8), height: block.height + 6)
+    ///
+    /// **13u4 UNIT S3 — KnownIssues row 63: the ring RESPECTS the gutter's
+    /// faces.** The 8 pt overhang was designed when the gutter held nothing;
+    /// since 13u3 UNIT A1 it holds the callout glyph and the comment badge,
+    /// both of which end 4 pt short of the prose — so on a block wearing one
+    /// the ring's leading edge (`textLeft − 8`) stood 4 pt INSIDE the face
+    /// and drew straight through it. `gutterTrailingX` is the trailing edge
+    /// of whatever that block's gutter actually draws (`gutterTrailingX(…)`,
+    /// which asks the one comment-face decision rather than guessing), and
+    /// the ring stops there.
+    ///
+    /// **THE GUTTER LAW, at this line:** the ring can only ever GIVE room
+    /// back. `textLeft` and `textRight` are arguments, never outputs; the
+    /// trailing edge is untouched; and the leading edge is clamped at
+    /// `textLeft` so no arithmetic here can ever put the ring on her words.
+    /// A margin CARD ends at `textLeft − 28` and therefore moves the ring by
+    /// nothing at all — which is the common commented block, and it looks
+    /// exactly as it shipped.
+    ///
+    /// nil (the default) is the no-gutter answer and is BYTE-IDENTICAL to
+    /// what shipped, which is what lets every existing pin ride unmodified.
+    static func indicatorRect(
+        block: CGRect, textLeft: CGFloat, textRight: CGFloat,
+        gutterTrailingX: CGFloat? = nil
+    ) -> CGRect {
+        let ideal = max(edgeMargin, textLeft - indicatorOverhang)
+        let left = min(textLeft, max(ideal, gutterTrailingX ?? ideal))
+        return CGRect(
+            x: left, y: block.minY - 3,
+            width: (textRight + indicatorOverhang) - left, height: block.height + 6)
+    }
+
+    /// **The trailing edge of everything this block's gutter DRAWS** (row 63)
+    /// — nil where it draws nothing. The glyph and the comment face are the
+    /// two inhabitants; the comment half is ASKED of `commentGutterFaces`,
+    /// the same decision the renderer draws from, because a second copy of
+    /// "card or badge?" is exactly the drift `indicatorRect`'s own shared-
+    /// geometry note warns about one screen up.
+    static func gutterTrailingX(
+        blockID: String, blockTop: CGFloat, in state: State,
+        commentFaces: [String: CommentFace]
+    ) -> CGFloat? {
+        var trailing: CGFloat?
+        if hasLeadingGlyph(state.presentations[blockID]),
+           let glyph = calloutGlyphRect(textLeft: state.textLeft, blockTop: blockTop) {
+            trailing = glyph.maxX
+        }
+        if let rect = commentFaces[blockID]?.rect {
+            trailing = max(trailing ?? rect.maxX, rect.maxX)
+        }
+        return trailing
+    }
+
+    /// **What a commented block's gutter draws, and where.** ONE decision,
+    /// asked twice: by `renderComments`, which draws it, and by the editing
+    /// indicator and the block highlight, which must not cross it (row 63).
+    enum CommentFace: Equatable {
+        /// The margin card (R7's ruling, on the LEFT by R5-3).
+        case card(CGRect)
+        /// The narrow-gutter count badge — still a door.
+        case badge(CGRect)
+        /// No gutter at all: the decoration YIELDS and the text keeps every
+        /// point of its measure (13u3 UNIT A1, the one law's other side).
+        /// Named `yields` rather than `none` deliberately — a `none` case on
+        /// a type that also travels as an Optional is the ambiguity Swift
+        /// warns about, and the app's own word for this state is "yields".
+        case yields
+
+        var rect: CGRect? {
+            switch self {
+            case .card(let rect), .badge(let rect): rect
+            case .yields: nil
+            }
+        }
+    }
+
+    /// The whole pass's gutter decision, keyed by block. **Empty when
+    /// comments render INLINE** (R7's setting — the tinted strip lives
+    /// inside the prose column, so the gutter holds nothing and the ring
+    /// keeps its shipped overhang).
+    ///
+    /// The arithmetic is `renderComments`' own, moved rather than copied:
+    /// each face's TOP is the STACK's answer (R-13u3-3) and each card's room
+    /// reaches to the NEXT face's top, so two commented blocks' cards never
+    /// abut (the rhythm, memo §2 B).
+    static func commentGutterFaces(_ state: State) -> [String: CommentFace] {
+        guard !state.appearance.inlineComments else { return [:] }
+        let items = state.frames.filter { !(state.comments[$0.blockID] ?? []).isEmpty }
+        guard !items.isEmpty else { return [:] }
+        let fitsCards = gutterFitsCards(width: state.textLeft)
+        let tops: [CGFloat] = items.map { item in
+            commentFaceTop(
+                blockTop: item.frame.minY,
+                glyph: hasLeadingGlyph(state.presentations[item.blockID])
+                    ? calloutGlyphRect(textLeft: state.textLeft, blockTop: item.frame.minY)
+                    : nil)
+        }
+        var faces: [String: CommentFace] = [:]
+        for (index, item) in items.enumerated() {
+            let top = tops[index]
+            let roomBelow = index + 1 < tops.count ? tops[index + 1] - top : nil
+            if fitsCards, let rect = leftCardRect(
+                textLeft: state.textLeft, top: top,
+                blockHeight: item.frame.height, roomBelow: roomBelow) {
+                faces[item.blockID] = .card(rect)
+            } else if let rect = commentBadgeRect(textLeft: state.textLeft, top: top) {
+                faces[item.blockID] = .badge(rect)
+            } else {
+                faces[item.blockID] = .yields
+            }
+        }
+        return faces
     }
 
     /// The drop boundary nearest a drag Y: `index` = the entry the dragged
@@ -579,11 +692,17 @@ final class BlockDecorOverlayController {
         // to reserve, nothing to release, and no second pass to ask for —
         // it draws in the room the page already owns.
         let tokens = state.appearance.tokens
+        // 13u4 UNIT S3 (row 63): the gutter's comment decision, made ONCE for
+        // the pass. The comments render LAST (below), but the indicator and
+        // the block highlight must know what the gutter will hold before they
+        // draw — so the decision is taken here and handed to all three,
+        // rather than the ring re-deriving "card or badge?" and drifting.
+        let commentFaces = BlockDecor.commentGutterFaces(state)
         renderCallouts(state, tokens: tokens, in: textView)
-        renderSelection(state, tokens: tokens, in: textView)
-        renderIndicator(state, tokens: tokens, in: textView)
+        renderSelection(state, tokens: tokens, in: textView, commentFaces: commentFaces)
+        renderIndicator(state, tokens: tokens, in: textView, commentFaces: commentFaces)
         renderSeams(state, tokens: tokens, in: textView)
-        renderComments(state, tokens: tokens, in: textView)
+        renderComments(state, tokens: tokens, in: textView, faces: commentFaces)
         renderHandles(state, in: textView)
     }
 
@@ -664,8 +783,13 @@ final class BlockDecorOverlayController {
     /// from it. Drawn BELOW the text like every other decoration (an
     /// overlay, never a rendering attribute — TEXTKIT2 §3), and pooled, so a
     /// selection of forty blocks costs only the visible ones (P1).
+    ///
+    /// Row 63 rides here too, for that same reason: the highlight takes the
+    /// gutter's trailing edge exactly as the ring does, so a picked callout
+    /// block's band and a caret block's ring stop at the same x.
     private func renderSelection(
-        _ state: BlockDecor.State, tokens: VoiceTokens, in textView: NSTextView
+        _ state: BlockDecor.State, tokens: VoiceTokens, in textView: NSTextView,
+        commentFaces: [String: BlockDecor.CommentFace]
     ) {
         let frames = state.selectedBlockIDs.isEmpty
             ? []
@@ -673,14 +797,18 @@ final class BlockDecorOverlayController {
         pool(&selectionViews, count: frames.count, in: textView, below: true) { DecorRectView() }
         for (view, frame) in zip(selectionViews, frames) {
             view.frame = BlockDecor.indicatorRect(
-                block: frame.frame, textLeft: state.textLeft, textRight: state.textRight)
+                block: frame.frame, textLeft: state.textLeft, textRight: state.textRight,
+                gutterTrailingX: BlockDecor.gutterTrailingX(
+                    blockID: frame.blockID, blockTop: frame.frame.minY,
+                    in: state, commentFaces: commentFaces))
             view.configure(
                 fill: NSColor(tokens.wash), border: NSColor(tokens.accent), cornerRadius: 6)
         }
     }
 
     private func renderIndicator(
-        _ state: BlockDecor.State, tokens: VoiceTokens, in textView: NSTextView
+        _ state: BlockDecor.State, tokens: VoiceTokens, in textView: NSTextView,
+        commentFaces: [String: BlockDecor.CommentFace]
     ) {
         let caretFrame = state.caretBlockID.flatMap { id in
             state.frames.first { $0.blockID == id }
@@ -700,7 +828,11 @@ final class BlockDecorOverlayController {
         }
         view.frame = BlockDecor.indicatorRect(
             block: caretFrame.frame,
-            textLeft: state.textLeft, textRight: state.textRight)
+            textLeft: state.textLeft, textRight: state.textRight,
+            // Row 63: the ring stops at whatever this block's gutter draws.
+            gutterTrailingX: BlockDecor.gutterTrailingX(
+                blockID: caretFrame.blockID, blockTop: caretFrame.frame.minY,
+                in: state, commentFaces: commentFaces))
         switch state.appearance.indicator {
         case .outline:
             view.configure(fill: nil, border: NSColor(tokens.ring), cornerRadius: 4)
@@ -711,8 +843,17 @@ final class BlockDecorOverlayController {
         }
     }
 
+    /// **13u4 UNIT S3 (row 63): the gutter decision ARRIVES, it is not made
+    /// here.** `faces` is `BlockDecor.commentGutterFaces(state)` — the STACK
+    /// (R-13u3-3), the card/badge/nothing choice and the rhythm's room, all
+    /// of it — computed once per pass in `render` so the editing indicator
+    /// and the block highlight can respect exactly what this draws. The
+    /// arithmetic MOVED; not one number of it changed. The inline strip
+    /// (R7's setting) stays here because it lives inside the PROSE column,
+    /// where no gutter face and no ring can meet it.
     private func renderComments(
-        _ state: BlockDecor.State, tokens: VoiceTokens, in textView: NSTextView
+        _ state: BlockDecor.State, tokens: VoiceTokens, in textView: NSTextView,
+        faces: [String: BlockDecor.CommentFace]
     ) {
         var items: [(frame: BlockDecor.Frame, briefs: [BlockDecor.CommentBrief])] = []
         for frame in state.frames {
@@ -721,29 +862,12 @@ final class BlockDecorOverlayController {
             }
         }
         let inline = state.appearance.inlineComments
-        // 13g R5-3: the LEFT gutter is the comment margin now.
-        let fitsCards = BlockDecor.gutterFitsCards(width: state.textLeft)
-        // **THE STACK (R-13u3-3), resolved for the whole pass.** Each face's
-        // TOP is the block's first line, or just under its callout glyph
-        // where the gutter is holding one; and each card's room reaches to
-        // the NEXT face's top, so two commented blocks' cards never abut
-        // (the rhythm, memo §2 B).
-        let tops: [CGFloat] = items.map { item in
-            BlockDecor.commentFaceTop(
-                blockTop: item.frame.frame.minY,
-                glyph: BlockDecor.hasLeadingGlyph(state.presentations[item.frame.blockID])
-                    ? BlockDecor.calloutGlyphRect(
-                        textLeft: state.textLeft, blockTop: item.frame.frame.minY)
-                    : nil)
-        }
         pool(&commentCards, count: items.count, in: textView, below: false) {
             CommentCardView()
         }
-        for (index, (card, item)) in zip(commentCards, items).enumerated() {
+        for (card, item) in zip(commentCards, items) {
             let text = item.briefs.map(\.text).joined(separator: "  ·  ")
             let blockID = item.frame.blockID
-            let top = tops[index]
-            let roomBelow = index + 1 < tops.count ? tops[index + 1] - top : nil
             card.onClick = onOpenComments.map { open in { open(blockID) } }
             if inline {
                 // The inline strip (R7's setting): the tinted line in the
@@ -757,9 +881,7 @@ final class BlockDecorOverlayController {
                     width: max(40, state.textRight - state.textLeft),
                     height: EditorTypography.inlineCommentSpacing - 4)
                 card.isHidden = false
-            } else if fitsCards, let rect = BlockDecor.leftCardRect(
-                textLeft: state.textLeft, top: top,
-                blockHeight: item.frame.frame.height, roomBelow: roomBelow) {
+            } else if case .card(let rect) = faces[blockID] ?? .yields {
                 // The margin card (R7's ruling — the round-2 mockup's
                 // mcmt), on the LEFT by her R5-3 ruling, at the STACK's top
                 // and with the rhythm's room (13u3 UNIT A1).
@@ -769,8 +891,7 @@ final class BlockDecorOverlayController {
                     style: .marginCard(rule: NSColor(tokens.commentTint)))
                 card.frame = rect
                 card.isHidden = false
-            } else if let rect = BlockDecor.commentBadgeRect(
-                textLeft: state.textLeft, top: top) {
+            } else if case .badge(let rect) = faces[blockID] ?? .yields {
                 // Narrow gutter: the count badge — still a door, and now on
                 // the same side as the cards it stands in for.
                 card.present(

@@ -3544,7 +3544,7 @@ CLOSE against what actually shipped):**
 | 2 | **Row 44 (R-13u4-5)** — the `fixedSize` sweep: a deliberate per-site `lineLimit` + the class-closing grep pin | DONE (this commit) — **45 sites, 34 swept, 11 already deliberate; the pin's own predicate run over the PRE-sweep blobs reports 34 offenders and over this tree 0**; 140 tests in 23 suites green |
 | 3 | **Row 45** — `BlockTagAssignmentSheet` takes the voice | NOT-STARTED |
 | 4 | **Row 46** — `ShellRouter.blockNamingDoor` on S2's ownership idea | NOT-STARTED |
-| 5 | **Row 63** — the indicator ring respects the gutter's faces (red-on-old owed) | NOT-STARTED |
+| 5 | **Row 63** — the indicator ring respects the gutter's faces (red-on-old owed) | DONE (this commit) — 8 pins; **67 tests in 9 suites green**. The BEHAVIOURAL REVERT is **PENDING** (piece 5b, named below — it starts only now that this state is committed) |
 | 6 | **Row 67** — `Help ▸ Restore Tutorial…` joins the SwiftUI `.alert` grammar | NOT-STARTED |
 | 7 | **Row 68** — the "pool & scraps" lesson swept against `SnippetsCopy` (H pattern; re-seed consequence recorded) | NOT-STARTED |
 | 8 | **Row 69** — Block History's rename field no longer OPENS under a seal | NOT-STARTED |
@@ -3701,3 +3701,67 @@ first place.
 `StampOracleOwnershipTests` · `SnippetsGroupDoorsTests` · `StatusCenterTests`) **and
 `ChromeMinHeightTests`, deliberately — it is the OTHER form's pin and a sweep of this one must
 not disturb it** → **140 tests in 23 suites passed** (exit 0, no skips).
+
+### ROW 63 — THE RING STOPS AT THE GUTTER'S FACES (piece 5)
+
+**The defect, traced at the two pure functions rather than inferred from the row's sentence.**
+The editing indicator's rect has begun at `textLeft − 8` since 13 C1 — the round-2 mockup's
+outline-offset, designed when the gutter held nothing at all. Since 13u3 UNIT A1 the gutter
+holds decorations at the block's first line, and two of them end **4 pt short of the prose**:
+the callout GLYPH (`textLeft − calloutGlyphAir − 18` … `textLeft − 4`) and the comment BADGE
+(`… − commentBadgeAir`). So on a block wearing either, the ring's leading edge stood 4 pt INSIDE
+the face and drew straight through it. The margin CARD ends at `textLeft − leftCardLane` =
+`textLeft − 28` and was never crossed — which is exactly why the commonest commented block
+looked right and the callout did not, and why the row names *"the callout glyph/comment face"*.
+
+**The fix, and the shape it took.** `indicatorRect` gains `gutterTrailingX: CGFloat? = nil` —
+the trailing edge of whatever that block's gutter actually draws — and the ring's leading edge
+becomes `min(textLeft, max(textLeft − 8, gutterTrailingX))`. nil is the no-gutter answer and is
+**byte-identical to what shipped**, which is what lets every pre-existing `indicatorRect` pin
+(including `theIndicatorRectWearsTheOutlineOffset`, whose assertion is an exact rect) ride
+UNMODIFIED.
+
+**THE GUTTER LAW, honored at the line and pinned:** the ring can only ever GIVE room back. The
+trailing edge never moves; the vertical air never moves; `textLeft`/`textRight` are arguments
+and never outputs; and the leading edge is clamped at `textLeft` so no arithmetic here can put
+the ring on her words (pinned with an absurd input, `gutterTrailingX: textLeft + 999`). **The
+prose column's measure and left edge move for nothing** — the R-13u-9 reversal's own law.
+
+**The one real design call: where the gutter fact comes from.** The ring must know whether that
+block's comment face is a CARD (which it never crosses) or a BADGE (which it does) — and that
+choice depends on the whole pass (the STACK's tops and each card's room below, R-13u3-3's
+rhythm). Re-deriving it inside the ring would put "card or badge?" in two places — the drift
+`indicatorRect`'s own shared-geometry note has warned about since 13e E2. So the decision MOVED
+out of `renderComments` into a pure `BlockDecor.commentGutterFaces(state)`, computed once per
+pass in `render` and handed to all three consumers: the comments, which draw it, and the
+indicator and the block highlight, which must not cross it. **Not one number of that arithmetic
+changed** — the tops, the `roomBelow`, `leftCardRect`, `commentBadgeRect` and the yields case
+are the same calls with the same inputs — and the INLINE strip (R7's setting) stayed in the
+renderer, because it lives inside the prose column where no gutter face and no ring can meet it.
+*(The enum's third case is named `.yields`, not `.none`: a `none` case on a type that also
+travels as an Optional is the ambiguity Swift warns about, and "yields" is the app's own word
+for this state.)*
+
+**The block HIGHLIGHT rides with it**, deliberately: `renderSelection` has used
+`indicatorRect` since 13e E2 *"because 'the block, edge to edge' is the same shape in both cases
+and a second rect rule would drift from it"* — so a picked callout block's band and a caret
+block's ring stop at the same x.
+
+**R14/R22's semantics are untouched:** off · outline ring · background wash, same setting, same
+three branches, same tokens.
+
+**The pins** (`App/Variorum/VariorumTests/IndicatorGutterTests.swift`, 8):
+the ring stops at the glyph AND the defect's size is asserted as a number (4 pt) · it stops at
+the badge in a narrow gutter · a margin card moves it by nothing · an empty gutter is
+byte-identical to the shipped rect · the gutter law (trailing edge, vertical air, the
+never-past-`textLeft` clamp) · inline comments leave the gutter empty · the block highlight
+takes the same edge · the one decision's three answers (card · badge · yields).
+
+**Run:** `IndicatorGutterTests` + every decoration suite the change can reach
+(`BlockDecorGeometryTests` · `CommentsAndReorderTests` · `EditorTypographyTests` ·
+`ProseGutterTests` — the gutter law's own suite · `EditorDecorTransactionTests` — the
+13u3 settle-hop guard · `BlockSelectionRegistryTests` · `WriteBlockSelectionTests` ·
+`EditorWindowSmokeTests`) → **67 tests in 9 suites passed**. *(A tenth name, `CommentsPanelTests`,
+matched NOTHING and was silently dropped — the `-only-testing` FILE-name trap every unit of this
+phase has met; the real types are `CommentCompositionTests`, `CommentPanelKeysTests` and
+`CommentsPanelModelEditorTests`, and they are in the unit's closing run.)*
