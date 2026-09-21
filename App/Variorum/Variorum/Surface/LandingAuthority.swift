@@ -73,6 +73,11 @@ nonisolated enum LandingCorrectionPace: Equatable {
 nonisolated enum LandingSurface: String, Equatable, CaseIterable {
     case bookOutline = "BookOutline"
     case readingFlow = "ReadingFlow"
+    /// **13u4 UNIT F1 — the book INDEX's pane, the third adopter** (her item
+    /// 10: *"clicking on the name of a chapter in a book isn't bringing you to
+    /// the correct location"*). The trace's compensator 4, which this file's
+    /// own header left to *"its next touch"*; this is that touch.
+    case bookIndex = "BookIndex"
 }
 
 nonisolated struct LandingPolicy: Equatable {
@@ -137,6 +142,35 @@ nonisolated struct LandingPolicy: Equatable {
         maxWait: 0.6, correctionBudget: 6, timeBudget: 4,
         correctionPace: .spacedByTheHold, correctsAnUnreportedTarget: false,
         correctionWord: "RE-LAND")
+
+    /// **The book INDEX pane's** (13u4 UNIT F1). Four of its seven numbers are
+    /// the Outline's, for the Outline's reasons; the three that differ were
+    /// each measured on the real Sherlock book before they were written down
+    /// (the unit's record carries the trials):
+    ///
+    /// - **`correctionBudget` 12, not 40.** A hand-run of this loop — the same
+    ///   anchor re-aimed by hand, 1.2 s apart — converged on the SIXTH aim
+    ///   (ch8 → blank → ch8 → ch8's end → the ch9 seam → the target, exactly).
+    ///   Twelve is that measurement with headroom; a bigger budget on this
+    ///   surface would only buy more jumping, because a correction here can
+    ///   realize a ten-thousand-word story rather than a card.
+    /// - **`timeBudget` 6 s, not 4.** Each correction on this column waits for
+    ///   a note's text to arrive from the store before the layout means
+    ///   anything, so the hold and the quiet interval are spent on real work;
+    ///   4 s stops the loop mid-convergence on a book of Sherlock's scale
+    ///   (measured: six aims of a long story's column take longer than four
+    ///   seconds even when every one of them is right).
+    /// - **`correctsAnUnreportedTarget` true**, and this one is load-bearing:
+    ///   the pin's second arm measured the pre-fix pane leaving the target so
+    ///   far away it never realized AT ALL, so a landing that refused to
+    ///   correct a silent target would refuse exactly the case she reported.
+    ///   (The Outline says true for the same reason; the flow says false
+    ///   because every row there is a direct child whose position is known.)
+    static let bookIndex = LandingPolicy(
+        surface: .bookIndex, tolerance: 2, settleInterval: 0.25, minimumHold: 1.0,
+        maxWait: 0.6, correctionBudget: 12, timeBudget: 6,
+        correctionPace: .quiet, correctsAnUnreportedTarget: true,
+        correctionWord: "HOP")
 
     /// How long after a decision the next look runs.
     func pause(elapsed: TimeInterval) -> TimeInterval {

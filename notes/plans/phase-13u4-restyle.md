@@ -1822,7 +1822,8 @@ is touched.
 | 1 | The record + the READING (the brief's four reading lists, in order) | DONE (8d84ab22) |
 | 2 | THE REPRODUCTION — her gesture on the dev-store Debug build, a TRIAL TABLE (rate, not one run) | DONE (this commit) — **20 trials, 11 MISSES**, the table below |
 | 3 | THE MECHANISM, TRACED (inputs → wrong scroll target → the landing below) — the `LandingAuthority` hypothesis TESTED, never assumed | DONE (this commit) — the two measured experiments below |
-| 4 | The red-on-old pin (behavioural-revert verified) + the fix | **PIN RED 3/3 on the pre-fix tree (this commit)** · the fix NOT-STARTED |
+| 4 | The red-on-old pin (behavioural-revert verified) + the fix | **THE FIX IS IN** (this commit) — the Index adopts `LandingAuthority`; pins red 3/3 pre-fix · the pin's first shape was HOLLOW and is recorded as such · the paired behavioural-revert measurement is piece 4b |
+| 4b | The BEHAVIOURAL REVERT — is the improvement the AUTHORITY's, or the probe's? (a worktree at the probe-only commit, the same trials) | NOT-STARTED |
 | 5 | Row 56's PAIRED INTERLEAVED adjudication (`theReadClickLandsInIndexAtThatBlock`, both trees) | NOT-STARTED |
 | 6 | The WALK — chapter clicks at several depths, before/after, captured | NOT-STARTED |
 | 7 | Closing suites + the ledger's F1 row | NOT-STARTED |
@@ -1984,3 +1985,79 @@ the app said in trial 3: the page is somewhere the target is not even realized.
 **This commit contains NO FIX.** What it contains is the probe (DEBUG-only writes; the geometry
 report itself is behaviour-free) and the two red pins, so the red is on the record before the fix
 exists.
+
+### THE FIX (piece 4) — the book Index adopts the ONE landing authority
+
+**The shape, and it is the prescribed one** (13u2b's own sentence: *"Takes and the book Index adopt
+at their next touch"*): the pane's one-shot `scrollTo` becomes a LANDING through
+`Surface/LandingAuthority` — aim, hold, watch, correct, give up rather than chase — with a
+`LandingPolicy.bookIndex` whose three non-Outline numbers were each measured first (the budget of
+12 from the six-aim convergence, the 6-second watchdog from the same, and
+`correctsAnUnreportedTarget: true` from the pin's own measurement that a missed target often never
+realizes at all). Nothing was invented: the discipline, the seed, the signpost and the story are
+the shared authority's, and this surface keeps only its own ACT (the unanimated `scrollTo`) and
+its own facts.
+
+**What moved, file by file:**
+
+1. **`App/Variorum/Variorum/Surface/LandingAuthority.swift`** — `LandingSurface.bookIndex` (the
+   closed type's third case, which is how the signpost's vocabulary stays closed) and
+   `LandingPolicy.bookIndex` with the reasoning at each number that differs.
+2. **`App/Variorum/Variorum/Features/BookView/BookIndexView.swift`** — the authority itself (with
+   the DEBUG storyboard on the Outline's pattern), the pane's own `PaneLandingBox` (a reference
+   box, never `@State`, so a content report cannot re-lay the column out — the Outline's
+   `OutlineLandingBox` rule), the per-row geometry report at the LAZY ROW's level, the per-BLOCK
+   report gated on the pending anchor, the whole-column listeners
+   (`onScrollGeometryChange` → `contentChanged`, `onScrollPhaseChange` → `userTookOver`), the
+   landing on `paneTarget`, and `landing.end()` on disappear.
+3. **`App/Variorum/VariorumTests/LandingAuthorityTests.swift`** — the surface-count line moves
+   2 → 3, which is what its own comment asks a third adopter to do (*"a third adds its case
+   here"*).
+
+**ONE PIN SHAPE WAS HOLLOW AND IS RECORDED AS SUCH** (the hallucination guard's rule, applied to
+my own pin): the first version asked the LAST story of the book to come to the top of the page.
+It measured 667 pt on BOTH trees — because a `scrollTo` CLAMPS at the end of the scroll, so the
+last row can only reach the top when a whole viewport stands below it. That is the clamp, not the
+landing. The pin now lands a MIDDLE row, where the claim is achievable, and the clamp is recorded
+below as a deliberate limitation rather than papered over.
+
+### WHAT THE FIX DOES IN THE APP (the measurement that decided the next piece)
+
+Dev-store Debug build, Sherlock ▸ Index, the same gesture as the reproduction. **Every landing
+that ran settled at the top**, and the app now SAYS so in her own Console — the content-free
+signpost the authority emits in Release too:
+
+```
+landing surface=BookIndex rows=26 target=24 offset=-1 total=36084 derived=26 exact=0 hops=0 content=4 ms=1021 end=settled top=0
+landing surface=BookIndex rows=26 target=12 offset=-1 total=69119 derived=26 exact=0 hops=3 content=6 ms=1768 end=settled top=0
+landing surface=BookIndex rows=26 target=20 offset=-1 total=135737 derived=26 exact=0 hops=0 content=6 ms=1012 end=settled top=0
+```
+
+Twenty-one landings across two sessions, **every one `end=settled top=0`** — including the COLD
+first click on the last chapter, which pre-fix missed by eight chapters. (`target=` is the row's
+index in the column, so a chapter heading is an even number: ch13 = 24.)
+
+**AND ONE CASE STILL FAILS, measured and recorded rather than smoothed over.** On a COLD column —
+the seconds after a book is opened, while the notes' text is still arriving and the column's own
+height is climbing (90,859 → 100,490 pt during this one landing) — a landing can stall:
+
+```
+landing surface=BookIndex rows=26 target=16 offset=-1 total=216381 derived=26 exact=0 hops=12 content=1 ms=6036 end=gaveup top=-9999
+```
+
+`top=-9999` is the authority's word for *the target never reported at all*. The verbose story says
+why, and it is worth quoting because it is the residual's whole mechanism:
+
+```
+LAND target=16 | content=90859 | offset=36663 | row 72F6 top=-4013 | offset=36727 | row 72F6 top=-4077
+| HOP 1 at 306 ms (top was 279.4) | offset=36790 | … | HOP 12 at 3231 ms (top was 279.4)
+| DONE: gave up at top=279.4 after 12 hops, 6094 ms
+```
+
+The page CREEPS — 60 pt at a time, between the hops and not because of them — as rows above the
+viewport finish loading their text and the scroll view keeps its visible content still. The
+target's own line never appears: it is never realized, so it never reports, and the hops are
+issued blind against a column whose geometry is being discovered faster than the loop can aim.
+**This is the architectural trace's §1 exactly** (*"every long lazy column in the app discovers its
+row heights AFTER it has aimed"*) — and the trace's own answer to it is not more compensation but
+§5(b), heights KNOWN before the aim.

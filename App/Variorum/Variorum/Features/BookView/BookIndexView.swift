@@ -73,8 +73,14 @@ enum BookIndexGeometry {
     /// The claim *"clicking a chapter brings you to that chapter"* is a claim
     /// about one number, so the pin reads that number.
     static var paneAnchorTops: [String: CGFloat] = [:]
+    /// **13u4 UNIT F1: the landing's own story**, the Outline's
+    /// `BookOutlineGeometry.trace` on this surface — the LAND line, the
+    /// hops, the content moves and the sentence it ended on. DEBUG only; the
+    /// shipping build carries the content-free `LandingSignpost` line instead.
+    static var trace: [String] = []
 
     static func reset() {
+        trace = []
         chapterCountFrame = nil
         noteMenuFrame = nil
         columnFrames = [:]
@@ -272,6 +278,42 @@ struct BookIndexView<Masthead: View>: View {
     @State private var columnTarget: String?
     @State private var seeded = false
 
+    /// **THE ONE LANDING AUTHORITY** (13u4 UNIT F1 — `Surface/LandingAuthority.swift`).
+    /// The aim/hold/quiet/hop discipline that the book Outline and the reading
+    /// flow adopted at 13u2b; this surface is the third adopter and the reason
+    /// is her item 10 — the pane used to aim ONCE, at whatever a lazy column's
+    /// estimate said, and never look again (measured: 11 of 20 chapter clicks
+    /// landed in a different story; one left the page blank; none corrected
+    /// itself in six seconds). What this surface keeps is its own ACT (the
+    /// scroll) and its own facts; the watching is the authority's.
+    #if DEBUG
+    @State private var landing = LandingAuthority(
+        policy: .bookIndex,
+        storyboard: LandingStoryboard(
+            note: { BookIndexGeometry.trace.append($0) },
+            dump: {
+                // A landing's story is only this landing's — print from the
+                // last line that ENDS in " LAND" (the Outline's own lesson,
+                // met on its walk when every landing printed the session).
+                let start = BookIndexGeometry.trace
+                    .lastIndex(where: { $0.hasSuffix(" LAND") }) ?? 0
+                return BookIndexGeometry.trace[start...].joined(separator: " | ")
+            }))
+    #else
+    @State private var landing = LandingAuthority(policy: .bookIndex)
+    #endif
+
+    /// The pane's own page bookkeeping — NOT render state, so it lives in a
+    /// reference box a `@State` merely holds and its mutations invalidate
+    /// nothing (the Outline's `OutlineLandingBox` rule, and the reason for it:
+    /// a `@State` write on every content report re-lays the lazy column out,
+    /// which is one more content report — a loop of the landing's own making).
+    @MainActor private final class PaneLandingBox {
+        /// The column's last reported content height — the signpost's `total`.
+        var contentHeight: CGFloat = 0
+    }
+    @State private var paneBox = PaneLandingBox()
+
     init(
         session: AppSession, model: BookViewModel, structure: BookStructureModel,
         @ViewBuilder masthead: @escaping () -> Masthead,
@@ -363,6 +405,11 @@ struct BookIndexView<Masthead: View>: View {
             edit.teardown()
             model.noteIndexLive(nil)
             model.noteIndexSelection(nil)
+            // 13u4 UNIT F1: a landing in flight ends with the surface rather
+            // than re-arming its check against a dead proxy (the 13u2b
+            // ladder's R2-12 class). Silent by the authority's own rule —
+            // nothing landed and the surface is gone.
+            landing.end()
         }
     }
 
@@ -389,13 +436,40 @@ struct BookIndexView<Masthead: View>: View {
         select(landing ?? model.entries[0].postID, scrollPane: true, report: false)
     }
 
-    /// A pane row reported where its top sits. **13u4 UNIT F1:** today this
-    /// feeds the DEBUG oracle only — the measurement behind the trace in that
-    /// unit's record — and the landing reads it next.
+    /// A pane ROW reported where its top sits — the landing's own evidence,
+    /// and the seed that makes a landing on the row the page is ALREADY at
+    /// terminate (`LandingAuthority.tops`: `onGeometryChange` reports a
+    /// CHANGE, so a scroll that moves nothing says nothing, and without the
+    /// seed that reads as "the target never realized").
     private func paneAnchorMoved(_ anchorID: String, top: CGFloat) {
         #if DEBUG
         BookIndexGeometry.paneAnchorTops[anchorID] = top
+        if landing.anchor == anchorID {
+            BookIndexGeometry.trace.append("\(anchorID) top=\(top) hops=\(landing.corrections)")
+        } else if landing.isPending {
+            BookIndexGeometry.trace.append("row \(anchorID.suffix(4)) top=\(Int(top))")
+        }
         #endif
+        landing.noteTop(anchorID, top)
+    }
+
+    /// A BLOCK inside a realized note reported where it sits — the third kind
+    /// of pane anchor (the Read ▸ Scroll click-through's target, row 38).
+    ///
+    /// **Gated on the pending landing, deliberately**, where a ROW's report is
+    /// not: a realized story is hundreds of blocks and every one of them
+    /// reports on every layout change, so recording them all would grow the
+    /// authority's seed by the corpus rather than by the rows it lands on.
+    /// What the gate keeps is exactly what is needed — a block that was landed
+    /// on once keeps its seed afterwards, because the authority records the
+    /// top it is handed.
+    private func paneBlockAnchorMoved(_ anchorID: String, top: CGFloat) {
+        guard landing.anchor == anchorID else { return }
+        #if DEBUG
+        BookIndexGeometry.paneAnchorTops[anchorID] = top
+        BookIndexGeometry.trace.append("\(anchorID) top=\(top) hops=\(landing.corrections)")
+        #endif
+        landing.noteTop(anchorID, top)
     }
 
     private func select(_ postID: String, scrollPane: Bool, report: Bool = true) {
@@ -635,7 +709,8 @@ struct BookIndexView<Masthead: View>: View {
                                     edit: edit,
                                     selected: selectedPostID == entry.postID,
                                     onTap: { select(entry.postID, scrollPane: false) },
-                                    onLandedBlock: { blockID in paneTarget = blockID })
+                                    onLandedBlock: { blockID in paneTarget = blockID },
+                                    onBlockTop: paneBlockAnchorMoved)
                             }
                         }
                         // **13u4 UNIT F1 — WHERE THIS ROW SITS.** At the LAZY
@@ -659,6 +734,30 @@ struct BookIndexView<Masthead: View>: View {
             }
             .coordinateSpace(name: BookIndexColumn.paneSpace)
             .background(tokens.surface)
+            // **13u4 UNIT F1: the landing listens to the WHOLE column.** Any
+            // change in the content's height re-arms the quiet interval — on
+            // this surface that is a note's text arriving from the store, which
+            // is the single biggest thing that can move a target (a row is ~40
+            // pt until its blocks land and thousands afterwards) — and a scroll
+            // by HER ends the landing where she put the page.
+            .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                geometry.contentSize.height
+            } action: { _, height in
+                paneBox.contentHeight = height
+                landing.contentChanged(height)
+            }
+            #if DEBUG
+            .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                geometry.contentOffset.y
+            } action: { _, offset in
+                if landing.isPending {
+                    BookIndexGeometry.trace.append("offset=\(Int(offset))")
+                }
+            }
+            #endif
+            .onScrollPhaseChange { _, phase in
+                if phase == .interacting { landing.userTookOver() }
+            }
             .onChange(of: paneTarget) { _, target in
                 // One address grammar: a note target is its postID, a
                 // chapter target arrives as "sec-<group id>", a landed
@@ -666,10 +765,41 @@ struct BookIndexView<Masthead: View>: View {
                 // No animation (the Outline lesson: an animated scrollTo
                 // toward lazy estimates travels wrong).
                 guard let target else { return }
-                proxy.scrollTo("bip-\(target)", anchor: .top)
                 paneTarget = nil
+                land("bip-\(target)", proxy)
             }
         }
+    }
+
+    /// **Put a pane anchor at the top of the page, and watch it settle**
+    /// (13u4 UNIT F1). What stays here is this surface's own act — the one
+    /// unanimated `scrollTo` — and the facts only this surface knows; the
+    /// hold, the quiet interval, the corrections, the watchdog and the
+    /// content-free signpost are the authority's.
+    private func land(_ anchorID: String, _ proxy: ScrollViewProxy) {
+        landing.land(anchorID, facts: paneFacts(anchorID)) { id in
+            proxy.scrollTo(id, anchor: .top)
+        }
+    }
+
+    /// What this column can honestly say about a landing, as numbers.
+    ///
+    /// **`derived` is the row count, and that is the honest answer, not a
+    /// placeholder:** this pane has no height manifest (13u2b UNIT 1 built one
+    /// for the Outline and UNIT 2 gave the flow its own), so NOT ONE row's
+    /// height is known before it is realized — every one of them is standing
+    /// on a lazy container's average. Saying `derived=0` would tell her
+    /// Console the opposite of the truth. `offset` stays −1 (unknown) for the
+    /// same reason, and `total` is what the column last reported it was.
+    private func paneFacts(_ anchorID: String) -> LandingFacts {
+        let rows = paneRows
+        return LandingFacts(
+            rows: rows.count,
+            targetIndex: rows.firstIndex { $0.id == anchorID } ?? -1,
+            offset: -1,
+            total: paneBox.contentHeight,
+            derived: rows.count,
+            exactAbove: false)
     }
 }
 
@@ -779,6 +909,9 @@ private struct BookIndexPaneNote: View {
     let onTap: () -> Void
     /// A landing made a block live here — the pane may scroll to it.
     let onLandedBlock: (String) -> Void
+    /// 13u4 UNIT F1: where one of this note's BLOCKS sits, for a landing whose
+    /// target is that block (the pane gates the report on its pending anchor).
+    let onBlockTop: (String, CGFloat) -> Void
 
     @State private var rows: [Queries.TOCRow] = []
 
@@ -786,7 +919,8 @@ private struct BookIndexPaneNote: View {
         session: AppSession, tokens: VoiceTokens,
         indicator: EditingIndicatorStyle, entry: Queries.ReadingEntry,
         edit: BookIndexEditModel, selected: Bool,
-        onTap: @escaping () -> Void, onLandedBlock: @escaping (String) -> Void
+        onTap: @escaping () -> Void, onLandedBlock: @escaping (String) -> Void,
+        onBlockTop: @escaping (String, CGFloat) -> Void
     ) {
         self.session = session
         self.tokens = tokens
@@ -796,6 +930,7 @@ private struct BookIndexPaneNote: View {
         self.selected = selected
         self.onTap = onTap
         self.onLandedBlock = onLandedBlock
+        self.onBlockTop = onBlockTop
         #if DEBUG
         BookIndexMaterialization.count += 1
         #endif
@@ -834,8 +969,19 @@ private struct BookIndexPaneNote: View {
             .contentShape(Rectangle())
             .onTapGesture { onTap() }
             ForEach(rows, id: \.blockID) { row in
+                // The anchor is built ONCE per row render, never inside the
+                // geometry closure — that closure runs per realized block per
+                // layout pass, and a string built there would be allocation
+                // churn at scroll rate (P1's letter: cost ∝ realized rows, and
+                // nothing per-row may be more than it has to be).
+                let anchor = "bip-\(row.blockID)"
                 blockView(row)
-                    .id("bip-\(row.blockID)")
+                    .id(anchor)
+                    .onGeometryChange(for: CGFloat.self) { geometry in
+                        geometry.frame(in: .named(BookIndexColumn.paneSpace)).minY
+                    } action: { top in
+                        onBlockTop(anchor, top)
+                    }
             }
             if rows.isEmpty {
                 Text(" ").font(tokens.body)

@@ -140,8 +140,16 @@ struct BookIndexLandingTests {
         return (window, hosting)
     }
 
-    /// **THE PIN.** Land on the LAST story of a long book and ask where it
-    /// ended up. A landing that arrived puts it at the top of the page.
+    /// **THE PIN.** Land on a story in the MIDDLE of a long book and ask
+    /// where it ended up. A landing that arrived puts that row at the top of
+    /// the page.
+    ///
+    /// **Why the middle and not the last row, and it is a measured reason:**
+    /// the last row of a column can only be at the top of the page when a
+    /// whole viewport of content stands below it, and a `scrollTo` CLAMPS at
+    /// the end of the scroll — the first shape of this pin asked the last
+    /// story to come to the top and measured 667 pt on BOTH trees, which is
+    /// the clamp and not the landing. A pin that cannot pass is not a pin.
     ///
     /// RED ON OLD: the pre-fix pane aimed once, at whatever the lazy column
     /// estimated, and never looked again.
@@ -170,16 +178,19 @@ struct BookIndexLandingTests {
             })
             await settle(window, hosting, until: { false }, maxTurns: 10)
 
-            let far = postIDs[postIDs.count - 1]
-            model.requestLanding(LandingTarget(postID: far))
+            // A NOTE reveal, never a block landing (`requestReveal` leaves
+            // `pendingLanding` nil) — so the anchor the landing rests on is
+            // this row itself and the claim is about one number.
+            let far = postIDs[5]
+            model.requestReveal(far)
             await settle(window, hosting, until: {
                 abs(BookIndexGeometry.paneAnchorTops["bip-\(far)"] ?? .greatestFiniteMagnitude)
                     <= tolerance
-            }, maxTurns: 200)
+            }, maxTurns: 250)
 
             let reported = BookIndexGeometry.paneAnchorTops["bip-\(far)"]
-            print("[13u4 F1] far landing top=\(reported.map { "\($0)" } ?? "never reported") "
-                + "· rows reporting=\(BookIndexGeometry.paneAnchorTops.count)")
+            print("[13u4 F1] far note landing top=\(reported.map { "\($0)" } ?? "never reported")")
+            print("[13u4 F1 story] " + BookIndexGeometry.trace.suffix(40).joined(separator: " | "))
             let top = try #require(
                 reported,
                 "the target row never reported — the page is somewhere else entirely")
@@ -189,16 +200,14 @@ struct BookIndexLandingTests {
         }
     }
 
-    /// **The same claim for a CHAPTER heading, which is her own gesture's
-    /// target.** The chapter click's channel is `paneTarget = "sec-<group
-    /// id>"`, and the pane's landing takes the same road; here the target is
-    /// requested through the note landing of the chapter's own note, so the
-    /// heading immediately above it must come to rest just above the page's
-    /// top — i.e. the chapter she clicked is what the page shows.
+    /// **The same claim for a BLOCK inside a story** — row 38's road, the one
+    /// a Read ▸ Scroll click takes into Index (`LandingTarget(postID:blockID:)`).
+    /// A block deep inside a note that is itself deep in the book is the
+    /// hardest address this surface has, and it must still come to the top.
     ///
-    /// RED ON OLD: with the un-watched aim the heading is thousands of points
-    /// away, or never realized at all.
-    @Test func aLandingBringsTheChaptersHeadingIntoView() async throws {
+    /// RED ON OLD: the un-watched aim leaves it hundreds of points away, or
+    /// never realizes it at all.
+    @Test func aBlockLandingDeepInTheBookArrivesAtThatBlock() async throws {
         try await withLongIndexBook { session, db, readingID, postIDs in
             let model = BookViewModel(session: session, readingID: readingID)
             await model.adopt(try await db.read { [readingID] in
@@ -221,16 +230,22 @@ struct BookIndexLandingTests {
             })
             await settle(window, hosting, until: { false }, maxTurns: 10)
 
-            let far = postIDs[postIDs.count - 2]
-            model.requestLanding(LandingTarget(postID: far))
+            let far = postIDs[5]
+            let rows = try await session.database.read { [far] in
+                try Queries.blockTOC($0, post: far)
+            }
+            let target = rows[rows.count / 2]
+            model.requestLanding(LandingTarget(postID: far, blockID: target.blockID))
             await settle(window, hosting, until: {
-                abs(BookIndexGeometry.paneAnchorTops["bip-\(far)"] ?? .greatestFiniteMagnitude)
-                    <= tolerance
-            }, maxTurns: 200)
-            let top = BookIndexGeometry.paneAnchorTops["bip-\(far)"]
-            print("[13u4 F1] second-to-last landing top=\(top.map { "\($0)" } ?? "never reported")")
+                abs(BookIndexGeometry.paneAnchorTops["bip-\(target.blockID)"]
+                    ?? .greatestFiniteMagnitude) <= tolerance
+            }, maxTurns: 250)
+
+            let top = BookIndexGeometry.paneAnchorTops["bip-\(target.blockID)"]
+            print("[13u4 F1] deep block landing top=\(top.map { "\($0)" } ?? "never reported")")
+            print("[13u4 F1 story] " + BookIndexGeometry.trace.suffix(40).joined(separator: " | "))
             #expect(abs(top ?? .greatestFiniteMagnitude) <= tolerance,
-                    "the landing arrived: top=\(top.map { "\($0)" } ?? "never reported")")
+                    "the block the landing named is at the top of the page")
             #endif
         }
     }
