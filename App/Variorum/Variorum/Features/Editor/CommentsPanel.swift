@@ -44,27 +44,38 @@ final class CommentsPanelModel {
     init(session: AppSession, blockID: String) {
         self.session = session
         self.blockID = blockID
-        // **RUN A ladder round 2 (the MAJOR, binding 5's sweep) — the open
-        // of the SAME block's panel takes a REFUSED draft back.** This
-        // model dies with its presentation (Close, a click outside the
-        // popover, ⎋⎋), so a draft the store refused used to die with it —
-        // row 65's class on the Mac's own comment surface. The park clears
-        // in the same breath (the panel is the only home again; a
-        // re-refusal re-parks): the add draft back into the add area, a
-        // refused in-place edit back onto its row. One recorded corner
-        // (QUESTIONS #140): a parked EDIT draft whose comment was deleted
-        // elsewhere while parked is pruned by the first snapshot's
-        // `survivingDrafts` — over-preservation everywhere else, never loss.
-        if let heldDraft = session.commentDraftPark.take(forBlock: blockID) {
-            if let id = heldDraft.commentID {
-                drafts[id] = heldDraft.text
-            } else {
-                addDraft = heldDraft.text
-            }
-            // The receipt register, deliberately — nothing is being
-            // refused; the line says why the box is not empty.
-            status = .receipt(CommentDraftPark.restoredNote)
+        // Deliberately side-effect-free (ladder round 3, F1): this model is
+        // minted inside `State(initialValue:)`, whose expression SwiftUI
+        // runs on EVERY construction of the view value — including the
+        // phantom values the sheet/popover content closures produce while
+        // the panel is presented, which are then discarded. The park
+        // restore lives in `restoreParkedDraft()`, called from the panel's
+        // `.task` — the installed lifecycle, once per real presentation.
+    }
+
+    /// **RUN A ladder round 2 (the MAJOR, binding 5's sweep) — the open of
+    /// the SAME block's panel reads a REFUSED draft back**, amended twice
+    /// at round 3: it runs from the panel's `.task` (F1 — never from
+    /// `init`, whose `State(initialValue:)` home runs on phantom view
+    /// constructions too; the pad's `.onAppear` shape), and it is a PEEK
+    /// (F2 — this panel's close never files the add draft, #118(a), so a
+    /// consuming restore made reopen-then-close lose the words for good;
+    /// the park holds until the same draft LANDS or a newer refusal
+    /// replaces it). The add draft comes back into the add area, a refused
+    /// in-place edit back onto its row. One recorded corner (QUESTIONS
+    /// #140): a parked EDIT draft whose comment was deleted elsewhere
+    /// while parked is pruned by the first snapshot's `survivingDrafts` —
+    /// over-preservation everywhere else, never loss.
+    func restoreParkedDraft() {
+        guard let heldDraft = session.commentDraftPark.peek(forBlock: blockID) else { return }
+        if let id = heldDraft.commentID {
+            drafts[id] = heldDraft.text
+        } else {
+            addDraft = heldDraft.text
         }
+        // The receipt register, deliberately — nothing is being refused;
+        // the line says why the box is not empty.
+        status = .receipt(CommentDraftPark.restoredNote)
     }
 
     private(set) var comments: [BlockComment] = []
@@ -209,11 +220,12 @@ final class CommentsPanelModel {
             }) {
                 addDraft = ""
                 filedCount += 1
-                // A landed submit of the parked block clears the park — a
-                // draft with a row must never come back as a ghost (any
-                // refused draft still standing lives in this OPEN panel
-                // and re-parks at its own next refusal).
-                session.commentDraftPark.clearIfHeld(blockID: blockID)
+                // A landed ADD clears a parked ADD draft — the same draft,
+                // (blockID, nil) — so nothing comes back as a ghost. It
+                // deliberately does NOT clear a parked EDIT draft (round
+                // 3's raise): that draft never landed, and under the peek
+                // its insurance must outlive unrelated submits.
+                session.commentDraftPark.clearIfHeld(blockID: blockID, commentID: nil)
             } else {
                 // **Parked at REFUSAL time, from the SUBMITTED text** (RUN
                 // A ladder round 2, the MAJOR — binding 5's sweep): this
@@ -245,7 +257,10 @@ final class CommentsPanelModel {
             if await perform({ ops in try ops.editBlockComment(id, text: text) }) {
                 drafts[id] = text
                 justSaved.insert(id)
-                session.commentDraftPark.clearIfHeld(blockID: blockID)
+                // The same-draft clear (round 3's raise): a landed edit of
+                // THIS comment clears only a parked edit of this comment —
+                // never a parked add draft, whose words have no row yet.
+                session.commentDraftPark.clearIfHeld(blockID: blockID, commentID: id)
             } else {
                 // The refused in-place edit rides the park WITH its row
                 // (the phone's editingID arm, in the Mac's grammar). The
@@ -522,6 +537,11 @@ struct CommentsPanel: View {
         .background(tokens.surface)
         .background(CommentPanelKeyMonitor(onAct: handle))
         .task {
+            // The park restore runs HERE, not in the model's init (ladder
+            // round 3, F1): `.task` runs once per INSTALLED presentation,
+            // while `State(initialValue:)` runs the init on every phantom
+            // view value the presenting body's re-evaluations construct.
+            model.restoreParkedDraft()
             // The panel opens ready to write — the add area is the act it is
             // usually opened for, and ⎋ (nothing typed) still closes it.
             focus = .add

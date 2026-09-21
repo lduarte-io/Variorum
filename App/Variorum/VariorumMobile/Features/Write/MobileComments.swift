@@ -49,9 +49,12 @@ final class MobileCommentsController {
     let draftPark = CommentDraftPark()
 
     /// One-shot the sheet's render consumes: the parked text the open just
-    /// took back. The field is the VIEW's, so the controller can only
-    /// offer the words once — after the consume, the field is the only
-    /// home again (clear-at-restore, binding 3).
+    /// read back. The field is the VIEW's, so the controller offers the
+    /// words once PER OPEN — the one-shot protects her typing within an
+    /// open (a later render must not clobber the field). It never clears
+    /// the PARK's own hold: since round 3's F2 the restore is a peek, and
+    /// the park lets go only when the draft lands or a newer refusal
+    /// replaces it.
     private(set) var restoredDraftText: String?
 
     /// Why the box is not empty — its own line, never the refusal
@@ -79,13 +82,15 @@ final class MobileCommentsController {
         guard let model, model.slot(for: blockID) != nil else { return }
         openBlockID = blockID
         deletedShown = false
-        // RUN A ladder round 2 (the MAJOR): the open of the SAME block
-        // takes the refused draft back — the sheet becomes the only home
-        // again (clear-at-restore; a re-refusal re-parks), the edit
-        // target comes back with it, and one line says why the box is not
-        // empty. A DIFFERENT block's open shows nothing of it and leaves
-        // it held.
-        if let heldDraft = draftPark.take(forBlock: blockID) {
+        // RUN A ladder round 2 (the MAJOR), amended round 3 (F2): the open
+        // of the SAME block READS the refused draft back — a PEEK, never a
+        // spend, because this surface's close never submits, so a consuming
+        // restore made reopen-then-close-without-filing lose the words for
+        // good. The park keeps holding until the draft LANDS or a newer
+        // refusal replaces it; the edit target comes back with it, and one
+        // line says why the box is not empty. A DIFFERENT block's open
+        // shows nothing of it and leaves it held.
+        if let heldDraft = draftPark.peek(forBlock: blockID) {
             restoredDraftText = heldDraft.text
             editingID = heldDraft.commentID
             restoredNote = CommentDraftPark.restoredNote
@@ -183,11 +188,12 @@ final class MobileCommentsController {
         switch outcome {
         case .landed:
             if editing != nil { editingID = nil }
-            // Binding 3: a landed submit of the parked block clears the
-            // park — a draft with a row must never come back as a ghost.
-            // Any refused draft still standing at this moment lives in
-            // the OPEN sheet and re-parks at its own next refusal.
-            draftPark.clearIfHeld(blockID: blockID)
+            // A landed submit of THE SAME DRAFT clears the park — the
+            // words it insured have a row now, so nothing comes back as a
+            // ghost. Keyed by (blockID, commentID) since round 3's raise:
+            // a landed EDIT must not spend a parked ADD draft's insurance
+            // (or vice versa) — that draft never landed.
+            draftPark.clearIfHeld(blockID: blockID, commentID: editing)
             onChanged?()
             return true
         case .refused:

@@ -24,6 +24,17 @@
 //  their restore arms, (c) and (e) at their parked premises; the guard
 //  (d) stays green (an unsubmitted draft never parked anything).
 //
+//  LADDER ROUND 3 (F1 + F2 + the raise): the restore moved OUT of the
+//  model's init (a `State(initialValue:)` side effect ran on phantom view
+//  constructions and ate the park — F1) into `restoreParkedDraft()`, the
+//  panel's `.task` home; the restore became a NON-CONSUMING PEEK (this
+//  panel's close never files the add draft, so clear-at-restore made
+//  reopen-then-close lose the words — F2); the clear is keyed by the SAME
+//  DRAFT `(blockID, commentID)` (a landed edit must not spend a parked add
+//  draft's insurance — the raise). Pins (f)/(g)/(h) hold those three; the
+//  round-2 pins' clear-at-restore assertions are RULED-CHANGE edits, named
+//  in the round-3 record. Reverts R3-A/B/C announced there.
+//
 
 import AppKit
 import Dependencies
@@ -91,13 +102,18 @@ struct CommentPanelParkTests {
             #expect(panel.status?.isRefusal == true, "the premise: the store refused")
             #expect(panel.addDraft == Self.typed, "…and the panel kept the draft (shipped)")
 
-            // The panel closes; the model dies. The next open mints fresh.
+            // The panel closes; the model dies. The next open mints fresh
+            // and restores from its installed lifecycle (round 3, F1).
             let reopened = CommentsPanelModel(session: session, blockID: seed.blockA)
+            reopened.restoreParkedDraft()
             #expect(reopened.addDraft == Self.typed, "her words came back")
             #expect(reopened.status == .receipt(CommentDraftPark.restoredNote),
                     "the box says why it is not empty — the receipt register")
-            #expect(session.commentDraftPark.held == nil,
-                    "clear-at-restore: the panel is the only home again")
+            // RULED-CHANGE edit (round 3, F2 — the peek): the restore no
+            // longer spends the insurance; it holds until the draft lands
+            // or a newer refusal replaces it.
+            #expect(session.commentDraftPark.held?.text == Self.typed,
+                    "the peek keeps the park holding — the insurance outlives the restore")
         }
     }
 
@@ -122,6 +138,7 @@ struct CommentPanelParkTests {
             #expect(panel.status?.isRefusal == true, "the premise: the commit refused")
 
             let reopened = CommentsPanelModel(session: session, blockID: seed.blockA)
+            reopened.restoreParkedDraft()
             #expect(reopened.draft(for: comment.id) == "Sharpened, and worth keeping.",
                     "the refused edit is back on its row")
             #expect(reopened.status == .receipt(CommentDraftPark.restoredNote))
@@ -159,6 +176,7 @@ struct CommentPanelParkTests {
             #expect(session.commentDraftPark.held == nil, "…and the park holds nothing")
 
             let reopened = CommentsPanelModel(session: session, blockID: seed.blockA)
+            reopened.restoreParkedDraft()
             #expect(reopened.addDraft.isEmpty, "no ghost of the landed text")
             #expect(reopened.status == nil)
             let stored = try await db.read { [blockID = seed.blockA] database in
@@ -181,6 +199,7 @@ struct CommentPanelParkTests {
             #expect(session.commentDraftPark.held == nil,
                     "nothing was refused, so nothing is parked")
             let reopened = CommentsPanelModel(session: session, blockID: seed.blockA)
+            reopened.restoreParkedDraft()
             #expect(reopened.addDraft.isEmpty, "the reopen is a fresh box — her ruled abandon")
             #expect(reopened.status == nil)
         }
@@ -200,13 +219,143 @@ struct CommentPanelParkTests {
             #expect(session.commentDraftPark.held?.blockID == seed.blockA)
 
             let other = CommentsPanelModel(session: session, blockID: seed.blockB)
+            other.restoreParkedDraft()
             #expect(other.addDraft.isEmpty, "another block's panel shows nothing of it")
             #expect(other.status == nil)
             #expect(session.commentDraftPark.held?.blockID == seed.blockA,
                     "…and the park still holds the first block's draft")
 
             let reopened = CommentsPanelModel(session: session, blockID: seed.blockA)
+            reopened.restoreParkedDraft()
             #expect(reopened.addDraft == Self.typed, "its own block's panel restores it")
+        }
+    }
+
+    /// **PIN (f) — RED ON OLD (the consuming take): the TWO-GENERATION
+    /// road.** Refused → close → reopen (restored) → close WITHOUT filing
+    /// (the unlock trip the refusal itself names) → reopen: the draft is
+    /// STILL there. Under clear-at-restore the first reopen SPENT the
+    /// insurance and the second close lost the words for good (round 3,
+    /// F2 — this panel's close never files the add draft, #118(a)).
+    @Test func aRestoredDraftSurvivesACloseSheNeverFiledFrom() async throws {
+        try await withPanelWorld { session, _ in
+            let seed = try await seedPanelPost(session)
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+            let panel = CommentsPanelModel(session: session, blockID: seed.blockA)
+            panel.addDraft = Self.typed
+            await panel.fileAddDraft()
+            #expect(panel.status?.isRefusal == true, "the premise: the store refused")
+
+            // Generation 1: close → reopen → restored.
+            let second = CommentsPanelModel(session: session, blockID: seed.blockA)
+            second.restoreParkedDraft()
+            #expect(second.addDraft == Self.typed, "generation 1 restores")
+
+            // She closes again WITHOUT filing (going to unseal the note —
+            // the refusal's own remedy). The model dies; nothing submits.
+            let third = CommentsPanelModel(session: session, blockID: seed.blockA)
+            third.restoreParkedDraft()
+            #expect(third.addDraft == Self.typed,
+                    "generation 2 STILL restores — the reopen did not spend the insurance")
+            #expect(third.status == .receipt(CommentDraftPark.restoredNote))
+        }
+    }
+
+    /// **PIN (g) — RED ON OLD (the init-time restore): the PHANTOM road
+    /// (round 3, F1).** `State(initialValue:)` runs the model's init on
+    /// every view-value construction — including phantom values the
+    /// presenting body's re-evaluations mint while the panel is up, which
+    /// are discarded without ever being installed. A phantom must not eat
+    /// the park: only the INSTALLED panel's `.task` restores.
+    @Test func aPhantomModelConstructionDoesNotEatThePark() async throws {
+        try await withPanelWorld { session, _ in
+            let seed = try await seedPanelPost(session)
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+            let panel = CommentsPanelModel(session: session, blockID: seed.blockA)
+            panel.addDraft = Self.typed
+            await panel.fileAddDraft()
+            #expect(session.commentDraftPark.held?.text == Self.typed,
+                    "the premise: the refusal parked it")
+
+            // The phantom: constructed by a body re-evaluation while the
+            // panel is presented, never installed, never given a `.task`.
+            _ = CommentsPanelModel(session: session, blockID: seed.blockA)
+            #expect(session.commentDraftPark.held?.text == Self.typed,
+                    "a bare construction leaves the park holding")
+
+            // The real reopen still restores.
+            let reopened = CommentsPanelModel(session: session, blockID: seed.blockA)
+            reopened.restoreParkedDraft()
+            #expect(reopened.addDraft == Self.typed, "the installed reopen restores")
+        }
+    }
+
+    /// **PIN (h) — the CROSS-KIND guard, both directions + the same-draft
+    /// clear (round 3's raise).** Under the peek the park outlives the
+    /// restore, so the clear must key on THE SAME DRAFT `(blockID,
+    /// commentID)`: a landed edit must not spend a parked ADD draft's
+    /// insurance, a landed add must not spend a parked EDIT draft's — and
+    /// a landed submit of the same draft still clears, so nothing ghosts.
+    @Test func aLandedSubmitOfADifferentDraftLeavesTheParkHolding() async throws {
+        try await withPanelWorld { session, db in
+            let seed = try await seedPanelPost(session)
+            let comment = try await session.runner.run { [blockID = seed.blockA] ops in
+                try ops.addBlockComment(to: blockID, text: "First thought.")
+            }
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+            let panel = CommentsPanelModel(session: session, blockID: seed.blockA)
+            panel.adopt(.init(live: [comment], deleted: []))
+            panel.addDraft = Self.typed
+            await panel.fileAddDraft()
+            #expect(session.commentDraftPark.held?.commentID == nil,
+                    "the premise: an ADD draft is parked")
+
+            // Arm 1: a landed EDIT on the same block leaves the parked ADD
+            // draft's insurance alone.
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.unlockPost(postID)
+            }
+            panel.setDraft("Sharpened v2, landing now.", for: comment.id)
+            await panel.commitEdit(comment.id)
+            #expect(panel.status == nil, "the premise: the edit landed")
+            #expect(session.commentDraftPark.held?.text == Self.typed,
+                    "…and the parked ADD draft still holds — its words have no row")
+
+            // Arm 2: a parked EDIT draft survives a landed ADD the same way.
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+            panel.setDraft("Sharpened v3, refused.", for: comment.id)
+            await panel.commitEdit(comment.id)
+            #expect(session.commentDraftPark.held?.commentID == comment.id,
+                    "the newer refusal replaced the park with the EDIT draft")
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.unlockPost(postID)
+            }
+            panel.addDraft = "A fresh add, landing now."
+            await panel.fileAddDraft()
+            #expect(session.commentDraftPark.held?.commentID == comment.id,
+                    "the landed ADD left the parked EDIT draft holding")
+
+            // Arm 3: the SAME draft landing still clears — no ghost.
+            await panel.commitEdit(comment.id)
+            #expect(session.commentDraftPark.held == nil,
+                    "the same draft landed — the insurance lets go")
+            let stored = try await db.read { [blockID = seed.blockA] database in
+                try Queries.blockComments(database, blockID: blockID)
+            }
+            // The parked ADD draft (arm 1) was REPLACED by arm 2's edit
+            // refusal — the recorded one-draft, newest-wins trade — so it
+            // never landed: exactly the two landed rows stand.
+            #expect(stored.map(\.text).sorted()
+                    == ["A fresh add, landing now.", "Sharpened v3, refused."].sorted(),
+                    "exactly the landed rows — the replaced add draft has none")
         }
     }
 }

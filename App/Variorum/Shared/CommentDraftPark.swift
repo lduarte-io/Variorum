@@ -5,7 +5,8 @@
 //  **RUN A ladder round 2, the MAJOR — a comment draft the store REFUSED
 //  survives its surface's close** (the orchestrator's fork ruling: the
 //  row-65 park's shape extended to the comment surfaces; PROVISIONAL,
-//  QUESTIONS #140).
+//  QUESTIONS #140). **Amended at ladder round 3 (F2): the restore is a
+//  NON-CONSUMING PEEK** — see the clear rule below.
 //
 //  The phone's comments sheet wiped its field on every close road — the
 //  dim-tap, Done, and the projection's auto-close — including the close the
@@ -27,14 +28,22 @@
 //  · **ONE held draft, keyed to its block**; a refusal elsewhere REPLACES
 //    it (newest wins — the bounded, recorded cost). The comment under edit
 //    rides along, so a refused edit keeps its target too.
-//  · **The next open of the SAME block's surface takes it back** and the
-//    park clears in the same breath — the surface becomes the only home
-//    again; a re-refusal re-parks. A different block's open shows nothing
-//    of it and leaves it held.
-//  · **A landed submit of the parked block clears it** — a draft with a
-//    row must never come back as a ghost. Any refused draft still standing
-//    at that moment lives in the OPEN surface and re-parks at its own next
-//    refusal.
+//  · **The restore is a PEEK, never a spend** (round 3's F2 — the ruling
+//    amendment to binding 3, for the comment surfaces ONLY): the open of
+//    the SAME block's surface reads the draft back into the box WITHOUT
+//    clearing the park. The pad's clear-at-restore was safe because the
+//    pad's CLOSE FILES — a close after its restore re-attempts the mint
+//    and a re-refusal re-parks. These surfaces' closes never submit, so a
+//    consuming restore made the reopen-then-close-without-filing road lose
+//    the words for good — round 2's own class, one generation later. The
+//    pad's `QuickNotePark` keeps its clear-at-restore; its premise holds
+//    there.
+//  · **The park clears on exactly three occasions**: a landed submit of
+//    THE SAME DRAFT — identified as `(blockID, commentID)`, nil meaning
+//    the add draft (the round-3 raise: a landed submit of a DIFFERENT
+//    draft on the same block must not clear insurance that never landed —
+//    the cross-kind arm is guard-pinned both directions); replacement by
+//    a newer refusal; and the session's end.
 //  · **Memory-only, deliberately** — the row-65 reasoning verbatim: the
 //    refusal's commonest cause is a locked or unreachable store, which is
 //    exactly the state in which no key exists to seal a persisted park.
@@ -49,7 +58,9 @@ final class CommentDraftPark {
         var text: String
         /// The comment under edit when the refusal struck — nil is the add
         /// draft. The edit arm's target rides the park (17b P4's second
-        /// loss, kept closed across the close roads too).
+        /// loss, kept closed across the close roads too), and it is HALF
+        /// THE CLEAR KEY: the insurance clears only when this same draft
+        /// lands (round 3's raise).
         var commentID: String?
     }
 
@@ -60,18 +71,26 @@ final class CommentDraftPark {
         held = Held(blockID: blockID, text: text, commentID: commentID)
     }
 
-    /// The next open of the SAME block takes it — and the park lets go in
-    /// the same breath (no ghost, no double restore). Another block's open
-    /// leaves it held and gets nil.
-    func take(forBlock blockID: String) -> Held? {
+    /// **The open of the SAME block reads it back — and the park KEEPS
+    /// holding it** (round 3's F2: a peek, never a spend). Another block's
+    /// open gets nil and leaves it held. The insurance outlives any number
+    /// of reopens she closes without filing; it lets go only through
+    /// `clearIfHeld` (the same draft landed) or a newer refusal's
+    /// replacement.
+    func peek(forBlock blockID: String) -> Held? {
         guard let held, held.blockID == blockID else { return nil }
-        defer { self.held = nil }
         return held
     }
 
-    /// A landed submit of the parked block: the words have a row now.
-    func clearIfHeld(blockID: String) {
-        if held?.blockID == blockID { held = nil }
+    /// A landed submit of THE SAME DRAFT — `(blockID, commentID)` both
+    /// matching (nil = the add draft): the words it insured have a row
+    /// now. A landed submit of a DIFFERENT draft on the same block leaves
+    /// it held (round 3's raise — clearing there would spend insurance
+    /// that never landed).
+    func clearIfHeld(blockID: String, commentID: String?) {
+        if let held, held.blockID == blockID, held.commentID == commentID {
+            self.held = nil
+        }
     }
 
     /// The restored surface's one line — why the box is not empty. Its own

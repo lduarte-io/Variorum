@@ -22,6 +22,14 @@
 //  pins (i), (ii), (iv) and (v) go red at their park/restore arms; the
 //  guard (iii) stays green (her abandon grammar never parked anything).
 //
+//  LADDER ROUND 3 (F2 + the raise): the restore became a NON-CONSUMING
+//  PEEK — this sheet's close never submits, so clear-at-restore made
+//  reopen-then-close-without-filing lose the words for good — and the
+//  clear is keyed by the SAME DRAFT `(blockID, commentID)` (a landed edit
+//  must not spend a parked add draft's insurance). Pins (vi)/(vii) hold
+//  those; pin (i)'s clear-at-restore assertion is a RULED-CHANGE edit,
+//  named in the round-3 record. Reverts R3-A/R3-C announced there.
+//
 
 import Foundation
 import GRDB
@@ -119,9 +127,11 @@ struct MobileCommentParkTests {
                 find("comments.restored", in: sheet) as? UILabel)
             #expect(!restoredLabel.isHidden)
 
-            // Clear-at-restore: the sheet is the only home again — a
-            // second open finds nothing parked.
-            #expect(model.comments.draftPark.held == nil)
+            // RULED-CHANGE edit (round 3, F2 — the peek): the restore no
+            // longer spends the insurance; the park holds until the draft
+            // lands or a newer refusal replaces it.
+            #expect(model.comments.draftPark.held?.text == typed,
+                    "the peek keeps the park holding — the insurance outlives the restore")
         }
     }
 
@@ -258,6 +268,108 @@ struct MobileCommentParkTests {
             #expect(model.comments.isOpen == false, "the premise: the auto-close ran")
             #expect(model.comments.draftPark.held?.text == typed,
                     "…and the park still holds her words — the auto-close is just another close")
+        }
+    }
+
+    /// **PIN (vi) — RED ON OLD (the consuming take): the TWO-GENERATION
+    /// road (round 3, F2).** Refused → close → reopen (restored) → close
+    /// WITHOUT filing (the unlock trip the refusal itself names) → reopen:
+    /// the draft is STILL there. Under clear-at-restore the first reopen
+    /// SPENT the insurance and the second close wiped the field for good.
+    @Test func aRestoredDraftSurvivesACloseSheNeverFiledFrom() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, surface) = await makeSurfaceEditor(session, postID: seed.postID)
+            let (window, _) = mounted(surface)
+            defer { window.isHidden = true }
+
+            model.openComments(blockID: seed.blockA)
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+            let typed = "Two closes, still here."
+            #expect(await model.comments.submitDraft(typed) == false)
+            model.comments.close()
+            window.layoutIfNeeded()
+
+            // Generation 1: reopen restores.
+            model.openComments(blockID: seed.blockA)
+            window.layoutIfNeeded()
+            let sheet = try #require(surface.textView.commentsSheetView)
+            let field = try #require(find("comments.draft", in: sheet) as? UITextView)
+            #expect(field.text == typed, "generation 1 restores")
+
+            // She closes again WITHOUT filing — going to unlock the note,
+            // which is the refusal's own remedy. The field wipes (the
+            // surface's standing close); the park must not have been spent.
+            model.comments.close()
+            window.layoutIfNeeded()
+            #expect((field.text ?? "").isEmpty, "the close still wipes the field")
+
+            model.openComments(blockID: seed.blockA)
+            window.layoutIfNeeded()
+            #expect(field.text == typed,
+                    "generation 2 STILL restores — the reopen did not spend the insurance")
+            #expect(model.comments.restoredNote == CommentDraftPark.restoredNote)
+        }
+    }
+
+    /// **PIN (vii) — the CROSS-KIND guard, both directions + the
+    /// same-draft clear (round 3's raise).** Under the peek the park
+    /// outlives the restore, so the clear must key on THE SAME DRAFT
+    /// `(blockID, commentID)`: a landed edit must not spend a parked ADD
+    /// draft's insurance, a landed add must not spend a parked EDIT
+    /// draft's — and the same draft landing still clears (no ghost).
+    @Test func aLandedSubmitOfADifferentDraftLeavesTheParkHolding() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedTwoBlockPost(session)
+            let (model, surface) = await makeSurfaceEditor(session, postID: seed.postID)
+            let (window, _) = mounted(surface)
+            defer { window.isHidden = true }
+
+            model.openComments(blockID: seed.blockA)
+            #expect(await model.comments.add("First thought."))
+            let comment = try #require(model.comments.comments.first)
+
+            // An ADD draft is parked by a refusal.
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+            let addTyped = "An add the store refused."
+            #expect(await model.comments.submitDraft(addTyped) == false)
+            #expect(model.comments.draftPark.held?.commentID == nil,
+                    "the premise: an ADD draft is parked")
+
+            // Arm 1: a landed EDIT on the same block leaves it holding.
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.unlockPost(postID)
+            }
+            model.comments.beginEditing(comment.id)
+            #expect(await model.comments.submitDraft("Sharpened v2, landing now."))
+            #expect(model.comments.draftPark.held?.text == addTyped,
+                    "the parked ADD draft still holds — its words have no row")
+
+            // Arm 2: a parked EDIT draft survives a landed ADD the same way.
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.lockPost(postID)
+            }
+            model.comments.beginEditing(comment.id)
+            #expect(await model.comments.submitDraft("Sharpened v3, refused.") == false)
+            #expect(model.comments.draftPark.held?.commentID == comment.id,
+                    "the newer refusal replaced the park with the EDIT draft")
+            try await session.runner.run { [postID = seed.postID] ops in
+                try ops.unlockPost(postID)
+            }
+            model.comments.cancelEditing()
+            #expect(await model.comments.submitDraft("A fresh add, landing now."))
+            #expect(model.comments.draftPark.held?.commentID == comment.id,
+                    "the landed ADD left the parked EDIT draft holding")
+
+            // Arm 3: the SAME draft landing still clears — no ghost.
+            model.comments.beginEditing(comment.id)
+            #expect(await model.comments.submitDraft("Sharpened v3, refused."))
+            #expect(model.comments.draftPark.held == nil,
+                    "the same draft landed — the insurance lets go")
         }
     }
 }
