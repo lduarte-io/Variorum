@@ -10,6 +10,31 @@
 //  editing everywhere stands beside it). Promote-tag(s)-to-book (R30/R37)
 //  lives here too — the manager is where you look at tags.
 //
+//  **13u4 UNIT S1 — THE SHAPE CHANGED (her items 4 and 6).** Her words:
+//  *"the settings menu could probably be broken up a little more - an
+//  overall one, then maybe tabs on text editing shortcuts, window /
+//  reshaping shortcuts, etc."* and *"simple text search within the settings
+//  menu - it's too hard to find how to make a callout."*
+//
+//  What was here: ONE `TabView` of five tabs, whose first tab was a single
+//  `Form` holding FIVE sections and fifteen controls. That is why the 18j
+//  appearance control sat below the fold at the shipped 560×460 size
+//  (KnownIssues row 59, her own owner assignment) — a pane that long has a
+//  fold wherever you put the window.
+//
+//  What is here now: a LEADING PANE LIST beside a detail column, with the
+//  search field at the list's head. The pane list is chosen over more tabs
+//  for three reasons, all of them hers: nine panes cannot fit a tab bar;
+//  the search needs a home and this is where macOS puts one; and the
+//  reference artifact's grammar (`notes/plans/pre-13u-mockups/
+//  blocks-and-snippets.html`, her *"actual guide"*) is solid geometric
+//  lines and calm cards, which is a list and a hairline. **Row 59 dies by
+//  construction**: General holds four controls, so the appearance choice is
+//  on screen the moment Settings opens.
+//
+//  The panes, the catalog and the search brain are `SettingsShape.swift`;
+//  this file composes them.
+//
 
 import GRDB  // AsyncValueObservation iteration (the ThemeStore pattern)
 import SwiftUI
@@ -33,6 +58,12 @@ struct AppSettingsView: View {
     let appearance: AppearanceController?
     @State private var theme: ThemeStore
     @State private var tags: TagsViewModel
+    /// The pane on screen. Her "overall one" opens.
+    @State private var pane: SettingsPane = .general
+    /// Item 4's field. Session-lived and nothing else — no storage, nothing
+    /// synced, gone when the window closes.
+    @State private var query = ""
+    @Environment(\.colorScheme) private var scheme
 
     init(
         session: AppSession, services: AppServices? = nil,
@@ -47,44 +78,372 @@ struct AppSettingsView: View {
         _tags = State(initialValue: TagsViewModel(session: session))
     }
 
+    private var tokens: VoiceTokens { theme.tokens(for: scheme) }
+
+    /// **Which catalog rows each pane actually renders** — the registry
+    /// walk's own shape (`CommitBar.renderedCapabilities`, P-1: declared ⇔
+    /// rendered), one layer down. Without it the catalog could name a
+    /// control no pane shows, and the search would send her to a pane that
+    /// does not hold the thing it promised: the same drift her item 7
+    /// reports one menu over, arriving through the search instead.
+    ///
+    /// The four panes composed from other files (`Tags`, `Protection`,
+    /// `Data Safety`, `Acknowledgments`) carry ONE catalog row each — the
+    /// pane itself, so it can be found by name — and that row is what these
+    /// entries say.
+    static let rowIDsRendered: [SettingsPane: [String]] = [
+        .general: ["voice", "palette", "appearance", "receipts"],
+        .editor: ["seams", "indicator", "inlineComments", "paragraphGap",
+                  "hoverHandles", "spellcheck", "longBlocks"],
+        .takes: ["fanStyle", "followScroll"],
+        .writing: ["segmentation", "cadence", "pruning"],
+        .shortcuts: [],
+        .tags: ["tagManager"],
+        .protection: ["protection"],
+        .dataSafety: ["backups"],
+        .acknowledgments: ["acknowledgments"],
+    ]
+
+    /// The panes this window can show. Protection is dropped where no
+    /// controller exists (a preview, a pin) rather than rendered empty —
+    /// P-2's letter, which the old `TabView` already applied to that tab.
+    private var panes: [SettingsPane] {
+        SettingsPane.allCases.filter { $0 != .protection || protection != nil }
+    }
+
     var body: some View {
-        TabView {
-            AppearancePane(session: session, theme: theme, appearance: appearance)
-                .tabItem { Label("Appearance", systemImage: "paintpalette") }
-            TagManagerPane(session: session, tags: tags)
-                .tabItem { Label("Tags", systemImage: "tag") }
-            // 13p Batch 2: the at-open modes, presets, escrow, and the
-            // passphrase/recovery doors (R13p-5/6/7/9).
-            if let protection {
-                ProtectionPane(controller: protection, services: services)
-                    .tabItem { Label("Protection", systemImage: "lock.shield") }
+        HStack(spacing: 0) {
+            sidebar
+            // The reference artifact's "solid geometric lines" — one
+            // hairline, never a floating pane (W8-3's retirement).
+            Rectangle()
+                .fill(tokens.line)
+                .frame(width: 1)
+            detail
+        }
+        .frame(width: 720, height: 520)
+        .background(tokens.room)
+        // Every voiced modifier inside Settings (`alarmVoice()` and its
+        // siblings) reads the store from the environment and otherwise
+        // falls back — so the panes have been painting in the FALLBACK
+        // voice since they were written. One line, and Protection's and
+        // Data Safety's refusals finally wear the voice she chose.
+        .environment(theme)
+        .tint(tokens.accent)
+        .task { await theme.start() }
+        .task { await tags.start() }
+    }
+
+    // MARK: - The leading column (the search, then the panes)
+
+    private var sidebar: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            searchField
+            ScrollView {
+                VStack(alignment: .leading, spacing: 1) {
+                    ForEach(panes) { candidate in
+                        paneRow(candidate)
+                    }
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
             }
-            // (The pre-13u "How Protection Works" explainer tab retired at
-            // pre-13x 5a — §13; the seeded book *Encryption Explained* and
-            // the tutorial's short chapter are the story now.)
+        }
+        .frame(width: 196)
+        .background(tokens.surface)
+    }
+
+    private var searchField: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "magnifyingglass")
+                .font(tokens.small)
+                .foregroundStyle(tokens.faint)
+            TextField(text: $query) {
+                Text(tokens.chromeLabel("search settings"))
+            }
+            .textFieldStyle(.plain)
+            .font(tokens.small)
+            .foregroundStyle(tokens.ink)
+            .lineLimit(1)
+            if !query.isEmpty {
+                Button {
+                    query = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
+                }
+                .buttonStyle(.plain)
+                .help("Clear the search")
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(tokens.card, in: RoundedRectangle(cornerRadius: 7))
+        .overlay(RoundedRectangle(cornerRadius: 7).stroke(tokens.line, lineWidth: 1))
+        .padding(10)
+    }
+
+    private func paneRow(_ candidate: SettingsPane) -> some View {
+        let selected = candidate == pane && query.isEmpty
+        return Button {
+            query = ""
+            pane = candidate
+        } label: {
+            HStack(spacing: 7) {
+                Image(systemName: candidate.symbol)
+                    .font(tokens.small)
+                    .frame(width: 16)
+                    .foregroundStyle(selected ? tokens.accent : tokens.muted)
+                Text(tokens.chromeLabel(candidate.title))
+                    .font(tokens.small)
+                    .fontWeight(selected ? .semibold : .regular)
+                    .foregroundStyle(selected ? tokens.ink : tokens.muted)
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 9)
+            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                selected ? AnyShapeStyle(tokens.wash) : AnyShapeStyle(Color.clear),
+                in: RoundedRectangle(cornerRadius: 7))
+            .contentShape(RoundedRectangle(cornerRadius: 7))
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - The detail column
+
+    @ViewBuilder private var detail: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            header
+            Rectangle().fill(tokens.line).frame(height: 1)
+            if query.isEmpty {
+                paneBody
+            } else {
+                SettingsResultsPane(
+                    tokens: tokens, query: query,
+                    onOpen: { finding in
+                        query = ""
+                        pane = finding.pane
+                    })
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(tokens.chromeLabel(query.isEmpty ? pane.title : "search"))
+                .font(tokens.heading)
+                .foregroundStyle(tokens.ink)
+                .lineLimit(1)
+            Text(query.isEmpty
+                 ? pane.blurb
+                 : "Settings, keyboard shortcuts and the app's own words — all three.")
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 12)
+    }
+
+    @ViewBuilder private var paneBody: some View {
+        switch pane {
+        case .general:
+            GeneralPane(theme: theme, session: session, appearance: appearance)
+        case .editor:
+            EditorSettingsPane(theme: theme)
+        case .takes:
+            TakesSettingsPane(theme: theme)
+        case .writing:
+            WritingSettingsPane(session: session)
+        case .shortcuts:
+            ShortcutsSettingsPane(tokens: tokens)
+        case .tags:
+            TagManagerPane(session: session, tags: tags)
+        case .protection:
+            if let protection {
+                // 13p Batch 2: the at-open modes, presets, escrow, and the
+                // passphrase/recovery doors (R13p-5/6/7/9).
+                ProtectionPane(controller: protection, services: services)
+            }
+        case .dataSafety:
             // 13l Act 4 (ledger row 12): backups, their freshness, and what
             // restoring one does — including to things that were deleted.
             DataSafetyPane(services: services, protection: protection)
-                .tabItem { Label("Data Safety", systemImage: "externaldrive.badge.timemachine") }
+        case .acknowledgments:
             // 13p Batch 1 (R13p-11's attribution obligation): the Zetetic
             // copyright line, the SQLCipher license text, and the
             // dependency notices — user-accessible, functional over polish.
             AcknowledgmentsPane()
-                .tabItem { Label("Acknowledgments", systemImage: "text.book.closed") }
         }
-        .frame(width: 560, height: 460)
-        .task { await theme.start() }
-        .task { await tags.start() }
     }
 }
 
-// MARK: - Appearance (B1's settings, faced)
+// MARK: - The search results (her item 4)
 
-private struct AppearancePane: View {
-    let session: AppSession
+/// The detail column while the field has words in it. A result names its
+/// PANE, so the answer teaches where the thing lives as well as what it is
+/// — and a shortcut or a dictionary word answers without going anywhere,
+/// which is the whole point of *"it's too hard to find how to make a
+/// callout"*: the answer to that is a chord, not a setting.
+private struct SettingsResultsPane: View {
+    let tokens: VoiceTokens
+    let query: String
+    let onOpen: (SettingsFinding) -> Void
+
+    private var findings: [SettingsFinding] {
+        SettingsSearch.findings(matching: query, in: SettingsSearch.wholeIndex)
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 7) {
+                if findings.isEmpty {
+                    Text("Nothing here matches “\(query)”. Try a word from the thing itself — "
+                         + "“callout”, “dark”, “seam”, “savepoint”.")
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 4)
+                } else {
+                    ForEach(findings) { finding in
+                        Button { onOpen(finding) } label: {
+                            CalmCard(tokens: tokens) {
+                                row(finding)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func row(_ finding: SettingsFinding) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(finding.lead)
+                    .font(finding.kind == .shortcut
+                          ? .system(.body, design: .monospaced)
+                          : tokens.body)
+                    .foregroundStyle(tokens.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                Text(tokens.chromeLabel(badge(finding)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(1)
+            }
+            Text(finding.detail)
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// What kind of answer this is, in the app's own words.
+    private func badge(_ finding: SettingsFinding) -> String {
+        switch finding.kind {
+        case .setting: finding.pane.title
+        case .shortcut: "shortcut"
+        case .word: "the word"
+        }
+    }
+}
+
+// MARK: - General (her "overall one")
+
+/// The three appearance dials and how the app talks back — everything here
+/// is about the WHOLE app rather than one surface. Deliberately the SHORT
+/// pane: **KnownIssues row 59** (the 18j appearance control below the fold)
+/// is a fold that existed because fifteen controls shared one pane, and the
+/// cure is that this one holds four.
+private struct GeneralPane: View {
     let theme: ThemeStore
-    /// 18j — the LOCAL light/dark choice (see `AppearanceChoice.swift`).
+    let session: AppSession
     let appearance: AppearanceController?
+
+    var body: some View {
+        Form {
+            Section("Voice") {
+                Picker(SettingsCatalog.title("voice"), selection: Binding(
+                    get: { theme.settings.voice },
+                    set: { theme.setVoice($0) })) {
+                    Text("Terminal").tag(ThemeVoice.terminal)
+                    Text("Study").tag(ThemeVoice.study)
+                }
+                .pickerStyle(.segmented)
+                Text("Two voices, one structure: Terminal is mono and airy with its own idioms; Study is the warm paper-and-serif look. Everything works identically in both, and the colour palette below works under either one.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(6)
+                    .fixedSize(horizontal: false, vertical: true)
+                // 18g (her R-Q6/R-Q11/R-Q13): the palette sits UNDER the
+                // voice — same section, one row down, because that is what
+                // it is. Its own file: a feature that arrives as fifty
+                // lines inside a pane is how a pane becomes a god file.
+                PaletteSettingsRow(session: session, theme: theme)
+            }
+            // 18j (her R-Q12): the light/dark choice sits directly UNDER the
+            // voice and the palette — the third of the three appearance
+            // dials, and the coarsest reading of the other two.
+            // 13u4 UNIT S1 (KnownIssues row 59, hers): it is reachable now
+            // because this pane is four controls instead of fifteen. The
+            // order is unchanged and deliberately so — 18g's own walk found
+            // the palette row's custom-hex refusal at the fold, and a
+            // section added ABOVE would push that refusal out of sight
+            // again.
+            if let appearance {
+                AppearanceChoiceRow(appearance: appearance)
+            }
+            // 18i (her R-Q5): its OWN section, because it is neither a look
+            // of the writing surface nor a habit of the document — it is how
+            // the app talks back, everywhere. Synced like the Writing pane's
+            // settings, so the same act confirms the same way on every
+            // device (the fan_style class).
+            Section("Confirmations") {
+                Picker(SettingsCatalog.title("receipts"), selection: Binding(
+                    get: { theme.settings.receiptStyle },
+                    set: { theme.setReceiptStyle($0) })) {
+                    ForEach(ReceiptStyle.allCases, id: \.self) { style in
+                        Text(ReceiptStyleCopy.label(style)).tag(style)
+                    }
+                }
+                Text(ReceiptStyleCopy.help)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(6)
+                    .fixedSize(horizontal: false, vertical: true)
+                // The sentence the setting must never leave out: a refusal
+                // is not a confirmation, and “Off” never silences one.
+                Text(ReceiptStyleCopy.alwaysShownNote)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+    }
+}
+
+// MARK: - Editor (her "text editing" pane)
+
+/// How the writing surface looks and behaves. Everything here is LOCAL to
+/// this Mac except the three that were always synced (seams, the editing
+/// indicator, inline comments), which say so in their own help.
+private struct EditorSettingsPane: View {
+    let theme: ThemeStore
     /// 13b 4D (S4-19, her ruling): hover-revealed drag handles in Write —
     /// default ON; OFF = the fully clean surface. LOCAL (this Mac's
     /// UserDefaults, the takes-density class — deliberately not the synced
@@ -101,9 +460,113 @@ private struct AppearancePane: View {
     @AppStorage(ParagraphGap.settingKey) private var paragraphGap = ParagraphGap.standard
     /// 13d batch 4 (A24): spellcheck level, coarse by TEXTKIT2 §3's warning.
     @AppStorage(SpellcheckLevel.settingKey) private var spellcheck = SpellcheckLevel.off
-    /// 13d batch 4 (A16): the DOCUMENT-GLOBAL segmentation default — the
-    /// one setting on this pane that is synced, because it changes what
-    /// entry DOES to the store rather than how one Mac looks.
+
+    var body: some View {
+        Form {
+            Section("The page") {
+                Toggle(SettingsCatalog.title("seams"), isOn: Binding(
+                    get: { theme.settings.seamsVisible },
+                    set: { theme.setSeamsVisible($0) }))
+                Picker(SettingsCatalog.title("indicator"), selection: Binding(
+                    get: { theme.settings.editingIndicator },
+                    set: { theme.setEditingIndicator($0) })) {
+                    Text("Off — the cursor is enough").tag(EditingIndicatorStyle.off)
+                    Text("Outline ring").tag(EditingIndicatorStyle.outline)
+                    Text("Background").tag(EditingIndicatorStyle.background)
+                }
+                Toggle(SettingsCatalog.title("inlineComments"), isOn: Binding(
+                    get: { theme.settings.inlineComments },
+                    set: { theme.setInlineComments($0) }))
+                // 13d batch 4 (A23): the paragraph gap. Pure presentation
+                // over the 2026-07-12 ruling's presentation half — uniform
+                // and per-PARAGRAPH, never per-seam (§12: boundaries stay
+                // invisible at rest).
+                Picker(SettingsCatalog.title("paragraphGap"), selection: $paragraphGap) {
+                    Text("Standard").tag(ParagraphGap.standard)
+                    Text("A blank line's worth").tag(ParagraphGap.paragraphTall)
+                }
+                Text("Air after every paragraph — inside a block and between blocks alike, so block boundaries stay invisible at rest. Purely how it looks: nothing is stored, and exports are byte-identical either way. This Mac only.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(6)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Section("While you write") {
+                Toggle(SettingsCatalog.title("hoverHandles"), isOn: $writeHoverHandles)
+                Text("ON: pointing at a block in Write reveals its ⠿ drag handle in the left margin. OFF: the fully clean writing surface. With block seams shown (⌘⇧B), every handle shows regardless. This Mac only.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(6)
+                    .fixedSize(horizontal: false, vertical: true)
+                // 13d batch 4 (A24): coarse by design — TEXTKIT2 §3 records
+                // continuous checking + the completion popover crashing
+                // NSTextView, so three levels and no finer.
+                Picker(SettingsCatalog.title("spellcheck"), selection: $spellcheck) {
+                    Text("Off").tag(SpellcheckLevel.off)
+                    Text("Check while typing").tag(SpellcheckLevel.checkWhileTyping)
+                    Text("Check and correct").tag(SpellcheckLevel.checkAndCorrect)
+                }
+                Text("Off (the default): no underlines; Edit ▸ Spelling and Grammar still checks on demand. Check while typing: red underlines as you go. Check and correct: macOS also fixes what it is confident about. Applies to every writing surface — Write, takes, comparisons. This Mac only.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(8)
+                    .fixedSize(horizontal: false, vertical: true)
+                Toggle(SettingsCatalog.title("longBlocks"), isOn: $longBlockLayout)
+                Text("ON: when you scroll near a very long block, Variorum asks the text system to measure that one block properly — which removes the empty space it was guessing at underneath. It happens once per block, only for blocks over about a long-paragraph's length and under a measured size cap, and never while you are actually scrolling. OFF: the text system's own estimate stands, and long blocks can show phantom space that vanishes when you scroll onto them. This Mac only.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(10)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+    }
+}
+
+// MARK: - Takes
+
+/// Two controls, and that is on purpose. A takes-shaped question ("where do
+/// I change how takes open?") gets a pane with the word on it rather than a
+/// row buried in a fifteen-control Editor pane — which is the whole
+/// complaint item 6 is about. (PROVISIONAL, QUESTIONS #131: folding these
+/// two back under Editor is one `case` away.)
+private struct TakesSettingsPane: View {
+    let theme: ThemeStore
+
+    var body: some View {
+        Form {
+            Section("The fan") {
+                Picker(SettingsCatalog.title("fanStyle"), selection: Binding(
+                    get: { theme.settings.fanStyle },
+                    set: { theme.setFanStyle($0) })) {
+                    Text("Stack").tag(FanStyle.stack)
+                    Text("Carousel").tag(FanStyle.carousel)
+                    Text("Margin grid").tag(FanStyle.marginGrid)
+                    Text("Slot split").tag(FanStyle.slotSplit)
+                }
+                Toggle(SettingsCatalog.title("followScroll"), isOn: Binding(
+                    get: { theme.settings.followTheScroll },
+                    set: { theme.setFollowTheScroll($0) }))
+                Text("Takes open with ⌘⇧T on the block you are in, and ⎋ closes them all. Both settings are synced, so a fan opens the same way on every device.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+    }
+}
+
+// MARK: - Writing (the document's own habits — the synced three)
+
+private struct WritingSettingsPane: View {
+    let session: AppSession
+    /// 13d batch 4 (A16): the DOCUMENT-GLOBAL segmentation default — synced,
+    /// because it changes what entry DOES to the store rather than how one
+    /// Mac looks.
     @State private var defaultSegmentation: Segmentation = .paragraph
     @State private var segmentationNote: String?
     /// 13j J11: the ONE cadence setting — synced document semantics, exactly
@@ -116,121 +579,11 @@ private struct AppearancePane: View {
 
     var body: some View {
         Form {
-            Section("Voice") {
-                Picker("Design voice", selection: Binding(
-                    get: { theme.settings.voice },
-                    set: { theme.setVoice($0) })) {
-                    Text("Terminal").tag(ThemeVoice.terminal)
-                    Text("Study").tag(ThemeVoice.study)
-                }
-                .pickerStyle(.segmented)
-                Text("Two voices, one structure: Terminal is mono and airy with its own idioms; Study is the warm paper-and-serif look. Everything works identically in both, and the colour palette below works under either one.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                // 18g (her R-Q6/R-Q11/R-Q13): the palette sits UNDER the
-                // voice — same section, one row down, because that is what
-                // it is. Its own file: a feature that arrives as fifty
-                // lines inside a pane is how a pane becomes a god file.
-                PaletteSettingsRow(session: session, theme: theme)
-            }
-            // 18j (her R-Q12): the light/dark choice sits directly UNDER the
-            // voice and the palette — the third of the three appearance
-            // dials, and the coarsest reading of the other two. Deliberately
-            // NOT above them: the palette row's custom-hex fields and their
-            // inline refusal sit at the 460 pt pane's fold (18g's own walk
-            // finding), and a section added above would push that refusal
-            // further out of sight.
-            // Its own file (the 18j ladder's R1-8), for the reason the
-            // palette row gives above.
-            if let appearance {
-                AppearanceChoiceRow(appearance: appearance)
-            }
-            Section("Editor") {
-                Toggle("Show block seams (dotted lines between blocks)", isOn: Binding(
-                    get: { theme.settings.seamsVisible },
-                    set: { theme.setSeamsVisible($0) }))
-                Picker("Mark the block being edited", selection: Binding(
-                    get: { theme.settings.editingIndicator },
-                    set: { theme.setEditingIndicator($0) })) {
-                    Text("Off — the cursor is enough").tag(EditingIndicatorStyle.off)
-                    Text("Outline ring").tag(EditingIndicatorStyle.outline)
-                    Text("Background").tag(EditingIndicatorStyle.background)
-                }
-                Toggle("Show comments inline (tinted, under the block)", isOn: Binding(
-                    get: { theme.settings.inlineComments },
-                    set: { theme.setInlineComments($0) }))
-                Toggle("Show the block drag handle on hover (Write)", isOn: $writeHoverHandles)
-                Text("ON: pointing at a block in Write reveals its ⠿ drag handle in the left margin. OFF: the fully clean writing surface. With block seams shown (⌘⇧B), every handle shows regardless. This Mac only.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Toggle("Lay out very long blocks as you reach them", isOn: $longBlockLayout)
-                Text("ON: when you scroll near a very long block, Variorum asks the text system to measure that one block properly — which removes the empty space it was guessing at underneath. It happens once per block, only for blocks over about a long-paragraph's length and under a measured size cap, and never while you are actually scrolling. OFF: the text system's own estimate stands, and long blocks can show phantom space that vanishes when you scroll onto them. This Mac only.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Toggle("Takes follow the scroll", isOn: Binding(
-                    get: { theme.settings.followTheScroll },
-                    set: { theme.setFollowTheScroll($0) }))
-                Picker("Takes open as", selection: Binding(
-                    get: { theme.settings.fanStyle },
-                    set: { theme.setFanStyle($0) })) {
-                    Text("Stack").tag(FanStyle.stack)
-                    Text("Carousel").tag(FanStyle.carousel)
-                    Text("Margin grid").tag(FanStyle.marginGrid)
-                    Text("Slot split").tag(FanStyle.slotSplit)
-                }
-                // 13d batch 4 (A23): the paragraph gap. Pure presentation
-                // over the 2026-07-12 ruling's presentation half — uniform
-                // and per-PARAGRAPH, never per-seam (§12: boundaries stay
-                // invisible at rest).
-                Picker("Space between paragraphs", selection: $paragraphGap) {
-                    Text("Standard").tag(ParagraphGap.standard)
-                    Text("A blank line's worth").tag(ParagraphGap.paragraphTall)
-                }
-                Text("Air after every paragraph — inside a block and between blocks alike, so block boundaries stay invisible at rest. Purely how it looks: nothing is stored, and exports are byte-identical either way. This Mac only.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                // 13d batch 4 (A24): coarse by design — TEXTKIT2 §3 records
-                // continuous checking + the completion popover crashing
-                // NSTextView, so three levels and no finer.
-                Picker("Spellchecking", selection: $spellcheck) {
-                    Text("Off").tag(SpellcheckLevel.off)
-                    Text("Check while typing").tag(SpellcheckLevel.checkWhileTyping)
-                    Text("Check and correct").tag(SpellcheckLevel.checkAndCorrect)
-                }
-                Text("Off (the default): no underlines; Edit ▸ Spelling and Grammar still checks on demand. Check while typing: red underlines as you go. Check and correct: macOS also fixes what it is confident about. Applies to every writing surface — Write, takes, comparisons. This Mac only.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            // 18i (her R-Q5): its OWN section, because it is neither a look
-            // of the writing surface nor a habit of the document — it is how
-            // the app talks back, everywhere. Synced like the two settings
-            // below it, so the same act confirms the same way on every
-            // device (the fan_style class).
-            Section("Confirmations") {
-                Picker(ReceiptStyleCopy.title, selection: Binding(
-                    get: { theme.settings.receiptStyle },
-                    set: { theme.setReceiptStyle($0) })) {
-                    ForEach(ReceiptStyle.allCases, id: \.self) { style in
-                        Text(ReceiptStyleCopy.label(style)).tag(style)
-                    }
-                }
-                Text(ReceiptStyleCopy.help)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                // The sentence the setting must never leave out: a refusal
-                // is not a confirmation, and “Off” never silences one.
-                Text(ReceiptStyleCopy.alwaysShownNote)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
             // 13d batch 4 (A16 — N34's deferred GLOBAL half): document
             // semantics, so it is SYNCED, and it says so. Per-post settings
             // still win where they are set.
-            Section("Writing") {
-                Picker(SegmentationFaceCopy.globalTitle, selection: Binding(
+            Section("Typing") {
+                Picker(SettingsCatalog.title("segmentation"), selection: Binding(
                     get: { defaultSegmentation },
                     set: { setDefaultSegmentation($0) })) {
                     Text(SegmentationFaceCopy.globalParagraph).tag(Segmentation.paragraph)
@@ -239,6 +592,8 @@ private struct AppearancePane: View {
                 Text(SegmentationFaceCopy.globalHelp)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .lineLimit(8)
+                    .fixedSize(horizontal: false, vertical: true)
                 if let segmentationNote {
                     Text(segmentationNote)
                         .font(.caption)
@@ -246,10 +601,12 @@ private struct AppearancePane: View {
                         .lineLimit(4)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+            }
+            Section("Savepoints") {
                 // 13j J11 (her round-1 ruling): the ONE cadence setting.
                 // SYNCED like segmentation above it, and for the same reason
                 // — it is a habit of the document, not a look of this Mac.
-                Picker(SavepointCadenceCopy.title, selection: Binding(
+                Picker(SettingsCatalog.title("cadence"), selection: Binding(
                     get: { savepointCadence },
                     set: { setSavepointCadence($0) })) {
                     ForEach(SavepointCadence.allCases, id: \.self) { cadence in
@@ -259,6 +616,7 @@ private struct AppearancePane: View {
                 Text(SavepointCadenceCopy.help)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .lineLimit(8)
                     .fixedSize(horizontal: false, vertical: true)
                 // The sentence the setting must never leave out: the
                 // INSURANCE occasions are not a cadence and stay on in
@@ -266,6 +624,7 @@ private struct AppearancePane: View {
                 Text(SavepointCadenceCopy.insuranceNote)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .lineLimit(6)
                     .fixedSize(horizontal: false, vertical: true)
                 if let cadenceNote {
                     Text(cadenceNote)
@@ -277,7 +636,7 @@ private struct AppearancePane: View {
                 // 13j batch 6b (her round-9 ruling): history PRUNING —
                 // one row beside the cadence it exists because of. Synced
                 // like it, and "Never means never on every device".
-                Picker(HistoryPruningCopy.title, selection: Binding(
+                Picker(SettingsCatalog.title("pruning"), selection: Binding(
                     get: { historyPruning },
                     set: { setHistoryPruning($0) })) {
                     ForEach(HistoryPruning.allCases, id: \.self) { pruning in
@@ -287,6 +646,7 @@ private struct AppearancePane: View {
                 Text(HistoryPruningCopy.help)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .lineLimit(8)
                     .fixedSize(horizontal: false, vertical: true)
                 if let pruningNote {
                     Text(pruningNote)
@@ -298,7 +658,7 @@ private struct AppearancePane: View {
             }
         }
         .formStyle(.grouped)
-        .padding(8)
+        .scrollContentBackground(.hidden)
         // A tiny bounded observation over the `setting` table (the
         // ThemeStore pattern) — so a change made on another device shows
         // here, and the picker never drifts from the store.
@@ -378,6 +738,63 @@ private struct AppearancePane: View {
             } catch {
                 pruningNote = OpsRefusalCopy.message(for: error)
             }
+        }
+    }
+}
+
+// MARK: - Shortcuts (her "text editing shortcuts, window / reshaping shortcuts")
+
+/// The keyboard map, in Settings — **the same grouped list the ⌘/ helper
+/// shows**, read from `HelperView.groups` rather than copied, because two
+/// copies of a list is two lists (and that one is already held to the
+/// registry by `everyDeclaredShortcutIsFindableInTheHelper`).
+///
+/// Her item 5's other half lands here: *"how are things unindented? that's
+/// further proof that I need a better formatting shortcut menu."* The
+/// Formatting group names every door, keyed and keyless alike.
+private struct ShortcutsSettingsPane: View {
+    let tokens: VoiceTokens
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Every shortcut here is also a menu item — the menus are the map. "
+                     + "The search field finds any of these by what it does.")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+                ForEach(HelperView.groups) { group in
+                    VStack(alignment: .leading, spacing: 5) {
+                        CalmSectionHeader(tokens: tokens, title: group.title)
+                        CalmCard(tokens: tokens) {
+                            VStack(alignment: .leading, spacing: 5) {
+                                ForEach(group.items, id: \.keys) { item in
+                                    HStack(alignment: .firstTextBaseline, spacing: 12) {
+                                        Text(item.keys)
+                                            .font(.system(.caption, design: .monospaced))
+                                            .foregroundStyle(tokens.ink)
+                                            .frame(width: 126, alignment: .leading)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                        Text(item.does)
+                                            .font(tokens.small)
+                                            .foregroundStyle(tokens.muted)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                Text("⌘/ opens the same list in its own window, beside the dictionary of the "
+                     + "app's own words.")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.faint)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }

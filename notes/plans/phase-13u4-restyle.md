@@ -2405,8 +2405,8 @@ last commit)*
 | # | Piece | Status |
 |---|---|---|
 | 1 | The record + the READING + the two AUDITS (⌘[ · the merge chord), traced in the code rather than assumed | DONE (this commit) — the tables below |
-| 2 | The Settings SHAPE: her tab sketch built, the card grammar, **row 59's fold dead** | NOT-STARTED |
-| 3 | Item 4 — the SEARCH: one pure brain + the catalog it reads + the results face + pins | NOT-STARTED |
+| 2 | The Settings SHAPE: her tab sketch built, the card grammar, **row 59's fold dead** | DONE (this commit) — nine panes beside a search field; the walk's proof of the fold is piece 6 |
+| 3 | Item 4 — the SEARCH: one pure brain + the catalog it reads + the results face + pins | DONE (this commit) — **46 tests in 3 suites passed**, her literal "callout" case first among them |
 | 4 | Item 7 — the merge chord (and its three hard-coded siblings) SAID on the faces + truth pins | DONE (this commit) — **66 tests in 4 suites passed**; the red-on-old measurement is piece 4b |
 | 4b | The BEHAVIOURAL REVERT — are the pins measuring the CHORD or the refactor? (a worktree with the four literals put back) | DONE (this commit) — **5 of 7 RED on the reverted tree, the 2 guards green**; the revert's own dump is the defect, printed |
 | 5 | Item 5 — the ⌘[ answer (PROVISIONAL) + QUESTIONS #130 | NOT-STARTED |
@@ -2578,3 +2578,73 @@ EXACT row (`titles.contains(capability.menuTitle())`), and the revert re-run wen
 
 Every ⌥ variant wearing its key; every plain act silent. Her *"where is the merge shortcut
 said ??"* has its answer in that line.
+
+### THE TAB-SET RATIONALE (piece 2, item 6) — PROVISIONAL, QUESTIONS #131
+
+**Her sketch, verbatim:** *"the settings menu could probably be broken up a little more - an
+overall one, then maybe tabs on text editing shortcuts, window / reshaping shortcuts, etc."*
+
+**Read with items 4 and 5 beside it, her three asks are ONE.** "It's too hard to find how to
+make a callout" is not a settings question — a callout is an ACT (Block ▸ Callout, ⌥⌘C) — and
+"that's further proof that I need a better formatting shortcut menu" is the same sentence again.
+Her own sketch names SHORTCUTS as what the tabs should hold. So the thing she is looking for in
+Settings is **what the app can do**, and the shape has to answer that or it answers nothing.
+
+**What was there.** ONE `TabView` of five tabs whose FIRST tab was a single `Form` with five
+sections and fifteen controls. That is the whole of row 59: a pane that long has a fold wherever
+the window sits, and the 18j appearance control was past it.
+
+**What is there now — a leading pane list beside a detail column, with the search at its head.**
+Chosen over more tabs, and every reason is hers: nine panes cannot fit a 720 pt tab bar; the
+search field needs a home and this is where macOS puts one; and the reference artifact's grammar
+is solid geometric lines and calm cards (W8-3 retired the floating pane), which is a list, a
+hairline and a card.
+
+| Pane | Holds | Why it is its own pane |
+|---|---|---|
+| **General** | voice · colour palette · light/dark · confirmations | her *"overall one"* — the app-wide dials and how it talks back. **FOUR controls**, deliberately: this is where row 59 dies |
+| **Editor** | seams · editing indicator · inline comments · paragraph gap · hover handle · spellchecking · long-block layout | her *"text editing"* — the writing surface's look and feel, split into "the page" and "while you write" |
+| **Takes** | takes open as · takes follow the scroll | thin ON PURPOSE. Takes are a first-class idea; "where do I change how takes open?" should land on a pane with the word on it, not on row eleven of a long Editor pane. That is item 6's complaint in miniature (the fold-back alternative is #131(b)) |
+| **Writing** | segmentation default · savepoint cadence · history pruning | the DOCUMENT's habits — and exactly the three that are SYNCED, which is a real line to draw |
+| **Shortcuts** | the whole grouped keyboard map | her *"tabs on text editing shortcuts, window / reshaping shortcuts"*, literally. It renders `HelperView.groups` — **the ⌘/ helper's own list, not a copy** |
+| Tags · Protection · Data Safety · Acknowledgments | unchanged panes | composed as they were; each gains ONE catalog row so it is findable by name |
+
+**What the split did NOT do:** not one control's behaviour, wording, help text, binding or
+storage changed. Every picker, toggle, observation and setter moved as written. The one new
+sentence anywhere is the Takes pane's help line (the two settings had none of their own) and the
+panes' own blurbs.
+
+**Two deliberate keeps, each reversible in a line.** (1) The control rows stay in
+`Form`/`Section` with `.formStyle(.grouped)`: two sub-rows (`AppearanceChoiceRow`,
+`PaletteSettingsRow`) EMIT `Section`, which only renders inside a `Form`, and the system controls
+are correct as they are. The calm grammar is applied where the chrome is new — the sidebar, the
+search field, the results cards, the Shortcuts pane — plus `.scrollContentBackground(.hidden)`
+over `tokens.room` and `.tint(tokens.accent)` so the pickers and toggles wear the voice.
+(2) **`ThemeStore` is now injected into the Settings environment** (`.environment(theme)`) —
+one line, and it is a fix: every `.alarmVoice()` in Protection and Data Safety reads the store
+from the environment and has been falling back to the default voice since it was written, so
+those refusals have never worn the voice she chose. Its HOME is untouched (the recorded waiver).
+
+### THE SEARCH (piece 3, item 4) — one pure brain, three sources, no storage
+
+`SettingsShape.swift`, all of it pure and testable without mounting anything:
+
+- **`SettingsCatalog`** — every settings row as data (`pane` · `title` · `blurb` · `keywords`).
+  **The pane renders `title` FROM here**, and `AppSettingsView.rowIDsRendered` lists what each
+  pane shows, so declared ⇔ rendered is a pin (`everyCatalogRowIsRenderedByItsOwnPane` and its
+  mirror) — the registry walk's own shape, one layer down. Without it the search could send her
+  to a pane that does not hold what it promised.
+- **`SettingsSearch.findings(matching:in:)`** — case- and diacritic-insensitive, terms ANDed
+  across the entry, ranked `lead ==` → `lead` prefix → `lead` contains → keyword → detail, so
+  the thing she named comes first.
+- **The index is the catalog + `HelperView.groups` + `HelperView.entries`** — the ⌘/ helper's
+  OWN two lists, read not copied. That is what makes her acceptance case literal: "callout" is
+  neither a setting nor a pane, it is a CHORD and a WORD, and both are in the index.
+  `everyDeclaredShortcutIsFindableInTheHelper` already holds that list to the registry, so
+  `everyDeclaredChordIsFindableInTheSearch` is that guarantee arriving at a second door rather
+  than a second promise to keep.
+
+**Typing "callout" (the pin, and the walk's step):** the word *callout — "A block wearing a
+colored frame (Block ▸ Callout). Presentation only…"* first, then **⌥⌘C — callout frame on this
+block (again to remove it)**. Two answers, one of which is the fastest there is. **No storage:**
+nothing is written, read from the store or synced; the query dies with the window.

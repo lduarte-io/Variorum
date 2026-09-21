@@ -1,0 +1,381 @@
+//
+//  SettingsShape.swift
+//  Variorum (Mac)
+//
+//  **13u4 UNIT S1 — her items 4 and 6.**
+//
+//  Item 6, verbatim: *"the settings menu could probably be broken up a
+//  little more - an overall one, then maybe tabs on text editing shortcuts,
+//  window / reshaping shortcuts, etc."*
+//  Item 4, verbatim: *"simple text search within the settings menu - it's
+//  too hard to find how to make a callout."*
+//
+//  **Read those two together and they are one ask.** "How do I make a
+//  callout" is not a setting — it is an ACT (Block ▸ Callout, ⌥⌘C) — and
+//  her own sketch names SHORTCUTS as the things the tabs should hold. So
+//  Settings is where she looks for *what the app can do*, and this file is
+//  that: a pane list she can scan, and a search that reaches the settings
+//  rows, the keyboard map AND the dictionary in one field.
+//
+//  Three pure pieces, so the answer is testable without mounting anything:
+//
+//   · `SettingsPane` — the panes, in order. Her "overall one" is General.
+//   · `SettingsCatalog` — every settings ROW as data: its pane, the words
+//     the pane renders as its label, a one-line blurb for a result, and the
+//     words she might type instead. **The pane renders `title` from here**,
+//     so the search can never name a row the pane does not show.
+//   · `SettingsSearch` — the filter. One pure function over an index; the
+//     index is assembled from the catalog + the ⌘/ helper's OWN two lists
+//     (`HelperView.groups`, `HelperView.entries`), never a second copy of
+//     them, so a shortcut is findable here exactly when it is findable
+//     there — and `everyDeclaredShortcutIsFindableInTheHelper` already
+//     holds that list to the registry.
+//
+//  NO new storage: nothing here is written, read from the store, or synced.
+//  The query lives for as long as the window is open.
+//
+
+import Foundation
+
+// MARK: - The panes (her item 6's sketch)
+
+/// The Settings window's panes, in the order the sidebar lists them.
+///
+/// **PROVISIONAL — QUESTIONS #131.** Her sketch named "an overall one, then
+/// maybe tabs on text editing shortcuts, window / reshaping shortcuts,
+/// etc."; the exact set is shaped from what the panes actually hold, which
+/// is what the brief asked for. The shape of the argument, pane by pane, is
+/// in the unit record's tab-set rationale.
+nonisolated enum SettingsPane: String, CaseIterable, Identifiable, Sendable {
+    /// Her "overall one": the three appearance dials and how the app talks
+    /// back. Everything here is about the WHOLE app, not one surface.
+    case general
+    /// The writing surface's look and feel.
+    case editor
+    /// Takes, which are a first-class idea and deserve a name she can find.
+    case takes
+    /// The DOCUMENT's own habits — the synced three.
+    case writing
+    /// The keyboard map: her sketch's "text editing shortcuts, window /
+    /// reshaping shortcuts" — one pane holding the same grouped list the
+    /// ⌘/ helper shows, because two copies of a list is two lists.
+    case shortcuts
+    case tags
+    case protection
+    case dataSafety
+    case acknowledgments
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .general: "General"
+        case .editor: "Editor"
+        case .takes: "Takes"
+        case .writing: "Writing"
+        case .shortcuts: "Shortcuts"
+        case .tags: "Tags"
+        case .protection: "Protection"
+        case .dataSafety: "Data Safety"
+        case .acknowledgments: "Acknowledgments"
+        }
+    }
+
+    /// One line under the pane's title — what this pane is for, so the
+    /// right pane can be picked without opening three.
+    var blurb: String {
+        switch self {
+        case .general: "The voice, the colours, light and dark, and how the app confirms what it did."
+        case .editor: "How the writing surface looks and behaves while you are in it."
+        case .takes: "How a block's alternative takes open and follow you."
+        case .writing: "What typing does to the note — and the savepoints Variorum keeps for you."
+        case .shortcuts: "Every keyboard shortcut and menu door, grouped. Search above reaches it."
+        case .tags: "The whole tag hierarchy: create, rename, re-parent, and promote tags to a book."
+        case .protection: "The passphrase, how the library locks, and the ways back in."
+        case .dataSafety: "Backups, how fresh they are, and what restoring one does."
+        case .acknowledgments: "The open-source notices Variorum is built on."
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .general: "gearshape"
+        case .editor: "text.alignleft"
+        case .takes: "rectangle.stack"
+        case .writing: "pencil.line"
+        case .shortcuts: "keyboard"
+        case .tags: "tag"
+        case .protection: "lock.shield"
+        case .dataSafety: "externaldrive.badge.timemachine"
+        case .acknowledgments: "text.book.closed"
+        }
+    }
+}
+
+// MARK: - The catalog (every settings row, as data)
+
+/// ONE settings control, described. The pane renders `title`; the search
+/// shows `title` + `blurb`; `keywords` are the words she might type that
+/// are not in either.
+nonisolated struct SettingsRow: Identifiable, Sendable, Equatable {
+    let id: String
+    let pane: SettingsPane
+    let title: String
+    let blurb: String
+    var keywords: [String] = []
+}
+
+nonisolated enum SettingsCatalog {
+    /// **The pane's label comes from here, not from a literal at the
+    /// control.** That is the whole reason this exists as data: a search
+    /// result that names a row the pane does not show is the same defect
+    /// class as her item 7 one menu over — a face and its description
+    /// drifting because nothing tied them together.
+    static let rows: [SettingsRow] = [
+        // MARK: General
+        SettingsRow(
+            id: "voice", pane: .general, title: "Design voice",
+            blurb: "Terminal (mono, airy, its own idioms) or Study (warm paper and serif).",
+            keywords: ["theme", "terminal", "study", "serif", "mono", "monospace",
+                       "font", "typeface", "look", "style"]),
+        SettingsRow(
+            id: "palette", pane: .general, title: PaletteCopy.title,
+            blurb: "Sixteen palettes plus your own hex — the room, the wash, the accent and "
+                + "the take tints, under either voice.",
+            keywords: ["colour", "color", "palette", "tint", "accent", "hex", "pastel",
+                       "custom", "background"]),
+        SettingsRow(
+            id: "appearance", pane: .general, title: "Appearance",
+            blurb: "Follow system, light, or dark. Dark is a fully black room in both voices. "
+                + "This Mac only.",
+            keywords: ["dark", "light", "dark mode", "night", "black", "bright", "system"]),
+        SettingsRow(
+            id: "receipts", pane: .general, title: ReceiptStyleCopy.title,
+            blurb: "Whether an act that landed says so as a toast, a quiet line, or nothing. "
+                + "Refusals always show.",
+            keywords: ["toast", "receipt", "message", "quiet", "notification", "banner",
+                       "confirmation", "status"]),
+
+        // MARK: Editor
+        SettingsRow(
+            id: "seams", pane: .editor, title: "Show block seams (dotted lines between blocks)",
+            blurb: "The dotted line between blocks. Off by default — at rest a note reads as "
+                + "seamless prose. ⌘⇧B toggles it too.",
+            keywords: ["seam", "dotted", "boundary", "boundaries", "divider", "block lines"]),
+        SettingsRow(
+            id: "indicator", pane: .editor, title: "Mark the block being edited",
+            blurb: "Off, an outline ring, or a background wash on the block you are in.",
+            keywords: ["ring", "outline", "highlight", "background", "indicator", "focus"]),
+        SettingsRow(
+            id: "inlineComments", pane: .editor,
+            title: "Show comments inline (tinted, under the block)",
+            blurb: "Comments as tinted strips under the block instead of cards in the margin.",
+            keywords: ["comment", "margin", "gutter", "note", "remark", "annotation"]),
+        SettingsRow(
+            id: "hoverHandles", pane: .editor,
+            title: "Show the block drag handle on hover (Write)",
+            blurb: "Pointing at a block reveals its ⠿ drag handle. This Mac only.",
+            keywords: ["drag", "handle", "move", "reorder", "hover", "grip"]),
+        SettingsRow(
+            id: "longBlocks", pane: .editor, title: "Lay out very long blocks as you reach them",
+            blurb: "Removes the empty space the text system guesses at under a very long "
+                + "block. This Mac only.",
+            keywords: ["phantom", "space", "gap", "layout", "long", "scroll", "performance"]),
+        SettingsRow(
+            id: "paragraphGap", pane: .editor, title: "Space between paragraphs",
+            blurb: "Standard, or a blank line's worth of air after every paragraph. "
+                + "Nothing is stored; exports are identical either way.",
+            keywords: ["gap", "spacing", "blank line", "air", "leading", "paragraph"]),
+        SettingsRow(
+            id: "spellcheck", pane: .editor, title: "Spellchecking",
+            blurb: "Off, check while typing, or check and correct. Applies to every writing "
+                + "surface. This Mac only.",
+            keywords: ["spelling", "spell check", "autocorrect", "typo", "underline",
+                       "grammar"]),
+
+        // MARK: Takes
+        SettingsRow(
+            id: "fanStyle", pane: .takes, title: "Takes open as",
+            blurb: "Stack, carousel, margin grid, or slot split — the four ways a block's fan "
+                + "lays out.",
+            keywords: ["fan", "bloom", "stack", "carousel", "grid", "slot", "alternates",
+                       "cards"]),
+        SettingsRow(
+            id: "followScroll", pane: .takes, title: "Takes follow the scroll",
+            blurb: "Open takes track the block you scroll to instead of staying where they "
+                + "were opened.",
+            keywords: ["follow", "scroll", "track", "fan"]),
+
+        // MARK: Writing
+        SettingsRow(
+            id: "segmentation", pane: .writing, title: SegmentationFaceCopy.globalTitle,
+            blurb: "Whether a new paragraph becomes its own block as you type past it. "
+                + "Synced; a note's own chip still wins where it is set.",
+            keywords: ["newline", "return", "enter", "paragraph", "block", "one block",
+                       "segmentation", "split"]),
+        SettingsRow(
+            id: "cadence", pane: .writing, title: SavepointCadenceCopy.title,
+            blurb: "How often Variorum writes a quiet savepoint for you. The insurance "
+                + "occasions stay on in every mode.",
+            keywords: ["savepoint", "commit", "autosave", "history", "backup", "version",
+                       "cadence"]),
+        SettingsRow(
+            id: "pruning", pane: .writing, title: HistoryPruningCopy.title,
+            blurb: "Whether old quiet savepoints are trimmed, and after how long. "
+                + "Never means never, on every device.",
+            keywords: ["prune", "trim", "clean", "history", "old", "savepoints"]),
+
+        // MARK: The panes that are their own thing
+        SettingsRow(
+            id: "tagManager", pane: .tags, title: "Tag manager",
+            blurb: "The whole hierarchy: new tags, child tags, rename, delete with the "
+                + "subtree — and Promote to Book, which turns tags into a smart book.",
+            keywords: ["tag", "tags", "hierarchy", "rename", "promote", "smart book",
+                       "label", "folder"]),
+        SettingsRow(
+            id: "protection", pane: .protection, title: "Protection",
+            blurb: "The passphrase, when the library locks, escrow and the recovery key.",
+            keywords: ["passphrase", "password", "lock", "encryption", "escrow", "recovery",
+                       "touch id", "security", "castle"]),
+        SettingsRow(
+            id: "backups", pane: .dataSafety, title: "Backups",
+            blurb: "Where copies go, how fresh the last one is, and what restoring one does — "
+                + "including to things that were deleted.",
+            keywords: ["backup", "restore", "copy", "folder", "safety", "icloud", "export"]),
+        SettingsRow(
+            id: "acknowledgments", pane: .acknowledgments, title: "Open-source notices",
+            blurb: "The licences and copyright notices for what Variorum is built on.",
+            keywords: ["licence", "license", "sqlcipher", "zetetic", "grdb", "credits",
+                       "acknowledgments", "legal"]),
+    ]
+
+    static func rows(in pane: SettingsPane) -> [SettingsRow] {
+        rows.filter { $0.pane == pane }
+    }
+
+    /// The label a control renders — by id, so a pane never types its own.
+    static func title(_ id: String) -> String {
+        rows.first { $0.id == id }?.title ?? id
+    }
+}
+
+// MARK: - The search (her item 4)
+
+/// One answer the search can give. `pane` is where clicking it goes.
+nonisolated struct SettingsFinding: Identifiable, Sendable, Equatable {
+    enum Kind: String, Sendable { case setting, shortcut, word }
+
+    let kind: Kind
+    let pane: SettingsPane
+    /// The bold half: the row's label, the chord, or the word.
+    let lead: String
+    let detail: String
+    var id: String { "\(kind.rawValue)|\(lead)" }
+}
+
+nonisolated enum SettingsSearch {
+    /// An entry in the searchable index — deliberately the same shape as a
+    /// finding, plus the extra words that are not in either visible half.
+    struct Entry: Sendable, Equatable {
+        let finding: SettingsFinding
+        let keywords: [String]
+    }
+
+    /// **The filter.** Case- and diacritic-insensitive; a query matches on
+    /// the lead, on a keyword, or in the detail, and the three rank in that
+    /// order so the row she named comes first and the row that merely
+    /// mentions the word comes last. Whitespace-only ⇒ no findings at all
+    /// (the detail keeps showing the pane).
+    ///
+    /// Multi-word queries are ANDed across the whole entry, so "dark mode"
+    /// finds the appearance row through its keyword while "block seam"
+    /// finds the seams row through its title — neither needs the words
+    /// adjacent, which is what makes typing half-remembered names work.
+    static func findings(matching query: String, in index: [Entry]) -> [SettingsFinding] {
+        let terms = query
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
+            .split(whereSeparator: \.isWhitespace)
+            .map(String.init)
+        guard !terms.isEmpty else { return [] }
+
+        var ranked: [(rank: Int, order: Int, finding: SettingsFinding)] = []
+        for (order, entry) in index.enumerated() {
+            let lead = fold(entry.finding.lead)
+            let detail = fold(entry.finding.detail)
+            let keywords = entry.keywords.map(fold)
+            var worst = 0
+            var matchedAll = true
+            for term in terms {
+                let rank: Int
+                if lead == term { rank = 0 }
+                else if lead.hasPrefix(term) { rank = 1 }
+                else if lead.contains(term) { rank = 2 }
+                else if keywords.contains(where: { $0.contains(term) }) { rank = 3 }
+                else if detail.contains(term) { rank = 4 }
+                else { matchedAll = false; break }
+                worst = max(worst, rank)
+            }
+            if matchedAll { ranked.append((worst, order, entry.finding)) }
+        }
+        return ranked
+            .sorted { $0.rank == $1.rank ? $0.order < $1.order : $0.rank < $1.rank }
+            .map(\.finding)
+    }
+
+    private static func fold(_ text: String) -> String {
+        text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
+    }
+
+    /// The settings half of the index — pure, so a pin can build it without
+    /// the helper's `@MainActor` lists.
+    static var settingsEntries: [Entry] {
+        SettingsCatalog.rows.map { row in
+            Entry(
+                finding: SettingsFinding(
+                    kind: .setting, pane: row.pane, lead: row.title, detail: row.blurb),
+                keywords: row.keywords + [row.pane.title])
+        }
+    }
+}
+
+extension SettingsSearch {
+    /// **The whole index: the settings rows, the ⌘/ helper's shortcut list,
+    /// and its dictionary.**
+    ///
+    /// The last two are read from `HelperView`'s OWN statics, never copied:
+    /// the shortcut list is hand-maintained prose in her voice and is held
+    /// to the registry by `everyDeclaredShortcutIsFindableInTheHelper`, so
+    /// every DECLARED chord is in this index by construction — and a
+    /// keyless door named only in prose (Format ▸ Outdent, Tab in a list)
+    /// is findable here for exactly the same reason.
+    ///
+    /// This is what makes her acceptance case literal: "callout" is not a
+    /// setting, so a catalog-only search could never answer it. It is a
+    /// chord (⌥⌘C) and a word (the dictionary's entry naming Block ▸
+    /// Callout), and both are here.
+    @MainActor static var wholeIndex: [Entry] {
+        settingsEntries + shortcutEntries + dictionaryEntries
+    }
+
+    @MainActor static var shortcutEntries: [Entry] {
+        HelperView.groups.flatMap { group in
+            group.items.map { item in
+                Entry(
+                    finding: SettingsFinding(
+                        kind: .shortcut, pane: .shortcuts,
+                        lead: item.keys, detail: item.does),
+                    keywords: [group.title])
+            }
+        }
+    }
+
+    @MainActor static var dictionaryEntries: [Entry] {
+        HelperView.entries.map { entry in
+            Entry(
+                finding: SettingsFinding(
+                    kind: .word, pane: .shortcuts,
+                    lead: entry.term, detail: entry.definition),
+                keywords: [])
+        }
+    }
+}
