@@ -5365,3 +5365,41 @@ fresh `DerivedData/13u4walk` build of the final tree); her `/Applications` app n
 captures to `notes/plans/13u4-screens/orch-walk/` (gitignored). Each unit's own richer walk
 stands as its evidence — this pass is the orchestrator's verification cross-section plus the
 one measurement OWED to her.
+
+---
+
+## PHASE CLOSEOUT (2026-09-21)
+
+**Every ledger row is DONE or CLOSED** — eleven units (E1 · E3 · C1 · C2 · F1 · S1 · S2 · S3 ·
+F2 · F3 built and walked; E2 CLOSED-DISMISSED at its own pin, the real observable hers at
+#126). The pre-ladder acceptance walk's results are its own section above (her Read-mode
+question answered by measurement: 5/5 cold clicks land — the stall was Index-only). The
+ladder: `notes/plans/13u4-ladder-round1.md` (0 BLOCKER · 0 MAJOR · 1 MINOR · 3 NIT; the fix
+pass's three commits) and `-round2.md` (0/0/0/0 — no round 3; the family's cleanest). Every
+finding carries a written disposition in the round files; nothing dismissed as hollow except
+the one report PROVEN hollow; every defect-shaped fix red-on-old with behavioural revert.
+
+**The CARRIED block, dispositioned row by row:** AppSpec §14's phase delta — DONE (closeout
+b, with 13u3's rolled verbatim). The tutorial re-seed consequence — HERS, one act
+(`Help ▸ Restore Tutorial… ▸ Replace` covers E3's merge lesson + S3's pools lesson), at the
+top of the handoff checklist. The export consequence (a merged block's internal newline
+exports as ONE newline where two blocks exported a blank line; `joinRenderedTexts` is #12's
+and deliberately untouched) — in the handoff for her eye. Make Block-across-blocks = DOOR —
+adjudicated SUSTAINED, reviewer CONCURRED, still hers to reverse in one argument. The
+MOBILE PARITY rows — FILED, PL-31…PL-36. The walker facts — CONSOLIDATED into
+`Tools/WalkKit/README.md` (one 13u3 entry retired). Row 51's letter — **17r MINTED**.
+Rows 65/66 — handed to 17b/17e at their KnownIssues cells. #128 → her ratify bundle.
+The Read-mode measurement — DELIVERED (the walk's W1).
+
+**KnownIssues at close:** every owner-13u4 row resolved (44 · 45 · 46 · 50 · 53 · 54 · 59 ·
+63 · 67 · 68 · 69 + F1's residual + row 56) or re-owned with its letter (51 → 17r); no
+orphans; rows 65/66 born this phase with owners at birth.
+
+**Schema ZERO · migrations ZERO · `Sync/` ZERO lines · `Server/` ZERO · the marker stays 8.**
+
+**FINALS:** core **1631/175 green** (55.5 s) · the FULL Mac suite **[FINAL-MAC]** · iOS build
+**[FINAL-IOS]** · mobile **[FINAL-MOBILE]** *(placeholders fill when the closing runs land —
+records-before-verification, the resiliency rule)*.
+
+**The install refresh:** PENDING the closing runs — Release build → `/Applications` at the
+verified zero-instance window, the A1 rail first, hashes to the handoff.
