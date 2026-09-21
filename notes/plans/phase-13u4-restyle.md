@@ -4740,7 +4740,7 @@ against what actually shipped):**
 |---|---|---|
 | 1 | The record + the READING (the brief's five reading lists, in order) | DONE (this commit) |
 | 2 | THE PRE-FIX COLD BASELINE, measured on THIS tree (not inherited) + the harness pin written RED-FIRST | **DONE** — the pins RED 3/3 (27807580) and the app-side baseline **6 of 6 cold clicks STALL** (this commit) |
-| 3 | THE FIX — the pane's note rows stand at length-derived heights | PENDING |
+| 3 | THE FIX — the pane's note rows stand at length-derived heights | **DONE** (this commit) — both pins GREEN 3/3, F1's two ride UNMODIFIED and green beside them; the app measurement is piece 5 |
 | 4 | The BEHAVIOURAL REVERT (red-on-old verified in a worktree) | PENDING |
 | 5 | THE POST-FIX COLD TRIAL TABLE (≥8 trials) + the warm trials against F1's 21/21 | PENDING |
 | 6 | The WALK — cold and warm, captured | PENDING |
@@ -4886,3 +4886,64 @@ column was still GROWING (86k → 157k → 171k) and w2 is the trial that ran wh
 on, `total` is stable at ~171k and every landing settles at `top=0` with zero hops. So "warm" is
 not a clock, it is **a column that has stopped moving** — which is the same sentence as the
 residual, and the reason the fix is heights rather than more compensation.
+
+### THE FIX (piece 3) — the Index pane's rows stand at heights the column KNOWS
+
+**The shape is the prescribed one** — 13u2b UNIT 1's, ported: *"the manifest must reach the ROWS,
+not only the aim"* (AR-1). The pane's `LazyVStack` becomes a plain `VStack` whose every row
+virtualizes ITSELF — real content near the viewport, a **manifest-height placeholder** far from it
+— and a note that is near but whose text has not arrived yet stands at the same height rather than
+collapsing to its title and a blank line. Nothing was invented: the precedence is
+`BookHeightManifest`'s (MEASURED > REMEMBERED > DERIVED), the prose arithmetic is
+`ProseHeightModel`'s (the ONE model the Outline and the reading flow already read), the near/far
+rule is `NearBand`'s, and the lengths come from the already-cached `Queries.blockExtents` through
+the book's own `flowExtents`.
+
+**What moved, file by file:**
+
+1. **`App/Variorum/Variorum/Features/BookView/BookIndexPaneHeights.swift`** (NEW) — the pure
+   `BookIndexPaneHeightModel` (a note's height from its blocks' stored lengths, plus this pane's
+   own chrome: the per-block padding, the blank line, the header) and `BookIndexPaneHeights`, the
+   `@MainActor`, **unobserved** store of what the column has LEARNED and the type it measured off
+   the real font. The pure model sits beside its class rather than in `Surface/` on
+   `FlowHeightEstimate`'s precedent, stated at the file's own head.
+2. **`BookViewModel.swift`** — the plumbing only: the observed `indexContentWidth` +
+   `reportIndexContentWidth`, `ensureIndexExtents` (ONE bounded lengths statement per ENTRY SET,
+   through the shared cache), `indexPaneRowInput`/`indexPaneRowHeight` (the one precedence brain,
+   asked per row and per column), `learnIndexPaneRowHeight`, and `indexPaneManifest`.
+3. **`BookIndexView.swift`** — `IndexPaneRow` (the row that virtualizes itself, ONE geometry report
+   with three readers: the landing's top, the height learning, and the near/far decision), the
+   pane's plain `VStack`, the pane's width report, `BookIndexPaneNote`'s **reservation** and its own
+   measurement door (a note reports a MEASUREMENT only once its text has arrived — a row cannot tell
+   a real report from a reservation, so the note that knows says so), the lengths read on appear and
+   on an entry-set change, and `paneFacts` now built **from the manifest**.
+
+**The honest `derived=26` retires.** UNIT F1 had to answer the signpost with `offset=-1 derived=26
+exact=0` — *"NOT ONE row's height is known before it is realized"* — and wrote at its own code that
+saying otherwise *"would tell her Console the opposite of the truth"*. The truth moved, so the
+answer does: the facts are the manifest's now, exactly as the Outline's and the flow's are, and a
+landing on a BLOCK inside a note still answers `offset=-1` because a block is not a row of this
+manifest — stated rather than faked.
+
+**THE PINS, POST-FIX** (`-only-testing:` this unit's suite AND UNIT F1's, three runs):
+
+| run | PIN 1 — the span DURING the landing | PIN 2 — the cold far landing | F1's two pins |
+|---|---|---|---|
+| 1 | 66594 → 67860 pt = **1.0×** | **top = 0.0** | 0.0 · 0.0 |
+| 2 | 67849 → 69126 pt = **1.0×** | **top = 0.0** | 0.0 · 0.0 |
+| 3 | 69115 → 70392 pt = **1.0×** | **top = 0.0** | 0.0 · 0.0 |
+
+Against the pre-fix 12.4× / 46.7× / 12.4× and tops of 1619 / 12447 / 4572 pt. **F1's two landing
+pins ride UNMODIFIED and green** — the hoist moved an address, not a behaviour.
+
+**PIN 1's SHAPE WAS CORRECTED BY ITS OWN FIRST MEASUREMENT, and the correction is recorded rather
+than quietly made.** Its first form asked the column not to grow by a large multiple *from the
+pane's very first frame*. Post-fix that measured **10.8×** — better than the pre-fix 12.4/46.7 but
+nowhere near a separation — and the reason is a fact the fix cannot change: **a column cannot know
+its notes' lengths before it has read them.** The first frames stand on the never-measured prior
+(8 notes × 800 pt = 6,888) and jump to the estimate (74,179) when the one bounded statement
+returns, tens of milliseconds later. A pin whose claim is arithmetic the surface is not allowed to
+do is not a pin. So it was narrowed to the sentence the residual is actually about and F1's trace
+actually ends on — **while a landing is in flight the column must not be discovering its own
+geometry** — by resetting the span at the moment the landing is asked for. That window is where the
+defect lives, and there the separation is total (1.0× against 12.4×+).

@@ -401,6 +401,11 @@ struct BookIndexView<Masthead: View>: View {
         }
         .background(tokens.surface)
         .onAppear {
+            // **13u4 UNIT F3: the lengths, before the first landing.** ONE
+            // bounded statement for the book, shared through the book's cache
+            // with the Outline and the reading flow — so a mode switch
+            // re-reads nothing, and nothing at autosave rate reaches it.
+            model.ensureIndexExtents()
             landOrSeed()
             // 18d batch 1: the index's LIVE note reaches the book the same
             // way its selection does — the sidebar's note box needs an
@@ -409,7 +414,12 @@ struct BookIndexView<Masthead: View>: View {
             model.noteIndexLive(edit.livePostID)
         }
         .onChange(of: model.pendingReveal) { _, _ in landOrSeed() }
-        .onChange(of: model.entries) { _, _ in landOrSeed() }
+        .onChange(of: model.entries) { _, _ in
+            // A changed membership is a changed entry set, which is the one
+            // key the lengths cache compares on.
+            model.ensureIndexExtents()
+            landOrSeed()
+        }
         // **NO SELECTION-FOLLOW HERE, and the reason is measured** (13u2
         // UNIT B, her item 19). The note surface's column needed one — its
         // rows are BLOCKS and a ring could move without the column hearing.
@@ -708,6 +718,15 @@ struct BookIndexView<Masthead: View>: View {
             case .note(let entry): "bip-\(entry.postID)"
             }
         }
+
+        /// 13u4 UNIT F3: whose LENGTHS answer this row's height — nil for a
+        /// chapter heading, whose height is a constant per voice and width.
+        var postID: String? {
+            switch self {
+            case .heading: nil
+            case .note(let entry): entry.postID
+            }
+        }
     }
 
     private var paneRows: [PaneRow] {
@@ -722,9 +741,23 @@ struct BookIndexView<Masthead: View>: View {
     private var pane: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 6) {
+                // **13u4 UNIT F3: a plain `VStack`, and each row virtualizes
+                // ITSELF at a height the manifest knows** — 13u2b UNIT 1's
+                // shape (AR-1's ruling) on this surface, which is the other
+                // half of the answer UNIT F1 adopted only the first half of.
+                // A lazy container answers "how tall is a row I have not
+                // realized" with the AVERAGE of the ones it has, and here a
+                // row is a whole NOTE standing at ~40 pt until its text
+                // arrives — so the column's own height oscillated by tens of
+                // thousands of points while a landing was in flight and
+                // 6 of 6 cold chapter clicks gave up. A height the column
+                // ASSERTS cannot do that.
+                VStack(alignment: .leading, spacing: BookIndexPaneHeights.rowSpacing) {
                     ForEach(paneRows) { row in
-                        Group {
+                        IndexPaneRow(
+                            anchorID: row.id, postID: row.postID, model: model,
+                            onTop: { top in paneAnchorMoved(row.id, top: top) }
+                        ) {
                             switch row {
                             case .heading(let group):
                                 Text(tokens.chromeLabel(group.title ?? ""))
@@ -737,26 +770,26 @@ struct BookIndexView<Masthead: View>: View {
                                     indicator: indicator, entry: entry,
                                     edit: edit,
                                     selected: selectedPostID == entry.postID,
+                                    reserved: model.indexPaneRowHeight(
+                                        row.id, postID: entry.postID),
                                     onTap: { select(entry.postID, scrollPane: false) },
                                     onLandedBlock: { blockID in paneTarget = blockID },
-                                    onBlockTop: paneBlockAnchorMoved)
+                                    onBlockTop: paneBlockAnchorMoved,
+                                    onMeasured: { height in
+                                        model.learnIndexPaneRowHeight(
+                                            row.id, height: height, isHeading: false)
+                                    })
                             }
-                        }
-                        // **13u4 UNIT F1 — WHERE THIS ROW SITS.** At the LAZY
-                        // ROW's level, never inside it: an unrealized lazy
-                        // row's inner views do not exist, so a report from
-                        // inside one is silence exactly when a landing needs
-                        // it (the Outline's own row-47 lesson, `BookView`'s
-                        // `outlineAnchor`). Read in the pane's named space, so
-                        // "at the top" is `minY ≈ 0`.
-                        .onGeometryChange(for: CGFloat.self) { geometry in
-                            geometry.frame(in: .named(BookIndexColumn.paneSpace)).minY
-                        } action: { top in
-                            paneAnchorMoved(row.id, top: top)
                         }
                     }
                 }
                 .frame(maxWidth: 640, alignment: .leading)
+                // **13u4 UNIT F3: the pane's own measure**, so the heights are
+                // derived at the width the prose really wraps at. Written only
+                // when it moves (the model's 1-pt tolerance).
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+                    model.reportIndexContentWidth(width)
+                }
                 .padding(.horizontal, 34)
                 .padding(.vertical, 26)
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -833,23 +866,122 @@ struct BookIndexView<Masthead: View>: View {
 
     /// What this column can honestly say about a landing, as numbers.
     ///
-    /// **`derived` is the row count, and that is the honest answer, not a
-    /// placeholder:** this pane has no height manifest (13u2b UNIT 1 built one
-    /// for the Outline and UNIT 2 gave the flow its own), so NOT ONE row's
-    /// height is known before it is realized — every one of them is standing
-    /// on a lazy container's average. Saying `derived=0` would tell her
-    /// Console the opposite of the truth. `offset` stays −1 (unknown) for the
-    /// same reason, and `total` is what the column last reported it was.
+    /// **13u4 UNIT F3: it can now say all of it.** UNIT F1 had to answer
+    /// `offset=-1 derived=<every row> exact=0`, because this pane had no
+    /// height manifest and not one row's height was known before it was
+    /// realized. The rows stand at known heights now, so the facts come from
+    /// the manifest exactly as the Outline's and the flow's do — and the
+    /// signpost in her own Console says how much of the geometry above the
+    /// thing she clicked was still arithmetic.
+    ///
+    /// The BLOCK road keeps the honest unknown: a landing whose target is a
+    /// block INSIDE a note is not a row of this manifest, so its `offset` is
+    /// −1 and its target index is the note's row. Stated rather than faked.
     private func paneFacts(_ anchorID: String) -> LandingFacts {
         let rows = paneRows
+        let manifest = model.indexPaneManifest(
+            rows: rows.map { (id: $0.id, postID: $0.postID) })
+        if manifest.offset(of: anchorID) != nil {
+            return LandingFacts(manifest: manifest, anchor: anchorID)
+        }
         return LandingFacts(
             rows: rows.count,
             targetIndex: rows.firstIndex { $0.id == anchorID } ?? -1,
             offset: -1,
-            total: paneBox.contentHeight,
-            derived: rows.count,
+            total: manifest.totalHeight,
+            derived: manifest.derivedCount,
             exactAbove: false)
     }
+}
+
+/// **One row of the Index PANE (13u4 UNIT F3): real near the viewport, a
+/// manifest-height placeholder far from it — and its landing anchor either
+/// way.**
+///
+/// This is `OutlineRunRow`'s shape (13u2b UNIT 1, AR-1's ruling) on this
+/// surface, and it is here for a measured reason rather than for symmetry: the
+/// pane's rows used to sit in a `LazyVStack`, which answers *"how tall is a
+/// row I have not realized"* with the AVERAGE of the ones it has — and a row
+/// here is a whole NOTE, ~40 pt until `observeBlockTOC` returns and thousands
+/// afterwards. The column's own height therefore moved by tens of thousands of
+/// points while a landing was in flight (measured: 39k → 143k → 80k in six
+/// seconds), and the landing could only give up. A height the column ASSERTS
+/// cannot do that.
+///
+/// **What it is NOT:** it is not the closed "one row scale per lazy run"
+/// road, and it does not touch any liveness mechanism — the pane's ONE live
+/// block is `BookIndexEditModel`'s (P-3), unchanged, and a note near the
+/// viewport renders exactly what it rendered before. Anchors are kept on every
+/// row, realized or not, so `scrollTo(id:)` is unchanged and no landing pin's
+/// mechanism moves.
+private struct IndexPaneRow<Content: View>: View {
+    let anchorID: String
+    /// nil ⇒ a chapter heading.
+    let postID: String?
+    let model: BookViewModel
+    let onTop: (CGFloat) -> Void
+    @ViewBuilder let content: () -> Content
+
+    /// How far beyond the viewport a row still counts as near — generous, so
+    /// a note is realized before it scrolls into view and released well after
+    /// it leaves. The Outline's own number for its small rows; a pane row is
+    /// heavier (it opens a TOC observation), so it is not made larger.
+    static var nearMargin: CGFloat { 2000 }
+
+    /// Starts false so a far row never renders real content for one frame;
+    /// the row's own first geometry report decides (`OutlinePostRow`'s rule).
+    @State private var near = false
+
+    var body: some View {
+        Group {
+            if near {
+                content()
+            } else {
+                Color.clear.frame(height: model.indexPaneRowHeight(anchorID, postID: postID))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .id(anchorID)
+        // ONE geometry report, three readers — the landing converges on the
+        // top, the column learns the height, and the row decides near or far.
+        // The band's rule is `NearBand`'s, shared rather than copied (P-8):
+        // at the window's 300-note cap a second observer per row would be
+        // hundreds more of them.
+        .onGeometryChange(for: IndexPaneRowGeometry.self) { geometry in
+            let frame = geometry.frame(in: .named(BookIndexColumn.paneSpace))
+            return IndexPaneRowGeometry(top: frame.minY, height: frame.height)
+        } action: { geometry in
+            // **Learn only from REAL content.** A near HEADING always renders
+            // real content, so its report is a measurement. A near NOTE may
+            // still be standing at its reservation while `observeBlockTOC` is
+            // in flight, and learning THAT would promote arithmetic to a
+            // measurement — the manifest's whole precedence, inverted — so a
+            // note learns through its own door instead, which knows whether
+            // its text has arrived.
+            if near, postID == nil {
+                model.learnIndexPaneRowHeight(anchorID, height: geometry.height, isHeading: true)
+            }
+            onTop(geometry.top)
+            let distance = NearBand.distance(
+                top: geometry.top, height: geometry.height, margin: Self.nearMargin)
+            guard let becomesNear = NearBand.decide(
+                distance: distance, near: near, margin: Self.nearMargin)
+            else { return }
+            // Never inside the layout pass that reported (the
+            // state-during-update class — `NearViewportObserver`'s own rule).
+            DispatchQueue.main.async { near = becomesNear }
+        }
+    }
+}
+
+/// What a pane row reports: where its top sits in the scroll's visible space,
+/// and how tall it is. (The Outline's `OutlineAnchorGeometry` is the same pair,
+/// file-private to its own; restated rather than hoisted because two
+/// two-`CGFloat` structs are not a shared brain — what IS shared is the rule
+/// that reads them, `NearBand`.)
+nonisolated private struct IndexPaneRowGeometry: Equatable, Sendable {
+    var top: CGFloat
+    var height: CGFloat
 }
 
 // MARK: - One column note row (selection wash, hover-waking doors)
@@ -951,6 +1083,13 @@ private struct BookIndexPaneNote: View {
     @MainActor static var livePaneTop: CGFloat {
         IndexProseColumn.livePaneTop(resting: restingTop, paneInset: PaneTextView.proseTopInset)
     }
+    /// 13u4 UNIT F3: everything of this row that is NOT the block column — the
+    /// title/date header with its padding, the body `VStack`'s gap under it,
+    /// and the note's own vertical padding. The reservation is a whole-ROW
+    /// height, so the placeholder that stands in for the prose owes this back.
+    /// It is the model's `noteChrome` seen from the other side, and the two
+    /// are the same measurement of the same surface.
+    static let chromeAroundProse: CGFloat = 60
 
     let session: AppSession
     let tokens: VoiceTokens
@@ -959,21 +1098,36 @@ private struct BookIndexPaneNote: View {
     let entry: Queries.ReadingEntry
     let edit: BookIndexEditModel
     let selected: Bool
+    /// **13u4 UNIT F3: what this note STANDS AT until its text arrives** — the
+    /// manifest's answer for this row. Without it a realized-but-unloaded note
+    /// is a title and a blank line (~40 pt) where a Sherlock story is nine
+    /// thousand points, which is the whole of F1's residual: the column
+    /// collapses under the rows it is realizing and the landing chases it.
+    let reserved: CGFloat
     let onTap: () -> Void
     /// A landing made a block live here — the pane may scroll to it.
     let onLandedBlock: (String) -> Void
     /// 13u4 UNIT F1: where one of this note's BLOCKS sits, for a landing whose
     /// target is that block (the pane gates the report on its pending anchor).
     let onBlockTop: (String, CGFloat) -> Void
+    /// 13u4 UNIT F3: this note reported its REAL height (its text has
+    /// arrived). The row itself cannot tell a real report from a reservation,
+    /// so the note that knows says so.
+    let onMeasured: (CGFloat) -> Void
 
     @State private var rows: [Queries.TOCRow] = []
+    /// Has `observeBlockTOC` come back at all? Distinguishes "not yet loaded"
+    /// (stand at the reservation) from "loaded and genuinely empty" (stand at
+    /// the blank line the body renders).
+    @State private var loaded = false
 
     init(
         session: AppSession, tokens: VoiceTokens,
         indicator: EditingIndicatorStyle, entry: Queries.ReadingEntry,
-        edit: BookIndexEditModel, selected: Bool,
+        edit: BookIndexEditModel, selected: Bool, reserved: CGFloat,
         onTap: @escaping () -> Void, onLandedBlock: @escaping (String) -> Void,
-        onBlockTop: @escaping (String, CGFloat) -> Void
+        onBlockTop: @escaping (String, CGFloat) -> Void,
+        onMeasured: @escaping (CGFloat) -> Void
     ) {
         self.session = session
         self.tokens = tokens
@@ -981,9 +1135,11 @@ private struct BookIndexPaneNote: View {
         self.entry = entry
         self.edit = edit
         self.selected = selected
+        self.reserved = reserved
         self.onTap = onTap
         self.onLandedBlock = onLandedBlock
         self.onBlockTop = onBlockTop
+        self.onMeasured = onMeasured
         #if DEBUG
         BookIndexMaterialization.count += 1
         #endif
@@ -1037,17 +1193,29 @@ private struct BookIndexPaneNote: View {
                     }
             }
             if rows.isEmpty {
-                Text(" ").font(tokens.body)
+                // 13u4 UNIT F3: until the text arrives this note stands at
+                // what the column says it is tall, not at one blank line. A
+                // note that has LOADED and is genuinely empty keeps the blank
+                // line — the reservation is for the waiting, never a floor.
+                if loaded {
+                    Text(" ").font(tokens.body)
+                } else {
+                    Color.clear.frame(height: max(0, reserved - Self.chromeAroundProse))
+                }
             }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
-        #if DEBUG
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+            #if DEBUG
             BookIndexGeometry.paneNoteHeights[entry.postID] = height
+            #endif
+            // 13u4 UNIT F3: a MEASUREMENT is what this note drew with its own
+            // text in it. While it stands at the reservation it is reporting
+            // the column's guess back to the column, so it says nothing.
+            if loaded { onMeasured(height) }
         }
-        #endif
         .environment(\.openURL, OpenURLAction { url in
             MarkdownLink.open(url.absoluteString) ? .handled : .discarded
         })
@@ -1065,6 +1233,7 @@ private struct BookIndexPaneNote: View {
             do {
                 for try await value in session.database.observeBlockTOC(entry.postID) {
                     rows = value
+                    loaded = true
                     edit.settle()
                     if let landed = edit.takePendingLiveBlock(postID: entry.postID, rows: value) {
                         onLandedBlock(landed)

@@ -781,6 +781,126 @@ final class BookViewModel {
     /// carries both facts, which is why there is no second rule here.
     func restandOutlineHeights() {
         outlineHeights.stand(at: outlineContentWidth)
+        indexPaneHeights.stand(at: indexContentWidth)
+    }
+
+    // MARK: - 13u4 UNIT F3 — THE INDEX PANE'S HEIGHTS
+    //
+    // The same idea as the Outline's above, on the surface UNIT F1 left with
+    // the landing authority and no heights: the pane's rows stand at KNOWN
+    // heights instead of at a lazy container's average, so the column stops
+    // moving under a landing that has already arrived. What lives here is the
+    // PLUMBING alone — the width, the lengths read and the doors the rows and
+    // the landing ask through; the arithmetic is `BookIndexPaneHeightModel`
+    // (pure) and the learning is `BookIndexPaneHeights` (unobserved).
+
+    /// The learned heights and the measured type for the Index pane.
+    /// Unobserved on purpose — see that file's own note.
+    @ObservationIgnored let indexPaneHeights = BookIndexPaneHeights()
+
+    /// The width the Index pane's content column is really drawing at.
+    /// Observed (a width change must re-render every row's placeholder),
+    /// written ONLY when it really moves — the same 1-pt tolerance
+    /// `StableSurface`, the flow and the Outline compare with.
+    private(set) var indexContentWidth: CGFloat = 0
+
+    /// The pane reported its measure.
+    func reportIndexContentWidth(_ width: CGFloat) {
+        guard width > 0,
+              abs(width - indexContentWidth) > stableSurfaceWidthTolerance else { return }
+        indexContentWidth = width
+        indexPaneHeights.stand(at: width)
+    }
+
+    /// Bumped when the lengths land, so a row standing on the estimate
+    /// re-renders with it. Observed and read by `indexPaneRowHeight`.
+    private(set) var indexExtentsGeneration = 0
+    @ObservationIgnored private var indexExtentsInFlight = false
+
+    /// **The lengths read for the INDEX pane — one bounded statement for the
+    /// book, ONCE.**
+    ///
+    /// Unlike the Outline's door this has no "nothing expanded" guard, and
+    /// that is the surface's own shape rather than an omission: the Index pane
+    /// renders EVERY note's prose (it is the whole book as read-cheap text),
+    /// so every row needs its note's length from the first frame. The cost
+    /// shape is stated and pinned: ONE `Queries.blockExtents` — lengths
+    /// computed in SQL, no prose crossing the boundary — per ENTRY SET, shared
+    /// through the book's `flowExtents` cache with the Outline and the reading
+    /// flow, so a mode switch re-reads nothing and **nothing at autosave rate
+    /// ever reaches this at all**.
+    func ensureIndexExtents() {
+        let ids = entries.map(\.postID)
+        guard !ids.isEmpty, !indexExtentsInFlight, flowExtents.lookup(ids) == nil else { return }
+        indexExtentsInFlight = true
+        Task { [weak self] in
+            guard let self else { return }
+            defer { self.indexExtentsInFlight = false }
+            guard let rows = try? await session.database.read({ db in
+                try Queries.blockExtents(db, containerIDs: ids)
+            }) else { return }
+            var byPost: [String: [Queries.BlockExtent]] = [:]
+            for row in rows { byPost[row.containerID, default: []].append(row) }
+            for id in ids where byPost[id] == nil { byPost[id] = [] }
+            flowExtents.store(byPost, for: ids)
+            // Every derivation taken before the lengths landed was taken over
+            // the "not known yet" prior; what a row MEASURED is untouched.
+            indexPaneHeights.forgetDerived()
+            #if DEBUG
+            BookIndexExtentReads.byBook[readingID, default: 0] += 1
+            #endif
+            indexExtentsGeneration += 1
+        }
+    }
+
+    /// What one pane row stands at: the manifest's precedence over this
+    /// surface's own answers. `postID` nil ⇒ a chapter heading.
+    func indexPaneRowHeight(_ anchorID: String, postID: String?) -> CGFloat {
+        BookHeightManifest.resolve(indexPaneRowInput(anchorID, postID: postID)).0
+    }
+
+    /// The same question as a manifest input (one precedence brain, asked per
+    /// row and per column).
+    func indexPaneRowInput(_ anchorID: String, postID: String?) -> BookHeightManifest.Input {
+        // Read so a row standing on the estimate re-renders when the lengths
+        // land (the Observation dependency IS the mechanism here).
+        _ = indexExtentsGeneration
+        guard let postID else {
+            return indexPaneHeights.input(
+                anchorID, derived: indexPaneHeights.metrics.heading, isHeading: true)
+        }
+        // Element-wise against the entries (no per-ask id-list build — this
+        // runs per row per body pass; the 13u2b ladder's NIT 2).
+        let extents = flowExtents.lookup(matching: entries)?[postID]
+        return indexPaneHeights.input(
+            anchorID,
+            derived: indexPaneHeights.derived(postID, extents: extents),
+            isHeading: false)
+    }
+
+    /// A pane row reported its height while rendering real content.
+    func learnIndexPaneRowHeight(_ anchorID: String, height: CGFloat, isHeading: Bool) {
+        indexPaneHeights.learn(anchorID, height: height, isHeading: isHeading)
+    }
+
+    /// **The whole pane, as heights and offsets** — the view hands in the row
+    /// list (it is the view that knows the book's grouping) and the arithmetic
+    /// happens here, through the same per-row brain the rows themselves ask.
+    ///
+    /// Built on demand: arithmetic over the rows in hand, no read, no layout,
+    /// ∝ rows. Its consumer is the LANDING'S FACTS — the signpost's `offset`,
+    /// `derived` and `exact`, which UNIT F1 could only answer with −1 and "all
+    /// of them".
+    ///
+    /// `leading` is 0: offsets are from the FIRST ROW rather than from the top
+    /// of the scroll's content, exactly as the Outline's manifest is built,
+    /// and nothing consumes an absolute offset — the landing addresses rows by
+    /// anchor.
+    func indexPaneManifest(rows: [(id: String, postID: String?)]) -> BookHeightManifest {
+        BookHeightManifest(
+            width: indexContentWidth, spacing: BookIndexPaneHeights.rowSpacing,
+            leading: 0,
+            inputs: rows.map { indexPaneRowInput($0.id, postID: $0.postID) })
     }
 
     /// 13f batch 4 (the MOUNT rule): whether this book's PANE is the

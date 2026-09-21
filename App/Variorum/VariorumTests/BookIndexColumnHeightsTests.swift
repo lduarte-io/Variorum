@@ -143,17 +143,23 @@ struct BookIndexColumnHeightsTests {
         return (window, hosting)
     }
 
-    /// **PIN 1 — THE MECHANISM.** Open the book in Index and let it load. The
-    /// column must not grow by a large multiple while it does.
+    /// **PIN 1 — THE MECHANISM: the column does not move under a landing.**
+    ///
+    /// The span is reset at the moment the landing is asked for, and that is
+    /// the honest scope rather than a convenient one. A column cannot know its
+    /// notes' lengths before it has read them — one bounded statement, tens of
+    /// milliseconds — so the very first frames of the very first book of a
+    /// session stand on a prior whatever this unit does. What the unit
+    /// promises, and what the residual is actually about, is the sentence
+    /// F1's trace ends on: **while a landing is in flight the column must not
+    /// be discovering its own geometry.** So the pin measures exactly that
+    /// window.
     ///
     /// The bound is a MEASURED number, stated at the assertion with both
-    /// trees' readings, not a tuned-until-green one: a column whose rows stand
-    /// at length-derived estimates ends within a small factor of where it
-    /// started, because the estimate IS approximately the real height; a
-    /// column of 40-pt rows that become thousands cannot.
+    /// trees' readings, not a tuned-until-green one.
     ///
     /// RED ON OLD — the pre-fix reading is in the unit's record.
-    @Test func theColumnDoesNotTrebleUnderItselfWhileTheBookLoads() async throws {
+    @Test func theColumnDoesNotMoveUnderALandingWhileTheBookIsStillLoading() async throws {
         try await withSlowIndexBook { session, db, readingID, postIDs in
             let model = BookViewModel(session: session, readingID: readingID)
             await model.adopt(try await db.read { [readingID] in
@@ -171,26 +177,33 @@ struct BookIndexColumnHeightsTests {
                 window.close()
             }
             #if DEBUG
-            // Let the pane load: the first note's rows arriving is the signal
-            // that the TOC reads are running, then give the column time to
-            // finish moving.
+            // The page is real (the arrival seed has landed the first note).
             await settle(window, hosting, until: {
                 BookIndexGeometry.paneAnchorTops["bip-\(postIDs[0])"] != nil
             })
-            await settle(window, hosting, until: { false }, maxTurns: 90)
+
+            // THE WINDOW UNDER TEST starts here: forget every height the
+            // column reported while it was being built, and watch what it does
+            // from the moment a landing is asked for.
+            BookIndexGeometry.paneContentSpans = [:]
+            model.requestReveal(postIDs[5])
+            await settle(window, hosting, until: { false }, maxTurns: 120)
 
             let span = try #require(
                 BookIndexGeometry.paneContentSpans[readingID],
-                "the pane never reported a content height")
-            print("[13u4 F3] column span low=\(Int(span.low)) high=\(Int(span.high)) "
+                "the pane never reported a content height during the landing")
+            print("[13u4 F3] landing-window span low=\(Int(span.low)) high=\(Int(span.high)) "
                 + "growth=\(String(format: "%.1f", span.growth))× reports=\(span.reports)")
-            // Pre-fix the column starts at a screenful of 40-pt note rows and
-            // ends at the real book; post-fix it starts at the estimate. The
-            // bound sits well above the estimate's own error and well below
-            // the pre-fix reading — both are in the record.
+            // Pre-fix the column is still discovering itself — a row of this
+            // pane is a title and a blank line until its text arrives — so it
+            // grows by a large multiple WHILE the landing is running, which is
+            // the residual's whole mechanism. Post-fix it is already standing
+            // at length-derived heights, so what is left to move is the
+            // difference between an estimate and the truth. Both readings are
+            // in the record.
             let growth = String(format: "%.1f", span.growth)
-            #expect(span.growth <= 3,
-                    "the column's height stays within a small factor of itself while it loads: \(Int(span.low)) → \(Int(span.high)) pt (\(growth)×)")
+            #expect(span.growth <= 2,
+                    "the column holds still under a landing: \(Int(span.low)) → \(Int(span.high)) pt (\(growth)×)")
             #endif
         }
     }
