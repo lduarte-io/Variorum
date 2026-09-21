@@ -195,6 +195,11 @@ extension Operations {
         // rule has no exception for acts that happen not to be undoable. It
         // runs AFTER the write, so a refused restore (a seal, a version that
         // is not this note's) leaves her future exactly as it found it.
+        // Like `register`, the clear sits OUTSIDE the transaction: a future
+        // compound composing this op as a leg and then rolling back would
+        // still have cleared the future — the recorded R1-10 class (13c
+        // Stage 1), accepted; no caller composes it today (ladder round 1,
+        // hazard note).
         let restored: NoteVersionRestore = try database.write { db in
             let post = try livePost(db, postID)
             try ensureUnlocked(post)

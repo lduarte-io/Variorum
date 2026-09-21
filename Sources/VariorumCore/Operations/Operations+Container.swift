@@ -392,6 +392,10 @@ extension Operations {
     /// leaves the future as it found it. (13j's doctrine — the Trash is the
     /// recovery door, not structural undo — is untouched: this gives
     /// `deleteContainer` no inverse, it only stops an abandoned one.)
+    /// Like `register`, it runs OUTSIDE the transaction: a future compound
+    /// that composed this op as a leg and then rolled back would still have
+    /// cleared the future — the recorded R1-10 class (13c Stage 1), accepted;
+    /// no caller composes it today (ladder round 1, hazard note).
     public func deleteContainer(_ id: String) throws {
         try database.write { db in
             var container = try liveContainer(db, id)
