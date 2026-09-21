@@ -141,6 +141,51 @@ assertion. No pin possible (unreachable); cleanliness only.
   cross-device launch remainder is the new KnownIssues row (owner 17e, #138(f)) and is correctly
   out of scope here.
 
+## THE FINAL CALLS (cross-model flow; the implementer's responses at `f6d7b960`) + THE FIX PASS
+
+**1 · MAJOR (the 1b one-shot re-armed by every ⌘Q) — CONFIRMED; implementer AGREES.** Fixed at
+`bfdd3bd6`: `QuickNotePark.park` re-arms `declineSpent` only when parking into an EMPTY park (a
+refusal ARISING); a re-park over a standing capture keeps the spent flag and still ASSIGNS
+`held` (the implementer's note — the newest words win). `clear()` resets the flag, so binding
+4's "resolved then re-arising re-arms" holds byte-exactly, and #137(c)'s sentence is now true
+on the pad-open road. Pin: `QuickNoteParkTests.theSecondQuitsOwnReRefusalDoesNotReArmTheDecline`
+— the integrated second press (finalize → decline → finalize again → decline must read false),
+plus the re-park-assigns arm, the capture-stays-parked arm, and the resolution-re-arms arm.
+Green with the fix: QuickNoteParkTests **6/6**.
+
+**REVERT R-L1 ANNOUNCED (from the committed `bfdd3bd6`):** put the unconditional
+`declineSpent = false` back in `park()` (the pre-fix body) in the working tree and run
+`QuickNoteParkTests` — expected: the new pin RED at its second-decline expectation (the decline
+reads true again), the five shipped pins GREEN (they never re-ran the quit road, which is
+exactly how the defect shipped). Restore by `git checkout --` from the repo root; result
+recorded below when written.
+
+**2 · MINOR (the comments sheet's clear discipline) — SPLIT: the behaviour change is DISMISSED
+AS WRONG; the comment fix is CONFIRMED.** I re-checked the implementer's falsification at both
+sites myself: `QuickNotePad.take` (QuickNoteView.swift:199 — `if text == submitted { text = ""
+… }`) is the SAME all-or-nothing gate, and the family's original records the rule deliberately
+(`QuickEntryBar.swift:113–121`: *"clearing them wholesale would lose them for the sake of
+tidiness. She sees them still there, and a second ⏎ makes them a second note."*). My finding's
+premise — that the pad strips the submitted prefix — was wrong (I conflated it with
+`MobileQuickNote`'s frozen-prefix machinery, which is a different mechanism on a different
+surface). The double-post corner is therefore the capture family's RECORDED consequence, not an
+oversight; prefix-stripping the comment door alone would fork it from the three capture doors
+(the forked-brains class), and changing the family's rule is the author's call, not a ladder
+fix. What remains true is that the sheet's doc comment claims a prefix discipline no door has —
+fixed to the bar's own recorded rule (comment-only, no pin owed).
+
+**3 · NIT (clearRedoFuture outside the transaction) — CONFIRMED as a comment-class hazard note;
+implementer AGREES.** One sentence at each call site naming the R1-10 class (a compound leg's
+clear survives its body's rollback — recorded, accepted, no caller composes it today). No pin
+(nothing red-on-old exists).
+
+**4 · NIT (the dead whitespace guard) — CONFIRMED; implementer AGREES.** The silent early-out
+replaced with a loud debug assertion + unconditional park: the one call site fires only after
+`QuickNoteMint.mints` passed, and the only thing the silent return could ever do is eat a
+refused capture (binding 1 inverted). No pin (the arm is unreachable from production code).
+
+*(Fix-pass suite lines land at the bottom of this section when the pass closes.)*
+
 ## CLEAN BILL — load-bearing things specifically checked and found solid
 
 1. **Core suite, my own hands:** `swift test` → **1639 tests in 177 suites, ALL GREEN** — the
