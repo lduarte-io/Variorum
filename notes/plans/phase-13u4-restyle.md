@@ -1542,7 +1542,7 @@ door is built.)*
 | 2 | The core op + its state-transition suite (rows read/written · the savepoint · the refusals · undo↔redo exact-row) + the AppSpec §9 bullet | DONE (this commit) — **22 tests in 1 suite passed**, below |
 | 3 | The Write door + its registry declaration + the registry walk | DONE (this commit) — **42 tests in 3 suites passed** (the two new suites + `CapabilityRegistryTests`) |
 | 4 | QUESTIONS #128 (the PROVISIONALs) | DONE (this commit) — (a)–(e); next free moves to #129 |
-| 5 | The walk on the dev-store Debug build, captured | NOT-STARTED |
+| 5 | The walk on the dev-store Debug build, captured | DONE (this commit) — 24 captures + 26 crops, both doors, both voices AND both appearances; the table below |
 | 6 | Closing suites + iOS build + the ledger's C2 row | NOT-STARTED |
 
 ### THE SHAPE, AS RULED (R-13u4-4 — read before the diff)
@@ -1555,3 +1555,43 @@ ONE transaction: **insurance savepoint of the current take** (LOAD-BEARING — h
 the stay case) · **the span leaves the current take's buffer** exactly as selected · **a new take
 mints at the fan's END** holding the span, branched from the current take, never chosen, never
 locked · **ONE undo entry** with the exact-row redo.
+
+### EVIDENCE — THE WALK (the unit closes on USE, not on pins)
+
+**Build:** `App/Variorum/DerivedData/13u4c2/Build/Products/Debug/Variorum.app`
+(`io.lduarte.Variorum.debug`, the fenced dev store). `pgrep -fl 'Variorum.app/Contents/MacOS'`
+was checked at the start — **ZERO instances; hers was not running at any point** — and each dev
+instance was quit **by identity** (`tell application id "io.lduarte.Variorum.debug" to quit`),
+never by a keystroke (the 13u3 breach's walker law), with `pgrep` re-checked after every quit and
+at the end. `/Applications/Variorum.app` was never touched. Captures:
+`notes/plans/13u4-screens/c2/` (gitignored) — 24 window captures plus `c2/crops/` with the 26
+read crops named below.
+
+| # | Step | What the app did | Capture |
+|---|---|---|---|
+| 1 | A one-block note staged through the shelf's quick-entry bar: *"The first sentence stays here. The middle piece moves into a take. The last sentence stays too."* | opens in Write, **block 1/1**, `17w block · 17w in note` | `02-note-open.png` |
+| 2 | Highlight the MIDDLE sentence (` The middle piece moves into a take.`), **right-click** | the selection menu carries **Move Selection into a New Take**, below Delete Block | `crops/04b-context-menu.png` |
+| 3 | Click it — **THE UNIT, IN USE** | the span LEAVES: the page reads *"The first sentence stays here. The last sentence stays too."*, a **⑂2 fan badge** appears on the block, the caret sits at the seam, `10w block` | `crops/05-after-move.png` |
+| 4 | The bottom bar's trailing end | the quiet receipt: ***"Moved into a new take — the take it left was saved first. ⌥⌘Z undoes it."*** | `crops/05-bar.png` |
+| 5 | **Takes** (⌘2) ▸ expand all | TWO cards: **✓ chosen** holding the remainder, and — at the fan's END — a card headed **`choose`** (i.e. NOT chosen) holding ` The middle piece moves into a take.` | `crops/07-takes-expanded.png` |
+| 6 | Write ▸ **history** — her ruled cover for the stay case | Block History ▸ Savepoints ▸ *take 1 of 2 · the take you're in · 1*: the savepoint reads the WHOLE pre-move text, `sep 20, 2026 at 6:40 pm · quiet`, with **Restore** beside it. Take 2 of 2: **0** | `crops/08-history.png` |
+| 7 | **⌥⌘Z** | ***"Undid: Move into a New Take"*** — the text is whole again (`17w block · 17w in note`), the badge gone | `crops/09-undone-text.png`, `crops/09-undone-bar.png` |
+| 8 | **⇧⌥⌘Z** | ***"Redid: Move into a New Take"*** — back to the post-move page with ⑂2, `10w block` | `crops/10-redone-text.png`, `crops/10-redone-bar.png` |
+| 9 | Caret only (no selection), open the bar's **block ▾** | the row is **ABSENT** — Divide · Divide choosing takes · Extract · Make Block · Merge · Merge choosing takes and nothing else (P-2 in use) | `crops/11-blockmenu-caret.png` |
+| 10 | Select a span, reopen **block ▾** | the row **APPEARS**, beside the six above | `crops/12-blockmenu-selection.png` |
+| 11 | Click it — the SECOND door acts | the span leaves, badge **⑂3**, the same receipt | `crops/13-after-bar-door.png`, `crops/13-bar.png` |
+| 12 | **STUDY voice** (Settings ▸ Appearance), block ▾ re-opened on a selection | the row renders in the serif voice too; clicking it lands the act and the receipt (`5w block · 5w in note`) | `crops/16-study-blockmenu.png`, `crops/17-study-bar.png` |
+| 13 | **DARK** (`appearanceChoice dark`, relaunch), Study voice, a span selected, right-click | the context row renders on the black room; clicking it lands the act (badge **⑂5**) | `crops/20-dark-contextmenu.png`, `crops/21-dark-after.png` |
+| 14 | **THE DEDUPE, CAUGHT IN USE** — the bar after step 13 | ***"Moved into a new take — ⌥⌘Z undoes it."*** — **without** the saved-first clause, because this take's buffer already matched its latest savepoint. The J8 copy-truth rule, visible: the clause appears only when a savepoint was actually written | `crops/21-dark-bar.png` |
+| 15 | …and why the cover still held: Block History ▸ show | take 1's FOUR quiet savepoints, newest first — `The first sentence stays here.` (6:44, the QUIT's `closeAutoCommit`), `…here. stays too.` (6:44, step 12), `…here. The last sentence stays too.` (6:43, step 11), and the whole original (6:40, step 3). **Nil never meant "nothing to restore"** | `crops/23-dark-savepoints.png` |
+
+**What step 14 proves, said plainly (it is the one thing a pin could not):** the insurance is
+deduped against the take's own last savepoint, so a move can legitimately write nothing — and in
+that case the pre-move text is already the top row of that take's history, one Restore away.
+The receipt tells the truth in BOTH branches rather than claiming a write that did not happen.
+
+**Dev-store state left as found:** voice back to **Terminal** (verified in Settings ▸ Appearance,
+`24-voice-restored.png`), `appearanceChoice` back to **system** (verified by `defaults read`),
+**zero instances**. Left in the dev store as this walk's fixture, as every walk's are: the note
+`The first sentence stays here.` (dated `2026-09-20`, in no book) carrying five takes — the four
+spans this walk moved out of it, plus the remainder.
