@@ -1300,18 +1300,24 @@ Apple arm, the heal's wire, `openSwitch`/`ceremony(for:)`), `PostureSwitch` (`ch
 | 0 | Record skeleton + `run-a-screens/a3/` | **DONE** |
 | 1 | The copy constants + the door's brain (`AppleRelinkModel`, shared) + the one passphrase-verification brain | **DONE** — `App/Variorum/Shared/AppleRelinkModel.swift` (new, in `Shared/` so the phone can compose it), the copy block in `PostureCopy.swift`, and `KeyActPassphrase` hoisted VERBATIM out of `PostureSwitchModel.verifyPassphrase` (row 12's lesson: a second key act must not carry a second copy of the rule). Mac build green; pins are piece 3 |
 | 2 | The Mac face: Settings ▸ Protection's Apple-account section + its sheet | **DONE** — a *Your Apple account* section between the posture cards and Castle's switches (explainer + the door), rendered under P-2's letter (Standard · `.enrolled` · the road wired) and disabled while a ceremony or a follow is on screen; `AppleRelinkSheet` beside `PostureSwitchSheet`. Held in the PANE's `@State`, not on the controller — this door reopens nothing, so row 11's two-presenter rule has nothing to say about it. Mac build green |
-| 3 | The pins (the door's state-transition suite: (i) the orphaned state → a new device enrolls with nothing typed · (ii) the consent names THIS device's account · (iii) the refusal arm writes nothing) | **DONE, green (8/1)** — `VariorumTests/AppleRelinkDoorTests`, the two harnesses joined: a scripted-gate `ProtectionController` (no Keychain, no prompts) + a REAL `EncryptionSession` over the emulated `key_vault` RPC, wired by `wireOneSecretHooks`' own line. The DISCRIMINATION checks (the red-on-old equivalent for new capability) are PENDING |
+| 3 | The pins (the door's state-transition suite: (i) the orphaned state → a new device enrolls with nothing typed · (ii) the consent names THIS device's account · (iii) the refusal arm writes nothing) | **DONE, green (8/1)** — `VariorumTests/AppleRelinkDoorTests`, the two harnesses joined: a scripted-gate `ProtectionController` (no Keychain, no prompts) + a REAL `EncryptionSession` over the emulated `key_vault` RPC, wired by `wireOneSecretHooks`' own line. The DISCRIMINATION checks (the red-on-old equivalent for new capability) RAN — R1 3 issues, R2 2 issues, each only in the pin whose mechanism was taken away; see Reverts |
 | 4 | The book's Chapter 2 + the FAQ brief's entry (content; the re-seed consequence recorded) | **NOT-STARTED** |
 | — | Closing evidence (targeted suites · `TutorialWalkTests` · the full Mac suite · iOS build · the walk) | **NOT-STARTED** |
 
 **Deaths and resumes:** none yet.
 
-**Reverts:** **R1 and R2 ANNOUNCED, about to run from the committed `64a41818`** — the DISCRIMINATION checks that
-stand in for red-on-old where the capability is new (there is no pre-fix tree in which this door refuses anything,
-because there is no door; what CAN be measured is whether each pin fails when its own mechanism is taken away).
-**R1:** `AppleRelinkModel.start()`'s `controller.readAppleKey()` → `readOrMintAppleKey()` — MAJOR-3 (b)'s defect
-exactly; the unreadable-key pin must go red. **R2:** the consented-id guard removed from `confirm` — the
-key-changed pin must go red. Both restored by `git checkout --` from the REPO ROOT, with the results written below.
+**Reverts:** **NO REVERT IN FLIGHT. R1 and R2 RAN from the committed `64a41818` and both DISCRIMINATED** — they are
+the stand-in for red-on-old where the capability is new (there is no pre-fix tree in which this door refuses
+anything, because there is no door; what CAN be measured is whether each pin fails when its own mechanism is taken
+away). **R1** — `AppleRelinkModel.start()`'s `controller.readAppleKey()` → `readOrMintAppleKey()`, MAJOR-3 (b)'s
+defect exactly — gave **3 issues, all in `anUnreadableAppleKeyRefusesAtTheDoorBeforeAnyScreenAndWritesNothing`**:
+the door MINTED a second iCloud key (`mac.appleKeys.key → AppleKey(42c042ae-…)` where `nil` is owed) and opened its
+consent screen *under that mint*, naming it as the key the account would be handed to; the other seven green.
+**R2** — the consented-id guard removed from `confirm` — gave **2 issues, both in
+`aKeyThatChangesUnderTheOpenSheetIsNotConsentedToAndNothingIsWritten`**: `phase → .done` and the vault's revision
+MOVED, i.e. the account's master re-wrapped under a key the consent never named; the other seven green. Both
+RESTORED by `git checkout --` from the REPO ROOT; `git diff` empty and `git status` clean before this line was
+written.
 *(Every behavioural revert is announced HERE before it starts, taken from a COMMITTED
 state, and restored by `git checkout --` from the REPO ROOT with `git diff` empty before "restored" is written. If a
 later session reads "revert starting" with no "restored" after it, check `git diff` first.)*
