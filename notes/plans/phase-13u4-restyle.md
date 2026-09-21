@@ -4739,7 +4739,7 @@ against what actually shipped):**
 | # | Piece | Status |
 |---|---|---|
 | 1 | The record + the READING (the brief's five reading lists, in order) | DONE (this commit) |
-| 2 | THE PRE-FIX COLD BASELINE, measured on THIS tree (not inherited) + the harness pin written RED-FIRST | **THE PINS ARE RED 3/3** (this commit — the probe and the two pins, NO FIX); the app-side cold baseline is the next commit |
+| 2 | THE PRE-FIX COLD BASELINE, measured on THIS tree (not inherited) + the harness pin written RED-FIRST | **DONE** — the pins RED 3/3 (27807580) and the app-side baseline **6 of 6 cold clicks STALL** (this commit) |
 | 3 | THE FIX — the pane's note rows stand at length-derived heights | PENDING |
 | 4 | The BEHAVIOURAL REVERT (red-on-old verified in a worktree) | PENDING |
 | 5 | THE POST-FIX COLD TRIAL TABLE (≥8 trials) + the warm trials against F1's 21/21 | PENDING |
@@ -4829,3 +4829,60 @@ reads the value the existing line beside it already wrote, so it is behaviour-fr
 red pins, so the red is on the record before the fix exists. (The same discipline F1 used, and for
 the same reason: piece 4 reverts to THIS commit in a worktree to prove the improvement is the fix's
 and not the probe's.)
+
+### THE PRE-FIX COLD BASELINE, MEASURED ON THIS TREE (piece 2b) — not inherited
+
+F1's brief hands this unit its 2-of-5 measurement as the pre-fix baseline. It is taken here
+anyway, on this machine, this week, against a build of THIS tree's pre-fix product code, because a
+rate is a fact about a machine and a store as much as about a diff — and because the trial table is
+this unit's red-on-old.
+
+**Build:** `App/Variorum/DerivedData/13u4f3-pre/Build/Products/Debug/Variorum.app`
+(`io.lduarte.Variorum.debug`, the fenced dev store — built from `f2e1ac17`, so it carries not one
+line of this unit, the DEBUG probe included). `pgrep -fl 'Variorum.app/Contents/MacOS'` was checked
+before the first launch and after every quit — **ZERO instances of hers at any point; she was not
+running** — and every dev instance was quit **by identity**
+(`tell application id "io.lduarte.Variorum.debug" to quit`), never by a keystroke (the 13u3 walker
+law). `/Applications/Variorum.app` was never touched.
+
+**The protocol, stated exactly** (and it is F1's, with one correction the walk itself found): quit ·
+`open -n` · wait for the window · click **the adventures of sherlock holmes** on the shelf · click
+**index** · **wait 2 s** · click a deep chapter · read the shipping signpost back out of her own
+Console. *The correction:* a fresh launch always lands on `~/shelf` and a book always opens in
+**Outline** — the book's mode is session state, not remembered across launches — so "reopen the
+book in Index" is two clicks, and the cold column begins at the second one. (Three trials were run
+against a wrong assumption about that before it was read off a capture; they are not in the table.)
+
+| # | chapter clicked (target index) | the signpost | verdict |
+|---|---|---|---|
+| 1 | copper beeches, ch13 (`target=24`) | `total=62481 hops=3 ms=6219 end=gaveup top=10006` | **STALL** — 10,006 pt short |
+| 2 | beryl coronet, ch12 (`target=22`) | `total=79437 hops=3 ms=6104 end=gaveup top=12064` | **STALL** — 12,064 pt short |
+| 3 | copper beeches, ch13 (`target=24`) | `total=62481 hops=3 ms=6233 end=gaveup top=10006` | **STALL** |
+| 4 | noble bachelor, ch11 (`target=20`) | `total=52475 hops=3 ms=6247 end=gaveup top=534` | **STALL** — 534 pt short |
+| 5 | copper beeches, ch13 (`target=24`) | `total=62068 hops=3 ms=6217 end=gaveup top=10563` | **STALL** |
+| 6 | engineer's thumb, ch10 (`target=18`) | `total=42895 hops=3 ms=6219 end=gaveup top=406` | **STALL** — 406 pt short |
+
+**THE PRE-FIX RATE: 6 of 6 cold deep clicks STALL** — every one `end=gaveup`, every one spending
+its whole 3-hop budget and the full 6-second watchdog. That is harsher than F1's recorded 2 of 5,
+and the difference is the protocol rather than the tree: this table's click lands **2 seconds after
+the Index pane mounts**, which is the coldest moment the gesture has, where F1's cold trials were
+staged a little later. Recorded as measured, with the reason, rather than bent to match the
+inherited number — the direction is the same and the mechanism is identical (`derived=26` on every
+line: **not one of the 26 rows' heights is known**).
+
+**And the WARM trials, taken in the same session immediately afterwards** (no relaunch — click
+another chapter, and another):
+
+| # | chapter (target) | the signpost | verdict |
+|---|---|---|---|
+| w1 | ch13 (`target=24`) | `total=86436 hops=0 ms=1018 end=settled top=0` | settled |
+| w2 | boscombe valley, ch5 (`target=7`) — a long jump UP | `total=156974 hops=3 ms=6229 end=gaveup top=11371` | **STALL** |
+| w3 | ch12 (`target=22`) | `total=170993 hops=0 ms=1033 end=settled top=0` | settled |
+| w4 | twisted lip, ch7 (`target=11`) | `total=170989 hops=0 ms=1030 end=settled top=0` | settled |
+| w5 | ch13 (`target=24`) | `total=171690 hops=0 ms=1030 end=settled top=0` | settled |
+
+**4 of 5 warm, and the one stall is informative rather than noise:** read the `total=` column — the
+column was still GROWING (86k → 157k → 171k) and w2 is the trial that ran while it grew. From w3
+on, `total` is stable at ~171k and every landing settles at `top=0` with zero hops. So "warm" is
+not a clock, it is **a column that has stopped moving** — which is the same sentence as the
+residual, and the reason the fix is heights rather than more compensation.
