@@ -214,3 +214,47 @@ from `submitDraft`'s refused arm: pins (i)/(ii)/(iv)/(v) red at their park/resto
 guard (iii) green. (2) Mac fix + 5 pins (`CommentPanelParkTests`); revert R2-B — remove both
 `park(` calls: (a)/(b) red at restore, (c)/(e) red at their premises, the guard (d) green.
 (3) the NIT sentence + #137(b) + the #140 QUESTIONS row. (4) closing runs.
+
+---
+
+## THE FIX PASS — RECORDS (all commits pathspec-limited, pushed, no trailers)
+
+**THE FIX PASS'S COMMITS:**
+- `b5e229b3` — the final calls + the binding-5 sweep verdict + both reverts announced (this file).
+- `9cf553e4` — the MAJOR's PHONE half: `Shared/CommentDraftPark.swift` (the one brain) + the
+  controller park/restore + the sheet's one-shot consume and `comments.restored` line + the five
+  pins (`MobileCommentParkTests`).
+- `62bfef0f` — the MAJOR's MAC half (binding 5's sweep CONFIRMED-and-FIXED): `AppSession.commentDraftPark`
+  + `CommentsPanelModel`'s init-restore and the two refusal-site parks + the five pins
+  (`CommentPanelParkTests`).
+- `40939923` — the NIT's cost-model sentence (`QuickNotePark`'s doc, the close-road flight window
+  named as its own class) + QUESTIONS #137(b) extended (record-truth edit, flagged) + QUESTIONS
+  #140 logged (next free → #141).
+
+**REVERT R2-A RAN AND DISCRIMINATED EXACTLY** (announced above; from the committed `9cf553e4`):
+the `draftPark.park(...)` call removed from `submitDraft`'s `.refused` arm → **8 issues across
+pins (i)/(ii)/(iv)/(v)** — the restore arms red with the field reading `""` against her paragraph
+and the edit target nil, both parked premises red, the auto-close's hold red — and **the guard
+(iii) GREEN** (her abandon never parked anything), which is binding 1's direction exactly.
+Restored by `git checkout --`; tree clean.
+
+**REVERT R2-B RAN AND DISCRIMINATED EXACTLY** (from the committed `62bfef0f`): both
+`commentDraftPark.park(...)` calls removed → **10 issues across pins (a)/(b)/(c)/(e)** — both
+fresh-model restores red (the add area empty, the row showing the stored text, `isDirty` false),
+both parked premises red — and **the guard (d) GREEN**. Restored by `git checkout --`; tree clean.
+
+**THE CLOSING RUNS (final tree, literal selectors, the N-tests lines read):**
+
+| Gate | Result |
+|---|---|
+| Mac — `CommentPanelParkTests` + `QuickNoteParkTests` + THE TUTORIAL SPINE by its eleven struct names | **90 tests in 13 suites — ALL GREEN** (5 + 6 + 79) |
+| Mobile — `MobileCommentParkTests` + `MobileCommentDraftTests` + `MobileQuickNoteReadFailureTests` | **11 tests in 3 suites — ALL GREEN** (5 + 3 + 3) |
+
+**Fences:** ZERO `Sources/` lines in this fix pass (the whole pass is App-side: one new Shared
+brain, two controllers/models, one sheet view, two pin files, the records); zero
+`Sources/VariorumCore/Sync/` lines in the run's whole range re-verified; zero trailers across the
+pass's commits (grep); tree clean at `40939923`.
+
+**Fix pass CLOSED.** Per the flow: the implementer side's sanity pass over `b5e229b3..40939923`
+is next; anything it raises returns here for the final word. Round 3 (a fresh reviewer over this
+round's fixes) follows per the ladder rule — the MAJOR was NEW in round 2.
