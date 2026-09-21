@@ -3512,3 +3512,88 @@ remainder list, and the seam-file list (row 63 touches the editor's decoration g
 the diff reaches `EditorTextView`/`BlockRangeIndex`, say so for the ladder); flip the ledger's
 S3 row and the seven KnownIssues rows' cells in your closing commit. The checkpoint protocol
 binds from the first commit.
+
+---
+
+## UNIT S3 RECORD — CHROME SINGLES + THE CONFORMANCE SWEEP (rows 44 · 45 · 46 · 63 · 67 · 68 · 69 + the Trash fork)
+
+**WHAT THIS UNIT DID NOT DO (the record's first line, written at the OPEN; RE-STATED AT THE
+CLOSE against what actually shipped):**
+
+- **It did not touch `Sources/VariorumCore/`** — no core, no `Sync/`, no schema, no migration,
+  no `Server/`; the lockstep marker stays **8**. *(PENDING — re-verified at the close over the
+  whole unit diff.)*
+- **It did not touch the EDITOR SEAM.** `BlockRangeIndex` · `EditorTextView` · `TypedReturn` ·
+  `PaneTextAuthority` · `StructuralSeamEdit` · `StructuralGesturePlanner` · `runStructural` and
+  its identity oracle · `MarkdownActs` — none of them. Row 63 touches the editor's DECORATION
+  geometry (`BlockDecor`, the pure rect brain + its overlay controller), which is not the seam;
+  the seam-file list below says so by name for the ladder. *(PENDING at the close.)*
+- **It did not narrow P-8** — a constitution edit is the author's (KnownIssues row 44 states
+  both options and she ruled the SWEEP at R-13u4-5).
+- **It did not re-word the ring's R14/R22 setting semantics** (off · outline · background), and
+  it did not move the prose column's measure or left edge for any decoration (the gutter law).
+- **It did not restyle the POST tag sheet** (`TagAssignmentSheet`) — row 45 names the BLOCK one.
+  The post sheet is unvoiced too and is named in the conformance walk's honest remainder list.
+- It did not do F2's or F3's newly-pulled-in work, and no other 13u4 unit's work was touched.
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The record + the READING (the brief's four reading lists, in order) | DONE (this commit) |
+| 2 | **Row 44 (R-13u4-5)** — the `fixedSize` sweep: a deliberate per-site `lineLimit` + the class-closing grep pin | NOT-STARTED |
+| 3 | **Row 45** — `BlockTagAssignmentSheet` takes the voice | NOT-STARTED |
+| 4 | **Row 46** — `ShellRouter.blockNamingDoor` on S2's ownership idea | NOT-STARTED |
+| 5 | **Row 63** — the indicator ring respects the gutter's faces (red-on-old owed) | NOT-STARTED |
+| 6 | **Row 67** — `Help ▸ Restore Tutorial…` joins the SwiftUI `.alert` grammar | NOT-STARTED |
+| 7 | **Row 68** — the "pool & scraps" lesson swept against `SnippetsCopy` (H pattern; re-seed consequence recorded) | NOT-STARTED |
+| 8 | **Row 69** — Block History's rename field no longer OPENS under a seal | NOT-STARTED |
+| 9 | **The Trash fork** — the 2a taste fork's card restyle | NOT-STARTED |
+| 10 | QUESTIONS #133 (the PROVISIONALs) | NOT-STARTED |
+| 11 | THE CLOSING CONFORMANCE WALK — both voices AND both appearances, captured, against the reference artifact; the honest remainder list | NOT-STARTED |
+| 12 | Closing suites + the ledger's S3 row + the seven KnownIssues rows' cells | NOT-STARTED |
+
+### THE READING (done in this session's own context, in the brief's order)
+
+1. This file's **Status banner** · **THE SIZING-AND-RULINGS SITTING RECORD** (**R-13u4-5 is
+   mine and BINDING** — sweep the sites with a deliberate per-site `lineLimit` plus a grep pin
+   on the 18j literal-colour pin's form; the constitution stands as written; R-13u4-6 the cast;
+   R-13u4-7/8 pulled F2 and F3 in AFTER this unit) · **THE LEDGER** · **ENVIRONMENT TRAPS** ·
+   **CAST & DISCIPLINE** · the **eight prior UNIT RECORDs** (E1 · E2 · E3 · C1 · C2 · F1 · S1 ·
+   S2) in full. The walker facts that bind this unit, carried forward:
+   - `cliclick t:` **drops characters** in the shelf's quick-entry bar and ⌘A does not select
+     there; `osascript … keystroke` + `key code 36 using shift down` is the staging road, and
+     every burst needs an explicit re-activation because a capture steals focus (E3).
+   - The capture boxes **substitute typed quotes** (C1); the shelf's row heights move the
+     quick-entry bar's y by ~70 points on a voice flip (C1).
+   - A full-screen `screencapture -x -o` is in SCREEN PIXELS with no window offset
+     (point = px/2); `walk-cap`'s WINDOW capture needs the window's Y added back (C2).
+   - A single `cliclick` click is sometimes swallowed by the activation — click TWICE on any
+     row whose act is idempotent (F1).
+   - **`cliclick t:` cannot type a bracket** — `osascript … keystroke "[" using command down`
+     (S1). `sips --cropOffset` misbehaved on S1's captures and behaved on S2's, EXCEPT past the
+     image's own height, which returns a blank PNG reading exactly like *"the surface drew
+     nothing"* (S1 + S2).
+   - A `.contextMenu`'s rows land relative to the RIGHT-CLICK point, so a row's coordinates are
+     re-measured from a fresh full-screen capture after every open — and the re-activation rule
+     applies between that capture and the click (S2's own mishap).
+   - Quit **by identity** (`tell application id "io.lduarte.Variorum.debug" to quit`), never
+     ⌘Q (the 13u3 breach's walker law); a second dev instance dies by a `pgrep`-proven PID only.
+2. **KnownIssues rows 44, 45, 46, 63, 67, 68, 69** in full, each with its own remedy sketch and
+   provenance — they are the mandate verbatim.
+3. **The restyle mandate:** roster item 1 + the carried 2026-08-31 addendum (her ruling that
+   `notes/plans/pre-13u-mockups/blocks-and-snippets.html` is *"an actual guide"*) — the artifact
+   read in full for its `.btn` / `.chip` / `.field` / card grammar and its two voice blocks (the
+   REAL `VoiceTokens` values) — and `Theme/CalmGrammar.swift` (`CalmCard` radius 10 / 14×11 pad,
+   `CalmSectionHeader`, `CalmButtonStyle` radius 7). The 13u3 closeout-refresh items **1** (the
+   gutter law: `Surface/ProseGutter` is the one horizontal-placement brain; a restyle never
+   moves a measure or left edge for a decoration), **2** (the transaction-gated decoration
+   refresh — `storageEditTransactionDepth`, new decoration work routes through the settle hop)
+   and **5** (`TakeCardMenu.rows` is THE act list; the ceremony sheets carry drift checks —
+   restyle their chrome, never the check order).
+4. The code each row names, read at the site rather than from a summary: every `.fixedSize()`
+   site in `App/Variorum/Variorum` · `BlockTagViews.swift` · `ShellRouter`/`RootView`'s DEBUG
+   door and `ShellLandingTests` · `BlockDecor`'s gutter numbers and both `indicatorRect`
+   consumers · `ShellActions.confirmTutorialReplace` and the app's `.alert` hosts ·
+   `TutorialSeeder`'s "pool & scraps" lesson beside `SnippetsCopy` · `BlockHistoryPane`'s
+   rename door and its three hosts · `RecoveryView.swift`.
