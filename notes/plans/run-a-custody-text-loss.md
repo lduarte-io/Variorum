@@ -748,7 +748,7 @@ MAJOR-3 and the F3 record's eight items; the copy constants' homes; the named co
 | 8 | **17l item 1** — the seeder's discover-then-mint latch + the ensure's purge consult | **FIXED** — pins `EncryptionBookDoorTests` (3 new), RED measured on the pre-fix tree TWICE (5 issues across the 3; the 5 standing tests green), green after at 24/2. The purge consult is NOT the ledger — the ledger is content-free by design; the trace and the substitution are recorded below |
 | 9 | **17l item 2** — the migration drill's escrow leg + her-Mac READ-ONLY confirmation | **FIXED** — the drill RED first with its expectation quoted, then green under `TEST_RUNNER_VARIORUM_MIGRATION_DRILL=1` (**5 tests in 2 suites**, the leg's own line firing). The her-Mac confirmation run READ-ONLY, commands + verbatim answers below, with the caveat that makes the negative honest |
 | 10 | **17l item 3** — her four ruled #90 wording changes, both platforms | NOT-STARTED |
-| 11 | **17l item 4** — the dead Replace-All-Keys door: present from the root | NOT-STARTED |
+| 11 | **17l item 4** — the dead Replace-All-Keys door: present from the root | **FIXED** — pin `Phase13pControllerTests.theCeremonyHasARootPresenterWhenNoProtectionPaneIsMounted` (4 arms + the non-negative count), **red-on-old measured by revert R1: 6 issues, all in the new pin, the 46 others green**. Green at 94/3 with the two neighbouring suites |
 | 12 | **17l item 6** — the ceremony's *(0 of 0)* → *preparing…* face | NOT-STARTED |
 | 13 | **17l item 7** — NIT-N8's face VERIFIED post-13u4 + MINOR-N4 (2)'s copy PROVISIONAL | NOT-STARTED |
 | 14 | **17n** — the encryption passphrase's 12-character floor at every SETTING door | NOT-STARTED |
@@ -904,6 +904,31 @@ something a session can produce. The unified log, which would have carried the w
 `migration 2a: legacy iCloud escrow item removed → …` line, has rotated (the KnownIssues row said so
 at the closeout). Recorded as it is rather than dressed up.
 
+### ROW 11 (17l item 4 / KnownIssues 40) — TWO PRESENTERS, ONE MODEL
+
+**The mechanism, read in the code.** `ProtectionController.activeSwitch` holds the ceremony (on the
+CONTROLLER deliberately, so it survives the re-key's reopen). On the Mac its only presenter was
+`ProtectionPane` — so the Account sheet's Encryption tab, reached from the main window's bottom bar,
+set a model nothing ever put on screen (the author's words: *"it was just a standalone button … no
+checkbox … no opportunity to type my existing words"*), and a second press hit `openSwitch`'s own
+`guard activeSwitch == nil` and did nothing at all. Nothing was written — the vault was verified
+untouched live at the walk — so this is a presenter defect, never a key one.
+
+**Where the root presenter went, and why there.** `ProtectionNoticeBar` — the main window's bottom
+`safeAreaInset`, mounted for the whole of a ready session, and **already the presenter of
+`controller.activeFollow`**. That last fact is what scopes this row: the FOLLOW never had the hole,
+so only the ceremony moves, and the bar's existing follow sheet is the proof that a sheet attached
+to that Group presents even when the bar renders `EmptyView()`.
+
+**Double presentation, impossible by construction.** The host is decided ONCE, inside `openSwitch`,
+from whether a Protection pane is on screen (`mountedProtectionPanes`, a count the pane maintains
+with `.onAppear`/`.onDisappear` — the Settings scene closes and reopens), and each presenter binds
+through `controller.ceremony(for:)`, which answers nil for the host that does not own it. Deciding
+at OPEN time rather than per frame is load-bearing: a per-frame rule would let a Settings window
+opened mid-ceremony tear the sheet out of the window she is looking at.
+
+**Red on old (revert R1, quoted in the Reverts line above): 6 issues, all in the new pin.**
+
 ### ROW 15 (KnownIssues 32) — THE VERIFICATION, AND THE ONE WORLD IT FOUND
 
 **What the row asks:** prove the store-only-phrase corner unreachable after pre-13x's 3a · 3b · 4a,
@@ -960,13 +985,14 @@ where it could not be (the unreadable-vault world), with the residual named hone
 whose vault was born wrap-free by a **14b-era build** and that has never generated words would still
 reach the mint; no build in the tree can create such a vault, and hers is not one (her words exist).
 
-**Reverts:** **REVERT R1 STARTING (row 11, from the COMMITTED state `d46f4c07`)** —
+**Reverts:** NO REVERT IN FLIGHT — **R1 (row 11, from the committed `d46f4c07`;
 `App/Variorum/Shared/ProtectionController.swift`, `ceremony(for:)` put back to the pre-row-11 world
-(only the Settings pane ever presents: `host == .pane ? activeSwitch : nil`, and `openSwitch` no
-longer decides a host), which is exactly the shape KnownIssues 40 describes. Expected: arms 1, 2 and
-4 of `theCeremonyHasARootPresenterWhenNoProtectionPaneIsMounted` red, arm 3 (Settings' own road)
-green. To be restored by `git checkout --` from the REPO ROOT with `git diff` empty before
-"restored" is written. Every behavioural revert is announced HERE before it starts, taken
+where only the Settings pane ever presents) RAN over `Phase13pControllerTests` and gave **6 issues,
+all in the new pin** (`ceremonyHost → .pane` where `.root` is owed; the root presenting `nil` on the
+main-window road; the pane holding a ceremony it does not host; and the same three again after the
+pane went away) — the 46 other tests green. RESTORED by `git checkout --` from the REPO ROOT;
+`git diff` empty and `git status` clean before this line was written. Every behavioural revert is
+announced HERE before it starts, taken
 from a COMMITTED state, and restored by `git checkout --` from the REPO ROOT with `git diff` empty
 before "restored" is written. If a later session reads "revert starting" here with no "restored"
 after it, check `git diff` first: an uncommitted diff in a mechanism file is a revert in flight —
