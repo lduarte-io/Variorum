@@ -281,6 +281,36 @@ resume in the record.
 
 ---
 
+## BATCH A1 RECORD — 17b, the text-loss doors
+
+**WHAT I DID NOT DO (this record's first line, per the standing rule):** [PENDING — filled at the
+batch's close.]
+
+**Session opened 2026-09-21.** Implementer: `opus-implementer` (fresh session, batch A1 only).
+Read before any code, in the brief's order: the run file's Status banner · FENCES · BINDING
+PRINCIPLES · LEDGER rows 1–7 + the kickoff scope rulings · ENVIRONMENT TRAPS · CAST & DISCIPLINE ·
+the A1 brief; `notes/plans/phase-17-standing-fixes.md` § 17b whole (all six items' finder claims +
+verifier traces); `notes/KnownIssuesAndTechDebt.md` row 65; `notes/QUESTIONS.md` #120 (esp. (e));
+OverallModel §3 and AppSpec §9's structural-undo/REDO paragraphs (auto-loaded canon).
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims marked PENDING)
+
+| Row | Item | Status |
+|---|---|---|
+| 0 | Record skeleton + `run-a-screens/` gitignored | **DONE** — this commit |
+| 7 | **row 65** — the pad's close/quit-while-refused loss: TRACE + the parking-mechanism PROPOSAL (design fork; the orchestrator rules before any build) | NOT-STARTED |
+| 1 | **P4** — the phone's comments sheet clears the draft before the write | NOT-STARTED |
+| 2 | **P5** — `promotePicks` copies an ARCHIVED pick as a block's only take | NOT-STARTED |
+| 3 | **P6** — `restoreNoteVersion`/`deleteContainer` leave the redo future unclear ed | NOT-STARTED |
+| 4 | **P7** — the boards' branch/＋new take/⌘T doors copy the STORE past a dirty buffer | NOT-STARTED |
+| 5 | **P14** — the phone quick note's `try?` folds a read failure into "nothing to save yet" | NOT-STARTED |
+| 6 | **P36** — `applyPendingIfClean` discards the deferred projection on a thrown re-read | NOT-STARTED |
+| — | Closing evidence: targeted suites green · `TutorialWalkTests` · mobile suites + `generic/platform=iOS` build · the WalkKit walk (pad road + board-branch road) → `notes/plans/run-a-screens/a1/` | NOT-STARTED |
+
+**Deaths and resumes:** none yet.
+
+---
+
 ## BATCH A2 BRIEF — 17l items 1–4/6–7 + 17n + the phrase-transit pin (self-contained; read in this order)
 
 **Read first, in full:** (1) this file's Status banner · FENCES · BINDING PRINCIPLES · THE LEDGER
