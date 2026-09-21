@@ -283,9 +283,12 @@ resume in the record.
 
 ## BATCH A1 RECORD — 17b, the text-loss doors
 
-**WHAT I DID NOT DO (this record's first line, per the standing rule):** **ROW 7 IS NOT BUILT** — its
-trace and its parking-mechanism proposal are below, awaiting the orchestrator's ruling, and not one
-line of a parking slot exists in the tree. Beyond that: no `Sources/VariorumCore/Sync/` line, no
+**WHAT I DID NOT DO (this record's first line, per the standing rule):** **ROW 7 IS NOW BUILT to the
+orchestrator's ruling** (Option 1 + the 1b rider, PROVISIONAL, QUESTIONS #137) — what remains undone
+there is named at its own record below: the park is MEMORY-ONLY by ruling, so a crash or a forced
+second ⌘Q still loses a refused capture, and the close road's new sentence deliberately carries no
+reason. The REFUSAL road could not be walked on a healthy dev store and is carried by its pins, as
+binding 7 allows. Beyond that: no `Sources/VariorumCore/Sync/` line, no
 schema change, no migration (the marker stays 8), nothing touched in `/Applications` or her real
 store, no author-only call taken. Row 3's UNDO-side residue was measured and pinned as documented
 behaviour rather than fixed (the reason and its owner are below), and neither `restoreNoteVersion`
@@ -311,7 +314,7 @@ OverallModel §3 and AppSpec §9's structural-undo/REDO paragraphs (auto-loaded 
 | 4 | **P7** — the boards' branch/＋new take/⌘T doors copy the STORE past a dirty buffer | **FIXED** — pin `BranchDoorFlushTests` (7), red-on-old measured on the pre-fix tree (6 defect arms red with the stale row in hand, the blank-take guard green); ONE arm's revert re-verified after the commit (below) |
 | 5 | **P14** — the phone quick note's `try?` folds a read failure into "nothing to save yet" | **FIXED** — pin `MobileQuickNoteReadFailureTests` (3); behavioural revert verified after the commit — **the double-mint reproduced live (`count → 2`)**, with `"There's nothing to save yet."` spoken over a note in SQLite |
 | 6 | **P36** — `applyPendingIfClean` discards the deferred projection on a thrown re-read | **FIXED** — pin `DeferredProjectionRetryTests` (2); behavioural revert verified AFTER the commit (`else { return }` put back ⇒ the marker arm red, the guard green) |
-| — | Closing evidence | **DONE** — core **1639/177 green** · full Mac **3054/506 ALL GREEN, zero issues** (tutorial spine green inside it) · mobile **632/108 PASSED with exactly the 4 known issues** · iOS **BUILD SUCCEEDED** · the walk captured (4 shots) |
+| — | Closing evidence | **DONE** — core **1639/177 green** · full Mac **3059/507 ALL GREEN, zero issues** (re-run with row 7 in; tutorial spine green inside it) · mobile **632/108 PASSED with exactly the 4 known issues** · iOS **BUILD SUCCEEDED** · the walk captured (7 shots) |
 
 **Deaths and resumes:** none yet.
 
@@ -410,7 +413,7 @@ their mechanism, neither a defect in this batch's fixes:
 | Gate | Command | Result |
 |---|---|---|
 | Core | `swift test` | **1639 tests in 177 suites — ALL GREEN** (baseline 1631/175; +8/+2 = this batch's two core suites) |
-| Full Mac | `xcodebuild test -scheme Variorum -destination platform=macOS` | **3054 tests in 506 suites — ALL GREEN, ZERO ISSUES** (baseline 3045/504; +9/+2 = `BranchDoorFlushTests` 7 + `DeferredProjectionRetryTests` 2) |
+| Full Mac | `xcodebuild test -scheme Variorum -destination platform=macOS` | **3059 tests in 507 suites — ALL GREEN, ZERO ISSUES** (baseline 3045/504; +14/+3 = `BranchDoorFlushTests` 7 + `DeferredProjectionRetryTests` 2 + `QuickNoteParkTests` 5). The rows-1–6 run read 3054/506, likewise all green. |
 | The acceptance spine | inside the full run | `Tutorial book shape` · `Tutorial doors` · `Tutorial acts — writing` all **passed** |
 | Mobile | `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` | **632 tests in 108 suites PASSED with exactly the 4 known issues** (baseline 626/106, same 4; +6/+2 = this batch's two mobile suites) |
 | iOS build | `xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS` | **BUILD SUCCEEDED** |
@@ -432,6 +435,12 @@ store unlocked, Terminal voice.** Captures in `notes/plans/run-a-screens/a1/` (g
    UNIT C walker fact). This is the state the parking proposal is about.
 4. `04-pad-filed-the-capture.png` — ⏎ filed it: the pad is gone, the bottom bar speaks the quiet
    receipt *"Filed in Quicknotes — tagged #quicknote."*, and the branch from (2) still stands (∨2).
+5. `05-pad-typed-before-close.png` · `06-close-filed-it-nothing-parked.png` ·
+   `07-next-summon-is-a-fresh-pad.png` — **row 7's binding-1 GUARD, walked on the rebuilt app**: a
+   capture typed into the pad, then ⌘W with a healthy store. The close FILED it (the shelf's
+   Quicknotes row moved 89w → 103w across the two filings) and the next ⌘⇧N came up EMPTY — no
+   restored line, "File It" grey. Her ruled grammar (*closing files it*; a summon she abandons
+   keeps nothing) is untouched by the park, on the real surface.
 
 **What the walk could NOT stage, said rather than faked:** the pad's REFUSAL road needs the store to
 refuse `importPost`, which on a healthy unlocked dev store cannot be provoked without breaking the
