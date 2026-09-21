@@ -3009,7 +3009,7 @@ CLOSE against what actually shipped):**
 | 4 | **Item 1a** — the masthead stamp's click-cycle (edited → created → clock) + ONE remembered LOCAL choice + pins | DONE (this commit) — **22 tests in 3 suites passed**; the cycle, the memory and a note-she-has-never-opened all pinned |
 | 5 | **Item 1b** — the word counter's click-cycle (full → note → block → icon), the target offer preserved in every state + pins | DONE (this commit) — **22 tests in 3 suites passed**; the target door pinned present in ALL FOUR faces |
 | 6 | **Row 54** — the Timeline rows take the voice's type + pin | DONE (this commit) — **10 tests in 3 suites passed**; the type AND the raw stamp column both fixed |
-| 7 | QUESTIONS #132 (the PROVISIONALs) | NOT-STARTED |
+| 7 | QUESTIONS #132 (the PROVISIONALs) | DONE (this commit) — (a)–(h); next free moves to **#133**. *(Written AFTER the walk, deliberately: three of the eight are calls the walk sharpened.)* |
 | 8 | The WALK on the dev-store Debug build — both voices AND both appearances, captured | DONE (this commit) — 26 captures + 27 crops; both cycles clicked through every state, a note she has never opened arriving in the remembered one, the target door opened FROM the icon, the Timeline in all four voice/appearance combinations |
 | 9 | Closing suites + the ledger's S2 row + the KnownIssues rows (50 · 51 · 54) | NOT-STARTED |
 
