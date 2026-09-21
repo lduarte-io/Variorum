@@ -238,6 +238,15 @@ struct WordTargetFace: View {
             .font(tokens.small.weight(.semibold))
             .foregroundStyle(tokens.accent)
             .lineLimit(1)
+            // 13u4 ladder round 1, R1-2 (the pre-ladder walk's flagged item):
+            // a plain-style button's hit area is exactly its label's bounds,
+            // which at the ICON face is one small glyph. The negative inset
+            // widens the CLICKABLE shape a few points on every side —
+            // hit-testing only, zero layout movement (`contentShape` never
+            // measures), so nothing on the bar moves by a point. Honestly
+            // un-pinnable: "the target feels small" has no red-on-old, so this
+            // is a comfort, verified by eye rather than by a test.
+            .contentShape(Rectangle().inset(by: -6))
         }
         .buttonStyle(.plain)
         // The hover carries the WHOLE fact in every face — which is what
