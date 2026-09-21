@@ -1,7 +1,8 @@
 # RUN A — custody & the text-loss doors (17b + 17l items 1–4/6–7 + 17n + 17m)
 
 **STATUS: OPEN — kicked off 2026-09-21 at the author's word (the `/architect-phase` invocation carrying
-`notes/plans/pre-beta-standing-fix-runs.md`'s paste-ready kickoff). Batch A1 next.**
+`notes/plans/pre-beta-standing-fix-runs.md`'s paste-ready kickoff). BATCH A1 CLOSED (orchestrator-verified,
+adjudication at the record's end). Batch A2 next.**
 
 An ad-hoc standing-fixes phase under a Fable orchestrator per the runs file (her confirmed grouping,
 2026-09-14, R-13u-6). **The entries themselves live in `notes/plans/phase-17-standing-fixes.md` — that
@@ -618,6 +619,34 @@ second-⌘Q-always-proceeds arm keeps her un-trapped. The class rule outranks th
    clear-at-restore semantics, and both PROVISIONAL sentences.
 7. The walk's honesty rule stands: the refusal road is carried by its pins and trace; walk what
    is walkable and say what is not.
+
+### BATCH A1 — ORCHESTRATOR ADJUDICATION (2026-09-21; the batch CLOSES here)
+
+**Verified, never trusted:** all 17 batch commits spot-checked against the report (head `fd2856e5`,
+tree clean, pushed); the P6 wiring confirmed by grep (`clearRedoFuture()` at both recovery-door
+acts); the two rewritten redo pins confirmed the ruled-change class (both had STAGED their state by
+the exact behaviour row 3 fixes; each keeps its subject on a below-operations vehicle); the
+KnownIssues residue row confirmed on disk with owner 17e; QUESTIONS #136/#137 confirmed logged.
+**The orchestrator's own verification acts:** `QuickNoteParkTests` + `BranchDoorFlushTests` re-run
+directly — **12/12 green**; capture `02` read — the minted take carries the debounce-window
+keystrokes on the real board, which is P7's acceptance in a photograph.
+
+**Adjudications sustained:** (1) the implementer's self-caught defaults residue (the row-42 class)
+was verified by contents, scrubbed one-key-only, and the pins isolated — exactly the honest form;
+(2) the row-49 landing flake adjudicated per the traps list (green isolated, zero diff lines in its
+files); (3) row 3's undo-side residue correctly NOT fixed (session-wide stack; 13j's product call)
+— DEFERRED to 17e, on her ratify list at #136; (4) row 7 built to the ruling with the early
+`.terminateNow` road's consult as a correct widening the trace demanded, and the no-reason close
+sentence accepted as the flagged judgment call (rides #137(e), one line to change).
+
+**Dispositions (ledger rows 1–7):** rows 1–6 **FIXED** with named red-on-old pins
+(`MobileCommentDraftTests` 3 · `PromotePicksArchivedPickTests` 3 · `ContentReplacementRedoTests` 5 ·
+`BranchDoorFlushTests` 7 · `MobileQuickNoteReadFailureTests` 3 · `DeferredProjectionRetryTests` 2);
+row 7 **FIXED** to the recorded ruling (`QuickNoteParkTests` 5, revert-verified, the guard green on
+both sides by design). One residue DEFERRED (17e). Nothing dismissed as hollow. Evidence: core
+1639/177 · full Mac **3059/507 ALL GREEN** · mobile 632/108 (the 4 knowns) · iOS build green · 7
+walk captures with the un-walkable refusal road said, not faked. **KnownIssues row 65 resolves at
+the run's closeout** (with rows 32/38/39/40), per the closeout duties.
 
 ---
 
