@@ -4741,7 +4741,7 @@ against what actually shipped):**
 | 1 | The record + the READING (the brief's five reading lists, in order) | DONE (this commit) |
 | 2 | THE PRE-FIX COLD BASELINE, measured on THIS tree (not inherited) + the harness pin written RED-FIRST | **DONE** — the pins RED 3/3 (27807580) and the app-side baseline **6 of 6 cold clicks STALL** (this commit) |
 | 3 | THE FIX — the pane's note rows stand at length-derived heights | **DONE** (this commit) — both pins GREEN 3/3, F1's two ride UNMODIFIED and green beside them; the app measurement is piece 5 |
-| 4 | The BEHAVIOURAL REVERT (red-on-old verified in a worktree) | **NAMED AND STARTING** (this commit; the pre-revert state is committed at f7a7a73e and pushed) — a worktree at the PROBE-ONLY commit `27807580`, this unit's final pins copied in and trimmed to what that tree can compile |
+| 4 | The BEHAVIOURAL REVERT (red-on-old verified in a worktree) | **DONE** — the improvement is the FIX's: 4 runs on the probe-only tree, PIN 1 red 4/4 and PIN 5 red 4/4; PIN 2 red on 5 of 7 pre-fix runs and green on 7 of 7 here |
 | 5 | THE POST-FIX COLD TRIAL TABLE (≥8 trials) + the warm trials against F1's 21/21 | **DONE** (this commit) — **9 of 9 cold SETTLE at top=0**, 11 of 11 warm settle |
 | 6 | The WALK — cold and warm, captured | **DONE** (this commit) — Terminal light (held at 1.5 s AND 6 s, byte-identical), Study light, Study DARK; 52 captures |
 | 7 | Closing suites + QUESTIONS + the KnownIssues row + the ledger's F3 row | PENDING |
@@ -5033,6 +5033,44 @@ the other three stand on arithmetic the calibration pin holds to within a fifth.
 
 **RUNNING TOTAL: 13 of 13 cold, 16 of 16 warm — every one `end=settled top=0`, against 6 of 6
 cold stalls on the pre-fix build.**
+
+### THE BEHAVIOURAL REVERT (piece 4) — is the improvement the FIX's, or the probe's?
+
+**Why this measurement had to be made.** This unit's diff contains TWO things: the heights, and a
+DEBUG span recorder installed beside an existing content-height observer. A probe on a scroll's
+geometry could in principle change how eagerly the surface measures, so "the landing got better"
+could be the probe's side effect rather than the fix's work — and a fix nobody can attribute is not
+a fix. F1's own words for it, and its own method.
+
+**How.** `git worktree add /tmp/f3-probe-only 27807580` — **this unit's own probe-only commit**:
+the span recorder is IN, the heights are OUT, the pane is still a `LazyVStack`. The FINAL pin file
+was copied in and trimmed to the two arms that tree can compile (PIN 3 and PIN 4 name symbols the
+fix introduced), built into its own DerivedData and run alone, four times, nothing else running.
+The worktree was removed afterwards.
+
+| run | PIN 1 — the span under the landing | PIN 5 — notes materialized | PIN 2 — the cold far landing |
+|---|---|---|---|
+| 1 | 13738 → 44655 = **3.3×** ✘ | **52 of 24** ✘ | −0.14 ✓ |
+| 2 | 13738 → 44655 = **3.3×** ✘ | **52 of 24** ✘ | −0.06 ✓ |
+| 3 | 14748 → 42603 = **2.9×** ✘ | **52 of 24** ✘ | **4572.5** ✘ |
+| 4 | 14748 → 42603 = **2.9×** ✘ | **52 of 24** ✘ | **8510.0** ✘ |
+| **this tree** | **1.0×** ✓ (4 runs) | **6 of 24** ✓ | **0.0** ✓ (7 runs) |
+
+**RED ON OLD, GREEN ON NEW, and the credit goes where the measurement puts it: the heights.**
+
+Three things in that table are worth saying out loud:
+
+1. **PIN 5's `52 of 24` is not a typo.** The counter counts `BookIndexPaneNote` CONSTRUCTIONS, and
+   a `LazyVStack` builds a row more than once as it realizes and re-realizes it — so a 24-note book
+   cost 52 constructions of a whole-note view, each opening its own `observeBlockTOC`. This tree
+   costs **6**. That is a P3 improvement nobody asked for and it was measured rather than claimed.
+2. **PIN 2 is red on 5 of 7 pre-fix runs and green on 7 of 7 here** — 1619 · 12447 · 4572 at the
+   probe-only commit's own three runs, and −0.14 · −0.06 · 4572 · 8510 in these four. **That rate
+   shape is the defect's own** (her word was *"sometimes"*; F1 measured 2 of 5, this unit's app
+   protocol measured 6 of 6), and it is exactly why the unit does not rest on that pin alone: the
+   two pins that separate TOTALLY are the ones about the mechanism.
+3. **The probe is exonerated.** Everything it could have improved, it did not: the reverted tree's
+   column moves and its landing misses with the probe installed.
 
 ### THE COLD TRIAL TABLE, POST-FIX (piece 5) — the same protocol, the same store, the same machine
 
