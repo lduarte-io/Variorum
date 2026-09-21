@@ -309,6 +309,11 @@ private struct SettingsResultsPane: View {
                          + "“callout”, “dark”, “seam”, “savepoint”.")
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)
+                        // P-8, per site and deliberate: this is PROSE, and a
+                        // sentence whose own point falls off the end is row
+                        // 63's defect (`CalmSectionHeader`'s own note says
+                        // the same). `nil` is the decision, not the default.
+                        .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.top, 4)
                 } else {
@@ -335,6 +340,10 @@ private struct SettingsResultsPane: View {
                           ? .system(.body, design: .monospaced)
                           : tokens.body)
                     .foregroundStyle(tokens.ink)
+                    // P-8: a row's NAME, so a cap — but a generous one,
+                    // because a helper row's `keys` can be a phrase
+                    // ("⏎ / ⇧⏎ in a capture box").
+                    .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 8)
                 Text(tokens.chromeLabel(badge(finding)))
@@ -345,6 +354,10 @@ private struct SettingsResultsPane: View {
             Text(finding.detail)
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
+                // P-8, deliberate: the ANSWER. Truncating it would be the
+                // feature failing at the moment it works — "how do I make a
+                // callout" is the sentence, not its first line.
+                .lineLimit(nil)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -788,10 +801,20 @@ private struct ShortcutsSettingsPane: View {
                                             .font(.system(.caption, design: .monospaced))
                                             .foregroundStyle(tokens.ink)
                                             .frame(width: 126, alignment: .leading)
+                                            // P-8: the chord column. Three
+                                            // lines is the widest row the
+                                            // helper actually has ("⏎ / ⇧⏎
+                                            // in a capture box").
+                                            .lineLimit(3)
                                             .fixedSize(horizontal: false, vertical: true)
                                         Text(item.does)
                                             .font(tokens.small)
                                             .foregroundStyle(tokens.muted)
+                                            // P-8, deliberate: prose that
+                                            // must finish — this is the
+                                            // ⌘/ helper's own wording and
+                                            // several rows run four lines.
+                                            .lineLimit(nil)
                                             .fixedSize(horizontal: false, vertical: true)
                                     }
                                 }

@@ -388,13 +388,32 @@ struct DivideExtractGestureTests {
             // selection standing here, so it is the caret row). The claim
             // below is untouched: every row stays ENABLED and a refused one
             // speaks.
+            // 13u4 UNIT S1 (her item 7) — A JUSTIFIED EDIT, and it is the
+            // one this list itself made visible: the four PLAIN structural
+            // rows were literals here AND in the menu, sitting beside two
+            // ceremony rows that carried their chords, so the menu read
+            // "Merge choosing takes… (⌥⌘⇧M)" directly under a silent "Merge
+            // Blocks". All six rows now come from the registry through the
+            // ONE chord formatter — **and so do the six expected values
+            // below**, so a key she re-picks moves in the registry alone and
+            // this guard follows it instead of going red. The claim below is
+            // untouched: every row stays ENABLED and a refused one speaks.
             #expect(items.map(\.title) == [
-                "Divide Block at Cursor", "Divide choosing takes… (⌥⌘⇧D)",
-                "Extract Selection",
-                "Make Block from Selection", "Merge Blocks",
-                "Merge choosing takes… (⌥⌘⇧M)",
+                CapabilityRegistry.capability(.divide).menuTitle(),
+                CapabilityRegistry.capability(.divideWithCeremony).menuTitle(),
+                CapabilityRegistry.capability(.extract).menuTitle(),
+                CapabilityRegistry.capability(.makeBlock).menuTitle(),
+                CapabilityRegistry.capability(.merge).menuTitle(),
+                CapabilityRegistry.capability(.mergeWithCeremony).menuTitle(),
                 "Delete in Every Take", "Show Takes", "Archive Block",
                 "Delete Block",
+            ])
+            // …and the chords are really there, spelled out once so the
+            // registry-driven line above cannot pass vacuously.
+            #expect(items.map(\.title).prefix(6) == [
+                "Divide Block at Cursor (⌘⇧D)", "Divide choosing takes… (⌥⌘⇧D)",
+                "Extract Selection (⌘⇧E)", "Make Block from Selection (⌘⇧K)",
+                "Merge Blocks (⌘⇧M)", "Merge choosing takes… (⌥⌘⇧M)",
             ])
             let allEnabled = items.allSatisfy(\.enabled)
             #expect(allEnabled)

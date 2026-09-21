@@ -116,7 +116,7 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 | C1 | Capture microsyntax (item 2, R-13u4-1) | shared rule + both Mac doors; `applyTypedPath` hoist; phone face → parity row | pins + capture walk | **DONE** — ONE pure `Shared/CaptureMicrosyntax.parse` on the `PlainPaste` pattern, run at the HAND-OFF only, on BOTH Mac doors; the `applyTypedPath` HOIST landed with it (`Shared/TypedTagPath`, four consumers, every pre-move name forwarded, **zero test edits on both platforms** — the KnownIssues row's `applyTypedPath` entry is DISCHARGED). **The walk caught what no pin could**: the capture boxes substitute typed quotes, so a hand-typed `{t:"…"}` arrived CURLY and silently filed as text — measured by hexdump, fixed in the brain, re-walked. ZERO routing machinery (the smart-book pin asserts the note joined with no `reading_post` row). Mac **191/31** · mobile **40/3** · iOS green · 34 captures. PROVISIONALs: **QUESTIONS #127** (a)–(g). Record below |
 | C2 | Selection → take (item 9, R-13u4-4) | the MOVE op + Write door; insurance savepoint load-bearing | state-transition + walk | **DONE** — ONE core op (`moveSpanToNewTake`) in the ruled shape: the insurance savepoint · the span leaving EXACTLY as selected · a take at the fan's END branched-not-chosen · ONE undo entry with the exact-row redo, both halves one transaction each. The Write door is registry-declared and rendered ONLY for a single-block selection (P-2, pinned both ways); no chord, the collision sweep recorded. The AppSpec §9 bullet rides the build. **The walk caught the dedupe branch in use** — a move whose take was already saved writes nothing and the receipt drops its saved-first clause, with the four quiet savepoints behind it proving the cover held. Core **1631/175** · Mac **336/38** · iOS green · 24 captures. PROVISIONALs: **QUESTIONS #128** (a)–(e). Record below |
 | F1 | Index chapter-click lands low (item 10) | trace first — the un-adopted `LandingAuthority` is the recorded hypothesis | red-on-old if confirmed + walk | **DONE — THE DEFECT IS REAL, THE HYPOTHESIS CONFIRMED BY MEASUREMENT, THE ADOPTION SHIPPED, AND ONE RESIDUAL STOP-AND-REPORTED.** Reproduced first: **11 misses in 20 chapter clicks** on Sherlock and the field guide (five landing in a DIFFERENT story, one on a blank page, none self-correcting in 6 s); the trace found the book Index had never adopted `Surface/LandingAuthority` (13u2b's own *"at their next touch"*) and a six-aim hand experiment proved a watched landing converges. Shipped: the adoption, with a `LandingPolicy.bookIndex` whose every number was measured (two earlier policies retired by measurement — 12 blind hops FLING the page 45k → 95k). Red-on-old **behavioural-revert verified** in a worktree: the reverted tree misses 3 of 4 gestures and both pins are red (8667 pt · 4077 pt · the block never reported) where this tree lands them at 0.04 and 0.24. Walked in both voices AND both appearances: a chapter click lands the heading at the top and HOLDS it (captured at 1.5 s and 6 s). **Row 56 adjudicated by the paired interleaved protocol** (6 runs, RED on both trees, byte-identical) and the row-49 Outline arm too (green on both, isolated and under load). **THE RESIDUAL, reported rather than smoothed over:** a COLD column still climbing can defeat any compensator (its height oscillates 39k → 143k → 80k pt in six seconds; 2 of 5 cold first deep clicks stall, `end=gaveup` in the signpost) — the remedy is 13u2b UNIT 1's manifest half on this surface, which this brief's stop rule makes the architect's. KnownIssues row opened; QUESTIONS **#129**. Record below |
-| S1 | The Settings shape (items 4/5/6/7 + row 59 + the 2a Settings fork) | tabs · search · fold fix · card grammar · ⌘[/unindent audit · merge-shortcut face; then walk row 53's two re-font occasions once reachable | walk both voices + appearances, captured | NOT-STARTED |
+| S1 | The Settings shape (items 4/5/6/7 + row 59 + the 2a Settings fork) | tabs · search · fold fix · card grammar · ⌘[/unindent audit · merge-shortcut face; then walk row 53's two re-font occasions once reachable | walk both voices + appearances, captured | **DONE** — Settings is NINE panes beside a search field (her item 6, read together with 4 and 5 as ONE ask: what she looks for in Settings is *what the app can do*). **Item 4**: one pure brain over the catalog PLUS the ⌘/ helper's own two lists read-not-copied, so her literal case works — "callout" answers with the word *and* ⌥⌘C. **Item 7 answered at the CLASS**: three menus rendered the four plain structural rows from hard-coded literals beside chorded ceremony rows, teaching that only the ⌥ variant had a key; all six now come from the registry through the ONE formatter, red-on-old measured in a worktree (**5 of 7 pins red, 2 guards green**, and the revert's own dump IS the defect printed). **Item 5**: an audit first — ⌘[ *was* Back, and 13f W16's stated reason (*"the platform's own back/forward idiom"*) measured TRUE of Finder/Safari and FALSE of Apple Notes, Pages, Xcode and VS Code; so ⌘[ outdents and back/forward moved to ⌥⌘[ / ⌥⌘], which is Apple Notes' own resolution of the same collision — PROVISIONAL, **#130**, swept, and said truthfully by the registry, both menu rows, the ⌘/ helper and the tooltips (which now READ the declared chord instead of typing one). **KnownIssues row 59 CLOSED** — and it took TWO moves, the second found by the walk: the nine-pane split alone left the fold alive, because the palette row still stood between the voice and Light & dark. **Row 53 REPRODUCES on BOTH occasions and is REPORTED, not built** (the brief's rule): a re-font that SHRINKS the document strands the surface, one that GROWS it does not; the store is untouched and ⌘↑ heals it. **The walk caught a word no pin could**: typing "unindent" — her own word — found nothing, because every pin typed the app's word "outdent". Mac **357/47**; core and iOS not owed. PROVISIONALs: **#130**, **#131** (a)–(f). Record below |
 | S2 | Library & masthead faces (item 1 + rows 50/51/54) | click-to-cycle stamp + word-counter condense (word-target offer preserved) · `FlippingStamp` hoist + oracle edges · F-0 residue · Timeline voice | walk, captured | NOT-STARTED |
 | S3 | Chrome singles + the conformance sweep (rows 44/45/46/63/67/68/69 + the Trash fork) | 27-site sweep + grep pin · tag sheet voiced · indicator ring · Restore Tutorial confirm · "pools" lesson sweep (re-seed consequence recorded) · seal-blind rename field · `blockNamingDoor` hygiene · Trash cards · closing conformance walk against the reference artifact | walk, captured | NOT-STARTED |
 
@@ -2411,7 +2411,7 @@ last commit)*
 | 4b | The BEHAVIOURAL REVERT — are the pins measuring the CHORD or the refactor? (a worktree with the four literals put back) | DONE (this commit) — **5 of 7 RED on the reverted tree, the 2 guards green**; the revert's own dump is the defect, printed |
 | 5 | Item 5 — the ⌘[ answer (PROVISIONAL) + QUESTIONS #130 | DONE (commit 4) — the swap, its sweep, and every face that says it |
 | 6 | The WALK on the dev-store Debug build, both voices AND both appearances, captured — **including row 53's two re-font occasions** | DONE (this commit) — 48 captures; **row 59 DEAD**, **row 53 REPRODUCES on BOTH occasions**, and the walk caught a word no pin could |
-| 7 | Closing suites + the ledger's S1 row + the KnownIssues rows (59 · 53) | NOT-STARTED |
+| 7 | Closing suites + the ledger's S1 row + the KnownIssues rows (59 · 53) | DONE (this commit) — **357 tests in 47 suites passed**, the acceptance spine's eleven types included; core and iOS NOT OWED (zero `Sources/`, zero `Shared/`) |
 
 ### THE READING (done in this session's own context, in the brief's order)
 
@@ -2742,3 +2742,127 @@ shrinks, and neither growing case reproduces.**
 this unit's job was to make the occasions reachable and say what they do. **KnownIssues row 53 is
 RE-STATED, not closed**: its "NOT exercised" caveat is discharged, and what replaces it is a
 reproduction with a rate, a direction, a healing road and a named hypothesis.
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
+
+**NONE — said explicitly, as the brief asks.** `BlockRangeIndex`, `EditorTextView`,
+`TypedReturn`, `PaneTextAuthority`, `StructuralSeamEdit`, `StructuralGesturePlanner`,
+`runStructural` and its identity oracle, `MarkdownActs` — not one of them is in the diff.
+`EditorViewModel.swift` IS in it, but only `contextMenuItems()`'s six row TITLES (the registry's
+strings in place of literals); no road, guard, order or derivation moved.
+
+**`Sources/VariorumCore/` — ZERO FILES** (verified by name over the whole unit diff), so `Sync/`,
+the schema, the migrations and `Server/` are untouched by construction, **no core run was owed**,
+and the lockstep marker stays **8**. **No `Shared/` file moved**, so the **iOS build is not owed**
+either (the standing convention) and nothing is mobile-visible: Settings is a Mac surface, and the
+phone has its own (`MobileSettingsView`).
+
+**The whole unit is seventeen source files, five test files and three notes files:**
+
+- **NEW: `Features/Settings/SettingsShape.swift`** — the panes, the catalog, the pure search.
+- `Features/Settings/AppSettingsView.swift` — rewritten shell + the four split panes + Shortcuts.
+- `Features/Editor/CommitBar.swift` · `Features/Editor/EditorViewModel.swift` ·
+  `Features/Takes/TakesBottomBar.swift` — item 7's six rows, titles only.
+- `Registry/CapabilityRegistry.swift` · `EditorCommands.swift` — item 5's four labels, two key
+  wirings, two new ones, and the menu rows that wear them.
+- `Features/Help/HelperView.swift` — two rows and one dictionary sentence.
+- `Workspace/WorkspaceNavigation.swift` — the back/forward tooltips now READ the declared chord.
+- Nine files whose only change is a stale chord in a DOC COMMENT (`RootView`, `ShellRouter`,
+  `WorkspaceModel`, `NoteWindowView`, `PaneHost`, `WindowRegistry`, `ContextBar`,
+  `CompareBoardView`, and `EditorCommands`' header) — a stale chord in a comment is the drift
+  class this repo names by name. Provenance comments that record PAST sweeps keep their chords
+  as history, deliberately.
+- Tests: **NEW** `ChordLegibilityTests.swift` (7) and `SettingsShapeTests.swift` (14);
+  `StructuralGestureTests` · `ContextBarShapeTests` · `WalkBuildRoundTests` rewritten to the
+  ruling; `PaneSplitTests`' message strings.
+
+### CLOSING RUNS (at the unit's END — never the full suite at the start)
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| **Mac** — the two new suites, every Settings/palette/appearance suite, the registry walk, the bar's layout suite, both menus' gesture suites, the context-bar and pane-split families the chord swap reaches, the list/format families, the command router and seal doors, the window smoke — AND the acceptance spine under its ELEVEN REAL TYPE NAMES (the `-only-testing` file-name trap, met by every prior unit of this phase and by this one twice) | `xcodebuild test -scheme Variorum -destination platform=macOS` with `-only-testing:` for `SettingsShapeTests` · `ChordLegibilityTests` · `CapabilityRegistryTests` · `CommitBarLayoutTests` · `AppearanceChoiceTests` · `PaletteReachTests` · `PaletteDerivationTests` · `ConfirmationsSettingTests` · `NoLiteralColourTests` · `CopyRegisterPinTests` · `ContextBarDoorsTests` · `ForwardDestinationTests` · `TagChipFitTests` · `PaneSplitModelTests` · `PaneSplitDoorTests` · `PaneMountTests` · `PaneLayoutTests` · `MarkdownActsTests` · `NestedListDoorTests` · `ListContinuationTests` · `SystemHotKeyDeclarationTests` · `QuickNoteMintTests` · `QuickNoteDoorTests` · `SavepointNameCopyTests` · `CommandRouterTests` · `MoveAndExecuteTests` · `SealDoorTests` · `FannedDefaultsTests` · `MergeGestureTests` · `DivideExtractGestureTests` · `MakeBlockGestureTests` · `StructuralRewriteDoorTests` · `DivideWCeremonyTests` · `SpanToTakeDoorTests` · `WriteBlockSelectionTests` · `EditorWindowSmokeTests` + the eleven `Tutorial*` types | **357 tests in 47 suites passed** (exit 0, no skips) |
+| The red-on-old measurement (piece 4b), in a worktree at this unit's own second commit | `-only-testing:VariorumTests/ChordLegibilityTests` on the reverted tree | **5 of 7 RED**, 2 guards green — the table above |
+| **Core** — NOT OWED: `git diff --name-only` over the whole unit lists **zero files under `Sources/`** | — | n/a |
+| **iOS** — NOT OWED: no `Shared/` file moved, and nothing here is mobile-visible | — | n/a |
+
+**Three drift guards were RED on the way and each was rewritten to the ruling, never silenced:**
+`theNestingActsAreDeclaredKeylessAndOffTheToolbar` (renamed
+`theNestingActsAreDeclaredWithTheBracketChords`, its Tab half KEPT and still pinned),
+`theHelpersHistoryRowTeachesTheBarsOwnGlyphs` (now finds its row by the DECLARED chord, so it
+survives this swap and any future re-pick), and `contextMenuItemsFireAndSpeak` (its expected
+titles now come from the registry too, with the six chords spelled out once beside them so the
+registry-driven line cannot pass vacuously). A fourth pin is NEW and exists because of this
+swap: `theNavigationActsMovedToTheOptionBrackets`, which also walks the app's WHOLE key table
+for a duplicate chord — the one way a swap like this can go wrong is by landing on something.
+
+No full-suite run was made at this unit's START; the plan's closeout-refresh baselines stand as
+the baseline (the standing rule).
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **Item 7 was fixed at the CLASS, not at the one row she named.** All four plain structural
+   rows were literals; fixing Merge alone would leave "Divide" silent beside "Divide choosing
+   takes… (⌥⌘⇧D)" — the identical false lesson one row over. Reversing is per-row, one
+   `menuTitle` call each.
+2. **⌘[ WAS REBOUND, and it is the biggest call in this unit.** The brief authorises a rebind as
+   a product-flavoured call implemented PROVISIONAL; what decided it is that 13f W16's *stated
+   reason* is measurably half true — ⌘[/⌘] are back/forward in Finder and Safari and
+   outdent/indent in **Apple Notes and Pages**, Apple's own writing apps, with no HIG rule either
+   way. Variorum is the writing kind, and Apple Notes resolves the same collision by putting its
+   own back/forward on ⌥+brackets, which is exactly where they went. **QUESTIONS #130** carries
+   the three options. Reversing is four labels and four key wirings.
+3. **The Settings shape is a PANE LIST, not more tabs.** Nine panes do not fit a tab bar, the
+   search needs a home, and the reference grammar is a list and a hairline. **#131(c)**.
+4. **Takes is a two-control pane of its own.** Thin is the point: findability is what item 6 is
+   about. **#131(b)**, one `case` from being folded into Editor.
+5. **The search reaches the keyboard map and the dictionary.** A settings-only search could not
+   answer "callout" at all, which is the one sentence that asked for the feature. **#131(d)**.
+6. **`ThemeStore` is injected into the Settings environment** — one line, and it is a fix: every
+   `.alarmVoice()` in Protection and Data Safety has been painting in the FALLBACK voice since it
+   was written. Its HOME is untouched (the recorded waiver).
+7. **The control rows kept `Form`/`Section`.** Two sub-rows EMIT `Section`, which only renders
+   inside a `Form`. The calm grammar is applied where the chrome is new; `.scrollContentBackground(.hidden)`
+   over `tokens.room` and `.tint(tokens.accent)` carry the voice into the system controls.
+8. **The General pane's ORDER changed, not just its contents** — the walk's finding. 18g's
+   recorded worry about pushing the palette's custom-hex refusal down is answered in the code
+   comment rather than waved past.
+9. **Stale chords in DOC COMMENTS were swept; provenance comments were not.** A comment that
+   says "⌘[ walks the pane back" became false; one that records "the same five places swept as
+   ⌘[/⌘] were" is history and stays.
+10. **Every NEW chrome `fixedSize` text carries a DELIBERATE `lineLimit`** (P-8), including four
+    that are `nil` WITH THE REASON AT THE LINE — they are prose whose point must not fall off the
+    end (`CalmSectionHeader`'s own note is the precedent). The 27 OLD sites are S3's (R-13u4-5).
+11. **Nothing was built for row 53.** The brief's rule is walk-and-report and the carve's design
+    is 13u2 UNIT D's record's. What this unit owed was reachability and a measurement, and both
+    are delivered.
+
+### CARRIED TO THE PHASE CLOSEOUT (from this unit)
+
+1. **QUESTIONS #130** (the ⌘[ swap) and **#131 (a)–(f)** (the Settings shape) join her ratify
+   bundle. Next free moves to **#132**.
+2. **KnownIssues row 59 is CLOSED** (walked in all four voice/appearance combinations). **Row 53
+   is RE-STATED**: its "not exercised" caveat is discharged and replaced by a reproduction with a
+   direction, a healing road and a named hypothesis; its owner line now says the remaining work
+   is the carve itself.
+3. **A MOBILE PARITY CANDIDATE, named rather than assumed:** the phone has its own
+   `MobileSettingsView` and none of this unit's code compiles into it. What the phone MIGHT owe
+   is the SHAPE — a search over its own settings — and that is the mobile catch-up's call, not
+   this unit's. (The ⌘[ swap is Mac-only by construction: the phone has no menu bar.)
+4. **A WALKER FACT** for `Tools/WalkKit/README.md` at its next touch: **`sips --cropOffset` did
+   not behave as the README's note describes on these captures** — crops landed on the image's
+   middle rather than at the stated offset, repeatedly, which reads exactly like "the surface
+   drew nothing". Reading the FULL capture (or `sips -Z <width>` to downscale it) was reliable
+   every time and is the road to prefer. Also: **`cliclick t:` cannot type a bracket** (`t:[`
+   is a zsh glob and fails before cliclick sees it) — `osascript … keystroke "[" using command
+   down` is the road for bracket chords.
+5. **The tutorial was NOT edited**, and its merge lesson already names ⌘⇧M, so nothing became
+   false. No re-seed consequence from this unit.
+
+### WHAT A FRESH SESSION WOULD NEED TO FINISH THIS
+
+Nothing. Everything is committed and pushed: the Settings shape and its pure brain, the search
+and its index, item 7's six rows across three menus, item 5's swap with its sweep and every face
+that says it, 21 new pins in two files, three drift guards rewritten to the ruling, QUESTIONS
+#130 and #131, the KnownIssues edits (59 closed, 53 re-stated), the walk captures (gitignored,
+48 of them, listed above) and this record. What is OPEN is hers: **#130** and **#131**. What is
+owed elsewhere: **row 53's carve**, which this unit deliberately did not start.
