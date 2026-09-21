@@ -1,8 +1,8 @@
 # RUN A — custody & the text-loss doors (17b + 17l items 1–4/6–7 + 17n + 17m)
 
 **STATUS: OPEN — kicked off 2026-09-21 at the author's word (the `/architect-phase` invocation carrying
-`notes/plans/pre-beta-standing-fix-runs.md`'s paste-ready kickoff). BATCH A1 CLOSED (orchestrator-verified,
-adjudication at the record's end). Batch A2 next.**
+`notes/plans/pre-beta-standing-fix-runs.md`'s paste-ready kickoff). BATCHES A1 AND A2 CLOSED
+(orchestrator-verified, adjudications at each record's end). Batch A3 next.**
 
 An ad-hoc standing-fixes phase under a Fable orchestrator per the runs file (her confirmed grouping,
 2026-09-14, R-13u-6). **The entries themselves live in `notes/plans/phase-17-standing-fixes.md` — that
@@ -1176,6 +1176,45 @@ from a COMMITTED state, and restored by `git checkout --` from the REPO ROOT wit
 before "restored" is written. If a later session reads "revert starting" here with no "restored"
 after it, check `git diff` first: an uncommitted diff in a mechanism file is a revert in flight —
 restore it from git, never adopt it.
+
+---
+
+### BATCH A2 — ORCHESTRATOR ADJUDICATION (2026-09-21; the batch CLOSES here)
+
+**Verified, never trusted:** the 20 commits spot-checked against the report (head `e841b341`, tree
+clean, pushed); the record's eight row sections read. **The orchestrator's own verification acts:**
+the row-9 custody DRILL re-run directly under `TEST_RUNNER_VARIORUM_MIGRATION_DRILL=1` — the escrow
+leg fired under my hands (*"legacy iCloud escrow item removed → true"*), 9/2 green with
+`EncryptionBookDoorTests` beside it; capture `03` read — the floor refusing a six-character word
+live on the Protection pane, row 14's acceptance in a photograph; **the row-8 substitution's
+premise verified at the source** — `Server/supabase/10_phase13j_purge.sql` §3's own header says the
+ledger is ids-only by design, so the entry's named consult could never answer a book's NAME.
+
+**Adjudications:** (1) **the row-8 design substitution is SUSTAINED** — the entry's letter named a
+mechanism that is unbuildable on the ledger's own security property (building it would mean a
+name-carrying ledger, a disclosure regression); the replacement records the reader's decision while
+the evidence stands, which is MINOR-N3's ruled principle in its own terms; the residuals are named
+at the code and in KnownIssues, and the adjacent product call (the launch seeder honouring another
+device's deletion) was correctly NOT taken — 17e owns it, #138(f) asks her. The 17l disposition
+copy at the run's closeout STATES this deviation plainly. (2) Row 9's her-Mac negative accepted as
+corroboration-not-proof, with the `migrated2a = 1` marker as the strong answer — the honest form.
+(3) Row 15's verification stands AND its one surviving world (`.newerFormat`, where
+`hasRecoveryWrap: false` means "I cannot tell") was a true red-on-old defect, fixed in the one door
+that starts at the phrase half — KnownIssues 32 resolves at the closeout as VERIFIED-plus-one-fix.
+(4) The self-caught row-13 pin over-reach was corrected at its mechanism and recorded — sustained
+as the honest form. (5) The two re-based verbatim pins (row 10) are the ruled-change class, reasons
+at their lines; the ladder sees them in the combined diff.
+
+**Dispositions (ledger rows 8–15):** rows 8 · 9 · 10 · 11 · 12 · 14 **FIXED** with named pins (row
+9 with the drill run and quoted); row 13 **VERIFIED + FIXED** (NIT-N8's face stands; MINOR-N4 (2)'s
+tail PROVISIONAL at #138(a)); row 15 **VERIFIED, and the one world it found FIXED** (arm 3
+red-on-old). Nothing dismissed as hollow. Evidence: core 1639/177 · full Mac **3069/507 ALL GREEN**
+· the drill 5/2 (and re-run by the orchestrator, 9/2 with row 8's suite) · mobile 635/108 (the 4
+knowns) · iOS build green · 4 walk captures with the un-stageable custody faces said, not faked.
+One new KnownIssues row (the launch seeder, owner 17e); QUESTIONS #138's seven items join her
+ratify list; the RE-SEED consequence recorded for the closeout bundle (one press covers 13u4's
+edits + this batch's Lesson 2 / Chapters 2 · 7). **KnownIssues rows 32/38/39/40 resolve at the
+run's closeout.**
 
 ---
 
