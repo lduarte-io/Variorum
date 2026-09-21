@@ -204,7 +204,7 @@ struct PaneSplitModelTests {
         #expect(workspace.closeSplit() == false, "nothing to close, and it says so")
     }
 
-    /// Item 3: each pane keys its own history, and ⌘[ / ⌘] act on the
+    /// Item 3: each pane keys its own history, and ⌥⌘[ / ⌥⌘] act on the
     /// FOCUSED one — which is what `history()`'s focus-aware default buys,
     /// at the model, for the registry closures and the keys alike.
     @Test func eachPaneWalksItsOwnTrailAndTheKeysFollowTheFocus() {
@@ -220,7 +220,7 @@ struct PaneSplitModelTests {
         // Focus is on the second pane, so the default IS the second pane.
         #expect(workspace.focusedPane == second)
         #expect(workspace.history().origin == .post("b"))
-        #expect(workspace.goBack() == .post("b"), "⌘[ walked the focused pane")
+        #expect(workspace.goBack() == .post("b"), "⌥⌘[ walked the focused pane")
         #expect(workspace.history(.primary).current == .post("a"),
                 "the other pane never moved")
 
@@ -231,7 +231,7 @@ struct PaneSplitModelTests {
     }
 
     /// **THE COLD REVIEW'S R1-2 PIN (red on the pre-fix code).** The menu's
-    /// ⌘[ / ⌘] go through the ROUTER, whose old `.primary` default pinned
+    /// ⌥⌘[ / ⌥⌘] go through the ROUTER, whose old `.primary` default pinned
     /// the model's focus-aware default shut. Two arms, both real states:
     /// with a split's second pane focused, `router.goBack()` popped the
     /// PRIMARY pane's trail (and the popped destination was then adopted
@@ -250,11 +250,11 @@ struct PaneSplitModelTests {
         }
         workspace.select(.post("c"), in: second)
 
-        // Arm 1: the split, second pane focused — ⌘[ walks the FOCUSED trail.
+        // Arm 1: the split, second pane focused — ⌥⌘[ walks the FOCUSED trail.
         #expect(workspace.focusedPane == second)
         router.goBack()
         #expect(router.pendingSelection == .post("b"),
-                "⌘[ walked the focused pane's trail, not the primary's")
+                "⌥⌘[ walked the focused pane's trail, not the primary's")
         #expect(workspace.history(.primary).current == .post("a"),
                 "the primary pane's trail never moved")
         router.pendingSelection = nil
@@ -266,7 +266,7 @@ struct PaneSplitModelTests {
         #expect(workspace.focusedPane == second, "focus landed on the survivor")
         router.goForward()  // arm 1's walk-back left a forward future
         #expect(router.pendingSelection == .post("c"),
-                "⌘] still works in the surviving pane")
+                "⌥⌘] still works in the surviving pane")
     }
 
     @Test func theOpenBesideCandidateIsTheMostRecentNoteNoPaneIsShowing() {

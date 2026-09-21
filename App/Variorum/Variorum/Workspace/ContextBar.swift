@@ -29,7 +29,7 @@
 //
 //  ── WHAT CHANGED, AND WHAT DID NOT ───────────────────────────────────────
 //  The NAVIGATION under it is 13f's, untouched: `NavigationHistory`'s
-//  arithmetic, ⌘[ / ⌘], and the W21/membership ascent (the shell decides
+//  arithmetic, ⌥⌘[ / ⌥⌘], and the W21/membership ascent (the shell decides
 //  what a named destination means — P-4). What this file owns is the FACE:
 //  the back chip's spelled-out label is gone, the "in <book(s)>" sentence
 //  is gone into the book icon, the → is a real forward door where before
@@ -60,7 +60,7 @@ struct ContextBar: View {
     /// the row is a constant). It names the destination in the tooltip;
     /// since K11 it is never spelled out on the bar.
     let originLabel: String?
-    /// Where ⌘] would go — nil ⇒ the → is grey. Her ruling: *"after you
+    /// Where ⌥⌘] would go — nil ⇒ the → is grey. Her ruling: *"after you
     /// just went back, i feel like you should be able to go forward"*.
     let forwardLabel: String?
     /// The pane's note's books, already ORDERED (`BookChooserOrder`) — one

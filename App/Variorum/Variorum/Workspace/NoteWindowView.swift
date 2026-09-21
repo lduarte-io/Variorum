@@ -18,7 +18,7 @@
 //     ALREADY EXIST ──────────────────────────────────────────────────────
 //  Not one new availability rule was written for this window. Its workspace
 //  is set with `showOnly`, which records NOTHING — so `openNoteCount` is 0
-//  (⌘⇧1–9 grey), `canNavigateBack`/`Forward` are false (⌘[ / ⌘] grey),
+//  (⌘⇧1–9 grey), `canNavigateBack`/`Forward` are false (⌥⌘[ / ⌥⌘] grey),
 //  `openBesideCandidate` is nil (Open Beside grey) and `panes.count` is 1
 //  (Close Split grey). Everything editing-scoped — ⌘S, the structural and
 //  take families, find — works exactly as in the main window, because it

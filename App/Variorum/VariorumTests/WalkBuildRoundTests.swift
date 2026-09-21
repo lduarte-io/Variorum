@@ -756,23 +756,70 @@ struct NestedListDoorTests {
         #expect(view.string == "prose\t")
     }
 
-    /// The declarations (P-1): keyless BY DESIGN, on the two menus, and
-    /// deliberately NOT on the bottom bar's toolbar.
-    @Test func theNestingActsAreDeclaredKeylessAndOffTheToolbar() {
+    /// The declarations (P-1): on the two menus, deliberately NOT on the
+    /// bottom bar's toolbar — and, since 13u4 UNIT S1, WEARING THE BRACKET
+    /// CHORDS.
+    ///
+    /// **RENAMED, and the rename is the record.** This pin was
+    /// `theNestingActsAreDeclaredKeylessAndOffTheToolbar` and asserted
+    /// `shortcutLabel == nil` on 13k K8's reasoning. Her item 5 —
+    /// *"how are things unindented? that's further proof that I need a
+    /// better formatting shortcut menu"* — is that decision felt from the
+    /// other side: an act with no key is an act no menu can advertise. The
+    /// PROVISIONAL swap (QUESTIONS #130) gives them ⌘] / ⌘[, Apple Notes'
+    /// and Pages' own list-level chords, and moves back/forward to ⌥⌘[ /
+    /// ⌥⌘] where Apple Notes itself puts them.
+    ///
+    /// **The half of K8's reasoning that was never about the brackets still
+    /// holds and is still pinned below:** ⇥ must never become a menu key
+    /// equivalent, so Tab and ⇧Tab stay in the surfaces' own
+    /// `insertTab`/`insertBacktab` — which is what the Tab arms of this
+    /// suite exercise, unmodified.
+    @Test func theNestingActsAreDeclaredWithTheBracketChords() {
         for id in [CapabilityID.formatIndent, .formatOutdent] {
             let capability = CapabilityRegistry.capability(id)
             #expect(capability.doors == [.menuBar, .contextMenu])
             #expect(!capability.doors.contains(.bottomBar),
                     "\(id): Tab is the primary door; the bar is already eight wide")
-            #expect(capability.shortcutLabel == nil,
-                    "declaring ⇥ would force a menu key equivalent and steal Tab app-wide")
-            #expect(EditorCommands.keyEquivalent(for: id) == nil)
             #expect(capability.takesAccess == .native)
             #expect(!FormatBar.renderedCapabilities.contains(id))
+        }
+        #expect(CapabilityRegistry.capability(.formatIndent).shortcutLabel == "⌘]")
+        #expect(CapabilityRegistry.capability(.formatOutdent).shortcutLabel == "⌘[")
+        // …and the keys are NOT ⇥: binding Tab as a menu equivalent would
+        // take it from every control in the app, which is K8's own reason
+        // and is untouched by the swap.
+        for id in [CapabilityID.formatIndent, .formatOutdent] {
+            let wiring = EditorCommands.keyEquivalent(for: id)
+            #expect(wiring != nil, "\(id) has exactly one key wiring")
+            #expect(wiring?.0 != .tab, "⇥ is never a menu key equivalent")
+            #expect(wiring?.1 == .command)
         }
         #expect(MarkdownActs.indentRows.map(\.id) == [.formatIndent, .formatOutdent])
         #expect(MarkdownActs.contextMenuCapabilities.contains(.formatIndent))
         #expect(MarkdownActs.contextMenuCapabilities.contains(.formatOutdent))
+    }
+
+    /// 13u4 UNIT S1 — the OTHER side of the swap, pinned so the pair can
+    /// never drift back into collision: the navigation acts keep their
+    /// brackets and gain ⌥, and no two acts in the app claim one chord.
+    @Test func theNavigationActsMovedToTheOptionBrackets() {
+        #expect(CapabilityRegistry.capability(.navigateBack).shortcutLabel == "⌥⌘[")
+        #expect(CapabilityRegistry.capability(.navigateForward).shortcutLabel == "⌥⌘]")
+        #expect(EditorCommands.keyEquivalent(for: .navigateBack)?.1 == [.command, .option])
+        #expect(EditorCommands.keyEquivalent(for: .navigateForward)?.1 == [.command, .option])
+        // The whole app's key table, checked for a duplicate — the one
+        // place a swap like this can go wrong is by landing on something.
+        var claimed: [String: CapabilityID] = [:]
+        for capability in CapabilityRegistry.all {
+            guard let label = capability.shortcutLabel,
+                  let wiring = EditorCommands.keyEquivalent(for: capability.id) else { continue }
+            let key = "\(wiring.0.character)|\(wiring.1.rawValue)"
+            if let taken = claimed[key] {
+                Issue.record("\(capability.id) (\(label)) collides with \(taken)")
+            }
+            claimed[key] = capability.id
+        }
     }
 
     /// The helper carries BOTH doors in prose — the registry's drift guard

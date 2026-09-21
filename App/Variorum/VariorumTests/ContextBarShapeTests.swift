@@ -75,16 +75,22 @@ struct ContextBarDoorsTests {
         #expect(forward == back + 2, "← and → are the mirrored pair of one block")
     }
 
-    /// **R2-1's drift guard (13k round 2):** the helper's ⌘[/⌘] row now
+    /// **R2-1's drift guard (13k round 2):** the helper's back/forward row
     /// INTERPOLATES the bar's own glyph constants, so the prose and the bar
     /// cannot disagree again. RED ON THE PRE-FIX COPY: the row read "the ←
     /// and › on the context bar" — the chevron R4-1 retired — so the second
     /// expectation failed and the third found the retired glyph by name.
+    ///
+    /// 13u4 UNIT S1: the row is found by the DECLARED chord rather than by a
+    /// typed one, so it survives her item 5's swap (⌘[ → ⌥⌘[) and any
+    /// future re-pick — a guard that has to be edited when a key moves is
+    /// half a guard.
     @MainActor
     @Test func theHelpersHistoryRowTeachesTheBarsOwnGlyphs() {
+        let chord = CapabilityRegistry.capability(.navigateBack).shortcutLabel
         let row = HelperView.groups.flatMap(\.items)
-            .first { $0.keys.contains("\u{2318}[") }
-        #expect(row != nil, "the ⌘[ / ⌘] row exists in the helper")
+            .first { $0.keys.contains(chord ?? "\u{2318}[") }
+        #expect(row != nil, "the back / forward row exists in the helper")
         #expect(row?.does.contains(ContextBarDoors.forwardGlyph) == true,
                 "the row teaches the glyph the bar actually wears")
         #expect(row?.does.contains("\u{203A}") == false,

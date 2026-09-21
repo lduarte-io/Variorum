@@ -1236,22 +1236,42 @@ nonisolated enum CapabilityRegistry {
         // **13k K8 — nesting** (her ruling: *"we should allow indented lists
         // and it should happen when you click tab"*; sitting Q3: ⇧Tab + these
         // two rows). NO `.bottomBar` door, deliberately: Tab and ⇧Tab are the
-        // primary door and K7's toolbar is already eight wide. NO
-        // `shortcutLabel`, also deliberately: the walk would then require a
-        // menu key equivalent (`everyShortcutLabelHasExactlyOneKeyWiring`),
-        // and binding ⇥ as one would steal Tab app-wide — so the keys live in
-        // the surfaces' `insertTab`/`insertBacktab`, where ⏎'s lives, and the
-        // ⌘/ helper carries both doors in prose instead.
+        // primary door and K7's toolbar is already eight wide.
+        //
+        // **13u4 UNIT S1 (her item 5) — THESE TWO GAINED ⌘] / ⌘[, PROVISIONAL
+        // (QUESTIONS #130).** Her report: *"command [ is moving me between my
+        // different open notes ? is that supposed to do that? I thought it
+        // unindented things. related - how are things unindented?"* Both
+        // halves were true: ⌘[ WAS `.navigateBack` (13f W16), and unindent
+        // was reachable only by ⇧Tab or a Format-menu row with no key.
+        //
+        // The measured ground for the swap (the unit record's audit 1): ⌘[/⌘]
+        // are **outdent/indent in Apple Notes and in Pages** — Apple's own
+        // writing apps, documented in their own shortcut guides — and in
+        // Xcode and VS Code; they are **back/forward in Finder and Safari**.
+        // There is no HIG rule naming them, so 13f W16's stated reason
+        // (*"the platform's own back/forward idiom"*) is true of navigation
+        // CHROME and false of the app category this app is in. **Apple Notes
+        // resolves the same collision the same way:** ⌘[/⌘] change the list
+        // level, and ⌥⌘[/⌥⌘] are its link back/forward — which is exactly
+        // where `.navigateBack`/`.navigateForward` moved below.
+        //
+        // The Tab pair is UNCHANGED and is still the primary door: ⇥ is not
+        // a menu key equivalent and must never become one (it would be taken
+        // from every control in the app), so it stays in the surfaces'
+        // `insertTab`/`insertBacktab` where ⏎'s lives. What these labels add
+        // is a key the menu can WEAR — which is what makes the act findable
+        // at all, and is the half of her report a tab of settings cannot fix.
         Capability(
             id: .formatIndent, verb: "Indent", scope: .block,
             doors: [.menuBar, .contextMenu],
-            shortcutLabel: nil, takesAccess: .native,
+            shortcutLabel: "\u{2318}]", takesAccess: .native,
             unavailableNote: "Formatting acts on the text you're writing — open a note first.",
             availability: editableText),
         Capability(
             id: .formatOutdent, verb: "Outdent", scope: .block,
             doors: [.menuBar, .contextMenu],
-            shortcutLabel: nil, takesAccess: .native,
+            shortcutLabel: "\u{2318}[", takesAccess: .native,
             unavailableNote: "Formatting acts on the text you're writing — open a note first.",
             availability: editableText),
 
@@ -1288,16 +1308,27 @@ nonisolated enum CapabilityRegistry {
         // you just went back, i feel like you should be able to go
         // forward"*). Declaring both is what puts the bar's own doors under
         // the walk (`ContextBar.surfaceCapabilities`).
+        // **13u4 UNIT S1 (her item 5) — THE CHORDS MOVED TO ⌥⌘[ / ⌥⌘],
+        // PROVISIONAL (QUESTIONS #130).** The acts, their doors, their
+        // availability and the context bar's ← → are byte-unchanged; only
+        // the keys moved, onto the pair **Apple Notes itself uses for
+        // back/forward** while its plain brackets change the list level.
+        // The collision sweep's result: ⌥⌘[ and ⌥⌘] are FREE — swept across
+        // `EditorCommands.keyEquivalent`, every `.keyboardShortcut(` call
+        // site in `Variorum/` and `Shared/` (the ONLY bracket chords in the
+        // app were these two), every `NSMenuItem` keyEquivalent (all empty
+        // strings) and both `performKeyEquivalent` overrides (⌘S, plus J7's
+        // non-consuming ⌘Z/⌘⇧Z hint arm) — no bracket anywhere carries ⌥.
         Capability(
             id: .navigateBack, verb: "Back", scope: .app,
             doors: [.menuBar, .surface],
-            shortcutLabel: "\u{2318}[", takesAccess: nil,
+            shortcutLabel: "\u{2325}\u{2318}[", takesAccess: nil,
             unavailableNote: "Nothing to go back to — this is where you started.",
             availability: { ctx in ctx.canNavigateBack ? .act : .unavailable }),
         Capability(
             id: .navigateForward, verb: "Forward", scope: .app,
             doors: [.menuBar, .surface],
-            shortcutLabel: "\u{2318}]", takesAccess: nil,
+            shortcutLabel: "\u{2325}\u{2318}]", takesAccess: nil,
             unavailableNote: "Nothing to go forward to — you haven't gone back.",
             availability: { ctx in ctx.canNavigateForward ? .act : .unavailable }),
         // 13f batch 4 — the SPLIT (her W1/A25 ruling). The menu door puts

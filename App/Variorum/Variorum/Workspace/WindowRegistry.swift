@@ -15,7 +15,7 @@
 //  right window:
 //
 //  1. **The menu bar.** `EditorCommands` is attached to the SCENE, not to a
-//     window, and its navigation doors (⌘[, ⌘], ⌘⇧1…9, Open Beside, the
+//     window, and its navigation doors (⌥⌘[, ⌥⌘], ⌘⇧1…9, Open Beside, the
 //     context-bar fold) act on *the key window's* workspace. It reads
 //     `activeRouter`.
 //  2. **The key-window mount gate.** `PaneMount` gained the window's

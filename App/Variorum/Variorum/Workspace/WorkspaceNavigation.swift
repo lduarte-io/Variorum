@@ -166,7 +166,7 @@ nonisolated enum PaneLayout {
 
 // MARK: - Per-pane history (W16)
 
-/// One pane's visit history — the ⌘[ / ⌘] stacks and the back chip's
+/// One pane's visit history — the ⌥⌘[ / ⌥⌘] stacks and the back chip's
 /// origin. Pure and totally ordered: `back` is oldest-first, so `back.last`
 /// is where "←" goes and whose name the chip wears.
 nonisolated struct NavigationHistory: Equatable {
@@ -214,7 +214,7 @@ nonisolated struct NavigationHistory: Equatable {
         forward.removeAll()
     }
 
-    /// ⌘[ — nil when there is nowhere back.
+    /// ⌥⌘[ — nil when there is nowhere back.
     mutating func goBack() -> SidebarSelection? {
         guard let destination = back.popLast() else { return nil }
         if let current { forward.append(current) }
@@ -222,7 +222,7 @@ nonisolated struct NavigationHistory: Equatable {
         return destination
     }
 
-    /// ⌘] — nil when nothing was walked back from.
+    /// ⌥⌘] — nil when nothing was walked back from.
     mutating func goForward() -> SidebarSelection? {
         guard let destination = forward.popLast() else { return nil }
         if let current { back.append(current) }
@@ -389,19 +389,32 @@ nonisolated enum WorkspaceNaming {
     /// having, because an arrow alone does not say where it lands. `nil` ⇒
     /// the door is grey, and it says why (the registry's `unavailableNote`,
     /// in the same words).
+    ///
+    /// **13u4 UNIT S1:** the chord is READ from the declaration rather than
+    /// typed here. It was `⌘[` in this string and `⌥⌘[` in the registry the
+    /// moment her item 5 moved the key — which is the same defect her item 7
+    /// reports one menu over (a face typing a chord beside a registry that
+    /// declares it). `shortcutLabel` is optional in the model, so the
+    /// parenthesis simply drops if the act is ever un-keyed.
     static func backHelp(origin: String?) -> String {
         guard let origin else { return "Nothing to go back to \u{2014} this is where you started" }
-        return "Back to \(origin) (\u{2318}[)"
+        return "Back to \(origin)\(chordSuffix(.navigateBack))"
+    }
+
+    /// The declared chord in parentheses, or nothing at all.
+    private static func chordSuffix(_ id: CapabilityID) -> String {
+        guard let chord = CapabilityRegistry.capability(id).shortcutLabel else { return "" }
+        return " (\(chord))"
     }
 
     /// 13k K11's second half — her words: *"after you just went back, i feel
-    /// like you should be able to go forward"*. The ⌘] act's face, and the
+    /// like you should be able to go forward"*. The forward act's face, and the
     /// mirror of `backHelp` down to its grey sentence.
     static func forwardHelp(destination: String?) -> String {
         guard let destination else {
             return "Nothing to go forward to \u{2014} you haven't gone back"
         }
-        return "Forward to \(destination) (\u{2318}])"
+        return "Forward to \(destination)\(chordSuffix(.navigateForward))"
     }
 
     // MARK: - The split (13f batch 4, W1/A25)

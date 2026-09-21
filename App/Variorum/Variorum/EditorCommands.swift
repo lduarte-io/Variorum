@@ -23,7 +23,7 @@ struct EditorCommands: Commands {
     /// 13f batch 5b (W2/A26): the menu bar is attached to the SCENE, not to
     /// a window, so it cannot hold one window's router any more — it asks
     /// the registry which window is key. Every door below that touches a
-    /// workspace (⌘[, ⌘], ⌘⇧1–9, Open Beside, Close Split, the context-bar
+    /// workspace (⌥⌘[, ⌥⌘], ⌘⇧1–9, Open Beside, Close Split, the context-bar
     /// fold) therefore acts on the window she is actually in.
     let windows: WindowRegistry
 
@@ -213,15 +213,32 @@ struct EditorCommands: Commands {
         // own save-as chord, which is exactly what saving a whole moment is.
         case .saveNoteVersion: ("s", [.command, .shift])
         case .helper: ("/", .command)
-        // 13f batch 3 (W16). THE COLLISION SWEEP'S RESULT: ⌘[ and ⌘] are
-        // FREE — swept across this table, every `.keyboardShortcut(` call
-        // site in `Variorum/` and `Shared/`, every `NSMenuItem`
-        // keyEquivalent (all empty strings), and the one
-        // `performKeyEquivalent` override (⌘S only). No bracket character
-        // is bound anywhere in the app, and they are the platform's own
-        // back/forward idiom.
-        case .navigateBack: ("[", .command)
-        case .navigateForward: ("]", .command)
+        // 13f batch 3 (W16) minted ⌘[ / ⌘] here, on the stated reason that
+        // *"they are the platform's own back/forward idiom"* — which the
+        // 13u4 UNIT S1 audit measured as true of navigation CHROME (Finder,
+        // Safari) and false of the app category this app is in: ⌘[ / ⌘] are
+        // **outdent / indent** in Apple Notes, Pages, Xcode and VS Code, and
+        // no HIG rule names them either way. Her item 5 is that collision,
+        // felt: *"command [ is moving me between my different open notes ?
+        // … I thought it unindented things."*
+        //
+        // **13u4 UNIT S1 — the chords swap, PROVISIONAL (QUESTIONS #130),
+        // on Apple Notes' OWN resolution of the same collision:** plain
+        // brackets change the list level, ⌥ brackets navigate. THE
+        // COLLISION SWEEP'S RESULT: ⌥⌘[ and ⌥⌘] are FREE — swept across
+        // this table, every `.keyboardShortcut(` call site in `Variorum/`
+        // and `Shared/` (the only bracket chords in the app were the two
+        // below), every `NSMenuItem` keyEquivalent (all empty strings) and
+        // both `performKeyEquivalent` overrides (⌘S; J7's non-consuming
+        // ⌘Z/⌘⇧Z hint arm). No bracket anywhere carries ⌥.
+        case .navigateBack: ("[", [.command, .option])
+        case .navigateForward: ("]", [.command, .option])
+        // 13k K8's pair, keyed at 13u4 UNIT S1. ⇥ / ⇧⇥ remain the primary
+        // door and are deliberately NOT menu key equivalents (binding ⇥
+        // would take Tab from every control in the app); these are the
+        // menu's own keys, so the act is findable at all.
+        case .formatOutdent: ("[", .command)
+        case .formatIndent: ("]", .command)
         // 13f batch 5 (W20 b) minted ⌘⇧I (the sweep found it free); 13k K12
         // repointed it at the tag cards' fold; the Act 10 correction round
         // (row 15) repoints it once more, at the act itself — the masthead's
@@ -701,14 +718,21 @@ struct EditorCommands: Commands {
             Button(verb(.formatChecklist)) { actions?.applyFormat(.checkbox) }
                 .disabled(!enabled(.formatChecklist))
             Divider()
-            // 13k K8 (her ruling + sitting Q3): the nesting rows. Keyless
-            // BY DESIGN — Tab and ⇧Tab do this inside a list, and neither
-            // may become a menu key equivalent (it would steal Tab from
-            // every control in the app), so the rows say what they do and
-            // the helper names both doors in prose.
+            // 13k K8 (her ruling + sitting Q3): the nesting rows. TAB and
+            // ⇧TAB remain the primary door and are still deliberately NOT
+            // menu key equivalents (binding ⇥ would steal Tab from every
+            // control in the app), so they stay in the surfaces' own
+            // `insertTab`/`insertBacktab`.
+            // 13u4 UNIT S1 (her item 5 — *"how are things unindented?"*):
+            // the rows now WEAR keys, so the act is findable from the menu
+            // that holds it. ⌘] / ⌘[ are Apple Notes' and Pages' own list-
+            // level chords; back/forward moved to ⌥⌘[ / ⌥⌘], which is where
+            // Apple Notes puts them too. PROVISIONAL — QUESTIONS #130.
             Button(verb(.formatIndent)) { actions?.applyFormat(.indent) }
+                .keyboardShortcut("]", modifiers: .command)
                 .disabled(!enabled(.formatIndent))
             Button(verb(.formatOutdent)) { actions?.applyFormat(.outdent) }
+                .keyboardShortcut("[", modifiers: .command)
                 .disabled(!enabled(.formatOutdent))
         }
         // ⌘1–⌘6 — the post modes (routed 13b 1b: composition, not a
@@ -721,15 +745,18 @@ struct EditorCommands: Commands {
                     .disabled(!enabled(.switchMode))
             }
             Divider()
-            // 13f batch 3 (W16 — her ruling): the pane's back/forward, on
-            // the platform's own keys. Every door in this file is honestly
-            // grey where it cannot act: at the shelf, with nothing visited
-            // yet, Back is grey rather than a key that does nothing.
+            // 13f batch 3 (W16 — her ruling): the pane's back/forward.
+            // Every door in this file is honestly grey where it cannot act:
+            // at the shelf, with nothing visited yet, Back is grey rather
+            // than a key that does nothing.
+            // 13u4 UNIT S1 (her item 5): the KEYS moved to ⌥⌘[ / ⌥⌘] — the
+            // acts, the doors and the context bar's ← → are unchanged. See
+            // `keyEquivalent(for:)` for the measurement and the sweep.
             Button(verb(.navigateBack)) { router?.goBack() }
-                .keyboardShortcut("[", modifiers: .command)
+                .keyboardShortcut("[", modifiers: [.command, .option])
                 .disabled(!enabled(.navigateBack))
             Button(verb(.navigateForward)) { router?.goForward() }
-                .keyboardShortcut("]", modifiers: .command)
+                .keyboardShortcut("]", modifiers: [.command, .option])
                 .disabled(!enabled(.navigateForward))
             // The Act 10 correction round (row 15): ⌘⇧I tags the note — it
             // opens the masthead's inline field, grey with no note open.

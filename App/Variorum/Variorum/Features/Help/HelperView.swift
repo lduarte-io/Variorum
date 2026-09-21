@@ -138,6 +138,15 @@ struct HelperView: View {
             ("Tab / ⇧Tab in a list", "indent / outdent the list item you're in "
                 + "(Format ▸ Indent and Format ▸ Outdent do the same); "
                 + "outside a list, Tab is the key it always was"),
+            // 13u4 UNIT S1 (her item 5, verbatim: *"how are things
+            // unindented? that's further proof that I need a better
+            // formatting shortcut menu"*). The list-level chords Apple Notes
+            // and Pages use, on the rows that already did the act — so the
+            // answer is a key AND a menu item, not only a key Tab cannot
+            // advertise. Back/forward moved to ⌥⌘[ / ⌥⌘], where Apple Notes
+            // puts them too.
+            ("⌘] / ⌘[", "indent / outdent the list item you're in — the same act "
+                + "as Tab / ⇧Tab, on keys the Format menu can show you"),
         ]),
         // QoL batch 3 (L6): the in-post find family. Deliberately its own
         // group and deliberately worded against ⌘K's row below — one searches
@@ -172,7 +181,10 @@ struct HelperView: View {
             // 13k round 2 (R2-1): the glyphs are INTERPOLATED from the bar's
             // own constants, so this row can never again describe a door the
             // bar stopped wearing (it read "← and ›" after R4-1 shipped →).
-            ("⌘[ / ⌘]", "back / forward, in the pane you're in — the "
+            // 13u4 UNIT S1 (her item 5): the KEYS moved to ⌥⌘[ / ⌥⌘] so the
+            // plain brackets can change a list's level, as they do in Apple
+            // Notes and Pages — which is also where ⌥ + brackets navigate.
+            ("⌥⌘[ / ⌥⌘]", "back / forward, in the pane you're in — the "
                 + "\(ContextBarDoors.backGlyph) and \(ContextBarDoors.forwardGlyph) "
                 + "on the context bar are the same two doors"),
             // The Act 10 correction round (row 15): ⌘⇧I tags the note — the
@@ -394,7 +406,7 @@ struct HelperView: View {
          + "a click when it's in several, lists them), and → forward. The note's tag "
          + "cards live in the masthead's right edge, with ＃ to add one. A door with "
          + "nowhere to go is greyed, not hidden — "
-         + "the row never changes shape. ⌘[ / ⌘] and ⌘⇧I are the same doors on the "
+         + "the row never changes shape. ⌥⌘[ / ⌥⌘] and ⌘⇧I are the same doors on the "
          + "keyboard."),
         ("star",
          "A shortcut to a note or a book, pinned at the sidebar's top under "

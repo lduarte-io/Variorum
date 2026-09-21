@@ -718,7 +718,7 @@ struct RootView: View {
                 router.workspace.focus(pane)
                 router.goBack(in: pane)
             },
-            // 13k K11: the → is ⌘]'s face, on the pane it sits above —
+            // 13k K11: the → is ⌥⌘]'s face, on the pane it sits above —
             // focus first, exactly as the ← does, so the key and the icon
             // can never act on different panes.
             onForward: {
@@ -919,7 +919,7 @@ struct RootView: View {
     /// 13f W20(a) — the ascent, decided in ONE place. Both doors (the
     /// masthead chip's link and the context bar's in-line) name a book and a
     /// post; this parks the landing and navigates through the ONE adoption
-    /// door, so the pane's history is pushed and ⌘[ returns to the note.
+    /// door, so the pane's history is pushed and ⌥⌘[ returns to the note.
     private func openBook(_ bookID: String, at postID: String, in pane: PaneID) {
         bookAscent = BookAscent(bookID: bookID, postID: postID)
         adopt(.reading(bookID), in: pane)

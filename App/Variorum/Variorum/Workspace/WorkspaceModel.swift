@@ -120,7 +120,7 @@ final class WorkspaceModel {
     /// "focused-pane refinement" landed: the registry's `canNavigateBack` /
     /// `canNavigateForward` closures the shell wired in batch 3 call
     /// `history()`, so they became focus-aware without a line changing at
-    /// either end, and ⌘[ / ⌘] act on the focused pane for the same reason.
+    /// either end, and ⌥⌘[ / ⌥⌘] act on the focused pane for the same reason.
     func history(_ pane: PaneID? = nil) -> NavigationHistory {
         histories[pane ?? focusedPane] ?? NavigationHistory()
     }
@@ -250,7 +250,7 @@ final class WorkspaceModel {
     /// and touches the open-notes recency when the destination is a note.
     ///
     /// Idempotent on re-arrival: the history no-ops when the destination is
-    /// already current (which is how ⌘[ / ⌘] avoid a re-entrancy flag),
+    /// already current (which is how ⌥⌘[ / ⌥⌘] avoid a re-entrancy flag),
     /// while the recency touch still runs — arriving IS opening, however
     /// you got there.
     func visit(_ destination: SidebarSelection, in pane: PaneID? = nil) {
@@ -275,7 +275,7 @@ final class WorkspaceModel {
     /// corpus (the bounded-windows discipline applied to view state).
     static let recentBookBound = 20
 
-    /// ⌘[ — the destination to navigate to, or nil. Acts on the FOCUSED
+    /// ⌥⌘[ — the destination to navigate to, or nil. Acts on the FOCUSED
     /// pane (item 3).
     func goBack(in pane: PaneID? = nil) -> SidebarSelection? {
         let pane = pane ?? focusedPane
@@ -285,7 +285,7 @@ final class WorkspaceModel {
         return destination
     }
 
-    /// ⌘] — the mirror.
+    /// ⌥⌘] — the mirror.
     func goForward(in pane: PaneID? = nil) -> SidebarSelection? {
         let pane = pane ?? focusedPane
         var history = self.history(pane)
@@ -301,7 +301,7 @@ final class WorkspaceModel {
     /// That silence is the whole mechanism behind the ruling's promise that
     /// every app-scope act "resolves honestly grey there through the
     /// EXISTING gates". With no visit recorded, `openNoteCount` is 0 (⌘⇧1–9
-    /// grey), `canNavigateBack/Forward` are false (⌘[ / ⌘] grey),
+    /// grey), `canNavigateBack/Forward` are false (⌥⌘[ / ⌥⌘] grey),
     /// `openBesideCandidate` is nil (Open Beside grey) and `panes.count` is
     /// 1 (Close Split grey) — four honest greys and not one new rule.
     func showOnly(_ destination: SidebarSelection) {

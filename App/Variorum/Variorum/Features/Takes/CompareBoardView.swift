@@ -1173,7 +1173,7 @@ struct CompareBoardView: View {
                             .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
                             .help("Line diff of the two notes' rendered text — savable to a file")
                         // 13f batch 3 (W16): fire-and-DO — OPEN the note in
-                        // the ordinary editor; ⌘[ comes straight back (P-4,
+                        // the ordinary editor; ⌥⌘[ comes straight back (P-4,
                         // the `.variorumOpenPost` channel).
                         Button(tokens.chromeLabel(CapabilityRegistry.capability(.openPeerPost).verb)) {
                             NotificationCenter.default.post(
