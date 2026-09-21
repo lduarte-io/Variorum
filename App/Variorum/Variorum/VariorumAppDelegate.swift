@@ -110,7 +110,12 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     /// (its `finalizeAtQuit` just ran), so nothing is said twice; when it is
     /// not, the status seam carries the same sentence the close road speaks,
     /// because a quit that quietly refuses to quit is its own defect.
-    private func declineQuitIfACaptureStands() -> Bool {
+    /// Internal, not private, for the reason the house style gives
+    /// elsewhere: the branch that decides whether ⌘Q is honoured should be
+    /// checkable. Driving `applicationShouldTerminate` itself would mean
+    /// calling `reply(toApplicationShouldTerminate:)` on the real `NSApp`
+    /// inside a test host, which is exactly the thing a pin must not do.
+    func declineQuitIfACaptureStands() -> Bool {
         guard let session, session.quickNotePark.declineQuitOnce() else { return false }
         if !session.quickNotePark.isPadShowing {
             session.status.refuse(QuickNoteCopy.parkedOnClose)

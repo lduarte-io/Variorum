@@ -24,7 +24,9 @@
 //     `applicationShouldTerminate` replied `true` unconditionally, so a
 //     refusal at quit was not even observable.
 //
-//  The four pins below are the ruling's, in its order.
+//  The ruling's four pins are below, in its order — with pin (iii) split
+//  in two: the park's own one-shot, and the quit door's decision as the
+//  delegate actually consults it.
 //
 
 import AppKit
@@ -179,6 +181,46 @@ struct QuickNoteParkTests {
             #expect(session.quickNotePark.declineQuitOnce(),
                     "a fresh refusal gets its own one-shot")
             #expect(!session.quickNotePark.declineQuitOnce())
+        }
+    }
+
+    /// **PIN (iii), the DELEGATE's half** — the same one-shot as the quit
+    /// door actually consults it, plus binding 4's "speaks where the pad
+    /// cannot": with no pad on screen the status seam carries the close
+    /// road's sentence, because a quit that quietly refuses to quit is its
+    /// own defect. (`applicationShouldTerminate` itself is not driven: it
+    /// would mean calling `reply(toApplicationShouldTerminate:)` on the
+    /// real `NSApp` inside the test host.)
+    @Test func theQuitDoorsOwnDecisionDeclinesOnceAndSpeaks() async throws {
+        try await withParkWorld { session in
+            let delegate = VariorumAppDelegate()
+            delegate.session = session
+            #expect(!delegate.declineQuitIfACaptureStands(),
+                    "nothing parked — ⌘Q is never touched")
+
+            let pad = refusingPad(session)
+            pad.text = Self.capture
+            _ = await pad.finalizeAtQuit()
+            session.quickNotePark.isPadShowing = false   // the pad had been closed
+
+            #expect(delegate.declineQuitIfACaptureStands(), "declined once")
+            #expect(session.status.current?.text == QuickNoteCopy.parkedOnClose,
+                    "…and it says so, since no pad is up to say it")
+            #expect(session.status.current?.kind == .refusal)
+
+            #expect(!delegate.declineQuitIfACaptureStands(),
+                    "the second consecutive ⌘Q proceeds")
+
+            // With the pad ON SCREEN it is already speaking its own refusal
+            // line, so the seam stays quiet — one event, said once.
+            session.quickNotePark.clear()
+            session.status.clear()
+            let open = refusingPad(session)
+            open.text = "still here, pad and all"
+            _ = await open.finalizeAtQuit()
+            session.quickNotePark.isPadShowing = true
+            #expect(delegate.declineQuitIfACaptureStands())
+            #expect(session.status.current == nil, "the pad carries it — never twice")
         }
     }
 
