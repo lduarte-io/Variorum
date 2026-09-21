@@ -698,7 +698,15 @@ final class QuitFinalizeRegistry {
 /// in which no key exists to seal a persisted park, so a disk-backed one
 /// would fail precisely when it was needed. The cost is stated rather than
 /// hidden: a crash or a forced second quit still loses the capture, bounded
-/// by one summon, which is the pad's own cost model.
+/// by one summon, which is the pad's own cost model. And one timing window
+/// belongs on the same ledger (ladder round 2, NIT — its own class, strictly
+/// neither a crash nor a forced quit): the CLOSE road's refusal lands
+/// asynchronously (`onDisappear` spawns the filing task), so a ⌘Q pressed
+/// inside that flight is decided before the park is armed and quits
+/// UNDECLINED — the quit road itself has no such window, because its own
+/// filing runs before the decision by construction, and parking
+/// optimistically at close would hold unrefused captures, which binding 1
+/// forbids.
 @MainActor
 @Observable
 final class QuickNotePark {
