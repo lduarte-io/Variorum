@@ -145,7 +145,7 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 | S1 | The Settings shape (items 4/5/6/7 + row 59 + the 2a Settings fork) | tabs · search · fold fix · card grammar · ⌘[/unindent audit · merge-shortcut face; then walk row 53's two re-font occasions once reachable | walk both voices + appearances, captured | **DONE** — Settings is NINE panes beside a search field (her item 6, read together with 4 and 5 as ONE ask: what she looks for in Settings is *what the app can do*). **Item 4**: one pure brain over the catalog PLUS the ⌘/ helper's own two lists read-not-copied, so her literal case works — "callout" answers with the word *and* ⌥⌘C. **Item 7 answered at the CLASS**: three menus rendered the four plain structural rows from hard-coded literals beside chorded ceremony rows, teaching that only the ⌥ variant had a key; all six now come from the registry through the ONE formatter, red-on-old measured in a worktree (**5 of 7 pins red, 2 guards green**, and the revert's own dump IS the defect printed). **Item 5**: an audit first — ⌘[ *was* Back, and 13f W16's stated reason (*"the platform's own back/forward idiom"*) measured TRUE of Finder/Safari and FALSE of Apple Notes, Pages, Xcode and VS Code; so ⌘[ outdents and back/forward moved to ⌥⌘[ / ⌥⌘], which is Apple Notes' own resolution of the same collision — PROVISIONAL, **#130**, swept, and said truthfully by the registry, both menu rows, the ⌘/ helper and the tooltips (which now READ the declared chord instead of typing one). **KnownIssues row 59 CLOSED** — and it took TWO moves, the second found by the walk: the nine-pane split alone left the fold alive, because the palette row still stood between the voice and Light & dark. **Row 53 REPRODUCES on BOTH occasions and is REPORTED, not built** (the brief's rule): a re-font that SHRINKS the document strands the surface, one that GROWS it does not; the store is untouched and ⌘↑ heals it. **The walk caught a word no pin could**: typing "unindent" — her own word — found nothing, because every pin typed the app's word "outdent". Mac **357/47**; core and iOS not owed. PROVISIONALs: **#130**, **#131** (a)–(f). Record below |
 | S2 | Library & masthead faces (item 1 + rows 50/51/54) | click-to-cycle stamp + word-counter condense (word-target offer preserved) · `FlippingStamp` hoist + oracle edges · F-0 residue · Timeline voice | walk, captured | **DONE** — **her item 1 is a CLICK on both faces and a Settings toggle on neither**: the masthead cycles edited → created → *a little clock icon* and the bottom bar's counter full → only the note → only this block → *just an icon*, each remembered as ONE local choice, so **a note she has never opened arrives wearing it** (walked). **Her keep survives where it mattered most:** her click took the gesture the word-target setter had, so the setter is on the counter's context menu in EVERY face — the walk opened it from the bare icon and set 500w, which then rides the condensed faces. **Rows 50 and 54 CLOSED, row 51 narrowed to its midnight-rollover note alone**: the two mechanical extractions landed with **zero test edits** (81/14), the `FlippingStamp` hoist likewise (34/5), and both DEBUG-oracle edges were fixed as ONE defect — the two-window one **measured RED first**. Row 54 turned out to be two defects: the system sans AND a raw stored stamp column, the 18h ladder's R3-2 met a third time. Mac **328/47** incl. the spine's eleven types; core and iOS NOT owed (zero `Sources/`, zero `Shared/`), the marker stays 8. PROVISIONALs: **QUESTIONS #132** (a)–(h). Record below |
 | S3 | Chrome singles + the conformance sweep (rows 44/45/46/63/67/68/69 + the Trash fork) | 27-site sweep + grep pin · tag sheet voiced · indicator ring · Restore Tutorial confirm · "pools" lesson sweep (re-seed consequence recorded) · seal-blind rename field · `blockNamingDoor` hygiene · Trash cards · closing conformance walk against the reference artifact | walk, captured | **DONE — all SEVEN rows CLOSED plus the 2a Trash fork.** The sweep was **re-measured first** (the tree moved: **45 bare sites, 34 without a limit**, not the row's 27-of-35) and every one is verdicted in a per-site table; the class-closing pin's own predicate reports **34 offenders on the pre-sweep blobs and 0 here**. Row 63 is the unit's one bug class and it is **behavioural-revert verified — 3 of 8 pins RED, `rect.minX 192.0` vs `glyph.maxX 196.0`: the 4 pt of ring drawn through the glyph, printed** — fixed under the GUTTER LAW (the ring yields; the prose column never moves), with the comment-face decision MOVED to one pure rule rather than copied. Row 67 built the shell's own confirm channel (`ShellRouter.ask`) and moved BOTH tutorial doors; the old modal was **unpinnable by construction** (a headless `runModal()` waits forever), so the new road's pin drives the real door with no seam. Row 69 watches the seal and gates the FIELD while the door still acts-and-speaks. Row 45 voiced the sheet three surfaces render and gave it a per-surface noun; row 46 put the DEBUG door on S2's ownership idea; row 68 swept the lesson with the H pattern as this suite practises it (plain prose, constants in the PIN). **The walk: 19 crops, all four voice/appearance combinations, every row in use** — and it says what it changed in the dev store (it pressed Replace, which is the only way to see a swept lesson). **The conformance remainder list is EIGHT rows**, each with its cost, including the walk's own find: one act with TWO vocabularies. Mac **417/65 + 17/7**; core and iOS NOT owed (zero `Sources/`, zero `Shared/`), the marker stays 8. PROVISIONALs: **QUESTIONS #133** (a)–(h). Record below |
-| F2 | The shrink-re-font strand (KnownIssues row 53, pulled in at R-13u4-7) | the full-document editor's blank-below-the-last-line after a SHRINKING re-font; ⌘↑ heals — the trace's relayout/anchor hint; S1's record has the reproduction | red-on-old + walk on both occasions | NOT-STARTED (runs after S3, before the ladder) |
+| F2 | The shrink-re-font strand (KnownIssues row 53, pulled in at R-13u4-7) | the full-document editor's blank-below-the-last-line after a SHRINKING re-font; ⌘↑ heals — the trace's relayout/anchor hint; S1's record has the reproduction | red-on-old + walk on both occasions | **DONE — THE DEFECT IS REAL, REPRODUCED HEADLESSLY, AND THE ROW'S HYPOTHESIS IS CORRECTED BY MEASUREMENT.** The pin came first and was **RED on the shipped tree: 5 of 7 issues across 4 tests**, her own gesture reproduced as **11.0 pt of prose in a 600-pt viewport** (305.5 before). The seven-step trace says what it is, and it is NOT 17o's high-water ratchet (the usage bound moved freely in BOTH directions, 26,196 → 20,366 → 21,554): a re-font changes the geometry under a scroll offset AppKit keeps in PIXELS — the Phase 6 spike's own measured hazard, answered on the WIDTH axis since Phase 7 and never on this one — and at the tail the shortened document's clamp plus the typewriter room IS "the last line at the top and a page of blank". The fix joins that existing road: ONE model door captures the top visible LOCATION before the storage write and parks the restore for the settle hop, where `JumpPrimitive` lands it; the generation bump is the width-reflow road's own two lines. **The first-application fence was MEASURED, not reasoned** — a park made at a surface's birth is spent later as a yank to the top, which the colour-only guard caught. Walked on her exact fixture: **both shrink rows draw the page whole with the same line at the top and no ⌘↑**, both grow rows now keep her place too, a Dark flip moves the page by zero points, and the caret read `block 212/212` throughout — 18 captures, both voices, both appearances, tail AND mid-note. Class sweep: 15 rows, one verdict each. **`EditorTextView` is NOT in the diff** and the absence is the finding. Mac **365/47** across three runs; core and iOS NOT owed (zero `Sources/`, zero `Shared/`), marker stays 8. PROVISIONALs: **QUESTIONS #134** (a)–(d). Record below |
 | F3 | The Index cold-column heights (F1's residual, pulled in at R-13u4-8) | the Index pane's note rows stand at length-derived heights (`ProseHeightModel`/`FlowHeightEstimate` over cached `blockExtents` — 13u2b UNIT 1's shape on this surface), so the column's geometry is known before the aim; F1's record has the oscillation measurements | cold-click trial table red-on-old + walk | NOT-STARTED (runs after F2, before the ladder) |
 
 **CARRIED TO CLOSEOUT (grows as units close; nothing here may be lost):** MOBILE PARITY rows —
@@ -4298,8 +4298,18 @@ checkpoint protocol binds from the first commit.
 
 ## UNIT F2 RECORD — THE SHRINK-RE-FONT STRAND (KnownIssues row 53, pulled in at R-13u4-7)
 
-**WHAT THIS UNIT DID NOT DO — the record's first line, per the discipline.** *(PENDING — filled
-at the close.)*
+**WHAT THIS UNIT DID NOT DO — the record's first line, per the discipline.** It did **not fix the
+PHONE**, which carries the same shape of whole-document re-font on a `UITextView` (itself a scroll
+view, with its own point-valued `contentOffset`) — `MobileEditorViewModel.applyVoiceChange`; that is
+filed as a MOBILE PARITY row below rather than reached for, because this unit is one surface. It did
+**not** extend the keeping to the CONTAINED editors, the Read tier or the take panes (sweep rows
+13–14: they own no scroll position, so there is nothing of this class to keep there — and what
+happens to their HOST's page is the 18d remembered-lengths machinery's, not this fix's). It did
+**not** touch `BlockRangeIndex`, `TypedReturn`, `runStructural`, `StructuralSeamEdit`,
+`PaneTextAuthority`, any attribute STAMP, `Sources/VariorumCore/`, `Shared/` or `Server/`. And it
+did **not** build the line-by-line re-font carve 13u2 UNIT D's record sketched as the row's likely
+remedy — the trace said the whole-document write is not what strands her, so that carve would have
+been motion without a mechanism.
 
 ### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
 
@@ -4311,7 +4321,7 @@ at the close.)*
 | 4 | The FIX at the traced site, through the settle hop | **DONE** — all 6 pins green; the tail page goes 11 pt of prose → 269 pt with the anchor restored exactly |
 | 5 | The CLASS SWEEP — every re-font occasion × both directions, one verdict each | **DONE** — 15 rows, one verdict each |
 | 6 | The WALK — S1's exact table on *Copper Beeches*, both occasions, both directions | **DONE** — 18 captures, both voices, both appearances, tail AND mid-note |
-| 7 | Closing runs + the record complete; ledger row + KnownIssues row 53 flipped | PENDING |
+| 7 | Closing runs + the record complete; ledger row + KnownIssues row 53 flipped | **DONE** — 365 tests in 47 suites green |
 
 ### THE READING (done in this session's own context, in the brief's order)
 
@@ -4538,3 +4548,116 @@ Editor pane's two re-font controls at screen **(871, 352)** and **(840, 390)**. 
 top of it, which is what makes a settings-flip walk capturable at all. **(4)** `walk-scroll`'s line
 count is **positive = down**; ±260 lines overshoots a 10k-word note end to end.
 
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list first)
+
+**The brief expected `EditorTextView` in the diff. IT IS NOT IN IT** — said plainly, because the
+absence is the finding: the trace put the mechanism in the SCROLL relationship (a kept pixel offset
+across a reflow), not in the text view's frame arithmetic or its typewriter room, so nothing in
+`EditorTextView.swift` needed to move. The room is a participant in the SYMPTOM (it is what makes
+"the bottom of the document" look like a blank page) and not in the CAUSE, and the fix leaves it
+exactly as it is. **The Fable rider still applies by construction** — the diff is the editor seam's
+own view model and its surface — which is why this list is exact:
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift` | **+65 lines, all new**: one door, `keepingReadingPosition(acrossRefont:_:)`, and its doc. It calls only existing members — `topVisibleOffset()`, `parkAnchorRestore`, `overlayGeometryGeneration`, `overlayLayoutDidSettle()` | not one existing line changed. No projection, no index, no attribute stamp, no structural road, no guard order, no autosave, no caret write |
+| `App/Variorum/Variorum/Features/Editor/EditorView.swift` | `EditorSurface` `private` → internal (on `InlineEditorSurface`'s own stated precedent, so the pins drive the real coordinator); both coordinators' `applyChrome` now wrap the `applyVoiceChrome` call in the model's door | the chrome VALUE, its `Equatable` gate, `needsStorageRefresh`'s definition, the idempotence guard, `refreshBadges`, the scroll view's paper — all byte-unchanged |
+| `App/Variorum/VariorumTests/RefontViewportTests.swift` | **NEW**, 6 pins | — |
+
+**Untouched, named because a reviewer will look for them:** `BlockRangeIndex`, `EditorTextView`,
+`TypedReturn`, `PaneTextAuthority`, `StructuralSeamEdit`, `StructuralGesturePlanner`,
+`runStructural` and its identity oracle, `MarkdownActs`, `JumpPrimitive` (consumed, not modified),
+`ScrollAnchorController` (the road this joins, unmodified), `EditorTypography`/`applyVoiceChrome`
+(the re-font itself is byte-identical). **`Sources/VariorumCore/` — ZERO FILES**, verified by name
+over the whole unit diff, so `Sync/`, the schema, the migrations and `Server/` are untouched by
+construction, **no core run was owed**, and the lockstep marker stays **8**. **No `Shared/` file
+moved**, so the **iOS build is not owed** either (the standing convention).
+
+**The TK2 discipline, checked rather than assumed:** no TK1 API is reached for anywhere in the diff
+(no `.layoutManager`, no `NSLayoutManager`, no TK1-era override), and the fallback canary is asserted
+silent through every one of the six new pins' windowed sessions by the suites that ride beside them
+(`EditorWindowSmokeTests` drives the canary explicitly on the same rig and is green). The one
+`ensureLayout(for: documentRange)` in this unit is in a TEST, with the reason at the line.
+
+### CLOSING RUNS (at the unit's END — never the full suite at the start)
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| **Mac, run 1** — the new suite, the whole windowed-editor/scroll/landing family, the chrome-application family, the typography and measurement families, and the acceptance spine under its **eleven REAL TYPE NAMES** (the `-only-testing` file-name trap, met again in this unit — see below) | `-only-testing:` `RefontViewportTests` · `EditorWindowSmokeTests` · `LandingOffsetTests` · `EditorDecorTransactionTests` · `ModeSwitchCarryTests` · `PaletteReachTests` · `SurfaceSizeMemoryTests` · `MarkdownFaceTests` · `EditorInkTests` · `TakePaneMeasureTests` · `ProseGutterTests` · `LongBlockLayoutPlannerTests` · `LongBlockLayoutHostedTests` · `PhantomSpaceTests` · `AppearanceChoiceTests` · `EditorSessionTests` · `EditorProjectionEngineTests` · `EditorRouterActiveTests` · `BlockRangeIndexTests` · `EditorDocumentTests` · `EditorSeamCostTests` · `CheckboxScrollTests` · `CurrentBlockContinuityTests` · `CrossBlockCompoundTests` + the eleven `Tutorial*` types | **295 tests in 35 suites passed** (exit 0, no skips) |
+| **Mac, run 2** — the suites whose FILE names are not their TYPE names, caught by counting the suites that actually ran | `ArmedEditTests` · `MacEditRoutingTests` · `MacEditRoutingCrashTests` · `IdentityProjectionAuditWalkTests` · `MacIdentityAuditWiringTests` · `BlockTOCTests` · `FindAndReplaceTests` · `EditorChurnCostTests` (+2 that were file names again) | **57 tests in 8 suites passed** |
+| **Mac, run 3** — the last four real type names | `CommandDeleteLineTraceTests` · `CommandDeleteInEditorTests` · `BlockTintTests` · `TextMetricsTests` | **13 tests in 4 suites passed** |
+| **TOTAL** | | **365 tests in 47 suites, all green** |
+| The red-on-old measurement (piece 2), on the shipped tree at this unit's own first commit `1438f491` | `-only-testing:VariorumTests/RefontViewportTests` | **5 of 7 issues RED across 4 tests**, 2 guards green — the table above |
+| Core (`swift test`) | — | **NOT OWED** — zero `Sources/VariorumCore/` files in the diff |
+| iOS build | — | **NOT OWED** — zero `Shared/` files in the diff |
+
+**The file-name trap, met twice in this unit and recorded for the next one:** `-only-testing`
+takes the TYPE name, and a silent non-match costs nothing visible — the run just passes with fewer
+suites. The only reliable check is to COUNT: `grep -oE '◇ Suite "[^"]+" started'` and compare with
+how many you asked for. Three of this unit's first list were file names (`EditRoutingTests`,
+`EditRoutingCrashTests`, `IdentityProjectionAuditTests`), and two of the second (`CommandDeleteLine
+Tests`, `BlockTintAndMetricsTests`). A suite with NO `@Suite` display name prints its type name
+instead of a quoted title, so it is invisible to that grep (`TakePaneMeasureTests` did run).
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **The restore reuses `pendingAnchorRestore` rather than minting a third park.** The cold mount's
+   anchor restore and this one are the same act — put her reading position back once the geometry is
+   honest — and one consumer at the hop means one ordering to reason about (the carry stands it down,
+   the reveal judges "already on screen" against it). *Reverse by* adding a fourth pending slot with
+   its own generation gate, which buys nothing this unit could name.
+2. **The keeper wraps the chrome application instead of living inside `applyVoiceChrome`.** That
+   extension is an `NSTextView` one serving three surfaces including the read tier, and it has no
+   model, no scroll view and no settle hop. *Reverse by* passing the model in, which couples a Theme
+   file to the editor's view model.
+3. **The contained editor's door calls the keeper too, where it is inert.** One rule, one place.
+   *Reverse by* omitting the call and a comment saying why — which is the same number of lines and
+   leaves the reader to verify the inertness themselves.
+4. **`EditorSurface` became internal.** Its sibling `InlineEditorSurface` already is, for this exact
+   reason, stated at its own declaration. *Reverse by* pinning the model's door alone and accepting
+   that "the app's surface calls it" is untested.
+5. **The tail pin lays the whole document out.** A harness that lets TK2 estimate measures a
+   different note from the one she has been reading, and it under-reported the defect by an order of
+   magnitude (274 pt of movement instead of 4,664). The cost is a test-only `ensureLayout` on a 212-
+   block fixture; the pin runs in 1.4 s. *Reverse by* shrinking the fixture until the viewport is a
+   large fraction of it, which changes what the pin is about.
+6. **The voice pin asserts geometry with a 30-pt tolerance, the others exact offsets.** A font change
+   re-breaks the lines, so the anchored offset need not START a line in the new voice; the promise
+   that survives both is "the anchored text is at the top". *Reverse by* asserting the offset exactly
+   and accepting a pin that is right for two occasions and wrong for the third.
+7. **The paragraph-gap occasion is walked, not pinned.** Stated in sweep row 5 with the reason (the
+   dial is a `UserDefaults.standard` process global that parallel suites share). *Reverse by* adding
+   a defaults-writing pin and a suite trait to serialize it against every other suite that reads the
+   dial — which is the whole target.
+
+### CARRIED TO THE PHASE CLOSEOUT (from this unit)
+
+1. **QUESTIONS #134 (a)–(d)** joins her ratify bundle; next free moves to **#135**.
+2. **KnownIssues row 53 is CLOSED** by this unit, with the hypothesis it carried CORRECTED rather
+   than confirmed (the 17o high-water ratchet is not the agent; the Phase 6 pixel-offset hazard is).
+   No row was opened.
+3. **A MOBILE PARITY ROW, named rather than assumed:** the phone re-fonts the whole open note on a
+   voice change (`MobileEditorViewModel.applyVoiceChange`, a full-range attribute write) and its
+   surface is a `UITextView`, which IS a scroll view holding its own `contentOffset` — so the same
+   class of "your place moves when the type changes size" exists there, unfixed and unmeasured by
+   this unit. What differs, and why it may not photograph the same way: the phone has no typewriter
+   room, so the dramatic blank-page half of the symptom has no mechanism there; the reading-position
+   half does. Owner: the mobile catch-up.
+4. **FOUR WALKER FACTS** for `Tools/WalkKit/README.md` at its next touch — listed at the end of the
+   walk section (⌘, is swallowed by the editor; the Settings window's new size and the Editor pane's
+   two control points; a window-id capture of the note is unoccluded by Settings on top of it;
+   `walk-scroll`'s sign and scale).
+5. **TWO RIG FACTS** worth carrying into any future editor pin: a nested runloop pump cannot drain
+   the main dispatch queue from a main-actor test body (only a real suspension does), and a settle
+   hop already scheduled when a geometry event lands leaves the park for the NEXT display pass.
+6. **The tutorial was NOT edited** and nothing in it describes this behaviour, so nothing became
+   false and there is no re-seed consequence from this unit.
+
+### WHAT A FRESH SESSION WOULD NEED TO FINISH THIS
+
+Nothing. Everything is committed and pushed: the six pins and their measured red run, the traced
+mechanism with both traces, the fix, the class sweep, the walk's 18 captures (gitignored,
+`notes/plans/13u4-screens/f2/`), QUESTIONS #134, the KnownIssues row-53 close, the ledger row, and
+this record. What is OPEN is hers: **#134**. What is owed elsewhere: **the phone's parity row**,
+which this unit deliberately did not reach for.
