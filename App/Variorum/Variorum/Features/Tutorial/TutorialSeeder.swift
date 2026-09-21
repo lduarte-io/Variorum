@@ -190,11 +190,16 @@ enum TutorialSeeder {
     /// when the confirm declined.
     @MainActor
     static func findOrSeed(
-        session: AppSession, confirmReplace: () -> Bool
+        session: AppSession, confirmReplace: () async -> Bool
     ) async throws -> String? {
         let existing = try await session.database.read { db in try discover(db) }
         if let bookID = existing.readingIDs.first { return bookID }
-        if !existing.isEmpty, !confirmReplace() { return nil }
+        // 13u4 UNIT S3 (row 67): the confirm is ASYNC now, because the app's
+        // own answer to it is a SwiftUI `.alert` the window presents rather
+        // than an app-modal `NSAlert.runModal()`. A synchronous closure still
+        // satisfies this type, so every pin that answers `{ true }` here is
+        // untouched.
+        if !existing.isEmpty, await !confirmReplace() { return nil }
         return try await restore(session: session, existing: existing)
     }
 

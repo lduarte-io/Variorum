@@ -321,7 +321,9 @@ struct ShellActions {
                     try TutorialSeeder.discover(db)
                 }
                 if !existing.isEmpty {
-                    let confirmed = confirm?() ?? Self.confirmTutorialReplace()
+                    let confirmed: Bool
+                    if let confirm { confirmed = confirm() }
+                    else { confirmed = await askToReplaceTutorial() }
                     guard confirmed else { return }
                 }
                 let bookID = try await TutorialSeeder.restore(session: session, existing: existing)
@@ -429,7 +431,9 @@ struct ShellActions {
             do {
                 guard let bookID = try await TutorialSeeder.findOrSeed(
                     session: session,
-                    confirmReplace: { confirm?() ?? Self.confirmTutorialReplace() })
+                    confirmReplace: {
+                        if let confirm { confirm() } else { await askToReplaceTutorial() }
+                    })
                 else {
                     // 13b 3F (Stage 2 round-2 note b): findOrSeed's one nil
                     // path is a DECLINED confirm — the user asked to OPEN
@@ -489,13 +493,24 @@ struct ShellActions {
 
     /// The spoken confirm (brief decision 6): plain words, exact scope.
     @MainActor
-    private static func confirmTutorialReplace() -> Bool {
-        let alert = NSAlert()
-        alert.messageText = TutorialSeeder.replaceQuestion
-        alert.informativeText = TutorialSeeder.replaceDetail
-        alert.addButton(withTitle: "Replace")
-        alert.addButton(withTitle: "Cancel")
-        return alert.runModal() == .alertFirstButtonReturn
+    /// **The tutorial's replace confirm — 13u4 UNIT S3, KnownIssues row 67.**
+    ///
+    /// It was an app-modal `NSAlert.runModal()`: the ONE confirm in the app
+    /// that did not use the SwiftUI `.alert` grammar its siblings use, and an
+    /// app-modal AppKit alert swallows input in ways that cost a walk an hour
+    /// (the WalkKit README's own new fact — the walker cannot answer it the
+    /// way it answers every other confirm in this app).
+    ///
+    /// The act holds no view, which is why the alert lived here. So it ASKS
+    /// the shell and the window presents — `pendingSelection`'s own shape and
+    /// P-4's: the door names what it wants, the window decides what that
+    /// means. The injectable `confirm:` seam above is untouched, so every
+    /// pin that answers this question headlessly rides unmodified.
+    private func askToReplaceTutorial() async -> Bool {
+        await shell.ask(
+            question: TutorialSeeder.replaceQuestion,
+            detail: TutorialSeeder.replaceDetail,
+            verb: "Replace", destructive: true)
     }
 
     /// ⌘K's Toggle Star (13f batch 6, W4 — her ruling's "+ ⌘K by name"

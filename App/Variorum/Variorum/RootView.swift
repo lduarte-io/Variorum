@@ -323,6 +323,7 @@ struct RootView: View {
         .task(id: noteBoxFactsKey) {
             await noteBoxFacts.load(session: session, postID: noteBoxReport?.state.postID)
         }
+        .shellConfirmAlert(router)
         .task { await theme.start() }
         .task { await library.start() }
         .task { await library.startJournal() }
@@ -999,4 +1000,46 @@ struct RootView: View {
         palette.commands = rows
     }
 
+}
+
+
+// MARK: - The shell's confirm (13u4 UNIT S3 — KnownIssues row 67)
+
+// **THE SHELL'S CONFIRM** (13u4 UNIT S3 — KnownIssues row 67): the
+// tutorial's replace confirm retires its app-modal
+// `NSAlert.runModal()` here. An act holds no view, so it ASKS
+// (`ShellRouter.ask`) and the window presents — in the same `.alert`
+// grammar every sibling confirm in the app already uses. Dismissal is
+// an ANSWER (`false`), never a silence: nothing may be left awaiting a
+// question that is no longer on screen.
+//
+// **What is NOT retired, named so this is not read as the class
+// closed:** `ShellActions.confirmDiscardingUndo` (A12's
+// destructive-undo warning) and `CalloutMenu.promptEmoji` are still
+// `NSAlert`s. Row 67 names the tutorial's confirm; the other two are
+// in this unit's conformance remainder list, and the UNDO one can now
+// adopt this channel in about five lines.
+
+private extension View {
+    /// Hosts whatever the shell is asking. Its own function for a mundane
+    /// reason worth recording: inlined in `RootView.body` the presenting
+    /// `.alert` pushed that already-enormous expression past the type
+    /// checker's budget (`unable to type-check this expression in reasonable
+    /// time`) — the one thing a big SwiftUI body reliably punishes.
+    func shellConfirmAlert(_ router: ShellRouter) -> some View {
+        alert(
+            router.pendingConfirm?.question ?? "",
+            isPresented: Binding(
+                get: { router.pendingConfirm != nil },
+                set: { shown in if !shown { router.answerPendingConfirm(false) } }),
+            presenting: router.pendingConfirm
+        ) { pending in
+            Button(pending.verb, role: pending.destructive ? .destructive : nil) {
+                router.answerPendingConfirm(true)
+            }
+            Button("Cancel", role: .cancel) { router.answerPendingConfirm(false) }
+        } message: { pending in
+            Text(pending.detail)
+        }
+    }
 }

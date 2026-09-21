@@ -42,6 +42,56 @@ final class ShellRouter {
     /// 13f batch 3: the window's open notes + per-pane back/forward.
     let workspace = WorkspaceModel()
 
+    // MARK: - The shell's CONFIRM (13u4 UNIT S3 — KnownIssues row 67)
+
+    /// **A question the shell is asking, for the window to present.**
+    ///
+    /// Row 67: `Help ▸ Restore Tutorial…` confirmed through an app-modal
+    /// `NSAlert.runModal()` while every other confirm in the app is a SwiftUI
+    /// `.alert` — the one inconsistent confirm chrome, and an app-modal
+    /// AppKit alert swallows input in ways that cost a walk an hour (the
+    /// WalkKit README's own new fact). The act cannot present it itself:
+    /// `ShellActions` holds no view, which is exactly why the alert lived
+    /// where it did. So it is a REQUEST the shell adopts — `pendingSelection`
+    /// and `quickNoteRequested`'s own shape, and P-4's: the door names what
+    /// it wants, the window decides what that means.
+    var pendingConfirm: Confirm?
+
+    /// One asked question. The `answer` resumes whoever is awaiting it, so a
+    /// dismissal is an ANSWER (false) rather than a silence.
+    struct Confirm: Identifiable {
+        let id = UUID()
+        let question: String
+        let detail: String
+        /// The confirming button's verb; Cancel is always the other one.
+        let verb: String
+        let destructive: Bool
+        let answer: (Bool) -> Void
+    }
+
+    /// Ask, and wait for the window to answer. **A second ask answers the
+    /// first with `false`** — nothing may be left awaiting a question that
+    /// is no longer on screen, and "the question went away" is a decline.
+    func ask(
+        question: String, detail: String, verb: String, destructive: Bool = false
+    ) async -> Bool {
+        await withCheckedContinuation { continuation in
+            pendingConfirm?.answer(false)
+            pendingConfirm = Confirm(
+                question: question, detail: detail, verb: verb,
+                destructive: destructive,
+                answer: { continuation.resume(returning: $0) })
+        }
+    }
+
+    /// The window's side of it: answer and clear, in one act, so a second
+    /// press of either button cannot resume a continuation twice.
+    func answerPendingConfirm(_ confirmed: Bool) {
+        let pending = pendingConfirm
+        pendingConfirm = nil
+        pending?.answer(confirmed)
+    }
+
     // MARK: - The parked block landing (17o c/d/e round 1, MAJOR-2)
 
     /// **A block a navigation named, held for the mount that consumes it.**

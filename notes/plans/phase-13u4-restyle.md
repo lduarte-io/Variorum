@@ -3545,7 +3545,7 @@ CLOSE against what actually shipped):**
 | 3 | **Row 45** — `BlockTagAssignmentSheet` takes the voice | NOT-STARTED |
 | 4 | **Row 46** — `ShellRouter.blockNamingDoor` on S2's ownership idea | DONE (this commit) — the registrant names itself (the shell's own `windowID`); 4 pins; the mechanism traced below (latent, the architectural arm) |
 | 5 | **Row 63** — the indicator ring respects the gutter's faces (red-on-old owed) | DONE (this commit) — 8 pins; **67 tests in 9 suites green**. The BEHAVIOURAL REVERT is **DONE** — 3 of 8 pins RED on the reverted tree (4 issues), the 5 guards green |
-| 6 | **Row 67** — `Help ▸ Restore Tutorial…` joins the SwiftUI `.alert` grammar | NOT-STARTED |
+| 6 | **Row 67** — `Help ▸ Restore Tutorial…` joins the SwiftUI `.alert` grammar | DONE (this commit) — the shell's own confirm channel; 5 pins incl. the door driven with NO seam; **26 tests in 4 suites green** |
 | 7 | **Row 68** — the "pool & scraps" lesson swept against `SnippetsCopy` (H pattern; re-seed consequence recorded) | NOT-STARTED |
 | 8 | **Row 69** — Block History's rename field no longer OPENS under a seal | DONE (this commit) — the seal WATCHED for as long as the pane is up; the branch a fact on the model; 4 pins; **28 tests in 4 suites green** |
 | 9 | **The Trash fork** — the 2a taste fork's card restyle | NOT-STARTED |
@@ -3860,3 +3860,48 @@ the operation still refuses underneath.
 
 **Run:** `BlockHistorySealTests` · `BlockHistoryPaneTests` · `SavepointNameFaceTests` ·
 `SavepointNameCopyTests` → **28 tests in 4 suites passed**.
+
+### ROW 67 — THE TUTORIAL'S CONFIRM JOINS THE APP'S ALERT GRAMMAR (piece 6)
+
+**Why the act could not simply present one**, which is the whole reason the modal was there:
+`ShellActions` is a struct with a session and a router and **no view**. So it ASKS and the window
+presents — `pendingSelection`'s own shape and P-4's letter (*the door names what it wants, the
+window decides what that means*).
+
+**The channel.** `ShellRouter` gains `pendingConfirm` plus `ask(question:detail:verb:destructive:)
+async -> Bool` (a checked continuation) and `answerPendingConfirm(_:)`. `RootView` hosts one
+`.alert`, in the grammar its siblings already use. Three rules are in the channel rather than in
+the callers, and each is pinned: **dismissal is an ANSWER** (`false`), never a silence — nothing
+may be left awaiting a question that is no longer on screen; **a second ask answers the first
+with `false`** rather than stranding it; and **answer-and-clear is one act**, so a double press
+cannot resume a continuation twice (which traps).
+
+**Both tutorial doors moved, not just the one the row names.** `restoreTutorial` and
+`openTutorial` shared `confirmTutorialReplace()`; `TutorialSeeder.findOrSeed`'s `confirmReplace`
+became `() async -> Bool` for it. **A synchronous closure still satisfies that type**, so every
+pin that answers `{ true }` or `{ false }` there rides UNMODIFIED — and the injectable `confirm:`
+seam on both doors is byte-untouched, which is why the whole tutorial spine is green with no test
+edits at all.
+
+**A defect the road change closes as a side effect, worth stating:** an app-modal
+`NSAlert.runModal()` in a headless test host **waits forever** — the tutorial's own insurance pin
+hung the acceptance spine exactly that way once, and `structuralUndo`'s doc still carries the
+warning. The old confirm was therefore not merely inconsistent chrome; it was **unpinnable by
+construction**. The new one is a fact a test can read, which is how the pin below drives the real
+door with NO seam at all. *(That also makes these pins the "product row" shape of red-on-old: the
+pre-fix tree cannot run them, and it cannot run them for the defect's own reason.)*
+
+**What is NOT retired, named so nobody reads the class as closed** (and carried into the
+conformance remainder list): **`ShellActions.confirmDiscardingUndo`** — A12's destructive-undo
+warning — and **`CalloutMenu.promptEmoji`** are still `NSAlert`s. Row 67 names the tutorial's
+confirm and this unit did that one; the undo confirm can now adopt this very channel in about
+five lines, and the emoji prompt is a text-entry alert with a system picker accessory, which is
+a different question.
+
+**The pins** (`ShellConfirmTests`, 5): ask publishes the question and the answer resumes the
+caller · dismissal is a decline · a second ask declines the first rather than stranding it ·
+answering twice is safe · **the tutorial's replace door asks through the shell with NO seam, its
+question word-for-word the modal's, and a decline leaves the book exactly where it was**.
+
+**Run:** `ShellConfirmTests` · `TutorialDoorTests` · `TutorialBookShapeTests` ·
+`EncryptionExplainedDrillTests` → **26 tests in 4 suites passed**.
