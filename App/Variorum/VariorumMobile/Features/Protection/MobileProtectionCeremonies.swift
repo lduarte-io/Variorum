@@ -373,7 +373,9 @@ struct MobileProtectionNoticeBar: View {
                 .foregroundStyle(tokens.muted)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 16) {
-                offer(ProtectionCopy.followEnterDoor) {
+                // Row 10 (ledger 54): the label says what the door will DO.
+                offer(ProtectionCopy.followEnterDoorLabel(
+                    asksNothing: controller.pendingFollowAsksNothing)) {
                     controller.openFollow()
                     controller.activeFollow?.choosePassphrase()
                 }

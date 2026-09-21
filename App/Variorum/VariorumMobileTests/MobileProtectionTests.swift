@@ -647,6 +647,35 @@ struct MobilePhoneProtectionCopyTests {
         #expect(!ProtectionCopy.joinStandardConsent.contains("Mac") && ProtectionCopy.joinStandardConsent.contains("Use Castle…"))
     }
 
+    /// **RUN A batch A2, row 10 (17l item 3) — the phone's twin of her four
+    /// ruled wordings (QUESTIONS #90's RULINGS block), in the phone's
+    /// nouns.** The Mac's is `Phase13pProtectionBrainTests
+    /// .herFourRuledWordingsAreWhatTheSurfacesSay`.
+    @MainActor
+    @Test func herFourRuledWordingsReadAsThePhones() {
+        // (2) ledger 54 — the door that asks nothing says what it does.
+        #expect(ProtectionCopy.followEnterDoorLabel(asksNothing: true) == "Pick Up New Keys")
+        #expect(ProtectionCopy.followEnterDoorLabel(asksNothing: false) == "Enter Passphrase…")
+
+        // (3) ledger 61 + 67 — the Done says WHY, in the phone's nouns.
+        let done = ProtectionCopy.enteredCastleAfterAnotherDevice(device: "Lillian's Mac")
+        #expect(done.hasPrefix("Another device entered Castle first, so this iPhone picked up that device's keys instead."))
+        #expect(done.contains("Lillian's Mac showed when it entered Castle"))
+        #expect(done.contains("the set to keep"))
+
+        // (4) ledger 46 — cancel · put the ACCOUNT in Castle · rejoin, and
+        // still never the word "Mac" on the phone.
+        let consent = ProtectionCopy.joinStandardConsent
+        #expect(consent.contains("Cancel here") && consent.contains("put the ACCOUNT in Castle")
+                && consent.contains("then join again"))
+        #expect(!consent.contains("Mac"))
+
+        // (7) MINOR-6 — the book the phone seeds carries the website's road.
+        let book = try! SampleLibrarySeeder.loadStories(for: .encryptionExplained)
+        let text = try! #require(book.first { $0.title.hasPrefix("Chapter 7") }).text
+        #expect(text.contains("stargazing.tech"))
+    }
+
     /// (The 13p loss-math pins retired at pre-13x 5a with `lossLegs` /
     /// `lossMath` — §13; the posture cards' floors carry the loss story,
     /// pinned in `thePostureCopyReadsAsThePhones` and the tutorial spine.)

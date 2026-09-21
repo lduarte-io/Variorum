@@ -669,7 +669,9 @@ struct ProtectionNoticeBar: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Button(ProtectionCopy.followEnterDoor) {
+            // Row 10 (ledger 54): the label says what the door will DO.
+            Button(ProtectionCopy.followEnterDoorLabel(
+                asksNothing: controller.pendingFollowAsksNothing)) {
                 controller.openFollow()
                 controller.activeFollow?.choosePassphrase()
             }
@@ -798,7 +800,8 @@ struct FollowSheet: View {
                     Button(model.notice.dismissDoor) { model.later(); onDone() }
                     Spacer()
                     Button(ProtectionCopy.followWordsDoor) { model.chooseWords() }
-                    Button(ProtectionCopy.followEnterDoor) { model.choosePassphrase() }
+                    Button(ProtectionCopy.followEnterDoorLabel(
+                        asksNothing: model.canFollowFromHeldKey)) { model.choosePassphrase() }
                         .keyboardShortcut(.defaultAction)
                 }
             case .askPassphrase:
@@ -829,7 +832,8 @@ struct FollowSheet: View {
                 HStack {
                     Button(model.notice.dismissDoor) { model.later(); onDone() }
                     Spacer()
-                    Button(ProtectionCopy.followEnterDoor) { model.choosePassphrase() }
+                    Button(ProtectionCopy.followEnterDoorLabel(
+                        asksNothing: model.canFollowFromHeldKey)) { model.choosePassphrase() }
                     Button("Enter") { Task { await model.enter(wordsText: typedWords) } }
                         .keyboardShortcut(.defaultAction)
                         .disabled(model.busy || typedWords.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)

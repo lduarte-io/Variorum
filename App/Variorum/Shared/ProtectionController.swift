@@ -505,6 +505,25 @@ final class ProtectionController {
         return key
     }
 
+    /// **RUN A batch A2, row 10 (her ruling on QUESTIONS #90 (2), ledger
+    /// 54): will the follow this notice describes ASK for anything?** ONE
+    /// predicate, two readers — `PostureFollowModel.canFollowFromHeldKey`
+    /// (which has a model) and the doors that render a label BEFORE a model
+    /// exists (the notice bar, the Encryption tab). The door's word comes
+    /// from `ProtectionCopy.followEnterDoorLabel(asksNothing:)`, so a door
+    /// that will run at once never promises a field.
+    func followAsksNothing(for notice: FollowNotice) -> Bool {
+        guard notice.kind != .connectLibrary, notice.kind != .alwaysAskRetiredWord,
+              !notice.isChangeNotice
+        else { return false }
+        return heldDerivedWrappingKey(under: notice.vaultKDF) != nil
+    }
+
+    /// The same question for the notice currently standing (no model yet).
+    var pendingFollowAsksNothing: Bool {
+        followNotice.map(followAsksNothing(for:)) ?? false
+    }
+
     /// pre-13x 3a: the Connect door (copy §3's *Connect…*) — the same
     /// follow model and sheets over the `.connectLibrary` kind; opens only
     /// while the rows' owner is not the signed-in account and an act is

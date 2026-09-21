@@ -357,7 +357,8 @@ struct MobileFollowSheet: View {
                 case .notice:
                     prose(model.notice.body, ink: true)
                     HStack(spacing: 16) {
-                        offer(ProtectionCopy.followEnterDoor) { model.choosePassphrase() }
+                        offer(ProtectionCopy.followEnterDoorLabel(
+                            asksNothing: model.canFollowFromHeldKey)) { model.choosePassphrase() }
                         offer(ProtectionCopy.followWordsDoor) { model.chooseWords() }
                         Spacer()
                         offer(model.notice.dismissDoor, quiet: true) { model.later(); onDone() }
@@ -389,7 +390,8 @@ struct MobileFollowSheet: View {
                               && !typedWords.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
                             Task { await model.enter(wordsText: typedWords) }
                         }
-                        offer(ProtectionCopy.followEnterDoor) { model.choosePassphrase() }
+                        offer(ProtectionCopy.followEnterDoorLabel(
+                            asksNothing: model.canFollowFromHeldKey)) { model.choosePassphrase() }
                         Spacer()
                         offer(model.notice.dismissDoor, quiet: true) { model.later(); onDone() }
                     }

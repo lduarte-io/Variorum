@@ -214,8 +214,11 @@ struct ProtectionCopyTests {
         #expect(ProtectionCopy.joinWordsDoor == "Use my twelve words instead.")
         #expect(ProtectionCopy.joinCastleRekeysSentence
                 == "This account is in Castle, so this library gets a new key as it joins. Everything you wrote here stays.")
+        // RUN A batch A2, row 10 — RE-BASED to HER RULING on QUESTIONS #90
+        // (4), ledger 46 (the ruled-change class, not a defect): the consent
+        // now DIRECTS — cancel · put the ACCOUNT in Castle · rejoin.
         #expect(ProtectionCopy.joinStandardConsent
-                == "This account is in Standard, so this library will open silently from now on and your Apple account will hold a key to it. To keep only-you keys for the whole account, enter Castle instead — Settings ▸ Protection ▸ Use Castle…")
+                == "This account is in Standard, so this library will open silently from now on and your Apple account will hold a key to it. If you'd rather not leave Castle: Cancel here, put the ACCOUNT in Castle from a device already signed into it (Settings ▸ Protection ▸ Use Castle…), then join again.")
         #expect(ProtectionCopy.joinDoor == "Join" && ProtectionCopy.joinCancelDoor == "Cancel")
         #expect(ProtectionCopy.joinLaterLine == "Sync isn't joined on this \(ProtectionCopy.deviceName).")
         #expect(ProtectionCopy.connectCancelDoor == "Cancel")
@@ -260,9 +263,14 @@ struct ProtectionCopyTests {
         // pre-13x 5b (ledger 66): copy §4's precised un-followed headline.
         #expect(ProtectionCopy.keysReplacedHeadline
                 == "This account's keys changed since this \(ProtectionCopy.deviceName) joined. Enter your passphrase to pick up the new ones.")
+        // RUN A batch A2, row 10 — RE-BASED to HER RULING on QUESTIONS #90
+        // (3), ledger 61 + 67 (the ruled-change class): the Done now says
+        // WHY — those are the words that device SHOWED when it entered
+        // Castle ("like look at what you just put into Castle").
         #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: "Lillian's iPhone")
-                == "Another device entered Castle first, so this \(ProtectionCopy.deviceName) picked up that device's keys instead. The twelve words shown here are NOT your account's — the account's words are the ones written down on Lillian's iPhone.")
-        #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: nil).hasSuffix("written down on another device."))
+                == "Another device entered Castle first, so this \(ProtectionCopy.deviceName) picked up that device's keys instead. The twelve words shown here are NOT your account's: your account's words are the ones Lillian's iPhone showed when it entered Castle — those are the set to keep.")
+        #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: nil)
+                .hasSuffix("another device showed when it entered Castle — those are the set to keep."))
         #expect(ProtectionCopy.castleDoneBody(nil) == ProtectionCopy.enteredCastleDone)
         // pre-13x ladder round 1, F2 (MAJOR-3 d): the different-Apple-ID
         // sentence HEDGED — the client cannot tell another Apple account
@@ -344,6 +352,49 @@ struct ProtectionCopyTests {
         #expect(ProtectionCopy.followEnterDoor == "Enter Passphrase…" && ProtectionCopy.followWordsDoor == "Use Twelve Words…"
                 && ProtectionCopy.followLaterDoor == "Later" && ProtectionCopy.followWaitingDoor == "Enter…"
                 && ProtectionCopy.enterItNowDoor == "Enter It Now…" && ProtectionCopy.followMovedToStandardDoor == "OK")
+    }
+
+    /// **RUN A batch A2, row 10 (17l item 3) — HER FOUR RULED WORDINGS on
+    /// QUESTIONS #90, each a copy constant with its pin on both platforms
+    /// (the phone's twin is `MobilePhoneProtectionCopyTests`). 13s
+    /// re-voices; three of the four are PROVISIONAL at QUESTIONS #138.**
+    @MainActor
+    @Test func herFourRuledWordingsAreWhatTheSurfacesSay() {
+        // (2) ledger 54 — RULED: *"Pick Up New Keys is fine as a choice"*.
+        // One brain, so a door that will run at once never promises a field.
+        #expect(ProtectionCopy.followPickUpKeysDoor == "Pick Up New Keys")
+        #expect(ProtectionCopy.followEnterDoorLabel(asksNothing: true) == "Pick Up New Keys")
+        #expect(ProtectionCopy.followEnterDoorLabel(asksNothing: false) == "Enter Passphrase…")
+
+        // (3) ledger 61 + 67 — RULED: the Done says WHY, "like look at what
+        // you just put into Castle". The device is named as the one that
+        // SHOWED the account's words, not merely as an address.
+        let done = ProtectionCopy.enteredCastleAfterAnotherDevice(device: "Lillian's iPhone")
+        #expect(done.contains("are NOT your account's"))
+        #expect(done.contains("Lillian's iPhone showed when it entered Castle"))
+        #expect(done.contains("the set to keep"))
+        #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: nil)
+                .contains("another device showed when it entered Castle"))
+
+        // (4) ledger 46 — RULED: cancel · put the ACCOUNT in Castle · rejoin.
+        let consent = ProtectionCopy.joinStandardConsent
+        #expect(consent.contains("Cancel here"))
+        #expect(consent.contains("put the ACCOUNT in Castle"))
+        #expect(consent.contains("then join again"))
+        #expect(consent.range(of: "Cancel here")!.lowerBound
+                < consent.range(of: "put the ACCOUNT in Castle")!.lowerBound,
+                "her order: cancel first")
+        #expect(consent.range(of: "put the ACCOUNT in Castle")!.lowerBound
+                < consent.range(of: "then join again")!.lowerBound)
+
+        // (7) MINOR-6 — RULED: the sentence names the website's road (the
+        // BUTTON stays her future-round candidate). The book's Chapter 7
+        // carries it; this pin reads the shipped resource itself.
+        let book = try! SampleLibrarySeeder.loadStories(for: .encryptionExplained)
+        let chapter7 = book.first { $0.title.hasPrefix("Chapter 7") }
+        let text = try! #require(chapter7).text
+        #expect(text.contains("stargazing.tech"), "the website's road is named")
+        #expect(text.contains("signing in and changing your password happen on the website, not in the app"))
     }
 
     @Test func everyModeSaysWhatItDoesNotProtect() {

@@ -172,6 +172,11 @@ final class EncryptionSession {
     /// requires. Wired by the composition root; nil = no runner (the old
     /// roads render, as in tests and unconfigured builds).
     var followDoor: (() -> Void)?
+    /// RUN A batch A2, row 10 (ledger 54): whether that door will ASK for
+    /// anything, so the Encryption tab's label can say what it will DO —
+    /// the controller's one predicate, read through this leaf because this
+    /// view has the session and not the controller. nil ⇒ the old label.
+    var followDoorAsksNothing: (() -> Bool)?
 
     /// Ladder R1-1: the persisted rekey-in-progress read, injected by the
     /// composition root (a local `sync_state` read through the app's

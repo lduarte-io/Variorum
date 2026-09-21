@@ -91,8 +91,13 @@ sentence to publish.
   In Standard your Apple account is the reset.*
   — Facts: design §1.4 (the account password never touches keys), §1.21 (the floors), §2's keystone 3.
 
-- **Someone knows my account password.** *Settings ▸ Account ▸ Sign Out Everywhere, then change it. They
+- **Someone knows my account password.** *Settings ▸ Account ▸ Sign Out Everywhere, then change the password
+  at stargazing.tech — signing in and changing your password happen on the website, not in the app. They
   could never read your writing with it, and after that they can't sign in either.*
+  — **RUN A batch A2, row 10 — her ruling on QUESTIONS #90 (7), MINOR-6, 2026-09-07:** *"right now you go
+  through the website to sign in, so i think it's good to direct users to the website but maybe i should add
+  a button that brings them to the right place on the website. i'll consider it for a future round."* The
+  sentence names the website's road; the BUTTON is her future-round candidate, deliberately not built here.
   — Facts: design §3.10 (the key proof: a bare session can fetch the wrapped copies, delete the whole account, and
   nothing else — it cannot read or write the sync copy), §5 (*Sign out everywhere*: every session revoked; keys
   untouched), §14.38 (a refresh token is revoked at once; an access token already issued lives to its expiry, ≤ 1 h,

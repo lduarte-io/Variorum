@@ -70,10 +70,10 @@ final class PostureFollowModel: Identifiable {
     /// pre-13x 4a (ledger 54): a follow can run from the word just typed at
     /// the lobby — the session holds a derived key under the VAULT's
     /// descriptor — so *Enter Passphrase…* asks nothing.
-    var canFollowFromHeldKey: Bool {
-        guard !isConnectVariant, !isAlwaysAskVariant, !isChangeNoticeVariant else { return false }
-        return controller.heldDerivedWrappingKey(under: notice.vaultKDF) != nil
-    }
+    /// RUN A batch A2, row 10: the predicate moved to the controller so the
+    /// doors that render a label BEFORE a model exists ask the same
+    /// question — ONE brain, never two readings of "will it ask".
+    var canFollowFromHeldKey: Bool { controller.followAsksNothing(for: notice) }
 
     // MARK: - The doors
 

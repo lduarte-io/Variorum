@@ -484,7 +484,12 @@ struct EncryptionView: View {
             Text(ProtectionCopy.pickUpKeysFirst)
                 .pageCaption(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
-            PageDoor(ProtectionCopy.followEnterDoor, style: pageStyle) { followDoor() }
+            // Row 10 (ledger 54): the label says what the door will DO.
+            PageDoor(
+                ProtectionCopy.followEnterDoorLabel(
+                    asksNothing: encryption.followDoorAsksNothing?() ?? false),
+                style: pageStyle
+            ) { followDoor() }
                 .disabled(encryption.busy)
         } else {
             Text("The keys this device holds were replaced after it enrolled — sync stays paused until you re-enroll; nothing is lost while paused.")

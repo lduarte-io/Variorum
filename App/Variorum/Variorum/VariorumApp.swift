@@ -135,6 +135,10 @@ struct VariorumApp: App {
                                 try await runner.followIntoStandard()
                             }
                             fresh.encryption.followDoor = { bootstrap.protection.openFollow() }
+                            // Row 10 (ledger 54): and whether that door will ask.
+                            fresh.encryption.followDoorAsksNothing = {
+                                bootstrap.protection.pendingFollowAsksNothing
+                            }
                             // pre-13x 3a (decision 17): the Connect door and
                             // its act — the adopt road over the services.
                             bootstrap.protection.connectAct = { [weak fresh] passphrase, words in

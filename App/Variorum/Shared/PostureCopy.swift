@@ -225,12 +225,19 @@ nonisolated extension ProtectionCopy {
     static let joinCastleRekeysSentence =
         "This account is in Castle, so this library gets a new key as it joins. Everything you wrote here stays."
     /// A Castle-born library joining a STANDARD account (decision 1 + corner
-    /// 6 — consent at enrollment): the PROVISIONAL string the orchestrator
-    /// supplied (ledger 46 — her words replace it).
+    /// 6 — consent at enrollment).
+    ///
+    /// **RUN A batch A2, row 10 — her ruling on QUESTIONS #90 (4), ledger
+    /// 46, 2026-09-07:** *"good that it asks for consent, it should direct
+    /// you to cancel, go put the standard account in castle mode and then
+    /// rejoin if you don't want to leave castle."* The old sentence named
+    /// the Castle door without saying it is the ACCOUNT that has to move,
+    /// or in what order. PROVISIONAL; 13s re-voices (QUESTIONS #138).
     static let joinStandardConsent =
         "This account is in Standard, so this library will open silently from now on and your Apple "
-        + "account will hold a key to it. To keep only-you keys for the whole account, enter Castle "
-        + "instead — Settings ▸ Protection ▸ Use Castle…"
+        + "account will hold a key to it. If you'd rather not leave Castle: Cancel here, put the "
+        + "ACCOUNT in Castle from a device already signed into it (Settings ▸ Protection ▸ Use "
+        + "Castle…), then join again."
     static let joinDoor = "Join"
     static let joinCancelDoor = "Cancel"
     /// After Cancel: the library stays unenrolled and Castle-shaped; one
@@ -501,6 +508,17 @@ nonisolated extension ProtectionCopy {
         "Your keys were replaced on \(device) on \(day). Enter your passphrase once to pick up the new ones."
     }
     static let followEnterDoor = "Enter Passphrase…"
+    /// **RUN A batch A2, row 10 — her ruling on QUESTIONS #90 (2), ledger 54,
+    /// 2026-09-07 ~02:05: *"Pick Up New Keys is fine as a choice"*.** When
+    /// the word was just typed to open, the follow runs at once from the
+    /// held derived key and this door asks for nothing — so it must not say
+    /// *Enter Passphrase…*, which promises a field that never comes.
+    static let followPickUpKeysDoor = "Pick Up New Keys"
+    /// The door's ONE label brain, for both platforms and every site that
+    /// renders it (`asksNothing` = the follow will run from the held key).
+    static func followEnterDoorLabel(asksNothing: Bool) -> String {
+        asksNothing ? followPickUpKeysDoor : followEnterDoor
+    }
     static let followWordsDoor = "Use Twelve Words…"
     static let followLaterDoor = "Later"
     /// pre-13x 4a (ledger 50(b), her ruling 2026-09-06): the sub-line names
@@ -665,10 +683,18 @@ nonisolated extension ProtectionCopy {
     // §2b Done, when another device entered Castle first (the conflict-follow —
     // ledger 61, PROVISIONAL; 13s re-voices): *[device]* from the vault's
     // self-reported device name, else *another device*.
+    /// **RUN A batch A2, row 10 — her ruling on QUESTIONS #90 (3), ledger
+    /// 61 + 67, 2026-09-07:** *"it's fine if it tells you the twelve words
+    /// aren't your account's. should probably tell you why though (like look
+    /// at what you just put into Castle)."* So the sentence now says WHERE
+    /// the real ones came from — the words that device showed when IT
+    /// entered Castle — instead of only naming the device. PROVISIONAL;
+    /// 13s re-voices (QUESTIONS #138).
     static func enteredCastleAfterAnotherDevice(device: String?) -> String {
         "Another device entered Castle first, so this \(deviceName) picked up that device's keys "
-        + "instead. The twelve words shown here are NOT your account's — the account's words are "
-        + "the ones written down on \(device ?? anotherDevice)."
+        + "instead. The twelve words shown here are NOT your account's: your account's words are "
+        + "the ones \(device ?? anotherDevice) showed when it entered Castle — those are the set "
+        + "to keep."
     }
 
     /// ONE brain for the Castle ceremony's Done on both platforms: copy
