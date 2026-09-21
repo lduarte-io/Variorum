@@ -477,6 +477,13 @@ struct EditorSurface: NSViewRepresentable {
 
         /// Idempotent per chrome value — a real voice/scheme change
         /// re-styles the whole surface (rare, deliberate).
+        ///
+        /// 13u4 UNIT F2 (row 53): a chrome whose BASE ATTRIBUTES moved
+        /// re-flows the whole document, and this surface keeps its scroll
+        /// offset in pixels — so the re-font runs inside the model's
+        /// reading-position keeper, which captures the top visible LOCATION
+        /// first and restores it on the settle hop. Byte-unchanged for a
+        /// colour-only chrome (the keeper's own guard).
         func applyChrome(
             _ chrome: EditorSurfaceChrome, to textView: EditorTextView,
             scrollView: NSScrollView
@@ -484,7 +491,19 @@ struct EditorSurface: NSViewRepresentable {
             guard appliedChrome != chrome else { return }
             let previous = appliedChrome
             appliedChrome = chrome
-            textView.applyVoiceChrome(chrome, previous: previous)
+            // A re-font is a CHANGE from one chrome to another. The FIRST
+            // application is a birth — `needsStorageRefresh(from: nil)` says
+            // "everything" because everything must be WRITTEN, not because
+            // anything re-flowed — and there is no reading position yet to
+            // keep. Parking one anyway is not merely useless: measured, it
+            // is a yank, because a park is spent by the first settle hop that
+            // is new enough and the surface is at offset 0 when it is born,
+            // so a jump taken later lands her at the top of the note.
+            model.keepingReadingPosition(
+                acrossRefont: previous != nil && chrome.needsStorageRefresh(from: previous)
+            ) {
+                textView.applyVoiceChrome(chrome, previous: previous)
+            }
             scrollView.backgroundColor = chrome.paper
             scrollView.drawsBackground = true
             model.refreshBadges()
@@ -563,11 +582,23 @@ struct InlineEditorSurface: NSViewRepresentable {
             self.surfaceDelegate = EditorSurfaceDelegate(model: model)
         }
 
+        /// 13u4 UNIT F2: the same door as the detail editor's, so the rule
+        /// lives in ONE place — and INERT here by construction, because this
+        /// surface owns no scroll view (the keeper's own guard, the same one
+        /// `parkAnchorRestore` and `revealLanding` already carry): the book
+        /// /spread/pool editor scrolls inside its host and has no viewport of
+        /// its own to keep. Byte-unchanged behaviour; the call is here so a
+        /// reader does not have to wonder whether the contained surface was
+        /// forgotten or excluded.
         func applyChrome(_ chrome: EditorSurfaceChrome, to textView: EditorTextView) {
             guard appliedChrome != chrome else { return }
             let previous = appliedChrome
             appliedChrome = chrome
-            textView.applyVoiceChrome(chrome, previous: previous)
+            model.keepingReadingPosition(
+                acrossRefont: previous != nil && chrome.needsStorageRefresh(from: previous)
+            ) {
+                textView.applyVoiceChrome(chrome, previous: previous)
+            }
             model.refreshBadges()
         }
 

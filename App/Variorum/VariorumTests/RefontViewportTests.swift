@@ -68,6 +68,7 @@ struct RefontViewportTests {
             + " gap=\(EditorTypography.current.paragraphSpacing)"
             + " font=\(EditorTypography.current.font.pointSize)"
             + " drawnInViewport=\(drawnHeightInViewport(h.textView, scrollView))"
+            + " park=\(String(describing: h.model.pendingAnchorRestore))"
             + " top=\(String(describing: h.model.topVisibleOffset()))"
             + " len=\(h.model.index.documentLength)"
     }
@@ -106,10 +107,10 @@ struct RefontViewportTests {
         _ chrome: EditorSurfaceChrome,
         _ h: EditorHarness, _ scrollView: NSScrollView,
         _ coordinator: EditorSurface.Coordinator
-    ) {
+    ) async {
         EditorTypography.adopt(chrome.typography)
         coordinator.applyChrome(chrome, to: h.textView, scrollView: scrollView)
-        draw(h)
+        await draw(h)
     }
 
     /// **A NOTE WHOSE GEOMETRY THE APP HAS MEASURED.** TK2 lays out the
@@ -121,20 +122,35 @@ struct RefontViewportTests {
     /// TEXTKIT2 §2's "resource-intensive", which is exactly why production
     /// never does it) puts the rig in the state a note she has been reading
     /// is in, and the symptom row 53 photographed appears at once.
-    @MainActor private func layEverythingOut(_ h: EditorHarness) {
+    @MainActor private func layEverythingOut(_ h: EditorHarness) async {
         guard let layoutManager = h.textView.textLayoutManager,
               let contentManager = layoutManager.textContentManager else { return }
         layoutManager.ensureLayout(for: contentManager.documentRange)
-        draw(h)
+        await draw(h)
     }
 
     /// A real display pass (which is what arms the surface's settle hop —
-    /// `EditorTextView.viewWillDraw`), then the runloop turn the hop lands on.
-    private func draw(_ h: EditorHarness) {
-        h.textView.window?.display()
-        pump()
-        h.textView.window?.display()
-        pump()
+    /// `EditorTextView.viewWillDraw`), then the turn the hop actually lands on.
+    ///
+    /// **`RunLoop.main.run` is not enough, and finding that out cost the fix
+    /// a whole run that read as a no-op** — the fact is written down one
+    /// suite over (`LandingOffsetTests`, the R1-5 pin): *"the test body is
+    /// itself a main-queue job, so a nested runloop pump cannot re-enter the
+    /// main queue"*. The settle hop is a `DispatchQueue.main.async`, so only
+    /// a real suspension hands the queue back. The pump stays beside it
+    /// because AppKit's own layout wants the runloop.
+    /// A handful of passes, not one: a settle hop that was ALREADY scheduled
+    /// when the re-font landed delivers the OLDER generation and, by the
+    /// R1-5 rule, leaves the park for the honest hop — which is armed by the
+    /// NEXT display pass. The app has a continuous display cycle; a harness
+    /// has to ask for the passes.
+    private func draw(_ h: EditorHarness) async {
+        for _ in 0..<4 {
+            h.textView.needsDisplay = true
+            h.textView.window?.display()
+            pump(0.02)
+            try? await Task.sleep(for: .milliseconds(30))
+        }
     }
 
     /// A windowed editor on the fixture, with the three process globals
@@ -189,14 +205,14 @@ struct RefontViewportTests {
 
     @Test func aShrinkingRefontKeepsTheLineAtTheViewportTop() async throws {
         try await withWindowedEditor { h, scrollView, coordinator in
-            adoptAndApply(tall, h, scrollView, coordinator)
+            await adoptAndApply(tall, h, scrollView, coordinator)
             _ = readingDeepInTheNote(h)
             let before = try #require(
                 h.model.topVisibleOffset(),
                 "the fixture must resolve a top line before the re-font")
             let beforeFacts = facts(h, scrollView)
 
-            adoptAndApply(short, h, scrollView, coordinator)
+            await adoptAndApply(short, h, scrollView, coordinator)
 
             #expect(
                 h.model.topVisibleOffset() == before,
@@ -214,8 +230,8 @@ struct RefontViewportTests {
     /// still full of her prose as well as anchored.
     @Test func herFixtureGestureLeavesThePageDrawn() async throws {
         try await withWindowedEditor { h, scrollView, coordinator in
-            adoptAndApply(tall, h, scrollView, coordinator)
-            layEverythingOut(h)
+            await adoptAndApply(tall, h, scrollView, coordinator)
+            await layEverythingOut(h)
             caretToTheEnd(h)
             let before = try #require(
                 h.model.topVisibleOffset(),
@@ -223,7 +239,7 @@ struct RefontViewportTests {
             let drawnBefore = drawnHeightInViewport(h.textView, scrollView)
             let beforeFacts = facts(h, scrollView)
 
-            adoptAndApply(short, h, scrollView, coordinator)
+            await adoptAndApply(short, h, scrollView, coordinator)
 
             let afterFacts = facts(h, scrollView)
             #expect(
@@ -245,11 +261,11 @@ struct RefontViewportTests {
     /// fix's shape. The caret does not move for a re-font.
     @Test func aRefontNeverMovesTheCaret() async throws {
         try await withWindowedEditor { h, scrollView, coordinator in
-            adoptAndApply(tall, h, scrollView, coordinator)
+            await adoptAndApply(tall, h, scrollView, coordinator)
             caretToTheEnd(h)
             let caret = h.textView.selectedRange()
 
-            adoptAndApply(short, h, scrollView, coordinator)
+            await adoptAndApply(short, h, scrollView, coordinator)
 
             #expect(h.textView.selectedRange() == caret)
         }
@@ -259,12 +275,12 @@ struct RefontViewportTests {
 
     @Test func aGrowingRefontKeepsTheLineAtTheViewportTopToo() async throws {
         try await withWindowedEditor { h, scrollView, coordinator in
-            adoptAndApply(short, h, scrollView, coordinator)
+            await adoptAndApply(short, h, scrollView, coordinator)
             _ = readingDeepInTheNote(h)
             let before = try #require(h.model.topVisibleOffset())
             let beforeFacts = facts(h, scrollView)
 
-            adoptAndApply(tall, h, scrollView, coordinator)
+            await adoptAndApply(tall, h, scrollView, coordinator)
 
             #expect(
                 h.model.topVisibleOffset() == before,
@@ -278,10 +294,10 @@ struct RefontViewportTests {
     /// geometric: the anchored text is at the viewport top, within a line.
     @Test func aVoiceSwitchKeepsHerPlaceInBothDirections() async throws {
         try await withWindowedEditor { h, scrollView, coordinator in
-            adoptAndApply(studyVoice, h, scrollView, coordinator)
+            await adoptAndApply(studyVoice, h, scrollView, coordinator)
             let anchor = readingDeepInTheNote(h)
 
-            adoptAndApply(short, h, scrollView, coordinator)  // → Terminal: shrink
+            await adoptAndApply(short, h, scrollView, coordinator)  // → Terminal: shrink
             let shrunk = try #require(
                 JumpPrimitive.lineSpan(ofOffset: anchor, in: h.textView),
                 "Study → Terminal: the anchored block has no geometry at all. \(facts(h, scrollView))")
@@ -289,7 +305,7 @@ struct RefontViewportTests {
                 abs(shrunk.top - Double(scrollView.contentView.bounds.minY)) < 30,
                 "Study → Terminal left the anchored block \(shrunk.top - Double(scrollView.contentView.bounds.minY)) pt from the viewport top. \(facts(h, scrollView))")
 
-            adoptAndApply(studyVoice, h, scrollView, coordinator)  // → Study: grow
+            await adoptAndApply(studyVoice, h, scrollView, coordinator)  // → Study: grow
             let grown = try #require(
                 JumpPrimitive.lineSpan(ofOffset: anchor, in: h.textView),
                 "Terminal → Study: the anchored block has no geometry at all. \(facts(h, scrollView))")
@@ -299,39 +315,13 @@ struct RefontViewportTests {
         }
     }
 
-    // MARK: - TRACE (temporary, 13u4 UNIT F2 piece 3 — removed once recorded)
-
-    @Test func traceTheShrink() async throws {
-        try await withWindowedEditor { h, scrollView, coordinator in
-            @MainActor func report(_ label: String) {
-                Issue.record("TRACE \(label) | \(facts(h, scrollView))")
-            }
-            adoptAndApply(tall, h, scrollView, coordinator)
-            report("1 tall, viewport-only layout")
-            layEverythingOut(h)
-            report("2 tall, WHOLE document laid out")
-            caretToTheEnd(h)
-            report("3 tall, caret at the end")
-            adoptAndApply(short, h, scrollView, coordinator)
-            report("4 short, right after the re-font")
-            pump(0.3)
-            report("5 short, +0.3s")
-            layEverythingOut(h)
-            report("6 short, WHOLE document laid out again")
-            h.textView.setSelectedRange(NSRange(location: 0, length: 0))
-            h.textView.scrollRangeToVisible(NSRange(location: 0, length: 0))
-            draw(h)
-            report("7 short, after the cmd-up heal")
-        }
-    }
-
     // MARK: - The guard: a COLOUR-only change is not a re-font
 
     /// The cheap road (18g's R1-1 carve) must stay cheap — a palette click
     /// moves no base attribute, so it must neither re-font nor scroll.
     @Test func aColourOnlyChangeMovesNothing() async throws {
         try await withWindowedEditor { h, scrollView, coordinator in
-            adoptAndApply(short, h, scrollView, coordinator)
+            await adoptAndApply(short, h, scrollView, coordinator)
             _ = readingDeepInTheNote(h)
             let before = try #require(h.model.topVisibleOffset())
             let frame = h.textView.frame.height
@@ -340,7 +330,7 @@ struct RefontViewportTests {
             let repainted = EditorSurfaceChrome(
                 voice: .terminal, dark: true, inlineComments: false)
             #expect(repainted.needsStorageRefresh(from: short) == false)
-            adoptAndApply(repainted, h, scrollView, coordinator)
+            await adoptAndApply(repainted, h, scrollView, coordinator)
 
             #expect(h.model.topVisibleOffset() == before)
             #expect(h.textView.frame.height == frame)

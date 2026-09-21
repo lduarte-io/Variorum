@@ -2300,6 +2300,71 @@ final class EditorViewModel {
     @ObservationIgnored private(set) var pendingAnchorRestore: Int?  // read by the RAISE-M1 pins' kin
     @ObservationIgnored private var pendingAnchorGeneration = 0
 
+    // MARK: - A RE-FONT IS A REFLOW (13u4 UNIT F2 — KnownIssues row 53)
+
+    /// **Keeps her reading position across a whole-document re-font** — a
+    /// voice switch, the inline-comments toggle, the paragraph-gap dial: the
+    /// three settings that move `EditorDocument.baseAttributes` and so make
+    /// `applyVoiceChrome` re-write the whole storage.
+    ///
+    /// **The mechanism it answers, measured (the UNIT F2 record's seven-step
+    /// trace).** A re-font changes the geometry under a scroll offset that
+    /// AppKit keeps in PIXELS — the Phase 6 spike's own hazard, which this
+    /// app already answers on the WIDTH axis (`ScrollAnchorController`
+    /// captures the top visible LOCATION and restores it through
+    /// `JumpPrimitive`) and had never answered on this one. Two things follow
+    /// from that, and only the second one photographs: in EVERY direction the
+    /// text under her viewport moves, and in the SHRINKING direction the old
+    /// offset can exceed the shortened document's maximum — at which point
+    /// the clip is clamped to the bottom, and because the document carries a
+    /// viewport-page of TYPEWRITER ROOM below its last line, "the bottom"
+    /// means "the last line at the very top and a page of blank". Measured on
+    /// a 212-block note: 305.5 pt of prose in the viewport before, **11.0 pt**
+    /// after. It never self-heals, because a clamp is a legitimate position.
+    ///
+    /// **Why the restore is PARKED and not performed here.** It is the
+    /// `revealLanding` rule, for the reason `revealLanding` states: at this
+    /// moment the storage's new attributes are written but nothing is laid
+    /// out for them, so the frame — and therefore `JumpPrimitive`'s scroll
+    /// range — is still the OLD document's. The settle hop is the first turn
+    /// on which the geometry is the new one, and it is where every other
+    /// landing on this surface is already spent. Deferring also keeps this
+    /// road clear of the 13u3 ladder's R1-1 rule by construction: no
+    /// layout-forcing query runs inside a storage-edit transaction, because
+    /// the capture happens BEFORE the write and the restore a turn AFTER it.
+    ///
+    /// **Why it bumps the generation.** A re-font is a geometry event with no
+    /// CHARACTER edit, so `storageDidEdit` never sees it (the delegate filters
+    /// on `.editedCharacters`) and no hop would ever be armed. These are the
+    /// width-reflow road's own two lines (`onWidthReflow`), for its own
+    /// stated reason — and the badges and decorations this surface draws get
+    /// the same post-layout refresh a reflow gives them, which they did not
+    /// have across a re-font either.
+    ///
+    /// **What it deliberately does not do.** It never moves the CARET (⌘↑ is
+    /// the symptom's healer, not the fix's shape — pinned), it never runs for
+    /// a colour-only chrome change (18g's R1-1 carve: a palette or an
+    /// appearance moves no base attribute, so there is no reflow to survive —
+    /// pinned), and it is inert on the CONTAINED editors, which own no scroll
+    /// view: the book/spread/pool surface scrolls inside its host and has no
+    /// viewport of its own to keep, exactly as `parkAnchorRestore` and
+    /// `revealLanding` already rule. A viewport resting in the typewriter
+    /// room has no top visible location at all (`topVisibleOffset` answers
+    /// nil there — the A22 batch-5 measurement), and then there is nothing to
+    /// keep and nothing is parked; the clamp leaves her at the end, which is
+    /// where she was.
+    func keepingReadingPosition(acrossRefont isRefont: Bool, _ apply: () -> Void) {
+        guard isRefont, scrollView != nil else {
+            apply()
+            return
+        }
+        let anchor = topVisibleOffset()
+        apply()
+        overlayGeometryGeneration &+= 1
+        if let anchor { parkAnchorRestore(anchor) }
+        overlayLayoutDidSettle()
+    }
+
     private func consumePendingAnchorRestore(deliveredBy generation: Int) {
         guard let offset = pendingAnchorRestore else { return }
         guard generation >= pendingAnchorGeneration else { return }  // a stale hop leaves it (R1-5's rule)

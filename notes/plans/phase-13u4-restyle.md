@@ -4308,7 +4308,7 @@ at the close.)*
 | 1 | The reading, in this session's own context, in the brief's order | **DONE** |
 | 2 | The RED-ON-OLD PIN, written and measured BEFORE a line of the fix | **DONE** — 5 of 7 red on the shipped tree, her symptom reproduced at 11 pt of prose in a 600-pt viewport |
 | 3 | The MECHANISM, traced (measured, never assumed) | **DONE** — seven-step trace below; the row's hypothesis is CORRECTED |
-| 4 | The FIX at the traced site, through the settle hop | PENDING |
+| 4 | The FIX at the traced site, through the settle hop | **DONE** — all 6 pins green; the tail page goes 11 pt of prose → 269 pt with the anchor restored exactly |
 | 5 | The CLASS SWEEP — every re-font occasion × both directions, one verdict each | PENDING |
 | 6 | The WALK — S1's exact table on *Copper Beeches*, both occasions, both directions | PENDING |
 | 7 | Closing runs + the record complete; ledger row + KnownIssues row 53 flipped | PENDING |
@@ -4415,4 +4415,66 @@ answered for the RE-FONT axis. The direction asymmetry her walk found falls stra
 GROW raises the maximum so nothing is clamped (the page stays full of prose, but of DIFFERENT prose
 — pins 1, 3 and 4 measure that half), while only a SHRINK can push the offset past the new maximum,
 and only at the TAIL is that clamp the whole viewport's worth.
+
+
+### THE FIX (piece 4) — the re-font joins the reflow the app already knows how to survive
+
+**One door, in the model, and two call sites.** `EditorViewModel.keepingReadingPosition(acrossRefont:_:)`
+wraps the chrome application: it captures `topVisibleOffset()` BEFORE the storage write, bumps the
+overlay geometry generation after it, parks the offset through the EXISTING
+`parkAnchorRestore`, and arms `overlayLayoutDidSettle()`. The restore itself is the one the cold
+mount already uses — `JumpPrimitive.jump` at the settle hop.
+
+Nothing new was invented: **every part of this already existed for the width axis**, and the whole
+change is that the re-font axis now reaches it.
+
+- **Why parked and not performed inline:** `revealLanding`'s own measured reason. At the moment the
+  chrome lands the new attributes are written and nothing is laid out for them — the trace's step 4a
+  shows it exactly (`usage=0.0`, `top=nil`, the frame still the OLD document's 26,803) — so a jump
+  taken there steers against a stale scroll range. The settle hop is the first honest turn.
+- **Why it bumps the generation:** a re-font is a geometry event with NO character edit, and the
+  storage delegate filters on `.editedCharacters`, so `storageDidEdit` never sees it and no hop
+  would ever be armed. These are the width-reflow road's own two lines (`onWidthReflow`), for its
+  own stated reason. The badges and decorations get the post-layout refresh across a re-font that
+  they have never had either.
+- **Why it cannot break the R1-1 transaction rule:** the capture happens BEFORE the storage write
+  and the restore a turn AFTER it, so no layout-forcing query is ever inside `processEditing`.
+- **The FIRST application is fenced out, and that fence was earned by a measurement.**
+  `needsStorageRefresh(from: nil)` says "everything" because everything must be WRITTEN at a
+  surface's birth — not because anything re-flowed. A park made there is not merely useless: the
+  surface is at offset 0 when it is born, the park survives until the first settle hop new enough to
+  spend it, and `aColourOnlyChangeMovesNothing` caught it **as a yank to the top of the note** on the
+  first cut. The predicate is `previous != nil && chrome.needsStorageRefresh(from: previous)`.
+- **Inert on the contained editors by construction** (the book/spread/pool surface owns no scroll
+  view — the guard `parkAnchorRestore` and `revealLanding` already carry). The call is written at
+  that site anyway, so the rule lives in one place and a reader does not have to wonder whether the
+  contained surface was forgotten or excluded.
+- **The caret is never touched.** Pinned (`aRefontNeverMovesTheCaret`).
+
+**THE SAME TRACE, AFTER THE FIX** (steps 3 → 5, the rest unchanged):
+
+```
+3 tall, caret at the end          | visibleY=25914.5  frame=26803.0 usage=26196.0 gap=29 drawn=305.5 park=nil          top=76270
+4a short, the instant it landed   | visibleY=25914.5  frame=26803.0 usage=0.0     gap=7  drawn=0.0   park=Opt(76270)   top=nil
+4 short, right after the re-font  | visibleY=20135.0  frame=20988.0 usage=20380.0 gap=7  drawn=269.0 park=nil (spent)  top=76270
+5 short, +0.3s                    | visibleY=20135.0  frame=20988.0 usage=20380.0 gap=7  drawn=269.0 park=nil          top=76270
+```
+
+**Read it against the pre-fix trace:** the clip still moves (20,135 rather than 25,914.5 — the
+document really is 5,800 pt shorter and the same text cannot be at the same pixel), but it moves to
+the place that puts **the very line she was reading back at the viewport top** (`top=76270`, the
+pre-re-font value, exactly), and the page carries **269 pt of her prose instead of 11**. The
+remaining blank below is the typewriter room under the note's last line, which is there at the tail
+in every state.
+
+**TWO RIG FACTS THE FIX'S OWN RUNS EARNED** (both recorded because each one cost a run that read as
+"the fix does nothing"):
+
+1. **A nested runloop pump cannot drain the main dispatch queue from inside a main-actor test
+   body** — written down already at `LandingOffsetTests`' R1-5 pin and met again here. The settle
+   hop is a `DispatchQueue.main.async`; only a real suspension (`Task.sleep`) hands the queue back.
+2. **A settle hop that was ALREADY scheduled when the re-font lands delivers the OLDER generation
+   and leaves the park** (the R1-5 rule, working as designed) — the honest hop is armed by the NEXT
+   display pass. The app has a continuous display cycle; a harness has to ask for the passes, so
+   `draw` marks the view dirty and displays four times.
 
