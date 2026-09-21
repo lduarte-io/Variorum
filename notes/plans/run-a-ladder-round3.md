@@ -197,3 +197,60 @@ Round 3 is the ladder's cap. F1 and F2 enter the cross-model flow (findings to t
 verbatim; responses return here for the final call; confirmed fixes implemented in this session,
 each with its pin, per piece, suite green after). Anything unsettled when this round closes is
 recorded for the author, never looped.
+
+---
+
+## THE FINAL CALLS (cross-model flow; the implementer's responses at `31b18914`, the ruling
+amendment at `65c5c11b`) + THE FIX PASS
+
+**F1 (the Mac restore consumed in `State(initialValue:)`) — CONFIRMED; implementer AGREES (the
+primary arm confirmed not speculative).** Fix to the ruled shape: the restore moves to the
+installed lifecycle — a `restoreParkedDraft()` on the model, called at the HEAD of the panel's
+existing `.task` before `model.start()` (the implementer-confirmed home; the pad's own shape);
+`CommentsPanelModel.init` becomes side-effect-free. Under F2's peek the phantom can no longer EAT
+anything, so the move is hygiene exactly as the amendment says — and the documented
+`State(initialValue:)` anti-pattern goes regardless.
+
+**F2 (clear-at-restore on surfaces whose close never submits) — CONFIRMED; implementer AGREES;
+the RAISE is ADOPTED (my final call, the mechanism re-derived myself).** The raise's trace holds
+at the code: under a peek, the block-keyed `clearIfHeld(blockID:)` becomes a cross-kind hole —
+the Mac's landed `commitEdit` (CommentsPanel.swift:248) clears a parked ADD draft on the same
+block that never landed, and the phone's `.landed` arm (MobileComments.swift:190) does the same
+when a landed edit follows a parked add (or vice versa). The hole is UNREACHABLE under the
+shipped consuming take (the park is already empty after the restore) and REAL under the peek —
+so the draft-keyed clear is the amendment's honest reading, exactly as the orchestrator's
+ruling-side answer records, not a widening: the insurance clears when THE DRAFT IT INSURES lands,
+identified as `(blockID, commentID)` (nil = the add draft). Built: `CommentDraftPark.peek` (non-
+consuming) + `clearIfHeld(blockID:commentID:)`; the pad's `QuickNotePark` untouched (its
+clear-at-restore premise holds — the pad's close files); the phone's one-shot render consume
+stays (orthogonal — it protects her typing within an open, never the park's hold).
+
+**F3 (the phone's dead-block corner unrecorded) — CONFIRMED; implementer AGREES.** One symmetric
+sentence at #140(d), noting the peek makes it strictly a hold-for-the-session (harmless, and the
+draft comes back if the block does — Put back).
+
+**Ruled-change pin edits, named before the pass (the A1 redo-pins precedent — the ruled change
+class, not defects):** Mac pin (a)'s `held == nil` clear-at-restore assertion and phone pin (i)'s
+same assertion flip to the peek's `held != nil` (the insurance now outlives the restore); the Mac
+pins' bare-init restores become explicit `restoreParkedDraft()` calls (init no longer restores —
+F1's fix); each keeps its subject.
+
+**THE REVERTS, ANNOUNCED (behavioural, from committed state, restored by `git checkout --`):**
+- **R3-A (the peek revert):** re-add the consuming `defer { held = nil }` to
+  `CommentDraftPark.peek`. Expected: the two-generation pins RED on BOTH platforms (the second
+  reopen restores nothing), the phantom pin GREEN (with init no longer consuming, a consuming
+  restore hook still serves the first installed reopen), the cross-kind and guard pins green.
+- **R3-B (the shipped-combination revert, Mac):** call `restoreParkedDraft()` from
+  `CommentsPanelModel.init` AND make the peek consuming — the shipped shape reproduced through
+  the new API. Expected: the phantom pin RED (the discarded init consumes; the reopen restores
+  nothing), the Mac two-generation pin RED, the guard (d) green.
+- **R3-C (the cross-kind revert):** make `clearIfHeld` ignore `commentID` (block-keyed again).
+  Expected: the cross-kind pins RED at their held-after-landed-other-draft arms on BOTH
+  platforms, the same-draft clear arms and pins (ii)/(c) GREEN.
+
+**The build order (commit per piece, pathspec-limited, pushed):** (1) this record; (2) the
+production fix + all pins in ONE commit (the brain's signature change binds both platforms'
+call sites and their pins into one coherent piece: `CommentDraftPark.swift`,
+`MobileComments.swift`, `CommentsPanel.swift`, both pin files); (3) the reverts, run and
+recorded; (4) #140's re-base + (d)'s sentence (record-truth edits, flagged); (5) closing runs
+(both platforms' touched suites + the tutorial spine by its eleven struct names).
