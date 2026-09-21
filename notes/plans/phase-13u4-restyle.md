@@ -1540,7 +1540,7 @@ door is built.)*
 |---|---|---|
 | 1 | The record + the READING (the brief's four reading lists, in order) | DONE (this commit) |
 | 2 | The core op + its state-transition suite (rows read/written · the savepoint · the refusals · undo↔redo exact-row) + the AppSpec §9 bullet | DONE (this commit) — **22 tests in 1 suite passed**, below |
-| 3 | The Write door + its registry declaration + the registry walk | NOT-STARTED |
+| 3 | The Write door + its registry declaration + the registry walk | DONE (this commit) — **42 tests in 3 suites passed** (the two new suites + `CapabilityRegistryTests`) |
 | 4 | QUESTIONS #128 (the PROVISIONALs) | NOT-STARTED |
 | 5 | The walk on the dev-store Debug build, captured | NOT-STARTED |
 | 6 | Closing suites + iOS build + the ledger's C2 row | NOT-STARTED |

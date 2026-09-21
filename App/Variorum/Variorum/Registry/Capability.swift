@@ -468,6 +468,18 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // EVERY time (round 10 — no session-scoped don't-ask), Empty Trash once
     // naming the FULL count by kind (round 8 — "everything, always").
     case deleteNow, emptyTrash
+    // 13u4 UNIT C2 — her 13u3 morning addition, item 9, verbatim: *"Having a
+    // command where you could highlight part of a block and move it into a
+    // take on that block (out of the take it's currently in) would be a nice
+    // time saver."* Its semantics were hers and she ruled them at the 13u4
+    // kickoff sitting (R-13u4-4): MOVE alone, with the quiet savepoint of the
+    // take it left as her cover for the stay case.
+    //
+    // Its own declaration rather than a mode on `.extract`: extract mints a
+    // BLOCK beside this one from a boundary-adjacent span, this mints a TAKE
+    // on this one from any span, and one declaration could not say that (the
+    // `.moveTakeEarlier`/`.moveTakeLater` grounds).
+    case moveSelectionToTake
     // Takes lifecycle completeness (13b Stage 3, 3D — T5/N1/N6)
     case unarchiveTake, labelTake, renameLens
     // The post-13l polish round (ledger row 14 / F1 — the take-card grammar

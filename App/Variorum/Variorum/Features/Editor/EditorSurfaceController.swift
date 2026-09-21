@@ -2706,6 +2706,76 @@ final class EditorSurfaceController {
         return preview.isEmpty ? "an empty take" : "“\(preview)…”"
     }
 
+    // MARK: - 13u4 UNIT C2 — selection → a take on the same block (her item
+    // 9, ruled R-13u4-4)
+
+    /// **The Write door.** Her words: *"highlight part of a block and move it
+    /// into a take on that block (out of the take it's currently in)"* —
+    /// MOVE alone, with the quiet savepoint of the take it left as her ruled
+    /// cover for the stay case (R-13u4-4).
+    ///
+    /// The whole act is the operation's (`moveSpanToNewTake` — one
+    /// transaction, one undo entry), and this is only where the span comes
+    /// from. Three things this door owes it and does here:
+    ///
+    /// 1. **the ONE brain's verdict** (`SpanToTakeGesture.plan`), which is
+    ///    the same verdict that decided whether the door renders at all — so
+    ///    a fired door and a rendered door can never disagree;
+    /// 2. **the surface's own text as the compare-and-set image** — read
+    ///    BEFORE the flight, exactly as `deleteInEveryTake` reads it, so a
+    ///    plan can never land on a buffer that moved under it;
+    /// 3. **`runStructural`, the one structural door** — the buffer flushes
+    ///    first (so the store text the operation validates equals the surface
+    ///    text this planned against), the surface is frozen for the flight,
+    ///    keystrokes defer rather than drop, and the text-undo stack is
+    ///    cleared by the rewrite because ⌥⌘Z is now the road back.
+    ///
+    /// `seam: nil` — the block count does not change and no seam shape in
+    /// `StructuralSeamEdit` describes "one block's text shrank", so the
+    /// rewrite re-renders from the store, which is truth. That is
+    /// `deleteInEveryTake`'s and `replaceInEveryTake`'s own posture for the
+    /// same reason, and the honest cost of a deliberate, occasional gesture.
+    func moveSelectionToNewTake() async {
+        guard model.header?.locked != true else {
+            model.refuseFeedback(RefusalCopy.message(for: .sealed))
+            return
+        }
+        guard let selection = model.textView?.selectedRange(), selection.length > 0 else {
+            model.refuseFeedback(SpanToTakeCopy.nothingSelected)
+            return
+        }
+        guard let plan = SpanToTakeGesture.plan(selection: selection, index: model.index)
+        else {
+            // The door renders only where a plan exists, so reaching here
+            // means the selection moved under an open menu. Say which shape
+            // it is now: a span across a seam is the commonest, and it has a
+            // road of its own.
+            let touchesTail = model.index.tailRange.map {
+                NSIntersectionRange(selection, $0).length > 0
+            } ?? false
+            model.refuseFeedback(
+                touchesTail
+                    ? RefusalCopy.message(for: .openTailTarget)
+                    : SpanToTakeCopy.crossBlockSpan)
+            return
+        }
+        let entryRange = model.index.range(ofEntryAt: plan.entryIndex)
+        let expected = model.viewText(entryRange)
+        let span = plan.intraRange.location..<plan.intraRange.upperBound
+        let variantID = plan.variantID
+        let blockID = plan.blockID
+        let caretOffset = plan.intraRange.location
+        _ = await runStructural { ops in
+            let result = try ops.moveSpanToNewTake(
+                from: variantID, span: span, expectedText: expected)
+            return StructuralOutcome(
+                caretBlockID: blockID,
+                caretOffset: caretOffset,
+                seam: nil,
+                note: SpanToTakeCopy.receipt(savedFirst: result.insuranceSavepoint != nil))
+        }
+    }
+
     // MARK: - 13e E9 — the takes-aware replace
 
     /// **"Replace All in Every Take"** — the KnownIssues row *"Find &

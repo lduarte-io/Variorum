@@ -139,6 +139,9 @@ struct CommitBar: View {
             .saveNoteVersion, .showNoteVersions,
             // 18c batch 3 (her U-6): the note ▾ row and the block ▾ row.
             .splitEveryNewlineIntoBlocks, .splitBlockAtNewlines,
+            // 13u4 UNIT C2 (her item 9, R-13u4-4): the `block ▾` row,
+            // rendered only where the selection lies inside one block.
+            .moveSelectionToTake,
         ]
         // 13k K7: the formatting toolbar's own eight, from ITS table (the
         // cluster is rendered here, so its doors are declared here).
@@ -607,6 +610,18 @@ struct CommitBar: View {
             Button("Merge") { model.mergeBlocks() }
             Button(CapabilityRegistry.capability(.mergeWithCeremony).menuTitle()) {
                 model.mergeBlocksWithCeremony()
+            }
+            // 13u4 UNIT C2 (her item 9, R-13u4-4): the row appears only where
+            // the selection lies inside ONE block — P-2, and the one
+            // deliberate difference from this menu's fire-and-speak posture.
+            // The posture retires the per-door DIMMING; it does not ask a
+            // menu to offer a gesture whose population is another act's (a
+            // cross-block span is Make Block from Selection's). The verdict
+            // is the act's own brain's, via `gestureAvailability`.
+            if model.gestureAvailability.moveToTake {
+                Button(CapabilityRegistry.capability(.moveSelectionToTake).menuTitle()) {
+                    Task { await model.moveSelectionToNewTake() }
+                }
             }
             Divider()
             Button("＋ New block below this one (⌘⇧⏎)") {

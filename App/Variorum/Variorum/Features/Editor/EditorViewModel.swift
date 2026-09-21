@@ -176,6 +176,13 @@ final class EditorViewModel {
         /// The fan door (9d): available wherever the caret is in a block —
         /// ANY arity (the badge stays fan-only; the door must not be).
         var takes = false
+        /// 13u4 UNIT C2 (her item 9, R-13u4-4): the selection lies inside
+        /// ONE block that has a take to move a span out of. Unlike the four
+        /// above this drives RENDERING, not dimming (P-2 — a cross-block
+        /// selection is not this gesture, so its doors do not appear there);
+        /// the verdict is `SpanToTakeGesture.plan`'s, the same one the act
+        /// consults.
+        var moveToTake = false
     }
 
     // The gesture band's state types moved to the surface controller
@@ -2090,6 +2097,13 @@ final class EditorViewModel {
         await structural.deleteInEveryTake()
     }
 
+    /// 13u4 UNIT C2 (her item 9, R-13u4-4) — the selected span leaves the
+    /// take it is in and becomes a take of its own on the same block (the
+    /// controller's; one operation, one undo entry).
+    func moveSelectionToNewTake() async {
+        await structural.moveSelectionToNewTake()
+    }
+
     // `StructuralSeam` lives beside its pure consumer in
     // StructuralSeamEdit.swift (review round 1, MINOR 5). `runStructural`,
     // the structural rewrite paths, and the DEBUG oracle live in
@@ -2634,6 +2648,11 @@ final class EditorViewModel {
         .callout,  // 13k K6 — the submenu this surface inserts beside Format
         // 13e E2 (A17) — rendered only while blocks are picked
         .deleteSelectedBlocks,
+        // 13u4 UNIT C2 (her item 9, R-13u4-4) — rendered ONLY where the
+        // selection lies inside one block (P-2: a cross-block selection is
+        // not this gesture, so the row does not appear there). The
+        // `.showOriginBlock` / `.deleteSelectedBlocks` per-target shape.
+        .moveSelectionToTake,
     ]
 
     func contextMenuItems() -> [EditorTextView.StructuralMenuItem] {
@@ -2715,6 +2734,22 @@ final class EditorViewModel {
                 title: BlockSelectionCopy.deleteVerb(picked: picked.count), enabled: true
             ) { [weak self] in
                 Task { await self?.deleteSelectedBlocks() }
+            })
+        }
+        // 13u4 UNIT C2 (her item 9, R-13u4-4): rendered ONLY where the
+        // selection lies inside ONE block with a take to move a span out of
+        // — the `.showOriginBlock` per-target shape below, P-2. A
+        // cross-block selection is a DIFFERENT gesture's population (Make
+        // Block from Selection), so the row is absent there rather than
+        // present-and-refusing. The verdict is the act's own brain's, asked
+        // fresh at menu-build time like every other row on this menu.
+        if let textView, SpanToTakeGesture.plan(
+            selection: textView.selectedRange(), index: index) != nil {
+            items.append(.init(
+                title: CapabilityRegistry.capability(.moveSelectionToTake).menuTitle(),
+                enabled: true
+            ) { [weak self] in
+                Task { await self?.moveSelectionToNewTake() }
             })
         }
         // 13f W10b: the lineage door, rendered ONLY on a block whose own
@@ -2801,7 +2836,11 @@ final class EditorViewModel {
             extract: enabled(.extractSelection),
             makeBlock: enabled(.makeBlockFromSelection),
             merge: enabled(.mergeBlocks),
-            takes: caretBlockID != nil)
+            takes: caretBlockID != nil,
+            // 13u4 UNIT C2: its own brain, for the reason stated there —
+            // this act moves no block boundary, so it is not one of the
+            // structural planner's verdicts.
+            moveToTake: SpanToTakeGesture.plan(selection: selection, index: index) != nil)
         if fresh != gestureAvailability {
             gestureAvailability = fresh
         }

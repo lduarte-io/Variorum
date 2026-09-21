@@ -230,6 +230,43 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .moveAndExecute,
             unavailableNote: "Delete in Every Take works on a selection inside a note.",
             availability: structural),
+        // 13u4 UNIT C2 — her item 9, ruled R-13u4-4: the selected span leaves
+        // the take it is in and becomes a take of its own on the same block,
+        // with the quiet savepoint of the take it left as her cover for the
+        // stay case.
+        //
+        // **TWO DOORS, both Write's, and both rendered CONDITIONALLY** (P-2):
+        // the selection context menu and the bar's `block ▾` row appear only
+        // where the selection lies inside ONE block — a cross-block span is
+        // Make Block from Selection's population, not this act's, and a row
+        // offering a gesture that could only refuse is what P-2 forbids. The
+        // per-selection verdict is `SpanToTakeGesture.plan`'s (the act's own
+        // brain, which also decides whether to render); this table's rule is
+        // the CONTEXT half, and it is `writeEditor` — attachment only, the
+        // `.previousBlock` family's rule, because the act calls the attached
+        // full-document editor directly and enablement must never outrun it.
+        //
+        // **NO CHORD, and the sweep is recorded rather than implied**
+        // (13u4 UNIT C2's record): the Take family's keys are all spoken for
+        // (⌘T · ⌥⌘T · ⇧⌥⌘T · ⌘⇧T), the span family's are ⌘⇧E and ⌘⇧K, and the
+        // free neighbours that remain (⌥⌘E, say) read as a VARIANT OF EXTRACT
+        // rather than as this act — which is the collision the ⌥-means-the-
+        // deliberate-variant convention exists to avoid. A chord would also
+        // owe a `.menuBar` door and a helper row (the walk asserts both), so
+        // it would be a third door this unit was not asked to build. Two
+        // discoverable menu doors, no key.
+        //
+        // **TakesAccess is nil and the exemption is NAMED** — see the
+        // registry walk's `exempt` set: a Takes-side shape for this gesture
+        // is a product call nobody has made (QUESTIONS #128), not a door this
+        // unit declined to wire.
+        Capability(
+            id: .moveSelectionToTake, verb: "Move Selection into a New Take", scope: .block,
+            doors: [.contextMenu, .bottomBar],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote:
+                "Moving a selection into a take happens where you write — open a note first.",
+            availability: writeEditor),
         Capability(
             id: .addBlockAtEnd, verb: "New Block at End of Note", scope: .block,
             doors: [.menuBar, .bottomBar, .palette],

@@ -182,6 +182,23 @@ struct CapabilityRegistryTests {
             // mode owns. Takes cannot be "behind Write" where Write has no
             // door of its own.
             .tagNote,
+            // 13u4 UNIT C2 (her item 9, ruled R-13u4-4) — a NAMED exemption,
+            // on the find family's own grounds and with the same expiry
+            // clause. What this act needs is a SELECTION IN THE FULL-DOCUMENT
+            // SURFACE: its whole question is "does this span lie inside one
+            // block", which only the document's tiling can answer. A Takes
+            // pane holds exactly ONE take, so the same words name a different
+            // gesture there — with a different target discipline and its own
+            // refusals — and R-13u4-4 ruled the semantics of the door she
+            // asked for, not a board-side shape. Giving it `moveAndExecute`
+            // would be worse than the exemption, and for `.replaceAllInEveryTake`'s
+            // exact reason: no board door exists to carry a selection, so the
+            // declaration would promise a reachability nothing delivers.
+            // Takes is not "behind Write" here because no surface anywhere
+            // hosts a per-take version of this act. The moment one is ruled
+            // (QUESTIONS #128) this declaration gains a real `takesAccess`
+            // and leaves this list.
+            .moveSelectionToTake,
         ]
         for capability in CapabilityRegistry.all
         where capability.scope != .app && !exempt.contains(capability.id) {
