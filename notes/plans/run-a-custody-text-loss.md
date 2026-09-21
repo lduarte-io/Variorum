@@ -1302,7 +1302,7 @@ Apple arm, the heal's wire, `openSwitch`/`ceremony(for:)`), `PostureSwitch` (`ch
 | 2 | The Mac face: Settings ▸ Protection's Apple-account section + its sheet | **DONE** — a *Your Apple account* section between the posture cards and Castle's switches (explainer + the door), rendered under P-2's letter (Standard · `.enrolled` · the road wired) and disabled while a ceremony or a follow is on screen; `AppleRelinkSheet` beside `PostureSwitchSheet`. Held in the PANE's `@State`, not on the controller — this door reopens nothing, so row 11's two-presenter rule has nothing to say about it. Mac build green |
 | 3 | The pins (the door's state-transition suite: (i) the orphaned state → a new device enrolls with nothing typed · (ii) the consent names THIS device's account · (iii) the refusal arm writes nothing) | **DONE, green (8/1)** — `VariorumTests/AppleRelinkDoorTests`, the two harnesses joined: a scripted-gate `ProtectionController` (no Keychain, no prompts) + a REAL `EncryptionSession` over the emulated `key_vault` RPC, wired by `wireOneSecretHooks`' own line. The DISCRIMINATION checks (the red-on-old equivalent for new capability) RAN — R1 3 issues, R2 2 issues, each only in the pin whose mechanism was taken away; see Reverts |
 | 4 | The book's Chapter 2 + the FAQ brief's entry (content; the re-seed consequence recorded) | **DONE** — *Encryption Explained* Chapter 2 gains a **"Re-linking your Apple account"** paragraph (the book's register, where keys are named); `notes/stargazing-help-faq-brief-pre13x.md` gains the entry *"I reset my iCloud Keychain — now a new device asks for my passphrase"* with its facts and the Mac-only note. Chapter COUNT unchanged (the drills' 8/9 hold); the manifest hashes the bundled text at runtime, so nothing is stale by construction. **THE RE-SEED CONSEQUENCE joins A2's bundle** — a store that already holds the book keeps the OLD text until her one `Help ▸ Restore "Encryption Explained"` press |
-| — | Closing evidence (targeted suites · `TutorialWalkTests` · the full Mac suite · iOS build · the walk) | **NOT-STARTED** |
+| — | Closing evidence (targeted suites · `TutorialWalkTests` · the full Mac suite · iOS build · the walk) | **DONE except the walk** — targeted custody/copy **141/11 green** · the book + the ELEVEN Tutorial suites **109/15 green** · the FULL Mac suite **3077 tests in 508 suites, ALL GREEN, ZERO ISSUES** (A2's close 3069/507; +8/+1 = this batch's one suite) · mobile **635/108 with exactly the 4 known issues** (unchanged) · iOS **BUILD SUCCEEDED**. The WALK is next |
 
 **Deaths and resumes:** none yet.
 
@@ -1336,7 +1336,24 @@ the heal (`ProtectionController.healAppleHeldCopy` → `EncryptionSession.reland
 device's custody, `settingAppleHeldCopy`, the CAS on the fetched revision, the key proof) → the reconcile, which
 lands this key file's own copy and re-reads the account. **No new custody semantics, no engine line, no schema.**
 
-*(Filled in as each piece lands.)*
+### CLOSING EVIDENCE (all runs on the final tree)
+
+| Gate | Command | Result |
+|---|---|---|
+| The door's own pins | `-only-testing:VariorumTests/AppleRelinkDoorTests` | **8 tests in 1 suite — ALL GREEN**, and both discrimination reverts red in exactly their own pin |
+| The custody + copy surfaces | 11 suites (`AppleRelinkDoorTests` · `Phase13pControllerTests` · `PostureSwitchTests` · `KeyDoorTests` · `ProtectionCopyTests` · `Phase13pCopySweepTests` · `ProtectionTierFaceTests` · `ProtectionSurfaceRenderTests` · `EncryptionFlowTests` · `SyncEnrollmentTests` · `ChromeLineLimitTests`) | **141 tests in 11 suites — ALL GREEN** (the `KeyActPassphrase` hoist's own proof: the ceremony's and the key doors' passphrase pins ride unmodified) |
+| The book + THE ACCEPTANCE SPINE | the 4 seeder/book suites + the ELEVEN Tutorial suites | **109 tests in 15 suites — ALL GREEN** (Chapter 2's new paragraph leaves the 8-chapter/9-note shape exactly where it was) |
+| Full Mac | `xcodebuild test -scheme Variorum -destination platform=macOS` | **3077 tests in 508 suites — ALL GREEN, ZERO ISSUES** (A2's close 3069/507; **+8/+1 = this batch's one new suite, nothing else moved**) |
+| Mobile | `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` | **635 tests in 108 suites PASSED with exactly the 4 known issues** — byte-identical to A2's close, over a `Shared/` diff the phone compiles |
+| iOS build | `xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS` | **BUILD SUCCEEDED** |
+| Core | not run — **this batch holds ZERO `Sources/` lines** (the diff is `App/Variorum/…` + notes), so A2's **1639/177** stands by construction | — |
+
+**AN ENVIRONMENT TRAP FOUND AND RECORDED FOR THE NEXT SESSION (the traps list's own kind).** Building the
+`-only-testing:` flags into a zsh VARIABLE and passing `$FLAGS` unquoted silently selects NOTHING: zsh does not
+word-split an unquoted parameter, so xcodebuild receives one giant argument, runs zero tests, prints
+`Executed 0 tests` **and `** TEST SUCCEEDED **`**. Twice, before the missing `Test run with …` line gave it away.
+The suite-level selectors must be written out literally (or `${=FLAGS}`), and the line that proves a run happened
+is Swift Testing's own `Test run with N tests in M suites` — never xcodebuild's TEST SUCCEEDED.
 
 ---
 
