@@ -283,8 +283,14 @@ resume in the record.
 
 ## BATCH A1 RECORD — 17b, the text-loss doors
 
-**WHAT I DID NOT DO (this record's first line, per the standing rule):** [PENDING — filled at the
-batch's close.]
+**WHAT I DID NOT DO (this record's first line, per the standing rule):** **ROW 7 IS NOT BUILT** — its
+trace and its parking-mechanism proposal are below, awaiting the orchestrator's ruling, and not one
+line of a parking slot exists in the tree. Beyond that: no `Sources/VariorumCore/Sync/` line, no
+schema change, no migration (the marker stays 8), nothing touched in `/Applications` or her real
+store, no author-only call taken. Row 3's UNDO-side residue was measured and pinned as documented
+behaviour rather than fixed (the reason and its owner are below), and neither `restoreNoteVersion`
+nor `deleteContainer` was made to REGISTER an undo entry (the brief's stop rule — that is 13j's
+product call). No item was dismissed as hollow: all six rows reproduced on the pre-fix tree.
 
 **Session opened 2026-09-21.** Implementer: `opus-implementer` (fresh session, batch A1 only).
 Read before any code, in the brief's order: the run file's Status banner · FENCES · BINDING
@@ -305,7 +311,7 @@ OverallModel §3 and AppSpec §9's structural-undo/REDO paragraphs (auto-loaded 
 | 4 | **P7** — the boards' branch/＋new take/⌘T doors copy the STORE past a dirty buffer | **FIXED** — pin `BranchDoorFlushTests` (7), red-on-old measured on the pre-fix tree (6 defect arms red with the stale row in hand, the blank-take guard green); ONE arm's revert re-verified after the commit (below) |
 | 5 | **P14** — the phone quick note's `try?` folds a read failure into "nothing to save yet" | **FIXED** — pin `MobileQuickNoteReadFailureTests` (3); behavioural revert verified after the commit — **the double-mint reproduced live (`count → 2`)**, with `"There's nothing to save yet."` spoken over a note in SQLite |
 | 6 | **P36** — `applyPendingIfClean` discards the deferred projection on a thrown re-read | **FIXED** — pin `DeferredProjectionRetryTests` (2); behavioural revert verified AFTER the commit (`else { return }` put back ⇒ the marker arm red, the guard green) |
-| — | Closing evidence: targeted suites green · `TutorialWalkTests` · mobile suites + `generic/platform=iOS` build · the WalkKit walk (pad road + board-branch road) → `notes/plans/run-a-screens/a1/` | NOT-STARTED |
+| — | Closing evidence | **DONE** — core **1639/177 green** · full Mac **3054/506 ALL GREEN, zero issues** (tutorial spine green inside it) · mobile **632/108 PASSED with exactly the 4 known issues** · iOS **BUILD SUCCEEDED** · the walk captured (4 shots) |
 
 **Deaths and resumes:** none yet.
 
@@ -398,6 +404,45 @@ their mechanism, neither a defect in this batch's fixes:
    batch's diff holds zero lines in any book, outline, landing or manifest file — the touched files
    are the operations layer, `UndoStack`, `TakesViewModel`, `EditorViewModel`, `AppSession`'s doc, and
    the two phone surfaces.
+
+### CLOSING EVIDENCE (all runs on the final tree)
+
+| Gate | Command | Result |
+|---|---|---|
+| Core | `swift test` | **1639 tests in 177 suites — ALL GREEN** (baseline 1631/175; +8/+2 = this batch's two core suites) |
+| Full Mac | `xcodebuild test -scheme Variorum -destination platform=macOS` | **3054 tests in 506 suites — ALL GREEN, ZERO ISSUES** (baseline 3045/504; +9/+2 = `BranchDoorFlushTests` 7 + `DeferredProjectionRetryTests` 2) |
+| The acceptance spine | inside the full run | `Tutorial book shape` · `Tutorial doors` · `Tutorial acts — writing` all **passed** |
+| Mobile | `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` | **632 tests in 108 suites PASSED with exactly the 4 known issues** (baseline 626/106, same 4; +6/+2 = this batch's two mobile suites) |
+| iOS build | `xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS` | **BUILD SUCCEEDED** |
+
+**THE WALK — dev-store Debug build (`io.lduarte.Variorum.debug`, built at `DerivedData/a1walk`), the
+store unlocked, Terminal voice.** Captures in `notes/plans/run-a-screens/a1/` (gitignored):
+
+1. `01-takes-board-before-branch.png` — a note staged through the shelf's quick-entry bar, opened in
+   Takes (⌘2): one block, one take, the pane live.
+2. `02-branch-carries-pending-keystrokes.png` — **P7's acceptance, by hand.** Typed
+   `" LATE WORDS"` into the live pane and pressed **⌘T in the same `osascript` burst** (inside the
+   500 ms debounce). The board came back with **two takes**, and the MINTED one reads
+   *"The branch road: first sentence. LATE WORDS"* — it carries the keystrokes that were still in
+   the buffer. On the pre-fix code that card would have read *"The branch road: first sentence."*
+   and the ring would have moved onto it.
+3. `03-pad-holding-an-unfiled-capture.png` — **the row-7 surface, photographed.** The quick-note pad
+   (⌘⇧N) holding a typed capture that exists NOWHERE else: `340×260` floating window, captured by
+   its AX frame (`screencapture -R`) because `walk-cap`'s layer-0 filter cannot see it (the 13u3
+   UNIT C walker fact). This is the state the parking proposal is about.
+4. `04-pad-filed-the-capture.png` — ⏎ filed it: the pad is gone, the bottom bar speaks the quiet
+   receipt *"Filed in Quicknotes — tagged #quicknote."*, and the branch from (2) still stands (∨2).
+
+**What the walk could NOT stage, said rather than faked:** the pad's REFUSAL road needs the store to
+refuse `importPost`, which on a healthy unlocked dev store cannot be provoked without breaking the
+store under a live app — so the refusal-then-close loss (row 7) is carried by its trace and by the
+pins on the same class, not by a photograph. The phone's two rows were driven at their real doors in
+the simulator instead (the comments sheet's own submit button, on a mounted sheet in a key window).
+
+**Instance discipline:** `pgrep -fl 'Variorum.app/Contents/MacOS'` empty before the launch, one PID
+(mine, at the `a1walk` path) during, empty after — quit by identity
+(`tell application id "io.lduarte.Variorum.debug" to quit`), never a keystroke, never hers.
+`/Applications/Variorum.app` untouched throughout.
 
 ### ROW 7 (KnownIssues 65) — THE TRACE, AND THE PARKING MECHANISM PROPOSED (the design fork; NOT built)
 
