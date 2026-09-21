@@ -116,3 +116,31 @@ window with her; nothing deploys server-side: zero lockstep, marker stays 8).
 > candidates). Checkpoint protocol restated in any brief; dispositions into the entries at
 > close; hard stop; 13y is next and is NOT yours to start.
 
+
+---
+
+## REFRESHED AT THE 13u4 CLOSEOUT (2026-09-21 — RUN A is NEXT at her word; the 13u family is complete)
+
+**Baselines at open:** core **1631/175** green · the FULL Mac suite [see the 13u4 closeout's
+finals in `notes/plans/phase-13u4-restyle.md` — filled at its closing runs] · iOS build green ·
+marker **8** · `/Applications` = the 13u4 Release (hashes in `notes/handoffs/phase-13u4-handoff.md`).
+The flake list is the 13u4 plan's ENVIRONMENT TRAPS section's, minus row 56/58's read-click
+members (BOTH CLOSED at 13u4 — F3's heights fixed the mechanism, paired-verified).
+
+**What 13u4 changed under RUN A:**
+1. **17b gains a row:** the quick-note pad's close-while-refused capture loss (KnownIssues row
+   65, found at 13u3 UNIT C and owned to 17b) — a refusal followed by closing the pad drops the
+   words; the honest fix is an unfiled-capture parking slot, and the refusal-speaks-on-the-pad
+   shape is #120(e)'s. Exactly 17b's class.
+2. **SETTINGS MOVED:** it is NINE PANES with a leading search now (13u4 S1) — any 17l/17m walk
+   instruction referencing the old Appearance tab's layout or the Encryption tab's position
+   is stale; Protection and Data Safety are their own panes; the Settings window comes up
+   720×552 at (200,120). The re-font controls' coordinates are in the WalkKit README's 13u4
+   section, with the rest of the accumulated walker facts (READ THEM — two rigs paid for
+   ignoring them this phase).
+3. **⌘[ / ⌘] are OUTDENT/INDENT now; back/forward moved to ⌥⌘[ / ⌥⌘]** (13u4 S1, PROVISIONAL
+   #130) — any walk that navigates notes by chord uses the new pair.
+4. **Implementers stage PATHSPEC-LIMITED** (never `git add -A`) — the standing rule since 13u4,
+   in that plan's ORCHESTRATOR NOTE; carry it into every RUN A brief.
+5. **17r exists** (the stamp midnight tick, minted at the 13u4 closeout) — NOT in RUN A; it
+   opens at her word only.
