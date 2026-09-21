@@ -230,6 +230,26 @@ struct ProtectionMigrationDrillTests {
             let status = SecItemDelete(Self.legacyE2EEQuery() as CFDictionary)
             return status == errSecSuccess || status == errSecItemNotFound
         }
+        // RUN A batch A2, row 9 (17l item 2 / KnownIssues 39) — THE ESCROW
+        // PAIR, overridden for the throwaway scope exactly as the two plain
+        // leaves above are.
+        //
+        // `LegacyLegs.forScope` hands every non-REAL scope an INERT set
+        // (corner 47: on iOS the dev build shares the Release build's
+        // keychain, and Q3's early run watched a dev store's migration
+        // delete the real store's legacy item), and this drill runs under
+        // `drill-<uuid>` by the tripwire's law — so leg 2 read "no legacy
+        // iCloud escrow item", nothing was removed, and the expectation
+        // below could not fire by construction. The DRILL was the drift, not
+        // the production rule: the escrow item is named by STORE ID alone
+        // (`legacyEscrowQuery(storeID:)`), and this store id belongs to a key
+        // file minted seconds ago in a temporary directory, so these two
+        // leaves can only ever see the throwaway item this test added. The
+        // ownership guard is the migration's own (`escrowed == facts.key`),
+        // and the REAL scope's live road stays pinned by
+        // `SessionTokenBindingTests.theLegacyLegsAreInertForADevScopeAndLiveForTheRealScopeOnly`.
+        leaves.loadLegacyEscrow = { StoreKeyGuardKeychain.loadLegacyEscrow(storeID: $0) }
+        leaves.removeLegacyEscrow = { StoreKeyGuardKeychain.removeLegacyEscrow(storeID: $0) }
         let logBox = LockIsolated<[String]>([])
         leaves.log = { line in logBox.withValue { $0.append(line) } }
 
