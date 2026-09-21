@@ -402,8 +402,8 @@ struct CommitBar: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             HStack(spacing: 6) {
                 ViewThatFits(in: .horizontal) {
-                    trailingCountsFace.fixedSize()
-                    noteTotalFace.fixedSize()
+                    countsFace().fixedSize()
+                    countsFace(narrowed: true).fixedSize()
                 }
                 Spacer(minLength: 4)
                 helperDoor.fixedSize()
@@ -411,15 +411,23 @@ struct CommitBar: View {
         }
     }
 
-    /// The flat bar's own counts face, reused whole (R11's word-count
-    /// prominence + the per-post word-target door).
-    @ViewBuilder private var trailingCountsFace: some View {
-        if let words = wordCountLabel {
+    /// **The bar's ONE counts face** (13u4 UNIT S2 — her item 1): the
+    /// counts, her remembered condensation, and the word-target door that
+    /// now lives on its context menu. `narrowed` is the width's own say —
+    /// the folded row and the book box's footer pass it, and it can only
+    /// shorten a FULL face, never lengthen one she condensed.
+    ///
+    /// *(It was two views, `trailingCountsFace` and `noteTotalFace`, one of
+    /// which hard-coded the note's total. A remembered face cannot live in
+    /// two views that each decide what to say.)*
+    @ViewBuilder private func countsFace(narrowed: Bool = false) -> some View {
+        if wordCounts.hasAnything {
             WordTargetFace(
-                tokens: tokens, baseLabel: words,
+                tokens: tokens, counts: wordCounts,
                 words: model.postWordCount,
                 target: model.header?.wordTarget,
-                onSet: { target in await model.setPostWordTarget(target) })
+                onSet: { target in await model.setPostWordTarget(target) },
+                narrowed: narrowed)
         }
     }
 
@@ -491,7 +499,7 @@ struct CommitBar: View {
                         Spacer(minLength: 8)
                         quietReceipt
                         Group {
-                            noteTotalFace
+                            countsFace(narrowed: true)
                             helperDoor
                         }
                         .fixedSize()
@@ -613,19 +621,6 @@ struct CommitBar: View {
             ? "The rest of this bar at this width: commit, takes, history, "
                 + "comments, formatting, and the note's own menu"
             : "The rest of this bar at this width: takes, comments and formatting")
-    }
-
-    /// The note's word total — the word-target door alone (the folded
-    /// row's counts, C-6's verdict from the side rail: the block/selected
-    /// counts are noise where the width is short).
-    @ViewBuilder private var noteTotalFace: some View {
-        if let total = model.postWordCount {
-            WordTargetFace(
-                tokens: tokens, baseLabel: "\(total.formatted())w in note",
-                words: model.postWordCount,
-                target: model.header?.wordTarget,
-                onSet: { target in await model.setPostWordTarget(target) })
-        }
     }
 
     /// Sitting 9 (R73/R91): hover = the cheat sheet; click = the full
@@ -847,18 +842,12 @@ struct CommitBar: View {
     /// 13b 1b (AD-14): the transient status line moved to the ONE shell
     /// toast (StatusCenter — R93's readability rides there).
     @ViewBuilder private var trailingCluster: some View {
-        if let words = wordCountLabel {
-            // R11: word-count PROMINENCE — the accent-colored,
-            // always-there part of the editing surface. 13b 4F (N36):
-            // the counts are now the per-post word-target face too —
-            // progress rides the label, clicking opens the setter (zero
-            // new bar width; the target's truth is the observed header).
-            WordTargetFace(
-                tokens: tokens, baseLabel: words,
-                words: model.postWordCount,
-                target: model.header?.wordTarget,
-                onSet: { target in await model.setPostWordTarget(target) })
-        }
+        // R11: word-count PROMINENCE — the accent-colored, always-there
+        // part of the editing surface. 13b 4F (N36): the counts are the
+        // per-post word-target face too (zero new bar width; the target's
+        // truth is the observed header). 13u4 UNIT S2 (her item 1): a click
+        // condenses them and the target door moved to the context menu.
+        countsFace()
         helperDoor
     }
 
@@ -882,16 +871,18 @@ struct CommitBar: View {
         return "—"
     }
 
-    private var wordCountLabel: String? {
-        var parts: [String] = []
-        if let block = model.caretBlockWordCount { parts.append("\(block)w block") }
-        if let selected = model.selectionWordCount { parts.append("\(selected)w selected") }
-        // R11: the post total, always ambient (incremental — never a
-        // whole-document walk per keystroke).
-        if let total = model.postWordCount {
-            parts.append("\(total.formatted())w in note")
-        }
-        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    /// The counts in THIS bar's words — the parts, never a composed string,
+    /// because her remembered face decides which of them are said (13u4
+    /// UNIT S2, item 1). Every word here is byte-identical to what this bar
+    /// has always said.
+    private var wordCounts: WordCounts {
+        WordCounts(
+            unit: model.caretBlockWordCount.map { "\($0)w block" },
+            selected: model.selectionWordCount.map { "\($0)w selected" },
+            // R11: the post total, always ambient (incremental — never a
+            // whole-document walk per keystroke).
+            note: model.postWordCount.map { "\($0.formatted())w in note" },
+            unitNoun: "block")
     }
 
     /// "yyyy-MM-dd" → a local-calendar Date (the picker's seed). Pure and

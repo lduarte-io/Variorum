@@ -108,11 +108,43 @@ nonisolated enum SegmentationFaceCopy {
 /// ratified `word_target` semantics, mirrored per post: never a wall,
 /// never an entry-time refusal.
 nonisolated enum WordTargetFaceCopy {
-    /// The word-count label's hover help (both bars) — it names the quiet
-    /// door: clicking the counts opens the target setter.
-    static let help =
-        "Word counts — click to set a word target for this note. "
-        + "A target shows progress here; it is a measure, never a wall."
+    /// The word-count label's hover help (both bars) — the WHOLE fact
+    /// first, then both gestures.
+    ///
+    /// **13u4 UNIT S2 (her item 1):** the click now CONDENSES the counts, so
+    /// the target setter it displaced is named as the right-click — and the
+    /// whole fact leads, because in the collapsed faces this sentence is
+    /// where the counts she is not looking at have gone. (It used to read
+    /// *"Word counts — click to set a word target for this note…"*, which
+    /// after her ruling would have been a face teaching the wrong gesture.)
+    static func help(whole: String?) -> String {
+        (whole.map { "\($0) \u{2014} " } ?? "Word counts \u{2014} ")
+            + "click condenses them; right-click sets a word target for this note, "
+            + "which shows progress here and is a measure, never a wall."
+    }
+
+    /// What the collapsed face is called where there are no words to read
+    /// it by (VoiceOver, and any face that draws only the glyph).
+    static let iconLabel = "Word counts"
+
+    /// The context menu's target rows — the door her keep asks for, offered
+    /// in every face: *"I like that it offers to set a word count target, so
+    /// I want to keep that functionality."*
+    static let setTargetItem = "Set a word target\u{2026}"
+    static let changeTargetItem = "Change the word target\u{2026}"
+    static let clearTargetItem = "Clear the word target"
+
+    /// …and the four faces themselves, so the cycle is legible rather than
+    /// folklore. The unit's noun is the BAR's (a block in Write, a take on
+    /// the boards) — the same word the counts themselves use.
+    static func faceItem(_ face: CountsFace, unitNoun: String) -> String {
+        switch face {
+        case .full: "Full counts"
+        case .note: "Only the note"
+        case .block: "Only this \(unitNoun)"
+        case .icon: "Just an icon"
+        }
+    }
     static let fieldPrompt = "Word target (blank = none)"
     static let parseError = "Targets are plain positive numbers (e.g. 5000) — nothing was changed."
     static func setNote(_ target: Int) -> String {

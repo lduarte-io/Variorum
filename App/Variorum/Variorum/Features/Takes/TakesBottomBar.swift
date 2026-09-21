@@ -502,12 +502,15 @@ struct TakesBottomBar: View {
     }
 
     @ViewBuilder private var trailingCluster: some View {
-        if let words = wordCountLabel {
+        if wordCounts.hasAnything {
             // 13b 4F (N36): the counts are the per-post word-target face
             // here too — R118 parity of prominence with Write's bar; the
             // target refreshes with the segmentation chip's cadence.
+            // 13u4 UNIT S2 (her item 1): …and they condense on a click here
+            // too, reading the SAME remembered face — R118's letter applied
+            // to a preference: no surface is behind another.
             WordTargetFace(
-                tokens: tokens, baseLabel: words,
+                tokens: tokens, counts: wordCounts,
                 words: model.postWordCount,
                 target: model.postWordTarget,
                 onSet: { target in await model.setPostWordTarget(target) })
@@ -526,20 +529,27 @@ struct TakesBottomBar: View {
         return BlockLineLabel.caret(ordinal: index + 1, of: model.projection.slots.count)
     }
 
-    private var wordCountLabel: String? {
-        var parts: [String] = []
+    /// The counts in THIS bar's words (13u4 UNIT S2: the parts, not a
+    /// composed string — her remembered face decides which are said). Every
+    /// word is byte-identical to what this bar has always said, *"take"*
+    /// and *"note"* included.
+    private var wordCounts: WordCounts {
+        var take: String?
         if let pane = model.focusedPane,
            let slot = model.projection.slots.first(where: { $0.blockID == pane.blockID }),
            let column = model.columns.first,
            let resolved = model.resolvedTake(column: column, slot: slot) {
             // O(the focused take) per render — the P1 edit unit.
-            parts.append("\(TextMetrics.wordCount(resolved.text))w take")
+            take = "\(TextMetrics.wordCount(resolved.text))w take"
         }
         // Round-1 MINOR-5: the post total is the model's CACHE (recomputed
         // per projection, incremental) — the bar re-renders per keystroke
         // (it reads the observed authority) and must never re-enumerate
         // every slot's full text each time.
-        parts.append("\(model.postWordCount.formatted())w note")
-        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+        return WordCounts(
+            unit: take,
+            selected: nil,
+            note: "\(model.postWordCount.formatted())w note",
+            unitNoun: "take")
     }
 }

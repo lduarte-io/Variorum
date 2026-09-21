@@ -2979,7 +2979,7 @@ CLOSE against what actually shipped):**
 | 3a | **Row 51** — the `FlippingStamp` hoist to the shared home (`Core/Views/`) | DONE (this commit) — **34 tests in 5 suites passed with ZERO test files touched** |
 | 3b | **Row 51** — the two DEBUG-oracle edges swept, each fixed or provably safe | DONE (this commit) — both FIXED, the two-window one **measured RED first**; 25 tests in 4 suites green, the two shipped stamp suites riding UNMODIFIED |
 | 4 | **Item 1a** — the masthead stamp's click-cycle (edited → created → clock) + ONE remembered LOCAL choice + pins | DONE (this commit) — **22 tests in 3 suites passed**; the cycle, the memory and a note-she-has-never-opened all pinned |
-| 5 | **Item 1b** — the word counter's click-cycle (full → note → block → icon), the target offer preserved in every state + pins | NOT-STARTED |
+| 5 | **Item 1b** — the word counter's click-cycle (full → note → block → icon), the target offer preserved in every state + pins | DONE (this commit) — **22 tests in 3 suites passed**; the target door pinned present in ALL FOUR faces |
 | 6 | **Row 54** — the Timeline rows take the voice's type + pin | NOT-STARTED |
 | 7 | QUESTIONS #132 (the PROVISIONALs) | NOT-STARTED |
 | 8 | The WALK on the dev-store Debug build — both voices AND both appearances, captured | NOT-STARTED |
@@ -3130,5 +3130,45 @@ apply — one value, nothing to evict. It DOES share **row 42's harness hazard**
 domain), and the seam for that is SwiftUI's own and needed no plumbing: **every mounted pin now
 mounts under `.defaultAppStorage(<a scrubbed suite>)`**, so no pin can read what a walk left
 behind nor leave anything behind for one.
+
+### ITEM 1b — THE WORD COUNTER CONDENSES ON A CLICK (piece 5)
+
+**Her words:** *"it would be nice if the word counter thing at the bottom could condense as
+well - I like that it offers to set a word count target, so I want to keep that functionality,
+but maybe a little icon meant to represent count or something could be an optional condensed
+view. Or show only note, only block, or only icon."*
+
+**THE ONE REAL DESIGN CALL, said plainly: her click TOOK the gesture the target setter had.**
+Clicking the counts opened the word-target popover (13b 4F); her mandate makes a click condense
+them. Both halves are hers — the cycle AND *"I like that it offers to set a word count target,
+so I want to keep that functionality"* — so the setter moved to the counter's **context menu**,
+where it is offered in EVERY face including the icon, and the four faces are listed beside it
+with a ✓ on the current one. That second half is deliberate: a bare click cycle is folklore
+until something says what the faces are, and the menu is the cheapest place that can. The
+alternatives are **QUESTIONS #132**.
+
+| What | How it is built |
+|---|---|
+| The four faces and their order | `CountsFace` — pure, at file scope, `CaseIterable`, so the cycle and the menu's rows are ONE rule (`StampFace`'s own shape) |
+| What each face says | The BAR's own words, byte-identical (*"12w block · 3w selected · 1,240w in note"* in Write, *"12w take · 1,240w note"* on the boards). The counter is condensed, never re-worded — the bars hand over PARTS (`WordCounts`) and the face picks |
+| The icon | `text.word.spacing` — measured present on this OS before it was written. **`number` was rejected outright**: `#` is the masthead's TAG door in this app, and one glyph meaning two things is the confusion the registry exists to avoid |
+| A face with nothing to say | Falls through (`block` with the caret nowhere shows the note; nothing at all shows the icon) — the counter is also the target door, and a door that vanishes is a door she cannot find |
+| The narrow bar | ONE rule (`narrowed`) where there were two views: a FULL face condenses to the note's total, and a face she already condensed is left exactly as she chose it. `noteTotalFace` — which hard-coded the total — is gone; a remembered face cannot live in two views that each decide what to say |
+| The memory | `@AppStorage(CountsFace.key)`, local, never synced, global to every note, read by BOTH bars — R118's letter applied to a preference: no surface is behind another |
+| The hover | The WHOLE fact in every face, then both gestures — which is what makes a collapse a collapse rather than a loss (the masthead clock's own rule) |
+
+**The pins** (`BarCountsFaceTests`) — **22 tests in 3 suites green** (with `CommitBarLayoutTests`
+and `LifecycleFacesTests`' word-target pin riding unmodified): her cycle and its round trip; each
+face's words on BOTH bars; the fall-throughs; the narrow-bar rule in both directions; **the
+target door present in all four faces, saying *set* or *change* and offering *clear* only when
+there is one**; the menu listing her four faces with exactly one ✓, on the face she is in; the
+memory's default-and-stranger posture; and the hover's whole fact with both gestures named.
+`CountsMenu.rows` is the menu AS DATA for the same reason `CommitBar.structuralRows` is (UNIT
+S1's own words: a private `@ViewBuilder` is unreachable from a test, and *"the offer survives in
+every face"* has to be checkable).
+
+**The file moved to `Core/Views/` with the work** — two features render `WordTargetFace`, and
+CLAUDE.md's placement rule sends such a component to the shared home at the next touch. Its new
+key states its defaults family at the declaration, exactly as `mastheadStampFace` does.
 
 *(The rest of this record fills in as the pieces land.)*
