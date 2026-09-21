@@ -1799,3 +1799,54 @@ necessary, stop and report. PROVISIONALs from **#129**.
 FIRST commit (PENDING marks), the reproduction table (trials × landing offset), the traced
 mechanism, the row-56 paired-run table, and the seam-file list; flip the ledger's F1 row in
 your closing commit. The checkpoint protocol binds from the first commit.
+
+---
+
+## UNIT F1 RECORD — THE INDEX CHAPTER-CLICK LANDS LOW (item 10)
+
+**WHAT THIS UNIT IS NOT DOING (the record's first line, written at the open and re-stated at the
+close):** it is not adopting Takes' compensator (13u2b left Takes and Index to their next touch;
+this is INDEX's touch, not Takes'), not touching `Sources/VariorumCore/` (no core change is
+expected — if one appears necessary the brief says STOP and report), not touching the book
+Outline or the reading flow (13u2b converted both; their suites must ride unmodified), not
+touching `BlockRangeIndex` / `EditorTextView` / `TypedReturn` / `PaneTextAuthority` / the
+editor's seam roads, and not re-opening any of the roads 13u2b's "WHAT NOT TO DO" closed (no
+lazy-run restructuring, no per-row `.task` reads, no `@State` writes on content reports, no
+`ensureLayout` over full documents, no compensator constant-tuning). No other 13u4 unit's work
+is touched.
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The record + the READING (the brief's four reading lists, in order) | DONE (this commit) |
+| 2 | THE REPRODUCTION — her gesture on the dev-store Debug build, a TRIAL TABLE (rate, not one run) | NOT-STARTED |
+| 3 | THE MECHANISM, TRACED (inputs → wrong scroll target → the landing below) — the `LandingAuthority` hypothesis TESTED, never assumed | NOT-STARTED |
+| 4 | The red-on-old pin (if the defect confirms; behavioural-revert verified) + the fix | NOT-STARTED |
+| 5 | Row 56's PAIRED INTERLEAVED adjudication (`theReadClickLandsInIndexAtThatBlock`, both trees) | NOT-STARTED |
+| 6 | The WALK — chapter clicks at several depths, before/after, captured | NOT-STARTED |
+| 7 | Closing suites + the ledger's F1 row | NOT-STARTED |
+
+### THE READING (done in this session's own context, in the brief's order)
+
+1. This file's Status banner · HER ADDITIONS item 10 (her verbatim report) · THE
+   SIZING-AND-RULINGS SITTING RECORD · THE LEDGER · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the
+   five prior UNIT RECORDs (E1 · E2 · E3 · C1 · C2 — their walker facts bind: E3's osascript
+   staging and the quick-entry bar's dropped characters; C1's curly-quote and voice-row-height
+   facts; C2's capture-offset arithmetic — a full-screen `screencapture` is px/2 with NO window
+   offset, a `walk-cap` window capture needs the window's Y added back).
+2. `notes/plans/navigation-landing-architecture-trace.md` IN FULL (the binding design record for
+   this class: §2's eight dated engagements, §3's four compensators — **Index is compensator 4**,
+   §4's reconciliation, §5's manifest + one-authority recommendation, §7's notes) and
+   `notes/plans/phase-13u2b-landing-seam.md` (the phase that built (b) and (c): UNIT 1's manifest
+   + the Outline, UNIT 2's `LandingAuthority` + the flow + the signpost, UNIT 3's fraction carry,
+   and the ladder's dispositions).
+3. The code: `BookIndexView.swift` (the chapter row's tap → `paneTarget` → the pane's single
+   `proxy.scrollTo`), `Surface/LandingAuthority.swift`, `Surface/BookHeightManifest.swift`,
+   `BookView.swift`'s Outline adoption (`landOutline` / `outlineAnchorMoved` /
+   `outlineContentResized` / `outlineUserScrolled`) as the side-by-side example, and
+   `BookIndexEditingTests.swift`.
+4. `notes/KnownIssuesAndTechDebt.md` row 56 in full (the load-flaky read-click, the
+   warm-DerivedData covariate) — **this diff touches the book Index, so the paired interleaved
+   protocol is mandatory there** — plus rows 49/64 (the landing/settle family) and row 42 (the
+   shared-defaults class, which a landing measurement must not be fooled by).
