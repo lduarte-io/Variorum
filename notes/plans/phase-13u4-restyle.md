@@ -3440,3 +3440,75 @@ Timeline's voice and its worded stamps, 16 new pins in three files plus the rewr
 suite, QUESTIONS #132, the KnownIssues edits (50 and 54 closed, 51 narrowed), the walk captures
 (gitignored, 26 + 27 crops, listed above) and this record. What is OPEN is hers: **#132**. What
 is owed elsewhere: **row 51's midnight tick**, which this unit deliberately did not build.
+
+---
+
+**ORCHESTRATOR NOTE (post-S2, binding on every remaining unit):** stage commits
+PATHSPEC-LIMITED (`git add <your files>`), never `git add -A` — the orchestrator edits shared
+records (this file, KnownIssues, QUESTIONS) between your commits, and a blanket stage carries
+those edits into your commit (S2's housekeeping note is the precedent; nothing was lost, but
+the authorship record blurs). CLOSEOUT DUTY added to the carried list: row 51's midnight-tick
+remainder needs a LETTERED 17 entry minted (the owner cell currently says "a 17 standing-fixes
+entry" — the file's rule wants the letter).
+
+## UNIT S3 BRIEF — CHROME SINGLES + THE CONFORMANCE SWEEP (rows 44 · 45 · 46 · 63 · 67 · 68 · 69 + the Trash fork; self-contained — read in this order)
+
+**Read first, in full:** (1) this file's Status banner · THE SIZING-AND-RULINGS SITTING RECORD
+(**R-13u4-5 is yours and BINDING** — sweep the 27 `.fixedSize()` sites with a deliberate
+per-site `lineLimit` + a grep pin on the 18j literal-colour pin's form; R-13u4-6 the cast) ·
+THE LEDGER · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the eight prior UNIT RECORDs (every
+walker fact binds — S2's context-menu re-measure rule and the sips caveats included). (2)
+**KnownIssues rows 44, 45, 46, 63, 67, 68, 69** — each is your mandate verbatim; read each
+row's own remedy sketch. (3) The restyle mandate: the reference artifact
+`notes/plans/pre-13u-mockups/blocks-and-snippets.html` · `Theme/CalmGrammar.swift` · the
+13u3 closeout-refresh items 1/2/5 (the gutter law — a restyle NEVER moves a measure or left
+edge for a decoration; the transaction-gated decoration refresh; `TakeCardMenu.rows` and the
+ceremony drift checks — restyle chrome, never check order). (4) The code each row names. Do
+your own reading.
+
+**The build, per row:**
+- **Row 44 (R-13u4-5):** sweep the 27 chrome `fixedSize` sites with a DELIBERATE per-site
+  `lineLimit` (1 for constant labels; a stated limit where a site is genuinely multi-line —
+  each site one line in the record's table) + the grep pin that keeps the class closed. The
+  constitution stands as written; the row closes.
+- **Row 45:** `BlockTagAssignmentSheet` takes the voice (`VoiceTokens` — it currently reads
+  system `.headline`/`List`/`Toggle` in both voices); its "block" title on a snippet face is
+  RECORDED as-is unless a per-surface word is one trivial parameter (then PROVISIONAL it).
+- **Row 46:** `ShellRouter.blockNamingDoor` — the process-global DEBUG closure published by
+  every `RootView` mount, cleared by one of eight test sites; fix on S2's oracle-ownership
+  idea (the registrant names itself; teardown clears only what it still owns) or the row's own
+  sketch; latent, so a structural fix without a red pin is acceptable IF the mechanism is
+  traced and stated (the hallucination guard's architectural-finding arm).
+- **Row 63:** the editing indicator ring's 8 pt overhang crossing the gutter's glyphs — the
+  ring's leading edge respects the gutter faces (stop at `proseLeft − air`) or a per-style
+  constant, tuned against the reference grammar; R14/R22 semantics untouched; THE GUTTER LAW:
+  the prose column's measure and left edge never move for this.
+- **Row 67:** `Help ▸ Restore Tutorial…` confirms through the same SwiftUI `.alert` grammar
+  its siblings use; the AppKit modal retires (and the walk stops paying its input-swallowing
+  tax).
+- **Row 68:** the "pool & scraps" lesson chapter swept against `SnippetsCopy`'s vocabulary
+  (groups, never "pools") with spine pins holding words to surfaces (the H pattern); the
+  RE-SEED CONSEQUENCE recorded in the carried block (it joins E3's — her one Restore Tutorial
+  act at the closeout covers both).
+- **Row 69:** Block History's rename field no longer OPENS under a sealed note — plumb the
+  seal fact to the pane's model and gate the offer (the op's refusal stays as the backstop;
+  this is the face half round 2 correctly deferred).
+- **The Trash card restyle** (the 2a fork) to the reference grammar.
+- **THE CLOSING CONFORMANCE WALK:** walk the app's surfaces against the reference artifact in
+  both voices and appearances; fix what this phase's own touches left non-conforming; LIST
+  what remains non-conforming honestly in the record (the closeout carries it — never a
+  silent pass).
+
+**Evidence:** the walk (both voices AND both appearances, captured — including the alert's
+new grammar, the ring beside a gutter glyph, the voiced tag sheet on all three surfaces that
+render it, the swept lesson's surface) + the grep pin + the spine pins + the sweep table
+(27 rows, each verdicted). The touched Mac suites + the acceptance spine (REAL TYPE NAMES) at
+the end. Captures to `notes/plans/13u4-screens/s3/`. PROVISIONALs from **#133**. Stage
+PATHSPEC-LIMITED (the orchestrator note above).
+
+**Your record:** append a `## UNIT S3 RECORD` section to THIS file with LIVE STATUS from the
+FIRST commit (PENDING marks), the 27-site sweep table, the conformance walk's honest
+remainder list, and the seam-file list (row 63 touches the editor's decoration geometry — if
+the diff reaches `EditorTextView`/`BlockRangeIndex`, say so for the ladder); flip the ledger's
+S3 row and the seven KnownIssues rows' cells in your closing commit. The checkpoint protocol
+binds from the first commit.
