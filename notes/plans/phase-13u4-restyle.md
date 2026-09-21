@@ -3549,7 +3549,7 @@ CLOSE against what actually shipped):**
 | 7 | **Row 68** — the "pool & scraps" lesson swept against `SnippetsCopy` (H pattern; re-seed consequence recorded) | DONE (this commit) — the prose swept, one H-pattern pin over every door it names; **28 tests in 5 suites green** |
 | 8 | **Row 69** — Block History's rename field no longer OPENS under a seal | DONE (this commit) — the seal WATCHED for as long as the pane is up; the branch a fact on the model; 4 pins; **28 tests in 4 suites green** |
 | 9 | **The Trash fork** — the 2a taste fork's card restyle | DONE (this commit) — calm rows in the voice, **zero structural decisions moved**; the Trash suites ride unmodified |
-| 10 | QUESTIONS #133 (the PROVISIONALs) | NOT-STARTED |
+| 10 | QUESTIONS #133 (the PROVISIONALs) | DONE (this commit) — (a)–(h); next free moves to **#134** |
 | 11 | THE CLOSING CONFORMANCE WALK — both voices AND both appearances, captured, against the reference artifact; the honest remainder list | NOT-STARTED |
 | 12 | Closing suites + the ledger's S3 row + the seven KnownIssues rows' cells | NOT-STARTED |
 
