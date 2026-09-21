@@ -108,8 +108,15 @@ final class MobileCommentsSheetView: UIView {
     /// rule (#120(e)) and the pad's shipped shape.
     ///
     /// Keystrokes that land DURING the write are not part of what was
-    /// submitted, so only the submitted text is cleared — the pad's
-    /// discipline, for the same reason.
+    /// submitted, so the field clears only while it still holds EXACTLY
+    /// what was submitted — the capture family's recorded rule, in the
+    /// original's own words (`QuickEntryBar`; the pad's `take()` is the
+    /// same gate): *"clearing them wholesale would lose them for the sake
+    /// of tidiness. She sees them still there, and a second ⏎ makes them a
+    /// second note."* The consequence — text that landed can ride into
+    /// that second post — is the family's chosen trade, not an oversight
+    /// (ladder round 1's MINOR, dismissed against this rationale; changing
+    /// the family's rule is the author's call, never one door's).
     private func submitDraft() {
         guard let model else { return }
         let text = draftField.text ?? ""
