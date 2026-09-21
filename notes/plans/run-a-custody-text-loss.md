@@ -1,8 +1,9 @@
 # RUN A — custody & the text-loss doors (17b + 17l items 1–4/6–7 + 17n + 17m)
 
 **STATUS: OPEN — kicked off 2026-09-21 at the author's word (the `/architect-phase` invocation carrying
-`notes/plans/pre-beta-standing-fix-runs.md`'s paste-ready kickoff). BATCHES A1 AND A2 CLOSED
-(orchestrator-verified, adjudications at each record's end). Batch A3 next.**
+`notes/plans/pre-beta-standing-fix-runs.md`'s paste-ready kickoff). ALL THREE BATCHES CLOSED
+(orchestrator-verified, adjudications at each record's end). THE LADDER runs next over the combined
+diff `50e581fa..HEAD`.**
 
 An ad-hoc standing-fixes phase under a Fable orchestrator per the runs file (her confirmed grouping,
 2026-09-14, R-13u-6). **The entries themselves live in `notes/plans/phase-17-standing-fixes.md` — that
@@ -183,6 +184,11 @@ table: instance × host/path, each cell FIXED-with-named-pin or provably SAFE.
   shared records between your commits (the 13u4 standing rule).
 - **Backups:** any act near the real store takes the A1 rail first (WAL-safe, UTC-named) — this run
   never touches it before the closeout refresh.
+- **The `-only-testing`-in-a-variable trap (found at batch A3, 2026-09-21):** `-only-testing`
+  flags built into a zsh VARIABLE and passed unquoted select NOTHING (zsh does not word-split), and
+  xcodebuild then prints `Executed 0 tests` **and `** TEST SUCCEEDED **`**. Write the selectors
+  literally on the command line; the only proof a run happened is Swift Testing's
+  `Test run with N tests in M suites` line with a non-zero N.
 
 ---
 
@@ -1460,6 +1466,36 @@ word-split an unquoted parameter, so xcodebuild receives one giant argument, run
 `Executed 0 tests` **and `** TEST SUCCEEDED **`**. Twice, before the missing `Test run with …` line gave it away.
 The suite-level selectors must be written out literally (or `${=FLAGS}`), and the line that proves a run happened
 is Swift Testing's own `Test run with N tests in M suites` — never xcodebuild's TEST SUCCEEDED.
+
+---
+
+### BATCH A3 — ORCHESTRATOR ADJUDICATION (2026-09-21; the batch CLOSES here)
+
+**Verified, never trusted:** the 11 commits spot-checked against the report (head `3568e6c1`, tree
+clean, pushed); `git diff --stat -- Sources/` over the batch is EMPTY, so the core-not-run claim
+stands by construction (A2's 1639/177 carries); **`AppleRelinkDoorTests` re-run directly by the
+orchestrator with literal selectors — 8/8 green**; the record's ROW 16 section read whole; the
+three captures present with the walk's acceptance honestly an ABSENCE (P-2 photographed: no
+re-link section in Castle) and the un-stageable consent face carried by its pins, per the row-16
+scope ruling.
+
+**Adjudications:** (1) the five judgment calls are properly flagged, not buried — all ride #139
+on her ratify list; the pane placement stays PROVISIONAL per the ledger. (2) **`healAppleHeldCopy`
+keeps its name with two callers** — concurred: the doc is widened, the authorization rule sits at
+each caller, and a rename would churn four shipped pins for a word; the ladder may still raise it.
+(3) The `KeyActPassphrase` hoist (the ceremony's verification rule, verbatim, one rule not two) is
+row 12's lesson applied correctly — the 3C form. (4) The two discrimination reverts are the right
+red-on-old stand-in for new capability (R1 reddened exactly the read-never-mint pin; R2 exactly
+the consented-id guard's) — sustained. (5) The zsh `-only-testing`-in-a-variable trap is ADOPTED
+into this file's ENVIRONMENT TRAPS (a selected-nothing run prints TEST SUCCEEDED — the machinery
+finding of the batch). (6) PL-37 recorded; the phone's twin is her call at #139(f).
+
+**Disposition (ledger row 16): FIXED** — built to the entry's spec through the F2 heal road behind
+consent, `AppleRelinkDoorTests` (8) as its state-transition suite, every refusal arm leaving the
+vault's revision unmoved, the door reading and never minting the iCloud key. Evidence: full Mac
+**3077/508 ALL GREEN** · custody/copy 141/11 · book + tutorial 109/15 · mobile 635/108 (the 4
+knowns) · iOS build green. The re-seed consequence joins the one bundled press (13u4's lessons +
+A2's Lesson 2 / Chapters 2 · 7 + A3's Chapter 2 paragraph, plus *Restore "Encryption Explained"*).
 
 ---
 
