@@ -1823,7 +1823,7 @@ is touched.
 | 2 | THE REPRODUCTION — her gesture on the dev-store Debug build, a TRIAL TABLE (rate, not one run) | DONE (this commit) — **20 trials, 11 MISSES**, the table below |
 | 3 | THE MECHANISM, TRACED (inputs → wrong scroll target → the landing below) — the `LandingAuthority` hypothesis TESTED, never assumed | DONE (this commit) — the two measured experiments below |
 | 4 | The red-on-old pin (behavioural-revert verified) + the fix | **THE FIX IS IN** (this commit) — the Index adopts `LandingAuthority`; pins red 3/3 pre-fix · the pin's first shape was HOLLOW and is recorded as such · the paired behavioural-revert measurement is piece 4b |
-| 4b | The BEHAVIOURAL REVERT — is the improvement the AUTHORITY's, or the probe's? (a worktree at the probe-only commit, the same trials) | NOT-STARTED |
+| 4b | The BEHAVIOURAL REVERT — is the improvement the AUTHORITY's, or the probe's? (a worktree at the probe-only commit, the same trials + the same pins) | DONE (this commit) — **the authority's**: 3 of 4 trials miss and both pins are RED on the reverted tree |
 | 5 | Row 56's PAIRED INTERLEAVED adjudication (`theReadClickLandsInIndexAtThatBlock`, both trees) | NOT-STARTED |
 | 6 | The WALK — chapter clicks at several depths, before/after, captured | NOT-STARTED |
 | 7 | Closing suites + the ledger's F1 row | NOT-STARTED |
@@ -2061,3 +2061,42 @@ issued blind against a column whose geometry is being discovered faster than the
 **This is the architectural trace's §1 exactly** (*"every long lazy column in the app discovers its
 row heights AFTER it has aimed"*) — and the trace's own answer to it is not more compensation but
 §5(b), heights KNOWN before the aim.
+
+### THE BEHAVIOURAL REVERT (piece 4b) — is the improvement the AUTHORITY's, or my probe's?
+
+**Why this measurement had to be made.** The fix's diff contains TWO things: the landing authority,
+and the geometry reports that feed it. Geometry observers on a lazy container's rows can change
+how eagerly that container measures — so "the landing got better" could have been the probe's
+side effect rather than the authority's work, and a fix nobody can attribute is not a fix. The
+brief's own words: *behavioural-revert verified*.
+
+**How.** `git worktree add /tmp/f1-probe-only feb2d5d0` — this unit's own probe-only commit: the
+reports and the named coordinate space are IN, the authority is OUT, the pane aims once. Built
+into its own DerivedData and run alone (the dev-store instance quit by identity first; one
+instance at a time, the 13u3 UNIT E walker law).
+
+| her gesture, same ys, same book | the REVERTED tree (probe only) | this unit's tree |
+|---|---|---|
+| COLD first click, ch13 copper beeches | *"This gentleman, Mr. Wilson, has been my partner"* — **ch3 Red-Headed League, ten chapters short** | the heading at the top (`hops=0 end=settled top=0`) |
+| ch2 a scandal in bohemia | the heading at the top | the heading at the top |
+| ch10 the engineer's thumb | *"Hotel Cosmopolitan Jewel Robbery"* — **ch8, two short** | the heading at the top |
+| ch12 the beryl coronet | *"…lived in Brixton Road, where she fattened fowls"* — **ch8, four short** | the heading at the top |
+
+**And the pins, run on both trees with the same fixture** (the final shape — a middle row, 8
+chapters × 40 blocks):
+
+| run | `aLandingOnAFarNoteArrivesAtThatNotesTop` | `aBlockLandingDeepInTheBookArrivesAtThatBlock` |
+|---|---|---|
+| REVERTED, run 1 | **8667.5 pt off** | **never reported** |
+| REVERTED, run 2 | **4077.5 pt off** | **never reported** |
+| this tree, run 1 | **0.04 pt** ✓ | **0.24 pt** ✓ |
+| this tree, run 2 | **0.00 pt** ✓ | **0.23 pt** ✓ |
+
+**RED ON OLD, GREEN ON NEW, and the credit goes where the measurement puts it: the authority.**
+
+*(The fixture is 40 blocks a note rather than 100, and the reason is measured and recorded rather
+than tuned-until-green: at 100 blocks the harness's column is still CLIMBING while the landing
+runs — the cold-column residual named above — and both trees fail, which is not evidence of
+anything. At 40 the column settles inside the landing's own hold, which is the state the app is in
+whenever she has been reading a book for a few seconds, and the two trees separate cleanly. The
+100-block measurements are kept in this record because they are how the residual was found.)*

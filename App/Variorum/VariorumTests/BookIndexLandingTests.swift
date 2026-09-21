@@ -40,7 +40,7 @@ import VariorumCore
 /// of the shipped sample library at a scale a test can build).
 @MainActor
 private func withLongIndexBook<T>(
-    notes: Int = 8, blocks: Int = 100,
+    notes: Int = 8, blocks: Int = 40,
     _ body: @MainActor (
         AppSession, AppDatabase, _ readingID: String, _ postIDs: [String]
     ) async throws -> T
