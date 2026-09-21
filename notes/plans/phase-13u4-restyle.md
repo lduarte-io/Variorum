@@ -4237,3 +4237,61 @@ door's ownership, **27 new pins — 26 in six new files (1 · 8 · 4 · 5 · 4 �
 own in `TutorialWalkTests`** — QUESTIONS #133, the walk captures (gitignored, 19 crops) and this
 record. What is OPEN is hers: **#133**. What is owed elsewhere: the **eight-row
 conformance remainder list**, which this unit deliberately did not start.
+
+---
+
+## UNIT F2 BRIEF — THE SHRINK-RE-FONT STRAND (KnownIssues row 53, pulled in at R-13u4-7; self-contained — read in this order)
+
+**Read first, in full:** (1) this file's Status banner · THE SIZING-AND-RULINGS SITTING RECORD
+(R-13u4-7 is why you exist: the defect must not ride the closeout's install refresh; R-13u4-6
+the cast) · THE LEDGER's F2 row · ENVIRONMENT TRAPS · CAST & DISCIPLINE **+ the ORCHESTRATOR
+NOTE (pathspec-limited staging)** · the nine prior UNIT RECORDs' walker facts. (2) **UNIT S1
+RECORD's row-53 section — your fixture, already measured:** *Copper Beeches* (212 blocks,
+9,999 words), caret driven to the document END; a re-font that SHRINKS the document (inline
+comments OFF · paragraph gap → Standard) strands the surface — only the last line draws, the
+rest blank; a GROWING one does not; the store untouched in every blank capture; no self-heal
+at +8 s; scrolling, a mode round trip, and leave-and-return do NOT heal; **⌘↑ heals completely
+and instantly**. (3) **KnownIssues row 53's full text** — the stated hypothesis you TEST: the
+mirror of 17o's `usageBoundsForTextContainer` high-water measurement — a genuinely shorter
+document leaves the viewport resting past its own content, and exactly one fragment lays out.
+(4) **13u2 UNIT D's record** in `notes/plans/phase-13u2-feel.md` (the carve design the row
+defers to — TRACE D-6's probe shapes and what it ruled out). (5) **`notes/TEXTKIT2_NOTES.md`**
+§2–§4 + the 17o ratchet finding (`PaneMeasurement` reads the laid-out fragments' bottom; the
+property is a high-water mark while text remains) + the macOS-26 attribute-fixing rule. (6)
+The code: `applyVoiceChrome`'s refresh road and the two occasions' setting paths · the
+full-document editor's viewport/scroll handling (`EditorTextView` — **THE SEAM: the Fable
+rider applies to this unit's diff by construction; name every seam file**) · the 13u3
+transaction-gated decoration refresh (`storageEditTransactionDepth` — any refresh work routes
+through the settle hop, never a synchronous refresh inside a storage-edit window). Do your own
+reading.
+
+**Discipline, in order:** (1) **The pin FIRST — this is a DEFECT, red-on-old owed:** drive a
+shrinking re-font on a tail-scrolled full-document editor in a harness and assert the viewport
+rests inside the content / the visible fragments draw (the `TakePaneMeasureTests` family shows
+the measurement grammar; this surface is the FULL-DOCUMENT editor, so the window-smoke rigs
+are the mounting precedent). The pin must be RED on the shipped tree — behavioural-revert
+verified — and S1's captures say it will be. (2) TRACE the mechanism to confirm or correct the
+hypothesis (what exactly is the viewport anchored to after the shrink; why does ⌘↑ heal — a
+caret move to offset 0 forces what, precisely). (3) FIX at the traced site — the healing road
+suggests a relayout/anchor clamp after a re-font whose new content bounds fall above the
+current viewport (the Phase 6 hybrid-jump road is the proven scroll-repair pattern) — routed
+through the settle hop per the transaction-gate rule, never a synchronous mid-edit refresh;
+never a TK1 API; the gutter law untouched. (4) **Sweep the CLASS:** every re-font/re-layout
+occasion on this road (voice switch · palette · ink · inline comments · paragraph gap · any
+other document-height-changing setting) × both directions, each verdicted FIXED / provably
+SAFE / does-not-shrink, one line each.
+
+**Evidence:** the red-on-old pin + the class-sweep table + a hands-on WALK repeating S1's
+exact table on *Copper Beeches* — both occasions, both directions: the shrink direction now
+draws the page whole with NO ⌘↑, the grow direction stays whole, the caret stays where she
+left it (never yank her to the top as the fix — ⌘↑ is the symptom's healer, not the fix's
+shape). Captures to `notes/plans/13u4-screens/f2/`. The touched Mac suites +
+`TakePaneMeasureTests` + the acceptance spine (REAL TYPE NAMES) at the end. PROVISIONALs from
+**#134**. Stage pathspec-limited.
+
+**Your record:** append a `## UNIT F2 RECORD` section to THIS file with LIVE STATUS from the
+FIRST commit (PENDING marks), the traced mechanism (what the viewport was resting on, stated
+as inputs → state), the red-run evidence, the class-sweep table, and the SEAM-FILE LIST (this
+unit's diff is expected to reach `EditorTextView` — the ladder's Fable reviewer reads it
+first); flip the ledger's F2 row and KnownIssues row 53's cell in your closing commit. The
+checkpoint protocol binds from the first commit.
