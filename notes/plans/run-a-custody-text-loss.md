@@ -1299,7 +1299,7 @@ Apple arm, the heal's wire, `openSwitch`/`ceremony(for:)`), `PostureSwitch` (`ch
 |---|---|---|
 | 0 | Record skeleton + `run-a-screens/a3/` | **DONE** |
 | 1 | The copy constants + the door's brain (`AppleRelinkModel`, shared) + the one passphrase-verification brain | **DONE** — `App/Variorum/Shared/AppleRelinkModel.swift` (new, in `Shared/` so the phone can compose it), the copy block in `PostureCopy.swift`, and `KeyActPassphrase` hoisted VERBATIM out of `PostureSwitchModel.verifyPassphrase` (row 12's lesson: a second key act must not carry a second copy of the rule). Mac build green; pins are piece 3 |
-| 2 | The Mac face: Settings ▸ Protection's Apple-account section + its sheet | **NOT-STARTED** |
+| 2 | The Mac face: Settings ▸ Protection's Apple-account section + its sheet | **DONE** — a *Your Apple account* section between the posture cards and Castle's switches (explainer + the door), rendered under P-2's letter (Standard · `.enrolled` · the road wired) and disabled while a ceremony or a follow is on screen; `AppleRelinkSheet` beside `PostureSwitchSheet`. Held in the PANE's `@State`, not on the controller — this door reopens nothing, so row 11's two-presenter rule has nothing to say about it. Mac build green |
 | 3 | The pins (the door's state-transition suite: (i) the orphaned state → a new device enrolls with nothing typed · (ii) the consent names THIS device's account · (iii) the refusal arm writes nothing) | **NOT-STARTED** |
 | 4 | The book's Chapter 2 + the FAQ brief's entry (content; the re-seed consequence recorded) | **NOT-STARTED** |
 | — | Closing evidence (targeted suites · `TutorialWalkTests` · the full Mac suite · iOS build · the walk) | **NOT-STARTED** |

@@ -164,12 +164,17 @@ struct ProtectionPane: View {
     @State private var reminderCheck: SecretCheckModel?
     /// pre-13x 2b: a switch that did not finish on this device (the marker).
     @State private var pendingSwitch: RotationMarker?
+    /// RUN A batch A3 (17m): the re-link door's sheet.
+    @State private var relinkModel: AppleRelinkModel?
 
     var body: some View {
         Form {
             leadSection
             checklistSection
             postureSection
+            if appleAccountDoorRenders {
+                appleAccountSection
+            }
             if controller.posture == .castle {
                 castleSwitchesSection
             }
@@ -189,6 +194,14 @@ struct ProtectionPane: View {
         .onDisappear { controller.protectionPaneDisappeared() }
         .sheet(item: $setSheetModel) { model in
             PassphraseSetSheet(model: model) { setSheetModel = nil }
+        }
+        // RUN A batch A3 (17m): the re-link door's own sheet. Held in this
+        // pane's `@State` and NOT on the controller (the ceremony sits there
+        // because a re-key reopens the `.ready` tree under it — this door
+        // writes ONE vault field and reopens nothing), so row 11's
+        // two-presenter rule has nothing to say about it.
+        .sheet(item: $relinkModel) { model in
+            AppleRelinkSheet(model: model) { relinkModel = nil }
         }
         // pre-13x 2b: THE CEREMONY, held on the controller (it survives the
         // re-key's reopen — this pane does not). Row 11: presented here only
@@ -355,6 +368,42 @@ struct ProtectionPane: View {
         .background(RoundedRectangle(cornerRadius: 8).fill(.quaternary.opacity(0.4)))
         .accessibilityElement(children: .combine)
         .accessibilityLabel(ProtectionCopy.postureName(posture))
+    }
+
+    // MARK: RUN A batch A3 (17m) — the re-link door (Standard only)
+
+    /// **P-2's letter, applied: this door renders exactly where it can act.**
+    /// STANDARD (Castle owes no Apple-held copy at all — §3.4's Castle table),
+    /// this device ENROLLED under the account's current keys (the write is
+    /// authorized by the master in its own custody and the key proof, which
+    /// only an enrolled device holds), and the reland road wired. It does
+    /// NOT gate on "the key on file differs from the one this Mac reads":
+    /// that reading needs a Keychain hop per render, and it would hide the
+    /// door in exactly the state where the answer is unknown — including the
+    /// one the entry names, where iCloud Keychain hands back nothing and the
+    /// door must be reachable to SAY so.
+    private var appleAccountDoorRenders: Bool {
+        guard controller.posture == .standard, controller.healAppleHeldCopy != nil,
+              let state = services?.encryption.state else { return false }
+        if case .enrolled = state { return true }
+        return false
+    }
+
+    private var appleAccountSection: some View {
+        Section(ProtectionCopy.relinkSectionTitle) {
+            Text(ProtectionCopy.relinkExplainer)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack {
+                Button(ProtectionCopy.relinkDoor) {
+                    relinkModel = AppleRelinkModel(
+                        controller: controller, vaultTie: VaultTie.make(services: services))
+                }
+                Spacer()
+            }
+            .disabled(controller.activeSwitch != nil || controller.activeFollow != nil)
+        }
     }
 
     // MARK: Castle's switches (shown only in Castle — copy §1)
@@ -1324,5 +1373,97 @@ struct PostureSwitchSheet: View {
         }
         .padding(12)
         .background(RoundedRectangle(cornerRadius: 8).fill(.quaternary.opacity(0.5)))
+    }
+}
+
+// MARK: - RUN A batch A3 (17m) — the re-link door's sheet
+
+/// The face over `AppleRelinkModel`: ONE consent screen (the sentence naming
+/// which Apple account will hold the key, what it replaces, and the
+/// passphrase — the key act), then the act, then Done. Every refusal it can
+/// meet — the door's three and the act's two — lands in the one `.failed`
+/// arm under *Nothing was changed*, which is literally true on all five:
+/// the door refuses before any screen, and the act refuses before or at the
+/// single vault write, never after it.
+struct AppleRelinkSheet: View {
+    @Bindable var model: AppleRelinkModel
+    var onDone: () -> Void
+
+    @State private var passphrase = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            switch model.phase {
+            case .checking:
+                title("Checking…")
+            case .consent:
+                title(ProtectionCopy.relinkTitle)
+                ForEach(model.consentSentences, id: \.self) { sentence in
+                    body(sentence)
+                }
+                Text(ProtectionCopy.relinkAuthorizeLine)
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+                PeekableSecretField(label: ProtectionCopy.passphraseFieldLabel, text: $passphrase)
+                    .textFieldStyle(.roundedBorder)
+                HStack {
+                    Button("Cancel") { onDone() }
+                    Spacer()
+                    Button(ProtectionCopy.relinkConfirmDoor) {
+                        Task { await model.confirm(passphrase: passphrase) }
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(model.busy || passphrase.isEmpty)
+                }
+            case .running:
+                title(ProtectionCopy.relinkTitle)
+                HStack(spacing: 8) {
+                    TravellingDotsIndicator(ink: .secondary)
+                    Text("Working…").font(.callout).foregroundStyle(.secondary)
+                }
+            case .done:
+                title("Done")
+                body(ProtectionCopy.relinkDone)
+                HStack { Spacer(); Button("Close") { onDone() }.keyboardShortcut(.defaultAction) }
+            case .failed(let sentence):
+                title("Nothing was changed.")
+                Text(sentence)
+                    .font(.callout)
+                    .alarmVoice()
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack { Spacer(); Button("Close") { onDone() }.keyboardShortcut(.defaultAction) }
+            case .closed:
+                EmptyView()
+            }
+            if model.busy, model.phase != .running {
+                HStack(spacing: 6) {
+                    TravellingDotsIndicator(ink: .secondary)
+                    Text("Working…").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            if let error = model.lastError {
+                Text(error)
+                    .font(.callout)
+                    .alarmVoice()
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(24)
+        .frame(width: 460)
+        .task { await model.start() }
+        .interactiveDismissDisabled(model.phase == .running)
+    }
+
+    private func title(_ text: String) -> some View {
+        Text(text)
+            .font(.title3.weight(.semibold))
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func body(_ text: String) -> some View {
+        Text(text)
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
