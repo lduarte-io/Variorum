@@ -1273,6 +1273,61 @@ resumes.
 
 ---
 
+## BATCH A3 RECORD — 17m, the Re-link-your-Apple-account door
+
+**WHAT I DID NOT DO (this record's first line, per the standing rule):** *(PENDING — written in full at the
+batch's close; the running list so far)* no `Sources/VariorumCore/Sync/` line, no `Sources/` line at all, no
+schema, no migration (the marker stays 8), nothing touched in `/Applications` or her real store, no author-only
+call taken, and **no door built for the phone** (17m's entry names Settings, Mac-first; the parity question is
+recorded rather than built).
+
+**Session opened 2026-09-21.** Implementer: `opus-implementer` (fresh session, batch A3 only). Read before any
+code, in the brief's order: this file's Status banner · FENCES · BINDING PRINCIPLES · LEDGER row 16 + its scope
+ruling · ENVIRONMENT TRAPS · CAST & DISCIPLINE · the BATCH A1 and A2 RECORDs with their adjudications;
+`notes/plans/phase-17-standing-fixes.md` § 17m (the entry IS the spec) and § 17l item 4 (row 11's presenter,
+which this door inherits); `notes/QUESTIONS.md` #90 item (10) + HER RULINGS block; `notes/plans/pre-13x-postures-design.md`
+§3.3 · §3.4 (the credential audit, both postures + the two switches) · §3.5 · §5 THE DOORS · the MAJOR-3 REFINED
+paragraph · F2's item 3 · MINOR-N1's row and F3's item 1; the named code — `ProtectionController` (the reconcile's
+Apple arm, the heal's wire, `openSwitch`/`ceremony(for:)`), `PostureSwitch` (`checkDoor`, `appleHeldCopyForStandard`,
+`leaveCastle`), `PostureSwitchModel` (`start`'s door refusals, `verifyPassphrase`), `EncryptionSession`
+(`relandAppleHeldCopy`), `PassphraseSetModel` + `VaultTie`, `ProtectionPane`, `ProtectionCopy`/`PostureCopy`,
+`Phase13pControllerTests`' world harness.
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims marked PENDING)
+
+| # | Piece | Status |
+|---|---|---|
+| 0 | Record skeleton + `run-a-screens/a3/` | **DONE** |
+| 1 | The copy constants + the door's brain (`AppleRelinkModel`, shared) + the one passphrase-verification brain | **NOT-STARTED** — the settled design is below |
+| 2 | The Mac face: Settings ▸ Protection's Apple-account section + its sheet | **NOT-STARTED** |
+| 3 | The pins (the door's state-transition suite: (i) the orphaned state → a new device enrolls with nothing typed · (ii) the consent names THIS device's account · (iii) the refusal arm writes nothing) | **NOT-STARTED** |
+| 4 | The book's Chapter 2 + the FAQ brief's entry (content; the re-seed consequence recorded) | **NOT-STARTED** |
+| — | Closing evidence (targeted suites · `TutorialWalkTests` · the full Mac suite · iOS build · the walk) | **NOT-STARTED** |
+
+**Deaths and resumes:** none yet.
+
+**Reverts:** none in flight. *(Every behavioural revert is announced HERE before it starts, taken from a COMMITTED
+state, and restored by `git checkout --` from the REPO ROOT with `git diff` empty before "restored" is written. If a
+later session reads "revert starting" with no "restored" after it, check `git diff` first.)*
+
+### THE DESIGN, settled before any code (so the record carries it whole)
+
+**What the door closes (MINOR-N1; QUESTIONS #90 (10)):** in Standard the vault's Apple-held copy of the master is
+wrapped under the iCloud key `A`. F3 made the heal key on a key READ, never a MINT — so after an iCloud Keychain
+RESET (or the establishing device signing into another Apple ID) the account's copy is ORPHANED: this device mints
+`A′` for its own key file, the vault's copy stays under the vanished `A`, and new Apple devices lose Standard's
+nothing-typed enroll until the vault's copy is re-landed. The only road today is the Castle → Standard round trip.
+
+**The shape, built from existing machinery only:** ONE consent screen (the sentence naming which Apple account will
+hold the key + the passphrase field, the key act) → ONE proof-authorized vault write through the road F2 built for
+the heal (`ProtectionController.healAppleHeldCopy` → `EncryptionSession.relandAppleHeldCopy(under:)` — M from this
+device's custody, `settingAppleHeldCopy`, the CAS on the fetched revision, the key proof) → the reconcile, which
+lands this key file's own copy and re-reads the account. **No new custody semantics, no engine line, no schema.**
+
+*(Filled in as each piece lands.)*
+
+---
+
 ## THE LADDER (ONE Fable ladder over the run's combined diff; opens after A3's record closes)
 
 Fresh `fable-reviewer` per round, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing from the
