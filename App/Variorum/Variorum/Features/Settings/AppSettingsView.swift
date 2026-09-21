@@ -387,23 +387,36 @@ private struct GeneralPane: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(6)
                     .fixedSize(horizontal: false, vertical: true)
-                // 18g (her R-Q6/R-Q11/R-Q13): the palette sits UNDER the
-                // voice — same section, one row down, because that is what
-                // it is. Its own file: a feature that arrives as fifty
-                // lines inside a pane is how a pane becomes a god file.
-                PaletteSettingsRow(session: session, theme: theme)
             }
-            // 18j (her R-Q12): the light/dark choice sits directly UNDER the
-            // voice and the palette — the third of the three appearance
-            // dials, and the coarsest reading of the other two.
-            // 13u4 UNIT S1 (KnownIssues row 59, hers): it is reachable now
-            // because this pane is four controls instead of fifteen. The
-            // order is unchanged and deliberately so — 18g's own walk found
-            // the palette row's custom-hex refusal at the fold, and a
-            // section added ABOVE would push that refusal out of sight
-            // again.
+            // 18j (her R-Q12): the light/dark choice, the third of the three
+            // appearance dials.
+            //
+            // **13u4 UNIT S1 — KnownIssues row 59 (hers: *"you can add the
+            // fold issue to 13u4"*).** Splitting the pane was NOT enough and
+            // the walk is what said so: the palette row is five swatch rows
+            // and two paragraphs tall, so with it still between the voice
+            // and this, "Light & dark" was STILL under the fold at the
+            // shipped window size — a shorter pane with the same order has
+            // the same fold. So the order changes: the two SHORT dials sit
+            // at the top where they are on screen the moment Settings
+            // opens, and the palette — by far the tallest control in the
+            // app's settings — follows them.
+            //
+            // 18g's recorded worry (a section added above pushes the
+            // palette's custom-hex refusal further out of sight) is
+            // answered rather than ignored: what sits above the palette now
+            // is two pickers and two short paragraphs, where before it was
+            // the whole of the old Appearance tab.
             if let appearance {
                 AppearanceChoiceRow(appearance: appearance)
+            }
+            // 18g (her R-Q6/R-Q11/R-Q13): the palette layers UNDER the
+            // voice, and reads that way — it is the third thing on the
+            // pane, below both dials it modifies. Its own file: a feature
+            // that arrives as fifty lines inside a pane is how a pane
+            // becomes a god file.
+            Section {
+                PaletteSettingsRow(session: session, theme: theme)
             }
             // 18i (her R-Q5): its OWN section, because it is neither a look
             // of the writing surface nor a habit of the document — it is how

@@ -145,8 +145,15 @@ struct HelperView: View {
             // answer is a key AND a menu item, not only a key Tab cannot
             // advertise. Back/forward moved to ⌥⌘[ / ⌥⌘], where Apple Notes
             // puts them too.
-            ("⌘] / ⌘[", "indent / outdent the list item you're in — the same act "
-                + "as Tab / ⇧Tab, on keys the Format menu can show you"),
+            // THE WALK'S FINDING (13u4 UNIT S1): her own word for this is
+            // UNINDENT — *"I thought it unindented things … how are things
+            // unindented?"* — and the app's word is "outdent", so Settings'
+            // search found nothing for the exact word she typed. The row
+            // says both. (A pin could not have caught it: the pin searched
+            // the app's word, which is the whole trap.)
+            ("⌘] / ⌘[", "indent / outdent — unindent, if that's your word for it — "
+                + "the list item you're in; the same act as Tab / ⇧Tab, on keys the "
+                + "Format menu can show you"),
         ]),
         // QoL batch 3 (L6): the in-post find family. Deliberately its own
         // group and deliberately worded against ⌘K's row below — one searches

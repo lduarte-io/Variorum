@@ -2409,8 +2409,8 @@ last commit)*
 | 3 | Item 4 — the SEARCH: one pure brain + the catalog it reads + the results face + pins | DONE (this commit) — **46 tests in 3 suites passed**, her literal "callout" case first among them |
 | 4 | Item 7 — the merge chord (and its three hard-coded siblings) SAID on the faces + truth pins | DONE (this commit) — **66 tests in 4 suites passed**; the red-on-old measurement is piece 4b |
 | 4b | The BEHAVIOURAL REVERT — are the pins measuring the CHORD or the refactor? (a worktree with the four literals put back) | DONE (this commit) — **5 of 7 RED on the reverted tree, the 2 guards green**; the revert's own dump is the defect, printed |
-| 5 | Item 5 — the ⌘[ answer (PROVISIONAL) + QUESTIONS #130 | NOT-STARTED |
-| 6 | The WALK on the dev-store Debug build, both voices AND both appearances, captured — **including row 53's two re-font occasions** | NOT-STARTED |
+| 5 | Item 5 — the ⌘[ answer (PROVISIONAL) + QUESTIONS #130 | DONE (commit 4) — the swap, its sweep, and every face that says it |
+| 6 | The WALK on the dev-store Debug build, both voices AND both appearances, captured — **including row 53's two re-font occasions** | DONE (this commit) — 48 captures; **row 59 DEAD**, **row 53 REPRODUCES on BOTH occasions**, and the walk caught a word no pin could |
 | 7 | Closing suites + the ledger's S1 row + the KnownIssues rows (59 · 53) | NOT-STARTED |
 
 ### THE READING (done in this session's own context, in the brief's order)
@@ -2648,3 +2648,97 @@ those refusals have never worn the voice she chose. Its HOME is untouched (the r
 colored frame (Block ▸ Callout). Presentation only…"* first, then **⌥⌘C — callout frame on this
 block (again to remove it)**. Two answers, one of which is the fastest there is. **No storage:**
 nothing is written, read from the store or synced; the query dies with the window.
+
+### EVIDENCE — THE WALK (piece 6; the unit closes on USE, not on pins)
+
+**Build:** `App/Variorum/DerivedData/13u4s1/Build/Products/Debug/Variorum.app`
+(`io.lduarte.Variorum.debug`, the fenced dev store). `pgrep -fl 'Variorum.app/Contents/MacOS'`
+was checked at the start — **ZERO instances; hers was not running at any point** — and every dev
+instance was quit **by identity** (`tell application id "io.lduarte.Variorum.debug" to quit`),
+never by a keystroke (the 13u3 UNIT D walker law), with `pgrep` re-checked after every quit and
+at the end. `/Applications/Variorum.app` was never touched. Captures:
+`notes/plans/13u4-screens/s1/` (gitignored) — **48 window captures**, named by step.
+
+| # | Step | What the app did | Capture |
+|---|---|---|---|
+| 1 | ⌘, on the first build of the new shape | the nine-pane list beside the detail, the search field at its head — and **row 59 NOT DEAD**: the palette row (five swatch rows + two paragraphs) still stood between the voice and Light & dark, so the appearance control was under the fold on a SHORT pane too | `01-settings-general-T-light.png` |
+| 2 | **THE WALK'S FIRST FINDING, fixed and re-walked**: the two short dials moved above the palette | **Light & dark ▸ Appearance (Follow system · Light · Dark) is on screen the moment Settings opens** — no scroll, no hunt. **KnownIssues row 59 is dead** | `02-general-appearance-above-fold-T-light.png` |
+| 3 | **Type `callout` — HER ACCEPTANCE CASE, LITERALLY** | two results: **callout** *(the word)* — *"A block wearing a colored frame (Block ▸ Callout). Presentation only…"* — and **⌥⌘C** *(shortcut)* — *"callout frame on this block (again to remove it)"*. Neither is a setting, which is exactly why a settings-only search could never have answered her | `03-search-callout-T-light.png` |
+| 4 | Type `dark mode` — a phrase in no label and no blurb | ONE result, **Appearance**, badged **general** — the keyword road, and the badge teaches where the thing lives | `04-search-darkmode-T-light.png` |
+| 5 | Click that result | the query clears and the pane lands on **General** with the appearance control in view | `05-result-click-lands-on-general.png` |
+| 6 | The **Shortcuts** pane | the whole grouped keyboard map in calm cards, in the voice's type — her *"tabs on text editing shortcuts, window / reshaping shortcuts"* | `06-shortcuts-pane-T-light.png` |
+| 7 | **Type `unindent` — HER OWN WORD** | **NOTHING.** *(See the finding below — the app's word is "outdent" and every pin had typed the app's word.)* | `07-search-unindent-T-light.png` |
+| 8 | …after the fix, re-walked | **⌘] / ⌘[ — "indent / outdent — unindent, if that's your word for it — the list item you're in; the same act as Tab / ⇧Tab, on keys the Format menu can show you"** — her item 5's question answered, with the new key in the same breath | `08-search-unindent-FIXED-T-light.png` |
+| 9 | Type `merge` — **ITEM 7 THROUGH THE SEARCH** | the word *merge* (naming ⌘⇧M in its own prose), ⌥⌘Z, **⌘⇧M — merge blocks — every take comes along**, ⌥⌘⇧M, and the `block ▾` row | `09-search-merge-T-light.png` |
+| 10 | A two-block note staged through the shelf's quick-entry bar (`Alpha paragraph.` ⇧⏎ `  - nested item` ⏎) | **block 1/2** | `11-note-staged.png` |
+| 11 | **The bar's `block ▾` — ITEM 7'S OWN DOOR** | **Divide (⌘⇧D) · Divide choosing takes… (⌥⌘⇧D) · Extract (⌘⇧E) · Make Block (⌘⇧K) · Merge (⌘⇧M) · Merge choosing takes… (⌥⌘⇧M)**. Her *"where is the merge shortcut said ??"* — it is said, on the door she uses, and so are its three siblings | `crops/12-blockmenu.png` |
+| 12 | **Right-click in the text** | **Merge Blocks (⌘⇧M)**, with all four plain acts chorded beside the two ceremony rows | `crops/13-contextmenu.png` |
+| 13 | Caret in `  - nested item`, **⌘[** | **the item OUTDENTS** — the two leading spaces go and the bullet aligns with the paragraph above. Her *"I thought it unindented things"* is now true | `crops/14-before-outdent.png`, `crops/15-after-outdent.png` |
+| 14 | **⌥⌘[** | **back to the shelf** — the navigation half of the swap, on Apple Notes' own chord | `16-after-opt-cmd-bracket-back.png` |
+| 15 | The menu bar, read through the accessibility API rather than a screenshot | `Format ▸ Indent [0|]]` · `Outdent [0|[]` (plain ⌘) and `View ▸ Back [2|[]` · `Forward [2|]]` (⌥⌘) — the real menu, not a claim about it | — |
+| 16 | **⌘/** | the helper's *windows & panes* group reads **⌥⌘[ / ⌥⌘]**, its *structure* group **⌘⇧M — merge blocks — every take comes along**, and its *formatting* group carries the new ⌘] / ⌘[ row beside the Tab one | `18-helper-formatting.png`, `19-helper-formatting-group.png` |
+| 17 | **STUDY voice** (Settings ▸ General) | the serif pane, Title-Case chrome, the search in serif — and **Light & dark still on screen**: row 59 dead in the second voice | `42-general-STUDY-light.png`, `43-search-callout-STUDY.png` |
+| 18 | **DARK** (`appearanceChoice dark`, relaunch), Study then Terminal | the fully black room in both voices, the appearance control on screen in both, the search legible in both | `44-general-STUDY-DARK.png`, `45-search-callout-STUDY-DARK.png`, `46-general-TERMINAL-DARK.png` |
+| 19 | The `block ▾` menu **in dark** | every row wearing its chord on the black room — item 7 in the fourth combination | `49-blockmenu-TERMINAL-DARK.png` |
+
+**Dev-store state left as found:** voice back to **Terminal** (set in the UI, verified in capture
+19's masthead chrome), `appearanceChoice` back to **system** (verified by `defaults read`), the
+paragraph gap back to **Standard** and inline comments back to **OFF** (both verified in
+`36`, the Editor pane re-read after the row-53 runs), **zero instances**. Left in the dev store as
+this walk's fixtures, as every walk's are: the note `Alpha paragraph.` (dated `2026-09-20`, in no
+book) and today's journal entry, which ⌘J minted to reach a Write surface in dark.
+
+### THE WALK'S FINDING THAT NO PIN COULD HAVE CAUGHT (step 7)
+
+Typing **`unindent`** — the word she wrote, twice, in item 5 — found **NOTHING**. The app's word
+is "outdent", the helper's row said "outdent", and **my own pin searched "outdent"**, so the
+suite was green on a vocabulary the user does not have. This is the C1 curly-quote class exactly
+one surface over: *a pin types the vocabulary it is testing, which is the whole trap.*
+
+The fix is one string and it fixes the word EVERYWHERE rather than only in the search: the
+helper's new bracket row now reads *"indent / outdent — unindent, if that's your word for it —
+…"*, so the ⌘/ window, the Settings ▸ Shortcuts pane and the search all teach both words from
+ONE source. The pin was widened to `["unindent", "outdent", "indent"]` with the finding written
+at it. **The alternative rejected:** a synonym table inside the search brain, which answers in
+one surface and starts a thesaurus nobody owns.
+
+### ROW 53 — WALKED, AND **IT REPRODUCES ON BOTH OCCASIONS** (report, do not build — the brief's rule)
+
+**The precondition the row names is met for the first time:** the inline-comments and
+paragraph-gap controls are now reachable without a hunt — both sit on the Editor pane's first
+section, on screen at the shipped window size (`22-editor-pane-T-light.png`).
+
+**The fixture:** *The Adventure of the Copper Beeches* (**212 blocks · 9,999 words**), Write,
+caret driven to the document END with ⌘↓ (`block 212/212`, the page drawn — `33-gap-before.png`).
+
+| Occasion | Direction | What happened | Capture |
+|---|---|---|---|
+| **Inline comments** | OFF → **ON** (the document grows) | the page redraws whole; the viewport shifts up, which is the honest consequence of every block getting taller. **No blank region**, stable at +2 s | `23`, `24` |
+| **Inline comments** | ON → **OFF** (the document shrinks) | **REPRODUCES.** Only the last line draws — *"Walsall, where I believe that she has met with considerable success."* — and the rest of the page is BLANK | `25-row53-inline-comments-off-again.png` |
+| **Paragraph gap** | Standard → **a blank line's worth** (grows) | page whole, no blank region | `37-gap-changed-editor.png` |
+| **Paragraph gap** | blank line's worth → **Standard** (shrinks) | **REPRODUCES**, identically | `38-gap-back-to-standard.png` |
+
+**What it is, measured rather than guessed:**
+
+- **The store is untouched throughout.** The bottom bar reads `block 212/212 · 149w block ·
+  9,999w in note` in every blank capture. This is a LAYOUT stranding, not a content loss.
+- **It does not self-heal**: byte-identical at +3 s and +8 s (`26`, `27`).
+- **Scrolling does not heal it** (`28`) — there is nothing to scroll to; the scroller behaves as
+  though the document were one line tall.
+- **A mode round trip does not heal it** (`30`), and **leaving the note and coming back does
+  not** (`31`, via ⌥⌘[ / ⌥⌘]).
+- **⌘↑ — a caret move to the document start — heals it completely and instantly** (`32`, `39`:
+  block 1/212, the whole page drawn). Any relayout aimed somewhere else recovers it.
+
+**The mechanism this points at** (stated as a hypothesis for whoever builds the carve, not as a
+finding): it is the mirror of the 17o measurement in TEXTKIT2_NOTES — `usageBoundsForTextContainer`
+is a HIGH-WATER MARK that never shrinks while the document holds text. Here the re-font makes the
+document genuinely SHORTER while the scroll offset sits at what used to be the end, and the
+viewport comes to rest past the content, so exactly one fragment lays out. The growing direction
+cannot produce it, which is precisely what the four rows above show: **both reproducing cases are
+shrinks, and neither growing case reproduces.**
+
+**Per the brief, NOTHING WAS BUILT for this** — the carve's design is 13u2 UNIT D's record's, and
+this unit's job was to make the occasions reachable and say what they do. **KnownIssues row 53 is
+RE-STATED, not closed**: its "NOT exercised" caveat is discharged, and what replaces it is a
+reproduction with a rate, a direction, a healing road and a named hypothesis.

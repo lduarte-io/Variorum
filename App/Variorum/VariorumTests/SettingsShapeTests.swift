@@ -99,11 +99,20 @@ struct SettingsShapeTests {
         }
     }
 
-    /// Her item 5's other half, answered through the same field.
-    @Test func typingUnindentFindsTheAnswer() {
-        let hits = findings("outdent")
-        #expect(hits.contains { $0.kind == .shortcut },
-                "the keyboard map answers “how are things unindented?”")
+    /// Her item 5's other half, answered through the same field — **in HER
+    /// word as well as the app's.**
+    ///
+    /// The walk is what earned the first of these two lines: the pin
+    /// originally searched "outdent", the app's word, and passed — while
+    /// typing "unindent", which is the word she actually wrote, found
+    /// NOTHING. A pin that types the vocabulary it is testing can never
+    /// catch that, which is exactly the C1 curly-quote class one surface
+    /// over. The helper row now says both words.
+    @Test func typingUnindentFindsTheAnswerAndSoDoesOutdent() {
+        for word in ["unindent", "outdent", "indent"] {
+            #expect(findings(word).contains { $0.kind == .shortcut },
+                    "“\(word)” answers “how are things unindented?”")
+        }
     }
 
     // MARK: - The catalog and the panes cannot drift (item 6)
