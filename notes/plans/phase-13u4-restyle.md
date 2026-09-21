@@ -4295,3 +4295,34 @@ as inputs → state), the red-run evidence, the class-sweep table, and the SEAM-
 unit's diff is expected to reach `EditorTextView` — the ladder's Fable reviewer reads it
 first); flip the ledger's F2 row and KnownIssues row 53's cell in your closing commit. The
 checkpoint protocol binds from the first commit.
+
+## UNIT F2 RECORD — THE SHRINK-RE-FONT STRAND (KnownIssues row 53, pulled in at R-13u4-7)
+
+**WHAT THIS UNIT DID NOT DO — the record's first line, per the discipline.** *(PENDING — filled
+at the close.)*
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims say PENDING)
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The reading, in this session's own context, in the brief's order | **DONE** |
+| 2 | The RED-ON-OLD PIN, written and measured BEFORE a line of the fix | PENDING |
+| 3 | The MECHANISM, traced (measured, never assumed) | PENDING |
+| 4 | The FIX at the traced site, through the settle hop | PENDING |
+| 5 | The CLASS SWEEP — every re-font occasion × both directions, one verdict each | PENDING |
+| 6 | The WALK — S1's exact table on *Copper Beeches*, both occasions, both directions | PENDING |
+| 7 | Closing runs + the record complete; ledger row + KnownIssues row 53 flipped | PENDING |
+
+### THE READING (done in this session's own context, in the brief's order)
+
+The Status banner · THE SIZING-AND-RULINGS SITTING RECORD (R-13u4-7 · R-13u4-6) · THE LEDGER's
+F2 row · ENVIRONMENT TRAPS · CAST & DISCIPLINE + the post-S2 ORCHESTRATOR NOTE (pathspec-limited
+staging) · the prior UNIT RECORDs' walker facts and `Tools/WalkKit/README.md` in full · **UNIT
+S1 RECORD's row-53 section** (the fixture and its four-row table) · **KnownIssues row 53's full
+text** (the stated hypothesis) · **13u2 UNIT D's TRACE D-6** in `notes/plans/phase-13u2-feel.md`
+(the probe shape, its two honest caveats, and what it ruled out) · `notes/TEXTKIT2_NOTES.md`
+§2–§4 + the 17o high-water finding + the macOS-26 attribute-fixing rule · the code:
+`EditorTypography.applyVoiceChrome` and its two coordinators, `JumpPrimitive`,
+`ScrollAnchorController`, `EditorTextView`'s frame/typewriter-room road, and the 13u3
+transaction-gated settle hop (`storageEditDepth` / `overlayLayoutDidSettle`).
+
