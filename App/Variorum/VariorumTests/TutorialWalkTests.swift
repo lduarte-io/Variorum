@@ -43,6 +43,13 @@ private func withTutorialWorld<T>(
         $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 13))
     } operation: { @MainActor in
         let session = AppSession(database: db)
+        // RUN A batch A2, row 8: the seeded-book marks are INJECTED — the
+        // test host IS `io.lduarte.Variorum.debug`, and the tutorial door's
+        // ensure both reads and (since row 8) writes this device's per-book
+        // mark. A headless spine run must never decide by, or leave anything
+        // in, the dev store's own defaults (the row-42 class).
+        session.seededBookMarkIsSet = { _ in false }
+        session.markSeededBook = { _ in }
         let bookID = try await TutorialSeeder.restore(session: session)
         return try await body(session, db, bookID)
     }

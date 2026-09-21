@@ -545,6 +545,15 @@ enum SampleLibrarySeeder {
         UserDefaults.standard.bool(forKey: seededDefaultsKey(for: storeVariant, book: book))
     }
 
+    /// RUN A batch A2, row 8 (17l item 1 / KnownIssues 38): the WRITE half —
+    /// what `perform` has always done through its `save` leaf, named so the
+    /// seeded-book DOORS can record the same decision (see
+    /// `AppSession.markSeededBook`, which is how they reach it; a headless
+    /// run injects its own leaf and never touches the shared domain).
+    nonisolated static func markSeeded(storeVariant: AppDatabase.StoreVariant, book: Book) {
+        UserDefaults.standard.set(true, forKey: seededDefaultsKey(for: storeVariant, book: book))
+    }
+
     /// What the seed needs to know about sync, and nothing more — the
     /// starter journal's gate, same two facts, same injection shape.
     struct SyncGate {

@@ -49,6 +49,24 @@ final class AppSession {
     /// injects its own, so no headless run ever reads the test host's
     /// defaults (a domain the real app shares).
     @ObservationIgnored var seededBookMarkIsSet: @MainActor (SampleLibrarySeeder.Book) -> Bool
+    /// **RUN A batch A2, row 8 (17l item 1 / KnownIssues 38): the WRITE half
+    /// of the same mark** — how a seeded-book road records, on this device,
+    /// that the reader's decision about this book is now on record.
+    ///
+    /// F3 (MINOR-N3) taught the silent ensure to decline on a tombstoned
+    /// reading of the book's name. A tombstone is the reader's word only
+    /// while the Trash keeps it: Delete Now writes a purge intent and the
+    /// janitor then physically removes the row — and 13j's purged-ids ledger
+    /// is CONTENT-FREE by design (`purge_intent` / `purged_row` carry a table
+    /// name and a row id, never a book's name), so after the purge nothing
+    /// that survives can be asked "was a book called this deleted?". The
+    /// roads therefore record the decision WHILE the evidence stands, in the
+    /// one place the seeder already keeps it.
+    ///
+    /// Injected for the same reason the reader is: the test host IS
+    /// `io.lduarte.Variorum.debug`, so a headless run that wrote the
+    /// production key would set the dev store's own mark (the row-42 class).
+    @ObservationIgnored var markSeededBook: @MainActor (SampleLibrarySeeder.Book) -> Void
 
     /// **The READ-side clock** (13j J1 — the 30-day Trash window).
     ///
@@ -583,6 +601,9 @@ final class AppSession {
         self.storeVariant = storeVariant
         self.seededBookMarkIsSet = { book in
             SampleLibrarySeeder.isMarkedSeeded(storeVariant: storeVariant, book: book)
+        }
+        self.markSeededBook = { book in
+            SampleLibrarySeeder.markSeeded(storeVariant: storeVariant, book: book)
         }
         let undo = UndoStack()
         self.undoStack = undo

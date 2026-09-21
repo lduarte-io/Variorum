@@ -20,6 +20,10 @@ import VariorumCore
 struct MobileSeededBookRestoreTests {
     @Test func theSharedRestoreMintsTheBookWholeThenReportsItAndBringsAMissingChapterBack() async throws {
         try await withEditorWorld { session, db in
+            // RUN A batch A2, row 8: the restore road now RECORDS this
+            // device's per-book mark; injected here so a headless phone run
+            // never writes the simulator app's own defaults.
+            session.markSeededBook = { _ in }
             let titles = try SampleLibrarySeeder.loadStories(for: .encryptionExplained).map(\.title)
             let first = try await SeededBookRestore.restore(session: session, book: .encryptionExplained)
             guard case .restored(let readingID, let minted) = first else {
