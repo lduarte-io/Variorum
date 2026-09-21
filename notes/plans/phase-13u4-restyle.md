@@ -2975,7 +2975,7 @@ CLOSE against what actually shipped):**
 | # | Piece | Status |
 |---|---|---|
 | 1 | The record + the READING (the brief's five reading lists, in order) | DONE (this commit) |
-| 2 | **Row 50** — the F-0 residue: `NoteCards`/`TagChips` out of the view file, the model's tag acts out of the model file. MECHANICAL, zero test edits | NOT-STARTED |
+| 2 | **Row 50** — the F-0 residue: `NoteCards`/`TagChips` out of the view file, the model's tag acts out of the model file. MECHANICAL, zero test edits | DONE (this commit) — **81 tests in 14 suites passed with ZERO test files touched**; the view 1,195 → 1,012 lines, the model 585 → 497 |
 | 3 | **Row 51** — the `FlippingStamp` hoist to the shared home + the two DEBUG-oracle edges swept | NOT-STARTED |
 | 4 | **Item 1a** — the masthead stamp's click-cycle (edited → created → clock) + ONE remembered LOCAL choice + pins | NOT-STARTED |
 | 5 | **Item 1b** — the word counter's click-cycle (full → note → block → icon), the target offer preserved in every state + pins | NOT-STARTED |
@@ -3016,5 +3016,35 @@ CLOSE against what actually shipped):**
    `notes/plans/pre-13u-mockups/blocks-and-snippets.html` (its voice blocks are the REAL
    `VoiceTokens` values — which is exactly why a system-font row reads as foreign), and
    `Theme/CalmGrammar.swift`.
+
+### ROW 50 — THE TWO MECHANICAL MOVES (piece 2), AND THEIR ZERO-TEST-EDIT PROOF
+
+*(The 18h ladder's R2-12 named both: the letter extracted `LibraryCatalogModel` and left the two
+card/chip loaders in the view file, with the model's tag acts as the next split. The 3C parity
+pattern: pre-move names forwarded — here, not even that, because nothing was RENAMED — and the
+proof is a green run of the suites that read them with not one test file modified.)*
+
+| Move | From → to | What moved | Lines |
+|---|---|---|---|
+| (a) | `LibraryCatalogView.swift` → **`LibraryListingReads.swift`** (new) | `NoteCards` (the card's leading blocks + its books, one windowed statement) and `TagChips` (the grouped chip load) — both `nonisolated` loaders over a `Database`, and both consumed by the POOL as well as the Library, which is the second reason they never belonged in one surface's view file | view **1,195 → 1,012** |
+| (b) | `LibraryCatalogModel.swift` → **`LibraryCatalogTagActs.swift`** (new) | `applyTag` · `applyTypedPath` · `removeTag` · `tagsOn` — the Library's BATCH semantics over the one tag road (`Shared/TypedTagPath`, C1's hoist) | model **585 → 497** |
+
+**The proof:** `xcodebuild test-without-building` over `LibraryCardNameTests` ·
+`LibraryCardStampsTests` · `LibraryDayFilterTests` · `LibraryPreviewBrainTests` ·
+`LibraryPanelHostTests` · `LibraryRowAlignmentTests` · `LibrarySortMenuTests` ·
+`MorningListTests` · `PoolCardPreviewTests` · `TagAndFolderTests` · `FreeTypedTagTests` ·
+`TagChipLeafTests` · `NoteCardSmartBooksTests` · `LibraryTagFaceTests` → **81 tests in 14 suites
+passed**, `git status` over the commit showing **four source files and no test file**.
+
+**The two lines that are NOT a pure move, both recorded rather than slipped in:**
+
+1. **`LibraryCatalogModel.report(_:)`** — `private(set)` scopes a setter to its DECLARING FILE,
+   so moving three acts that write `lastError` out of that file means either widening the
+   setter to the whole module or naming ONE door for the one other writer. It names the door;
+   the three call sites read `report(TagsViewModel.message(error))` where they read
+   `lastError = TagsViewModel.message(error)`. Behaviour-identical, same places, same strings.
+2. **Two orphan doc lines moved to the enum they describe.** *"One grouped tag-chip load shared
+   by the Library and the Pool"* headed `NoteCards` and describes `TagChips` — the 18h
+   extraction's own seam. They now head `TagChips`. No code.
 
 *(The rest of this record fills in as the pieces land.)*
