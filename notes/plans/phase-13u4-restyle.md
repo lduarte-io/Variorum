@@ -2976,7 +2976,8 @@ CLOSE against what actually shipped):**
 |---|---|---|
 | 1 | The record + the READING (the brief's five reading lists, in order) | DONE (this commit) |
 | 2 | **Row 50** — the F-0 residue: `NoteCards`/`TagChips` out of the view file, the model's tag acts out of the model file. MECHANICAL, zero test edits | DONE (this commit) — **81 tests in 14 suites passed with ZERO test files touched**; the view 1,195 → 1,012 lines, the model 585 → 497 |
-| 3 | **Row 51** — the `FlippingStamp` hoist to the shared home + the two DEBUG-oracle edges swept | NOT-STARTED |
+| 3a | **Row 51** — the `FlippingStamp` hoist to the shared home (`Core/Views/`) | DONE (this commit) — **34 tests in 5 suites passed with ZERO test files touched** |
+| 3b | **Row 51** — the two DEBUG-oracle edges swept, each fixed or provably safe | NOT-STARTED |
 | 4 | **Item 1a** — the masthead stamp's click-cycle (edited → created → clock) + ONE remembered LOCAL choice + pins | NOT-STARTED |
 | 5 | **Item 1b** — the word counter's click-cycle (full → note → block → icon), the target offer preserved in every state + pins | NOT-STARTED |
 | 6 | **Row 54** — the Timeline rows take the voice's type + pin | NOT-STARTED |

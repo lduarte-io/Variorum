@@ -106,17 +106,20 @@ struct MastheadStamp: View {
     @ViewBuilder private var face: some View {
         if let date {
             let words = TimeStampFace.stamp(subject, date: date, now: now)
-            Button {
-                flip()
-            } label: {
+            // 13u4 UNIT S2 (row 51): the button, its style, its `fixedSize`
+            // and the em-dashed tooltip grammar are `FlippingStamp`'s now —
+            // the ONE flipping stamp, shared with the Library card's. The
+            // words, the subject and the probe stay this masthead's.
+            FlippingStamp(
+                tokens: tokens,
+                help: "\(TimeStampFace.tooltip(subject, date: date)) \u{2014} "
+                    + StampFlipHint.toSee(showsCreated ? .edited : .created),
+                flip: flip
+            ) {
                 Text(tokens.chromeLabel(words))
                     .font(tokens.small)
                     .lineLimit(1)
             }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-            .fixedSize()
-            .help("\(TimeStampFace.tooltip(subject, date: date)) \u{2014} "
-                  + "click to see when it was \(showsCreated ? "last edited" : "created")")
             .accessibilityLabel(words)
             .mastheadGeometryProbe(.stamp(postID), in: PostDetailView.mastheadSpace)
         } else {

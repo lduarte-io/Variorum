@@ -176,12 +176,14 @@ nonisolated enum LibrarySortFace {
     /// What a click on a small card's one stamp is about to do — the
     /// masthead's own tooltip grammar (*"click to see when it was
     /// created"*), said here so no view body spells it.
+    ///
+    /// **A forwarder since 13u4 UNIT S2 (row 51's hoist):** the table itself
+    /// is `StampFlipHint` in `Core/Views/FlippingStamp.swift`, because the
+    /// note masthead spelled these same words inline and one gesture must
+    /// not be worded twice. The name stays here so every call site and pin
+    /// in this file reads unchanged (the 3C parity pattern).
     static func flipHint(to subject: TimeStampFace.Subject) -> String {
-        switch subject {
-        case .created: "click to see when it was created"
-        case .edited: "click to see when it was last edited"
-        case .dated: "click to see the day this note is about"
-        }
+        StampFlipHint.toSee(subject)
     }
 
     static func rowStamp(
@@ -376,17 +378,18 @@ struct CatalogCardStamps: View {
     }
 
     private var flipping: some View {
-        Button {
-            showsTheOther.toggle()
-        } label: {
+        // 13u4 UNIT S2 (row 51): the button, its style and its `fixedSize`
+        // are `FlippingStamp`'s now — the ONE flipping stamp, shared with
+        // the note masthead's. `help` is nil here because the LABEL carries
+        // the tooltip: `CatalogRowStamp` composes the whole fact and this
+        // suffix itself.
+        FlippingStamp(tokens: tokens, flip: { showsTheOther.toggle() }) {
             CatalogRowStamp(
                 tokens: tokens, face: shown, now: now,
                 oracleKey: postID, oracleSlot: "card.small",
                 helpSuffix: LibrarySortFace.flipHint(
                     to: showsTheOther ? stamps.sorted.subject : stamps.unsorted.subject))
         }
-        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-        .fixedSize()
         .catalogStampFlipDoor(postID) { showsTheOther.toggle() }
     }
 }
