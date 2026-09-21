@@ -115,7 +115,7 @@ transaction-gated decoration refresh · the panel-as-one-surface · the status-s
 | E3 | Merge keeps the newlines (item 8, R-13u4-3) | the rendering join, every door; ceremony default; canon delta rides | state-transition suite + walk | **DONE** — `MergeJoinRule` makes the DOORS-vs-DELETES classification structural (12 door roads flipped, the 2 delete roads byte-unchanged with guard pins); the differential seam arm had to learn the new join or every merge would have cost a full re-render; ~30 door pins rewritten to the ruling across 12 suites + 3 the ruling earns; both tutorials' falsified sentence fixed with their pins; canon delta in AppSpec §9 + OverallModel §7. Walked in both voices AND both appearances — a door merge moves not one byte of the page, the next seam's backspace still collapses to a space. Core 1609/174 · Mac 373/39 · mobile 71/6 · iOS green. Record below |
 | C1 | Capture microsyntax (item 2, R-13u4-1) | shared rule + both Mac doors; `applyTypedPath` hoist; phone face → parity row | pins + capture walk | **DONE** — ONE pure `Shared/CaptureMicrosyntax.parse` on the `PlainPaste` pattern, run at the HAND-OFF only, on BOTH Mac doors; the `applyTypedPath` HOIST landed with it (`Shared/TypedTagPath`, four consumers, every pre-move name forwarded, **zero test edits on both platforms** — the KnownIssues row's `applyTypedPath` entry is DISCHARGED). **The walk caught what no pin could**: the capture boxes substitute typed quotes, so a hand-typed `{t:"…"}` arrived CURLY and silently filed as text — measured by hexdump, fixed in the brain, re-walked. ZERO routing machinery (the smart-book pin asserts the note joined with no `reading_post` row). Mac **191/31** · mobile **40/3** · iOS green · 34 captures. PROVISIONALs: **QUESTIONS #127** (a)–(g). Record below |
 | C2 | Selection → take (item 9, R-13u4-4) | the MOVE op + Write door; insurance savepoint load-bearing | state-transition + walk | **DONE** — ONE core op (`moveSpanToNewTake`) in the ruled shape: the insurance savepoint · the span leaving EXACTLY as selected · a take at the fan's END branched-not-chosen · ONE undo entry with the exact-row redo, both halves one transaction each. The Write door is registry-declared and rendered ONLY for a single-block selection (P-2, pinned both ways); no chord, the collision sweep recorded. The AppSpec §9 bullet rides the build. **The walk caught the dedupe branch in use** — a move whose take was already saved writes nothing and the receipt drops its saved-first clause, with the four quiet savepoints behind it proving the cover held. Core **1631/175** · Mac **336/38** · iOS green · 24 captures. PROVISIONALs: **QUESTIONS #128** (a)–(e). Record below |
-| F1 | Index chapter-click lands low (item 10) | trace first — the un-adopted `LandingAuthority` is the recorded hypothesis | red-on-old if confirmed + walk | NOT-STARTED |
+| F1 | Index chapter-click lands low (item 10) | trace first — the un-adopted `LandingAuthority` is the recorded hypothesis | red-on-old if confirmed + walk | **DONE — THE DEFECT IS REAL, THE HYPOTHESIS CONFIRMED BY MEASUREMENT, THE ADOPTION SHIPPED, AND ONE RESIDUAL STOP-AND-REPORTED.** Reproduced first: **11 misses in 20 chapter clicks** on Sherlock and the field guide (five landing in a DIFFERENT story, one on a blank page, none self-correcting in 6 s); the trace found the book Index had never adopted `Surface/LandingAuthority` (13u2b's own *"at their next touch"*) and a six-aim hand experiment proved a watched landing converges. Shipped: the adoption, with a `LandingPolicy.bookIndex` whose every number was measured (two earlier policies retired by measurement — 12 blind hops FLING the page 45k → 95k). Red-on-old **behavioural-revert verified** in a worktree: the reverted tree misses 3 of 4 gestures and both pins are red (8667 pt · 4077 pt · the block never reported) where this tree lands them at 0.04 and 0.24. Walked in both voices AND both appearances: a chapter click lands the heading at the top and HOLDS it (captured at 1.5 s and 6 s). **Row 56 adjudicated by the paired interleaved protocol** (6 runs, RED on both trees, byte-identical) and the row-49 Outline arm too (green on both, isolated and under load). **THE RESIDUAL, reported rather than smoothed over:** a COLD column still climbing can defeat any compensator (its height oscillates 39k → 143k → 80k pt in six seconds; 2 of 5 cold first deep clicks stall, `end=gaveup` in the signpost) — the remedy is 13u2b UNIT 1's manifest half on this surface, which this brief's stop rule makes the architect's. KnownIssues row opened; QUESTIONS **#129**. Record below |
 | S1 | The Settings shape (items 4/5/6/7 + row 59 + the 2a Settings fork) | tabs · search · fold fix · card grammar · ⌘[/unindent audit · merge-shortcut face; then walk row 53's two re-font occasions once reachable | walk both voices + appearances, captured | NOT-STARTED |
 | S2 | Library & masthead faces (item 1 + rows 50/51/54) | click-to-cycle stamp + word-counter condense (word-target offer preserved) · `FlippingStamp` hoist + oracle edges · F-0 residue · Timeline voice | walk, captured | NOT-STARTED |
 | S3 | Chrome singles + the conformance sweep (rows 44/45/46/63/67/68/69 + the Trash fork) | 27-site sweep + grep pin · tag sheet voiced · indicator ring · Restore Tutorial confirm · "pools" lesson sweep (re-seed consequence recorded) · seal-blind rename field · `blockNamingDoor` hygiene · Trash cards · closing conformance walk against the reference artifact | walk, captured | NOT-STARTED |
@@ -1826,7 +1826,7 @@ is touched.
 | 4b | The BEHAVIOURAL REVERT — is the improvement the AUTHORITY's, or the probe's? (a worktree at the probe-only commit, the same trials + the same pins) | DONE (this commit) — **the authority's**: 3 of 4 trials miss and both pins are RED on the reverted tree |
 | 5 | Row 56's PAIRED INTERLEAVED adjudication (`theReadClickLandsInIndexAtThatBlock`, both trees) | DONE (this commit) — **6 runs, 3 rounds, alternating: RED on BOTH trees, byte-identical, every round** |
 | 6 | The WALK — chapter clicks at several depths, before/after, captured, both voices AND both appearances | DONE (this commit) — the table below |
-| 7 | Closing suites + the ledger's F1 row | NOT-STARTED |
+| 7 | Closing suites + QUESTIONS #129 + the KnownIssues row + the ledger's F1 row | DONE (this commit) — **148 tests in 24 suites, 2 issues, both row 56's one adjudicated test** |
 
 ### THE READING (done in this session's own context, in the brief's order)
 
@@ -2203,3 +2203,101 @@ ACTIVATES and does not act, so the step silently does nothing and the next captu
 app ignored it". Clicking TWICE (`cliclick c:x,y w:400 c:x,y`) makes a walk step reliable, and on
 a row whose act is idempotent (a chapter click re-aims at the same chapter) the second click costs
 nothing. Three of this walk's steps were lost to the single-click form before it was diagnosed.
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list)
+
+**NONE — said explicitly, as the brief asks.** `BlockRangeIndex`, `EditorTextView`,
+`TypedReturn`, `PaneTextAuthority`, `EditorViewModel`, `EditorSurfaceController`, `runStructural`
+and its identity oracle, `StructuralSeamEdit`, `StructuralGesturePlanner`, `MarkdownActs` — not
+one of them is in the diff. **`Sources/VariorumCore/` contains ZERO files of this unit** (verified
+by name over the whole diff), so `Sync/`, the schema, the migrations and `Server/` are untouched by
+construction, no core run was owed, and **no `Shared/` file moved**, so the iOS build is not owed
+either (the standing convention). The marker stays **8**.
+
+**The whole unit is four source files and two notes files:**
+
+- `App/Variorum/Variorum/Surface/LandingAuthority.swift` — **the shared authority**: one new
+  `LandingSurface` case and one new `LandingPolicy`. Not one line of the decision, the runner, the
+  seed, the signpost or either shipped policy was changed; the Outline's and the flow's numbers
+  are byte-identical, and their landing suites ride UNMODIFIED and green (13 + 9 tests).
+- `App/Variorum/Variorum/Features/BookView/BookIndexView.swift` — the adoption (the authority, the
+  reference-box bookkeeping, the row and block reports, the two column listeners, the landing on
+  `paneTarget`, `end()` on disappear) plus the DEBUG oracle and story.
+- `App/Variorum/VariorumTests/BookIndexLandingTests.swift` (new, 2 pins) and
+  `App/Variorum/VariorumTests/LandingAuthorityTests.swift` (the surface-count line 2 → 3, which is
+  what its own comment asks a third adopter to do).
+- `notes/QUESTIONS.md` (#129) and `notes/KnownIssuesAndTechDebt.md` (the residual's row).
+
+### CLOSING RUNS (at the unit's END — never the full suite at the start)
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| **Mac** — the two new suites, every landing/Index/Outline/flow suite this diff can reach, the mode-switch carry, the prose column, AND the acceptance spine under its ELEVEN REAL TYPE NAMES (the `-only-testing` file-name trap, met by every prior unit of this phase) | `xcodebuild test -scheme Variorum -destination platform=macOS` with `-only-testing:` for `BookIndexLandingTests` · `LandingAuthorityTests` · `BookIndexColumnTests` · `BookIndexEditingTests` · `BookRedesignMountTests` · `BookOutlineLandingTests` · `BookOutlineRowsTests` · `ReadingFlowLandingTests` · `BookHeightManifestTests` · `BookOutlineCostTests` · `ReadLandingTests` · `ShellLandingTests` · `ModeSwitchCarryTests` · `IndexProseColumnTests` + the eleven `Tutorial*` types | **148 tests in 24 suites, 2 issues — BOTH of them row 56's ONE adjudicated test** (`theReadClickLandsInIndexAtThatBlock`, two expectations). Everything else green, the spine included |
+| The same selection WITHOUT that one suite | as above, minus `BookIndexEditingTests` | **141 tests in 23 suites PASSED** (exit 0, no skips) |
+| **The row-49 Outline arm**, which appeared once under this unit's 13-suite load (`abs(top) → 3424.0`, the exact value the flake list records) | the paired interleaved protocol: base ↔ mine, isolated ×2 each, then the same multi-suite LOAD on both | **green on both trees, 2/2 isolated; green on both under load** — the recorded load-flaky arm, not this diff |
+| **Core** — NOT OWED: `git diff --name-only` over the whole unit lists **zero files under `Sources/`** | — | n/a |
+| **iOS** — NOT OWED: no `Shared/` file moved, nothing mobile-visible (this is a Mac surface) | — | n/a |
+
+No full-suite run was made at this unit's start; the plan's closeout-refresh baselines stand as the
+baseline (the standing rule).
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **The unit SHIPPED the adoption and STOPPED at the manifest.** The brief prescribes the
+   adoption (*"adopt, don't fork"*) and stops the unit at a 13u2b-class problem bigger than one.
+   Both clauses fired: the adoption is real and measured, and the residual is the other clause's
+   case, with its mechanism, its rate and its named remedy in the KnownIssues row. Reversing means
+   ruling the heights half INTO this phase — which is a unit, not a line.
+2. **All three pane targets go through ONE landing** — chapter, note and block. A surface with two
+   landing roads is the fork the hoist exists to prevent, and the block road (row 38's Read-click
+   through-door) has the same one-shot aim the chapter road had. Reversing: route `onLandedBlock`
+   back to a bare `proxy.scrollTo`, which is two lines.
+3. **A BLOCK's geometry report is gated on the pending anchor; a ROW's is not.** A realized story
+   is hundreds of blocks and every one of them reports on every layout pass, so recording them all
+   would grow the authority's seed by the corpus rather than by the rows it lands on. The gate
+   keeps what is needed (a block landed on once keeps its seed). Reversing: drop one `guard`.
+4. **`LandingFacts.derived` is set to the ROW COUNT, not 0.** This pane has no height manifest, so
+   not one row's height is known before it is realized; `derived=0` would tell her Console the
+   opposite of the truth, and `offset=-1` says the same thing about the arithmetic this surface
+   cannot do. Reversing: two literals.
+5. **A target that cannot be topped spends its budget and ends at the watchdog** — deliberately NOT
+   short-circuited on "the scroll is at its end". During a landing on this surface "at the end" is
+   often a LIE told by a column whose rows have not realized (measured: content 12,040 → 7,630 pt
+   mid-landing), so ending early there would freeze the page in the wrong place. The honest cost
+   is a few invisible corrections when the last row of a short book genuinely cannot reach the top.
+6. **The first pin shape was HOLLOW and is recorded as such** rather than quietly rewritten: it
+   asked the LAST row to come to the top, which a clamped `scrollTo` can never do, and it measured
+   667 pt on both trees.
+7. **No `Sources/` change was needed and none was made.** The brief's stop condition on core was
+   checked and never came close: this is scroll geometry on one Mac surface.
+8. **Old DerivedData caches were deleted to finish the work** (`13u1u2`, `13u2b`, `13u2e`,
+   `pre13x-b0` and their siblings — nine closed units' build caches, 18 GB): the volume hit 736 MiB
+   free mid-unit and a build failed on it. Pure caches, regenerated on demand, no repo content.
+
+### CARRIED TO THE PHASE CLOSEOUT (from this unit)
+
+1. **THE HANDED-UP ITEM, and it is the reason this record is long:** the book Index pane wants the
+   OTHER half of 13u2b's answer — its note rows standing at heights derived from their blocks'
+   lengths, so the column stops moving under a landing. The KnownIssues row carries the mechanism,
+   the rate, the brains it would use (`ProseHeightModel`/`FlowHeightEstimate` over the cached
+   `Queries.blockExtents`) and the precedent (13u2b UNIT 1 did exactly this for the Outline). The
+   architect rules whether it runs in this phase.
+2. **QUESTIONS #129** joins her ratify bundle — should the app SAY anything when a chapter click
+   cannot reach its chapter (shipped: silence; the alternatives are a refusal or a quiet retry).
+   Next free moves to **#130**.
+3. **A WALKER FACT** for `Tools/WalkKit/README.md` at its next touch: a single `cliclick` click
+   into the dev window is sometimes swallowed by the activation, so a walk step should click twice
+   (`c:x,y w:400 c:x,y`) on any row whose act is idempotent; three steps of this walk were lost
+   before it was diagnosed. And: `/usr/bin/log show --predicate 'eventMessage CONTAINS "landing
+   surface"'` is how the shipped signpost is read back, but a script that greps its own command
+   line out of the log must filter `end=` — the `log show` process's own arguments appear in it.
+4. **Nothing in `notes/KnownIssuesAndTechDebt.md` was CLOSED by this unit**; one row was opened
+   (the residual). Row 56 stands, re-measured and unchanged.
+
+### WHAT A FRESH SESSION WOULD NEED TO FINISH THIS
+
+Nothing — the unit is closed on a shipped fix, a walked acceptance and an honest residual.
+Everything is committed and pushed: the policy and its measured reasoning, the adoption, the two
+pins (red-on-old in a worktree, green here), the DEBUG oracle and story, QUESTIONS #129, the
+KnownIssues row, the walk captures (gitignored, listed above) and this record. What is OPEN is
+**the architect's**: whether the manifest half runs now, and **hers**: #129.
