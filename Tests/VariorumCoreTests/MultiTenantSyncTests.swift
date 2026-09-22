@@ -20,6 +20,14 @@ import Testing
 /// forced-RLS policies. The REAL Postgres truth is proven at the gate's
 /// integration pass + the live stranger-sees-zero probes with the
 /// provisioned second account (the plan's ruled proof bar).
+///
+/// RUN B batch B4 (ledger row 14): `fleetQuiesce` runs production's round
+/// shape (pull → push per device). The hostile-write and gate tests fire
+/// the server surface DIRECTLY — no room for a round there: the crafted
+/// batch IS each test's subject, and the per-half refusal pairs
+/// (push AND pull both refusing) are per-half subjects by design.
+/// Single-user boundary-split mechanics are the sweep suite's; no
+/// cross-tenant chunk-split cell exists (a partition is one tenant's).
 @Suite("Two-user convergence (Phase 14c, batch 1 — the second axis)")
 struct MultiTenantSyncTests {
     // MARK: - The two accounts' worlds
@@ -84,21 +92,25 @@ struct MultiTenantSyncTests {
         return TwoUserWorld(server: server, a1: a1, a2: a2, b1: b1, b2: b2)
     }
 
-    /// One FLEET's quiescence (two devices of one user). The shared
-    /// `syncToQuiescence` compares cursors against the GLOBAL head seq,
+    /// One FLEET's quiescence (two devices of one user), in PRODUCTION'S
+    /// round shape — pull → push per device (RUN B B4). The shared
+    /// `productionQuiescence` compares cursors against the GLOBAL head seq,
     /// which no longer holds when another tenant owns the head — a
     /// user's cursor legitimately rests at their OWN partition's last
-    /// seq. Quiet = both outboxes empty and one full round applies,
-    /// merges, and repairs nothing on either device.
+    /// seq. Quiet = both outboxes empty and a round in which neither
+    /// device's pull applies, merges, or repairs anything (a device that
+    /// pushed this round is seen by the OTHER's pull this round or its
+    /// own peer's next — so a quiet round proves the previous one moved
+    /// nothing either).
     @discardableResult
     private func fleetQuiesce(
         _ x: SyncClient, _ y: SyncClient, maxRounds: Int = 12
     ) async throws -> Int {
         for round in 1...maxRounds {
-            try await x.push()
-            try await y.push()
             let px = try await x.pull()
+            try await x.push()
             let py = try await y.pull()
+            try await y.push()
             let quiet = try x.outboxCount() == 0 && y.outboxCount() == 0
                 && px.applied + px.merged + px.repairs == 0 && !px.stalled
                 && py.applied + py.merged + py.repairs == 0 && !py.stalled
@@ -195,7 +207,7 @@ struct MultiTenantSyncTests {
             let post = try ops.createPost(title: "hers", profile: .journal)
             return try ops.newBlock(in: post.id, text: "Words only A may read.", at: .end).variant.id
         }
-        try await world.a1.push()
+        _ = try await productionRound(world.a1)
 
         let stored = await world.server.currentRow(
             table: "variant", rowID: variantID, for: Self.userA)
@@ -337,6 +349,7 @@ struct MultiTenantSyncTests {
     /// caller's partition. The latitude is RETIRED here — the fake now
     /// refuses like the server, so the guard's full letter is exercised
     /// in-harness rather than resting on the DDL text pin plus a live probe.
+    // B4 exempt: direct server-gate calls — no room for a round.
     @Test func aNullOrAbsentOwnerPushRefusesExactlyLikeAForeignOne() async throws {
         let world = try await makeWorld()
         let before = await world.server.rowCount(table: "container", for: Self.userB)
@@ -372,6 +385,8 @@ struct MultiTenantSyncTests {
     /// push would have CAS-fought the first (rejected at base 0) — the
     /// red-on-old shape, verified by behavioral revert on the fake's
     /// partitioning (see the batch record).
+    // B4 exempt: crafted third-party server pushes + bare first-half
+    // pulls — the composite-PK identity is the subject, not a round.
     @Test func collidingRowIDsLandInSeparatePartitionsWithIndependentCAS() async throws {
         let world = try await makeWorld()
         let sharedID = "5haredc0-1111-4222-8333-444444444444"
@@ -720,8 +735,7 @@ struct MultiTenantSyncTests {
         try a.with { ops, _ in
             _ = try ops.createPost(title: "wire pin", profile: .blog)
         }
-        _ = try await a.push()
-        _ = try await a.pull()
+        _ = try await productionRound(a)
 
         let pushed = await recorder.pushKeyIDs
         let pulled = await recorder.pullKeyIDs

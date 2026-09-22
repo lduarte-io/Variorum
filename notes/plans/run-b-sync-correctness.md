@@ -1541,8 +1541,11 @@ waits, no subagents (one Sonnet lookup max), commit-before-revert, no trailers.
   (`theDoubleCreateSplitAtTheBlockBoundaryStillConvergesToTwoWholeEntries` — the bodiless entry
   crosses mid-split, §5's read-side tolerance, both bodies whole after the resume). GREEN: 6
   tests / 3 suites.
-- [ ] MultiTenantSyncTests: `fleetQuiesce` → production order (pull→push per device); stagings
-  converted; gate/refusal halves annotated — PENDING
+- [x] MultiTenantSyncTests: `fleetQuiesce` → production order (pull→push per device; the quiet
+  criterion restated at the helper); the stranger-corpus staging + the wire pin →
+  `productionRound`; the direct-gate and crafted-push tests annotated exempt at the line; the
+  fresh-account test was already production (in-code). Suite GREEN: 13 tests (the two
+  attacker-file tests riding untouched).
 - [ ] Row 16: the tenth arm (`sync_reencrypt` under an OLD proof — fence-first + proof-refused +
   the gate-pass control + the DDL text pin), the nine arms byte-untouched — PENDING
 - [ ] SyncMergeTests suite-level exemption annotated; `ProductionRound.swift` header's
