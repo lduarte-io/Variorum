@@ -235,6 +235,20 @@ devices — the sync twin of "the refresh follows the walk," recorded rather tha
   state being state), and the window's acts proceed without a further scheduling ask the moment
   the ladder closes: A1 backup → the Mac install refresh → the phone build → the ping for her
   round. The HELD optional live Replace All Keys stays hers to decide at the round itself.
+- **THE OVERNIGHT AMENDMENT (her word, 2026-09-22 night, verbatim: "i'll be going to sleep, so I
+  won't be able to do the live two-device round. please write instructions for it in a handoff
+  and i will handle it with a new session in the morning, or tell me if it's essential to do
+  with you present tomorrow. my app is quit and ready for reinstall and my phone should also
+  hopefully accept reinstall."):** the orchestrator's answer — NOT essential with this session
+  present; the handoff is the designed road. **The handoff:
+  `notes/handoffs/run-b-live-round-handoff.md`** (drafted with PENDING slots per the resiliency
+  addendum 7; finalized at the overnight tail). **The overnight sequence, autonomous
+  (PROVISIONAL-and-continue; author-only calls remain hard stops):** the ladder to its cap →
+  finals (core · FULL Mac in the zero-instance window · iOS build · mobile) → the A1 backup →
+  the Mac Release install refresh (HER EXPLICIT authorization above — "quit and ready for
+  reinstall") → the PHONE build; a phone INSTALL is attempted ONLY if the device shows connected
+  and available, else it is the morning's (marker 8 means the OLD phone build syncs fine — the
+  refresh is hygiene, not a gate on the evidence). `caffeinate -dims` running (pid 71984).
 - **The stress-test pass: HOSTED IN RUN B** (her pick) — one read-only Fable session in a
   sequential slot, **slotted as S1 between B1 and B2** (both hunts complete before the fix batch,
   so an in-scope finding can join B2's brief; out-of-scope findings file as 17/13y candidates).
