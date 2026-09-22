@@ -99,6 +99,7 @@ once. Claim a letter here first.
 | **17m** | The Re-link-your-Apple-account door | **CLOSED 2026-09-21 — RUN A batch A3.** FIXED to the entry's spec via the F2 heal road behind consent (reads, never mints; every refusal leaves the vault's revision unmoved); `AppleRelinkDoorTests` (8); placement on the Protection pane PROVISIONAL (#139(a)); PL-37 for the phone's face. Disposition in the entry below |
 | **17n** | The encryption passphrase's 12-character floor | **CLOSED 2026-09-21 — RUN A batch A2.** FIXED — the floor named once, two real gaps closed (the four `PassphraseSetModel.commit` door sites; sync setup's no-wrap arm), never at unlock (negative pins), walked live. Disposition in the entry below |
 | **17r** | The stamp faces' midnight rollover tick (minted at the 13u4 closeout) | open — at her word only |
+| **17s** | The drop-out returner's rescue — QUESTIONS #141 ruled (b)-eventually (minted 2026-09-21 at the RUN B kickoff sitting) | open — at her word only |
 
 **Why 13p-fix is 17g and not part of 17a.** 17a is the *sweep's* 13p residue — eight findings from a
 review that read the code. 13p-fix is a *tested* defect she hit in the running app, with its own plan
@@ -1475,3 +1476,24 @@ Her two 2026-09-13 morning rulings built (R-Q20 the landing wins; R-Q17 the card
 ## 17r — THE STAMP FACES' MIDNIGHT ROLLOVER TICK (minted 2026-09-21 at the 13u4 closeout — KnownIssues row 51's surviving remainder, given its lettered owner per that file's own rule; OPENS AT HER WORD)
 
 Every stamp face takes `now = Date()` at render with no day-rollover tick, so a window left open across midnight reads *"today …"* for yesterday until any interaction. The brain (`TimeStampFace`, core `Domain`) is correct and pinned; 13u4 UNIT S2's hoist verified a tick is NOT free (no clock lives in the shared `Core/Views/FlippingStamp` component, and building one would tick every stamp in every list — a deliberate-cost decision, never a patch). The remedy when she opens this door: ONE shared midnight tick republishing `now` (a single scheduled publisher the stamp faces observe), plus a pin. Cosmetic — no data is ever wrong, only the word "today" one day stale on an untouched window. Pin-before-fix binds as everywhere in this file.
+
+## 17s — THE DROP-OUT RETURNER'S RESCUE (minted 2026-09-21 at the RUN B kickoff sitting — QUESTIONS #141 RULED the same day it was filed; OPENS AT HER WORD)
+
+**Her ruling, verbatim (2026-09-21, on #141's options): *"hmm yeah maybe make it a 17 issue for
+later that i want to switch to b eventually but i don't see why i'd need to do that now."*** So:
+**the destination is option (b)** — before the ledger pre-pass drops a purged family from a
+60-day drop-out returner, the family's locally-DIRTY texts and never-pushed takes are RESCUED
+into a fresh local note (the conflict-as-variant instinct applied at the purge boundary); the
+rows still drop, so the purge-wins convergence — no refusal, no mirror orphan, the
+`aReturnersUnpushedChildNeverLandsAsAMirrorOrphan` guarantee — is untouched; only the WORDS
+survive, locally. **Until this entry runs, shipped option (a) — the silent family-complete drop —
+stands as the pinned contract** (`SyncReconciliationProbeTests.p2bTheSixtyDayDropoutReturnerDropsItsEditsWithThePurgedFamily`,
+green on (a); RUN B batch B1's probe P2(b) is the trace — the full mechanism is that batch's
+record and the memo's ANSWERED block).
+
+**What the entry settles when it runs:** the rescue note's shape (one note per dropped family vs
+one per session; its title/wording — 13s may re-voice), whether the rescue speaks a line ((b)
+carries (c)'s honesty nearly for free), and the rescue's own sync posture (the fresh note is
+ordinary local rows that push normally). **The pre-pass is `PurgeJanitor` — `Sync/`, the standing
+Fable rider.** Pin-before-fix binds: the build RE-BASES the (a) pin to (b)'s expectation, which
+is red-on-old by construction (today's code drops; the new expectation rescues).
