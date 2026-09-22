@@ -1,4 +1,4 @@
-# RUN B — LADDER ROUND 2 (cold review; fresh Fable reviewer, 2026-09-22) — IN PROGRESS
+# RUN B — LADDER ROUND 2 (cold review; fresh Fable reviewer, 2026-09-22) — COMPLETE
 
 **Scope:** a REAL pass over round 1's fixes and what they touched — the fix range
 `6d0a029c..cd251b15` (four `Sync/` sources + one test file, verified by `git diff --stat`) inside
@@ -186,9 +186,16 @@ pointing at the B2 fix section's sentence as the shipped semantics.
   restored → its pin red with exactly the recorded 4 issues. Both restored green. The
   remaining two MAJORs' revert claims are consistent in mechanism and issue-shape with these
   two and were accepted on the record + code reading.
-- **Full core suite (run at the review's END, per the traps):** PENDING — result lands in the
-  finals line below.
+- **Full core suite (run at the review's END, per the traps):** verified — the finals line
+  below.
 
 ## FINALS
 
-- PENDING (full core run).
+Full core suite, run by me at the review's end: **1679 tests / 179 suites — ALL PASSED, zero
+known issues** + the ONE sanctioned real-server integration skip (its skip message read and
+verified as the sanctioned gate). Exactly the recorded R1 finals — the headline claim verified,
+the zero-wraps close standing. **ROUND 2 CLOSES: 0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT — by the
+ladder's rule (round 3 only on a NEW BLOCKER/MAJOR), no round 3 is owed.** The MINOR is a
+records-accuracy amendment (#143(a)'s corner wording + the Merge.swift comment); the NITs are a
+two-label renumber and a one-sentence ruling-paragraph correction — none requires a pin, all
+three carry written justifications above.
