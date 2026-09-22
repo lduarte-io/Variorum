@@ -1,8 +1,9 @@
 # RUN B — sync correctness (17i + 17d + 17l item 5)
 
-**STATUS: CLOSED IN-REPO 2026-09-22 — ONE OPEN ACCEPTANCE LEG: her morning live round**
-(`notes/handoffs/run-b-live-round-handoff.md`; the morning session flips the pending lines here
-and in the 17 file). Five batches + the hosted stress pass + a two-round ladder all closed;
+**STATUS: CLOSED 2026-09-22 — COMPLETE. The live two-device round PASSED at her morning
+window** (the evidence is the CLOSEOUT's LIVE ROUND slot; every pending acceptance line — here
+and in the 17 file — flipped by the morning session, same commit as this banner). Five batches
++ the hosted stress pass + a two-round ladder all closed;
 finals green on all four gates (the one full-Mac red adjudicated as the standing flake, paired
 protocol); the install refreshed behind the A1 rail; marker 8, zero deploys, zero schema.
 
@@ -2033,9 +2034,19 @@ paired + available) and refused the developer-disk-image mount — the locked-ov
 recorded in the handoff with the morning road; her current phone build is VALID evidence (the
 marker fact)**.
 
-**THE LIVE ROUND (the one open acceptance leg):** **PENDING her morning round** — the checklist
-and the paste-ready morning kickoff are `notes/handoffs/run-b-live-round-handoff.md`; the
-evidence lands HERE and the pending lines flip (this file's dispositions + the 17 file's two).
+**THE LIVE ROUND (the one open acceptance leg): PASSED — RUN B's ACCEPTANCE IS COMPLETE**
+(2026-09-22, her morning window; recorded by the morning session). She ran the handoff's
+checklist on her devices — the refreshed Mac install (`1ab27652…`) against her current phone
+build (THE MARKER FACT: marker 8, zero deploys, so the pairing is genuine acceptance evidence)
+— and confirmed it: her word, verbatim, **"yep it worked"** — the plain round, both directions
+per the checklist (the Mac's note arriving on the phone, the phone's note arriving on the Mac),
+with no stall or deferral warning reported (the run's new honest face stayed silent, as it
+should). No findings surfaced; nothing new is owed. The optional live Replace All Keys was NOT
+reported as run — the held decision stays hers (the headless pins are item 5's evidence either
+way; ratify-bundle item 6 asks her directly, and a zero-prompt follow reported later appends
+here). Morning-session verification before recording: git tip `fb8434c6` pushed clean · the A1
+backup's 149 files present · the installed binary's hash matching the handoff's `1ab27652…`
+record exactly.
 
 **HER RATIFY BUNDLE (the checkpoint report's list):**
 1. **#142** — the recreated-tag catch ((a) keep the rescue stands PROVISIONAL).
