@@ -132,7 +132,7 @@ brief names it.
 | 10 | B2 | **17d P9** — `expandContainer`'s member-block arm is liveness-conditional: a LIVE container root purges the note + placements while orphaning every block it held (incl. the verifier's more-reachable road: the in-transaction re-expand after `executePurge` racing a Put back) | **FIXED** (B2 P1 — live-root family-complete expansion; two pins red-on-old) |
 | 11 | B2 | **17d P28** — `reapplyStructural`'s untombstoning loop is the ONE revive road that does not `voidPurgeIntents`; a leftover Delete-Now intent later claims the block and strips its 30-day window | **FIXED** (B2 P1 — the redo road voids intents; pin red-on-old) |
 | 12 | B2 | **17d P31** — a permanently stalled pull cursor reports a clean round forever: `PullReport.stalled` (and `PushReport.deferred`) gain a production reader (the `BridgeScheduler.status.stalled` precedent); the status surface stops saying "fine" under a stall | **FIXED** (B2 P1 — the stall + deferral surfaced honestly; pins red-on-old) |
-| 13 | B3 | **17l item 5** — the double passphrase ask at a follow after a rotation (KnownIssues row 37): when the passphrase is UNCHANGED at a rotation, `RotationSecrets` re-wraps under the EXISTING descriptor (same salt → same derived key; the wrapped payload is the new master). **HER SCOPE (2026-09-07): passphrase wrap ONLY — the recovery-words wrap keeps its fresh salt at every act, and a pin asserts the two descriptors stay independent.** Pin: a sibling that opened by the passphrase follows a Replace All Keys with zero prompts (red today) | open |
+| 13 | B3 | **17l item 5** — the double passphrase ask at a follow after a rotation (KnownIssues row 37): when the passphrase is UNCHANGED at a rotation, `RotationSecrets` re-wraps under the EXISTING descriptor (same salt → same derived key; the wrapped payload is the new master). **HER SCOPE (2026-09-07): passphrase wrap ONLY — the recovery-words wrap keeps its fresh salt at every act, and a pin asserts the two descriptors stay independent.** Pin: a sibling that opened by the passphrase follows a Replace All Keys with zero prompts (red today) | **FIXED** (B3 — the proven-by-unwrap reuse road; three pins, revert-verified core AND door; the nine attacker arms byte-untouched) |
 | 14 | B4 | **The harness-realism structural deliverable** — `productionRound` (built in B1 as the hunt's instrument) becomes the convergence suites' DEFAULT; chunk splits at registry boundaries as a sweep; every suite green under the NEW shape | open |
 
 | 16 | B4 | **S1's Q2 NIT (the hosted stress pass)** — `sync_reencrypt` under an OLD key proof is the one data RPC the attacker suite never fires; it HOLDS structurally (`sync_key_gate`) — a TENTH arm in `MultiTenantSyncAttackerTests` (or the fake-server twin) pins it. Test-only; green-by-design is this row's expected verdict (a coverage pin, not a defect claim) | open |
@@ -1284,18 +1284,18 @@ COMMITTED (B2's slip is the fresh reminder); no commit trailers.
 - [x] THE FIX — `RotationSecrets.derive(passphrase:recoveryWords:forRotationOf:freshKDF:)` in
   `Sync/CorpusRotation.swift` (the reuse road, proven-by-unwrap) + the runner's ceremony derive
   moved into the branches (`PostureSwitch.swift`: the enrolled arm derives against the fetched
-  vault; the local-only arm keeps the fresh salt). Core `swift build` green. Pins PENDING.
+  vault; the local-only arm keeps the fresh salt). Core `swift build` green. *(Pins landed in the bullets below — the trailer stood while this piece was the head.)*
 - [x] Pin 2 (the independence guard) + pin 3 (the changed-passphrase guard) + the core half of
   pin 1 (the same-word rotation keeps the vault's descriptor; a pre-rotation held key opens M′)
   — `CorpusRotationTests` +3, suite **18/18 green** (15 existing + the 3 pins, all named in the
-  run log). Revert evidence PENDING.
+  run log). *(Revert evidence landed below.)*
 - [x] Pin 1 (the zero-prompt follow, the DOOR) —
   `PostureSwitchTests.theSiblingThatOpenedByThePassphraseFollowsAReplaceAllKeysWithZeroPrompts`
   (the entry's letter end to end + the changed-word door arm) + arm (vii) of the
   un-followed-device pin RE-BASED to the fixed contract (the ruled-change class: the second
   same-word rotation reuses the descriptor, the held key still matches, the follow runs with no
   field). Suite run: **44/44 passed, 0 skipped** (149 s; her real-store instance pid 38939
-  observed running at `/Applications` and left strictly alone). Mac revert evidence PENDING.
+  observed running at `/Applications` and left strictly alone). *(Mac revert evidence landed below.)*
 - [x] CORE revert evidence (pre-revert state committed at b57a8d38, both reverts + restores):
   **REVERT A** (the reuse road forced onto the fresh-salt arm — the pre-fix semantics):
   `aSameWordRotationKeeps…` RED, 3 issues (`secrets.kdf == before.kdf` :277, `after.kdf ==
@@ -1442,6 +1442,26 @@ orchestrator's verification; B4 is not mine to start.**
 
 ---
 
+### BATCH B3 — ORCHESTRATOR ADJUDICATION (2026-09-22; the batch CLOSES here)
+
+**Verification, my own hands:** the four commits read (pathspec-limited, pushed, honest); the
+custody suites re-run by the orchestrator — `CorpusRotationTests` + `MultiTenantSyncAttackerTests`
++ `KeyProofGateTests`: **31 tests / 3 suites GREEN** (all nine attacker arms standing untouched —
+the tripwire never fired); the record's revert evidence read in full (REVERT A reproducing her
+double ask at BOTH layers — `unwrapFailed` on the held key in core, `.askPassphrase` at the door
+— and REVERT B catching exactly the old-salt leak the changed-case guard fences). Three stale
+`PENDING` trailer words in LIVE STATUS were verified as discharged-by-later-bullets and tidied
+by the orchestrator (a cosmetic record edit, no substance). The arm-(vii) re-base is SUSTAINED
+as the ruled-change class (the shipped arm asserted the pre-fix staleness this entry exists to
+end; ledger 35's notice half untouched). The mid-batch commit `5ecb8c2b` was verified as the
+BACKGROUND health-review session's own new file (`notes/plans/post-13u-health-rounds.md`) — no
+collision with this run; left alone per her instruction. **BATCH B3 CLOSES; ledger row 13
+FIXED.** One item carried to the window's checklist: her HELD optional live Replace All Keys
+would now let her FEEL the zero-prompt follow on the phone — the fix is exactly her reported
+annoyance's cure.
+
+---
+
 ## BATCH B4 — HARNESS REALISM (brief finalized at spawn; the settled scope)
 
 Ledger row 14: `productionRound` becomes the convergence suites' DEFAULT round shape; the chunk
@@ -1449,7 +1469,31 @@ splits at registry boundaries land as a sweep (suite × scenario × boundary, ea
 or exempt-with-reason); every suite green under the new shape. The old convenience order survives
 only where a test's SUBJECT is the order itself (named, with the reason at the line). This is the
 postmortem lesson-8 deliverable: after B4, a sync test that doesn't exercise the production path
-is decoration BY EXCEPTION, not by default.
+is decoration BY EXCEPTION, not by default. **Plus row 16** (S1's routing): the tenth attacker
+arm — `sync_reencrypt` under an OLD proof — pinned in `MultiTenantSyncAttackerTests` or the
+fake-server twin (test-only; green-by-design is the expected verdict).
+
+**BATCH B4 BRIEF (self-contained):** you are a Fable implementer session for RUN B batch B4 —
+the structural deliverable. READ FIRST, in full, in your own context: `CLAUDE.md` + canon
+(SyncSpec WHOLE) · `notes/sync-postmortem-fragments.md` (lesson 8 is your charter) · THIS FILE
+(FENCES · TRAPS · rows 14 + 16 · the B1 RECORD — `ProductionRound.swift`'s shape and the P4
+sweep's coverage map are your starting point · all three adjudications) ·
+`Tests/VariorumCoreTests/Support/ProductionRound.swift` + the convergence suites named in the
+TRAPS section. THE WORK: (1) convert the convergence suites' round driving to `productionRound`
+as the DEFAULT — pull → push per device, chunked pushes as separate server transactions —
+recording the conversion as a SWEEP TABLE (suite × scenario: converted · exempt-with-reason;
+the only legal exemptions are tests whose SUBJECT is the order itself or whose harness
+composition has no room for a round at all, each named with the reason at the line); (2) the
+registry-boundary chunk-split arm added where a scenario crosses a boundary (B1's
+`pushSplitAtBoundary` is the instrument); (3) row 16's tenth-arm pin; (4) every suite green
+under the new shape — a conversion that turns a pin red is a FINDING, not a nuisance: trace it
+(the B1/B2 classes are the likely homes), record it, and STOP AND REPORT if it is a product
+defect rather than a test-idiom artifact (the orchestrator routes it — a new ledger row or an
+owner). NO product lines: `Tests/` only; zero `Sources/`, zero schema, marker 8. Your record:
+`## BATCH B4 RECORD` with LIVE STATUS from the first commit, the sweep table, any findings, and
+finals (full core at close — baseline **1669/179, zero wraps**). Checkpoint protocol as every
+batch: commit per piece + push, pathspec-limited, PENDING until verified, foreground grep-poll
+waits, no subagents (one Sonnet lookup max), commit-before-revert, no trailers.
 
 ---
 
