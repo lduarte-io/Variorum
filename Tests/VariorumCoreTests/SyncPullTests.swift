@@ -7,6 +7,16 @@ import Testing
 /// The pull half (SyncSpec §5): one apply-mode transaction with deferred
 /// FKs, clean rows verbatim, dirty rows through the merge, an in-transaction
 /// cursor, and straggler tolerance.
+///
+/// RUN B batch B4 (ledger row 14) — the sweep's ruling for this suite: the
+/// SUBJECT here is ONE HALF of the round (the pull's own apply mechanics),
+/// so most tests have no room for a full round — a bare pull IS
+/// production's first half, and the `ScriptedTransport` tests craft batch
+/// shapes no round-trip can produce (the transport cannot even accept a
+/// push). Stagings that drive a real device's round use `productionRound`;
+/// the two echo tests keep push-then-pull deliberately: that sequence is
+/// production's own ADJACENT halves (round N's push, round N+1's pull),
+/// and the echo between them is the subject itself.
 @Suite("Pull engine & apply mode (Phase 5, Step 4)")
 struct SyncPullTests {
     // MARK: - Clean apply
@@ -19,7 +29,7 @@ struct SyncPullTests {
             let post = try ops.createPost(title: "hello", profile: .journal)
             _ = try ops.newBlock(in: post.id, text: "an entry", at: .end)
         }
-        try await a.push()
+        _ = try await productionRound(a)
 
         let report = try await b.pull()
         #expect(report.applied > 0)
@@ -40,6 +50,8 @@ struct SyncPullTests {
         #expect(try b.outboxCount() == 0)
     }
 
+    // B4 exempt: the SUBJECT is the order itself — a push followed by its
+    // own echo pull, which is production's adjacent halves.
     @Test func echoOfOwnPushAppliesAsANoOp() async throws {
         let server = FakeSyncServer()
         let a = try SyncClient(name: "A", prefix: "AA", transport: server)
@@ -63,7 +75,7 @@ struct SyncPullTests {
             let reading = try ops.createReading(name: "r", kind: .curated, maxPosts: nil)
             _ = try ops.addPostToReading(post.id, to: reading.id)
         }
-        try await a.push()
+        _ = try await productionRound(a)
 
         // Two fresh devices, one pulling in windows of 1, one in windows of
         // 100: same converged bytes (the apply transaction always covers the
@@ -85,12 +97,12 @@ struct SyncPullTests {
             let post = try ops.createPost(title: "p", profile: nil)
             return try ops.newBlock(in: post.id, text: "shared base", at: .end).variant.id
         }
-        try await a.push()
+        _ = try await productionRound(a)
         try await b.pull()
 
-        // Both edit offline. A's edit reaches the server first.
+        // Both edit offline. A rounds first: its edit is server truth.
         try a.with { ops, _ in try ops.autosave(variantID, text: "A's take", charDelta: 3) }
-        try await a.push()
+        _ = try await productionRound(a)
         try b.with { ops, _ in try ops.autosave(variantID, text: "B's take", charDelta: 3) }
 
         let report = try await b.pull()
@@ -113,6 +125,9 @@ struct SyncPullTests {
     /// the local edit is a pending CAS win. Merging would revert the buffer
     /// under her cursor and demote the newer text to a spurious 'conflict'
     /// card on every push→type→pull cycle.
+    // B4 exempt: the SUBJECT is the order itself — push, type, then the
+    // periodic pull replaying the device's own rows (adjacent production
+    // halves with the author's typing between them).
     @Test func pullingYourOwnEchoWhileTypingNeitherRevertsNorForksTheBuffer() async throws {
         let server = FakeSyncServer()
         let a = try SyncClient(name: "A", prefix: "AA", transport: server)
@@ -149,6 +164,8 @@ struct SyncPullTests {
     /// prefix row whose referent arrives at/after the stop point must ALSO
     /// stall — otherwise the deferred-FK commit fails and every retry
     /// rolls the whole batch back instead of stalling gracefully.
+    // B4 exempt: ScriptedTransport — no room for a round (crafted batch
+    // shapes; the transport takes no pushes).
     @Test func prefixRowLeaningOnAPostStopReferentStallsInsteadOfFailing() async throws {
         let scripted = ScriptedTransport(rows: [
             // b1 leans on v1, which arrives AFTER b2 — and b2 leans on a
@@ -180,6 +197,7 @@ struct SyncPullTests {
 
     // MARK: - Atomicity: one transaction, cursor inside it
 
+    // B4 exempt: ScriptedTransport — no room for a round.
     @Test func aFailingRowRollsBackTheWholeBatchAndTheCursor() async throws {
         let b = try SyncClient(
             name: "B", prefix: "BB",
@@ -222,6 +240,7 @@ struct SyncPullTests {
     /// A multi-row structural op split across tiny pull windows still lands
     /// in ONE transaction: child rows may precede their parents in seq order
     /// and deferred FKs resolve at commit (SyncSpec §5).
+    // B4 exempt: ScriptedTransport — no room for a round.
     @Test func childBeforeParentWithinOneBatchCommitsUnderDeferredFKs() async throws {
         let b = try SyncClient(name: "B", prefix: "BB", transport: ScriptedTransport(rows: []))
         // Craft a world where the variant (child) carries a LOWER seq than
@@ -251,6 +270,7 @@ struct SyncPullTests {
     /// local cascade (transition-guarded, active during apply — SyncSpec §3)
     /// pre-produces the same child rows; the children's rows then apply over
     /// them idempotently. Nothing re-enqueues on the pulling device.
+    // B4 exempt: ScriptedTransport — no room for a round.
     @Test func parentTombstoneBeforeChildrenAppliesIdempotently() async throws {
         let scripted = ScriptedTransport(rows: [])
         let b = try SyncClient(name: "B", prefix: "BB", transport: scripted)
@@ -315,6 +335,7 @@ struct SyncPullTests {
     /// outbox still owes it): the batch stops just before it, the cursor
     /// holds, the read side renders what arrived — and the stall self-heals
     /// when the referent lands.
+    // B4 exempt: ScriptedTransport — no room for a round.
     @Test func stragglerStallsTheCursorThenSelfHeals() async throws {
         let scripted = ScriptedTransport(rows: [
             SyncPulledRow(row: try TestRows.container(id: "c1", title: "post"), serverSeq: 1),

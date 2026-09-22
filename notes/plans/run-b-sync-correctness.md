@@ -1527,8 +1527,10 @@ waits, no subagents (one Sonnet lookup max), commit-before-revert, no trailers.
   never-accepted variant stays S4's) + the cross-batch `post_tag` split arm — which found
   **FINDING F-3** instead of its green (the section below; wrapped `withKnownIssue`, the row-51
   pattern). Suite run: **11 tests PASSED with exactly the 2 known issues** (both the F-3 wrap's).
-- [ ] SyncPullTests stagings converted; SyncPullTests/SyncPushTests exemptions annotated at the
-  line (half-round mechanics · order-is-the-subject) — PENDING
+- [x] SyncPullTests stagings converted (3 real-device stagings → `productionRound`);
+  SyncPullTests exemptions at the line (2 order-is-the-subject echo tests · 5 ScriptedTransport
+  no-room tests) + SyncPushTests suite-level exemption (whole suite: the push half's own
+  mechanics, instrumented windows, adjacent halves). Both suites GREEN: 17 tests / 2 suites.
 - [ ] FaultInjectionSyncTests seeds + tails converted (armed fault halves stay — the subject) —
   PENDING
 - [ ] EditorRateSyncTests + StructuralSessionSyncTests + MobileCaptureSyncTests converted + the

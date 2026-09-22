@@ -6,6 +6,15 @@ import Testing
 /// The push half (SyncSpec §4): outbox drain, CAS bookkeeping in apply mode
 /// (the Phase 1 trap), the clear-vs-re-dirty race, and reject→merge→re-push
 /// convergence within one bounded call.
+///
+/// RUN B batch B4 (ledger row 14) — the sweep's ruling for this suite,
+/// whole: EXEMPT, no room for a round. Every test's SUBJECT is the push
+/// half's own mechanics — the drain, the CAS bookkeeping, the instrumented
+/// mid-push interference windows (`InterferingTransport`), the bounded
+/// reject→merge→re-push loop — and a bare push is production's own second
+/// half. The device-identity test's push→pull→push is adjacent production
+/// halves asserting per-half wire facts. The same paths run under full
+/// production rounds in the convergence suites.
 @Suite("Push engine (Phase 5, Step 3)")
 struct SyncPushTests {
     /// THE master-plan assertion: a full push cycle ends with an EMPTY
