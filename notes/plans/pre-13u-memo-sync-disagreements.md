@@ -11,7 +11,7 @@ that we just finish this phase and its ladder out now"*).
 
 ---
 
-## ⚠️ UNSETTLED — the probes to run FIRST (17i's opening act; record each answer here)
+## ✅ ANSWERED (RUN B batch B1, 2026-09-21/22 — every probe run under production's round shape; the dated ANSWERED blocks below each probe are the record, the pins are the proof; header flipped at the RUN B closeout per the ritual)
 
 Run as two in-memory clients against the in-process `FakeSyncServer` (`Tests/VariorumCoreTests/
 Support/`), in PRODUCTION'S round shape — pull → push, pushes chunked at `batchSize` via
@@ -140,8 +140,8 @@ the two; (c) the echo pull costs one extra round per two-copy meeting. Each is a
 
 | devices disagree on… | what happens | status |
 |---|---|---|
-| phone DELETES a note; laptop EDITS its text + adds a take | note → Trash on both; the new take rides the Trash stamp; the edited text of the old take: **P1** | ? |
-| the same, phone's deletion PURGED before sync resumed | the horizon holds the purge while the laptop is live; past the 60-day drop-out the returner meets `purged` — local handling **P2** | ? |
+| phone DELETES a note; laptop EDITS its text + adds a take | note → Trash on both; the new take rides the Trash stamp; the edited text of the old take: **P1 — ANSWERED: the laptop's NEW text rides the row into the Trash on both devices; no conflict card; Put back converges byte-identically** | ✔ (RUN B B1) |
+| the same, phone's deletion PURGED before sync resumed | the horizon holds the purge while the laptop is live; past the 60-day drop-out the returner meets `purged` — local handling **P2 — ANSWERED: the horizon HOLDS while the laptop is live (pinned); the drop-out returner drops family-complete, silently — ruled at #141: shipped (a) stands, the (b) rescue is entry 17s at her word** | ✔ (RUN B B1; #141 RULED) |
 | both EDIT the same take's text | conflict-as-variant: the loser becomes a `'conflict'` card, nothing lost | ✔ (Phase 5) |
 | one DELETES a take, the other EDITS it (block lives) | the edit is rescued as a conflict variant, then the tombstone applies | ✔ (Phase 5) |
 | both DELETE different last takes of one block (I10) | the highest-seq take resurrects, labeled `'rescued'` | ✔ |
