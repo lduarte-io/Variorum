@@ -1270,6 +1270,123 @@ per piece + push; pathspec-limited staging; PENDING until verified; foreground g
 no subagents (one Sonnet lookup for external facts only); NO REVERT without the pre-revert state
 COMMITTED (B2's slip is the fresh reminder); no commit trailers.
 
+## BATCH B3 RECORD — 17l ITEM 5, the double passphrase ask
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims marked PENDING)
+
+- [x] Record opened; brief + READ FIRST list read in full (SyncSpec whole + the canon load, the
+  postmortem, this file's FENCES/TRAPS/brief/both adjudications, 17l item 5 verbatim, KnownIssues
+  row 37, the postures design's ledger 54 + §7 step 1/§12 contract sentences + the 4a item-4
+  build record, `CorpusRotation.swift` whole, `PassphraseKDF.swift` whole, `KeyVaultFormat`'s
+  create/unwrap roads, `RecoveryPhrase`'s derivation, `StoreKeyEnvelope`'s wrap fields, the
+  runner's ceremony + both follow roads, and the three test suites' idioms). The mechanism
+  re-traced by my own hands (the trace below).
+- [x] THE FIX — `RotationSecrets.derive(passphrase:recoveryWords:forRotationOf:freshKDF:)` in
+  `Sync/CorpusRotation.swift` (the reuse road, proven-by-unwrap) + the runner's ceremony derive
+  moved into the branches (`PostureSwitch.swift`: the enrolled arm derives against the fetched
+  vault; the local-only arm keeps the fresh salt). Core `swift build` green. Pins PENDING.
+- [ ] Pin 2 (the independence guard) + pin 3 (the changed-passphrase guard) + the core half of
+  pin 1 (the same-word rotation keeps the vault's descriptor; a pre-rotation held key opens M′)
+  — `CorpusRotationTests`. PENDING.
+- [ ] Pin 1 (the zero-prompt follow, the DOOR) — `PostureSwitchTests` (the entry's letter + the
+  changed-word door arm) + arm (vii) of the un-followed-device pin RE-BASED to the fixed
+  contract (the ruled-change class). PENDING.
+- [ ] Revert evidence — all three pins by BEHAVIOURAL REVERT with the pre-revert state
+  COMMITTED FIRST (B2's reminder binds). PENDING.
+- [ ] Finals: the custody suites (`CorpusRotationTests` · `MultiTenantSyncAttackerTests`'s nine
+  arms · `KeyProofGateTests`' headless drill) · the FULL CORE SUITE (baseline 1666/179, zero
+  wraps) · the touched Mac suites · the iOS build gate. PENDING.
+
+### DEATHS / RESUMES
+
+- none.
+
+### THE TRACE (my own hands — why the fresh salt broke ledger 54's no-second-entry road)
+
+A derived passphrase key is a function of (word, descriptor) — Argon2id over the descriptor's
+salt — and can only open a wrap made under that exact pair. Ledger 54's follow
+(`PostureSwitchRunner.followDerived`, `PostureSwitch.swift` ~:716) therefore gates on descriptor
+EQUALITY: `fetched.format.kdf == kdf` (the held key's), then `unwrapMaster(withPassphraseKey:)`.
+Her phone's lobby held the key it derived when she typed her word to unlock — under the local key
+file's P-wrap descriptor, which equals the VAULT's descriptor as of the last reconcile
+(ledger 53's shape). But `RotationSecrets.derive` (`CorpusRotation.swift` :71) defaulted its
+descriptor to `.v1(salt: PassphraseKDF.randomSalt())` — a FRESH salt at every call — and the
+runner's ceremony (`PostureSwitch.swift` :479) called it with that default, before even fetching
+the vault. So every Replace All Keys / entering Castle moved the vault to a descriptor no
+sibling could be holding yet, even when the word itself did not change: the follow's equality
+gate failed on every sibling (`passphraseRequired` — the field asks), and the held key could not
+have opened the new wrap anyway (same word + different salt = different key). Result, hers at
+the acceptance walk: a device that had just typed its word to unlock was asked the same word
+again at the follow — "reused for the follow, never asked twice" (§7 step 1) broken across every
+rotation, structurally, since the road shipped.
+
+### THE FIX
+
+**Core (`Sources/VariorumCore/Sync/CorpusRotation.swift`):** a second derive entry,
+`RotationSecrets.derive(passphrase:recoveryWords:forRotationOf:freshKDF:)`. It floor-validates
+the vault's descriptor (the read-site discipline), derives under it, and PROVES the word
+unchanged by opening the vault's `masterWrappedByPassphrase` — never guessed from UI state. On
+proof: the descriptor is REUSED (same salt → same derived key; the wrapped payload is the new
+master — the entry's "cryptographically sound"). On failure: the word is changed (or was changed
+elsewhere) and the shipped fresh-salt road runs byte-unchanged (`freshKDF` defaulted to the
+heavy v1; tests inject a fast one) — one extra derivation, only on that rare deliberate act.
+HER SCOPE LINE held structurally: the recovery key is derived fresh from the words given at the
+act, identically in both arms — no part of the passphrase descriptor reaches that path.
+
+**The one call site (`App/Variorum/Shared/PostureSwitch.swift`):** the ceremony's derive moved
+from before the vault fetch into the branches — the enrolled arm derives against the FETCHED
+format through the new road (off-main as before); the local-only arm (no vault, nothing to
+reuse, no sibling to follow) keeps the fresh-salt derive. The follow roads, `begin`, the walk,
+completion: untouched.
+
+### PINS + REVERT EVIDENCE (pre-revert state COMMITTED FIRST, every time)
+
+- **Pin 1, core half — `aSameWordRotationKeepsTheVaultsDescriptorSoAPreRotationHeldKeyOpens`**
+  (`CorpusRotationTests`): a key derived under the vault's descriptor BEFORE a same-word
+  rotation opens M′ AFTER it (`secrets.kdf == before.kdf`, `after.kdf == before.kdf`, the
+  held key unwraps the new master — ledger 54's gate in core terms) — and the SECOND rotation
+  reuses it again (the chain her phone lives on).
+- **Pin 1, the DOOR — `theSiblingThatOpenedByThePassphraseFollowsAReplaceAllKeysWithZeroPrompts`**
+  (`PostureSwitchTests`): the sibling's session holds the key derived under the PRE-rotation
+  vault descriptor (the lobby's state); the acting device runs Replace All Keys with the SAME
+  word; the sibling's follow: `canFollowFromHeldKey` TRUE, `choosePassphrase()` asks NOTHING,
+  `.done`, the library re-keyed once, M′ in custody, the new key file's P copy under the reused
+  descriptor and opening under the typed word. Then the CHANGED-word door arm: a second rotation
+  under a NEW word → the held key is honestly stale → the field asks (the reuse never leaks into
+  the changed case, at the door).
+- **Pin 2 — `theRecoveryWrapStaysFreshAndIndependentWhenThePassphraseDescriptorIsReused`**
+  (`CorpusRotationTests`): across a same-word rotation with fresh words, `after.kdf ==
+  before.kdf` (the reuse premise) while `masterWrappedByRecovery` is FRESH BYTES wrapping the
+  NEW master under the words given at the act — the old words open nothing, the new words open
+  M′; and a second same-word SAME-words rotation still mints a fresh recovery wrap (fresh at
+  every act even when both secrets are unchanged). Her scope line as code.
+- **Pin 3 — `aChangedPassphraseMintsAFreshSaltAndTheReuseNeverLeaksIntoTheChangedCase`**
+  (`CorpusRotationTests`): the new road with a DIFFERENT word mints a FRESH descriptor
+  (`secrets.kdf != before.kdf`, fresh salt), the rotation lands under it, a key under the OLD
+  descriptor opens nothing, the new word under the new descriptor opens M′.
+- **REVERT A (the behavioural revert — the pre-fix semantics restored: `forRotationOf` made to
+  take the fresh-salt road unconditionally), to run AFTER the pins' commit:** expected to red
+  pin 1 (both halves) and pin 2's reuse premise; pin 3 expected GREEN (the changed case IS the
+  old behavior — it is a preserved-behavior guard, B2's
+  `aDeliberateDeleteWithNoSecondCopyIsNeverDefended` class). EVIDENCE PENDING.
+- **REVERT B (the discrimination mutant — the reuse made UNCONDITIONAL):** expected to red
+  pin 3 — its discriminating red, recorded plainly rather than claimed as red-on-old.
+  EVIDENCE PENDING.
+- **RE-BASED SHIPPED PIN (the ruled-change class, B2's precedent):** the un-followed-device
+  pin's arm (vii) tail (`PostureSwitchTests` ~:3530) asserted the PRE-fix consequence — after a
+  second same-word rotation "the held key's descriptor is the first rotation's — asked". Under
+  the fix the second rotation reuses the descriptor, so the held key still matches and the
+  follow runs from it with no field; the arm now asserts exactly that (and the ledger-35 head
+  of the arm — the notice re-asks at once on the NEW key id — is untouched: the notice keys on
+  the corpus key id, which is fresh at every rotation regardless).
+
+### FINALS
+
+PENDING (the custody suites, the full core suite against baseline 1666/179 zero wraps, the
+touched Mac suites, the iOS build gate — recorded here when run).
+
+---
+
 ## BATCH B4 — HARNESS REALISM (brief finalized at spawn; the settled scope)
 
 Ledger row 14: `productionRound` becomes the convergence suites' DEFAULT round shape; the chunk

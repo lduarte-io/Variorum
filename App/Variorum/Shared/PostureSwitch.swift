@@ -475,9 +475,13 @@ final class PostureSwitchRunner {
         let signedIn = await leaves.signedIn()
         let custody = await leaves.keyStore.offMain { $0.load() }
         let enrolled = leaves.vault != nil && leaves.transport != nil && signedIn && custody != nil
-        let secrets = try await Task.detached(priority: .userInitiated) {
-            try RotationSecrets.derive(passphrase: passphrase, recoveryWords: recoveryWords)
-        }.value
+        // 17l item 5 (RUN B B3): the derive moved INTO the branches — the
+        // enrolled road derives against the FETCHED vault (an unchanged
+        // word reuses the vault's descriptor, so a sibling's held lobby
+        // key still matches after the rotation and ledger 54's
+        // no-second-entry follow holds ACROSS rotations); the local-only
+        // road, with no vault to reuse, keeps the fresh salt.
+        let secrets: RotationSecrets
         var material: DeviceKeyMaterial?
         var reencrypted = 0
         var recoveryWrapDigest: String?
@@ -506,6 +510,15 @@ final class PostureSwitchRunner {
             if let previous = fetched.format.previousCorpusKey {
                 throw CorpusRotationError.rotationInProgress(previousKeyID: previous.keyID)
             }
+            // 17l item 5: an UNCHANGED word re-wraps under the vault's
+            // EXISTING descriptor (proven by the unwrap, never guessed);
+            // a changed word keeps the fresh salt. Off-main as before
+            // (Argon2id — tenths of a second).
+            let format = fetched.format
+            secrets = try await Task.detached(priority: .userInitiated) {
+                try RotationSecrets.derive(
+                    passphrase: passphrase, recoveryWords: recoveryWords, forRotationOf: format)
+            }.value
             // pre-13x 3b (ledger 44 — decision 33 at the RUNNER): a vault
             // that carries a recovery wrap is never rewritten without the
             // twelve words in hand — `CorpusRotation.begin` would mint M′
@@ -597,6 +610,9 @@ final class PostureSwitchRunner {
             material = final.material
             reencrypted = final.reencrypted
         } else {
+            secrets = try await Task.detached(priority: .userInitiated) {
+                try RotationSecrets.derive(passphrase: passphrase, recoveryWords: recoveryWords)
+            }.value
             leaves.log("posture switch: local-only — steps 4–7 only")
         }
 

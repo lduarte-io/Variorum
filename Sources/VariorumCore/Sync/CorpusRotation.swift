@@ -75,6 +75,50 @@ public struct RotationSecrets: Sendable {
         let recoveryKey = try recoveryWords.map { try RecoveryPhrase.recoveryWrapKey(words: $0) }
         return RotationSecrets(passphraseKey: passphraseKey, kdf: kdf, recoveryKey: recoveryKey)
     }
+
+    /// 17l item 5 (RUN B batch B3; KnownIssues row 37 — her find at the
+    /// pre-13x acceptance walk: *"I was asked to enter my passphrase
+    /// again"*): derive for a ROTATION of `vault`, REUSING the vault's
+    /// existing KDF descriptor when the typed passphrase is UNCHANGED —
+    /// proven, never guessed from UI state: the key derived under the
+    /// vault's own descriptor must open its passphrase-wrapped master
+    /// copy. The same word under the same salt is the same derived key,
+    /// so a sibling that opened its lobby by the passphrase still holds a
+    /// key whose descriptor equals the vault's AFTER the rotation, and
+    /// ledger 54's no-second-entry follow (the postures design §7 step 1
+    /// "reused for the follow, never asked twice"; the runner's
+    /// `follow(derivedPassphraseKey:kdf:)` descriptor-equality gate) now
+    /// holds ACROSS Replace All Keys / entering Castle. The wrapped
+    /// payload is the NEW master — cryptographically sound (the entry's
+    /// letter: same secret, same salt, fresh content). A CHANGED word
+    /// fails the unwrap and takes the fresh-salt road exactly as before
+    /// (the pinned guard) — at the cost of one extra derivation, only on
+    /// that rare deliberate act. `freshKDF` is that road's descriptor
+    /// (tests inject a fast one, as with `derive(…kdf:)`).
+    ///
+    /// HER SCOPE LINE (2026-09-07, binding): the reuse applies to the
+    /// PASSPHRASE wrap ONLY — the recovery key is derived fresh from the
+    /// words given at THIS act, identically in both arms, and no part of
+    /// the passphrase descriptor reaches that path (the independence pin).
+    public static func derive(
+        passphrase: String, recoveryWords: [String]?,
+        forRotationOf vault: KeyVaultFormat,
+        freshKDF: PassphraseKDF.Descriptor = .v1(salt: PassphraseKDF.randomSalt())
+    ) throws -> RotationSecrets {
+        guard !passphrase.isEmpty else { throw VaultEnrollmentError.emptyPassphrase }
+        // The read-site discipline (`PassphraseKDF.Floor`): a descriptor
+        // read from a vault is floor-checked before any derivation, so a
+        // downgraded descriptor can never be perpetuated by the reuse.
+        try vault.kdf.validateFloor()
+        let underCurrent = try PassphraseKDF.deriveKey(passphrase: passphrase, descriptor: vault.kdf)
+        guard (try? vault.unwrapMaster(withPassphraseKey: underCurrent)) != nil else {
+            // The word is CHANGED (or was changed elsewhere): the fresh
+            // random salt — the shipped behavior, byte-unchanged.
+            return try derive(passphrase: passphrase, recoveryWords: recoveryWords, kdf: freshKDF)
+        }
+        let recoveryKey = try recoveryWords.map { try RecoveryPhrase.recoveryWrapKey(words: $0) }
+        return RotationSecrets(passphraseKey: underCurrent, kdf: vault.kdf, recoveryKey: recoveryKey)
+    }
 }
 
 /// THE PER-STEP PERSISTED MARKER (§4's "a persisted marker (the
