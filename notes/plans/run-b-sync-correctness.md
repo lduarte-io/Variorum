@@ -226,7 +226,13 @@ devices — the sync twin of "the refresh follows the walk," recorded rather tha
 
 - **The live-round window: AT THE RUN'S CLOSE** (her pick of the recommended option) — batches →
   ladder → finals first; then ONE coordinated window (A1 backup → both refreshes → her round each
-  direction); the orchestrator pings her when everything else is done.
+  direction); the orchestrator pings her when everything else is done. **DECLARED READY
+  2026-09-22 (her word, mid-B4: "i've closed my app, so the live window should be considered
+  ready - my phone will also be available when it is time")** — her app is quit (zero-instance
+  for the finals' full Mac run and the Release build; the pgrep check still runs at each act,
+  state being state), and the window's acts proceed without a further scheduling ask the moment
+  the ladder closes: A1 backup → the Mac install refresh → the phone build → the ping for her
+  round. The HELD optional live Replace All Keys stays hers to decide at the round itself.
 - **The stress-test pass: HOSTED IN RUN B** (her pick) — one read-only Fable session in a
   sequential slot, **slotted as S1 between B1 and B2** (both hunts complete before the fix batch,
   so an in-scope finding can join B2's brief; out-of-scope findings file as 17/13y candidates).
