@@ -40,6 +40,22 @@ public actor SyncScheduler {
         public var lastErrorIsOffline = false
         /// Outbox rows still owed to the server after the last round.
         public var pendingPushCount = 0
+        /// RUN B B2 row 12 (17d P31): the pull's straggler-stall signal,
+        /// read from the round's own report — the
+        /// `BridgeScheduler.status.stalled` precedent, applied here at
+        /// last. A stalled pull RETURNS NORMALLY (`PullReport.stalled`,
+        /// cursor held at the stall point), so without a production
+        /// reader a permanently jammed cursor presented as a clean,
+        /// successful round forever — the system saying "fine" under a
+        /// one-way divergence, which in a sync engine is worse than the
+        /// fault. True when the last completed round's pull truncated at
+        /// a row whose referents have not arrived; a transient straggler
+        /// self-heals and the next clean round flips it back.
+        public var pullStalled = false
+        /// The push half's twin (`PushReport.deferred`): rows left
+        /// enqueued because their referents never arrived — they stay in
+        /// `pendingPushCount`, and this names the CAUSE.
+        public var pushDeferredCount = 0
         /// Rounds finished (clean or failed) — test observability.
         public var roundsCompleted = 0
         public init() {}
@@ -193,11 +209,17 @@ public actor SyncScheduler {
         }
         do {
             // Pinned: pull → push (A3).
-            _ = try await engine.pull()
-            _ = try await engine.push()
+            let pullReport = try await engine.pull()
+            let pushReport = try await engine.push()
             status.lastError = nil
             status.lastErrorIsOffline = false
             status.lastSuccessAt = date.now
+            // Row 12 (17d P31): the reports' honesty signals reach the
+            // status surface — assigned on the success branch only (the
+            // BridgeScheduler precedent: a thrown round learned nothing
+            // about them, so the previous values stand).
+            status.pullStalled = pullReport.stalled
+            status.pushDeferredCount = pushReport.deferred
             // Phase 13j: the janitor sweeps AFTER a clean round — the
             // order her round-10 wording implies (unsynced writes pushed
             // first; the sweep's say-so, if it ever fires, comes after

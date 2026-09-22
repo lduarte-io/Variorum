@@ -37,6 +37,11 @@ nonisolated struct SyncRowFace: Equatable {
     enum Kind: Equatable {
         case devStore, signedOut, syncOff, syncing, offline
         case keysLocked, keysReplaced, rekeyIncomplete, notEntitled, error, idle
+        /// RUN B B2 row 12 (17d P31): a CLEAN round whose pull is held at
+        /// a row whose referents have not arrived — the round succeeded,
+        /// but "Synced <time>" would be saying "fine" while nothing new
+        /// can come in. Same doors as idle; an honest line instead.
+        case stalled
     }
 
     struct Door: Equatable, Identifiable {
@@ -55,13 +60,18 @@ nonisolated struct SyncRowFace: Equatable {
     var kind: Kind
     var doors: [Door]
 
+    /// `stalled` (row 12 — 17d P31) is `Status.pullStalled`, defaulted so
+    /// every existing state pin reads unmodified: it decorates only the
+    /// CLEAN branch (an error face already says something is wrong, and a
+    /// syncing row is mid-answer).
     static func face(
         allowsSync: Bool,
         isConfigured: Bool,
         signedIn: Bool,
         isSyncing: Bool,
         lastError: String?,
-        lastErrorIsOffline: Bool
+        lastErrorIsOffline: Bool,
+        stalled: Bool = false
     ) -> SyncRowFace {
         // The A4 fence: a dev-store session never syncs — no sign-in door
         // either (the one mirror belongs to the real store; signing in
@@ -144,6 +154,15 @@ nonisolated struct SyncRowFace: Equatable {
                 Door(label: "Account…", act: .openAccount(.account)),
             ])
         }
+        if stalled {
+            // Row 12 (17d P31): the honest line under a held pull cursor —
+            // the idle row's own doors ("Sync now" retries, which is also
+            // how a transient straggler's heal is felt).
+            return SyncRowFace(kind: .stalled, doors: [
+                Door(label: "Sync now", act: .syncNow),
+                Door(label: "Account…", act: .openAccount(.account)),
+            ])
+        }
         return SyncRowFace(kind: .idle, doors: [
             Door(label: "Sync now", act: .syncNow),
             Door(label: "Account…", act: .openAccount(.account)),
@@ -173,7 +192,8 @@ struct SyncStatusRow: View {
             signedIn: services.account.variorum != nil,
             isSyncing: sync.status.isSyncing,
             lastError: sync.status.lastError,
-            lastErrorIsOffline: sync.status.lastErrorIsOffline)
+            lastErrorIsOffline: sync.status.lastErrorIsOffline,
+            stalled: sync.status.pullStalled)
     }
 
     var body: some View {
@@ -292,6 +312,13 @@ struct SyncStatusRow: View {
             Text(HostedSyncTier.rowLabel)
                 .pageCaption(pageStyle)
                 .help(sync.status.lastError ?? "")
+        case .stalled:
+            // Row 12 (17d P31): warning-styled, never the error red — the
+            // round itself was clean; what's honest is that new changes
+            // are held up.
+            Text(Self.stalledLabel)
+                .pageCaptionWarning(pageStyle)
+            pendingNote
         case .error:
             Text("Sync error")
                 .pageCaptionError(pageStyle)
@@ -343,4 +370,10 @@ struct SyncStatusRow: View {
     /// The offline presentation's one string (Step A0's row letter),
     /// exposed for the presented-state pin.
     static let offlineLabel = "Waiting to sync (offline)"
+
+    /// Row 12's one string (17d P31): the stalled-pull line — a clean
+    /// round whose cursor is held at rows the server cannot complete yet,
+    /// so "Synced <time>" would be false comfort. Exposed for the
+    /// presented-state pin like its siblings.
+    static let stalledLabel = "Sync incomplete — some changes haven't arrived yet"
 }

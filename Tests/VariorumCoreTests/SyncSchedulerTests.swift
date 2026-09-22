@@ -251,4 +251,100 @@ struct SchedulerRetirementTests {
         #expect(status.roundsCompleted == 1,
                 "the in-flight round finishes; the follow-up dies with retirement")
     }
+
+    // MARK: - RUN B B2 row 12 (17d P31): the reports' honesty signals
+
+    /// **The stall gains its production reader (red on old by behavioural
+    /// revert — the assignments removed leave the flag false forever):**
+    /// `SyncEngine.pull` truncates at the first row whose FK closure is
+    /// unsatisfiable and RETURNS NORMALLY with `report.stalled = true` and
+    /// the cursor held — a designed, graceful state the scheduler then
+    /// discarded, so a permanently jammed cursor (the P8 orphan class)
+    /// reported "Synced just now" forever while integrating nothing. The
+    /// `BridgeScheduler.status.stalled` precedent, applied here.
+    @Test func aStalledPullStopsReportingACleanRoundAsFine() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, seed: 2)
+        let scheduler = SyncScheduler(engine: a.engine())
+
+        // A clean round first: the flag reads FALSE on an honest round.
+        try b.with { ops, _ in
+            _ = try ops.createPost(title: "healthy content", profile: .journal)
+        }
+        _ = try await b.push()
+        try await a.withAsync { _ in await scheduler.trigger() }
+        await scheduler.awaitIdle()
+        #expect(await scheduler.status.pullStalled == false)
+
+        // B lands a second note whose container the mirror then loses (the
+        // P8 purge-orphan shape, minted cheaply test-side): the placement's
+        // referent can never arrive, so every pull truncates at it.
+        let orphaned: String = try b.with { ops, _ in
+            let note = try ops.createPost(title: "orphaned", profile: .journal)
+            _ = try ops.newBlock(in: note.id, text: "stranded words", at: .end)
+            return note.id
+        }
+        _ = try await b.push()
+        _ = try await server.executePurge(
+            [SyncPurgeTarget(table: "container", rowID: orphaned)],
+            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+
+        try await a.withAsync { _ in await scheduler.trigger() }
+        await scheduler.awaitIdle()
+        let status = await scheduler.status
+        #expect(status.lastError == nil,
+                "the round itself is CLEAN — no exception was thrown")
+        #expect(status.lastSuccessAt != nil)
+        #expect(status.pullStalled,
+                "…but the status stops saying everything arrived (17d P31)")
+    }
+
+    /// **The push half's twin:** rows left enqueued because their referents
+    /// never arrived (`PushReport.deferred`) name their cause on the
+    /// status row — and a later clean round clears it. The construction is
+    /// the A5 visibility band: B's competing move commits inside the band,
+    /// so A's pull sees nothing while A's push meets the reject whose
+    /// current row references a container A has never seen.
+    @Test func aDeferredPushIsNamedOnTheStatusRowAndClearsWhenItResolves() async throws {
+        let band: Int64 = 5
+        let server = FakeSyncServer(visibilityHorizon: band)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, seed: 2)
+        let scheduler = SyncScheduler(engine: a.engine())
+
+        let blockID: String = try a.with { ops, _ in
+            let note = try ops.createPost(title: "shared", profile: .journal)
+            return try ops.newBlock(in: note.id, text: "the block", at: .end).block.id
+        }
+        try await a.push()
+        await server.advanceClock(by: band)
+        try await productionQuiescence(a, b, server: server)
+
+        // B moves the block to a NEW home; the move commits INSIDE the
+        // band. A, band-blind, reorders the same placement.
+        try b.with { ops, _ in
+            let c2 = try ops.createPost(title: "B's new home", profile: .journal)
+            try ops.moveBlock(blockID, to: c2.id)
+        }
+        _ = try await b.push()
+        try a.with { ops, _ in try ops.reorder(blockID, to: .end) }
+
+        try await a.withAsync { _ in await scheduler.trigger() }
+        await scheduler.awaitIdle()
+        var status = await scheduler.status
+        #expect(status.lastError == nil)
+        #expect(status.pushDeferredCount == 1,
+                "the placement waits on a referent the band still hides — named, not silent")
+        #expect(status.pendingPushCount >= 1, "the deferred row stays in the outbox")
+        #expect(status.pullStalled == false)
+
+        // The band passes: the next round pulls the referent, the merge
+        // resolves, and the signal clears.
+        await server.advanceClock(by: band)
+        try await a.withAsync { _ in await scheduler.trigger() }
+        await scheduler.awaitIdle()
+        status = await scheduler.status
+        #expect(status.pushDeferredCount == 0, "a clean round clears the cause")
+    }
 }
