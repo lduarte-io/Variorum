@@ -73,11 +73,17 @@ public struct PurgeJanitor: Sendable {
         public init() {}
     }
 
-    // MARK: - The sweep
+    // MARK: - The preflight (one body, three doors — LADDER R1 F-R7)
 
-    @discardableResult
-    public func sweep() async throws -> SweepReport {
-        // The engine's own preflight discipline, in the engine's order.
+    /// The janitor's preflight — the engine's refusal discipline in the
+    /// engine's order (the rekey marker first, keys before any network
+    /// contact, the §12 lockstep check), shared by `sweep()`,
+    /// `reconcileLedger()` and `healPurgeOrphan` (which carried it
+    /// verbatim ×3 until this hoist; the R2-M2 rationale at
+    /// `reconcileLedger` explains why the pre-pass must never run naked).
+    /// Returns the round's key id + proof on success; refuses by throw —
+    /// outbox intact, cursor unmoved, every time.
+    private func preflight() async throws -> (keyID: String, keyProof: String) {
         let rekeyIncomplete = try await database.read { try RotationMarker.isSet($0) }
         guard !rekeyIncomplete else { throw SyncError.accountRekeyIncomplete }
         let keyID: String
@@ -94,6 +100,15 @@ public struct PurgeJanitor: Sendable {
             throw SyncError.schemaLockstepMismatch(
                 client: SyncSchema.lockstepVersion, server: server)
         }
+        return (keyID, keyProof)
+    }
+
+    // MARK: - The sweep
+
+    @discardableResult
+    public func sweep() async throws -> SweepReport {
+        // The engine's own preflight discipline, in the engine's order.
+        let (keyID, keyProof) = try await preflight()
 
         var report = SweepReport()
 
@@ -252,22 +267,7 @@ public struct PurgeJanitor: Sendable {
         // — scan point unmoved, nothing dropped. When `sweep()` calls
         // this the checks re-run (one cheap RPC, twice per sweep); the
         // standalone scheduler entry is the one that must never be naked.
-        let rekeyIncomplete = try await database.read { try RotationMarker.isSet($0) }
-        guard !rekeyIncomplete else { throw SyncError.accountRekeyIncomplete }
-        let keyID: String
-        let keyProof: String
-        do {
-            let keys = try keyProvider.currentKeys()
-            keyID = keys.corpusKeyID
-            keyProof = keys.keyProof
-        } catch {
-            throw SyncError.encryptionKeysUnavailable
-        }
-        let server = try await transport.schemaVersion()
-        guard server == SyncSchema.lockstepVersion else {
-            throw SyncError.schemaLockstepMismatch(
-                client: SyncSchema.lockstepVersion, server: server)
-        }
+        let (keyID, keyProof) = try await preflight()
         let (scanPoint, acknowledgedFloor) = try await database.read { db in
             (try Self.stateValue(db, "last_purge_seq"),
              try Self.stateValue(db, "purge_floor_acknowledged"))
@@ -642,14 +642,15 @@ public struct PurgeJanitor: Sendable {
     /// the ledger, so the stalled row can only be a late-arriving family
     /// member, and it goes where its family went.
     ///
-    ///  1. **Preflight**: the reconcile's own discipline (rekey marker,
-    ///     keys, §12 lockstep) — refusal, never improvisation.
-    ///  2. **The ruled NARROWING**: the stalled row must itself be a
+    ///  1. **The ruled NARROWING** (checked FIRST — two field reads, no
+    ///     network; LADDER R1 F-R5): the stalled row must itself be a
     ///     TOMBSTONE (the traced construction's shape — the peer's
     ///     cascade stamped it before the push). A LIVE stalled row is
     ///     NEVER healed, whatever the ledger says: an untraced class,
     ///     left stalled and honest under the status flag
     ///     (safe-by-refusal), recorded if ever observed.
+    ///  2. **Preflight**: the reconcile's own discipline (rekey marker,
+    ///     keys, §12 lockstep) — refusal, never improvisation.
     ///  3. **The DISCRIMINATOR — exact, no timers**: EVERY missing
     ///     referent must be named in the purged-ids ledger (read from 0:
     ///     content-free and prunable by design; this path runs only on a
@@ -678,26 +679,19 @@ public struct PurgeJanitor: Sendable {
     /// round on true (the feed no longer carries the orphan, so the
     /// cursor proceeds).
     public func healPurgeOrphan(_ stall: SyncEngine.PullStall) async throws -> Bool {
-        let rekeyIncomplete = try await database.read { try RotationMarker.isSet($0) }
-        guard !rekeyIncomplete else { throw SyncError.accountRekeyIncomplete }
-        let keyID: String
-        let keyProof: String
-        do {
-            let keys = try keyProvider.currentKeys()
-            keyID = keys.corpusKeyID
-            keyProof = keys.keyProof
-        } catch {
-            throw SyncError.encryptionKeysUnavailable
-        }
-        let server = try await transport.schemaVersion()
-        guard server == SyncSchema.lockstepVersion else {
-            throw SyncError.schemaLockstepMismatch(
-                client: SyncSchema.lockstepVersion, server: server)
-        }
-
-        // 2. The ruled narrowing: tombstones only.
+        // 2. The ruled narrowing FIRST — two struct-field reads (LADDER R1
+        // F-R5: the scheduler hands EVERY stalled clean round here, and the
+        // common §5 transient class paid the preflight's schemaVersion RPC
+        // per round for a refusal these two lines decide; a live-row stall
+        // now costs zero network). The degenerate difference — a live
+        // stall under a set rotation marker refuses by `false` here where
+        // it refused by throw before — is unreachable in production: the
+        // round's own pull refuses on the marker before any stall exists.
         guard let stamp = stall.tombstoneStamp else { return false }
         guard !stall.missingReferents.isEmpty else { return false }
+
+        // 1. The preflight (the reconcile's discipline — F-R7's one body).
+        let (keyID, keyProof) = try await preflight()
 
         // 3. The discriminator: every missing referent ledger-named.
         let page = try await transport.purgeLedger(
