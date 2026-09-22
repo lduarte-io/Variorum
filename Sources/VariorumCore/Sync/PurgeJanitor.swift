@@ -627,6 +627,112 @@ public struct PurgeJanitor: Sendable {
         return prunable
     }
 
+    // MARK: - The ledger-verified orphan heal (RUN B B2 row 9 — 17d P8)
+
+    /// **THE LEDGER-VERIFIED ORPHAN HEAL** — the fix for the purge-window
+    /// mirror orphan (the orchestrator's row-9 ruling: Shape A, with the
+    /// tombstone-only narrowing). The traced class: a peer's cascade rows
+    /// commit inside the A5 visibility band while this device's sweep
+    /// expands the family from a store that never saw them — the mirror
+    /// keeps rows referencing a container purged everywhere, no ledger
+    /// entry names them, no device retains a root, and every pull stalls
+    /// at them FOREVER (B1's two pinned constructions). The heal
+    /// COMPLETES the family's purge — §4f's own act, through the EXISTING
+    /// RPCs (zero server lines): the missing referent is proven purged by
+    /// the ledger, so the stalled row can only be a late-arriving family
+    /// member, and it goes where its family went.
+    ///
+    ///  1. **Preflight**: the reconcile's own discipline (rekey marker,
+    ///     keys, §12 lockstep) — refusal, never improvisation.
+    ///  2. **The ruled NARROWING**: the stalled row must itself be a
+    ///     TOMBSTONE (the traced construction's shape — the peer's
+    ///     cascade stamped it before the push). A LIVE stalled row is
+    ///     NEVER healed, whatever the ledger says: an untraced class,
+    ///     left stalled and honest under the status flag
+    ///     (safe-by-refusal), recorded if ever observed.
+    ///  3. **The DISCRIMINATOR — exact, no timers**: EVERY missing
+    ///     referent must be named in the purged-ids ledger (read from 0:
+    ///     content-free and prunable by design; this path runs only on a
+    ///     stall, which is rare and self-limiting). Any referent NOT
+    ///     named is a genuine §5 straggler the owing device still owes —
+    ///     heal NOTHING; the class self-heals when that device drains.
+    ///     (Under a future non-zero floor a pruned entry cannot be
+    ///     checked by id — the heal refuses there too; the ledger-pruning
+    ///     rider owes the below-floor refinement.)
+    ///  4. **The COMPLETION SET**: the stalled row plus the local
+    ///     cascade residue carrying its EXACT stamp (the cascade
+    ///     contract's discriminator — in the traced shape, the block and
+    ///     take the purging device never saw), expanded family-complete
+    ///     through `PurgeFamily`. `executePurge` removes them from the
+    ///     mirror AND ledgers them (idempotent — a second device meeting
+    ///     the same stall heals the same rows into the same entries);
+    ///     `deleteLocal` takes the local residue in one transaction.
+    ///
+    /// **The row-19 fence, stated (KnownIssues, owner 12):** this is the
+    /// narrow traced mechanism — a heal for the ledger-PROVEN
+    /// purge-orphan class only. No parking, no retry policy, no
+    /// drop-loudly framework: a stall this discriminator cannot prove
+    /// permanent is left exactly as designed.
+    ///
+    /// Returns whether it healed; the scheduler triggers a follow-up
+    /// round on true (the feed no longer carries the orphan, so the
+    /// cursor proceeds).
+    public func healPurgeOrphan(_ stall: SyncEngine.PullStall) async throws -> Bool {
+        let rekeyIncomplete = try await database.read { try RotationMarker.isSet($0) }
+        guard !rekeyIncomplete else { throw SyncError.accountRekeyIncomplete }
+        let keyID: String
+        let keyProof: String
+        do {
+            let keys = try keyProvider.currentKeys()
+            keyID = keys.corpusKeyID
+            keyProof = keys.keyProof
+        } catch {
+            throw SyncError.encryptionKeysUnavailable
+        }
+        let server = try await transport.schemaVersion()
+        guard server == SyncSchema.lockstepVersion else {
+            throw SyncError.schemaLockstepMismatch(
+                client: SyncSchema.lockstepVersion, server: server)
+        }
+
+        // 2. The ruled narrowing: tombstones only.
+        guard let stamp = stall.tombstoneStamp else { return false }
+        guard !stall.missingReferents.isEmpty else { return false }
+
+        // 3. The discriminator: every missing referent ledger-named.
+        let page = try await transport.purgeLedger(
+            since: 0, activeKeyID: keyID, keyProof: keyProof)
+        let named = Set(page.entries.map { "\($0.table)|\($0.rowID)" })
+        for referent in stall.missingReferents {
+            guard named.contains("\(referent.table)|\(referent.rowID)") else {
+                return false
+            }
+        }
+
+        // 4. The completion set: the stalled row + same-stamp local
+        // residue of the four root kinds, family-expanded.
+        let family: PurgeFamily.Expansion = try await database.read { db in
+            var roots = [SyncPurgeTarget(table: stall.table, rowID: stall.rowID)]
+            for kind in ["container", "reading", "block", "variant"] {
+                let residue = try String.fetchAll(
+                    db,
+                    sql: "SELECT id FROM \(kind) WHERE deleted_at = ? ORDER BY id",
+                    arguments: [stamp])
+                roots.append(contentsOf: residue.map {
+                    SyncPurgeTarget(table: kind, rowID: $0)
+                })
+            }
+            return try PurgeFamily.expand(db, roots: roots)
+        }
+        _ = try await transport.executePurge(
+            family.orderedRows, activeKeyID: keyID, keyProof: keyProof)
+        try await database.write { db in
+            try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
+            try PurgeFamily.deleteLocal(db, family: family, stamp: self.nowStamp())
+        }
+        return true
+    }
+
     // MARK: - The returner road (round 10 — SAY SO FIRST)
 
     /// **The reload a left-behind device runs after the say-so** (her

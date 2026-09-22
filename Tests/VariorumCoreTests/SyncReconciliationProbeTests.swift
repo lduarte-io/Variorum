@@ -510,20 +510,37 @@ struct SyncReconciliationProbeTests {
             "one-way: B's fresh note can never reach A")
         _ = variantX
 
-        // THE DESIRED CONTRACT — known-broken today (RUN B ledger row 9;
-        // B2's fix unwraps this block as its red-on-old pin): bounded
-        // rounds + reconciles after the release must clear the jam.
-        await withKnownIssue(
-            "17d P8 (RUN B ledger row 9): the purge-window mirror orphan jams the pull forever"
-        ) {
-            var healed = false
-            for _ in 0..<4 {
-                _ = try await reconcile(a, server)
-                let round = try await a.pull()
-                if !round.stalled { healed = true; break }
-            }
-            #expect(healed, "the inbound jam must clear within bounded rounds")
+        // THE HEAL (RUN B ledger row 9 — B1's wrapped desired contract,
+        // UNWRAPPED at B2 Phase 2 as the red-on-old pin): bounded
+        // PRODUCTION rounds clear the jam. The scheduler's stalled report
+        // hands the stall's identity to the janitor's ledger-verified
+        // orphan heal — the missing referent is proven purged (its ledger
+        // entry can never be satisfied by a future arrival), the stalled
+        // TOMBSTONE completes its family's purge through the EXISTING
+        // RPCs, and the cursor proceeds.
+        let scheduler = SyncScheduler(
+            engine: a.engine(),
+            janitor: PurgeJanitor(transport: server, keyProvider: a.keyProvider))
+        var healed = false
+        for _ in 0..<4 {
+            try await a.withAsync { _ in await scheduler.trigger() }
+            await scheduler.awaitIdle()
+            if await scheduler.status.pullStalled == false { healed = true; break }
         }
+        #expect(healed, "the inbound jam clears within bounded rounds")
+        #expect(await server.currentRow(table: "container_block", rowID: placementX) == nil,
+                "the orphan left the mirror — §4f: really gone, the server included")
+        #expect(await server.isPurged(table: "container_block", rowID: placementX),
+                "…and the ledger fences any straggler")
+        #expect(try a.db.fetchInt(
+            "SELECT COUNT(*) FROM block WHERE id = ?", [blockX]) == 0,
+            "A's local residue (the block the purge never knew) completed the family")
+        // The one-way jam is broken: B's fresh note reaches A.
+        let after = try await a.pull()
+        #expect(!after.stalled)
+        #expect(try a.db.fetchInt(
+            "SELECT COUNT(*) FROM container WHERE id = ?", [freshNote]) == 1,
+            "one-way no more — the account flows again")
     }
 
     /// The VISIBILITY-BAND variant of the same construction (the A5 skew
@@ -591,17 +608,87 @@ struct SyncReconciliationProbeTests {
         #expect(still.stalled && still.newCursor == held,
                 "the cursor holds at the stall point across rounds")
 
-        await withKnownIssue(
-            "17d P8 (RUN B ledger row 9): the visibility-band variant of the purge-window jam"
-        ) {
-            var healed = false
-            for _ in 0..<4 {
-                _ = try await reconcile(a, server)
-                let round = try await a.pull()
-                if !round.stalled { healed = true; break }
-            }
-            #expect(healed, "the inbound jam must clear within bounded rounds")
+        // THE HEAL (row 9 — the band variant's wrap, UNWRAPPED the same
+        // way): the same scheduler road clears the same jam.
+        let scheduler = SyncScheduler(
+            engine: a.engine(),
+            janitor: PurgeJanitor(transport: server, keyProvider: a.keyProvider))
+        var healed = false
+        for _ in 0..<4 {
+            try await a.withAsync { _ in await scheduler.trigger() }
+            await scheduler.awaitIdle()
+            if await scheduler.status.pullStalled == false { healed = true; break }
         }
+        #expect(healed, "the band-shaped jam clears within bounded rounds")
+        #expect(await server.currentRow(table: "container_block", rowID: placementX) == nil)
+        #expect(await server.isPurged(table: "container_block", rowID: placementX))
+        #expect(try a.db.fetchInt(
+            "SELECT COUNT(*) FROM block WHERE id = ?", [blockX]) == 0)
+    }
+
+    /// **Row 9's ruled NARROWING, end to end: a LIVE stalled row is NEVER
+    /// healed** — even when its missing referent is ledger-named. The
+    /// construction: a note pushed live, its container then purged from
+    /// the mirror (test-side `executePurge` — the ledger names it) while
+    /// the PLACEMENT stays on the mirror LIVE. Every pull stalls at it;
+    /// the ledger proves the referent gone; and the heal still refuses —
+    /// an untraced class, left stalled and HONEST under row 12's flag
+    /// (safe-by-refusal), never guessed at.
+    @Test func aLiveStalledRowIsLeftStalledAndHonestNeverHealed() async throws {
+        let (a, b, server) = try pair()
+        let orphaned: String = try b.with { ops, _ in
+            let note = try ops.createPost(title: "orphaned live", profile: .journal)
+            _ = try ops.newBlock(in: note.id, text: "stranded words", at: .end)
+            return note.id
+        }
+        _ = try await b.push()
+        _ = try await server.executePurge(
+            [SyncPurgeTarget(table: "container", rowID: orphaned)],
+            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+        let placement = try b.db.fetchString(
+            """
+            SELECT id FROM container_block WHERE container_id = ?
+            """, [orphaned])!
+        let ledgerBefore = await server.purgedLedgerCount()
+
+        let scheduler = SyncScheduler(
+            engine: a.engine(),
+            janitor: PurgeJanitor(transport: server, keyProvider: a.keyProvider))
+        for _ in 0..<3 {
+            try await a.withAsync { _ in await scheduler.trigger() }
+            await scheduler.awaitIdle()
+        }
+        #expect(await scheduler.status.pullStalled,
+                "the live orphan stays stalled — and the status says so (row 12)")
+        #expect(await scheduler.status.lastError == nil, "no error is invented for it")
+        #expect(await server.currentRow(table: "container_block", rowID: placement) != nil,
+                "nothing was purged: a live row is never healed, whatever the ledger says")
+        #expect(await server.purgedLedgerCount() == ledgerBefore,
+                "no ledger entry was written — no executePurge fired")
+    }
+
+    /// **Row 9's transient guard: a missing referent the ledger does NOT
+    /// name is a genuine §5 straggler — the heal touches NOTHING.** The
+    /// owing device still holds the referent in its outbox; the class
+    /// self-heals when it drains, and a heal here would purge rows whose
+    /// parent is merely late. Driven directly (the discriminator's own
+    /// refusal arm; the fire arms are the two unwrapped constructions).
+    @Test func aStallWhoseReferentIsNotLedgerNamedHealsNothing() async throws {
+        let (a, _, server) = try pair()
+        _ = try await a.push()  // settings seeds; the janitor's preflight is real
+        let headBefore = await server.headSeq
+        let ledgerBefore = await server.purgedLedgerCount()
+        let healed = try await a.withAsync { _ in
+            try await PurgeJanitor(transport: server, keyProvider: a.keyProvider)
+                .healPurgeOrphan(SyncEngine.PullStall(
+                    table: "container_block", rowID: "some-arriving-placement",
+                    tombstoneStamp: "2026-09-01T00:00:00.000Z",
+                    missingReferents: [.init(table: "container", rowID: "a-late-parent")]))
+        }
+        #expect(!healed, "an unproven stall is a straggler, never an orphan")
+        #expect(await server.headSeq == headBefore,
+                "no executePurge fired — the mirror is untouched")
+        #expect(await server.purgedLedgerCount() == ledgerBefore)
     }
 
     // MARK: - P5(b)/(c): the sample-library dedupe's traced observations

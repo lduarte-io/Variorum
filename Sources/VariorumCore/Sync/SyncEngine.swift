@@ -315,7 +315,43 @@ public struct SyncEngine: Sendable {
         /// them); the cursor holds just before that row and the next pull
         /// retries. Self-heals when the owing device drains.
         public var stalled = false
+        /// RUN B B2 row 9 (17d P8): the stall's IDENTITY — which arriving
+        /// row truncated the batch, whether it is a tombstone, and which
+        /// referents could not be satisfied. Client-side detail only (no
+        /// wire change); the scheduler hands it to the janitor's
+        /// ledger-verified orphan heal, which is the ONLY consumer that
+        /// may act on it.
+        public var stall: PullStall?
         public init() {}
+    }
+
+    /// The stalled row's identity (row 9 — 17d P8). `tombstoneStamp` is
+    /// the arriving row's `deleted_at` when it carries one: the heal's
+    /// ruled narrowing (a LIVE stalled row is never healed) and the
+    /// cascade-residue discriminator both read it.
+    public struct PullStall: Equatable, Sendable {
+        public struct MissingReferent: Equatable, Sendable {
+            public var table: String
+            public var rowID: String
+            public init(table: String, rowID: String) {
+                self.table = table
+                self.rowID = rowID
+            }
+        }
+
+        public var table: String
+        public var rowID: String
+        public var tombstoneStamp: String?
+        public var missingReferents: [MissingReferent]
+        public init(
+            table: String, rowID: String, tombstoneStamp: String?,
+            missingReferents: [MissingReferent]
+        ) {
+            self.table = table
+            self.rowID = rowID
+            self.tombstoneStamp = tombstoneStamp
+            self.missingReferents = missingReferents
+        }
     }
 
     /// Fetches the changefeed to head, then applies **everything in one
@@ -457,6 +493,31 @@ public struct SyncEngine: Sendable {
             try setCursor(db, newCursor)
             report.newCursor = newCursor
             report.stalled = stopIndex < batch.count
+            if stopIndex < batch.count {
+                // Row 9 (17d P8): name the stall — the first unsatisfiable
+                // row and exactly which referents are missing (neither
+                // local nor in the applied prefix). Read-only detail; the
+                // janitor's ledger-verified heal is its one consumer.
+                let stalledRow = batch[stopIndex].row
+                let prefixArriving = arrivingRowIDs(Array(batch[..<stopIndex]))
+                var missing: [PullStall.MissingReferent] = []
+                for fk in try foreignKeyColumns(db, table: stalledRow.table) {
+                    guard case .text(let target) = stalledRow.columns[fk.column] else { continue }
+                    if prefixArriving[fk.targetTable]?.contains(target) == true { continue }
+                    let exists = try Bool.fetchOne(
+                        db,
+                        sql: "SELECT EXISTS (SELECT 1 FROM \(fk.targetTable) WHERE \(fk.targetPrimaryKey) = ?)",
+                        arguments: [target]) ?? false
+                    if !exists {
+                        missing.append(.init(table: fk.targetTable, rowID: target))
+                    }
+                }
+                var stamp: String?
+                if case .text(let value) = stalledRow.columns["deleted_at"] { stamp = value }
+                report.stall = PullStall(
+                    table: stalledRow.table, rowID: stalledRow.rowID,
+                    tombstoneStamp: stamp, missingReferents: missing)
+            }
             return report
         }
     }

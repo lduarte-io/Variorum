@@ -232,6 +232,26 @@ public actor SyncScheduler {
                     status.lastError = String(describing: error)
                     status.lastErrorIsOffline = Self.isOfflineError(error)
                 }
+                // RUN B B2 row 9 (17d P8): a stalled pull hands its
+                // identity to the janitor's ledger-verified orphan heal —
+                // the ONLY consumer of the stall detail. A heal triggers
+                // one follow-up round (the feed no longer carries the
+                // orphan, so the cursor proceeds and `pullStalled` flips
+                // back honestly); a refusal leaves the stall standing
+                // under row 12's flag (the transient class self-heals; a
+                // live stalled row is safe-by-refusal). A heal fault
+                // surfaces like a sweep fault, never un-succeeding the
+                // round.
+                if pullReport.stalled, let stall = pullReport.stall {
+                    do {
+                        if try await janitor.healPurgeOrphan(stall) {
+                            followUpRequested = true
+                        }
+                    } catch {
+                        status.lastError = String(describing: error)
+                        status.lastErrorIsOffline = Self.isOfflineError(error)
+                    }
+                }
             }
         } catch {
             // Offline / protected-data / server hiccup: the round is
