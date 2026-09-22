@@ -2052,9 +2052,18 @@ disposition (the hallucination guard); no fix on the reviewer's word alone.
   merge-adjacent suites 58/7 green on the fix. REVERT VERIFIED COMMIT-FIRST: discriminator
   disabled in the working tree → the pin red again with the same 8 issues; restored via
   `git checkout` of the committed fix → 14/14 green.
-- [ ] **F-R2 (MAJOR) — AGREED; fix PENDING** (pin planned:
-  `aDeliberateDeleteAfterTheMeetingSettledIsNeverDefended`, red on HEAD; fix = the three-arm
-  meeting bound, never wider than HEAD; revert commit-first).
+- [x] **F-R2 (MAJOR) — AGREED, FIXED with pin** (commit 70039504):
+  `aDeliberateDeleteAfterTheMeetingSettledIsNeverDefended` RED ON HEAD with **4 issues** — her
+  month-later `deleteReading` of the kept, savepointed copy UNDONE on both devices, dumps
+  converged on the revival. Fix = `meetingStands` (live / own-unpushed-retirement / 1 h settle
+  window; unparseable stamps read outside — the narrow direction). One construction lesson
+  recorded honestly: the pin's first run also failed its SETUP asserts because
+  `productionQuiescence` goes quiet before any empty window fires the armed markers (the p5c
+  cadence) — the deciding rounds now run explicitly; a probe bug, not a product finding. Probe
+  + both dedupe suites 32/3 green on the fix (the delayed-push crossing rides the outbox arm,
+  both-edited the live arm, the marker-spent pin untouched). REVERT VERIFIED COMMIT-FIRST:
+  HEAD's bare-EXISTS predicate restored in the working tree → the pin red again with the same
+  4 issues; restored → defense pins green.
 - [ ] **F-R3 (MAJOR) — AGREED; fix PENDING** (pin planned:
   `aRetirementSplitAtTheReadingBoundaryNeverRevivesThePristineCopy`, red on HEAD; fix = the
   first-death verdict persisted as a local one-shot keyed copy+stamp, consumed at the reading's
