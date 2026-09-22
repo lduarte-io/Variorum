@@ -129,6 +129,24 @@ extension SyncEngine {
         if !resolved.isTombstoned, ["reading_post", "reading_section"].contains(resolved.table) {
             resolved = try repointJournalChildUnderDeadLoser(db, resolved, touched: &touched)
         }
+        // The tag.path repair's arrival-order independence (RUN B B2 row 7
+        // — 17i fix item 1, KnownIssues row 34; pre-existing since Phase
+        // 5): SyncSpec §7's "re-point the duplicate's post_tag/block_tag
+        // rows to the keeper" has NO time bound, but the collision repair
+        // above re-points only applications PRESENT when the duplicate
+        // dies. One arriving AFTER that (registry order puts `tag` before
+        // both application tables, so the same batch suffices) met the
+        // dead parent in the orphan check below, joined its cascade, and
+        // that tombstone won the merge in both push orders — two devices
+        // creating one path offline and applying it to DIFFERENT notes
+        // lost one side's applications everywhere. The Journal keeper's
+        // direction-2 shape, applied to tags: same-path is the §7
+        // identity, exactly as mint-shape is the Journal's. Runs BEFORE
+        // the orphan check so the re-pointed row is no orphan; the
+        // post/block-side dead-parent check still applies after it.
+        if !resolved.isTombstoned, ["post_tag", "block_tag"].contains(resolved.table) {
+            resolved = try repointApplicationUnderDeadDuplicateTag(db, resolved, touched: &touched)
+        }
         // Orphan repair, direction 2: a live child arriving under a
         // locally-dead parent joins the parent's cascade — same stamp, so
         // every device converges byte-identically, and `restoreContainer`/
@@ -261,6 +279,58 @@ extension SyncEngine {
             resolved.columns["deleted_at"] = .text(nowStamp())
         } else {
             resolved.columns["reading_id"] = .text(keeperID)
+        }
+        try enqueueExplicitly(db, table: row.table, rowID: row.rowID)
+        touched.inlineRepairs += 1
+        return resolved
+    }
+
+    /// A live `post_tag`/`block_tag` arriving under a DEAD tag while a
+    /// LIVE tag carries the same path: the §7 tag.path rule's
+    /// arrival-order leg (RUN B B2 row 7). Re-point it to the keeper — or
+    /// tombstone it as a pure duplicate when the keeper is already applied
+    /// to the same target (`uq_post_tag_live`/`uq_block_tag_live`) — and
+    /// enqueue explicitly. Byte-identical to what `repairTagPathCollision`
+    /// writes on the device that held the rows at collision time, so the
+    /// two roads' rows meet as equals under CAS.
+    ///
+    /// A missing tag row stays a STRAGGLER (SyncSpec §5 tolerance — the
+    /// leg reads only a locally-present dead tag), and a dead tag with NO
+    /// live same-path keeper is an ordinary deletion: the cascade below
+    /// takes the application exactly as ever. PROVISIONAL consequence,
+    /// recorded (QUESTIONS — the run record's draft): a deliberate
+    /// tombstone-then-recreate now also catches a stale offline
+    /// application onto the recreation, because at arrival time the two
+    /// histories are the same picture (dead tag + live same-path keeper) —
+    /// the rescue direction, per the §6 "deleting an edit nobody chose to
+    /// lose" doctrine.
+    private func repointApplicationUnderDeadDuplicateTag(
+        _ db: Database, _ row: SyncRow, touched: inout TouchedRows
+    ) throws -> SyncRow {
+        guard case .text(let tagID) = row.columns["tag_id"],
+              let deadPath = try String.fetchOne(
+                  db,
+                  sql: "SELECT path FROM tag WHERE id = ? AND deleted_at IS NOT NULL",
+                  arguments: [tagID]),
+              let keeperID = try String.fetchOne(
+                  db,
+                  sql: "SELECT id FROM tag WHERE path = ? AND deleted_at IS NULL AND id <> ? ORDER BY id LIMIT 1",
+                  arguments: [deadPath, tagID])
+        else { return row }
+        let targetColumn = row.table == "post_tag" ? "post_id" : "block_id"
+        guard case .text(let targetID) = row.columns[targetColumn] else { return row }
+        var resolved = row
+        let keeperAlreadyApplied = try Bool.fetchOne(
+            db,
+            sql: """
+                SELECT EXISTS (SELECT 1 FROM \(row.table)
+                WHERE tag_id = ? AND \(targetColumn) = ? AND deleted_at IS NULL AND id <> ?)
+                """,
+            arguments: [keeperID, targetID, row.rowID]) ?? false
+        if keeperAlreadyApplied {
+            resolved.columns["deleted_at"] = .text(nowStamp())
+        } else {
+            resolved.columns["tag_id"] = .text(keeperID)
         }
         try enqueueExplicitly(db, table: row.table, rowID: row.rowID)
         touched.inlineRepairs += 1

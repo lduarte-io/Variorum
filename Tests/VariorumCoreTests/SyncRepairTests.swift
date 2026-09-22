@@ -126,6 +126,129 @@ struct SyncRepairTests {
             "SELECT tag_id FROM post_tag WHERE post_id = ? AND deleted_at IS NULL", [postID]) == tagA)
     }
 
+    /// **RUN B B2 row 7 (17i fix item 1 — KnownIssues row 34; pre-existing
+    /// since Phase 5, MAJOR):** the §7 sentence "re-point the duplicate's
+    /// `post_tag`/`block_tag` rows to the keeper" has no time bound — it
+    /// must hold for applications arriving AFTER the duplicate died.
+    /// The pin as the row states it: two devices create "ideas" offline
+    /// and each applies it to its OWN note; converge → BOTH notes tagged
+    /// on both devices.
+    ///
+    /// The broken direction, traced: B rounds first (production pull→push
+    /// — its pull is empty, so its push lands tag_B + its application
+    /// un-repaired); A's pull then retires tag_B at the write-time
+    /// collision (keeper = the smaller id, A's) and re-points "the
+    /// duplicate's live applications" — but B's application arrives LATER
+    /// IN THE SAME BATCH (registry order: `tag` before `post_tag`), meets
+    /// the freshly-dead parent, and was orphan-stamped into its cascade;
+    /// that tombstone then won the merge in both push orders. Red on old:
+    /// B's note untagged everywhere. (The Phase 5 pin above applies both
+    /// tags to the SAME post, which masks exactly this.)
+    @Test(arguments: [200, 1])
+    func applicationsArrivingAfterTheDuplicateTagDiedRepointToTheKeeper(batchSize: Int) async throws {
+        let (a, b, server) = try await twoDevices { ops, _ in
+            _ = try ops.createPost(title: "A's note", profile: nil)
+            _ = try ops.createPost(title: "B's note", profile: nil)
+        }
+        let noteA = try a.db.fetchString(
+            "SELECT id FROM container WHERE title = ?", ["A's note"])!
+        let noteB = try a.db.fetchString(
+            "SELECT id FROM container WHERE title = ?", ["B's note"])!
+
+        // Offline: each device creates "ideas" and applies it to its OWN
+        // note. A's UUIDs (AA…) sort below B's (BB…) — A's tag is the
+        // deterministic keeper everywhere.
+        let tagA: String = try a.with { ops, _ in
+            let tag = try ops.createTag(parent: nil, name: "ideas")
+            _ = try ops.applyTag(tag.id, toPost: noteA)
+            return tag.id
+        }
+        let tagB: String = try b.with { ops, _ in
+            let tag = try ops.createTag(parent: nil, name: "ideas")
+            _ = try ops.applyTag(tag.id, toPost: noteB)
+            return tag.id
+        }
+
+        // B rounds FIRST: its rows land un-repaired (the pull half is
+        // empty). A's pull then meets tag_B and its application in ONE
+        // batch, tag first. A's round is spelled as its two halves —
+        // production's own order — so the (c) leg is asserted between
+        // them, before the push drains the repair's rows.
+        _ = try await productionRound(b, batchSize: batchSize)
+        let aPull = try await a.pull(batchSize: batchSize)
+        #expect(aPull.repairs >= 1, "A's pull ran the collision repair")
+        // The repair's outbox rows exist on A (the suite's (c) leg): the
+        // retired duplicate and the re-pointed application both push.
+        #expect(try a.outboxContains("tag", tagB))
+        let bApplication = try a.db.fetchString(
+            "SELECT id FROM post_tag WHERE post_id = ?", [noteB])
+        #expect(bApplication != nil, "B's application reached A")
+        if let bApplication {
+            #expect(try a.outboxContains("post_tag", bApplication),
+                    "the arrival-order repair must push or the devices silently diverge")
+        }
+        _ = try await a.push(batchSize: batchSize)
+
+        try await productionQuiescence(a, b, server: server, batchSize: batchSize)
+        try await assertConverged(a, b, server)
+
+        for client in [a, b] {
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM tag WHERE path = 'ideas' AND deleted_at IS NULL") == 1,
+                "\(client.name): one keeper")
+            #expect(try client.db.deletedAt("tag", tagA) == nil, "\(client.name)")
+            #expect(try client.db.deletedAt("tag", tagB) != nil, "\(client.name)")
+            for note in [noteA, noteB] {
+                #expect(try client.db.fetchString(
+                    """
+                    SELECT tag_id FROM post_tag
+                    WHERE post_id = ? AND deleted_at IS NULL
+                    """, [note]) == tagA,
+                    "\(client.name): BOTH notes carry a live application pointing at the keeper")
+            }
+        }
+    }
+
+    /// Row 7's block_tag twin, one construction: the same §7 sentence
+    /// covers both application tables, and the arrival-order leg must
+    /// serve `block_tag` identically (its registry slot also follows
+    /// `tag`).
+    @Test func blockTagApplicationsArrivingAfterTheDuplicateDiedRepointToo() async throws {
+        let (a, b, server) = try await twoDevices { ops, _ in
+            let post = try ops.createPost(title: "post", profile: nil)
+            _ = try ops.newBlock(in: post.id, text: "A's block.", at: .end)
+            _ = try ops.newBlock(in: post.id, text: "B's block.", at: .end)
+        }
+        let blocks = try await a.db.read { db in
+            try String.fetchAll(db, sql: "SELECT id FROM block ORDER BY created_at, id")
+        }
+        let tagA: String = try a.with { ops, _ in
+            let tag = try ops.createTag(parent: nil, name: "marks")
+            _ = try ops.applyTag(tag.id, toBlock: blocks[0])
+            return tag.id
+        }
+        let tagB: String = try b.with { ops, _ in
+            let tag = try ops.createTag(parent: nil, name: "marks")
+            _ = try ops.applyTag(tag.id, toBlock: blocks[1])
+            return tag.id
+        }
+        _ = try await productionRound(b)
+        _ = try await productionRound(a)
+        try await productionQuiescence(a, b, server: server)
+        try await assertConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try client.db.deletedAt("tag", tagB) != nil, "\(client.name)")
+            for block in blocks {
+                #expect(try client.db.fetchString(
+                    """
+                    SELECT tag_id FROM block_tag
+                    WHERE block_id = ? AND deleted_at IS NULL
+                    """, [block]) == tagA,
+                    "\(client.name): both blocks stay tagged, on the keeper")
+            }
+        }
+    }
+
     // MARK: - Pure duplicates: edge (incl. reversed version_of), reading_post, post_tag
 
     @Test func reversedVersionOfEdgesAreDuplicatesKeepingTheSmallerID() async throws {
