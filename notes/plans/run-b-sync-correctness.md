@@ -1229,15 +1229,46 @@ B3/B4 records inherit the reminder.
 
 ---
 
-## BATCH B3 — 17l ITEM 5 (brief finalized at spawn; the settled scope)
+## BATCH B3 BRIEF — 17l ITEM 5, the double passphrase ask (row 13; self-contained)
 
-Ledger row 13, the entry's text verbatim (`phase-17-standing-fixes.md` 17l item 5 + KnownIssues
-row 37): the same-descriptor re-wrap at an UNCHANGED passphrase in `CorpusRotation.swift`
-(`RotationSecrets.init`); a CHANGED passphrase keeps the fresh salt; **her scope line — the reuse
-applies to the PASSPHRASE wrap ONLY**, the recovery-words wrap keeps its own descriptor and fresh
-salt, a pin asserts the two descriptors stay independent. Pins: the zero-prompt follow (red
-today) + the independence guard + a changed-passphrase-fresh-salt guard. The custody suites
-(`MultiTenantSyncAttackerTests`, `CorpusRotationTests`, the rotation drill) ride the close.
+**You are a Fable implementer session for RUN B batch B3.** ONE item, custody-adjacent `Sync/`:
+her find at the pre-13x acceptance walk — *"I used my passphrase to sign in on my phone but then
+I was asked to enter my passphrase again … a little annoying."*
+
+**READ FIRST, in full, in your own context:** `CLAUDE.md` + canon (SyncSpec WHOLE — §3's
+pre-13x/E2EE paragraphs; the 14b design pointer) · `notes/sync-postmortem-fragments.md` · THIS
+FILE (FENCES · ENVIRONMENT TRAPS · this brief · both prior adjudications — the B2 slip's
+commit-before-revert reminder binds you) · `notes/plans/phase-17-standing-fixes.md` **17l item 5
+verbatim** (the entry's text is the spec) + `notes/KnownIssuesAndTechDebt.md` row 37 ·
+`notes/plans/pre-13x-postures-design.md`'s ledger 54 (the no-second-entry follow this fix makes
+true across rotations) · `Sources/VariorumCore/Sync/CorpusRotation.swift` (`RotationSecrets.init`,
+~:71) + the descriptor/KDF sources it touches (`PassphraseKDF`, `StoreKeyEnvelope` as needed).
+
+**THE FIX (the entry's letter):** when the passphrase is UNCHANGED at a rotation,
+`RotationSecrets` re-wraps the master under the EXISTING KDF descriptor (the same salt → the
+same derived key; the wrapped payload is the new master — cryptographically sound); a CHANGED
+passphrase keeps the fresh random salt. **HER SCOPE LINE, binding: the reuse applies to the
+PASSPHRASE wrap ONLY — the recovery-words wrap keeps its own descriptor and its fresh salt at
+every act.**
+
+**PINS (each red-on-old by behavioural revert, commit-first):** (1) the zero-prompt follow — a
+sibling that opened by the passphrase follows a Replace All Keys with zero prompts (RED today:
+the descriptor differs and the field asks); (2) the independence guard — the passphrase wrap's
+and the recovery wrap's descriptors stay independent across a rotation (the recovery salt is
+fresh even when the passphrase salt is reused); (3) the changed-passphrase guard — a rotation
+that CHANGES the passphrase mints a fresh salt (the reuse never leaks into the changed case).
+**The custody suites ride your close:** `CorpusRotationTests` · `MultiTenantSyncAttackerTests`
+(the nine arms must stay green — a descriptor reuse that weakened an arm would be a finding
+against the FIX, stop and report) · the rotation drill where it runs headless · the full core
+suite (baseline **1666/179, zero wraps**). Zero schema, zero server lines, marker 8; her store
+and `/Applications` untouched.
+
+**Your record:** append `## BATCH B3 RECORD` below this brief — LIVE STATUS from the first
+commit, the trace in your own words (WHY the fresh salt broke ledger 54's road — the follow's
+descriptor-equality gate), fix, pins + revert evidence, finals. **Checkpoint protocol:** commit
+per piece + push; pathspec-limited staging; PENDING until verified; foreground grep-poll waits;
+no subagents (one Sonnet lookup for external facts only); NO REVERT without the pre-revert state
+COMMITTED (B2's slip is the fresh reminder); no commit trailers.
 
 ## BATCH B4 — HARNESS REALISM (brief finalized at spawn; the settled scope)
 
