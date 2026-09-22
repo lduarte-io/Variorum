@@ -1289,11 +1289,26 @@ COMMITTED (B2's slip is the fresh reminder); no commit trailers.
   pin 1 (the same-word rotation keeps the vault's descriptor; a pre-rotation held key opens M′)
   — `CorpusRotationTests` +3, suite **18/18 green** (15 existing + the 3 pins, all named in the
   run log). Revert evidence PENDING.
-- [ ] Pin 1 (the zero-prompt follow, the DOOR) — `PostureSwitchTests` (the entry's letter + the
-  changed-word door arm) + arm (vii) of the un-followed-device pin RE-BASED to the fixed
-  contract (the ruled-change class). PENDING.
-- [ ] Revert evidence — all three pins by BEHAVIOURAL REVERT with the pre-revert state
-  COMMITTED FIRST (B2's reminder binds). PENDING.
+- [x] Pin 1 (the zero-prompt follow, the DOOR) —
+  `PostureSwitchTests.theSiblingThatOpenedByThePassphraseFollowsAReplaceAllKeysWithZeroPrompts`
+  (the entry's letter end to end + the changed-word door arm) + arm (vii) of the
+  un-followed-device pin RE-BASED to the fixed contract (the ruled-change class: the second
+  same-word rotation reuses the descriptor, the held key still matches, the follow runs with no
+  field). Suite run: **44/44 passed, 0 skipped** (149 s; her real-store instance pid 38939
+  observed running at `/Applications` and left strictly alone). Mac revert evidence PENDING.
+- [x] CORE revert evidence (pre-revert state committed at b57a8d38, both reverts + restores):
+  **REVERT A** (the reuse road forced onto the fresh-salt arm — the pre-fix semantics):
+  `aSameWordRotationKeeps…` RED, 3 issues (`secrets.kdf == before.kdf` :277, `after.kdf ==
+  before.kdf` :281, and the held key's `unwrapMaster` threw `unwrapFailed` :268 — her double
+  ask's core mechanism verbatim) · `theRecoveryWrapStaysFresh…` RED, 2 issues (both reuse
+  premises) · pin 3 GREEN (the changed case IS the old behavior — the guard class, as
+  predicted); run 18 tests / 5 issues. Restored via `git checkout` over the committed tree →
+  18/18 green. **REVERT B** (the reuse made unconditional — the unwrap proof skipped): pin 3
+  RED, 4 issues (:361 fresh descriptor, :362 fresh salt, :366 the vault's descriptor moved, and
+  :372 "an error was expected but none was thrown" — under the mutant the changed word under
+  the OLD salt OPENED the new wrap, precisely the leak the guard exists for); pins 1/2 green.
+  Restored → 18/18 green.
+- [ ] Mac revert evidence (REVERT A against the committed Mac pins). PENDING.
 - [ ] Finals: the custody suites (`CorpusRotationTests` · `MultiTenantSyncAttackerTests`'s nine
   arms · `KeyProofGateTests`' headless drill) · the FULL CORE SUITE (baseline 1666/179, zero
   wraps) · the touched Mac suites · the iOS build gate. PENDING.

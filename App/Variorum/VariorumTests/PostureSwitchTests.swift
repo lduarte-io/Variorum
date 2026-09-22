@@ -2865,6 +2865,84 @@ struct PostureSwitchTests {
         #expect(try await siblingTwo.marker() == nil)
         _ = client
     }
+
+    /// 17l ITEM 5 (RUN B batch B3; KnownIssues row 37 — her find at the
+    /// pre-13x acceptance walk, 2026-09-07 08:19Z: her phone typed the
+    /// word to unlock and was asked the SAME word again at the follow): a
+    /// sibling that opened its lobby by the passphrase — the derived key
+    /// held under the PRE-rotation vault descriptor — follows a Replace
+    /// All Keys that KEPT the word with ZERO prompts, because the rotation
+    /// re-wrapped under the EXISTING descriptor
+    /// (`RotationSecrets.derive(forRotationOf:)` through the runner's
+    /// ceremony), so the held key still equals the vault's and ledger 54's
+    /// no-second-entry road runs end to end ACROSS the rotation. RED
+    /// TODAY (pre-fix): the rotation minted a fresh salt, the descriptor
+    /// differed, and the field asked — her double ask. The second act: a
+    /// rotation that CHANGES the word — the held key is then honestly
+    /// stale and the field asks (the reuse never leaks into the changed
+    /// case, at the door).
+    @Test func theSiblingThatOpenedByThePassphraseFollowsAReplaceAllKeysWithZeroPrompts() async throws {
+        let acting = try await makeWorld()
+        defer { acting.tearDown() }
+        let sibling = try await makeWorld(sharing: acting)
+        defer { sibling.tearDown() }
+        let oldMaterial = try #require(sibling.oldMaterial)
+        let before = try await sibling.vault()
+        // The lobby's state: the key derived when the word was typed to
+        // unlock — BEFORE the acting device's rotation.
+        let heldKey = try PassphraseKDF.deriveKey(passphrase: "sesame", descriptor: before.format.kdf)
+
+        // The acting device replaces all keys, KEEPING the word.
+        _ = try await acting.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: acting.words)
+        let after = try await sibling.vault()
+        let newKeyID = try #require(after.format.classKey(for: .corpus)?.keyID)
+        #expect(newKeyID != oldMaterial.corpusKeyID, "a genuine rotation")
+        #expect(after.format.kdf == before.format.kdf,
+                "the unchanged word re-wrapped under the vault's EXISTING descriptor — 17l item 5's letter")
+
+        let held = SyncCustodySession()
+        held.holdDerivedWrappingKey(heldKey, kdf: before.format.kdf)
+        let one = controller(for: sibling, material: oldMaterial, session: held)
+        await one.reconcile()
+        let owed = try #require(one.followNotice)
+        #expect(owed.vaultKDF == before.format.kdf, "the notice carries the SAME descriptor the lobby derived under")
+        one.openFollow()
+        let model = try #require(one.activeFollow)
+        #expect(model.canFollowFromHeldKey,
+                "the word typed at the lobby follows a Replace All Keys — never asked twice, ACROSS the rotation")
+        model.choosePassphrase()
+        #expect(model.phase != .askPassphrase, "zero prompts — the door asks nothing")
+        for _ in 0..<600 {
+            if case .done = model.phase { break }
+            if case .failed = model.phase { break }
+            if model.phase == .askPassphrase { break }
+            try await Task.sleep(for: .milliseconds(50))
+        }
+        guard case .done = model.phase else { Issue.record("expected .done, got \(model.phase) \(model.lastError ?? "")"); return }
+        #expect(sibling.keyStore.load()?.corpusKeyID == newKeyID, "M′ in custody — the follow ran whole")
+        #expect(sibling.calls.rekeys == 1, "the library re-keyed as it followed")
+        #expect(!one.followPending)
+        let outcome = try #require(model.outcome)
+        let newFile = try sibling.keyFile(outcome.newKeyFingerprint)
+        #expect(newFile.passphrase?.kdf == before.format.kdf, "the P copy under the held key's descriptor — reused")
+        #expect(try newFile.unwrapKey(passphrase: "sesame") == sibling.keyInHand, "the typed word opens the new key file")
+
+        // The CHANGED word: the reuse never leaks — the field honestly asks.
+        _ = try await acting.runner.replaceAllKeys(passphrase: "a-genuinely-new-word", recoveryWords: acting.words)
+        let final = try await sibling.vault()
+        #expect(final.format.kdf != before.format.kdf, "a changed word minted a fresh salt")
+        let stillHeld = SyncCustodySession()
+        stillHeld.holdDerivedWrappingKey(heldKey, kdf: before.format.kdf)
+        let two = controller(for: sibling, material: oldMaterial, session: stillHeld)
+        await two.reconcile()
+        #expect(two.followNotice != nil)
+        two.openFollow()
+        let modelTwo = try #require(two.activeFollow)
+        #expect(!modelTwo.canFollowFromHeldKey, "the word changed — the held key is honestly stale")
+        modelTwo.choosePassphrase()
+        #expect(modelTwo.phase == .askPassphrase, "the field asks, as it must")
+    }
+
     // MARK: - pre-13x 4b: helpers shared by the choreography, the un-followed device, the doors and the posture pins
 
     /// A sibling's controller composed the app's way: the plain custody
@@ -3527,13 +3605,22 @@ struct PostureSwitchTests {
         #expect(reasked.kind == .movedToCastle, "still Standard-shaped and the account Castle: the same honest kind, a new id")
         #expect(controller.notice == .follow(reasked), "Later's banner gives way — the modal notice at once")
 
-        // Followed (the field — the held key is stale after the second rotation), every door opens again.
+        // Followed — 17l item 5 (RUN B B3) RE-BASED this tail (the
+        // ruled-change class): the second rotation KEPT the word, so its
+        // descriptor was REUSED and the held key still matches — the
+        // follow runs from it with NO field (the shipped pre-fix arm
+        // asserted the fresh-salt consequence here: a stale key and the
+        // field asking). Every door opens again.
         controller.openFollow()
         let follow = try #require(controller.activeFollow)
-        #expect(!follow.canFollowFromHeldKey, "the held key's descriptor is the first rotation's — asked")
+        #expect(follow.canFollowFromHeldKey, "the held key still matches — the unchanged word's descriptor was reused")
         follow.choosePassphrase()
-        #expect(follow.phase == .askPassphrase)
-        await follow.enter(passphrase: "sesame")
+        #expect(follow.phase != .askPassphrase, "no field — never asked twice, across the second rotation too")
+        for _ in 0..<600 {
+            if case .done = follow.phase { break }
+            if case .failed = follow.phase { break }
+            try await Task.sleep(for: .milliseconds(50))
+        }
         guard case .done = follow.phase else { Issue.record("expected .done, got \(follow.phase) \(follow.lastError ?? "")"); return }
         #expect(!controller.followPending && sibling.calls.rekeys == 1)
         await encryption.refresh()
