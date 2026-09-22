@@ -1763,6 +1763,41 @@ repo-first at the moments the premises fell. Zero `Sync/` lines in every pass; t
 
 ---
 
+## RUN A CLOSEOUT (2026-09-21)
+
+**Duties discharged:** (1) all 16 ledger rows dispositioned (the table's cells + the adjudication
+blocks); (2) the four entries CLOSED in `notes/plans/phase-17-standing-fixes.md` with dispositions
+copied whole (17l's row-8 deviation stated; item 5 deferred → RUN B) and the allocation register
+brought true (`383779c1`); (3) KnownIssues rows 32/38/39/40/65 REMOVED as resolved, row 41
+re-owned to RUN B, the run's two new 17e rows standing (`2974f5b9`); (4) the master plan's order
+line 2 ticked ✔ and the banner advanced to RUN B-next (`2974f5b9`); (5) canon deltas: NONE beyond
+the flagged record-truth edits to QUESTIONS #137/#140 and the new rows #136–#140 — zero AppSpec
+lines, zero schema, marker 8, zero `Sync/` lines across the whole run.
+
+**CLOSING RUNS (the run's final tree):**
+- Full Mac suite: **PENDING(run in flight)**
+- Core `swift test`: **PENDING**
+- Mobile suite: **PENDING**
+- iOS build: **PENDING**
+
+**THE ORCHESTRATOR'S CLOSING WALK:** **PENDING** (the peek's two-generation road live on the dev
+store — seal, refuse, close, reopen, close again, reopen; the pad guard; captures to
+`notes/plans/run-a-screens/closeout/`).
+
+**THE INSTALL REFRESH:** **PENDING** (after the walk; A1 backup first; zero-instance window).
+
+**HER RATIFY BUNDLE (the checkpoint report's list):** QUESTIONS **#136** (A1's five PROVISIONALs)
+· **#137** (the quick-note park + the one-shot quit decline; (b) extended as a record-truth edit)
+· **#138** (A2's seven items — the MINOR-N4 (2) tail, the label rule, the floor, the seeded-book
+durability + its residual, the launch seeder's cross-device call at (f), the unreadable-vault
+refusal) · **#139** (17m's seven calls incl. the pane placement and the phone's twin at (f)) ·
+**#140** (the comment-draft park's six items, re-based to the peek). **HER ONE BUNDLED ACT:**
+`Help ▸ Restore Tutorial… ▸ Replace` + *Restore "Encryption Explained"* — one press each covers
+13u4's pending lesson edits AND this run's (17n's Lesson 2 / Chapter 2; 17m's Chapter 2 paragraph;
+the FAQ brief's new entry is the website agent's, not a store's).
+
+---
+
 ## CLOSEOUT DUTIES (the standing ritual, run-shaped — nothing here runs until the ladder ends)
 
 1. Every ledger row dispositioned (FIXED-with-named-pin / DISMISSED-AS-HOLLOW / VERIFIED (row 15's
