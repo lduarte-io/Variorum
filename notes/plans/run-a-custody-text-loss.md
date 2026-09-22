@@ -191,8 +191,13 @@ table: instance × host/path, each cell FIXED-with-named-pin or provably SAFE.
   `Test run with N tests in M suites` line with a non-zero N. **Same family (found at the round-1
   fix pass): `-only-testing:VariorumTests/TutorialWalkTests` selects NOTHING** — the file holds
   eleven suite TYPES, none named after itself, and the invocation still prints green for its other
-  selectors. The spine is named by its struct names (`TutorialBookShapeTests` …
-  `TutorialFannedMatrixTests`, eleven suites, 79 tests).
+  selectors. The spine is named by its struct names — ALL ELEVEN, spelled out because a guessed
+  middle name selects a subset that still prints green (the round-3 reviewer walked exactly that
+  trap: 4 suites/25 tests, green): `TutorialBookShapeTests` · `TutorialDoorTests` ·
+  `TutorialWritingActsTests` · `TutorialTakesActsTests` · `TutorialStructureActsTests` ·
+  `TutorialLookingActsTests` · `TutorialLibraryActsTests` · `TutorialDeletionActsTests` ·
+  `TutorialWherePlacesActsTests` · `TutorialPrivacyChapterTests` · `TutorialFannedMatrixTests`
+  (79 tests, 11 suites).
 
 ---
 
@@ -1718,6 +1723,24 @@ covers the mechanics. Two peek facts confirmed from the build: the phone's one-s
 consume stays (orthogonal — it protects typing within an open, never the park's hold), and no
 ghost road opens on the landed path itself (both Mac sites and the phone's `.landed` arm clear
 before returning; the latch serialises flights).
+
+**THE ROUND-3 FINAL CALLS + FIX PASS (the reviewer's; head `d9ac75d6`):** F1 **CONFIRMED, FIXED**
+— `CommentsPanelModel.init` side-effect-free, the restore in `restoreParkedDraft()` at the head of
+the panel's existing `.task`. F2 **CONFIRMED with the RAISE ADOPTED on the reviewer's own
+re-derivation** — `peek(forBlock:)` non-consuming, `clearIfHeld(blockID:commentID:)` keyed on the
+SAME DRAFT, three clear occasions exactly; the pad's `QuickNotePark` byte-untouched. F3
+**CONFIRMED, FIXED** (#140(d)'s phone mirror). One production+pins commit (`46aadc10`, the brain's
+signature binding both platforms), the round-2 clear-at-restore assertions flipped as NAMED
+ruled-change edits; #140 re-based to the peek in flagged record-truth edits (`b1cac50e`). THREE
+reverts, each discriminating exactly: R3-A (peek reverted) 3+3 issues at the two-generation arms;
+R3-B (the shipped combination) 5 issues with the phantom pin red at BOTH arms; R3-C (block-keyed
+clear reverted) 2+2 at exactly the raise's arms. Closing runs: Mac 93/13 with the eleven-suite
+spine · mobile 13/3, green; zero `Sources/` lines, `QuickNotePark` byte-untouched. **The
+reviewer's own guessed-spine-selector walk reported honestly and ADOPTED into ENVIRONMENT TRAPS
+(all eleven struct names now spelled out there). Orchestrator verification: the four commits
+spot-checked, `Sources/` diff-empty confirmed, both Mac park suites re-run directly — 14/2
+green.** **Next: the implementer's FINAL sanity pass over `bb5d74ea..HEAD` — the cap; anything
+unsettled there is recorded for the author, never looped.**
 
 ---
 
