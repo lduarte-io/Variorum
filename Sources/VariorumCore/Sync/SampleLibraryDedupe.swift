@@ -340,17 +340,29 @@ extension SyncEngine {
         if row.table == "reading" {
             copyID = row.rowID
         } else {
+            // LADDER R1 F-R6 (the cleanliness half; the defect half was
+            // pin-dismissed as hollow — a full retirement's reading row
+            // resolves directly, so evidence is never wholly missed): the
+            // resolution filters to readings wearing an injected facts
+            // NAME and orders deterministically. Correctness must not
+            // ride SQLite's plan — a post also living in a personal
+            // collection resolved to an ARBITRARY reading under the bare
+            // `LIMIT 1`, and under F-R3's persisted first-death verdict a
+            // wrong batch-1 resolution would skip the marker and re-open
+            // the split-revival it closes.
             copyID = try String.fetchOne(
                 db,
                 sql: """
                     SELECT r.id FROM reading r
                     JOIN reading_post rp ON rp.reading_id = r.id AND rp.deleted_at IS NULL
                     WHERE rp.post_id = ? AND r.deleted_at IS NULL
+                      AND r.name IN (SELECT value FROM json_each(?))
                       AND EXISTS (SELECT 1 FROM container c
                                   WHERE c.id = rp.post_id AND c.deleted_at IS NULL)
+                    ORDER BY r.id
                     LIMIT 1
                     """,
-                arguments: [row.rowID])
+                arguments: [row.rowID, jsonArray(Set(sampleLibraryFacts.map(\.bookName)))])
         }
         guard let copyID,
               !touched.sampleCopyKills.contains(where: { $0.copyID == copyID }),

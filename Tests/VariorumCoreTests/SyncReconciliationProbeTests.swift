@@ -1207,6 +1207,58 @@ struct SyncReconciliationProbeTests {
         }
     }
 
+    /// **LADDER R1 F-R6 (the pin-first CONFIRM): a sample post living in a
+    /// SECOND book still gets its kill evidence recorded — the ruled
+    /// matrix holds in the two-book configuration.** The container→copy
+    /// resolution carried `LIMIT 1` with no ORDER BY and no name filter,
+    /// so a post with two live memberships resolved to whichever reading
+    /// SQLite's plan returned. The finding's loss shape (the defense
+    /// silently missing its kill) is structurally tempered — a full
+    /// retirement's READING row resolves directly, no query — and this
+    /// pin is the confirm: red proves the loss road; green on both sides
+    /// dismisses the defect half as hollow, with the deterministic
+    /// name-filtered resolution landing as the cleanliness half (it is
+    /// load-bearing for F-R3's persisted first-death verdict, which a
+    /// wrong batch-1 resolution would skip).
+    @Test func aSamplePostInASecondBookStillRecordsItsKillEvidence() async throws {
+        let (a, b, server) = try dedupePair()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        try await a.push()
+        try await b.push()
+
+        // B files the edited note into a PERSONAL collection too (the
+        // non-exclusive membership default), edits it, and its pushes are
+        // delayed — the p5b crossing with a second live membership.
+        let editedPost = copyB.postIDs["A Scandal in Bohemia"]!
+        let editedVariant = try firstVariantID(b, postID: editedPost)
+        try b.with { ops, _ in
+            let personal = try ops.createReading(
+                name: "her collection", kind: .curated, profile: "collection")
+            _ = try ops.addPostToReading(editedPost, to: personal.id)
+            try ops.autosave(editedVariant, text: "Rewritten in her own words.", charDelta: 20)
+        }
+        _ = try await b.pull()
+        _ = try await b.pull()
+        #expect(try liveCopyIDs(b) == [copyB.bookID], "B kept its engaged copy")
+        _ = try await a.pull()
+        _ = try await a.pull()
+        #expect(try liveCopyIDs(a) == [copyA.bookID], "A retired copyB on its pristine evidence")
+
+        try await productionQuiescence(a, b, server: server, maxRounds: 20)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyB.bookID],
+                    "\(client.name): the engaged copy survives — the second membership never hides the kill")
+            #expect(try client.db.fetchInt(
+                """
+                SELECT COUNT(*) FROM variant
+                WHERE working_text = 'Rewritten in her own words.' AND deleted_at IS NULL
+                """) == 1,
+                "\(client.name): the edit lives on the surviving copy")
+        }
+    }
+
     /// **P5(c) — the echo pull's extra round, RUN AND RECORDED (designed
     /// cost, green pin) — and the mechanism OBSERVED is sharper than the
     /// memo's phrase.** Under PRODUCTION rounds (pull → push per device),
