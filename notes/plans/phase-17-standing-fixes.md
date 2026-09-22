@@ -86,12 +86,13 @@ once. Claim a letter here first.
 |---|---|---|
 | **17a** | **CLOSED 2026-08-30 — the pre-13u round's Act 9 (the Fable custody batch).** All 8 items FIXED with revert-verified red-on-old pins; per-item dispositions in the entry below; the two KnownIssues rows that carried owner "17a" without being in the item list are RE-ROUTED to **17h** (opened at her word) | **closed** |
 | **17b** | Doors that lose or mis-copy her text (+ KnownIssues row 65 at the 13u4 refresh) | **CLOSED 2026-09-21 — RUN A batch A1 + the run's ladder.** All 7 items FIXED with revert-verified red-on-old pins; the ladder extended the class twice (the quick-note park's quit rider hardened; the comment-draft park born on both platforms); one undo-side residue DEFERRED → 17e. Dispositions in the entry below |
-| 17d, 17e | The 2026-08-30 sweep's remaining groups (17e has since gained rows: P6's undo-side residue, the launch seeder's cross-device deletion, the canvas router fact) | open, unstarted |
+| **17d** | Purge & sync honesty (P8/P9/P28/P31; P30 dissolved 2026-09-04) | **CLOSED 2026-09-22 — RUN B** (dispositions in the entry; the live-round leg pending her morning round) |
+| 17e | The 2026-08-30 sweep's remaining group (has since gained rows: P6's undo-side residue, the launch seeder's cross-device deletion, the canvas router fact, the content-replacement undo row) | open, unstarted |
 | **17f** | **CLOSED 2026-08-31 — the pre-13u round's Act 5.** 8 of 9 items FIXED (each with its evidence class named: three red-on-old drills, two grep-verified dead-code removals, one hoist, one canon correction, one documented mechanism); **P50 DISMISSED AS HOLLOW by measurement** — the WAL it claimed was checkpointed away measures byte-identical before and after `lock()`. Per-item dispositions in the entry below | **closed** |
 | **17c** | **CLOSED 2026-08-31 — the pre-13u round's Acts 3+4.** All 4 read-layer items (P18–P21) FIXED with revert-verified red-on-old pins (query plans and statement counts, never timings); the P20 index landed as its own schema commit and is NOT a §12 lockstep event (marker stays 7). Per-item dispositions with before/after numbers in the entry below; one residual (`container_block(block_id)`) re-routed to **12** in KnownIssues | **closed** |
 | **17g** | **CLOSED 2026-08-30 — the `13p-fix` session** (author's live session of 2026-08-30: an issue she found testing the refreshed 13p install). That session owns this letter and writes its own entry; it does **not** fold into 17a. | **closed** |
 | **17h** | **The custody riders 17a never listed** — opened at the author's word 2026-08-30 (the pre-13u sitting: "Open 17h, run it this round"). TWO items, both already traced in `KnownIssuesAndTechDebt.md` rows that carried owner "17a" without being in its 8-item list: **(1)** the `saveGated` delete-before-add window (13p-fix ladder R2-7 — a failed `SecItemAdd` after the forced delete leaves no custody; remedy sketch on the row: add under a temporary account → verify → swap → delete old, or an explicit accepted-window doc line); **(2)** the delete-status-discarded family (R3-5 — `deleteAuto`/`deleteGated` drop `OSStatus`, so the custody law binds writes only; remedy on the row: `Bool`-returning delete seams + refuse/report on failed release + a `deletesSucceed` knob pin; the riders travel with it: `E2EECustodyStorage.live` wiring coverage R3-4, `setMode`'s MainActor SecItem calls R3-6). The rows' mechanisms and remedies are the brief; runs as a small fresh Fable session inside the pre-13u round, after Act 9 closes. **CLOSED 2026-08-31** — both items FIXED (R2-7 as probe-first narrowing with the residual window recorded; R3-5 with all riders), every pin red-on-old by behavioral revert; the entry below is the record | **closed** |
-| **17i** | **Sync across devices — the reconciliation probes, the scenario sweep, and the harness-realism fix** — opened at the author's word 2026-08-31 (the pre-13u round's tail): *"this is really hunting for bugs + discrepancies + issues in the implementation of sync across devices, so I think it's fine to have there… I want to have a more proper phase."* The brief is `notes/plans/pre-13u-memo-sync-disagreements.md` — the posture in five rules, the scenario table, and the UNSETTLED probes at its top (P1 delete-vs-edit-plus-new-take; P2 the purged-past-30-days + returner corner; P3 edit-vs-edit; P4 the production-round-shape sweep of every convergence suite). Structural item: the harness runs production's pull→push chunked round shape by DEFAULT. All `Sync/` — the standing Fable rider applies; pin before fix; a probe whose expected and actual agree is recorded, not "fixed". Not run inside the pre-13u round (her ruling). | **open** |
+| **17i** | **Sync across devices — the reconciliation probes, the scenario sweep, and the harness-realism fix** — opened at the author's word 2026-08-31 (the pre-13u round's tail): *"this is really hunting for bugs + discrepancies + issues in the implementation of sync across devices, so I think it's fine to have there… I want to have a more proper phase."* The brief is `notes/plans/pre-13u-memo-sync-disagreements.md` — the posture in five rules, the scenario table, and the UNSETTLED probes at its top (P1 delete-vs-edit-plus-new-take; P2 the purged-past-30-days + returner corner; P3 edit-vs-edit; P4 the production-round-shape sweep of every convergence suite). Structural item: the harness runs production's pull→push chunked round shape by DEFAULT. All `Sync/` — the standing Fable rider applies; pin before fix; a probe whose expected and actual agree is recorded, not "fixed". Not run inside the pre-13u round (her ruling). | **CLOSED 2026-09-22 — RUN B** (the hunt, the fixes incl. F-1/F-3, the harness deliverable; dispositions in the entry; the live-round leg pending her morning round) |
 | **17o** | **The 2026-09-06 use-report round's DEFECTS** — opened 2026-09-07 at her word (the fixes half of that round; its product half is 18c · 18d · 18e · 18f). Batches: **b** the landing family (every door into Write lands at the remembered caret offset; the fan panel's Takes landing scrolls; Blocks → Write scrolls) · **c** the Takes faces (the live pane honors the editing-indicator setting everywhere; the chosen bar the card's full height; "＋ new block" on an empty note; the pane's stale height after a big deletion) · **d** the chrome singles (the sidebar divider's grip; the Messages fill-code popover; the title LEADS from the path chip — supersedes Act 10 rows 4/19; the title faces' baseline; the sidebar headers' inset and air; the versions link on a blockless note MINTS the first block; the one-shot chrome titles become observations; the Index count ↔ ⋯ column; the tag field collapses; the divider's white top) · **e** the Snippets area (the card door opens the CARD's pool and lands on the block; the tag door findable) — **Opus only** on e, her word. **The record is the round's plan, `notes/plans/use-report-round-2026-09-06.md`** (ledger rows 6–21 · 27 · 38–42; §5.3); the dispositions block is copied here at the entry's close. Cast: `opus-implementer` (xhigh); `fable-reviewer` on batch b, `opus-reviewer` on c/d/e | **CLOSED 2026-09-08** — all 27 rows FIXED with pins (6–21 · 27 · 38–47), two ladders capped (b: Fable ×3; c/d/e: Opus ×3); the dispositions block in the entry below |
 | **17p** | **The 2026-09-12 use-report round's DEFECTS** — opened 2026-09-12 at her word (the fixes half of that round; its product half is 18g · 18h · 18i). Batches: **a** the Takes board (the article scrolled its current block to the TOP on every entry — image 1; a per-note scroll memory + a reveal-only landing rule; the empty block's face and the ＋ new block door's alignment) · **b** the chrome singles (the tray's block rows gain Delete Now — the explainer promised it; the Callout Emoji alert's collapsed field; the comment badge and the callout emoji drawn OVER the text in the book Outline — a reserved left lane, the emoji inside the frame) · ~~**c** the phone's opening scroll~~ (RETIRED at the sitting — hers to run in a mobile session, standalone or with 13u; the `mobile` branch's handoff §12.2 carries it). **The record is the round's plan, `notes/plans/use-report-round-2026-09-12.md`** (ledger rows 1–7; §4.1–§4.4, §4.9; §5.1); the dispositions block is copied here at the entry's close. Cast: `opus-implementer` (xhigh); `fable-reviewer` on BOTH batches (b's decor lane reached the editor seam — the adjudication's J4) | **CLOSED 2026-09-12** — rows 1–6 FIXED with pins, row 7 RETIRED to the mobile session; two Fable ladders (a: three rounds to the cap; b: two); the dispositions block in the entry below |
 | **17q** | **The 2026-09-12 use-report round's MORNING BUILDS + the 18h cap's residue** — opened 2026-09-13 at her word (the successor session's first act, before 18i). Items: **(1)** R-Q20 — J3 ruled *"the block I came from wins"*: when the Takes entry landing names a block, the landing wins and the remembered place is not restored (one condition in `TakesBoardLayout`'s restore/landing step + the 60-block remount pin's sibling) · **(2)** R-Q17 — QUESTIONS #103 ruled: the Library's Notes card shows the stated day AND the sort's stamp where there is room, the masthead's click-flip where small; with it R3-2 (the List row's raw `entry_date` slot through the one brain, never one day twice) · **(3)** the 18h ladder's cap residue (KnownIssues row "The 18h ladder's residue at the cap", owner 17q): R3-1 the synchronous selection clear on a mode change, and the seven NITs R3-4…R3-10. **The record is the round's plan, `notes/plans/use-report-round-2026-09-12.md`** (`### R-8 · 17q — BRIEF` / `RECORD`); the dispositions block is copied here at the entry's close. Cast: `opus-implementer` (xhigh); `fable-reviewer` (the Takes half is the landing family; cross-model flow) | **CLOSED 2026-09-13** — R-Q20/R-Q21, R-Q17 (+R3-2), R3-1 and R3-4…R3-10 all FIXED with pins; one Fable ladder to the cap (three rounds: 2 + 3 + 1 MAJOR, all fixed; the restore had never run in the app before this entry); the residue owned on KnownIssues row 54 (13u2); the dispositions block in the entry below |
@@ -701,6 +702,22 @@ WINS — it was written with the real code open and with instructions to refute.
 
 ---
 
+### CLOSED 2026-09-22 — the dispositions (RUN B; the record is `notes/plans/run-b-sync-correctness.md`)
+
+**P8 CONFIRMED then FIXED — the entry's own rule discharged both ways:** B1 REPRODUCED it in BOTH
+constructions (held-push + the A5 visibility band; "reproducing it IS the pin"), and B2 built the
+ruled fix (Shape A: the ledger-verified orphan heal through EXISTING RPCs — zero server lines —
+with the tombstone-only narrowing; hardened at the ladder: F-R4 scoped the completion set to the
+stall's present referents' FK-connected family, F-R5 reordered the guards). The permanent one-way
+jam clears in bounded rounds; the mirror stops hosting a purged note's ciphertext. **P9 FIXED**
+(the live-root family-complete expansion; the Put-back-races-the-sweep road pinned). **P28
+FIXED** (the redo road voids purge intents like its six siblings). **P31 FIXED** (`PullReport.stalled`
++ `PushReport.deferred` gained production readers; a stalled round STOPS reporting "Synced" —
+the honest `.stalled` face, clean-branch only). P30 stood DISSOLVED (2026-09-04, the bridge's
+retirement). Every fix red-on-old by behavioural revert, commit-first. **THE LIVE-ROUND
+ACCEPTANCE LEG: PENDING her morning round** — `notes/handoffs/run-b-live-round-handoff.md`; the
+morning session flips this line.
+
 ## 17e — Correctness & honesty singles
 
 **Status: open, unstarted.** 10 items, no pins.
@@ -1054,6 +1071,29 @@ against the CODE unless the author rules the sentence wrong. **Related, kept sep
 daily-Journal identity memo (13y) and the dedupe's late-registry residual (KnownIssues, 13y).
 
 
+### CLOSED 2026-09-22 — the dispositions (RUN B, all five batches + the two-round ladder; the record is `notes/plans/run-b-sync-correctness.md`)
+
+**The hunt ran exactly as designed and everything it caught is FIXED in-run.** B1: probes P1–P3 +
+P5(b)/(c) + P8's run + the P4 round-shape sweep, every answer recorded in the memo's (now
+ANSWERED) section with pins — P1/P2(a)/P3 CONFIRMED canon; P4 swept 0 findings; P2(b)'s returner
+corner RULED at QUESTIONS #141 (shipped (a) stands; the (b) rescue is entry 17s at her word).
+**Fix item 1 (the tag.path arrival-order loss, KnownIssues row 34) FIXED** (B2 row 7,
+`repointApplicationUnderDeadDuplicateTag`, red-on-old both directions; the recreated-tag catch
+PROVISIONAL #142) — **and its REJECT-PATH face, found by B4's own sweep (F-3), FIXED too** (B5
+row 17: the shape-scoped fingerprint defer — the CAS-reject door yields to §9's feed authority;
+the Journal-family face closed BY EVIDENCE, its probe green). **R3-2 DONE** (one public
+classifier body; the guard invokes it). **The structural deliverable DONE** (B4:
+`productionRound` is the convergence suites' DEFAULT — 37 converted / 3 already-production / 33
+exempt with reasons at the lines; 3 new registry-boundary arms + the stress pass's tenth
+attacker arm; the beyond-scope residue named in the run record). **Hunt finding F-1 (the dedupe
+double-retirement race, edit bytes lost) FIXED** (B2 row 15: ride-the-row #143(a) + the
+kill-time defense; hardened at the ladder — F-R1's text-sole-divergence narrowing, F-R2's
+bounded meeting, F-R3's persisted verdict). The ladder: TWO rounds (4 MAJOR · 3 MINOR · 4 NIT,
+zero disputes, every finding dispositioned; round 2 re-proved round 1's red-on-olds
+independently). Her ratify rows: **#141 (ruled) · #142 · #143 (amended to shipped behavior)**.
+**THE LIVE-ROUND ACCEPTANCE LEG: PENDING her morning round** —
+`notes/handoffs/run-b-live-round-handoff.md`; the morning session flips this line.
+
 ## 17j — PARKED: the "open your library without Variorum" recipe (may or may not happen)
 
 **Status: parked, unstarted** (author, 2026-09-01: *"I'm not going to worry about a decrypting
@@ -1370,6 +1410,16 @@ RESOLVED. Nothing dismissed as hollow.**
 
 **This letter's ratify rows: #138 (seven items). The re-seed consequence (Lesson 2 / Chapters
 2 · 7) rides her ONE bundled press — see the run's checkpoint report.**
+
+**ITEM 5 RESOLVED 2026-09-22 — RUN B batch B3 (the deferred row comes home):** FIXED as the entry
+wrote it — `RotationSecrets.derive(forRotationOf:)` reuses the vault's KDF descriptor when the
+typed word is UNCHANGED, **proven by opening the vault's own passphrase-wrapped master** (never
+guessed from UI state); a changed word keeps the fresh salt byte-unchanged; **her scope line held
+STRUCTURALLY** (the recovery wrap derives fresh from the act's words in both arms, its
+independence pinned). Three pins revert-verified at BOTH layers (her double ask reproduced in
+core — `unwrapFailed` on the held key — and at the door — `.askPassphrase`); the nine attacker
+arms byte-untouched; ledger 54's no-second-entry follow now holds ACROSS Replace All Keys /
+entering Castle. KnownIssues row 37 resolved. The record: the run plan's BATCH B3 sections.
 
 ## 17m — THE RE-LINK-YOUR-APPLE-ACCOUNT DOOR (her ruling 2026-09-07 ~02:05 on QUESTIONS #90's item 10 — *"I think we do need a re-link your apple account door. I'd maybe make it a 17 item and I'll have to run that before release, so it should go on the plan for before release"*; PRE-RELEASE — on the running order before 🚀)
 
