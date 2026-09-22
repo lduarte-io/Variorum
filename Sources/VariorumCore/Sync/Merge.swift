@@ -41,7 +41,47 @@ extension SyncEngine {
         // The one mutable text (S5): whichever side's text loses the row is
         // rescued as a conflict variant — never clobbered.
         if table.name == "variant" {
-            try rescueLosingText(db, local: local, server: server, touched: &touched)
+            let cardMinted = try rescueLosingText(
+                db, local: local, server: server, touched: &touched)
+            // RUN B B2 row 15 Part 1 (F-1's bytes; PROVISIONAL — the §6
+            // silent-cell reading, QUESTIONS #143(a)): when the LOCAL
+            // side's dirty text loses the row and the conflict-card
+            // rescue cannot land (the block is dead — a whole-family
+            // tombstone arriving over an unpushed edit), the edit RIDES
+            // THE ROW instead of being clobbered by the server's old
+            // text: the same end-state B1's P1 probe blessed for the
+            // pushed direction ("the edit rides the row INTO the
+            // Trash"), applied to the unpushed one. §6's own ratified
+            // warrant: "deleting an edit nobody chose to lose is the one
+            // forbidden outcome." The merged row then differs from the
+            // server, so the outbox entry SURVIVES below and the ridden
+            // text pushes — both devices converge with the edit intact
+            // on the (still tombstoned) row, and Put back returns it.
+            // SCOPED to the arriving-TOMBSTONE shape, the traced
+            // construction — and the LOCAL side's tombstone state is
+            // deliberately NOT consulted, because the loss's real shape
+            // is (true, true): the arriving BLOCK tombstone's local
+            // cascade stamps the dirty row EARLIER IN THE SAME BATCH
+            // (cascades stay active during apply), so by the time the
+            // variant row merges, the unpushed edit sits on a
+            // locally-tombstoned row. That is F-1's B-side mechanism
+            // and the phone-first P1 order alike. What stays UNCHANGED,
+            // recorded in the run record rather than silently decided:
+            // a LIVE server row over a dirty local edit under a dead
+            // block (the untraced both-edited corner, where riding
+            // would merely swap WHOSE bytes die — one row, no card
+            // possible) keeps its shipped server-wins behavior; and in
+            // (true, true) with BOTH sides edited (both rode), riding
+            // keeps the LOCAL edit where the old code kept the first
+            // pusher's — one side's bytes lose the row either way,
+            // recorded as the same corner's other face.
+            if !cardMinted, server.isTombstoned,
+               let localText = local.workingText,
+               let serverText = server.workingText,
+               localText != serverText,
+               let ridden = local.columns["working_text"] {
+                merged.columns["working_text"] = ridden
+            }
         }
 
         let landed = try writeResolvedRow(db, merged, serverSeq: serverSeq, touched: &touched)
@@ -65,14 +105,17 @@ extension SyncEngine {
     ///
     /// A rescue lands only while the block is still live locally — a dead
     /// block's fan is unreachable, and inserting a live variant under a dead
-    /// block would dangle (rescue skipped; coarse, not forensic).
+    /// block would dangle (rescue skipped; coarse, not forensic). Returns
+    /// whether a card WAS minted (row 15 Part 1's caller reads it: a
+    /// losing local edit no card could hold rides the merged row instead).
+    @discardableResult
     private func rescueLosingText(
         _ db: Database, local: SyncRow, server: SyncRow, touched: inout TouchedRows
-    ) throws {
+    ) throws -> Bool {
         guard let localText = local.workingText,
               let serverText = server.workingText,
               localText != serverText
-        else { return }
+        else { return false }
 
         let losingText: String
         switch (local.isTombstoned, server.isTombstoned) {
@@ -81,15 +124,15 @@ extension SyncEngine {
         case (true, false):
             losingText = serverText
         case (true, true):
-            return
+            return false
         }
 
-        guard case .text(let blockID) = server.columns["block_id"] else { return }
+        guard case .text(let blockID) = server.columns["block_id"] else { return false }
         let blockIsLive = try Bool.fetchOne(
             db,
             sql: "SELECT EXISTS (SELECT 1 FROM block WHERE id = ? AND deleted_at IS NULL)",
             arguments: [blockID]) ?? false
-        guard blockIsLive else { return }
+        guard blockIsLive else { return false }
 
         let parent: String?
         if case .text(let value) = local.columns["parent_variant_id"] {
@@ -104,5 +147,6 @@ extension SyncEngine {
         // reaches the outbox explicitly or it never syncs (SyncSpec §7).
         try enqueueExplicitly(db, table: "variant", rowID: conflict.id)
         touched.blocksWithVariantChanges.insert(blockID)
+        return true
     }
 }

@@ -124,6 +124,70 @@ struct SyncReconciliationProbeTests {
         }
     }
 
+    /// **RUN B B2 row 15 Part 1 (F-1's bytes; PROVISIONAL §6 silent-cell
+    /// reading, QUESTIONS #143(a)) — P1's OTHER resume order, closed.**
+    /// The memo's P1 probe ran laptop-first, so the edit reached the
+    /// server before any tombstone met it. PHONE-FIRST, the same offline
+    /// divergence lost the edit's BYTES on the old code: the phone's
+    /// tombstone family arrives over the laptop's dirty UNPUSHED edit,
+    /// the block is dead in the same batch so `rescueLosingText`'s
+    /// conflict-card rescue skips, the server-wins baseline (the OLD
+    /// text) lands, the merged row equals the server wholesale and the
+    /// outbox entry clears — zero rows anywhere carry the edit. Part 1's
+    /// rule: when the losing local text cannot be rescued as a card, it
+    /// RIDES THE ROW — the same end-state P1 blessed for the pushed
+    /// direction — and the row stays enqueued, so the ridden text pushes
+    /// and both devices converge with the edit in the Trash; Put back
+    /// returns it whole.
+    @Test(arguments: [200, 1])
+    func p1PhoneFirstResumeRidesTheUnpushedEditIntoTheTrash(batchSize: Int) async throws {
+        let (laptop, phone, server) = try pair()
+        let (noteID, blockID, t1): (String, String, String) = try laptop.with { ops, _ in
+            let note = try ops.createPost(title: "her note", profile: .journal)
+            let made = try ops.newBlock(in: note.id, text: "the shared base", at: .end)
+            return (note.id, made.block.id, made.variant.id)
+        }
+        try await productionQuiescence(laptop, phone, server: server, batchSize: batchSize)
+
+        // Sync stops. The phone deletes; the laptop edits, UNPUSHED.
+        try phone.with { ops, _ in try ops.deleteContainer(noteID) }
+        try laptop.with { ops, _ in
+            try ops.autosave(t1, text: "rewritten on the laptop", charDelta: 9)
+        }
+
+        // The PHONE resumes first — its tombstones land before the
+        // laptop's edit ever reaches the server.
+        _ = try await productionRound(phone, batchSize: batchSize)
+        _ = try await productionRound(laptop, batchSize: batchSize)
+        try await productionQuiescence(laptop, phone, server: server, batchSize: batchSize)
+        #expect(try laptop.syncedDump() == phone.syncedDump())
+
+        let stamp = try phone.db.deletedAt("container", noteID)
+        for client in [laptop, phone] {
+            #expect(try client.db.deletedAt("variant", t1) == stamp,
+                    "\(client.name): the deletion still wins — into the Trash (rule 1)")
+            #expect(try client.db.fetchString(
+                "SELECT working_text FROM variant WHERE id = ?", [t1])
+                == "rewritten on the laptop",
+                "\(client.name): the unpushed edit rides the row — bytes never lost (§6's forbidden outcome)")
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE label = 'conflict'") == 0,
+                "\(client.name): no conflict card — the block died whole, the card rescue stays skipped")
+        }
+
+        // Put back returns the edit whole, and the pair converges.
+        try laptop.with { ops, _ in try ops.restoreContainer(noteID) }
+        try await productionQuiescence(laptop, phone, server: server, batchSize: batchSize)
+        #expect(try laptop.syncedDump() == phone.syncedDump())
+        for client in [laptop, phone] {
+            #expect(try client.db.fetchString(
+                """
+                SELECT working_text FROM variant
+                WHERE block_id = ? AND deleted_at IS NULL
+                """, [blockID]) == "rewritten on the laptop", "\(client.name)")
+        }
+    }
+
     // MARK: - P2: the same scenario, but the deletion is purge-aged
 
     private func sweep(
