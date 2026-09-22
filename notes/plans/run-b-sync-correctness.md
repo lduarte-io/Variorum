@@ -312,8 +312,14 @@ STOP AND REPORT to the orchestrator instead of adding one).
   recorded below; canon confirmed.
 - [x] Probe P3 (edit-vs-edit, production shape) — RUN, GREEN pin
   (`SyncReconciliationProbeTests.p3EditVsEditOnOneTake`, batch sizes 200 and 1); canon confirmed.
-- [ ] Probe P2(a) (horizon holds while the laptop is live) — PENDING.
-- [ ] Probe P2(b) (60-day drop-out returner vs purged family) — PENDING.
+- [x] Probe P2(a) (horizon holds while the laptop is live) — RUN, GREEN pin
+  (`p2aTheHorizonHoldsThePurgeWhileTheLaptopIsLive`); canon confirmed; one deliberate
+  consequence recorded (the 30-day window is the deletion's clock, not each device's discovery
+  clock).
+- [x] Probe P2(b) (60-day drop-out returner vs purged family) — RUN, GREEN pin
+  (`p2bTheSixtyDayDropoutReturnerDropsItsEditsWithThePurgedFamily`); shipped behavior RECORDED
+  (drop, family-complete, silent — the purge-wins letter); the canon GAP goes to QUESTIONS
+  (draft below) — the orchestrator files it.
 - [ ] 17d P8 run (ledger row 6) — PENDING.
 - [ ] Probe P5(b) (dedupe double-retirement race) — PENDING.
 - [ ] Probe P5(c) (echo pull's extra round) — PENDING.
@@ -352,6 +358,56 @@ deletion wins into the Trash, the edit survives on the row, the new take rides t
 back restores everything. No canon sentence falsified; no fix owed. Positive-activity asserts pin
 that the phone's resume round really merged (≥2), applied (≥1) and repaired (≥1) — the pass
 cannot go vacuous.
+
+#### P2 — the deletion PURGED before resume (ledger row 2): (a) CONFIRMED green · (b) RECORDED + a QUESTIONS draft
+
+**(a) The horizon HOLDS while the laptop is a live device — confirmed, green pin.** With the
+laptop silent but inside the 60-day window, the phone's sweep DEFERS the backdated family
+(`familiesPurged == 0`, `familiesDeferred ≥ 1`) and nothing leaves the mirror. Once the laptop
+pulls the tombstone (P1's merge dance runs — its edit rides the row into the Trash, T2 joins the
+cascade) and both cursors re-record, the purge proceeds family-complete, the laptop reconciles
+through the ledger, and both stores converge to zero family rows.
+
+**One deliberate consequence, recorded (no defect):** the 30-day window belongs to the DELETION's
+clock (`TrashWindow.cutoffStamp` compares `deleted_at`), not to each device's discovery clock. A
+laptop offline longer than the window sees the family land in its Trash and purge moments later —
+the horizon guarantees every live device SEES the deletion before the bytes go (13j memo §2's
+letter), not that each device's own 30 days restart. Canon-conforming; noted for 18a's design
+sitting since it borders the same product territory as (b).
+
+**(b) The 60-day drop-out returner — the memo's unsettled corner. THE ANSWER: DROP,
+family-complete, silently.** Shipped mechanism, production path (the scheduler's B2
+ledger-reconciliation pre-pass runs BEFORE each round's drain):
+
+- the ledger names every row the purging device knew (N, the block, T1 — never T2, whose id the
+  server never saw);
+- the pre-pass expands those roots against the RETURNER's own store (`PurgeFamily.expand` —
+  `expandBlock` takes variants liveness-blind), so the dirty T1 edit AND the never-pushed T2 are
+  physically deleted with the family, their outbox entries swept;
+- the subsequent round is CLEAN: `push.purged == 0` (the refusal never fires — nothing left to
+  refuse), no stall, and **no mirror orphan** (T2 never lands — the
+  `aReturnersUnpushedChildNeverLandsAsAMirrorOrphan` guarantee re-proven on her scenario);
+- **no say-so fires**: `deviceLeftBehindReloadRequired` gates on the ledger FLOOR, which stays 0
+  until ledger pruning exists — so the returner's unpushed writing under a purged family is
+  discarded with NO surface at all.
+
+This is the purge-wins doctrine's letter, stated at `PurgeJanitor.reconcileLedger`'s own comment
+— the CODE conforms to canon (13j memo §2 + §4f). Whether the PRODUCT wants more than silence is
+the gap. **QUESTIONS DRAFT (for the orchestrator to file at the next free number):**
+
+> **The 60-day drop-out returner's edited-purged-rows corner (17i probe P2(b), RUN B B1).** A
+> device that left the horizon returns holding unpushed edits to (and new takes on) a family
+> other devices purged. Shipped behavior, pinned: the ledger pre-pass drops the family —
+> including the unpushed writing — locally and silently; no refusal fires, no say-so exists
+> (the say-so road gates on ledger pruning's floor, which is 0). "Nothing typed in either app
+> can be permanently lost" and the purge-wins doctrine collide here. Options: **(a)** keep the
+> silent drop (her own deletion, 30+ days aged; the returner was gone 60+ days — the drop is the
+> designed convergence; zero code); **(b)** before dropping, RESCUE the family's locally-dirty
+> texts and never-pushed takes into a fresh local note (the conflict-as-variant instinct applied
+> at the purge boundary; the rows still drop, the words survive); **(c)** SAY SO without
+> rescuing: one visible line (count + dates) when the pre-pass discards unpushed writing, the
+> R-13j returner grammar extended to the floor-0 road. PROVISIONAL: shipped (a) stands until she
+> rules; the probe pins (a) as the current contract.
 
 #### P3 — edit-vs-edit on one take, production shape (ledger row 3): CONFIRMED — canon, green pin
 

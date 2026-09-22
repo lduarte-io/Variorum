@@ -124,6 +124,215 @@ struct SyncReconciliationProbeTests {
         }
     }
 
+    // MARK: - P2: the same scenario, but the deletion is purge-aged
+
+    private func sweep(
+        _ client: SyncClient, _ server: FakeSyncServer
+    ) async throws -> PurgeJanitor.SweepReport {
+        try await client.withAsync { _ in
+            try await PurgeJanitor(transport: server, keyProvider: client.keyProvider).sweep()
+        }
+    }
+
+    /// The scheduler's B2 pre-pass, exactly as production runs it BEFORE
+    /// each round's drain (SyncScheduler.runOneRound).
+    private func reconcile(
+        _ client: SyncClient, _ server: FakeSyncServer
+    ) async throws -> Int {
+        try await client.withAsync { _ in
+            try await PurgeJanitor(transport: server, keyProvider: client.keyProvider).reconcileLedger()
+        }
+    }
+
+    /// Backdates one deletion event's EXACT stamp coherently (the
+    /// PurgeConvergenceTests idiom) — run BEFORE pushing so the mirror
+    /// holds the backdated stamps too.
+    private func backdate(
+        _ client: SyncClient, from original: String, to stamp: String
+    ) throws {
+        try client.db.write { db in
+            for table in SyncSchema.tables where table.hasTombstone {
+                try db.execute(
+                    sql: "UPDATE \(table.name) SET deleted_at = ? WHERE deleted_at = ?",
+                    arguments: [stamp, original])
+            }
+        }
+    }
+
+    /// Past the 30-day window for the harness clock (starts 2026-07-01).
+    private let oldStamp = "2026-05-01T00:00:00.000Z"
+
+    /// P1's offline divergence, purge-aged: converged note N; sync stops;
+    /// the phone deletes N (stamp backdated past 30 days); the laptop
+    /// edits T1 and branches T2, both unpushed. Both device cursors are
+    /// committed + server-recorded at head before the stop.
+    private func p2Setup() async throws -> (
+        laptop: SyncClient, phone: SyncClient, server: FakeSyncServer,
+        noteID: String, blockID: String, t1: String, t2: String
+    ) {
+        let (laptop, phone, server) = try pair()
+        let (noteID, blockID, t1): (String, String, String) = try laptop.with { ops, _ in
+            let note = try ops.createPost(title: "her note", profile: .journal)
+            let made = try ops.newBlock(in: note.id, text: "the shared base", at: .end)
+            return (note.id, made.block.id, made.variant.id)
+        }
+        try await productionQuiescence(laptop, phone, server: server)
+        // Extra rounds so each device's SERVER-RECORDED cursor reaches head
+        // (the device id rides only a pull's first window, where `since` is
+        // the pre-round committed cursor — the purge-suite idiom, in
+        // production's order).
+        for _ in 0..<2 {
+            _ = try await productionRound(laptop)
+            _ = try await productionRound(phone)
+        }
+
+        try phone.with { ops, _ in try ops.deleteContainer(noteID) }
+        let freshStamp = try phone.db.deletedAt("container", noteID)!
+        try backdate(phone, from: freshStamp, to: oldStamp)
+        let t2: String = try laptop.with { ops, _ in
+            try ops.autosave(t1, text: "rewritten on the laptop", charDelta: 9)
+            let t2 = try ops.branchVariant(blockID, from: t1)
+            try ops.autosave(t2.id, text: "a brand-new take", charDelta: 5)
+            return t2.id
+        }
+        return (laptop, phone, server, noteID, blockID, t1, t2)
+    }
+
+    /// THE MEMO'S P2, first half: **the horizon HOLDS the purge while the
+    /// laptop is a live device.** The phone's janitor must NOT purge N
+    /// until the laptop has pulled the tombstone; once the laptop has
+    /// caught up (P1's merge dance included), the purge proceeds.
+    ///
+    /// Recorded consequence, deliberate per the 13j memo §2 (no defect):
+    /// the 30-day window belongs to the DELETION's clock, not to each
+    /// device's discovery clock — a laptop offline longer than the window
+    /// meets a purge-eligible family the moment it reconnects; the horizon
+    /// guarantees it SEES the deletion (the tombstone lands, the Trash
+    /// lists it) before the bytes go, not that its own 30 days restart.
+    @Test func p2aTheHorizonHoldsThePurgeWhileTheLaptopIsLive() async throws {
+        let (laptop, phone, server, noteID, _, t1, t2) = try await p2Setup()
+
+        // The phone rounds (tombstones pushed, cursor committed + recorded);
+        // the laptop stays silent but IN the horizon window.
+        for _ in 0..<3 { _ = try await productionRound(phone) }
+        let held = try await sweep(phone, server)
+        #expect(held.familiesPurged == 0,
+                "the laptop has not seen the deletion — the horizon holds")
+        #expect(held.familiesDeferred >= 1)
+        #expect(await server.currentRow(table: "container", rowID: noteID) != nil,
+                "nothing leaves the mirror while a live device is behind")
+
+        // The laptop catches up: P1's merge dance (edit rides the row into
+        // the Trash, T2 joins the cascade), then cursors re-record.
+        for _ in 0..<3 { _ = try await productionRound(laptop) }
+        for _ in 0..<3 { _ = try await productionRound(phone) }
+        #expect(try laptop.db.deletedAt("container", noteID) != nil,
+                "the laptop saw the deletion before any byte went")
+
+        // NOW the purge proceeds — the whole family, the laptop's late
+        // edits included (they rode the tombstoned rows).
+        let after = try await sweep(phone, server)
+        #expect(after.familiesPurged >= 1, "every live device has seen it — the purge runs")
+        #expect(await server.currentRow(table: "container", rowID: noteID) == nil)
+        #expect(await server.currentRow(table: "variant", rowID: t1) == nil)
+        #expect(await server.purgedLedgerCount() > 0)
+
+        // The laptop reconciles through the ledger and both stores converge
+        // to zero family rows.
+        _ = try await sweep(laptop, server)
+        for client in [laptop, phone] {
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM container WHERE id = ?", [noteID]) == 0, "\(client.name)")
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE id IN (?, ?)", [t1, t2]) == 0, "\(client.name)")
+        }
+        for _ in 0..<2 {
+            _ = try await productionRound(laptop)
+            _ = try await productionRound(phone)
+        }
+        #expect(try laptop.outboxCount() == 0)
+        #expect(try phone.outboxCount() == 0)
+        #expect(try laptop.syncedDump() == phone.syncedDump())
+    }
+
+    /// THE MEMO'S P2, second half — THE DROP-OUT CASE, and the memo's
+    /// unsettled corner: the laptop goes silent past 60 days; the phone's
+    /// janitor purges N's family; the laptop returns holding its dirty T1
+    /// edit and the never-pushed take T2. **What does the returner do
+    /// LOCALLY with T1/T2?**
+    ///
+    /// THE RECORDED ANSWER (shipped behavior, production path — the
+    /// scheduler's B2 ledger-reconciliation pre-pass runs BEFORE the
+    /// round's drain): **DROP, family-complete, silently.** The ledger
+    /// names every row the purging device knew (N, the block, T1); the
+    /// pre-pass expands those roots against the returner's own store, so
+    /// the never-pushed T2 — the one id no ledger could ever name — dies
+    /// WITH its family, outbox entries swept. The subsequent round is
+    /// clean: nothing meets the `purged` refusal (the entries are already
+    /// gone), nothing lands as a mirror orphan, no stall. No say-so fires:
+    /// `deviceLeftBehindReloadRequired` gates on the ledger FLOOR, which
+    /// stays 0 until ledger pruning exists — so the returner's unpushed
+    /// writing under a purged family is discarded with NO surface at all.
+    /// This is the purge-wins doctrine's letter, named out loud at
+    /// `PurgeJanitor.reconcileLedger`'s own comment — canon-conforming
+    /// CODE; whether the PRODUCT wants a rescue/say-so here is the memo's
+    /// unsettled corner → QUESTIONS (the batch record carries the draft).
+    @Test func p2bTheSixtyDayDropoutReturnerDropsItsEditsWithThePurgedFamily() async throws {
+        let (laptop, phone, server, noteID, blockID, t1, t2) = try await p2Setup()
+
+        // The phone rounds; the laptop still holds the horizon (sanity).
+        for _ in 0..<3 { _ = try await productionRound(phone) }
+        let held = try await sweep(phone, server)
+        #expect(held.familiesPurged == 0 && held.familiesDeferred >= 1)
+
+        // The laptop goes dark past the 60-day window; the phone's next
+        // round re-stamps its own seen-at; the purge proceeds without the
+        // laptop.
+        await server.setHorizonDropoutTicks(10)
+        await server.advanceClock(by: 100)
+        for _ in 0..<2 { _ = try await productionRound(phone) }
+        let after = try await sweep(phone, server)
+        #expect(after.familiesPurged >= 1, "the drop-out no longer holds the horizon")
+        #expect(await server.currentRow(table: "container", rowID: noteID) == nil)
+        let ledgered = await server.purgedLedgerCount()
+        #expect(ledgered > 0)
+        #expect(await server.isPurged(table: "variant", rowID: t1))
+        #expect(!(await server.isPurged(table: "variant", rowID: t2)),
+                "the never-pushed take's id is the one no ledger can name")
+
+        // THE RETURNER, production path: the B2 pre-pass BEFORE the round.
+        let dropped = try await reconcile(laptop, server)
+        #expect(dropped > 0, "the pre-pass dropped the purged family's local rows")
+        #expect(try laptop.db.fetchInt(
+            "SELECT COUNT(*) FROM container WHERE id = ?", [noteID]) == 0)
+        #expect(try laptop.db.fetchInt(
+            "SELECT COUNT(*) FROM block WHERE id = ?", [blockID]) == 0)
+        #expect(try laptop.db.fetchInt(
+            "SELECT COUNT(*) FROM variant WHERE id = ?", [t1]) == 0,
+            "the dirty EDIT is discarded with the family — the purge-wins letter")
+        #expect(try laptop.db.fetchInt(
+            "SELECT COUNT(*) FROM variant WHERE id = ?", [t2]) == 0,
+            "the never-pushed take dies WITH its family — family expansion, not the ledger, names it")
+        #expect(try laptop.outboxContains("variant", t1) == false)
+        #expect(try laptop.outboxContains("variant", t2) == false)
+
+        // The returner's round is clean: nothing meets `purged`, nothing
+        // lands as a mirror orphan, no stall.
+        let round = try await productionRound(laptop)
+        #expect(round.push.purged == 0, "the refusal never fires — the pre-pass already screened")
+        #expect(round.pull.stalled == false)
+        #expect(await server.currentRow(table: "variant", rowID: t2) == nil,
+                "no mirror orphan: the unpushed child never landed")
+
+        for _ in 0..<2 {
+            _ = try await productionRound(laptop)
+            _ = try await productionRound(phone)
+        }
+        #expect(try laptop.outboxCount() == 0)
+        #expect(try phone.outboxCount() == 0)
+        #expect(try laptop.syncedDump() == phone.syncedDump())
+    }
+
     // MARK: - P3: edit-vs-edit on one take (S5), production shape
 
     /// THE MEMO'S P3: both devices edit T1 offline; sync in production's
