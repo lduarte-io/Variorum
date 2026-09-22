@@ -1767,7 +1767,10 @@ never-pushed takes into a fresh local note (the conflict-as-variant instinct app
 boundary; the rows still drop, the words survive); **(c)** SAY SO without rescuing: one visible
 line (count + dates) when the pre-pass discards unpushed writing, the R-13j returner grammar
 extended to the floor-0 road. **PROVISIONAL: shipped (a) stands until she rules; the probe pins
-(a) as the current contract.** Two adjacent recorded FACTS for the same sitting eye (no ruling
+(a) as the current contract.** **RULED — same sitting (2026-09-21), her words verbatim: *"hmm
+yeah maybe make it a 17 issue for later that i want to switch to b eventually but i don't see why
+i'd need to do that now."* → the destination is (b); the work is parked as entry 17s (minted,
+opens at her word); shipped (a) stands as the pinned contract until 17s runs.** Two adjacent recorded FACTS for the same sitting eye (no ruling
 needed): the 30-day Trash window runs on the DELETION's clock, not each device's discovery clock
 (P2(a)'s consequence — a laptop offline longer than the window sees the family land in its Trash
 and purge moments later, the horizon having guaranteed only that it SEES the deletion first); and

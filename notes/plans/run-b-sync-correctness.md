@@ -594,7 +594,9 @@ keeps the fence honest: a fix that turns out design-scale stops and reports rath
 once-per-store-life event class — temper reachability, not the class).
 
 **The P2(b) product gap is FILED as QUESTIONS #141** (the implementer's draft, taken verbatim
-with the filing frame; shipped behavior (a) stands PROVISIONAL until she rules). **P2(a)'s
+with the filing frame; shipped behavior (a) stands PROVISIONAL until she rules). **RULED the same
+sitting: (b) eventually, not now — parked as NEW ENTRY 17s (opens at her word); #141 and the 17
+file carry her words. Ledger row 2(b) is therefore fully closed — recorded, filed, ruled, owned.** **P2(a)'s
 deletion-clock consequence and P5(c)'s 3-round cadence** are recorded facts whose durable home is
 the memo's ANSWERED blocks — 18a's sitting reads the memo; no unowned residue.
 
