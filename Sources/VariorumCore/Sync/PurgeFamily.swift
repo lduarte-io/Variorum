@@ -106,16 +106,32 @@ struct PurgeFamily {
             db, sql: "SELECT id FROM reading_post WHERE post_id = ?", arguments: [containerID]))
         family.insert("container_block", try String.fetchAll(
             db, sql: "SELECT id FROM container_block WHERE container_id = ?", arguments: [containerID]))
-        // The note's blocks: exact-stamp cascade victims ONLY (the
-        // restoreContainer discriminator — a block with its own clock keeps
-        // it; an archived block is live and never rides).
+        // The note's blocks. DEAD root: exact-stamp cascade victims ONLY
+        // (the restoreContainer discriminator — a block with its own clock
+        // keeps it; an archived block is live and never rides). LIVE root
+        // (RUN B B2 row 10 — 17d P9): the arm was liveness-conditional, so
+        // a live root expanded to placements and side rows with ZERO
+        // blocks, and the purge-wins roads that can hand this a live root
+        // — the engine's `.purged` refusal handler, the janitor's
+        // in-transaction re-expand after `executePurge` racing a Put back,
+        // a ledger entry naming a since-revived row — removed the note
+        // while stranding its blocks live, unplaced and invisible: the
+        // partial state this file's own header forbids. The live arm takes
+        // LIVE blocks under LIVE placements — what `deleteContainer`'s
+        // cascade would take. A block deleted earlier still keeps its own
+        // clock (dead, no live placement), and an ARCHIVED block still
+        // never rides (archiving releases its placement, so the
+        // live-placement discriminator excludes it by construction).
         let memberBlocks = try String.fetchAll(
             db,
             sql: """
                 SELECT DISTINCT b.id FROM block b
                 JOIN container_block cb ON cb.block_id = b.id AND cb.container_id = ?
                 JOIN container c ON c.id = ?
-                WHERE b.deleted_at IS NOT NULL AND b.deleted_at = c.deleted_at
+                WHERE (c.deleted_at IS NOT NULL
+                       AND b.deleted_at IS NOT NULL AND b.deleted_at = c.deleted_at)
+                   OR (c.deleted_at IS NULL
+                       AND b.deleted_at IS NULL AND cb.deleted_at IS NULL)
                 """,
             arguments: [containerID, containerID])
         for blockID in memberBlocks {

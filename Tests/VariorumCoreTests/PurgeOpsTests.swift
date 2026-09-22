@@ -124,6 +124,52 @@ struct PurgeOpsTests {
         }
     }
 
+    // MARK: - RUN B B2 row 10 (17d P9): a LIVE container root's family
+
+    /// **The mechanism pin (red on old):** `expandContainer`'s member-block
+    /// arm was liveness-conditional — `b.deleted_at = c.deleted_at` can
+    /// never be true for a LIVE container, so a live root expanded to its
+    /// placements, lenses, tags and memberships with ZERO blocks, and the
+    /// purge-wins roads that can hand the expansion a live root (the
+    /// engine's `.purged` refusal handler; the janitor's in-transaction
+    /// re-expand after `executePurge` racing a Put back; a ledger entry
+    /// naming a since-revived row) removed the note while stranding its
+    /// blocks live, unplaced and invisible — the partial state the file's
+    /// own header contract ("purge is never partial") forbids.
+    ///
+    /// The live arm's discriminator: LIVE blocks under LIVE placements —
+    /// what `deleteContainer`'s cascade would take. A block deleted
+    /// EARLIER (its own stamp, its own Trash clock) does not ride, exactly
+    /// as on the dead-root arm; an ARCHIVED block (kept forever) does not
+    /// ride either, excluded by the same discriminator since archiving
+    /// releases its placement.
+    @Test func aLiveContainerRootExpandsItsLiveMemberBlocksFamilyComplete() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "revived note", profile: .generic)
+            let kept = try ops.newBlock(in: post.id, text: "kept prose", at: .end)
+            let second = try ops.newBlock(in: post.id, text: "second block", at: .end)
+            let earlier = try ops.newBlock(in: post.id, text: "deleted earlier", at: .end)
+            try ops.deleteBlock(earlier.block.id)
+            let archived = try ops.newBlock(in: post.id, text: "kept forever", at: .end)
+            try ops.archiveBlock(archived.block.id)
+
+            let family: PurgeFamily.Expansion = try db.read { db in
+                try PurgeFamily.expand(
+                    db, roots: [SyncPurgeTarget(table: "container", rowID: post.id)])
+            }
+            let familyBlocks = family.ids(in: "block")
+            #expect(familyBlocks.contains(kept.block.id),
+                    "a live root's live member blocks ride — purge is never partial")
+            #expect(familyBlocks.contains(second.block.id))
+            #expect(family.ids(in: "variant").contains(kept.variant.id),
+                    "the member blocks' takes ride with them")
+            #expect(!familyBlocks.contains(earlier.block.id),
+                    "a block deleted earlier keeps its own clock — it never rides")
+            #expect(!familyBlocks.contains(archived.block.id),
+                    "an archived block is kept forever — its released placement excludes it")
+        }
+    }
+
     // MARK: - The intent FENCE: rows leave every surface immediately
 
     @Test func anIntentNamedRowLeavesEverySurfaceImmediately() throws {

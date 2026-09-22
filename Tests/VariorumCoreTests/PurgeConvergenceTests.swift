@@ -864,4 +864,121 @@ struct PurgeConvergenceTests {
         #expect(dropped > 0)
         #expect(try familyRowCount(a, post: family.post) == 0)
     }
+
+    // MARK: - RUN B B2 row 10 (17d P9): a Put back racing the sweep's mirror purge
+
+    /// **The verifier's more-reachable road, pinned (red on old):** the
+    /// janitor's `eligibleSynced` arm re-expands the family INSIDE the
+    /// removal's own transaction, AFTER `executePurge` — deliberately, so
+    /// "a restore that raced the await loses to the purge" (the ruled
+    /// purge-wins doctrine). But `expandContainer`'s member-block arm was
+    /// liveness-conditional, so a Put back landing in that network window
+    /// made the root LIVE and the re-expansion took the note, its
+    /// placements and its side rows while stranding the just-revived
+    /// blocks — live, unplaced, `last_container_id` nulled by the survivor
+    /// detachment, invisible on every surface: the partial state
+    /// `PurgeFamily`'s own header contract ("purge is never partial")
+    /// forbids. The fix makes the revived note lose to the purge WHOLE.
+    @Test func aPutBackRacingTheSweepsMirrorPurgeNeverLeavesAPartialFamily() async throws {
+        let server = FakeSyncServer()
+        let hooked = ExecutePurgeHookedTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: hooked)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 90, seed: 2)
+
+        let family = try buildAndDeleteFamily(a)
+        try backdate(a, from: family.deletedStamp, to: oldStamp)
+        try await syncToQuiescence(a, b, server: server)
+        try await round(a)
+        try await round(b)
+
+        // THE RACE: the Put back lands inside the sweep's network window —
+        // after the mirror purge + the ledger write, before the janitor's
+        // removal transaction re-expands. (The hook binds A's store
+        // directly — `SyncClient` itself is not Sendable.)
+        let aStore = a.db
+        await hooked.armAfterNextExecutePurge {
+            try withDependencies {
+                $0.database = aStore
+                $0.date = DateGenerator { Date(timeIntervalSince1970: 1_782_900_000) }
+                $0.uuid = .incrementing
+            } operation: {
+                try Operations().restoreContainer(family.post)
+            }
+        }
+        let sweep = try await a.withAsync { _ in
+            try await PurgeJanitor(transport: hooked, keyProvider: a.keyProvider).sweep()
+        }
+        #expect(sweep.familiesPurged >= 1, "the family was horizon-eligible and purged")
+
+        // Purge-wins, FAMILY-COMPLETE: zero family rows survive on A — the
+        // note, its placements AND its blocks. Red on old: the blocks (and
+        // their takes) stayed live and orphaned behind the removed note.
+        #expect(try familyRowCount(a, post: family.post) == 0)
+        for block in family.blocks {
+            #expect(try a.db.fetchInt(
+                "SELECT COUNT(*) FROM block WHERE id = ?", [block]) == 0,
+                "no live orphaned block strands behind the purged note")
+            #expect(try a.db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE block_id = ?", [block]) == 0,
+                "its takes go with it")
+        }
+
+        // The pair converges to the purge, no stall, byte-identical.
+        try await round(a)
+        _ = try await b.withAsync { _ in
+            try await PurgeJanitor(transport: server, keyProvider: b.keyProvider).reconcileLedger()
+        }
+        try await round(b)
+        let pull = try await a.pull()
+        #expect(!pull.stalled)
+        #expect(try familyRowCount(b, post: family.post) == 0, "B converged to the purge")
+        #expect(try a.syncedDump() == b.syncedDump())
+    }
+}
+
+/// RUN B B2 row 10 — the race's instrument: the verifier's road needs the
+/// Put back to land INSIDE the sweep's network window (after the mirror
+/// purge + ledger write, before the removal transaction). This wrapper
+/// delegates every call to the fake server and runs a one-shot armed hook
+/// exactly there — inside `executePurge`, after the server's work returns.
+private actor ExecutePurgeHookedTransport: SyncTransport, SyncPurgeTransport {
+    private let server: FakeSyncServer
+    private var afterExecutePurge: (@Sendable () throws -> Void)?
+
+    init(server: FakeSyncServer) {
+        self.server = server
+    }
+
+    func armAfterNextExecutePurge(_ hook: @escaping @Sendable () throws -> Void) {
+        afterExecutePurge = hook
+    }
+
+    func schemaVersion() async -> Int {
+        await server.schemaVersion()
+    }
+
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+        try await server.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
+    }
+
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+        try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof, deviceID: deviceID)
+    }
+
+    func syncHorizon(activeKeyID: String, keyProof: String) async throws -> Int64 {
+        try await server.syncHorizon(activeKeyID: activeKeyID, keyProof: keyProof)
+    }
+
+    func purgeLedger(since: Int64, activeKeyID: String, keyProof: String) async throws -> SyncPurgeLedgerPage {
+        try await server.purgeLedger(since: since, activeKeyID: activeKeyID, keyProof: keyProof)
+    }
+
+    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: String) async throws -> Int64 {
+        let granted = try await server.executePurge(rows, activeKeyID: activeKeyID, keyProof: keyProof)
+        if let hook = afterExecutePurge {
+            afterExecutePurge = nil
+            try hook()
+        }
+        return granted
+    }
 }
