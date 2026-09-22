@@ -426,7 +426,48 @@ Re-link door) with its product shape at **QUESTIONS #90** — not a new finding.
 *Move the library file aside on a Castle Mac while signed in. Prove the fresh library cannot sync
 without a typed secret. (§3.7; the KnownIssues row resolved at 1a/2a/3a)*
 
-**PENDING**
+**The proof, step by step against the code.** This is the same-machine-bypass class — the design's
+claim (§3.3): "the same-machine bypass stays closed by per-store custody + the absent-store
+route."
+1. **Move the library aside → the lock STAYS.** `StoreLaunchRoute.resolve` returns
+   `.libraryMissing(demand:)` on `presence == .absent` (`StoreLaunchGate.swift:308`); the mode is
+   "your library file is missing — restore, open, or start new" and `openResettingModeToAuto` is
+   DELETED (§3.7), so the absence NEVER silently clears the lock. Restore / Open / Start New are
+   the only doors.
+2. **Start New → a NEW store id, empty custody.** `LibraryMissingLobby.startNewLibrary`
+   (`AppBootstrap.swift:931`) mints under a NEW store id via `StoreIdentity.establish` (the id +
+   fingerprint written BEFORE any custody exists); the old key file beside the absent store is SET
+   ASIDE, never deleted, and "per-store naming makes [the old library's items] unreachable, never
+   gone" (:886–896). So the fresh library has NO library key, NO master, NO device identity for
+   its new store id.
+3. **The fresh library's sync engine REFUSES before any network contact.** `SyncKeyProviding`
+   reads custody; empty custody makes `currentKeys()` THROW, and "the engine maps every throw to
+   `SyncError.encryptionKeysUnavailable` and refuses the round before any network contact"
+   (`SyncEncryption.swift:75–79`; the `UnenrolledKeyProvider` default, :97–105). `deviceIdentity()`
+   throws the same way (:81–90) — "a copy of the library on another machine has no custody for its
+   store id and therefore no identity — it is writing, never a device." So a fresh library holds
+   no master ⇒ no key proof ⇒ the engine never even reaches the mirror.
+4. **To sync it must ENROLL, and on a Castle account enroll needs a TYPED secret.** Posture is the
+   ACCOUNT's once a vault exists (decision 8), and a Castle vault carries NO iCloud-held copy of M
+   (only P and W wraps) — so the enroll road is the passphrase or the twelve words typed once
+   (§5). The still-signed-in SESSION can fetch the vault's WRAPPED copies (a session-only vault
+   read) but cannot unwrap M without P or W, so it holds no master, computes no proof, and the key
+   proof gate refuses every mutating and read RPC (Q1). **There is no silent road: a typed secret
+   is mandatory.**
+
+**The bypass is closed on both legs, confirmed:** the fresh library cannot read the OLD store's
+custody (per-store naming — a different store id), and the absent-store route never resets the
+lock (`openResettingModeToAuto` deleted). Adjacent variant, also closed: dropping a
+DIFFERENT/attacker-supplied library file at the path is corner 33 (a library arriving with its
+key file) — opening it on Castle needs its key file's Castle roads and syncing it still needs
+enroll → a typed secret.
+
+**VERDICT: HOLDS.** The fresh library provably cannot sync without a typed secret: its sync engine
+refuses at `currentKeys()`/`deviceIdentity()` (no custody for the new store id) before any network
+contact, and joining the Castle account requires the passphrase or words typed once — the session
+alone reaches only the vault's wrapped copies, which it cannot unwrap. Both legs of §3.3's claim
+(per-store custody + the absent-store route) are enforced in code. No finding; the KnownIssues
+same-machine-bypass row is genuinely resolved (1a/2a/3a).
 
 ## Q8 — a pre-Replace-All-Keys backup restored on the same Mac
 
