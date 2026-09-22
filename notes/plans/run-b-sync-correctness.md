@@ -301,7 +301,12 @@ STOP AND REPORT to the orchestrator instead of adding one).
 - [x] Record opened; brief + READ FIRST list read in full (SyncSpec whole, the memo whole, the
   postmortem, 17i + 17d P8 + the purge memo §2/§4f, the harness files, the engine +
   scheduler + janitor + Merge + Repairs + SampleLibraryDedupe sources).
-- [ ] `productionRound` helper (Tests/Support/ProductionRound.swift) — PENDING.
+- [x] `productionRound` helper (Tests/Support/ProductionRound.swift) — BUILT, compiles: pull→push
+  per device at transport `batchSize` (each push chunk its own server transaction), the
+  `ProductionStep` weave for cross-device interleavings, `productionQuiescence` (non-purge
+  scenarios; the purge idiom stays explicit rounds + dump equality), and `pushSplitAtBoundary`
+  (the registry-boundary chunk split via the armed mid-drain fault). Janitor legs deliberately
+  composed per scenario, not baked in (the fault transport has no purge surface).
 - [ ] Probe P1 (delete-vs-edit-plus-new-take) — PENDING.
 - [ ] Probe P3 (edit-vs-edit, production shape) — PENDING.
 - [ ] Probe P2(a) (horizon holds while the laptop is live) — PENDING.
