@@ -340,7 +340,10 @@ STOP AND REPORT to the orchestrator instead of adding one).
 - [x] Memo ⚠️ UNSETTLED section updated — a dated ANSWERED block with pin names under each of
   P1 · P2 · P3 · P4 · P5(b)/(c) (the section-header flip to "answered" stays the closeout's;
   the scenario table's two `?` rows likewise).
-- [ ] Finals: full core suite (baseline 1639/177) — PENDING.
+- [x] Finals: FULL CORE SUITE **1654 tests in 179 suites — PASSED, with exactly the 3 known
+  issues** (the two P8 wraps + the P5(b) wrap; zero unexpected failures; the one standing skip
+  is the sanctioned real-server integration gate). Baseline 1639/177 + B1's 15 probes in 2 new
+  suites, exactly accounted. **BATCH B1 IS COMPLETE — awaiting the orchestrator's verification.**
 
 ### DEATHS / RESUMES
 
@@ -549,6 +552,18 @@ zero product findings.
 | F-2 | 17d P8: the purge-window mirror orphan permanently jams the pull, one-way and silent | MAJOR (the entry's own rating) | `p8AHeldPushAcrossThePurgeWindowJamsThePullForever` + `p8TheVisibilityBandVariantJamsTheSameWay` (both wrapped) | OWNED — ledger row 9 (B2) |
 | — | P2(b)'s silent-drop returner corner | product gap, not a defect | `p2bTheSixtyDayDropoutReturnerDropsItsEditsWithThePurgedFamily` (green, pins shipped behavior) | QUESTIONS draft above — the orchestrator files |
 | — | P2(a)'s deletion-clock window consequence · P5(c)'s 3-round cadence | recorded facts, no defect | green pins | noted for 18a's sitting |
+
+### B1 FINALS
+
+Core suite: **1654 tests / 179 suites, PASSED, exactly 3 known issues** (the wraps: 2 × P8, 1 ×
+P5(b)); one standing sanctioned skip (the real-server integration gate). Files added:
+`Tests/VariorumCoreTests/Support/ProductionRound.swift` (the instrument),
+`Tests/VariorumCoreTests/SyncReconciliationProbeTests.swift` (8 probes),
+`Tests/VariorumCoreTests/ProductionRoundShapeSweepTests.swift` (7 sweep scenarios). Zero
+`Sources/` lines, zero mirror access, zero schema — the fences held. Per-ledger-row verdicts:
+row 1 CONFIRMED-green · row 2 CONFIRMED-green (a) + RECORDED-with-QUESTIONS-draft (b) · row 3
+CONFIRMED-green · row 4 RUN, 0 findings · row 5 REPRODUCED-wrapped (b) + CONFIRMED-green-cost
+(c) · row 6 CONFIRMED-REPRODUCED (both constructions; row 9 live for B2).
 
 ---
 
