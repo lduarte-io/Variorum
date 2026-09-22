@@ -252,6 +252,133 @@ struct CorpusRotationTests {
                 == again.material.masterKey, "the same twelve words open the NEW master")
     }
 
+    // MARK: - 17l item 5 (RUN B B3): the descriptor reuse at an unchanged word
+
+    /// 17l item 5's core half (KnownIssues row 37; ledger 54's gate in core
+    /// terms): a rotation whose typed word is UNCHANGED derives through
+    /// `derive(forRotationOf:)` and REUSES the vault's existing KDF
+    /// descriptor — so the vault's descriptor does not move across Replace
+    /// All Keys / entering Castle, and a key derived under it BEFORE the
+    /// rotation (the sibling lobby's held key) opens M′ AFTER it with no
+    /// second entry. The chain holds at the second rotation too (the state
+    /// her phone lives in). RED ON OLD (behavioural revert: the reuse road
+    /// taking the fresh-salt arm unconditionally — the pre-fix semantics):
+    /// the descriptor moves at every rotation and the held key opens
+    /// nothing.
+    @Test func aSameWordRotationKeepsTheVaultsDescriptorSoAPreRotationHeldKeyOpens() async throws {
+        let world = try await makeWorld()
+        let before = try #require(try await world.vault.client.fetchVault()).format
+        // The sibling's lobby state: the key derived when the word was
+        // typed to unlock — under the PRE-rotation descriptor.
+        let held = try PassphraseKDF.deriveKey(passphrase: Self.passphrase, descriptor: before.kdf)
+        let secrets = try RotationSecrets.derive(
+            passphrase: Self.passphrase, recoveryWords: nil,
+            forRotationOf: before, freshKDF: fastKDF())
+        #expect(secrets.kdf == before.kdf, "the unchanged word reuses the vault's descriptor")
+        let begun = try await CorpusRotation.begin(
+            client: world.vault.client, current: world.old, secrets: secrets, appleHeldCopy: nil)
+        let after = try #require(try await world.vault.client.fetchVault()).format
+        #expect(after.kdf == before.kdf,
+                "the vault's descriptor did not move — the follow's equality gate holds across the rotation")
+        #expect(try after.unwrapMaster(withPassphraseKey: held).data == begun.material.masterKey,
+                "the pre-rotation held key opens M′ — ledger 54's no-second-entry follow, zero prompts")
+        // The second rotation, same word: the reuse holds again.
+        let cleared = try await CorpusRotation.complete(client: world.vault.client, material: begun.material)
+        let secondSecrets = try RotationSecrets.derive(
+            passphrase: Self.passphrase, recoveryWords: nil,
+            forRotationOf: after, freshKDF: fastKDF())
+        #expect(secondSecrets.kdf == before.kdf, "…and again at the second rotation")
+        let again = try await CorpusRotation.begin(
+            client: world.vault.client, current: cleared, secrets: secondSecrets, appleHeldCopy: nil)
+        let third = try #require(try await world.vault.client.fetchVault()).format
+        #expect(try third.unwrapMaster(withPassphraseKey: held).data == again.material.masterKey,
+                "the same held key still opens M″ — no rotation ever re-asks an unchanged word")
+        _ = try await CorpusRotation.complete(client: world.vault.client, material: again.material)
+    }
+
+    /// HER SCOPE LINE as code (17l item 5, 2026-09-07: "the reuse applies
+    /// to the PASSPHRASE wrap ONLY"): across a same-word rotation the
+    /// passphrase descriptor is REUSED while the recovery-words wrap is a
+    /// FRESH act-scoped wrap — minted from the words given at THIS act,
+    /// wrapping the NEW master; the old words open nothing, and a second
+    /// rotation under the SAME words still mints fresh bytes (fresh at
+    /// every act even when both secrets are unchanged). Nothing of the
+    /// passphrase descriptor reaches the recovery path.
+    @Test func theRecoveryWrapStaysFreshAndIndependentWhenThePassphraseDescriptorIsReused() async throws {
+        let world = try await makeWorld()
+        let oldWords = try RecoveryPhrase.generate()
+        try await world.vault.enrollment.landRecoveryWrap(words: oldWords, material: world.old)
+        let before = try #require(try await world.vault.client.fetchVault()).format
+        let wrapBefore = try #require(before.masterWrappedByRecovery, "the premise isn't vacuous")
+
+        let newWords = try RecoveryPhrase.generate()
+        let secrets = try RotationSecrets.derive(
+            passphrase: Self.passphrase, recoveryWords: newWords,
+            forRotationOf: before, freshKDF: fastKDF())
+        #expect(secrets.kdf == before.kdf, "the reuse premise — the passphrase side")
+        let begun = try await CorpusRotation.begin(
+            client: world.vault.client, current: world.old, secrets: secrets, appleHeldCopy: nil)
+        let after = try #require(try await world.vault.client.fetchVault()).format
+        #expect(after.kdf == before.kdf, "the passphrase descriptor reused…")
+        let wrapAfter = try #require(after.masterWrappedByRecovery)
+        #expect(wrapAfter != wrapBefore, "…while the recovery wrap is FRESH bytes at the act")
+        #expect(try after.unwrapMaster(withRecoveryKey: try RecoveryPhrase.recoveryWrapKey(words: newWords)).data
+                == begun.material.masterKey, "the act's words wrap the NEW master")
+        await #expect(throws: (any Error).self, "the old words open nothing") {
+            _ = try await world.vault.enrollment.enroll(recoveryWords: oldWords)
+        }
+        // A second rotation under the SAME word AND the SAME words: still
+        // a fresh wrap — the recovery side is act-scoped, never reused.
+        let cleared = try await CorpusRotation.complete(client: world.vault.client, material: begun.material)
+        let againSecrets = try RotationSecrets.derive(
+            passphrase: Self.passphrase, recoveryWords: newWords,
+            forRotationOf: after, freshKDF: fastKDF())
+        let again = try await CorpusRotation.begin(
+            client: world.vault.client, current: cleared, secrets: againSecrets, appleHeldCopy: nil)
+        let third = try #require(try await world.vault.client.fetchVault()).format
+        #expect(try #require(third.masterWrappedByRecovery) != wrapAfter,
+                "fresh at every act — even with both secrets unchanged")
+        #expect(try third.unwrapMaster(withRecoveryKey: try RecoveryPhrase.recoveryWrapKey(words: newWords)).data
+                == again.material.masterKey)
+        _ = try await CorpusRotation.complete(client: world.vault.client, material: again.material)
+    }
+
+    /// The changed-passphrase guard (17l item 5's third pin): a rotation
+    /// that CHANGES the word takes the fresh-salt road exactly as before
+    /// the entry — the reuse never leaks into the changed case. A key
+    /// under the OLD descriptor (the old word's, or the new word under the
+    /// old salt) opens nothing; the new word under the NEW descriptor
+    /// opens M′. This pins PRESERVED behavior (green on the pre-fix code
+    /// by design — the guard class); its discriminating red is the
+    /// reuse-always mutant, recorded in the batch record.
+    @Test func aChangedPassphraseMintsAFreshSaltAndTheReuseNeverLeaksIntoTheChangedCase() async throws {
+        let world = try await makeWorld()
+        let before = try #require(try await world.vault.client.fetchVault()).format
+        let changedWord = "a-genuinely-different-word"
+        let secrets = try RotationSecrets.derive(
+            passphrase: changedWord, recoveryWords: nil,
+            forRotationOf: before, freshKDF: fastKDF())
+        #expect(secrets.kdf != before.kdf, "a changed word mints a fresh descriptor")
+        #expect(secrets.kdf.salt != before.kdf.salt, "…with a fresh salt")
+        let begun = try await CorpusRotation.begin(
+            client: world.vault.client, current: world.old, secrets: secrets, appleHeldCopy: nil)
+        let after = try #require(try await world.vault.client.fetchVault()).format
+        #expect(after.kdf == secrets.kdf && after.kdf != before.kdf)
+        // The old word's key — and the NEW word under the OLD salt — open nothing.
+        #expect(throws: (any Error).self, "the old word's held key is honestly stale") {
+            _ = try after.unwrapMaster(withPassphraseKey:
+                try PassphraseKDF.deriveKey(passphrase: Self.passphrase, descriptor: before.kdf))
+        }
+        #expect(throws: (any Error).self, "the changed word under the old salt opens nothing either") {
+            _ = try after.unwrapMaster(withPassphraseKey:
+                try PassphraseKDF.deriveKey(passphrase: changedWord, descriptor: before.kdf))
+        }
+        #expect(try after.unwrapMaster(withPassphraseKey:
+                try PassphraseKDF.deriveKey(passphrase: changedWord, descriptor: after.kdf)).data
+                == begun.material.masterKey, "the new word under the new descriptor opens M′")
+        _ = try await CorpusRotation.complete(client: world.vault.client, material: begun.material)
+    }
+
     // MARK: - §4 step 3: THE WALK, and COMPLETION
 
     /// The driver re-encrypts every row below the seq (opened under the

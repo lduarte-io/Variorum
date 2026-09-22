@@ -1285,9 +1285,10 @@ COMMITTED (B2's slip is the fresh reminder); no commit trailers.
   `Sync/CorpusRotation.swift` (the reuse road, proven-by-unwrap) + the runner's ceremony derive
   moved into the branches (`PostureSwitch.swift`: the enrolled arm derives against the fetched
   vault; the local-only arm keeps the fresh salt). Core `swift build` green. Pins PENDING.
-- [ ] Pin 2 (the independence guard) + pin 3 (the changed-passphrase guard) + the core half of
+- [x] Pin 2 (the independence guard) + pin 3 (the changed-passphrase guard) + the core half of
   pin 1 (the same-word rotation keeps the vault's descriptor; a pre-rotation held key opens M′)
-  — `CorpusRotationTests`. PENDING.
+  — `CorpusRotationTests` +3, suite **18/18 green** (15 existing + the 3 pins, all named in the
+  run log). Revert evidence PENDING.
 - [ ] Pin 1 (the zero-prompt follow, the DOOR) — `PostureSwitchTests` (the entry's letter + the
   changed-word door arm) + arm (vii) of the un-followed-device pin RE-BASED to the fixed
   contract (the ruled-change class). PENDING.
