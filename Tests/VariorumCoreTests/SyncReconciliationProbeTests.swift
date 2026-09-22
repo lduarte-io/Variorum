@@ -690,6 +690,97 @@ struct SyncReconciliationProbeTests {
             "SELECT COUNT(*) FROM block WHERE id = ?", [blockX]) == 0)
     }
 
+    /// **LADDER R1 F-R4: the heal's completion set is the stalled row's
+    /// OWN family — never a store-wide stamp sweep.** The first completion
+    /// set gathered residue by `deleted_at = <stamp>` over four whole
+    /// tables: a millisecond stamp collision (two deletes in one frozen
+    /// instant — deterministic under the injected clock) handed an
+    /// UNRELATED, merely-tombstoned family to `executePurge` — a
+    /// pre-horizon mirror purge + ledger entry, violating the §4f sentence
+    /// `p2a…` pinned green this same run (a device offline < 60 days
+    /// holding edits to that family would meet the ledger fence and drop
+    /// them silently). The fixed set scopes through the stalled row's
+    /// FK-CONNECTED referents (`PullStall.presentReferents`) at the exact
+    /// stamp, family-expanded — and the four unindexed full-table scans
+    /// go with it.
+    @Test func theHealNeverTakesAnUnrelatedFamilySharingTheMillisecondStamp() async throws {
+        let (a, b, server) = try pair()
+        let (noteID, bystanderID): (String, String) = try a.with { ops, _ in
+            let doomed = try ops.createPost(title: "doomed", profile: .generic)
+            _ = try ops.newBlock(in: doomed.id, text: "the original words", at: .end)
+            let bystander = try ops.createPost(title: "innocent bystander", profile: .generic)
+            _ = try ops.newBlock(in: bystander.id, text: "unrelated words she may still want", at: .end)
+            return (doomed.id, bystander.id)
+        }
+        try await productionQuiescence(a, b, server: server)
+        for _ in 0..<2 {
+            _ = try await productionRound(a)
+            _ = try await productionRound(b)
+        }
+
+        // B creates X inside N, offline (the p8 shape).
+        let (blockX, placementX): (String, String) = try b.with { ops, db in
+            let made = try ops.newBlock(in: noteID, text: "the phone's late block", at: .end)
+            let placement = try db.fetchString(
+                "SELECT id FROM container_block WHERE block_id = ?", [made.block.id])!
+            return (made.block.id, placement)
+        }
+
+        // ONE FROZEN INSTANT on A: the Delete-Now of N and an ORDINARY
+        // delete of the bystander — same millisecond stamp. The bystander
+        // carries no intent and is not aged: nothing ever sweeps it; its
+        // tombstoned family is exactly the same-stamp bait.
+        let frozen = Date(timeIntervalSince1970: 1_782_867_600)  // 2026-07-01T01:00:00Z
+        try a.with { ops, _ in
+            try withDependencies {
+                $0.date = .constant(frozen)
+            } operation: {
+                try ops.deleteContainer(noteID)
+                _ = try ops.requestPurge([SyncPurgeTarget(table: "container", rowID: noteID)])
+                try ops.deleteContainer(bystanderID)
+            }
+        }
+        #expect(try a.db.deletedAt("container", noteID) == a.db.deletedAt("container", bystanderID),
+                "the collision is real: both families share one millisecond stamp")
+        for _ in 0..<3 { _ = try await productionRound(a) }
+
+        // B's round with its push held (the A5 window); A sweeps inside it;
+        // the held transaction commits — the orphan surfaces (the p8 jam).
+        await server.holdNextPush()
+        _ = try await productionRound(b)
+        _ = try await b.pull()
+        let sweep = try await sweep(a, server)
+        #expect(sweep.familiesPurged >= 1)
+        await server.commitHeldPushes()
+        #expect(await server.currentRow(table: "container_block", rowID: placementX) != nil)
+
+        // THE HEAL — it must clear the jam AND touch ONLY the stalled
+        // row's own family.
+        let scheduler = SyncScheduler(
+            engine: a.engine(),
+            janitor: PurgeJanitor(transport: server, keyProvider: a.keyProvider))
+        var healed = false
+        for _ in 0..<4 {
+            try await a.withAsync { _ in await scheduler.trigger() }
+            await scheduler.awaitIdle()
+            if await scheduler.status.pullStalled == false { healed = true; break }
+        }
+        #expect(healed, "the jam still clears — the connected family is the whole orphan")
+        #expect(await server.currentRow(table: "container_block", rowID: placementX) == nil)
+        #expect(try a.db.fetchInt("SELECT COUNT(*) FROM block WHERE id = ?", [blockX]) == 0,
+                "A's connected residue (X) completed the family")
+
+        // THE PIN'S TOOTH: the bystander family SURVIVES — on the mirror,
+        // in the ledger's silence, and locally (its Trash row stands).
+        #expect(await server.currentRow(table: "container", rowID: bystanderID) != nil,
+                "the unrelated family stays on the mirror — no pre-horizon purge")
+        #expect(!(await server.isPurged(table: "container", rowID: bystanderID)),
+                "no ledger entry fences the bystander — §4f holds")
+        #expect(try a.db.fetchInt(
+            "SELECT COUNT(*) FROM container WHERE id = ?", [bystanderID]) == 1,
+            "the bystander's Trash row stands locally — Put back stays real")
+    }
+
     /// **Row 9's ruled NARROWING, end to end: a LIVE stalled row is NEVER
     /// healed** — even when its missing referent is ledger-named. The
     /// construction: a note pushed live, its container then purged from

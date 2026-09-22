@@ -709,18 +709,35 @@ public struct PurgeJanitor: Sendable {
             }
         }
 
-        // 4. The completion set: the stalled row + same-stamp local
-        // residue of the four root kinds, family-expanded.
+        // 4. The completion set: the stalled row + the local cascade
+        // residue carrying its EXACT stamp, scoped to the stalled row's
+        // OWN FK-CONNECTED family (LADDER R1 F-R4 — this replaced a
+        // store-wide `deleted_at = ?` sweep of four whole tables, which a
+        // millisecond stamp collision could point at an UNRELATED,
+        // merely-tombstoned family: `executePurge` would remove and
+        // LEDGER it before every live device saw its deletion — the
+        // pre-horizon purge §4f exists to forbid, the exact guarantee
+        // `p2aTheHorizonHoldsThePurgeWhileTheLaptopIsLive` pins. It was
+        // also four unindexed full-table scans). The connection facts
+        // ride the stall itself (`presentReferents` — the arriving row's
+        // FK targets that resolved; the row has no local copy to read):
+        // a present referent tombstoned at the stall's exact stamp is
+        // cascade residue of the same event, and `PurgeFamily.expand`
+        // reaches everything behind it (the traced X + VX shape whole).
+        // A multi-placement family heals iteratively — one stalled row
+        // per round, the scheduler's follow-up round reaching the next;
+        // bounded, and every round progresses.
         let family: PurgeFamily.Expansion = try await database.read { db in
             var roots = [SyncPurgeTarget(table: stall.table, rowID: stall.rowID)]
-            for kind in ["container", "reading", "block", "variant"] {
-                let residue = try String.fetchAll(
-                    db,
-                    sql: "SELECT id FROM \(kind) WHERE deleted_at = ? ORDER BY id",
-                    arguments: [stamp])
-                roots.append(contentsOf: residue.map {
-                    SyncPurgeTarget(table: kind, rowID: $0)
-                })
+            for referent in stall.presentReferents {
+                guard let registered = SyncSchema.table(named: referent.table),
+                      registered.hasTombstone,
+                      try String.fetchOne(
+                          db,
+                          sql: "SELECT deleted_at FROM \(registered.name) WHERE \(registered.primaryKey) = ?",
+                          arguments: [referent.rowID]) == stamp
+                else { continue }
+                roots.append(SyncPurgeTarget(table: referent.table, rowID: referent.rowID))
             }
             return try PurgeFamily.expand(db, roots: roots)
         }

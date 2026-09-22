@@ -372,14 +372,25 @@ public struct SyncEngine: Sendable {
         public var rowID: String
         public var tombstoneStamp: String?
         public var missingReferents: [MissingReferent]
+        /// LADDER R1 F-R4: the stalled row's FK targets that DID resolve —
+        /// locally, or via the batch's applied prefix (which committed with
+        /// it). The heal's completion set scopes its same-stamp cascade
+        /// residue THROUGH these, never by a store-wide stamp sweep: a
+        /// millisecond stamp collision must not hand an unrelated family
+        /// to `executePurge` (a pre-horizon mirror purge — the §4f class).
+        /// The element type is the same (table, row) pair; the field name
+        /// carries the meaning.
+        public var presentReferents: [MissingReferent]
         public init(
             table: String, rowID: String, tombstoneStamp: String?,
-            missingReferents: [MissingReferent]
+            missingReferents: [MissingReferent],
+            presentReferents: [MissingReferent] = []
         ) {
             self.table = table
             self.rowID = rowID
             self.tombstoneStamp = tombstoneStamp
             self.missingReferents = missingReferents
+            self.presentReferents = presentReferents
         }
     }
 
@@ -530,14 +541,23 @@ public struct SyncEngine: Sendable {
                 let stalledRow = batch[stopIndex].row
                 let prefixArriving = arrivingRowIDs(Array(batch[..<stopIndex]))
                 var missing: [PullStall.MissingReferent] = []
+                var present: [PullStall.MissingReferent] = []
                 for fk in try foreignKeyColumns(db, table: stalledRow.table) {
                     guard case .text(let target) = stalledRow.columns[fk.column] else { continue }
-                    if prefixArriving[fk.targetTable]?.contains(target) == true { continue }
+                    // A prefix-satisfied referent commits WITH this batch —
+                    // it is local by the time any consumer reads the stall
+                    // (F-R4: the heal's residue scoping needs it named).
+                    if prefixArriving[fk.targetTable]?.contains(target) == true {
+                        present.append(.init(table: fk.targetTable, rowID: target))
+                        continue
+                    }
                     let exists = try Bool.fetchOne(
                         db,
                         sql: "SELECT EXISTS (SELECT 1 FROM \(fk.targetTable) WHERE \(fk.targetPrimaryKey) = ?)",
                         arguments: [target]) ?? false
-                    if !exists {
+                    if exists {
+                        present.append(.init(table: fk.targetTable, rowID: target))
+                    } else {
                         missing.append(.init(table: fk.targetTable, rowID: target))
                     }
                 }
@@ -545,7 +565,8 @@ public struct SyncEngine: Sendable {
                 if case .text(let value) = stalledRow.columns["deleted_at"] { stamp = value }
                 report.stall = PullStall(
                     table: stalledRow.table, rowID: stalledRow.rowID,
-                    tombstoneStamp: stamp, missingReferents: missing)
+                    tombstoneStamp: stamp, missingReferents: missing,
+                    presentReferents: present)
             }
             return report
         }
