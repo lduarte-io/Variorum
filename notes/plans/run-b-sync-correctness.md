@@ -1,7 +1,10 @@
 # RUN B — sync correctness (17i + 17d + 17l item 5)
 
-**STATUS: OPEN — kickoff 2026-09-21 (the author's word, same day RUN A closed).** Batch B1 (the
-hunt) is next to spawn; her kickoff answers are recorded below as they land.
+**STATUS: CLOSED IN-REPO 2026-09-22 — ONE OPEN ACCEPTANCE LEG: her morning live round**
+(`notes/handoffs/run-b-live-round-handoff.md`; the morning session flips the pending lines here
+and in the 17 file). Five batches + the hosted stress pass + a two-round ladder all closed;
+finals green on all four gates (the one full-Mac red adjudicated as the standing flake, paired
+protocol); the install refreshed behind the A1 rail; marker 8, zero deploys, zero schema.
 
 An ad-hoc standing-fixes phase under a Fable orchestrator per the runs file
 (`notes/plans/pre-beta-standing-fix-runs.md`, her confirmed grouping 2026-09-14, R-13u-6).
@@ -2019,8 +2022,16 @@ table's two rows ✔ · the master plan's order line 3 ticked ✔ · QUESTIONS #
 | Mobile | `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` | **642 tests / 109 suites PASSED with exactly the 4 known issues** — byte-identical to RUN A's close (the run added no mobile tests; the count holding exact is the right result) |
 | Full Mac | `xcodebuild test -scheme Variorum -destination platform=macOS` | **3089 tests / 510 suites — 3088 green + ONE standing flake, ADJUDICATED per the paired protocol** (baseline 3086/509 + exactly the run's 3 Mac tests / 1 suite). The one red: `BookOutlineLandingTests.openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded` at `abs(top) → 3424.0` — the flake list's named member at its byte-identical PRE-RUN signature (KnownIssues row 60 recorded 3424 on 2026-09-19, two days before RUN B's first commit); the run's diff has no road into that surface (four Sync/ sources; the status-row face is defaulted-off). Adjudication runs: current tree isolated 1-red-then-2-green; BASE tree (08d9ea8f, fresh DD) 3/3 green; interleaved WARM pairs base/current 4/4 green — no tree difference under the protocol; the red appeared only under/immediately after full-suite load. The load-flaky geometry class (rows 44/60), never a code finding; owner 12 unchanged |
 
-**THE INSTALL REFRESH (her authorization recorded in KICKOFF):** **PENDING** — A1 backup name ·
-old → new hash · built-from commit · codesign/access-groups check · phone attempt result.
+**THE INSTALL REFRESH — DONE 2026-09-22 (the 13u4 recipe verbatim):** A1 backup
+`run-b-refresh-20260922T101543Z` (149 files, `diff -rq` byte-verified; zero instances; her store
+never opened) · `/Applications` old `d22dc18e…` (= RUN A's recorded hash — custody chain clean)
+→ new `1ab2765238c906e23d8fe3ec88ed5810b227350db642e22b9b946984a50cd493` (installed copy
+verified identical; codesign OK on build AND installed copy; both access groups present and
+identical) · built from `4afaed63`'s tree (code-identical to `c28d0096`) in a clean throwaway
+worktree, worktree + DerivedData removed after · **the PHONE install was attempted (device
+paired + available) and refused the developer-disk-image mount — the locked-overnight state;
+recorded in the handoff with the morning road; her current phone build is VALID evidence (the
+marker fact)**.
 
 **THE LIVE ROUND (the one open acceptance leg):** **PENDING her morning round** — the checklist
 and the paste-ready morning kickoff are `notes/handoffs/run-b-live-round-handoff.md`; the

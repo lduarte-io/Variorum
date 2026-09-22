@@ -41,15 +41,36 @@ phone's shipped descriptor-equality gate passes with the key it already holds. R
 phone build is good hygiene, not a gate — the overnight tail attempts it only if the device is
 connected; otherwise install it whenever convenient (Xcode ▸ your usual run-to-device road).
 
-## STATE AT HANDOFF (filled at the overnight tail — PENDING until then)
+## STATE AT HANDOFF (filled at the overnight tail, 2026-09-22 ~04:30)
 
-- Ladder outcome: **PENDING** *(round 1 returned 4 MAJOR · 2 MINOR · 2 NIT · 0 BLOCKER — the
-  fix pass and later rounds run overnight; this slot gets the final tally and dispositions.)*
-- Finals: core **PENDING** · full Mac **PENDING** · iOS build **PENDING** · mobile **PENDING**.
-- A1 backup: **PENDING** (name + verification).
-- `/Applications/Variorum.app`: **PENDING** (old hash → new hash; built from commit …).
-- Phone build/install: **PENDING** (installed overnight, or left to the morning with the reason).
-- Git head at handoff: **PENDING**.
+- Ladder outcome: **CLOSED at TWO rounds** — R1: 4 MAJOR · 3 MINOR · 4 NIT hunted and ALL
+  fixed/dismissed at the fix pass (zero disputes); R2: 0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT
+  (wording/labels, fixed at adjudication) — no round 3 owed; every R1 disposition re-verified
+  cold, two red-on-olds independently re-proven. Dispositions in the run plan's ladder sections.
+- Finals, all four gates: core **1679/179 ALL PASSED, zero known issues** · iOS **BUILD
+  SUCCEEDED** · mobile **642/109 with exactly the 4 known issues (byte-identical to RUN A's
+  close)** · full Mac **3089/510 — 3088 green + the ONE standing flake, ADJUDICATED by the
+  paired protocol** (its failure number pre-dates the run by two days; base and current trees
+  indistinguishable over seven runs; the record's closeout table has the full adjudication).
+- A1 backup: **`~/dev/variorum-store-backups/run-b-refresh-20260922T101543Z/` — 149 files,
+  `diff -rq` byte-verified**; her store never opened (closed-store file copy, zero instances).
+- `/Applications/Variorum.app`: **REFRESHED** — old `d22dc18e…` (= RUN A's recorded install
+  hash, custody chain clean) → new
+  `1ab2765238c906e23d8fe3ec88ed5810b227350db642e22b9b946984a50cd493`; installed copy verified
+  *[removed for publication]*
+  + `….shared`). Built from `4afaed63`'s tree (code-identical to the last code commit
+  `c28d0096`) in a clean throwaway worktree, cleaned after.
+- Phone build/install: **NOT completed overnight — the device (iPhone 17 Pro, paired,
+  `available`) refused the developer disk image mount: the LOCKED-overnight state.** Her current
+  build is VALID for the round (THE MARKER FACT above). Morning road, if wanted: unlock the
+  phone near the Mac, then either her usual Xcode ▸ Run, or:
+  `cd ~/dev/variorum/App/Variorum && xcodebuild -scheme VariorumMobile -destination
+  *[removed for publication]*
+  *[removed for publication]*
+  <the built .app>`. (Two overnight attempts recorded: a destination-identifier miss, then the
+  mount refusal; her installed app untouched throughout.)
+- Git head at handoff: **the RUN B closeout commits on `main`, all pushed** (the run plan's
+  STATUS banner and this file's final commit are the tip; verify with `git log --oneline -5`).
 
 ## FOR THE MORNING SESSION (paste-ready kickoff below)
 
