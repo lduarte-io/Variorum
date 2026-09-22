@@ -975,6 +975,84 @@ struct SyncReconciliationProbeTests {
             "the unpushed edit rode the row into the Trash — Part 1's bytes, no resurrection")
     }
 
+    /// **LADDER R1 F-R3: a retirement SPLIT across two applies never
+    /// revives the correctly-retired PRISTINE copy.** The kill-time
+    /// verdict's first-death fence was per-batch (`TouchedRows`), but one
+    /// retirement can reach the puller in TWO pulls (the drain's chunk
+    /// boundary between the member containers and the reading row — the
+    /// everyday A2(c) cut, or the A5 band between two chunk commits).
+    /// Batch 1: the containers die; the verdict — PRISTINE, taken at the
+    /// first death with the copy whole — was recorded and then DISCARDED
+    /// with the batch (the reading had not died). Batch 2: the reading's
+    /// tombstone is a fresh batch's first family death, the memberships
+    /// are still locally live, their POSTS are dead — the classifier's
+    /// own leg reads the half-killed copy as EDITED, and the defense
+    /// revived the whole family on the retirement's one stamp: a
+    /// correctly-retired pristine copy returned, pushed, and churned
+    /// (the peer re-retires on a fresh stamp). The fix persists the
+    /// first-death verdict as a local one-shot keyed copy+stamp; the
+    /// reading's later death CONSUMES that whole-copy verdict instead of
+    /// re-classifying a half-killed one.
+    @Test func aRetirementSplitAtTheReadingBoundaryNeverRevivesThePristineCopy() async throws {
+        let server = FakeSyncServer()
+        let aFault = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: aFault)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 977, seed: 2)
+        a.sampleLibraryFacts = Self.sampleFacts()
+        b.sampleLibraryFacts = Self.sampleFacts()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        try await a.push()
+        try await b.push()
+
+        // A meets copyB and decides (the p5c cadence, driven manually so
+        // the retirement sits UNDRAINED in A's outbox): pull 1 defers
+        // (arrived this batch), pull 2's empty window retires copyB.
+        _ = try await a.pull()
+        _ = try await a.pull()
+        #expect(try liveCopyIDs(a) == [copyA.bookID],
+                "A's pass decided: both pristine, the smaller-id keeper stays")
+
+        // THE SPLIT: A's drain dies at the `reading` boundary — the member
+        // containers' tombstones (and everything before `reading` in
+        // registry order) land; the reading row and everything after stay
+        // in A's outbox.
+        try await pushSplitAtBoundary(a, table: "reading", transport: aFault)
+
+        // B's round BETWEEN the halves: batch 1 kills the member notes.
+        // The first-death verdict (PRISTINE — the copy still whole) is
+        // recorded; the reading has not died, so nothing is defended.
+        _ = try await productionRound(b)
+        #expect(try b.db.deletedAt("reading", copyB.bookID) == nil,
+                "the reading's tombstone is still held back — the copy is half-killed")
+
+        // A's resumed drain lands the second half (the lost-ack echoes
+        // settle; the reading + memberships arrive fresh).
+        _ = try await productionRound(a)
+
+        // B applies the reading's death. THE PIN'S TOOTH: the half-killed
+        // re-read (dead posts under live memberships ⇒ EDITED) must NOT
+        // revive the copy — the persisted first-death verdict (PRISTINE)
+        // outranks it.
+        _ = try await productionRound(b)
+        #expect(try liveCopyIDs(b) == [copyA.bookID],
+                "the correctly-retired pristine copy STAYS retired — no half-killed EDITED misread")
+
+        try await productionQuiescence(a, b, server: server, maxRounds: 20)
+        _ = try await productionRound(a)
+        _ = try await productionRound(b)
+        try await productionQuiescence(a, b, server: server, maxRounds: 16)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyA.bookID],
+                    "\(client.name): one library, the keeper — no churn, no second Sherlock")
+            #expect(try client.db.deletedAt("reading", copyB.bookID) != nil, "\(client.name)")
+        }
+        #expect(try b.db.fetchInt(
+            "SELECT COUNT(*) FROM sync_state WHERE key LIKE 'sample_kill_verdict:%'") == 0,
+            "the one-shot verdict was consumed, not leaked")
+    }
+
     /// **LADDER R1 F-R2: the meeting is BOUNDED — a deliberate delete
     /// AFTER the meeting settled is never defended.** The defense's
     /// meeting predicate counted DEAD readings, so the retired loser's

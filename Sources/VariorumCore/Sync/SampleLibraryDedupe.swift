@@ -434,12 +434,82 @@ extension SyncEngine {
             guard try String.fetchOne(
                 db, sql: "SELECT deleted_at FROM reading WHERE id = ?",
                 arguments: [kill.copyID]) == kill.stamp
-            else { continue }
-            guard kill.verdict == .edited else { continue }
+            else {
+                // LADDER R1 F-R3: the first-death fence was per-batch, but
+                // ONE retirement can reach this device in TWO applies (a
+                // chunk boundary between the member containers and the
+                // reading row, crossed by the A5 band or a mid-drain cut).
+                // Discarding this batch's verdict re-opened the exact
+                // hazard the fence exists for: the NEXT batch's verdict,
+                // taken at the reading's own tombstone, reads a
+                // HALF-KILLED copy (dead members = "her pruning" = EDITED)
+                // and revives a correctly-retired pristine copy. The
+                // verdict therefore becomes DURABLE across the split — a
+                // local-only one-shot (the R2-3 marker idiom; sync_state,
+                // never synced, written inside the apply transaction so a
+                // rollback unwinds it) keyed copy+stamp, consumed when the
+                // reading's death arrives. INSERT OR IGNORE keeps the
+                // FIRST verdict — the earliest death saw the wholest copy.
+                // A verdict for a retirement whose reading never dies (a
+                // lone member-note deletion) lingers inert, bounded by
+                // meeting-context kill events, and is cleared whenever a
+                // later kill of the same copy consumes.
+                try persistKillVerdict(
+                    db, copyID: kill.copyID, stamp: kill.stamp, verdict: kill.verdict)
+                continue
+            }
+            // F-R3's consumption: a persisted first-death verdict for this
+            // exact (copy, stamp) OUTRANKS the current batch's re-read —
+            // the earlier moment saw the copy whole; this batch may be
+            // seeing it half-killed. INDETERMINATE consumes literally
+            // (deferring to the retiring side's complete evidence stays
+            // loop-free — never revive-on-doubt).
+            let verdict = try consumeKillVerdict(
+                db, copyID: kill.copyID, stamp: kill.stamp) ?? kill.verdict
+            guard verdict == .edited else { continue }
             defended.insert(kill.copyID)
             repairs += try reviveSampleCopy(db, copyID: kill.copyID, stamp: kill.stamp)
         }
         return repairs
+    }
+
+    /// F-R3's one-shot verdict marker (local-only; `sync_state`).
+    static func killVerdictKey(copyID: String, stamp: String) -> String {
+        "sample_kill_verdict:\(copyID):\(stamp)"
+    }
+
+    private func persistKillVerdict(
+        _ db: Database, copyID: String, stamp: String, verdict: SampleCopyVerdict
+    ) throws {
+        let raw: String
+        switch verdict {
+        case .pristine: raw = "pristine"
+        case .edited: raw = "edited"
+        case .indeterminate: raw = "indeterminate"
+        }
+        try db.execute(
+            sql: "INSERT OR IGNORE INTO sync_state (key, value) VALUES (?, ?)",
+            arguments: [Self.killVerdictKey(copyID: copyID, stamp: stamp), raw])
+    }
+
+    /// Reads-and-spends the persisted verdict for (copy, stamp) — and
+    /// clears EVERY lingering verdict for the copy while it is at it (the
+    /// reading died: any other stamp's marker is stale bookkeeping).
+    private func consumeKillVerdict(
+        _ db: Database, copyID: String, stamp: String
+    ) throws -> SampleCopyVerdict? {
+        let value = try String.fetchOne(
+            db, sql: "SELECT value FROM sync_state WHERE key = ?",
+            arguments: [Self.killVerdictKey(copyID: copyID, stamp: stamp)])
+        try db.execute(
+            sql: "DELETE FROM sync_state WHERE key LIKE ?",
+            arguments: ["sample_kill_verdict:\(copyID):%"])
+        switch value {
+        case "pristine": return .pristine
+        case "edited": return .edited
+        case "indeterminate": return .indeterminate
+        default: return nil
+        }
     }
 
     /// The exact-stamp revival: flips `deleted_at` back to NULL on every
