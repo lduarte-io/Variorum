@@ -736,11 +736,34 @@ noted.
   touched-suite run green (18/2: SampleLibraryTests + SyncStalledRowTests); iOS BUILD SUCCEEDED.
   Fences held: zero schema, zero server/mirror lines, marker 8, `/Applications` and her real
   store untouched (her live real-store instance observed running and left strictly alone).
-- [ ] **PHASE 2 (opens only at the orchestrator's rulings):** rows 9 + 15 — PENDING
+- [x] **PHASE 2 (built to the recorded rulings, 2026-09-22):**
+  - [x] Row 15 Part 1 (the ride-the-row rescue) — FIXED, red-on-old VERIFIED BY BEHAVIOURAL
+    REVERT (pin `p1PhoneFirstResumeRidesTheUnpushedEditIntoTheTrash` [200/1]); ONE scope
+    judgment flagged below (the (true,true) shape — the trace's own find).
+  - [x] Row 15 Part 2 (the defense leg) — FIXED, B1's P5(b) wrap UNWRAPPED as red-on-old and
+    VERIFIED BY BEHAVIOURAL REVERT against the committed fix; ONE ruled-constraint deviation
+    flagged below WITH ITS PIN-PROOF (the pre-batch-dirt arm's unsoundness), for the
+    orchestrator's arbitration.
+  - [x] Row 9 (the ledger-verified orphan heal, ruled Shape A + tombstone narrowing) — FIXED,
+    B1's two P8 wraps UNWRAPPED as red-on-old and VERIFIED BY BEHAVIOURAL REVERT against the
+    committed fix; the live-row refusal and the transient guard pinned beside them.
+  - [x] Phase 2 finals: FULL CORE SUITE **1666 tests / 179 suites — ALL PASSED, ZERO KNOWN
+    ISSUES** (the three B1 wraps are GONE — green pins now; the one sanctioned real-server
+    skip stands). Arithmetic exact: Phase-1's 1661 + 5 new pins. Mac app BUILD SUCCEEDED ·
+    iOS BUILD SUCCEEDED (core's public API grew: `PullStall`, `PullReport.stall`,
+    `SampleCopyVerdict`/`SampleCopyClassifier`). Fences held: zero schema, zero server/mirror
+    lines, marker 8; `/Applications` and her real store untouched.
 
 ### DEATHS / RESUMES
 
-- none.
+- none. **One PROTOCOL SLIP, recorded (Phase 2, row 15 Part 2):** the implementer ran a
+  behavioural revert on Repairs.swift BEFORE Part 2's hook was committed and restored it with
+  `git checkout`, which wiped the uncommitted hook — exactly the state the no-revert-without-a-
+  committed-pre-revert-state rule exists to prevent. Recovery: the three edits were re-applied
+  from the session's own context byte-faithfully, rebuilt, re-verified (44/5 green), COMMITTED
+  — and the behavioural revert then re-run against the committed fix (both p5b pins red, 12
+  issues; restored 13/13). Every revert after the slip was commit-first. Nothing was lost;
+  noted because the record must never read cleaner than the session ran.
 
 ### ROW 7 — the tag.path repair's arrival-order leg (17i fix item 1; KnownIssues row 34): FIXED
 
@@ -1062,6 +1085,109 @@ and Part 1 lands PROVISIONAL.**
   considered-and-dropped alternatives are sustained as dropped (the mark is schema; deferral
   cannot stop the crossing). Pins as proposed, plus the both-edited variant and the no-defense
   guard.
+
+---
+
+## BATCH B2 RECORD — PHASE 2 (rows 9 + 15, built to the rulings; 2026-09-22)
+
+### ROW 15 — F-1, the double-retirement race: FIXED (both parts; two judgment calls FLAGGED)
+
+**Part 1 — the ride-the-row rescue (`Merge.swift`; PROVISIONAL #143(a) as ruled).** When a
+dirty local `working_text` loses the row to an ARRIVING TOMBSTONE and the conflict-card rescue
+cannot land (block dead), the local text overlays the merged row; the outbox entry survives
+(landed ≠ server), the ridden text pushes, both devices converge with the edit on the
+tombstoned row, and Put back returns it. `rescueLosingText` now returns whether a card was
+minted; no card is ever minted here (S5 untouched).
+
+**FLAGGED JUDGMENT CALL 1 — the (true,true) scope, found by the pin's own first red:** my
+proposal said "when the LOCAL side's dirty text loses the row… (block dead)"; the ruling
+approved it as the §6 silent-cell reading. Building it exposed the loss's REAL shape: the
+arriving BLOCK tombstone's local cascade stamps the dirty variant EARLIER IN THE SAME BATCH
+(registry order; cascades stay active during apply), so by the variant's own merge the case is
+**(true, true)** — both tombstoned, the local row carrying the unpushed edit — not (false,
+true). The shipped overlay therefore keys on `server.isTombstoned` alone and deliberately does
+NOT consult the local tombstone state. Two untraced corners recorded, NOT silently decided:
+(a) a LIVE server row over a dirty local edit under a dead block keeps shipped server-wins
+behavior (riding would merely swap whose bytes die — one row, no card possible); (b) in
+(true,true) with BOTH sides having ridden edits, riding keeps the LOCAL edit where the old code
+kept the first pusher's — one side loses the row's bytes either way; the changed face of the
+same corner. Both are the same both-edited-under-a-dead-block class; stated at the code.
+
+**Part 2 — the defense leg (`Repairs.swift` + `SampleLibraryDedupe.swift`).** The kill-time
+hook records evidence at the retirement's FIRST family death — a member CONTAINER's or the
+READING's own live→dead transition, whichever arrives first in registry order — reading the
+REAL classifier while the copy is still whole, once per copy per batch, pull-only. The
+post-batch defense (`defendEditedSampleCopies`) revives exact-stamp (every flip enqueued, §7)
+only where the READING itself ended dead under the recorded stamp (a lone member-note deletion
+is an ordinary delete) and only on a definite EDITED verdict (INDETERMINATE defers to the
+retiring side's complete evidence — loop-free). Self-retirements never record kills (direct
+writes bypass `writeResolvedRow`), so the constraint's degradation scenario is dead by
+construction. The registry-order finding is itself recorded: a verdict taken at the READING's
+tombstone reads a half-killed copy (dead members = "her pruning" = EDITED) and revives every
+correct retirement forever — the scratch trace's ping-pong, which is why the hook fires at the
+FIRST death.
+
+**FLAGGED JUDGMENT CALL 2 — the ruled PRE-BATCH-DIRT arm is ABSENT, its unsoundness
+PIN-PROVEN (the orchestrator arbitrates):** the ruling's letter — outbox rows whose enqueue
+precedes the batch — was built first and broke an EXISTING pin:
+`theMarkerIsSpentWhenTheOtherDevicesRetirementLands` (both copies PRISTINE) went red because
+the tag-collision repair's re-pointed applications of the arriving copy's own notes — PRIOR-
+batch repair bookkeeping, enqueued in an earlier pull's apply — sat in the batch-start snapshot
+and revived the correctly-retired copy: the constraint's exact degradation scenario ("repair
+bookkeeping… revives the copy it just correctly retired"), one batch earlier than the letter
+anticipated. The kill-time classifier arm is STRICTLY STRONGER against that scenario (it reads
+domain rows and NO outbox evidence at all) and is what makes the ruled matrix's BOTH-EDITED row
+reachable (each device's edit has typically PUSHED before the peer's retirement arrives, so
+outbox evidence cannot defend it — the ruled pin itself forced this). The classifier-blind
+residual (a chapter rename as the ONLY act) remains exactly the pre-existing R2-5 declined-leg
+class, unchanged by this batch. If the orchestrator overrules, the dirt arm is a small re-add —
+but it re-reds the marker pin.
+
+**Pins + revert (all against the committed fix):**
+`p1PhoneFirstResumeRidesTheUnpushedEditIntoTheTrash` [200/1] (Part 1's bytes — P1's un-probed
+other resume order, closed; red-on-old pre-fix at the clobber, red again under the overlay
+revert) · `p5bTheDoubleRetirementRaceKeepsTheEditedCopyAliveWithItsEdit` (B1's wrap UNWRAPPED —
+the ruled matrix's first row; red under the hook revert at survival AND bytes) ·
+`p5bBothEditedMeansBothCopiesSurvive` (the matrix's second row; red under the same revert) ·
+`aDeliberateDeleteWithNoSecondCopyIsNeverDefended` (no meeting context ⇒ the deletion stands;
+green under the revert too — it pins the defense's ABSENCE) · `p5c…` (the 3-round cadence) and
+the full dedupe suites green beside them.
+
+### ROW 9 — 17d P8's fix: THE LEDGER-VERIFIED ORPHAN HEAL (ruled Shape A + narrowing): FIXED
+
+**Built exactly to the ruling.** `PullReport.stall` names the stall (the first unsatisfiable
+row, its tombstone stamp, its missing referents — client-side, no wire change). A scheduler
+round ending stalled hands it to `PurgeJanitor.healPurgeOrphan`: preflight (the reconcile's
+discipline) → **the ruled narrowing** (tombstones only; a LIVE stalled row is never healed —
+left stalled and honest under row 12's flag) → **the exact discriminator** (EVERY missing
+referent named in the purged-ids ledger, read from 0 on this rare, self-limiting path; an
+unnamed referent is a genuine §5 straggler and NOTHING is touched; the below-floor case refuses
+too — recorded for the ledger-pruning rider) → **the completion set** (the stalled row + local
+cascade residue on its EXACT stamp, family-expanded) through `executePurge` + `deleteLocal` —
+§4f's own act, existing RPCs only, zero server lines; idempotent across devices. One follow-up
+round flips `pullStalled` back honestly. The row-19 park/heal fence is stated at the site: no
+parking, no retry policy, no drop-loudly framework.
+
+**Pins + revert (against the committed fix):** B1's two wrapped constructions UNWRAPPED —
+`p8AHeldPushAcrossThePurgeWindowJamsThePullForever` + `p8TheVisibilityBandVariantJamsTheSameWay`
+(bounded SCHEDULER rounds clear the jam; the orphan leaves the mirror AND is ledger-fenced; A's
+local residue completes the family; B's fresh note reaches A — the one-way flow resumes). Under
+the behavioural revert (the scheduler's heal call disabled) both are fully red — the permanent
+jam exactly as B1 reproduced it — while the refusal pins stay green; restored 13/13. Beside
+them: `aLiveStalledRowIsLeftStalledAndHonestNeverHealed` (the narrowing end to end:
+ledger-named referent, LIVE row, nothing purged, ledger count unchanged, status honest) and
+`aStallWhoseReferentIsNotLedgerNamedHealsNothing` (the transient guard: no `executePurge`
+fires, mirror untouched).
+
+### PHASE 2 FINALS
+
+FULL CORE SUITE **1666 tests / 179 suites — ALL PASSED, ZERO KNOWN ISSUES** (the finish line
+the brief set: the SAME tests with zero wraps — B1's three wrapped probes are now green pins
+of the fixed contracts) + the one sanctioned real-server skip. Arithmetic exact: Phase-1
+finals 1661 + 5 new pins (p1PhoneFirst, p5bBothEdited, aDeliberateDelete, aLiveStalledRow,
+aStallWhoseReferent; p5b renamed in place). Mac app **BUILD SUCCEEDED** · iOS **BUILD
+SUCCEEDED** (core's grown public API compiles into both targets). Fences: zero schema, zero
+server/mirror lines, marker 8, `/Applications` and her real store untouched throughout.
 
 ---
 
