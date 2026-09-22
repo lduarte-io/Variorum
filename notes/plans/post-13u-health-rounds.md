@@ -248,8 +248,11 @@ the editor seam, custody, or `Sync/` — if an entry's diff drifts onto one, the
   `*Rows` core its siblings share; `merge`/`mergeCeremony` get a `mergeRows` core with `merge` as
   the degenerate call. **Proof: the entire structural state-transition suite rides UNMODIFIED**, and
   because `divideDuplicating` is live phone-side, the full mobile suite is part of the finals.
-  **Excluded, deliberately: the `PurgeJanitor` two-types file split — it is `Sync/` (the rider);
-  it belongs beside RUN B's or 18a's Sync work, noted in C0's ledger pass.**
+  **Excluded, deliberately: the `PurgeJanitor` two-types file split — it is `Sync/` (the rider),
+  and RUN B was already mid-flight when this file was ratified (author, 2026-09-22), so it does not
+  go there. It rides the NEXT Sync-fenced round after RUN B — 17i if that runs pre-beta (the
+  recommendation, for row 34's tag-application repair), else 18a — and C0's ledger pass records
+  that owner so it never sits unowned.**
 - **D2 — layering singles** (review §2.4): the three sibling view-model constructions call
   `Shared/TypedTagPath.apply` directly; `AppSettingsView`'s second `TagsViewModel` owner routes
   through parent composition; `PostDetailView` gains a `PostDetailModel` and its raw SQL (plus the
