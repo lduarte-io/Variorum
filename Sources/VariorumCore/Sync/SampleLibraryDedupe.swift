@@ -111,7 +111,7 @@ public struct SampleLibraryDedupeFacts: Sendable {
 ///      pass runs, whatever it decides (R2-3);
 ///   3. a `post_tag` row for the RESERVED path applied in this batch: the
 ///      evidence the reserved-tag completeness guard waits for.
-/// The guard (`classifySampleCopy`, R2-1): every live member post of a
+/// The guard (`SampleCopyClassifier.classify`, R2-1): every live member post of a
 /// seeded copy carries the reserved tag, and `post_tag` is the FIRST
 /// engagement table in the push order — so a member with NO `post_tag`
 /// row for the reserved path (live or dead; any tag row wearing the path,
@@ -123,13 +123,45 @@ public struct SampleLibraryDedupeFacts: Sendable {
 /// in a table AFTER `post_tag` (`block_tag`, `reference`, `block_comment`)
 /// travelling in a chunk of its own behind a landed tag chunk — the
 /// recorded residual (its KnownIssues row, owner 13y).
-extension SyncEngine {
-    enum SampleCopyVerdict: Equatable {
-        case pristine
-        case edited
-        case indeterminate
-    }
+///
+/// The classifier's ONE body lives in `SampleCopyClassifier` below (RUN B
+/// B2 row 8 — R3-2): public, so the Mac's seed-shape drift guard invokes
+/// the REAL classifier over the real shipped seed instead of mirroring its
+/// SQL; the engine's pass calls the same body.
 
+/// One copy's classification (RUN B B2 row 8 — the pre-13u ladder's R3-2:
+/// PUBLIC, so the Mac's seed-shape drift guard INVOKES the real classifier
+/// over the real shipped seed instead of hand-mirroring its SQL — a
+/// classifier leg the mirror lacked left the guard green while the real
+/// classifier read the seed EDITED, the silent both-survive failure the
+/// guard exists to announce).
+public enum SampleCopyVerdict: Equatable, Sendable {
+    case pristine
+    case edited
+    case indeterminate
+}
+
+/// The classifier itself, ONE body (row 8's letter: "invokes the real
+/// classifier — never a second copy"): the engine's pass and the Mac guard
+/// both call through here.
+public enum SampleCopyClassifier {
+    /// The guard's door: derives the manifest and the reserved tag id from
+    /// the injected facts exactly as the engine's pass does, then runs the
+    /// one classifier body.
+    public static func classify(
+        _ db: Database, copyID: String, facts: SampleLibraryDedupeFacts
+    ) throws -> SampleCopyVerdict {
+        let manifest = try facts.loadNoteHashes()
+        let reservedTagID = try String.fetchOne(
+            db, sql: "SELECT id FROM tag WHERE path = ? AND deleted_at IS NULL",
+            arguments: [facts.tagPath])
+        return try classify(
+            db, copyID: copyID, manifest: manifest,
+            reservedTagID: reservedTagID, reservedTagPath: facts.tagPath, hash: facts.hash)
+    }
+}
+
+extension SyncEngine {
     /// Whether this batch is one of the pass's three occasions (above).
     /// Pull-only by construction; cost: two flag reads, one local-only
     /// marker read, and — only when the batch applied `post_tag` rows —
@@ -212,7 +244,7 @@ extension SyncEngine {
         var pristine: [String] = []
         var edited: [String] = []
         for copyID in copies {
-            switch try classifySampleCopy(
+            switch try SampleCopyClassifier.classify(
                 db, copyID: copyID, manifest: manifest,
                 reservedTagID: reservedTagID, reservedTagPath: facts.tagPath, hash: facts.hash) {
             case .pristine: pristine.append(copyID)
@@ -256,10 +288,57 @@ extension SyncEngine {
         }
     }
 
+    /// Retires one copy, family-complete: the book (its cascade takes the
+    /// memberships and chapters at this exact stamp), then each member note
+    /// (the container cascade takes placements, blocks, variants, tags,
+    /// references). Ordinary tombstones — the Trash lists them — and every
+    /// write reaches the outbox: the direct writes explicitly, the cascades
+    /// via the victim sweep (SyncSpec §7).
+    ///
+    /// **Put back, honestly** (the ladder's F4): this family shape — a book
+    /// AND its member notes under ONE stamp — is one no ordinary op mints,
+    /// and `restoreReading` revives only stamp-matched MEMBERSHIPS, never
+    /// containers. Putting the retired BOOK back therefore yields a book
+    /// whose members are still in the Trash; each note's own Put back
+    /// revives it (and its membership, by the stamp). Fourteen rows in a
+    /// Trash she never asked to fill, and a fourteen-step road out — both
+    /// recorded for her at QUESTIONS #85(e); widening the recovery door is
+    /// an op-semantics call, not this repair's.
+    private func retireSampleCopy(
+        _ db: Database, copyID: String, arrivingDead: [String: Set<String>]
+    ) throws -> Int {
+        var repairs = 0
+        let stamp = nowStamp()
+        let memberPosts = try String.fetchAll(
+            db,
+            sql: "SELECT post_id FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL ORDER BY post_id",
+            arguments: [copyID])
+        try db.execute(
+            sql: "UPDATE reading SET deleted_at = ?, updated_at = ? WHERE id = ?",
+            arguments: [stamp, stamp, copyID])
+        try enqueueExplicitly(db, table: "reading", rowID: copyID)
+        repairs += 1
+        repairs += try enqueueSuppressedCascadeVictims(
+            db, parent: ("reading", copyID, stamp), arrivingDead: arrivingDead)
+        for postID in memberPosts {
+            try db.execute(
+                sql: "UPDATE container SET deleted_at = ?, updated_at = ? WHERE id = ? AND deleted_at IS NULL",
+                arguments: [stamp, stamp, postID])
+            try enqueueExplicitly(db, table: "container", rowID: postID)
+            repairs += 1
+            repairs += try enqueueSuppressedCascadeVictims(
+                db, parent: ("container", postID, stamp), arrivingDead: arrivingDead)
+        }
+        return repairs
+    }
+}
+
+extension SampleCopyClassifier {
     /// One copy's verdict, computed from SYNCED rows only — the same answer
     /// on every device once the rows have converged, which is what makes
-    /// the keeper choice deterministic.
-    private func classifySampleCopy(
+    /// the keeper choice deterministic. ONE body, two callers: the engine's
+    /// pass and the Mac seed-shape drift guard (row 8 — R3-2).
+    static func classify(
         _ db: Database, copyID: String, manifest: [String: String],
         reservedTagID: String?, reservedTagPath: String, hash: (String) -> String
     ) throws -> SampleCopyVerdict {
@@ -478,47 +557,4 @@ extension SyncEngine {
         return .pristine
     }
 
-    /// Retires one copy, family-complete: the book (its cascade takes the
-    /// memberships and chapters at this exact stamp), then each member note
-    /// (the container cascade takes placements, blocks, variants, tags,
-    /// references). Ordinary tombstones — the Trash lists them — and every
-    /// write reaches the outbox: the direct writes explicitly, the cascades
-    /// via the victim sweep (SyncSpec §7).
-    ///
-    /// **Put back, honestly** (the ladder's F4): this family shape — a book
-    /// AND its member notes under ONE stamp — is one no ordinary op mints,
-    /// and `restoreReading` revives only stamp-matched MEMBERSHIPS, never
-    /// containers. Putting the retired BOOK back therefore yields a book
-    /// whose members are still in the Trash; each note's own Put back
-    /// revives it (and its membership, by the stamp). Fourteen rows in a
-    /// Trash she never asked to fill, and a fourteen-step road out — both
-    /// recorded for her at QUESTIONS #85(e); widening the recovery door is
-    /// an op-semantics call, not this repair's.
-    private func retireSampleCopy(
-        _ db: Database, copyID: String, arrivingDead: [String: Set<String>]
-    ) throws -> Int {
-        var repairs = 0
-        let stamp = nowStamp()
-        let memberPosts = try String.fetchAll(
-            db,
-            sql: "SELECT post_id FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL ORDER BY post_id",
-            arguments: [copyID])
-        try db.execute(
-            sql: "UPDATE reading SET deleted_at = ?, updated_at = ? WHERE id = ?",
-            arguments: [stamp, stamp, copyID])
-        try enqueueExplicitly(db, table: "reading", rowID: copyID)
-        repairs += 1
-        repairs += try enqueueSuppressedCascadeVictims(
-            db, parent: ("reading", copyID, stamp), arrivingDead: arrivingDead)
-        for postID in memberPosts {
-            try db.execute(
-                sql: "UPDATE container SET deleted_at = ?, updated_at = ? WHERE id = ? AND deleted_at IS NULL",
-                arguments: [stamp, stamp, postID])
-            try enqueueExplicitly(db, table: "container", rowID: postID)
-            repairs += 1
-            repairs += try enqueueSuppressedCascadeVictims(
-                db, parent: ("container", postID, stamp), arrivingDead: arrivingDead)
-        }
-        return repairs
-    }
 }

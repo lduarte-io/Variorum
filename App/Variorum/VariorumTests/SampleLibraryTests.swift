@@ -539,13 +539,17 @@ struct SampleLibraryTests {
     /// **THE SEED-SHAPE DRIFT GUARD.** The sync engine's sample-library
     /// dedupe (`SampleLibraryDedupe.swift`, core) classifies a seeded copy
     /// PRISTINE from a fixed list of legs — and it reads the seeder's shape
-    /// through injected facts it cannot otherwise see. This pin walks every
-    /// leg the classifier reads over the REAL shipped seed, so a change to
-    /// either side announces itself here rather than as "both Sherlock
-    /// copies survive forever, silently" on a reader's second device. It
-    /// deliberately mirrors the classifier's queries one for one; keep the
-    /// two in step. (Chapter NAMES are not a leg: the front chapter is not
-    /// named after its note, and the facts carry note titles only.)
+    /// through injected facts it cannot otherwise see. **Since RUN B B2
+    /// row 8 (the pre-13u ladder's R3-2) the guard INVOKES the real
+    /// classifier** (`SampleCopyClassifier.classify`, the engine's one
+    /// body, exposed public for exactly this) over the REAL shipped seed
+    /// and asserts `.pristine` — a hand-copied SQL mirror could miss a leg
+    /// the classifier grew and stay green while the real classifier read
+    /// the seed EDITED ("both Sherlock copies survive forever, silently"
+    /// on a reader's second device). The per-leg walk below STAYS, as
+    /// diagnostics: when the invocation assert reds, the legs name WHICH
+    /// fact drifted. (Chapter NAMES are not a leg: the front chapter is
+    /// not named after its note, and the facts carry note titles only.)
     @Test("The shipped seed satisfies the sync dedupe's PRISTINE contract — every leg the classifier reads")
     func theShippedSeedSatisfiesTheDedupesPristineContract() async throws {
         try await expectPristineContract(book: .sherlock)
@@ -571,6 +575,12 @@ struct SampleLibraryTests {
             let manifest = try facts.loadNoteHashes()
 
             try await db.read { db in
+                // THE CONTRACT ITSELF (row 8 — R3-2): the REAL classifier,
+                // invoked over the real seed with the real facts. Every
+                // leg it will ever grow is walked by construction.
+                #expect(try SampleCopyClassifier.classify(db, copyID: bookID, facts: facts)
+                        == .pristine,
+                        "the shipped seed reads PRISTINE to the engine's own classifier")
                 // The book: the schema's default sort, no finish, no extent,
                 // no grouping.
                 let book = try #require(try Row.fetchOne(
