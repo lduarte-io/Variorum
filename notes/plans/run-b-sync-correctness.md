@@ -727,8 +727,15 @@ noted.
 - [x] Row 12 (P31: stalled/deferred gain production readers + the honest face line) — FIXED,
   red-on-old VERIFIED BY BEHAVIOURAL REVERT (core pins ×2 + Mac face pins; iOS build gate green;
   section below).
-- [ ] The two PROPOSALS written (row 9 · row 15) — PENDING
-- [ ] Phase 1 finals (full core suite; iOS build gate for the shared-file touches) — PENDING
+- [x] The two PROPOSALS written (row 9 · row 15) — sections below; AWAITING THE ORCHESTRATOR'S
+  RULINGS (no Phase-2 line built).
+- [x] Phase 1 finals: FULL CORE SUITE **1661 tests / 179 suites — PASSED, exactly the 3 known
+  issues** (the two P8 wraps + the P5(b) wrap, waiting for Phase 2) + the one sanctioned
+  real-server skip. Arithmetic exact: baseline 1654/179 + 7 new pins (2 SyncRepairTests,
+  2 PurgeOpsTests, 1 PurgeConvergenceTests, 2 SyncSchedulerTests), zero new suites. Mac
+  touched-suite run green (18/2: SampleLibraryTests + SyncStalledRowTests); iOS BUILD SUCCEEDED.
+  Fences held: zero schema, zero server/mirror lines, marker 8, `/Applications` and her real
+  store untouched (her live real-store instance observed running and left strictly alone).
 - [ ] **PHASE 2 (opens only at the orchestrator's rulings):** rows 9 + 15 — PENDING
 
 ### DEATHS / RESUMES
@@ -897,6 +904,117 @@ verified by BEHAVIOURAL REVERT of the two assignment lines (both pins fail exact
 flags). Mac `SyncStalledRowTests` (the `.stalled` face + the never-outranks precedence),
 suite-run green 18/2 beside the row-8 guards; **iOS BUILD SUCCEEDED** (the shared-file gate —
 the pre-13u R3-2 lesson applied to its own namesake).
+
+### PROPOSAL — ROW 9 (17d P8, the purge-window mirror orphan): the design fork, for the orchestrator's ruling
+
+**The B1 refinements bind:** the stall lands AT the orphaned placement (block X + VX apply and
+the cursor passes them; the placement's `container_id → N` fails everywhere); the jam is
+permanent and one-way; after B's reconcile NO device holds any row or tombstone for the mirror's
+orphan; nothing ever removes it from the mirror. Client-side only — and the client HAS a
+mirror-row remover: `executePurge`, an existing RPC (zero server lines).
+
+**Shape A (RECOMMENDED) — the ledger-verified orphan heal, janitor/scheduler layer.**
+1. `PullReport` gains the stall's identity (client-side struct only): the stalled row's
+   (table, rowID) and its unresolvable FK referents.
+2. A scheduler round that ends `pullStalled` with a janitor wired hands the stall to
+   `janitor.healPurgeOrphan(_:using:)` (row 12's reader is the hook, already built).
+3. The heal's DISCRIMINATOR — exact, no timers: read the full purge ledger
+   (`purgeLedger(since: 0)` — content-free and prunable by design; the stall path is rare and
+   self-limiting). EVERY missing referent ledger-named (or below a non-zero floor — pruned,
+   same meaning) ⇒ the referent can NEVER arrive: this is a purge orphan, a late-arriving
+   member of a family purged everywhere. Any referent NOT named while the floor is 0 ⇒ a
+   genuine transient straggler ⇒ heal NOTHING (SyncSpec §5's self-healing class stands).
+4. The heal: build the completion set — the stalled row plus its locally-present cascade
+   residue (rows tombstoned with the stalled row's own exact stamp, the cascade contract's
+   discriminator; expanded through `PurgeFamily`) — `executePurge` it (the mirror deletes the
+   orphan rows AND ledgers them, idempotently: every device's feed stops carrying them, and
+   any straggler push meets the `'purged'` refusal), then `deleteLocal` the local residue.
+   Report the heal (SweepReport + status); the scheduler triggers a follow-up round and the
+   pull proceeds past the gap.
+5. **§4f legality:** the healed rows are cascade-stamped members of a family whose deletion
+   crossed the horizon (it was purged); they are TOMBSTONES on the mirror (B's cascade stamped
+   them before the held/banded push); no device holds them live (B1's refinement 2, asserted).
+   The heal COMPLETES an incomplete purge — it removes nothing any device wants, and it is
+   what makes "really gone… not on the server either" true for the orphan variant rows'
+   sealed ciphertext of a purged note. Deterministic: every device runs the same check against
+   the same ledger; `executePurge` is idempotent.
+6. **The fence, stated:** this is the NARROW traced mechanism — a heal for the
+   ledger-verified purge-orphan class only — NOT the general poison-row park/heal subsystem
+   (KnownIssues row 19, owner 12): no parking, no retry policy, no drop-loudly framework; a
+   stall that is not ledger-proven-permanent is left exactly as designed.
+
+**Shape B — prevention at the sweep (REJECTED as primary):** impossible client-side — the A5
+visibility band means the sweeping device cannot see a peer's in-band rows by construction, so
+any quiescence heuristic narrows the window without closing it; a server-side pre-purge orphan
+check is a mirror change (a 13y candidate, not a proposal). Could ride Shape A as a cheap
+narrowing (skip the sweep when the same round's pull was non-empty); deliberately NOT proposed —
+the heal is needed regardless and the smaller diff is the honest one.
+
+**Shape C — skip-and-advance, drop loudly (REJECTED):** deterministic ("a tombstoned arriving
+row whose referents are ledger-purged skips; the cursor advances") and transport-free — but the
+orphan rows stay on the mirror FOREVER (a purged note's sealed ciphertext hosted indefinitely,
+against §4f's whole purpose), and every fresh device re-meets and re-decides them. Stands only
+as the recorded degraded posture for engine compositions with no purge surface — which already
+refuse visibly (`pullToHead`'s typed `pullStalled`) and now carry row 12's flag.
+
+**Pins on the build:** unwrap B1's two wrapped desired-contract blocks (held-push +
+visibility-band: "bounded rounds + reconciles after the release must clear the jam") as the
+red-on-old pins; add the transient guard (a stall whose referent is NOT ledger-named heals
+nothing — no `executePurge` fires); assert both devices converge and the mirror holds zero
+orphan rows after the heal.
+
+### PROPOSAL — ROW 15 (F-1, the dedupe double-retirement race): the design fork, for the orchestrator's ruling
+
+**The constraints bind:** exactly-one-edited ⇒ the EDITED copy survives (LIVE — the ruled
+matrix names survival, not a Trash row); both-edited ⇒ both survive; deterministic on both
+devices; err toward EDITED. Two coordinated repair-rule-scale parts — the escape valve is NOT
+invoked (occasions untouched, classifier untouched, no schema).
+
+**Part 1 — the merge layer's ride-the-row rescue (the BYTES).** In `rescueLosingText`'s
+skip case: when the LOCAL side's dirty `working_text` loses the row and the conflict-card
+rescue cannot land (block dead), the local text OVERLAYS the merged row's `working_text` — the
+edit rides the row, exactly P1's settled end-state ("the edit rides the row INTO the Trash"),
+extended from the pushed direction to the unpushed one. The merged row then differs from the
+server ⇒ the outbox entry SURVIVES ⇒ the ridden text pushes and converges. This also closes the
+GENERAL unpushed-edit-vs-whole-family-deletion bytes loss (P1's un-probed other resume order:
+phone-first, the laptop's unpushed edit currently clobbered by the server's old text — same
+mechanism F-1 rides). **Flagged for arbitration, honestly:** §6's tombstone rule is silent on
+the row's TEXT when the block is dead; P1's ANSWERED block blessed ride-the-row for the pushed
+direction; I read the overlay as the same sentence's other half and §6's "deleting an edit
+nobody chose to lose is the one forbidden outcome" as its warrant — the orchestrator arbitrates
+against the spec.
+
+**Part 2 — the dedupe's defense leg (the COPY, the ruled matrix).** A post-batch check in the
+dedupe's own firing scope: when a pull batch transitioned a same-name sample copy live→dead
+(`touched.tombstonedParents` ∩ the facts' book name), AND the meeting context stands (another
+same-name copy row exists, live or dead — the once-per-store-life event), AND the dead copy's
+family carries LOCAL INTENT THE SERVER NEVER SAW (family rows still in `sync_outbox` after the
+batch — Part 1 is what keeps the edited row's entry alive through the merge), the copy was
+EDITED-HERE with the evidence still in flight: REVIVE the family exact-stamp (the
+`restoreContainer` flip shape, in-apply, every write enqueued explicitly per §7). The revival
+pushes; the other device applies it, its own pass re-fires (a `reading` row applied) and finds
+one live copy → settles. Outcomes on the matrix: exactly-one-edited ⇒ the edited copy ends LIVE
+everywhere with its bytes (the pristine one stays retired); both-edited ⇒ each device defends
+its own ⇒ both survive; deterministic end-state under CAS; errs toward EDITED (outbox dirt =
+unpushed intent = defense).
+- **The accepted corner (record + PROVISIONAL):** her deliberate delete of the sample book on
+  one device while another holds UNPUSHED edits to it, INSIDE the two-copy meeting window,
+  is revived by the defense — visible in the library, never silent; outside the meeting window
+  (one copy — the overwhelmingly normal state) the defense can never fire. Err-toward-EDITED's
+  letter.
+- **Fences re-verified, not absorbed:** NOT row 33's late-registry legs (that class is
+  trailing-chunk evidence of PUSHED engagement; this discriminator is exactly UNPUSHED outbox
+  evidence — disjoint by construction); NOT an occasion redesign (18a keeps its sitting).
+- **Considered and dropped:** a retirement MARK the editing side rescues against (B1's
+  candidate ii — no column exists; zero schema; overloading a user column is corruption), and
+  a B-side pass deferral while its own copy holds outbox dirt (doesn't stop A's stale-evidence
+  retirement from landing; prevention cannot reach the race's cause).
+
+**Pins on the build:** unwrap `p5bTheDoubleRetirementRaceRetiresBothCopiesAndLosesTheEdit` as
+red-on-old (the edited copy survives live, bytes intact); add the both-edited variant (both
+survive); a Part-1 bytes pin (the P1 phone-first order: an unpushed edit rides the row into the
+Trash and Put back returns it); and the no-defense guard (a deliberate delete with NO second
+copy present never revives).
 
 ---
 
