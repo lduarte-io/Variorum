@@ -1749,8 +1749,58 @@ Finals: full core at close — baseline **1673/179 with F-3's 2-issue wrap**; yo
   pull lands the death keeper-first, and both days' entries end live in the ONE Journal with
   the designation converged — byte-identical dumps. The shape-scoped ruling's closure PROVEN by
   evidence, not assumption. Suite 15/15 GREEN (the 14 standing pins untouched beside it).
-- [ ] Beside-suites + finals (full core — baseline 1673/179 with F-3's 2-issue wrap; finish
-  line ZERO wraps) — PENDING.
+- [x] **Beside-suites + FINALS — the finish line reached: ZERO WRAPS.** The exposed classes
+  re-run explicitly first (SyncPushTests' reject roads · SyncPullTests · FaultInjectionSyncTests
+  · SampleLibraryDedupeRepairTests · both FurnitureConvergence suites · RestoreMatrixTests ·
+  SyncConvergenceTests: **82 tests / 11 suites GREEN**, zero issues — the five named
+  byte-unchanged classes' pins all standing). Then the FULL CORE, **verified on TWO full runs:
+  1674 tests / 179 suites — ALL PASSED, ZERO KNOWN ISSUES** + the one sanctioned real-server
+  skip. **Arithmetic exact: baseline 1673/179 + 1 new test (the Journal-face probe), zero new
+  suites — and the baseline's 2 known issues are GONE** (F-3's wrap is now the bare red-on-old
+  contract, green on the fix). Fences held whole: the batch diff is exactly THREE files —
+  `Sync/SyncEngine.swift` (+29, the defer and its trace comment), `SyncRepairTests.swift`,
+  `FurnitureConvergenceRepairTests.swift` — zero schema, zero `Server/` lines, zero `App/`
+  lines, zero mirror access, marker 8; `/Applications` and her real store untouched.
+  **BATCH B5 IS COMPLETE — awaiting the orchestrator's verification; the ladder is not mine
+  to start.**
+
+### THE FIX AS BUILT (Phase 2, to the recorded ruling)
+
+**The defer** (`Sources/VariorumCore/Sync/SyncEngine.swift`, the `.rejected` case): after the
+local-row fetch and before the FK check — `current.row.isTombstoned && !local.isTombstoned &&
+local.syncVersion == 0` ⇒ `result.deferred += 1; continue` (the row stays enqueued untouched,
+the standing straggler idiom one branch below). Shape-scoped exactly as ruled — no table
+clause; the trace comment at the line carries the fingerprint's meaning ("my never-acked row
+was killed before I learned"), the §9 warrant, the bounded-by-the-band argument (a reject
+proves the current state sits on the feed beyond the cursor), and the five byte-unchanged
+reject classes. ZERO new repair semantics: the healing is entirely the shipped legs' —
+`repairTagPathCollision` at the keeper's post-band arrival, row 7's
+`repointApplicationUnderDeadDuplicateTag` at the live application's arrival, and the Journal
+family's F1 twins for the reading face.
+
+**The unwrapped pin** (`SyncRepairTests.aRejectDeliveredRetirementCascadesTheStrandedApplicationBeforeTheKeeperArrives`
+— the name kept, the ledger's and records' reference): the finding trace preserved as history in
+the doc comment with the fix paragraph beside it; the resume-round asserts rewritten to the
+healed flow (deferred ≥ 1 — the ruling's row-12 visibility requirement — tag_B live-deferred
+with its outbox entry standing, the application shipping LIVE); A's next pull asserting row 7's
+arrival leg re-pointed it with the §7 outbox leg; the finals asserting BOTH notes on the keeper
+on BOTH devices — with row 7's two pins (the both-pushed order) this covers the contract in
+both orders, as ruled.
+
+**Revert evidence:** committed first (6edbec44), then the defer disabled in the working tree —
+the pin RED with exactly 8 issues reproducing the finding whole (deferred 0; the retirement
+landing by reject; the application dead in the resume drain; no re-point, no outbox row on A;
+the both-notes-tagged contract red on both devices) — then the committed fix restored,
+11/11 green. Commit-first honored throughout; no protocol slips.
+
+**The Journal-face probe** (the ruling's added deliverable): green as expected on its first
+run — the LIVE STATUS bullet above carries the construction and verdict; the closure the
+shape-scoped ruling bought is now evidence, not assumption. No stop-and-report was triggered.
+
+**What Phase 2 did NOT do, stated:** no change to any other reject shape (restore-vs-redelete,
+F-1's ride, the lost-ack echo, mirror reset, metadata CAS — all outside the fingerprint, their
+pins green in the finals); no schema, no server lines, no `Sync/` file beyond the one; Shape
+B's legs and Shape C's revival were not built (B dominated, C rejected — the ruling).
 
 ### DEATHS / RESUMES
 
