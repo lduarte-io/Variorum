@@ -525,7 +525,44 @@ runbook honestly scoped to current-key copies until then.
 *A device wiped and restored from Time Machine: what custody survives, what identity does it
 present, and can it be mistaken for the old device? (§3.3 decision 13; `ThisDeviceOnly`)*
 
-**PENDING**
+**What custody survives — nothing usable.** Both custody items are
+`kSecAttrAccessibleWhenUnlockedThisDeviceOnly`: the silent bound item
+(`EncryptionKeychain.swift:595`) and the biometric gated item (:643, wrapped by
+`.biometryCurrentSet` in the Secure Enclave). `ThisDeviceOnly` items are device-bound — excluded
+from backups that migrate to another device, and unreadable after an erase (the class keys that
+protected them are gone). So a wipe-and-restore leaves NEITHER the silent nor the gated custody
+item usable. What DOES survive is the ordinary files Time Machine copies: the library FILE (with
+its `sync_state` cursor) and the key FILE beside it — but "the library file carries writing and
+local bookkeeping only — never a key and never an identity" (§3.3). This is decision 13 / corner
+21 verbatim: "Time Machine / Migration Assistant of a Castle Mac carries nothing usable (no key in
+the file; custody items device-bound; tokens bound; the gated item hardware-wrapped)."
+
+**What identity it presents — a FRESH one.** The device identity RIDES the custody item
+(`deviceIdentity()` → `store.deviceID()`, :877). With no bound custody item surviving, the mint
+falls through `session.record?.deviceID ?? leaves.loadPlain()?.deviceID ?? UUID().uuidString`
+(:405–407) to a FRESH UUID — §3.3's "a machine with no custody for a store id has never opened
+that library, so a copy gets a fresh device id by construction; a wiped Keychain mints a new one —
+harmless." To rejoin sync the restored device must ENROLL (it holds no keys): Castle → the
+passphrase or words once (the Touch ID gated item is gone); Standard → the iCloud key once it
+re-syncs, else the passphrase.
+
+**Can it be mistaken for the old device — NO.** The device_id is the discriminator for the
+`device_cursor` and the purge horizon, and it rides custody, which is device-bound and does not
+survive the restore — so a restored device ALWAYS presents a fresh id, never the old device's.
+The subtle interaction is that the restored library holds the OLD cursor value in `sync_state`
+(Time Machine copied it), so the restored device is a (new id, non-zero cursor) pair — which is
+EXACTLY corner 37: "A re-minted device identity with a non-zero cursor is a RETURNER to the purge
+ledger (13j's fence) — reconciled at its first round, never stranded." It reconciles any purges it
+missed while gone and is tracked as its own `device_cursor` row; the old device's cursor is a
+SEPARATE row that self-heals via 13j's 60-day drop-out (or an explicit sign-out). The two are
+never conflated.
+
+**VERDICT: HOLDS.** No usable custody survives (both items are `ThisDeviceOnly`, hardware-bound);
+the restored device presents a FRESH device identity minted by construction; and it cannot be
+mistaken for the old device — the id discriminator is always fresh, and a restored non-zero cursor
+makes it a well-defined RETURNER (corner 37), reconciled at its first round, tracked as its own
+`device_cursor` row. Corner 9 ("same-Mac erase-and-restore proven in the drill") is the live
+evidence. No finding.
 
 ## Q10 — brute-forcing the passphrase at the shipped KDF floor
 
