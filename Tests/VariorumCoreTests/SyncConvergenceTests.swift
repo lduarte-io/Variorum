@@ -9,6 +9,12 @@ import Testing
 /// byte-identical synced tables**. Determinism means identical inputs
 /// converge whichever order batches arrive — the soak randomizes op mixes
 /// AND pull window sizes to prove batch boundaries never matter.
+///
+/// RUN B batch B4 (ledger row 14 — the postmortem's lesson 8): every round
+/// this suite drives is PRODUCTION'S shape — pull → push per device
+/// (`productionRound` / `productionQuiescence`), never the retired
+/// push-both-then-pull convenience order. Where a scenario's staging says
+/// "X reaches the server first", X simply rounds first.
 @Suite("Two-client convergence (Phase 5, Step 7)")
 struct SyncConvergenceTests {
     private func pair() throws -> (a: SyncClient, b: SyncClient, server: FakeSyncServer) {
@@ -21,7 +27,7 @@ struct SyncConvergenceTests {
     private func assertConverged(
         _ a: SyncClient, _ b: SyncClient, _ server: FakeSyncServer, batchSize: Int = 200
     ) async throws {
-        try await syncToQuiescence(a, b, server: server, batchSize: batchSize)
+        try await productionQuiescence(a, b, server: server, batchSize: batchSize)
         #expect(try a.syncedDump() == b.syncedDump())
         #expect(try a.outboxCount() == 0)
         #expect(try b.outboxCount() == 0)
@@ -50,11 +56,11 @@ struct SyncConvergenceTests {
         let postID: String = try a.with { ops, _ in
             try ops.createPost(title: "original", profile: nil).id
         }
-        try await syncToQuiescence(a, b, server: server)
+        try await productionQuiescence(a, b, server: server)
 
         try a.with { ops, _ in try ops.renameContainer(postID, title: "A's title") }
         try b.with { ops, _ in try ops.renameContainer(postID, title: "B's title") }
-        try await a.push()  // A reaches the server first: A's title is server truth…
+        _ = try await productionRound(a)  // A rounds first: A's title is server truth…
         try await assertConverged(a, b, server)
         // …and B's later push CAS-rejected into accepting it. Deterministic,
         // worst case a lost rename — never corruption (SyncSpec §6/AppSpec §9).
@@ -74,11 +80,11 @@ struct SyncConvergenceTests {
             let homeB = try ops.createPost(title: "home B", profile: nil)
             return (made.block.id, homeA.id, homeB.id)
         }
-        try await syncToQuiescence(a, b, server: server)
+        try await productionQuiescence(a, b, server: server)
 
         try a.with { ops, _ in try ops.moveBlock(blockID, to: homeA, at: .end) }
         try b.with { ops, _ in try ops.moveBlock(blockID, to: homeB, at: .end) }
-        try await b.push()  // B's move is server truth this time
+        _ = try await productionRound(b)  // B rounds first: B's move is server truth this time
         try await assertConverged(a, b, server)
         let home = try a.db.fetchString(
             "SELECT container_id FROM container_block WHERE block_id = ? AND deleted_at IS NULL",
@@ -95,11 +101,11 @@ struct SyncConvergenceTests {
             let post = try ops.createPost(title: "p", profile: .journal)
             return try ops.newBlock(in: post.id, text: "the shared base", at: .end).variant.id
         }
-        try await syncToQuiescence(a, b, server: server)
+        try await productionQuiescence(a, b, server: server)
 
         try a.with { ops, _ in try ops.autosave(variantID, text: "rewritten on the Mac", charDelta: 8) }
         try b.with { ops, _ in try ops.autosave(variantID, text: "rewritten on the phone", charDelta: 8) }
-        try await a.push()
+        _ = try await productionRound(a)  // A rounds first: its text wins the row
         try await assertConverged(a, b, server)
 
         // S5, end to end: the row carries one text, the fan carries the
@@ -125,14 +131,14 @@ struct SyncConvergenceTests {
         let postID: String = try a.with { ops, _ in
             try ops.createPost(title: "doomed", profile: .journal).id
         }
-        try await syncToQuiescence(a, b, server: server)
+        try await productionQuiescence(a, b, server: server)
 
         // B journals into the post and ships it; A deletes the post without
         // ever seeing B's entry.
         let newBlock: String = try b.with { ops, _ in
             try ops.newBlock(in: postID, text: "phone entry into a dying post", at: .end).block.id
         }
-        try await b.push()
+        _ = try await productionRound(b)
         try a.with { ops, _ in try ops.deleteContainer(postID) }
         try await assertConverged(a, b, server)
 
@@ -153,6 +159,87 @@ struct SyncConvergenceTests {
             == "phone entry into a dying post")
     }
 
+    /// RUN B batch B4 — the registry-boundary chunk-split arm for the
+    /// plain-delete CASCADE family (ledger row 14; B1's `pushSplitAtBoundary`
+    /// is the instrument): A's push of a deleted post's cascade dies AT the
+    /// `container_block` boundary — the container, block and variant
+    /// tombstones land; every placement tombstone is STRANDED — and B's full
+    /// round runs in the gap. B's local cascade (transition-guarded, active
+    /// during apply) pre-produces the missing placement tombstones with the
+    /// post's exact stamp; A's resumed drain applies over them idempotently;
+    /// and `restoreContainer` still revives the WHOLE family everywhere.
+    /// (The divide family's edge/placement split is the sweep suite's S6;
+    /// the purge family's splits are the probe suite's — this is the
+    /// everyday delete cascade's own cell.)
+    @Test func aDeletedPostsCascadeSplitAtThePlacementBoundaryStillConvergesRestorably() async throws {
+        let server = FakeSyncServer()
+        let aFault = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: aFault)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 977, seed: 2)
+        let (postID, aBlock): (String, String) = try a.with { ops, _ in
+            let post = try ops.createPost(title: "doomed, in chunks", profile: .journal)
+            let made = try ops.newBlock(in: post.id, text: "the desk half", at: .end)
+            return (post.id, made.block.id)
+        }
+        try await productionQuiescence(a, b, server: server)
+
+        // B writes into the post; its entry reaches the mirror.
+        let bBlock: String = try b.with { ops, _ in
+            try ops.newBlock(in: postID, text: "the phone half", at: .end).block.id
+        }
+        _ = try await productionRound(b)
+
+        // A deletes the post. A's round, spelled as its halves: the pull
+        // brings B's block under the locally-dead post (the §7 direction-2
+        // orphan repair stamps it into the cascade), then the push dies AT
+        // the container_block boundary.
+        try a.with { ops, _ in try ops.deleteContainer(postID) }
+        _ = try await a.pull()
+        try await pushSplitAtBoundary(a, table: "container_block", transport: aFault)
+
+        // B's full round in the gap: the container tombstone arrives WITHOUT
+        // its placement tombstones; B's local cascade pre-produces them on
+        // the exact stamp (SyncPullTests' idempotent-cascade contract, here
+        // end-to-end at a real chunk split).
+        _ = try await productionRound(b)
+        let stamp = try a.db.deletedAt("container", postID)
+        #expect(stamp != nil)
+        #expect(try b.db.deletedAt("container", postID) == stamp,
+                "the container tombstone crossed in the first chunk")
+        for blockID in [aBlock, bBlock] {
+            #expect(try b.db.deletedAt("block", blockID) == stamp,
+                    "B: every member block carries the post's exact stamp mid-split")
+        }
+
+        // A resumes; the stranded chunk applies over B's pre-produced rows.
+        try await assertConverged(a, b, server)
+        for client in [a, b] {
+            for blockID in [aBlock, bBlock] {
+                #expect(try client.db.deletedAt("block", blockID) == stamp, "\(client.name)")
+            }
+        }
+
+        // The pointer religion's payoff survives the split: restoring the
+        // post revives the whole family everywhere.
+        try a.with { ops, _ in try ops.restoreContainer(postID) }
+        try await assertConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try client.db.deletedAt("container", postID) == nil, "\(client.name)")
+            let texts = try await client.db.read { db in
+                Set(try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT v.working_text FROM variant v
+                        JOIN container_block cb ON cb.block_id = v.block_id AND cb.deleted_at IS NULL
+                        WHERE cb.container_id = ? AND v.deleted_at IS NULL
+                        """,
+                    arguments: [postID]))
+            }
+            #expect(texts == ["the desk half", "the phone half"],
+                    "\(client.name): the whole family came back, both halves")
+        }
+    }
+
     /// SyncSpec §7's documented convergence behavior, NOT a bug: two devices
     /// structurally dividing the same block offline converge to duplicated
     /// content — no index is violated, so no repair fires; the fan carries
@@ -165,11 +252,11 @@ struct SyncConvergenceTests {
             let made = try ops.newBlock(in: post.id, text: "One. Two. Three.", at: .end)
             return (post.id, made.block.id)
         }
-        try await syncToQuiescence(a, b, server: server)
+        try await productionQuiescence(a, b, server: server)
 
         try a.with { ops, _ in _ = try ops.divide(blockID, cut: 5) }   // "One." | "Two. Three."
         try b.with { ops, _ in _ = try ops.divide(blockID, cut: 10) }  // "One. Two." | "Three."
-        try await a.push()
+        _ = try await productionRound(a)  // A rounds first: its first-half wins the block row
         try await assertConverged(a, b, server)
 
         for client in [a, b] {
@@ -214,7 +301,7 @@ struct SyncConvergenceTests {
             try a.with { ops, db in try mixerA.perform(ops, db, count: 18) }
             try b.with { ops, db in try mixerB.perform(ops, db, count: 18) }
             let window = Int.random(in: 1...9, using: &windowRNG)
-            try await syncToQuiescence(a, b, server: server, batchSize: window, maxRounds: 16)
+            try await productionQuiescence(a, b, server: server, batchSize: window, maxRounds: 16)
             #expect(try a.syncedDump() == b.syncedDump(), "diverged at round \(round) (window \(window))")
             for client in [a, b] {
                 try assertSyncedWorldInvariants(client, round: round)

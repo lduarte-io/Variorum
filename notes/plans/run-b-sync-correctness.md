@@ -1512,8 +1512,14 @@ waits, no subagents (one Sonnet lookup max), commit-before-revert, no trailers.
   the TRAPS name — SyncConvergence, SyncMerge, SyncRepair, SyncPull, SyncPush, FaultInjection,
   EditorRate, StructuralSession, MobileCapture, MultiTenant + the attacker file — plus the
   `outboxRowsAhead` helper and the `sync_reencrypt` SQL body's gate wiring).
-- [ ] SyncConvergenceTests converted (assertConverged + seeds + stagings → production shape) +
-  the deleted-post cascade split arm at the `container_block` boundary — PENDING
+- [x] SyncConvergenceTests converted (assertConverged + 5 seed settles + the soak →
+  `productionQuiescence`; 5 "X reaches the server first" stagings → `productionRound(x)`) + the
+  NEW deleted-post cascade split arm at the `container_block` boundary
+  (`aDeletedPostsCascadeSplitAtThePlacementBoundaryStillConvergesRestorably` — B's local cascade
+  pre-produces the stranded placement tombstones on the exact stamp; restore revives the whole
+  family). Suite run GREEN: 20 tests / 3 suites (the filter also matches the separate
+  `Phase11SyncConvergenceTests`/`Phase13SyncConvergenceTests` structs — out-of-brief residue,
+  their own quiesce helpers already pull→push).
 - [ ] SyncRepairTests converted (seed → productionQuiescence; the both-accepted races as
   concurrent-round weaves; B-round-as-halves where the (c)-leg asserts between them) + the
   cross-batch `post_tag` split arm (the row-7 durable predicate's chunk-gap claim, pinned) —
