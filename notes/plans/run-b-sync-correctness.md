@@ -1557,14 +1557,60 @@ waits, no subagents (one Sonnet lookup max), commit-before-revert, no trailers.
 - [x] SyncMergeTests suite-level exemption annotated (direct merge-unit calls — no transport, no
   drain, no cursor: no round exists to shape; 15 tests green); `ProductionRound.swift`'s header
   now states the DEFAULT-since-B4 rule and the two legal exemption classes.
-- [ ] THE SWEEP TABLE (suite × scenario: converted · exempt-with-reason · boundary cell) written
-  below — PENDING
-- [ ] Finals: FULL CORE SUITE at close (baseline **1669/179, zero wraps**; arithmetic stated
-  exactly) — PENDING
+- [x] THE SWEEP TABLE written below — **37 converted · 3 already-production · 33 exempt (2
+  order-is-the-subject · 31 no-room, every reason at its line) · 4 new arms**; the out-of-brief
+  residue named, not absorbed.
+- [x] Finals: FULL CORE SUITE **1673 tests / 179 suites — PASSED with exactly the 2 known
+  issues** (both the F-3 wrap's own asserts — the ONE stated deviation from the brief's
+  zero-wraps line, per its own finding rule: never a bare red) + the one sanctioned real-server
+  skip. **Arithmetic exact: baseline 1669/179 + 4 new tests (3 boundary arms — one of them F-3's
+  pin — + row 16's tenth arm), zero new suites.** Verified on TWO full runs (57.9 s · the
+  accounting run). Fences held: `Tests/VariorumCoreTests/` only — zero `Sources/` lines, zero
+  `App/` lines, zero schema, zero mirror access, marker 8; `/Applications` and her real store
+  untouched. **BATCH B4 IS COMPLETE — awaiting the orchestrator's verification; the ladder is
+  not mine to start.**
 
 ### DEATHS / RESUMES
 
 - none so far.
+
+### THE SWEEP TABLE (suite × scenario; the round cell and the boundary cell per row)
+
+Legend — **C**: converted to production's round shape this batch · **AP**: already production
+(B1/B2 built it that way, or in-code by construction) · **E(order)**: exempt, the SUBJECT is the
+order itself · **E(no-room)**: exempt, the composition has no room for a round (reason at the
+line in every exempt case) · boundary cells name the split arm's home or the reason none exists.
+
+| Suite (test fns) | Scenario rows | Round cell | Boundary cell |
+|---|---|---|---|
+| SyncConvergenceTests (8) | offlineDisjoint · metadataRace · moveMove · workingTextRace · writingIntoDeletedPost · concurrentDivide · randomizedSoak ×3 seeds | **C** (assertConverged + seeds + 5 stagings + the soak) | workingTextRace → sweep S1 · concurrentDivide → sweep S6 · deleted-post cascade → **NEW ARM** `aDeletedPostsCascadeSplitAtThePlacementBoundary…` (container_block) · disjoint/CAS rows: no cross-table race to split (generic resume = FaultInjection (c)) · the soak randomizes pull windows by design |
+| SyncMergeTests (15) | the §6 matrix + resolveSyncConflict | **E(no-room)** whole — direct merge-unit calls; no transport/drain/cursor exists (suite header) | n/a — no wire in the composition |
+| SyncRepairTests (11) | placementRace · dupTagPaths · row-7 pins ×2 fns · reversedVersionOf · dupMemberships · doubleTombstone · archiveArchive · danglingChosen · defaultArrivingDead | **C** ×8 (seed + assertConverged + the six both-accepted races as the concurrent weave; defaultDead's staging) · **AP** ×2 (the row-7 pins — B2 built them production) | placementRace → sweep S4 · doubleTombstone → sweep S3 · tag family cross-batch → **NEW ARM** `aRejectDeliveredRetirementCascades…` (post_tag) = **FINDING F-3**, wrapped · single-table duplicate races (edge/reading_post/archive): no cross-table boundary in the race · danglingChosen: the weave's per-side receipt IS the one-row-without-the-other shape |
+| SyncPullTests (10) | clean apply · echo ×2 · window size · dirty merge · straggler/deferred-FK/rollback/cascade ×5 | **C** ×3 (real-device stagings) · **E(order)** ×2 (the echo pair — push-then-pull is production's adjacent halves and the echo is the subject) · **E(no-room)** ×5 (ScriptedTransport: crafted batches, no push door) | the straggler/deferred-FK tests ARE batch-boundary mechanics, as the subject |
+| SyncPushTests (7) | drain · table span · mid-push races · reject roads · identity | **E(no-room)** whole — the push half's own mechanics + instrumented windows (suite header) | the mid-drain chunk mechanics are FaultInjection (c)'s subject |
+| FaultInjectionSyncTests (6) | (a)(e)(b)(b′)(c)(d) | **C** (all 8 seeds/tails + (b′) stagings; the armed halves stay — the subject) | (c) IS the generic mid-drain chunk-split resume pin |
+| EditorRateSyncTests (2) | the typing session · the multi-post session | **C** (every beat + tails) | divide family → sweep S6 · commit_point: leaf append-only straggler, no dependent — generic resume covers (suite header) |
+| StructuralSessionSyncTests (1) | the gesture session | **C** (every beat + tail) | the divide family's edge/placement split → sweep S6 (same row family; not duplicated) |
+| MobileCaptureSyncTests (3) | capture/conflict session · double-create · NEW split arm | **C** ×2 | double-create → **NEW ARM** `theDoubleCreateSplitAtTheBlockBoundary…` (block; the bodiless entry, §5 tolerance) |
+| MultiTenantSyncTests (11) | two fleets · stranger corpus · foreign owner · null/absent · colliding ids · settings · tag repair · stale writer · unentitled · fresh account · wire pin | **C** ×8 (fleetQuiesce → production order + 2 stagings + the wire pin) · **AP** ×1 (fresh account — in-code production) · **E(no-room)** ×2 (direct gate calls; crafted third-party pushes) | no cross-tenant split cell exists (a partition is one tenant's); single-user split mechanics are the sweep suite's |
+| MultiTenantSyncAttackerTests (3) | the nine arms · arm 9 · **the tenth arm (row 16)** | **E(no-room)** ×2 — custody pins, byte-untouched (the TRAPS fence; their push/pull halves are per-half wire subjects) · the tenth arm added beside them | row 16's arm is itself the gate cell (fence → proof, + the DDL text pin) |
+
+**Totals: 37 test fns CONVERTED · 3 ALREADY-PRODUCTION · 33 EXEMPT** (classes: 2 order-is-the-
+subject · 31 no-room — direct unit calls, scripted transports, instrumented half-windows, direct
+gate calls, custody pins) **· 4 NEW arms** (3 registry-boundary splits — one of them F-3's
+finding pin — + row 16's tenth). Boundary coverage rides three homes with zero duplication: the
+sweep suite's S1–S7, the three new arms here, and the named no-boundary reasons.
+
+**Out-of-brief residue (recorded, NOT absorbed — the TRAPS name exactly ten suites):** the
+convenience order (`syncToQuiescence` or explicit half sequences) survives outside the sweep's
+scope in PurgeConvergenceTests (the purge idiom is explicit rounds + dump equality BY DESIGN —
+`ProductionRound.swift`'s own header: `executePurge` consumes a seq no feed row carries) ·
+RestoreMatrixTests · KeyProofGateTests · SyncMirrorDumpAndResyncTests ·
+FurnitureConvergenceRepairTests (its own `syncAllToQuiescence`; its F1 pins are already
+cross-chunk ORDER pins) · SampleLibraryDedupeRepairTests · KeyedStoreConvergenceTests ·
+CorpusRotationTests · SyncSchedulerTests · SyncEncryptionTests · OwnerIdentityTests · the
+Phase11/Phase13 lockstep convergence structs (whose local quiesce helpers already run
+pull→push). A future round may extend the sweep there; nothing in this batch touched them.
 
 ### FINDING F-3 — STOP-AND-REPORT (product-defect-shaped; the orchestrator routes; NO product line touched)
 
