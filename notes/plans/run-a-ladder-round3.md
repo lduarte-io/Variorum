@@ -254,3 +254,58 @@ call sites and their pins into one coherent piece: `CommentDraftPark.swift`,
 `MobileComments.swift`, `CommentsPanel.swift`, both pin files); (3) the reverts, run and
 recorded; (4) #140's re-base + (d)'s sentence (record-truth edits, flagged); (5) closing runs
 (both platforms' touched suites + the tutorial spine by its eleven struct names).
+
+---
+
+## THE FIX PASS — RECORDS (all commits pathspec-limited, pushed, no trailers)
+
+**THE FIX PASS'S COMMITS:**
+- `bb5d74ea` — the final calls + the raise's adoption + the three reverts announced (this file).
+- `46aadc10` — the production fix + ALL pins, one coherent piece (the brain's signature change
+  binds both platforms): `CommentDraftPark` peek + draft-keyed `clearIfHeld(blockID:commentID:)`;
+  the phone controller's peek/clear call sites; the Mac's `restoreParkedDraft()` at the head of
+  the panel's `.task` with a side-effect-free `CommentsPanelModel.init`; Mac pins (f)/(g)/(h) +
+  phone pins (vi)/(vii); the round-2 clear-at-restore assertions flipped as the named
+  ruled-change edits.
+- `b1cac50e` — QUESTIONS #140 re-based to the peek (header + (b) + (f), each flagged as a
+  record-truth edit in place) + (d)'s phone dead-block mirror (F3).
+
+**REVERT R3-A RAN AND DISCRIMINATED EXACTLY** (from committed `46aadc10`; the consuming
+`defer { held = nil }` put back on `peek`): Mac — **3 issues**: pin (a) red at its
+held-survives arm, the two-generation pin (f) red at BOTH generation-2 arms; phone — **3
+issues**: pin (i) red at its held-survives arm, pin (vi) red at both generation-2 arms (the
+field `""` against her paragraph, the restored note nil). The phantom pin, the cross-kind pins
+and every guard GREEN — the two-generation loss reproduced alone. Restored by `git checkout --`;
+tree clean.
+
+**REVERT R3-B RAN AND DISCRIMINATED EXACTLY** (the shipped combination reproduced through the
+new API: `restoreParkedDraft()` called from `init` AND the peek consuming): Mac — **5 issues**:
+the phantom pin (g) red at BOTH arms (the bare construction ate the park; the installed reopen
+restored nothing — F1's exact loss), plus (f)/(a) as under R3-A. The guard (d) and the
+cross-kind (h) GREEN. Restored; tree clean.
+
+**REVERT R3-C RAN AND DISCRIMINATED EXACTLY** (`clearIfHeld` made block-keyed again): Mac —
+**2 issues**, phone — **2 issues**: the cross-kind pins red at exactly their two
+held-after-a-different-draft-landed arms on each platform (the landed edit spent the parked add
+draft's insurance, then the landed add spent the parked edit's); the same-draft clear arms and
+the round-2 ghost guards (ii)/(c) GREEN — the raise's direction exactly. Restored; tree clean.
+
+**THE CLOSING RUNS (final tree, literal selectors, the N-tests lines read; one selector trap
+walked on the way — the first spine attempt used guessed middle names, selected only 4 suites
+(25 tests) and still printed green, so the eleven names were re-read from the file's structs
+before the real run):**
+
+| Gate | Result |
+|---|---|
+| Mac — `CommentPanelParkTests` (8) + `QuickNoteParkTests` (6) + THE TUTORIAL SPINE by its eleven struct names (79) | **93 tests in 13 suites — ALL GREEN** |
+| Mobile — `MobileCommentParkTests` (7) + `MobileCommentDraftTests` (3) + `MobileQuickNoteReadFailureTests` (3) | **13 tests in 3 suites — ALL GREEN** |
+
+**Fences:** ZERO `Sources/` lines in this fix pass (the whole pass is App-side: the Shared
+brain, one controller, one panel, two pin files, the records); zero
+`Sources/VariorumCore/Sync/` lines; zero trailers across the pass's commits (grep, count 0);
+tree clean; marker untouched, no schema. The pad's `QuickNotePark` byte-untouched by this pass,
+as the amendment requires.
+
+**Fix pass CLOSED.** Per the flow: the implementer side's sanity pass over `bb5d74ea..HEAD` is
+next; anything it raises returns here for the final word. This is the ladder's CAP — anything
+that cannot settle there is recorded for the author, never looped.
