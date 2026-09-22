@@ -1,9 +1,11 @@
 # RUN A — custody & the text-loss doors (17b + 17l items 1–4/6–7 + 17n + 17m)
 
-**STATUS: CLOSING — kicked off 2026-09-21 at the author's word (the `/architect-phase` invocation carrying
-`notes/plans/pre-beta-standing-fix-runs.md`'s paste-ready kickoff). ALL THREE BATCHES CLOSED, THE LADDER CLOSED AT ITS CAP (all findings dispositioned, final sanity pass CLEAR);
-(orchestrator-verified, adjudications at each record's end). THE LADDER runs next over the combined
-diff `50e581fa..HEAD`.**
+**STATUS: CLOSED 2026-09-21.** All three batches closed (orchestrator-verified); the three-round
+Fable ladder closed at its cap with every finding dispositioned and the final sanity pass CLEAR;
+the four entries (17b · 17l items 1–4/6–7 · 17n · 17m) CLOSED in the 17 file with 17l item 5
+deferred to RUN B; finals green on all four gates; the orchestrator's closing walk done; the
+install refreshed behind the A1 rail (`1548f68a…` → `d22dc18e…`). The CLOSEOUT section below is
+the record's summary; RUN B is a fresh invocation at her word.
 
 An ad-hoc standing-fixes phase under a Fable orchestrator per the runs file (her confirmed grouping,
 2026-09-14, R-13u-6). **The entries themselves live in `notes/plans/phase-17-standing-fixes.md` — that
@@ -1799,9 +1801,17 @@ the ⌘K palette's ⏎ did not run my typed command twice (nothing minted — ca
 Library rather than trusting the gesture); the pad's own chord was the road, per the walker
 facts.
 
-**THE INSTALL REFRESH:** **PENDING — runs after this finals commit** (the 13u4 recipe verbatim:
-A1 backup of the whole real-store folder, byte-verified; a clean throwaway worktree Release build
-from this head; SHA-256 old→new; codesign + both access groups; zero instances throughout).
+**THE INSTALL REFRESH — DONE 2026-09-21 (the 13u4 recipe verbatim):**
+
+| | |
+|---|---|
+| **A1 backup (taken FIRST, zero instances)** | `~/dev/variorum-store-backups/run-a-refresh-20260922T004359Z/` — the whole real-store folder, **149 files, `diff -rq` byte-verified** |
+| **Built from** | `aa468390` (the finals commit), clean throwaway worktree at `/tmp/run-a-release`, standard Release (worktree + DerivedData removed after) |
+| **Old → new binary SHA-256** | `1548f68a…` (= 13u4's recorded install hash — custody chain clean) → `d22dc18e9c5acabdb6e1ade619fb7dd82daa2c50510dd79cc9d57caa60eec79e` (installed copy verified IDENTICAL) |
+*[removed for publication]*
+| **Instances** | zero at every step; her store never opened by any session (the backup is a closed-store file copy) |
+
+**THE RUN IS CLOSED.** Hard stop per the kickoff: RUN B is a fresh invocation at her word.
 
 **HER RATIFY BUNDLE (the checkpoint report's list):** QUESTIONS **#136** (A1's five PROVISIONALs)
 · **#137** (the quick-note park + the one-shot quit decline; (b) extended as a record-truth edit)
