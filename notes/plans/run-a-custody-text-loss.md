@@ -1,7 +1,7 @@
 # RUN A — custody & the text-loss doors (17b + 17l items 1–4/6–7 + 17n + 17m)
 
-**STATUS: OPEN — kicked off 2026-09-21 at the author's word (the `/architect-phase` invocation carrying
-`notes/plans/pre-beta-standing-fix-runs.md`'s paste-ready kickoff). ALL THREE BATCHES CLOSED
+**STATUS: CLOSING — kicked off 2026-09-21 at the author's word (the `/architect-phase` invocation carrying
+`notes/plans/pre-beta-standing-fix-runs.md`'s paste-ready kickoff). ALL THREE BATCHES CLOSED, THE LADDER CLOSED AT ITS CAP (all findings dispositioned, final sanity pass CLEAR);
 (orchestrator-verified, adjudications at each record's end). THE LADDER runs next over the combined
 diff `50e581fa..HEAD`.**
 
@@ -107,22 +107,22 @@ table: instance × host/path, each cell FIXED-with-named-pin or provably SAFE.
 
 | # | Batch | Item (the binding text is the 17 entry's) | Status |
 |---|---|---|---|
-| 1 | A1 | **17b P4** — the phone's comments sheet clears the typed draft before the write is attempted (a refused submit destroys her comment; the edit arm loses the target too) — `MobileCommentsSheetView.swift:105` / `MobileComments.swift` | open |
-| 2 | A1 | **17b P5** — `promotePicks` copies an ARCHIVED pick as a block's ONLY take (I10 at birth; the copied text is not what the column showed) — `Operations+Versions.swift:674` | open |
-| 3 | A1 | **17b P6** — `restoreNoteVersion` (and `deleteContainer`) replace/remove content without clearing the redo future (a redo resurrects a block from the abandoned timeline, or wedges the session's redo stack) — `Operations+NoteVersions.swift:187`, `UndoStack.swift` | open |
-| 4 | A1 | **17b P7** — the boards' branch / ＋ new take / ⌘T doors copy the STORE past a dirty buffer where Write's twin flushes first (`branchTake`, `branchIntoColumn`, `blankIntoColumn`, `addWriteColumn`, `replaceColumnWithNewWrite`, `writeNewTakesEverywhere`, `WriteTakesPanel:238`) — verify against OverallModel §3's "branching inherits the current buffer" | open |
-| 5 | A1 | **17b P14** — the phone quick note's `try?` folds a read failure into "There's nothing to save yet", orphans a created note, and lets the clock double-mint — `MobileQuickNote.swift:682` | open |
-| 6 | A1 | **17b P36** — a failed re-read in `applyPendingIfClean` discards the deferred projection instead of restoring it (the two sibling guards restore) — `EditorViewModel.swift:803` | open |
-| 7 | A1 | **17b row 65** — the quick-note pad's close/quit-while-refused road still loses the capture (KnownIssues row 65; #120(e) is the shipped refusal shape). The parking mechanism is a DESIGN FORK: the implementer proposes BEFORE building, the orchestrator rules, PROVISIONAL logged | open |
-| 8 | A2 | **17l item 1** — the seeder's discover-then-mint latch + the `purged_row` consult in `SeededBookRestore.ensure` (KnownIssues row 38). Pins: concurrent open + launch seed ⇒ one book; a purged book + the tutorial door ⇒ none | open |
-| 9 | A2 | **17l item 2** — the migration drill's escrow leg under a throwaway scope: the drill overrides the escrow pair for its scope; re-run under `TEST_RUNNER_VARIORUM_MIGRATION_DRILL=1` (KnownIssues row 39). PLUS the read-only confirm from her Mac that the window migration removed the legacy escrow item (Keychain inventory READ — never a write) | open |
-| 10 | A2 | **17l item 3** — her four ruled #90 wording changes, each a copy constant + its pin on both platforms: 54 *Pick Up New Keys* · 61/67 the conflict-follow Done's WHY · 46 the Castle-born-into-Standard consent direction (cancel · put the account in Castle · rejoin) · MINOR-6 the website's sign-in road named (13s re-voices all) | open |
-| 11 | A2 | **17l item 4** — the dead Replace-All-Keys door from the main window: present `ProtectionController.activeSwitch` from the root (KnownIssues row 40). Pin: the door invoked with no Protection pane mounted ⇒ the ceremony presented (red today) | open |
-| 12 | A2 | **17l item 6** — the ceremony's *(0 of 0)* renders *preparing…* until the first pulled window lands. Copy + a face pin | open |
-| 13 | A2 | **17l item 7** — the #90-residue copy: NIT-N8's face is BUILT (pre-13x F3) — VERIFY it stands (pin re-run), and land MINOR-N4 (2)'s `.failed`-after-`regenerated` copy PROVISIONAL in the ruled ledger-61 sentence family (#90 item 11 is unruled — the orchestrator's scope ruling below; QUESTIONS row + her ratify list) | open |
-| 14 | A2 | **17n** — the encryption passphrase's 12-character floor at every SETTING door (sync setup's first device · change passphrase · the migration's confirm where a new word is set · Replace All Keys' new-passphrase checkbox), one refusal sentence, NEVER at unlock; pins both platforms; the tutorial chapter's Lesson 2 + the book's Chapter 2 say the floor once (re-seed consequence recorded at close) | open |
-| 15 | A2 | **The phrase-transit one-arm pin** (KnownIssues row 32, 17l's re-own): prove the store-only-phrase corner unreachable after pre-13x (3a · 3b · 4a), or fix the few lines. NOTE: this pin is a VERIFICATION — green-on-both-sides here is the row's own success criterion (record it as VERIFIED, not hollow), red means fix | open |
-| 16 | A3 | **17m** — the Re-link-your-Apple-account door (Standard only): consent sentence naming the Apple account · the passphrase (a key act) · one proof-authorized re-land of the Apple-held copy via the F2 heal road's shape (`EncryptionSession.relandAppleHeldCopy(under:)` behind consent); refuses when `A` is unreadable (the waiting face). Pins as the entry writes them; the book's Chapter 2 / FAQ gain the door's sentence. Settings placement: the Protection pane (the entry's "Account & Encryption" predates the nine-pane split — PROVISIONAL, one move to change) | open |
+| 1 | A1 | **17b P4** — the phone's comments sheet clears the typed draft before the write is attempted (a refused submit destroys her comment; the edit arm loses the target too) — `MobileCommentsSheetView.swift:105` / `MobileComments.swift` | **FIXED** |
+| 2 | A1 | **17b P5** — `promotePicks` copies an ARCHIVED pick as a block's ONLY take (I10 at birth; the copied text is not what the column showed) — `Operations+Versions.swift:674` | **FIXED** |
+| 3 | A1 | **17b P6** — `restoreNoteVersion` (and `deleteContainer`) replace/remove content without clearing the redo future (a redo resurrects a block from the abandoned timeline, or wedges the session's redo stack) — `Operations+NoteVersions.swift:187`, `UndoStack.swift` | **FIXED** |
+| 4 | A1 | **17b P7** — the boards' branch / ＋ new take / ⌘T doors copy the STORE past a dirty buffer where Write's twin flushes first (`branchTake`, `branchIntoColumn`, `blankIntoColumn`, `addWriteColumn`, `replaceColumnWithNewWrite`, `writeNewTakesEverywhere`, `WriteTakesPanel:238`) — verify against OverallModel §3's "branching inherits the current buffer" | **FIXED** |
+| 5 | A1 | **17b P14** — the phone quick note's `try?` folds a read failure into "There's nothing to save yet", orphans a created note, and lets the clock double-mint — `MobileQuickNote.swift:682` | **FIXED** |
+| 6 | A1 | **17b P36** — a failed re-read in `applyPendingIfClean` discards the deferred projection instead of restoring it (the two sibling guards restore) — `EditorViewModel.swift:803` | **FIXED** |
+| 7 | A1 | **17b row 65** — the quick-note pad's close/quit-while-refused road still loses the capture (KnownIssues row 65; #120(e) is the shipped refusal shape). The parking mechanism is a DESIGN FORK: the implementer proposes BEFORE building, the orchestrator rules, PROVISIONAL logged | **FIXED** (A1 to the ruling; hardened at ladder R1) |
+| 8 | A2 | **17l item 1** — the seeder's discover-then-mint latch + the `purged_row` consult in `SeededBookRestore.ensure` (KnownIssues row 38). Pins: concurrent open + launch seed ⇒ one book; a purged book + the tutorial door ⇒ none | **FIXED** |
+| 9 | A2 | **17l item 2** — the migration drill's escrow leg under a throwaway scope: the drill overrides the escrow pair for its scope; re-run under `TEST_RUNNER_VARIORUM_MIGRATION_DRILL=1` (KnownIssues row 39). PLUS the read-only confirm from her Mac that the window migration removed the legacy escrow item (Keychain inventory READ — never a write) | **FIXED** |
+| 10 | A2 | **17l item 3** — her four ruled #90 wording changes, each a copy constant + its pin on both platforms: 54 *Pick Up New Keys* · 61/67 the conflict-follow Done's WHY · 46 the Castle-born-into-Standard consent direction (cancel · put the account in Castle · rejoin) · MINOR-6 the website's sign-in road named (13s re-voices all) | **FIXED** |
+| 11 | A2 | **17l item 4** — the dead Replace-All-Keys door from the main window: present `ProtectionController.activeSwitch` from the root (KnownIssues row 40). Pin: the door invoked with no Protection pane mounted ⇒ the ceremony presented (red today) | **FIXED** |
+| 12 | A2 | **17l item 6** — the ceremony's *(0 of 0)* renders *preparing…* until the first pulled window lands. Copy + a face pin | **FIXED** |
+| 13 | A2 | **17l item 7** — the #90-residue copy: NIT-N8's face is BUILT (pre-13x F3) — VERIFY it stands (pin re-run), and land MINOR-N4 (2)'s `.failed`-after-`regenerated` copy PROVISIONAL in the ruled ledger-61 sentence family (#90 item 11 is unruled — the orchestrator's scope ruling below; QUESTIONS row + her ratify list) | **VERIFIED + FIXED** (A2) |
+| 14 | A2 | **17n** — the encryption passphrase's 12-character floor at every SETTING door (sync setup's first device · change passphrase · the migration's confirm where a new word is set · Replace All Keys' new-passphrase checkbox), one refusal sentence, NEVER at unlock; pins both platforms; the tutorial chapter's Lesson 2 + the book's Chapter 2 say the floor once (re-seed consequence recorded at close) | **FIXED** |
+| 15 | A2 | **The phrase-transit one-arm pin** (KnownIssues row 32, 17l's re-own): prove the store-only-phrase corner unreachable after pre-13x (3a · 3b · 4a), or fix the few lines. NOTE: this pin is a VERIFICATION — green-on-both-sides here is the row's own success criterion (record it as VERIFIED, not hollow), red means fix | **VERIFIED — its one found world FIXED** (A2) |
+| 16 | A3 | **17m** — the Re-link-your-Apple-account door (Standard only): consent sentence naming the Apple account · the passphrase (a key act) · one proof-authorized re-land of the Apple-held copy via the F2 heal road's shape (`EncryptionSession.relandAppleHeldCopy(under:)` behind consent); refuses when `A` is unreadable (the waiting face). Pins as the entry writes them; the book's Chapter 2 / FAQ gain the door's sentence. Settings placement: the Protection pane (the entry's "Account & Encryption" predates the nine-pane split — PROVISIONAL, one move to change) | **FIXED** |
 
 **Orchestrator scope rulings at kickoff (recorded so no batch re-derives them):**
 - **Row 7:** the runs file names the fix shape ("an unfiled-capture parking slot"); the MECHANISM
@@ -1741,6 +1741,25 @@ reviewer's own guessed-spine-selector walk reported honestly and ADOPTED into EN
 spot-checked, `Sources/` diff-empty confirmed, both Mac park suites re-run directly — 14/2
 green.** **Next: the implementer's FINAL sanity pass over `bb5d74ea..HEAD` — the cap; anything
 unsettled there is recorded for the author, never looped.**
+
+**THE FINAL SANITY PASS (the A1 implementer, 2026-09-21): CLEAR on all five, nothing raised —
+NOTHING IS CARRIED TO THE AUTHOR UNSETTLED FROM THE FLOW.** Its re-derivation: `peek` a pure read
+with exactly three clear roads (grep-verified — two `peek` sites, three `clearIfHeld` sites, no
+fourth spender); both cross-kind arms closed with the phone's `commentID` captured BEFORE the
+flight so the `.landed` arm's own `editingID = nil` cannot corrupt the key; the init
+side-effect-free with the restore ordered before `focus`/`start()`; the flipped assertions exactly
+two lines, both named ruled-change edits, with three `held == nil` guards surviving per platform;
+the one-shot consume unchanged and orthogonal. Its runs: Mac 116/17 (the full eleven-name spine
+inside) · phone 16/4, the P4/P14 pins riding unmodified; `git diff` over the pass: zero
+`Sources/`, zero `AppSession.swift` — the pad's park byte-untouched, as the amendment requires.
+
+**THE LADDER IS CLOSED (three rounds, the cap):** round 1 — 0/1/1/2 (MAJOR fixed; MINOR split,
+its behaviour change dismissed as wrong; 2 NIT fixed) → round 2 — 0/1/0/1 (the new MAJOR ruled and
+built BOTH platforms; the NIT at sentence size) → round 3 — 0/2/0/1 (the peek amendment + the
+draft-keyed clear, the phantom fix, the record sentence). Every finding carries a written
+disposition in its round file and this section; every fix red-on-current with a discriminating
+behavioural revert; two sanity passes and a final one, all CLEAR; two ruling amendments made
+repo-first at the moments the premises fell. Zero `Sync/` lines in every pass; the marker stays 8.
 
 ---
 
