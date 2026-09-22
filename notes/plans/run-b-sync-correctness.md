@@ -1730,7 +1730,14 @@ Finals: full core at close — baseline **1673/179 with F-3's 2-issue wrap**; yo
   row 7's arrival leg re-pointed it with the §7 outbox leg; the finals asserting BOTH notes on
   the keeper on BOTH devices, the old wrap's contract now bare). `SyncRepairTests` **11/11
   GREEN, ZERO known issues** — the two F-3 wraps are gone.
-- [ ] Red-on-old by BEHAVIOURAL REVERT against the committed fix — PENDING.
+- [x] **Red-on-old VERIFIED BY BEHAVIOURAL REVERT against the committed fix** (6edbec44
+  committed FIRST; the defer condition then disabled in the working tree — `if false,` prefixed
+  — and the unwrapped pin re-run: **RED with exactly 8 issues**, the finding's whole mechanism —
+  `bResumePush.deferred` 0 against ≥ 1, the retirement landing by reject (tag_B dead on B), the
+  application dead in the resume drain, the outbox drained, A receiving it tombstoned with no
+  re-point and no outbox row, and the final both-notes-tagged contract failing on BOTH devices
+  (line 399 ×2 — the formerly-wrapped asserts). Restored via `git checkout` of the committed
+  fix; suite re-run **11/11 GREEN**.)
 - [ ] The Journal-face probe pin (expected green) — PENDING.
 - [ ] Beside-suites + finals (full core — baseline 1673/179 with F-3's 2-issue wrap; finish
   line ZERO wraps) — PENDING.
