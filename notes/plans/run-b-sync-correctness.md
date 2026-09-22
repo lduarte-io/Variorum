@@ -307,8 +307,11 @@ STOP AND REPORT to the orchestrator instead of adding one).
   scenarios; the purge idiom stays explicit rounds + dump equality), and `pushSplitAtBoundary`
   (the registry-boundary chunk split via the armed mid-drain fault). Janitor legs deliberately
   composed per scenario, not baked in (the fault transport has no purge surface).
-- [ ] Probe P1 (delete-vs-edit-plus-new-take) — PENDING.
-- [ ] Probe P3 (edit-vs-edit, production shape) — PENDING.
+- [x] Probe P1 (delete-vs-edit-plus-new-take) — RUN, GREEN pin
+  (`SyncReconciliationProbeTests.p1DeleteVsEditPlusNewTake`, batch sizes 200 and 1); answer
+  recorded below; canon confirmed.
+- [x] Probe P3 (edit-vs-edit, production shape) — RUN, GREEN pin
+  (`SyncReconciliationProbeTests.p3EditVsEditOnOneTake`, batch sizes 200 and 1); canon confirmed.
 - [ ] Probe P2(a) (horizon holds while the laptop is live) — PENDING.
 - [ ] Probe P2(b) (60-day drop-out returner vs purged family) — PENDING.
 - [ ] 17d P8 run (ledger row 6) — PENDING.
@@ -324,7 +327,37 @@ STOP AND REPORT to the orchestrator instead of adding one).
 
 ### PER-PROBE ANSWERS
 
-*(sections below are appended as each probe lands — PENDING until then)*
+#### P1 — delete-vs-edit-plus-new-take (ledger row 1): CONFIRMED — canon, green pin
+
+Run exactly as the memo states it (production round shape, laptop resumes first), at transport
+batch sizes 200 and 1. **The answers, in the memo's own terms:**
+
+- **N is in the Trash on both devices, `deleted_at` matching** — the tombstone wins (rule 1); the
+  phone's cascade stamp is the one stamp everywhere.
+- **T2 exists on both, tombstoned with N's EXACT stamp** — the §7 orphan repair direction 2 stamps
+  the live take arriving under the locally-dead block into the cascade; it rides Put back.
+- **T1's `working_text` after the merge is the laptop's NEW text — on BOTH devices.** Mechanism,
+  traced then observed: the phone's merge takes the server-wins baseline (the laptop's pushed
+  edit) and overlays the phone's tombstone on it, so the edited text rides the row INTO the
+  Trash; `rescueLosingText`'s block-live guard SKIPS the conflict card (the whole block died with
+  the note — `rescueSkippedWhenTheWholeBlockDied`'s unit rule, now proven end-to-end at the
+  whole-note scale). The phone's OLD text is the same take's pre-edit ancestor state, not a
+  separate intent — no one's intent is lost; zero `'conflict'` rows exist afterwards.
+- **`restoreContainer(N)` on the laptop brings back the WHOLE family and converges to the phone
+  byte-identically**: N, the block, T1 (still the new text), T2 (its own text) — every row revived
+  on the one exact stamp, both dumps equal after the settle.
+
+Verdict: **the §6 rescue rule's whole-note-tombstone case resolves SAFELY under shipped code** —
+deletion wins into the Trash, the edit survives on the row, the new take rides the stamp, Put
+back restores everything. No canon sentence falsified; no fix owed. Positive-activity asserts pin
+that the phone's resume round really merged (≥2), applied (≥1) and repaired (≥1) — the pass
+cannot go vacuous.
+
+#### P3 — edit-vs-edit on one take, production shape (ledger row 3): CONFIRMED — canon, green pin
+
+S5 end-to-end under production's pull→push order at batch sizes 200 and 1: the loser lands as
+exactly ONE `'conflict'` card on the same block; both texts live on both devices; dumps equal.
+The Phase 5 pin's claim survives the round shape production actually runs.
 
 ---
 
