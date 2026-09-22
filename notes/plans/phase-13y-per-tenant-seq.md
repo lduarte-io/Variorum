@@ -169,6 +169,32 @@ proven on her real account).
 - Fragments-side implementation — the brief carries; their repo is
   hands-off.
 
+## AUTHOR RULING (2026-09-21, at the RUN B kickoff sitting — the scope CONFIRMED, the abuse numbers DELEGATED with one named constraint)
+
+Asked whether 13y was worth discussing further or settled, and given the tradeoffs straight
+(the tenant-to-tenant leak is worst at friends-beta scale; the migration-cost asymmetry is the
+real reason for the pre-release slot; the riders are necessary regardless; the costs are the live
+§12 window, a new per-owner counter hot row, and one phase of beta delay), she ruled:
+
+- **The scope stands as is.** Her words: *"I think we should keep it as is then, sounds like it's
+  solid and will be helpful."* No reopening of the per-tenant design; the plan runs as authored
+  plus the 2026-09-21 correction note above (marker 8→9, the `12_` slot, the rider fold-in).
+- **The abuse-guard NUMBERS are delegated to this phase's recommendation** — her words: *"I'll
+  probably just go with your or phase 13y's recommendation on the abuse number."* The phase's
+  Step 4 proposes concrete numbers with its reasoning; she confirms at its sitting ("probably" is
+  hers — the confirmation is still a sitting item, not pre-granted).
+- **ONE NAMED CONSTRAINT the numbers must serve, hers verbatim:** *"I do need to account for
+  onetime migrations from existing notes app but in general I don't want it abused."* A new
+  user's one-time import of an existing notes corpus (the 13h/Apple-Notes road, or any bulk first
+  load) is an HONEST write burst the quota must never refuse — the guard's shape must
+  distinguish a first-load burst from sustained abuse (e.g. a generous first-window allowance or
+  burst bucket beside a lower steady-state rate; the mechanism is Step 4's to design). A refused
+  honest import on day one is the worst possible first impression and is this constraint's whole
+  point.
+- **The launch-era framing confirmed:** *"once sync is paid for I can also price it more
+  appropriately"* — the numbers are free-tier launch numbers; 13t revisits with pricing, exactly
+  as NON-GOALS already states.
+
 ## ADDENDUM (2026-09-01 — from the pre-13x postures design, at the author's word)
 The minimal abuse guard gains two named items: **(1) the re-authentication doors** — Replace Keys,
 account deletion, and the Standard-mode confirmations (change-passphrase without biometrics, the
