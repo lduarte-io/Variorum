@@ -461,6 +461,56 @@ struct PurgeOpsTests {
         }
     }
 
+    /// **RUN B B2 row 11 (17d P28):** `reapplyStructural`'s untombstoning
+    /// loop performs exactly `revertDeleteBlock`'s transition (its own
+    /// comment says so) — but it was the ONE revive road that did not call
+    /// `voidPurgeIntents`. The entry's trace, through the real doors:
+    /// divide → type in the minted successor → ⌥⌘Z (the undo TRAYS the
+    /// diverged mint) → Delete Now on it in the tray (a LIVE intent) →
+    /// ⇧⌥⌘Z. Red on old: the intent stays live; an ordinary re-delete
+    /// before the next sweep then names a genuinely-tombstoned row — the
+    /// stamp-aware fences hide it from the Trash and the tray
+    /// (`pi.deleted_at IS NULL`), `familyVerdict` no longer reads
+    /// `.stale`, and the janitor takes it at the horizon with NO 30-day
+    /// window at all.
+    @Test func theRedoRoadVoidsALiveIntentLikeEverySiblingRevive() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let post = try ops.createPost()
+            let a = try ops.seedBlock(in: post.id, text: "First half. Second half.")
+            let divided = try ops.divide(a.block.id, cut: 13)
+            // She works in the minted successor, so the undo TRAYS it
+            // (the divergence bucket) and the tray's Delete Now can name it.
+            try ops.autosave(divided.variant.id, text: "Second half, reworked.", charDelta: 10)
+            #expect(try stack.undo(with: ops) == "Divide")
+            #expect(try db.deletedAt("block", divided.block.id) != nil,
+                    "the diverged mint trays rather than vanishing")
+            _ = try ops.requestPurge(
+                [SyncPurgeTarget(table: "block", rowID: divided.block.id)])
+
+            #expect(try stack.redo(with: ops) == "Divide")
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM block WHERE id = ? AND deleted_at IS NULL",
+                [divided.block.id]) == 1, "the redo brought the block back")
+            #expect(try db.fetchInt(
+                """
+                SELECT COUNT(*) FROM purge_intent
+                WHERE table_name = 'block' AND row_id = ? AND deleted_at IS NULL
+                """, [divided.block.id]) == 0,
+                    "…and the leftover intent can never claim it — the B1 rule, redo road")
+
+            // The consequence the entry traced: an ordinary re-delete
+            // starts a FRESH 30-day clock and the row LISTS.
+            try ops.deleteBlock(divided.block.id)
+            let rows = try db.read {
+                try Queries.trash($0, now: harnessNow, kinds: [.block])
+            }
+            #expect(rows.map(\.id).contains(divided.block.id),
+                    "the re-deleted row lists on its fresh clock, never intent-limbo")
+        }
+    }
+
     @Test func aReDeletedRowListsInTheTrashDespiteItsVoidedIntent() throws {
         try withOperations { ops, db in
             let post = try ops.createPost(title: "note", profile: .generic)

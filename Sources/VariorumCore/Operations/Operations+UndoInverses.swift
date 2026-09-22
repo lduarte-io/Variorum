@@ -421,6 +421,14 @@ extension Operations {
                 block.updatedAt = now
                 try block.update(db)
                 try flipBlockCascadeTombstones(db, blockID: minted.blockID, stamp: stamp, now: now)
+                // 13j ladder B (B1), the redo road (RUN B B2 row 11 — 17d
+                // P28): this loop flips the same tombstone every sibling
+                // revive flips, so a restored row voids any live intent
+                // naming it — or a Delete Now confirmed between the undo
+                // and this redo would still claim the block she just
+                // brought back, and an ordinary re-delete before the next
+                // sweep would purge it with no 30-day window at all.
+                try voidPurgeIntents(db, table: "block", rowID: minted.blockID)
             }
 
             for preImage in restoringTexts {
