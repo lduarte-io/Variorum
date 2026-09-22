@@ -2016,7 +2016,7 @@ table's two rows ✔ · the master plan's order line 3 ticked ✔ · QUESTIONS #
 |---|---|---|
 | Core | `swift test` | **1679 tests / 179 suites — ALL PASSED, zero known issues** (+ the one sanctioned real-server skip). Baseline at open 1639/177; the run added exactly 40 tests / 2 suites — the probes, the sweep suite, the fix pins, the ladder pins |
 | iOS build | `xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS` | **BUILD SUCCEEDED** |
-| Mobile | `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` | **PENDING (in flight)** |
+| Mobile | `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` | **642 tests / 109 suites PASSED with exactly the 4 known issues** — byte-identical to RUN A's close (the run added no mobile tests; the count holding exact is the right result) |
 | Full Mac | `xcodebuild test -scheme Variorum -destination platform=macOS` | **PENDING (runs alone after mobile)** |
 
 **THE INSTALL REFRESH (her authorization recorded in KICKOFF):** **PENDING** — A1 backup name ·
