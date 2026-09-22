@@ -33,6 +33,20 @@ precedent — her hands on the trigger); nothing deploys without her.
 dissolved by R13p-16). **This phase takes marker 7→8 and
 `11_phase13y_tenant_seq.sql`.**
 
+> **⚠️ STALE — CORRECTED 2026-09-21 (the RUN B orchestrator, while
+> answering the author's 13y question; this plan predates pre-13x):**
+> pre-13x took marker **7→8** and claimed `11_pre13x_postures.sql`
+> (SyncSpec §12's pre-13x entry; `lockstepVersion = 8` today). **This
+> phase therefore takes marker 8→9 and `12_phase13y_tenant_seq.sql`.**
+> The same refresh pass at this phase's kickoff must fold in the riders
+> the pre-release table added AFTER this plan was authored (its row 14):
+> **the key-proof challenge** (the static bearer proof → per-request
+> challenge; pre-13x CONSIDERATIONS item 1) · **the A5 horizon's one
+> source of truth** (the server's 2 s vs the client's 2.5 s in
+> `CorpusRotation.horizonWait`; item 2) · NIT-4 · the adopt-road pin —
+> each a step with its own tests, the key-proof challenge with a short
+> design memo (nonce/replay-window shape) before its build.
+
 ## WHY (one paragraph)
 
 The mirror's `server_seq` is ONE global monotonic sequence stamped
