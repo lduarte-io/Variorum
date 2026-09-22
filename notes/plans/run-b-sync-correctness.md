@@ -189,7 +189,8 @@ B2, or RECORDED with a named owner outside the run.)*
 
 **Orchestrator: Fable — this session** (writes no feature code beyond adjudication/record acts).
 **Implementer: Fable (`claude`-type agent on this model), a FRESH session per batch, strictly
-sequential, one at a time, ONE batch each** (B1 → B2 → B3 → B4). **Cold review: ONE
+sequential, one at a time, ONE batch each** (B1 → **S1, the hosted stress pass — read-only,
+custody/postures, its own findings file, never a fix** → B2 → B3 → B4). **Cold review: ONE
 `fable-reviewer` ladder over the run's COMBINED diff** after B4 (fresh reviewer per round; cap
 three rounds). **This is a SAME-MODEL phase** — findings go to a fresh Fable fix session verbatim,
 agree/dispute returns, and **the orchestrator arbitrates against the spec docs (the spec wins;
@@ -217,13 +218,17 @@ devices — the sync twin of "the refresh follows the walk," recorded rather tha
 
 ---
 
-## KICKOFF — her answers (recorded verbatim-faithful as they land)
+## KICKOFF — her answers (2026-09-21, the kickoff sitting)
 
-- **The live-round window:** PENDING (asked at kickoff).
-- **The stress-test pass (the pre-13x CONSIDERATIONS' ten questions — her-triggered, read-only;
-  findings file as 17/13y candidates):** PENDING (asked at kickoff — hosted beside this run, or
-  hers to run separately).
-- **The optional live Replace All Keys at the window (item 5 felt live):** PENDING.
+- **The live-round window: AT THE RUN'S CLOSE** (her pick of the recommended option) — batches →
+  ladder → finals first; then ONE coordinated window (A1 backup → both refreshes → her round each
+  direction); the orchestrator pings her when everything else is done.
+- **The stress-test pass: HOSTED IN RUN B** (her pick) — one read-only Fable session in a
+  sequential slot, **slotted as S1 between B1 and B2** (both hunts complete before the fix batch,
+  so an in-scope finding can join B2's brief; out-of-scope findings file as 17/13y candidates).
+  Its findings file: `notes/plans/run-b-stress-pass.md`.
+- **The optional live Replace All Keys at the window (item 5 felt live): UNANSWERED — HELD** on
+  her checklist for the window itself; the headless pins are the evidence either way.
 
 ---
 
