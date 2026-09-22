@@ -569,10 +569,78 @@ evidence. No finding.
 *Brute-force the encryption passphrase against a stolen key file at the shipped KDF floor. At
 what passphrase length is the cost real? (`PassphraseKDF.Floor`; 17n)*
 
-**PENDING**
+**The parameters, confirmed.** The passphrase wrap is the ONLY brute-forceable wrap (the recovery
+wrap is 128-bit by construction, R-5 — `PassphraseKDF.swift:8–9`). Devices MINT the v1 default:
+Argon2id m=64 MiB, t=3, p=1, 32-byte output (:73–83) — RFC 9106's second recommended option's
+memory/time class. The read-time FLOOR (`Floor.production`, :106) is m=19 MiB, t=2, 16-byte salt
+(the OWASP Argon2id floor); `validateFloor` (:194–207) is called at every READ site, so a
+DOWNGRADED descriptor (a compromised server or tampered key file declaring cheaper parameters) is
+refused BEFORE any derivation. The passphrase is NFKD-normalized before hashing (:165). **Note the
+offline attacker cannot USE the floor to cheapen the attack** — a stolen key file's wrap was made
+with the wrap's OWN descriptor (the default m=64 MiB, t=3), and a candidate key derived under
+cheaper parameters simply won't unwrap; so the attacker is stuck at m=64 MiB / t=3 per guess. The
+floor's job is to stop a downgrade on the honest client, not to bound the attacker's per-guess
+cost (which is the higher default).
+
+**The cost is entropy-driven — length alone is a poor proxy.** Argon2id at m=64 MiB / t=3 is
+memory-hard: each guess needs 64 MiB of fast memory for its duration, which caps parallelism (a
+24 GB GPU holds ~375 concurrent instances; a large GPU farm reaches on the order of ~10^6–10^7
+guesses/s — an ASSUMPTION for scale, not a precise figure; exact attacker economics would sharpen
+the dollars, not the conclusion). Against that, a well-funded adversary can exhaust roughly ~2^47
+guesses in a year. So, for a RANDOM passphrase:
+- ~8 random alphanumeric chars (~48 bits) — BORDERLINE (about a year at the assumed farm scale;
+  a bigger adversary breaks it sooner).
+- ~10 random alphanumeric chars (~60 bits) — real (~10^5 years at that scale).
+- ~12 random alphanumeric chars (~71 bits), or 5+ Diceware words (~65 bits) — comfortably real.
+
+**The residual this exposes — a LENGTH floor is not an ENTROPY floor.** Closeout consideration 4
+already discloses the class ("The encryption passphrase has no strength floor … a stolen backup +
+key file is an offline target at a modest KDF cost → 17n") and 17n owns the fix ("a 12-character
+floor at every setting door"). The stress-test refinement worth recording is that **17n's 12-*char*
+floor is a partial mitigation, not a strength guarantee**: a HUMAN-CHOSEN 12-character passphrase
+(a common word + digits, a familiar phrase) can carry ~30–40 bits of real entropy — which the
+memory-hard KDF slows but does NOT save against a funded offline attacker — while a RANDOM
+12-character passphrase (~71 bits) is safe. So the honest answer to "at what length is the cost
+real": ~10–12 characters IF random (or 5+ Diceware words); for human-chosen strings, length does
+not guarantee it. The high-security anchor is the twelve WORDS (128 bits, always real) — a user
+who fears the offline attack should trust the words, or set a high-entropy passphrase.
+
+**VERDICT: HOLDS — with the disclosed residual owned by 17n, plus a refinement on 17n's scope.**
+The KDF itself is sound: memory-hard Argon2id at m=64 MiB / t=3 by default, a downgrade-proof
+read-time floor, a versioned descriptor honored on unwrap, the recovery wrap high-entropy by
+construction. No design defect. The one thing to carry to **17n**: a 12-character LENGTH floor
+does not equal an entropy floor — consider pairing it with a strength/entropy check (a zxcvbn-style
+meter or a Diceware suggestion) or explicitly documenting that the strong-security path is the
+twelve words, so the length floor is not mistaken for a guarantee against a weak human-chosen
+passphrase. Severity: low (an offline attacker needs BOTH the stolen key file AND a weak
+user-chosen passphrase; the words remain the strong anchor), and the class is already disclosed
+and owned.
 
 ---
 
-## VERDICT SUMMARY (filled at the close)
+## VERDICT SUMMARY
 
-**PENDING**
+| Q | Topic | Verdict | Owner (where a residual) |
+|---|---|---|---|
+| 1 | key proof's server-side retention surface | **HOLDS** | disclosed; 13y (per-request challenge) |
+| 2 | attacker nine arms + a tenth | **HOLDS** | NIT: add a `sync_reencrypt`-under-old-proof pin (B2 / B4) |
+| 3 | pre-rotation straggler vs horizon + guard | **HOLDS** | 13y (one horizon source of truth); Phase 12 (poison row); + a deploy-checklist caveat (re-apply the overlay after an 11 redeploy) |
+| 4 | same-second passphrase + Castle entries | **HOLDS** | her ratify bundle (ledger 61's Done wording, PROVISIONAL) |
+| 5 | recovery-wrap digest; forged digest | **HOLDS** | NIT: RFC-3394-determinism dependency (only if the wrap primitive changes) |
+| 6 | iCloud Keychain reset, three devices | **HOLDS** | 17m (Re-link door) + QUESTIONS #90 |
+| 7 | fresh library cannot sync without a typed secret | **HOLDS** | — |
+| 8 | pre-Replace-All-Keys backup restore | **HOLDS** | 13x (same-Mac older-key open-a-copy door) |
+| 9 | Time Machine wipe-and-restore | **HOLDS** | — |
+| 10 | brute-force passphrase at the KDF floor | **HOLDS** | 17n — with the refinement that a 12-char LENGTH floor ≠ an entropy floor |
+
+**Ten HOLDS, zero FINDINGs, zero OPEN.** Every question the design answered was traced to the
+code, the pin, or the SQL; no invented findings. The pass surfaced three things worth the
+orchestrator's routing, none of them a design hole: (a) a NIT suite-completeness pin for Q2's
+tenth arm (`sync_reencrypt` under the old proof — the one data RPC no attacker arm fires; it holds
+by the shared gate); (b) an operational caveat for Q3's deploy checklist (re-applying the
+maintenance completion-guard overlay after any `11_pre13x_postures.sql` redeploy, since the guard
+is a body change to the same signature that an 11 redeploy silently reverts); (c) a scope
+refinement for Q10's owner 17n (a 12-character LENGTH floor is not an ENTROPY floor — a
+human-chosen 12-char passphrase can still be brute-forceable; pair it with a strength check or
+lean on the twelve-words guarantee). Everything else is a HOLDS with its disclosed, already-owned
+residual (13y · Phase 12 · 17m/#90 · 13x · 17n · her ratify bundle).
