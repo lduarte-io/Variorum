@@ -2075,10 +2075,18 @@ disposition (the hallucination guard); no fix on the reviewer's word alone.
   literally — loop-free deference kept, no outbox arm returns). Probe + dedupe + furniture
   suites 50/5 green. REVERT VERIFIED COMMIT-FIRST: persistence made a no-op in the working
   tree → the pin red again at the same tooth; restored → 18/3 green.
-- [ ] **F-R4 (MAJOR) — AGREED; fix PENDING** (pin planned:
-  `theHealNeverTakesAnUnrelatedFamilySharingTheMillisecondStamp`, red on HEAD; fix =
-  `PullStall.presentReferents` + residue scoped to exact-stamp present referents,
-  family-expanded — the store-wide scan deleted; revert commit-first).
+- [x] **F-R4 (MAJOR) — AGREED, FIXED with pin** (commit c9c15de2):
+  `theHealNeverTakesAnUnrelatedFamilySharingTheMillisecondStamp` RED ON HEAD with **3
+  issues** — the frozen-instant bystander family purged from the mirror, LEDGER-FENCED (the
+  silent-drop fence for any returner's edits), and removed locally, while the heal cleared the
+  jam. Fix = `PullStall.presentReferents` (named at the stall's birth — the stalled row has no
+  local copy to read; defaulted init parameter, every construction site unmodified) + the
+  janitor residue scoped to exact-stamp present referents, family-expanded; the store-wide
+  `deleted_at = ?` sweep and its four unindexed scans deleted. The heal's iterative
+  multi-placement behavior recorded (one stalled row per round, follow-up rounds progress).
+  Probe + purge + scheduler suites 60/5 green. REVERT VERIFIED COMMIT-FIRST: the store-wide
+  scan restored in the working tree → the pin red again with the same 3 issues; restored → the
+  five heal/guard pins 5/1 green.
 - [ ] **F-R5 (MINOR) — AGREED; fix PENDING** (architectural class, no pin owed; the two field
   guards hoisted above the preflight; written justification in the response).
 - [ ] **F-R6 (MINOR, SPECULATIVE) — pin-first confirm PENDING** (the pin decides: red confirms
