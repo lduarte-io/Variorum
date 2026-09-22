@@ -109,8 +109,14 @@ fix-phase step opens the sequence:
 >    entries closed (16 ledger rows; a three-round Fable ladder to the cap, every finding
 >    dispositioned; 17l item 5 deferred to RUN B as planned); the record is
 >    `notes/plans/run-a-custody-text-loss.md`, the dispositions in the 17 file
-> 3. **RUN B — sync correctness: 17i + 17d + 17l item 5** (all `Sync/` — Fable end to end, the
->    rider; same file) **+ the stress-test agent's pass** beside it (before 13y's lockstep)
+> 3. **RUN B ✔ — sync correctness: 17i + 17d + 17l item 5** (all `Sync/` — Fable end to end, the
+>    rider; same file) **+ the stress-test agent's pass** beside it (before 13y's lockstep).
+>    **CLOSED 2026-09-22** — both entries + the deferred item closed (17-row ledger, all
+>    dispositioned; the hunt's three findings F-1/F-2(P8)/F-3 all FIXED in-run; the hosted
+>    stress pass 10 HOLDS; `productionRound` is the convergence suites' default; a two-round
+>    Fable ladder, zero disputes; marker stayed 8, zero deploys). The record is
+>    `notes/plans/run-b-sync-correctness.md`; **the live-round acceptance leg lands via
+>    `notes/handoffs/run-b-live-round-handoff.md` at her morning round.**
 > 4. **13y — per-tenant `server_seq`** ("the last one that really matters before other people
 >    see the app")
 > 5. **13r — distribution/packaging** (Sparkle + XPC, notarized DMG; 17m already done)
