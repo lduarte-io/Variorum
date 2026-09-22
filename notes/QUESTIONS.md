@@ -1750,4 +1750,29 @@ This unit did NOT change it (the brief's fence: a rule that narrows a measure no
 
 **(f) SCOPE:** the park is memory-only and dies with its home — the phone's with the note's editor, the Mac's with the app session — for #137(b)'s own reason: the refusal's commonest cause is a locked store, which is the state in which no key could seal a persisted park. *(Round 3, record-truth: within that home the park now clears on exactly three occasions — the same draft LANDS, a newer refusal REPLACES it, or the home ends. A restore never spends it.)*
 
-*(Next free number: **#141**.)*
+## RUN B (2026-09-21) — B1's hunt, the one product gap for her ruling
+
+#141 — **THE 60-DAY DROP-OUT RETURNER'S EDITED-PURGED-ROWS CORNER (17i probe P2(b), RUN B batch
+B1 — the memo's unsettled corner, now ANSWERED by measurement and pinned as shipped; filed by the
+orchestrator from the implementer's draft, verbatim).** A device that left the horizon returns
+holding unpushed edits to (and new takes on) a family other devices purged. Shipped behavior,
+pinned (`p2bTheSixtyDayDropoutReturnerDropsItsEditsWithThePurgedFamily`, green): the ledger
+pre-pass drops the family — including the unpushed writing — locally and silently; no refusal
+fires (nothing is left to refuse, so no mirror orphan either), and no say-so exists (the say-so
+road gates on ledger pruning's floor, which is 0). "Nothing typed in either app can be
+permanently lost" and the purge-wins doctrine collide here. Options: **(a)** keep the silent drop
+(her own deletion, 30+ days aged; the returner was gone 60+ days — the drop is the designed
+convergence; zero code); **(b)** before dropping, RESCUE the family's locally-dirty texts and
+never-pushed takes into a fresh local note (the conflict-as-variant instinct applied at the purge
+boundary; the rows still drop, the words survive); **(c)** SAY SO without rescuing: one visible
+line (count + dates) when the pre-pass discards unpushed writing, the R-13j returner grammar
+extended to the floor-0 road. **PROVISIONAL: shipped (a) stands until she rules; the probe pins
+(a) as the current contract.** Two adjacent recorded FACTS for the same sitting eye (no ruling
+needed): the 30-day Trash window runs on the DELETION's clock, not each device's discovery clock
+(P2(a)'s consequence — a laptop offline longer than the window sees the family land in its Trash
+and purge moments later, the horizon having guaranteed only that it SEES the deletion first); and
+a two-copy sample-library meeting decides on a 3-round cadence under production order (P5(c) —
+latency only). Both live durably in `notes/plans/pre-13u-memo-sync-disagreements.md`'s ANSWERED
+blocks.
+
+*(Next free number: **#142**.)*

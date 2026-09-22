@@ -120,12 +120,12 @@ brief names it.
 
 | # | Batch | Item (the binding text is the 17 entry's / the memo's) | Status |
 |---|---|---|---|
-| 1 | B1 | **Probe P1** — delete-vs-edit-plus-new-take (her scenario): N in the Trash on both, matching stamp; T2 tombstoned with N's exact stamp; **T1's `working_text` on the laptop after the merge — new or old? — RECORDED**; `restoreContainer(N)` on the laptop: what comes back, and does it converge to the phone | open |
-| 2 | B1 | **Probe P2** — the same, deletion PURGED before resume: (a) ASSERT the horizon HOLDS the purge while the laptop is a live device; (b) the 60-day drop-out returner meets `purged` — **what it does LOCALLY with dirty T1 + new T2, RECORDED** (the unsettled corner → QUESTIONS with options, never decided) | open |
-| 3 | B1 | **Probe P3** — edit-vs-edit on one take (S5): loser is a `'conflict'` card on the same block; nothing lost either side (expected confirm; lands as a green pin) | open |
-| 4 | B1 | **Probe P4** — the round-shape sweep: the convergence suites' CORE scenarios re-run under production's round shape (pull → push, 200-row chunks each its own server transaction, interleavings) + a chunk split at each registry boundary the scenario crosses; **any pin that passes only in the harness's order is a finding** (recorded as a new ledger row) | open |
-| 5 | B1 | **Probes P5(b) + P5(c)** — the dedupe double-retirement race (classifier's push delayed past the other device's pass, evidence changed between) · the echo pull's extra round per two-copy meeting; RECORDED (fence: the late-registry legs are 18a's — re-verify, don't absorb) | open |
-| 6 | B1 | **17d P8 — THE RUN** (the entry's own rule: reproducing it IS the red-on-old pin; not reproducing it closes it REFUTED): the deterministic construction the verifier named — hold B's push (`FakeSyncServer.holdPushes`), let A pull + sweep, release (`commitHeldPushes`) — a mirror orphan whose pull stalls A's cursor forever. Read against `notes/plans/phase-13j-purge-memo.md` §4f | open |
+| 1 | B1 | **Probe P1** — delete-vs-edit-plus-new-take (her scenario): N in the Trash on both, matching stamp; T2 tombstoned with N's exact stamp; **T1's `working_text` on the laptop after the merge — new or old? — RECORDED**; `restoreContainer(N)` on the laptop: what comes back, and does it converge to the phone | **CONFIRMED — canon, green pin** (the laptop's NEW text rides into the Trash on both; Put back converges byte-identically) |
+| 2 | B1 | **Probe P2** — the same, deletion PURGED before resume: (a) ASSERT the horizon HOLDS the purge while the laptop is a live device; (b) the 60-day drop-out returner meets `purged` — **what it does LOCALLY with dirty T1 + new T2, RECORDED** (the unsettled corner → QUESTIONS with options, never decided) | **(a) CONFIRMED — green · (b) RECORDED — the silent family-complete drop pinned as shipped; QUESTIONS #141 filed, hers** |
+| 3 | B1 | **Probe P3** — edit-vs-edit on one take (S5): loser is a `'conflict'` card on the same block; nothing lost either side (expected confirm; lands as a green pin) | **CONFIRMED — green (production order, sizes 200/1)** |
+| 4 | B1 | **Probe P4** — the round-shape sweep: the convergence suites' CORE scenarios re-run under production's round shape (pull → push, 200-row chunks each its own server transaction, interleavings) + a chunk split at each registry boundary the scenario crosses; **any pin that passes only in the harness's order is a finding** (recorded as a new ledger row) | **RUN — 0 new findings** (7 scenarios green; the seq-0 placement observation recorded as canon-conforming) |
+| 5 | B1 | **Probes P5(b) + P5(c)** — the dedupe double-retirement race (classifier's push delayed past the other device's pass, evidence changed between) · the echo pull's extra round per two-copy meeting; RECORDED (fence: the late-registry legs are 18a's — re-verify, don't absorb) | **(b) REPRODUCED — hunt finding F-1 → NEW ROW 15 (B2), the orchestrator's ruling below · (c) CONFIRMED — designed cost, green pin (3-round cadence made precise)** |
+| 6 | B1 | **17d P8 — THE RUN** (the entry's own rule: reproducing it IS the red-on-old pin; not reproducing it closes it REFUTED): the deterministic construction the verifier named — hold B's push (`FakeSyncServer.holdPushes`), let A pull + sweep, release (`commitHeldPushes`) — a mirror orphan whose pull stalls A's cursor forever. Read against `notes/plans/phase-13j-purge-memo.md` §4f | **CONFIRMED — REPRODUCED in BOTH constructions** (held-push + visibility-band, wrapped citing row 9; row 9 LIVE for B2) |
 | 7 | B2 | **17i fix item 1** — the general `tag.path` repair honors §7's own sentence for applications arriving AFTER the duplicate died (KnownIssues row 34; pre-existing since Phase 5, MAJOR). Pin as the row states it: two devices create "ideas" offline, each applies it to its OWN note, converge → both notes tagged on both devices (red on old: one application dead) | open |
 | 8 | B2 | **17i structural item R3-2** — the seed-shape guard invokes the REAL classifier (`Queries.isDailyJournalMintShape`) instead of mirroring its SQL | open |
 | 9 | B2 | **17d P8 — the fix**, per row 6's verdict (a reproduced mechanism gets a fix whose DESIGN the implementer proposes and the orchestrator rules BEFORE building — client-side only; a fix wanting server lines stops and reports as a 13y candidate). REFUTED at row 6 ⇒ this row closes with it | open |
@@ -135,8 +135,11 @@ brief names it.
 | 13 | B3 | **17l item 5** — the double passphrase ask at a follow after a rotation (KnownIssues row 37): when the passphrase is UNCHANGED at a rotation, `RotationSecrets` re-wraps under the EXISTING descriptor (same salt → same derived key; the wrapped payload is the new master). **HER SCOPE (2026-09-07): passphrase wrap ONLY — the recovery-words wrap keeps its fresh salt at every act, and a pin asserts the two descriptors stay independent.** Pin: a sibling that opened by the passphrase follows a Replace All Keys with zero prompts (red today) | open |
 | 14 | B4 | **The harness-realism structural deliverable** — `productionRound` (built in B1 as the hunt's instrument) becomes the convergence suites' DEFAULT; chunk splits at registry boundaries as a sweep; every suite green under the NEW shape | open |
 
+| 15 | B2 | **F-1 (B1's hunt, probe P5(b))** — the dedupe double-retirement race: an edit landing between the seed-push and the two devices' passes, with the editor's pushes delayed across its own two pulls, retires BOTH copies on both devices AND loses the edit's bytes outright (pull-first merges the pristine tombstoned baseline over the dirty row; rescue skips block-dead; the cleared outbox means the edit never reaches the server). Breaks R-pre13u-8's "an edited copy is NEVER silently retired" and §6's forbidden outcome IN THE BYTES. Red pin waiting wrapped: `p5bTheDoubleRetirementRaceRetiresBothCopiesAndLosesTheEdit`. **Fix constraints (the orchestrator's, at the F-1 ruling):** the outcome must land on the ruled matrix — exactly-one-edited ⇒ the EDITED copy survives; both-edited ⇒ both survive; deterministic on both devices; err toward EDITED. Design fork: the implementer proposes, the orchestrator rules, repo-first, before the build. **Escape valve:** if the honest fix is a redesign of the dedupe's occasions rather than a repair-rule-scale change, STOP AND REPORT — the row then closes RECORDED → 18a beside KnownIssues row 33, the pin standing wrapped | open |
+
 *(Hunt findings from B1 join the ledger as new rows at B1's adjudication — each owned: fixed in
-B2, or RECORDED with a named owner outside the run.)*
+B2, or RECORDED with a named owner outside the run. F-1 is row 15; F-2 was already owned as
+row 9.)*
 
 ---
 
@@ -564,6 +567,43 @@ P5(b)); one standing sanctioned skip (the real-server integration gate). Files a
 row 1 CONFIRMED-green · row 2 CONFIRMED-green (a) + RECORDED-with-QUESTIONS-draft (b) · row 3
 CONFIRMED-green · row 4 RUN, 0 findings · row 5 REPRODUCED-wrapped (b) + CONFIRMED-green-cost
 (c) · row 6 CONFIRMED-REPRODUCED (both constructions; row 9 live for B2).
+
+---
+
+### BATCH B1 — ORCHESTRATOR ADJUDICATION (2026-09-21; the batch CLOSES here)
+
+**Verification, my own hands:** the eight commits read one by one (each pathspec-limited, each
+pushed, honestly named); the record's LIVE STATUS all flipped with zero PENDING residue; the memo
+carries a dated ANSWERED block with pin names under every probe (headers flip at closeout, per
+the ritual); **the two new suites re-run by the orchestrator: 15 tests / 2 suites PASSED with
+exactly the 3 known-issue wraps** — the two P8 constructions and the P5(b) race — matching the
+record's finals exactly (the implementer's full-core claim of 1654/179 is arithmetic-consistent
+with baseline 1639/177 + 15/2 and is spot-checked, not re-run; B2's close re-runs the full core).
+Zero `Sources/` lines, zero mirror access, marker 8 — the fences held. **BATCH B1 CLOSES.**
+
+**The F-1 ruling (recorded repo-first before any B2 session exists): F-1 is ROW 15, fixed in
+B2.** Reasons: (1) 17i's own charter — *"every discrepancy found becomes an item here with the
+standard trace + red-on-old pin"* — and P5(b) was a NAMED 17i probe, so its reproduction is
+17i's item by design; (2) the class is DATA LOSS IN THE BYTES, breaking two ruled sentences
+(R-pre13u-8's never-silently-retired; §6's forbidden outcome) — the project's worst class, with
+the right cast already seated; (3) the 18a fence names the LATE-REGISTRY legs (KnownIssues row
+33), which the implementer re-verified this is NOT — the fence's purpose was to keep 18a's
+DESIGN work out, not to bounce a reproduced deterministic defect. The escape valve on row 15
+keeps the fence honest: a fix that turns out design-scale stops and reports rather than absorbing
+18a's sitting. Severity MAJOR sustained (the narrowing facts — the interleave window, the
+once-per-store-life event class — temper reachability, not the class).
+
+**The P2(b) product gap is FILED as QUESTIONS #141** (the implementer's draft, taken verbatim
+with the filing frame; shipped behavior (a) stands PROVISIONAL until she rules). **P2(a)'s
+deletion-clock consequence and P5(c)'s 3-round cadence** are recorded facts whose durable home is
+the memo's ANSWERED blocks — 18a's sitting reads the memo; no unowned residue.
+
+**Row 4's seq-0 observation** is canon working as written (SyncSpec §3's never-accepted-ranks-0
+sentence) — recorded, no action, deliberately NOT a QUESTIONS row.
+
+**Hand-note for S1 (the stress pass):** `Tests/VariorumCoreTests/Support/ProductionRound.swift`
+now exists as a constructions instrument; F-1's and P8's constructions are worked examples if a
+question's answer wants a runnable trace (S1 remains read-only — it cites, it never fixes).
 
 ---
 
