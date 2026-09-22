@@ -2087,15 +2087,33 @@ disposition (the hallucination guard); no fix on the reviewer's word alone.
   Probe + purge + scheduler suites 60/5 green. REVERT VERIFIED COMMIT-FIRST: the store-wide
   scan restored in the working tree → the pin red again with the same 3 issues; restored → the
   five heal/guard pins 5/1 green.
-- [ ] **F-R5 (MINOR) — AGREED; fix PENDING** (architectural class, no pin owed; the two field
-  guards hoisted above the preflight; written justification in the response).
-- [ ] **F-R6 (MINOR, SPECULATIVE) — pin-first confirm PENDING** (the pin decides: red confirms
-  the defect; green on both sides dismisses the defect half as hollow, with the determinism
-  hardening still landing as the cleanliness half under its written justification).
-- [ ] **F-R7 (NIT) — AGREED; fix PENDING** (the janitor's `preflight()` helper at this touch).
-- [ ] **F-R8 (NIT) — AGREED; folds into F-R1's fix.**
-- [ ] **FINALS — PENDING**: full core (baseline 1674/179, zero wraps — the close must keep zero
-  wraps), touched Mac suites, iOS build if core public API moved.
+- [x] **F-R5 (MINOR) — AGREED, FIXED, no pin owed** (commit db462ad1, architectural): the two
+  field guards hoisted above the preflight — a live-row transient stall now costs zero network
+  per round; the degenerate throw-vs-false difference stated at the site and unreachable in
+  production (the round's own pull refuses on the rotation marker before any stall exists).
+- [x] **F-R6 (MINOR, SPECULATIVE) — defect half DISMISSED AS HOLLOW at its own pin; the
+  determinism hardening LANDED as the cleanliness half** (commit 09bd53b5):
+  `aSamplePostInASecondBookStillRecordsItsKillEvidence` GREEN on the unfixed resolution (the
+  p5b crossing with a second personal-book membership — the ruled matrix held: the reading-row
+  hook is the structural backstop my re-trace named) and green after; the resolution now
+  filters to facts-named readings + `ORDER BY r.id` (justification: plan-independence, and
+  F-R3's persisted verdict is skipped by a wrong batch-1 resolution — load-bearing, not
+  cosmetic). The pin stays as the two-book contract's coverage.
+- [x] **F-R7 (NIT) — AGREED, FIXED** (commit db462ad1): `preflight()` extracted, one body,
+  three doors, refusal order byte-identical.
+- [x] **F-R8 (NIT) — AGREED, FIXED** (inside F-R1's commit fde96a7d — one binding).
+- [x] **FINALS — VERIFIED**: FULL CORE SUITE **1679 tests / 179 suites — ALL PASSED, ZERO
+  known issues** (the zero-wraps close kept; arithmetic exact: baseline 1674/179 + the 5 new
+  pins — F-R1/F-R2/F-R3/F-R4/F-R6 — zero new suites; the ONE skip is the sanctioned
+  real-server integration gate, verified by its own skip message). Touched Mac suites:
+  `SyncStalledRowTests` + `SampleLibraryTests` — **18 tests / 2 suites PASSED, TEST
+  SUCCEEDED** (zero instances running, pgrep-checked; the row-8 seed guards green over the
+  changed dedupe code, the stalled-row face green over the grown `PullStall`). iOS
+  `VariorumMobile` generic-platform build: **BUILD SUCCEEDED** (`PullStall.presentReferents`
+  is the one public-API growth). Fences verified by diff: the session's whole code diff is
+  FOUR `Sync/` sources + ONE test file + this record — zero `Server/` lines, zero
+  `Persistence/`/schema lines, `lockstepVersion` still 8; `/Applications` and her real store
+  untouched throughout.
 
 ### DEATHS / RESUMES
 
@@ -2349,8 +2367,19 @@ The overlay's second `working_text` binding removed — `localText` (already bou
    never consumed) and the split-gap edit corner are recorded above — no action owed, stated
    for round 2's anchor.
 
-### FINALS (PENDING — written when run; the LIVE STATUS bullet is the verified record)
+### FINALS (verified — the LIVE STATUS bullet carries the full record)
 
-Owed at close: the full core suite (baseline 1674/179, zero wraps — the close keeps zero
-wraps), the touched Mac suites, the iOS build if core public API moves. Fences to re-verify:
-zero schema, zero `Server/` lines, marker 8; `/Applications` and her real store untouched.
+Full core **1679/179 ALL PASSED, zero known issues** + the one sanctioned real-server skip ·
+Mac touched suites **18/2 PASSED** · iOS **BUILD SUCCEEDED** · fences whole (four `Sync/`
+sources + one test file + this record; zero server, zero schema, marker 8; her store and
+`/Applications` untouched). **Per-finding dispositions: F-R1 AGREED-FIXED-with-pin ·
+F-R2 AGREED-FIXED-with-pin · F-R3 AGREED-FIXED-with-pin · F-R4 AGREED-FIXED-with-pin ·
+F-R5 AGREED-FIXED (architectural, justified) · F-R6 defect half DISMISSED-AS-HOLLOW at its
+own pin, cleanliness half LANDED-with-justification · F-R7 AGREED-FIXED · F-R8 AGREED-FIXED
+(inside F-R1). Zero disputes — every finding's mechanism reproduced under my own trace.**
+Round 2's fresh reviewer anchors here: the four MAJOR fixes are `textIsTheOnlyDivergence`
+(Merge.swift), `meetingStands` (SampleLibraryDedupe.swift), `persistKillVerdict`/
+`consumeKillVerdict` (SampleLibraryDedupe.swift), and `PullStall.presentReferents` + the
+connected completion set (SyncEngine.swift + PurgeJanitor.swift); the five new pins live in
+`SyncReconciliationProbeTests`; the orchestrator's amendment list is the FLAGGED section
+above (#143(a) and #143(b) re-wording + the 1-hour settle-window width, arbitrable).
