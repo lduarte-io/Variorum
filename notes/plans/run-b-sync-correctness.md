@@ -717,13 +717,16 @@ noted.
 - [x] Row 7 (tag.path arrival-order repair) — FIXED, red-on-old VERIFIED BY BEHAVIOURAL REVERT
   (pins `applicationsArrivingAfterTheDuplicateTagDiedRepointToTheKeeper` [200/1] +
   `blockTagApplicationsArrivingAfterTheDuplicateDiedRepointToo`; per-row section below).
-- [ ] Row 8 (the seed-shape guard invokes the real classifier) — PENDING
+- [x] Row 8 (the seed-shape guard invokes the real classifier) — DONE (architectural; both Mac
+  guard tests green invoking `SampleCopyClassifier.classify` over the real seeds; section below).
 - [x] Row 10 (P9: expandContainer's live-root member-block arm) — FIXED, red-on-old VERIFIED BY
   BEHAVIOURAL REVERT (pins `aLiveContainerRootExpandsItsLiveMemberBlocksFamilyComplete` +
   `aPutBackRacingTheSweepsMirrorPurgeNeverLeavesAPartialFamily`; per-row section below).
 - [x] Row 11 (P28: reapplyStructural voids purge intents) — FIXED, red-on-old VERIFIED BY
   BEHAVIOURAL REVERT (pin `theRedoRoadVoidsALiveIntentLikeEverySiblingRevive`; section below).
-- [ ] Row 12 (P31: stalled/deferred gain production readers + the honest face line) — PENDING
+- [x] Row 12 (P31: stalled/deferred gain production readers + the honest face line) — FIXED,
+  red-on-old VERIFIED BY BEHAVIOURAL REVERT (core pins ×2 + Mac face pins; iOS build gate green;
+  section below).
 - [ ] The two PROPOSALS written (row 9 · row 15) — PENDING
 - [ ] Phase 1 finals (full core suite; iOS build gate for the shared-file touches) — PENDING
 - [ ] **PHASE 2 (opens only at the orchestrator's rulings):** rows 9 + 15 — PENDING
@@ -844,6 +847,56 @@ mint → `stack.undo` (trays the diverged mint) → `requestPurge` (the tray's D
 `stack.redo` → asserts the intent is voided AND the ordinary re-delete lists on a fresh clock.
 RED ON OLD verified by BEHAVIOURAL REVERT against the committed fix (call removed → both
 asserts fail; restored → 15/15; undo/redo suites 65/65 across 5 suites).
+
+### ROW 8 — R3-2: the seed-shape guard invokes the REAL classifier (17i structural): DONE
+
+**The mechanism (architectural — the hallucination guard's written-justification class, no test
+pin owed):** `theShippedSeedSatisfiesTheDedupesPristineContract` was a hand-copied mirror of the
+classifier's SQL. What concretely degrades: a classifier LEG the mirror lacks (the class has
+grown twice already — R2-5's five legs, R3-3's six named more) leaves the guard green while the
+real classifier reads the shipped seed EDITED — the silent both-survive failure ("two Sherlock
+books forever") the guard exists to announce, undetectable by any test that doesn't run the real
+body. **The fix:** the classifier's ONE body moves to `public SampleCopyClassifier`
+(`SampleCopyVerdict` public with it; the facts-taking wrapper derives manifest + reserved tag id
+exactly as the engine's pass does); the engine's pass calls the same body — the row's letter,
+"never a second copy" — and BOTH Mac guard tests (Sherlock + *Encryption Explained*) now assert
+`classify(db, copyID:, facts:) == .pristine` over the REAL seed, with the per-leg walk kept as
+diagnostics naming WHICH fact drifted when the invocation reds. Drift is now impossible by
+construction: a new classifier leg runs inside the guard the moment it exists. Behavior
+byte-unchanged (dedupe suites, probes, and both Mac guards green; the invocation assert is
+green-by-design — the old mirror was faithful TODAY, which is exactly why this is architectural
+and not a defect).
+
+### ROW 12 — P31: the stall and the deferral gain production readers (17d P31): FIXED
+
+**The mechanism, re-traced:** `SyncEngine.pull` truncates at the first FK-unsatisfiable row and
+RETURNS NORMALLY (`report.stalled = true`, cursor held); `SyncScheduler.runOneRound` discarded
+both reports (`_ = try await engine.pull()`) and unconditionally stamped
+`lastError = nil / lastSuccessAt = now` — so a permanently jammed cursor (the P8 orphan class)
+rendered "Synced <time>" forever while integrating nothing, one-way divergence under a green
+light. `PushReport.deferred` (rows enqueued whose referents never arrived) was discarded the
+same way. The pattern existed next door: `BridgeScheduler.status.stalled`.
+
+**The fix:** `Status.pullStalled` + `Status.pushDeferredCount`, assigned from the round's own
+reports on the SUCCESS branch (the precedent's shape — a thrown round learned nothing); the
+shared status row gains the `.stalled` face — warning-toned, LITERALLY the idle row's doors,
+ONE honest line (`stalledLabel` = "Sync incomplete — some changes haven't arrived yet") — which
+decorates only the CLEAN branch (syncing/offline/error faces byte-unchanged, pinned). P-8 held:
+no new chrome vocabulary, existing caption styles and door shapes only. The face's `stalled:`
+parameter is DEFAULTED false so every existing state pin reads unmodified (the 3C spirit);
+`VaultBootstrap`'s one-shot pull stays out of scope (its stall already surfaces through
+`pullToHead`'s typed refusal).
+
+**Pins + revert:** core `aStalledPullStopsReportingACleanRoundAsFine` (a clean round first —
+flag false; then the P8 orphan shape minted cheaply test-side via `server.executePurge` — round
+clean, `lastError nil`, `pullStalled` TRUE) and
+`aDeferredPushIsNamedOnTheStatusRowAndClearsWhenItResolves` (the A5 visibility-band
+construction: B's competing move commits inside the band, A's push defers at the reject whose
+current row references an unseen container; the band passes and the signal clears) — RED ON OLD
+verified by BEHAVIOURAL REVERT of the two assignment lines (both pins fail exactly at the
+flags). Mac `SyncStalledRowTests` (the `.stalled` face + the never-outranks precedence),
+suite-run green 18/2 beside the row-8 guards; **iOS BUILD SUCCEEDED** (the shared-file gate —
+the pre-13u R3-2 lesson applied to its own namesake).
 
 ---
 
