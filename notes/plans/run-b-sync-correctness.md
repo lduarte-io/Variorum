@@ -718,7 +718,9 @@ noted.
   (pins `applicationsArrivingAfterTheDuplicateTagDiedRepointToTheKeeper` [200/1] +
   `blockTagApplicationsArrivingAfterTheDuplicateDiedRepointToo`; per-row section below).
 - [ ] Row 8 (the seed-shape guard invokes the real classifier) — PENDING
-- [ ] Row 10 (P9: expandContainer's live-root member-block arm) — PENDING
+- [x] Row 10 (P9: expandContainer's live-root member-block arm) — FIXED, red-on-old VERIFIED BY
+  BEHAVIOURAL REVERT (pins `aLiveContainerRootExpandsItsLiveMemberBlocksFamilyComplete` +
+  `aPutBackRacingTheSweepsMirrorPurgeNeverLeavesAPartialFamily`; per-row section below).
 - [ ] Row 11 (P28: reapplyStructural voids purge intents) — PENDING
 - [ ] Row 12 (P31: stalled/deferred gain production readers + the honest face line) — PENDING
 - [ ] The two PROPOSALS written (row 9 · row 15) — PENDING
@@ -775,6 +777,46 @@ then both notes tagged on the keeper on both devices) + `blockTagApplicationsArr
 > depend on random UUID order. Options: (a) keep the rescue (shipped by this fix); (b) narrow
 > the leg to same-batch-retired duplicates only (re-opens the cross-batch loss). PROVISIONAL:
 > (a) stands until she rules.
+
+### ROW 10 — P9: a LIVE container root expands family-complete (17d P9): FIXED
+
+**The mechanism, re-traced:** `expandContainer`'s member-block arm required
+`b.deleted_at = c.deleted_at` — never true for a LIVE container — while placements, lenses,
+canvas rows, references, tags and memberships were taken liveness-blind. Three purge-wins roads
+can hand the expansion a live root: the engine's `.purged` refusal handler (SyncEngine ~:209 —
+no liveness precondition on the pushed row), the janitor's in-transaction re-expand AFTER
+`executePurge` (a Put back landing in the network window makes the root live — the verifier's
+more-reachable road), and `reconcileLedger` (filters on `rowExists` only). On each, the note and
+its placements went while its blocks stayed live, unplaced, `last_container_id` nulled by the
+survivor detachment — invisible on every surface, the partial state `PurgeFamily`'s own header
+("purge is never partial") forbids.
+
+**Reachability, honestly stated (my own tracing, beyond the entry's):** on the ENGINE road and
+the reconcile road the partiality is TRANSIENT in most constructions — the peer's `executePurge`
+ledgered every family row, so the stranded blocks are refused `'purged'` as their own roots at
+their own pushes (Put back enqueues them) and self-heal within a drain or a round; the verifier's
+tempering said as much. The state that persists to the next round — and the contract violation
+either way — is the janitor's race road, where the sweep ITSELF leaves the store partial and
+every listing between that sweep and the next round shows a note-less orphan family. MINOR
+sustained; fixed at the mechanism.
+
+**The fix:** the member-block arm gains the LIVE-root arm — live blocks under LIVE placements
+(what `deleteContainer`'s cascade would take) — dead-root behavior byte-identical (exact-stamp
+victims only). A block deleted EARLIER still keeps its own clock (dead ⇒ no live placement); an
+ARCHIVED block still never rides (archiving releases its placement, so the discriminator
+excludes it by construction — verified against `performArchiveBlock`). `familyVerdict` is
+unchanged in outcome: a live family row of a tombstoned kind already read `.stale` on the
+janitor's collection road, and now the stale check sees the blocks too.
+
+**Pins + revert:** `aLiveContainerRootExpandsItsLiveMemberBlocksFamilyComplete` (PurgeOpsTests —
+the mechanism: live root ⇒ live member blocks + takes ride; earlier-deleted and archived blocks
+excluded) and `aPutBackRacingTheSweepsMirrorPurgeNeverLeavesAPartialFamily`
+(PurgeConvergenceTests — the verifier's road, deterministic via `ExecutePurgeHookedTransport`, a
+one-shot hook landing the Put back between the mirror purge and the removal transaction; asserts
+zero family rows post-sweep, then convergence with no stall). RED ON OLD verified by BEHAVIOURAL
+REVERT against the committed fix (old WHERE clause restored → 7 issues, exactly the stranded
+blocks/takes; restored → 32/32 green across both suites). The B1 probe suite stays green beside
+it (P1/P2's whole-family scenarios exercise the dead-root arm byte-unchanged).
 
 ---
 
