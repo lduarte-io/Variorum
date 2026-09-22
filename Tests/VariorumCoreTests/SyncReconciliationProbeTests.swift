@@ -540,6 +540,215 @@ struct SyncReconciliationProbeTests {
         }
     }
 
+    // MARK: - P5(b)/(c): the sample-library dedupe's traced observations
+
+    private static let sampleBookName = "the adventures of sherlock holmes"
+    private static let sampleTagPath = "sherlock holmes"
+    private static let sampleNotes: [(title: String, text: String)] = [
+        ("About this book", "Attribution text."),
+        ("A Scandal in Bohemia", "To Sherlock Holmes she is always THE woman."),
+    ]
+
+    private static func sampleFacts() -> SampleLibraryDedupeFacts {
+        let hashes = Dictionary(
+            uniqueKeysWithValues: sampleNotes.map { ($0.title, BridgeHash.body($0.text)) })
+        return SampleLibraryDedupeFacts(
+            bookName: sampleBookName, tagPath: sampleTagPath,
+            loadNoteHashes: { hashes }, hash: BridgeHash.body(_:))
+    }
+
+    private func dedupePair() throws -> (a: SyncClient, b: SyncClient, server: FakeSyncServer) {
+        let (a, b, server) = try pair()
+        a.sampleLibraryFacts = Self.sampleFacts()
+        b.sampleLibraryFacts = Self.sampleFacts()
+        return (a, b, server)
+    }
+
+    /// Seeds one copy in the seeder's exact shape (the dedupe suite's idiom).
+    @discardableResult
+    private func seedCopy(_ client: SyncClient) throws -> (bookID: String, postIDs: [String: String]) {
+        try client.with { ops, _ in
+            let book = try ops.createReading(
+                name: Self.sampleBookName, kind: .curated, profile: "book")
+            let tag = try ops.createTag(name: Self.sampleTagPath)
+            var postIDs: [String: String] = [:]
+            for note in Self.sampleNotes {
+                let section = try ops.createSection(in: book.id, name: note.title)
+                let minted = try ops.importPost(
+                    title: note.title, text: note.text, undoLabel: "Sample Library")
+                _ = try ops.addPostToReading(minted.container.id, to: book.id)
+                try ops.assignPostToSection(minted.container.id, in: book.id, section: section.id)
+                _ = try ops.applyTag(tag.id, toPost: minted.container.id)
+                postIDs[note.title] = minted.container.id
+            }
+            return (book.id, postIDs)
+        }
+    }
+
+    private func liveCopyIDs(_ client: SyncClient) throws -> [String] {
+        try client.db.read { db in
+            try String.fetchAll(
+                db,
+                sql: "SELECT id FROM reading WHERE name = ? AND deleted_at IS NULL ORDER BY id",
+                arguments: [Self.sampleBookName])
+        }
+    }
+
+    private func firstVariantID(_ client: SyncClient, postID: String) throws -> String {
+        try client.db.read { db in
+            try String.fetchOne(
+                db,
+                sql: """
+                    SELECT v.id FROM variant v
+                    JOIN container_block cb ON cb.block_id = v.block_id
+                    WHERE cb.container_id = ? AND cb.deleted_at IS NULL AND v.deleted_at IS NULL
+                    ORDER BY cb.position, v.id LIMIT 1
+                    """,
+                arguments: [postID])!
+        }
+    }
+
+    /// **P5(b) — the double-retirement race, RUN AND REPRODUCED.** The
+    /// memo's traced observation: the classifying device's push is delayed
+    /// past the other device's pass, and the evidence changes between the
+    /// two. Construction:
+    ///
+    ///  1. A seeds copyA, B seeds copyB; both push (copyB's PRISTINE bytes
+    ///     are what the server holds);
+    ///  2. B edits a copyB note — the edit sits in B's outbox, its pushes
+    ///     DELAYED from here;
+    ///  3. B pulls twice: its pass reads copyB EDITED (local evidence) →
+    ///     retires copyA (the ruled "edited kept");
+    ///  4. A pulls twice: its pass reads BOTH pristine (the edit never
+    ///     arrived) → retires copyB (the ruled smaller-id keeper);
+    ///  5. the delayed pushes land, production order (pull → push).
+    ///
+    /// REPRODUCTION FACTS (asserted green): the two retirements CROSS —
+    /// tombstones win on both sides, **both copies end dead on both
+    /// devices** (the shipped sample library vanishes into the Trash), and
+    /// — sharper, production-order-specific — **the edit's bytes are LOST
+    /// OUTRIGHT**: B's resume round pulls A's retirement BEFORE pushing
+    /// (production's order), the merge lands the server's pristine
+    /// tombstoned baseline over the dirty edited row, the rescue skips
+    /// because the block died earlier in the same batch, and the cleared
+    /// outbox entry means the edit never reaches the server at all. The
+    /// converged stores agree — this is a ruled-outcome violation ("an
+    /// edited copy is NEVER silently retired") plus the §6 forbidden
+    /// outcome (an edit nobody chose to lose, deleted), not a divergence.
+    ///
+    /// THE DESIRED CONTRACT (`withKnownIssue`-wrapped — a B1 HUNT FINDING;
+    /// its ledger row lands at adjudication; owner candidates recorded in
+    /// the batch record, the 18a fence re-verified not absorbed): the
+    /// edited copy survives live with its edit intact.
+    @Test func p5bTheDoubleRetirementRaceRetiresBothCopiesAndLosesTheEdit() async throws {
+        let (a, b, server) = try dedupePair()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        try await a.push()
+        try await b.push()
+
+        // 2. B edits — from here B's pushes are delayed.
+        let editedPost = copyB.postIDs["A Scandal in Bohemia"]!
+        let editedVariant = try firstVariantID(b, postID: editedPost)
+        try b.with { ops, _ in
+            try ops.autosave(editedVariant, text: "Rewritten in her own words.", charDelta: 20)
+        }
+
+        // 3. B's pass: copyB edited (local evidence) → copyA retired on B.
+        _ = try await b.pull()
+        _ = try await b.pull()
+        #expect(try liveCopyIDs(b) == [copyB.bookID],
+                "B kept the edited copy and retired the pristine one — the ruled outcome, on B's evidence")
+
+        // 4. A's pass: both pristine (the edit is still only in B's outbox)
+        // → copyB retired on A.
+        _ = try await a.pull()
+        _ = try await a.pull()
+        #expect(try liveCopyIDs(a) == [copyA.bookID],
+                "A retired copyB as a redundant pristine copy — correct on A's evidence")
+
+        // 5. The delayed pushes land, production order per device.
+        try await productionQuiescence(a, b, server: server, maxRounds: 16)
+        #expect(try a.syncedDump() == b.syncedDump(), "the stores CONVERGE — the loss is agreed on")
+
+        // REPRODUCTION FACTS: both copies dead everywhere; the edit's bytes
+        // exist nowhere — live or tombstoned, local or mirror.
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client).isEmpty,
+                    "\(client.name): the whole sample library vanished — both copies retired")
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM variant WHERE working_text = 'Rewritten in her own words.'") == 0,
+                "\(client.name): the edit was clobbered by the pristine tombstoned baseline (rescue skipped — block dead)")
+        }
+        let mirrorTexts = await server.allStoredRows.filter { $0.table == "variant" }
+        _ = mirrorTexts  // ciphertext on the wire; the local stores above are the honest surface
+
+        let liveOnB = try liveCopyIDs(b)
+        withKnownIssue(
+            "B1 hunt finding (P5(b)): the double-retirement race retires the EDITED copy and loses the edit"
+        ) {
+            #expect(liveOnB == [copyB.bookID],
+                    "the edited copy must survive on both devices")
+        }
+    }
+
+    /// **P5(c) — the echo pull's extra round, RUN AND RECORDED (designed
+    /// cost, green pin) — and the mechanism OBSERVED is sharper than the
+    /// memo's phrase.** Under PRODUCTION rounds (pull → push per device),
+    /// the deferring device takes THREE rounds from meeting to decision:
+    ///
+    ///  - round 1's pull brings the other copy → the arrived-this-batch
+    ///    deferral + the one-shot marker (R2-3);
+    ///  - round 2's pull is NOT empty — it serves back the device's OWN
+    ///    push ECHO (its copy's rows, pushed in round 1's push half, sit
+    ///    above its cursor). The echo applies that copy's `reading` row
+    ///    again, so the arrived-this-batch rule RE-DEFERS and re-arms the
+    ///    marker — THE ECHO PULL, costing the extra round the memo's
+    ///    observation names;
+    ///  - round 3's pull is the genuinely empty window: the marker fires
+    ///    the pass, which decides.
+    ///
+    /// (The harness's convenience order hid a round: pushing both copies
+    /// before any pull folds the meeting and the echo into ONE window, so
+    /// the old suites saw a 1-round deferral. Production's shape shows 2.)
+    /// Latency only — convergence intact, verdicts unchanged. Not a
+    /// defect; pinned so the cost is a stated fact.
+    @Test func p5cTheDeferralPlusTheEchoPullCostTwoRoundsPerMeeting() async throws {
+        let (a, b, server) = try dedupePair()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+
+        _ = try await productionRound(a)   // copyA lands on the server
+        _ = try await productionRound(b)   // B meets copyA: defer + marker; copyB lands
+        #expect(try liveCopyIDs(b) == [copyA.bookID, copyB.bookID].sorted(),
+                "round 1 on B: the meeting round DEFERS — both copies stand")
+        #expect(try b.db.fetchString(
+            "SELECT value FROM sync_state WHERE key = 'sample_dedupe_pending'") == "1",
+            "the one-shot marker is armed")
+
+        // Round 2: THE ECHO PULL — B's own push comes back, re-defers.
+        let echo = try await productionRound(b)
+        #expect(echo.pull.applied > 0, "the echo window is NOT empty — B's own copy returns")
+        #expect(try liveCopyIDs(b) == [copyA.bookID, copyB.bookID].sorted(),
+                "the echo re-triggers the arrived-this-batch deferral — both copies still stand")
+        #expect(try b.db.fetchString(
+            "SELECT value FROM sync_state WHERE key = 'sample_dedupe_pending'") == "1",
+            "the marker re-armed for the next window")
+
+        // Round 3: the genuinely empty window decides.
+        let deciding = try await productionRound(b)
+        #expect(deciding.pull.applied == 0, "the deciding pull is the EMPTY window")
+        #expect(deciding.pull.repairs > 0, "positive activity: the deferred pass ran and retired")
+        #expect(try liveCopyIDs(b) == [copyA.bookID],
+                "round 3 on B decides: the smaller-id keeper")
+
+        try await productionQuiescence(a, b, server: server, maxRounds: 16)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyA.bookID], "\(client.name)")
+        }
+    }
+
     // MARK: - P3: edit-vs-edit on one take (S5), production shape
 
     /// THE MEMO'S P3: both devices edit T1 offline; sync in production's

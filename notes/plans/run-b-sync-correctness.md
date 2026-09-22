@@ -325,8 +325,14 @@ STOP AND REPORT to the orchestrator instead of adding one).
   `p8TheVisibilityBandVariantJamsTheSameWay`), each `withKnownIssue`-wrapped citing ledger row 9;
   reproduction facts asserted green; the answer + the observed mechanism refinements recorded
   below. Row 6 verdict: **CONFIRMED — reproducing it IS the pin; row 9 (the fix) is LIVE for B2.**
-- [ ] Probe P5(b) (dedupe double-retirement race) — PENDING.
-- [ ] Probe P5(c) (echo pull's extra round) — PENDING.
+- [x] Probe P5(b) (dedupe double-retirement race) — RUN: **REPRODUCED**
+  (`p5bTheDoubleRetirementRaceRetiresBothCopiesAndLosesTheEdit`, wrapped) — both copies retired
+  everywhere AND the edit's bytes lost outright under production order; finding F-1 below;
+  RECORDED with owner candidates (the 18a fence re-verified, not absorbed).
+- [x] Probe P5(c) (echo pull's extra round) — RUN, GREEN pin
+  (`p5cTheDeferralPlusTheEchoPullCostTwoRoundsPerMeeting`); the designed cost observed PRECISELY:
+  the deferring device's own push ECHO re-defers, so meeting → echo → decide is a 3-round cadence
+  under production order (the harness order folded meeting + echo into one window). Latency only.
 - [ ] Probe P4 round-shape sweep — PENDING.
 - [ ] Memo ⚠️ UNSETTLED section updated with dated answers + pin names — PENDING.
 - [ ] Finals: full core suite (baseline 1639/177) — PENDING.
@@ -454,6 +460,61 @@ the desired-contract block as its red-on-old pin):
 to rule BEFORE building — client-side only; anything wanting server lines stops as a 13y
 candidate. The two wrapped desired-contract blocks ("bounded rounds + reconciles after the
 release must clear the jam") are the red-on-old pins waiting to unwrap.
+
+#### P5(b) — the dedupe double-retirement race (ledger row 5): REPRODUCED — hunt finding F-1
+
+**Construction (the memo's traced observation made deterministic):** A seeds copyA, B seeds
+copyB, both push (the server holds copyB's PRISTINE bytes); B then edits a copyB note — the edit
+sits in B's outbox and B's pushes are delayed from here; B's two pulls run its pass on LOCAL
+evidence (copyB edited → keep it, retire copyA — the ruled outcome, on B's evidence); A's two
+pulls run its pass on the SERVER's evidence (both pristine → retire copyB, smaller-id keeper —
+correct, on A's evidence); the delayed pushes then land, production order per device.
+
+**Observed, asserted green:** the two retirements CROSS — tombstones win both ways, **both
+copies end dead on both devices** (the shipped sample library vanishes into the Trash whole),
+the stores CONVERGE (this is a ruled-outcome violation, not a divergence) — **and the edit's
+bytes are LOST OUTRIGHT**: B's resume round pulls A's retirement BEFORE pushing (production's
+own order), the merge lands the server's pristine tombstoned baseline over the dirty edited row,
+`rescueLosingText` skips because the block died earlier in the same batch, and the cleared
+outbox entry means the edit never reaches the server at all. Zero rows anywhere carry the edited
+text, live or tombstoned.
+
+**Severity read (mine, for adjudication): MAJOR.** It breaks two ruled sentences at once — "an
+edited copy is NEVER silently retired" (R-pre13u-8) and §6's "deleting an edit nobody chose to
+lose is the one forbidden outcome" — and the second breaks in the BYTES, not merely to the
+Trash. Tempered by: the window needs an edit landing between the seed-push and both passes with
+the editor's pushes delayed across its own two pulls (a real but narrow interleave); the event
+class is once-per-store-life (two independently-seeded copies meeting); and in real use the
+savepoint occasions often insure the text (though a mid-session autosave-only edit, as probed,
+has no savepoint). **Ownership: NOT row 33's late-registry leg** (that class is engagement rows
+in post-`post_tag` tables travelling in a trailing chunk; this class is evidence CHANGING
+between two devices' passes — re-verified, not absorbed). Candidates for the orchestrator:
+(i) a new ledger row fixed in B2 (a dedupe-shaped fix — e.g. the pass refuses to classify a copy
+whose rows carry pending LOCAL dirt for the other side, or retirement tombstones carry a
+distinguishing mark the editing side's merge rescues against); (ii) RECORDED to 18a beside row
+33 (the deletion-aware-sync design sitting owns the posture). The wrapped pin
+(`withKnownIssue`, "the edited copy must survive on both devices") waits for either owner.
+
+#### P5(c) — the echo pull's extra round (ledger row 5): CONFIRMED designed cost, green pin — with a sharper mechanism than the memo's phrase
+
+Under PRODUCTION rounds the deferring device takes THREE rounds from meeting to decision:
+round 1's pull brings the other copy (arrived-this-batch deferral + the one-shot marker, R2-3);
+**round 2's pull is NOT empty — it serves the device's OWN push echo back** (its copy's rows sat
+above its cursor after round 1's push half), the echo re-applies that copy's `reading` row, and
+the arrived-this-batch rule RE-DEFERS and re-arms the marker — this is "the echo pull" of the
+memo's observation; round 3's genuinely-empty window fires the pass and decides. The harness's
+convenience order had folded the meeting and the echo into ONE window (push-both-then-pull), so
+the old suites recorded a 1-round deferral; production's shape shows 2. Latency only —
+convergence intact, verdicts unchanged, pinned as a stated fact.
+
+### FINDINGS LIST (B1's hand-over to adjudication)
+
+| # | Finding | Severity (mine) | Pin | Owner status |
+|---|---|---|---|---|
+| F-1 | P5(b): the dedupe double-retirement race retires BOTH copies (the edited one included) and loses the edit's bytes under production order | MAJOR | `p5bTheDoubleRetirementRaceRetiresBothCopiesAndLosesTheEdit` (wrapped) | NEW — candidates: B2 row, or RECORDED → 18a beside KnownIssues row 33 (not row 33 itself — re-verified) |
+| F-2 | 17d P8: the purge-window mirror orphan permanently jams the pull, one-way and silent | MAJOR (the entry's own rating) | `p8AHeldPushAcrossThePurgeWindowJamsThePullForever` + `p8TheVisibilityBandVariantJamsTheSameWay` (both wrapped) | OWNED — ledger row 9 (B2) |
+| — | P2(b)'s silent-drop returner corner | product gap, not a defect | `p2bTheSixtyDayDropoutReturnerDropsItsEditsWithThePurgedFamily` (green, pins shipped behavior) | QUESTIONS draft above — the orchestrator files |
+| — | P2(a)'s deletion-clock window consequence · P5(c)'s 3-round cadence | recorded facts, no defect | green pins | noted for 18a's sitting |
 
 ---
 
