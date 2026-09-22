@@ -133,10 +133,12 @@ brief names it.
 | 11 | B2 | **17d P28** — `reapplyStructural`'s untombstoning loop is the ONE revive road that does not `voidPurgeIntents`; a leftover Delete-Now intent later claims the block and strips its 30-day window | **FIXED** (B2 P1 — the redo road voids intents; pin red-on-old) |
 | 12 | B2 | **17d P31** — a permanently stalled pull cursor reports a clean round forever: `PullReport.stalled` (and `PushReport.deferred`) gain a production reader (the `BridgeScheduler.status.stalled` precedent); the status surface stops saying "fine" under a stall | **FIXED** (B2 P1 — the stall + deferral surfaced honestly; pins red-on-old) |
 | 13 | B3 | **17l item 5** — the double passphrase ask at a follow after a rotation (KnownIssues row 37): when the passphrase is UNCHANGED at a rotation, `RotationSecrets` re-wraps under the EXISTING descriptor (same salt → same derived key; the wrapped payload is the new master). **HER SCOPE (2026-09-07): passphrase wrap ONLY — the recovery-words wrap keeps its fresh salt at every act, and a pin asserts the two descriptors stay independent.** Pin: a sibling that opened by the passphrase follows a Replace All Keys with zero prompts (red today) | **FIXED** (B3 — the proven-by-unwrap reuse road; three pins, revert-verified core AND door; the nine attacker arms byte-untouched) |
-| 14 | B4 | **The harness-realism structural deliverable** — `productionRound` (built in B1 as the hunt's instrument) becomes the convergence suites' DEFAULT; chunk splits at registry boundaries as a sweep; every suite green under the NEW shape | open |
+| 14 | B4 | **The harness-realism structural deliverable** — `productionRound` (built in B1 as the hunt's instrument) becomes the convergence suites' DEFAULT; chunk splits at registry boundaries as a sweep; every suite green under the NEW shape | **DONE** (B4 — 37 converted / 3 already-production / 33 exempt across the two legal classes, reasons at the lines; 3 new boundary arms + the tenth; the beyond-scope residue named in the record) |
 
-| 16 | B4 | **S1's Q2 NIT (the hosted stress pass)** — `sync_reencrypt` under an OLD key proof is the one data RPC the attacker suite never fires; it HOLDS structurally (`sync_key_gate`) — a TENTH arm in `MultiTenantSyncAttackerTests` (or the fake-server twin) pins it. Test-only; green-by-design is this row's expected verdict (a coverage pin, not a defect claim) | open |
+| 16 | B4 | **S1's Q2 NIT (the hosted stress pass)** — `sync_reencrypt` under an OLD key proof is the one data RPC the attacker suite never fires; it HOLDS structurally (`sync_key_gate`) — a TENTH arm in `MultiTenantSyncAttackerTests` (or the fake-server twin) pins it. Test-only; green-by-design is this row's expected verdict (a coverage pin, not a defect claim) | **DONE — GREEN-BY-DESIGN** (B4 — the tenth arm beside the byte-untouched nine; fence-first, proof-refused, mirror unmoved, non-vacuity control, the DDL text pin) |
 | 15 | B2 | **F-1 (B1's hunt, probe P5(b))** — the dedupe double-retirement race: an edit landing between the seed-push and the two devices' passes, with the editor's pushes delayed across its own two pulls, retires BOTH copies on both devices AND loses the edit's bytes outright (pull-first merges the pristine tombstoned baseline over the dirty row; rescue skips block-dead; the cleared outbox means the edit never reaches the server). Breaks R-pre13u-8's "an edited copy is NEVER silently retired" and §6's forbidden outcome IN THE BYTES. Red pin waiting wrapped: `p5bTheDoubleRetirementRaceRetiresBothCopiesAndLosesTheEdit`. **Fix constraints (the orchestrator's, at the F-1 ruling):** the outcome must land on the ruled matrix — exactly-one-edited ⇒ the EDITED copy survives; both-edited ⇒ both survive; deterministic on both devices; err toward EDITED. Design fork: the implementer proposes, the orchestrator rules, repo-first, before the build. **Escape valve:** if the honest fix is a redesign of the dedupe's occasions rather than a repair-rule-scale change, STOP AND REPORT — the row then closes RECORDED → 18a beside KnownIssues row 33, the pin standing wrapped | **FIXED** (B2 P2 — ride-the-row #143(a) + the kill-time defense per the AMENDED ruling; B1 wrap unwrapped red-on-old) |
+
+| 17 | B5 | **F-3 (B4's sweep, the cross-batch post_tag split arm)** — the reject-delivered retirement: a CAS reject hands B the duplicate tag's tombstone OUTSIDE the changefeed/seq order/band, AHEAD of the keeper B has never seen; the reject-merge's local cascade kills B's live never-seen-live application and re-pushes it DEAD; on A it ARRIVES TOMBSTONED so the row-7 leg (`!resolved.isTombstoned`) never fires — tombstone-wins converges both stores ON the loss (noteB untagged everywhere). Breaks the SAME §7 sentence row 7 fixed, on its reject-path face — **MAJOR sustained for class consistency** (narrower window than row 7's, same user-intent-loss class). Red pin waiting wrapped: `aRejectDeliveredRetirementCascadesTheStrandedApplicationBeforeTheKeeperArrives`. **Fix shape UNDECIDED — the design fork: the implementer proposes (the record's two candidate homes are the starting observations, not a ruling), the orchestrator rules, repo-first, before the build** | open |
 
 *(Hunt findings from B1 join the ledger as new rows at B1's adjudication — each owned: fixed in
 B2, or RECORDED with a named owner outside the run. F-1 is row 15; F-2 was already owned as
@@ -1655,9 +1657,52 @@ repair-rule-scale; neither is decided here.
 **Routing:** a new ledger row (fix batch) or RECORDED with an owner — the orchestrator's
 adjudication; the wrap cites F-3 and stands as the future red-on-old pin either way.
 
+### BATCH B4 — ORCHESTRATOR ADJUDICATION (2026-09-22; the batch CLOSES here)
+
+**Verification, my own hands:** the ten commits read (pathspec-limited, pushed, honest); the
+sweep table read whole — the TRAPS' ten named convergence suites fully dispositioned (37 C ·
+3 AP · 33 E across exactly the two legal classes, every reason at its line), the beyond-scope
+residue NAMED not absorbed (ten further suites outside the sweep's charter; any future round may
+extend — recorded, no owner owed by this run's letter); **the full core re-run by the
+orchestrator: 1673 tests / 179 suites PASSED with exactly the 2 known issues** (F-3's wrap — the
+stated, correct deviation from the zero-wraps line per the never-bare-red rule). Row 16's tenth
+arm verified as the row expected: green-by-design, the nine byte-untouched. The `2e794811`
+interloper was verified as the background session re-routing ITS candidate work OFF this run —
+respects our fences, left alone. **BATCH B4 CLOSES; rows 14 + 16 DONE.**
+
+**F-3 ROUTED — NEW ROW 17, fixed in this run as BATCH B5.** The reasons are F-1's, compounded:
+it breaks the SAME §7 sentence row 7 just fixed (this is row 7's reject-path face — closing the
+entry with its own contract half-broken would be false); 17i's charter makes a hunt finding an
+item by design; the cast is seated and the wrapped pin waits. **Severity MAJOR sustained** for
+class consistency with row 7 (user-intent loss against a §7 sentence; the narrower window
+tempers reachability, not class). The fix shape is genuinely undecided — B5 runs the
+design-fork-first shape: the implementer traces, proposes 2–3 repair-rule-scale candidates (the
+F-3 record's two observations are starting points, not rulings), STOPS, and builds only to the
+recorded ruling. **A shape that cannot stay repair-rule-scale (schema, server lines, or a
+protocol change) STOPS AND REPORTS — 13y/18a candidates, the pin standing wrapped.**
+
+**BATCH B5 BRIEF (self-contained):** you are a Fable implementer session for RUN B batch B5 —
+ONE item, ledger row 17 (F-3). READ FIRST, in full, in your own context: `CLAUDE.md` + canon
+(SyncSpec WHOLE — §§4, 5, 7 are the roads in play) · `notes/sync-postmortem-fragments.md` ·
+THIS FILE (FENCES · TRAPS · row 17 · the FINDING F-3 section — its five-step trace, every step
+already pinned green · the ROW 7 record in BATCH B2 — the arrival-order leg this face evades ·
+all four adjudications) · `Sync/SyncEngine.swift`'s reject-merge road + `Sync/Repairs.swift`'s
+`repointApplicationUnderDeadDuplicateTag` + `Sync/Merge.swift` as the trace names them. THE
+SHAPE: re-trace F-3 by your own hands (the wrapped pin is your reproduction), write your
+PROPOSAL (2–3 candidates, tradeoffs, recommendation — determinism on both devices and §7's
+no-time-bound sentence are the constraints; both-pushed AND the reject road must converge on
+BOTH-NOTES-TAGGED), commit it to your record, hand back, WAIT for the ruling by message, then
+build: unwrap F-3's pin as red-on-old, revert-verify commit-first, the row-7 pins and the full
+dedupe/repair suites green beside it. Fences: zero schema, zero server lines, marker 8, her
+store untouched. Your record: `## BATCH B5 RECORD` — LIVE STATUS from the first commit, the
+trace, the proposal, then the build half. Checkpoint protocol as every batch (commit+push per
+piece, pathspec-limited, foreground waits, no subagents, commit-before-revert, no trailers).
+Finals: full core at close — baseline **1673/179 with F-3's 2-issue wrap**; your finish line is
+**zero wraps**.
+
 ---
 
-## THE LADDER (ONE Fable ladder over the run's combined diff; opens after B4's record closes)
+## THE LADDER (ONE Fable ladder over the run's combined diff; opens after B5's record closes — amended from "B4's" when F-3 became row 17)
 
 Fresh `fable-reviewer` per round, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing; findings
 recorded here repo-first before any fix session sees them; the SAME-MODEL flow (fix session
