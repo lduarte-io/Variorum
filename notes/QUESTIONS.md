@@ -1778,4 +1778,32 @@ a two-copy sample-library meeting decides on a 3-round cadence under production 
 latency only). Both live durably in `notes/plans/pre-13u-memo-sync-disagreements.md`'s ANSWERED
 blocks.
 
-*(Next free number: **#142**.)*
+#142 — **THE RECREATED-TAG CATCH (RUN B batch B2, row 7 — the tag.path repair's arrival-order
+leg; the implementer's draft verbatim, filed by the orchestrator).** The arrival-order leg keys
+on the picture at arrival (a dead tag + a live same-path keeper), which is also the picture a
+deliberate tombstone-then-recreate leaves. Consequence: a stale offline application of the
+DELETED tag now re-points onto the recreation instead of dying with the deleted tag's cascade.
+Spec-defensible (the §7 sentence names the path as the identity; the Journal keeper's direction-2
+does the same for mint-shape; §6's "deleting an edit nobody chose to lose" points the same way),
+and the alternative discriminators are worse: batch-scoped state misses cross-batch arrivals, and
+a keeper-id-ordering test made the outcome depend on random UUID order. Options: **(a)** keep the
+rescue (shipped by this fix); **(b)** narrow the leg to same-batch-retired duplicates only
+(re-opens the cross-batch loss). **PROVISIONAL: (a) stands until she rules.**
+
+#143 — **THE F-1 FIX'S TWO PROVISIONAL EDGES (RUN B batch B2, row 15 — the dedupe
+double-retirement fix; the orchestrator's rulings section has the full arbitration).** **(a) The
+§6 clarification, ride-the-row:** the merge matrix is silent on a tombstoned row's TEXT when the
+whole block is dead; the fix makes an UNPUSHED losing edit ride the row into the Trash (staying
+enqueued, converging with the bytes intact) — the same end-state B1's P1 probe measured and
+blessed for the PUSHED direction, warranted by §6's own "deleting an edit nobody chose to lose is
+the one forbidden outcome." Ratify as a §6 clarification (the closeout's delta would add one
+sentence to the tombstone row), or revert to server-text-wins-on-dead-blocks. PROVISIONAL:
+ride-the-row stands. **(b) The deliberate-delete-revival corner:** deleting the sample book on
+one device while another device holds UNPUSHED edits to its copy, INSIDE the once-per-store-life
+two-copy meeting window, is revived by the defense leg — visibly, never silently; outside that
+window a delete is never second-guessed. Err-toward-EDITED's letter. PROVISIONAL: the revival
+stands. *(Adjacent, ruled the same day, no action: S1's Q10 refinement — 17n's 12-character floor
+is a length floor, not an entropy floor; whether to pair it with a strength check is on the
+checkpoint bundle, propose-only.)*
+
+*(Next free number: **#144**.)*

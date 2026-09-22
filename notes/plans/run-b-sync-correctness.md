@@ -1016,6 +1016,53 @@ survive); a Part-1 bytes pin (the P1 phone-first order: an unpushed edit rides t
 Trash and Put back returns it); and the no-defense guard (a deliberate delete with NO second
 copy present never revives).
 
+### ROWS 9 + 15 — THE ORCHESTRATOR'S RULINGS (2026-09-22, recorded repo-first; Phase 2 builds to these)
+
+**Phase 1 verified before ruling:** the eight commits read; LIVE STATUS complete, zero PENDING;
+all six new pins re-run by the orchestrator's own hands — 6 tests / 4 suites GREEN. The row-7
+recreated-tag PROVISIONAL is FILED as **QUESTIONS #142** (the draft verbatim; (a) stands).
+
+**ROW 9 RULING — Shape A APPROVED, with ONE narrowing condition.** The heal is §4f's own
+completion (the orphan rows are tombstones of a family whose deletion crossed the horizon; the
+mirror hosting a purged note's sealed ciphertext forever is what §4f exists to end), uses ONLY
+existing RPCs (the zero-server-lines fence holds), leaves §5's transient-straggler class
+untouched by the exact ledger discriminator, and is the narrow traced mechanism — not row 19's
+park/heal subsystem (no parking, no retry policy; that fence line stands in the build). **The
+narrowing condition:** the heal fires ONLY when the stalled arriving row is itself a TOMBSTONE
+(`deleted_at` set — the traced construction's shape; B's cascade stamps the orphan before the
+push). A LIVE stalled row whose referent is ledger-named is NEVER healed — left stalled and
+honest under row 12's flag, and recorded if ever observed, because it would be a class nobody
+has traced and safe-by-refusal is the right posture toward it. Shapes B and C rejected as
+proposed (B impossible client-side; C hosts purged ciphertext forever). The `purgeLedger(since:
+0)` full read is accepted on the stall path's rarity; owner-12's future ledger pruning keeps the
+below-floor-means-purged semantics the discriminator already handles. Pins as proposed, plus the
+live-row refusal guard.
+
+**ROW 15 RULING — the two-part repair APPROVED, with ONE constraint on Part 2's discriminator,
+and Part 1 lands PROVISIONAL.**
+- **Part 1 (ride-the-row) — the canon arbitration:** §6's matrix is SILENT on the tombstoned
+  row's TEXT when the block is dead; its own ratified doctrine sentence ("deleting an edit
+  nobody chose to lose is the one forbidden outcome") is the warrant, and B1's P1 verdict
+  blessed ride-the-row as the SAFE end-state for the pushed direction — Part 1 makes the
+  unpushed direction converge to the same end-state, closing P1's un-probed other resume order
+  as well as F-1's bytes. No invariant moves (the row stays tombstoned; S5 untouched — no
+  conflict card is minted for a dead block). Under the PROVISIONAL rule this is the most
+  spec-defensible reading of a silent cell, not a canon change: **it lands PROVISIONAL, filed as
+  QUESTIONS #143(a)** for her ratification as a §6 clarification at the closeout.
+- **Part 2 (the defense leg) — the constraint:** the defense's evidence is **PRE-BATCH dirt
+  only** — outbox rows whose enqueue PRECEDES the current apply (`queued_at` before the
+  transaction's start, or an equivalent batch-start snapshot). In-apply enqueues (the repairs'
+  own explicit outbox rows, including anything a pass writes near the keeper) can NEVER
+  self-justify a revival — without this line, a device's own repair bookkeeping could read as
+  "edits" and revive the copy it just correctly retired, degrading exactly-one-edited into
+  both-survive. (Part 1's preserved entry qualifies naturally: the edit's enqueue predates the
+  batch.) The accepted corner (her deliberate delete inside the two-copy meeting window with
+  unpushed edits revives, visibly) is **QUESTIONS #143(b)**, PROVISIONAL — it errs toward her
+  words and can never fire outside the once-per-store-life meeting window. The
+  considered-and-dropped alternatives are sustained as dropped (the mark is schema; deferral
+  cannot stop the crossing). Pins as proposed, plus the both-edited variant and the no-defense
+  guard.
+
 ---
 
 ## BATCH B3 — 17l ITEM 5 (brief finalized at spawn; the settled scope)
