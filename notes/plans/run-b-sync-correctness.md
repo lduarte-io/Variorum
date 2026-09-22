@@ -1554,8 +1554,9 @@ waits, no subagents (one Sonnet lookup max), commit-before-revert, no trailers.
   style DDL text pin (`sync_reencrypt`'s deployed body performs `sync_key_gate`). **VERDICT:
   GREEN-BY-DESIGN, exactly the row's expected outcome — a coverage pin, no defect.** The nine
   arms + arm 9 byte-untouched, re-run green beside it (3 tests).
-- [ ] SyncMergeTests suite-level exemption annotated; `ProductionRound.swift` header's
-  "B4's deliverable" sentence flipped to done — PENDING
+- [x] SyncMergeTests suite-level exemption annotated (direct merge-unit calls — no transport, no
+  drain, no cursor: no round exists to shape; 15 tests green); `ProductionRound.swift`'s header
+  now states the DEFAULT-since-B4 rule and the two legal exemption classes.
 - [ ] THE SWEEP TABLE (suite × scenario: converted · exempt-with-reason · boundary cell) written
   below — PENDING
 - [ ] Finals: FULL CORE SUITE at close (baseline **1669/179, zero wraps**; arithmetic stated

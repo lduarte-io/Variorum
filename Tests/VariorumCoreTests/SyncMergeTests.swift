@@ -6,6 +6,13 @@ import Testing
 /// SyncSpec §6 rule by rule, plus AppSpec §9's `resolveSyncConflict`. The
 /// merge is exercised directly (the unit under test); the same paths run
 /// end-to-end in the push/pull and convergence suites.
+///
+/// RUN B batch B4 (ledger row 14) — the sweep's ruling for this suite,
+/// whole: EXEMPT, no room for a round. Every test calls the merge function
+/// directly on crafted local/server row pairs — there is no transport, no
+/// outbox drain and no cursor in the composition, so no round exists to
+/// shape. The same merge paths run under full production rounds in the
+/// convergence suites (the header's own sentence, now made true by B4).
 @Suite("Merge matrix & resolveSyncConflict (Phase 5, Step 5)")
 struct SyncMergeTests {
     // MARK: - Fixtures

@@ -13,8 +13,12 @@ import Testing
 /// suites' convenience order (push → push → pull → pull, whole outboxes in
 /// one batch) is a sequence production never runs — the pre-13u ladder's
 /// own lesson (R2-1/R2-2 passed in the first order and failed in the
-/// second). This file gives the probes production's order; converting the
-/// EXISTING suites to it is batch B4's deliverable, not B1's.
+/// second). This file gives the probes production's order — and since RUN B
+/// batch B4 (ledger row 14, the postmortem's lesson-8 deliverable) it is
+/// the convergence suites' DEFAULT round shape: the convenience order is
+/// retired from every suite the TRAPS name, surviving only where a test's
+/// SUBJECT is the order itself or its composition has no room for a round
+/// (each exemption named at its line; the sweep table is the B4 record's).
 ///
 /// What this deliberately does NOT model: the janitor legs of a scheduled
 /// round (`reconcileLedger` before, `sweep` after). Purge-flavored probes
