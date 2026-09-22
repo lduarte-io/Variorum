@@ -370,7 +370,56 @@ wrap-primitive change — no owner needed unless that change is contemplated).
 silently, which fall to the passphrase, and does any device ever write the vault without consent?
 (MAJOR-3 REFINED; MINOR-N1; 17m)*
 
-**PENDING**
+**The setup.** An iCloud Keychain reset wipes the SYNCHRONIZABLE items — and `A` (the iCloud key)
+is the ONLY synchronizable item this design writes (§3.9). Each device's silent library-key
+custody item is device-local (never synchronizable), so it SURVIVES the reset.
+
+**Which devices still open silently — all three.** Standard's auto-open reads the library key
+from the device-local silent item (§3.8), which the reset does not touch; and the master M sits
+in each enrolled device's local custody. So all three existing devices keep opening silently AND
+keep syncing — nothing about their own operation depends on `A` (confirmed against
+`reconcileAppleKey`: the Apple arm is a background reconcile, never on the open path).
+
+**Which fall to the passphrase — none of the three; only a NEW or wiped device.** A device that
+must enroll via the Apple road (a fourth device, or one whose device-local item was also lost)
+reads `A` as nil (`appleKeys.read()` nil after the reset), holds no master, so
+`readAppleKeyForReconcile` sets `waiting: apple == nil && !mintAllowed`
+(`ProtectionController.swift:1556–1559`) → `appleKeyWaiting = true` (:1479) → the "waiting for
+iCloud Keychain" state with its passphrase / twelve-words doors (§3.8). The vault's Apple-held
+copy is orphaned under the wiped `A`, so silent enroll cannot serve it until re-landed.
+
+**Does any device ever write the vault without consent — NO, confirmed at the code.** For each of
+the three existing devices the reconcile computes `holdsMaster = syncCustodyPresentAtReady` (true)
+and `mintAllowed = vaultAppleKeyID == nil || holdsMaster` (true), so `read()` (nil) falls to
+`readOrMint()` which MINTS a fresh `A′` with `minted: true` and a NEW id (:1555–1558). The HEAL —
+the ONLY path that writes the vault (`healAppleHeldCopy`, :1499) — is gated `!read.minted &&
+read.envelope.appleKeyID == vaultAppleKeyID && apple.id != vaultAppleKeyID` (:1496–1497), so a
+MINT never heals (`read.minted` is true), and after the reset the device's key file no longer
+records the vault's id anyway (it records its own minted `A′`). Instead the mint lands into the
+device's OWN key file only (`landAppleCopyOffMain` saves the envelope, :1510–1513; the log line at
+:1493 states "the vault's Apple-held copy stays under the recorded id"). This is MINOR-N1's fix
+(F3 item 1, pin `aMintNeverHealsTheVaultEvenWhenTheFileRecordsTheVaultsId`), which corrected the
+pre-F3 bug where a nil-read mint silently re-homed the account's vault copy under whatever Apple
+account the device now held. The heal fires ONLY on a genuine READ of a different id — proof of a
+same-account duplicate (`read()` returns an id ≠ the recorded/vault id, which only the same Apple
+account can produce) — the exact scenario an iCloud Keychain reset does NOT create for the vault's
+copy (the vault's id was the wiped one, not a live read).
+
+**The recorded consequence, already owned:** the account's Apple-held copy in the VAULT is
+ORPHANED under the wiped `A`, so Standard's silent enroll for NEW devices stops until it is
+re-landed; the only road today is the Castle → Standard round trip (heavy). This is exactly
+closeout consideration 6 — "the orphaned Apple-held copy after an iCloud Keychain reset or an
+Apple-ID switch → 17m (the Re-link door, pre-release)" — and MINOR-N1's disposition names the
+deliberate *Re-link your Apple account* door (with a consent sentence) as the honest fix,
+AUTHOR-CLASS at QUESTIONS #90.
+
+**VERDICT: HOLDS — with the orphaned-vault-copy consequence owned by 17m + QUESTIONS #90.** All
+three existing devices open silently and sync; only a new/wiped device falls to the passphrase;
+and no device ever writes the vault without consent — the heal that writes the vault is gated to
+fire only on a genuine read proving a same-account duplicate, never on a nil-read mint (MINOR-N1's
+`!read.minted` guard). The one owned residual is the recorded consequence (silent enroll for new
+devices needs the vault's copy re-landed via a deliberate act), whose owner is **17m** (the
+Re-link door) with its product shape at **QUESTIONS #90** — not a new finding.
 
 ## Q7 — the fresh library on a Castle Mac cannot sync without a typed secret
 
