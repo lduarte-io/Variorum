@@ -320,7 +320,11 @@ STOP AND REPORT to the orchestrator instead of adding one).
   (`p2bTheSixtyDayDropoutReturnerDropsItsEditsWithThePurgedFamily`); shipped behavior RECORDED
   (drop, family-complete, silent — the purge-wins letter); the canon GAP goes to QUESTIONS
   (draft below) — the orchestrator files it.
-- [ ] 17d P8 run (ledger row 6) — PENDING.
+- [x] 17d P8 run (ledger row 6) — RUN: **REPRODUCED, BOTH constructions** (held-push
+  `p8AHeldPushAcrossThePurgeWindowJamsThePullForever` + visibility-band
+  `p8TheVisibilityBandVariantJamsTheSameWay`), each `withKnownIssue`-wrapped citing ledger row 9;
+  reproduction facts asserted green; the answer + the observed mechanism refinements recorded
+  below. Row 6 verdict: **CONFIRMED — reproducing it IS the pin; row 9 (the fix) is LIVE for B2.**
 - [ ] Probe P5(b) (dedupe double-retirement race) — PENDING.
 - [ ] Probe P5(c) (echo pull's extra round) — PENDING.
 - [ ] Probe P4 round-shape sweep — PENDING.
@@ -414,6 +418,42 @@ the gap. **QUESTIONS DRAFT (for the orchestrator to file at the next free number
 S5 end-to-end under production's pull→push order at batch sizes 200 and 1: the loser lands as
 exactly ONE `'conflict'` card on the same block; both texts live on both devices; dumps equal.
 The Phase 5 pin's claim survives the round shape production actually runs.
+
+#### 17d P8 — the purge-window mirror orphan (ledger row 6): REPRODUCED, both constructions — row 9 is live
+
+**The run's rule discharged: reproducing it IS the red-on-old pin.** Both deterministic
+constructions land the permanent jam, `withKnownIssue`-wrapped citing ledger row 9 (B2 unwraps
+the desired-contract block as its red-on-old pin):
+
+- **Held-push** (`p8AHeldPushAcrossThePurgeWindowJamsThePullForever`): phone B mints block X
+  inside converged note N offline; Mac A Delete-Nows N and rounds; B's round applies N's
+  tombstone (X joins the cascade, N's exact stamp) and B's push of X's three rows is HELD
+  (`FakeSyncServer.holdNextPush` — seqs assigned, invisible); A's sweep expands N's family from
+  A's store, which never saw X, and `executePurge` removes + ledgers exactly what A knew; the
+  held transaction commits; X's rows surface above A's cursor.
+- **Visibility-band** (`p8TheVisibilityBandVariantJamsTheSameWay`): the same shape with NO held
+  transaction — `FakeSyncServer(visibilityHorizon:)`; B's push commits inside the band, A pulls
+  and sweeps within it, the clock leaves it. The window production actually has (~2 s).
+
+**Observed mechanism, two refinements on the verifier's trace (recorded for B2's design fork):**
+
+1. The stall lands AT the orphaned placement, not at the batch's head: block X and variant VX
+   APPLY (their FK closures resolve in-batch — X's pushed row carries a NULL
+   `last_container_id`, since `newBlock` never sets it and the cascade doesn't either; only
+   `deleteBlock` stamps it), the cursor advances past them, then `container_block.container_id →
+   N` fails both locally and in-batch, `stopIndex` truncates, and the cursor holds JUST BELOW
+   the placement — permanently. A therefore ends up holding a tombstoned X + VX with no
+   placement and no container: harmless rows, but the placement above them jams the feed.
+2. The jam is PERMANENT and ONE-WAY, asserted: A's ledger reconcile names nothing A still holds
+   (scan point advances, nothing drops); B's reconcile sweeps X LOCALLY on B — after which **no
+   device holds any row or tombstone for the mirror's orphan** — and nothing ever removes it
+   from the mirror; a fresh note B then writes lands above the stall and can NEVER reach A
+   (asserted by id). Silent under P31's green light (row 12 is the honesty half).
+
+**For B2 (row 9):** the fix design fork is the implementer's to propose and the orchestrator's
+to rule BEFORE building — client-side only; anything wanting server lines stops as a 13y
+candidate. The two wrapped desired-contract blocks ("bounded rounds + reconciles after the
+release must clear the jam") are the red-on-old pins waiting to unwrap.
 
 ---
 

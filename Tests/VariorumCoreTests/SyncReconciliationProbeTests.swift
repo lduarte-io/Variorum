@@ -333,6 +333,213 @@ struct SyncReconciliationProbeTests {
         #expect(try laptop.syncedDump() == phone.syncedDump())
     }
 
+    // MARK: - 17d P8: the purge-window mirror orphan (ledger row 6 — THE RUN)
+
+    /// **17d P8, RUN AND REPRODUCED** (the entry's own rule: reproducing it
+    /// IS the red-on-old pin). The verifier's deterministic construction:
+    ///
+    ///  1. note N converged on Mac A and phone B, both cursors recorded;
+    ///  2. B (offline) creates block X inside N — X's rows exist ONLY on B;
+    ///  3. A Delete-Nows N (tombstone + purge intent) and rounds;
+    ///  4. B's round: the pull applies N's tombstone (the cascade takes X
+    ///     with N's exact stamp), then B's push of X's rows is HELD —
+    ///     `FakeSyncServer.holdNextPush`, the A5 in-flight-transaction
+    ///     window: seqs assigned, rows invisible;
+    ///  5. A's sweep runs inside that window: the family expands from A's
+    ///     store, WHICH NEVER SAW X — `executePurge` removes exactly what A
+    ///     knows and ledgers exactly what it was handed;
+    ///  6. the held transaction commits: X's rows surface at their original
+    ///     seqs — a placement referencing a container that exists NOWHERE
+    ///     (purged from the mirror and every store) and that NO ledger
+    ///     entry names.
+    ///
+    /// REPRODUCTION FACTS (asserted green — the mechanism's record):
+    /// A's next pull stalls (`foreignKeysSatisfiable` → stopIndex
+    /// truncation), the cursor holds, and it NEVER heals — the ledger
+    /// reconciliation cannot name X, B's reconcile drops X locally on B but
+    /// never from the mirror, and every later write B makes lands ABOVE the
+    /// orphan, so A integrates NOTHING from the account ever again: the
+    /// permanent one-way inbound jam, silent under P31.
+    ///
+    /// THE DESIRED CONTRACT (`withKnownIssue`-wrapped, citing RUN B ledger
+    /// row 9 — B2 unwraps this as its red-on-old pin): a bounded number of
+    /// rounds + ledger reconciles after the release must clear the jam.
+    @Test func p8AHeldPushAcrossThePurgeWindowJamsThePullForever() async throws {
+        let (a, b, server) = try pair()
+        let (noteID, _, _): (String, String, String) = try a.with { ops, _ in
+            let note = try ops.createPost(title: "doomed", profile: .generic)
+            let made = try ops.newBlock(in: note.id, text: "the original words", at: .end)
+            return (note.id, made.block.id, made.variant.id)
+        }
+        try await productionQuiescence(a, b, server: server)
+        for _ in 0..<2 {
+            _ = try await productionRound(a)
+            _ = try await productionRound(b)
+        }
+
+        // 2. B creates X inside N, offline.
+        let (blockX, variantX, placementX): (String, String, String) = try b.with { ops, db in
+            let made = try ops.newBlock(in: noteID, text: "the phone's late block", at: .end)
+            let placement = try db.fetchString(
+                "SELECT id FROM container_block WHERE block_id = ?", [made.block.id])!
+            return (made.block.id, made.variant.id, placement)
+        }
+
+        // 3. A Delete-Nows N and rounds (tombstones + intent pushed,
+        // cursor committed + recorded).
+        try a.with { ops, _ in
+            try ops.deleteContainer(noteID)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "container", rowID: noteID)])
+        }
+        for _ in 0..<3 { _ = try await productionRound(a) }
+
+        // 4. B's round, its push held open: the pull lands N's tombstone
+        // (X joins the cascade, N's exact stamp), then X's rows get seqs
+        // but stay invisible.
+        await server.holdNextPush()
+        _ = try await productionRound(b)
+        #expect(try b.db.deletedAt("block", blockX) != nil,
+                "X joined N's cascade on B before the push")
+        _ = try await b.pull()  // records B's advanced cursor (first-window rule)
+
+        // 5. A's sweep inside the window: the purge expands from A's store,
+        // which never saw X.
+        let sweep = try await sweep(a, server)
+        #expect(sweep.familiesPurged >= 1, "the family was horizon-eligible and purged")
+        #expect(await server.currentRow(table: "container", rowID: noteID) == nil)
+        #expect(!(await server.isPurged(table: "container_block", rowID: placementX)),
+                "no ledger entry names X's placement — the purging device never knew it")
+
+        // 6. The held transaction commits: the orphan surfaces.
+        await server.commitHeldPushes()
+        #expect(await server.currentRow(table: "container_block", rowID: placementX) != nil,
+                "the mirror keeps X's placement, referencing a container that exists nowhere")
+
+        // REPRODUCTION FACTS: A's pull stalls AT the orphaned placement.
+        // Precisely observed: block X and variant VX apply (their FK
+        // closures resolve within the batch — the cursor advances past
+        // them), then PX truncates the batch and the cursor holds just
+        // below it, forever.
+        let jammed = try await a.pull()
+        #expect(jammed.stalled, "the FK walk cannot satisfy the orphan — the batch truncates")
+        #expect(try a.db.fetchInt(
+            "SELECT COUNT(*) FROM container_block WHERE id = ?", [placementX]) == 0,
+            "the orphaned placement never applies")
+        let held = jammed.newCursor
+
+        // Nothing heals it: A's ledger reconcile names nothing A still
+        // holds; B's reconcile drops X locally on B but never from the
+        // mirror; and every later write B makes lands ABOVE the orphan.
+        _ = try await reconcile(a, server)
+        _ = try await reconcile(b, server)
+        #expect(try b.db.fetchInt("SELECT COUNT(*) FROM block WHERE id = ?", [blockX]) == 0,
+                "B's reconcile swept X locally — no device holds a tombstone for the mirror's copy")
+        let freshNote: String = try b.with { ops, _ in
+            try ops.createPost(title: "life goes on", profile: .journal).id
+        }
+        for _ in 0..<2 { _ = try await productionRound(b) }
+        let still = try await a.pull()
+        #expect(still.stalled && still.newCursor == held,
+                "the jam is permanent: the cursor holds at the stall point across rounds")
+        #expect(try a.db.fetchInt(
+            "SELECT COUNT(*) FROM container WHERE id = ?", [freshNote]) == 0,
+            "one-way: B's fresh note can never reach A")
+        _ = variantX
+
+        // THE DESIRED CONTRACT — known-broken today (RUN B ledger row 9;
+        // B2's fix unwraps this block as its red-on-old pin): bounded
+        // rounds + reconciles after the release must clear the jam.
+        await withKnownIssue(
+            "17d P8 (RUN B ledger row 9): the purge-window mirror orphan jams the pull forever"
+        ) {
+            var healed = false
+            for _ in 0..<4 {
+                _ = try await reconcile(a, server)
+                let round = try await a.pull()
+                if !round.stalled { healed = true; break }
+            }
+            #expect(healed, "the inbound jam must clear within bounded rounds")
+        }
+    }
+
+    /// The VISIBILITY-BAND variant of the same construction (the A5 skew
+    /// without a held transaction): B's push COMMITS normally but the
+    /// server's changefeed refuses to serve rows younger than the band
+    /// (`visibilityHorizon`) — A pulls and sweeps inside the band, the
+    /// clock advances, the orphan surfaces. Same jam, the timing window
+    /// production actually has (~2 s on the real mirror). Wrapped citing
+    /// the same ledger row.
+    @Test func p8TheVisibilityBandVariantJamsTheSameWay() async throws {
+        let band: Int64 = 5
+        let server = FakeSyncServer(visibilityHorizon: band)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 977, seed: 2)
+
+        let noteID: String = try a.with { ops, _ in
+            let note = try ops.createPost(title: "doomed", profile: .generic)
+            _ = try ops.newBlock(in: note.id, text: "the original words", at: .end)
+            return note.id
+        }
+        // Every settled stage advances the clock past the band first, so
+        // earlier rows are visible and only the FINAL push sits inside it.
+        try await a.push()
+        await server.advanceClock(by: band)
+        try await productionQuiescence(a, b, server: server)
+        for _ in 0..<2 {
+            _ = try await productionRound(a)
+            _ = try await productionRound(b)
+        }
+
+        let (blockX, placementX): (String, String) = try b.with { ops, db in
+            let made = try ops.newBlock(in: noteID, text: "the phone's late block", at: .end)
+            let placement = try db.fetchString(
+                "SELECT id FROM container_block WHERE block_id = ?", [made.block.id])!
+            return (made.block.id, placement)
+        }
+        try a.with { ops, _ in
+            try ops.deleteContainer(noteID)
+            _ = try ops.requestPurge([SyncPurgeTarget(table: "container", rowID: noteID)])
+        }
+        _ = try await productionRound(a)
+        await server.advanceClock(by: band)
+        for _ in 0..<2 { _ = try await productionRound(a) }
+
+        // B's round: the pull lands the tombstone (X joins the cascade);
+        // the push commits INSIDE the band — visible to no pull yet.
+        _ = try await productionRound(b)
+        #expect(try b.db.deletedAt("block", blockX) != nil)
+        _ = try await b.pull()
+
+        // A sweeps inside the band; the clock then leaves it.
+        let sweep = try await sweep(a, server)
+        #expect(sweep.familiesPurged >= 1)
+        #expect(await server.currentRow(table: "container", rowID: noteID) == nil)
+        await server.advanceClock(by: band)
+
+        let jammed = try await a.pull()
+        #expect(jammed.stalled, "the band-hidden rows surfaced as the same permanent orphan")
+        #expect(try a.db.fetchInt(
+            "SELECT COUNT(*) FROM container_block WHERE id = ?", [placementX]) == 0,
+            "the orphaned placement never applies")
+        #expect(await server.currentRow(table: "container_block", rowID: placementX) != nil)
+        let held = jammed.newCursor
+        let still = try await a.pull()
+        #expect(still.stalled && still.newCursor == held,
+                "the cursor holds at the stall point across rounds")
+
+        await withKnownIssue(
+            "17d P8 (RUN B ledger row 9): the visibility-band variant of the purge-window jam"
+        ) {
+            var healed = false
+            for _ in 0..<4 {
+                _ = try await reconcile(a, server)
+                let round = try await a.pull()
+                if !round.stalled { healed = true; break }
+            }
+            #expect(healed, "the inbound jam must clear within bounded rounds")
+        }
+    }
+
     // MARK: - P3: edit-vs-edit on one take (S5), production shape
 
     /// THE MEMO'S P3: both devices edit T1 offline; sync in production's
