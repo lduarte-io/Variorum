@@ -171,7 +171,72 @@ NIT: the mechanism holds; only the explicit coverage is absent.
 2-second horizon, the walk and the deployed completion guard. Where would a second horizon, or a
 clock skew, reopen it? (THE LADDER, BLOCKER-1; `CorpusRotationTests`)*
 
-**PENDING**
+**The trace, confirmed against the code.** The straggler is a push that passed the OLD gate one
+second before the rotation, holding the vault row FOR SHARE. The rotation's begin
+(`key_vault_update`) takes FOR UPDATE, which WAITS for that push to commit
+(`pre13x-ladder-rotation-clearing-guard.sql:127–129`; `11:346–348` the gate's FOR SHARE);
+`rotation_started_seq` is `nextval('sync_server_seq')` taken INSIDE the vault write's transaction
+(:174), so the straggler's rows land BELOW the seq — but `sync_pull`'s A5 horizon
+(`server_written_at <= clock_timestamp() - interval '2 seconds'`, `11:587/599`;
+`03_visibility_horizon.sql:85`) HIDES them for up to 2 s. On a small corpus the client walk's two
+passes could both finish inside that window and miss the straggler (BLOCKER-1's traced
+catastrophe: pre-fix `complete` NULLed the previous key, sealing the row under a key that exists
+NOWHERE, wedging every later pull's decrypt forever — availability, not confidentiality).
+
+**The two-half fix, both live on the production mirror** (F1 built the client half; the server
+half was deployed by the orchestrator at her word and verified — the ladder's F1 ADOPTED note +
+the closeout):
+- **CLIENT** (`CorpusRotation.reencryptRemainder:477–488`): at the FIRST empty window the walk
+  `horizonWait()`s (production `Task.sleep(2.5 s)`, `:285`) then pulls once more — 0.5 s of margin
+  over the server's 2 s — so the straggler becomes visible and is re-encrypted (re-stamped ABOVE
+  the seq by `sync_reencrypt`).
+- **SERVER** (the maintenance guard, `:141–168`): the clearing arm refuses
+  `VARIORUM_ROTATION_ROWS_REMAIN` while any ciphertext-carrying row of the caller's partition
+  still sits `server_seq < rotation_started_seq`. **This count is SEQ-based, read under FOR
+  UPDATE** — every in-flight old-proof push (FOR SHARE) has committed by then — so it reads every
+  committed straggler REGARDLESS of the visibility horizon. The runner re-walks on the refusal up
+  to `maxCompletionTries` (3), then the honest `completionRefused` still-finishing state.
+
+**Where a SECOND horizon reopens it — the precise answer:** the SERVER guard is horizon- and
+clock-INDEPENDENT by construction (a `server_seq` comparison, never a time comparison), so as
+long as it is deployed, a client/server horizon DRIFT cannot reopen the CATASTROPHE — it only
+degrades completion. If a future change lengthened the server's 2 s past the client's 2.5 s (or
+shortened the client wait), the walk's single re-pull would miss, the guard would refuse
+`VARIORUM_ROTATION_ROWS_REMAIN`, and the runner would re-walk until real time exceeds the
+effective server horizon — the honest "still finishing," never a wedge. **The catastrophe
+reopens ONLY if the server guard is ABSENT** (a mirror that never ran the maintenance overlay, or
+a redeploy of bare `11_pre13x_postures.sql` OVER it — the maintenance file is a body change to
+the same signature, so re-running 11 silently reverts the guard; its own re-run guard protects
+11's redeploy but nothing forces the overlay to be re-applied after an 11 redeploy) AND the
+client wait drifts below the server horizon. That two-constants exposure is **exactly closeout
+consideration 2's scope** — "the A5 visibility horizon lives in two constants … a drift reopens
+BLOCKER-1's class → 13y (one source of truth)." I confirmed both halves are the only guards:
+`aRowHiddenByTheVisibilityWindowIsReencryptedBeforeCompletionAndEveryLaterPullOpens` (:385) and
+`completionIsRefusedWhileACiphertextRowStillSitsBelowTheSeq` (:489) are the pins; the reverts R1
+(client wait removed) and the fake's guard removed both redden them (the F1 record).
+
+**Where a CLOCK SKEW reopens it — it does not.** The horizon compares two SERVER-side values:
+`clock_timestamp()` and `server_written_at`, itself stamped by the server's own trigger
+(`03:47`) — no client clock is trusted (SyncSpec §9). A client clock skew is inert. A server
+replica-clock skew (a changefeed read off a lagging replica) could serve a straggler EARLIER than
+the primary intended, but the completion guard runs on the primary under FOR UPDATE and is
+seq-based, so it still refuses; and the client `Task.sleep` is monotonic, so a backward NTP step
+under load can only make the single re-pull early — again caught by the guard. Skew degrades
+completion latency; it never reopens the wedge while the guard stands.
+
+**The one recorded residual, NOT a Q3 reopening: the poison row** — a row sealed under a key the
+account never held makes the walk THROW, completion refused forever, the account honestly
+still-finishing (`aPoisonRowLeavesTheRotationStillFinishingWithThePreviousKeyRetainedUntilItIsPurged`,
+:659). That is SAFE (nothing cleared, everything readable, the second rotation refused) and is
+already owned by **Phase 12** (park-and-heal; closeout consideration 7).
+
+**VERDICT: HOLDS — with the disclosed 13y and Phase 12 residuals, both already owned.** The
+seq-based server guard is the structural backstop that makes BLOCKER-1's class immune to horizon
+drift and clock skew; the client wait is the latency optimization in front of it. The single
+reopening path (guard absent + horizon drift) is precisely closeout consideration 2's
+two-constants risk (owner 13y, one source of truth) plus the operational caveat this pass adds:
+**an 11 redeploy must be followed by re-applying the maintenance overlay** — worth stating on the
+deploy checklist so a future mirror rebuild cannot silently drop the guard.
 
 ## Q4 — same-second passphrase changes; same-second Castle entries
 
