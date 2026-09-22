@@ -448,6 +448,107 @@ struct JournalKeeperRepairTests {
         }
     }
 
+    /// **RUN B B5 (ledger row 17) — THE JOURNAL-FACE PROBE, the ruling's
+    /// added deliverable.** F-3's reject face constructed in the
+    /// Journal-keeper family: B's mint dies AT the `reading_post` boundary
+    /// (the loser reading lands UNACKED, its membership stranded); A
+    /// retires the BARE loser inside the A5 band; B's resume pull is blind
+    /// and its push re-sends the loser at base 0 — the CAS reject answers
+    /// with the retirement, outside seq order, ahead of the keeper B has
+    /// never seen. Under the OLD reject-merge the local cascade killed the
+    /// stranded membership (`journalKeeperBesideRetiring` finds no LOCAL
+    /// keeper; on A it arrived tombstoned past the F1 leg's
+    /// `!resolved.isTombstoned` guard) — the entry ended BOOKLESS
+    /// everywhere, F-3's loss by the Journal door. Under the SHAPE-SCOPED
+    /// fingerprint defer the retirement waits for the feed, the membership
+    /// ships LIVE, the F1 direction-2 leg re-points it on A, and B's
+    /// post-band pull delivers the death keeper-first where direction 1
+    /// moves the children. **EXPECTED GREEN — a coverage pin proving the
+    /// structural closure by evidence (the ruling: an untraced class is
+    /// never fixed on momentum; a red here is a stop-and-report).**
+    @Test func aRejectDeliveredLoserRetirementDefersAndTheKeeperGetsTheStrandedMembership() async throws {
+        let server = FakeSyncServer(visibilityHorizon: 2)
+        let bFault = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: bFault, clockOffset: 1000, seed: 2)
+        func settle() async throws {
+            for _ in 1...4 {
+                _ = try await productionRound(a)
+                await server.advanceClock(by: 2)
+                _ = try await productionRound(b)
+                await server.advanceClock(by: 2)
+            }
+        }
+        try await settle()  // the settings seeds converge
+        #expect(try a.outboxCount() == 0 && b.outboxCount() == 0, "the seed settled")
+
+        // Offline: each device correctly sees "no Journal exists" and mints
+        // its own, with one entry. A's (AA…) is the deterministic keeper.
+        let journalA = try mintJournal(a, day: "2026-09-01")
+        let journalB = try mintJournal(b, day: "2026-09-02")
+
+        // B's round: the pull is empty; the push dies AT the reading_post
+        // boundary — the loser reading lands (unacked, still base 0 on B),
+        // its membership is stranded.
+        _ = try await b.pull()
+        try await pushSplitAtBoundary(b, table: "reading_post", transport: bFault)
+        await server.advanceClock(by: 2)  // the landed prefix leaves the band
+
+        // A's full round in the gap: its pull meets the loser BARE — the
+        // keeper repair retires it with nothing to move — and its push
+        // (the retirement + the keeper + A's own membership) commits
+        // INSIDE the band.
+        _ = try await a.pull()
+        #expect(try liveJournalBookIDs(a) == [journalA.bookID])
+        #expect(try a.db.deletedAt("reading", journalB.bookID) != nil)
+        #expect(try a.db.fetchInt(
+            "SELECT COUNT(*) FROM reading_post WHERE post_id = ?", [journalB.entryID]) == 0,
+            "B's membership has NOT arrived — the split held it back")
+        _ = try await a.push()
+
+        // B's resume round. The pull: the band + the re-stamped loser hide
+        // the retirement and the keeper...
+        _ = try await b.pull()
+        #expect(try b.db.deletedAt("reading", journalB.bookID) == nil,
+                "B still holds its Journal live")
+        #expect(try b.db.fetchString(
+            "SELECT id FROM reading WHERE id = ?", [journalA.bookID]) == nil,
+            "the keeper is still unseen on B")
+        // ...and the push meets the F-3 fingerprint on the loser reading:
+        // DEFERRED, visibly; the stranded membership ships LIVE beside it.
+        let resume = try await b.push()
+        #expect(resume.deferred >= 1,
+                "the out-of-context retirement defers, and the report says so (row 12)")
+        #expect(try b.db.deletedAt("reading", journalB.bookID) == nil,
+                "the retirement did NOT land by reject — it waits for the feed")
+        #expect(try b.db.fetchString(
+            "SELECT deleted_at FROM reading_post WHERE post_id = ?", [journalB.entryID]) == nil,
+            "the membership survives the resume drain LIVE")
+        await server.advanceClock(by: 2)
+
+        // A's next pull: the membership arrives LIVE under the locally-dead
+        // loser with the keeper standing — the F1 direction-2 leg
+        // re-points it to the keeper.
+        _ = try await a.pull()
+        #expect(try a.db.fetchString(
+            "SELECT reading_id FROM reading_post WHERE post_id = ? AND deleted_at IS NULL",
+            [journalB.entryID]) == journalA.bookID,
+            "the F1 arrival leg re-pointed the live arrival to the keeper")
+
+        try await settle()
+        #expect(try a.syncedDump() == b.syncedDump(), "converged, byte-identical")
+        for client in [a, b] {
+            #expect(try liveJournalBookIDs(client) == [journalA.bookID])
+            #expect(try client.db.fetchInt(
+                """
+                SELECT COUNT(*) FROM reading_post
+                WHERE reading_id = ? AND deleted_at IS NULL
+                """, [journalA.bookID]) == 2,
+                "\(client.name): BOTH days' entries live in the ONE Journal — nothing bookless")
+            #expect(try designation(client) == journalA.bookID)
+        }
+    }
+
     /// **RED ON OLD (round 2, R2-4 — MINOR):** direction 1 moved the
     /// children but never the DESIGNATION. Between the loser-tombstone chunk
     /// and the repairer's `setting` chunk, the loser's own device still

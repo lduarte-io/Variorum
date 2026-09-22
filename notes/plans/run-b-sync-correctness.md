@@ -1738,7 +1738,17 @@ Finals: full core at close — baseline **1673/179 with F-3's 2-issue wrap**; yo
   re-point and no outbox row, and the final both-notes-tagged contract failing on BOTH devices
   (line 399 ×2 — the formerly-wrapped asserts). Restored via `git checkout` of the committed
   fix; suite re-run **11/11 GREEN**.)
-- [ ] The Journal-face probe pin (expected green) — PENDING.
+- [x] **The Journal-face probe pin — GREEN AS EXPECTED, first run** (the ruling's added
+  deliverable; no stop-and-report owed):
+  `aRejectDeliveredLoserRetirementDefersAndTheKeeperGetsTheStrandedMembership` in
+  `JournalKeeperRepairTests` (FurnitureConvergenceRepairTests.swift, beside the F1
+  arrival-order pins) — F-3's exact choreography transplanted to the Journal family (the strand
+  at the `reading_post` boundary, the bare-loser retirement inside the band, the blind resume
+  pull, the base-0 reject): the fingerprint defers the retirement VISIBLY (`deferred >= 1`),
+  the stranded membership ships LIVE, the F1 direction-2 leg re-points it on A, B's post-band
+  pull lands the death keeper-first, and both days' entries end live in the ONE Journal with
+  the designation converged — byte-identical dumps. The shape-scoped ruling's closure PROVEN by
+  evidence, not assumption. Suite 15/15 GREEN (the 14 standing pins untouched beside it).
 - [ ] Beside-suites + finals (full core — baseline 1673/179 with F-3's 2-issue wrap; finish
   line ZERO wraps) — PENDING.
 
