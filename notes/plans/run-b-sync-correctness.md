@@ -337,7 +337,9 @@ STOP AND REPORT to the orchestrator instead of adding one).
   green): **0 new findings** — every ✔-row core scenario converges under production's round
   shape + registry-boundary chunk splits with the other device's round between the halves.
   Coverage map + the two out-of-reach ✔ rows (with reasons) live in the suite header and below.
-- [ ] Memo ⚠️ UNSETTLED section updated with dated answers + pin names — PENDING.
+- [x] Memo ⚠️ UNSETTLED section updated — a dated ANSWERED block with pin names under each of
+  P1 · P2 · P3 · P4 · P5(b)/(c) (the section-header flip to "answered" stays the closeout's;
+  the scenario table's two `?` rows likewise).
 - [ ] Finals: full core suite (baseline 1639/177) — PENDING.
 
 ### DEATHS / RESUMES

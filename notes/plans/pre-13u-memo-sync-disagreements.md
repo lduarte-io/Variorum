@@ -27,6 +27,17 @@ NEW text or the phone's OLD text?** (the §6 rescue rule is written for a take d
 block lives; a whole-note tombstone is the case to settle). Then `restoreContainer(N)` on the
 laptop: what comes back, and does it converge to the phone?
 
+> **ANSWERED (RUN B batch B1, 2026-09-21 — pin
+> `SyncReconciliationProbeTests.p1DeleteVsEditPlusNewTake`, batch sizes 200 and 1; GREEN,
+> canon confirmed):** N is in the Trash on both, stamps matching; T2 is tombstoned with N's
+> EXACT stamp on both (the §7 direction-2 orphan repair). **T1 carries the laptop's NEW text —
+> on both devices**: the server-wins baseline carries the pushed edit into the merged row while
+> the phone's tombstone overlays it, so the edit rides the row INTO the Trash; no conflict card
+> is minted (the whole block died, so `rescueLosingText`'s block-live guard skips — the phone's
+> OLD text was the same take's pre-edit ancestor, not a separate intent). `restoreContainer(N)`
+> on the laptop revives the WHOLE family — N, the block, T1 (still the new text), T2 — and
+> converges to the phone byte-identically. The whole-note tombstone case is SETTLED SAFE.
+
 **P2 — the same, but the phone's deletion was PURGED (past 30 days) before sync resumed.** The
 purge horizon (13j — `sync_horizon()`, 60-day drop-out) should HOLD the purge while the laptop is
 a live device: assert the phone's janitor does not purge N until the laptop has pulled the
@@ -35,12 +46,42 @@ the laptop with its dirty T1 + new T2 → its pushes meet the `purged` refusal; 
 returner do LOCALLY with T1/T2 — drop, keep as local-only, resurrect?** (the "say-so returner",
 13j's client road — its exact handling of edited purged rows is the unsettled corner).
 
+> **ANSWERED (RUN B batch B1, 2026-09-21 — pins
+> `p2aTheHorizonHoldsThePurgeWhileTheLaptopIsLive` +
+> `p2bTheSixtyDayDropoutReturnerDropsItsEditsWithThePurgedFamily`, both GREEN):**
+> **(a)** the horizon HOLDS — the phone's sweep defers (`familiesPurged == 0`) until the laptop
+> has pulled the tombstone; then the purge proceeds family-complete and both stores converge.
+> (Recorded consequence, deliberate: the 30-day window is the DELETION's clock, not each
+> device's discovery clock — a long-offline device sees the family land in its Trash and purge
+> moments later; the horizon guarantees seen-before-gone, not a restarted window.)
+> **(b)** the returner **DROPS, family-complete, silently**: production's B2 pre-pass
+> (`reconcileLedger` before the round's drain) expands the ledger's roots against the
+> returner's own store, so the dirty T1 edit AND the never-pushed T2 — the id no ledger can
+> name — are physically deleted with the family, outbox swept; the round after is clean
+> (`push.purged == 0`, no stall, no mirror orphan). NO say-so fires — the
+> `deviceLeftBehindReloadRequired` road gates on the ledger FLOOR, which stays 0 until ledger
+> pruning exists. Canon-conforming code (the purge-wins letter); the PRODUCT gap — silence vs
+> rescue vs say-so — is drafted for `notes/QUESTIONS.md` in the RUN B record (BATCH B1
+> RECORD's P2 section), filed at adjudication.
+
 **P3 — edit-vs-edit on one take** (the S5 case): both devices edit T1 offline; sync → the loser is
 a conflict card labeled `'conflict'` on the same block; assert no text lost on either side.
+
+> **ANSWERED (RUN B batch B1, 2026-09-21 — pin `p3EditVsEditOnOneTake`, batch sizes 200 and 1;
+> GREEN, canon confirmed):** exactly one `'conflict'` card, both texts live on both devices,
+> dumps byte-equal — under production's pull→push order.
 
 **P4 — the round-shape sweep:** re-run every existing convergence suite's core scenarios with the
 production round shape + a chunk split at each registry boundary the scenario crosses; any pin
 that passes only in the harness's order is a finding.
+
+> **ANSWERED (RUN B batch B1, 2026-09-21 — suite `ProductionRoundShapeSweepTests`, 7 scenarios,
+> ALL GREEN): 0 new findings.** Every ✔-row core scenario converges under production's shape +
+> a registry-boundary chunk split with the other device's round between the halves. One
+> observation recorded: under the split, a never-accepted placement ranks seq 0 and loses the
+> I2 repair (SyncSpec §3's own sentence) — the split changes WHICH row wins vs the both-pushed
+> order, deterministically. Coverage map + the two out-of-reach ✔ rows (backup re-key; seed
+> gate) with reasons: the RUN B record, BATCH B1 RECORD P4 section.
 
 **P5 — three traced observations from the pre-13u ladder's round-2 fix session (recorded there,
 not fixed — outside every finding's letter):** (a) the tag-collision repair orphan-stamps
@@ -48,6 +89,26 @@ applications arriving AFTER the duplicate tag dies instead of re-pointing them �
 copy's stories lose the reserved tag on both devices; (b) a double-retirement race when the
 classifying device's push is delayed past the other device's pass and the evidence changes between
 the two; (c) the echo pull costs one extra round per two-copy meeting. Each is a probe here first. **P5(a) was RE-CALIBRATED at ladder round 3 (2026-09-01): it is the GENERAL `tag.path` repair not honoring its own §7 sentence for applications arriving after the duplicate died — pre-existing since Phase 5, MAJOR-class, promoted from probe to 17i's FIRST FIX ITEM (KnownIssues row filed); the pin is stated there.**
+
+> **P5(b) ANSWERED (RUN B batch B1, 2026-09-21 — pin
+> `p5bTheDoubleRetirementRaceRetiresBothCopiesAndLosesTheEdit`, `withKnownIssue`-wrapped as
+> hunt finding F-1): REPRODUCED, and sharper than the observation.** The two passes classify
+> on DIFFERENT evidence (the edit sits in the delayed pusher's outbox), the retirements CROSS,
+> tombstones win both ways — **both copies end dead on both devices** (the library vanishes
+> into the Trash, convergently) — and under production's pull-first order **the edit's bytes
+> are LOST OUTRIGHT** (the pristine tombstoned baseline lands over the dirty row; the rescue
+> skips because the block died earlier in the same batch; the cleared outbox entry means the
+> edit never reaches the server). Severity read MAJOR; ownership at RUN B's adjudication
+> (candidates: a B2 row, or RECORDED → 18a beside the late-registry KnownIssues row 33 —
+> which it is NOT: that class is trailing-chunk evidence, this one is evidence CHANGING
+> between passes).
+>
+> **P5(c) ANSWERED (same date — pin `p5cTheDeferralPlusTheEchoPullCostTwoRoundsPerMeeting`,
+> GREEN, designed cost):** the observation's mechanism, precisely: under production rounds the
+> deferring device's round-2 pull serves back its OWN push echo, whose `reading` row re-trips
+> the arrived-this-batch deferral and re-arms the marker — so meeting → echo → decide is a
+> 3-round cadence (the harness's push-both-then-pull order had folded meeting and echo into
+> one window, hiding a round). Latency only; convergence and verdicts intact.
 
 ---
 
