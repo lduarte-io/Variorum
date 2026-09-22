@@ -1501,6 +1501,44 @@ finals (full core at close — baseline **1669/179, zero wraps**). Checkpoint pr
 batch: commit per piece + push, pathspec-limited, PENDING until verified, foreground grep-poll
 waits, no subagents (one Sonnet lookup max), commit-before-revert, no trailers.
 
+## BATCH B4 RECORD — HARNESS REALISM
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims marked PENDING)
+
+- [x] Record opened; brief + READ FIRST list read in full (SyncSpec whole + the canon load, the
+  postmortem — lesson 8 the charter, this file's FENCES/TRAPS/rows 14+16/the B1 record whole/all
+  three adjudications, `Support/ProductionRound.swift` + `SyncTestHarness` + `FakeSyncServer` +
+  `FaultInjectingTransport`, `ProductionRoundShapeSweepTests` whole, and every convergence suite
+  the TRAPS name — SyncConvergence, SyncMerge, SyncRepair, SyncPull, SyncPush, FaultInjection,
+  EditorRate, StructuralSession, MobileCapture, MultiTenant + the attacker file — plus the
+  `outboxRowsAhead` helper and the `sync_reencrypt` SQL body's gate wiring).
+- [ ] SyncConvergenceTests converted (assertConverged + seeds + stagings → production shape) +
+  the deleted-post cascade split arm at the `container_block` boundary — PENDING
+- [ ] SyncRepairTests converted (seed → productionQuiescence; the both-accepted races as
+  concurrent-round weaves; B-round-as-halves where the (c)-leg asserts between them) + the
+  cross-batch `post_tag` split arm (the row-7 durable predicate's chunk-gap claim, pinned) —
+  PENDING
+- [ ] SyncPullTests stagings converted; SyncPullTests/SyncPushTests exemptions annotated at the
+  line (half-round mechanics · order-is-the-subject) — PENDING
+- [ ] FaultInjectionSyncTests seeds + tails converted (armed fault halves stay — the subject) —
+  PENDING
+- [ ] EditorRateSyncTests + StructuralSessionSyncTests + MobileCaptureSyncTests converted + the
+  same-day double-create split arm at the `block` boundary — PENDING
+- [ ] MultiTenantSyncTests: `fleetQuiesce` → production order (pull→push per device); stagings
+  converted; gate/refusal halves annotated — PENDING
+- [ ] Row 16: the tenth arm (`sync_reencrypt` under an OLD proof — fence-first + proof-refused +
+  the gate-pass control + the DDL text pin), the nine arms byte-untouched — PENDING
+- [ ] SyncMergeTests suite-level exemption annotated; `ProductionRound.swift` header's
+  "B4's deliverable" sentence flipped to done — PENDING
+- [ ] THE SWEEP TABLE (suite × scenario: converted · exempt-with-reason · boundary cell) written
+  below — PENDING
+- [ ] Finals: FULL CORE SUITE at close (baseline **1669/179, zero wraps**; arithmetic stated
+  exactly) — PENDING
+
+### DEATHS / RESUMES
+
+- none so far.
+
 ---
 
 ## THE LADDER (ONE Fable ladder over the run's combined diff; opens after B4's record closes)
