@@ -15,9 +15,17 @@
    the navigation-feel round ships.
 
 **Her schedule as stated 2026-09-22:** these rounds → 13y → 13r → friends beta → 13i → 13o → 13s →
-remaining residuals / website / onboarding → general release. **RUN B** (the Sync-fenced roster in
-`notes/plans/pre-beta-standing-fix-runs.md`) is untouched by this file and still owed its pre-beta
-slot — nothing below touches `Sync/`, by design.
+remaining residuals / website / onboarding → general release. ***SUPERSEDED the same day by her
+later ruling (recorded 2026-09-22 at the RUN B morning session): 13y runs NEXT — before these
+rounds.*** The rounds keep their internal order (RUN C → navigation-feel → conductor hoist; RUN D
+flexible) and run at her word after 13y; the rest of the chain stands as stated. **RUN B** (the
+Sync-fenced roster in `notes/plans/pre-beta-standing-fix-runs.md`) has since RUN AND FULLY
+CLOSED — 2026-09-22: five batches + the hosted stress pass + a two-round ladder, finals green on
+all four gates, and the live two-device acceptance round PASSED at her morning window ("yep it
+worked"; the record is `notes/plans/run-b-sync-correctness.md`). Its closes matter below: **17i
+and 17d are CLOSED, 17l item 5 RESOLVED, KnownIssues rows 34 + 37 removed, 17s is the last-minted
+letter**, and the test baselines are RUN B's finals (RUN C's read-first names them). Nothing
+below touches `Sync/`, by design.
 
 **How to use:** paste one kickoff into a fresh session at its turn. Each round keeps its own record
 file (named in its kickoff) from the first commit, per `notes/SessionResiliencyProtocol.md`. When a
@@ -41,9 +49,12 @@ here is product advancement; every item is a runtime-hygiene fix from the post-1
 **Read first, in this order:** `notes/codebase-health-review-2026-09-21.md` (§5, §6, §7 are this
 run's charter); `notes/KnownIssuesAndTechDebt.md` (you will edit it — read the header rule); the
 17-file `notes/plans/phase-17-standing-fixes.md` (mint this run's entries as the next free letters —
-17r is the last minted as of 2026-09-21; record each entry there per its conventions);
-`notes/SessionResiliencyProtocol.md` (you, at kickoff); the latest closed run/phase record's finals
-(RUN A's record / the 13u4 closeout) for the test baseline — read it, never rerun the suite at start.
+**17s is the last minted as of 2026-09-22**, RUN B's close; record each entry there per its
+conventions); `notes/SessionResiliencyProtocol.md` (you, at kickoff); the latest closed run's finals
+for the test baseline — **RUN B's** (`notes/plans/run-b-sync-correctness.md` CLOSEOUT: core
+**1679/179** clean · full Mac **3089/510** with the one paired-protocol standing flake · mobile
+**642/109** with exactly the 4 known · iOS green · install `1ab27652`) — read it, never rerun the
+suite at start.
 
 **Cast (the author's standing shape; she may redirect at invocation):** Fable orchestrates (this
 session, writes no feature code) · one `opus-implementer` per entry, briefed with the checkpoint
@@ -95,8 +106,10 @@ author-only call. The run closes on use-shaped evidence, and the install refresh
   pin class is the two-window cross-clear test the reference fixes already model. Add the one
   non-DEBUG guard: a comment-plus-pin on `MarkdownStyling.palette`'s three-writer invariant.
 - **C0 — ledger housekeeping** (review §7; may run first or last). Re-own rows 56/57 (orphaned when
-  17l closed — **proposed owner: RUN B's roster**, where the protection-surface siblings live; the
-  author confirms at the checkpoint); fix row 27's stale owner pointer (→ 13o); add the review's §3
+  17l closed — the original proposal, RUN B's roster, is STALE: **RUN B ran and fully closed
+  2026-09-22 without them**; propose a live owner instead — a fresh 17 letter of the
+  protection/custody class is the natural candidate — and the author confirms at the checkpoint);
+  fix row 27's stale owner pointer (→ 13o); add the review's §3
   finds to row 28's fork list (the editor conductor band; the tutorial-seeder scaffolding); file the
   review's new rows with the owners its sections propose (T2 → 12; `StableSurface`'s asyncAfter →
   12; the warming assessment → 12; anything this run fixes needs no row). Every edit follows the
@@ -249,10 +262,12 @@ the editor seam, custody, or `Sync/` — if an entry's diff drifts onto one, the
   the degenerate call. **Proof: the entire structural state-transition suite rides UNMODIFIED**, and
   because `divideDuplicating` is live phone-side, the full mobile suite is part of the finals.
   **Excluded, deliberately: the `PurgeJanitor` two-types file split — it is `Sync/` (the rider),
-  and RUN B was already mid-flight when this file was ratified (author, 2026-09-22), so it does not
-  go there. It rides the NEXT Sync-fenced round after RUN B — 17i if that runs pre-beta (the
-  recommendation, for row 34's tag-application repair), else 18a — and C0's ledger pass records
-  that owner so it never sits unowned.**
+  and RUN B was already mid-flight when this file was ratified (author, 2026-09-22), so it did not
+  go there. The fork this paragraph carried ("17i if that runs pre-beta, else 18a") has since
+  RESOLVED by its own else-arm: RUN B closed 2026-09-22 WITH 17i inside it — row 34's
+  tag-application repair FIXED there (the very reason 17i was the recommendation) — and the split
+  did not ride (RUN B touched `PurgeJanitor.swift` but split no files). The owner is therefore
+  **18a**, the fork's own answer, and C0's ledger pass records 18a so it never sits unowned.**
 - **D2 — layering singles** (review §2.4): the three sibling view-model constructions call
   `Shared/TypedTagPath.apply` directly; `AppSettingsView`'s second `TagsViewModel` owner routes
   through parent composition; `PostDetailView` gains a `PostDetailModel` and its raw SQL (plus the
