@@ -85,7 +85,8 @@ once. Claim a letter here first.
 | Letter | Subject | State |
 |---|---|---|
 | **17a** | **CLOSED 2026-08-30 — the pre-13u round's Act 9 (the Fable custody batch).** All 8 items FIXED with revert-verified red-on-old pins; per-item dispositions in the entry below; the two KnownIssues rows that carried owner "17a" without being in the item list are RE-ROUTED to **17h** (opened at her word) | **closed** |
-| 17b, 17d, 17e | The 2026-08-30 sweep's remaining groups | open, unstarted |
+| **17b** | Doors that lose or mis-copy her text (+ KnownIssues row 65 at the 13u4 refresh) | **CLOSED 2026-09-21 — RUN A batch A1 + the run's ladder.** All 7 items FIXED with revert-verified red-on-old pins; the ladder extended the class twice (the quick-note park's quit rider hardened; the comment-draft park born on both platforms); one undo-side residue DEFERRED → 17e. Dispositions in the entry below |
+| 17d, 17e | The 2026-08-30 sweep's remaining groups (17e has since gained rows: P6's undo-side residue, the launch seeder's cross-device deletion, the canvas router fact) | open, unstarted |
 | **17f** | **CLOSED 2026-08-31 — the pre-13u round's Act 5.** 8 of 9 items FIXED (each with its evidence class named: three red-on-old drills, two grep-verified dead-code removals, one hoist, one canon correction, one documented mechanism); **P50 DISMISSED AS HOLLOW by measurement** — the WAL it claimed was checkpointed away measures byte-identical before and after `lock()`. Per-item dispositions in the entry below | **closed** |
 | **17c** | **CLOSED 2026-08-31 — the pre-13u round's Acts 3+4.** All 4 read-layer items (P18–P21) FIXED with revert-verified red-on-old pins (query plans and statement counts, never timings); the P20 index landed as its own schema commit and is NOT a §12 lockstep event (marker stays 7). Per-item dispositions with before/after numbers in the entry below; one residual (`container_block(block_id)`) re-routed to **12** in KnownIssues | **closed** |
 | **17g** | **CLOSED 2026-08-30 — the `13p-fix` session** (author's live session of 2026-08-30: an issue she found testing the refreshed 13p install). That session owns this letter and writes its own entry; it does **not** fold into 17a. | **closed** |
@@ -94,6 +95,10 @@ once. Claim a letter here first.
 | **17o** | **The 2026-09-06 use-report round's DEFECTS** — opened 2026-09-07 at her word (the fixes half of that round; its product half is 18c · 18d · 18e · 18f). Batches: **b** the landing family (every door into Write lands at the remembered caret offset; the fan panel's Takes landing scrolls; Blocks → Write scrolls) · **c** the Takes faces (the live pane honors the editing-indicator setting everywhere; the chosen bar the card's full height; "＋ new block" on an empty note; the pane's stale height after a big deletion) · **d** the chrome singles (the sidebar divider's grip; the Messages fill-code popover; the title LEADS from the path chip — supersedes Act 10 rows 4/19; the title faces' baseline; the sidebar headers' inset and air; the versions link on a blockless note MINTS the first block; the one-shot chrome titles become observations; the Index count ↔ ⋯ column; the tag field collapses; the divider's white top) · **e** the Snippets area (the card door opens the CARD's pool and lands on the block; the tag door findable) — **Opus only** on e, her word. **The record is the round's plan, `notes/plans/use-report-round-2026-09-06.md`** (ledger rows 6–21 · 27 · 38–42; §5.3); the dispositions block is copied here at the entry's close. Cast: `opus-implementer` (xhigh); `fable-reviewer` on batch b, `opus-reviewer` on c/d/e | **CLOSED 2026-09-08** — all 27 rows FIXED with pins (6–21 · 27 · 38–47), two ladders capped (b: Fable ×3; c/d/e: Opus ×3); the dispositions block in the entry below |
 | **17p** | **The 2026-09-12 use-report round's DEFECTS** — opened 2026-09-12 at her word (the fixes half of that round; its product half is 18g · 18h · 18i). Batches: **a** the Takes board (the article scrolled its current block to the TOP on every entry — image 1; a per-note scroll memory + a reveal-only landing rule; the empty block's face and the ＋ new block door's alignment) · **b** the chrome singles (the tray's block rows gain Delete Now — the explainer promised it; the Callout Emoji alert's collapsed field; the comment badge and the callout emoji drawn OVER the text in the book Outline — a reserved left lane, the emoji inside the frame) · ~~**c** the phone's opening scroll~~ (RETIRED at the sitting — hers to run in a mobile session, standalone or with 13u; the `mobile` branch's handoff §12.2 carries it). **The record is the round's plan, `notes/plans/use-report-round-2026-09-12.md`** (ledger rows 1–7; §4.1–§4.4, §4.9; §5.1); the dispositions block is copied here at the entry's close. Cast: `opus-implementer` (xhigh); `fable-reviewer` on BOTH batches (b's decor lane reached the editor seam — the adjudication's J4) | **CLOSED 2026-09-12** — rows 1–6 FIXED with pins, row 7 RETIRED to the mobile session; two Fable ladders (a: three rounds to the cap; b: two); the dispositions block in the entry below |
 | **17q** | **The 2026-09-12 use-report round's MORNING BUILDS + the 18h cap's residue** — opened 2026-09-13 at her word (the successor session's first act, before 18i). Items: **(1)** R-Q20 — J3 ruled *"the block I came from wins"*: when the Takes entry landing names a block, the landing wins and the remembered place is not restored (one condition in `TakesBoardLayout`'s restore/landing step + the 60-block remount pin's sibling) · **(2)** R-Q17 — QUESTIONS #103 ruled: the Library's Notes card shows the stated day AND the sort's stamp where there is room, the masthead's click-flip where small; with it R3-2 (the List row's raw `entry_date` slot through the one brain, never one day twice) · **(3)** the 18h ladder's cap residue (KnownIssues row "The 18h ladder's residue at the cap", owner 17q): R3-1 the synchronous selection clear on a mode change, and the seven NITs R3-4…R3-10. **The record is the round's plan, `notes/plans/use-report-round-2026-09-12.md`** (`### R-8 · 17q — BRIEF` / `RECORD`); the dispositions block is copied here at the entry's close. Cast: `opus-implementer` (xhigh); `fable-reviewer` (the Takes half is the landing family; cross-model flow) | **CLOSED 2026-09-13** — R-Q20/R-Q21, R-Q17 (+R3-2), R3-1 and R3-4…R3-10 all FIXED with pins; one Fable ladder to the cap (three rounds: 2 + 3 + 1 MAJOR, all fixed; the restore had never run in the app before this entry); the residue owned on KnownIssues row 54 (13u2); the dispositions block in the entry below |
+| **17l** | pre-13x residuals (items 1–4, 6–7 + the phrase-transit rider) | **CLOSED 2026-09-21 — RUN A batch A2 + the run's ladder.** Items 1–4/6–7 FIXED/VERIFIED with pins (item 1 with ONE stated deviation: the purged_row consult is unbuildable on the ledger's own ids-only design — the per-book device mark shipped instead); the phrase-transit rider VERIFIED with its one found world fixed (KnownIssues 32 resolved); **item 5 DEFERRED → RUN B** (the `Sync/` fence; KnownIssues 41 re-owned). Dispositions in the entry below |
+| **17m** | The Re-link-your-Apple-account door | **CLOSED 2026-09-21 — RUN A batch A3.** FIXED to the entry's spec via the F2 heal road behind consent (reads, never mints; every refusal leaves the vault's revision unmoved); `AppleRelinkDoorTests` (8); placement on the Protection pane PROVISIONAL (#139(a)); PL-37 for the phone's face. Disposition in the entry below |
+| **17n** | The encryption passphrase's 12-character floor | **CLOSED 2026-09-21 — RUN A batch A2.** FIXED — the floor named once, two real gaps closed (the four `PassphraseSetModel.commit` door sites; sync setup's no-wrap arm), never at unlock (negative pins), walked live. Disposition in the entry below |
+| **17r** | The stamp faces' midnight rollover tick (minted at the 13u4 closeout) | open — at her word only |
 
 **Why 13p-fix is 17g and not part of 17a.** 17a is the *sweep's* 13p residue — eight findings from a
 review that read the code. 13p-fix is a *tested* defect she hit in the running app, with its own plan
@@ -433,6 +438,42 @@ WINS — it was written with the real code open and with instructions to refute.
 > The code asymmetry is exactly as described and unambiguous. EditorViewModel.swift:795-816: the method sets `pendingProjection = nil` before spawning the read task; the failure arm is `guard let fresh = try? await session.database.read(...) else { return }` — a bare return with no restore — while the two guards immediately below both write `pendingProjection = fresh` before returning (the busy guard and the generation-fence guard, which additionally re-calls `applyPendingIfClean()`). So on a thrown read the deferred marker is dropped and nothing re-arms it; the surface then waits on the next ValueObservation delivery, which only fires on a further store change. Two honest qualifications that hold the severity at NIT rather than higher: the discarded value is a STALE photograph that would have been re-fetched anyway (so restoring it costs nothing but gains only a retry), and the plausible post-13p trigger the finding names — a re-lock closing the keyed store — would very likely also error the observation itself (EditorViewModel.swift:622-624 sets `statusMessage = "Note observation failed"`), which is a louder failure than the lost marker. The Task is unstructured with no cancellation source, so `try?` is swallowing a store error rather than a cancellation. NIT confirmed: a real one-line asymmetry against the surrounding machinery's own never-lose-the-marker rule, with narrow and mostly-moot consequence.
 
 *No red-on-old pin.* Evidence quotes + verifier trace: review doc, P36.
+
+### CLOSED 2026-09-21 — the dispositions (RUN A batch A1 + the run's ladder; the record is `notes/plans/run-a-custody-text-loss.md` — the BATCH A1 RECORD, its ORCHESTRATOR ADJUDICATION, and THE LADDER)
+
+**Seven items (the six above + KnownIssues row 65, which joined at the 13u4 closeout's refresh) —
+every one FIXED with a named red-on-old pin; nothing dismissed as hollow; one residue DEFERRED
+with an owner:**
+- **P4 FIXED** — `MobileCommentDraftTests` (3), the door driven on a mounted sheet under a real
+  seal; revert-verified. **The ladder then widened the class twice, and both widenings are
+  BUILT:** round 2 found the sheet's CLOSE destroyed the refused draft P4 preserved (the sheet had
+  inherited the pad's pre-park shape), and round 3 found the fix's own two generational holes —
+  the landed shape is the **comment-draft park on BOTH platforms** (`Shared/CommentDraftPark`: a
+  NON-CONSUMING peek restored at the same block's next open, the clear keyed to THE SAME DRAFT,
+  the Mac's restore in the installed lifecycle), pins `MobileCommentParkTests` (7) +
+  `CommentPanelParkTests` (8) with five discriminating reverts across the rounds. QUESTIONS #140.
+- **P5 FIXED** — `PromotePicksArchivedPickTests` (3), red on the pre-fix tree: a stale pick reads
+  as NO pick for the shown take and the chosen pointer; I10-at-birth impossible on every arm.
+- **P6 FIXED** — `ContentReplacementRedoTests` (5): `UndoStack.clearRedoFuture()` at the two
+  recovery-door acts (`restoreNoteVersion`, `deleteContainer`), post-write; two shipped pins
+  re-based as the ruled-change class. **The UNDO-side residue DEFERRED → 17e** (a KnownIssues row;
+  clearing a session-wide stack for one note's restore would take her other notes' history — the
+  note-scoped-entries design is 17e's, the product half hers at #136(b)).
+- **P7 FIXED** — `BranchDoorFlushTests` (7): a branch IS a copy, five doors onto
+  `AppSession.runCopying`; the 15-door sweep table in the run plan (6 FIXED · 9 provably SAFE);
+  blank takes deliberately bare, pinned as such.
+- **P14 FIXED** — `MobileQuickNoteReadFailureTests` (3); the revert reproduced the double-mint
+  LIVE (`count → 2` with *"There's nothing to save yet."* over a note in SQLite).
+- **P36 FIXED** — `DeferredProjectionRetryTests` (2), the marker restored like its siblings.
+- **Row 65 FIXED to the orchestrator's recorded ruling** (the design fork ruled repo-first):
+  `QuickNotePark` — a memory-only session-scoped park restored at the next summon, PLUS the 1b
+  one-shot quit decline (a second consecutive ⌘Q always proceeds; hardened at ladder round 1,
+  whose MAJOR found the one-shot re-armed by every press with the pad open — the integrated
+  second-press pin is `theSecondQuitsOwnReRefusalDoesNotReArmTheDecline`). `QuickNoteParkTests`
+  (6). QUESTIONS #137.
+
+**Evidence at the letter's close:** the run's finals (the run plan's CLOSEOUT section); zero
+`Sync/` lines; zero schema. **This letter's ratify rows: #136 · #137 · #140.**
 
 ---
 
@@ -1284,13 +1325,91 @@ Small, independently pinnable items the phase closed WITHOUT so its ladder could
 6. **The ceremony's *(0 of 0)* before the first window** (her observation): the re-encryption count renders `0 of 0` for the seconds between the vault write and the first pulled window; render *preparing…* (copy) until the first window lands. Copy + a face pin.
 7. **The ladder's NIT-N8 face and MINOR-N4 (2)'s copy** once she rules #90's items 10–14 (the orphaned Apple-held copy's recovery door is a DESIGN item, not this entry's).
 
+### CLOSED 2026-09-21 — the dispositions (RUN A batch A2 + the run's ladder; the record is `notes/plans/run-a-custody-text-loss.md` — the BATCH A2 RECORD + its ORCHESTRATOR ADJUDICATION)
+
+**Items 1–4 and 6–7 dispositioned; item 5 DEFERRED → RUN B (the run's standing fence — `Sync/`,
+`CorpusRotation.swift`; KnownIssues row 41 re-owned to RUN B; `notes/plans/pre-beta-standing-fix-runs.md`
+carries it on RUN B's roster). The phrase-transit rider (KnownIssues row 32) rode here and is
+RESOLVED. Nothing dismissed as hollow.**
+- **Item 1 FIXED, with ONE DEVIATION FROM THE ENTRY'S LETTER, stated plainly:** the latch landed
+  (`SampleLibrarySeeder.withSeedLatch` — one discover-then-mint per book per store, the waiter
+  re-discovering inside it; `EncryptionBookDoorTests` +3, red twice on the true pre-fix tree), but
+  **the named `purged_row` consult CANNOT BE BUILT** — 13j's ledger is content-free BY DESIGN (ids
+  only, never names; `10_phase13j_purge.sql` §3, verified independently by the implementer and the
+  orchestrator), so nothing surviving a purge can answer *"was a book called this deleted?"*. The
+  honest equivalent shipped instead: the roads RECORD THE READER'S DECISION WHILE THE EVIDENCE
+  STANDS (the ensure marks when it declines on the tombstone; restore marks when it mints or finds
+  whole) — MINOR-N3's ruled principle in its own terms. Residuals recorded: the mark is
+  `UserDefaults` (the seeder's header carries the limit and the store-`setting` road that would
+  close it), and **the launch seeder's cross-device deletion blindness is a NEW KnownIssues row,
+  owner 17e, the product call hers at #138(f)**.
+- **Item 2 FIXED** — the drill's escrow pair overridden for its throwaway scope; the leg FIRED
+  under `TEST_RUNNER_VARIORUM_MIGRATION_DRILL=1` (*"legacy iCloud escrow item removed → true"*,
+  quoted; re-run by the orchestrator's own hands). Her-Mac read-only confirmation: the flagless
+  `security` search finds no legacy escrow item (exit 44) — recorded as CORROBORATION (it cannot
+  see a synchronizable item) with the strong answer being her real store's `migrated2a = 1`
+  marker, also read.
+- **Item 3 FIXED** — her four ruled #90 wordings as constants + pins on BOTH platforms; ledger 54
+  built as a RULE (one label brain over `ProtectionController.followAsksNothing`, six render sites
+  + the Encryption tab); two shipped verbatim pins re-based as the ruled-change class.
+- **Item 4 FIXED** — the ceremony's ROOT presenter on `ProtectionNoticeBar` (already the follow's
+  presenter); the host decided ONCE at `openSwitch`, double presentation impossible; revert R1
+  discriminated (6 issues, all in the new pin).
+- **Item 6 FIXED** — the gate is the FIRST WINDOW (`total == 0`), the four byte-identical
+  running-line switches collapsed to ONE brain, a grep pin banning a fifth copy.
+- **Item 7 VERIFIED + FIXED** — NIT-N8's face STANDS post-13u4 (its pin re-run, extended to the
+  pane mounted at 720×552); MINOR-N4 (2)'s `.failed`-after-`regenerated` copy landed PROVISIONAL
+  in the ruled ledger-61 sentence family (#138(a)); `WordsCeremony.regenerated` set AFTER the
+  generate so the flag means what its readers assume.
+- **The phrase-transit rider VERIFIED, and the one world it found FIXED** — `VaultTie.make` traced
+  arm by arm (after 3a no production road makes a wrap-free vault; arms 1–2 green either side,
+  the row's own success criterion); the survivor `.newerFormat` (where `hasRecoveryWrap: false`
+  means "I cannot tell") was minting a second secret — RED on old, fixed in the one door that
+  starts at the phrase half. KnownIssues row 32 RESOLVED.
+
+**This letter's ratify rows: #138 (seven items). The re-seed consequence (Lesson 2 / Chapters
+2 · 7) rides her ONE bundled press — see the run's checkpoint report.**
+
 ## 17m — THE RE-LINK-YOUR-APPLE-ACCOUNT DOOR (her ruling 2026-09-07 ~02:05 on QUESTIONS #90's item 10 — *"I think we do need a re-link your apple account door. I'd maybe make it a 17 item and I'll have to run that before release, so it should go on the plan for before release"*; PRE-RELEASE — on the running order before 🚀)
 
 **What it closes:** in Standard, the vault's Apple-held copy of the master is wrapped under the iCloud key `A`; if `A` vanishes from iCloud Keychain (an iCloud Keychain reset; the establishing Mac switching Apple IDs) a device holding the master mints a fresh key for its own file but the vault's copy stays under the vanished one (the ladder's MINOR-N1, option A — the heal keys on a READ of a different id, never a mint), so new devices on that Apple ID lose Standard's nothing-typed enroll until the vault's copy is re-landed — and the only road today is Castle → Standard. **The door:** Settings ▸ Account & Encryption (Standard only) — *Re-link your Apple account…*: a CONSENT sentence naming which Apple account will hold the key from now on (copy — 13s re-voices), the passphrase (a key act), then one proof-authorized vault write re-landing the master's Apple-held copy under this device's readable `A` (the `relandAppleHeldCopy` road F2 built for the heal — the same shape, behind consent). Refuses when `A` is unreadable here (the waiting face). Pins: the orphaned state → the door → a new device enrolls with nothing typed; a different-Apple-ID device's door names ITS account in the sentence. The book's Chapter 2 / the FAQ gain the door's sentence. Review: an Opus cold review always; a Fable one (custody code).
 
+### CLOSED 2026-09-21 — the disposition (RUN A batch A3 + the run's Fable ladder; the record is `notes/plans/run-a-custody-text-loss.md` — the BATCH A3 RECORD + its ORCHESTRATOR ADJUDICATION)
+
+**FIXED — built to this entry's spec through the F2 heal road behind consent.** The brain is
+shared (`Shared/AppleRelinkModel`): refuses BEFORE any screen (Castle · a follow owed · no
+readable `A` — the waiting face's existing vocabulary, MINOR-N4 (1)'s door pattern), one consent
+screen naming the Apple account the only honest way the client can, the passphrase as the key act
+through `KeyActPassphrase` (the ceremony's verification rule hoisted VERBATIM — one rule, not
+two), then ONE proof-authorized re-land — **reading the iCloud key, never minting it** (decision
+30; discrimination-revert-verified both ways: the read-never-mint arm and the consented-id
+guard). Pins `AppleRelinkDoorTests` (8): the orphaned state end-to-end (a new device enrolls with
+nothing typed), the consent naming THIS device's account, and every refusal arm leaving the
+vault's revision exactly where it was. The face: a *Your Apple account* section on Settings ▸
+**Protection** (the entry's "Account & Encryption" predates 13u4's nine-pane split — placement
+PROVISIONAL, #139(a)), rendered only where the door can act (P-2). The book's Chapter 2 + the FAQ
+brief carry the door's sentences (the re-seed bundle). Live iCloud is not agent-exercisable: the
+acceptance is the DRILL kind (harness worlds over the real proof/CAS-enforcing emulation) plus
+the walk's honest ABSENCE capture (Castle renders no door). **MOBILE PARITY row PL-37** (the
+phone owes a face only — the brain is shared; whether at all is hers at #139(f)). **This letter's
+ratify rows: #139 (seven items).**
+
 ## 17n — THE ENCRYPTION PASSPHRASE'S 12-CHARACTER FLOOR (her ruling 2026-09-07 ~02:30: *"we can make the encryption passphrase requirement 12 characters as well — maybe make that another 17 item"*)
 
 The 12-character floor shipped at pre-13x 3b is the ACCOUNT password's (decision 25); the ENCRYPTION passphrase — the secret that wraps the library key and the master, and the one an offline attacker with a stolen backup + key file can guess against at the shipped KDF floor (Argon2id 19,456 KiB · t = 2) — has no length floor. Build: a 12-character minimum at every door that SETS the encryption passphrase (sync setup's first device, change passphrase, the migration's confirm where a new word is set, Replace All Keys' new-passphrase checkbox), refused with one sentence (copy — 13s re-voices), never applied to an EXISTING passphrase at unlock (an old shorter word still opens; the change door then asks for a longer one). Pins on both platforms; the tutorial chapter's Lesson 2 and the book's Chapter 2 say the floor once. Review: an Opus cold review; a Fable one (custody code).
+
+### CLOSED 2026-09-21 — the disposition (RUN A batch A2; the record is `notes/plans/run-a-custody-text-loss.md` — the BATCH A2 RECORD's row-14 section)
+
+**FIXED — the floor NAMED ONCE (`ProtectionCopy.passphraseFloor`) with the sweep table door ×
+platform × pin in the run's record.** Two real gaps closed: `PassphraseSetModel.commit` (FOUR door
+sites — two Mac, two phone — with no length rule at all) and sync setup's *no-wrap-after-all* arm;
+the five pre-existing literal `12`s now read the one constant. NEVER at unlock, pinned as
+negatives (the primitive has no floor by design; an existing shorter word still opens; the
+migration's confirm re-wraps rather than refusing at the one moment she must not be refused).
+Revert R2 measured: a six-character word was accepted AND landed on the old code, the negatives
+green. Walked by hand: a six-character word refused live on the Protection pane (capture
+`a2/03`). The tutorial's Lesson 2 and the book's Chapter 2 say the floor once — the re-seed
+consequence rides her ONE bundled press. **This letter's ratify row: #138(d).**
 
 ## 17o — THE 2026-09-06 USE-REPORT ROUND'S DEFECTS (opened 2026-09-07 at her word; the record is `notes/plans/use-report-round-2026-09-06.md`)
 
