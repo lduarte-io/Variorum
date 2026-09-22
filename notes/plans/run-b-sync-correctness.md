@@ -1702,6 +1702,170 @@ Finals: full core at close — baseline **1673/179 with F-3's 2-issue wrap**; yo
 
 ---
 
+## BATCH B5 RECORD — ROW 17 (F-3, the reject-delivered retirement)
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims marked PENDING)
+
+- [x] Record opened; brief + READ FIRST list read in full, in my own context (CLAUDE.md + the
+  canon load with SyncSpec WHOLE — §§4/5/7 as the roads in play; the postmortem; this file's
+  FENCES/TRAPS/ledger row 17/the FINDING F-3 section/the ROW 7 record in B2/all four
+  adjudications + the B4 record and sweep table; `Sync/SyncEngine.swift` whole, `Sync/Merge.swift`
+  whole, `Sync/Repairs.swift` whole; `SyncRepairTests.swift` whole including the wrapped pin;
+  `Triggers.swift`'s tag cascade; `ProductionRound.swift`'s `pushSplitAtBoundary` +
+  `FakeSyncServer`'s visibility-band mechanics).
+- [x] **Phase 1 — F-3 re-traced by my own hands** (the wrapped pin run as the reproduction:
+  `SyncRepairTests` **11 tests PASSED with exactly the 2 known issues**, both F-3's wrap —
+  `liveTagOnA` and `liveTagOnB` nil against the keeper; the per-step mechanism section below).
+- [x] **The PROPOSAL written** (three candidate shapes with tradeoffs + my recommendation —
+  Shape A, the fingerprint-scoped reject deferral) — AWAITING THE ORCHESTRATOR'S RULING; no
+  Phase-2 line built, per the brief's design-fork shape.
+- [ ] Phase 2 (opens only at the recorded ruling): build, unwrap the pin red-on-old
+  (commit-first, revert-verified), row-7 pins + full repair/dedupe suites green, finals (full
+  core — baseline 1673/179 with F-3's 2-issue wrap; finish line ZERO wraps).
+
+### DEATHS / RESUMES
+
+- none so far.
+
+### THE RE-TRACE (my own hands, not taken from the F-3 section; every step read in the code)
+
+The reproduction is the wrapped pin
+(`aRejectDeliveredRetirementCascadesTheStrandedApplicationBeforeTheKeeperArrives`,
+SyncRepairTests.swift:285): run fresh at batch open — 11 tests, exactly the 2 known issues, both
+the wrap's asserts; noteB's live application is nil on BOTH devices against keeper tag_A, and the
+dumps are byte-equal — converged ON the loss, exactly as routed.
+
+The mechanism, step by step against the code:
+
+1. **The strand.** `pushSplitAtBoundary(b, table: "post_tag")` arms the everyday A2(c) cut: the
+   drain (`SyncEngine.precedesInDrain` — registry order, then ascending id) sends the `tag`
+   chunk first, so tag_B lands COMMITTED server-side while the call dies before the ack — B
+   still holds tag_B at base 0, and B's application never left the outbox.
+2. **A's gap round.** A's pull meets tag_B ALONE (the application never landed);
+   `repairTagPathCollision` (Repairs.swift:540) retires it — keeper = the lexically smaller
+   tag_A — and its "re-point the duplicate's live applications" loop finds NOTHING to re-point
+   (they don't exist on the server yet). A's push (tag_A insert + tag_B's repair tombstone +
+   A's own application) commits INSIDE the A5 visibility band (`FakeSyncServer.visibilityHorizon`).
+3. **B's resume pull is empty.** The feed is STATE-BASED: tag_B's one row was re-stamped by A's
+   repair to a seq inside the band, and B's own echo is gone with it — nothing is served, the
+   cursor holds, and the unacked chunk cannot heal by the merged-equals-server rule.
+4. **The kill.** B's resume push re-sends tag_B at base 0 → the CAS reject hands back
+   `current` = the TOMBSTONE (SyncEngine.push, the `.rejected` case) — **outside the changefeed,
+   outside seq order, outside the band, ahead of the keeper B has never seen**. `merge()` takes
+   the server baseline (tombstone-wins; no variant leg for `tag`); `writeResolvedRow` applies it;
+   the still-active cascade (`cascade_tag_tombstone`, Triggers.swift:89 — victims stamped with
+   `NEW.deleted_at`, the parent's exact arriving stamp) kills B's live, never-seen-live
+   application. Direction 1's post-batch sweep (`enqueueSuppressedCascadeVictims`) enqueues the
+   victim explicitly, and the bounded push loop re-ships it DEAD in the same call.
+5. **No leg can fire, anywhere.** On B at kill time there is NO live same-path keeper locally —
+   the picture is indistinguishable from an ordinary tag deletion, so no repair CAN adjudicate
+   there. On A the application arrives TOMBSTONED, and every §7 leg in `writeResolvedRow` guards
+   `!resolved.isTombstoned` — `repairDuplicateCollision`, row 7's
+   `repointApplicationUnderDeadDuplicateTag`, all of them. Tombstone-wins converges both stores
+   on the loss: noteB untagged everywhere. A ruled-outcome violation (§7's no-time-bound
+   re-point sentence; row 7's both-notes-tagged contract), not divergence.
+
+**The structural observation the proposal turns on:** on every OTHER road the retirement arrives
+IN CONTEXT. The drain order guarantees seq(keeper insert) < seq(duplicate's tombstone) — the
+keeper is the smaller id by the repair's own definition, and within a table the drain pushes
+ascending id (the R2-7 comment's argument, pinned by `TheDrainOrderTests`) — and the pull applies
+in seq order, so a pull-delivered retirement is ALWAYS preceded by the keeper, whose arrival
+fires `repairTagPathCollision` against the still-live local duplicate and re-points the local
+applications BEFORE the tombstone lands. **The CAS reject is the ONE door that delivers a
+tombstone with no context at all** — that door, not any missing repair leg, is the mechanism.
+
+### THE PROPOSAL (Phase 1's deliverable; the orchestrator rules before any line is built)
+
+Constraints honored by every candidate weighed: deterministic on both devices; §7's
+no-time-bound sentence; BOTH the both-pushed order (row 7's green pins) and the reject road
+converge on both-notes-tagged; repair-rule-scale only (zero schema, zero server lines, marker 8).
+
+**SHAPE A — defer the out-of-context tombstone (the reject road's straggler-defer class, one
+predicate wider). RECOMMENDED.**
+The finding's fingerprint is exact: a reject whose `current` row is TOMBSTONED while the local
+row is LIVE at **`sync_version == 0`** — a never-accepted row meeting a death verdict for a row
+this device never landed. That shape is reachable ONLY through F-3's half-landed-drain class (a
+row travels nowhere but by push; a base-0 row the server holds a tombstone for means the strand
+landed unacked and someone since retired it). The fix: in `SyncEngine.push`'s `.rejected` case,
+that fingerprint **defers** — `result.deferred += 1`, row left enqueued untouched, exactly the
+standing straggler-defer idiom two branches above it ("a pull brings the referent, then the next
+push retries") — so the death reaches this device by the FEED, in seq order, keeper first, where
+the shipped legs already do everything: the collision repair re-points B's live application at
+the keeper's arrival, tag_B's tombstone then lands over the already-retired row and converges
+stamps, and B's stranded application (accepted LIVE in the same resume drain — the mirror is
+constraint-free by design, §2) is re-pointed on A by row 7's own arrival-order leg the moment it
+lands. Traced end-to-end against the pin's construction: both notes tagged on both devices, both
+directions, no new repair semantics at all.
+- *Why it can't wedge:* a reject PROVES `current.version > local.syncVersion`, so the current
+  state sits at a seq strictly beyond this device's cursor (the only batch truncation is the
+  straggler stall, which holds the cursor BEFORE the stalled row — row 9's healed class) — the
+  next post-band pull serves it. The defer is bounded by the A5 horizon (~2 s real), and
+  `PushReport.deferred` already has its honest production reader (row 12).
+- *Why the blast radius is provably narrow:* every OTHER reject shape keeps its byte-identical
+  road — restore-vs-redelete (base ≥ 1), F-1's ride (variant, base ≥ 1), the lost-ack echo
+  (current live), mirror-reset (current nil), metadata CAS (both live). The fingerprint cannot
+  arise outside the half-landed-drain class, argued above from the drain order + the
+  rows-travel-only-by-push fact.
+- *Doctrinal warrant:* §12's own grammar — "stalling is safe by design; guessing is the only
+  forbidden move." The reject-merge GUESSED (honored a death it could not contextualize);
+  deferring routes every death through the one ordered door. Postmortem lesson 5's caveat ("a
+  loser always learns via reject — but only if lesson 2 holds") gains its precise limit: a
+  never-accepted row learns nothing usable from a reject-delivered tombstone.
+- *Tradeoffs:* the retirement lands on B one band later (~2 s; invisible). An extra
+  `deferred` count in reports mid-heal. ~4 lines + the trace comment, in `Sync/SyncEngine.swift`.
+- *A scope fork for the ruling, stated honestly:* the fingerprint predicate is SHAPE-scoped, not
+  table-scoped — it would also cover a sibling I have NOT traced and do NOT assert as a finding:
+  the Journal-keeper family's reject face (`journalKeeperBesideRetiring` needs a LOCAL keeper
+  candidate; a reject-delivered loser tombstone ahead of the keeper looks like the same door —
+  the F1 legs' `!resolved.isTombstoned`/local-keeper guards mirror row 7's exactly). If the
+  orchestrator wants row 17's letter only, the predicate gains `table == "tag"`; my
+  recommendation is the shape-scoped form (the durable-predicate philosophy row 7's own record
+  praises — one rule, no drift), with the Journal twin flagged for a hunt probe either way
+  rather than silently absorbed.
+
+**SHAPE B — the stranded intent stays live (kill-side exemption + a keeper-arrival re-point).**
+The F-3 record's first observation, built out: when a `tag` tombstone lands by merge over a live
+local tag, its cascade victims that are UNPUSHED LOCAL INTENT (enqueued AND `knownSeq == 0`) are
+revived in-transaction and stay enqueued — they push LIVE, and the ARRIVAL legs adjudicate on
+devices that hold the full picture (row 7's leg re-points where a keeper stands; orphan
+direction 2 stamps them dead where none does, converging an ordinary deletion to the same kill
+one hop later). A second leg (the collision repair's dead-rival sibling) re-points the local
+holder's live applications when the keeper eventually ARRIVES over the locally-dead duplicate.
+- *Works, traced.* Same end-state as A on F-3's construction.
+- *Why A dominates it:* two new legs and a minted intermediate state (live applications under a
+  locally-dead tag, pushed live) versus A's re-route through legs that already exist; tag-scoped
+  by construction, so the untraced Journal sibling would someday need twin legs of its own; and
+  the ordinary-deletion stale-intent corner changes timing (kill at arrival instead of locally)
+  for no user-visible gain. Viable fallback if the orchestrator prefers the kill-side home.
+
+**SHAPE C — widen the arrival-order leg to cascade-stamp-matched TOMBSTONED arrivals under a
+live keeper (the F-3 record's second observation). RECOMMEND AGAINST.**
+Revive-and-re-point a dead-arriving application whose `deleted_at` equals its locally-dead
+tag's own stamp while a live same-path keeper stands (the `restoreContainer` exact-stamp
+doctrine, applied at apply time). It heals F-3's construction — but the picture is
+INDISTINGUISHABLE from a deliberate delete-then-recreate: she deletes a tag (cascade victims
+carry the tag's exact stamp, honored on every device), later recreates the path, and this leg
+would resurrect every application she deliberately removed. Fencing that requires seq-rank or
+id-order discriminators — precisely the classes row 7's record weighed and called worse (id-luck
+outcomes; `sync_row_seq` drift under later keeper edits) — and doctrinally it crosses a line A
+and B never do: they protect intent the server never accepted; C overrides tombstones every
+store had already honored. #142's recorded consequence (re-pointing a stale LIVE straggler) does
+not stretch this far.
+
+**RECOMMENDATION: Shape A**, shape-scoped fingerprint (`current` tombstoned · local live ·
+`local.syncVersion == 0` → defer), with the `tag`-only narrowing as the fork the orchestrator
+may rule instead; the Journal-keeper reject face flagged as an UNTRACED observation for routing
+(a probe, a future row, or moot under shape-scoped A — not mine to decide). Phase-2 plan under a
+Shape-A ruling: the ~4-line defer + trace comment; unwrap F-3's pin (rewriting the
+mid-construction "SHIPPED (the finding's mechanism)" asserts to the healed flow — the resume
+push defers tag_B and ships the application live; the finding text stays as history), red-on-old
+verified by behavioural revert COMMIT-FIRST; row-7's two pins, the full `SyncRepairTests`,
+`FurnitureConvergenceRepairTests`, `SampleLibraryDedupeRepairTests`, `SyncPushTests`,
+`FaultInjectionSyncTests` and the full core beside it — any pin the defer flips gets adjudicated
+at its mechanism per the B4 finding rule, never quietly rewritten.
+
+---
+
 ## THE LADDER (ONE Fable ladder over the run's combined diff; opens after B5's record closes — amended from "B4's" when F-3 became row 17)
 
 Fresh `fable-reviewer` per round, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing; findings
