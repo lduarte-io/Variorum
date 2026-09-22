@@ -475,7 +475,50 @@ same-machine-bypass row is genuinely resolved (1a/2a/3a).
 does the custody item for the current key ever get used on the older file? (§6; 5b's question 6;
 13x's row)*
 
-**PENDING**
+**The shapes.** A Replace All Keys rotates M→M′, C→C′ and (device by device as each follows) the
+library key L→L′; the live library and its LIVE key file move to L′ under P, W, M′. A backup made
+BEFORE the RAK is under the OLD library key L, and it carries ITS OWN key file (written with it,
+NEVER rewritten — §6, decision 11) holding L wrapped under the day's P, under W, under the OLD
+master M, and — if Standard-era — under A. The snapshot's filename and its key file are named by
+L's fingerprint (`variorum-backup-<stamp>-<fp8>` + `<...>.keys.json`).
+
+**Which credential opens it.** The day's PASSPHRASE (if unchanged across the RAK, that IS the
+current passphrase — P wraps L in the snapshot's own key file), the TWELVE WORDS (unless
+regenerated), and — for a Standard-era snapshot — the Apple account (A). **NOT the old master:**
+after a RAK the old master is dead on every device, so the master-wrapped-copy road to a
+pre-rotation backup CLOSES (ledger 50(a): "the MASTER-copy road to pre-rotation backups closes —
+the old master is gone from every device; the day's passphrase, the words … and Standard's Apple
+account still open them"). This is exactly §6's one user sentence.
+
+**Does the custody item for the current key ever get used on the older file — NO.** The key file
+for a KEY is chosen by FINGERPRINT (§3.5: "custody's raw key names it directly (zero
+derivations)"). The current custody holds L′; the older file is under L; L′ ≠ L, so the current
+custody's raw key names the L′-fingerprint file and NOT the older L-fingerprint one
+(`preferredURL`/`locate` route by fingerprint, `StoreKeyEnvelope.swift:455–497`;
+`matchesFingerprint` at :155–159 refuses a mismatch). The current key is therefore never
+successfully applied to the older file, and P1 guarantees it is never WRITTEN over it either ("an
+unreadable sidecar SKIPS the arm whole — nothing is ever written over a file that may hold intact
+wraps"). §6's own words: "custody and the LIVE key file pair with every snapshot of the SAME
+library key" — a pre-RAK snapshot is a DIFFERENT library key, so it pairs with its own key file,
+not the current custody.
+
+**The recorded caveat, owned by 13x (5b's question 6).** On the SAME Mac the store id names a
+custody item holding the CURRENT key, and the runbook's restore recipe is deliberately SCOPED to a
+copy under the library's CURRENT key (the everyday 13l drill). Restoring an OLDER-key copy on the
+same Mac — where the gate finds custody's L′ does not open the restored older-L file and must fall
+to that file's own passphrase/words road — is 13x's open-door territory ("Open a library file…",
+the "second look" for a matching-fingerprint key file), which is UNBUILT today. So the CREDENTIAL
+answer holds unconditionally (the day's P / W / Standard's A open the snapshot by its own key
+file), but the same-Mac RESTORE-and-open ROUTING for an older-key copy is 13x's, named on its row
+(5b.6, CONFIRMED at 5b's adjudication; re-stated on the master plan's 13x hand-forward).
+
+**VERDICT: HOLDS — with the 13x same-Mac older-key open-door caveat, already owned.** The
+credential that opens a pre-RAK backup is the day's passphrase (= the current one if unchanged),
+the twelve words (unless regenerated), or Standard's Apple account — never the old master (dead
+after the RAK, ledger 50(a)); and the current key's custody item is NEVER used on the older file
+(fingerprint mismatch, and P1 forbids any write). The one open item is not a defect: the same-Mac
+restore ROUTING for an older-key copy is 13x's unbuilt open-a-copy door (owner **13x**), with the
+runbook honestly scoped to current-key copies until then.
 
 ## Q9 — a device wiped and restored from Time Machine
 
