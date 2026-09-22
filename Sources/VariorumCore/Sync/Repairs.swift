@@ -43,6 +43,15 @@ struct TouchedRows {
     /// landing is exactly the moment a tag-leg deferral was waiting for,
     /// so the pass re-examines the copy at that apply and at no other.
     var appliedPostTagTagIDs: Set<String> = []
+    /// Same-name sample copies an ARRIVING retirement began killing in
+    /// this batch (the two-copy meeting context), with the retirement's
+    /// stamp and the copy's verdict from the REAL classifier read at the
+    /// FIRST family death — a member container's or the reading's own
+    /// live→dead transition, whichever arrives first in registry order —
+    /// while the copy was still whole, the only moment the ruled
+    /// classification can be computed. The defense leg reads these
+    /// post-batch and defends only where the READING itself ended dead.
+    var sampleCopyKills: [(copyID: String, stamp: String, verdict: SampleCopyVerdict)] = []
     /// Inline (write-time) repair count, for reporting.
     var inlineRepairs = 0
 }
@@ -198,6 +207,29 @@ extension SyncEngine {
         //    the comparator, and pinned by `TheDrainOrderTests`.
         // With no keeper in sight this is an ordinary delete: the cascade
         // takes its victims exactly as ever.
+        // RUN B B2 row 15 Part 2 — the defense leg's KILL-TIME EVIDENCE:
+        // an arriving retirement's FIRST family death names the copy, and
+        // the REAL classifier reads it AT THAT MOMENT — while the copy is
+        // still whole. The moment matters precisely: a retirement arrives
+        // in REGISTRY order, member CONTAINERS before the reading row, so
+        // a verdict taken at the reading's own tombstone reads a
+        // half-killed copy (dead members = "her pruning" = EDITED) and
+        // would revive every correct retirement forever — the scratch
+        // trace's ping-pong. The hook therefore fires on the first
+        // arriving live→dead transition of a member CONTAINER or of the
+        // READING itself, once per copy per batch; the verdict and the
+        // retirement's stamp are recorded for the post-batch defense
+        // (`defendEditedSampleCopies`), which also requires the READING
+        // to have actually died — a lone member-note deletion is an
+        // ordinary delete, never a kill. Pull-only, like the pass
+        // (R2-1's logic). Repair bookkeeping cannot mint this evidence:
+        // the classifier reads domain rows, never the outbox.
+        if resolved.isTombstoned, touched.isPullBatch, !sampleLibraryFacts.isEmpty,
+           ["container", "reading"].contains(resolved.table),
+           case .text(let killStamp) = resolved.columns["deleted_at"] {
+            try recordSampleCopyKillEvidence(
+                db, arriving: resolved, stamp: killStamp, touched: &touched)
+        }
         if resolved.isTombstoned, resolved.table == "reading",
            let keeperID = try journalKeeperBesideRetiring(db, arriving: resolved) {
             touched.inlineRepairs += try moveJournalChildren(
@@ -783,6 +815,13 @@ extension SyncEngine {
         // of two independently-seeded copies actually meeting.
         if !touched.readingIDs.isEmpty || touched.dailyDesignationTouched {
             repairs += try convergeDailyJournalDuplicates(db, touched: touched)
+        }
+        // RUN B B2 row 15 Part 2 — THE DEFENSE LEG, before the pass: a
+        // same-name copy an arriving retirement killed this batch revives
+        // exact-stamp when the ruled matrix says it must survive. See
+        // `defendEditedSampleCopies` for the evidence arm and its rulings.
+        if !touched.sampleCopyKills.isEmpty {
+            repairs += try defendEditedSampleCopies(db, touched: touched)
         }
         // The dedupe's occasions — PULL-ONLY, three of them (the ladder's
         // F2, then R2-1/R2-6): a book touched by the batch, the one-shot

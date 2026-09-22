@@ -672,88 +672,156 @@ struct SyncReconciliationProbeTests {
         }
     }
 
-    /// **P5(b) — the double-retirement race, RUN AND REPRODUCED.** The
-    /// memo's traced observation: the classifying device's push is delayed
-    /// past the other device's pass, and the evidence changes between the
-    /// two. Construction:
+    /// **P5(b) — the double-retirement race, FIXED (RUN B ledger row 15;
+    /// B1's `withKnownIssue` wrap UNWRAPPED at B2 Phase 2 as the
+    /// red-on-old pin).** The race, as B1 reproduced it: the two passes
+    /// classify on DIFFERENT evidence (the edit sits in the delayed
+    /// pusher's outbox), the retirements CROSS, tombstones win both ways —
+    /// both copies dead on both devices AND the edit's bytes lost outright
+    /// (the pristine tombstoned baseline over the dirty row; rescue
+    /// block-dead-skipped; outbox cleared).
     ///
-    ///  1. A seeds copyA, B seeds copyB; both push (copyB's PRISTINE bytes
-    ///     are what the server holds);
-    ///  2. B edits a copyB note — the edit sits in B's outbox, its pushes
-    ///     DELAYED from here;
-    ///  3. B pulls twice: its pass reads copyB EDITED (local evidence) →
-    ///     retires copyA (the ruled "edited kept");
-    ///  4. A pulls twice: its pass reads BOTH pristine (the edit never
-    ///     arrived) → retires copyB (the ruled smaller-id keeper);
-    ///  5. the delayed pushes land, production order (pull → push).
-    ///
-    /// REPRODUCTION FACTS (asserted green): the two retirements CROSS —
-    /// tombstones win on both sides, **both copies end dead on both
-    /// devices** (the shipped sample library vanishes into the Trash), and
-    /// — sharper, production-order-specific — **the edit's bytes are LOST
-    /// OUTRIGHT**: B's resume round pulls A's retirement BEFORE pushing
-    /// (production's order), the merge lands the server's pristine
-    /// tombstoned baseline over the dirty edited row, the rescue skips
-    /// because the block died earlier in the same batch, and the cleared
-    /// outbox entry means the edit never reaches the server at all. The
-    /// converged stores agree — this is a ruled-outcome violation ("an
-    /// edited copy is NEVER silently retired") plus the §6 forbidden
-    /// outcome (an edit nobody chose to lose, deleted), not a divergence.
-    ///
-    /// THE DESIRED CONTRACT (`withKnownIssue`-wrapped — a B1 HUNT FINDING;
-    /// its ledger row lands at adjudication; owner candidates recorded in
-    /// the batch record, the 18a fence re-verified not absorbed): the
-    /// edited copy survives live with its edit intact.
-    @Test func p5bTheDoubleRetirementRaceRetiresBothCopiesAndLosesTheEdit() async throws {
+    /// THE RULED MATRIX, now pinned green (the orchestrator's row-15
+    /// ruling): **exactly-one-edited ⇒ the EDITED copy survives LIVE on
+    /// both devices with its edit intact; the pristine copy stays
+    /// retired.** Two repairs land it: Part 1 (the merge's ride-the-row
+    /// rescue keeps the edit's bytes AND its outbox entry alive through
+    /// the retirement batch) and Part 2 (the dedupe's defense leg: a
+    /// same-name copy killed by an ARRIVING retirement, in the two-copy
+    /// meeting context, whose family carries PRE-BATCH outbox dirt —
+    /// unpushed local intent the retiring device could never have seen —
+    /// revives exact-stamp and pushes).
+    @Test func p5bTheDoubleRetirementRaceKeepsTheEditedCopyAliveWithItsEdit() async throws {
         let (a, b, server) = try dedupePair()
         let copyA = try seedCopy(a)
         let copyB = try seedCopy(b)
         try await a.push()
         try await b.push()
 
-        // 2. B edits — from here B's pushes are delayed.
+        // B edits — from here B's pushes are delayed.
         let editedPost = copyB.postIDs["A Scandal in Bohemia"]!
         let editedVariant = try firstVariantID(b, postID: editedPost)
         try b.with { ops, _ in
             try ops.autosave(editedVariant, text: "Rewritten in her own words.", charDelta: 20)
         }
 
-        // 3. B's pass: copyB edited (local evidence) → copyA retired on B.
+        // B's pass: copyB edited (local evidence) → copyA retired on B.
         _ = try await b.pull()
         _ = try await b.pull()
         #expect(try liveCopyIDs(b) == [copyB.bookID],
                 "B kept the edited copy and retired the pristine one — the ruled outcome, on B's evidence")
 
-        // 4. A's pass: both pristine (the edit is still only in B's outbox)
-        // → copyB retired on A.
+        // A's pass: both pristine (the edit is still only in B's outbox)
+        // → copyB retired on A — correct on A's evidence; the defense is
+        // what un-crosses it when the evidence lands.
         _ = try await a.pull()
         _ = try await a.pull()
         #expect(try liveCopyIDs(a) == [copyA.bookID],
                 "A retired copyB as a redundant pristine copy — correct on A's evidence")
 
-        // 5. The delayed pushes land, production order per device.
+        // The delayed pushes land, production order per device.
         try await productionQuiescence(a, b, server: server, maxRounds: 16)
-        #expect(try a.syncedDump() == b.syncedDump(), "the stores CONVERGE — the loss is agreed on")
+        #expect(try a.syncedDump() == b.syncedDump(), "the stores converge")
 
-        // REPRODUCTION FACTS: both copies dead everywhere; the edit's bytes
-        // exist nowhere — live or tombstoned, local or mirror.
+        // THE RULED MATRIX: the edited copy alive everywhere, edit intact,
+        // the pristine copy retired. (Red on old: both copies dead and the
+        // bytes gone — B1's reproduction, wrapped until this fix.)
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyB.bookID],
+                    "\(client.name): the EDITED copy survives — never silently retired (R-pre13u-8)")
+            #expect(try client.db.fetchInt(
+                """
+                SELECT COUNT(*) FROM variant
+                WHERE working_text = 'Rewritten in her own words.' AND deleted_at IS NULL
+                """) == 1,
+                "\(client.name): the edit lives on the surviving copy (§6's forbidden outcome held off)")
+            #expect(try client.db.deletedAt("reading", copyA.bookID) != nil,
+                    "\(client.name): the pristine copy stays retired — one library, hers")
+        }
+    }
+
+    /// **Row 15's BOTH-EDITED variant (the ruled matrix's second row):**
+    /// each device edits ITS OWN copy before the crossing; each side's
+    /// pass correctly keeps its own and retires the other on its local
+    /// evidence; the retirements cross — and BOTH copies survive, each
+    /// defended at its kill moment by the classifier's own EDITED verdict
+    /// (reachable even though each device's edit has PUSHED by the time
+    /// the peer's retirement arrives — the reason the defense reads the
+    /// classifier at the kill, never the outbox). The settled state is
+    /// then the pass's own both-edited row: two live copies, both edited,
+    /// nothing retired.
+    @Test func p5bBothEditedMeansBothCopiesSurvive() async throws {
+        let (a, b, server) = try dedupePair()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        try await a.push()
+        try await b.push()
+
+        let variantA = try firstVariantID(a, postID: copyA.postIDs["A Scandal in Bohemia"]!)
+        let variantB = try firstVariantID(b, postID: copyB.postIDs["A Scandal in Bohemia"]!)
+        try a.with { ops, _ in
+            try ops.autosave(variantA, text: "In A's own words.", charDelta: 10)
+        }
+        try b.with { ops, _ in
+            try ops.autosave(variantB, text: "In B's own words.", charDelta: 10)
+        }
+
+        // Each side's pass, on its local evidence: keep own (edited),
+        // retire the other (pristine as far as it can see).
+        _ = try await a.pull()
+        _ = try await a.pull()
+        _ = try await b.pull()
+        _ = try await b.pull()
+        #expect(try liveCopyIDs(a) == [copyA.bookID])
+        #expect(try liveCopyIDs(b) == [copyB.bookID])
+
+        try await productionQuiescence(a, b, server: server, maxRounds: 20)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyA.bookID, copyB.bookID].sorted(),
+                    "\(client.name): both-edited ⇒ BOTH survive (the documented concurrent-divide class)")
+            for text in ["In A's own words.", "In B's own words."] {
+                #expect(try client.db.fetchInt(
+                    "SELECT COUNT(*) FROM variant WHERE working_text = ? AND deleted_at IS NULL",
+                    [text]) == 1,
+                    "\(client.name): each side's edit lives on its own surviving copy")
+            }
+        }
+    }
+
+    /// **Row 15's NO-DEFENSE guard:** her deliberate delete of the sample
+    /// library with NO second copy anywhere — the overwhelmingly normal
+    /// state — is never defended: no meeting context, no kill recorded,
+    /// the deletion stands (rule 1). The other device's unpushed edit
+    /// still rides the row into the Trash (Part 1) — bytes never lost,
+    /// copy never resurrected.
+    @Test func aDeliberateDeleteWithNoSecondCopyIsNeverDefended() async throws {
+        let (a, b, server) = try dedupePair()
+        let copy = try seedCopy(a)
+        try await productionQuiescence(a, b, server: server)
+
+        let variant = try firstVariantID(b, postID: copy.postIDs["A Scandal in Bohemia"]!)
+        try b.with { ops, _ in
+            try ops.autosave(variant, text: "Kept in her drafts.", charDelta: 5)
+        }
+        try a.with { ops, _ in
+            for postID in copy.postIDs.values.sorted() {
+                try ops.deleteContainer(postID)
+            }
+            try ops.deleteReading(copy.bookID)
+        }
+        _ = try await productionRound(a)
+        _ = try await productionRound(b)
+        try await productionQuiescence(a, b, server: server)
+        #expect(try a.syncedDump() == b.syncedDump())
         for client in [a, b] {
             #expect(try liveCopyIDs(client).isEmpty,
-                    "\(client.name): the whole sample library vanished — both copies retired")
-            #expect(try client.db.fetchInt(
-                "SELECT COUNT(*) FROM variant WHERE working_text = 'Rewritten in her own words.'") == 0,
-                "\(client.name): the edit was clobbered by the pristine tombstoned baseline (rescue skipped — block dead)")
+                    "\(client.name): the deliberate delete stands — nothing revives")
         }
-        let mirrorTexts = await server.allStoredRows.filter { $0.table == "variant" }
-        _ = mirrorTexts  // ciphertext on the wire; the local stores above are the honest surface
-
-        let liveOnB = try liveCopyIDs(b)
-        withKnownIssue(
-            "B1 hunt finding (P5(b)): the double-retirement race retires the EDITED copy and loses the edit"
-        ) {
-            #expect(liveOnB == [copyB.bookID],
-                    "the edited copy must survive on both devices")
-        }
+        #expect(try b.db.fetchString(
+            "SELECT working_text FROM variant WHERE id = ?", [variant])
+            == "Kept in her drafts.",
+            "the unpushed edit rode the row into the Trash — Part 1's bytes, no resurrection")
     }
 
     /// **P5(c) — the echo pull's extra round, RUN AND RECORDED (designed

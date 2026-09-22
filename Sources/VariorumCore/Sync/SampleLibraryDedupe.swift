@@ -288,6 +288,178 @@ extension SyncEngine {
         }
     }
 
+    /// **RUN B B2 row 15 Part 2 — THE DEFENSE LEG** (F-1, the
+    /// double-retirement race; the orchestrator's row-15 ruling): a
+    /// same-name sample copy killed by an ARRIVING retirement in the
+    /// two-copy meeting context revives, exact-stamp and enqueued, when
+    /// the ruled matrix says it must survive ("an edited copy is NEVER
+    /// silently retired" — R-pre13u-8; err toward EDITED). ONE evidence
+    /// arm — **the kill-time verdict**: the REAL classifier, read at the
+    /// moment the retirement's first family death landed (the copy's rows
+    /// still whole — `TouchedRows.sampleCopyKills` carries the verdict),
+    /// says EDITED. This is the ruled classification itself, so the
+    /// both-edited row of the matrix is reachable even when this device's
+    /// edit already pushed — and the ruling's constraint ("repair
+    /// bookkeeping can NEVER self-justify a revival") holds BY
+    /// CONSTRUCTION: the classifier reads domain rows and never the
+    /// outbox. An INDETERMINATE verdict never defends (deferring to the
+    /// retiring side's complete evidence is loop-free; revive-on-doubt
+    /// could ping-pong against the other device's pass forever).
+    ///
+    /// **The ruled PRE-BATCH-DIRT arm is deliberately ABSENT — its
+    /// unsoundness is pin-proven, recorded for the orchestrator:** the
+    /// batch-start snapshot excludes in-apply enqueues (the constraint's
+    /// letter) but NOT a PRIOR batch's repair enqueues, which are the
+    /// same bookkeeping one pull earlier — in
+    /// `theMarkerIsSpentWhenTheOtherDevicesRetirementLands` (both copies
+    /// PRISTINE), the tag-collision repair's re-pointed applications of
+    /// the arriving copy's own notes sat in the snapshot and revived the
+    /// correctly-retired copy: the constraint's exact degradation
+    /// scenario, by the ruled mechanism itself. The classifier arm is
+    /// STRICTLY stronger against that scenario (no outbox evidence at
+    /// all) and the classifier-blind residual (a chapter rename) remains
+    /// exactly the pre-existing R2-5 declined-leg class, unchanged.
+    ///
+    /// A device's OWN pass can never trip the defense: self-retirements
+    /// write directly and never pass through `writeResolvedRow`, so no
+    /// kill is recorded for them — the constraint's degradation scenario
+    /// (reviving the copy the device just correctly retired) is dead by
+    /// construction, and the ordinary both-pristine convergence keeps its
+    /// pinned 3-round cadence (`p5c…`).
+    /// The kill-time recorder (`writeResolvedRow`'s hook body): resolves
+    /// the arriving tombstone to a LIVE same-name copy — a `reading` row
+    /// directly, a `container` row through its live membership — checks
+    /// the two-copy meeting context, and records ONE verdict per copy per
+    /// batch, read by the REAL classifier while the copy is still whole
+    /// (the first family death is the last such moment). Nothing is
+    /// decided or written here.
+    func recordSampleCopyKillEvidence(
+        _ db: Database, arriving row: SyncRow, stamp: String, touched: inout TouchedRows
+    ) throws {
+        let copyID: String?
+        if row.table == "reading" {
+            copyID = row.rowID
+        } else {
+            copyID = try String.fetchOne(
+                db,
+                sql: """
+                    SELECT r.id FROM reading r
+                    JOIN reading_post rp ON rp.reading_id = r.id AND rp.deleted_at IS NULL
+                    WHERE rp.post_id = ? AND r.deleted_at IS NULL
+                      AND EXISTS (SELECT 1 FROM container c
+                                  WHERE c.id = rp.post_id AND c.deleted_at IS NULL)
+                    LIMIT 1
+                    """,
+                arguments: [row.rowID])
+        }
+        guard let copyID,
+              !touched.sampleCopyKills.contains(where: { $0.copyID == copyID }),
+              let copy = try Reading.fetchOne(db, key: copyID), copy.deletedAt == nil
+        else { return }
+        for facts in sampleLibraryFacts where copy.name == facts.bookName {
+            let meeting = try Bool.fetchOne(
+                db,
+                sql: "SELECT EXISTS (SELECT 1 FROM reading WHERE name = ? AND id <> ?)",
+                arguments: [facts.bookName, copyID]) ?? false
+            guard meeting else { continue }
+            touched.sampleCopyKills.append((
+                copyID: copyID, stamp: stamp,
+                verdict: try SampleCopyClassifier.classify(db, copyID: copyID, facts: facts)))
+            return
+        }
+    }
+
+    func defendEditedSampleCopies(_ db: Database, touched: TouchedRows) throws -> Int {
+        var repairs = 0
+        var defended: Set<String> = []
+        for kill in touched.sampleCopyKills where !defended.contains(kill.copyID) {
+            // The copy's READING must itself have died, under the recorded
+            // retirement stamp: a lone member-note deletion records
+            // evidence at its first death but is an ordinary delete — the
+            // book stands, nothing is defended.
+            guard try String.fetchOne(
+                db, sql: "SELECT deleted_at FROM reading WHERE id = ?",
+                arguments: [kill.copyID]) == kill.stamp
+            else { continue }
+            guard kill.verdict == .edited else { continue }
+            defended.insert(kill.copyID)
+            repairs += try reviveSampleCopy(db, copyID: kill.copyID, stamp: kill.stamp)
+        }
+        return repairs
+    }
+
+    /// The exact-stamp revival: flips `deleted_at` back to NULL on every
+    /// family row carrying the retirement's stamp — the retirement was
+    /// tombstones-only, so the flip alone restores the copy as it stood —
+    /// and enqueues every flipped row explicitly (SyncSpec §7: the
+    /// revival must PUSH, or the defending device diverges silently).
+    /// Rows with a different stamp (an earlier delete's own clock) are
+    /// never touched. Purge intents naming revived rows are deliberately
+    /// NOT voided here: none exist on this road by construction, and the
+    /// sweep-time staleness net (`familyVerdict` → `.stale`) is the
+    /// designed second net for revives that cannot void (the standing
+    /// note at `voidPurgeIntents`).
+    private func reviveSampleCopy(
+        _ db: Database, copyID: String, stamp: String
+    ) throws -> Int {
+        var repairs = 0
+        func flip(
+            _ table: String, where clause: String, _ args: [String]
+        ) throws -> [String] {
+            let ids = try String.fetchAll(
+                db,
+                sql: "SELECT id FROM \(table) WHERE \(clause) AND deleted_at = ?",
+                arguments: StatementArguments(args + [stamp]))
+            for id in ids {
+                try db.execute(
+                    sql: "UPDATE \(table) SET deleted_at = NULL WHERE id = ?",
+                    arguments: [id])
+                try enqueueExplicitly(db, table: table, rowID: id)
+                repairs += 1
+            }
+            return ids
+        }
+        _ = try flip("reading", where: "id = ?", [copyID])
+        _ = try flip("reading_section", where: "reading_id = ?", [copyID])
+        _ = try flip("reading_post", where: "reading_id = ?", [copyID])
+        let posts = try String.fetchAll(
+            db,
+            sql: "SELECT post_id FROM reading_post WHERE reading_id = ?",
+            arguments: [copyID])
+        for postID in posts {
+            _ = try flip("container", where: "id = ?", [postID])
+            let placements = try flip("container_block", where: "container_id = ?", [postID])
+            if !placements.isEmpty {
+                let blocks = try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT DISTINCT block_id FROM container_block
+                        WHERE container_id = ?
+                        """,
+                    arguments: [postID])
+                for blockID in blocks {
+                    _ = try flip("block", where: "id = ?", [blockID])
+                    _ = try flip("variant", where: "block_id = ?", [blockID])
+                    _ = try flip("block_comment", where: "block_id = ?", [blockID])
+                    _ = try flip("block_tag", where: "block_id = ?", [blockID])
+                    _ = try flip("canvas_layout", where: "block_id = ?", [blockID])
+                    _ = try flip("lens_choice", where: "block_id = ?", [blockID])
+                    _ = try flip(
+                        "edge", where: "(source_block_id = ? OR target_block_id = ?)",
+                        [blockID, blockID])
+                }
+            }
+            _ = try flip("post_tag", where: "post_id = ?", [postID])
+            _ = try flip("reference", where: "container_id = ?", [postID])
+            _ = try flip("canvas_layout", where: "container_id = ?", [postID])
+            let lenses = try flip("lens", where: "container_id = ?", [postID])
+            for lensID in lenses {
+                _ = try flip("lens_choice", where: "lens_id = ?", [lensID])
+            }
+        }
+        return repairs
+    }
+
     /// Retires one copy, family-complete: the book (its cascade takes the
     /// memberships and chapters at this exact stamp), then each member note
     /// (the container cascade takes placements, blocks, variants, tags,
