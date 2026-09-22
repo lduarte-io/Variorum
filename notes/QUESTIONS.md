@@ -1791,18 +1791,31 @@ rescue (shipped by this fix); **(b)** narrow the leg to same-batch-retired dupli
 (re-opens the cross-batch loss). **PROVISIONAL: (a) stands until she rules.**
 
 #143 — **THE F-1 FIX'S TWO PROVISIONAL EDGES (RUN B batch B2, row 15 — the dedupe
-double-retirement fix; the orchestrator's rulings section has the full arbitration).** **(a) The
-§6 clarification, ride-the-row:** the merge matrix is silent on a tombstoned row's TEXT when the
-whole block is dead; the fix makes an UNPUSHED losing edit ride the row into the Trash (staying
-enqueued, converging with the bytes intact) — the same end-state B1's P1 probe measured and
-blessed for the PUSHED direction, warranted by §6's own "deleting an edit nobody chose to lose is
-the one forbidden outcome." Ratify as a §6 clarification (the closeout's delta would add one
-sentence to the tombstone row), or revert to server-text-wins-on-dead-blocks. PROVISIONAL:
-ride-the-row stands. **(b) The deliberate-delete-revival corner:** deleting the sample book on
-one device while another device holds UNPUSHED edits to its copy, INSIDE the once-per-store-life
-two-copy meeting window, is revived by the defense leg — visibly, never silently; outside that
-window a delete is never second-guessed. Err-toward-EDITED's letter. PROVISIONAL: the revival
-stands. *(Adjacent, ruled the same day, no action: S1's Q10 refinement — 17n's 12-character floor
+double-retirement fix; the orchestrator's rulings section has the full arbitration; AMENDED at
+the round-1 ladder, 2026-09-22 — the fixes F-R1/F-R2 narrowed both edges, so this row now states
+SHIPPED behavior).** **(a) The §6 clarification, ride-the-row (amended):** the merge matrix is
+silent on a tombstoned row's TEXT when the whole block is dead; the fix makes an UNPUSHED losing
+TEXT EDIT ride the row into the Trash (staying enqueued, converging with the bytes intact) — the
+same end-state B1's P1 probe measured for the PUSHED direction, warranted by §6's "deleting an
+edit nobody chose to lose is the one forbidden outcome." **The ladder's F-R1 narrowed the
+discriminator: the ride fires ONLY when `working_text` is the sole divergence between the local
+and server rows — a metadata-only-dirty row (a label, a lock, a fan move) keeps server-wins, so
+stale ancestor text can never overwrite the peer's final edit.** Two recorded corners, hers if
+she ever wants them ruled: MIXED dirt (a text edit + a metadata divergence on one row) falls
+back to pre-run server-wins (never worse than old; a durable text-intent record would be schema);
+coincidentally byte-identical metadata on both sides still rides. Ratify ride-the-row-as-narrowed
+as a §6 clarification, or revert to server-text-wins-on-dead-blocks. PROVISIONAL: the narrowed
+ride stands. **(b) The deliberate-delete-revival corner (amended — the original "once-per-store-
+life window" premise was FALSIFIED by the ladder's F-R2 and the fix BOUNDED it):** the defense
+now fires only while the meeting genuinely STANDS — the other copy live, or this device's own
+retirement still unpushed, or the loser's tombstone within a ONE-HOUR settle window of the
+arriving kill — so a deliberate cross-device delete of a kept, engaged copy a day (or month)
+later is NEVER second-guessed. Inside that bounded window, a deliberate delete crossing the
+race is revived visibly, never silently — err-toward-EDITED's letter. **The one-hour width is
+the orchestrator's arbitrated call (the crossing's stamps are bounded by delayed pushes + the
+~2 s band + round cadence — realistically minutes; an hour is generous headroom; the
+unpushed-outbox arm covers longer offline gaps on its own):** hers to widen or narrow.
+PROVISIONAL: the bounded revival stands. *(Adjacent, ruled the same day, no action: S1's Q10 refinement — 17n's 12-character floor
 is a length floor, not an entropy floor; whether to pair it with a strength check is on the
 checkpoint bundle, propose-only.)*
 

@@ -2383,3 +2383,32 @@ Round 2's fresh reviewer anchors here: the four MAJOR fixes are `textIsTheOnlyDi
 connected completion set (SyncEngine.swift + PurgeJanitor.swift); the five new pins live in
 `SyncReconciliationProbeTests`; the orchestrator's amendment list is the FLAGGED section
 above (#143(a) and #143(b) re-wording + the 1-hour settle-window width, arbitrable).
+
+### LADDER ROUND 1 — ORCHESTRATOR ADJUDICATION (2026-09-22 night; round 2 opens next)
+
+**Verification, my own hands:** the fix pass's ten commits read; the code diff is FOUR `Sync/`
+sources + ONE test file (exactly as reported); **the full core re-run by the orchestrator: 1679
+tests / 179 suites — ALL PASSED, zero known issues** (baseline 1674 + the 5 new pins, exact).
+ZERO DISPUTES — all eight findings re-traced and agreed by the fix session, so no
+implementer-vs-reviewer arbitration was owed; the four MAJOR fixes each landed red-on-HEAD with
+commit-first revert verification, F-R6's defect half DISMISSED-AS-HOLLOW at its own
+green-both-sides pin (the cleanliness half landed with its load-bearing justification — the
+F-R3 dependency), F-R5/F-R7/F-R8 landed architectural.
+
+**The flagged arbitration — the ONE-HOUR settle window (F-R2's width): SUSTAINED.** The
+crossing's stamps are bounded by delayed pushes + the ~2 s visibility band + round cadence —
+realistically minutes; an hour is generous headroom without approaching the month-scale
+tombstone lifetime that F-R2 caught (three orders of magnitude away); the unpushed-outbox arm
+independently covers offline-gap crossings beyond any window. Recorded as the orchestrator's
+call in #143(b), hers to move.
+
+**The #143 amendments are DONE** (this commit): (a) the F-R1 narrowing named (text-sole-
+divergence; the two recorded corners — mixed dirt falls back to pre-run server-wins, byte-equal
+metadata still rides); (b) re-worded to shipped behavior (the bounded meeting; the falsified
+once-per-store-life premise corrected; the window width stated as arbitrated).
+
+**Round 2's anchor:** the reviewer's file `notes/plans/run-b-ladder-round1.md` + the fix
+session's `LADDER ROUND 1 — FIX-SESSION RESPONSES` section + this adjudication. The recorded
+round-2 watch items from the fix session: F-R3's inert-lingering marker corner and the
+split-gap-edit corner (one band wider than the one-batch design's own), both recorded with
+mechanisms.
