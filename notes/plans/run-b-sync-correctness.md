@@ -2003,14 +2003,43 @@ recorded here repo-first before any fix session sees them; the SAME-MODEL flow (
 responds agree/dispute; the orchestrator arbitrates against canon; the spec wins); cap three
 rounds; every finding dispositioned in writing.
 
-## CLOSEOUT (opens at the ladder's close)
+## CLOSEOUT (opened 2026-09-22 night, at the ladder's close; PENDING slots flip as the tail lands)
 
-Dispositions copied into the 17 file (17i · 17d close; 17l item 5's disposition lands in 17l's
-closed section as the deferred row's resolution); KnownIssues rows 34 + 37 resolved/re-owned; the
-memo's ⚠️ UNSETTLED section flipped to answered; the master plan's order line 3 ticked; her
-ratify bundle (QUESTIONS rows) assembled; the coordinated live-round window (A1 rail → install +
-phone refresh → her round each direction → the evidence recorded here); the checkpoint report;
-hard stop — **13y is next and is NOT this run's to start.**
+**Discharged:** the 17-file dispositions (17i CLOSED · 17d CLOSED · 17l item 5 RESOLVED — each
+close carrying its LIVE-ROUND-LEG-PENDING line for the morning flip) ✔ · KnownIssues rows 34 +
+37 removed as resolved ✔ · the memo's UNSETTLED section flipped to ANSWERED with the scenario
+table's two rows ✔ · the master plan's order line 3 ticked ✔ · QUESTIONS #141 (RULED → 17s) /
+#142 / #143 (amended to shipped) filed ✔ · 17s minted ✔ · the morning handoff drafted ✔.
+
+**FINALS (the four gates, on the final tree — strictly sequential, zero instances):**
+| Gate | Invocation | Result |
+|---|---|---|
+| Core | `swift test` | **1679 tests / 179 suites — ALL PASSED, zero known issues** (+ the one sanctioned real-server skip). Baseline at open 1639/177; the run added exactly 40 tests / 2 suites — the probes, the sweep suite, the fix pins, the ladder pins |
+| iOS build | `xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS` | **BUILD SUCCEEDED** |
+| Mobile | `xcodebuild test -scheme VariorumMobile -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` | **PENDING (in flight)** |
+| Full Mac | `xcodebuild test -scheme Variorum -destination platform=macOS` | **PENDING (runs alone after mobile)** |
+
+**THE INSTALL REFRESH (her authorization recorded in KICKOFF):** **PENDING** — A1 backup name ·
+old → new hash · built-from commit · codesign/access-groups check · phone attempt result.
+
+**THE LIVE ROUND (the one open acceptance leg):** **PENDING her morning round** — the checklist
+and the paste-ready morning kickoff are `notes/handoffs/run-b-live-round-handoff.md`; the
+evidence lands HERE and the pending lines flip (this file's dispositions + the 17 file's two).
+
+**HER RATIFY BUNDLE (the checkpoint report's list):**
+1. **#142** — the recreated-tag catch ((a) keep the rescue stands PROVISIONAL).
+2. **#143 (amended)** — (a) ride-the-row as narrowed (text-sole-divergence; the R2-sharpened
+   net-zero-round-trip corner named); (b) the bounded meeting (the ONE-HOUR settle window is the
+   orchestrator's arbitrated width, yours to move).
+3. **#141 — already RULED by you** (shipped (a); the (b) rescue parked as 17s) — FYI line only.
+4. **Propose-only (S1's Q10):** 17n's 12-char floor is a length floor, not an entropy floor — a
+   strength check beside it is yours to want or decline; 17n stays closed either way.
+5. **FYI (S1's Q3, recorded in the pre-13x deploy checklist):** any redeploy of
+   `11_pre13x_postures.sql` silently reverts the rotation completion guard — the overlay re-runs
+   after any 11 redeploy; 13y's consolidated DDL should fold it in.
+6. **The optional live Replace All Keys** at your round — still yours in the moment.
+
+**Hard stop after the checkpoint report — 13y is next and is NOT this run's to start.**
 
 ### BATCH B5 — ORCHESTRATOR ADJUDICATION (2026-09-22; the batch CLOSES here — ALL BATCHES DONE)
 
