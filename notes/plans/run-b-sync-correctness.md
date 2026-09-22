@@ -333,7 +333,10 @@ STOP AND REPORT to the orchestrator instead of adding one).
   (`p5cTheDeferralPlusTheEchoPullCostTwoRoundsPerMeeting`); the designed cost observed PRECISELY:
   the deferring device's own push ECHO re-defers, so meeting → echo → decide is a 3-round cadence
   under production order (the harness order folded meeting + echo into one window). Latency only.
-- [ ] Probe P4 round-shape sweep — PENDING.
+- [x] Probe P4 round-shape sweep — RUN (`ProductionRoundShapeSweepTests`, 7 scenarios, all
+  green): **0 new findings** — every ✔-row core scenario converges under production's round
+  shape + registry-boundary chunk splits with the other device's round between the halves.
+  Coverage map + the two out-of-reach ✔ rows (with reasons) live in the suite header and below.
 - [ ] Memo ⚠️ UNSETTLED section updated with dated answers + pin names — PENDING.
 - [ ] Finals: full core suite (baseline 1639/177) — PENDING.
 
@@ -506,6 +509,35 @@ memo's observation; round 3's genuinely-empty window fires the pass and decides.
 convenience order had folded the meeting and the echo into ONE window (push-both-then-pull), so
 the old suites recorded a 1-round deferral; production's shape shows 2. Latency only —
 convergence intact, verdicts unchanged, pinned as a stated fact.
+
+#### P4 — the round-shape sweep (ledger row 4): 0 NEW FINDINGS — every core scenario converges under production shape + boundary splits
+
+`ProductionRoundShapeSweepTests`, seven scenarios, each pull→push per device with a mid-drain
+chunk split at a registry boundary the scenario crosses and the OTHER device's full round
+between the halves:
+
+| Scenario (✔ row) | Shape + boundary | Outcome |
+|---|---|---|
+| edit-vs-edit (S5) | split at `variant` (+ probe P3 at sizes 200/1) | GREEN — 1 conflict card, nothing lost |
+| delete-take-vs-edit, block lives | split at `variant` (tombstone stranded) | GREEN — edit rescued, tombstone honored, I10 holds |
+| I10 double-tombstone | split at `variant` | GREEN — same `'rescued'` survivor on both, seq-deterministic |
+| placement race (I2) | split at `container_block` (A's placement never accepted) | GREEN — the never-accepted row ranks seq 0 and LOSES (SyncSpec §3's own sentence; the split changes WHICH row wins vs the both-pushed order — deterministically, not divergently; recorded as an observation, not a finding) |
+| rename/rename CAS | production, sizes 200/1 (single-table — no cross-table boundary exists) | GREEN — first-landed wins, lost rename only |
+| concurrent divide | split at `edge` (edge AND placement chunks stranded) | GREEN — the documented B₁C₁B₂C₂ duplication, byte-identical |
+| daily-Journal keeper | production rounds at chunk-per-row (batchSize 1) | GREEN — one keeper, both entries, designation converged. (The tombstone-vs-re-point cross-chunk orders are the furniture suite's existing F1 pins — not duplicated.) |
+
+**Covered elsewhere, not duplicated:** the sample-library dedupe's production-shape runs are
+probes P5(b)/P5(c); its `post_tag`-boundary chunk split is the R2-1 reserved-tag completeness
+guard's own pinned territory (`SampleLibraryDedupeRepairTests`). **Out of sweep reach, with
+reasons:** the restored-old-backup re-key row (a custody/backup-matrix behavior — wave 2a's
+pins, not a two-client convergence scenario) and the seed-gate-declines row (app-target seeder
+logic, outside the core harness).
+
+**One construction lesson recorded honestly:** the sweep's first run flagged S2/S3 red on
+`variantIsChosen` — my constructions, not the code (deleteVariant refuses a chosen variant BY
+DESIGN; the suites' null-the-chosen seed idiom applies) — and S4 red on my INVERTED expectation
+(I predicted later-landing wins; the spec ranks a never-accepted row 0). Both were probe bugs;
+zero product findings.
 
 ### FINDINGS LIST (B1's hand-over to adjudication)
 
