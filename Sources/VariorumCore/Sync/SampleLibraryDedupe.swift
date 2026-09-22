@@ -357,16 +357,70 @@ extension SyncEngine {
               let copy = try Reading.fetchOne(db, key: copyID), copy.deletedAt == nil
         else { return }
         for facts in sampleLibraryFacts where copy.name == facts.bookName {
-            let meeting = try Bool.fetchOne(
-                db,
-                sql: "SELECT EXISTS (SELECT 1 FROM reading WHERE name = ? AND id <> ?)",
-                arguments: [facts.bookName, copyID]) ?? false
-            guard meeting else { continue }
+            guard try meetingStands(db, bookName: facts.bookName, copyID: copyID, killStamp: stamp)
+            else { continue }
             touched.sampleCopyKills.append((
                 copyID: copyID, stamp: stamp,
                 verdict: try SampleCopyClassifier.classify(db, copyID: copyID, facts: facts)))
             return
         }
+    }
+
+    /// **The meeting context, BOUNDED (LADDER R1 F-R2).** The first predicate
+    /// counted DEAD readings — so a retired loser's tombstone kept the
+    /// "meeting" open for its whole tombstone lifetime (30-day window +
+    /// horizon), and a deliberate cross-device delete of the kept,
+    /// ever-engaged copy was REVIVED for a month after any meeting: the
+    /// row-15 ruling's own premise ("can never fire outside the
+    /// once-per-store-life meeting window") falsified, and a resurrected
+    /// deliberate delete is exactly the class the row-17 ruling rejected
+    /// Shape C over. The meeting now stands only under one of three arms,
+    /// each strictly NARROWER than the old any-row-any-age predicate —
+    /// this bound can only ever suppress a revival, never widen one:
+    ///
+    ///  1. another same-name copy's reading row is LIVE here — the true
+    ///     two-copy state (carries both-edited: the peer kept its own copy);
+    ///  2. another same-name copy is dead AND its reading row still sits in
+    ///     THIS device's outbox — my own retirement not yet acked: the
+    ///     meeting is unsettled from this device's standpoint whatever the
+    ///     stamps say (carries the delayed-push crossing, offline gaps
+    ///     included);
+    ///  3. another same-name copy died within the SETTLE WINDOW of the
+    ///     arriving kill — |kill stamp − loser's deleted_at| ≤ 1 h, two
+    ///     EVENT stamps minted at their acts (receipt time never enters;
+    ///     wall stamps are display/domain data and this is a bounded-window
+    ///     heuristic, never an ordering authority — the 30-day Trash window's
+    ///     own idiom). The crossing's two pass stamps are bounded by delayed
+    ///     pushes + the A5 band + round cadence (seconds-to-minutes real);
+    ///     an hour covers generously; the month-scale tombstone lifetime is
+    ///     three orders beyond. An unparseable stamp reads as OUTSIDE the
+    ///     window — the narrow direction.
+    ///
+    /// Residual, stated: a deliberate delete INSIDE a real meeting's settle
+    /// window still defends — that is QUESTIONS #143(b)'s accepted corner,
+    /// now actually bounded the way the ruling believed it was.
+    private static let meetingSettleWindow: TimeInterval = 3600
+    private func meetingStands(
+        _ db: Database, bookName: String, copyID: String, killStamp: String
+    ) throws -> Bool {
+        let others = try Row.fetchAll(
+            db,
+            sql: "SELECT id, deleted_at FROM reading WHERE name = ? AND id <> ?",
+            arguments: [bookName, copyID])
+        guard !others.isEmpty else { return false }
+        if others.contains(where: { ($0["deleted_at"] as String?) == nil }) { return true }
+        let killDate = DateFormatter.variorumISO8601.date(from: killStamp)
+        for other in others {
+            let otherID: String = other["id"]
+            if try isEnqueued(db, table: "reading", rowID: otherID) { return true }
+            if let killDate,
+               let stamp = other["deleted_at"] as String?,
+               let otherDate = DateFormatter.variorumISO8601.date(from: stamp),
+               abs(killDate.timeIntervalSince(otherDate)) <= Self.meetingSettleWindow {
+                return true
+            }
+        }
+        return false
     }
 
     func defendEditedSampleCopies(_ db: Database, touched: TouchedRows) throws -> Int {

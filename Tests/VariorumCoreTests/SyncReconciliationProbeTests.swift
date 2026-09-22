@@ -975,6 +975,69 @@ struct SyncReconciliationProbeTests {
             "the unpushed edit rode the row into the Trash — Part 1's bytes, no resurrection")
     }
 
+    /// **LADDER R1 F-R2: the meeting is BOUNDED — a deliberate delete
+    /// AFTER the meeting settled is never defended.** The defense's
+    /// meeting predicate counted DEAD readings, so the retired loser's
+    /// tombstone kept the "meeting context" open for its whole tombstone
+    /// lifetime (a month+): a deliberate cross-device `deleteReading` of
+    /// the kept, ever-engaged copy arrived as the batch's only family
+    /// death (the reading itself — the stamp check trivially matches),
+    /// the kill-time classifier read any engagement ever as EDITED, and
+    /// her deleted book reappeared on every device — resurrecting a
+    /// deliberate delete, the class the row-17 ruling rejected Shape C
+    /// over. The fixed meeting stands only while the other copy is LIVE,
+    /// or its retirement is this device's own UNPUSHED act, or its
+    /// tombstone sits within the settle window of the arriving kill —
+    /// each arm strictly narrower than the old any-row-any-age predicate.
+    @Test func aDeliberateDeleteAfterTheMeetingSettledIsNeverDefended() async throws {
+        let (a, b, server) = try dedupePair()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        // The meeting resolves normally: both pristine, the smaller-id
+        // keeper (copyA) survives, the loser retires, rounds settle.
+        // (Quiescence alone goes quiet before any empty window fires the
+        // armed markers — the p5c cadence — so the deciding rounds run
+        // explicitly: A's empty pull decides, B applies.)
+        try await productionQuiescence(a, b, server: server, maxRounds: 20)
+        _ = try await productionRound(a)
+        _ = try await productionRound(b)
+        try await productionQuiescence(a, b, server: server, maxRounds: 16)
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyA.bookID],
+                    "\(client.name): the meeting resolved to the keeper")
+            #expect(try client.db.deletedAt("reading", copyB.bookID) != nil,
+                    "\(client.name): the loser retired — its tombstone will outlive the meeting")
+        }
+
+        // She ENGAGES the kept copy (one manual savepoint — engagement the
+        // classifier reads as EDITED forever after) and it settles.
+        let saved = try firstVariantID(a, postID: copyA.postIDs["A Scandal in Bohemia"]!)
+        try a.with { ops, _ in _ = try ops.commit(saved) }
+        try await productionQuiescence(a, b, server: server)
+
+        // A MONTH LATER she deliberately deletes the book — the shelf's
+        // own door, the book alone (notes stand). The op runs under a
+        // constant future clock so the kill stamp sits far outside any
+        // honest settle window of the long-dead loser's retirement.
+        let aMonthOn = Date(timeIntervalSince1970: 1_785_542_400)  // 2026-08-01T00:00:00Z
+        try a.with { ops, _ in
+            try withDependencies {
+                $0.date = .constant(aMonthOn)
+            } operation: {
+                try ops.deleteReading(copyA.bookID)
+            }
+        }
+        _ = try await productionRound(a)
+        _ = try await productionRound(b)
+        try await productionQuiescence(a, b, server: server, maxRounds: 16)
+        #expect(try a.syncedDump() == b.syncedDump())
+        for client in [a, b] {
+            #expect(try client.db.deletedAt("reading", copyA.bookID) != nil,
+                    "\(client.name): her deliberate delete STANDS — the month-old loser tombstone is not a meeting")
+            #expect(try liveCopyIDs(client).isEmpty, "\(client.name): nothing revives")
+        }
+    }
+
     /// **P5(c) — the echo pull's extra round, RUN AND RECORDED (designed
     /// cost, green pin) — and the mechanism OBSERVED is sharper than the
     /// memo's phrase.** Under PRODUCTION rounds (pull → push per device),
