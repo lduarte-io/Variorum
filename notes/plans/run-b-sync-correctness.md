@@ -1308,10 +1308,21 @@ COMMITTED (B2's slip is the fresh reminder); no commit trailers.
   :372 "an error was expected but none was thrown" — under the mutant the changed word under
   the OLD salt OPENED the new wrap, precisely the leak the guard exists for); pins 1/2 green.
   Restored → 18/18 green.
-- [ ] Mac revert evidence (REVERT A against the committed Mac pins). PENDING.
-- [ ] Finals: the custody suites (`CorpusRotationTests` · `MultiTenantSyncAttackerTests`'s nine
-  arms · `KeyProofGateTests`' headless drill) · the FULL CORE SUITE (baseline 1666/179, zero
-  wraps) · the touched Mac suites · the iOS build gate. PENDING.
+- [x] Mac revert evidence (REVERT A against the committed tree 58946397): run **44 tests /
+  8 issues / 2 failed — EXACTLY the two 17l-item-5 tests, zero collateral**: the door pin RED
+  with 5 issues (:2900 the descriptor moved, :2908 the notice's kdf differs, :2911
+  `canFollowFromHeldKey → false`, :2914 the door fell to `.askPassphrase` — her double ask at
+  the door verbatim, :2921 the `.done` guard) and the re-based arm (vii) RED with 3 issues
+  (the same three). Restored via `git checkout` over the committed tree → both touched suites
+  re-run green.
+- [x] Finals: `MultiTenantSyncAttackerTests` **2/2 — all nine arms green, untouched** ·
+  `KeyProofGateTests` **11/11** (the headless drill's home) · `CorpusRotationTests` **18/18** ·
+  FULL CORE SUITE **1669 tests / 179 suites — ALL PASSED** (baseline 1666 + exactly the 3 pins;
+  zero known issues; the one sanctioned real-server skip) · touched Mac suites
+  (`PostureSwitchTests` + `Phase13pControllerTests`) **92 tests / 2 suites — passed, 0 skipped**
+  · iOS `VariorumMobile` generic-platform build **BUILD SUCCEEDED**. Fences held: zero schema,
+  zero server/mirror lines, marker 8; `/Applications` and her real store untouched (her live
+  real-store instance, pid 38939, observed and left strictly alone).
 
 ### DEATHS / RESUMES
 
@@ -1381,13 +1392,25 @@ completion: untouched.
   (`secrets.kdf != before.kdf`, fresh salt), the rotation lands under it, a key under the OLD
   descriptor opens nothing, the new word under the new descriptor opens M′.
 - **REVERT A (the behavioural revert — the pre-fix semantics restored: `forRotationOf` made to
-  take the fresh-salt road unconditionally), to run AFTER the pins' commit:** expected to red
-  pin 1 (both halves) and pin 2's reuse premise; pin 3 expected GREEN (the changed case IS the
-  old behavior — it is a preserved-behavior guard, B2's
-  `aDeliberateDeleteWithNoSecondCopyIsNeverDefended` class). EVIDENCE PENDING.
-- **REVERT B (the discrimination mutant — the reuse made UNCONDITIONAL):** expected to red
-  pin 3 — its discriminating red, recorded plainly rather than claimed as red-on-old.
-  EVIDENCE PENDING.
+  take the fresh-salt road unconditionally), run AFTER each pins' commit, restore verified
+  green each time:** CORE — `aSameWordRotationKeeps…` RED, 3 issues (the reuse premise :277,
+  the vault's descriptor moved :281, and the held key's `unwrapMaster` threw `unwrapFailed`
+  :268 — her double ask's core mechanism verbatim); `theRecoveryWrapStaysFresh…` RED, 2 issues
+  (both reuse premises); pin 3 GREEN (the changed case IS the old behavior — the
+  preserved-behavior guard class, B2's `aDeliberateDeleteWithNoSecondCopyIsNeverDefended`
+  precedent); run 18 tests / 5 issues. MAC — 44 tests / 8 issues / 2 failed, EXACTLY the two
+  17l-item-5 tests and zero collateral: the door pin RED, 5 issues (`canFollowFromHeldKey →
+  false`; the door fell to `.askPassphrase` — the field asked the word just typed, her find at
+  the walk reproduced at the door); the re-based arm (vii) RED, 3 issues. Every revert started
+  only after the pre-revert state was COMMITTED (b57a8d38 for core, 58946397 for the Mac);
+  every restore was `git checkout` over a committed tree, re-run green (core 18/18; Mac 92/2).
+- **REVERT B (the discrimination mutant — the reuse made UNCONDITIONAL, the unwrap proof
+  skipped):** pin 3 RED, 4 issues (:361 the fresh-descriptor assert, :362 the fresh salt, :366
+  the vault's descriptor moved, and :372 "an error was expected but none was thrown" — under
+  the mutant the changed word under the OLD salt OPENED the new wrap, precisely the leak the
+  guard exists for); pins 1/2 premises green. Restored → 18/18 green. Pin 3 is a
+  preserved-behavior guard (green on the pre-fix code BY DESIGN); this mutant is its
+  discriminating red — recorded plainly rather than claimed as red-on-old.
 - **RE-BASED SHIPPED PIN (the ruled-change class, B2's precedent):** the un-followed-device
   pin's arm (vii) tail (`PostureSwitchTests` ~:3530) asserted the PRE-fix consequence — after a
   second same-word rotation "the held key's descriptor is the first rotation's — asked". Under
@@ -1398,8 +1421,24 @@ completion: untouched.
 
 ### FINALS
 
-PENDING (the custody suites, the full core suite against baseline 1666/179 zero wraps, the
-touched Mac suites, the iOS build gate — recorded here when run).
+Core: `CorpusRotationTests` **18/18** (15 existing + the 3 pins) · `MultiTenantSyncAttackerTests`
+**2/2 — all nine arms green, byte-untouched** (the arms turn on the master, the proof and the
+fence — none on the passphrase salt; the reuse weakened nothing, so the brief's stop-and-report
+tripwire never fired) · `KeyProofGateTests` **11/11** (the headless rotation drill's home) ·
+FULL CORE SUITE **1669 tests / 179 suites — ALL PASSED, zero known issues** + the one sanctioned
+real-server skip (arithmetic exact: baseline 1666/179 + 3 core pins, zero new suites). Mac
+touched suites (`PostureSwitchTests` + `Phase13pControllerTests`): **92 tests / 2 suites —
+passed, 0 skipped** (44 + 48; the new door pin and the re-based arm (vii) inside). iOS
+`VariorumMobile` generic-platform build: **BUILD SUCCEEDED** (the shared runner compiles into
+the phone — the R3-2 lesson's gate). Fences: zero schema, zero server/mirror lines, marker 8;
+`/Applications` and her real store untouched throughout (her live real-store instance, pid
+38939 at the `/Applications` path, observed before every Mac-suite run and left strictly
+alone). Files touched: `Sources/VariorumCore/Sync/CorpusRotation.swift` ·
+`App/Variorum/Shared/PostureSwitch.swift` · `Tests/VariorumCoreTests/CorpusRotationTests.swift`
+· `App/Variorum/VariorumTests/PostureSwitchTests.swift` · this record. Commits: b0fa300a (the
+fix + the record) · b57a8d38 (the core pins) · 58946397 (the door pin + the re-base) · this
+close — each pathspec-limited, each pushed. **BATCH B3 IS COMPLETE — awaiting the
+orchestrator's verification; B4 is not mine to start.**
 
 ---
 
