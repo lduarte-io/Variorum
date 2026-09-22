@@ -2064,10 +2064,17 @@ disposition (the hallucination guard); no fix on the reviewer's word alone.
   both-edited the live arm, the marker-spent pin untouched). REVERT VERIFIED COMMIT-FIRST:
   HEAD's bare-EXISTS predicate restored in the working tree → the pin red again with the same
   4 issues; restored → defense pins green.
-- [ ] **F-R3 (MAJOR) — AGREED; fix PENDING** (pin planned:
-  `aRetirementSplitAtTheReadingBoundaryNeverRevivesThePristineCopy`, red on HEAD; fix = the
-  first-death verdict persisted as a local one-shot keyed copy+stamp, consumed at the reading's
-  death; revert commit-first).
+- [x] **F-R3 (MAJOR) — AGREED, FIXED with pin** (commit 1ce77b1a):
+  `aRetirementSplitAtTheReadingBoundaryNeverRevivesThePristineCopy` RED ON HEAD with **1
+  issue** at exactly the pin's tooth — copyB revived on B the moment the reading's death
+  applied (the setup asserts all green, so the split choreography is the traced one; the churn
+  then SELF-RESOLVED by settle exactly as my trace predicted — the peer re-retires on a fresh
+  stamp — so the tooth is the arrival-moment assert, and the tail asserts pin the no-churn
+  contract). Fix = `persistKillVerdict`/`consumeKillVerdict` (INSERT OR IGNORE keeps the
+  earliest/wholest verdict; consumption clears the copy's markers; INDETERMINATE consumes
+  literally — loop-free deference kept, no outbox arm returns). Probe + dedupe + furniture
+  suites 50/5 green. REVERT VERIFIED COMMIT-FIRST: persistence made a no-op in the working
+  tree → the pin red again at the same tooth; restored → 18/3 green.
 - [ ] **F-R4 (MAJOR) — AGREED; fix PENDING** (pin planned:
   `theHealNeverTakesAnUnrelatedFamilySharingTheMillisecondStamp`, red on HEAD; fix =
   `PullStall.presentReferents` + residue scoped to exact-stamp present referents,
