@@ -94,7 +94,76 @@ logging is.
 old master; the owner then enters Castle. Walk the nine arms in `MultiTenantSyncAttackerTests`
 and find a tenth. (§14.29)*
 
-**PENDING**
+**The nine arms, walked and confirmed against the code** (`MultiTenantSyncAttackerTests.swift`,
+`herAttackerScenarioTheNineArmsAfterTheSwitchToCastle` + `noOwnershipChangeInstructionExistsOnTheWire`).
+The attacker's holdings are the strongest the design names: the snapshot pair (a Standard-era
+iCloud-Drive backup + its key file), A's iCloud key, a session for A (the account password), AND
+the OLD master + old corpus key unwrapped from the vault's Apple-held copy while Standard stood.
+Then A enters Castle and writes.
+1. **The old snapshot opens through the Apple key — expected, and it holds ONLY pre-switch
+   writing** (:306–321); the same Standard-era key file + A opens NO page of the re-keyed live
+   library (§12).
+2. **Cannot enroll:** the post-switch vault carries NO Apple-held copy (the ABSENCE is pinned,
+   :323–325); a guessed passphrase and guessed words refuse; the old master unwraps none of the
+   vault's NEW class keys (:337).
+3. **Push/pull with old custody:** the FENCE refuses the old key id first; with the CURRENT id
+   (readable by any session) the PROOF refuses; nothing moves, and a refused pull records no
+   device cursor (:341–372).
+4. **Replace All Keys** refuses at the front check (`staleMaster`) AND at the server
+   (`key_vault_update` under the old proof) (:374–391).
+5. **A passphrase-change vault write** refuses (`masterKeyMismatch` at the format verify; the
+   hand-built re-wrap refused by the proof) (:393–404).
+6. **Purge / truncate refuse; the read RPCs give nothing** (`sync_purge_execute` ·
+   `account_data_truncate` · `sync_horizon` · `sync_purge_ledger`, all `keyProofRefused`)
+   (:406–422). Between 6 and 8 the confidentiality arm: the old corpus key opens NOTHING sealed
+   on the server after the walk, while C′ opens every row (:424–433).
+7. **The attacker CAN purge the whole account** — the disclosed loud-and-survivable
+   account-password class; every local copy survives and A's re-setup ADOPTS into a fresh
+   partition (:475–518).
+8. **An upload under the attacker's OWN account** (Connect to B): rows stamped A are refused
+   WHOLE by the owner guard; the adopt road re-stamps LOCALLY and lands under B; A's partition is
+   byte-identical on the wire (:435–473).
+9. **No ownership-change instruction exists on the wire** — the client RPC set, the transport
+   protocols and the deployed function set are asserted BY NAME; none names or takes an owner /
+   transfer / move / adopt parameter; the owner is `auth.uid()` (:531–600).
+
+**The tenth arm — the strongest genuinely-un-fired attacker action: `sync_reencrypt` under the
+old proof (or a bare session).** Of the eight mutating/read RPCs the proof gates, the arms fire
+seven as attacker actions — push, pull, purge_execute, truncate, horizon, purge_ledger,
+key_vault_update. **The ONE data RPC no arm fires as the attacker is `sync_reencrypt`** — the
+rotation's write. It is exactly the RPC an attacker holding the old master would reach for: it
+overwrites row payloads in place (version-neutral, no CAS bump), so a successful call could
+replace A's ciphertext with attacker-chosen or old-C bytes, a targeted corruption of the corpus.
+I traced it: `sync_reencrypt(rows, active_key_id, key_proof)` takes `sync_key_gate(active_key_id,
+key_proof)` as its FIRST act (`11_pre13x_postures.sql:794`), the identical fence+proof gate as
+`sync_push`/`sync_pull`; after the switch the old proof hashes to a value distinct from M′'s
+stored hash, so the constant-time compare in `sync_key_proof_check` refuses
+(`VARIORUM_KEY_PROOF_REQUIRED`), and a bare session (no proof) refuses the same way. **The design
+answers the tenth arm** — the shared gate makes `sync_reencrypt` refuse under the old/absent proof
+byte-for-byte as push and pull do (the entitlement gate at :801 is a further wall behind it).
+
+Two adversarial angles I also chased and found closed by the design: **(a) horizon-DoS** — a
+stale attacker device_cursor pinning the purge horizon forever is impossible, because
+`sync_pull` (the only cursor writer) and `sync_horizon` both sit behind the proof gate, so a
+proofless/stale attacker never registers or reads a cursor (arm 3 pins `deviceCursor == nil`
+after a refused pull), and 13j's 60-day drop-out bounds even a legitimately-registered stale
+cursor; **(b) replay/downgrade** — pushing old-C ciphertext back to overwrite C′ rows is refused
+at the gate before any byte lands (arm 3), and even a hypothetically-authorized push would carry
+old-id AAD that a legitimate device fails to open (not silent acceptance).
+
+**Evidence:** the suite lines above; `11_pre13x_postures.sql:794` (the reencrypt gate),
+:257–362 (the gate + proof check the tenth arm hits). No behavioural revert run (read-only slot);
+the nine arms' red-on-old reverts are the batch-4b record's (the fake's four gates reverted one
+at a time).
+
+**VERDICT: HOLDS — with a NIT-level SUITE-COMPLETENESS recommendation, not a design gap.** No
+tenth arm breaks the design: the shared gate refuses `sync_reencrypt` under the old proof exactly
+as it refuses the seven fired RPCs. The honest finding is that the suite never FIRES
+`sync_reencrypt` as an explicit attacker action, so the one data-corruption RPC's refusal rests
+on the shared-gate argument rather than a dedicated pin. **Owner candidate: a one-line pin
+addition** (a `sync_reencrypt` call under the old proof asserting `keyProofRefused`, beside arm
+6) — naturally a B2 test-add or RECORDED for the run's harness-realism deliverable (B4). Severity
+NIT: the mechanism holds; only the explicit coverage is absent.
 
 ## Q3 — the pre-rotation straggler vs the horizon and the completion guard
 
