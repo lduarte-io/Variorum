@@ -1719,9 +1719,21 @@ Finals: full core at close — baseline **1673/179 with F-3's 2-issue wrap**; yo
 - [x] **The PROPOSAL written** (three candidate shapes with tradeoffs + my recommendation —
   Shape A, the fingerprint-scoped reject deferral) — AWAITING THE ORCHESTRATOR'S RULING; no
   Phase-2 line built, per the brief's design-fork shape.
-- [ ] Phase 2 (opens only at the recorded ruling): build, unwrap the pin red-on-old
-  (commit-first, revert-verified), row-7 pins + full repair/dedupe suites green, finals (full
-  core — baseline 1673/179 with F-3's 2-issue wrap; finish line ZERO wraps).
+- [x] **Phase 2 OPEN** — the ruling read (f4cd063e, the ROW 17 RULING section): Shape A
+  approved SHAPE-SCOPED; the Journal-face probe added as a deliverable (expected green; red =
+  stop-and-report).
+- [x] **The fix built to the ruling**: the fingerprint defer in `SyncEngine.push`'s `.rejected`
+  case (server row tombstoned · local row live · `local.syncVersion == 0` → `deferred += 1`,
+  row left enqueued — the standing straggler idiom, with the trace comment at the line); F-3's
+  pin UNWRAPPED and rewritten to the healed flow (the resume push asserts `deferred >= 1` — the
+  row-12 visibility — tag_B live-deferred, the application shipping LIVE; A's pull asserting
+  row 7's arrival leg re-pointed it with the §7 outbox leg; the finals asserting BOTH notes on
+  the keeper on BOTH devices, the old wrap's contract now bare). `SyncRepairTests` **11/11
+  GREEN, ZERO known issues** — the two F-3 wraps are gone.
+- [ ] Red-on-old by BEHAVIOURAL REVERT against the committed fix — PENDING.
+- [ ] The Journal-face probe pin (expected green) — PENDING.
+- [ ] Beside-suites + finals (full core — baseline 1673/179 with F-3's 2-issue wrap; finish
+  line ZERO wraps) — PENDING.
 
 ### DEATHS / RESUMES
 

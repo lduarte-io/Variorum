@@ -261,27 +261,36 @@ struct SyncRepairTests {
     /// RUN B batch B4 — the registry-boundary chunk-split arm for the TAG
     /// family (ledger row 14). It went looking for the row-7 durable
     /// predicate's cross-batch green and FOUND A GAP instead — **B4 finding
-    /// F-3** (wrapped `withKnownIssue`, the row-51 pattern; the trace and
-    /// severity read live in the batch record; the orchestrator routes it).
+    /// F-3**, routed as **ledger row 17 and FIXED in batch B5** (the ruled
+    /// Shape A: the fingerprint defer in `SyncEngine.push`). This test is
+    /// the finding's red-on-old pin, unwrapped at the fix.
     ///
-    /// THE MECHANISM, traced: B's push dies AT the `post_tag` boundary —
-    /// tag_B lands UNACKED, its application is stranded in the outbox. A's
-    /// round retires tag_B at the collision (nothing to re-point yet) and
-    /// its push commits INSIDE the A5 visibility band. B's resume round:
-    /// the pull is EMPTY — the feed is STATE-BASED, so A's repair
-    /// re-stamped tag_B's one row to a new seq inside the band and B's own
-    /// echo is gone from the feed. B's push then re-sends tag_B at base 0
-    /// and the CAS REJECT delivers the tombstone — outside the changefeed,
-    /// outside seq order, ahead of the keeper B has never seen. The
-    /// reject-merge honors it; the LOCAL CASCADE kills B's live,
-    /// never-seen-live application; the bounded push loop ships it DEAD in
-    /// the same call. The keeper arrives on B only afterwards — the
-    /// collision repair keys on a LIVE local rival and finds none; on A
-    /// the application ARRIVES TOMBSTONED, so the arrival-order leg
-    /// (`!resolved.isTombstoned`) never fires. Tombstone-wins converges
-    /// both stores on the loss: noteB untagged EVERYWHERE — §7's
-    /// "re-point the duplicate's rows to the keeper" (no time bound) and
-    /// row 7's both-notes-tagged contract broken in the cross-batch order.
+    /// THE OLD MECHANISM, traced (history — what the fix ends): B's push
+    /// dies AT the `post_tag` boundary — tag_B lands UNACKED, its
+    /// application is stranded in the outbox. A's round retires tag_B at
+    /// the collision (nothing to re-point yet) and its push commits INSIDE
+    /// the A5 visibility band. B's resume round: the pull is EMPTY — the
+    /// feed is STATE-BASED, so A's repair re-stamped tag_B's one row to a
+    /// new seq inside the band and B's own echo is gone from the feed. B's
+    /// push then re-sent tag_B at base 0 and the CAS REJECT delivered the
+    /// tombstone — outside the changefeed, outside seq order, ahead of the
+    /// keeper B had never seen. The reject-merge honored it; the LOCAL
+    /// CASCADE killed B's live, never-seen-live application; the bounded
+    /// push loop shipped it DEAD in the same call. On A it ARRIVED
+    /// TOMBSTONED, so the arrival-order leg (`!resolved.isTombstoned`)
+    /// never fired. Tombstone-wins converged both stores on the loss:
+    /// noteB untagged EVERYWHERE — §7's "re-point the duplicate's rows to
+    /// the keeper" (no time bound) and row 7's both-notes-tagged contract
+    /// broken in the cross-batch order.
+    ///
+    /// THE FIX ASSERTED HERE (row 17's ruling): the reject DEFERS the
+    /// out-of-context tombstone — visibly, through `PushReport.deferred`
+    /// (row 12's honest reader; the state is never silent) — the stranded
+    /// application ships LIVE in the same drain, row 7's arrival leg
+    /// re-points it on A, and B's post-band pull delivers the retirement
+    /// keeper-first where the collision repair does the rest. Both notes
+    /// tagged on the keeper, on both devices; with row 7's two pins (the
+    /// both-pushed arrival order) this asserts the contract in BOTH orders.
     @Test func aRejectDeliveredRetirementCascadesTheStrandedApplicationBeforeTheKeeperArrives() async throws {
         let server = FakeSyncServer(visibilityHorizon: 2)
         let bFault = FaultInjectingTransport(server: server)
@@ -343,50 +352,57 @@ struct SyncRepairTests {
         #expect(bResumePull.applied == 0 && bResumePull.merged == 0,
                 "the band + the state-based feed hide everything from B")
         #expect(try b.db.deletedAt("tag", tagB) == nil, "B still holds its tag live")
-        // The push: tag_B re-sends at base 0 → the CAS reject delivers the
-        // tombstone; the merge honors it; the local cascade kills B's live
-        // application; the bounded loop re-pushes it DEAD.
-        _ = try await b.push()
-        #expect(try b.db.deletedAt("tag", tagB) != nil,
-                "the reject-merge landed the retirement on B")
-        let bAppStamp = try b.db.fetchString(
-            "SELECT deleted_at FROM post_tag WHERE post_id = ?", [noteB])
-        #expect(bAppStamp != nil,
-                "SHIPPED (the finding's mechanism): the cascade took B's application at the reject-merge")
+        // The push: tag_B re-sends at base 0 → the CAS reject answers with
+        // the tombstone — the F-3 fingerprint (server dead · local live ·
+        // base 0) — and the fix DEFERS it, VISIBLY (row 12's counter: the
+        // deferral is never silent). tag_B stays live locally, the
+        // application survives and ships LIVE in the same drain.
+        let bResumePush = try await b.push()
+        #expect(bResumePush.deferred >= 1,
+                "the out-of-context tombstone defers, and the report says so (row 12)")
+        #expect(try b.db.deletedAt("tag", tagB) == nil,
+                "the retirement did NOT land by reject — it waits for the feed")
+        #expect(try b.db.fetchString(
+            "SELECT deleted_at FROM post_tag WHERE post_id = ?", [noteB]) == nil,
+            "B's application survives the resume drain LIVE")
+        #expect(try b.outboxCount() >= 1, "tag_B stays enqueued for the post-band retry")
         await server.advanceClock(by: 2)
 
-        // A's next pull: the application arrives — TOMBSTONED, so the
-        // arrival-order leg never sees it live.
+        // A's next pull: the application arrives — LIVE, under the locally
+        // dead duplicate, with the keeper standing — and row 7's
+        // arrival-order leg re-points it to the keeper and pushes.
         _ = try await a.pull()
+        let bAppOnA = try a.db.fetchString(
+            "SELECT id FROM post_tag WHERE post_id = ?", [noteB])
+        #expect(bAppOnA != nil, "B's application reached A")
         #expect(try a.db.fetchString(
-            "SELECT deleted_at FROM post_tag WHERE post_id = ?", [noteB]) == bAppStamp,
-            "SHIPPED: the application reached A already dead, on the cascade's stamp")
+            "SELECT tag_id FROM post_tag WHERE post_id = ? AND deleted_at IS NULL", [noteB]) == tagA,
+            "row 7's arrival leg re-pointed the live arrival to the keeper")
+        if let bAppOnA {
+            #expect(try a.outboxContains("post_tag", bAppOnA),
+                    "the re-point must push or the devices silently diverge (SyncSpec §7)")
+        }
 
         try await settle()
         #expect(try a.syncedDump() == b.syncedDump(),
-                "the stores CONVERGE — on the loss (a ruled-outcome violation, not divergence)")
+                "the stores converge — byte-identical")
+        // THE CONTRACT (§7's sentence; row 7's letter), formerly wrapped as
+        // finding F-3, now bare — the red-on-old for the B5 fix: BOTH notes
+        // tagged on the keeper, on BOTH devices.
         for client in [a, b] {
             #expect(try client.db.fetchInt(
                 "SELECT COUNT(*) FROM tag WHERE path = 'ideas' AND deleted_at IS NULL") == 1,
                 "\(client.name): one keeper")
-            #expect(try client.db.fetchString(
-                """
-                SELECT tag_id FROM post_tag
-                WHERE post_id = ? AND deleted_at IS NULL
-                """, [noteA]) == tagA,
-                "\(client.name): the keeper's own application is untouched")
-        }
-        // THE DESIRED CONTRACT (§7's sentence; row 7's letter): noteB stays
-        // tagged on the keeper, on both devices. Red on shipped code —
-        // wrapped until F-3's owner unwraps it as the red-on-old pin.
-        let liveTagOnA = try a.db.fetchString(
-            "SELECT tag_id FROM post_tag WHERE post_id = ? AND deleted_at IS NULL", [noteB])
-        let liveTagOnB = try b.db.fetchString(
-            "SELECT tag_id FROM post_tag WHERE post_id = ? AND deleted_at IS NULL", [noteB])
-        withKnownIssue(
-            "B4 finding F-3: a reject-delivered duplicate-tag retirement cascades the stranded application before the keeper arrives — noteB ends untagged everywhere") {
-            #expect(liveTagOnA == tagA, "A: the duplicate's application belongs to the keeper")
-            #expect(liveTagOnB == tagA, "B: the duplicate's application belongs to the keeper")
+            #expect(try client.db.deletedAt("tag", tagB) != nil,
+                "\(client.name): the duplicate is retired everywhere in the end")
+            for note in [noteA, noteB] {
+                #expect(try client.db.fetchString(
+                    """
+                    SELECT tag_id FROM post_tag
+                    WHERE post_id = ? AND deleted_at IS NULL
+                    """, [note]) == tagA,
+                    "\(client.name): BOTH notes carry a live application pointing at the keeper")
+            }
         }
     }
 

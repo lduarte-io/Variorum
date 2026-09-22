@@ -242,6 +242,35 @@ public struct SyncEngine: Sendable {
                                 result.deferred += 1
                                 continue
                             }
+                            // RUN B B5 (ledger row 17, finding F-3 — the
+                            // ruled Shape A, shape-scoped): a reject whose
+                            // current row is TOMBSTONED while the local row
+                            // is LIVE at base 0 means "my never-acked row
+                            // was killed before I learned" — reachable only
+                            // through the half-landed-drain class (rows
+                            // travel nowhere but by push). Landing that
+                            // tombstone HERE delivers a death outside §9's
+                            // ordering authority, ahead of any context: the
+                            // local cascade killed the stranded children
+                            // (tag applications, Journal memberships) that
+                            // §7 promises to the keeper, and no repair leg
+                            // could fire on either device. DEFER instead —
+                            // the standing straggler idiom below: the reject
+                            // itself proves the current state sits on the
+                            // feed beyond our cursor, so the next post-band
+                            // pull delivers the death IN seq order, keeper
+                            // first (the drain order guarantees it), where
+                            // the shipped legs adjudicate with full context.
+                            // Every other reject shape is byte-unchanged
+                            // (restore-vs-redelete and F-1's ride carry
+                            // base ≥ 1; a lost-ack echo's current is live;
+                            // a mirror reset's is nil; metadata CAS is
+                            // live-vs-live).
+                            if current.row.isTombstoned, !local.isTombstoned,
+                               local.syncVersion == 0 {
+                                result.deferred += 1
+                                continue
+                            }
                             if try foreignKeysSatisfiable(db, row: current.row, arriving: [:]) {
                                 try merge(
                                     db, local: local, server: current.row,
