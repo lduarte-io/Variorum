@@ -1520,10 +1520,13 @@ waits, no subagents (one Sonnet lookup max), commit-before-revert, no trailers.
   family). Suite run GREEN: 20 tests / 3 suites (the filter also matches the separate
   `Phase11SyncConvergenceTests`/`Phase13SyncConvergenceTests` structs — out-of-brief residue,
   their own quiesce helpers already pull→push).
-- [ ] SyncRepairTests converted (seed → productionQuiescence; the both-accepted races as
-  concurrent-round weaves; B-round-as-halves where the (c)-leg asserts between them) + the
-  cross-batch `post_tag` split arm (the row-7 durable predicate's chunk-gap claim, pinned) —
-  PENDING
+- [x] SyncRepairTests converted (the `twoDevices` seed + assertConverged → productionQuiescence;
+  the six both-accepted races as the concurrent-round weave
+  `runProduction([.pull(a), .pull(b), .push(a), .push(b)])` — two offline devices coming back at
+  once, each round pull→push, the pin's both-accepted subject preserved; the
+  never-accepted variant stays S4's) + the cross-batch `post_tag` split arm — which found
+  **FINDING F-3** instead of its green (the section below; wrapped `withKnownIssue`, the row-51
+  pattern). Suite run: **11 tests PASSED with exactly the 2 known issues** (both the F-3 wrap's).
 - [ ] SyncPullTests stagings converted; SyncPullTests/SyncPushTests exemptions annotated at the
   line (half-round mechanics · order-is-the-subject) — PENDING
 - [ ] FaultInjectionSyncTests seeds + tails converted (armed fault halves stay — the subject) —
@@ -1544,6 +1547,49 @@ waits, no subagents (one Sonnet lookup max), commit-before-revert, no trailers.
 ### DEATHS / RESUMES
 
 - none so far.
+
+### FINDING F-3 — STOP-AND-REPORT (product-defect-shaped; the orchestrator routes; NO product line touched)
+
+**The claim it breaks:** SyncSpec §7's "re-point the duplicate's `post_tag`/`block_tag` rows to
+the keeper" (no time bound — row 7's own reading) and row 7's ruled end-state "BOTH notes tagged
+on both devices," in a cross-batch order the B2 fix's arrival-order leg cannot see.
+
+**The mechanism, traced by my own hands (every step pinned green in
+`SyncRepairTests.aRejectDeliveredRetirementCascadesTheStrandedApplicationBeforeTheKeeperArrives`;
+the desired contract wrapped `withKnownIssue` — 2 known issues, the suite green):**
+1. Two devices offline mint the same tag path; each applies it to its OWN note. B's push dies
+   mid-drain AT the `post_tag` boundary (the everyday A2(c) cut): tag_B lands UNACKED (B still
+   holds base 0), the application is stranded in B's outbox.
+2. A's round retires tag_B at the write-time collision — nothing to re-point yet — and A's push
+   (retirement + keeper + A's application) commits INSIDE the A5 visibility band.
+3. B's resume round: the pull is EMPTY — the feed is STATE-BASED, so A's repair re-stamped
+   tag_B's one row to a new seq inside the band; B's own echo is GONE from the feed and the
+   unacked chunk cannot heal by the merged-equals-server rule.
+4. B's push re-sends tag_B at base 0 → **the CAS reject delivers the tombstone OUTSIDE the
+   changefeed, outside seq order, and outside the band — ahead of the keeper B has never
+   seen.** The reject-merge honors it; the LOCAL CASCADE (active during apply, by design) kills
+   B's live, never-seen-live application; the bounded push loop re-pushes it DEAD in the same
+   call.
+5. The keeper reaches B only afterwards — the local collision repair keys on a LIVE local rival
+   and finds none. On A the application ARRIVES TOMBSTONED, so
+   `repointApplicationUnderDeadDuplicateTag` (guard: `!resolved.isTombstoned`) never fires.
+   Tombstone-wins converges both stores ON THE LOSS: noteB untagged everywhere — a
+   ruled-outcome violation, not divergence (dumps byte-equal, pinned).
+
+**Severity read (mine, for adjudication):** the class is user-intent loss against a §7 sentence
+(row 7's own neighborhood — the same 17i item's reject-path face), but in a TAG APPLICATION,
+not prose bytes, and the window is narrow: it needs the duplicate-path race AND the mid-drain
+cut separating the tag from its application AND the retirement landing in-band relative to B's
+resume round (~2 s on the real mirror). Rarer than F-1; I read it MINOR-to-MAJOR — the
+orchestrator's call. **Fix-shape observations, NOT built (the fence):** candidate homes are the
+reject-merge road (a duplicate-tag tombstone landing by reject while LIVE local applications
+exist and no same-path keeper is locally known — the cascade could re-point-on-keeper-arrival
+or defer) and/or widening the arrival-order leg to a tombstoned application arriving whose
+stamp equals the dead duplicate's cascade stamp while a live keeper stands. Both are
+repair-rule-scale; neither is decided here.
+
+**Routing:** a new ledger row (fix batch) or RECORDED with an owner — the orchestrator's
+adjudication; the wrap cites F-3 and stands as the future red-on-old pin either way.
 
 ---
 

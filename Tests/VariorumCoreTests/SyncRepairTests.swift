@@ -9,6 +9,14 @@ import Testing
 /// spec demands: (a) the deterministic outcome, (b) both devices converge
 /// on the same choice, (c) **the repair's outbox row exists** — a repair
 /// that never pushes is silent divergence.
+///
+/// RUN B batch B4 (ledger row 14): every round is production's shape. The
+/// both-accepted races — where the repair's determinism keys on both rows
+/// having server seqs — run as a CONCURRENT weave of production rounds
+/// (`runProduction([.pull(a), .pull(b), .push(a), .push(b)])`): two offline
+/// devices coming back at once, each round pull → push, the pulls landing
+/// before either push. The never-accepted variant of the same races (one
+/// row stranded, ranking seq 0) is the sweep suite's S4 — not duplicated.
 @Suite("Apply-time repairs (Phase 5, Step 6)")
 struct SyncRepairTests {
     /// A + B sharing one fake server, with a synced starting world built by
@@ -20,17 +28,14 @@ struct SyncRepairTests {
         let a = try SyncClient(name: "A", prefix: "AA", transport: server)
         let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 1000, seed: 2)
         try a.with { ops, db in try seed(ops, db) }
-        try await a.push()
-        try await b.pull()
-        try await b.push()  // settings seeds converge
-        try await a.pull()
+        try await productionQuiescence(a, b, server: server)  // world + settings seeds converge
         return (a, b, server)
     }
 
     private func assertConverged(
         _ a: SyncClient, _ b: SyncClient, _ server: FakeSyncServer
     ) async throws {
-        try await syncToQuiescence(a, b, server: server)
+        try await productionQuiescence(a, b, server: server)
         #expect(try a.syncedDump() == b.syncedDump(), "converged devices must be byte-identical")
     }
 
@@ -59,8 +64,11 @@ struct SyncRepairTests {
             let home = try ops.createPost(title: "B's home", profile: nil)
             return try ops.placeBlock(released, in: home.id, at: .end).id
         }
-        try await a.push()  // A's placement gets the LOWER seq
-        try await b.push()  // B's the higher: later intent
+        // Concurrent production rounds (B4): both pulls run before either
+        // push lands — the both-accepted meeting the seq ranking exists
+        // for. A pushes first: its placement gets the LOWER seq; B's the
+        // higher — later intent.
+        try await runProduction([.pull(a), .pull(b), .push(a), .push(b)])
 
         try await a.pull()
         // Deterministic outcome on A: B's placement (higher seq) won; A's
@@ -104,8 +112,9 @@ struct SyncRepairTests {
             _ = try ops.applyTag(tag.id, toPost: postID)
             return tag.id
         }
-        try await a.push()
-        try await b.push()
+        // Concurrent production rounds (B4): both duplicates land before
+        // either device meets the other's — the mirror accepts both (§2).
+        try await runProduction([.pull(a), .pull(b), .push(a), .push(b)])
         try await b.pull()
 
         // On B: the incoming (smaller-id) tag keeps; B's duplicate is
@@ -249,6 +258,138 @@ struct SyncRepairTests {
         }
     }
 
+    /// RUN B batch B4 — the registry-boundary chunk-split arm for the TAG
+    /// family (ledger row 14). It went looking for the row-7 durable
+    /// predicate's cross-batch green and FOUND A GAP instead — **B4 finding
+    /// F-3** (wrapped `withKnownIssue`, the row-51 pattern; the trace and
+    /// severity read live in the batch record; the orchestrator routes it).
+    ///
+    /// THE MECHANISM, traced: B's push dies AT the `post_tag` boundary —
+    /// tag_B lands UNACKED, its application is stranded in the outbox. A's
+    /// round retires tag_B at the collision (nothing to re-point yet) and
+    /// its push commits INSIDE the A5 visibility band. B's resume round:
+    /// the pull is EMPTY — the feed is STATE-BASED, so A's repair
+    /// re-stamped tag_B's one row to a new seq inside the band and B's own
+    /// echo is gone from the feed. B's push then re-sends tag_B at base 0
+    /// and the CAS REJECT delivers the tombstone — outside the changefeed,
+    /// outside seq order, ahead of the keeper B has never seen. The
+    /// reject-merge honors it; the LOCAL CASCADE kills B's live,
+    /// never-seen-live application; the bounded push loop ships it DEAD in
+    /// the same call. The keeper arrives on B only afterwards — the
+    /// collision repair keys on a LIVE local rival and finds none; on A
+    /// the application ARRIVES TOMBSTONED, so the arrival-order leg
+    /// (`!resolved.isTombstoned`) never fires. Tombstone-wins converges
+    /// both stores on the loss: noteB untagged EVERYWHERE — §7's
+    /// "re-point the duplicate's rows to the keeper" (no time bound) and
+    /// row 7's both-notes-tagged contract broken in the cross-batch order.
+    @Test func aRejectDeliveredRetirementCascadesTheStrandedApplicationBeforeTheKeeperArrives() async throws {
+        let server = FakeSyncServer(visibilityHorizon: 2)
+        let bFault = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: bFault, clockOffset: 1000, seed: 2)
+        func settle() async throws {
+            for _ in 1...4 {
+                _ = try await productionRound(a)
+                await server.advanceClock(by: 2)
+                _ = try await productionRound(b)
+                await server.advanceClock(by: 2)
+            }
+        }
+        try a.with { ops, _ in
+            _ = try ops.createPost(title: "A's note", profile: nil)
+            _ = try ops.createPost(title: "B's note", profile: nil)
+        }
+        try await settle()
+        #expect(try a.outboxCount() == 0 && b.outboxCount() == 0, "the seed settled")
+        let noteA = try a.db.fetchString("SELECT id FROM container WHERE title = ?", ["A's note"])!
+        let noteB = try a.db.fetchString("SELECT id FROM container WHERE title = ?", ["B's note"])!
+
+        // Offline: each device creates "ideas" and applies it to its own
+        // note; A's tag (AA…) is the deterministic keeper.
+        let tagA: String = try a.with { ops, _ in
+            let tag = try ops.createTag(parent: nil, name: "ideas")
+            _ = try ops.applyTag(tag.id, toPost: noteA)
+            return tag.id
+        }
+        let tagB: String = try b.with { ops, _ in
+            let tag = try ops.createTag(parent: nil, name: "ideas")
+            _ = try ops.applyTag(tag.id, toPost: noteB)
+            return tag.id
+        }
+
+        // B's round: the pull is empty; the push dies AT the post_tag
+        // boundary — tag_B lands (unacked, still base 0 on B), its
+        // application is stranded.
+        _ = try await b.pull()
+        try await pushSplitAtBoundary(b, table: "post_tag", transport: bFault)
+        await server.advanceClock(by: 2)  // tag_B leaves the band
+
+        // A's full round in the gap: its pull meets tag_B ALONE — the
+        // collision retires it with NO application in sight to re-point —
+        // and its push (the retirement + A's own tag and application)
+        // commits INSIDE the band.
+        let gapPull = try await a.pull()
+        #expect(gapPull.repairs >= 1, "A's pull ran the collision repair on the bare duplicate")
+        #expect(try a.db.deletedAt("tag", tagB) != nil)
+        #expect(try a.db.fetchInt(
+            "SELECT COUNT(*) FROM post_tag WHERE post_id = ?", [noteB]) == 0,
+            "B's application has NOT arrived — the split held it back")
+        _ = try await a.push()
+
+        // B's resume round. The pull: EMPTY — the state-based feed holds
+        // only tag_B's tombstone, re-stamped inside the band; B's own echo
+        // is gone, so the unacked chunk cannot heal by merge.
+        let bResumePull = try await b.pull()
+        #expect(bResumePull.applied == 0 && bResumePull.merged == 0,
+                "the band + the state-based feed hide everything from B")
+        #expect(try b.db.deletedAt("tag", tagB) == nil, "B still holds its tag live")
+        // The push: tag_B re-sends at base 0 → the CAS reject delivers the
+        // tombstone; the merge honors it; the local cascade kills B's live
+        // application; the bounded loop re-pushes it DEAD.
+        _ = try await b.push()
+        #expect(try b.db.deletedAt("tag", tagB) != nil,
+                "the reject-merge landed the retirement on B")
+        let bAppStamp = try b.db.fetchString(
+            "SELECT deleted_at FROM post_tag WHERE post_id = ?", [noteB])
+        #expect(bAppStamp != nil,
+                "SHIPPED (the finding's mechanism): the cascade took B's application at the reject-merge")
+        await server.advanceClock(by: 2)
+
+        // A's next pull: the application arrives — TOMBSTONED, so the
+        // arrival-order leg never sees it live.
+        _ = try await a.pull()
+        #expect(try a.db.fetchString(
+            "SELECT deleted_at FROM post_tag WHERE post_id = ?", [noteB]) == bAppStamp,
+            "SHIPPED: the application reached A already dead, on the cascade's stamp")
+
+        try await settle()
+        #expect(try a.syncedDump() == b.syncedDump(),
+                "the stores CONVERGE — on the loss (a ruled-outcome violation, not divergence)")
+        for client in [a, b] {
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM tag WHERE path = 'ideas' AND deleted_at IS NULL") == 1,
+                "\(client.name): one keeper")
+            #expect(try client.db.fetchString(
+                """
+                SELECT tag_id FROM post_tag
+                WHERE post_id = ? AND deleted_at IS NULL
+                """, [noteA]) == tagA,
+                "\(client.name): the keeper's own application is untouched")
+        }
+        // THE DESIRED CONTRACT (§7's sentence; row 7's letter): noteB stays
+        // tagged on the keeper, on both devices. Red on shipped code —
+        // wrapped until F-3's owner unwraps it as the red-on-old pin.
+        let liveTagOnA = try a.db.fetchString(
+            "SELECT tag_id FROM post_tag WHERE post_id = ? AND deleted_at IS NULL", [noteB])
+        let liveTagOnB = try b.db.fetchString(
+            "SELECT tag_id FROM post_tag WHERE post_id = ? AND deleted_at IS NULL", [noteB])
+        withKnownIssue(
+            "B4 finding F-3: a reject-delivered duplicate-tag retirement cascades the stranded application before the keeper arrives — noteB ends untagged everywhere") {
+            #expect(liveTagOnA == tagA, "A: the duplicate's application belongs to the keeper")
+            #expect(liveTagOnB == tagA, "B: the duplicate's application belongs to the keeper")
+        }
+    }
+
     // MARK: - Pure duplicates: edge (incl. reversed version_of), reading_post, post_tag
 
     @Test func reversedVersionOfEdgesAreDuplicatesKeepingTheSmallerID() async throws {
@@ -274,8 +415,9 @@ struct SyncRepairTests {
                 try Fixture.edge(db, id: "BB-edge", source: blocks[1], target: blocks[0], type: "version_of")
             }
         }
-        try await a.push()
-        try await b.push()
+        // Concurrent production rounds (B4): both duplicates land before
+        // either device meets the other's — the mirror accepts both (§2).
+        try await runProduction([.pull(a), .pull(b), .push(a), .push(b)])
         try await b.pull()
 
         #expect(try b.db.deletedAt("edge", "BB-edge") != nil)
@@ -301,8 +443,9 @@ struct SyncRepairTests {
         let membershipB: String = try b.with { ops, _ in
             try ops.addPostToReading(postID, to: readingID).id
         }
-        try await a.push()
-        try await b.push()
+        // Concurrent production rounds (B4): both duplicates land before
+        // either device meets the other's — the mirror accepts both (§2).
+        try await runProduction([.pull(a), .pull(b), .push(a), .push(b)])
         try await b.pull()
 
         let (keeper, loser) = membershipA < membershipB
@@ -341,8 +484,9 @@ struct SyncRepairTests {
         // variant — I10 violated with neither device breaking a rule.
         try a.with { ops, _ in try ops.deleteVariant(v1) }
         try b.with { ops, _ in try ops.deleteVariant(v2) }
-        try await a.push()  // v1's tombstone: lower seq
-        try await b.push()  // v2's tombstone: HIGHER seq
+        // Concurrent production rounds (B4): both tombstones accepted
+        // before either pull — v1's gets the lower seq, v2's the HIGHER.
+        try await runProduction([.pull(a), .pull(b), .push(a), .push(b)])
 
         try await a.pull()
         // Deterministic choice: resurrect the tombstoned variant with the
@@ -385,8 +529,8 @@ struct SyncRepairTests {
         }
         try a.with { ops, _ in try ops.archiveVariant(fan[0]) }
         try b.with { ops, _ in try ops.archiveVariant(fan[1]) }
-        try await a.push()
-        try await b.push()
+        // Concurrent production rounds (B4): both archives accepted first.
+        try await runProduction([.pull(a), .pull(b), .push(a), .push(b)])
         try await a.pull()
 
         #expect(try a.db.fetchString("SELECT status FROM variant WHERE id = ?", [fan[1]]) == "active",
@@ -424,8 +568,10 @@ struct SyncRepairTests {
         // RESTRICT never fires under soft delete (AppSpec §9 review #3).
         try b.with { ops, _ in try ops.chooseVariant(blockID, variantID: v1) }
         try a.with { ops, _ in try ops.deleteVariant(v1) }
-        try await a.push()
-        try await b.push()
+        // Concurrent production rounds (B4): both writes accepted before
+        // either device meets the other's — the repair fires on RECEIPT,
+        // on each side.
+        try await runProduction([.pull(a), .pull(b), .push(a), .push(b)])
 
         // A pulls B's chosen=v1 over a variant A knows is dead: the pointer
         // lands (FKs only need row existence), then the post-batch repair
@@ -472,7 +618,7 @@ struct SyncRepairTests {
         try a.with { ops, _ in
             try ops.deleteVariant(defaultID)
         }
-        try await a.push()
+        _ = try await productionRound(a)
         var staleBlock = await server.currentRow(table: "block", rowID: blockID)!
         staleBlock.columns["default_variant_id"] = .text(defaultID)
         _ = try await server.push([staleBlock], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
