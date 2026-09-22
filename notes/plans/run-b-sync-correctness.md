@@ -2023,3 +2023,306 @@ disabled defer, commit-first honored); the Journal-face probe GREEN on its first
 shape-scoped closure is now evidence, no stop-and-report owed. **BATCH B5 CLOSES; row 17
 FIXED-with-named-pin. The ledger's build rows are ALL dispositioned (1–17). THE LADDER OPENS
 NEXT** over the run's combined diff.
+
+---
+
+## LADDER ROUND 1 — FIX-SESSION RESPONSES (fresh Fable fix session, 2026-09-22; the SAME-MODEL flow)
+
+**Findings received VERBATIM from `notes/plans/run-b-ladder-round1.md` (F-R1…F-R8: 4 MAJOR ·
+2 MINOR · 2 NIT · 0 BLOCKER).** Read whole first, then this run record whole (the ROW 17
+Shape-A/C boundaries, the ROWS 9+15 rulings, the B2 adjudication's amended kill-time arm),
+CLAUDE.md + canon (SyncSpec whole), the fragments postmortem, and every source/test file the
+findings name — `Merge.swift`, `SampleLibraryDedupe.swift`, `Repairs.swift` (`writeResolvedRow`
++ `runPostApplyRepairs` + the hook), `SyncEngine.swift` (the pull/merge road, the drain order,
+`PullStall`), `PurgeJanitor.swift` (`sweep`/`reconcileLedger`/`healPurgeOrphan`),
+`PurgeFamily.swift`, `SyncSchema.swift` (registry order, `SyncRow`), the probe suite, the dedupe
+repair suite, the harness files. Every mechanism below RE-TRACED by my own hands before any
+disposition (the hallucination guard); no fix on the reviewer's word alone.
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims marked PENDING)
+
+- [x] Section opened; findings + run record + canon + postmortem + the named code read in full,
+  in my own context. Per-finding re-traces recorded below; every disposition below is an
+  AGREE/DISPUTE verdict already made on the trace — build status per finding follows here.
+- [ ] **F-R1 (MAJOR) — AGREED; fix PENDING** (pin planned:
+  `aMetadataOnlyDirtyRowNeverRidesStaleTextOverTheServersFinalEdit` [200/1], red on HEAD; fix =
+  the text-is-the-only-divergence discriminator per the arbitration constraint; F-R8 folds in;
+  revert commit-first).
+- [ ] **F-R2 (MAJOR) — AGREED; fix PENDING** (pin planned:
+  `aDeliberateDeleteAfterTheMeetingSettledIsNeverDefended`, red on HEAD; fix = the three-arm
+  meeting bound, never wider than HEAD; revert commit-first).
+- [ ] **F-R3 (MAJOR) — AGREED; fix PENDING** (pin planned:
+  `aRetirementSplitAtTheReadingBoundaryNeverRevivesThePristineCopy`, red on HEAD; fix = the
+  first-death verdict persisted as a local one-shot keyed copy+stamp, consumed at the reading's
+  death; revert commit-first).
+- [ ] **F-R4 (MAJOR) — AGREED; fix PENDING** (pin planned:
+  `theHealNeverTakesAnUnrelatedFamilySharingTheMillisecondStamp`, red on HEAD; fix =
+  `PullStall.presentReferents` + residue scoped to exact-stamp present referents,
+  family-expanded — the store-wide scan deleted; revert commit-first).
+- [ ] **F-R5 (MINOR) — AGREED; fix PENDING** (architectural class, no pin owed; the two field
+  guards hoisted above the preflight; written justification in the response).
+- [ ] **F-R6 (MINOR, SPECULATIVE) — pin-first confirm PENDING** (the pin decides: red confirms
+  the defect; green on both sides dismisses the defect half as hollow, with the determinism
+  hardening still landing as the cleanliness half under its written justification).
+- [ ] **F-R7 (NIT) — AGREED; fix PENDING** (the janitor's `preflight()` helper at this touch).
+- [ ] **F-R8 (NIT) — AGREED; folds into F-R1's fix.**
+- [ ] **FINALS — PENDING**: full core (baseline 1674/179, zero wraps — the close must keep zero
+  wraps), touched Mac suites, iOS build if core public API moved.
+
+### DEATHS / RESUMES
+
+- none.
+
+### F-R1 — AGREE (re-traced): the overlay conflates dirty ROW with dirty TEXT
+
+**My own trace, not the reviewer's word:** the outbox is a dirty-ROW set (SyncSpec §3);
+`Operations.setTakeLabel` (Operations+Variant.swift:431) enqueues the variant row with
+`working_text` untouched. The pull path invokes `merge` for any enqueued row whose incoming
+version is newer (SyncEngine.swift:505–511). In the construction (B labels; A autosaves new
+text then `deleteContainer`s; A rounds; B pulls): the arriving container/block tombstones apply
+FIRST (registry order, SyncSchema.tables), the still-active local cascade stamps B's variant,
+so the variant's own merge is (true, true) → `rescueLosingText` returns false → every overlay
+condition at Merge.swift:78 holds → `merged.working_text` = B's ancestor text REPLACES the
+server baseline that carried A's only-ever edit. `landed ≠ server` keeps the outbox entry; B
+pushes the stale text at the server's version; CAS accepts; A applies it clean. A's final edit
+is gone from every row, live or tombstoned — and the PRE-run code (server-wins) handled this
+input correctly. Verified the no-pre-image claim too: `SyncRow` (SyncSchema.swift:603) carries
+current columns only; `sync_row_seq` carries seq only; the outbox carries (table, row,
+queued_at). The regression is real and it is in §6's own forbidden class.
+
+**The fix (built to the arbitration constraint — preserve ride-the-row for genuinely-dirty
+TEXT, restore server-wins for metadata-only-dirty):** the overlay gains the one discriminator
+current state can honestly answer — **the ride fires only when `working_text` is the ONLY
+divergence between the local and server rows** (every column compared except `working_text`,
+`deleted_at`, `updated_at`; `sync_version` rides outside `columns`). A metadata-only-dirty row
+diverges in the metadata it dirtied → server-wins restored (this finding's input). A
+text-only-dirty row diverges in text alone → the ride, exactly the ruled/blessed cases (F-1's
+B-side, P1's phone-first — both pins green under the fix). F-R8 folded: the second
+`working_text` binding removed.
+
+**Recorded corners (for the orchestrator's #143(a) amendment — the finding's own point that
+the input must be named whatever the shape):**
+1. **Mixed dirt** (local text edit + metadata divergence on either side): the discriminator
+   refuses the ride → server-wins → the pre-RUN-B behavior exactly. Never worse than old code,
+   but the F-1 bytes loss survives in this narrower mixed configuration (an autosave racing a
+   peer's label-then-delete). Recorded, not silently decided — state-based rows hold no
+   pre-image, so "whose metadata moved" is unknowable client-side; a durable text-intent record
+   is schema and therefore not this session's to add.
+2. **Coincidental metadata equality** (both devices independently set byte-identical metadata,
+   one with stale text): the ride fires on stale text. Vanishingly narrow; recorded.
+3. #143(a)'s text needs: the metadata-only-dirty input named (restored to server-wins), the
+   discriminator stated, and corners 1–2 listed. The orchestrator amends QUESTIONS.
+
+**Pin (evidence recorded in LIVE STATUS as it lands):**
+`aMetadataOnlyDirtyRowNeverRidesStaleTextOverTheServersFinalEdit` [batch 200/1]
+(SyncReconciliationProbeTests) — exactly the finding's sketch; asserts the converged tombstoned
+row's `working_text` is A's new text on BOTH devices, the label intent dropped by ordinary
+metadata CAS, dumps equal, and Put back returning A's text. Expected RED on HEAD, green at
+`08d9ea8f` by construction (server-wins was the old code), green on the fix. Revert protocol:
+fix committed FIRST; the discriminator condition disabled in the working tree → the pin must
+red again; restored → suite green.
+
+### F-R2 — AGREE (re-traced): the meeting predicate counts DEAD readings
+
+**My own trace:** the check at SampleLibraryDedupe.swift:360–363 is
+`SELECT EXISTS (SELECT 1 FROM reading WHERE name = ? AND id <> ?)` — no liveness filter. After
+a meeting resolves, the retired loser's tombstoned `reading` row satisfies it for the loser's
+whole tombstone lifetime (30-day window + horizon). Her month-later `deleteReading` of the kept
+copy (the shelf's book-delete door — the book alone dies, the notes stand) arrives as the
+batch's ONLY family death = the reading row itself → the hook fires at it, the stamp check
+trivially matches, the classifier reads the still-whole copy and any engagement ever (one
+manual savepoint suffices) answers EDITED → `defendEditedSampleCopies` revives her deleted book
+on every device. Both of the row-15 ruling's stated premises falsified in the bytes: the window
+is not once-per-store-life, and the evidence is not unpushed edits. Resurrecting a deliberate
+delete is Shape C's rejected territory — the hard boundary.
+
+**The fix (narrows the window; NEVER widens revival):** the meeting stands only under one of
+three arms, each strictly narrower than HEAD's any-row-any-age —
+1. **the other same-name copy's reading row is LIVE** (the true two-copy state; carries
+   `p5bBothEditedMeansBothCopiesSurvive` and the marker-spent pin);
+2. **the other copy is dead AND its reading row still sits in this device's own outbox** — my
+   own retirement not yet acked, the meeting unsettled from this device's standpoint (carries
+   the delayed-push crossing, `p5bTheDoubleRetirementRaceKeepsTheEditedCopyAliveWithItsEdit`,
+   including its offline-gap variant where stamps drift apart);
+3. **the other copy is dead within the SETTLE WINDOW of the arriving kill** — |kill stamp −
+   loser's `deleted_at`| ≤ 1 hour, two event stamps minted at their acts (receipt time never
+   enters), covering the pushed-and-racing crossing whose retirement stamps are minted within
+   the same live-round window. An unparseable stamp reads as OUTSIDE the window (the narrow
+   direction).
+A month-old loser tombstone (this finding's construction) fails all three. **The window
+constant (1 h) is a judgment call flagged for the orchestrator:** the crossing's two pass
+stamps are bounded by delayed pushes + the A5 band + round cadence (seconds-to-minutes real);
+an hour covers generously; the month-scale tombstone lifetime is three orders beyond. #143(b)'s
+text needs re-wording either way (the amended kill-time-classifier arm AND the bounded meeting)
+— the orchestrator amends.
+
+**Residual, honestly stated:** a deliberate delete INSIDE the settle window of a real meeting
+still defends — that is #143(b)'s accepted corner, now actually bounded the way the ruling
+believed it was. The full-delete flavor (notes + book, stamps split across ops) records
+evidence at a container death whose stamp the reading's death then fails to match — no defense
+fires there even on HEAD; unchanged.
+
+**Pin (evidence in LIVE STATUS as it lands):** `aDeliberateDeleteAfterTheMeetingSettledIsNeverDefended`
+(SyncReconciliationProbeTests) — meeting resolves normally (both pristine, smaller-id keeper,
+rounds settled); she engages the kept copy (one manual savepoint — `ops.commit`) and it
+settles; a MONTH later (the delete op run under a constant future clock, the backdate idiom's
+inverse) she `deleteReading`s the kept copy on A; B pulls; production rounds settle. Asserts
+the book stays deleted on both devices and dumps converge. Expected RED on HEAD (the defense
+revives the book on both sides), green on the fix. Revert protocol: fix committed FIRST;
+HEAD's bare-EXISTS predicate restored in the working tree → must red again; restored → green.
+
+### F-R3 — AGREE (re-traced): the first-death fence is per-batch; a split retirement re-classifies half-killed
+
+**My own trace:** the fence is `!touched.sampleCopyKills.contains` (Repairs.swift:227–232 +
+SampleLibraryDedupe:356) and `TouchedRows` is minted fresh per apply transaction
+(SyncEngine.swift:488). One retirement CAN reach the puller in two applies: `retireSampleCopy`
+stamps the whole family with ONE `nowStamp()` (SampleLibraryDedupe:483), the drain sorts by
+registry order (container idx 0 < reading idx 7 — SyncSchema.tables), a chunk boundary between
+the member containers and the reading row makes two server transactions, and the puller's round
+inside the gap (`pull` fetches to head — SyncEngine:417–441 — so only the band/cut can split)
+serves batch 1 alone. Batch 1: containers die, the hook records verdict PRISTINE at the first
+death, the defense's reading-guard fails, the evidence dies with the batch. Batch 2: the
+reading tombstone is a fresh batch's first family death; memberships still live locally; their
+posts dead → `SampleCopyClassifier.classify`'s own leg (line 599: dead post under live
+membership ⇒ `.edited`) answers EDITED; the reading dies under the same retirement stamp → the
+defense revives the WHOLE family (the exact-stamp flip reaches batch 1's victims). A correctly
+retired PRISTINE copy returns and pushes; the peer re-retires on a fresh stamp — the visible
+churn. Confirmed leg by leg.
+
+**The fix (the cross-batch fence EXTENDING — no outbox arm returns, the loop-free deference
+kept):** the first-death verdict becomes DURABLE across the split. In
+`defendEditedSampleCopies`: a kill whose reading did NOT die under the recorded stamp persists
+its verdict as a local-only one-shot in `sync_state`
+(`sample_kill_verdict:<copyID>:<stamp>` — the dedupe's own R2-3 marker idiom; written inside
+the apply transaction, rollback-safe, never synced); a kill whose reading DID die consumes a
+persisted marker for the same (copy, stamp) — **the persisted first-death verdict outranks the
+batch's own half-killed re-read** — and clears the copy's markers. INDETERMINATE persists and
+consumes literally (deferring to the retiring side's complete evidence stays loop-free — no
+revive-on-doubt). The between-batches-edit corner (an edit landing in the split's ~2 s gap is
+invisible to the persisted verdict) is the SAME corner the shipped one-batch design already
+has at first-death time, one band wider; Part 1's ride keeps the bytes regardless; recorded. A
+never-consumed marker (a lone member-note deletion's kill evidence) lingers inert in
+`sync_state`, bounded by meeting-context kill events; cleared whenever a later kill of the
+same copy consumes; recorded.
+
+**Pin (evidence in LIVE STATUS as it lands):** `aRetirementSplitAtTheReadingBoundaryNeverRevivesThePristineCopy`
+(SyncReconciliationProbeTests) — the run's own instruments exactly as the finding sketches:
+both seed (both pristine), A's deciding pass retires copyB, A's push split at the `reading`
+boundary (`pushSplitAtBoundary(a, table: "reading")` over a `FaultInjectingTransport`), B's
+round between the halves (batch 1: containers die, no defense), A's resumed push lands batch
+2, B's round applies the reading death; production rounds settle. Asserts copyB STAYS retired
+on both devices, copyA the one live copy, dumps equal. Expected RED on HEAD (the misread
+revives copyB), green on the fix. Revert protocol: fix committed FIRST; persistence disabled
+in the working tree → must red again; restored → green.
+
+### F-R4 — AGREE (re-traced): the heal's completion set is store-wide by stamp
+
+**My own trace:** PurgeJanitor.swift:716–724 gathers residue by
+`SELECT id FROM <kind> WHERE deleted_at = ?` over container/reading/block/variant with no
+family scoping — against every other exact-stamp discriminator in the codebase, which all
+scope to the root's own children. Stamps are millisecond ISO-8601; two op transactions can
+share one (deterministic under the injected clock). A same-stamp UNRELATED family still
+tombstoned locally (an ordinary un-intended delete; a deferred family) is expanded and handed
+to `executePurge` — removed from the mirror and LEDGERED before every live device saw its
+deletion, so a returning device inside the 60-day horizon meets the ledger fence and drops its
+unpushed edits silently: exactly the §4f sentence `p2aTheHorizonHoldsThePurgeWhileTheLaptopIsLive`
+pinned green this run. Also confirmed the side wrinkle: no index serves `deleted_at = ?` (the
+partial indexes are all `WHERE deleted_at IS NULL`) — four full-table scans on the stall path.
+
+**The fix (residue through the stalled row's FK-connected family, per the constraint):** the
+stalled row has NO local copy (it never applied) and `PullStall` carried no columns, so the
+stall's identity grows the connection facts at its birth: `PullStall.presentReferents` — the
+stalled row's FK targets that DID resolve (locally or via the applied prefix), computed in the
+same loop that already finds the missing ones (SyncEngine's stall naming; a defaulted init
+parameter, every existing construction site compiles unmodified). The heal's completion set
+becomes: the stalled row + each present referent whose local row is tombstoned with the
+stall's EXACT stamp (an indexed PK read each; the tombstone-bearing guard skips
+`commit_point`-class kinds), family-expanded through `PurgeFamily` exactly as before. The
+traced construction (X + VX behind N's placement) is fully covered: the placement's `block_id`
+and `chosen_variant_id` are present referents, and `expandBlock` reaches the take and the
+side rows. A multi-placement family heals iteratively (one placement per stall, the
+scheduler's follow-up round reaching the next) — bounded, each round progresses; recorded.
+The store-wide scan and its four unindexed corpus-scale scans are deleted outright.
+
+**Pin (evidence in LIVE STATUS as it lands):** `theHealNeverTakesAnUnrelatedFamilySharingTheMillisecondStamp`
+(SyncReconciliationProbeTests) — the finding's sketch: the p8 held-push construction with A's
+`deleteContainer(N)` + `requestPurge` run under a FROZEN injected clock, and a second,
+UNRELATED note deleted ordinarily (no intent) in the SAME frozen instant — same millisecond
+stamp, never swept (no intent, un-aged). The heal fires for family 1's orphan; asserts family
+2's rows survive locally AND on the mirror, no ledger entry names them, and the heal still
+clears the jam. Expected RED on HEAD (family 2 purged from mirror + store), green on the fix.
+Revert protocol: fix committed FIRST; the store-wide scan restored in the working tree → must
+red again; restored → green, with both p8 heal pins and the two guard pins green beside it.
+
+### F-R5 — AGREE, architectural (no pin owed; the traced degradation is the justification)
+
+**Trace:** `healPurgeOrphan`'s preflight (rekey read + keys + `transport.schemaVersion()`)
+ran before `guard let stamp` / `guard !missingReferents.isEmpty`. The scheduler hands EVERY
+stalled clean round to the heal, so the common §5 transient class paid one `schemaVersion`
+RPC per round for a refusal two struct-field reads decide; the ledger read already sat below
+the guards (the finding's tombstoned-transient arm pays `purgeLedger(since: 0)` only when the
+stamp guard passes — that cost is the discriminator's own and stays). Fix: the two field
+guards hoisted to the top; preflight and ledger below, order unchanged. Behavior identical on
+every reachable input (a live-stall heal call with the rotation marker set cannot occur — the
+round's own pull refuses first — and the degenerate difference is refuse-by-false vs
+refuse-by-throw on inputs production never passes; stated here so the equivalence claim is
+honest).
+
+### F-R6 — the pin-first confirm decides the defect half (verdict recorded in LIVE STATUS)
+
+**Re-trace first (the mandate: the pin is the confirm):** the `LIMIT 1` resolution
+(SampleLibraryDedupe:343–353) is real and unordered — but the finding's stated consequence
+("the defense can silently miss its kill evidence… the fixed loss resurfaces") is structurally
+tempered by my own trace: for any FULL retirement the READING row itself dies, and the
+reading-row hook resolves `copyID = row.rowID` directly — no query, no plan — so kill evidence
+is recorded at the latest at the reading's death whatever the container resolutions did. The
+un-tempered degradations are (a) the verdict taken LATE (at the reading, half-killed → the
+EDITED bias — F-R3's class, an over-defense, not the loss direction), and (b) **under F-R3's
+fix**: in a split retirement whose batch-1 container hooks all resolved to a personal book, no
+first-death verdict is persisted, so batch 2 falls back to the half-killed re-read — re-opening
+F-R3's revival in exactly the two-book configuration. So the hardening is load-bearing for
+F-R3's closure, while the finding's own loss shape appears to have no road — the pin decides.
+
+**The pin, built FIRST as the confirm:** `aSamplePostInASecondBookStillRecordsItsKillEvidence`
+(SyncReconciliationProbeTests) — the p5b exactly-one-edited race with the edited copy's note
+ALSO living in a personal second book on B. Red on HEAD confirms the defect and the fix
+proceeds as a defect fix; green on both sides means the defect half is DISMISSED AS HOLLOW,
+with the pin staying as the contract's coverage in the two-book configuration.
+
+**The cleanliness half, landed with justification:** the resolution now filters the JOIN to
+readings whose name matches an injected facts row and orders deterministically
+(`ORDER BY r.id LIMIT 1`) — correctness no longer rides SQLite's plan, and F-R3's persisted
+first-death verdict is reachable in the two-book split. Architectural class: traced mechanism
+(what degrades, where) + this written justification; no red-on-old owed or possible (the
+defect it forecloses is plan-dependent by nature).
+
+### F-R7 — AGREE, FIXED (the hoist-at-next-touch instinct; the file was open)
+
+`sweep()`, `reconcileLedger()` and `healPurgeOrphan` carried the janitor preflight verbatim
+×3. Extracted as `preflight() -> (keyID, keyProof)`; three call sites; byte-identical refusal
+order (rekey marker → keys → §12 lockstep). Behavior unchanged; the janitor + probe suites
+green.
+
+### F-R8 — AGREE, FIXED (folded into F-R1)
+
+The overlay's second `working_text` binding removed — `localText` (already bound) feeds
+`merged.columns["working_text"] = .text(localText)`.
+
+### FLAGGED FOR THE ORCHESTRATOR (the hand-back's amendment list)
+
+1. **QUESTIONS #143(a)** needs amending whatever else stands: the metadata-only-dirty input
+   named (server-wins restored — F-R1); the text-only-divergence discriminator stated; the two
+   recorded corners (mixed dirt → pre-run server-wins; coincidental metadata equality → rides).
+2. **QUESTIONS #143(b)** needs re-wording to the shipped behavior: the amended kill-time
+   classifier arm (the B2 adjudication's own amendment, still not in #143(b)'s text if it
+   describes outbox dirt) AND the now-bounded meeting (live / own-unpushed-retirement / 1 h
+   settle window). **The 1-hour settle-window width is my judgment call — arbitrable.**
+3. The F-R3 marker's inert-lingering corner (a lone member-note deletion's persisted verdict
+   never consumed) and the split-gap edit corner are recorded above — no action owed, stated
+   for round 2's anchor.
+
+### FINALS (PENDING — written when run; the LIVE STATUS bullet is the verified record)
+
+Owed at close: the full core suite (baseline 1674/179, zero wraps — the close keeps zero
+wraps), the touched Mac suites, the iOS build if core public API moves. Fences to re-verify:
+zero schema, zero `Server/` lines, marker 8; `/Applications` and her real store untouched.
