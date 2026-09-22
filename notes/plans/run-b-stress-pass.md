@@ -307,7 +307,62 @@ sentence is a PROVISIONAL copy string awaiting her ratification (already a QUEST
 digest make a device land the wrong words or skip a notice? (ledger 53;
 `StoreKeyEnvelope.vaultRecoveryWrapDigest`)*
 
-**PENDING**
+**What it is, confirmed.** `recoveryWrapDigest = SHA-256(masterWrappedByRecovery)` hex — a hash
+of the VAULT's recovery wrap, which is M wrapped under the twelve-words' key by RFC 3394
+`AES.KeyWrap` (`KeyVaultFormat.swift:379`, `RecoveryWrapDigest.hex` :440–445). RFC 3394 is
+DETERMINISTIC (a fixed IV, no nonce), so two wraps of the same M under the same words are
+byte-identical and the digest changes EXACTLY when the words or the master change. It is recorded
+in the key file (`vaultRecoveryWrapDigest`, `StoreKeyEnvelope.swift:96–102`) at every
+reconciliation — a non-secret, in a file the design already treats as public (§3.5 "holding it
+grants nothing").
+
+**What it reveals.** It is a hash of CIPHERTEXT (M under the words' key), so it reveals nothing
+about M, the words, or the new words — no plaintext, no brute-force handle (unwrapping still
+needs the words' key). It is an EQUALITY tag: it discloses (1) the FACT that a regeneration
+happened (the digest moved) and (2) LINKABILITY — two key files carrying the same digest were
+reconciled against the same (M, words) pairing. Both are already implied by the public key file's
+existence, and the digest leaks strictly less than the wrap bytes it hashes (which live
+server-side, not in the key file). No confidentiality loss.
+
+**What it DRIVES — only an advisory notice, never a key act.** Its sole consumer is
+`ProtectionController.changeElsewhere` (:783–797): if the key file's recorded digest ≠ the
+vault's current digest, emit the `wordsRegeneratedElsewhere` NOTICE — a nudge to type the new
+words when convenient. It is checked SECOND, behind the passphrase-KDF branch, and only in the
+convenience-act domain (a same-corpus-key-id change — a rotation takes the FOLLOW path instead),
+where M is invariant, so within its domain the digest moves exactly when the WORDS move and the
+label is correct. The actual LANDING of a new recovery wrap
+(`landRecoveryWrap(words:recoveryWrapDigest:)`, :1158–1171) sets the wrap FROM THE WORDS
+(`setRecoveryWrap(key:words:)`) and records the digest only as an advisory AFTERWARD — **the
+digest never participates in an unwrap, a verify, or any authorization.**
+
+**Can a forged digest land the wrong words or skip a notice?** Traced both directions:
+- **The VAULT-side digest is not forgeable without the proof.** `reading.recoveryWrapDigest` is
+  computed locally from the session-gated fetched vault bytes; changing it means writing the
+  vault, which needs `key_vault_update` under the current proof (Q1/Q2). So a cross-device forge
+  is exactly as hard as writing the vault.
+- **The LOCAL key-file digest is forgeable** (the file is a non-secret the device owns), but the
+  only reachable effects are UX-level: forge it to EQUAL the vault's → SKIP the nudge (the user
+  isn't reminded to update their local words copy — but the old words still open locally and the
+  new words still open online through the vault road, which verifies against the vault's REAL
+  wrap, not the digest); forge it to DIFFER → a SPURIOUS nudge (annoying, harmless — typing the
+  current words succeeds and re-records the true digest). Neither lands wrong words nor locks
+  anyone out, because landing verifies the WORDS against the vault's actual wrap. And forging the
+  local key file requires write access to the file beside the library — the open-device attacker,
+  out of scope by decision 19.
+
+**One correctness dependency, verified as holding:** the notice's honesty rests on RFC 3394
+determinism (a non-deterministic wrap would move the digest on every re-wrap and fire the notice
+spuriously). `AES.KeyWrap` is deterministic, so this holds; worth naming so a future switch of
+the wrap primitive to a nonce-carrying AEAD would have to revisit the digest's meaning.
+
+**VERDICT: HOLDS.** The digest is a non-secret equality tag that reveals only the fact and
+linkability of a (M, words) pairing — no plaintext, no brute-force handle. A forged digest can
+only suppress or spuriously fire the device's OWN advisory nudge (a UX nuisance needing
+out-of-scope key-file write access); it can never land wrong words, skip a security-relevant act,
+or lock a device out, because every landing verifies the actual words against the vault's real
+wrap and the vault-side digest is proof-gated. Nothing found beyond the disclosed non-secret
+class; the one thing worth recording is the RFC-3394-determinism dependency (a NIT for any future
+wrap-primitive change — no owner needed unless that change is contemplated).
 
 ## Q6 — iCloud Keychain reset on a three-device Standard account
 
