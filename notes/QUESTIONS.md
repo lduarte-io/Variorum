@@ -1788,7 +1788,9 @@ does the same for mint-shape; §6's "deleting an edit nobody chose to lose" poin
 and the alternative discriminators are worse: batch-scoped state misses cross-batch arrivals, and
 a keeper-id-ordering test made the outcome depend on random UUID order. Options: **(a)** keep the
 rescue (shipped by this fix); **(b)** narrow the leg to same-batch-retired duplicates only
-(re-opens the cross-batch loss). **PROVISIONAL: (a) stands until she rules.**
+(re-opens the cross-batch loss). **RATIFIED (a) — 2026-09-22, the RUN B morning session's ratify
+bundle, her word: "question 1: ratify." The rescue stands as RULED behavior; the shipped pins are
+the contract.**
 
 #143 — **THE F-1 FIX'S TWO PROVISIONAL EDGES (RUN B batch B2, row 15 — the dedupe
 double-retirement fix; the orchestrator's rulings section has the full arbitration; AMENDED at
@@ -1815,8 +1817,11 @@ race is revived visibly, never silently — err-toward-EDITED's letter. **The on
 the orchestrator's arbitrated call (the crossing's stamps are bounded by delayed pushes + the
 ~2 s band + round cadence — realistically minutes; an hour is generous headroom; the
 unpushed-outbox arm covers longer offline gaps on its own):** hers to widen or narrow.
-PROVISIONAL: the bounded revival stands. *(Adjacent, ruled the same day, no action: S1's Q10 refinement — 17n's 12-character floor
+PROVISIONAL: the bounded revival stands. **STATUS 2026-09-22 (the morning ratify sitting): she
+asked for plainer explanations of both halves before ruling — given at the sitting; (a) and (b)
+remain PROVISIONAL as shipped, awaiting her word.** *(Adjacent, ruled the same day, no action: S1's Q10 refinement — 17n's 12-character floor
 is a length floor, not an entropy floor; whether to pair it with a strength check is on the
-checkpoint bundle, propose-only.)*
+checkpoint bundle, propose-only — **DECLINED by her at the 2026-09-22 morning sitting ("decline");
+17n stays closed, nothing further owed**.)*
 
 *(Next free number: **#144**.)*

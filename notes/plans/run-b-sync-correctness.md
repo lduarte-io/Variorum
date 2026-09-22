@@ -2041,25 +2041,32 @@ build (THE MARKER FACT: marker 8, zero deploys, so the pairing is genuine accept
 — and confirmed it: her word, verbatim, **"yep it worked"** — the plain round, both directions
 per the checklist (the Mac's note arriving on the phone, the phone's note arriving on the Mac),
 with no stall or deferral warning reported (the run's new honest face stayed silent, as it
-should). No findings surfaced; nothing new is owed. The optional live Replace All Keys was NOT
-reported as run — the held decision stays hers (the headless pins are item 5's evidence either
-way; ratify-bundle item 6 asks her directly, and a zero-prompt follow reported later appends
-here). Morning-session verification before recording: git tip `fb8434c6` pushed clean · the A1
+should). No findings surfaced; nothing new is owed. The optional live Replace All Keys: **SKIPPED
+— her word, same sitting ("i skipped the replace all keys live option")** — the held decision
+resolved; the plain round is the round's whole live evidence, exactly as the handoff provided,
+and the headless pins carry item 5's proof. Morning-session verification before recording: git tip `fb8434c6` pushed clean · the A1
 backup's 149 files present · the installed binary's hash matching the handoff's `1ab27652…`
 record exactly.
 
 **HER RATIFY BUNDLE (the checkpoint report's list):**
-1. **#142** — the recreated-tag catch ((a) keep the rescue stands PROVISIONAL).
+1. **#142** — the recreated-tag catch — **RATIFIED (a), 2026-09-22 morning sitting (her word:
+   "ratify"); the QUESTIONS row records it.**
 2. **#143 (amended)** — (a) ride-the-row as narrowed (text-sole-divergence; the R2-sharpened
    net-zero-round-trip corner named); (b) the bounded meeting (the ONE-HOUR settle window is the
-   orchestrator's arbitrated width, yours to move).
+   orchestrator's arbitrated width, yours to move). **STATUS 2026-09-22: she asked for plainer
+   explanations of both halves before ruling — given at the sitting; both stand PROVISIONAL as
+   shipped, awaiting her word.**
 3. **#141 — already RULED by you** (shipped (a); the (b) rescue parked as 17s) — FYI line only.
 4. **Propose-only (S1's Q10):** 17n's 12-char floor is a length floor, not an entropy floor — a
-   strength check beside it is yours to want or decline; 17n stays closed either way.
+   strength check beside it is yours to want or decline; 17n stays closed either way. **DECLINED
+   — 2026-09-22 morning sitting (her word: "decline"); nothing further owed.**
 5. **FYI (S1's Q3, recorded in the pre-13x deploy checklist):** any redeploy of
    `11_pre13x_postures.sql` silently reverts the rotation completion guard — the overlay re-runs
    after any 11 redeploy; 13y's consolidated DDL should fold it in.
-6. **The optional live Replace All Keys** at your round — still yours in the moment.
+6. **The optional live Replace All Keys** at your round — still yours in the moment. **SKIPPED —
+   her word at the 2026-09-22 morning sitting ("i skipped the replace all keys live option"); the
+   plain round stands as the round's whole live evidence, the headless pins carry item 5's proof,
+   and the ceremony remains an ordinary act she can run any time.**
 
 **Hard stop after the checkpoint report — 13y is next and is NOT this run's to start.**
 

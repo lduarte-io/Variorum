@@ -1,4 +1,4 @@
-# Post-13u Health Rounds — kickoff prompts (author-ratified 2026-09-22)
+# Post-13u Health Rounds — 18k · 18l · 18m · 18n (kickoff prompts; author-ratified 2026-09-22)
 
 **What this is:** four ready-to-paste kickoff prompts, born from
 `notes/codebase-health-review-2026-09-21.md` (the read-only five-explorer audit) and the author's
@@ -8,49 +8,75 @@
    shape, walk the boards under load, and revert on any felt regression."* (Health review §5.1 A1 —
    the pane's visible AppKit frame is set synchronously so no pane ever visibly waits; only the
    SwiftUI state write defers; the existing convergence loop stays as the net.)
-2. **The packaging and order below** — RUN C first, then the navigation-feel round, then the
-   conductor hoist (then mobile work resumes). RUN D is flexible-slot.
+2. **The packaging and order below** — 18k first, then 18l, then 18m (then mobile work resumes);
+   18n is flexible-slot. ***THE NAMING RULING (author, 2026-09-22, at the RUN B morning session —
+   her words: "it's too confusing to have these different names"): the four rounds are 18 LETTERS
+   — 18k runtime hygiene · 18l navigation feel · 18m the editor-conductor hoist · 18n structure
+   singles.*** The round names "RUN C" / "the navigation-feel round" / "the editor-conductor
+   hoist" / "RUN D" are RETIRED (kept below only as was-names); the master plan's row 18
+   registers the letters; an 18 entry is a valid KnownIssues owner exactly as a 17 entry is, and
+   these entries mint NO 17 letters — each entry is its own roster.
 3. **The warming trigger protocol** (§W at the end of this file): warming is deliberately NOT built
    in these rounds; it is committed to only if the author still feels a first-visit stutter after
-   the navigation-feel round ships.
+   18l (the navigation-feel entry) ships.
 
 **Her schedule as stated 2026-09-22:** these rounds → 13y → 13r → friends beta → 13i → 13o → 13s →
 remaining residuals / website / onboarding → general release. ***SUPERSEDED the same day by her
 later ruling (recorded 2026-09-22 at the RUN B morning session): 13y runs NEXT — before these
-rounds.*** The rounds keep their internal order (RUN C → navigation-feel → conductor hoist; RUN D
+rounds.*** The rounds keep their internal order (18k → 18l → 18m; 18n
 flexible) and run at her word after 13y; the rest of the chain stands as stated. **RUN B** (the
 Sync-fenced roster in `notes/plans/pre-beta-standing-fix-runs.md`) has since RUN AND FULLY
 CLOSED — 2026-09-22: five batches + the hosted stress pass + a two-round ladder, finals green on
 all four gates, and the live two-device acceptance round PASSED at her morning window ("yep it
 worked"; the record is `notes/plans/run-b-sync-correctness.md`). Its closes matter below: **17i
 and 17d are CLOSED, 17l item 5 RESOLVED, KnownIssues rows 34 + 37 removed, 17s is the last-minted
-letter**, and the test baselines are RUN B's finals (RUN C's read-first names them). Nothing
+letter**, and the test baselines are RUN B's finals (18k's read-first names them). Nothing
 below touches `Sync/`, by design.
 
 **How to use:** paste one kickoff into a fresh session at its turn. Each round keeps its own record
 file (named in its kickoff) from the first commit, per `notes/SessionResiliencyProtocol.md`. When a
 round closes, its closeout may strike its row here; this file is otherwise not edited by the rounds.
 
-| Round | Record file | Status |
+| Entry | Record file | Status |
 |---|---|---|
-| RUN C — runtime hygiene | `notes/plans/run-c-runtime-hygiene.md` | pending |
-| Navigation-feel round | `notes/plans/navigation-feel-round.md` | pending |
-| Editor-conductor hoist | `notes/plans/editor-conductor-hoist.md` | pending |
-| RUN D — structure singles | `notes/plans/run-d-structure-singles.md` | pending (flexible slot) |
+| **18k** — runtime hygiene (was "RUN C") | `notes/plans/phase-18k-runtime-hygiene.md` | pending |
+| **18l** — navigation feel | `notes/plans/phase-18l-navigation-feel.md` | pending |
+| **18m** — the editor-conductor hoist | `notes/plans/phase-18m-editor-conductor-hoist.md` | pending |
+| **18n** — structure singles (was "RUN D") | `notes/plans/phase-18n-structure-singles.md` | pending (flexible slot) |
+
+## THE OWNERSHIP MAP (her 2026-09-22 instruction: every left-behind item traceable to an owner, 18 where the rounds were the answer)
+
+The left-behind list she was handed (the adviser's seven, pre-dating RUN B's close), each item's
+home as of 2026-09-22:
+
+| # | Item | Where it lives |
+|---|---|---|
+| 1 | Phase 12 has no slot in the stated schedule (23 ledger rows park there) | **Owned by Phase 12 itself — NOT an 18 item** (moving the hardening phase's rows would dissolve it). The open half is SCHEDULING ONLY, hers: the adviser's recommendation — right after friends beta, fed by beta-scale evidence — stands recorded here for her word. **This is the one list item still needing her decision.** |
+| 2 | Row 34 — the tag.path application loss (17i "never run") | **RESOLVED — RUN B** (closed 2026-09-22, live round passed): row 34 FIXED both faces (arrival-order + the F-3 reject face), 17i CLOSED. Nothing owed. |
+| 3 | Rows 56/57 orphaned on the closed 17l (RekeyRecencyProbe wiring; the recovery-phrase copy doors) | **18k** (interim owner at her word — RUN B closed without adopting them; the ledger's owner cells updated this commit). 18k's C0 proposes the DURABLE owner and she confirms at its checkpoint; a fix carries the custody Fable rider. |
+| 4 | 17e's correctness singles unscheduled (the Canvas ⌘K wrong-target; the #136(b)/#138(f) product calls) | **Rides 18k** (item C5 below, the adviser's fold-in at her word). The 17e entry stays the BINDING record; the product calls surface to her at 18k's checkpoint, never decided. |
+| 5 | Row 51 — the phone's tutorial teaches the retired duplicate-divide default | **Owned — the mobile app project row** (the ledger's standing owner; "a 17 entry at her word takes it earlier" stands). Flag for her: if friends beta includes the phone, the pre-beta pull-forward needs her word. |
+| 6 | 13w / the version-anchor schema call (#19(c)) | **Owned — 13w** (FuturePhases) holds both rows. The DESIGN decision's recommended sitting is 13i's (the next lockstep moment) — hers to adopt at 13i's kickoff; recorded, not moved. |
+| 7 | The smaller residue | Accessibility → **filed by 18k's C0** onto the Design & UI review project row (the review's own §7.5 proposal). The EditorViewModel decomposition rows → **18m** (it IS the next phase that opens the editor — the BookView-at-13i pattern, letterized; C0 files them so). 13m's export polish → 13m (owned, FuturePhases). The dedupe residuals → 18a (owned). |
+
+The adviser's four-kickoff list maps 1:1 onto the letters: kickoff 1 → **18k** · kickoff 2 →
+**18l** · kickoff 3 → **18m** · kickoff 4 → **18n** (the PurgeJanitor-split exclusion it recorded
+is owned at **18a** — the D1 paragraph below).
 
 ---
 
-## KICKOFF 1 — RUN C: the runtime-hygiene run (17-entries, run together)
+## KICKOFF 1 — 18k: the runtime-hygiene run (was "RUN C")
 
-You are the orchestrator of **RUN C**, a standing-fixes run of 17-entries executed together (the
-RUN A shape: one roster, lettered entries, each independently scoped, cast, run and closed). Nothing
-here is product advancement; every item is a runtime-hygiene fix from the post-13u health review.
+You are the orchestrator of **18k — runtime hygiene** (the RUN A discipline: one roster, each item
+independently scoped, cast, run and closed — but the entry is 18k ITSELF, her 2026-09-22 letters
+ruling: no 17 letters are minted for C0–C5; they are 18k's own items, dispositioned in its record).
+Every item is a runtime-hygiene fix from the post-13u health review.
 
 **Read first, in this order:** `notes/codebase-health-review-2026-09-21.md` (§5, §6, §7 are this
 run's charter); `notes/KnownIssuesAndTechDebt.md` (you will edit it — read the header rule); the
-17-file `notes/plans/phase-17-standing-fixes.md` (mint this run's entries as the next free letters —
-**17s is the last minted as of 2026-09-22**, RUN B's close; record each entry there per its
-conventions); `notes/SessionResiliencyProtocol.md` (you, at kickoff); the latest closed run's finals
+17-file `notes/plans/phase-17-standing-fixes.md` for **17e**, whose roster rides this run (item C5
+— its dispositions land in the 17e entry, which stays the binding record; NO new 17 letters are
+minted, per the letters ruling); `notes/SessionResiliencyProtocol.md` (you, at kickoff); the latest closed run's finals
 for the test baseline — **RUN B's** (`notes/plans/run-b-sync-correctness.md` CLOSEOUT: core
 **1679/179** clean · full Mac **3089/510** with the one paired-protocol standing flake · mobile
 **642/109** with exactly the 4 known · iOS green · install `1ab27652`) — read it, never rerun the
@@ -72,7 +98,7 @@ non-gating ambiguity (log to `notes/QUESTIONS.md`); stop-and-report for gating a
 author-only call. The run closes on use-shaped evidence, and the install refresh
 (Release build → `/Applications`) follows if the Mac app changed.
 
-**The roster (mint letters in this order):**
+**The roster (18k's own items, in this order):**
 
 - **C1 — the autosave-registry release** (review §6.1). Seven Mac acquisition sites, one release
   caller (the phone). Fix: the six teardowns call `session.releaseAutosave(forPost:)` after their
@@ -105,29 +131,39 @@ author-only call. The run closes on use-shaped evidence, and the install refresh
   `SeamGrip`/`SidebarGeometry`'s subject-keyed-not-owner-keyed maps. DEBUG-only blast radius; the
   pin class is the two-window cross-clear test the reference fixes already model. Add the one
   non-DEBUG guard: a comment-plus-pin on `MarkdownStyling.palette`'s three-writer invariant.
-- **C0 — ledger housekeeping** (review §7; may run first or last). Re-own rows 56/57 (orphaned when
-  17l closed — the original proposal, RUN B's roster, is STALE: **RUN B ran and fully closed
-  2026-09-22 without them**; propose a live owner instead — a fresh 17 letter of the
-  protection/custody class is the natural candidate — and the author confirms at the checkpoint);
-  fix row 27's stale owner pointer (→ 13o); add the review's §3
+- **C0 — ledger housekeeping** (review §7; may run first or last). Rows 56/57's re-own is DONE
+  INTERIM (owner **18k**, set at her 2026-09-22 word after RUN B closed without adopting them —
+  the ledger's owner cells carry it): C0 proposes the DURABLE owner (a fresh protection-class
+  letter, or 18b, whose restore/credential surface is adjacent) and the author confirms at the
+  checkpoint; fix row 27's stale owner pointer (→ 13o); add the review's §3
   finds to row 28's fork list (the editor conductor band; the tutorial-seeder scaffolding); file the
   review's new rows with the owners its sections propose (T2 → 12; `StableSurface`'s asyncAfter →
-  12; the warming assessment → 12; anything this run fixes needs no row). Every edit follows the
-  ledger's own header rule: no row without an owner.
+  12; the warming assessment → 12; the EditorViewModel decomposition rows → **18m**, the next
+  phase that opens the editor — the BookView-at-13i pattern, letterized; the §7.5 accessibility
+  decision row → the Design & UI review project row, its own proposal; anything this run fixes
+  needs no row). Every edit follows the ledger's own header rule: no row without an owner.
+- **C5 — 17e's correctness singles RIDE THIS RUN** (her 2026-09-22 word, the left-behind list's
+  item 4 — the fold-in). The 17e entry in the 17 file stays the BINDING record and its
+  dispositions land there. Size at kickoff — 17e's own text expects a split: the minimum take is
+  the Canvas focused-block row (⌘K "Block History" opening on the wrong target); the two
+  product-call rows (**#136(b)** note-scoped undo · **#138(f)** cross-device deletion finality)
+  are SURFACED to her at the checkpoint, never decided. If the fold makes 18k oversized under
+  `notes/PhaseSizingGuidance.md`, say so to her rather than splitting silently.
 
-**Close:** dispositions per entry in the run record; the 17-file's rows updated; finals recorded;
+**Close:** dispositions per item in the run record (C5's into the 17e entry); the ledger rows
+updated; finals recorded;
 MOBILE PARITY line (expected: "nothing mobile-visible" — C1–C4 are Mac-app/DEBUG surfaces; say so
 explicitly); install refresh if the app changed; checkpoint report to the author; push.
 
 ---
 
-## KICKOFF 2 — the navigation-feel round
+## KICKOFF 2 — 18l: the navigation-feel round
 
-You are the orchestrator of **the navigation-feel round** — the round that finishes the landing
+You are the orchestrator of **18l — the navigation-feel round** — the entry that finishes the landing
 subsystem's perimeter so the author can "click around everywhere with no issues." The subsystem's
 core is sound and recently proven (13u4 UNIT F3: 13/13 cold deep clicks at `top=0, hops=0`); this
 round transplants that shape onto the two surfaces that never adopted it and lands the author's
-ratified PanePublisher change. Record file: `notes/plans/navigation-feel-round.md`.
+ratified PanePublisher change. Record file: `notes/plans/phase-18l-navigation-feel.md`.
 
 **Read first:** `notes/codebase-health-review-2026-09-21.md` §1 whole (the map, the stutter
 diagnosis, the work list, §1.4's warming refusal — warming is OUT of this round's scope by the
@@ -180,7 +216,7 @@ their diffs drift onto the seam.** Sequential, one agent at a time.
   `BookHeightManifest.resolve` instead of `FlowHeightEstimate.honestHeight` (D1) **unless** 13i has
   already taken it — check first.
 
-**Standing rules:** as RUN C's paragraph, verbatim — pin-before-fix and traced mechanisms bind;
+**Standing rules:** as 18k's paragraph, verbatim — pin-before-fix and traced mechanisms bind;
 commit-per-piece + LIVE STATUS + push; no trailers; tests at end against the last recorded finals;
 PROVISIONAL-and-continue; author-only calls are hard stops. **The round closes on use-shaped
 evidence** — the walk is the acceptance, pins are the floor — and the install refresh follows the
@@ -189,13 +225,13 @@ U3/U4; U1's shape is the phone's own long-note landing pattern to inherit later 
 
 ---
 
-## KICKOFF 3 — the editor-conductor hoist (runs before mobile work resumes)
+## KICKOFF 3 — 18m: the editor-conductor hoist (runs before mobile work resumes)
 
-You are the orchestrator of **the editor-conductor hoist** — retiring the ~700-line Mac↔mobile
+You are the orchestrator of **18m — the editor-conductor hoist** — retiring the ~700-line Mac↔mobile
 conductor duplication and turning the drifted cross-block routing cascade into ONE pure, tested
 decision. This round is the opening spine for the mobile catch-up that follows it: the phone's owed
 seam work (ledger row 53) will then land as declared arms of a shared brain instead of a third
-copy. Record file: `notes/plans/editor-conductor-hoist.md`.
+copy. Record file: `notes/plans/phase-18m-editor-conductor-hoist.md`.
 
 **Read first:** `notes/codebase-health-review-2026-09-21.md` §3 (the charter) and §2.1 (the three
 leaks — this round takes leak 1 and leak 2); ledger rows 28 (the fork rule and the 3C zero-test-edit
@@ -240,15 +276,15 @@ it still owes (row 53's carves, the refusal-copy faces).
 
 ---
 
-## KICKOFF 4 — RUN D: the structure-singles run (flexible slot; zero behavior change)
+## KICKOFF 4 — 18n: the structure-singles run (was "RUN D"; flexible slot; zero behavior change)
 
-You are the orchestrator of **RUN D**, a standing-fixes run of purely structural 17-entries — code
+You are the orchestrator of **18n — structure singles**, a run of purely structural items — code
 shape only, zero behavior change, each proven by unmodified-suite rides. It can run in any gap (the
-author's stated lean: get the core solid now). Record file: `notes/plans/run-d-structure-singles.md`.
+author's stated lean: get the core solid now). Record file: `notes/plans/phase-18n-structure-singles.md`.
+D1–D4 are 18n's own items (no 17 letters minted, per the letters ruling).
 
-**Read first:** `notes/codebase-health-review-2026-09-21.md` §2.4/§2.5 and §4 (the charter); the
-17-file (mint next free letters); `notes/SessionResiliencyProtocol.md`; the latest finals for the
-baseline.
+**Read first:** `notes/codebase-health-review-2026-09-21.md` §2.4/§2.5 and §4 (the charter);
+`notes/SessionResiliencyProtocol.md`; the latest finals for the baseline.
 
 **Cast:** Fable orchestrates · `opus-implementer` per entry · Opus cold review (nothing here touches
 the editor seam, custody, or `Sync/` — if an entry's diff drifts onto one, the Fable rider fires).
@@ -283,7 +319,7 @@ the editor seam, custody, or `Sync/` — if an entry's diff drifts onto one, the
   13i's** — on the 3C pattern. If the run is full, these stay listed for their next touch; the
   hoist-at-next-touch rule already owns them.
 
-**Standing rules:** as RUN C's, verbatim. MOBILE PARITY line at close (expected "nothing
+**Standing rules:** as 18k's, verbatim. MOBILE PARITY line at close (expected "nothing
 mobile-visible" except D1's core reshuffle riding under the phone's existing ops — say so).
 
 ---
@@ -291,7 +327,7 @@ mobile-visible" except D1's core reshuffle riding under the phone's existing ops
 ## §W — the warming trigger (what the author says if the stutter survives)
 
 Warming is deliberately unbuilt in all four rounds. The author's decision protocol, ratified
-2026-09-22: ship the navigation-feel round, use the app for a while, and commit to warming ONLY if a
+2026-09-22: ship 18l (the navigation-feel entry), use the app for a while, and commit to warming ONLY if a
 first-visit stutter still registers. Her own observation, recorded because it bears on the design:
 real users often dwell before navigating, which is exactly the window idle-warming exploits — so if
 warming is ever built, its idle-chunked shape has the usage pattern on its side.
@@ -299,7 +335,7 @@ warming is ever built, its idle-chunked shape has the usage pattern on its side.
 **If she still feels it, she says to a fresh session (verbatim, or near it):**
 
 > Read `notes/codebase-health-review-2026-09-21.md` §1.4 and `notes/plans/post-13u-health-rounds.md`
-> §W, plus the closed navigation-feel round record. I'm still noticing a first-visit stutter after
+> §W, plus the closed 18l (navigation-feel) record. I'm still noticing a first-visit stutter after
 > that round, so I'm ratifying the warming build in §1.4's honest form: warm through the REAL row
 > pipeline — realize the actual row views off-viewport at idle, chunked one note per tick, cancelled
 > the instant I interact, invalidated per width/voice/edit — never a parallel headless layout model.

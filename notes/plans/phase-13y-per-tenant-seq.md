@@ -47,6 +47,18 @@ dissolved by R13p-16). **This phase takes marker 7→8 and
 > each a step with its own tests, the key-proof challenge with a short
 > design memo (nonce/replay-window shape) before its build.
 
+> **CARRY FROM RUN B (added 2026-09-22 at the author's word, the morning
+> session — RUN B's S1 stress pass, finding Q3; the durable record is
+> `notes/plans/pre-13x-deploy-checklist.md` §10's standing caveat):** any
+> redeploy of `11_pre13x_postures.sql` SILENTLY REVERTS the rotation
+> completion guard, and the maintenance overlay must re-run after any 11
+> redeploy. **This phase's consolidated DDL (`12_phase13y_tenant_seq.sql`)
+> must FOLD THE GUARD IN** so the caveat retires with the 12 artifact —
+> verify the deployed body carries it (the arm-9-style DDL text pin
+> pattern) rather than assuming the overlay's state. Same class as #141's
+> neighborhood: an operational trap recorded so no future deploy window
+> rediscovers it live.
+
 ## WHY (one paragraph)
 
 The mirror's `server_seq` is ONE global monotonic sequence stamped
