@@ -714,7 +714,9 @@ noted.
   SyncScheduler, Operations+UndoInverses, Operations+Purge, Triggers, the harness files, the B1
   probe suite, the Mac guard test, SyncStatusViews). Every Phase-1 mechanism re-traced by my own
   hands (per-row trace sections below).
-- [ ] Row 7 (tag.path arrival-order repair) — PENDING
+- [x] Row 7 (tag.path arrival-order repair) — FIXED, red-on-old VERIFIED BY BEHAVIOURAL REVERT
+  (pins `applicationsArrivingAfterTheDuplicateTagDiedRepointToTheKeeper` [200/1] +
+  `blockTagApplicationsArrivingAfterTheDuplicateDiedRepointToo`; per-row section below).
 - [ ] Row 8 (the seed-shape guard invokes the real classifier) — PENDING
 - [ ] Row 10 (P9: expandContainer's live-root member-block arm) — PENDING
 - [ ] Row 11 (P28: reapplyStructural voids purge intents) — PENDING
@@ -726,6 +728,53 @@ noted.
 ### DEATHS / RESUMES
 
 - none.
+
+### ROW 7 — the tag.path repair's arrival-order leg (17i fix item 1; KnownIssues row 34): FIXED
+
+**The mechanism, re-traced by my own hands (not taken from the row):**
+`repairTagPathCollision` (Repairs.swift) fires at write time when a live `tag` row collides on
+path with a live local rival; it re-points only the duplicate's applications PRESENT at that
+moment. An application arriving AFTER the duplicate died — the same pull batch suffices, since
+registry order puts `tag` before both application tables — reached the orphan check
+(`deadParentStamp`), met the freshly-dead parent, and was orphan-stamped into its cascade; that
+tombstone (enqueued, pushed) then won the merge against the other side's re-pointed copy in both
+push orders. The broken DIRECTION is the duplicate-holder-pushes-first order: under production's
+pull→push, the device whose tag is the keeper meets the other side's un-repaired rows in one
+batch. (The keeper-arrives-first direction already healed: the local collision repair re-points
+local applications before they ever push.) The Phase 5 pin applied both tags to the SAME post,
+which masked exactly this — it stays green beside the new pins.
+
+**The fix:** `repointApplicationUnderDeadDuplicateTag` — a write-time leg in `writeResolvedRow`
+between the Journal-keeper leg and the orphan check, the Journal keeper's direction-2 shape
+applied to tags: a live `post_tag`/`block_tag` arriving under a locally-present DEAD tag while a
+LIVE tag carries the same path re-points to that keeper (same-path is §7's identity for tags,
+exactly as mint-shape is the Journal's), or tombstones as a pure duplicate when the keeper is
+already applied to the same target; enqueued explicitly (§7's repair-write discipline). A
+missing tag row stays a straggler (§5 tolerance); a dead tag with no live same-path keeper is an
+ordinary deletion — the cascade takes the application exactly as ever. Deliberately a DURABLE
+predicate, not batch-scoped state: it serves the same-batch letter AND any cross-batch arrival
+(a real-concurrency chunk gap) by one rule, and cannot rot if pull windowing ever changes.
+
+**Pins + revert:** `applicationsArrivingAfterTheDuplicateTagDiedRepointToTheKeeper` (sizes
+200/1; production order, B-first; asserts the (c) outbox leg between the pull and push halves,
+then both notes tagged on the keeper on both devices) + `blockTagApplicationsArrivingAfter…`
+(the block_tag twin). RED ON OLD verified by BEHAVIOURAL REVERT against the committed fix
+(`if false` on the leg → exactly the both-notes-tagged asserts fail, 6 issues; restored →
+10/10 green). Suite `SyncRepairTests` 10/10.
+
+**PROVISIONAL, for the orchestrator's QUESTIONS filing (drafted; I never decide):**
+
+> **The recreated-tag catch (RUN B B2 row 7's one behavior consequence).** The arrival-order
+> leg keys on the picture at arrival (a dead tag + a live same-path keeper), which is also the
+> picture a deliberate tombstone-then-recreate leaves. Consequence: a stale offline
+> application of the DELETED tag now re-points onto the recreation instead of dying with the
+> deleted tag's cascade. Spec-defensible (the §7 sentence names the path as the identity; the
+> Journal keeper's direction-2 does the same for mint-shape; §6's "deleting an edit nobody
+> chose to lose" points the same way), and the alternative discriminators are worse: batch-
+> scoped state misses cross-batch arrivals, and a keeper-id-ordering test made the outcome
+> depend on random UUID order. Options: (a) keep the rescue (shipped by this fix); (b) narrow
+> the leg to same-batch-retired duplicates only (re-opens the cross-batch loss). PROVISIONAL:
+> (a) stands until she rules.
 
 ---
 
