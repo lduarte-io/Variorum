@@ -721,7 +721,8 @@ noted.
 - [x] Row 10 (P9: expandContainer's live-root member-block arm) — FIXED, red-on-old VERIFIED BY
   BEHAVIOURAL REVERT (pins `aLiveContainerRootExpandsItsLiveMemberBlocksFamilyComplete` +
   `aPutBackRacingTheSweepsMirrorPurgeNeverLeavesAPartialFamily`; per-row section below).
-- [ ] Row 11 (P28: reapplyStructural voids purge intents) — PENDING
+- [x] Row 11 (P28: reapplyStructural voids purge intents) — FIXED, red-on-old VERIFIED BY
+  BEHAVIOURAL REVERT (pin `theRedoRoadVoidsALiveIntentLikeEverySiblingRevive`; section below).
 - [ ] Row 12 (P31: stalled/deferred gain production readers + the honest face line) — PENDING
 - [ ] The two PROPOSALS written (row 9 · row 15) — PENDING
 - [ ] Phase 1 finals (full core suite; iOS build gate for the shared-file touches) — PENDING
@@ -817,6 +818,32 @@ zero family rows post-sweep, then convergence with no stall). RED ON OLD verifie
 REVERT against the committed fix (old WHERE clause restored → 7 issues, exactly the stranded
 blocks/takes; restored → 32/32 green across both suites). The B1 probe suite stays green beside
 it (P1/P2's whole-family scenarios exercise the dead-root arm byte-unchanged).
+
+### ROW 11 — P28: the redo road voids purge intents (17d P28): FIXED
+
+**The mechanism, re-traced:** `voidPurgeIntents` has six callers — every road that flips a
+tombstone back (`revertDeleteBlock`, `revertDeleteVariant`, `restoreBlock`, `restoreVariant`,
+`restoreContainerRows`, `restoreReading`'s), each with the 13j-ladder-B1 reason at the site —
+and `reapplyStructural`'s `untombstoningBlocks` loop performs the identical
+`deletedAt = nil` + `flipBlockCascadeTombstones` transition (its own comment names it
+`revertDeleteBlock`'s exact shape) without the call. The other two re-applies are safe by
+delegation (`reapplyMintedContainer` → `restoreContainer`; `reapplyImportedBlocks` →
+`revertDeleteBlock`), so this loop was the single hole. Consequence chain verified with the
+fences' own predicates: a live leftover intent hides the row from the Trash and the tray
+unconditionally (`pi.deleted_at IS NULL`), and `familyVerdict` reads `.stale` only while the row
+is LIVE — an ordinary re-delete before the next sweep flips it eligible and the janitor takes
+the bytes with no Trash listing, no Put back, no 30-day window.
+
+**The fix:** one call in the loop, the sibling roads' exact rule, reason at the site.
+Block-level only, matching `revertDeleteBlock` (the cascade victims' own intents follow their
+kinds' roads exactly as on the undo side).
+
+**Pin + revert:** `theRedoRoadVoidsALiveIntentLikeEverySiblingRevive` (PurgeOpsTests, beside
+its undo-road sibling) — the entry's trace through the REAL doors: divide → autosave in the
+mint → `stack.undo` (trays the diverged mint) → `requestPurge` (the tray's Delete Now) →
+`stack.redo` → asserts the intent is voided AND the ordinary re-delete lists on a fresh clock.
+RED ON OLD verified by BEHAVIOURAL REVERT against the committed fix (call removed → both
+asserts fail; restored → 15/15; undo/redo suites 65/65 across 5 suites).
 
 ---
 
