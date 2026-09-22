@@ -135,6 +135,7 @@ brief names it.
 | 13 | B3 | **17l item 5** — the double passphrase ask at a follow after a rotation (KnownIssues row 37): when the passphrase is UNCHANGED at a rotation, `RotationSecrets` re-wraps under the EXISTING descriptor (same salt → same derived key; the wrapped payload is the new master). **HER SCOPE (2026-09-07): passphrase wrap ONLY — the recovery-words wrap keeps its fresh salt at every act, and a pin asserts the two descriptors stay independent.** Pin: a sibling that opened by the passphrase follows a Replace All Keys with zero prompts (red today) | open |
 | 14 | B4 | **The harness-realism structural deliverable** — `productionRound` (built in B1 as the hunt's instrument) becomes the convergence suites' DEFAULT; chunk splits at registry boundaries as a sweep; every suite green under the NEW shape | open |
 
+| 16 | B4 | **S1's Q2 NIT (the hosted stress pass)** — `sync_reencrypt` under an OLD key proof is the one data RPC the attacker suite never fires; it HOLDS structurally (`sync_key_gate`) — a TENTH arm in `MultiTenantSyncAttackerTests` (or the fake-server twin) pins it. Test-only; green-by-design is this row's expected verdict (a coverage pin, not a defect claim) | open |
 | 15 | B2 | **F-1 (B1's hunt, probe P5(b))** — the dedupe double-retirement race: an edit landing between the seed-push and the two devices' passes, with the editor's pushes delayed across its own two pulls, retires BOTH copies on both devices AND loses the edit's bytes outright (pull-first merges the pristine tombstoned baseline over the dirty row; rescue skips block-dead; the cleared outbox means the edit never reaches the server). Breaks R-pre13u-8's "an edited copy is NEVER silently retired" and §6's forbidden outcome IN THE BYTES. Red pin waiting wrapped: `p5bTheDoubleRetirementRaceRetiresBothCopiesAndLosesTheEdit`. **Fix constraints (the orchestrator's, at the F-1 ruling):** the outcome must land on the ruled matrix — exactly-one-edited ⇒ the EDITED copy survives; both-edited ⇒ both survive; deterministic on both devices; err toward EDITED. Design fork: the implementer proposes, the orchestrator rules, repo-first, before the build. **Escape valve:** if the honest fix is a redesign of the dedupe's occasions rather than a repair-rule-scale change, STOP AND REPORT — the row then closes RECORDED → 18a beside KnownIssues row 33, the pin standing wrapped | open |
 
 *(Hunt findings from B1 join the ledger as new rows at B1's adjudication — each owned: fixed in
@@ -609,15 +610,98 @@ question's answer wants a runnable trace (S1 remains read-only — it cites, it 
 
 ---
 
-## BATCH B2 — THE FIXES (brief finalized at spawn, after B1's adjudication; the settled scope)
+### SLOT S1 — ORCHESTRATOR ADJUDICATION (2026-09-21; the slot CLOSES here)
 
-Ledger rows 7–12 + whatever B1 hands over: the `tag.path` repair (row 7, pin as stated) · R3-2's
-classifier (row 8) · P8 per its verdict (row 9 — **design fork: the implementer proposes, the
-orchestrator rules, repo-first, before the build**) · P9 (row 10) · P28 (row 11) · P31 (row 12).
-Pin before fix on every row; pins under production's round shape wherever the scenario is a sync
-round (the memo's own lesson — R2-1/R2-2 passed in the harness order and failed in production's);
-red-on-old verified by behavioural revert. `Sources/VariorumCore/Sync/` +
-`Operations+UndoInverses.swift` (P28) expected; zero schema, zero server lines.
+**The hosted stress pass ran and returned 10 HOLDS · 0 FINDING · 0 OPEN** — the findings file
+`notes/plans/run-b-stress-pass.md` (ten sections, each flipped in its own pathspec-limited
+commit; verified by the orchestrator: 10 VERDICT lines + the summary, zero PENDING, the range
+diff touching ONLY that file). No design hole; the sharp corners (the crash-resume
+conflict-follow pair, the iCloud-reset mint-vs-heal gap, BLOCKER-1's seq-based guard) each held
+exactly at the seam an adversary pushes. **Three routings, none a defect:**
+1. **Q2's suite-completeness NIT → NEW LEDGER ROW 16 (B4):** `sync_reencrypt` under an OLD proof
+   is structurally gated (`sync_key_gate`) but is the one data RPC the attacker suite never
+   fires — a tenth arm pins it (test-only).
+2. **Q3's operational caveat → RECORDED in its durable home** (`notes/plans/pre-13x-deploy-checklist.md`
+   §10's standing caveat): an `11_pre13x_postures.sql` redeploy silently reverts the completion
+   guard; the maintenance overlay re-runs after any 11 redeploy, and 13y's consolidated DDL
+   should fold the guard in.
+3. **Q10's 17n scope refinement → HER CHECKPOINT BUNDLE (propose-only):** the 12-CHARACTER floor
+   is a length floor, not an ENTROPY floor — a human-chosen 12-char passphrase can still be
+   brute-forceable; pairing the floor with a strength check is her call to want or decline
+   (17n is closed; nothing reopens without her word).
+The already-owned residuals S1 cited (13y · Phase 12 · 17m/#90 · 13x · ledger 61's PROVISIONAL)
+were re-verified as owned — nothing absorbed, nothing unowned. **SLOT S1 CLOSES.**
+
+---
+
+## BATCH B2 BRIEF — THE FIXES (rows 7–12 + 15; self-contained; read in this order)
+
+**You are a Fable implementer session for RUN B batch B2 — the fix batch.** Every defect you fix
+was traced by B1's hunt or the 2026-08-30 sweep's verifier; your work is pin-first fixes, with
+TWO design forks that go to the orchestrator before their builds.
+
+**READ FIRST, in full, in your own context (never delegated):**
+1. `CLAUDE.md` + the canon it loads — **SyncSpec WHOLE** (§§5–7, §12); OverallModel §6/S2/S5.
+2. `notes/sync-postmortem-fragments.md` — the standing read before any `Sync/` line.
+3. THIS FILE: the FENCES · ENVIRONMENT TRAPS · LEDGER rows 7–12 + 15 · the **BATCH B1 RECORD**
+   whole (the mechanisms, the wrapped pins waiting for you, and the two P8 refinements are
+   there) · the B1 and S1 adjudications.
+4. `notes/plans/phase-17-standing-fixes.md` — entries **17i** (rows 7–8's letter) and **17d**
+   (P8/P9/P28/P31's finder claims + verifier traces, which are your trace starting points, to be
+   re-verified by your own hands — the hallucination guard).
+5. `notes/KnownIssuesAndTechDebt.md` row 34 (the tag.path mechanism + its pin, stated).
+6. `notes/plans/phase-13j-purge-memo.md` §4f (the contract P8's fix must honor).
+7. The code as the rows name it: `Sync/Repairs.swift` (tag.path), `Sync/SampleLibraryDedupe.swift`
+   + `Sync/Merge.swift` (F-1), `Sync/PurgeJanitor.swift` + `Sync/PurgeFamily.swift` +
+   `Sync/SyncEngine.swift` (P8/P9), `Operations/Operations+UndoInverses.swift` (P28),
+   `Sync/SyncScheduler.swift` (P31).
+
+**THE WORK — two phases in ONE session:**
+
+**Phase 1 (build now):** rows 7 · 8 · 10 · 11 · 12, each pin-before-fix, red-on-old verified by
+BEHAVIOURAL REVERT, pins under `productionRound` wherever the scenario is a sync round:
+- **Row 7 (tag.path):** the repair honors §7's sentence for applications arriving AFTER the
+  duplicate died — the pin as KnownIssues row 34 states it (two devices, one path, each applied
+  to its OWN note; both notes tagged on both devices after convergence; red on old).
+- **Row 8 (R3-2):** the seed-shape guard invokes `Queries.isDailyJournalMintShape` itself —
+  delete the mirrored SQL, never a second copy.
+- **Row 10 (P9):** `expandContainer`'s member-block arm made liveness-safe for a LIVE container
+  root; cover the verifier's more-reachable road (the in-transaction re-expand after
+  `executePurge` racing a Put back). Honor "purge is never partial."
+- **Row 11 (P28):** `reapplyStructural`'s untombstoning loop calls `voidPurgeIntents` like every
+  sibling road, reason at the site (the B1-class one-liner; the entry's trace is the pin's
+  scenario).
+- **Row 12 (P31):** `PullReport.stalled` and `PushReport.deferred` gain production readers — the
+  `BridgeScheduler.status.stalled` precedent; a stalled round STOPS reporting as a clean success.
+  The scheduler half is `Sync/`; a minimal honest status face line in the App-side sync status
+  surface is LEGAL for this row (keep it minimal; no new chrome vocabulary — P-8 binds).
+**Then STOP building and write the two PROPOSALS** (below) into your record, hand back, and WAIT.
+
+**Phase 2 (after the orchestrator's rulings arrive by message):** rows 9 and 15 built to the
+rulings:
+- **Row 9 (P8, the purge-window mirror orphan):** propose 2–3 candidate CLIENT-SIDE fix shapes
+  with tradeoffs (the B1 refinements bind: the stall lands AT the placement; the jam is
+  permanent/one-way; no device retains a root). A shape wanting server lines is a 13y candidate,
+  not a proposal. Unwrap B1's two wrapped constructions as your red-on-old pins.
+- **Row 15 (F-1, the dedupe double-retirement race):** propose per the row's fix constraints
+  (exactly-one-edited ⇒ the EDITED copy survives; both-edited ⇒ both survive; deterministic on
+  both devices; err toward EDITED). The escape valve is the row's: a design-scale-only answer is
+  a STOP-AND-REPORT, not a build. Unwrap B1's wrapped pin as red-on-old.
+
+**Fences restated:** zero schema, zero server/mirror lines, marker 8; `/Applications` and her
+real store untouched; the 18a/13y/12-owned residuals stay owned (fix the traced mechanisms,
+never the park/heal design or the dedupe's occasion redesign). Full core suite at your close
+(baseline 1654/179 with 3 wraps — your finish line is the SAME tests with ZERO wraps: the three
+wrapped probes become green pins as their fixes land).
+
+**Your record:** append `## BATCH B2 RECORD — THE FIXES` below this brief: LIVE STATUS from the
+first commit (every row a line, PENDING until verified); per-row trace-in-your-own-words +
+pin + fix + revert verification; the two PROPOSALS as their own subsections (options, tradeoffs,
+your recommendation); finals. **Checkpoint protocol (binding from the FIRST commit):** commit
+per piece + push every commit, pathspec-limited staging (never `git add -A`); LIVE STATUS
+flipped in the same commit; foreground grep-poll waits only; never spawn subagents (ONE Sonnet
+lookup for external facts only); no revert without a committed pre-revert state; deaths/resumes
+noted.
 
 ## BATCH B3 — 17l ITEM 5 (brief finalized at spawn; the settled scope)
 
