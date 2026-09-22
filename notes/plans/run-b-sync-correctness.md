@@ -126,17 +126,17 @@ brief names it.
 | 4 | B1 | **Probe P4** — the round-shape sweep: the convergence suites' CORE scenarios re-run under production's round shape (pull → push, 200-row chunks each its own server transaction, interleavings) + a chunk split at each registry boundary the scenario crosses; **any pin that passes only in the harness's order is a finding** (recorded as a new ledger row) | **RUN — 0 new findings** (7 scenarios green; the seq-0 placement observation recorded as canon-conforming) |
 | 5 | B1 | **Probes P5(b) + P5(c)** — the dedupe double-retirement race (classifier's push delayed past the other device's pass, evidence changed between) · the echo pull's extra round per two-copy meeting; RECORDED (fence: the late-registry legs are 18a's — re-verify, don't absorb) | **(b) REPRODUCED — hunt finding F-1 → NEW ROW 15 (B2), the orchestrator's ruling below · (c) CONFIRMED — designed cost, green pin (3-round cadence made precise)** |
 | 6 | B1 | **17d P8 — THE RUN** (the entry's own rule: reproducing it IS the red-on-old pin; not reproducing it closes it REFUTED): the deterministic construction the verifier named — hold B's push (`FakeSyncServer.holdPushes`), let A pull + sweep, release (`commitHeldPushes`) — a mirror orphan whose pull stalls A's cursor forever. Read against `notes/plans/phase-13j-purge-memo.md` §4f | **CONFIRMED — REPRODUCED in BOTH constructions** (held-push + visibility-band, wrapped citing row 9; row 9 LIVE for B2) |
-| 7 | B2 | **17i fix item 1** — the general `tag.path` repair honors §7's own sentence for applications arriving AFTER the duplicate died (KnownIssues row 34; pre-existing since Phase 5, MAJOR). Pin as the row states it: two devices create "ideas" offline, each applies it to its OWN note, converge → both notes tagged on both devices (red on old: one application dead) | open |
-| 8 | B2 | **17i structural item R3-2** — the seed-shape guard invokes the REAL classifier (`Queries.isDailyJournalMintShape`) instead of mirroring its SQL | open |
-| 9 | B2 | **17d P8 — the fix**, per row 6's verdict (a reproduced mechanism gets a fix whose DESIGN the implementer proposes and the orchestrator rules BEFORE building — client-side only; a fix wanting server lines stops and reports as a 13y candidate). REFUTED at row 6 ⇒ this row closes with it | open |
-| 10 | B2 | **17d P9** — `expandContainer`'s member-block arm is liveness-conditional: a LIVE container root purges the note + placements while orphaning every block it held (incl. the verifier's more-reachable road: the in-transaction re-expand after `executePurge` racing a Put back) | open |
-| 11 | B2 | **17d P28** — `reapplyStructural`'s untombstoning loop is the ONE revive road that does not `voidPurgeIntents`; a leftover Delete-Now intent later claims the block and strips its 30-day window | open |
-| 12 | B2 | **17d P31** — a permanently stalled pull cursor reports a clean round forever: `PullReport.stalled` (and `PushReport.deferred`) gain a production reader (the `BridgeScheduler.status.stalled` precedent); the status surface stops saying "fine" under a stall | open |
+| 7 | B2 | **17i fix item 1** — the general `tag.path` repair honors §7's own sentence for applications arriving AFTER the duplicate died (KnownIssues row 34; pre-existing since Phase 5, MAJOR). Pin as the row states it: two devices create "ideas" offline, each applies it to its OWN note, converge → both notes tagged on both devices (red on old: one application dead) | **FIXED** (B2 P1 — `repointApplicationUnderDeadDuplicateTag`; two pins red-on-old by revert; #142 PROVISIONAL) |
+| 8 | B2 | **17i structural item R3-2** — the seed-shape guard invokes the REAL classifier (`Queries.isDailyJournalMintShape`) instead of mirroring its SQL | **DONE** (B2 P1 — architectural; the one public classifier body invoked by pass AND guard) |
+| 9 | B2 | **17d P8 — the fix**, per row 6's verdict (a reproduced mechanism gets a fix whose DESIGN the implementer proposes and the orchestrator rules BEFORE building — client-side only; a fix wanting server lines stops and reports as a 13y candidate). REFUTED at row 6 ⇒ this row closes with it | **FIXED** (B2 P2 — the ledger-verified orphan heal, ruled Shape A + tombstone narrowing; B1 wraps unwrapped red-on-old) |
+| 10 | B2 | **17d P9** — `expandContainer`'s member-block arm is liveness-conditional: a LIVE container root purges the note + placements while orphaning every block it held (incl. the verifier's more-reachable road: the in-transaction re-expand after `executePurge` racing a Put back) | **FIXED** (B2 P1 — live-root family-complete expansion; two pins red-on-old) |
+| 11 | B2 | **17d P28** — `reapplyStructural`'s untombstoning loop is the ONE revive road that does not `voidPurgeIntents`; a leftover Delete-Now intent later claims the block and strips its 30-day window | **FIXED** (B2 P1 — the redo road voids intents; pin red-on-old) |
+| 12 | B2 | **17d P31** — a permanently stalled pull cursor reports a clean round forever: `PullReport.stalled` (and `PushReport.deferred`) gain a production reader (the `BridgeScheduler.status.stalled` precedent); the status surface stops saying "fine" under a stall | **FIXED** (B2 P1 — the stall + deferral surfaced honestly; pins red-on-old) |
 | 13 | B3 | **17l item 5** — the double passphrase ask at a follow after a rotation (KnownIssues row 37): when the passphrase is UNCHANGED at a rotation, `RotationSecrets` re-wraps under the EXISTING descriptor (same salt → same derived key; the wrapped payload is the new master). **HER SCOPE (2026-09-07): passphrase wrap ONLY — the recovery-words wrap keeps its fresh salt at every act, and a pin asserts the two descriptors stay independent.** Pin: a sibling that opened by the passphrase follows a Replace All Keys with zero prompts (red today) | open |
 | 14 | B4 | **The harness-realism structural deliverable** — `productionRound` (built in B1 as the hunt's instrument) becomes the convergence suites' DEFAULT; chunk splits at registry boundaries as a sweep; every suite green under the NEW shape | open |
 
 | 16 | B4 | **S1's Q2 NIT (the hosted stress pass)** — `sync_reencrypt` under an OLD key proof is the one data RPC the attacker suite never fires; it HOLDS structurally (`sync_key_gate`) — a TENTH arm in `MultiTenantSyncAttackerTests` (or the fake-server twin) pins it. Test-only; green-by-design is this row's expected verdict (a coverage pin, not a defect claim) | open |
-| 15 | B2 | **F-1 (B1's hunt, probe P5(b))** — the dedupe double-retirement race: an edit landing between the seed-push and the two devices' passes, with the editor's pushes delayed across its own two pulls, retires BOTH copies on both devices AND loses the edit's bytes outright (pull-first merges the pristine tombstoned baseline over the dirty row; rescue skips block-dead; the cleared outbox means the edit never reaches the server). Breaks R-pre13u-8's "an edited copy is NEVER silently retired" and §6's forbidden outcome IN THE BYTES. Red pin waiting wrapped: `p5bTheDoubleRetirementRaceRetiresBothCopiesAndLosesTheEdit`. **Fix constraints (the orchestrator's, at the F-1 ruling):** the outcome must land on the ruled matrix — exactly-one-edited ⇒ the EDITED copy survives; both-edited ⇒ both survive; deterministic on both devices; err toward EDITED. Design fork: the implementer proposes, the orchestrator rules, repo-first, before the build. **Escape valve:** if the honest fix is a redesign of the dedupe's occasions rather than a repair-rule-scale change, STOP AND REPORT — the row then closes RECORDED → 18a beside KnownIssues row 33, the pin standing wrapped | open |
+| 15 | B2 | **F-1 (B1's hunt, probe P5(b))** — the dedupe double-retirement race: an edit landing between the seed-push and the two devices' passes, with the editor's pushes delayed across its own two pulls, retires BOTH copies on both devices AND loses the edit's bytes outright (pull-first merges the pristine tombstoned baseline over the dirty row; rescue skips block-dead; the cleared outbox means the edit never reaches the server). Breaks R-pre13u-8's "an edited copy is NEVER silently retired" and §6's forbidden outcome IN THE BYTES. Red pin waiting wrapped: `p5bTheDoubleRetirementRaceRetiresBothCopiesAndLosesTheEdit`. **Fix constraints (the orchestrator's, at the F-1 ruling):** the outcome must land on the ruled matrix — exactly-one-edited ⇒ the EDITED copy survives; both-edited ⇒ both survive; deterministic on both devices; err toward EDITED. Design fork: the implementer proposes, the orchestrator rules, repo-first, before the build. **Escape valve:** if the honest fix is a redesign of the dedupe's occasions rather than a repair-rule-scale change, STOP AND REPORT — the row then closes RECORDED → 18a beside KnownIssues row 33, the pin standing wrapped | **FIXED** (B2 P2 — ride-the-row #143(a) + the kill-time defense per the AMENDED ruling; B1 wrap unwrapped red-on-old) |
 
 *(Hunt findings from B1 join the ledger as new rows at B1's adjudication — each owned: fixed in
 B2, or RECORDED with a named owner outside the run. F-1 is row 15; F-2 was already owned as
@@ -1188,6 +1188,44 @@ finals 1661 + 5 new pins (p1PhoneFirst, p5bBothEdited, aDeliberateDelete, aLiveS
 aStallWhoseReferent; p5b renamed in place). Mac app **BUILD SUCCEEDED** · iOS **BUILD
 SUCCEEDED** (core's grown public API compiles into both targets). Fences: zero schema, zero
 server/mirror lines, marker 8, `/Applications` and her real store untouched throughout.
+
+### BATCH B2 — ORCHESTRATOR ADJUDICATION (2026-09-22; the batch CLOSES here)
+
+**Verification, my own hands:** the Phase-2 commits read one by one (pathspec-limited, pushed,
+honest); the record's LIVE STATUS complete; **the FULL core suite re-run by the orchestrator:
+1666 tests / 179 suites — ALL PASSED, zero known issues** (the finish line: B1's three wraps are
+gone, their contracts now ordinary green pins). Fences held: zero schema, zero server lines,
+marker 8, her store untouched. **BATCH B2 CLOSES; ledger rows 7 · 8 · 9 · 10 · 11 · 12 · 15 all
+FIXED/DONE.**
+
+**JUDGMENT CALL 1 — SUSTAINED.** The build follows the TRACED mechanism over my proposal's
+letter, which is the hallucination guard's own doctrine: the pin's first red proved the loss's
+real shape is (true,true) — the arriving block tombstone's local cascade stamps the dirty
+variant earlier in the same batch — so keying the overlay on `server.isTombstoned` alone is the
+fix for the mechanism that exists, and the ruled OUTCOME (the P1-blessed end-state in the
+unpushed direction) is pin-proven. The two untraced both-edited-under-a-dead-block corners are
+correctly recorded-not-decided (one row, no card possible, one side's bytes lose the row under
+EITHER choice — a symmetric-loss cell no build should silently pick); they stay stated at the
+code and in this record, inside #143(a)'s neighborhood if she ever wants to rule them.
+
+**JUDGMENT CALL 2 — SUSTAINED; MY RULING'S LETTER IS AMENDED.** The pre-batch-dirt arm I ruled
+was built to the letter first and PIN-PROVEN UNSOUND (`theMarkerIsSpentWhenTheOtherDevicesRetirementLands`
+red with both copies pristine — PRIOR-batch repair bookkeeping is pre-batch dirt, the exact
+degradation my constraint existed to prevent, one batch earlier than its letter anticipated).
+The kill-time classifier arm satisfies the constraint's PURPOSE strictly more strongly — the
+defense reads domain rows through the ONE classifier (row 8's own unification) and NO outbox
+evidence at all, so repair bookkeeping cannot masquerade as edits by construction — and it is
+what makes the ruled both-edited row reachable at all. **The amended ruling, binding:** the
+defense's evidence is the kill-time classifier verdict (definite EDITED at the FIRST family
+death, reading-ended-dead, self-retirements recording nothing); no outbox-based arm exists or
+returns. The classifier-blind residual (a chapter rename as the only act) is the pre-existing
+R2-5 declined-leg class, unchanged, owned where it was.
+
+**The protocol slip — noted, resolved, and carried forward:** one behavioural revert ran via
+`git checkout` over an UNCOMMITTED hook (the resiliency addendum's 11(a) class — "commit before
+you revert" — violated once), recovered byte-faithfully, re-verified commit-first, honestly
+recorded in DEATHS/RESUMES. Nothing was lost; the remaining briefs keep the rule stated and the
+B3/B4 records inherit the reminder.
 
 ---
 
