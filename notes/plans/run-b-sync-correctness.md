@@ -703,6 +703,32 @@ flipped in the same commit; foreground grep-poll waits only; never spawn subagen
 lookup for external facts only); no revert without a committed pre-revert state; deaths/resumes
 noted.
 
+## BATCH B2 RECORD — THE FIXES
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims marked PENDING)
+
+- [x] Record opened; brief + READ FIRST list read in full (SyncSpec whole + the canon load, the
+  postmortem, this file's FENCES/TRAPS/LEDGER/B1 record/both adjudications, 17i + 17d whole,
+  KnownIssues row 34, the purge memo whole, the disagreements memo whole, and the code as the
+  rows name it — Repairs, SampleLibraryDedupe, Merge, PurgeJanitor, PurgeFamily, SyncEngine,
+  SyncScheduler, Operations+UndoInverses, Operations+Purge, Triggers, the harness files, the B1
+  probe suite, the Mac guard test, SyncStatusViews). Every Phase-1 mechanism re-traced by my own
+  hands (per-row trace sections below).
+- [ ] Row 7 (tag.path arrival-order repair) — PENDING
+- [ ] Row 8 (the seed-shape guard invokes the real classifier) — PENDING
+- [ ] Row 10 (P9: expandContainer's live-root member-block arm) — PENDING
+- [ ] Row 11 (P28: reapplyStructural voids purge intents) — PENDING
+- [ ] Row 12 (P31: stalled/deferred gain production readers + the honest face line) — PENDING
+- [ ] The two PROPOSALS written (row 9 · row 15) — PENDING
+- [ ] Phase 1 finals (full core suite; iOS build gate for the shared-file touches) — PENDING
+- [ ] **PHASE 2 (opens only at the orchestrator's rulings):** rows 9 + 15 — PENDING
+
+### DEATHS / RESUMES
+
+- none.
+
+---
+
 ## BATCH B3 — 17l ITEM 5 (brief finalized at spawn; the settled scope)
 
 Ledger row 13, the entry's text verbatim (`phase-17-standing-fixes.md` 17l item 5 + KnownIssues
