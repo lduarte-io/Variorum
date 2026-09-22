@@ -294,6 +294,35 @@ STOP AND REPORT to the orchestrator instead of adding one).
 
 ---
 
+## BATCH B1 RECORD — THE HUNT
+
+### LIVE STATUS (flipped in the same commit as each piece; unverified claims marked PENDING)
+
+- [x] Record opened; brief + READ FIRST list read in full (SyncSpec whole, the memo whole, the
+  postmortem, 17i + 17d P8 + the purge memo §2/§4f, the harness files, the engine +
+  scheduler + janitor + Merge + Repairs + SampleLibraryDedupe sources).
+- [ ] `productionRound` helper (Tests/Support/ProductionRound.swift) — PENDING.
+- [ ] Probe P1 (delete-vs-edit-plus-new-take) — PENDING.
+- [ ] Probe P3 (edit-vs-edit, production shape) — PENDING.
+- [ ] Probe P2(a) (horizon holds while the laptop is live) — PENDING.
+- [ ] Probe P2(b) (60-day drop-out returner vs purged family) — PENDING.
+- [ ] 17d P8 run (ledger row 6) — PENDING.
+- [ ] Probe P5(b) (dedupe double-retirement race) — PENDING.
+- [ ] Probe P5(c) (echo pull's extra round) — PENDING.
+- [ ] Probe P4 round-shape sweep — PENDING.
+- [ ] Memo ⚠️ UNSETTLED section updated with dated answers + pin names — PENDING.
+- [ ] Finals: full core suite (baseline 1639/177) — PENDING.
+
+### DEATHS / RESUMES
+
+- none.
+
+### PER-PROBE ANSWERS
+
+*(sections below are appended as each probe lands — PENDING until then)*
+
+---
+
 ## BATCH B2 — THE FIXES (brief finalized at spawn, after B1's adjudication; the settled scope)
 
 Ledger rows 7–12 + whatever B1 hands over: the `tag.path` repair (row 7, pin as stated) · R3-2's
