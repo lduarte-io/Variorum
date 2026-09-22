@@ -188,6 +188,70 @@ struct SyncReconciliationProbeTests {
         }
     }
 
+    /// **LADDER R1 F-R1 (RUN B's cold review): dirty ROW is not dirty
+    /// TEXT.** The row-15 ride-the-row overlay keyed on the outbox's
+    /// dirty-ROW fact alone — but `setTakeLabel` (and every metadata op)
+    /// enqueues the variant row with `working_text` untouched, so a
+    /// metadata-only-dirty row whose text is the un-edited ANCESTOR rode
+    /// that stale text over the server's NEWER final edit: B labels a
+    /// take; A autosaves new text into it and deletes the note; A pushes;
+    /// B pulls — and on the old overlay B's stale ancestor text replaced
+    /// the server baseline carrying A's only-ever edit, pushed, and
+    /// converged everywhere with the new bytes GONE (a regression in §6's
+    /// own forbidden class; the PRE-run server-wins handled this input
+    /// correctly). The fix: the ride fires only when `working_text` is
+    /// the ONLY divergence between the rows — a metadata-only-dirty row
+    /// diverges in the metadata it dirtied and takes server-wins again;
+    /// the genuinely-text-dirty rides exactly as ruled (#143(a)).
+    @Test(arguments: [200, 1])
+    func aMetadataOnlyDirtyRowNeverRidesStaleTextOverTheServersFinalEdit(batchSize: Int) async throws {
+        let (laptop, phone, server) = try pair()
+        let (noteID, _, t1): (String, String, String) = try laptop.with { ops, _ in
+            let note = try ops.createPost(title: "her note", profile: .journal)
+            let made = try ops.newBlock(in: note.id, text: "the shared base", at: .end)
+            return (note.id, made.block.id, made.variant.id)
+        }
+        try await productionQuiescence(laptop, phone, server: server, batchSize: batchSize)
+
+        // Sync stops. The PHONE only labels the take — its row is dirty,
+        // its text is the ancestor. The LAPTOP writes the only new bytes
+        // anyone ever typed, then deletes the note.
+        try phone.with { ops, _ in try ops.setTakeLabel(t1, label: "keeper") }
+        try laptop.with { ops, _ in
+            try ops.autosave(t1, text: "her final words", charDelta: 6)
+            try ops.deleteContainer(noteID)
+        }
+
+        // The laptop's tombstones + final text land first; the phone's
+        // pull merges them over its metadata-dirty row.
+        _ = try await productionRound(laptop, batchSize: batchSize)
+        _ = try await productionRound(phone, batchSize: batchSize)
+        try await productionQuiescence(laptop, phone, server: server, batchSize: batchSize)
+        #expect(try laptop.syncedDump() == phone.syncedDump())
+
+        let stamp = try laptop.db.deletedAt("container", noteID)
+        for client in [laptop, phone] {
+            #expect(try client.db.fetchString(
+                "SELECT working_text FROM variant WHERE id = ?", [t1])
+                == "her final words",
+                "\(client.name): the only new bytes survive into the Trash — the stale ancestor never rides")
+            #expect(try client.db.deletedAt("variant", t1) == stamp,
+                    "\(client.name): the deletion still wins (rule 1)")
+            #expect(try client.db.fetchString(
+                "SELECT label FROM variant WHERE id = ?", [t1]) == nil,
+                "\(client.name): the label intent dropped by ordinary metadata CAS (§6) — the pre-fix outcome for metadata, unchanged")
+        }
+
+        // Put back returns A's final words, not the ancestor.
+        try laptop.with { ops, _ in try ops.restoreContainer(noteID) }
+        try await productionQuiescence(laptop, phone, server: server, batchSize: batchSize)
+        for client in [laptop, phone] {
+            #expect(try client.db.fetchString(
+                "SELECT working_text FROM variant WHERE id = ? AND deleted_at IS NULL", [t1])
+                == "her final words", "\(client.name)")
+        }
+    }
+
     // MARK: - P2: the same scenario, but the deletion is purge-aged
 
     private func sweep(

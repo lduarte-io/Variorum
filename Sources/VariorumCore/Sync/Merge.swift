@@ -75,12 +75,32 @@ extension SyncEngine {
             // keeps the LOCAL edit where the old code kept the first
             // pusher's — one side's bytes lose the row either way,
             // recorded as the same corner's other face.
+            //
+            // LADDER R1 F-R1: dirty ROW is not dirty TEXT. The outbox
+            // is a dirty-ROW set (SyncSpec §3) — `setTakeLabel`, a lock,
+            // a fan reorder all enqueue the row with `working_text`
+            // untouched, and the first overlay rode that STALE ancestor
+            // text over a server row carrying the peer's newer, final
+            // edit (the only new bytes died — §6's forbidden class, a
+            // regression against pre-run server-wins). State-based rows
+            // hold no last-acked pre-image, so "is my text an edit" is
+            // answered by the one discriminator current state can
+            // honestly give: the ride fires ONLY when `working_text` is
+            // the SOLE divergence between the rows (every column equal
+            // but text and the volatile bookkeeping). A metadata-only-
+            // dirty row diverges in the metadata it dirtied → server-
+            // wins again; a text-only-dirty row rides exactly as ruled.
+            // Recorded corners (#143(a)'s amendment): mixed dirt (text
+            // edit + metadata divergence on either side) refuses the
+            // ride and falls back to the PRE-run server-wins — never
+            // worse than old code; byte-identical metadata minted
+            // independently on both devices would still ride.
             if !cardMinted, server.isTombstoned,
                let localText = local.workingText,
                let serverText = server.workingText,
                localText != serverText,
-               let ridden = local.columns["working_text"] {
-                merged.columns["working_text"] = ridden
+               Self.textIsTheOnlyDivergence(local: local, server: server) {
+                merged.columns["working_text"] = .text(localText)
             }
         }
 
@@ -91,6 +111,21 @@ extension SyncEngine {
             // nothing left to push for this row.
             try clearOutboxEntry(db, table: merged.table, rowID: merged.rowID)
         }
+    }
+
+    /// F-R1's discriminator: true when `working_text` is the ONLY
+    /// divergence between the two rows. Volatile bookkeeping is excluded —
+    /// `deleted_at` (tombstone semantics are the tombstone-wins rules'),
+    /// `updated_at` (touch bookkeeping, bumped by both sides' acts) —
+    /// and `sync_version` rides outside `columns` by construction. What
+    /// remains for a variant row (id, block_id, parent_variant_id,
+    /// status, locked, label, fan_position, created_at) is exactly the
+    /// row's INTENT surface: equality there means the local dirt, if
+    /// any, is text.
+    private static func textIsTheOnlyDivergence(local: SyncRow, server: SyncRow) -> Bool {
+        let volatile: Set<String> = ["working_text", "deleted_at", "updated_at"]
+        let keys = Set(local.columns.keys).union(server.columns.keys).subtracting(volatile)
+        return keys.allSatisfy { local.columns[$0] == server.columns[$0] }
     }
 
     /// S5 + the §6 tombstone-rescue rule, symmetric by side:
