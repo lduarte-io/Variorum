@@ -1866,6 +1866,43 @@ at its mechanism per the B4 finding rule, never quietly rewritten.
 
 ---
 
+### ROW 17 — THE ORCHESTRATOR'S RULING (2026-09-22, recorded repo-first; B5 Phase 2 builds to this)
+
+**SHAPE A APPROVED, SHAPE-SCOPED — with the Journal-face probe added as a Phase-2 deliverable.**
+
+**Why A, in canon's own terms:** §9 makes `server_seq` the ONLY ordering authority, and the
+CAS-reject door is the one road that delivers state OUTSIDE that authority — B5's re-trace
+sharpened F-3 into exactly this (the door, not a missing leg, is the mechanism; every
+pull-delivered retirement arrives in context because drain order guarantees the keeper's seq
+precedes the tombstone's). Shape A makes the reject door DEFER to the feed's authority precisely
+where the feed has not yet spoken: the fingerprint (server row TOMBSTONED · local row LIVE ·
+local `sync_version` 0) means "my never-acked row was killed before I learned," and the reject
+itself PROVES the current state sits on the feed beyond the cursor — so the deferral is bounded
+by the A5 band, can never jam, and the death then arrives keeper-first through the shipped legs
+(the collision repair + row 7's arrival leg) with ZERO new repair semantics. Convergence-neutral
+for every meaning of the tombstone: a repair retirement heals both-notes-tagged; a DELIBERATE
+peer deletion still lands by feed one round later, tombstone-wins intact. Row 12's deferred
+reader makes the deferral VISIBLE, not silent — the unwrap's asserts should touch that counter.
+
+**Shape-scoped, not tag-scoped (the durable-predicate philosophy, row 7's own):** the
+fingerprint's meaning is table-independent, and the generic form re-routes any future
+same-shaped race through feed order instead of leaving per-table twins to write. **The
+tradeoff's cost is bought back by evidence, not assumption: Phase 2 ADDS the Journal-face PROBE
+PIN** — construct the Journal-keeper family's analogue of F-3's reject face (the flagged
+untraced observation); EXPECTED GREEN under shape-scoped A (the structural closure proven, a
+coverage pin); if it unexpectedly reds, STOP AND REPORT (an untraced class is never fixed on
+momentum). **Shape B is DOMINATED as proposed** (two new legs + a minted intermediate state vs
+A's re-route through existing legs; per-family twins owed). **Shape C is REJECTED as proposed —
+sustained emphatically:** exact-stamp dead-arrival revival is indistinguishable from a
+deliberate delete-then-recreate and would resurrect applications she deliberately removed; row
+7's record already priced those discriminators as worse.
+
+**Phase 2's deliverables:** the ~4-line defer in `SyncEngine.push` (the fingerprint exact; every
+other reject shape byte-unchanged — the five named classes' pins stay green); F-3's pin
+UNWRAPPED as red-on-old (revert-verified, commit-first), asserting both-notes-tagged on both
+devices in both orders AND the deferral's visibility through the row-12 counter; the Journal-face
+probe (expected green); the row-7 pins + repair/dedupe suites green beside; finals to ZERO wraps.
+
 ## THE LADDER (ONE Fable ladder over the run's combined diff; opens after B5's record closes — amended from "B4's" when F-3 became row 17)
 
 Fresh `fable-reviewer` per round, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing; findings
