@@ -11,6 +11,11 @@ import Testing
 /// client editing concurrently, and `newBlock`'s Phase 9 touch/churn stamps
 /// riding every mint. Convergence bar unchanged: empty outboxes,
 /// byte-identical synced tables, identical rendered text.
+///
+/// RUN B batch B4 (ledger row 14): every interleaved beat runs production's
+/// round shape. Boundary cell: the divide family's edge/placement chunk
+/// split is the sweep suite's S6 — the same row family this session's
+/// gestures cross; not duplicated.
 @Suite("Sync under structural gestures (Phase 9, Step 8)")
 struct StructuralSessionSyncTests {
     @Test func aGestureSessionConvergesUnderInterleavedSync() async throws {
@@ -32,8 +37,8 @@ struct StructuralSessionSyncTests {
                     in: post.id, text: "Closing block. Final words here.", at: .end)
                 return (post.id, one.block.id, one.variant.id, two.block.id, three.block.id)
             }
-        _ = try await mac.push()
-        _ = try await phone.pull()
+        _ = try await productionRound(mac)
+        _ = try await productionRound(phone)
 
         // The phone edits a Mac-authored block while the Mac restructures.
         try phone.with { ops, _ in
@@ -46,10 +51,8 @@ struct StructuralSessionSyncTests {
             let ops = Operations(undoStack: stack)
             return try ops.divide(world.b2, cut: 14)
         }
-        _ = try await mac.push()
-        _ = try await phone.push()
-        _ = try await mac.pull()
-        _ = try await phone.pull()
+        _ = try await productionRound(mac)
+        _ = try await productionRound(phone)
 
         // Gesture 2: the W ceremony on block 1 (branch, then divideW with
         // both takes marked — the ceremony's exact op call).
@@ -60,8 +63,8 @@ struct StructuralSessionSyncTests {
                 branch.id, text: "Different opening. It also runs long.", charDelta: 0)
             _ = try ops.divideW(world.b1, cuts: [world.v1: 17, branch.id: 19])
         }
-        _ = try await mac.push()
-        _ = try await phone.pull()
+        _ = try await productionRound(mac)
+        _ = try await productionRound(phone)
 
         // Gesture 3: merge the divided halves back (adjacent pair).
         try mac.with { _, _ in
@@ -85,10 +88,8 @@ struct StructuralSessionSyncTests {
                 _ = try ops.divide(first.block.id, cut: 12)
             }
         }
-        _ = try await mac.push()
-        _ = try await phone.pull()
-        _ = try await phone.push()
-        _ = try await mac.pull()
+        _ = try await productionRound(mac)
+        _ = try await productionRound(phone)
 
         // Undos interleaved with rounds: undo the make-block compound, then
         // undo the merge — ordinary operations onto the outbox.
@@ -97,11 +98,11 @@ struct StructuralSessionSyncTests {
             _ = try stack.undo(with: ops)  // the compound (make-block)
             _ = try stack.undo(with: ops)  // the merge
         }
-        _ = try await mac.push()
-        _ = try await phone.pull()
+        _ = try await productionRound(mac)
+        _ = try await productionRound(phone)
 
         // Quiescence: everything everywhere, byte-identical.
-        _ = try await syncToQuiescence(mac, phone, server: server)
+        _ = try await productionQuiescence(mac, phone, server: server)
         #expect(try mac.syncedDump() == phone.syncedDump())
         #expect(try mac.outboxCount() == 0)
         #expect(try phone.outboxCount() == 0)

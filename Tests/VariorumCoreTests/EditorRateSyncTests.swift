@@ -11,6 +11,14 @@ import Testing
 /// teardown mint — while the Phase 5 engine syncs a second in-memory client
 /// MID-session (not just at the end). Convergence bar unchanged: empty
 /// outboxes, byte-identical synced tables.
+///
+/// RUN B batch B4 (ledger row 14): every mid-session sync beat and the
+/// closing quiescence run production's round shape — pull → push per
+/// device, never the retired push-both-then-pull order. Boundary cell:
+/// the session's structural family (divide) is the sweep suite's S6; a
+/// stranded `commit_point` chunk is a leaf append-only straggler with no
+/// dependent, covered by the generic mid-drain resume
+/// (FaultInjectionSyncTests (c)).
 @Suite("Sync under editor-rate writes (Phase 7, Step 8)")
 struct EditorRateSyncTests {
     @Test func aTypingSessionConvergesUnderInterleavedSync() async throws {
@@ -40,10 +48,8 @@ struct EditorRateSyncTests {
                     try ops.autosave(variantID, text: buffer, charDelta: 1)
                 }
             }
-            _ = try await mac.push()
-            _ = try await phone.push()
-            _ = try await mac.pull()
-            _ = try await phone.pull()
+            _ = try await productionRound(mac)
+            _ = try await productionRound(phone)
         }
 
         // Mid-session structure: a crystallization mint, a manual commit,
@@ -59,15 +65,15 @@ struct EditorRateSyncTests {
         try phone.with { ops, _ in
             try ops.autosave(phoneVariantID, text: "Phone thought, extended.", charDelta: 10)
         }
-        _ = try await mac.push()
-        _ = try await phone.pull()
+        _ = try await productionRound(mac)
+        _ = try await productionRound(phone)
 
         // Teardown: the open tail crystallizes on editor close.
         try mac.with { ops, _ in
             _ = try ops.newBlock(in: postID, text: "Trailing tail, crystallized at teardown", at: .end)
         }
 
-        _ = try await syncToQuiescence(mac, phone, server: server)
+        _ = try await productionQuiescence(mac, phone, server: server)
         #expect(try mac.syncedDump() == phone.syncedDump())
         #expect(try mac.outboxCount() == 0)
         #expect(try phone.outboxCount() == 0)
@@ -114,7 +120,7 @@ struct EditorRateSyncTests {
             }
             return reading.id
         }
-        _ = try await syncToQuiescence(mac, phone, server: server)
+        _ = try await productionQuiescence(mac, phone, server: server)
 
         // The observations a Phase 10 shell holds, iterated concurrently
         // for the session's duration (the phone side).
@@ -163,10 +169,8 @@ struct EditorRateSyncTests {
                 buffers[other].append("p")
                 try ops.autosave(variantIDs[other], text: buffers[other], charDelta: 1)
             }
-            _ = try await mac.push()
-            _ = try await phone.push()
-            _ = try await mac.pull()
-            _ = try await phone.pull()
+            _ = try await productionRound(mac)
+            _ = try await productionRound(phone)
         }
         // A reorder (the readings face) and a fresh member mid-session.
         try mac.with { ops, _ in
@@ -175,7 +179,7 @@ struct EditorRateSyncTests {
             try ops.addPostToReading(fresh.id, to: readingID)
         }
 
-        _ = try await syncToQuiescence(mac, phone, server: server)
+        _ = try await productionQuiescence(mac, phone, server: server)
         #expect(try mac.syncedDump() == phone.syncedDump())
         #expect(try mac.outboxCount() == 0)
         #expect(try phone.outboxCount() == 0)

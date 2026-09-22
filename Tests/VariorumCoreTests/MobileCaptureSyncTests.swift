@@ -9,6 +9,11 @@ import Testing
 /// an edit to a Mac-authored block, and the S5 conflict when both devices
 /// edit the same entry across an offline window. Convergence bar unchanged:
 /// empty outboxes, byte-identical synced tables.
+///
+/// RUN B batch B4 (ledger row 14): every round runs production's shape,
+/// and the double-create scenario carries its own registry-boundary
+/// chunk-split arm (the `block` boundary — a bodiless entry crossing the
+/// wire mid-split).
 @Suite("Sync under the mobile capture write pattern (Phase 8, Step 7)")
 struct MobileCaptureSyncTests {
     @Test func offlineCaptureEditsAndConflictsConverge() async throws {
@@ -23,7 +28,7 @@ struct MobileCaptureSyncTests {
             _ = try ops.createOrOpenJournalEntry(entryDate: "2026-07-06")
             return minted.variant.id
         }
-        _ = try await syncToQuiescence(mac, phone, server: server)
+        _ = try await productionQuiescence(mac, phone, server: server)
 
         // ── The phone goes OFFLINE and journals (the capture stream). ──
         let phoneEntryVariant: String = try phone.with { ops, _ in
@@ -55,7 +60,7 @@ struct MobileCaptureSyncTests {
         }
 
         // ── Back online: rounds until quiescence. ──
-        _ = try await syncToQuiescence(mac, phone, server: server)
+        _ = try await productionQuiescence(mac, phone, server: server)
         #expect(try mac.syncedDump() == phone.syncedDump())
         #expect(try mac.outboxCount() == 0)
         #expect(try phone.outboxCount() == 0)
@@ -118,7 +123,7 @@ struct MobileCaptureSyncTests {
             let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
             _ = try ops.newBlock(in: entry.container.id, text: "Phone half of the day.", at: .end)
         }
-        _ = try await syncToQuiescence(mac, phone, server: server)
+        _ = try await productionQuiescence(mac, phone, server: server)
         #expect(try mac.syncedDump() == phone.syncedDump())
 
         for client in [mac, phone] {
@@ -144,5 +149,72 @@ struct MobileCaptureSyncTests {
         #expect(!phoneOpened.created)
         #expect(macOpened.container.id == phoneOpened.container.id,
                 "the earliest-created entry opens, deterministically on every device")
+    }
+
+    /// RUN B batch B4 — the registry-boundary chunk-split arm for the
+    /// capture family (ledger row 14; B1's `pushSplitAtBoundary` is the
+    /// instrument): the Mac's push of its half of the double-create dies AT
+    /// the `block` boundary — the entry's container crosses the wire
+    /// BODILESS (its block, variant and placement stranded) — and the
+    /// phone's full round runs against that partial picture (SyncSpec §5's
+    /// read-side tolerance: render gaps, never crash). The resumed drain
+    /// completes the family; the day still converges to the documented two
+    /// visible entries with both bodies, and create-or-open still opens the
+    /// same earliest entry everywhere.
+    @Test func theDoubleCreateSplitAtTheBlockBoundaryStillConvergesToTwoWholeEntries() async throws {
+        let server = FakeSyncServer()
+        let macFault = FaultInjectingTransport(server: server)
+        let mac = try SyncClient(name: "Mac", prefix: "AA", transport: macFault)
+        let phone = try SyncClient(name: "Phone", prefix: "BB", transport: server, clockOffset: 977, seed: 2)
+
+        try mac.with { ops, _ in
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+            _ = try ops.newBlock(in: entry.container.id, text: "Desk half of the day.", at: .end)
+        }
+        try phone.with { ops, _ in
+            let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+            _ = try ops.newBlock(in: entry.container.id, text: "Phone half of the day.", at: .end)
+        }
+
+        // The Mac's round: pull (empty), then the push dies at the block
+        // boundary — the container lands alone.
+        _ = try await mac.pull()
+        try await pushSplitAtBoundary(mac, table: "block", transport: macFault)
+
+        // The phone's full round in the gap: the bodiless entry arrives (a
+        // legal partial world) and the phone's own whole entry lands.
+        let gapPull = try await phone.pull()
+        #expect(gapPull.applied >= 1, "the bodiless container crossed in the first chunk")
+        #expect(try phone.db.fetchInt(
+            """
+            SELECT COUNT(*) FROM container
+            WHERE profile = 'journal' AND entry_date = '2026-07-07' AND deleted_at IS NULL
+            """) == 2, "the phone sees both entries mid-split — one still bodiless")
+        _ = try await phone.push()
+
+        // The Mac resumes; both families complete everywhere.
+        _ = try await productionQuiescence(mac, phone, server: server)
+        #expect(try mac.syncedDump() == phone.syncedDump())
+        for client in [mac, phone] {
+            #expect(try client.db.fetchInt(
+                """
+                SELECT COUNT(*) FROM container
+                WHERE profile = 'journal' AND entry_date = '2026-07-07' AND deleted_at IS NULL
+                """) == 2, "\(client.name): the documented two visible entries")
+            for text in ["Desk half of the day.", "Phone half of the day."] {
+                #expect(try client.db.fetchString(
+                    "SELECT working_text FROM variant WHERE working_text = ? AND deleted_at IS NULL",
+                    [text]) != nil, "\(client.name): both bodies whole after the resume")
+            }
+        }
+        let macOpened = try mac.with { ops, _ in
+            try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+        }
+        let phoneOpened = try phone.with { ops, _ in
+            try ops.createOrOpenJournalEntry(entryDate: "2026-07-07")
+        }
+        #expect(!macOpened.created && !phoneOpened.created)
+        #expect(macOpened.container.id == phoneOpened.container.id,
+                "create-or-open converges through the split too")
     }
 }

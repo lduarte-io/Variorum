@@ -1534,8 +1534,13 @@ waits, no subagents (one Sonnet lookup max), commit-before-revert, no trailers.
 - [x] FaultInjectionSyncTests: all 8 seed/tail quiescences → `productionQuiescence`, the (b′)
   stagings → `productionRound`; the armed fault windows stay as bare halves (the subject; a
   bare half is production's own). Suite GREEN: 6 tests.
-- [ ] EditorRateSyncTests + StructuralSessionSyncTests + MobileCaptureSyncTests converted + the
-  same-day double-create split arm at the `block` boundary — PENDING
+- [x] EditorRateSyncTests + StructuralSessionSyncTests + MobileCaptureSyncTests converted (every
+  mid-session beat and tail → production rounds/quiescence; boundary cells stated at the suite
+  headers: the divide family is S6's, commit_point is a leaf straggler under the generic
+  mid-drain resume) + the NEW double-create split arm at the `block` boundary
+  (`theDoubleCreateSplitAtTheBlockBoundaryStillConvergesToTwoWholeEntries` — the bodiless entry
+  crosses mid-split, §5's read-side tolerance, both bodies whole after the resume). GREEN: 6
+  tests / 3 suites.
 - [ ] MultiTenantSyncTests: `fleetQuiesce` → production order (pull→push per device); stagings
   converted; gate/refusal halves annotated — PENDING
 - [ ] Row 16: the tenth arm (`sync_reencrypt` under an OLD proof — fence-first + proof-refused +
