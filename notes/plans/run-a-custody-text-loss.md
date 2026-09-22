@@ -1774,17 +1774,34 @@ line 2 ticked ✔ and the banner advanced to RUN B-next (`2974f5b9`); (5) canon 
 the flagged record-truth edits to QUESTIONS #137/#140 and the new rows #136–#140 — zero AppSpec
 lines, zero schema, marker 8, zero `Sync/` lines across the whole run.
 
-**CLOSING RUNS (the run's final tree):**
-- Full Mac suite: **PENDING(run in flight)**
-- Core `swift test`: **PENDING**
-- Mobile suite: **PENDING**
-- iOS build: **PENDING**
+**CLOSING RUNS (the run's final tree — all four gates GREEN):**
+- Full Mac suite: **3086 tests in 509 suites — ALL GREEN, ZERO failures** (818 s; baseline
+  3045/504 → +41/+5, the arithmetic matching the run's added suites exactly; the only `skipped:`
+  lines the opt-in Keychain drills, the standing shape).
+- Core `swift test`: **1639 tests in 177 suites — ALL GREEN** (57 s; baseline 1631/175).
+- Mobile suite: **642 tests in 109 suites PASSED with exactly the 4 known issues** (baseline
+  626/106 → +16/+3, matching; the same 4 knowns as at open).
+- iOS build: **BUILD SUCCEEDED**.
 
-**THE ORCHESTRATOR'S CLOSING WALK:** **PENDING** (the peek's two-generation road live on the dev
-store — seal, refuse, close, reopen, close again, reopen; the pad guard; captures to
-`notes/plans/run-a-screens/closeout/`).
+**THE ORCHESTRATOR'S CLOSING WALK — DONE 2026-09-21, hands-on on the dev-store Debug build built
+at the run's head** (captures `01`–`08` in `notes/plans/run-a-screens/closeout/`, gitignored).
+**The ladder's centerpiece verified IN USE, the full cycle:** the pad filed a capture (its guard
+road — the shelf aggregate stale by design, the Library proving the landing); the note sealed
+via the note ▾ menu; a comment typed and refused under the seal WITH THE TEXT KEPT (P4's Mac
+twin); the panel closed and reopened — **restored, generation 1**; closed WITHOUT filing and
+reopened — **STILL restored, generation 2** (the round-3 peek; on round 2's code this reopen was
+empty), the restored line in the receipt register (*"the comment that couldn't be saved — here to
+try again"*); unsealed; add — **the comment LANDED as a row with its margin card in the gutter,
+the field empty, no ghost**. Instance discipline: the suite's test host discriminated by PATH and
+never touched; my instance quit by PID (two same-id instances make `tell application id`
+ambiguous — the UNIT E rule, followed this time); zero instances after. One walk lesson recorded:
+the ⌘K palette's ⏎ did not run my typed command twice (nothing minted — caught by reading the
+Library rather than trusting the gesture); the pad's own chord was the road, per the walker
+facts.
 
-**THE INSTALL REFRESH:** **PENDING** (after the walk; A1 backup first; zero-instance window).
+**THE INSTALL REFRESH:** **PENDING — runs after this finals commit** (the 13u4 recipe verbatim:
+A1 backup of the whole real-store folder, byte-verified; a clean throwaway worktree Release build
+from this head; SHA-256 old→new; codesign + both access groups; zero instances throughout).
 
 **HER RATIFY BUNDLE (the checkpoint report's list):** QUESTIONS **#136** (A1's five PROVISIONALs)
 · **#137** (the quick-note park + the one-shot quit decline; (b) extended as a record-truth edit)
