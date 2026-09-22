@@ -1546,8 +1546,14 @@ waits, no subagents (one Sonnet lookup max), commit-before-revert, no trailers.
   `productionRound`; the direct-gate and crafted-push tests annotated exempt at the line; the
   fresh-account test was already production (in-code). Suite GREEN: 13 tests (the two
   attacker-file tests riding untouched).
-- [ ] Row 16: the tenth arm (`sync_reencrypt` under an OLD proof — fence-first + proof-refused +
-  the gate-pass control + the DDL text pin), the nine arms byte-untouched — PENDING
+- [x] Row 16: the tenth arm
+  (`theTenthArmSyncReencryptUnderAnOldProofRefusesAtTheGate`, its own @Test in the attacker
+  file) — fence-first with the old key id; `keyProofRefused` under the old proof with the
+  current id (the row's letter); bytes/per-row seq/head all unmoved; the NON-VACUITY control
+  (the current proof passes the same gate, a stale-version row answers `.skipped`); the arm-9-
+  style DDL text pin (`sync_reencrypt`'s deployed body performs `sync_key_gate`). **VERDICT:
+  GREEN-BY-DESIGN, exactly the row's expected outcome — a coverage pin, no defect.** The nine
+  arms + arm 9 byte-untouched, re-run green beside it (3 tests).
 - [ ] SyncMergeTests suite-level exemption annotated; `ProductionRound.swift` header's
   "B4's deliverable" sentence flipped to done — PENDING
 - [ ] THE SWEEP TABLE (suite × scenario: converted · exempt-with-reason · boundary cell) written

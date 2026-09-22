@@ -518,6 +518,85 @@ extension MultiTenantSyncTests {
         // TheGlobalScope…`; the core suite has no auth fake.)
     }
 
+    // MARK: - (10) `sync_reencrypt` under an OLD key proof (RUN B B4, ledger row 16)
+
+    /// THE TENTH ARM — S1's Q2 suite-completeness NIT (the stress pass's
+    /// one routing into the suites): `sync_reencrypt` was the ONE data RPC
+    /// the attacker scenario never fired. GREEN-BY-DESIGN — a coverage pin
+    /// over the gate's standing order (`sync_key_gate`: fence → proof), not
+    /// a defect claim; the nine arms above are byte-untouched. The shape is
+    /// the stale-writer-after-re-key window — exactly where the walk's RPC
+    /// lives: the vault has moved to a new corpus key id and the NEW
+    /// master's proof hash; a writer still holding the OLD material fires
+    /// the walk's own door.
+    @Test func theTenthArmSyncReencryptUnderAnOldProofRefusesAtTheGate() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let variantID: String = try a.with { ops, _ in
+            let post = try ops.createPost(title: "hers", profile: .blog)
+            return try ops.newBlock(in: post.id, text: "Sealed words.", at: .end).variant.id
+        }
+        _ = try await productionRound(a)
+        let storedBefore = try #require(await server.currentRow(table: "variant", rowID: variantID))
+        let seqBefore = await server.currentSeq(table: "variant", rowID: variantID)
+        let headBefore = await server.headSeq
+        #expect(seqBefore != nil, "the row is on the mirror — the pin isn't vacuous")
+
+        // The re-key's server half (the CF-8 order — the vault FIRST): a
+        // new corpus key id + the NEW master's proof hash.
+        let rotatedMaster = SymmetricKey(data: Data((0..<32).map { UInt8($0 &+ 0xE0) }))
+        let rotatedKeyID = "test-corpus-key-ARM10-000000001"
+        await server.setVaultRow(
+            corpusKeyID: rotatedKeyID, keyProofHash: KeyProof.hash(master: rotatedMaster))
+
+        // (i) The OLD key id with the old proof: the FENCE refuses first —
+        // the gate's order, the SQL's own.
+        await #expect(throws: SyncError.encryptionKeysReplaced,
+                      "ARM 10: the fence first — sync_reencrypt with the old key id") {
+            _ = try await server.reencrypt(
+                [storedBefore], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+        }
+        // (ii) The CURRENT id (readable from the vault by any session) with
+        // the OLD proof — the row's letter: the PROOF refuses.
+        await #expect(throws: SyncError.keyProofRefused,
+                      "ARM 10: sync_reencrypt under an old proof — the proof refuses") {
+            _ = try await server.reencrypt(
+                [storedBefore], activeKeyID: rotatedKeyID, keyProof: SyncTestKeys.keyProof)
+        }
+        // Nothing replaced: bytes, the per-row seq and the head all unmoved.
+        #expect(await server.currentRow(table: "variant", rowID: variantID) == storedBefore)
+        #expect(await server.currentSeq(table: "variant", rowID: variantID) == seqBefore)
+        #expect(await server.headSeq == headBefore)
+
+        // The NON-VACUITY control: the CURRENT proof passes the same gate
+        // on the same call — a stale-VERSION row answers `.skipped`, so the
+        // refusals above are the gate's, not some always-throwing door, and
+        // the control itself moves nothing.
+        var staleVersion = storedBefore
+        staleVersion.syncVersion += 7
+        let outcomes = try await server.reencrypt(
+            [staleVersion], activeKeyID: rotatedKeyID,
+            keyProof: KeyProof.wireToken(master: rotatedMaster))
+        #expect(outcomes == [.skipped(currentVersion: storedBefore.syncVersion)],
+                "the gate passes the current proof; the version guard alone answers")
+        #expect(await server.currentRow(table: "variant", rowID: variantID) == storedBefore,
+                "…and the control moved nothing either")
+
+        // The DEPLOYED function's own wiring (the arm-9 text-pin
+        // precedent): `sync_reencrypt`'s body routes through the ONE gate.
+        let root = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        let sql11 = try String(
+            contentsOf: root.appendingPathComponent("Server/supabase/11_pre13x_postures.sql"),
+            encoding: .utf8)
+        let reencryptBody = try #require(
+            sql11.components(separatedBy: "create or replace function sync_reencrypt")
+                .dropFirst().first?
+                .components(separatedBy: "create or replace function ").first)
+        #expect(reencryptBody.contains("perform sync_key_gate(active_key_id, key_proof);"),
+                "the deployed sync_reencrypt routes through the one gate")
+    }
+
     // MARK: - (9) No ownership-change instruction on the wire
 
     /// ARM 9 — NO OWNERSHIP-CHANGE INSTRUCTION EXISTS ON THE WIRE: the
