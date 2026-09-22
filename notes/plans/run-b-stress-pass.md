@@ -244,7 +244,62 @@ deploy checklist so a future mirror rebuild cannot silently drop the guard.
 same second. Which device's words are the account's, and does every device's Done say so? (§7;
 `PostureSwitchTests`' choreography pins; ledger 61/67/69)*
 
-**PENDING**
+**Same-second PASSPHRASE change (§7 step 5) — the LAST change wins; a re-wrap, nothing lost.**
+`bothDevicesChangeThePassphraseAtOnceTheCASRefusesTheSecondAndTheLastChangeWins` (:3110) confirms:
+device 1's change lands INSIDE device 2's write; device 2's CAS refuses
+(`vaultRevisionConflict` — "nothing was overwritten"); the vault is under device 1's word (p1).
+Device 2 then RE-READS, finds its own typed old word now RETIRED at the door
+(`retiredPassphraseAtDoor`, :3161), and retries by the road needing no current word (Touch ID /
+held material) — landing ON TOP, so the vault ends under device 2's word (p2), revision +2. **The
+answer: whichever change commits LAST is the account's** (order-determined by the CAS; both are
+legitimate — a passphrase change re-wraps the SAME keys, so no key rotates and nothing is lost).
+**Does every device's Done say so? For a passphrase change there is NO Done line — the say-so is
+the NOTICE, by design.** Device 1 learns at its next open via `changeNotice ==
+.passphraseChangedElsewhere` (:3184) + a dismissable banner; its own word still opens it locally,
+the winning word opens it online through the vault road and re-wraps its copy (:3188–3191). This
+is 4a's ruling recorded at closeout item 60 ("the change door has no done line — the notice's
+disappearance is the feedback"). Transient stale belief (device 1 believing p1 is current until
+it reconciles) causes no lockout and no loss — the notice + vault road resolve it. HOLDS.
+
+**Same-second CASTLE entry (§7 step 7) — the FIRST rotation wins; every device's Done says so
+EXACTLY.** `twoDevicesSwitchingPostureAtOnceTheSecondsCASRefuseBecomesTheFollow` (:3208): device
+B's WHOLE `enterCastle` lands inside device A's vault write. A's attempt is refused (the PROOF's
+refusal — B's rotation replaced the hash, checked before the CAS); A RE-READS, the account has
+already moved to Castle under B's keys, and A's road becomes THE FOLLOW with the passphrase it
+typed — no second rotation, no vault write of A's own, the corpus key id advanced exactly ONCE
+(B's, :3239), `updateCount == +3` (B's begin, B's completion, A's ONE refused attempt), A
+re-keys its own library under B's M′ and holds B's material (:3244), A's Standard-era key file
+retired. **The account's words are B's (the winner — the first rotation to land).** The critical
+safety property: A's ceremony SHOWED A a fresh set of twelve words that are NOT the account's, so
+**A's Done must not be the ordinary one** — it renders `enteredCastleAfterAnotherDevice(device:
+"test device")` naming the device the vault records (`updated_by_device`), NEVER
+`enteredCastleDone` (:3257–3260); B's Done IS the ordinary one (:3261). This is ledger 61 — the
+vacuous-promise this phase exists to end.
+
+**The two resume-road corners, resolved EXACTLY by F1's discriminator (ledger 67/69).** The
+danger is telling A the wrong story after a crash: the discriminator is the vault's current
+corpus key id vs the id A's marker STAMPED (`CorpusRotation.prepare` mints the id BEFORE the
+marker's write — F1, ledger 69), and `updated_by_device` is ONLY the sentence's name, never the
+discriminator.
+- **67** (`aCeremonyKilledBeforeItsVaultWriteResumesIntoAnotherDevicesSwitchAsTheFollowAndSaysSo`,
+  :3294): A crashed BEFORE its vault write; B enters Castle whole; A resumes → the vault's id is
+  B's (≠ A's marker's id) ⇒ the FOLLOW with the flag + B's name ⇒ the conflict Done. Right.
+- **69** (`aCeremonyWhoseOwnWriteLandedResumesAsItselfAfterAFollowerFinishedAndSpeaksTheOrdinaryDone`,
+  :3355): A's write LANDED (its marker's id == the vault's), custody failed, a FOLLOWER (B)
+  finished the rotation and stamped ITS name on `updated_by_device`; A resumes → the vault's id
+  IS the one A minted ⇒ A's OWN switch ⇒ the ORDINARY Done, A's words LANDED (they ARE the
+  account's — B followed under them). Without F1's id discriminator the old device-name reading
+  would have told A the conflict sentence over words that WERE the account's — a false alarm F1
+  closed (the red-on-old revert R3 in the F1 record reddens exactly this).
+
+**VERDICT: HOLDS — with ledger 61's conflict-follow Done wording PROVISIONAL (hers to ratify).**
+Both same-second cases are comprehensively pinned and safe: the passphrase change's say-so is the
+notice (no Done line, by design); the Castle entry's say-so is a Done on every device, with the
+loser's conflict-follow Done and the two crash-resume corners resolved EXACTLY by the
+mint-id-vs-marker-id discriminator so neither a vacuous promise (67) nor a false alarm (69)
+survives. The one open item is not a defect: ledger 61's `enteredCastleAfterAnotherDevice`
+sentence is a PROVISIONAL copy string awaiting her ratification (already a QUESTIONS candidate) —
+**owner: her ratify bundle**, not a fix.
 
 ## Q5 — the recovery-wrap digest as a non-secret; a forged digest
 
