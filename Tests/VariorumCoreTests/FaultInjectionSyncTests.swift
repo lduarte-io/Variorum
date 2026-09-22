@@ -10,6 +10,12 @@ import Testing
 /// synced tables, empty outboxes), no `working_text` loss, no spurious
 /// conflict variants, bounded push cycles — and POSITIVE activity counts, so
 /// an accidentally-empty scenario can never pass vacuously.
+///
+/// RUN B batch B4 (ledger row 14): seeds and convergence tails run
+/// production's round shape (`productionQuiescence`). The armed fault
+/// windows themselves stay spelled as bare halves — the instrumented half
+/// IS each scenario's subject, and a bare push/pull is production's own
+/// half.
 @Suite("Transport fault injection (Phase 8, A2)")
 struct FaultInjectionSyncTests {
     private func conflictVariantCount(_ client: SyncClient) throws -> Int {
@@ -50,7 +56,7 @@ struct FaultInjectionSyncTests {
         let serverPost = await server.currentRow(table: "container", rowID: postID)
         #expect(serverPost?.syncVersion == 1)
 
-        _ = try await syncToQuiescence(a, b, server: server)
+        _ = try await productionQuiescence(a, b, server: server)
         #expect(try a.syncedDump() == b.syncedDump())
         #expect(try conflictVariantCount(a) == 0)
         #expect(try conflictVariantCount(b) == 0)
@@ -72,7 +78,7 @@ struct FaultInjectionSyncTests {
             let post = try ops.createPost(title: "journal", profile: .journal)
             return try ops.newBlock(in: post.id, text: "Morning page.", at: .end).variant.id
         }
-        _ = try await syncToQuiescence(a, b, server: server)
+        _ = try await productionQuiescence(a, b, server: server)
         let variantsBefore = try a.db.fetchInt("SELECT COUNT(*) FROM variant") ?? 0
 
         // The edit whose ack gets lost.
@@ -95,7 +101,7 @@ struct FaultInjectionSyncTests {
             "SELECT working_text FROM variant WHERE id = ?", [variantID])
             == "Morning page, revised.")
 
-        _ = try await syncToQuiescence(a, b, server: server)
+        _ = try await productionQuiescence(a, b, server: server)
         #expect(try a.syncedDump() == b.syncedDump())
         #expect(try conflictVariantCount(b) == 0)
     }
@@ -128,7 +134,7 @@ struct FaultInjectionSyncTests {
         #expect(serverPost?.syncVersion == 1)
         #expect(await server.rowCount(table: "container") == 1)
 
-        _ = try await syncToQuiescence(a, b, server: server)
+        _ = try await productionQuiescence(a, b, server: server)
         #expect(try a.syncedDump() == b.syncedDump())
         #expect(try conflictVariantCount(a) == 0)
         #expect(try conflictVariantCount(b) == 0)
@@ -145,14 +151,14 @@ struct FaultInjectionSyncTests {
         try a.with { ops, _ in
             _ = try ops.createPost(title: "first post", profile: .journal)
         }
-        _ = try await a.push()
+        _ = try await productionRound(a)
         let first = try await b.pull()
         #expect(first.applied > 0, "positive activity: the first window landed")
 
         try a.with { ops, _ in
             _ = try ops.createPost(title: "second post", profile: .journal)
         }
-        _ = try await a.push()
+        _ = try await productionRound(a)
 
         // The next pull is answered with the PREVIOUS window first (a stale
         // replay), then behaves — the engine must terminate, re-apply the
@@ -165,7 +171,7 @@ struct FaultInjectionSyncTests {
         #expect(try b.db.fetchInt(
             "SELECT COUNT(*) FROM container WHERE deleted_at IS NULL") == 2,
             "each post exactly once — replay must not duplicate")
-        _ = try await syncToQuiescence(a, b, server: server)
+        _ = try await productionQuiescence(a, b, server: server)
         #expect(try a.syncedDump() == b.syncedDump())
         #expect(try conflictVariantCount(b) == 0)
     }
@@ -200,7 +206,7 @@ struct FaultInjectionSyncTests {
         #expect(try a.outboxCount() == 0)
         #expect(await server.rowCount(table: "container") == 3)
 
-        _ = try await syncToQuiescence(a, b, server: server)
+        _ = try await productionQuiescence(a, b, server: server)
         #expect(try a.syncedDump() == b.syncedDump())
         #expect(try conflictVariantCount(a) == 0)
         #expect(try conflictVariantCount(b) == 0)
@@ -218,7 +224,7 @@ struct FaultInjectionSyncTests {
             let post = try ops.createPost(title: "journal", profile: .journal)
             return try ops.newBlock(in: post.id, text: "Draft.", at: .end).variant.id
         }
-        _ = try await syncToQuiescence(a, b, server: server)
+        _ = try await productionQuiescence(a, b, server: server)
 
         // The edit that goes out on the wire…
         try a.with { ops, _ in
@@ -253,7 +259,7 @@ struct FaultInjectionSyncTests {
             == "Draft, second revision — mid-flight.")
         #expect(try conflictVariantCount(a) == 0, "the newer edit wins by CAS, never as a conflict card")
 
-        _ = try await syncToQuiescence(a, b, server: server)
+        _ = try await productionQuiescence(a, b, server: server)
         #expect(try a.syncedDump() == b.syncedDump())
         #expect(try b.db.fetchString(
             "SELECT working_text FROM variant WHERE id = ?", [variantID])

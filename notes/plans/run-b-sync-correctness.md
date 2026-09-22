@@ -1531,8 +1531,9 @@ waits, no subagents (one Sonnet lookup max), commit-before-revert, no trailers.
   SyncPullTests exemptions at the line (2 order-is-the-subject echo tests · 5 ScriptedTransport
   no-room tests) + SyncPushTests suite-level exemption (whole suite: the push half's own
   mechanics, instrumented windows, adjacent halves). Both suites GREEN: 17 tests / 2 suites.
-- [ ] FaultInjectionSyncTests seeds + tails converted (armed fault halves stay — the subject) —
-  PENDING
+- [x] FaultInjectionSyncTests: all 8 seed/tail quiescences → `productionQuiescence`, the (b′)
+  stagings → `productionRound`; the armed fault windows stay as bare halves (the subject; a
+  bare half is production's own). Suite GREEN: 6 tests.
 - [ ] EditorRateSyncTests + StructuralSessionSyncTests + MobileCaptureSyncTests converted + the
   same-day double-create split arm at the `block` boundary — PENDING
 - [ ] MultiTenantSyncTests: `fleetQuiesce` → production order (pull→push per device); stagings
