@@ -679,7 +679,7 @@ public struct PurgeJanitor: Sendable {
     /// round on true (the feed no longer carries the orphan, so the
     /// cursor proceeds).
     public func healPurgeOrphan(_ stall: SyncEngine.PullStall) async throws -> Bool {
-        // 2. The ruled narrowing FIRST — two struct-field reads (LADDER R1
+        // 1. The ruled narrowing FIRST — two struct-field reads (LADDER R1
         // F-R5: the scheduler hands EVERY stalled clean round here, and the
         // common §5 transient class paid the preflight's schemaVersion RPC
         // per round for a refusal these two lines decide; a live-row stall
@@ -690,7 +690,7 @@ public struct PurgeJanitor: Sendable {
         guard let stamp = stall.tombstoneStamp else { return false }
         guard !stall.missingReferents.isEmpty else { return false }
 
-        // 1. The preflight (the reconcile's discipline — F-R7's one body).
+        // 2. The preflight (the reconcile's discipline — F-R7's one body).
         let (keyID, keyProof) = try await preflight()
 
         // 3. The discriminator: every missing referent ledger-named.

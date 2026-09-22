@@ -1080,7 +1080,7 @@ honest under row 12's flag, and recorded if ever observed, because it would be a
 has traced and safe-by-refusal is the right posture toward it. Shapes B and C rejected as
 proposed (B impossible client-side; C hosts purged ciphertext forever). The `purgeLedger(since:
 0)` full read is accepted on the stall path's rarity; owner-12's future ledger pruning keeps the
-below-floor-means-purged semantics the discriminator already handles. Pins as proposed, plus the
+below-floor-means-purged semantics the discriminator already handles. [CORRECTED at ladder R2 (NIT): the SHIPPED heal deliberately REFUSES on ANY un-named referent, below-floor included — the B2 fix section and the code state it correctly; this ruling sentence described a semantics the build rightly did not adopt. Unreachable today (floor 0); Phase-12/13y pruning work must build to the code's refusal, not this sentence.] Pins as proposed, plus the
 live-row refusal guard.
 
 **ROW 15 RULING — the two-part repair APPROVED, with ONE constraint on Part 2's discriminator,
@@ -2412,3 +2412,35 @@ session's `LADDER ROUND 1 — FIX-SESSION RESPONSES` section + this adjudication
 round-2 watch items from the fix session: F-R3's inert-lingering marker corner and the
 split-gap-edit corner (one band wider than the one-batch design's own), both recorded with
 mechanisms.
+
+### LADDER ROUND 2 — ORCHESTRATOR ADJUDICATION (2026-09-22 night; THE LADDER CLOSES)
+
+**Round 2's verdict: 0 BLOCKER · 0 MAJOR · 1 MINOR · 2 NIT — no round 3 owed** (the trigger is a
+NEW BLOCKER/MAJOR; none). The record is `notes/plans/run-b-ladder-round2.md`. Every round-1
+disposition RE-VERIFIED by the fresh reviewer's own hands, including two INDEPENDENT red-on-old
+re-proofs in a scratch clone (F-R1's exact 8 issues; F-R2's exact 4); both round-2 watch items
+verified at mechanism depth (the marker inert; the split-gap corner as recorded); the full core
+re-run by the reviewer at its close (1679/179, zero known issues — the recorded finals verified
+exactly). One reviewer process note recorded: an attribution trailer was caught and amended
+BEFORE pushing (her no-trailer rule held; no pushed history rewritten).
+
+**The three findings, dispositioned at adjudication (comment/record-level — the orchestrator's
+small-fix prerogative, this commit):**
+- **The MINOR (the #143(a) corner's understated on-ramp) — FIXED AS ITS OWN REMEDY DEMANDS
+  (honest wording, no behavior):** the reviewer itself sustained record-don't-fix (no client-side
+  discriminator exists without a text pre-image — schema, correctly refused; demanding a
+  behavioral fix would be the hollow-fix trap). The Merge.swift recorded-corners comment and
+  QUESTIONS #143(a) now name the REAL on-ramps (the one-device net-zero metadata round-trip; the
+  latent resyncReinitialize shape) before her PROVISIONAL ratification.
+- **NIT 1 (the healPurgeOrphan inline step labels) — FIXED** (renumbered to the doc comment's
+  post-F-R5 order).
+- **NIT 2 (the ROW 9 RULING's below-floor sentence) — FIXED** (bracketed correction in place:
+  the shipped heal refuses on ANY un-named referent; pruning work builds to the code, not the
+  stale sentence).
+Build + the touched suites green after the comment edits (33/2).
+
+**THE LADDER CLOSES: two rounds, 4 MAJOR · 3 MINOR · 4 NIT total, every finding dispositioned in
+writing, zero disputes, nothing open at the cap.** The overnight tail proceeds: finals on all
+four gates → the A1 backup → the Mac install refresh (her authorization recorded above) → the
+phone attempt-if-connected → the handoff's PENDING slots filled → the 17-file dispositions with
+the live-round leg pending → the checkpoint report.

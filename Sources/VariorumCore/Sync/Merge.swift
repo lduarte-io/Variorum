@@ -90,11 +90,19 @@ extension SyncEngine {
             // but text and the volatile bookkeeping). A metadata-only-
             // dirty row diverges in the metadata it dirtied → server-
             // wins again; a text-only-dirty row rides exactly as ruled.
-            // Recorded corners (#143(a)'s amendment): mixed dirt (text
-            // edit + metadata divergence on either side) refuses the
-            // ride and falls back to the PRE-run server-wins — never
-            // worse than old code; byte-identical metadata minted
-            // independently on both devices would still ride.
+            // Recorded corners (#143(a)'s amendment; on-ramps sharpened
+            // at ladder R2): mixed dirt (text edit + metadata divergence
+            // on either side) refuses the ride and falls back to the
+            // PRE-run server-wins — never worse than old code. Metadata
+            // equality can also arise WITHOUT a two-device coincidence:
+            // a NET-ZERO metadata round-trip on one device (set a label
+            // then clear it before a round — the coalescing outbox keeps
+            // the row dirty with intent columns equal to the server's)
+            // reaches this ride with a stale ancestor text; latently,
+            // resyncReinitialize's no-divergence re-enqueues share the
+            // shape. No better client-side discriminator exists without
+            // a text pre-image (schema — refused); recorded, not fixed
+            // (ladder R2 MINOR, disposition sustained).
             if !cardMinted, server.isTombstoned,
                let localText = local.workingText,
                let serverText = server.workingText,

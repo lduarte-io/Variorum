@@ -1803,7 +1803,7 @@ and server rows — a metadata-only-dirty row (a label, a lock, a fan move) keep
 stale ancestor text can never overwrite the peer's final edit.** Two recorded corners, hers if
 she ever wants them ruled: MIXED dirt (a text edit + a metadata divergence on one row) falls
 back to pre-run server-wins (never worse than old; a durable text-intent record would be schema);
-coincidentally byte-identical metadata on both sides still rides. Ratify ride-the-row-as-narrowed
+byte-identical metadata still rides — and the ladder's round 2 sharpened that corner's on-ramp: it needs NO two-device coincidence (a net-zero metadata round-trip on one device — a label set then cleared before a round — leaves the row dirty with intent columns equal to the server's, so a stale ancestor text can still ride there; recorded, not fixable client-side without a text pre-image, which is schema). Ratify ride-the-row-as-narrowed
 as a §6 clarification, or revert to server-text-wins-on-dead-blocks. PROVISIONAL: the narrowed
 ride stands. **(b) The deliberate-delete-revival corner (amended — the original "once-per-store-
 life window" premise was FALSIFIED by the ladder's F-R2 and the fix BOUNDED it):** the defense
