@@ -2044,10 +2044,14 @@ disposition (the hallucination guard); no fix on the reviewer's word alone.
 - [x] Section opened; findings + run record + canon + postmortem + the named code read in full,
   in my own context. Per-finding re-traces recorded below; every disposition below is an
   AGREE/DISPUTE verdict already made on the trace — build status per finding follows here.
-- [ ] **F-R1 (MAJOR) — AGREED; fix PENDING** (pin planned:
-  `aMetadataOnlyDirtyRowNeverRidesStaleTextOverTheServersFinalEdit` [200/1], red on HEAD; fix =
-  the text-is-the-only-divergence discriminator per the arbitration constraint; F-R8 folds in;
-  revert commit-first).
+- [x] **F-R1 (MAJOR) — AGREED, FIXED with pin** (commit fde96a7d):
+  `aMetadataOnlyDirtyRowNeverRidesStaleTextOverTheServersFinalEdit` [200/1] RED ON HEAD with
+  **8 issues** — exactly the two `working_text` asserts (into-the-Trash + Put-back), both
+  devices, both args; the dumps still converged, i.e. converged ON the loss, as traced. Fix =
+  `textIsTheOnlyDivergence` gating the ride (F-R8's binding folded). Probe suite 14/14 +
+  merge-adjacent suites 58/7 green on the fix. REVERT VERIFIED COMMIT-FIRST: discriminator
+  disabled in the working tree → the pin red again with the same 8 issues; restored via
+  `git checkout` of the committed fix → 14/14 green.
 - [ ] **F-R2 (MAJOR) — AGREED; fix PENDING** (pin planned:
   `aDeliberateDeleteAfterTheMeetingSettledIsNeverDefended`, red on HEAD; fix = the three-arm
   meeting bound, never wider than HEAD; revert commit-first).
