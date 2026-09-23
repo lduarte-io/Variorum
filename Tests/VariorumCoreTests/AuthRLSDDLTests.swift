@@ -2313,9 +2313,13 @@ struct AuthRLSDDLTests {
     }
 
     /// The purge door's fold: 12's `sync_purge_execute` is 11's body with
-    /// EXACTLY the M2 mint swapped — plus, since UNIT B, the challenge
-    /// signature/gate swaps and the ONE contiguous re-auth insertion
-    /// (memo §5's 10-minute window, its declaration beside it).
+    /// EXACTLY the M2 mint swapped + the UNIT B challenge signature/gate
+    /// swaps — and NO re-auth window (ladder R1 F-R1: the 13j janitor calls
+    /// this door unattended, so a 10-minute amr check would freeze the
+    /// autonomous purge pipeline; the re-ruling struck it from this door
+    /// only). Red-on-old on the DDL side: the pre-fix body carried the
+    /// re-auth block, so `swapped == body12` would fail (swapped has no
+    /// re-auth to match it).
     @Test func thePurgeExecutionDoorIsElevensBodyWithExactlyTheMintSwapped() throws {
         let eleven = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
         let twelve = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
@@ -2333,15 +2337,13 @@ struct AuthRLSDDLTests {
                 return line
             }
         }
-        let withoutReauth = try #require(
-            Self.removingContiguousBlock(Self.reauthBlock, from: body12),
-            "the re-auth window must sit whole and contiguous in 12's purge-execute body")
-        let withoutBoth = try #require(
-            Self.removingContiguousBlock(["newest_password_auth timestamptz;"], from: withoutReauth),
-            "the re-auth declaration must be present")
-        #expect(swapped == withoutBoth,
-                "12's sync_purge_execute is 11's body with exactly the mint/challenge swaps + the re-auth insertion")
+        #expect(swapped == body12,
+                "12's sync_purge_execute is 11's body with EXACTLY the mint/challenge/gate swaps — no re-auth (F-R1)")
         #expect(body11 != swapped, "the swaps are real — the pin isn't vacuous")
+        // F-R1: this door carries NO re-auth window — its caller is the
+        // unattended janitor. (Red-on-old: the pre-fix body contained it.)
+        #expect(!body12.contains { $0.contains("VARIORUM_REAUTH_REQUIRED") },
+                "sync_purge_execute must NOT demand re-auth — the janitor runs it unattended")
     }
 
     /// The re-auth window's exact lines (memo §5 — 10 minutes, the JWT's
@@ -2607,28 +2609,29 @@ struct AuthRLSDDLTests {
                 "the truncate RESETS the pool — the adopt road's repush is a first load")
     }
 
-    /// THE RE-AUTH DOORS (memo §5; QUESTIONS #144(c)): both destructive
-    /// RPCs carry the EXACT 10-minute amr window, AFTER the gate (the
-    /// fence and proof outrank) and BEFORE any destructive work.
-    @Test func theReauthWindowGuardsBothDestructiveDoorsAfterTheGate() throws {
-        for function in ["sync_purge_execute", "account_data_truncate"] {
-            let body = try Self.finalBody(of: function)
-            for line in Self.reauthBlock {
-                #expect(body.contains(line), "\(function) must carry the re-auth line: \(line)")
-            }
-            let gate = try #require(body.range(of: "perform sync_key_gate("))
-            let reauth = try #require(body.range(of: "VARIORUM_REAUTH_REQUIRED"))
-            let work = try #require(body.range(of: function == "sync_purge_execute"
-                ? "granted_seq := next_tenant_seq(caller);"
-                : "foreach tbl in array data_tables loop"))
-            #expect(gate.lowerBound < reauth.lowerBound && reauth.lowerBound < work.lowerBound,
-                    "\(function): gate → re-auth → the destructive work")
+    /// THE RE-AUTH DOOR (memo §5 as AMENDED 2026-09-23; QUESTIONS #144(c)):
+    /// `account_data_truncate` — and ONLY it — carries the EXACT 10-minute
+    /// amr window, AFTER the gate (the fence and proof outrank) and BEFORE
+    /// any destructive work. `sync_purge_execute` carries NO re-auth
+    /// (ladder R1 F-R1: its production caller is the unattended 13j
+    /// janitor, which a re-auth window would freeze).
+    @Test func theReauthWindowGuardsTheTruncateDoorAfterTheGate() throws {
+        let body = try Self.finalBody(of: "account_data_truncate")
+        for line in Self.reauthBlock {
+            #expect(body.contains(line), "account_data_truncate must carry the re-auth line: \(line)")
         }
-        // The non-destructive doors carry NO re-auth — a sync round must
-        // never demand a fresh password.
-        for function in ["sync_push", "sync_pull", "sync_horizon", "sync_purge_ledger", "sync_reencrypt"] {
+        let gate = try #require(body.range(of: "perform sync_key_gate("))
+        let reauth = try #require(body.range(of: "VARIORUM_REAUTH_REQUIRED"))
+        let work = try #require(body.range(of: "foreach tbl in array data_tables loop"))
+        #expect(gate.lowerBound < reauth.lowerBound && reauth.lowerBound < work.lowerBound,
+                "account_data_truncate: gate → re-auth → the destructive work")
+        // Every OTHER door — the round doors AND `sync_purge_execute`
+        // (F-R1) — carries NO re-auth: a round runs unattended, and so does
+        // the janitor's purge.
+        for function in ["sync_push", "sync_pull", "sync_horizon", "sync_purge_ledger",
+                         "sync_reencrypt", "sync_purge_execute"] {
             #expect(!(try Self.finalBody(of: function)).contains("VARIORUM_REAUTH_REQUIRED"),
-                    "\(function) never demands re-auth — rounds run unattended")
+                    "\(function) never demands re-auth — it runs unattended")
         }
     }
 

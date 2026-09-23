@@ -83,6 +83,45 @@ struct PurgeConvergenceTests {
         return total
     }
 
+    // MARK: - 0. The unattended janitor needs no sign-in (ladder R1 F-R1)
+
+    /// THE UNATTENDED JANITOR PURGES WITH NO SIGN-IN ON ITS PATH (ladder R1
+    /// F-R1): the 13j janitor sweeps after every clean round, unattended, on
+    /// refresh tokens — nothing on `SyncScheduler`'s path signs in, and the
+    /// app's `verifyPassword` discards+revokes its fresh grant so the
+    /// standing session's amr never freshens. So `sync_purge_execute` must
+    /// carry NO re-auth window, or server-side physical removal (a shipped
+    /// privacy promise) silently stops ~10 min after the last human sign-in.
+    /// This pin runs the janitor exactly as the scheduler does — NO re-auth
+    /// setup anywhere — and the eligible synced family purges, ledger and
+    /// all. **RED-ON-OLD (behavioral revert, recorded in the ladder file):**
+    /// with the pre-fix re-auth check re-added to `executePurge` and the
+    /// fake's claim at production truth (stale), this sweep threw
+    /// `reauthRequired` and purged nothing.
+    @Test func theUnattendedJanitorPurgesAnEligibleFamilyWithNoSignIn() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 90, seed: 2)
+
+        let family = try buildAndDeleteFamily(a)
+        try backdate(a, from: family.deletedStamp, to: oldStamp)
+        try await syncToQuiescence(a, b, server: server)
+        try await round(a)
+        try await round(b)
+
+        // The scheduler's unattended path: no verifyPassword, no re-auth
+        // setup — exactly what the janitor sees weeks into a session.
+        let report = try await sweep(a, server)
+        #expect(report.familiesPurged >= 1,
+                "the janitor's autonomous door runs with no fresh password")
+        #expect(try familyRowCount(a, post: family.post) == 0,
+                "the local family is physically gone")
+        #expect(await server.currentRow(table: "container", rowID: family.post) == nil,
+                "the mirror's family is gone")
+        #expect(await server.purgedLedgerCount() > 0,
+                "every purged row leaves a content-free ledger entry")
+    }
+
     // MARK: - 1. The 30-day road + the ledger fence (resurrection banned)
 
     @Test func aThirtyDayDeletionPurgesEverywhereAndAStalePeerCannotResurrectIt() async throws {

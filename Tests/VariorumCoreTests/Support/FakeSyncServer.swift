@@ -958,9 +958,10 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         _ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: SyncKeyProof, as userID: String
     ) throws -> Int64 {
         _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof, rpc: "sync_purge_execute")
-        // 13y UNIT B (memo §5): the destructive door's re-auth window —
-        // gate first (fence/proof outrank), then the claim check.
-        try checkRecentReauth(for: userID)
+        // 13y ladder R1 (F-R1): NO re-auth window on this door — the 13j
+        // janitor calls it UNATTENDED, so a re-auth check would freeze the
+        // autonomous purge pipeline. The gate (challenge-verified proof) is
+        // its wall; the re-auth window stays on account_data_truncate only.
         // 13y M2: the granted ledger seq is the caller's own.
         let granted = nextTenantSeq(for: userID)
         for target in rows {

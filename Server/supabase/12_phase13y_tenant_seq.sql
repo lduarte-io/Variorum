@@ -165,15 +165,24 @@
 --     corner, stated: a pool burned inside one window meets the daily
 --     limit immediately for that window's remainder — only the abuse
 --     shape ever reaches it. 13t re-prices every number.
---   * THE RE-AUTH DOORS (memo §5; the ADDENDUM's item 2): the two
---     destructive RPCs — `account_data_truncate` and `sync_purge_execute`
---     — require a session re-authenticated by PASSWORD within 10 MINUTES,
---     read from the JWT's `amr` (the newest password-method timestamp);
---     absent or stale refuses typed VARIORUM_REAUTH_REQUIRED. This
---     matches the doors' client flow exactly (they verify the account
---     password through a sign-in immediately before acting); the window's
---     empirical probe (memo §5) confirms the amr timestamp survives a
---     token refresh, or the fallback comes back for a re-ruling.
+--   * THE RE-AUTH DOOR (memo §5 as AMENDED 2026-09-23, the ladder R1
+--     re-ruling; the ADDENDUM's item 2): `account_data_truncate` — and
+--     ONLY it — requires a session re-authenticated by PASSWORD within 10
+--     MINUTES, read from the JWT's `amr` (the newest password-method
+--     timestamp); absent or stale refuses typed VARIORUM_REAUTH_REQUIRED.
+--     `sync_purge_execute` carries NO re-auth check: its main production
+--     caller is the 13j JANITOR, which executes purge intents AUTONOMOUSLY
+--     (possibly days after any human act, unattended, on refresh tokens),
+--     so a re-auth window there would FREEZE the shipped purge pipeline ~10
+--     min after every sign-in — F-R1, a BLOCKER against the memo's own
+--     original premise. Its walls are the challenge-verified proof + the
+--     session + the own-partition guard, which is what actually gates a
+--     stolen long-lived token there. The truncate door matches its client
+--     flow (it verifies the account password through a sign-in immediately
+--     before acting, and the flow ADOPTS that fresh grant's session for the
+--     call — F-R3); the window's empirical probe (memo §5) confirms the amr
+--     timestamp survives a token refresh, or the fallback comes back for a
+--     re-ruling.
 --   * THE SIGNATURES: every gated RPC gains the defaultless `challenge`
 --     (before the defaulted parameters — the NIT-4 discipline), so the
 --     OLD signatures are DROPPED FIRST (section 0 — the 09/10/11
@@ -1078,12 +1087,13 @@ $$;
 --    granted ledger seq draws from the CALLER's counter — the owner's
 --    device cursors and `last_purge_seq` scan points are what it is
 --    compared against, and they live on the same counter now — and, since
---    UNIT B, the challenge-gated signature + THE RECENT-RE-AUTH WINDOW
---    (memo §5, QUESTIONS #144(c)): a destructive RPC requires a session
---    re-authenticated by PASSWORD within 10 minutes, read from the JWT's
---    `amr` — a stolen long-lived token cannot empty an account's server
---    copy from a custom client. NO quota (removal is a right, and this
---    door writes no data rows).
+--    UNIT B, the challenge-gated signature. NO re-auth window (memo §5 as
+--    AMENDED 2026-09-23, the ladder R1 re-ruling / QUESTIONS #144(c)): its
+--    main production caller is the 13j JANITOR, which executes purge
+--    intents AUTONOMOUSLY, so a 10-minute re-auth here would freeze the
+--    shipped purge pipeline — F-R1. Its walls stay the challenge-verified
+--    proof + the session + the own-partition guard. NO quota either
+--    (removal is a right, and this door writes no data rows).
 -- ---------------------------------------------------------------------------
 
 create or replace function sync_purge_execute(rows jsonb, active_key_id text, key_proof text, challenge text) returns bigint
@@ -1101,7 +1111,6 @@ declare
   tbl text;
   pk text;
   granted_seq bigint;
-  newest_password_auth timestamptz;
 begin
   caller := auth.uid();
   if caller is null then
@@ -1109,19 +1118,12 @@ begin
   end if;
   perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_purge_execute');
 
-  -- THE RECENT-RE-AUTH WINDOW (13y UNIT B, memo §5 — 10 minutes): the
-  -- session's newest PASSWORD-method amr entry must be inside it; absent
-  -- or stale refuses typed. The doors' client flow signs in immediately
-  -- before acting, so an honest act always passes.
-  select to_timestamp(max((amr_entry->>'timestamp')::bigint))
-    into newest_password_auth
-    from jsonb_array_elements(coalesce(auth.jwt()->'amr', '[]'::jsonb)) amr_entry
-    where amr_entry->>'method' = 'password';
-  if newest_password_auth is null
-     or newest_password_auth < now() - interval '10 minutes' then
-    raise exception 'VARIORUM_REAUTH_REQUIRED: this act needs a fresh sign-in — confirm the account password and try again';
-  end if;
-
+  -- NO RE-AUTH WINDOW HERE (memo §5 as AMENDED 2026-09-23, ladder R1 F-R1):
+  -- the 13j janitor calls this door UNATTENDED, so a 10-minute amr check
+  -- would freeze the autonomous purge pipeline. The gate above (the
+  -- challenge-verified proof) + the own-partition deletes below are its
+  -- walls. `account_data_truncate` keeps its re-auth window; this door
+  -- deliberately does not.
   granted_seq := next_tenant_seq(caller);
   for item in select * from jsonb_array_elements(rows) loop
     tbl := item->>'table';
@@ -1811,9 +1813,9 @@ commit;
 --   select pg_get_functiondef('sync_reencrypt(jsonb,text,text,text)'::regprocedure)
 --          not like '%sync_write_budget%';                            -- true (the exemption — a rotation is never metered)
 --   select pg_get_functiondef('sync_purge_execute(jsonb,text,text,text)'::regprocedure)
---          like '%VARIORUM_REAUTH_REQUIRED%';                         -- true (the destructive doors' 10-minute window)
+--          not like '%VARIORUM_REAUTH_REQUIRED%';                     -- true (F-R1: the janitor's autonomous door has NO re-auth window)
 --   select pg_get_functiondef('account_data_truncate(text,text,text)'::regprocedure)
---          like '%VARIORUM_REAUTH_REQUIRED%';                         -- true (both of them)
+--          like '%VARIORUM_REAUTH_REQUIRED%';                         -- true (the ONE destructive door with a 10-minute window)
 --   THE AMR REFRESH-SURVIVAL PROBE (memo §5's named check, HER window):
 --     decode her session's JWT before and after a token refresh — the
 --     amr password timestamp must be byte-identical; if it BUMPS, the

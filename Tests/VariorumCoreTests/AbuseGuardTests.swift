@@ -163,33 +163,39 @@ struct AbuseGuardTests {
 
     // MARK: - The re-auth doors (memo §5; QUESTIONS #144(c))
 
-    /// THE DESTRUCTIVE RPCs DEMAND RECENT RE-AUTH: a session whose newest
-    /// password-method amr entry is absent or stale refuses BOTH doors
-    /// typed — a stolen long-lived token cannot empty an account's server
-    /// copy — and nothing is deleted; a fresh re-auth (the doors' own
-    /// flow: they verify the password immediately before acting) passes.
-    /// The fake enforces the CLAIM check on synthetic claims (the
-    /// 10-minute letter is the DDL pin's — an emulation choice, recorded).
-    @Test func theDestructiveDoorsRefuseWithoutRecentReauthAndPassWithIt() async throws {
+    /// THE TRUNCATE DOOR DEMANDS RECENT RE-AUTH; THE PURGE DOOR RUNS
+    /// UNATTENDED (ladder R1 F-R1): a session whose newest password-method
+    /// amr entry is absent or stale refuses `account_data_truncate` typed —
+    /// a stolen long-lived token cannot empty an account's server copy —
+    /// but `sync_purge_execute` carries NO re-auth (its caller is the 13j
+    /// janitor, which sweeps unattended), so a purge under a STALE claim
+    /// succeeds. A fresh re-auth (the truncate door's own flow: it verifies
+    /// the password immediately before acting) passes. The fake enforces
+    /// the CLAIM check on synthetic claims (the 10-minute letter is the DDL
+    /// pin's — an emulation choice, recorded).
+    @Test func theTruncateDoorDemandsRecentReauthWhileThePurgeDoorRunsUnattended() async throws {
         let server = FakeSyncServer()
         _ = try await server.push(
-            [containerRow(id: "c1")], activeKeyID: SyncTestKeys.corpusKeyID,
+            [containerRow(id: "c1"), containerRow(id: "c2")],
+            activeKeyID: SyncTestKeys.corpusKeyID,
             keyProof: server.mintProof(rpc: "sync_push"))
         // The stolen-token shape: valid keys, valid proofs, STALE re-auth.
         await server.setRecentPasswordAuth(false)
-        await #expect(throws: SyncError.reauthRequired, "sync_purge_execute") {
-            _ = try await server.executePurge(
-                [SyncPurgeTarget(table: "container", rowID: "c1")],
-                activeKeyID: SyncTestKeys.corpusKeyID,
-                keyProof: server.mintProof(rpc: "sync_purge_execute"))
-        }
+        // F-R1: the janitor's door runs UNATTENDED — a stale claim never
+        // freezes it. The purge succeeds and leaves its ledger entry.
+        _ = try await server.executePurge(
+            [SyncPurgeTarget(table: "container", rowID: "c1")],
+            activeKeyID: SyncTestKeys.corpusKeyID,
+            keyProof: server.mintProof(rpc: "sync_purge_execute"))
+        #expect(await server.rowCount(table: "container") == 1, "the purge ran unattended — c1 is gone")
+        #expect(await server.purgedLedgerCount() == 1, "and it left a ledger entry")
+        // The truncate door, by contrast, REFUSES a stale claim.
         await #expect(throws: SyncError.reauthRequired, "account_data_truncate") {
             try await server.truncateAccount(
                 FakeSyncServer.defaultUserID, activeKeyID: SyncTestKeys.corpusKeyID,
                 keyProof: server.mintProof(rpc: "account_data_truncate"))
         }
-        #expect(await server.rowCount(table: "container") == 1, "nothing deleted, nothing purged")
-        #expect(await server.purgedLedgerCount() == 0)
+        #expect(await server.rowCount(table: "container") == 1, "nothing truncated — c2 stands")
         // The gate ORDER holds: a wrong proof still refuses AS a proof
         // fault (fence/proof outrank the re-auth check — 12's letter).
         await #expect(throws: SyncError.keyProofRefused) {
@@ -199,13 +205,12 @@ struct AbuseGuardTests {
                     rpc: "account_data_truncate",
                     material: KeyProofMaterial(master: SymmetricKey(size: .bits256))))
         }
-        // The doors' own flow: a fresh sign-in immediately before acting.
+        // The truncate door's own flow: a fresh sign-in immediately before acting.
         await server.setRecentPasswordAuth(true)
-        _ = try await server.executePurge(
-            [SyncPurgeTarget(table: "container", rowID: "c1")],
-            activeKeyID: SyncTestKeys.corpusKeyID,
-            keyProof: server.mintProof(rpc: "sync_purge_execute"))
-        #expect(await server.rowCount(table: "container") == 0)
+        try await server.truncateAccount(
+            FakeSyncServer.defaultUserID, activeKeyID: SyncTestKeys.corpusKeyID,
+            keyProof: server.mintProof(rpc: "account_data_truncate"))
+        #expect(await server.rowCount(table: "container") == 0, "a fresh claim lets the truncate through")
         // …and the honest wording.
         #expect(SyncError.reauthRequired.description.contains("fresh sign-in"))
     }

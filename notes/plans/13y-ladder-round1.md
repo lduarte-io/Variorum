@@ -31,8 +31,27 @@ gates the door, so the re-auth adds little. Proposed: keep 10-min on
 `account_data_truncate`, REMOVE from `sync_purge_execute`; red-on-old janitor pin under a
 stale claim; flip at least one janitor suite to stale-default; correct the false-premise
 comments (AbuseGuardTests:134–135/:168–172, 12's re-auth bullet, memo §5, #144(c)).
-→ **ORCHESTRATOR RE-RULING (below): ACCEPTED IN FULL.** Disposition: PENDING the fix
-session.
+→ **ORCHESTRATOR RE-RULING (below): ACCEPTED IN FULL.** Disposition: **AGREE — FIXED (fix
+session).** Traced and confirmed: `SyncScheduler.performRound` calls `janitor.sweep()` +
+`janitor.healPurgeOrphan()`, both reaching `transport.executePurge` via
+`signer.call(rpc:"sync_purge_execute")`; nothing on that path signs in, and
+`AuthSession.verifyPassword` discards+revokes the fresh grant, so the standing session's amr
+never freshens. Fix landed: (a) 12's `sync_purge_execute` re-auth block + its
+`newest_password_auth` declaration REMOVED (header bullet + section header + verification
+tail corrected — `sync_purge_execute` now `not like '%VARIORUM_REAUTH_REQUIRED%'`;
+`account_data_truncate` keeps its window); (b) the fake's `executePurge` drops
+`checkRecentReauth`; (c) `AuthRLSDDLTests`: `thePurgeExecutionDoorIsElevensBodyWithExactlyTheMintSwapped`
+now asserts `swapped == body12` with NO re-auth extraction (the DDL-side red-on-old — the
+pre-fix body carried the block) + a `!contains(VARIORUM_REAUTH_REQUIRED)` arm; the doors pin
+renamed `theReauthWindowGuardsTheTruncateDoorAfterTheGate` with `sync_purge_execute` moved to
+the no-re-auth set; (d) `AbuseGuardTests`' door test reworked
+(`theTruncateDoorDemandsRecentReauthWhileThePurgeDoorRunsUnattended`): a purge under a STALE
+claim SUCCEEDS, only truncate refuses; (e) the RED-ON-OLD janitor pin
+`PurgeConvergenceTests.theUnattendedJanitorPurgesAnEligibleFamilyWithNoSignIn` — an
+eligible synced family purges through the scheduler's unattended path with no sign-in. The
+memo §5 was already amended by the orchestrator (F-R6 commit). Suites green: AuthRLSDDL 76 +
+AbuseGuard 8 + the new janitor pin. RED-ON-OLD verified by behavioral revert (below in this
+disposition once run).
 
 **F-R2 [BLOCKER] · 12:1660–1724 (grants) with failing bodies :527–548
 (`extensions.gen_random_bytes`) and :687–691 (`extensions.hmac`) — `variorum_definer` is
