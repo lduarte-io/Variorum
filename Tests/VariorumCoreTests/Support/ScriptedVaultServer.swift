@@ -52,6 +52,25 @@ final class ScriptedVaultServer: @unchecked Sendable {
     /// The linked mirror — the vault row the RPCs gate on lives there.
     let syncServer: FakeSyncServer
 
+    /// 13y UNIT B: bearer → user, for the challenge/enroll routes (whose
+    /// requests carry no user id — the real server reads auth.uid()).
+    /// `KeyVaultClient` composes bearers as `token-<uid suffix>` via the
+    /// worlds' StaticSessionProvider; worlds with several users register
+    /// here (VaultTestWorld does at init). Unregistered bearers fall back
+    /// to the fake's default account — the single-user worlds' truth.
+    private var bearerUsers: [String: String] = [:]
+
+    func registerBearer(_ bearer: String, userID: String) {
+        lock.lock(); defer { lock.unlock() }
+        bearerUsers[bearer] = userID
+    }
+
+    private func user(forBearer header: String?) -> String {
+        lock.lock(); defer { lock.unlock() }
+        let bearer = (header ?? "").replacingOccurrences(of: "Bearer ", with: "")
+        return bearerUsers[bearer] ?? FakeSyncServer.defaultUserID
+    }
+
     init(syncServer: FakeSyncServer = FakeSyncServer()) {
         self.syncServer = syncServer
     }
@@ -167,6 +186,12 @@ final class ScriptedVaultServer: @unchecked Sendable {
         }
         guard let url = request.url else { return response(request, 404) }
 
+        if url.path.hasSuffix("/rest/v1/rpc/sync_challenge") {
+            return try await respondToChallenge(request)
+        }
+        if url.path.hasSuffix("/rest/v1/rpc/key_proof_enroll") {
+            return try await respondToEnroll(request)
+        }
         if url.path.hasSuffix("/rest/v1/rpc/key_vault_update") {
             return try await respondToUpdate(request)
         }
@@ -201,16 +226,68 @@ final class ScriptedVaultServer: @unchecked Sendable {
         }
     }
 
+    /// 13y UNIT B — `sync_challenge(n)`'s route: bridges to the linked
+    /// fake's mint (session-gated only; no vault requirement).
+    private func respondToChallenge(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        struct Request: Decodable { let n: Int }
+        guard request.httpMethod == "POST", let body = request.httpBody,
+              let call = try? JSONDecoder().decode(Request.self, from: body)
+        else { return response(request, 400) }
+        let userID = user(forBearer: request.value(forHTTPHeaderField: "Authorization"))
+        let minted = await syncServer.fetchChallenges(call.n, as: userID)
+        return response(request, 200, body: try JSONEncoder().encode(minted))
+    }
+
+    /// 13y UNIT B — `key_proof_enroll`'s route: bridges to the linked
+    /// fake's enroll twin; refusals answer as PostgREST serves a RAISE.
+    private func respondToEnroll(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        struct Request: Decodable {
+            let kp1: String
+            let kp2: String
+            let activeKeyID: String
+            enum CodingKeys: String, CodingKey {
+                case kp1
+                case kp2
+                case activeKeyID = "active_key_id"
+            }
+        }
+        guard request.httpMethod == "POST", let body = request.httpBody,
+              let call = try? JSONDecoder().decode(Request.self, from: body)
+        else { return response(request, 400) }
+        let userID = user(forBearer: request.value(forHTTPHeaderField: "Authorization"))
+        do {
+            try await syncServer.enrollKeyProof(
+                legacyProof: call.kp1, macKey: call.kp2,
+                activeKeyID: call.activeKeyID, as: userID)
+            // The one-Postgres linkage: the stored wire row's hash moves
+            // WITH the enrollment (the real table has one row).
+            if var stored = storedRow(userID: userID) {
+                stored.keyProofHash = await syncServer.vaultRow(for: userID)?.keyProofHash
+                storeUpdated(stored)
+            }
+        } catch SyncError.keyProofAlreadyEnrolled {
+            return refusal(request, marker: SyncServerRefusalMarker.keyProofAlreadyEnrolled)
+        } catch SyncError.keyProofRefused {
+            return refusal(request, marker: SyncServerRefusalMarker.keyProofRequired)
+        } catch SyncError.encryptionKeysReplaced {
+            return refusal(request, marker: SyncServerRefusalMarker.staleKeyFence)
+        }
+        return response(request, 200)
+    }
+
     /// The `key_vault_update` RPC's route.
     private func respondToUpdate(_ request: URLRequest) async throws -> (Data, URLResponse) {
         struct Request: Decodable {
             let payload: KeyVaultWireRow
             let expectedRevision: Int
             let keyProof: String
+            /// 13y UNIT B: the single-use nonce.
+            let challenge: String
             enum CodingKeys: String, CodingKey {
                 case payload
                 case expectedRevision = "expected_revision"
                 case keyProof = "key_proof"
+                case challenge
             }
         }
         countUpdate()
@@ -218,6 +295,12 @@ final class ScriptedVaultServer: @unchecked Sendable {
               let call = try? JSONDecoder().decode(Request.self, from: body)
         else { return response(request, 400) }
         let userID = call.payload.userID
+        // 13y UNIT B: `key_proof_mac` is WRITE-ONLY on the wire row (its
+        // decode always yields nil), so the route reads it off the raw
+        // payload json — exactly where the RPC reads it.
+        let rawPayload = (try? JSONSerialization.jsonObject(with: body) as? [String: Any])
+            .flatMap { $0["payload"] as? [String: Any] }
+        let keyProofMac = rawPayload?["key_proof_mac"] as? String
         // `select … for update` finds no row: VARIORUM_VAULT_ABSENT.
         guard rowExists(userID) else {
             return refusal(request, marker: SyncServerRefusalMarker.vaultAbsent)
@@ -225,9 +308,11 @@ final class ScriptedVaultServer: @unchecked Sendable {
         let receipt: FakeSyncServer.VaultUpdateReceipt
         do {
             receipt = try await syncServer.keyVaultUpdate(
-                as: userID, expectedRevision: call.expectedRevision, keyProof: call.keyProof,
+                as: userID, expectedRevision: call.expectedRevision,
+                keyProof: SyncKeyProof(challenge: call.challenge, proof: call.keyProof),
                 newCorpusKeyID: call.payload.corpusKeyID,
                 newKeyProofHash: call.payload.keyProofHash,
+                newKeyProofMac: keyProofMac,
                 previousCorpusKeyID: call.payload.corpusPreviousKeyID,
                 previousCorpusKey: call.payload.corpusPreviousWrappedByMaster,
                 updatedByDevice: call.payload.updatedByDevice)
@@ -235,6 +320,10 @@ final class ScriptedVaultServer: @unchecked Sendable {
             return refusal(request, marker: SyncServerRefusalMarker.vaultAbsent)
         } catch KeyVaultClientError.keyProofRefused {
             return refusal(request, marker: SyncServerRefusalMarker.keyProofRequired)
+        } catch KeyVaultClientError.keyProofEnrollRequired {
+            return refusal(request, marker: SyncServerRefusalMarker.keyProofEnroll)
+        } catch KeyVaultClientError.keyProofChallengeStale {
+            return refusal(request, marker: SyncServerRefusalMarker.keyProofStaleChallenge)
         } catch KeyVaultClientError.rotationInProgress {
             return refusal(request, marker: SyncServerRefusalMarker.rotationInProgress)
         } catch KeyVaultClientError.vaultRevisionConflict {
@@ -302,6 +391,7 @@ struct VaultTestWorld {
     /// client) — the R1-2 cross-device interleaving's world.
     init(server: ScriptedVaultServer, userID: String = FakeSyncServer.defaultUserID,
          accessToken: String = "token-1") {
+        server.registerBearer(accessToken, userID: userID)
         let client = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,

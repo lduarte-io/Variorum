@@ -312,7 +312,7 @@ struct PurgeConvergenceTests {
                 db, roots: [SyncPurgeTarget(table: "container", rowID: family.post)]
             ).orderedRows
         }
-        _ = try await server.executePurge(rows, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+        _ = try await server.executePurge(rows, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "sync_purge_execute"))
         let ledger = await server.purgedLedgerCount()
         #expect(try familyRowCount(a, post: family.post) > 0,
                 "the crash left the local rows standing")
@@ -823,7 +823,7 @@ struct PurgeConvergenceTests {
         try await round(a)
         _ = try await server.executePurge(
             [SyncPurgeTarget(table: "container", rowID: family.post)],
-            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "sync_purge_execute"))
 
         // The mirror deploys the NEXT lockstep marker: this client is now
         // BEHIND. The standalone pre-pass (the scheduler's pre-round call)
@@ -957,23 +957,34 @@ private actor ExecutePurgeHookedTransport: SyncTransport, SyncPurgeTransport {
         await server.schemaVersion()
     }
 
-    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+    // 13y UNIT B: the challenge surface forwards transparently
+    // (wrappers forward — the standing doctrine).
+    func fetchChallenges(_ count: Int) async throws -> [String] {
+        try await server.fetchChallenges(count)
+    }
+
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
+        try await server.enrollKeyProof(
+            legacyProof: legacyProof, macKey: macKey, activeKeyID: activeKeyID)
+    }
+
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
         try await server.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
         try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof, deviceID: deviceID)
     }
 
-    func syncHorizon(activeKeyID: String, keyProof: String) async throws -> Int64 {
+    func syncHorizon(activeKeyID: String, keyProof: SyncKeyProof) async throws -> Int64 {
         try await server.syncHorizon(activeKeyID: activeKeyID, keyProof: keyProof)
     }
 
-    func purgeLedger(since: Int64, activeKeyID: String, keyProof: String) async throws -> SyncPurgeLedgerPage {
+    func purgeLedger(since: Int64, activeKeyID: String, keyProof: SyncKeyProof) async throws -> SyncPurgeLedgerPage {
         try await server.purgeLedger(since: since, activeKeyID: activeKeyID, keyProof: keyProof)
     }
 
-    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: String) async throws -> Int64 {
+    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: SyncKeyProof) async throws -> Int64 {
         let granted = try await server.executePurge(rows, activeKeyID: activeKeyID, keyProof: keyProof)
         if let hook = afterExecutePurge {
             afterExecutePurge = nil

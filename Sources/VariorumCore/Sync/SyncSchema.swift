@@ -107,7 +107,16 @@ public enum SyncSchema {
     /// canonical `key_vault_update`; the global `sync_server_seq`
     /// DROPPED fail-loud; CLIENT SEMANTICS UNCHANGED — the Step 0 survey
     /// verdicted every seq comparison within-account, so per-tenant
-    /// numbering preserves every order any client observes; mirror DDL
+    /// numbering preserves every order any client observes; PLUS, in the
+    /// SAME marker-9 event, UNIT B's three halves per the ruled memo and
+    /// QUESTIONS #144: the KEY-PROOF CHALLENGE — the static bearer proof
+    /// retires for a per-request `HMAC(kp2, nonce ‖ ':' ‖ rpc_name)` over
+    /// server-issued single-use nonces (`sync_challenge`), kp2 in
+    /// Supabase Vault, enrollment once via `key_proof_enroll`, every
+    /// gated RPC's signature gaining the defaultless `challenge`; the
+    /// MINIMAL ABUSE GUARD (`sync_write_budget` — 2,000/call · 500,000
+    /// lifetime pool · 50,000/24h, typed VARIORUM_WRITE_QUOTA); and the
+    /// destructive RPCs' 10-minute amr RE-AUTH window; mirror DDL
     /// 12_phase13y_tenant_seq.sql — deploy is the orchestrator's ONE
     /// end-of-phase window under her standing pre-authorization,
     /// R-13y-2). **Bump this
@@ -452,6 +461,26 @@ public enum SyncServerRefusalMarker {
     /// server refuses, the client re-walks. Deployed by the maintenance
     /// artifact `maintenance/pre13x-ladder-rotation-clearing-guard.sql`.
     public static let rotationRowsRemain = "VARIORUM_ROTATION_ROWS_REMAIN"
+    /// 13y UNIT B (the ruled memo §3): the account holds no Vault-held
+    /// per-request proof secret yet — raised BEFORE any nonce is consumed,
+    /// so the signer's enroll road retries under a live challenge.
+    public static let keyProofEnroll = "VARIORUM_KEY_PROOF_ENROLL"
+    /// 13y UNIT B: `key_proof_enroll` found the account's secret already
+    /// landed — the racing loser's outcome, treated as success (its kp2
+    /// is the same value; memo §7 edge 1).
+    public static let keyProofAlreadyEnrolled = "VARIORUM_KEY_PROOF_ALREADY_ENROLLED"
+    /// 13y UNIT B: the presented challenge is unknown, already consumed,
+    /// or expired (the 5-minute server-clock TTL) — the signer fetches
+    /// fresh and retries ONCE, then surfaces the §12 grammar.
+    public static let keyProofStaleChallenge = "VARIORUM_KEY_PROOF_STALE_CHALLENGE"
+    /// 13y UNIT B (the memo §4; QUESTIONS #144(b)): the minimal abuse
+    /// guard refused the push — the per-call cap or the daily window.
+    /// Carries `retry_after_seconds=<n>` in the message.
+    public static let writeQuota = "VARIORUM_WRITE_QUOTA"
+    /// 13y UNIT B (the memo §5; QUESTIONS #144(c)): a destructive RPC
+    /// (`account_data_truncate` / `sync_purge_execute`) demands a session
+    /// re-authenticated by password within 10 minutes.
+    public static let reauthRequired = "VARIORUM_REAUTH_REQUIRED"
 }
 
 public enum SyncError: Error, Equatable, Sendable {
@@ -544,6 +573,26 @@ public enum SyncError: Error, Equatable, Sendable {
     /// reached the server, so nothing typed here is ever re-encrypted from
     /// a stale copy or pushed under a key the fence then refuses.
     case outboxNotEmpty(pending: Int)
+    /// 13y UNIT B (memo §3): the account has not enrolled its per-request
+    /// proof secret. The `SyncChallengeSigner` handles it TRANSPARENTLY
+    /// (the one enroll road, then a retry); surfacing means enrollment
+    /// itself keeps refusing — the round fails visibly, outbox intact.
+    case keyProofEnrollRequired
+    /// 13y UNIT B: the enroll road found the secret already landed — a
+    /// racing device won; the signer treats it as success (memo §7 edge 1)
+    /// and it never reaches a round's status.
+    case keyProofAlreadyEnrolled
+    /// 13y UNIT B: the challenge was unknown, consumed, or expired TWICE
+    /// (the signer already fetched fresh and retried once) — the round
+    /// refuses in the §12 grammar and the next trigger retries clean.
+    case keyProofChallengeStale
+    /// 13y UNIT B (memo §4; QUESTIONS #144(b)): the server's minimal
+    /// abuse guard refused the push. Outbox intact, cursor unmoved —
+    /// nothing is lost; sync resumes when the window passes.
+    case writeQuotaExceeded(retryAfterSeconds: Int?)
+    /// 13y UNIT B (memo §5; QUESTIONS #144(c)): a destructive act needs a
+    /// session re-authenticated by password within the 10-minute window.
+    case reauthRequired
 }
 
 extension SyncError: CustomStringConvertible {
@@ -606,6 +655,28 @@ extension SyncError: CustomStringConvertible {
             // is the engine's own status sentence.
             return "Sync is paused until you enter your passphrase once — your keys were "
                 + "replaced on another device. Nothing is lost while paused."
+        case .keyProofEnrollRequired:
+            return "Sync couldn't finish setting up this account's security check — it "
+                + "retries on the next sync. Nothing is lost while it waits."
+        case .keyProofAlreadyEnrolled:
+            // Never a round's status (the signer swallows it); the honest
+            // sentence exists so a stray surface never prints a raw case.
+            return "This account's security check is already set up."
+        case .keyProofChallengeStale:
+            return "Sync couldn't complete a security check just now — it retries on the "
+                + "next sync. Nothing is lost while it waits."
+        case .writeQuotaExceeded(let retryAfterSeconds):
+            // The memo §4's wording (13s re-words); the retry-after rides
+            // when the server named one.
+            let wait = retryAfterSeconds.map { seconds -> String in
+                let minutes = max(1, seconds / 60)
+                return " It resumes automatically (about \(minutes) minute\(minutes == 1 ? "" : "s"))."
+            } ?? " It resumes automatically."
+            return "Sync is paused — this account hit today's write limit; nothing is "
+                + "lost.\(wait)"
+        case .reauthRequired:
+            return "This needs a fresh sign-in — confirm your account password and try "
+                + "again."
         }
     }
 }

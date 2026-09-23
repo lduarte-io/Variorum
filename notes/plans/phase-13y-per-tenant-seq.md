@@ -814,9 +814,45 @@ and the full `AuthRLSDDLTests` suite (68/68) re-run green by the orchestrator.
   function's revoke-from-PUBLIC pair. `SerializerCompletenessTests.serverOnlyTables`
   gains the two tables (UNIT A's counter precedent). **AuthRLSDDLTests 76/76 (+7) ·
   SerializerCompletenessTests 6/6.**
-- **Piece 4 — the client challenge road (KeyProof v2 · KeyProofMaterial/SyncKeyProof ·
-  the transport seam · the signer · engine/janitor/probe/rotation/vault-client call sites ·
-  the fake's twins · the suite sweep): PENDING.**
+- **Piece 4 — the client challenge road: DONE (this commit).** `KeyProof` gains the v2
+  purpose + `macKey`/`macHash`; `KeyProofMaterial` (kp1 wire + kp2, ONE struct from ONE
+  master — the approved both-or-neither shape) and `SyncKeyProof` (nonce + bound HMAC,
+  one value through the Swift seam — the approved pairing) land; `SyncEncryptionKeys
+  .keyProof` becomes the MATERIAL (production derives it in `DeviceKeyMaterial.syncKeys`
+  — zero app-target production key-construction sites); `SyncChallengeTransport`
+  (fetchChallenges + enrollKeyProof) with `SyncTransport` INHERITING it (every round
+  consumer needs it — deliberately not the 13j single-consumer opt-in shape); the
+  `SyncChallengeSigner` actor (one per round half/janitor pass/walk/probe: a nonce batch
+  fetched once, one nonce per call, the stale-fetch-fresh-retry-ONCE road and the
+  enroll-once road with the racing loser's ALREADY_ENROLLED-as-success); every gated
+  transport signature's `keyProof` re-typed (labels keep — the pre-13x churn class,
+  stated up front and approved); `SupabaseTransport` splits the pair into the two wire
+  keys + the two new RPC roads + five new marker classifications (incl.
+  `VARIORUM_WRITE_QUOTA` with the retry-after parser and `VARIORUM_REAUTH_REQUIRED`);
+  `KeyVaultClient.updateVault` takes the material + optional `successorMacKey` and owns
+  its own dance (challenge road, stale-retry-once, enroll road — WITH the found-and-fixed
+  post-enroll payload-hash refresh, recorded below); `AccountLifecycleClient` likewise
+  (no enroll — the re-key order guarantees enrollment); `CorpusRotation.prepare` installs
+  the POST-ENROLL hash (SHA-256(kp2′)) and `begin` carries kp2′ so hash and Vault secret
+  land together; the fake mirrors ALL of it (nonce mint/TTL/single-use/eviction on the
+  logical clock, the enroll twin with ONE recorded latitude — a NIL-hash row adopts the
+  first enrollment, the auto-adopt worlds' road, real-server-refused and DDL-pinned —
+  the challenge-verified checkProof in the RULED order, the quota twin, the re-auth
+  claim twin, `mintProof` as the direct-call test helper) + `ScriptedVaultServer` routes
+  + the whole suite sweep (~30 test files; the wrapper transports forward the new
+  surface; per-user worlds gain material/enrolled-state values). TWO REAL FINDINGS fixed
+  in the tracing, both recorded: (1) a vault-update payload FETCHED BEFORE enrollment
+  carries the creation-era v1 hash, which the server's land-together rule would refuse
+  after the dance's own enroll — the client refreshes the payload hash from its material
+  (rotation payloads excepted: theirs is the successor's); the cross-DEVICE stale-fetch
+  corner refuses loudly into the standing refetch contract, recorded; (2) the successor
+  rule could MASK the R1-2 revision CAS for stale-fetch payloads (a proof-flavored
+  refusal where the honest contract is refetch-and-re-derive) — 12 + the fake gain the
+  revision PRE-CHECK under the held lock right after the proof (the UPDATE's filter
+  stays as the belt), the exactness pin's insertion grown by exactly those lines.
+  **FULL CORE SUITE at this commit: 1705/179 ALL PASSED** (+7 over the 1698 baseline —
+  the seven UNIT B DDL pins; the reworked KeyProofGate suite holds its count with the
+  migration-arm tests REWORKED into the enroll-road ones).**
 - **Piece 5 — the quota client half (typed refusal + wording + fake budget + pins):
   PENDING.**
 - **Piece 6 — the re-auth doors' client half + the auth rate-limit numbers/pins: PENDING.**

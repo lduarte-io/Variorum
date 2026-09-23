@@ -316,7 +316,7 @@ struct VaultEnrollmentTests {
         await #expect(throws: KeyVaultClientError.vaultRevisionConflict) {
             try await deviceB.client.updateVault(
                 fromStale, expectedRevision: stale.revision,
-                keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+                keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
         }
 
         // The WRITTEN phrase still unwraps; the discarded one stays dead —

@@ -1425,6 +1425,15 @@ begin
 
   perform sync_key_proof_check(key_proof, challenge, 'key_vault_update');
 
+  -- The R1-2 revision CAS, PRE-CHECKED under the held lock (13y UNIT B:
+  -- the successor rule below must never mask a stale fetch's honest
+  -- refetch-and-re-derive contract — a stale payload's outdated hash
+  -- would otherwise refuse as a proof fault; the UPDATE's own filter
+  -- stays below as the belt, byte-unchanged).
+  if vault_revision is distinct from expected_revision then
+    raise exception 'VARIORUM_VAULT_REVISION_CONFLICT: the vault changed since it was fetched — fetch it again and re-derive';
+  end if;
+
   -- THE ROTATION'S SUCCESSOR (13y UNIT B, memo §3): hash and secret land
   -- TOGETHER or not at all. The vault row is already locked FOR UPDATE
   -- above, so this read-then-write is serialized per account.

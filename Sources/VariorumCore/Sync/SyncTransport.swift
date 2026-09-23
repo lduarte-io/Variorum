@@ -32,11 +32,53 @@ public enum SyncPushOutcome: Equatable, Sendable {
     case purged
 }
 
+/// 13y UNIT B (the ruled memo §3) — ONE PER-REQUEST PROOF: the single-use
+/// nonce (`challenge` on the wire) paired with the HMAC computed over it
+/// under kp2, bound to the calling RPC's name (`key_proof` on the wire).
+/// The pair travels as ONE value through the Swift seam so a call can
+/// never carry one half without the other; `SupabaseTransport` splits it
+/// into the two wire parameters, the fake verifies both. Minted by
+/// `KeyProofMaterial.proof(challenge:rpc:)`; consumed by exactly one
+/// request — a replay refuses server-side by construction.
+public struct SyncKeyProof: Equatable, Sendable, Codable {
+    /// The nonce, base64 — the wire `challenge` parameter.
+    public let challenge: String
+    /// The bound HMAC, base64 — the wire `key_proof` parameter.
+    public let proof: String
+
+    public init(challenge: String, proof: String) {
+        self.challenge = challenge
+        self.proof = proof
+    }
+}
+
+/// 13y UNIT B — the challenge surface every gated call rides: the nonce
+/// mint (`sync_challenge`) and the one enrollment road
+/// (`key_proof_enroll`). `SyncTransport` INHERITS it (every round consumer
+/// — the engine, the janitor, the rotation walk, the recency probe —
+/// needs it, so unlike the single-consumer purge/rotation surfaces it is
+/// not a separate opt-in); wrappers forward, fakes enforce — the standing
+/// doctrine.
+public protocol SyncChallengeTransport: Sendable {
+    /// `sync_challenge(n)`: a batch of single-use base64 nonces
+    /// (session-gated server-side; n is clamped to 32 there). The
+    /// `SyncChallengeSigner` fetches once per round and consumes one per
+    /// RPC call.
+    func fetchChallenges(_ count: Int) async throws -> [String]
+
+    /// `key_proof_enroll(kp1, kp2, active_key_id)`: the ONE enrollment
+    /// road — the existing hash authorizes the successor, once per
+    /// account. Throws `SyncError.keyProofAlreadyEnrolled` when a racing
+    /// device won (callers treat it as success — kp2 is the same value,
+    /// both derive from M; memo §7 edge 1).
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws
+}
+
 /// The transport seam (SyncSpec §2): exactly two endpoints. The in-process
 /// fake server (test support) and the Supabase RPC client are two
 /// implementations of this one protocol — the engine never knows which it
 /// is talking to.
-public protocol SyncTransport: Sendable {
+public protocol SyncTransport: SyncChallengeTransport, Sendable {
     /// Pushes a batch; the result array is per-row, index-aligned with the
     /// batch. Each `SyncRow.syncVersion` is the CAS base (the row's last
     /// server-accepted version; 0 for never-accepted rows).
@@ -51,15 +93,16 @@ public protocol SyncTransport: Sendable {
     /// doctrine below): a wrapper that silently dropped the key id would
     /// bypass the fence in every test that composes it.
     ///
-    /// `keyProof` (pre-13x, decision 12 — THE KEY PROOF): the wire form of
-    /// `HMAC-SHA256(M, "variorum.key-proof.v1")`, presented in the request
-    /// BODY (never a URL, never a header) and compared server-side against
-    /// the vault's stored hash in constant time. THE PROOF IS THE
+    /// `keyProof` (pre-13x, decision 12 — THE KEY PROOF; PER-REQUEST since
+    /// 13y UNIT B, the ruled memo §3): the single-use nonce + the HMAC
+    /// bound to THIS RPC's name, both in the request BODY (never a URL,
+    /// never a header), verified server-side against the Vault-held kp2
+    /// with the nonce consumed atomically. THE PROOF IS THE
     /// AUTHORIZATION — the key id is readable from the vault by any
     /// session; the proof is not. A session without it gets
     /// `SyncError.keyProofRefused` and nothing from the mirror. REQUIRED,
     /// no default — the `activeKeyID` doctrine exactly.
-    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome]
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome]
 
     /// Rows changed after `since`, ordered by `server_seq`, at most `limit`.
     /// State-based: each row appears once, in its current state, stamped
@@ -77,7 +120,7 @@ public protocol SyncTransport: Sendable {
     /// forward, fakes record (the schemaVersion doctrine): a wrapper that
     /// silently dropped the device id would starve the horizon in every
     /// test that composes it.
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow]
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow]
 
     /// The mirror's deployed schema-version marker (SyncSpec §12's
     /// version-check mechanism — shipped with the Phase 11 lockstep event,
@@ -152,18 +195,18 @@ public protocol SyncPurgeTransport: Sendable {
     ///
     /// pre-13x: a READ, and the proof gates it too — a session without
     /// the keys gets nothing from the mirror, a seq included.
-    func syncHorizon(activeKeyID: String, keyProof: String) async throws -> Int64
+    func syncHorizon(activeKeyID: String, keyProof: SyncKeyProof) async throws -> Int64
 
     /// Ledger entries with `purged_seq > since`, plus the coverage floor.
     /// Proof-gated like the horizon (pre-13x).
-    func purgeLedger(since: Int64, activeKeyID: String, keyProof: String) async throws -> SyncPurgeLedgerPage
+    func purgeLedger(since: Int64, activeKeyID: String, keyProof: SyncKeyProof) async throws -> SyncPurgeLedgerPage
 
     /// Executes one family's purge server-side: deletes exactly the named
     /// rows inside the caller's own partition and records every one in the
     /// ledger, ONE transaction (the adjudication's note 1). Idempotent —
     /// a janitor resuming mid-family re-runs it safely. Returns the
     /// granted ledger seq (one per call: the purge is one event).
-    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: String) async throws -> Int64
+    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: SyncKeyProof) async throws -> Int64
 }
 
 // MARK: - The rotation surface (pre-13x batch 1b — the design's §3.10,
@@ -192,7 +235,7 @@ public protocol SyncRotationTransport: Sendable {
     /// caller pulled it at (`expected_version` — the CAS). Own partition
     /// only; the gate (fence + proof) and the entitlement gate ride it
     /// exactly as a push's do.
-    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome]
+    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncReencryptOutcome]
 
     /// The server's A5 visibility horizon, in milliseconds — the value
     /// `sync_visibility_horizon_ms()` serves (Phase 13y, the R-13y-4 fork's

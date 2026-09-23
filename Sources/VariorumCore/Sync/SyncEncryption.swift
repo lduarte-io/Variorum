@@ -26,13 +26,15 @@ public struct SyncEncryptionKeys: Sendable {
     /// (`PayloadCipher.Binding`), so a value can never be silently
     /// re-attributed to a different key.
     public let corpusKeyID: String
-    /// pre-13x (decision 12): THE KEY PROOF's wire form —
-    /// `KeyProof.wireToken(master:)`, computed on demand by the holder of
-    /// the master key and presented in the BODY of every mutating RPC and
-    /// the two read RPCs. REQUIRED here (no default — every composition
-    /// site decides): a round without it is refused by the server with
+    /// pre-13x (decision 12): THE KEY PROOF — since 13y UNIT B the
+    /// MATERIAL (`KeyProofMaterial`: kp1's wire form for the enroll road +
+    /// kp2, the per-request MAC key, both derived from M), computed on
+    /// demand by the holder of the master key. The round's
+    /// `SyncChallengeSigner` turns it into one single-use proof per RPC
+    /// call. REQUIRED here (no default — every composition site decides):
+    /// a round without it is refused by the server with
     /// `SyncError.keyProofRefused`.
-    public let keyProof: String
+    public let keyProof: KeyProofMaterial
     /// pre-13x (decisions 6 / 31): while a rotation is finishing, the
     /// PREVIOUS corpus key (+ its id) and the server's rotation seq — the
     /// seam opens a pulled row whose `server_seq` is BELOW the seq under
@@ -42,7 +44,7 @@ public struct SyncEncryptionKeys: Sendable {
     public let rotation: RotationInProgress?
 
     public init(
-        corpusKey: SymmetricKey, corpusKeyID: String, keyProof: String,
+        corpusKey: SymmetricKey, corpusKeyID: String, keyProof: KeyProofMaterial,
         rotation: RotationInProgress? = nil
     ) {
         self.corpusKey = corpusKey

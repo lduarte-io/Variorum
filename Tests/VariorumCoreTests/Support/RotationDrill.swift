@@ -31,7 +31,7 @@ enum RotationDrill {
         /// The follower's keys: the current world + the previous key under
         /// the seq rule.
         let keys: SyncEncryptionKeys
-        var keyProof: String { keys.keyProof }
+        var keyProof: KeyProofMaterial { keys.keyProof }
         /// The current world WITHOUT the previous key — what a device holds
         /// once the rotation is complete.
         var completedKeys: SyncEncryptionKeys {
@@ -47,20 +47,26 @@ enum RotationDrill {
     /// serves the fake).
     static func beginRotation(
         on server: FakeSyncServer, as userID: String = FakeSyncServer.defaultUserID,
-        previous: SyncEncryptionKeys, oldProof: String, expectedRevision: Int = 1
+        previous: SyncEncryptionKeys, oldProof: KeyProofMaterial, expectedRevision: Int = 1
     ) async throws -> RotatedWorld {
         let newMaster = SymmetricKey(size: .bits256)
         let newCorpus = SymmetricKey(size: .bits256)
         let newID = "test-corpus-key-ROTATED-" + UUID().uuidString.lowercased().prefix(8)
+        // 13y UNIT B: the write rides ONE challenge-bound proof under the
+        // OLD material, and carries the SUCCESSOR (the new hash is
+        // SHA-256(kp2') beside kp2' itself — they land together).
+        let successor = KeyProofMaterial(master: newMaster)
         let receipt = try await server.keyVaultUpdate(
-            as: userID, expectedRevision: expectedRevision, keyProof: oldProof,
-            newCorpusKeyID: newID, newKeyProofHash: KeyProof.hash(master: newMaster),
+            as: userID, expectedRevision: expectedRevision,
+            keyProof: server.mintProof(rpc: "key_vault_update", for: userID, material: oldProof),
+            newCorpusKeyID: newID, newKeyProofHash: KeyProof.macHash(master: newMaster),
+            newKeyProofMac: successor.macKeyWire,
             previousCorpusKeyID: previous.corpusKeyID,
             previousCorpusKey: Data(repeating: 0x11, count: 40).base64EncodedString())
         guard let seq = receipt.rotationStartedSeq else { throw DrillError.noRotationInProgress }
         let keys = SyncEncryptionKeys(
             corpusKey: newCorpus, corpusKeyID: newID,
-            keyProof: KeyProof.wireToken(master: newMaster),
+            keyProof: successor,
             rotation: RotationInProgress(
                 previousCorpusKey: previous.corpusKey,
                 previousCorpusKeyID: previous.corpusKeyID,
@@ -87,7 +93,8 @@ enum RotationDrill {
         while true {
             let window = try await server.pull(
                 since: cursor, limit: batchSize, activeKeyID: keys.corpusKeyID,
-                keyProof: keys.keyProof, deviceID: nil, as: userID)
+                keyProof: server.mintProof(rpc: "sync_pull", for: userID, material: keys.keyProof),
+                deviceID: nil, as: userID)
             guard !window.isEmpty else { break }
             for pulled in window where pulled.serverSeq < rotation.startedSeq {
                 // The seq rule opens it under the PREVIOUS key; re-sealed
@@ -107,7 +114,9 @@ enum RotationDrill {
     ) async throws -> [SyncReencryptOutcome] {
         guard !rows.isEmpty else { return [] }
         return try await server.reencrypt(
-            rows, activeKeyID: keys.corpusKeyID, keyProof: keys.keyProof, as: userID)
+            rows, activeKeyID: keys.corpusKeyID,
+            keyProof: server.mintProof(rpc: "sync_reencrypt", for: userID, material: keys.keyProof),
+            as: userID)
     }
 
     /// The whole walk — pull, re-seal, send — returning every outcome the
@@ -129,7 +138,8 @@ enum RotationDrill {
         world: RotatedWorld, expectedRevision: Int
     ) async throws {
         _ = try await server.keyVaultUpdate(
-            as: userID, expectedRevision: expectedRevision, keyProof: world.keyProof,
+            as: userID, expectedRevision: expectedRevision,
+            keyProof: server.mintProof(rpc: "key_vault_update", for: userID, material: world.keyProof),
             newCorpusKeyID: world.newCorpusKeyID, newKeyProofHash: nil,
             previousCorpusKeyID: nil, previousCorpusKey: nil)
     }

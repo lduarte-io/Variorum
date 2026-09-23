@@ -152,7 +152,7 @@ struct SyncPushTests {
         var competing = await server.currentRow(table: "container", rowID: postID)!
         competing.columns["title"] = .text(try SyncTestKeys.seal(
             "competing title", table: "container", rowID: postID, column: "title"))
-        _ = try await server.push([competing], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+        _ = try await server.push([competing], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "sync_push"))
 
         // Local intent: a metadata edit (loses, CAS rebase)…
         try a.with { ops, _ in
@@ -169,7 +169,7 @@ struct SyncPushTests {
         var competing2 = await server.currentRow(table: "container", rowID: postID)!
         competing2.columns["title"] = .text(try SyncTestKeys.seal(
             "edited again remotely", table: "container", rowID: postID, column: "title"))
-        _ = try await server.push([competing2], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+        _ = try await server.push([competing2], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "sync_push"))
         try a.with { ops, _ in
             try ops.deleteContainer(postID)
         }
@@ -203,7 +203,7 @@ struct SyncPushTests {
         var competing = await server.currentRow(table: "variant", rowID: variantID)!
         competing.columns["working_text"] = .text(try SyncTestKeys.seal(
             "competing text", table: "variant", rowID: variantID, column: "working_text"))
-        _ = try await server.push([competing], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+        _ = try await server.push([competing], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "sync_push"))
         // …the author edits locally (base is now stale — the push will
         // reject)…
         try a.with { ops, _ in
@@ -281,7 +281,7 @@ actor InterferingTransport: SyncTransport {
         interference = body
     }
 
-    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
         let outcomes = try await inner.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
         if let body = interference {
             interference = nil
@@ -290,11 +290,22 @@ actor InterferingTransport: SyncTransport {
         return outcomes
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
         try await inner.pull(since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof, deviceID: deviceID)
     }
 
     func schemaVersion() async -> Int {
         await inner.schemaVersion()
+    }
+
+    // 13y UNIT B: the challenge surface forwards transparently
+    // (wrappers forward — the standing doctrine).
+    func fetchChallenges(_ count: Int) async throws -> [String] {
+        try await inner.fetchChallenges(count)
+    }
+
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
+        try await inner.enrollKeyProof(
+            legacyProof: legacyProof, macKey: macKey, activeKeyID: activeKeyID)
     }
 }

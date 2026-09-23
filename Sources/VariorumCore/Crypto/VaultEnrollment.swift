@@ -57,12 +57,13 @@ public struct DeviceKeyMaterial: Codable, Equatable, Sendable {
             previousCorpusKeyID: previousCorpusKeyID, startedSeq: rotationStartedSeq)
     }
 
-    /// The round's keys: the current corpus key, the proof from the
-    /// master, and the rotation while one is finishing.
+    /// The round's keys: the current corpus key, the proof MATERIAL from
+    /// the master (kp1 + kp2 — 13y UNIT B), and the rotation while one is
+    /// finishing.
     public var syncKeys: SyncEncryptionKeys {
         SyncEncryptionKeys(
             corpusKey: corpusSymmetricKey, corpusKeyID: corpusKeyID,
-            keyProof: KeyProof.wireToken(master: masterSymmetricKey),
+            keyProof: KeyProofMaterial(master: masterSymmetricKey),
             rotation: rotation)
     }
 
@@ -282,7 +283,7 @@ public struct VaultEnrollment: Sendable {
         // proof (pre-13x): the held master authorizes the write.
         try await client.updateVault(
             updated, expectedRevision: fetched.revision,
-            keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+            keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
     }
 
     // MARK: - Change passphrase (Round 7's scope addition)
@@ -335,7 +336,7 @@ public struct VaultEnrollment: Sendable {
         // master the authorization just unwrapped (pre-13x).
         try await client.updateVault(
             updated, expectedRevision: fetched.revision,
-            keyProof: KeyProof.wireToken(master: master))
+            keyProof: KeyProofMaterial(master: master))
         return try material(from: vault, master: master)
     }
 
@@ -361,7 +362,7 @@ public struct VaultEnrollment: Sendable {
             kdf: descriptor)
         try await client.updateVault(
             updated, expectedRevision: fetched.revision,
-            keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+            keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
     }
 
     // MARK: - Helpers

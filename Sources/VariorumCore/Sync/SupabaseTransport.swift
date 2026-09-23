@@ -73,11 +73,12 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotation
 
     // MARK: - SyncTransport
 
-    public func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+    public func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
         let data = try await rpc(
             "sync_push",
             body: PushRequest(
-                batch: batch.map(PushItem.init), activeKeyID: activeKeyID, keyProof: keyProof))
+                batch: batch.map(PushItem.init), activeKeyID: activeKeyID,
+                keyProof: keyProof.proof, challenge: keyProof.challenge))
         let results = try JSONDecoder().decode([PushResult].self, from: data)
         guard results.count == batch.count else {
             throw SupabaseTransportError.mismatchedResultCount(
@@ -86,12 +87,12 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotation
         return try results.map { try $0.outcome() }
     }
 
-    public func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    public func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
         let data = try await rpc(
             "sync_pull",
             body: PullRequest(
                 sinceSeq: since, maxRows: limit, activeKeyID: activeKeyID,
-                keyProof: keyProof, deviceID: deviceID))
+                keyProof: keyProof.proof, challenge: keyProof.challenge, deviceID: deviceID))
         return try JSONDecoder().decode([PulledItem].self, from: data).map(\.pulledRow)
     }
 
@@ -129,9 +130,11 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotation
 
     // MARK: - SyncPurgeTransport (Phase 13j — 10_phase13j_purge.sql)
 
-    public func syncHorizon(activeKeyID: String, keyProof: String) async throws -> Int64 {
+    public func syncHorizon(activeKeyID: String, keyProof: SyncKeyProof) async throws -> Int64 {
         let data = try await rpc(
-            "sync_horizon", body: PurgeKeyOnlyRequest(activeKeyID: activeKeyID, keyProof: keyProof))
+            "sync_horizon",
+            body: PurgeKeyOnlyRequest(
+                activeKeyID: activeKeyID, keyProof: keyProof.proof, challenge: keyProof.challenge))
         let body = String(data: data, encoding: .utf8)?
             .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         guard let horizon = Int64(body) else {
@@ -141,10 +144,12 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotation
         return horizon
     }
 
-    public func purgeLedger(since: Int64, activeKeyID: String, keyProof: String) async throws -> SyncPurgeLedgerPage {
+    public func purgeLedger(since: Int64, activeKeyID: String, keyProof: SyncKeyProof) async throws -> SyncPurgeLedgerPage {
         let data = try await rpc(
             "sync_purge_ledger",
-            body: PurgeLedgerRequest(sinceSeq: since, activeKeyID: activeKeyID, keyProof: keyProof))
+            body: PurgeLedgerRequest(
+                sinceSeq: since, activeKeyID: activeKeyID,
+                keyProof: keyProof.proof, challenge: keyProof.challenge))
         let decoded = try JSONDecoder().decode(PurgeLedgerResult.self, from: data)
         return SyncPurgeLedgerPage(
             floor: decoded.floor,
@@ -153,12 +158,12 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotation
             })
     }
 
-    public func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: String) async throws -> Int64 {
+    public func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: SyncKeyProof) async throws -> Int64 {
         let data = try await rpc(
             "sync_purge_execute",
             body: PurgeExecuteRequest(
                 rows: rows.map { PurgeExecuteItem(table: $0.table, rowID: $0.rowID) },
-                activeKeyID: activeKeyID, keyProof: keyProof))
+                activeKeyID: activeKeyID, keyProof: keyProof.proof, challenge: keyProof.challenge))
         let body = String(data: data, encoding: .utf8)?
             .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         guard let seq = Int64(body) else {
@@ -170,11 +175,12 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotation
 
     // MARK: - SyncRotationTransport (pre-13x — 11_pre13x_postures.sql)
 
-    public func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] {
+    public func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncReencryptOutcome] {
         let data = try await rpc(
             "sync_reencrypt",
             body: ReencryptRequest(
-                rows: rows.map(ReencryptItem.init), activeKeyID: activeKeyID, keyProof: keyProof))
+                rows: rows.map(ReencryptItem.init), activeKeyID: activeKeyID,
+                keyProof: keyProof.proof, challenge: keyProof.challenge))
         let results = try JSONDecoder().decode([ReencryptResult].self, from: data)
         guard results.count == rows.count else {
             throw SupabaseTransportError.mismatchedResultCount(
@@ -198,6 +204,25 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotation
                 "sync_visibility_horizon_ms returned '\(body)', not an integer")
         }
         return millis
+    }
+
+    // MARK: - SyncChallengeTransport (13y UNIT B — 12's challenge half)
+
+    /// `sync_challenge(n)`: a batch of single-use base64 nonces.
+    /// Session-gated only — no vault requirement, no proof (the enroll
+    /// road needs a challenge first).
+    public func fetchChallenges(_ count: Int) async throws -> [String] {
+        let data = try await rpc("sync_challenge", body: ChallengeRequest(n: count))
+        return try JSONDecoder().decode([String].self, from: data)
+    }
+
+    /// `key_proof_enroll(kp1, kp2, active_key_id)`: the ONE enrollment
+    /// road. kp1/kp2 are BODY parameters only (never a URL, never a
+    /// header — the enroll transit is the memo's stated residue).
+    public func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
+        _ = try await rpc(
+            "key_proof_enroll",
+            body: EnrollRequest(kp1: legacyProof, kp2: macKey, activeKeyID: activeKeyID))
     }
 
     // MARK: - HTTP plumbing
@@ -248,6 +273,24 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotation
         if body.contains(SyncServerRefusalMarker.notEntitled) {
             return SyncError.syncNotEntitled
         }
+        // 13y UNIT B: the challenge protocol's typed refusals — the
+        // ALREADY_ENROLLED check precedes ENROLL by prefix-safety belt.
+        if body.contains(SyncServerRefusalMarker.keyProofAlreadyEnrolled) {
+            return SyncError.keyProofAlreadyEnrolled
+        }
+        if body.contains(SyncServerRefusalMarker.keyProofEnroll) {
+            return SyncError.keyProofEnrollRequired
+        }
+        if body.contains(SyncServerRefusalMarker.keyProofStaleChallenge) {
+            return SyncError.keyProofChallengeStale
+        }
+        if body.contains(SyncServerRefusalMarker.writeQuota) {
+            return SyncError.writeQuotaExceeded(
+                retryAfterSeconds: Self.retryAfterSeconds(in: body))
+        }
+        if body.contains(SyncServerRefusalMarker.reauthRequired) {
+            return SyncError.reauthRequired
+        }
         // pre-13x: the key proof's refusal — the account's keys moved
         // elsewhere (the un-followed state) or this session holds no
         // master; the round refuses, outbox intact, cursor unmoved.
@@ -255,6 +298,15 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotation
             return SyncError.keyProofRefused
         }
         return SupabaseTransportError.httpFailure(status: status, body: body)
+    }
+
+    /// The quota refusal's `retry_after_seconds=<n>` token (memo §4) —
+    /// display detail only; absent parses as nil and the status still
+    /// reads honestly.
+    static func retryAfterSeconds(in body: String) -> Int? {
+        guard let range = body.range(of: "retry_after_seconds=") else { return nil }
+        let digits = body[range.upperBound...].prefix { $0.isNumber }
+        return Int(digits)
     }
 
     private func send(
@@ -292,13 +344,34 @@ struct PushRequest: Encodable {
     /// Phase 14c: the vault-key-id fence parameter (09's required
     /// `active_key_id`).
     let activeKeyID: String
-    /// pre-13x: the key proof — a BODY parameter only (11's `key_proof`).
+    /// pre-13x: the key proof — a BODY parameter only (11's `key_proof`);
+    /// PER-REQUEST since 13y UNIT B (the bound HMAC).
     let keyProof: String
+    /// 13y UNIT B: the single-use nonce the proof consumed.
+    let challenge: String
 
     enum CodingKeys: String, CodingKey {
         case batch
         case activeKeyID = "active_key_id"
         case keyProof = "key_proof"
+        case challenge
+    }
+}
+
+/// 13y UNIT B — `sync_challenge(n)`'s body.
+struct ChallengeRequest: Encodable {
+    let n: Int
+}
+
+/// 13y UNIT B — `key_proof_enroll(kp1, kp2, active_key_id)`'s body.
+struct EnrollRequest: Encodable {
+    let kp1: String
+    let kp2: String
+    let activeKeyID: String
+    enum CodingKeys: String, CodingKey {
+        case kp1
+        case kp2
+        case activeKeyID = "active_key_id"
     }
 }
 
@@ -363,9 +436,11 @@ struct EmptyRPCRequest: Encodable {}
 struct PurgeKeyOnlyRequest: Encodable {
     let activeKeyID: String
     let keyProof: String
+    let challenge: String
     enum CodingKeys: String, CodingKey {
         case activeKeyID = "active_key_id"
         case keyProof = "key_proof"
+        case challenge
     }
 }
 
@@ -373,10 +448,12 @@ struct PurgeLedgerRequest: Encodable {
     let sinceSeq: Int64
     let activeKeyID: String
     let keyProof: String
+    let challenge: String
     enum CodingKeys: String, CodingKey {
         case sinceSeq = "since_seq"
         case activeKeyID = "active_key_id"
         case keyProof = "key_proof"
+        case challenge
     }
 }
 
@@ -408,10 +485,12 @@ struct PurgeExecuteRequest: Encodable {
     let rows: [PurgeExecuteItem]
     let activeKeyID: String
     let keyProof: String
+    let challenge: String
     enum CodingKeys: String, CodingKey {
         case rows
         case activeKeyID = "active_key_id"
         case keyProof = "key_proof"
+        case challenge
     }
 }
 
@@ -446,10 +525,12 @@ struct ReencryptRequest: Encodable {
     let rows: [ReencryptItem]
     let activeKeyID: String
     let keyProof: String
+    let challenge: String
     enum CodingKeys: String, CodingKey {
         case rows
         case activeKeyID = "active_key_id"
         case keyProof = "key_proof"
+        case challenge
     }
 }
 
@@ -506,9 +587,12 @@ struct PullRequest: Encodable {
     let maxRows: Int
     /// Phase 14c: the vault-key-id fence parameter (both round halves).
     let activeKeyID: String
-    /// pre-13x: the key proof (11's `key_proof` — a body parameter with a
-    /// server-side `default null` that the gate refuses; sent always).
+    /// pre-13x: the key proof (defaultless since 12's NIT-4 reorder;
+    /// PER-REQUEST since 13y UNIT B — the bound HMAC).
     let keyProof: String
+    /// 13y UNIT B: the single-use nonce the proof consumed (defaultless
+    /// on the server, before the defaulted parameters).
+    let challenge: String
     /// Phase 13j: the device-cursor report (10's `for_device` parameter —
     /// renamed from `device_id` the day the first live round caught the
     /// 42702 shadow; the standing rule: no RPC parameter shadows a column
@@ -525,6 +609,7 @@ struct PullRequest: Encodable {
         case maxRows = "max_rows"
         case activeKeyID = "active_key_id"
         case keyProof = "key_proof"
+        case challenge
         case deviceID = "for_device"
     }
 
@@ -534,6 +619,7 @@ struct PullRequest: Encodable {
         try container.encode(maxRows, forKey: .maxRows)
         try container.encode(activeKeyID, forKey: .activeKeyID)
         try container.encode(keyProof, forKey: .keyProof)
+        try container.encode(challenge, forKey: .challenge)
         try container.encode(deviceID, forKey: .deviceID)
     }
 }

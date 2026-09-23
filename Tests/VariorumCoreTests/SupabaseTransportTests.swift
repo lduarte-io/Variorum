@@ -84,7 +84,8 @@ struct SupabaseTransportTests {
 
     @Test func pullRequestEncodesSnakeCaseParameters() throws {
         let data = try JSONEncoder().encode(
-            PullRequest(sinceSeq: 42, maxRows: 500, activeKeyID: "key-1", keyProof: "proof-1", deviceID: "device-A"))
+            PullRequest(sinceSeq: 42, maxRows: 500, activeKeyID: "key-1", keyProof: "proof-1",
+                        challenge: "nonce-1", deviceID: "device-A"))
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         #expect(json?["since_seq"] as? Int == 42)
         #expect(json?["max_rows"] as? Int == 500)
@@ -95,12 +96,15 @@ struct SupabaseTransportTests {
         // `device_id` parameter shadowed the device_cursor COLUMN — the
         // live 42702; her ruling: fix the name, never relax the policy).
         #expect(json?["for_device"] as? String == "device-A")
-        // pre-13x: the key proof rides the body snake-cased too.
+        // pre-13x: the key proof rides the body snake-cased too; 13y
+        // UNIT B: the single-use nonce beside it, its own wire key.
         #expect(json?["key_proof"] as? String == "proof-1")
+        #expect(json?["challenge"] as? String == "nonce-1")
         // And a nil device still ENCODES (JSON null → the parameter's
         // default server-side), so mid-round windows are explicit.
         let nilData = try JSONEncoder().encode(
-            PullRequest(sinceSeq: 1, maxRows: 1, activeKeyID: "key-1", keyProof: "proof-1", deviceID: nil))
+            PullRequest(sinceSeq: 1, maxRows: 1, activeKeyID: "key-1", keyProof: "proof-1",
+                        challenge: "nonce-1", deviceID: nil))
         let nilJSON = try JSONSerialization.jsonObject(with: nilData) as? [String: Any]
         #expect(nilJSON?.keys.contains("for_device") == true)
         #expect(nilJSON?["for_device"] is NSNull)
@@ -108,10 +112,12 @@ struct SupabaseTransportTests {
 
     @Test func pushRequestEncodesTheFenceParameter() throws {
         let data = try JSONEncoder().encode(
-            PushRequest(batch: [], activeKeyID: "key-2", keyProof: "proof-2"))
+            PushRequest(batch: [], activeKeyID: "key-2", keyProof: "proof-2", challenge: "nonce-2"))
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         #expect(json?["active_key_id"] as? String == "key-2")
         #expect(json?["key_proof"] as? String == "proof-2")
+        // 13y UNIT B: the nonce rides its own wire key.
+        #expect(json?["challenge"] as? String == "nonce-2")
     }
 
     /// The mirror DDL must track the registry: every synced table appears in
@@ -277,11 +283,12 @@ struct SupabaseTransportSessionTests {
             configuration: Self.projectConfiguration,
             sessionProvider: provider, load: http.loader())
 
+        let pair = SyncKeyProof(challenge: "nonce", proof: "proof")
         await #expect(throws: UserSessionError.notSignedIn) {
-            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof, deviceID: nil)
+            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: pair, deviceID: nil)
         }
         await #expect(throws: UserSessionError.notSignedIn) {
-            _ = try await transport.push([], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+            _ = try await transport.push([], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: pair)
         }
         #expect(http.requests.isEmpty, "a signed-out session must never compose a request")
         #expect(provider.refreshCalls == 0)
@@ -296,7 +303,7 @@ struct SupabaseTransportSessionTests {
             configuration: Self.projectConfiguration,
             sessionProvider: provider, load: http.loader())
 
-        let rows = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof, deviceID: nil)
+        let rows = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncKeyProof(challenge: "nonce", proof: "proof"), deviceID: nil)
         #expect(rows.isEmpty)
         #expect(provider.refreshCalls == 1)
         #expect(http.bearers == ["Bearer stale", "Bearer fresh"],
@@ -315,7 +322,7 @@ struct SupabaseTransportSessionTests {
             sessionProvider: provider, load: http.loader())
 
         await #expect(throws: SupabaseTransportError.httpFailure(status: 401, body: "expired")) {
-            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof, deviceID: nil)
+            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncKeyProof(challenge: "nonce", proof: "proof"), deviceID: nil)
         }
         #expect(http.requests.count == 2, "exactly one retry — never a loop")
         #expect(provider.refreshCalls == 1)
@@ -331,7 +338,7 @@ struct SupabaseTransportSessionTests {
             sessionProvider: provider, load: http.loader())
 
         await #expect(throws: UserSessionError.notSignedIn) {
-            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof, deviceID: nil)
+            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncKeyProof(challenge: "nonce", proof: "proof"), deviceID: nil)
         }
         #expect(http.requests.count == 1)
         #expect(provider.refreshCalls == 1)
@@ -350,7 +357,7 @@ struct SupabaseTransportSessionTests {
             sessionProvider: provider, load: http.loader())
 
         await #expect(throws: SupabaseTransportError.httpFailure(status: 503, body: "unavailable")) {
-            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof, deviceID: nil)
+            _ = try await transport.pull(since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncKeyProof(challenge: "nonce", proof: "proof"), deviceID: nil)
         }
         #expect(http.requests.count == 1)
         #expect(provider.refreshCalls == 0)
@@ -363,7 +370,9 @@ struct SupabaseTransportSessionTests {
     /// item lands in gateway logs) nor in a header. Recorded off the real
     /// transport's requests against a scripted hop.
     @Test func theProofRidesTheBodyOnlyNeverTheURLOrAHeader() async throws {
-        let proof = "the-secret-proof-token"
+        // 13y UNIT B: the proof is a PAIR now — the bound HMAC and its
+        // nonce, BOTH body-only (a gateway log must capture neither).
+        let pair = SyncKeyProof(challenge: "the-single-use-nonce", proof: "the-secret-proof-token")
         let http = ScriptedHTTP([
             (200, "[]"), (200, "[]"), (200, "0"),
             (200, #"{"floor": 0, "entries": []}"#), (200, "7"), (200, "[]"),
@@ -373,21 +382,24 @@ struct SupabaseTransportSessionTests {
             sessionProvider: StaticSessionProvider(
                 session: UserSession(accessToken: "session-token", userID: "u1")),
             load: http.loader())
-        _ = try await transport.push([], activeKeyID: "k", keyProof: proof)
-        _ = try await transport.pull(since: 0, limit: 1, activeKeyID: "k", keyProof: proof, deviceID: "d")
-        _ = try await transport.syncHorizon(activeKeyID: "k", keyProof: proof)
-        _ = try await transport.purgeLedger(since: 0, activeKeyID: "k", keyProof: proof)
-        _ = try await transport.executePurge([], activeKeyID: "k", keyProof: proof)
-        _ = try await transport.reencrypt([], activeKeyID: "k", keyProof: proof)
+        _ = try await transport.push([], activeKeyID: "k", keyProof: pair)
+        _ = try await transport.pull(since: 0, limit: 1, activeKeyID: "k", keyProof: pair, deviceID: "d")
+        _ = try await transport.syncHorizon(activeKeyID: "k", keyProof: pair)
+        _ = try await transport.purgeLedger(since: 0, activeKeyID: "k", keyProof: pair)
+        _ = try await transport.executePurge([], activeKeyID: "k", keyProof: pair)
+        _ = try await transport.reencrypt([], activeKeyID: "k", keyProof: pair)
         #expect(http.requests.count == 6)
         for request in http.requests {
             let body = String(data: request.httpBody ?? Data(), encoding: .utf8) ?? ""
-            #expect(body.contains(#""key_proof":"\#(proof)""#), "\(request.url!.lastPathComponent): the proof is in the body")
+            #expect(body.contains(#""key_proof":"\#(pair.proof)""#), "\(request.url!.lastPathComponent): the proof is in the body")
+            #expect(body.contains(#""challenge":"\#(pair.challenge)""#), "\(request.url!.lastPathComponent): the nonce is in the body")
             #expect(request.url!.query()?.contains("key_proof") != true
-                        && request.url!.absoluteString.contains(proof) == false,
+                        && request.url!.absoluteString.contains(pair.proof) == false
+                        && request.url!.absoluteString.contains(pair.challenge) == false,
                     "\(request.url!.lastPathComponent): never a URL item")
             for (name, value) in request.allHTTPHeaderFields ?? [:] {
-                #expect(!value.contains(proof) && name.lowercased() != "key_proof",
+                #expect(!value.contains(pair.proof) && !value.contains(pair.challenge)
+                            && name.lowercased() != "key_proof" && name.lowercased() != "challenge",
                         "\(request.url!.lastPathComponent): never a header")
             }
         }
@@ -405,7 +417,7 @@ struct SupabaseTransportSessionTests {
                 session: UserSession(accessToken: "t", userID: "u1")),
             load: http.loader())
         await #expect(throws: SyncError.keyProofRefused) {
-            _ = try await transport.push([], activeKeyID: "k", keyProof: "stale")
+            _ = try await transport.push([], activeKeyID: "k", keyProof: SyncKeyProof(challenge: "n", proof: "stale"))
         }
         // And the re-encryption door's result shapes decode.
         let replaced = try JSONDecoder().decode(
@@ -498,6 +510,7 @@ struct SupabaseTransportSessionTests {
                     let batch: [PushItem]
                     let active_key_id: String
                     let key_proof: String
+                    let challenge: String
                 }
                 let wire = try JSONDecoder().decode(PushWire.self, from: body)
                 let batch = wire.batch.map {
@@ -505,7 +518,8 @@ struct SupabaseTransportSessionTests {
                             columns: $0.columns, syncVersion: $0.baseVersion)
                 }
                 let outcomes = try await server.push(
-                    batch, activeKeyID: wire.active_key_id, keyProof: wire.key_proof)
+                    batch, activeKeyID: wire.active_key_id,
+                    keyProof: SyncKeyProof(challenge: wire.challenge, proof: wire.key_proof))
                 let results = outcomes.map { outcome -> PushResult in
                     switch outcome {
                     case .accepted(let newVersion, let serverSeq):
@@ -529,17 +543,26 @@ struct SupabaseTransportSessionTests {
                     }
                 }
                 responseBody = try JSONEncoder().encode(results)
+            } else if request.url!.lastPathComponent == "sync_challenge" {
+                // 13y UNIT B: the engine's signer fetches nonce batches
+                // over the same documented HTTP shape.
+                struct ChallengeWire: Decodable { let n: Int }
+                let params = try JSONDecoder().decode(ChallengeWire.self, from: body)
+                responseBody = try JSONEncoder().encode(await server.fetchChallenges(params.n))
             } else {
                 struct PullWire: Decodable {
                     let since_seq: Int64
                     let max_rows: Int
                     let active_key_id: String
                     let key_proof: String
+                    let challenge: String
                 }
                 let params = try JSONDecoder().decode(PullWire.self, from: body)
                 let rows = try await server.pull(
                     since: params.since_seq, limit: params.max_rows,
-                    activeKeyID: params.active_key_id, keyProof: params.key_proof, deviceID: nil)
+                    activeKeyID: params.active_key_id,
+                    keyProof: SyncKeyProof(challenge: params.challenge, proof: params.key_proof),
+                    deviceID: nil)
                 responseBody = try JSONEncoder().encode(rows.map {
                     PulledItem(
                         table: $0.row.table, rowID: $0.row.rowID,

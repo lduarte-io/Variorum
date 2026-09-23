@@ -81,17 +81,19 @@ public struct PurgeJanitor: Sendable {
     /// `reconcileLedger()` and `healPurgeOrphan` (which carried it
     /// verbatim ×3 until this hoist; the R2-M2 rationale at
     /// `reconcileLedger` explains why the pre-pass must never run naked).
-    /// Returns the round's key id + proof on success; refuses by throw —
-    /// outbox intact, cursor unmoved, every time.
-    private func preflight() async throws -> (keyID: String, keyProof: String) {
+    /// Returns the round's key id + its challenge signer on success (13y
+    /// UNIT B: the proof is per-request — one signer per janitor pass,
+    /// one nonce per RPC call); refuses by throw — outbox intact, cursor
+    /// unmoved, every time.
+    private func preflight() async throws -> (keyID: String, signer: SyncChallengeSigner) {
         let rekeyIncomplete = try await database.read { try RotationMarker.isSet($0) }
         guard !rekeyIncomplete else { throw SyncError.accountRekeyIncomplete }
         let keyID: String
-        let keyProof: String
+        let material: KeyProofMaterial
         do {
             let keys = try keyProvider.currentKeys()
             keyID = keys.corpusKeyID
-            keyProof = keys.keyProof
+            material = keys.keyProof
         } catch {
             throw SyncError.encryptionKeysUnavailable
         }
@@ -100,7 +102,8 @@ public struct PurgeJanitor: Sendable {
             throw SyncError.schemaLockstepMismatch(
                 client: SyncSchema.lockstepVersion, server: server)
         }
-        return (keyID, keyProof)
+        return (keyID, SyncChallengeSigner(
+            transport: transport, material: material, activeKeyID: keyID))
     }
 
     // MARK: - The sweep
@@ -108,7 +111,7 @@ public struct PurgeJanitor: Sendable {
     @discardableResult
     public func sweep() async throws -> SweepReport {
         // The engine's own preflight discipline, in the engine's order.
-        let (keyID, keyProof) = try await preflight()
+        let (keyID, signer) = try await preflight()
 
         var report = SweepReport()
 
@@ -129,7 +132,10 @@ public struct PurgeJanitor: Sendable {
         // `sync_row_seq`-absent, so no peer ever saw them and there is no
         // one to strand — purge below with no mirror contact at all.
         let cursor = try await database.read { try Self.stateValue($0, "last_server_seq") }
-        let horizon = min(try await transport.syncHorizon(activeKeyID: keyID, keyProof: keyProof), cursor)
+        let horizon = min(
+            try await signer.call(rpc: "sync_horizon") { proof in
+                try await self.transport.syncHorizon(activeKeyID: keyID, keyProof: proof)
+            }, cursor)
         if horizon <= 0 { report.skippedNoHorizon = true }
 
         // 3. COLLECTION: intent roots (live intents published before the
@@ -190,8 +196,11 @@ public struct PurgeJanitor: Sendable {
                     report.familiesDeferred += 1
                 }
             case .eligibleSynced:
-                let grantedSeq = try await transport.executePurge(
-                    expansion.orderedRows, activeKeyID: keyID, keyProof: keyProof)
+                let purgeRows = expansion.orderedRows
+                let grantedSeq = try await signer.call(rpc: "sync_purge_execute") { proof in
+                    try await self.transport.executePurge(
+                        purgeRows, activeKeyID: keyID, keyProof: proof)
+                }
                 let removed: Int = try await database.write { db in
                     try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
                     // Re-expand inside the removal's own transaction (the
@@ -267,12 +276,14 @@ public struct PurgeJanitor: Sendable {
         // — scan point unmoved, nothing dropped. When `sweep()` calls
         // this the checks re-run (one cheap RPC, twice per sweep); the
         // standalone scheduler entry is the one that must never be naked.
-        let (keyID, keyProof) = try await preflight()
+        let (keyID, signer) = try await preflight()
         let (scanPoint, acknowledgedFloor) = try await database.read { db in
             (try Self.stateValue(db, "last_purge_seq"),
              try Self.stateValue(db, "purge_floor_acknowledged"))
         }
-        let page = try await transport.purgeLedger(since: scanPoint, activeKeyID: keyID, keyProof: keyProof)
+        let page = try await signer.call(rpc: "sync_purge_ledger") { proof in
+            try await self.transport.purgeLedger(since: scanPoint, activeKeyID: keyID, keyProof: proof)
+        }
         if page.floor > scanPoint && page.floor > acknowledgedFloor {
             throw SyncError.deviceLeftBehindReloadRequired(
                 floor: page.floor, scanPoint: scanPoint)
@@ -691,11 +702,13 @@ public struct PurgeJanitor: Sendable {
         guard !stall.missingReferents.isEmpty else { return false }
 
         // 2. The preflight (the reconcile's discipline — F-R7's one body).
-        let (keyID, keyProof) = try await preflight()
+        let (keyID, signer) = try await preflight()
 
         // 3. The discriminator: every missing referent ledger-named.
-        let page = try await transport.purgeLedger(
-            since: 0, activeKeyID: keyID, keyProof: keyProof)
+        let page = try await signer.call(rpc: "sync_purge_ledger") { proof in
+            try await self.transport.purgeLedger(
+                since: 0, activeKeyID: keyID, keyProof: proof)
+        }
         let named = Set(page.entries.map { "\($0.table)|\($0.rowID)" })
         for referent in stall.missingReferents {
             guard named.contains("\(referent.table)|\(referent.rowID)") else {
@@ -735,8 +748,11 @@ public struct PurgeJanitor: Sendable {
             }
             return try PurgeFamily.expand(db, roots: roots)
         }
-        _ = try await transport.executePurge(
-            family.orderedRows, activeKeyID: keyID, keyProof: keyProof)
+        let healRows = family.orderedRows
+        _ = try await signer.call(rpc: "sync_purge_execute") { proof in
+            try await self.transport.executePurge(
+                healRows, activeKeyID: keyID, keyProof: proof)
+        }
         try await database.write { db in
             try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
             try PurgeFamily.deleteLocal(db, family: family, stamp: self.nowStamp())
@@ -775,17 +791,21 @@ public struct PurgeJanitor: Sendable {
     /// that cannot occur, recorded in the batch record.)
     public func reonboardFromAccount(using engine: SyncEngine) async throws {
         let keyID: String
-        let keyProof: String
+        let material: KeyProofMaterial
         do {
             let keys = try keyProvider.currentKeys()
             keyID = keys.corpusKeyID
-            keyProof = keys.keyProof
+            material = keys.keyProof
         } catch {
             throw SyncError.encryptionKeysUnavailable
         }
+        let signer = SyncChallengeSigner(
+            transport: transport, material: material, activeKeyID: keyID)
         _ = try await engine.push()
         try await engine.resyncReinitialize()
-        let page = try await transport.purgeLedger(since: 0, activeKeyID: keyID, keyProof: keyProof)
+        let page = try await signer.call(rpc: "sync_purge_ledger") { proof in
+            try await self.transport.purgeLedger(since: 0, activeKeyID: keyID, keyProof: proof)
+        }
         try await database.write { db in
             try Self.setStateValue(db, "purge_floor_acknowledged", page.floor)
             let scan = try Self.stateValue(db, "last_purge_seq")

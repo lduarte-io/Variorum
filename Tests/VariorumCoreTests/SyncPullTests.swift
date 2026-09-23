@@ -382,17 +382,26 @@ actor ScriptedTransport: SyncTransport {
         rows = (rows + more).sorted { $0.serverSeq < $1.serverSeq }
     }
 
-    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) -> [SyncPushOutcome] {
         batch.map { _ in .accepted(newVersion: 1, serverSeq: 0) }  // unused in these tests
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) -> [SyncPulledRow] {
         Array(rows.filter { $0.serverSeq > since }.prefix(limit))
     }
 
     func schemaVersion() -> Int {
         SyncSchema.lockstepVersion  // scripted batches model an in-lockstep server
     }
+
+    // 13y UNIT B: scripted batches model an ENROLLED account — nonces are
+    // vended freely and never verified (the verification pins are the
+    // fake server's; this double's job is batch SHAPES).
+    func fetchChallenges(_ count: Int) -> [String] {
+        (0..<max(count, 1)).map { _ in Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64EncodedString() }
+    }
+
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) {}
 }
 
 enum TestRows {

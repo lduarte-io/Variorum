@@ -22,8 +22,17 @@ enum SyncTestKeys {
     static let masterKey = SymmetricKey(data: Data((0..<32).map { UInt8($0 &+ 0x20) }))
     static let keyProof = KeyProof.wireToken(master: masterKey)
     static let keyProofHash = KeyProof.hash(master: masterKey)
+    /// 13y UNIT B: the material (kp1 + kp2, both from the fixed master) —
+    /// what every round's signer signs with, and what enrolled fake
+    /// accounts hold as their Vault-held secret.
+    static let proofMaterial = KeyProofMaterial(master: masterKey)
+    static let macKeyWire = proofMaterial.macKeyWire
+    /// The POST-ENROLLMENT hash — SHA-256(kp2), what the vault row
+    /// carries once the account enrolled (the fake's default account is
+    /// provisioned enrolled).
+    static let macKeyHash = KeyProof.macHash(master: masterKey)
     static let keys = SyncEncryptionKeys(
-        corpusKey: corpusKey, corpusKeyID: corpusKeyID, keyProof: keyProof)
+        corpusKey: corpusKey, corpusKeyID: corpusKeyID, keyProof: proofMaterial)
     private static var crypto: SyncPayloadCrypto { SyncPayloadCrypto(keys: keys) }
 
     /// Seal one value exactly as the engine's seam would (AAD-bound to

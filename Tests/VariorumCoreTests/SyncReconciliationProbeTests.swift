@@ -799,7 +799,7 @@ struct SyncReconciliationProbeTests {
         _ = try await b.push()
         _ = try await server.executePurge(
             [SyncPurgeTarget(table: "container", rowID: orphaned)],
-            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "sync_purge_execute"))
         let placement = try b.db.fetchString(
             """
             SELECT id FROM container_block WHERE container_id = ?

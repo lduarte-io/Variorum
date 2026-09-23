@@ -288,7 +288,7 @@ struct SchedulerRetirementTests {
         _ = try await b.push()
         _ = try await server.executePurge(
             [SyncPurgeTarget(table: "container", rowID: orphaned)],
-            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "sync_purge_execute"))
 
         try await a.withAsync { _ in await scheduler.trigger() }
         await scheduler.awaitIdle()

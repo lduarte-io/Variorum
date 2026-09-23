@@ -65,16 +65,20 @@ struct KeyVaultClientTests {
         // Absent → refuses; nothing invented.
         await #expect(throws: KeyVaultClientError.vaultAbsent) {
             try await world.client.updateVault(
-                sample.format, expectedRevision: 1, keyProof: KeyProof.wireToken(master: sample.master))
+                sample.format, expectedRevision: 1, keyProof: KeyProofMaterial(master: sample.master))
         }
         try await world.client.createVault(sample.format)
         let updated = try sample.format.addingRecoveryWrap(
             masterKey: sample.master, recoveryKey: sample.recoveryKey)
         try await world.client.updateVault(
-            updated, expectedRevision: 1, keyProof: KeyProof.wireToken(master: sample.master))
+            updated, expectedRevision: 1, keyProof: KeyProofMaterial(master: sample.master))
         let fetched = try await world.client.fetchVault()
         var expected = updated
         expected.updatedByDevice = "test device"  // decision 34: the writer's name (2c)
+        // 13y UNIT B: the door's first act ENROLLED the fresh account —
+        // the stored hash is SHA-256(kp2) and the dance refreshed the
+        // payload's copy to match (the land-together rule).
+        expected.keyProofHash = KeyProof.macHash(master: sample.master)
         #expect(fetched?.format == expected)
         #expect(fetched?.format.masterWrappedByRecovery != nil)
         // The CAS token advanced with the write (R1-2).
@@ -93,13 +97,13 @@ struct KeyVaultClientTests {
         let moved = try sample.format.addingRecoveryWrap(
             masterKey: sample.master, recoveryKey: sample.recoveryKey)
         try await world.client.updateVault(
-            moved, expectedRevision: 1, keyProof: KeyProof.wireToken(master: sample.master))
+            moved, expectedRevision: 1, keyProof: KeyProofMaterial(master: sample.master))
         let rowBefore = world.server.storedRow(userID: world.userID)
 
         // The stale writer still holds token 1 — refused, nothing written.
         await #expect(throws: KeyVaultClientError.vaultRevisionConflict) {
             try await world.client.updateVault(
-                sample.format, expectedRevision: 1, keyProof: KeyProof.wireToken(master: sample.master))
+                sample.format, expectedRevision: 1, keyProof: KeyProofMaterial(master: sample.master))
         }
         #expect(world.server.storedRow(userID: world.userID) == rowBefore,
                 "a refused stale update writes nothing")
@@ -108,7 +112,7 @@ struct KeyVaultClientTests {
         #expect(current.revision == 2)
         try await world.client.updateVault(
             current.format, expectedRevision: current.revision,
-            keyProof: KeyProof.wireToken(master: sample.master))
+            keyProof: KeyProofMaterial(master: sample.master))
         #expect(try await world.client.fetchVault()?.revision == 3)
     }
 
@@ -133,11 +137,15 @@ struct KeyVaultClientTests {
                 return try await load(request)
             })
         try await recording.createVault(sample.format)
-        let proof = KeyProof.wireToken(master: sample.master)
+        let material = KeyProofMaterial(master: sample.master)
         let receipt = try await recording.updateVault(
             try sample.format.addingRecoveryWrap(masterKey: sample.master, recoveryKey: sample.recoveryKey),
-            expectedRevision: 1, keyProof: proof)
+            expectedRevision: 1, keyProof: material)
         #expect(receipt == KeyVaultClient.UpdateReceipt(revision: 2, rotationStartedSeq: nil))
+        // 13y UNIT B: a freshly created vault is UN-ENROLLED, so the door's
+        // first act runs the whole production dance — challenge fetch,
+        // the ENROLL refusal, the enroll road, a fresh challenge, the
+        // update. The LAST request is the update that landed.
         let update = try #require(requests.value.last)
         #expect(update.httpMethod == "POST")
         #expect(update.url?.path.hasSuffix("/rest/v1/rpc/key_vault_update") == true, "the RPC, never a PATCH")
@@ -145,7 +153,12 @@ struct KeyVaultClientTests {
         // Decoded, not substring-matched: Foundation escapes `/` in JSON
         // strings, and a base64 token carries slashes.
         let body = try JSONSerialization.jsonObject(with: update.httpBody ?? Data()) as? [String: Any]
-        #expect(body?["key_proof"] as? String == proof, "the proof is a BODY parameter")
+        // The proof is PER-REQUEST now: a bound HMAC beside its nonce —
+        // never kp1's static wire token (the v1-era value the new
+        // protocol never accepts on a gated call).
+        let wireProof = try #require(body?["key_proof"] as? String, "the proof is a BODY parameter")
+        #expect(wireProof != material.legacyWireToken, "the static bearer token never rides a gated call")
+        #expect((body?["challenge"] as? String)?.isEmpty == false, "the nonce rides beside it")
         #expect(body?["expected_revision"] as? Int == 1)
         #expect((body?["payload"] as? [String: Any])?["corpus_key_id"] as? String == "corpus-id-1")
         // Decision 34 (2c): every write stamps THIS device's name into the
@@ -155,14 +168,16 @@ struct KeyVaultClientTests {
         #expect(try await recording.fetchVault()?.format.updatedByDevice == "test device",
                 "the row carries the last writer's name back")
         #expect(world.server.patchCount == 0, "the client never PATCHes")
-        #expect(world.server.updateCount == 1)
+        // Two update ATTEMPTS crossed the route: the enroll-refused first
+        // try and the one that landed.
+        #expect(world.server.updateCount == 2)
 
         // A wrong proof: refused typed, nothing written, the revision unmoved.
         let before = world.server.storedRow(userID: world.userID)
         await #expect(throws: KeyVaultClientError.keyProofRefused) {
             try await recording.updateVault(
                 sample.format, expectedRevision: 2,
-                keyProof: KeyProof.wireToken(master: SymmetricKey(size: .bits256)))
+                keyProof: KeyProofMaterial(master: SymmetricKey(size: .bits256)))
         }
         #expect(world.server.storedRow(userID: world.userID) == before)
         #expect(try await recording.fetchVault()?.revision == 2)

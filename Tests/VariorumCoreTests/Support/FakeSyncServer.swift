@@ -129,9 +129,15 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         /// nil = AUTO-ADOPT: the first round's presented key id becomes
         /// the vault's (the bootstrap-runner latitude — `setVaultKeyAutoAdopt`).
         var corpusKeyID: String?
-        /// nil = the NULL-hash MIGRATION ARM (the author's existing vault):
-        /// the first proof presented lands its hash and is accepted, once.
+        /// nil = a hash-less row. The 11-era NULL-hash migration arm is
+        /// RETIRED (13y UNIT B) — the challenge road refuses it; the one
+        /// surviving latitude is the fake-only auto-adopt enroll below.
         var keyProofHash: String?
+        /// 13y UNIT B — the VAULT-HELD MAC SECRET's twin (kp2, base64):
+        /// what `vault.decrypted_secrets` serves the real verify. nil =
+        /// NOT ENROLLED — every gated call refuses
+        /// VARIORUM_KEY_PROOF_ENROLL until `key_proof_enroll` lands it.
+        var keyProofMacSecret: String?
         /// The previous corpus key — its id and its bare wrap, two columns
         /// — while a rotation is finishing; nil otherwise, TOGETHER with the
         /// seq.
@@ -244,10 +250,16 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         // row exists before any round" (the real server refuses a
         // vault-less caller at the fence; here, an unprovisioned USER does
         // the same).
+        // Provisioned ENROLLED (13y UNIT B): the secret present and the
+        // hash at its post-enrollment value — the fake twin of "the
+        // account's first round enrolled long ago", so the single-user
+        // suites run the challenge protocol without each replaying the
+        // enroll road (which has its own pins).
         accounts[Self.defaultUserID] = Account(
             vault: VaultRow(
                 corpusKeyID: SyncTestKeys.corpusKeyID,
-                keyProofHash: SyncTestKeys.keyProofHash))
+                keyProofHash: SyncTestKeys.macKeyHash,
+                keyProofMacSecret: SyncTestKeys.macKeyWire))
     }
 
     func setDeployedLockstepVersion(_ version: Int) {
@@ -299,11 +311,18 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// ledger — only the vault row (revision 1) and the entitlement reset
     /// (the `ScriptedVaultServer`'s create lands here for a user whose
     /// partition may already carry rows).
+    /// `keyProofMacSecret` (13y UNIT B): the Vault-held kp2 (base64) —
+    /// non-nil provisions the account ENROLLED; nil (the default) leaves
+    /// it un-enrolled, and its first gated call takes the enroll road
+    /// (the production shape for every fresh account).
     func provisionAccount(
-        _ userID: String, vaultCorpusKeyID: String, keyProofHash: String?, entitled: Bool = true
+        _ userID: String, vaultCorpusKeyID: String, keyProofHash: String?, entitled: Bool = true,
+        keyProofMacSecret: String? = nil
     ) {
         var account = accounts[userID] ?? Account(vault: VaultRow())
-        account.vault = VaultRow(corpusKeyID: vaultCorpusKeyID, keyProofHash: keyProofHash)
+        account.vault = VaultRow(
+            corpusKeyID: vaultCorpusKeyID, keyProofHash: keyProofHash,
+            keyProofMacSecret: keyProofMacSecret)
         account.entitled = entitled
         accounts[userID] = account
     }
@@ -316,10 +335,12 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// and every stale proof refused).
     func setVaultRow(
         corpusKeyID: String, keyProofHash: String?,
+        keyProofMacSecret: String? = nil,
         for userID: String = FakeSyncServer.defaultUserID
     ) {
         accounts[userID]?.vault.corpusKeyID = corpusKeyID
         accounts[userID]?.vault.keyProofHash = keyProofHash
+        accounts[userID]?.vault.keyProofMacSecret = keyProofMacSecret
     }
 
     /// The tier's server half: revoke/grant hosted sync.
@@ -340,6 +361,7 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     func setVaultKeyAutoAdopt(for userID: String = FakeSyncServer.defaultUserID) {
         accounts[userID]?.vault.corpusKeyID = nil
         accounts[userID]?.vault.keyProofHash = nil
+        accounts[userID]?.vault.keyProofMacSecret = nil
     }
 
     /// Test inspection: the account's vault row as the RPCs see it.
@@ -357,11 +379,11 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     // MARK: SyncTransport (the default account — the single-user suites'
     // implicit caller)
 
-    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) throws -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) throws -> [SyncPushOutcome] {
         try push(batch, activeKeyID: activeKeyID, keyProof: keyProof, as: Self.defaultUserID)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) throws -> [SyncPulledRow] {
         try pull(
             since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof,
             deviceID: deviceID, as: Self.defaultUserID)
@@ -371,51 +393,154 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         deployedLockstepVersion
     }
 
+    // MARK: SyncChallengeTransport (default account — 13y UNIT B)
+
+    func fetchChallenges(_ count: Int) -> [String] {
+        fetchChallenges(count, as: Self.defaultUserID)
+    }
+
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) throws {
+        try enrollKeyProof(
+            legacyProof: legacyProof, macKey: macKey, activeKeyID: activeKeyID,
+            as: Self.defaultUserID)
+    }
+
     // MARK: SyncPurgeTransport (default account)
 
-    func syncHorizon(activeKeyID: String, keyProof: String) throws -> Int64 {
+    func syncHorizon(activeKeyID: String, keyProof: SyncKeyProof) throws -> Int64 {
         try syncHorizon(activeKeyID: activeKeyID, keyProof: keyProof, as: Self.defaultUserID)
     }
 
-    func purgeLedger(since: Int64, activeKeyID: String, keyProof: String) throws -> SyncPurgeLedgerPage {
+    func purgeLedger(since: Int64, activeKeyID: String, keyProof: SyncKeyProof) throws -> SyncPurgeLedgerPage {
         try purgeLedger(since: since, activeKeyID: activeKeyID, keyProof: keyProof, as: Self.defaultUserID)
     }
 
-    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: String) throws -> Int64 {
+    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: SyncKeyProof) throws -> Int64 {
         try executePurge(rows, activeKeyID: activeKeyID, keyProof: keyProof, as: Self.defaultUserID)
     }
 
     // MARK: SyncRotationTransport (default account)
 
-    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) throws -> [SyncReencryptOutcome] {
+    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) throws -> [SyncReencryptOutcome] {
         try reencrypt(rows, activeKeyID: activeKeyID, keyProof: keyProof, as: Self.defaultUserID)
     }
 
     // MARK: The tenant-scoped halves (the RPC bodies' fake twins)
 
-    /// THE PROOF CHECK (the SQL's `sync_key_proof_check` twin): the
-    /// presented wire token hashed and compared to the vault's stored
-    /// hash; a malformed token refuses; the NULL-hash arm lands the first.
-    /// The ruled determinism (the orchestrator's ruling 5 — the SQL takes
-    /// the row FOR UPDATE from the start on a NULL peek): here the actor's
-    /// serialization IS the row lock — two racing first proofs run one
-    /// after the other, the first lands, the second compares against it.
-    private func checkProof(_ keyProof: String, for userID: String) throws {
-        guard let presented = KeyProof.hash(ofWireToken: keyProof) else {
+    // MARK: 13y UNIT B — the challenge machinery (12's twins)
+
+    /// Per-user unconsumed nonces (the `key_proof_challenge` twin), in
+    /// mint order (eviction is oldest-first). Keyed by user, NOT by
+    /// account: `sync_challenge` is session-gated only — no vault
+    /// requirement (a not-yet-provisioned caller mints too).
+    private var challengeStashes: [String: [(nonce: Data, issuedAt: Int64)]] = [:]
+    /// The 5-minute TTL, in the fake's LOGICAL clock ticks — settable so
+    /// the expiry pin can cross it; the huge default keeps every suite
+    /// that advances the clock (the A5 arms) inside the window.
+    private var challengeTTLTicks: Int64 = .max / 4
+
+    func setChallengeTTLTicks(_ ticks: Int64) {
+        challengeTTLTicks = ticks
+    }
+
+    /// Test inspection: the user's live (unconsumed) nonce count.
+    func liveChallengeCount(for userID: String = FakeSyncServer.defaultUserID) -> Int {
+        challengeStashes[userID]?.count ?? 0
+    }
+
+    /// `sync_challenge(n)`'s twin: clamp 1...32, GC the caller's expired
+    /// rows, mint, evict beyond 64 oldest-first.
+    func fetchChallenges(_ count: Int, as userID: String) -> [String] {
+        let granted = min(max(count, 1), 32)
+        var stash = challengeStashes[userID] ?? []
+        stash.removeAll { $0.issuedAt < clock - challengeTTLTicks }
+        var minted: [String] = []
+        for _ in 0..<granted {
+            var nonce = Data(count: 32)
+            for i in 0..<32 { nonce[i] = UInt8.random(in: 0...255) }
+            stash.append((nonce: nonce, issuedAt: clock))
+            minted.append(nonce.base64EncodedString())
+        }
+        if stash.count > 64 {
+            stash.removeFirst(stash.count - 64)
+        }
+        challengeStashes[userID] = stash
+        return minted
+    }
+
+    /// `key_proof_enroll`'s twin: the fence, ONCE (an existing secret
+    /// refuses — the racing loser proceeds), the OLD hash authorizing,
+    /// the secret + the post-enroll hash landing together. ONE fake-only
+    /// latitude, recorded: a NIL-hash row ADOPTS the first enrollment
+    /// (the auto-adopt worlds' road — the real server refuses a hash-less
+    /// enroll; fence and proof tests always set explicit values).
+    func enrollKeyProof(
+        legacyProof: String, macKey: String, activeKeyID: String, as userID: String
+    ) throws {
+        guard let account = accounts[userID],
+              let fenceKey = account.vault.corpusKeyID else {
+            throw SyncError.encryptionKeysReplaced
+        }
+        guard fenceKey == activeKeyID else {
+            throw SyncError.encryptionKeysReplaced
+        }
+        guard account.vault.keyProofMacSecret == nil else {
+            throw SyncError.keyProofAlreadyEnrolled
+        }
+        if let stored = account.vault.keyProofHash {
+            guard let presented = KeyProof.hash(ofWireToken: legacyProof),
+                  presented == stored else {
+                throw SyncError.keyProofRefused
+            }
+        }
+        guard let macRaw = Data(base64Encoded: macKey) else {
             throw SyncError.keyProofRefused
         }
-        guard let stored = accounts[userID]?.vault.keyProofHash else {
-            // THE MIGRATION ARM: the first proof lands its hash — once.
-            accounts[userID]?.vault.keyProofHash = presented
-            return
+        accounts[userID]?.vault.keyProofMacSecret = macKey
+        accounts[userID]?.vault.keyProofHash = KeyProof.hash(ofToken: macRaw)
+    }
+
+    /// THE PROOF CHECK (12's `sync_key_proof_check` twin, the RULED
+    /// order): vault present → the Vault-held secret (ABSENT refuses
+    /// ENROLL, before any nonce is consumed) → the nonce consumed
+    /// atomically (single-use — THE replay closure) → the TTL → the HMAC
+    /// over `nonce ‖ ':' ‖ rpc` recomputed from the secret. The actor's
+    /// serialization stands in for the SQL's atomic DELETE … RETURNING.
+    private func checkProof(_ keyProof: SyncKeyProof, rpc: String, for userID: String) throws {
+        guard accounts[userID] != nil else {
+            throw SyncError.encryptionKeysReplaced
         }
-        guard stored == presented else { throw SyncError.keyProofRefused }
+        guard let secret = accounts[userID]?.vault.keyProofMacSecret,
+              let secretRaw = Data(base64Encoded: secret) else {
+            throw SyncError.keyProofEnrollRequired
+        }
+        guard let nonce = Data(base64Encoded: keyProof.challenge) else {
+            throw SyncError.keyProofChallengeStale
+        }
+        var stash = challengeStashes[userID] ?? []
+        guard let index = stash.firstIndex(where: { $0.nonce == nonce }) else {
+            throw SyncError.keyProofChallengeStale
+        }
+        let issuedAt = stash[index].issuedAt
+        stash.remove(at: index)
+        challengeStashes[userID] = stash
+        guard issuedAt >= clock - challengeTTLTicks else {
+            throw SyncError.keyProofChallengeStale
+        }
+        let expected = KeyProofMaterial(legacyWireToken: "", macKey: secretRaw)
+            .proof(challenge: keyProof.challenge, rpc: rpc).proof
+        guard expected == keyProof.proof else {
+            throw SyncError.keyProofRefused
+        }
     }
 
     /// The round-level gates, in the SQL's order: account (auth) → fence →
-    /// PROOF → entitlement. Any refusal aborts the WHOLE call before any
-    /// row is touched, exactly as the RPC's RAISE does.
-    private func gatedAccount(_ userID: String, activeKeyID: String, keyProof: String) throws -> Account {
+    /// PROOF (challenge-verified, bound to the calling RPC's name) →
+    /// entitlement. Any refusal aborts the WHOLE call before any row is
+    /// touched, exactly as the RPC's RAISE does.
+    private func gatedAccount(
+        _ userID: String, activeKeyID: String, keyProof: SyncKeyProof, rpc: String
+    ) throws -> Account {
         guard var account = accounts[userID] else {
             // The real server: an authenticated caller with NO key_vault
             // row hits the fence's missing-vault arm. An unprovisioned
@@ -432,11 +557,107 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         guard account.vault.corpusKeyID == activeKeyID else {
             throw SyncError.encryptionKeysReplaced
         }
-        try checkProof(keyProof, for: userID)
+        try checkProof(keyProof, rpc: rpc, for: userID)
         guard accounts[userID]!.entitled else {
             throw SyncError.syncNotEntitled
         }
         return accounts[userID]!
+    }
+
+    // MARK: 13y UNIT B — the abuse guard's twin (12's quota, memo §4)
+
+    private struct WriteBudget {
+        var lifetimeRows: Int64 = 0
+        var windowStart: Int64
+        var windowRows: Int64 = 0
+    }
+    private var writeBudgets: [String: WriteBudget] = [:]
+    /// The ruled numbers as defaults; settable so the quota pins can
+    /// cross them without minting half a million rows. The window runs
+    /// on the LOGICAL clock (ticks-as-seconds — a day's worth by
+    /// default, far past anything the A5 arms advance).
+    private var quotaBatchCap = 2_000
+    private var quotaLifetimePool: Int64 = 500_000
+    private var quotaWindowLimit: Int64 = 50_000
+    private var quotaWindowTicks: Int64 = 86_400
+
+    func setWriteQuota(
+        batchCap: Int = 2_000, lifetimePool: Int64 = 500_000,
+        windowLimit: Int64 = 50_000, windowTicks: Int64 = 86_400
+    ) {
+        quotaBatchCap = batchCap
+        quotaLifetimePool = lifetimePool
+        quotaWindowLimit = windowLimit
+        quotaWindowTicks = windowTicks
+    }
+
+    /// Test inspection: the account's budget facts.
+    func writeBudgetFacts(
+        for userID: String = FakeSyncServer.defaultUserID
+    ) -> (lifetime: Int64, windowRows: Int64)? {
+        writeBudgets[userID].map { ($0.lifetimeRows, $0.windowRows) }
+    }
+
+    /// The pre-loop check (12's letter): the cap, the pool, the tumbling
+    /// window — the REFUSE-WHOLE boundary, no overshoot.
+    private func checkWriteQuota(batchRows: Int, for userID: String) throws {
+        if batchRows > quotaBatchCap {
+            throw SyncError.writeQuotaExceeded(retryAfterSeconds: 0)
+        }
+        var budget = writeBudgets[userID] ?? WriteBudget(windowStart: clock)
+        if budget.lifetimeRows >= quotaLifetimePool {
+            if clock - budget.windowStart >= quotaWindowTicks {
+                budget.windowStart = clock
+                budget.windowRows = 0
+            } else if budget.windowRows + Int64(batchRows) > quotaWindowLimit {
+                throw SyncError.writeQuotaExceeded(
+                    retryAfterSeconds: Int(budget.windowStart + quotaWindowTicks - clock))
+            }
+        }
+        writeBudgets[userID] = budget
+    }
+
+    /// The post-loop increment: the ACTUAL accepted rows (CAS rejects
+    /// burn nothing — 12's letter).
+    private func recordAcceptedWrites(_ accepted: Int, for userID: String) {
+        guard accepted > 0 else { return }
+        var budget = writeBudgets[userID] ?? WriteBudget(windowStart: clock)
+        budget.lifetimeRows += Int64(accepted)
+        budget.windowRows += Int64(accepted)
+        writeBudgets[userID] = budget
+    }
+
+    // MARK: 13y UNIT B — the re-auth doors' twin (memo §5, on synthetic claims)
+
+    /// The synthetic amr claim: true models "the session's newest
+    /// password-method entry is inside the 10-minute window" — the doors'
+    /// client flow signs in immediately before acting, so the DEFAULT is
+    /// fresh (an emulation choice, recorded: the fake enforces the CLAIM
+    /// check; the 10-minute letter is the DDL pin's).
+    private var recentPasswordAuth: [String: Bool] = [:]
+
+    func setRecentPasswordAuth(_ fresh: Bool, for userID: String = FakeSyncServer.defaultUserID) {
+        recentPasswordAuth[userID] = fresh
+    }
+
+    private func checkRecentReauth(for userID: String) throws {
+        guard recentPasswordAuth[userID] ?? true else {
+            throw SyncError.reauthRequired
+        }
+    }
+
+    // MARK: 13y UNIT B — the direct-call test helper
+
+    /// Test support: ONE fresh proof for a DIRECT server call — mints a
+    /// nonce as the user and binds it to `rpc` under `material`'s kp2.
+    /// Pure minting: it never enrolls (the enroll-road pins drive that
+    /// door explicitly).
+    func mintProof(
+        rpc: String, for userID: String = FakeSyncServer.defaultUserID,
+        material: KeyProofMaterial = SyncTestKeys.proofMaterial
+    ) -> SyncKeyProof {
+        let nonce = fetchChallenges(1, as: userID)[0]
+        return material.proof(challenge: nonce, rpc: rpc)
     }
 
     /// The client-carried owner guard (the RPC's RAISE, whole-batch): a row
@@ -466,13 +687,19 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     }
 
     func push(
-        _ batch: [SyncRow], activeKeyID: String, keyProof: String, as userID: String
+        _ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof, as userID: String
     ) throws -> [SyncPushOutcome] {
-        _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
+        _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof, rpc: "sync_push")
         // Validated for the WHOLE batch BEFORE any row applies: the RPC's
         // RAISE aborts the whole transaction, so a partial application
         // here would be emulation drift.
         try requireOwnerStamps(batch, as: userID)
+        // 13y UNIT B (12's quota, memo §4): the ONLY quota'd door — the
+        // cap, the pool, the tumbling window, refuse-whole; the increment
+        // counts the ACTUAL accepted rows after the loop.
+        try checkWriteQuota(batchRows: batch.count, for: userID)
+        var acceptedRows = 0
+        defer { recordAcceptedWrites(acceptedRows, for: userID) }
         let heldTransaction = holdingNextPush
         holdingNextPush = false
         return try batch.map { incoming in
@@ -499,15 +726,16 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
             accounts[userID]!.tables[incoming.table, default: [:]][incoming.rowID] =
                 StoredRow(row: try normalized(accepted), serverSeq: granted,
                           writtenAt: clock, committed: !heldTransaction)
+            acceptedRows += 1
             return .accepted(newVersion: accepted.syncVersion, serverSeq: granted)
         }
     }
 
     func pull(
-        since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String? = nil,
+        since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String? = nil,
         as userID: String
     ) throws -> [SyncPulledRow] {
-        let account = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
+        let account = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof, rpc: "sync_pull")
         // Phase 13j — the device-cursor upsert (10's `for_device` arm):
         // monotonic on last_seq, seen-at stamped with the logical clock.
         if let deviceID {
@@ -537,9 +765,11 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// row `skipped` with the server's current version. The push posture
     /// (the gate + the owner guard); own partition only.
     func reencrypt(
-        _ rows: [SyncRow], activeKeyID: String, keyProof: String, as userID: String
+        _ rows: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof, as userID: String
     ) throws -> [SyncReencryptOutcome] {
-        _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
+        // NO quota, deliberately (memo §4): a rotation rewrites the
+        // whole corpus by design.
+        _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof, rpc: "sync_reencrypt")
         try requireOwnerStamps(rows, as: userID)
         return try rows.map { incoming in
             guard let current = accounts[userID]?.tables[incoming.table]?[incoming.rowID] else {
@@ -573,8 +803,9 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// FORMAT columns live on the `ScriptedVaultServer`, which calls this
     /// FIRST and stores the payload only when it returns.
     func keyVaultUpdate(
-        as userID: String, expectedRevision: Int, keyProof: String,
+        as userID: String, expectedRevision: Int, keyProof: SyncKeyProof,
         newCorpusKeyID: String, newKeyProofHash: String?,
+        newKeyProofMac: String? = nil,
         previousCorpusKeyID: String?, previousCorpusKey: String?,
         updatedByDevice: String? = nil
     ) throws -> VaultUpdateReceipt {
@@ -582,11 +813,33 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
             throw KeyVaultClientError.vaultAbsent
         }
         do {
-            try checkProof(keyProof, for: userID)
+            try checkProof(keyProof, rpc: "key_vault_update", for: userID)
         } catch SyncError.keyProofRefused {
             throw KeyVaultClientError.keyProofRefused
+        } catch SyncError.keyProofEnrollRequired {
+            throw KeyVaultClientError.keyProofEnrollRequired
+        } catch SyncError.keyProofChallengeStale {
+            throw KeyVaultClientError.keyProofChallengeStale
         }
         account = accounts[userID]!
+        // The R1-2 revision CAS, pre-checked under the held lock (12's
+        // 13y UNIT B letter: the successor rule must never mask a stale
+        // fetch's honest refetch contract).
+        guard account.vault.revision == expectedRevision else {
+            throw KeyVaultClientError.vaultRevisionConflict
+        }
+        // 13y UNIT B (12's successor block, memo §3): a NEW hash lands
+        // ONLY beside its sha256-matched key_proof_mac — the row's hash
+        // and the Vault-held secret move TOGETHER or not at all.
+        if let mac = newKeyProofMac {
+            guard let macRaw = Data(base64Encoded: mac),
+                  let hash = newKeyProofHash,
+                  KeyProof.hash(ofToken: macRaw) == hash else {
+                throw KeyVaultClientError.keyProofRefused
+            }
+        } else if let hash = newKeyProofHash, hash != account.vault.keyProofHash {
+            throw KeyVaultClientError.keyProofRefused
+        }
         // The id and the wrap travel together, never one without the other.
         guard (previousCorpusKeyID == nil) == (previousCorpusKey == nil) else {
             throw FakeSyncServerError.previousKeyHalfMissing
@@ -628,6 +881,7 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         }
         account.vault.corpusKeyID = newCorpusKeyID
         if let newKeyProofHash { account.vault.keyProofHash = newKeyProofHash }
+        if let newKeyProofMac { account.vault.keyProofMacSecret = newKeyProofMac }
         account.vault.previousCorpusKeyID = previousCorpusKeyID
         account.vault.previousCorpusKey = previousCorpusKey
         account.vault.rotationStartedSeq = nextSeq
@@ -674,8 +928,8 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         accounts[userID]?.ledgerFloor = floor
     }
 
-    func syncHorizon(activeKeyID: String, keyProof: String, as userID: String) throws -> Int64 {
-        let account = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
+    func syncHorizon(activeKeyID: String, keyProof: SyncKeyProof, as userID: String) throws -> Int64 {
+        let account = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof, rpc: "sync_horizon")
         let live = account.deviceCursors.values
             .filter { $0.seenAt + horizonDropoutTicks > clock }
             .map(\.lastSeq)
@@ -683,9 +937,9 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     }
 
     func purgeLedger(
-        since: Int64, activeKeyID: String, keyProof: String, as userID: String
+        since: Int64, activeKeyID: String, keyProof: SyncKeyProof, as userID: String
     ) throws -> SyncPurgeLedgerPage {
-        let account = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
+        let account = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof, rpc: "sync_purge_ledger")
         let entries = account.purgedRows
             .filter { $0.value > since }
             .map { SyncPurgedRecord(table: $0.key.table, rowID: $0.key.rowID, purgedSeq: $0.value) }
@@ -701,9 +955,12 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// original seq, the ON CONFLICT DO NOTHING twin). One granted seq per
     /// call: the purge is one event.
     func executePurge(
-        _ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: String, as userID: String
+        _ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: SyncKeyProof, as userID: String
     ) throws -> Int64 {
-        _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
+        _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof, rpc: "sync_purge_execute")
+        // 13y UNIT B (memo §5): the destructive door's re-auth window —
+        // gate first (fence/proof outrank), then the claim check.
+        try checkRecentReauth(for: userID)
         // 13y M2: the granted ledger seq is the caller's own.
         let granted = nextTenantSeq(for: userID)
         for target in rows {
@@ -811,9 +1068,14 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// deletes nothing. device_cursor and purged_row are untouched (10's
     /// letter) — and so is the account's counter (13y, 12's letter: the
     /// owner's sequence stays monotonic across a re-key, cursors valid).
-    func truncateAccount(_ userID: String, activeKeyID: String, keyProof: String) throws {
-        _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
+    func truncateAccount(_ userID: String, activeKeyID: String, keyProof: SyncKeyProof) throws {
+        _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof, rpc: "account_data_truncate")
+        // 13y UNIT B (memo §5): the second destructive door's re-auth.
+        try checkRecentReauth(for: userID)
         accounts[userID]?.tables = [:]
+        // 13y UNIT B (memo §4): the POOL RESET — the repush after a
+        // re-key is a first load (the adopt road's letter).
+        writeBudgets[userID] = nil
     }
 
     /// The deletion door's purge (batch 2's `account_purge` RPC, her
@@ -828,8 +1090,13 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         accounts[userID] = nil
         // 13y (12's account_purge letter): the account's counter goes with
         // it — a re-created account reads its own sequence from its start
-        // (the adopt road's premise).
+        // (the adopt road's premise). UNIT B: the nonces, the budget row
+        // and the Vault-held secret go too (the secret rides the vault
+        // row here — accounts[userID] carries it).
         tenantSeqs[userID] = nil
+        challengeStashes[userID] = nil
+        writeBudgets[userID] = nil
+        recentPasswordAuth[userID] = nil
     }
 }
 
@@ -840,11 +1107,11 @@ struct FakeSyncServerConnection: SyncTransport, SyncPurgeTransport, SyncRotation
     let server: FakeSyncServer
     let userID: String
 
-    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
         try await server.push(batch, activeKeyID: activeKeyID, keyProof: keyProof, as: userID)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
         try await server.pull(
             since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof,
             deviceID: deviceID, as: userID)
@@ -854,19 +1121,28 @@ struct FakeSyncServerConnection: SyncTransport, SyncPurgeTransport, SyncRotation
         await server.schemaVersion()
     }
 
-    func syncHorizon(activeKeyID: String, keyProof: String) async throws -> Int64 {
+    func fetchChallenges(_ count: Int) async throws -> [String] {
+        await server.fetchChallenges(count, as: userID)
+    }
+
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
+        try await server.enrollKeyProof(
+            legacyProof: legacyProof, macKey: macKey, activeKeyID: activeKeyID, as: userID)
+    }
+
+    func syncHorizon(activeKeyID: String, keyProof: SyncKeyProof) async throws -> Int64 {
         try await server.syncHorizon(activeKeyID: activeKeyID, keyProof: keyProof, as: userID)
     }
 
-    func purgeLedger(since: Int64, activeKeyID: String, keyProof: String) async throws -> SyncPurgeLedgerPage {
+    func purgeLedger(since: Int64, activeKeyID: String, keyProof: SyncKeyProof) async throws -> SyncPurgeLedgerPage {
         try await server.purgeLedger(since: since, activeKeyID: activeKeyID, keyProof: keyProof, as: userID)
     }
 
-    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: String) async throws -> Int64 {
+    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: SyncKeyProof) async throws -> Int64 {
         try await server.executePurge(rows, activeKeyID: activeKeyID, keyProof: keyProof, as: userID)
     }
 
-    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] {
+    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncReencryptOutcome] {
         try await server.reencrypt(rows, activeKeyID: activeKeyID, keyProof: keyProof, as: userID)
     }
 

@@ -637,7 +637,7 @@ struct SyncRepairTests {
         _ = try await productionRound(a)
         var staleBlock = await server.currentRow(table: "block", rowID: blockID)!
         staleBlock.columns["default_variant_id"] = .text(defaultID)
-        _ = try await server.push([staleBlock], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+        _ = try await server.push([staleBlock], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "sync_push"))
 
         try await b.pull()
         let bDefault = try b.db.fetchString(

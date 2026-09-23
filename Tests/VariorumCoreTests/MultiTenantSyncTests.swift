@@ -48,8 +48,12 @@ struct MultiTenantSyncTests {
         static let masterKey = SymmetricKey(data: Data((0..<32).map { UInt8($0 &+ 0x90) }))
         static let keyProof = KeyProof.wireToken(master: masterKey)
         static let keyProofHash = KeyProof.hash(master: masterKey)
+        /// 13y UNIT B: B's material + the enrolled-state values.
+        static let proofMaterial = KeyProofMaterial(master: masterKey)
+        static let macKeyWire = proofMaterial.macKeyWire
+        static let macKeyHash = KeyProof.macHash(master: masterKey)
         static let keys = SyncEncryptionKeys(
-            corpusKey: corpusKey, corpusKeyID: corpusKeyID, keyProof: keyProof)
+            corpusKey: corpusKey, corpusKeyID: corpusKeyID, keyProof: proofMaterial)
 
         static func seal(
             _ plaintext: String, table: String, rowID: String, column: String
@@ -73,9 +77,13 @@ struct MultiTenantSyncTests {
     /// per-user connections — the fake twin of "authenticated as B".
     private func makeWorld() async throws -> TwoUserWorld {
         let server = FakeSyncServer()
+        // 13y UNIT B: B is provisioned ENROLLED (the secret + the
+        // post-enroll hash) — the two-user world's direct calls mint
+        // bound pairs; the enroll road has its own pins.
         await server.provisionAccount(
             Self.userB, vaultCorpusKeyID: StrangerKeys.corpusKeyID,
-            keyProofHash: StrangerKeys.keyProofHash)
+            keyProofHash: StrangerKeys.macKeyHash,
+            keyProofMacSecret: StrangerKeys.macKeyWire)
         let a1 = try SyncClient(name: "A1", prefix: "AA", transport: server)
         let a2 = try SyncClient(
             name: "A2", prefix: "AB", transport: server, clockOffset: 313, seed: 2)
@@ -303,7 +311,7 @@ struct MultiTenantSyncTests {
             table: "container", rowID: herContainerID)) {
             _ = try await world.server.push(
                 [honest, hostile],
-                activeKeyID: StrangerKeys.corpusKeyID, keyProof: StrangerKeys.keyProof, as: Self.userB)
+                activeKeyID: StrangerKeys.corpusKeyID, keyProof: world.server.mintProof(rpc: "sync_push", for: Self.userB, material: StrangerKeys.proofMaterial), as: Self.userB)
         }
 
         // NOTHING landed — in either partition. The honest row shares the
@@ -332,7 +340,7 @@ struct MultiTenantSyncTests {
                         table: table.name, rowID: rowID,
                         columns: [table.primaryKey: .text(rowID), "owner_id": .text(Self.userA)],
                         syncVersion: 0)],
-                    activeKeyID: StrangerKeys.corpusKeyID, keyProof: StrangerKeys.keyProof, as: Self.userB)
+                    activeKeyID: StrangerKeys.corpusKeyID, keyProof: world.server.mintProof(rpc: "sync_push", for: Self.userB, material: StrangerKeys.proofMaterial), as: Self.userB)
             }
             #expect(await world.server.rowCount(table: table.name, for: Self.userA) == 0
                         || table.name == "container",
@@ -360,7 +368,7 @@ struct MultiTenantSyncTests {
         await #expect(throws: FakeSyncServerError.ownerMismatch(
             table: "container", rowID: "b-null-owner")) {
             _ = try await world.server.push(
-                [nullOwner], activeKeyID: StrangerKeys.corpusKeyID, keyProof: StrangerKeys.keyProof, as: Self.userB)
+                [nullOwner], activeKeyID: StrangerKeys.corpusKeyID, keyProof: world.server.mintProof(rpc: "sync_push", for: Self.userB, material: StrangerKeys.proofMaterial), as: Self.userB)
         }
 
         var absentOwner = Self.containerRow(
@@ -369,7 +377,7 @@ struct MultiTenantSyncTests {
         await #expect(throws: FakeSyncServerError.ownerMismatch(
             table: "container", rowID: "b-absent-owner")) {
             _ = try await world.server.push(
-                [absentOwner], activeKeyID: StrangerKeys.corpusKeyID, keyProof: StrangerKeys.keyProof, as: Self.userB)
+                [absentOwner], activeKeyID: StrangerKeys.corpusKeyID, keyProof: world.server.mintProof(rpc: "sync_push", for: Self.userB, material: StrangerKeys.proofMaterial), as: Self.userB)
         }
 
         #expect(await world.server.rowCount(table: "container", for: Self.userB) == before,
@@ -414,13 +422,13 @@ struct MultiTenantSyncTests {
                 owner: Self.userA,
                 sealedTitle: try SyncTestKeys.seal(
                     "A's title", table: "container", rowID: sharedID, column: "title"))],
-            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: world.server.mintProof(rpc: "sync_push"))
         let bOutcome = try await world.server.push(
             [containerRow(
                 owner: Self.userB,
                 sealedTitle: try StrangerKeys.seal(
                     "B's title", table: "container", rowID: sharedID, column: "title"))],
-            activeKeyID: StrangerKeys.corpusKeyID, keyProof: StrangerKeys.keyProof, as: Self.userB)
+            activeKeyID: StrangerKeys.corpusKeyID, keyProof: world.server.mintProof(rpc: "sync_push", for: Self.userB, material: StrangerKeys.proofMaterial), as: Self.userB)
 
         // Independent CAS: BOTH accepted as fresh inserts at version 1 —
         // no cross-tenant collision, improbable made impossible.
@@ -546,10 +554,13 @@ struct MultiTenantSyncTests {
         let rotated = SyncEncryptionKeys(
             corpusKey: SymmetricKey(data: Data((0..<32).map { UInt8($0 &+ 0xC0) })),
             corpusKeyID: "test-corpus-key-ROTATED-0000003",
-            keyProof: KeyProof.wireToken(master: rotatedMaster))
+            keyProof: KeyProofMaterial(master: rotatedMaster))
+        // 13y UNIT B: the re-key's server half lands the rotated account
+        // ENROLLED — the post-enroll hash + the Vault-held kp2′.
         await world.server.setVaultRow(
             corpusKeyID: rotated.corpusKeyID,
-            keyProofHash: KeyProof.hash(master: rotatedMaster), for: Self.userA)
+            keyProofHash: KeyProof.macHash(master: rotatedMaster),
+            keyProofMacSecret: rotated.keyProof.macKeyWire, for: Self.userA)
 
         // The stale writer types on, then tries to sync with OLD keys.
         try world.a1.with { ops, _ in
@@ -583,7 +594,7 @@ struct MultiTenantSyncTests {
         world.a1.keyProvider = FixedSyncKeyProvider(keys: rotated)
         world.a2.keyProvider = FixedSyncKeyProvider(keys: rotated)
         try await world.server.truncateAccount(
-            Self.userA, activeKeyID: rotated.corpusKeyID, keyProof: rotated.keyProof)
+            Self.userA, activeKeyID: rotated.corpusKeyID, keyProof: world.server.mintProof(rpc: "account_data_truncate", material: rotated.keyProof))
         try await world.a1.withAsync { db in
             try await SyncEngine(transport: world.server).resyncReinitialize()
             _ = db
@@ -675,7 +686,7 @@ struct MultiTenantSyncTests {
         let freshKeys = SyncEncryptionKeys(
             corpusKey: SymmetricKey(data: Data((0..<32).map { UInt8($0 &+ 0x40) })),
             corpusKeyID: "test-corpus-key-USERC-0000000003",
-            keyProof: KeyProof.wireToken(master: freshMaster))
+            keyProof: KeyProofMaterial(master: freshMaster))
         await world.server.provisionAccount(
             userC, vaultCorpusKeyID: freshKeys.corpusKeyID,
             keyProofHash: KeyProof.hash(master: freshMaster))
@@ -744,11 +755,16 @@ struct MultiTenantSyncTests {
         #expect((pushed + pulled).allSatisfy { $0 == SyncTestKeys.corpusKeyID },
                 "the id sent is exactly the provider's held corpus key id")
         // pre-13x: and the PROOF beside it, on both halves — the
-        // authorization, computed from the provider's master.
+        // authorization, computed from the provider's master. 13y UNIT B:
+        // PER-REQUEST — every recorded proof is a challenge-bound HMAC,
+        // NEVER the static v1 wire token, and no two calls repeat one
+        // (each consumed its own nonce).
         let proofs = await recorder.pushProofs + recorder.pullProofs
         #expect(proofs.count == pushed.count + pulled.count)
-        #expect(proofs.allSatisfy { $0 == SyncTestKeys.keyProof },
-                "the proof sent is exactly the provider's key proof")
+        #expect(proofs.allSatisfy { $0 != SyncTestKeys.keyProof },
+                "the static bearer token never rides a gated call")
+        #expect(Set(proofs).count == proofs.count,
+                "every call's proof is its own — single-use nonces, no repeats")
     }
 
     // MARK: - Phase 13y UNIT A: per-tenant `server_seq` (the 12 event's
@@ -967,19 +983,30 @@ actor KeyIDRecordingTransport: SyncTransport {
         self.inner = inner
     }
 
-    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
         pushKeyIDs.append(activeKeyID)
-        pushProofs.append(keyProof)
+        pushProofs.append(keyProof.proof)
         return try await inner.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
         pullKeyIDs.append(activeKeyID)
-        pullProofs.append(keyProof)
+        pullProofs.append(keyProof.proof)
         return try await inner.pull(since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof, deviceID: deviceID)
     }
 
     func schemaVersion() async throws -> Int {
         await inner.schemaVersion()
+    }
+
+    // 13y UNIT B: the challenge surface forwards transparently
+    // (wrappers forward — the standing doctrine).
+    func fetchChallenges(_ count: Int) async throws -> [String] {
+        try await inner.fetchChallenges(count)
+    }
+
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
+        try await inner.enrollKeyProof(
+            legacyProof: legacyProof, macKey: macKey, activeKeyID: activeKeyID)
     }
 }

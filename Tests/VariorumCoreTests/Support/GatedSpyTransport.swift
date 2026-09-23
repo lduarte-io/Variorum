@@ -72,14 +72,14 @@ actor GatedSpyTransport: SyncTransport {
 
     // MARK: SyncTransport
 
-    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
         calls.append(.push(rows: batch.count))
         if failing { throw InjectedNetworkFault() }
         await passGate()
         return try await server.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
         calls.append(.pull)
         if failing { throw InjectedNetworkFault() }
         await passGate()
@@ -94,5 +94,19 @@ actor GatedSpyTransport: SyncTransport {
     func schemaVersion() async throws -> Int {
         if failing { throw InjectedNetworkFault() }
         return await server.schemaVersion()
+    }
+
+    // 13y UNIT B: round plumbing like the version check — unrecorded and
+    // ungated (the A3 pins assert the DATA calls); the failing flag still
+    // applies (offline fails the fetch first, the same skipped round).
+    func fetchChallenges(_ count: Int) async throws -> [String] {
+        if failing { throw InjectedNetworkFault() }
+        return try await server.fetchChallenges(count)
+    }
+
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
+        if failing { throw InjectedNetworkFault() }
+        try await server.enrollKeyProof(
+            legacyProof: legacyProof, macKey: macKey, activeKeyID: activeKeyID)
     }
 }

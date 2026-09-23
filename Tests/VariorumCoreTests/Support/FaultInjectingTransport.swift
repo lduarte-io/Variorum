@@ -56,7 +56,19 @@ actor FaultInjectingTransport: SyncTransport {
         await server.schemaVersion()
     }
 
-    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+    // 13y UNIT B: the challenge surface forwards transparently — the
+    // fault arms target the DATA calls; a dropped challenge fetch is the
+    // same failed-round class as a dropped version check.
+    func fetchChallenges(_ count: Int) async throws -> [String] {
+        try await server.fetchChallenges(count)
+    }
+
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
+        try await server.enrollKeyProof(
+            legacyProof: legacyProof, macKey: macKey, activeKeyID: activeKeyID)
+    }
+
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
         pushCalls += 1
 
         if let rows = failNextPushAfterRows {
@@ -89,7 +101,7 @@ actor FaultInjectingTransport: SyncTransport {
         return outcomes
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
         pullCalls += 1
         if replayNextPull, !lastPullWindow.isEmpty {
             replayNextPull = false

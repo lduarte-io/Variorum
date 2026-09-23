@@ -222,7 +222,8 @@ public actor KeyVaultClient {
     /// unless this call began a rotation, or carried one through).
     @discardableResult
     public func updateVault(
-        _ format: KeyVaultFormat, expectedRevision: Int, keyProof: String
+        _ format: KeyVaultFormat, expectedRevision: Int, keyProof: KeyProofMaterial,
+        successorMacKey: String? = nil
     ) async throws -> UpdateReceipt {
         let session = try await sessionProvider.currentSession()
         var row = try KeyVaultWireRow(format: format, userID: session.userID)
@@ -230,21 +231,68 @@ public actor KeyVaultClient {
         // writes `updated_by_device` from the payload (never a server
         // guess: only the client knows its name).
         row.updatedByDevice = configuration.deviceName
+        // 13y UNIT B (memo §3): a rotation's payload carries kp2′ so the
+        // server lands the new hash and the Vault secret TOGETHER; nil on
+        // every non-rotating update (the hash unchanged, no secret moves).
+        row.keyProofMac = successorMacKey
+        // THE CHALLENGE DANCE (13y UNIT B): one nonce, the proof bound to
+        // this door's name; on a stale challenge fetch fresh and retry
+        // ONCE; on an un-enrolled account run the enroll road once (the
+        // racing loser's ALREADY_ENROLLED counts as success) and retry.
+        do {
+            return try await sendUpdate(row, expectedRevision: expectedRevision, proof:
+                keyProof.proof(challenge: try await fetchChallenge(), rpc: "key_vault_update"))
+        } catch KeyVaultClientError.keyProofChallengeStale {
+            return try await sendUpdate(row, expectedRevision: expectedRevision, proof:
+                keyProof.proof(challenge: try await fetchChallenge(), rpc: "key_vault_update"))
+        } catch KeyVaultClientError.keyProofEnrollRequired {
+            // The current vault row's corpus key id is the enroll fence's
+            // comparand — read it rather than guessing from the payload
+            // (a rotation's payload carries the NEW id; the fence wants
+            // the CURRENT one).
+            guard let fenceKeyID = try await fetchVault()?.format.classKey(for: .corpus)?.keyID else {
+                throw KeyVaultClientError.vaultAbsent
+            }
+            try await enroll(keyProof, activeKeyID: fenceKeyID)
+            // Enrollment just moved the row's hash to SHA-256(kp2) — a
+            // payload FETCHED before it still carries the creation-era v1
+            // hash, which the server's hash-and-secret-together rule
+            // would refuse. Refresh it from the material's own truth —
+            // unless a rotation successor rides, whose hash is already
+            // the successor's. (The cross-DEVICE stale-fetch corner —
+            // fetched here, enrolled by a peer's round meanwhile — still
+            // refuses loudly and heals by the standing refetch-and-
+            // re-derive contract; recorded.)
+            if successorMacKey == nil {
+                row.keyProofHash = KeyProof.hash(ofToken: keyProof.macKey)
+            }
+            return try await sendUpdate(row, expectedRevision: expectedRevision, proof:
+                keyProof.proof(challenge: try await fetchChallenge(), rpc: "key_vault_update"))
+        }
+    }
+
+    private func sendUpdate(
+        _ row: KeyVaultWireRow, expectedRevision: Int, proof: SyncKeyProof
+    ) async throws -> UpdateReceipt {
         struct Request: Encodable {
             let payload: KeyVaultWireRow
             let expectedRevision: Int
             /// The proof — a BODY parameter only (never a URL, never a header).
             let keyProof: String
+            /// 13y UNIT B: the single-use nonce the proof consumed.
+            let challenge: String
             enum CodingKeys: String, CodingKey {
                 case payload
                 case expectedRevision = "expected_revision"
                 case keyProof = "key_proof"
+                case challenge
             }
         }
         let body: Data
         do {
             body = try JSONEncoder().encode(
-                Request(payload: row, expectedRevision: expectedRevision, keyProof: keyProof))
+                Request(payload: row, expectedRevision: expectedRevision,
+                        keyProof: proof.proof, challenge: proof.challenge))
         } catch {
             throw KeyVaultClientError.malformedRow(String(describing: error))
         }
@@ -277,11 +325,66 @@ public actor KeyVaultClient {
         }
     }
 
+    // MARK: - The challenge + enroll roads (13y UNIT B — the vault door's own)
+
+    /// One nonce off `sync_challenge(1)` — the vault door's calls are
+    /// one-shot lifecycle acts, so it mints per call rather than stashing
+    /// a round batch (the engine's signer owns that cadence).
+    private func fetchChallenge() async throws -> String {
+        struct Request: Encodable { let n: Int }
+        let body = try JSONEncoder().encode(Request(n: 1))
+        let data: Data
+        do {
+            (data, _) = try await authorizedRequest(
+                method: "POST", path: "rest/v1/rpc/sync_challenge",
+                query: [], body: body, prefer: nil)
+        } catch KeyVaultClientError.httpFailure(let status, let responseBody) {
+            throw Self.classifiedUpdateFailure(status: status, body: responseBody)
+        }
+        guard let nonce = try? JSONDecoder().decode([String].self, from: data).first else {
+            throw KeyVaultClientError.malformedRow("sync_challenge returned no nonce")
+        }
+        return nonce
+    }
+
+    /// `key_proof_enroll(kp1, kp2, active_key_id)` — swallows the racing
+    /// loser's ALREADY_ENROLLED (memo §7 edge 1: its kp2 is the same).
+    private func enroll(_ material: KeyProofMaterial, activeKeyID: String) async throws {
+        struct Request: Encodable {
+            let kp1: String
+            let kp2: String
+            let activeKeyID: String
+            enum CodingKeys: String, CodingKey {
+                case kp1
+                case kp2
+                case activeKeyID = "active_key_id"
+            }
+        }
+        let body = try JSONEncoder().encode(Request(
+            kp1: material.legacyWireToken, kp2: material.macKeyWire, activeKeyID: activeKeyID))
+        do {
+            _ = try await authorizedRequest(
+                method: "POST", path: "rest/v1/rpc/key_proof_enroll",
+                query: [], body: body, prefer: nil)
+        } catch KeyVaultClientError.httpFailure(let status, let responseBody) {
+            let classified = Self.classifiedUpdateFailure(status: status, body: responseBody)
+            if case .keyProofAlreadyEnrolled = classified { return }
+            throw classified
+        } catch KeyVaultClientError.keyProofAlreadyEnrolled {
+            return
+        }
+    }
+
     /// The RPC's typed refusals, classified by marker (the transports'
     /// discipline: tokens, never sentences).
     static func classifiedUpdateFailure(status: Int, body: String) -> KeyVaultClientError {
         if body.contains(SyncServerRefusalMarker.vaultAbsent) { return .vaultAbsent }
         if body.contains(SyncServerRefusalMarker.vaultRevisionConflict) { return .vaultRevisionConflict }
+        // 13y UNIT B: the challenge protocol's typed refusals —
+        // ALREADY_ENROLLED before ENROLL (the belt).
+        if body.contains(SyncServerRefusalMarker.keyProofAlreadyEnrolled) { return .keyProofAlreadyEnrolled }
+        if body.contains(SyncServerRefusalMarker.keyProofEnroll) { return .keyProofEnrollRequired }
+        if body.contains(SyncServerRefusalMarker.keyProofStaleChallenge) { return .keyProofChallengeStale }
         if body.contains(SyncServerRefusalMarker.keyProofRequired) { return .keyProofRefused }
         if body.contains(SyncServerRefusalMarker.rotationInProgress) { return .rotationInProgress }
         if body.contains(SyncServerRefusalMarker.rotationRowsRemain) { return .rotationRowsRemain }
@@ -378,6 +481,16 @@ public enum KeyVaultClientError: Error, Equatable, Sendable {
     /// visibility window hid from the walk. Nothing was cleared; the caller
     /// re-walks (any device holding M′ can) and completes again.
     case rotationRowsRemain
+    /// 13y UNIT B: the account holds no Vault-held proof secret yet —
+    /// `updateVault` runs the enroll road once and retries; surfacing
+    /// means enrollment itself refused.
+    case keyProofEnrollRequired
+    /// 13y UNIT B: the enroll race's losing arm — treated as success by
+    /// the enroll road (the same kp2 landed).
+    case keyProofAlreadyEnrolled
+    /// 13y UNIT B: the challenge was unknown, consumed or expired twice
+    /// (one fresh retry already ran) — retry the act.
+    case keyProofChallengeStale
 }
 
 // MARK: - The wire row (1:1 with 08_phase14b_lockstep.sql)
@@ -428,6 +541,12 @@ struct KeyVaultWireRow: Codable, Equatable {
     /// NAME, stamped by the client on every write from its configuration
     /// and written by the RPC from the payload; read back for the notices.
     var updatedByDevice: String?
+    /// 13y UNIT B (memo §3) — WRITE-ONLY, never a table column: kp2′
+    /// (base64), carried by a ROTATION's payload so `key_vault_update`
+    /// lands the new `key_proof_hash` and the Vault secret TOGETHER
+    /// (`vault.update_secret` in the same transaction). The server never
+    /// stores or serves it; a read always decodes nil.
+    var keyProofMac: String?
 
     enum CodingKeys: String, CodingKey {
         case userID = "user_id"
@@ -454,6 +573,7 @@ struct KeyVaultWireRow: Codable, Equatable {
         case corpusPreviousWrappedByMaster = "corpus_previous_wrapped_by_master"
         case rotationStartedSeq = "rotation_started_seq"
         case updatedByDevice = "updated_by_device"
+        case keyProofMac = "key_proof_mac"
     }
 
     /// Hand-written decode for exactly one reason: `revision` defaults to
@@ -495,6 +615,8 @@ struct KeyVaultWireRow: Codable, Equatable {
             String.self, forKey: .corpusPreviousWrappedByMaster)
         rotationStartedSeq = try container.decodeIfPresent(Int64.self, forKey: .rotationStartedSeq)
         updatedByDevice = try container.decodeIfPresent(String.self, forKey: .updatedByDevice)
+        // 13y UNIT B: write-only — the server never serves it.
+        keyProofMac = nil
     }
 
     /// Format → row. Refuses a format missing either v1 class key — the

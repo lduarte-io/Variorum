@@ -148,6 +148,11 @@ public struct SyncEngine: Sendable {
         // before any network contact — outbox intact, cursor unmoved.
         let crypto = try roundCrypto()
         try await verifySchemaLockstep()
+        // 13y UNIT B: one challenge signer per round half — a nonce batch
+        // fetched once, one nonce consumed per RPC call.
+        let signer = SyncChallengeSigner(
+            transport: transport, material: crypto.keys.keyProof,
+            activeKeyID: crypto.keys.corpusKeyID)
         var report = PushReport()
         for _ in 0..<maxPushIterations {
             let batch: [SyncRow] = try await database.read { db in
@@ -176,10 +181,14 @@ public struct SyncEngine: Sendable {
                 let wireChunk = try chunk.map(crypto.encryptForWire)
                 // pre-13x: the key proof rides beside the key id — the
                 // authorization (decision 12); the id stays the honesty
-                // check.
-                let rawOutcomes = try await transport.push(
-                    wireChunk, activeKeyID: crypto.keys.corpusKeyID,
-                    keyProof: crypto.keys.keyProof)
+                // check. 13y UNIT B: PER-REQUEST — the round's signer
+                // turns the material into one single-use bound proof per
+                // call (the stale-retry-once and enroll roads live there).
+                let keyID = crypto.keys.corpusKeyID
+                let rawOutcomes = try await signer.call(rpc: "sync_push") { proof in
+                    try await self.transport.push(
+                        wireChunk, activeKeyID: keyID, keyProof: proof)
+                }
                 // THE SEAM, reject-merge half: a reject's `current` row is
                 // opened HERE, before the FK check and the merge — inland
                 // logic sees plaintext only.
@@ -422,6 +431,10 @@ public struct SyncEngine: Sendable {
         // the same visible refusal as absent keys.
         let deviceID = try roundDeviceIdentity()
         try await verifySchemaLockstep()
+        // 13y UNIT B: the pull half's own signer (one per round half).
+        let signer = SyncChallengeSigner(
+            transport: transport, material: crypto.keys.keyProof,
+            activeKeyID: crypto.keys.corpusKeyID)
         let since = try await database.read { try cursor($0) }
         var pulled: [SyncPulledRow] = []
         var fetchCursor = since
@@ -436,10 +449,14 @@ public struct SyncEngine: Sendable {
             // are uncommitted fetch positions, and recording one would
             // over-report what this device has integrated if the apply
             // below never commits.
-            let window = try await transport.pull(
-                since: fetchCursor, limit: batchSize, activeKeyID: crypto.keys.corpusKeyID,
-                keyProof: crypto.keys.keyProof,
-                deviceID: fetchCursor == since ? deviceID : nil)
+            let keyID = crypto.keys.corpusKeyID
+            let windowSince = fetchCursor
+            let windowDevice = fetchCursor == since ? deviceID : nil
+            let window = try await signer.call(rpc: "sync_pull") { proof in
+                try await self.transport.pull(
+                    since: windowSince, limit: self.batchSize, activeKeyID: keyID,
+                    keyProof: proof, deviceID: windowDevice)
+            }
             guard !window.isEmpty else { break }
             // THE SEAM, pull half (Phase 14b): every arriving row is opened
             // BEFORE the apply transaction exists — a decrypt refusal

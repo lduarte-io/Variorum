@@ -373,7 +373,7 @@ struct RestoreMatrixTests {
         #expect(restoredRecorded >= restoredCursor)
         let horizonAfter = try await server.syncHorizon(
             activeKeyID: a.keyProvider.currentKeys().corpusKeyID,
-            keyProof: a.keyProvider.currentKeys().keyProof)
+            keyProof: server.mintProof(rpc: "sync_horizon", material: a.keyProvider.currentKeys().keyProof))
         #expect(horizonAfter <= restoredRecorded,
                 "the horizon holds at the restored device's position — nothing it has not seen is purgeable")
         // And the re-pull was harmless: the restored store caught up.

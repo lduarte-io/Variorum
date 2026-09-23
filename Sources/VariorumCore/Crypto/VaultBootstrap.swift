@@ -123,7 +123,7 @@ public struct VaultBootstrap: Sendable {
         let keys = SyncEncryptionKeys(
             corpusKey: material.corpusSymmetricKey,
             corpusKeyID: material.corpusKeyID,
-            keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+            keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
 
         return try await withDependencies {
             $0.database = database

@@ -39,7 +39,7 @@ struct AccountLifecycleTests {
             self.events = events
         }
 
-        func truncateAccountData(activeKeyID: String, keyProof: String) async throws -> [String: Int] {
+        func truncateAccountData(activeKeyID: String, keyProof: KeyProofMaterial) async throws -> [String: Int] {
             events.withValue { $0.append("truncate:\(activeKeyID)") }
             if failNextTruncate.withValue({ value -> Bool in
                 defer { value = false }
@@ -48,8 +48,12 @@ struct AccountLifecycleTests {
                 throw AccountLifecycleError.httpFailure(status: 503, body: "gateway hiccup")
             }
             // Through the fake's GATE (the real RPC's): the right key id
-            // without the proof deletes nothing.
-            try await server.truncateAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
+            // without the proof deletes nothing. 13y UNIT B: the fake
+            // conformance owns the challenge dance exactly as the real
+            // one does — one minted nonce, the door's own binding.
+            try await server.truncateAccount(
+                userID, activeKeyID: activeKeyID,
+                keyProof: server.mintProof(rpc: "account_data_truncate", for: userID, material: keyProof))
             return [:]
         }
 
@@ -123,7 +127,7 @@ struct AccountLifecycleTests {
     private func keys(of material: DeviceKeyMaterial) -> SyncEncryptionKeys {
         SyncEncryptionKeys(
             corpusKey: material.corpusSymmetricKey, corpusKeyID: material.corpusKeyID,
-            keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+            keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
     }
 
     /// Drain one client to an empty outbox (pull → push per A3).
@@ -211,30 +215,47 @@ struct AccountLifecycleTests {
                 })
         }
 
+        // 13y UNIT B: the door's dance fetches ONE nonce first — every
+        // responder serves the challenge route by path, and the material
+        // stands in for the old string proof.
+        let material = SyncTestKeys.proofMaterial
+        func serving(
+            _ respond: @escaping @Sendable (URLRequest, Int) -> (Int, String)
+        ) -> AccountLifecycleClient {
+            client { request, n in
+                if request.url!.path.hasSuffix("sync_challenge") {
+                    return (200, #"["bm9uY2U="]"#)
+                }
+                return respond(request, n)
+            }
+        }
+
         // The fence marker → the CF-16 typed error, same as at sync.
-        let fenced = client { _, _ in
+        let fenced = serving { _, _ in
             (400, #"{"message":"VARIORUM_STALE_KEY_FENCE: stale key id"}"#)
         }
         await #expect(throws: SyncError.encryptionKeysReplaced) {
-            _ = try await fenced.truncateAccountData(activeKeyID: "old-id", keyProof: "proof")
+            _ = try await fenced.truncateAccountData(activeKeyID: "old-id", keyProof: material)
         }
         // pre-13x: the proof's refusal classifies into ITS typed error —
         // the right key id without the proof deletes nothing.
-        let proofless = client { _, _ in
+        let proofless = serving { _, _ in
             (400, #"{"message":"VARIORUM_KEY_PROOF_REQUIRED: no proof"}"#)
         }
         await #expect(throws: SyncError.keyProofRefused) {
-            _ = try await proofless.truncateAccountData(activeKeyID: "new-id", keyProof: "")
+            _ = try await proofless.truncateAccountData(activeKeyID: "new-id", keyProof: material)
         }
 
-        // ONE 401 refresh-and-retry, then the decoded truncate counts.
-        let retried = client { _, n in
-            n == 1 ? (401, #"{"message":"JWT expired"}"#)
+        // ONE 401 refresh-and-retry, then the decoded truncate counts
+        // (ordinal 1 is the challenge fetch; the 401 lands on the
+        // truncate's first attempt).
+        let retried = serving { _, n in
+            n == 2 ? (401, #"{"message":"JWT expired"}"#)
                    : (200, #"{"container": 3, "variant": 7}"#)
         }
-        let counts = try await retried.truncateAccountData(activeKeyID: "new-id", keyProof: "proof")
+        let counts = try await retried.truncateAccountData(activeKeyID: "new-id", keyProof: material)
         // The proof rides the BODY, never the URL.
-        #expect(calls.value.allSatisfy { !$0.contains("key_proof") })
+        #expect(calls.value.allSatisfy { !$0.contains("key_proof") && !$0.contains("challenge=") })
         #expect(counts == ["container": 3, "variant": 7])
 
         // The purge report decodes 1:1 with 09's jsonb keys.

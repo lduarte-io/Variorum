@@ -82,6 +82,10 @@ public struct RekeyRecencyProbe: Sendable {
         // already fenced off (keys replaced elsewhere) throws here, and
         // the face words "couldn't compare" rather than blocking the door.
         let keys = try keyProvider.currentKeys()
+        // 13y UNIT B: one signer per probe run — the per-request proof.
+        let signer = SyncChallengeSigner(
+            transport: transport, material: keys.keyProof,
+            activeKeyID: keys.corpusKeyID)
 
         // The local copy's own vantage: its committed cursor, and its
         // container listing (id → updated_at). One read transaction; no
@@ -106,9 +110,12 @@ public struct RekeyRecencyProbe: Sendable {
         var serverRows: [String: SyncRow] = [:]
         var fetchCursor = since
         while true {
-            let window = try await transport.pull(
-                since: fetchCursor, limit: batchSize,
-                activeKeyID: keys.corpusKeyID, keyProof: keys.keyProof, deviceID: nil)
+            let windowSince = fetchCursor
+            let window = try await signer.call(rpc: "sync_pull") { proof in
+                try await self.transport.pull(
+                    since: windowSince, limit: self.batchSize,
+                    activeKeyID: keys.corpusKeyID, keyProof: proof, deviceID: nil)
+            }
             guard !window.isEmpty else { break }
             for item in window where item.row.table == "container" {
                 // Keep the LAST state seen (state-based feed; a later seq

@@ -20,10 +20,13 @@ public protocol AccountLifecycleProviding: Sendable {
     /// the re-key order (new vault FIRST) enforceable — a stale device
     /// cannot empty the account. Returns per-table deleted counts.
     ///
-    /// `keyProof` (pre-13x decision 12): the right `activeKeyID` WITHOUT
-    /// the proof deletes nothing — the server's gate checks the fence,
-    /// then the proof (`SyncError.keyProofRefused` on refusal).
-    func truncateAccountData(activeKeyID: String, keyProof: String) async throws -> [String: Int]
+    /// `keyProof` (pre-13x decision 12; PER-REQUEST since 13y UNIT B): the
+    /// right `activeKeyID` WITHOUT the proof deletes nothing — the
+    /// server's gate checks the fence, then the challenge-verified proof
+    /// (`SyncError.keyProofRefused` on refusal), then the 10-minute
+    /// re-auth window (`SyncError.reauthRequired`). Takes the MATERIAL:
+    /// the conformance owns the challenge dance.
+    func truncateAccountData(activeKeyID: String, keyProof: KeyProofMaterial) async throws -> [String: Int]
 
     /// The deletion door's purge (09's `account_purge`, her Round-5
     /// ruling): the account's data rows + its `key_vault` row + its
@@ -117,25 +120,56 @@ public struct AccountLifecycleClient: AccountLifecycleProviding {
 
     // MARK: - AccountLifecycleProviding
 
-    public func truncateAccountData(activeKeyID: String, keyProof: String) async throws -> [String: Int] {
+    public func truncateAccountData(activeKeyID: String, keyProof: KeyProofMaterial) async throws -> [String: Int] {
+        // THE CHALLENGE DANCE (13y UNIT B): one nonce bound to this door;
+        // a stale challenge fetches fresh and retries ONCE. Deliberately
+        // NO enroll road here — the truncate runs mid-re-key on an
+        // account whose vault write (the rotation's) already enrolled or
+        // rotated the secret; an un-enrolled refusal surfaces typed.
+        do {
+            return try await sendTruncate(activeKeyID: activeKeyID, proof:
+                keyProof.proof(challenge: try await fetchChallenge(), rpc: "account_data_truncate"))
+        } catch SyncError.keyProofChallengeStale {
+            return try await sendTruncate(activeKeyID: activeKeyID, proof:
+                keyProof.proof(challenge: try await fetchChallenge(), rpc: "account_data_truncate"))
+        }
+    }
+
+    private func sendTruncate(activeKeyID: String, proof: SyncKeyProof) async throws -> [String: Int] {
         struct Request: Encodable {
             let activeKeyID: String
             /// pre-13x: the key proof, a BODY parameter only.
             let keyProof: String
+            /// 13y UNIT B: the single-use nonce the proof consumed.
+            let challenge: String
             enum CodingKeys: String, CodingKey {
                 case activeKeyID = "active_key_id"
                 case keyProof = "key_proof"
+                case challenge
             }
         }
         let data = try await send(
             method: "POST", path: "rest/v1/rpc/account_data_truncate",
             query: [],
-            body: try JSONEncoder().encode(Request(activeKeyID: activeKeyID, keyProof: keyProof)))
+            body: try JSONEncoder().encode(Request(
+                activeKeyID: activeKeyID, keyProof: proof.proof, challenge: proof.challenge)))
         do {
             return try JSONDecoder().decode([String: Int].self, from: data)
         } catch {
             throw AccountLifecycleError.malformedResult(String(describing: error))
         }
+    }
+
+    /// One nonce off `sync_challenge(1)` — the lifecycle door's own road.
+    private func fetchChallenge() async throws -> String {
+        struct Request: Encodable { let n: Int }
+        let data = try await send(
+            method: "POST", path: "rest/v1/rpc/sync_challenge",
+            query: [], body: try JSONEncoder().encode(Request(n: 1)))
+        guard let nonce = try? JSONDecoder().decode([String].self, from: data).first else {
+            throw AccountLifecycleError.malformedResult("sync_challenge returned no nonce")
+        }
+        return nonce
     }
 
     public func purgeAccount() async throws -> AccountPurgeReport {
@@ -198,6 +232,20 @@ public struct AccountLifecycleClient: AccountLifecycleProviding {
         let text = String(data: body, encoding: .utf8) ?? ""
         if text.contains(SyncServerRefusalMarker.staleKeyFence) {
             return SyncError.encryptionKeysReplaced
+        }
+        // 13y UNIT B: the challenge protocol's + the re-auth door's typed
+        // refusals (ALREADY_ENROLLED before ENROLL — the belt).
+        if text.contains(SyncServerRefusalMarker.keyProofAlreadyEnrolled) {
+            return SyncError.keyProofAlreadyEnrolled
+        }
+        if text.contains(SyncServerRefusalMarker.keyProofEnroll) {
+            return SyncError.keyProofEnrollRequired
+        }
+        if text.contains(SyncServerRefusalMarker.keyProofStaleChallenge) {
+            return SyncError.keyProofChallengeStale
+        }
+        if text.contains(SyncServerRefusalMarker.reauthRequired) {
+            return SyncError.reauthRequired
         }
         if text.contains(SyncServerRefusalMarker.keyProofRequired) {
             return SyncError.keyProofRefused

@@ -265,7 +265,7 @@ struct VaultBootstrapTests {
         let dropPushCalls: Set<Int>
         let pushCalls = LockIsolated(0)
 
-        func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+        func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
             let call = pushCalls.withValue { value -> Int in
                 value += 1
                 return value
@@ -276,12 +276,23 @@ struct VaultBootstrapTests {
             return try await wrapped.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
         }
 
-        func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+        func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
             try await wrapped.pull(since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof, deviceID: deviceID)
         }
 
         func schemaVersion() async throws -> Int {
             try await wrapped.schemaVersion()
+        }
+
+        // 13y UNIT B: the challenge surface forwards transparently
+        // (wrappers forward — the standing doctrine).
+        func fetchChallenges(_ count: Int) async throws -> [String] {
+            try await wrapped.fetchChallenges(count)
+        }
+
+        func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
+            try await wrapped.enrollKeyProof(
+                legacyProof: legacyProof, macKey: macKey, activeKeyID: activeKeyID)
         }
     }
 

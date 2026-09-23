@@ -113,7 +113,7 @@ struct CorpusRotationTests {
         // the §5 straggler: A's pull stops at it, cursor held.
         _ = try await server.push(
             [blockRow(id: "b-stray", lastContainer: "c-late")],
-            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "sync_push"))
         await #expect(throws: SyncError.pullStalled(cursor: 0), "a straggler that never clears refuses typed") {
             _ = try await a.pullToHead(maxAttempts: 3)
         }
@@ -122,7 +122,7 @@ struct CorpusRotationTests {
         // reads to head.
         _ = try await server.push(
             [try containerRow(id: "c-late", title: "the late parent")],
-            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "sync_push"))
         let report = try await a.pullToHead()
         #expect(!report.stalled)
         #expect(report.applied == 2)
@@ -171,7 +171,9 @@ struct CorpusRotationTests {
         let vault = fetched.format
         #expect(vault.classKey(for: .corpus)?.keyID == begun.material.corpusKeyID)
         #expect(begun.material.corpusKeyID != world.old.corpusKeyID, "a genuinely fresh corpus key")
-        #expect(vault.keyProofHash == KeyProof.hash(master: begun.material.masterSymmetricKey))
+        // 13y UNIT B: a rotation installs the POST-ENROLL hash —
+        // SHA-256(kp2′) — beside kp2′ itself (they land together).
+        #expect(vault.keyProofHash == KeyProof.macHash(master: begun.material.masterSymmetricKey))
         #expect(vault.previousCorpusKey?.keyID == world.old.corpusKeyID, "the old corpus key's id in its own column")
         #expect(vault.rotationStartedSeq == seq)
         #expect(begun.material.rotation?.startedSeq == seq)
@@ -187,11 +189,16 @@ struct CorpusRotationTests {
                 == begun.material.masterKey, "M′ under the twelve words")
         #expect(try vault.unwrapPreviousCorpusKey(masterKey: begun.material.masterSymmetricKey).key.data
                 == world.old.corpusKey, "the previous corpus key under M′")
-        // The OLD proof is dead on every door.
+        // The OLD proof is dead on every door (13y UNIT B: the rotation
+        // swapped the Vault-held secret, so a proof under the OLD kp2
+        // fails the HMAC even on a fresh nonce).
         await #expect(throws: SyncError.keyProofRefused) {
             _ = try await world.server.pull(
                 since: 0, limit: 1, activeKeyID: begun.material.corpusKeyID,
-                keyProof: KeyProof.wireToken(master: world.old.masterSymmetricKey), deviceID: nil)
+                keyProof: world.server.mintProof(
+                    rpc: "sync_pull",
+                    material: KeyProofMaterial(master: world.old.masterSymmetricKey)),
+                deviceID: nil)
         }
         // A SECOND rotation while this one stands: refused at the door.
         await #expect(throws: CorpusRotationError.rotationInProgress(previousKeyID: world.old.corpusKeyID)) {
@@ -766,7 +773,7 @@ struct CorpusRotationTests {
             ],
             syncVersion: 0)
         _ = try await world.server.push(
-            [plainRow], activeKeyID: world.old.corpusKeyID, keyProof: world.old.syncKeys.keyProof)
+            [plainRow], activeKeyID: world.old.corpusKeyID, keyProof: world.server.mintProof(rpc: "sync_push", material: world.old.syncKeys.keyProof))
         #expect(SyncSchema.table(named: "purge_intent")?.encryptedColumns.isEmpty == true, "the pin's premise")
 
         let begun = try await CorpusRotation.begin(
@@ -819,7 +826,7 @@ struct CorpusRotationTests {
         // `name` and `presentation` NULL, pushed just before the switch.
         _ = try await world.server.push(
             [blockRow(id: "blank-block", lastContainer: nil)],
-            activeKeyID: world.old.corpusKeyID, keyProof: world.old.syncKeys.keyProof)
+            activeKeyID: world.old.corpusKeyID, keyProof: world.server.mintProof(rpc: "sync_push", material: world.old.syncKeys.keyProof))
         #expect(SyncSchema.table(named: "block")?.encryptedColumns.isEmpty == false, "the pin's premise: block is an encrypted table")
         let blankSeqBefore = try #require(await world.server.currentSeq(table: "block", rowID: "blank-block"))
 
@@ -872,7 +879,7 @@ struct CorpusRotationTests {
         // pushed under the account's old proof, so it sits below the seq.
         _ = try await world.server.push(
             [try containerRow(id: "poison", title: "sealed under a key nobody here holds")],
-            activeKeyID: world.old.corpusKeyID, keyProof: world.old.syncKeys.keyProof)
+            activeKeyID: world.old.corpusKeyID, keyProof: world.server.mintProof(rpc: "sync_push", material: world.old.syncKeys.keyProof))
         let oldSeam = SyncPayloadCrypto(keys: world.old.syncKeys)
         let poisonStored = try #require(await world.server.storedRowsWithSeqs().first { $0.row.rowID == "poison" })
         #expect((try? oldSeam.decryptFromWire(poisonStored)) == nil, "the pin's premise: the old key does not open it either")
@@ -915,7 +922,7 @@ struct CorpusRotationTests {
         // the partition; the next walk finds nothing and completion clears.
         let purged = try await world.server.executePurge(
             [SyncPurgeTarget(table: "container", rowID: "poison")],
-            activeKeyID: begun.material.corpusKeyID, keyProof: begun.material.syncKeys.keyProof)
+            activeKeyID: begun.material.corpusKeyID, keyProof: world.server.mintProof(rpc: "sync_purge_execute", material: begun.material.syncKeys.keyProof))
         #expect(purged > 0)
         let report = try await driver.reencryptRemainder(material: begun.material)
         #expect(report.replaced >= 0)
@@ -1090,17 +1097,27 @@ private actor HorizonSpyTransport: SyncTransport, SyncRotationTransport {
 
     init(server: FakeSyncServer) { self.server = server }
 
-    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
         try await server.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
         try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof, deviceID: deviceID)
+    }
+
+    // 13y UNIT B: the challenge surface forwards transparently.
+    func fetchChallenges(_ count: Int) async throws -> [String] {
+        await server.fetchChallenges(count)
+    }
+
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
+        try await server.enrollKeyProof(
+            legacyProof: legacyProof, macKey: macKey, activeKeyID: activeKeyID)
     }
 
     func schemaVersion() async throws -> Int { await server.schemaVersion() }
 
-    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] {
+    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncReencryptOutcome] {
         try await server.reencrypt(rows, activeKeyID: activeKeyID, keyProof: keyProof)
     }
 
@@ -1127,19 +1144,29 @@ private actor SeamTransport: SyncTransport, SyncRotationTransport {
         self.seam = seam
     }
 
-    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
         try await server.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
         try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof, deviceID: deviceID)
+    }
+
+    // 13y UNIT B: the challenge surface forwards transparently.
+    func fetchChallenges(_ count: Int) async throws -> [String] {
+        await server.fetchChallenges(count)
+    }
+
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
+        try await server.enrollKeyProof(
+            legacyProof: legacyProof, macKey: macKey, activeKeyID: activeKeyID)
     }
 
     func schemaVersion() async throws -> Int { await server.schemaVersion() }
 
     func visibilityHorizonMillis() async throws -> Int64 { try await server.visibilityHorizonMillis() }
 
-    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] {
+    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncReencryptOutcome] {
         let outcomes = try await server.reencrypt(rows, activeKeyID: activeKeyID, keyProof: keyProof)
         landed += outcomes.filter { if case .replaced = $0 { return true } else { return false } }.count
         if !tripped {

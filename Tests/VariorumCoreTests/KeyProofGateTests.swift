@@ -19,9 +19,18 @@ import Testing
 /// the seq-rule pins go red when `SyncPayloadCrypto.keyMaterial(forServerSeq:)`
 /// is reverted to the current key (production code — the batch record
 /// quotes both reverts' failing assertions).
-@Suite("The key proof gate + the rotation seq (pre-13x 1b)")
+///
+/// REWORKED at 13y UNIT B to the CHALLENGE PROTOCOL (the ruled memo §3;
+/// QUESTIONS #144(a)): the static bearer proof retires — every gated call
+/// rides a single-use nonce + an HMAC under kp2 bound to the door's name;
+/// enrollment replaces the migration arm; a rotation swaps the Vault-held
+/// secret beside the hash. The UNIT B pins (replay · expiry · splice ·
+/// the signer's retry road · enroll-once · the together rule) sit at the
+/// end of the suite; the replay pin's red-on-old is a BEHAVIORAL REVERT
+/// of the fake's atomic consume (never committed — the record quotes it).
+@Suite("The key proof gate + the rotation seq (pre-13x 1b; challenge-reworked 13y UNIT B)")
 struct KeyProofGateTests {
-    private static let wrongProof = KeyProof.wireToken(master: SymmetricKey(size: .bits256))
+    private static let wrongMaterial = KeyProofMaterial(master: SymmetricKey(size: .bits256))
 
     private func containerRow(id: String, title: String, base: Int) -> SyncRow {
         SyncRow(
@@ -48,44 +57,64 @@ struct KeyProofGateTests {
         let server = world.syncServer
         let material = try await world.enrollment.setUp(passphrase: "orchard-lantern-13")
         let keyID = material.corpusKeyID
-        let right = KeyProof.wireToken(master: material.masterSymmetricKey)
-        // Something to protect.
+        let right = KeyProofMaterial(master: material.masterSymmetricKey)
+        // The production first round's shape: the fresh account enrolls
+        // (the old hash authorizes the successor), then pushes under a
+        // minted single-use pair.
+        try await server.enrollKeyProof(
+            legacyProof: right.legacyWireToken, macKey: right.macKeyWire,
+            activeKeyID: keyID, as: world.userID)
         _ = try await server.push(
             [containerRow(id: "c1", title: "e1:sealed", base: 0)],
-            activeKeyID: keyID, keyProof: right)
+            activeKeyID: keyID,
+            keyProof: server.mintProof(rpc: "sync_push", for: world.userID, material: right))
         let rowsBefore = await server.rowCount(table: "container")
         let vaultBefore = world.server.storedRow(userID: world.userID)
 
-        for proof in [Self.wrongProof, "", "not!!base64"] {
-            await #expect(throws: SyncError.keyProofRefused, "push · proof '\(proof.prefix(8))'") {
-                _ = try await server.push(
-                    [containerRow(id: "c2", title: "e1:x", base: 0)], activeKeyID: keyID, keyProof: proof)
-            }
-            await #expect(throws: SyncError.keyProofRefused, "pull") {
-                _ = try await server.pull(since: 0, limit: 10, activeKeyID: keyID, keyProof: proof, deviceID: "d")
-            }
-            await #expect(throws: SyncError.keyProofRefused, "horizon — a READ, gated too") {
-                _ = try await server.syncHorizon(activeKeyID: keyID, keyProof: proof)
-            }
-            await #expect(throws: SyncError.keyProofRefused, "ledger — a READ, gated too") {
-                _ = try await server.purgeLedger(since: 0, activeKeyID: keyID, keyProof: proof)
-            }
-            await #expect(throws: SyncError.keyProofRefused, "purge") {
-                _ = try await server.executePurge(
-                    [SyncPurgeTarget(table: "container", rowID: "c1")], activeKeyID: keyID, keyProof: proof)
-            }
-            await #expect(throws: SyncError.keyProofRefused, "truncate") {
-                try await server.truncateAccount(world.userID, activeKeyID: keyID, keyProof: proof)
-            }
-            await #expect(throws: SyncError.keyProofRefused, "re-encrypt") {
-                _ = try await server.reencrypt(
-                    [containerRow(id: "c1", title: "e1:y", base: 1)], activeKeyID: keyID, keyProof: proof)
-            }
-            await #expect(throws: KeyVaultClientError.keyProofRefused, "the vault update") {
-                try await world.client.updateVault(
-                    try #require(try await world.client.fetchVault()).format,
-                    expectedRevision: 1, keyProof: proof)
-            }
+        // A session WITHOUT the master mints real nonces (the mint is
+        // session-gated only) but its HMACs are another kp2's — every
+        // door refuses, and a garbage challenge refuses stale.
+        func wrongPair(_ rpc: String) async -> SyncKeyProof {
+            await server.mintProof(rpc: rpc, for: world.userID, material: Self.wrongMaterial)
+        }
+        await #expect(throws: SyncError.keyProofRefused, "push") {
+            _ = try await server.push(
+                [containerRow(id: "c2", title: "e1:x", base: 0)], activeKeyID: keyID,
+                keyProof: await wrongPair("sync_push"))
+        }
+        await #expect(throws: SyncError.keyProofRefused, "pull") {
+            _ = try await server.pull(since: 0, limit: 10, activeKeyID: keyID, keyProof: await wrongPair("sync_pull"), deviceID: "d")
+        }
+        await #expect(throws: SyncError.keyProofRefused, "horizon — a READ, gated too") {
+            _ = try await server.syncHorizon(activeKeyID: keyID, keyProof: await wrongPair("sync_horizon"))
+        }
+        await #expect(throws: SyncError.keyProofRefused, "ledger — a READ, gated too") {
+            _ = try await server.purgeLedger(since: 0, activeKeyID: keyID, keyProof: await wrongPair("sync_purge_ledger"))
+        }
+        await #expect(throws: SyncError.keyProofRefused, "purge") {
+            _ = try await server.executePurge(
+                [SyncPurgeTarget(table: "container", rowID: "c1")], activeKeyID: keyID,
+                keyProof: await wrongPair("sync_purge_execute"))
+        }
+        await #expect(throws: SyncError.keyProofRefused, "truncate") {
+            try await server.truncateAccount(world.userID, activeKeyID: keyID, keyProof: await wrongPair("account_data_truncate"))
+        }
+        await #expect(throws: SyncError.keyProofRefused, "re-encrypt") {
+            _ = try await server.reencrypt(
+                [containerRow(id: "c1", title: "e1:y", base: 1)], activeKeyID: keyID,
+                keyProof: await wrongPair("sync_reencrypt"))
+        }
+        await #expect(throws: KeyVaultClientError.keyProofRefused, "the vault update") {
+            try await world.client.updateVault(
+                try #require(try await world.client.fetchVault()).format,
+                expectedRevision: 1, keyProof: Self.wrongMaterial)
+        }
+        // A fabricated challenge — never minted — refuses STALE (fetch
+        // fresh and retry once is the signer's road, not a bare door's).
+        await #expect(throws: SyncError.keyProofChallengeStale, "an unminted challenge") {
+            _ = try await server.push(
+                [containerRow(id: "c2", title: "e1:x", base: 0)], activeKeyID: keyID,
+                keyProof: right.proof(challenge: Data(repeating: 7, count: 32).base64EncodedString(), rpc: "sync_push"))
         }
         // Nothing landed, nothing moved.
         #expect(await server.rowCount(table: "container") == rowsBefore)
@@ -97,12 +126,21 @@ struct KeyProofGateTests {
 
         // What a bare session CAN do: fetch the wrapped copies…
         let fetched = try #require(try await world.client.fetchVault())
-        #expect(fetched.format.keyProofHash == KeyProof.hash(master: material.masterSymmetricKey))
+        #expect(fetched.format.masterWrappedByPassphrase.isEmpty == false,
+                "the wrapped copies read for any session — enrollment gates the mirror, not the vault read")
+        // The gate's truth: the post-enroll hash is SHA-256(kp2). (The
+        // direct-enroll road updated the sync fake's row; the scripted
+        // PostgREST copy follows only through its own enroll route.)
+        #expect(await server.vaultRow(for: world.userID)?.keyProofHash
+                == KeyProof.macHash(master: material.masterSymmetricKey),
+                "the post-enroll hash: SHA-256(kp2)")
         // …and delete the whole account — no proof asked (decision 12).
         await server.purgeAccount(world.userID)
         #expect(await server.vaultRow(for: world.userID) == nil)
         await #expect(throws: SyncError.encryptionKeysReplaced, "the missing-vault arm after deletion") {
-            _ = try await server.push([], activeKeyID: keyID, keyProof: right)
+            _ = try await server.push(
+                [], activeKeyID: keyID,
+                keyProof: server.mintProof(rpc: "sync_push", for: world.userID, material: right))
         }
     }
 
@@ -128,38 +166,73 @@ struct KeyProofGateTests {
         #expect(String(data: body, encoding: .utf8)?.contains("42501") == true, "permission denied")
         #expect(world.server.storedRow(userID: world.userID) == before, "nothing written")
         #expect(world.server.patchCount == 1)
-        // The proof hash it tried to overwrite still gates the mirror.
+        // The proof machinery it tried to overwrite still gates the
+        // mirror (13y UNIT B: enroll, then a minted pair).
+        let rightMaterial = KeyProofMaterial(master: material.masterSymmetricKey)
+        try await world.syncServer.enrollKeyProof(
+            legacyProof: rightMaterial.legacyWireToken, macKey: rightMaterial.macKeyWire,
+            activeKeyID: material.corpusKeyID, as: world.userID)
         _ = try await world.syncServer.push(
             [], activeKeyID: material.corpusKeyID,
-            keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+            keyProof: world.syncServer.mintProof(
+                rpc: "sync_push", for: world.userID, material: rightMaterial))
     }
 
-    /// THE MIGRATION ARM (the author's existing vault): a NULL-hash row
-    /// accepts the FIRST proof presented and stores its hash — ONCE: the
-    /// next call must match it. And THE INSERT ARM: a vault CREATED without
-    /// its hash is refused — the arm exists for the one existing row only.
-    @Test func theNullHashArmLandsTheFirstProofOnceAndANullHashInsertIsRefused() async throws {
+    /// THE ENROLL ROAD (13y UNIT B — replacing the retired NULL-hash
+    /// migration arm, hers and spent): the EXISTING hash authorizes the
+    /// successor — a wrong kp1 refuses; the right one lands the secret
+    /// and the post-enroll hash TOGETHER, once; a second enrollment
+    /// refuses ALREADY_ENROLLED; gated calls pass only under the enrolled
+    /// material. And THE INSERT ARM (unchanged): a vault CREATED without
+    /// its hash is refused by the trigger's twin.
+    @Test func theEnrollRoadLandsTheSecretOnceUnderTheOldHashesAuthorization() async throws {
         let server = FakeSyncServer()
-        // Her pre-postures row: the key id, no hash.
-        await server.provisionAccount("00000000-aaaa-4bbb-8ccc-00000000a01d", vaultCorpusKeyID: "her-key", keyProofHash: nil)
-        let her = server.connection(as: "00000000-aaaa-4bbb-8ccc-00000000a01d")
-        let firstMaster = SymmetricKey(size: .bits256)
-        let first = KeyProof.wireToken(master: firstMaster)
-        let second = KeyProof.wireToken(master: SymmetricKey(size: .bits256))
+        let uid = "00000000-aaaa-4bbb-8ccc-00000000a01d"
+        let hers = KeyProofMaterial(master: SymmetricKey(size: .bits256))
+        // A fresh account: created with its v1 hash, NOT yet enrolled.
+        await server.provisionAccount(
+            uid, vaultCorpusKeyID: "her-key",
+            keyProofHash: KeyProof.hash(ofWireToken: hers.legacyWireToken))
+        let her = server.connection(as: uid)
 
-        #expect(await server.vaultRow(for: "00000000-aaaa-4bbb-8ccc-00000000a01d")?.keyProofHash == nil)
-        // Her Mac's first post-install round: the first proof lands.
-        _ = try await her.pull(since: 0, limit: 10, activeKeyID: "her-key", keyProof: first, deviceID: "mac")
-        #expect(await server.vaultRow(for: "00000000-aaaa-4bbb-8ccc-00000000a01d")?.keyProofHash
-                == KeyProof.hash(master: firstMaster), "the first proof's hash landed")
-        // Closed the moment it lands: a different proof is refused, the
-        // first keeps working.
-        await #expect(throws: SyncError.keyProofRefused) {
-            _ = try await her.pull(since: 0, limit: 10, activeKeyID: "her-key", keyProof: second, deviceID: "phone")
+        // Un-enrolled: every gated call refuses ENROLL (before any nonce
+        // is consumed — the retry's challenge survives, pinned at the DDL).
+        await #expect(throws: SyncError.keyProofEnrollRequired) {
+            _ = try await her.pull(
+                since: 0, limit: 10, activeKeyID: "her-key",
+                keyProof: server.mintProof(rpc: "sync_pull", for: uid, material: hers), deviceID: "mac")
         }
-        _ = try await her.pull(since: 0, limit: 10, activeKeyID: "her-key", keyProof: first, deviceID: "mac")
-        #expect(await server.vaultRow(for: "00000000-aaaa-4bbb-8ccc-00000000a01d")?.keyProofHash
-                == KeyProof.hash(master: firstMaster), "landed ONCE — never replaced by a later first-comer")
+        // A WRONG kp1 cannot enroll — the old hash authorizes.
+        await #expect(throws: SyncError.keyProofRefused, "a wrong kp1 refuses enrollment") {
+            try await server.enrollKeyProof(
+                legacyProof: Self.wrongMaterial.legacyWireToken,
+                macKey: Self.wrongMaterial.macKeyWire, activeKeyID: "her-key", as: uid)
+        }
+        #expect(await server.vaultRow(for: uid)?.keyProofMacSecret == nil, "nothing landed")
+        // The right kp1 enrolls: the secret and the post-enroll hash land
+        // together.
+        try await server.enrollKeyProof(
+            legacyProof: hers.legacyWireToken, macKey: hers.macKeyWire,
+            activeKeyID: "her-key", as: uid)
+        #expect(await server.vaultRow(for: uid)?.keyProofMacSecret == hers.macKeyWire)
+        #expect(await server.vaultRow(for: uid)?.keyProofHash
+                == KeyProof.hash(ofToken: hers.macKey), "the hash is SHA-256(kp2) now")
+        // ONCE: a second enrollment refuses — the racing loser's outcome,
+        // which the signer treats as success (the same kp2 landed).
+        await #expect(throws: SyncError.keyProofAlreadyEnrolled) {
+            try await server.enrollKeyProof(
+                legacyProof: hers.legacyWireToken, macKey: hers.macKeyWire,
+                activeKeyID: "her-key", as: uid)
+        }
+        // Enrolled: her material passes; the wrong one refuses at the HMAC.
+        _ = try await her.pull(
+            since: 0, limit: 10, activeKeyID: "her-key",
+            keyProof: server.mintProof(rpc: "sync_pull", for: uid, material: hers), deviceID: "mac")
+        await #expect(throws: SyncError.keyProofRefused) {
+            _ = try await her.pull(
+                since: 0, limit: 10, activeKeyID: "her-key",
+                keyProof: server.mintProof(rpc: "sync_pull", for: uid, material: Self.wrongMaterial), deviceID: "phone")
+        }
 
         // The insert arm: a fresh vault without its hash is refused, and no
         // row (and no account) exists afterwards.
@@ -180,47 +253,45 @@ struct KeyProofGateTests {
         #expect(world.server.isEmpty, "the refused insert wrote nothing")
     }
 
-    /// THE NULL-HASH ARM UNDER A RACE (the orchestrator's ruling on 1b's
-    /// question 5): two first proofs racing a NULL-hash vault land EXACTLY
-    /// ONE hash — the first to take the row — and the second call passes
-    /// (the same proof) or refuses (a different one) deterministically
-    /// against what landed; never two hashes, never a deadlock. The fake's
-    /// actor serializes exactly as the SQL's FOR UPDATE from the start does.
-    @Test func twoRacingFirstProofsLandExactlyOneHashAndTheSecondIsDecidedAgainstIt() async throws {
-        for sameProof in [true, false] {
-            let server = FakeSyncServer()
-            let uid = "00000000-aaaa-4bbb-8ccc-00000000a01d"
-            await server.provisionAccount(uid, vaultCorpusKeyID: "her-key", keyProofHash: nil)
-            let her = server.connection(as: uid)
-            let m1 = SymmetricKey(size: .bits256)
-            let p1 = KeyProof.wireToken(master: m1)
-            let m2 = SymmetricKey(size: .bits256)
-            let p2 = sameProof ? p1 : KeyProof.wireToken(master: m2)
-            let first = Task {
-                try await her.pull(since: 0, limit: 1, activeKeyID: "her-key", keyProof: p1, deviceID: "mac")
-            }
-            let second = Task {
-                try await her.pull(since: 0, limit: 1, activeKeyID: "her-key", keyProof: p2, deviceID: "phone")
-            }
-            let results = [await first.result, await second.result]
-            let successes = results.filter { if case .success = $0 { return true } else { return false } }.count
-            let landed = try #require(await server.vaultRow(for: uid)?.keyProofHash, "exactly one hash landed")
-            if sameProof {
-                #expect(successes == 2, "the same proof twice: both pass, one hash")
-                #expect(landed == KeyProof.hash(master: m1))
-            } else {
-                #expect(successes == 1, "different proofs: exactly one lands, the other refuses against it")
-                let winnerIsFirst = landed == KeyProof.hash(master: m1)
-                #expect(winnerIsFirst || landed == KeyProof.hash(master: m2), "the landed hash is one of the two")
-                let winner = winnerIsFirst ? p1 : p2
-                let loser = winnerIsFirst ? p2 : p1
-                _ = try await her.pull(since: 0, limit: 1, activeKeyID: "her-key", keyProof: winner, deviceID: "mac")
-                await #expect(throws: SyncError.keyProofRefused, "the loser stays refused — never a second hash") {
-                    _ = try await her.pull(since: 0, limit: 1, activeKeyID: "her-key", keyProof: loser, deviceID: "phone")
-                }
-                #expect(await server.vaultRow(for: uid)?.keyProofHash == landed, "the landed hash stands")
-            }
+    /// ENROLLMENT UNDER A RACE (13y UNIT B; memo §7 edge 1 — replacing
+    /// the retired first-proof race): two devices racing `key_proof_enroll`
+    /// land EXACTLY ONE secret — the FOR UPDATE serializes (the fake's
+    /// actor stands in) and the loser meets ALREADY_ENROLLED. Both derive
+    /// kp2 from the SAME master, so the loser's material keeps working —
+    /// the signer treats the refusal as success and proceeds.
+    @Test func twoRacingEnrollmentsLandExactlyOneSecretAndTheLoserProceeds() async throws {
+        let server = FakeSyncServer()
+        let uid = "00000000-aaaa-4bbb-8ccc-00000000a01d"
+        let master = SymmetricKey(size: .bits256)
+        let material = KeyProofMaterial(master: master)
+        await server.provisionAccount(
+            uid, vaultCorpusKeyID: "her-key",
+            keyProofHash: KeyProof.hash(ofWireToken: material.legacyWireToken))
+        let her = server.connection(as: uid)
+        let first = Task {
+            try await her.enrollKeyProof(
+                legacyProof: material.legacyWireToken, macKey: material.macKeyWire,
+                activeKeyID: "her-key")
         }
+        let second = Task {
+            try await her.enrollKeyProof(
+                legacyProof: material.legacyWireToken, macKey: material.macKeyWire,
+                activeKeyID: "her-key")
+        }
+        let results = [await first.result, await second.result]
+        let successes = results.filter { if case .success = $0 { return true } else { return false } }.count
+        let losses = results.filter {
+            if case .failure(let error) = $0, case SyncError.keyProofAlreadyEnrolled = error { return true }
+            return false
+        }.count
+        #expect(successes == 1 && losses == 1,
+                "exactly one enrollment lands; the loser meets ALREADY_ENROLLED")
+        #expect(await server.vaultRow(for: uid)?.keyProofMacSecret == material.macKeyWire,
+                "exactly one secret landed — the shared kp2")
+        // The loser PROCEEDS: its identical material signs valid proofs.
+        _ = try await her.pull(
+            since: 0, limit: 1, activeKeyID: "her-key",
+            keyProof: server.mintProof(rpc: "sync_pull", for: uid, material: material), deviceID: "phone")
     }
 
     /// The right `active_key_id` WITHOUT the proof deletes nothing (the
@@ -230,16 +301,17 @@ struct KeyProofGateTests {
         let server = FakeSyncServer()
         _ = try await server.push(
             [containerRow(id: "c1", title: "e1:a", base: 0), containerRow(id: "c2", title: "e1:b", base: 0)],
-            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "sync_push"))
         await #expect(throws: SyncError.keyProofRefused) {
             try await server.truncateAccount(
-                FakeSyncServer.defaultUserID, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: Self.wrongProof)
+                FakeSyncServer.defaultUserID, activeKeyID: SyncTestKeys.corpusKeyID,
+                keyProof: server.mintProof(rpc: "account_data_truncate", material: Self.wrongMaterial))
         }
         #expect(await server.rowCount(table: "container") == 2, "the right key id without the proof deleted NOTHING")
         try await server.truncateAccount(
-            FakeSyncServer.defaultUserID, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+            FakeSyncServer.defaultUserID, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "account_data_truncate"))
         #expect(await server.rowCount(table: "container") == 0)
-        #expect(await server.vaultRow()?.keyProofHash == SyncTestKeys.keyProofHash, "the vault row survives a truncate")
+        #expect(await server.vaultRow()?.keyProofHash == SyncTestKeys.macKeyHash, "the vault row survives a truncate")
     }
 
     // MARK: - The rotation road
@@ -253,50 +325,70 @@ struct KeyProofGateTests {
         let world = VaultTestWorld()
         let server = world.syncServer
         let old = try await world.enrollment.setUp(passphrase: "orchard-lantern-13")
-        let oldProof = KeyProof.wireToken(master: old.masterSymmetricKey)
+        let oldMaterial = KeyProofMaterial(master: old.masterSymmetricKey)
+        try await server.enrollKeyProof(
+            legacyProof: oldMaterial.legacyWireToken, macKey: oldMaterial.macKeyWire,
+            activeKeyID: old.corpusKeyID, as: world.userID)
         _ = try await server.push(
-            [containerRow(id: "c1", title: "e1:old", base: 0)], activeKeyID: old.corpusKeyID, keyProof: oldProof)
+            [containerRow(id: "c1", title: "e1:old", base: 0)], activeKeyID: old.corpusKeyID,
+            keyProof: server.mintProof(rpc: "sync_push", for: world.userID, material: oldMaterial))
 
-        // The rotation's vault write: a fresh master + corpus key, the new
-        // hash in the payload, authorized by the OLD proof.
+        // The rotation's vault write: a fresh master + corpus key, the
+        // POST-ENROLL hash (SHA-256(kp2′)) in the payload BESIDE kp2′
+        // itself (13y UNIT B: hash and Vault secret land TOGETHER — the
+        // memo's rotation road), authorized by the OLD proof.
         let newMaster = SymmetricKey(size: .bits256)
+        let newMaterial = KeyProofMaterial(master: newMaster)
         let fetched = try #require(try await world.client.fetchVault())
-        let rotated = try KeyVaultFormat.create(
+        var rotated = try KeyVaultFormat.create(
             masterKey: newMaster, passphraseKey: SymmetricKey(size: .bits256), recoveryKey: nil,
             classKeys: [
                 (keyClass: .corpus, keyID: "rotated-corpus", key: SymmetricKey(size: .bits256)),
                 (keyClass: .journalBridge, keyID: "rotated-journal", key: SymmetricKey(size: .bits256)),
             ],
             kdf: .v1(salt: PassphraseKDF.randomSalt()))
-        #expect(rotated.keyProofHash == KeyProof.hash(master: newMaster))
+        #expect(rotated.keyProofHash == KeyProof.hash(master: newMaster),
+                "creation's own hash is the v1 enroll authorization…")
+        rotated.keyProofHash = KeyProof.macHash(master: newMaster)
         let receipt = try await world.client.updateVault(
-            rotated, expectedRevision: fetched.revision, keyProof: oldProof)
+            rotated, expectedRevision: fetched.revision, keyProof: oldMaterial,
+            successorMacKey: newMaterial.macKeyWire)
         #expect(receipt.revision == fetched.revision + 1)
         #expect(receipt.rotationStartedSeq == nil, "no previous key in this payload — a re-key, not a rotation with a remainder")
-        let newProof = KeyProof.wireToken(master: newMaster)
+        #expect(await server.vaultRow(for: world.userID)?.keyProofMacSecret == newMaterial.macKeyWire,
+                "THE ATOMIC SWAP: the Vault-held secret is kp2′ the moment the hash is")
 
         // The OLD proof, every door.
         await #expect(throws: SyncError.encryptionKeysReplaced, "the fence refuses the old key id FIRST") {
-            _ = try await server.push([], activeKeyID: old.corpusKeyID, keyProof: oldProof)
+            _ = try await server.push(
+                [], activeKeyID: old.corpusKeyID,
+                keyProof: server.mintProof(rpc: "sync_push", for: world.userID, material: oldMaterial))
         }
         await #expect(throws: SyncError.keyProofRefused, "the new id with the old proof: the proof refuses") {
-            _ = try await server.push([], activeKeyID: "rotated-corpus", keyProof: oldProof)
+            _ = try await server.push(
+                [], activeKeyID: "rotated-corpus",
+                keyProof: server.mintProof(rpc: "sync_push", for: world.userID, material: oldMaterial))
         }
         await #expect(throws: SyncError.keyProofRefused) {
-            _ = try await server.pull(since: 0, limit: 10, activeKeyID: "rotated-corpus", keyProof: oldProof, deviceID: nil)
+            _ = try await server.pull(
+                since: 0, limit: 10, activeKeyID: "rotated-corpus",
+                keyProof: server.mintProof(rpc: "sync_pull", for: world.userID, material: oldMaterial), deviceID: nil)
         }
         await #expect(throws: KeyVaultClientError.keyProofRefused, "the vault update refuses the old proof") {
-            try await world.client.updateVault(rotated, expectedRevision: receipt.revision, keyProof: oldProof)
+            try await world.client.updateVault(rotated, expectedRevision: receipt.revision, keyProof: oldMaterial)
         }
         // The NEW proof, accepted.
         let outcomes = try await server.push(
-            [containerRow(id: "c2", title: "e1:new", base: 0)], activeKeyID: "rotated-corpus", keyProof: newProof)
+            [containerRow(id: "c2", title: "e1:new", base: 0)], activeKeyID: "rotated-corpus",
+            keyProof: server.mintProof(rpc: "sync_push", for: world.userID, material: newMaterial))
         guard case .accepted = outcomes[0] else { Issue.record("the new proof must be accepted"); return }
-        _ = try await server.pull(since: 0, limit: 10, activeKeyID: "rotated-corpus", keyProof: newProof, deviceID: nil)
+        _ = try await server.pull(
+            since: 0, limit: 10, activeKeyID: "rotated-corpus",
+            keyProof: server.mintProof(rpc: "sync_pull", for: world.userID, material: newMaterial), deviceID: nil)
         let again = try await world.client.updateVault(
-            rotated, expectedRevision: receipt.revision, keyProof: newProof)
+            rotated, expectedRevision: receipt.revision, keyProof: newMaterial)
         #expect(again.revision == receipt.revision + 1)
-        #expect(world.server.storedRow(userID: world.userID)?.keyProofHash == KeyProof.hash(master: newMaster))
+        #expect(world.server.storedRow(userID: world.userID)?.keyProofHash == KeyProof.macHash(master: newMaster))
     }
 
     /// ONE ROTATION AT A TIME (decision 32): setting a previous corpus key
@@ -309,7 +401,9 @@ struct KeyProofGateTests {
     @Test func aSecondRotationWhileOneIsOpenIsRefusedAndCompletionClearsTheKeyAndTheSeqTogether() async throws {
         let world = VaultTestWorld()
         let material = try await world.enrollment.setUp(passphrase: "orchard-lantern-13")
-        let proof = KeyProof.wireToken(master: material.masterSymmetricKey)
+        // 13y UNIT B: the proof is the MATERIAL — the first update's dance
+        // enrolls the fresh account transparently (the production shape).
+        let proof = KeyProofMaterial(master: material.masterSymmetricKey)
         let fetched = try #require(try await world.client.fetchVault())
         #expect(fetched.format.previousCorpusKey == nil && fetched.format.rotationStartedSeq == nil,
                 "nil together before any rotation")
@@ -366,7 +460,7 @@ struct KeyProofGateTests {
         let old = SyncTestKeys.keys
         let pre = try await server.push(
             [containerRow(id: "c1", title: "e1:one", base: 0), containerRow(id: "c2", title: "e1:two", base: 0)],
-            activeKeyID: old.corpusKeyID, keyProof: old.keyProof)
+            activeKeyID: old.corpusKeyID, keyProof: server.mintProof(rpc: "sync_push", material: old.keyProof))
         let preSeqs = pre.compactMap { outcome -> Int64? in
             if case .accepted(_, let seq) = outcome { return seq } else { return nil }
         }
@@ -379,11 +473,11 @@ struct KeyProofGateTests {
 
         await #expect(throws: SyncError.encryptionKeysReplaced, "the old world cannot write past the seq") {
             _ = try await server.push(
-                [containerRow(id: "c3", title: "e1:late", base: 0)], activeKeyID: old.corpusKeyID, keyProof: old.keyProof)
+                [containerRow(id: "c3", title: "e1:late", base: 0)], activeKeyID: old.corpusKeyID, keyProof: server.mintProof(rpc: "sync_push", material: old.keyProof))
         }
         let post = try await server.push(
             [containerRow(id: "c3", title: "e1:three", base: 0)],
-            activeKeyID: world.newCorpusKeyID, keyProof: world.keyProof)
+            activeKeyID: world.newCorpusKeyID, keyProof: server.mintProof(rpc: "sync_push", material: world.keyProof))
         guard case .accepted(_, let postSeq) = post[0] else { Issue.record("accepted"); return }
         #expect(postSeq > world.rotationStartedSeq, "a write under the NEW proof lands ABOVE the rotation seq")
         // Which key a row is under is told by its seq: the stored rows
@@ -404,7 +498,7 @@ struct KeyProofGateTests {
         let current = SyncEncryptionKeys(
             corpusKey: SymmetricKey(data: Data((0..<32).map { UInt8($0 &+ 0x70) })),
             corpusKeyID: "test-corpus-key-CURRENT-000000002",
-            keyProof: KeyProof.wireToken(master: SymmetricKey(size: .bits256)),
+            keyProof: KeyProofMaterial(master: SymmetricKey(size: .bits256)),
             rotation: RotationInProgress(
                 previousCorpusKey: previous.corpusKey, previousCorpusKeyID: previous.corpusKeyID,
                 startedSeq: 10))

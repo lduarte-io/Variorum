@@ -427,6 +427,12 @@ public struct CorpusRotation: Sendable {
             format = try format.settingAppleHeldCopy(
                 masterKey: master, appleKey: appleHeldCopy.key, appleKeyID: appleHeldCopy.id)
         }
+        // 13y UNIT B (memo §3): a ROTATION's payload installs the
+        // POST-ENROLLMENT hash — SHA-256(kp2′) — beside kp2′ itself
+        // (`begin` passes the successor MAC; the server lands hash and
+        // Vault secret together). `KeyVaultFormat.create`'s own hash is
+        // the CREATION-time v1 value (the enroll compare) and stays.
+        format.keyProofHash = KeyProof.macHash(master: master)
         let material = DeviceKeyMaterial(
             masterKey: master.data, corpusKey: corpus.data, corpusKeyID: corpusID,
             journalBridgeKey: journal.data, journalBridgeKeyID: journalID)
@@ -456,11 +462,16 @@ public struct CorpusRotation: Sendable {
             throw CorpusRotationError.staleMaster(vaultKeyID: vaultKeyID, heldKeyID: current.corpusKeyID)
         }
         // The OLD master's proof authorizes the ONE write that installs
-        // the new hash (decision 12); the old proof is refused from then on.
-        let oldProof = KeyProof.wireToken(master: current.masterSymmetricKey)
+        // the new hash (decision 12); the old proof is refused from then
+        // on. 13y UNIT B: the successor MAC (kp2′, from the NEW master)
+        // rides the payload so the server lands hash + Vault secret
+        // together — followers derive the same kp2′ from M′.
+        let oldProof = KeyProofMaterial(master: current.masterSymmetricKey)
         var format = prepared.format
         let receipt = try await client.updateVault(
-            format, expectedRevision: fetched.revision, keyProof: oldProof)
+            format, expectedRevision: fetched.revision, keyProof: oldProof,
+            successorMacKey: KeyProofMaterial(
+                master: prepared.material.masterSymmetricKey).macKeyWire)
         guard let seq = receipt.rotationStartedSeq else {
             throw CorpusRotationError.noRotationSeq
         }
@@ -533,6 +544,12 @@ public struct CorpusRotation: Sendable {
         }
         let keys = material.syncKeys
         let crypto = SyncPayloadCrypto(keys: keys)
+        // 13y UNIT B: one signer per walk — fresh nonce batches as it
+        // goes (the memo's letter; a slow walk's stale nonces recover
+        // through the signer's fetch-fresh-retry-once road).
+        let signer = SyncChallengeSigner(
+            transport: transport, material: keys.keyProof,
+            activeKeyID: keys.corpusKeyID)
         var report = WalkReport()
         var total: Int?
         var reencrypted = 0
@@ -544,7 +561,7 @@ public struct CorpusRotation: Sendable {
         var workingPasses = 0
         while workingPasses < maxPasses {
             report.passes += 1
-            let below = try await pullBelow(seq: rotation.startedSeq, keys: keys)
+            let below = try await pullBelow(seq: rotation.startedSeq, keys: keys, signer: signer)
             if total == nil {
                 total = below.count
                 progress?(Progress(reencrypted: 0, total: below.count))
@@ -574,8 +591,10 @@ public struct CorpusRotation: Sendable {
                 let resealed = try chunk.map { pulled in
                     try crypto.encryptForWire(try crypto.decryptFromWire(pulled).row)
                 }
-                let outcomes = try await transport.reencrypt(
-                    resealed, activeKeyID: keys.corpusKeyID, keyProof: keys.keyProof)
+                let outcomes = try await signer.call(rpc: "sync_reencrypt") { proof in
+                    try await self.transport.reencrypt(
+                        resealed, activeKeyID: keys.corpusKeyID, keyProof: proof)
+                }
                 for outcome in outcomes {
                     switch outcome {
                     case .replaced:
@@ -590,19 +609,24 @@ public struct CorpusRotation: Sendable {
             }
         }
         // The pass budget ran out with rows still below the seq.
-        let remaining = try await pullBelow(seq: rotation.startedSeq, keys: keys).count
+        let remaining = try await pullBelow(seq: rotation.startedSeq, keys: keys, signer: signer).count
         throw CorpusRotationError.walkDidNotConverge(remaining: remaining)
     }
 
     /// The rows still below the rotation seq (the bounded remainder pull —
     /// device id nil: a walk is not a round and records no cursor).
-    private func pullBelow(seq: Int64, keys: SyncEncryptionKeys) async throws -> [SyncPulledRow] {
+    private func pullBelow(
+        seq: Int64, keys: SyncEncryptionKeys, signer: SyncChallengeSigner
+    ) async throws -> [SyncPulledRow] {
         var cursor: Int64 = 0
         var below: [SyncPulledRow] = []
         while true {
-            let window = try await transport.pull(
-                since: cursor, limit: batchSize, activeKeyID: keys.corpusKeyID,
-                keyProof: keys.keyProof, deviceID: nil)
+            let windowSince = cursor
+            let window = try await signer.call(rpc: "sync_pull") { proof in
+                try await self.transport.pull(
+                    since: windowSince, limit: self.batchSize, activeKeyID: keys.corpusKeyID,
+                    keyProof: proof, deviceID: nil)
+            }
             guard !window.isEmpty else { break }
             below.append(contentsOf: window.filter { $0.serverSeq < seq })
             // The feed is seq-ordered: past the rotation seq nothing more is
@@ -639,7 +663,7 @@ public struct CorpusRotation: Sendable {
             try await client.updateVault(
                 fetched.format.clearingPreviousCorpusKey(),
                 expectedRevision: fetched.revision,
-                keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+                keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
         }
         return material.clearingPreviousCorpusKey()
     }

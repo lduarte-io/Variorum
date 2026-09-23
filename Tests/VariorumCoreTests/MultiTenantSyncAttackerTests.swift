@@ -132,7 +132,10 @@ extension MultiTenantSyncTests {
         }
 
         static func vaultClient(for userID: String, over vault: ScriptedVaultServer) -> KeyVaultClient {
-            KeyVaultClient(
+            // 13y UNIT B: the challenge/enroll routes identify the caller
+            // by bearer (the real server reads auth.uid()) — register it.
+            vault.registerBearer("token-\(userID.suffix(4))", userID: userID)
+            return KeyVaultClient(
                 configuration: KeyVaultClient.Configuration(
                     projectURL: URL(string: "https://vault.test.invalid")!,
                     apiKey: "publishable-test-key", deviceName: "test device"),
@@ -284,7 +287,11 @@ extension MultiTenantSyncTests {
         try world.takeSnapshotPair()
         try await world.attackerGathersHoldings()
         let oldMaterial = try #require(world.oldMaterial)
-        let oldProof = KeyProof.wireToken(master: oldMaterial.masterSymmetricKey)
+        // 13y UNIT B: the attacker's holding is the old MATERIAL (kp1 +
+        // kp2 from the old master) — his per-request proofs bind real
+        // nonces under the OLD kp2, which the rotated Vault secret
+        // refuses at the HMAC (the same typed refusal as ever).
+        let oldProof = KeyProofMaterial(master: oldMaterial.masterSymmetricKey)
         let oldKeyID = oldMaterial.corpusKeyID
         let oldLibraryKey = try #require(world.oldLibraryKey)
         let pairKeyFile = try #require(try StoreKeyEnvelope.load(at: world.snapshotKeyFileURL))
@@ -406,16 +413,16 @@ extension MultiTenantSyncTests {
         // ————— (6) Purge / truncate refuse; the read RPCs give nothing —————
         let target = SyncPurgeTarget(table: "container", rowID: try #require(world.preSwitchTitles.keys.first))
         await #expect(throws: SyncError.keyProofRefused, "ARM 6: sync_purge_execute") {
-            _ = try await server.executePurge([target], activeKeyID: currentKeyID, keyProof: oldProof, as: userA)
+            _ = try await server.executePurge([target], activeKeyID: currentKeyID, keyProof: server.mintProof(rpc: "sync_purge_execute", for: userA, material: oldProof), as: userA)
         }
         await #expect(throws: SyncError.keyProofRefused, "ARM 6: account_data_truncate") {
-            try await server.truncateAccount(userA, activeKeyID: currentKeyID, keyProof: oldProof)
+            try await server.truncateAccount(userA, activeKeyID: currentKeyID, keyProof: server.mintProof(rpc: "account_data_truncate", for: userA, material: oldProof))
         }
         await #expect(throws: SyncError.keyProofRefused, "ARM 6: sync_horizon gives nothing") {
-            _ = try await server.syncHorizon(activeKeyID: currentKeyID, keyProof: oldProof, as: userA)
+            _ = try await server.syncHorizon(activeKeyID: currentKeyID, keyProof: server.mintProof(rpc: "sync_horizon", for: userA, material: oldProof), as: userA)
         }
         await #expect(throws: SyncError.keyProofRefused, "ARM 6: sync_purge_ledger gives nothing") {
-            _ = try await server.purgeLedger(since: 0, activeKeyID: currentKeyID, keyProof: oldProof, as: userA)
+            _ = try await server.purgeLedger(since: 0, activeKeyID: currentKeyID, keyProof: server.mintProof(rpc: "sync_purge_ledger", for: userA, material: oldProof), as: userA)
         }
         let rowsAfterSix = await server.rowCount(table: "container", for: userA)
         let ledgerAfterSix = await server.purgedLedgerCount(for: userA)
@@ -543,25 +550,29 @@ extension MultiTenantSyncTests {
         #expect(seqBefore != nil, "the row is on the mirror — the pin isn't vacuous")
 
         // The re-key's server half (the CF-8 order — the vault FIRST): a
-        // new corpus key id + the NEW master's proof hash.
+        // new corpus key id + the NEW master's proof secret (13y UNIT B:
+        // the rotated account is ENROLLED under kp2′ — the hash at its
+        // post-enroll value, the Vault-held secret beside it).
         let rotatedMaster = SymmetricKey(data: Data((0..<32).map { UInt8($0 &+ 0xE0) }))
+        let rotatedMaterial = KeyProofMaterial(master: rotatedMaster)
         let rotatedKeyID = "test-corpus-key-ARM10-000000001"
         await server.setVaultRow(
-            corpusKeyID: rotatedKeyID, keyProofHash: KeyProof.hash(master: rotatedMaster))
+            corpusKeyID: rotatedKeyID, keyProofHash: KeyProof.macHash(master: rotatedMaster),
+            keyProofMacSecret: rotatedMaterial.macKeyWire)
 
         // (i) The OLD key id with the old proof: the FENCE refuses first —
         // the gate's order, the SQL's own.
         await #expect(throws: SyncError.encryptionKeysReplaced,
                       "ARM 10: the fence first — sync_reencrypt with the old key id") {
             _ = try await server.reencrypt(
-                [storedBefore], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
+                [storedBefore], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "sync_reencrypt"))
         }
         // (ii) The CURRENT id (readable from the vault by any session) with
         // the OLD proof — the row's letter: the PROOF refuses.
         await #expect(throws: SyncError.keyProofRefused,
                       "ARM 10: sync_reencrypt under an old proof — the proof refuses") {
             _ = try await server.reencrypt(
-                [storedBefore], activeKeyID: rotatedKeyID, keyProof: SyncTestKeys.keyProof)
+                [storedBefore], activeKeyID: rotatedKeyID, keyProof: server.mintProof(rpc: "sync_reencrypt"))
         }
         // Nothing replaced: bytes, the per-row seq and the head all unmoved.
         #expect(await server.currentRow(table: "variant", rowID: variantID) == storedBefore)
@@ -576,7 +587,7 @@ extension MultiTenantSyncTests {
         staleVersion.syncVersion += 7
         let outcomes = try await server.reencrypt(
             [staleVersion], activeKeyID: rotatedKeyID,
-            keyProof: KeyProof.wireToken(master: rotatedMaster))
+            keyProof: server.mintProof(rpc: "sync_reencrypt", material: rotatedMaterial))
         #expect(outcomes == [.skipped(currentVersion: storedBefore.syncVersion)],
                 "the gate passes the current proof; the version guard alone answers")
         #expect(await server.currentRow(table: "variant", rowID: variantID) == storedBefore,
@@ -586,15 +597,17 @@ extension MultiTenantSyncTests {
         // precedent): `sync_reencrypt`'s body routes through the ONE gate.
         let root = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-        let sql11 = try String(
-            contentsOf: root.appendingPathComponent("Server/supabase/11_pre13x_postures.sql"),
+        // 13y UNIT B: the DEPLOYED body is 12's (the challenge signature)
+        // — the pin follows the deployed truth, as the precedent says.
+        let sql12 = try String(
+            contentsOf: root.appendingPathComponent("Server/supabase/12_phase13y_tenant_seq.sql"),
             encoding: .utf8)
         let reencryptBody = try #require(
-            sql11.components(separatedBy: "create or replace function sync_reencrypt")
+            sql12.components(separatedBy: "create or replace function sync_reencrypt")
                 .dropFirst().first?
                 .components(separatedBy: "create or replace function ").first)
-        #expect(reencryptBody.contains("perform sync_key_gate(active_key_id, key_proof);"),
-                "the deployed sync_reencrypt routes through the one gate")
+        #expect(reencryptBody.contains("perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_reencrypt');"),
+                "the deployed sync_reencrypt routes through the one gate, naming itself")
     }
 
     // MARK: - (9) No ownership-change instruction on the wire
@@ -633,18 +646,26 @@ extension MultiTenantSyncTests {
         // joined the wire — the served A5 horizon the rotation walk's
         // production wait derives from. Zero parameters, so the
         // forbidden-word scan below covers it like every other road.
+        // 13y UNIT B: `sync_challenge` (the nonce mint — one int) and
+        // `key_proof_enroll` (kp1/kp2/active_key_id) joined — the
+        // challenge protocol's two roads; both scanned below like every
+        // other, and the allowlist extends by EXACTLY them (UNIT A's
+        // precedent: never a relaxation of the blanket scans).
         #expect(clientRPCs == [
             "sync_push", "sync_pull", "sync_schema_version",
             "sync_horizon", "sync_purge_ledger", "sync_purge_execute", "sync_reencrypt",
             "key_vault_update", "account_data_truncate", "account_purge",
             "sync_visibility_horizon_ms",
+            "sync_challenge", "key_proof_enroll",
         ], "the client's RPC set, by name — \(clientRPCs.sorted())")
 
         // THE TRANSPORT PROTOCOLS' requirements, exactly.
         let protocols = try source("Sources/VariorumCore/Sync/SyncTransport.swift")
         #expect(try names(#"\n\s*func ([a-zA-Z]+)\("#, in: protocols)
                 == ["push", "pull", "schemaVersion", "syncHorizon", "purgeLedger", "executePurge", "reencrypt",
-                    "visibilityHorizonMillis"])
+                    "visibilityHorizonMillis",
+                    // 13y UNIT B: the challenge surface's two requirements.
+                    "fetchChallenges", "enrollKeyProof"])
         let lifecycleProtocol = try #require(lifecycle.components(separatedBy: "public protocol AccountLifecycleProviding").dropFirst().first?
             .components(separatedBy: "\n}").first)
         #expect(try names(#"func ([a-zA-Z]+)\("#, in: lifecycleProtocol)

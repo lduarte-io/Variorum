@@ -2262,6 +2262,9 @@ struct AuthRLSDDLTests {
             "mac_secret_id uuid;",
         ]
         let successorBlock = [
+            "if vault_revision is distinct from expected_revision then",
+            "raise exception 'VARIORUM_VAULT_REVISION_CONFLICT: the vault changed since it was fetched — fetch it again and re-derive';",
+            "end if;",
             "incoming_hash := payload->>'key_proof_hash';",
             "incoming_mac := payload->>'key_proof_mac';",
             "select key_proof_hash into vault_current_hash from key_vault where user_id = caller;",

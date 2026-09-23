@@ -27,6 +27,12 @@ public enum KeyProof {
     /// coexist with this one at a lockstep event.
     public static let purpose = "variorum.key-proof.v1"
 
+    /// 13y UNIT B (the ruled memo §3): the v2 purpose — `kp2`, the
+    /// PER-REQUEST MAC KEY. Deliberately not the v1 value: every
+    /// hypothetical captured log of the v1 era holds a value the new
+    /// protocol never accepts. Like kp1, kp2 reveals nothing about M.
+    public static let purposeV2 = "variorum.key-proof.v2"
+
     /// The raw 32-byte token for `master`.
     public static func token(master: SymmetricKey) -> Data {
         Data(HMAC<SHA256>.authenticationCode(for: Data(purpose.utf8), using: master))
@@ -35,6 +41,18 @@ public enum KeyProof {
     /// The wire form (`key_proof`): the token, base64.
     public static func wireToken(master: SymmetricKey) -> String {
         token(master: master).base64EncodedString()
+    }
+
+    /// 13y UNIT B: kp2 — the per-request MAC key, raw 32 bytes.
+    public static func macKey(master: SymmetricKey) -> Data {
+        Data(HMAC<SHA256>.authenticationCode(for: Data(purposeV2.utf8), using: master))
+    }
+
+    /// What the vault's `key_proof_hash` carries AFTER enrollment (and
+    /// what a rotation's payload installs beside `key_proof_mac`):
+    /// SHA-256(kp2), lowercase hex.
+    public static func macHash(master: SymmetricKey) -> String {
+        hash(ofToken: macKey(master: master))
     }
 
     /// What the server stores for a raw token: SHA-256, lowercase hex.
@@ -54,5 +72,51 @@ public enum KeyProof {
     public static func hash(ofWireToken wire: String) -> String? {
         guard let raw = Data(base64Encoded: wire) else { return nil }
         return hash(ofToken: raw)
+    }
+}
+
+/// 13y UNIT B (the ruled memo §3; the orchestrator's adjudication approved
+/// the pairing shapes) — THE PROOF MATERIAL one device holds: kp1's wire
+/// form (the ENROLL road's authorization — the existing hash authorizes
+/// the successor, once) beside kp2 (the per-request MAC key). ONE struct,
+/// both derived from the SAME master, so both-or-neither holds by
+/// construction — a site can never pair one master's kp1 with another's
+/// kp2. Never persisted; computed on demand exactly as the wire token
+/// always was.
+public struct KeyProofMaterial: Equatable, Sendable {
+    /// kp1's wire form — `key_proof_enroll`'s first parameter, and the
+    /// value whose SHA-256 a pre-enroll vault row stores.
+    public let legacyWireToken: String
+    /// kp2 — the raw MAC key every per-request proof is computed under,
+    /// and (base64) the secret enrollment lands in Supabase Vault.
+    public let macKey: Data
+
+    public init(master: SymmetricKey) {
+        self.legacyWireToken = KeyProof.wireToken(master: master)
+        self.macKey = KeyProof.macKey(master: master)
+    }
+
+    /// The crafted-world form (tests; a deliberately mismatched pair is a
+    /// test's own statement).
+    public init(legacyWireToken: String, macKey: Data) {
+        self.legacyWireToken = legacyWireToken
+        self.macKey = macKey
+    }
+
+    /// kp2's wire form — `key_proof_enroll`'s second parameter and the
+    /// rotation payload's `key_proof_mac`.
+    public var macKeyWire: String { macKey.base64EncodedString() }
+
+    /// THE PER-REQUEST PROOF (memo §3): `HMAC-SHA256(kp2, nonce ‖ ':' ‖
+    /// rpc_name)`, base64, paired with the nonce it consumed. Binding the
+    /// RPC name stops cross-RPC splicing of an unconsumed pair; the body
+    /// is deliberately NOT bound (TLS carries transit integrity — the
+    /// memo's recorded reason). A malformed challenge simply produces a
+    /// proof the server refuses as stale — never a client crash.
+    public func proof(challenge: String, rpc: String) -> SyncKeyProof {
+        var input = Data(base64Encoded: challenge) ?? Data()
+        input.append(Data(":\(rpc)".utf8))
+        let mac = HMAC<SHA256>.authenticationCode(for: input, using: SymmetricKey(data: macKey))
+        return SyncKeyProof(challenge: challenge, proof: Data(mac).base64EncodedString())
     }
 }
