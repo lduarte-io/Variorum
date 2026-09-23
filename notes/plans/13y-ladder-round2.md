@@ -30,7 +30,21 @@ ARGUMENT-ORDER arm — first argument of `extensions.hmac(` must be the message 
 second `decode(stored_mac, 'base64')`; RED on the current body, green after the swap.
 **Fix:** swap the two arguments; add the pin arm; client, fakes, memo and every other pin
 stay byte-unchanged (they implement the ruled contract — the DDL alone drifted).
-Disposition: PENDING the fix seat.
+Disposition: **AGREE — FIXED (fix seat, round 2).** Traced myself: pgcrypto's signature is
+`hmac(data bytea, key bytea, type text)` — message first, key second (the repo's own F-R2
+window probe names them `('probe'::bytea, 'key'::bytea)` in that order); the client contract
+(`KeyProofMaterial.proof` — `HMAC<SHA256>.authenticationCode(for: input, using: kp2)`, memo
+§3's letter) computes HMAC_kp2(nonce‖':'‖rpc); the pre-fix body passed kp2 as arg1=data and
+the message as arg2=key → HMAC_msg(kp2), and HMAC is asymmetric in (key, message) by
+construction (the key enters the ipad/opad schedule), so the mirror would refuse every
+honest per-request proof. The two arguments SWAPPED (12 §5g, with the mechanism commented
+at the line + the section header amended); THE ARGUMENT-ORDER ARM added to
+`theProofCheckConsumesTheNonceInTheRuledOrderAndTheMigrationArmRetires` (within the body,
+`extensions.hmac(` < the message expression ≤ `decode(stored_mac, 'base64')` — the message
+is the data, kp2 the key). **RED-ON-OLD VERIFIED by behavioral revert (fix committed
+FIRST):** with the two arguments swapped back, the arm failed —
+`Expectation failed: hmac.lowerBound < message.lowerBound && message.upperBound <=
+macKey.lowerBound` — restored, green. Client/fakes/memo byte-unchanged.
 
 **R2-F2 [MINOR] · 12:696–704 (§5g) — the `exception when others` block swallows
 INFRASTRUCTURE errors as proof refusals.** Only the base64 decode can legitimately fail
@@ -40,7 +54,16 @@ your keys before syncing" — an actively misleading refusal that would have mad
 class and R2-F1 itself painful to diagnose live. Architectural/diagnosability; no pin
 owed (needs live Postgres to demonstrate); the trace is the justification. **Fix:**
 compute `expected_hex` OUTSIDE the guarded block (scope the handler to the one decode).
-Disposition: PENDING the fix seat.
+Disposition: **AGREE — FIXED (fix seat, round 2).** Traced: the `when others` wrapped THREE
+failable expressions, of which only `decode(key_proof, 'base64')` can fail on legitimate
+client input — `decode(stored_mac, …)` fails only on stored corruption (enrollment landed
+it) and `extensions.hmac` only on schema-resolution/permission infrastructure (F-R2's exact
+class) — and the catch converted all three into the "pick up your keys" proof refusal.
+`expected_hex` now computes OUTSIDE the handler (an infra fault RAISES as itself); the
+handler scopes to the one client-failable decode, so a malformed proof still refuses as a
+proof fault, never a raw decode error. The ruled-order pin's arms all hold unchanged
+(verified: AuthRLSDDLTests 76/76). No pin owed (needs live Postgres — the reviewer's call,
+kept); the mechanism is commented at the line.
 
 ## ROUND-2 CLEAN BILL (the reviewer's, kept for round 3's anchor)
 

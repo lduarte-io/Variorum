@@ -2562,6 +2562,21 @@ struct AuthRLSDDLTests {
                 "the ruled order: vault → secret (enroll BEFORE consume) → atomic consume → TTL → HMAC → constant-time")
         #expect(body.contains("presented_nonce || convert_to(':' || rpc_name, 'utf8')"),
                 "the binding: nonce ‖ ':' ‖ rpc_name — cross-RPC splicing refuses")
+        // THE ARGUMENT-ORDER ARM (ladder round 2, R2-F1 — BLOCKER):
+        // pgcrypto's hmac is (data, key, type) — the MESSAGE must be the
+        // FIRST argument and the Vault-held kp2 (`decode(stored_mac, …)`)
+        // the SECOND, or the server computes HMAC_msg(kp2) where the
+        // client (`KeyProofMaterial.proof`, memo §3) computes
+        // HMAC_kp2(msg) and every honest per-request proof refuses on the
+        // real mirror. No executing suite can see a SQL argument-order
+        // error (the fakes compute with the client's own function) — this
+        // text arm is the one witness. Red-on-old: the pre-fix body
+        // passed decode(stored_mac, …) first.
+        let message = try #require(
+            body.range(of: "presented_nonce || convert_to(':' || rpc_name, 'utf8')"))
+        let macKey = try #require(body.range(of: "decode(stored_mac, 'base64')"))
+        #expect(hmac.lowerBound < message.lowerBound && message.upperBound <= macKey.lowerBound,
+                "hmac(data, key, type): the message is the DATA (first), kp2 the KEY (second) — swapped, the mirror refuses every honest proof")
         #expect(body.components(separatedBy: "VARIORUM_KEY_PROOF_STALE_CHALLENGE").count - 1 == 3,
                 "malformed, unknown/consumed, and expired all refuse STALE — fetch fresh and retry once")
         #expect(!body.contains("update key_vault"),

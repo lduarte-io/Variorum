@@ -635,11 +635,17 @@ $$;
 --     consumed atomically (DELETE … RETURNING — an unknown, already-used
 --     or malformed challenge refuses VARIORUM_KEY_PROOF_STALE_CHALLENGE;
 --     single-use by construction, THE replay closure); (3) the 5-minute
---     server-clock TTL; (4) the HMAC recomputed from the Vault-held kp2
---     over `nonce ‖ ':' ‖ rpc_name` (the binding that stops cross-RPC
---     splicing), compared constant-time. A malformed proof refuses the
---     same way — never a raw decode error. `extensions.hmac` — pgcrypto's
---     schema on Supabase, hence the widened search_path.
+--     server-clock TTL; (4) the HMAC recomputed under the Vault-held kp2
+--     over `nonce ‖ ':' ‖ rpc_name` — pgcrypto's `hmac(data, key, type)`:
+--     the MESSAGE is the data (first argument), kp2 the key (second) —
+--     the ladder round-2 R2-F1 correction, pinned by argument order —
+--     compared constant-time (the binding stops cross-RPC splicing). A
+--     malformed proof refuses the same way — never a raw decode error —
+--     via a handler scoped to the ONE client-failable decode (R2-F2: an
+--     `extensions.hmac` schema/permission fault or stored-mac corruption
+--     RAISES as the infrastructure error it is, never masquerading as a
+--     proof refusal). `extensions.hmac` — pgcrypto's schema on Supabase,
+--     hence the widened search_path.
 -- ---------------------------------------------------------------------------
 
 create or replace function sync_key_proof_check(key_proof text, challenge text, rpc_name text) returns void
@@ -693,11 +699,25 @@ begin
     raise exception 'VARIORUM_KEY_PROOF_STALE_CHALLENGE: the challenge is unknown, already used, or expired — fetch a fresh challenge and retry once';
   end if;
 
+  -- R2-F1 (ladder round 2, BLOCKER): pgcrypto's hmac is (data, key, type)
+  -- — the MESSAGE is the FIRST argument, the Vault-held kp2 the SECOND.
+  -- The pre-fix body had them swapped, computing HMAC_msg(kp2) where the
+  -- client (KeyProofMaterial.proof, memo §3) computes HMAC_kp2(msg) — the
+  -- suites could never see it (the fakes compute with the client's own
+  -- function); the argument-order pin arm holds this line now.
+  -- R2-F2 (MINOR): computed OUTSIDE the decode handler — its inputs are
+  -- server-held (stored_mac) and already-validated (presented_nonce), so
+  -- a failure HERE is infrastructure (schema resolution/permission — the
+  -- F-R2 class) or stored corruption, and must RAISE, never masquerade as
+  -- the "pick up your keys" proof refusal.
+  expected_hex := encode(extensions.hmac(
+    presented_nonce || convert_to(':' || rpc_name, 'utf8'),
+    decode(stored_mac, 'base64'),
+    'sha256'), 'hex');
+  -- The handler scopes to the ONE expression a client can legitimately
+  -- fail: its own proof's base64 (a malformed proof refuses as a proof
+  -- fault, never a raw decode error).
   begin
-    expected_hex := encode(extensions.hmac(
-      decode(stored_mac, 'base64'),
-      presented_nonce || convert_to(':' || rpc_name, 'utf8'),
-      'sha256'), 'hex');
     presented_hex := encode(decode(key_proof, 'base64'), 'hex');
   exception when others then
     presented_hex := null;
