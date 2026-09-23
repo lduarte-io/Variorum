@@ -90,6 +90,19 @@ definer road fails. Proposed: one idempotent
 grant-pin/sweep; add a `set role variorum_definer; select extensions.hmac(...); reset
 role;` probe to the verification tail. Disposition: **AGREE the fix — DISPUTE the severity
 (fix session; new technical fact for the orchestrator).**
+**ORCHESTRATOR ARBITRATION (2026-09-23): the severity dispute is UPHELD; the fix stands
+IN FULL.** The membership fact verifies in the repo: `14c-gate-definer-owner.sql:89` makes
+`variorum_definer` a member of `authenticated` (no NOINHERIT anywhere — grep-verified),
+and that same file proved LIVE at the 14c gate that the definer resolves auth-schema
+objects THROUGH this membership; `authenticated` holds `extensions` USAGE on hosted. So
+the round-1 live-failure claim ("sync refuses at her first call") is PROBABLY a false
+alarm — a fact the round-1 reviewer lacked. What survives of the finding, and why the fix
+still ships whole: the privilege was INCIDENTAL (inherited via membership), never
+DECLARED, never proven for THIS schema, and the artifact's own deployer-context probe
+could not distinguish — the explicit grant + the live `has_schema_privilege` sweep fact +
+the `set role` probe convert "probably inherited" into "verified live at the window."
+Final severity: a masked-verification hardening, not a live BLOCKER; recorded so round 2
+reads the arbitration rather than re-litigating.
 **The fix, BUILT:** (a) `grant usage on schema extensions to variorum_definer;` in 12
 section 11 beside the vault grants (idempotent; commented WHY); (b) `AuthRLSDDLTests`'
 `theVaultGrantsAndEveryNewFunctionsRevokePairLand` asserts the line; (c) the grant sweep
