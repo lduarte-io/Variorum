@@ -559,6 +559,16 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
   VersionRPCsShape`, carrying the cross-pin) + the 3 new CorpusRotationTests pins (the
   derivation · the spy-counted production road · the nil-default end-to-end). Suites
   unchanged at 179. **UNIT A IS CLOSED**; the orchestrator verifies, then the ladder.
+  **One honest PENDING for the finals:** the three APP-TARGET files this piece touched
+  (`App/Variorum/Shared/PostureSwitch.swift` — the Leaves default now nil = the driver's
+  production road; `App/Variorum/VariorumTests/PostureSwitchTests.swift` +
+  `App/Variorum/VariorumMobileTests/MobileProtectionTests.swift` — the two emulators'
+  new required conformance) are written to the files' own idioms but COMPILE-UNVERIFIED
+  in this session: the closer's loop is the core package only (the brief's letter — no
+  Mac-suite runs), so the Mac/mobile targets first build at the orchestrator's
+  finals/ladder. The seam is small (one optional default passed straight through at the
+  one construction site; two three-line conformances), and the core-side compiler has
+  proven the protocol change against five conformers already.
 
 ### WHAT REMAINS OPEN IN UNIT A (nothing — the unit is CLOSED; the ladder flags below stay recorded)
 
