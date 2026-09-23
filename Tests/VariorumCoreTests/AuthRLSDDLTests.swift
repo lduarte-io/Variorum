@@ -279,10 +279,13 @@ struct AuthRLSDDLTests {
     /// client classifies into the CF-16 replaced state — then checks the
     /// proof. Every DATA body carries the call; `account_purge` does not.
     @Test func everyDeployedDataBodyCallsTheGateAndTheGateCarriesTheFence() throws {
+        // 13y UNIT B: the gate call carries the per-request challenge and
+        // names the calling RPC — the HMAC binding that stops cross-RPC
+        // splicing rides the name each body passes as a literal.
         for function in Self.proofGatedFunctions {
             let body = try Self.finalBody(of: function)
-            #expect(body.contains("perform sync_key_gate(active_key_id, key_proof);"),
-                    "\(function) must call the gate — the fence + the proof — before any row is touched")
+            #expect(body.contains("perform sync_key_gate(active_key_id, key_proof, challenge, '\(function)');"),
+                    "\(function) must call the gate — the fence + the proof — before any row is touched, naming ITSELF")
             #expect(!body.contains("select corpus_key_id into fence_key"),
                     "\(function) must not inline a second fence beside the gate's")
         }
@@ -290,15 +293,19 @@ struct AuthRLSDDLTests {
         #expect(gate.contains("select corpus_key_id into fence_key from key_vault where user_id = caller for share;"),
                 "the gate reads the caller's vault key id under a SHARE lock (decision 31) — on a landed hash")
         #expect(gate.contains("select corpus_key_id into fence_key from key_vault where user_id = caller for update;"),
-                "…and FOR UPDATE from the start on a NULL hash (the migration arm, ruling 5)")
+                "…and FOR UPDATE from the start on a NULL hash (a conservative lock on an impossible state since the arm's retirement)")
         #expect(gate.contains("if fence_key is null or fence_key is distinct from active_key_id then"),
                 "the gate must fence on mismatch AND on a missing vault row")
         #expect(gate.contains(SyncServerRefusalMarker.staleKeyFence),
                 "the fence refusal must carry the client-classifiable marker")
-        #expect(gate.contains("perform sync_key_proof_check(key_proof);"),
-                "the fence is followed by the proof — the authorization")
+        #expect(gate.contains("perform sync_key_proof_check(key_proof, challenge, rpc_name);"),
+                "the fence is followed by the proof — the authorization, challenge-verified")
+        // account_purge stays session-only — deletion is mandated and loud
+        // (decision 12). Since UNIT B its body DOES name the challenge
+        // TABLE (the account's nonces go with the account), so the pin is
+        // on the gate machinery, never the substring.
         let purge = try Self.finalBody(of: "account_purge")
-        #expect(!purge.contains("sync_key_gate") && !purge.contains("key_proof"),
+        #expect(!purge.contains("sync_key_gate") && !purge.contains("sync_key_proof_check"),
                 "account_purge stays session-only — deletion is mandated and loud (decision 12)")
     }
 
@@ -468,8 +475,8 @@ struct AuthRLSDDLTests {
         // pre-13x 11: the fence + the proof ride the ONE gate helper (the
         // gate's own pin holds the fence's letter); the right
         // active_key_id WITHOUT the proof deletes nothing.
-        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof);"),
-                "the truncate must call the gate — the fence, then the proof")
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof, challenge, 'account_data_truncate');"),
+                "the truncate must call the gate — the fence, then the challenge-verified proof")
         #expect(body.contains("delete from %I where owner_id = $1"),
                 "row deletes, tenant-scoped by the composite identity — never TRUNCATE")
         #expect(!body.lowercased().contains("truncate table"),
@@ -876,7 +883,8 @@ struct AuthRLSDDLTests {
         // Coverage: every registry table, the three account-data tables,
         // and every function 09 or its predecessors expose.
         for table in SyncSchema.tables.map(\.name)
-            + ["entitlement", "key_vault", "sync_meta", "sync_tenant_seq"] {
+            + ["entitlement", "key_vault", "sync_meta", "sync_tenant_seq",
+               "key_proof_challenge", "sync_write_budget"] {
             #expect(sql.contains("('\(table)',"),
                     "the sweep must carry an expectation for \(table)")
         }
@@ -893,14 +901,20 @@ struct AuthRLSDDLTests {
         // `next_tenant_seq(uuid)` joined on the helper posture, and the
         // served-horizon function joined on the version RPC's posture
         // (the R-13y-4 fork's Shape 1).
-        for function in ["sync_push(jsonb,text,text)", "sync_pull(bigint,text,text,integer,text)",
-                         "account_data_truncate(text,text)", "account_purge()",
+        // 13y UNIT B: every gated signature moved to its CHALLENGE spelling
+        // (12 drops ALL 11-era overloads — a reappearance is the UNEXPECTED
+        // class, a challenge-free door), and the new surface joined:
+        // the mint, the enroll road, the hoisted constant-time helper.
+        for function in ["sync_push(jsonb,text,text,text)", "sync_pull(bigint,text,text,text,integer,text)",
+                         "account_data_truncate(text,text,text)", "account_purge()",
                          "entitlement_set(uuid,text,boolean,timestampwithtimezone,text)",
                          "sync_schema_version()", "sync_table_pk(text)",
-                         "sync_horizon(text,text)", "sync_purge_ledger(bigint,text,text)",
-                         "sync_purge_execute(jsonb,text,text)",
-                         "sync_reencrypt(jsonb,text,text)", "key_vault_update(jsonb,integer,text)",
-                         "sync_key_gate(text,text)", "sync_key_proof_check(text)",
+                         "sync_horizon(text,text,text)", "sync_purge_ledger(bigint,text,text,text)",
+                         "sync_purge_execute(jsonb,text,text,text)",
+                         "sync_reencrypt(jsonb,text,text,text)", "key_vault_update(jsonb,integer,text,text)",
+                         "sync_key_gate(text,text,text,text)", "sync_key_proof_check(text,text,text)",
+                         "sync_challenge(integer)", "key_proof_enroll(text,text,text)",
+                         "sync_constant_time_equal(text,text)",
                          "key_vault_require_proof_hash()", "next_tenant_seq(uuid)",
                          "sync_visibility_horizon_ms()"] {
             #expect(sql.contains("('\(function)'"),
@@ -909,7 +923,13 @@ struct AuthRLSDDLTests {
         for old in ["('sync_push(jsonb,text)'", "('sync_pull(bigint,text,integer,text)'",
                     "('account_data_truncate(text)'", "('sync_horizon(text)'",
                     "('sync_purge_ledger(bigint,text)'", "('sync_purge_execute(jsonb,text)'",
-                    "('sync_pull(bigint,text,integer,text,text)'"] {
+                    "('sync_pull(bigint,text,integer,text,text)'",
+                    // The 11-era key_proof spellings — dropped by 12's UNIT B.
+                    "('sync_push(jsonb,text,text)'", "('sync_pull(bigint,text,text,integer,text)'",
+                    "('account_data_truncate(text,text)'", "('sync_horizon(text,text)'",
+                    "('sync_purge_ledger(bigint,text,text)'", "('sync_purge_execute(jsonb,text,text)'",
+                    "('sync_reencrypt(jsonb,text,text)'", "('key_vault_update(jsonb,integer,text)'",
+                    "('sync_key_gate(text,text)'", "('sync_key_proof_check(text)'"] {
             #expect(!sql.contains(old),
                     "the sweep must not EXPECT the dropped overload \(old) — it must surface it as UNEXPECTED")
         }
@@ -1323,7 +1343,7 @@ struct AuthRLSDDLTests {
         #expect(body.contains("coalesce"))
         // pre-13x 11: a READ RPC, and the proof gates it too — a session
         // without the keys gets nothing from the mirror, a seq included.
-        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof);"))
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_horizon');"))
         #expect(!body.contains("from entitlement"),
                 "no entitlement gate on purge — data removal is a right")
     }
@@ -1338,7 +1358,7 @@ struct AuthRLSDDLTests {
         #expect(body.contains("'floor', 0"))
         #expect(body.contains("p.purged_seq > since_seq"))
         #expect(body.contains("'purged_seq', p.purged_seq"))
-        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof);"),
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_purge_ledger');"),
                 "pre-13x: the ledger page is proof-gated too")
         #expect(!body.contains("from entitlement"))
     }
@@ -1358,7 +1378,7 @@ struct AuthRLSDDLTests {
                 "the ledger upsert is what makes a resumed family purge idempotent")
         #expect(Self.namedArray("allowed", in: body) == Set(SyncSchema.tables.map(\.name)),
                 "the purge door's allowlist drifted from the registry")
-        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof);"))
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_purge_execute');"))
         #expect(!body.contains("from entitlement"))
         #expect(!body.lowercased().contains("truncate table"))
     }
@@ -1539,7 +1559,14 @@ struct AuthRLSDDLTests {
     /// string compare — with a malformed token refusing typed and the
     /// NULL-hash MIGRATION ARM landing the first proof.
     @Test func theProofCheckIsConstantTimeWithTheMigrationArm() throws {
-        let body = try Self.finalBody(of: "sync_key_proof_check")
+        // 13y UNIT B re-pointed this pin at 11's OWN file: the check it
+        // pins — the static compare with the NULL-hash migration arm — is
+        // the marker-8 ERA's deployed body (history, byte-untouched),
+        // superseded in the composition by 12's challenge-verified check
+        // (its own pins sit in the 12 block; the migration arm RETIRED
+        // with the static road — hers landed 2026-09-06).
+        let eleven = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
+        let body = try #require(Self.lastBody(of: "sync_key_proof_check", in: eleven))
         #expect(body.contains("select true, key_proof_hash into vault_found, stored_hash\n    from key_vault where user_id = caller;"),
                 "the re-read under the lock the CALLER holds — no lock clause of its own (an upgrade under a second share lock would deadlock)")
         #expect(!body.contains("for share") && !body.contains("for update"),
@@ -1581,15 +1608,20 @@ struct AuthRLSDDLTests {
         #expect(peek.lowerBound < forUpdate.lowerBound && forUpdate.lowerBound < forShare.lowerBound
                     && forShare.lowerBound < fence.lowerBound,
                 "peek → the lock branches → the fence — the lock is taken BEFORE any check, once, for the round")
-        let check = try Self.finalBody(of: "sync_key_proof_check")
+        // The ARM itself is the marker-8 era's (11's own file — retired by
+        // 12's challenge-verified check, whose body carries NO hash-landing
+        // write; the 12 block pins the retirement).
+        let eleven = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
+        let check = try #require(Self.lastBody(of: "sync_key_proof_check", in: eleven))
         #expect(check.contains("if stored_hash is null then") && check.contains("update key_vault set key_proof_hash = presented_hash where user_id = caller;"),
                 "the arm's write, only when the re-read under the held lock still finds NULL")
         #expect(!check.contains("deadlock detector aborting"), "the deadlock detector is no longer the arm's resolution")
         // `key_vault_update` holds FOR UPDATE before it calls the check —
-        // the same exclusive discipline (pinned in its own test).
+        // the same exclusive discipline (pinned in its own test; the call
+        // is challenge-verified since UNIT B).
         let update = try Self.finalBody(of: "key_vault_update")
         let lock = try #require(update.range(of: "for update;"))
-        let call = try #require(update.range(of: "perform sync_key_proof_check(key_proof);"))
+        let call = try #require(update.range(of: "perform sync_key_proof_check(key_proof, challenge, 'key_vault_update');"))
         #expect(lock.lowerBound < call.lowerBound)
     }
 
@@ -1601,7 +1633,7 @@ struct AuthRLSDDLTests {
         let body = try Self.finalBody(of: "sync_reencrypt")
         #expect(body.contains("security definer"))
         #expect(body.contains("caller := auth.uid();"))
-        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof);"))
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_reencrypt');"))
         #expect(body.contains("feature = 'hosted_sync'"),
                 "the push posture: the entitlement gate rides (batch 1b's recorded reading)")
         #expect(Self.namedArray("allowed", in: body) == Set(SyncSchema.tables.map(\.name)),
@@ -1672,7 +1704,10 @@ struct AuthRLSDDLTests {
         #expect(body.contains("from key_vault where user_id = caller for update;"),
                 "the serialization point (decision 31)")
         #expect(body.contains(SyncServerRefusalMarker.vaultAbsent))
-        #expect(body.contains("perform sync_key_proof_check(key_proof);"), "the CURRENT proof authorizes")
+        // 13y UNIT B: the door's ONLY callers here are 12's bodies — the
+        // proof is challenge-verified, bound to the door's own name.
+        #expect(body.contains("perform sync_key_proof_check(key_proof, challenge, 'key_vault_update');"),
+                "the CURRENT proof authorizes — challenge-verified")
         #expect(body.contains("incoming_previous_id := payload->>'corpus_previous_key_id';")
                     && body.contains("incoming_previous := payload->>'corpus_previous_wrapped_by_master';"),
                 "the previous key is its id AND its wrap — two columns")
@@ -1889,6 +1924,26 @@ struct AuthRLSDDLTests {
             .filter { !$0.isEmpty }
     }
 
+    /// 13y UNIT B: remove EXACTLY ONE contiguous occurrence of `block`
+    /// from `lines`, or nil when the block is not there whole and in
+    /// order. The verbatim-modulo pins use it for multi-line insertions
+    /// whose members include COMMON lines (`begin`, `end if;`) a set
+    /// filter would strip everywhere — the insertion is pinned as one
+    /// exact contiguous slice, never as loose membership.
+    private static func removingContiguousBlock(
+        _ block: [String], from lines: [String]
+    ) -> [String]? {
+        guard !block.isEmpty, lines.count >= block.count else { return nil }
+        for start in 0...(lines.count - block.count) {
+            if Array(lines[start..<(start + block.count)]) == block {
+                var out = lines
+                out.removeSubrange(start..<(start + block.count))
+                return out
+            }
+        }
+        return nil
+    }
+
     /// 12 takes the 09/10/11 deploy shape: one transaction, the re-run
     /// guard before the destructive drop, the marker bump last inside the
     /// transaction; the guard keys on evidence only a deployed 12 leaves
@@ -1914,19 +1969,38 @@ struct AuthRLSDDLTests {
     /// drop). No defaulted proof survives anywhere in 12.
     @Test func theTenantSeqEventDropsTheOldPullSignatureAndMakesTheProofDefaultless() throws {
         let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
-        let drop = "drop function if exists sync_pull(bigint, text, int, text, text);"
-        let create = "create or replace function sync_pull(since_seq bigint, active_key_id text, key_proof text, max_rows int default 500, for_device text default null)"
-        #expect(sql.contains(drop), "the 11-era overload must be dropped first")
-        #expect(sql.contains(create), "the reordered signature: key_proof before the defaulted parameters")
-        let dropSite = try #require(sql.range(of: drop))
+        // 13y UNIT B: EVERY 11-era gated signature is dropped first (an
+        // overload left standing would be a CHALLENGE-FREE door beside the
+        // new one — the static-bearer road this half of the event closes),
+        // the helpers included.
+        let drops = [
+            "drop function if exists sync_pull(bigint, text, int, text, text);",
+            "drop function if exists sync_push(jsonb, text, text);",
+            "drop function if exists sync_horizon(text, text);",
+            "drop function if exists sync_purge_ledger(bigint, text, text);",
+            "drop function if exists sync_purge_execute(jsonb, text, text);",
+            "drop function if exists account_data_truncate(text, text);",
+            "drop function if exists sync_reencrypt(jsonb, text, text);",
+            "drop function if exists key_vault_update(jsonb, int, text);",
+            "drop function if exists sync_key_gate(text, text);",
+            "drop function if exists sync_key_proof_check(text);",
+        ]
+        let create = "create or replace function sync_pull(since_seq bigint, active_key_id text, key_proof text, challenge text, max_rows int default 500, for_device text default null)"
+        #expect(sql.contains(create),
+                "the reordered signature: key_proof AND the challenge defaultless, before the defaulted parameters")
         let createSite = try #require(sql.range(of: create))
-        #expect(dropSite.lowerBound < createSite.lowerBound,
-                "the drop precedes the create — no window holds both")
+        for drop in drops {
+            let dropSite = try #require(sql.range(of: drop), "the 11-era overload must be dropped: \(drop)")
+            #expect(dropSite.lowerBound < createSite.lowerBound,
+                    "every drop precedes the creates — no window holds both: \(drop)")
+        }
         #expect(!sql.contains("key_proof text default null"),
                 "the proof is defaultless everywhere in 12 — NIT-4's letter")
-        #expect(sql.contains("alter function sync_pull(bigint, text, text, int, text) owner to variorum_definer;"))
-        #expect(sql.contains("revoke execute on function sync_pull(bigint, text, text, int, text) from public, anon;"))
-        #expect(sql.contains("grant execute on function sync_pull(bigint, text, text, int, text) to authenticated, service_role;"))
+        #expect(!sql.contains("challenge text default"),
+                "the challenge is defaultless everywhere in 12 — the same letter")
+        #expect(sql.contains("alter function sync_pull(bigint, text, text, text, int, text) owner to variorum_definer;"))
+        #expect(sql.contains("revoke execute on function sync_pull(bigint, text, text, text, int, text) from public, anon;"))
+        #expect(sql.contains("grant execute on function sync_pull(bigint, text, text, text, int, text) to authenticated, service_role;"))
         #expect(sql.contains("grant usage, create on schema public to variorum_definer;")
                     && sql.contains("revoke create on schema public from variorum_definer;"),
                 "the CREATE-for-acquisition dance is opened and closed in the same transaction")
@@ -1938,16 +2012,18 @@ struct AuthRLSDDLTests {
     /// the horizon read ONCE from `sync_visibility_horizon_ms()` — and
     /// the two branch filters swapped from the inline literal to the
     /// derived interval (each swap is a filter line + its format-args
-    /// line). Line for line, nothing else moved: a quiet body change can
-    /// ride neither the reorder nor the derivation. (This pin's earlier
-    /// form asserted plain equality below the signature; the ruled swap
+    /// line) — PLUS, since UNIT B, exactly the challenge-gate swap (the
+    /// gate call gains the challenge and names the RPC). Line for line,
+    /// nothing else moved: a quiet body change can ride neither the
+    /// reorder, the derivation, nor the challenge. (This pin's earlier
+    /// form asserted plain equality below the signature; the ruled swaps
     /// re-shaped it — the `theCompletionGuardIsTheOverlaysBody…` idiom.)
     @Test func theTenantSeqPullIsElevensBodyWithExactlyTheHorizonDerivationSwapped() throws {
         let eleven = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
         let twelve = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
         let body11 = Self.codeLines(try #require(Self.lastBody(of: "sync_pull", in: eleven)))
         let body12 = Self.codeLines(try #require(Self.lastBody(of: "sync_pull", in: twelve)))
-        #expect(body11.first != body12.first, "the signature lines differ — the reorder")
+        #expect(body11.first != body12.first, "the signature lines differ — the reorder + the challenge")
         let declare = "horizon interval := make_interval(secs => sync_visibility_horizon_ms() / 1000.0);"
         #expect(body12.filter { $0 == declare }.count == 1,
                 "the horizon is read ONCE into a local, from the one serving function")
@@ -1957,12 +2033,14 @@ struct AuthRLSDDLTests {
                 return "and t.server_written_at <= clock_timestamp() - %L::interval$q$,"
             case "tbl, sync_table_pk(tbl), tbl, caller, since_seq);":
                 return "tbl, sync_table_pk(tbl), tbl, caller, since_seq, horizon);"
+            case "perform sync_key_gate(active_key_id, key_proof);":
+                return "perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_pull');"
             default:
                 return line
             }
         }
         #expect(Array(body12.dropFirst()).filter { $0 != declare } == swapped,
-                "12's sync_pull is 11's below the signature with exactly the horizon derivation swapped in")
+                "12's sync_pull is 11's below the signature with exactly the horizon derivation + the challenge gate swapped in")
         #expect(swapped != Array(body11.dropFirst()), "the swap is real — the pin isn't vacuous")
     }
 
@@ -2152,7 +2230,10 @@ struct AuthRLSDDLTests {
     }
 
     /// THE FOLD-IN's exactness: 12's `key_vault_update` is the OVERLAY's
-    /// deployed body (11 + the guard) with EXACTLY the M3 mint swapped —
+    /// deployed body (11 + the guard) with EXACTLY the enumerated UNIT A +
+    /// UNIT B moves — the M3 mint swap, the challenge signature and
+    /// proof-check swaps, and the two contiguous UNIT B insertions (the
+    /// successor declarations; the hash-and-secret-land-together block) —
     /// line for line, nothing else moved. The strongest form of "the
     /// guard's body folded in, never re-shaped".
     @Test func theCompletionGuardIsTheOverlaysBodyWithExactlyTheMintSwapped() throws {
@@ -2160,30 +2241,109 @@ struct AuthRLSDDLTests {
         let twelve = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
         let overlayBody = Self.codeLines(try #require(Self.lastBody(of: "key_vault_update", in: overlay)))
         let twelveBody = Self.codeLines(try #require(Self.lastBody(of: "key_vault_update", in: twelve)))
-        let swapped = overlayBody.map {
-            $0 == "next_seq := nextval('sync_server_seq');"
-                ? "next_seq := next_tenant_seq(caller);" : $0
+        let swapped = overlayBody.map { line in
+            switch line {
+            case "next_seq := nextval('sync_server_seq');":
+                return "next_seq := next_tenant_seq(caller);"
+            case "create or replace function key_vault_update(payload jsonb, expected_revision int, key_proof text) returns jsonb":
+                return "create or replace function key_vault_update(payload jsonb, expected_revision int, key_proof text, challenge text) returns jsonb"
+            case "perform sync_key_proof_check(key_proof);":
+                return "perform sync_key_proof_check(key_proof, challenge, 'key_vault_update');"
+            default:
+                return line
+            }
         }
-        #expect(swapped == twelveBody,
-                "12's key_vault_update is the overlay's body with exactly the mint swapped")
-        #expect(overlayBody != swapped, "the swap is real — the pin isn't vacuous")
+        // The two UNIT B insertions, each ONE exact contiguous slice.
+        let successorDeclarations = [
+            "incoming_hash text;",
+            "incoming_mac text;",
+            "incoming_mac_hash text;",
+            "vault_current_hash text;",
+            "mac_secret_id uuid;",
+        ]
+        let successorBlock = [
+            "incoming_hash := payload->>'key_proof_hash';",
+            "incoming_mac := payload->>'key_proof_mac';",
+            "select key_proof_hash into vault_current_hash from key_vault where user_id = caller;",
+            "if incoming_mac is not null then",
+            "begin",
+            "incoming_mac_hash := encode(sha256(decode(incoming_mac, 'base64')), 'hex');",
+            "exception when others then",
+            "incoming_mac_hash := null;",
+            "end;",
+            "if incoming_mac_hash is null or incoming_hash is null",
+            "or incoming_mac_hash <> incoming_hash then",
+            "raise exception 'VARIORUM_KEY_PROOF_REQUIRED: the successor proof secret must hash to the payload''s key_proof_hash — they land together or not at all';",
+            "end if;",
+            "elsif incoming_hash is not null and incoming_hash is distinct from vault_current_hash then",
+            "raise exception 'VARIORUM_KEY_PROOF_REQUIRED: a new key_proof_hash lands only beside its key_proof_mac — a hash that moved without its secret would refuse every follower';",
+            "end if;",
+            "if incoming_mac is not null then",
+            "select s.id into mac_secret_id",
+            "from vault.secrets s where s.name = 'kp:' || caller::text;",
+            "if mac_secret_id is null then",
+            "perform vault.create_secret(incoming_mac, 'kp:' || caller::text);",
+            "else",
+            "perform vault.update_secret(mac_secret_id, incoming_mac);",
+            "end if;",
+            "end if;",
+        ]
+        let withoutBlock = try #require(
+            Self.removingContiguousBlock(successorBlock, from: twelveBody),
+            "the hash-and-secret block must sit whole and contiguous in 12's body")
+        let withoutBoth = try #require(
+            Self.removingContiguousBlock(successorDeclarations, from: withoutBlock),
+            "the successor declarations must sit whole and contiguous in 12's declare section")
+        #expect(swapped == withoutBoth,
+                "12's key_vault_update is the overlay's body with exactly the enumerated swaps + the two UNIT B insertions")
+        #expect(overlayBody != swapped, "the swaps are real — the pin isn't vacuous")
     }
 
     /// The purge door's fold: 12's `sync_purge_execute` is 11's body with
-    /// EXACTLY the M2 mint swapped.
+    /// EXACTLY the M2 mint swapped — plus, since UNIT B, the challenge
+    /// signature/gate swaps and the ONE contiguous re-auth insertion
+    /// (memo §5's 10-minute window, its declaration beside it).
     @Test func thePurgeExecutionDoorIsElevensBodyWithExactlyTheMintSwapped() throws {
         let eleven = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
         let twelve = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
         let body11 = Self.codeLines(try #require(Self.lastBody(of: "sync_purge_execute", in: eleven)))
         let body12 = Self.codeLines(try #require(Self.lastBody(of: "sync_purge_execute", in: twelve)))
-        let swapped = body11.map {
-            $0 == "granted_seq := nextval('sync_server_seq');"
-                ? "granted_seq := next_tenant_seq(caller);" : $0
+        let swapped = body11.map { line in
+            switch line {
+            case "granted_seq := nextval('sync_server_seq');":
+                return "granted_seq := next_tenant_seq(caller);"
+            case "create or replace function sync_purge_execute(rows jsonb, active_key_id text, key_proof text) returns bigint":
+                return "create or replace function sync_purge_execute(rows jsonb, active_key_id text, key_proof text, challenge text) returns bigint"
+            case "perform sync_key_gate(active_key_id, key_proof);":
+                return "perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_purge_execute');"
+            default:
+                return line
+            }
         }
-        #expect(swapped == body12,
-                "12's sync_purge_execute is 11's body with exactly the mint swapped")
-        #expect(body11 != swapped, "the swap is real — the pin isn't vacuous")
+        let withoutReauth = try #require(
+            Self.removingContiguousBlock(Self.reauthBlock, from: body12),
+            "the re-auth window must sit whole and contiguous in 12's purge-execute body")
+        let withoutBoth = try #require(
+            Self.removingContiguousBlock(["newest_password_auth timestamptz;"], from: withoutReauth),
+            "the re-auth declaration must be present")
+        #expect(swapped == withoutBoth,
+                "12's sync_purge_execute is 11's body with exactly the mint/challenge swaps + the re-auth insertion")
+        #expect(body11 != swapped, "the swaps are real — the pin isn't vacuous")
     }
+
+    /// The re-auth window's exact lines (memo §5 — 10 minutes, the JWT's
+    /// newest password-method amr timestamp), shared by the two
+    /// destructive doors' exactness pins and the guard pin below.
+    private static let reauthBlock = [
+        "select to_timestamp(max((amr_entry->>'timestamp')::bigint))",
+        "into newest_password_auth",
+        "from jsonb_array_elements(coalesce(auth.jwt()->'amr', '[]'::jsonb)) amr_entry",
+        "where amr_entry->>'method' = 'password';",
+        "if newest_password_auth is null",
+        "or newest_password_auth < now() - interval '10 minutes' then",
+        "raise exception 'VARIORUM_REAUTH_REQUIRED: this act needs a fresh sign-in — confirm the account password and try again';",
+        "end if;",
+    ]
 
     /// The whole account goes (the 13j letter, extended): `account_purge`
     /// removes the caller's counter row beside the purge machinery's; and
@@ -2198,20 +2358,38 @@ struct AuthRLSDDLTests {
         let truncate = try Self.finalBody(of: "account_data_truncate")
         #expect(!truncate.contains("sync_tenant_seq"),
                 "a re-key truncate must not touch the counter — monotonic per owner, cursors stay valid")
-        // Exactness: 12's purge body is 10's plus exactly the one line.
+        // Exactness: 12's purge body is 10's plus exactly ONE contiguous
+        // insertion — the counter-row delete (UNIT A) followed by UNIT B's
+        // cleanup: the challenge nonces, the budget row, and the
+        // best-effort Vault-secret delete (never fails the purge; a
+        // dangling secret for a dead uuid authorizes nothing — recorded,
+        // window-verified).
         let ten = Self.strippingComments(try Self.sqlFile("10_phase13j_purge.sql"))
         let twelve = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
         let body10 = Self.codeLines(try #require(Self.lastBody(of: "account_purge", in: ten)))
         let body12 = Self.codeLines(try #require(Self.lastBody(of: "account_purge", in: twelve)))
-        let withoutTheLine = body12.filter { $0 != "delete from sync_tenant_seq where owner_id = caller;" }
-        #expect(withoutTheLine == body10,
-                "12's account_purge is 10's body plus exactly the counter-row delete")
-        #expect(withoutTheLine != body12, "the added line is real — the pin isn't vacuous")
+        let insertion = [
+            "delete from sync_tenant_seq where owner_id = caller;",
+            "delete from key_proof_challenge where owner_id = caller;",
+            "delete from sync_write_budget where owner_id = caller;",
+            "begin",
+            "delete from vault.secrets where name = 'kp:' || caller::text;",
+            "exception when others then",
+            "null;",
+            "end;",
+        ]
+        let withoutTheBlock = try #require(
+            Self.removingContiguousBlock(insertion, from: body12),
+            "the account cleanup must sit whole and contiguous in 12's purge body")
+        #expect(withoutTheBlock == body10,
+                "12's account_purge is 10's body plus exactly the counter + UNIT B cleanup insertion")
+        #expect(withoutTheBlock != body12, "the added block is real — the pin isn't vacuous")
     }
 
     /// The 13j naming rule, applied to 12: no parameter shadows a column
     /// the function writes — `for_tenant` against the counter's columns,
-    /// the reordered pull's parameters against `device_cursor`'s.
+    /// the reordered pull's parameters against `device_cursor`'s, and
+    /// UNIT B's parameters against the challenge/budget/vault columns.
     @Test func noTenantSeqParameterShadowsAColumnItWrites() throws {
         let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
         let counterColumns: Set<String> = ["owner_id", "last_seq"]
@@ -2219,9 +2397,262 @@ struct AuthRLSDDLTests {
         #expect(!counterColumns.contains("for_tenant"),
                 "for_tenant shadows a sync_tenant_seq column")
         let cursorColumns: Set<String> = ["owner_id", "device_id", "last_seq", "seen_at"]
-        for param in ["since_seq", "active_key_id", "key_proof", "max_rows", "for_device"] {
+        for param in ["since_seq", "active_key_id", "key_proof", "challenge", "max_rows", "for_device"] {
             #expect(!cursorColumns.contains(param),
                     "sync_pull's \(param) shadows a device_cursor column it writes")
+        }
+        // UNIT B: the proof check DELETEs against key_proof_challenge; the
+        // mint INSERTs into it; the enroll road UPDATEs key_vault; the
+        // push writes sync_write_budget.
+        let challengeColumns: Set<String> = ["owner_id", "nonce", "issued_at"]
+        for param in ["key_proof", "challenge", "rpc_name", "n"] {
+            #expect(!challengeColumns.contains(param),
+                    "\(param) shadows a key_proof_challenge column it writes")
+        }
+        let budgetColumns: Set<String> = ["owner_id", "lifetime_rows", "window_start", "window_rows"]
+        for param in ["batch", "active_key_id", "key_proof", "challenge"] {
+            #expect(!budgetColumns.contains(param),
+                    "sync_push's \(param) shadows a sync_write_budget column it writes")
+        }
+        let vaultColumns: Set<String> = ["user_id", "key_proof_hash", "corpus_key_id", "revision"]
+        for param in ["kp1", "kp2", "active_key_id"] {
+            #expect(!vaultColumns.contains(param),
+                    "key_proof_enroll's \(param) shadows a key_vault column it writes")
+        }
+    }
+
+    // MARK: - Phase 13y UNIT B: the key-proof challenge · the abuse guard ·
+    // the re-auth doors (the ruled memo
+    // notes/plans/phase-13y-memo-key-proof-challenge.md; QUESTIONS #144).
+    // NEW-MECHANISM pins, green by design (stated per the brief): the
+    // artifact is authored, not deployed — these hold its letter exactly
+    // as the UNIT A block holds Steps 1–3's.
+
+    /// The two UNIT B tables take the `device_cursor` posture exactly:
+    /// server-only (never in an allowlist), FORCE RLS with the
+    /// no-`to`-clause owner policy, API-role privileges revoked, the
+    /// definer's row grants for exactly the verbs the bodies use.
+    @Test func theChallengeAndBudgetTablesTakeTheDeviceCursorPosture() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        for table in ["key_proof_challenge", "sync_write_budget"] {
+            #expect(sql.contains("create table \(table) ("))
+            #expect(sql.contains("alter table \(table) enable row level security;"))
+            #expect(sql.contains("alter table \(table) force row level security;"))
+            #expect(sql.contains("create policy \(table)_owner_all on \(table)"))
+            #expect(sql.contains("revoke all on \(table) from anon, authenticated;"))
+            #expect(!sql.contains("on \(table) to authenticated"), "no API-role road back onto \(table)")
+            for function in Self.proofGatedFunctions where function != "sync_push" {
+                let body = try Self.finalBody(of: function)
+                if table == "sync_write_budget", function == "account_data_truncate" { continue }
+                #expect(!body.contains("'\(table)'"),
+                        "\(function)'s allowlist must never carry \(table)")
+            }
+        }
+        #expect(sql.contains("grant select, insert, delete on key_proof_challenge to variorum_definer;"),
+                "the mint inserts, the check deletes — exactly those verbs")
+        #expect(sql.contains("grant select, insert, update, delete on sync_write_budget to variorum_definer;"),
+                "the push upserts and updates, the truncate deletes — exactly those verbs")
+    }
+
+    /// THE MINT (memo §3/§7 edge 7): session-gated ONLY (no vault
+    /// requirement — a not-yet-enrolled account fetches challenges too),
+    /// `n` clamped to 32, the caller's expired rows GC'd at every mint
+    /// (the 5-minute TTL literal), the 64-row cap evicting oldest-first,
+    /// nonces from `gen_random_bytes(32)` under the widened search_path
+    /// (pgcrypto lives in `extensions` on Supabase).
+    @Test func theChallengeMintIsSessionGatedCappedAndSelfGC() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let body = try #require(Self.lastBody(of: "sync_challenge", in: sql))
+        #expect(body.contains("create or replace function sync_challenge(n int) returns jsonb"))
+        #expect(body.contains("set search_path = public, extensions"))
+        #expect(body.contains("raise exception 'sync requires an authenticated user'"),
+                "session-gated: a sessionless caller gets nothing")
+        #expect(!body.contains("sync_key_gate") && !body.contains("key_vault"),
+                "…and ONLY session-gated — no vault requirement, no proof (the enroll road needs a challenge first)")
+        #expect(body.contains("granted := least(greatest(coalesce(n, 1), 1), 32);"),
+                "n is clamped to 32 per call")
+        #expect(body.contains("issued_at < clock_timestamp() - interval '5 minutes'"),
+                "the caller's EXPIRED rows are GC'd at every mint — the one TTL literal")
+        #expect(body.contains("extensions.gen_random_bytes(32)"))
+        #expect(body.contains("if live > 64 then") && body.contains("order by c.issued_at asc")
+                    && body.contains("limit live - 64"),
+                "the per-owner cap: 64 live nonces, oldest evicted")
+        #expect(body.contains("encode(fresh, 'base64')"),
+                "the wire carries base64 nonces (44 chars — under PG's 76-char line fold)")
+    }
+
+    /// THE ENROLL ROAD (memo §3): FOR UPDATE on the vault row (racing
+    /// devices serialize; the loser meets ALREADY_ENROLLED and proceeds),
+    /// the fence, ONCE per account (an existing Vault secret refuses),
+    /// the OLD hash authorizing via the hoisted constant-time compare,
+    /// and the secret + the hash landing TOGETHER
+    /// (`vault.create_secret(kp2)` + `key_proof_hash = SHA-256(kp2)`).
+    /// The NULL-hash migration arm RETIRED: a hash-less row refuses.
+    @Test func theEnrollRoadIsOnceForUpdateAndLandsHashAndSecretTogether() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let body = try #require(Self.lastBody(of: "key_proof_enroll", in: sql))
+        #expect(body.contains("create or replace function key_proof_enroll(kp1 text, kp2 text, active_key_id text) returns void"))
+        #expect(body.contains("from key_vault where user_id = caller for update;"),
+                "one enrollment at a time, per account — the row lock serializes the race")
+        #expect(body.contains("if vault_fence_key is null or vault_fence_key is distinct from active_key_id then")
+                    && body.contains(SyncServerRefusalMarker.staleKeyFence),
+                "the fence rides the enroll road too — stale-device honesty")
+        #expect(body.contains("from vault.secrets s where s.name = 'kp:' || caller::text;")
+                    && body.contains("VARIORUM_KEY_PROOF_ALREADY_ENROLLED"),
+                "ONCE per account: an existing secret refuses (the racing loser proceeds — its kp2 is the same)")
+        #expect(body.contains("encode(sha256(decode(kp1, 'base64')), 'hex')")
+                    && body.contains("not sync_constant_time_equal(stored_hash, presented_hash)"),
+                "the OLD hash authorizes the successor, constant-time")
+        #expect(body.contains("if stored_hash is null or presented_hash is null"),
+                "the NULL-hash arm is RETIRED — a hash-less row refuses, never adopts")
+        #expect(!body.contains("update key_vault set key_proof_hash = presented_hash"),
+                "…and no first-comer's hash ever lands here")
+        let secret = try #require(body.range(of: "perform vault.create_secret(kp2, 'kp:' || caller::text);"))
+        let hash = try #require(body.range(of: "update key_vault set key_proof_hash = successor_hash where user_id = caller;"))
+        #expect(secret.lowerBound < hash.lowerBound,
+                "the secret and the hash land together, one transaction — the function IS the transaction")
+    }
+
+    /// THE REWORKED CHECK (memo §3), in the RULED order: the vault re-read
+    /// under the caller's held lock (no lock clause of its own — 11's
+    /// letter kept) → the Vault-held secret (ABSENT refuses ENROLL,
+    /// BEFORE any nonce is consumed — the enroll retry's challenge
+    /// survives) → the nonce consumed ATOMICALLY (DELETE … RETURNING —
+    /// single-use by construction, THE replay closure) → the 5-minute
+    /// SERVER-clock TTL → the HMAC over `nonce ‖ ':' ‖ rpc_name` (the
+    /// cross-RPC splicing binding) compared via the hoisted constant-time
+    /// helper. The static compare and the migration arm are GONE.
+    @Test func theProofCheckConsumesTheNonceInTheRuledOrderAndTheMigrationArmRetires() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let body = try #require(Self.lastBody(of: "sync_key_proof_check", in: sql))
+        #expect(body.contains("create or replace function sync_key_proof_check(key_proof text, challenge text, rpc_name text) returns void"))
+        #expect(body.contains("set search_path = public, extensions"))
+        #expect(!body.contains("for share") && !body.contains("for update"),
+                "the check takes no lock of its own — the gate (or key_vault_update) chose it")
+        let vaultRead = try #require(body.range(of: "select true into vault_found from key_vault where user_id = caller;"))
+        let secretRead = try #require(body.range(of: "from vault.decrypted_secrets ds"))
+        let enrollRefusal = try #require(body.range(of: "VARIORUM_KEY_PROOF_ENROLL"))
+        let consume = try #require(body.range(of: "delete from key_proof_challenge"))
+        let returning = try #require(body.range(of: "returning issued_at into nonce_issued_at;"))
+        let ttl = try #require(body.range(of: "if nonce_issued_at < clock_timestamp() - interval '5 minutes' then"))
+        let hmac = try #require(body.range(of: "extensions.hmac("))
+        let compare = try #require(body.range(of: "not sync_constant_time_equal(expected_hex, presented_hex)"))
+        #expect(vaultRead.lowerBound < secretRead.lowerBound
+                    && secretRead.lowerBound < enrollRefusal.lowerBound
+                    && enrollRefusal.lowerBound < consume.lowerBound
+                    && consume.lowerBound < returning.upperBound
+                    && returning.upperBound < ttl.lowerBound
+                    && ttl.lowerBound < hmac.lowerBound
+                    && hmac.lowerBound < compare.lowerBound,
+                "the ruled order: vault → secret (enroll BEFORE consume) → atomic consume → TTL → HMAC → constant-time")
+        #expect(body.contains("presented_nonce || convert_to(':' || rpc_name, 'utf8')"),
+                "the binding: nonce ‖ ':' ‖ rpc_name — cross-RPC splicing refuses")
+        #expect(body.components(separatedBy: "VARIORUM_KEY_PROOF_STALE_CHALLENGE").count - 1 == 3,
+                "malformed, unknown/consumed, and expired all refuse STALE — fetch fresh and retry once")
+        #expect(!body.contains("update key_vault"),
+                "the migration arm is RETIRED — the check writes nothing to the vault")
+        #expect(!body.contains("encode(sha256(decode(key_proof, 'base64')), 'hex')"),
+                "…and the static bearer compare is GONE — the proof is per-request now")
+    }
+
+    /// THE MINIMAL ABUSE GUARD (memo §4; the adjudicated shape): the
+    /// ruled numbers verbatim — 2,000 per call (the measured shipped
+    /// chunk ×10) · the 500,000-row lifetime pool · 50,000 per tumbling
+    /// 24-hour window — the REFUSE-WHOLE boundary (no overshoot: the
+    /// check reads `window_rows + batch_rows > 50000` BEFORE the loop),
+    /// the retry-after in the typed message, the increment counting the
+    /// ACTUAL accepted rows AFTER the loop, the budget row locked AFTER
+    /// the gate's vault lock (one order, no cycle), and the exemptions:
+    /// push is the ONLY quota'd door; the truncate RESETS the pool.
+    @Test func theQuotaLivesInThePushAloneWithTheRuledNumbers() throws {
+        let push = try Self.finalBody(of: "sync_push")
+        #expect(push.contains("if batch_rows > 2000 then"), "the per-call cap: 200 × 10")
+        #expect(push.contains("if budget_lifetime >= 500000 then"), "the lifetime first-load pool")
+        #expect(push.contains("elsif budget_window_rows + batch_rows > 50000 then"),
+                "the refuse-whole boundary — no overshoot, pinned as stated (the adjudication's point 1)")
+        #expect(push.contains("clock_timestamp() - budget_window_start >= interval '24 hours'"),
+                "the tumbling window (its ≤2× seam worst case ACCEPTED — point 2; 13t re-prices)")
+        #expect(push.components(separatedBy: "VARIORUM_WRITE_QUOTA").count - 1 == 2,
+                "both refusals — the cap and the window — are typed")
+        #expect(push.contains("retry_after_seconds="), "the typed refusal carries a retry-after")
+        let gate = try #require(push.range(of: "perform sync_key_gate("))
+        let budgetLock = try #require(push.range(of: "insert into sync_write_budget (owner_id) values (caller)"))
+        let loop = try #require(push.range(of: "for item in select * from jsonb_array_elements(batch) loop"))
+        let increment = try #require(push.range(of: "set lifetime_rows = lifetime_rows + accepted_rows,"))
+        #expect(gate.lowerBound < budgetLock.lowerBound && budgetLock.lowerBound < loop.lowerBound
+                    && loop.lowerBound < increment.lowerBound,
+                "gate (vault lock) → budget lock → the CAS loop → the accepted-count increment — one lock order (point 3)")
+        #expect(push.contains("if accepted_rows > 0 then"),
+                "the increment counts ACCEPTED rows — CAS rejects burn nothing")
+        // The exemptions, each with its reason in the artifact.
+        #expect(!(try Self.finalBody(of: "sync_reencrypt")).contains("sync_write_budget"),
+                "sync_reencrypt is EXEMPT — a rotation rewrites the corpus by design")
+        #expect(!(try Self.finalBody(of: "sync_purge_execute")).contains("sync_write_budget"),
+                "sync_purge_execute takes no quota — removal is a right")
+        #expect((try Self.finalBody(of: "account_data_truncate"))
+                    .contains("delete from sync_write_budget where owner_id = caller;"),
+                "the truncate RESETS the pool — the adopt road's repush is a first load")
+    }
+
+    /// THE RE-AUTH DOORS (memo §5; QUESTIONS #144(c)): both destructive
+    /// RPCs carry the EXACT 10-minute amr window, AFTER the gate (the
+    /// fence and proof outrank) and BEFORE any destructive work.
+    @Test func theReauthWindowGuardsBothDestructiveDoorsAfterTheGate() throws {
+        for function in ["sync_purge_execute", "account_data_truncate"] {
+            let body = try Self.finalBody(of: function)
+            for line in Self.reauthBlock {
+                #expect(body.contains(line), "\(function) must carry the re-auth line: \(line)")
+            }
+            let gate = try #require(body.range(of: "perform sync_key_gate("))
+            let reauth = try #require(body.range(of: "VARIORUM_REAUTH_REQUIRED"))
+            let work = try #require(body.range(of: function == "sync_purge_execute"
+                ? "granted_seq := next_tenant_seq(caller);"
+                : "foreach tbl in array data_tables loop"))
+            #expect(gate.lowerBound < reauth.lowerBound && reauth.lowerBound < work.lowerBound,
+                    "\(function): gate → re-auth → the destructive work")
+        }
+        // The non-destructive doors carry NO re-auth — a sync round must
+        // never demand a fresh password.
+        for function in ["sync_push", "sync_pull", "sync_horizon", "sync_purge_ledger", "sync_reencrypt"] {
+            #expect(!(try Self.finalBody(of: function)).contains("VARIORUM_REAUTH_REQUIRED"),
+                    "\(function) never demands re-auth — rounds run unattended")
+        }
+    }
+
+    /// THE VAULT GRANTS + the PUBLIC-execute footgun sweep (memo §2's
+    /// named footgun): the definer role's vault-schema reach is stated,
+    /// and EVERY function 12 creates or re-creates carries its explicit
+    /// revoke-from-PUBLIC pair — Supabase grants EXECUTE to PUBLIC at
+    /// CREATE, so an unswept new function is an open door.
+    @Test func theVaultGrantsAndEveryNewFunctionsRevokePairLand() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        #expect(sql.contains("grant usage on schema vault to variorum_definer;"))
+        #expect(sql.contains("grant select on vault.secrets, vault.decrypted_secrets to variorum_definer;"))
+        #expect(sql.contains("grant execute on all functions in schema vault to variorum_definer;"),
+                "the vault helpers granted as a schema (signatures vary by Vault version — the window's sweep verifies)")
+        for signature in ["sync_push(jsonb, text, text, text)",
+                          "sync_pull(bigint, text, text, text, int, text)",
+                          "sync_horizon(text, text, text)",
+                          "sync_purge_ledger(bigint, text, text, text)",
+                          "sync_purge_execute(jsonb, text, text, text)",
+                          "account_data_truncate(text, text, text)",
+                          "sync_reencrypt(jsonb, text, text, text)",
+                          "key_vault_update(jsonb, int, text, text)",
+                          "sync_challenge(int)", "key_proof_enroll(text, text, text)",
+                          "sync_key_gate(text, text, text, text)",
+                          "sync_key_proof_check(text, text, text)",
+                          "sync_constant_time_equal(text, text)",
+                          "next_tenant_seq(uuid)", "sync_visibility_horizon_ms()"] {
+            #expect(sql.contains("revoke execute on function \(signature) from public, anon"),
+                    "\(signature) must carry its revoke-from-PUBLIC pair")
+            // `next_tenant_seq` stays the deployer's deliberately — UNIT
+            // A's `stamp_server_seq` class (SECURITY INVOKER; ownership
+            // carries no privilege there, and 11 §14's letter keeps the
+            // trigger-class functions with the deployer).
+            if signature != "next_tenant_seq(uuid)" {
+                #expect(sql.contains("alter function \(signature) owner to variorum_definer;"),
+                        "\(signature) must return to the non-bypass definer owner")
+            }
         }
     }
 }

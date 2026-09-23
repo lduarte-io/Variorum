@@ -11,6 +11,16 @@
 -- posture — forced RLS, one owner policy, no API-role privileges), and
 -- the `sync_visibility_horizon_ms()` served-horizon function (the
 -- R-13y-4 fork's Shape 1 — `sync_schema_version()`'s exact posture).
+-- EXTENDED at Phase 13y UNIT B for the SAME event's challenge half (the
+-- ruled memo, QUESTIONS #144): EVERY gated RPC's signature gains the
+-- defaultless `challenge` (the 11-era spellings ALL become the
+-- UNEXPECTED lingering-overload class — a survivor is a CHALLENGE-FREE
+-- door), the two gate helpers re-shape with it, and the new surface
+-- lands: `sync_challenge(integer)` + `key_proof_enroll(text,text,text)`
+-- (the account-door posture), `sync_constant_time_equal(text,text)` (the
+-- helper posture), and the two server-only tables
+-- `key_proof_challenge` / `sync_write_budget` (the device_cursor
+-- posture).
 --
 -- WHAT IT IS: one READ-ONLY query, run IMMEDIATELY AFTER a lockstep deploy
 -- (09 at the 14c gate; 10 at the 13j window; 11 at the pre-13x window),
@@ -41,21 +51,23 @@
 -- new one; 11 section 0 drops all six old signatures) — and, since 11, a
 -- lingering `key_vault_owner_update` policy, the proof-free PATCH road.
 --
--- The expectations below are the artifacts' letter, transcribed (11's
--- signatures supersede 10's; 10's superseded 09's):
---   sync_push(jsonb,text,text) / sync_pull(bigint,text,text,integer,text)
+-- The expectations below are the artifacts' letter, transcribed (12's
+-- signatures supersede 11's; 11's superseded 10's; 10's superseded 09's):
+--   sync_push(jsonb,text,text,text) / sync_pull(bigint,text,text,text,integer,text)
 --                                    anon ✗  authenticated ✓  service_role ✓
---                                    (the pull spelling is 12's NIT-4 reorder —
---                                    key_proof defaultless; the 11-era
---                                    sync_pull(bigint,text,integer,text,text) is
---                                    DROPPED by 12 and would surface UNEXPECTED)
---   account_data_truncate(text,text) / account_purge()
+--                                    (both spellings are 13y UNIT B's challenge
+--                                    signatures; EVERY 11-era gated spelling is
+--                                    DROPPED by 12 and would surface UNEXPECTED —
+--                                    a survivor is a CHALLENGE-FREE door)
+--   account_data_truncate(text,text,text) / account_purge()
 --                                    anon ✗  authenticated ✓  service_role ✗
---   sync_horizon(text,text) / sync_purge_ledger(bigint,text,text) /
---   sync_purge_execute(jsonb,text,text) / sync_reencrypt(jsonb,text,text) /
---   key_vault_update(jsonb,integer,text)
+--   sync_horizon(text,text,text) / sync_purge_ledger(bigint,text,text,text) /
+--   sync_purge_execute(jsonb,text,text,text) / sync_reencrypt(jsonb,text,text,text) /
+--   key_vault_update(jsonb,integer,text,text) /
+--   sync_challenge(integer) / key_proof_enroll(text,text,text) (13y UNIT B)
 --                                    anon ✗  authenticated ✓  service_role ✗
---   sync_key_gate(text,text) / sync_key_proof_check(text) /
+--   sync_key_gate(text,text,text,text) / sync_key_proof_check(text,text,text) /
+--   sync_constant_time_equal(text,text) (13y UNIT B) /
 --   next_tenant_seq(uuid) (13y)       anon ✗  authenticated ✗  service_role ✗
 --                                    (definer bodies are the only callers)
 --   entitlement_set                  anon ✗  authenticated ✗  service_role ✓
@@ -74,25 +86,29 @@
 
 with expected_functions (signature, exp_anon, exp_authenticated, exp_service_role) as (
   values
-    -- pre-13x 11: every data RPC's signature gained `key_proof`; the OLD
-    -- overloads (10's) are DROPPED by 11 — any reappearance is UNEXPECTED,
-    -- the exact lingering-overload class this sweep exists to catch.
-    ('sync_push(jsonb,text,text)',                                     false, true,  true),
-    -- 13y (12): the NIT-4 reorder — key_proof defaultless. The 11-era
-    -- spelling sync_pull(bigint,text,integer,text,text) is DROPPED by 12;
-    -- its reappearance is the UNEXPECTED lingering-overload class.
-    ('sync_pull(bigint,text,text,integer,text)',                       false, true,  true),
-    ('account_data_truncate(text,text)',                               false, true,  false),
+    -- 13y UNIT B (12): every gated RPC's signature gained the defaultless
+    -- `challenge`; ALL 11-era overloads are DROPPED by 12 — any
+    -- reappearance is UNEXPECTED, the exact lingering-overload class this
+    -- sweep exists to catch (a survivor is a CHALLENGE-FREE door).
+    ('sync_push(jsonb,text,text,text)',                                false, true,  true),
+    ('sync_pull(bigint,text,text,text,integer,text)',                  false, true,  true),
+    ('account_data_truncate(text,text,text)',                          false, true,  false),
     ('account_purge()',                                                false, true,  false),
-    ('sync_horizon(text,text)',                                        false, true,  false),
-    ('sync_purge_ledger(bigint,text,text)',                            false, true,  false),
-    ('sync_purge_execute(jsonb,text,text)',                            false, true,  false),
-    ('sync_reencrypt(jsonb,text,text)',                                false, true,  false),
-    ('key_vault_update(jsonb,integer,text)',                           false, true,  false),
+    ('sync_horizon(text,text,text)',                                   false, true,  false),
+    ('sync_purge_ledger(bigint,text,text,text)',                       false, true,  false),
+    ('sync_purge_execute(jsonb,text,text,text)',                       false, true,  false),
+    ('sync_reencrypt(jsonb,text,text,text)',                           false, true,  false),
+    ('key_vault_update(jsonb,integer,text,text)',                      false, true,  false),
+    -- 13y UNIT B: the nonce mint (session-gated) and the one enrollment
+    -- road — the account-door posture.
+    ('sync_challenge(integer)',                                        false, true,  false),
+    ('key_proof_enroll(text,text,text)',                               false, true,  false),
     -- The two gate helpers: reachable by NO API role (the sync_table_pk
     -- posture — the definer bodies call them as their owner).
-    ('sync_key_gate(text,text)',                                       false, false, false),
-    ('sync_key_proof_check(text)',                                     false, false, false),
+    ('sync_key_gate(text,text,text,text)',                             false, false, false),
+    ('sync_key_proof_check(text,text,text)',                           false, false, false),
+    -- 13y UNIT B: the hoisted constant-time compare — the helper posture.
+    ('sync_constant_time_equal(text,text)',                            false, false, false),
     -- 13y (12): the per-owner counter helper — the sync_table_pk posture
     -- (the trigger and the definer bodies are its only callers).
     ('next_tenant_seq(uuid)',                                           false, false, false),
@@ -152,6 +168,10 @@ expected_tables (relname, exp_anon, exp_authenticated, exp_rls, exp_forced, exp_
     -- 13y (12_phase13y_tenant_seq.sql): the per-owner sequence counter —
     -- server-only, the device_cursor posture.
     ('sync_tenant_seq',  false, false, true,  true,  1),
+    -- 13y UNIT B (12): the single-use challenge nonces and the abuse
+    -- guard's accounting row — server-only, the device_cursor posture.
+    ('key_proof_challenge', false, false, true, true, 1),
+    ('sync_write_budget',   false, false, true, true, 1),
     -- policy counts +1 each since the 14c-gate BYPASSRLS repair
     -- (2026-08-11, maintenance/14c-gate-definer-owner.sql): the own-row
     -- SELECT policies for the non-bypass variorum_definer owner

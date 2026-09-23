@@ -774,8 +774,46 @@ and the full `AuthRLSDDLTests` suite (68/68) re-run green by the orchestrator.
   under R-13y-4 the unit proceeds on it without waiting — an orchestrator counter-ruling
   reworks the mechanism, not the numbers (the numbers are the memo §4's, ruled).
 - **Piece 2 — the server halves in 12 (the challenge · the quota · the re-auth doors) +
-  the grant-sweep extension: PENDING.**
-- **Piece 3 — the DDL pins (the AuthRLSDDLTests 12-block rework + the new pins): PENDING.**
+  the grant-sweep extension: DONE (this commit).** The artifact grew UNIT B whole inside
+  the ONE transaction: section 0's drop list now drops EVERY 11-era gated signature (a
+  survivor would be a challenge-free door); 5b `key_proof_challenge` + 5c
+  `sync_write_budget` (both the device_cursor posture); 5d the hoisted
+  `sync_constant_time_equal`; 5e `sync_challenge(n)` (session-gated, clamp 32, 5-min GC,
+  64-cap oldest-evicted, `extensions.gen_random_bytes`); 5f `key_proof_enroll` (FOR
+  UPDATE, the fence, ONCE — ALREADY_ENROLLED for the racing loser, old-hash constant-time
+  authorization, secret+hash land together; the NULL-hash arm RETIRED); 5g the reworked
+  check (the RULED order: vault → Vault secret [ENROLL before any nonce is consumed] →
+  atomic DELETE…RETURNING consume → 5-min server-clock TTL → HMAC over
+  `nonce ‖ ':' ‖ rpc_name` → constant-time); 5h the gate passing challenge + the caller's
+  name through; 6b sync_push re-created with the gate swap AND the adjudicated quota
+  (cap 2000 · pool 500000 · window 50000, refuse-whole boundary, accepted-count increment
+  after the loop, budget lock AFTER the vault lock — the stated order); 7/7e the two
+  destructive doors gain the 10-minute amr re-auth (gate → re-auth → work) and the
+  truncate resets the pool; 7b–7d horizon/ledger/reencrypt re-created challenge-gated
+  (reencrypt EXEMPT from the quota, stated); 8 key_vault_update challenge-verified with
+  the successor block (a new hash lands ONLY beside its `key_proof_mac`, sha256-matched,
+  `vault.create_secret`/`update_secret` in the same transaction); 9 account_purge takes
+  the nonces, the budget row and (best-effort, recorded) the Vault secret; 11 the full
+  re-own/re-grant sweep + the vault-schema grants (ALL FUNCTIONS form, the
+  signature-drift reasoning at the line); the verification tail + the PENDING-until-live
+  list extended (extensions-schema resolution, the Vault road, the amr refresh-survival
+  probe, the purge's vault delete under postgres). Marker stays 9 — ONE event.
+- **Piece 3 — the DDL pins (the AuthRLSDDLTests 12-block rework + the new pins): DONE
+  (this commit).** Fourteen UNIT A-era pins re-pointed at the new letter in their own
+  idioms (the verbatim-modulo pins gained the enumerated challenge swaps + a
+  `removingContiguousBlock` helper for multi-line insertions whose members include common
+  lines; the 11-era proof-check/migration-arm pins re-pointed at 11's OWN file as
+  deployed history; the sweep-coverage pin's signature lists moved whole with the 11-era
+  spellings joining the must-not-EXPECT class) and SEVEN new UNIT B pins added
+  (new-mechanism, green by design, stated): the two tables' posture · the mint's
+  session-gate/clamp/GC/cap · the enroll road's once/FOR-UPDATE/land-together ·
+  the check's RULED consume order + the migration arm's retirement + the static
+  compare's absence · the quota's ruled numbers with the refuse-whole boundary and the
+  lock order (the adjudication's three points, pinned as stated) · the re-auth window on
+  BOTH destructive doors and NONE of the round doors · the vault grants + every new
+  function's revoke-from-PUBLIC pair. `SerializerCompletenessTests.serverOnlyTables`
+  gains the two tables (UNIT A's counter precedent). **AuthRLSDDLTests 76/76 (+7) ·
+  SerializerCompletenessTests 6/6.**
 - **Piece 4 — the client challenge road (KeyProof v2 · KeyProofMaterial/SyncKeyProof ·
   the transport seam · the signer · engine/janitor/probe/rotation/vault-client call sites ·
   the fake's twins · the suite sweep): PENDING.**

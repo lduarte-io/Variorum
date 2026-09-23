@@ -108,14 +108,101 @@
 --     fail-loud closure: any future artifact that quietly `nextval`s the
 --     global counter ERRORS instead of silently reopening the disclosure.
 --
--- WHAT DOES NOT CHANGE: `sync_push` (its granted seqs come from the
--- trigger — M1 covers it); `sync_reencrypt` (same road); the gate and the
--- proof; the entitlement gate; the A5 horizon; every table, policy and
--- payload shape; `sync_schema_version()`'s own shape. Client semantics
--- are UNCHANGED AND TEST-PINNED (the phase's premise, Step 0-verified):
--- a client's cursor only ever meets own-account rows, and every seq
--- comparison any client makes is between own-account numbers — per-tenant
--- sequences preserve every relative order any client ever observes.
+-- WHAT UNIT B ADDS TO THE SAME EVENT (the ruled memo
+-- `notes/plans/phase-13y-memo-key-proof-challenge.md`, R-13y-4,
+-- QUESTIONS #144 a/b/c — one marker, one window, one transaction):
+--   * THE KEY-PROOF CHALLENGE (memo §3): the static bearer proof retires —
+--     every gated RPC's `key_proof` becomes a PER-REQUEST value
+--     `base64(HMAC-SHA256(kp2, nonce ‖ ':' ‖ rpc_name))` beside a new
+--     defaultless `challenge` parameter carrying the nonce, where
+--     `kp2 = HMAC-SHA256(M, "variorum.key-proof.v2")` — deliberately NOT
+--     the v1 value, so every hypothetical captured log of the v1 era holds
+--     a value the new protocol never accepts. kp2 lives in SUPABASE VAULT
+--     (`vault.create_secret`, name `kp:<owner uuid>`; backups stay
+--     ciphertext — the confirmed property), read ONLY inside the verify;
+--     `key_vault.key_proof_hash` becomes `SHA-256(kp2)` after enrollment
+--     and keeps its roles (the integrity record; the enroll compare).
+--     The nonce table `key_proof_challenge` is per-owner capped at 64
+--     (oldest evicted), GC'd at every mint, TTL 5 minutes on the SERVER
+--     clock only (§9: no client-clock trust); the verify consumes the
+--     nonce ATOMICALLY (DELETE … RETURNING — single-use by construction),
+--     recomputes the HMAC from the Vault-held secret, and compares via the
+--     standing 64-hex constant-time loop (hoisted into ONE helper,
+--     `sync_constant_time_equal`, shared with the enroll road). Binding
+--     `rpc_name` stops cross-RPC splicing of an unconsumed pair; the
+--     request BODY is deliberately NOT bound (TLS carries transit
+--     integrity; jsonb canonicalization is a bug farm — the memo's stated
+--     reason). `sync_challenge(n)` (session-gated, n ≤ 32) mints nonce
+--     batches; `key_proof_enroll(kp1, kp2, active_key_id)` is the ONE
+--     enrollment road — the OLD hash authorizes the successor, once, FOR
+--     UPDATE on the vault row; a second call refuses
+--     (VARIORUM_KEY_PROOF_ALREADY_ENROLLED — the racing loser proceeds,
+--     its kp2 is the same value, both derive from M). The NULL-hash
+--     first-proof migration arm (hers, spent 2026-09-06) RETIRES with the
+--     static road. `key_vault_update` gains the rotation's successor:
+--     a payload installing a NEW `key_proof_hash` must carry `key_proof_mac`
+--     (kp2′, whose SHA-256 must equal the new hash) and the row's hash and
+--     the Vault secret land TOGETHER — or the account's followers, who
+--     derive kp2′ from M′, would be refused forever. Honest residue,
+--     stated (memo §3): kp values still transit the body at ENROLLMENT
+--     (once per account) and ROTATION (per rotation) — the shared-secret
+--     floor; asymmetric in-database is ruled out (pgsodium deprecation).
+--   * THE MINIMAL ABUSE GUARD (memo §4; the numbers ruled, the table shape
+--     the UNIT B implementer's plan-recorded proposal): ONE per-owner
+--     `sync_write_budget` row + a TUMBLING 24-hour window — a
+--     500,000-row LIFETIME first-load pool before any daily check (her
+--     constraint: a one-time import is an HONEST burst — a 10k-note
+--     import lands ~50–100k rows, ×5–10 headroom), then 50,000 accepted
+--     row-writes per window; a per-call batch cap of 2,000 (the measured
+--     shipped chunk, `SyncEngine.batchSize` = 200, ×10). `sync_push` is
+--     the ONLY quota'd door; `sync_reencrypt` is EXEMPT (a rotation
+--     rewrites the corpus by design); `sync_purge_execute` takes no quota
+--     (removal is a right); `account_data_truncate` RESETS the pool by
+--     deleting the row (delete-and-set-up-again's repush IS a first
+--     load). The refusal is typed VARIORUM_WRITE_QUOTA carrying
+--     `retry_after_seconds=<n>`; the increment counts the ACTUAL accepted
+--     rows, after the CAS loop, on the same locked row. Deliberate
+--     corner, stated: a pool burned inside one window meets the daily
+--     limit immediately for that window's remainder — only the abuse
+--     shape ever reaches it. 13t re-prices every number.
+--   * THE RE-AUTH DOORS (memo §5; the ADDENDUM's item 2): the two
+--     destructive RPCs — `account_data_truncate` and `sync_purge_execute`
+--     — require a session re-authenticated by PASSWORD within 10 MINUTES,
+--     read from the JWT's `amr` (the newest password-method timestamp);
+--     absent or stale refuses typed VARIORUM_REAUTH_REQUIRED. This
+--     matches the doors' client flow exactly (they verify the account
+--     password through a sign-in immediately before acting); the window's
+--     empirical probe (memo §5) confirms the amr timestamp survives a
+--     token refresh, or the fallback comes back for a re-ruling.
+--   * THE SIGNATURES: every gated RPC gains the defaultless `challenge`
+--     (before the defaulted parameters — the NIT-4 discipline), so the
+--     OLD signatures are DROPPED FIRST (section 0 — the 09/10/11
+--     discipline: an overload left standing would be a challenge-free
+--     door beside the new one); the two gate helpers re-shape the same
+--     way. Ownership and grants are re-stated for every dropped-and-
+--     re-created function (they die with a drop; section 11).
+--
+-- WHAT DOES NOT CHANGE: the entitlement gate; the A5 horizon; every
+-- data-table policy and payload shape; `sync_schema_version()`'s own
+-- shape; `account_purge`'s session-only posture (deletion is mandated
+-- and loud — no proof, no challenge; it now takes the account's
+-- challenge rows, budget row and Vault secret WITH the account). Client
+-- semantics beyond the proof's carriage are UNCHANGED AND TEST-PINNED
+-- (the phase's premise, Step 0-verified): a client's cursor only ever
+-- meets own-account rows, and every seq comparison any client makes is
+-- between own-account numbers — per-tenant sequences preserve every
+-- relative order any client ever observes.
+--
+-- PENDING-UNTIL-LIVE (the 13j-window class, each verified at HER window
+-- before the installs): `vault.create_secret`/`vault.update_secret`
+-- availability + the definer-role grant road on the hosted project (the
+-- memo §2's community-converged pattern — the verification tail carries
+-- the read-only probes); `extensions.hmac`/`extensions.gen_random_bytes`
+-- resolution (pgcrypto lives in the `extensions` schema on Supabase — the
+-- two new bodies that need it carry `search_path = public, extensions`);
+-- the `auth.jwt() -> 'amr'` password-timestamp refresh-survival probe
+-- (memo §5's named check); and `account_purge`'s best-effort Vault-secret
+-- delete under its `postgres` owner.
 --
 -- THE CHOREOGRAPHY (SyncSpec §12): this file runs on the mirror FIRST, at
 -- the ORCHESTRATOR's window under her standing PRE-AUTHORIZED go — never
@@ -131,7 +218,11 @@
 --
 -- THE NAMING RULE (13j, the author's ruling): no RPC parameter may shadow
 -- a column it writes. `for_tenant` is none of `sync_tenant_seq`'s columns
--- (`owner_id`, `last_seq`) — the `for_device` idiom exactly.
+-- (`owner_id`, `last_seq`) — the `for_device` idiom exactly. UNIT B's
+-- parameters hold it too: `challenge` / `rpc_name` are none of
+-- `key_proof_challenge`'s columns (`owner_id`, `nonce`, `issued_at` —
+-- which the proof check DELETEs against); `n` is none of them either;
+-- `kp1` / `kp2` / `active_key_id` are none of `key_vault`'s.
 
 begin;
 
@@ -169,13 +260,27 @@ end
 $rerun_guard$;
 
 -- ---------------------------------------------------------------------------
--- 0. Drop the OLD sync_pull signature before creating the reordered one
---    (Postgres overloads by signature — the 09/10/11 discipline): a
---    lingering sync_pull(bigint, text, int, text, text) would keep serving
---    the changefeed with a DEFAULTED proof parameter beside the new one.
+-- 0. Drop the OLD signatures before creating the new ones (Postgres
+--    overloads by signature — the 09/10/11 discipline): a lingering
+--    sync_pull(bigint, text, int, text, text) would keep serving the
+--    changefeed with a DEFAULTED proof parameter beside the new one — and,
+--    since UNIT B, EVERY gated RPC's signature gains the defaultless
+--    `challenge`, so every 11-era overload left standing would be a
+--    CHALLENGE-FREE door beside the new one (the static-bearer road this
+--    half of the event exists to close). The two gate helpers re-shape the
+--    same way and drop with them.
 -- ---------------------------------------------------------------------------
 
 drop function if exists sync_pull(bigint, text, int, text, text);
+drop function if exists sync_push(jsonb, text, text);
+drop function if exists sync_horizon(text, text);
+drop function if exists sync_purge_ledger(bigint, text, text);
+drop function if exists sync_purge_execute(jsonb, text, text);
+drop function if exists account_data_truncate(text, text);
+drop function if exists sync_reencrypt(jsonb, text, text);
+drop function if exists key_vault_update(jsonb, int, text);
+drop function if exists sync_key_gate(text, text);
+drop function if exists sync_key_proof_check(text);
 
 -- ---------------------------------------------------------------------------
 -- 1. sync_tenant_seq — the per-owner counter (server-only: never a mirror
@@ -335,6 +440,316 @@ as $$
 $$;
 
 -- ---------------------------------------------------------------------------
+-- 5b. key_proof_challenge — the single-use nonce table (UNIT B, memo §3).
+--     Server-only (never a mirror data table, never in an allowlist, never
+--     in a payload); the `device_cursor` posture. A row IS one unconsumed
+--     challenge: minted by `sync_challenge`, consumed ATOMICALLY by the
+--     proof check's DELETE … RETURNING (single-use by construction),
+--     GC'd at every mint, capped at 64 live rows per owner (memo §7 edge
+--     3: the table is bounded by 64 × live accounts). `issued_at` is the
+--     SERVER clock — the 5-minute TTL trusts nothing a client stamps.
+-- ---------------------------------------------------------------------------
+
+create table key_proof_challenge (
+  owner_id  uuid        not null,
+  nonce     bytea       not null,
+  issued_at timestamptz not null default clock_timestamp(),
+  primary key (owner_id, nonce)
+);
+alter table key_proof_challenge enable row level security;
+alter table key_proof_challenge force row level security;
+create policy key_proof_challenge_owner_all on key_proof_challenge
+  for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());
+revoke all on key_proof_challenge from anon, authenticated;
+grant select, insert, delete on key_proof_challenge to variorum_definer;
+
+-- ---------------------------------------------------------------------------
+-- 5c. sync_write_budget — the minimal abuse guard's accounting row (UNIT B,
+--     memo §4; the numbers ruled at QUESTIONS #144(b), the shape the
+--     plan-recorded proposal, ADJUDICATED approved-as-proposed). ONE row
+--     per owner, no write log — the guard must never be its own write
+--     amplifier. Server-only, the `device_cursor` posture.
+-- ---------------------------------------------------------------------------
+
+create table sync_write_budget (
+  owner_id      uuid        not null,
+  lifetime_rows bigint      not null default 0,
+  window_start  timestamptz not null default clock_timestamp(),
+  window_rows   bigint      not null default 0,
+  primary key (owner_id)
+);
+alter table sync_write_budget enable row level security;
+alter table sync_write_budget force row level security;
+create policy sync_write_budget_owner_all on sync_write_budget
+  for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());
+revoke all on sync_write_budget from anon, authenticated;
+grant select, insert, update, delete on sync_write_budget to variorum_definer;
+
+-- ---------------------------------------------------------------------------
+-- 5d. sync_constant_time_equal — the standing 64-hex constant-time compare
+--     (11's proof-check loop, hoisted into ONE helper so the challenge
+--     verify and the enroll road share one implementation): a fixed
+--     64-step loop over the hex digits accumulating XOR into an OR, never
+--     short-circuiting (`ascii('')` is 0 past either string's end; the
+--     lengths join the accumulator last). The `sync_table_pk` posture —
+--     reachable by NO API role.
+-- ---------------------------------------------------------------------------
+
+create or replace function sync_constant_time_equal(a text, b text) returns boolean
+language plpgsql
+set search_path = public
+as $$
+declare
+  acc int := 0;
+  i int;
+begin
+  for i in 1..64 loop
+    acc := acc | (ascii(substr(a, i, 1)) # ascii(substr(b, i, 1)));
+  end loop;
+  acc := acc | (length(a) # length(b));
+  return acc = 0;
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 5e. sync_challenge — the nonce mint (UNIT B, memo §3). SESSION-GATED
+--     ONLY, deliberately (memo §7 edge 7): a sessionless caller gets
+--     nothing; a session-holder can at worst churn its own 64 rows. No
+--     vault requirement — a not-yet-enrolled account fetches challenges
+--     too (its first gated call refuses VARIORUM_KEY_PROOF_ENROLL and the
+--     client enrolls, then spends the same batch). `n` is clamped to 32
+--     per call; the caller's EXPIRED rows are GC'd at every mint; the
+--     64-row cap evicts oldest-first. `extensions.gen_random_bytes` —
+--     pgcrypto lives in the `extensions` schema on Supabase, hence this
+--     body's widened search_path.
+-- ---------------------------------------------------------------------------
+
+create or replace function sync_challenge(n int) returns jsonb
+language plpgsql security definer
+set search_path = public, extensions
+as $$
+declare
+  caller uuid;
+  granted int;
+  fresh bytea;
+  minted jsonb := '[]'::jsonb;
+  live int;
+  i int;
+begin
+  caller := auth.uid();
+  if caller is null then
+    raise exception 'sync requires an authenticated user';
+  end if;
+  granted := least(greatest(coalesce(n, 1), 1), 32);
+  delete from key_proof_challenge
+    where owner_id = caller
+      and issued_at < clock_timestamp() - interval '5 minutes';
+  for i in 1..granted loop
+    fresh := extensions.gen_random_bytes(32);
+    insert into key_proof_challenge (owner_id, nonce) values (caller, fresh);
+    minted := minted || to_jsonb(encode(fresh, 'base64'));
+  end loop;
+  select count(*) into live from key_proof_challenge where owner_id = caller;
+  if live > 64 then
+    delete from key_proof_challenge
+      where owner_id = caller
+        and nonce in (
+          select c.nonce from key_proof_challenge c
+          where c.owner_id = caller
+          order by c.issued_at asc
+          limit live - 64);
+  end if;
+  return minted;
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 5f. key_proof_enroll — THE ONE ENROLLMENT ROAD (UNIT B, memo §3): the
+--     EXISTING hash authorizes the successor, ONCE per account, FOR
+--     UPDATE on the vault row (two racing devices serialize; the loser
+--     meets VARIORUM_KEY_PROOF_ALREADY_ENROLLED and proceeds — its kp2 is
+--     the same value, both derive from M). The secret and the hash land
+--     TOGETHER, one transaction: `vault.create_secret(kp2)` under the
+--     unique name `kp:<owner uuid>` + `key_proof_hash = SHA-256(kp2)`.
+--     The NULL-hash migration arm is RETIRED with the static road (hers
+--     landed 2026-09-06; creation lands one by trigger) — a hash-less row
+--     refuses rather than adopting a first-comer.
+-- ---------------------------------------------------------------------------
+
+create or replace function key_proof_enroll(kp1 text, kp2 text, active_key_id text) returns void
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  caller uuid;
+  vault_fence_key text;
+  stored_hash text;
+  presented_hash text;
+  successor_hash text;
+  existing_secret uuid;
+begin
+  caller := auth.uid();
+  if caller is null then
+    raise exception 'account acts require an authenticated user';
+  end if;
+  select corpus_key_id, key_proof_hash into vault_fence_key, stored_hash
+    from key_vault where user_id = caller for update;
+  if vault_fence_key is null or vault_fence_key is distinct from active_key_id then
+    raise exception 'VARIORUM_STALE_KEY_FENCE: this account''s encryption keys were replaced — the device holds a stale key id; re-enroll before syncing';
+  end if;
+  select s.id into existing_secret
+    from vault.secrets s where s.name = 'kp:' || caller::text;
+  if existing_secret is not null then
+    raise exception 'VARIORUM_KEY_PROOF_ALREADY_ENROLLED: this account''s per-request key proof is already enrolled';
+  end if;
+  begin
+    presented_hash := encode(sha256(decode(kp1, 'base64')), 'hex');
+    successor_hash := encode(sha256(decode(kp2, 'base64')), 'hex');
+  exception when others then
+    presented_hash := null;
+  end;
+  if stored_hash is null or presented_hash is null
+     or not sync_constant_time_equal(stored_hash, presented_hash) then
+    raise exception 'VARIORUM_KEY_PROOF_REQUIRED: this session holds no proof of the account''s master key — pick up your keys before syncing';
+  end if;
+  perform vault.create_secret(kp2, 'kp:' || caller::text);
+  update key_vault set key_proof_hash = successor_hash where user_id = caller;
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 5g. THE PROOF CHECK, REWORKED (UNIT B, memo §3 — replacing 11's static
+--     compare): the re-read under the caller's held lock stays; then, in
+--     THIS order — (1) the Vault-held MAC secret is read (ABSENT refuses
+--     VARIORUM_KEY_PROOF_ENROLL, BEFORE any nonce is consumed, so the
+--     enroll road's retry still holds a live challenge); (2) the nonce is
+--     consumed atomically (DELETE … RETURNING — an unknown, already-used
+--     or malformed challenge refuses VARIORUM_KEY_PROOF_STALE_CHALLENGE;
+--     single-use by construction, THE replay closure); (3) the 5-minute
+--     server-clock TTL; (4) the HMAC recomputed from the Vault-held kp2
+--     over `nonce ‖ ':' ‖ rpc_name` (the binding that stops cross-RPC
+--     splicing), compared constant-time. A malformed proof refuses the
+--     same way — never a raw decode error. `extensions.hmac` — pgcrypto's
+--     schema on Supabase, hence the widened search_path.
+-- ---------------------------------------------------------------------------
+
+create or replace function sync_key_proof_check(key_proof text, challenge text, rpc_name text) returns void
+language plpgsql
+set search_path = public, extensions
+as $$
+declare
+  caller uuid;
+  vault_found boolean := false;
+  stored_mac text;
+  presented_nonce bytea;
+  nonce_issued_at timestamptz;
+  expected_hex text;
+  presented_hex text;
+begin
+  caller := auth.uid();
+  if caller is null then
+    raise exception 'sync requires an authenticated user';
+  end if;
+
+  -- The re-read under the caller's lock (no lock clause of its own — a
+  -- FOR SHARE here would be a no-op for a FOR UPDATE holder and an UPGRADE
+  -- hazard is what the gate's peek exists to avoid).
+  select true into vault_found from key_vault where user_id = caller;
+  if not coalesce(vault_found, false) then
+    raise exception 'VARIORUM_STALE_KEY_FENCE: this account''s encryption keys were replaced — the device holds a stale key id; re-enroll before syncing';
+  end if;
+
+  select ds.decrypted_secret into stored_mac
+    from vault.decrypted_secrets ds
+    where ds.name = 'kp:' || caller::text;
+  if stored_mac is null then
+    raise exception 'VARIORUM_KEY_PROOF_ENROLL: this account holds no per-request proof secret yet — enroll before this call';
+  end if;
+
+  begin
+    presented_nonce := decode(challenge, 'base64');
+  exception when others then
+    presented_nonce := null;
+  end;
+  if presented_nonce is null then
+    raise exception 'VARIORUM_KEY_PROOF_STALE_CHALLENGE: the challenge is unknown, already used, or expired — fetch a fresh challenge and retry once';
+  end if;
+  delete from key_proof_challenge
+    where owner_id = caller and nonce = presented_nonce
+    returning issued_at into nonce_issued_at;
+  if nonce_issued_at is null then
+    raise exception 'VARIORUM_KEY_PROOF_STALE_CHALLENGE: the challenge is unknown, already used, or expired — fetch a fresh challenge and retry once';
+  end if;
+  if nonce_issued_at < clock_timestamp() - interval '5 minutes' then
+    raise exception 'VARIORUM_KEY_PROOF_STALE_CHALLENGE: the challenge is unknown, already used, or expired — fetch a fresh challenge and retry once';
+  end if;
+
+  begin
+    expected_hex := encode(extensions.hmac(
+      decode(stored_mac, 'base64'),
+      presented_nonce || convert_to(':' || rpc_name, 'utf8'),
+      'sha256'), 'hex');
+    presented_hex := encode(decode(key_proof, 'base64'), 'hex');
+  exception when others then
+    presented_hex := null;
+  end;
+  if presented_hex is null
+     or not sync_constant_time_equal(expected_hex, presented_hex) then
+    raise exception 'VARIORUM_KEY_PROOF_REQUIRED: this session holds no proof of the account''s master key — pick up your keys before syncing';
+  end if;
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 5h. THE GATE, REWORKED (UNIT B): 11's body — the lock choice, the fence
+--     — with the challenge and the calling RPC's name passed through to
+--     the proof check. The gate ORDER is unchanged (the memo's letter):
+--     the lock choice → the `active_key_id` fence → the proof, now
+--     challenge-verified. The FOR UPDATE arm of the lock choice survives
+--     as the conservative lock on a hash-less row (an impossible state
+--     since the migration arm's retirement — creation lands a hash by
+--     trigger and hers landed 2026-09-06; a hash-less row now dead-ends
+--     at the proof check's enroll refusal, whose enroll road refuses a
+--     NULL hash in turn: correct-by-refusal, never adopted).
+-- ---------------------------------------------------------------------------
+
+create or replace function sync_key_gate(active_key_id text, key_proof text, challenge text, rpc_name text) returns void
+language plpgsql
+set search_path = public
+as $$
+declare
+  caller uuid;
+  fence_key text;
+  peek_hash text;
+begin
+  caller := auth.uid();
+  if caller is null then
+    raise exception 'sync requires an authenticated user';
+  end if;
+
+  -- THE LOCK CHOICE: the unlocked peek, then the row locked for the round.
+  select key_proof_hash into peek_hash from key_vault where user_id = caller;
+  if peek_hash is null then
+    select corpus_key_id into fence_key from key_vault where user_id = caller for update;
+  else
+    select corpus_key_id into fence_key from key_vault where user_id = caller for share;
+  end if;
+
+  -- THE VAULT-KEY-ID FENCE (THE DESIGN item 2, 14c): the caller's presented
+  -- corpus key id must match the account's current key_vault row. A
+  -- mismatch — or a missing vault row — refuses the WHOLE round before
+  -- any row is touched (the CF-16 replaced state, client-classified).
+  if fence_key is null or fence_key is distinct from active_key_id then
+    raise exception 'VARIORUM_STALE_KEY_FENCE: this account''s encryption keys were replaced — the device holds a stale key id; re-enroll before syncing';
+  end if;
+
+  -- THE KEY PROOF (pre-13x decision 12; challenge-verified since 13y
+  -- UNIT B): the authorization.
+  perform sync_key_proof_check(key_proof, challenge, rpc_name);
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
 -- 6. sync_pull — 11's body VERBATIM under the REORDERED signature (NIT-4):
 --    `key_proof` is now DEFAULTLESS, before the genuinely-optional
 --    `max_rows` / `for_device`. Zero wire change (PostgREST resolves by
@@ -345,7 +760,7 @@ $$;
 --    declare line + the two branch filters — nothing else moves).
 -- ---------------------------------------------------------------------------
 
-create or replace function sync_pull(since_seq bigint, active_key_id text, key_proof text, max_rows int default 500, for_device text default null)
+create or replace function sync_pull(since_seq bigint, active_key_id text, key_proof text, challenge text, max_rows int default 500, for_device text default null)
 returns jsonb
 language plpgsql security definer
 set search_path = public
@@ -381,8 +796,9 @@ begin
     raise exception 'sync requires an authenticated user';
   end if;
 
-  -- THE GATE (pre-13x): the vault row FOR SHARE, the fence, the proof.
-  perform sync_key_gate(active_key_id, key_proof);
+  -- THE GATE (pre-13x; challenge-verified since 13y UNIT B): the vault
+  -- row FOR SHARE, the fence, the proof.
+  perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_pull');
 
   -- THE ENTITLEMENT GATE (same as push).
   if not exists (
@@ -453,13 +869,224 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
+-- 6b. sync_push — 11's body VERBATIM except the challenge-gated signature
+--     and THE MINIMAL ABUSE GUARD (UNIT B, memo §4 — the ONLY quota'd
+--     door; the numbers ruled at QUESTIONS #144(b), the row shape
+--     adjudicated approved-as-proposed):
+--       * the per-call batch cap (2,000 — the measured shipped chunk,
+--         `SyncEngine.batchSize` = 200, ×10) refuses a malformed client
+--         before any row lands; the shipped engine's chunks never meet it;
+--       * the owner's budget row is upsert-locked FOR UPDATE — always
+--         AFTER the gate's vault lock (only push touches the budget row,
+--         one lock order, no cycle: the deadlock argument, stated here);
+--       * `lifetime_rows < 500000` is the FIRST-LOAD POOL: no daily check
+--         applies (her constraint — a one-time import is an honest burst);
+--       * past the pool, the TUMBLING 24-hour window: expired resets it,
+--         and `window_rows + batch > 50000` refuses the WHOLE call typed
+--         (VARIORUM_WRITE_QUOTA, `retry_after_seconds=<n>`) — the
+--         refuse-whole boundary means NO overshoot, pinned as stated
+--         (the adjudication's point 1); the seam's bounded ≤2× short-span
+--         worst case is ACCEPTED for the minimal posture (point 2; 13t
+--         re-prices);
+--       * the increment counts the ACTUAL accepted rows, after the CAS
+--         loop, on the same locked row — CAS rejects burn nothing.
+-- ---------------------------------------------------------------------------
+
+create or replace function sync_push(batch jsonb, active_key_id text, key_proof text, challenge text) returns jsonb
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  allowed constant text[] := array[
+    'container', 'block', 'variant', 'commit_point', 'edge',
+    'container_block', 'reading', 'reading_section', 'reading_post', 'tag',
+    'post_tag', 'block_tag', 'reference', 'canvas_layout',
+    'lens', 'lens_choice', 'block_comment', 'setting', 'purge_intent'];
+  -- The tables whose CLIENT schema carries owner_id (AppSpec §6 top-level
+  -- entities + their later siblings): payloads carry owner and must
+  -- carry the caller's. Everything else is mirror-only-owner: the
+  -- server stamps on insert and subtracts on serve.
+  owner_tables constant text[] := array[
+    'container', 'block', 'reading', 'tag', 'reference',
+    'canvas_layout', 'lens', 'block_comment', 'purge_intent'];
+  caller uuid;
+  item jsonb;
+  tbl text;
+  pk text;
+  row_id text;
+  base_version bigint;
+  current_version bigint;
+  current_jsonb jsonb;
+  full_row jsonb;
+  granted_seq bigint;
+  results jsonb := '[]'::jsonb;
+  batch_rows int;
+  budget_lifetime bigint;
+  budget_window_start timestamptz;
+  budget_window_rows bigint;
+  accepted_rows int := 0;
+  quota_retry_after int;
+begin
+  caller := auth.uid();
+  if caller is null then
+    raise exception 'sync requires an authenticated user';
+  end if;
+
+  -- THE GATE (pre-13x; challenge-verified since 13y UNIT B): the vault
+  -- row FOR SHARE, the fence, the proof.
+  perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_push');
+
+  -- THE ENTITLEMENT GATE (THE DESIGN item 5): hosted sync is the tier.
+  if not exists (
+    select 1 from entitlement
+    where user_id = caller and feature = 'hosted_sync'
+      and (expires_at is null or expires_at > now())
+  ) then
+    raise exception 'VARIORUM_NO_ENTITLEMENT: hosted sync is not active on this account';
+  end if;
+
+  -- THE MINIMAL ABUSE GUARD (UNIT B, memo §4): the batch cap, then the
+  -- budget row FOR UPDATE (after the vault lock — one order, no cycle),
+  -- then the pool / the tumbling window. Refusal here aborts the whole
+  -- call before any row lands — the §12 grammar's server half.
+  batch_rows := jsonb_array_length(batch);
+  if batch_rows > 2000 then
+    raise exception 'VARIORUM_WRITE_QUOTA: the batch exceeds the per-call cap — retry_after_seconds=0';
+  end if;
+  insert into sync_write_budget (owner_id) values (caller)
+  on conflict (owner_id) do update set owner_id = excluded.owner_id
+  returning lifetime_rows, window_start, window_rows
+    into budget_lifetime, budget_window_start, budget_window_rows;
+  if budget_lifetime >= 500000 then
+    if clock_timestamp() - budget_window_start >= interval '24 hours' then
+      update sync_write_budget
+        set window_start = clock_timestamp(), window_rows = 0
+        where owner_id = caller;
+      budget_window_rows := 0;
+    elsif budget_window_rows + batch_rows > 50000 then
+      quota_retry_after := greatest(0, ceil(extract(epoch from
+        (budget_window_start + interval '24 hours' - clock_timestamp())))::int);
+      raise exception 'VARIORUM_WRITE_QUOTA: this account reached its daily write limit — retry_after_seconds=%', quota_retry_after;
+    end if;
+  end if;
+
+  for item in select * from jsonb_array_elements(batch) loop
+    tbl := item->>'table';
+    if not (tbl = any (allowed)) then
+      raise exception 'unknown sync table %', tbl;
+    end if;
+    pk := sync_table_pk(tbl);
+    row_id := item->>'row_id';
+    base_version := (item->>'base_version')::bigint;
+    current_version := null;
+    current_jsonb := null;
+
+    -- Client-carried owner guard (the NINE, since purge_intent): a pushed
+    -- row must carry the caller's own owner_id (NULL refused too — `is
+    -- distinct from`).
+    if tbl = any (owner_tables)
+       and (item->'columns'->>'owner_id') is distinct from caller::text then
+      raise exception 'owner_id mismatch on % row % — pushes must carry owner_id = auth.uid()',
+        tbl, row_id;
+    end if;
+
+    -- THE PURGED-IDS LEDGER (Phase 13j — the memo's §2): a push naming a
+    -- purged id is REFUSED with the typed 'purged' status. This is what
+    -- makes physical removal safe under S2's bend: a stale peer's
+    -- re-push can never resurrect a purged row — the client drops the
+    -- outbox entry and its local copy instead of retrying. Checked
+    -- BEFORE the CAS: a purged row has no CAS state to compare.
+    if exists (
+      select 1 from purged_row p
+      where p.owner_id = caller and p.table_name = tbl and p.row_id = item->>'row_id'
+    ) then
+      results := results || jsonb_build_array(jsonb_build_object('status', 'purged'));
+      continue;
+    end if;
+
+    -- TENANT-SCOPED CAS lock + read: identity is (owner_id, id) — the
+    -- composite PK — so another account's same-id row is structurally
+    -- unaddressable, and this seek is exact.
+    execute format(
+      'select sync_version, to_jsonb(t) from %I t where t.owner_id = $2 and t.%I = $1 for update',
+      tbl, pk)
+      into current_version, current_jsonb
+      using row_id, caller;
+
+    if current_version is null then
+      -- Absent row (in THIS tenant's partition): only base 0 inserts.
+      if base_version = 0 then
+        full_row := (item->'columns')
+          || jsonb_build_object('sync_version', 1, 'owner_id', caller);
+        execute format(
+          'insert into %I select * from jsonb_populate_record(null::%I, $1) returning server_seq',
+          tbl, tbl)
+          into granted_seq using full_row;
+        accepted_rows := accepted_rows + 1;
+        results := results || jsonb_build_array(jsonb_build_object(
+          'status', 'accepted', 'new_version', 1, 'server_seq', granted_seq));
+      else
+        results := results || jsonb_build_array(jsonb_build_object(
+          'status', 'rejected', 'current', null));
+      end if;
+    elsif base_version = current_version then
+      -- Matching base: replace the row wholesale (delete+insert is safe —
+      -- nothing references a mirror row) and bump.
+      full_row := (item->'columns')
+        || jsonb_build_object('sync_version', current_version + 1, 'owner_id', caller);
+      execute format('delete from %I where owner_id = $2 and %I = $1', tbl, pk)
+        using row_id, caller;
+      execute format(
+        'insert into %I select * from jsonb_populate_record(null::%I, $1) returning server_seq',
+        tbl, tbl)
+        into granted_seq using full_row;
+      accepted_rows := accepted_rows + 1;
+      results := results || jsonb_build_array(jsonb_build_object(
+        'status', 'accepted', 'new_version', current_version + 1, 'server_seq', granted_seq));
+    else
+      -- Stale base: reject WITH the current row so the client can merge
+      -- deterministically and push again (SyncSpec §4). No server
+      -- merging. The served payload subtracts the server-only columns —
+      -- and, for the mirror-only-owner tables, the stamped owner_id.
+      results := results || jsonb_build_array(jsonb_build_object(
+        'status', 'rejected',
+        'current', jsonb_build_object(
+          'table', tbl,
+          'row_id', row_id,
+          'sync_version', current_version,
+          'server_seq', current_jsonb->'server_seq',
+          'columns', case when tbl = any (owner_tables)
+            then current_jsonb - 'sync_version' - 'server_seq' - 'server_written_at'
+            else current_jsonb - 'sync_version' - 'server_seq' - 'server_written_at' - 'owner_id'
+          end)));
+    end if;
+  end loop;
+  -- THE GUARD's increment: the ACTUAL accepted rows, on the same locked
+  -- row (memo §4's "accepted row-writes" — CAS rejects burn nothing).
+  if accepted_rows > 0 then
+    update sync_write_budget
+      set lifetime_rows = lifetime_rows + accepted_rows,
+          window_rows   = window_rows + accepted_rows
+      where owner_id = caller;
+  end if;
+  return results;
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
 -- 7. sync_purge_execute — 11's body VERBATIM except the mint (M2): the
 --    granted ledger seq draws from the CALLER's counter — the owner's
 --    device cursors and `last_purge_seq` scan points are what it is
---    compared against, and they live on the same counter now.
+--    compared against, and they live on the same counter now — and, since
+--    UNIT B, the challenge-gated signature + THE RECENT-RE-AUTH WINDOW
+--    (memo §5, QUESTIONS #144(c)): a destructive RPC requires a session
+--    re-authenticated by PASSWORD within 10 minutes, read from the JWT's
+--    `amr` — a stolen long-lived token cannot empty an account's server
+--    copy from a custom client. NO quota (removal is a right, and this
+--    door writes no data rows).
 -- ---------------------------------------------------------------------------
 
-create or replace function sync_purge_execute(rows jsonb, active_key_id text, key_proof text) returns bigint
+create or replace function sync_purge_execute(rows jsonb, active_key_id text, key_proof text, challenge text) returns bigint
 language plpgsql security definer
 set search_path = public
 as $$
@@ -474,12 +1101,26 @@ declare
   tbl text;
   pk text;
   granted_seq bigint;
+  newest_password_auth timestamptz;
 begin
   caller := auth.uid();
   if caller is null then
     raise exception 'sync requires an authenticated user';
   end if;
-  perform sync_key_gate(active_key_id, key_proof);
+  perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_purge_execute');
+
+  -- THE RECENT-RE-AUTH WINDOW (13y UNIT B, memo §5 — 10 minutes): the
+  -- session's newest PASSWORD-method amr entry must be inside it; absent
+  -- or stale refuses typed. The doors' client flow signs in immediately
+  -- before acting, so an honest act always passes.
+  select to_timestamp(max((amr_entry->>'timestamp')::bigint))
+    into newest_password_auth
+    from jsonb_array_elements(coalesce(auth.jwt()->'amr', '[]'::jsonb)) amr_entry
+    where amr_entry->>'method' = 'password';
+  if newest_password_auth is null
+     or newest_password_auth < now() - interval '10 minutes' then
+    raise exception 'VARIORUM_REAUTH_REQUIRED: this act needs a fresh sign-in — confirm the account password and try again';
+  end if;
 
   granted_seq := next_tenant_seq(caller);
   for item in select * from jsonb_array_elements(rows) loop
@@ -499,6 +1140,213 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
+-- 7b. sync_horizon — 11's body VERBATIM under the challenge-gated
+--     signature. A READ, and the proof gates it too (decision 12's
+--     letter): a session without the keys gets nothing from the mirror,
+--     a seq included.
+-- ---------------------------------------------------------------------------
+
+create or replace function sync_horizon(active_key_id text, key_proof text, challenge text) returns bigint
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  caller uuid;
+begin
+  caller := auth.uid();
+  if caller is null then
+    raise exception 'sync requires an authenticated user';
+  end if;
+  perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_horizon');
+  return coalesce(
+    (select min(last_seq) from device_cursor
+      where owner_id = caller and seen_at > now() - interval '60 days'),
+    0);
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 7c. sync_purge_ledger — 11's body VERBATIM under the challenge-gated
+--     signature (a READ, proof-gated for the same reason).
+-- ---------------------------------------------------------------------------
+
+create or replace function sync_purge_ledger(since_seq bigint, active_key_id text, key_proof text, challenge text) returns jsonb
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  caller uuid;
+begin
+  caller := auth.uid();
+  if caller is null then
+    raise exception 'sync requires an authenticated user';
+  end if;
+  perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_purge_ledger');
+  return jsonb_build_object(
+    'floor', 0,
+    'entries', coalesce(
+      (select jsonb_agg(jsonb_build_object(
+         'table', p.table_name, 'row_id', p.row_id, 'purged_seq', p.purged_seq)
+         order by p.purged_seq)
+        from purged_row p
+        where p.owner_id = caller and p.purged_seq > since_seq),
+      '[]'::jsonb));
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 7d. sync_reencrypt — 11's body VERBATIM under the challenge-gated
+--     signature. DELIBERATELY NO QUOTA (memo §4's exemption): a rotation
+--     rewrites the whole corpus by design, it is already proof- and
+--     entitlement-gated, and a quota here would break Replace All Keys at
+--     exactly the corpus sizes that matter.
+-- ---------------------------------------------------------------------------
+
+create or replace function sync_reencrypt(rows jsonb, active_key_id text, key_proof text, challenge text) returns jsonb
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  allowed constant text[] := array[
+    'container', 'block', 'variant', 'commit_point', 'edge',
+    'container_block', 'reading', 'reading_section', 'reading_post', 'tag',
+    'post_tag', 'block_tag', 'reference', 'canvas_layout',
+    'lens', 'lens_choice', 'block_comment', 'setting', 'purge_intent'];
+  owner_tables constant text[] := array[
+    'container', 'block', 'reading', 'tag', 'reference',
+    'canvas_layout', 'lens', 'block_comment', 'purge_intent'];
+  caller uuid;
+  item jsonb;
+  tbl text;
+  pk text;
+  row_id text;
+  expected_version bigint;
+  current_version bigint;
+  full_row jsonb;
+  granted_seq bigint;
+  results jsonb := '[]'::jsonb;
+begin
+  caller := auth.uid();
+  if caller is null then
+    raise exception 'sync requires an authenticated user';
+  end if;
+
+  perform sync_key_gate(active_key_id, key_proof, challenge, 'sync_reencrypt');
+
+  if not exists (
+    select 1 from entitlement
+    where user_id = caller and feature = 'hosted_sync'
+      and (expires_at is null or expires_at > now())
+  ) then
+    raise exception 'VARIORUM_NO_ENTITLEMENT: hosted sync is not active on this account';
+  end if;
+
+  for item in select * from jsonb_array_elements(rows) loop
+    tbl := item->>'table';
+    if not (tbl = any (allowed)) then
+      raise exception 'unknown sync table %', tbl;
+    end if;
+    pk := sync_table_pk(tbl);
+    row_id := item->>'row_id';
+    expected_version := (item->>'expected_version')::bigint;
+    current_version := null;
+
+    if tbl = any (owner_tables)
+       and (item->'columns'->>'owner_id') is distinct from caller::text then
+      raise exception 'owner_id mismatch on % row % — re-encryptions must carry owner_id = auth.uid()',
+        tbl, row_id;
+    end if;
+
+    execute format(
+      'select sync_version from %I t where t.owner_id = $2 and t.%I = $1 for update',
+      tbl, pk)
+      into current_version
+      using row_id, caller;
+
+    if current_version is null or current_version is distinct from expected_version then
+      -- The version moved (an edit landed since the caller pulled this
+      -- row) or the row is gone: skipped — the caller pulls and retries.
+      results := results || jsonb_build_array(jsonb_build_object(
+        'status', 'skipped', 'current_version', current_version));
+      continue;
+    end if;
+
+    -- The bytes swapped, the version KEPT, a fresh seq stamped.
+    full_row := (item->'columns')
+      || jsonb_build_object('sync_version', current_version, 'owner_id', caller);
+    execute format('delete from %I where owner_id = $2 and %I = $1', tbl, pk)
+      using row_id, caller;
+    execute format(
+      'insert into %I select * from jsonb_populate_record(null::%I, $1) returning server_seq',
+      tbl, tbl)
+      into granted_seq using full_row;
+    results := results || jsonb_build_array(jsonb_build_object(
+      'status', 'replaced', 'server_seq', granted_seq));
+  end loop;
+  return results;
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 7e. account_data_truncate — 11's body VERBATIM under the challenge-gated
+--     signature, plus UNIT B's two arms: THE RECENT-RE-AUTH WINDOW (memo
+--     §5 — the second destructive RPC, same 10-minute amr check) and THE
+--     POOL RESET (memo §4: the budget row is DELETED, so the next push
+--     re-creates it at zero — delete-and-set-up-again's repush IS a
+--     first load; the adopt road converges). The SEQ counter
+--     (`sync_tenant_seq`) stays deliberately untouched — metering is
+--     never ordering.
+-- ---------------------------------------------------------------------------
+
+create or replace function account_data_truncate(active_key_id text, key_proof text, challenge text) returns jsonb
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  data_tables constant text[] := array[
+    'container', 'block', 'variant', 'commit_point', 'edge',
+    'container_block', 'reading', 'reading_section', 'reading_post', 'tag',
+    'post_tag', 'block_tag', 'reference', 'canvas_layout',
+    'lens', 'lens_choice', 'block_comment', 'setting', 'purge_intent'];
+  caller uuid;
+  tbl text;
+  removed bigint;
+  counts jsonb := '{}'::jsonb;
+  newest_password_auth timestamptz;
+begin
+  caller := auth.uid();
+  if caller is null then
+    raise exception 'account acts require an authenticated user';
+  end if;
+
+  -- THE GATE (the sync RPCs' exact arm: the fence, then the proof).
+  perform sync_key_gate(active_key_id, key_proof, challenge, 'account_data_truncate');
+
+  -- THE RECENT-RE-AUTH WINDOW (13y UNIT B, memo §5 — 10 minutes): the
+  -- session's newest PASSWORD-method amr entry must be inside it; absent
+  -- or stale refuses typed. The doors' client flow signs in immediately
+  -- before acting, so an honest act always passes.
+  select to_timestamp(max((amr_entry->>'timestamp')::bigint))
+    into newest_password_auth
+    from jsonb_array_elements(coalesce(auth.jwt()->'amr', '[]'::jsonb)) amr_entry
+    where amr_entry->>'method' = 'password';
+  if newest_password_auth is null
+     or newest_password_auth < now() - interval '10 minutes' then
+    raise exception 'VARIORUM_REAUTH_REQUIRED: this act needs a fresh sign-in — confirm the account password and try again';
+  end if;
+
+  foreach tbl in array data_tables loop
+    execute format('delete from %I where owner_id = $1', tbl) using caller;
+    get diagnostics removed = row_count;
+    counts := counts || jsonb_build_object(tbl, removed);
+  end loop;
+  -- THE POOL RESET (memo §4): the repush after a re-key is a FIRST LOAD.
+  delete from sync_write_budget where owner_id = caller;
+  return counts;
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
 -- 8. key_vault_update — THE ONE WRITE ROAD into the vault, now carrying
 --    the ROTATION COMPLETION GUARD in its CANONICAL body (the fold-in;
 --    the maintenance overlay is superseded) and the per-owner mint (M3):
@@ -507,9 +1355,21 @@ $$;
 --    guard both compare it against the owner's own data-row seqs, which
 --    live on the same counter now. Everything 11's header says of this
 --    door holds; the guard's reasoning is the overlay's, verbatim.
+--
+--    UNIT B (memo §3, the rotation's successor): the signature gains the
+--    defaultless `challenge`; the proof check is challenge-verified; and
+--    a payload installing a NEW `key_proof_hash` MUST carry
+--    `key_proof_mac` (kp2′, base64 — a payload KEY, never a table
+--    column) whose SHA-256 equals the new hash — the row's hash and the
+--    Vault-held secret then land TOGETHER in this same transaction
+--    (`vault.update_secret`, or `create_secret` on a never-enrolled
+--    account), because a hash that moved without its secret would refuse
+--    every follower forever (they derive kp2′ from M′ and the verify
+--    reads the SECRET). A mac whose hash mismatches refuses; a payload
+--    with neither (a re-wrap under the same master) is byte-unchanged.
 -- ---------------------------------------------------------------------------
 
-create or replace function key_vault_update(payload jsonb, expected_revision int, key_proof text) returns jsonb
+create or replace function key_vault_update(payload jsonb, expected_revision int, key_proof text, challenge text) returns jsonb
 language plpgsql security definer
 set search_path = public
 as $$
@@ -545,6 +1405,11 @@ declare
   rows_below_tbl text;
   rows_below_cols text;
   rows_below bigint;
+  incoming_hash text;
+  incoming_mac text;
+  incoming_mac_hash text;
+  vault_current_hash text;
+  mac_secret_id uuid;
 begin
   caller := auth.uid();
   if caller is null then
@@ -558,7 +1423,36 @@ begin
     raise exception 'VARIORUM_VAULT_ABSENT: no vault exists for this account — set up sync first';
   end if;
 
-  perform sync_key_proof_check(key_proof);
+  perform sync_key_proof_check(key_proof, challenge, 'key_vault_update');
+
+  -- THE ROTATION'S SUCCESSOR (13y UNIT B, memo §3): hash and secret land
+  -- TOGETHER or not at all. The vault row is already locked FOR UPDATE
+  -- above, so this read-then-write is serialized per account.
+  incoming_hash := payload->>'key_proof_hash';
+  incoming_mac := payload->>'key_proof_mac';
+  select key_proof_hash into vault_current_hash from key_vault where user_id = caller;
+  if incoming_mac is not null then
+    begin
+      incoming_mac_hash := encode(sha256(decode(incoming_mac, 'base64')), 'hex');
+    exception when others then
+      incoming_mac_hash := null;
+    end;
+    if incoming_mac_hash is null or incoming_hash is null
+       or incoming_mac_hash <> incoming_hash then
+      raise exception 'VARIORUM_KEY_PROOF_REQUIRED: the successor proof secret must hash to the payload''s key_proof_hash — they land together or not at all';
+    end if;
+  elsif incoming_hash is not null and incoming_hash is distinct from vault_current_hash then
+    raise exception 'VARIORUM_KEY_PROOF_REQUIRED: a new key_proof_hash lands only beside its key_proof_mac — a hash that moved without its secret would refuse every follower';
+  end if;
+  if incoming_mac is not null then
+    select s.id into mac_secret_id
+      from vault.secrets s where s.name = 'kp:' || caller::text;
+    if mac_secret_id is null then
+      perform vault.create_secret(incoming_mac, 'kp:' || caller::text);
+    else
+      perform vault.update_secret(mac_secret_id, incoming_mac);
+    end if;
+  end if;
 
   incoming_previous_id := payload->>'corpus_previous_key_id';
   incoming_previous := payload->>'corpus_previous_wrapped_by_master';
@@ -682,10 +1576,24 @@ begin
   end loop;
 
   -- The purge machinery's own account rows go with the account — and,
-  -- since 13y, the account's sequence counter with them.
+  -- since 13y, the account's sequence counter with them; UNIT B adds the
+  -- challenge nonces, the write-budget row, and the Vault-held MAC
+  -- secret. The secret's delete is BEST-EFFORT under this function's
+  -- `postgres` owner (vault-schema privileges are the window's probe): a
+  -- failure never fails the purge — deletion is mandated and loud, and a
+  -- dangling secret for a dead uuid authorizes nothing (no auth user can
+  -- ever present it; a re-created account is a NEW uuid, a new name) —
+  -- recorded, window-verified.
   delete from device_cursor where owner_id = caller;
   delete from purged_row where owner_id = caller;
   delete from sync_tenant_seq where owner_id = caller;
+  delete from key_proof_challenge where owner_id = caller;
+  delete from sync_write_budget where owner_id = caller;
+  begin
+    delete from vault.secrets where name = 'kp:' || caller::text;
+  exception when others then
+    null;
+  end;
 
   delete from key_vault where user_id = caller;
   get diagnostics vault_rows = row_count;
@@ -717,40 +1625,92 @@ $$;
 drop sequence if exists sync_server_seq;
 
 -- ---------------------------------------------------------------------------
--- 11. Ownership + the demotion posture. `create or replace` preserved the
---     owner and ACL for sync_purge_execute / key_vault_update /
---     account_purge (their signatures are unchanged); the DROPPED-and-
---     re-created sync_pull and the NEW sync_visibility_horizon_ms return
---     to the definer owner through the CREATE-for-acquisition dance (the
---     10/11 idiom), and their grants are stated (sync_pull's died with
---     the drop; the horizon function is new, on `sync_schema_version()`'s
---     exact grant pair). `next_tenant_seq` takes the helper posture (the
---     `sync_table_pk` class): reachable by NO API role — the trigger and
---     the definer bodies are its only callers, and Supabase's CREATE-time
---     default EXECUTE-to-PUBLIC is revoked by name (the memo §2's
---     recorded footgun).
+-- 11. Ownership + the demotion posture. UNIT B DROPS AND RE-CREATES every
+--     gated function (the challenge signatures), so ownership and grants
+--     are RE-STATED for all of them — nothing rides `create or replace`'s
+--     ACL preservation any more except `account_purge` (unchanged
+--     signature; `postgres`-owned by the 14c-gate reasoning, auth-schema
+--     DML). Everything returns to the NON-BYPASS definer owner through
+--     the CREATE-for-acquisition dance (the 10/11 idiom). The helpers —
+--     `next_tenant_seq`, `sync_constant_time_equal`, the reworked
+--     `sync_key_gate`/`sync_key_proof_check` — take the `sync_table_pk`
+--     posture: reachable by NO API role (Supabase's CREATE-time
+--     EXECUTE-to-PUBLIC default revoked by name — the memo §2's recorded
+--     footgun, every new function). THE VAULT GRANTS (memo §2/§3): the
+--     definer role reads the MAC secret inside the verify and writes it
+--     at enroll/rotation — USAGE on schema `vault`, SELECT on
+--     `vault.secrets` + `vault.decrypted_secrets`, and EXECUTE on the
+--     vault helper functions (granted as ALL FUNCTIONS IN SCHEMA rather
+--     than by signature: `create_secret`/`update_secret` signatures vary
+--     by Vault version, a wrong-signature grant fails the whole deploy,
+--     and the schema's surface is Supabase's own fixed helper set — the
+--     window's sweep verifies the landed posture; the role is NOLOGIN
+--     and reachable only through these definer bodies).
 -- ---------------------------------------------------------------------------
 
+grant usage on schema vault to variorum_definer;
+grant select on vault.secrets, vault.decrypted_secrets to variorum_definer;
+grant execute on all functions in schema vault to variorum_definer;
+
 grant usage, create on schema public to variorum_definer;
-alter function sync_pull(bigint, text, text, int, text) owner to variorum_definer;
+alter function sync_push(jsonb, text, text, text) owner to variorum_definer;
+alter function sync_pull(bigint, text, text, text, int, text) owner to variorum_definer;
+alter function sync_horizon(text, text, text) owner to variorum_definer;
+alter function sync_purge_ledger(bigint, text, text, text) owner to variorum_definer;
+alter function sync_purge_execute(jsonb, text, text, text) owner to variorum_definer;
+alter function account_data_truncate(text, text, text) owner to variorum_definer;
+alter function sync_reencrypt(jsonb, text, text, text) owner to variorum_definer;
+alter function key_vault_update(jsonb, int, text, text) owner to variorum_definer;
+alter function sync_key_gate(text, text, text, text) owner to variorum_definer;
+alter function sync_key_proof_check(text, text, text) owner to variorum_definer;
+alter function sync_constant_time_equal(text, text) owner to variorum_definer;
+alter function sync_challenge(int) owner to variorum_definer;
+alter function key_proof_enroll(text, text, text) owner to variorum_definer;
 alter function sync_visibility_horizon_ms() owner to variorum_definer;
 revoke create on schema public from variorum_definer;
 
-revoke execute on function sync_pull(bigint, text, text, int, text) from public, anon;
-grant execute on function sync_pull(bigint, text, text, int, text) to authenticated, service_role;
+-- The two round RPCs keep the 09 posture (authenticated + the named
+-- service_role default, zero live reach — both bodies refuse a NULL
+-- auth.uid()).
+revoke execute on function sync_push(jsonb, text, text, text) from public, anon;
+grant execute on function sync_push(jsonb, text, text, text) to authenticated, service_role;
+revoke execute on function sync_pull(bigint, text, text, text, int, text) from public, anon;
+grant execute on function sync_pull(bigint, text, text, text, int, text) to authenticated, service_role;
 
 revoke execute on function sync_visibility_horizon_ms() from public, anon;
 grant execute on function sync_visibility_horizon_ms() to authenticated, service_role;
 
+-- The account-door posture (authenticated only, service_role revoked by
+-- name) for everything a signed-in device alone may call — the mint and
+-- the enroll road included.
+revoke execute on function sync_horizon(text, text, text) from public, anon, service_role;
+grant execute on function sync_horizon(text, text, text) to authenticated;
+revoke execute on function sync_purge_ledger(bigint, text, text, text) from public, anon, service_role;
+grant execute on function sync_purge_ledger(bigint, text, text, text) to authenticated;
+revoke execute on function sync_purge_execute(jsonb, text, text, text) from public, anon, service_role;
+grant execute on function sync_purge_execute(jsonb, text, text, text) to authenticated;
+revoke execute on function account_data_truncate(text, text, text) from public, anon, service_role;
+grant execute on function account_data_truncate(text, text, text) to authenticated;
+revoke execute on function sync_reencrypt(jsonb, text, text, text) from public, anon, service_role;
+grant execute on function sync_reencrypt(jsonb, text, text, text) to authenticated;
+revoke execute on function key_vault_update(jsonb, int, text, text) from public, anon, service_role;
+grant execute on function key_vault_update(jsonb, int, text, text) to authenticated;
+revoke execute on function sync_challenge(int) from public, anon, service_role;
+grant execute on function sync_challenge(int) to authenticated;
+revoke execute on function key_proof_enroll(text, text, text) from public, anon, service_role;
+grant execute on function key_proof_enroll(text, text, text) to authenticated;
+
+-- The helper posture: reachable by NO API role.
 revoke execute on function next_tenant_seq(uuid) from public, anon, authenticated, service_role;
 grant execute on function next_tenant_seq(uuid) to variorum_definer;
+revoke execute on function sync_key_gate(text, text, text, text) from public, anon, authenticated, service_role;
+grant execute on function sync_key_gate(text, text, text, text) to variorum_definer;
+revoke execute on function sync_key_proof_check(text, text, text) from public, anon, authenticated, service_role;
+grant execute on function sync_key_proof_check(text, text, text) to variorum_definer;
+revoke execute on function sync_constant_time_equal(text, text) from public, anon, authenticated, service_role;
+grant execute on function sync_constant_time_equal(text, text) to variorum_definer;
 
--- Belt (idempotent; `create or replace` preserves ACLs): the re-created
--- bodies keep their standing postures, re-affirmed by name.
-revoke execute on function sync_purge_execute(jsonb, text, text) from public, anon, service_role;
-grant execute on function sync_purge_execute(jsonb, text, text) to authenticated;
-revoke execute on function key_vault_update(jsonb, int, text) from public, anon, service_role;
-grant execute on function key_vault_update(jsonb, int, text) to authenticated;
+-- Belt (idempotent): the one function this event does NOT re-create.
 revoke execute on function account_purge() from public, anon, service_role;
 grant execute on function account_purge() to authenticated;
 
@@ -779,10 +1739,43 @@ commit;
 --          and not exists (select 1 from pg_class where relname = 'sync_server_seq');
 --                                                                    -- the global counter is gone
 --   select oid::regprocedure from pg_proc where proname = 'sync_pull';
---                                                                    -- ONE row: sync_pull(bigint,text,text,integer,text)
+--                                                                    -- ONE row: sync_pull(bigint,text,text,text,integer,text)
 --   select sync_visibility_horizon_ms();                              -- 2000 (the served horizon)
---   select pg_get_functiondef('sync_pull(bigint,text,text,int,text)'::regprocedure)
+--   select pg_get_functiondef('sync_pull(bigint,text,text,text,int,text)'::regprocedure)
 --          like '%sync_visibility_horizon_ms%';                       -- true (the ONE horizon — derived, never inlined)
---   select pg_get_functiondef('sync_pull(bigint,text,text,int,text)'::regprocedure)
+--   select pg_get_functiondef('sync_pull(bigint,text,text,text,int,text)'::regprocedure)
 --          not like '%interval ''2 seconds''%';                       -- true (no inline literal survives)
+--
+-- UNIT B verification (read-only; the window runs these too):
+--   select oid::regprocedure from pg_proc where proname in
+--     ('sync_push','sync_pull','sync_horizon','sync_purge_ledger',
+--      'sync_purge_execute','account_data_truncate','sync_reencrypt',
+--      'key_vault_update','sync_key_gate','sync_key_proof_check')
+--     order by 1;                                                     -- EXACTLY ONE row per name — the challenge signatures;
+--                                                                    --   any second spelling is a lingering challenge-free door
+--   select count(*) from key_proof_challenge;                         -- 0 (nothing minted yet)
+--   select count(*) from sync_write_budget;                           -- 0 (no push has run yet)
+--   select extensions.hmac('probe'::bytea, 'key'::bytea, 'sha256') is not null;
+--                                                                    -- true (pgcrypto resolves in `extensions` — the PENDING-until-live probe)
+--   select vault.create_secret('cHJvYmU=', 'kp:deploy-probe');        -- a uuid (the Vault road works for the DEPLOYER;
+--   delete from vault.secrets where name = 'kp:deploy-probe';        --   then removed; the DEFINER-role road is proven by
+--                                                                    --   her first round's enroll — the window watches it land)
+--   select key_proof_hash from key_vault;                             -- pre-enroll: her v1 hash (unchanged by the deploy);
+--                                                                    --   AFTER her Mac's first round: a NEW 64-hex value =
+--                                                                    --   sha256(kp2), landed by key_proof_enroll, and
+--                                                                    --   select name from vault.secrets → 'kp:<her uuid>'
+--   select pg_get_functiondef('sync_key_proof_check(text,text,text)'::regprocedure)
+--          like '%VARIORUM_KEY_PROOF_ENROLL%';                        -- true (the enroll refusal, before any nonce is consumed)
+--   select pg_get_functiondef('sync_push(jsonb,text,text,text)'::regprocedure)
+--          like '%VARIORUM_WRITE_QUOTA%';                             -- true (the guard lives in the one quota'd door)
+--   select pg_get_functiondef('sync_reencrypt(jsonb,text,text,text)'::regprocedure)
+--          not like '%sync_write_budget%';                            -- true (the exemption — a rotation is never metered)
+--   select pg_get_functiondef('sync_purge_execute(jsonb,text,text,text)'::regprocedure)
+--          like '%VARIORUM_REAUTH_REQUIRED%';                         -- true (the destructive doors' 10-minute window)
+--   select pg_get_functiondef('account_data_truncate(text,text,text)'::regprocedure)
+--          like '%VARIORUM_REAUTH_REQUIRED%';                         -- true (both of them)
+--   THE AMR REFRESH-SURVIVAL PROBE (memo §5's named check, HER window):
+--     decode her session's JWT before and after a token refresh — the
+--     amr password timestamp must be byte-identical; if it BUMPS, the
+--     guard is hollow and the fallback comes back for a re-ruling.
 --   plus maintenance/14c-post-deploy-grant-sweep.sql — every row OK/INFO.

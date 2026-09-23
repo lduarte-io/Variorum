@@ -178,6 +178,12 @@ struct SerializerCompletenessTests {
         // bodies are its only writers); the client sees only the seqs it
         // grants, never the table.
         "sync_tenant_seq",
+        // Phase 13y UNIT B (12, the challenge half): the single-use nonce
+        // table (minted by sync_challenge, consumed by the proof check)
+        // and the abuse guard's per-owner accounting row — both pure
+        // server machinery, never payload tables (the client sees only
+        // base64 nonces and the typed refusals).
+        "key_proof_challenge", "sync_write_budget",
     ]
 
     @Test func mirrorDDLCoversEverySyncedColumn() throws {
