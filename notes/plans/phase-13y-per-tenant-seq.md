@@ -834,6 +834,22 @@ the row (the next push re-creates it at zero — delete-and-set-up-again's repus
 first load); `account_purge` removes it (the whole account goes). The seq counter
 (`sync_tenant_seq`) is untouched by both — the budget is metering, never ordering.
 
+**ADJUDICATION (orchestrator, 2026-09-22, under the architect mandate): APPROVED AS
+PROPOSED — build it.** The shape is the memo §4's targets served by the minimal honest
+mechanism: O(1) per push, one self-contained row, the server no less dumb, and both
+alternatives correctly declined for the right reasons (a guard that amplifies writes
+fails its own purpose; a wall-clock bucket serves nobody). Three things I note as
+adjudicated rather than left implicit: (1) the refusal boundary
+(`window_rows + batch > 50000` refuses whole) means no overshoot and at worst one
+refused sub-limit batch at the seam — acceptable, pin it as stated; (2) the tumbling
+seam's ≤2× short-span worst case is ACCEPTED and recorded (13t re-prices); (3) the lock
+order (budget row strictly AFTER the vault lock, push the only toucher) is the
+deadlock-safety argument — keep it stated at the code. The client seam note is also
+adjudicated: the `SyncKeyProof` pairing and `KeyProofMaterial`'s both-or-neither
+construction are APPROVED (the memo's shape, made structural), and the app-target
+COMPILE-PENDING edits follow the UNIT A closer's exact precedent — the orchestrator
+closes them with build-for-testing on both targets at unit close.
+
 ### NOTES CARRIED WHILE BUILDING (repo-first; the report repeats them)
 
 - **The client seam change is the pre-13x class, stated up front:** the challenge protocol
