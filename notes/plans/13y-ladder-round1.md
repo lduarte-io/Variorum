@@ -50,8 +50,13 @@ claim SUCCEEDS, only truncate refuses; (e) the RED-ON-OLD janitor pin
 `PurgeConvergenceTests.theUnattendedJanitorPurgesAnEligibleFamilyWithNoSignIn` — an
 eligible synced family purges through the scheduler's unattended path with no sign-in. The
 memo §5 was already amended by the orchestrator (F-R6 commit). Suites green: AuthRLSDDL 76 +
-AbuseGuard 8 + the new janitor pin. RED-ON-OLD verified by behavioral revert (below in this
-disposition once run).
+AbuseGuard 8 + the new janitor pin. **RED-ON-OLD VERIFIED by behavioral revert (committed
+fix first, then reverted on a dirty tree, restored via `git checkout --`):** with the
+pre-fix re-auth check re-added to `executePurge` and the fake's default claim set to
+production truth (`?? false`), the janitor pin failed —
+`PurgeConvergenceTests.swift:101 Caught error: This needs a fresh sign-in — confirm your
+account password and try again` (the sweep threw `reauthRequired`, family unpurged). Fix
+restored, pin green.
 
 **F-R2 [BLOCKER] · 12:1660–1724 (grants) with failing bodies :527–548
 (`extensions.gen_random_bytes`) and :687–691 (`extensions.hmac`) — `variorum_definer` is
