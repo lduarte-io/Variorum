@@ -60,8 +60,11 @@ public enum KeyProof {
         SHA256.hash(data: token).map { String(format: "%02x", $0) }.joined()
     }
 
-    /// The hash the vault's `key_proof_hash` carries for `master` — what
-    /// vault CREATION lands, and what a rotation's vault update installs.
+    /// The hash the vault's `key_proof_hash` carries for `master` at
+    /// CREATION (the v1, pre-enrollment hash — the enroll road's
+    /// authorization comparand). A rotation's vault update installs
+    /// `macHash` since 13y UNIT B, and enrollment moves the row there
+    /// too; this creation-era form is what both roads authorize AGAINST.
     public static func hash(master: SymmetricKey) -> String {
         hash(ofToken: token(master: master))
     }

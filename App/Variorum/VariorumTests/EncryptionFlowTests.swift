@@ -817,7 +817,7 @@ struct AccountDoorWiringTests {
     private actor RecordingLifecycle: AccountLifecycleProviding {
         private(set) var truncateKeyIDs: [String] = []
         private(set) var purgeCalls = 0
-        func truncateAccountData(activeKeyID: String, keyProof: String) async throws -> [String: Int] {
+        func truncateAccountData(activeKeyID: String, keyProof: KeyProofMaterial) async throws -> [String: Int] {
             truncateKeyIDs.append(activeKeyID)
             return [:]
         }
@@ -830,10 +830,17 @@ struct AccountDoorWiringTests {
     }
 
     private actor QuietTransport: SyncTransport {
-        func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+        /// 13y UNIT B: the challenge roads — this fake never verifies proofs,
+        /// so the mint is a bare nonce and enrollment is a silent yes
+        /// (uncounted round plumbing, like `schemaVersion`).
+        func fetchChallenges(_ count: Int) async throws -> [String] {
+            (0..<max(count, 1)).map { _ in Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64EncodedString() }
+        }
+        func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {}
+        func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
             batch.map { _ in .rejected(current: nil) }
         }
-        func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] { [] }
+        func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] { [] }
         func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
     }
 
@@ -1140,11 +1147,18 @@ struct RetiredNamesPinTests {
 struct SyncLockedFaceTests {
     private actor CountingTransport: SyncTransport {
         private(set) var calls = 0
-        func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+        /// 13y UNIT B: the challenge roads — this fake never verifies proofs,
+        /// so the mint is a bare nonce and enrollment is a silent yes
+        /// (uncounted round plumbing, like `schemaVersion`).
+        func fetchChallenges(_ count: Int) async throws -> [String] {
+            (0..<max(count, 1)).map { _ in Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64EncodedString() }
+        }
+        func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {}
+        func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
             calls += 1
             return batch.map { _ in .rejected(current: nil) }
         }
-        func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+        func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
             calls += 1
             return []
         }

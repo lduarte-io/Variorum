@@ -1211,14 +1211,21 @@ private actor InertTransport: SyncTransport, SyncRotationTransport {
     /// pre-13x 3a (ledger 43): the `for_device` every pull carried — the
     /// identity assertion reads it before and after the follow.
     private(set) var pulledDeviceIDs: [String?] = []
-    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] { touched += 1; return [] }
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    /// 13y UNIT B: the challenge roads — this fake never verifies proofs,
+    /// so the mint is a bare nonce and enrollment is a silent yes
+    /// (uncounted round plumbing, like `schemaVersion`).
+    func fetchChallenges(_ count: Int) async throws -> [String] {
+        (0..<max(count, 1)).map { _ in Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64EncodedString() }
+    }
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {}
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] { touched += 1; return [] }
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
         touched += 1
         pulledDeviceIDs.append(deviceID)
         return []
     }
     func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
-    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] { touched += 1; return [] }
+    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncReencryptOutcome] { touched += 1; return [] }
     // 13y (`SyncRotationTransport`): the served horizon — counted as a
     // touch like every other door of this inert transport.
     func visibilityHorizonMillis() async throws -> Int64 { touched += 1; return 2000 }

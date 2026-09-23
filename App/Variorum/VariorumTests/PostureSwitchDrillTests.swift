@@ -190,7 +190,7 @@ struct PostureSwitchDrillTests {
         try await vaultClient.updateVault(
             try minted.format.settingAppleHeldCopy(
                 masterKey: material.masterSymmetricKey, appleKey: apple.symmetricKey, appleKeyID: apple.id),
-            expectedRevision: minted.revision, keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+            expectedRevision: minted.revision, keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
 
         // The key file FIRST (the custody items are named by its store id).
         let storeID = "drill-\(UUID().uuidString.lowercased())"

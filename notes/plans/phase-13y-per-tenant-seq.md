@@ -1027,6 +1027,59 @@ closes them with build-for-testing on both targets at unit close.
   precedent, mostly the same files). Piece 6 adds ONE more to the same list:
   `App/Variorum/Shared/ErrorPresentation.swift`'s rate-limit arm (reads two core
   symbols, same build-for-testing close).
+
+  **CORRECTION (2026-09-23, on the orchestrator's failed build-for-testing — exit 65
+  both targets, three surfaced errors):** the paragraph above CLAIMED the app-target
+  seam edits were made pending compile verification. **They were not — the Piece 4
+  sweep covered `Tests/VariorumCoreTests` only and never touched the app target.**
+  The three surfaced errors were the app MODULE's alone (the test targets were never
+  compiled behind the failing module), so the fix pass swept the WHOLE app-target
+  seam, not three expressions:
+  - **The three named errors:** `ErrorPresentation.swift` — the mechanism was a
+    MISSING `import VariorumCore` (the file's only core reference until the arm was
+    the app-side `AuthSessionError`), NOT visibility — `AuthRateLimit` was already
+    fully `public`, so zero core visibility changes; `PostureSwitch.swift:1208` +
+    `EncryptionSession.swift:447` — both Apple-held-copy reland payloads passing the
+    kp1 wire String — now construct `KeyProofMaterial(master:)` from the same master
+    (the both-or-neither idiom; the dance's enroll arm serves these non-rotation
+    payloads per finding 1).
+  - **The app-target TEST seam, swept whole (would have failed the NEXT build):**
+    `VaultRPCEmulation` (both byte-identical copies, VariorumTests +
+    VariorumMobileTests) reworked to the challenge protocol — `serveUpdate` now
+    serves THREE paths so the doubles' unconditional first call routes the dance with
+    zero consumer churn (`sync_challenge` mints single-use nonces; `key_proof_enroll`
+    lands the secret + post-enroll hash together under the old hash's authorization,
+    once; the update check runs 12's RULED order incl. the finding-2 revision
+    PRE-CHECK and the successor mac rule; the static-token check and its NULL-hash
+    adopt arm RETIRED). The kp2-secret twin rides the ROW JSON under a test-only key
+    (per-world storage — a static would cross-contaminate parallel worlds); recorded
+    latitudes: no enroll-fence check, no TTL, lock-serialization for FOR UPDATE.
+    `PostureSwitchTests`' `EmulatedVault` routes the two roads explicitly (it guards
+    the update path before delegating); its `EmulatedMirror` grew the REAL gate twin
+    (minted nonces, enrolled secret, HMAC bound to the calling rpc's name, and the
+    vault-hash-is-truth rule: a hash moved since enrollment clears the secret and
+    demands re-enrollment, with the post-rotation re-adopt arm — the mirror's vault
+    WRITE road is external, the recorded latitude). Signature swaps + trivial
+    challenge roads (bare mint, silent enroll — these fakes never verified proofs) on
+    every transport fake: Phase8ServicesTests ×2, Phase9cAuthWiringTests,
+    TierAndOnboardingTests, EncryptionFlowTests ×2, MobileProtectionTests'
+    InertTransport; `truncateAccountData` conformers → `KeyProofMaterial` in
+    PostureSwitchTests, ConnectLibraryTests, TierAndOnboardingTests,
+    EncryptionFlowTests; `updateVault` material swaps in PostureSwitchTests ×5 (incl.
+    the stale-proof keys construction), EnrollDirectionsTests, PostureSwitchDrillTests;
+    Phase8's keys construction. TWO rotation-completed hash pins moved to `macHash`
+    (PostureSwitchTests 733/2234 — Piece 4's `prepare` made `hash(master:)` the wrong
+    truth there; PostureSwitchDrillTests:669's negative pin stays true either way),
+    and core `KeyProof.hash(master:)`'s doc dropped its now-false "what a rotation's
+    vault update installs" clause (the ONE core file touched — comment only; full
+    suite re-run 1719/180 ALL PASSED, unchanged).
+  - **Verification within the fence:** all fourteen edited files pass a syntax-only
+    `swiftc -parse` sweep; typecheck is the orchestrator's build-for-testing (no
+    Mac-suite runs on this side). **Runtime exposure, stated honestly:** the app
+    suites' RUNTIME behavior under the challenge dance (the emulation roads above)
+    is untested until the next full Mac-suite run — the doubles were built to
+    preserve each test's old outcome through the new protocol, but that claim has
+    compile-and-reasoning evidence only.
 - **OWED AT THE WINDOW (the deploy sitting's list — none of these is mine to run; the
   fences bar all mirror contact):** (1) **the live amr refresh-survival probe** (the
   brief's own note): whether a real GoTrue session's `amr` password timestamp survives

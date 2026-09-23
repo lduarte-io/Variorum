@@ -96,7 +96,7 @@ struct EnrollDirectionsTests {
                 try fetched.format.settingAppleHeldCopy(
                     masterKey: material.masterSymmetricKey, appleKey: apple.symmetricKey, appleKeyID: apple.id),
                 expectedRevision: fetched.revision,
-                keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+                keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
         }
         return (material, words)
     }

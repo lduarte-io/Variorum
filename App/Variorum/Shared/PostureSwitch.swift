@@ -1205,7 +1205,7 @@ final class PostureSwitchRunner {
                 masterKey: material.masterSymmetricKey, appleKey: apple.symmetricKey, appleKeyID: apple.id)
             try await vault.updateVault(
                 updated, expectedRevision: fetched.revision,
-                keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+                keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
             leaves.log("leaving Castle: the vault gained the Apple-held copy under \(apple.id.prefix(8))")
         }
         // The key file's Apple copy.

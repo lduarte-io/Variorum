@@ -13,6 +13,7 @@
 
 import Foundation
 import SwiftUI
+import VariorumCore  // 13y UNIT B: AuthRateLimit (the rate-limit arm below)
 
 /// The R94 inline-cause block, ONE component for every status row: the
 /// auth guidance (when the failure is auth-shaped) + the verbatim error —

@@ -83,6 +83,19 @@ final class EmulatedVault: @unchecked Sendable {
                 url: request.url!, statusCode: status,
                 httpVersion: "HTTP/1.1", headerFields: nil)!)
         }
+        // 13y UNIT B: the vault door's challenge + enroll roads. The other
+        // doubles reach them through their unconditional first
+        // `serveUpdate` call; this one guards the update path before
+        // delegating, so the two roads are routed here explicitly.
+        if request.url?.path.hasSuffix("/rest/v1/rpc/sync_challenge") == true
+            || request.url?.path.hasSuffix("/rest/v1/rpc/key_proof_enroll") == true {
+            var current: Data? = lock.withLock { row }
+            guard let served = VaultRPCEmulation.serveUpdate(request, row: &current) else {
+                return response(404)
+            }
+            lock.withLock { row = current }
+            return response(served.status, served.body)
+        }
         if request.url?.path.hasSuffix("/rest/v1/rpc/key_vault_update") == true {
             if let hook = takeBeforeUpdate() { try await hook() }
             lock.withLock { updateCount += 1 }
@@ -216,16 +229,66 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
         rows.values.filter { $0.seq < rotationSeq && SyncSchema.rowCarriesCiphertext($0.row) }.count
     }
 
-    private func gate(activeKeyID: String, keyProof: String) async throws {
+    // 13y UNIT B — the mirror's challenge protocol twin (the fake
+    // server's shape at this emulation's scale): minted single-use
+    // nonces, an enrolled kp2 secret, and the HMAC bound to the calling
+    // RPC's name. The vault's HASH stays the truth the secret follows —
+    // this mirror's vault WRITE road is external (`EmulatedVault`), so a
+    // rotation moves the hash there and the next gate re-enrolls to it.
+    private var challengeNonces: Set<String> = []
+    private var macSecret: Data?
+    /// The vault hash the secret was enrolled under — moved hash ⇒ the
+    /// secret is stale and the gate demands re-enrollment.
+    private var enrolledUnderHash: String?
+
+    func fetchChallenges(_ count: Int) async throws -> [String] {
+        (0..<max(count, 1)).map { _ in
+            let nonce = Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64EncodedString()
+            challengeNonces.insert(nonce)
+            return nonce
+        }
+    }
+
+    func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
         guard let vault, let fetched = try await vault.fetchVault() else {
             throw SyncError.encryptionKeysReplaced
         }
         guard fetched.format.classKey(for: .corpus)?.keyID == activeKeyID else {
             throw SyncError.encryptionKeysReplaced
         }
-        guard let presented = KeyProof.hash(ofWireToken: keyProof),
-              presented == fetched.format.keyProofHash
-        else { throw SyncError.keyProofRefused }
+        let vaultHash = fetched.format.keyProofHash
+        guard let macRaw = Data(base64Encoded: macKey) else { throw SyncError.keyProofRefused }
+        // Creation-era authorization (the old kp1 hash) — or the
+        // post-rotation re-adopt: a rotation landed kp2′'s own hash in
+        // the vault, and re-enrolling to it re-syncs this mirror's
+        // secret (the external-write-road latitude, recorded).
+        let legacyOK = KeyProof.hash(ofWireToken: legacyProof) == vaultHash
+        let successorOK = KeyProof.hash(ofToken: macRaw) == vaultHash
+        guard legacyOK || successorOK else { throw SyncError.keyProofRefused }
+        macSecret = macRaw
+        enrolledUnderHash = vaultHash
+    }
+
+    private func gate(activeKeyID: String, keyProof: SyncKeyProof, rpc: String) async throws {
+        guard let vault, let fetched = try await vault.fetchVault() else {
+            throw SyncError.encryptionKeysReplaced
+        }
+        guard fetched.format.classKey(for: .corpus)?.keyID == activeKeyID else {
+            throw SyncError.encryptionKeysReplaced
+        }
+        // The vault hash moved since enrollment (a rotation) ⇒ the
+        // enrolled secret is stale: demand re-enrollment.
+        if macSecret != nil, enrolledUnderHash != fetched.format.keyProofHash {
+            macSecret = nil
+            enrolledUnderHash = nil
+        }
+        guard let secret = macSecret else { throw SyncError.keyProofEnrollRequired }
+        guard challengeNonces.remove(keyProof.challenge) != nil else {
+            throw SyncError.keyProofChallengeStale
+        }
+        let expected = KeyProofMaterial(legacyWireToken: "", macKey: secret)
+            .proof(challenge: keyProof.challenge, rpc: rpc).proof
+        guard expected == keyProof.proof else { throw SyncError.keyProofRefused }
     }
 
     private func requireOwnerStamps(_ batch: [SyncRow]) throws {
@@ -239,8 +302,8 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
         }
     }
 
-    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
-        try await gate(activeKeyID: activeKeyID, keyProof: keyProof)
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncPushOutcome] {
+        try await gate(activeKeyID: activeKeyID, keyProof: keyProof, rpc: "sync_push")
         try requireOwnerStamps(batch)
         pushes += 1
         return batch.map { incoming in
@@ -257,8 +320,8 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
         }
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
-        try await gate(activeKeyID: activeKeyID, keyProof: keyProof)
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: SyncKeyProof, deviceID: String?) async throws -> [SyncPulledRow] {
+        try await gate(activeKeyID: activeKeyID, keyProof: keyProof, rpc: "sync_pull")
         pulls += 1
         if pullsToFire > 0, let onPull {
             if pullsToFire != Int.max { pullsToFire -= 1 }
@@ -279,8 +342,8 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
     /// emulation honest to the wire.
     func visibilityHorizonMillis() async throws -> Int64 { 2000 }
 
-    func reencrypt(_ incomingRows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] {
-        try await gate(activeKeyID: activeKeyID, keyProof: keyProof)
+    func reencrypt(_ incomingRows: [SyncRow], activeKeyID: String, keyProof: SyncKeyProof) async throws -> [SyncReencryptOutcome] {
+        try await gate(activeKeyID: activeKeyID, keyProof: keyProof, rpc: "sync_reencrypt")
         try requireOwnerStamps(incomingRows)
         if crashNextReencrypt {
             crashNextReencrypt = false
@@ -310,7 +373,7 @@ private struct FixedKeyProvider: SyncKeyProviding {
 /// Delete-account arm (the 3b brain runs whether or not a follow is owed).
 private actor PurgeCountingLifecycle: AccountLifecycleProviding {
     private(set) var purges = 0
-    func truncateAccountData(activeKeyID: String, keyProof: String) async throws -> [String: Int] { [:] }
+    func truncateAccountData(activeKeyID: String, keyProof: KeyProofMaterial) async throws -> [String: Int] { [:] }
     func purgeAccount() async throws -> AccountPurgeReport {
         purges += 1
         return AccountPurgeReport(dataRows: 0, vaultRows: 1, entitlementRows: 1, authUserRemoved: true)
@@ -730,7 +793,8 @@ struct PostureSwitchTests {
             #expect(vault.format.masterWrappedByAppleHeld == nil && vault.format.appleKeyID == nil,
                     "no Apple-held copy under Castle")
             #expect(vault.format.classKey(for: .corpus)?.keyID == material.corpusKeyID)
-            #expect(vault.format.keyProofHash == KeyProof.hash(master: material.masterSymmetricKey))
+            #expect(vault.format.keyProofHash == KeyProof.macHash(master: material.masterSymmetricKey),
+                    "post-rotation the vault carries kp2\u{2032}'s hash (13y: the mac and the hash land together)")
             #expect(material.rotation == nil, "custody carries no previous key after completion")
             #expect(world.keyStore.load()?.corpusKeyID == material.corpusKeyID)
             #expect(try newFile.unwrapKey(master: material.masterSymmetricKey) == newKey, "L′ under M′")
@@ -1918,7 +1982,7 @@ struct PostureSwitchTests {
             try fetched.format.settingAppleHeldCopy(
                 masterKey: material.masterSymmetricKey, appleKey: otherDevicesApple.symmetricKey,
                 appleKeyID: otherDevicesApple.id),
-            expectedRevision: fetched.revision, keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+            expectedRevision: fetched.revision, keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
         let revisionAfterTheirWrite = try await world.vault().revision
 
         try await world.runner.followIntoStandard()
@@ -2015,7 +2079,7 @@ struct PostureSwitchTests {
         try await client.updateVault(
             try fetched.format.settingAppleHeldCopy(
                 masterKey: material.masterSymmetricKey, appleKey: world.apple.symmetricKey, appleKeyID: world.apple.id),
-            expectedRevision: fetched.revision, keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+            expectedRevision: fetched.revision, keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
         let before = try await world.vault()
 
         // (1) A unreadable here (propagation lag; iCloud Keychain off).
@@ -2068,7 +2132,7 @@ struct PostureSwitchTests {
         try await client.updateVault(
             try fetched.format.settingAppleHeldCopy(
                 masterKey: material.masterSymmetricKey, appleKey: world.apple.symmetricKey, appleKeyID: world.apple.id),
-            expectedRevision: fetched.revision, keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+            expectedRevision: fetched.revision, keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
         let before = try await world.vault()
         let controller = makeController(for: world)
 
@@ -2231,7 +2295,7 @@ struct PostureSwitchTests {
         }
         // THE KEY FILE followed under the VAULT's new descriptor (§3.6 — derive once).
         let after = try await world.vault()
-        #expect(after.format.keyProofHash == KeyProof.hash(master: newMaterial.masterSymmetricKey), "the proof is M′'s")
+        #expect(after.format.keyProofHash == KeyProof.macHash(master: newMaterial.masterSymmetricKey), "the proof is M′'s (kp2′'s hash — 13y)")
         let newFile = try world.keyFile(outcome.newKeyFingerprint)
         let newKey = try newFile.unwrapKey(passphrase: "a-brand-new-passphrase-12")
         #expect(StoreEncryptionMigration.opens(world.storeURL, key: newKey), "L′ under the NEW passphrase")
@@ -3300,7 +3364,7 @@ struct PostureSwitchTests {
         let born = try await a.vault()
         try await client.updateVault(
             try born.format.settingAppleHeldCopy(masterKey: material.masterSymmetricKey, appleKey: a.apple.symmetricKey, appleKeyID: a.apple.id),
-            expectedRevision: born.revision, keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+            expectedRevision: born.revision, keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
         let b = try await makeWorld(sharing: a)  // built BEFORE any switch (its seed rides the old keys)
         defer { b.tearDown() }
         let revisionBefore = try await a.vault().revision
@@ -3545,7 +3609,7 @@ struct PostureSwitchTests {
         #expect(fenced as? SyncError == .encryptionKeysReplaced, "the fence's marker — the old custody")
         let staleProofEngine = SyncEngine(transport: mirror, keyProvider: FixedKeyProvider(keys: SyncEncryptionKeys(
             corpusKey: oldMaterial.corpusSymmetricKey, corpusKeyID: newKeyID,
-            keyProof: KeyProof.wireToken(master: oldMaterial.masterSymmetricKey))))
+            keyProof: KeyProofMaterial(master: oldMaterial.masterSymmetricKey))))
         let refused: (any Error)? = await {
             do { try await withDependencies { $0.database = sibling.view } operation: { _ = try await staleProofEngine.pull() }; return nil }
             catch { return error }

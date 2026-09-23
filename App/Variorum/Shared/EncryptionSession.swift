@@ -444,7 +444,7 @@ final class EncryptionSession {
                 masterKey: material.masterSymmetricKey, appleKey: apple.symmetricKey, appleKeyID: apple.id)
             try await client.updateVault(
                 updated, expectedRevision: fetched.revision,
-                keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+                keyProof: KeyProofMaterial(master: material.masterSymmetricKey))
             return true
         } catch {
             return false

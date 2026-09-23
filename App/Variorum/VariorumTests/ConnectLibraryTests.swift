@@ -31,7 +31,7 @@ struct FixedKeys: SyncKeyProviding {
 }
 
 actor QuietLifecycle: AccountLifecycleProviding {
-    func truncateAccountData(activeKeyID: String, keyProof: String) async throws -> [String: Int] { [:] }
+    func truncateAccountData(activeKeyID: String, keyProof: KeyProofMaterial) async throws -> [String: Int] { [:] }
     func purgeAccount() async throws -> AccountPurgeReport {
         AccountPurgeReport(dataRows: 0, vaultRows: 0, entitlementRows: 0, authUserRemoved: true)
     }
