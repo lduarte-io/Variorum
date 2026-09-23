@@ -125,7 +125,8 @@
 --     The nonce table `key_proof_challenge` is per-owner capped at 64
 --     (oldest evicted), GC'd at every mint, TTL 5 minutes on the SERVER
 --     clock only (§9: no client-clock trust); the verify consumes the
---     nonce ATOMICALLY (DELETE … RETURNING — single-use by construction),
+--     nonce ATOMICALLY (DELETE … RETURNING — single-use per SUCCESS:
+--     a refusing RAISE rolls the DELETE back, R3-F1),
 --     recomputes the HMAC from the Vault-held secret, and compares via the
 --     standing 64-hex constant-time loop (hoisted into ONE helper,
 --     `sync_constant_time_equal`, shared with the enroll road). Binding
@@ -453,7 +454,8 @@ $$;
 --     Server-only (never a mirror data table, never in an allowlist, never
 --     in a payload); the `device_cursor` posture. A row IS one unconsumed
 --     challenge: minted by `sync_challenge`, consumed ATOMICALLY by the
---     proof check's DELETE … RETURNING (single-use by construction),
+--     proof check's DELETE … RETURNING (single-use per SUCCESS — a
+--     refusing RAISE rolls the DELETE back, R3-F1),
 --     GC'd at every mint, capped at 64 live rows per owner (memo §7 edge
 --     3: the table is bounded by 64 × live accounts). `issued_at` is the
 --     SERVER clock — the 5-minute TTL trusts nothing a client stamps.
@@ -634,7 +636,10 @@ $$;
 --     enroll road's retry still holds a live challenge); (2) the nonce is
 --     consumed atomically (DELETE … RETURNING — an unknown, already-used
 --     or malformed challenge refuses VARIORUM_KEY_PROOF_STALE_CHALLENGE;
---     single-use by construction, THE replay closure); (3) the 5-minute
+--     single-use PER SUCCESS, THE replay closure: a refusing RAISE aborts
+--     the RPC's transaction and ROLLS THE DELETE BACK, so a nonce
+--     survives every refused attempt and is spent exactly once, by its
+--     one successful use — R3-F1's deployed-truth wording); (3) the 5-minute
 --     server-clock TTL; (4) the HMAC recomputed under the Vault-held kp2
 --     over `nonce ‖ ':' ‖ rpc_name` — pgcrypto's `hmac(data, key, type)`:
 --     the MESSAGE is the data (first argument), kp2 the key (second) —
@@ -722,7 +727,13 @@ begin
   exception when others then
     presented_hex := null;
   end;
-  if presented_hex is null
+  -- R3-F2 (post-cap hardening): BOTH comparands guarded — §5f's own idiom.
+  -- Unguarded, a NULL expected_hex fails OPEN (`false or not NULL` → NULL
+  -- → the IF does not fire → success). Unreachable today (every gate call
+  -- passes a LITERAL rpc_name; nonce and stored_mac are null-guarded
+  -- above), but a future variable rpc_name would have turned a NULL into
+  -- a silent proof BYPASS rather than a refusal.
+  if expected_hex is null or presented_hex is null
      or not sync_constant_time_equal(expected_hex, presented_hex) then
     raise exception 'VARIORUM_KEY_PROOF_REQUIRED: this session holds no proof of the account''s master key — pick up your keys before syncing';
   end if;

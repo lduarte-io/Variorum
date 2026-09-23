@@ -2577,6 +2577,15 @@ struct AuthRLSDDLTests {
         let macKey = try #require(body.range(of: "decode(stored_mac, 'base64')"))
         #expect(hmac.lowerBound < message.lowerBound && message.upperBound <= macKey.lowerBound,
                 "hmac(data, key, type): the message is the DATA (first), kp2 the KEY (second) — swapped, the mirror refuses every honest proof")
+        // THE FAIL-CLOSED ARM (ladder round 3, R3-F2 — post-cap hardening;
+        // GREEN-BY-DESIGN, stated plainly: no red-on-old is possible
+        // because every deployed gate call passes a LITERAL rpc_name, so a
+        // NULL expected_hex is unreachable today). Unguarded, `false or
+        // not NULL` is NULL and the IF would not fire — a NULL expected
+        // comparand would fail OPEN (a silent proof BYPASS) instead of
+        // refusing. The compare guards BOTH comparands, §5f's own idiom.
+        #expect(body.contains("if expected_hex is null or presented_hex is null"),
+                "the final compare fails CLOSED on a NULL comparand — both sides guarded (§5f's idiom)")
         #expect(body.components(separatedBy: "VARIORUM_KEY_PROOF_STALE_CHALLENGE").count - 1 == 3,
                 "malformed, unknown/consumed, and expired all refuse STALE — fetch fresh and retry once")
         #expect(!body.contains("update key_vault"),

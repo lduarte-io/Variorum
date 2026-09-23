@@ -764,11 +764,16 @@ struct KeyProofGateTests {
     }
 
     /// THE BINDING: a proof minted for ONE door refuses on another — the
-    /// `nonce ‖ ':' ‖ rpc_name` HMAC input stops cross-RPC splicing of an
-    /// unconsumed pair (memo §3's stated reason for the binding). The
-    /// splice CONSUMES the nonce (the DELETE precedes the compare), so
-    /// the refused pair is dead afterwards too.
-    @Test func aProofBoundToOneDoorRefusesOnAnotherAndTheSpliceSpendsTheNonce() async throws {
+    /// `nonce ‖ ':' ‖ rpc_name` HMAC input stops cross-RPC splicing (memo
+    /// §3's stated reason for the binding). DEPLOYED TRUTH (R3-F1, the
+    /// ladder's post-cap correction): the refusing RAISE aborts the RPC's
+    /// transaction, so the consume's DELETE ROLLS BACK and the nonce
+    /// SURVIVES the refused splice — the pair then lands ONCE on its own
+    /// door (exactly the one spend it always had; the splice detour gains
+    /// an attacker NOTHING) and is spent by that landing (the replay
+    /// closure). The pin's old second arm asserted the fake's
+    /// burn-on-refusal, behavior the real mirror does not exhibit.
+    @Test func aProofBoundToOneDoorRefusesOnAnotherAndTheSpliceGainsNothing() async throws {
         let server = FakeSyncServer()
         let boundToPush = await server.mintProof(rpc: "sync_push")
         await #expect(throws: SyncError.keyProofRefused, "the splice: a push proof on the pull door") {
@@ -776,14 +781,20 @@ struct KeyProofGateTests {
                 since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID,
                 keyProof: boundToPush, deviceID: nil)
         }
-        // The nonce was consumed by the refused splice — the pair is dead
-        // even on ITS OWN door now.
-        await #expect(throws: SyncError.keyProofChallengeStale, "the spliced pair is spent") {
+        // The refused splice ROLLED BACK its consume — the pair still
+        // lands ONCE on its own door, the one spend it always had…
+        _ = try await server.push(
+            [containerRow(id: "c1", title: "e1:x", base: 0)],
+            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: boundToPush)
+        #expect(await server.rowCount(table: "container") == 1,
+                "the pair's own-door spend survives the refused splice — the detour gained nothing")
+        // …and is SPENT by that landing: the replay refuses.
+        await #expect(throws: SyncError.keyProofChallengeStale, "spent by its one landing") {
             _ = try await server.push(
-                [containerRow(id: "c1", title: "e1:x", base: 0)],
+                [containerRow(id: "c1", title: "e1:y", base: 1)],
                 activeKeyID: SyncTestKeys.corpusKeyID, keyProof: boundToPush)
         }
-        #expect(await server.rowCount(table: "container") == 0)
+        #expect(await server.rowCount(table: "container") == 1, "the replay landed nothing")
     }
 
     /// THE SIGNER'S RETRY ROAD (memo §7 edge 2 — a round outliving its

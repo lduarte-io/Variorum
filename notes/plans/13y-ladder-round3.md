@@ -26,8 +26,31 @@ detour gains nothing; replay-after-landing refuses identically; the shipped clie
 re-spends) — the defect is a PINNED FALSE CLAIM about deployed truth. Fix: transactional
 semantics in the fake (consume only on whole-check success), the pin's second arm
 re-worded to deployed truth, the two comments corrected. Red-on-old exists (the re-worded
-arm fails on the current fake). Disposition: PENDING the fix seat (post-cap, adjudicated
-below).
+arm fails on the current fake). Disposition: **AGREE — FIXED (fix seat, post-cap).** Traced:
+the fake removed the nonce at `checkProof`'s stash-lookup, BEFORE the TTL and HMAC checks —
+on the mirror the refusing RAISE aborts the RPC transaction and the consume's DELETE rolls
+back, so the nonce survives every refused attempt and is spent exactly once, by its one
+successful use. Fix: `FakeSyncServer.checkProof` consumes ONLY when the whole check succeeds
+(the actor's synchronous method makes check-then-remove-on-success equivalent to
+DELETE…RETURNING + rollback-on-raise; the rollback semantics commented at both refusal
+sites); the splice pin renamed+re-worded to deployed truth —
+`aProofBoundToOneDoorRefusesOnAnotherAndTheSpliceGainsNothing`: the refused splice rolls
+back, the pair lands ONCE on its own door (the one spend it always had — the detour gains
+nothing), and is spent BY that landing (replay refuses); the three "single-use by
+construction" comments in 12 (top header · §5b · §5g) corrected to single-use PER SUCCESS
+with refusals rolling back. **Ripple re-derived pin-by-pin against transactional truth:**
+the replay pin (success still consumes — unchanged, deployed-true) · the TTL pin (the
+expired nonce now SURVIVES the refusal, exactly as the real row lingers till the mint's GC;
+the pin never asserted its burn — green and now more faithful) · the signer's stale-retry
+pin (drives the CLIENT stash; server-side survivors are expired and can never pass — green)
+· the fresh-account/together-rule pins (enroll road, no nonce-burn claims) — no other pin
+assumed burn-on-refusal. **RED-ON-OLD VERIFIED by behavioral revert against the COMMITTED
+fix** (evidence below in this file's FIX SEAT CLOSE). **One residual RECORDED, not built
+(beyond the adjudicated scope):** on the real mirror a RAISE anywhere LATER in the same RPC
+(the quota refusal, the entitlement gate, an owner-stamp RAISE) also rolls the consume back,
+while the fake burns the nonce once the CHECK succeeds — unpinned (no test asserts nonce
+fate after a post-proof refusal), bounded identically (nothing gained), same class; noted
+for the record so a future pin on that seam starts from the truth.
 
 **R3-F2 [MINOR — hardening; unreachable today, no red-on-old possible; traced degradation
 is the justification] · 12:725–728 + `sync_constant_time_equal`:507–521 — §5g's final
@@ -38,8 +61,18 @@ cover the old handler gave the expected side. Unreachable through every deployed
 (every gate call passes a LITERAL rpc_name; nonce/stored_mac null-guarded above) — but a
 future variable rpc_name or refactor turns it into a silent proof BYPASS rather than a
 refusal. Fix: one line, §5f's own idiom (`if expected_hex is null or presented_hex is
-null or not …`) + a green-by-design text arm on the ruled-order pin. Disposition: PENDING
-the fix seat (post-cap, adjudicated below).
+null or not …`) + a green-by-design text arm on the ruled-order pin. Disposition:
+**AGREE — FIXED (fix seat, post-cap).** Traced the fail-open myself: `extensions.hmac` and
+`encode` are STRICT (a NULL rpc_name → `':' || NULL` → NULL propagates to a NULL
+`expected_hex` with NO error), while `sync_constant_time_equal` is NOT strict — over a NULL
+comparand its accumulator goes NULL and `return acc = 0` returns NULL, so `false or not
+NULL` → NULL and the IF does not fire: the check RETURNS (success) — a silent proof bypass,
+not a refusal. Unreachable today (every gate call passes a LITERAL rpc_name; nonce and
+stored_mac are null-guarded above) — GREEN-BY-DESIGN, said plainly: no red-on-old is
+possible. Fix: the compare guards BOTH comparands in §5f's own idiom, the mechanism
+commented at the line; THE FAIL-CLOSED ARM added to the ruled-order pin
+(`body.contains("if expected_hex is null or presented_hex is null")`), its green-by-design
+status stated in the arm's own comment.
 
 ## THE ORCHESTRATOR'S POST-CAP ADJUDICATION (2026-09-23)
 

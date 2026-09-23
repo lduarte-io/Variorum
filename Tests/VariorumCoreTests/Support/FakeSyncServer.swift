@@ -502,10 +502,15 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
 
     /// THE PROOF CHECK (12's `sync_key_proof_check` twin, the RULED
     /// order): vault present → the Vault-held secret (ABSENT refuses
-    /// ENROLL, before any nonce is consumed) → the nonce consumed
-    /// atomically (single-use — THE replay closure) → the TTL → the HMAC
-    /// over `nonce ‖ ':' ‖ rpc` recomputed from the secret. The actor's
-    /// serialization stands in for the SQL's atomic DELETE … RETURNING.
+    /// ENROLL, before any nonce is consumed) → the nonce → the TTL → the
+    /// HMAC over `nonce ‖ ':' ‖ rpc` recomputed from the secret — and the
+    /// nonce is CONSUMED ONLY WHEN THE WHOLE CHECK SUCCEEDS (R3-F1, the
+    /// mirror's transactional truth: a refusing RAISE aborts the RPC's
+    /// transaction and the consume's DELETE rolls back, so a nonce
+    /// survives every refused attempt and is spent exactly once, by its
+    /// one successful use). The actor's serialization makes
+    /// check-then-remove-on-success equivalent to the SQL's atomic
+    /// DELETE … RETURNING + rollback-on-raise.
     private func checkProof(_ keyProof: SyncKeyProof, rpc: String, for userID: String) throws {
         guard accounts[userID] != nil else {
             throw SyncError.encryptionKeysReplaced
@@ -521,17 +526,22 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         guard let index = stash.firstIndex(where: { $0.nonce == nonce }) else {
             throw SyncError.keyProofChallengeStale
         }
-        let issuedAt = stash[index].issuedAt
-        stash.remove(at: index)
-        challengeStashes[userID] = stash
-        guard issuedAt >= clock - challengeTTLTicks else {
+        guard stash[index].issuedAt >= clock - challengeTTLTicks else {
+            // Rollback semantics: the expired nonce STAYS (the real row
+            // survives the RAISE and lingers until the mint's GC) — it can
+            // never succeed later, only refuse stale again.
             throw SyncError.keyProofChallengeStale
         }
         let expected = KeyProofMaterial(legacyWireToken: "", macKey: secretRaw)
             .proof(challenge: keyProof.challenge, rpc: rpc).proof
         guard expected == keyProof.proof else {
+            // Rollback semantics: a refused proof (the splice, a wrong
+            // key) leaves the nonce standing — the pair keeps exactly the
+            // one spend on its own door it always had.
             throw SyncError.keyProofRefused
         }
+        stash.remove(at: index)
+        challengeStashes[userID] = stash
     }
 
     /// The round-level gates, in the SQL's order: account (auth) → fence →
