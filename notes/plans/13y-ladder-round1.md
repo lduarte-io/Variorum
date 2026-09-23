@@ -95,7 +95,15 @@ same commit as this file.** Disposition: RESOLVED — record-only.
 (stale-retry, enroll-retry) don't compose; a crossing surfaces instead of running the
 other road once. Bounded, self-heals next round under the §12 grammar; arguably the
 "retry ONCE" letter. Record the choice at the code or compose — the fix session's call
-with a trace. Disposition: PENDING.
+with a trace. Disposition: **RECORD-AT-THE-CODE (fix session).** Traced: the server's
+`sync_key_proof_check` (12 §5g) refuses ENROLL *before* consuming any nonce, so an
+un-enrolled account always refuses ENROLL (never STALE) and an enrolled account never
+refuses ENROLL — the two recovery roads are MUTUALLY EXCLUSIVE within one round by the
+server's own order, and the crossing the finding describes is unreachable in practice; the
+one residual (the stash going stale during the sub-ms enroll hop) self-heals next round.
+A doc paragraph now records this at `KeyProofChallenge.swift`'s `SyncChallengeSigner` (the
+retry-once is correct; composing would add a retry loop for an impossible case). Clarity
+class, mechanism traced, no pin owed (the hallucination guard's architectural-finding path).
 
 ## THE ORCHESTRATOR'S RE-RULING (2026-09-23, under R-13y-4 — amending its OWN #144(c); the accountability stated plainly)
 

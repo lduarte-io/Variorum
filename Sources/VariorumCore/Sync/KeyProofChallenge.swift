@@ -22,6 +22,22 @@ import Foundation
 ///    enroll refusal after a successful enrollment propagates typed —
 ///    something is genuinely wrong and the round must say so.
 ///
+/// **Why the two roads deliberately DON'T compose (13y ladder R1, F-R7 —
+/// the retry-ONCE letter, recorded):** each road retries its own refusal
+/// once and surfaces a crossing (a stale challenge inside the enroll-retry,
+/// or an enroll refusal inside the stale-retry) rather than running the
+/// other road too. That crossing is unreachable in practice, because the
+/// SERVER (`sync_key_proof_check`, 12 §5g) refuses ENROLL *before* it
+/// consumes any nonce: an UN-enrolled account therefore always refuses
+/// ENROLL, never STALE (so the stale-retry road is only ever reached by an
+/// already-ENROLLED account, whose enroll road never fires again), and the
+/// two refusals are mutually exclusive within one round. The one residual —
+/// the stash going stale during the sub-millisecond enroll hop itself (a
+/// >5-minute single request) — self-heals on the next round under the §12
+/// grammar (outbox intact, cursor unmoved). Composing the roads would add a
+/// retry loop for a case the server's own order makes impossible; the
+/// bounded retry-once is correct.
+///
 /// An actor: calls interleave at suspension points, the stash mutates only
 /// on the actor, and a nonce is popped BEFORE the body awaits — two
 /// interleaved calls can never spend one nonce.
