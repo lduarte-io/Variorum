@@ -42,9 +42,10 @@ at the line + the section header amended); THE ARGUMENT-ORDER ARM added to
 `theProofCheckConsumesTheNonceInTheRuledOrderAndTheMigrationArmRetires` (within the body,
 `extensions.hmac(` < the message expression ≤ `decode(stored_mac, 'base64')` — the message
 is the data, kp2 the key). **RED-ON-OLD VERIFIED by behavioral revert (fix committed
-FIRST):** with the two arguments swapped back, the arm failed —
-`Expectation failed: hmac.lowerBound < message.lowerBound && message.upperBound <=
-macKey.lowerBound` — restored, green. Client/fakes/memo byte-unchanged.
+FIRST, the round-1 lesson applied):** with the two arguments swapped back on a dirty tree,
+the arm failed exactly — `AuthRLSDDLTests.swift:2578 Expectation failed:
+(hmac.lowerBound < message.lowerBound → true) && (message.upperBound <= macKey.lowerBound
+→ false)` — restored via `git checkout --` (to the COMMITTED fix), green. Client/fakes/memo byte-unchanged.
 
 **R2-F2 [MINOR] · 12:696–704 (§5g) — the `exception when others` block swallows
 INFRASTRUCTURE errors as proof refusals.** Only the base64 decode can legitimately fail
@@ -64,6 +65,15 @@ handler scopes to the one client-failable decode, so a malformed proof still ref
 proof fault, never a raw decode error. The ruled-order pin's arms all hold unchanged
 (verified: AuthRLSDDLTests 76/76). No pin owed (needs live Postgres — the reviewer's call,
 kept); the mechanism is commented at the line.
+
+## FIX SEAT CLOSE (2026-09-23 — round 2's fixes, for round 3's anchor)
+
+Both findings AGREE/FIXED in ONE surgical commit (`12_phase13y_tenant_seq.sql` §5g +
+`AuthRLSDDLTests`' ruled-order pin + this file). R2-F1's red-on-old verified by behavioral
+revert against the COMMITTED fix (evidence quoted in its disposition). Suites at close:
+**AuthRLSDDLTests 76/76 · FULL CORE 1722 tests / 180 suites — ALL PASSED** (+0 over the
+round-1 close, as expected — the argument-order arm extends an existing pin). Client, fakes,
+memo, and every other pin byte-unchanged; zero mirror contact.
 
 ## ROUND-2 CLEAN BILL (the reviewer's, kept for round 3's anchor)
 
