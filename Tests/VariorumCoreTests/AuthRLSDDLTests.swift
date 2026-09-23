@@ -949,6 +949,16 @@ struct AuthRLSDDLTests {
         #expect(sql.contains("UNEXPECTED FUNCTION"))
         #expect(sql.contains("UNEXPECTED TABLE"))
         #expect(sql.contains("UNEXPECTED POLICY"))
+        // 13y ladder R1 (F-R2): the sweep verifies the definer role's
+        // SCHEMA-USAGE reach LIVE — `extensions` (pgcrypto: the two new
+        // bodies' gen_random_bytes/hmac) and `vault` (the MAC secret) — via
+        // has_schema_privilege, the honest end-state check whichever
+        // mechanism (explicit grant OR the inherited authenticated
+        // membership) supplies it.
+        #expect(sql.contains("has_schema_privilege('variorum_definer', s.schema_name, 'USAGE')"),
+                "the sweep must verify the definer's schema-usage reach live")
+        #expect(sql.contains("('extensions'), ('vault')"),
+                "the schema-usage fact must cover both extensions (pgcrypto) and vault (the MAC secret)")
     }
 
     // MARK: - Header choreography pins (prose, deliberately)
@@ -2633,6 +2643,12 @@ struct AuthRLSDDLTests {
         #expect(sql.contains("grant select on vault.secrets, vault.decrypted_secrets to variorum_definer;"))
         #expect(sql.contains("grant execute on all functions in schema vault to variorum_definer;"),
                 "the vault helpers granted as a schema (signatures vary by Vault version — the window's sweep verifies)")
+        // 13y ladder R1 (F-R2): the two new bodies resolve pgcrypto in the
+        // `extensions` schema AS the definer — the explicit grant states the
+        // dependency (the definer's `authenticated` membership very likely
+        // already inherits it; the live sweep/probe verify the end state).
+        #expect(sql.contains("grant usage on schema extensions to variorum_definer;"),
+                "sync_challenge/sync_key_proof_check resolve extensions.* as the definer — the grant states it")
         for signature in ["sync_push(jsonb, text, text, text)",
                           "sync_pull(bigint, text, text, text, int, text)",
                           "sync_horizon(text, text, text)",

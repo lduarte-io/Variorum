@@ -47,7 +47,32 @@ probe runs as the DEPLOYER (which holds USAGE), so the listed check would pass w
 definer road fails. Proposed: one idempotent
 `grant usage on schema extensions to variorum_definer;` in section 11; extend the
 grant-pin/sweep; add a `set role variorum_definer; select extensions.hmac(...); reset
-role;` probe to the verification tail. Disposition: PENDING the fix session.
+role;` probe to the verification tail. Disposition: **AGREE the fix — DISPUTE the severity
+(fix session; new technical fact for the orchestrator).**
+**The fix, BUILT:** (a) `grant usage on schema extensions to variorum_definer;` in 12
+section 11 beside the vault grants (idempotent; commented WHY); (b) `AuthRLSDDLTests`'
+`theVaultGrantsAndEveryNewFunctionsRevokePairLand` asserts the line; (c) the grant sweep
+gains a `schema-usage` fact CTE verifying `has_schema_privilege('variorum_definer',
+{'extensions','vault'}, 'USAGE')` LIVE, and `thePostDeployGrantSweepIsReadOnlyAndCoversEverything`
+pins it; (d) 12's verification tail gains a `set role variorum_definer; select
+extensions.hmac(...); select length(extensions.gen_random_bytes(32))=32; reset role;` probe
+with a comment saying the deployer-context probe alone masks the class. AuthRLSDDLTests
+76/76 green.
+**The severity dispute — a NEW technical fact the finding didn't weigh:** the definer role
+is ALREADY a member of `authenticated` (`14c-gate-definer-owner.sql:89`, `grant authenticated
+to variorum_definer`), and that same file DOCUMENTS + PROVED LIVE at the 14c gate that this
+membership is exactly how the definer got `auth`-schema USAGE. `authenticated` holds
+`extensions` USAGE on the hosted plan (the finding's own Sonnet fact), and with default
+INHERIT the definer resolves `extensions.*` during its SECURITY DEFINER calls through that
+membership — so "sync refuses at her first live call" is very likely a FALSE ALARM (the
+membership road already carries it). Two riders recorded for the orchestrator/window: (1)
+the explicit grant may be a WARNING no-op at deploy if `postgres` lacks grant option on the
+platform-owned `extensions` schema (as it did for `auth`) — harmless, never a transaction
+abort; (2) therefore the durable value is the LIVE sweep fact + `set role` probe (verifying
+the actual end-state whichever mechanism supplies it), not the grant line's mere presence.
+The fix lands regardless (belt, drift-insurance against a future `revoke authenticated`, and
+the honest live verification the grant-sweep exists for). **Orchestrator: severity is yours
+to adjudicate against canon; the fix is safe either way.**
 
 **F-R3 [MAJOR] · AuthSession.swift:553–566 + AbuseGuardTests:134–135/:168–172 +
 FakeSyncServer.swift:632–637 — even the door that keeps its window can't be satisfied by

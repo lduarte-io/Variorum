@@ -20,7 +20,11 @@
 -- (the account-door posture), `sync_constant_time_equal(text,text)` (the
 -- helper posture), and the two server-only tables
 -- `key_proof_challenge` / `sync_write_budget` (the device_cursor
--- posture).
+-- posture). EXTENDED again at Phase 13y ladder R1 (F-R2): the definer
+-- role's SCHEMA-USAGE reach on `extensions` (pgcrypto, for
+-- gen_random_bytes/hmac) and `vault` (the MAC secret) is now asserted LIVE
+-- via `has_schema_privilege` — the honest end-state check the grant line's
+-- mere presence cannot be.
 --
 -- WHAT IT IS: one READ-ONLY query, run IMMEDIATELY AFTER a lockstep deploy
 -- (09 at the 14c gate; 10 at the 13j window; 11 at the pre-13x window),
@@ -335,6 +339,30 @@ vault_fact_rows as (
     end as verdict
   from expected_vault_facts e
   left join observed_vault_facts o on o.fact = e.fact
+),
+-- 13y ladder R1 (F-R2): the definer role's SCHEMA-USAGE reach, verified
+-- LIVE. The two 13y-UNIT-B bodies resolve pgcrypto in `extensions` AS
+-- `variorum_definer` (the SECURITY DEFINER callers), and the definer reads
+-- the MAC secret in `vault`. `has_schema_privilege` reports the ACTUAL
+-- end state whichever mechanism supplies it — the explicit
+-- `grant usage on schema extensions/vault to variorum_definer` in 12/11 OR
+-- the definer's inherited `authenticated` membership (14c-gate) — so this
+-- is the honest verification the grant-line's mere presence cannot be
+-- (an explicit grant is a WARNING no-op where postgres lacks grant option
+-- on a platform-owned schema, exactly as it was for `auth`).
+schema_usage_rows as (
+  select
+    'schema-usage'                                                       as kind,
+    'variorum_definer USAGE on ' || s.schema_name                       as object,
+    ''                                                                   as acl,
+    has_schema_privilege('variorum_definer', s.schema_name, 'USAGE')::text as observed,
+    'true'                                                              as expected,
+    case
+      when has_schema_privilege('variorum_definer', s.schema_name, 'USAGE')
+        then 'OK'
+      else 'MISMATCH:usage — the definer bodies cannot resolve this schema (extensions.hmac / vault.decrypted_secrets refuse)'
+    end                                                                  as verdict
+  from (values ('extensions'), ('vault')) as s(schema_name)
 )
 select * from (
   select 1 as ord, * from function_rows
@@ -344,5 +372,7 @@ select * from (
   select 3 as ord, * from vault_policy_rows
   union all
   select 4 as ord, * from vault_fact_rows
+  union all
+  select 5 as ord, * from schema_usage_rows
 ) sweep
 order by ord, case when verdict = 'OK' or verdict = 'INFO' then 1 else 0 end, object;

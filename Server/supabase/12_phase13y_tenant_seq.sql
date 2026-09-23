@@ -1661,6 +1661,25 @@ grant usage on schema vault to variorum_definer;
 grant select on vault.secrets, vault.decrypted_secrets to variorum_definer;
 grant execute on all functions in schema vault to variorum_definer;
 
+-- THE EXTENSIONS-SCHEMA USAGE (13y ladder R1, F-R2): pgcrypto lives in the
+-- `extensions` schema on Supabase, and this event's two new bodies resolve
+-- `extensions.gen_random_bytes` (sync_challenge) and `extensions.hmac`
+-- (sync_key_proof_check) as `variorum_definer` (the SECURITY DEFINER
+-- callers run with the definer's privileges). The definer role IS already a
+-- member of `authenticated` (14c-gate-definer-owner.sql), which holds
+-- `extensions` USAGE on the hosted plan, so with default INHERIT the role
+-- very likely already resolves both — the identical membership road that
+-- gave it `auth`-schema USAGE, proven live at the 14c gate. This explicit
+-- grant makes the dependency STATED rather than inherited (and survives a
+-- future `revoke authenticated from variorum_definer` for isolation); it is
+-- idempotent and harmless even where it is a no-op (if `postgres` lacks
+-- grant option on the platform-owned `extensions` schema — exactly as it
+-- did for `auth` — this raises a WARNING and does nothing, never an abort).
+-- The LIVE guarantee is the sweep's `has_schema_privilege` fact + the
+-- verification tail's `set role variorum_definer` probe, which verify the
+-- END STATE whichever mechanism supplies it.
+grant usage on schema extensions to variorum_definer;
+
 grant usage, create on schema public to variorum_definer;
 alter function sync_push(jsonb, text, text, text) owner to variorum_definer;
 alter function sync_pull(bigint, text, text, text, int, text) owner to variorum_definer;
@@ -1765,7 +1784,19 @@ commit;
 --   select count(*) from key_proof_challenge;                         -- 0 (nothing minted yet)
 --   select count(*) from sync_write_budget;                           -- 0 (no push has run yet)
 --   select extensions.hmac('probe'::bytea, 'key'::bytea, 'sha256') is not null;
---                                                                    -- true (pgcrypto resolves in `extensions` — the PENDING-until-live probe)
+--                                                                    -- true (pgcrypto resolves in `extensions` — but this runs as the
+--                                                                    --   DEPLOYER, who always holds `extensions` USAGE, so it MASKS the
+--                                                                    --   definer-road class F-R2 caught. The next two probes run as
+--                                                                    --   `variorum_definer` — the role the SECURITY DEFINER bodies use —
+--                                                                    --   so they verify the ACTUAL resolution path both new bodies take:)
+--   set role variorum_definer;
+--     select extensions.hmac('x'::bytea, 'k'::bytea, 'sha256') is not null;   -- true (sync_key_proof_check's road)
+--     select length(extensions.gen_random_bytes(32)) = 32;                    -- true (sync_challenge's road)
+--   reset role;
+--                                                                    -- both true whether via the explicit `grant usage on schema
+--                                                                    --   extensions` above OR the pre-existing `authenticated` membership
+--                                                                    --   (14c-gate) that the definer role inherits — the sweep's
+--                                                                    --   has_schema_privilege fact records which.
 --   select vault.create_secret('cHJvYmU=', 'kp:deploy-probe');        -- a uuid (the Vault road works for the DEPLOYER;
 --   delete from vault.secrets where name = 'kp:deploy-probe';        --   then removed; the DEFINER-role road is proven by
 --                                                                    --   her first round's enroll — the window watches it land)
