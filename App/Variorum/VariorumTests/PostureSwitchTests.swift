@@ -62,6 +62,28 @@ final class EmulatedVault: @unchecked Sendable {
         lock.withLock { beforeUpdate = hook }
     }
 
+    /// 13y UNIT B — the ONE-ACCOUNT-ONE-SECRET repair (the first
+    /// execution's trace): the REAL account has one enrollment state that
+    /// the first ENGINE round lands for every door, but this vault double
+    /// and its world's mirror keep separate secrets — so a world whose
+    /// engine round preceded its first vault write paid an extra
+    /// enroll-refused `key_vault_update` request the real wire never
+    /// sees, skewing the request-counting pins by +1. The mirror's
+    /// enroll calls this through the world builder's hook, landing the
+    /// same secret (and its post-enroll hash) at the vault door.
+    func enrollProof(macKeyWire: String) {
+        lock.withLock {
+            guard let stored = row,
+                  var current = (try? JSONSerialization.jsonObject(with: stored)) as? [String: Any],
+                  current[VaultRPCEmulation.secretKey] == nil,
+                  let mac = Data(base64Encoded: macKeyWire)
+            else { return }
+            current[VaultRPCEmulation.secretKey] = macKeyWire
+            current["key_proof_hash"] = KeyProof.hash(ofToken: mac)
+            row = (try? JSONSerialization.data(withJSONObject: current)) ?? row
+        }
+    }
+
     private func takeBeforeUpdate() -> (@Sendable () async throws -> Void)? {
         lock.withLock {
             let hook = beforeUpdate
@@ -249,6 +271,12 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
         }
     }
 
+    /// 13y: the world builder's one-account-one-secret hook — the vault
+    /// double learns every enrollment this mirror accepts (see
+    /// `EmulatedVault.enrollProof`).
+    private var onEnroll: (@Sendable (String) -> Void)?
+    func setOnEnroll(_ hook: @escaping @Sendable (String) -> Void) { onEnroll = hook }
+
     func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
         guard let vault, let fetched = try await vault.fetchVault() else {
             throw SyncError.encryptionKeysReplaced
@@ -267,6 +295,7 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
         guard legacyOK || successorOK else { throw SyncError.keyProofRefused }
         macSecret = macRaw
         enrolledUnderHash = vaultHash
+        onEnroll?(macKey)
     }
 
     /// 13y UNIT B — the DIRECT-CALL test helper (the core fake's
@@ -602,6 +631,10 @@ struct PostureSwitchTests {
                     session: UserSession(accessToken: "token-2b", userID: "user-2b")),
                 load: emu.load)
             await server.attach(vault: client)
+            // 13y: one account, one secret — the engine round's enrollment
+            // reaches the vault door too (the request-counting pins'
+            // arithmetic stays the real wire's).
+            await server.setOnEnroll { [weak emu] in emu?.enrollProof(macKeyWire: $0) }
             let minted = try await VaultEnrollment(client: client).setUp(passphrase: "sesame")
             #expect(keyStore.save(minted))
             material = minted

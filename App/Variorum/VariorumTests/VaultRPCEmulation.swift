@@ -29,7 +29,7 @@ enum VaultRPCEmulation {
     /// row), never a static that parallel worlds would cross-contaminate.
     /// The client's `KeyVaultWireRow` decode ignores unknown keys, so the
     /// GET road serves it harmlessly.
-    private static let secretKey = "_emu_key_proof_mac_secret"
+    static let secretKey = "_emu_key_proof_mac_secret"  // internal: EmulatedVault's enrollProof writes it
 
     private static func marker(_ name: String) -> Served {
         Served(status: 400, body: Data(#"{"code":"P0001","message":"\#(name): refused by the mirror"}"#.utf8))

@@ -180,6 +180,8 @@ struct PostureSwitchDrillTests {
                 session: UserSession(accessToken: "token-2b-drill", userID: "user-2b-drill")),
             load: emu.load)
         await mirror.attach(vault: vaultClient)
+        // 13y: one account, one secret (see EmulatedVault.enrollProof).
+        await mirror.setOnEnroll { [weak emu] in emu?.enrollProof(macKeyWire: $0) }
         let material = try await VaultEnrollment(client: vaultClient).setUp(passphrase: "sesame")
         // STANDARD's steady state (2a): the vault carries the Apple-held copy
         // of M under this account's A — the same act leaving Castle performs

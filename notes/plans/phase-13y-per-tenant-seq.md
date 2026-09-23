@@ -1086,9 +1086,36 @@ closes them with build-for-testing on both targets at unit close.
     other eleven all hand the material to material-taking seams (`updateVault`,
     `SyncEncryptionKeys`) or are the mirror's own gate forwards; this was the
     class's only member.
-  - **Verification within the fence:** all fourteen (+2 in round 2) edited files
-    pass a syntax-only `swiftc -parse` sweep; typecheck is the orchestrator's
-    build-for-testing (no Mac-suite runs on this side). **Runtime exposure, stated honestly:** the app
+  - **Round 3 (the doubles' FIRST EXECUTION: mobile green; Mac 66 tests/5 suites,
+    TWO issues — both `emu.updateCount` exactly +1 over the pin in the
+    Castle-runner suite):** the traced mechanism CORRECTS the orchestrator's
+    read — the mirror never touches `updateCount` and the enroll ROUTE is
+    uncounted; the +1 was a genuine SECOND `key_vault_update` REQUEST: both tests
+    run `engine.push()` (enrolling at the MIRROR) before the measured window, then
+    the rekey's `begin` is the world's first VAULT-door write, whose first attempt
+    is enroll-refused (counted — the counter increments before the check refuses)
+    before the accepted retry (counted). On the REAL wire the account has ONE
+    enrollment state, landed by that very engine round, so `begin` costs one
+    request — **the pins' arithmetic is the real wire's truth and stays
+    UNMODIFIED; the fidelity bug was the doubles' SPLIT enrollment state** (mirror
+    secret vs vault-emu secret). Fix, the surgical one: the mirror's accepted
+    enroll propagates to the vault double — `EmulatedMirror.setOnEnroll` +
+    `EmulatedVault.enrollProof(macKeyWire:)` (idempotent: never overwrites an
+    existing secret, so the post-rotation re-adopt can't cross the successor
+    rule's landing), wired at ALL THREE world builders (PostureSwitchTests,
+    ConnectLibraryTests, PostureSwitchDrillTests) — strictly convergent toward
+    the pre-13y (= real-wire) request counts every existing pin asserts;
+    `VaultRPCEmulation.secretKey` went internal for it (both copies still
+    byte-identical). Re-derived under the fix: test 1 = begin·refused·accepted =
+    +3 ✓; test 2 = begin + 3 refused = +4 ✓. **The `sqlcipher hmac check failed
+    pgno=1` ERROR lines are the suite's standing designed wrong-key noise** — the
+    Castle drills deliberately open stores under wrong keys/passphrases
+    (`StoreEncryptionMigration.opens` probes, the wrongPassphrase arms) and
+    SQLCipher logs the hmac failure on every such open, since the 13p
+    encrypted-store era; none of this fix pass touches store-key code.
+  - **Verification within the fence:** all fourteen (+2 in round 2, +5 in round 3)
+    edited files pass a syntax-only `swiftc -parse` sweep; typecheck and execution
+    are the orchestrator's (no Mac-suite runs on this side). **Runtime exposure, stated honestly:** the app
     suites' RUNTIME behavior under the challenge dance (the emulation roads above)
     is untested until the next full Mac-suite run — the doubles were built to
     preserve each test's old outcome through the new protocol, but that claim has
