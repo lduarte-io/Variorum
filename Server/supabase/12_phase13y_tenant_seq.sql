@@ -1740,9 +1740,9 @@ commit;
 --   select sync_schema_version();                                    -- 9
 --   select count(*) from sync_tenant_seq;                             -- ≥ 1 (her account)
 --   select owner_id, last_seq from sync_tenant_seq;                   -- her floor ≥ her devices' cursors
---   select pg_get_functiondef('key_vault_update(jsonb, int, text)'::regprocedure)
+--   select pg_get_functiondef('key_vault_update(jsonb, int, text, text)'::regprocedure)
 --          like '%VARIORUM_ROTATION_ROWS_REMAIN%';                   -- true (the fold-in)
---   select pg_get_functiondef('key_vault_update(jsonb, int, text)'::regprocedure)
+--   select pg_get_functiondef('key_vault_update(jsonb, int, text, text)'::regprocedure)
 --          like '%next_tenant_seq%';                                  -- true (M3)
 --   select to_regclass('public.sync_server_seq') is null
 --          and not exists (select 1 from pg_class where relname = 'sync_server_seq');

@@ -67,12 +67,19 @@ session.
 `key_vault_update(jsonb, int, text)` spelling section 0 drops; post-deploy the cast itself
 errors, tripping the window at exactly the two lines proving the guard fold-in and M3.
 UNIT B widened the signature and extended the tail but left these UNIT A-era lines. Fix:
-update both casts (verification-doc class, no pin owed). Disposition: PENDING.
+update both casts (verification-doc class, no pin owed). Disposition: **AGREE — FIXED
+(fix session).** Both verification-tail casts at 12:1743/1745 updated to the four-parameter
+`key_vault_update(jsonb, int, text, text)` spelling UNIT B's signature carries (12:1372).
+Verification-doc class, no pin owed.
 
 **F-R5 [MINOR] · KeyProof.swift:16–24 —** the type-level doc teaches two retired
 contracts (the NULL-hash first-proof arm, retired by 12 §5f; kp1 as "the `key_proof` BODY
 parameter of every mutating RPC," superseded by the per-request bound HMAC). Two-sentence
-doc correction. Disposition: PENDING.
+doc correction. Disposition: **AGREE — FIXED (fix session).** `KeyProof.swift`'s type doc
+corrected: the v1 wire token is now named the ENROLLMENT authorization (kp1) — SUPERSEDED as
+the per-request proof by kp2's challenge-bound HMAC (pointing at `KeyProofMaterial`/
+`SyncKeyProof`) — and the NULL-hash-first-proof migration-arm sentence is struck (retired by
+12 §5f). Doc class, no pin owed.
 
 **F-R6 [MINOR] · the challenge memo §7 —** the edge list omits the PRE-ENROLLMENT GAP:
 between the marker-9 deploy and an account's first round, `key_proof_enroll` is authorized

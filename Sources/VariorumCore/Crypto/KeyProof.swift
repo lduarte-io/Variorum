@@ -10,15 +10,24 @@ import Foundation
 /// - **The token:** `HMAC-SHA256(M, "variorum.key-proof.v1")` — 32 bytes,
 ///   computed on demand by every device that holds M (the key provider's
 ///   `currentKeys()`), never stored anywhere client-side.
-/// - **The wire form:** the token base64-encoded, the `key_proof` BODY
-///   parameter of every mutating RPC and of the two read RPCs — never a URL
-///   query item, never a header (a gateway log must never capture it).
+/// - **The wire form (since 13y UNIT B — SUPERSEDED as the per-request
+///   proof):** this v1 token base64-encoded is now the ENROLLMENT
+///   authorization only — `key_proof_enroll`'s first argument (`kp1`), the
+///   value whose `SHA-256` a pre-enrollment vault row stores. The proof
+///   carried on every mutating RPC and both read RPCs is no longer this
+///   static token but a PER-REQUEST value bound to a single-use server
+///   challenge (`base64(HMAC-SHA256(kp2, nonce ‖ ':' ‖ rpc_name))` — see
+///   `KeyProofMaterial` and `SyncKeyProof`), so a captured request body
+///   holds a consumed nonce, not a reusable bearer. Never a URL query
+///   item, never a header (a gateway log must never capture it).
 /// - **What the server keeps:** `SHA-256(token)` as lowercase hex in
-///   `key_vault.key_proof_hash`, compared in constant time inside the RPCs;
-///   a vault whose hash is NULL accepts its FIRST proof (the author's
-///   existing vault — the migration arm). A server compromise or a log
-///   capture therefore yields at most the right to MUTATE the mirror,
-///   never the right to READ it — the account-password class.
+///   `key_vault.key_proof_hash`, compared in constant time inside the RPCs
+///   (after enrollment the row moves to `SHA-256(kp2)` — `macHash` below).
+///   The NULL-hash-accepts-its-first-proof migration arm is RETIRED (12
+///   §5f); creation lands a hash by trigger and enrollment refuses a
+///   hash-less row. A server compromise or a log capture therefore yields
+///   at most the right to MUTATE the mirror, never the right to READ it —
+///   the account-password class.
 /// - **The rotation road:** a new master M′ gives a new token; the ONE
 ///   `key_vault_update` that installs the new hash is authorized by the
 ///   OLD proof; the old proof is refused from then on (pinned).
