@@ -484,9 +484,39 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
   rows. **The whole sync family green under `productionRound`: 396/396 in 52 suites**
   (Sync* · Purge* · Rotation · Furniture · DrainOrder · Tenant + attacker · FaultInjection ·
   EditorRate · StructuralSession · MobileCapture · KeyProof · Vault · AuthRLS ·
-  SerializerCompleteness). Red-on-old for the probe: PENDING (the behavioral-revert
-  demonstration runs against this commit, next).
-- Full core suite at unit close: PENDING.
+  SerializerCompleteness). **RED-ON-OLD: DEMONSTRATED against commit d4002bf6 by behavioral
+  revert** — the fake's mint temporarily reverted to ONE shared counter (the pre-13y mirror's
+  numbering; never committed), the probe went RED on exactly its disclosure lines: A's one
+  write after B's forty-note burst was granted seq **171** where A's own head was **8** — the
+  163-seq gap IS the aggregate-volume side channel (three failed expectations: the contiguity
+  line, the cursor line, the bookkeeping-ceiling line); the committed state restored via
+  `git checkout --` on the clean tree, the probe green again. The DDL pins carry their own
+  non-vacuity arms (the doctored-fixture idiom + the `!= swapped` checks on every
+  verbatim-modulo pin).
+- **FULL CORE SUITE AT UNIT CLOSE: 1694 tests / 179 suites — ALL PASSED** (2026-09-22; log
+  archived in the session scratchpad), exactly ONE skipped — the standing env-gated
+  real-server integration pass (`basicOfflineEditsConvergeOverTheRealServer`, part of the
+  baseline). The +15 over the 1679/179 baseline is exact: the 12 new AuthRLSDDL 12-block
+  pins + the 3 new MultiTenant probes. Suites unchanged at 179.
+
+### WHAT REMAINS OPEN IN UNIT A (the fork, and nothing else)
+
+1. **The horizon-exposure VEHICLE** (Step 1's last piece + Step 2 pin (d)) — proposed above
+   (three shapes, Shape 1 recommended), awaiting the orchestrator's R-13y-4 ruling; the 12
+   artifact, the sweep, `AuthRLSDDLTests` (incl. re-pointing `theVisibilityHorizonSurvives
+   EveryRework` at the ruled shape), `SyncRotationTransport`/`SupabaseTransport`/
+   `FakeSyncServer` and `CorpusRotation.horizonWait` all take the ruled shape in one
+   follow-up piece. Everything else in Steps 0–3 is DONE and green.
+2. **Flagged for the ladder, recorded (not defects):** F-S4's drop-the-global-sequence call
+   (fail-loud closure — the orchestrator may keep or strike; one `drop sequence` line);
+   the `sync_tenant_seq` rename note (Step 2's block above); and the F-S3 observation that
+   per-owner counter locking serializes ONE account's concurrent pushes mint-to-commit
+   (the plan's own stated intent; negligible at personal scale, recorded for 13t's
+   at-scale eye) and incidentally closes the A5 skew class within an account (A5 kept
+   deployed byte-unchanged as the belt). Also recorded: a service-role DIRECT table write
+   (no designed road uses one — everything goes through the RPCs) would now fail loudly at
+   `next_tenant_seq`'s EXECUTE check instead of silently minting; fail-loud on an undesigned
+   write road, recorded as intended.
 
 ### STEP 0 — THE SEQ-ASSUMPTION SURVEY (read-only; every consumer read in this session's own context)
 
