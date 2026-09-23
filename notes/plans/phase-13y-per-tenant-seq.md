@@ -427,7 +427,7 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
 | 9 | B | Step 4 — the abuse guard (+ numbers PROVISIONAL; #144) | **DONE (ec80f92d + deb86054)** — the adjudicated one-row tumbling shape; AbuseGuardTests 8/8 |
 | 10 | B | Step 4b — the re-auth doors | **DONE (ec80f92d + deb86054)** — 10-min amr check both destructive doors; AuthRateLimit numbers stated + burst pin |
 | 11 | B | Step 5 — the Fragments brief | **DONE (61416521)** — the dated carry item, brief only |
-| 12 | — | The ladder (combined diff; cap three) | open |
+| 12 | — | The ladder (combined diff; cap three) | **ROUND 1 DONE** (2 BLOCKER / 1 MAJOR / 3 MINOR / 1 NIT → all dispositioned; the record + the F-R1 re-ruling + the F-R2 arbitration: `notes/plans/13y-ladder-round1.md`; fixes pushed, core 1722/180, both targets build clean) — **ROUND 2 OPEN** (fresh reviewer; its anchor is the round-1 record's findings + dispositions) |
 | 13 | — | Step 6 — HER WINDOW (deploy · installs · live round · carry-over proof) | open |
 | 14 | — | Closeout (SyncSpec §12 running record + I-1 amendment · master plan · handoff · #144 ratify bundle) | open |
 
