@@ -430,3 +430,151 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
 | 12 | — | The ladder (combined diff; cap three) | open |
 | 13 | — | Step 6 — HER WINDOW (deploy · installs · live round · carry-over proof) | open |
 | 14 | — | Closeout (SyncSpec §12 running record + I-1 amendment · master plan · handoff · #144 ratify bundle) | open |
+
+---
+
+## UNIT A RECORD (the per-tenant sequence — implementer session, 2026-09-22)
+
+### LIVE STATUS (flipped in the same commit as each piece; a fresh session finishes from this)
+
+- **Step 0 — the seq-assumption survey: DONE (this commit)** — verdict table below; ZERO
+  cross-account verdicts, no stop-and-report. Two load-bearing survey findings (F-S1 floor
+  widening, F-S2 dedupe verified-absent) + two recorded observations (F-S3 A5-belt, F-S4
+  sequence-object disposal) below.
+- **Step 1 — `12_phase13y_tenant_seq.sql`: NOT-STARTED — settled design in the survey's
+  CONSEQUENCES block below**; the ONE named fork (the horizon-exposure vehicle) is PROPOSED
+  below and NOT BUILT pending the orchestrator's ruling; everything else in Step 1 proceeds.
+- **Step 2 — client: NOT-STARTED** (lockstepVersion 8→9 rides Step 1's commit per the standing
+  same-commit rule; pins (a)/(b)/adopt-road ride Step 3's suites; pin (d) awaits the fork ruling).
+- **Step 3 — harness: NOT-STARTED — settled design below** (per-account counters + lazy
+  max-floor; `headSeq(for:)`; quiescence helpers per-account; the disclosure-closure probe).
+- Full core suite at unit close: PENDING.
+
+### STEP 0 — THE SEQ-ASSUMPTION SURVEY (read-only; every consumer read in this session's own context)
+
+**Verdict: WITHIN-ACCOUNT everywhere. No client- or server-side comparison crosses accounts.**
+The phase's premise holds: per-tenant sequences preserve every relative order any client ever
+observes, because every observable order is already per-account (the RLS/owner-scoped feed
+serves only own rows; every repair/janitor/rotation comparison is between own-account numbers).
+
+**The mint sites — the plan's three, VERIFIED, and the list COMPLETED by grep over
+`Server/supabase/**/*.sql` for `nextval`: no fourth live mint site exists.** (01:29, 03:46,
+10:582 are superseded historical bodies; 11:60/862 are comments.)
+
+| # | Mint site (deployed truth) | Where | Swap in 12 |
+|---|---|---|---|
+| M1 | `stamp_server_seq()` — the trigger every data table fires (19 tables) | 09:227 (re-affirmed body) | `new.server_seq := next_owner_seq(new.owner_id)` — every data row carries `owner_id uuid NOT NULL` (09's rebuild), so the trigger has the owner in hand |
+| M2 | `sync_purge_execute` — `granted_seq := nextval(…)`, compared against the owner's device cursors (ledger scan points) | 11:697 | `next_owner_seq(caller)` |
+| M3 | `key_vault_update` rotation-begin — `next_seq := nextval(…)` into `rotation_started_seq`, compared against the owner's data-row seqs (the seq rule + the completion guard) | overlay:174 (= 11:922 + guard) | `next_owner_seq(caller)` |
+
+**Client-side consumers, each verdicted:**
+
+| Consumer | What it compares | Verdict |
+|---|---|---|
+| `SyncEngine.cursor`/`setCursor` (`last_server_seq`) | own cursor vs served rows' seqs — the feed is owner-scoped (09/11 `where t.owner_id = %L` on every branch) | WITHIN |
+| `SyncEngine.recordSeq`/`knownSeq` (`sync_row_seq`) | own accepts + own pulls; read only by repairs below | WITHIN |
+| `SyncEngine.pullIgnoringMarker` window paging | own feed's seq ordering | WITHIN |
+| `Merge.merge` | passes serverSeq through to `recordSeq`; no comparison | WITHIN |
+| `Repairs.repairPlacementCollision` | incoming seq vs `knownSeq(rival)` — two placements of ONE block in ONE store (one account by construction) | WITHIN |
+| `Repairs` I10 resurrection + archive-race rescue | `ORDER BY COALESCE(s.server_seq,0) DESC` over ONE block's variants | WITHIN |
+| `PurgeJanitor.sweep` | served horizon (min over OWN device_cursor) capped at OWN cursor; family rows' `sync_row_seq` vs that horizon | WITHIN |
+| `PurgeJanitor.reconcileLedger` | own `last_purge_seq` scan point vs own account's ledger page (floor + purgedSeq) — its R2-M2 comment already anticipates this phase and leans on the §12 lockstep refusal during the window | WITHIN |
+| `PurgeJanitor.healPurgeOrphan` / `reonboardFromAccount` | own ledger, own stall, own floor | WITHIN |
+| `PurgeFamily.deleteLocal` | deletes own `sync_row_seq` bookkeeping | WITHIN |
+| `CorpusRotation` (`pullBelow`, walk, completion) + `SyncPayloadCrypto.keyMaterial(forServerSeq:)` | own rows' seqs vs `rotation_started_seq` — VALID only because M3 mints from the same counter as M1; the swap keeps them on the owner's counter together | WITHIN (after M3 swap) |
+| `RekeyRecencyProbe` | own cursor anchor; compares `updated_at` strings, not seqs | WITHIN |
+| `SampleLibraryDedupe` | **VERIFIED ABSENT (F-S2)**: zero seq reads — keeper choice is smaller-id, kill evidence is wall stamps, `meetingStands` is liveness/outbox/stamps. The plan's starting list named it; the survey's answer is that no seq-ranked leg exists there | N/A |
+| `RotationMarker` / `KeyVaultFormat.rotationStartedSeq` / `VaultBootstrap` / `OwnerIdentity` / `Migrations` / `Triggers` / `VariorumRecord` | storage/definitions/log strings only | WITHIN |
+| `resyncReinitialize` | clears own `sync_row_seq` + cursor; its "the global server_seq itself is NEVER reset" comment re-reads per-owner (the OWNER's counter is never reset) — comment updated at Step 2 | WITHIN |
+
+**Server-side consumers, each verdicted (deployed truth = 11 + the rotation-clearing overlay):**
+
+| Consumer | Verdict |
+|---|---|
+| `sync_pull` ordering + A5 horizon | WITHIN — every branch owner-filtered; ordering semantics preserved per-owner |
+| `sync_push` CAS + granted seqs + reject payloads | WITHIN — tenant-scoped since 09 |
+| `sync_reencrypt` fresh seqs (via M1) | WITHIN |
+| `sync_horizon` — min(last_seq) over own `device_cursor` | WITHIN |
+| `sync_purge_ledger` — own `purged_row` page + floor 0 | WITHIN |
+| `sync_purge_execute` — M2 + own-partition deletes + ledger | WITHIN (after M2 swap) |
+| `key_vault_update` — M3 + the completion guard counting OWN ciphertext rows below the seq | WITHIN (after M3 swap) |
+| `device_cursor` / `purged_row` rows | per-(owner, device) / per-owner | WITHIN |
+
+**CONSEQUENCES the survey settles for Step 1 (the buildable design):**
+
+- **The counter**: `sync_owner_seq(owner_id uuid PK, last_seq bigint)` + `next_owner_seq(for_owner uuid)`
+  (upsert-increment `ON CONFLICT … DO UPDATE … RETURNING` — the row lock IS the per-tenant
+  serialization; the parameter name honors the 13j naming rule, the `for_device` idiom).
+  Posture: the `device_cursor` pattern — FORCE RLS + owner policy (`owner_id = auth.uid()` —
+  every mint path executes with the caller's auth context), revokes from anon/authenticated,
+  `select, insert, update` to `variorum_definer` (M1 runs as the definer inside the SECURITY
+  DEFINER bodies — the 14c-gate file's recorded INVOKER-trigger reading).
+- **Lock-order safety, traced**: every path takes the vault row (gate FOR SHARE /
+  `key_vault_update` FOR UPDATE) BEFORE its first counter touch — one lock order, no cycle.
+  Decision 31's guarantee TIGHTENS: an old-proof push holds the owner's counter row to commit,
+  so the rotation mint waits on BOTH the vault share lock and the counter row — pre-rotation
+  seqs sit below the rotation seq by lock order, per owner.
+- **F-S1 — THE FLOOR IS WIDER THAN THE PLAN'S SENTENCE (load-bearing; the plan's own "her
+  cursors must stay valid" demands it).** Data-max alone is NOT a valid floor: the janitor's
+  `executePurge` REMOVES rows from the mirror, so an owner's data-table max can sit BELOW her
+  device cursors (she was served the top seqs, then their rows were purged) — a counter floored
+  at data-max would mint fresh seqs ≤ her cursor, and her pulls (`server_seq > cursor`) would
+  never serve them: silent loss. Same class for the ledger (`purged_seq` below a device's
+  `last_purge_seq` scan point is never scanned again) and for a mid-flight rotation
+  (`rotation_started_seq`). **The initialization therefore floors each owner's counter at
+  GREATEST of: max data-row seq across all 19 tables · max `device_cursor.last_seq` ·
+  max `purged_row.purged_seq` · `key_vault.rotation_started_seq`.** Deploy-time reality check:
+  on the real mirror all four give values ≤ the global head and the greatest is what her
+  cursors demand; on her account today the data/cursor values are the live ones.
+- **F-S3 (recorded observation, no action)**: the per-owner counter-row lock serializes ONE
+  account's concurrent writers from mint to commit — commit order = seq order per owner — which
+  structurally closes the A5 skew class WITHIN an account. A5 stays deployed byte-unchanged
+  (CorpusRotation's wait and BLOCKER-1's apparatus lean on it; it demotes to a belt). The
+  per-account write serialization is the plan's own stated intent ("tenants never contend with
+  each other"); at two-device personal scale the queueing cost is negligible.
+- **F-S4 (small call, flagged for the orchestrator/ladder)**: after the three swaps NOTHING
+  references `sync_server_seq` (the data tables default `server_seq` to 0; the trigger
+  overwrites). Step 1 DROPS the sequence in 12 — fail-loud closure: any future artifact that
+  quietly `nextval`s the global counter errors instead of silently reopening the disclosure.
+  The superseded overlay is independently inert: its own re-run guard refuses once the deployed
+  `key_vault_update` body carries `VARIORUM_ROTATION_ROWS_REMAIN` (which 12's fold-in does).
+- **Harness (Step 3)**: `FakeSyncServer` converts its one global `seq` to per-account counters
+  with a LAZY max-floor (first mint for an account reads `max(serverSeq)` over its partition —
+  the DDL's floor semantics exactly, and it models the migration scenario for free);
+  `wipe()`/`truncateAccount` leave counters untouched (the sequence-survives doctrine, per-owner);
+  `account`-scoped `headSeq(for:)` replaces the global `headSeq` in `syncToQuiescence` /
+  `productionQuiescence` (both compare ONE account's cursors — the per-account head is the
+  honest comparand; `MultiTenantSyncTests.fleetQuiesce`'s workaround comment can then say why
+  it no longer needs one).
+
+### THE NAMED DESIGN FORK — the A5 horizon-exposure VEHICLE (proposed; NOT BUILT until the orchestrator's ruling lands here)
+
+Today: `interval '2 seconds'` inline in `sync_pull`'s branches; the client twin
+`CorpusRotation.productionHorizonWait = 2500 ms` hardcoded — two constants, no link
+(BLOCKER-1's class if either moves alone). Three shapes weighed:
+
+- **Shape 1 (RECOMMENDED) — a sibling zero-arg definer function, `sync_schema_version()`'s
+  exact shape: `sync_visibility_horizon_ms() returns bigint` (STABLE, returns the constant
+  2000; same posture/grants as the version RPC; `variorum_definer`-owned).** `sync_pull`
+  reads it ONCE into a local and derives its filter interval from it — the served value and
+  the enforced value are ONE function, un-driftable by construction. Client half:
+  `SyncRotationTransport` gains `visibilityHorizonMillis()` (the 13j separate-protocol
+  precedent — CorpusRotation's walk is the only consumer, so the dozens of engine-wrapper
+  transports never carry a dead conformance); the walk's production wait derives
+  `served + margin` through one pure pinned function (`CorpusRotation.horizonWait(forServedMillis:)`,
+  margin 500 ms — today's 2500−2000), the hardcoded 2500 retired. Pins: DDL (the pull body
+  carries the helper call and NO inline interval literal; the helper returns 2000), client
+  (the derivation function; the walk fetches the served value on its production road —
+  spy-counted), fake (serves a settable value; the walk's wait observed = served + margin).
+- **Shape 2 — the constant rides `sync_meta` (`'visibility_horizon_ms'`), read by a serving
+  function AND by `sync_pull` per call.** Pro: operator-tunable without a function redeploy.
+  Con: a tunable knob makes the dumb server less dumb for no present need — §12's grammar
+  deploys changes via numbered artifacts anyway; and the coalesce-default split (function
+  default vs table row) is a second place for drift.
+- **Shape 3 — widen `sync_schema_version()` itself to jsonb `{version, horizon_ms}`.**
+  REJECTED: that function's shape is what a MISMATCHED (old) client must still be able to
+  read to refuse cleanly — changing its return type breaks the §12 refusal road for every
+  old build, which is exactly the wrong function to destabilize.
+
+**RULING (orchestrator, under R-13y-4): PENDING.**
+
