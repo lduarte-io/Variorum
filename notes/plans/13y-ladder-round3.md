@@ -85,3 +85,21 @@ artifact carrying a known fail-open asymmetry when amending it pre-deploy costs 
 surgical and fully specified by the round-3 reviewer; the orchestrator verifies them by
 its own read + pin runs; the finals and the window's live evidence stand behind them. No
 round 4; these dispositions close in this file.
+
+## FIX SEAT CLOSE (2026-09-23 — the post-cap fixes; the ladder's build work ends here)
+
+Both MINORs AGREE/FIXED in ONE surgical commit (the fake's `checkProof` + the renamed
+splice pin + 12 §5g's guard and the three single-use comments + the two pin arms + this
+file). **R3-F1's RED-ON-OLD verified by behavioral revert against the COMMITTED fix:** with
+burn-on-refusal temporarily restored in the fake, the re-worded pin failed at its own-door
+landing — `KeyProofGateTests.swift:776 Caught error: Sync couldn't complete a security
+check just now…` (the stale refusal: the burned pair could not land) — restored via
+checkout to the committed fix, green. R3-F2's arm is green-by-design, stated plainly (no
+red-on-old possible; the traced NULL fail-open is the justification). Ripple re-derived
+pin-by-pin (recorded in R3-F1's disposition); one residual recorded there (post-proof RAISEs
+in the same RPC also roll back on the mirror — unpinned, bounded, noted for any future pin
+on that seam). Suites at close: **AuthRLSDDLTests 76/76 · KeyProofGateTests 17/17 · FULL
+CORE 1722 tests / 180 suites — ALL PASSED** (+0 over round 2's close: the splice pin
+re-worded in place, both new arms extending existing pins). No app-target files touched
+this round (the standing COMPILE-PENDING list unchanged: `AuthSession.swift` only, from
+round 1). Zero mirror contact.
