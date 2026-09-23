@@ -1826,4 +1826,31 @@ is a length floor, not an entropy floor; whether to pair it with a strength chec
 checkpoint bundle, propose-only — **DECLINED by her at the 2026-09-22 morning sitting ("decline");
 17n stays closed, nothing further owed**.)*
 
-*(Next free number: **#144**.)*
+#144 — **13y's TWO RULED PROVISIONALS (2026-09-22, the orchestrator under the architect
+mandate, per YOUR kickoff answer R-13y-4 — "PROVISIONAL-and-continue"; the binding design is
+`notes/plans/phase-13y-memo-key-proof-challenge.md`; both are NAMED one line each at the
+deploy window's pre-deploy summary before anything fires, and ratified here at the
+checkpoint):** **(a) THE KEY-PROOF CHALLENGE'S SHAPE** — a server-issued single-use
+challenge (5-min TTL, server clock only, per-owner capped nonce table) over a NEW
+`kp2 = HMAC-SHA256(M, "variorum.key-proof.v2")` held server-side in **Supabase Vault**
+(backups provably stay ciphertext — the confirmed property; the definer-role grant pattern
+with the PUBLIC-execute revokes), verified per-request as `HMAC(kp2, nonce‖rpc_name)` in
+constant time; enrollment authorized ONCE by the old hash; rotation carries kp2′ through
+`key_vault_update` under the current proof. The stated trades: kp values still transit at
+enroll/rotation only (the shared-secret floor — asymmetric in-database is ruled out on
+Supabase's own pgsodium deprecation); a control-plane compromise (Management-API root key)
+could recover kp2 — a NEW narrow integrity-only surface, recorded for the disclosure
+envelope. Alternatives weighed in the memo §2/§6. **(b) THE ABUSE-GUARD NUMBERS** — a
+500,000-row LIFETIME first-load pool per account (your import constraint: her words,
+*"I do need to account for onetime migrations…"* — a 10k-note import lands ~50–100k rows,
+×5–10 headroom) + **50,000 accepted row-writes per rolling 24 h** steady-state (×10+ over a
+heavy human day) + a per-call batch cap from the measured chunk size ×10; `sync_reencrypt`
+EXEMPT (a rotation rewrites the corpus by design), `account_data_truncate` RESETS the pool
+(the adopt road's repush is a first load); typed `VARIORUM_WRITE_QUOTA`, §12 grammar,
+nothing lost. **(c) rides with them: the destructive RPCs' recent-re-auth window = 10
+minutes** via the JWT's `amr` password timestamp (matches the doors' existing
+sign-in-before-acting flow exactly; one empirical refresh-survival probe at the window —
+if the timestamp bumps on refresh the guard is hollow and the fallback comes back for a
+re-ruling). 13t revisits every number with pricing.
+
+*(Next free number: **#145**.)*

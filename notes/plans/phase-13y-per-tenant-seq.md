@@ -393,8 +393,8 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
 | 5 | A | Step 1 — the `12_` DDL (+ guard fold-in, NIT-4, horizon exposure, sweep extension) | open |
 | 6 | A | Step 2 — client pins (incl. the adopt-road scenario) | open |
 | 7 | A | Step 3 — per-tenant harness + the disclosure-closure probe | open |
-| 8 | B | Step 4c memo — the key-proof challenge design (orchestrator rules; #144) | open |
-| 9 | B | Step 4 — the abuse guard (+ numbers PROVISIONAL; #144) | open |
+| 8 | B | Step 4c memo — the key-proof challenge design (orchestrator rules; #144) | **RULED 2026-09-22 — `notes/plans/phase-13y-memo-key-proof-challenge.md` (the challenge shape §3, the numbers §4, the re-auth window §5, trades §6, edges §7); #144 logged; UNIT B builds TO it** |
+| 9 | B | Step 4 — the abuse guard (+ numbers PROVISIONAL; #144) | numbers RULED (the memo §4); the mechanism's table shape is the implementer's proposal against them |
 | 10 | B | Step 4b — the re-auth doors | open |
 | 11 | B | Step 5 — the Fragments brief | open |
 | 12 | — | The ladder (combined diff; cap three) | open |
