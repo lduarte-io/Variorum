@@ -9,6 +9,23 @@ order, the rotation successor, the quota, the horizon vehicle, grants posture, b
 records). Both BLOCKERs and the MAJOR converge on ONE re-ruling + one grant line; nothing
 deployed needs repair.
 
+## FIX SESSION CLOSE (2026-09-23 — the fresh fix session; same-model flow)
+
+All in-scope findings dispositioned and pushed (6 commits, `2c4de36d`→`7f464bc2`). Full core
+suite **1722 tests / 180 suites — ALL PASSED** (baseline 1719 + 3 new pins: 1 janitor
+red-on-old + 2 truncate). Per finding: **F-R1** AGREE/FIXED (re-auth stripped from
+`sync_purge_execute`; red-on-old verified by behavioral revert) · **F-R2** AGREE the fix /
+**DISPUTE the severity** (a new technical fact — the definer's `authenticated` membership very
+likely already inherits `extensions` USAGE; the fix is belt + honest live verification; the
+orchestrator adjudicates severity) · **F-R3** AGREE/FIXED (the truncate adopts a fresh grant;
+red-on-old verified) · **F-R4** AGREE/FIXED (casts) · **F-R5** AGREE/FIXED (doc) · **F-R6**
+RESOLVED record-only (orchestrator's, unchanged) · **F-R7** RECORD-AT-THE-CODE (traced
+unreachable; documented). Nothing dismissed as hollow. **APP-TARGET COMPILE-PENDING for the
+orchestrator's build-for-testing:** `App/Variorum/Shared/AuthSession.swift`'s new
+`reauthenticatedGrant(_:)` (F-R3; reads `VariorumCore.ReauthenticatedSession`, no production
+caller yet). One process slip recorded honestly in F-R3's disposition (a behavioral-revert run
+on uncommitted work; re-applied from context, no committed work lost).
+
 ## THE FINDINGS (verbatim-faithful; dispositions filled by the fix session + orchestrator)
 
 **F-R1 [BLOCKER] · 12:1112–1123 + SyncScheduler.swift:230 + PurgeJanitor.swift:199/:751 —
