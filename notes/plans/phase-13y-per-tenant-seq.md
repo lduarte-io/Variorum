@@ -644,5 +644,39 @@ Today: `interval '2 seconds'` inline in `sync_pull`'s branches; the client twin
   read to refuse cleanly — changing its return type breaks the §12 refusal road for every
   old build, which is exactly the wrong function to destabilize.
 
-**RULING (orchestrator, under R-13y-4): PENDING.**
+**RULING (orchestrator, 2026-09-22, under the architect mandate): SHAPE 1, as proposed —
+build it.** The deciding property is Shape 1's own sentence: the served value and the
+enforced value are ONE function, un-driftable by construction — which is the rider's whole
+demand ("one constant moving without the other reopens BLOCKER-1's class"). Shape 2's
+tunability is a knob nobody asked for on a server whose whole design is dumbness (a horizon
+change is a deliberate §12-grammar act, not a dial); Shape 3's rejection is correct and
+stands (the marker function is the one thing an OLD client must still read to refuse
+cleanly — never destabilize the refusal road). The 500 ms margin stays today's arithmetic
+(2500−2000), stated as derived so a future horizon change moves the wait for free. Pins as
+proposed, all four legs.
+
+**FLAG ADJUDICATIONS (the report's four, each verdicted):**
+1. **F-S4's `drop sequence sync_server_seq` — KEPT.** Fail-loud closure is the right
+   posture: the mint-closure pin proves no `nextval` survives in the canonical text, and the
+   DROP makes any UN-pinned survivor (a future overlay, a hand-run fragment) error loudly
+   instead of silently minting from a dead global. The sequence was ours (01's), nothing
+   platform-side references it.
+2. **The `sync_tenant_seq`/`next_tenant_seq(for_tenant)` rename — APPROVED, and the reason
+   is the valuable part:** keeping the attacker suite's blanket no-owner-named-function wire
+   pin UNRELAXED preserves arm 9's strength exactly as ruled; an exemption list on that pin
+   would have been the drift class. The column stays `owner_id` (the 14c vocabulary).
+3. **F-S3 (per-owner lock serializes one account's concurrent pushes mint-to-commit) —
+   RECORDED as the plan's stated intent** ("per-tenant serialization, tenants never contend
+   with each other"); the at-scale eye is 13t's, noted on its orbit. The A5 horizon staying
+   deployed byte-unchanged as the belt is right — the incidental within-account closure is
+   a bonus, never the load-bearing guard.
+4. **The service-role direct-write fail-loud at the helper's EXECUTE check — INTENDED**
+   (the designed roads are the RPCs; a road nobody designed failing loudly is the 14c
+   two-layer doctrine applied).
+
+**Orchestrator verification before this ruling landed (my own hands):** the four commits
+read; the 12 DDL's load-bearing hunks read (the wide floor, the three mint swaps at their
+lines, the fold-in with `VARIORUM_ROTATION_ROWS_REMAIN` in the canonical body, the
+drop-sequence, marker 9 last, the helper's revoke/grant pair); the disclosure-closure probe
+and the full `AuthRLSDDLTests` suite (68/68) re-run green by the orchestrator.
 
