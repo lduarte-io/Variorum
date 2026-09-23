@@ -594,7 +594,7 @@ struct MultiTenantSyncTests {
         world.a1.keyProvider = FixedSyncKeyProvider(keys: rotated)
         world.a2.keyProvider = FixedSyncKeyProvider(keys: rotated)
         try await world.server.truncateAccount(
-            Self.userA, activeKeyID: rotated.corpusKeyID, keyProof: world.server.mintProof(rpc: "account_data_truncate", material: rotated.keyProof))
+            Self.userA, activeKeyID: rotated.corpusKeyID, keyProof: world.server.mintProof(rpc: "account_data_truncate", material: rotated.keyProof), reauth: .freshGrant)
         try await world.a1.withAsync { db in
             try await SyncEngine(transport: world.server).resyncReinitialize()
             _ = db

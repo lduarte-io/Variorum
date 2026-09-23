@@ -416,7 +416,7 @@ extension MultiTenantSyncTests {
             _ = try await server.executePurge([target], activeKeyID: currentKeyID, keyProof: server.mintProof(rpc: "sync_purge_execute", for: userA, material: oldProof), as: userA)
         }
         await #expect(throws: SyncError.keyProofRefused, "ARM 6: account_data_truncate") {
-            try await server.truncateAccount(userA, activeKeyID: currentKeyID, keyProof: server.mintProof(rpc: "account_data_truncate", for: userA, material: oldProof))
+            try await server.truncateAccount(userA, activeKeyID: currentKeyID, keyProof: server.mintProof(rpc: "account_data_truncate", for: userA, material: oldProof), reauth: .freshGrant)
         }
         await #expect(throws: SyncError.keyProofRefused, "ARM 6: sync_horizon gives nothing") {
             _ = try await server.syncHorizon(activeKeyID: currentKeyID, keyProof: server.mintProof(rpc: "sync_horizon", for: userA, material: oldProof), as: userA)

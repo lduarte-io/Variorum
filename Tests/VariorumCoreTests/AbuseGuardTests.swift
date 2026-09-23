@@ -131,11 +131,11 @@ struct AbuseGuardTests {
                 (0..<2).map { containerRow(id: "post-pool-\($0)") },
                 activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "sync_push"))
         }
-        // The re-key road: truncate (re-auth fresh by default — the doors
-        // sign in immediately before acting) → the pool is FRESH.
+        // The re-key road: truncate riding a FRESH grant (the door adopts a
+        // just-minted grant — F-R3) → the pool is FRESH.
         try await server.truncateAccount(
             FakeSyncServer.defaultUserID, activeKeyID: SyncTestKeys.corpusKeyID,
-            keyProof: server.mintProof(rpc: "account_data_truncate"))
+            keyProof: server.mintProof(rpc: "account_data_truncate"), reauth: .freshGrant)
         #expect(await server.writeBudgetFacts() == nil, "the budget row went with the truncate")
         let repush = try await server.push(
             (0..<3).map { containerRow(id: "repush-\($0)") },
@@ -164,14 +164,14 @@ struct AbuseGuardTests {
     // MARK: - The re-auth doors (memo §5; QUESTIONS #144(c))
 
     /// THE TRUNCATE DOOR DEMANDS RECENT RE-AUTH; THE PURGE DOOR RUNS
-    /// UNATTENDED (ladder R1 F-R1): a session whose newest password-method
-    /// amr entry is absent or stale refuses `account_data_truncate` typed —
-    /// a stolen long-lived token cannot empty an account's server copy —
-    /// but `sync_purge_execute` carries NO re-auth (its caller is the 13j
-    /// janitor, which sweeps unattended), so a purge under a STALE claim
-    /// succeeds. A fresh re-auth (the truncate door's own flow: it verifies
-    /// the password immediately before acting) passes. The fake enforces
-    /// the CLAIM check on synthetic claims (the 10-minute letter is the DDL
+    /// UNATTENDED (ladder R1 F-R1 + F-R3): the truncate reads the re-auth
+    /// claim from the SESSION it rides (F-R3) — a `.staleSession` (the
+    /// standing session, or a stolen long-lived token, whose amr never
+    /// freshens) refuses `account_data_truncate` typed; a `.freshGrant`
+    /// (the door's own adopt-fresh-grant flow) passes. `sync_purge_execute`
+    /// carries NO re-auth (F-R1: its caller is the 13j janitor, which
+    /// sweeps unattended), so a purge always runs. The fake models the
+    /// SESSION, never a defaulted bool (the 10-minute letter is the DDL
     /// pin's — an emulation choice, recorded).
     @Test func theTruncateDoorDemandsRecentReauthWhileThePurgeDoorRunsUnattended() async throws {
         let server = FakeSyncServer()
@@ -179,48 +179,48 @@ struct AbuseGuardTests {
             [containerRow(id: "c1"), containerRow(id: "c2")],
             activeKeyID: SyncTestKeys.corpusKeyID,
             keyProof: server.mintProof(rpc: "sync_push"))
-        // The stolen-token shape: valid keys, valid proofs, STALE re-auth.
-        await server.setRecentPasswordAuth(false)
-        // F-R1: the janitor's door runs UNATTENDED — a stale claim never
-        // freezes it. The purge succeeds and leaves its ledger entry.
+        // F-R1: the janitor's door runs UNATTENDED — no re-auth to freeze
+        // it. The purge succeeds and leaves its ledger entry.
         _ = try await server.executePurge(
             [SyncPurgeTarget(table: "container", rowID: "c1")],
             activeKeyID: SyncTestKeys.corpusKeyID,
             keyProof: server.mintProof(rpc: "sync_purge_execute"))
         #expect(await server.rowCount(table: "container") == 1, "the purge ran unattended — c1 is gone")
         #expect(await server.purgedLedgerCount() == 1, "and it left a ledger entry")
-        // The truncate door, by contrast, REFUSES a stale claim.
-        await #expect(throws: SyncError.reauthRequired, "account_data_truncate") {
+        // F-R3: the truncate riding a STALE standing session refuses.
+        await #expect(throws: SyncError.reauthRequired, "account_data_truncate on a stale session") {
             try await server.truncateAccount(
                 FakeSyncServer.defaultUserID, activeKeyID: SyncTestKeys.corpusKeyID,
-                keyProof: server.mintProof(rpc: "account_data_truncate"))
+                keyProof: server.mintProof(rpc: "account_data_truncate"),
+                reauth: .staleSession)
         }
         #expect(await server.rowCount(table: "container") == 1, "nothing truncated — c2 stands")
-        // The gate ORDER holds: a wrong proof still refuses AS a proof
-        // fault (fence/proof outrank the re-auth check — 12's letter).
+        // The gate ORDER holds: a wrong proof refuses AS a proof fault even
+        // riding a fresh session (fence/proof outrank re-auth — 12's letter).
         await #expect(throws: SyncError.keyProofRefused) {
             try await server.truncateAccount(
                 FakeSyncServer.defaultUserID, activeKeyID: SyncTestKeys.corpusKeyID,
                 keyProof: server.mintProof(
                     rpc: "account_data_truncate",
-                    material: KeyProofMaterial(master: SymmetricKey(size: .bits256))))
+                    material: KeyProofMaterial(master: SymmetricKey(size: .bits256))),
+                reauth: .freshGrant)
         }
-        // The truncate door's own flow: a fresh sign-in immediately before acting.
-        await server.setRecentPasswordAuth(true)
+        // The truncate door's own flow: it ADOPTS a fresh grant for the call.
         try await server.truncateAccount(
             FakeSyncServer.defaultUserID, activeKeyID: SyncTestKeys.corpusKeyID,
-            keyProof: server.mintProof(rpc: "account_data_truncate"))
-        #expect(await server.rowCount(table: "container") == 0, "a fresh claim lets the truncate through")
+            keyProof: server.mintProof(rpc: "account_data_truncate"),
+            reauth: .freshGrant)
+        #expect(await server.rowCount(table: "container") == 0, "a fresh grant lets the truncate through")
         // …and the honest wording.
         #expect(SyncError.reauthRequired.description.contains("fresh sign-in"))
     }
 
-    /// THE ROUND DOORS NEVER DEMAND RE-AUTH: rounds run unattended — a
-    /// stale claim refuses nothing on push/pull (the fake's twin of 12's
-    /// scoping, whose DDL pin holds the letter).
+    /// THE ROUND DOORS NEVER DEMAND RE-AUTH: rounds run unattended — no
+    /// re-auth check touches push/pull (only `account_data_truncate` carries
+    /// one; the DDL pin holds the letter, and the fake has no re-auth on the
+    /// round doors to trip).
     @Test func aStaleReauthClaimNeverTouchesTheRoundDoors() async throws {
         let server = FakeSyncServer()
-        await server.setRecentPasswordAuth(false)
         let a = try SyncClient(name: "A", prefix: "AA", transport: server)
         try a.with { ops, _ in _ = try ops.createPost(title: "unattended", profile: .blog) }
         let report = try await a.push()

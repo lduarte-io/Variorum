@@ -97,7 +97,7 @@ struct KeyProofGateTests {
                 keyProof: await wrongPair("sync_purge_execute"))
         }
         await #expect(throws: SyncError.keyProofRefused, "truncate") {
-            try await server.truncateAccount(world.userID, activeKeyID: keyID, keyProof: await wrongPair("account_data_truncate"))
+            try await server.truncateAccount(world.userID, activeKeyID: keyID, keyProof: await wrongPair("account_data_truncate"), reauth: .freshGrant)
         }
         await #expect(throws: SyncError.keyProofRefused, "re-encrypt") {
             _ = try await server.reencrypt(
@@ -305,11 +305,11 @@ struct KeyProofGateTests {
         await #expect(throws: SyncError.keyProofRefused) {
             try await server.truncateAccount(
                 FakeSyncServer.defaultUserID, activeKeyID: SyncTestKeys.corpusKeyID,
-                keyProof: server.mintProof(rpc: "account_data_truncate", material: Self.wrongMaterial))
+                keyProof: server.mintProof(rpc: "account_data_truncate", material: Self.wrongMaterial), reauth: .freshGrant)
         }
         #expect(await server.rowCount(table: "container") == 2, "the right key id without the proof deleted NOTHING")
         try await server.truncateAccount(
-            FakeSyncServer.defaultUserID, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "account_data_truncate"))
+            FakeSyncServer.defaultUserID, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: server.mintProof(rpc: "account_data_truncate"), reauth: .freshGrant)
         #expect(await server.rowCount(table: "container") == 0)
         #expect(await server.vaultRow()?.keyProofHash == SyncTestKeys.macKeyHash, "the vault row survives a truncate")
     }

@@ -63,6 +63,32 @@ public struct AccountPurgeReport: Equatable, Sendable, Codable {
     }
 }
 
+/// 13y ladder R1 (F-R3) — A FRESHLY RE-AUTHENTICATED SESSION the truncate
+/// road ADOPTS for its one destructive call. `account_data_truncate`
+/// demands a session re-authenticated by password within 10 minutes (12
+/// §7e), and the standing session's `amr` never freshens (`verifyPassword`
+/// discards+revokes its fresh grant), so the truncate road performs its own
+/// password grant and rides THAT session's token — a NEW session with a NEW
+/// amr — then revokes it (the standing session untouched). The supplier is
+/// the app layer's (`AuthSession.reauthenticatedGrant`); the client rides
+/// the token here.
+public struct ReauthenticatedSession: Sendable {
+    public let accessToken: String
+    public let userID: String
+    /// Best-effort local logout of the fresh grant after the one call —
+    /// so no adopted-but-unused token lingers (`verifyPassword`'s discipline).
+    public let revoke: @Sendable () async -> Void
+
+    public init(
+        accessToken: String, userID: String,
+        revoke: @escaping @Sendable () async -> Void
+    ) {
+        self.accessToken = accessToken
+        self.userID = userID
+        self.revoke = revoke
+    }
+}
+
 /// One `entitlement` row as the apps read it (owner-only SELECT policy).
 public struct AccountEntitlement: Equatable, Sendable, Codable {
     public var feature: String
@@ -94,15 +120,25 @@ public struct AccountLifecycleClient: AccountLifecycleProviding {
     public let sessionProvider: any UserSessionProviding
     /// The HTTP hop, seam-injectable for the no-network suites.
     private let load: @Sendable (URLRequest) async throws -> (Data, URLResponse)
+    /// 13y ladder R1 (F-R3): the truncate road's password-grant supplier.
+    /// Present ⇒ the truncate ADOPTS a fresh grant's session for its one
+    /// call; ABSENT ⇒ the truncate road refuses LOUDLY
+    /// (`reauthenticationNotConfigured`) rather than silently riding the
+    /// standing session (whose amr never freshens — the server would refuse
+    /// the 10-minute window). Purge and entitlement never touch it. A future
+    /// truncate door supplies it from `AuthSession.reauthenticatedGrant`.
+    private let reauthentication: (@Sendable () async throws -> ReauthenticatedSession)?
 
     public init(
         configuration: SupabaseTransport.Configuration,
         sessionProvider: any UserSessionProviding,
+        reauthentication: (@Sendable () async throws -> ReauthenticatedSession)? = nil,
         session: URLSession = .shared
     ) {
         self.init(
             configuration: configuration,
             sessionProvider: sessionProvider,
+            reauthentication: reauthentication,
             load: { try await session.data(for: $0) })
     }
 
@@ -111,31 +147,67 @@ public struct AccountLifecycleClient: AccountLifecycleProviding {
     public init(
         configuration: SupabaseTransport.Configuration,
         sessionProvider: any UserSessionProviding,
+        reauthentication: (@Sendable () async throws -> ReauthenticatedSession)? = nil,
         load: @escaping @Sendable (URLRequest) async throws -> (Data, URLResponse)
     ) {
         self.configuration = configuration
         self.sessionProvider = sessionProvider
+        self.reauthentication = reauthentication
         self.load = load
     }
 
     // MARK: - AccountLifecycleProviding
 
     public func truncateAccountData(activeKeyID: String, keyProof: KeyProofMaterial) async throws -> [String: Int] {
-        // THE CHALLENGE DANCE (13y UNIT B): one nonce bound to this door;
-        // a stale challenge fetches fresh and retries ONCE. Deliberately
-        // NO enroll road here — the truncate runs mid-re-key on an
-        // account whose vault write (the rotation's) already enrolled or
-        // rotated the secret; an un-enrolled refusal surfaces typed.
+        // F-R3 (the re-ruling's design rider): ADOPT a fresh grant's session
+        // for this one destructive call — a NEW session with a NEW amr — so
+        // the server's 10-minute re-auth window (12 §7e) reads a genuinely
+        // fresh timestamp. Riding the STANDING session (whose amr never
+        // freshens) would refuse. No seam ⇒ refuse LOUDLY rather than
+        // silently ride the standing session.
+        guard let reauthentication else {
+            throw AccountLifecycleError.reauthenticationNotConfigured
+        }
+        let reauth = try await reauthentication()
         do {
-            return try await sendTruncate(activeKeyID: activeKeyID, proof:
-                keyProof.proof(challenge: try await fetchChallenge(), rpc: "account_data_truncate"))
-        } catch SyncError.keyProofChallengeStale {
-            return try await sendTruncate(activeKeyID: activeKeyID, proof:
-                keyProof.proof(challenge: try await fetchChallenge(), rpc: "account_data_truncate"))
+            let result = try await runTruncate(
+                activeKeyID: activeKeyID, keyProof: keyProof, bearer: reauth.accessToken)
+            await reauth.revoke()
+            return result
+        } catch {
+            await reauth.revoke()
+            throw error
         }
     }
 
-    private func sendTruncate(activeKeyID: String, proof: SyncKeyProof) async throws -> [String: Int] {
+    /// THE CHALLENGE DANCE (13y UNIT B), riding the fresh grant's `bearer`:
+    /// one nonce bound to this door; a stale challenge fetches fresh and
+    /// retries ONCE. Deliberately NO enroll road here — the truncate runs
+    /// mid-re-key on an account whose vault write already enrolled or
+    /// rotated the secret; an un-enrolled refusal surfaces typed. The whole
+    /// destructive act (its challenge AND its RPC) rides the fresh session,
+    /// so the amr the server reads is the one this call minted.
+    private func runTruncate(
+        activeKeyID: String, keyProof: KeyProofMaterial, bearer: String
+    ) async throws -> [String: Int] {
+        do {
+            return try await sendTruncate(
+                activeKeyID: activeKeyID, bearer: bearer,
+                proof: keyProof.proof(
+                    challenge: try await fetchChallenge(bearer: bearer),
+                    rpc: "account_data_truncate"))
+        } catch SyncError.keyProofChallengeStale {
+            return try await sendTruncate(
+                activeKeyID: activeKeyID, bearer: bearer,
+                proof: keyProof.proof(
+                    challenge: try await fetchChallenge(bearer: bearer),
+                    rpc: "account_data_truncate"))
+        }
+    }
+
+    private func sendTruncate(
+        activeKeyID: String, bearer: String, proof: SyncKeyProof
+    ) async throws -> [String: Int] {
         struct Request: Encodable {
             let activeKeyID: String
             /// pre-13x: the key proof, a BODY parameter only.
@@ -148,9 +220,9 @@ public struct AccountLifecycleClient: AccountLifecycleProviding {
                 case challenge
             }
         }
-        let data = try await send(
-            method: "POST", path: "rest/v1/rpc/account_data_truncate",
-            query: [],
+        let data = try await sendRiding(
+            bearer: bearer, method: "POST",
+            path: "rest/v1/rpc/account_data_truncate", query: [],
             body: try JSONEncoder().encode(Request(
                 activeKeyID: activeKeyID, keyProof: proof.proof, challenge: proof.challenge)))
         do {
@@ -160,11 +232,13 @@ public struct AccountLifecycleClient: AccountLifecycleProviding {
         }
     }
 
-    /// One nonce off `sync_challenge(1)` — the lifecycle door's own road.
-    private func fetchChallenge() async throws -> String {
+    /// One nonce off `sync_challenge(1)`, riding the fresh grant's `bearer`
+    /// — the truncate act's own road, so the challenge and its RPC share
+    /// the one re-authenticated session.
+    private func fetchChallenge(bearer: String) async throws -> String {
         struct Request: Encodable { let n: Int }
-        let data = try await send(
-            method: "POST", path: "rest/v1/rpc/sync_challenge",
+        let data = try await sendRiding(
+            bearer: bearer, method: "POST", path: "rest/v1/rpc/sync_challenge",
             query: [], body: try JSONEncoder().encode(Request(n: 1)))
         guard let nonce = try? JSONDecoder().decode([String].self, from: data).first else {
             throw AccountLifecycleError.malformedResult("sync_challenge returned no nonce")
@@ -200,6 +274,22 @@ public struct AccountLifecycleClient: AccountLifecycleProviding {
     }
 
     // MARK: - HTTP plumbing (the transports' shape)
+
+    /// F-R3: a hop riding an EXPLICIT bearer — the fresh grant's token for
+    /// the truncate act — rather than the standing `sessionProvider`. No
+    /// 401 refresh-retry: a session granted moments ago does not expire
+    /// within the one call, and a retry would have no fresh token to ride
+    /// without re-granting; a 401 here surfaces classified.
+    private func sendRiding(
+        bearer: String, method: String, path: String, query: [URLQueryItem], body: Data?
+    ) async throws -> Data {
+        let (data, status) = try await hop(
+            method: method, path: path, query: query, body: body, bearer: bearer)
+        guard (200..<300).contains(status) else {
+            throw Self.classified(status: status, body: data)
+        }
+        return data
+    }
 
     private func send(
         method: String, path: String, query: [URLQueryItem], body: Data?
@@ -278,4 +368,10 @@ public enum AccountLifecycleError: Error, Equatable, Sendable {
     case notHTTP
     case httpFailure(status: Int, body: String)
     case malformedResult(String)
+    /// F-R3: the truncate road was called on a client with no
+    /// reauthentication supplier — a wiring bug. Refused LOUDLY rather than
+    /// silently riding the standing session (whose amr would be refused by
+    /// the server's 10-minute window). Every truncate composition must pass
+    /// `reauthentication:` (backed by `AuthSession.reauthenticatedGrant`).
+    case reauthenticationNotConfigured
 }

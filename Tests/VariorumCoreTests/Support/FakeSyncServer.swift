@@ -627,21 +627,28 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         writeBudgets[userID] = budget
     }
 
-    // MARK: 13y UNIT B — the re-auth doors' twin (memo §5, on synthetic claims)
+    // MARK: 13y ladder R1 (F-R3) — the truncate door's re-auth, DERIVED FROM
+    // THE RIDDEN SESSION (never a defaulted bool)
 
-    /// The synthetic amr claim: true models "the session's newest
-    /// password-method entry is inside the 10-minute window" — the doors'
-    /// client flow signs in immediately before acting, so the DEFAULT is
-    /// fresh (an emulation choice, recorded: the fake enforces the CLAIM
-    /// check; the 10-minute letter is the DDL pin's).
-    private var recentPasswordAuth: [String: Bool] = [:]
-
-    func setRecentPasswordAuth(_ fresh: Bool, for userID: String = FakeSyncServer.defaultUserID) {
-        recentPasswordAuth[userID] = fresh
+    /// The re-auth claim `account_data_truncate` reads comes from the
+    /// SESSION the call rides (12 §7e reads `auth.jwt()->'amr'`). F-R3
+    /// retired the old per-user default-fresh Bool (which modeled
+    /// production's steady state — a stale standing session — NOWHERE): the
+    /// truncate call now STATES which session it rode. A `.freshGrant` is
+    /// the door's own flow (it adopts a just-minted grant — a fresh amr); a
+    /// `.staleSession` is the standing session (or a stolen long-lived
+    /// token), whose amr sits outside the window. `sync_purge_execute`
+    /// carries no re-auth at all (F-R1), so it takes no claim.
+    enum TruncateReauth: Sendable {
+        /// A freshly-granted session — the truncate road's adopt-fresh-grant
+        /// flow (`AccountLifecycleClient` rides a new grant's token).
+        case freshGrant
+        /// The standing session, whose amr is stale (or a stolen token).
+        case staleSession
     }
 
-    private func checkRecentReauth(for userID: String) throws {
-        guard recentPasswordAuth[userID] ?? true else {
+    private func checkTruncateReauth(_ reauth: TruncateReauth) throws {
+        guard case .freshGrant = reauth else {
             throw SyncError.reauthRequired
         }
     }
@@ -1069,10 +1076,14 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// deletes nothing. device_cursor and purged_row are untouched (10's
     /// letter) — and so is the account's counter (13y, 12's letter: the
     /// owner's sequence stays monotonic across a re-key, cursors valid).
-    func truncateAccount(_ userID: String, activeKeyID: String, keyProof: SyncKeyProof) throws {
+    func truncateAccount(
+        _ userID: String, activeKeyID: String, keyProof: SyncKeyProof,
+        reauth: TruncateReauth
+    ) throws {
         _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof, rpc: "account_data_truncate")
-        // 13y UNIT B (memo §5): the second destructive door's re-auth.
-        try checkRecentReauth(for: userID)
+        // 13y ladder R1 (F-R3): the re-auth claim is a property of the
+        // SESSION this call rides — the gate (fence/proof) outranks it.
+        try checkTruncateReauth(reauth)
         accounts[userID]?.tables = [:]
         // 13y UNIT B (memo §4): the POOL RESET — the repush after a
         // re-key is a first load (the adopt road's letter).
@@ -1097,7 +1108,6 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         tenantSeqs[userID] = nil
         challengeStashes[userID] = nil
         writeBudgets[userID] = nil
-        recentPasswordAuth[userID] = nil
     }
 }
 

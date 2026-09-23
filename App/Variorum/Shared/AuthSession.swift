@@ -572,6 +572,40 @@ actor AuthSession: UserSessionProviding {
         }
     }
 
+    /// 13y ladder R1 (F-R3) — the truncate road's FRESH-GRANT supplier.
+    /// Unlike `verifyPassword` (which discards AND revokes the grant, because
+    /// the deletion door needs only a yes/no and must not re-fire the sign-in
+    /// wiring mid-deletion), this RETURNS the fresh session so the truncate
+    /// road can ADOPT it — `AccountLifecycleClient` rides this token for the
+    /// one `account_data_truncate` call, a NEW session with a NEW `amr` the
+    /// server's 10-minute re-auth window (12 §7e) reads as fresh. The STANDING
+    /// session is untouched (the grant is never adopted into it), and the
+    /// returned `revoke` best-effort logs the grant out afterward so no
+    /// adopted-but-unused token lingers (`verifyPassword`'s discipline, kept).
+    /// This is the supplier a future truncate composition passes as
+    /// `AccountLifecycleClient(reauthentication:)`.
+    func reauthenticatedGrant(_ password: String) async throws -> ReauthenticatedSession {
+        ensureLoadedFromStore()
+        guard let email = tokens?.email, !email.isEmpty else {
+            throw AuthSessionError.malformedResponse("the signed-in session carries no email to re-authenticate")
+        }
+        let fresh = try await tokenRequest(
+            grantType: "password", body: ["email": email, "password": password])
+        let userID = fresh.user?.id ?? ""
+        guard !userID.isEmpty else {
+            throw AuthSessionError.malformedResponse("token response carried no user id")
+        }
+        let configuration = self.configuration
+        let http = self.http
+        let accessToken = fresh.accessToken
+        return ReauthenticatedSession(
+            accessToken: accessToken, userID: userID,
+            revoke: {
+                _ = try? await http(Self.logoutRequest(
+                    configuration: configuration, accessToken: accessToken, scope: .local))
+            })
+    }
+
     // MARK: UserSessionProviding (the Step 2 seam)
 
     func currentSession() async throws -> UserSession {

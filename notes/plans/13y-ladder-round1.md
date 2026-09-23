@@ -109,8 +109,42 @@ stale for long sessions; re-dates ⇒ hollow; the sessions-table fallback equall
 Proposed: whatever window survives on truncate, the client flow must freshen the claim
 the server reads (adopt the fresh grant's session for the one destructive call); the
 fake's twin derives the claim from the SESSION used (never a settable bool defaulted
-fresh); pin the flow red-on-old; correct the comments. Disposition: PENDING the fix
-session.
+fresh); pin the flow red-on-old; correct the comments. Disposition: **AGREE — FIXED (fix
+session).** Traced `verifyPassword`'s discard-and-revoke first (it must NOT re-fire the
+sign-in wiring mid-deletion and must leave no lingering token — KEPT for the deletion door,
+which uses `purgeAccount`). Only the truncate road adopts. Fix landed:
+- **Core `AccountLifecycle.swift`:** a `ReauthenticatedSession` value (fresh token + userID +
+  a `revoke` closure); `AccountLifecycleClient` gains an optional `reauthentication` seam; the
+  truncate road adopts the fresh grant and rides ITS token for the WHOLE destructive act (the
+  challenge fetch AND the RPC, via a new bearer-explicit `sendRiding`), then revokes — nil
+  seam refuses LOUDLY (`reauthenticationNotConfigured`), never silently rides the standing
+  session. Protocol signature UNCHANGED (zero conformer ripple).
+- **App `AuthSession.swift` (COMPILE-PENDING):** `reauthenticatedGrant(_:)` — the supplier
+  that performs the password grant and RETURNS the fresh session (never adopting it) + a
+  best-effort revoke, `verifyPassword`'s discipline kept for its own use.
+- **Fake:** the defaulted-fresh `recentPasswordAuth` bool + `checkRecentReauth` + the
+  `setRecentPasswordAuth` setter RETIRED; `truncateAccount(…, reauth: TruncateReauth)` derives
+  the claim from the SESSION the call rides (`.freshGrant` / `.staleSession`, no default).
+- **Pins:** `AccountLifecycleTests.theTruncateRoadRidesAFreshGrantsSessionNotTheStandingOne`
+  (the challenge + RPC both bear `Bearer FRESH-GRANT`, never `STANDING`; revoke fires) +
+  `theTruncateRoadRefusesLoudlyWithoutAReauthenticationSeam`; the AbuseGuard door test moved
+  to the session param; the classify/decode test's 401-retry moved to the standing-session
+  `purgeAccount`. All truncate callers pass `reauth:`.
+**RED-ON-OLD VERIFIED by behavioral revert** (the truncate road temporarily rode the standing
+session): the pin failed all three assertions —
+`Expectation failed: bearers.value.allSatisfy { $0.hasSuffix("Bearer FRESH-GRANT") }`,
+the no-`STANDING` arm, and `revoked … false`. **Process slip corrected (recorded honestly):**
+I ran that revert on UNCOMMITTED F-R3 work, so the `git checkout --` that restored it also
+discarded the fix in `AccountLifecycle.swift`; I re-applied the file's four edits from context
+(the other six F-R3 files were untouched by the checkout) and re-verified green. The checkpoint
+rule (commit the fix BEFORE any revert) is why this is a slip, not a loss — no committed work
+was affected. Suites: AccountLifecycle 6/6 + the moved AbuseGuard/KeyProofGate/MultiTenant
+callers all green.
+**APP-TARGET COMPILE-PENDING (for the orchestrator's build-for-testing):**
+`App/Variorum/Shared/AuthSession.swift`'s new `reauthenticatedGrant(_:)` (reads
+`VariorumCore.ReauthenticatedSession`; no production caller yet — the seam is ready for a
+future truncate door). `AppServices.swift`'s `AccountLifecycleClient` construction is UNCHANGED
+(the `reauthentication:` param defaults nil; deletion uses `purgeAccount`, not truncate).
 
 **F-R4 [MINOR] · 12:1743–1746 —** the verification tail's two fold-in checks cast the OLD
 `key_vault_update(jsonb, int, text)` spelling section 0 drops; post-deploy the cast itself

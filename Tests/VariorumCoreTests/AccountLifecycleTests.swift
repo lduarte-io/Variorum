@@ -53,7 +53,8 @@ struct AccountLifecycleTests {
             // one does — one minted nonce, the door's own binding.
             try await server.truncateAccount(
                 userID, activeKeyID: activeKeyID,
-                keyProof: server.mintProof(rpc: "account_data_truncate", for: userID, material: keyProof))
+                keyProof: server.mintProof(rpc: "account_data_truncate", for: userID, material: keyProof),
+                reauth: .freshGrant)
             return [:]
         }
 
@@ -205,6 +206,12 @@ struct AccountLifecycleTests {
                     apiKey: "publishable-test-key"),
                 sessionProvider: StaticSessionProvider(
                     session: UserSession(accessToken: "token-1", userID: "user-x")),
+                // F-R3: the truncate road adopts a fresh grant; supply the
+                // seam so the classify/decode sub-cases exercise it.
+                reauthentication: {
+                    ReauthenticatedSession(
+                        accessToken: "fresh-grant", userID: "user-x", revoke: {})
+                },
                 load: { request in
                     let n = ordinal.withValue { v -> Int in v += 1; return v }
                     calls.withValue { $0.append("\(request.httpMethod ?? "?") \(request.url!.path)") }
@@ -246,17 +253,23 @@ struct AccountLifecycleTests {
             _ = try await proofless.truncateAccountData(activeKeyID: "new-id", keyProof: material)
         }
 
-        // ONE 401 refresh-and-retry, then the decoded truncate counts
-        // (ordinal 1 is the challenge fetch; the 401 lands on the
-        // truncate's first attempt).
-        let retried = serving { _, n in
-            n == 2 ? (401, #"{"message":"JWT expired"}"#)
-                   : (200, #"{"container": 3, "variant": 7}"#)
-        }
-        let counts = try await retried.truncateAccountData(activeKeyID: "new-id", keyProof: material)
+        // The truncate decodes its counts (its own challenge fetched first).
+        let counted = serving { _, _ in (200, #"{"container": 3, "variant": 7}"#) }
+        let counts = try await counted.truncateAccountData(activeKeyID: "new-id", keyProof: material)
         // The proof rides the BODY, never the URL.
         #expect(calls.value.allSatisfy { !$0.contains("key_proof") && !$0.contains("challenge=") })
         #expect(counts == ["container": 3, "variant": 7])
+
+        // ONE 401 refresh-and-retry on the STANDING-session road (purge:
+        // F-R3 gave the truncate its own no-retry ridden path, so the
+        // 401-retry coverage lives on the door that still uses the standing
+        // session + refresh).
+        let retried = client { _, n in
+            n == 1 ? (401, #"{"message":"JWT expired"}"#)
+                   : (200, #"{"data_rows": 5, "vault_rows": 1, "entitlement_rows": 0, "auth_user_removed": true}"#)
+        }
+        let retryReport = try await retried.purgeAccount()
+        #expect(retryReport.dataRows == 5, "the standing-session door retries once past a 401")
 
         // The purge report decodes 1:1 with 09's jsonb keys.
         let purger = client { _, _ in
@@ -277,6 +290,76 @@ struct AccountLifecycleTests {
         #expect(entitlements == [AccountEntitlement(
             feature: "hosted_sync", expiresAt: nil, source: "14c-deploy-seed")])
         #expect(calls.value == ["GET /rest/v1/entitlement"])
+    }
+
+    // MARK: - The truncate adopts a fresh grant (13y ladder R1, F-R3)
+
+    /// THE TRUNCATE ROAD RIDES A FRESH GRANT'S SESSION, NOT THE STANDING ONE
+    /// (F-R3): `account_data_truncate` demands a session re-authenticated by
+    /// password within 10 minutes (12 §7e), and the standing session's amr
+    /// never freshens (`verifyPassword` discards+revokes its grant), so the
+    /// truncate road adopts a fresh grant and rides ITS token for the whole
+    /// destructive act — the challenge fetch AND the RPC — then revokes it.
+    /// **RED-ON-OLD:** the pre-fix road rode `sessionProvider` (the standing
+    /// session), so every request bore `Bearer STANDING` — this pin's
+    /// `allSatisfy { Bearer FRESH-GRANT }` would fail.
+    @Test func theTruncateRoadRidesAFreshGrantsSessionNotTheStandingOne() async throws {
+        let bearers = LockIsolated<[String]>([])
+        let revoked = LockIsolated(false)
+        let client = AccountLifecycleClient(
+            configuration: SupabaseTransport.Configuration(
+                projectURL: URL(string: "https://mirror.test.invalid")!,
+                apiKey: "publishable-test-key"),
+            sessionProvider: StaticSessionProvider(
+                session: UserSession(accessToken: "STANDING", userID: "user-x")),
+            reauthentication: {
+                ReauthenticatedSession(
+                    accessToken: "FRESH-GRANT", userID: "user-x",
+                    revoke: { revoked.setValue(true) })
+            },
+            load: { request in
+                bearers.withValue {
+                    $0.append("\(request.url!.lastPathComponent):"
+                        + (request.value(forHTTPHeaderField: "Authorization") ?? "none"))
+                }
+                let body = request.url!.path.hasSuffix("sync_challenge")
+                    ? #"["bm9uY2U="]"# : #"{"container": 1}"#
+                return (Data(body.utf8), HTTPURLResponse(
+                    url: request.url!, statusCode: 200,
+                    httpVersion: "HTTP/1.1", headerFields: nil)!)
+            })
+        _ = try await client.truncateAccountData(
+            activeKeyID: "new-id", keyProof: SyncTestKeys.proofMaterial)
+        // Both requests — the challenge AND the truncate — rode the FRESH
+        // grant, never the standing session.
+        #expect(bearers.value.count == 2, "the challenge fetch + the truncate RPC")
+        #expect(bearers.value.allSatisfy { $0.hasSuffix("Bearer FRESH-GRANT") },
+                "the whole destructive act rides the fresh grant: \(bearers.value)")
+        #expect(!bearers.value.contains { $0.contains("STANDING") },
+                "the standing session's stale amr is never the one the server reads")
+        #expect(revoked.value, "the fresh grant is revoked after the one call — no adopted token lingers")
+    }
+
+    /// A truncate road with NO reauthentication seam refuses LOUDLY (F-R3),
+    /// never silently riding the standing session (whose amr the server's
+    /// window would refuse). So a future truncate wiring that forgets the
+    /// seam fails at the door, not quietly on the server.
+    @Test func theTruncateRoadRefusesLoudlyWithoutAReauthenticationSeam() async throws {
+        let client = AccountLifecycleClient(
+            configuration: SupabaseTransport.Configuration(
+                projectURL: URL(string: "https://mirror.test.invalid")!,
+                apiKey: "publishable-test-key"),
+            sessionProvider: StaticSessionProvider(
+                session: UserSession(accessToken: "STANDING", userID: "user-x")),
+            load: { request in
+                (Data("{}".utf8), HTTPURLResponse(
+                    url: request.url!, statusCode: 200,
+                    httpVersion: "HTTP/1.1", headerFields: nil)!)
+            })
+        await #expect(throws: AccountLifecycleError.reauthenticationNotConfigured) {
+            _ = try await client.truncateAccountData(
+                activeKeyID: "new-id", keyProof: SyncTestKeys.proofMaterial)
+        }
     }
 
     // MARK: - key_vault.updated_at (R2-1's declined one-liner, decided)
