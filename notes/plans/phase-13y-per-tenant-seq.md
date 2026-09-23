@@ -930,8 +930,23 @@ and the full `AuthRLSDDLTests` suite (68/68) re-run green by the orchestrator.
   whole — hash and secret land together or not at all, revision unmoved). All but the
   replay pin are new-mechanism green-by-design, said plainly; the replay pin carries
   the quoted red above.*
-- **Piece 8 — the Fragments carry item (Step 5): PENDING.**
-- **Piece 9 — the full-core-suite close line (baseline at open: 1698/179): PENDING.**
+- **Piece 8 — the Fragments carry item (Step 5): DONE** *(commit 61416521 — ONE dated
+  `## CARRY ITEM (2026-09-23)` appended to `notes/fragments-bridge-contract.md` in the
+  file's own format: the three layers (challenge proof · quota numbers · re-auth doors)
+  as an offered pattern with the Variorum-side file pointers, the SHARED token-endpoint
+  facts (same Supabase project), and the honest-429-wording suggestion for their
+  sign-in face. Brief only, nothing owed, their repo untouched — the hands-off fence's
+  letter.)*
+- **Piece 9 — the full-core-suite close line (baseline at open: 1698/179): DONE.
+  FULL CORE SUITE AT CLOSE: 1719 tests in 180 suites, ALL PASSED** *(78 s; exactly the
+  one standing env-gated real-server skip). **+21 tests, +1 suite over the baseline,
+  and the arithmetic closes exactly:** +7 UNIT B DDL pins (piece 2+3) + 6 challenge
+  pins (piece 7) + 8 AbuseGuardTests pins (pieces 5+6); the one new suite is
+  AbuseGuardTests. The KeyProofGate rework held its count (the two migration-arm tests
+  REWORKED into the enroll-road pair, not removed). Everything pushed; the app-target
+  COMPILE-PENDING list (the three test files' conformers + the two one-line
+  `updateVault` argument sites + the ErrorPresentation rate-limit arm) is the
+  orchestrator's build-for-testing close per the adjudication.*
 
 ### THE QUOTA MECHANISM'S TABLE SHAPE (the implementer's proposal, per the memo §8 — sent to the orchestrator BEFORE that half builds)
 
