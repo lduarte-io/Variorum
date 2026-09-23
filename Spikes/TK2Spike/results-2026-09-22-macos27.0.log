@@ -1,0 +1,208 @@
+[0/1] Planning build
+Building for debugging...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+[1/3] Linking TK2Spike
+[2/3] Applying TK2Spike
+Build of product 'TK2Spike' complete! (1.19s)
+  [0.env] macOS = Version 27.0 (Build 26A428)
+  [0.env] xcode = Xcode 26.3
+  [0.env] sdk.macosx = 26.2
+  [0.env] swift = Apple Swift version 6.2.4 (swiftlang-6.2.4.1.4 clang-1700.6.4.2)
+  [0.env] process = TK2Spike (swift run, debug), arm64
+  [1.load] corpus.words = 50084
+  [1.load] corpus.paragraphs(blocks) = 431
+  [1.load] corpus.utf16Chars = 380964
+  [1.load] corpus.buildTime = 40.54 ms
+  [1.load] setAttributedString(50k words + blockID attrs) = 13.36 ms
+  [1.load] timeToFirstViewportLayout = 65.68 ms
+  [1.load] initialUsageHeightEstimate = 47690.75 px
+  [1.load] initialDocViewHeight = 47691.00 px
+  [1.load] settleAtRest = 0.00 ms, 0 revisions  (usage=47691.00px doc=47691.00px)
+  [1.load] tk2Alive = true
+  [1.load] canaryEventsAtRest = 0
+  [2.fallback] selectionSweep.setSelectedRange = n=11 avg=0.31 p50=0.28 p95=0.49 max=0.59 ms
+  [2.fallback] paste.2kWords.insertText = 4.28 ms
+  [2.fallback] exercisedActions = typing@start, typing@middle, typing@end, attributeUpdate.textStorage, attributeUpdate.rendering, selectionSweep, find.showHideFindBar, spellcheck.toggleAndType, paste.2kWords@middle, undo.x3
+  [2.fallback] canaryEventsTotal = 0  (no fallback observed under any exercised action)
+  [2.fallback] tk2AliveAtEnd = true
+  [2.fallback] notExercised = lists/NSTextList, WritingTools tables, custom caret drawing  (out of product scope; absence of evidence scoped to actions above)
+  [3.height] estimateAfterLoadSettle = 47690.75 px
+  [3.height] stepScrollToEnd = 88 viewport steps in 1395.19 ms
+  [3.height] estimateRevisionsWhileScrolling = 78  (maxSingleDelta=1288.20px)
+  [3.height] contentMovedBackwardSteps = 0  (steps where the top block regressed vs a prior step (visual jump proxy))
+  [3.height] settledHeightAfterFullScroll = 51425.00 px  (drift from initial estimate: 3734.25px (7.8%))
+  [3.height] lastLineAfterIncrementalScroll = VISIBLE  (fragMaxY=51425.00 docH=51425.00 clipTop=50825.00)
+  [3.height] coldScrollToEndOfDocument = 129.27 ms  (revisions during settle: 1)
+  [3.height] distanceFromTrueEndAfterSettle = -6.00 px  (0 = still at end after estimates revised)
+  [3.height] lastLineAfterColdJump = VISIBLE  (fragMaxY=47741.75 clipTop=47148.00)
+  [3.height] resize900to600.settle = 106.68 ms, 0 revisions  (usage=68382.43px doc=68382.50px)
+  [3.height] resize.usageVsDocMismatch = -0.07 px  (large positive = potential crop (§3))
+  [3.height] resize.readingPositionDrift = -79 paragraphs  (top block before=227 after=148)
+  [3.height] resize600to900.settle = 105.79 ms, 0 revisions  (top block now=231 (started at 227))
+  [4.scrub] A-proportional @10% = paraErr(max)=2 pxErr(max)=101.72  (time: n=3 avg=100.68 p50=101.18 p95=101.18 max=102.07)
+  [4.scrub] D-scrollRangeToVisible @10% = paraErr(max)=0 pxErr(max)=307.52  (time: n=3 avg=129.66 p50=129.81 p95=129.81 max=130.11)
+  [4.scrub] C-hybrid @10% = paraErr(max)=0 pxErr(max)=0.00 postSettleDrift(max)=0.00  (time: n=3 avg=7.51 p50=7.62 p95=7.62 max=8.42; iters max=1; jump max=101.72px)
+  [4.scrub] B-relocateViewport @10% rep1 = call=0.31ms vpTop(immediate)=48 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=48
+  [4.scrub] B-relocateViewport @10% rep2 = call=0.45ms vpTop(immediate)=48 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=48
+  [4.scrub] B-relocateViewport @10% rep3 = call=0.52ms vpTop(immediate)=48 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=48
+  [4.scrub] A-proportional @25% = paraErr(max)=2 pxErr(max)=158.17  (time: n=3 avg=105.22 p50=104.90 p95=104.90 max=106.84)
+  [4.scrub] D-scrollRangeToVisible @25% = paraErr(max)=0 pxErr(max)=308.82  (time: n=3 avg=137.06 p50=137.01 p95=137.01 max=137.43)
+  [4.scrub] C-hybrid @25% = paraErr(max)=0 pxErr(max)=0.00 postSettleDrift(max)=0.00  (time: n=3 avg=12.99 p50=13.03 p95=13.03 max=13.81; iters max=1; jump max=158.17px)
+  [4.scrub] B-relocateViewport @25% rep1 = call=1.75ms vpTop(immediate)=119 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=119
+  [4.scrub] B-relocateViewport @25% rep2 = call=1.81ms vpTop(immediate)=119 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=119
+  [4.scrub] B-relocateViewport @25% rep3 = call=1.79ms vpTop(immediate)=119 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=119
+  [4.scrub] A-proportional @50% = paraErr(max)=2 pxErr(max)=236.70  (time: n=3 avg=101.02 p50=101.32 p95=101.32 max=101.80)
+  [4.scrub] D-scrollRangeToVisible @50% = paraErr(max)=0 pxErr(max)=307.50  (time: n=3 avg=129.99 p50=129.94 p95=129.94 max=131.29)
+  [4.scrub] C-hybrid @50% = paraErr(max)=0 pxErr(max)=0.00 postSettleDrift(max)=0.00  (time: n=3 avg=8.42 p50=8.53 p95=8.53 max=9.29; iters max=1; jump max=236.70px)
+  [4.scrub] B-relocateViewport @50% rep1 = call=3.56ms vpTop(immediate)=230 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=230
+  [4.scrub] B-relocateViewport @50% rep2 = call=3.39ms vpTop(immediate)=230 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=230
+  [4.scrub] B-relocateViewport @50% rep3 = call=3.22ms vpTop(immediate)=230 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=230
+  [4.scrub] A-proportional @75% = paraErr(max)=4 pxErr(max)=334.83  (time: n=3 avg=99.25 p50=99.12 p95=99.12 max=100.40)
+  [4.scrub] D-scrollRangeToVisible @75% = paraErr(max)=0 pxErr(max)=322.75  (time: n=3 avg=128.55 p50=128.49 p95=128.49 max=130.31)
+  [4.scrub] C-hybrid @75% = paraErr(max)=0 pxErr(max)=0.00 postSettleDrift(max)=0.00  (time: n=3 avg=7.48 p50=7.23 p95=7.23 max=8.41; iters max=1; jump max=334.83px)
+  [4.scrub] B-relocateViewport @75% rep1 = call=4.36ms vpTop(immediate)=338 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=338
+  [4.scrub] B-relocateViewport @75% rep2 = call=4.76ms vpTop(immediate)=338 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=338
+  [4.scrub] B-relocateViewport @75% rep3 = call=5.08ms vpTop(immediate)=338 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=338
+  [4.scrub] A-proportional @90% = paraErr(max)=1 pxErr(max)=229.70  (time: n=3 avg=99.07 p50=98.42 p95=98.42 max=100.99)
+  [4.scrub] D-scrollRangeToVisible @90% = paraErr(max)=0 pxErr(max)=339.75  (time: n=3 avg=129.30 p50=128.71 p95=128.71 max=131.25)
+  [4.scrub] C-hybrid @90% = paraErr(max)=0 pxErr(max)=0.00 postSettleDrift(max)=0.00  (time: n=3 avg=6.70 p50=7.21 p95=7.21 max=7.28; iters max=1; jump max=229.70px)
+  [4.scrub] B-relocateViewport @90% rep1 = call=3.44ms vpTop(immediate)=403 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=403
+  [4.scrub] B-relocateViewport @90% rep2 = call=3.17ms vpTop(immediate)=403 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=403
+  [4.scrub] B-relocateViewport @90% rep3 = call=5.07ms vpTop(immediate)=403 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=403
+  [4.scrub] A-proportional OVERALL = paraErr max=4 avg=2.2  (time: n=15 avg=101.05 p50=100.99 p95=104.90 max=106.84 ms; pxErr max=334.83)
+  [4.scrub] D-scrollRangeToVisible OVERALL = paraErr max=0 avg=0.0  (time: n=15 avg=130.91 p50=129.94 p95=137.01 max=137.43 ms; pxErr max=339.75)
+  [4.scrub] C-hybrid OVERALL = paraErr max=0 pxErr max=0.00 postSettleDrift max=0.00  (time: n=15 avg=8.62 p50=7.62 p95=13.03 max=13.81 ms; iters max=1; jump max=334.83px; capped=0)
+  [5.typing] caretPlacement@start (scrollRangeToVisible+settle) = 94.87 ms
+  [5.typing] keystroke@start = n=120 avg=2.12 p50=1.97 p95=2.80 max=6.50 ms
+  [5.typing] caretPlacement@middle (scrollRangeToVisible+settle) = 125.53 ms
+  [5.typing] keystroke@middle = n=120 avg=2.10 p50=2.02 p95=2.42 max=3.36 ms
+  [5.typing] caretPlacement@end (scrollRangeToVisible+settle) = 125.69 ms
+  [5.typing] keystroke@end = n=120 avg=1.42 p50=1.39 p95=1.76 max=2.50 ms
+  [5.typing] paste.5kWords@middle.insertText = 4.52 ms
+  [5.typing] paste.settle = 31.34 ms, 1 revisions
+  [5.typing] keystroke@start post-paste (55k words) = n=120 avg=2.44 p50=2.23 p95=3.34 max=7.82 ms
+  [5.typing] keystroke@middle post-paste (55k words) = n=120 avg=1.92 p50=1.88 p95=2.26 max=3.12 ms
+  [5.typing] keystroke@end post-paste (55k words) = n=120 avg=1.44 p50=1.42 p95=1.64 max=2.18 ms
+  [5.typing] tk2AliveAtEnd = true
+  [6.fullEnsureLayout] estimateBeforeEnsure = 47690.75 px
+  [6.fullEnsureLayout] ensureLayout(documentRange) = 139.44 ms  (the cost P1 bans from ever being on a user path)
+  [6.fullEnsureLayout] trueHeightAfterEnsure = 51425.00 px  (estimate error was 3734.0px vs docView; avg px/block=119.3)
+  [7.scale200k] corpus = 201873 words, 1771 blocks, 1531371 utf16 chars
+  [7.scale200k] C-hybrid @50% (200k words) = paraErr max=0 pxErr max=0.00 postSettleDrift max=0.00  (time: n=3 avg=6.39 p50=6.77 p95=6.77 max=7.26; iters max=1; flat vs 50k = P1 pass)
+  [7.scale200k] keystroke@middle (200k words) = n=120 avg=2.37 p50=2.22 p95=2.88 max=6.04 ms
+  [7.scale200k] ensureLayout(documentRange) 200k = 562.37 ms  (grows with document size — the path P1 bans)
+  [7.scale200k] trueHeight 200k = 206669.00 px
+  [7.run] totalRunTime = 26.7 s
+  [7.run] canaryEventsWholeRun = 0  (TK2 never fell back to TK1)
+
+==================== TK2 SPIKE RESULTS ====================
+
+-- 0.env --
+macOS                                               | Version 27.0 (Build 26A428)
+xcode                                               | Xcode 26.3
+sdk.macosx                                          | 26.2
+swift                                               | Apple Swift version 6.2.4 (swiftlang-6.2.4.1.4 clang-1700.6.4.2)
+process                                             | TK2Spike (swift run, debug), arm64
+
+-- 1.load --
+corpus.words                                        | 50084
+corpus.paragraphs(blocks)                           | 431
+corpus.utf16Chars                                   | 380964
+corpus.buildTime                                    | 40.54 ms
+setAttributedString(50k words + blockID attrs)      | 13.36 ms
+timeToFirstViewportLayout                           | 65.68 ms
+initialUsageHeightEstimate                          | 47690.75 px
+initialDocViewHeight                                | 47691.00 px
+settleAtRest                                        | 0.00 ms, 0 revisions   // usage=47691.00px doc=47691.00px
+tk2Alive                                            | true
+canaryEventsAtRest                                  | 0
+
+-- 2.fallback --
+selectionSweep.setSelectedRange                     | n=11 avg=0.31 p50=0.28 p95=0.49 max=0.59 ms
+paste.2kWords.insertText                            | 4.28 ms
+exercisedActions                                    | typing@start, typing@middle, typing@end, attributeUpdate.textStorage, attributeUpdate.rendering, selectionSweep, find.showHideFindBar, spellcheck.toggleAndType, paste.2kWords@middle, undo.x3
+canaryEventsTotal                                   | 0   // no fallback observed under any exercised action
+tk2AliveAtEnd                                       | true
+notExercised                                        | lists/NSTextList, WritingTools tables, custom caret drawing   // out of product scope; absence of evidence scoped to actions above
+
+-- 3.height --
+estimateAfterLoadSettle                             | 47690.75 px
+stepScrollToEnd                                     | 88 viewport steps in 1395.19 ms
+estimateRevisionsWhileScrolling                     | 78   // maxSingleDelta=1288.20px
+contentMovedBackwardSteps                           | 0   // steps where the top block regressed vs a prior step (visual jump proxy)
+settledHeightAfterFullScroll                        | 51425.00 px   // drift from initial estimate: 3734.25px (7.8%)
+lastLineAfterIncrementalScroll                      | VISIBLE   // fragMaxY=51425.00 docH=51425.00 clipTop=50825.00
+coldScrollToEndOfDocument                           | 129.27 ms   // revisions during settle: 1
+distanceFromTrueEndAfterSettle                      | -6.00 px   // 0 = still at end after estimates revised
+lastLineAfterColdJump                               | VISIBLE   // fragMaxY=47741.75 clipTop=47148.00
+resize900to600.settle                               | 106.68 ms, 0 revisions   // usage=68382.43px doc=68382.50px
+resize.usageVsDocMismatch                           | -0.07 px   // large positive = potential crop (§3)
+resize.readingPositionDrift                         | -79 paragraphs   // top block before=227 after=148
+resize600to900.settle                               | 105.79 ms, 0 revisions   // top block now=231 (started at 227)
+
+-- 4.scrub --
+A-proportional @10%                                 | paraErr(max)=2 pxErr(max)=101.72   // time: n=3 avg=100.68 p50=101.18 p95=101.18 max=102.07
+D-scrollRangeToVisible @10%                         | paraErr(max)=0 pxErr(max)=307.52   // time: n=3 avg=129.66 p50=129.81 p95=129.81 max=130.11
+C-hybrid @10%                                       | paraErr(max)=0 pxErr(max)=0.00 postSettleDrift(max)=0.00   // time: n=3 avg=7.51 p50=7.62 p95=7.62 max=8.42; iters max=1; jump max=101.72px
+B-relocateViewport @10% rep1                        | call=0.31ms vpTop(immediate)=48 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=48
+B-relocateViewport @10% rep2                        | call=0.45ms vpTop(immediate)=48 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=48
+B-relocateViewport @10% rep3                        | call=0.52ms vpTop(immediate)=48 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=48
+A-proportional @25%                                 | paraErr(max)=2 pxErr(max)=158.17   // time: n=3 avg=105.22 p50=104.90 p95=104.90 max=106.84
+D-scrollRangeToVisible @25%                         | paraErr(max)=0 pxErr(max)=308.82   // time: n=3 avg=137.06 p50=137.01 p95=137.01 max=137.43
+C-hybrid @25%                                       | paraErr(max)=0 pxErr(max)=0.00 postSettleDrift(max)=0.00   // time: n=3 avg=12.99 p50=13.03 p95=13.03 max=13.81; iters max=1; jump max=158.17px
+B-relocateViewport @25% rep1                        | call=1.75ms vpTop(immediate)=119 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=119
+B-relocateViewport @25% rep2                        | call=1.81ms vpTop(immediate)=119 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=119
+B-relocateViewport @25% rep3                        | call=1.79ms vpTop(immediate)=119 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=119
+A-proportional @50%                                 | paraErr(max)=2 pxErr(max)=236.70   // time: n=3 avg=101.02 p50=101.32 p95=101.32 max=101.80
+D-scrollRangeToVisible @50%                         | paraErr(max)=0 pxErr(max)=307.50   // time: n=3 avg=129.99 p50=129.94 p95=129.94 max=131.29
+C-hybrid @50%                                       | paraErr(max)=0 pxErr(max)=0.00 postSettleDrift(max)=0.00   // time: n=3 avg=8.42 p50=8.53 p95=8.53 max=9.29; iters max=1; jump max=236.70px
+B-relocateViewport @50% rep1                        | call=3.56ms vpTop(immediate)=230 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=230
+B-relocateViewport @50% rep2                        | call=3.39ms vpTop(immediate)=230 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=230
+B-relocateViewport @50% rep3                        | call=3.22ms vpTop(immediate)=230 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=230
+A-proportional @75%                                 | paraErr(max)=4 pxErr(max)=334.83   // time: n=3 avg=99.25 p50=99.12 p95=99.12 max=100.40
+D-scrollRangeToVisible @75%                         | paraErr(max)=0 pxErr(max)=322.75   // time: n=3 avg=128.55 p50=128.49 p95=128.49 max=130.31
+C-hybrid @75%                                       | paraErr(max)=0 pxErr(max)=0.00 postSettleDrift(max)=0.00   // time: n=3 avg=7.48 p50=7.23 p95=7.23 max=8.41; iters max=1; jump max=334.83px
+B-relocateViewport @75% rep1                        | call=4.36ms vpTop(immediate)=338 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=338
+B-relocateViewport @75% rep2                        | call=4.76ms vpTop(immediate)=338 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=338
+B-relocateViewport @75% rep3                        | call=5.08ms vpTop(immediate)=338 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=338
+A-proportional @90%                                 | paraErr(max)=1 pxErr(max)=229.70   // time: n=3 avg=99.07 p50=98.42 p95=98.42 max=100.99
+D-scrollRangeToVisible @90%                         | paraErr(max)=0 pxErr(max)=339.75   // time: n=3 avg=129.30 p50=128.71 p95=128.71 max=131.25
+C-hybrid @90%                                       | paraErr(max)=0 pxErr(max)=0.00 postSettleDrift(max)=0.00   // time: n=3 avg=6.70 p50=7.21 p95=7.21 max=7.28; iters max=1; jump max=229.70px
+B-relocateViewport @90% rep1                        | call=3.44ms vpTop(immediate)=403 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=403
+B-relocateViewport @90% rep2                        | call=3.17ms vpTop(immediate)=403 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=403
+B-relocateViewport @90% rep3                        | call=5.07ms vpTop(immediate)=403 vpTop(afterPump)=0 clipMoved=0.00px topByPoint=0 target=403
+A-proportional OVERALL                              | paraErr max=4 avg=2.2   // time: n=15 avg=101.05 p50=100.99 p95=104.90 max=106.84 ms; pxErr max=334.83
+D-scrollRangeToVisible OVERALL                      | paraErr max=0 avg=0.0   // time: n=15 avg=130.91 p50=129.94 p95=137.01 max=137.43 ms; pxErr max=339.75
+C-hybrid OVERALL                                    | paraErr max=0 pxErr max=0.00 postSettleDrift max=0.00   // time: n=15 avg=8.62 p50=7.62 p95=13.03 max=13.81 ms; iters max=1; jump max=334.83px; capped=0
+
+-- 5.typing --
+caretPlacement@start (scrollRangeToVisible+settle)  | 94.87 ms
+keystroke@start                                     | n=120 avg=2.12 p50=1.97 p95=2.80 max=6.50 ms
+caretPlacement@middle (scrollRangeToVisible+settle) | 125.53 ms
+keystroke@middle                                    | n=120 avg=2.10 p50=2.02 p95=2.42 max=3.36 ms
+caretPlacement@end (scrollRangeToVisible+settle)    | 125.69 ms
+keystroke@end                                       | n=120 avg=1.42 p50=1.39 p95=1.76 max=2.50 ms
+paste.5kWords@middle.insertText                     | 4.52 ms
+paste.settle                                        | 31.34 ms, 1 revisions
+keystroke@start post-paste (55k words)              | n=120 avg=2.44 p50=2.23 p95=3.34 max=7.82 ms
+keystroke@middle post-paste (55k words)             | n=120 avg=1.92 p50=1.88 p95=2.26 max=3.12 ms
+keystroke@end post-paste (55k words)                | n=120 avg=1.44 p50=1.42 p95=1.64 max=2.18 ms
+tk2AliveAtEnd                                       | true
+
+-- 6.fullEnsureLayout --
+estimateBeforeEnsure                                | 47690.75 px
+ensureLayout(documentRange)                         | 139.44 ms   // the cost P1 bans from ever being on a user path
+trueHeightAfterEnsure                               | 51425.00 px   // estimate error was 3734.0px vs docView; avg px/block=119.3
+
+-- 7.scale200k --
+corpus                                              | 201873 words, 1771 blocks, 1531371 utf16 chars
+C-hybrid @50% (200k words)                          | paraErr max=0 pxErr max=0.00 postSettleDrift max=0.00   // time: n=3 avg=6.39 p50=6.77 p95=6.77 max=7.26; iters max=1; flat vs 50k = P1 pass
+keystroke@middle (200k words)                       | n=120 avg=2.37 p50=2.22 p95=2.88 max=6.04 ms
+ensureLayout(documentRange) 200k                    | 562.37 ms   // grows with document size — the path P1 bans
+trueHeight 200k                                     | 206669.00 px
+
+-- 7.run --
+totalRunTime                                        | 26.7 s
+canaryEventsWholeRun                                | 0   // TK2 never fell back to TK1
+
+===========================================================

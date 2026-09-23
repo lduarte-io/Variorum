@@ -1,185 +1,291 @@
 # Phase 13y — Per-Tenant `server_seq` + the Minimal Abuse Guard
 
-**STATUS: plan AUTHORED 2026-08-30 at the 13p closeout (the just-in-time
-rule). The phase has NOT run; it launches at her word.** Created
-PRE-RELEASE at her 2026-08-26 launch-strategy ruling, the moment she
-ruled sync OPEN at v1: *"I'm not going to block people from signing in
-and syncing when the app is first released… It's cheap now. and it seems
-like it's better to have it done."* The master-plan 13y row is the
-scope's record; this plan is the buildable detail.
+**STATUS: OPEN — kicked off 2026-09-22 at her word (`/architect-phase 13y`), the kickoff
+sitting's answers below (R-13y-1…4).** Plan authored 2026-08-30 at the 13p closeout;
+corrected 2026-09-21 (marker 8→9, the `12_` slot); **REFRESHED 2026-09-22 at this kickoff —
+the correction note's rider fold-in is executed in the STEPS below**, so this file reads
+top-to-bottom without patch notes. The master-plan 13y row is the scope's record; this plan
+is the buildable detail and the phase's ONE running record (ledger, sitting records, unit
+records, the ladder, the closeout).
+
+Created PRE-RELEASE at her 2026-08-26 launch-strategy ruling, the moment she ruled sync OPEN
+at v1: *"I'm not going to block people from signing in and syncing when the app is first
+released… It's cheap now. and it seems like it's better to have it done."*
 
 ---
 
-## KICKOFF MESSAGE (for the fresh session that runs this phase)
+## KICKOFF MESSAGE (for fresh implementer sessions — briefs name sections of this file)
 
-Read, in order: this file top to bottom; `CLAUDE.md` + the canon docs
-per the standing preflight; **`notes/SyncSpec.md` IN FULL** (this phase
-lives in its §2/§3/§5/§7/§9/§12 — the I-1 disclosure record in §12 is
-the thing this phase closes); the 14c gate record in
-`notes/plans/phase-14c-multi-tenant.md` (the mirror's born-multi-tenant
-shape, the BYPASSRLS repair, the `variorum_definer` role);
-`notes/plans/phase-13j-purge-memo.md` + SyncSpec §12's 13j entry (the
-deploy-window choreography this phase repeats, and the
+Read, in order: this file top to bottom; `CLAUDE.md` + the canon docs per the standing
+preflight; **`notes/SyncSpec.md` IN FULL** (this phase lives in its §2/§3/§5/§7/§9/§12 — the
+I-1 disclosure record in §12 is the thing this phase closes); **`notes/sync-postmortem-fragments.md`**
+(the standing read before changing anything in `Sync/`); the 14c gate record in
+`notes/plans/phase-14c-multi-tenant.md` (the mirror's born-multi-tenant shape, the BYPASSRLS
+repair, the `variorum_definer` role); `notes/plans/phase-13j-purge-memo.md` + SyncSpec §12's
+13j entry (the deploy-window choreography this phase repeats, and the
 `device_cursor`/`purged_row`/`sync_horizon()` machinery it must review);
-`Server/supabase/` DDL 01–10 (the live mirror's true shape).
+`notes/plans/pre-13x-deploy-checklist.md` (the most recent window's worked example + §10's
+standing caveat this phase retires); `Server/supabase/` DDL 01–11 **+ the `maintenance/`
+overlays** (the live mirror's true shape — the deployed truth is 11's function set WITH the
+rotation-clearing-guard overlay applied).
 
-**The whole phase is `Sources/VariorumCore/Sync/` + server SQL — the
-standing Fable rider applies to ALL of it.** Cast decided at her
-kickoff, as always. Her deploy window executes the lockstep (the 13j
-precedent — her hands on the trigger); nothing deploys without her.
+**The whole phase is `Sources/VariorumCore/Sync/` + server SQL — the standing Fable rider
+applies to ALL of it.** Cast: R-13y-1 below.
 
-**Numbering facts, pinned so nothing collides:** 13p closed at marker
-**7** with `Server/supabase/11_…` UNCLAIMED (its lockstep event was
-dissolved by R13p-16). **This phase takes marker 7→8 and
-`11_phase13y_tenant_seq.sql`.**
+**Numbering facts, pinned so nothing collides:** pre-13x took marker **7→8** and claimed
+`11_pre13x_postures.sql`; `SyncSchema.lockstepVersion` = **8** today. **This phase takes
+marker 8→9 and `12_phase13y_tenant_seq.sql`.** *(The plan's original "7→8 / 11_" claim was
+authored before pre-13x existed; corrected 2026-09-21 by the RUN B orchestrator.)*
 
-> **⚠️ STALE — CORRECTED 2026-09-21 (the RUN B orchestrator, while
-> answering the author's 13y question; this plan predates pre-13x):**
-> pre-13x took marker **7→8** and claimed `11_pre13x_postures.sql`
-> (SyncSpec §12's pre-13x entry; `lockstepVersion = 8` today). **This
-> phase therefore takes marker 8→9 and `12_phase13y_tenant_seq.sql`.**
-> The same refresh pass at this phase's kickoff must fold in the riders
-> the pre-release table added AFTER this plan was authored (its row 14):
-> **the key-proof challenge** (the static bearer proof → per-request
-> challenge; pre-13x CONSIDERATIONS item 1) · **the A5 horizon's one
-> source of truth** (the server's 2 s vs the client's 2.5 s in
-> `CorpusRotation.horizonWait`; item 2) · NIT-4 · the adopt-road pin —
-> each a step with its own tests, the key-proof challenge with a short
-> design memo (nonce/replay-window shape) before its build.
+## THE KICKOFF SITTING RECORD (2026-09-22 — her four answers; verbatim-faithful)
 
-> **CARRY FROM RUN B (added 2026-09-22 at the author's word, the morning
-> session — RUN B's S1 stress pass, finding Q3; the durable record is
-> `notes/plans/pre-13x-deploy-checklist.md` §10's standing caveat):** any
-> redeploy of `11_pre13x_postures.sql` SILENTLY REVERTS the rotation
-> completion guard, and the maintenance overlay must re-run after any 11
-> redeploy. **This phase's consolidated DDL (`12_phase13y_tenant_seq.sql`)
-> must FOLD THE GUARD IN** so the caveat retires with the 12 artifact —
-> verify the deployed body carries it (the arm-9-style DDL text pin
-> pattern) rather than assuming the overlay's state. Same class as #141's
-> neighborhood: an operational trap recorded so no future deploy window
-> rediscovers it live.
+- **R-13y-1 — CAST: all-Fable, RUN B's shape** (her pick of the recommended option): this
+  session as orchestrator (writes no feature code beyond adjudication/record/environment
+  acts), a **FRESH Fable implementer session per acceptance unit**, strictly sequential, ONE
+  `fable-reviewer` ladder over the phase's combined diff (fresh reviewer per round, cap
+  three; the SAME-MODEL flow — the orchestrator arbitrates against canon, the spec wins).
+- **R-13y-2 — THE DEPLOY WINDOW: PAT pre-authorized, ONE end-of-phase window** (her pick of
+  the recommended option): units → ladder → then ONE coordinated sitting — A1 backup, the
+  mirror deploy executed by the orchestrator through the stored PAT (the pre-13x §16
+  arrangement; if the permission classifier blocks the mutating call, the exact command is
+  prepared and SHE fires it via the `!` road — the 13j precedent), the Mac Release + phone
+  refreshes (marker-9 builds), her live round each direction, the cursor carry-over verified
+  on her real account.
+- **R-13y-3 — THE macOS-27 BASELINE: yes** — her words: *"yes my app is quit now"*. The
+  TK2-spike §5 re-run PLUS one early full-Mac-suite baseline on the new OS before UNIT A
+  spawns (a recorded, justified deviation from "never run the full suite at a session's
+  start": the OS under the recorded baseline changed, and TEXTKIT2_NOTES §5 demands the
+  re-verification). Results in ENVIRONMENT ACTS below.
+- **R-13y-4 — THE TWO MID-PHASE DECISIONS: PROVISIONAL-and-continue** (her pick): the
+  abuse-guard NUMBERS and the key-proof challenge DESIGN are ruled by the orchestrator under
+  the architect mandate, logged in `notes/QUESTIONS.md` as PROVISIONAL, built, and ratified
+  by her at the checkpoint. **This supersedes, for this phase and at her own word, the
+  2026-09-21 "she confirms at its sitting" clause on the numbers.** Governance rider the
+  orchestrator adds, recorded here so it binds: because the deploy is the one hard-to-reverse
+  act, the window's pre-deploy summary NAMES both PROVISIONALs in one line each before
+  anything fires — a last honest exit, not a re-litigation.
+
+## BINDING PRINCIPLES
+
+The 13b constitution (P-1…P-9) + its application notes bind this phase per the
+`/architect-phase` skill, exactly as RUN B carried them (`notes/plans/run-b-sync-correctness.md`
+§BINDING PRINCIPLES — copied byte-verbatim there; incorporated here by that reference to keep
+this file readable in full). The load-bearing ones for a `Sync/` phase: **P-4** (broadcasts
+carry signals, never decisions), **P-5** (the friction doctrine — the challenge memo is
+exactly a P-5 memo), **P-7** (find bugs before she does; red-on-old absolute), **P-8**
+(standing law: P1–P3 bind the engine; complexity in the store, restraint in the UI).
 
 ## WHY (one paragraph)
 
-The mirror's `server_seq` is ONE global monotonic sequence stamped
-across all tenants. Ordering-wise that is fine (each client only ever
-SEES its own rows), but it leaks: any tenant can infer the AGGREGATE
-write volume/timing of all others from the gaps in the seqs they
-receive — the 14c I-1 accepted-and-recorded disclosure, accepted at
-launch scale with the closure named as a future §12 event. With sync
-OPEN at v1 (free ~3 months), stranger cursors accumulate from launch
-day — after which a seq-semantics migration means resetting or
-re-mapping REAL users' cursors. Now, with effectively one tenant, the
-migration is nearly free. The same open-at-v1 ruling means the project
-takes unmetered public writes from launch day — hence the MINIMAL abuse
-guard rides along, and the Fragments agent gets an abuse-posture brief
-through the standing carry channel.
+The mirror's `server_seq` is ONE global monotonic sequence stamped across all tenants.
+Ordering-wise that is fine (each client only ever SEES its own rows), but it leaks: any
+tenant can infer the AGGREGATE write volume/timing of all others from the gaps in the seqs
+they receive — the 14c I-1 accepted-and-recorded disclosure, accepted at launch scale with
+the closure named as a future §12 event. With sync OPEN at v1 (free ~3 months), stranger
+cursors accumulate from launch day — after which a seq-semantics migration means resetting or
+re-mapping REAL users' cursors. Now, with effectively one tenant, the migration is nearly
+free. The same open-at-v1 ruling means the project takes unmetered public writes from launch
+day — hence the MINIMAL abuse guard rides along, and the Fragments agent gets an
+abuse-posture brief through the standing carry channel.
 
 ## THE DESIGN CONSTRAINTS (from the row + SyncSpec — binding)
 
-- **Client semantics UNCHANGED, and test-pinned.** The premise that
-  makes this safe: a client's cursor only ever meets own-account rows,
-  and §7's seq-ranked repairs compare rows WITHIN one account — so
-  per-tenant sequences preserve every relative order any client ever
-  observes. Step 0 VERIFIES this premise against the code before
-  anything is built; if any client-side comparison crosses accounts,
-  STOP and report (that would be a design surprise, not a detail).
-- **Ordering authority stays `server_seq`** (§9) — per-owner now, but
-  still server-stamped, still monotonic per the only scope any client
-  sees. Wall clocks stay display-only.
-- **Her existing seqs CARRY OVER as the initial per-tenant values — no
-  cursor reset** for her devices (the row's explicit requirement).
-- **ONE §12 lockstep event, HER window, the 13j choreography** (both
-  her device builds refreshed in-window; the marker fences).
-- **The server stays dumb.** Per-owner stamping is a trigger + counter
-  table; no merge intelligence moves server-side.
-- **The abuse guard is MINIMAL by design** — per-account write
-  quotas/rate limits at the RPC layer with a TYPED refusal the client
-  surfaces honestly (the §12 refusal grammar: outbox intact, cursor
-  unmoved, a visible status). The tier's full posture is 13t's; this
-  phase only ensures launch day is not an open firehose.
+- **Client semantics UNCHANGED, and test-pinned.** The premise that makes this safe: a
+  client's cursor only ever meets own-account rows, and §7's seq-ranked repairs compare rows
+  WITHIN one account — so per-tenant sequences preserve every relative order any client ever
+  observes. Step 0 VERIFIES this premise against the code before anything is built; if any
+  client-side comparison crosses accounts, STOP and report (that would be a design surprise,
+  not a detail).
+- **Ordering authority stays `server_seq`** (§9) — per-owner now, but still server-stamped,
+  still monotonic per the only scope any client sees. Wall clocks stay display-only.
+- **Her existing seqs CARRY OVER as the initial per-tenant values — no cursor reset** for her
+  devices (the row's explicit requirement).
+- **ONE §12 lockstep event, HER window, the 13j choreography** (both her device builds
+  refreshed in-window; the marker fences). R-13y-2 sets the window's shape.
+- **The server stays dumb.** Per-owner stamping is a trigger + counter table; no merge
+  intelligence moves server-side.
+- **The abuse guard is MINIMAL by design** — per-account write quotas/rate limits at the RPC
+  layer with a TYPED refusal the client surfaces honestly (the §12 refusal grammar: outbox
+  intact, cursor unmoved, a visible status). The tier's full posture is 13t's; this phase
+  only ensures launch day is not an open firehose.
+- **PROVISIONAL governance (R-13y-4):** the numbers and the challenge design are the
+  orchestrator's ruled PROVISIONALs — logged at `notes/QUESTIONS.md` #144 when ruled, named
+  at the window pre-deploy, ratified at the checkpoint.
 
-## STEPS (each with tests; suites run at step ends)
+## THE ACCEPTANCE UNITS (named at plan time, per `notes/PhaseSizingGuidance.md`)
 
-**Step 0 — the seq-assumption survey (read-only; the gate on
-everything).** Enumerate every reader of `server_seq`/`sync_row_seq`
-client-side (`Merge.swift`, `Repairs.swift`, cursor handling, the
-janitor/ledger reconciliation) and every server-side consumer
-(`sync_pull`'s ordering + the A5 visibility horizon, `sync_horizon()`,
-`sync_purge_ledger()`, `device_cursor`, `purged_row`). Verdict each
-WITHIN-ACCOUNT (safe) or CROSS-ACCOUNT (stop-and-report). Record the
-table in this file. Test: none (survey); its output is the record.
+Two phase-sized units under the one theme — within the guidance's line. ONE implementer
+session each, strictly sequential (B builds on A's artifact). The phase is ONE §12 lockstep
+event; its sync-kind acceptance evidence is shared: **the convergence suites green under the
+per-tenant harness + her live two-device round at the window with cursors intact.**
 
-**Step 1 — the mirror's per-owner stamping**
-(`Server/supabase/11_phase13y_tenant_seq.sql`, deployed ONLY at her
-window): a per-owner counter table + the stamping trigger swapped to
-increment per `owner_id`; `sync_pull` ordering/cursor per-owner (the
-RLS/owner scoping already fences visibility — the cursor semantics
-join it); `sync_horizon()` and the purge ledger reviewed per Step 0's
-verdicts; initialization copies each owner's current MAX(server_seq)
-as their counter's floor so her existing cursors stay valid. The
-in-file re-run guard per the 09/10 precedent; `sync_schema_version()`
-7→8.
+- **UNIT A — the per-tenant sequence** (Steps 0–3): the survey, the `12_` DDL authored (with
+  the guard fold-in + NIT-4 + the horizon exposure), the client pins, the per-tenant fake
+  server, the disclosure-closure probe, the adopt-road pin. Unit-level evidence: ALL
+  convergence/two-user suites green under per-tenant numbering + the probe as the headline
+  pin.
+- **UNIT B — the guard and the proof** (Steps 4–5): the minimal abuse guard (+ the re-auth
+  doors), the key-proof challenge (memo → ruling → build), the Fragments brief. Unit-level
+  evidence: the quota suites (refuse cleanly, recover, never refuse the import burst), the
+  challenge suites (a replayed captured proof refuses; the fake's twin), the refusal-grammar
+  pins.
 
-**Step 2 — the client.** `SyncSchema.lockstepVersion` 7→8; any Step-0
-verdicted site adjusted (expected: none — the premise says client code
-is already within-account); pins added: (a) a cursor never meets
-another account's rows (two-user harness assertion, existing suites
-extended); (b) §7's seq-ranked repairs produce identical outcomes
-under per-tenant numbering (the repair suites re-run against the
-per-tenant fake server); (c) the refusal grammar on the new quota
-refusal (typed, outbox intact, cursor unmoved).
+Then: the ladder over the combined diff → **Step 6, HER WINDOW** (the shared acceptance
+evidence lands there).
 
-**Step 3 — the harness.** The fake in-process server gains per-tenant
-counters (mirroring Step 1's semantics exactly); ALL convergence
-suites re-run green; the DISCLOSURE-CLOSURE PROBE: tenant B writes
-heavily; tenant A's pulls and seq bookkeeping are asserted to carry
-ZERO information about it (no gaps, no advancing seqs A didn't cause)
-— the probe is the phase's headline pin and the closeout amends
-SyncSpec §12's I-1 record on its evidence.
+## STEPS (each with tests; suites run at step ends — the 2026-09-21 riders are FOLDED IN)
 
-**Step 4 — the minimal abuse guard.** Per-account write quota/rate
-limit at the RPC layer (shape decided in-phase: simplest honest
-mechanism — e.g. a per-owner rolling write-count check inside
-`sync_push` refusing with a typed error). Client: the refusal surfaces
-per the §12 grammar. Tests: the fake server enforces the same limit;
-a suite proves an over-quota push refuses cleanly and recovers when
-the window passes. NUMBERS are deliberately generous (launch-scale
-honest-user headroom; 13t revisits).
+**Step 0 — the seq-assumption survey (UNIT A; read-only; the gate on everything).**
+Enumerate every reader of `server_seq`/`sync_row_seq` client-side (`Merge.swift`,
+`Repairs.swift`, cursor handling, `PurgeJanitor`/ledger reconciliation, `CorpusRotation`'s
+seq comparisons, `SampleLibraryDedupe`'s seq-ranked legs, `RekeyRecencyProbe`) and every
+server-side consumer (`sync_pull`'s ordering + the A5 visibility horizon, `sync_horizon()`,
+`sync_purge_ledger()`, `sync_purge_execute`, `device_cursor`, `purged_row`,
+`key_vault_update`'s rotation arm). Verdict each WITHIN-ACCOUNT (safe) or CROSS-ACCOUNT
+(stop-and-report). Record the table in this file. **Three server-side mint sites are already
+known from the kickoff preflight — the survey verifies and COMPLETES this list, never trusts
+it:** `stamp_server_seq()`'s `nextval('sync_server_seq')` (09:227 — the trigger every data
+table fires), `sync_purge_execute`'s `granted_seq := nextval(…)` (11:697 — compared against
+the owner's device cursors), and `key_vault_update`'s `next_seq := nextval(…)` (11:922 — the
+`rotation_started_seq` mint, compared against the owner's data-row seqs by the completion
+guard). Every one must draw from the OWNER'S counter or its comparison breaks. Test: none
+(survey); its output is the record.
 
-**Step 5 — the Fragments abuse-limiting brief.** A dated carry item in
-`notes/fragments-bridge-contract.md` sharing the quota/limit design so
-the suite's posture is one posture (her ask, with the hands-off-repo
-rule answering her "it's all stargazing" alternative — the brief is
-the mechanism, never direct implementation).
+**Step 1 — the mirror's per-owner stamping (UNIT A): `Server/supabase/12_phase13y_tenant_seq.sql`,
+authored now, deployed ONLY at her window.**
+- A per-owner counter table + one counter function (row-locked upsert-increment — per-tenant
+  serialization: tenants never contend with each other); the stamping trigger and the Step-0
+  mint sites ALL swapped to it.
+- `sync_pull` ordering/cursor per-owner (the RLS/owner scoping already fences visibility —
+  the cursor semantics join it), **with its parameters REORDERED so `key_proof` is
+  defaultless everywhere** (NIT-4, pre-13x ladder 2026-09-07 — Postgres forbids a defaultless
+  parameter after defaulted ones; old signatures dropped first, the 09 discipline).
+- Initialization copies each owner's current `MAX(server_seq)` across every data table as
+  their counter's floor, so her existing cursors stay valid (no reset — the carry-over is
+  proven live at Step 6).
+- **The rotation completion guard's body FOLDED IN** (RUN B S1/Q3's carry; the standing
+  caveat at `notes/plans/pre-13x-deploy-checklist.md` §10 retires with this artifact): the
+  deployed `key_vault_update` carries `VARIORUM_ROTATION_ROWS_REMAIN` in its canonical body,
+  verified by an arm-9-style **DDL text pin** on the deployed body, never assumed from the
+  overlay's state. The `maintenance/pre13x-ladder-rotation-clearing-guard.sql` overlay is
+  marked superseded-by-12 in its header.
+- **The A5 horizon's ONE source of truth** (pre-13x closeout consideration 2, her
+  instruction): the server's visibility horizon (today `interval '2 seconds'` inline in
+  `sync_pull`) becomes a served constant exposed through the lockstep read
+  (`sync_schema_version`'s shape — the exact vehicle is the implementer's proposal, the
+  orchestrator rules), and `CorpusRotation.horizonWait` DERIVES its wait from it (server + margin),
+  pinned — one constant moving without the other reopens BLOCKER-1's class.
+- `sync_schema_version()` 8→9 last, inside the one guarded transaction; the in-file re-run
+  guard per the 09/10/11 precedent; `maintenance/14c-post-deploy-grant-sweep.sql` EXTENDED to
+  name every signature 12 creates (the `AuthRLSDDLTests` pin extends with it).
+Tests: `AuthRLSDDLTests`' 12 block (signatures, ownership, grants, the guard text pin, the
+horizon-exposure shape); the fake server's twin lands in Step 3.
 
-**Step 6 — HER DEPLOY WINDOW (the 13j choreography):** mirror DDL
-executed at her go; both her device builds refreshed in-window
-(marker-8 builds; a marker-7 build visibly refuses after the deploy —
-by design, keep the window tight); live verification (marker 8; a
-live round green; her cursors intact — the Step 1 floor carry-over
-proven on her real account).
+**Step 2 — the client (UNIT A).** `SyncSchema.lockstepVersion` 8→9; any Step-0 verdicted
+site adjusted (expected: none — the premise says client code is already within-account); pins
+added: (a) a cursor never meets another account's rows (two-user harness assertion, existing
+suites extended); (b) §7's seq-ranked repairs produce identical outcomes under per-tenant
+numbering (the repair suites re-run against the per-tenant fake server); (c) **the adopt-road
+pin** (pre-13x closeout hand-forward, 2026-09-04): the delete-and-set-up-again road — owner
+re-stamp + `resyncReinitialize`, the ONLY v1 road that rotates the sync master — still
+converges under per-tenant `server_seq` (a cursor reset to 0 under a NEW owner reads that
+owner's sequence from its start; the two-user suite gains a delete → recreate → adopt
+scenario); (d) `horizonWait` derived from the served horizon (Step 1's client half), pinned.
 
-## VERIFICATION (phase acceptance, from the row)
+**Step 3 — the harness (UNIT A).** The fake in-process server gains per-tenant counters
+(mirroring Step 1's semantics exactly, including the counter floor + the three mint sites);
+ALL convergence suites re-run green under `productionRound` (RUN B's default); **the
+DISCLOSURE-CLOSURE PROBE**: tenant B writes heavily; tenant A's pulls and seq bookkeeping are
+asserted to carry ZERO information about it (no gaps, no advancing seqs A didn't cause) — the
+probe is the phase's headline pin and the closeout amends SyncSpec §12's I-1 record on its
+evidence.
 
-- Convergence + two-user suites green under per-tenant numbering.
-- The disclosure-closure probe: a second tenant's write activity
-  provably invisible in the first tenant's pulls and seq bookkeeping.
-- Zero client-visible behavior change (the pinned premise).
+**Step 4 — the minimal abuse guard (UNIT B).** Per-account write quota/rate limit at the RPC
+layer (shape decided in-phase: simplest honest mechanism — e.g. a per-owner rolling
+write-count check inside `sync_push` refusing with a typed error). Client: the refusal
+surfaces per the §12 grammar (outbox intact, cursor unmoved, a visible status). **The one
+named constraint the numbers must serve, hers verbatim (2026-09-21):** *"I do need to account
+for onetime migrations from existing notes app but in general I don't want it abused."* — a
+new user's one-time bulk first load is an HONEST burst the quota must never refuse (a
+generous first-window allowance or burst bucket beside a lower steady-state rate; the
+mechanism is this step's to design). NUMBERS: the orchestrator's ruled PROVISIONAL
+(R-13y-4), generous launch-scale headroom, logged at #144; 13t revisits with pricing. Tests:
+the fake server enforces the same limit; a suite proves an over-quota push refuses cleanly
+and recovers when the window passes; a suite proves the import-burst shape passes untouched.
+
+**Step 4b — the re-auth doors (UNIT B; the 2026-09-01 ADDENDUM, executed):** (1) the
+re-authentication doors — Replace Keys, account deletion, and the Standard-mode confirmations
+verify the ACCOUNT PASSWORD through a sign-in call against the suite issuer; that road
+inherits Supabase's auth rate limits — STATE the numbers in this file, pin a test that a
+burst of wrong passwords is refused, and make the app's refusal wording honest ("too many
+attempts — wait N minutes"); (2) recent re-authentication for the destructive RPCs —
+`account_data_truncate` and `sync_purge_execute` require a session re-authenticated within a
+short window (an auth-time claim check inside the RPC, the tenant-scoped-guard pattern; rides
+the 12 DDL), so a stolen long-lived token cannot empty an account's server copy from a custom
+client. Record: `notes/plans/pre-13x-postures-design.md` §18-I.
+
+**Step 4c — the key-proof challenge (UNIT B; memo FIRST, build second).** Today the proof is
+a STATIC bearer secret (`HMAC-SHA256(M, "variorum.key-proof.v1")`, identical on every
+request, in every RPC body) — anything operator-side that retains request bodies holds
+mutating access forever (pre-13x CONSIDERATIONS item 1; stress-pass Q1 verified the durable
+data plane holds only the hash). The fix: a PER-REQUEST challenge verified in
+`sync_key_proof_check`. **The short design memo comes before any line** (the plan's own
+2026-09-21 rider) and must weigh, at minimum: the verification-key custody trade (the
+hash-only-at-rest property Q1 praised is at stake — a symmetric MAC secret stored server-side
+vs an asymmetric public key with zero server secret; pgsodium/Ed25519 availability on
+Supabase is a Sonnet-lookup fact, never assumed), the nonce/replay-window lifecycle, clock
+dependence (§9: no client-clock trust), the fake server's twin, and the migration arm for her
+existing vault row. The orchestrator rules the shape under R-13y-4 (PROVISIONAL, #144); the
+build lands the server half in the 12 DDL and the client half in `SyncEncryption`/transport.
+Pin: a captured proof value replayed on a second request REFUSES.
+
+**Step 5 — the Fragments abuse-limiting brief (UNIT B).** A dated carry item in
+`notes/fragments-bridge-contract.md` sharing the quota/limit design so the suite's posture is
+one posture (her ask, with the hands-off-repo rule answering her "it's all stargazing"
+alternative — the brief is the mechanism, never direct implementation).
+
+**Step 6 — HER DEPLOY WINDOW (R-13y-2; the 13j/pre-13x choreography — the pre-13x checklist
+is the worked example).** In one sitting: the A1 rail (WAL-safe backup, integrity_check) →
+the pre-deploy snapshot (marker 8, row counts, function set) → `12_phase13y_tenant_seq.sql`
+WHOLE in ONE session via the stored-PAT query road (classifier block ⇒ the `!` road, her
+hands) → verification (marker 9; every signature; ownership `variorum_definer`; the grant
+sweep every-row OK/INFO; the completion-guard TEXT PIN against the deployed body; the horizon
+read served; **the pre-deploy summary names the two #144 PROVISIONALs, one line each**) → the
+Mac Release refresh behind the A1 rail + the phone build/install (both marker-9; both
+marker-8 builds visibly refuse from the bump until refreshed — keep the window tight) → her
+live round each direction → **the carry-over proof: her cursors intact on her real account
+(the Step 1 floor proven live), `device_cursor` carrying both devices** → the grant sweep
+once more.
+
+## VERIFICATION (phase acceptance, from the row + the folded riders)
+
+- Convergence + two-user suites green under per-tenant numbering (the harness's per-tenant
+  fake, `productionRound` default).
+- The disclosure-closure probe: a second tenant's write activity provably invisible in the
+  first tenant's pulls and seq bookkeeping.
+- Zero client-visible behavior change (the pinned premise); the adopt-road scenario
+  converges.
 - Her devices sync across the deploy with cursors intact.
-- The quota refusal is typed, honest, and recoverable; normal use
-  never meets it.
-- SyncSpec §12's I-1 record AMENDED at closeout (the closure executed);
-  the lockstep running record gains the marker 7→8 entry.
+- The quota refusal is typed, honest, and recoverable; normal use never meets it; the
+  import-burst shape never refuses.
+- The challenge: a replayed captured proof refuses; the memo's ruled shape built on both
+  halves; the fake's twin exact.
+- The horizon has ONE source of truth, served and derived, pinned on both halves.
+- The completion guard lives in the canonical 12 body (text-pinned); the overlay is retired.
+- The re-auth doors: auth rate limits stated + pinned; the destructive RPCs demand recent
+  re-auth.
+- SyncSpec §12's I-1 record AMENDED at closeout (the closure executed); the lockstep running
+  record gains the marker 8→9 entry; the deploy checklist's §10 caveat marked retired.
 
 ## NON-GOALS
 
-- The tier's full rate/abuse posture, pricing, entitlement changes —
-  13t's.
-- Any merge-matrix or repair-semantics change — the phase's whole
-  premise is that none is needed (Step 0 enforces).
-- Fragments-side implementation — the brief carries; their repo is
-  hands-off.
+- The tier's full rate/abuse posture, pricing, entitlement changes — 13t's.
+- Any merge-matrix or repair-semantics change — the phase's whole premise is that none is
+  needed (Step 0 enforces).
+- Fragments-side implementation — the brief carries; their repo is hands-off.
+- The 13y-adjacent residuals that are NOT this phase's: the sample-library dedupe's
+  late-registry legs (KnownIssues row 33, owner **18a**) · the daily Journal's identity
+  (owner **13i-e**) · pull-to-head memory + the poison-row park/heal design (owner **12**).
 
 ## AUTHOR RULING (2026-09-21, at the RUN B kickoff sitting — the scope CONFIRMED, the abuse numbers DELEGATED with one named constraint)
 
@@ -190,11 +296,11 @@ real reason for the pre-release slot; the riders are necessary regardless; the c
 
 - **The scope stands as is.** Her words: *"I think we should keep it as is then, sounds like it's
   solid and will be helpful."* No reopening of the per-tenant design; the plan runs as authored
-  plus the 2026-09-21 correction note above (marker 8→9, the `12_` slot, the rider fold-in).
+  plus the 2026-09-21 correction (folded into the STEPS above at the 2026-09-22 kickoff refresh).
 - **The abuse-guard NUMBERS are delegated to this phase's recommendation** — her words: *"I'll
-  probably just go with your or phase 13y's recommendation on the abuse number."* The phase's
-  Step 4 proposes concrete numbers with its reasoning; she confirms at its sitting ("probably" is
-  hers — the confirmation is still a sitting item, not pre-granted).
+  probably just go with your or phase 13y's recommendation on the abuse number."* *(Superseded in
+  MECHANISM by R-13y-4, her own kickoff answer: PROVISIONAL-and-continue — the orchestrator rules,
+  #144 logs, the checkpoint ratifies; the window pre-deploy names it.)*
 - **ONE NAMED CONSTRAINT the numbers must serve, hers verbatim:** *"I do need to account for
   onetime migrations from existing notes app but in general I don't want it abused."* A new
   user's one-time import of an existing notes corpus (the 13h/Apple-Notes road, or any bulk first
@@ -218,4 +324,79 @@ minutes"); **(2) recent re-authentication for the destructive RPCs** — `accoun
 claim check inside the RPC, the tenant-scoped-guard pattern), so a stolen long-lived token cannot
 empty an account's server copy from a custom client. Record: `notes/plans/pre-13x-postures-design.md`
 §18-I (the back-door audit). Both are server SQL + `Sync/`-adjacent — the Fable rider.
+*(Executed as Step 4b above.)*
 
+## ENVIRONMENT TRAPS (every implementer brief carries this section verbatim)
+
+- **The loop is the core package:** `swift build` / `swift test --filter <SuiteName>` from the
+  repo root. The FULL core suite runs at each unit's close (baseline **1679/179**, re-confirmed
+  on macOS 27 at this kickoff); the full Mac suite ONLY at the phase's finals (baseline: the
+  ENVIRONMENT ACTS row below — measured on macOS 27 at this kickoff; never at a session's
+  start). Swift Testing's "Test run with N tests" line COUNTS skipped tests — read the
+  `skipped:` lines before claiming a gated suite ran.
+- **The two-client harness lives in `Tests/VariorumCoreTests/Support/`** — `SyncTestHarness.swift`
+  (two in-memory clients), `FakeSyncServer.swift` (in-process; `visibilityHorizon`,
+  `holdPushes`/`commitHeldPushes`), `FaultInjectingTransport.swift` (chunking, drops,
+  re-entrancy). The convergence suites: `SyncConvergenceTests` · `SyncMergeTests` ·
+  `SyncRepairTests` · `SyncPullTests` · `SyncPushTests` · `FaultInjectionSyncTests` ·
+  `EditorRateSyncTests` · `StructuralSessionSyncTests` · `MobileCaptureSyncTests` ·
+  `MultiTenantSyncTests` (+ `MultiTenantSyncAttackerTests`). `productionRound` is the suites'
+  default round shape since RUN B.
+- **Zero mirror access until Step 6:** no SQL against production, no PAT use, no deploys.
+  `12_phase13y_tenant_seq.sql` is AUTHORED in-repo and pinned by `AuthRLSDDLTests`; it fires
+  only at her window, by the orchestrator.
+- **A reproduced defect a unit is not fixing lands as a `withKnownIssue`-wrapped probe citing
+  its ledger row** — never a bare red test.
+- **Mac-suite runs (finals only):** from `App/Variorum/`, suite-level `-only-testing` only,
+  selectors literal on the command line; NEVER a custom build configuration; zsh `pipestatus`;
+  `pgrep -fl 'Variorum.app/Contents/MacOS'` before any run, discriminate by PATH, real-store
+  instances quit by HER only. The flake list (adjudicate by the paired interleaved protocol,
+  never one isolated run): the differential-latency pin · `CanvasDragTrackingTests` ·
+  `BlocksWorkbenchFaceTests`' single-click · the row-49 landing arm · `ModeSwitchCarryTests`'
+  top-of-Write arm.
+- **Git:** never `git checkout` over uncommitted work; commit per piece and PUSH after every
+  commit; NO commit trailers; stage PATHSPEC-LIMITED (`git add <your files>`), never
+  `git add -A` — the orchestrator edits shared records between your commits.
+- **Session resiliency (the checkpoint protocol — binding from the FIRST commit):** the unit
+  record's LIVE STATUS section written at the START and flipped in the same commit as each
+  piece, unverified claims marked PENDING · synchronous foreground waits only, via the
+  grep-poll loop (`grep -q '<EXIT LINE>' <log> && break; sleep 5` — never `tail -f | grep -m1`,
+  never a backgrounded run you end your turn on) · never spawn subagents (ONE Sonnet lookup for
+  external facts only; repo reading never delegated) · no revert starts until the record names
+  it and the pre-revert state is COMMITTED · every death and resume noted in the record.
+
+## ENVIRONMENT ACTS AT KICKOFF (2026-09-22 — the macOS 27.0 update; R-13y-3)
+
+- **The machine moved macOS 26.x → 27.0 (build 26A428) between RUN B's close and this
+  kickoff; Xcode stays 26.3 (SDK 26.2)** — the runtime is now NEWER than the build SDK.
+  CLAUDE.md's environment note ("Tahoe 26.x") is stale; the closeout updates it as a recorded
+  fact.
+- **The TK2 spike §5 re-run: CLEAN on 27.0** (`Spikes/TK2Spike/results-2026-09-22-macos27.0.log`,
+  the archived run): canary **0** whole-run (no TK1 fallback), C-hybrid jump pixel-exact
+  (paraErr 0, pxErr 0.00, postSettleDrift 0.00) at 6.4–13.8 ms across 10–90% and FLAT at 200k
+  words, keystrokes ~2 ms flat at 50k and 200k, `ensureLayout(documentRange)` still the
+  banned-path cost (139 ms / 562 ms at 50k/200k — unchanged class). Every Phase-6 conclusion
+  holds; live TK2 geometry stays adopted. The §5 matrix row for 27.0 is this line + the log.
+- **Core suite on 27.0: 1679/179 ALL PASSED** — byte-matching RUN B's finals count.
+- **Full Mac suite on 27.0 (the R-13y-3 early baseline): PENDING** — running at this writing
+  in the kickoff's zero-instance window (her app quit at her word); the result lands here and
+  any new red is adjudicated as OS-delta by the paired protocol BEFORE UNIT A spawns.
+
+## LEDGER (every row owned; a row closes FIXED/DONE-with-evidence · RECORDED-with-owner · DEFERRED-with-owner)
+
+| # | Unit | Item | Status |
+|---|---|---|---|
+| 1 | env | The TK2 spike §5 re-run on macOS 27.0 | **DONE — clean** (see ENVIRONMENT ACTS) |
+| 2 | env | Core suite new-OS baseline | **DONE — 1679/179 green** |
+| 3 | env | Full-Mac new-OS baseline (R-13y-3) | **PENDING — running** |
+| 4 | A | Step 0 survey + verdict table | open |
+| 5 | A | Step 1 — the `12_` DDL (+ guard fold-in, NIT-4, horizon exposure, sweep extension) | open |
+| 6 | A | Step 2 — client pins (incl. the adopt-road scenario) | open |
+| 7 | A | Step 3 — per-tenant harness + the disclosure-closure probe | open |
+| 8 | B | Step 4c memo — the key-proof challenge design (orchestrator rules; #144) | open |
+| 9 | B | Step 4 — the abuse guard (+ numbers PROVISIONAL; #144) | open |
+| 10 | B | Step 4b — the re-auth doors | open |
+| 11 | B | Step 5 — the Fragments brief | open |
+| 12 | — | The ladder (combined diff; cap three) | open |
+| 13 | — | Step 6 — HER WINDOW (deploy · installs · live round · carry-over proof) | open |
+| 14 | — | Closeout (SyncSpec §12 running record + I-1 amendment · master plan · handoff · #144 ratify bundle) | open |
