@@ -854,10 +854,82 @@ and the full `AuthRLSDDLTests` suite (68/68) re-run green by the orchestrator.
   the seven UNIT B DDL pins; the reworked KeyProofGate suite holds its count with the
   migration-arm tests REWORKED into the enroll-road ones).**
 - **Piece 5 — the quota client half (typed refusal + wording + fake budget + pins):
-  PENDING.**
-- **Piece 6 — the re-auth doors' client half + the auth rate-limit numbers/pins: PENDING.**
+  DONE** *(the typed `SyncError.writeQuotaExceeded(retryAfterSeconds:)` + the honest §12
+  wording, the `retry_after_seconds=%` DETAIL parser, and the fake's budget twin all
+  landed inside Piece 4's commit (b4c43b58) — the seam ran through the same files; what
+  this piece ADDS is the pin suite `Tests/VariorumCoreTests/AbuseGuardTests.swift`
+  (NEW, "The minimal abuse guard + the re-auth doors (13y UNIT B)") — the memo §4's
+  named pins plus the adjudication's three explicit points, all new-mechanism green-by-
+  design: over-quota refuses WHOLE with outbox intact + cursor unmoved and RECOVERS
+  when the window tumbles (the refuse-whole boundary pinned AS STATED — `window_rows +
+  batch > 50,000` refuses with zero overshoot); the import-burst shape (a first load
+  far over 50k) passes untouched through the LIFETIME pool; the batch cap refuses a
+  malformed 2,001-row call AND the pin asserts the ruled relation itself —
+  `SyncEngine(transport:).batchSize * 10 == 2_000` — so a future chunk-size change
+  breaks the pin, not the cap silently; `account_data_truncate` RESETS the pool (the
+  adopt road's re-push is a first load, the ruled reset reason); CAS rejects burn NO
+  quota (only accepted rows count — the accepted-count-after-the-loop point pinned).
+  8/8 green. The budget-after-vault lock order stays STATED AT THE CODE in 12
+  (adjudication point 3 — a comment obligation, verified present, not a pin).*
+- **Piece 6 — the re-auth doors' client half + the auth rate-limit numbers/pins: DONE**
+  *(the typed `SyncError.reauthRequired` + wording landed in Piece 4's seam; this piece
+  adds (a) `Sources/VariorumCore/Auth/AuthRateLimit.swift` (NEW) — the pure classifier
+  `isRateLimited(status:body:)` (HTTP 429 OR the `over_request_rate_limit` body token —
+  the two-vocabulary precedent) + the ONE honest refusal sentence, with THE NUMBERS
+  STATED AS FACTS in its doc per the brief's letter and RESTATED HERE per the ADDENDUM:
+  **Supabase's token endpoint (the password grant every sign-in and every re-auth
+  `verifyPassword` hits) defaults to 150 requests per 5 minutes per IP, bursts to 30,
+  configurable** — with the recorded caveats stated honestly: the limit is IP-SCOPED
+  (a distributed brute-force is not capped per account) and the tracker holds under-
+  enforcement reports, so this is a SPEED BUMP never the wall; the walls are the
+  password, the per-request key proof, and the E2EE design (the account password alone
+  sees nothing — the postures design §3.10's consequence). (b) The AbuseGuardTests
+  re-auth pins: BOTH destructive doors refuse a stale amr claim typed
+  (`reauthRequired`) and pass a fresh one; the gate order holds (an unauthenticated
+  caller on a stale-reauth account meets the GATE's refusal, never the re-auth's); the
+  ROUND doors never consult the claim (push/pull under stale re-auth run clean — the
+  memo's "never the round" line pinned). (c) The burst pin: a local `FakeTokenEndpoint`
+  modeling the stated limit refuses 150 wrong-password attempts as credentials then
+  429s the 151st; the classifier reads it; the IP-scoped caveat has its own arm (a
+  second IP passes at the same account); the app's wording asserted VERBATIM against
+  `AuthRateLimit.refusalWording`. (d) The COMPILE-PENDING app arm:
+  `App/Variorum/Shared/ErrorPresentation.swift`'s `signInFailureMessage` gains the
+  rate-limit arm FIRST in the endpointFailure switch — a 429 judged nothing about the
+  credential, so "Wrong email or password." would be a lie there — returning the core
+  wording; idiom-matched, orchestrator closes with build-for-testing. **The live amr
+  refresh-survival probe is OWED AT THE WINDOW** (noted in the window list below): the
+  fake's Bool claim twin is a recorded latitude — whether a refreshed session's `amr`
+  password timestamp survives token refresh on real GoTrue must be probed live before
+  the doors are trusted in anger.*
 - **Piece 7 — the KeyProofGateTests rework + the attacker-suite extensions (the tenth arm
-  under the challenge protocol; arm 9's exact-name allowlist extensions): PENDING.**
+  under the challenge protocol; arm 9's exact-name allowlist extensions): DONE** *(the
+  REWORK and the attacker extensions landed inside Piece 4's sweep commit (b4c43b58) —
+  they were inseparable from the seam re-type; what closes the piece is the memo §3's
+  SIX NAMED CHALLENGE PINS appended to `KeyProofGateTests` (suite now 17/17): **THE
+  REPLAY PIN** (the headline — a captured `(nonce, proof)` pair spends once; replayed,
+  it refuses `keyProofChallengeStale` on its own door AND a different door, nothing
+  lands twice, no seq granted, no cursor written), whose red-on-old is a BEHAVIORAL
+  REVERT of the fake's atomic consume (the two consume lines commented out, run once,
+  RESTORED, never committed — the diff against HEAD empty afterwards), quoted:
+  `✘ … KeyProofGateTests.swift:729:15: Expectation failed: an error was expected but
+  none was thrown` / `✘ … :739:9: … await server.rowCount(table: "container") ==
+  rowsAfter` / `✘ … :740:9: … await server.headSeq == headAfter` — with consume
+  disabled the replayed pair LANDED the second push and moved the seq head, the exact
+  static-bearer attacker outcome the protocol closes; the TTL pin (an unconsumed nonce
+  older than the window refuses stale on the server's clock alone; a fresh nonce on
+  the same clock passes — the TTL is the nonce's age, never the session's); the
+  CROSS-RPC SPLICE pin (a push-bound pair on the pull door refuses `keyProofRefused`
+  AND the splice CONSUMES the nonce — the DELETE precedes the compare — so the pair is
+  dead on its own door after); the SIGNER'S RETRY road (a wholly stale stash — the
+  sleeping laptop — meets one refusal, refetches EXACTLY once via a counting
+  transport, lands; no surfaced error, no loop); the FRESH ACCOUNT'S FIRST ENGINE
+  ROUND (provisioned v1-hash-no-secret, one `productionRound` drains the outbox
+  through the transparent enroll road and the vault ends enrolled — secret + post-
+  enroll hash together, the production shape); and the TOGETHER-RULE refusal (a new
+  hash with NO mac, and a mac whose SHA-256 mismatches, both refuse the vault update
+  whole — hash and secret land together or not at all, revision unmoved). All but the
+  replay pin are new-mechanism green-by-design, said plainly; the replay pin carries
+  the quoted red above.*
 - **Piece 8 — the Fragments carry item (Step 5): PENDING.**
 - **Piece 9 — the full-core-suite close line (baseline at open: 1698/179): PENDING.**
 
@@ -937,4 +1009,20 @@ closes them with build-for-testing on both targets at unit close.
   Phase8ServicesTests' fakes, MobileProtectionTests) and the two one-line app-production
   `updateVault(keyProof:)` argument expressions (EncryptionSession/PostureSwitch) take
   idiom-matched edits, COMPILE-PENDING for the orchestrator (the UNIT A closer's exact
-  precedent, mostly the same files).
+  precedent, mostly the same files). Piece 6 adds ONE more to the same list:
+  `App/Variorum/Shared/ErrorPresentation.swift`'s rate-limit arm (reads two core
+  symbols, same build-for-testing close).
+- **OWED AT THE WINDOW (the deploy sitting's list — none of these is mine to run; the
+  fences bar all mirror contact):** (1) **the live amr refresh-survival probe** (the
+  brief's own note): whether a real GoTrue session's `amr` password timestamp survives
+  token REFRESH — the fake's Bool claim is a recorded latitude, and if refresh strips
+  or re-dates the claim the 10-minute window mis-measures in one direction or the
+  other; probe live before the destructive doors are trusted. (2) **the Vault grants +
+  extensions-schema probes** (12's own PENDING-until-live header list): `vault.
+  create_secret`/`update_secret` callable by `variorum_definer` on the hosted plan,
+  and `hmac`/`gen_random_bytes` resolving via `extensions` in the two bodies that set
+  `search_path = public, extensions` — both are hosted-shape facts no fake can pin.
+  (3) **`account_purge`'s best-effort vault delete** — the purge takes the nonces,
+  budget row and secret with it; the secret's `vault.secrets` DELETE is best-effort by
+  design (a stranded secret is inert ciphertext), verify the happy path once live.
+  (4) The standing UNIT A window items are unchanged by this unit.

@@ -157,6 +157,14 @@ enum ErrorPresentation {
         if let authError = error as? AuthSessionError {
             switch authError {
             case .endpointFailure(let status, let body):
+                // 13y UNIT B (the abuse-guard memo §5): the rate limiter's
+                // refusal FIRST — a 429 judged nothing about the credential,
+                // so "wrong email or password" would be a lie here. The
+                // classifier + the honest wording live in core beside the
+                // stated numbers (AuthRateLimit).
+                if AuthRateLimit.isRateLimited(status: status, body: body) {
+                    return AuthRateLimit.refusalWording
+                }
                 let lowered = body.lowercased()
                 if status == 400,
                    lowered.contains("invalid_grant")

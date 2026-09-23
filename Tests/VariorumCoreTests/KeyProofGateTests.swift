@@ -703,4 +703,184 @@ struct KeyProofGateTests {
         // The merge happened (metadata: server-version-wins) — nothing refused.
         #expect(try b.db.fetchString("SELECT title FROM container WHERE id = ?", [postID]) == "A's rename, old key")
     }
+
+    // MARK: - 13y UNIT B: the challenge protocol's own pins (the memo
+    // §3's named suite list). New-mechanism pins, green by design —
+    // except THE REPLAY PIN, whose red-on-old is a BEHAVIORAL REVERT of
+    // the fake's atomic consume (run once, never committed; the unit
+    // record quotes the red).
+
+    /// THE REPLAY PIN (the memo's headline): a captured (nonce, proof)
+    /// pair spends once and REFUSES on every later presentation — the
+    /// atomic consume is the closure of the static-bearer class (a body
+    /// log's captured value is worthless the moment its request landed).
+    @Test func aCapturedProofPairReplayedRefusesAndNothingLandsTwice() async throws {
+        let server = FakeSyncServer()
+        let captured = await server.mintProof(rpc: "sync_push")
+        let outcomes = try await server.push(
+            [containerRow(id: "c1", title: "e1:once", base: 0)],
+            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: captured)
+        guard case .accepted = outcomes[0] else { Issue.record("the first spend lands"); return }
+        let rowsAfter = await server.rowCount(table: "container")
+        let headAfter = await server.headSeq
+
+        // The captured pair, replayed — the body-log attacker's whole
+        // holding: refused STALE (consumed), nothing lands, on every door.
+        await #expect(throws: SyncError.keyProofChallengeStale, "the replayed pair refuses") {
+            _ = try await server.push(
+                [containerRow(id: "c2", title: "e1:again", base: 0)],
+                activeKeyID: SyncTestKeys.corpusKeyID, keyProof: captured)
+        }
+        await #expect(throws: SyncError.keyProofChallengeStale, "…and on a different door too") {
+            _ = try await server.pull(
+                since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID,
+                keyProof: captured, deviceID: "d")
+        }
+        #expect(await server.rowCount(table: "container") == rowsAfter, "nothing landed twice")
+        #expect(await server.headSeq == headAfter, "no seq was granted to a replay")
+        #expect(await server.deviceCursor("d") == nil, "a replayed pull records no cursor")
+    }
+
+    /// THE TTL: a nonce older than the server-clock window refuses stale
+    /// — even unconsumed, even with a perfect HMAC (the 5-minute literal
+    /// is the DDL pin's; the fake's window runs on its logical clock).
+    @Test func anExpiredChallengeRefusesOnTheServersClockAlone() async throws {
+        let server = FakeSyncServer()
+        await server.setChallengeTTLTicks(10)
+        let minted = await server.mintProof(rpc: "sync_push")
+        await server.advanceClock(by: 11)
+        await #expect(throws: SyncError.keyProofChallengeStale) {
+            _ = try await server.push(
+                [containerRow(id: "c1", title: "e1:late", base: 0)],
+                activeKeyID: SyncTestKeys.corpusKeyID, keyProof: minted)
+        }
+        #expect(await server.rowCount(table: "container") == 0)
+        // A fresh nonce on the same clock passes — the TTL is the nonce's
+        // age, never the session's.
+        _ = try await server.push(
+            [containerRow(id: "c1", title: "e1:fresh", base: 0)],
+            activeKeyID: SyncTestKeys.corpusKeyID,
+            keyProof: server.mintProof(rpc: "sync_push"))
+    }
+
+    /// THE BINDING: a proof minted for ONE door refuses on another — the
+    /// `nonce ‖ ':' ‖ rpc_name` HMAC input stops cross-RPC splicing of an
+    /// unconsumed pair (memo §3's stated reason for the binding). The
+    /// splice CONSUMES the nonce (the DELETE precedes the compare), so
+    /// the refused pair is dead afterwards too.
+    @Test func aProofBoundToOneDoorRefusesOnAnotherAndTheSpliceSpendsTheNonce() async throws {
+        let server = FakeSyncServer()
+        let boundToPush = await server.mintProof(rpc: "sync_push")
+        await #expect(throws: SyncError.keyProofRefused, "the splice: a push proof on the pull door") {
+            _ = try await server.pull(
+                since: 0, limit: 10, activeKeyID: SyncTestKeys.corpusKeyID,
+                keyProof: boundToPush, deviceID: nil)
+        }
+        // The nonce was consumed by the refused splice — the pair is dead
+        // even on ITS OWN door now.
+        await #expect(throws: SyncError.keyProofChallengeStale, "the spliced pair is spent") {
+            _ = try await server.push(
+                [containerRow(id: "c1", title: "e1:x", base: 0)],
+                activeKeyID: SyncTestKeys.corpusKeyID, keyProof: boundToPush)
+        }
+        #expect(await server.rowCount(table: "container") == 0)
+    }
+
+    /// THE SIGNER'S RETRY ROAD (memo §7 edge 2 — a round outliving its
+    /// nonces never wedges): a stash gone stale wholesale (the sleeping
+    /// laptop) meets ONE stale refusal, fetches fresh, and the call
+    /// SUCCEEDS — one extra fetch, no surfaced error.
+    @Test func theSignersRetryOnceRecoversAWhollyStaleStash() async throws {
+        let server = FakeSyncServer()
+        await server.setChallengeTTLTicks(10)
+        let fetches = LockIsolated(0)
+        /// A counting pass-through — the observable the pin needs.
+        struct CountingChallengeTransport: SyncChallengeTransport {
+            let server: FakeSyncServer
+            let fetches: LockIsolated<Int>
+            func fetchChallenges(_ count: Int) async throws -> [String] {
+                fetches.withValue { $0 += 1 }
+                return await server.fetchChallenges(count)
+            }
+            func enrollKeyProof(legacyProof: String, macKey: String, activeKeyID: String) async throws {
+                try await server.enrollKeyProof(
+                    legacyProof: legacyProof, macKey: macKey, activeKeyID: activeKeyID)
+            }
+        }
+        let signer = SyncChallengeSigner(
+            transport: CountingChallengeTransport(server: server, fetches: fetches),
+            material: SyncTestKeys.proofMaterial,
+            activeKeyID: SyncTestKeys.corpusKeyID)
+        // The first call stocks the stash and lands.
+        _ = try await signer.call(rpc: "sync_push") { proof in
+            try await server.push(
+                [self.containerRow(id: "c1", title: "e1:a", base: 0)],
+                activeKeyID: SyncTestKeys.corpusKeyID, keyProof: proof)
+        }
+        #expect(fetches.value == 1)
+        // The laptop sleeps: every stashed nonce outlives the TTL.
+        await server.advanceClock(by: 11)
+        // The next call meets the stale refusal, refetches ONCE, lands.
+        let outcomes = try await signer.call(rpc: "sync_push") { proof in
+            try await server.push(
+                [self.containerRow(id: "c2", title: "e1:b", base: 0)],
+                activeKeyID: SyncTestKeys.corpusKeyID, keyProof: proof)
+        }
+        guard case .accepted = outcomes[0] else { Issue.record("the retry lands"); return }
+        #expect(fetches.value == 2, "exactly one refetch — the retry is ONCE, never a loop")
+        #expect(await server.rowCount(table: "container") == 2)
+    }
+
+    /// A FRESH ACCOUNT'S FIRST ENGINE ROUND ENROLLS TRANSPARENTLY (the
+    /// production shape every new account takes): provisioned with its
+    /// creation-era v1 hash and NO secret, the first `productionRound`
+    /// meets the ENROLL refusal, runs the road, retries, and converges —
+    /// the vault row ends enrolled (the secret + the post-enroll hash).
+    @Test func aFreshAccountsFirstEngineRoundEnrollsTransparentlyAndConverges() async throws {
+        let server = FakeSyncServer()
+        await server.provisionAccount(
+            FakeSyncServer.defaultUserID,
+            vaultCorpusKeyID: SyncTestKeys.corpusKeyID,
+            keyProofHash: SyncTestKeys.keyProofHash)  // v1 — NOT enrolled
+        #expect(await server.vaultRow()?.keyProofMacSecret == nil, "the scenario starts un-enrolled")
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        try a.with { ops, _ in
+            _ = try ops.createPost(title: "the first round", profile: .blog)
+        }
+        _ = try await productionRound(a)
+        #expect(try a.outboxCount() == 0, "the round drained through the enroll road")
+        #expect(await server.vaultRow()?.keyProofMacSecret == SyncTestKeys.macKeyWire,
+                "the round enrolled the account — kp2 landed in the Vault")
+        #expect(await server.vaultRow()?.keyProofHash == SyncTestKeys.macKeyHash,
+                "…beside the post-enroll hash, together")
+    }
+
+    /// THE TOGETHER RULE'S REFUSAL (memo §3's consequence, enforced): a
+    /// vault update installing a NEW proof hash WITHOUT its mac — or
+    /// with a mac whose SHA-256 mismatches — refuses whole; a hash that
+    /// moved without its secret would refuse every follower forever.
+    @Test func aNewHashWithoutItsMatchingMacRefusesTheVaultUpdate() async throws {
+        let server = FakeSyncServer()
+        let strayHash = KeyProof.macHash(master: SymmetricKey(size: .bits256))
+        await #expect(throws: KeyVaultClientError.keyProofRefused, "a new hash with NO mac") {
+            _ = try await server.keyVaultUpdate(
+                as: FakeSyncServer.defaultUserID, expectedRevision: 1,
+                keyProof: server.mintProof(rpc: "key_vault_update"),
+                newCorpusKeyID: SyncTestKeys.corpusKeyID,
+                newKeyProofHash: strayHash,
+                previousCorpusKeyID: nil, previousCorpusKey: nil)
+        }
+        await #expect(throws: KeyVaultClientError.keyProofRefused, "a mac whose hash mismatches") {
+            _ = try await server.keyVaultUpdate(
+                as: FakeSyncServer.defaultUserID, expectedRevision: 1,
+                keyProof: server.mintProof(rpc: "key_vault_update"),
+                newCorpusKeyID: SyncTestKeys.corpusKeyID,
+                newKeyProofHash: strayHash,
+                newKeyProofMac: SyncTestKeys.macKeyWire,
+                previousCorpusKeyID: nil, previousCorpusKey: nil)
+        }
+        #expect(await server.vaultRow()?.keyProofHash == SyncTestKeys.macKeyHash,
+                "the refusals wrote nothing — hash and secret stand together or not at all")
+        #expect(await server.vaultRow()?.revision == 1)
+    }
 }
