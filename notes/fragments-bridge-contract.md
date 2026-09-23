@@ -1030,3 +1030,45 @@ lockbox reply's consistency map. She carries it; questions return here.
 > Disconnect on her installed build logs its session out best-effort; Variorum otherwise only clears its LOCAL
 > copy of that refresh token, and Supabase refresh tokens never expire on their own — so a session that missed
 > the logout stays valid until you revoke it or the author signs out of Fragments globally.
+
+## CARRY ITEM (2026-09-23) — Variorum's minimal abuse guard: the design + numbers, shared as a pattern (nothing owed)
+
+Variorum's Phase 13y UNIT B just hardened its sync doors ahead of the friends beta, and per
+the author's standing instruction the design is shared here so Fragments can adopt any of it
+on its own merits. **Brief only — nothing is owed, and none of this touches Fragments' schema
+or the shared issuer.** Three layers, all server-side in Variorum's own RPCs:
+
+1. **A per-request challenge-verified key proof** replacing the static per-round bearer token:
+   the client fetches single-use server-minted nonces (5-minute server-clock TTL, per-user cap
+   64) and each gated RPC call presents `base64(HMAC-SHA256(K, nonce ‖ ":" ‖ rpc_name))` over a
+   secret K enrolled once into Supabase Vault under the OLD static proof's authorization. The
+   nonce is consumed atomically (`DELETE … RETURNING`) BEFORE the compare, so a captured
+   request body — a proxy log, a crash report — is worthless the moment it landed: replay
+   refuses, cross-RPC splicing refuses (the rpc name is inside the MAC), and the secret itself
+   never crosses the wire after enrollment. If Fragments' sync ever wants the same, the whole
+   shape is in `Server/supabase/12_phase13y_tenant_seq.sql` (sections 5b–5h) + the ruled memo
+   `notes/plans/phase-13y-memo-key-proof-challenge.md` on Variorum's side.
+
+2. **A write quota on the push door** (the beta's runaway-client/abuse wall), O(1) per push,
+   ONE self-contained per-owner row, no write log: a **500,000-row lifetime first-load pool**
+   (covers any full-corpus adoption re-push), then **50,000 accepted row-writes per tumbling
+   24 h window**, and a **per-call batch cap of 2,000** (the measured shipped chunk ×10).
+   Refusals are WHOLE (no partial batch, no overshoot), typed, and carry `retry_after_seconds`
+   so the client can speak an honest "sync resumes in about N hours" instead of an error.
+   CAS rejects burn no quota — only accepted rows count. `account_data_truncate` resets the
+   pool (a keys-replaced re-push is a first load again); the purge road is unquota'd.
+
+3. **A 10-minute password re-auth on the two destructive doors** (account truncate + purge
+   execute), read from the JWT's `amr` claim server-side — a stolen still-valid session alone
+   can no longer destroy the account's data. The sync round doors deliberately never consult
+   it.
+
+**The shared facts that DO touch Fragments** (same Supabase project, same token endpoint):
+the auth rate limits are **150 requests per 5 minutes per IP on the password grant, bursts to
+30, configurable** — IP-scoped (a distributed brute-force is not capped per account) and with
+under-enforcement reports on the tracker, so treat them as a speed bump, never the wall; the
+walls remain the password itself and (on Variorum's side) the key proof + E2EE. Variorum's
+sign-in form now words a 429 honestly ("Too many attempts — wait a few minutes and try
+again.") rather than "wrong password" — worth mirroring in Fragments' sign-in face, since a
+burst from one IP judges nothing about the credential. Questions come back through this
+channel.
