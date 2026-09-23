@@ -2053,9 +2053,11 @@ record exactly.
    "ratify"); the QUESTIONS row records it.**
 2. **#143 (amended)** — (a) ride-the-row as narrowed (text-sole-divergence; the R2-sharpened
    net-zero-round-trip corner named); (b) the bounded meeting (the ONE-HOUR settle window is the
-   orchestrator's arbitrated width, yours to move). **STATUS 2026-09-22: she asked for plainer
-   explanations of both halves before ruling — given at the sitting; both stand PROVISIONAL as
-   shipped, awaiting her word.**
+   orchestrator's arbitrated width, yours to move). **RATIFIED BOTH — 2026-09-22 morning sitting
+   (her word, after plainer explanations given: "yeah ratify both"); the one-hour width stands
+   as set, hers to move later; the §6/§7 canon annotations landed dated, the QUESTIONS row
+   records it. THE RATIFY BUNDLE IS FULLY ANSWERED — nothing from this run remains open with
+   her.**
 3. **#141 — already RULED by you** (shipped (a); the (b) rescue parked as 17s) — FYI line only.
 4. **Propose-only (S1's Q10):** 17n's 12-char floor is a length floor, not an entropy floor — a
    strength check beside it is yours to want or decline; 17n stays closed either way. **DECLINED

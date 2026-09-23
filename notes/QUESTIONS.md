@@ -1805,9 +1805,10 @@ and server rows — a metadata-only-dirty row (a label, a lock, a fan move) keep
 stale ancestor text can never overwrite the peer's final edit.** Two recorded corners, hers if
 she ever wants them ruled: MIXED dirt (a text edit + a metadata divergence on one row) falls
 back to pre-run server-wins (never worse than old; a durable text-intent record would be schema);
-byte-identical metadata still rides — and the ladder's round 2 sharpened that corner's on-ramp: it needs NO two-device coincidence (a net-zero metadata round-trip on one device — a label set then cleared before a round — leaves the row dirty with intent columns equal to the server's, so a stale ancestor text can still ride there; recorded, not fixable client-side without a text pre-image, which is schema). Ratify ride-the-row-as-narrowed
-as a §6 clarification, or revert to server-text-wins-on-dead-blocks. PROVISIONAL: the narrowed
-ride stands. **(b) The deliberate-delete-revival corner (amended — the original "once-per-store-
+byte-identical metadata still rides — and the ladder's round 2 sharpened that corner's on-ramp: it needs NO two-device coincidence (a net-zero metadata round-trip on one device — a label set then cleared before a round — leaves the row dirty with intent columns equal to the server's, so a stale ancestor text can still ride there; recorded, not fixable client-side without a text pre-image, which is schema). **RATIFIED —
+2026-09-22, her word at the morning sitting ("yeah ratify both"): ride-the-row-as-narrowed IS
+the §6 clarification (recorded at SyncSpec §6's tombstone row, dated); the recorded corners
+stand as documented behavior.** **(b) The deliberate-delete-revival corner (amended — the original "once-per-store-
 life window" premise was FALSIFIED by the ladder's F-R2 and the fix BOUNDED it):** the defense
 now fires only while the meeting genuinely STANDS — the other copy live, or this device's own
 retirement still unpushed, or the loser's tombstone within a ONE-HOUR settle window of the
@@ -1817,9 +1818,10 @@ race is revived visibly, never silently — err-toward-EDITED's letter. **The on
 the orchestrator's arbitrated call (the crossing's stamps are bounded by delayed pushes + the
 ~2 s band + round cadence — realistically minutes; an hour is generous headroom; the
 unpushed-outbox arm covers longer offline gaps on its own):** hers to widen or narrow.
-PROVISIONAL: the bounded revival stands. **STATUS 2026-09-22 (the morning ratify sitting): she
-asked for plainer explanations of both halves before ruling — given at the sitting; (a) and (b)
-remain PROVISIONAL as shipped, awaiting her word.** *(Adjacent, ruled the same day, no action: S1's Q10 refinement — 17n's 12-character floor
+**RATIFIED — 2026-09-22, the same word ("yeah ratify both"): the bounded revival stands as
+RULED behavior, the ONE-HOUR width ratified as set (still hers to move later if use argues);
+recorded at SyncSpec §7's dedupe bullet, dated.** *(Process note: she asked for plainer
+explanations of both halves at the sitting — given — then ratified both.)* *(Adjacent, ruled the same day, no action: S1's Q10 refinement — 17n's 12-character floor
 is a length floor, not an entropy floor; whether to pair it with a strength check is on the
 checkpoint bundle, propose-only — **DECLINED by her at the 2026-09-22 morning sitting ("decline");
 17n stays closed, nothing further owed**.)*
