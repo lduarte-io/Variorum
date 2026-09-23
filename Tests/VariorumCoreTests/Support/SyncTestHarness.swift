@@ -228,7 +228,10 @@ func syncToQuiescence(
         try await b.push(batchSize: batchSize)
         try await a.pull(batchSize: batchSize)
         try await b.pull(batchSize: batchSize)
-        let head = await server.headSeq
+        // 13y: heads are per-account — quiescence compares one FLEET's
+        // cursors against ITS OWN account's head (the pair is always one
+        // account's two devices).
+        let head = await server.headSeq(for: a.ownerID ?? FakeSyncServer.defaultUserID)
         let quiet = try a.outboxCount() == 0 && b.outboxCount() == 0
             && a.db.fetchString("SELECT value FROM sync_state WHERE key = 'last_server_seq'") == String(head)
             && b.db.fetchString("SELECT value FROM sync_state WHERE key = 'last_server_seq'") == String(head)

@@ -49,7 +49,9 @@ func productionQuiescence(
     for round in 1...maxRounds {
         _ = try await productionRound(a, batchSize: batchSize)
         _ = try await productionRound(b, batchSize: batchSize)
-        let head = await server.headSeq
+        // 13y: per-account heads — one fleet's cursors rest at its OWN
+        // account's head.
+        let head = await server.headSeq(for: a.ownerID ?? FakeSyncServer.defaultUserID)
         let quiet = try a.outboxCount() == 0 && b.outboxCount() == 0
             && a.cursor() == head && b.cursor() == head
         if quiet { return round }

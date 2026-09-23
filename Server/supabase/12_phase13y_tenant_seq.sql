@@ -28,11 +28,11 @@
 -- aggregate write volume/timing from the gaps in the seqs it receives;
 -- with sync OPEN at v1 the closure must land BEFORE stranger cursors
 -- accumulate):
---   * `sync_owner_seq` — the per-owner counter table (server-only, never
+--   * `sync_tenant_seq` — the per-owner counter table (server-only, never
 --     a mirror data table, never in an allowlist or a payload), one row
 --     per account, on the `device_cursor` posture (FORCE RLS + owner
 --     policy + definer grants);
---   * `next_owner_seq(for_owner)` — the ONE counter function: a
+--   * `next_tenant_seq(for_tenant)` — the ONE counter function: a
 --     row-locked upsert-increment, so ONE account's writers serialize on
 --     their own row and TENANTS NEVER CONTEND WITH EACH OTHER. The row
 --     lock is held to commit, which also means one account's pushes
@@ -72,7 +72,7 @@
 --     resolves RPC arguments BY NAME and the client always sends every
 --     key. The body is 11's VERBATIM — the A5 horizon, the device-cursor
 --     upsert, the owner scoping and the subtraction all byte-kept;
---   * `account_purge` gains the caller's `sync_owner_seq` row — the whole
+--   * `account_purge` gains the caller's `sync_tenant_seq` row — the whole
 --     account goes (the 13j letter, extended to the table this event
 --     adds). `account_data_truncate` deliberately does NOT touch the
 --     counter: the owner's sequence stays monotonic across a re-key
@@ -115,7 +115,7 @@
 -- rolls back whole, marker untouched; an honest retry needs no override.
 --
 -- THE NAMING RULE (13j, the author's ruling): no RPC parameter may shadow
--- a column it writes. `for_owner` is none of `sync_owner_seq`'s columns
+-- a column it writes. `for_tenant` is none of `sync_tenant_seq`'s columns
 -- (`owner_id`, `last_seq`) — the `for_device` idiom exactly.
 
 begin;
@@ -123,7 +123,7 @@ begin;
 -- ---------------------------------------------------------------------------
 -- 0a. THE RE-RUN GUARD — first statement inside the transaction, before
 --     the destructive drop below. Keyed on evidence only a deployed 12
---     leaves: the marker at 9+, or the `sync_owner_seq` table no other
+--     leaves: the marker at 9+, or the `sync_tenant_seq` table no other
 --     artifact creates.
 -- ---------------------------------------------------------------------------
 
@@ -131,7 +131,7 @@ do $rerun_guard$
 declare
   override            text    := nullif(current_setting('variorum.allow_12_rerun', true), '');
   deployed_marker     int     := 1;
-  counter_table_here  boolean := to_regclass('public.sync_owner_seq') is not null;
+  counter_table_here  boolean := to_regclass('public.sync_tenant_seq') is not null;
 begin
   if override = 'yes-rerun-the-tenant-seq-event' then
     raise notice 'VARIORUM 12 RE-RUN OVERRIDE ACCEPTED — re-applying the per-tenant sequence event.';
@@ -146,7 +146,7 @@ begin
   if deployed_marker >= 9 or counter_table_here then
     raise exception using
       message = 'VARIORUM_12_ALREADY_DEPLOYED: this mirror has already run 12 (lockstep marker '
-                || deployed_marker || '; sync_owner_seq table '
+                || deployed_marker || '; sync_tenant_seq table '
                 || case when counter_table_here then 'present' else 'absent' end || ').',
       hint    = 'If this re-run is genuinely intended, prepend `set variorum.allow_12_rerun = ''yes-rerun-the-tenant-seq-event'';` in the same execution. Otherwise: nothing to do — the mirror already speaks this schema.';
   end if;
@@ -163,7 +163,7 @@ $rerun_guard$;
 drop function if exists sync_pull(bigint, text, int, text, text);
 
 -- ---------------------------------------------------------------------------
--- 1. sync_owner_seq — the per-owner counter (server-only: never a mirror
+-- 1. sync_tenant_seq — the per-owner counter (server-only: never a mirror
 --    data table, never in an allowlist, never in a payload). One row per
 --    account; the `device_cursor` posture exactly. Every mint path runs
 --    with the caller's auth context (the trigger fires inside the
@@ -171,20 +171,20 @@ drop function if exists sync_pull(bigint, text, int, text, text);
 --    FORCE-RLS owner policy scopes to auth.uid() — the calling account).
 -- ---------------------------------------------------------------------------
 
-create table sync_owner_seq (
+create table sync_tenant_seq (
   owner_id uuid   not null,
   last_seq bigint not null default 0,
   primary key (owner_id)
 );
-alter table sync_owner_seq enable row level security;
-alter table sync_owner_seq force row level security;
-create policy sync_owner_seq_owner_all on sync_owner_seq
+alter table sync_tenant_seq enable row level security;
+alter table sync_tenant_seq force row level security;
+create policy sync_tenant_seq_owner_all on sync_tenant_seq
   for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());
-revoke all on sync_owner_seq from anon, authenticated;
-grant select, insert, update on sync_owner_seq to variorum_definer;
+revoke all on sync_tenant_seq from anon, authenticated;
+grant select, insert, update on sync_tenant_seq to variorum_definer;
 
 -- ---------------------------------------------------------------------------
--- 2. next_owner_seq — the ONE counter function: a row-locked
+-- 2. next_tenant_seq — the ONE counter function: a row-locked
 --    upsert-increment. The ON CONFLICT UPDATE takes the owner's counter
 --    row lock and HOLDS IT TO COMMIT — one account's writers serialize on
 --    their own row (per-tenant serialization; commit order = seq order
@@ -200,17 +200,17 @@ grant select, insert, update on sync_owner_seq to variorum_definer;
 --    FORCE-RLS policy above binds even a misuse to the caller's own row.
 -- ---------------------------------------------------------------------------
 
-create or replace function next_owner_seq(for_owner uuid) returns bigint
+create or replace function next_tenant_seq(for_tenant uuid) returns bigint
 language plpgsql
 set search_path = public
 as $$
 declare
   granted bigint;
 begin
-  insert into sync_owner_seq (owner_id, last_seq)
-  values (for_owner, 1)
+  insert into sync_tenant_seq (owner_id, last_seq)
+  values (for_tenant, 1)
   on conflict (owner_id) do update
-    set last_seq = sync_owner_seq.last_seq + 1
+    set last_seq = sync_tenant_seq.last_seq + 1
   returning last_seq into granted;
   return granted;
 end;
@@ -228,7 +228,7 @@ $$;
 --    transaction — before any new mint can occur.
 -- ---------------------------------------------------------------------------
 
-insert into sync_owner_seq (owner_id, last_seq)
+insert into sync_tenant_seq (owner_id, last_seq)
 select owner_id, max(server_seq) from (
   select owner_id, server_seq from container
   union all
@@ -276,7 +276,7 @@ select owner_id, max(server_seq) from (
 ) seq_sources
 group by owner_id
 on conflict (owner_id) do update
-  set last_seq = greatest(sync_owner_seq.last_seq, excluded.last_seq);
+  set last_seq = greatest(sync_tenant_seq.last_seq, excluded.last_seq);
 
 -- ---------------------------------------------------------------------------
 -- 4. stamp_server_seq — the trigger every data table fires, REPLACED: the
@@ -290,7 +290,7 @@ on conflict (owner_id) do update
 create or replace function stamp_server_seq() returns trigger
 language plpgsql as $$
 begin
-  new.server_seq := next_owner_seq(new.owner_id);
+  new.server_seq := next_tenant_seq(new.owner_id);
   new.server_written_at := clock_timestamp();
   return new;
 end;
@@ -435,7 +435,7 @@ begin
   end if;
   perform sync_key_gate(active_key_id, key_proof);
 
-  granted_seq := next_owner_seq(caller);
+  granted_seq := next_tenant_seq(caller);
   for item in select * from jsonb_array_elements(rows) loop
     tbl := item->>'table';
     if not (tbl = any (allowed)) then
@@ -551,7 +551,7 @@ begin
     -- A rotation begins: the next value of the CALLER'S OWN counter — the
     -- rows' own sequence (13y, M3) — inside this transaction, with the
     -- row locked.
-    next_seq := next_owner_seq(caller);
+    next_seq := next_tenant_seq(caller);
   elsif incoming_previous = vault_previous and incoming_previous_id = vault_previous_id then
     -- A carry-through (decision 32's precision): a re-wrap mid-rotation
     -- sends the vault whole with the SAME previous key — not a second
@@ -599,7 +599,7 @@ $$;
 
 -- ---------------------------------------------------------------------------
 -- 8. account_purge — 11-era body verbatim; the ONE change: the caller's
---    `sync_owner_seq` row goes with the account (the 13j letter — the
+--    `sync_tenant_seq` row goes with the account (the 13j letter — the
 --    whole account goes; a re-created account is a NEW uuid and starts
 --    its own counter at 1). `account_data_truncate` deliberately does NOT
 --    touch the counter — the owner's sequence stays monotonic across a
@@ -639,7 +639,7 @@ begin
   -- since 13y, the account's sequence counter with them.
   delete from device_cursor where owner_id = caller;
   delete from purged_row where owner_id = caller;
-  delete from sync_owner_seq where owner_id = caller;
+  delete from sync_tenant_seq where owner_id = caller;
 
   delete from key_vault where user_id = caller;
   get diagnostics vault_rows = row_count;
@@ -676,7 +676,7 @@ drop sequence if exists sync_server_seq;
 --     account_purge (their signatures are unchanged); the DROPPED-and-
 --     re-created sync_pull returns to the definer owner through the
 --     CREATE-for-acquisition dance (the 10/11 idiom), and its grants are
---     re-stated (they died with the drop). `next_owner_seq` takes the
+--     re-stated (they died with the drop). `next_tenant_seq` takes the
 --     helper posture (the `sync_table_pk` class): reachable by NO API
 --     role — the trigger and the definer bodies are its only callers,
 --     and Supabase's CREATE-time default EXECUTE-to-PUBLIC is revoked by
@@ -690,8 +690,8 @@ revoke create on schema public from variorum_definer;
 revoke execute on function sync_pull(bigint, text, text, int, text) from public, anon;
 grant execute on function sync_pull(bigint, text, text, int, text) to authenticated, service_role;
 
-revoke execute on function next_owner_seq(uuid) from public, anon, authenticated, service_role;
-grant execute on function next_owner_seq(uuid) to variorum_definer;
+revoke execute on function next_tenant_seq(uuid) from public, anon, authenticated, service_role;
+grant execute on function next_tenant_seq(uuid) to variorum_definer;
 
 -- Belt (idempotent; `create or replace` preserves ACLs): the re-created
 -- bodies keep their standing postures, re-affirmed by name.
@@ -717,12 +717,12 @@ commit;
 
 -- Verification (read-only; the window runs these — the checklist's shape):
 --   select sync_schema_version();                                    -- 9
---   select count(*) from sync_owner_seq;                             -- ≥ 1 (her account)
---   select owner_id, last_seq from sync_owner_seq;                   -- her floor ≥ her devices' cursors
+--   select count(*) from sync_tenant_seq;                             -- ≥ 1 (her account)
+--   select owner_id, last_seq from sync_tenant_seq;                   -- her floor ≥ her devices' cursors
 --   select pg_get_functiondef('key_vault_update(jsonb, int, text)'::regprocedure)
 --          like '%VARIORUM_ROTATION_ROWS_REMAIN%';                   -- true (the fold-in)
 --   select pg_get_functiondef('key_vault_update(jsonb, int, text)'::regprocedure)
---          like '%next_owner_seq%';                                  -- true (M3)
+--          like '%next_tenant_seq%';                                  -- true (M3)
 --   select to_regclass('public.sync_server_seq') is null
 --          and not exists (select 1 from pg_class where relname = 'sync_server_seq');
 --                                                                    -- the global counter is gone

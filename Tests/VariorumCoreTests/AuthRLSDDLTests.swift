@@ -867,7 +867,7 @@ struct AuthRLSDDLTests {
         // Coverage: every registry table, the three account-data tables,
         // and every function 09 or its predecessors expose.
         for table in SyncSchema.tables.map(\.name)
-            + ["entitlement", "key_vault", "sync_meta", "sync_owner_seq"] {
+            + ["entitlement", "key_vault", "sync_meta", "sync_tenant_seq"] {
             #expect(sql.contains("('\(table)',"),
                     "the sweep must carry an expectation for \(table)")
         }
@@ -881,7 +881,7 @@ struct AuthRLSDDLTests {
         // 13y (12): sync_pull's expectation moved to its REORDERED NIT-4
         // signature (key_proof defaultless — 12 drops the 11-era spelling,
         // whose reappearance is the UNEXPECTED class), and the counter
-        // helper `next_owner_seq(uuid)` joined on the helper posture.
+        // helper `next_tenant_seq(uuid)` joined on the helper posture.
         for function in ["sync_push(jsonb,text,text)", "sync_pull(bigint,text,text,integer,text)",
                          "account_data_truncate(text,text)", "account_purge()",
                          "entitlement_set(uuid,text,boolean,timestampwithtimezone,text)",
@@ -890,7 +890,7 @@ struct AuthRLSDDLTests {
                          "sync_purge_execute(jsonb,text,text)",
                          "sync_reencrypt(jsonb,text,text)", "key_vault_update(jsonb,integer,text)",
                          "sync_key_gate(text,text)", "sync_key_proof_check(text)",
-                         "key_vault_require_proof_hash()", "next_owner_seq(uuid)"] {
+                         "key_vault_require_proof_hash()", "next_tenant_seq(uuid)"] {
             #expect(sql.contains("('\(function)'"),
                     "the sweep must carry an expectation for \(function)")
         }
@@ -1627,7 +1627,7 @@ struct AuthRLSDDLTests {
         // `theClearingGuardOverlayIsElevensBodyPlusOneClause`, and the
         // fold-in's exactness by `theCompletionGuardIsTheOverlaysBodyWithExactlyTheMintSwapped`.
         for body in [try Self.finalBody(of: "key_vault_update"), try Self.deployedBody(of: "key_vault_update")] {
-            try Self.expectVaultUpdateDoor(body, mintsRotationSeqWith: "next_owner_seq(caller)")
+            try Self.expectVaultUpdateDoor(body, mintsRotationSeqWith: "next_tenant_seq(caller)")
         }
         let deployed = try Self.deployedBody(of: "key_vault_update")
         #expect(deployed.contains(SyncServerRefusalMarker.rotationRowsRemain),
@@ -1650,7 +1650,7 @@ struct AuthRLSDDLTests {
 
     /// The one write road's clauses, as a sentence about a BODY. `mint` is
     /// the rotation-begin expression the body must take its seq from —
-    /// `next_owner_seq(caller)` since 13y's 12 (the caller's own counter);
+    /// `next_tenant_seq(caller)` since 13y's 12 (the caller's own counter);
     /// the 11-era bodies said `nextval('sync_server_seq')`.
     private static func expectVaultUpdateDoor(
         _ body: String, mintsRotationSeqWith mint: String
@@ -1880,14 +1880,14 @@ struct AuthRLSDDLTests {
     /// 12 takes the 09/10/11 deploy shape: one transaction, the re-run
     /// guard before the destructive drop, the marker bump last inside the
     /// transaction; the guard keys on evidence only a deployed 12 leaves
-    /// (the marker at 9+, or the `sync_owner_seq` table no other artifact
+    /// (the marker at 9+, or the `sync_tenant_seq` table no other artifact
     /// creates) and spells its one deliberate override.
     @Test func theTenantSeqEventDeploysAsOneGuardedTransaction() throws {
         let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
         let problems = Self.deployShapeProblems(strippedSQL: sql)
         #expect(problems.isEmpty, "12's deploy shape is unsound: \(problems.sorted())")
         #expect(sql.contains("deployed_marker >= 9 or counter_table_here"))
-        #expect(sql.contains("to_regclass('public.sync_owner_seq') is not null"))
+        #expect(sql.contains("to_regclass('public.sync_tenant_seq') is not null"))
         #expect(sql.contains("VARIORUM_12_ALREADY_DEPLOYED"))
         #expect(sql.contains("current_setting('variorum.allow_12_rerun', true)")
                     && sql.contains("'yes-rerun-the-tenant-seq-event'"),
@@ -1942,18 +1942,18 @@ struct AuthRLSDDLTests {
     /// privileges revoked, the definer's row grants for the upsert.
     @Test func theCounterTableTakesTheDeviceCursorPosture() throws {
         let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
-        #expect(sql.contains("create table sync_owner_seq ("))
+        #expect(sql.contains("create table sync_tenant_seq ("))
         #expect(sql.contains("primary key (owner_id)"))
-        #expect(sql.contains("alter table sync_owner_seq enable row level security;"))
-        #expect(sql.contains("alter table sync_owner_seq force row level security;"))
-        #expect(sql.contains("create policy sync_owner_seq_owner_all on sync_owner_seq"))
+        #expect(sql.contains("alter table sync_tenant_seq enable row level security;"))
+        #expect(sql.contains("alter table sync_tenant_seq force row level security;"))
+        #expect(sql.contains("create policy sync_tenant_seq_owner_all on sync_tenant_seq"))
         #expect(sql.contains("for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());"))
-        #expect(sql.contains("revoke all on sync_owner_seq from anon, authenticated;"))
-        #expect(sql.contains("grant select, insert, update on sync_owner_seq to variorum_definer;"))
-        #expect(!sql.contains("on sync_owner_seq to authenticated"), "no API-role road back")
+        #expect(sql.contains("revoke all on sync_tenant_seq from anon, authenticated;"))
+        #expect(sql.contains("grant select, insert, update on sync_tenant_seq to variorum_definer;"))
+        #expect(!sql.contains("on sync_tenant_seq to authenticated"), "no API-role road back")
         for function in Self.proofGatedFunctions {
             let body = try Self.finalBody(of: function)
-            #expect(!body.contains("'sync_owner_seq'"),
+            #expect(!body.contains("'sync_tenant_seq'"),
                     "\(function)'s allowlist must never carry the counter table")
         }
     }
@@ -1967,21 +1967,21 @@ struct AuthRLSDDLTests {
     /// its only callers).
     @Test func theCounterFunctionIsARowLockedUpsertIncrementOnTheHelperPosture() throws {
         let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
-        let body = try #require(Self.lastBody(of: "next_owner_seq", in: sql))
-        #expect(body.contains("create or replace function next_owner_seq(for_owner uuid) returns bigint"))
-        #expect(body.contains("insert into sync_owner_seq (owner_id, last_seq)"))
+        let body = try #require(Self.lastBody(of: "next_tenant_seq", in: sql))
+        #expect(body.contains("create or replace function next_tenant_seq(for_tenant uuid) returns bigint"))
+        #expect(body.contains("insert into sync_tenant_seq (owner_id, last_seq)"))
         #expect(body.contains("on conflict (owner_id) do update"))
-        #expect(body.contains("set last_seq = sync_owner_seq.last_seq + 1"))
+        #expect(body.contains("set last_seq = sync_tenant_seq.last_seq + 1"))
         #expect(body.contains("returning last_seq into granted;"),
                 "the upsert RETURNING is what makes mint-and-lock one statement")
         #expect(body.contains("set search_path = public"))
         #expect(!body.contains("security definer"),
                 "SECURITY INVOKER — the FORCE-RLS policy binds even a misuse to the caller's own row")
-        #expect(sql.contains("revoke execute on function next_owner_seq(uuid) from public, anon, authenticated, service_role;"))
-        #expect(sql.contains("grant execute on function next_owner_seq(uuid) to variorum_definer;"))
-        #expect(!sql.contains("next_owner_seq(uuid) to authenticated")
-                    && !sql.contains("next_owner_seq(uuid) to service_role")
-                    && !sql.contains("next_owner_seq(uuid) to anon"),
+        #expect(sql.contains("revoke execute on function next_tenant_seq(uuid) from public, anon, authenticated, service_role;"))
+        #expect(sql.contains("grant execute on function next_tenant_seq(uuid) to variorum_definer;"))
+        #expect(!sql.contains("next_tenant_seq(uuid) to authenticated")
+                    && !sql.contains("next_tenant_seq(uuid) to service_role")
+                    && !sql.contains("next_tenant_seq(uuid) to anon"),
                 "the helper is reachable by NO API role")
     }
 
@@ -1995,15 +1995,15 @@ struct AuthRLSDDLTests {
     @Test func everyMintSiteDrawsFromTheOwnersCounterAndTheGlobalSequenceRetires() throws {
         let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
         let trigger = try Self.finalBody(of: "stamp_server_seq")
-        #expect(trigger.contains("new.server_seq := next_owner_seq(new.owner_id);"),
+        #expect(trigger.contains("new.server_seq := next_tenant_seq(new.owner_id);"),
                 "M1: every data row's seq draws from its OWNER's counter")
         #expect(trigger.contains("new.server_written_at := clock_timestamp();"),
                 "the A5 substrate stays — the horizon is untouched by this event")
         #expect(try Self.finalBody(of: "sync_purge_execute")
-                    .contains("granted_seq := next_owner_seq(caller);"),
+                    .contains("granted_seq := next_tenant_seq(caller);"),
                 "M2: the granted ledger seq is the caller's own")
         #expect(try Self.finalBody(of: "key_vault_update")
-                    .contains("next_seq := next_owner_seq(caller);"),
+                    .contains("next_seq := next_tenant_seq(caller);"),
                 "M3: the rotation seq is the caller's own — the seq rule and the completion guard compare it against the caller's data rows")
         #expect(!sql.contains("nextval"),
                 "no global mint survives anywhere in 12")
@@ -2039,7 +2039,7 @@ struct AuthRLSDDLTests {
         #expect(branchCount == SyncSchema.tables.count + 3,
                 "the floor has \(branchCount) branches; expected \(SyncSchema.tables.count) tables + 3 extra sources")
         #expect(sql.contains("group by owner_id"))
-        #expect(sql.contains("set last_seq = greatest(sync_owner_seq.last_seq, excluded.last_seq)"),
+        #expect(sql.contains("set last_seq = greatest(sync_tenant_seq.last_seq, excluded.last_seq)"),
                 "a re-run can only raise a floor, never lower one")
     }
 
@@ -2096,7 +2096,7 @@ struct AuthRLSDDLTests {
         let twelveBody = Self.codeLines(try #require(Self.lastBody(of: "key_vault_update", in: twelve)))
         let swapped = overlayBody.map {
             $0 == "next_seq := nextval('sync_server_seq');"
-                ? "next_seq := next_owner_seq(caller);" : $0
+                ? "next_seq := next_tenant_seq(caller);" : $0
         }
         #expect(swapped == twelveBody,
                 "12's key_vault_update is the overlay's body with exactly the mint swapped")
@@ -2112,7 +2112,7 @@ struct AuthRLSDDLTests {
         let body12 = Self.codeLines(try #require(Self.lastBody(of: "sync_purge_execute", in: twelve)))
         let swapped = body11.map {
             $0 == "granted_seq := nextval('sync_server_seq');"
-                ? "granted_seq := next_owner_seq(caller);" : $0
+                ? "granted_seq := next_tenant_seq(caller);" : $0
         }
         #expect(swapped == body12,
                 "12's sync_purge_execute is 11's body with exactly the mint swapped")
@@ -2127,31 +2127,31 @@ struct AuthRLSDDLTests {
     /// the one added line.
     @Test func theAccountPurgeTakesTheCounterRowAndTheTruncateNeverDoes() throws {
         let purge = try Self.finalBody(of: "account_purge")
-        #expect(purge.contains("delete from sync_owner_seq where owner_id = caller;"),
+        #expect(purge.contains("delete from sync_tenant_seq where owner_id = caller;"),
                 "the account's counter row goes with the account")
         let truncate = try Self.finalBody(of: "account_data_truncate")
-        #expect(!truncate.contains("sync_owner_seq"),
+        #expect(!truncate.contains("sync_tenant_seq"),
                 "a re-key truncate must not touch the counter — monotonic per owner, cursors stay valid")
         // Exactness: 12's purge body is 10's plus exactly the one line.
         let ten = Self.strippingComments(try Self.sqlFile("10_phase13j_purge.sql"))
         let twelve = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
         let body10 = Self.codeLines(try #require(Self.lastBody(of: "account_purge", in: ten)))
         let body12 = Self.codeLines(try #require(Self.lastBody(of: "account_purge", in: twelve)))
-        let withoutTheLine = body12.filter { $0 != "delete from sync_owner_seq where owner_id = caller;" }
+        let withoutTheLine = body12.filter { $0 != "delete from sync_tenant_seq where owner_id = caller;" }
         #expect(withoutTheLine == body10,
                 "12's account_purge is 10's body plus exactly the counter-row delete")
         #expect(withoutTheLine != body12, "the added line is real — the pin isn't vacuous")
     }
 
     /// The 13j naming rule, applied to 12: no parameter shadows a column
-    /// the function writes — `for_owner` against the counter's columns,
+    /// the function writes — `for_tenant` against the counter's columns,
     /// the reordered pull's parameters against `device_cursor`'s.
     @Test func noTenantSeqParameterShadowsAColumnItWrites() throws {
         let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
         let counterColumns: Set<String> = ["owner_id", "last_seq"]
-        #expect(sql.contains("create or replace function next_owner_seq(for_owner uuid)"))
-        #expect(!counterColumns.contains("for_owner"),
-                "for_owner shadows a sync_owner_seq column")
+        #expect(sql.contains("create or replace function next_tenant_seq(for_tenant uuid)"))
+        #expect(!counterColumns.contains("for_tenant"),
+                "for_tenant shadows a sync_tenant_seq column")
         let cursorColumns: Set<String> = ["owner_id", "device_id", "last_seq", "seen_at"]
         for param in ["since_seq", "active_key_id", "key_proof", "max_rows", "for_device"] {
             #expect(!cursorColumns.contains(param),

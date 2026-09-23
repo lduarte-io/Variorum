@@ -2,13 +2,34 @@ import Foundation
 @testable import VariorumCore
 
 /// The in-process stand-in for the Supabase mirror (SyncSpec §2/§4) — and it
-/// must stay exactly this dumb WITHIN a tenant: per-row compare-and-set, one
-/// global monotonic `server_seq`, **no uniqueness constraints, no foreign
-/// keys, no domain logic**. The real mirror deliberately accepts both sides
-/// of a race (two live placements for one block, dangling references
-/// mid-batch) so clients can repair deterministically; any check added here
-/// that Postgres won't have hides a client bug the real server would let
-/// through.
+/// must stay exactly this dumb WITHIN a tenant: per-row compare-and-set, a
+/// PER-OWNER monotonic `server_seq` (Phase 13y — 12_phase13y_tenant_seq.sql's
+/// twin; the 14c I-1 disclosure's closure), **no uniqueness constraints, no
+/// foreign keys, no domain logic**. The real mirror deliberately accepts
+/// both sides of a race (two live placements for one block, dangling
+/// references mid-batch) so clients can repair deterministically; any check
+/// added here that Postgres won't have hides a client bug the real server
+/// would let through.
+///
+/// PHASE 13Y — PER-TENANT SEQUENCING (12's semantics, mirrored EXACTLY):
+///  - every mint draws from the CALLING account's own counter
+///    (`nextTenantSeq` — `next_tenant_seq(for_tenant)`'s twin), at all three
+///    of 12's mint sites: the accept stamp (push + reencrypt — the
+///    trigger's road), `executePurge`'s granted ledger seq, and
+///    `keyVaultUpdate`'s rotation-begin seq;
+///  - THE FLOOR (12's F-S1 initialization, lazily): an account's FIRST
+///    mint reads the GREATEST seq its partition already carries — data
+///    rows, device cursors, ledger entries, a standing rotation seq — so
+///    a fake seeded mid-history (the migration scenario) continues above
+///    everything its cursors compare against, exactly as the deploy's
+///    per-owner MAX floor does. An empty account starts at 1;
+///  - `wipe()` / `truncateAccount` leave counters UNTOUCHED (the
+///    sequence-survives-a-truncate doctrine, per owner: cursors stay
+///    valid across a re-key); `purgeAccount` removes the account's
+///    counter with it (12's account_purge letter — a re-created account
+///    reads its own sequence from its start: the adopt road);
+///  - `headSeq` is PER-ACCOUNT (`headSeq(for:)`; the property is the
+///    default account's — the single-user suites' exact old meaning).
 ///
 /// PHASE 14C — MULTI-TENANT PARITY (batch 1; THE DESIGN items 1–2 and 5).
 /// This fake EMULATES the 09 mirror's Postgres semantics — the REAL
@@ -152,7 +173,34 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// user id → account. The default account models the single-user era's
     /// one caller; multi-tenant suites provision more.
     private var accounts: [String: Account] = [:]
-    private var seq: Int64 = 0
+    /// 13y: user id → the account's own counter (12's `sync_tenant_seq`
+    /// twin). Absent = never minted; the first mint floors lazily.
+    private var tenantSeqs: [String: Int64] = [:]
+
+    /// 12's `next_tenant_seq(for_tenant)`: the per-owner upsert-increment.
+    /// The actor's serialization stands in for the counter row's lock.
+    private func nextTenantSeq(for userID: String) -> Int64 {
+        let granted = (tenantSeqs[userID] ?? tenantFloorSeq(for: userID)) + 1
+        tenantSeqs[userID] = granted
+        return granted
+    }
+
+    /// 12's floor initialization (F-S1), lazily per account: the GREATEST
+    /// seq the partition already carries — data rows, device cursors,
+    /// ledger entries, a standing rotation seq — so minting always
+    /// continues ABOVE everything the account's bookkeeping compares
+    /// against (no cursor resets, the carry-over's letter).
+    private func tenantFloorSeq(for userID: String) -> Int64 {
+        guard let account = accounts[userID] else { return 0 }
+        var floor: Int64 = 0
+        for rows in account.tables.values {
+            for stored in rows.values { floor = max(floor, stored.serverSeq) }
+        }
+        for cursor in account.deviceCursors.values { floor = max(floor, cursor.lastSeq) }
+        for purgedSeq in account.purgedRows.values { floor = max(floor, purgedSeq) }
+        if let rotationSeq = account.vault.rotationStartedSeq { floor = max(floor, rotationSeq) }
+        return floor
+    }
 
     /// The single-user suites' implicit caller (a uuid-shaped string so
     /// owner-stamped local rows read plausibly in dumps).
@@ -420,13 +468,16 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
                     SyncPulledRow(row: $0.row, serverSeq: $0.serverSeq)
                 })
             }
-            seq += 1
+            // 13y: the accept stamp draws from the CALLER's own counter
+            // (the trigger's `next_tenant_seq(new.owner_id)` — the
+            // partition IS the stamp here).
+            let granted = nextTenantSeq(for: userID)
             var accepted = incoming
             accepted.syncVersion = currentVersion + 1
             accounts[userID]!.tables[incoming.table, default: [:]][incoming.rowID] =
-                StoredRow(row: try normalized(accepted), serverSeq: seq,
+                StoredRow(row: try normalized(accepted), serverSeq: granted,
                           writtenAt: clock, committed: !heldTransaction)
-            return .accepted(newVersion: accepted.syncVersion, serverSeq: seq)
+            return .accepted(newVersion: accepted.syncVersion, serverSeq: granted)
         }
     }
 
@@ -475,13 +526,13 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
             guard current.row.syncVersion == incoming.syncVersion else {
                 return .skipped(currentVersion: current.row.syncVersion)
             }
-            seq += 1
             // The bytes swapped, the version KEPT (never bumped), a fresh
-            // seq stamped.
+            // seq stamped — from the caller's own counter (13y).
+            let granted = nextTenantSeq(for: userID)
             accounts[userID]!.tables[incoming.table, default: [:]][incoming.rowID] =
-                StoredRow(row: try normalized(incoming), serverSeq: seq,
+                StoredRow(row: try normalized(incoming), serverSeq: granted,
                           writtenAt: clock, committed: true)
-            return .replaced(serverSeq: seq)
+            return .replaced(serverSeq: granted)
         }
     }
 
@@ -538,10 +589,10 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
             }
             nextSeq = nil
         } else if account.vault.previousCorpusKey == nil {
-            // A rotation begins: the next value of the SAME sequence the
-            // rows take (`nextval('sync_server_seq')`), inside this call.
-            seq += 1
-            nextSeq = seq
+            // A rotation begins: the next value of the CALLER'S OWN
+            // counter — the same one the account's rows take (13y M3;
+            // 12's `next_tenant_seq(caller)`), inside this call.
+            nextSeq = nextTenantSeq(for: userID)
         } else if account.vault.previousCorpusKey == previousCorpusKey
                     && account.vault.previousCorpusKeyID == previousCorpusKeyID {
             // The carry-through (decision 32's precision): the SAME
@@ -631,8 +682,8 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         _ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: String, as userID: String
     ) throws -> Int64 {
         _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
-        seq += 1
-        let granted = seq
+        // 13y M2: the granted ledger seq is the caller's own.
+        let granted = nextTenantSeq(for: userID)
         for target in rows {
             accounts[userID]?.tables[target.table]?[target.rowID] = nil
             let key = PurgedKey(table: target.table, rowID: target.rowID)
@@ -662,7 +713,16 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         accounts[userID]?.purgedRows[PurgedKey(table: table, rowID: rowID)] != nil
     }
 
-    var headSeq: Int64 { seq }
+    /// The DEFAULT account's head — the single-user suites' exact old
+    /// meaning (one tenant minted everything, so its head was the global
+    /// one). Multi-tenant reads name the account.
+    var headSeq: Int64 { headSeq(for: Self.defaultUserID) }
+
+    /// 13y: one account's sequence head — what its next mint exceeds and
+    /// what its devices' cursors rest at when fully caught up.
+    func headSeq(for userID: String) -> Int64 {
+        tenantSeqs[userID] ?? tenantFloorSeq(for: userID)
+    }
 
     func currentRow(
         table: String, rowID: String, for userID: String = FakeSyncServer.defaultUserID
@@ -713,10 +773,10 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// Truncates every stored data row — the fake twin of the gate's
     /// data-table truncate artifact. Provisioning (vault rows,
     /// entitlement) SURVIVES, exactly as the real truncate never touches
-    /// `key_vault` or `entitlement`; the global `server_seq` sequence is
+    /// `key_vault` or `entitlement`; the per-owner counters (13y) are
     /// deliberately NOT reset: the ordering authority stays monotonic
-    /// across the wipe (SyncSpec §9), exactly as the real mirror's
-    /// sequence object survives a TRUNCATE.
+    /// per owner across the wipe (SyncSpec §9), exactly as 12's counter
+    /// table survives the real truncate.
     func wipe() {
         for user in accounts.keys {
             accounts[user]!.tables = [:]
@@ -727,7 +787,8 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// `account_data_truncate` RPC, pre-13x-gated): one tenant's data rows
     /// only — through the gate, so the right key id WITHOUT the proof
     /// deletes nothing. device_cursor and purged_row are untouched (10's
-    /// letter).
+    /// letter) — and so is the account's counter (13y, 12's letter: the
+    /// owner's sequence stays monotonic across a re-key, cursors valid).
     func truncateAccount(_ userID: String, activeKeyID: String, keyProof: String) throws {
         _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
         accounts[userID]?.tables = [:]
@@ -743,6 +804,10 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// JWT-until-expiry window.
     func purgeAccount(_ userID: String) {
         accounts[userID] = nil
+        // 13y (12's account_purge letter): the account's counter goes with
+        // it — a re-created account reads its own sequence from its start
+        // (the adopt road's premise).
+        tenantSeqs[userID] = nil
     }
 }
 

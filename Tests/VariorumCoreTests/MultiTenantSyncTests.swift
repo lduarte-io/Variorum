@@ -750,6 +750,208 @@ struct MultiTenantSyncTests {
         #expect(proofs.allSatisfy { $0 == SyncTestKeys.keyProof },
                 "the proof sent is exactly the provider's key proof")
     }
+
+    // MARK: - Phase 13y UNIT A: per-tenant `server_seq` (the 12 event's
+    // client-visible truths — the fake mirrors 12's semantics exactly)
+
+    /// THE DISCLOSURE-CLOSURE PROBE — the phase's HEADLINE pin (13y Step 3;
+    /// the closure of the 14c I-1 accepted disclosure): another tenant's
+    /// write activity is PROVABLY INVISIBLE in this tenant's pulls and seq
+    /// bookkeeping — the seq a write is granted is CONTIGUOUS with the
+    /// tenant's own head across ANY volume of foreign writing (no gaps a
+    /// stranger caused, no advances this tenant did not cause), and the
+    /// cursor rests at the tenant's OWN head. RED-ON-OLD, verified by
+    /// behavioral revert at the 13y build (the record's note): with the
+    /// fake's mint reverted to one shared counter — the pre-13y mirror's
+    /// numbering — B's forty-note burst advances the seq A's next accept
+    /// is granted, which IS the aggregate write volume/timing side channel
+    /// her I-1 acceptance recorded and this phase closes.
+    @Test func theSeqsATenantSeesCarryZeroInformationAboutAnotherTenantsWrites() async throws {
+        let world = try await makeWorld()
+        // A's baseline: a real drained world; bookkeeping at A's own head.
+        try world.a1.with { ops, _ in
+            let post = try ops.createPost(title: "hers", profile: .blog)
+            _ = try ops.newBlock(in: post.id, text: "Her words.", at: .end)
+        }
+        _ = try await productionRound(world.a1)
+        let aHeadBefore = await world.server.headSeq(for: Self.userA)
+        let aMaxKnownBefore = try world.a1.db.fetchInt(
+            "SELECT MAX(server_seq) FROM sync_row_seq") ?? 0
+        #expect(Int64(aMaxKnownBefore) == aHeadBefore, "A's bookkeeping rests at A's own head")
+
+        // B writes HEAVILY and drains — the foreign volume whose
+        // visibility this probe forbids.
+        try world.b1.with { ops, _ in
+            for index in 0..<40 {
+                let post = try ops.createPost(title: "b-\(index)", profile: .blog)
+                _ = try ops.newBlock(in: post.id, text: "Stranger words \(index).", at: .end)
+            }
+        }
+        _ = try await productionRound(world.b1)
+        let bHead = await world.server.headSeq(for: Self.userB)
+        #expect(bHead > aHeadBefore + 40, "the foreign volume is real — the probe isn't vacuous")
+
+        // A writes ONE more note: its granted seq is aHeadBefore + 1 —
+        // contiguous with A's own history. B's burst moved NOTHING of A's.
+        let onePostID: String = try world.a1.with { ops, _ in
+            try ops.createPost(title: "one more", profile: .blog).id
+        }
+        _ = try await world.a1.push()
+        let granted = try world.a1.db.fetchInt(
+            "SELECT server_seq FROM sync_row_seq WHERE table_name = 'container' AND row_id = ?",
+            [onePostID]).map(Int64.init)
+        #expect(granted == aHeadBefore + 1,
+                "ONE write costs ONE seq — no gap B could have caused (granted \(String(describing: granted)) after head \(aHeadBefore))")
+
+        // The pull half (Step 2 pin (a)'s two-user arm): A's second device
+        // reads to A's OWN head — the cursor never meets another account's
+        // rows OR numbers.
+        _ = try await world.a2.pull()
+        #expect(try world.a2.cursor() == aHeadBefore + 1,
+                "the cursor rests at A's own head — B's activity is invisible in it")
+        let foreignRows = try world.a2.db.fetchInt(
+            "SELECT COUNT(*) FROM container WHERE title LIKE 'b-%'") ?? 0
+        #expect(foreignRows == 0, "no foreign row ever reached A's store")
+        let aMaxKnownAfter = try world.a2.db.fetchInt(
+            "SELECT MAX(server_seq) FROM sync_row_seq") ?? 0
+        #expect(Int64(aMaxKnownAfter) <= aHeadBefore + 1,
+                "every number in A's bookkeeping is A's own")
+    }
+
+    /// Step 2 pin (b) — §7's seq-ranked repairs produce IDENTICAL outcomes
+    /// under per-tenant numbering: the I2 move/move race run in BOTH
+    /// tenants at once, the drains interleaving on one server — each
+    /// tenant's repair keys on ITS OWN later-intent (the account's own seq
+    /// order), exactly the single-user suite's outcome
+    /// (`SyncRepairTests.placementRaceConvergesToTheHigherSeq`), with the
+    /// other tenant's interleaved mints unable to reorder anything.
+    @Test func theSeqRankedRepairResolvesEachTenantsRaceByItsOwnLaterIntent() async throws {
+        let world = try await makeWorld()
+
+        func seedReleased(_ x: SyncClient, _ y: SyncClient) async throws -> String {
+            try x.with { ops, _ in
+                let post = try ops.createPost(title: "seed", profile: nil)
+                let b1 = try ops.newBlock(in: post.id, text: "one.", at: .end).block
+                let b2 = try ops.newBlock(in: post.id, text: "two.", at: .end).block
+                _ = try ops.merge(b1.id, b2.id)  // releases b1, b2: live, unplaced
+            }
+            try await fleetQuiesce(x, y)
+            return try x.db.fetchString(
+                """
+                SELECT b.id FROM block b WHERE b.deleted_at IS NULL AND NOT EXISTS
+                  (SELECT 1 FROM container_block cb WHERE cb.block_id = b.id AND cb.deleted_at IS NULL)
+                ORDER BY b.id LIMIT 1
+                """)!
+        }
+        func place(_ client: SyncClient, _ blockID: String, home: String) throws -> String {
+            try client.with { ops, _ in
+                let post = try ops.createPost(title: home, profile: nil)
+                return try ops.placeBlock(blockID, in: post.id, at: .end).id
+            }
+        }
+
+        let releasedA = try await seedReleased(world.a1, world.a2)
+        let releasedB = try await seedReleased(world.b1, world.b2)
+        let loserA = try place(world.a1, releasedA, home: "A1 home")
+        let winnerA = try place(world.a2, releasedA, home: "A2 home")
+        let loserB = try place(world.b1, releasedB, home: "B1 home")
+        let winnerB = try place(world.b2, releasedB, home: "B2 home")
+        // The both-accepted meeting, tenants INTERLEAVED: every pull runs
+        // before any push lands; the pushes alternate A/B so the two
+        // counters mint interleaved. Within each tenant the second pusher's
+        // placement takes the higher OWN seq — later intent.
+        try await runProduction([
+            .pull(world.a1), .pull(world.b1), .pull(world.a2), .pull(world.b2),
+            .push(world.a1), .push(world.b1), .push(world.a2), .push(world.b2),
+        ])
+        try await fleetQuiesce(world.a1, world.a2)
+        try await fleetQuiesce(world.b1, world.b2)
+
+        for (x, y, winner, loser, released) in [
+            (world.a1, world.a2, winnerA, loserA, releasedA),
+            (world.b1, world.b2, winnerB, loserB, releasedB),
+        ] {
+            for client in [x, y] {
+                #expect(try client.db.deletedAt("container_block", loser) != nil,
+                        "\(client.name): the earlier intent's placement is tombstoned")
+                #expect(try client.db.deletedAt("container_block", winner) == nil,
+                        "\(client.name): the later intent won — the tenant's OWN seq order decided")
+                #expect(try client.db.fetchInt(
+                    "SELECT COUNT(*) FROM container_block WHERE block_id = ? AND deleted_at IS NULL",
+                    [released]) == 1, "exactly one live placement survives (I2)")
+            }
+            #expect(try x.syncedDump() == y.syncedDump(), "the fleet converged byte-identically")
+        }
+    }
+
+    /// Step 2 pin (c) — THE ADOPT-ROAD PIN (the pre-13x closeout
+    /// hand-forward): delete-and-set-up-again — owner re-stamp +
+    /// `resyncReinitialize`, the ONLY v1 road that rotates the sync master
+    /// — converges under per-tenant `server_seq`. The purge removed the
+    /// old account's counter WITH the account (12's account_purge letter);
+    /// the re-created account reads its OWN sequence from ITS START; and a
+    /// fresh device with cursor 0 pulls the re-uploaded corpus at the new
+    /// owner's own numbers and quiesces at the new owner's own head.
+    @Test func theAdoptRoadConvergesUnderPerTenantSequencing() async throws {
+        let server = FakeSyncServer()
+        let scratch = try RestoreScratch()
+        defer { scratch.cleanUp() }
+        let storeURL = scratch.url("adopt.sqlite")
+        let original = try SyncClient(
+            name: "A-orig", prefix: "AA", transport: server, storeURL: storeURL)
+        try original.with { ops, _ in
+            let post = try ops.createPost(title: "kept across accounts", profile: .blog)
+            _ = try ops.newBlock(in: post.id, text: "The words that survive.", at: .end)
+        }
+        _ = try await productionRound(original)
+        let oldHead = await server.headSeq(for: FakeSyncServer.defaultUserID)
+        #expect(oldHead > 0, "the original account minted real seqs")
+
+        // The account deleted server-side (decision 12: loud, session-only)
+        // — its counter goes with it.
+        await server.purgeAccount(FakeSyncServer.defaultUserID)
+
+        // The re-setup: a FRESH account (a fresh uid — the purge removed
+        // the auth user), the library ADOPTED (pre-13x decision 17): the
+        // re-stamp is LOCAL, then `resyncReinitialize` (versions → 0, seq
+        // bookkeeping cleared, cursor 0, everything enqueued).
+        let aPrime = "00000000-aaaa-4bbb-8ccc-00000000ad07"
+        await server.provisionAccount(
+            aPrime, vaultCorpusKeyID: SyncTestKeys.corpusKeyID,
+            keyProofHash: SyncTestKeys.keyProofHash)
+        let adopted = try SyncClient(
+            name: "A-adopt", prefix: "AB", transport: server.connection(as: aPrime),
+            clockOffset: 500, seed: 7, storeURL: storeURL)
+        adopted.ownerID = aPrime
+        _ = try adopted.with { ops, _ in try ops.restampOwner(to: aPrime) }
+        try await adopted.withAsync { _ in
+            try await SyncEngine(transport: server.connection(as: aPrime)).resyncReinitialize()
+        }
+        #expect(try adopted.cursor() == 0, "the reinit rewound the cursor")
+        let uploaded = try await adopted.push()
+        #expect(uploaded.accepted > 0 && uploaded.rejected == 0 && uploaded.deferred == 0)
+        // THE PER-TENANT FACT: the new owner's sequence starts at ITS
+        // start — the upload's seqs are 1...accepted, never a continuation
+        // of the dead account's (or anyone else's) numbers.
+        let newHead = await server.headSeq(for: aPrime)
+        #expect(newHead == Int64(uploaded.accepted),
+                "the new owner's sequence reads from its start (head \(newHead) after \(uploaded.accepted) accepts)")
+
+        // A fresh second device of the new account: cursor 0 reads the
+        // owner's whole sequence from its start and the pair quiesces at
+        // the owner's own head.
+        let fresh = try SyncClient(
+            name: "A-fresh", prefix: "AC", transport: server.connection(as: aPrime),
+            clockOffset: 900, seed: 9)
+        fresh.ownerID = aPrime
+        #expect(try fresh.cursor() == 0)
+        _ = try await productionRound(fresh)
+        #expect(try fresh.cursor() == newHead,
+                "the fresh cursor reads the new owner's sequence to its head")
+        try await productionQuiescence(adopted, fresh, server: server)
+        #expect(try adopted.syncedDump() == fresh.syncedDump(),
+                "the adopted pair converges byte-identically")
+    }
 }
 
 /// Records every activeKeyID + keyProof the engine presents, forwarding to

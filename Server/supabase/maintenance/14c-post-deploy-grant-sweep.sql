@@ -6,8 +6,8 @@
 -- EXTENDED at Phase 13y UNIT A for the per-tenant sequence event
 -- (12_phase13y_tenant_seq.sql): sync_pull's REORDERED signature (NIT-4 —
 -- the old spelling becomes the UNEXPECTED lingering-overload class), the
--- `next_owner_seq(uuid)` counter helper (the sync_table_pk posture — no
--- API role), and the `sync_owner_seq` counter table (the device_cursor
+-- `next_tenant_seq(uuid)` counter helper (the sync_table_pk posture — no
+-- API role), and the `sync_tenant_seq` counter table (the device_cursor
 -- posture — forced RLS, one owner policy, no API-role privileges).
 --
 -- WHAT IT IS: one READ-ONLY query, run IMMEDIATELY AFTER a lockstep deploy
@@ -54,7 +54,7 @@
 --   key_vault_update(jsonb,integer,text)
 --                                    anon ✗  authenticated ✓  service_role ✗
 --   sync_key_gate(text,text) / sync_key_proof_check(text) /
---   next_owner_seq(uuid) (13y)       anon ✗  authenticated ✗  service_role ✗
+--   next_tenant_seq(uuid) (13y)       anon ✗  authenticated ✗  service_role ✗
 --                                    (definer bodies are the only callers)
 --   entitlement_set                  anon ✗  authenticated ✗  service_role ✓
 --   sync_schema_version              anon ✗  authenticated ✓
@@ -90,7 +90,7 @@ with expected_functions (signature, exp_anon, exp_authenticated, exp_service_rol
     ('sync_key_proof_check(text)',                                     false, false, false),
     -- 13y (12): the per-owner counter helper — the sync_table_pk posture
     -- (the trigger and the definer bodies are its only callers).
-    ('next_owner_seq(uuid)',                                           false, false, false),
+    ('next_tenant_seq(uuid)',                                           false, false, false),
     ('entitlement_set(uuid,text,boolean,timestampwithtimezone,text)',  false, false, true),
     ('sync_schema_version()',                                          false, true,  null),
     ('sync_table_pk(text)',                                            false, false, null),
@@ -143,7 +143,7 @@ expected_tables (relname, exp_anon, exp_authenticated, exp_rls, exp_forced, exp_
     ('purged_row',      false, false, true,  true,  1),
     -- 13y (12_phase13y_tenant_seq.sql): the per-owner sequence counter —
     -- server-only, the device_cursor posture.
-    ('sync_owner_seq',  false, false, true,  true,  1),
+    ('sync_tenant_seq',  false, false, true,  true,  1),
     -- policy counts +1 each since the 14c-gate BYPASSRLS repair
     -- (2026-08-11, maintenance/14c-gate-definer-owner.sql): the own-row
     -- SELECT policies for the non-bypass variorum_definer owner

@@ -96,8 +96,8 @@ public enum SyncSchema {
     /// her standing pre-authorization, immediately before batch 2's
     /// migration + both installs); version 9 = the Phase 13y PER-TENANT
     /// `server_seq` event (the 14c I-1 disclosure closed: `server_seq`
-    /// becomes per-owner — the `sync_owner_seq` counter table + the
-    /// row-locked `next_owner_seq`, every mint site swapped (the stamp
+    /// becomes per-owner — the `sync_tenant_seq` counter table + the
+    /// row-locked `next_tenant_seq`, every mint site swapped (the stamp
     /// trigger, `sync_purge_execute`'s ledger seq, `key_vault_update`'s
     /// rotation seq), each owner's counter floored at the GREATEST of
     /// their data-row seqs / device cursors / ledger seqs / a standing

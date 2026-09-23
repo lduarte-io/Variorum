@@ -177,7 +177,7 @@ struct SerializerCompletenessTests {
         // counter — pure server machinery (the trigger and the definer
         // bodies are its only writers); the client sees only the seqs it
         // grants, never the table.
-        "sync_owner_seq",
+        "sync_tenant_seq",
     ]
 
     @Test func mirrorDDLCoversEverySyncedColumn() throws {

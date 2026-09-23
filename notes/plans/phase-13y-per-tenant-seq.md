@@ -453,10 +453,39 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
   the F-S1 floor-coverage pin; `SerializerCompletenessTests.serverOnlyTables` gains the
   counter. **AuthRLSDDLTests + SerializerCompletenessTests: 74/74 green.** The ONE remaining
   Step 1 piece: the horizon-exposure vehicle — PROPOSED below, NOT BUILT pending the ruling.
-- **Step 2 — client: lockstepVersion DONE (rode Step 1's commit)**; pins (a)/(b)/adopt-road
-  ride Step 3's suites; pin (d) awaits the fork ruling.
-- **Step 3 — harness: NOT-STARTED — settled design below** (per-account counters + lazy
-  max-floor; `headSeq(for:)`; quiescence helpers per-account; the disclosure-closure probe).
+- **Step 2 — client: DONE except pin (d)** — lockstepVersion rode Step 1's commit; ZERO
+  Step-0-verdicted client sites needed adjusting (the expected outcome — the premise held);
+  pin (a)'s two-user arm rides the disclosure probe's pull half (cursor == OWN head, zero
+  foreign rows), pin (b) is `theSeqRankedRepairResolvesEachTenantsRaceByItsOwnLaterIntent`
+  (the I2 race in BOTH tenants interleaved — each resolves by its OWN later-intent), the
+  ADOPT-ROAD pin is `theAdoptRoadConvergesUnderPerTenantSequencing` (purge takes the counter;
+  the re-created owner's sequence reads from ITS START — head == accepts; a cursor-0 fresh
+  device reads to the new owner's own head; byte-identical pair). Pin (d) awaits the fork
+  ruling. **A RENAME, recorded honestly:** the counter landed as `sync_tenant_seq` /
+  `next_tenant_seq(for_tenant)` — the survey/record's earlier `sync_owner_seq`/`next_owner_seq`
+  spelling tripped the attacker suite's BLANKET wire pin
+  (`noOwnershipChangeInstructionExistsOnTheWire` bans "owner" in any deployed function name or
+  parameter list); the pin's substance (no wire-reachable ownership instruction) is exactly
+  worth keeping unrelaxed, so the FUNCTION renamed to the phase's own per-tenant vocabulary
+  instead of the pin gaining an exemption mechanism. The table's COLUMN stays `owner_id`
+  (every server table's idiom; the pin scans function signatures only).
+- **Step 3 — harness: DONE (this commit)** — `FakeSyncServer` converted to per-account
+  counters mirroring 12 EXACTLY (`nextTenantSeq` at all three mint sites; the LAZY wide floor
+  — an account's first mint reads the GREATEST of its partition's data seqs, device cursors,
+  ledger seqs, a standing rotation seq — the F-S1 initialization's semantics, which also
+  models the migration for free; `wipe`/`truncateAccount` leave counters, `purgeAccount`
+  takes the account's with it); `headSeq` split per-account (`headSeq(for:)`; the property
+  stays the default account's — the single-user suites' exact old meaning);
+  `syncToQuiescence`/`productionQuiescence` compare a fleet's cursors against ITS OWN
+  account's head. **THE DISCLOSURE-CLOSURE PROBE (the headline)**:
+  `theSeqsATenantSeesCarryZeroInformationAboutAnotherTenantsWrites` — after B's forty-note
+  burst, A's next accept is granted `aHead + 1` exactly (contiguous — no gap B could cause),
+  A's cursor rests at A's own head, every number in A's bookkeeping is A's own, zero foreign
+  rows. **The whole sync family green under `productionRound`: 396/396 in 52 suites**
+  (Sync* · Purge* · Rotation · Furniture · DrainOrder · Tenant + attacker · FaultInjection ·
+  EditorRate · StructuralSession · MobileCapture · KeyProof · Vault · AuthRLS ·
+  SerializerCompleteness). Red-on-old for the probe: PENDING (the behavioral-revert
+  demonstration runs against this commit, next).
 - Full core suite at unit close: PENDING.
 
 ### STEP 0 — THE SEQ-ASSUMPTION SURVEY (read-only; every consumer read in this session's own context)
