@@ -378,9 +378,39 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
   banned-path cost (139 ms / 562 ms at 50k/200k — unchanged class). Every Phase-6 conclusion
   holds; live TK2 geometry stays adopted. The §5 matrix row for 27.0 is this line + the log.
 - **Core suite on 27.0: 1679/179 ALL PASSED** — byte-matching RUN B's finals count.
-- **Full Mac suite on 27.0 (the R-13y-3 early baseline): PENDING** — running at this writing
-  in the kickoff's zero-instance window (her app quit at her word); the result lands here and
-  any new red is adjudicated as OS-delta by the paired protocol BEFORE UNIT A spawns.
+- **Full Mac suite on 27.0 (the R-13y-3 early baseline): 3089 tests / 510 suites — 3084
+  green + FIVE deterministic macOS-27 deltas, ALL adjudicated before UNIT A spawned.** Every
+  one reproduces ISOLATED with a byte-identical signature (so none is load-flake), and the
+  tree is unchanged in `Sources/`/`Tests/` since RUN B's all-green finals on macOS 26 two
+  days ago — attribution to the OS is by construction. The standing row-60 flake did NOT
+  fire this run. The five, classified:
+  1. `RefontViewportTests.aShrinkingRefontKeepsTheLineAtTheViewportTop` —
+     `topVisibleOffset()` 42034 vs 42128 (a 94-pt drift, deterministic): 13u4 UNIT F2's
+     re-font restore is no longer exact on 27 — **possibly a REAL (small) product delta**;
+     needs an editor-seam trace (NOT 13y's — the seam wants its own session per R-cor-14).
+  2. `PagedReadViewTests.theBarKeepsItsScrubberAndSpeaksApproximately` —
+     `count(NSSlider) 0 == 1`: **pin mechanism only.** SwiftUI's `Slider` is no longer
+     `NSSlider`-backed on 27. **Product verified IN USE at this kickoff** (dev-store walk:
+     the paged Read scrubber renders AND a track click jumped pages 1→286 of ~428; capture
+     `notes/plans/13y-screens/01-paged-read-scrubber-jumped-macos27.png`).
+  3. `BookViewTests….theSpreadKeepsItsBarWithFormsAndTheJumpScrubber` — identical
+     signature and class as 2 (the same control on the two-up spread's bar).
+  4. `BoundaryFluidityTests.theKeystrokePathRoutesCrossBlockDeletesIntoTheCompound` —
+     `status.spoken → nil`, deterministic: the compound's status never speaks under the
+     HARNESS's synthetic keystroke on 27 — needs a trace (harness key-routing vs real
+     behavior); editor-seam-adjacent, not 13y's.
+  5. `LibraryPanelHostTests.aNoteSelectionStandsThePanelUpWith…` — the pin bans the word
+     "inspector" in the SwiftUI reflection dump and an OS-renamed INTERNAL symbol now
+     matches it: **pin mechanism only** (nobody added an inspector).
+  **Consequence for this phase's finals:** the full-Mac gate reads "green modulo these five
+  adjudicated kickoff deltas" — any SIXTH red is 13y's to answer. Ownership: the
+  KnownIssues row added at this kickoff, owner **18k** (runtime hygiene — the round she
+  ordered to run right AFTER 13y; rows 1 and 4 are its trace items, 2/3/5 are pin
+  re-mechanizations). Also observed, recorded: the run logs **6,706 `[AppKit] Invalid view
+  geometry: width is infinity/too large` lines** — a NEW macOS-27 logging class with zero
+  prior mentions in the repo (the width-1/infinity probes were silent on 26); no test
+  failed for it; it joins the standing warning-sweep family (the 1,989 `Modifying state`
+  class, owner 12).
 
 ## LEDGER (every row owned; a row closes FIXED/DONE-with-evidence · RECORDED-with-owner · DEFERRED-with-owner)
 
@@ -388,7 +418,7 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
 |---|---|---|---|
 | 1 | env | The TK2 spike §5 re-run on macOS 27.0 | **DONE — clean** (see ENVIRONMENT ACTS) |
 | 2 | env | Core suite new-OS baseline | **DONE — 1679/179 green** |
-| 3 | env | Full-Mac new-OS baseline (R-13y-3) | **PENDING — running** |
+| 3 | env | Full-Mac new-OS baseline (R-13y-3) | **DONE — 3089/510, five deterministic macOS-27 deltas adjudicated (see ENVIRONMENT ACTS; KnownIssues row added, owner 18k; the scrubber product-verified in use)** |
 | 4 | A | Step 0 survey + verdict table | open |
 | 5 | A | Step 1 — the `12_` DDL (+ guard fold-in, NIT-4, horizon exposure, sweep extension) | open |
 | 6 | A | Step 2 — client pins (incl. the adopt-road scenario) | open |
