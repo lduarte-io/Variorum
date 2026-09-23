@@ -7,8 +7,10 @@
 -- (12_phase13y_tenant_seq.sql): sync_pull's REORDERED signature (NIT-4 —
 -- the old spelling becomes the UNEXPECTED lingering-overload class), the
 -- `next_tenant_seq(uuid)` counter helper (the sync_table_pk posture — no
--- API role), and the `sync_tenant_seq` counter table (the device_cursor
--- posture — forced RLS, one owner policy, no API-role privileges).
+-- API role), the `sync_tenant_seq` counter table (the device_cursor
+-- posture — forced RLS, one owner policy, no API-role privileges), and
+-- the `sync_visibility_horizon_ms()` served-horizon function (the
+-- R-13y-4 fork's Shape 1 — `sync_schema_version()`'s exact posture).
 --
 -- WHAT IT IS: one READ-ONLY query, run IMMEDIATELY AFTER a lockstep deploy
 -- (09 at the 14c gate; 10 at the 13j window; 11 at the pre-13x window),
@@ -58,6 +60,9 @@
 --                                    (definer bodies are the only callers)
 --   entitlement_set                  anon ✗  authenticated ✗  service_role ✓
 --   sync_schema_version              anon ✗  authenticated ✓
+--   sync_visibility_horizon_ms (13y) anon ✗  authenticated ✓
+--                                    (the version RPC's exact posture — the
+--                                    served A5 horizon, Shape 1)
 --   sync_table_pk                    anon ✗  authenticated ✗   (finding I-4)
 --   the 19 data tables               anon ✗  authenticated ✗  RLS on + FORCED, 1 policy
 --   entitlement                      anon ✗  authenticated ✓ (SELECT only), RLS on, 2 policies
@@ -93,6 +98,9 @@ with expected_functions (signature, exp_anon, exp_authenticated, exp_service_rol
     ('next_tenant_seq(uuid)',                                           false, false, false),
     ('entitlement_set(uuid,text,boolean,timestampwithtimezone,text)',  false, false, true),
     ('sync_schema_version()',                                          false, true,  null),
+    -- 13y (12): the served A5 horizon (the R-13y-4 fork's Shape 1) —
+    -- the version RPC's exact posture, transcribed.
+    ('sync_visibility_horizon_ms()',                                   false, true,  null),
     ('sync_table_pk(text)',                                            false, false, null),
     ('stamp_server_seq()',                                             null,  null,  null),
     -- pre-13x 11: the vault's insert trigger function — RETURNS trigger,

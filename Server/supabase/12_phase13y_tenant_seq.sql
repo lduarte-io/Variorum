@@ -70,8 +70,23 @@
 --     reason the proof ever carried `default null`). The OLD signature is
 --     DROPPED FIRST (the 09/10/11 discipline). ZERO wire change: PostgREST
 --     resolves RPC arguments BY NAME and the client always sends every
---     key. The body is 11's VERBATIM — the A5 horizon, the device-cursor
---     upsert, the owner scoping and the subtraction all byte-kept;
+--     key. The body is 11's VERBATIM below the signature except ONE swap
+--     — the A5 horizon's filter now DERIVES from the serving function
+--     (next bullet); the device-cursor upsert, the owner scoping and the
+--     subtraction all byte-kept;
+--   * THE A5 HORIZON EXPOSED — served and enforced by ONE function (the
+--     R-13y-4 fork's ruling, Shape 1; the pre-13x closeout's
+--     consideration 2, her instruction): `sync_visibility_horizon_ms()`
+--     returns the constant 2000 on `sync_schema_version()`'s exact shape
+--     and grants, and `sync_pull` reads it ONCE into a local and derives
+--     its filter interval FROM it — no inline interval literal survives
+--     in the pull body, so the served value and the enforced value
+--     CANNOT drift (BLOCKER-1's class closed by construction). The
+--     client's rotation walk fetches the served value and waits
+--     served + margin (`CorpusRotation.horizonWait(forServedMillis:)`;
+--     margin 500 ms, stated as derived — today's 2500 − 2000). A future
+--     horizon change is a deliberate §12-grammar act moving this ONE
+--     function; the client wait re-derives for free;
 --   * `account_purge` gains the caller's `sync_tenant_seq` row — the whole
 --     account goes (the 13j letter, extended to the table this event
 --     adds). `account_data_truncate` deliberately does NOT touch the
@@ -297,12 +312,37 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- 5. sync_pull — 11's body VERBATIM under the REORDERED signature (NIT-4):
+-- 5. sync_visibility_horizon_ms — THE ONE HORIZON (the R-13y-4 fork's
+--    ruling, Shape 1): the A5 visibility horizon, in milliseconds, served
+--    as a constant on `sync_schema_version()`'s exact shape (zero-arg,
+--    STABLE, definer, the same grants). `sync_pull` below derives its
+--    filter interval FROM this function — the served value and the
+--    enforced value are ONE definition, un-driftable by construction
+--    (the rider's whole demand: one constant moving without the other
+--    reopens BLOCKER-1's class). A horizon change is a deliberate
+--    §12-grammar act — a numbered artifact moving this one function, the
+--    client's wait re-deriving for free — never an operator dial, which
+--    is why this is a constant-returning function and not a `sync_meta`
+--    row (Shape 2's tunability declined: a knob makes the dumb server
+--    less dumb for no present need).
+-- ---------------------------------------------------------------------------
+
+create or replace function sync_visibility_horizon_ms() returns bigint
+language sql stable security definer
+set search_path = public
+as $$
+  select 2000;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- 6. sync_pull — 11's body VERBATIM under the REORDERED signature (NIT-4):
 --    `key_proof` is now DEFAULTLESS, before the genuinely-optional
 --    `max_rows` / `for_device`. Zero wire change (PostgREST resolves by
---    name; the client always sends every key). The A5 visibility horizon,
---    the device-cursor upsert, the owner scoping and the server-only
---    column subtraction are all byte-kept.
+--    name; the client always sends every key). The device-cursor upsert,
+--    the owner scoping and the server-only column subtraction are all
+--    byte-kept; the ONE swap below the signature is the A5 horizon's
+--    filter, which now DERIVES from `sync_visibility_horizon_ms()` (one
+--    declare line + the two branch filters — nothing else moves).
 -- ---------------------------------------------------------------------------
 
 create or replace function sync_pull(since_seq bigint, active_key_id text, key_proof text, max_rows int default 500, for_device text default null)
@@ -327,6 +367,11 @@ declare
   -- author's ruling: fix the NAME, never relax the policy — no RPC
   -- parameter may shadow a column it writes (the standing naming rule).
   dev text := for_device;
+  -- 13y (the R-13y-4 fork's Shape 1): the A5 horizon, read ONCE from the
+  -- one serving function; the two branch filters below derive from this
+  -- local — no inline interval literal survives in this body, so the
+  -- served value and the enforced value cannot drift.
+  horizon interval := make_interval(secs => sync_visibility_horizon_ms() / 1000.0);
   tbl text;
   union_sql text := '';
   result jsonb;
@@ -362,8 +407,9 @@ begin
 
   -- State-based changefeed: each row appears once, in its current state,
   -- at its latest seq (SyncSpec §2) — strictly within the caller's
-  -- partition. The visibility horizon (A5) is the `interval '2 seconds'`
-  -- filter: rows written within that window are never served.
+  -- partition. The visibility horizon (A5) is the derived-interval
+  -- filter (the `horizon` local above — `sync_visibility_horizon_ms()`,
+  -- 2000 ms): rows written within that window are never served.
   foreach tbl in array allowed loop
     if union_sql <> '' then
       union_sql := union_sql || ' union all ';
@@ -377,8 +423,8 @@ begin
            from %I t
            where t.owner_id = %L
              and t.server_seq > %s
-             and t.server_written_at <= clock_timestamp() - interval '2 seconds'$q$,
-        tbl, sync_table_pk(tbl), tbl, caller, since_seq);
+             and t.server_written_at <= clock_timestamp() - %L::interval$q$,
+        tbl, sync_table_pk(tbl), tbl, caller, since_seq, horizon);
     else
       -- Mirror-only owner: subtract the stamped owner_id — the client
       -- has no home for it (the unknown-column refusal would fire).
@@ -389,8 +435,8 @@ begin
            from %I t
            where t.owner_id = %L
              and t.server_seq > %s
-             and t.server_written_at <= clock_timestamp() - interval '2 seconds'$q$,
-        tbl, sync_table_pk(tbl), tbl, caller, since_seq);
+             and t.server_written_at <= clock_timestamp() - %L::interval$q$,
+        tbl, sync_table_pk(tbl), tbl, caller, since_seq, horizon);
     end if;
   end loop;
 
@@ -407,7 +453,7 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- 6. sync_purge_execute — 11's body VERBATIM except the mint (M2): the
+-- 7. sync_purge_execute — 11's body VERBATIM except the mint (M2): the
 --    granted ledger seq draws from the CALLER's counter — the owner's
 --    device cursors and `last_purge_seq` scan points are what it is
 --    compared against, and they live on the same counter now.
@@ -453,7 +499,7 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- 7. key_vault_update — THE ONE WRITE ROAD into the vault, now carrying
+-- 8. key_vault_update — THE ONE WRITE ROAD into the vault, now carrying
 --    the ROTATION COMPLETION GUARD in its CANONICAL body (the fold-in;
 --    the maintenance overlay is superseded) and the per-owner mint (M3):
 --    a rotation's `rotation_started_seq` draws from the CALLER's counter
@@ -598,7 +644,7 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- 8. account_purge — 11-era body verbatim; the ONE change: the caller's
+-- 9. account_purge — 11-era body verbatim; the ONE change: the caller's
 --    `sync_tenant_seq` row goes with the account (the 13j letter — the
 --    whole account goes; a re-created account is a NEW uuid and starts
 --    its own counter at 1). `account_data_truncate` deliberately does NOT
@@ -660,7 +706,7 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- 9. THE GLOBAL SEQUENCE RETIRES (F-S4): nothing references
+-- 10. THE GLOBAL SEQUENCE RETIRES (F-S4): nothing references
 --    `sync_server_seq` after the swaps above (the data tables default the
 --    column to 0 and the trigger overwrites; the two direct mints now
 --    draw per-owner). Dropping it is the fail-loud closure — a future
@@ -671,24 +717,30 @@ $$;
 drop sequence if exists sync_server_seq;
 
 -- ---------------------------------------------------------------------------
--- 10. Ownership + the demotion posture. `create or replace` preserved the
+-- 11. Ownership + the demotion posture. `create or replace` preserved the
 --     owner and ACL for sync_purge_execute / key_vault_update /
 --     account_purge (their signatures are unchanged); the DROPPED-and-
---     re-created sync_pull returns to the definer owner through the
---     CREATE-for-acquisition dance (the 10/11 idiom), and its grants are
---     re-stated (they died with the drop). `next_tenant_seq` takes the
---     helper posture (the `sync_table_pk` class): reachable by NO API
---     role — the trigger and the definer bodies are its only callers,
---     and Supabase's CREATE-time default EXECUTE-to-PUBLIC is revoked by
---     name (the memo §2's recorded footgun).
+--     re-created sync_pull and the NEW sync_visibility_horizon_ms return
+--     to the definer owner through the CREATE-for-acquisition dance (the
+--     10/11 idiom), and their grants are stated (sync_pull's died with
+--     the drop; the horizon function is new, on `sync_schema_version()`'s
+--     exact grant pair). `next_tenant_seq` takes the helper posture (the
+--     `sync_table_pk` class): reachable by NO API role — the trigger and
+--     the definer bodies are its only callers, and Supabase's CREATE-time
+--     default EXECUTE-to-PUBLIC is revoked by name (the memo §2's
+--     recorded footgun).
 -- ---------------------------------------------------------------------------
 
 grant usage, create on schema public to variorum_definer;
 alter function sync_pull(bigint, text, text, int, text) owner to variorum_definer;
+alter function sync_visibility_horizon_ms() owner to variorum_definer;
 revoke create on schema public from variorum_definer;
 
 revoke execute on function sync_pull(bigint, text, text, int, text) from public, anon;
 grant execute on function sync_pull(bigint, text, text, int, text) to authenticated, service_role;
+
+revoke execute on function sync_visibility_horizon_ms() from public, anon;
+grant execute on function sync_visibility_horizon_ms() to authenticated, service_role;
 
 revoke execute on function next_tenant_seq(uuid) from public, anon, authenticated, service_role;
 grant execute on function next_tenant_seq(uuid) to variorum_definer;
@@ -703,7 +755,7 @@ revoke execute on function account_purge() from public, anon, service_role;
 grant execute on function account_purge() to authenticated;
 
 -- ---------------------------------------------------------------------------
--- 11. The lockstep marker (SyncSpec §12): THE LAST STATEMENT INSIDE THE
+-- 12. The lockstep marker (SyncSpec §12): THE LAST STATEMENT INSIDE THE
 --     TRANSACTION, immediately before commit — a partial deploy can never
 --     advertise the new version. The mirror now speaks lockstep version 9.
 --     Must equal SyncSchema.lockstepVersion in the client — the in-repo
@@ -728,4 +780,9 @@ commit;
 --                                                                    -- the global counter is gone
 --   select oid::regprocedure from pg_proc where proname = 'sync_pull';
 --                                                                    -- ONE row: sync_pull(bigint,text,text,integer,text)
+--   select sync_visibility_horizon_ms();                              -- 2000 (the served horizon)
+--   select pg_get_functiondef('sync_pull(bigint,text,text,int,text)'::regprocedure)
+--          like '%sync_visibility_horizon_ms%';                       -- true (the ONE horizon — derived, never inlined)
+--   select pg_get_functiondef('sync_pull(bigint,text,text,int,text)'::regprocedure)
+--          not like '%interval ''2 seconds''%';                       -- true (no inline literal survives)
 --   plus maintenance/14c-post-deploy-grant-sweep.sql — every row OK/INFO.

@@ -437,6 +437,47 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
 
 ### LIVE STATUS (flipped in the same commit as each piece; a fresh session finishes from this)
 
+- **MACHINERY (recorded per the resiliency protocol):** the UNIT A implementer session
+  DIED AT A MODEL-BUDGET LIMIT after delivering Steps 0–3 whole (commits ec188df3 ·
+  468a1fba · d4002bf6 · 4c346e98, all pushed; tree clean) and before writing any line of
+  the ruled fork piece. A FRESH CLOSER CONTINUATION (2026-09-22, this session) builds
+  exactly the ruled Shape 1 and closes the unit — no design latitude, the fork RULING
+  section below governs.
+- **THE HORIZON VEHICLE (the ruled Shape 1 — the closer continuation's piece):**
+  - **SERVER HALF: DONE (this commit)** — `sync_visibility_horizon_ms()` in 12 (new
+    section 5; SQL, STABLE, definer, `sync_schema_version()`'s exact grants,
+    `variorum_definer`-owned via the acquisition dance, returns 2000); `sync_pull` reads
+    it ONCE into a `horizon interval` local and both branch filters derive from it
+    (`- %L::interval` — NO inline interval literal survives in the pull body); the grant
+    sweep gains the new signature on the version RPC's exact expectation row; the
+    verification tail extended (the served constant + two functiondef LIKE checks).
+    `AuthRLSDDLTests` re-shaped with it: `theVisibilityHorizonSurvivesEveryRework`
+    RE-POINTED at the derivation (helper call present, derived filter, inline literal
+    BANNED), the pull's verbatim-modulo pin rewritten as **11's body below the signature
+    with EXACTLY the horizon derivation swapped in** (one declare line + the two
+    filter/args swaps, the fold-in pins' idiom, non-vacuity arm included), and ONE new
+    pin `theServedHorizonIsAConstantFunctionOnTheVersionRPCsShape` (shape · posture ·
+    grants · ownership · the 2000 constant — a new-mechanism pin, green by design).
+    **AuthRLSDDLTests 69/69 green (+1 over the unit's 68) · SerializerCompleteness 6/6.**
+  - **CLIENT HALF + PIN (d) + THE FAKE: PENDING (the follow-up commit flips this line)** —
+    the ruled shape, restated for the record:
+    `SyncRotationTransport.visibilityHorizonMillis()` (REQUIRED, no default — the
+    doctrine); `SupabaseTransport` answers via the RPC (the `sync_horizon` bare-bigint
+    parse idiom); `CorpusRotation.horizonWait(forServedMillis:)` the ONE pure derivation
+    (served + `horizonWaitMargin` 500 ms, stated as derived: today's 2500 − 2000) and
+    `productionHorizonWait(transport:sleep:)` the ONE production road (fetch → derive →
+    sleep), the init's `horizonWait:` parameter now optional with nil = that road; the
+    hardcoded `productionHorizonWait: Duration = 2500 ms` RETIRED (core + the app's
+    `PostureSwitch.Leaves` default, which now passes nil through); `FakeSyncServer`
+    serves a SETTABLE horizon-millis value (default 2000, the deployed constant) and
+    both fake conformers + `SeamTransport`/`EmulatedMirror`/`InertTransport` forward it.
+    Pins (CorpusRotationTests): the pure derivation (2000→2500 + settable X→X+500 with
+    the margin stated as the subtraction), the SPY-COUNTED production-road walk (served
+    7000 → ONE fetch, wait observed exactly 7500 ms through the injected sleeper), and
+    the nil-default resolves-to-production-road walk (served 0 → ONE fetch through the
+    REAL sleep road). New-mechanism pins, green by design (stated per the brief); the
+    non-vacuous arm is the DDL side's inline-literal ban.
+
 - **Step 0 — the seq-assumption survey: DONE (this commit)** — verdict table below; ZERO
   cross-account verdicts, no stop-and-report. Two load-bearing survey findings (F-S1 floor
   widening, F-S2 dedupe verified-absent) + two recorded observations (F-S3 A5-belt, F-S4

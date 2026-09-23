@@ -574,12 +574,21 @@ struct AuthRLSDDLTests {
     }
 
     /// Replacing `sync_pull` must not regress A5: the visibility horizon and
-    /// the server-only column subtraction survive verbatim in the DEPLOYED
-    /// bodies (04's and 05's alike).
+    /// the server-only column subtraction survive in the DEPLOYED bodies.
+    /// RE-POINTED at Phase 13y (the R-13y-4 fork's ruling, Shape 1): the
+    /// deployed pull no longer carries an inline `interval '2 seconds'` —
+    /// it DERIVES its filter from the ONE serving function
+    /// (`sync_visibility_horizon_ms()`), so the pin now asserts the
+    /// derivation and BANS the inline literal (an inline literal
+    /// reappearing IS the drift this mechanism exists to make impossible).
     @Test func theVisibilityHorizonSurvivesEveryRework() throws {
         let pull = try Self.finalBody(of: "sync_pull")
-        #expect(pull.contains("t.server_written_at <= clock_timestamp() - interval '2 seconds'"),
-                "the deployed sync_pull must keep the A5 horizon")
+        #expect(pull.contains("sync_visibility_horizon_ms()"),
+                "the deployed sync_pull derives the A5 horizon from the one serving function")
+        #expect(pull.contains("t.server_written_at <= clock_timestamp() - %L::interval"),
+                "every branch's filter subtracts the DERIVED interval")
+        #expect(!pull.contains("interval '"),
+                "no inline interval literal survives in the pull body — served and enforced cannot drift")
         #expect(pull.contains("- 'sync_version' - 'server_seq' - 'server_written_at'"),
                 "server-only columns must stay subtracted from payloads")
         let push = try Self.finalBody(of: "sync_push")
@@ -880,8 +889,10 @@ struct AuthRLSDDLTests {
         // nothing).
         // 13y (12): sync_pull's expectation moved to its REORDERED NIT-4
         // signature (key_proof defaultless — 12 drops the 11-era spelling,
-        // whose reappearance is the UNEXPECTED class), and the counter
-        // helper `next_tenant_seq(uuid)` joined on the helper posture.
+        // whose reappearance is the UNEXPECTED class), the counter helper
+        // `next_tenant_seq(uuid)` joined on the helper posture, and the
+        // served-horizon function joined on the version RPC's posture
+        // (the R-13y-4 fork's Shape 1).
         for function in ["sync_push(jsonb,text,text)", "sync_pull(bigint,text,text,integer,text)",
                          "account_data_truncate(text,text)", "account_purge()",
                          "entitlement_set(uuid,text,boolean,timestampwithtimezone,text)",
@@ -890,7 +901,8 @@ struct AuthRLSDDLTests {
                          "sync_purge_execute(jsonb,text,text)",
                          "sync_reencrypt(jsonb,text,text)", "key_vault_update(jsonb,integer,text)",
                          "sync_key_gate(text,text)", "sync_key_proof_check(text)",
-                         "key_vault_require_proof_hash()", "next_tenant_seq(uuid)"] {
+                         "key_vault_require_proof_hash()", "next_tenant_seq(uuid)",
+                         "sync_visibility_horizon_ms()"] {
             #expect(sql.contains("('\(function)'"),
                     "the sweep must carry an expectation for \(function)")
         }
@@ -1920,20 +1932,64 @@ struct AuthRLSDDLTests {
                 "the CREATE-for-acquisition dance is opened and closed in the same transaction")
     }
 
-    /// The reordered `sync_pull` is 11's body VERBATIM — every behavioral
-    /// pin above (the A5 horizon, the cursor upsert, the owner scoping,
-    /// the allowlists) already reads 12's body through `finalBody`; this
-    /// pin adds the strongest form: line-for-line equality with 11's,
-    /// signature line aside. A quiet body change can never ride the
-    /// reorder.
-    @Test func theTenantSeqPullIsElevensBodyUnderTheReorderedSignature() throws {
+    /// The reordered `sync_pull` is 11's body VERBATIM below the signature
+    /// MODULO exactly the horizon derivation (the R-13y-4 fork's ruling,
+    /// Shape 1, the piece that closed UNIT A): one declare line added —
+    /// the horizon read ONCE from `sync_visibility_horizon_ms()` — and
+    /// the two branch filters swapped from the inline literal to the
+    /// derived interval (each swap is a filter line + its format-args
+    /// line). Line for line, nothing else moved: a quiet body change can
+    /// ride neither the reorder nor the derivation. (This pin's earlier
+    /// form asserted plain equality below the signature; the ruled swap
+    /// re-shaped it — the `theCompletionGuardIsTheOverlaysBody…` idiom.)
+    @Test func theTenantSeqPullIsElevensBodyWithExactlyTheHorizonDerivationSwapped() throws {
         let eleven = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
         let twelve = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
         let body11 = Self.codeLines(try #require(Self.lastBody(of: "sync_pull", in: eleven)))
         let body12 = Self.codeLines(try #require(Self.lastBody(of: "sync_pull", in: twelve)))
         #expect(body11.first != body12.first, "the signature lines differ — the reorder")
-        #expect(Array(body11.dropFirst()) == Array(body12.dropFirst()),
-                "12's sync_pull body is 11's line for line below the signature")
+        let declare = "horizon interval := make_interval(secs => sync_visibility_horizon_ms() / 1000.0);"
+        #expect(body12.filter { $0 == declare }.count == 1,
+                "the horizon is read ONCE into a local, from the one serving function")
+        let swapped = Array(body11.dropFirst()).map { line in
+            switch line {
+            case "and t.server_written_at <= clock_timestamp() - interval '2 seconds'$q$,":
+                return "and t.server_written_at <= clock_timestamp() - %L::interval$q$,"
+            case "tbl, sync_table_pk(tbl), tbl, caller, since_seq);":
+                return "tbl, sync_table_pk(tbl), tbl, caller, since_seq, horizon);"
+            default:
+                return line
+            }
+        }
+        #expect(Array(body12.dropFirst()).filter { $0 != declare } == swapped,
+                "12's sync_pull is 11's below the signature with exactly the horizon derivation swapped in")
+        #expect(swapped != Array(body11.dropFirst()), "the swap is real — the pin isn't vacuous")
+    }
+
+    /// THE SERVED HORIZON (the R-13y-4 fork's ruling, Shape 1 — Step 1's
+    /// last piece): `sync_visibility_horizon_ms()` is a sibling zero-arg
+    /// definer function on `sync_schema_version()`'s exact shape — SQL,
+    /// STABLE, definer, `search_path` pinned, public/anon revoked,
+    /// authenticated + service_role granted, `variorum_definer`-owned via
+    /// the acquisition dance — returning the constant 2000. The pull's
+    /// derivation from it is pinned above (the verbatim-modulo pin + the
+    /// re-pointed A5 pin). A NEW-MECHANISM pin, green by design — not a
+    /// defect fix, so no red-on-old is owed; the non-vacuous arm is the
+    /// derivation pins' ban on the inline literal.
+    @Test func theServedHorizonIsAConstantFunctionOnTheVersionRPCsShape() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let body = try #require(Self.lastBody(of: "sync_visibility_horizon_ms", in: sql))
+        #expect(body.contains("create or replace function sync_visibility_horizon_ms() returns bigint"))
+        #expect(body.contains("language sql stable security definer"),
+                "the version RPC's exact shape — zero-arg, STABLE, definer")
+        #expect(body.contains("set search_path = public"))
+        #expect(body.contains("select 2000;"),
+                "the deployed constant — the client's wait derives against the SERVED value, never this literal")
+        #expect(sql.contains("alter function sync_visibility_horizon_ms() owner to variorum_definer;"),
+                "the acquisition dance re-owns the new function")
+        #expect(sql.contains("revoke execute on function sync_visibility_horizon_ms() from public, anon;"))
+        #expect(sql.contains("grant execute on function sync_visibility_horizon_ms() to authenticated, service_role;"),
+                "sync_schema_version()'s exact grant pair")
     }
 
     /// The per-owner counter table takes the `device_cursor` posture
