@@ -441,11 +441,20 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
   cross-account verdicts, no stop-and-report. Two load-bearing survey findings (F-S1 floor
   widening, F-S2 dedupe verified-absent) + two recorded observations (F-S3 A5-belt, F-S4
   sequence-object disposal) below.
-- **Step 1 — `12_phase13y_tenant_seq.sql`: NOT-STARTED — settled design in the survey's
-  CONSEQUENCES block below**; the ONE named fork (the horizon-exposure vehicle) is PROPOSED
-  below and NOT BUILT pending the orchestrator's ruling; everything else in Step 1 proceeds.
-- **Step 2 — client: NOT-STARTED** (lockstepVersion 8→9 rides Step 1's commit per the standing
-  same-commit rule; pins (a)/(b)/adopt-road ride Step 3's suites; pin (d) awaits the fork ruling).
+- **Step 1 — `12_phase13y_tenant_seq.sql`: DONE except the horizon vehicle (this commit)** —
+  the artifact authored whole (guard, NIT-4 drop-first reorder, counter + floor, the three
+  mint swaps, the completion-guard fold-in, the global sequence dropped, marker 9 last in the
+  one transaction); the overlay carries the superseded-by-12 header; the grant sweep extended
+  (new pull spelling, `next_owner_seq(uuid)`, `sync_owner_seq`); `SyncSchema.lockstepVersion`
+  8→9 in the same commit (the standing rule); `AuthRLSDDLTests` gains the 12 block — ELEVEN
+  new pins including the three VERBATIM-MODULO exactness pins (12's pull ≡ 11's below the
+  signature; purge-execute ≡ 11's + exactly the M2 swap; key_vault_update ≡ the overlay's +
+  exactly the M3 swap — the fold-in's "never assumed from the overlay's state" letter) and
+  the F-S1 floor-coverage pin; `SerializerCompletenessTests.serverOnlyTables` gains the
+  counter. **AuthRLSDDLTests + SerializerCompletenessTests: 74/74 green.** The ONE remaining
+  Step 1 piece: the horizon-exposure vehicle — PROPOSED below, NOT BUILT pending the ruling.
+- **Step 2 — client: lockstepVersion DONE (rode Step 1's commit)**; pins (a)/(b)/adopt-road
+  ride Step 3's suites; pin (d) awaits the fork ruling.
 - **Step 3 — harness: NOT-STARTED — settled design below** (per-account counters + lazy
   max-floor; `headSeq(for:)`; quiescence helpers per-account; the disclosure-closure probe).
 - Full core suite at unit close: PENDING.

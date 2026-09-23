@@ -94,11 +94,27 @@ public enum SyncSchema {
     /// six nullable columns incl. `rotation_started_seq`; mirror DDL
     /// 11_pre13x_postures.sql — deploy is the orchestrator's window under
     /// her standing pre-authorization, immediately before batch 2's
-    /// migration + both installs). **Bump this
+    /// migration + both installs); version 9 = the Phase 13y PER-TENANT
+    /// `server_seq` event (the 14c I-1 disclosure closed: `server_seq`
+    /// becomes per-owner — the `sync_owner_seq` counter table + the
+    /// row-locked `next_owner_seq`, every mint site swapped (the stamp
+    /// trigger, `sync_purge_execute`'s ledger seq, `key_vault_update`'s
+    /// rotation seq), each owner's counter floored at the GREATEST of
+    /// their data-row seqs / device cursors / ledger seqs / a standing
+    /// rotation seq so NO cursor resets; `sync_pull` reordered so
+    /// `key_proof` is defaultless (NIT-4 — zero wire change, PostgREST
+    /// resolves by name); the rotation completion guard folded into the
+    /// canonical `key_vault_update`; the global `sync_server_seq`
+    /// DROPPED fail-loud; CLIENT SEMANTICS UNCHANGED — the Step 0 survey
+    /// verdicted every seq comparison within-account, so per-tenant
+    /// numbering preserves every order any client observes; mirror DDL
+    /// 12_phase13y_tenant_seq.sql — deploy is the orchestrator's ONE
+    /// end-of-phase window under her standing pre-authorization,
+    /// R-13y-2). **Bump this
     /// constant together with the mirror file's marker in every future
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
-    public static let lockstepVersion = 8
+    public static let lockstepVersion = 9
     /// The synced tables, in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs

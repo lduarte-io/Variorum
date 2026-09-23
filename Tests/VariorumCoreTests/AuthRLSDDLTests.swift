@@ -39,6 +39,7 @@ struct AuthRLSDDLTests {
         "09_phase14c_multitenant.sql",
         "10_phase13j_purge.sql",
         "11_pre13x_postures.sql",
+        "12_phase13y_tenant_seq.sql",
     ]
 
     /// The DATA RPCs — every function 11 re-creates with `key_proof` beside
@@ -105,8 +106,16 @@ struct AuthRLSDDLTests {
 
     /// What the deployed server RUNS for `functionName` once the ladder
     /// overlay is deployed after 11: the overlay's body where it carries
-    /// one, else the composition's.
+    /// one, else the composition's. SUPERSEDED-BY-12 (Phase 13y): a
+    /// function 12 re-creates is deployed AFTER the overlay, so for those
+    /// the composition's last body IS the deployed truth — the overlay is
+    /// history (its own header says so, and its re-run guard refuses once
+    /// the deployed body carries the guard text 12 folds in).
     private static func deployedBody(of functionName: String) throws -> String {
+        let twelve = strippingComments(try sqlFile("12_phase13y_tenant_seq.sql"))
+        if lastBody(of: functionName, in: twelve) != nil {
+            return try finalBody(of: functionName)
+        }
         let overlay = strippingComments(try sqlFile(ladderOverlayFile))
         if let body = lastBody(of: functionName, in: overlay) { return body }
         return try finalBody(of: functionName)
@@ -857,7 +866,8 @@ struct AuthRLSDDLTests {
         #expect(sql.lowercased().contains("select"), "the sweep is a query — the pin isn't vacuous")
         // Coverage: every registry table, the three account-data tables,
         // and every function 09 or its predecessors expose.
-        for table in SyncSchema.tables.map(\.name) + ["entitlement", "key_vault", "sync_meta"] {
+        for table in SyncSchema.tables.map(\.name)
+            + ["entitlement", "key_vault", "sync_meta", "sync_owner_seq"] {
             #expect(sql.contains("('\(table)',"),
                     "the sweep must carry an expectation for \(table)")
         }
@@ -868,7 +878,11 @@ struct AuthRLSDDLTests {
         // vault's policy set + insert trigger + per-role UPDATE privilege
         // are asserted BY NAME (a count cannot tell the closure from
         // nothing).
-        for function in ["sync_push(jsonb,text,text)", "sync_pull(bigint,text,integer,text,text)",
+        // 13y (12): sync_pull's expectation moved to its REORDERED NIT-4
+        // signature (key_proof defaultless — 12 drops the 11-era spelling,
+        // whose reappearance is the UNEXPECTED class), and the counter
+        // helper `next_owner_seq(uuid)` joined on the helper posture.
+        for function in ["sync_push(jsonb,text,text)", "sync_pull(bigint,text,text,integer,text)",
                          "account_data_truncate(text,text)", "account_purge()",
                          "entitlement_set(uuid,text,boolean,timestampwithtimezone,text)",
                          "sync_schema_version()", "sync_table_pk(text)",
@@ -876,13 +890,14 @@ struct AuthRLSDDLTests {
                          "sync_purge_execute(jsonb,text,text)",
                          "sync_reencrypt(jsonb,text,text)", "key_vault_update(jsonb,integer,text)",
                          "sync_key_gate(text,text)", "sync_key_proof_check(text)",
-                         "key_vault_require_proof_hash()"] {
+                         "key_vault_require_proof_hash()", "next_owner_seq(uuid)"] {
             #expect(sql.contains("('\(function)'"),
                     "the sweep must carry an expectation for \(function)")
         }
         for old in ["('sync_push(jsonb,text)'", "('sync_pull(bigint,text,integer,text)'",
                     "('account_data_truncate(text)'", "('sync_horizon(text)'",
-                    "('sync_purge_ledger(bigint,text)'", "('sync_purge_execute(jsonb,text)'"] {
+                    "('sync_purge_ledger(bigint,text)'", "('sync_purge_execute(jsonb,text)'",
+                    "('sync_pull(bigint,text,integer,text,text)'"] {
             #expect(!sql.contains(old),
                     "the sweep must not EXPECT the dropped overload \(old) — it must surface it as UNEXPECTED")
         }
@@ -983,6 +998,26 @@ struct AuthRLSDDLTests {
         #expect(sql11.contains("PHONE"))
         #expect(sql11.contains("LIVE PATCH PROBE"))
         #expect(sql11.contains("pre-13x-deploy-checklist.md"))
+        // 12 (Phase 13y): the per-tenant sequence event. Deploy is the
+        // ORCHESTRATOR's ONE end-of-phase window under her standing
+        // pre-authorization (R-13y-2), never a batch implementer's; the
+        // window bundles BOTH device builds; the A1 rail; and the
+        // GOVERNANCE RIDER (R-13y-4): the pre-deploy summary names the
+        // two QUESTIONS #144 PROVISIONALs, one line each, before anything
+        // fires. The carry-over proof (her cursors intact — the floor,
+        // proven live) closes the window.
+        let sql12 = try Self.sqlFile("12_phase13y_tenant_seq.sql")
+        #expect(sql12.contains("THE CHOREOGRAPHY"))
+        #expect(sql12.contains("this file runs on the mirror FIRST"))
+        #expect(sql12.contains("SyncSpec §12"))
+        #expect(sql12.contains("ORCHESTRATOR"))
+        #expect(sql12.contains("never a batch implementer"))
+        #expect(sql12.contains("PRE-AUTHORIZED"))
+        #expect(sql12.contains("A1 rail"))
+        #expect(sql12.contains("PHONE"))
+        #expect(sql12.contains("#144"))
+        #expect(sql12.contains("pre-deploy summary"))
+        #expect(sql12.contains("carry-over proof") || sql12.contains("CARRY-OVER PROOF"))
     }
 
     // MARK: - The key_vault pins (Phase 14b — the vault is ACCOUNT data on
@@ -1585,13 +1620,14 @@ struct AuthRLSDDLTests {
     /// VARIORUM_ROTATION_IN_PROGRESS on a DIFFERENT one (decision 32);
     /// cleared with the key.
     @Test func theVaultUpdateDoorLocksForUpdateCASesAndRecordsTheRotationSeq() throws {
-        // 11's own body, and the body the server RUNS once the ladder's
-        // overlay is deployed over it (F1, BLOCKER-1) — every clause below
-        // holds of both; the overlay adds exactly one more (the last
-        // assertions), pinned line for line against 11 by the sibling
-        // `theClearingGuardOverlayIsElevensBodyPlusOneClause`.
+        // The DEPLOYED body — since Phase 13y that is 12's canonical one
+        // (the F1 completion guard FOLDED IN, and the rotation seq minted
+        // from the CALLER'S OWN counter, M3); 11's era body (the overlay's)
+        // stays pinned line for line by the sibling
+        // `theClearingGuardOverlayIsElevensBodyPlusOneClause`, and the
+        // fold-in's exactness by `theCompletionGuardIsTheOverlaysBodyWithExactlyTheMintSwapped`.
         for body in [try Self.finalBody(of: "key_vault_update"), try Self.deployedBody(of: "key_vault_update")] {
-            try Self.expectVaultUpdateDoor(body)
+            try Self.expectVaultUpdateDoor(body, mintsRotationSeqWith: "next_owner_seq(caller)")
         }
         let deployed = try Self.deployedBody(of: "key_vault_update")
         #expect(deployed.contains(SyncServerRefusalMarker.rotationRowsRemain),
@@ -1612,9 +1648,13 @@ struct AuthRLSDDLTests {
                 "the guard runs in the clearing arm before the seq is nulled")
     }
 
-    /// The one write road's clauses, as a sentence about a BODY (11's, and
-    /// the ladder overlay's — F1).
-    private static func expectVaultUpdateDoor(_ body: String) throws {
+    /// The one write road's clauses, as a sentence about a BODY. `mint` is
+    /// the rotation-begin expression the body must take its seq from —
+    /// `next_owner_seq(caller)` since 13y's 12 (the caller's own counter);
+    /// the 11-era bodies said `nextval('sync_server_seq')`.
+    private static func expectVaultUpdateDoor(
+        _ body: String, mintsRotationSeqWith mint: String
+    ) throws {
         #expect(body.contains("security definer"))
         #expect(body.contains("caller := auth.uid();"), "scoped to the caller — the 14c guard")
         #expect(body.contains("from key_vault where user_id = caller for update;"),
@@ -1627,8 +1667,8 @@ struct AuthRLSDDLTests {
         #expect(body.contains("if (incoming_previous is null) <> (incoming_previous_id is null) then"),
                 "one without the other refuses")
         #expect(body.contains("elsif vault_previous is null then")
-                    && body.contains("next_seq := nextval('sync_server_seq');"),
-                "a rotation begins: nextval INSIDE this transaction, the row locked")
+                    && body.contains("next_seq := \(mint);"),
+                "a rotation begins: the seq minted INSIDE this transaction, the row locked, from \(mint)")
         #expect(body.contains("elsif incoming_previous = vault_previous and incoming_previous_id = vault_previous_id then")
                     && body.contains("next_seq := vault_seq;"),
                 "a carry-through (a re-wrap mid-rotation with the SAME previous key) keeps the seq — decision 32's precision")
@@ -1820,6 +1860,302 @@ struct AuthRLSDDLTests {
             for param in params {
                 #expect(!vaultColumns.contains(param), "\(param) shadows a key_vault column")
             }
+        }
+    }
+
+    // MARK: - Phase 13y UNIT A: the per-tenant `server_seq` event (12) pins.
+    // The plan (notes/plans/phase-13y-per-tenant-seq.md — the Step 0 survey's
+    // verdict table + findings F-S1..F-S4) is the binding record; the
+    // artifact is AUTHORED AND PINNED, NOT DEPLOYED — deploy is the
+    // orchestrator's ONE end-of-phase window (R-13y-2).
+
+    /// A body's code lines, trimmed and non-empty — the equality surface
+    /// the verbatim-modulo pins below compare on (the overlay pin's idiom).
+    private static func codeLines(_ body: String) -> [String] {
+        body.split(separator: "\n", omittingEmptySubsequences: false)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+    }
+
+    /// 12 takes the 09/10/11 deploy shape: one transaction, the re-run
+    /// guard before the destructive drop, the marker bump last inside the
+    /// transaction; the guard keys on evidence only a deployed 12 leaves
+    /// (the marker at 9+, or the `sync_owner_seq` table no other artifact
+    /// creates) and spells its one deliberate override.
+    @Test func theTenantSeqEventDeploysAsOneGuardedTransaction() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let problems = Self.deployShapeProblems(strippedSQL: sql)
+        #expect(problems.isEmpty, "12's deploy shape is unsound: \(problems.sorted())")
+        #expect(sql.contains("deployed_marker >= 9 or counter_table_here"))
+        #expect(sql.contains("to_regclass('public.sync_owner_seq') is not null"))
+        #expect(sql.contains("VARIORUM_12_ALREADY_DEPLOYED"))
+        #expect(sql.contains("current_setting('variorum.allow_12_rerun', true)")
+                    && sql.contains("'yes-rerun-the-tenant-seq-event'"),
+                "the deliberate override must be spelled in the file the operator is reading")
+        #expect(sql.contains("hint    ="), "the refusal carries the operator's next step")
+    }
+
+    /// NIT-4 (the pre-13x ladder): `sync_pull`'s `key_proof` is DEFAULTLESS
+    /// — the OLD signature (the only reason the proof ever carried
+    /// `default null`) is dropped FIRST, the reordered one created, the
+    /// ownership dance run and the grants re-stated (they died with the
+    /// drop). No defaulted proof survives anywhere in 12.
+    @Test func theTenantSeqEventDropsTheOldPullSignatureAndMakesTheProofDefaultless() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let drop = "drop function if exists sync_pull(bigint, text, int, text, text);"
+        let create = "create or replace function sync_pull(since_seq bigint, active_key_id text, key_proof text, max_rows int default 500, for_device text default null)"
+        #expect(sql.contains(drop), "the 11-era overload must be dropped first")
+        #expect(sql.contains(create), "the reordered signature: key_proof before the defaulted parameters")
+        let dropSite = try #require(sql.range(of: drop))
+        let createSite = try #require(sql.range(of: create))
+        #expect(dropSite.lowerBound < createSite.lowerBound,
+                "the drop precedes the create — no window holds both")
+        #expect(!sql.contains("key_proof text default null"),
+                "the proof is defaultless everywhere in 12 — NIT-4's letter")
+        #expect(sql.contains("alter function sync_pull(bigint, text, text, int, text) owner to variorum_definer;"))
+        #expect(sql.contains("revoke execute on function sync_pull(bigint, text, text, int, text) from public, anon;"))
+        #expect(sql.contains("grant execute on function sync_pull(bigint, text, text, int, text) to authenticated, service_role;"))
+        #expect(sql.contains("grant usage, create on schema public to variorum_definer;")
+                    && sql.contains("revoke create on schema public from variorum_definer;"),
+                "the CREATE-for-acquisition dance is opened and closed in the same transaction")
+    }
+
+    /// The reordered `sync_pull` is 11's body VERBATIM — every behavioral
+    /// pin above (the A5 horizon, the cursor upsert, the owner scoping,
+    /// the allowlists) already reads 12's body through `finalBody`; this
+    /// pin adds the strongest form: line-for-line equality with 11's,
+    /// signature line aside. A quiet body change can never ride the
+    /// reorder.
+    @Test func theTenantSeqPullIsElevensBodyUnderTheReorderedSignature() throws {
+        let eleven = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
+        let twelve = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let body11 = Self.codeLines(try #require(Self.lastBody(of: "sync_pull", in: eleven)))
+        let body12 = Self.codeLines(try #require(Self.lastBody(of: "sync_pull", in: twelve)))
+        #expect(body11.first != body12.first, "the signature lines differ — the reorder")
+        #expect(Array(body11.dropFirst()) == Array(body12.dropFirst()),
+                "12's sync_pull body is 11's line for line below the signature")
+    }
+
+    /// The per-owner counter table takes the `device_cursor` posture
+    /// exactly: server-only (never in an allowlist), FORCE RLS with the
+    /// no-`to`-clause owner policy (the definer must match it), API-role
+    /// privileges revoked, the definer's row grants for the upsert.
+    @Test func theCounterTableTakesTheDeviceCursorPosture() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        #expect(sql.contains("create table sync_owner_seq ("))
+        #expect(sql.contains("primary key (owner_id)"))
+        #expect(sql.contains("alter table sync_owner_seq enable row level security;"))
+        #expect(sql.contains("alter table sync_owner_seq force row level security;"))
+        #expect(sql.contains("create policy sync_owner_seq_owner_all on sync_owner_seq"))
+        #expect(sql.contains("for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());"))
+        #expect(sql.contains("revoke all on sync_owner_seq from anon, authenticated;"))
+        #expect(sql.contains("grant select, insert, update on sync_owner_seq to variorum_definer;"))
+        #expect(!sql.contains("on sync_owner_seq to authenticated"), "no API-role road back")
+        for function in Self.proofGatedFunctions {
+            let body = try Self.finalBody(of: function)
+            #expect(!body.contains("'sync_owner_seq'"),
+                    "\(function)'s allowlist must never carry the counter table")
+        }
+    }
+
+    /// The ONE counter function: a row-locked upsert-increment (the row
+    /// lock IS the per-tenant serialization — one account's writers
+    /// serialize on their own row; tenants never contend), SECURITY
+    /// INVOKER (the stamp_server_seq class), on the helper posture — no
+    /// API role can execute it (Supabase's CREATE-time EXECUTE-to-PUBLIC
+    /// default revoked by name; the definer bodies and the trigger are
+    /// its only callers).
+    @Test func theCounterFunctionIsARowLockedUpsertIncrementOnTheHelperPosture() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let body = try #require(Self.lastBody(of: "next_owner_seq", in: sql))
+        #expect(body.contains("create or replace function next_owner_seq(for_owner uuid) returns bigint"))
+        #expect(body.contains("insert into sync_owner_seq (owner_id, last_seq)"))
+        #expect(body.contains("on conflict (owner_id) do update"))
+        #expect(body.contains("set last_seq = sync_owner_seq.last_seq + 1"))
+        #expect(body.contains("returning last_seq into granted;"),
+                "the upsert RETURNING is what makes mint-and-lock one statement")
+        #expect(body.contains("set search_path = public"))
+        #expect(!body.contains("security definer"),
+                "SECURITY INVOKER — the FORCE-RLS policy binds even a misuse to the caller's own row")
+        #expect(sql.contains("revoke execute on function next_owner_seq(uuid) from public, anon, authenticated, service_role;"))
+        #expect(sql.contains("grant execute on function next_owner_seq(uuid) to variorum_definer;"))
+        #expect(!sql.contains("next_owner_seq(uuid) to authenticated")
+                    && !sql.contains("next_owner_seq(uuid) to service_role")
+                    && !sql.contains("next_owner_seq(uuid) to anon"),
+                "the helper is reachable by NO API role")
+    }
+
+    /// THE STRUCTURAL CLOSURE (the phase's WHY): every mint site draws
+    /// from the OWNER's counter — the stamp trigger (M1, `new.owner_id`),
+    /// the purge door's granted ledger seq (M2, `caller`) and the
+    /// rotation-begin seq (M3, `caller`) — and the GLOBAL sequence is
+    /// DROPPED (F-S4: fail-loud — a future `nextval` of it ERRORS instead
+    /// of silently reopening the cross-tenant disclosure). No `nextval`
+    /// survives anywhere in 12.
+    @Test func everyMintSiteDrawsFromTheOwnersCounterAndTheGlobalSequenceRetires() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let trigger = try Self.finalBody(of: "stamp_server_seq")
+        #expect(trigger.contains("new.server_seq := next_owner_seq(new.owner_id);"),
+                "M1: every data row's seq draws from its OWNER's counter")
+        #expect(trigger.contains("new.server_written_at := clock_timestamp();"),
+                "the A5 substrate stays — the horizon is untouched by this event")
+        #expect(try Self.finalBody(of: "sync_purge_execute")
+                    .contains("granted_seq := next_owner_seq(caller);"),
+                "M2: the granted ledger seq is the caller's own")
+        #expect(try Self.finalBody(of: "key_vault_update")
+                    .contains("next_seq := next_owner_seq(caller);"),
+                "M3: the rotation seq is the caller's own — the seq rule and the completion guard compare it against the caller's data rows")
+        #expect(!sql.contains("nextval"),
+                "no global mint survives anywhere in 12")
+        #expect(sql.contains("drop sequence if exists sync_server_seq;"),
+                "the global sequence retires fail-loud (F-S4)")
+    }
+
+    /// THE FLOOR (F-S1 — wider than data-max, deliberately): each owner's
+    /// counter initializes to the GREATEST seq any of their bookkeeping
+    /// already compares against — EVERY registry table's rows, their
+    /// device cursors (a purge can leave data-max below a served cursor —
+    /// a narrower floor would mint seqs the pulls never serve), their
+    /// ledger entries, and a standing rotation seq. No cursor resets, by
+    /// construction; the window's carry-over proof is this floor live.
+    @Test func theFloorCoversEveryDataTableAndTheThreeExtraSources() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let open = try #require(sql.range(of: "select owner_id, max(server_seq) from ("))
+        let close = try #require(sql.range(of: ") seq_sources", range: open.upperBound..<sql.endIndex))
+        let floor = String(sql[open.upperBound..<close.lowerBound])
+        for table in SyncSchema.tables {
+            #expect(floor.contains("select owner_id, server_seq from \(table.name)"),
+                    "the floor must read \(table.name)'s seqs")
+        }
+        #expect(floor.contains("select owner_id, last_seq from device_cursor"),
+                "the floor must cover the device cursors (F-S1's traced corner)")
+        #expect(floor.contains("select owner_id, purged_seq from purged_row"),
+                "the floor must cover the purge ledger")
+        #expect(floor.contains("select user_id, rotation_started_seq from key_vault where rotation_started_seq is not null"),
+                "the floor must cover a standing rotation seq")
+        // Exactly the registry's tables + the three extra sources — one
+        // SELECT branch each, nothing extra.
+        let branchCount = floor.components(separatedBy: "select ").count - 1
+        #expect(branchCount == SyncSchema.tables.count + 3,
+                "the floor has \(branchCount) branches; expected \(SyncSchema.tables.count) tables + 3 extra sources")
+        #expect(sql.contains("group by owner_id"))
+        #expect(sql.contains("set last_seq = greatest(sync_owner_seq.last_seq, excluded.last_seq)"),
+                "a re-run can only raise a floor, never lower one")
+    }
+
+    /// THE FOLD-IN's text pin (the plan's named deliverable — "verified on
+    /// the deployed body, never assumed from the overlay's state"): the
+    /// CANONICAL 12 body carries the rotation completion guard — the
+    /// refusal marker, the per-table count, the guard INSIDE the clearing
+    /// arm before the seq clears — and its ciphertext map EQUALS the
+    /// client registry's encrypted columns exactly (the overlay pin's
+    /// check, applied to 12).
+    @Test func theCompletionGuardLivesInTheCanonicalTwelveBody() throws {
+        let body = try Self.finalBody(of: "key_vault_update")
+        #expect(body.contains(SyncServerRefusalMarker.rotationRowsRemain),
+                "completion is 'no row of mine below it' — in the CANONICAL body now")
+        #expect(body.contains("if vault_previous is not null then")
+                    && body.contains("for rows_below_tbl in select jsonb_object_keys(ciphertext_columns) loop")
+                    && body.contains("select string_agg(format('t.%I is not null', c.col), ' or ')")
+                    && body.contains("'select count(*) from %I t where t.owner_id = $1 and t.server_seq < $2 and (%s)'")
+                    && body.contains("into rows_below using caller, vault_seq;")
+                    && body.contains("if rows_below > 0 then"),
+                "the guard counts the CALLER's ciphertext-carrying rows below the rotation seq")
+        let arm = try #require(body.range(of: "if incoming_previous is null then"))
+        let guardSite = try #require(body.range(of: SyncServerRefusalMarker.rotationRowsRemain))
+        let clearSite = try #require(body.range(of: "next_seq := null;"))
+        #expect(arm.lowerBound < guardSite.lowerBound && guardSite.lowerBound < clearSite.lowerBound,
+                "the guard runs in the clearing arm before the seq is nulled")
+        // The map is the registry's, byte-exact (a future encrypted column
+        // fails HERE, in the canonical file — the overlay's twin pin keeps
+        // the historical artifact honest independently).
+        let open = try #require(body.range(of: "ciphertext_columns constant jsonb := '"))
+        let close = try #require(body.range(of: "'::jsonb;", range: open.upperBound..<body.endIndex))
+        let json = String(body[open.upperBound..<close.lowerBound])
+        let decoded = try #require(
+            try JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: [String]])
+        let listed = decoded.mapValues { Set($0) }
+        let registry = Dictionary(
+            uniqueKeysWithValues: SyncSchema.tablesCarryingCiphertext.map { ($0.name, $0.encryptedColumns) })
+        #expect(listed == registry,
+                "12's ciphertext map drifted from the registry: \(listed) vs \(registry)")
+        // And the superseded overlay says so in its header.
+        let overlayHeader = try Self.sqlFile(Self.ladderOverlayFile)
+        #expect(overlayHeader.contains("SUPERSEDED BY `12_phase13y_tenant_seq.sql`"),
+                "the overlay must carry the superseded-by-12 header note")
+    }
+
+    /// THE FOLD-IN's exactness: 12's `key_vault_update` is the OVERLAY's
+    /// deployed body (11 + the guard) with EXACTLY the M3 mint swapped —
+    /// line for line, nothing else moved. The strongest form of "the
+    /// guard's body folded in, never re-shaped".
+    @Test func theCompletionGuardIsTheOverlaysBodyWithExactlyTheMintSwapped() throws {
+        let overlay = Self.strippingComments(try Self.sqlFile(Self.ladderOverlayFile))
+        let twelve = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let overlayBody = Self.codeLines(try #require(Self.lastBody(of: "key_vault_update", in: overlay)))
+        let twelveBody = Self.codeLines(try #require(Self.lastBody(of: "key_vault_update", in: twelve)))
+        let swapped = overlayBody.map {
+            $0 == "next_seq := nextval('sync_server_seq');"
+                ? "next_seq := next_owner_seq(caller);" : $0
+        }
+        #expect(swapped == twelveBody,
+                "12's key_vault_update is the overlay's body with exactly the mint swapped")
+        #expect(overlayBody != swapped, "the swap is real — the pin isn't vacuous")
+    }
+
+    /// The purge door's fold: 12's `sync_purge_execute` is 11's body with
+    /// EXACTLY the M2 mint swapped.
+    @Test func thePurgeExecutionDoorIsElevensBodyWithExactlyTheMintSwapped() throws {
+        let eleven = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
+        let twelve = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let body11 = Self.codeLines(try #require(Self.lastBody(of: "sync_purge_execute", in: eleven)))
+        let body12 = Self.codeLines(try #require(Self.lastBody(of: "sync_purge_execute", in: twelve)))
+        let swapped = body11.map {
+            $0 == "granted_seq := nextval('sync_server_seq');"
+                ? "granted_seq := next_owner_seq(caller);" : $0
+        }
+        #expect(swapped == body12,
+                "12's sync_purge_execute is 11's body with exactly the mint swapped")
+        #expect(body11 != swapped, "the swap is real — the pin isn't vacuous")
+    }
+
+    /// The whole account goes (the 13j letter, extended): `account_purge`
+    /// removes the caller's counter row beside the purge machinery's; and
+    /// `account_data_truncate` deliberately does NOT touch the counter —
+    /// the owner's sequence stays monotonic across a re-key (cursors stay
+    /// valid; SyncSpec §9 per-owner). 12's purge body is 10's with exactly
+    /// the one added line.
+    @Test func theAccountPurgeTakesTheCounterRowAndTheTruncateNeverDoes() throws {
+        let purge = try Self.finalBody(of: "account_purge")
+        #expect(purge.contains("delete from sync_owner_seq where owner_id = caller;"),
+                "the account's counter row goes with the account")
+        let truncate = try Self.finalBody(of: "account_data_truncate")
+        #expect(!truncate.contains("sync_owner_seq"),
+                "a re-key truncate must not touch the counter — monotonic per owner, cursors stay valid")
+        // Exactness: 12's purge body is 10's plus exactly the one line.
+        let ten = Self.strippingComments(try Self.sqlFile("10_phase13j_purge.sql"))
+        let twelve = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let body10 = Self.codeLines(try #require(Self.lastBody(of: "account_purge", in: ten)))
+        let body12 = Self.codeLines(try #require(Self.lastBody(of: "account_purge", in: twelve)))
+        let withoutTheLine = body12.filter { $0 != "delete from sync_owner_seq where owner_id = caller;" }
+        #expect(withoutTheLine == body10,
+                "12's account_purge is 10's body plus exactly the counter-row delete")
+        #expect(withoutTheLine != body12, "the added line is real — the pin isn't vacuous")
+    }
+
+    /// The 13j naming rule, applied to 12: no parameter shadows a column
+    /// the function writes — `for_owner` against the counter's columns,
+    /// the reordered pull's parameters against `device_cursor`'s.
+    @Test func noTenantSeqParameterShadowsAColumnItWrites() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let counterColumns: Set<String> = ["owner_id", "last_seq"]
+        #expect(sql.contains("create or replace function next_owner_seq(for_owner uuid)"))
+        #expect(!counterColumns.contains("for_owner"),
+                "for_owner shadows a sync_owner_seq column")
+        let cursorColumns: Set<String> = ["owner_id", "device_id", "last_seq", "seen_at"]
+        for param in ["since_seq", "active_key_id", "key_proof", "max_rows", "for_device"] {
+            #expect(!cursorColumns.contains(param),
+                    "sync_pull's \(param) shadows a device_cursor column it writes")
         }
     }
 }

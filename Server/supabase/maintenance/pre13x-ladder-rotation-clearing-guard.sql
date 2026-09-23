@@ -1,3 +1,14 @@
+-- ⚠️ SUPERSEDED BY `12_phase13y_tenant_seq.sql` (Phase 13y UNIT A, 2026-09-22 — RUN B S1/Q3's
+-- carry executed): the completion guard's body is FOLDED INTO the canonical 12 file, so this
+-- overlay stops being severable — a redeploy of 11 no longer silently reverts the guard,
+-- because 12 (deployed after) re-lands it, and the deploy checklist's §10 standing caveat
+-- retires with it. NEVER RUN THIS FILE AFTER 12 DEPLOYS: its body predates the per-tenant
+-- mint (it would regress `rotation_started_seq` to a `nextval` of the DROPPED global
+-- sequence — a loud failure, not a silent one), and its own re-run guard already refuses
+-- once the deployed body carries VARIORUM_ROTATION_ROWS_REMAIN, which 12's does. Kept
+-- byte-intact below as the deployed-history record (the marker-8 era's live repair) and as
+-- the equality pin's subject (`AuthRLSDDLTests.theClearingGuardOverlayIsElevensBodyPlusOneClause`).
+--
 -- pre-13x — THE LADDER's ROUND-1 REPAIR (2026-09-06, fix session F1; the cold reviewer's BLOCKER-1, adopted whole by
 -- the orchestrator): THE ROTATION'S COMPLETION GUARD on `key_vault_update`'s clearing arm.
 --

@@ -173,6 +173,11 @@ struct SerializerCompletenessTests {
         // read/write server-side, never payload tables (the client learns
         // of them only through sync_horizon / sync_purge_ledger).
         "device_cursor", "purged_row",
+        // Phase 13y (12_phase13y_tenant_seq.sql): the per-owner sequence
+        // counter — pure server machinery (the trigger and the definer
+        // bodies are its only writers); the client sees only the seqs it
+        // grants, never the table.
+        "sync_owner_seq",
     ]
 
     @Test func mirrorDDLCoversEverySyncedColumn() throws {
