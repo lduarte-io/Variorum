@@ -552,6 +552,13 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
   real-server integration pass (`basicOfflineEditsConvergeOverTheRealServer`, part of the
   baseline). The +15 over the 1679/179 baseline is exact: the 12 new AuthRLSDDL 12-block
   pins + the 3 new MultiTenant probes. Suites unchanged at 179.
+- **FULL CORE SUITE AT THE CLOSER'S UNIT CLOSE (the horizon piece landed): 1698 tests /
+  179 suites — ALL PASSED, ZERO failures** (2026-09-22, the closer continuation; log in its
+  session scratchpad), exactly the same ONE env-gated skip. The +4 over the predecessor's
+  1694 is exact: the 1 new AuthRLSDDL pin (`theServedHorizonIsAConstantFunctionOnThe
+  VersionRPCsShape`, carrying the cross-pin) + the 3 new CorpusRotationTests pins (the
+  derivation · the spy-counted production road · the nil-default end-to-end). Suites
+  unchanged at 179. **UNIT A IS CLOSED**; the orchestrator verifies, then the ladder.
 
 ### WHAT REMAINS OPEN IN UNIT A (nothing — the unit is CLOSED; the ladder flags below stay recorded)
 
