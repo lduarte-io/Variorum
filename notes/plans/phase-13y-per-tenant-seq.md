@@ -1073,9 +1073,22 @@ closes them with build-for-testing on both targets at unit close.
     and core `KeyProof.hash(master:)`'s doc dropped its now-false "what a rotation's
     vault update installs" clause (the ONE core file touched — comment only; full
     suite re-run 1719/180 ALL PASSED, unchanged).
-  - **Verification within the fence:** all fourteen edited files pass a syntax-only
-    `swiftc -parse` sweep; typecheck is the orchestrator's build-for-testing (no
-    Mac-suite runs on this side). **Runtime exposure, stated honestly:** the app
+  - **Round 2 (the orchestrator's second build: iOS CLEAN, Mac ONE error):** a
+    third error SHAPE the String sweep could not catch — a DIRECT RPC call handing
+    the MATERIAL where the per-request `SyncKeyProof` stands
+    (`ConnectLibraryTests:201`, the owner-guard probe pushing straight at
+    `y.mirror`). Fixed in the core fake's `mintProof` idiom: `EmulatedMirror` gains
+    `mintProof(rpc:material:activeKeyID:)` (enroll-if-unenrolled + one nonce + the
+    rpc-bound proof — the gate runs before the owner check, so the probe must pass
+    it to REACH the refusal under test; enrolling Y's material there is what Y's
+    first engine round would do anyway). The CLASS swept as directed: every
+    `keyProof:` argument expression across BOTH app test targets audited — the
+    other eleven all hand the material to material-taking seams (`updateVault`,
+    `SyncEncryptionKeys`) or are the mirror's own gate forwards; this was the
+    class's only member.
+  - **Verification within the fence:** all fourteen (+2 in round 2) edited files
+    pass a syntax-only `swiftc -parse` sweep; typecheck is the orchestrator's
+    build-for-testing (no Mac-suite runs on this side). **Runtime exposure, stated honestly:** the app
     suites' RUNTIME behavior under the challenge dance (the emulation roads above)
     is untested until the next full Mac-suite run — the doubles were built to
     preserve each test's old outcome through the new protocol, but that claim has

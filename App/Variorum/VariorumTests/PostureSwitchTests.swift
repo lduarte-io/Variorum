@@ -269,6 +269,20 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
         enrolledUnderHash = vaultHash
     }
 
+    /// 13y UNIT B — the DIRECT-CALL test helper (the core fake's
+    /// `mintProof` idiom): enroll `material` when no secret is enrolled,
+    /// mint one nonce, bind the proof to `rpc`. Direct RPC calls in tests
+    /// mint through this; engine calls ride the signer as in production.
+    func mintProof(rpc: String, material: KeyProofMaterial, activeKeyID: String) async throws -> SyncKeyProof {
+        if macSecret == nil {
+            try await enrollKeyProof(
+                legacyProof: material.legacyWireToken, macKey: material.macKeyWire,
+                activeKeyID: activeKeyID)
+        }
+        let nonce = try await fetchChallenges(1)[0]
+        return material.proof(challenge: nonce, rpc: rpc)
+    }
+
     private func gate(activeKeyID: String, keyProof: SyncKeyProof, rpc: String) async throws {
         guard let vault, let fetched = try await vault.fetchVault() else {
             throw SyncError.encryptionKeysReplaced

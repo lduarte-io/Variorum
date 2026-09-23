@@ -196,9 +196,17 @@ struct ConnectLibraryTests {
                 try SyncRow.fetch(d, table: SyncSchema.table(named: "container")!, rowID: titlesUnderX.keys.sorted()[0])
             }
             let yKeysForProbe = FixedKeys(keys: yElsewhere.syncKeys, identity: "probe")
+            // 13y UNIT B: a direct RPC call mints its per-request proof
+            // through the mirror's `mintProof` road (the gate runs before
+            // the owner check, so the probe must pass it to REACH the
+            // refusal under test; enrolling Y's own material here is what
+            // Y's first engine round would do anyway).
+            let probeProof = try await y.mirror.mintProof(
+                rpc: "sync_push", material: try yKeysForProbe.currentKeys().keyProof,
+                activeKeyID: yElsewhere.corpusKeyID)
             await #expect(throws: EmulatedMirror.OwnerRefusal.self, "Y's mirror refuses a row stamped X") {
                 _ = try await y.mirror.push([try #require(stray)], activeKeyID: yElsewhere.corpusKeyID,
-                                            keyProof: try yKeysForProbe.currentKeys().keyProof)
+                                            keyProof: probeProof)
             }
 
             // A wrong word connects nothing.
