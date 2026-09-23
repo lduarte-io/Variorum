@@ -220,6 +220,17 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// but stay invisible until `commitHeldPushes()` — one in-flight
     /// transaction later transactions commit around.
     private var holdingNextPush = false
+    /// 13y (12's `sync_visibility_horizon_ms()` twin — the R-13y-4 fork's
+    /// Shape 1): the SERVED horizon, in milliseconds — what the rotation
+    /// walk's production road fetches and derives its wait from. Defaults
+    /// to the deployed constant (2000); SETTABLE (`setServedVisibility
+    /// HorizonMillis`) so the derivation pin can observe wait = served +
+    /// margin for an arbitrary value. Deliberately independent of
+    /// `visibilityHorizon` above: the fake's ENFORCED window runs on the
+    /// logical tick clock (tests advance it by hand), while the served
+    /// value is a wire fact — the mirror's one-function coupling is the
+    /// DDL pins' to prove, not this emulation's.
+    private var servedVisibilityHorizonMillis: Int64 = 2000
 
     /// The mirror's deployed lockstep marker (SyncSpec §12). Defaults to
     /// the client's current version — a fake models an in-lockstep server
@@ -241,6 +252,17 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
 
     func setDeployedLockstepVersion(_ version: Int) {
         deployedLockstepVersion = version
+    }
+
+    /// 13y: set the SERVED horizon (see `servedVisibilityHorizonMillis`).
+    func setServedVisibilityHorizonMillis(_ millis: Int64) {
+        servedVisibilityHorizonMillis = millis
+    }
+
+    /// 13y (`SyncRotationTransport`): the served A5 horizon — the fake
+    /// twin of `sync_visibility_horizon_ms()`.
+    func visibilityHorizonMillis() async throws -> Int64 {
+        servedVisibilityHorizonMillis
     }
 
     func advanceClock(by ticks: Int64) {
@@ -846,6 +868,10 @@ struct FakeSyncServerConnection: SyncTransport, SyncPurgeTransport, SyncRotation
 
     func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] {
         try await server.reencrypt(rows, activeKeyID: activeKeyID, keyProof: keyProof, as: userID)
+    }
+
+    func visibilityHorizonMillis() async throws -> Int64 {
+        try await server.visibilityHorizonMillis()
     }
 }
 

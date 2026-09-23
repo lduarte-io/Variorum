@@ -193,4 +193,18 @@ public protocol SyncRotationTransport: Sendable {
     /// only; the gate (fence + proof) and the entitlement gate ride it
     /// exactly as a push's do.
     func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome]
+
+    /// The server's A5 visibility horizon, in milliseconds — the value
+    /// `sync_visibility_horizon_ms()` serves (Phase 13y, the R-13y-4 fork's
+    /// Shape 1: the SAME function derives `sync_pull`'s filter, so the
+    /// served value and the enforced value cannot drift). The rotation
+    /// walk's production wait DERIVES from it
+    /// (`CorpusRotation.horizonWait(forServedMillis:)` — served + margin);
+    /// nothing client-side hardcodes the horizon any more. On this
+    /// protocol rather than `SyncTransport` for the same 13j reason the
+    /// protocol exists: the walk is the only consumer, so the dozens of
+    /// wrapper transports never carry a dead conformance. REQUIRED, no
+    /// default — wrappers forward, fakes serve (the schemaVersion
+    /// doctrine).
+    func visibilityHorizonMillis() async throws -> Int64
 }

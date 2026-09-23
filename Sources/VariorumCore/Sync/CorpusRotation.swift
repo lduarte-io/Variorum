@@ -317,30 +317,61 @@ public struct CorpusRotation: Sendable {
     public var progress: (@Sendable (Progress) -> Void)?
     /// pre-13x ladder round 1, F1 (BLOCKER-1): THE WAIT PAST THE A5
     /// VISIBILITY HORIZON — run ONCE, at the walk's first empty window,
-    /// before the pull that decides the walk is done. Production sleeps
-    /// `Self.productionHorizonWait` (the mirror hides a row for 2 s after
-    /// its write; 2.5 s covers it with margin); the pins inject the fake
-    /// server's clock (`advanceClock`) — or nothing, to prove the server's
-    /// guard alone. Injectable, never a hidden `Task.sleep` inside the
-    /// loop, so the walk's timing is a fact a test can state.
+    /// before the pull that decides the walk is done. Production runs
+    /// `Self.productionHorizonWait(transport:sleep:)` — it FETCHES the
+    /// SERVED horizon (`visibilityHorizonMillis()` — the same server
+    /// function that derives `sync_pull`'s filter, Phase 13y Shape 1) and
+    /// sleeps `horizonWait(forServedMillis:)`'s derived duration; the
+    /// pins inject the fake server's clock (`advanceClock`) — or nothing,
+    /// to prove the server's guard alone. Injectable, never a hidden
+    /// `Task.sleep` inside the loop, so the walk's timing is a fact a
+    /// test can state.
     public var horizonWait: @Sendable () async throws -> Void
 
-    /// The production wait: the mirror's `interval '2 seconds'` plus margin.
-    public static let productionHorizonWait: Duration = .milliseconds(2500)
+    /// Phase 13y (the R-13y-4 fork's ruling, Shape 1): the margin the
+    /// production wait adds over the SERVED horizon — DERIVED, not
+    /// invented: today's arithmetic is the retired hardcoded wait minus
+    /// the mirror's constant (2500 − 2000 ms), kept as the slack that
+    /// covered the horizon before the served read existed. A future
+    /// horizon change moves the wait for free (served + this margin);
+    /// only a deliberate re-derivation moves the margin.
+    public static let horizonWaitMargin: Duration = .milliseconds(500)
+
+    /// THE ONE DERIVATION (13y Shape 1, pinned): the production wait for
+    /// a served horizon — served + margin. Nothing client-side hardcodes
+    /// the old 2500 ms any more; this function is the only road from the
+    /// server's answer to a wait.
+    public static func horizonWait(forServedMillis served: Int64) -> Duration {
+        .milliseconds(served) + horizonWaitMargin
+    }
+
+    /// THE PRODUCTION ROAD (13y Shape 1): fetch the served horizon from
+    /// the transport, derive the wait, sleep it. `sleep` is the one
+    /// injection point the duration pin observes; production passes the
+    /// real `Task.sleep`. The init's nil `horizonWait` resolves to this.
+    public static func productionHorizonWait(
+        transport: any SyncRotationTransport,
+        sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
+    ) -> @Sendable () async throws -> Void {
+        {
+            let served = try await transport.visibilityHorizonMillis()
+            try await sleep(horizonWait(forServedMillis: served))
+        }
+    }
 
     public init(
         transport: any SyncTransport & SyncRotationTransport,
         batchSize: Int = 200, maxPasses: Int = 8,
         progress: (@Sendable (Progress) -> Void)? = nil,
-        horizonWait: @escaping @Sendable () async throws -> Void = {
-            try await Task.sleep(for: CorpusRotation.productionHorizonWait)
-        }
+        horizonWait: (@Sendable () async throws -> Void)? = nil
     ) {
         self.transport = transport
         self.batchSize = batchSize
         self.maxPasses = maxPasses
         self.progress = progress
-        self.horizonWait = horizonWait
+        // nil = the production road (13y): the served horizon + the
+        // derived margin, through the real sleep.
+        self.horizonWait = horizonWait ?? Self.productionHorizonWait(transport: transport)
     }
 
     // MARK: - BEGIN (§4 step 2) — the mint, then the write

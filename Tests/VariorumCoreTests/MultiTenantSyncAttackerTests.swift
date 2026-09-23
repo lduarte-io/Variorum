@@ -629,16 +629,22 @@ extension MultiTenantSyncTests {
         // for the schema-version probe — both are the transport's one road.
         var clientRPCs = try names(#"(?:rpc|send)\(\s*"([a-z_]+)""#, in: transport)
         clientRPCs.formUnion(try names(#"rest/v1/rpc/([a-z_]+)"#, in: vaultClient + lifecycle + transport))
+        // 13y (the R-13y-4 fork's Shape 1): `sync_visibility_horizon_ms`
+        // joined the wire — the served A5 horizon the rotation walk's
+        // production wait derives from. Zero parameters, so the
+        // forbidden-word scan below covers it like every other road.
         #expect(clientRPCs == [
             "sync_push", "sync_pull", "sync_schema_version",
             "sync_horizon", "sync_purge_ledger", "sync_purge_execute", "sync_reencrypt",
             "key_vault_update", "account_data_truncate", "account_purge",
+            "sync_visibility_horizon_ms",
         ], "the client's RPC set, by name — \(clientRPCs.sorted())")
 
         // THE TRANSPORT PROTOCOLS' requirements, exactly.
         let protocols = try source("Sources/VariorumCore/Sync/SyncTransport.swift")
         #expect(try names(#"\n\s*func ([a-zA-Z]+)\("#, in: protocols)
-                == ["push", "pull", "schemaVersion", "syncHorizon", "purgeLedger", "executePurge", "reencrypt"])
+                == ["push", "pull", "schemaVersion", "syncHorizon", "purgeLedger", "executePurge", "reencrypt",
+                    "visibilityHorizonMillis"])
         let lifecycleProtocol = try #require(lifecycle.components(separatedBy: "public protocol AccountLifecycleProviding").dropFirst().first?
             .components(separatedBy: "\n}").first)
         #expect(try names(#"func ([a-zA-Z]+)\("#, in: lifecycleProtocol)

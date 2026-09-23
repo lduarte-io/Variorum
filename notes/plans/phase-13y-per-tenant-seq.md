@@ -459,8 +459,21 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
     pin `theServedHorizonIsAConstantFunctionOnTheVersionRPCsShape` (shape · posture ·
     grants · ownership · the 2000 constant — a new-mechanism pin, green by design).
     **AuthRLSDDLTests 69/69 green (+1 over the unit's 68) · SerializerCompleteness 6/6.**
-  - **CLIENT HALF + PIN (d) + THE FAKE: PENDING (the follow-up commit flips this line)** —
-    the ruled shape, restated for the record:
+  - **CLIENT HALF + PIN (d) + THE FAKE: DONE (this commit)** — as ruled, one deviation-free
+    piece; plus ONE expected pin extension the road itself announced:
+    `noOwnershipChangeInstructionExistsOnTheWire` (arm 9's exact wire allowlists) went RED
+    on the two new names — the pin doing precisely what its comment promises for a new
+    wire road — and its client-RPC and protocol-requirement sets extended by exactly
+    `sync_visibility_horizon_ms` / `visibilityHorizonMillis` (zero parameters, so the
+    blanket forbidden-word scan covers it unrelaxed; the substance is untouched). The
+    Mac/mobile emulators (`EmulatedMirror` · `InertTransport`) gained the required
+    conformance (constant 2000; the inert one counts it as a touch), and the app's
+    `PostureSwitch.Leaves.horizonWait` default became nil — the driver's production road —
+    retiring the app-side hardcoded 2.5 s with it. Suites at this commit:
+    **CorpusRotationTests 21/21 (+3) · AuthRLSDDLTests 69/69 (the cross-pin extending the
+    helper pin: the extracted deployed constant through the client derivation = the
+    retired 2500) · MultiTenantSyncAttackerTests 3/3 · KeyProofGateTests 11/11 ·
+    VisibilitySkewTests 2/2.** The details of the ruled shape, as built:
     `SyncRotationTransport.visibilityHorizonMillis()` (REQUIRED, no default — the
     doctrine); `SupabaseTransport` answers via the RPC (the `sync_horizon` bare-bigint
     parse idiom); `CorpusRotation.horizonWait(forServedMillis:)` the ONE pure derivation
@@ -540,14 +553,16 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
   baseline). The +15 over the 1679/179 baseline is exact: the 12 new AuthRLSDDL 12-block
   pins + the 3 new MultiTenant probes. Suites unchanged at 179.
 
-### WHAT REMAINS OPEN IN UNIT A (the fork, and nothing else)
+### WHAT REMAINS OPEN IN UNIT A (nothing — the unit is CLOSED; the ladder flags below stay recorded)
 
-1. **The horizon-exposure VEHICLE** (Step 1's last piece + Step 2 pin (d)) — proposed above
-   (three shapes, Shape 1 recommended), awaiting the orchestrator's R-13y-4 ruling; the 12
-   artifact, the sweep, `AuthRLSDDLTests` (incl. re-pointing `theVisibilityHorizonSurvives
-   EveryRework` at the ruled shape), `SyncRotationTransport`/`SupabaseTransport`/
-   `FakeSyncServer` and `CorpusRotation.horizonWait` all take the ruled shape in one
-   follow-up piece. Everything else in Steps 0–3 is DONE and green.
+1. **The horizon-exposure VEHICLE — CLOSED (the closer continuation, 2026-09-22).** The
+   orchestrator's ruling landed (Shape 1, the fork section below) and the piece is BUILT
+   whole per the LIVE STATUS's "THE HORIZON VEHICLE" bullet: the 12 artifact + the sweep +
+   `AuthRLSDDLTests` (incl. `theVisibilityHorizonSurvivesEveryRework` re-pointed at the
+   derivation), `SyncRotationTransport.visibilityHorizonMillis()` /
+   `SupabaseTransport` / `FakeSyncServer`, and `CorpusRotation.horizonWait(forServedMillis:)`
+   with the production road replacing the retired hardcoded 2500. Pin (d) closed (the
+   three CorpusRotationTests pins). Everything in Steps 0–3 is DONE and green.
 2. **Flagged for the ladder, recorded (not defects):** F-S4's drop-the-global-sequence call
    (fail-loud closure — the orchestrator may keep or strike; one `drop sequence` line);
    the `sync_tenant_seq` rename note (Step 2's block above); and the F-S3 observation that

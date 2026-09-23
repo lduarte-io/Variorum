@@ -1219,6 +1219,9 @@ private actor InertTransport: SyncTransport, SyncRotationTransport {
     }
     func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
     func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] { touched += 1; return [] }
+    // 13y (`SyncRotationTransport`): the served horizon — counted as a
+    // touch like every other door of this inert transport.
+    func visibilityHorizonMillis() async throws -> Int64 { touched += 1; return 2000 }
 }
 
 /// The sync record's custody leaves, recorded — the Mac suite's

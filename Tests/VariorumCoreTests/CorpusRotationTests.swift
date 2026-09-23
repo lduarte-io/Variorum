@@ -605,6 +605,82 @@ struct CorpusRotationTests {
         #expect(await world.server.ciphertextRowsBelow(rotationSeq) == 0)
     }
 
+    // MARK: - Phase 13y, the served horizon (the R-13y-4 fork's ruling,
+    // Shape 1 — UNIT A's last piece; pin (d)): the mirror SERVES its A5
+    // horizon (`sync_visibility_horizon_ms()` — the SAME function derives
+    // `sync_pull`'s filter, pinned in AuthRLSDDLTests), and the walk's
+    // production wait DERIVES from it. NEW-MECHANISM pins, green by
+    // design (no defect is being fixed, so no red-on-old is owed); the
+    // non-vacuous arm is the DDL side's ban on the inline literal.
+
+    /// THE ONE DERIVATION: served + margin, with the margin STATED AS
+    /// DERIVED — the retired hardcoded wait minus the deployed constant
+    /// (2500 − 2000 ms). The deployed constant reproduces exactly the
+    /// wait production used to hardcode, and a moved horizon moves the
+    /// wait for free.
+    @Test func theProductionWaitDerivesFromTheServedHorizonPlusTheMargin() {
+        #expect(CorpusRotation.horizonWaitMargin == .milliseconds(2500) - .milliseconds(2000),
+                "the margin is the subtraction, not an invention")
+        #expect(CorpusRotation.horizonWait(forServedMillis: 2000) == .milliseconds(2500),
+                "the deployed constant derives the exact wait the retired hardcode used to state")
+        #expect(CorpusRotation.horizonWait(forServedMillis: 7000) == .milliseconds(7500),
+                "served + margin, one function — a horizon change re-derives the wait for free")
+    }
+
+    /// THE PRODUCTION ROAD, OBSERVED (the spy-counted pin): the walk's
+    /// wait FETCHES the served value from the transport — once, at the
+    /// first empty window — and sleeps EXACTLY served + margin. The road
+    /// under observation is `productionHorizonWait(transport:sleep:)`,
+    /// the same function the nil default resolves to; only the sleeper is
+    /// injected, so the duration is observed without a real 7.5 s sleep.
+    @Test func theWalkProductionRoadFetchesTheServedHorizonOnceAndWaitsServedPlusMargin() async throws {
+        let world = try await makeWorld()
+        let a = try client("A", prefix: "AA", world: world, material: world.old)
+        try a.with { ops, _ in
+            let post = try ops.createPost(title: "before the rotation", profile: .blog)
+            _ = try ops.newBlock(in: post.id, text: "Old-key prose.", at: .end)
+        }
+        _ = try await a.push()
+        let begun = try await CorpusRotation.begin(
+            client: world.vault.client, current: world.old, secrets: try secrets(), appleHeldCopy: nil)
+        await world.server.setServedVisibilityHorizonMillis(7000)
+        let spy = HorizonSpyTransport(server: world.server)
+        let slept = LockIsolated<[Duration]>([])
+        let driver = CorpusRotation(
+            transport: spy, batchSize: 100,
+            horizonWait: CorpusRotation.productionHorizonWait(
+                transport: spy, sleep: { duration in slept.withValue { $0.append(duration) } }))
+        let report = try await driver.reencryptRemainder(material: begun.material)
+        #expect(report.replaced >= 3 && report.skipped == 0, "the walk completed over the spy")
+        #expect(await spy.horizonFetches == 1,
+                "the production road fetches the SERVED value — once, at the first empty window")
+        #expect(slept.value == [.milliseconds(7500)],
+                "the observed wait is served + margin exactly — the fake's settable value drove it")
+    }
+
+    /// The init's nil default IS the production road, end to end: a driver
+    /// built with no `horizonWait` fetches the served value through the
+    /// REAL sleep road (the fake serves 0 here, so the real sleep is the
+    /// margin alone — half a second, not a hardcoded 2.5).
+    @Test func aDriverBuiltWithoutAWaitTakesTheProductionRoad() async throws {
+        let world = try await makeWorld()
+        let a = try client("A", prefix: "AA", world: world, material: world.old)
+        try a.with { ops, _ in
+            let post = try ops.createPost(title: "before the rotation", profile: .blog)
+            _ = try ops.newBlock(in: post.id, text: "Old-key prose.", at: .end)
+        }
+        _ = try await a.push()
+        let begun = try await CorpusRotation.begin(
+            client: world.vault.client, current: world.old, secrets: try secrets(), appleHeldCopy: nil)
+        await world.server.setServedVisibilityHorizonMillis(0)
+        let spy = HorizonSpyTransport(server: world.server)
+        let driver = CorpusRotation(transport: spy, batchSize: 100)
+        let report = try await driver.reencryptRemainder(material: begun.material)
+        #expect(report.replaced >= 3, "the walk completed on the default road")
+        #expect(await spy.horizonFetches == 1,
+                "nil horizonWait resolves to the production road — the fetch proves the wiring end to end")
+    }
+
     /// F1 — THE SERVER's COMPLETION GUARD (the structural half; the fake
     /// server's twin of the maintenance artifact): a walk whose wait does
     /// NOT let time pass (the straggler stays hidden) leaves one
@@ -1006,6 +1082,34 @@ struct CorpusRotationTests {
     }
 }
 
+/// 13y (the served-horizon pins): a forwarding transport that COUNTS the
+/// served-horizon fetches — what the production-road pins observe.
+private actor HorizonSpyTransport: SyncTransport, SyncRotationTransport {
+    let server: FakeSyncServer
+    private(set) var horizonFetches = 0
+
+    init(server: FakeSyncServer) { self.server = server }
+
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+        try await server.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
+    }
+
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+        try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof, deviceID: deviceID)
+    }
+
+    func schemaVersion() async throws -> Int { await server.schemaVersion() }
+
+    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] {
+        try await server.reencrypt(rows, activeKeyID: activeKeyID, keyProof: keyProof)
+    }
+
+    func visibilityHorizonMillis() async throws -> Int64 {
+        horizonFetches += 1
+        return try await server.visibilityHorizonMillis()
+    }
+}
+
 /// A transport with ONE seam after the first re-encrypt batch lands: it
 /// either DIES there (the crash mid-walk the resume must survive) or lets
 /// time pass on the server (the A5 visibility window closing — what makes
@@ -1032,6 +1136,8 @@ private actor SeamTransport: SyncTransport, SyncRotationTransport {
     }
 
     func schemaVersion() async throws -> Int { await server.schemaVersion() }
+
+    func visibilityHorizonMillis() async throws -> Int64 { try await server.visibilityHorizonMillis() }
 
     func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] {
         let outcomes = try await server.reencrypt(rows, activeKeyID: activeKeyID, keyProof: keyProof)

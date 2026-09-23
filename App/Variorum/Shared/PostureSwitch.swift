@@ -269,12 +269,14 @@ final class PostureSwitchRunner {
         var deviceName: @Sendable () -> String = { DeviceName.current }
         /// pre-13x ladder round 1, F1 (BLOCKER-1): the walk's WAIT PAST THE
         /// A5 VISIBILITY HORIZON, run once at its first empty window
-        /// (`CorpusRotation.horizonWait`). Production sleeps 2.5 s; the pins
-        /// advance the emulated mirror's clock — or nothing, to prove the
-        /// server's completion guard and the runner's re-walk alone.
-        var horizonWait: @Sendable () async throws -> Void = {
-            try await Task.sleep(for: CorpusRotation.productionHorizonWait)
-        }
+        /// (`CorpusRotation.horizonWait`). nil = the driver's PRODUCTION
+        /// ROAD (Phase 13y, the R-13y-4 fork's Shape 1): fetch the SERVED
+        /// horizon from the transport (`visibilityHorizonMillis()`) and
+        /// sleep served + margin (`CorpusRotation.horizonWait(
+        /// forServedMillis:)`) — the app no longer hardcodes 2.5 s; the
+        /// pins advance the emulated mirror's clock — or nothing, to prove
+        /// the server's completion guard and the runner's re-walk alone.
+        var horizonWait: (@Sendable () async throws -> Void)? = nil
     }
 
     /// pre-13x ladder round 1, F1 (BLOCKER-1): how many times the clearing

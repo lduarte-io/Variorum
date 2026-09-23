@@ -183,6 +183,23 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotation
         return try results.map { try $0.outcome() }
     }
 
+    /// Phase 13y (12 — the R-13y-4 fork's Shape 1): the served A5 horizon.
+    /// `sync_visibility_horizon_ms()` is a zero-arg RPC returning a bare
+    /// bigint on `sync_schema_version()`'s exact shape; the walk derives
+    /// its production wait from the answer. Ordinary RPC posture (401
+    /// refresh-and-retry, non-2xx classified) — a marker mismatch refuses
+    /// the round before any walk runs, so no 404 arm is owed here.
+    public func visibilityHorizonMillis() async throws -> Int64 {
+        let data = try await rpc("sync_visibility_horizon_ms", body: EmptyRPCRequest())
+        let body = String(data: data, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard let millis = Int64(body) else {
+            throw SupabaseTransportError.malformedResult(
+                "sync_visibility_horizon_ms returned '\(body)', not an integer")
+        }
+        return millis
+    }
+
     // MARK: - HTTP plumbing
 
     private func rpc<Body: Encodable>(_ function: String, body: Body) async throws -> Data {
@@ -339,6 +356,9 @@ struct PushResult: Codable {
 }
 
 // Phase 13j — the purge RPCs' wire DTOs (10_phase13j_purge.sql).
+
+/// A zero-argument RPC's body: `{}` (13y — the served-horizon read).
+struct EmptyRPCRequest: Encodable {}
 
 struct PurgeKeyOnlyRequest: Encodable {
     let activeKeyID: String

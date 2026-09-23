@@ -273,6 +273,12 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
 
     func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
 
+    /// 13y (`SyncRotationTransport`): the served A5 horizon — the deployed
+    /// constant. The Mac worlds always inject a `horizonWait`, so the
+    /// production road never fetches here; the conformance keeps this
+    /// emulation honest to the wire.
+    func visibilityHorizonMillis() async throws -> Int64 { 2000 }
+
     func reencrypt(_ incomingRows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] {
         try await gate(activeKeyID: activeKeyID, keyProof: keyProof)
         try requireOwnerStamps(incomingRows)
