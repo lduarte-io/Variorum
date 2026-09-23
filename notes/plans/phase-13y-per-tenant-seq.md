@@ -1113,9 +1113,35 @@ closes them with build-for-testing on both targets at unit close.
     (`StoreEncryptionMigration.opens` probes, the wrongPassphrase arms) and
     SQLCipher logs the hmac failure on every such open, since the 13p
     encrypted-store era; none of this fix pass touches store-key code.
-  - **Verification within the fence:** all fourteen (+2 in round 2, +5 in round 3)
-    edited files pass a syntax-only `swiftc -parse` sweep; typecheck and execution
-    are the orchestrator's (no Mac-suite runs on this side). **Runtime exposure, stated honestly:** the app
+  - **Round 4 (round 3 REGRESSED the suite — 66/43, all one sentence, the enroll
+    road's `keyProofEnrollRequired` thrown suite-wide): THE STRUCTURAL FIX.** The
+    traced regression mechanism, confirmed at the source: round 3's hook moved the
+    row hash to hash(kp2) INSIDE `enrollKeyProof`, AFTER the mirror recorded its
+    pre-move `enrolledUnderHash` — so the signer's retry gate saw a "moved" hash,
+    the truth-follows rule cleared the secret it had just enrolled, the same
+    call's SECOND enroll refusal hit the signer's `guard !enrolled`
+    (`KeyProofChallenge.swift:62`) and surfaced; every world's first push died at
+    build/seed, hence 42-wide. The orchestrator's steer taken on the trace's
+    evidence — the SPLIT state itself was the disease (rounds 1–3 each patched
+    its seam from a different side): **the vault double's row is now THE ONE
+    ACCOUNT** — `EmulatedVault.enrolledSecret` (the row-held Vault-secret twin) +
+    `enrollRoad(kp1:kp2:)` (the HTTP enroll route's twin: once, old-hash
+    authorization, secret + post-enroll hash landing together,
+    ALREADY_ENROLLED-as-refusal that the signer swallows), and the MIRROR
+    consults and enrolls THROUGH it (`attach(vault:enrollment:)` at all three
+    world builders). RETIRED WHOLE: the mirror's local `macSecret`,
+    `enrolledUnderHash`, the truth-follows/re-adopt machinery, and round 3's
+    `setOnEnroll`/`enrollProof` hook — the gate is now the real check's own
+    shape (the secret, never a hash comparison), and a rotation's successor rule
+    replaces the shared secret at the vault write with nothing left to re-sync.
+    Pins byte-untouched; the arithmetic re-derives identically (+3/+4), the
+    stale-proof engine still refuses `keyProofRefused` (secret is kp2′, the old
+    material's HMAC mismatches), and the two-device world gates both engines
+    against the one shared row secret.
+  - **Verification within the fence:** all fourteen (+2 in round 2, +5 in round 3,
+    +3 in round 4) edited files pass a syntax-only `swiftc -parse` sweep;
+    typecheck and execution are the orchestrator's (no Mac-suite runs on this
+    side). **Runtime exposure, stated honestly:** the app
     suites' RUNTIME behavior under the challenge dance (the emulation roads above)
     is untested until the next full Mac-suite run — the doubles were built to
     preserve each test's old outcome through the new protocol, but that claim has

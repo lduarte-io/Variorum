@@ -72,9 +72,9 @@ struct ConnectLibraryTests {
                     deviceName: "test device"),
                 sessionProvider: auth,
                 load: emu.load)
-            await mirror.attach(vault: client)
-            // 13y: one account, one secret (see EmulatedVault.enrollProof).
-            await mirror.setOnEnroll { [weak emu] in emu?.enrollProof(macKeyWire: $0) }
+            // 13y round 4: one account, one enrollment state (see
+            // EmulatedVault.enrolledSecret).
+            await mirror.attach(vault: client, enrollment: emu)
         }
     }
 
