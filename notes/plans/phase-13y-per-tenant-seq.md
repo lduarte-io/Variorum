@@ -424,9 +424,9 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
 | 6 | A | Step 2 — client pins (incl. the adopt-road scenario) | **DONE (d4002bf6 + 2d74c4ab)** — pins a/b/d + adopt-road; lockstepVersion 9; horizonWait derived |
 | 7 | A | Step 3 — per-tenant harness + the disclosure-closure probe | **DONE (d4002bf6)** — the headline probe red-on-old by behavioral revert; core 1698/179 at unit close |
 | 8 | B | Step 4c memo — the key-proof challenge design (orchestrator rules; #144) | **RULED 2026-09-22 — `notes/plans/phase-13y-memo-key-proof-challenge.md` (the challenge shape §3, the numbers §4, the re-auth window §5, trades §6, edges §7); #144 logged; UNIT B builds TO it** |
-| 9 | B | Step 4 — the abuse guard (+ numbers PROVISIONAL; #144) | numbers RULED (the memo §4); the mechanism's table shape is the implementer's proposal against them |
-| 10 | B | Step 4b — the re-auth doors | open |
-| 11 | B | Step 5 — the Fragments brief | open |
+| 9 | B | Step 4 — the abuse guard (+ numbers PROVISIONAL; #144) | **DONE (ec80f92d + deb86054)** — the adjudicated one-row tumbling shape; AbuseGuardTests 8/8 |
+| 10 | B | Step 4b — the re-auth doors | **DONE (ec80f92d + deb86054)** — 10-min amr check both destructive doors; AuthRateLimit numbers stated + burst pin |
+| 11 | B | Step 5 — the Fragments brief | **DONE (61416521)** — the dated carry item, brief only |
 | 12 | — | The ladder (combined diff; cap three) | open |
 | 13 | — | Step 6 — HER WINDOW (deploy · installs · live round · carry-over proof) | open |
 | 14 | — | Closeout (SyncSpec §12 running record + I-1 amendment · master plan · handoff · #144 ratify bundle) | open |
@@ -1010,6 +1010,35 @@ adjudicated: the `SyncKeyProof` pairing and `KeyProofMaterial`'s both-or-neither
 construction are APPROVED (the memo's shape, made structural), and the app-target
 COMPILE-PENDING edits follow the UNIT A closer's exact precedent — the orchestrator
 closes them with build-for-testing on both targets at unit close.
+
+### ORCHESTRATOR VERIFICATION + UNIT B CLOSE (2026-09-23, my own hands)
+
+The six build commits verified (105691c8 → 1579fa61, all pushed); the full core suite
+re-run by the orchestrator: **1719/180 ALL PASSED**. The DDL's refusal grammar, the atomic
+consume, and the Fragments carry item spot-read. **The app seam took FOUR fix rounds after
+the unit's own close claim, each found by EXECUTION, not review** — recorded here because
+the ladder should read it plainly:
+1. (6c7b952f) three compile errors + the honest correction that the whole app-target test
+   seam had been missed (the record's original COMPILE-PENDING claim was wrong; corrected
+   in place) — the sweep that followed reworked the twinned `VaultRPCEmulation` +
+   `EmulatedMirror`/`EmulatedVault` doubles to the challenge protocol.
+2. (9f7c5ca7) one more site class (a direct-call `keyProof:` expression), swept as a class.
+3. (7395d396) the FIRST EXECUTION of the doubles found a fidelity bug (a split enrollment
+   state producing a real extra vault request; the pins' arithmetic confirmed as the real
+   wire's truth) — the patch REGRESSED the suite to 43 issues (the enroll self-invalidated
+   through its own hash move).
+4. (af5d28a5) the STRUCTURAL fix on the orchestrator's steer: the split state retired
+   whole — the vault double's row is the one account, the mirror consults it — and the
+   doubles ended ~40 lines SMALLER than after the patches.
+**Executed evidence at close, every consumer of the doubles:** Mac 66/5 (Castle runner +
+drills + connect/tier/flows) + 20/4 (relink · enroll-joins · sync-setup · key doors) +
+39/7 (off-main custody · data-safety faces) all PASSED; mobile 33/9 PASSED; both targets
+build-for-testing clean. **One process correction, the orchestrator's own:** the first two
+mobile "green" claims were VACUOUS (the `Executed 0 tests` + `TEST SUCCEEDED` trap — the
+selector named the FILE, not the suite types; the environment traps name exactly this and
+it still fired twice on the orchestrator's own runs). The counts above are re-runs with
+type-name selectors and confirmed executed counts. **UNIT B IS CLOSED AND VERIFIED. THE
+LADDER OPENS NEXT** over the phase's combined diff (ff3a3f86..af5d28a5's tree).
 
 ### NOTES CARRIED WHILE BUILDING (repo-first; the report repeats them)
 
