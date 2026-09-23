@@ -1851,6 +1851,15 @@ nothing lost. **(c) rides with them: the destructive RPCs' recent-re-auth window
 minutes** via the JWT's `amr` password timestamp (matches the doors' existing
 sign-in-before-acting flow exactly; one empirical refresh-survival probe at the window —
 if the timestamp bumps on refresh the guard is hollow and the fallback comes back for a
-re-ruling). 13t revisits every number with pricing.
+re-ruling). 13t revisits every number with pricing. **⚠️ (c) AMENDED 2026-09-23 (the
+ladder's round-1 BLOCKER F-R1 — `notes/plans/13y-ladder-round1.md`): the window applies
+to `account_data_truncate` ONLY.** `sync_purge_execute`'s main production caller is the
+13j JANITOR (autonomous, possibly days after any human act — no interactive prompt can
+cover it), so the original (c) would have silently frozen the shipped purge pipeline
+~10 minutes after every sign-in; the door stays gated by the challenge-verified proof +
+the session + the own-partition guard. The original premise was the orchestrator's own
+tracing error, caught by the cold review pre-deploy. The truncate flow adopts the fresh
+grant's session for the one destructive call, which is what makes the claim genuinely
+fresh.
 
 *(Next free number: **#145**.)*

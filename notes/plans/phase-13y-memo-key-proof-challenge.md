@@ -138,10 +138,22 @@ existing notes app but in general I don't want it abused."*
   the import-burst shape passes untouched; normal-use suites never meet the guard.
 - 13t revisits every number with pricing (NON-GOALS' standing line).
 
-## 5. THE RE-AUTH DOORS (Step 4b — ruled)
+## 5. THE RE-AUTH DOORS (Step 4b — ruled; **AMENDED 2026-09-23 at the ladder's F-R1, a BLOCKER against this section's own premise**)
+
+> **⚠️ AMENDMENT (2026-09-23, the round-1 re-ruling — `notes/plans/13y-ladder-round1.md`):
+> the window applies to `account_data_truncate` ONLY. `sync_purge_execute` carries NO
+> re-auth check — its main production caller is the 13j JANITOR, which executes purge
+> intents autonomously (possibly days after any human act), so a re-auth window there
+> freezes the shipped purge pipeline; its walls are the challenge-verified proof + the
+> session + the own-partition guard. This section's original premise ("matches the doors'
+> existing sign-in-before-acting flow exactly") was FALSE for that door — the
+> orchestrator's own tracing error, caught by the ladder. The truncate flow ADOPTS the
+> fresh grant's session for the one destructive call (a new session with a new amr is
+> what makes the claim genuinely fresh); the fake models the session, never a defaulted
+> bool.**
 
 - **The recent-re-auth window for the destructive RPCs (`account_data_truncate`,
-  `sync_purge_execute`): 10 minutes.** The check reads `auth.jwt() -> 'amr'` (confirmed:
+  ~~`sync_purge_execute`~~ — struck by the amendment above): 10 minutes.** The check reads `auth.jwt() -> 'amr'` (confirmed:
   per-method `timestamp` fields, reachable in SQL) for the newest `password` entry inside
   the window; absent or stale refuses typed (`VARIORUM_REAUTH_REQUIRED`). This matches the
   client flow exactly — the doors already verify the account password through a sign-in
@@ -196,6 +208,14 @@ existing notes app but in general I don't want it abused."*
    nothing; a session-holder can at worst churn its own 64 rows.
 8. **The A5 horizon exposure rides the same DDL** (Step 1) and is orthogonal — no
    interaction with the challenge beyond sharing the artifact.
+9. **The PRE-ENROLLMENT GAP (added 2026-09-23, the ladder's F-R6):** between the marker-9
+   deploy and an account's first round, `key_proof_enroll` is authorized by the v1 STATIC
+   value — so the historical-capture class this phase closes retains mutating power
+   (including enrolling a foreign kp2, a mutating-plane lockout recoverable by
+   delete-and-set-up-again) for exactly that gap. Inherent to any shared-secret upgrade;
+   the real mitigation is the window choreography itself (her first round runs inside the
+   window, closing her account's gap in minutes; new accounts have no v1 history to
+   capture). One disclosure line rides the closeout's I-1 amendment.
 
 ## 8. What UNIT B proposes vs. builds
 
