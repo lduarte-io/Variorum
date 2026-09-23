@@ -762,3 +762,89 @@ lines, the fold-in with `VARIORUM_ROTATION_ROWS_REMAIN` in the canonical body, t
 drop-sequence, marker 9 last, the helper's revoke/grant pair); the disclosure-closure probe
 and the full `AuthRLSDDLTests` suite (68/68) re-run green by the orchestrator.
 
+
+---
+
+## UNIT B RECORD (the guard and the proof — implementer session, 2026-09-22)
+
+### LIVE STATUS (flipped in the same commit as each piece; a fresh session finishes from this)
+
+- **Piece 1 — the record + the quota-shape proposal: DONE (this commit).** The proposal
+  below is sent to the orchestrator before the quota half builds (the memo §8's letter);
+  under R-13y-4 the unit proceeds on it without waiting — an orchestrator counter-ruling
+  reworks the mechanism, not the numbers (the numbers are the memo §4's, ruled).
+- **Piece 2 — the server halves in 12 (the challenge · the quota · the re-auth doors) +
+  the grant-sweep extension: PENDING.**
+- **Piece 3 — the DDL pins (the AuthRLSDDLTests 12-block rework + the new pins): PENDING.**
+- **Piece 4 — the client challenge road (KeyProof v2 · KeyProofMaterial/SyncKeyProof ·
+  the transport seam · the signer · engine/janitor/probe/rotation/vault-client call sites ·
+  the fake's twins · the suite sweep): PENDING.**
+- **Piece 5 — the quota client half (typed refusal + wording + fake budget + pins):
+  PENDING.**
+- **Piece 6 — the re-auth doors' client half + the auth rate-limit numbers/pins: PENDING.**
+- **Piece 7 — the KeyProofGateTests rework + the attacker-suite extensions (the tenth arm
+  under the challenge protocol; arm 9's exact-name allowlist extensions): PENDING.**
+- **Piece 8 — the Fragments carry item (Step 5): PENDING.**
+- **Piece 9 — the full-core-suite close line (baseline at open: 1698/179): PENDING.**
+
+### THE QUOTA MECHANISM'S TABLE SHAPE (the implementer's proposal, per the memo §8 — sent to the orchestrator BEFORE that half builds)
+
+Against the memo §4's ruled targets (500,000-row lifetime first-load pool · 50,000
+accepted row-writes per rolling 24 h after it · a per-call batch cap of the measured
+shipped chunk ×10 — **measured: `SyncEngine.batchSize` = 200, no composition site
+overrides it (grep-verified across `App/` and `Sources/`), so the cap is 2,000
+rows/call** · `sync_reencrypt` exempt · `account_data_truncate` resets the pool ·
+`sync_purge_execute` unquota'd):
+
+**PROPOSED: ONE per-owner accounting row + a TUMBLING 24-hour window — no write log.**
+
+```sql
+create table sync_write_budget (
+  owner_id      uuid not null primary key,
+  lifetime_rows bigint not null default 0,   -- accepted row-writes ever (since the last truncate reset)
+  window_start  timestamptz not null default clock_timestamp(),
+  window_rows   bigint not null default 0    -- accepted row-writes since window_start
+);
+```
+(the `device_cursor`/`sync_tenant_seq` posture: FORCE RLS + owner policy, no API-role
+privileges, definer row grants.)
+
+Semantics, all inside `sync_push` (the ONLY quota'd door — reencrypt/purge write no new
+data rows; the vault write is not data): after the gate + the entitlement gate —
+(1) `jsonb_array_length(batch) > 2000` refuses (a malformed client's bound, never a limit
+the shipped engine meets — its chunks are ≤ 200); (2) the owner's budget row is
+upsert-locked FOR UPDATE (lock order: always AFTER the vault lock — only push touches the
+row, no cycle); (3) `lifetime_rows < 500000` ⇒ the first-load pool is live and NO daily
+check applies; else the window: `clock_timestamp() - window_start >= interval '24 hours'`
+resets it, and `window_rows + jsonb_array_length(batch) > 50000` refuses typed
+`VARIORUM_WRITE_QUOTA` carrying `retry_after_seconds=<window_start + 24 h − now>`;
+(4) after the CAS loop the SAME locked row increments by the ACTUAL accepted count (the
+memo's "accepted row-writes" — CAS rejects burn nothing).
+
+Why this shape over the alternatives I weighed: a per-write LOG table gives an exact
+SLIDING window but costs a row per accepted write (the abuse guard becoming its own write
+amplifier) and needs its own GC; a fixed UTC-day bucket resets at a wall-clock boundary
+that means nothing to the user and lets a midnight-straddling burst double the limit the
+same way. The tumbling window is O(1) per push, self-contained in one row, aligns with the
+user's own activity (the window starts at their first steady-state write), and its one
+weakness — a burst at a window seam can reach ≤ 2× the daily number over a short span —
+is bounded, harmless at the ruled scale, and exactly the MINIMAL-guard posture the plan
+demands (13t re-prices with real machinery). `account_data_truncate` resets by DELETING
+the row (the next push re-creates it at zero — delete-and-set-up-again's repush IS a
+first load); `account_purge` removes it (the whole account goes). The seq counter
+(`sync_tenant_seq`) is untouched by both — the budget is metering, never ordering.
+
+### NOTES CARRIED WHILE BUILDING (repo-first; the report repeats them)
+
+- **The client seam change is the pre-13x class, stated up front:** the challenge protocol
+  makes the proof PER-REQUEST, so the Swift transport seam's `keyProof` parameter changes
+  TYPE (`String` → the paired `SyncKeyProof` challenge+proof struct; labels keep) on every
+  gated method, `SyncEncryptionKeys.keyProof` becomes the derived `KeyProofMaterial`
+  (kp1 wire + kp2 MAC key, both from M — one struct so both-or-neither holds by
+  construction), and every conformer/call site sweeps mechanically — exactly the churn
+  class pre-13x paid when the proof was ADDED. Consequence the brief's "expected: none"
+  did not anticipate: the app-target TEST conformers (PostureSwitchTests' emulators,
+  Phase8ServicesTests' fakes, MobileProtectionTests) and the two one-line app-production
+  `updateVault(keyProof:)` argument expressions (EncryptionSession/PostureSwitch) take
+  idiom-matched edits, COMPILE-PENDING for the orchestrator (the UNIT A closer's exact
+  precedent, mostly the same files).
