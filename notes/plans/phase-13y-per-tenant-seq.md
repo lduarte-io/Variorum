@@ -419,10 +419,10 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
 | 1 | env | The TK2 spike §5 re-run on macOS 27.0 | **DONE — clean** (see ENVIRONMENT ACTS) |
 | 2 | env | Core suite new-OS baseline | **DONE — 1679/179 green** |
 | 3 | env | Full-Mac new-OS baseline (R-13y-3) | **DONE — 3089/510, five deterministic macOS-27 deltas adjudicated (see ENVIRONMENT ACTS; KnownIssues row added, owner 18k; the scrubber product-verified in use)** |
-| 4 | A | Step 0 survey + verdict table | open |
-| 5 | A | Step 1 — the `12_` DDL (+ guard fold-in, NIT-4, horizon exposure, sweep extension) | open |
-| 6 | A | Step 2 — client pins (incl. the adopt-road scenario) | open |
-| 7 | A | Step 3 — per-tenant harness + the disclosure-closure probe | open |
+| 4 | A | Step 0 survey + verdict table | **DONE (ec188df3)** — ALL WITHIN-ACCOUNT; F-S1 wide floor; the record's table |
+| 5 | A | Step 1 — the `12_` DDL (+ guard fold-in, NIT-4, horizon exposure, sweep extension) | **DONE (468a1fba + c398e1f1)** — authored, text-pinned, marker 9; the horizon vehicle built to the Shape-1 ruling |
+| 6 | A | Step 2 — client pins (incl. the adopt-road scenario) | **DONE (d4002bf6 + 2d74c4ab)** — pins a/b/d + adopt-road; lockstepVersion 9; horizonWait derived |
+| 7 | A | Step 3 — per-tenant harness + the disclosure-closure probe | **DONE (d4002bf6)** — the headline probe red-on-old by behavioral revert; core 1698/179 at unit close |
 | 8 | B | Step 4c memo — the key-proof challenge design (orchestrator rules; #144) | **RULED 2026-09-22 — `notes/plans/phase-13y-memo-key-proof-challenge.md` (the challenge shape §3, the numbers §4, the re-auth window §5, trades §6, edges §7); #144 logged; UNIT B builds TO it** |
 | 9 | B | Step 4 — the abuse guard (+ numbers PROVISIONAL; #144) | numbers RULED (the memo §4); the mechanism's table shape is the implementer's proposal against them |
 | 10 | B | Step 4b — the re-auth doors | open |
@@ -559,16 +559,25 @@ empty an account's server copy from a custom client. Record: `notes/plans/pre-13
   VersionRPCsShape`, carrying the cross-pin) + the 3 new CorpusRotationTests pins (the
   derivation · the spy-counted production road · the nil-default end-to-end). Suites
   unchanged at 179. **UNIT A IS CLOSED**; the orchestrator verifies, then the ladder.
-  **One honest PENDING for the finals:** the three APP-TARGET files this piece touched
-  (`App/Variorum/Shared/PostureSwitch.swift` — the Leaves default now nil = the driver's
-  production road; `App/Variorum/VariorumTests/PostureSwitchTests.swift` +
-  `App/Variorum/VariorumMobileTests/MobileProtectionTests.swift` — the two emulators'
-  new required conformance) are written to the files' own idioms but COMPILE-UNVERIFIED
-  in this session: the closer's loop is the core package only (the brief's letter — no
-  Mac-suite runs), so the Mac/mobile targets first build at the orchestrator's
-  finals/ladder. The seam is small (one optional default passed straight through at the
-  one construction site; two three-line conformances), and the core-side compiler has
-  proven the protocol change against five conformers already.
+  ~~**One honest PENDING for the finals:** the three APP-TARGET files this piece touched
+  … COMPILE-UNVERIFIED in this session~~ **CLOSED by the orchestrator, same day:**
+  `xcodebuild build-for-testing` on BOTH targets (Mac platform=macOS; mobile iPhone 17
+  Pro simulator) — **both BUILD SUCCEEDED, zero errors** (the app + test targets
+  compile; the seam files — `PostureSwitch.swift`'s nil Leaves default,
+  `PostureSwitchTests.swift`'s + `MobileProtectionTests.swift`'s emulator conformances —
+  prove out). The finals still RUN the suites; what no longer waits is "does main
+  compile."
+
+**ORCHESTRATOR VERIFICATION + UNIT A CLOSE (2026-09-22, my own hands):** the closer's
+four commits read; 12's section 5 read (the ruled shape byte-for-it: SQL STABLE definer
+returning 2000, the version RPC's grant pair) and the pull's `make_interval` derivation
+confirmed at its line with no inline interval literal surviving; spot-runs green —
+`CorpusRotationTests` 21/21 (the three new pins among them), the arm-9 wire-allowlist
+pin, and earlier the disclosure probe + `AuthRLSDDLTests`; both app targets
+build-for-testing clean (above). The predecessor's budget death and the closer
+continuation are noted in LIVE STATUS per the resiliency protocol — the death cost zero
+commits. **UNIT A IS CLOSED AND VERIFIED. Next: UNIT B (fresh implementer, builds TO the
+ruled memo), then the ladder.**
 
 ### WHAT REMAINS OPEN IN UNIT A (nothing — the unit is CLOSED; the ladder flags below stay recorded)
 
