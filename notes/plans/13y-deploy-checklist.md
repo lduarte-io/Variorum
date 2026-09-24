@@ -184,8 +184,49 @@ present (`sync_push(jsonb,text,text)`, `sync_pull(bigint,text,integer,text,text)
 `key_vault_update(jsonb,integer,text)`, …); `sync_challenge` / `key_proof_enroll` /
 `sync_visibility_horizon_ms` ABSENT; `sync_server_seq` sequence EXISTS.
 
-**Deploy · verification · installs · first rounds · probes · the sweep twice:** PENDING —
-this record fills as each lands.
+**The A1 rail (2026-09-24T21:24Z):** her app quit by her; zero real-store instances
+(pgrep by path). Terminal.app had LOST Full Disk Access since pre-13x (TCC refused the
+container even unsandboxed) — she re-granted it and restarted Terminal, the session resumed
+by `--resume` with zero loss (the resiliency protocol's designed road). Byte copy of the
+closed encrypted store: `Backups/variorum-backup-a1-13y-window-20260924T212417Z.*` — main
+11,984,896 B (sha256 `a547596b44ca4a99…`, `cmp` byte-identical), WAL 2,673,912 B, shm
+32,768 B, plus ALL THREE key files (`keys.json` 519 B + the two suffixed custody jsons).
+The pre-13x integrity latitude stands (an encrypted store cannot be PRAGMA-checked from
+the CLI; the app's own next backup run asserts it).
+
+**THE DEPLOY (2026-09-24, two runs):** run 1 REFUSED whole — HTTP 400,
+`42501: permission denied for function _crypto_aead_det_encrypt` — the blanket
+`grant execute on all functions in schema vault` swept in supabase_admin's zero-grant
+internals, and Postgres ERRORS a grant whose grantor holds nothing grantable; the one
+transaction rolled back, marker untouched (the rollback posture proven live). The
+live-probed ACLs showed the exact reach postgres CAN grant (`create_secret` /
+`update_secret` / `_crypto_aead_det_decrypt`, all `X*`), the artifact was fixed to
+bare-name grants (version-proof — names unique in the schema), the AuthRLSDDL pin moved
+with it + a never-return arm (76/76 green), committed `c1a607f7`. Run 2: **`[]`, HTTP 201
+— LANDED.**
+
+**VERIFICATION (all read-only, every line its stated answer):** marker **9** · ONE
+`sync_tenant_seq` row, her floor **76,149** = the recorded purged-max, ≥ every step-3
+number — **the carry-over floor proven at the DDL level, the F-S1 purge-above-data case
+live in her own mirror** · `key_proof_challenge` 0 · `sync_write_budget` 0 ·
+`sync_visibility_horizon_ms()` = 2000 · `sync_server_seq` GONE · all nine functiondef
+arms true (fold-in `VARIORUM_ROTATION_ROWS_REMAIN` — **the pre-13x §10 caveat RETIRES**;
+`next_tenant_seq` in `key_vault_update`; the ONE derived horizon, no inline literal; the
+enroll refusal; quota in `sync_push` only; `sync_reencrypt` exempt; the janitor
+UN-windowed; truncate guarded) · EXACTLY ONE signature per gated name, the 12 set,
+no 11-era survivor · `key_proof` + `challenge` DEFAULTLESS in `sync_pull` (defaults only
+on `max_rows`/`for_device` — NIT-4's reorder exact) · ownership `variorum_definer`
+throughout, `account_purge` stays postgres, `next_tenant_seq` stays the deployer
+(deliberate) · definer-role probes live (`extensions.hmac` ✓, `gen_random_bytes` ✓ —
+the F-R2 road proven AS the definer) · the Vault road probe: `create_secret` returned a
+*[removed for publication]*
+(pre-enroll, as it must be) · the two new tables + `sync_tenant_seq` all FORCE RLS with
+owner policies. **THE GRANT SWEEP run 1: 63 rows — 60 OK · 3 INFO · ZERO failures**
+(the INFOs are the three standing RETURNS-trigger rows; the NEW schema-usage facts both
+true live: `variorum_definer` USAGE on `extensions` AND `vault`).
+
+**Installs · first rounds · probes · the sweep again:** PENDING — this record fills as
+each lands.
 - SyncSpec §12's **I-1 record AMENDED**: the closure executed on the disclosure-probe's
   evidence; the envelope gains the Vault-held MAC secret line + the pre-enrollment-gap
   line (memo §7 edge 9).
