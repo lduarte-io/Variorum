@@ -152,6 +152,40 @@ Named to her, one line each, at the window's start:
   counter + floor; the challenge protocol + enrollment's one-time land; the quota; the
   re-auth-on-truncate; NIT-4; the horizon function; the guard fold-in retiring the
   overlay; the window's evidence).
+
+## 10. THE WINDOW'S RECORD (2026-09-24 — live, updated as the window runs)
+
+**Opened 2026-09-24 at her word.** The pre-deploy summary (§2) spoken across the sitting's
+first two turns — #144(a) explained to her question (the two-vaults disambiguation: Supabase
+Vault holds ONLY kp2, a one-way MAC secret; the prose keys stay wrapped under her passphrase
+and recovery phrase in `key_vault`; operator-level integrity access is pre-existing, kp2 adds
+no read power), #144(b) framed against her own corpus numbers, #144(c)'s janitor amendment
+walked through — **ALL THREE APPROVED, her words: "ok all are approved and i'm here, ready
+for the sitting."** #144's ratification is thereby SPOKEN at the window; the checkpoint
+records it formally.
+
+**Prep:** ladder closed + finals green (the recorded tip `01b67382`, = origin/main, tree
+clean). **The stored PAT was found DEAD** (HTTP 401 on a bare projects read — her planned
+rotation had landed since pre-13x); she minted a fresh PAT into `.env.supabase.local` at the
+window's start, verified live (HTTP 200) before anything else ran. 12's header + verification
+tail re-read; the sweep-coverage prep line satisfied by `AuthRLSDDLTests`' 12 block in the
+green finals.
+
+**The pre-deploy snapshot (read-only, the PAT query road):** marker **8**; rows container
+**229** · block **4,462** · variant **4,636** · commit_point **4,647** · key_vault **1**
+*[removed for publication]*
+*[removed for publication]*
+*[removed for publication]*
+own 19-table list, verbatim); `device_cursor` rows `3D4D5F8A…` → **76,143** and `53536eb5…`
+→ **75,919**; `purged_row` max **76,149** — ABOVE data-max, the F-S1 purge-outruns-data case
+LIVE in her own mirror, so the wide floor is load-bearing on day one; no rotation seq. **The
+post-deploy carry-over bar: her counter row ≥ 76,149.** Function set: all 11-era signatures
+present (`sync_push(jsonb,text,text)`, `sync_pull(bigint,text,integer,text,text)`,
+`key_vault_update(jsonb,integer,text)`, …); `sync_challenge` / `key_proof_enroll` /
+`sync_visibility_horizon_ms` ABSENT; `sync_server_seq` sequence EXISTS.
+
+**Deploy · verification · installs · first rounds · probes · the sweep twice:** PENDING —
+this record fills as each lands.
 - SyncSpec §12's **I-1 record AMENDED**: the closure executed on the disclosure-probe's
   evidence; the envelope gains the Vault-held MAC secret line + the pre-enrollment-gap
   line (memo §7 edge 9).
