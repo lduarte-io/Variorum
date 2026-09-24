@@ -1682,17 +1682,30 @@ drop sequence if exists sync_server_seq;
 --     definer role reads the MAC secret inside the verify and writes it
 --     at enroll/rotation — USAGE on schema `vault`, SELECT on
 --     `vault.secrets` + `vault.decrypted_secrets`, and EXECUTE on the
---     vault helper functions (granted as ALL FUNCTIONS IN SCHEMA rather
---     than by signature: `create_secret`/`update_secret` signatures vary
---     by Vault version, a wrong-signature grant fails the whole deploy,
---     and the schema's surface is Supabase's own fixed helper set — the
---     window's sweep verifies the landed posture; the role is NOLOGIN
---     and reachable only through these definer bodies).
+--     vault helpers BY BARE NAME, no argument list (each name is unique
+--     in the schema, so the grant is legal and version-proof — the
+--     signature-variance concern the first draft answered with ALL
+--     FUNCTIONS IN SCHEMA, which the 13y WINDOW ITSELF refused live:
+--     the blanket sweeps in supabase_admin's zero-grant internals
+--     (`_crypto_aead_det_encrypt`/`_noncegen` — postgres holds NOTHING
+--     on them, live-probed ACLs), and Postgres ERRORS a grant whose
+--     grantor holds no grantable privilege at all, rolling the whole
+--     file back; the window's fix, 2026-09-24). The named set is the
+--     definer's EXACT reach: `create_secret`/`update_secret` (postgres
+--     holds both WITH GRANT OPTION — live-probed) for enroll/rotation,
+--     plus `_crypto_aead_det_decrypt` — the one internal the
+--     `decrypted_secrets` VIEW makes its CALLER execute (function
+--     EXECUTE inside a view checks the caller, not the view owner;
+--     it is why Supabase grants postgres/service_role that internal
+--     and only that one). The window's sweep verifies the landed
+--     posture; the role is NOLOGIN and reachable only through these
+--     definer bodies.
 -- ---------------------------------------------------------------------------
 
 grant usage on schema vault to variorum_definer;
 grant select on vault.secrets, vault.decrypted_secrets to variorum_definer;
-grant execute on all functions in schema vault to variorum_definer;
+grant execute on function vault.create_secret, vault.update_secret to variorum_definer;
+grant execute on function vault._crypto_aead_det_decrypt to variorum_definer;
 
 -- THE EXTENSIONS-SCHEMA USAGE (13y ladder R1, F-R2): pgcrypto lives in the
 -- `extensions` schema on Supabase, and this event's two new bodies resolve

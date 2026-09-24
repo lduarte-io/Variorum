@@ -2668,8 +2668,19 @@ struct AuthRLSDDLTests {
         let sql = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
         #expect(sql.contains("grant usage on schema vault to variorum_definer;"))
         #expect(sql.contains("grant select on vault.secrets, vault.decrypted_secrets to variorum_definer;"))
-        #expect(sql.contains("grant execute on all functions in schema vault to variorum_definer;"),
-                "the vault helpers granted as a schema (signatures vary by Vault version — the window's sweep verifies)")
+        // The 13y window's fix (2026-09-24): the blanket ALL-FUNCTIONS grant
+        // refused LIVE — it sweeps in supabase_admin's zero-grant internals
+        // (`_crypto_aead_det_encrypt`/`_noncegen`), and Postgres ERRORS a
+        // grant whose grantor holds nothing grantable, rolling the whole
+        // file back. Named bare-name grants (unique names — version-proof)
+        // cover the definer's exact reach: the two write helpers plus the
+        // one internal the `decrypted_secrets` view makes its CALLER run.
+        #expect(sql.contains("grant execute on function vault.create_secret, vault.update_secret to variorum_definer;"),
+                "the vault write helpers granted by bare name (the window's live fix)")
+        #expect(sql.contains("grant execute on function vault._crypto_aead_det_decrypt to variorum_definer;"),
+                "the decrypt internal the decrypted_secrets view makes its caller execute")
+        #expect(!sql.contains("all functions in schema vault"),
+                "the blanket vault grant must never return — it refused live at the 13y window")
         // 13y ladder R1 (F-R2): the two new bodies resolve pgcrypto in the
         // `extensions` schema AS the definer — the explicit grant states the
         // dependency (the definer's `authenticated` membership very likely
