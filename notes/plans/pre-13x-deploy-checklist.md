@@ -200,10 +200,11 @@ before the sitting because the face reads the vault).
 ## 10. CLOSED 2026-09-07
 The phase closed; the mirror at marker 8 with the completion guard; the remaining boxes (the refreshed installs, ledger 51's drill) are the author handoff's checklist.
 
-**⚠️ STANDING CAVEAT (added 2026-09-21, RUN B's hosted stress pass, Q3 — binding on every future
-mirror act):** the §9 completion guard is a BODY-ONLY overlay on `key_vault_update`'s clearing arm
-— **any redeploy of `11_pre13x_postures.sql` (same signature, `create or replace`) silently
-REVERTS it.** After ANY 11 redeploy or mirror rebuild, re-run
-`maintenance/pre13x-ladder-rotation-clearing-guard.sql` and re-verify `guard_deployed = true`
-per §9's queries. A future consolidated DDL (13y's `12_…` or later) should fold the guard's body
-into the canonical file so the overlay stops being severable.
+**⚠️ STANDING CAVEAT — RETIRED-BY-12 (2026-09-24, the 13y deploy window):** the fold-in this
+caveat asked for happened — `12_phase13y_tenant_seq.sql`'s canonical `key_vault_update` carries
+the completion guard's body (`VARIORUM_ROTATION_ROWS_REMAIN`), text-verified live at the window
+(the checklist's verification), so the overlay is superseded and no severable body remains.
+*(The retired text, for history: the §9 completion guard was a BODY-ONLY overlay on
+`key_vault_update`'s clearing arm — any redeploy of `11_pre13x_postures.sql` silently REVERTED
+it; after any 11 redeploy the overlay had to be re-run and re-verified. A 12 re-run is now safe
+on the guard's own terms — the completion guard rides the canonical body.)*

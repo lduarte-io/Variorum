@@ -1862,4 +1862,17 @@ tracing error, caught by the cold review pre-deploy. The truncate flow adopts th
 grant's session for the one destructive call, which is what makes the claim genuinely
 fresh.
 
+**✔ RATIFIED IN FULL 2026-09-24, at the deploy window's pre-deploy summary (her words: "ok
+all are approved and i'm here, ready for the sitting"):** (a) approved after her question
+round — the two-vaults disambiguation (Supabase Vault holds ONLY kp2, one-way, no read
+power; the prose keys stay wrapped under her passphrase/recovery in `key_vault`; a
+control-plane attacker already writes rows, so net-new ≈ none) walked through to her
+satisfaction; (b) approved against her own corpus frame (7,278-row repush · low-thousands
+heavy days); (c) approved AS AMENDED — and the amendment proved out LIVE the same hour:
+the 13j janitor ran unattended during her first marker-9 round through the un-windowed
+purge door. The window's amr refresh-survival probe read BYTE-IDENTICAL (password
+timestamp 1790290761 both sides of the refresh), so the truncate guard stands and the
+fallback stays closed. The window record: `notes/plans/13y-deploy-checklist.md` §10.
+**CLOSED.**
+
 *(Next free number: **#145**.)*

@@ -225,8 +225,45 @@ owner policies. **THE GRANT SWEEP run 1: 63 rows — 60 OK · 3 INFO · ZERO fai
 (the INFOs are the three standing RETURNS-trigger rows; the NEW schema-usage facts both
 true live: `variorum_definer` USAGE on `extensions` AND `vault`).
 
-**Installs · first rounds · probes · the sweep again:** PENDING — this record fills as
-each lands.
+**THE INSTALLS:** Mac — Release built clean (`/tmp/13y-release-dd`), copied to
+`/Applications/Variorum.app` at a re-checked zero-instance window; `codesign --verify
+--deep --strict` OK (Identifier `io.lduarte.Variorum`, Team `<apple-team-id>`), installed
+binary sha256 `9e15f8bfd825aa4f…` = the fresh product. Phone — built from the MAIN repo's
+`VariorumMobile` scheme (the finals' own road; the worktree's project points at the
+lagging mobile-branch core — recorded so no future window builds the phone from there),
+`generic/platform=iOS` destination (xcodebuild could not see the paired device;
+`devicectl` could), installed to her iPhone 17 Pro via
+*[removed for publication]*
+
+**THE FIRST ROUNDS (the acceptance evidence, all verified live):** her Mac's first round
+*[removed for publication]*
+*[removed for publication]*
+cursor advanced 76,143 → 76,147 with NO reset** (the carry-over proven). **The window's
+one surprise, benign and load-bearing:** seqs 76,150–76,182 were minted NOT by pushes
+(data-max stayed 76,147; `sync_write_budget` empty — no `sync_push` had run) but by the
+**13j JANITOR running unattended through the challenge-verified purge door**, draining
+the ready purge intents (0 left) — live proof of #144(c)'s amendment the same hour it
+deployed. The phone's first round: cursor 75,919 → 76,147 forward-only, ALREADY_ENROLLED
+swallowed as success (same master ⇒ same kp2 — still exactly one `kp:` row, hash
+unchanged). **Her live round each direction landed** (her word + the server reads): the
+first real push minted the budget row at **lifetime 8 · window 8** — "normal use never
+meets the guard," demonstrated; both cursors advanced through each other's pushes
+(76,187 / 76,189), counter = data-max = 76,190; nonces bounded at 63 under the 64 cap.
+
+**THE OWED PROBES:** (a) **amr refresh-survival: BYTE-IDENTICAL** — password timestamp
+1790290761 before and after refresh (her run of `Tools/13y-amr-probe.sh`, content-free
+by construction); the truncate guard STANDS, the `auth.sessions` fallback stays closed.
+(b) The schema-usage sweep facts stand as the Vault/extensions live evidence (both
+`true`). (c) `account_purge`'s best-effort vault-secret delete: the recorded latitude
+stands, the fake's twin carries it. **THE SWEEP TWICE: run 1 and run 2 both 60 OK ·
+3 INFO · 0 fail** (the INFOs are the three standing RETURNS-trigger rows).
+
+**THE WINDOW CLOSED 2026-09-24.** Marker 9 live; both devices current and syncing;
+#144 ratified in full at the summary (her question round on (a) answered first — the
+QUESTIONS entry carries the ratification); the pre-13x §10 caveat RETIRED-BY-12; the
+SyncSpec §12 entry + I-1 amendment written; CLAUDE.md's macOS 27.0 note recorded. The
+one in-window artifact fix (the vault grant) is commit `c1a607f7`; the probe script
+`Tools/13y-amr-probe.sh` rides with the window's closing commit.
 - SyncSpec §12's **I-1 record AMENDED**: the closure executed on the disclosure-probe's
   evidence; the envelope gains the Vault-held MAC secret line + the pre-enrollment-gap
   line (memo §7 edge 9).
