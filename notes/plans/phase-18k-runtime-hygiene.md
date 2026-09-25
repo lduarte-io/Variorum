@@ -977,11 +977,21 @@ does not compose; not this unit's fence).
   (`EditorView.swift` from the seam `48297899`, `walk4-PRE-fix-same-driver.log`); the tree restored to
   HEAD after (`git diff --quiet HEAD`, zero probe strings in `App/` outside gitignored logs). THE USE
   EVIDENCE table below.
-- A BISECT for the change that REMOVED the double (measurement only, scratch worktree, in-memory store;
-  the Outline harness's chapter-reveal make count as the predicate, `cfe53bb5` doubles → `709bd7bf`
-  single, ~8 steps) — IN-PROGRESS (so the row can be closed with a mechanism rather than "no longer
-  reproduces"; if it stalls, the row is amended with what is measured).
-- The ledger row amendment (claimed only if confirmed — it is NOT; amended with the measurement) —
-  NOT-STARTED.
+- A BISECT for the change that REMOVED the double — DONE: measurement only (a scratch worktree, an
+  in-memory store, the minimal make/dismantle/window probe; the predicate is the Outline harness's
+  chapter-reveal make count). The range: `cfe53bb5` doubles, `709bd7bf` makes once. Nine steps
+  (b1f903f4 1 · f3f3a345 1 · 448c4237 1 · c954145c **2+orphan** · 1399b67a 1 · 9206a078 **2+orphan** ·
+  f8610cb9 1 · f049af48 **2+orphan** · e6e7abb0 **2+orphan**) → **the first single commit is
+  `f8610cb9` — 13u2b UNIT 1**, which replaced the Outline's `LazyVStack` runs of small rows with
+  `OutlineRunRow` (expanded notes and the one live editor kept as direct children of the column).
+  Confirmed by a repeat run on each side: parent `e6e7abb0` doubles (orphan), `f8610cb9` makes once;
+  2 of 2 each. B-1 had caught the second mount inside the LAYOUT pass, and that commit's structural
+  change to the column is the lazy-container swap. Nothing about SwiftUI internals is claimed beyond
+  that. The app-side double is not bisected in the app (an old build never opens the dev store); it
+  predates the commit and is absent today.
+- The ledger row amendment — DONE (this commit): `KnownIssuesAndTechDebt.md`'s "SHADOW
+  `InlineEditorSurface`" row is AMENDED, NOT CLAIMED. It now records that the double no longer
+  reproduces, the fourth eliminated cause (this binding, M4) and the bisect. It **suggests the owner
+  close the row as RESOLVED-BY `f8610cb9`**, which is the orchestrator's or 12's call. Owner stays 12.
 - Closing runs — NOT-STARTED.
 - Deaths / resumes: none.
