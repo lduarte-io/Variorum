@@ -258,6 +258,14 @@ by construction); the truncate guard STANDS, the `auth.sessions` fallback stays 
 stands, the fake's twin carries it. **THE SWEEP TWICE: run 1 and run 2 both 60 OK ·
 3 INFO · 0 fail** (the INFOs are the three standing RETURNS-trigger rows).
 
+**A WINDOW-TAIL ACT, same sitting, same road (recorded here as a pointer — its record
+rides 13t's row in `notes/FuturePhases.md`):** at her word ("yeah, i'd do it now"),
+signup auto-entitlement deployed — `maintenance/beta-signup-auto-entitle.sql`, the
+`auth.users` trigger granting `hosted_sync` at signup (her ruled open-at-v1 posture's
+signup end, landed early for the friends beta); pinned, sweep-registered (60 OK · 4 INFO),
+live-verified INCLUDING a behavioral probe signup (trigger fired, probe account deleted).
+NO marker; the 13y window's own record above is untouched by it.
+
 **THE WINDOW CLOSED 2026-09-24.** Marker 9 live; both devices current and syncing;
 #144 ratified in full at the summary (her question round on (a) answered first — the
 QUESTIONS entry carries the ratification); the pre-13x §10 caveat RETIRED-BY-12; the
