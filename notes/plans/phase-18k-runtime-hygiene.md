@@ -45,7 +45,8 @@ here touches distribution, signing or `/Applications` before this run's own clos
 | **C2** | The inline editor's height binding written inside `makeNSView`/`updateNSView` — MEASURE FIRST (ledger row "The Outline's SHADOW `InlineEditorSurface`", the surviving double realization) | review §5.1 A2 | trace → the instrumented chain on the long-note fixture; the pin is the double-realization count IF confirmed; else the deferral lands as hygiene and the row is NOT claimed | Fable if the seam is touched, else Opus | NOT-STARTED |
 | **C3** | The mechanical state-write deferrals (~14 geometry actions, the `BookIndexView` twin first, Canvas's observed geometry writes, window registration WITH the sticky-key ruling) | review §5.1 A3/A4/A5 | hygiene → per-site verdict table (the 13u4 S3 form) + a before/after `Modifying state during view update` count on a bounded run; behaviour byte-identical; walk of Canvas drag + the book Index | Opus | NOT-STARTED |
 | **C4** | The DEBUG-oracle ownership sweep (owner-keyed registration on the three reference shapes) + the `MarkdownStyling.palette` three-writer comment-plus-pin | review §5.2 | harness → the two-window cross-clear pins per oracle (red-on-old where reachable; structural where teardown order cannot be forced — S2's precedent) | Opus | NOT-STARTED |
-| **C5** | 17e rides this run — SCOPE per the kickoff sitting (below) | 17e + KnownIssues rows 59 · 64 · 66 | per item | per diff | NOT-STARTED — scope PENDING the sitting |
+| **C5** | 17e's concurrency five (R-18k-1): row 59 Canvas focused-block fact · P26 phone liveness race · P27 ⌘⇧M frozen-projection merge · P33 ⌥⌘Z in-flight latch · P38 backup single-flight latch | 17e + KnownIssues row 59 | runtime/concurrency → red-on-old pins per item (P26 on the MOBILE suite); walks: Canvas select → ⌘K Block History on that block; ⌥⌘Z double-press | Fable (P27 is `EditorSurfaceController`, the seam's pair) | NOT-STARTED |
+| **→18o** | The rest of 17e + 17t + row 66 (#138(f) ruled) + row 64 (#136(b) record-only) — a SEPARATE 18 entry run right after 18k (R-18k-1/2/4/5) | the sitting | its own record + ladder | Fable (17t = custody) | NOT-STARTED — opens at 18k's close |
 | **C6** | KnownIssues row 65 — the FIVE macOS-27 test deltas: TRACE `RefontViewportTests.aShrinkingRefontKeepsTheLineAtTheViewportTop` (94-pt drift — possibly REAL, the editor seam) and `BoundaryFluidityTests.theKeystrokePathRoutesCrossBlockDeletesIntoTheCompound` (intermittent); RE-MECHANIZE the two `NSSlider` scrubber pins and `LibraryPanelHostTests`' "inspector" reflection pin | ledger row 65 | trace + pin re-mechanization → the full Mac suite reads GREEN (no "modulo"); a Refont fix, if owed, walks on the Copper Beeches fixture (13u4 F2's own walk) | **Fable** (Refont / BoundaryFluidity are the editor seam) | NOT-STARTED |
 
 **Run order:** C0 (orchestrator, first — records only) → C1 → C2 → C3 → C4 → C6 → C5 → the ladder →
@@ -54,9 +55,43 @@ measures the warning family C3 then sweeps.
 
 ---
 
-## THE KICKOFF SITTING (2026-09-25) — PENDING her answers
+## THE KICKOFF SITTING (2026-09-25) — her rulings, verbatim-faithful
 
-*(Recorded verbatim-faithful the turn they land.)*
+- **R-18k-1 — C5's scope: a SPLIT into a second 18 entry.** Asked how much of 17e (~13 items) this
+  run takes, her words: *"plan a single extra session, split items appropriately between them, give
+  it an 18 name."* The orchestrator proposed the split and she confirmed it ("Yes, as proposed"):
+  **18k's C5 = the stale-fact / in-flight concurrency class** — KnownIssues row 59 (Canvas reports no
+  focused block, so ⌘K "Block History" opens on a stale target) · **P26** (the phone's
+  `takeLiveness` grants the pen from a stale continuation — two editors live) · **P27** (⌘⇧M's merge
+  threshold reads the frozen `slots` projection) · **P33** (the Mac's ⌥⌘Z has no in-flight latch) ·
+  **P38** (`StoreBackup.run` has no single-flight latch). **The extra session is 18o — CORRECTNESS &
+  HONESTY SINGLES** (record file `notes/plans/phase-18o-correctness-singles.md`, authored when 18k
+  closes): **P23** (CRLF imports as one block) · **P29** · **P32** (false code docs; P32's UX gap
+  named) · **P34** (the snap boundary pin + doc) · **P35** (`shelf_pins` self-heal) · **P37** (the
+  tray's archived truncation marker) · **17e (12)** (`.toggleSidebar`'s window-kind gate as a
+  registry fact) · **KnownIssues row 66** built to her #138(f) ruling below · **17t** (below).
+  **18o runs right after 18k, under this orchestrator.** 17e (11) needs no build (kickoff
+  correction 5); row 64 / #136(b) is ruled below.
+- **R-18k-2 — rows 56/57's durable owner: a new letter 17t, riding an 18.** Her words: *"17t and
+  add that to an 18"* — confirmed by the split above: **17t (the two unwired protection doors — the
+  Replace-All-Keys typed near-empty confirmation #86(c)/#87, and the recovery phrase's COPY ALL /
+  dead "Copied" branch, Mac + the shared enrollment page; the phone's three word-screen doors stay
+  the mobile app row's) rides 18o.** The custody Fable rider fires on 18o's ladder.
+- **R-18k-3 — the install refresh:** her real-store app was running at the kickoff; her words: she
+  will quit it before bed (*"I'll quit it before bed"*). Both 18k and 18o close with the Release →
+  `/Applications` refresh behind the A1 rail at that zero-instance window — re-checked by PATH before
+  any Release build; if an instance lives, the refresh is HELD, never forced.
+- **R-18k-4 — QUESTIONS #136(b), note-scoped structural undo: LEAVE IT FOR NOW** (her pick of the
+  recommended option). KnownIssues row 64 stays documented + pinned behaviour; its owner moves from
+  17e to **18o** as a RECORD-ONLY disposition (18o re-verifies the pin and records the ruling; no
+  build). A future note-scoped undo is a design, at her word.
+- **R-18k-5 — QUESTIONS #138(f), cross-device deletion finality at the LAUNCH seeder: HONOR THE
+  TOMBSTONE AT LAUNCH** (her pick of the recommended option) — the launch road declines on a
+  tombstoned seeded book exactly as the tutorial door's silent ensure already does. Built at 18o
+  (KnownIssues row 66), pin-before-fix.
+- **Her standing posture for the night:** *"just bring me the issues now, your session will be
+  running overnight"* — every remaining ambiguity is PROVISIONAL-and-continue; anything needing her
+  hands (a Touch-ID-gated custody walk, a product call) is HELD and bundled for the morning.
 
 ---
 
@@ -144,7 +179,8 @@ COMMITTED · every death and resume noted in the record.
 ## LIVE STATUS (the orchestrator's; flipped at every state change)
 
 - C0 — NOT-STARTED.
-- C1–C6 — NOT-STARTED; C5's scope PENDING the kickoff sitting.
+- The kickoff sitting — DONE (R-18k-1…5, above).
+- C1–C6 — NOT-STARTED.
 - Deaths / resumes: none.
 
 ---
