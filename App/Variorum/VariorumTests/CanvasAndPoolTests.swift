@@ -958,3 +958,104 @@ struct CanvasOrderAndOverviewTests {
         }
     }
 }
+
+/// **18k C5 — KnownIssues row 59: Canvas reports its card to the router.**
+///
+/// Every writing surface reports the block she is standing in through
+/// `CommandRouter.noteFocusedBlock` (Write's caret, the boards' ring, Read's
+/// selection, Blocks' row); the ⌘K "Block History" row falls through to that
+/// fact wherever no surface handler consumes it — and the canvas's handler
+/// consumes only ⌘S and the switcher's three. Canvas never reported, so the
+/// door opened the pane on the block the LAST OTHER surface had reported for
+/// this note (her 13u3 UNIT D walk).
+///
+/// RED-ON-OLD (behavioural revert, recorded in the 18k C5 record): delete the
+/// report in `CanvasViewModel.focus(blockID:variantID:)` — every arm below
+/// reads the stale first block.
+@Suite("Canvas reports its card to the router (18k C5 — row 59)")
+@MainActor
+struct CanvasFocusedBlockFactTests {
+    @Test func aCardClickIsTheBlockTheHistoryDoorOpens() async throws {
+        try await withWorld { session, db in
+            let world = try await session.runner.run { ops -> (post: String, blocks: [String], takes: [String]) in
+                let post = try ops.createPost(title: "the canvas's fact", profile: .generic)
+                var blocks: [String] = []
+                var takes: [String] = []
+                for text in ["The first card.", "The second card.", "The third card."] {
+                    let mint = try ops.newBlock(in: post.id, text: text, at: .end)
+                    blocks.append(mint.block.id)
+                    takes.append(mint.variant.id)
+                }
+                return (post.id, blocks, takes)
+            }
+            let router = session.commandRouter
+            var opened: [BlockHistoryRequest] = []
+            let token = router.registerDetail(
+                postID: world.post, mode: .canvas, applyMode: { _ in },
+                showBlockHistory: { opened.append($0) })
+            defer {
+                router.unregisterDetail(token)
+                router.forgetCurrentBlock(for: world.post)
+            }
+            // Where she was before Canvas: Write's caret, in the first block.
+            router.noteFocusedBlock(world.blocks[0], variantID: world.takes[0], postID: world.post)
+
+            let model = CanvasViewModel(session: session, containerID: world.post)
+            model.adopt(try await db.read { try Queries.canvasProjection($0, container: world.post) })
+
+            // She clicks the THIRD card: the one live ring migrates there…
+            model.focus(blockID: world.blocks[2], variantID: world.takes[2])
+            #expect(model.authority.livePane?.blockID == world.blocks[2])
+            // …and the note's current-block fact follows it.
+            #expect(router.focusedBlock?.blockID == world.blocks[2],
+                    "the card she clicked is the block she is in")
+            #expect(router.focusedBlock?.variantID == world.takes[2],
+                    "…on the take the card shows")
+
+            // ⌘K "Block History", through the shell's own door.
+            ShellActions(session: session, shell: ShellRouter()).showBlockHistory()
+            #expect(opened.last?.blockID == world.blocks[2],
+                    "the door opens the pane on the clicked card, never the stale block")
+            #expect(opened.last?.focusedVariantID == world.takes[2])
+            model.teardown()
+        }
+    }
+
+    /// The re-click arm — why the report rides BEFORE the ring's switch, as
+    /// the Takes board's does: a click on the card that already holds the
+    /// ring changes nothing in the authority (`.unchanged`), but the fact may
+    /// have moved meanwhile (another pane on the same note reported). The
+    /// click is where she is standing, so it re-asserts the fact.
+    @Test func reClickingTheLiveCardReassertsTheFact() async throws {
+        try await withWorld { session, db in
+            let world = try await session.runner.run { ops -> (post: String, blocks: [String], takes: [String]) in
+                let post = try ops.createPost(title: "the re-click", profile: .generic)
+                var blocks: [String] = []
+                var takes: [String] = []
+                for text in ["One card.", "Another card."] {
+                    let mint = try ops.newBlock(in: post.id, text: text, at: .end)
+                    blocks.append(mint.block.id)
+                    takes.append(mint.variant.id)
+                }
+                return (post.id, blocks, takes)
+            }
+            let router = session.commandRouter
+            let token = router.registerDetail(postID: world.post, mode: .canvas, applyMode: { _ in })
+            defer {
+                router.unregisterDetail(token)
+                router.forgetCurrentBlock(for: world.post)
+            }
+            let model = CanvasViewModel(session: session, containerID: world.post)
+            model.adopt(try await db.read { try Queries.canvasProjection($0, container: world.post) })
+
+            model.focus(blockID: world.blocks[1], variantID: world.takes[1])
+            // Another surface on this note reports the first block.
+            router.noteFocusedBlock(world.blocks[0], variantID: world.takes[0], postID: world.post)
+            // She clicks the live card again.
+            model.focus(blockID: world.blocks[1], variantID: world.takes[1])
+            #expect(router.focusedBlock?.blockID == world.blocks[1],
+                    "the click is where she is standing, whatever the ring already held")
+            model.teardown()
+        }
+    }
+}
