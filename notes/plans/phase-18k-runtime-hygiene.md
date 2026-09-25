@@ -105,6 +105,11 @@ measures the warning family C3 then sweeps.
 
 ## ENVIRONMENT TRAPS (every batch brief carries this section verbatim — the skill's rule; carried from RUN A's, updated for macOS 27)
 
+- **(added at C7) Every Mac test run launches the DEV app as test host, and that launch runs the dev
+  store's backup tick** — which writes into the dev store's configured second folder,
+  `~/Documents/Variorum/Backups/`, in the author's real home folder. Harmless, but know it: files
+  there may be test-run artifacts.
+
 - **Machine: macOS 27.0, Xcode 26.** Five deterministic suite deltas were adjudicated at 13y's
   kickoff (KnownIssues row 65 — this run's C6); until C6 lands, a full-Mac run reads "green modulo
   those" and any SIXTH red is a finding.
@@ -195,7 +200,8 @@ COMMITTED · every death and resume noted in the record.
 - C6 — DONE, ACCEPTED (row 65 CLOSED; the re-font drift a REAL 27 regression, fixed in `JumpPrimitive`).
 - C5 — DONE, ACCEPTED (four FIXED, P26 pinned-already-fixed; dispositions in 17e).
 - THE WALKS — DONE (adjudicated below): C1 · C2 · C3 · C5 PASS; C6 FINDINGS W-4/W-2 → **C6b**; W-3 (backup second folder) → **C7**; W-1 (a canvas grab glyph) → 12.
-- C7 — IN-PROGRESS (data safety first). C6b — NOT-STARTED (after C7).
+- C7 — DONE, ACCEPTED (the name-sorted backup listing — five readers fixed by one rule + the act's own file passed through; her real store verified exposed: 11 hourly copies).
+- C6b — IN-PROGRESS.
 - NEXT: C7 → C6b → the ladder (Fable, one combined diff) → finals → closeout → refresh → 18o.
 - Deaths / resumes: none.
 
@@ -670,6 +676,22 @@ walks are BUNDLED for her morning (granting Ghostty those permissions is her cal
 6. A stale worktree at `/private/tmp/claude-501/u1-baseline-tree` — not this run's; left untouched.
 
 ## HER MORNING BUNDLE (accumulating; the checkpoint report carries it)
+
+- **⚠️ FIRST — YOUR BACKUPS (18k C7, 2026-09-25).** Since 2026-09-04 the app's backup listing sorted
+  by NAME, so the A1 safety copies sessions leave in `Backups/` (`variorum-backup-a1-…`) counted as
+  "the newest": the hourly check wrote a snapshot EVERY HOUR instead of daily, and the prune deleted
+  real dated copies to keep the A1 ones. **Verified against your real folder (names only, read-only):
+  exactly 11 dated copies, hourly, 2026-09-24 23:09 → 2026-09-25 09:09 UTC** — your beside-the-library
+  history reaches ~11 hours, not 14 days; the older dated copies it pruned cannot come back. No
+  current writing is lost (the store itself and sync are untouched; the three A1 snapshots of
+  Sept 4/5/24 survive). **If you set a second folder,** it has been receiving the 2026-09-05 pre13x
+  A1 snapshot every run since ~Sept 5 — its check read "ok", so nothing looked wrong. FIXED in
+  `StoreBackup.swift` (C7). **Your remedy, once this build is installed:** open Settings ▸ Data
+  Safety, press **Back Up Now** once, and check the "A second folder" row shows today's date; the
+  `variorum-backup-a1-…` files in that folder's `Variorum/Backups/` are early-September strays the
+  app will no longer send or touch — keep or delete. **A procedure question for you:** should
+  sessions keep writing A1 safety copies into the app's own `Backups/` (harmless after the fix), or
+  into a separate folder?
 
 - **QUESTIONS #146** — the signed-out-first phone's sample book (decided PROVISIONALLY at her
   instruction; 18o builds it).
@@ -3600,3 +3622,23 @@ folder `scratch-second/Variorum/` (kept for a spot-check `cmp`). Logs + scripts 
 `18k-c7-closing1` · `18k-c7-ios-build`; `18k-c7-run.sh`, `18k-c7-closing.sh`.
 - Deaths / resumes: none.
 - **C7 — DONE (implementer), awaiting the orchestrator's spot-check.**
+
+### UNIT C7 — ORCHESTRATOR ADJUDICATION (2026-09-25; the unit CLOSES here)
+
+**Verified:** 6 commits `f48e86f9`…`cebc9d4f`, pushed, zero trailers; diff = `Shared/StoreBackup.swift` +
+`DataSafetyTests.swift` only; zero instances; her real container never opened by the implementer. **The
+prediction checked by the orchestrator against her real folder's NAMES (read-only):** exactly 11 dated
+copies, hourly, `2026-09-24-230922` → `2026-09-25-090949` — the traced mechanism confirmed in the field.
+**ACCEPTED — C7 FIXED** (`ff0e67c2`): the listing admits only the app's own dated names (empty or
+`-<8 hex>` tail, the stamp must parse back exactly), which fixes all five readers (the second-folder
+source, both due-checks, the prune, the Castle offer); the second folder is handed the run's own file.
+`BackupOwnFilesTests` 7/8 red-on-old (21 issues; four named reverts each landing exactly); the face
+guard green both sides → the face-as-defect DISMISSED AS HOLLOW. Dev-store use evidence: the run's own
+file arrives `cmp`-identical, checks ok, drill files untouched. **Her exposure and remedy lead the morning
+bundle.** **Owners for C7's noticed items:** (1) a future-stamped copy silently stops automatic
+backups → KnownIssues, owner **18o**; (2) the A1-into-`Backups/` procedure → her bundle; (3) the
+test-host backup tick writing into `~/Documents/Variorum/Backups/` → ENVIRONMENT TRAPS (added);
+(4) the strays in the dev folders → hers; (5) Castle's lock-time copy has no test of its own → the
+ladder; (6) cosmetic log line → dropped (no owner needed: not a defect). **For the Fable ladder:** the
+changed Castle offer contents and "a failed beside-the-library backup sends nothing to the second
+folder" (judgment call 2).
