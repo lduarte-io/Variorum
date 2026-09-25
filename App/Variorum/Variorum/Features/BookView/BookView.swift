@@ -2031,6 +2031,10 @@ private struct OutlinePostRow: View {
                     // and nothing else. The gutter it used to reserve is
                     // gone with the bar that lived in it.
                     VStack(alignment: .leading, spacing: 6) {
+                        #if DEBUG
+                        let _ = C2Probe.log("row body LIVE post=\(entry.postID.prefix(8)) near=\(nearViewport) "
+                            + "known=\(model.rememberedSurfaceSize(entry.postID).map { "\($0.width)x\($0.height)" } ?? "nil")")
+                        #endif
                         postHeader
                             .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
                             .frame(maxWidth: BookView.proseColumn, alignment: .leading)

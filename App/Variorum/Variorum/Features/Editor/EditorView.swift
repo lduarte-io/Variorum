@@ -119,6 +119,9 @@ struct EditorView: View {
             }
             blockSelectionBanner
             if inline {
+                #if DEBUG
+                let _ = C2Probe.log("body model=\(C2Probe.id(model)) inlineHeight=\(inlineHeight)")
+                #endif
                 InlineEditorSurface(
                     model: model, height: $inlineHeight, chrome: chrome, gutter: gutter)
                     .frame(height: inlineHeight)
@@ -539,7 +542,25 @@ struct InlineEditorSurface: NSViewRepresentable {
     }
 
     func makeNSView(context: Context) -> EditorTextView {
+        #if DEBUG
+        C2Probe.makes += 1
+        let makeNumber = C2Probe.makes
+        C2Probe.log("make #\(makeNumber) model=\(C2Probe.id(model)) binding=\(height)")
+        C2Probe.phase = "make"
+        defer { C2Probe.phase = "async" }
+        #endif
         let textView = EditorTextView.makeInlineEditor()
+        #if DEBUG
+        let probedModel = model
+        for delay in [0.05, 0.5, 2.0] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak textView] in
+                C2Probe.log("window make#\(makeNumber) +\(delay)s alive=\(textView != nil) "
+                    + "inWindow=\(textView?.window != nil) superview=\(textView?.superview != nil) "
+                    + "frame=\(textView?.frame.size.height ?? -1) "
+                    + "entries=\(probedModel.index.entries.count)")
+            }
+        }
+        #endif
         textView.proseGutter = gutter
         context.coordinator.surfaceDelegate.wire(to: textView)
         context.coordinator.applyChrome(chrome, to: textView)
@@ -550,12 +571,24 @@ struct InlineEditorSurface: NSViewRepresentable {
         }
 
         context.coordinator.install(textView: textView) { [self] newHeight in
+            #if DEBUG
+            C2Probe.writes += 1
+            C2Probe.log("write phase=\(C2Probe.phase) model=\(C2Probe.id(model)) "
+                + "binding=\(height) new=\(newHeight) wrote=\(abs(height - newHeight) > 0.5)")
+            #endif
             if abs(height - newHeight) > 0.5 { height = newHeight }
         }
         return textView
     }
 
     func updateNSView(_ nsView: EditorTextView, context: Context) {
+        #if DEBUG
+        C2Probe.updates += 1
+        C2Probe.log("update model=\(C2Probe.id(model)) binding=\(height) "
+            + "frame=\(nsView.frame.size.height) inWindow=\(nsView.window != nil)")
+        C2Probe.phase = "update"
+        defer { C2Probe.phase = "async" }
+        #endif
         // Projection-driven through the model; the width is SwiftUI's.
         nsView.proseGutter = gutter
         context.coordinator.applyChrome(chrome, to: nsView)
@@ -563,6 +596,10 @@ struct InlineEditorSurface: NSViewRepresentable {
     }
 
     static func dismantleNSView(_ nsView: EditorTextView, coordinator: Coordinator) {
+        #if DEBUG
+        C2Probe.dismantles += 1
+        C2Probe.log("dismantle model=\(C2Probe.id(coordinator.model))")
+        #endif
         coordinator.uninstall()
     }
 
@@ -624,6 +661,10 @@ struct InlineEditorSurface: NSViewRepresentable {
                     // didProcessEditing fires INSIDE the edit transaction;
                     // geometry reads must wait for it to close.
                     DispatchQueue.main.async {
+                        #if DEBUG
+                        C2Probe.phase = "storage"
+                        defer { C2Probe.phase = "async" }
+                        #endif
                         self?.remeasure()
                     }
                 }
@@ -876,3 +917,29 @@ final class ScrollAnchorController {
         }
     }
 }
+
+#if DEBUG
+/// 18k C2 — TEMPORARY Phase 1 probe ("WIP: probe"; REMOVED before the unit
+/// closes). Counts and logs the inline editor's realization chain.
+@MainActor enum C2Probe {
+    static var armed = ProcessInfo.processInfo.environment["C2_PROBE"] == "1"
+    static var t0 = CFAbsoluteTimeGetCurrent()
+    static var makes = 0
+    static var updates = 0
+    static var writes = 0
+    static var dismantles = 0
+    static var phase = "async"
+    static func reset() {
+        t0 = CFAbsoluteTimeGetCurrent()
+        makes = 0; updates = 0; writes = 0; dismantles = 0
+    }
+    static func id(_ object: AnyObject) -> String {
+        String(String(UInt(bitPattern: ObjectIdentifier(object).hashValue), radix: 16).suffix(6))
+    }
+    static func log(_ line: String) {
+        guard armed else { return }
+        NSLog("C2PROBE +%@ %@",
+              String(format: "%.1f", (CFAbsoluteTimeGetCurrent() - t0) * 1000), line)
+    }
+}
+#endif

@@ -331,6 +331,9 @@ struct RootView: View {
         .task { await readings.start() }
         .task { await pool.start() }
         .task { await stars.start() }
+        #if DEBUG
+        .task { await c2Walk(router: router) }
+        #endif
         .onAppear {
             windows.register(windowID, router: router, kind: .full)
             wirePaletteCommands()

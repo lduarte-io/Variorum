@@ -785,7 +785,13 @@ and the spread's active page. The brief's "pool inline editor" no longer exists 
 ### LIVE STATUS
 
 - Reading — DONE (this commit).
-- Phase 1, the instrument (DEBUG probes, committed as "WIP: probe", removed before close) — NOT-STARTED.
+- Phase 1, the instrument (DEBUG probes, committed as "WIP: probe", removed before close) — DONE
+  (this commit; REMOVAL PENDING): `C2Probe` (EditorView.swift — makeNSView/updateNSView/dismantle
+  counts, every binding write with its phase make|update|storage and whether it wrote, the host
+  body's `inlineHeight` per pass, each text view's window-ness at +0.05/+0.5/+2 s), `StableSurface`
+  (every report, the `loaded` flip, the settle), `NearViewportObserver` (every decision), the Outline
+  row's live-branch body; `C2WalkProbe.swift` — an env-gated (`C2_WALK=1`) in-app driver: short-note
+  focus (control) → long-note focus → five keystrokes typed and deleted → scrolled away and back.
 - Phase 1, the measurement (the chain, step by step, with numbers; verdict CONFIRMED/DISPROVED) —
   NOT-STARTED.
 - Phase 2, the deferral (coalescing hop, first height delivered) — NOT-STARTED.
