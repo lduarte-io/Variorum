@@ -675,6 +675,11 @@ walks are BUNDLED for her morning (granting Ghostty those permissions is her cal
 - **TCC for walks:** Ghostty has neither Screen Recording nor Accessibility — every GUI walk of this run
   is HELD for her grant (or her walking it herself); the list of held walks grows below per unit.
   Held so far: C6 (Copper Beeches re-font steps — the line stays at the top) · C1 (open/close many notes; ⌘Q feels instant) · C2 (the eight steps in its record: Sherlock ▸ Outline ▸ *A Scandal in Bohemia*, click in, type, scroll, narrow/restore, the spread view).
+  **→ DONE 2026-09-25 inside the run (R-18k-7), by the walk session — `## THE HELD WALKS — RESULTS` at the end of this
+  file.** C1 · C2 PASS; C3 PASS (+ W-1); C5 PASS (+ W-3); C6 PASS on the blank page, voice, gap and landings, with
+  **W-4** (the previous paragraph's last line left on top after a comments toggle when the page top sits in a paragraph
+  gap — the step's own pre-fix symptom) and **W-2** (the place lost after a gap round trip). Four findings for her,
+  none fixed.
 - **C1 item 3:** should a note edited inside a book (or as a Compare peer) get a leaving savepoint when
   she leaves the BOOK, the way a note gets one when she leaves the note? Today: only ⌘Q/lock/idle.
 
@@ -2985,6 +2990,16 @@ session (R-18k-7).
 own DerivedData (`App/Variorum/DerivedData/18k-walks/`). Captures: `notes/plans/18k-screens/walks/`
 (gitignored). Zero app instances at the start (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty).
 
+**SUMMARY (per unit; the tables below are the evidence):**
+
+| Unit | Verdict | Findings (recorded verbatim, NOT fixed — the orchestrator's) |
+|---|---|---|
+| **C1** registry release | **PASS** | — (16 notes through every mode; quit by identity in 0.42 s; both typed markers survived) |
+| **C2** inline editor height | **PASS** (Terminal + Study) | — (no jump/flash at expand or live; no gap vs a control; 0 warnings; the ~85 pt residual NOT seen) |
+| **C3** state-write deferrals | **PASS** (the measurement confirmed by use: every warning a pane mount) | **W-1** — one Canvas card's ⠿ grab glyph refused 8 drags in a row (pre-existing, not 18k's diff); the step's "expect none" is mis-stated for Canvas (its cards are `PaneSurface` panes) |
+| **C6** re-font reading position | voice switch · gap control · landings · no blank page at the end: **PASS**; the place across a comments toggle: **FINDING** | **W-4** — with the page's top edge in a paragraph gap, the first comments ON→OFF leaves the previous paragraph's last line on top, hers one line lower (the step's own pre-fix symptom; 7 runs, both voices, mid-note and end) · **W-2** — after a gap round trip + ⌘↓, the place lost by a dozen paragraphs (2 of 7) · O-2 a stale ring |
+| **C5** concurrency | row 59 · P33 (+ redo arm) · P38: **PASS** (Study + Terminal); P26/P27 not walkable here | **W-3** — the SECOND backup folder is sent a stray July drill file instead of the act's backup, and its check reports "file is not a database" (pre-existing, not 18k's diff) · O-3 a 0 ms synthetic double press is silent |
+
 ### LIVE STATUS
 
 - Step 0 (grants) — DONE (`AX: true SCREEN: true`).
@@ -2994,7 +3009,8 @@ own DerivedData (`App/Variorum/DerivedData/18k-walks/`). Captures: `notes/plans/
 - C3 — DONE, **PASS with one FINDING (W-1, pre-existing, not 18k's diff) and one step-text correction** (table below).
 - C6 — WALKED in both voices (table below): voice switch, the paragraph-gap control, the landings and the no-blank-page end all **PASS**; **FINDING W-4** (with the page's top edge in a paragraph gap, the first comments ON→OFF leaves the previous paragraph's last line on top — the step's own pre-fix symptom — 7 runs, both voices) and **FINDING W-2** (the place lost by a dozen paragraphs, 2 runs) + O-2 (a stale ring). Settings restored and read back.
 - C2 Study repeat — DONE, **PASS** (below).
-- C5 — WALKED in Study: steps 1–4 **PASS**; **FINDING W-3** (the second backup folder gets the wrong file, pre-existing) + O-3 (a 0-ms synthetic double press is silent) (table below). The Terminal repeat of steps 1–2 — IN-PROGRESS.
+- C5 — DONE: steps 1–4 **PASS** in Study, steps 1–2 **PASS** in Terminal; **FINDING W-3** (the second backup folder gets the wrong file, pre-existing) + O-3.
+- Settings read back as found; the dev instance quit by identity; zero instances. KnownIssues rows filed for W-1 · W-2/W-4 · W-3 (owner 12, the orchestrator's to re-own). **THE WALKS — DONE.**
 - Deaths / resumes: none.
 
 **The dev store as found:** custody posture **standard** ("Your Apple account holds a key") — the app opened
@@ -3152,3 +3168,21 @@ holding the copies and the two plain-text exports, was deleted after the origina
 
 **Walk residue in the dev store:** the scratch note **"2026-09-25"** (in no book — the Pool) with its two
 blocks; the *Walk test* canvas card left placed (C3).
+
+### C5 — the Terminal repeat (steps 1–2)
+
+| # | Step | Captures | What I saw | Verdict |
+|---|---|---|---|---|
+| 1 | *three ways of working*: Write, a click into block 1 (1/5); Canvas; a click into card 4 (the fanned one); ⌘K → Block History | `c5t-01a…d` | The pane opened on card 4's block — "The keeper's logbook…", **take 1 of 2**, its savepoint listed — not block 1 | PASS |
+| 2 | The scratch note: ⌘⇧D, `zzterm` typed into the first half, ⌘⇧D on another block; ⌥⌘Z twice 30 ms apart; Cancel | `c5t-02a…f` · `c5t-02e-dialog` | One undo landed, the second press brought **"Undo Divide?"**; Cancel kept `zzterm`; the Edit menu reads "Undo Divide" / "Redo Divide" (nothing undone past the confirm) | PASS |
+
+**Warnings over the whole second instance (`app-run2.log`): 92**, every burst at a pane mount — C3's 26 (above); 48 at
+13:40 (C6's Takes switch over the 212-block note), 3 at 13:41–42 (Blocks), 10 at 13:52 and 5 at 14:03 (C5's two
+Canvas mounts). None during Index/Outline/resize/scroll/drag/windows, C2 or the C6 toggles.
+
+**The dev store as left:** Terminal · Follow system · Rose & moss · inline comments OFF · gap Standard · Outline ring ·
+insurance OFF · second folder `~/Documents/` (all read back through Accessibility before the quit); Settings on its
+General pane. Residue: the Pool note **"2026-09-25"** (the C5 scratch — its divides partly undone; `zzword`/`zzterm`
+in its first block and in Block History), the *Walk test* canvas card, and two quiet savepoints the walk's divides
+wrote. The instance was quit by identity (`tell application id … to quit`), `pgrep -fl 'Variorum.app/Contents/MacOS'`
+empty afterwards; `/Applications/Variorum.app` and her real store were never touched.
