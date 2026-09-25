@@ -416,3 +416,183 @@ struct DataSafetyRunbookTests {
         #expect(DataSafetyCopy.runbook.contains("Always copy out as new"))
     }
 }
+
+/// A main-actor flag the pin's Task sets (a captured `var` may not be
+/// mutated from a Task's closure).
+@MainActor
+private final class SingleFlightFlag {
+    var value = false
+}
+
+/// **18k C5 — 17e's P38: the backup run is SINGLE-FLIGHT.**
+///
+/// `StoreBackup.run` used to spawn a detached run per request with no
+/// in-flight guard, and a snapshot's name is second-granular — so two forced
+/// runs in one second wrote the SAME path, raced `integrityCheck`'s sidecar
+/// deletion, and both `prune`d the same doomed set (the loser's `removeItem`
+/// throwing out as a false `failed` for a snapshot that succeeded). Doors that
+/// reach it with no shared latch: the hourly tick, the insurance toggle (no
+/// `busy`), the iCloud offer, the posture switch.
+///
+/// RED-ON-OLD (behavioural revert R1-i5, recorded in the 18k C5 record): two
+/// runs, two log records, two outcomes — and the pane never busy.
+@MainActor
+@Suite("Backup single-flight (18k C5 — 17e P38)")
+struct BackupSingleFlightTests {
+    private func temporaryDirectory() throws -> URL {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("variorum-18k-c5-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
+    }
+
+    /// Never `.standard` (the dev store's own domain while the suite runs).
+    private func scratchDefaults() -> @Sendable () -> UserDefaults {
+        let suite = "variorum-18k-c5-tests-\(UUID().uuidString)"
+        return { UserDefaults(suiteName: suite)! }
+    }
+
+    private func populatedDatabase() throws -> AppDatabase {
+        let db = try AppDatabase.inMemory()
+        try withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 1))
+        } operation: {
+            let ops = Operations()
+            let post = try ops.createPost(title: "one copy, once", profile: .journal)
+            _ = try ops.newBlock(in: post.id, text: "Words worth one careful copy.")
+        }
+        return db
+    }
+
+    /// The shape the app's real store has: an on-disk WAL pool (readers run
+    /// beside the writer), so two runs' snapshot reads are not serialised by
+    /// the source the way an in-memory queue's are.
+    private func populatedOnDiskDatabase(in dir: URL) throws -> AppDatabase {
+        let db = try AppDatabase.onDisk(
+            url: dir.appendingPathComponent("store.sqlite"), key: nil)
+        try withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 1))
+        } operation: {
+            let ops = Operations()
+            let post = try ops.createPost(title: "one copy, once", profile: .journal)
+            _ = try ops.newBlock(in: post.id, text: "Words worth one careful copy.")
+        }
+        return db
+    }
+
+    /// An older copy already in the folder, so a run's prune (keep 1) has
+    /// something to take — the half of the race that produced the false
+    /// `failed`.
+    private func seedOlderCopy(_ source: AppDatabase, in dir: URL, at stamp: Date) async throws {
+        _ = try await Task.detached {
+            try StoreBackup.performBackupIfDue(
+                database: source, directory: dir, configuration: .init(), now: stamp, force: true)
+        }.value
+    }
+
+    /// THE P38 pin: Back Up Now twice inside one second (two doors, or one
+    /// door and the insurance toggle) is ONE run — one snapshot, one log
+    /// record, the second request handed the first run's outcome.
+    @Test func twoForcedRunsInOneSecondAreOneRun() async throws {
+        let storeDir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: storeDir) }
+        let source = try populatedOnDiskDatabase(in: storeDir)
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let defaults = scratchDefaults()
+        let noon = Date(timeIntervalSince1970: 1_782_900_000)
+        try await seedOlderCopy(source, in: dir, at: noon.addingTimeInterval(-2 * 86_400))
+
+        var configuration = StoreBackup.Configuration()
+        configuration.keep = 1
+        // One clock reading for both requests: the same second, by construction.
+        let backup = StoreBackup(
+            database: source, directory: dir, configuration: configuration,
+            defaults: defaults, now: { noon })
+        let first = Task { await backup.backUpNow() }
+        let second = Task { await backup.backUpNow() }
+        let (a, b) = (await first.value, await second.value)
+
+        #expect(BackupLog.read(defaults()).count == 1, "ONE run for two requests")
+        #expect(a == b, "the second request is handed the first run's outcome")
+        #expect(a.primary.outcome == .written)
+        #expect(b.primary.outcome != .failed, "never a false 'failed' for a copy that landed")
+        #expect(backup.lastError == nil)
+        let copies = try StoreBackup.existingBackups(in: dir)
+        #expect(copies.count == 1, "one snapshot kept (keep 1), the older one pruned once")
+        #expect(copies.first?.lastPathComponent == a.primary.file)
+    }
+
+    /// The guard on the one call this fix had to make: a FORCED request
+    /// arriving while an UNFORCED run is in flight is not handed that run's
+    /// "already up to date" — Back Up Now promises a fresh copy regardless of
+    /// the interval. It waits for the due-check, then runs its own (never in
+    /// parallel). Green on the unlatched door too (there the two ran side by
+    /// side); what it guards is the latch's shape (mutation M-P38c:
+    /// "coalesce every request").
+    @Test func aForcedRequestBehindADueCheckStillWritesAFreshCopy() async throws {
+        let source = try populatedDatabase()
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let defaults = scratchDefaults()
+        let noon = Date(timeIntervalSince1970: 1_782_900_000)
+        // A copy from an hour ago: the due-check has nothing to do.
+        try await seedOlderCopy(source, in: dir, at: noon.addingTimeInterval(-3_600))
+
+        let backup = StoreBackup(
+            database: source, directory: dir, configuration: .init(),
+            defaults: defaults, now: { noon })
+        let tick = Task { await backup.backupIfDue() }
+        let pressed = Task { await backup.backUpNow() }
+        let (due, forced) = (await tick.value, await pressed.value)
+
+        #expect(due.primary.outcome == .upToDate, "the tick found nothing due")
+        #expect(forced.primary.outcome == .written,
+                "Back Up Now wrote a fresh copy — it was not handed the tick's answer")
+        #expect(BackupLog.read(defaults()).count == 2, "two runs, one after the other")
+        #expect(backup.lastError == nil)
+    }
+
+    /// The pane's un-latched door: turning the plain-text insurance ON runs a
+    /// forced backup, and it now holds the pane's ONE latch while it does —
+    /// so Back Up Now and the folder doors grey (`.disabled(model.busy)`)
+    /// exactly as they do behind their own runs, and a Back Up Now that
+    /// reaches the model anyway starts nothing.
+    @Test func theInsuranceToggleHoldsThePanesLatchWhileItsBackupRuns() async throws {
+        let source = try populatedDatabase()
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let defaults = scratchDefaults()
+        let noon = Date(timeIntervalSince1970: 1_782_900_000)
+        let backup = StoreBackup(
+            database: source, directory: dir, configuration: .init(),
+            defaults: defaults, now: { noon })
+        let model = DataSafetyModel(backup: backup, defaults: defaults)
+
+        let finished = SingleFlightFlag()
+        let toggling = Task {
+            await model.setInsurance(true)
+            finished.value = true
+        }
+        var sawBusy = false
+        for _ in 0..<5000 where !finished.value {
+            if model.busy { sawBusy = true; break }
+            await Task.yield()
+        }
+        #expect(sawBusy, "the toggle's backup pass holds the pane busy — its siblings grey")
+        // A Back Up Now that reaches the model while the pass runs starts nothing.
+        await model.backUpNow()
+        await toggling.value
+
+        #expect(!model.busy, "and lets go when it lands")
+        #expect(model.insuranceEnabled)
+        #expect(BackupLog.read(defaults()).count == 1, "one run: the toggle's")
+        #expect(model.note?.contains("Copied") == true, "the toggle's receipt speaks")
+    }
+}
