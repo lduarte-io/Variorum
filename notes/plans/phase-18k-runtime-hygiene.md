@@ -335,3 +335,25 @@ you (files you did not change changing), write nothing, report, stop.
 `Sync/`. PROVISIONAL-and-continue for non-gating ambiguity (QUESTIONS from **#146**); stop-and-report
 for anything product-flavoured or author-only. **Your final message:** a short summary pointing at
 your record — the record is the deliverable.
+
+---
+
+## UNIT C1 RECORD — the autosave-coordinator registry release (implementer: `opus-implementer`, 2026-09-25)
+
+**NOT DONE (first line, per the brief):** everything below is PENDING until flipped — the record opens
+before the first line of code.
+
+### LIVE STATUS
+
+- Reading (CLAUDE.md canon, this plan's kickoff corrections / ledger / sitting / traps / cast, the
+  review §6, `AppSession`, the quit + lock + leaving roads, `AutosaveCoordinator`, all eight
+  acquisition sites, the phone's release precedent) — DONE (in-session, this record's first commit).
+- The trace (every site's acquisition shape and real end of life; what the ⌘Q/lock registration is
+  still doing for J11) — IN-PROGRESS (written into this record next).
+- Pins (red-on-old) — NOT-STARTED.
+- The fix — NOT-STARTED.
+- Behavioural revert (red-on-old evidence) — NOT-STARTED.
+- Dev-store before/after measurement — NOT-STARTED.
+- Closing runs (touched suites + pins + the eleven Tutorial suites; iOS build; phone quick-note
+  suites) — NOT-STARTED.
+- Deaths / resumes: none.
