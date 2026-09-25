@@ -2992,7 +2992,7 @@ own DerivedData (`App/Variorum/DerivedData/18k-walks/`). Captures: `notes/plans/
 - C1 — DONE, **PASS** (table below).
 - C2 — DONE in Terminal, **PASS** (table below); the Study repeat rides the C6 voice flip.
 - C3 — DONE, **PASS with one FINDING (W-1, pre-existing, not 18k's diff) and one step-text correction** (table below).
-- C6 — WALKED in both voices: steps PASS on the ordinary road, **FINDING W-2** (the place lost after a gap round trip + a long landing, both voices) + observations O-1/O-2 (table below); the settings restore rides the end of the walk.
+- C6 — WALKED in both voices: steps PASS on the ordinary road, **FINDING W-2** (the place lost after a gap round trip + a long landing, both voices, 2 of 4) + observations O-1/O-2 (table below); the settings restore rides the end of the walk.
 - C2 Study repeat · C5 — NOT-STARTED.
 - Deaths / resumes: none.
 
@@ -3079,14 +3079,14 @@ NOT toggle them (three tries, the point verified at the AX frame); the Accessibi
 | 5 | Voice Study ⇄ Terminal from mid-story | `c6-12a-mid` · `c6-12c-study-mid` · `c6-12d-terminal-back` | The same paragraph at the top both ways ("“‘Oh, yes,’ said he…"), Study re-wrapped; the note's current block (118) kept | PASS |
 | 6 | Landings: ⌘2 → ⌘1; a deep jump from Blocks ▸ open in Write | `c6-13a/b/c` · `c6-14a/b/c` · `c6-15a…d` | Write → Takes → Write: the page where it was (the whole-window diff is 178 px — the caret only). Blocks ▸ block 11 and block 211 (filtered) ▸ **open in write**: each block's FIRST line at the very top (block 11/212, 211/212). (A double-click on a filtered row did not open it — the row had not been selected by the first click, a missed point; the button road worked) | PASS |
 
-**FINDING W-2 (C6's surface — the place LOST after a paragraph-gap round trip, both voices; 2 of 3 tries):**
+**FINDING W-2 (C6's surface — the place LOST after a paragraph-gap round trip, both voices; 2 of 4 tries — corrected from "2 of 3" in the commit that first recorded it: run `c6-20-e1` also followed a gap round trip, `c6-19`, and held its place):**
 recipe — mid-story, paragraph gap → "a blank line's worth" → "Standard"; click in the text; **⌘↓** (a long landing to
 the end); ~2.5 s later turn inline comments **ON**. In **Terminal** (`c6-07*` then `c6-08a/b/c`): the end-landed page
 ("And in this way he managed…" at the top) went, on ON, to "“I have my revolver,” said I." — about a dozen
 paragraphs and two screens UP — and OFF left it there. In **Study** (`c6-21-g1a/b/c`): the same, the page going
 from "And in this way…" to "He has come back and done it…" (≈ a dozen paragraphs up) and staying on OFF. The
-immediately following identical run (`c6-21-g2*`) held, with O-1's one-line shift (153 → 176). **Without** the gap
-round trip, 10 end runs and 7 mid runs never lost the place. Expected per the step: the same line at the top.
+immediately following identical run (`c6-21-g2*`) held, with O-1's one-line shift (153 → 176), and `c6-20-e1` held
+(with O-2). **Without** the gap round trip, 9 end runs (8 Terminal, 1 Study) and 7 mid runs never lost the place. Expected per the step: the same line at the top.
 Not traced; whether it is C6's re-assert or the pre-existing estimate class is the orchestrator's (a pre-C6 build
 pair is WalkKit's worktree recipe). **O-2 (the same precondition):** in Study run `c6-20-e1a`, 2.5 s after that
 ⌘↓ landing (the run after a gap round trip), the editing RING was drawn ~one line too HIGH — its top in the gap
