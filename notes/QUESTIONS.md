@@ -1899,6 +1899,11 @@ on its kickoff table. **(b) ACKNOWLEDGED-HERS 2026-09-24, same sitting — her w
 "good to know for 13t - i'll handle it then"; it waits for 13t's kickoff, deliberately
 undecided until the channel decision sits beside it. (a) stays OPEN with the recorded
 lean standing (CAPTCHA unarmed until abuse appears) — re-surface it at the beta's
-start.**
+start.** **(a) RULED 2026-09-25 at the 13r kickoff sitting — re-surfaced as promised
+(13r is the phase before the beta), her call at the sitting's question round: KEEP THE
+LEAN — CAPTCHA stays unarmed until abuse appears. The arming recipe stays recorded here
+for the day it's needed (the Supabase dashboard toggle + the app's auth calls carrying
+the token — a small client change that would want a slot). Both halves of #145 are now
+dispositioned: (a) ruled, (b) held for 13t's kickoff by her word.**
 
 *(Next free number: **#146**.)*
