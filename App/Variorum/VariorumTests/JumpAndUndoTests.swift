@@ -108,6 +108,21 @@ struct FragmentLinesTests {
         #expect(FragmentLines.lineIndex(atLocalOffset: 200, lineRanges: ranges) == 2)
         #expect(FragmentLines.lineIndex(atLocalOffset: 9_999, lineRanges: ranges) == 2)
     }
+
+    /// 18k C6b (W-4, QUESTIONS #147 PROVISIONAL): the line she is READING is
+    /// the first whose baseline is at or below the edge — Terminal's
+    /// measured baselines, 14 pt into each 17-pt line. A line cut above its
+    /// baseline is still hers; cut below it (descenders only), the next line
+    /// is; below every baseline (the paragraph's trailing spacing), none here.
+    @Test func theReadingLineIsTheFirstWhoseBaselineIsStillOnScreen() {
+        let baselines: [CGFloat] = [14, 31, 48]
+        #expect(FragmentLines.readingLineIndex(atLocalY: 0, baselines: baselines) == 0)
+        #expect(FragmentLines.readingLineIndex(atLocalY: 14, baselines: baselines) == 0)
+        #expect(FragmentLines.readingLineIndex(atLocalY: 15, baselines: baselines) == 1)
+        #expect(FragmentLines.readingLineIndex(atLocalY: 47.5, baselines: baselines) == 2)
+        #expect(FragmentLines.readingLineIndex(atLocalY: 49, baselines: baselines) == nil)
+        #expect(FragmentLines.readingLineIndex(atLocalY: 5, baselines: []) == nil)
+    }
 }
 
 @MainActor

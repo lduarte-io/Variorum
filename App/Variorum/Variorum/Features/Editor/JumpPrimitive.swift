@@ -102,6 +102,17 @@ nonisolated enum FragmentLines {
         return lineBounds.count - 1
     }
 
+    /// **The line she is READING at fragment-local `y`** (18k C6b — the
+    /// held walks' W-4): the first line whose baseline is at or below `y`,
+    /// i.e. whose letters are still on screen under an edge at `y`. nil ⇒
+    /// every line's baseline is above `y` — the edge is in the paragraph's
+    /// trailing spacing or cuts only its last line's descenders, and the
+    /// reading position belongs to what follows. `baselines` are fragment-
+    /// local (a line's typographic top plus its `glyphOrigin.y`).
+    static func readingLineIndex(atLocalY y: CGFloat, baselines: [CGFloat]) -> Int? {
+        baselines.firstIndex { y <= $0 }
+    }
+
     /// The line whose character range contains `offset` (fragment-local,
     /// UTF-16 — the structural API's unit). Past the last range ⇒ the last.
     static func lineIndex(atLocalOffset offset: Int, lineRanges: [NSRange]) -> Int? {

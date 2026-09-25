@@ -138,9 +138,9 @@ struct ScrollAnchorTests {
                 let layoutManager = try #require(textView.textLayoutManager)
                 let origin = textView.textContainerOrigin
 
-                /// Ground truth: the first entry that still has TEXT at or
-                /// below the anchor's probe (one point under the viewport
-                /// top) — the block she is reading.
+                /// Ground truth: the first entry whose LETTERS are still at
+                /// or below the anchor's probe (one point under the viewport
+                /// top) — its baseline on screen — the block she is reading.
                 ///
                 /// 18k C6b (W-4) re-mechanized this from "the last entry whose
                 /// FRAGMENT top is at or above the viewport top". A TK2 layout
@@ -154,17 +154,18 @@ struct ScrollAnchorTests {
                 /// BOTH stops (the scroll to 200 lands on a line, the one to
                 /// 500 in a gap) — proven by that mutation in the C6b record.
                 /// Every block here is one line with no blank paragraph, so
-                /// "has text below the probe" is the last line's bottom.
+                /// "its letters are on screen" is its last line's baseline.
                 @MainActor func topEntry(_ top: CGFloat) -> Int {
-                    var textBottoms: [CGFloat] = []
+                    var baselines: [CGFloat] = []
                     layoutManager.enumerateTextLayoutFragments(
                         from: layoutManager.documentRange.location, options: []
                     ) { fragment in
-                        let lastLine = fragment.textLineFragments.last?.typographicBounds.maxY ?? 0
-                        textBottoms.append(fragment.layoutFragmentFrame.minY + origin.y + lastLine)
+                        let last = fragment.textLineFragments.last
+                        let baseline = (last?.typographicBounds.minY ?? 0) + (last?.glyphOrigin.y ?? 0)
+                        baselines.append(fragment.layoutFragmentFrame.minY + origin.y + baseline)
                         return true
                     }
-                    return textBottoms.firstIndex { $0 > top + 1 } ?? textBottoms.count - 1
+                    return baselines.firstIndex { $0 >= top + 1 } ?? baselines.count - 1
                 }
                 @MainActor func entry(containing offset: Int) -> Int {
                     var start = 0

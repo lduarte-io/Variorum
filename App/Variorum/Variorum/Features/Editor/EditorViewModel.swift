@@ -4084,21 +4084,29 @@ final class EditorViewModel {
         // Resolve to the LINE at the viewport top instead (`FragmentLines`).
         let lines = fragment.textLineFragments
         let localY = point.y - fragment.layoutFragmentFrame.minY
-        // 18k C6b (the held walks' W-4): the edge in a paragraph GAP is not on
-        // any line she is reading. A layout fragment includes its paragraph's
-        // trailing spacing, so an edge below its last line hit the PREVIOUS
-        // paragraph and named its last line; and a note with a blank line
-        // between paragraphs (every sample-library story — bulk entry keeps
-        // that line as content) put the edge on the BLANK paragraph too. The
-        // restore then put that line at the top and hers a line lower. Here
-        // the line she is reading is the first line of the next paragraph
-        // that has text, so the capture names it. Bounded by the viewport
-        // and laid-out fragments only (P1); nothing readable below the edge
-        // inside the viewport (a note's end, a page of blank lines) keeps the
-        // old answer.
-        let belowItsLastLine = lines.last.map { localY >= $0.typographicBounds.maxY } ?? false
-        if belowItsLastLine || Self.isBlankParagraph(fragment),
-           let below = firstReadableLineStart(
+        // 18k C6b (the held walks' W-4): the line she is reading is the first
+        // one whose LETTERS are still on screen — its baseline at or below
+        // the probe — in a paragraph that has text. The capture used to name
+        // whatever line's BOX the probe hit, and a layout fragment's box runs
+        // past its last line through the paragraph's trailing spacing: an
+        // edge in the gap between two paragraphs named the PREVIOUS
+        // paragraph's last line, and a note with a blank line between
+        // paragraphs (every sample-library story — bulk entry keeps that line
+        // as content) named the blank line. The restore then put that line at
+        // the top and hers a line lower. The same holds for an edge that cuts
+        // a line below its baseline, where only descenders are left on screen
+        // (the fix's own walk, Study at the end of a note — PROVISIONAL,
+        // QUESTIONS #147). A line cut above its baseline is still hers.
+        // Bounded by the viewport and laid-out fragments (P1); when nothing
+        // readable follows inside the viewport (a note's end, a page of blank
+        // lines) the old answer stands.
+        if !Self.isBlankParagraph(fragment),
+           let i = FragmentLines.readingLineIndex(
+            atLocalY: localY,
+            baselines: lines.map { $0.typographicBounds.minY + $0.glyphOrigin.y }) {
+            return fragmentStart + lines[i].characterRange.location
+        }
+        if let below = firstReadableLineStart(
             after: fragment, above: top + scrollView.contentView.bounds.height - origin.y,
             layoutManager: layoutManager, contentManager: contentManager) {
             return below

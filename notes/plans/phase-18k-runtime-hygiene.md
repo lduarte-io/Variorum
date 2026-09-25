@@ -3766,4 +3766,11 @@ the box. To her eye it is a gap top, and it is the W-4 shape. **Pin first:** `Re
 **RED on the fix tree `a8e1e8cc`** (5 issues: 47510 for 47525, `18k-c6b-baseline-prefix.log`), the other seven cases
 green. **The refinement (PROVISIONAL, QUESTIONS #147):** a line counts as hers while its baseline is at or below the
 probe (TK2's `glyphOrigin.y` — 14 of 17 pt Terminal, 17 of 22 Study, measured); a line whose baseline has scrolled
-off yields to the next line with text. PENDING until the pins run.
+off yields to the next line with text. **Built — the pins GREEN** (`18k-c6b-pins-fixed2.log`: 27 tests / 6 suites —
+the eight `RefontGapTopTests` cases incl. the sliver, `JumpViewportLayoutTests`, `RefontViewportTests`,
+`JumpCorrectionLoopTests`, `FragmentLinesTests` + the new pure pin `theReadingLineIsTheFirstWhoseBaselineIsStillOnScreen`,
+`ScrollAnchorTests` with its ground truth moved to the baseline too). One pure function carries the rule,
+`FragmentLines.readingLineIndex(atLocalY:baselines:)`; the capture's old box test is gone (the baseline subsumes
+it: an edge in a paragraph's trailing spacing is below every baseline). Behavioural revert **R-base** (named here,
+run after this commit): `topVisibleOffset()` back to `a8e1e8cc`'s box rule — expected: only the sliver zone red
+(5 issues), every other case green; and **M-inset** re-run against the moved ground truth. Results PENDING.
