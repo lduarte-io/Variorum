@@ -340,8 +340,11 @@ your record — the record is the deliverable.
 
 ## UNIT C1 RECORD — the autosave-coordinator registry release (implementer: `opus-implementer`, 2026-09-25)
 
-**NOT DONE (first line, per the brief):** everything below is PENDING until flipped — the record opens
-before the first line of code.
+**NOT DONE (first line, per the brief):** (1) the HANDS-ON GUI walk and its captures — HELD: this
+session's host (Ghostty) holds neither Screen Recording nor Accessibility, so nothing in this session
+tree could capture or drive the app; granting either is the author's (TCC). An in-app scripted walk
+on the dev store stands in as the use evidence (below). (2) The full Mac suite — the orchestrator's
+finals, per the brief. Everything else the brief asks for is done.
 
 ### THE TRACE (done in-session before any pin or fix — every claim re-read at the code)
 
@@ -364,7 +367,10 @@ surface touched accumulate for the session; `finalizeAll` (⌘Q, `VariorumAppDel
 | `BookIndexEditModel.swift:57` | ONCE per post per cache lifetime (`coordinators[postID]`); `teardown` clears the cache and a reused model re-acquires on its next touch (the ladder's R1-8 shape) | per post: `teardown` (cache cleared) or the model's death |
 | `Registry/ShellActions.swift:109` (`toggleSeal` fallback) | one acquisition per press, never released, for `router.activePostID` | none — it only FLUSHES; `flushExistingAutosave` is the right door (T5) |
 
-The per-access/per-call sites mean the holder count for a Canvas- or Compare-touched post climbs by
+*(Found while building the fix: `CompareViewModel.init` ALSO acquires — `_ = coordinator(for:
+anchorPostID)` — and so does `peerSlots.didSet` for every picked peer on every mutation; so
+Compare's discarded eager twins acquire too, which is why its release lives in `deinit` as well as
+at `teardown()`.)* The per-access/per-call sites mean the holder count for a Canvas- or Compare-touched post climbs by
 hundreds in minutes; nothing today reads it, but a release there without first making the
 acquisition single would be meaningless.
 
@@ -525,6 +531,84 @@ savepoints its own sessions, and the idle backstop (`IdleCommitScheduler`, every
   Open-strip row — every Debug walk and any Debug session that opens ten notes in one window; the
   Release app most likely builds a malformed two-grapheme key equivalent for rows 10+ instead
   (unverified what AppKit then does with it).
-- Closing runs (touched suites + pins + the eleven Tutorial suites; iOS build; phone quick-note
-  suites) — NOT-STARTED.
+- Closing runs — DONE (on the committed fix, the tree clean, zero app instances): **every Mac suite
+  in every test file that constructs or drives a touched type** (`EditorViewModel(session:)`,
+  `TakesViewModel(`, `BlockTOCViewModel(`, `CanvasViewModel(`, `CompareViewModel(`,
+  `BookIndexEditModel(`, `ShellActions(`) **or the registry roads** (`autosave(forPost`,
+  `releaseAutosave`, `savepointOnLeaving`, `quitFinalize`, `macWillLock`, `openAutosaveCount`) —
+  152 suites selected literally by name, **including all eleven Tutorial acceptance-spine suites**:
+  **`Test run with 858 tests in 152 suites passed after 223.410 seconds`**, zero `✘`, zero skipped.
+  iOS: **`xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS` → `** BUILD
+  SUCCEEDED **`**. The phone suites that exercise the shared registry (`MobileQuickNoteTests` — the
+  one production release — `MobileQuickNoteReadFailureTests`, `MobileSavepointOnLeavingTests`,
+  `MobileMembershipTests`, `MobileDeletionTests`, `MobileNoteEntryDateTests`,
+  `MobileNoteRenameTests`) on the iPhone 17 Pro simulator: **`Test run with 65 tests in 7 suites
+  passed`**. No `swift test` (zero `Sources/`). No full Mac suite (the orchestrator's finals).
+
+### DISPOSITION
+
+**C1 — FIXED**, pinned by `VariorumTests/AutosaveRegistryLifecycleTests.swift`:
+- the count pins, RED on the pre-fix tree (`af9041e7`) and under R1, GREEN on the fix —
+  `writeLetsGoOnceTheNoteIsLeft` · `writeLetsGoWhenItsEditorOutlivesTheLeaving` ·
+  `takesLetsGoOnceTheNoteIsLeft` · `blocksAndReadLetGoOnceTheNoteIsLeft` ·
+  `canvasHoldsExactlyOneAndLetsGo` · `compareHoldsOnePerPostAndLetsGo` ·
+  `theBookIndexHandsBackWhatItTook` · `theSealFallbackFlushesWithoutMinting`;
+- the three verifications + the mode switch, GREEN on old (it never let go) and RED under the
+  mutations M1/M2 that a wrong release would be — (a) `theOpenTailOfANoteLeftMidParagraphIsIn
+  ItsLeavingSavepoint` (also RED on old — T3.3, the tail now lands at the leaving instead of at ⌘Q)
+  · `theOpenTailIsSavepointedByQuitAtTheLatest` · `aNoteEditedInABookKeepsItsQuitAndLockSavepoint`;
+  (b) `quitStillFinalizesEveryNoteThatIsStillOpen` · `theLockStillFinalizesEveryNoteThatIsStillOpen`;
+  (c) `twoSurfacesOnOneNoteKeepOneCoordinatorWhenOneCloses` (M2 shows the text loss);
+  `aModeSwitchIsNotALeaving`; parity `theSealFallbackStillFlushesAnOpenSurfacesTyping`.
+- `ShellActions:109` (kickoff correction 4) — FIXED with the same suite's seal pin.
+- The 13l L-d Mac pins (`AutosaveRegistryReleaseTests`) — ADAPTED, not weakened: three pins let a
+  post go through `letGo` (release, then the leaving savepoint), every assertion unchanged in
+  meaning; the phone's release rule is byte-unchanged (`#else`).
+- A DEBUG `assert` now stops the world on more releases than acquisitions for a post (the text-loss
+  class the brief names) — a guard, not a behaviour; nothing in the 858 + 65 tripped it.
+
+**Named residuals (recorded, bounded, all on the SAFE side — an entry kept, never one dropped early):**
+1. **Book and Compare-peer notes stay registered until a leaving savepoint lands for them** — the
+   ⌘Q/lock walk, which now DROPS every note it savepoints with nobody holding it, or a workspace
+   leaving if the note is also a pane's. So the registry resets at every lock, but between locks a
+   book-heavy session still walks the book notes it touched (today's behaviour for them, exactly —
+   the ⌘Q/lock savepoint is their ONLY leaving road; see noticed item 3).
+2. **An entry the lock walk could not savepoint** (the store closing under it) stays until the next
+   leaving or walk — bounded by the notes open at the lock.
+3. **A savepoint racing an in-flight multi-variant flush** (pre-existing: `closeAutoCommit` can land
+   between a batch's per-variant writes) leaves the entry dirty at completion → kept, so ⌘Q/lock
+   still reaches the second variant's text. Nothing new; the release makes it no worse.
+
+**Recorded consequence** — as T5's paragraph above: a note the Mac LEFT, later changed elsewhere and
+not re-opened here, no longer gets a Mac ⌘Q savepoint (J11's letter; the idle backstop covers it).
+
+### NOTICED, NOT TOUCHED (C1's scope fence)
+
+1. **A pre-existing DEBUG-build crash — the tenth Open-strip row** (`EditorCommands.swift:780`;
+   full note under "FOUND ON THE WAY" above; crash report in `notes/plans/18k-screens/c1/`). Needs
+   an owner (a one-liner — key only the first `OpenNotes.ordinalCap` rows — plus a red pin that
+   mounts the menu with ten open notes). Every Debug walk that opens ten notes in one window hits it.
+2. **The phone's editor has the same leak class**: `MobileEditorViewModel.swift:187` acquires and
+   never releases (the phone has no quit registry, but `flushEveryOpenPost` walks every entry at
+   each filing and background flush). The mobile app row's (or its catch-up's).
+3. **A pre-existing J11 coverage question for the author:** a note edited INSIDE a book (or as a
+   Compare peer) is never reported LEFT — `WorkspaceModel.shownNoteIDs` counts only a pane's own
+   note — so its leaving savepoint arrives only at ⌘Q, the lock, or the 2 h idle backstop, never
+   when she leaves the book. C1 preserves that exactly; whether leaving a BOOK should savepoint
+   the notes edited in it is hers.
+4. **The walk tooling's grant note is stale for this host**: `Tools/WalkKit/README.md` says
+   Accessibility is granted to "the terminal host" — true of whichever host earlier walks used,
+   false of Ghostty tonight (no Accessibility, no Screen Recording). Worth one line in the README
+   and her one-time grant if walks are to run from Ghostty.
+5. `EditorViewModel.teardown()` stops observing the coordinator; a model SwiftUI re-shows after an
+   `onDisappear` (same `@State`) stays unobserved (no settle/refusal callbacks) — pre-existing, C1
+   neither causes nor fixes it (the model's HOLD stays until its death, so no pipeline splits).
+6. A stale worktree `/private/tmp/claude-501/u1-baseline-tree` (prunable, not this session's).
+
+### CAPTURES
+
+None possible (see the first line). The use evidence is the in-app walk's probe logs
+(`notes/plans/18k-screens/c1/pre-walk-probe.log`, `post-walk-probe.log`, `pre-walk-crash-probe.log`),
+the crash report, and the instrumentation script that produced them (`c1_instrument.py` — apply to a
+tree, build Debug, launch the binary with `C1_WALK=1`).
 - Deaths / resumes: none.
