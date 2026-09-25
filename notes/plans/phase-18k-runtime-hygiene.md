@@ -940,8 +940,10 @@ does not compose; not this unit's fence).
   (`reports == [10929.0]` inside the install), the update pin RED (reported inside the pass), the burst
   pin RED (2 reports inside the burst, **5** in all), the whole-road guard GREEN (as designed); plus
   one arm not designed to be red — the update pin's steady-state precondition (the last report 229 pt
-  off the measured height after 20 turns on the old road) — its numbers are now printed; interpreted
-  after the fix runs (PENDING). The pins as committed:
+  off the measured height after 20 turns on the old road). **That arm was interpreted after the fix
+  ran: it is TextKit's provisional FIRST measure** (11,182 on the report turn, 10,929 one turn later,
+  with no edit, frame or inset change), not either road's timing. The pins now settle layout before
+  the install, as `mounted()`'s doc records (NOTICED 3). The pins as committed:
   the seam `InlineEditorSurface.Coordinator.viewUpdated(chrome:gutter:on:)` — `updateNSView`'s body
   moved verbatim onto the coordinator (still a synchronous `remeasure()`: behaviour-identical) so a pin
   can drive the update road without a SwiftUI `Context`; `VariorumTests/InlineHeightReportTests.swift`
@@ -951,7 +953,7 @@ does not compose; not this unit's fence).
   `EditorView(inline: true)` mounted fresh reaches its measured height (a GUARD; its teeth are a
   mutation). No double-realization pin: the double is DISPROVED as this binding's effect and does not
   reproduce today (THE MEASUREMENT).
-- The `Modifying state during view update` count, before/after, one fixed suite set — IN-PROGRESS.
+- The `Modifying state during view update` count, before/after, one fixed suite set — DONE (`5b0cc41e`).
   **The set (16 pre-existing suites, named literally, the same on both sides):** `BookOutlineLandingTests`
   · `BookOutlineRowsTests` · `BookViewTests` · `BookFocusFoldTests` · `OutlineWritingSurfaceTests` ·
   `SpreadBookViewTests` · `NoteBoxGeometryTests` · `NoteBoxCompositionTests` · `BookRedesignMountTests` ·
