@@ -305,7 +305,8 @@ struct LibraryPanelHostTests {
             // `SwiftUI.InspectorModifier<…>`; today it spells no inspector.
             let composedType = String(
                 reflecting: type(of: Self.catalog(session, model, library: library).body))
-            #expect(!composedType.lowercased().contains("inspector"),
+            let spellsAnInspector = composedType.lowercased().contains("inspector")
+            #expect(spellsAnInspector == false,
                     "the panel is a column of our own, never a system inspector")
         }
     }
