@@ -524,6 +524,23 @@ struct EditorSurface: NSViewRepresentable {
 /// (the container owns scroll position), height published to SwiftUI after
 /// every storage change so the row grows with typing. Everything else —
 /// delegate pipeline, badges, tint, model — is the one editor brain.
+///
+/// **18k C2 — the height is reported on the NEXT TURN, never inside SwiftUI's
+/// update.** `makeNSView` (through `install`) and every `updateNSView` used to
+/// write the `@Binding` synchronously: measured, that write was the source of
+/// every "Modifying state during view update" this representable emitted (20
+/// of 20 in `BookOutlineLandingTests`' run), and SwiftUI was measured
+/// IGNORING one (an update-phase 16,134 pt no body pass saw, rescued ~29 ms
+/// later by the storage road). All three triggers — the mount, an update
+/// pass, a storage edit — now go through ONE coalescing hop
+/// (`scheduleRemeasure`, newest trigger wins), so a burst reports once, and the binding is only
+/// ever written outside an update, where it reads live (inside one, the
+/// captured binding was measured reading a stale 24). The mount still
+/// schedules its report: wiring is the delivery (the constitution's sink
+/// law) — a surface whose text is already in place when it mounts has no
+/// storage edit to prompt one. The review's claim that this write caused
+/// the Outline's double realization was DISPROVED by measurement (the unit
+/// record, M4). Pinned: `InlineHeightReportTests`.
 // Internal (not private): the inline window tests drive the REAL
 // coordinator path — its per-edit remeasure is the measured cost
 // (review round 1, MINOR 6).
@@ -607,7 +624,28 @@ struct InlineEditorSurface: NSViewRepresentable {
         ) {
             textView.proseGutter = gutter
             applyChrome(chrome, to: textView)
-            remeasure()
+            scheduleRemeasure()
+        }
+
+        /// 18k C2: the newest trigger's number — only its hop measures.
+        private var reportGeneration = 0
+
+        /// The ONE report hop (18k C2). Every trigger — the mount, an update
+        /// pass, a storage edit — schedules a hop, and only the NEWEST one
+        /// measures, so a burst in one turn reports ONCE and at exactly the
+        /// point the old road's LAST report measured: after every trigger of
+        /// the burst and after any main-queue work those triggers queued
+        /// ahead of it. (A first-trigger latch would have measured BEFORE the
+        /// work the later triggers queued — earlier than the road it
+        /// replaces.) A trigger the measurement itself causes bumps the
+        /// generation and gets its own hop, never swallowed.
+        func scheduleRemeasure() {
+            reportGeneration &+= 1
+            let generation = reportGeneration
+            DispatchQueue.main.async { [weak self] in
+                guard let self, generation == reportGeneration else { return }
+                remeasure()
+            }
         }
 
         func install(textView: EditorTextView, reportHeight: @escaping (CGFloat) -> Void) {
@@ -630,13 +668,16 @@ struct InlineEditorSurface: NSViewRepresentable {
                     object: storage, queue: nil
                 ) { [weak self] _ in
                     // didProcessEditing fires INSIDE the edit transaction;
-                    // geometry reads must wait for it to close.
-                    DispatchQueue.main.async {
-                        self?.remeasure()
-                    }
+                    // geometry reads must wait for it to close — the
+                    // scheduled hop is that wait (one turn, as before; 18k C2
+                    // only lets it share the hop with the other triggers).
+                    // Text storage is edited on the main thread, so the
+                    // notification arrives there (the canary's pattern).
+                    MainActor.assumeIsolated { self?.scheduleRemeasure() }
                 }
             }
-            remeasure()
+            // The FIRST height — scheduled, never written inside the mount.
+            scheduleRemeasure()
         }
 
         func remeasure() {

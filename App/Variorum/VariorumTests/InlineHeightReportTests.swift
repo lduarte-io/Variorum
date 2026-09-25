@@ -46,6 +46,13 @@ struct InlineHeightReportTests {
 
     private let chrome = EditorSurfaceChrome(tokens: Queries.ThemeSettings(), dark: false)
 
+    /// One line of the inline editor's prose. TextKit's first full measure
+    /// after an edit was measured one line (20 pt) from the layout a later
+    /// display pass converges to, with no edit and no report in between —
+    /// the measurement brain's class (TEXTKIT2 §2), on the old road and the
+    /// new alike, so value arms that follow an edit allow one line.
+    private let lineSlack: CGFloat = 24
+
     private func spin(_ seconds: TimeInterval) {
         RunLoop.main.run(until: Date().addingTimeInterval(seconds))
     }
@@ -55,12 +62,32 @@ struct InlineHeightReportTests {
         await Task.yield()
     }
 
+    /// A few full turns WITH the window's layout and display passes, so a
+    /// value compared afterwards is TextKit's converged layout, never a
+    /// provisional one (the class `mounted` documents).
+    private func converge(_ window: NSWindow) async {
+        for _ in 0..<4 {
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            await turn()
+        }
+    }
+
     /// The harness's text view (holding the projection, attached to its
     /// model) in a short window, installed on a REAL coordinator whose report
-    /// closure frames the view the way SwiftUI's `.frame(height:)` would.
+    /// closure frames the view the way SwiftUI's `.frame(height:)` would —
+    /// in `makeNSView`'s order: the chrome first, then the install.
+    ///
+    /// **The layout is settled BEFORE the install (measured, not assumed):**
+    /// the first full layout after the view enters its window ran at a
+    /// PROVISIONAL container width — a first measure read 11,182 pt and the
+    /// next turn's 10,929 with no edit, no frame change and no inset change
+    /// (StableSurface's "provisional-width first measure" class, old road and
+    /// new alike). That is TextKit's, not this report's timing, so the pins
+    /// measure a surface whose width has settled.
     private func mounted(
         _ h: EditorHarness, width: CGFloat = 700
-    ) -> (NSWindow, InlineEditorSurface.Coordinator, ReportLog) {
+    ) async -> (NSWindow, InlineEditorSurface.Coordinator, ReportLog) {
         let window = NSWindow(
             contentRect: NSRect(x: 80, y: 80, width: width, height: 300),
             styleMask: [.titled], backing: .buffered, defer: false)
@@ -70,8 +97,13 @@ struct InlineHeightReportTests {
         h.textView.frame = NSRect(x: 0, y: 0, width: width, height: 24)
         container.addSubview(h.textView)
         window.orderFrontRegardless()
-        let log = ReportLog()
         let coordinator = InlineEditorSurface.Coordinator(model: h.model)
+        coordinator.applyChrome(chrome, to: h.textView)
+        for _ in 0..<3 {
+            _ = PaneMeasurement.height(of: h.textView)
+            await turn()
+        }
+        let log = ReportLog()
         let textView = h.textView
         coordinator.install(textView: textView) { height in
             log.reports.append(height)
@@ -91,50 +123,67 @@ struct InlineHeightReportTests {
     /// report landed inside the mount (`reports.count == 1` at once).
     @Test func theFirstHeightArrivesOnTheTurnAfterTheMountNeverInsideIt() async throws {
         try await withInlineEditor(seedBlocks: corpus) { h in
-            let (window, coordinator, log) = mounted(h)
+            let (window, coordinator, log) = await mounted(h)
             defer { coordinator.uninstall(); window.orderOut(nil); window.close() }
             #expect(log.reports.isEmpty,
                     "no height is reported inside the mount: \(log.reports)")
 
             for _ in 0..<20 where log.reports.isEmpty { await turn() }
+            await converge(window)
             let measured = PaneMeasurement.height(of: h.textView)
             #expect(log.reports.count == 1, "the first height arrived exactly once: \(log.reports)")
             #expect(measured > 1000, "the harness measured the seeded post: \(measured)")
-            #expect(abs((log.reports.first ?? 0) - measured) < 0.5,
-                    "and it is the measured height: \(log.reports) vs \(measured)")
+            #expect(abs((log.reports.first ?? 0) - measured) <= lineSlack,
+                    "and it is the content's height: \(log.reports) vs \(measured)")
         }
     }
 
-    /// **THE UPDATE PASS: no report inside it; the new height arrives next
-    /// turn.** `viewUpdated` is `updateNSView`'s body. The text view is
-    /// narrowed first (a reflow with no storage edit), so the update's own
-    /// report is the one that carries the new height.
+    /// **THE UPDATE PASS: no report inside it — and the height it reports
+    /// is the one its own layout produced.** `viewUpdated` is `updateNSView`'s
+    /// body. SwiftUI's order inside one pass is UPDATE, then LAYOUT (which is
+    /// where a new width reaches the view), then the next turn — so the pin
+    /// drives exactly that: the update, then the column narrowed and laid out
+    /// (a reflow with no storage edit — nothing else will re-report it), then
+    /// the turns.
     ///
-    /// RED ON OLD: `updateNSView` re-measured synchronously — the report
-    /// landed inside the update pass (the measured warning generator, and
-    /// the write SwiftUI was measured ignoring).
+    /// RED ON OLD, twice over: `updateNSView` re-measured synchronously, so
+    /// the report landed INSIDE the pass (the measured warning generator, and
+    /// the write SwiftUI was measured ignoring) — and it measured BEFORE the
+    /// layout that pass was about to do, so it reported the WIDE height and
+    /// nothing re-reported the narrow one: a stranded frame.
     @Test func anUpdatePassReportsOnTheTurnAfterItNeverInsideIt() async throws {
         try await withInlineEditor(seedBlocks: corpus) { h in
-            let (window, coordinator, log) = mounted(h)
+            let (window, coordinator, log) = await mounted(h)
             defer { coordinator.uninstall(); window.orderOut(nil); window.close() }
-            coordinator.applyChrome(chrome, to: h.textView)
-            for _ in 0..<20 { await turn() }
+            for _ in 0..<20 where log.reports.isEmpty { await turn() }
+            await converge(window)
             let wide = PaneMeasurement.height(of: h.textView)
             #expect(abs((log.reports.last ?? 0) - wide) < 0.5,
                     "steady state: reported \(log.reports), measured \(wide)")
             log.reports = []
 
-            h.textView.frame.size.width = 420
             coordinator.viewUpdated(chrome: chrome, gutter: .contained, on: h.textView)
             #expect(log.reports.isEmpty,
                     "no height is reported inside the update pass: \(log.reports)")
+            // …the same pass's layout: the new width reaches the view.
+            h.textView.frame.size.width = 420
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
 
             for _ in 0..<20 where log.reports.isEmpty { await turn() }
+            await converge(window)
             let narrow = PaneMeasurement.height(of: h.textView)
-            #expect(narrow > wide + 100, "the narrower column is taller: \(narrow) vs \(wide)")
+            #expect(narrow > wide + 1000, "the narrower column is taller: \(narrow) vs \(wide)")
             #expect(log.reports.count == 1, "one report: \(log.reports)")
-            #expect(abs((log.reports.first ?? 0) - narrow) < 0.5,
-                    "carrying the reflowed height: \(log.reports) vs \(narrow)")
+            // The report is the height the pass's OWN layout produced — on the
+            // narrow side of the midpoint. The old road measured before that
+            // layout and reported the WIDE height, which nothing re-reported.
+            // (Not an equality: TextKit's first full measure after a reflow sat
+            // 631 pt — 3.3% — from the layout a display pass converges to,
+            // measured on both roads alike; TEXTKIT2 §2's documented class, the
+            // measurement brain's and not this report's timing.)
+            #expect((log.reports.first ?? 0) > (wide + narrow) / 2,
+                    "carrying the reflowed height, not the stranded wide one: \(log.reports) — wide \(wide), narrow \(narrow)")
         }
     }
 
@@ -147,10 +196,10 @@ struct InlineHeightReportTests {
     /// keystroke's storage hop.
     @Test func aBurstOfEditsAndUpdatesInOneTurnReportsOnce() async throws {
         try await withInlineEditor(seedBlocks: corpus) { h in
-            let (window, coordinator, log) = mounted(h)
+            let (window, coordinator, log) = await mounted(h)
             defer { coordinator.uninstall(); window.orderOut(nil); window.close() }
-            coordinator.applyChrome(chrome, to: h.textView)
-            for _ in 0..<20 { await turn() }
+            for _ in 0..<20 where log.reports.isEmpty { await turn() }
+            await converge(window)
             log.reports = []
 
             let caret = h.model.index.range(ofEntryAt: 12).location + 3
@@ -161,10 +210,10 @@ struct InlineHeightReportTests {
             #expect(log.reports.isEmpty, "nothing reported inside the burst: \(log.reports)")
 
             for _ in 0..<20 where log.reports.isEmpty { await turn() }
-            for _ in 0..<3 { await turn() }
+            await converge(window)
             #expect(log.reports.count == 1, "the burst reported once: \(log.reports)")
-            #expect(abs((log.reports.last ?? 0) - PaneMeasurement.height(of: h.textView)) < 0.5,
-                    "with the height after the burst")
+            #expect(abs((log.reports.last ?? 0) - PaneMeasurement.height(of: h.textView)) <= lineSlack,
+                    "with the height after the burst: \(log.reports) vs \(PaneMeasurement.height(of: h.textView))")
             await h.flush()
         }
     }

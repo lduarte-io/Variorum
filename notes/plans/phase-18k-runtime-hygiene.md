@@ -866,8 +866,25 @@ change between `cfe53bb5` and today removed it; C2 did not, and claims nothing f
   terminate moved off its task — walk 1's synchronous `NSApp.terminate` from inside a main-actor task
   hung in `terminateLater`, and both walk instances were stopped by PID, path verified as the Debug
   product.)
-- Phase 2, the deferral (coalescing hop, first height delivered) — NOT-STARTED.
-- Pins — IN-PROGRESS: **run on the PRE-FIX behaviour (the seam tree `48297899` + this commit's compile
+- Phase 2, the deferral — DONE (this commit): `InlineEditorSurface.Coordinator.scheduleRemeasure()` —
+  every trigger (the mount's first report in `install`, `viewUpdated` = `updateNSView`'s body, and the
+  storage road, now `MainActor.assumeIsolated { scheduleRemeasure() }` — still one hop) schedules; ONLY
+  THE NEWEST measures (a generation counter), so a burst reports once, at exactly the point the old
+  road's LAST report measured. The binding closure and its `abs(Δ) > 0.5` gate are byte-unchanged; it
+  is simply never called inside a SwiftUI update now. `remeasure()` stays synchronous and public (the
+  measurement brain's caller the window tests drive). **Design note, measured:** the first version
+  used a FIRST-trigger latch; it was replaced before commit because it measures BEFORE any main-queue
+  work the burst's later triggers queued — earlier than the road it replaces — while newest-wins can
+  never measure earlier than the old road's last report. **Pin-harness facts found on the way (NOT
+  this fix's, recorded for the ladder):** TextKit's FIRST full measure after the view enters its window,
+  after a width change, or after an edit can differ from the layout a later display pass converges to
+  (11,182 → 10,929 with no edit/frame/inset change; 18,713 vs 19,344 after a 700→420 reflow; one 20-pt
+  line after three keystrokes) — TEXTKIT2 §2's documented `enumerateTextLayoutFragments` class, in the
+  fenced measurement brain (`PaneMeasurement`), identical on both roads; nothing re-reports that drift
+  on either. The pins settle layout before the install and allow a line (or a midpoint, for the
+  reflow) accordingly — see NOTICED.
+- Pins — GREEN ON THE FIX (this commit): **`Test run with 4 tests in 1 suite passed` — 3 of 3 runs**;
+  the behavioural revert + mutations NEXT (PENDING). Earlier, **run on the PRE-FIX behaviour (the seam tree `48297899` + this commit's compile
   fixes to the pins): `Test run with 4 tests in 1 suite failed … with 5 issues`** — the mount pin RED
   (`reports == [10929.0]` inside the install), the update pin RED (reported inside the pass), the burst
   pin RED (2 reports inside the burst, **5** in all), the whole-road guard GREEN (as designed); plus
