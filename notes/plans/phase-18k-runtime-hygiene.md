@@ -183,8 +183,9 @@ COMMITTED · every death and resume noted in the record.
 - C1 — DONE, ACCEPTED (`a8b27b11`; adjudication below). GUI walk HELD (TCC).
 - C2 — DONE, ACCEPTED (hypothesis disproved; deferral as hygiene `6571c558`; shadow row CLOSED as resolved-by `f8610cb9`). GUI walk HELD.
 - C3 — DONE, ACCEPTED (premise DISMISSED AS HOLLOW by measurement — all warnings are `PaneSurface`'s, 18l's; comment corrections only).
-- C4 — IN-PROGRESS (brief appended; implementer spawned).
-- C5, C6 — NOT-STARTED.
+- C4 — DONE, ACCEPTED (12 oracle types owner-keyed; 13 two-window pins red-on-old; palette guard).
+- C6 — IN-PROGRESS (brief appended; implementer spawned).
+- C5 — NOT-STARTED.
 - Deaths / resumes: none.
 
 ---
@@ -2057,3 +2058,90 @@ the dependency crash, old3 the one precondition, old4 the recorded run) and
 `18k-c4-palette-teeth.log`, `18k-c4-M-norelease.log`; the builds `18k-c4-bft{0,1}.log`; the closing
 runs `18k-c4-closing{1,2,3}.log`. The proof scripts (`release_projection.py`, `debug_proof.py`) and the
 population parser are session scratch — each is small enough to re-derive from its description here.
+
+### UNIT C4 — ORCHESTRATOR ADJUDICATION (2026-09-25 night; the unit CLOSES here)
+
+**Verified by spot-check:** 10 commits `02bcc320`…`a58b903b`, pushed, zero trailers, tree clean, zero
+app instances, no scratch worktree left. The DEBUG gating spot-read: `DebugOracleOwnership.swift` is
+wholly inside `#if DEBUG`, and the per-view owner tokens (`@State private var oracleOwner`) and their
+releases are `#if DEBUG`-fenced at the touched views read; the implementer's Release-compile
+comparison (0 of 18 touched files differ) is the production-identity proof. **ACCEPTED — C4 FIXED:**
+38 DEBUG oracle types re-grepped; 12 types / 49 slots owner-keyed (FIXED), 24 SAFE-AS-IS with
+mechanisms, 0 LEFT; 13 two-window pins measured RED on the pre-fix tree in their final form (32
+issues), green after; 18 structural pins (red by non-compilation, and by the M-norelease revert — 82
+issues); the 7 unkeyed-singleton pins opt-in (`TEST_RUNNER_VARIORUM_ORACLE_SINGLETON_WINDOWS=1`, run
+alone) because the parallel-suites axis is NOT this unit's; 21 existing pin lines changed as named
+reset doors (the S3 precedent), every READ unmodified. The mid-unit design correction ("the last live
+writer answers" — what the bare static answered while every writer was on screen) is the right call
+and is flagged for the ladder. **Palette guard:** the three writers documented + `MarkdownPaletteWritersTests`
+(three arms, each red under its own mutation). **Closing run:** 414/65, the only 2 issues row 65's
+(C6's). **Carried:** the parallel-suites axis + `EditorTypography.current` → a KnownIssues row, owner
+12 (filed this commit). The one-live-editor-per-SESSION fact across two windows is P3 working as
+designed — FYI, not a finding.
+
+## UNIT C6 BRIEF — the five macOS-27 test deltas (KnownIssues row 65; self-contained; read in this order)
+
+**You are the C6 implementer (`opus-implementer`), ONE unit, this session only.** Read, in order:
+1. `CLAUDE.md` (auto-loaded) and `notes/TEXTKIT2_NOTES.md` (auto-loaded — §5's point-release matrix is
+   exactly this unit's subject: the machine moved macOS 26 → 27.0 with the tree unchanged).
+2. THIS FILE: the kickoff corrections, THE LEDGER (row C6), **ENVIRONMENT TRAPS (binding)**, CAST &
+   DISCIPLINE, the closing sections + ORCHESTRATOR ADJUDICATIONS of the earlier unit records, and this
+   brief.
+3. `notes/KnownIssuesAndTechDebt.md` — the row beginning "**FIVE deterministic macOS-27 test deltas**"
+   (your charter) and the RESOLVED row about the full-document editor's RE-FONT road (13u4 UNIT F2's
+   fix — `EditorViewModel.keepingReadingPosition(acrossRefont:_:)`); 13y's kickoff-baseline record in
+   `notes/plans/phase-13y-per-tenant-seq.md` (grep "macOS-27" / "Refont") for how the five were first
+   adjudicated; 13u4's UNIT F2 RECORD in `notes/plans/phase-13u4-restyle.md` for the re-font design.
+
+**The five, in two classes:**
+- **TRACE items (possibly REAL product behaviour on 27 — the hallucination guard binds hard):**
+  1. `RefontViewportTests.aShrinkingRefontKeepsTheLineAtTheViewportTop` — a deterministic **94-pt
+     drift** on 27. Question: is F2's restore inexact on 27 (a real regression her place-keeping would
+     feel), or has the test's measurement of "the line at the viewport top" changed meaning? Trace the
+     park → settle hop → `JumpPrimitive` spend on 27 with numbers (the TK2 geometry of the anchor
+     fragment before/after; which hop lands where). If REAL: fix on the smallest surface, pin
+     red-on-old — **this is the editor seam; if the fix must touch `EditorTextView`, the storage seam
+     or `JumpPrimitive`'s contract, make it the narrowest possible change and name it plainly in the
+     record for the Fable ladder.** If the pin's measurement is wrong on 27, re-mechanize the pin and
+     state why the product is right (with the measured evidence).
+  2. `BoundaryFluidityTests.theKeystrokePathRoutesCrossBlockDeletesIntoTheCompound` — `status.spoken`
+     nil under the harness's synthetic keystroke; **INTERMITTENT on 27** (red at 13y's kickoff twice
+     incl. isolated, green at 13y's finals). Run it N times isolated and in its suite; find the
+     covariate (harness routing vs real routing — does the synthetic keystroke reach the same
+     `shouldChangeText` road the real key does on 27?). Verdict: harness fix (pin re-mechanized) ·
+     real defect (fix + pin) · load-flake (joins the flake list with the paired-protocol numbers —
+     only if you cannot find a mechanism, and say so).
+- **PIN-MECHANISM items (the PRODUCT was verified in use at 13y's kickoff — re-mechanize the pin, never
+  the product):** 3–4. the two `count(NSSlider) == 1` scrubber pins (`PagedReadViewTests` + the
+  BookView spread) — SwiftUI's `Slider` is no longer `NSSlider`-backed on 27; find what IS in the
+  hierarchy now (or assert through an accessibility role / an identifier the view already carries) so
+  the pin still proves "exactly one scrubber, and it works". 5. `LibraryPanelHostTests`' banned-word
+  "inspector" reflection pin — an OS-renamed internal symbol now matches it; narrow the reflection to
+  the app's own types so the pin still bans what it was written to ban (read its history first).
+
+**Acceptance:** each of the five gets a written verdict with its mechanism. The pins you rewrite must
+still be ABLE to fail — prove each one by a deliberate mutation of the thing it guards (red), restored
+(green). **The unit's evidence is the full-Mac suite reading GREEN with no "modulo"** — but the full
+suite is the orchestrator's finals; YOU run the five tests' suites isolated and in-suite, the touched
+surfaces' suites, and the eleven Tutorial suites. **Note from C4's closing run:** `RefontViewportTests`' 94 pt and
+`LibraryPanelHostTests`' "inspector" are still red on today's tree (C4's diff did not move them); the
+C4 two-window pins are OPT-IN for one suite (`DebugOracleSingletonWindowTests`) — do not run it in
+your sets. If the Refont trace yields a product fix, write the
+GUI walk steps for the author (Copper Beeches, 212 blocks, caret at the end, Settings ▸ Editor ▸
+inline comments OFF / paragraph gap → Standard — 13u4 F2's walk) into your record: the terminal host
+holds NO Screen Recording / Accessibility, so the walk is HELD for her morning; your in-app evidence is
+the rig's numbers.
+
+**CHECKPOINT RULES (restated, binding from your first commit):** write `## UNIT C6 RECORD` with its
+`### LIVE STATUS` at the END of this file in your FIRST commit, and flip it in the same commit as each
+piece; unverified claims marked **PENDING**. Commit per coherent piece and PUSH after every commit;
+stage pathspec-limited, never `git add -A`; NO commit trailers (no Co-Authored-By, no Claude-Session).
+Synchronous foreground waits only — the grep-poll loop; never end your turn with a run in progress.
+Never spawn subagents (one Sonnet lookup for EXTERNAL facts only — e.g. the macOS 27 SwiftUI `Slider`
+backing, if documentation helps). No behavioural revert starts until the record names it and the
+pre-revert state is COMMITTED. Every death/resume noted in the record. If the worktree moves under
+you, write nothing, report, stop. Never touch `/Applications`, never build Release, never quit or kill
+a real-store Variorum instance.
+
+**Scope fence:** C6 only. Zero `Sources/`, zero `Sync/`. QUESTIONS: check the end marker for the next
+free number. **Your final message:** a short summary pointing at your record.
