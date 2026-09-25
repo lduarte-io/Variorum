@@ -3773,4 +3773,8 @@ the eight `RefontGapTopTests` cases incl. the sliver, `JumpViewportLayoutTests`,
 `FragmentLines.readingLineIndex(atLocalY:baselines:)`; the capture's old box test is gone (the baseline subsumes
 it: an edge in a paragraph's trailing spacing is below every baseline). Behavioural revert **R-base** (named here,
 run after this commit): `topVisibleOffset()` back to `a8e1e8cc`'s box rule — expected: only the sliver zone red
-(5 issues), every other case green; and **M-inset** re-run against the moved ground truth. Results PENDING.
+(5 issues), every other case green; and **M-inset** re-run against the moved ground truth. **R-base: RED — exactly the
+sliver zone** (5 issues, 47510 for 47525), the seven other gap cases and `ScrollAnchorTests` green
+(`18k-c6b-R-base.log`); restored → clean. **M-inset (again): RED at both stops** (`7 == 6`, `17 == 16` — the block
+numbers differ from the first M-inset run's `8/7`, `21/20` because the rig's second scroll landed elsewhere this
+time; the mutation bites at both stops in both runs; `18k-c6b-M-inset2.log`); restored → clean.
