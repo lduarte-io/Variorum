@@ -3729,3 +3729,12 @@ the re-assert never fired in a losing run (no `reassert` line), and neither the 
 hop-before-display ORDER through the coordinator (a harness display pass always intervened, even with the
 window ordered out), so the pin drives the losing hop's exact call — the grow's storage write, then the jump —
 and the app trace carries the ordering.
+
+### THE BEHAVIOURAL REVERTS (named before they run; the pre-revert state is `a8e1e8cc`, committed + pushed)
+
+Each is a working-tree edit only, the pins run, then the file is restored to `a8e1e8cc` byte-exact and
+`git status` checked clean.
+- **R-W4** — `topVisibleOffset()`'s gap branch forced off (`if false, belowItsLastLine || …`). Expected:
+  `RefontGapTopTests` red exactly as on the pre-fix tree (19 issues; 47510 / 47524 / 42034), the W-2 pin green.
+- **R-W2** — `jump`'s `maxScroll()` reads the ENTRY frame again (`docHeight − clip height`). Expected: the W-2
+  pin red as on the pre-fix tree (4 issues; ~1,624 / ~2,384 pt), `RefontGapTopTests` green.
