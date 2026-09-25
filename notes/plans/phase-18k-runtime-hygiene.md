@@ -1936,9 +1936,12 @@ name every Features oracle).
 
 ### THE VERDICT TABLE (every DEBUG oracle type in the Mac app — 38 — plus the non-DEBUG globals; the S3 form)
 
-**Totals: FIXED 12 types (51 slots) · SAFE-AS-IS 25 types + the SAFE fields of 5 FIXED types
-(A 20 · B 6 · C 1 type + 2 fields · D 3) · FIXED-AT-13u4 (the references, untouched) 1 type + 2 fields
-of another · LEFT 0.** "Registrant" is the identity that now names itself; "clear" is the teardown
+**Totals (38 types): FIXED 12 types (49 slots: 6+8+1+9+7+4+2+2+3+1+4+2) · SAFE-AS-IS 24 types (A 15
+· B 6 · D 3), plus the SAFE fields inside FIXED types (A: the 3 traces, `pageTurns`, the 2 realized-row
+logs, `mounted`, `noteBoxFaces` · B: `headerWorlds` · C: `starredSectionHeights`, `bodyEvaluations`) ·
+FIXED-AT-13u4 (the references, untouched) 2 types (`ShellRouter`, `CatalogStampOracle`) +
+`PostDetailOracle.stamp*` · LEFT 0.** (The closing commit's message says "51 slots" — a miscount,
+corrected here; the history left as it is.) "Registrant" is the identity that now names itself; "clear" is the teardown
 that releases ONLY that registrant's rows; pins: **TW** = `DebugOracleTwoWindowTests` (always on,
 keyed), **SW** = `DebugOracleSingletonWindowTests` (opt-in, unkeyed), **ST** =
 `DebugOracleOwnershipTests` (structural, always on). Every TW/SW pin was MEASURED RED on the pre-fix
@@ -1987,7 +1990,7 @@ red under M-norelease on the final tree. Arm: **X** cross-clear, **S** stale-sta
 ### DISPOSITION
 
 **Ledger row C4 — FIXED.** The class is closed on the owner axis for every process-global DEBUG
-registration in the Mac app: 12 oracle types, 51 slots, one generic
+registration in the Mac app: 12 oracle types, 49 slots, one generic
 (`Core/Views/DebugOracleOwnership.swift`) in the reference fixes' shape — the registrant names itself,
 a teardown clears only what it still owns, the last LIVE writer answers exactly as the static did.
 Production byte-identical: Release projection 0 of 18 files differ.
