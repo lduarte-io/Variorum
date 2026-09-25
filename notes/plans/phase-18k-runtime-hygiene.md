@@ -1645,3 +1645,85 @@ Release, never quit or kill a real-store Variorum instance.
 
 **Scope fence:** C4 only. Zero `Sources/`, zero `Sync/`. QUESTIONS: check the end marker for the next
 free number. **Your final message:** a short summary pointing at your record.
+
+## UNIT C4 RECORD — the DEBUG-oracle ownership sweep (implementer: `opus-implementer`, 2026-09-25)
+
+**NOT DONE (first line, per the brief):** *(kept current; the final wording lands at close)* — PENDING.
+
+### READING (done in-session before any code)
+
+CLAUDE.md + canon (auto-loaded); this file's kickoff corrections, THE LEDGER (row C4), ENVIRONMENT
+TRAPS, CAST & DISCIPLINE, the C1/C2/C3 records' closing sections + all three ORCHESTRATOR
+ADJUDICATIONS, C3's verdict table (group S — the 38 geometry actions that write only DEBUG statics),
+and the C4 brief; the health review §5.2 (re-traced below, claim by claim); the three reference fixes
+at the code AND their records — `ShellRouter.blockNamingDoors` (`ShellRouter.swift:226–280`, the 13u4
+UNIT S3 record's ROW 46 + `ShellDoorOwnershipTests`), `PostDetailOracle.stamp*`
+(`PostDetailView.swift:1016–1153` + `MastheadStamp.swift:131–197`) and `CatalogStampOracle`
+(`LibraryTimeFace.swift:398–512`) (the 13u4 UNIT S2 record's ROW 51 + `StampOracleOwnershipTests`);
+and the 13u2 UNIT E scoping rule (`Core/Views/DebugProbeScope.swift` + `DebugOracleScopingTests`),
+which is the OTHER axis (parallel suites) and bears on the classification.
+
+### THE POPULATION (re-grepped; the review's list is a sample)
+
+A scratch parser walked every `.swift` file under `App/Variorum/Variorum/`, tracking `#if DEBUG` /
+`#else` / `#endif` nesting, and listed every `static var` (and `static let`) with its enclosing type:
+**188 `static var`s; 101 inside `#if DEBUG` across 38 DEBUG types** (+ the one `static let` that
+matters, none). Outside DEBUG the only mutable process-global stores are `MarkdownStyling.storedPalette`
+(the brief's non-DEBUG guard), `EditorTypography.current`/`isAdopted` (the review's "same class,
+lower risk"), `FallbackCanary.assertionHandler` and `FlowHeightEstimate.metricsCache`. `Shared/`
+carries two more DEBUG-shaped statics (`KeychainCustody`'s trip counters — custody code) and two
+seeder latches (owner-keyed by construction). Every app-side WRITER of every DEBUG oracle was then
+listed (135 lines + the multi-line ones found by hand) — the verdict table below carries them.
+
+### THE CLASSIFICATION RULE (decided before any code — stated so the table can be checked)
+
+The reference fixes' own definition of the defect: **a registration keyed by its subject (or not
+keyed) with no record of WHO registered it, so a departing view tears down — or leaves standing over —
+a registration that belongs to a view still on screen.** Two arms: **cross-clear** (a teardown clears
+a slot another live owner wrote; the survivor reads nil) and **stale-standing** (nothing clears it;
+a departed owner's value or closure stays the answer while a live owner stands).
+- **FIXED** — a LAST-VALUE registration (a door, a surface fact, a frame, a per-row map) in a
+  PROCESS-GLOBAL slot whose key does not name its registrant. Fix = the reference shape: the
+  registrant names itself, the read answers from the most recent registrant, a teardown releases
+  only its own, a pin's reset stays unconditional ("a pin owns nothing").
+- **SAFE-AS-IS (A) accumulators** — counters, +1/−1 mount refcounts, set unions, logs: every owner's
+  contribution composes and none can erase another's, so neither arm exists.
+- **SAFE-AS-IS (B) session-scoped worlds** (13u2 UNIT E) — every write lands under the WRITING
+  session's scope and every read names the reader's own; no teardown writes them. Another test can
+  neither clear nor overwrite a pin's rows; two owners on one scope exist only inside one test, which
+  orders its own mounts.
+- **SAFE-AS-IS (C) already owner-keyed** (keyed by a workspace's identity; the three references).
+- **SAFE-AS-IS (D) the value is a function of its key** — any registrant writes the same value, so
+  no order can change the answer.
+- **LEFT** — with the reason.
+
+**The one axis this unit does NOT fix, stated so nobody reads it as fixed:** two LIVE owners in
+different tests on one unscoped slot (parallel suites) — owner-keying answers from the newest
+registrant, which can be the other test's. That is the 13u2 UNIT E scoping axis (row 50's), and the
+references share the residual (`ShellRouter.blockNamingDoor` answers from the most recent shell,
+whoever mounted it). Oracles with that exposure are listed under NOTICED.
+
+### THE DESIGN (PENDING — the first code commit)
+
+One DEBUG-only generic in `Core/Views/DebugOracleOwnership.swift` (beside `DebugProbeScope.swift`):
+`OwnedRegistrations<Key, Value>` — per key, the registrants in first-registration order, the last one
+the answer; `publish(_:for:owner:)` replaces in place; `withdraw(_:owner:)` and `release(owner:)` take
+ONLY the owner's own (a reverse index keeps a surface teardown ∝ what it wrote); `forget`/`forgetAll`
+are the pin's unconditional doors — plus `OwnedSlot<Value>` for the unkeyed singletons. The
+registrant is the VIEW that writes: its own `@State` token (MastheadStamp's `oracleOwner`, the S2
+shape); a surface whose ROWS write (separate structs, probe modifiers) hands its token down by
+environment (the `debugProbeScope` road, one level down), and a probe mounted with no surface above
+it names itself. A surface's teardown releases its token from every converted oracle through ONE
+explicit list (`DebugOracleOwners.release`). Reads keep their names and types (computed, read-only),
+so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to a named reset door
+(S3's precedent) — each recorded.
+
+### LIVE STATUS
+
+- Reading + population + the classification rule — DONE (this commit).
+- The generic + its pins — NOT STARTED.
+- The conversions, oracle by oracle — NOT STARTED.
+- The two-window pins (red first where reachable) — NOT STARTED.
+- The `MarkdownStyling.palette` guard — NOT STARTED.
+- Closing runs — NOT STARTED.
+- Deaths / resumes: none.
