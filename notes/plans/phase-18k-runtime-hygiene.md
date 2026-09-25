@@ -750,3 +750,48 @@ or kill the author's real-store app.
 touched"). Zero `Sources/`, zero `Sync/`. PROVISIONAL-and-continue for non-gating ambiguity
 (QUESTIONS — the next free number is **#147**; check the end marker); stop-and-report for anything
 product-flavoured. **Your final message:** a short summary pointing at your record.
+
+---
+
+## UNIT C2 RECORD — the inline editor's height binding (implementer: `opus-implementer`, 2026-09-25)
+
+**NOT DONE (first line, per the brief):** PENDING — written at close.
+
+### READING (done in-session before any probe)
+
+CLAUDE.md + canon (auto-loaded); this file's kickoff corrections, ledger row C2, ENVIRONMENT TRAPS,
+CAST & DISCIPLINE, the C1 record's close + adjudication, and the C2 brief; the health review §5.1
+(A2, with A1/A3 as context); KnownIssues' "SHADOW `InlineEditorSurface`" row; 13u2's UNIT B record +
+TRACE B-1 (`notes/plans/phase-13u2-feel.md`); `EditorView.swift` (`EditorView`, `InlineEditorSurface`
+and its coordinator), `Core/Views/StableSurface.swift`, the two inline hosts (`BookView.swift`'s
+`OutlinePostRow` live branch, `SpreadBookView.swift`'s active page), and the harness shapes
+(`InlineEditorWindowTests`, `ProseGutterTests`, `BookOutlineLandingTests`, `EditorRouterActiveTests`).
+
+**A fact on the record BEFORE measuring (the hallucination guard, read at the source):** the review's
+premise that "the 13u2 trace eliminated the Outline row's publish, NOT the representable's binding"
+does not match TRACE B-1 as written. B-1's eliminated cause 1 IS this binding: *"`Coordinator.install`
+ends in `remeasure()`, which writes `EditorView`'s `@State inlineHeight` inside `makeNSView`, and
+`updateNSView` does it again … Deferred both to the next runloop turn: still doubled."* And B-1's
+cause 3 bypassed `StableSurface` entirely ("still doubled") — which is the chain's second link. So
+the hypothesis enters this unit already contradicted by one prior measurement; Phase 1 re-measures it
+independently rather than trusting either record. (Also on the record: `BookOutlineLandingTests`'
+13u2 A2 comment says the REAL APP mounted once, B-1 says twice on a LONG note — the two are
+reconciled by B-1's long/short finding; A2's walk may have used a short note. Not re-litigated here.)
+
+**The hosts, counted:** `inline: true` has exactly TWO hosts today — the book Outline's focused row
+and the spread's active page. The brief's "pool inline editor" no longer exists as an inline host
+(Canvas/the scraps area mount the full-document `EditorView`, `CanvasView.swift:1103`).
+
+### LIVE STATUS
+
+- Reading — DONE (this commit).
+- Phase 1, the instrument (DEBUG probes, committed as "WIP: probe", removed before close) — NOT-STARTED.
+- Phase 1, the measurement (the chain, step by step, with numbers; verdict CONFIRMED/DISPROVED) —
+  NOT-STARTED.
+- Phase 2, the deferral (coalescing hop, first height delivered) — NOT-STARTED.
+- Pins (first-height delivery; the double-realization count only IF confirmed) — NOT-STARTED.
+- The `Modifying state during view update` count, before/after, one fixed suite set — NOT-STARTED.
+- In-app use evidence (dev-store Debug, scripted; the GUI walk HELD for TCC) — NOT-STARTED.
+- The ledger row amendment (claimed only if confirmed) — NOT-STARTED.
+- Closing runs — NOT-STARTED.
+- Deaths / resumes: none.
