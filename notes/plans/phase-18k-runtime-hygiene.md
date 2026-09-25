@@ -2157,7 +2157,7 @@ free number. **Your final message:** a short summary pointing at your record.
 | 1 | The reading, in this session's own context, in the brief's order | **DONE** — CLAUDE.md + canon, TEXTKIT2 §5, this file's corrections/ledger/traps/cast + C1–C4 closings and adjudications, KnownIssues row 65 + the re-font RESOLVED row, 13y's kickoff adjudication (lines 381–413), 13u4's UNIT F2 RECORD whole |
 | 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | **TRACED** — REAL on 27 (the mechanism below). **Pin committed RED on the pre-fix tree** (`JumpViewportLayoutTests`, 3 issues + the Refont shrink pin's 1 — `18k-c6-jumppin-prefix.log`). **FIXED** in `JumpPrimitive.scroll(to:)` (one bounded re-assert) — both pins GREEN (`18k-c6-jumppin-fixed.log`, 7/2); behavioural revert R1 RED (4 issues, identical) → restored GREEN. **Item 1 CLOSED: FIXED** (the family re-run on the final tree rides the closing runs) |
 | 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | **TRACED — HARNESS** (the pin's wait predicate precedes its asserted event by one awaited hop); pin RE-MECHANIZED (wait on the scheduled compound) — green 14/14; M1/M2/M3 RED at their targets, P (the delay) GREEN. **Item 2 CLOSED: HARNESS, re-mechanized** |
-| 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | **RE-MECHANIZED** (`ComposedSliders` — composition nodes + the node's own binding driving the surface) — green; **plus the Outline's zero-slider arm, found HOLLOW in the same class** — first re-mechanized by composition (`d21bf0fd`), then MEASURED hollow for the A6 shape (MO) and re-mechanized on the page's bottom content inset; MO-2 + MS1–MS4 PENDING |
+| 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | **RE-MECHANIZED** (`ComposedSliders` — composition nodes + the node's own binding driving the surface) — green; **plus the Outline's zero-slider arm, found HOLLOW in the same class** — first re-mechanized by composition (`d21bf0fd`), then MEASURED hollow for the A6 shape (MO) and re-mechanized on the page's bottom content inset. MO-2 + MS1–MS4 all RED at their targets. **Items 3–4 CLOSED: PIN MECHANISM, re-mechanized (+ the Outline arm)** |
 | 5 | `LibraryPanelHostTests`' "inspector" pin — history, narrow, mutation proof | PENDING |
 | 6 | Closing runs (the five suites isolated + in-suite, the touched surfaces, the eleven Tutorial suites) | PENDING |
 | 7 | The record complete (verdicts, disposition, held walk steps, noticed-not-touched) | PENDING |
@@ -2401,6 +2401,17 @@ unchanged. The pin's doc is corrected. **Green: `OutlineWritingSurfaceTests` 7/7
 (`18k-c6-outline-geo-new.log`).
 
 **MO-2 (added, named here before it runs):** the A6 inset restored with the `Slider` ALONE (no progress
-bar) against the new arm. Expected RED on the inset arm; the progress arm green. Results for MO-2 and
-MS1–MS4 PENDING.
+bar) against the new arm. Expected RED on the inset arm; the progress arm green.
+
+**Results (every product file restored from HEAD after each; `git status` clean after each):**
+- **MO-2 → RED, 1 issue** (`18k-c6-scrub-MO2.log`): `scrollViews.allSatisfy { bottom == 0 }` failed,
+  reading `[0.0, 32.0]` (the navigator 0, the page 32 — the slider-only bar). The progress arm stayed
+  green, so the new arm alone catches what used to pass the whole pin.
+- **MS1 → RED, 2 issues** (`18k-c6-scrub-MS1.log`): `scrubbers.count → 0 == 1`, and the binding
+  `#require`.
+- **MS2 → RED, 1 issue** (`18k-c6-scrub-MS2.log`): `drawnPages().first → 1 > 2`. The count arm stayed
+  green, so the "it works" arm is independent.
+- **MS3 → RED, 1 issue** (`18k-c6-scrub-MS3.log`): `scrubbers.count → 2 == 1`.
+- **MS4 → RED, 1 issue** (`18k-c6-scrub-MS4.log`): `model.leftPage?.postID → …0001 == postIDs.last →
+  …0038`. The count arm stayed green.
 
