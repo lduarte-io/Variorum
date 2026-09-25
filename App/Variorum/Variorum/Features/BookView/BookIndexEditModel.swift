@@ -148,8 +148,25 @@ final class BookIndexEditModel {
             coordinators[postID]?.stopObserving(token)
         }
         tokens.removeAll()
-        let all = Array(coordinators.values)
+        // 18k C1: the cache letting go of a post IS this model letting go of
+        // its acquisition — flush first, then exactly one release per entry
+        // (a reused model re-acquires on its next touch, and a later
+        // teardown pairs that). A note edited here is never reported LEFT, so
+        // on the Mac the session keeps its entry until a leaving savepoint
+        // lands — the ⌘Q/lock walk still owes it one.
+        let held = coordinators
         coordinators.removeAll()
-        Task { for coordinator in all { await coordinator.flushNow() } }
+        let session = session
+        Task {
+            for coordinator in held.values { await coordinator.flushNow() }
+            for postID in held.keys { session.releaseAutosave(forPost: postID) }
+        }
+    }
+
+    /// **18k C1 — whatever the index still holds when it dies goes back**
+    /// (a model that never saw `teardown()`). Nothing records through it
+    /// after it dies.
+    isolated deinit {
+        for postID in coordinators.keys { session.releaseAutosave(forPost: postID) }
     }
 }

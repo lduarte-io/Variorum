@@ -80,6 +80,20 @@ final class TakesViewModel {
     }
 
     @ObservationIgnored private var autosaveToken: UUID?
+
+    /// **18k C1 — the ONE release for the ONE acquisition in `init`.** The
+    /// instance's death is the only point that runs exactly once per
+    /// acquisition: SwiftUI builds this model eagerly in its view's `init`
+    /// (`State(initialValue:)` evaluates its argument on EVERY re-init and
+    /// keeps only the first), so discarded twins acquire too and never see
+    /// `onDisappear`, while a kept one can see `teardown()` more than once.
+    /// Nothing records through this instance after it dies, and it dies only
+    /// after its flush has landed — `teardown()`'s flush Task holds `self` until then — so the
+    /// release is flush-then-release by construction. What the session does
+    /// with the last release is `AppSession.releaseAutosave(forPost:)`'s.
+    isolated deinit {
+        session.releaseAutosave(forPost: postID)
+    }
     /// The store-write freshness generation (the `EditorViewModel` fence,
     /// mirrored — mobile S3 ladder MAJOR 3): bumped whenever OUR writes
     /// settle, so a fresh read that STRADDLED a settle is re-signaled

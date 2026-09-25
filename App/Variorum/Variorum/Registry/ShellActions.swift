@@ -106,7 +106,11 @@ struct ShellActions {
                 let sealed = try await session.database.read { db in
                     try Queries.containerHeader(db, containerID: postID)?.locked == true
                 }
-                await session.autosave(forPost: postID).flushNow()
+                // 18k C1: FLUSH, never mint — an open post's entry is held by
+                // its surface, so this reaches the same coordinator; where no
+                // surface holds one there is nothing pending by construction,
+                // and a mint here was a holder nobody would ever release.
+                await session.flushExistingAutosave(forPost: postID)
                 try await session.runner.run { ops in
                     if sealed {
                         try ops.unlockPost(postID)

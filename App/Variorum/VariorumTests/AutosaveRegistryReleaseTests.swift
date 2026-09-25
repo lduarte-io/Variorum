@@ -14,6 +14,15 @@
 //  registration are all `Shared/`, and only the Mac compiles the
 //  `quitFinalize` half.
 //
+//  18k C1: ON THE MAC the last release no longer drops the entry by itself —
+//  the entry is also the note's ⌘Q/lock savepoint, and a surface letting go
+//  is not the note being LEFT (see `releaseAutosave(forPost:)`'s doc). The
+//  Mac drops through a leaving savepoint that lands with nobody holding the
+//  note, so the three pins below that let a post GO do it through `letGo`
+//  (release, then the leaving savepoint — the order in which a surface
+//  unmounts ahead of the workspace reporting the note left). Every
+//  assertion's meaning is unchanged; the phone's rule is unchanged.
+//
 
 import Dependencies
 import Foundation
@@ -38,6 +47,16 @@ struct AutosaveRegistryReleaseTests {
         }
     }
 
+    /// Let a post go the Mac's way (18k C1): the last holder releases, then
+    /// the note's leaving savepoint lands with nobody holding it. Returns
+    /// whether the entry left the registry.
+    private func letGo(_ session: AppSession, _ postID: String) async -> Bool {
+        let before = session.openAutosaveCount
+        session.releaseAutosave(forPost: postID)
+        await session.savepointOnLeaving(postID)
+        return session.openAutosaveCount < before
+    }
+
     /// **THE FIX.** A capture's coordinator can be handed back, and the
     /// flush walk stops carrying it. `flushEveryOpenPost` is the observable
     /// consequence — it is what the growth actually cost.
@@ -46,7 +65,7 @@ struct AutosaveRegistryReleaseTests {
             let coordinator = session.autosave(forPost: "p1")
             #expect(session.quitFinalize.isEmpty == false, "the ⌘Q half registered")
 
-            #expect(session.releaseAutosave(forPost: "p1"))
+            #expect(await letGo(session, "p1"))
             #expect(session.quitFinalize.isEmpty,
                     "the registration went with the entry — no closure for a post nothing holds")
 
@@ -64,7 +83,7 @@ struct AutosaveRegistryReleaseTests {
             _ = session.autosave(forPost: "p1")
             #expect(session.quitFinalize.count == 1)
 
-            session.releaseAutosave(forPost: "p1")
+            _ = await letGo(session, "p1")
             #expect(session.quitFinalize.count == 0)
 
             _ = session.autosave(forPost: "p1")
@@ -125,7 +144,7 @@ struct AutosaveRegistryReleaseTests {
             for i in 0..<8 { _ = session.autosave(forPost: "capture-\(i)") }
             #expect(session.quitFinalize.count == 8, "eight jots, eight entries")
 
-            for i in 0..<8 { session.releaseAutosave(forPost: "capture-\(i)") }
+            for i in 0..<8 { _ = await letGo(session, "capture-\(i)") }
             #expect(session.quitFinalize.count == 0, "and the day's jotting costs nothing")
         }
     }

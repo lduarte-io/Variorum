@@ -195,20 +195,37 @@ final class CompareViewModel {
     // MARK: Coordinators (per post — the N3 boundary)
 
     @ObservationIgnored private var coordinatorTokens: [String: UUID] = [:]
+    /// The coordinators this board HOLDS — one acquisition per post, kept
+    /// until `teardown()` lets go of them (or the model dies holding them).
+    /// 18k C1: `coordinator(for:)` used to call `session.autosave(forPost:)`
+    /// on EVERY call — each projection's dirty check, each settle, each
+    /// keystroke — and once more per post inside `teardown()`, so a board
+    /// held hundreds of acquisitions nothing could ever give back.
+    @ObservationIgnored private var coordinators: [String: AutosaveCoordinator] = [:]
 
-    /// The per-post coordinator, observation-registered exactly once. Two
-    /// or more coordinators live at once is compare's DESIGNED shape (one
-    /// per post context; the 1a consolidation's boundary is per post).
+    /// The per-post coordinator, acquired and observation-registered exactly
+    /// once per post. Two or more coordinators live at once is compare's
+    /// DESIGNED shape (one per post context; the 1a consolidation's boundary
+    /// is per post).
     private func coordinator(for postID: String) -> AutosaveCoordinator {
+        if let held = coordinators[postID] { return held }
         let coordinator = session.autosave(forPost: postID)
-        if coordinatorTokens[postID] == nil {
-            coordinatorTokens[postID] = coordinator.observe(
-                onError: { [weak self] error in
-                    self?.statusMessage = OpsRefusalCopy.message(for: error)
-                },
-                onSettled: { [weak self] in self?.settleIfClean() })
-        }
+        coordinators[postID] = coordinator
+        coordinatorTokens[postID] = coordinator.observe(
+            onError: { [weak self] error in
+                self?.statusMessage = OpsRefusalCopy.message(for: error)
+            },
+            onSettled: { [weak self] in self?.settleIfClean() })
         return coordinator
+    }
+
+    /// **18k C1 — whatever the board still holds when it dies goes back.**
+    /// `teardown()` is the ordinary letting-go (flush, then release); this is
+    /// for the model that never saw it — the discarded twin SwiftUI builds on
+    /// a re-init of `CompareBoardView` (its `init` acquires the anchor), or a
+    /// board that was never mounted. Nothing records through it after it dies.
+    isolated deinit {
+        for postID in coordinators.keys { session.releaseAutosave(forPost: postID) }
     }
 
     private var mountedPostIDs: [String] {
@@ -324,11 +341,20 @@ final class CompareViewModel {
     func teardown() {
         observation?.cancel()
         for (postID, token) in coordinatorTokens {
-            let coordinator = session.autosave(forPost: postID)
-            coordinator.stopObserving(token)
-            Task { await coordinator.flushNow() }
+            coordinators[postID]?.stopObserving(token)
         }
         coordinatorTokens = [:]
+        // 18k C1: let go of every post this board held — flush first, then
+        // exactly one release per acquisition. A board reused after this
+        // (a host keeping it across `onDisappear`) re-acquires on its next
+        // touch through `coordinator(for:)`, which a later teardown pairs.
+        let held = coordinators
+        coordinators = [:]
+        let session = session
+        Task {
+            for coordinator in held.values { await coordinator.flushNow() }
+            for postID in held.keys { session.releaseAutosave(forPost: postID) }
+        }
     }
 
     // MARK: Faces + resolution

@@ -163,8 +163,10 @@ final class AppSession {
     /// alive tab stacks, each able to hold the same post), so the door is
     /// now both platforms': one coordinator per post makes the newest
     /// text win structurally (one pending entry per variant).
-    /// Coordinators are session-cached (tiny; bounded by posts opened per
-    /// session). The clock parameters apply when the coordinator is
+    /// Coordinators are cached while held (tiny; since 18k C1 every Mac holder
+    /// releases at its end of life, so the cache is bounded by the notes open
+    /// — plus, on the Mac, those still owed a leaving savepoint — never by
+    /// the notes opened this session). The clock parameters apply when the coordinator is
     /// MINTED — the cache means later callers share the first caller's
     /// clock, which is exactly what the test harness's deterministic
     /// sleep needs; production callers pass nothing.
@@ -198,10 +200,28 @@ final class AppSession {
         /// and `ShellActions` as that kind of caller. `NoteDeletion` no
         /// longer mints at all — it flushes through
         /// `flushExistingAutosave(forPost:)`, because its doors routinely
-        /// name notes nothing ever opened. `ShellActions.toggleSeal` still
-        /// mints, but only for `router.activePostID` — a post that is open
-        /// by definition, so its entry was going to exist anyway.)*
+        /// name notes nothing ever opened. 18k C1: neither does
+        /// `ShellActions.toggleSeal` — an open post's entry is held by its
+        /// surface, and once holds are RELEASED a transient mint that never
+        /// released would pin the entry for good.)*
+        ///
+        /// **18k C1 — every Mac holder now releases, exactly once per
+        /// acquisition, at its owner's real end of life** (a view model's
+        /// `deinit`; a per-post cache's letting go). That is what brings this
+        /// to zero; the Mac's rule for what happens THEN is on
+        /// `releaseAutosave(forPost:)`.
         var holders: Int
+        #if os(macOS)
+        /// Every acquisition this entry has had — a generation. A surface
+        /// opening the note moves it, which is how a drop in flight knows the
+        /// note was re-opened under it (18k C1).
+        var acquisitions = 1
+        /// The `acquisitions` value at which a leaving savepoint was last
+        /// asked for. Equal to `acquisitions` means the note has been LEFT
+        /// and nothing has opened it since (18k C1).
+        var leftAtAcquisition: Int?
+        var isLeft: Bool { leftAtAcquisition == acquisitions }
+        #endif
     }
 
     func autosave(
@@ -212,6 +232,9 @@ final class AppSession {
     ) -> AutosaveCoordinator {
         if var existing = postAutosaves[postID] {
             existing.holders += 1
+            #if os(macOS)
+            existing.acquisitions += 1
+            #endif
             postAutosaves[postID] = existing
             return existing.coordinator
         }
@@ -267,30 +290,6 @@ final class AppSession {
         await postAutosaves[postID]?.coordinator.flushNow()
     }
 
-    /// **Let go of a post's coordinator** (13l L-d).
-    ///
-    /// The map is a cache with one guarantee — ONE coordinator per post, so
-    /// two surfaces editing one note can never run two debounced pipelines
-    /// and flush a stale buffer over a newer one (13b 1a's N3, and the S3
-    /// ladder's BLOCKER). Nothing ever let go of an entry, which was fine
-    /// while every entry was a note she had OPENED; the phone's quick note
-    /// broke that assumption by taking one per capture.
-    ///
-    /// Releasing is **deliberately conservative**: it drops the entry only
-    /// when the last holder lets go AND the coordinator has nothing
-    /// pending. A dirty coordinator keeps its place, because
-    /// `flushEveryOpenPost` and the ⌘Q registration must still be able to
-    /// reach unflushed text — dropping it is the one thing that could lose
-    /// bytes, so it is the one thing this refuses to do.
-    ///
-    /// **The traced trap is closed, not tolerated.** The Mac registers a
-    /// `quitFinalize` closure when a post's coordinator is minted, so
-    /// release-then-re-mint used to mean two registrations for one post
-    /// (harmless — `closeAutoCommit` dedupes — but noise nobody chose).
-    /// The token now rides in the entry and goes with it, so a re-mint
-    /// registers exactly once and a released post leaves no closure behind.
-    ///
-    /// Returns whether the entry was actually dropped.
     /// How many posts this session is holding a coordinator for — the size
     /// of the walk `flushEveryOpenPost` makes (13l L-d). The growth this
     /// fix is about is a claim about a COUNT on BOTH platforms, and only
@@ -318,20 +317,97 @@ final class AppSession {
         postAutosaves.values.contains { $0.coordinator.isDirty }
     }
 
+    /// **Let go of a post's coordinator** (13l L-d).
+    ///
+    /// The map is a cache with one guarantee — ONE coordinator per post, so
+    /// two surfaces editing one note can never run two debounced pipelines
+    /// and flush a stale buffer over a newer one (13b 1a's N3, and the S3
+    /// ladder's BLOCKER). Nothing ever let go of an entry, which was fine
+    /// while every entry was a note she had OPENED; the phone's quick note
+    /// broke that assumption by taking one per capture.
+    ///
+    /// Releasing is **deliberately conservative**: it drops the entry only
+    /// when the last holder lets go AND the coordinator has nothing
+    /// pending. A dirty coordinator keeps its place, because
+    /// `flushEveryOpenPost` and the ⌘Q registration must still be able to
+    /// reach unflushed text — dropping it is the one thing that could lose
+    /// bytes, so it is the one thing this refuses to do.
+    ///
+    /// **The traced trap is closed, not tolerated.** The Mac registers a
+    /// `quitFinalize` closure when a post's coordinator is minted, so
+    /// release-then-re-mint used to mean two registrations for one post
+    /// (harmless — `closeAutoCommit` dedupes — but noise nobody chose).
+    /// The token now rides in the entry and goes with it, so a re-mint
+    /// registers exactly once and a released post leaves no closure behind.
+    ///
+    /// **ON THE MAC THE LAST RELEASE NEVER DROPS THE ENTRY BY ITSELF (18k
+    /// C1).** There the entry is also the note's ⌘Q/lock savepoint — the
+    /// quit closure IS `savepointOnLeaving` — and a surface letting go is
+    /// not the note being LEFT: a split's unfocused pane keeps showing its
+    /// note after its editor unmounts, a mode switch closes one surface
+    /// before the next opens, and a note edited inside a book or as a
+    /// Compare peer is never reported as left at all. Dropping on the
+    /// release would quietly cost each of those its savepoint. So the Mac
+    /// drops an entry only through **a leaving savepoint that lands after
+    /// the last holder let go** (`savepointOnLeaving`, below): a release of
+    /// a note nobody has left keeps it, owed; a release of a note that WAS
+    /// left re-takes that leaving savepoint — it flushes first, and it
+    /// carries whatever the departing surface wrote on its way out, such as
+    /// the open tail its finalize crystallized AFTER the workspace's own
+    /// leaving savepoint ran — and the entry goes when it lands. The phone
+    /// has no quit registry and keeps the rule above unchanged.
+    ///
+    /// Returns whether the entry was dropped by THIS call — on the Mac,
+    /// never (the drop, when it comes, is the savepoint's).
     @discardableResult
     func releaseAutosave(forPost postID: String) -> Bool {
         guard var hold = postAutosaves[postID] else { return false }
         hold.holders -= 1
+        // More releases than acquisitions is the text-loss class (a surviving
+        // surface would record into a coordinator the ⌘Q walk can no longer
+        // reach): stop the world in DEBUG, never silently.
+        assert(hold.holders >= 0, "releaseAutosave: more releases than acquisitions for \(postID)")
+        #if os(macOS)
+        postAutosaves[postID] = hold
+        guard hold.holders <= 0, hold.isLeft else { return false }
+        Task { [weak self] in await self?.savepointOnLeaving(postID) }
+        return false
+        #else
         guard hold.holders <= 0, !hold.coordinator.isDirty else {
             postAutosaves[postID] = hold
             return false
         }
-        #if os(macOS)
-        if let token = hold.quitToken { quitFinalize.unregister(token) }
-        #endif
         postAutosaves[postID] = nil
         return true
+        #endif
     }
+
+    #if os(macOS)
+    /// A leaving savepoint is starting for `postID` (18k C1): mark the note
+    /// LEFT at its current generation, and report whether anybody held it as
+    /// the savepoint began. Only a savepoint that STARTS with nobody holding
+    /// the note may drop the entry — one that starts while a surface is still
+    /// finalizing cannot see what that surface writes on its way out, and the
+    /// surface's own last release re-takes it instead.
+    private func markLeaving(_ postID: String) -> (acquisitions: Int, unheld: Bool)? {
+        guard var hold = postAutosaves[postID] else { return nil }
+        hold.leftAtAcquisition = hold.acquisitions
+        postAutosaves[postID] = hold
+        return (hold.acquisitions, hold.holders <= 0)
+    }
+
+    /// The Mac's one drop (18k C1): the savepoint landed, and since it began
+    /// nobody has opened the note, nobody holds it, and nothing is pending.
+    private func dropAfterLeaving(_ postID: String, acquisitions: Int) {
+        guard let hold = postAutosaves[postID],
+              hold.acquisitions == acquisitions,
+              hold.holders <= 0,
+              !hold.coordinator.isDirty
+        else { return }
+        if let token = hold.quitToken { quitFinalize.unregister(token) }
+        postAutosaves[postID] = nil
+    }
+    #endif
 
     /// **THE SHARED DIVERGE ENTRY — every W23 door rides it** (13f cold
     /// review, R1-4: the Mac's first-edit note button + chip book rows,
@@ -471,10 +547,24 @@ final class AppSession {
         // through it, which is why its filing flushes before it savepoints
         // and why it now RELEASES the entry afterwards. The reasoning above
         // stands on its own; the example was simply wrong.)
+        #if os(macOS)
+        // 18k C1: this is also the Mac registry's ONE drop — see
+        // `releaseAutosave(forPost:)` for why the release itself never is.
+        let leaving = markLeaving(postID)
+        #endif
         await flushExistingAutosave(forPost: postID)
-        _ = try? await runner.run { ops in
+        let landed = (try? await runner.run { ops in
             try ops.closeAutoCommit(postID)
+        }) != nil
+        #if os(macOS)
+        // A savepoint that did not land (a locked or failing store) keeps the
+        // entry: the note still owes it, and ⌘Q or the lock tries again.
+        if landed, let leaving, leaving.unheld {
+            dropAfterLeaving(postID, acquisitions: leaving.acquisitions)
         }
+        #else
+        _ = landed
+        #endif
     }
 
     #if os(macOS)

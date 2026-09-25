@@ -450,7 +450,20 @@ savepoints its own sessions, and the idle backstop (`IdleCommitScheduler`, every
   wrote NOTHING for a tail the editor minted on its way out. The pure guards GREEN on old, as they
   must be (the old tree never let go of anything): quit-at-the-latest tail, book-note lock
   savepoint, still-open ⌘Q walk, mode switch, seal-still-flushes.
-- The fix — NOT-STARTED.
+- The fix — DONE (this commit), PENDING the revert/mutation evidence, the walk and the closing runs:
+  `AppSession` (Mac: the entry leaves only through a leaving savepoint that lands after the last
+  holder let go — `markLeaving`/`dropAfterLeaving`, the acquisition generation; the last release of a
+  LEFT note re-takes that savepoint; a DEBUG `assert` on more releases than acquisitions; the phone's
+  release byte-unchanged under `#else`) · `EditorViewModel` / `TakesViewModel` / `BlockTOCViewModel`
+  — one `isolated deinit` release each · `CanvasViewModel` — the coordinator stored ONCE (was a
+  computed acquire-per-read) + `isolated deinit` · `CompareViewModel` — a per-post cache (was
+  acquire-per-call, plus one more per post inside teardown), released after flush at `teardown()` +
+  `isolated deinit` for what it still holds · `BookIndexEditModel` — release after flush at
+  `teardown()` + `isolated deinit` · `ShellActions.toggleSeal` → `flushExistingAutosave`. The three
+  13l L-d Mac pins (`AutosaveRegistryReleaseTests`: the flush-walk, re-mint-once and eight-captures
+  pins) let a post go through a `letGo` helper (release, then the leaving savepoint) — their
+  assertions' meaning unchanged; the other three untouched. **Run on the fixed tree: `Test run with
+  22 tests in 3 suites passed`** (the 16 C1 pins + the 6 L-d pins).
 - Behavioural revert (red-on-old evidence) — NOT-STARTED.
 - Dev-store before/after measurement — NOT-STARTED.
 - Closing runs (touched suites + pins + the eleven Tutorial suites; iOS build; phone quick-note

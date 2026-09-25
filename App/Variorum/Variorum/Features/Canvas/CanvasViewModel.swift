@@ -65,8 +65,25 @@ final class CanvasViewModel {
         self.containerID = containerID
         self.forwarder = StatusForwarder(session.status)
         // The coordinator is tracked from birth (edits may land the moment
-        // a pane goes live) — the ONE per-post pipeline (N3).
+        // a pane goes live) — the ONE per-post pipeline (N3). 18k C1: taken
+        // ONCE, here; it used to be a computed property that acquired again
+        // on every read (every projection, keystroke and focus move).
+        self.coordinator = session.autosave(forPost: containerID)
         observeCoordinator()
+    }
+
+    /// **18k C1 — the ONE release for the ONE acquisition in `init`.** The
+    /// instance's death is the only point that runs exactly once per
+    /// acquisition: `CanvasView` builds this model eagerly in its `init`
+    /// (`State(initialValue:)` evaluates its argument on EVERY re-init and
+    /// keeps only the first), so discarded twins acquire too and never see
+    /// `onDisappear`. Nothing records through this instance after it dies. A
+    /// flush still in flight when it does (teardown's Task holds the
+    /// coordinator, not the model) is covered by the session: a dirty
+    /// coordinator is never dropped, and the Mac's drop waits for a leaving
+    /// savepoint, which flushes first.
+    isolated deinit {
+        session.releaseAutosave(forPost: containerID)
     }
 
     private(set) var projection = Queries.CanvasProjection()
@@ -116,9 +133,8 @@ final class CanvasViewModel {
     @ObservationIgnored private var coordinatorToken: UUID?
     @ObservationIgnored private var deferredFace: CanvasFace?
 
-    private var coordinator: AutosaveCoordinator {
-        session.autosave(forPost: containerID)
-    }
+    /// The post's ONE coordinator, held for this model's life (18k C1).
+    @ObservationIgnored private let coordinator: AutosaveCoordinator
 
     private func observeCoordinator() {
         guard coordinatorToken == nil else { return }
