@@ -126,6 +126,10 @@ with expected_functions (signature, exp_anon, exp_authenticated, exp_service_rol
     -- pre-13x 11: the vault's insert trigger function — RETURNS trigger,
     -- uncallable via RPC by Postgres rule; INFO by design.
     ('key_vault_require_proof_hash()',                                 null,  null,  null),
+    -- Signup auto-entitlement (maintenance, 2026-09-24 — her word at the
+    -- 13y window's tail; the record rides 13t's row): the auth.users
+    -- signup trigger's function — RETURNS trigger; INFO by design.
+    ('signup_auto_entitle()',                                          null,  null,  null),
     -- Identified at the 14c gate (2026-08-11): a platform-side event-trigger
     -- function (attached as `ensure_rls` on ddl_command_end) that auto-enables
     -- RLS on new public tables — never in a repo artifact, benign and

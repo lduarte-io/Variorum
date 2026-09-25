@@ -860,6 +860,38 @@ struct AuthRLSDDLTests {
         #expect(sql.contains("using (auth.uid() = user_id)"))
     }
 
+    /// SIGNUP AUTO-ENTITLEMENT (maintenance, 2026-09-24 — her word at the
+    /// 13y window's tail; the record rides 13t's row): every new auth user
+    /// is granted `hosted_sync` at signup by an auth.users trigger, making
+    /// her ruled "sync is open at v1" posture (and the friends beta) real
+    /// without her hand on the door. The artifact must be idempotent, keep
+    /// the footgun revoke pair, never overwrite a deliberate
+    /// `entitlement_set` state, and carry the backfill for pre-trigger
+    /// signups. The kill-switch (`entitlement_set(..., false)`) is
+    /// untouched by construction — the trigger only ever fires at INSERT
+    /// on auth.users, never re-granting a revoked account.
+    @Test func signupAutoEntitlementIsIdempotentGuardedAndKillSwitchSafe() throws {
+        let sql = Self.strippingComments(
+            try Self.sqlFile("maintenance/beta-signup-auto-entitle.sql"))
+        #expect(sql.contains("create or replace function signup_auto_entitle() returns trigger"))
+        #expect(sql.contains("security definer"))
+        #expect(sql.contains("set search_path = public"))
+        #expect(sql.contains("revoke execute on function signup_auto_entitle() from public, anon, authenticated;"),
+                "every new function carries its footgun revoke pair")
+        #expect(sql.contains("drop trigger if exists variorum_signup_auto_entitle on auth.users;"))
+        #expect(sql.contains("after insert on auth.users"),
+                "the grant fires at signup and ONLY at signup — a revoked account is never re-granted")
+        #expect(sql.contains("on conflict (user_id, feature) do nothing"),
+                "a deliberate entitlement_set state wins over the default; re-runs are no-ops")
+        #expect(sql.contains("'signup-auto-backfill'"),
+                "pre-trigger signups are backfilled")
+        // The sweep's expected set must know the new trigger function, or
+        // its full-enumeration arm reports it UNEXPECTED on the next run.
+        let sweep = try Self.sqlFile("maintenance/14c-post-deploy-grant-sweep.sql")
+        #expect(sweep.contains("('signup_auto_entitle()'"),
+                "the sweep's registry carries the signup trigger function as an INFO row")
+    }
+
     /// THE POST-DEPLOY GRANT SWEEP (I-3's other half; live-probe
     /// obligation 11): a committed, READ-ONLY verification query that
     /// prints the FINAL posture — every function's per-role EXECUTE and
