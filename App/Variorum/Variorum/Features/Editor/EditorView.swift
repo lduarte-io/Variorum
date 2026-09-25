@@ -557,9 +557,7 @@ struct InlineEditorSurface: NSViewRepresentable {
 
     func updateNSView(_ nsView: EditorTextView, context: Context) {
         // Projection-driven through the model; the width is SwiftUI's.
-        nsView.proseGutter = gutter
-        context.coordinator.applyChrome(chrome, to: nsView)
-        context.coordinator.remeasure()
+        context.coordinator.viewUpdated(chrome: chrome, gutter: gutter, on: nsView)
     }
 
     static func dismantleNSView(_ nsView: EditorTextView, coordinator: Coordinator) {
@@ -600,6 +598,16 @@ struct InlineEditorSurface: NSViewRepresentable {
                 textView.applyVoiceChrome(chrome, previous: previous)
             }
             model.refreshBadges()
+        }
+
+        /// `updateNSView`'s body, on the coordinator (18k C2) so a pin can
+        /// drive the SAME road a SwiftUI update takes without a `Context`.
+        func viewUpdated(
+            chrome: EditorSurfaceChrome, gutter: ProseGutter, on textView: EditorTextView
+        ) {
+            textView.proseGutter = gutter
+            applyChrome(chrome, to: textView)
+            remeasure()
         }
 
         func install(textView: EditorTextView, reportHeight: @escaping (CGFloat) -> Void) {

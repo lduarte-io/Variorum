@@ -867,7 +867,16 @@ change between `cfe53bb5` and today removed it; C2 did not, and claims nothing f
   hung in `terminateLater`, and both walk instances were stopped by PID, path verified as the Debug
   product.)
 - Phase 2, the deferral (coalescing hop, first height delivered) — NOT-STARTED.
-- Pins (first-height delivery; the double-realization count only IF confirmed) — NOT-STARTED.
+- Pins — IN-PROGRESS (this commit: the seam + the pins, run on the PRE-FIX behaviour next — PENDING):
+  the seam `InlineEditorSurface.Coordinator.viewUpdated(chrome:gutter:on:)` — `updateNSView`'s body
+  moved verbatim onto the coordinator (still a synchronous `remeasure()`: behaviour-identical) so a pin
+  can drive the update road without a SwiftUI `Context`; `VariorumTests/InlineHeightReportTests.swift`
+  (4 tests): the mount reports nothing inside itself and the first height still arrives with NO storage
+  edit to prompt it · an update pass reports nothing inside itself and the reflowed height arrives next
+  turn · a burst (3 keystrokes + 2 update passes in one turn) reports once · the whole road — the real
+  `EditorView(inline: true)` mounted fresh reaches its measured height (a GUARD; its teeth are a
+  mutation). No double-realization pin: the double is DISPROVED as this binding's effect and does not
+  reproduce today (THE MEASUREMENT).
 - The `Modifying state during view update` count, before/after, one fixed suite set — NOT-STARTED.
 - In-app use evidence (dev-store Debug, scripted; the GUI walk HELD for TCC) — NOT-STARTED.
 - The ledger row amendment (claimed only if confirmed) — NOT-STARTED.
