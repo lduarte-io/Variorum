@@ -1920,4 +1920,7 @@ dispositioned: (a) ruled, (b) held for 13t's kickoff by her word.**
 **The alternatives:** (a) the line's whole box decides (the 13c/13u4 rule as it stood: a line counts while any of it, even a 3-pt sliver of descenders, is on screen); (c) half the line decides (a line counts while at least half its height is on screen — a line cut through its middle would flip).
 **Where it lives:** one read, `EditorViewModel.topVisibleOffset()` — the capture every reading-position restore shares (a re-font, a width reflow, leaving and returning to a note, a full re-render). Reversing it is one condition.
 
-*(Next free number: **#148**.)*
+#148 — **ONE SENTENCE IN THE BACKUP LOG: WHAT THE SECOND FOLDER'S ROW SAYS WHEN A RUN'S OWN BACKUP FAILED (2026-09-25, the 18k ladder round 1, NIT 1). PROVISIONAL — built; copy is yours.**
+**The case:** since C7 the second folder is handed the run's OWN snapshot, never one re-discovered by listing. When the beside-the-library backup FAILS and the far folder is due, the far leg copies nothing and said *"There is no snapshot to copy yet."* — false whenever older copies exist beside the library (only THIS run made none). **The provisional wording:** *"This run made no snapshot to copy."* One string in `StoreBackup.performSecondLeg`; pinned (`BackupRunTests.aFailedPrimaryLegLeavesTheFarFolderAnHonestSentence`, red-on-old by the old string); reversing or rewording is one line.
+
+*(Next free number: **#149**.)*

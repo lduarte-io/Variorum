@@ -197,3 +197,30 @@ cross-model fix flow (two are recorded trades/wording, one is a sibling-conventi
 orchestrator wants NIT 1's one-line wording tweak, this reviewer can land it on authorization with
 a copy-level pin. Per the ladder rule, no NEW BLOCKER/MAJOR arose, so no round-3 pass is owed by
 this round's findings; round 2's re-review of any fixes is the orchestrator's call.
+
+---
+
+## FIX PASS (this reviewer, on the orchestrator's authorization — NIT 1 CONFIRMED; NITs 2/3 stand recorded, no change)
+
+**The fix (one line + its comment):** `App/Variorum/Shared/StoreBackup.swift`,
+`performSecondLeg`'s `guard let source` arm — the failed-primary sentence is now
+**"This run made no snapshot to copy."** (was *"There is no snapshot to copy yet."*, which claimed
+no snapshot EXISTED — false whenever older copies sit beside the library). Copy is the author's:
+**PROVISIONAL, QUESTIONS #148** (one-line row; end marker moved to #149). Scope kept to that line
+and its pin; no behaviour changed (`outcome == .failed`, the return, and every other leg arm are
+byte-identical).
+
+**The pin (red-on-old by the old string):**
+`BackupRunTests.aFailedPrimaryLegLeavesTheFarFolderAnHonestSentence` — a reachable, DUE far folder
+handed `source: nil` must fail with the new sentence. Measured on the pre-fix working tree:
+`✘ Test run with 9 tests in 1 suite failed after 0.103 seconds with 1 issue` — exactly this pin,
+`(leg.detail → "There is no snapshot to copy yet.") == "This run made no snapshot to copy."`
+(`DerivedData/18k-ladder-r1-nit1-red.log`).
+
+**Green on the fix — the Data Safety suites (all five suites of `DataSafetyTests.swift`:
+`BackupRetentionTests` · `BackupRunTests` · `DataSafetyRunbookTests` · `BackupSingleFlightTests` ·
+`BackupOwnFilesTests`):** `✔ Test run with 31 tests in 5 suites passed after 0.365 seconds`,
+zero skipped (`DerivedData/18k-ladder-r1-nit1-green.log`).
+
+**Commit:** `690a6b85` — pathspec-limited (`StoreBackup.swift`,
+`DataSafetyTests.swift`, `notes/QUESTIONS.md`, this file), no trailers, pushed.

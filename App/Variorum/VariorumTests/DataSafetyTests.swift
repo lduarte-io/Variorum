@@ -255,6 +255,37 @@ struct BackupRunTests {
         #expect(leg.succeeded == false)
     }
 
+    /// **18k ladder round 1, NIT 1 — the failed-primary sentence is honest
+    /// (copy correctness; PROVISIONAL, QUESTIONS #148).** When THIS RUN made
+    /// no snapshot (the primary leg failed) and the far folder is due, the
+    /// far leg copies nothing by design (C7's pass-through — it never
+    /// re-discovers by listing). Its sentence must blame THIS run, not claim
+    /// no snapshot exists at all: snapshots usually do, beside the library —
+    /// this act just has none to hand through. RED-ON-OLD by the old string
+    /// ("There is no snapshot to copy yet.").
+    @Test func aFailedPrimaryLegLeavesTheFarFolderAnHonestSentence() async throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let defaults = scratchDefaults()
+        // A REACHABLE picked folder that is DUE (empty) — so the guard the
+        // sentence lives in is the one that answers, not the resolve.
+        let picked = dir.appendingPathComponent("picked", isDirectory: true)
+        try FileManager.default.createDirectory(at: picked, withIntermediateDirectories: true)
+        let bookmark = try picked.bookmarkData(
+            options: [.withSecurityScope], includingResourceValuesForKeys: nil, relativeTo: nil)
+        defaults().set(bookmark, forKey: BackupDestination.defaultsKey)
+
+        let leg = await Task.detached {
+            StoreBackup.performSecondLeg(
+                source: nil, directory: dir, configuration: .init(), defaults: defaults(),
+                now: Date(), force: false,
+                artifactConfiguration: GRDB.Configuration())
+        }.value
+        #expect(leg.outcome == .failed, "a due far folder handed no file is a failed leg")
+        #expect(leg.detail == "This run made no snapshot to copy.",
+                "the sentence blames THIS run — it never claims no snapshot exists")
+    }
+
     @Test func theLogKeepsTheNewestRunsAndSurvivesAtItsCap() {
         let defaults = scratchDefaults()
         for index in 0..<(BackupLog.capacity + 5) {

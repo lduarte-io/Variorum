@@ -395,7 +395,13 @@ final class StoreBackup {
                 }
                 guard let source else {
                     leg.outcome = .failed
-                    leg.detail = "There is no snapshot to copy yet."
+                    // 18k ladder round 1 (NIT 1; PROVISIONAL — QUESTIONS
+                    // #148): THIS RUN made no snapshot (the primary leg
+                    // failed), so there is nothing of this act's to hand
+                    // through. The old sentence ("There is no snapshot to
+                    // copy yet.") claimed none EXISTED — false whenever
+                    // older copies sit beside the library.
+                    leg.detail = "This run made no snapshot to copy."
                     return
                 }
                 let destination = target.appendingPathComponent(source.lastPathComponent)
