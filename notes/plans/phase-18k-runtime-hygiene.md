@@ -3437,7 +3437,50 @@ All three sort after every dated name; among themselves `…-a1-pre13x-…` sort
   - **R-tight: `failed … with 2 issues`** — ONLY the listing pin: `…-130000-a1-window.sqlite` and
     `…-140000-drill.sqlite` listed as the app's own, and both offered for deletion by the Castle listing. The
     tightening is load-bearing on its own.
-- Dev-store use evidence (a scratch second folder, `cmp`, its check) — PENDING.
-- The remedy sentence for her — PENDING.
+- **Dev-store use evidence — DONE** (the section THE USE EVIDENCE below): the fixed Debug build (`70607656`) on
+  the dev store, whose `Backups/` still holds THREE plaintext `…-seed-drill-…` files (W-3's exact setting). Launch:
+  nothing written, both folders up to date. Change Folder… → a scratch folder: the act's
+  `…-204646-54909c07.sqlite` sent, **`cmp`-identical** (and its pair), both checks ok, the pane *"Copied, checked,
+  ok. Copied to your folder too."*; **Back Up Now**: the act's `…-204706-…` sent, `cmp`-identical, *"…1 old copy
+  retired."*; the drill files untouched throughout; the pick restored to `~/Documents/` as found (its run's
+  `…-204738-…` sent there, `cmp`-identical). Quit by identity; zero instances.
+- **The remedy sentence for her — DONE** (THE REMEDY below).
 - Closing runs — PENDING.
 - Deaths / resumes: none.
+
+### THE USE EVIDENCE (dev store, `io.lduarte.Variorum.debug`, the Debug build of `70607656` in `DerivedData/18k-c7-walk`)
+
+Grants re-proved first (a compiled probe: `AX: true SCREEN: true`); zero instances before and after. Settings driven
+through Accessibility (WalkKit's 18k road: pane `button 8 of scroll area 1 of group 1`; Change Folder… =
+`button 1 of group 2 of scroll area 2 of group 1`; Back Up Now = `button 1 of group 1 …`; the Open panel through
+⌘⇧G + `button "Use This Folder" of splitter group 1`). Every outcome below is read from THE APP'S OWN persisted
+run log (`variorum.backup.log` in the dev domain, decoded read-only) and the folders' files, not from a capture
+alone. Captures `notes/plans/18k-screens/c7/settings/01…05` (gitignored).
+
+| # | Act | What the app did (its own log) | Files | Verdict |
+|---|---|---|---|---|
+| 0 | **The dev store as found** (before any launch of the fixed build) | — | `Backups/`: 11 dated copies, ALL of 2026-09-25, + three PLAINTEXT `…-seed-drill-2026-07-18T…Z.sqlite` (+ their `-wal`/`-shm`); second folder `~/Documents/`, holding the drill file and (see 0b) one dated copy; insurance OFF. The face (`01`) read *"Beside your library … 11 copies · back to Sep 25"* — **the dev twin of her exposure, shown by the face by date**: every launch had written a copy and three drill names held three of the 14 slots | the damage, reproduced |
+| 0b | **The test runs of this unit** (the test host IS the dev app, and its launch runs the dev store's backup tick — NOTICED 3) | pre-fix trees (14:27, 14:29, R-full 14:35): P written, **S written `…-seed-drill-…` → *"could not be checked: SQLite error 26: file is not a database"*** (W-3 in the app's own log); **fixed tree (14:33): P upToDate, S written `…-202951-…` ok**; R-narrow (14:39, the pass-through kept): S written `…-203919-…` ok | the three Fix-1 launches wrote NO primary copy; the three pre-Fix-1 launches each wrote one (at 14:29:51, 14:35:41, 14:39:19 — each launch's second) | Fix 1's due-check and Fix 2's copy, observed in the app process itself |
+| 1 | **Launch** the fixed build (20:45:35Z) | **P upToDate · S upToDate** (`…-203919-…`, `~/Documents/Variorum/Backups/`) | none written | PASS — before the fix the drill (last by name) forced BOTH legs to write at every launch |
+| 2 | Settings ▸ Data Safety ▸ **Change Folder…** → `notes/plans/18k-screens/c7/scratch-second/` (`02`, `03`) | 20:46:46Z: **P written `…-204646-54909c07.sqlite` ok · S written `…-204646-54909c07.sqlite` ok** | scratch `Variorum/Backups/` = exactly that pair; **`cmp` sqlite IDENTICAL, `cmp` pair IDENTICAL** (sha256 `85c514c529084190…` both); first bytes `fdb1 de49…` = ciphertext (not `SQLite format 3`) + `RESTORE.md` + the folder key file | **PASS** — the pane: *"Copied, checked, ok. Copied to your folder too."*; the far row *"Newest: Sep 25, 2026 at 2:46 PM · 1 copy"*; beside the library **12 copies** (the prune no longer counts the drill files) |
+| 3 | **Back Up Now…** (`04`) | 20:47:06Z: **P written `…-204706-…` ok · S written `…-204706-…` ok** | scratch = exactly the `…-204706-…` pair (the same-day `…-204646-…` retired by the 14+4 rule); **`cmp` sqlite IDENTICAL, pair IDENTICAL**; beside the library 13 own copies; **the three drill files untouched** | **PASS** — *"Copied, checked, ok. Copied to your folder too, 1 old copy retired."* |
+| 4 | **Restore as found:** Change Folder… → `~/Documents/` (`05`) | 20:47:38Z: P written `…-204738-…` ok · S written `…-204738-…` ok, `~/Documents/Variorum/Backups/` | `~/Documents/Variorum/Backups/` = the `…-204738-…` pair (`cmp` IDENTICAL; the same-day `…-203919-…` retired) + the July drill copy, left as it was | restored |
+| 5 | Read back + quit | the insurance switch reads `0` (OFF, as found) through Accessibility | `tell application id "io.lduarte.Variorum.debug" to quit`; `pgrep` empty | — |
+
+**The dev store as left:** second folder `~/Documents/` (as found), insurance OFF (as found), voice/palette untouched
+(Settings' Data Safety pane only). Beside the library: 13 own dated copies + the three July drill files (never the
+app's to prune). `~/Documents/Variorum/Backups/`: one real dev snapshot pair (`…-204738-…`) + the July plaintext
+drill copy the pre-fix app had been re-sending there (NOTICED 4). The scratch folder
+`notes/plans/18k-screens/c7/scratch-second/` is KEPT (gitignored) for the orchestrator's spot-check `cmp`.
+
+### THE REMEDY (for her — one sentence)
+
+**Once this build is installed, open Settings ▸ Data Safety and press Back Up Now once, and check that the "A second
+folder" row now shows today's date — the `variorum-backup-a1-…` files left in that folder's `Variorum/Backups/` are
+early-September strays the app will no longer send or touch, safe to delete or keep.**
+
+*(Why that is enough, from the code: the fixed build's first run — automatic at launch, or the press — reads the
+second folder's newest REAL copy (early September, so due) and sends that run's own snapshot, and from then on once
+a day; nothing needs re-picking. Beside the library there is nothing to do and nothing that can be done: the dated
+copies the old prune deleted are gone, and the kept set grows back to fourteen days, one real copy a day, over the
+next two weeks of use. The A1 copies there are the rail's and stay.)*
