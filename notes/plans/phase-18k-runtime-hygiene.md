@@ -1818,10 +1818,21 @@ so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to
      ShellsSeam`). The always-on guard for the unkeyed slots is the structural arm.
   **Fixed tree after the three:** always-on `✔ Test run with 27 tests in 3 suites passed after 11.788
   seconds` (`18k-c4-new3.log`: 6 keyed + 18 structural + 3 palette); opt-in, alone, `✔ Test run with 7
-  tests in 1 suite passed after 10.051 seconds` (`18k-c4-new-singletons.log`). **PENDING:** the FINAL
-  pin forms re-measured RED on the pre-fix tree (a scratch worktree at `0a84adbc` with the two final
-  files copied in); a behavioural revert of the fix's release road on the final tree for the structural
-  pins (M-norelease: every oracle's `release(owner:)` a no-op); the closing run.
+  tests in 1 suite passed after 10.051 seconds` (`18k-c4-new-singletons.log`).
+- **THE FINAL PIN FORMS, RE-MEASURED RED ON THE PRE-FIX TREE — DONE** (`DerivedData/18k-c4-final-forms-
+  prefix.log`): a scratch worktree at `0a84adbc` (the pre-fix app and its own tests) with the two final
+  two-window files copied in — both compile against the old read API — built with its own derived data;
+  worktree and build REMOVED after (`git worktree list` shows only the two pre-existing ones). Keyed,
+  always-on: `✘ Test run with 6 tests in 1 suite failed after 11.176 seconds with 16 issues`; unkeyed,
+  opt-in, alone: `✘ Test run with 7 tests in 1 suite failed after 12.454 seconds with 16 issues`. **All
+  13 red, every issue a post-teardown assertion, no precondition red**, the same values as the first
+  measurement (the table above) plus the one new arm: the Read host's first edit-row paint answered β's
+  `15:06:39` against α's none.
+- **NEXT — the behavioural revert, named before it runs (M-norelease):** on the committed final tree,
+  `OwnedRegistrations.release(owner:)`'s body replaced by `return` (the fix's hand-back road cut at its
+  one door; every oracle's `release` and every slot's forwards to it), then the always-on pins run —
+  expected RED: the structural arm's "after the newer leaves" checks and the keyed two-window pins.
+  Restored by `git checkout -- App/Variorum/Variorum/Core/Views/DebugOracleOwnership.swift`.
 - The two-window pins (red first where reachable) — WRITTEN AND MEASURED RED ON THE PRE-FIX TREE (this
   commit). `VariorumTests/DebugOracleTwoWindowTests.swift`, 12 tests, written against the read names the
   tree ALREADY has so each compiles on both sides; every one mounts the same kind of surface in TWO real
