@@ -98,6 +98,12 @@ struct ReadModeView: View {
     @AppStorage("readModeTypeScale") private var typeScale = 1.0
     /// The CURRENT block on this surface (row 39's fact, mirrored here).
     @State private var selectedBlockID: String?
+    #if DEBUG
+    /// **This Read host's own name in the DEBUG oracles** (18k UNIT C4 — the
+    /// `MastheadStamp.oracleOwner` shape): it owns the host's face, form,
+    /// selection and frames, and its rows read it by environment. DEBUG-only.
+    @State private var oracleOwner = UUID()
+    #endif
     /// One-shot scroll requests, one per consumer: the column and the
     /// mounted face each consume their own (two consumers of one nil-after-
     /// scroll request race each other — the wave-2c walk caught it).
@@ -168,7 +174,7 @@ struct ReadModeView: View {
                     } action: { frame in
                         carryGeometry.noteViewport(frame)
                         #if DEBUG
-                        ReadModeOracle.faceFrames[postID] = frame
+                        ReadModeOracle.recordFaceFrame(postID, frame, owner: oracleOwner)
                         #endif
                     }
             } panel: {
@@ -198,14 +204,20 @@ struct ReadModeView: View {
                     onJump: onJump)
                     .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
                         #if DEBUG
-                        ReadModeOracle.indexColumnFrames[postID] =
-                            CGRect(origin: .zero, size: size)
+                        ReadModeOracle.recordIndexColumn(
+                            postID, CGRect(origin: .zero, size: size), owner: oracleOwner)
                         #endif
                     }
             }
         }
         .background(tokens.room)
         .coordinateSpace(name: Self.probeSpace)
+        #if DEBUG
+        // 18k C4: the host's rows register under THIS host's name, and it
+        // takes exactly its own with it when it leaves.
+        .environment(\.debugOracleOwner, oracleOwner)
+        .onDisappear { ReadModeOracle.release(owner: oracleOwner) }
+        #endif
         // Ladder R1-9 (row 83's shape, the mode her ruling put beside Takes):
         // the rows are PRIMED by one bounded read before the observation
         // starts, and the sibling observations wait for it — Read arrives
@@ -478,10 +490,9 @@ struct ReadModeView: View {
 
     private func report() {
         #if DEBUG
-        ReadModeOracle.face = face
-        ReadModeOracle.form = form
-        ReadModeOracle.selectedBlockID = selectedBlockID
-        ReadModeOracle.liveBlockID = model.liveBlockID
+        ReadModeOracle.report(
+            face: face, form: form, selected: selectedBlockID, live: model.liveBlockID,
+            owner: oracleOwner)
         #endif
     }
 }
@@ -492,41 +503,106 @@ struct ReadModeView: View {
 /// what she sees, per face, not a state the code merely intends.
 @MainActor
 enum ReadModeOracle {
-    static var face: ReadModeView.Face?
-    static var form: ReadModeView.Form?
-    static var selectedBlockID: String?
-    static var liveBlockID: String?
+    // **18k UNIT C4 — EVERY REGISTRATION BELOW NAMES ITS OWNER** (the rule
+    // and its reasons: `Core/Views/DebugOracleOwnership.swift`): the mounted
+    // host's `oracleOwner` (its rows read it by environment), released when
+    // that host leaves. The four state singletons were bare statics every
+    // mounted host overwrote, and the frame maps were keyed by note or block
+    // — shared by the same note open twice — so after one window closed,
+    // every answer here was ITS: measured red, `DebugOracleTwoWindowTests`.
+    // Read names and shapes unchanged.
+    private struct HostState {
+        var face: ReadModeView.Face?
+        var form: ReadModeView.Form?
+        var selectedBlockID: String?
+        var liveBlockID: String?
+    }
+
+    private static var stateSlot = OwnedSlot<HostState>()
+    private static var firstPaintSlot = OwnedSlot<Date>()
+    private static var pageBlockStore = OwnedRegistrations<String, CGRect>()
+    private static var editBlockStore = OwnedRegistrations<String, CGRect>()
+    private static var faceFrameStore = OwnedRegistrations<String, CGRect>()
+    private static var indexColumnStore = OwnedRegistrations<String, CGRect>()
+
+    static var face: ReadModeView.Face? { stateSlot.value?.face }
+    static var form: ReadModeView.Form? { stateSlot.value?.form }
+    static var selectedBlockID: String? { stateSlot.value?.selectedBlockID }
+    static var liveBlockID: String? { stateSlot.value?.liveBlockID }
     /// Each face's block frames in the host's own named space, so a pin
     /// can CLICK a block for real — the rig's synthesized events.
-    static var pageBlockFrames: [String: CGRect] = [:]
-    static var editBlockFrames: [String: CGRect] = [:]
+    static var pageBlockFrames: [String: CGRect] { pageBlockStore.current }
+    static var editBlockFrames: [String: CGRect] { editBlockStore.current }
     /// Ladder R1-5: how many leaves the pages face turned by its arrow keys.
+    /// A COUNTER, not a registration (18k C4 — SAFE-AS-IS (A)).
     static var pageTurns = 0
     /// Ladder R1-9: when the `edit` face painted its FIRST row (the Blocks
-    /// arrival measure's shape).
-    static var firstEditRowPaintedAt: Date?
+    /// arrival measure's shape) — per host since 18k C4: each host's own
+    /// first paint, the most recent host's answering.
+    static var firstEditRowPaintedAt: Date? { firstPaintSlot.value }
     /// 13u2b UNIT 3: the FACE's own frame in the host's space — the viewport a
     /// carried block's fraction is measured against, so a pin can state where
     /// a block landed as a fraction rather than as a raw offset. Keyed by the
     /// NOTE's id, like the column's frames beside it (suites run in parallel).
-    static var faceFrames: [String: CGRect] = [:]
+    static var faceFrames: [String: CGRect] { faceFrameStore.current }
     /// 18d batch 3 (her U-13): what the CONTENTS COLUMN actually drew. "It
     /// is the width she left it at" is a claim about a rectangle, so the pin
     /// reads the rectangle, never `NoteIndexColumn.width`. Keyed by the
     /// NOTE's id: suites run in parallel, so a pin must read its own note's.
-    static var indexColumnFrames: [String: CGRect] = [:]
+    static var indexColumnFrames: [String: CGRect] { indexColumnStore.current }
 
+    // MARK: - The writes (each names its owner)
+
+    static func report(
+        face: ReadModeView.Face, form: ReadModeView.Form,
+        selected: String?, live: String?, owner: UUID
+    ) {
+        stateSlot.publish(
+            HostState(face: face, form: form, selectedBlockID: selected, liveBlockID: live),
+            owner: owner)
+    }
+
+    static func recordPageBlock(_ blockID: String, _ frame: CGRect, owner: UUID) {
+        pageBlockStore.publish(frame, for: blockID, owner: owner)
+    }
+
+    /// An edit-face row's frame — and, the first time THIS host paints one,
+    /// its arrival time.
+    static func recordEditBlock(_ blockID: String, _ frame: CGRect, owner: UUID) {
+        if firstPaintSlot.value(owner: owner) == nil {
+            firstPaintSlot.publish(Date(), owner: owner)
+        }
+        editBlockStore.publish(frame, for: blockID, owner: owner)
+    }
+
+    static func recordFaceFrame(_ postID: String, _ frame: CGRect, owner: UUID) {
+        faceFrameStore.publish(frame, for: postID, owner: owner)
+    }
+
+    static func recordIndexColumn(_ postID: String, _ frame: CGRect, owner: UUID) {
+        indexColumnStore.publish(frame, for: postID, owner: owner)
+    }
+
+    /// A host leaving: its own registrations, and nothing another window's
+    /// host still answers for.
+    static func release(owner: UUID) {
+        stateSlot.release(owner: owner)
+        firstPaintSlot.release(owner: owner)
+        pageBlockStore.release(owner: owner)
+        editBlockStore.release(owner: owner)
+        faceFrameStore.release(owner: owner)
+        indexColumnStore.release(owner: owner)
+    }
+
+    /// A PIN's door, unconditional (a pin owns nothing).
     static func reset() {
-        face = nil
-        form = nil
-        selectedBlockID = nil
-        liveBlockID = nil
-        pageBlockFrames = [:]
-        editBlockFrames = [:]
+        stateSlot.forget()
+        firstPaintSlot.forget()
+        pageBlockStore.forgetAll()
+        editBlockStore.forgetAll()
         pageTurns = 0
-        firstEditRowPaintedAt = nil
-        indexColumnFrames = [:]
-        faceFrames = [:]
+        indexColumnStore.forgetAll()
+        faceFrameStore.forgetAll()
     }
 }
 #endif
@@ -601,23 +677,34 @@ extension View {
     @ViewBuilder
     func readModeGeometryProbe(_ slot: ReadModeProbeSlot) -> some View {
         #if DEBUG
-        self.onGeometryChange(for: CGRect.self) {
-            $0.frame(in: .named(ReadModeView.probeSpace))
-        } action: { frame in
-            switch slot {
-            case .pageBlock(let id): ReadModeOracle.pageBlockFrames[id] = frame
-            case .editBlock(let id):
-                if ReadModeOracle.firstEditRowPaintedAt == nil {
-                    ReadModeOracle.firstEditRowPaintedAt = Date()
-                }
-                ReadModeOracle.editBlockFrames[id] = frame
-            }
-        }
+        self.modifier(ReadModeGeometryProbe(slot: slot))
         #else
         self
         #endif
     }
 }
+
+#if DEBUG
+/// 18k C4: a modifier rather than a bare `onGeometryChange`, because it must
+/// READ its owning host from the environment (`TakeCardGeometryProbe`'s own
+/// reason) — the row's rectangle is that host's, and goes when it does.
+private struct ReadModeGeometryProbe: ViewModifier {
+    let slot: ReadModeProbeSlot
+    @Environment(\.debugOracleOwner) private var owner
+
+    func body(content: Content) -> some View {
+        content.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(ReadModeView.probeSpace))
+        } action: { frame in
+            let owner = owner ?? DebugOracleOwner.unowned
+            switch slot {
+            case .pageBlock(let id): ReadModeOracle.recordPageBlock(id, frame, owner: owner)
+            case .editBlock(let id): ReadModeOracle.recordEditBlock(id, frame, owner: owner)
+            }
+        }
+    }
+}
+#endif
 
 // MARK: - The continuous page (the wave-2c paper, kept)
 

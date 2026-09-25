@@ -125,6 +125,12 @@ struct LibraryCatalogView: View {
     /// Row 34: the library's measured width — the panel column's width is
     /// derived from it (`LibraryPanelLayout`), never from an inspector.
     @State private var libraryWidth: CGFloat = 0
+    #if DEBUG
+    /// **This catalog's own name in the DEBUG oracle** (18k UNIT C4 — the
+    /// `MastheadStamp.oracleOwner` shape): its probes read it by environment,
+    /// and the catalog takes exactly its own frames with it when it leaves.
+    @State private var oracleOwner = UUID()
+    #endif
 
     /// The catalog's own coordinate space — the DEBUG oracle's frames are
     /// read here (a `.global` read inside a macOS `ScrollView` answers in
@@ -208,6 +214,10 @@ struct LibraryCatalogView: View {
         .libraryGeometryProbe(.root)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { libraryWidth = $0 }
         .background(tokens.surface)
+        #if DEBUG
+        .environment(\.debugOracleOwner, oracleOwner)
+        .onDisappear { LibraryPanelOracle.release(owner: oracleOwner) }
+        #endif
         .task { await model.search() }
         // 13g R5-6: switching INTO notes fills the cards; switching out
         // clears them, so a mode she is not in holds no derived text.

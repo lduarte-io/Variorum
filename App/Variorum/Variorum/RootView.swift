@@ -352,6 +352,8 @@ struct RootView: View {
 #if DEBUG
             // Row 46: this shell's own registration goes with this shell.
             ShellRouter.releaseBlockNamingDoor(owner: windowID)
+            // 18k C4: …and so do its pane seams, under the same name.
+            SeamGeometry.release(owner: windowID)
 #endif
             // 13j J11: closing the window is a leaving for every note its
             // panes were showing.
@@ -677,18 +679,23 @@ struct RootView: View {
             frameSpace: .named(Self.paneRowSpace),
             onLineFrame: { frame in
                 #if DEBUG
-                SeamGeometry.lineFrames[
+                // 18k C4: registered under THIS window's id (the subject
+                // already names this window's router; the owner makes the
+                // teardown take only this shell's seams).
+                SeamGeometry.recordLine(
                     SeamGeometry.key(
                         Self.paneSeamFamily,
-                        subject: Self.paneSeamSubject(router: router, index: index))] = frame
+                        subject: Self.paneSeamSubject(router: router, index: index)),
+                    frame, owner: windowID)
                 #endif
             },
             onGripFrame: { frame in
                 #if DEBUG
-                SeamGeometry.gripFrames[
+                SeamGeometry.recordGrip(
                     SeamGeometry.key(
                         Self.paneSeamFamily,
-                        subject: Self.paneSeamSubject(router: router, index: index))] = frame
+                        subject: Self.paneSeamSubject(router: router, index: index)),
+                    frame, owner: windowID)
                 #endif
             })
     }

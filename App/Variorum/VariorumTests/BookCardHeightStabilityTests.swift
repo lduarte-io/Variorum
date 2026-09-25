@@ -155,7 +155,7 @@ struct BookCardHeightStabilityTests {
                 try Queries.assembleReading($0, readingID: readingID)
             })
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
-            BookOutlineGeometry.rowHeights = [:]
+            BookOutlineGeometry.forgetRowHeights()
             let (window, hosting) = mounted(
                 session: session, readingID: readingID, model: model, structure: structure)
             defer {

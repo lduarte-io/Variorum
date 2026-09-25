@@ -338,7 +338,7 @@ struct BookOutlineLandingTests {
             })
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
             #expect(structure.chaptersActive)
-            BookOutlineGeometry.anchorTops = [:]
+            BookOutlineGeometry.forgetAnchorTops()
             BookOutlineGeometry.trace = []
             let watchdog = MainThreadWatchdog()
             defer { watchdog.stop() }
@@ -387,7 +387,7 @@ struct BookOutlineLandingTests {
                 try Queries.assembleReading($0, readingID: readingID)
             })
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
-            BookOutlineGeometry.anchorTops = [:]
+            BookOutlineGeometry.forgetAnchorTops()
             BookOutlineGeometry.trace = []
             let watchdog = MainThreadWatchdog()
             defer { watchdog.stop() }
@@ -482,7 +482,7 @@ struct BookOutlineLandingTests {
                 try Queries.assembleReading($0, readingID: readingID)
             })
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
-            BookOutlineGeometry.anchorTops = [:]
+            BookOutlineGeometry.forgetAnchorTops()
             BookOutlineGeometry.trace = []
             let watchdog = MainThreadWatchdog()
             defer { watchdog.stop() }
@@ -623,7 +623,7 @@ extension BookOutlineLandingTests {
             let model = BookViewModel(session: session, readingID: readingID)
             #expect(model.entries.isEmpty, "the premise: the entries have not arrived")
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
-            BookOutlineGeometry.anchorTops = [:]
+            BookOutlineGeometry.forgetAnchorTops()
             BookOutlineGeometry.trace = []
             let watchdog = MainThreadWatchdog()
             defer { watchdog.stop() }
@@ -744,7 +744,7 @@ extension BookOutlineLandingTests {
                 try Queries.assembleReading($0, readingID: readingID)
             })
             let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
-            BookOutlineGeometry.anchorTops = [:]
+            BookOutlineGeometry.forgetAnchorTops()
             BookOutlineGeometry.trace = []
             let watchdog = MainThreadWatchdog()
             defer { watchdog.stop() }

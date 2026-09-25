@@ -50,6 +50,11 @@ struct ShellSplit<Sidebar: View, Detail: View>: View {
     /// The remembered width. `AppStorage` rather than window state: one
     /// sidebar width for the app, kept across launches.
     @AppStorage(Self.widthKey) private var sidebarWidth: Double = Self.idealWidth
+    #if DEBUG
+    /// **This shell's own name in the DEBUG oracle** (18k UNIT C4 — the
+    /// `MastheadStamp.oracleOwner` shape). DEBUG-only.
+    @State private var oracleOwner = UUID()
+    #endif
 
     static var widthKey: String { "shellSidebarWidth" }
     static var minimumWidth: CGFloat { 180 }
@@ -100,6 +105,10 @@ struct ShellSplit<Sidebar: View, Detail: View>: View {
         }
         .coordinateSpace(name: Self.splitSpace)
         .animation(.easeInOut(duration: 0.2), value: sidebarShown)
+        #if DEBUG
+        // 18k C4: this shell's seam, and no other window's.
+        .onDisappear { ShellGeometry.release(owner: oracleOwner) }
+        #endif
     }
 
     /// The one honest line, and the grip over it — **the shared seam**
@@ -136,12 +145,12 @@ struct ShellSplit<Sidebar: View, Detail: View>: View {
             lineRunsUnderTheTopBand: true,
             onLineFrame: { frame in
                 #if DEBUG
-                ShellGeometry.dividerLineFrame = frame
+                ShellGeometry.recordLine(frame, owner: oracleOwner)
                 #endif
             },
             onGripFrame: { frame in
                 #if DEBUG
-                ShellGeometry.dividerGripFrame = frame
+                ShellGeometry.recordGrip(frame, owner: oracleOwner)
                 #endif
             })
     }
@@ -184,12 +193,31 @@ struct ShellSplit<Sidebar: View, Detail: View>: View {
 /// claim about two rectangles (the `SidebarGeometry` pattern).
 @MainActor
 enum ShellGeometry {
-    static var dividerLineFrame: CGRect?
-    static var dividerGripFrame: CGRect?
+    // **18k UNIT C4 — the two frames NAME THEIR OWNER** (the rule and its
+    // reasons: `Core/Views/DebugOracleOwnership.swift`): the mounted
+    // `ShellSplit`'s `oracleOwner`, released when that shell leaves. They
+    // were bare statics every shell overwrote — after one window closed the
+    // seam was ITS (measured red, `DebugOracleTwoWindowTests`).
+    private static var lineSlot = OwnedSlot<CGRect>()
+    private static var gripSlot = OwnedSlot<CGRect>()
 
+    static var dividerLineFrame: CGRect? { lineSlot.value }
+    static var dividerGripFrame: CGRect? { gripSlot.value }
+
+    static func recordLine(_ frame: CGRect, owner: UUID) { lineSlot.publish(frame, owner: owner) }
+
+    static func recordGrip(_ frame: CGRect, owner: UUID) { gripSlot.publish(frame, owner: owner) }
+
+    /// A shell leaving: its own seam, and no other window's.
+    static func release(owner: UUID) {
+        lineSlot.release(owner: owner)
+        gripSlot.release(owner: owner)
+    }
+
+    /// A PIN's door, unconditional (a pin owns nothing).
     static func reset() {
-        dividerLineFrame = nil
-        dividerGripFrame = nil
+        lineSlot.forget()
+        gripSlot.forget()
     }
 }
 #endif

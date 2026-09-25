@@ -105,7 +105,7 @@ struct TrayPanelMoveTests {
             // it drew its divider in a KEY window only. The column is ours now
             // (`SideColumn`), and its oracle — our divider's frame, reported
             // in every window state — is the honest "the pane stands" signal.
-            PostDetailOracle.sideColumnDividerFrame = nil
+            PostDetailOracle.forgetSideColumnDivider()
             let atRest = Self.classNames(hosting)
             #expect(PostDetailOracle.sideColumnDividerFrame == nil,
                     "the side panel is not on screen at rest")

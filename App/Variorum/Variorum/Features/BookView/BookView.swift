@@ -86,6 +86,14 @@ struct BookView: View {
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
     @State private var newChapterPresented = false
+    #if DEBUG
+    /// **This book's own name in the DEBUG oracles** (18k UNIT C4 — the
+    /// `MastheadStamp.oracleOwner` shape): minted once per view identity, it
+    /// owns this book's focus door, navigator and anchor rows, and its rows
+    /// read it by environment. DEBUG-only; the shipping build carries
+    /// neither the field nor the mint.
+    @State private var oracleOwner = UUID()
+    #endif
     @State private var chapterNameField = ""
     @State private var renameChapterTarget: ReadingSection?
     @State private var settingsShown = false
@@ -222,6 +230,10 @@ struct BookView: View {
             navigator
         }
         .background(tokens.surface)
+        #if DEBUG
+        // 18k C4: the navigator's rows register under THIS book's name.
+        .environment(\.debugOracleOwner, oracleOwner)
+        #endif
         // 13c 2D (A31): the assembly's ORDER is a task input, so changing
         // the way she is looking restarts the observation rather than
         // re-sorting delivered rows (the window is applied by the query —
@@ -248,15 +260,21 @@ struct BookView: View {
             // The round-end Fable pass, MAJOR-1's door: a pin that mounts the
             // REAL shell has no road to this book's focus (the model is this
             // view's `@State`), so the book publishes its one focus act,
-            // keyed by its own id (J41: never a singleton).
-            BookOutlineGeometry.focusDoors[readingID] = { model.focus($0) }
+            // keyed by its own id (J41: never a singleton) — and, since 18k
+            // C4, under THIS view's own name, so a second window on the same
+            // book neither overwrites it nor takes it down on leaving.
+            BookOutlineGeometry.publishFocusDoor(readingID, owner: oracleOwner) { model.focus($0) }
 #endif
         }
         .onChange(of: noteBoxReport) { _, _ in publishNoteBox() }
         .onDisappear {
             onNoteBox?(readingID, nil, nil)
 #if DEBUG
-            BookOutlineGeometry.focusDoors[readingID] = nil
+            // 18k C4: THIS book's registrations — its door, its navigator,
+            // its rows' anchors — and nothing another window's book still
+            // answers for (the old `focusDoors[readingID] = nil` cleared the
+            // other window's door too; measured, `DebugOracleTwoWindowTests`).
+            BookOutlineGeometry.release(owner: oracleOwner)
 #endif
         }
         // 13f W20(a): the ascent's request, taken once — whether this book
@@ -747,8 +765,8 @@ struct BookView: View {
             .background(tokens.room)
             .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
                 #if DEBUG
-                BookOutlineGeometry.navigatorFrames[readingID] =
-                    CGRect(origin: .zero, size: size)
+                BookOutlineGeometry.recordNavigator(
+                    readingID, CGRect(origin: .zero, size: size), owner: oracleOwner)
                 #endif
             }
             .coordinateSpace(name: BookNavigatorLayout.space)
@@ -1102,8 +1120,7 @@ struct BookView: View {
             landingBox.topRow = (anchorID, top)
         }
         #if DEBUG
-        BookOutlineGeometry.anchorTops[anchorID] = top
-        BookOutlineGeometry.rowHeights[anchorID] = height
+        BookOutlineGeometry.recordAnchor(anchorID, top: top, height: height, owner: oracleOwner)
         if landing.isPending {
             let known = landingBox.rowHeights[anchorID]
             if known == nil || abs((known ?? 0) - height) > 0.5 {
@@ -1762,7 +1779,23 @@ enum BookOutlineMaterialization {
 /// the user sees, not a scroll request that was merely issued.
 @MainActor
 enum BookOutlineGeometry {
-    static var anchorTops: [String: CGFloat] = [:]
+    // **18k UNIT C4 — EVERY REGISTRATION BELOW NAMES ITS OWNER** (the rule
+    // and its reasons: `Core/Views/DebugOracleOwnership.swift`). The owner is
+    // the mounted `BookView`'s `oracleOwner` — its rows read it by
+    // environment — and a `BookView` leaving releases ONLY its own. Before,
+    // the same book in two windows shared every key: the focus door was nil
+    // after EITHER window's teardown (its `onDisappear` cleared the book's
+    // key), and the navigator answered with the closed window's rectangle —
+    // measured red, `DebugOracleTwoWindowTests`. The read names and shapes
+    // are unchanged; a pin that used to ASSIGN a reset calls the named door.
+    private static var anchorTopStore = OwnedRegistrations<String, CGFloat>()
+    private static var rowHeightStore = OwnedRegistrations<String, CGFloat>()
+    private static var navigatorFrameStore = OwnedRegistrations<String, CGRect>()
+    private static var navigatorChapterRowStore = OwnedRegistrations<String, CGRect>()
+    private static var navigatorNoteRowStore = OwnedRegistrations<String, CGRect>()
+    private static var focusDoorStore = OwnedRegistrations<String, @MainActor (String?) -> Void>()
+
+    static var anchorTops: [String: CGFloat] { anchorTopStore.current }
     /// **13u2 UNIT A2: each anchor row's CURRENT height**, recorded on the
     /// same report as its top and keyed the same way (the anchor id carries
     /// the post/section id, so this is subject-keyed like `anchorTops` beside
@@ -1771,10 +1804,16 @@ enum BookOutlineGeometry {
     /// the real Sherlock book. The landing's own `landingBox.rowHeights`
     /// below is untouched — that one is a per-landing change LOG, and this is
     /// the current fact.
-    static var rowHeights: [String: CGFloat] = [:]
+    static var rowHeights: [String: CGFloat] { rowHeightStore.current }
     /// The pending landing's report sequence (id · top · hop) — what a pin
-    /// prints when a landing does not converge.
-    static var trace: [String] = []
+    /// prints when a landing does not converge. An append-only LOG, so it is
+    /// not a registration (18k C4: no owner's teardown can erase another's
+    /// lines — SAFE-AS-IS (A)); what C4 adds is the BOUND, the 13u2 UNIT E
+    /// `TakeCardGeometry` rule: it used to grow for a DEBUG process's whole
+    /// life, pruned only by pins.
+    static var trace: [String] = [] {
+        didSet { DebugOracleLog.bound(&trace) }
+    }
     /// **18d batch 3 (her U-13): what the NAVIGATOR actually drew** — the
     /// column's own rect, and each chapter/note row's rect in the
     /// navigator's own named space. "The chapters have room" and "the
@@ -1785,20 +1824,66 @@ enum BookOutlineGeometry {
     /// the same statics — a pin that reads "the navigator" rather than "MY
     /// navigator" is flaky by construction (measured: 4 chapter rows in a
     /// two-chapter book, and a frame from someone else's mount).
-    static var navigatorFrames: [String: CGRect] = [:]
-    static var navigatorChapterRows: [String: CGRect] = [:]
-    static var navigatorNoteRows: [String: CGRect] = [:]
+    static var navigatorFrames: [String: CGRect] { navigatorFrameStore.current }
+    static var navigatorChapterRows: [String: CGRect] { navigatorChapterRowStore.current }
+    static var navigatorNoteRows: [String: CGRect] { navigatorNoteRowStore.current }
     /// The round-end Fable pass, MAJOR-1: each mounted book's ONE focus act
     /// (`BookViewModel.focus`), published by the view whose `@State` holds
     /// the model — the only way a pin over the real shell can make a note
-    /// live in the Outline. Keyed by the book's id; cleared on disappear.
-    static var focusDoors: [String: @MainActor (String?) -> Void] = [:]
+    /// live in the Outline. Keyed by the book's id and OWNED by the view
+    /// that published it (18k C4): the most recently mounted book answers,
+    /// and a book leaving takes only its own door.
+    static var focusDoors: [String: @MainActor (String?) -> Void] { focusDoorStore.current }
+
+    // MARK: - The writes (each names its owner)
+
+    static func recordAnchor(_ anchorID: String, top: CGFloat, height: CGFloat, owner: UUID) {
+        anchorTopStore.publish(top, for: anchorID, owner: owner)
+        rowHeightStore.publish(height, for: anchorID, owner: owner)
+    }
+
+    static func recordNavigator(_ readingID: String, _ frame: CGRect, owner: UUID) {
+        navigatorFrameStore.publish(frame, for: readingID, owner: owner)
+    }
+
+    static func recordNavigatorRow(_ id: String, chapter: Bool, _ frame: CGRect, owner: UUID) {
+        if chapter {
+            navigatorChapterRowStore.publish(frame, for: id, owner: owner)
+        } else {
+            navigatorNoteRowStore.publish(frame, for: id, owner: owner)
+        }
+    }
+
+    static func publishFocusDoor(
+        _ readingID: String, owner: UUID, _ door: @escaping @MainActor (String?) -> Void
+    ) {
+        focusDoorStore.publish(door, for: readingID, owner: owner)
+    }
+
+    /// A `BookView` leaving: its own registrations, every one, and nothing
+    /// another window's book still answers for.
+    static func release(owner: UUID) {
+        anchorTopStore.release(owner: owner)
+        rowHeightStore.release(owner: owner)
+        navigatorFrameStore.release(owner: owner)
+        navigatorChapterRowStore.release(owner: owner)
+        navigatorNoteRowStore.release(owner: owner)
+        focusDoorStore.release(owner: owner)
+    }
+
+    // MARK: - A pin's doors (unconditional — a pin owns nothing)
 
     static func resetNavigator() {
-        navigatorFrames = [:]
-        navigatorChapterRows = [:]
-        navigatorNoteRows = [:]
+        navigatorFrameStore.forgetAll()
+        navigatorChapterRowStore.forgetAll()
+        navigatorNoteRowStore.forgetAll()
     }
+
+    static func forgetAnchorTops() { anchorTopStore.forgetAll() }
+
+    static func forgetRowHeights() { rowHeightStore.forgetAll() }
+
+    static func forgetFocusDoor(_ readingID: String) { focusDoorStore.forget(readingID) }
 }
 #endif
 
@@ -1842,20 +1927,32 @@ private extension View {
     /// build carries nothing).
     @ViewBuilder func navigatorRowFrame(_ id: String, chapter: Bool) -> some View {
         #if DEBUG
-        self.onGeometryChange(for: CGRect.self) {
-            $0.frame(in: .named(BookNavigatorLayout.space))
-        } action: { frame in
-            if chapter {
-                BookOutlineGeometry.navigatorChapterRows[id] = frame
-            } else {
-                BookOutlineGeometry.navigatorNoteRows[id] = frame
-            }
-        }
+        self.modifier(NavigatorRowProbe(id: id, chapter: chapter))
         #else
         self
         #endif
     }
 }
+
+#if DEBUG
+/// 18k C4: a modifier rather than a bare `onGeometryChange`, because it must
+/// READ its owning book from the environment (`TakeCardGeometryProbe`'s own
+/// reason) — the row's rectangle is that book's, and goes when it does.
+private struct NavigatorRowProbe: ViewModifier {
+    let id: String
+    let chapter: Bool
+    @Environment(\.debugOracleOwner) private var owner
+
+    func body(content: Content) -> some View {
+        content.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(BookNavigatorLayout.space))
+        } action: { frame in
+            BookOutlineGeometry.recordNavigatorRow(
+                id, chapter: chapter, frame, owner: owner ?? DebugOracleOwner.unowned)
+        }
+    }
+}
+#endif
 
 /// What an Outline anchor reports: where its top sits in the scroll's
 /// visible space, and how tall the row is (the landing converges on the

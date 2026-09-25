@@ -1721,8 +1721,40 @@ so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to
 ### LIVE STATUS
 
 - Reading + population + the classification rule — DONE (this commit).
-- The generic + its pins — NOT STARTED.
-- The conversions, oracle by oracle — NOT STARTED.
+- The generic — DONE (this commit): `Core/Views/DebugOracleOwnership.swift` (all `#if DEBUG`) —
+  `OwnedRegistrations<Key, Value>`, `OwnedSlot<Value>` (an optional `Value` registers a "nothing"),
+  `DebugOracleLog.bound` (the 13u2 UNIT E `TakeCardGeometry` rule for append-only logs, shared) and the
+  `debugOracleOwner` environment value. Its structural pins — PENDING (next piece).
+- The conversions — DONE (this commit), 13 oracles in 16 app files, every change inside `#if DEBUG`
+  (the proof is PENDING, at close): `BookOutlineGeometry` · `BookIndexGeometry` · `ReadingFlowGeometry`
+  · `ReadModeOracle` · `LibraryPanelOracle` · `PostDetailOracle` (the four singletons) · `ShellGeometry`
+  · `CommitBarGeometry` (row + width) · `CanvasArrivalOracle` · `TakesArticleDoorProbe` ·
+  `SidebarGeometry` (rail + box maps) · `SeamGeometry`. Each registering view now holds a DEBUG
+  `@State private var oracleOwner = UUID()` (the `MastheadStamp` shape) and releases it in its
+  `onDisappear`; the Outline's navigator rows, the Index's rows/panes, the Read host's rows and the
+  catalog's probes read their surface's token by environment (their probe extensions became modifiers,
+  the `TakeCardGeometryProbe` reason); the Takes article door's modifier names itself; the shell's pane
+  seam registers under `RootView.windowID` (the identity it already had). The three landing traces and
+  the catalog's two realized-row lists are LOGS (SAFE-AS-IS (A)) and gained only the bound.
+  **Build:** `** TEST BUILD SUCCEEDED **` (`DerivedData/18k-c4-bft1.log`); every warning in a touched
+  file is a kind that file already carried before C4 (found in C3's logs: `probeSpace`/`frameSpace`/
+  `outlineSpace`/`flowSpace`/`surfaceSpace`/`space` from Sendable closures, `Content.Type` capture) —
+  none new.
+  **THE FIX, MEASURED:** `DebugOracleTwoWindowTests` on the fixed tree — `✔ Test run with 12 tests in 1
+  suite passed after 19.481 seconds` (`DerivedData/18k-c4-new1.log`). RED 31 → GREEN 0.
+  **The 21 pin lines whose API changed** (S3's precedent — ONE line per call site, each an ASSIGNMENT
+  that became the named reset door, the pin's body untouched): `PostDetailOracle.sideColumnDividerFrame
+  = nil` → `.forgetSideColumnDivider()` (`BlockHistoryPaneTests:154`, `NoteVersionsPaneTests:113`,
+  `SideColumnTests:118`, `TrayPanelMoveTests:108`) · `BookOutlineGeometry.anchorTops = [:]` →
+  `.forgetAnchorTops()` (`BookOutlineLandingTests:341,390,485,626,747`) · `BookOutlineGeometry.rowHeights
+  = [:]` → `.forgetRowHeights()` (`BookCardHeightStabilityTests:158`) · `BookOutlineGeometry.focusDoors[id]
+  = nil` → `.forgetFocusDoor(id)` (`NoteBoxMountTests:656`) · `ReadingFlowGeometry.anchorTops = [:]` →
+  `.forgetAnchorTops()` (`ReadingFlowLandingTests:199,239,280,396,502,574`) · `BookIndexGeometry.
+  paneContentSpans = [:]` → `.forgetContentSpans()` (`BookIndexColumnHeightsTests:188`) ·
+  `SidebarGeometry.railGroupHeights[id] = nil` → `.forgetRail(id)` (`NoteBoxMountTests:172,389`) ·
+  `SidebarGeometry.noteBoxFrames[id] = nil` → `.forgetBoxFrame(id)` (`NoteBoxMountTests:194`). Every READ
+  rides unmodified (the read names and types are unchanged, computed and get-only — so an unowned write
+  is now a compile error, not a runtime surprise). **PENDING:** the reader suites' run.
 - The two-window pins (red first where reachable) — WRITTEN AND MEASURED RED ON THE PRE-FIX TREE (this
   commit). `VariorumTests/DebugOracleTwoWindowTests.swift`, 12 tests, written against the read names the
   tree ALREADY has so each compiles on both sides; every one mounts the same kind of surface in TWO real

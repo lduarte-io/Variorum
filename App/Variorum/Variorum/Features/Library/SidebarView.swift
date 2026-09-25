@@ -193,6 +193,11 @@ struct SidebarView: View {
     /// The column's height, as laid out — the fit test's input
     /// (`SidebarLayout`). Zero on the first pass, which never compresses.
     @State private var columnHeight: CGFloat = 0
+    #if DEBUG
+    /// **This column's own name in the DEBUG oracle** (18k UNIT C4 — the
+    /// `MastheadStamp.oracleOwner` shape): it owns the rail's drawn height.
+    @State private var oracleOwner = UUID()
+    #endif
 
     struct TagSheetTarget: Identifiable {
         let id: String
@@ -288,6 +293,10 @@ struct SidebarView: View {
         }
         .background(tokens.room)
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { columnHeight = $0 }
+        #if DEBUG
+        // 18k C4: this column's rail, and no other window's.
+        .onDisappear { SidebarGeometry.release(owner: oracleOwner) }
+        #endif
         // Row 24 (the sidebar half): the rail fades in and out with the
         // note — the groups below it slide, nothing snaps.
         .animation(.easeInOut(duration: 0.22), value: railPostID)
@@ -617,7 +626,7 @@ struct SidebarView: View {
             .padding(.horizontal, Self.groupPadding)
             #if DEBUG
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
-                SidebarGeometry.railGroupHeights[postID] = height
+                SidebarGeometry.recordRail(postID, height, owner: oracleOwner)
             }
             #endif
         }
@@ -845,7 +854,7 @@ enum SidebarGeometry {
     /// their REFERENCE height from here, and an unkeyed number let a rail
     /// drawn concurrently by another suite supply it — spuriously red at a
     /// compressed pitch, meaninglessly green at the generous one.
-    static var railGroupHeights: [String: CGFloat] = [:]
+    static var railGroupHeights: [String: CGFloat] { railStore.current }
     /// 13u2 item 10: the STARRED section's drawn height, keyed by the
     /// column's workspace. Her ask is about what the section does when the
     /// list outgrows the window, which is a claim about a rectangle — and
@@ -864,8 +873,8 @@ enum SidebarGeometry {
     /// nothing. The key is the book the box belongs to (`RootView` passes
     /// the report's `readingID`); the suites mint LIVE uuids so two worlds
     /// cannot share one.
-    static var noteBoxFrames: [String: CGRect] = [:]
-    static var noteBoxHeaderFrames: [String: CGRect] = [:]
+    static var noteBoxFrames: [String: CGRect] { boxFrameStore.current }
+    static var noteBoxHeaderFrames: [String: CGRect] { boxHeaderStore.current }
     /// WHICH FACE the box is showing right now — `"empty"` (state 1) and
     /// `"door"` (state 2's one door), per subject. The state a view was
     /// HANDED is not what it DREW, and the pin's whole job is the second;
@@ -888,7 +897,7 @@ enum SidebarGeometry {
     /// …and what the note box's where-line SAYS, per subject — the second
     /// arm of the same pin: the count must fall AND the label must still
     /// follow the caret, or the pin is satisfied by deleting the label.
-    static var noteBoxWhereLines: [String: String] = [:]
+    static var noteBoxWhereLines: [String: String] { whereLineStore.current }
 
     static func bodyKey(for workspace: WorkspaceModel) -> String {
         "\(ObjectIdentifier(workspace))"
@@ -898,9 +907,51 @@ enum SidebarGeometry {
         bodyEvaluations[bodyKey(for: workspace), default: 0] += 1
     }
 
-    static func recordWhereLine(_ line: String, for subject: String) {
-        noteBoxWhereLines[subject] = line
+    // **18k UNIT C4 — the rail and the box NAME THEIR OWNER** (the rule and
+    // its reasons: `Core/Views/DebugOracleOwnership.swift`). Keyed by their
+    // SUBJECT (the rail's note, the box's book), the same subject in two
+    // windows shared one row — after one window closed, the rail and the box
+    // were ITS (measured red, `DebugOracleTwoWindowTests`). The registrant is
+    // the drawing view: the column (`SidebarView`) for the rail, the box
+    // (`SidebarNoteBox`) for its frame, header and where-line. The faces
+    // beside them are +1/−1 REFCOUNTS, `bodyEvaluations` and
+    // `starredSectionHeights` are keyed by the WORKSPACE (an owner already),
+    // and the header worlds are SESSION-SCOPED — all SAFE-AS-IS, untouched.
+    private static var railStore = OwnedRegistrations<String, CGFloat>()
+    private static var boxFrameStore = OwnedRegistrations<String, CGRect>()
+    private static var boxHeaderStore = OwnedRegistrations<String, CGRect>()
+    private static var whereLineStore = OwnedRegistrations<String, String>()
+
+    static func recordRail(_ postID: String, _ height: CGFloat, owner: UUID) {
+        railStore.publish(height, for: postID, owner: owner)
     }
+
+    static func recordBoxFrame(_ subject: String, _ frame: CGRect, owner: UUID) {
+        boxFrameStore.publish(frame, for: subject, owner: owner)
+    }
+
+    static func recordBoxHeader(_ subject: String, _ frame: CGRect, owner: UUID) {
+        boxHeaderStore.publish(frame, for: subject, owner: owner)
+    }
+
+    static func recordWhereLine(_ line: String, for subject: String, owner: UUID) {
+        whereLineStore.publish(line, for: subject, owner: owner)
+    }
+
+    /// A column or a box leaving: its own rows among the four, and nothing
+    /// another window's column or box still answers for.
+    static func release(owner: UUID) {
+        railStore.release(owner: owner)
+        boxFrameStore.release(owner: owner)
+        boxHeaderStore.release(owner: owner)
+        whereLineStore.release(owner: owner)
+    }
+
+    /// A PIN's doors (they used to be `railGroupHeights[post] = nil` and
+    /// `noteBoxFrames[book] = nil`): unconditional — a pin owns nothing.
+    static func forgetRail(_ postID: String) { railStore.forget(postID) }
+
+    static func forgetBoxFrame(_ subject: String) { boxFrameStore.forget(subject) }
 
     /// **A pin clears ITS OWN box and no other** (the round-end Fable pass's
     /// round 2, MINOR-2 — the (c) class round 1 closed for `SeamGeometry`,
@@ -918,10 +969,10 @@ enum SidebarGeometry {
     /// keyed by the rail's POST) is a different thing and stays per-key at
     /// its own callers.
     static func forgetBox(subject: String) {
-        noteBoxFrames[subject] = nil
-        noteBoxHeaderFrames[subject] = nil
+        boxFrameStore.forget(subject)
+        boxHeaderStore.forget(subject)
         noteBoxFaces[subject] = nil
-        noteBoxWhereLines[subject] = nil
+        whereLineStore.forget(subject)
     }
 
     // (`resetHeaders()` RETIRED at 13u2 UNIT E — the whole-oracle wipe it

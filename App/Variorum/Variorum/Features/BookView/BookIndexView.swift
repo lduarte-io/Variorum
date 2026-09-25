@@ -46,38 +46,59 @@ import VariorumCore
 /// about two rectangles, held the way rows 58/80 hold the masthead's.
 @MainActor
 enum BookIndexGeometry {
-    static var chapterCountFrame: CGRect?
-    static var noteMenuFrame: CGRect?
+    // **18k UNIT C4 — EVERY REGISTRATION BELOW NAMES ITS OWNER** (the rule
+    // and its reasons: `Core/Views/DebugOracleOwnership.swift`). The owner is
+    // the mounted `BookIndexView`'s `oracleOwner`; its note rows and panes
+    // read it by environment; an Index leaving releases ONLY its own. Before,
+    // the same book's Index in two windows shared every key (and the two
+    // glyph frames had no key at all), so after one window closed the column
+    // and the panes answered with ITS numbers — measured red,
+    // `DebugOracleTwoWindowTests`. Read names and shapes unchanged.
+    private static var chapterCountSlot = OwnedSlot<CGRect>()
+    private static var noteMenuSlot = OwnedSlot<CGRect>()
+    private static var columnFrameStore = OwnedRegistrations<String, CGRect>()
+    private static var washHeightStore = OwnedRegistrations<String, CGFloat>()
+    private static var noteHeightStore = OwnedRegistrations<String, CGFloat>()
+    private static var proseLeadingStore = OwnedRegistrations<String, CGFloat>()
+    private static var anchorTopStore = OwnedRegistrations<String, CGFloat>()
+    private static var contentSpanStore = OwnedRegistrations<String, BookIndexContentSpan>()
+
+    static var chapterCountFrame: CGRect? { chapterCountSlot.value }
+    static var noteMenuFrame: CGRect? { noteMenuSlot.value }
     /// 18d batch 3 (her U-13): what the CHAPTER PANEL drew — the rectangle,
     /// never `idealWidth`. Keyed by the BOOK's id: suites run in parallel,
     /// so a pin must read ITS book's panel, not the last one drawn anywhere.
-    static var columnFrames: [String: CGRect] = [:]
+    static var columnFrames: [String: CGRect] { columnFrameStore.current }
     /// **13u2 UNIT B (her item 19): the rectangle the SELECTED note's wash
     /// actually covers, and the note's own height beside it.** *"I don't want
     /// the whole note i'm editing to be that color"* is a claim about two
     /// rectangles, so the pin reads the rectangles. Keyed by the NOTE's id
     /// (the subject-keyed rule, KnownIssues row 50).
-    static var paneSelectionWashHeights: [String: CGFloat] = [:]
-    static var paneNoteHeights: [String: CGFloat] = [:]
+    static var paneSelectionWashHeights: [String: CGFloat] { washHeightStore.current }
+    static var paneNoteHeights: [String: CGFloat] { noteHeightStore.current }
     /// **13u2 UNIT B (her item 19): where a block's PROSE starts, per tier.**
     /// *"the text indents in index mode where you're editing it"* is a claim
     /// about one x, measured the same way in both tiers: the read tier reports
     /// its text column's own leading edge, the live tier its pane's plus the
     /// pane's MEASURED internal inset (`PaneTextView.proseLeadingInset`).
     /// Keyed by the BLOCK's id (the subject-keyed rule).
-    static var paneProseLeading: [String: CGFloat] = [:]
+    static var paneProseLeading: [String: CGFloat] { proseLeadingStore.current }
     /// **13u4 UNIT F1 (her item 10): where every PANE ROW's top sits**, in the
     /// pane scroll's own space — visible-relative, so a row landed at the top
     /// reads ≈ 0 and a landing that missed reads the distance it missed by.
     /// Keyed by the row's anchor (`PaneRow.id`, the subject-keyed rule).
     /// The claim *"clicking a chapter brings you to that chapter"* is a claim
     /// about one number, so the pin reads that number.
-    static var paneAnchorTops: [String: CGFloat] = [:]
+    static var paneAnchorTops: [String: CGFloat] { anchorTopStore.current }
     /// **13u4 UNIT F1: the landing's own story**, the Outline's
     /// `BookOutlineGeometry.trace` on this surface — the LAND line, the
     /// hops, the content moves and the sentence it ended on. DEBUG only; the
     /// shipping build carries the content-free `LandingSignpost` line instead.
-    static var trace: [String] = []
+    /// An append-only LOG, not a registration (18k C4 — SAFE-AS-IS (A)),
+    /// bounded like every DEBUG log (`DebugOracleLog`).
+    static var trace: [String] = [] {
+        didSet { DebugOracleLog.bound(&trace) }
+    }
     /// **13u4 UNIT F3: how far the whole COLUMN moved while it was loading** —
     /// the lowest and the highest content height the pane ever reported, and
     /// how many times it reported. F1's stop-and-reported residual IS this
@@ -87,20 +108,80 @@ enum BookIndexGeometry {
     /// *"the column's geometry is approximately honest before any text
     /// arrives"* is a claim about this span, and the pin reads this span.
     /// Keyed by the BOOK's id (the subject-keyed rule, KnownIssues row 50 —
-    /// suites run in parallel, so a pin must read ITS book's column).
-    static var paneContentSpans: [String: BookIndexContentSpan] = [:]
+    /// suites run in parallel, so a pin must read ITS book's column) and,
+    /// since 18k C4, OWNED: each Index folds only its own reports.
+    static var paneContentSpans: [String: BookIndexContentSpan] { contentSpanStore.current }
+
+    // MARK: - The writes (each names its owner)
+
+    static func recordChapterCount(_ frame: CGRect, owner: UUID) {
+        chapterCountSlot.publish(frame, owner: owner)
+    }
+
+    static func recordNoteMenu(_ frame: CGRect, owner: UUID) {
+        noteMenuSlot.publish(frame, owner: owner)
+    }
+
+    static func recordColumn(_ readingID: String, _ frame: CGRect, owner: UUID) {
+        columnFrameStore.publish(frame, for: readingID, owner: owner)
+    }
+
+    static func recordSelectionWash(_ postID: String, height: CGFloat, owner: UUID) {
+        washHeightStore.publish(height, for: postID, owner: owner)
+    }
+
+    static func recordNoteHeight(_ postID: String, _ height: CGFloat, owner: UUID) {
+        noteHeightStore.publish(height, for: postID, owner: owner)
+    }
+
+    static func recordProseLeading(_ blockID: String, _ x: CGFloat, owner: UUID) {
+        proseLeadingStore.publish(x, for: blockID, owner: owner)
+    }
+
+    static func recordAnchor(_ anchorID: String, top: CGFloat, owner: UUID) {
+        anchorTopStore.publish(top, for: anchorID, owner: owner)
+    }
+
+    /// One content-height report, folded into THIS Index's own span (never
+    /// into another window's — the read-modify-write builds on the owner's
+    /// own row).
+    static func recordContentHeight(_ readingID: String, _ height: CGFloat, owner: UUID) {
+        var span = contentSpanStore.value(for: readingID, owner: owner)
+            ?? BookIndexContentSpan(low: height, high: height, reports: 0)
+        span.low = min(span.low, height)
+        span.high = max(span.high, height)
+        span.reports += 1
+        contentSpanStore.publish(span, for: readingID, owner: owner)
+    }
+
+    /// An Index leaving: its own registrations, every one, and nothing
+    /// another window's Index still answers for.
+    static func release(owner: UUID) {
+        chapterCountSlot.release(owner: owner)
+        noteMenuSlot.release(owner: owner)
+        columnFrameStore.release(owner: owner)
+        washHeightStore.release(owner: owner)
+        noteHeightStore.release(owner: owner)
+        proseLeadingStore.release(owner: owner)
+        anchorTopStore.release(owner: owner)
+        contentSpanStore.release(owner: owner)
+    }
+
+    // MARK: - A pin's doors (unconditional — a pin owns nothing)
 
     static func reset() {
         trace = []
-        chapterCountFrame = nil
-        noteMenuFrame = nil
-        columnFrames = [:]
-        paneProseLeading = [:]
-        paneSelectionWashHeights = [:]
-        paneNoteHeights = [:]
-        paneAnchorTops = [:]
-        paneContentSpans = [:]
+        chapterCountSlot.forget()
+        noteMenuSlot.forget()
+        columnFrameStore.forgetAll()
+        proseLeadingStore.forgetAll()
+        washHeightStore.forgetAll()
+        noteHeightStore.forgetAll()
+        anchorTopStore.forgetAll()
+        contentSpanStore.forgetAll()
     }
+
+    static func forgetContentSpans() { contentSpanStore.forgetAll() }
 }
 
 /// 13u4 UNIT F3: one column's reported-height span (see `paneContentSpans`).
@@ -292,6 +373,11 @@ struct BookIndexView<Masthead: View>: View {
 
     /// The pane's ONE liveness authority (row 22).
     @State private var edit: BookIndexEditModel
+    #if DEBUG
+    /// **This Index's own name in the DEBUG oracles** (18k UNIT C4 — the
+    /// `MastheadStamp.oracleOwner` shape). DEBUG-only.
+    @State private var oracleOwner = UUID()
+    #endif
     @State private var selectedPostID: String?
     @State private var collapsed: Set<String> = []
     @State private var filter = ""
@@ -394,12 +480,18 @@ struct BookIndexView<Masthead: View>: View {
             column
                 .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
                     #if DEBUG
-                    BookIndexGeometry.columnFrames[model.readingID] =
-                        CGRect(origin: .zero, size: size)
+                    BookIndexGeometry.recordColumn(
+                        model.readingID, CGRect(origin: .zero, size: size), owner: oracleOwner)
                     #endif
                 }
         }
         .background(tokens.surface)
+        #if DEBUG
+        // 18k C4: the Index's rows and panes register under THIS Index's
+        // name, and it takes exactly its own with it when it leaves.
+        .environment(\.debugOracleOwner, oracleOwner)
+        .onDisappear { BookIndexGeometry.release(owner: oracleOwner) }
+        #endif
         .onAppear {
             // **13u4 UNIT F3: the lengths, before the first landing.** ONE
             // bounded statement for the book, shared through the book's cache
@@ -477,7 +569,7 @@ struct BookIndexView<Masthead: View>: View {
     /// seed that reads as "the target never realized").
     private func paneAnchorMoved(_ anchorID: String, top: CGFloat) {
         #if DEBUG
-        BookIndexGeometry.paneAnchorTops[anchorID] = top
+        BookIndexGeometry.recordAnchor(anchorID, top: top, owner: oracleOwner)
         if landing.anchor == anchorID {
             BookIndexGeometry.trace.append("\(anchorID) top=\(top) hops=\(landing.corrections)")
         } else if landing.isPending {
@@ -505,7 +597,7 @@ struct BookIndexView<Masthead: View>: View {
     private func paneBlockAnchorMoved(_ anchorID: String, top: CGFloat) {
         guard landing.anchor == anchorID else { return }
         #if DEBUG
-        BookIndexGeometry.paneAnchorTops[anchorID] = top
+        BookIndexGeometry.recordAnchor(anchorID, top: top, owner: oracleOwner)
         BookIndexGeometry.trace.append("\(anchorID) top=\(top) hops=\(landing.corrections)")
         #endif
         landing.noteTop(anchorID, top)
@@ -623,7 +715,7 @@ struct BookIndexView<Masthead: View>: View {
                 .frame(width: BookIndexColumn.trailingColumn, alignment: .trailing)
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                    BookIndexGeometry.chapterCountFrame = $0
+                    BookIndexGeometry.recordChapterCount($0, owner: oracleOwner)
                 }
                 #endif
         }
@@ -811,12 +903,8 @@ struct BookIndexView<Masthead: View>: View {
                 // 13u4 UNIT F3's probe: behaviour-free — it reads the value the
                 // line above already wrote, and writes only to the oracle.
                 if height > 1 {
-                    var span = BookIndexGeometry.paneContentSpans[model.readingID]
-                        ?? BookIndexContentSpan(low: height, high: height, reports: 0)
-                    span.low = min(span.low, height)
-                    span.high = max(span.high, height)
-                    span.reports += 1
-                    BookIndexGeometry.paneContentSpans[model.readingID] = span
+                    BookIndexGeometry.recordContentHeight(
+                        model.readingID, height, owner: oracleOwner)
                 }
                 #endif
                 landing.contentChanged(height)
@@ -1014,6 +1102,10 @@ private struct BookIndexNoteRow: View {
     let menu: () -> AnyView
 
     @State private var hovering = false
+    #if DEBUG
+    /// The owning Index's name (18k C4) — its ⋯ frame is that Index's.
+    @Environment(\.debugOracleOwner) private var oracleOwner
+    #endif
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
@@ -1055,7 +1147,7 @@ private struct BookIndexNoteRow: View {
                 // because its WIDTH is the claim: the chevron's reserved room
                 // is what moved the glyph.
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                    BookIndexGeometry.noteMenuFrame = $0
+                    BookIndexGeometry.recordNoteMenu($0, owner: oracleOwner ?? DebugOracleOwner.unowned)
                 }
                 #endif
                 .frame(width: BookIndexColumn.trailingColumn, alignment: .trailing)
@@ -1142,6 +1234,11 @@ private struct BookIndexPaneNote: View {
     /// (stand at the reservation) from "loaded and genuinely empty" (stand at
     /// the blank line the body renders).
     @State private var loaded = false
+    #if DEBUG
+    /// The owning Index's name (18k C4) — this note's pane heights, wash and
+    /// prose edges are that Index's, and go when it does.
+    @Environment(\.debugOracleOwner) private var oracleOwner
+    #endif
 
     init(
         session: AppSession, tokens: VoiceTokens,
@@ -1193,7 +1290,9 @@ private struct BookIndexPaneNote: View {
                 BookIndexWashReport(height: $0.size.height, selected: selected)
             } action: { report in
                 if report.selected {
-                    BookIndexGeometry.paneSelectionWashHeights[entry.postID] = report.height
+                    BookIndexGeometry.recordSelectionWash(
+                        entry.postID, height: report.height,
+                        owner: oracleOwner ?? DebugOracleOwner.unowned)
                 }
             }
             #endif
@@ -1231,7 +1330,8 @@ private struct BookIndexPaneNote: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
             #if DEBUG
-            BookIndexGeometry.paneNoteHeights[entry.postID] = height
+            BookIndexGeometry.recordNoteHeight(
+                entry.postID, height, owner: oracleOwner ?? DebugOracleOwner.unowned)
             #endif
             // 13u4 UNIT F3: a MEASUREMENT is what this note drew with its own
             // text in it. While it stands at the reservation it is reporting
@@ -1292,8 +1392,9 @@ private struct BookIndexPaneNote: View {
                 })
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-                    BookIndexGeometry.paneProseLeading[row.blockID] =
-                        frame.minX + PaneTextView.proseLeadingInset
+                    BookIndexGeometry.recordProseLeading(
+                        row.blockID, frame.minX + PaneTextView.proseLeadingInset,
+                        owner: oracleOwner ?? DebugOracleOwner.unowned)
                 }
                 #endif
                 // 13u2 UNIT B (her item 19): the live pane's PROSE lands where
@@ -1323,7 +1424,8 @@ private struct BookIndexPaneNote: View {
             }
             #if DEBUG
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-                BookIndexGeometry.paneProseLeading[row.blockID] = frame.minX
+                BookIndexGeometry.recordProseLeading(
+                    row.blockID, frame.minX, owner: oracleOwner ?? DebugOracleOwner.unowned)
             }
             #endif
             // 13u2 UNIT B: the read tier's prose sits at the SAME column as

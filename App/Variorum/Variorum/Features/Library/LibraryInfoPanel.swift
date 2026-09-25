@@ -563,34 +563,57 @@ private struct LibraryOutlineRowView: View {
 /// space — batch C's lesson), and what the preview rendered.
 @MainActor
 enum LibraryPanelOracle {
+    // **18k UNIT C4 — the frames NAME THEIR OWNER** (the rule and its
+    // reasons: `Core/Views/DebugOracleOwnership.swift`): the mounted
+    // catalog's `oracleOwner`, which its probes read by environment and which
+    // the catalog releases when it leaves. The six were bare statics every
+    // mounted catalog overwrote — after one window closed they were ITS
+    // rectangles (measured red, `DebugOracleTwoWindowTests`). Read names and
+    // shapes unchanged.
+    private static var frameStore = OwnedRegistrations<LibraryProbeSlot, CGRect>()
+
     /// The catalog view's own frame (the host's size).
-    static var rootFrame: CGRect?
+    static var rootFrame: CGRect? { frameStore[.root] }
     /// OUR divider between the list and the panel — the boundary that must
     /// hold when the window is inactive (row 34).
-    static var dividerFrame: CGRect?
-    static var panelFrame: CGRect?
+    static var dividerFrame: CGRect? { frameStore[.divider] }
+    static var panelFrame: CGRect? { frameStore[.panel] }
     /// The message row (a receipt or an error) — laid out, never overlaid
     /// (F's (a)).
-    static var messageFrame: CGRect?
-    static var quickEntryFrame: CGRect?
+    static var messageFrame: CGRect? { frameStore[.message] }
+    static var quickEntryFrame: CGRect? { frameStore[.quickEntry] }
     /// A book row's LINE — its width must span the row (row 33 (a)).
-    static var bookLineFrame: CGRect?
+    static var bookLineFrame: CGRect? { frameStore[.bookLine] }
     /// Each NOTE row's frame by post id — so a pin can click a row for
     /// real (ladder R1-2: the row-click brain's timing pin).
-    static var noteRowFrames: [String: CGRect] = [:]
-    /// The blocks the note preview realized, in appearance order.
-    static var shownBlockIDs: [String] = []
-    /// The outline rows the book preview realized.
-    static var shownOutlineRowIDs: [String] = []
+    static var noteRowFrames: [String: CGRect] {
+        var rows: [String: CGRect] = [:]
+        for (slot, frame) in frameStore.current {
+            if case .noteRow(let id) = slot { rows[id] = frame }
+        }
+        return rows
+    }
+    /// The blocks the note preview realized, in appearance order — an
+    /// append-only LOG, not a registration (18k C4 — SAFE-AS-IS (A)),
+    /// bounded like every DEBUG log (`DebugOracleLog`).
+    static var shownBlockIDs: [String] = [] {
+        didSet { DebugOracleLog.bound(&shownBlockIDs) }
+    }
+    /// The outline rows the book preview realized (the same kind of log).
+    static var shownOutlineRowIDs: [String] = [] {
+        didSet { DebugOracleLog.bound(&shownOutlineRowIDs) }
+    }
 
+    static func record(_ slot: LibraryProbeSlot, _ frame: CGRect, owner: UUID) {
+        frameStore.publish(frame, for: slot, owner: owner)
+    }
+
+    /// A catalog leaving: its own frames, and no other window's.
+    static func release(owner: UUID) { frameStore.release(owner: owner) }
+
+    /// A PIN's door, unconditional (a pin owns nothing).
     static func reset() {
-        rootFrame = nil
-        dividerFrame = nil
-        panelFrame = nil
-        messageFrame = nil
-        quickEntryFrame = nil
-        bookLineFrame = nil
-        noteRowFrames = [:]
+        frameStore.forgetAll()
         shownBlockIDs = []
         shownOutlineRowIDs = []
     }
@@ -611,21 +634,27 @@ extension View {
     @ViewBuilder
     func libraryGeometryProbe(_ slot: LibraryProbeSlot) -> some View {
         #if DEBUG
-        self.onGeometryChange(for: CGRect.self) {
-            $0.frame(in: .named(LibraryCatalogView.probeSpace))
-        } action: { frame in
-            switch slot {
-            case .root: LibraryPanelOracle.rootFrame = frame
-            case .divider: LibraryPanelOracle.dividerFrame = frame
-            case .panel: LibraryPanelOracle.panelFrame = frame
-            case .message: LibraryPanelOracle.messageFrame = frame
-            case .quickEntry: LibraryPanelOracle.quickEntryFrame = frame
-            case .bookLine: LibraryPanelOracle.bookLineFrame = frame
-            case .noteRow(let id): LibraryPanelOracle.noteRowFrames[id] = frame
-            }
-        }
+        self.modifier(LibraryGeometryProbe(slot: slot))
         #else
         self
         #endif
     }
 }
+
+#if DEBUG
+/// 18k C4: a modifier rather than a bare `onGeometryChange`, because it must
+/// READ its owning catalog from the environment (`TakeCardGeometryProbe`'s
+/// own reason) — the rectangle is that catalog's, and goes when it does.
+private struct LibraryGeometryProbe: ViewModifier {
+    let slot: LibraryProbeSlot
+    @Environment(\.debugOracleOwner) private var owner
+
+    func body(content: Content) -> some View {
+        content.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(LibraryCatalogView.probeSpace))
+        } action: { frame in
+            LibraryPanelOracle.record(slot, frame, owner: owner ?? DebugOracleOwner.unowned)
+        }
+    }
+}
+#endif

@@ -148,6 +148,13 @@ struct SideColumn<Content: View, Panel: View>: View {
 
     @AppStorage private var remembered: Double
     @State private var totalWidth: CGFloat = 0
+    #if DEBUG
+    /// **This column's own name in the DEBUG seam oracle** (18k UNIT C4 —
+    /// the `MastheadStamp.oracleOwner` shape): the same note or book open in
+    /// two windows is two columns on ONE `SeamGeometry` key, so each seam
+    /// registers as itself and takes only its own rectangles with it.
+    @State private var oracleOwner = UUID()
+    #endif
 
     init(
         tokens: VoiceTokens, shown: Bool, widthKey: String, subjectKey: String,
@@ -208,6 +215,9 @@ struct SideColumn<Content: View, Panel: View>: View {
         }
         .coordinateSpace(name: widthKey)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { totalWidth = $0 }
+        #if DEBUG
+        .onDisappear { SeamGeometry.release(owner: oracleOwner) }
+        #endif
         .onChange(of: shown) { _, now in
             if !now { onDividerFrame?(nil) }
         }
@@ -256,14 +266,14 @@ struct SideColumn<Content: View, Panel: View>: View {
             onLineFrame: { frame in
                 onDividerFrame?(frame)
                 #if DEBUG
-                SeamGeometry.lineFrames[
-                    SeamGeometry.key(widthKey, subject: subjectKey)] = frame
+                SeamGeometry.recordLine(
+                    SeamGeometry.key(widthKey, subject: subjectKey), frame, owner: oracleOwner)
                 #endif
             },
             onGripFrame: { frame in
                 #if DEBUG
-                SeamGeometry.gripFrames[
-                    SeamGeometry.key(widthKey, subject: subjectKey)] = frame
+                SeamGeometry.recordGrip(
+                    SeamGeometry.key(widthKey, subject: subjectKey), frame, owner: oracleOwner)
                 #endif
             })
     }

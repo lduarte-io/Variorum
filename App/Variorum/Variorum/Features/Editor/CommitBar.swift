@@ -47,6 +47,11 @@ struct CommitBar: View {
     @State private var pendingDelete: NoteDeleteConfirm?
     /// N15: the bar's measured width — the one-row/two-row switch.
     @State private var barWidth: CGFloat = 0
+    #if DEBUG
+    /// **This bar's own name in the DEBUG oracle** (18k UNIT C4 — the
+    /// `MastheadStamp.oracleOwner` shape). DEBUG-only.
+    @State private var oracleOwner = UUID()
+    #endif
 
     /// **Act 10 item 6 (her ruling: "this bottom bar should be spread out
     /// again, unless the window is small and it needs to be collapsed").**
@@ -213,6 +218,8 @@ struct CommitBar: View {
         .onDisappear {
             CommitBarGeometry.mounted[model.postID, default: [:]][
                 Self.name(of: axis), default: 0] -= 1
+            // 18k C4: this bar's row and width, and no other window's bar's.
+            CommitBarGeometry.release(owner: oracleOwner)
         }
 #endif
         // Ledger row 17: the FALLBACK host. The pane's named home is the post
@@ -532,7 +539,7 @@ struct CommitBar: View {
             #if DEBUG
             .onGeometryChange(for: CGRect.self) {
                 $0.frame(in: .named(Self.barSpace))
-            } action: { CommitBarGeometry.rowFrame = $0 }
+            } action: { CommitBarGeometry.recordRow($0, owner: oracleOwner) }
             #endif
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { barWidth = $0 }
             .padding(.horizontal, 12)
@@ -541,7 +548,7 @@ struct CommitBar: View {
             .coordinateSpace(name: Self.barSpace)
             #if DEBUG
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: {
-                CommitBarGeometry.barWidth = $0
+                CommitBarGeometry.recordWidth($0, owner: oracleOwner)
             }
             #endif
         }
@@ -918,8 +925,28 @@ struct CommitBar: View {
 /// not a layout the code merely intends.
 @MainActor
 enum CommitBarGeometry {
-    static var rowFrame: CGRect?
-    static var barWidth: CGFloat?
+    // **18k UNIT C4 — the row and the width NAME THEIR OWNER** (the rule and
+    // its reasons: `Core/Views/DebugOracleOwnership.swift`): the mounted
+    // bar's `oracleOwner`, released when that bar leaves. They were bare
+    // statics every bar overwrote — after one window closed they were ITS
+    // (measured red, `DebugOracleTwoWindowTests`). `mounted` below is a
+    // REFCOUNT (+1 on appear, −1 on disappear), which composes across owners
+    // by construction — SAFE-AS-IS, untouched.
+    private static var rowSlot = OwnedSlot<CGRect>()
+    private static var widthSlot = OwnedSlot<CGFloat>()
+
+    static var rowFrame: CGRect? { rowSlot.value }
+    static var barWidth: CGFloat? { widthSlot.value }
+
+    static func recordRow(_ frame: CGRect, owner: UUID) { rowSlot.publish(frame, owner: owner) }
+
+    static func recordWidth(_ width: CGFloat, owner: UUID) { widthSlot.publish(width, owner: owner) }
+
+    /// A bar leaving: its own row and width, and no other window's bar's.
+    static func release(owner: UUID) {
+        rowSlot.release(owner: owner)
+        widthSlot.release(owner: owner)
+    }
     /// 18d batch 1: how many bars of each arrangement are mounted right now,
     /// **keyed by the bar's POST** (the 18d ladder's MINOR-3). The
     /// retirement's oracle — the book's editing surfaces must mount NONE
@@ -935,9 +962,10 @@ enum CommitBarGeometry {
         mounted[post]?[axis] ?? 0
     }
 
+    /// A PIN's door, unconditional (a pin owns nothing).
     static func reset() {
-        rowFrame = nil
-        barWidth = nil
+        rowSlot.forget()
+        widthSlot.forget()
         mounted = [:]
     }
 }

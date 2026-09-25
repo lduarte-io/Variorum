@@ -157,6 +157,13 @@ struct PostDetailView: View {
         }
     }
     @State private var inspectorPanel: InspectorPanel?
+    #if DEBUG
+    /// **This detail's own name in the DEBUG oracle** (18k UNIT C4 — the
+    /// `MastheadStamp.oracleOwner` shape): it owns the detail's panel and
+    /// divider rows, and the detail takes exactly those with it when it
+    /// leaves. DEBUG-only.
+    @State private var oracleOwner = UUID()
+    #endif
     /// Row 15 (the correction round): whether the masthead's inline tag
     /// field is out — the ＃ and ⌘⇧I (routed here by the command router)
     /// open the same one.
@@ -212,7 +219,7 @@ struct PostDetailView: View {
             widthKey: Self.sideColumnWidthKey, subjectKey: postID,
             onDividerFrame: { frame in
                 #if DEBUG
-                PostDetailOracle.sideColumnDividerFrame = frame
+                PostDetailOracle.recordSideColumnDivider(frame, owner: oracleOwner)
                 #endif
             }
         ) {
@@ -541,6 +548,10 @@ struct PostDetailView: View {
             if let routerToken {
                 session.commandRouter.unregisterDetail(routerToken)
             }
+            #if DEBUG
+            // 18k C4: THIS detail's panel and divider, and no other window's.
+            PostDetailOracle.release(owner: oracleOwner)
+            #endif
         }
         .task(id: postID) {
             // Sitting 9 batch 6: a BLOCKLESS post opens in WRITE no matter
@@ -562,7 +573,7 @@ struct PostDetailView: View {
         }
         .onChange(of: inspectorPanel, initial: true) { _, panel in
             #if DEBUG
-            PostDetailOracle.inspectorPanel = panel
+            PostDetailOracle.recordInspectorPanel(panel, owner: oracleOwner)
             #endif
         }
         .onChange(of: mode) { _, new in
@@ -642,6 +653,11 @@ struct PostDetailView: View {
         @State private var editing = false
         @State private var draft = ""
         @FocusState private var fieldFocused: Bool
+        #if DEBUG
+        /// This title's own name in the DEBUG oracle (18k UNIT C4): it owns
+        /// the title door and the shown words, and takes them with it.
+        @State private var oracleOwner = UUID()
+        #endif
 
         var body: some View {
             // **ONE BOX for both faces** (17o batch d, rows 11 + 12).
@@ -729,7 +745,13 @@ struct PostDetailView: View {
                 }
                 .task(id: postID) { await watch() }
                 #if DEBUG
-                .onAppear { PostDetailOracle.beginTitleEditing = { beginEditing() } }
+                .onAppear {
+                    PostDetailOracle.publishTitleDoor(owner: oracleOwner) { beginEditing() }
+                }
+                // 18k C4: a title leaving takes its door and words, and no
+                // other window's (the door used to be cleared by nobody, so
+                // a closed window's title answered the next reader).
+                .onDisappear { PostDetailOracle.release(owner: oracleOwner) }
                 #endif
         }
 
@@ -840,7 +862,7 @@ struct PostDetailView: View {
                     title = read.stored
                     displayed = read.shown
                     #if DEBUG
-                    PostDetailOracle.titleShown = displayed
+                    PostDetailOracle.recordTitleShown(displayed, owner: oracleOwner)
                     #endif
                 }
             } catch is CancellationError {
@@ -1020,18 +1042,65 @@ extension View {
 /// AppKit container can linger in the tree, collapsed, after a close).
 @MainActor
 enum PostDetailOracle {
-    static var inspectorPanel: PostDetailView.InspectorPanel?
+    // **18k UNIT C4 — THE FOUR SINGLETONS NAME THEIR OWNER** (the rule and
+    // its reasons: `Core/Views/DebugOracleOwnership.swift`; the stamps below
+    // were the same idea hand-rolled at 13u4 UNIT S2). They were bare
+    // statics every mounted detail overwrote, and the title door was cleared
+    // by nobody — so after one window closed, the title, the panel and the
+    // divider were ITS, and the door drove a title that no longer existed.
+    // Measured red, `DebugOracleTwoWindowTests`. Read names and shapes
+    // unchanged; the one pin door that used to be an assignment is
+    // `forgetSideColumnDivider()`.
+    private static var inspectorPanelSlot = OwnedSlot<PostDetailView.InspectorPanel?>()
+    private static var titleDoorSlot = OwnedSlot<@MainActor () -> Void>()
+    private static var titleShownSlot = OwnedSlot<String>()
+    private static var dividerSlot = OwnedSlot<CGRect?>()
+
+    /// The detail's inspector occupant — the newest detail's, and nil when
+    /// that detail holds no panel (a REGISTERED nil: "no panel" is a fact
+    /// about a detail on screen, distinct from no detail at all).
+    static var inspectorPanel: PostDetailView.InspectorPanel? { inspectorPanelSlot.value ?? nil }
     /// Row 12 (17o batch d): the title's own "click to rename" door, so a
     /// pin can put the masthead into its editing face and read both frames
     /// without simulating an AppKit click into a hosted `TextField`.
-    static var beginTitleEditing: (@MainActor () -> Void)?
+    static var beginTitleEditing: (@MainActor () -> Void)? { titleDoorSlot.value }
     /// Row 19 (17o batch d): the words the masthead is SHOWING — so "a date
     /// change doesn't change the auto display name" is a claim about the
     /// rendered title rather than about the store it is derived from.
-    static var titleShown: String?
+    static var titleShown: String? { titleShownSlot.value }
     /// Row 74: OUR divider's frame in the side column's space — reported in
-    /// every window state, nil while no panel stands.
-    static var sideColumnDividerFrame: CGRect?
+    /// every window state, nil while no panel stands (the column REPORTS that
+    /// nil, so it is registered like `inspectorPanel`'s).
+    static var sideColumnDividerFrame: CGRect? { dividerSlot.value ?? nil }
+
+    static func recordInspectorPanel(_ panel: PostDetailView.InspectorPanel?, owner: UUID) {
+        inspectorPanelSlot.publish(panel, owner: owner)
+    }
+
+    static func publishTitleDoor(owner: UUID, _ door: @escaping @MainActor () -> Void) {
+        titleDoorSlot.publish(door, owner: owner)
+    }
+
+    static func recordTitleShown(_ words: String, owner: UUID) {
+        titleShownSlot.publish(words, owner: owner)
+    }
+
+    static func recordSideColumnDivider(_ frame: CGRect?, owner: UUID) {
+        dividerSlot.publish(frame, owner: owner)
+    }
+
+    /// A detail (or its title) leaving: its own registrations among the
+    /// four, and nothing another window's detail still answers for.
+    static func release(owner: UUID) {
+        inspectorPanelSlot.release(owner: owner)
+        titleDoorSlot.release(owner: owner)
+        titleShownSlot.release(owner: owner)
+        dividerSlot.release(owner: owner)
+    }
+
+    /// A PIN's door (it used to be `sideColumnDividerFrame = nil`):
+    /// unconditional — a pin owns nothing.
+    static func forgetSideColumnDivider() { dividerSlot.forget() }
     /// 18h batch 1 (row 9): the WORDS the masthead's time stamp is showing,
     /// and the edited stamp its HELD read last delivered — so "an autosave
     /// moves it" is a claim about the observation rather than about the

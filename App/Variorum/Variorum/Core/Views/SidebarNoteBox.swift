@@ -70,6 +70,13 @@ struct SidebarNoteBox: View {
     /// editor — see `BookNoteBox.livePost`).
     var bar: AnyView?
 
+    #if DEBUG
+    /// **This box's own name in the DEBUG oracle** (18k UNIT C4 — the
+    /// `MastheadStamp.oracleOwner` shape): it owns the box's frame, header
+    /// and where-line, and takes exactly those with it when it leaves.
+    @State private var oracleOwner = UUID()
+    #endif
+
     /// The mockup's `.box{padding:8px}`, minus the border, so the box's
     /// contents land on exactly the left edge the column's ROW text does
     /// (`groupPadding` + 1 pt of border + this = `rowPadding`'s inset). Her
@@ -137,8 +144,10 @@ struct SidebarNoteBox: View {
         .overlay(alignment: .topTrailing) { editingMark }
 #if DEBUG
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-            SidebarGeometry.noteBoxFrames[subjectKey] = $0
+            SidebarGeometry.recordBoxFrame(subjectKey, $0, owner: oracleOwner)
         }
+        // 18k C4: this box's rows, and no other window's box's.
+        .onDisappear { SidebarGeometry.release(owner: oracleOwner) }
 #endif
     }
 
@@ -156,7 +165,7 @@ struct SidebarNoteBox: View {
             .lineLimit(1)
 #if DEBUG
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                SidebarGeometry.noteBoxHeaderFrames[subjectKey] = $0
+                SidebarGeometry.recordBoxHeader(subjectKey, $0, owner: oracleOwner)
             }
 #endif
             .padding(.bottom, SidebarLayout.headerAir)
@@ -206,7 +215,7 @@ struct SidebarNoteBox: View {
                 // that counts the shell's bodies can also prove the label
                 // still follows the caret (a body count alone is satisfied by
                 // deleting the label).
-                let _ = SidebarGeometry.recordWhereLine(line, for: subjectKey)
+                let _ = SidebarGeometry.recordWhereLine(line, for: subjectKey, owner: oracleOwner)
 #endif
                 if !line.isEmpty {
                     Text(tokens.chromeLabel(line))

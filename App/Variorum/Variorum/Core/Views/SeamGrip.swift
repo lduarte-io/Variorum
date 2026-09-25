@@ -136,17 +136,42 @@ enum SeamGeometry {
         "\(family)|\(subject)"
     }
 
-    static var lineFrames: [String: CGRect] = [:]
-    static var gripFrames: [String: CGRect] = [:]
+    // **18k UNIT C4 — …AND BY WHO DREW IT.** The family and subject name
+    // the SEAM; they do not name the WINDOW. The same note or book in two
+    // windows is two seams on one key, and after one window closed the key
+    // answered with ITS rectangles (measured red, `DebugOracleTwoWindowTests`).
+    // Each seam's host now registers as itself (a `SideColumn`'s own token;
+    // the shell's pane divider under its window's id) and takes only its own
+    // with it (the rule and its reasons: `Core/Views/DebugOracleOwnership.swift`).
+    private static var lineStore = OwnedRegistrations<String, CGRect>()
+    private static var gripStore = OwnedRegistrations<String, CGRect>()
+
+    static var lineFrames: [String: CGRect] { lineStore.current }
+    static var gripFrames: [String: CGRect] { gripStore.current }
+
+    static func recordLine(_ key: String, _ frame: CGRect, owner: UUID) {
+        lineStore.publish(frame, for: key, owner: owner)
+    }
+
+    static func recordGrip(_ key: String, _ frame: CGRect, owner: UUID) {
+        gripStore.publish(frame, for: key, owner: owner)
+    }
+
+    /// A seam's host leaving: its own rectangles, and no other window's.
+    static func release(owner: UUID) {
+        lineStore.release(owner: owner)
+        gripStore.release(owner: owner)
+    }
 
     /// A pin clears ITS OWN seam and no other (the round-end Fable pass,
     /// MINOR-2 (c)). The old `reset()` wiped every subject's entries — and
     /// `onGeometryChange` republishes only on CHANGE, so a still-mounted seam
     /// in a parallel suite was never republished and that suite's `#require`
-    /// timed out with no defect behind it.
+    /// timed out with no defect behind it. Unconditional for that one key —
+    /// a pin owns nothing.
     static func forget(_ key: String) {
-        lineFrames[key] = nil
-        gripFrames[key] = nil
+        lineStore.forget(key)
+        gripStore.forget(key)
     }
 }
 #endif

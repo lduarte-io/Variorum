@@ -1778,9 +1778,40 @@ private struct CollapsibleTakeCard: View {
 /// `LensesGeometry` pattern.
 @MainActor
 enum TakesArticleDoorProbe {
-    static var frame: CGRect?
+    // **18k UNIT C4 — the frame NAMES ITS OWNER** (the rule and its reasons:
+    // `Core/Views/DebugOracleOwnership.swift`): the door itself registers
+    // (`ArticleDoorProbe`'s own token) and takes its frame with it when it
+    // leaves. A bare static every board overwrote — after one window closed
+    // the door stood where ITS door had been (measured red,
+    // `DebugOracleTwoWindowTests`).
+    private static var frameSlot = OwnedSlot<CGRect>()
 
-    static func reset() { frame = nil }
+    static var frame: CGRect? { frameSlot.value }
+
+    static func record(_ frame: CGRect, owner: UUID) { frameSlot.publish(frame, owner: owner) }
+
+    /// A door leaving: its own frame, and no other window's.
+    static func release(owner: UUID) { frameSlot.release(owner: owner) }
+
+    /// A PIN's door, unconditional (a pin owns nothing).
+    static func reset() { frameSlot.forget() }
+}
+
+/// The door's registration as a modifier, for ONE reason (13u4 UNIT S2's
+/// `CatalogStampRecorder`): a modifier can hold the `@State` token that says
+/// who is registering; a chained `onGeometryChange` has nowhere to keep one.
+private struct ArticleDoorProbe: ViewModifier {
+    @State private var owner = UUID()
+
+    func body(content: Content) -> some View {
+        content
+            .onGeometryChange(for: CGRect.self) {
+                $0.frame(in: .global)
+            } action: { frame in
+                TakesArticleDoorProbe.record(frame, owner: owner)
+            }
+            .onDisappear { TakesArticleDoorProbe.release(owner: owner) }
+    }
 }
 #endif
 
@@ -1789,11 +1820,7 @@ extension View {
     @ViewBuilder
     func articleDoorProbe() -> some View {
         #if DEBUG
-        self.onGeometryChange(for: CGRect.self) {
-            $0.frame(in: .global)
-        } action: { frame in
-            TakesArticleDoorProbe.frame = frame
-        }
+        self.modifier(ArticleDoorProbe())
         #else
         self
         #endif

@@ -169,7 +169,7 @@ struct NoteBoxGeometryTests {
                 // pass, MINOR-2 (a)): a rail drawn concurrently by another suite
                 // used to supply this reference, spuriously red at a compressed
                 // pitch and meaninglessly green at the generous one.
-                SidebarGeometry.railGroupHeights[post.id] = nil
+                SidebarGeometry.forgetRail(post.id)
                 let (railWindow, _) = await drawnColumn(
                     session: session, theme: theme, selection: .post(post.id), box: nil,
                     openNote: post.id, until: { SidebarGeometry.railGroupHeights[post.id] != nil })
@@ -191,7 +191,7 @@ struct NoteBoxGeometryTests {
                     NoteBoxState.selected(post.id),
                     NoteBoxState.live(post.id),
                 ] {
-                    SidebarGeometry.noteBoxFrames[book.id] = nil
+                    SidebarGeometry.forgetBoxFrame(book.id)
                     let (window, _) = await drawnColumn(
                         session: session, theme: theme, selection: .reading(book.id),
                         box: makeBox(state, tokens: tokens, subjectKey: book.id),
@@ -386,7 +386,7 @@ struct NoteBoxCompositionTests {
             // and MY box, by its book (round 2's MINOR-2: the whole-oracle
             // `resetHeaders()` that stood here wiped every other suite's box
             // too, and `onGeometryChange` never republishes a wiped frame).
-            SidebarGeometry.railGroupHeights[postIDs[0]] = nil
+            SidebarGeometry.forgetRail(postIDs[0])
             SidebarGeometry.forgetBox(subject: readingID)
 #endif
             let hosting = NSHostingView(
@@ -653,7 +653,7 @@ struct NoteBoxCompositionTests {
             // MY box, by its book (round 2's MINOR-2 folded the two hand-nils
             // that stood here into the one keyed door).
             SidebarGeometry.forgetBox(subject: readingID)
-            BookOutlineGeometry.focusDoors[readingID] = nil
+            BookOutlineGeometry.forgetFocusDoor(readingID)
 #endif
             let hosting = NSHostingView(
                 rootView: RootView(session: session, services: nil, router: router))

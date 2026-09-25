@@ -122,6 +122,11 @@ struct CanvasView: View {
     /// Row 88(a) (R-cor-11(3)): whether this canvas has already been
     /// landed on arrival — once per mount.
     @State private var arrivalFitted = false
+    #if DEBUG
+    /// **This canvas's own name in the DEBUG oracle** (18k UNIT C4 — the
+    /// `MastheadStamp.oracleOwner` shape). DEBUG-only.
+    @State private var oracleOwner = UUID()
+    #endif
     /// The chip under the pointer while dragging out of the bank (the
     /// ghost's whole state — nothing model-side moves until the drop).
     @State private var bankDrag: BankDrag?
@@ -268,6 +273,10 @@ struct CanvasView: View {
                 session.commandRouter.unregisterHandler(commandToken)
             }
             model.teardown()
+            #if DEBUG
+            // 18k C4: this canvas's arrival, and no other window's.
+            CanvasArrivalOracle.release(owner: oracleOwner)
+            #endif
         }
     }
 
@@ -545,7 +554,7 @@ struct CanvasView: View {
         let viewport = model.visibleRect.isEmpty
             ? CGSize(width: 1200, height: 800) : model.visibleRect.size
         #if DEBUG
-        if onArrival { CanvasArrivalOracle.viewport = viewport }
+        if onArrival { CanvasArrivalOracle.recordViewport(viewport, owner: oracleOwner) }
         #endif
         let outcome = model.fitAll(viewport: viewport)
         guard onArrival else {
@@ -570,7 +579,7 @@ struct CanvasView: View {
         // opens the overview.
         let landing = CanvasArrival.landing(after: outcome)
         #if DEBUG
-        CanvasArrivalOracle.landing = landing
+        CanvasArrivalOracle.recordLanding(landing, owner: oracleOwner)
         #endif
         switch landing {
         case .none:
@@ -638,7 +647,7 @@ struct CanvasView: View {
         }
         #if DEBUG
         .onGeometryChange(for: CGSize.self) { $0.size } action: {
-            CanvasArrivalOracle.boardContentSize = $0
+            CanvasArrivalOracle.recordBoardContentSize($0, owner: oracleOwner)
         }
         #endif
     }
@@ -1161,17 +1170,47 @@ nonisolated enum CanvasArrival {
 /// Row 88(a)'s DEBUG oracle: how the arrival landed — nil until it does.
 @MainActor
 enum CanvasArrivalOracle {
-    static var landing: CanvasArrival.Landing?
+    // **18k UNIT C4 — the three facts NAME THEIR OWNER** (the rule and its
+    // reasons: `Core/Views/DebugOracleOwnership.swift`): the mounted canvas's
+    // `oracleOwner`, released when that canvas leaves. They were bare
+    // statics every canvas overwrote — after one window closed the arrival
+    // was ITS (measured red, `DebugOracleTwoWindowTests`).
+    private static var landingSlot = OwnedSlot<CanvasArrival.Landing>()
+    private static var contentSizeSlot = OwnedSlot<CGSize>()
+    private static var viewportSlot = OwnedSlot<CGSize>()
+
+    static var landing: CanvasArrival.Landing? { landingSlot.value }
     /// Row 91: the board's scroll-content size — in the overview it must be
     /// the SCALED size (the drawing fits the viewport), never the board's.
-    static var boardContentSize: CGSize?
+    static var boardContentSize: CGSize? { contentSizeSlot.value }
     /// Ladder R1-14: the viewport the arrival's decision read — the REPORTED
     /// one, never the 1200 × 800 fallback.
-    static var viewport: CGSize?
+    static var viewport: CGSize? { viewportSlot.value }
+
+    static func recordLanding(_ landing: CanvasArrival.Landing, owner: UUID) {
+        landingSlot.publish(landing, owner: owner)
+    }
+
+    static func recordBoardContentSize(_ size: CGSize, owner: UUID) {
+        contentSizeSlot.publish(size, owner: owner)
+    }
+
+    static func recordViewport(_ size: CGSize, owner: UUID) {
+        viewportSlot.publish(size, owner: owner)
+    }
+
+    /// A canvas leaving: its own arrival, and no other window's.
+    static func release(owner: UUID) {
+        landingSlot.release(owner: owner)
+        contentSizeSlot.release(owner: owner)
+        viewportSlot.release(owner: owner)
+    }
+
+    /// A PIN's door, unconditional (a pin owns nothing).
     static func reset() {
-        landing = nil
-        boardContentSize = nil
-        viewport = nil
+        landingSlot.forget()
+        contentSizeSlot.forget()
+        viewportSlot.forget()
     }
 }
 #endif

@@ -196,7 +196,7 @@ struct ReadingFlowLandingTests {
     @Test func aRevealOfTheFifthLongEntryLandsItsRowAtTheTop() async throws {
         try await withFiveStories(seed: 19) { session, entries in
             #if DEBUG
-            ReadingFlowGeometry.anchorTops = [:]
+            ReadingFlowGeometry.forgetAnchorTops()
             ReadingFlowGeometry.trace = []
             #endif
             let box = FlowRevealBox()
@@ -236,7 +236,7 @@ struct ReadingFlowLandingTests {
     @Test func aRevealOfTheSecondStoryWithTheFirstUnloadedLandsAndHolds() async throws {
         try await withFiveStories(seed: 23) { session, entries in
             #if DEBUG
-            ReadingFlowGeometry.anchorTops = [:]
+            ReadingFlowGeometry.forgetAnchorTops()
             ReadingFlowGeometry.trace = []
             #endif
             let box = FlowRevealBox()
@@ -277,7 +277,7 @@ struct ReadingFlowLandingTests {
     @Test func aRevealOfTheTwelfthStoryWithElevenUnloadedAboveLandsAndHolds() async throws {
         try await withStories(count: 12, seed: 29) { session, entries in
             #if DEBUG
-            ReadingFlowGeometry.anchorTops = [:]
+            ReadingFlowGeometry.forgetAnchorTops()
             ReadingFlowGeometry.trace = []
             #endif
             let box = FlowRevealBox()
@@ -393,7 +393,7 @@ struct ReadingFlowLandingTests {
     @Test func aFlowTornDownMidLandingLeaksNoDoneIntoTheNextFlow() async throws {
         try await withStories(count: 5, seed: 43) { session, entries in
             #if DEBUG
-            ReadingFlowGeometry.anchorTops = [:]
+            ReadingFlowGeometry.forgetAnchorTops()
             ReadingFlowGeometry.trace = []
             #endif
             let boxA = FlowRevealBox()
@@ -499,7 +499,7 @@ extension ReadingFlowLandingTests {
     @Test func aRevealOfAFarChaptersFirstStoryLandsAtThatChaptersHeading() async throws {
         try await withStories(count: 12, seed: 61) { session, entries in
             #if DEBUG
-            ReadingFlowGeometry.anchorTops = [:]
+            ReadingFlowGeometry.forgetAnchorTops()
             ReadingFlowGeometry.trace = []
             #endif
             let grouped = inChapters(entries)
@@ -571,7 +571,7 @@ extension ReadingFlowLandingTests {
     @Test func landingAgainOnTheStoryThePageIsAlreadyAtSettlesInsteadOfSpinning() async throws {
         try await withFiveStories(seed: 67) { session, entries in
             #if DEBUG
-            ReadingFlowGeometry.anchorTops = [:]
+            ReadingFlowGeometry.forgetAnchorTops()
             ReadingFlowGeometry.trace = []
             #endif
             let box = FlowRevealBox()

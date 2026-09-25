@@ -185,7 +185,7 @@ struct BookIndexColumnHeightsTests {
             // THE WINDOW UNDER TEST starts here: forget every height the
             // column reported while it was being built, and watch what it does
             // from the moment a landing is asked for.
-            BookIndexGeometry.paneContentSpans = [:]
+            BookIndexGeometry.forgetContentSpans()
             model.requestReveal(postIDs[5])
             await settle(window, hosting, until: { false }, maxTurns: 120)
 

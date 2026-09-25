@@ -93,6 +93,11 @@ struct ReadingFlowView: View {
     /// now; what stays is what only this surface knows — which stories are
     /// near, and which of those have said they settled.
     @State private var landing = FlowLanding()
+    #if DEBUG
+    /// **This flow's own name in the DEBUG oracles** (18k UNIT C4 — the
+    /// `MastheadStamp.oracleOwner` shape). DEBUG-only.
+    @State private var oracleOwner = UUID()
+    #endif
     /// **THE ONE LANDING AUTHORITY** (`Surface/LandingAuthority.swift`): the
     /// aim/hold/quiet/correct discipline this surface used to carry as a
     /// hand-copy of the book Outline's, parameterized instead
@@ -212,6 +217,10 @@ struct ReadingFlowView: View {
                 .onDisappear {
                     landing.end()
                     authority.end()
+                    #if DEBUG
+                    // 18k C4: this flow's row tops, and no other window's.
+                    ReadingFlowGeometry.release(owner: oracleOwner)
+                    #endif
                 }
                 .task(id: grouped.flatMap { $0.entries.map(\.postID) }) {
                     await loadExtents()
@@ -468,11 +477,8 @@ struct ReadingFlowView: View {
     /// the interval's, never the report's.
     private func rowMoved(_ rowID: String, top: CGFloat, height: CGFloat?) {
         #if DEBUG
-        if let postID = FlowRows.postID(ofAnchor: rowID) {
-            ReadingFlowGeometry.anchorTops[postID] = top
-        } else {
-            ReadingFlowGeometry.anchorTops[rowID] = top
-        }
+        ReadingFlowGeometry.recordAnchor(
+            FlowRows.postID(ofAnchor: rowID) ?? rowID, top: top, owner: oracleOwner)
         #endif
         // A SMALL row's height is a fact about this column at this width (it
         // always renders real content); a story's is `SurfaceSizeMemory`'s.
@@ -984,8 +990,32 @@ enum ReadingFlowExtentsReads {
 /// and the pending landing's story (`LAND` · `CORRECT` · `DONE`).
 @MainActor
 enum ReadingFlowGeometry {
-    static var anchorTops: [String: CGFloat] = [:]
-    static var trace: [String] = []
+    // **18k UNIT C4 — the row tops NAME THEIR OWNER** (the rule and its
+    // reasons: `Core/Views/DebugOracleOwnership.swift`): the mounted flow's
+    // `oracleOwner`, released when that flow leaves. Keyed by the story's
+    // note, the same book's flow in two windows shared every key, and after
+    // one window closed the tops were ITS — measured red,
+    // `DebugOracleTwoWindowTests`.
+    private static var anchorTopStore = OwnedRegistrations<String, CGFloat>()
+
+    static var anchorTops: [String: CGFloat] { anchorTopStore.current }
+    /// An append-only LOG, not a registration (18k C4 — SAFE-AS-IS (A)); the
+    /// 13u2b landing story. Bounded like every DEBUG log (`DebugOracleLog`):
+    /// it had no reset door but a pin's assignment and grew for a DEBUG
+    /// process's whole life.
+    static var trace: [String] = [] {
+        didSet { DebugOracleLog.bound(&trace) }
+    }
+
+    static func recordAnchor(_ key: String, top: CGFloat, owner: UUID) {
+        anchorTopStore.publish(top, for: key, owner: owner)
+    }
+
+    /// A flow leaving: its own tops, and no other window's.
+    static func release(owner: UUID) { anchorTopStore.release(owner: owner) }
+
+    /// A PIN's door, unconditional (a pin owns nothing).
+    static func forgetAnchorTops() { anchorTopStore.forgetAll() }
 }
 #endif
 

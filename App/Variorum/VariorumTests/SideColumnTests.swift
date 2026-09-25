@@ -115,7 +115,7 @@ struct SideColumnTests {
             }
             let root = PostDetailView(session: session, postID: post.id)
             #if DEBUG
-            PostDetailOracle.sideColumnDividerFrame = nil
+            PostDetailOracle.forgetSideColumnDivider()
             #endif
             let hosting = NSHostingView(
                 rootView: root
