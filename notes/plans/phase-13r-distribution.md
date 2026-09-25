@@ -1,7 +1,10 @@
 # Phase 13r — Distribution Mechanics (the Sparkle round)
 
-**STATUS: OPEN — opened 2026-09-25 at the author-attended kickoff sitting (this file's SITTING
-RECORD is the binding record of its rulings). Units not yet started. LIVE STATUS at the bottom.**
+**STATUS: OPEN — PAUSED AT THE SITTING'S CLOSE (2026-09-25, her word: she resumes later with
+`/architect-phase 13r`; one or more of the 18 health rounds may run overnight in between — no
+conflict, nothing of 13r is built yet). The kickoff sitting is COMPLETE: every ruling is made
+(R-13r-1…9 below), the plan is fully made, the records are pushed. Units not yet started.
+RESUME AT THE BOTTOM — the LIVE STATUS block says exactly what a fresh orchestrator does first.**
 
 ---
 
@@ -290,10 +293,32 @@ the rider.
 
 ---
 
-## LIVE STATUS
+## LIVE STATUS (paused 2026-09-25 at the sitting's close — resume point for `/architect-phase 13r`)
+
+**WHAT IS DONE (all pushed):** the kickoff sitting whole — preflight, rulings R-13r-1…9, this plan
+file (`dc0d478f`), the 13y closeout-ritual housekeeping + the 13r row moved back + the pointer
+(`7f021d22`), the site-agent brief + #145(a)'s ruling (`79a89556`). Zero code written; zero unit
+opened; the working tree was left clean.
+
+**RESUME — the fresh orchestrator's first acts, in order:**
+1. Read this file IN FULL (the kickoff section names the rest of the preflight). Do NOT re-open any
+   ruling — the sitting settled them; a newfound technical constraint goes to her, per the skill.
+2. `git log --oneline -10` + `git status -sb` first: one or more 18 health rounds may have run
+   since the pause (`notes/plans/post-13u-health-rounds.md` — 18k → 18l → 18m, 18n flexible).
+   Their commits are expected and harmless to 13r (nothing of 13r is built; the build-number
+   stamping is commit-count-based, so intervening commits only raise it, which is the safe
+   direction). If a round is still RUNNING, stop and coordinate with her before spawning anything.
+3. Ask her whether the site-agent brief has gone out and whether the appcast URL / mailbox have
+   answers yet (`notes/stargazing-13r-distribution-brief.md`) — U2 bakes the URL, so the earlier
+   this settles the better; U1 does not wait on it.
+4. Open **U1 with HER HANDS steps 1–2** (the HER HANDS section): walk her through the portal steps
+   live (Developer ID Application cert · the Developer ID provisioning profile · the notarytool
+   credential), then spawn U1's `opus-implementer` briefed ONLY from this file's U1 section +
+   environment traps.
 
 - **U1 — NOT STARTED.** Opens with HER HANDS steps 1–2.
-- **U2 — NOT STARTED** (gated on U1; her step 3 at its start).
+- **U2 — NOT STARTED** (gated on U1; her step 3 — EdDSA minting — at its start; the appcast URL
+  from the site brief must be settled before this unit closes).
 - **U3 — NOT STARTED.**
 - **U4 — NOT STARTED.**
 - Ladder / closeout — not started.
