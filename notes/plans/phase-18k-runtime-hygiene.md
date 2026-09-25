@@ -924,7 +924,26 @@ change between `cfe53bb5` and today removed it; C2 did not, and claims nothing f
   · `ProseGutterTests` · `InlineEditorWindowTests` · `ReadTierTests`. **BEFORE = the named revert W-B:**
   `EditorView.swift` from the seam commit `48297899` (behaviour-identical to the pre-fix `709bd7bf`)
   over the committed `86b7a5e1`; AFTER = the committed tree. Paired and interleaved (B, A, B, A), zero
-  app instances, grep of the xcodebuild log. PENDING.
+  app instances, grep of the xcodebuild log. **RESULT: BEFORE 84 · 85 — AFTER 4 · 4** (`Test run with
+  92 tests in 16 suites` every run; logs `App/Variorum/DerivedData/18k-c2-warn-{B,A}{1,2}.log`). The
+  4 that remain are other generators (C3's family / A1's publisher — not this representable's).
+  **Both sides carried the known macOS-27 delta** `theSpreadKeepsItsBarWithFormsAndTheJumpScrubber`
+  (the NSSlider scrubber pin, KnownIssues row 65 — C6's). **AFTER also turned
+  `InlineEditorWindowTests.inlineBadgesTrackAWidthReflow` RED (2 of 2; green before 2 of 2) — traced,
+  and it is the HARNESS's coupling, not an app regression:** that test's text view is born 600 pt wide
+  and its ONLY width-setter is the height-report closure (`frame = (wrapperWidth, height)`), so on the
+  old road `install`'s synchronous report widened it to 700 at the mount, and the reload's storage
+  edits then laid the text out at 700 (steady 915 pt). With the report deferred, the width first
+  changed at the test's explicit `remeasure()` — AFTER the reload — and TextKit's first measure at the
+  new width (880 pt, converging to 915 over display passes — the §2 class) became the steady state,
+  the ⑂ badge delivered on it (855 vs 890) and nothing re-triggered it. In the app SwiftUI lays the
+  wrapper out at its width right after `makeNSView`, before ANY report (the report sets height, never
+  width) — so the mount order the old harness got by accident is the app's by construction. **The
+  adaptation (this commit): ONE line in the harness setup — `textView.frame.size.width =
+  wrapperWidth` at mount, with the reason at the line; every assertion byte-unchanged.** Green on both
+  roads (`3 tests … passed`, fixed ×2 and pre-fix ×1). **M-teeth (named here, runs next over this
+  commit):** `EditorViewModel.attach`'s `onWidthReflow` handler emptied — the MINOR-2 pin's reflow arm
+  must go RED, proving the adaptation left it teeth.
 - In-app use evidence (dev-store Debug, scripted; the GUI walk HELD for TCC) — NOT-STARTED.
 - The ledger row amendment (claimed only if confirmed) — NOT-STARTED.
 - Closing runs — NOT-STARTED.

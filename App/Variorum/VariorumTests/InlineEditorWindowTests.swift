@@ -167,6 +167,15 @@ struct InlineEditorWindowTests {
             // The wrapper width is SwiftUI's in the app; the height report
             // follows it (the real InlineEditorSurface shape).
             var wrapperWidth: CGFloat = 700
+            // 18k C2: …and SwiftUI lays the wrapper out at that width right
+            // after `makeNSView`, BEFORE any height report — the report sets
+            // the height, never the width. This harness used to reach 700 pt
+            // only through `install`'s synchronous report; the report now
+            // arrives on the next turn, so the mount's width is set the way
+            // the app sets it (traced: without this line the width first
+            // changed AFTER the reload, and TextKit's first measure at the new
+            // width — 880 pt against a converged 915 — became the steady state).
+            textView.frame.size.width = wrapperWidth
             let coordinator = InlineEditorSurface.Coordinator(model: h.model)
             coordinator.install(textView: textView) { height in
                 textView.frame = NSRect(x: 0, y: 0, width: wrapperWidth, height: height)
