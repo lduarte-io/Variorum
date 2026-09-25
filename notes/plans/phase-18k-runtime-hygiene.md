@@ -1723,24 +1723,35 @@ so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to
 - Reading + population + the classification rule — DONE (this commit).
 - The generic + its pins — NOT STARTED.
 - The conversions, oracle by oracle — NOT STARTED.
-- The two-window pins (red first where reachable) — IN PROGRESS. `VariorumTests/DebugOracleTwoWindowTests.swift`,
-  written against the read names the tree ALREADY has, so each compiles on both sides. **Batch 1, RUN ON
-  THE PRE-FIX TREE (`DerivedData/18k-c4-old2.log`): `✘ Test run with 3 tests in 1 suite failed … with
-  12 issues` — every precondition green, every post-teardown assertion red, exactly the traced arms:**
-  - `thePostDetailsSingletonsAnswerForTheWindowStillOpen` (4 issues): after window β closed, `titleShown`
-    → "beta, the window that goes"; `inspectorPanel` → β's `.tray`; `sideColumnDividerFrame` → β's
-    `(479, 0, 1, 560)`; and `beginTitleEditing` drove β's torn-down title, so α's open mark never came.
-  - `aBookInTwoWindowsKeepsTheOpenWindowsDoorAndNavigator` (6 issues): the navigator and its seam answered
-    with the closed window's `…×600` against the open one's `…×900`; `focusDoors[book]` was **nil** after
-    the NEWER window's teardown AND after the OLDER one's (both arms of the cross-clear), so neither
-    survivor's model could be focused.
-  - `theBarsGeometryIsTheOpenBarsAfterTheOtherCloses` (2 issues): `barWidth` 480 pt off (the closed 420-pt
-    bar's) and `rowFrame` the closed bar's compact `(12, 6, 396, 18)` against `(12, 6, 876, 18)`. Its
-    `mounted` refcount control is green (SAFE-AS-IS (A)).
-  (A first run, `18k-c4-old1.log`, crashed two tests on the live-store fallback — the helper had not
-  installed the `database` dependency; fixed in the helper before the recorded run. Not a finding.)
-  **PENDING:** the remaining oracles' pins (Read mode ×2, the book Index, the Library panel, Canvas, the
-  Takes article door, the reading flow, the shell/rail/box through two shells).
+- The two-window pins (red first where reachable) — WRITTEN AND MEASURED RED ON THE PRE-FIX TREE (this
+  commit). `VariorumTests/DebugOracleTwoWindowTests.swift`, 12 tests, written against the read names the
+  tree ALREADY has so each compiles on both sides; every one mounts the same kind of surface in TWO real
+  windows whose registrations differ, tears one down, and asks the oracle about the one still standing.
+  **THE PRE-FIX RUN (`DerivedData/18k-c4-old4.log`, `DerivedData/18k-c4-pins.sh`): `✘ Test run with 12
+  tests in 1 suite failed after 21.533 seconds with 31 issues` — every precondition green (each test
+  first proves the two windows reported DIFFERENT values), every red a post-teardown assertion, each the
+  closed window's value:**
+
+  | pin | issues | what the pre-fix tree answered after the teardown |
+  |---|---|---|
+  | `thePostDetailsSingletonsAnswerForTheWindowStillOpen` | 4 | `titleShown` "beta, the window that goes"; `inspectorPanel` β's `.tray`; `sideColumnDividerFrame` β's `(479,0,1,560)`; `beginTitleEditing` drove β's torn-down title, so α's open mark never came |
+  | `aBookInTwoWindowsKeepsTheOpenWindowsDoorAndNavigator` | 6 | navigator `…×600` and its seam `…×600` against the open window's `…×900`; `focusDoors[book]` **nil** after the NEWER window's teardown AND after the OLDER one's — both cross-clear arms — so neither survivor could be focused |
+  | `theBarsGeometryIsTheOpenBarsAfterTheOtherCloses` | 2 | `barWidth` 480 pt off (the closed 420-pt bar's); `rowFrame` the closed bar's compact `(12,6,396,18)` vs `(12,6,876,18)`; its `mounted` refcount control GREEN (SAFE-AS-IS (A)) |
+  | `theReadHostsFaceAndSelectionAreTheOpenWindows` | 2 | `face` β's `.edit` (α rests on `.read`); `selectedBlockID` β's block |
+  | `oneNoteReadInTwoWindowsKeepsTheOpenWindowsFrames` | 4 | `faceFrames`, `indexColumnFrames`, `editBlockFrames` and the index column's `SeamGeometry` row all the short window's (`…×484` vs `…×714`; the row `(375,62,411,71)` vs `(400.5,62,640,50)`) |
+  | `aBookIndexInTwoWindowsKeepsTheOpenWindowsColumnAndPanes` | 2 | `columnFrames` `…×560` vs `…×900`; `paneNoteHeights` 141 vs 99 |
+  | `theLibraryCatalogInTwoWindowsKeepsTheOpenWindowsFrames` | 3 | `rootFrame`, `dividerFrame`, `panelFrame` the short window's (`…×520` vs `…×700`) |
+  | `aCanvasInTwoWindowsKeepsTheOpenWindowsArrival` | 1 | `viewport` `(760,486)` vs `(1300,826)` |
+  | `theTakesArticleDoorIsTheOpenWindows` | 1 | the door at x 48 (the narrow window's) vs 318 |
+  | `aReadingFlowInTwoWindowsKeepsTheOpenWindowsRowTops` | 1 | the second story's top 497 (narrow) vs 397 |
+  | `aNoteInTwoShellsKeepsTheOpenShellsSeamAndRail` | 3 | the shell seam's line and grip `…×452` vs `…×932`; `railGroupHeights` 198 (compressed) vs 240 |
+  | `aBookInTwoShellsKeepsTheOpenShellsNoteBox` | 2 | `noteBoxFrames` `(12,205,206,198)` vs `(12,235,206,240)`; the where-line "2 of 2 in this book" vs "one · 1 of 2 · block 1/1" |
+
+  Two runs before the recorded one are not findings: `18k-c4-old1.log` crashed two tests on the
+  live-store fallback (the helper had not installed the `database` dependency), and `18k-c4-old3.log`
+  failed ONE precondition — the two Library catalogs lay out at the same (minimum) width, so their
+  note rows are the same rectangle and `noteRowFrames` cannot be separated in that fixture; it was
+  dropped from the pin (it rests on the structural arm) before the recorded run.
 - The `MarkdownStyling.palette` guard — NOT STARTED.
 - Closing runs — NOT STARTED.
 - Deaths / resumes: none.

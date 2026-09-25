@@ -385,5 +385,504 @@ struct DebugOracleTwoWindowTests {
                     "the mount count is back to what one bar makes")
         }
     }
+
+    // MARK: - ReadModeOracle — the Read host's face, selection and frames
+
+    /// A Read host over `postID`, the way `ReadModeTests` mounts one: its
+    /// detail registered (the fact reports need an active post), its own
+    /// model, and a scrubbed `@AppStorage` so a walk's toggles cannot move
+    /// the index column this pin reads.
+    private func readHost(
+        _ session: AppSession, _ postID: String, storage: UserDefaults
+    ) -> some View {
+        _ = session.commandRouter.registerDetail(postID: postID, mode: .read) { _ in }
+        return ReadModeView(
+            session: session, postID: postID,
+            model: BlockTOCViewModel(session: session, postID: postID))
+            .environment(ThemeStore(session: session))
+            .defaultAppStorage(storage)
+    }
+
+    private func scrubbedStorage(_ name: String) throws -> UserDefaults {
+        let suite = "18k-c4-\(name)-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defaults.removePersistentDomain(forName: suite)
+        return defaults
+    }
+
+    private func note(
+        _ session: AppSession, _ title: String, blocks: Int = 3
+    ) throws -> (postID: String, blockIDs: [String]) {
+        let post = try session.operations.createPost(title: title)
+        var ids: [String] = []
+        for b in 0..<blocks {
+            ids.append(try session.operations.newBlock(
+                in: post.id,
+                text: "Block \(b) of \(title) — a sentence of prose, long enough that a "
+                    + "narrow window wraps it where a wide one does not.").block.id)
+        }
+        return (post.id, ids)
+    }
+
+    /// **`ReadModeOracle.face` / `.selectedBlockID`** — the Read host's
+    /// unkeyed singletons. Window one reads note α on its `read` face; window
+    /// two opens note β on `edit`, and goes.
+    ///
+    /// RED ON OLD (measured — the C4 record): the face is β's `edit` and the
+    /// selection is β's block, with only α on screen.
+    @Test func theReadHostsFaceAndSelectionAreTheOpenWindows() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withLiveWorld(db, seed: 43) {
+            let s1 = AppSession(database: db)
+            let s2 = AppSession(database: db)
+            let alpha = try note(s1, "alpha")
+            let beta = try note(s2, "beta")
+            ReadModeView.remember(.read, postID: alpha.postID)
+            ReadModeView.remember(.edit, postID: beta.postID)
+            let storage = try scrubbedStorage("read-faces")
+            defer {
+                for (s, n) in [(s1, alpha.postID), (s2, beta.postID)] {
+                    UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(n))
+                    s.commandRouter.forgetCurrentBlock(for: n)
+                }
+            }
+            ReadModeOracle.reset()
+            let one = mount(readHost(s1, alpha.postID, storage: storage), width: 1100, height: 750)
+            defer { close(one.window) }
+            #expect(await settle([one], until: {
+                ReadModeOracle.face == .read && ReadModeOracle.selectedBlockID == alpha.blockIDs[0]
+            }), "window one reports its read face on α")
+
+            let two = mount(readHost(s2, beta.postID, storage: storage), width: 900, height: 560, x: 260)
+            defer { close(two.window) }
+            #expect(await settle([one, two], until: {
+                ReadModeOracle.face == .edit && ReadModeOracle.selectedBlockID == beta.blockIDs[0]
+            }), "window two reports its edit face on β")
+            close(two.window)
+            await idle([one])
+
+            #expect(ReadModeOracle.face == .read,
+                    "the face is the open window's: \(String(describing: ReadModeOracle.face))")
+            #expect(ReadModeOracle.selectedBlockID == alpha.blockIDs[0],
+                    "the selection is the open window's block")
+        }
+    }
+
+    /// **`ReadModeOracle.faceFrames` / `.indexColumnFrames` /
+    /// `.editBlockFrames` / `.firstEditRowPaintedAt`, and the index column's
+    /// `SeamGeometry` row** — keyed by note or block, so the SAME note open
+    /// twice shares every key. A tall window stays; a short one goes.
+    ///
+    /// RED ON OLD (measured — the C4 record): every one of them answers with
+    /// the short window's rectangle (or its later first-paint time).
+    @Test func oneNoteReadInTwoWindowsKeepsTheOpenWindowsFrames() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withLiveWorld(db, seed: 44) {
+            let session = AppSession(database: db)
+            let theNote = try note(session, "one note, two windows")
+            ReadModeView.remember(.edit, postID: theNote.postID)
+            let storage = try scrubbedStorage("read-frames")
+            defer {
+                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(theNote.postID))
+                session.commandRouter.forgetCurrentBlock(for: theNote.postID)
+            }
+            let post = theNote.postID
+            let block = theNote.blockIDs[0]
+            let seam = SeamGeometry.key(ReadModeView.indexColumnWidthKey, subject: post)
+            ReadModeOracle.reset()
+            let one = mount(readHost(session, post, storage: storage), width: 1100, height: 750)
+            defer { close(one.window) }
+            #expect(await settle([one], until: {
+                ReadModeOracle.faceFrames[post] != nil
+                    && ReadModeOracle.indexColumnFrames[post] != nil
+                    && ReadModeOracle.editBlockFrames[block] != nil
+                    && SeamGeometry.lineFrames[seam] != nil
+            }), "window one reported its face, column, first row and seam")
+            await idle([one])
+            let faceOne = try #require(ReadModeOracle.faceFrames[post])
+            let columnOne = try #require(ReadModeOracle.indexColumnFrames[post])
+            let rowOne = try #require(ReadModeOracle.editBlockFrames[block])
+            let seamOne = try #require(SeamGeometry.lineFrames[seam])
+            let paintedOne = try #require(ReadModeOracle.firstEditRowPaintedAt)
+
+            let two = mount(readHost(session, post, storage: storage), width: 820, height: 520, x: 280)
+            defer { close(two.window) }
+            #expect(await settle([one, two], until: {
+                ReadModeOracle.faceFrames[post] != faceOne
+                    && ReadModeOracle.indexColumnFrames[post] != columnOne
+                    && ReadModeOracle.editBlockFrames[block] != rowOne
+                    && SeamGeometry.lineFrames[seam] != seamOne
+            }), "window two drew every one of them differently")
+            close(two.window)
+            await idle([one])
+
+            #expect(ReadModeOracle.faceFrames[post] == faceOne, "the face frame is the open window's")
+            #expect(ReadModeOracle.indexColumnFrames[post] == columnOne, "the index column is the open window's")
+            #expect(ReadModeOracle.editBlockFrames[block] == rowOne, "the row is the open window's")
+            #expect(SeamGeometry.lineFrames[seam] == seamOne, "the column's seam is the open window's")
+            #expect(ReadModeOracle.firstEditRowPaintedAt == paintedOne,
+                    "the first paint is the open window's arrival")
+        }
+    }
+
+    // MARK: - BookIndexGeometry — the book Index's column and panes
+
+    /// **`BookIndexGeometry.columnFrames` / `.paneNoteHeights`** — the Index's
+    /// chapter panel keyed by the book, its note panes keyed by the note.
+    /// The same book in Index in a wide window (stays) and a narrow, short
+    /// one (goes): the panel is shorter there and every pane wraps taller.
+    ///
+    /// RED ON OLD (measured — the C4 record): both answer with the closed
+    /// window's numbers.
+    @Test func aBookIndexInTwoWindowsKeepsTheOpenWindowsColumnAndPanes() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withLiveWorld(db, seed: 45) {
+            let session = AppSession(database: db)
+            let (readingID, postIDs) = try book(session)
+            let (m1, st1) = try await loadedBook(
+                session: session, db: db, readingID: readingID, mode: .index)
+            let one = mount(
+                BookView(session: session, readingID: readingID, model: m1, structure: st1)
+                    .environment(ThemeStore(session: session)),
+                width: 1400, height: 900)
+            defer { close(one.window) }
+            #expect(await settle([one], until: {
+                BookIndexGeometry.columnFrames[readingID] != nil
+                    && BookIndexGeometry.paneNoteHeights[postIDs[0]] != nil
+            }), "window one's Index reported its column and a pane")
+            await idle([one])
+            let columnOne = try #require(BookIndexGeometry.columnFrames[readingID])
+            let paneOne = try #require(BookIndexGeometry.paneNoteHeights[postIDs[0]])
+
+            let (m2, st2) = try await loadedBook(
+                session: session, db: db, readingID: readingID, mode: .index)
+            let two = mount(
+                BookView(session: session, readingID: readingID, model: m2, structure: st2)
+                    .environment(ThemeStore(session: session)),
+                width: 700, height: 560, x: 300)
+            defer { close(two.window) }
+            #expect(await settle([one, two], until: {
+                BookIndexGeometry.columnFrames[readingID] != columnOne
+                    && BookIndexGeometry.paneNoteHeights[postIDs[0]] != paneOne
+            }), "window two drew a different column and a differently-wrapped pane")
+            close(two.window)
+            await idle([one])
+
+            #expect(BookIndexGeometry.columnFrames[readingID] == columnOne,
+                    "the column is the open window's: \(String(describing: BookIndexGeometry.columnFrames[readingID])) vs \(columnOne)")
+            #expect(BookIndexGeometry.paneNoteHeights[postIDs[0]] == paneOne,
+                    "the pane is the open window's: \(String(describing: BookIndexGeometry.paneNoteHeights[postIDs[0]])) vs \(paneOne)")
+        }
+    }
+
+    // MARK: - LibraryPanelOracle — the catalog and its panel
+
+    /// **`LibraryPanelOracle.rootFrame` / `.dividerFrame` / `.panelFrame`** —
+    /// the catalog's unkeyed frames. Two catalogs with the panel standing, a
+    /// tall window (stays) and a short one (goes). (Its per-row map,
+    /// `noteRowFrames`, is converted with the oracle but cannot be separated
+    /// here — the catalog lays out at its own minimum width in both windows,
+    /// so the two rows are the same rectangle; measured, the C4 record. It
+    /// rests on the structural arm, `DebugOracleOwnershipTests`.)
+    ///
+    /// RED ON OLD (measured — the C4 record): all three are the short
+    /// window's.
+    @Test func theLibraryCatalogInTwoWindowsKeepsTheOpenWindowsFrames() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withLiveWorld(db, seed: 46) {
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "the preview")
+            _ = try session.operations.newBlock(in: post.id, text: "The first block's own words.")
+            _ = try session.operations.newBlock(in: post.id, text: "The second block.")
+            let firstModel = LibraryCatalogModel(session: session)
+            await firstModel.search()
+            firstModel.clickNoteRow(post.id, modifiers: .none)
+            let secondModel = LibraryCatalogModel(session: session)
+            await secondModel.search()
+            secondModel.clickNoteRow(post.id, modifiers: .none)
+            @MainActor func host(_ model: LibraryCatalogModel) -> some View {
+                LibraryCatalogView(
+                    session: session, model: model, library: LibraryViewModel(session: session),
+                    tags: TagsViewModel(session: session), onOpen: { _ in })
+                    .environment(ThemeStore(session: session))
+            }
+            LibraryPanelOracle.reset()
+            let one = mount(host(firstModel), width: 1100, height: 700)
+            defer { close(one.window) }
+            #expect(await settle([one], until: {
+                LibraryPanelOracle.rootFrame != nil && LibraryPanelOracle.dividerFrame != nil
+                    && LibraryPanelOracle.panelFrame != nil
+            }), "catalog one reported its room, divider and panel")
+            await idle([one])
+            let rootOne = try #require(LibraryPanelOracle.rootFrame)
+            let dividerOne = try #require(LibraryPanelOracle.dividerFrame)
+            let panelOne = try #require(LibraryPanelOracle.panelFrame)
+
+            let two = mount(host(secondModel), width: 860, height: 520, x: 280)
+            defer { close(two.window) }
+            #expect(await settle([one, two], until: {
+                LibraryPanelOracle.rootFrame != rootOne && LibraryPanelOracle.dividerFrame != dividerOne
+                    && LibraryPanelOracle.panelFrame != panelOne
+            }), "catalog two drew every one of them differently")
+            close(two.window)
+            await idle([one])
+
+            #expect(LibraryPanelOracle.rootFrame == rootOne, "the room is the open window's")
+            #expect(LibraryPanelOracle.dividerFrame == dividerOne, "the divider is the open window's")
+            #expect(LibraryPanelOracle.panelFrame == panelOne, "the panel is the open window's")
+        }
+    }
+
+    // MARK: - CanvasArrivalOracle — the arrival's viewport
+
+    /// **`CanvasArrivalOracle.viewport`** — the viewport the arrival read,
+    /// an unkeyed singleton. The same note's canvas in a large window
+    /// (stays) and a small one (goes).
+    ///
+    /// RED ON OLD (measured — the C4 record): the viewport is the small
+    /// window's.
+    @Test func aCanvasInTwoWindowsKeepsTheOpenWindowsArrival() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withLiveWorld(db, seed: 47) {
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "a spread of cards")
+            for i in 1...12 {
+                _ = try session.operations.newBlock(in: post.id, text: "Card \(i) of a canvas.")
+            }
+            @MainActor func host() async throws -> (some View, CanvasViewModel) {
+                let model = CanvasViewModel(session: session, containerID: post.id)
+                model.adopt(try await db.read { try Queries.canvasProjection($0, container: post.id) })
+                return (CanvasView(session: session, containerID: post.id, model: model)
+                    .environment(ThemeStore(session: session)), model)
+            }
+            CanvasArrivalOracle.reset()
+            let (viewOne, modelOne) = try await host()
+            defer { modelOne.teardown() }
+            let one = mount(viewOne, width: 1300, height: 860)
+            defer { close(one.window) }
+            #expect(await settle([one], until: { CanvasArrivalOracle.viewport != nil }),
+                    "canvas one arrived")
+            await idle([one])
+            let viewportOne = try #require(CanvasArrivalOracle.viewport)
+
+            let (viewTwo, modelTwo) = try await host()
+            defer { modelTwo.teardown() }
+            let two = mount(viewTwo, width: 760, height: 520, x: 300)
+            defer { close(two.window) }
+            #expect(await settle([one, two], until: {
+                CanvasArrivalOracle.viewport != nil && CanvasArrivalOracle.viewport != viewportOne
+            }), "canvas two arrived in a different viewport")
+            close(two.window)
+            await idle([one])
+
+            #expect(CanvasArrivalOracle.viewport == viewportOne,
+                    "the arrival is the open window's: \(String(describing: CanvasArrivalOracle.viewport)) vs \(viewportOne)")
+        }
+    }
+
+    // MARK: - TakesArticleDoorProbe — the article's ＋ new block door
+
+    /// **`TakesArticleDoorProbe.frame`** — an unkeyed frame in WINDOW space.
+    /// The same note's Takes board in a wide window (stays) and a narrow one
+    /// (goes): the article's door stands at a different x in each.
+    ///
+    /// RED ON OLD (measured — the C4 record): the frame is the narrow
+    /// window's.
+    @Test func theTakesArticleDoorIsTheOpenWindows() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withLiveWorld(db, seed: 48) {
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "a note in Takes")
+            _ = try session.operations.newBlock(in: post.id, text: "Paragraph one.")
+            _ = try session.operations.newBlock(in: post.id, text: "Paragraph two is a line.")
+            let storage = try scrubbedStorage("takes")
+            @MainActor func host() async throws -> (some View, TakesViewModel) {
+                let model = TakesViewModel(session: session, postID: post.id, defaults: storage)
+                model.landingEnabled = true
+                model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+                return (TakesBoardView(session: session, postID: post.id, model: model)
+                    .environment(ThemeStore(session: session)), model)
+            }
+            TakesArticleDoorProbe.reset()
+            let (viewOne, modelOne) = try await host()
+            defer { modelOne.teardown() }
+            let one = mount(viewOne, width: 1300, height: 760)
+            defer { close(one.window) }
+            #expect(await settle([one], until: { TakesArticleDoorProbe.frame != nil }),
+                    "board one's door reported")
+            await idle([one])
+            let doorOne = try #require(TakesArticleDoorProbe.frame)
+
+            let (viewTwo, modelTwo) = try await host()
+            defer { modelTwo.teardown() }
+            let two = mount(viewTwo, width: 760, height: 560, x: 300)
+            defer { close(two.window) }
+            #expect(await settle([one, two], until: {
+                TakesArticleDoorProbe.frame != nil && TakesArticleDoorProbe.frame != doorOne
+            }), "board two's door stands elsewhere")
+            close(two.window)
+            await idle([one])
+
+            #expect(TakesArticleDoorProbe.frame == doorOne,
+                    "the door is the open window's: \(String(describing: TakesArticleDoorProbe.frame)) vs \(doorOne)")
+        }
+    }
+
+    // MARK: - ReadingFlowGeometry — the flow's row tops
+
+    /// **`ReadingFlowGeometry.anchorTops`** — keyed by the story's note, so
+    /// the same book's flow in two windows shares every key. A wide window
+    /// (stays) and a narrow one (goes): the narrow column wraps the first
+    /// story taller, so the SECOND story's top differs.
+    ///
+    /// RED ON OLD (measured — the C4 record): the top is the narrow
+    /// window's.
+    @Test func aReadingFlowInTwoWindowsKeepsTheOpenWindowsRowTops() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withLiveWorld(db, seed: 49) {
+            let session = AppSession(database: db)
+            var entries: [Queries.ReadingEntry] = []
+            for p in 0..<3 {
+                let story = try note(session, "story \(p)", blocks: 4)
+                entries.append(Queries.ReadingEntry(
+                    postID: story.postID, title: "story \(p)", entryDate: nil, sectionPath: nil))
+            }
+            let second = entries[1].postID
+            @MainActor func host() -> some View {
+                ReadingFlowView(
+                    session: session, readingName: "the flow",
+                    grouped: [(nil, entries)],
+                    onWake: { _, _ in },
+                    reveal: nil,
+                    onRevealLanded: {})
+                    .environment(ThemeStore(session: session))
+            }
+            let one = mount(host(), width: 1100, height: 900)
+            defer { close(one.window) }
+            #expect(await settle([one], until: { ReadingFlowGeometry.anchorTops[second] != nil }),
+                    "flow one reported the second story's top")
+            await idle([one], turns: 20)
+            let topOne = try #require(ReadingFlowGeometry.anchorTops[second])
+
+            let two = mount(host(), width: 520, height: 900, x: 300)
+            defer { close(two.window) }
+            #expect(await settle([one, two], until: {
+                ReadingFlowGeometry.anchorTops[second] != nil
+                    && ReadingFlowGeometry.anchorTops[second] != topOne
+            }), "flow two's narrow column put the second story elsewhere")
+            await idle([one, two], turns: 20)
+            close(two.window)
+            await idle([one])
+
+            #expect(ReadingFlowGeometry.anchorTops[second] == topOne,
+                    "the top is the open window's: \(String(describing: ReadingFlowGeometry.anchorTops[second])) vs \(topOne)")
+        }
+    }
+
+    // MARK: - The shell: ShellGeometry, the rail, the note box
+
+    private func shell(_ session: AppSession, _ router: ShellRouter) -> some View {
+        RootView(session: session, services: nil, router: router)
+    }
+
+    /// **`ShellGeometry`'s two frames and `SidebarGeometry.railGroupHeights`**
+    /// — the shell seam's unkeyed pair, and the "this note" rail keyed by
+    /// the note. The same note in a tall shell (stays) and a short one
+    /// (goes): the seam runs a different height, and the short column
+    /// compresses the rail's pitch.
+    ///
+    /// RED ON OLD (measured — the C4 record): the seam and the rail are the
+    /// short shell's.
+    @Test func aNoteInTwoShellsKeepsTheOpenShellsSeamAndRail() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withLiveWorld(db, seed: 50) {
+            let session = AppSession(database: db)
+            let theNote = try note(session, "one note, two shells", blocks: 2)
+            let post = theNote.postID
+            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post)")
+            defer { UserDefaults.standard.removeObject(forKey: "postMode.\(post)") }
+            ShellGeometry.reset()
+            let routerOne = ShellRouter()
+            let one = mount(shell(session, routerOne), width: 1200, height: 900)
+            defer { close(one.window) }
+            routerOne.workspace.visit(.post(post))
+            _ = routerOne.workspace.select(.post(post))
+            #expect(await settle([one], until: {
+                ShellGeometry.dividerLineFrame != nil && ShellGeometry.dividerGripFrame != nil
+                    && SidebarGeometry.railGroupHeights[post] != nil
+            }, maxTurns: 300), "shell one drew its seam and the note's rail")
+            await idle([one])
+            let lineOne = try #require(ShellGeometry.dividerLineFrame)
+            let gripOne = try #require(ShellGeometry.dividerGripFrame)
+            let railOne = try #require(SidebarGeometry.railGroupHeights[post])
+
+            let routerTwo = ShellRouter()
+            let two = mount(shell(session, routerTwo), width: 1000, height: 420, x: 300)
+            defer { close(two.window) }
+            routerTwo.workspace.visit(.post(post))
+            _ = routerTwo.workspace.select(.post(post))
+            #expect(await settle([one, two], until: {
+                ShellGeometry.dividerLineFrame != lineOne && ShellGeometry.dividerGripFrame != gripOne
+                    && SidebarGeometry.railGroupHeights[post] != railOne
+            }, maxTurns: 300), "shell two's seam and compressed rail differ")
+            close(two.window)
+            await idle([one])
+
+            #expect(ShellGeometry.dividerLineFrame == lineOne, "the seam's line is the open shell's")
+            #expect(ShellGeometry.dividerGripFrame == gripOne, "the seam's grip is the open shell's")
+            #expect(SidebarGeometry.railGroupHeights[post] == railOne,
+                    "the rail is the open shell's: \(String(describing: SidebarGeometry.railGroupHeights[post])) vs \(railOne)")
+        }
+    }
+
+    /// **`SidebarGeometry.noteBoxFrames` / `.noteBoxWhereLines`** — the book's
+    /// note box, keyed by the book. The same book in a tall shell with its
+    /// first note selected (stays) and a short shell with its second note
+    /// selected (goes): the box is compressed there, and says another note.
+    ///
+    /// RED ON OLD (measured — the C4 record): the box and its where-line are
+    /// the short shell's.
+    @Test func aBookInTwoShellsKeepsTheOpenShellsNoteBox() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withLiveWorld(db, seed: 51) {
+            let session = AppSession(database: db)
+            let (readingID, postIDs) = try book(session)
+            let routerOne = ShellRouter()
+            let one = mount(shell(session, routerOne), width: 1200, height: 900)
+            defer { close(one.window) }
+            routerOne.pendingSelection = .reading(readingID)
+            #expect(await settle([one], until: {
+                SidebarGeometry.noteBoxFrames[readingID] != nil
+                    && BookOutlineGeometry.focusDoors[readingID] != nil
+            }, maxTurns: 300), "shell one's book put its box up")
+            BookOutlineGeometry.focusDoors[readingID]?(postIDs[0])
+            #expect(await settle([one], until: {
+                SidebarGeometry.noteBoxWhereLines[readingID] != nil
+            }, maxTurns: 200), "shell one's box names its note")
+            await idle([one])
+            let boxOne = try #require(SidebarGeometry.noteBoxFrames[readingID])
+            let lineOne = try #require(SidebarGeometry.noteBoxWhereLines[readingID])
+
+            let routerTwo = ShellRouter()
+            let two = mount(shell(session, routerTwo), width: 1000, height: 420, x: 300)
+            defer { close(two.window) }
+            routerTwo.pendingSelection = .reading(readingID)
+            #expect(await settle([one, two], until: {
+                SidebarGeometry.noteBoxFrames[readingID] != boxOne
+            }, maxTurns: 300), "shell two's compressed box differs")
+            // The newest book's door is shell two's (on both trees).
+            BookOutlineGeometry.focusDoors[readingID]?(postIDs[1])
+            #expect(await settle([one, two], until: {
+                SidebarGeometry.noteBoxWhereLines[readingID] != lineOne
+            }, maxTurns: 200), "shell two's box names its other note")
+            close(two.window)
+            await idle([one])
+
+            #expect(SidebarGeometry.noteBoxFrames[readingID] == boxOne,
+                    "the box is the open shell's: \(String(describing: SidebarGeometry.noteBoxFrames[readingID])) vs \(boxOne)")
+            #expect(SidebarGeometry.noteBoxWhereLines[readingID] == lineOne,
+                    "the where-line is the open shell's: \(String(describing: SidebarGeometry.noteBoxWhereLines[readingID])) vs \(lineOne)")
+        }
+    }
 }
 #endif
