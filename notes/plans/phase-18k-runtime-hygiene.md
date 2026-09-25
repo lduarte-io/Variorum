@@ -181,8 +181,9 @@ COMMITTED · every death and resume noted in the record.
 - C0 — DONE (`5fea5e81`).
 - The kickoff sitting — DONE (R-18k-1…5, above).
 - C1 — DONE, ACCEPTED (`a8b27b11`; adjudication below). GUI walk HELD (TCC).
-- C2 — IN-PROGRESS (brief appended; implementer spawned).
-- C3–C6 — NOT-STARTED.
+- C2 — DONE, ACCEPTED (hypothesis disproved; deferral as hygiene `6571c558`; shadow row CLOSED as resolved-by `f8610cb9`). GUI walk HELD.
+- C3 — IN-PROGRESS (brief appended; implementer spawned).
+- C4–C6 — NOT-STARTED.
 - Deaths / resumes: none.
 
 ---
@@ -661,7 +662,7 @@ walks are BUNDLED for her morning (granting Ghostty those permissions is her cal
   instruction; 18o builds it).
 - **TCC for walks:** Ghostty has neither Screen Recording nor Accessibility — every GUI walk of this run
   is HELD for her grant (or her walking it herself); the list of held walks grows below per unit.
-  Held so far: C1 (open/close many notes; ⌘Q feels instant).
+  Held so far: C1 (open/close many notes; ⌘Q feels instant) · C2 (the eight steps in its record: Sherlock ▸ Outline ▸ *A Scandal in Bohemia*, click in, type, scroll, narrow/restore, the spread view).
 - **C1 item 3:** should a note edited inside a book (or as a Compare peer) get a leaving savepoint when
   she leaves the BOOK, the way a note gets one when she leaves the note? Today: only ⌘Q/lock/idle.
 
@@ -1114,3 +1115,96 @@ None possible (see the first line). The use evidence is the in-app walk logs in
 (harness1 · pins-prefix · pins-fixed-r{1,2,3} · R1 · Mstrand · Mstuck · Mteeth · warn-{B,A}{1,2} ·
 closing1). The probe scripts are session-scratch only (`c2_probe_apply.py`, `c2_min_probe.py`,
 `bisect_step.sh`), and the Phase 1 probe is recoverable from `d599539b`/`3f9b84ea`.
+
+### UNIT C2 — ORCHESTRATOR ADJUDICATION (2026-09-25 night; the unit CLOSES here)
+
+**Verified by spot-check:** 17 commits `709bd7bf`…`6571c558`, pushed, **zero trailers**, tree clean,
+zero app instances, the scratch bisect worktree removed (the only other worktree,
+`u1-baseline-tree`, predates this run — untouched). Diff scope: `InlineEditorSurface` in
+`EditorView.swift` + two test files — no `EditorTextView`, no storage seam, no `PaneSurface`, no
+`Sources/`. **ACCEPTED — the hypothesis DISPROVED honestly** (TRACE B-1 had already deferred this
+binding and still doubled; M4 on B-1's tree: warnings 18 → 0 with the double intact), **the deferral
+landed as hygiene with red-on-old pins** (`InlineHeightReportTests`, 5 issues on old incl. a
+behavioural strand at 10,929 vs 18,713 pt; the M-strand/M-stuck mutations prove the first-report
+delivery law holds), and **the double realization bisected to `f8610cb9` (13u2b UNIT 1)**. The one
+existing-test adaptation (`InlineEditorWindowTests.inlineBadgesTrackAWidthReflow`, one setup line,
+assertions unchanged, M-teeth still red at its original 816) is traced and accepted.
+**Warning counts:** the fixed 16-suite set 84/85 → 4/4 (the 4 are `PanePublisher`'s — 18l U3's family);
+in-app 10 → 0. **Ledger:** the shadow-editor row CLOSED as RESOLVED-BY `f8610cb9` (the orchestrator
+adopts the suggested disposition); the ~85-pt restore residual filed as its own row, owner 12.
+**Noticed items:** (3) the measured TK2 fact (first full measure after window entry / width change /
+edit differs from the settled layout) → a `TEXTKIT2_NOTES.md` measured-finding paragraph at THIS
+RUN's CLOSEOUT (recording a measured delta, the 13l/17o precedent); (7) `BookOutlineLandingTests`'
+stale "realizes twice" comment → C3 may correct it if it touches that file, else the ladder notes it;
+(5) the dev app not exiting on `NSApp.terminate` under the driver — recorded, not established as a
+product hang; watched for in later units. **GUI walk HELD** — the eight steps are in the C2 RECORD and
+join the morning bundle.
+
+## UNIT C3 BRIEF — the mechanical state-write deferrals (self-contained; read in this order)
+
+**You are the C3 implementer (`opus-implementer`), ONE unit, this session only.** Read, in order:
+1. `CLAUDE.md` (auto-loaded).
+2. THIS FILE: the kickoff corrections, THE LEDGER (row C3), **ENVIRONMENT TRAPS (binding)**, CAST &
+   DISCIPLINE, the C1 and C2 RECORDS' closing sections + their ORCHESTRATOR ADJUDICATIONS (the tree
+   moved; C2 measured the warning family you now sweep — START from its numbers and its
+   noticed-not-touched list), and this brief.
+3. `notes/codebase-health-review-2026-09-21.md` §5.1 — A3/A4/A5 are yours; **A1 (`PanePublisher`) is
+   NOT** (it is 18l's, under her ratified frame-synchronous/state-deferred ruling — do not touch
+   `PanePublisher`/`PaneSurface`), and A2 was C2's. A REVIEW record: re-trace every site.
+4. `App/Variorum/Variorum/Workspace/WindowRegistry.swift`'s header — **the sticky-key ruling binds**
+   (`theStickyKeySurvivesAppDeactivation` pins its regression); read it before touching any window
+   registration.
+
+**The class:** a SwiftUI state write (an `@State`, an `@Observable` model's observed stored property,
+a `@Binding`) performed synchronously inside a view-update pass — `.onGeometryChange` actions,
+`onAppear` paths that write observed state, window-registration callbacks — logs
+`Modifying state during view update` and can drop or re-order the write. The known-correct shape is in
+the tree: `BookView.swift:~1413` gates on a tolerance and defers with `DispatchQueue.main.async`; its
+**un-deferred twin is `BookIndexView.swift:~791`** (`model.reportIndexContentWidth(width)` straight in
+the action) — do that one first, it is a copy of a pattern already reviewed. Then enumerate the rest:
+the review counts ~14 un-deferred geometry actions, **Canvas** handing geometry straight into observed
+storage (including the `ForEach`-driving `realizedIDs`; `CanvasDragTrackingTests` is on the flake list
+and its structure matches this symptom — note it, don't claim it), plain-`@State` sites, and ~6 A4/A5
+one-liners in window registration / `onAppear`.
+
+**The acceptance form (the 13u4 UNIT S3 precedent):** a **per-site verdict table** in your record —
+site (file:line) × what it writes × verdict: DEFERRED (with the shape used) · SAFE-AS-IS (the write is
+not observed / is already off the update pass — state the mechanism) · LEFT (with the reason, e.g. the
+sticky-key ruling, or a write whose ordering is load-bearing — name the pin that proves it). Grep the
+whole Mac app for `.onGeometryChange` and `onPreferenceChange`-like actions so the table is COMPLETE,
+not the review's sample — enumerate trigger inputs, not just consumers. **Behaviour must be
+byte-identical**: every existing pin on a touched surface rides UNMODIFIED (a pin that needs editing
+means the deferral changed behaviour — stop and re-trace). Where a deferral could reorder a
+load-bearing sequence (a landing, a measure-then-aim), prefer LEFT-with-reason over a clever fix.
+**No red-on-old pin is owed for pure deferral hygiene** (the warning is the evidence); a site where
+the deferral fixes an OBSERVABLE defect gets its pin.
+
+**The measurement:** the `Modifying state during view update` count over the SAME fixed 16-suite set C2 named
+in its record (84/85 → 4/4 after C2; the 4 left are `PanePublisher`'s — 18l's, not yours), PLUS a
+second set covering Canvas, the book Index, Compare and the shell if C2's set misses a site you
+touch — name it and run it BOTH sides: your pre-change commit and your final one, recorded with the command.
+
+**Use-shaped evidence:** the terminal host holds NO Screen Recording / Accessibility (do not drive the
+GUI). In-app scripted or harness evidence: Canvas drag tracking, the book Index width report, window
+open/close — the touched surfaces' suites plus `CanvasDragTrackingTests` run 3× (report the rate; it
+is a known load-flake — the point is whether it moved). Write the GUI walk steps for the author into
+your record (they are HELD for her morning).
+
+**Closing runs (tests at the END):** every touched surface's suites + the eleven Tutorial suites
+(names in ENVIRONMENT TRAPS), each read by its "Test run with N tests" line; no full Mac suite.
+
+**CHECKPOINT RULES (restated, binding from your first commit):** write `## UNIT C3 RECORD` with its
+`### LIVE STATUS` at the END of this file in your FIRST commit, and flip it in the same commit as each
+piece; unverified claims marked **PENDING**. Commit per coherent piece (a site or a small group per
+commit is right here) and PUSH after every commit; stage pathspec-limited, never `git add -A`; NO
+commit trailers (no Co-Authored-By, no Claude-Session). Synchronous foreground waits only — the
+grep-poll loop; never end your turn with a run in progress. Never spawn subagents (one Sonnet lookup
+for EXTERNAL facts only). No behavioural revert starts until the record names it and the pre-revert
+state is COMMITTED. Every death/resume noted in the record. If the worktree moves under you, write
+nothing, report, stop. Never touch `/Applications`, never build Release, never quit or kill a
+real-store Variorum instance.
+
+**Scope fence:** C3 only. Zero `Sources/`, zero `Sync/`, zero `PanePublisher`/`PaneSurface`/
+`EditorTextView`/`BlockRangeIndex`. The DEBUG oracles are C4's (list them, don't touch). QUESTIONS:
+check the end marker for the next free number. **Your final message:** a short summary pointing at
+your record.
