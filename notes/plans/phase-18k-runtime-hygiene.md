@@ -3394,10 +3394,38 @@ All three sort after every dated name; among themselves `…-a1-pre13x-…` sort
     names listed, and all six offered for deletion;
   - `theFaceReadsByDateAndNeverNamedAForeignFile` — **GREEN on the pre-fix tree: the face as a defect is DISMISSED
     AS HOLLOW** (it reads by date; kept as a guard, labelled so).
-- Pins committed (this commit).
-- Fix 1 (the listing matches only the app's own dated pattern) + Fix 2 (the copy sends the act's own file) —
-  PENDING.
-- Behavioural reverts (named before they start; pre-revert state committed first) — PENDING.
+- Pins committed (`35a7aac7`).
+- **Fix 1 + Fix 2 — DONE (this commit), both in `Shared/StoreBackup.swift`:**
+  - **Fix 1 — the app's own names only.** `existingBackups(in:)` keeps a file only when `date(fromBackupURL:)`
+    parses it (and its extension is `.sqlite`), sorted by the parsed stamp with the name as tiebreak — the
+    `MarkdownInsurance.existingExports` rule. `date(fromBackupURL:)` accepts exactly the app's two names: the tail
+    is empty or `-` + eight lowercase hex (`StoreKeyEnvelope.shortFingerprint`), and the stamp must read back
+    exactly as the writer formats it — so a stamp-FIRST foreign name (`…-<stamp>-a1-window.sqlite`) is not the
+    app's either. One rule, so all five readers are fixed at once: both due-checks, the primary prune (and the
+    lock-time copy's, which shares it), and the Castle offer's listing.
+  - **Fix 2 — the act's own file, handed through.** The primary leg now names its snapshot either way
+    (`performPrimaryLeg` → `.written(url)` / `.fresh(url)`; `performBackupIfDue` is its thin wrapper, signature
+    unchanged); `performRun` hands that file to `performSecondLeg(source:…)` — a REQUIRED parameter (the R1-m5
+    shape) — which no longer lists the folder at all. A failed primary leg hands nil: the far leg, when due,
+    copies nothing and says the standing sentence (JUDGMENT CALLS 2).
+  - `BackupRunTests.anUnreachableFolderIsReportedNotSkipped` passes `source: nil` (the new required parameter;
+    the unreachable road returns before reading it).
+  - **Fixed tree: `BackupOwnFilesTests` + `BackupRunTests` + `BackupSingleFlightTests` — `Test run with 19 tests
+    in 3 suites passed`** (`18k-c7-pins-fixed.log`).
+- **Behavioural reverts — NAMED HERE BEFORE ANY STARTS** (the fix commit is the pre-revert state; each revert is a
+  working-tree edit of `StoreBackup.swift`, run against `BackupOwnFilesTests`, then `git checkout HEAD --` and a
+  clean `git status`):
+  - **R-full** — `StoreBackup.swift` from the pins commit `35a7aac7` over the fix (+ the one test call's `source: nil`
+    removed so the target compiles). Expected: the pre-fix 7 red / 21 issues, identical.
+  - **R-pass** — Fix 2 alone reverted (the far leg re-lists: `guard let source = try existingBackups(in:
+    directory).last`), Fix 1 kept. Expected: ONLY `theCopyIsTheActsFileEvenBesideANewerStampedCopy` red.
+  - **R-narrow** — Fix 1 reverted whole (the old prefix-only name-sorted listing + the old parse), Fix 2 kept.
+    Expected: the due-check, prune, far-due and listing pins red; the two W-3 pins GREEN (the pass-through alone
+    fixes the copy).
+  - **R-tight** — only the parse's tightening reverted (`tail.isEmpty || tail.hasPrefix("-")`, no read-back), the
+    listing's date filter kept. Expected: ONLY `theListingIsTheAppsOwnNamesOnly` red (the two stamp-first foreign
+    names listed and offered).
+  - PENDING.
 - Dev-store use evidence (a scratch second folder, `cmp`, its check) — PENDING.
 - The remedy sentence for her — PENDING.
 - Closing runs — PENDING.

@@ -246,7 +246,7 @@ struct BackupRunTests {
             // (the store under test is unkeyed), which is now a visible
             // decision rather than a silent default.
             StoreBackup.performSecondLeg(
-                directory: dir, configuration: .init(), defaults: defaults(),
+                source: nil, directory: dir, configuration: .init(), defaults: defaults(),
                 now: Date(), force: false,
                 artifactConfiguration: GRDB.Configuration())
         }.value

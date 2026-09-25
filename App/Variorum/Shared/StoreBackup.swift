@@ -226,6 +226,13 @@ final class StoreBackup {
     /// the integrity check on the far copy meaningful — it is checking the
     /// TRANSFER, which is the part that can go wrong on an external volume
     /// or a cloud-synced folder.
+    ///
+    /// **18k C7 (W-3): the copy is THIS ACT'S snapshot, handed through** — the
+    /// file the primary leg just wrote, or the fresh one its due-check stood on
+    /// — never re-discovered by listing the folder. Before, the second leg took
+    /// the folder listing's last NAME, which any stray `variorum-backup-*` file
+    /// could be: her second folder was sent a July drill file on the dev store,
+    /// and (by the same rule) an A1-rail safety copy from 5 September on hers.
     nonisolated static func performRun(
         database: AppDatabase, directory: URL, configuration: Configuration,
         defaults: UserDefaults, now: Date, force: Bool
@@ -242,14 +249,19 @@ final class StoreBackup {
         // NOW, with the key in hand — "checked the next time you unlock".
         let lockTimeChecks = checkPendingLockTimeCopies(
             in: directory, defaults: defaults, using: artifactConfiguration)
+        // 18k C7: the snapshot this act stands on — handed to the second leg.
+        var standing: URL?
         do {
-            let written = try performBackupIfDue(
+            switch try performPrimaryLeg(
                 database: database, directory: directory,
-                configuration: configuration, now: now, force: force)
-            if let written {
+                configuration: configuration, now: now, force: force) {
+            case .written(let written):
                 primary.outcome = .written
                 primary.file = written.lastPathComponent
                 primary.integrity = integrityCheck(of: written, using: artifactConfiguration)
+                standing = written
+            case .fresh(let fresh):
+                standing = fresh
             }
         } catch {
             primary.outcome = .failed
@@ -271,7 +283,7 @@ final class StoreBackup {
         copyKeyEnvelope(keyFile, into: directory)
 
         let secondary = performSecondLeg(
-            directory: directory, configuration: configuration,
+            source: standing, directory: directory, configuration: configuration,
             defaults: defaults, now: now, force: force,
             artifactConfiguration: artifactConfiguration)
 
@@ -334,8 +346,12 @@ final class StoreBackup {
     /// one level up, the exact door `integrityCheck`'s required parameter
     /// closed — a future caller quietly checking ciphertext copies with a
     /// plain connection and reporting every one "could not be checked".
+    ///
+    /// `source` is the act's own snapshot (18k C7) — REQUIRED, the R1-m5 shape
+    /// again: a caller must hand the file it means, never let this leg find one.
+    /// nil (the primary leg failed, so this act has no snapshot) copies nothing.
     nonisolated static func performSecondLeg(
-        directory: URL, configuration: Configuration,
+        source: URL?, directory: URL, configuration: Configuration,
         defaults: UserDefaults, now: Date, force: Bool,
         artifactConfiguration: GRDB.Configuration
     ) -> BackupRunRecord.Leg {
@@ -377,7 +393,7 @@ final class StoreBackup {
                     leg.file = newest.lastPathComponent
                     return
                 }
-                guard let source = try existingBackups(in: directory).last else {
+                guard let source else {
                     leg.outcome = .failed
                     leg.detail = "There is no snapshot to copy yet."
                     return
@@ -502,11 +518,33 @@ final class StoreBackup {
         database: AppDatabase, directory: URL,
         configuration: Configuration, now: Date, force: Bool = false
     ) throws -> URL? {
+        if case .written(let url) = try performPrimaryLeg(
+            database: database, directory: directory,
+            configuration: configuration, now: now, force: force) {
+            return url
+        }
+        return nil
+    }
+
+    /// What the primary leg did, naming the snapshot either way (18k C7): the
+    /// one it WROTE, or the newest one its due-check found fresh — the file this
+    /// act stands on, which `performRun` hands to the second leg.
+    nonisolated enum PrimarySnapshot: Equatable, Sendable {
+        case written(URL)
+        case fresh(URL)
+    }
+
+    /// The primary leg: a new snapshot when the newest of the app's own is
+    /// older than the interval (or none exists, or `force`), else the fresh one.
+    nonisolated static func performPrimaryLeg(
+        database: AppDatabase, directory: URL,
+        configuration: Configuration, now: Date, force: Bool
+    ) throws -> PrimarySnapshot {
         dispatchPrecondition(condition: .notOnQueue(.main))
         if !force, let newest = try existingBackups(in: directory).last,
            let newestDate = date(fromBackupURL: newest),
            now.timeIntervalSince(newestDate) < configuration.interval {
-            return nil
+            return .fresh(newest)
         }
         // pre-13x 1a (§6): a keyed store's snapshot carries its key's short
         // fingerprint — `variorum-backup-<stamp>-<fp8>.sqlite` — so a folder
@@ -524,7 +562,7 @@ final class StoreBackup {
             from: configuration.keyEnvelopeStoreURL
                 .flatMap { StoreKeyEnvelope.locate(besideStore: $0) })
         try prune(directory: directory, keep: configuration.keep)
-        return url
+        return .written(url)
     }
 
     // MARK: - Snapshot pairs (pre-13x 2a, row 42)
@@ -558,8 +596,9 @@ final class StoreBackup {
         }
     }
 
-    /// Oldest-first pruning down to `keep` (names sort chronologically —
-    /// the stamp format is lexicographic). Pairs go with their snapshots.
+    /// Oldest-first pruning down to `keep` — over the app's OWN snapshots only
+    /// (`existingBackups`, 18k C7): a foreign file is never counted against the
+    /// keep and never deleted. Pairs go with their snapshots.
     nonisolated static func prune(directory: URL, keep: Int) throws {
         let backups = try existingBackups(in: directory)
         guard backups.count > keep else { return }
@@ -641,28 +680,56 @@ final class StoreBackup {
         }
     }
 
-    /// This directory's backup files, oldest first.
+    /// This directory's backup files, oldest first — **the app's OWN snapshots
+    /// and nothing else** (18k C7, the held walks' W-3): a name `date(fromBackupURL:)`
+    /// accepts, with the `.sqlite` extension. Every "newest copy" in this file is
+    /// this list's `.last`, and every prune counts it — so it must never hold a
+    /// file the app did not write. It used to keep ANY `variorum-backup-*.sqlite`
+    /// sorted by name, and a foreign file that merely starts the same way (the A1
+    /// rail's `variorum-backup-a1-…` safety copies, a July drill's
+    /// `variorum-backup-seed-drill-…`) sorts after every dated copy (`2` < `a` <
+    /// `s`): it became the copy sent to the second folder, the reason every hourly
+    /// check wrote a fresh snapshot, and a slot the prune kept while deleting real
+    /// copies. Such files are the author's (or a session's), never candidates and
+    /// never pruned here — `MarkdownInsurance.existingExports` has always filtered
+    /// the same way. Sorted by the parsed stamp (name as the tiebreak), not by the
+    /// raw name, so the order is the dates' whatever a name's tail carries.
     nonisolated static func existingBackups(in directory: URL) throws -> [URL] {
         guard FileManager.default.fileExists(atPath: directory.path) else { return [] }
         return try FileManager.default
             .contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
-            .filter {
-                $0.lastPathComponent.hasPrefix(filePrefix)
-                    && $0.pathExtension == fileExtension
+            .compactMap { url -> (url: URL, date: Date)? in
+                guard url.pathExtension == fileExtension,
+                      let date = date(fromBackupURL: url) else { return nil }
+                return (url, date)
             }
-            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+            .sorted { ($0.date, $0.url.lastPathComponent) < ($1.date, $1.url.lastPathComponent) }
+            .map(\.url)
     }
 
-    /// Both names parse (pre-13x 1a): the 13p-era `variorum-backup-<stamp>`
-    /// and the fingerprinted `variorum-backup-<stamp>-<fp8>`.
+    /// Both of the app's names parse (pre-13x 1a): the 13p-era
+    /// `variorum-backup-<stamp>` and the fingerprinted `variorum-backup-<stamp>-<fp8>`
+    /// — and ONLY those (18k C7): the tail is empty or `-` plus the key's eight
+    /// lowercase hex characters (`StoreKeyEnvelope.shortFingerprint`), and the stamp
+    /// must read back exactly as the writer formats it. A foreign name that happens
+    /// to START with a stamp (`…-<stamp>-a1-window.sqlite`) is not the app's.
     nonisolated static func date(fromBackupURL url: URL) -> Date? {
         let name = url.deletingPathExtension().lastPathComponent
         guard name.hasPrefix(filePrefix) else { return nil }
         let rest = name.dropFirst(filePrefix.count)
-        let stamp = rest.prefix(stampLength)
+        let stamp = String(rest.prefix(stampLength))
         let tail = rest.dropFirst(stampLength)
-        guard tail.isEmpty || tail.hasPrefix("-") else { return nil }
-        return stampFormatter.date(from: String(stamp))
+        guard tail.isEmpty || isFingerprintSuffix(tail) else { return nil }
+        guard let date = stampFormatter.date(from: stamp),
+              stampFormatter.string(from: date) == stamp else { return nil }
+        return date
+    }
+
+    /// `-` + eight lowercase hex characters — the suffix `performBackupIfDue` and
+    /// the lock-time copy write.
+    nonisolated private static func isFingerprintSuffix(_ tail: Substring) -> Bool {
+        tail.count == 9 && tail.first == "-"
+            && tail.dropFirst().allSatisfy { "0123456789abcdef".contains($0) }
     }
 
     /// The short fingerprint a snapshot's name carries, nil for a legacy
