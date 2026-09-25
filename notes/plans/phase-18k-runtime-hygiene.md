@@ -2784,7 +2784,7 @@ parallel runs append TWO log records for one intent. **CONFIRMED.**
 ### LIVE STATUS
 
 - Reading + the trace — DONE (this commit).
-- Item 1 (row 59) — NOT-STARTED.
+- Item 1 (row 59) — DONE, FIXED (`bc5e8cf9`; pin `4eb91dad`). Pins `CanvasFocusedBlockFactTests` (in `CanvasAndPoolTests.swift`, 2 tests): the card click is the router's fact and ⌘K "Block History" (through `ShellActions.showBlockHistory`, the canvas's own fall-through road) opens on it; a re-click on the live card re-asserts the fact. **Pre-fix tree: `Test run with 2 tests in 1 suite failed … with 5 issues`** (every arm read the stale first block). Fixed: `2 tests … passed`. **R1-i1** (the production file from `4eb91dad` over the fix): `failed … with 5 issues`, identical; restored, `git diff` empty. The fix is one report in `CanvasViewModel.focus(blockID:variantID:)`, placed BEFORE `authority.focus` (the Takes board's placement — the re-click arm is what a report after the `.unchanged` return would fail), nil offset.
 - Item 2 (P26) — NOT-STARTED.
 - Item 3 (P27) — NOT-STARTED.
 - Item 4 (P33) — NOT-STARTED.
