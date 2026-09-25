@@ -1895,6 +1895,10 @@ signup now mints a Variorum `hosted_sync` row (harmless under open-at-v1), and 1
 recorded trial key (`auth.users.created_at`) would start the Variorum clock at a
 Fragments signup — and reset on delete-and-re-signup. The trial-mechanics decision is
 13t's (with the purchase channel); this entry just makes sure the suite-scope fact is
-on its kickoff table.
+on its kickoff table. **(b) ACKNOWLEDGED-HERS 2026-09-24, same sitting — her words:
+"good to know for 13t - i'll handle it then"; it waits for 13t's kickoff, deliberately
+undecided until the channel decision sits beside it. (a) stays OPEN with the recorded
+lean standing (CAPTCHA unarmed until abuse appears) — re-surface it at the beta's
+start.**
 
 *(Next free number: **#146**.)*
