@@ -481,7 +481,43 @@ savepoints its own sessions, and the idle backstop (`IdleCommitScheduler`, every
   seven guards red, and the two-surface pin shows the brief's TEXT-LOSS class in the flesh: the
   survivor's typing was NOT reached by the ⌘Q walk (`working_text` still "One."). Both mutations
   restored the same way; `git diff` empty (`git status` clean).
-- Dev-store before/after measurement — NOT-STARTED.
+- Dev-store before/after measurement — DONE, as an IN-APP scripted walk (the GUI walk is HELD — see
+  "WALK" below). Two DEV-STORE Debug builds (`io.lduarte.Variorum.debug`), each carrying the same
+  temporary DEBUG instrumentation (NSLog probes on every acquire / mint / release / drop, on every
+  `EditorViewModel` init / deinit, and an env-gated driver) — PRE = a worktree at `af9041e7` (pins +
+  seam, pre-fix behaviour), POST = the fixed tree; the instrumentation was applied only for each
+  build and reverted (main tree clean after each; the worktree removed). The driver runs the
+  shell's own doors: 20 notes of the dev library, each opened through `ShellRouter.adopt(.post(id))`
+  and switched through `CommandRouter.requestMode` twice (all seven note modes, 5–6 times each; 40/40
+  steps accepted), navigating away to the next note; then a book; then home (`.shelf`); then it
+  reads the counts and times `quitFinalize.finalizeAll()` — the exact ⌘Q/lock walk. **PRE:**
+  entries 1 → 2 → … → 20 across the walk; at home **20 coordinators, 20 ⌘Q closures, 137 holds**;
+  the finalize walk over them **62 ms** (≈3 ms per note on the encrypted dev store — so hundreds of
+  notes after days of use is a lock/quit teardown measured in seconds). **POST:** exactly **1**
+  entry while a note is open, at every step; at home **0 coordinators, 0 ⌘Q closures**; the
+  finalize walk **0.07 ms**; **96 acquisitions, 96 releases** (every hold given back), 20 drops.
+  **T2 confirmed in the running app:** `EditorViewModel` inits 43 (PRE) / 44 (POST) against ≈8–10
+  Write mounts in the walk — SwiftUI's discarded eager twins outnumber the mounted editors ~4:1, so a
+  teardown-placed release would have left the holds above zero; and inits = deinits in both runs
+  (no retain cycle keeps a model alive). Probe logs + the instrumentation script:
+  `notes/plans/18k-screens/c1/` (gitignored).
+- **WALK — HELD for the author's grant.** This session's host is Ghostty
+  (`ghostty → login → zsh → claude`), which holds NEITHER Screen Recording
+  (`CGPreflightScreenCaptureAccess() == false`; `screencapture` fails for every window and the whole
+  display, which is awake and unlocked) NOR Accessibility (`AXIsProcessTrusted() == false`; a System
+  Events call hung on a consent prompt and was stopped). So no capture and no `cliclick` walk were
+  possible from any session in this tree tonight; granting either is the author's (TCC). The in-app
+  driver above is the substitute evidence; the hands-on walk (open/close ~20 notes by hand, then
+  read the counts with a probe) is owed at her word, and captures with it.
+- **FOUND ON THE WAY — a pre-existing CRASH, not C1's, not touched (for the orchestrator):** the
+  first PRE walk trapped at the TENTH note — `Character.init` "more than one extended grapheme
+  cluster" in `EditorCommands.body` (`EditorCommands.swift:780`, the Open strip's `⌘⇧<n>` menu:
+  `KeyEquivalent(Character("\(index + 1)"))` over `workspace.openNotes.shown`). Since pre-13u Act 10
+  (`a9772471`, 2026-08-31) `shown` is EVERY open note (the tracked cap is 20; `ordinalCap = 9` caps
+  only the KEYS in `id(atOrdinal:)`), so the tenth row asks for `Character("10")`. `Character.init`'s
+  check is not DEBUG-only — this should trap the Release app too, whenever a window's Open strip
+  reaches ten rows (crash report: `notes/plans/18k-screens/c1/open-strip-tenth-note-crash.ips`). The
+  driver then closed each left note's strip row (closing a row is not a leaving) to stay under it.
 - Closing runs (touched suites + pins + the eleven Tutorial suites; iOS build; phone quick-note
   suites) — NOT-STARTED.
 - Deaths / resumes: none.
