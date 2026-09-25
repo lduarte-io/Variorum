@@ -2249,3 +2249,8 @@ is unchanged; the fix makes it true again on 27. **P1:** the extra work is one v
 **Pins after the fix** (`18k-c6-jumppin-fixed.log`): `JumpViewportLayoutTests` 1/1 green and
 `RefontViewportTests` 6/6 green — **7 tests / 2 suites passed**.
 
+**BEHAVIOURAL REVERT R1 (named before it runs; the pre-revert state is `f058ac7f`, committed + pushed):**
+the re-assert's condition forced false (`if false, abs(...) >= 0.5`) in the working tree only, the two
+pins run, then `JumpPrimitive.swift` restored to `f058ac7f` byte-exact and the pins run again.
+Expected: red as on the pre-fix tree, then green. Result PENDING.
+
