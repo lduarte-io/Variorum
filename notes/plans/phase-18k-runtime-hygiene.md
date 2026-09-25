@@ -848,6 +848,32 @@ tree's suite, 20 of 20 on today's). **And the double realization itself no longe
 today's tree** (M1 app 0/3, M2 harness 0/8 including the test that doubles on the B-1 tree) — some
 change between `cfe53bb5` and today removed it; C2 did not, and claims nothing for it.
 
+### THE USE EVIDENCE (in-app, dev store, *A Scandal in Bohemia* 262 blocks + a 3-block control; the same driver on both roads)
+
+The gesture set per run: B-1's expand-then-click on the long story and on the short note, a straight
+focus of each, five keystrokes typed and deleted, the 23,601-pt Outline scrolled to its end and back,
+then the WINDOW narrowed by 260 pt and restored. Frame = the live text view's SwiftUI-driven frame;
+content = `PaneMeasurement.height` of it at that moment.
+
+| | PRE-fix road (W-app-B) | POST-fix (the fix) |
+|---|---|---|
+| realizations per focus (makes / dismantles) | 1 / 0, every focus (4 of 4) | 1 / 0, every focus (4 of 4) |
+| `Modifying state during view update` in the whole walk | **10** | **0** |
+| binding writes made INSIDE `makeNSView`/`updateNSView` | **18** (6 of them WROTE) | **0** |
+| frame vs content after focus, typing, scroll away/back | equal (20,993 · 231) | equal (20,993 · 231) |
+| after the window NARROWED | **stranded: frame 20,993 over 20,908 of content** (the update pass measured before its own layout; nothing re-reported) | **equal: 20,993 / 20,993** (the hop measured after the layout, re-reported once as TextKit settled) |
+| after the window was RESTORED | frame 20,993 over 20,908 | frame 20,993 over 20,908 — the one miss, identical on both roads |
+
+**Reading it:** the fix removes this representable's writes-inside-an-update entirely (18 → 0) and
+with them every warning the walk produced (10 → 0); it changes nothing about realization (the double
+does not occur on today's tree on either road); and on the width road it is strictly better — the old
+road's update-pass measure read the pre-layout width and stranded BOTH resize steps, the new one
+converges on the first and misses only the second. That remaining 85-pt miss is the measurement's,
+not the report's timing: the same text at the same width measured 20,993 or 20,908 depending on
+layout history (TEXTKIT2 §2's class), and the inline editor has no convergence loop to re-report a
+late settle — see NOTICED (it is the pane component's `PanePublisher` heal, which the inline editor
+does not compose; not this unit's fence).
+
 ### LIVE STATUS
 
 - Reading — DONE (this commit).
@@ -944,12 +970,13 @@ change between `cfe53bb5` and today removed it; C2 did not, and claims nothing f
   roads (`3 tests … passed`, fixed ×2 and pre-fix ×1). **M-teeth (named here, runs next over this
   commit):** `EditorViewModel.attach`'s `onWidthReflow` handler emptied — the MINOR-2 pin's reflow arm
   must go RED, proving the adaptation left it teeth.
-- In-app use evidence (dev-store Debug, scripted; the GUI walk HELD for TCC) — IN-PROGRESS: the
-  Phase 1 probes RE-APPLIED to the working tree by a scratchpad script (`c2_probe_apply.py`, NEVER
-  committed this time; the driver gained a frame-vs-content read at every checkpoint and a window
-  resize, narrow then back). **POST walk DONE** (`walk3-POST-fix.log`). **PRE walk NEXT — the named
-  revert W-app-B:** `EditorView.swift` from the seam commit `48297899` (pre-fix behaviour) with the
-  same probes, over the committed `5b0cc41e`; restored to `5b0cc41e` (probes removed) after. PENDING.
+- In-app use evidence — DONE (dev-store Debug, scripted; the GUI walk HELD for TCC): the Phase 1
+  probes RE-APPLIED to the working tree by a scratchpad script (`c2_probe_apply.py`, NEVER committed
+  this time; the driver gained a frame-vs-content read at every checkpoint and a window resize, narrow
+  then back); the SAME driver run on the fix (`walk3-POST-fix.log`) and on the named revert W-app-B
+  (`EditorView.swift` from the seam `48297899`, `walk4-PRE-fix-same-driver.log`); the tree restored to
+  HEAD after (`git diff --quiet HEAD`, zero probe strings in `App/` outside gitignored logs). THE USE
+  EVIDENCE table below.
 - A BISECT for the change that REMOVED the double (measurement only, scratch worktree, in-memory store;
   the Outline harness's chapter-reveal make count as the predicate, `cfe53bb5` doubles → `709bd7bf`
   single, ~8 steps) — IN-PROGRESS (so the row can be closed with a mechanism rather than "no longer

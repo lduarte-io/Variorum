@@ -656,7 +656,11 @@ struct InlineEditorSurface: NSViewRepresentable {
             // (13u3 UNIT A1: the decoration lane's second pass is GONE with
             // the lane — a decoration can no longer move this surface's
             // prose column, so there is no re-report to compose here. A real
-            // WIDTH reflow still re-measures, through `onWidthReflow`.)
+            // WIDTH change re-measures through the update pass SwiftUI runs
+            // for it — measured at 18k C2: `updateNSView` fired on each step
+            // of a window resize. `onWidthReflow`, which this line used to
+            // name, re-derives the OVERLAYS (the model wires it), not the
+            // height.)
             //
             // Every storage change (typing, projections, structural
             // rewrites) can change the content height; re-measure after
