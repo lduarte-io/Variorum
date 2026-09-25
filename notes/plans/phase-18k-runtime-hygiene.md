@@ -2156,7 +2156,7 @@ free number. **Your final message:** a short summary pointing at your record.
 |---|---|---|
 | 1 | The reading, in this session's own context, in the brief's order | **DONE** — CLAUDE.md + canon, TEXTKIT2 §5, this file's corrections/ledger/traps/cast + C1–C4 closings and adjudications, KnownIssues row 65 + the re-font RESOLVED row, 13y's kickoff adjudication (lines 381–413), 13u4's UNIT F2 RECORD whole |
 | 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | **TRACED** — REAL on 27 (the mechanism below). **Pin committed RED on the pre-fix tree** (`JumpViewportLayoutTests`, 3 issues + the Refont shrink pin's 1 — `18k-c6-jumppin-prefix.log`). **FIXED** in `JumpPrimitive.scroll(to:)` (one bounded re-assert) — both pins GREEN (`18k-c6-jumppin-fixed.log`, 7/2); behavioural revert R1 RED (4 issues, identical) → restored GREEN. **Item 1 CLOSED: FIXED** (the family re-run on the final tree rides the closing runs) |
-| 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | **TRACED — HARNESS** (the pin's wait predicate precedes its asserted event by one awaited hop); pin RE-MECHANIZED (wait on the scheduled compound) — green 14/14; mutation proofs M1–M3 + the perturbation re-run PENDING |
+| 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | **TRACED — HARNESS** (the pin's wait predicate precedes its asserted event by one awaited hop); pin RE-MECHANIZED (wait on the scheduled compound) — green 14/14; M1/M2/M3 RED at their targets, P (the delay) GREEN. **Item 2 CLOSED: HARNESS, re-mechanized** |
 | 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | PENDING |
 | 5 | `LibraryPanelHostTests`' "inspector" pin — history, narrow, mutation proof | PENDING |
 | 6 | Closing runs (the five suites isolated + in-suite, the touched surfaces, the eleven Tutorial suites) | PENDING |
@@ -2304,5 +2304,15 @@ only `BoundaryFluidityTests` run):**
   Expected RED (`#require pendingCrossBlockTask`).
 - **P — the timing perturbation, against the REAL rewritten pin:** the 100-ms sleep between the
   commit and the receipt re-applied. Expected GREEN (the old form went red under it).
-Results PENDING.
+
+**Results (every file restored from HEAD after each; `git status` clean after each restore):**
+- **M1 → RED, 2 issues** (`18k-c6-fluid-M1.log`): `spoken.kind → .refusal == .receipt`, and
+  `status.current → Item(… "the ends joined — originals under Came from. ⌥⌘Z undoes it." … .refusal)
+  == nil`.
+- **M2 → RED, 1 issue** (`18k-c6-fluid-M2.log`): `status.spoken → nil` at the `#require` (line 108).
+- **M3 → RED** at the new `#require` (`pendingCrossBlockTask → nil`, line 92) — plus the two OTHER
+  suite pins that ride the same arm (`aFannedCrossBlockDeleteEditsTheVisibleTakesOnly`,
+  `quitTimeFinalizeLandsAScheduledCrossBlockCompound`), 5 issues in all (`18k-c6-fluid-M3.log`).
+- **P → GREEN**, 14/14, the suite 1.280 s against 0.45 s unperturbed, so the delay did run
+  (`18k-c6-fluid-P.log`).
 
