@@ -3275,3 +3275,104 @@ Claude-Session); synchronous foreground waits (grep-poll), never end your turn m
 (one Sonnet lookup for external facts only); commit the pre-revert state before any revert; never quit
 or kill a real-store instance, never build Release, never touch `/Applications`. Final message: a
 short summary pointing at your record.
+
+## UNIT C7 RECORD — the second backup folder receives the wrong file (implementer: `opus-implementer`, 2026-09-25)
+
+**NOT DONE (first line, per the brief):** everything below marked PENDING. Nothing yet.
+
+### READING (done in-session before any code)
+
+`CLAUDE.md` and the canon it loads; this file's kickoff corrections, ENVIRONMENT TRAPS, CAST & DISCIPLINE, the
+UNIT C5 RECORD whole (P38 made `StoreBackup.run` single-flight — `run` → `performOneRun` byte-unchanged), THE HELD
+WALKS — RESULTS (C5's table + FINDING W-3), THE HELD WALKS — ORCHESTRATOR ADJUDICATION, the C7 BRIEF;
+KnownIssues' row "The SECOND backup folder…"; `notes/DataSafetyRunbook.md` whole; the A1-rail records it and the
+adjudication cite (`13y-deploy-checklist.md` — the A1 copy is a BYTE copy of the closed store's main file PLUS its
+`-wal`/`-shm` and key files; `pre-13x-bridge-retirement.md` — the same shape, 2026-09-04); `Tools/WalkKit/README.md`
+whole. Code at HEAD `4ad2b961`: `Shared/StoreBackup.swift` whole, `Shared/BackupRetention.swift`,
+`Shared/BackupDestination.swift`, `Shared/MarkdownInsurance.swift` (its listing — the precedent below),
+`Features/Settings/DataSafetyModel.swift`, `DataSafetyPane.swift` (the face's rows and the log), `AppServices`
+(construction + `start()`'s hourly tick), `VariorumApp` (the lock-time copy), `PostureSwitch.swift` (the
+pre-switch offer's listing), `StoreKeyEnvelope.fingerprint/shortFingerprint` (the fp8 alphabet), and the suites
+the pins join (`DataSafetyTests`, `Phase8ServicesTests`, `SnapshotPairTests`, `PostureSwitchTests`).
+
+### THE TRACE (inputs → wrong state; every line re-read at HEAD `4ad2b961`)
+
+**The one rule everything reads.** `StoreBackup.existingBackups(in:)` (`StoreBackup.swift:645–654`) keeps every
+file whose name starts `variorum-backup-` and whose extension is `sqlite`, sorted by NAME, and every "newest" in
+the file is that list's `.last`. The app's own names are `variorum-backup-<yyyy-MM-dd-HHmmss>[-<fp8>].sqlite`;
+the prefix filter also admits any foreign name that happens to start the same way — the A1 rail's
+`variorum-backup-a1-…` and the July drill's `variorum-backup-seed-drill-…`. By byte order `2` (0x32) < `a` (0x61)
+< `s` (0x73), so **every foreign name of those shapes sorts AFTER every dated copy** and becomes `.last`.
+(`MarkdownInsurance.existingExports` — the sibling listing — already filters by `date(fromExportURL:) != nil`;
+`existingBackups` is the drifted copy of that rule.)
+
+**The name-order hypothesis — CONFIRMED by the code (the harness reproduction is PENDING, below).** Five readers
+take `.last` or prune by position:
+1. **The copy to the second folder picks its SOURCE by re-listing** (`:380`, `guard let source = try
+   existingBackups(in: directory).last`) — never the file this run just wrote. With a foreign name present the
+   source is the foreign file, copied under its own name (`:385–389`), checked (`:400`) and logged as the leg's
+   `file` (`:399`). **W-3's mechanism exactly:** the dev `Backups/` holds `…-seed-drill-2026-07-18T095149Z.sqlite`
+   (plaintext), `s` sorts last, the far check opens plaintext with the keyed configuration → *"file is not a
+   database"*.
+2. **The second folder's due-check** (`:372–379`) reads the FAR folder's `.last`; once a foreign file has been
+   copied there it is `.last`, `date(fromBackupURL:)` returns nil, the `if` falls through — so **every run
+   re-copies** (remove + copy, `:386–389`), hourly.
+3. **The primary due-check** (`performBackupIfDue`, `:506–510`) reads `.last` of `Backups/` → the foreign name →
+   nil date → the guard falls through → **a new snapshot at EVERY check** (launch + the hourly tick,
+   `AppServices.start()` → `StoreBackup.start(recheckEvery: 1 h)`), not once a day.
+4. **The primary prune** (`prune(directory:keep:)`, `:563–569`) drops the FIRST `count − 14` by name — the foreign
+   names sort last, so they are kept and take slots, and **real dated snapshots are deleted to make room**:
+   with three foreign names, 11 dated copies survive. Combined with (3) — hourly copies — the beside-the-store
+   reach collapses from 14 days to the last ~11 hours the app was running. The same due-check + `prune(keep: 14)`
+   ride the Castle lock-time copy (`performLockTimeCopyIfDue`, `:592–596`, `:618`).
+5. **The Castle switch's delete offer** (`PostureSwitch.swift:1483–1487`, the `pairs` closure over
+   `existingBackups` filtered by `shortFingerprint != keep`): a foreign name has no fingerprint (nil ≠ the new
+   key's) → **it is LISTED as one of "the app's own PRE-switch snapshot pairs"** (the Outcome's own doc words) and
+   deleted if she accepts the offer — in BOTH folders.
+
+**Not by the same rule:** the freshness FACE (`DataSafetyModel.summarize`, `:171–181`) maps the list through
+`date(fromBackupURL:)` and takes `max()` — foreign names drop out, so the face's count, "Newest" and "back to"
+are by DATE and never name a foreign file. The face is honest; what it reports is the damage (the primary row's
+short "back to", the far row's stale orange "Newest"). The far prune (`pruneSecond`) is by date too — foreign
+names are never its candidates. (Pins for both — PENDING, expected green on both sides = HOLLOW as defects.)
+
+### IS HER REAL STORE EXPOSED? (reasoned from the code and the orchestrator's read-only name listing ONLY — I did not open, list or touch her container)
+
+The listing named three foreign `.sqlite` names in her real `Backups/`: `variorum-backup-a1-bridge-retirement-2026-09-04T185230Z.sqlite`,
+`variorum-backup-a1-pre13x-window-20260905T235821Z.sqlite`, `variorum-backup-a1-13y-window-20260924T212417Z.sqlite`.
+All three sort after every dated name; among themselves `…-a1-pre13x-…` sorts last (`p` > `b` > `1`).
+
+- **YES, CERTAINLY — the copies beside the store (whether or not she ever picked a second folder).** Since the
+  first A1 copy landed (2026-09-04 18:52 UTC), readers 3 and 4 above have held: a fresh snapshot at every hourly
+  check while the app runs, and prune keeping the A1 copies plus only the newest 14 − (foreign count) dated
+  copies — **11 today** if those three are the only foreign names. So the beside-the-store copies reach back
+  about **eleven running hours, not fourteen days**. No current writing is lost — each hourly copy is a real,
+  checked snapshot of the live store; what is lost is **reach**: a mistake noticed more than ~half a day of app
+  time later cannot be undone from these copies. *(The orchestrator's listing can confirm this without me: the
+  dated names should be roughly an hour apart and number 11.)*
+- **YES, IF she has a second folder set** (a pick, or the iCloud Drive offer at the first backup): since about
+  2026-09-04/05, every run sent an A1 main file instead of that run's snapshot — `…-a1-bridge-retirement-…` until
+  2026-09-05 23:58 UTC, then **`…-a1-pre13x-window-20260905T235821Z.sqlite` at every hourly run since**
+  (reader 2). That file is the A1 rail's byte copy of the closed store's MAIN file; its `-wal` was copied beside
+  it on her container and is NOT carried (the extension filter), so the far copy is **the library as of its last
+  checkpoint on or before 5 September**. The far folder's genuine dated copies stopped then and are never pruned
+  away (retention counts days-with-copies, and no new dated copy arrives). The far check opens it with the
+  current key: **if the library key is unchanged since 5 September it reads "ok" and the receipt says "Copied to
+  your folder too." — silently stale**; if the key changed, the receipt says "file is not a database" (the dev
+  walk's words). Either way the face's far row shows "Newest: ~4–5 Sep" in the stale orange.
+- **Latent, if she ever enters Castle and accepts the offer to delete older copies** (reader 5): the three A1
+  copies (and the far folder's stale copies of them) would be deleted with the app's own.
+
+### LIVE STATUS
+
+- Reading + the trace + the exposure statement — DONE (this commit).
+- The harness reproduction (the brief's shape: a dated copy + a `seed-drill-` name + an `a1-…-window-…` name, one
+  run — which file reaches the destination?) — PENDING.
+- Pins, red on the pre-fix tree — PENDING.
+- Fix 1 (the listing matches only the app's own dated pattern) + Fix 2 (the copy sends the act's own file) —
+  PENDING.
+- Behavioural reverts (named before they start; pre-revert state committed first) — PENDING.
+- Dev-store use evidence (a scratch second folder, `cmp`, its check) — PENDING.
+- The remedy sentence for her — PENDING.
+- Closing runs — PENDING.
+- Deaths / resumes: none.
