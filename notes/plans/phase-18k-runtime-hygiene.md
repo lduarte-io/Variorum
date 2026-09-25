@@ -2992,7 +2992,7 @@ own DerivedData (`App/Variorum/DerivedData/18k-walks/`). Captures: `notes/plans/
 - C1 — DONE, **PASS** (table below).
 - C2 — DONE in Terminal, **PASS** (table below); the Study repeat rides the C6 voice flip.
 - C3 — DONE, **PASS with one FINDING (W-1, pre-existing, not 18k's diff) and one step-text correction** (table below).
-- C6 — WALKED in both voices: steps PASS on the ordinary road, **FINDING W-2** (the place lost after a gap round trip + a long landing, both voices, 2 of 4) + observations O-1/O-2 (table below); the settings restore rides the end of the walk.
+- C6 — WALKED in both voices (table below): voice switch, the paragraph-gap control, the landings and the no-blank-page end all **PASS**; **FINDING W-4** (with the page's top edge in a paragraph gap, the first comments ON→OFF leaves the previous paragraph's last line on top — the step's own pre-fix symptom — 7 runs, both voices) and **FINDING W-2** (the place lost by a dozen paragraphs, 2 runs) + O-2 (a stale ring). Settings restored and read back.
 - C2 Study repeat — DONE, **PASS** (below).
 - C5 — WALKED in Study: steps 1–4 **PASS**; **FINDING W-3** (the second backup folder gets the wrong file, pre-existing) + O-3 (a 0-ms synthetic double press is silent) (table below). The Terminal repeat of steps 1–2 — IN-PROGRESS.
 - Deaths / resumes: none.
@@ -3073,10 +3073,10 @@ NOT toggle them (three tries, the point verified at the AX frame); the Accessibi
 | # | Step | Captures | What I saw (measured) | Verdict |
 |---|---|---|---|---|
 | 1 | *Copper Beeches* in Write; the middle of the story | `c6-01-copper-write` · `c6-02-mid` | The note opened at its remembered caret (block 212/212, its last line at the page top — the end-landing shape) | — |
-| 2 | Inline comments ON, then OFF, mid-story — **Terminal** | `c6-06a/b/c-textline-*` (the pair `c6-04*`/`c6-05*` were no-ops: the cliclick road above) | A line straddling the top edge ("committed there.") stays the top line ON and OFF; after OFF every line sits **5 pt** lower than before (204 → 209) — the same line, within itself | PASS |
-| 2 | — **Study** | `c6-16a/b/c` · `c6-17-s1*/s2*` · `c6-18-p1*/p2*/p3*` | Straddling lines (p1–p3) stay the top line, pulled fully into view (+3 / +11 pt). **O-1:** when the anchor line's GLYPHS sat just under the edge ("Pray tell us…", 154 pt, the edge at 140), the FIRST ON→OFF left it **22 pt (one Study line) lower**, a blank band above it (176 pt); from there, two more ON/OFF round trips returned to 176 exactly | PASS, with O-1 recorded |
+| 2 | Inline comments ON, then OFF, mid-story — **Terminal** | `c6-03a-mid-before-settings` · `c6-05a/b-comments-*` · `c6-06a/b/c-textline-*` (`c6-04*` were no-ops — the cliclick road above) | **Corrected at the walk's end (the first write of this row called `c6-05` a no-op; it was the FIRST AX toggle and it moved):** with the top edge in the gap above "“That will do very nicely…", ON→OFF left the PREVIOUS paragraph's last line ("is due at Winchester at 11:30.”") at the top and hers one line lower — **W-4**. With a line STRADDLING the edge ("committed there.", `c6-06`) the same line stays the top line ON and OFF, 5 pt lower (204 → 209) | **FINDING W-4** (gap-top case) · PASS (straddle case) |
+| 2 | — **Study** | `c6-16a/b/c` · `c6-17-s1*/s2*` · `c6-18-p1*/p2*/p3*` | With the edge in the gap above "Pray tell us…" (154 pt), the FIRST ON→OFF left it **22 pt (one Study line) lower** (176 pt) — **W-4**; from there two more round trips returned to 176 exactly. Straddling lines (p1–p3) stay the top line: +3 pt, **+11 pt (p2 — half a Study line)**, and p3's text unchanged | **FINDING W-4** (gap-top) · PASS (straddle, p2's 11 pt noted) |
 | 3 | Paragraph gap → a blank line's worth → Standard — Terminal and Study | `c6-07a/b/c-gap-*` · `c6-19a/b/c-study-gap-*` | Terminal: back to the baseline PIXEL-IDENTICAL in the top region; Study: the same line at the top, back to the baseline to ≤1 pt | PASS |
-| 4 | ⌘↓ to the end, then comments ON/OFF — Terminal ×6, Study ×2 | `c6-09*` · `c6-10-t1…t3*` · `c6-11-r1…r4*` · `c6-20-e1*/e2*` | The page drawn whole every time (no blank page — row 53 holds); the same tail line at the top ON and OFF in all eight | PASS |
+| 4 | ⌘↓ to the end, then comments ON/OFF — Terminal ×11, Study ×4 (incl. W-2's recipe runs) | `c6-08*` · `c6-09*` · `c6-10-t1…t3*` · `c6-11-r1…r4*` · `c6-20-e1*/e2*` · `c6-21-g1*/g2*` · `c6-22-w*` · `c6-23-r2*/r3*` | **The page drew WHOLE every time — no blank page in 15 runs (row 53's fix holds).** The place, **MEASURED (corrected at the walk's end — the first write of this row read "the same tail line in all eight" off tiled thumbnails):** held in 8 (`c6-10` ×3 exact, `c6-11` ×4 within 2 pt, `c6-20-e1` within 1 pt); moved ONE LINE in 5 (`c6-09` +15 pt, `c6-20-e2` ~+19, `c6-21-g2` +23, `c6-22` +17, `c6-23-r2/r3` +18 — W-4); LOST in 2 (`c6-08`, `c6-21-g1` — W-2) | PASS on the blank page · **FINDINGS W-4, W-2** on the place |
 | 5 | Voice Study ⇄ Terminal from mid-story | `c6-12a-mid` · `c6-12c-study-mid` · `c6-12d-terminal-back` | The same paragraph at the top both ways ("“‘Oh, yes,’ said he…"), Study re-wrapped; the note's current block (118) kept | PASS |
 | 6 | Landings: ⌘2 → ⌘1; a deep jump from Blocks ▸ open in Write | `c6-13a/b/c` · `c6-14a/b/c` · `c6-15a…d` | Write → Takes → Write: the page where it was (the whole-window diff is 178 px — the caret only). Blocks ▸ block 11 and block 211 (filtered) ▸ **open in write**: each block's FIRST line at the very top (block 11/212, 211/212). (A double-click on a filtered row did not open it — the row had not been selected by the first click, a missed point; the button road worked) | PASS |
 
@@ -3093,6 +3093,22 @@ pair is WalkKit's worktree recipe). **O-2 (the same precondition):** in Study ru
 ⌘↓ landing (the run after a gap round trip), the editing RING was drawn ~one line too HIGH — its top in the gap
 above the paragraph, its bottom edge cutting through the second-to-last line, the last line outside it (zoom:
 `tmp/` crop of `c6-20-e1a-end`); the next frame (`c6-20-e1b-ON`) drew it right.
+
+**FINDING W-4 (C6's surface — the step's OWN pre-fix symptom, when the page's top edge sits in a PARAGRAPH GAP; both
+voices, mid-note and at the end):** the FIRST inline-comments ON→OFF leaves **the previous paragraph's last line at the
+very top and hers one line lower** — the exact shape the C6 step 2 text names as fixed ("turning comments off left
+the line above hers (the previous paragraph's last line) at the top, with hers one line lower"). Measured with the
+line tool and seen in crops (`tmp/grid.png` pairs, rebuildable from the named captures): Terminal mid-story, the
+walk's very first toggle, no gap round trip before it (`c6-03a` → `c6-05b`: "is due at Winchester at 11:30.”" now on
+top); Study mid-story (`c6-16`: +22 pt); and at the END, 5 of 7 end runs whose landing left the edge in a gap
+(`c6-09` +15, `c6-20-e2` ~+19, `c6-21-g2` +23, `c6-22` +17 with "serenely." on top, `c6-23-r2/r3` +18) — the other
+two being W-2's lost places. **Once shifted, the page holds:** further round trips from the shifted position
+returned to it exactly (`c6-17` ×2; `c6-10` ×3 landed where `c6-09` had shifted to, and held). **With a text line
+AT or STRADDLING the edge, the place holds** (`c6-06`, `c6-11` ×4, `c6-20-e1`, `c6-18-p1/p3`; `c6-18-p2` moved 11 pt,
+half a Study line). Not traced, and no pre-C6 build was walked for comparison (WalkKit's worktree recipe would pair
+it); whether the gap-top case is inside C6's fix, a separate anchor-choice class, or a hollow reading of the step is
+the orchestrator's. **W-2 is plausibly the same class at its extreme** (both start from a gap-top landing) — recorded
+separately because its size (a dozen paragraphs) is different in kind.
 
 ### C2 — the Study repeat (steps 2, 4, 8)
 
