@@ -1725,7 +1725,8 @@ so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to
   `OwnedRegistrations<Key, Value>`, `OwnedSlot<Value>` (an optional `Value` registers a "nothing"),
   `DebugOracleLog.bound` (the 13u2 UNIT E `TakeCardGeometry` rule for append-only logs, shared) and the
   `debugOracleOwner` environment value. Its structural pins — PENDING (next piece).
-- The conversions — DONE (this commit), 13 oracles in 16 app files, every change inside `#if DEBUG`
+- The conversions — DONE (`9fe6ae5d`), **12** oracle types in 16 app files (that commit's message and
+  this line first said 13 — a miscount, corrected here, the history left as it is), every change inside `#if DEBUG`
   (the proof is PENDING, at close): `BookOutlineGeometry` · `BookIndexGeometry` · `ReadingFlowGeometry`
   · `ReadModeOracle` · `LibraryPanelOracle` · `PostDetailOracle` (the four singletons) · `ShellGeometry`
   · `CommitBarGeometry` (row + width) · `CanvasArrivalOracle` · `TakesArticleDoorProbe` ·
@@ -1755,6 +1756,31 @@ so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to
   `SidebarGeometry.noteBoxFrames[id] = nil` → `.forgetBoxFrame(id)` (`NoteBoxMountTests:194`). Every READ
   rides unmodified (the read names and types are unchanged, computed and get-only — so an unowned write
   is now a compile error, not a runtime surprise). **PENDING:** the reader suites' run.
+- The structural pins — DONE (this commit): `VariorumTests/DebugOracleOwnershipTests.swift`, 18 tests —
+  the container's rules one pin each (newest answers + a re-publish keeps its place · a teardown takes
+  only its own FROM EITHER SIDE · a release reaches every key its owner holds and no other · a stranger's
+  or a double release is a no-op · withdraw takes one key · a pin's forget is unconditional · an owner's
+  own value · an optional slot registers "nothing" as a fact · the log bound) and EVERY converted oracle
+  driven through its own doors by two owners (newer leaves → every read is the older's; older leaves →
+  nothing) — which is where the fields the mounted pins could not separate stand (the catalog's note
+  rows, the Outline's anchor tops/row heights/navigator rows, the Index's two glyphs/wash/prose
+  edges/anchors, the Read host's `form`/`liveBlockID`/page rows, the canvas's landing and content size,
+  the box's header) and where a field forgotten in its oracle's `release(owner:)` would go red. RED ON
+  OLD by non-compilation (S2's card-pin shape): none of these doors existed.
+- The `MarkdownStyling.palette` guard — DONE (this commit): the doc comment at the declaration names the
+  three writers (`RootView.adoptMarkdownPalette` · `NSTextView.applyVoiceChrome` · `PaneSurface.applyFace`)
+  and the invariant (appearance is app-wide, so all three resolve one value; per-window anything makes
+  them a race); `VariorumTests/MarkdownPaletteWritersTests.swift`, a source walk in the 18j
+  `NoLiteralColourTests` form, three arms: exactly the three writers with their exact right-hand sides ·
+  every `MarkdownStyling.Palette` outside its file built `Palette(tokens:)`, the pane's face built at its
+  one site and handed to the one representable · appearance app-wide (an `NSAppearance(named:)` only in
+  `AppearanceChoice`, no `preferredColorScheme(` / `environment(\.colorScheme` override). Green on this
+  tree. **ITS TEETH — NEXT, named here before they run (scratch mutations on the committed tree, each
+  restored by `git checkout -- <file>`):** M-fourth (a fourth writer in `RootView`) → arm one red;
+  M-diverge (the pane's face built without the tokens) → arm two red; M-scheme (a
+  `.preferredColorScheme(.dark)` on a view) → arm three red.
+- **The unit's pins, fixed tree (`DerivedData/18k-c4-new2.log`): `✔ Test run with 33 tests in 3 suites
+  passed after 19.903 seconds`** (12 two-window + 18 structural + 3 palette).
 - The two-window pins (red first where reachable) — WRITTEN AND MEASURED RED ON THE PRE-FIX TREE (this
   commit). `VariorumTests/DebugOracleTwoWindowTests.swift`, 12 tests, written against the read names the
   tree ALREADY has so each compiles on both sides; every one mounts the same kind of surface in TWO real
@@ -1784,6 +1810,5 @@ so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to
   failed ONE precondition — the two Library catalogs lay out at the same (minimum) width, so their
   note rows are the same rectangle and `noteRowFrames` cannot be separated in that fixture; it was
   dropped from the pin (it rests on the structural arm) before the recorded run.
-- The `MarkdownStyling.palette` guard — NOT STARTED.
 - Closing runs — NOT STARTED.
 - Deaths / resumes: none.

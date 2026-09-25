@@ -102,6 +102,29 @@ nonisolated enum MarkdownStyling {
     /// palette through `EditorDocument.materialize`, both surface kinds and
     /// every pane composer — is the divergent-private-copy class this app has
     /// already paid for twice.
+    ///
+    /// **ITS WRITERS — EXACTLY THREE — AND THE INVARIANT THAT MAKES ONE
+    /// GLOBAL SAFE** (18k UNIT C4, the post-13u health review §5.2's one
+    /// non-DEBUG guard):
+    ///   1. `RootView.adoptMarkdownPalette()` — `Palette(tokens:
+    ///      theme.tokens(for: scheme))`, on a window's theme or scheme change;
+    ///   2. `NSTextView.applyVoiceChrome(_:previous:)` (`EditorTypography.swift`)
+    ///      — the full-document editor's chrome application —
+    ///      `Palette(tokens: chrome.tokens)`;
+    ///   3. `PaneSurface.applyFace` — a pane's `updateNSView` writing the
+    ///      face its host pushed, built at the one construction site as
+    ///      `tokens.map { MarkdownStyling.Palette(tokens: $0) }`.
+    /// All three resolve from the ONE settings → tokens road, so at any
+    /// moment they write the same value — **because appearance is app-wide**:
+    /// the voice and the palette are synced settings, and the light/dark
+    /// choice is applied once as `NSApp.appearance` (`AppearanceChoice`),
+    /// never per window or per view. That is what makes "the last writer
+    /// wins" harmless here. **The day anything about the face becomes
+    /// per-window, the three become a race** — a pane's `updateNSView` in
+    /// one window restyling in another window's colours — and this global
+    /// must become per-surface state instead. `MarkdownPaletteWritersTests`
+    /// fails if a fourth writer appears, if a writer stops resolving from
+    /// the tokens, or if the app-wide appearance precondition breaks.
     nonisolated(unsafe) private static var storedPalette: Palette?
 
     static var palette: Palette {
