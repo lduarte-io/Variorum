@@ -852,7 +852,9 @@ change between `cfe53bb5` and today removed it; C2 did not, and claims nothing f
 
 - Reading — DONE (this commit).
 - Phase 1, the instrument (DEBUG probes, committed as "WIP: probe", removed before close) — DONE
-  (this commit; REMOVAL PENDING): `C2Probe` (EditorView.swift — makeNSView/updateNSView/dismantle
+  (`d599539b`/`3f9b84ea`; **REMOVED** at the commit after `3f9b84ea` — `App/` byte-identical to the
+  pre-probe `709bd7bf`, verified by `git diff --quiet`; kept as a patch in the session scratchpad for
+  the post-fix in-app run, never re-committed): `C2Probe` (EditorView.swift — makeNSView/updateNSView/dismantle
   counts, every binding write with its phase make|update|storage and whether it wrote, the host
   body's `inlineHeight` per pass, each text view's window-ness at +0.05/+0.5/+2 s), `StableSurface`
   (every report, the `loaded` flip, the settle), `NearViewportObserver` (every decision), the Outline

@@ -250,8 +250,6 @@ struct BookView: View {
             // view's `@State`), so the book publishes its one focus act,
             // keyed by its own id (J41: never a singleton).
             BookOutlineGeometry.focusDoors[readingID] = { model.focus($0) }
-            C2Probe.expandDoors[readingID] = { model.expand($0) }
-            C2Probe.caretFocusDoors[readingID] = { model.focus($0, caret: $1) }
 #endif
         }
         .onChange(of: noteBoxReport) { _, _ in publishNoteBox() }
@@ -2033,10 +2031,6 @@ private struct OutlinePostRow: View {
                     // and nothing else. The gutter it used to reserve is
                     // gone with the bar that lived in it.
                     VStack(alignment: .leading, spacing: 6) {
-                        #if DEBUG
-                        let _ = C2Probe.log("row body LIVE post=\(entry.postID.prefix(8)) near=\(nearViewport) "
-                            + "known=\(model.rememberedSurfaceSize(entry.postID).map { "\($0.width)x\($0.height)" } ?? "nil")")
-                        #endif
                         postHeader
                             .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
                             .frame(maxWidth: BookView.proseColumn, alignment: .leading)

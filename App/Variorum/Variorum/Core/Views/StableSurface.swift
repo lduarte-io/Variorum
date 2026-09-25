@@ -104,9 +104,6 @@ struct NearViewportObserver: ViewModifier {
                 // the mounted editor in the harness).
                 guard let becomesNear = NearBand.decide(
                     distance: report.distance, near: near, margin: margin) else { return }
-                #if DEBUG
-                C2Probe.log("near DECIDE space=\(space) distance=\(report.distance) -> \(becomesNear)")
-                #endif
                 DispatchQueue.main.async { near = becomesNear }
             }
     }
@@ -205,19 +202,11 @@ struct StableSurface<Content: View>: View {
     }
 
     private func report(_ size: CGSize) {
-        #if DEBUG
-        C2Probe.log("stable report h=\(size.height) w=\(size.width) loaded=\(loaded) "
-            + "known=\(known.map { "\($0.width)x\($0.height)" } ?? "nil") reserved=\(reserved ?? -1)")
-        #endif
         if !loaded {
             let reached = known.map { size.height >= $0.height - stableSurfaceReachedSlack } ?? true
             // Flipped on the next turn, never inside the layout pass that
             // reported (the state-during-update class).
-            if reached { DispatchQueue.main.async {
-                #if DEBUG
-                C2Probe.log("stable loaded FLIP (reached) h=\(size.height)")
-                #endif
-                loaded = true } }
+            if reached { DispatchQueue.main.async { loaded = true } }
         }
         guard size.height > stableSurfacePlaceholderCeiling, size.width > 0 else { return }
         if reportedWidth != size.width {
@@ -237,9 +226,6 @@ struct StableSurface<Content: View>: View {
         let box = settle
         DispatchQueue.main.asyncAfter(deadline: .now() + settleInterval) {
             guard box.generation == generation, box.lastSize == size else { return }
-            #if DEBUG
-            C2Probe.log("stable SETTLED h=\(size.height) (loaded was \(loaded))")
-            #endif
             remember(size)
             loaded = true
             settled?()
