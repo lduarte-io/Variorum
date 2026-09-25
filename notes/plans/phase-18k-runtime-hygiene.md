@@ -1228,10 +1228,21 @@ warnings across 61 suites, attributed by nearest started test — mostly pane-mo
 ### LIVE STATUS
 
 - Reading — DONE (this commit).
-- Phase 0, THE MECHANISM — which write shapes SwiftUI actually flags (a scratch experiment, never
-  committed) — IN-PROGRESS.
-- Phase 1, THE ENUMERATION — every `.onGeometryChange` / `.onScrollGeometryChange` / `onAppear` /
-  representable / window-registration write in the Mac app, with its trigger — NOT-STARTED.
+- Phase 0, THE MECHANISM — DONE (this commit; scratch, never committed — THE MECHANISM below):
+  of fourteen minimal write shapes, SwiftUI flags exactly ONE — a `@State`/`@Binding` write inside
+  `updateNSView`. `onGeometryChange` / `onScrollGeometryChange` / `onAppear` / `onChange` /
+  `viewDidMoveToWindow` → `@State`, and every `@Observable` write (even inside `updateNSView`),
+  log nothing.
+- Phase 1, THE ENUMERATION + ATTRIBUTION — DONE (this commit): 76 geometry actions, 49 representable
+  / NSView-callback / Layout triggers, the three window registrations. A trigger-scoped probe
+  (scratch, never committed; `git checkout` removes it) bracketed 132 triggers across THREE suite
+  sets — C2's 16 (92 tests), a named second set of 39 suites (187 tests), and a third of 9 (55
+  tests, incl. a scratch `CommentsPanel` mount): **1,181 warnings, EVERY ONE inside `PaneSurface`'s
+  `makeNSView` (1,168) or `updateNSView` (10)... [the exact split: A 4/0, B 1117/10, C 50/0] — 18l's
+  `PanePublisher` family; ZERO unbracketed; ZERO inside any of the 125 other exercised triggers
+  (70,752 probed entries, 29,071 of them geometry actions — 75 of the 76 exercised).** The review's
+  A3/A4/A5 premise — that these sites GENERATE the warning — is DISPROVED by measurement.
+  **PENDING:** the per-site verdict table and the dispositions (next commit).
 - Phase 2, the BEFORE count on C2's 16-suite set + a second set (named when chosen) — NOT-STARTED.
 - Phase 3, the deferrals (the `BookIndexView` twin first) — NOT-STARTED.
 - Phase 4, the AFTER count, `CanvasDragTrackingTests` ×3 both sides, closing runs — NOT-STARTED.
