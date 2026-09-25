@@ -916,7 +916,15 @@ change between `cfe53bb5` and today removed it; C2 did not, and claims nothing f
   `EditorView(inline: true)` mounted fresh reaches its measured height (a GUARD; its teeth are a
   mutation). No double-realization pin: the double is DISPROVED as this binding's effect and does not
   reproduce today (THE MEASUREMENT).
-- The `Modifying state during view update` count, before/after, one fixed suite set — NOT-STARTED.
+- The `Modifying state during view update` count, before/after, one fixed suite set — IN-PROGRESS.
+  **The set (16 pre-existing suites, named literally, the same on both sides):** `BookOutlineLandingTests`
+  · `BookOutlineRowsTests` · `BookViewTests` · `BookFocusFoldTests` · `OutlineWritingSurfaceTests` ·
+  `SpreadBookViewTests` · `NoteBoxGeometryTests` · `NoteBoxCompositionTests` · `BookRedesignMountTests` ·
+  `BookOutlineCostTests` · `OutlineRoomTests` · `BookCardHeightStabilityTests` · `EditorRouterActiveTests`
+  · `ProseGutterTests` · `InlineEditorWindowTests` · `ReadTierTests`. **BEFORE = the named revert W-B:**
+  `EditorView.swift` from the seam commit `48297899` (behaviour-identical to the pre-fix `709bd7bf`)
+  over the committed `86b7a5e1`; AFTER = the committed tree. Paired and interleaved (B, A, B, A), zero
+  app instances, grep of the xcodebuild log. PENDING.
 - In-app use evidence (dev-store Debug, scripted; the GUI walk HELD for TCC) — NOT-STARTED.
 - The ledger row amendment (claimed only if confirmed) — NOT-STARTED.
 - Closing runs — NOT-STARTED.
