@@ -2157,7 +2157,7 @@ free number. **Your final message:** a short summary pointing at your record.
 | 1 | The reading, in this session's own context, in the brief's order | **DONE** — CLAUDE.md + canon, TEXTKIT2 §5, this file's corrections/ledger/traps/cast + C1–C4 closings and adjudications, KnownIssues row 65 + the re-font RESOLVED row, 13y's kickoff adjudication (lines 381–413), 13u4's UNIT F2 RECORD whole |
 | 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | **TRACED** — REAL on 27 (the mechanism below). **Pin committed RED on the pre-fix tree** (`JumpViewportLayoutTests`, 3 issues + the Refont shrink pin's 1 — `18k-c6-jumppin-prefix.log`). **FIXED** in `JumpPrimitive.scroll(to:)` (one bounded re-assert) — both pins GREEN (`18k-c6-jumppin-fixed.log`, 7/2); behavioural revert R1 RED (4 issues, identical) → restored GREEN. **Item 1 CLOSED: FIXED** (the family re-run on the final tree rides the closing runs) |
 | 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | **TRACED — HARNESS** (the pin's wait predicate precedes its asserted event by one awaited hop); pin RE-MECHANIZED (wait on the scheduled compound) — green 14/14; M1/M2/M3 RED at their targets, P (the delay) GREEN. **Item 2 CLOSED: HARNESS, re-mechanized** |
-| 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | **RE-MECHANIZED** (`ComposedSliders` — composition nodes + the node's own binding driving the surface) — green; **plus the Outline's zero-slider arm, found HOLLOW in the same class and re-mechanized the same way**; mutation proofs PENDING |
+| 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | **RE-MECHANIZED** (`ComposedSliders` — composition nodes + the node's own binding driving the surface) — green; **plus the Outline's zero-slider arm, found HOLLOW in the same class** — first re-mechanized by composition (`d21bf0fd`), then MEASURED hollow for the A6 shape (MO) and re-mechanized on the page's bottom content inset; MO-2 + MS1–MS4 PENDING |
 | 5 | `LibraryPanelHostTests`' "inspector" pin — history, narrow, mutation proof | PENDING |
 | 6 | Closing runs (the five suites isolated + in-suite, the touched surfaces, the eleven Tutorial suites) | PENDING |
 | 7 | The record complete (verdicts, disposition, held walk steps, noticed-not-touched) | PENDING |
@@ -2380,5 +2380,27 @@ HEAD after each):**
 - **MS2 — the paged Slider's setter a no-op** → the paged pin RED on its "it works" arm only.
 - **MS3 — the spread bar gains a second Slider** → the spread pin RED (count 2).
 - **MS4 — the spread Slider's setter a no-op** → the spread pin RED on its "it works" arm only.
-Results PENDING.
+
+**MO — RESULT (`18k-c6-scrub-MO.log`), and it CORRECTED this unit's own first rewrite.** With the A6 inset
+restored where it stood (a `ProgressView` + a `Slider` in a `.safeAreaInset(edge: .bottom)` on the
+Outline's `ScrollViewReader` content), BOTH slider arms read **GREEN**. The old `count(NSSlider) == 0`
+is hollow on 27, as expected. **`d21bf0fd`'s composition arm is also hollow for this shape**: the reader
+closure runs at render time, so no body walk reaches it. Only the `NSProgressIndicator` arm went red
+(1 issue), and only because this mutation carried a progress bar too. A slider-only restoration would
+have passed the whole pin.
+
+**The Outline arm, re-mechanized a second time, on what her ruling actually removed** (13c 2A: *"Outline's
+ENTIRE bottom inset is gone"*). A scratch probe of the hosted Outline's scroll views (`18k-c6-outline-geo-{MO,HEAD}.log`)
+reads the page's `HostingScrollView` (909 × 800, the widest) with **`contentInsets.bottom` = 54 under MO
+and 0 on HEAD**, and the navigator's scroll view at 0 both times. The arm now asserts **every
+`NSScrollView` in the hosted Outline has a 0 bottom content inset, and the page's scroll view reaches the
+window's bottom edge (≤ 1 pt)**. It uses AppKit's scroll-view API, not how SwiftUI draws a control, and
+it catches ANY bottom bar, which is the letter of her ruling. The composition arm is DROPPED there
+(it was hollow for the regression shape; keeping it would give false confidence). The progress arm is
+unchanged. The pin's doc is corrected. **Green: `OutlineWritingSurfaceTests` 7/7**
+(`18k-c6-outline-geo-new.log`).
+
+**MO-2 (added, named here before it runs):** the A6 inset restored with the `Slider` ALONE (no progress
+bar) against the new arm. Expected RED on the inset arm; the progress arm green. Results for MO-2 and
+MS1–MS4 PENDING.
 

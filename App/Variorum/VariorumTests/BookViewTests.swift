@@ -604,8 +604,10 @@ struct OutlineWritingSurfaceTests {
     }
 
     /// A6, red-on-old by behavioral revert: restoring the `safeAreaInset`
-    /// block puts an `NSSlider` (and a progress indicator) back in the
-    /// hierarchy and this fails. Her ruling covered BOTH controls — "it
+    /// block puts a bottom bar back — the page's scroll view takes a bottom
+    /// content inset, and a progress indicator returns to the hierarchy —
+    /// and this fails. (It counted an `NSSlider` until 18k C6: on macOS 27 a
+    /// SwiftUI `Slider` is no NSView, so that arm went hollow.) Her ruling covered BOTH controls — "it
     /// makes no sense to have a horizontal scrollbar on a vertical page"
     /// and "it seems a bit buggy… remove it fully for now".
     @Test func outlineCarriesNoBottomChrome() async throws {
@@ -616,15 +618,33 @@ struct OutlineWritingSurfaceTests {
                 for sub in view.subviews { n += count(type, in: sub) }
                 return n
             }
+            func views<V: NSView>(_ type: V.Type, in view: NSView) -> [V] {
+                var found = (view as? V).map { [$0] } ?? []
+                for sub in view.subviews { found += views(type, in: sub) }
+                return found
+            }
             // 18k C6 (KnownIssues row 65's class): this arm was
             // `count(NSSlider) == 0`, which on macOS 27 cannot fail — a
-            // SwiftUI `Slider` is no NSView there, so a restored slider would
-            // have read 0 too (hollow). It reads the composition instead
-            // (`ComposedSliders`); the progress arm below is unchanged,
-            // because `ProgressView` is still an `NSProgressIndicator` on 27
-            // (measured), so it kept its teeth.
-            #expect(ComposedSliders.find(in: hosting.rootView.body).isEmpty,
-                    "no jump slider — a horizontal scrollbar on a vertical page")
+            // SwiftUI `Slider` is no NSView there, so a restored slider read
+            // 0 too (measured HOLLOW: 13c 2A's removed inset put back where
+            // it stood left this arm green). Reading the composition does
+            // not reach it either: the inset called `proxy.scrollTo`, so it
+            // lived inside the `ScrollViewReader` closure, which SwiftUI runs
+            // at render time (measured hollow too). What her ruling actually
+            // removed is the WHOLE bottom inset, and that is AppKit-visible
+            // on the page's own scroll view: restored, the inset shows as a
+            // 54-pt bottom content inset; today it is 0 and the page reaches
+            // the window's bottom edge.
+            let scrollViews = views(NSScrollView.self, in: hosting)
+            let page = try #require(
+                scrollViews.max { $0.bounds.width < $1.bounds.width },
+                "the outline page scrolls")
+            #expect(scrollViews.allSatisfy { $0.contentInsets.bottom == 0 },
+                    "no bottom bar — no jump slider (a horizontal scrollbar on a vertical page), nothing: \(scrollViews.map(\.contentInsets.bottom))")
+            #expect(abs(page.convert(page.bounds, to: hosting).maxY - hosting.bounds.maxY) <= 1,
+                    "the page runs to the window's bottom edge")
+            // The progress arm is unchanged: `ProgressView` is still an
+            // `NSProgressIndicator` on 27 (measured), so it kept its teeth.
             #expect(count(NSProgressIndicator.self, in: hosting) == 0,
                     "no progress bar — she ruled it out fully, bugginess unchased")
         }
