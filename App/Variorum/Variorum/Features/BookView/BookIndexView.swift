@@ -981,8 +981,8 @@ private struct IndexPaneRow<Content: View>: View {
             guard let becomesNear = NearBand.decide(
                 distance: distance, near: near, margin: Self.nearMargin)
             else { return }
-            // Never inside the layout pass that reported (the
-            // state-during-update class — `NearViewportObserver`'s own rule).
+            // On the next turn, as `NearViewportObserver` does (a harmless
+            // hop, kept; its doc corrects the reason once given for it).
             DispatchQueue.main.async { near = becomesNear }
         }
     }

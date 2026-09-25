@@ -93,7 +93,7 @@ struct BookView: View {
     /// its text surfaces need that the prose column itself cannot tell them:
     /// how much whitespace stands beside the column. Read from the scroll
     /// view (the pane), written on a real change only, on the next turn (a
-    /// geometry action can arrive inside a layout pass). Zero until the
+    /// harmless hop — `NearViewportObserver`'s doc). Zero until the
     /// first pass, where `outlineGutter` answers `.contained` — the shipped
     /// geometry, so the first frame is unchanged.
     @State private var outlinePaneWidth: CGFloat = 0
@@ -1404,9 +1404,9 @@ struct BookView: View {
                 // reflows, so everything learned under the old one is dropped
                 // when this moves (`BookOutlineHeights.stand`). Written only
                 // on a real change (the app's one 1-pt tolerance), and on the
-                // next turn — a geometry action can arrive inside a layout
-                // pass, and a state write there is the class that doubled a
-                // mounted editor.
+                // next turn (a harmless hop, kept — `NearViewportObserver`'s
+                // doc says why it is not the state-during-update class it
+                // was once blamed on).
                 .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
                     guard abs(width - model.outlineContentWidth) > stableSurfaceWidthTolerance
                     else { return }
@@ -1949,8 +1949,8 @@ private struct OutlineRunRow<Content: View>: View {
             guard let becomesNear = NearBand.decide(
                 distance: distance, near: near, margin: BookView.runRowNearMargin)
             else { return }
-            // Never inside the layout pass that reported (the
-            // state-during-update class — `NearViewportObserver`'s own rule).
+            // On the next turn, as `NearViewportObserver` does (a harmless
+            // hop, kept; its doc corrects the reason once given for it).
             DispatchQueue.main.async { near = becomesNear }
         }
     }

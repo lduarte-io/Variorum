@@ -1249,11 +1249,20 @@ warnings across 61 suites, attributed by nearest started test — mostly pane-mo
   named literally in the script) `Test run with 187 tests in 39 suites` → 1,126 warnings.** One
   issue each, both KnownIssues row 65's macOS-27 deltas (A: the NSSlider scrubber pin; B:
   `LibraryPanelHostTests`' "inspector" pin). Logs `DerivedData/18k-c3-before-{A,B}.log`.
-- Phase 2b, THE HOLLOW DEMONSTRATION on the brief's first site — IN-PROGRESS. **Named before it
-  runs (scratch, never committed):** apply `BookView:1410`'s exact shape to `BookIndexView:791`
-  (tolerance gate + `DispatchQueue.main.async { model.reportIndexContentWidth(width) }`), run set B
-  unprobed + the three BookIndex suites, compare the count and every pin; restore with
-  `git checkout -- App/Variorum/Variorum/Features/BookView/BookIndexView.swift`, verify `git diff`.
-- Phase 3, the deferrals (the `BookIndexView` twin first) — NOT-STARTED.
+- Phase 2b, THE HOLLOW DEMONSTRATION on the brief's first site — DONE (named in `4bdced1c` before
+  it ran; scratch, never committed): `BookView:1410`'s exact shape applied to `BookIndexView:791`
+  (tolerance gate + `DispatchQueue.main.async { model.reportIndexContentWidth(width) }`), set B
+  unprobed: **`Test run with 187 tests in 39 suites` → 1,134 warnings (before: 1,126) — NO
+  decrease.** Per-test diff of the two logs: identical everywhere except ONE Takes test
+  (`theBloomDoorStillGoesToTheBlockTheRingWasLastIn`, 105 → 113 — `PaneSurface`'s own run-to-run
+  count); the four BookIndex suites pass on both sides with zero warnings attributed to them. The
+  deferral is HOLLOW at its own evidence → NOT applied. Restored by `git checkout --
+  …/BookIndexView.swift`, `git diff` empty. Log `DerivedData/18k-c3-hollow-B.log`.
+- Phase 3, the deferrals — DONE AS **ZERO DEFERRALS** (every site SAFE-AS-IS by the measured
+  mechanism; the verdict table is the next commit). **What DID land (this commit): a comment-only
+  correction** at the six places that gave the disproven reason for a next-turn hop
+  (`StableSurface.swift` ×2 + a canonical note on `NearViewportObserver`; `BookView.swift` ×3;
+  `BookIndexView.swift` ×1). The hops are byte-identical and kept; only the stated WHY changed.
+  `git diff -U0` over `App/`: **0 non-comment lines changed.** Build + AFTER counts PENDING.
 - Phase 4, the AFTER count, `CanvasDragTrackingTests` ×3 both sides, closing runs — NOT-STARTED.
 - Deaths / resumes: none.

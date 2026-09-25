@@ -62,6 +62,18 @@ nonisolated enum NearBand {
     }
 }
 
+/// **The next-turn hops in this file and its neighbours (the Outline's run
+/// rows and content width, the Index pane's rows) are KEPT, but the reason
+/// they used to give is not true.** 18k UNIT C3 measured it (the record:
+/// `notes/plans/phase-18k-runtime-hygiene.md`, UNIT C3 RECORD). SwiftUI runs
+/// `onGeometryChange` and `onScrollGeometryChange` actions OUTSIDE its view
+/// update. A `@State` write in one is never flagged as "Modifying state during
+/// view update": zero flags in ~29,000 action entries across 64 suites, while
+/// the same write inside `updateNSView` is flagged every time. And the
+/// mounted-editor double these hops were blamed on was the Outline's lazy
+/// container, gone since `f8610cb9` (18k C2's bisect). The hops stay because
+/// they are harmless and every pin here was measured with them. A new
+/// geometry action does not need a hop for this reason.
 struct NearViewportObserver: ViewModifier {
     @Binding var near: Bool
     let margin: CGFloat
@@ -98,10 +110,8 @@ struct NearViewportObserver: ViewModifier {
                     armed: armed)
             } action: { report in
                 guard report.armed else { return }
-                // Decided on the next turn: a geometry report can arrive
-                // inside a layout pass, and a state write there is the
-                // "modifying state during view update" class (it doubled
-                // the mounted editor in the harness).
+                // Decided on the next turn (a harmless hop, kept; the
+                // reason it once gave is corrected on this type's doc).
                 guard let becomesNear = NearBand.decide(
                     distance: report.distance, near: near, margin: margin) else { return }
                 DispatchQueue.main.async { near = becomesNear }
@@ -204,8 +214,9 @@ struct StableSurface<Content: View>: View {
     private func report(_ size: CGSize) {
         if !loaded {
             let reached = known.map { size.height >= $0.height - stableSurfaceReachedSlack } ?? true
-            // Flipped on the next turn, never inside the layout pass that
-            // reported (the state-during-update class).
+            // Flipped on the next turn (a harmless hop, kept — see
+            // `NearViewportObserver`'s doc for why it is not a correctness
+            // requirement).
             if reached { DispatchQueue.main.async { loaded = true } }
         }
         guard size.height > stableSurfacePlaceholderCeiling, size.width > 0 else { return }
