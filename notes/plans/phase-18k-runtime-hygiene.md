@@ -1194,7 +1194,143 @@ your record (they are HELD for her morning).
 (names in ENVIRONMENT TRAPS), each read by its "Test run with N tests" line; no full Mac suite.
 
 **CHECKPOINT RULES (restated, binding from your first commit):** write `## UNIT C3 RECORD` with its
-`### LIVE STATUS` at the END of this file in your FIRST commit, and flip it in the same commit as each
+`### THE MECHANISM (Phase 0 + 1 — every number from a run in this session)
+
+**M1 — what SwiftUI flags, in a minimal harness** (a scratch Swift Testing file mounting one view
+per write shape in an `NSHostingView` window, mount + a resize each, bracketed by `NSLog` markers
+on the warning's own stream; never committed; `DerivedData/18k-c3-mech1.log`). Of fourteen shapes,
+exactly ONE is flagged: **a `@State` written through a `@Binding` inside `updateNSView`** (arm E).
+Not flagged: `onGeometryChange` → `@State` (read in the body, or not) · `onGeometryChange` →
+`@Observable` (read, or not) · the same with a `DispatchQueue.main.async` hop · `onAppear` →
+`@State` / `@Observable` · `onChange` → `@State` · `onScrollGeometryChange` → `@State` ·
+`viewDidMoveToWindow` → `@State` / `@Observable` (the `WindowKeyReporter` shape) · a preference
+round-trip → `@State` · **and an `@Observable` write inside `updateNSView`** (arm F — the warning
+cannot see Observation at all, so it can never be the evidence for an `@Observable` site).
+
+**M2 — who emits it in the app** (a trigger-scoped probe: `NSLog` enter/exit around 132 triggers —
+all 76 geometry/scroll-geometry actions, every representable's make/update/dismantle, the
+window reporter's `viewDidMoveToWindow`/`windowBecameKey`, the three `Layout` types' methods, and
+the NSView `layout`/`setFrameSize` overrides; applied by a scratch script, never committed; a
+warning is attributed to the innermost open bracket on its thread):
+
+| run | tests / suites | warnings | inside `PaneSurface.makeNSView` | inside `PaneSurface.updateNSView` | anywhere else | unbracketed |
+|---|---|---|---|---|---|---|
+| set A (C2's 16) | 92 / 16 | 4 | 4 | 0 | **0** | **0** |
+| set B (this unit's 39) | 187 / 39 | 1,127 | 1,117 | 10 | **0** | **0** |
+| set C (9, incl. a scratch `CommentsPanel` mount) | 55 / 9 | 50 | 50 | 0 | **0** | **0** |
+
+70,752 probed trigger entries; 125 of the 132 triggers exercised; **29,071 geometry-action entries
+over 75 of the 76 sites, none flagged**. The seven never entered: `CommentsPanel:795` (the deleted
+fold's height, behind a click — the same shape as `:649`/`:917`, which were) and `ReferencePanel`'s
+three representables (they write no SwiftUI storage — below). **Conclusion: in these 334 tests the
+warning family is 100% `PaneSurface` (18l's `PanePublisher`), and the review's A3/A4/A5 premise —
+that the geometry actions and the window/onAppear one-liners GENERATE it — is DISPROVED.** The
+kind-level fact the table leans on: the SAME modifier's action closure writing a `@State` (15 sites,
+~515 entries) is never flagged, while a `@State` write inside an update is flagged every time — so
+`onGeometryChange` / `onScrollGeometryChange` actions run OUTSIDE SwiftUI's view update, and an
+`@Observable` write in one is the ordinary Observation invalidation, not a write during an update.
+
+### THE VERDICT TABLE (the 13u4 S3 form — every trigger in the Mac app; entries = probed entries over sets A+B+C)
+
+**Verdicts: DEFERRED 0 · SAFE-AS-IS 76 geometry actions + every non-geometry trigger below · LEFT
+(as well as safe) 8 landing sites + the window-registration road (the sticky-key ruling) ·
+`PaneSurface` LEFT for 18l (fenced).** No deferral was applied anywhere: at every site the
+evidence a deferral would remove — the warning — reads zero on both sides (the brief's own form of
+"a pin green on both sides is hollow"; demonstrated literally on its first site, Phase 2b).
+
+**S — DEBUG oracle / pin-seam writes into plain statics (not SwiftUI storage; nothing to flag by
+construction; their OWNERSHIP is C4's sweep) — 38 sites, SAFE-AS-IS:**
+`BaselineProbe:61` (19) · `SeamGrip:87`/`:101` (265/262 — callbacks whose every consumer writes a
+DEBUG static — `SeamGeometry`, `ShellGeometry`, `PostDetailOracle` via `SideColumn.onDividerFrame`
+— or a pin seam that is nil in the app, `WorkbenchSeam.onFrame`) · `SidebarNoteBox:139`/`:158` (9/9)
+· `BookIndexView:395` (29) `:625` (171) `:833` scroll-offset trace (62) `:1057` (212) `:1192` (77)
+`:1294` (23) `:1325` (3,657) · `BookView:748` (169) `:1845` (4,842) · `CanvasView:640` (16) ·
+`CommitBar:533` (60) `:543` (59) · `LibraryInfoPanel:614` (55) · `SidebarView:371` (50) `:486` (4)
+`:596` (138) `:605` (105) `:619` (15) `:728` (233) `:737` (30) `:740` (233) · `ReadModeView:199`
+(20) `:604` (81) · `CompareBoardView:1579` (26) · `LensesBoardView:936` (21) · `PostDetailView:373`
+(52) `:677` (99) `:759` (4) `:775` (97) `:991` (305) · `TakesBoardView:1697` (162) `:1792` (91) ·
+`BlocksWorkbenchView:1082` (44).
+
+**A — `@State` written synchronously in the action (the kind that WOULD be flagged were the action
+inside the update; measured: never) — 15 sites, SAFE-AS-IS:**
+
+| site | writes | entries | note |
+|---|---|---|---|
+| `SideColumn:210` | `totalWidth` | 126 | |
+| `CommitBar:537` | `barWidth` | 59 | |
+| `TakesBottomBar:267` | `barWidth` | 51 | |
+| `LibraryCatalogView:209` | `libraryWidth` | 13 | |
+| `SidebarView:290` | `columnHeight` | 52 | |
+| `ShelfView:82` | `listContentHeight` | 28 | the `of:` trailing-closure form |
+| `PostDetailView:304` | `mastheadIconRowWidth` | 49 | |
+| `BlocksWorkbenchView:260` | `totalWidth` | 3 | |
+| `ReadingFlowView:278` | `columnWidth` | 2 | equality-guarded |
+| `ProseTakeCard:266` | `width`, then `rebuild()` → `geometry` | 10 | 0.5-pt gate |
+| `CalmGrammar:155` / `:159` | `textWidth` / `boxWidth` (the marquee) | 65 / 54 | |
+| `CommentsPanel:649` / `:917` | `commentsHeight` / `measured` | 2 / 1 | scratch mount (no suite mounts the panel's view) |
+| `CommentsPanel:795` | `deletedHeight` | 0 | not entered (behind a click); the same shape as the two above |
+
+**O — an `@Observable` model's OBSERVED property, written synchronously in the action — 4 sites,
+SAFE-AS-IS** (the action is outside the update — kind A's measurement; the write is the ordinary
+Observation invalidation; the warning cannot see these either way — M1 arm F):
+
+| site | writes | entries | note |
+|---|---|---|---|
+| **`BookIndexView:791`** — the brief's "un-deferred twin" | `BookViewModel.indexContentWidth` (1-pt tolerance in the model), `indexPaneHeights.stand` | 17 | **DISMISSED AS HOLLOW, demonstrated:** `BookView:1410`'s exact deferral applied in scratch → set B 1,126 → 1,134 (no decrease; the +8 is one Takes test's `PaneSurface` count), the four Index suites green both sides with zero warnings attributed. The "known-correct" twin's hop rests on the B-1 claim C2 disproved — it is harmless and kept, not a pattern owed here. |
+| `CanvasView:161` | `boardViewportRect` | 14 | read only by the drop decision (a method), no body reads it |
+| `CanvasView:166` (scroll) | `visibleRect` (+ `realizedIDs` via `recull()`, re-cull hysteresis-gated) | 35 | `realizedIDs` drives the `ForEach` through `realizedCards` — the write is outside the update, so the `ForEach` re-renders on the NEXT pass as designed. The review's "structure matches symptom" for `CanvasDragTrackingTests` is not this mechanism (it produces no warning); the flake rate is recorded below, unclaimed. |
+| `CanvasView:431` | `bankRect` | 7 | read only by the drop decision |
+
+**U — unobserved storage (a plain class held in `@State`, `@ObservationIgnored`, or a nil pin seam)
+— 5 sites, SAFE-AS-IS by construction:** `ReadEditPane:264` → `ReadCarryGeometry.noteRow` (72; a
+plain class, "not observed, deliberately") · `ReadModeView:166` → `noteViewport` + a DEBUG static
+(20) · `ReadModeView:807` → `noteRow` (9) · `BookIndexView:1232` → a DEBUG static + `onMeasured` →
+`learnIndexPaneRowHeight` → `indexPaneHeights` (`@ObservationIgnored`) (146) · `CalmGrammar:85` →
+`onDetailHeight` (nil in the app — row 89's pin seam) (1).
+
+**L — LANDING / measure-then-aim reports (load-bearing ORDER: a hop would move each report behind
+the aim it feeds) — 8 sites, SAFE-AS-IS and LEFT:** `BookView:1440` (scroll) →
+`LandingAuthority.contentChanged` (128) · `BookView:1883` → `outlineAnchorMoved` → the landing box +
+`landing.noteTop` (2,348) · `BookIndexView:806` (scroll) → `paneBox.contentHeight` +
+`contentChanged` (120) · `BookIndexView:1211` → `paneBlockAnchorMoved` → `noteTop` (3,622) ·
+`ReadingFlowView:188` (scroll) → `landing.lastOffset` + `contentResized` (6) ·
+`ReadingFlowView:1004` → the flow's anchor report (575) · `TakesBoardView:608` →
+`noteArticleRowFrame` (`@ObservationIgnored` frames; the 17q R1-1 ordering note) +
+`spendArticleLanding` → `scrollTo` (2,631) · `TakesBoardView:666` (scroll) →
+`consumeArticleGeometry` → `scrollTo` (362). (`LandingAuthority`, the landing boxes and
+`paneBox` are plain classes — not observed.) Pins that hold the order: `BookOutlineLandingTests`,
+`BookIndexLandingTests`, `ReadingFlowLandingTests`, `TakesArticleScrollTests` — all in the closing
+runs.
+
+**D — ALREADY DEFERRED (a next-turn hop) — 6 sites, SAFE-AS-IS; the hop KEPT byte-identical, its
+stated reason CORRECTED (comment-only, `5286ff39`):** `StableSurface:102` (`near`, 2,786) ·
+`StableSurface:208` (`loaded` / `reportedWidth`, 346) · `BookView:1410` (`outlineContentWidth`, 61)
+· `BookView:1432` (`outlinePaneWidth`, 163) · `BookView:1940` (the run row: `learnOutlineRowHeight`
+unobserved + `outlineAnchorMoved` synchronous, `near` hopped; 1,527) · `BookIndexView:959` (the
+pane row: the same shape, 1,754). Each comment said the hop existed because "a geometry action can
+arrive inside a layout pass, and a state write there is the class that doubled a mounted editor";
+M2 shows the first half is not the flagged class and C2's bisect showed the double was the lazy
+container. One canonical note now sits on `NearViewportObserver`; the five others point to it.
+
+**Non-geometry triggers:**
+
+| trigger | entries | flagged | verdict |
+|---|---|---|---|
+| `PaneSurface` `makeNSView` / `updateNSView` | 1,125 / 4,215 | **1,171 / 10 — every warning in the app's runs** | LEFT — 18l's (`PanePublisher`, her frame-synchronous/state-deferred ruling); fenced |
+| `EditorView` full-document (make/update) + `InlineEditorSurface` (make/update) | 52+119 / 20+130 | 0 | SAFE-AS-IS (C2 deferred the inline height report) |
+| `CaptureTextView` make/update/`sizeThatFits`/`viewDidMoveToWindow` | 23 / 1,146 / 11,387 / 38 | 0 | SAFE-AS-IS — update adopts `text` INTO the NSView (`view.string =`, no state write); focus via the coordinator |
+| `ReadPostView` make/update | 79 / 199 | 0 | SAFE-AS-IS — attach/install/chrome, no binding written |
+| `PageLeafView`, `PageTurnKeys`, `CommentsPanel`'s key monitor, `DivideWSheet`'s key monitor, `PaneFocusCatcher` | 4+16, 2+8, 1+5, 5+9, 20+91 | 0 | SAFE-AS-IS — assign closures/properties onto the NSView only |
+| `ReferencePanel` ×3 (PDF / Quick Look / web) | 0 (not mounted by any suite) | — | SAFE-AS-IS by construction — NSView properties + a `.main`-queue notification observer (async) |
+| `Layout` types: `TrailingFlow`, `MastheadRowTwo`, `FlowLayoutLite` | 3,691+3,404 · 4,241+4,425 · 2+7 | 0 | SAFE-AS-IS — size/placement arithmetic, no state |
+| NSView overrides (`EditorTextView` `setFrameSize`/`layout`/`viewDidMoveToWindow`, `BlockDecor.layout`, `PaneSurface` `layout`/`viewDidMoveToWindow`) | 1,882 / 162 / 136 · 11 · 2,828 / 1,587 | 0 | SAFE-AS-IS (and `EditorTextView`/`PaneSurface` fenced) |
+| **Window registration** — `RootView:334` / `NoteWindowView:139` / `QuickNoteView:353` `.onAppear { windows.register(…) }` | (onAppear — M1 arms C/D) | 0 unbracketed in any window suite | SAFE-AS-IS and LEFT — `WindowRegistry` is `@Observable`; the sticky-key ruling binds its order and key-ness, untouched |
+| **`WindowKeyReporter`** (three hosts): `onWindow` → `windows.attach` (+ `NoteWindowView`'s `@State window`), `onKey` → `windows.noteKey` | make 18 · `viewDidMoveToWindow` 19 · `windowBecameKey` 4 | 0 | SAFE-AS-IS and LEFT — the sticky-key ruling (no resign door; `theStickyKeySurvivesAppDeactivation`); `NoteWindowView`'s `@State` shape is M1 arm G |
+| every other `.onAppear` (57 in all: `EditorView:169,185` · `QuickNoteView:353` · `DivideWSheet:146` · `CanvasView:235,1116` · `TrayPanel:1295` · `TakesBoardView:143,145,148,200,597` · `NoteWindowView:139` · `SidebarNoteBox:184,268` · `LibraryInfoPanel:436,546` · `ProtectionPane:193` · `ReadPostView:96` · `RootView:334,812,813,818,858` · `TakesShared:124,162,647,796,821` · `CommentsPanel:60` · `CompareBoardView:971` · `CommitBar:209` · `PostDetailView:492,723,732` · `VariorumApp:54` · `LensesBoardView:152` · `ReadModeView:216` · `ReadingFlowView:205,1086` · `ShelfView:426` · `LibraryTimeFace:485,500` · `CalmGrammar:127` · `BookView:235,241,245,1467,2056,2095,2109,2393` · `SpreadBookView:95` · `SidebarView:250` · `BookIndexView:403` · `BookOrderAndConversion:150` · `NotePicker:247`) | — | 0 unbracketed across 334 tests | SAFE-AS-IS as a kind — `onAppear` runs after the update (M1 arms C/D) |
+| `onPreferenceChange` | — | — | none in the codebase (0 sites) |
+| `GeometryReader` bodies (`RootView:622`, `TakesBoardView:578`, `CommentsPanel:619`, `NotePagesView:107`, `PagedReadView:148`) | — | 0 | SAFE-AS-IS — no synchronous write in any of the five bodies (read) |
+
+### LIVE STATUS` at the END of this file in your FIRST commit, and flip it in the same commit as each
 piece; unverified claims marked **PENDING**. Commit per coherent piece (a site or a small group per
 commit is right here) and PUSH after every commit; stage pathspec-limited, never `git add -A`; NO
 commit trailers (no Co-Authored-By, no Claude-Session). Synchronous foreground waits only — the
@@ -1259,7 +1395,7 @@ warnings across 61 suites, attributed by nearest started test — mostly pane-mo
   deferral is HOLLOW at its own evidence → NOT applied. Restored by `git checkout --
   …/BookIndexView.swift`, `git diff` empty. Log `DerivedData/18k-c3-hollow-B.log`.
 - Phase 3, the deferrals — DONE AS **ZERO DEFERRALS** (every site SAFE-AS-IS by the measured
-  mechanism; the verdict table is the next commit). **What DID land (this commit): a comment-only
+  mechanism; THE VERDICT TABLE above, committed after `5286ff39`). **What DID land (this commit): a comment-only
   correction** at the six places that gave the disproven reason for a next-turn hop
   (`StableSurface.swift` ×2 + a canonical note on `NearViewportObserver`; `BookView.swift` ×3;
   `BookIndexView.swift` ×1). The hops are byte-identical and kept; only the stated WHY changed.
