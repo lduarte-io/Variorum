@@ -194,8 +194,9 @@ COMMITTED · every death and resume noted in the record.
 - C4 — DONE, ACCEPTED (12 oracle types owner-keyed; 13 two-window pins red-on-old; palette guard).
 - C6 — DONE, ACCEPTED (row 65 CLOSED; the re-font drift a REAL 27 regression, fixed in `JumpPrimitive`).
 - C5 — DONE, ACCEPTED (four FIXED, P26 pinned-already-fixed; dispositions in 17e).
-- THE WALKS — IN-PROGRESS (walk session spawned; `notes/handoffs/18k-held-walks-handoff.md`).
-- NEXT: the ladder (Fable, one combined diff) → finals → closeout → refresh → 18o.
+- THE WALKS — DONE (adjudicated below): C1 · C2 · C3 · C5 PASS; C6 FINDINGS W-4/W-2 → **C6b**; W-3 (backup second folder) → **C7**; W-1 (a canvas grab glyph) → 12.
+- C7 — IN-PROGRESS (data safety first). C6b — NOT-STARTED (after C7).
+- NEXT: C7 → C6b → the ladder (Fable, one combined diff) → finals → closeout → refresh → 18o.
 - Deaths / resumes: none.
 
 ---
@@ -3186,3 +3187,91 @@ General pane. Residue: the Pool note **"2026-09-25"** (the C5 scratch — its di
 in its first block and in Block History), the *Walk test* canvas card, and two quiet savepoints the walk's divides
 wrote. The instance was quit by identity (`tell application id … to quit`), `pgrep -fl 'Variorum.app/Contents/MacOS'`
 empty afterwards; `/Applications/Variorum.app` and her real store were never touched.
+
+### THE HELD WALKS — ORCHESTRATOR ADJUDICATION (2026-09-25)
+
+**Verified:** the walk session's 13 commits `228ac57b`…`ec2a616d`, pushed, zero trailers; its diff is
+records + `Tools/WalkKit/README.md` + three KnownIssues rows only (no code); zero app instances;
+`/Applications` untouched; Step 0 proved `AX: true SCREEN: true`; build walked `791044eb`. **Accepted as
+USE evidence** for C1 · C2 · C3 · C5 (the units close on it). **Two findings re-owned INTO this run
+before the ladder:**
+- **W-4 / W-2 → UNIT C6b.** W-4 is the EXACT symptom C6's walk step says is fixed (a top edge in a
+  paragraph GAP: the first comments ON→OFF leaves the previous paragraph's last line on top — 7 runs,
+  both voices); W-2 (a dozen paragraphs lost after a gap round trip + ⌘↓, 2/7) shares the surface.
+  Nobody walked a pre-C6 build, so the first question is regression-or-pre-existing.
+- **W-3 → UNIT C7 (data safety).** The second backup folder received a stray July drill file instead of
+  the act's own copy. **The orchestrator listed (names only, read-only) her REAL `Backups/`:** A1-rail
+  safety copies (`variorum-backup-a1-13y-window-20260924T212417Z.sqlite`,
+  `-a1-bridge-retirement-2026-09-04T185230Z.sqlite`, `-a1-pre13x-window-20260905T235821Z.sqlite`) sort
+  AFTER the dated `variorum-backup-2026-09-25-090949-….sqlite`. If the pick is by NAME, her real
+  second folder (if she configured one) has been receiving the 2026-09-05 snapshot. Inference until
+  traced — **this goes to the TOP of her morning report either way.**
+- W-1 (one canvas card's grab glyph refusing drags; pre-existing, not 18k's diff) stays owner 12. O-2/O-3
+  are recorded observations.
+
+## UNIT C7 BRIEF — the second backup folder receives the wrong file (W-3; self-contained)
+
+**You are the C7 implementer (`opus-implementer`), ONE unit.** Read: `CLAUDE.md`; THIS FILE's kickoff
+corrections, ENVIRONMENT TRAPS, CAST & DISCIPLINE, the UNIT C5 RECORD (it just made `StoreBackup.run`
+single-flight — read before touching the file), THE HELD WALKS — RESULTS (C5's W-3 rows) and the
+adjudication above; KnownIssues' row beginning "The SECOND backup folder"; `notes/DataSafetyRunbook.md`
+and the 13l records it cites (the backup + secondary-destination + insurance-export design);
+`App/Variorum/Shared/StoreBackup.swift` + `Features/Settings/DataSafetyModel.swift`.
+**Task:** (1) TRACE how the copy to the second folder picks its source file. Confirm or refute the
+name-order hypothesis with the code + a harness reproduction (a `Backups/` dir holding a dated backup
+AND a non-dated name — a `seed-drill-` file and an `a1-…-window-…` file — then one run: which file
+reaches the destination?). (2) **State plainly in the record whether her REAL store is exposed:** the
+real `Backups/` holds `variorum-backup-a1-pre13x-window-20260905T235821Z.sqlite`, `-a1-bridge-retirement-2026-09-04T185230Z.sqlite`,
+`-a1-13y-window-20260924T212417Z.sqlite` beside dated copies (names from the orchestrator's read-only
+listing — you may NOT open, list further, or touch anything in her real container; reason from the code).
+Also: does PRUNING or the freshness face read by the same rule (could prune delete a real backup and keep
+an A1 copy, or the "last backup" face name the wrong one)? (3) FIX: the copy must send THE ACT'S OWN
+backup (the file this run just wrote — pass it through, never re-discover by listing), and any
+"newest" discovery must match only the app's own dated pattern (A1-rail and drill files are never
+candidates, never pruned by the app). Pins red-on-old by behavioural revert: wrong-file copy; prune
+ignoring foreign names; the face naming the real newest. (4) The use evidence: a dev-store run with
+a scratch second folder (the walk session's shape — Accessibility is granted; `Tools/WalkKit/README.md`
+has the Settings driving recipe) showing the destination receives the act's file, `cmp`-identical,
+and its check passes. **Also answer, for her:** if her second folder has been receiving a stale file,
+what should she do (the one-sentence remedy — e.g. press Back Up Now once after the fix ships)?
+**Scope:** `StoreBackup`/Data Safety only; zero `Sources/`, zero `Sync/`; the real store and
+`/Applications` untouched. PROVISIONAL → QUESTIONS (next free **#147**).
+**CHECKPOINT RULES (binding from your first commit):** `## UNIT C7 RECORD` + `### LIVE STATUS` at the END
+of this file in your FIRST commit, flipped with each piece; PENDING for unverified claims; commit per
+piece + push after each; pathspec-limited staging; NO commit trailers (no Co-Authored-By, no
+Claude-Session); synchronous foreground waits (grep-poll), never end your turn mid-run; no subagents
+(one Sonnet lookup for external facts only); commit the pre-revert state before any revert; never quit
+or kill a real-store instance, never build Release. Final message: a short summary pointing at your record.
+
+## UNIT C6b BRIEF — the re-font reading position when the top edge sits in a paragraph GAP (W-4 / W-2; self-contained)
+
+**You are the C6b implementer (`opus-implementer`), ONE unit.** Read: `CLAUDE.md` + `notes/TEXTKIT2_NOTES.md`;
+THIS FILE's kickoff corrections, ENVIRONMENT TRAPS, CAST & DISCIPLINE, the UNIT C6 RECORD + its
+adjudication (the `JumpPrimitive` re-assert), THE HELD WALKS — RESULTS (C6's rows, W-4/W-2, captures
+`notes/plans/18k-screens/walks/c6-*`) and the adjudication above; KnownIssues' row beginning "After an
+inline-comments (or paragraph-gap) toggle"; the 13u4 UNIT F2 RECORD in `notes/plans/phase-13u4-restyle.md`
+(`keepingReadingPosition(acrossRefont:_:)`, `topVisibleOffset()`, `parkAnchorRestore`).
+**Task:** (1) **REGRESSION OR PRE-EXISTING — measure first:** reproduce W-4 in a rig (top edge placed
+inside a paragraph gap, then a shrinking re-font) on THIS tree and on C6's parent (`8ce7a892`, a
+scratch worktree, in-memory/harness store only — an old build must NEVER open the dev store). (2) TRACE:
+which offset does `topVisibleOffset()` capture when the edge sits in a gap (the previous paragraph's
+terminator? the next paragraph's first char?), and where does the restore aim it — the hypothesis is an
+anchor-CHOICE class (gap → the preceding character), distinct from C6's clip displacement. Trace W-2
+(gap round trip + ⌘↓ + comments ON loses a dozen paragraphs, 2/7) the same way — is it the same
+mechanism, a landing-vs-park race after ⌘↓, or C6's re-assert firing on a stale target? (3) FIX on the
+narrowest surface with red-on-old pins (behavioural revert); **the product rule is 13u4 F2's: the line
+she was reading stays at the top** — for a gap-top, that is the FOLLOWING paragraph's first line
+(PROVISIONAL if the trace shows any ambiguity; QUESTIONS next free number per the end marker). **The
+editor seam** — keep the change minimal and name it plainly for the Fable ladder; if it wants
+`EditorTextView` or `BlockRangeIndex`, stop and report. (4) USE evidence: a walk on *Copper Beeches*
+(Accessibility + Screen Recording are granted; `Tools/WalkKit/README.md` has the Settings-driving
+recipe and the facts), gap-top and line-top cases, both voices, mid-note and at the end — the walk
+session's W-4 protocol, now expecting PASS. Dev-store Debug build only; quit only the instance you
+launched, by path.
+**CHECKPOINT RULES (binding from your first commit):** `## UNIT C6b RECORD` + `### LIVE STATUS` at the END
+of this file in your FIRST commit, flipped with each piece; PENDING for unverified claims; commit per
+piece + push after each; pathspec-limited staging; NO commit trailers (no Co-Authored-By, no
+Claude-Session); synchronous foreground waits (grep-poll), never end your turn mid-run; no subagents
+(one Sonnet lookup for external facts only); commit the pre-revert state before any revert; never quit
+or kill a real-store instance, never build Release, never touch `/Applications`. Final message: a
+short summary pointing at your record.
