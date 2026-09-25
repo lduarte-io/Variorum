@@ -596,3 +596,327 @@ struct BackupSingleFlightTests {
         #expect(model.note?.contains("Copied") == true, "the toggle's receipt speaks")
     }
 }
+
+// MARK: - 18k C7 (W-3): the act's own file · the app's own names
+
+/// **18k C7 — the second backup folder received the wrong file (the held walks' W-3).**
+/// Every "newest copy" in `StoreBackup` was the `.last` of ONE listing that kept any
+/// `variorum-backup-*.sqlite` name and sorted by NAME — so a foreign file whose name
+/// merely starts the same way (the A1 rail's `variorum-backup-a1-…`, a July drill's
+/// `variorum-backup-seed-drill-…`) sorted AFTER every dated copy (`2` < `a` < `s`) and
+/// became "the newest": the copy sent to her second folder, the reason every hourly
+/// check wrote again, and a slot the prune kept while it deleted real copies. These
+/// pins stand one per reader; each names what reached where when it fails, so the
+/// red run on the pre-fix tree IS the harness reproduction the brief asks for.
+@Suite("The act's own file; the app's own names (18k C7 — W-3)")
+struct BackupOwnFilesTests {
+    /// The foreign names, verbatim: the dev walk's drill file, and the three A1-rail
+    /// copies the orchestrator's read-only listing found in her REAL `Backups/`.
+    static let drillName = "variorum-backup-seed-drill-2026-07-18T095149Z.sqlite"
+    static let a1Names = [
+        "variorum-backup-a1-bridge-retirement-2026-09-04T185230Z.sqlite",
+        "variorum-backup-a1-pre13x-window-20260905T235821Z.sqlite",
+        "variorum-backup-a1-13y-window-20260924T212417Z.sqlite",
+    ]
+
+    /// 2026-09-25 12:00:00 UTC — the act's clock.
+    private let noon = ISO8601DateFormatter().date(from: "2026-09-25T12:00:00Z")!
+
+    private func temporaryDirectory() throws -> URL {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("variorum-18k-c7-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
+    }
+
+    /// Never `.standard` (the dev store's own domain while the suite runs).
+    private func scratchDefaults() -> @Sendable () -> UserDefaults {
+        let suite = "variorum-18k-c7-tests-\(UUID().uuidString)"
+        return { UserDefaults(suiteName: suite)! }
+    }
+
+    /// The app's real store shape since 13p: on disk and KEYED, so its snapshots are
+    /// ciphertext — a plaintext stray then reads "file is not a database" at the far
+    /// check exactly as W-3's pane said, and a same-key stray reads "ok".
+    private func keyedStore(in dir: URL) throws -> AppDatabase {
+        let db = try AppDatabase.onDisk(
+            url: dir.appendingPathComponent("store.sqlite"), key: StoreKey.mint())
+        try write("Words written before any stray copy existed.", into: db)
+        return db
+    }
+
+    private func write(_ text: String, into db: AppDatabase) throws {
+        try withDependencies {
+            $0.database = db
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 1))
+        } operation: {
+            let ops = Operations()
+            let post = try ops.createPost(title: text, profile: .journal)
+            _ = try ops.newBlock(in: post.id, text: text)
+        }
+    }
+
+    /// The app's own snapshot name for `date` (the writer's format, UTC).
+    private func ownName(_ date: Date, fingerprint: String?) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.dateFormat = "yyyy-MM-dd-HHmmss"
+        let suffix = fingerprint.map { "-" + StoreKeyEnvelope.shortFingerprint($0) } ?? ""
+        return "\(StoreBackup.filePrefix)\(formatter.string(from: date))\(suffix).\(StoreBackup.fileExtension)"
+    }
+
+    /// A real snapshot the app itself would have written at `stamp`.
+    private func snapshot(_ source: AppDatabase, in dir: URL, at stamp: Date) async throws -> URL {
+        try #require(try await Task.detached {
+            try StoreBackup.performBackupIfDue(
+                database: source, directory: dir, configuration: .init(), now: stamp, force: true)
+        }.value)
+    }
+
+    /// The A1 rail's shape: the SAME library under the SAME key, taken earlier — a
+    /// consistent stand-in for its byte copy of the closed store.
+    private func a1Copy(of source: AppDatabase, at url: URL) async throws {
+        try await Task.detached { try source.backup(to: url) }.value
+    }
+
+    /// The July drill's shape: a PLAINTEXT database.
+    private func plaintextDrill(at url: URL) throws {
+        let queue = try DatabaseQueue(path: url.path)
+        try queue.write { try $0.execute(sql: "CREATE TABLE drill (x TEXT)") }
+    }
+
+    private func pickSecondFolder(_ picked: URL, in defaults: UserDefaults) throws {
+        let bookmark = try picked.bookmarkData(
+            options: [.withSecurityScope], includingResourceValuesForKeys: nil, relativeTo: nil)
+        defaults.set(bookmark, forKey: BackupDestination.defaultsKey)
+    }
+
+    /// Every `.sqlite` name in a folder, foreign ones included (a raw listing — never
+    /// the rule under test).
+    private func sqliteNames(in dir: URL) -> [String] {
+        ((try? FileManager.default.contentsOfDirectory(atPath: dir.path)) ?? [])
+            .filter { $0.hasSuffix(".sqlite") }
+            .sorted()
+    }
+
+    private func run(
+        _ source: AppDatabase, _ dir: URL, _ defaults: @escaping @Sendable () -> UserDefaults,
+        at stamp: Date, force: Bool
+    ) async -> BackupRunRecord {
+        await Task.detached {
+            StoreBackup.performRun(
+                database: source, directory: dir, configuration: .init(),
+                defaults: defaults(), now: stamp, force: force)
+        }.value
+    }
+
+    /// The copy's own-file arm, over the two shapes that matter: the dev walk's
+    /// (a plaintext drill + one A1 copy) and HERS (the three A1 copies alone — the
+    /// silent case: same key, so the far check on a stale copy reads "ok").
+    private func theSecondFolderReceivesTheActsOwnSnapshot(strays: [String]) async throws {
+        let storeDir = try temporaryDirectory()
+        let backups = try temporaryDirectory()
+        let picked = try temporaryDirectory()
+        defer { for d in [storeDir, backups, picked] { try? FileManager.default.removeItem(at: d) } }
+        let source = try keyedStore(in: storeDir)
+        let defaults = scratchDefaults()
+        _ = try await snapshot(source, in: backups, at: noon.addingTimeInterval(-86_400))
+        for name in strays {
+            let url = backups.appendingPathComponent(name)
+            if name == Self.drillName { try plaintextDrill(at: url) } else { try await a1Copy(of: source, at: url) }
+        }
+        // Written AFTER the strays were taken: only the act's own snapshot holds these.
+        try write("Words written after every stray copy.", into: source)
+        try pickSecondFolder(picked, in: defaults())
+
+        // Back Up Now's shape (forced), at noon.
+        let record = await run(source, backups, defaults, at: noon, force: true)
+
+        #expect(record.primary.outcome == .written)
+        let act = try #require(record.primary.file)
+        let far = BackupDestination.backupsFolder(in: picked)
+        #expect(sqliteNames(in: far) == [act],
+                "the second folder received \(sqliteNames(in: far)), not the act's \(act)")
+        #expect(record.secondary.file == act, "the log names what was sent")
+        #expect(record.secondary.integrity == "ok",
+                "the far check said “\(record.secondary.integrity ?? "nil")”")
+        // `cmp`: byte-identical to the act's file beside the store.
+        let farBytes = try? Data(contentsOf: far.appendingPathComponent(act))
+        let actBytes = try Data(contentsOf: backups.appendingPathComponent(act))
+        #expect(farBytes == actBytes, "the far copy is the act's file, byte for byte")
+        // And it carries what only the act's snapshot holds. (Opened only when it
+        // arrived — a DatabaseQueue on a missing path would CREATE an empty one.)
+        let farURL = far.appendingPathComponent(act)
+        if FileManager.default.fileExists(atPath: farURL.path) {
+            let farCopy = try DatabaseQueue(path: farURL.path, configuration: source.artifactConfiguration())
+            let newest = try farCopy.inDatabase { db in
+                try Int.fetchOne(db, sql: "SELECT count(*) FROM variant WHERE working_text = ?",
+                                 arguments: ["Words written after every stray copy."])
+            }
+            #expect(newest == 1, "the far copy holds the words written after the strays")
+        }
+        // THE FACE (her second folder's row): one copy, and its newest is this act.
+        guard case .set(_, let summary) = DataSafetyModel.summarizeSecondDestination(in: defaults()) else {
+            Issue.record("the second folder should read as set"); return
+        }
+        #expect(summary.count == 1, "the face counts \(summary.count) copies there")
+        #expect(summary.newest == noon, "the face's Newest is \(String(describing: summary.newest))")
+        // Nothing the app did not write ever travels.
+        for name in strays { #expect(!sqliteNames(in: far).contains(name), "\(name) travelled") }
+    }
+
+    /// THE W-3 PIN, the dev walk's shape.
+    @Test func theSecondFolderReceivesTheActsFileBesideADrillAndAnA1Copy() async throws {
+        try await theSecondFolderReceivesTheActsOwnSnapshot(strays: [Self.drillName, Self.a1Names[1]])
+    }
+
+    /// THE W-3 PIN, HER real `Backups/` shape (the three A1 copies alone).
+    @Test func theSecondFolderReceivesTheActsFileBesideHerThreeA1Copies() async throws {
+        try await theSecondFolderReceivesTheActsOwnSnapshot(strays: Self.a1Names)
+    }
+
+    /// THE PASS-THROUGH'S OWN PIN: the copy is the file this act WROTE, never a
+    /// re-discovered "newest" — even an own-pattern copy stamped after the act (a copy
+    /// taken while the clock ran a day ahead) is not what the second folder gets.
+    @Test func theCopyIsTheActsFileEvenBesideANewerStampedCopy() async throws {
+        let storeDir = try temporaryDirectory()
+        let backups = try temporaryDirectory()
+        let picked = try temporaryDirectory()
+        defer { for d in [storeDir, backups, picked] { try? FileManager.default.removeItem(at: d) } }
+        let source = try keyedStore(in: storeDir)
+        let defaults = scratchDefaults()
+        let ahead = try await snapshot(source, in: backups, at: noon.addingTimeInterval(86_400))
+        try pickSecondFolder(picked, in: defaults())
+
+        let record = await run(source, backups, defaults, at: noon, force: true)
+
+        let act = try #require(record.primary.file)
+        #expect(act != ahead.lastPathComponent)
+        let far = BackupDestination.backupsFolder(in: picked)
+        #expect(sqliteNames(in: far) == [act],
+                "the second folder received \(sqliteNames(in: far)), not the act's \(act)")
+        #expect(record.secondary.file == act)
+    }
+
+    /// THE PRIMARY DUE-CHECK: a foreign name is never "the newest copy", so an hourly
+    /// check beside a fresh copy writes nothing (it wrote a new snapshot EVERY hour).
+    @Test func aForeignNameNeverMakesTheHourlyCheckWriteAgain() async throws {
+        let storeDir = try temporaryDirectory()
+        let backups = try temporaryDirectory()
+        defer { for d in [storeDir, backups] { try? FileManager.default.removeItem(at: d) } }
+        let source = try keyedStore(in: storeDir)
+        let fresh = try await snapshot(source, in: backups, at: noon.addingTimeInterval(-3_600))
+        for name in Self.a1Names {
+            try Data("an A1-rail copy".utf8).write(to: backups.appendingPathComponent(name))
+        }
+
+        let record = await run(source, backups, scratchDefaults(), at: noon, force: false)
+
+        #expect(record.primary.outcome == .upToDate,
+                "an hour-old copy is fresh; the check \(record.primary.outcome) (\(record.primary.file ?? "-"))")
+        #expect(sqliteNames(in: backups) == ([fresh.lastPathComponent] + Self.a1Names).sorted(),
+                "the folder now holds \(sqliteNames(in: backups))")
+    }
+
+    /// THE PRIMARY PRUNE: fourteen REAL copies are kept, and a foreign name is neither
+    /// counted nor ever deleted (the app did not write it; it is not the app's to prune).
+    @Test func pruningKeepsFourteenRealCopiesAndNeverAForeignName() async throws {
+        let storeDir = try temporaryDirectory()
+        let backups = try temporaryDirectory()
+        defer { for d in [storeDir, backups] { try? FileManager.default.removeItem(at: d) } }
+        let source = try keyedStore(in: storeDir)
+        let fingerprint = source.storeKeyFingerprint
+        let older = (1...14).map { ownName(noon.addingTimeInterval(Double(-$0) * 86_400), fingerprint: fingerprint) }
+        for name in older { try Data("a day's copy".utf8).write(to: backups.appendingPathComponent(name)) }
+        let foreign = Self.a1Names + [Self.drillName]
+        for name in foreign { try Data("not the app's".utf8).write(to: backups.appendingPathComponent(name)) }
+
+        let record = await run(source, backups, scratchDefaults(), at: noon, force: true)
+
+        let act = try #require(record.primary.file)
+        let names = sqliteNames(in: backups)
+        let own = names.filter { !foreign.contains($0) }
+        #expect(own.count == 14, "\(own.count) real copies kept (the keep is 14): \(own)")
+        #expect(own.contains(act))
+        #expect(!own.contains(older.last!), "the OLDEST real copy is the one pruned")
+        for name in foreign { #expect(names.contains(name), "\(name) was pruned") }
+    }
+
+    /// THE SECOND FOLDER'S DUE-CHECK: a foreign file already in the second folder (her
+    /// real one holds A1 copies sent there since early September) never makes every run
+    /// copy again — the far folder's newest is its newest REAL copy.
+    @Test func aForeignFileInTheSecondFolderNeverDefeatsItsDueCheck() async throws {
+        let storeDir = try temporaryDirectory()
+        let backups = try temporaryDirectory()
+        let picked = try temporaryDirectory()
+        defer { for d in [storeDir, backups, picked] { try? FileManager.default.removeItem(at: d) } }
+        let source = try keyedStore(in: storeDir)
+        let defaults = scratchDefaults()
+        let fresh = try await snapshot(source, in: backups, at: noon.addingTimeInterval(-3_600))
+        let far = BackupDestination.backupsFolder(in: picked)
+        try FileManager.default.createDirectory(at: far, withIntermediateDirectories: true)
+        try FileManager.default.copyItem(at: fresh, to: far.appendingPathComponent(fresh.lastPathComponent))
+        let stale = far.appendingPathComponent(Self.a1Names[1])
+        try Data("the stale A1 copy sent here in September".utf8).write(to: stale)
+        try pickSecondFolder(picked, in: defaults())
+
+        let record = await run(source, backups, defaults, at: noon, force: false)
+
+        #expect(record.secondary.outcome == .upToDate,
+                "the second folder already holds an hour-old copy; the leg \(record.secondary.outcome)")
+        #expect(record.secondary.file == fresh.lastPathComponent)
+        #expect(try Data(contentsOf: stale) == Data("the stale A1 copy sent here in September".utf8),
+                "and the foreign file is left exactly as it was")
+    }
+
+    /// THE RULE ITSELF: the app's own names are `variorum-backup-<stamp>[-<fp8>].sqlite`
+    /// and nothing else — not an A1 or drill name, and not a foreign name that happens
+    /// to START with a stamp. The last expectation is the Castle switch's delete offer,
+    /// whose listing is this rule filtered by fingerprint (`PostureSwitch.Leaves.live`'s
+    /// `pairs`): a foreign file is never "one of the app's own pre-switch copies".
+    @Test func theListingIsTheAppsOwnNamesOnly() throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let own = "variorum-backup-2026-09-25-120000-0123abcd.sqlite"
+        let legacy = "variorum-backup-2026-09-25-110000.sqlite"
+        let foreign = Self.a1Names + [
+            Self.drillName,
+            "variorum-backup-2026-09-25-130000-a1-window.sqlite",
+            "variorum-backup-2026-09-25-140000-drill.sqlite",
+        ]
+        for name in [own, legacy] + foreign + [
+            "variorum-backup-2026-09-25-120000-0123abcd.keys.json",
+            "variorum-backup-2026-09-25-120000-0123abcd.sqlite-wal",
+        ] {
+            try Data("x".utf8).write(to: dir.appendingPathComponent(name))
+        }
+
+        let listed = try StoreBackup.existingBackups(in: dir).map(\.lastPathComponent)
+        #expect(listed == [legacy, own], "the app's own copies, oldest first — listed \(listed)")
+        let offered = try StoreBackup.existingBackups(in: dir)
+            .filter { StoreBackup.shortFingerprint(fromBackupURL: $0) != "0123abcd" }
+            .map(\.lastPathComponent)
+        #expect(offered == [legacy], "the Castle offer would delete \(offered)")
+    }
+
+    /// THE FACE (a guard, and the record's HOLLOW verdict for the face as a defect): the
+    /// Data Safety rows read the folder by DATE, so a foreign file was never their
+    /// "Newest" — green on the pre-fix tree too. What the face showed wrong was the
+    /// damage (a short reach, a stale far folder), never a foreign name.
+    @Test func theFaceReadsByDateAndNeverNamedAForeignFile() throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let earlier = noon.addingTimeInterval(-86_400)
+        for name in [ownName(earlier, fingerprint: nil), ownName(noon, fingerprint: nil)]
+            + Self.a1Names + [Self.drillName] {
+            try Data("x".utf8).write(to: dir.appendingPathComponent(name))
+        }
+        let summary = DataSafetyModel.summarize(dir)
+        #expect(summary.count == 2)
+        #expect(summary.newest == noon)
+        #expect(summary.oldest == earlier)
+    }
+}

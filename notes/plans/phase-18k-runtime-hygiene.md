@@ -3366,9 +3366,35 @@ All three sort after every dated name; among themselves `…-a1-pre13x-…` sort
 ### LIVE STATUS
 
 - Reading + the trace + the exposure statement — DONE (this commit).
-- The harness reproduction (the brief's shape: a dated copy + a `seed-drill-` name + an `a1-…-window-…` name, one
-  run — which file reaches the destination?) — PENDING.
-- Pins, red on the pre-fix tree — PENDING.
+- **The harness reproduction — DONE: the name-order hypothesis is CONFIRMED** (the pins' pre-fix run IS it —
+  `DerivedData/18k-c7-pins-prefix.log`, HEAD `f48e86f9` + the pins only). One forced run (Back Up Now's shape) over
+  a keyed on-disk store whose `Backups/` holds a real dated copy plus the strays:
+  - **the dev walk's shape** (the drill + one A1 copy): the second folder received
+    `variorum-backup-seed-drill-2026-07-18T095149Z.sqlite`, the log named it as the leg's file, and the far check
+    said *"could not be checked: SQLite error 26: file is not a database…"* — W-3, reproduced word for word;
+  - **HER shape** (the three A1 copies alone, same key): the second folder received
+    `variorum-backup-a1-pre13x-window-20260905T235821Z.sqlite` and **the far check said "ok"** (the pin's
+    integrity arm stayed GREEN on the pre-fix tree while its name arm went red) — **the silent case, proven: a
+    stale copy under the same key passes the check, and the receipt says "Copied to your folder too."**;
+  - the face's far row counted **0** copies and no Newest (the walk's "No copies here yet").
+- **Pins, red on the pre-fix tree — DONE:** `BackupOwnFilesTests` (8 tests, in `DataSafetyTests.swift`) —
+  **`Test run with 8 tests in 1 suite failed … with 21 issues`**, 7 red, the eighth (the face guard) green:
+  - `theSecondFolderReceivesTheActsFileBesideADrillAndAnA1Copy` (7 issues) · `…BesideHerThreeA1Copies` (6) — the
+    W-3 pins, one per shape: far folder == [the act's file], log names it, check "ok", `cmp`-equal bytes, the far
+    copy holds the words written after the strays, the face's far row = 1 copy / Newest = the act, no stray travels;
+  - `theCopyIsTheActsFileEvenBesideANewerStampedCopy` (2) — the PASS-THROUGH's own: an own-pattern copy stamped a
+    day AHEAD (a clock that ran fast) was sent instead of the act's file;
+  - `aForeignNameNeverMakesTheHourlyCheckWriteAgain` (2) — reader 3: an hour-old copy + the three A1 names → the
+    check WROTE again (`.written`, not `.upToDate`);
+  - `pruningKeepsFourteenRealCopiesAndNeverAForeignName` (1) — reader 4: **10 real copies kept, not 14** (four
+    foreign names held four slots; the foreign files themselves were never pruned on either tree);
+  - `aForeignFileInTheSecondFolderNeverDefeatsItsDueCheck` (1) — reader 2: the far folder's hour-old copy + a stale
+    A1 copy there → the leg RE-COPIED (`.written`, not `.upToDate`);
+  - `theListingIsTheAppsOwnNamesOnly` (2) — the rule itself + the Castle offer's listing (reader 5): all six foreign
+    names listed, and all six offered for deletion;
+  - `theFaceReadsByDateAndNeverNamedAForeignFile` — **GREEN on the pre-fix tree: the face as a defect is DISMISSED
+    AS HOLLOW** (it reads by date; kept as a guard, labelled so).
+- Pins committed (this commit).
 - Fix 1 (the listing matches only the app's own dated pattern) + Fix 2 (the copy sends the act's own file) —
   PENDING.
 - Behavioural reverts (named before they start; pre-revert state committed first) — PENDING.
