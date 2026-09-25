@@ -212,7 +212,7 @@ COMMITTED · every death and resume noted in the record.
 - THE WALKS — DONE (adjudicated below): C1 · C2 · C3 · C5 PASS; C6 FINDINGS W-4/W-2 → **C6b**; W-3 (backup second folder) → **C7**; W-1 (a canvas grab glyph) → 12.
 - C7 — DONE, ACCEPTED (the name-sorted backup listing — five readers fixed by one rule + the act's own file passed through; her real store verified exposed: 11 hourly copies).
 - C6b — DONE, ACCEPTED (W-4/W-2 pre-existing, FIXED; #147 PROVISIONAL).
-- THE LADDER — ROUND 1 IN-PROGRESS (Fable; the combined diff `1b7858eb^..HEAD`).
+- THE LADDER — ROUND 1 DONE (0/0/0/3 NIT; NIT 1 fixed `0ebc3b5e`, #148). ROUND 2 IN-PROGRESS.
 - NEXT: C7 → C6b → the ladder (Fable, one combined diff) → finals → closeout → refresh → 18o.
 - Deaths / resumes: none.
 
@@ -714,6 +714,7 @@ walks are BUNDLED for her morning (granting Ghostty those permissions is her cal
   **W-4** (the previous paragraph's last line left on top after a comments toggle when the page top sits in a paragraph
   gap — the step's own pre-fix symptom) and **W-2** (the place lost after a gap round trip). Four findings for her,
   none fixed.
+- **QUESTIONS #148 (PROVISIONAL, the ladder):** the far-folder sentence when a run's own snapshot failed — "This run made no snapshot to copy."
 - **QUESTIONS #147 (PROVISIONAL, C6b):** when the page's top edge cuts a line BELOW its letters (only descenders showing), the line she is reading is the NEXT one — "the baseline decides".
 - **C1 item 3 — RULED (R-18k-6), built at 18o:** should a note edited inside a book (or as a Compare peer) get a leaving savepoint when
   she leaves the BOOK, the way a note gets one when she leaves the note? Today: only ⌘Q/lock/idle.
@@ -3967,3 +3968,17 @@ custody seam, C1). Cross-model flow (the implementers were Opus): the reviewer m
 disputes and implements its confirmed findings' fixes itself, after the orchestrator's authorization.
 **Findings file:** `notes/plans/18k-ladder-round1.md`, written INCREMENTALLY by the reviewer (the
 resiliency protocol's reviewer rule). Cap three rounds; a fresh reviewer per round.
+
+**ROUND 1 (2026-09-25) — findings file `notes/plans/18k-ladder-round1.md` (`af2a761b`).** Verdict:
+**0 BLOCKER · 0 MAJOR · 0 MINOR · 3 NIT.** The two flagged targets were stress-traced clean (C1's
+drop-through-leaving across every racing order the reviewer could construct; the C6/C6b jump seam);
+C7's seven listing readers enumerated independently; the C3/C4 release-projection claims re-proven;
+286 tests / 36 suites re-run green by the reviewer. **Orchestrator adjudication:** NIT 1 (a false
+sentence — the far leg said "There is no snapshot to copy yet." when this act alone made none)
+CONFIRMED and FIXED by the reviewer under the cross-model flow (`0ebc3b5e`: "This run made no snapshot
+to copy." — PROVISIONAL, QUESTIONS **#148**; pin `BackupRunTests.aFailedPrimaryLegLeavesTheFarFolderAnHonestSentence`
+red-on-old by the old string; 31 tests / 5 Data Safety suites green). NIT 2 (`MainActor.assumeIsolated`
+traps loudly if a storage edit ever arrives off-main — today impossible) and NIT 3 (a sub-frame toggle
+intent dropped before `busy` renders; the human road closed by `.disabled`) RECORDED as deliberate
+trades. No new BLOCKER/MAJOR. **ROUND 2 (a fresh reviewer; a real pass over the fix and what it
+touched) opens next**; round 3 is owed only if round 2 raises a new BLOCKER/MAJOR.
