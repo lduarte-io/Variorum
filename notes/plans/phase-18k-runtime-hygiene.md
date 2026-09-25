@@ -440,7 +440,16 @@ savepoints its own sessions, and the idle backstop (`IdleCommitScheduler`, every
   acquisition sites, the phone's release precedent) — DONE (in-session, this record's first commit).
 - The trace (every site's acquisition shape and real end of life; what the ⌘Q/lock registration is
   still doing for J11) — DONE (T1–T5 above).
-- Pins (red-on-old) — NOT-STARTED.
+- Pins (red-on-old) — DONE (this commit): the seam `AppSession.autosaveHolderCount(forPost:)`
+  (read-only, no behaviour) + `VariorumTests/AutosaveRegistryLifecycleTests.swift` (two suites,
+  16 tests). **Run on the PRE-FIX behaviour (seam only): `Test run with 16 tests in 2 suites failed …
+  with 25 issues`** — every count pin RED (Write ×2, Takes, Blocks/Read, Canvas — 7 holds after one
+  open, 9 after close; Compare — 6, then 7; the book index — 1 hold never returned; the seal fallback
+  — +1 entry +1 ⌘Q closure), the lock pin's count arm RED, the two-surface pin's hold arm RED (2),
+  and **the open-tail leaving pin RED — T3 case 3 confirmed empirically**: the old leaving savepoint
+  wrote NOTHING for a tail the editor minted on its way out. The pure guards GREEN on old, as they
+  must be (the old tree never let go of anything): quit-at-the-latest tail, book-note lock
+  savepoint, still-open ⌘Q walk, mode switch, seal-still-flushes.
 - The fix — NOT-STARTED.
 - Behavioural revert (red-on-old evidence) — NOT-STARTED.
 - Dev-store before/after measurement — NOT-STARTED.

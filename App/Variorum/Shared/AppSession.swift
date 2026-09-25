@@ -297,6 +297,17 @@ final class AppSession {
     /// the Mac has a `quitFinalize` registry to read it from.
     var openAutosaveCount: Int { postAutosaves.count }
 
+    /// How many holders a post's coordinator has right now — zero when the
+    /// post has no entry (18k C1). "Exactly one release per acquisition" is a
+    /// claim about THIS number, and it is not visible in the entry count:
+    /// a surface that acquires on every keystroke, or a discarded view-model
+    /// twin that acquired and never released, leaves the entry looking the
+    /// same while pinning it forever. The pins read it; nothing in the app
+    /// decides anything from it.
+    func autosaveHolderCount(forPost postID: String) -> Int {
+        postAutosaves[postID]?.holders ?? 0
+    }
+
     /// True while any open note's coordinator holds typed text that has not
     /// landed (pending in its debounce, or a flush in flight). The phone's
     /// first-write furniture reads this to PACE the sample library's story
