@@ -755,7 +755,16 @@ product-flavoured. **Your final message:** a short summary pointing at your reco
 
 ## UNIT C2 RECORD — the inline editor's height binding (implementer: `opus-implementer`, 2026-09-25)
 
-**NOT DONE (first line, per the brief):** PENDING — written at close.
+**NOT DONE (first line, per the brief):** (1) **The row's double realization is NOT claimed.** The
+review's hypothesis that this binding caused it is DISPROVED (M4), and the double no longer reproduces
+on today's tree; it was removed by `f8610cb9` (13u2b UNIT 1, bisected), not by C2. The KnownIssues row
+is AMENDED, not closed. (2) **The hands-on GUI walk and its captures are HELD**: this session's host
+holds no Screen Recording and no Accessibility grant (C1's finding). An in-app scripted walk on the
+dev store stands in, and her walk steps are listed below. (3) The app-side double was not bisected in
+the app, because an old build must never open the dev store. (4) No full Mac suite (the
+orchestrator's finals), no `swift test` (zero `Sources/`), no iOS build (zero `Shared/`; the only
+production file touched is the Mac target's `EditorView.swift`). Everything else the brief asks for
+is done.
 
 ### READING (done in-session before any probe)
 
@@ -993,5 +1002,113 @@ does not compose; not this unit's fence).
   `InlineEditorSurface`" row is AMENDED, NOT CLAIMED. It now records that the double no longer
   reproduces, the fourth eliminated cause (this binding, M4) and the bisect. It **suggests the owner
   close the row as RESOLVED-BY `f8610cb9`**, which is the orchestrator's or 12's call. Owner stays 12.
-- Closing runs — NOT-STARTED.
+- Closing runs — DONE (this commit; the committed fix, the tree clean, zero app instances): 61
+  suites selected literally: my pins, every suite that constructs or drives `InlineEditorSurface` or
+  mounts a book Outline / spread / reading-flow / Index / read-tier / pane-window surface, and **all
+  eleven Tutorial acceptance-spine suites**. **`Test run with 330 tests in 61 suites failed after
+  195.367 seconds with 1 issue`** — the one issue is `theSpreadKeepsItsBarWithFormsAndTheJumpScrubber`
+  (`count(NSSlider.self) → 0`), one of the two NSSlider scrubber pins in KnownIssues row 65's
+  macOS-27 deltas (C6's). It failed identically on the PRE-fix side of the warning set (B1/B2), so
+  it is not this change's. 60 suites green, all eleven Tutorial suites green, zero skipped. Log:
+  `App/Variorum/DerivedData/18k-c2-closing1.log` (the script beside it).
 - Deaths / resumes: none.
+- **C2 — DONE (implementer), awaiting the orchestrator's spot-check; the GUI walk HELD.**
+
+### DISPOSITION
+
+**The ledger row C2 — the hypothesis DISPROVED, the row NOT claimed, and the deferral LANDED AS
+HYGIENE with red-on-old pins:**
+- **The review's §5.1 A2 chain — DISPROVED, link by link (THE MEASUREMENT).** No write is dropped at
+  the mount (they are 24→24 no-ops before the projection arrives). `loaded` flips. And on TRACE
+  B-1's own tree, removing every mid-update write takes the warnings from 18 to 0 while the double
+  stands (M4). The KnownIssues row is AMENDED with that (a fourth eliminated cause) and with the
+  bisect (`f8610cb9` removed the double). Its owner stays 12, with close-as-resolved-by suggested.
+- **The deferral — FIXED as hygiene, and it proved to be more than hygiene.** Pinned by
+  `VariorumTests/InlineHeightReportTests.swift` (4 tests):
+  `theFirstHeightArrivesOnTheTurnAfterTheMountNeverInsideIt` ·
+  `anUpdatePassReportsOnTheTurnAfterItNeverInsideIt` ·
+  `aBurstOfEditsAndUpdatesInOneTurnReportsOnce` · `aFreshlyMountedLongNoteReachesItsMeasuredHeight`
+  (the delivery guard). Evidence:
+  - RED ON OLD by the behavioural revert R1: 5 issues, including a BEHAVIOURAL red — the old update
+    pass measured before its own layout and stranded a reflowed frame at the wide height (10,929 pt
+    reported against 18,713 laid out).
+  - Mutations: M-strand turns the mount pin red (3 issues); M-stuck turns the delivery guard red (a
+    24-pt frame over 10,929 pt of content).
+  - Warnings over a fixed 16-suite set: **84/85 → 4/4** (the 4 left are another generator's).
+  - In the app, same driver both roads: **10 → 0** warnings and **18 → 0** in-update writes; the
+    window-narrow step stranded before (85 pt) and converges after.
+- **`InlineEditorWindowTests.inlineBadgesTrackAWidthReflow` — its harness ADAPTED, one line, and
+  every assertion unchanged.** Traced: the harness's only width-setter was the now-deferred report.
+  It is green on both roads, and M-teeth proves it still bites (816 pt, its original number).
+- **No PROVISIONAL, no QUESTIONS entry** (#147 unused). The one design choice made in the fix is
+  newest-trigger-wins over a first-trigger latch, and it is technical, not product: it never
+  measures earlier than the old road's last report did.
+
+### NOTICED, NOT TOUCHED (C2's scope fence)
+
+1. **C3's family, as the review names it** (§5.1 A3/A4/A5): the ~14 un-deferred geometry actions —
+   `BookIndexView.swift:791` (the un-deferred twin of the known-correct deferral at
+   `BookView.swift:1413`), Canvas's geometry writes into observed storage (incl. the `ForEach`-driving
+   `realizedIDs`), and the window-registration/onAppear writes (the sticky-key ruling in
+   `WindowRegistry`'s header). Plus what this unit measured of the remainder: the fixed set's last 4
+   warnings sit inside `SpreadBookViewTests.aMountedSpreadConsumesTheCommitCommandInEitherForm`
+   (its Takes form mounts panes — A1's `PanePublisher`, 18l's), and the 61-suite closing run logged
+   50 from other generators. None of them can be this representable's, because its report closure is
+   only called from the hop.
+2. **The inline editor's frame can stay off its content after a width change settles late**:
+   measured in the app at **85 pt taller than the text after the window was restored**, identically on
+   both roads (the old road also missed the narrowing step, which the fix converges). Cause: the same
+   text at the same width measured 20,993 or 20,908 depending on layout history (TEXTKIT2 §2's
+   `enumerateTextLayoutFragments` class), and nothing re-reports a late settle. The pane component
+   has a bounded convergence heal (`PanePublisher`) that the inline editor does not compose. It needs
+   an owner (a candidate is 12, beside the read-click flake row). Fixing it would reach the
+   measurement brain (`PaneSurface`, fenced), so it is untouched.
+3. **A measured TextKit fact worth a TEXTKIT2_NOTES line (canon, so it is left for the orchestrator):**
+   on macOS 27 the FIRST full `.ensuresLayout` measure after a text view enters its window, after a
+   container width change, or after an edit can differ from the layout a later display pass converges
+   to, with no edit, no frame change and no inset change in between. Measured: 11,182 → 10,929 on
+   entering the window; 18,713 vs 19,344 after a 700→420 reflow; one 20-pt line after three
+   keystrokes. The pins are built around it (layout settled before the install, one line of slack,
+   and a midpoint discriminator for the reflow).
+4. **Inside a SwiftUI update, a `Binding` captured at `makeNSView` reads the PRE-update value**
+   (measured: 24 while the state already held 20,993). This is moot for C2, whose closure never runs
+   inside an update now, but any representable that gates on a captured binding inside `updateNSView`
+   inherits the stale read.
+5. **The dev app did not exit on the driver's `NSApp.terminate`.** In walk 1 a synchronous terminate
+   from inside a main-actor task hung in `terminateLater` for over 2 minutes. In walks 2–4, with the
+   terminate deferred, the app had not exited 3 s later and was stopped by PID (the path verified as
+   the Debug product each time). This is NOT established as a product ⌘Q hang: it was the driver's
+   own call, and the real menu/⌘Q road was not exercised. It is recorded so nobody reads the PID stops
+   as clean exits.
+6. **Every test host prints two `sqlcipher_codec_ctx_set_error` lines at startup**, on old and new
+   trees alike. Pre-existing noise, not investigated.
+7. **`BookOutlineLandingTests`' `writingEditor(in:)` doc** says the harness realizes the Outline's
+   editor twice (13u2 A2). It has not since `f8610cb9` (bisected here), so that claim is stale; the
+   helper's choose-the-editor-with-text logic stays harmless. Left for whoever owns the suite.
+8. The brief's "pool inline editor" is no longer an inline host (see READING). The C1 walk's
+   tenth-Open-strip-row crash did not arise, because this driver opens at most two notes.
+
+### THE GUI WALK — HELD for the author (her steps; ~5 minutes on the dev-store Debug build)
+
+1. Run the dev-store Debug build (Xcode's Run). Open the **Sherlock** book in **Outline**.
+2. Click ▸ on *A Scandal in Bohemia*, then click into its prose so it goes live. Expect no jump and
+   no flash, and the story at its full length at once, with no strip of blank space growing under it.
+3. Scroll to the story's last paragraph. Expect nothing clipped and no blank gap below the last line.
+4. Type a few characters mid-story and delete them. Expect the row to track the text and the page
+   not to hop.
+5. Scroll to the book's end and back. The story should still be live at the same place.
+6. Drag the window narrower, then back to its width, and look under the story's last line again. A
+   blank gap of up to ~85 pt after widening is the RECORDED residual (NOTICED 2, the same before and
+   after this change). A clipped last line would be new — tell the orchestrator.
+7. Optional: Console.app filtered on *Modifying state during view update* while doing 2–6. Expect
+   none from the Outline's editor (other surfaces may still print theirs — C3's and 18l's families).
+8. Switch the book to the page (spread) view, open a note and type. The page should grow with the text.
+
+### CAPTURES
+
+None possible (see the first line). The use evidence is the in-app walk logs in
+`notes/plans/18k-screens/c2/` (gitignored): `walk1-pre-fix.log`, `walk2-pre-fix-expand-then-click.log`,
+`walk3-POST-fix.log`, `walk4-PRE-fix-same-driver.log`. The harness logs are in `App/Variorum/DerivedData/18k-c2-*.log`
+(harness1 · pins-prefix · pins-fixed-r{1,2,3} · R1 · Mstrand · Mstuck · Mteeth · warn-{B,A}{1,2} ·
+closing1). The probe scripts are session-scratch only (`c2_probe_apply.py`, `c2_min_probe.py`,
+`bisect_step.sh`), and the Phase 1 probe is recoverable from `d599539b`/`3f9b84ea`.
