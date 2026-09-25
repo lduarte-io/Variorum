@@ -2367,3 +2367,18 @@ beside it proves the surface builds and lays out).
   both reads (`ThemeStore?`, `colorScheme`) fall back to defaults that do not decide whether a slider is
   composed.
 
+**MUTATION PROOFS for the three re-mechanized arms (named before they run; pre-mutation state
+`d21bf0fd`, committed + pushed; each mutation in the working tree only, the product file restored from
+HEAD after each):**
+- **MO — the A6 regression shape, restored:** 13c 2A's removed `.safeAreaInset(edge: .bottom) { … Slider
+  … }` re-attached where it stood, INSIDE the Outline's `ScrollViewReader` closure (it called
+  `proxy.scrollTo`), with a scratch copy of the OLD arm (`count(NSSlider) == 0`) beside the new one.
+  **Run FIRST, because the closure placement means a body walk may not reach it** — the expectation
+  written down before the run: the old arm GREEN (hollow on 27); the new arm possibly GREEN too (hollow
+  for this shape), in which case the Outline arm needs a different mechanism.
+- **MS1 — the paged bar loses its Slider** → the paged pin RED (count 0).
+- **MS2 — the paged Slider's setter a no-op** → the paged pin RED on its "it works" arm only.
+- **MS3 — the spread bar gains a second Slider** → the spread pin RED (count 2).
+- **MS4 — the spread Slider's setter a no-op** → the spread pin RED on its "it works" arm only.
+Results PENDING.
+
