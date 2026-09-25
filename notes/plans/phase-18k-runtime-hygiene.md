@@ -184,8 +184,8 @@ COMMITTED · every death and resume noted in the record.
 - C2 — DONE, ACCEPTED (hypothesis disproved; deferral as hygiene `6571c558`; shadow row CLOSED as resolved-by `f8610cb9`). GUI walk HELD.
 - C3 — DONE, ACCEPTED (premise DISMISSED AS HOLLOW by measurement — all warnings are `PaneSurface`'s, 18l's; comment corrections only).
 - C4 — DONE, ACCEPTED (12 oracle types owner-keyed; 13 two-window pins red-on-old; palette guard).
-- C6 — IN-PROGRESS (brief appended; implementer spawned).
-- C5 — NOT-STARTED.
+- C6 — DONE, ACCEPTED (row 65 CLOSED; the re-font drift a REAL 27 regression, fixed in `JumpPrimitive`).
+- C5 — IN-PROGRESS (brief appended; implementer spawned).
 - Deaths / resumes: none.
 
 ---
@@ -664,7 +664,7 @@ walks are BUNDLED for her morning (granting Ghostty those permissions is her cal
   instruction; 18o builds it).
 - **TCC for walks:** Ghostty has neither Screen Recording nor Accessibility — every GUI walk of this run
   is HELD for her grant (or her walking it herself); the list of held walks grows below per unit.
-  Held so far: C1 (open/close many notes; ⌘Q feels instant) · C2 (the eight steps in its record: Sherlock ▸ Outline ▸ *A Scandal in Bohemia*, click in, type, scroll, narrow/restore, the spread view).
+  Held so far: C6 (Copper Beeches re-font steps — the line stays at the top) · C1 (open/close many notes; ⌘Q feels instant) · C2 (the eight steps in its record: Sherlock ▸ Outline ▸ *A Scandal in Bohemia*, click in, type, scroll, narrow/restore, the spread view).
 - **C1 item 3:** should a note edited inside a book (or as a Compare peer) get a leaving savepoint when
   she leaves the BOOK, the way a note gets one when she leaves the note? Today: only ⌘Q/lock/idle.
 
@@ -2606,3 +2606,91 @@ hand-back).
 - Deaths / resumes: none.
 - **C6 — DONE (implementer), awaiting the orchestrator's spot-check; the hands-on GUI walk HELD.**
 
+
+### UNIT C6 — ORCHESTRATOR ADJUDICATION (2026-09-25 night; the unit CLOSES here)
+
+**Verified by spot-check:** 18 commits after `8ce7a892`, pushed, zero trailers, tree clean, zero app
+instances. The one product change read in full: `JumpPrimitive.scroll(to:)` — after the scroll, if the
+clip sits ≥ 0.5 pt from the REACHABLE target (`min(wanted, frameHeight − clipHeight)` — so a clamp at
+a shrunken maximum is not a displacement), re-scroll once, reflect, and lay the viewport out again;
+TK2 API only (`textViewportLayoutController` exists only on `NSTextLayoutManager` — no TK1 touch).
+Bounded (one re-assert), measured firing 9× in 299 tests, always converging in one. **ACCEPTED — C6
+DONE: KnownIssues row 65 CLOSED** with all five mechanisms (1 real product regression FIXED on the
+editor seam's jump primitive with a red-on-old pin; 1 test race; 3 pin mechanisms re-built, each proven
+able to fail by mutation — plus one hollow `== 0` arm found and rewritten beyond the five). **FOR THE
+FABLE LADDER (the seam):** the `JumpPrimitive` re-assert is the run's second-highest-value review
+target after C1's registry. **Carried:** the `layoutViewport()` displacement → a `TEXTKIT2_NOTES.md`
+measured-finding paragraph at the CLOSEOUT (with C2's first-measure finding); `PaneSurface`'s own
+`layoutViewport()` caller (the render restore) was not examined → 18l's; the `SurfaceComposition`
+dump-reach → a KnownIssues row, owner 12 (filed this commit). **Walk HELD** (Copper Beeches steps in
+the C6 RECORD) → the morning bundle.
+
+## UNIT C5 BRIEF — 17e's concurrency five (her ruling R-18k-1; self-contained; read in this order)
+
+**You are the C5 implementer (`opus-implementer`), ONE unit, this session only.** Read, in order:
+1. `CLAUDE.md` (auto-loaded).
+2. THIS FILE: the kickoff corrections, THE LEDGER (row C5), THE KICKOFF SITTING (R-18k-1), **ENVIRONMENT
+   TRAPS (binding)**, CAST & DISCIPLINE, the closing sections + ORCHESTRATOR ADJUDICATIONS of the
+   earlier unit records (the tree moved: C1 changed `AppSession`'s autosave registry and several view
+   models' lifecycles — read its record before touching the undo or editor doors), and this brief.
+3. `notes/plans/phase-17-standing-fixes.md`'s **17e entry** — the BINDING item record: read P26, P27,
+   P33 and P38 WHOLE, including each "verifier's check" (where finder and verifier differ, the
+   verifier wins), and KnownIssues' row beginning "Canvas reports no focused block".
+
+**The five (each its own pin, its own commit; red-on-old by behavioural revert unless stated):**
+1. **Row 59 — Canvas reports no focused block to the router**, so ⌘K "Block History" (any
+   router-reading door) acts on the last OTHER surface's block. One wire: the canvas's selection calls
+   `CommandRouter.noteFocusedBlock` (read how Write/Takes/Blocks/Read call it — U-20's offset rule where
+   applicable); pin: select a card in Canvas → the router's fact names it.
+2. **P26 (MAJOR, the PHONE) — `MobileLivenessAuthority.takeLiveness` grants the pen from a stale
+   continuation** across its awaits (two editors `isLive`; the worse ordering leaves the VISIBLE note
+   uneditable). Fix the check-then-act-across-await: re-check `live === editor` after the suspensions
+   before `noteLivenessGranted()` (and/or a generation token). Pin on the MOBILE suite (interleave two
+   `takeLiveness` calls with a controllable suspension). The phone's P3 invariant (exactly one live
+   editor) is the property.
+3. **P27 — ⌘⇧M's merge threshold reads the frozen `slots` projection**
+   (`EditorSurfaceController.applyStructural`'s `.merge` arm): a fan arriving mid-typing-burst makes
+   the door take the un-carrying instant merge and suppress the lineage receipt. The sibling roads read
+   truth via `liveActiveFans` ("from the store — never `model.slots`"); make this door do the same (an
+   authorization read, not a projection read). Pin: fan arrives while the editor is busy → ⌘⇧M carries.
+   **Seam note:** `EditorSurfaceController` is the editor seam's pair — keep the change to the arity
+   decision; flag it plainly for the Fable ladder.
+4. **P33 — the Mac's ⌥⌘Z has no in-flight guard** (`ShellActions.structuralUndo`): two presses inside
+   one runner round-trip compute both warnings against entry E while the second undoes E−1, skipping
+   the A12 confirm. Adopt the phone's rule (`MobileUndoDoor.beginUndo`'s `guard !inFlight` + its
+   refusal) — the Mac is the drifted copy; check whether a shared brain is the right home (MobileSoul
+   §3 hoist rule) and record the call. Pin: two presses in flight → the second refuses (or queues
+   after), never undoes an unwarned entry. Check the redo door (⇧⌥⌘Z) for the same shape and treat it
+   the same way if it has it.
+5. **P38 — `StoreBackup.run` has no single-flight latch** (`Shared/StoreBackup.swift`): two forced runs
+   in one second share a filename and race `integrityCheck`'s sidecar deletion and `prune`. Add an
+   in-flight latch (a second request while one runs coalesces — returns the in-flight run's outcome —
+   never starts a parallel one), and guard `DataSafetyModel.setInsurance`'s un-latched door. Pin: two
+   forced runs back to back → one run, one file, no false `failed`. Shared file: the iOS build must
+   still succeed; run the phone's backup suites if any exist.
+
+**Acceptance:** each item FIXED-with-pin (red-on-old by behavioural revert) or DISMISSED-AS-HOLLOW
+(pin green on both sides — recorded, not fixed). The terminal host holds NO Screen Recording /
+Accessibility — in-app/harness evidence only; write the author's GUI walk steps (Canvas select → ⌘K
+Block History; ⌥⌘Z pressed twice fast after two structural acts; Back Up Now while the insurance toggle
+flips) into your record, HELD for her morning.
+
+**Closing runs (tests at the END):** the touched surfaces' Mac suites + your pins + the eleven Tutorial
+suites; the iOS build (`xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS`) and
+the phone's liveness/shell suites + P26's pin on the iPhone 17 Pro simulator; each read by its "Test
+run with N tests" line; no full suites (the orchestrator's finals).
+
+**CHECKPOINT RULES (restated, binding from your first commit):** write `## UNIT C5 RECORD` with its
+`### LIVE STATUS` at the END of this file in your FIRST commit, and flip it in the same commit as each
+piece; unverified claims marked **PENDING**. Commit per item and PUSH after every commit; stage
+pathspec-limited, never `git add -A`; NO commit trailers (no Co-Authored-By, no Claude-Session).
+Synchronous foreground waits only — the grep-poll loop; never end your turn with a run in progress.
+Never spawn subagents (one Sonnet lookup for EXTERNAL facts only). No behavioural revert starts until
+the record names it and the pre-revert state is COMMITTED. Every death/resume noted in the record. If
+the worktree moves under you, write nothing, report, stop. Never touch `/Applications`, never build
+Release, never quit or kill a real-store Variorum instance.
+
+**Scope fence:** these five only — 17e's other items are 18o's. Zero `Sources/`, zero `Sync/`. A fix
+that wants product behaviour decided (e.g. what the refusal SAYS) → the phone's existing sentence is
+the default, PROVISIONAL (QUESTIONS — check the end marker). **Your final message:** a short summary
+pointing at your record.
