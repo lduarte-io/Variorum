@@ -3642,3 +3642,22 @@ test-host backup tick writing into `~/Documents/Variorum/Backups/` → ENVIRONME
 ladder; (6) cosmetic log line → dropped (no owner needed: not a defect). **For the Fable ladder:** the
 changed Castle offer contents and "a failed beside-the-library backup sends nothing to the second
 folder" (judgment call 2).
+
+## UNIT C6b RECORD — the re-font reading position when the top edge sits in a paragraph GAP (implementer: `opus-implementer`, 2026-09-25)
+
+**WHAT THIS UNIT DID NOT DO — the record's first line.** PENDING (written at the unit's end).
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The reading, in this session's own context, in the brief's order | **DONE** — CLAUDE.md + canon, TEXTKIT2, this file's kickoff corrections / ENVIRONMENT TRAPS / CAST & DISCIPLINE, the UNIT C6 RECORD + adjudication, THE HELD WALKS — RESULTS (C6) + adjudication, KnownIssues' W-4/W-2 row, 13u4's UNIT F2 BRIEF + RECORD, `Tools/WalkKit/README.md` whole; the code: `topVisibleOffset`, `FragmentLines`, `JumpPrimitive`, `keepingReadingPosition`, `parkAnchorRestore`, `consumePendingAnchorRestore`, `jumpToDocumentEnd`, `EditorDocument.baseParagraphStyle` (the gap is `paragraphSpacing` — AFTER each paragraph) |
+| 2 | W-4 reproduced in a rig on THIS tree, and on C6's parent `8ce7a892` (scratch worktree, harness store only) — regression or pre-existing | PENDING |
+| 3 | W-4 TRACE — what `topVisibleOffset()` captures at a gap-top, where the restore aims it | PENDING |
+| 4 | W-2 TRACE — same mechanism, a landing-vs-park race after ⌘↓, or C6's re-assert on a stale target | PENDING |
+| 5 | Red-on-old pins committed RED on the pre-fix tree | PENDING |
+| 6 | The FIX (narrowest surface) + pins GREEN + behavioural revert | PENDING |
+| 7 | USE — the *Copper Beeches* walk on the dev-store Debug build, both voices, gap-top + line-top, mid-note + end | PENDING |
+| 8 | Closing runs + the record complete | PENDING |
+
+- Deaths / resumes: none.
