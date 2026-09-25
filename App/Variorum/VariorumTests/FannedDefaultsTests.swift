@@ -532,6 +532,75 @@ struct FannedDefaultsTests {
         }
     }
 
+    // MARK: - 18k C5 (17e P27): ⌘⇧M authorizes from the store, never the frozen slots
+
+    /// **THE P27 pin.** `model.slots` is deliberately frozen while the editor
+    /// is busy (`EditorProjectionPolicy` defers every delivery while the
+    /// buffer is dirty), and ⌘⇧M used to decide carry-all vs instant from it.
+    /// A take born on the block below mid-burst therefore read as "unfanned",
+    /// the door took the INSTANT merge — which never reads the store, and
+    /// `ops.merge` has no fan fence — and the take was left behind on the
+    /// released block with nothing said (the receipt counts from the same
+    /// frozen slots). The sibling roads already read the store
+    /// (`liveActiveFans`: the seam keystroke, the ceremony's open, the
+    /// carry-all road's own fallback); this pin drives the frozen projection
+    /// on purpose, `SeamMergeTests`' shape: it never calls `reload()`.
+    ///
+    /// RED-ON-OLD (behavioural revert R1-i3, recorded in the 18k C5 record):
+    /// the merged block carries ONE take and no receipt speaks.
+    @Test func aFanArrivingWhileSheIsTypingIsCarriedByTheMerge() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { h in
+            let trailing = try h.storeSlots()[1]
+            let trailingVariant = try #require(trailing.variantID)
+
+            // She is typing: autosave holds the edit for its debounce, so the
+            // editor is BUSY and every arriving projection defers.
+            h.type("X", at: 0)
+            #expect(h.model.autosave.isDirty, "the burst — this pin's precondition")
+
+            // Meanwhile a take is born on the block below — from sync, or from
+            // her own Takes surface, which never touches this buffer.
+            _ = try h.session.operations.branchVariant(trailing.blockID, from: trailingVariant)
+            let fresh = try h.storeSlots()
+            #expect(fresh[1].activeVariantCount == 2, "the STORE knows about the take")
+            h.model.applyProjection(fresh)
+            #expect(h.model.slots[1].activeVariantCount == 1,
+                    "…and the editor's projection deliberately does not — the freeze, reproduced")
+
+            selectAcross(h, 0, 1)
+            await h.model.invokeGesture(.mergeBlocks)
+
+            let after = try h.storeSlots()
+            #expect(after.count == 1, "one block stands where two stood")
+            #expect(after.first?.activeVariantCount == 2,
+                    "the take that arrived mid-burst is CARRIED onto the merged block, never left behind")
+            #expect(after.first?.text == "XAlpha one.\nBeta two.",
+                    "her typing landed in the join")
+            #expect(h.model.statusMessage == FannedDefaultsCopy.merged(carried: 1),
+                    "and the receipt names what was carried")
+            #expect(h.model.mergeCeremony == nil, "⌘⇧M still never asks")
+        }
+    }
+
+    /// The guard beside it: with the store read in the decision, an UNFANNED
+    /// pair merged mid-burst is still the instant merge, byte-unchanged, with
+    /// her typing in it (green on both sides — what the fix must not move).
+    @Test func anUnfannedMergeMidBurstIsStillTheInstantMerge() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { h in
+            h.type("X", at: 0)
+            #expect(h.model.autosave.isDirty)
+
+            selectAcross(h, 0, 1)
+            await h.model.invokeGesture(.mergeBlocks)
+
+            let after = try h.storeSlots()
+            #expect(after.count == 1)
+            #expect(after.first?.text == "XAlpha one.\nBeta two.")
+            #expect(after.first?.activeVariantCount == 1, "one take, exactly as before")
+            #expect(h.model.mergeCeremony == nil)
+        }
+    }
+
     // MARK: - J4b's ceremony door
 
     @Test func theMergeCeremonyDoorStillOpensTheSheetPrePaired() async throws {
