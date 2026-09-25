@@ -884,7 +884,13 @@ change between `cfe53bb5` and today removed it; C2 did not, and claims nothing f
   on either. The pins settle layout before the install and allow a line (or a midpoint, for the
   reflow) accordingly — see NOTICED.
 - Pins — GREEN ON THE FIX (this commit): **`Test run with 4 tests in 1 suite passed` — 3 of 3 runs**;
-  the behavioural revert + mutations NEXT (PENDING). Earlier, **run on the PRE-FIX behaviour (the seam tree `48297899` + this commit's compile
+  the behavioural revert + mutations NEXT (PENDING) — named before they run, over the committed fix
+  `d4ede53b`: **R1** = `EditorView.swift` from the seam commit `48297899` (the pre-fix behaviour, the
+  seam kept) under the committed pins; **M-strand** = the fix with `install`'s first
+  `scheduleRemeasure()` removed (the mount reports nothing — the delivery law broken); **M-stuck** = the
+  fix with only the FIRST generation ever allowed to measure (a latch that never re-arms — the
+  stranding a coalescing hop can introduce). Each restored by `git checkout d4ede53b -- <file>`,
+  verified by `git diff`. Earlier, **run on the PRE-FIX behaviour (the seam tree `48297899` + this commit's compile
   fixes to the pins): `Test run with 4 tests in 1 suite failed … with 5 issues`** — the mount pin RED
   (`reports == [10929.0]` inside the install), the update pin RED (reported inside the pass), the burst
   pin RED (2 reports inside the burst, **5** in all), the whole-road guard GREEN (as designed); plus
