@@ -2145,3 +2145,21 @@ a real-store Variorum instance.
 
 **Scope fence:** C6 only. Zero `Sources/`, zero `Sync/`. QUESTIONS: check the end marker for the next
 free number. **Your final message:** a short summary pointing at your record.
+
+## UNIT C6 RECORD — the five macOS-27 test deltas (implementer: `opus-implementer`, 2026-09-25)
+
+**WHAT THIS UNIT DID NOT DO — the record's first line.** PENDING (written at close).
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The reading, in this session's own context, in the brief's order | **DONE** — CLAUDE.md + canon, TEXTKIT2 §5, this file's corrections/ledger/traps/cast + C1–C4 closings and adjudications, KnownIssues row 65 + the re-font RESOLVED row, 13y's kickoff adjudication (lines 381–413), 13u4's UNIT F2 RECORD whole |
+| 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | PENDING |
+| 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | PENDING |
+| 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | PENDING |
+| 5 | `LibraryPanelHostTests`' "inspector" pin — history, narrow, mutation proof | PENDING |
+| 6 | Closing runs (the five suites isolated + in-suite, the touched surfaces, the eleven Tutorial suites) | PENDING |
+| 7 | The record complete (verdicts, disposition, held walk steps, noticed-not-touched) | PENDING |
+
+- Deaths / resumes: none.
