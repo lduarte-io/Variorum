@@ -2155,7 +2155,7 @@ free number. **Your final message:** a short summary pointing at your record.
 | # | Piece | Status |
 |---|---|---|
 | 1 | The reading, in this session's own context, in the brief's order | **DONE** — CLAUDE.md + canon, TEXTKIT2 §5, this file's corrections/ledger/traps/cast + C1–C4 closings and adjudications, KnownIssues row 65 + the re-font RESOLVED row, 13y's kickoff adjudication (lines 381–413), 13u4's UNIT F2 RECORD whole |
-| 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | **TRACED** — REAL on 27 (the mechanism below). **Pin committed RED on the pre-fix tree** (`JumpViewportLayoutTests`, 3 issues + the Refont shrink pin's 1 — `18k-c6-jumppin-prefix.log`). **FIXED** in `JumpPrimitive.scroll(to:)` (one bounded re-assert) — both pins GREEN (`18k-c6-jumppin-fixed.log`, 7/2); the behavioural revert PENDING |
+| 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | **TRACED** — REAL on 27 (the mechanism below). **Pin committed RED on the pre-fix tree** (`JumpViewportLayoutTests`, 3 issues + the Refont shrink pin's 1 — `18k-c6-jumppin-prefix.log`). **FIXED** in `JumpPrimitive.scroll(to:)` (one bounded re-assert) — both pins GREEN (`18k-c6-jumppin-fixed.log`, 7/2); behavioural revert R1 RED (4 issues, identical) → restored GREEN. **Item 1 CLOSED: FIXED** (the family re-run on the final tree rides the closing runs) |
 | 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | PENDING |
 | 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | PENDING |
 | 5 | `LibraryPanelHostTests`' "inspector" pin — history, narrow, mutation proof | PENDING |
@@ -2252,5 +2252,8 @@ is unchanged; the fix makes it true again on 27. **P1:** the extra work is one v
 **BEHAVIOURAL REVERT R1 (named before it runs; the pre-revert state is `f058ac7f`, committed + pushed):**
 the re-assert's condition forced false (`if false, abs(...) >= 0.5`) in the working tree only, the two
 pins run, then `JumpPrimitive.swift` restored to `f058ac7f` byte-exact and the pins run again.
-Expected: red as on the pre-fix tree, then green. Result PENDING.
+Expected: red as on the pre-fix tree, then green. **Result: RED — 4 issues, byte-identical to the
+pre-fix measurement** (29.0 pt · `42128` vs `42056` ×2 · the Refont shrink's `42034` vs `42128`;
+`18k-c6-R1.log`, 7 tests / 2 suites); **restored → GREEN** (`18k-c6-R1-restored.log`, 7/2 passed;
+`git status` clean after the restore).
 
