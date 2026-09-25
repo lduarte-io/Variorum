@@ -116,4 +116,106 @@ struct JumpViewportLayoutTests {
             #expect(h.model.topVisibleOffset() == target)
         }
     }
+
+    // MARK: - 18k C6b (the held walks' W-2): a jump whose OWN layout grows the document
+
+    /// **HER NOTE ITSELF:** *The Adventure of the Copper Beeches* exactly as
+    /// the sample library seeds it — the bundled story, segmented by
+    /// paragraph through the same bulk-entry rule (each block keeps the blank
+    /// line between paragraphs as its one trailing newline). The real
+    /// paragraph lengths matter here: TK2's LOW re-estimate after a
+    /// whole-document re-font, which is what the jump then outruns, was
+    /// measured on this text; a synthetic note of short even paragraphs grew
+    /// by less than a page and never reached the stale maximum.
+    private func herNote() throws -> [String] {
+        let story = try #require(
+            try SampleLibrarySeeder.loadStories().first { $0.title.contains("Copper Beeches") },
+            "the bundled Sherlock text carries Copper Beeches")
+        return SegmentationRules.bulkSegments(story.text, mode: .paragraph)
+    }
+
+    /// **W-2, measured in the app and reproduced here.** Mid-note, a
+    /// whole-document re-font round trip (her walk used the paragraph gap;
+    /// inline comments do the same) invalidates every fragment and TK2
+    /// re-estimates the un-laid-out majority LOW. She then goes to the end
+    /// (⌘↓) and turns inline comments ON — a GROW. The instrumented app
+    /// showed the re-font's settle hop spending its park BEFORE any display
+    /// pass had laid the new style out (the frame at the spend equal to the
+    /// frame at the capture, in every run that lost), so the restore's jump
+    /// starts on the pre-re-font frame. Its scroll range was computed ONCE
+    /// from that frame; its own first layout grew the document by thousands
+    /// of points; every proposal after that clamped to the stale maximum, and
+    /// the loop's "clamped at the document edge" arm reported convergence
+    /// with the page a dozen paragraphs ABOVE the line (1,624 pt in
+    /// Terminal, 2,384 pt in Study on this rig; 2,368 pt in her Study walk).
+    /// This drives exactly that call: the storage write, then the jump, with
+    /// no display pass between them.
+    @Test(arguments: [ThemeVoice.terminal, ThemeVoice.study])
+    func aJumpWhoseOwnLayoutGrowsTheDocumentStillLandsItsLine(_ voice: ThemeVoice) async throws {
+        let current = EditorTypography.current
+        let adopted = EditorTypography.isAdopted
+        let palette = MarkdownStyling.palette
+        defer {
+            EditorTypography.current = current
+            EditorTypography.isAdopted = adopted
+            MarkdownStyling.palette = palette
+        }
+        let off = EditorSurfaceChrome(voice: voice, dark: false, inlineComments: false)
+        let on = EditorSurfaceChrome(voice: voice, dark: false, inlineComments: true)
+        try await withEditor(seedBlocks: try herNote()) { h in
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 720, height: 828),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let scrollView = try #require(h.textView.enclosingScrollView)
+            window.contentView = scrollView
+            window.orderFrontRegardless()
+            pump()
+            let coordinator = EditorSurface.Coordinator(model: h.model)
+            @MainActor func apply(_ chrome: EditorSurfaceChrome) async {
+                EditorTypography.adopt(chrome.typography)
+                coordinator.applyChrome(chrome, to: h.textView, scrollView: scrollView)
+                await draw(h.textView)
+            }
+            await apply(off)
+            // Mid-note, the re-font round trip.
+            let mid = h.model.index.range(ofEntryAt: 120).location
+            JumpPrimitive.jump(toOffset: mid, textView: h.textView, scrollView: scrollView)
+            await draw(h.textView)
+            await apply(on)
+            await apply(off)
+            // ⌘↓ — the real selector the key sends.
+            window.makeFirstResponder(h.textView)
+            h.textView.setSelectedRange(NSRange(location: mid + 5, length: 0))
+            h.textView.moveToEndOfDocument(nil)
+            await draw(h.textView)
+            await draw(h.textView)
+            let anchor = try #require(h.model.topVisibleOffset(), "the end landing resolves a top line")
+
+            // The losing hop's call: the grow's storage write, then the jump
+            // at once — no display pass has laid the new style out.
+            EditorTypography.adopt(on.typography)
+            h.textView.applyVoiceChrome(on, previous: off)
+            let frameAtTheWrite = Double(h.textView.frame.height)
+            JumpPrimitive.jump(toOffset: anchor, textView: h.textView, scrollView: scrollView)
+
+            let edge = Double(scrollView.contentView.bounds.minY)
+            let line = try #require(
+                JumpPrimitive.lineSpan(ofOffset: anchor, in: h.textView),
+                "the anchored line has no geometry at all")
+            // The precondition that makes this the W-2 shape and not a quiet
+            // jump: the jump's own layout grew the document well past a page.
+            try #require(
+                Double(h.textView.frame.height) - frameAtTheWrite > Double(scrollView.contentView.bounds.height),
+                "the rig must grow the document under the jump: \(frameAtTheWrite) → \(h.textView.frame.height)")
+            #expect(
+                abs(line.top - edge) < 1,
+                "\(voice): the jump reported convergence with its line \(line.top - edge) pt below the viewport top (clip \(edge), frame \(frameAtTheWrite) → \(h.textView.frame.height))")
+            #expect(h.model.topVisibleOffset() == anchor)
+        }
+    }
 }
