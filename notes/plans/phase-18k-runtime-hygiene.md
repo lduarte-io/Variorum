@@ -43,7 +43,7 @@ here touches distribution, signing or `/Applications` before this run's own clos
 | **C0** | Ledger housekeeping (review §7): rows 56/57's DURABLE owner (her confirmation); row 27's stale owner → 13o; row 28's fork list gains the conductor band + the tutorial-seeder scaffolding; file the review's new rows with owners (T2 · StableSurface's asyncAfter · the warming assessment → 12; the EditorViewModel decomposition → 18m; accessibility → the Design & UI review row); the PurgeJanitor split → 18a | review §7; KICKOFF 1 C0 + D1's paragraph | records → the ledger's header rule holds (no blank owner) | — (orchestrator's records) | NOT-STARTED |
 | **C1** | The autosave-coordinator registry release — 7 Mac holders + the `ShellActions` flush site mint and never release | review §6.1 | runtime/lifecycle → red-on-old count pin (`openAutosaveCount` / `QuitFinalizeRegistry.count` across open→close) + the dev-store measurement: counts after opening many notes, before/after; the lock/⌘Q finalize walk | Opus (Fable if the diff reaches the editor seam) | **DONE** — FIXED `a8b27b11` |
 | **C2** | The inline editor's height binding written inside `makeNSView`/`updateNSView` — MEASURE FIRST (ledger row "The Outline's SHADOW `InlineEditorSurface`", the surviving double realization) | review §5.1 A2 | trace → the instrumented chain on the long-note fixture; the pin is the double-realization count IF confirmed; else the deferral lands as hygiene and the row is NOT claimed | Fable if the seam is touched, else Opus | NOT-STARTED |
-| **C3** | The mechanical state-write deferrals (~14 geometry actions, the `BookIndexView` twin first, Canvas's observed geometry writes, window registration WITH the sticky-key ruling) | review §5.1 A3/A4/A5 | hygiene → per-site verdict table (the 13u4 S3 form) + a before/after `Modifying state during view update` count on a bounded run; behaviour byte-identical; walk of Canvas drag + the book Index | Opus | NOT-STARTED |
+| **C3** | The mechanical state-write deferrals (~14 geometry actions, the `BookIndexView` twin first, Canvas's observed geometry writes, window registration WITH the sticky-key ruling) | review §5.1 A3/A4/A5 | hygiene → per-site verdict table (the 13u4 S3 form) + a before/after `Modifying state during view update` count on a bounded run; behaviour byte-identical; walk of Canvas drag + the book Index | Opus | **DONE** — DISMISSED AS HOLLOW (measured; comments only) |
 | **C4** | The DEBUG-oracle ownership sweep (owner-keyed registration on the three reference shapes) + the `MarkdownStyling.palette` three-writer comment-plus-pin | review §5.2 | harness → the two-window cross-clear pins per oracle (red-on-old where reachable; structural where teardown order cannot be forced — S2's precedent) | Opus | NOT-STARTED |
 | **C5** | 17e's concurrency five (R-18k-1): row 59 Canvas focused-block fact · P26 phone liveness race · P27 ⌘⇧M frozen-projection merge · P33 ⌥⌘Z in-flight latch · P38 backup single-flight latch | 17e + KnownIssues row 59 | runtime/concurrency → red-on-old pins per item (P26 on the MOBILE suite); walks: Canvas select → ⌘K Block History on that block; ⌥⌘Z double-press | Fable (P27 is `EditorSurfaceController`, the seam's pair) | NOT-STARTED |
 | **→18o** | The rest of 17e + 17t + row 66 (#138(f) ruled) + row 64 (#136(b) record-only) — a SEPARATE 18 entry run right after 18k (R-18k-1/2/4/5) | the sitting | its own record + ladder | Fable (17t = custody) | NOT-STARTED — opens at 18k's close |
@@ -182,8 +182,9 @@ COMMITTED · every death and resume noted in the record.
 - The kickoff sitting — DONE (R-18k-1…5, above).
 - C1 — DONE, ACCEPTED (`a8b27b11`; adjudication below). GUI walk HELD (TCC).
 - C2 — DONE, ACCEPTED (hypothesis disproved; deferral as hygiene `6571c558`; shadow row CLOSED as resolved-by `f8610cb9`). GUI walk HELD.
-- C3 — IN-PROGRESS (brief appended; implementer spawned).
-- C4–C6 — NOT-STARTED.
+- C3 — DONE, ACCEPTED (premise DISMISSED AS HOLLOW by measurement — all warnings are `PaneSurface`'s, 18l's; comment corrections only).
+- C4 — IN-PROGRESS (brief appended; implementer spawned).
+- C5, C6 — NOT-STARTED.
 - Deaths / resumes: none.
 
 ---
@@ -1558,3 +1559,89 @@ None possible (see the first line). The evidence is the harness logs and the in-
   capture) and `c3-walk2.log` (the real one), with the instruments `c3_probe_apply.py`,
   `c3_walk_apply.py` + `c3_walk_patch2.py` (+ its `c3_walk_drag_block.swift.txt`), `c3_attr.py`,
   and the M1 harness `C3ScratchMechanismTests.swift`. None of these was ever committed.
+
+### UNIT C3 — ORCHESTRATOR ADJUDICATION (2026-09-25 night; the unit CLOSES here)
+
+**Verified by spot-check:** 7 commits `7802ea6a`…`1d833ca0`, pushed, zero trailers, tree clean, zero
+app instances, no scratch worktree left. The one code commit (`5286ff39`) has **zero non-comment
+lines** (diff filtered by the orchestrator). **ACCEPTED — the review's §5.1 A3/A4/A5 premise is
+DISMISSED AS HOLLOW by measurement:** a 14-shape minimal harness shows SwiftUI flags exactly one shape
+(a state write inside `updateNSView`), and a bracketed in-app probe over 334 tests put **all 1,181
+warnings inside `PaneSurface`'s make/update** — zero from 29,071 geometry-action entries (75 of 76
+sites exercised), zero from window registration, `onAppear` or any other trigger; the brief's first
+site (`BookIndexView:791`) deferred in scratch moved the count 1,126 → 1,134 (not kept). The
+76-site verdict table (0 DEFERRED; SAFE-AS-IS / LEFT with reasons) is the unit's record. The six
+comments that justified existing hops with the disproven reason now point at the true one; the hops
+are byte-identical (every landing pin was measured with them). Two sites never entered by any run
+(`CommentsPanel:795`, `ReferencePanel`'s views) rest on shape + reading — recorded as such.
+**Carried forward:** (a) **for 18l U3 — `PanePublisher`/`PaneSurface` is ALL of the warning count in
+every measured run, not "the estimated majority"; the Takes article tests are the heaviest
+generators** — 18l's kickoff should read this adjudication; (b) the walk-tooling facts (Ghostty's
+missing TCC grants; `OS_ACTIVITY_DT_MODE=YES` or a false zero) written into `Tools/WalkKit/README.md`
+this commit; (c) C2's stale `BookOutlineLandingTests` comment → the ladder. **GUI walk HELD** (six
+steps in the C3 RECORD; nothing visible changed — it would only confirm the measurement).
+
+## UNIT C4 BRIEF — the DEBUG-oracle ownership sweep (self-contained; read in this order)
+
+**You are the C4 implementer (`opus-implementer`), ONE unit, this session only.** Read, in order:
+1. `CLAUDE.md` (auto-loaded).
+2. THIS FILE: the kickoff corrections, THE LEDGER (row C4), **ENVIRONMENT TRAPS (binding)**, CAST &
+   DISCIPLINE, the closing sections + ORCHESTRATOR ADJUDICATIONS of every earlier unit record (the tree
+   moved — C3's verdict table names 38 geometry actions that write ONLY DEBUG statics: those are your
+   population's writers, a ready-made enumeration to check yours against), and this brief.
+3. `notes/codebase-health-review-2026-09-21.md` §5.2 — a REVIEW record; re-trace every claim.
+4. **The three reference fixes — the shape you apply:** `ShellRouter.blockNamingDoors`
+   (`ShellRouter.swift:~247` — owner-keyed map + an owner stack, `publish(owner:)`/`release(owner:)`,
+   a reset for pins; the 13u4 UNIT S3 record in `notes/plans/phase-13u4-restyle.md` explains it and
+   its pins `ShellDoorOwnershipTests`), `PostDetailOracle.stamp*` and `CatalogStampOracle`
+   (`LibraryTimeFace.swift:~404`; the 13u4 UNIT S2 record; pins `StampOracleOwnershipTests`). **The two
+   rules:** the registrant names itself (a window/owner identity it already has), and a teardown clears
+   only what it still owns.
+
+**The instances (review §5.2):** `BookOutlineGeometry.focusDoors` (`BookView.swift:~1764` — the
+clearest: two windows on one book cross-clear each other's doors, and its closure captures a
+`@State`-owned model) · `PostDetailOracle`'s four UNKEYED singletons (`PostDetailView.swift:~1022`;
+`beginTitleEditing` is never cleared by anyone) · the unkeyed frame singletons `ShellGeometry`
+(`ShellSplit.swift:~186`) · `CommitBarGeometry` (`CommitBar.swift:~920`) · `CanvasArrivalOracle`
+(`CanvasView.swift:~1163`) · `BookIndexGeometry` (`BookIndexView.swift:~48`) · the two append-only
+trace buffers never cleared by `resetNavigator()` (find them) · `SidebarGeometry`'s (`SidebarView.swift
+:~783`) and the seam grip's subject-keyed-not-owner-keyed maps. **Re-grep for the class** (`static var`
+dictionaries/closures/frames in `#if DEBUG` oracle enums across the Mac app) so your table is COMPLETE
+— the review's list is a sample.
+
+**Acceptance:** a per-oracle verdict table (oracle × registrant identity used × clear rule × pin) —
+FIXED · SAFE-AS-IS (with the mechanism — e.g. read only by one pin that mounts one window) · LEFT (with
+reason). **Pins:** the two-window cross-clear test the reference fixes model — MEASURED RED FIRST where
+reachable (mount two owners, tear down one, assert the survivor's registration still answers); where
+SwiftUI teardown order cannot be forced, the fix stands on the structural arm (S2's recycled-card
+precedent) — say which per row. Every existing pin that READS these oracles must ride UNMODIFIED
+except where the API itself changes (then ONE line per call site, recorded — S3's precedent). DEBUG-only
+blast radius: production behaviour byte-identical (grep proof that every touched symbol is inside
+`#if DEBUG`, or state why not).
+
+**The one non-DEBUG guard:** `MarkdownStyling.palette` (`Theme/MarkdownStyling.swift:~107`) has three
+writers, one of them a pane's `updateNSView` (`applyFace`, "the third writer of that global") — fine
+while appearance is app-wide, a race the day anything is per-window. Add a doc comment naming the
+three writers and the invariant (appearance is app-wide), plus a pin that fails if a fourth writer
+appears or a writer diverges (a source-walk pin in the 18j literal-colour pin's form is acceptable).
+No behaviour change.
+
+**Use-shaped evidence:** this is a harness unit — the evidence IS the pins + the per-oracle table. The
+terminal host holds no Screen Recording / Accessibility; do not drive the GUI.
+
+**Closing runs (tests at the END):** every suite that reads a touched oracle (grep for each symbol
+across `VariorumTests`) + your pins + the eleven Tutorial suites, each read by its "Test run with N
+tests" line; no full Mac suite.
+
+**CHECKPOINT RULES (restated, binding from your first commit):** write `## UNIT C4 RECORD` with its
+`### LIVE STATUS` at the END of this file in your FIRST commit, and flip it in the same commit as each
+piece; unverified claims marked **PENDING**. Commit per coherent piece and PUSH after every commit;
+stage pathspec-limited, never `git add -A`; NO commit trailers (no Co-Authored-By, no Claude-Session).
+Synchronous foreground waits only — the grep-poll loop; never end your turn with a run in progress.
+Never spawn subagents (one Sonnet lookup for EXTERNAL facts only). No behavioural revert starts until
+the record names it and the pre-revert state is COMMITTED. Every death/resume noted in the record. If
+the worktree moves under you, write nothing, report, stop. Never touch `/Applications`, never build
+Release, never quit or kill a real-store Variorum instance.
+
+**Scope fence:** C4 only. Zero `Sources/`, zero `Sync/`. QUESTIONS: check the end marker for the next
+free number. **Your final message:** a short summary pointing at your record.

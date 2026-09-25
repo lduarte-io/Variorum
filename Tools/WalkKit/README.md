@@ -17,7 +17,16 @@ swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
 - `walk-scroll <x> <y> <lines>` — posts real scroll-wheel events at a screen point (points). SwiftUI Settings
   forms do not expose an addressable scroll area to AppleScript and page-down keys do not reach them; this does.
 
-## The osascript recipe (System Events; Accessibility is already granted to the terminal host)
+## The osascript recipe (System Events; Accessibility must be granted to the terminal host)
+
+> **CHECK THE HOST FIRST (18k, 2026-09-25).** The grant is per TERMINAL APP. The 2026-09-04 note
+> "already granted" held for the terminal of that date; **Ghostty holds NEITHER Accessibility NOR
+> Screen Recording** (`AXIsProcessTrusted() == false`, `CGPreflightScreenCaptureAccess() == false`),
+> and a System Events call under it HANGS on a consent prompt. Check both before any walk; if
+> either is false, the walk is HELD for the author (granting is hers — never a session's).
+> **Counting SwiftUI warnings in a DIRECTLY launched Debug binary needs `OS_ACTIVITY_DT_MODE=YES`**
+> in its environment, or the `Modifying state during view update` lines are not emitted and the
+> count reads a FALSE ZERO (18k C3's first walk; run a positive control).
 - Activate: `set frontmost of (first application process whose unix id is <pid>) to true`.
 - Click at screen POINTS: `click at {x, y}` — convert from a 2× screenshot: `x_pt = x_px/2`, `y_pt = y_px/2 + windowY`
   (the window's Y from `walk-cap`; the main window sat at Y=33 under the menu bar).
