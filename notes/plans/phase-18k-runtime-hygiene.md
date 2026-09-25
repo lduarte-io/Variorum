@@ -2990,7 +2990,8 @@ own DerivedData (`App/Variorum/DerivedData/18k-walks/`). Captures: `notes/plans/
 - Step 0 (grants) — DONE (`AX: true SCREEN: true`).
 - The Debug build — DONE (`** BUILD SUCCEEDED **`, `DerivedData/18k-walks-build.log`).
 - C1 — DONE, **PASS** (table below).
-- C2 — IN-PROGRESS. C3 · C6 · C5 — NOT-STARTED.
+- C2 — DONE in Terminal, **PASS** (table below); the Study repeat rides the C6 voice flip.
+- C3 — IN-PROGRESS. C6 · C5 — NOT-STARTED.
 - Deaths / resumes: none.
 
 **The dev store as found:** custody posture **standard** ("Your Apple account holds a key") — the app opened
@@ -3007,3 +3008,20 @@ logged to `walks/app-run<n>.log` (the SwiftUI warning count's source).
 | 3 | Type a second marker into *Walk test* and quit AT ONCE, by identity (`tell application id … to quit` — the ⌘Q road's terminate, never a keystroke) | `c1-06-walk-test` · `c1-07-quitmark-typed` | The quit call returned after **0.26 s**; the process was gone **0.42 s** after the call | PASS |
 | 4 | Relaunch; open both notes | `c1-08-relaunch-walk-test` · `c1-09-relaunch-three-ways` | Both markers present: *Walk test* reads `words c1quitmark` (the still-open note, saved by the quit's flush alone), *three ways of working* ends `…the bridge.” c1walkmark`; both stamped "edited today" | PASS |
 | 5 | Clean up: both markers deleted by backspace | `c1-10-walktest-cleaned` · `c1-11-threeways-cleaned` | Both notes back to their original text | — |
+
+### C2 — the inline editor's height binding (Terminal voice; the C2 RECORD's eight steps; Study repeat below)
+
+Window 1440×1000 at (0,33). Log: `walks/app-run2.log` (the relaunched instance).
+
+| # | Step | Captures | What I saw | Verdict |
+|---|---|---|---|---|
+| 1 | Sherlock ▸ Outline (via ⌘K — a shelf click after the relaunch landed on *field notes*, a stale row point, not the app) | `c2-01-sherlock-outline` | The book opens in Outline, 13 chapters | PASS |
+| 2 | ▸ on *A Scandal in Bohemia*, then a click into its prose; each captured at ~0.2 s, 0.7 s and 2 s | `c2-02a/b/c-expand-*` · `c2-03a/b/c-live-*` | The expanded row is pixel-identical at 0.2 s and 2 s; after the click the three live captures differ ONLY in a 6×20 px box at the caret (the blink) — no jump, no flash, no growing strip; the story is at its full length at once, the ring on block 2/262 | PASS |
+| 3 | Scroll to the story's last paragraph | `c2-04*` · `c2-05-story-last-line` · control `c2-05b-control-short-expanded` | The last line reads whole ("…honourable title of _the_ woman."), nothing clipped. Its last line sits **91 pt** above the next chapter heading — and a CONTROL (the short *About this book* expanded the same way) measures the same **91 pt**, so there is no blank gap under the story | PASS |
+| 4 | Type mid-story and delete | `c2-06a2-clicked` · `c2-06b-typed` · `c2-06c-deleted` | `QQQ` typed at "position." changed pixels ONLY on the caret's line (y 588–608); after three deletes the page differs from before ONLY by the caret blink — the row tracked, the page did not hop | PASS |
+| 5 | Scroll to the book's end and back | `c2-04b-story-end` · `c2-05-story-last-line` | The book's end drew whole (*Copper Beeches* the last card); back at the story, it was still live with the caret where it had been | PASS |
+| 6 | Window 1440 → 1000 pt → 1440 (`set size`), then look under the last line | `c2-08a-narrow` · `c2-08b-restored` · `hunt1…4` (hunt2 is the one) | The narrow state reflowed cleanly; after the restore the last line again sits **91 pt** above the next heading (the control's number) — **the recorded ~85 pt residual did not appear on this run**, and nothing clipped. (The log shows the story's measured height settling 23,910 → 24,029 narrow, 20,969 → 21,054 restored.) | PASS |
+| 7 | *Modifying state during view update* over steps 2–6 | `walks/app-run2.log` | **0** in the whole C2 run (the log is live: its `BookOutline landing` traces print) | PASS |
+| 8 | Book (spread) view; a note on a page goes live and takes typing | `c2-09a-spread` · `c2-09d-about-click2` · `c2-09e/f` (crops paired in `tmp/pair.png`) · `c2-09g-about-cleaned` | Typing 40 characters at the end of *About this book* wrapped one new line and the page (and its ring) grew with it; deleting them shrank it back. (A first click placed just past the last glyph of the read-tier page did nothing; a click on a word made it live — recorded, not a finding: the click missed the text.) | PASS |
+
+All typed text was deleted; the story and *About this book* read as before.
