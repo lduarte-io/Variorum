@@ -3669,3 +3669,63 @@ folder" (judgment call 2).
 | 8 | Closing runs + the record complete | PENDING |
 
 - Deaths / resumes: none.
+
+### THE TRACE (inputs → wrong state; every number from a run in this session)
+
+**One fact about her note first — it decides what "the gap" is.** The sample library's stories are Gutenberg
+text with a blank line between paragraphs, and bulk entry keeps that blank line as CONTENT
+(`SegmentationRules.bulkSegments`' k−1 rule): 211 of *Copper Beeches*' 212 blocks end in one `\n`, and the
+editor's separator adds the second. So Write shows an EMPTY paragraph between every two. The gap she sees is three
+zones, top to bottom: the paragraph's own trailing `paragraphSpacing` (7 pt in Terminal with comments OFF,
+29 pt ON), the blank line (17 pt), and the blank line's own spacing (7 / 29). Measured in the rig on the real
+story: block 119's fragment is 160 pt tall with its last line ending at local y 153, and the blank paragraph's
+fragment is 24 pt with its line ending at 17. **A TK2 layout fragment includes its paragraph's trailing spacing.**
+
+**W-4 — an anchor-CHOICE class, in `topVisibleOffset()`.** The capture probes one point below the viewport top,
+takes the layout fragment whose frame contains it, and resolves the LINE through
+`FragmentLines.lineIndex(atLocalY:)`, whose documented rule is "below the last line (the paragraph's trailing
+gap) ⇒ the last". With the edge in a gap, it names:
+
+| Edge in | Fragment hit | Captured (rig, block 120) | Restored to the top | What she sees |
+|---|---|---|---|---|
+| the paragraph's trailing spacing | the PREVIOUS paragraph | its last line (`b119+596`) | that line | the walk's W-4 exactly: the previous paragraph's last line on top, hers a line + a gap lower |
+| the blank line | the blank paragraph | the blank line (`b119+606`) | the blank line | a blank line on top, hers one gap lower (+8.5 pt here) |
+| the blank line's spacing | the blank paragraph | the blank line | the blank line | hers +20.5 pt lower (the walk's +15…+23) |
+
+The restore then lands exactly what was captured (the pins read `topVisibleOffset()` after it: 47510 and 47524
+where hers is 47525). Once shifted, the top is a line, so every later toggle holds — the walk's "once shifted,
+the page holds". A text line CUT by the edge is captured as itself and lands whole at the top (the walk's PASS
+rows; the guard pin). **Regression or pre-existing: PRE-EXISTING.** The capture rule is 13c 1A's, and the
+pins are red **byte-identically** (19 issues, the same offsets) on a tree whose re-font road is C6's parent.
+What C6 changed is that the landing is now EXACT on macOS 27. On the parent road the same gap-top toggles
+landed wherever TK2's displacement put them — up to a whole paragraph away on unsettled geometry (scratch trace
+`18k-c6b-old-trace.log`: `b119+596` captured, `b120+1251` on top after ON). C6 did not create W-4. It made the
+anchor's choice visible to the point.
+
+**W-2 — a DIFFERENT mechanism: the jump clamps against a scroll range computed before its own layout.**
+Reproduced in the app first, then in a rig, on the instrumented current road (NSLog at the capture, the park,
+the spend, every jump iteration and the width-reflow restore — a scratch build, never committed; log
+`18k-c6b-app-trace1.log`):
+1. Mid-note, a whole-document re-font round trip (her gap round trip; a comments round trip does the same)
+   invalidates every fragment, and TK2 re-estimates the un-laid-out majority LOW (rig: frame 19,600 → 17,649
+   Terminal, 21,098 → 18,612 Study).
+2. ⌘↓ lands at the end on that under-estimated document.
+3. Comments ON. The capture is right (`anchor=51625`). But `keepingReadingPosition` arms the settle hop
+   directly, and in the app the hop spent the park BEFORE any display pass had laid the new style out: in the
+   instrumented walk the frame at the spend equalled the frame at the capture in **every** lost race (all ten
+   popup-driven gap re-fonts mid-note and both Study end runs that lost), and differed in every run whose hop
+   came after layout.
+4. `JumpPrimitive.jump` computes `maxScroll` ONCE, from that stale frame (18,276 − 828 = 17,448 in her Study
+   run). Its first `layoutViewport()` grows the frame to 20,853; the line measures at 19,606; the loop proposes
+   `min(19,606, 17,448)` = 17,448; the next measure says 19,816; the proposal clamps to 17,448 again, equal to
+   `top`, and `JumpCorrectionLoop`'s "clamped (target near the document edge)" arm returns **converged**. The page
+   rests 2,368 pt above the line: a dozen paragraphs.
+5. OFF: the capture reads the wrong place and faithfully keeps it — the walk's "and OFF left it there".
+
+The mid-note races lost too, but harmlessly (a target far from the end is never above a stale maximum). Terminal
+never lost at the end in seven runs: the checkbox toggle's hop came after layout there. **Not C6's re-assert:**
+the re-assert never fired in a losing run (no `reassert` line), and neither the arm nor the clamp is C6's.
+**PRE-EXISTING:** the pin is red on the C6-parent road (1,629.6 / 2,353.7 pt). The rig could not force the
+hop-before-display ORDER through the coordinator (a harness display pass always intervened, even with the
+window ordered out), so the pin drives the losing hop's exact call — the grow's storage write, then the jump —
+and the app trace carries the ordering.
