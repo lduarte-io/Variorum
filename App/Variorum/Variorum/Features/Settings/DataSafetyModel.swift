@@ -122,7 +122,17 @@ final class DataSafetyModel {
     /// seed-immediately precedent); turning it OFF writes nothing more —
     /// existing files stay until their own retention would have taken
     /// them, and the face says so.
+    ///
+    /// **18k C5 (17e P38): it takes the pane's ONE latch, like its three
+    /// siblings.** Turning it on runs a forced backup, and without `busy` the
+    /// pane left Back Up Now and the folder doors live over that run (the
+    /// toggle itself greys while theirs run — `DataSafetyPane`). The run
+    /// itself is single-flight in `StoreBackup` whatever reaches it; this is
+    /// the pane saying so with its own doors.
     func setInsurance(_ enabled: Bool) async {
+        guard !busy else { return }
+        busy = true
+        defer { busy = false }
         let defaults = self.defaults
         await Task.detached(priority: .utility) {
             MarkdownInsurance.setEnabled(enabled, in: defaults())

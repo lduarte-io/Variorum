@@ -147,7 +147,45 @@ final class StoreBackup {
         await run(force: true)
     }
 
+    /// **18k C5 (17e P38) — ONE RUN AT A TIME.** A snapshot's name is
+    /// second-granular, so two runs in one second wrote the SAME path, raced
+    /// `integrityCheck`'s sidecar deletion and both `prune`d one doomed set
+    /// (the loser's `removeItem` surfacing as a false `failed`). Several
+    /// doors reach `run` with no latch they share — the hourly tick, Back Up
+    /// Now, the insurance toggle, the iCloud offer, the posture switch — so
+    /// the latch lives HERE, where they all meet. `id` lets a finished run
+    /// clear only its own slot.
+    private var inFlight: (id: Int, task: Task<BackupRunRecord, Never>, forced: Bool)?
+    private var runSerial = 0
+
+    /// The single-flight door. A request while a run is in flight is handed
+    /// THAT run's outcome — never a parallel run — whenever that run does at
+    /// least what the request asks: any request behind a forced run, and a
+    /// due-check behind anything. The one exception is Back Up Now's own
+    /// promise ("a fresh snapshot regardless of the interval", above): a
+    /// FORCED request behind a due-check that may find nothing due waits for
+    /// it and then runs its own, so it is never answered "already up to date"
+    /// — still one run at a time, one after the other.
     private func run(force: Bool) async -> BackupRunRecord {
+        if let current = inFlight, current.forced || !force {
+            return await current.task.value
+        }
+        let behind = inFlight?.task
+        runSerial += 1
+        let id = runSerial
+        let task = Task { @MainActor in
+            _ = await behind?.value
+            let record = await performOneRun(force: force)
+            if inFlight?.id == id { inFlight = nil }
+            return record
+        }
+        inFlight = (id, task, force)
+        return await task.value
+    }
+
+    /// One run, start to finish — the pre-18k `run(force:)` body, byte-
+    /// unchanged but for its name: only `run` above may call it.
+    private func performOneRun(force: Bool) async -> BackupRunRecord {
         let database = database
         let directory = directory
         let configuration = configuration

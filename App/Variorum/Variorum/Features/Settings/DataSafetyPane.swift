@@ -172,7 +172,10 @@ struct DataSafetyPane: View {
             Toggle("Keep a weekly plain-text copy of every note", isOn: Binding(
                 get: { model.insuranceEnabled },
                 set: { on in Task { await model.setInsurance(on) } }))
-                .disabled(model.destination == .unset && !model.insuranceEnabled)
+                // 18k C5 (P38): greyed while any of the pane's acts runs, as
+                // its three siblings are (its own run holds `busy` too).
+                .disabled(model.busy
+                    || (model.destination == .unset && !model.insuranceEnabled))
             if model.destination == .unset && !model.insuranceEnabled {
                 Text("Pick a second folder above first — the plain-text copies "
                      + "only ever go there.")
