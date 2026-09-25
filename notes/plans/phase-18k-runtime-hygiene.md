@@ -2993,7 +2993,8 @@ own DerivedData (`App/Variorum/DerivedData/18k-walks/`). Captures: `notes/plans/
 - C2 — DONE in Terminal, **PASS** (table below); the Study repeat rides the C6 voice flip.
 - C3 — DONE, **PASS with one FINDING (W-1, pre-existing, not 18k's diff) and one step-text correction** (table below).
 - C6 — WALKED in both voices: steps PASS on the ordinary road, **FINDING W-2** (the place lost after a gap round trip + a long landing, both voices, 2 of 4) + observations O-1/O-2 (table below); the settings restore rides the end of the walk.
-- C2 Study repeat · C5 — NOT-STARTED.
+- C2 Study repeat — DONE, **PASS** (below).
+- C5 — IN-PROGRESS (Study first, then Terminal).
 - Deaths / resumes: none.
 
 **The dev store as found:** custody posture **standard** ("Your Apple account holds a key") — the app opened
@@ -3092,3 +3093,13 @@ pair is WalkKit's worktree recipe). **O-2 (the same precondition):** in Study ru
 ⌘↓ landing (the run after a gap round trip), the editing RING was drawn ~one line too HIGH — its top in the gap
 above the paragraph, its bottom edge cutting through the second-to-last line, the last line outside it (zoom:
 `tmp/` crop of `c6-20-e1a-end`); the next frame (`c6-20-e1b-ON`) drew it right.
+
+### C2 — the Study repeat (steps 2, 4, 8)
+
+| # | Step | Captures | What I saw | Verdict |
+|---|---|---|---|---|
+| 2 | Sherlock ▸ Outline ▸ ▸ *A Scandal in Bohemia*, then a click into the prose (bursts at 0.2 s / 2 s) | `c2s-01-book` · `c2s-02a/c-expand-*` · `c2s-03a/c-live-*` | Expanded: pixel-identical at 0.2 s and 2 s. Live: the two frames differ only by the caret (86 px); the change from the expanded frame is the ring and the sidebar note box, no text moved | PASS |
+| 4 | Type `QQQ` mid-paragraph, delete them | `c2s-04b-typed` · `c2s-04c-deleted` | The paragraph re-wrapped with the typing and returned: after the deletes no pixel differs from before by more than anti-aliasing (0 over 40/255) | PASS |
+| 8 | Book (spread) view: type a 40-character phrase at the end of *About this book*, delete it | `c2s-05a-spread` · `c2s-05b/c/d-about-*` (tiled `tmp/tops.png`) | The page and its ring grew by one line with the text and shrank back | PASS |
+
+*Modifying state during view update* over the Study repeat: **0**.
