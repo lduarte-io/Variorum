@@ -3080,7 +3080,7 @@ NOT toggle them (three tries, the point verified at the AX frame); the Accessibi
 | 5 | Voice Study ⇄ Terminal from mid-story | `c6-12a-mid` · `c6-12c-study-mid` · `c6-12d-terminal-back` | The same paragraph at the top both ways ("“‘Oh, yes,’ said he…"), Study re-wrapped; the note's current block (118) kept | PASS |
 | 6 | Landings: ⌘2 → ⌘1; a deep jump from Blocks ▸ open in Write | `c6-13a/b/c` · `c6-14a/b/c` · `c6-15a…d` | Write → Takes → Write: the page where it was (the whole-window diff is 178 px — the caret only). Blocks ▸ block 11 and block 211 (filtered) ▸ **open in write**: each block's FIRST line at the very top (block 11/212, 211/212). (A double-click on a filtered row did not open it — the row had not been selected by the first click, a missed point; the button road worked) | PASS |
 
-**FINDING W-2 (C6's surface — the place LOST after a paragraph-gap round trip, both voices; 2 of 4 tries — corrected from "2 of 3" in the commit that first recorded it: run `c6-20-e1` also followed a gap round trip, `c6-19`, and held its place):**
+**FINDING W-2 (C6's surface — the place LOST after a paragraph-gap round trip, both voices; **2 of 7** runs of the recipe — `c6-20-e1`, `c6-21-g2`, `c6-22` and `c6-23-r2/r3` also followed a gap round trip and kept their place, the last four with W-4's one-line shift):**
 recipe — mid-story, paragraph gap → "a blank line's worth" → "Standard"; click in the text; **⌘↓** (a long landing to
 the end); ~2.5 s later turn inline comments **ON**. In **Terminal** (`c6-07*` then `c6-08a/b/c`): the end-landed page
 ("And in this way he managed…" at the top) went, on ON, to "“I have my revolver,” said I." — about a dozen
