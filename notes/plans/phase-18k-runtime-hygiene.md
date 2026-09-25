@@ -2561,8 +2561,11 @@ when TK2 was still settling. 13u4 F2's walk is the one that shows it.
    put. A plain flipped document and a bare `setFrameSize` do not move the clip. Only the viewport
    layout does, and only when it changes laid-out geometry. Anything that scrolls, lays out the
    viewport and then trusts its requested offset inherits the displacement.* `JumpPrimitive` now
-   re-asserts it; nothing else in the app scrolls-then-lays-out that way (every `layoutViewport()` call
-   site is in `JumpPrimitive`: re-grep before relying on this).
+   re-asserts it. **Re-grepped (not assumed): the app has exactly TWO `layoutViewport()` call sites.**
+   `JumpPrimitive.scroll(to:)` is this fix. `PaneSurface.scheduleRenderRestore` (`PaneSurface.swift:1732`)
+   is the A47c render-tier restore on a content-sized pane: it scrolls nothing and trusts no requested
+   offset, so it is not this shape. Whether 27's displacement can nudge the HOST's scroll view when
+   that restore relays out a pane was NOT examined. That surface is 18l's (fenced).
 2. **`SurfaceComposition.text(of:)`'s value dump reaches swift-dependencies' captured test context, test
    NAME included** (the probe's own name hit 6 lines). Any pin that searches that dump for a plain word
    can be tripped by a test's name. The inspector pin no longer reads it; `LibraryPanelHostTests`'
