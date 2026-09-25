@@ -141,9 +141,24 @@ struct ShellActions {
     /// the default runs a modal alert, which in a test host waits forever
     /// (found exactly that way: the tutorial's own insurance pin hung the
     /// spine until it answered).
+    ///
+    /// **One flight at a time (18k C5, 17e P33 — the phone's rule).** The
+    /// warning and the undo are two runner submissions that each read the
+    /// stack's top, so a second press inside the first's flight used to
+    /// queue warn, warn, undo, undo: both warnings described E while the
+    /// second press undid E−1, skipping A12's confirm when E−1 was the one
+    /// in the insurance class. The latch is taken at PRESS time, before any
+    /// await, and a press that finds it held refuses in the phone's words.
+    /// It is SHARED with ⇧⌥⌘Z (`structuralRedo`), as the phone's is: a redo
+    /// landing inside this gap is the same crossing one door over.
     func structuralUndo(confirm: ((UndoStack.PendingUndoWarning) -> Bool)? = nil) {
+        guard session.beginStructuralUndoDoor() else {
+            status.refuse(StructuralUndoCopy.anotherIsLanding)
+            return
+        }
         let undoStack = session.undoStack  // Sendable; the closure must not capture the session
         Task { @MainActor in
+            defer { session.endStructuralUndoDoor() }
             do {
                 let warning = try await session.runner.run { ops in
                     undoStack.pendingUndoWarning(with: ops)
@@ -177,9 +192,20 @@ struct ShellActions {
     /// ⇧⌥⌘Z (13c 1B — A10): the undo door's exact mirror. Same
     /// mode-independent execution and reporting; a refused re-apply stays
     /// on the redo stack for retry, like a refused inverse.
+    ///
+    /// 18k C5 (P33): it holds the undo door's ONE latch — a redo inside an
+    /// undo's warn→act gap would re-apply the entry that undo then takes,
+    /// after the confirm she answered described a different one. Its own
+    /// single submission reads and pops atomically, so two REDO presses were
+    /// never the defect; the shared latch is the phone's rule, whole.
     func structuralRedo() {
+        guard session.beginStructuralUndoDoor() else {
+            status.refuse(StructuralUndoCopy.anotherIsLanding)
+            return
+        }
         let undoStack = session.undoStack  // Sendable; never capture the session
         Task { @MainActor in
+            defer { session.endStructuralUndoDoor() }
             do {
                 let label = try await session.runner.run { ops in
                     try undoStack.redo(with: ops)

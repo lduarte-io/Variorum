@@ -703,6 +703,27 @@ final class AppSession {
     func endTutorialDoor() {
         tutorialDoorInFlight = false
     }
+
+    /// **18k C5 (17e P33): the structural undo/redo DOOR's in-flight latch —
+    /// the phone's rule, adopted.** ⌥⌘Z reads the stack across two runner
+    /// submissions (the A12 warning, then the undo), so a second press — or a
+    /// ⇧⌥⌘Z — landing inside that gap acts on an entry nobody was asked
+    /// about. `MobileUndoDoor.inFlight` holds ONE flight across both doors
+    /// for exactly that reason; this is the Mac's copy, session-scoped
+    /// because `ShellActions` is a value built per menu read (one stack per
+    /// session, so one latch per session). `begin` runs synchronously at
+    /// PRESS time, before any await — the tutorial door's shape above.
+    private(set) var structuralUndoDoorInFlight = false
+
+    func beginStructuralUndoDoor() -> Bool {
+        if structuralUndoDoorInFlight { return false }
+        structuralUndoDoorInFlight = true
+        return true
+    }
+
+    func endStructuralUndoDoor() {
+        structuralUndoDoorInFlight = false
+    }
     #endif
 
     init(database: AppDatabase, storeVariant: AppDatabase.StoreVariant = .real) {
