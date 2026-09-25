@@ -3278,7 +3278,14 @@ short summary pointing at your record.
 
 ## UNIT C7 RECORD — the second backup folder receives the wrong file (implementer: `opus-implementer`, 2026-09-25)
 
-**NOT DONE (first line, per the brief):** everything below marked PENDING. Nothing yet.
+**NOT DONE (first line, per the brief):** (1) **Nothing in her real container was opened, listed or touched** (the
+brief's fence) — so the real-store exposure below is REASONED FROM THE CODE and the harness, and its one checkable
+prediction stays PENDING for the orchestrator's own read-only name listing: her `Backups/` should hold ~11 dated
+copies roughly an hour apart (all within the last day or so of app time). (2) The full Mac suite — the orchestrator's
+finals. (3) Flipping KnownIssues' W-3 row and carrying the exposure + remedy to her morning report — the orchestrator's
+records (ready-to-copy lines under DISPOSITION). (4) No phone suite: the phone never wires `StoreBackup` (no
+reference in `VariorumMobile`/`VariorumMobileTests`); the iOS build is the phone's evidence. Everything else the brief
+asks for is done.
 
 ### READING (done in-session before any code)
 
@@ -3445,7 +3452,9 @@ All three sort after every dated name; among themselves `…-a1-pre13x-…` sort
   retired."*; the drill files untouched throughout; the pick restored to `~/Documents/` as found (its run's
   `…-204738-…` sent there, `cmp`-identical). Quit by identity; zero instances.
 - **The remedy sentence for her — DONE** (THE REMEDY below).
-- Closing runs — PENDING.
+- **Closing runs — DONE** (CLOSING RUNS below): the Mac closing set **296 tests in 37 suites passed** (the eleven
+  Tutorial suites included, zero skipped); iOS **BUILD SUCCEEDED**.
+- **The record closed — DONE** (this commit).
 - Deaths / resumes: none.
 
 ### THE USE EVIDENCE (dev store, `io.lduarte.Variorum.debug`, the Debug build of `70607656` in `DerivedData/18k-c7-walk`)
@@ -3484,3 +3493,110 @@ second folder's newest REAL copy (early September, so due) and sends that run's 
 a day; nothing needs re-picking. Beside the library there is nothing to do and nothing that can be done: the dated
 copies the old prune deleted are gone, and the kept set grows back to fourteen days, one real copy a day, over the
 next two weeks of use. The A1 copies there are the rail's and stay.)*
+
+### DISPOSITION — one verdict per reader of the rule (W-3 is reader 1)
+
+| # | Reader (the trace's numbering) | Verdict | Pin(s) — red-on-old evidence | Commits |
+|---|---|---|---|---|
+| 1 | **The copy to the second folder (W-3)** | **FIXED** (Fix 2; Fix 1 alone also fixes the foreign-name case) | `BackupOwnFilesTests.theSecondFolderReceivesTheActsFileBesideADrillAndAnA1Copy` (7 issues pre-fix) + `…BesideHerThreeA1Copies` (6) + the pass-through's own `theCopyIsTheActsFileEvenBesideANewerStampedCopy` (2) — R-full identical; **R-pass reddens the pass-through pin alone** | pins `35a7aac7` · fix `ff0e67c2` |
+| 2 | The second folder's due-check | **FIXED** (Fix 1) | `aForeignFileInTheSecondFolderNeverDefeatsItsDueCheck` (1) — R-full, R-narrow | same |
+| 3 | The primary due-check (a copy at EVERY check) | **FIXED** (Fix 1) | `aForeignNameNeverMakesTheHourlyCheckWriteAgain` (2) — R-full, R-narrow; **also observed in the app process**: the three Fix-1 test-host launches wrote no primary copy, the three pre-Fix-1 launches wrote one each (THE USE EVIDENCE 0b) | same |
+| 4 | The primary prune (real copies deleted, foreign kept) — and the lock-time copy's, which shares it | **FIXED** (Fix 1) | `pruningKeepsFourteenRealCopiesAndNeverAForeignName` (1: 10 kept, not 14) — R-full, R-narrow | same |
+| 5 | The Castle switch's delete offer listing foreign files | **FIXED by the rule** (Fix 1 + the tightening; zero lines in `PostureSwitch.swift` — JUDGMENT CALLS 1) | `theListingIsTheAppsOwnNamesOnly` (2) — R-full, R-narrow, **R-tight alone** | same |
+| — | The freshness FACE naming the wrong newest | **DISMISSED AS HOLLOW** — it reads by date on both trees | `theFaceReadsByDateAndNeverNamedAForeignFile` green pre-fix (kept as a guard); the W-3 pins' face arm (the far row: 1 copy, Newest = the act) reddens only THROUGH the copy | — |
+| — | The second folder's prune (`pruneSecond`) | **no defect** — by date on both trees (foreign names were never its candidates) | — | — |
+
+**The brief's (2), answered in one line each:** *Could the prune delete a real backup and keep an A1 copy?* **Yes** —
+proven (10 real copies kept of 14 with four foreign names; hers: 11 with three). *Could the "last backup" face name the
+wrong one?* **No** — the face reads by date; what it showed wrong was the damage (a short "back to", a stale far row),
+never a foreign name.
+
+**Ready to copy (the orchestrator's records):** *KnownIssues W-3 row — FIXED 18k C7 (`ff0e67c2`; pins
+`BackupOwnFilesTests`, 8): the copy sends the act's own snapshot; the listing keeps only the app's own dated names (both
+due-checks, the prune, the lock-time copy and the Castle offer). Her real store: the copies beside the library had
+collapsed to ~11 running hours of reach since 2026-09-04 (certain); a second folder, if set, had been receiving the
+5 September A1 main file since ~2026-09-05, checked "ok" if the key is unchanged (conditional). Remedy: THE REMEDY
+below.*
+
+**No PROVISIONAL, no QUESTIONS entry** (#147 unused): every call below is technical and reversible in a line; the
+one behaviour a user could see change (the Castle offer no longer lists foreign files) is what its own doc comment and
+the runbook (§7: "the switch offers to delete Variorum's own, and the rest are yours") already say.
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder reads this first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `App/Variorum/Shared/StoreBackup.swift` (shared — the phone compiles it, never wires it) | `existingBackups` keeps only names `date(fromBackupURL:)` parses (+ `.sqlite`), sorted by parsed stamp; `date(fromBackupURL:)` accepts only the app's two names (empty tail or `-`+8 lowercase hex; stamp read-back); `performPrimaryLeg` → `PrimarySnapshot` (`.written`/`.fresh`), `performBackupIfDue` its wrapper (signature unchanged); `performRun` hands the standing file to `performSecondLeg(source:…)`, which no longer lists the folder | `run`/`performOneRun` (C5's single-flight), `integrityCheck`, the legs' copy/pair/runbook/key-file code, `pruneSecond`, `removeSnapshotPair`, the lock-time copy's body, every name the app WRITES |
+| `App/Variorum/VariorumTests/DataSafetyTests.swift` | `BackupOwnFilesTests` (8); `anUnreachableFolderIsReportedNotSkipped` passes `source: nil` | every other test |
+
+**Custody-adjacent consequence, named for the Fable ladder (zero lines changed there):** `PostureSwitch.Leaves.live`'s
+`pairs` closure lists through `existingBackups`, so the Castle switch's delete offer now lists ONLY the app's own
+copies. **Zero `Sources/`, zero `Sync/`, zero `Server/`; no schema; marker 9 unchanged.** `EditorTextView`,
+`EditorViewModel`, `BlockRangeIndex`, `PaneSurface`, `PaneTextAuthority` untouched.
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **One rule for all five readers, fixed at the listing** — not per-reader filters. So the Castle offer changed too
+   (above). *Reverse by* a prefix-only listing inside the offer's `pairs` closure.
+2. **A failed primary leg hands the second leg nothing** — it copies nothing and says the standing sentence (*"There is
+   no snapshot to copy yet."*), rather than re-listing for an older copy (the old road did). The brief's letter
+   ("never re-discover by listing"). Cost, stated: when the primary fails AND the far folder is due, the far copy waits
+   for the next run (≤ 1 h — that run's due-check stands on the newest own copy and hands it through). A `prune` that
+   throws AFTER a successful write also counts as failed here (pre-existing: `performBackupIfDue` has always thrown
+   then). *Reverse by* `standing = standing ?? (try? existingBackups(in: directory).last)`.
+3. **The name rule is exact** — fp8 must be eight LOWERCASE hex (every writer uses `StoreKeyEnvelope.fingerprint`,
+   lowercase `%02x`) and the stamp must read back byte-for-byte. *Reverse by* the old tail rule (R-tight shows what it
+   re-admits).
+4. **`performBackupIfDue` stays** as a wrapper with its signature (dozens of test call sites); the enum is the new
+   road's only type.
+5. **`performSecondLeg(source:)` is required, no default** — R1-m5's shape: a caller hands the file it means.
+6. **The listing sorts by the PARSED stamp (name as tiebreak)** — identical to name order for the app's names (fixed
+   position, lexicographic stamp), and it no longer depends on that property.
+7. **The face pin is kept as a guard** though the face as a defect is hollow — it pins the property the fix relies on.
+
+### CLOSING RUNS (at the unit's END, on the final tree `860b8cb2`; zero app instances before each)
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| **Mac closing set** — 37 literal suites: the backup/Data Safety family (`BackupOwnFilesTests`, `BackupRetentionTests`, `BackupRunTests`, `BackupSingleFlightTests`, `DataSafetyRunbookTests`, `MarkdownInsuranceTests`, `SyncSafetyFaceTests`, `SecretCheckTests`, `ICloudDriveOfferTests`, `MarkdownInsuranceFlipTests`, `AcknowledgmentsCopyTests`, `Phase13pBackupEnvelopeTests`, `Phase13pInsuranceFaceTests`, `StoreLocationTests`, `StoreBackupTests`, `IdleCommitSchedulerTests`, `SyncSessionFenceTests`, `IdleSweepMarkTests`, `SnapshotPairTests`), the Castle offer's (`PostureSwitchTests`, `Phase13pControllerTests`, `ProtectionDialsTests`, `ProtectionCopyTests`, `ProtectionCadenceTests`, `StoreKeyGuardBackingTests`, `ProtectionDialsPerStoreTests`), and **the eleven Tutorial suites** | `DerivedData/18k-c7-closing.sh 18k-c7-closing1` | **`✔ Test run with 296 tests in 37 suites passed after 196.066 seconds`** — zero skipped, zero ✘ |
+| iOS build | `xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS` | **`** BUILD SUCCEEDED **`** (`18k-c7-ios-build.log`) |
+| Core (`swift test`) | — | **NOT OWED** — zero `Sources/` |
+
+Not run, named: the opt-in keychain drills (`PostureSwitchDrillTests` — it replicates the offer's closure over
+`existingBackups`; `Phase13pKeyedDrillTests`) — the orchestrator's to opt into.
+
+### NOTICED, NOT TOUCHED (C7's scope fence)
+
+1. **A copy stamped in the FUTURE stops the automatic backups silently** (a separate mechanism — the clock, not a
+   name). If any own-pattern copy carries a stamp ahead of now (a clock that once ran fast), the primary due-check
+   reads it as fresh (`now − future` is negative, `< interval`) until that date plus a day, and the face never turns
+   stale-orange (`Date() − newest` is negative). The 13l silent-stop class. Needs an owner (12 or 18o).
+2. **The A1 rail writes its safety copies INTO the app's `Backups/` under the app's prefix** (`variorum-backup-a1-…`).
+   After this fix the name is harmless to the app — never a candidate, never pruned, never sent, never offered — but a
+   rail writing to a sibling folder (or without the prefix) would keep the app's folder the app's; and those copies are
+   ciphertext her Apple account can open (Standard) for as long as they sit, outside any retention. Orchestrator
+   procedure, not code.
+3. **Every Mac test run launches the dev app as the test host, and the host's launch runs the dev store's backup
+   tick** — a dev snapshot beside the dev store and, when due, one into the dev store's configured second folder, which
+   on this machine is `~/Documents/Variorum/Backups/` (her real home). Proven here by the dev store's own log (THE USE
+   EVIDENCE 0b). Before this fix each such launch re-sent the plaintext drill file there; now at most one real dev
+   snapshot a day. WalkKit's "every launch of the Debug build takes a dev-store backup" covers the app, not the test
+   host — worth an ENVIRONMENT TRAPS line (and whether a test host should start `AppServices`' clocks at all is 12's).
+4. **`~/Documents/Variorum/Backups/` holds a PLAINTEXT copy of the July dev drill**
+   (`variorum-backup-seed-drill-2026-07-18T095149Z.sqlite`, 1.8 MB — the dev store of 2026-07-18) that the pre-fix dev
+   app re-sent at every run; the dev `Backups/` holds three such files plus sidecars. The app never deletes them (not
+   its names); hers to delete. I touched none.
+5. **The lock-time copy (Castle)** shares the fixed rule (its due-check and `prune(keep: 14)` go through
+   `existingBackups`) — covered by the rule's pins, not separately pinned (it needs a keyed file + key-file world).
+6. On an up-to-date run the log's primary leg names no file (`primary.file` nil for `.fresh`), so a receipt cannot say
+   which copy the second folder was sent from. The log's shape, unchanged; cosmetic.
+
+### CAPTURES
+
+`notes/plans/18k-screens/c7/` (gitignored): `settings/01-data-safety-as-found.png` · `02-open-panel-scratch.png` ·
+`03-after-pick.png` · `04-after-back-up-now.png` · `05-restored-documents.png` · `launch/w0.png`; the scratch second
+folder `scratch-second/Variorum/` (kept for a spot-check `cmp`). Logs + scripts in `App/Variorum/DerivedData/`:
+`18k-c7-pins-prefix` · `18k-c7-pins-fixed` · `18k-c7-R-{full,pass,narrow,tight}` · `18k-c7-walk-build` ·
+`18k-c7-closing1` · `18k-c7-ios-build`; `18k-c7-run.sh`, `18k-c7-closing.sh`.
+- Deaths / resumes: none.
+- **C7 — DONE (implementer), awaiting the orchestrator's spot-check.**
