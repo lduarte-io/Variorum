@@ -126,6 +126,11 @@ struct RefontGapTopTests {
 
     /// Where the page's top edge rests inside the gap above her paragraph.
     enum Zone: String, CaseIterable, Sendable, CustomTestStringConvertible {
+        /// The previous paragraph's last line, below its BASELINE — only its
+        /// descenders on screen. The C6b walk's own find (Study, at the end
+        /// of the note after ⌘↓: a 3-pt sliver of the line above): to her eye
+        /// this IS a gap top, and the capture named the sliver's line.
+        case belowThePreviousBaseline
         /// The previous paragraph's own trailing spacing — the walk's W-4.
         case belowTheParagraph
         /// The blank line between the two paragraphs.
@@ -138,6 +143,7 @@ struct RefontGapTopTests {
     /// The geometry of the gap above block `n` on her note's shape.
     private struct Gap {
         let herStart: Int
+        let paragraphBaseline: Double
         let paragraphBottom: Double
         let blankTop: Double
         let blankBottom: Double
@@ -154,8 +160,13 @@ struct RefontGapTopTests {
         let blank = try #require(
             JumpPrimitive.lineSpan(ofOffset: previous.upperBound, in: h.textView))
         let her = try #require(JumpPrimitive.lineSpan(ofOffset: herStart, in: h.textView))
+        // Leading is 0 in both voices, so the baseline sits one descent
+        // above the line's bottom (TK2's `glyphOrigin.y`: 14 of 17 in
+        // Terminal, 17 of 22 in Study — measured).
+        let descent = Double(abs(EditorDocument.baseFont.descender))
         return Gap(
-            herStart: herStart, paragraphBottom: paragraph.bottom,
+            herStart: herStart, paragraphBaseline: paragraph.bottom - descent,
+            paragraphBottom: paragraph.bottom,
             blankTop: blank.top, blankBottom: blank.bottom, herTop: her.top)
     }
 
@@ -183,6 +194,7 @@ struct RefontGapTopTests {
         await bringIntoView(n, h, scrollView)
         let g = try gap(above: n, h)
         let y: Double = switch zone {
+        case .belowThePreviousBaseline: g.paragraphBaseline + 0.5
         case .belowTheParagraph: (g.paragraphBottom + g.blankTop) / 2
         case .onTheBlankLine: (g.blankTop + g.blankBottom) / 2
         case .belowTheBlankLine: (g.blankBottom + g.herTop) / 2
@@ -193,6 +205,9 @@ struct RefontGapTopTests {
         let now = try gap(above: n, h)
         let edge = Double(scrollView.contentView.bounds.minY)
         let inZone = switch zone {
+        // The probe (one point under the edge) must also fall below the
+        // baseline and inside the line's box.
+        case .belowThePreviousBaseline: edge > now.paragraphBaseline && edge + 1 < now.paragraphBottom
         case .belowTheParagraph: edge > now.paragraphBottom && edge < now.blankTop
         case .onTheBlankLine: edge > now.blankTop && edge < now.blankBottom
         case .belowTheBlankLine: edge > now.blankBottom && edge < now.herTop

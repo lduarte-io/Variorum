@@ -3754,3 +3754,16 @@ not the product: the ground truth is now "the first entry with text at or below 
 for still bites at BOTH stops — **mutation M-inset** (named here, run after the commit that carries this line): drop
 `topVisibleOffset()`'s container conversion (`top + 1` for `top + 1 - origin.y`); expected red at 200 (block 8 for 7)
 and at 500 (block 21 for 20). **Result: RED exactly as predicted** — `8 == 7` and `21 == 20`, 2 issues (`18k-c6b-M-inset.log`); restored → clean.
+
+### THE WALK FOUND A NEIGHBOUR OF W-4 — the descender sliver (PROVISIONAL, QUESTIONS #147)
+
+The walk of the fix (below) passed every gap-top row in Terminal and Study mid-note, and the Terminal end. **The Study
+END row failed**: after ⌘↓ the page's top edge sat 3 pt inside the previous paragraph's last line — below its
+baseline, only descender tips on screen (`walk/s-end-a-before`, crop `cmp-send`) — and comments ON brought that line
+back whole to the top with hers below (`walk/s-end-b-ON`). The fix's gap test used the line BOX; this edge was inside
+the box. To her eye it is a gap top, and it is the W-4 shape. **Pin first:** `RefontGapTopTests` gains the zone
+`belowThePreviousBaseline` (the edge half a point under the previous line's baseline; the probe inside its descent) —
+**RED on the fix tree `a8e1e8cc`** (5 issues: 47510 for 47525, `18k-c6b-baseline-prefix.log`), the other seven cases
+green. **The refinement (PROVISIONAL, QUESTIONS #147):** a line counts as hers while its baseline is at or below the
+probe (TK2's `glyphOrigin.y` — 14 of 17 pt Terminal, 17 of 22 Study, measured); a line whose baseline has scrolled
+off yields to the next line with text. PENDING until the pins run.
