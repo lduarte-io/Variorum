@@ -97,6 +97,13 @@ measures the warning family C3 then sweeps.
 - **R-18k-7 — the TCC grants:** she granted Ghostty Accessibility + Screen Recording mid-run; both
   read true without a restart (`AX: true SCREEN: true`), so the held walks run INSIDE this run after
   C5, before the ladder (`notes/handoffs/18k-held-walks-handoff.md` is the walk session's brief).
+- **R-18k-8 — A1 safety copies go into a SUBFOLDER of `Backups/`** (her answer to C7's procedure
+  question, 2026-09-25: *"sessions can keep putting their safety copies in the app's own Backups/
+  folder but maybe in a subfolder. I'm soon going to go through and delete all of the extra backups
+  (aside from one most recent one) anyway, so it's not a huge issue."*). The subfolder is
+  **`Backups/safety-copies/`** (the name PROVISIONAL, the orchestrator's; C7's listing reads only the
+  top level, so nothing there is ever a candidate or pruned). Recorded in the architect-phase skill's
+  environment line; this run's closeout refresh is its first use.
 - **Her standing posture for the night:** *"just bring me the issues now, your session will be
   running overnight"* — every remaining ambiguity is PROVISIONAL-and-continue; anything needing her
   hands (a Touch-ID-gated custody walk, a product call) is HELD and bundled for the morning.
@@ -142,8 +149,9 @@ measures the warning family C3 then sweeps.
   commit**. **No commit trailers** (her 2026-09-04 rule — no `Co-Authored-By`, no `Claude-Session`).
   **Stage PATHSPEC-LIMITED (`git add <your files>`), never `git add -A`** — the orchestrator edits
   shared records between your commits.
-- **Backups:** any act near the real store takes the A1 rail first (WAL-safe, UTC-named) — this run
-  never touches it before the closeout refresh.
+- **Backups:** any act near the real store takes the A1 rail first (WAL-safe, UTC-named), written
+  into **`Backups/safety-copies/`** (R-18k-8) — never loose in `Backups/`. This run never touches the
+  real store before the closeout refresh.
 - **The `-only-testing`-in-a-variable trap:** flags built into a zsh VARIABLE and passed unquoted
   select NOTHING, and xcodebuild prints `Executed 0 tests` **and `** TEST SUCCEEDED **`**. Write the
   selectors literally; the only proof a run happened is `Test run with N tests in M suites` with a

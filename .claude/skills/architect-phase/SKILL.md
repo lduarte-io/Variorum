@@ -267,7 +267,9 @@ oracles out from under the tests, the 4G-recorded trap); suites running
 beside a live session flash the test host's windows on screen — prefer
 zero-instance windows for timing-sensitive measurements; backups
 WAL-safe with UTC names, ALWAYS before
-touching the real store (the A1 rail); drives need unlocked +
+touching the real store (the A1 rail) — written into the SUBFOLDER
+`Backups/safety-copies/`, never loose in `Backups/` (her ruling R-18k-8,
+2026-09-25: the app's own listing lives at the top level); drives need unlocked +
 author-free + own `caffeinate -d`; screenshots in gitignored dirs;
 never `git checkout` over uncommitted work; never push.
 
