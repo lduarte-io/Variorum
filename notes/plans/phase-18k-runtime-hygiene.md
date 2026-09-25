@@ -1323,12 +1323,41 @@ container. One canonical note now sits on `NearViewportObserver`; the five other
 | `PageLeafView`, `PageTurnKeys`, `CommentsPanel`'s key monitor, `DivideWSheet`'s key monitor, `PaneFocusCatcher` | 4+16, 2+8, 1+5, 5+9, 20+91 | 0 | SAFE-AS-IS — assign closures/properties onto the NSView only |
 | `ReferencePanel` ×3 (PDF / Quick Look / web) | 0 (not mounted by any suite) | — | SAFE-AS-IS by construction — NSView properties + a `.main`-queue notification observer (async) |
 | `Layout` types: `TrailingFlow`, `MastheadRowTwo`, `FlowLayoutLite` | 3,691+3,404 · 4,241+4,425 · 2+7 | 0 | SAFE-AS-IS — size/placement arithmetic, no state |
-| NSView overrides (`EditorTextView` `setFrameSize`/`layout`/`viewDidMoveToWindow`, `BlockDecor.layout`, `PaneSurface` `layout`/`viewDidMoveToWindow`) | 1,882 / 162 / 136 · 11 · 2,828 / 1,587 | 0 | SAFE-AS-IS (and `EditorTextView`/`PaneSurface` fenced) |
+| NSView overrides (`EditorTextView` `setFrameSize`/`layout`/`viewDidMoveToWindow`, `BlockDecor.layout`, `PaneSurface` `layout`/`viewDidMoveToWindow`) | 1,882 / 151 / 136 · 11 · 2,828 / 1,587 | 0 | SAFE-AS-IS (and `EditorTextView`/`PaneSurface` fenced) |
 | **Window registration** — `RootView:334` / `NoteWindowView:139` / `QuickNoteView:353` `.onAppear { windows.register(…) }` | (onAppear — M1 arms C/D) | 0 unbracketed in any window suite | SAFE-AS-IS and LEFT — `WindowRegistry` is `@Observable`; the sticky-key ruling binds its order and key-ness, untouched |
 | **`WindowKeyReporter`** (three hosts): `onWindow` → `windows.attach` (+ `NoteWindowView`'s `@State window`), `onKey` → `windows.noteKey` | make 18 · `viewDidMoveToWindow` 19 · `windowBecameKey` 4 | 0 | SAFE-AS-IS and LEFT — the sticky-key ruling (no resign door; `theStickyKeySurvivesAppDeactivation`); `NoteWindowView`'s `@State` shape is M1 arm G |
 | every other `.onAppear` (57 in all: `EditorView:169,185` · `QuickNoteView:353` · `DivideWSheet:146` · `CanvasView:235,1116` · `TrayPanel:1295` · `TakesBoardView:143,145,148,200,597` · `NoteWindowView:139` · `SidebarNoteBox:184,268` · `LibraryInfoPanel:436,546` · `ProtectionPane:193` · `ReadPostView:96` · `RootView:334,812,813,818,858` · `TakesShared:124,162,647,796,821` · `CommentsPanel:60` · `CompareBoardView:971` · `CommitBar:209` · `PostDetailView:492,723,732` · `VariorumApp:54` · `LensesBoardView:152` · `ReadModeView:216` · `ReadingFlowView:205,1086` · `ShelfView:426` · `LibraryTimeFace:485,500` · `CalmGrammar:127` · `BookView:235,241,245,1467,2056,2095,2109,2393` · `SpreadBookView:95` · `SidebarView:250` · `BookIndexView:403` · `BookOrderAndConversion:150` · `NotePicker:247`) | — | 0 unbracketed across 334 tests | SAFE-AS-IS as a kind — `onAppear` runs after the update (M1 arms C/D) |
 | `onPreferenceChange` | — | — | none in the codebase (0 sites) |
 | `GeometryReader` bodies (`RootView:622`, `TakesBoardView:578`, `CommentsPanel:619`, `NotePagesView:107`, `PagedReadView:148`) | — | 0 | SAFE-AS-IS — no synchronous write in any of the five bodies (read) |
+
+### THE USE EVIDENCE (in-app, dev store, the final tree + the scratch probe; the Sherlock book, *A Scandal in Bohemia* 262 blocks, a 14-block note for Canvas)
+
+The driver (`C3_WALK=1`, a DEBUG task on `RootView`, never committed, the C1/C2 pattern — the
+scripts are in `notes/plans/18k-screens/c3/`) walked, in order: the book in **INDEX** (an ANIMATED
+live resize 1,700 → 1,440 → 1,700 pt, then the 235,019-pt pane scrolled to five depths and back) ·
+the book in **OUTLINE** (the same) · the note in **CANVAS** (the resize, the board scrolled, and
+ONE synthesized card drag through `NSApp.sendEvent`, which MOVED the card (20,20) → (100,68) on
+its first attempt) · **TAKES** as the positive control · a **note-only window** and a **second main
+window**, each opened and closed.
+
+| phase | `Modifying state during view update` | inside |
+|---|---|---|
+| Index · Outline · Canvas (incl. the drag) · both windows | **0** | — |
+| opening the note on the way into Canvas (it opens in its remembered pane mode first) | 14 | `PaneSurface.makeNSView` |
+| Takes (the positive control) | 15 | `PaneSurface.makeNSView` |
+
+12,762 probed entries, including `BookIndexView:791` ×1 (the Index column is capped at 640 pt, so a
+260-pt window resize never changes its width and the action fires only at the mount),
+`BookIndexView:959` ×510 and `:1211` ×3,161, `BookView:1940` ×208, `CanvasView:161` ×47 and `:166` ×99,
+and the window reporter (3 mounts, 4 `viewDidMoveToWindow`, 3 `windowBecameKey`). **One capture
+trap, recorded for every future walker:** the FIRST launch (`c3-walk1.log`, no env) logged ZERO
+warnings, the Takes control included. A directly launched binary does not mirror SwiftUI's
+runtime-issue log to stderr. The second launch set `OS_ACTIVITY_DT_MODE=YES` and captured the
+control (`c3-walk2.log`), so an in-app warning count needs that variable AND a positive control.
+**The dev store was written by the walk:** one Canvas card's layout moved, as above. That is a
+dev-store row, never the real store. The Debug instance was stopped by PID after its path was
+verified as this session's `DerivedData/18k-c3-walk` product, following C2's precedent that a
+driver's `NSApp.terminate` hangs.
 
 ### LIVE STATUS` at the END of this file in your FIRST commit, and flip it in the same commit as each
 piece; unverified claims marked **PENDING**. Commit per coherent piece (a site or a small group per
@@ -1347,9 +1376,19 @@ your record.
 
 ## UNIT C3 RECORD — the mechanical state-write deferrals (implementer: `opus-implementer`, 2026-09-25)
 
-**NOT DONE (first line, per the brief):** PENDING — written at close. Known already: the hands-on GUI
-walk and its captures are HELD (this host has no Screen Recording / Accessibility — C1's finding);
-the in-app scripted / harness evidence stands in, and her walk steps are listed at close.
+**NOT DONE (first line, per the brief):** (1) **NO DEFERRAL WAS APPLIED — the brief's premise did
+not survive measurement.** Not one of the 76 geometry actions, the window-registration road, any
+`onAppear`, or any trigger other than `PaneSurface` (18l's, fenced) emits `Modifying state during
+view update`: 0 of 1,181 harness warnings and 0 of 29 in-app ones. So the brief's "defer each one
+that can be deferred" found nothing whose evidence a deferral would move. The first site was
+deferred in scratch to prove it (no decrease), and the change was not kept. What landed is a
+COMMENT-ONLY correction at the six hops that gave the disproven reason. (2) **The hands-on GUI walk
+and its captures are HELD**: this host holds no Screen Recording and no Accessibility grant (C1's
+finding). An in-app scripted walk on the dev store stands in, and her steps are listed below.
+(3) `CommentsPanel:795` (the deleted fold's height, behind a click) and `ReferencePanel`'s three
+representables were never entered by any run. Their verdicts rest on the shape (the same as sites
+that were entered) and on reading the code (no SwiftUI storage written). (4) No full Mac suite (the
+orchestrator's finals). No `swift test` and no iOS build: zero `Sources/`, zero `Shared/`.
 
 ### READING (done in-session before any code)
 
@@ -1399,16 +1438,123 @@ warnings across 61 suites, attributed by nearest started test — mostly pane-mo
   correction** at the six places that gave the disproven reason for a next-turn hop
   (`StableSurface.swift` ×2 + a canonical note on `NearViewportObserver`; `BookView.swift` ×3;
   `BookIndexView.swift` ×1). The hops are byte-identical and kept; only the stated WHY changed.
-  `git diff -U0` over `App/`: **0 non-comment lines changed.** Build + AFTER counts PENDING.
+  `git diff -U0` over `App/`: **0 non-comment lines changed.** Built and counted AFTER (Phase 4).
 - Phase 4, the AFTER count, `CanvasDragTrackingTests` ×3, closing runs — DONE (numbers under
-  DISPOSITION; written at close).
+  DISPOSITION).
 - Phase 5, the IN-APP scripted walk (dev-store Debug build; the GUI cannot be driven from this host)
-  — IN-PROGRESS. **The working tree carries an UNCOMMITTED scratch probe + walk driver while this
-  runs (41 files); if this session dies, REMOVE it — `git checkout -- App/Variorum/Variorum && rm -f
-  App/Variorum/Variorum/Core/C3Probe.swift` — never commit it.** Driver (env `C3_WALK=1`, appended to
+  — DONE (THE USE EVIDENCE above). The scratch probe + driver are REMOVED: `git checkout -- App/…`
+  + the helper deleted; `git diff --quiet HEAD` true; zero `C3Probe`/`C3Walk` strings in `App/`;
+  zero app instances. (While it ran, the tree carried them uncommitted, as recorded in
+  `286c27a6`.) Driver (env `C3_WALK=1`, appended to
   `RootView.swift`): the Sherlock book in INDEX (a live animated resize narrow/back + the pane
   scrolled), then OUTLINE (the same), a mid-size note in CANVAS (resize, scroll, one synthesized card
   drag through `NSApp.sendEvent`), TAKES as the POSITIVE CONTROL (panes mount, so `PaneSurface`
   should warn — a zero elsewhere cannot then be a capture failure), and a note-only window + a
   second main window opened and closed. Built with `-derivedDataPath DerivedData/18k-c3-walk`.
 - Deaths / resumes: none.
+- **C3 — DONE (implementer), awaiting the orchestrator's spot-check; the GUI walk HELD.**
+
+### DISPOSITION
+
+**Ledger row C3 — the review's §5.1 A3/A4/A5 are DISMISSED AS HOLLOW, measured. No deferral was
+applied. A comment-only correction landed. No observable defect was found, so no pin is owed.**
+- **The mechanism (M1, M2, THE USE EVIDENCE):** SwiftUI flags a state write only inside a view
+  update, meaning inside `makeNSView`/`updateNSView` here. It runs `onGeometryChange` and
+  `onScrollGeometryChange` actions, `onAppear`, and the window reporter's AppKit callbacks outside
+  that update. In this app the family is 100% `PaneSurface`: set A 4 of 4 · set B 1,127 of 1,127 ·
+  set C 50 of 50 · the in-app walk 29 of 29.
+- **The brief's first site, `BookIndexView:791`, was demonstrated hollow.** `BookView:1410`'s exact
+  deferral was applied in scratch. Set B read 1,126 → 1,134 (no decrease; the +8 sits in one Takes
+  test's `PaneSurface` count), and the Index suites were green with zero warnings on both sides.
+  The change was not kept. The "known-correct" twin's hop is not a pattern this site owes, because
+  its stated reason is the claim C2 disproved.
+- **The table:** 0 DEFERRED · SAFE-AS-IS everywhere · LEFT as well for the 8 landing reports (a hop
+  would reorder measure-then-aim) and the window-registration road (the sticky-key ruling,
+  untouched) · `PaneSurface` LEFT for 18l.
+- **Landed (`5286ff39`, comment-only; `git diff -U0` over `App/`: 0 non-comment lines):** the six
+  places that justified a hop with the disproven mechanism now say the hop is harmless and kept,
+  and one canonical note on `NearViewportObserver` carries the measurement. The hops are
+  byte-identical. Reason: the review's A3 claim was plausibly read off these very comments, and
+  leaving them would invite the next reviewer to re-derive it.
+- **Warning counts, one fixed pair of suite sets, unprobed, zero app instances, commands in the
+  scripts:**
+  - **Set A**, C2's 16 suites (`DerivedData/18k-c2-warnset.sh`): **BEFORE 4 → AFTER 4**.
+  - **Set B**, this unit's 39 suites (`DerivedData/18k-c3-setB.sh`): **BEFORE 1,126 → AFTER
+    1,135**. The spread across four runs of the same app code is 1,126 · 1,127 · 1,134 · 1,135.
+    The per-test diff puts every difference in two `TakesArticleScrollTests` tests (+8, +1): that is
+    `PaneSurface`'s run-to-run variance, not this unit.
+  - Before = `a43af3e9`, whose app code is the pre-C3 `c823357b`. After = `61fda725`, which adds
+    the comment-only diff.
+- **`CanvasDragTrackingTests`: 7 of 7 green.** 4 of the runs were inside set B under load
+  (probed · before · scratch-deferral · after) and 3 were isolated (`✔ Test run with 2 tests in 1
+  suite passed` ×3). The flake did not reproduce this session. The review's "structure matches
+  symptom" is not supported, because the Canvas writes produce no warning. Unclaimed either way.
+- **Existing pins:** none modified; none needed editing.
+- **Closing runs (the final tree):**
+  - Set A AFTER: `✘ Test run with 92 tests in 16 suites failed after 42.885 seconds with 1 issue`.
+    The one issue is the NSSlider scrubber pin, a KnownIssues row 65 macOS-27 delta.
+  - Set B AFTER: `✘ Test run with 187 tests in 39 suites failed after 109.914 seconds with 1
+    issue`. The one issue is `LibraryPanelHostTests`' "inspector" pin, the same row.
+  - Closing: `✔ Test run with 138 tests in 20 suites passed after 116.190 seconds`. That is
+    `StableSurfaceTests`, `SurfaceSizeMemoryTests`, the three `ReadingFlow` suites,
+    `BookOutlineHeightsTests`, `BookHeightManifestTests`, `LandingAuthorityTests`, `BookAnchorTests`
+    and **all eleven Tutorial suites, green**, with zero skipped. Its 9 warnings are all in one
+    Tutorial takes act (`branchOnAClosedFanRevealsTheNewTake`, panes, `PaneSurface`), the same 9
+    C2's closing run saw there.
+  - In all, 417 tests / 75 suites ran on the final tree. The only issues were those two known
+    deltas.
+- **No PROVISIONAL, no QUESTIONS entry** (#147 unused). Nothing product-shaped arose.
+
+### NOTICED, NOT TOUCHED (C3's scope fence)
+
+1. **For 18l (A1's ruling): `PanePublisher` is not the "estimated majority" of the warning count.
+   It is ALL of it** in every run this unit made (1,181 harness, 29 in-app), mostly inside
+   `PaneSurface.makeNSView`. The heaviest single generators are the Takes article tests (~80–113
+   each: `theBloomDoorStillGoesToTheBlockTheRingWasLastIn`,
+   `aPlainRoundTripComesBackToTheSameLineNotOnlyTheSameRow`, …). The review document itself
+   (`notes/codebase-health-review-2026-09-21.md` §5.1) is untouched; annotating it is the
+   orchestrator's call.
+2. **The walk-tooling trap:** a directly launched Debug binary needs `OS_ACTIVITY_DT_MODE=YES` for
+   SwiftUI's runtime issues to reach stderr. Without it the count reads a false ZERO (walk 1 did,
+   positive control included). One line in `Tools/WalkKit/README.md` would save the next walker.
+   It is left for the orchestrator, because the tooling doc is shared.
+3. **The Outline and Index hops (group D) are harmless but not free of history:** every landing pin
+   was measured WITH them. A future cleanup that removes them is a timing change and would need
+   the landing suites re-run, so it is not recommended as hygiene.
+4. `BookIndexView:791` fires once per mount at any window width above the 640-pt column cap. That
+   is fine, and recorded so nobody reads "1 entry" as a dead action.
+5. `CommentsPanel`'s view is mounted by no suite (its tests drive `CommentsPanelModel`), and neither
+   are `ShelfView`, `TakesBottomBar` or `ProseTakeCard` directly (they were reached through their
+   hosts). A mount smoke for the panel would be cheap for whoever next owns it.
+6. C2's noticed item 7 (`BookOutlineLandingTests`' stale "realizes twice" comment) is still there,
+   because this unit did not touch that file.
+7. The DEBUG oracles in group S (38 sites) are C4's ownership sweep, listed not touched.
+
+### THE GUI WALK — HELD for the author (her steps; ~5 minutes on the dev-store Debug build)
+
+Nothing she sees should change, because this unit changed only comments. The walk confirms the
+measurement.
+1. Run the dev-store Debug build (Xcode's Run). Open **Console.app**, filter on *Modifying state
+   during view update*, process **Variorum**.
+2. Open **Sherlock** in **Index**. Drag the window narrower, then wider, and scroll the pane from
+   top to bottom. Expect **no** Console lines, and no rows jumping under the scroll.
+3. Switch the book to **Outline** and repeat step 2. Expect none.
+4. Open a note in **Canvas**. Drag a card, scroll the board, and resize the window. Expect none,
+   and the card lands where it was dropped.
+5. Open a note in a **new window** and close it. Then File ▸ **New Window**, and close that too.
+   ⌘-Tab to another app and back: the note you were editing stays live (the sticky key). Expect
+   none.
+6. **The control:** switch a note to **Takes**. Console WILL print lines here. They are
+   `PaneSurface`'s, the family 18l owns, and they are expected.
+
+### CAPTURES
+
+None possible (see the first line). The evidence is the harness logs and the in-app walk logs.
+- **Harness logs** (`App/Variorum/DerivedData/`): `18k-c3-mech1.log` (M1),
+  `18k-c3-attr{A,B,C}.log` (M2, probed), `18k-c3-before-{A,B}.log`, `18k-c3-hollow-B.log`,
+  `18k-c3-after-{A,B}.log`, `18k-c3-canvasdrag-{1,2,3}.log` and `18k-c3-closing1.log`, with the
+  set scripts beside them (`18k-c2-warnset.sh`, `18k-c3-setB.sh`, `18k-c3-closing.sh`).
+- **In-app walk** (`notes/plans/18k-screens/c3/`, gitignored): `c3-walk1.log` (the false-zero
+  capture) and `c3-walk2.log` (the real one), with the instruments `c3_probe_apply.py`,
+  `c3_walk_apply.py` + `c3_walk_patch2.py` (+ its `c3_walk_drag_block.swift.txt`), `c3_attr.py`,
+  and the M1 harness `C3ScratchMechanismTests.swift`. None of these was ever committed.
