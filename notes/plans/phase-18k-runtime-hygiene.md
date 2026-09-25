@@ -2992,7 +2992,8 @@ own DerivedData (`App/Variorum/DerivedData/18k-walks/`). Captures: `notes/plans/
 - C1 — DONE, **PASS** (table below).
 - C2 — DONE in Terminal, **PASS** (table below); the Study repeat rides the C6 voice flip.
 - C3 — DONE, **PASS with one FINDING (W-1, pre-existing, not 18k's diff) and one step-text correction** (table below).
-- C6 — IN-PROGRESS. C5 — NOT-STARTED.
+- C6 — WALKED in both voices: steps PASS on the ordinary road, **FINDING W-2** (the place lost after a gap round trip + a long landing, both voices) + observations O-1/O-2 (table below); the settings restore rides the end of the walk.
+- C2 Study repeat · C5 — NOT-STARTED.
 - Deaths / resumes: none.
 
 **The dev store as found:** custody posture **standard** ("Your Apple account holds a key") — the app opened
@@ -3057,3 +3058,37 @@ Not reproduced on a second card; recorded for the orchestrator, not traced furth
 **Canvas residue:** the three cards placed on *three ways of working* were returned to the bank (`c3-12d/e/f`,
 `c3-12g` — its bank layout as found). The *Walk test* card stays placed: with an empty bank the toolbar shows no
 bank chip to drop onto (*Walk test* is itself walk residue).
+
+### C6 — the re-font reading position on *The Adventure of the Copper Beeches* (212 blocks) — BOTH voices
+
+Settings as found (general): voice **Terminal**, appearance **Follow system**, palette **Rose & moss**; (editor)
+inline comments **OFF**, paragraph gap **Standard**, ring **Outline ring**. Settings opened from the app menu. A
+"line at the top" is MEASURED (text-row tops in the page column, `/tmp/lines.py`, points), not eyeballed.
+**Walker fact (for the README):** `cliclick` clicks on the SwiftUI Settings switches and on the sidebar pane rows did
+NOT toggle them (three tries, the point verified at the AX frame); the Accessibility road does — `click` on
+`checkbox "<name>"` / `radio button n of radio group "Design voice"` / `pop up button "<name>"` of
+`group n of scroll area 2 of group 1` of the Settings window, and the panes are `button 1…9 of scroll area 1`.
+
+| # | Step | Captures | What I saw (measured) | Verdict |
+|---|---|---|---|---|
+| 1 | *Copper Beeches* in Write; the middle of the story | `c6-01-copper-write` · `c6-02-mid` | The note opened at its remembered caret (block 212/212, its last line at the page top — the end-landing shape) | — |
+| 2 | Inline comments ON, then OFF, mid-story — **Terminal** | `c6-06a/b/c-textline-*` (the pair `c6-04*`/`c6-05*` were no-ops: the cliclick road above) | A line straddling the top edge ("committed there.") stays the top line ON and OFF; after OFF every line sits **5 pt** lower than before (204 → 209) — the same line, within itself | PASS |
+| 2 | — **Study** | `c6-16a/b/c` · `c6-17-s1*/s2*` · `c6-18-p1*/p2*/p3*` | Straddling lines (p1–p3) stay the top line, pulled fully into view (+3 / +11 pt). **O-1:** when the anchor line's GLYPHS sat just under the edge ("Pray tell us…", 154 pt, the edge at 140), the FIRST ON→OFF left it **22 pt (one Study line) lower**, a blank band above it (176 pt); from there, two more ON/OFF round trips returned to 176 exactly | PASS, with O-1 recorded |
+| 3 | Paragraph gap → a blank line's worth → Standard — Terminal and Study | `c6-07a/b/c-gap-*` · `c6-19a/b/c-study-gap-*` | Terminal: back to the baseline PIXEL-IDENTICAL in the top region; Study: the same line at the top, back to the baseline to ≤1 pt | PASS |
+| 4 | ⌘↓ to the end, then comments ON/OFF — Terminal ×6, Study ×2 | `c6-09*` · `c6-10-t1…t3*` · `c6-11-r1…r4*` · `c6-20-e1*/e2*` | The page drawn whole every time (no blank page — row 53 holds); the same tail line at the top ON and OFF in all eight | PASS |
+| 5 | Voice Study ⇄ Terminal from mid-story | `c6-12a-mid` · `c6-12c-study-mid` · `c6-12d-terminal-back` | The same paragraph at the top both ways ("“‘Oh, yes,’ said he…"), Study re-wrapped; the note's current block (118) kept | PASS |
+| 6 | Landings: ⌘2 → ⌘1; a deep jump from Blocks ▸ open in Write | `c6-13a/b/c` · `c6-14a/b/c` · `c6-15a…d` | Write → Takes → Write: the page where it was (the whole-window diff is 178 px — the caret only). Blocks ▸ block 11 and block 211 (filtered) ▸ **open in write**: each block's FIRST line at the very top (block 11/212, 211/212). (A double-click on a filtered row did not open it — the row had not been selected by the first click, a missed point; the button road worked) | PASS |
+
+**FINDING W-2 (C6's surface — the place LOST after a paragraph-gap round trip, both voices; 2 of 3 tries):**
+recipe — mid-story, paragraph gap → "a blank line's worth" → "Standard"; click in the text; **⌘↓** (a long landing to
+the end); ~2.5 s later turn inline comments **ON**. In **Terminal** (`c6-07*` then `c6-08a/b/c`): the end-landed page
+("And in this way he managed…" at the top) went, on ON, to "“I have my revolver,” said I." — about a dozen
+paragraphs and two screens UP — and OFF left it there. In **Study** (`c6-21-g1a/b/c`): the same, the page going
+from "And in this way…" to "He has come back and done it…" (≈ a dozen paragraphs up) and staying on OFF. The
+immediately following identical run (`c6-21-g2*`) held, with O-1's one-line shift (153 → 176). **Without** the gap
+round trip, 10 end runs and 7 mid runs never lost the place. Expected per the step: the same line at the top.
+Not traced; whether it is C6's re-assert or the pre-existing estimate class is the orchestrator's (a pre-C6 build
+pair is WalkKit's worktree recipe). **O-2 (the same precondition):** in Study run `c6-20-e1a`, 2.5 s after that
+⌘↓ landing (the run after a gap round trip), the editing RING was drawn ~one line too HIGH — its top in the gap
+above the paragraph, its bottom edge cutting through the second-to-last line, the last line outside it (zoom:
+`tmp/` crop of `c6-20-e1a-end`); the next frame (`c6-20-e1b-ON`) drew it right.
