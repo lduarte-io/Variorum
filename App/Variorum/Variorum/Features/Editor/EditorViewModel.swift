@@ -4083,11 +4083,61 @@ final class EditorViewModel {
         // reader back to the top of the block on every width reflow (A4).
         // Resolve to the LINE at the viewport top instead (`FragmentLines`).
         let lines = fragment.textLineFragments
+        let localY = point.y - fragment.layoutFragmentFrame.minY
+        // 18k C6b (the held walks' W-4): the edge in a paragraph GAP is not on
+        // any line she is reading. A layout fragment includes its paragraph's
+        // trailing spacing, so an edge below its last line hit the PREVIOUS
+        // paragraph and named its last line; and a note with a blank line
+        // between paragraphs (every sample-library story — bulk entry keeps
+        // that line as content) put the edge on the BLANK paragraph too. The
+        // restore then put that line at the top and hers a line lower. Here
+        // the line she is reading is the first line of the next paragraph
+        // that has text, so the capture names it. Bounded by the viewport
+        // and laid-out fragments only (P1); nothing readable below the edge
+        // inside the viewport (a note's end, a page of blank lines) keeps the
+        // old answer.
+        let belowItsLastLine = lines.last.map { localY >= $0.typographicBounds.maxY } ?? false
+        if belowItsLastLine || Self.isBlankParagraph(fragment),
+           let below = firstReadableLineStart(
+            after: fragment, above: top + scrollView.contentView.bounds.height - origin.y,
+            layoutManager: layoutManager, contentManager: contentManager) {
+            return below
+        }
         guard let i = FragmentLines.lineIndex(
-            atLocalY: point.y - fragment.layoutFragmentFrame.minY,
+            atLocalY: localY,
             lineBounds: lines.map(\.typographicBounds))
         else { return fragmentStart }
         return fragmentStart + lines[i].characterRange.location
+    }
+
+    /// 18k C6b: a paragraph with no text on it — a blank line.
+    private static func isBlankParagraph(_ fragment: NSTextLayoutFragment) -> Bool {
+        guard let paragraph = fragment.textElement as? NSTextParagraph else { return false }
+        return paragraph.attributedString.string
+            .trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// 18k C6b: the start of the first paragraph with text AFTER `fragment`
+    /// whose top is above `limit` (the viewport's bottom, in container
+    /// coordinates) — nil when there is none. No `.ensuresLayout`: every
+    /// fragment it can accept is on screen, so already laid out.
+    private func firstReadableLineStart(
+        after fragment: NSTextLayoutFragment, above limit: CGFloat,
+        layoutManager: NSTextLayoutManager, contentManager: NSTextContentManager
+    ) -> Int? {
+        let rangeEnd = fragment.rangeInElement.endLocation
+        guard contentManager.offset(from: rangeEnd, to: contentManager.documentRange.endLocation) > 0
+        else { return nil }
+        var found: Int?
+        layoutManager.enumerateTextLayoutFragments(from: rangeEnd, options: []) { next in
+            if next === fragment { return true }
+            guard next.layoutFragmentFrame.minY < limit else { return false }
+            if Self.isBlankParagraph(next) { return true }
+            found = contentManager.offset(
+                from: contentManager.documentRange.location, to: next.rangeInElement.location)
+            return false
+        }
+        return found
     }
 
     func restoreTopVisibleOffset(_ offset: Int) {

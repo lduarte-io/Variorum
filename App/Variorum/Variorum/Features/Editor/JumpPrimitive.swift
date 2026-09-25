@@ -36,7 +36,28 @@ nonisolated enum JumpCorrectionLoop {
         maxIterations: Int = 6,
         targetMinY: (Double) -> Double?
     ) -> Result {
-        var top = min(max(0, initialTop), maxScroll)
+        run(
+            initialTop: initialTop, maxScroll: { maxScroll }, tolerance: tolerance,
+            maxIterations: maxIterations, targetMinY: targetMinY)
+    }
+
+    /// The same loop with the scroll range read AS OF EACH CLAMP (18k C6b —
+    /// the held walks' W-2). The driver's own layout can change the
+    /// document's height while it steers: a range computed once, before the
+    /// first pass, went stale under a jump into TK2-estimated geometry
+    /// (a whole-document re-font had left the note under-estimated by
+    /// thousands of points), every proposal clamped to it, and the
+    /// "clamped at the document edge" arm below reported convergence a dozen
+    /// paragraphs above the target. A constant range behaves exactly as
+    /// before (the overload above).
+    static func run(
+        initialTop: Double,
+        maxScroll: () -> Double,
+        tolerance: Double = 1.0,
+        maxIterations: Int = 6,
+        targetMinY: (Double) -> Double?
+    ) -> Result {
+        var top = min(max(0, initialTop), maxScroll())
         var iterations = 0
         while true {
             guard let minY = targetMinY(top) else {
@@ -48,7 +69,7 @@ nonisolated enum JumpCorrectionLoop {
             if iterations >= maxIterations {
                 return Result(finalTop: top, iterations: iterations, converged: false)
             }
-            let next = min(max(0, minY), maxScroll)
+            let next = min(max(0, minY), maxScroll())
             if next == top {
                 // Clamped (target near the document edge): as close as the
                 // scroll geometry allows.
@@ -205,7 +226,17 @@ enum JumpPrimitive {
         // no room the two are the same number and the behaviour is unchanged.
         let room = Double((textView as? EditorTextView)?.typewriterRoom ?? 0)
         let textHeight = max(1, Double(docHeight) - room)
-        let maxScroll = Double(max(0, docHeight - clip.bounds.height))
+        // 18k C6b (the held walks' W-2): the scroll RANGE is the one the LAST
+        // pass left, read at every use — never a number taken once from the
+        // frame at entry. A jump into TK2-estimated geometry lays that
+        // geometry out as it steers, and a whole-document re-font can leave
+        // the note under-estimated by thousands of points: measured, her
+        // Study walk's restore entered on a 18,276-pt frame, its first pass
+        // grew the frame to 20,853, and every proposal after that clamped to
+        // the entry range's 17,448 while the line sat at 19,816 — "converged"
+        // 2,368 pt above it. On a frame that does not move (every settled
+        // landing) this is the same number it always was.
+        func maxScroll() -> Double { Double(max(0, textView.frame.height - clip.bounds.height)) }
         let docLength = contentManager.offset(
             from: contentManager.documentRange.location,
             to: contentManager.documentRange.endLocation)
@@ -223,7 +254,7 @@ enum JumpPrimitive {
         else { return }
 
         func scroll(to y: Double) {
-            let wanted = min(max(0, y), maxScroll)
+            let wanted = min(max(0, y), maxScroll())
             clip.scroll(to: NSPoint(x: 0, y: wanted))
             scrollView.reflectScrolledClipView(clip)
             layoutManager.textViewportLayoutController.layoutViewport()
@@ -239,7 +270,7 @@ enum JumpPrimitive {
             // measured). A clamp at a maximum the pass SHRANK is not a
             // displacement and is left alone. On settled geometry the clip is
             // already where it was asked to be and none of this runs.
-            let reachable = min(wanted, Double(max(0, textView.frame.height - clip.bounds.height)))
+            let reachable = min(wanted, maxScroll())
             if abs(Double(clip.bounds.origin.y) - reachable) >= 0.5 {
                 clip.scroll(to: NSPoint(x: 0, y: wanted))
                 scrollView.reflectScrolledClipView(clip)

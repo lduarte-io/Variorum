@@ -3664,7 +3664,7 @@ folder" (judgment call 2).
 | 3 | W-4 TRACE — what `topVisibleOffset()` captures at a gap-top, where the restore aims it | **DONE** — an anchor-CHOICE class, confirmed: the capture names the line whose FRAGMENT the edge hits; a paragraph's trailing spacing belongs to its own fragment, and her note carries a BLANK paragraph between every two (the sample library's k−1 newline). Numbers in the TRACE section (write-up PENDING) |
 | 4 | W-2 TRACE — same mechanism, a landing-vs-park race after ⌘↓, or C6's re-assert on a stale target | **DONE — a DIFFERENT mechanism, PRE-EXISTING, not C6's re-assert.** Reproduced on an instrumented dev-store build (2 of 3 Study end runs; 0 of 7 Terminal) and in a rig: the re-font's settle hop can spend its park BEFORE any display pass (spend frame == capture frame in every lost race), and `JumpPrimitive.jump` clamps every proposal to a scroll range computed ONCE from that stale frame while its own layout grows the document — 'converged' 1,624–2,384 pt above the line. The pin is RED here and on the C6-parent road (`18k-c6b-w2pin-prefix2.log` · `18k-c6b-w2pin-oldroad.log`). Write-up in the TRACE section (PENDING) |
 | 5 | Red-on-old pins committed RED on the pre-fix tree | **DONE** — W-4: `RefontGapTopTests` (4 tests, 8 cases): the capture ×3 zones + the re-font ×3 zones + a typed note RED; the straddled-line guard GREEN. W-2: `JumpViewportLayoutTests.aJumpWhoseOwnLayoutGrowsTheDocumentStillLandsItsLine` ×2 voices RED (4 issues) |
-| 6 | The FIX (narrowest surface) + pins GREEN + behavioural revert | PENDING |
+| 6 | The FIX (narrowest surface) + pins GREEN + behavioural revert | **FIXED, pins GREEN** (`18k-c6b-pins-fixed.log`: 22 tests / 5 suites — `RefontGapTopTests`, `JumpViewportLayoutTests`, `RefontViewportTests`, `JumpCorrectionLoopTests`, `FragmentLinesTests`). Two changes, both editor seam: W-4 in `EditorViewModel.topVisibleOffset()` (an edge in a gap names the next paragraph with text), W-2 in `JumpPrimitive.jump` + a closure overload of `JumpCorrectionLoop.run` (the scroll range read as of each clamp). Behavioural reverts PENDING (named below, run after this commit) |
 | 7 | USE — the *Copper Beeches* walk on the dev-store Debug build, both voices, gap-top + line-top, mid-note + end | PENDING |
 | 8 | Closing runs + the record complete | PENDING |
 
@@ -3712,8 +3712,8 @@ the spend, every jump iteration and the width-reflow restore — a scratch build
 2. ⌘↓ lands at the end on that under-estimated document.
 3. Comments ON. The capture is right (`anchor=51625`). But `keepingReadingPosition` arms the settle hop
    directly, and in the app the hop spent the park BEFORE any display pass had laid the new style out: in the
-   instrumented walk the frame at the spend equalled the frame at the capture in **every** lost race (all ten
-   popup-driven gap re-fonts mid-note and both Study end runs that lost), and differed in every run whose hop
+   instrumented walk the frame at the spend equalled the frame at the capture in **every** lost race (all twenty
+   popup-driven gap re-fonts mid-note — ten runs, two each — and both Study end runs that lost), and differed in every run whose hop
    came after layout.
 4. `JumpPrimitive.jump` computes `maxScroll` ONCE, from that stale frame (18,276 − 828 = 17,448 in her Study
    run). Its first `layoutViewport()` grows the frame to 20,853; the line measures at 19,606; the loop proposes
