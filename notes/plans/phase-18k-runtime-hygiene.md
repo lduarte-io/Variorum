@@ -2970,3 +2970,24 @@ the ceremony-branch residue → 18o; the phone's popped-screen residue → the m
 FABLE LADDER:** P27's store read (a short await before `runStructural`'s in-flight flag — the same gap
 the carry-all/seam roads already carry) and P33's shared latch. **Walks:** run next by the walk
 session (R-18k-7).
+
+---
+
+## THE HELD WALKS — RESULTS (2026-09-25)
+
+**Walk session** (spawned by the 18k orchestrator after C5, per R-18k-7; brief
+`notes/handoffs/18k-held-walks-handoff.md`). 18k only — 18o has not opened.
+
+**Step 0 — the grants, proved:** a compiled probe printed `AX: true SCREEN: true`
+(`AXIsProcessTrusted()` / `CGPreflightScreenCaptureAccess()`), in this session's own process tree.
+
+**Build walked:** the DEV-STORE Debug build (`io.lduarte.Variorum.debug`) from `main` at `791044eb`, into its
+own DerivedData (`App/Variorum/DerivedData/18k-walks/`). Captures: `notes/plans/18k-screens/walks/`
+(gitignored). Zero app instances at the start (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty).
+
+### LIVE STATUS
+
+- Step 0 (grants) — DONE (`AX: true SCREEN: true`).
+- The Debug build — IN-PROGRESS.
+- C1 · C2 · C3 · C6 · C5 walks — NOT-STARTED.
+- Deaths / resumes: none.
