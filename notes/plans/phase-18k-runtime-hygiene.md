@@ -2994,7 +2994,7 @@ own DerivedData (`App/Variorum/DerivedData/18k-walks/`). Captures: `notes/plans/
 - C3 — DONE, **PASS with one FINDING (W-1, pre-existing, not 18k's diff) and one step-text correction** (table below).
 - C6 — WALKED in both voices: steps PASS on the ordinary road, **FINDING W-2** (the place lost after a gap round trip + a long landing, both voices, 2 of 4) + observations O-1/O-2 (table below); the settings restore rides the end of the walk.
 - C2 Study repeat — DONE, **PASS** (below).
-- C5 — IN-PROGRESS (Study first, then Terminal).
+- C5 — WALKED in Study: steps 1–4 **PASS**; **FINDING W-3** (the second backup folder gets the wrong file, pre-existing) + O-3 (a 0-ms synthetic double press is silent) (table below). The Terminal repeat of steps 1–2 — IN-PROGRESS.
 - Deaths / resumes: none.
 
 **The dev store as found:** custody posture **standard** ("Your Apple account holds a key") — the app opened
@@ -3103,3 +3103,36 @@ above the paragraph, its bottom edge cutting through the second-to-last line, th
 | 8 | Book (spread) view: type a 40-character phrase at the end of *About this book*, delete it | `c2s-05a-spread` · `c2s-05b/c/d-about-*` (tiled `tmp/tops.png`) | The page and its ring grew by one line with the text and shrank back | PASS |
 
 *Modifying state during view update* over the Study repeat: **0**.
+
+### C5 — 17e's concurrency five: the walkable four (Study voice; Terminal repeat below)
+
+| # | Step | Captures | What I saw | Verdict |
+|---|---|---|---|---|
+| 1 | Row 59: *three ways of working* in Write, a click into block 1 (block 1/5); Canvas (⌘7); a click into card 3; ⌘K → **Block History** | `c5-01a…f` | The pane opened on **card 3's** block ("THREAD ONE PIECE…"), not the first | PASS |
+| 1b | Click card 2, ask again; then ⌘1 | `c5-01g/h/i` | The pane FOLLOWED to "POLISH IN PLACE…"; ⌘1 landed Write on **block 2/5** at its start (the stated consequence — Canvas now feeds the memory; seen earlier too: Write reopened on block 5 after C3's card-5 click) | PASS |
+| 2 | P33: a scratch note (two blocks, via the shelf's quick entry — `c5-02a/b/c`), ⌘⇧D in block 1 + `zzword` typed into the first half, ⌘⇧D in block 2; ⌥⌘Z twice | `c5-02d/e` · `c5-02f/g` · `c5-03-run1…3-*` · `c5-04-gap*` | **Never both undone without a confirm — 9 of 9 double presses.** At 30 / 60 / 100 / 150 ms between presses the second press brought the **"Undo Divide?"** confirm naming the edited take (AppKit modal, `c5-02h-confirm-dialog`, `c5-03-run3-dialog`); **Cancel kept `zzword`** (`c5-02i`). **O-3:** at **0 ms** (both keystrokes in one `osascript` call) the second press showed NOTHING — no confirm, no refusal toast, 3 of 3 — with exactly one undo run (Edit menu: "Undo Divide" / "Redo Divide"). Whether that synthetic second event reached the app is not established; the refusal sentence *"Another structural change is still landing."* never appeared in any run | PASS on the safety expectation; O-3 recorded |
+| 3 | P33's redo arm: ⌥⌘Z then ⇧⌥⌘Z at 0 and 30 ms; then the same with **Undo** approved | `c5-05-redoarm-*` · `c5-05-approved-undo` · `c5-05-history-zzword` | Both times the confirm naming the edited divide came up and, on Cancel, NOTHING moved (the redo did not slip through). Approving **Undo** undid divide 1 alone (the pre-divide text back, "Redo Divide" still waiting) — exactly what was approved; the edited text sits in Block History as a quiet savepoint ("…delta. zzword", 1:57 PM) | PASS |
+| 4 | P38: Settings ▸ Data Safety — a SCRATCH second folder picked (the found pick, `~/Documents/`, is not scratch — see below); the insurance toggle ON, then Back Up Now; Back Up Now, then the toggle | `c5-06a…f` + an AX state trace (every 0.25 s) | Toggle ON → **Back Up Now, Change Folder… and the toggle itself went grey** at once and were enabled by +0.25 s; Back Up Now → the toggle greyed and a click on it changed nothing. **ONE run per act, nothing doubled:** beside-the-library copies at exactly one per act (19:59:30 folder change · 20:00:20 toggle · 20:00:42 Back Up Now, UTC), plain-text exports exactly one per insurance act (144 notes each); no "failed" anywhere. Toggle back OFF | PASS |
+| 5–6 | P26 (phone) · P27 (two devices) | — | Not walked: the phone and a second device are outside this session (the record's own "optional" / "not hand-walkable") | — |
+
+**FINDING W-3 (Data Safety — the SECOND FOLDER is sent the wrong file; pre-existing, not 18k's diff):** every copy
+to the second folder copies `variorum-backup-seed-drill-2026-07-18T095149Z.sqlite` — a stray July drill file in the
+dev container's `Backups/` (1,871,872 bytes, **plaintext**: its header reads `SQLite format 3`) — instead of that
+act's own 10.6 MB encrypted copy (`cmp`: byte-identical to the drill file). Its check then reports, in the pane's
+own words: *"Copied, checked, ok. Copied to your folder, but the check there said 'could not be checked: SQLite
+error 26: file is not a database - while executing `SELECT * FROM sqlite_master LIMIT 1`'."*, and the folder reads
+"No copies here yet" (seen at the walk's start too, on `~/Documents/`). The pattern is consistent with the "newest
+copy" being picked by NAME ORDER (`…-seed-drill-…` sorts after `…-2026-09-25-…`) — an inference, not traced.
+So the dev store's second folder has never received a real backup in this walk. Whether the real store's
+`Backups/` can hold such a stray file is the orchestrator's question. 18k's C5 moved `StoreBackup.run`'s body
+verbatim into `performOneRun(force:)` — the copy selection is untouched.
+
+**What the folder change did (recorded, not judged):** picking a new second folder COPIED the old folder's
+contents across (`RESTORE.md`, `variorum-keys-54909c0749de983c.json` — the dev store's key id, matching its
+backups — and the drill file) and ran a backup. The walk then put the pick back to `~/Documents/` with the toggle
+OFF: `~/Documents/Variorum/` is file-for-file and checksum-identical to before (only the `Backups/` folder's
+mtime moved, 14:02 — the drill file written again). The scratch folder (`walks/backup-scratch/`, gitignored),
+holding the copies and the two plain-text exports, was deleted after the originals were verified.
+
+**Walk residue in the dev store:** the scratch note **"2026-09-25"** (in no book — the Pool) with its two
+blocks; the *Walk test* canvas card left placed (C3).
