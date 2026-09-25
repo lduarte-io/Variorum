@@ -944,7 +944,12 @@ change between `cfe53bb5` and today removed it; C2 did not, and claims nothing f
   roads (`3 tests … passed`, fixed ×2 and pre-fix ×1). **M-teeth (named here, runs next over this
   commit):** `EditorViewModel.attach`'s `onWidthReflow` handler emptied — the MINOR-2 pin's reflow arm
   must go RED, proving the adaptation left it teeth.
-- In-app use evidence (dev-store Debug, scripted; the GUI walk HELD for TCC) — NOT-STARTED.
+- In-app use evidence (dev-store Debug, scripted; the GUI walk HELD for TCC) — IN-PROGRESS: the
+  Phase 1 probes RE-APPLIED to the working tree by a scratchpad script (`c2_probe_apply.py`, NEVER
+  committed this time; the driver gained a frame-vs-content read at every checkpoint and a window
+  resize, narrow then back). **POST walk DONE** (`walk3-POST-fix.log`). **PRE walk NEXT — the named
+  revert W-app-B:** `EditorView.swift` from the seam commit `48297899` (pre-fix behaviour) with the
+  same probes, over the committed `5b0cc41e`; restored to `5b0cc41e` (probes removed) after. PENDING.
 - The ledger row amendment (claimed only if confirmed) — NOT-STARTED.
 - Closing runs — NOT-STARTED.
 - Deaths / resumes: none.
