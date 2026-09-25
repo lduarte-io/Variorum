@@ -3653,7 +3653,17 @@ folder" (judgment call 2).
 
 ## UNIT C6b RECORD — the re-font reading position when the top edge sits in a paragraph GAP (implementer: `opus-implementer`, 2026-09-25)
 
-**WHAT THIS UNIT DID NOT DO — the record's first line.** PENDING (written at the unit's end).
+**WHAT THIS UNIT DID NOT DO — the record's first line.** It did **not** build a whole `8ce7a892` app for the
+regression question: a C6-parent test host would have run the pre-C7 backup code on the dev store at launch (C7's
+ENVIRONMENT TRAP), so the comparison tree was HEAD with the re-font road's one changed file (`JumpPrimitive.swift`)
+checked out at `8ce7a892` — the road's other files are byte-identical between the two (`git diff 8ce7a892` over
+`Features/Editor`, `Theme`, `Surface`: only `EditorSurfaceController`'s merge branch). It did **not** remove F2's
+direct settle-hop arm in `keepingReadingPosition` (judgment call 3). It did **not** edit KnownIssues (the W-4/W-2
+row's close is the orchestrator's), `TEXTKIT2_NOTES.md` (measured facts handed over, below) or `Tools/WalkKit/`
+(walker facts handed over). It did **not** examine the phone's re-font keeping. It did **not** re-walk after the last
+commit `aa205e9b`, whose one product change is behaviour-identical (the blank-line test's implementation: the first
+visible character instead of a trim); the pins re-ran on it in the closing run. Zero `Sources/`, `Sync/`, `Shared/`,
+`Server/`; `EditorTextView` and `BlockRangeIndex` untouched.
 
 ### LIVE STATUS
 
@@ -3661,12 +3671,12 @@ folder" (judgment call 2).
 |---|---|---|
 | 1 | The reading, in this session's own context, in the brief's order | **DONE** — CLAUDE.md + canon, TEXTKIT2, this file's kickoff corrections / ENVIRONMENT TRAPS / CAST & DISCIPLINE, the UNIT C6 RECORD + adjudication, THE HELD WALKS — RESULTS (C6) + adjudication, KnownIssues' W-4/W-2 row, 13u4's UNIT F2 BRIEF + RECORD, `Tools/WalkKit/README.md` whole; the code: `topVisibleOffset`, `FragmentLines`, `JumpPrimitive`, `keepingReadingPosition`, `parkAnchorRestore`, `consumePendingAnchorRestore`, `jumpToDocumentEnd`, `EditorDocument.baseParagraphStyle` (the gap is `paragraphSpacing` — AFTER each paragraph) |
 | 2 | W-4 reproduced in a rig on THIS tree, and on C6's parent `8ce7a892` (scratch worktree, harness store only) — regression or pre-existing | **DONE — PRE-EXISTING.** The pins below are RED on this tree (`18k-c6b-pins-prefix2.log`: 19 issues, 7 of 8 cases) and RED **byte-identically** on the C6-parent road (`18k-c6b-pins-oldroad.log`: 19 issues, the same offsets 47510 / 47524 / 42034). The worktree was HEAD with the re-font road's ONE changed file (`JumpPrimitive.swift`) checked out at `8ce7a892` — see the TRACE for why a whole `8ce7a892` build was not used |
-| 3 | W-4 TRACE — what `topVisibleOffset()` captures at a gap-top, where the restore aims it | **DONE** — an anchor-CHOICE class, confirmed: the capture names the line whose FRAGMENT the edge hits; a paragraph's trailing spacing belongs to its own fragment, and her note carries a BLANK paragraph between every two (the sample library's k−1 newline). Numbers in the TRACE section (write-up PENDING) |
-| 4 | W-2 TRACE — same mechanism, a landing-vs-park race after ⌘↓, or C6's re-assert on a stale target | **DONE — a DIFFERENT mechanism, PRE-EXISTING, not C6's re-assert.** Reproduced on an instrumented dev-store build (2 of 3 Study end runs; 0 of 7 Terminal) and in a rig: the re-font's settle hop can spend its park BEFORE any display pass (spend frame == capture frame in every lost race), and `JumpPrimitive.jump` clamps every proposal to a scroll range computed ONCE from that stale frame while its own layout grows the document — 'converged' 1,624–2,384 pt above the line. The pin is RED here and on the C6-parent road (`18k-c6b-w2pin-prefix2.log` · `18k-c6b-w2pin-oldroad.log`). Write-up in the TRACE section (PENDING) |
+| 3 | W-4 TRACE — what `topVisibleOffset()` captures at a gap-top, where the restore aims it | **DONE** — an anchor-CHOICE class, confirmed: the capture names the line whose FRAGMENT the edge hits; a paragraph's trailing spacing belongs to its own fragment, and her note carries a BLANK paragraph between every two (the sample library's k−1 newline). Numbers in the TRACE section |
+| 4 | W-2 TRACE — same mechanism, a landing-vs-park race after ⌘↓, or C6's re-assert on a stale target | **DONE — a DIFFERENT mechanism, PRE-EXISTING, not C6's re-assert.** Reproduced on an instrumented dev-store build (2 of 3 Study end runs; 0 of 7 Terminal) and in a rig: the re-font's settle hop can spend its park BEFORE any display pass (spend frame == capture frame in every lost race), and `JumpPrimitive.jump` clamps every proposal to a scroll range computed ONCE from that stale frame while its own layout grows the document — 'converged' 1,624–2,384 pt above the line. The pin is RED here and on the C6-parent road (`18k-c6b-w2pin-prefix2.log` · `18k-c6b-w2pin-oldroad.log`). Write-up in the TRACE section |
 | 5 | Red-on-old pins committed RED on the pre-fix tree | **DONE** — W-4: `RefontGapTopTests` (4 tests, 8 cases): the capture ×3 zones + the re-font ×3 zones + a typed note RED; the straddled-line guard GREEN. W-2: `JumpViewportLayoutTests.aJumpWhoseOwnLayoutGrowsTheDocumentStillLandsItsLine` ×2 voices RED (4 issues) |
 | 6 | The FIX (narrowest surface) + pins GREEN + behavioural revert | **FIXED, pins GREEN** (`18k-c6b-pins-fixed.log`: 22 tests / 5 suites — `RefontGapTopTests`, `JumpViewportLayoutTests`, `RefontViewportTests`, `JumpCorrectionLoopTests`, `FragmentLinesTests`). Two changes, both editor seam: W-4 in `EditorViewModel.topVisibleOffset()` (an edge in a gap names the next paragraph with text), W-2 in `JumpPrimitive.jump` + a closure overload of `JumpCorrectionLoop.run` (the scroll range read as of each clamp). Behavioural reverts DONE: R-W4 RED (19, identical to pre-fix) · R-W2 RED (4); one prior pin re-mechanized (`ScrollAnchorTests`' ground truth) with its mutation RED — below |
-| 7 | USE — the *Copper Beeches* walk on the dev-store Debug build, both voices, gap-top + line-top, mid-note + end | IN PROGRESS — the fixed Debug build is `DerivedData/18k-c6b-walk` (BUILD SUCCEEDED) |
-| 8 | Closing runs + the record complete | PENDING |
+| 7 | USE — the *Copper Beeches* walk on the dev-store Debug build, both voices, gap-top + line-top, mid-note + end | **DONE — PASS** on the final build (every row below, both voices; the first walk, on `a8e1e8cc`, found the descender sliver → #147, fixed, re-walked) |
+| 8 | Closing runs + the record complete | **DONE** — 577 tests / 71 suites green on the final tree `aa205e9b` (below). C6b — DONE (implementer), awaiting the orchestrator's spot-check |
 
 - Deaths / resumes: none.
 
@@ -3778,3 +3788,146 @@ sliver zone** (5 issues, 47510 for 47525), the seven other gap cases and `Scroll
 (`18k-c6b-R-base.log`); restored → clean. **M-inset (again): RED at both stops** (`7 == 6`, `17 == 16` — the block
 numbers differ from the first M-inset run's `8/7`, `21/20` because the rig's second scroll landed elsewhere this
 time; the mutation bites at both stops in both runs; `18k-c6b-M-inset2.log`); restored → clean.
+
+### THE WALK (USE) — the dev-store Debug build, *The Adventure of the Copper Beeches* (212 blocks)
+
+Build: `DerivedData/18k-c6b-walk` from `918080e4` (product code = `c537bab2`), launched directly with
+`OS_ACTIVITY_DT_MODE=YES` (log `18k-c6b-app-walk2.log`), zero instances before and after, quit by identity. Settings
+driven through Accessibility (WalkKit's recipe). **"The line at the top" is MEASURED, not eyeballed:** a PIL tool
+(`DerivedData/c6bmeasure.py`) lists the text rows of the page column in points below the editor's top edge (the
+masthead hairline), each with a signature of its pixels, so a line is followed across captures. In the resting state
+a line at the very top has its ink 3.5–4 pt (Terminal) / 5.5 pt (Study) below the edge; that number after a toggle
+is "her line at the top". (Signatures can differ for the same line at a fractional scroll position — those rows were
+checked by eye, crops `cmp-*` in the scratchpad.) Edge placement used a pixel-unit wheel event (`pxscroll.swift`) and
+was verified from the "before" capture every time. Captures: `notes/plans/18k-screens/c6b/walk2/` (gitignored).
+
+| Voice | Row | Edge before (measured) | Comments ON | Comments OFF | Verdict |
+|---|---|---|---|---|---|
+| Study | **End, ⌘↓ from mid** — the row the first walk failed | 3 pt inside the previous line's descent; hers 46.5 pt down (`s-end2-a`) | hers at the top, 5.5 (`s-end2-b`) | hers at the top (`s-end2-c`) | **PASS** |
+| Study | mid, previous line's descent (sliver) | hers 46.5 down (`s-mid-sliver-a`) | top, 5.5 | top | **PASS** |
+| Study | mid, the blank line's spacing (z3) | hers 7.5 down | top | top | **PASS** |
+| Study | mid, on the blank line (z2) | hers 22.5 down | top | top | **PASS** |
+| Study | mid, the paragraph's spacing (z1) | hers 37.5 down | top | top | **PASS** |
+| Study | mid, a line cut ABOVE its baseline | the line cut by 10 pt (`s-mid-straddle-a`) | that line whole at the top | same | **PASS** |
+| Study | **W-2's recipe** ×3 (mid → gap blank → Standard → click → ⌘↓ → 2.5 s → ON → OFF) | the end landing | the landing's line at the top, 3 of 3 (`s-w2r{1,2,3}-03-ON`) | same, 3 of 3 | **PASS** (pre-fix: 2 of 3 lost a dozen paragraphs) |
+| Terminal | mid, z1 | hers 31.0 down (`t-mid-z1-a`) | top, 4.0 | top | **PASS** |
+| Terminal | mid, z3 | hers 9.5 down (`t-mid-z3c-a`) | top | top | **PASS** |
+| Terminal | mid, z2 | hers 19.0 down (`t-mid-z2c-a`) | top, 3.5 | top | **PASS** |
+| Terminal | mid, previous line's descent (sliver) | hers 35.0 down (`t-mid-sliver-a`) | top | top | **PASS** |
+| Terminal | a line cut above its baseline (×3: `t-mid-z3-a`, `t-mid-z2-a`, `t-mid-line-a`) | cut 2.5 / 2 / 3 pt | that line whole at the top | same | **PASS** |
+| Terminal | a line cut BELOW its baseline, mid-paragraph | only descenders of it left; the next line 5.5 down (`t-mid-descent-a`) | the next line at the top (the page moved 2 pt) | same | **PASS** (#147's rule) |
+| Terminal | End, ⌘↓ from mid | hers 34.0 down (`t-end-a`) | top | top | **PASS** |
+| Terminal | W-2's recipe ×2 | the end landing | top, 2 of 2 | top, 2 of 2 | **PASS** |
+| Both | Voice Terminal → Study → Terminal from a mid gap top (z1) | hers 31.5 down (`t-voice-a`) | Study: her line at the top (`t-voice-b`, crop `cmp-voice`) | Terminal: at the top (`t-voice-c`) | **PASS** |
+
+**The first walk (build of `a8e1e8cc`, captures `c6b/walk/`)** passed every Terminal row (z1/z2/z3, straddle, line-top,
+end, W-2 ×2) and the Study mid rows, and **failed the Study end row** (`walk/s-end-b-ON`) — the descender sliver,
+recorded above, pinned, fixed and re-walked here. **The instrumented pre-fix build's walk (captures `c6b/trace/`, log
+`18k-c6b-app-trace1.log`)** is the W-2 reproduction: Terminal 0/7, Study 2/3 lost.
+
+**Not a C6b row, observed:** leaving the note at a gap top and returning re-topped the page on the CARET's block
+(`t-note-c-back`) — the caret sat at the end from an earlier ⌘↓, so the arrival's reveal decided (QUESTIONS #98's
+standing landing policy), not the scroll anchor. **O-2 reproduced once** on the pre-fix instrumented build: right after
+⌘↓ from mid-note (no gap round trip) the editing ring was drawn a line and more too HIGH (`c6b/trace/r0-state`) —
+noticed, not traced (below).
+
+**Settings as found and as left:** Terminal · Follow system · inline comments OFF · paragraph gap Standard (read back
+through Accessibility before the quit). Walk residue: none in the store (nothing typed); *three ways of working* sits in
+the session's Open strip.
+
+### DISPOSITION
+
+| Row | Verdict | Mechanism (traced + measured) | Evidence |
+|---|---|---|---|
+| **W-4** (gap top → the previous paragraph's last line on top) | **PRE-EXISTING → FIXED** in `topVisibleOffset()` (editor seam) | The capture named the line whose layout-fragment BOX the edge hit; a fragment's box includes its paragraph's trailing spacing, and her note carries a blank paragraph between every two. So an edge in the gap named the previous paragraph's last line or the blank line, and the (exact, since C6) restore put that line at the top. | `RefontGapTopTests` RED on the pre-fix tree AND on the C6-parent road (19 issues, identical); R-W4 RED (19, identical) → green |
+| **W-4's neighbour** (an edge below a line's baseline — only descenders showing) | **FIXED, PROVISIONAL** (QUESTIONS #147) — found by this unit's own walk | The same box rule, one step up: the edge inside the previous line's descent is a gap to her eye | the `belowThePreviousBaseline` zone RED on the fix tree `a8e1e8cc` (5 issues); R-base RED (exactly those 5) → green; walked PASS in both voices |
+| **W-2** (a dozen paragraphs lost after a gap round trip + ⌘↓ + ON) | **PRE-EXISTING → FIXED** in `JumpPrimitive` (editor seam) — **not** C6's re-assert | A whole-document re-font leaves the note under-estimated; the re-font's settle hop can spend before any display pass; the jump computed its scroll range ONCE from that stale frame, its own layout grew the document, and every proposal clamped to the stale maximum until the loop's clamped arm reported convergence far above the line | Instrumented app trace (the ordering); `JumpViewportLayoutTests.aJumpWhoseOwnLayoutGrowsTheDocumentStillLandsItsLine` RED on the pre-fix tree AND the C6-parent road; R-W2 RED (4) → green; walked PASS (Study 3/3, Terminal 2/2) |
+| `ScrollAnchorTests.theAnchorNamesTheBlockAtTheViewportTopNotTheOneBelow` | **PIN MECHANISM → re-mechanized** (its ground truth encoded the box rule) | At the 500 stop the edge rests in block 19's trailing spacing: block 19 has no text on screen | Mutation M-inset (13c 1A's container-inset defect back) RED at both stops, twice |
+
+**QUESTIONS:** #147 (PROVISIONAL, built). **No other product call made.**
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift` | `topVisibleOffset()`: the reading line is the first whose baseline is at or below the probe, in a paragraph with text; else the first paragraph with text below, inside the viewport; else the old answer. Two private helpers (`isBlankParagraph`, `firstReadableLineStart`) | the probe point and its container conversion, `restoreTopVisibleOffset`, `keepingReadingPosition`, `parkAnchorRestore`, every `consume*`, the storage seam, `renderFull` |
+| `App/Variorum/Variorum/Features/Editor/JumpPrimitive.swift` | `JumpCorrectionLoop.run` gains a `maxScroll: () -> Double` overload (the Double form forwards, byte-identical behaviour); `jump` reads its scroll range from the current frame at every use (the loop's clamp, `scroll(to:)`'s `wanted`, C6's `reachable`); `FragmentLines.readingLineIndex(atLocalY:baselines:)` (pure) | the estimate, `lineSpan`, the ≤ 6 bound, `landingInset`, C6's re-assert, every signature and caller |
+| `VariorumTests/RefontGapTopTests.swift` | NEW — 4 tests / 9 cases (the capture and the re-font across four zones of her note's gap, a typed note, the straddle guard) | — |
+| `VariorumTests/JumpViewportLayoutTests.swift` | + W-2's pin (×2 voices, the bundled story) | C6's pin |
+| `VariorumTests/JumpAndUndoTests.swift` | + the pure `readingLineIndex` pin | the loop and line pins |
+| `VariorumTests/ScrollAnchorTests.swift` | the block-at-the-top ground truth (baseline) | the three other pins, the stops |
+
+`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, `PaneTextAuthority`, `runStructural`: untouched. No TK1 API: the
+new reads are `NSTextParagraph.attributedString`, `NSTextLineFragment.glyphOrigin`/`typographicBounds`,
+`enumerateTextLayoutFragments(options: [])`. P1: the capture's extra work is bounded by the viewport (laid-out
+fragments only, no `ensureLayout`) and the blank test stops at the first visible character; the jump's live range is
+a frame read.
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **The capture fix lives in `topVisibleOffset()`**, so all four consumers get it: the re-font, the width reflow, the
+   leave-and-return scroll anchor, and a warm full re-render. They all mean "keep the text she was looking at", and a
+   gap top named the wrong line for each of them. *Reverse by* a parameter only `keepingReadingPosition` passes.
+2. **The baseline rule (#147) replaces the box rule for text lines too.** A line cut below its baseline yields to the
+   next line even mid-paragraph (walked: the page moves up by the descent, 2–5 pt, instead of down by most of a line).
+   *Reverse by* restricting the baseline test to a paragraph's LAST line (the gap-adjacent case only).
+3. **W-2 is fixed at the primitive, not by removing F2's direct hop arm.** The traced defect is the jump reporting
+   convergence 2,368 pt from its line; every `JumpPrimitive.jump` caller on estimated geometry inherits it. The race
+   (the hop before the display pass) still happens and is now harmless. *Reverse by* also (or instead) dropping
+   `overlayLayoutDidSettle()` from `keepingReadingPosition`, so only a display pass arms the hop.
+4. **W-2's pin drives the primitive,** the losing hop's exact call (the grow's storage write, then the jump), because
+   the harness could not force the hop ahead of a display pass through the coordinator (a display pass intervened
+   even with the window ordered out). The ordering's evidence is the instrumented app trace.
+5. **W-2's pin reads the bundled *Copper Beeches* text** (`SampleLibrarySeeder.loadStories`): the under-estimate
+   depends on real paragraph lengths — a synthetic note of short paragraphs grew by less than a page and never
+   reached the stale maximum (measured).
+6. **`ScrollAnchorTests`' ground truth moved to the baseline**, not the product back to the box. Its defect still
+   bites (M-inset, twice).
+
+### CLOSING RUNS (at the unit's END, final tree `aa205e9b`; zero app instances; `DebugOracleSingletonWindowTests` in no set)
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| **The closing set** — C6's 70 selectors (every `JumpPrimitive` consumer and the editor/landing family, the five deltas' suites, the touched test files' suites, **the eleven Tutorial suites**) + `RefontGapTopTests` | `DerivedData/18k-c6b-closing.sh 18k-c6b-closing3` | **✔ Test run with 577 tests in 71 suites passed after 174.1 s** — 0 issues, 0 skipped (the two "skipped" lines are AppIntents metadata warnings); 71 suites counted (70 named + `TakePaneMeasureTests`, which prints without a display name). 51 `Modifying state during view update` lines (the pane-mounting suites — `PaneSurface`'s family, 18l's, as C3 measured) |
+| The first closing run, on `a8e1e8cc` | `18k-c6b-closing1` | 576 / 71, **1 issue** — the `ScrollAnchorTests` ground truth (re-mechanized above) |
+| Core `swift test` · iOS build · mobile | — | **NOT OWED** — zero `Sources/`, zero `Shared/` |
+
+### NOTICED, NOT TOUCHED (C6b's scope fence)
+
+1. **Measured TK2 facts for `TEXTKIT2_NOTES.md`** (canon, the orchestrator's at the closeout): *(a)* a layout fragment's
+   frame INCLUDES its paragraph's trailing `paragraphSpacing` (160 pt for a paragraph whose last line ends at 153),
+   the document's LAST paragraph carries none, and an empty paragraph's fragment is zero-width; *(b)*
+   `NSTextLineFragment.glyphOrigin.y` is the baseline from the line's top — 14 of 17 pt (Terminal 14-pt mono), 17 of 22
+   pt (Study 16-pt Iowan), leading 0; *(c)* after a whole-document re-font TK2 re-estimates the un-laid-out text LOW
+   (rig: 19,600 → 17,649 pt Terminal, 21,098 → 18,612 Study) and the next viewport layout corrects it by thousands of
+   points — anything holding a height computed before that layout is stale.
+2. **The re-font's settle hop still races the display pass** (`keepingReadingPosition` arms it directly). Harmless
+   after the jump fix, but the restore now always does its own layout on the first frame (judgment call 3).
+3. **O-2 (a stale editing ring after ⌘↓)** reproduced once on the pre-fix instrumented build, no gap round trip needed
+   (`c6b/trace/r0-state`: the ring's top a line and more above its block). A geometry correction that bumps no
+   generation leaves the decorations unrefreshed. Not traced. Owner candidate: 18l (the pane/decoration family) or 12.
+4. **Walker facts for `Tools/WalkKit/README.md`:** `walk-scroll <x> <y> 1` is TEN line events ≈ 100 pt; a single
+   pixel-unit wheel event (`DerivedData/pxscroll.swift`) moves exactly its value for POSITIVE deltas but is erratic for
+   small negative ones (−3 moved 25–45 pt) — approach a target from above; the PIL row tool
+   (`DerivedData/c6bmeasure.py`) measures "the line at the top" with a per-line signature; the Settings AX paths
+   (Editor = `button 2`, General = `button 1` of `scroll area 1 of group 1`; `checkbox "Show comments inline (tinted,
+   under the block)"`, `pop up button "Space between paragraphs"` of `group 1 of scroll area 2 of group 1`; voice =
+   `radio button 1/2 of radio group "Design voice"`) held throughout.
+5. **The phone's re-font keeping** (F2's mobile parity row) may carry the same box-rule capture; not examined — the
+   mobile catch-up's.
+6. The note-return landing observed above (#98's policy) — standing, not C6b's.
+
+### CAPTURES
+
+`notes/plans/18k-screens/c6b/` (gitignored): `trace/` (the instrumented pre-fix walk: `r1…r7` Terminal, `s1…s3` Study,
+each `-00-mid/-01-gaprt/-02-end/-03-ON/-04-OFF`); `walk/` (the first fix build: `t-mid-z1/z2/z3/z2c/line/straddle-*`,
+`t-end-*`, `t-w2r{1,2}-*`, `s-mid-z1/zB/z3-*`, `s-end-*` — the failed row); `walk2/` (the final build — every row of the
+table above). Logs + tools in `App/Variorum/DerivedData/` (gitignored): `18k-c6b-trace{1..8}`, `18k-c6b-old-trace`,
+`18k-c6b-pins-{prefix,prefix2,oldroad,fixed,fixed2}`, `18k-c6b-w2pin-{prefix,prefix2,oldroad}`,
+`18k-c6b-old-w2prim`, `18k-c6b-R-{W4,W2,base}`, `18k-c6b-M-inset{,2}`, `18k-c6b-baseline-prefix`, `18k-c6b-glyph`,
+`18k-c6b-scrollanchor`, `18k-c6b-closing{1,2,3}`, `18k-c6b-app-{trace1,walk1,walk2}`, `18k-c6b-{trace-build,walk-build,walk-build2}`;
+`18k-c6b-run.sh`, `18k-c6b-closing.sh`, `c6bmeasure.py`, `pxscroll.swift`, `w.sh`. The scratch instruments were never
+committed (the NSLog patch lived only in the scratch worktree, removed; `C6bScratchTrace.swift` kept in the session
+scratchpad). The scratch worktree and its DerivedData are removed; `git worktree list` shows only `main` and `mobile`.
+- Deaths / resumes: none.
+- **C6b — DONE (implementer), awaiting the orchestrator's spot-check.**
