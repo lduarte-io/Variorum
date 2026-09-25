@@ -62,10 +62,12 @@
 //  nor the tokens nor the environment value.
 //
 
+// DEBUG only, imports included — a Release build compiles this file to
+// nothing (the C4 record's release-projection proof).
+#if DEBUG
 import Foundation
 import SwiftUI
 
-#if DEBUG
 /// Owner-keyed registrations under `Key` — the C4 rule, once.
 struct OwnedRegistrations<Key: Hashable, Value> {
     private struct Standing {

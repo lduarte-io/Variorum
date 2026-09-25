@@ -1833,6 +1833,30 @@ so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to
   one door; every oracle's `release` and every slot's forwards to it), then the always-on pins run —
   expected RED: the structural arm's "after the newer leaves" checks and the keyed two-window pins.
   Restored by `git checkout -- App/Variorum/Variorum/Core/Views/DebugOracleOwnership.swift`.
+- **M-norelease — RAN (`DerivedData/18k-c4-M-norelease.log`): `✘ Test run with 27 tests in 3 suites
+  failed after 11.995 seconds with 82 issues`** — all 6 keyed two-window pins red and 16 of the 18
+  structural pins (the two that stay green by design never call `release`: an owner's own value, the
+  log bound); the 3 palette pins green (unrelated). Restored; `git diff --quiet HEAD` true; zero
+  `M-norelease` strings in the tree. The final pins bite the fix's own mechanism.
+- **Release projection — made EXACT (this commit):** the new file's two imports moved inside its
+  `#if DEBUG`, so a Release build compiles `DebugOracleOwnership.swift` to nothing. The proof script
+  (`release_projection.py`, session scratch): for every app file the C4 diff touches, the lines a
+  non-DEBUG build compiles (DEBUG branches dropped, `#else` kept, directives/comments/blanks dropped),
+  old vs new — PENDING its final run over `0a84adbc..HEAD` at close (before this move it read 1 of 18
+  differing: exactly those two imports).
+- **THE SECOND CLOSING RUN (`DerivedData/18k-c4-closing2.log`, the final tree before this commit):
+  `✘ Test run with 414 tests in 65 suites failed after 226.036 seconds with 3 issues`** — the two row-65
+  deltas again, the opt-in suite reported SKIPPED with its reason on all 7 tests (the gate works), and
+  ONE flaw in this unit's keyed note-box pin, traced: shell one's where-line after shell two closed was
+  shell ONE's, but in its not-live form (`"one · 1 of 2 in this book"`) where the pin had captured the
+  live form (`"… · block 1/1"`). Both shells shared ONE session, and the one live editor is a
+  session's (P-3), so shell two's focus legitimately stepped shell one's note down — the pin compared
+  against state that had moved for a real reason, green or red by timing. **Fixed in the PIN** (this
+  commit): the two shells get two sessions on one store (the post-detail pin's arrangement), and shell
+  two's precondition names its own note (`hasPrefix("2 of 2")`) rather than "anything but line one".
+  Keyed suite, fixed tree, ×3: `✔ Test run with 6 tests in 1 suite passed` each
+  (`18k-c4-keyed-r{1,2,3}.log`). **PENDING:** that pin re-measured on the pre-fix tree; the final
+  closing run.
 - The two-window pins (red first where reachable) — WRITTEN AND MEASURED RED ON THE PRE-FIX TREE (this
   commit). `VariorumTests/DebugOracleTwoWindowTests.swift`, 12 tests, written against the read names the
   tree ALREADY has so each compiles on both sides; every one mounts the same kind of surface in TWO real

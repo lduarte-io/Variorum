@@ -496,8 +496,16 @@ struct DebugOracleTwoWindowTests: DebugOracleWindowRig {
 
     /// **`SidebarGeometry.noteBoxFrames` / `.noteBoxWhereLines`** — the book's
     /// note box, keyed by the book. The same book in a tall shell with its
-    /// first note selected (stays) and a short shell with its second note
-    /// selected (goes): the box is compressed there, and says another note.
+    /// first note live (stays) and a short shell with its second note live
+    /// (goes): the box is compressed there, and says another note.
+    ///
+    /// **Two sessions on one store** (the post-detail pin's arrangement), and
+    /// the reason is measured: the ONE live editor is a SESSION's (P-3), so
+    /// with one session the second shell's focus stepped the first shell's
+    /// note down from live — its where-line legitimately changed form, and a
+    /// pin comparing it to the live form it had was timing (the final closing
+    /// run caught it: `"one · 1 of 2 in this book"` against `"one · 1 of 2 ·
+    /// block 1/1"`, shell ONE's line both times).
     ///
     /// RED ON OLD (measured — the C4 record): the box and its where-line are
     /// the short shell's.
@@ -505,6 +513,7 @@ struct DebugOracleTwoWindowTests: DebugOracleWindowRig {
         let db = try AppDatabase.inMemory()
         try await withLiveWorld(db, seed: 51) {
             let session = AppSession(database: db)
+            let sessionTwo = AppSession(database: db)
             let (readingID, postIDs) = try book(session)
             let routerOne = ShellRouter()
             let one = mount(shell(session, routerOne), width: 1200, height: 900)
@@ -523,7 +532,7 @@ struct DebugOracleTwoWindowTests: DebugOracleWindowRig {
             let lineOne = try #require(SidebarGeometry.noteBoxWhereLines[readingID])
 
             let routerTwo = ShellRouter()
-            let two = mount(shell(session, routerTwo), width: 1000, height: 420, x: 300)
+            let two = mount(shell(sessionTwo, routerTwo), width: 1000, height: 420, x: 300)
             defer { close(two.window) }
             routerTwo.pendingSelection = .reading(readingID)
             #expect(await settle([one, two], until: {
@@ -532,7 +541,7 @@ struct DebugOracleTwoWindowTests: DebugOracleWindowRig {
             // The newest book's door is shell two's (on both trees).
             BookOutlineGeometry.focusDoors[readingID]?(postIDs[1])
             #expect(await settle([one, two], until: {
-                SidebarGeometry.noteBoxWhereLines[readingID] != lineOne
+                SidebarGeometry.noteBoxWhereLines[readingID]?.hasPrefix("2 of 2") == true
             }, maxTurns: 200), "shell two's box names its other note")
             close(two.window)
             await idle([one])
