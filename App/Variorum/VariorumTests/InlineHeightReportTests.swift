@@ -46,8 +46,12 @@ struct InlineHeightReportTests {
 
     private let chrome = EditorSurfaceChrome(tokens: Queries.ThemeSettings(), dark: false)
 
+    private func spin(_ seconds: TimeInterval) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
+
     private func turn() async {
-        RunLoop.main.run(until: Date().addingTimeInterval(0.005))
+        spin(0.005)
         await Task.yield()
     }
 
@@ -116,7 +120,8 @@ struct InlineHeightReportTests {
             coordinator.applyChrome(chrome, to: h.textView)
             for _ in 0..<20 { await turn() }
             let wide = PaneMeasurement.height(of: h.textView)
-            #expect(abs((log.reports.last ?? 0) - wide) < 0.5, "steady state: \(log.reports)")
+            #expect(abs((log.reports.last ?? 0) - wide) < 0.5,
+                    "steady state: reported \(log.reports), measured \(wide)")
             log.reports = []
 
             h.textView.frame.size.width = 420
@@ -191,23 +196,23 @@ struct InlineHeightReportTests {
             window.makeKeyAndOrderFront(nil)
             defer { window.orderOut(nil); window.close() }
 
-            func editor() -> EditorTextView? {
+            @MainActor func editor() -> EditorTextView? {
                 var found: EditorTextView?
-                func walk(_ v: NSView) {
+                @MainActor func walk(_ v: NSView) {
                     if found == nil, let e = v as? EditorTextView { found = e }
                     v.subviews.forEach(walk)
                 }
                 walk(hosting)
                 return found
             }
-            func settled() -> Bool {
+            @MainActor func settled() -> Bool {
                 guard let e = editor(), e.string.count > 1000 else { return false }
                 return abs(e.frame.height - PaneMeasurement.height(of: e)) < 1
             }
             for _ in 0..<120 where !settled() {
                 hosting.layoutSubtreeIfNeeded()
                 window.displayIfNeeded()
-                RunLoop.main.run(until: Date().addingTimeInterval(0.02))
+                spin(0.02)
                 await Task.yield()
             }
             let e = try #require(editor(), "the inline editor mounted")
@@ -215,8 +220,7 @@ struct InlineHeightReportTests {
             #expect(e.string.count > 1000, "its projection arrived: \(e.string.count) characters")
             #expect(measured > 1000, "a long note: \(measured)")
             #expect(abs(e.frame.height - measured) < 1,
-                    "the frame reached the measured height, not the 24-pt start: "
-                        + "\(e.frame.height) vs \(measured)")
+                    "the frame reached the measured height, not the 24-pt start: \(e.frame.height) vs \(measured)")
         }
     }
 }

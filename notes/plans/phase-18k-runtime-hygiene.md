@@ -867,7 +867,13 @@ change between `cfe53bb5` and today removed it; C2 did not, and claims nothing f
   hung in `terminateLater`, and both walk instances were stopped by PID, path verified as the Debug
   product.)
 - Phase 2, the deferral (coalescing hop, first height delivered) — NOT-STARTED.
-- Pins — IN-PROGRESS (this commit: the seam + the pins, run on the PRE-FIX behaviour next — PENDING):
+- Pins — IN-PROGRESS: **run on the PRE-FIX behaviour (the seam tree `48297899` + this commit's compile
+  fixes to the pins): `Test run with 4 tests in 1 suite failed … with 5 issues`** — the mount pin RED
+  (`reports == [10929.0]` inside the install), the update pin RED (reported inside the pass), the burst
+  pin RED (2 reports inside the burst, **5** in all), the whole-road guard GREEN (as designed); plus
+  one arm not designed to be red — the update pin's steady-state precondition (the last report 229 pt
+  off the measured height after 20 turns on the old road) — its numbers are now printed; interpreted
+  after the fix runs (PENDING). The pins as committed:
   the seam `InlineEditorSurface.Coordinator.viewUpdated(chrome:gutter:on:)` — `updateNSView`'s body
   moved verbatim onto the coordinator (still a synchronous `remeasure()`: behaviour-identical) so a pin
   can drive the update road without a SwiftUI `Context`; `VariorumTests/InlineHeightReportTests.swift`
