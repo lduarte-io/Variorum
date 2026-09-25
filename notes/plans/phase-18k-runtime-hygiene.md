@@ -883,8 +883,18 @@ change between `cfe53bb5` and today removed it; C2 did not, and claims nothing f
   fenced measurement brain (`PaneMeasurement`), identical on both roads; nothing re-reports that drift
   on either. The pins settle layout before the install and allow a line (or a midpoint, for the
   reflow) accordingly — see NOTICED.
-- Pins — GREEN ON THE FIX (this commit): **`Test run with 4 tests in 1 suite passed` — 3 of 3 runs**;
-  the behavioural revert + mutations NEXT (PENDING) — named before they run, over the committed fix
+- Pins — DONE: GREEN ON THE FIX (`d4ede53b`): **`Test run with 4 tests in 1 suite passed` — 3 of 3
+  runs**. **R1 (pre-fix behaviour under the committed pins): `Test run with 4 tests in 1 suite failed …
+  with 5 issues`** — the mount reported inside itself (`[10929.0]`), the update pass reported inside
+  itself, **and the old road STRANDED the reflowed height: it reported the WIDE 10,929 pt (measured
+  before the layout that pass was about to do) while the narrow layout converged to 18,713 pt, and
+  nothing re-reported it** (the behavioural red — a mis-sized frame, not only a warning), the burst
+  reported twice inside itself and **5** times in all; the whole-road guard green, by design.
+  **M-strand: `failed … with 3 issues`** — no first report at all (`[]` against 10,929 pt measured).
+  **M-stuck: `failed … with 5 issues`** — incl. the whole-road GUARD: the real `EditorView(inline:)`
+  stuck at a **24.0-pt frame over 10,929 pt of content**. All three restored by `git checkout d4ede53b
+  -- …/EditorView.swift`, `git diff` empty. The revert and mutations were named before they ran, over
+  the committed fix
   `d4ede53b`: **R1** = `EditorView.swift` from the seam commit `48297899` (the pre-fix behaviour, the
   seam kept) under the committed pins; **M-strand** = the fix with `install`'s first
   `scheduleRemeasure()` removed (the mount reports nothing — the delivery law broken); **M-stuck** = the
