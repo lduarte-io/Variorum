@@ -1400,5 +1400,15 @@ warnings across 61 suites, attributed by nearest started test — mostly pane-mo
   (`StableSurface.swift` ×2 + a canonical note on `NearViewportObserver`; `BookView.swift` ×3;
   `BookIndexView.swift` ×1). The hops are byte-identical and kept; only the stated WHY changed.
   `git diff -U0` over `App/`: **0 non-comment lines changed.** Build + AFTER counts PENDING.
-- Phase 4, the AFTER count, `CanvasDragTrackingTests` ×3 both sides, closing runs — NOT-STARTED.
+- Phase 4, the AFTER count, `CanvasDragTrackingTests` ×3, closing runs — DONE (numbers under
+  DISPOSITION; written at close).
+- Phase 5, the IN-APP scripted walk (dev-store Debug build; the GUI cannot be driven from this host)
+  — IN-PROGRESS. **The working tree carries an UNCOMMITTED scratch probe + walk driver while this
+  runs (41 files); if this session dies, REMOVE it — `git checkout -- App/Variorum/Variorum && rm -f
+  App/Variorum/Variorum/Core/C3Probe.swift` — never commit it.** Driver (env `C3_WALK=1`, appended to
+  `RootView.swift`): the Sherlock book in INDEX (a live animated resize narrow/back + the pane
+  scrolled), then OUTLINE (the same), a mid-size note in CANVAS (resize, scroll, one synthesized card
+  drag through `NSApp.sendEvent`), TAKES as the POSITIVE CONTROL (panes mount, so `PaneSurface`
+  should warn — a zero elsewhere cannot then be a capture failure), and a note-only window + a
+  second main window opened and closed. Built with `-derivedDataPath DerivedData/18k-c3-walk`.
 - Deaths / resumes: none.
