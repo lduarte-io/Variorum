@@ -250,6 +250,8 @@ struct BookView: View {
             // view's `@State`), so the book publishes its one focus act,
             // keyed by its own id (J41: never a singleton).
             BookOutlineGeometry.focusDoors[readingID] = { model.focus($0) }
+            C2Probe.expandDoors[readingID] = { model.expand($0) }
+            C2Probe.caretFocusDoors[readingID] = { model.focus($0, caret: $1) }
 #endif
         }
         .onChange(of: noteBoxReport) { _, _ in publishNoteBox() }

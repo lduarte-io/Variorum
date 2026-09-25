@@ -929,6 +929,8 @@ final class ScrollAnchorController {
     static var writes = 0
     static var dismantles = 0
     static var phase = "async"
+    static var expandDoors: [String: @MainActor (String) -> Void] = [:]
+    static var caretFocusDoors: [String: @MainActor (String, Int) -> Void] = [:]
     static func reset() {
         t0 = CFAbsoluteTimeGetCurrent()
         makes = 0; updates = 0; writes = 0; dismantles = 0

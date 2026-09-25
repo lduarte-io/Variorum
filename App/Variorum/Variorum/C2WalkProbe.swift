@@ -54,6 +54,23 @@ extension RootView {
                   session.editorRouter.editing.map { C2Probe.id($0) } ?? "nil")
         }
 
+        // 0 — B-1's OWN gesture: expand read-cheap first, then click into the
+        // prose (a focus WITH a caret — the read tier's onFocusRequest road).
+        if ProcessInfo.processInfo.environment["C2_GESTURE"] == "expandThenClick" {
+            for target in [long] + (short.map { [$0] } ?? []) {
+                C2Probe.reset(); C2Probe.armed = true
+                NSLog("C2PROBE walk: ===== EXPAND %@ (%d blocks)", String(target.post.prefix(8)), target.blocks)
+                C2Probe.expandDoors[target.reading]?(target.post)
+                await block("expanded read-cheap", seconds: 3)
+                NSLog("C2PROBE walk: ===== CLICK-FOCUS %@", String(target.post.prefix(8)))
+                C2Probe.caretFocusDoors[target.reading]?(target.post, 120)
+                await block("click-focused", seconds: 3)
+                C2Probe.armed = false
+                focus(nil)
+                try? await Task.sleep(for: .seconds(2))
+            }
+        }
+
         // 1 — the SHORT note first (the control: B-1 measured one mount).
         if let short {
             C2Probe.reset(); C2Probe.armed = true
@@ -111,7 +128,9 @@ extension RootView {
         router.adopt(.shelf)
         try? await Task.sleep(for: .seconds(2))
         NSLog("C2PROBE walk: done — terminating the dev app")
-        NSApp.terminate(nil)
+        // Off this task: a synchronous terminate from inside a main-actor
+        // task hung in terminateLater (walk 1).
+        DispatchQueue.main.async { NSApp.terminate(nil) }
     }
 
     private func outlineScroll(containing view: NSView) -> NSScrollView? {

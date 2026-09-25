@@ -782,6 +782,72 @@ reconciled by B-1's long/short finding; A2's walk may have used a short note. No
 and the spread's active page. The brief's "pool inline editor" no longer exists as an inline host
 (Canvas/the scraps area mount the full-document `EditorView`, `CanvasView.swift:1103`).
 
+### THE MEASUREMENT (Phase 1 — every number from a run in this session)
+
+**The instrument** (`WIP: probe`, `d599539b` + this commit): per realization — `makeNSView` /
+`updateNSView` / `dismantleNSView` counts; every binding write with its PHASE (`make` · `update` ·
+`storage`), the value the closure's binding READ, the value written, and whether the gate let it
+write; the host `EditorView` body's `inlineHeight` on every pass (did SwiftUI apply the write?);
+`StableSurface`'s reports, `loaded` flip and settle; every near-band decision; the Outline row's
+live-branch body; each text view's window-ness at +0.05/+0.5/+2 s (B-1's orphan discriminator).
+
+**M1 — the dev store, today's tree (in-app driver, the Sherlock book, *A Scandal in Bohemia*, 262
+blocks; a 3-block note as the control).** Two runs, two gestures: focus straight from a collapsed
+card (walk 1, `notes/plans/18k-screens/c2/walk1-pre-fix.log`), and B-1's OWN gesture — expand
+read-cheap first, then a focus WITH a caret, the read tier's click road (walk 2,
+`walk2-pre-fix-expand-then-click.log`). **Every focus realized ONCE: 3 of 3 long-note focuses, 3 of 3
+short** — `makes=1`, `dismantles=0`, the one text view in a window at +0.05 s and still at +2 s with
+all 262 entries, `active == editing` on it. Typing 5 keystrokes and deleting them, scrolling the
+23,601-pt column away and back: still one realization. The chain, link by link (walk 2, the long
+note, the remembered size `696×20993` present):
+
+| t (ms) | event | what it shows |
+|---|---|---|
+| +3091.9 | `make #1`, binding 24 | one realization |
+| +3092.8 | write `phase=make` 24 → 24, **wrote=false** | the mount-time write writes NOTHING: no projection yet (`entries=0` at +0.05 s) — nothing to drop |
+| +3093.2 / +3118.5 | write `phase=update` 24 → 24, wrote=false (×2) | same |
+| +3096.7 | `StableSurface` report h=24, `loaded=false`, **reserved=20993** | the reservation holds the row at its remembered 20,993 pt — the column never sees 24 pt |
+| +3231.0 | write **`phase=storage`** 24 → 20993, WROTE | the first real height arrives through the ALREADY-DEFERRED storage road |
+| +3236.7 | body `inlineHeight=20993` | SwiftUI APPLIED it (link 1 of the hypothesis breaks here: no dropped write) |
+| +3237.4 | write `phase=update`, closure's binding READS **24**, new 20993, **wrote=true** → `[SwiftUI] Modifying state during view update` | the ONE warning: a REDUNDANT re-write of a height the state already holds, because the binding captured at `makeNSView` reads stale inside a view update |
+| +3238.9 | `StableSurface` loaded FLIP (reached) | `loaded` flips (link 2 breaks: nothing is stuck under the 60-pt ceiling) |
+| +4242.5 | settled at 20993 | |
+
+Without a remembered size (walk 1's first long focus, `known=nil`): `loaded` flips at +101 ms on the
+24-pt report (`reached` is true with no memory), the real height lands via the storage road at
++236 ms — same single realization.
+
+**M2 — the mounted harness, today's tree** (`BookOutlineLandingTests`, the row's own harness shape,
+probes armed via `TEST_RUNNER_C2_PROBE=1`): **8 realizations for 8 focuses** across the suite's 8
+tests (the multi-story test's makes each pair with a dismantle as focus moves) — NO double, including
+`aChapterRevealLandsAtTheChapterWithAStoryExpandedAndLive`. **20 `Modifying state during view update`
+warnings in the run, and every one of the 20 immediately follows this representable's
+`updateNSView`-phase write that WROTE** (log interleave, `DerivedData/18k-c2-harness1.log`): the
+harness's first real height often arrives through `updateNSView` before the storage hop, and the
+stale captured binding re-writes it on the next update.
+
+**M3 — THE CONTROL: the instrument on TRACE B-1's own tree** (`cfe53bb5`, a scratch worktree, a
+minimal make/dismantle/window probe, an in-memory store only — an old build never opened the dev
+store): `aChapterRevealLandsAtTheChapterWithAStoryExpandedAndLive` **DOUBLES** — two makes back to
+back, and at +0.3 s one text view in a window and one alive but window-LESS: B-1's orphan, exactly.
+So the instrument sees the double where it existed, and today's tree does not have it.
+
+**M4 — THE HYPOTHESIS TESTED DIRECTLY, on the tree where the double exists:** the B-1 tree with EVERY
+synchronous height write deferred to the next turn (install's first report, `updateNSView`'s, and the
+then-extant decoration lane's second pass), run twice: **the double REMAINS in 2 of 2 runs** (two
+makes, the window-less orphan at +0.3 s) **while the suite's `Modifying state` warnings go 18 → 0.**
+
+**VERDICT — DISPROVED, link by link:** (1) no write is dropped — at mount the writes are 24→24 no-ops
+because the projection has not arrived, and the first real height is applied by SwiftUI on the pass
+after the storage road writes it; (2) `loaded` flips (on reach, or on the 24-pt report when nothing is
+remembered) and `StableSurface`'s reservation keeps the column from ever seeing a 24-pt frame; (3) the
+causal claim itself fails M4 — removing every mid-update write removes this representable's warnings
+and leaves the double untouched. What the binding write DOES cause is exactly one thing, measured:
+the `Modifying state during view update` warnings this representable emits (18 of 18 on the B-1
+tree's suite, 20 of 20 on today's). **And the double realization itself no longer reproduces on
+today's tree** (M1 app 0/3, M2 harness 0/8 including the test that doubles on the B-1 tree) — some
+change between `cfe53bb5` and today removed it; C2 did not, and claims nothing for it.
+
 ### LIVE STATUS
 
 - Reading — DONE (this commit).
@@ -792,8 +858,12 @@ and the spread's active page. The brief's "pool inline editor" no longer exists 
   (every report, the `loaded` flip, the settle), `NearViewportObserver` (every decision), the Outline
   row's live-branch body; `C2WalkProbe.swift` — an env-gated (`C2_WALK=1`) in-app driver: short-note
   focus (control) → long-note focus → five keystrokes typed and deleted → scrolled away and back.
-- Phase 1, the measurement (the chain, step by step, with numbers; verdict CONFIRMED/DISPROVED) —
-  NOT-STARTED.
+- Phase 1, the measurement — DONE (this commit): **DISPROVED**, and the symptom no longer reproduces
+  on today's tree — THE MEASUREMENT below. (Probe additions in this commit: a temporary expand door
+  and caret-focus door beside the book's DEBUG focus door, for B-1's own gesture; the driver's
+  terminate moved off its task — walk 1's synchronous `NSApp.terminate` from inside a main-actor task
+  hung in `terminateLater`, and both walk instances were stopped by PID, path verified as the Debug
+  product.)
 - Phase 2, the deferral (coalescing hop, first height delivered) — NOT-STARTED.
 - Pins (first-height delivery; the double-realization count only IF confirmed) — NOT-STARTED.
 - The `Modifying state during view update` count, before/after, one fixed suite set — NOT-STARTED.
