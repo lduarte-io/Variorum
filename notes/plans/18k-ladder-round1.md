@@ -222,5 +222,5 @@ handed `source: nil` must fail with the new sentence. Measured on the pre-fix wo
 `BackupOwnFilesTests`):** `✔ Test run with 31 tests in 5 suites passed after 0.365 seconds`,
 zero skipped (`DerivedData/18k-ladder-r1-nit1-green.log`).
 
-**Commit:** `690a6b85` — pathspec-limited (`StoreBackup.swift`,
+**Commit:** `0ebc3b5e` — pathspec-limited (`StoreBackup.swift`,
 `DataSafetyTests.swift`, `notes/QUESTIONS.md`, this file), no trailers, pushed.
