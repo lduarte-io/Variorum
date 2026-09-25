@@ -518,6 +518,13 @@ savepoints its own sessions, and the idle backstop (`IdleCommitScheduler`, every
   check is not DEBUG-only — this should trap the Release app too, whenever a window's Open strip
   reaches ten rows (crash report: `notes/plans/18k-screens/c1/open-strip-tenth-note-crash.ips`). The
   driver then closed each left note's strip row (closing a row is not a leaving) to stay under it.
+  **CORRECTION (same session, verified at the SDK's `Swift.swiftinterface`):** the grapheme check in
+  `Character.init(_: String)` is a `_debugPrecondition` inside an `@inlinable @inline(__always)`
+  body, so it is compiled OUT of the `-O` Release app — the sentence above that it "should trap the
+  Release app too" is WRONG. What is established: the DEBUG (dev-store) build traps at the tenth
+  Open-strip row — every Debug walk and any Debug session that opens ten notes in one window; the
+  Release app most likely builds a malformed two-grapheme key equivalent for rows 10+ instead
+  (unverified what AppKit then does with it).
 - Closing runs (touched suites + pins + the eleven Tutorial suites; iOS build; phone quick-note
   suites) — NOT-STARTED.
 - Deaths / resumes: none.
