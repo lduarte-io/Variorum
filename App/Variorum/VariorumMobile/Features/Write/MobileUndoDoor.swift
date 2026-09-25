@@ -250,7 +250,10 @@ final class MobileUndoDoor {
 
     // MARK: - Words
 
-    static let anotherIsLanding = "Another structural change is still landing."
+    /// 18k C5: the words live in the shared home now (the Mac's door speaks
+    /// them too) — byte-identical, forwarded so this door's call sites and
+    /// pins read exactly as before.
+    static let anotherIsLanding = StructuralUndoCopy.anotherIsLanding
 
     /// **The A12 warning's DETAIL, in phone words.** The question is shared
     /// (`StructuralUndoCopy.discardingUndoQuestion`); this half is not,

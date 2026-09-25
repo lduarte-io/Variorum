@@ -144,6 +144,118 @@ struct DestructiveUndoWarningTests {
         }
     }
 
+    // MARK: - 18k C5 (17e P33): one flight at a time — the phone's rule
+
+    /// Divides the SECOND block too, with nothing edited after — a clean
+    /// entry E on top of `divideThenEdit`'s insurance-class entry E−1.
+    private func divideTheSecondBlockCleanly(_ h: EditorHarness) async throws {
+        h.textView.setSelectedRange(
+            NSRange(location: h.model.index.range(ofEntryAt: 1).location + 7, length: 0))
+        h.model.updateCaretContext()
+        await h.model.invokeGesture(.divideAtCursor)
+        await h.flush()
+        #expect(h.session.undoStack.depth == 2, "E−1 (edited since) under E (clean)")
+    }
+
+    /// Bounded quiescence: long enough for a second in-flight undo to land
+    /// on the unlatched door, short enough that the latched door (where
+    /// nothing is left in flight) only waits it out.
+    private func quiesce(_ predicate: () -> Bool) async {
+        for _ in 0..<300 where !predicate() {
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(1))
+        }
+    }
+
+    /// **THE P33 pin.** The door reads the stack TWICE across two runner
+    /// submissions — the A12 warning, then the undo — and used to hold no
+    /// latch. Two ⌥⌘Z presses therefore queued as warn, warn, undo, undo:
+    /// both warnings described E (clean, so silent), and the second press
+    /// undid E−1 — the entry whose buffer she had edited since — without the
+    /// confirm her A12 ruling puts in front of exactly that. The phone's
+    /// door holds one flight at a time (`MobileUndoDoor.beginUndo`); this is
+    /// the Mac adopting it: the second press refuses in the phone's words.
+    ///
+    /// RED-ON-OLD (behavioural revert R1-i4, recorded in the 18k C5 record):
+    /// no refusal, both entries undone, E−1's writing set aside unasked.
+    @Test func twoUndoPressesInFlightNeverUndoAnUnwarnedEntry() async throws {
+        try await withEditor(seedBlocks: ["First sentence. Second one."]) { h in
+            let actions = ShellActions(session: h.session, shell: ShellRouter())
+            try await divideThenEdit(h)
+            let afterFirstDivide = try h.storeSlots().compactMap(\.text)
+            try await divideTheSecondBlockCleanly(h)
+
+            let asked = Box<[UndoStack.PendingUndoWarning]>([])
+            let confirm: (UndoStack.PendingUndoWarning) -> Bool = { warning in
+                asked.value.append(warning)
+                return false        // anything asked is cancelled
+            }
+            // Two presses inside one runner round-trip — the gesture, exactly.
+            actions.structuralUndo(confirm: confirm)
+            actions.structuralUndo(confirm: confirm)
+            #expect(h.session.status.current?.text == StructuralUndoCopy.anotherIsLanding,
+                    "the second press refuses at once, in the phone's words")
+
+            await settle { h.session.status.spoken?.text.contains("Undid") == true }
+            await quiesce { h.session.undoStack.depth == 0 }
+
+            #expect(h.session.undoStack.depth == 1,
+                    "ONE press undid ONE entry — E−1 was never undone behind her back")
+            #expect(try h.storeSlots().compactMap(\.text) == afterFirstDivide,
+                    "the writing she did after the first divide is still on the page")
+            #expect(asked.value.isEmpty, "E was clean, so nothing was asked — and nothing else ran")
+
+            // The latch releases with the flight: the NEXT press is ordinary,
+            // and it asks about E−1, because E−1 is in the insurance class.
+            actions.structuralUndo(confirm: confirm)
+            await settle { h.session.status.current?.text.contains("cancelled") == true }
+            #expect(asked.value.map(\.label) == ["Divide"], "the next press asks about E−1")
+            #expect(h.session.undoStack.depth == 1, "and her cancel changed nothing")
+        }
+    }
+
+    /// **The redo door, crossing an undo's flight** — the same shape across
+    /// two doors, which is why the phone's ONE latch covers both. ⇧⌥⌘Z
+    /// pressed inside ⌥⌘Z's warn→act gap used to land between them: the
+    /// confirm she answered was about E−1, and the undo then took the entry
+    /// the redo had just re-applied. Now the redo refuses while the undo is
+    /// in flight, and the undo does exactly what she was asked about.
+    ///
+    /// RED-ON-OLD (R1-i4): no refusal; she approved discarding E−1's writing,
+    /// and E was undone instead while E−1 stayed.
+    @Test func aRedoPressedInsideAnUndosFlightRefusesAndTheUndoDoesWhatItAsked() async throws {
+        try await withEditor(seedBlocks: ["First sentence. Second one."]) { h in
+            let actions = ShellActions(session: h.session, shell: ShellRouter())
+            try await divideThenEdit(h)
+            try await divideTheSecondBlockCleanly(h)
+            // Undo E alone (clean — nothing asked): E−1 is on top, E is redoable.
+            actions.structuralUndo(confirm: { _ in true })
+            await settle {
+                h.session.undoStack.redoDepth == 1
+                    && h.session.status.spoken?.text.contains("Undid") == true
+            }
+            #expect(h.session.undoStack.depth == 1)
+
+            let asked = Box<[UndoStack.PendingUndoWarning]>([])
+            actions.structuralUndo(confirm: { warning in
+                asked.value.append(warning)
+                return true         // she approves discarding E−1's writing
+            })
+            actions.structuralRedo()
+            #expect(h.session.status.current?.text == StructuralUndoCopy.anotherIsLanding,
+                    "the redo refuses while the undo is in flight")
+
+            await settle { !asked.value.isEmpty }
+            await quiesce { h.session.undoStack.depth == 0 }
+
+            #expect(asked.value.map(\.label) == ["Divide"], "she was asked about E−1")
+            #expect(h.session.undoStack.depth == 0, "…and E−1 is what was undone")
+            #expect(h.session.undoStack.redoDepth == 2, "both entries are redoable, in order")
+            #expect(try h.storeSlots().compactMap(\.text) == ["First sentence. Second one."],
+                    "the page is back to the one block she started with")
+        }
+    }
+
     /// The dialog's words name what would be set aside AND where it goes —
     /// pure copy, so it is readable without a window.
     @Test func theDialogNamesWhatIsSetAsideAndWhereItLands() {

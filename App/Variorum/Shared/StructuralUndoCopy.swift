@@ -43,6 +43,16 @@ nonisolated enum StructuralUndoCopy {
     static let nothingToRedo = "No structural change to redo."
     static let undoCancelled = "Undo cancelled — nothing changed."
 
+    /// **The door's in-flight refusal** (18k C5, 17e P33): a second press
+    /// while the first is still landing. The door reads the stack across
+    /// suspensions (the A12 warning, then the act), so a press inside the
+    /// first's flight would act on an entry nobody was asked about. The
+    /// phone's door said this first (`MobileUndoDoor`, M20); the Mac's door
+    /// adopted the rule at 18k, and the words moved here so the one sentence
+    /// has one home — the same words every structural door's own flight
+    /// guard already speaks.
+    static let anotherIsLanding = "Another structural change is still landing."
+
     /// A failed inverse STAYS on the stack (the `UndoStack` doctrine): the
     /// user resolves the refusal — unseal the note, say — and presses again.
     static func undoFailed(_ message: String) -> String { "Undo failed: \(message)" }
