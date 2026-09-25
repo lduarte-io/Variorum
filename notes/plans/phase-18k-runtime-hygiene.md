@@ -464,14 +464,23 @@ savepoints its own sessions, and the idle backstop (`IdleCommitScheduler`, every
   pins) let a post go through a `letGo` helper (release, then the leaving savepoint) — their
   assertions' meaning unchanged; the other three untouched. **Run on the fixed tree: `Test run with
   22 tests in 3 suites passed`** (the 16 C1 pins + the 6 L-d pins).
-- Behavioural revert (red-on-old evidence) — IN-PROGRESS. **R1:** the eight production files
-  (`AppSession` · `EditorViewModel` · `TakesViewModel` · `BlockTOCView` · `CanvasViewModel` ·
-  `CompareBoardView` · `BookIndexEditModel` · `ShellActions`) checked out from `af9041e7` (pins +
-  seam, pre-fix behaviour) over the committed fix `a8b27b11`; the three C1-touched suites run; then
-  restored with `git checkout a8b27b11 -- <files>`, verified by an empty `git diff`. **M1/M2
-  (mutations, for the guard pins' teeth):** M1 = the Mac's release drops like the phone's (plain
-  release, no leaving gate); M2 = the release ignores the holder count. Each applied to the fixed
-  tree, the guard suite run, restored the same way.
+- Behavioural revert (red-on-old evidence) — DONE. **R1** (the eight production files from
+  `af9041e7` over the fix `a8b27b11`): `Test run with 22 tests in 3 suites failed … with 25 issues` —
+  byte-for-byte the pre-fix picture (every count pin red, the open-tail leaving pin red, the lock
+  pin's and the two-surface pin's count arms red; the L-d suite and the pure guards green); restored
+  by `git checkout a8b27b11 -- <files>`, `git diff` empty. **M1** (the Mac's release drops like the
+  phone's — no leaving gate) on the fixed tree: `Test run with 16 tests in 2 suites failed … with 8
+  issues` — the open tail (both forms), the book-note lock savepoint, the still-shown note's ⌘Q
+  savepoint (B), the mode switch (a DIFFERENT coordinator after the switch), and — incidental, and
+  worth having — Compare (a release that finds its coordinator mid-flush is refused and nothing ever
+  retries it; the fix's re-run savepoint flushes first) and the book index (the entry dropped
+  although the note still owes its savepoint). The lock pin passed M1 BY TIMING (its surface had not
+  released before the walk's snapshot) → tightened to wait for the release first (`732bfa23`) and
+  re-run under M1: RED, as it must be. **M2** (the release drops the entry whatever other holders
+  remain — the over-release shape): `Test run with 7 tests in 1 suite failed … with 9 issues` — all
+  seven guards red, and the two-surface pin shows the brief's TEXT-LOSS class in the flesh: the
+  survivor's typing was NOT reached by the ⌘Q walk (`working_text` still "One."). Both mutations
+  restored the same way; `git diff` empty (`git status` clean).
 - Dev-store before/after measurement — NOT-STARTED.
 - Closing runs (touched suites + pins + the eleven Tutorial suites; iOS build; phone quick-note
   suites) — NOT-STARTED.
