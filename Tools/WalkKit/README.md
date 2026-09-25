@@ -194,3 +194,30 @@ swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
 - **`walk-scroll` is positive-is-down**; ±260 lines crosses a 10k-word note (F2).
 - **RETIRED: the 13u3 UNIT E fact about the Restore Tutorial door's AppKit modal** — that door is
   a SwiftUI `.alert` since 13u4 S3 (ESC cancels; it draws inside the window and captures normally).
+
+## Walker facts from the 18k held walks (2026-09-25)
+
+- **Ghostty now holds BOTH grants** (`AX: true SCREEN: true`, re-proved by a compiled probe at the walk's start) —
+  the 18k note above describes the night before her grant. Still check before any walk.
+- **`cliclick` clicks do NOT toggle the SwiftUI Settings controls** (switches, sidebar pane rows) even with the point
+  verified at the element's AX frame. **Drive Settings through Accessibility instead:** panes are
+  `button 1…9 of scroll area 1 of group 1` of the window named `"<App> Settings"` (1 General, 2 Editor, 8 Data Safety);
+  inside a pane, `checkbox "<name>"`, `pop up button "<name>"` (click it, then `click menu item "<x>" of menu 1 of it`)
+  and `radio button n of radio group "Design voice"` of `group n of scroll area 2 of group 1`. Read values back the
+  same way — it is also how to verify you restored her settings.
+- **A scroll aimed at the note while Settings is open must land OUTSIDE the Settings window's frame** (720×552 at
+  (200,120)), or the wheel scrolls Settings and the note does not move.
+- **The structural-undo confirm ("Undo Divide?") is an AppKit modal** (`subrole AXDialog`, 260×298 at (734,230) here):
+  `walk-cap` cannot see it; capture it with `screencapture -R`, read `value of static text 1 of window 1`, and press
+  `button "Cancel"`/`"Undo"` by name. The Edit menu's items 3–4 name the undo/redo entries — a cheap state probe.
+- **Two keystrokes in ONE `osascript` call arrive ~0 ms apart**; the app answered the second with nothing at all.
+  Put a `delay 0.03` between them to model a fast human double press.
+- **`st` is reserved in AppleScript** (the ordinal suffix): a handler named `st()` does not compile. Use a word.
+- **Measure "the same line at the top" instead of eyeballing a tile:** count text-row tops in a fixed page-column
+  box (a 20-line PIL script over the 1× capture). Two of this walk's verdicts were wrong from thumbnails and right
+  from the numbers.
+- **The Open panel's "Use This Folder" button lives in `splitter group 1 of window "Open"`**, and
+  `value of pop up button "Where:" of splitter group 1` confirms the folder before you press it.
+- A NOTE WINDOW opened from the Open strip's context menu ("Open in New Window") is 800×720 and opens in the note's
+  remembered mode; `click (first button whose subrole is "AXCloseButton") of (first window whose size is {800, 720})`
+  closes exactly that one.
