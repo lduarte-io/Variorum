@@ -2697,10 +2697,12 @@ pointing at your record.
 
 ## UNIT C5 RECORD — 17e's concurrency five (implementer: `opus-implementer`, 2026-09-25)
 
-**NOT DONE (first line, per the brief):** IN PROGRESS — this line is rewritten at the unit's close.
-The hands-on GUI walks and captures are HELD from the start: this session's terminal host holds
-neither Screen Recording nor Accessibility (the C1–C6 finding), so the use evidence is harness and
-in-app evidence, and the author's walk steps are written below for her morning.
+**NOT DONE (first line, per the brief):** (1) the hands-on GUI walks and their captures — HELD (the brief: this
+host could not drive or capture the app when the unit began; the orchestrator's handoff `262ff146` now runs them
+after C5, from the steps under THE GUI WALK below). (2) The full Mac suite — the orchestrator's finals. (3) Copying
+C5's dispositions into 17e's entry and flipping KnownIssues row 59 — the orchestrator's records (a ready-to-copy
+block is under DISPOSITION). (4) P26's product code — nothing was owed: `6bc4f187` had already fixed it; C5 pinned it.
+Everything else the brief asks for is done.
 
 ### READING (done in-session before any code)
 
@@ -2789,5 +2791,157 @@ parallel runs append TWO log records for one intent. **CONFIRMED.**
 - Item 3 (P27) — DONE, FIXED (`dee61938`; pin `98880463`). **EDITOR-SEAM PAIR — flagged for the Fable ladder:** `EditorSurfaceController.applyStructural`'s `.merge` arm, the non-ceremony UNFANNED branch only (+20 lines): before the instant merge it reads `liveActiveFans` (the seam keystroke's exact shape, `runSeamMerge`) and takes the carry-all road if the store says either block is fanned. Untouched: the fanned branch (its road re-reads truth and falls back, as before), the ceremony branch (⌥⌘⇧M — see NOTICED), `runInstantMerge`, `runCarryAllMerge`, `runStructural`, every signature. Pins in `FannedDefaultsTests`: `aFanArrivingWhileSheIsTypingIsCarriedByTheMerge` (the burst: type, branch a take on the block below, deliver the projection so the engine defers it, ⌘⇧M) and the guard `anUnfannedMergeMidBurstIsStillTheInstantMerge` (green both sides). **Pre-fix tree: `Test run with 33 tests in 1 suite failed … with 2 issues`** (the merged block carried ONE take — the new one left on the released block — and `statusMessage` was nil). Fixed: `FannedDefaultsTests` + `SeamMergeTests` **`53 tests in 2 suites passed`**. **R1-i3** (the production file from `98880463` over the fix): `33 tests … failed … with 2 issues`, identical; restored, `git diff` empty. Cost: one indexed read of the two blocks' fans per everyday ⌘⇧M (P1-bounded). The read is an await before `runStructural` raises its flight flag — the window the carry-all and seam roads already have; a second structural act inside it is refused by `runStructural`'s own guard, and `runInstantMerge` resolves its entries by id at act time (R1-2), so nothing acts on a stale index.
 - Item 4 (P33) — DONE, FIXED (`65aa05fa`; pins + the sentence's home `8a172f7a`). The Mac's ⌥⌘Z AND ⇧⌥⌘Z share ONE in-flight latch, taken synchronously at press time: `AppSession.beginStructuralUndoDoor()` / `endStructuralUndoDoor()` (macOS block, beside the tutorial door's latch — the precedent; session-scoped because `ShellActions` is a value rebuilt per menu read), released by a `defer` in each door's Task. A press that finds it held refuses with `StructuralUndoCopy.anotherIsLanding` — the phone's words, hoisted into the shared copy home, with `MobileUndoDoor.anotherIsLanding` forwarding byte-identically (the call: see JUDGMENT CALLS). Pins in `DestructiveUndoWarningTests`: `twoUndoPressesInFlightNeverUndoAnUnwarnedEntry` (E−1 edited since, E clean, two presses) and `aRedoPressedInsideAnUndosFlightRefusesAndTheUndoDoesWhatItAsked` (the redo door's cross-door shape). **Pre-fix door** (the copy hoist present, no latch): **`Test run with 7 tests in 1 suite failed … with 9 issues`** — arm A: no refusal, BOTH entries undone, the writing after the first divide gone, and the next press found nothing to ask; arm B: she was asked about E−1 and approved, yet E was undone and E−1 stayed. Fixed: `DestructiveUndoWarningTests` + `BlockDeletionAndRedoTests` **`36 tests in 2 suites passed`**. **R1-i4** (both production files from `8a172f7a`): `7 tests … failed … with 9 issues`, identical; restored. **M-P33r** (undo latched, redo NOT): `failed … with 4 issues`, all in the redo arm — the shared half is load-bearing. Consequence, stated: two presses inside ONE flight (milliseconds) now refuse the second rather than queueing it — the phone's rule and every structural door's own flight guard; a held-down chord undoes at the rate flights land.
 - Item 5 (P38) — DONE, FIXED (`3f480486`; pins `824dfebf`). **`StoreBackup.run` is single-flight** (Shared): an in-flight slot `(id, task, forced)`; a request is handed the in-flight run's outcome whenever that run covers it (any request behind a forced run; a due-check behind anything); a FORCED request behind a due-check waits for it and then runs its own (JUDGMENT CALLS 3) — never two runs in parallel; the old body moved verbatim into `performOneRun`. **The pane's door:** `DataSafetyModel.setInsurance` takes `busy` like its three siblings (`guard !busy`, set, defer clear), and the pane's toggle adds `model.busy` to its `.disabled` (the siblings' line). Pins `BackupSingleFlightTests` (in `DataSafetyTests.swift`, 3 tests): `twoForcedRunsInOneSecondAreOneRun` (on-disk WAL source, keep 1 with an older copy to prune, one clock reading for both), the guard `aForcedRequestBehindADueCheckStillWritesAFreshCopy`, and `theInsuranceToggleHoldsThePanesLatchWhileItsBackupRuns`. **Pre-fix: `Test run with 3 tests in 1 suite failed … with 3 issues`** — TWO runs (two log records) for one intent, and the pane never busy during the toggle's pass. **Honest about the consequence:** the false `failed` P38 names did NOT occur on the unlatched door in 80 runs (`-test-iterations 40`, in-memory AND on-disk sources: `18k-c5-p38-prefix-iter40.log`, `…-disk40.log`) — both sources serialise the two snapshot writes, so one run's `prune` lands before the other lists; the double run (the mechanism) reddened every iteration, 80/80. The `failed`/`lastError` arms stay as guards of the consequence. Fixed: `BackupSingleFlightTests` + `BackupRunTests` + `Phase13pInsuranceFaceTests` **`13 tests in 3 suites passed`**. **R1-i5** (all three production files from `824dfebf`): `3 tests … failed … with 3 issues`, identical. **M-P38c** (coalesce EVERY request): `failed … with 2 issues`, both in the guard (Back Up Now handed the tick's `upToDate`). **M-P38d** (the pane's door reverted, the latch kept): `failed … with 2 issues`, both in the door pin (never busy; the press ran a second pass). Restored each time, tree clean.
-- Closing runs — NOT-STARTED.
+- Closing runs — DONE (below, CLOSING RUNS): Mac closing set 609/95 green ×2 of 3 on the final tree, the one red being the flake list's `ModeSwitchCarryTests` top-of-Write arm, adjudicated by the paired interleaved protocol; iOS BUILD SUCCEEDED; the phone's five suites 58/5 green.
+- The record closed — DONE (this commit).
 - Deaths / resumes: none.
+
+### DISPOSITION — the five, one verdict each
+
+| # | Item | Verdict | Pin (red-on-old evidence) | Commits |
+|---|---|---|---|---|
+| 1 | KnownIssues row 59 — Canvas reports no focused block | **FIXED** | `CanvasFocusedBlockFactTests` (2) — pre-fix 5 issues; R1-i1 5, identical | pin `4eb91dad` · fix `bc5e8cf9` |
+| 2 | P26 — the phone's `takeLiveness` stale continuation | **ALREADY FIXED by `6bc4f187` (2026-08-30), now PINNED** — not hollow, zero product code | `MobileLivenessTests.aGrantSuspendedInsideItsFlushNeverResumesIntoThePen` — green on HEAD; M-P26 (the post-suspension guards deleted) 2 issues in this pin alone, `6bc4f187`'s two pins green | pin `ebd690e6` |
+| 3 | P27 — ⌘⇧M decides from the frozen `slots` | **FIXED** (editor seam's pair — Fable ladder) | `FannedDefaultsTests.aFanArrivingWhileSheIsTypingIsCarriedByTheMerge` + guard — pre-fix 2 issues; R1-i3 2, identical | pin `98880463` · fix `dee61938` |
+| 4 | P33 — ⌥⌘Z has no in-flight latch (+ ⇧⌥⌘Z, same shape across doors) | **FIXED** (both doors, one shared latch) | `DestructiveUndoWarningTests` (2 new) — pre-fix 9 issues; R1-i4 9, identical; M-P33r 4 (redo arm only) | pins `8a172f7a` · fix `65aa05fa` |
+| 5 | P38 — `StoreBackup.run` has no single-flight latch (+ `setInsurance`'s door) | **FIXED** | `BackupSingleFlightTests` (3) — pre-fix 3 issues (double run 80/80; the false `failed` 0/80, recorded); R1-i5 3; M-P38c 2; M-P38d 2 | pins `824dfebf` · fix `3f480486` |
+
+**Ready to copy into 17e's entry (the orchestrator's act):** *row 59 — FIXED 18k C5 (`bc5e8cf9`, pin
+`CanvasFocusedBlockFactTests`) · P26 — ALREADY FIXED by `6bc4f187`, pinned 18k C5
+(`MobileLivenessTests.aGrantSuspendedInsideItsFlushNeverResumesIntoThePen`) · P27 — FIXED 18k C5 (`dee61938`,
+pin `FannedDefaultsTests.aFanArrivingWhileSheIsTypingIsCarriedByTheMerge`) · P33 — FIXED 18k C5 (`65aa05fa`, both
+doors; pins `DestructiveUndoWarningTests.twoUndoPressesInFlightNeverUndoAnUnwarnedEntry` +
+`aRedoPressedInsideAnUndosFlightRefusesAndTheUndoDoesWhatItAsked`) · P38 — FIXED 18k C5 (`3f480486`, pins
+`BackupSingleFlightTests`).*
+
+**No PROVISIONAL, no QUESTIONS entry** (#147 unused): the one refusal sentence is the phone's existing words (the
+brief's default), and every other call below is technical, each reversible in a line.
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder reads this first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift` | **The editor seam's pair (P27), +20 lines:** the `.merge` arm's non-ceremony UNFANNED branch reads `liveActiveFans` and takes the carry-all road when the store says fanned | the fanned branch, the ceremony branch, `runInstantMerge`, `runCarryAllMerge`, `runStructural`, `liveActiveFans` itself, every signature |
+| `App/Variorum/Shared/AppSession.swift` (shared) | +21 lines inside the existing `#if os(macOS)` block: `structuralUndoDoorInFlight` + begin/end (the tutorial door's latch, beside it) | the autosave registry C1 rebuilt, everything the phone compiles |
+| `App/Variorum/Shared/StoreBackup.swift` (shared) | the single-flight slot + `run(force:)`; the old body moved verbatim into `performOneRun(force:)` | `performRun`, `performBackupIfDue`, `prune`, `integrityCheck`, the legs, every static |
+| `App/Variorum/Shared/StructuralUndoCopy.swift` (shared) | `anotherIsLanding` (the phone's sentence, byte-identical) | every other string |
+| `App/Variorum/VariorumMobile/Features/Write/MobileUndoDoor.swift` | `anotherIsLanding` forwards to the shared copy (same bytes) | the door's latch, flush contract, presentation state |
+| `App/Variorum/Variorum/Registry/ShellActions.swift` | `structuralUndo` / `structuralRedo` take the latch at press time, `defer` release in their Tasks | the A12 warning, the confirm seam, every report |
+| `App/Variorum/Variorum/Features/Canvas/CanvasViewModel.swift` | one `noteFocusedBlock` in `focus(blockID:variantID:)` | the ring, the flush, order mode, every other method |
+| `App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift` · `DataSafetyPane.swift` | `setInsurance` takes `busy`; the toggle's `.disabled` gains `model.busy` | the other three doors, the receipts |
+
+**Untouched, named because a reviewer will look:** `EditorTextView`, `EditorViewModel`, the storage seam,
+`BlockRangeIndex`, `PaneSurface`, `PaneTextAuthority`, `MobileLivenessAuthority` (P26 is test-only),
+`CommandRouter`. **Zero `Sources/`, zero `Sync/`, zero `Server/`; marker 9 unchanged; no schema.**
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **Row 59 — the report rides BEFORE `authority.focus`, with a nil offset, and nothing on blur.** Before: the
+   Takes board's placement, so a re-click on the live card re-asserts a fact another pane moved (the second pin).
+   Nil offset: nil is UNKNOWN under U-20, and a canvas caret reporter is the "fourth reporter … a design act" that
+   Blocks' row records (NOTICED 2). No blur report: no surface clears the fact on blur; "the block you were in"
+   outlives the ring. *Consequence, stated:* Canvas now FEEDS the row-39 memory, so Canvas → Write lands on the
+   card she last clicked (its remembered offset, else its start) rather than Write's older caret block — the
+   memory's design, now honest in Canvas too.
+2. **P26's verdict wording.** The defect was real on the tree it was filed against (`6bc4f187`'s parent) and is
+   closed at HEAD; "hollow" would misstate it and "fixed by C5" would claim someone else's fix. The pin is what
+   was owed. *Reverse by* re-labelling; nothing in code turns on it.
+3. **P38 — a forced request behind an UNFORCED run waits and then runs its own** (instead of being handed the
+   due-check's answer). Back Up Now's own doc promises "a fresh snapshot at both destinations regardless of the
+   interval"; handing it "already up to date" would break that promise while still never running in parallel.
+   Every other pairing coalesces, as the brief says. *Reverse by* `if let current = inFlight {` (M-P38c shows the
+   guard pin that would flip).
+4. **P33 — the latch is session-scoped on `AppSession` (Mac), SHARED by undo and redo; the phone keeps its own
+   door-local latch; only the SENTENCE is hoisted.** MobileSoul §3's hoist rule, applied: the RULE (one flight at a
+   time, across both doors, refused in these words) now reads identically on both platforms, and its words have
+   one home (`StructuralUndoCopy`). The latch MECHANISM is not hoisted: the phone's is interleaved with its
+   presentation state (released before its alert shows, re-taken at confirm), the Mac's alert is modal inside the
+   flight, so a shared latch type would be six lines each door wraps differently — no brain, just two lifecycles.
+   *Reverse by* a `StructuralUndoFlight` type in `Shared/` both doors hold.
+5. **P33 — refuse, not queue.** The brief allowed either; the phone refuses, and so does every structural door's
+   own flight guard in the same words. A second press inside one flight (milliseconds) now shows the sentence.
+6. **P27 — the store read sits only in the unfanned branch.** The fanned branch's road already re-reads truth
+   and falls back; the ceremony branch's stale read can only REFUSE (never authorize) — see NOTICED 1.
+7. **P38 — the pin runs on an on-disk WAL source** (the app's real store shape), after the in-memory source showed
+   the same 0/40 for the `failed` consequence. The double run reddens either way.
+
+### CLOSING RUNS (at the unit's END, on the final tree; zero app instances; `DebugOracleSingletonWindowTests` in no set)
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| **Mac closing set** — 95 literal suites: row 59's router/Canvas family (27), P27's merge-door family (31), P33's undo doors (8), P38's backup family (18), **the eleven Tutorial suites** | `DerivedData/18k-c5-closing.sh 18k-c5-closing1` (list in the script) | **`✘ Test run with 609 tests in 95 suites failed after 101.981 seconds with 2 issues`** — both in `ModeSwitchCarryTests.aBlockAtTheTopOfWriteArrivesAtTheTopOfRead`, the flake list's "top-of-Write arm", at its PRECONDITION (`wrote <= 0.02`: Write's own harness scroll, before any mode switch) — a road no line of C5 sits on |
+| **The paired interleaved adjudication** (her protocol: this tree vs the opening commit `5d831922`, alternating; a scratch worktree, removed) | `ROOT=… DerivedData/18k-c5-closing-at.sh <log>` | base `18k-c5-pair-old1` **600/93 passed** · final `…-new2` **609/95 passed** · base `…-old2` **600/93 passed** · final `…-new3` **609/95 passed**. Isolated, `-test-iterations 10`: **30/10 passed on BOTH trees, 0 reds** (`18k-c5-msc-{new,old}-iter10.log`). Verdict: the known load flake (1 of 3 loaded runs on the final tree, 0 of 2 on the base, 0 of 20 isolated), not C5's. The 9-test / 2-suite difference is exactly this unit's pins. |
+| iOS build | `xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS` | **`** BUILD SUCCEEDED **`** |
+| Phone suites (iPhone 17 Pro, iOS 26.2) | `DerivedData/18k-c5-phone.sh 18k-c5-phone-closing MobileLivenessTests MobileShellTests MobileUndoDoorTests MobileBlockMenuTests MobileStructuralTests` | **`✔ Test run with 58 tests in 5 suites passed`** (P26's pin included) |
+| Core (`swift test`) | — | **NOT OWED** — zero `Sources/` |
+
+Not run, named: the opt-in drills (`PostureSwitchDrillTests` reaches `backUpNow` through the posture switch;
+`Phase13pKeyedDrillTests`) — keychain-scoped, the orchestrator's to opt into.
+
+### THE GUI WALK — HELD for the author (her steps; ~5 minutes on the dev-store Debug build)
+
+1. **Canvas → ⌘K Block History (row 59).** Open a note of several blocks in **Write** and click into its FIRST
+   block. Switch to **Canvas** (⌘7) and click into a card further down (say the third). ⌘K → **Block History**.
+   Expect the pane to open on THAT card's block, not the first. Click a different card and ask again: the pane
+   follows. (Then ⌘1: Write now lands on the card you last clicked — the stated consequence.)
+2. **⌥⌘Z pressed twice fast (P33).** In Write on a scratch note: ⌘⇧D to divide a block, then type a word into
+   the first half; ⌘⇧D a different block and type nothing. Press ⌥⌘Z twice as fast as you can. Expect ONE of:
+   the second press shows *"Another structural change is still landing."* (it was inside the first's flight), or
+   — if the first had already landed — the "Undo Divide?" confirm for the edited one. **Never** both divides
+   undone with no confirm. Answer Cancel and check the typed word is still there.
+3. **⇧⌥⌘Z inside ⌥⌘Z (P33's redo arm).** From step 2's state after one undo: press ⌥⌘Z and immediately ⇧⌥⌘Z.
+   Expect the redo refused in the same words, OR the confirm naming the edited divide — and whatever you approve
+   is what comes back.
+4. **Back Up Now vs the insurance toggle (P38).** Settings ▸ **Data Safety** (dev store, with a SCRATCH backup
+   folder picked — the toggle writes plain-text copies there). Flip **"Keep a weekly plain-text copy…"** ON and
+   look at the pane at once: Back Up Now and the folder buttons grey while its pass runs, and the toggle itself
+   greys while a Back Up Now runs. Press Back Up Now right after flipping: nothing doubles. The log below shows
+   ONE run per act, and no *"failed"*. Turn the toggle back OFF afterwards.
+5. **(P26 — the phone, optional.)** On the phone, with the same note open in both tab stacks, tap Library →
+   Shelf → Library as fast as you can, then type. Expect the note you're LOOKING at to take the keystroke, and
+   the other tab's copy never editable. (Already fixed since 2026-08-30; this is a confirmation, not a new face.)
+6. **(P27 — not hand-walkable.)** It needs a take to arrive from another device inside a typing burst; the pin
+   drives exactly that. If she wants to try: type in the Mac note while adding a take to the NEXT block from the
+   phone, then ⌘⇧M across the two within a second — the merged block should carry the take and the receipt
+   should say *"…1 other take came along whole…"*.
+
+### NOTICED, NOT TOUCHED (C5's scope fence)
+
+1. **⌥⌘⇧M's arity is still read from the frozen `slots`** (the `.merge` arm's ceremony branch, same two numbers
+   P27 fixed for ⌘⇧M). Mechanism: a take born mid-burst makes the door REFUSE with *"needs a fan"* while one
+   exists (a factually wrong refusal, the safe direction — pressing again after the burst works); and the mirror,
+   a take archived elsewhere mid-burst, makes "Merge choosing takes…" fall through `openMergeCeremony`'s truth
+   read into an INSTANT merge rather than its ruled refusal. Neither authorizes from stale state, which is why it
+   was left; fixing it is one store read in that branch and changes what the ceremony door does in the second
+   case — a door-behaviour call. Needs an owner (18o's correctness singles, or the ladder's word).
+2. **Canvas reports no caret OFFSET** — the Blocks row's "fourth reporter … a design act", now a fifth surface
+   with a real caret. Canvas → Write lands at the card's remembered offset (else its start), not where the
+   canvas pane's caret sat. Needs an owner if she wants it (U-20's family; a design act, not a fix).
+3. **P26's neighbour, traced on the way:** a grant whose editor is DEREGISTERED (its screen popped) while the grant
+   is suspended mid-flush still resumes into `noteLivenessGranted()` — a pop does not bump the handoff token. The
+   popped model ends `isLive` with no surface (its screen is gone, so no keystroke road), until it deallocates;
+   a later `register` cannot stand it down because it is no longer registered. Not user-visible; a
+   `live === editor` belt beside the token would close it. The mobile app row's.
+4. **P38's consequence is not reproducible in the harness** (0/80 false `failed`, both source shapes — the snapshot
+   writes serialise, so one prune lands before the other lists). The single-flight latch removes the race
+   structurally; the `failed` arms stay as guards. Recorded so no one reads the green as the race "measured gone".
+5. **The Mac's merge/undo doors now await before `runStructural` raises its flight flag in one more place**
+   (P27's read) — the window the carry-all and seam roads already had; a second structural act inside it is
+   refused by `runStructural`'s own guard. Recorded for the Fable reviewer, not a defect found.
+6. `git worktree prune` (run while removing this unit's scratch worktree) also removed the STALE administrative
+   entry for `/private/tmp/claude-501/u1-baseline-tree` that C1–C6 left in place — its directory was already gone
+   (it was listed `prunable`), so only metadata went; nothing on disk was touched.
+
+### CAPTURES
+
+None (the GUI walk is HELD — see the first line). The evidence is the harness logs in `App/Variorum/DerivedData/`
+(gitignored), with the scripts beside them (`18k-c5-run.sh`, `18k-c5-phone.sh`, `18k-c5-closing.sh`,
+`18k-c5-closing-at.sh`):
+- Row 59: `18k-c5-i1-{prefix,fixed,R1}`.
+- P26: `18k-c5-p26-{head,M}`.
+- P27: `18k-c5-p27-{prefix,fixed,R1}`.
+- P33: `18k-c5-p33-{prefix,fixed,R1,Mredo}`.
+- P38: `18k-c5-p38-{prefix,prefix-iter40,prefix-disk40,fixed,R1,Mc,Md}`.
+- Closing: `18k-c5-closing1` · `18k-c5-pair-{old1,new2,old2,new3}` · `18k-c5-msc-{new,old}-iter10` ·
+  `18k-c5-ios-build` · `18k-c5-phone-closing`.
+- Deaths / resumes: none.
+- **C5 — DONE (implementer), awaiting the orchestrator's spot-check; the hands-on GUI walk HELD.**
