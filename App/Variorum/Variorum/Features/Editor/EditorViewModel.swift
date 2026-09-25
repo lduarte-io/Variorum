@@ -4118,11 +4118,14 @@ final class EditorViewModel {
         return fragmentStart + lines[i].characterRange.location
     }
 
-    /// 18k C6b: a paragraph with no text on it — a blank line.
+    /// 18k C6b: a paragraph with no text on it — a blank line. Stops at the
+    /// first visible character, so a long paragraph costs what its leading
+    /// whitespace costs (this runs on every scroll through the anchor).
     private static func isBlankParagraph(_ fragment: NSTextLayoutFragment) -> Bool {
         guard let paragraph = fragment.textElement as? NSTextParagraph else { return false }
-        return paragraph.attributedString.string
-            .trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return (paragraph.attributedString.string as NSString)
+            .rangeOfCharacter(from: CharacterSet.whitespacesAndNewlines.inverted)
+            .location == NSNotFound
     }
 
     /// 18k C6b: the start of the first paragraph with text AFTER `fragment`
