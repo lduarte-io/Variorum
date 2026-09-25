@@ -2988,6 +2988,22 @@ own DerivedData (`App/Variorum/DerivedData/18k-walks/`). Captures: `notes/plans/
 ### LIVE STATUS
 
 - Step 0 (grants) — DONE (`AX: true SCREEN: true`).
-- The Debug build — IN-PROGRESS.
-- C1 · C2 · C3 · C6 · C5 walks — NOT-STARTED.
+- The Debug build — DONE (`** BUILD SUCCEEDED **`, `DerivedData/18k-walks-build.log`).
+- C1 — DONE, **PASS** (table below).
+- C2 — IN-PROGRESS. C3 · C6 · C5 — NOT-STARTED.
 - Deaths / resumes: none.
+
+**The dev store as found:** custody posture **standard** ("Your Apple account holds a key") — the app opened
+with no Touch ID prompt, so no step of this walk met a custody gate; Terminal voice; the pink palette;
+appearance `system`. The Debug binary is launched DIRECTLY with `OS_ACTIVITY_DT_MODE=YES`, its output
+logged to `walks/app-run<n>.log` (the SwiftUI warning count's source).
+
+### C1 — the registry release: many notes, then ⌘Q (Terminal voice; lifecycle, voice-independent)
+
+| # | Step | Captures | What I saw | Verdict |
+|---|---|---|---|---|
+| 1 | Open 16 notes (Library click + ⌘K), each switched through a mode (⌘1…⌘7 in rotation) and back to Write, leaving each for the next; the oldest Open-strip row closed once the strip held five (below C1's recorded tenth-row Debug trap, owned by 18o) | `c1-00-library` · `c1-01-first-note` · `c1-02-palette` · `c1-03-second-note` · `c1-04-after-14-notes` | Every open and mode switch landed; no stall, no crash; the 97 s script time is the script's own delays. *A Scandal in Bohemia* (262 blocks) opened through Blocks and back without a hitch | PASS |
+| 2 | Type a marker into a note, then leave it | `c1-05-typed-marker` | ` c1walkmark` landed whole at the end of *three ways of working*'s last block (per-character `osascript` keystrokes with re-activation — the whole string landed) | PASS |
+| 3 | Type a second marker into *Walk test* and quit AT ONCE, by identity (`tell application id … to quit` — the ⌘Q road's terminate, never a keystroke) | `c1-06-walk-test` · `c1-07-quitmark-typed` | The quit call returned after **0.26 s**; the process was gone **0.42 s** after the call | PASS |
+| 4 | Relaunch; open both notes | `c1-08-relaunch-walk-test` · `c1-09-relaunch-three-ways` | Both markers present: *Walk test* reads `words c1quitmark` (the still-open note, saved by the quit's flush alone), *three ways of working* ends `…the bridge.” c1walkmark`; both stamped "edited today" | PASS |
+| 5 | Clean up: both markers deleted by backspace | `c1-10-walktest-cleaned` · `c1-11-threeways-cleaned` | Both notes back to their original text | — |
