@@ -446,7 +446,7 @@ savepoints its own sessions, and the idle backstop (`IdleCommitScheduler`, every
   acquisition sites, the phone's release precedent) — DONE (in-session, this record's first commit).
 - The trace (every site's acquisition shape and real end of life; what the ⌘Q/lock registration is
   still doing for J11) — DONE (T1–T5 above).
-- Pins (red-on-old) — DONE (this commit): the seam `AppSession.autosaveHolderCount(forPost:)`
+- Pins (red-on-old) — DONE (`af9041e7`; the lock pin tightened at `732bfa23`): the seam `AppSession.autosaveHolderCount(forPost:)`
   (read-only, no behaviour) + `VariorumTests/AutosaveRegistryLifecycleTests.swift` (two suites,
   16 tests). **Run on the PRE-FIX behaviour (seam only): `Test run with 16 tests in 2 suites failed …
   with 25 issues`** — every count pin RED (Write ×2, Takes, Blocks/Read, Canvas — 7 holds after one
@@ -456,7 +456,7 @@ savepoints its own sessions, and the idle backstop (`IdleCommitScheduler`, every
   wrote NOTHING for a tail the editor minted on its way out. The pure guards GREEN on old, as they
   must be (the old tree never let go of anything): quit-at-the-latest tail, book-note lock
   savepoint, still-open ⌘Q walk, mode switch, seal-still-flushes.
-- The fix — DONE (this commit), PENDING the revert/mutation evidence, the walk and the closing runs:
+- The fix — DONE (`a8b27b11`; verified by R1/M1/M2, the in-app walk and the closing runs below):
   `AppSession` (Mac: the entry leaves only through a leaving savepoint that lands after the last
   holder let go — `markLeaving`/`dropAfterLeaving`, the acquisition generation; the last release of a
   LEFT note re-takes that savepoint; a DEBUG `assert` on more releases than acquisitions; the phone's
@@ -612,3 +612,4 @@ None possible (see the first line). The use evidence is the in-app walk's probe 
 the crash report, and the instrumentation script that produced them (`c1_instrument.py` — apply to a
 tree, build Debug, launch the binary with `C1_WALK=1`).
 - Deaths / resumes: none.
+- **C1 — DONE (implementer), awaiting the orchestrator's spot-check; the hands-on GUI walk HELD.**
