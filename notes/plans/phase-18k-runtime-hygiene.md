@@ -950,6 +950,11 @@ change between `cfe53bb5` and today removed it; C2 did not, and claims nothing f
   resize, narrow then back). **POST walk DONE** (`walk3-POST-fix.log`). **PRE walk NEXT — the named
   revert W-app-B:** `EditorView.swift` from the seam commit `48297899` (pre-fix behaviour) with the
   same probes, over the committed `5b0cc41e`; restored to `5b0cc41e` (probes removed) after. PENDING.
-- The ledger row amendment (claimed only if confirmed) — NOT-STARTED.
+- A BISECT for the change that REMOVED the double (measurement only, scratch worktree, in-memory store;
+  the Outline harness's chapter-reveal make count as the predicate, `cfe53bb5` doubles → `709bd7bf`
+  single, ~8 steps) — IN-PROGRESS (so the row can be closed with a mechanism rather than "no longer
+  reproduces"; if it stalls, the row is amended with what is measured).
+- The ledger row amendment (claimed only if confirmed — it is NOT; amended with the measurement) —
+  NOT-STARTED.
 - Closing runs — NOT-STARTED.
 - Deaths / resumes: none.
