@@ -517,6 +517,10 @@ struct AutosaveRegistryReleaseGuardTests {
             await tocB?.autosave.flushNow()
             tocB?.teardown()
             tocB = nil
+            // The surface is really gone (its teardown Task held it) before
+            // the walk takes its snapshot — otherwise the walk would reach B
+            // by timing, not by the registry keeping it.
+            await eventually { session.autosaveHolderCount(forPost: b.id) == 0 }
 
             await macWillLock(session: session, stopServices: {})()
 
