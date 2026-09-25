@@ -75,14 +75,24 @@ struct BoundaryFluidityTests {
             harness.replace(NSRange(location: 6, length: 10), with: "")
             // The keystroke itself was refused (surface unchanged, for now).
             #expect(harness.documentText == "Alpha one.\nBeta two.")
-            // The compound lands asynchronously — pump with real awaits.
-            for _ in 0..<200 {
-                let count = try await harness.database.read { db in
-                    try Queries.renderPost(db, containerID: harness.postID).count
-                }
-                if count == 1 { break }
-                try await Task.sleep(for: .milliseconds(10))
-            }
+            // …and SCHEDULED the compound. **18k C6 (KnownIssues row 65,
+            // item 2): wait on THAT act, never on a store row.** This pin
+            // used to poll the store until the merged block appeared and then
+            // read the receipt — but the compound's transaction commits a
+            // full awaited read BEFORE the receipt is spoken (`runStructural`
+            // fetches the fresh projection, re-renders, THEN speaks), so the
+            // poll's condition is an earlier event than the one asserted, and
+            // which of the two main-actor continuations resumes first was
+            // never guaranteed. Measured: the compound still in flight with
+            // nothing spoken at the poll's break in 8 of 60 runs; a 100-ms
+            // delay between the commit and the receipt (no outcome changed)
+            // turns the old form red with 13y's exact signature
+            // (`status.spoken → nil`) and leaves this form green. The
+            // intermittent macOS-27 red was that race, not the routing.
+            let compound = try #require(
+                harness.model.pendingCrossBlockTask,
+                "the refused keystroke must schedule the cross-block compound")
+            await compound.value
             let texts = try await harness.database.read { db in
                 try Queries.renderPost(db, containerID: harness.postID).compactMap(\.text)
             }

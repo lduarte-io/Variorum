@@ -2156,7 +2156,7 @@ free number. **Your final message:** a short summary pointing at your record.
 |---|---|---|
 | 1 | The reading, in this session's own context, in the brief's order | **DONE** — CLAUDE.md + canon, TEXTKIT2 §5, this file's corrections/ledger/traps/cast + C1–C4 closings and adjudications, KnownIssues row 65 + the re-font RESOLVED row, 13y's kickoff adjudication (lines 381–413), 13u4's UNIT F2 RECORD whole |
 | 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | **TRACED** — REAL on 27 (the mechanism below). **Pin committed RED on the pre-fix tree** (`JumpViewportLayoutTests`, 3 issues + the Refont shrink pin's 1 — `18k-c6-jumppin-prefix.log`). **FIXED** in `JumpPrimitive.scroll(to:)` (one bounded re-assert) — both pins GREEN (`18k-c6-jumppin-fixed.log`, 7/2); behavioural revert R1 RED (4 issues, identical) → restored GREEN. **Item 1 CLOSED: FIXED** (the family re-run on the final tree rides the closing runs) |
-| 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | PENDING |
+| 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | **TRACED — HARNESS** (the pin's wait predicate precedes its asserted event by one awaited hop); pin RE-MECHANIZED (wait on the scheduled compound) — green 14/14; mutation proofs M1–M3 + the perturbation re-run PENDING |
 | 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | PENDING |
 | 5 | `LibraryPanelHostTests`' "inspector" pin — history, narrow, mutation proof | PENDING |
 | 6 | Closing runs (the five suites isolated + in-suite, the touched surfaces, the eleven Tutorial suites) | PENDING |
@@ -2256,4 +2256,39 @@ Expected: red as on the pre-fix tree, then green. **Result: RED — 4 issues, by
 pre-fix measurement** (29.0 pt · `42128` vs `42056` ×2 · the Refont shrink's `42034` vs `42128`;
 `18k-c6-R1.log`, 7 tests / 2 suites); **restored → GREEN** (`18k-c6-R1-restored.log`, 7/2 passed;
 `git status` clean after the restore).
+
+### ITEM 2 — `BoundaryFluidityTests.theKeystrokePathRoutesCrossBlockDeletesIntoTheCompound` — HARNESS
+
+**Runs on today's tree (27.0):** isolated **40/40 green** (`-test-iterations 40`,
+`18k-c6-fluid-iso40.log`); in its suite **15/15 green** (`-test-iterations 15`, 210 tests,
+`18k-c6-fluid-suite15.log`); inside the 35-suite jump/landing family once, green. The kickoff's red
+did not reproduce in 56 runs — so the mechanism had to be found, not waited for.
+
+**The mechanism (read at the code, then measured).** The pin polled the STORE until the merged block
+appeared, did one more `await database.read`, then read `status.spoken`. But `runStructural`
+(`EditorSurfaceController.swift`) speaks the receipt only AFTER the transaction: `await
+runner.run(body)` commits → `await database.read` the fresh projection → `applyStructuralResult`
+(re-render + caret) → `showReceipt(note)`. So the poll's condition (the row is visible) is an EARLIER
+event than the asserted one (the receipt spoken), separated by an awaited read on each side; which
+of the two main-actor continuations resumes first was never guaranteed. **Measured** (a scratch copy,
+60 iterations in one process, `18k-c6-fluid-window1.log`): at the moment the pin's poll broke, the
+compound was **still in flight with nothing spoken in 8 of 60**; the pin's extra read covered the
+window in all 60 that run; **after awaiting the scheduled compound itself: 60/60 a receipt, 0
+refusals.** **Forced** (a scratch 100-ms sleep between `runner.run` and the fresh read — no outcome
+changed, reverted; `18k-c6-fluid-perturb.log`): the SHIPPED pin went red with **13y's exact
+signature** (`BoundaryFluidityTests.swift:98 … status.spoken → nil`), an old-form copy red beside it,
+the re-mechanized form green, and the other 13 suite tests green.
+
+**The routing question the brief asked** ("does the synthetic keystroke reach the same
+`shouldChangeText` road the real key does on 27?"): **yes** — `harness.replace` is
+`insertText(_:replacementRange:)`, the real `NSTextInputClient` road; 13y's failure carried only the
+`spoken` line, so the surface-unchanged assertion (the storage refused the edit) and `texts ==
+["Alpha two."]` (the compound landed) both held on the red runs. The routing was never the red.
+
+**Verdict — HARNESS; the pin RE-MECHANIZED, the product untouched.** The pin now `#require`s the
+handle the refused keystroke scheduled (`model.pendingCrossBlockTask` — which also makes "the
+keystroke scheduled a compound" an explicit assertion) and awaits its `value` — the act that speaks
+the receipt — instead of a store row. Every assertion after the wait is byte-unchanged in meaning.
+Not a load-flake: the mechanism is named and forced. **Green: `BoundaryFluidityTests` 14/14**
+(`18k-c6-fluid-new.log`).
 
