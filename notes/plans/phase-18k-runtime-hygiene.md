@@ -1238,12 +1238,22 @@ warnings across 61 suites, attributed by nearest started test — mostly pane-mo
   (scratch, never committed; `git checkout` removes it) bracketed 132 triggers across THREE suite
   sets — C2's 16 (92 tests), a named second set of 39 suites (187 tests), and a third of 9 (55
   tests, incl. a scratch `CommentsPanel` mount): **1,181 warnings, EVERY ONE inside `PaneSurface`'s
-  `makeNSView` (1,168) or `updateNSView` (10)... [the exact split: A 4/0, B 1117/10, C 50/0] — 18l's
-  `PanePublisher` family; ZERO unbracketed; ZERO inside any of the 125 other exercised triggers
+  `makeNSView` (1,171 = A 4 + B 1,117 + C 50) or `updateNSView` (10, all B) — 18l's `PanePublisher`
+  family; ZERO unbracketed; ZERO inside any of the 125 other exercised triggers
   (70,752 probed entries, 29,071 of them geometry actions — 75 of the 76 exercised).** The review's
   A3/A4/A5 premise — that these sites GENERATE the warning — is DISPROVED by measurement.
   **PENDING:** the per-site verdict table and the dispositions (next commit).
-- Phase 2, the BEFORE count on C2's 16-suite set + a second set (named when chosen) — NOT-STARTED.
+- Phase 2, the BEFORE count — DONE (this commit), unprobed, on `a43af3e9` (app code = the pre-C3
+  tree `c823357b`), zero app instances: **set A (C2's 16 suites, `DerivedData/18k-c2-warnset.sh`)
+  `Test run with 92 tests in 16 suites` → 4 warnings; set B (39 suites, `DerivedData/18k-c3-setB.sh`,
+  named literally in the script) `Test run with 187 tests in 39 suites` → 1,126 warnings.** One
+  issue each, both KnownIssues row 65's macOS-27 deltas (A: the NSSlider scrubber pin; B:
+  `LibraryPanelHostTests`' "inspector" pin). Logs `DerivedData/18k-c3-before-{A,B}.log`.
+- Phase 2b, THE HOLLOW DEMONSTRATION on the brief's first site — IN-PROGRESS. **Named before it
+  runs (scratch, never committed):** apply `BookView:1410`'s exact shape to `BookIndexView:791`
+  (tolerance gate + `DispatchQueue.main.async { model.reportIndexContentWidth(width) }`), run set B
+  unprobed + the three BookIndex suites, compare the count and every pin; restore with
+  `git checkout -- App/Variorum/Variorum/Features/BookView/BookIndexView.swift`, verify `git diff`.
 - Phase 3, the deferrals (the `BookIndexView` twin first) — NOT-STARTED.
 - Phase 4, the AFTER count, `CanvasDragTrackingTests` ×3 both sides, closing runs — NOT-STARTED.
 - Deaths / resumes: none.
