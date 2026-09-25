@@ -2148,7 +2148,15 @@ free number. **Your final message:** a short summary pointing at your record.
 
 ## UNIT C6 RECORD — the five macOS-27 test deltas (implementer: `opus-implementer`, 2026-09-25)
 
-**WHAT THIS UNIT DID NOT DO — the record's first line.** PENDING (written at close).
+**WHAT THIS UNIT DID NOT DO — the record's first line.** No GUI walk and no captures: the terminal
+host holds neither Screen Recording nor Accessibility. The Refont fix's walk is HELD for her morning
+(steps below), and its in-app evidence is the rig's numbers, as the brief sets. No full-Mac suite (the
+orchestrator's finals). No core `swift test` (zero `Sources/`) and no iOS build (zero `Shared/`). No
+edit to `KnownIssuesAndTechDebt.md` row 65 or to `TEXTKIT2_NOTES.md`: both are canon records, and the
+row's close and the measured-TK2 paragraph are handed to the orchestrator (below). No phone code. No
+`DebugOracleSingletonWindowTests` in any set. **One item went BEYOND the five, and it is stated, not
+silent:** the Outline's `count(NSSlider) == 0` arm had gone HOLLOW on 27 in the same class. It is
+re-mechanized (items 3–4).
 
 ### LIVE STATUS
 
@@ -2159,8 +2167,8 @@ free number. **Your final message:** a short summary pointing at your record.
 | 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | **TRACED — HARNESS** (the pin's wait predicate precedes its asserted event by one awaited hop); pin RE-MECHANIZED (wait on the scheduled compound) — green 14/14; M1/M2/M3 RED at their targets, P (the delay) GREEN. **Item 2 CLOSED: HARNESS, re-mechanized** |
 | 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | **RE-MECHANIZED** (`ComposedSliders` — composition nodes + the node's own binding driving the surface) — green; **plus the Outline's zero-slider arm, found HOLLOW in the same class** — first re-mechanized by composition (`d21bf0fd`), then MEASURED hollow for the A6 shape (MO) and re-mechanized on the page's bottom content inset. MO-2 + MS1–MS4 all RED at their targets. **Items 3–4 CLOSED: PIN MECHANISM, re-mechanized (+ the Outline arm)** |
 | 5 | `LibraryPanelHostTests`' "inspector" pin — history, narrow, mutation proof | **NARROWED** to the body's static type — green 6/6; MI (the retired host back) RED on the final form. **Item 5 CLOSED: PIN MECHANISM, narrowed** |
-| 6 | Closing runs (the five suites isolated + in-suite, the touched surfaces, the eleven Tutorial suites) | PENDING |
-| 7 | The record complete (verdicts, disposition, held walk steps, noticed-not-touched) | PENDING |
+| 6 | Closing runs (the five suites isolated + in-suite, the touched surfaces, the eleven Tutorial suites) | **DONE** — 48/7 alone, then 569/70 all green, 0 skipped, suites counted (below) |
+| 7 | The record complete (verdicts, disposition, held walk steps, noticed-not-touched) | **DONE** — C6 complete (implementer), awaiting the orchestrator's spot-check; the GUI walk HELD |
 
 - Deaths / resumes: none.
 
@@ -2452,4 +2460,146 @@ then on the final committed form `90290e92` (the predicate bound to a name so a 
 `(spellsAnInspector → true) == false`, not a 12k-character type; `18k-c6-inspector-MI3.log`). Restored → green
 6/6 (`18k-c6-inspector-new3.log`); `git status` clean after each restore. The rest of the pin (the
 mounted half: our divider + panel in both window states) is byte-unchanged.
+
+### DISPOSITION — the five, one verdict each
+
+| # | Pin | Verdict | Mechanism (traced + measured) | Evidence |
+|---|---|---|---|---|
+| 1 | `RefontViewportTests.aShrinkingRefontKeepsTheLineAtTheViewportTop` | **REAL on 27 → FIXED** (`JumpPrimitive`, editor seam) | TK2's `layoutViewport()` moves the clip by the height delta its own pass causes, and the jump loop judged convergence against the top it REQUESTED. The shrink's restore therefore landed one line + one gap low. | Red-on-old pin `JumpViewportLayoutTests` (3 issues) + the Refont shrink pin; behavioural revert R1 red (4 issues, identical) → green |
+| 2 | `BoundaryFluidityTests.theKeystrokePathRoutesCrossBlockDeletesIntoTheCompound` | **HARNESS → pin re-mechanized** (not a load-flake) | The pin waited on the store row, which commits an awaited read BEFORE `runStructural` speaks the receipt. Two main-actor continuations raced. The routing was never the red. | Window measured 8/60; a 100-ms delay forces 13y's exact red; the new form waits on the scheduled compound. M1/M2/M3 red, P green |
+| 3–4 | The two `count(NSSlider) == 1` scrubber pins | **PIN MECHANISM → re-mechanized** (+ the Outline's hollow zero arm) | On 27 a SwiftUI `Slider` is no NSView at all, and in-process there is no accessibility tree. The pins now read composition NODES plus the node's own binding driving the surface. The Outline arm (whose A6 inset sits in a `ScrollViewReader` closure) reads the page's bottom content inset. | MO proved both old and composition Outline arms hollow; MO-2 / MS1–MS4 red at their targets |
+| 5 | `LibraryPanelHostTests`' "inspector" ban | **PIN MECHANISM → narrowed** | SwiftUI's sheet modifier grew a stored `activeInspector: nil` on 27, and the value dump matched it; the dump also reached the test's name. The ban now reads the body's STATIC TYPE. | MI (the retired host back) red on the final form; green 6/6 |
+
+**No PROVISIONAL, no QUESTIONS entry** (#147 unused): no product-shaped call arose. The Refont fix
+restores a promise F2 already made ("the same line at the viewport top"); it rules nothing new.
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder's Fable reviewer reads this list first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `App/Variorum/Variorum/Features/Editor/JumpPrimitive.swift` | **The ONE product change, 21 lines (a comment + one bounded re-assert) in `jump`'s local `scroll(to:)`.** After `layoutViewport()`, if the clip is ≥ 0.5 pt from the requested top (the requested top re-clamped to the frame the pass left), scroll back once and lay out the viewport again | `JumpCorrectionLoop` (the pure loop; its pins untouched), the closure's measurement, `lineSpan`, `FragmentLines`, the estimate, `maxScroll`, the ≤ 6 bound, `landingInset`, every signature and every caller |
+| `App/Variorum/VariorumTests/JumpViewportLayoutTests.swift` | NEW — the primitive's red-on-old pin | — |
+| `App/Variorum/VariorumTests/ComposedSliders.swift` | NEW — test-only helper (composition nodes + the node's own binding) | — |
+| `App/Variorum/VariorumTests/BoundaryFluidityTests.swift` | the keystroke pin's WAIT (the scheduled compound, not a store row) | every assertion after the wait |
+| `App/Variorum/VariorumTests/PagedReadTests.swift` | the paged scrubber pin (count + "it works") | the pin's `pageLine` half |
+| `App/Variorum/VariorumTests/BookViewTests.swift` | the spread scrubber pin (count + "it works"); the Outline pin's slider arm (bottom content inset) + its doc | the segmented-picker count; the progress arm |
+| `App/Variorum/VariorumTests/LibraryPanelTests.swift` | the inspector ban (the body's static type) | the mounted half |
+
+**Untouched, named because a reviewer will look:** `EditorTextView`, `EditorViewModel`
+(`keepingReadingPosition`, `consumePendingAnchorRestore`, `topVisibleOffset`), the storage seam,
+`BlockRangeIndex`, `PaneSurface`, `PaneTextAuthority`, `runStructural`, `ScrollAnchorController`,
+`EditorSurfaceController`, `LibraryCatalogView`, `PagedReadView`, `SpreadBookView`, `BookView`. **Zero
+`Sources/`, zero `Sync/`, zero `Shared/`, zero `Server/`; marker 9 unchanged.** TK2 discipline: no TK1
+API anywhere in the diff; the fix adds no `ensureLayout`, and its one extra `layoutViewport()` is
+viewport-bounded and runs only on a displaced scroll (P1).
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **The fix lives in the primitive, not the one consumer.** All seven `JumpPrimitive.jump` call sites
+   inherit the displacement on 27, and the pin's own first jump showed it outside the re-font road.
+   *Reverse by* moving the retry to `consumePendingAnchorRestore` (jump, then re-jump when
+   `topVisibleOffset()` reads off), which fixes the row and leaves six landings a line off on unsettled
+   geometry.
+2. **One re-assert, not a loop.** Measured 9 of 9: the second `layoutViewport()` never displaced. A
+   future point release that displaces twice would show up here as a red `JumpViewportLayoutTests`.
+   *Reverse by* a bounded `while`.
+3. **The Outline zero arm was taken into C6** although the brief named the five. It is the same
+   mechanism (an AppKit-class count SwiftUI no longer backs), it was HOLLOW (it could not fail), and
+   the brief's own rule is that a rewritten pin must be able to fail. *Reverse by* restoring
+   `count(NSSlider) == 0` and filing the hollowness as its own row.
+4. **The scrubber pins read `hosting.rootView.body`** (the hosted composition) rather than a freshly
+   built view. For `PagedReadView` that is what makes "it works" real, because its page model is
+   `@State` and only the installed instance is the one drawn (the moving `pageNumber`s prove it). The
+   cost is SwiftUI's "Environment read outside a view" notice (122 lines in the closing run).
+5. **The inspector ban keeps a substring match over the TYPE**, not SwiftUI's exact internal name
+   `InspectorModifier`. A rename of the internal name would silently hollow an exact match; an app type
+   named `…Inspector…` composed here would fail loudly. Loud is the safe direction. *Reverse by*
+   matching `"swiftui.inspectormodifier<"` exactly.
+6. **BoundaryFluidity `#require`s the handle** (`pendingCrossBlockTask`). That adds an explicit "the
+   refused keystroke scheduled a compound" assertion the old poll only implied (M3 proves it bites).
+
+### CLOSING RUNS (at the unit's END, on the final tree `54217fc9`; zero app instances; `DebugOracleSingletonWindowTests` in no set)
+
+| Run | Command (from `App/Variorum/`) | Result |
+|---|---|---|
+| **1 — the five deltas' suites alone** (+ the new primitive pin and the corrected Outline pin) | `DerivedData/18k-c6-run.sh 18k-c6-closing-five RefontViewportTests BoundaryFluidityTests PagedReadViewTests SpreadBookViewTests LibraryPanelHostTests JumpViewportLayoutTests OutlineWritingSurfaceTests` | **✔ Test run with 48 tests in 7 suites passed** (7 suites counted), 0 skipped |
+| **2 — the closing set, in-suite** (`DerivedData/18k-c6-closing.sh`, 70 literal selectors): every `JumpPrimitive` consumer's suite and the editor/landing family (13u4 F2's closing list + this unit's jump family), every touched test file's suites (`PageDomainTests` · `PagePaginatorTests` · `PagedReadViewTests` · `BookViewTests` · `BookFocusFoldTests` · `OutlineWritingSurfaceTests` · `SpreadBookViewTests` · `LibraryPreviewBrainTests` · `LibraryPanelHostTests` · `JumpViewportLayoutTests`) and **the eleven Tutorial suites** | `DerivedData/18k-c6-closing.sh 18k-c6-closing1` | **✔ Test run with 569 tests in 70 suites passed after 149.4 s** — 0 issues, 0 skipped, **70 suites counted** against 70 asked. 50 `Modifying state during view update` lines (all in suites that mount panes — `PaneSurface`'s family, 18l's, as C3 measured) and 122 SwiftUI "outside of being installed" notices (the composition road's standing cost) |
+| Repeated (item 2) | `-test-iterations 40` isolated · `-test-iterations 15` in-suite | **40/40** · **15/15** green (`18k-c6-fluid-iso40.log`, `18k-c6-fluid-suite15.log`) |
+| Core (`swift test`) · iOS build | — | **NOT OWED** — zero `Sources/`, zero `Shared/` |
+
+**What the orchestrator's full-Mac finals should read:** the four deterministic row-65 reds (Refont,
+the two scrubbers, inspector) now GREEN, and BoundaryFluidity's intermittent red closed at its
+mechanism. Any red there is a finding, not "modulo".
+
+### THE GUI WALK — HELD for the author (her steps; ~5 minutes on the dev-store Debug build)
+
+The fix changes where every Write landing puts the page on macOS 27, by up to about one line, and only
+when TK2 was still settling. 13u4 F2's walk is the one that shows it.
+1. Run the dev-store Debug build (Xcode's Run). Open ***The Adventure of the Copper Beeches*** (212
+   blocks) in **Write**. Scroll to the middle of the story and note the line at the very top of the page.
+2. Open Settings **from the menu** (Variorum ▸ Settings…; ⌘, is swallowed while the editor has focus).
+   In **Editor**, turn **inline comments ON** and then **OFF**. **Expect the same line at the very top
+   both times.** Before this fix, on macOS 27, turning comments off left the line above hers
+   (the previous paragraph's last line) at the top, with hers one line lower.
+3. Set **paragraph gap → a blank line's worth**, then **→ Standard**. Expect the same line at the top.
+4. Press **⌘↓** (the caret to the end), then repeat step 2. Expect the page drawn whole, with the same
+   tail line at the top and no blank page (row 53's fix, still holding).
+5. Switch the voice **Study ⇄ Terminal** from the mid-story position. Expect the same paragraph at the
+   top (Study re-wraps it, so within a line).
+6. Landings, since the fix lives in the shared jump: switch to Takes (⌘2) and back (⌘1). Expect the page
+   where you left it. Then jump deep into the note from the block index or the outline, and expect the
+   block's first line at the very top, not its second.
+7. Put Settings back the way you found it (the dev store was left: Terminal voice, inline comments
+   OFF, paragraph gap Standard at 13u4 F2, and whatever you have set since).
+
+### NOTICED, NOT TOUCHED (C6's scope fence)
+
+1. **A measured TK2 fact for `TEXTKIT2_NOTES.md` (canon, so it is the orchestrator's at the closeout, as
+   C2's item 3 was):** *on macOS 27.0, `NSTextViewportLayoutController.layoutViewport()` can move the
+   enclosing clip view by about the height change its own layout pass causes (+29 pt with the
+   document frame +29; −23.23 with −23.5), while a fragment just laid out by `.ensuresLayout` stays
+   put. A plain flipped document and a bare `setFrameSize` do not move the clip. Only the viewport
+   layout does, and only when it changes laid-out geometry. Anything that scrolls, lays out the
+   viewport and then trusts its requested offset inherits the displacement.* `JumpPrimitive` now
+   re-asserts it; nothing else in the app scrolls-then-lays-out that way (every `layoutViewport()` call
+   site is in `JumpPrimitive`: re-grep before relying on this).
+2. **`SurfaceComposition.text(of:)`'s value dump reaches swift-dependencies' captured test context, test
+   NAME included** (the probe's own name hit 6 lines). Any pin that searches that dump for a plain word
+   can be tripped by a test's name. The inspector pin no longer reads it; `LibraryPanelHostTests`'
+   List pin (`contains("List<Swift.Never")`) and `ProtectionSurfaceRenderTests`' `carries` (quoted
+   sentences) are unlikely victims, but the class is real. Needs an owner if filed (a candidate is the
+   harness family, 12).
+3. **The same OS-internal-name risk sits in the List pin** (`LibraryPanelHostTests`, line ~425): it
+   reads SwiftUI's type spellings (`List<Swift.Never`, `List<Swift.Set<`) out of the VALUE dump. A
+   rename would turn its negative arm hollow silently. It is green on 27 and was not touched.
+4. **Row 65's close:** all five are dispositioned here. The KnownIssues row flip (to RESOLVED — 18k C6,
+   with the Outline arm noted) is the orchestrator's.
+5. **`EditorWindowSmokeTests.tenThousandWordPostStaysSnappyAndAnchored`'s jump displaced by 3,441 pt**
+   on a non-final iteration on 27, and the old loop happened to re-steer out of it. That is why that
+   pin never went red. After the fix the re-assert absorbs it at that iteration. Nothing owed.
+6. **The book surfaces' landings (`LandingAuthority`, the Outline / Index / Read columns) do not use
+   `JumpPrimitive`** and were not examined for the 27 displacement. Their suites are green in this
+   unit's closing run and in 13y's finals.
+7. The stale `/private/tmp/claude-501/u1-baseline-tree` worktree (not this run's) — untouched, as C1–C4
+   left it. This unit created no worktree.
+
+### CAPTURES
+
+None possible (see the first line). The evidence is the harness logs in `App/Variorum/DerivedData/`
+(gitignored), with the scripts beside them (`18k-c6-run.sh`, `18k-c6-family.sh`, `18k-c6-closing.sh`):
+- Refont: `18k-c6-refont-iso1` · the traces `18k-c6-trace{1,2,3,4}` · the candidate
+  `18k-c6-candA-{refont,family,once}` · `18k-c6-jumppin-{prefix,fixed}` · `18k-c6-R1{,-restored}`.
+- BoundaryFluidity: `18k-c6-fluid-{window1,iso40,suite15,perturb,new,M1,M2,M3,P}`.
+- Scrubbers: `18k-c6-slider-explore{,2,3}` · `18k-c6-bare-controls` · `18k-c6-scrub-{new,MO,MO2,MS1,MS2,MS3,MS4}` ·
+  `18k-c6-outline-geo-{MO,HEAD,new}`.
+- Inspector: `18k-c6-inspector-{explore,explore2,type-HEAD,type-MI,new,MI,new2,MI2,new3,MI3}`.
+- Closing: `18k-c6-closing-five` · `18k-c6-closing1`.
+
+The scratch instruments were never committed: the instrumented `JumpPrimitive` candidate patch, the
+BoundaryFluidity perturbation patch, and the two scratch suites (`C6ScratchRefontTrace.swift`,
+`C6ScratchFluidityForms.swift`, `C6ScratchFluidityTrace.swift`). They are kept in this session's
+scratchpad only. Every product file they touched is byte-identical to HEAD (`git status` clean at
+hand-back).
+- Deaths / resumes: none.
+- **C6 — DONE (implementer), awaiting the orchestrator's spot-check; the hands-on GUI walk HELD.**
 
