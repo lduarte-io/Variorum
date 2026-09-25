@@ -1667,8 +1667,8 @@ which is the OTHER axis (parallel suites) and bears on the classification.
 
 A scratch parser walked every `.swift` file under `App/Variorum/Variorum/`, tracking `#if DEBUG` /
 `#else` / `#endif` nesting, and listed every `static var` (and `static let`) with its enclosing type:
-**188 `static var`s; 101 inside `#if DEBUG` across 38 DEBUG types** (+ the one `static let` that
-matters, none). Outside DEBUG the only mutable process-global stores are `MarkdownStyling.storedPalette`
+**188 `static var`s; 101 inside `#if DEBUG` across 38 DEBUG types** (the DEBUG `static let`s are
+constants — `DebugProbeScopeKey.defaultValue`, `TakeCardGeometry.reportLimit`). Outside DEBUG the only mutable process-global stores are `MarkdownStyling.storedPalette`
 (the brief's non-DEBUG guard), `EditorTypography.current`/`isAdopted` (the review's "same class,
 lower risk"), `FallbackCanary.assertionHandler` and `FlowHeightEstimate.metricsCache`. `Shared/`
 carries two more DEBUG-shaped statics (`KeychainCustody`'s trip counters — custody code) and two
@@ -1723,7 +1723,24 @@ so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to
 - Reading + population + the classification rule — DONE (this commit).
 - The generic + its pins — NOT STARTED.
 - The conversions, oracle by oracle — NOT STARTED.
-- The two-window pins (red first where reachable) — NOT STARTED.
+- The two-window pins (red first where reachable) — IN PROGRESS. `VariorumTests/DebugOracleTwoWindowTests.swift`,
+  written against the read names the tree ALREADY has, so each compiles on both sides. **Batch 1, RUN ON
+  THE PRE-FIX TREE (`DerivedData/18k-c4-old2.log`): `✘ Test run with 3 tests in 1 suite failed … with
+  12 issues` — every precondition green, every post-teardown assertion red, exactly the traced arms:**
+  - `thePostDetailsSingletonsAnswerForTheWindowStillOpen` (4 issues): after window β closed, `titleShown`
+    → "beta, the window that goes"; `inspectorPanel` → β's `.tray`; `sideColumnDividerFrame` → β's
+    `(479, 0, 1, 560)`; and `beginTitleEditing` drove β's torn-down title, so α's open mark never came.
+  - `aBookInTwoWindowsKeepsTheOpenWindowsDoorAndNavigator` (6 issues): the navigator and its seam answered
+    with the closed window's `…×600` against the open one's `…×900`; `focusDoors[book]` was **nil** after
+    the NEWER window's teardown AND after the OLDER one's (both arms of the cross-clear), so neither
+    survivor's model could be focused.
+  - `theBarsGeometryIsTheOpenBarsAfterTheOtherCloses` (2 issues): `barWidth` 480 pt off (the closed 420-pt
+    bar's) and `rowFrame` the closed bar's compact `(12, 6, 396, 18)` against `(12, 6, 876, 18)`. Its
+    `mounted` refcount control is green (SAFE-AS-IS (A)).
+  (A first run, `18k-c4-old1.log`, crashed two tests on the live-store fallback — the helper had not
+  installed the `database` dependency; fixed in the helper before the recorded run. Not a finding.)
+  **PENDING:** the remaining oracles' pins (Read mode ×2, the book Index, the Library panel, Canvas, the
+  Takes article door, the reading flow, the shell/rail/box through two shells).
 - The `MarkdownStyling.palette` guard — NOT STARTED.
 - Closing runs — NOT STARTED.
 - Deaths / resumes: none.
