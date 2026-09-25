@@ -1648,7 +1648,17 @@ free number. **Your final message:** a short summary pointing at your record.
 
 ## UNIT C4 RECORD — the DEBUG-oracle ownership sweep (implementer: `opus-implementer`, 2026-09-25)
 
-**NOT DONE (first line, per the brief):** *(kept current; the final wording lands at close)* — PENDING.
+**NOT DONE (first line, per the brief):** (1) **the parallel-suites axis is NOT fixed** — two LIVE
+surfaces in two different TESTS on one UNKEYED slot still answer from the last writer, which can be
+the other test's (13u2 UNIT E's session-scoping axis, KnownIssues row 50's class; the three reference
+fixes share it). It bit this unit's own pins at the first closing run and is why the seven two-window
+pins over unkeyed singletons are an OPT-IN suite (run alone; `DebugOracleSingletonWindowTests`), with
+the synchronous structural arm as their always-on guard; the unscoped oracles it exposes are listed
+under NOTICED for an owner's call. (2) **No GUI walk and no captures** — a harness unit, and the host
+holds no Screen Recording / Accessibility; the pins and the table are the evidence (the brief's own
+terms). (3) No full Mac suite (the orchestrator's finals), no `swift test`, no iOS build — zero
+`Sources/`, zero `Shared/`, zero mobile. (4) The session-scoped oracles (SAFE-AS-IS (B)) were not
+given owners WITHIN a session; the table says why that is safe for every reader today.
 
 ### READING (done in-session before any code)
 
@@ -1684,8 +1694,9 @@ a slot another live owner wrote; the survivor reads nil) and **stale-standing** 
 a departed owner's value or closure stays the answer while a live owner stands).
 - **FIXED** — a LAST-VALUE registration (a door, a surface fact, a frame, a per-row map) in a
   PROCESS-GLOBAL slot whose key does not name its registrant. Fix = the reference shape: the
-  registrant names itself, the read answers from the most recent registrant, a teardown releases
-  only its own, a pin's reset stays unconditional ("a pin owns nothing").
+  registrant names itself, the read answers from the last LIVE writer (what the static answered while
+  every writer stood — see THE DESIGN for why not "the first registration"), a teardown releases only
+  its own, a pin's reset stays unconditional ("a pin owns nothing").
 - **SAFE-AS-IS (A) accumulators** — counters, +1/−1 mount refcounts, set unions, logs: every owner's
   contribution composes and none can erase another's, so neither arm exists.
 - **SAFE-AS-IS (B) session-scoped worlds** (13u2 UNIT E) — every write lands under the WRITING
@@ -1698,36 +1709,77 @@ a departed owner's value or closure stays the answer while a live owner stands).
 - **LEFT** — with the reason.
 
 **The one axis this unit does NOT fix, stated so nobody reads it as fixed:** two LIVE owners in
-different tests on one unscoped slot (parallel suites) — owner-keying answers from the newest
-registrant, which can be the other test's. That is the 13u2 UNIT E scoping axis (row 50's), and the
+different tests on one unscoped slot (parallel suites) — owner-keying answers from the last live
+writer, which can be the other test's. That is the 13u2 UNIT E scoping axis (row 50's), and the
 references share the residual (`ShellRouter.blockNamingDoor` answers from the most recent shell,
 whoever mounted it). Oracles with that exposure are listed under NOTICED.
 
-### THE DESIGN (PENDING — the first code commit)
+### THE DESIGN (as built — two points differ from the plan first written here, both recorded)
 
-One DEBUG-only generic in `Core/Views/DebugOracleOwnership.swift` (beside `DebugProbeScope.swift`):
-`OwnedRegistrations<Key, Value>` — per key, the registrants in first-registration order, the last one
-the answer; `publish(_:for:owner:)` replaces in place; `withdraw(_:owner:)` and `release(owner:)` take
-ONLY the owner's own (a reverse index keeps a surface teardown ∝ what it wrote); `forget`/`forgetAll`
-are the pin's unconditional doors — plus `OwnedSlot<Value>` for the unkeyed singletons. The
-registrant is the VIEW that writes: its own `@State` token (MastheadStamp's `oracleOwner`, the S2
-shape); a surface whose ROWS write (separate structs, probe modifiers) hands its token down by
-environment (the `debugProbeScope` road, one level down), and a probe mounted with no surface above
-it names itself. A surface's teardown releases its token from every converted oracle through ONE
-explicit list (`DebugOracleOwners.release`). Reads keep their names and types (computed, read-only),
-so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to a named reset door
-(S3's precedent) — each recorded.
+One DEBUG-only generic in `Core/Views/DebugOracleOwnership.swift` (beside `DebugProbeScope.swift`;
+the whole file, imports included, is `#if DEBUG`): `OwnedRegistrations<Key, Value>` — per key, the
+LIVE registrants in the order they last wrote, the last one the answer; `publish(_:for:owner:)`
+replaces the owner's value and makes it the newest (an in-place write when it already is — geometry
+rate); `withdraw(_:owner:)` and `release(owner:)` take ONLY the owner's own (a reverse index keeps a
+teardown ∝ what it wrote); `value(for:owner:)` is the read-modify-write door; `forget`/`forgetAll` are
+the pin's unconditional doors — plus `OwnedSlot<Value>` for the unkeyed singletons (an optional
+`Value` registers "nothing" as a fact), `DebugOracleLog.bound` (the 13u2 UNIT E `TakeCardGeometry`
+rule for append-only logs, shared), and the `debugOracleOwner` environment value. The registrant is
+the VIEW that writes: its own DEBUG `@State private var oracleOwner = UUID()` (the `MastheadStamp`
+shape; `RootView` uses the `windowID` it already had); a surface whose ROWS write (separate structs,
+probe extensions — now modifiers, the `TakeCardGeometryProbe` reason) hands its token down by
+environment (the `debugProbeScope` road, one level down) so a row's registration lives exactly as
+long as the surface that drew it; a probe with no owning surface above it falls back to
+`DebugOracleOwner.unowned` (never released — the pre-C4 behaviour, for that case only; no mount path
+in the app or the suite hits it). Reads keep their names and types (computed, get-only — an unowned
+write is now a COMPILE error), so reading pins ride unmodified; a pin that ASSIGNED a reset changed
+ONE line to a named reset door (S3's precedent, 21 lines, listed below).
+**Differs from the plan:** (1) the order was first "the most recent FIRST registration" — replaced by
+the last live writer after the first closing run (the trace is under LIVE STATUS: the first design
+would have changed every existing unkeyed reader's live behaviour under parallel suites); (2) the plan
+named one central release list (`DebugOracleOwners.release`) — not built: each registrant releases
+its own oracle in its own `onDisappear` (explicit, local, and a Core file would otherwise have had to
+name every Features oracle).
 
 ### LIVE STATUS
 
 - Reading + population + the classification rule — DONE (this commit).
+- The two-window pins (red first where reachable) — WRITTEN AND MEASURED RED ON THE PRE-FIX TREE (this
+  commit). `VariorumTests/DebugOracleTwoWindowTests.swift`, 12 tests, written against the read names the
+  tree ALREADY has so each compiles on both sides; every one mounts the same kind of surface in TWO real
+  windows whose registrations differ, tears one down, and asks the oracle about the one still standing.
+  **THE PRE-FIX RUN (`DerivedData/18k-c4-old4.log`, `DerivedData/18k-c4-pins.sh`): `✘ Test run with 12
+  tests in 1 suite failed after 21.533 seconds with 31 issues` — every precondition green (each test
+  first proves the two windows reported DIFFERENT values), every red a post-teardown assertion, each the
+  closed window's value:**
+
+  | pin | issues | what the pre-fix tree answered after the teardown |
+  |---|---|---|
+  | `thePostDetailsSingletonsAnswerForTheWindowStillOpen` | 4 | `titleShown` "beta, the window that goes"; `inspectorPanel` β's `.tray`; `sideColumnDividerFrame` β's `(479,0,1,560)`; `beginTitleEditing` drove β's torn-down title, so α's open mark never came |
+  | `aBookInTwoWindowsKeepsTheOpenWindowsDoorAndNavigator` | 6 | navigator `…×600` and its seam `…×600` against the open window's `…×900`; `focusDoors[book]` **nil** after the NEWER window's teardown AND after the OLDER one's — both cross-clear arms — so neither survivor could be focused |
+  | `theBarsGeometryIsTheOpenBarsAfterTheOtherCloses` | 2 | `barWidth` 480 pt off (the closed 420-pt bar's); `rowFrame` the closed bar's compact `(12,6,396,18)` vs `(12,6,876,18)`; its `mounted` refcount control GREEN (SAFE-AS-IS (A)) |
+  | `theReadHostsFaceAndSelectionAreTheOpenWindows` | 2 | `face` β's `.edit` (α rests on `.read`); `selectedBlockID` β's block |
+  | `oneNoteReadInTwoWindowsKeepsTheOpenWindowsFrames` | 4 | `faceFrames`, `indexColumnFrames`, `editBlockFrames` and the index column's `SeamGeometry` row all the short window's (`…×484` vs `…×714`; the row `(375,62,411,71)` vs `(400.5,62,640,50)`) |
+  | `aBookIndexInTwoWindowsKeepsTheOpenWindowsColumnAndPanes` | 2 | `columnFrames` `…×560` vs `…×900`; `paneNoteHeights` 141 vs 99 |
+  | `theLibraryCatalogInTwoWindowsKeepsTheOpenWindowsFrames` | 3 | `rootFrame`, `dividerFrame`, `panelFrame` the short window's (`…×520` vs `…×700`) |
+  | `aCanvasInTwoWindowsKeepsTheOpenWindowsArrival` | 1 | `viewport` `(760,486)` vs `(1300,826)` |
+  | `theTakesArticleDoorIsTheOpenWindows` | 1 | the door at x 48 (the narrow window's) vs 318 |
+  | `aReadingFlowInTwoWindowsKeepsTheOpenWindowsRowTops` | 1 | the second story's top 497 (narrow) vs 397 |
+  | `aNoteInTwoShellsKeepsTheOpenShellsSeamAndRail` | 3 | the shell seam's line and grip `…×452` vs `…×932`; `railGroupHeights` 198 (compressed) vs 240 |
+  | `aBookInTwoShellsKeepsTheOpenShellsNoteBox` | 2 | `noteBoxFrames` `(12,205,206,198)` vs `(12,235,206,240)`; the where-line "2 of 2 in this book" vs "one · 1 of 2 · block 1/1" |
+
+  Two runs before the recorded one are not findings: `18k-c4-old1.log` crashed two tests on the
+  live-store fallback (the helper had not installed the `database` dependency), and `18k-c4-old3.log`
+  failed ONE precondition — the two Library catalogs lay out at the same (minimum) width, so their
+  note rows are the same rectangle and `noteRowFrames` cannot be separated in that fixture; it was
+  dropped from the pin (it rests on the structural arm) before the recorded run.
 - The generic — DONE (this commit): `Core/Views/DebugOracleOwnership.swift` (all `#if DEBUG`) —
   `OwnedRegistrations<Key, Value>`, `OwnedSlot<Value>` (an optional `Value` registers a "nothing"),
   `DebugOracleLog.bound` (the 13u2 UNIT E `TakeCardGeometry` rule for append-only logs, shared) and the
-  `debugOracleOwner` environment value. Its structural pins — PENDING (next piece).
+  `debugOracleOwner` environment value. Its structural pins — DONE (`c85b48c8`, below).
 - The conversions — DONE (`9fe6ae5d`), **12** oracle types in 16 app files (that commit's message and
   this line first said 13 — a miscount, corrected here, the history left as it is), every change inside `#if DEBUG`
-  (the proof is PENDING, at close): `BookOutlineGeometry` · `BookIndexGeometry` · `ReadingFlowGeometry`
+  (the proof: DONE at close, below): `BookOutlineGeometry` · `BookIndexGeometry` · `ReadingFlowGeometry`
   · `ReadModeOracle` · `LibraryPanelOracle` · `PostDetailOracle` (the four singletons) · `ShellGeometry`
   · `CommitBarGeometry` (row + width) · `CanvasArrivalOracle` · `TakesArticleDoorProbe` ·
   `SidebarGeometry` (rail + box maps) · `SeamGeometry`. Each registering view now holds a DEBUG
@@ -1755,7 +1807,7 @@ so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to
   `SidebarGeometry.railGroupHeights[id] = nil` → `.forgetRail(id)` (`NoteBoxMountTests:172,389`) ·
   `SidebarGeometry.noteBoxFrames[id] = nil` → `.forgetBoxFrame(id)` (`NoteBoxMountTests:194`). Every READ
   rides unmodified (the read names and types are unchanged, computed and get-only — so an unowned write
-  is now a compile error, not a runtime surprise). **PENDING:** the reader suites' run.
+  is now a compile error, not a runtime surprise). The reader suites' run: DONE (the closing runs, below).
 - The structural pins — DONE (this commit): `VariorumTests/DebugOracleOwnershipTests.swift`, 18 tests —
   the container's rules one pin each (newest answers + a re-publish keeps its place · a teardown takes
   only its own FROM EITHER SIDE · a release reaches every key its owner holds and no other · a stranger's
@@ -1842,8 +1894,12 @@ so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to
   `#if DEBUG`, so a Release build compiles `DebugOracleOwnership.swift` to nothing. The proof script
   (`release_projection.py`, session scratch): for every app file the C4 diff touches, the lines a
   non-DEBUG build compiles (DEBUG branches dropped, `#else` kept, directives/comments/blanks dropped),
-  old vs new — PENDING its final run over `0a84adbc..HEAD` at close (before this move it read 1 of 18
-  differing: exactly those two imports).
+  old vs new — **final run over `0a84adbc..80b3787c`: `files 18; release projections that differ: 0`**
+  (before this move it read 1 of 18: exactly those two imports). A line-level companion
+  (`debug_proof.py`) flags 4 of 1,281 changed lines outside a DEBUG region — all four the diff's
+  re-alignment of the Read probe's unchanged `#else self #endif` tail (`-617 self` / `+682 self` and
+  two braces), which the projection shows is content-identical. `MarkdownStyling.swift`'s change is
+  doc-comment lines only.
 - **THE SECOND CLOSING RUN (`DerivedData/18k-c4-closing2.log`, the final tree before this commit):
   `✘ Test run with 414 tests in 65 suites failed after 226.036 seconds with 3 issues`** — the two row-65
   deltas again, the opt-in suite reported SKIPPED with its reason on all 7 tests (the gate works), and
@@ -1855,36 +1911,146 @@ so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to
   commit): the two shells get two sessions on one store (the post-detail pin's arrangement), and shell
   two's precondition names its own note (`hasPrefix("2 of 2")`) rather than "anything but line one".
   Keyed suite, fixed tree, ×3: `✔ Test run with 6 tests in 1 suite passed` each
-  (`18k-c4-keyed-r{1,2,3}.log`). **PENDING:** that pin re-measured on the pre-fix tree; the final
-  closing run.
-- The two-window pins (red first where reachable) — WRITTEN AND MEASURED RED ON THE PRE-FIX TREE (this
-  commit). `VariorumTests/DebugOracleTwoWindowTests.swift`, 12 tests, written against the read names the
-  tree ALREADY has so each compiles on both sides; every one mounts the same kind of surface in TWO real
-  windows whose registrations differ, tears one down, and asks the oracle about the one still standing.
-  **THE PRE-FIX RUN (`DerivedData/18k-c4-old4.log`, `DerivedData/18k-c4-pins.sh`): `✘ Test run with 12
-  tests in 1 suite failed after 21.533 seconds with 31 issues` — every precondition green (each test
-  first proves the two windows reported DIFFERENT values), every red a post-teardown assertion, each the
-  closed window's value:**
-
-  | pin | issues | what the pre-fix tree answered after the teardown |
-  |---|---|---|
-  | `thePostDetailsSingletonsAnswerForTheWindowStillOpen` | 4 | `titleShown` "beta, the window that goes"; `inspectorPanel` β's `.tray`; `sideColumnDividerFrame` β's `(479,0,1,560)`; `beginTitleEditing` drove β's torn-down title, so α's open mark never came |
-  | `aBookInTwoWindowsKeepsTheOpenWindowsDoorAndNavigator` | 6 | navigator `…×600` and its seam `…×600` against the open window's `…×900`; `focusDoors[book]` **nil** after the NEWER window's teardown AND after the OLDER one's — both cross-clear arms — so neither survivor could be focused |
-  | `theBarsGeometryIsTheOpenBarsAfterTheOtherCloses` | 2 | `barWidth` 480 pt off (the closed 420-pt bar's); `rowFrame` the closed bar's compact `(12,6,396,18)` vs `(12,6,876,18)`; its `mounted` refcount control GREEN (SAFE-AS-IS (A)) |
-  | `theReadHostsFaceAndSelectionAreTheOpenWindows` | 2 | `face` β's `.edit` (α rests on `.read`); `selectedBlockID` β's block |
-  | `oneNoteReadInTwoWindowsKeepsTheOpenWindowsFrames` | 4 | `faceFrames`, `indexColumnFrames`, `editBlockFrames` and the index column's `SeamGeometry` row all the short window's (`…×484` vs `…×714`; the row `(375,62,411,71)` vs `(400.5,62,640,50)`) |
-  | `aBookIndexInTwoWindowsKeepsTheOpenWindowsColumnAndPanes` | 2 | `columnFrames` `…×560` vs `…×900`; `paneNoteHeights` 141 vs 99 |
-  | `theLibraryCatalogInTwoWindowsKeepsTheOpenWindowsFrames` | 3 | `rootFrame`, `dividerFrame`, `panelFrame` the short window's (`…×520` vs `…×700`) |
-  | `aCanvasInTwoWindowsKeepsTheOpenWindowsArrival` | 1 | `viewport` `(760,486)` vs `(1300,826)` |
-  | `theTakesArticleDoorIsTheOpenWindows` | 1 | the door at x 48 (the narrow window's) vs 318 |
-  | `aReadingFlowInTwoWindowsKeepsTheOpenWindowsRowTops` | 1 | the second story's top 497 (narrow) vs 397 |
-  | `aNoteInTwoShellsKeepsTheOpenShellsSeamAndRail` | 3 | the shell seam's line and grip `…×452` vs `…×932`; `railGroupHeights` 198 (compressed) vs 240 |
-  | `aBookInTwoShellsKeepsTheOpenShellsNoteBox` | 2 | `noteBoxFrames` `(12,205,206,198)` vs `(12,235,206,240)`; the where-line "2 of 2 in this book" vs "one · 1 of 2 · block 1/1" |
-
-  Two runs before the recorded one are not findings: `18k-c4-old1.log` crashed two tests on the
-  live-store fallback (the helper had not installed the `database` dependency), and `18k-c4-old3.log`
-  failed ONE precondition — the two Library catalogs lay out at the same (minimum) width, so their
-  note rows are the same rectangle and `noteRowFrames` cannot be separated in that fixture; it was
-  dropped from the pin (it rests on the structural arm) before the recorded run.
-- Closing runs — NOT STARTED.
+  (`18k-c4-keyed-r{1,2,3}.log`).
+- **The reworked pin re-measured on the pre-fix tree — DONE** (`DerivedData/18k-c4-final-forms-
+  prefix2.log`, a fresh scratch worktree at `0a84adbc` with the final files; worktree and build
+  REMOVED): keyed `✘ Test run with 6 tests in 1 suite failed after 11.229 seconds with 16 issues`,
+  opt-in `✘ Test run with 7 tests in 1 suite failed after 12.583 seconds with 16 issues` — the
+  note-box pin red on its two post-teardown lines only (box `(12,205,206,198)` vs `(12,235,206,240)`;
+  where-line "2 of 2 in this book" vs "one · 1 of 2 · block 1/1"), its "2 of 2" precondition green.
+- **THE FINAL CLOSING RUN — DONE** (`DerivedData/18k-c4-closing3.log`, `DerivedData/18k-c4-closing.sh`,
+  final tree `80b3787c`, zero app instances): **`✘ Test run with 414 tests in 65 suites failed after
+  225.951 seconds with 2 issues`** — BOTH KnownIssues row 65's macOS-27 deltas, nothing else:
+  `LibraryPanelHostTests.aNoteSelectionStandsThePanelUpWithItsBoundaryActiveAndInactive` (the
+  "inspector" composition pin, `LibraryPanelTests.swift:296`) and `RefontViewportTests.
+  aShrinkingRefontKeepsTheLineAtTheViewportTop` (42034 vs 42128 — its 94 pt). 62 suites passed, 2
+  failed (those), 1 SKIPPED — the opt-in suite, all 7 tests `skipped: "unkeyed slots are written by
+  every parallel suite's surfaces — run deliberately and alone with TEST_RUNNER_VARIORUM_ORACLE_
+  SINGLETON_WINDOWS=1"`. **All eleven Tutorial suites green.** The 65: every suite that reads a
+  touched oracle (a grep over `VariorumTests` for the 12 converted types + `MarkdownStyling.palette` —
+  50 suites, a deliberate superset), the touched surfaces' own mount suites not already in it
+  (`BookViewTests`, `ShellDoorOwnershipTests`, `ShellLandingTests`, `WindowsTests`,
+  `LibraryCardStampsTests`), the unit's four suites, and the eleven Tutorial suites.
 - Deaths / resumes: none.
+- **C4 — DONE (implementer), awaiting the orchestrator's spot-check.**
+
+### THE VERDICT TABLE (every DEBUG oracle type in the Mac app — 38 — plus the non-DEBUG globals; the S3 form)
+
+**Totals: FIXED 12 types (51 slots) · SAFE-AS-IS 25 types + the SAFE fields of 5 FIXED types
+(A 20 · B 6 · C 1 type + 2 fields · D 3) · FIXED-AT-13u4 (the references, untouched) 1 type + 2 fields
+of another · LEFT 0.** "Registrant" is the identity that now names itself; "clear" is the teardown
+that releases ONLY that registrant's rows; pins: **TW** = `DebugOracleTwoWindowTests` (always on,
+keyed), **SW** = `DebugOracleSingletonWindowTests` (opt-in, unkeyed), **ST** =
+`DebugOracleOwnershipTests` (structural, always on). Every TW/SW pin was MEASURED RED on the pre-fix
+tree in its final form (the LIVE STATUS numbers); every ST pin is red on old by non-compilation and
+red under M-norelease on the final tree. Arm: **X** cross-clear, **S** stale-standing.
+
+| # | oracle (file) | slots | kind / arm | verdict | registrant · clear | pins |
+|---|---|---|---|---|---|---|
+| 1 | `BookOutlineGeometry` (`BookView`) | `focusDoors` (book) · `navigatorFrames` (book) · `navigatorChapterRows` · `navigatorNoteRows` (row) · `anchorTops` · `rowHeights` (anchor) | X (the door) · S (the rest) | **FIXED** | the `BookView`'s `oracleOwner` (its navigator rows by environment) · `BookView.onDisappear` → `release` | TW `aBookInTwoWindows…` (both arms of the door; navigator; its seam) · ST `theOutlinesRegistrations…` (all six) |
+| 1a | ″ | `trace` | log | **SAFE-AS-IS (A)**, bounded (`DebugOracleLog`) — one of the review's two "never cleared" buffers | — | ST (the bound) |
+| 2 | `BookIndexGeometry` (`BookIndexView`) | `chapterCountFrame` · `noteMenuFrame` (unkeyed) · `columnFrames` · `paneContentSpans` (book) · `paneSelectionWashHeights` · `paneNoteHeights` (note) · `paneProseLeading` (block) · `paneAnchorTops` (anchor) | S | **FIXED** | the `BookIndexView`'s token (its note rows/panes by environment) · its `onDisappear`; the span's fold reads only its own row | TW `aBookIndexInTwoWindows…` (column, pane heights) · ST `theIndexsRegistrations…` (all eight, incl. the fold) |
+| 2a | ″ | `trace` | log | **SAFE-AS-IS (A)**, bounded (it already had `reset()`) | — | — |
+| 3 | `ReadingFlowGeometry` (`ReadingFlowView`) | `anchorTops` (story) | S | **FIXED** | the flow's token · its `onDisappear` | TW `aReadingFlow…` · ST `theFlowsRowTops…` |
+| 3a | ″ | `trace` | log | **SAFE-AS-IS (A)**, bounded — the review's second "never cleared" buffer (no reset door at all) | — | — |
+| 4 | `ReadModeOracle` (`ReadModeView`) | `face` · `form` · `selectedBlockID` · `liveBlockID` (one host-state slot) · `firstEditRowPaintedAt` (per host) · `pageBlockFrames` · `editBlockFrames` (block) · `faceFrames` · `indexColumnFrames` (note) | S | **FIXED** | the host's token (its page/edit rows by environment) · its `onDisappear` | TW `oneNoteRead…` (face frame, column, row, + seam) · SW `theReadHostsFace…` (face, selection, first paint) · ST `theReadHostsRegistrations…` |
+| 4a | ″ | `pageTurns` | counter | **SAFE-AS-IS (A)** | — | — |
+| 5 | `LibraryPanelOracle` (`LibraryInfoPanel` · `LibraryCatalogView`) | `rootFrame` · `dividerFrame` · `panelFrame` · `messageFrame` · `quickEntryFrame` · `bookLineFrame` (unkeyed) · `noteRowFrames` (row) | S | **FIXED** | the catalog's token, read by `libraryGeometryProbe` (now a modifier) · the catalog's `onDisappear` | SW `theLibraryCatalog…` (root, divider, panel) · ST `theCatalogsFrames…` (all seven — the rows the mounted pair could not separate) |
+| 5a | ″ | `shownBlockIDs` · `shownOutlineRowIDs` | logs | **SAFE-AS-IS (A)**, bounded | — | — |
+| 6 | `PostDetailOracle` (`PostDetailView`) | `inspectorPanel` · `sideColumnDividerFrame` (the detail) · `beginTitleEditing` · `titleShown` (the title label) — all unkeyed; the door never cleared by anyone | S (+ a closure over a dead view) | **FIXED** | the detail's token / the title label's token · each view's `onDisappear` | SW `thePostDetailsSingletons…` · ST `theDetailsSingletons…` |
+| 6a | ″ | `stamp*` | — | **FIXED at 13u4 UNIT S2** (the reference) — untouched | the masthead's token | `StampOracleOwnershipTests` |
+| 7 | `ShellGeometry` (`ShellSplit`) | `dividerLineFrame` · `dividerGripFrame` | S | **FIXED** | the `ShellSplit`'s token · its `onDisappear` | SW `aShellInTwoWindows…` · ST `theUnkeyedFrames…` |
+| 8 | `CommitBarGeometry` (`CommitBar`) | `rowFrame` · `barWidth` | S | **FIXED** | the bar's token · its `onDisappear` | SW `theBarsGeometry…` · ST `theUnkeyedFrames…` |
+| 8a | ″ | `mounted` | +1/−1 refcount | **SAFE-AS-IS (A)** — composes across owners by construction | — | — |
+| 9 | `CanvasArrivalOracle` (`CanvasView`) | `landing` · `boardContentSize` · `viewport` | S | **FIXED** | the canvas's token · its `onDisappear` | SW `aCanvas…` (viewport) · ST `theUnkeyedFrames…` (all three) |
+| 10 | `TakesArticleDoorProbe` (`TakesBoardView`) | `frame` | S | **FIXED** | the door's own modifier token (`ArticleDoorProbe`, the `CatalogStampRecorder` shape) · the door's `onDisappear` | SW `theTakesArticleDoor…` · ST `theUnkeyedFrames…` |
+| 11 | `SidebarGeometry` (`SidebarView` · `SidebarNoteBox`) | `railGroupHeights` (note) · `noteBoxFrames` · `noteBoxHeaderFrames` · `noteBoxWhereLines` (book) | S — the review's named "subject-keyed, not owner-keyed" maps | **FIXED** | the column's token (the rail) / the box's token (its three) · each view's `onDisappear` | TW `aNoteInTwoShells…Rail` · `aBookInTwoShells…NoteBox` · ST `theRailAndTheBox…` |
+| 11a | ″ | `headerWorlds` | session-scoped | **SAFE-AS-IS (B)** | — | `DebugOracleScopingTests` |
+| 11b | ″ | `starredSectionHeights` · `bodyEvaluations` | keyed by the workspace (an owner) | **SAFE-AS-IS (C)** | — | — |
+| 11c | ″ | `noteBoxFaces` | +1/−1 refcount | **SAFE-AS-IS (A)** | — | — |
+| 12 | `SeamGeometry` (`SeamGrip`) | `lineFrames` · `gripFrames` (family·subject) — the review's named "seam grip" maps | S | **FIXED** | each `SideColumn`'s token; the shell's pane seam under `RootView.windowID` (its key already named the window's router) · `SideColumn.onDisappear` / `RootView.onDisappear` | TW (the navigator seam, the Read index column's seam) · ST `aSeamAnswers…` |
+| 13 | `ShellRouter` (`blockNamingDoors`) | — | — | **FIXED at 13u4 UNIT S3** (the reference) — untouched | `RootView.windowID` | `ShellDoorOwnershipTests` |
+| 14 | `CatalogStampOracle` (`LibraryTimeFace`) | — | — | **FIXED at 13u4 UNIT S2** (the reference) — untouched | the card's token | `StampOracleOwnershipTests` |
+| 15 | `MastheadGeometry` (`PostDetailView`) | `worlds` | session-scoped | **SAFE-AS-IS (B)** (its per-note stamp row is S2's refcounted rule) | — | `DebugOracleScopingTests` |
+| 16 | `CompareGeometry` · 17 `LensesGeometry` · 18 `BlocksWorkbenchOracle` · 19 `TakeCardGeometry` (bounded log) · 20 `TakeCardDoors` (union) | `worlds` / `byScope` | session-scoped | **SAFE-AS-IS (B)** | — | `DebugOracleScopingTests` |
+| 21 | `BaselineProbe` (`BaselineProbe.swift`) | `offsets` · `tops` (probe id) | — | **SAFE-AS-IS (D)** — each probe reports in its ROW's own named space (`catalog-note-line`, …), so every row of a kind writes the same row-relative baseline under the one app-wide voice; its one reader asserts two ids agree within a point | — | `LibraryRowAlignmentTests` |
+| 22 | `TakesCellChrome` (`TakesShared`) | `overlayWords` (variant) | — | **SAFE-AS-IS (D)** — the one call site records the constant `[]` | — | — |
+| 23 | `TrayRowDoorProbe` (`TrayPanel`) | `verbs` (row) | — | **SAFE-AS-IS (D)** — the verbs are the row's own facts from the one store (put back, + delete now where `TrayPurgeDoor` says) | — | — |
+| 24 | `TakesEmptyStateDoors` (`TakesShared`) | `rendered` | union | **SAFE-AS-IS (A)** | — | — |
+| 25–36 | `PagedReadMaterialization` · `BookIndexMaterialization` · `BookOutlineMaterialization` · `ReadingFlowMaterialization` · `BookSpreadMaterialization` · `CanvasCardMaterialization` · `CanvasBankChipMaterialization` · `CutFlowRealization` · `BookIndexExtentReads` · `BookOutlineExtentReads` · `ReadingFlowExtentsReads` · `BookCardPreviewReads` | counts | counters | **SAFE-AS-IS (A)** (the two `*ExtentReads` are keyed by book — row 50's rule) | — | — |
+| 37 | `TypewriterCaretClearance` (`EditorTextView` — the editor seam) | `applied` | counter | **SAFE-AS-IS (A)**, and fenced | — | — |
+| 38 | `PaneSurfaceAudit` (`PaneSurface` — 18l's) | `foreignTextComparisons` | counter | **SAFE-AS-IS (A)**, and fenced | — | — |
+| — | `MarkdownStyling.palette` (non-DEBUG) | the markdown face's live colours | three writers | **GUARDED** (the brief's one non-DEBUG item): the three writers + the app-wide invariant at the declaration; `MarkdownPaletteWritersTests` (three arms, each with teeth — M-fourth / M-diverge / M-scheme) | — | `MarkdownPaletteWritersTests` |
+| — | `EditorTypography.current` / `isAdopted` (non-DEBUG) | the adopted typography | — | **not in C4's brief** — the review's "same class, lower risk"; NOTICED | — | — |
+| — | `FallbackCanary.assertionHandler` · `FlowHeightEstimate.metricsCache` · `Shared/KeychainCustody` trip counters · `Shared/SampleLibrarySeeder` latches | — | — | **out of the population** — a test seam, a pure cache, custody counters (custody — never touched here), owner-keyed seed latches (the review: "checked clean") | — | — |
+
+### DISPOSITION
+
+**Ledger row C4 — FIXED.** The class is closed on the owner axis for every process-global DEBUG
+registration in the Mac app: 12 oracle types, 51 slots, one generic
+(`Core/Views/DebugOracleOwnership.swift`) in the reference fixes' shape — the registrant names itself,
+a teardown clears only what it still owns, the last LIVE writer answers exactly as the static did.
+Production byte-identical: Release projection 0 of 18 files differ.
+- **Pins:** 13 two-window pins, every one MEASURED RED on the pre-fix tree in its final form (keyed
+  6/16 issues, unkeyed 7/16; `18k-c4-final-forms-prefix2.log`) and green on the fixed tree (keyed ×3;
+  unkeyed alone); 18 structural pins (red on old by non-compilation; 16 red under M-norelease, the
+  other two independent of `release` by design); the palette guard's 3 source-walk pins (each arm red
+  under its own mutation).
+- **The review's §5.2 claims, re-traced:** `focusDoors` "two windows on one book cross-clear each
+  other's doors" — TRUE, measured (nil after either teardown); `PostDetailOracle`'s four "unkeyed
+  singletons", `beginTitleEditing` "never cleared by anyone" — TRUE, measured (the door drove a dead
+  title); `ShellGeometry` / `CommitBarGeometry` / `CanvasArrivalOracle` / `BookIndexGeometry` "unkeyed
+  frames" — TRUE, measured; "two append-only trace buffers never cleared by `resetNavigator()`" —
+  `BookOutlineGeometry.trace` and `ReadingFlowGeometry.trace` (the third, `BookIndexGeometry.trace`,
+  has a reset): a LOG is not a registration (no clear/overwrite arm), so their disposition is the
+  bound; `SidebarGeometry`'s and the seam grip's "subject-keyed (not owner-keyed) maps" — TRUE,
+  measured. The re-grep added five the review did not name: `ReadModeOracle` (the heaviest — read by
+  7 suites), `LibraryPanelOracle`, `TakesArticleDoorProbe`, `ReadingFlowGeometry.anchorTops`, and the
+  per-row maps inside the named oracles.
+- **Existing pins:** every read rides unmodified; **21 lines** changed, each an ASSIGNMENT that became
+  its named reset door (S3's precedent), listed under LIVE STATUS.
+- **No PROVISIONAL, no QUESTIONS entry** (#147 unused): nothing product-shaped arose — every call was
+  harness design, each recorded with its reason (the order, the split, the two-session pin).
+
+### NOTICED, NOT TOUCHED (C4's scope fence)
+
+1. **The parallel-suites axis on the UNKEYED oracles is live and pre-existing** — every pin that reads
+   `PostDetailOracle`'s four, `CommitBarGeometry`'s two, `ReadModeOracle`'s host state / first paint,
+   `LibraryPanelOracle`'s six frames, `CanvasArrivalOracle`, `TakesArticleDoorProbe`, `ShellGeometry`
+   or `BookIndexGeometry`'s two glyph frames reads a slot any concurrently mounted suite writes (C4's
+   own first closing run proved it on its own pins; the readers include `MastheadLayoutTests`,
+   `SideColumnTests`, `TrayPanelMoveTests`, `BlockHistoryPaneTests`, `NoteVersionsPaneTests`,
+   `CommitBarLayoutTests`, `ReadModeTests`, `ReadLandingTests`, `ModeSwitchCarryTests`,
+   `CurrentBlockContinuityTests`, `ReadArrivalMeasureTests`, `LibraryPanelTests`, `CanvasArrivalTests`,
+   `TakesEmptyBlockFaceTests`, `ShellChromeTests`). C4's order keeps their live behaviour exactly what
+   it was (last write wins), so C4 adds no exposure — but the exposure is real, and it is 13u2 UNIT
+   E's class: the fix is session-scoping these oracles the way UNIT E scoped six (a scoped read beside
+   the unscoped one). Needs an owner (a candidate is the harness family, 12, or 18l beside its
+   `PaneSurface` work). The same axis also reaches the unscoped COUNTERS a pin resets to 0 and then
+   bounds (`*Materialization.count` read by `BookViewTests`/`CanvasBankTests`/`PagedReadTests`/…):
+   another suite's mount adds to them.
+2. **`EditorTypography.current` / `isAdopted`** — the review's "same class, lower risk" non-DEBUG
+   global. Not in C4's brief; the palette guard's invariant (appearance app-wide) is its invariant too,
+   so the same three-arm pin would extend to it cheaply.
+3. **Session-scoped oracles within ONE session** (SAFE-AS-IS (B)): two same-kind surfaces under one
+   session share a scope, and no teardown writes them — safe for every reader today (none mounts two).
+   A future pin that does would need owners below the scope; the container is ready for it.
+4. **The first closing run's note-box finding is a real product fact, not a defect:** the ONE live
+   editor is a session's, so in the real app (one session, many windows) focusing a note in one
+   window's book steps another window's book note down from live. By design (P-3); recorded because a
+   reader of the where-line oracle will meet it.
+5. The stale `/private/tmp/claude-501/u1-baseline-tree` worktree (not this run's) — untouched, as C1–C3
+   left it.
+
+### CAPTURES
+
+None — a harness unit on a host without Screen Recording / Accessibility (the brief: "the evidence IS
+the pins + the per-oracle table"). The logs, all in `App/Variorum/DerivedData/` (gitignored), with the
+scripts beside them (`18k-c4-pins.sh`, `18k-c4-singletons.sh`, `18k-c4-keyed.sh`,
+`18k-c4-palette.sh`, `18k-c4-closing.sh`): the pre-fix measurements `18k-c4-old{1,2,3,4}.log` (old1
+the dependency crash, old3 the one precondition, old4 the recorded run) and
+`18k-c4-final-forms-prefix{,2}.log`; the fixed-tree runs `18k-c4-new{1,2,3}.log`,
+`18k-c4-new-singletons.log`, `18k-c4-keyed-r{1,2,3}.log`; the teeth and the revert
+`18k-c4-palette-teeth.log`, `18k-c4-M-norelease.log`; the builds `18k-c4-bft{0,1}.log`; the closing
+runs `18k-c4-closing{1,2,3}.log`. The proof scripts (`release_projection.py`, `debug_proof.py`) and the
+population parser are session scratch — each is small enough to re-derive from its description here.
