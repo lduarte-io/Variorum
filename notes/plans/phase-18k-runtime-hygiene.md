@@ -2158,7 +2158,7 @@ free number. **Your final message:** a short summary pointing at your record.
 | 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | **TRACED** — REAL on 27 (the mechanism below). **Pin committed RED on the pre-fix tree** (`JumpViewportLayoutTests`, 3 issues + the Refont shrink pin's 1 — `18k-c6-jumppin-prefix.log`). **FIXED** in `JumpPrimitive.scroll(to:)` (one bounded re-assert) — both pins GREEN (`18k-c6-jumppin-fixed.log`, 7/2); behavioural revert R1 RED (4 issues, identical) → restored GREEN. **Item 1 CLOSED: FIXED** (the family re-run on the final tree rides the closing runs) |
 | 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | **TRACED — HARNESS** (the pin's wait predicate precedes its asserted event by one awaited hop); pin RE-MECHANIZED (wait on the scheduled compound) — green 14/14; M1/M2/M3 RED at their targets, P (the delay) GREEN. **Item 2 CLOSED: HARNESS, re-mechanized** |
 | 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | **RE-MECHANIZED** (`ComposedSliders` — composition nodes + the node's own binding driving the surface) — green; **plus the Outline's zero-slider arm, found HOLLOW in the same class** — first re-mechanized by composition (`d21bf0fd`), then MEASURED hollow for the A6 shape (MO) and re-mechanized on the page's bottom content inset. MO-2 + MS1–MS4 all RED at their targets. **Items 3–4 CLOSED: PIN MECHANISM, re-mechanized (+ the Outline arm)** |
-| 5 | `LibraryPanelHostTests`' "inspector" pin — history, narrow, mutation proof | PENDING |
+| 5 | `LibraryPanelHostTests`' "inspector" pin — history, narrow, mutation proof | **NARROWED** to the body's static type — green 6/6; mutation MI PENDING |
 | 6 | Closing runs (the five suites isolated + in-suite, the touched surfaces, the eleven Tutorial suites) | PENDING |
 | 7 | The record complete (verdicts, disposition, held walk steps, noticed-not-touched) | PENDING |
 
@@ -2414,4 +2414,37 @@ bar) against the new arm. Expected RED on the inset arm; the progress arm green.
 - **MS3 → RED, 1 issue** (`18k-c6-scrub-MS3.log`): `scrubbers.count → 2 == 1`.
 - **MS4 → RED, 1 issue** (`18k-c6-scrub-MS4.log`): `model.leftPage?.postID → …0001 == postIDs.last →
   …0038`. The count arm stayed green.
+
+### ITEM 5 — `LibraryPanelHostTests.aNoteSelectionStandsThePanelUpWith…`'s "inspector" ban — PIN MECHANISM
+
+**History (read first, as the brief asks).** `dcb620d6` (pre-13u Act 10 wave 1) hosted the Library's right
+panel in a SwiftUI `.inspector(isPresented:)` applied in `LibraryCatalogView.body`. `04355fba` (the Act
+10 correction round, batch E) retired it for a column of our own, because the system draws an
+inspector's divider only in a KEY window, so tabbed out the boundary vanished (row 34). `4ef9c80a` pinned
+it: the mounted half (our divider + panel reported in both window states) plus a reflection line that
+bans "inspector" in `SurfaceComposition.text(of: catalog.body)`, the VALUE dump lowercased.
+
+**What matched on 27, measured** (a scratch probe, reverted; `18k-c6-inspector-explore{,2}.log`): the
+dump is **14,672 lines**, and its real hits are two **`- activeInspector: nil`** lines. Each is a stored
+field of SwiftUI's own sheet-presentation modifier (beside `sheetContent`, `placement`,
+`drawsBackground`, `anchorProvider`), one for each of this view's two `.sheet(item:)`s
+(`$tagSheetTarget`, `$versionPickTarget`). SwiftUI's internals grew the field on 27; nobody added an
+inspector. **A latent trap found beside it:** the dump also descends into the swift-dependencies test
+context the models captured, test NAME included (the probe's own name, `c6ScratchWhichInspector`, hit
+6 lines). So any pin in this suite named with the word would have tripped the ban on ANY OS.
+
+**The narrowing — the body's STATIC TYPE, the app's own composition exactly as written.** The line now
+reads `String(reflecting: type(of: catalog.body))`. That is the modifier chain `LibraryCatalogView`
+composes, including both branches of every conditional. It never includes SwiftUI's stored fields, and
+never a captured dependency context. **Measured (`18k-c6-inspector-type-{HEAD,MI}.log`):** today the
+type string is 12,459 characters with no "inspector"; with the retired `.inspector(isPresented:)` host
+put back at the body's end, it spells **`SwiftUI.InspectorModifier<SwiftUI.Text>`**. The substring ban
+over the TYPE is kept deliberately, rather than the exact internal name `InspectorModifier`. Pinning
+SwiftUI's internal type name would go silently hollow if it were renamed. A substring match would
+instead fail LOUDLY on a composed app type whose name contains "Inspector", and that false positive
+is the safe direction. **Green: `LibraryPanelHostTests` 6/6** (`18k-c6-inspector-new.log`).
+
+**MUTATION MI (named before it runs; pre-mutation state = this commit):** the retired host put back
+(`.inspector(isPresented: .constant(model.infoHit != nil)) { Text(…) }` at `LibraryCatalogView.body`'s
+end) → expected RED on the narrowed line. Result PENDING.
 

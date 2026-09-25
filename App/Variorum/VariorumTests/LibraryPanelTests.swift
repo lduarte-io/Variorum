@@ -291,9 +291,21 @@ struct LibraryPanelHostTests {
                         "\(state): the note's blocks rendered in the preview")
             }
 
-            let composition = SurfaceComposition.text(
-                of: Self.catalog(session, model, library: library).body)
-            #expect(!composition.lowercased().contains("inspector"),
+            // 18k C6 (KnownIssues row 65, item 5): the ban reads the body's
+            // STATIC TYPE — the modifier chain exactly as this view composes
+            // it — never the VALUE dump. The dump descends into SwiftUI's own
+            // stored fields, and on macOS 27 SwiftUI's sheet-presentation
+            // modifier (this view's two `.sheet(item:)`s) grew a stored
+            // `activeInspector: nil`, which the dump's text matched with no
+            // inspector anywhere. It also reaches the dependency context the
+            // models captured, test NAME included, so any test named with
+            // the word would have tripped it on any OS. The type carries
+            // exactly what the correction round's batch E retired: with the old
+            // `.inspector(isPresented:)` host put back, the type spells
+            // `SwiftUI.InspectorModifier<…>`; today it spells no inspector.
+            let composedType = String(
+                reflecting: type(of: Self.catalog(session, model, library: library).body))
+            #expect(!composedType.lowercased().contains("inspector"),
                     "the panel is a column of our own, never a system inspector")
         }
     }
