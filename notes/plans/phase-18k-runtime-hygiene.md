@@ -343,13 +343,103 @@ your record — the record is the deliverable.
 **NOT DONE (first line, per the brief):** everything below is PENDING until flipped — the record opens
 before the first line of code.
 
+### THE TRACE (done in-session before any pin or fix — every claim re-read at the code)
+
+**T1 — the review's §6.1 claim holds, and is WORSE than stated at three sites.** Every Mac holder
+acquires through `AppSession.autosave(forPost:)` (holders += 1) and none calls
+`releaseAutosave(forPost:)` — grep-verified: the one production release is the phone's
+`MobileQuickNote.swift:1031`. So `postAutosaves` + one `quitFinalize` closure per distinct note ANY
+surface touched accumulate for the session; `finalizeAll` (⌘Q, `VariorumAppDelegate`) and
+`macWillLock` (every screen lock) walk them all, each `savepointOnLeaving` → flush + an awaited
+`closeAutoCommit` write transaction. The per-site shapes:
+
+| Site | Acquisition shape | Real end of life |
+|---|---|---|
+| `EditorViewModel.swift:49` | ONCE, in `init` (`let autosave`) | the instance's death — see T2 |
+| `TakesViewModel.swift:59` | ONCE, in `init` (`let autosave`) | the instance's death — see T2 |
+| `BlockTOCView.swift:36` (`BlockTOCViewModel`) | ONCE, in `init` (`let autosave`) | the instance's death — see T2 |
+| `CanvasViewModel.swift:120` | **PER ACCESS** — `coordinator` is a COMPUTED property calling `session.autosave(forPost:)`: init, every projection delivery, every settle, every keystroke, teardown | the instance's death (the fix stores it ONCE) |
+| `CompareBoardView.swift:203` (`CompareViewModel.coordinator(for:)`) | **PER CALL** — every `anyDirty` check (each projection delivery), every `adopt` settle-closure call (per buffered variant × mounted post), every focus/blur/keystroke | per post: the model's teardown (its cache cleared) or its death |
+| `CompareBoardView.swift:327` (`teardown`) | one MORE acquisition per cached token, inside teardown itself | — (the fix reads the cache, acquiring nothing) |
+| `BookIndexEditModel.swift:57` | ONCE per post per cache lifetime (`coordinators[postID]`); `teardown` clears the cache and a reused model re-acquires on its next touch (the ladder's R1-8 shape) | per post: `teardown` (cache cleared) or the model's death |
+| `Registry/ShellActions.swift:109` (`toggleSeal` fallback) | one acquisition per press, never released, for `router.activePostID` | none — it only FLUSHES; `flushExistingAutosave` is the right door (T5) |
+
+The per-access/per-call sites mean the holder count for a Canvas- or Compare-touched post climbs by
+hundreds in minutes; nothing today reads it, but a release there without first making the
+acquisition single would be meaningless.
+
+**T2 — why "the teardown" is NOT the genuine end of life for the three init-acquirers.** Every host
+builds its model EAGERLY in the view's `init` (`EditorView.swift:75`, `TakesBoardView.swift:140`,
+`WriteTakesPanel.swift:83`, `LensesBoardView.swift:128`, `BlocksWorkbenchView.swift:178`,
+`ReadModeView.swift:133`, `CanvasView.swift:100`) and hands it to `State(initialValue:)`, whose
+argument is evaluated on EVERY re-init of the view struct — SwiftUI keeps the first instance and
+discards the rest, which never mount and never see `onDisappear`. Each discarded instance has already
+acquired. A release placed in `teardown()` therefore pairs with ONE of N acquisitions and the entry
+can never reach zero (a hollow fix), while a second `teardown()` (a host re-appearing the same
+`@State`) would release TWICE for one acquisition — the over-release TEXT-LOSS class the brief
+names. **The instance's `deinit` is the one point that runs exactly once per acquisition and after
+which nothing can record through that instance** — and it runs only after `finalizeWork()`'s /
+`teardown()`'s flush Tasks (which hold `self` strongly) have finished, so flush-then-release is
+ordered by construction. The repo's precedent for `isolated deinit` is
+`MobileFallbackCanary` (`MobileEditorTextView.swift:60`). Controllers hold these models `unowned`
+(`EditorSurfaceController:50`, `TakesStructureController:58`, `TakesChoreographer:29`) and
+`EditorViewModel` holds its text view `weak` — no cycle keeps them alive (the dev-store measurement is
+the empirical check).
+
+**T3 — the registry's ⌘Q/lock registration is doing J11 work a plain release would silently
+remove.** The quit closure IS `savepointOnLeaving(postID)` — J11's road 3. For a note the workspace
+reports as LEFT (road 1/2, `SavepointOnLeave`), the leaving savepoint lands independently of the
+registry, so dropping its entry costs nothing. But three ordinary situations have NO leaving road
+before ⌘Q/lock, and today they get their savepoint ONLY because the entry leaks until then:
+1. **A still-shown note whose surface is gone** — `RootView.swift:808–826`: "the shell re-creates
+   this view whenever the pane stops being live (a split's other pane taking focus, a second window
+   becoming key)" and renders `readCheapNote` instead. The note is still shown (not left, so no J11
+   savepoint), its editor has unmounted, and a plain release would drop it: ⌘Q/lock would then skip
+   a note that is STILL OPEN — brief verification (b) broken.
+2. **Notes edited inside a BOOK or as a Compare PEER** — `WorkspaceModel.shownNoteIDs` counts only
+   `selections[pane]?.noteID`, and a book selection has none; Compare's peers are not the pane's
+   note. Their only savepoint roads are ⌘Q/lock and the 2 h idle backstop — brief verification (a)
+   broken for them by a plain release.
+3. **The open-tail race on the ordinary road** — navigating away from a note with an uncrystallized
+   tail: the workspace spawns the leaving Task at the click, SwiftUI's `onDisappear` spawns
+   `finalizeWork` after it, the leaving Task's flush finds nothing pending (tail typing records
+   nothing — the tail has no variant), its `closeAutoCommit` enqueues on the serial runner BEFORE
+   the finalize's tail `newBlock` → the leaving savepoint misses the tail block, whose take is then
+   "never committed and non-empty" (`autoCommitDirtyVariants`' dirty rule). Today ⌘Q/lock catches it
+   via the leaked entry; a plain release at the editor's death would leave it to the idle backstop.
+
+**T4 — the fix's shape follows from T2 + T3 (no product call in it).** (i) Every acquisition is made
+single and paired with exactly one release at the owner's death (or, for the two per-post caches,
+when the cache lets go of that post). (ii) On the Mac the registry drops an entry only through a
+**leaving savepoint that LANDED after the last holder let go** — the brief's own condition (a),
+"release never runs before the leaving road has flushed and savepointed", made structural rather
+than timing luck: a release of a note nobody has left keeps the entry (it still owes its ⌘Q/lock
+savepoint — T3 cases 1/2); a release of a note that WAS left re-takes the leaving savepoint (it
+flushes first) and drops the entry when that lands (T3 case 3's tail is in it); a leaving savepoint
+that begins with nobody holding the note drops the entry when it lands. An acquisition generation
+guards both drops against a surface that re-opened the note mid-flight. The phone's release keeps
+its 13l L-d behaviour byte-for-byte (`#if os(macOS)` — the phone has no quit registry).
+
+**T5 — `ShellActions:109`.** The seal fallback only FLUSHES before `lockPost`/`unlockPost` (whose
+own insurance auto-commits read the rows). The 13l LR-MINOR-2 doc judged it fine because its post is
+open by definition — true of the FLUSH, false of the mint: an open post has an entry held by its
+surface, so `flushExistingAutosave` flushes the SAME coordinator; where no surface holds one, there is
+nothing pending by construction and the mint only buys a permanent holder that would now pin the
+entry forever. → `flushExistingAutosave(forPost:)`.
+
+**Recorded consequence (not a product call — the leak's accident, named):** a note the Mac LEFT whose
+text is later changed ELSEWHERE (a phone edit arriving by sync) and never re-opened here no longer
+gets a Mac ⌘Q/lock savepoint; J11's letter is "every editing session that changed a note", the phone
+savepoints its own sessions, and the idle backstop (`IdleCommitScheduler`, every note by
+`last_touched_at`) still covers it.
+
 ### LIVE STATUS
 
 - Reading (CLAUDE.md canon, this plan's kickoff corrections / ledger / sitting / traps / cast, the
   review §6, `AppSession`, the quit + lock + leaving roads, `AutosaveCoordinator`, all eight
   acquisition sites, the phone's release precedent) — DONE (in-session, this record's first commit).
 - The trace (every site's acquisition shape and real end of life; what the ⌘Q/lock registration is
-  still doing for J11) — IN-PROGRESS (written into this record next).
+  still doing for J11) — DONE (T1–T5 above).
 - Pins (red-on-old) — NOT-STARTED.
 - The fix — NOT-STARTED.
 - Behavioural revert (red-on-old evidence) — NOT-STARTED.
