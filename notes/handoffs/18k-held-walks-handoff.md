@@ -8,6 +8,8 @@ Accessibility needs Ghostty restarted, and restarting would have killed the runn
 file is the paste-ready kickoff for the session that runs those walks afterwards**, in Terminal.app or
 a restarted Ghostty.
 
+**UPDATE (2026-09-25, same night): BOTH grants took effect without a restart** (re-checked by the orchestrator: `AX: true SCREEN: true`). So the walks run INSIDE the 18k orchestration, after C5 closes and before the ladder, as a walk session spawned by the orchestrator with this kickoff; the orchestrator spot-checks the captures. The original timing note below stands only if that does not happen.
+
 **When to run it:** after the 18k orchestrator session has ENDED (or at least after 18k's closeout
 commit — check `notes/plans/phase-18k-runtime-hygiene.md`'s STATUS line and LIVE STATUS). If 18o has
 also closed, fold 18o's held walks in the same way (its record: `notes/plans/phase-18o-correctness-singles.md`).
