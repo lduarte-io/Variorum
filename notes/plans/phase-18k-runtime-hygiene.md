@@ -2694,3 +2694,100 @@ Release, never quit or kill a real-store Variorum instance.
 that wants product behaviour decided (e.g. what the refusal SAYS) → the phone's existing sentence is
 the default, PROVISIONAL (QUESTIONS — check the end marker). **Your final message:** a short summary
 pointing at your record.
+
+## UNIT C5 RECORD — 17e's concurrency five (implementer: `opus-implementer`, 2026-09-25)
+
+**NOT DONE (first line, per the brief):** IN PROGRESS — this line is rewritten at the unit's close.
+The hands-on GUI walks and captures are HELD from the start: this session's terminal host holds
+neither Screen Recording nor Accessibility (the C1–C6 finding), so the use evidence is harness and
+in-app evidence, and the author's walk steps are written below for her morning.
+
+### READING (done in-session before any code)
+
+`CLAUDE.md` and the canon it loads; this file's kickoff corrections, THE LEDGER (row C5), THE KICKOFF
+SITTING (R-18k-1), ENVIRONMENT TRAPS, CAST & DISCIPLINE, the closing sections and ORCHESTRATOR
+ADJUDICATIONS of C1–C4 and C6, and the C5 BRIEF; `notes/plans/phase-17-standing-fixes.md`'s 17e
+entry whole (P26, P27, P33, P38 with each verifier's check); KnownIssues row 59; `MobileSoul.md` §3.
+The code, at HEAD `5d831922`: `CommandRouter` (the focused-block fact, `requestBlockHistoryForFocusedBlock`),
+`ShellActions` (`showBlockHistory`, `structuralUndo`, `structuralRedo`), `CanvasViewModel` /
+`CanvasView`, every other `noteFocusedBlock` reporter (Write, Takes, Blocks, Read, the TOC),
+`MobileLivenessAuthority` + its callers (`MobileShellView.tabDoor`, `MobileWriteView`) + its pins
+(`MobileLivenessTests`), `MobileUndoDoor`, `StructuralUndoCopy`, `AppSession` (the Mac latch
+precedent `tutorialDoorInFlight`), `EditorSurfaceController` (`applyStructural`'s `.merge` arm,
+`runInstantMerge`, `runCarryAllMerge`, `openMergeCeremony`, `runSeamMerge`, `liveActiveFans`,
+`runStructural`), `StoreBackup` (`run`, `performRun`, `performBackupIfDue`, `prune`,
+`integrityCheck`), `DataSafetyModel`, `DataSafetyPane`, and the suites each item's pin will join
+(`CanvasAndPoolTests`, `SeamMergeTests`, `FannedDefaultsTests`, `DestructiveUndoWarningTests`,
+`DataSafetyTests`, `Phase13pSubstrateTests`).
+
+### THE TRACE (inputs → wrong state; every claim re-read at the code, not taken from 17e)
+
+**Item 1 — row 59, Canvas's focused-block fact.** `CanvasViewModel.focus(blockID:variantID:)`
+migrates the ONE ring (`authority.focus`) and flushes; it never calls
+`CommandRouter.noteFocusedBlock` (grep: the reporters are Write, Takes ×2, Blocks, the TOC, Read ×3 —
+no Canvas file). ⌘K "Block History" → `ShellActions.showBlockHistory` → `router.dispatch(.showBlockHistory)`;
+the canvas's registered handler consumes only `.commit` and the switcher's three, so it returns false →
+`router.requestBlockHistoryForFocusedBlock()` reads `focusedBlock`, which is whatever the LAST
+reporter wrote for this note (the fact survives a mode switch within the note — that is the row-39
+memory's design). Wrong output: she clicks card Y in Canvas, presses ⌘K Block History, and the pane
+opens on block X, the Write caret's block from before she switched. **CONFIRMED.**
+
+**Item 2 — P26, the phone's liveness grant.** P26 cites `MobileLivenessAuthority.swift:107/112/113/115/117`.
+Those are the lines of the file BEFORE `6bc4f187` (2026-08-30, "The five MAJORs"), which added the
+monotonic handoff token for the architectural review's MAJOR 2 — the same defect, reached by another
+review the same day. At HEAD the grant re-checks `isCurrent(token)` at entry AND after each suspension
+(after `flushNow`, after `refreshTakesFromStore`), and the shell mints the token synchronously at the
+tap (`MobileShellView.tabDoor` → `beginHandoff()` in the same turn as `tab = target`). Both of P26's
+orderings, re-traced against HEAD: (a) the finder's — the stale grant suspended INSIDE the flush,
+the newer one completing, the stale one resuming → the post-suspension guard returns before
+`noteLivenessGranted()`; (b) the verifier's worse one — the stale task suspended in `fileOnLeaving()`
+before it ever enters → the entry guard returns. **So P26 is already FIXED, by `6bc4f187`, before
+this unit.** What is NOT covered: the two pins `6bc4f187` added
+(`theLastRequestedTabWinsEvenWhenTheStaleHandoffLandsLast` and its mirror) run the stale grant as a
+LATER ENTRY, which only the entry guard sees. The post-suspension guards — P26's literal mechanism —
+are pinned by nothing: deleting both leaves every liveness pin green (to be shown by mutation M-P26).
+The unit's work on P26 is therefore the missing pin, not a fix.
+
+**Item 3 — P27, ⌘⇧M's arity read.** `applyStructural`'s `.merge` arm decides from
+`model.slots[i].activeVariantCount` (`EditorSurfaceController.swift:329–332` at HEAD — P27's `:277`
+has moved). `slots` is frozen while the editor is busy (`EditorProjectionPolicy` → `.deferUntilClean`).
+A take born on the trailing block mid-burst (sync, or her own Takes surface) leaves `trailingArity == 1`
+→ the `else` arm → `runInstantMerge`, which never reads the store; `ops.merge` accepts fanned blocks
+(no fan fence); the trailing block is released to lineage with its take behind it, and
+`speakAboutMergedFans(mergedAwayTakes(...))` reads the same stale slots → 0 → silent. The
+false-POSITIVE direction is guarded (`runCarryAllMerge` re-reads via `liveActiveFans` and falls
+back); the false-NEGATIVE is not. The ceremony branch (⌥⌘⇧M) reads the same two numbers for its
+"needs a fan" refusal, so a fan that arrived mid-burst makes that door refuse wrongly — the same
+arity decision, one branch over (recorded under THE FIX's scope note). **CONFIRMED.**
+
+**Item 4 — P33, the Mac's ⌥⌘Z.** `ShellActions.structuralUndo` spawns a `Task` with no latch and makes
+TWO runner submissions — `pendingUndoWarning` then `undo` — each reading the stack's top
+independently. Two presses: T1 and T2 start in order on the main actor, each submits its warning
+read before either resumes → runner order T1.warn, T2.warn, T1.undo, T2.undo → both warnings were
+computed against entry E while T2 undoes E−1. With E clean and E−1 in the insurance class, the A12
+confirm never shows and E−1's edited buffer is discarded without asking. **The redo door has the
+same shape across doors:** ⇧⌥⌘Z pressed inside an undo's warn→act gap lands a redo between them, so
+the confirm she answered was about E−1 while the act undoes the entry the redo just re-applied. The
+phone's door shares ONE latch across undo and redo (`MobileUndoDoor.inFlight`, guarding `beginUndo`,
+`confirmPendingUndo` and `redo`) for exactly this reason. **CONFIRMED (both).**
+
+**Item 5 — P38, the backup single-flight.** `StoreBackup.run(force:)` (now `:150`, P38's `:143`
+moved) takes `stamp = now()` and awaits a detached `performRun` with no in-flight guard; the snapshot
+name is second-granular (`stampFormatter`), so two runs in one second write the SAME path, both run
+`integrityCheck` (which deletes `-wal`/`-shm` beside that path) and both `prune` the same doomed set
+— the loser's `removeItem` throws out of `performBackupIfDue` and its record reads `.failed` for a
+snapshot that succeeded (`lastError` set, the Data Safety face says it failed). Doors that reach it
+un-latched: the hourly `start()` tick, `DataSafetyModel.setInsurance` (no `busy`, and its toggle is
+not `.disabled(model.busy)`), `ICloudDriveOffer`, `PostureSwitch`. Even with no prune race, two
+parallel runs append TWO log records for one intent. **CONFIRMED.**
+
+### LIVE STATUS
+
+- Reading + the trace — DONE (this commit).
+- Item 1 (row 59) — NOT-STARTED.
+- Item 2 (P26) — NOT-STARTED.
+- Item 3 (P27) — NOT-STARTED.
+- Item 4 (P33) — NOT-STARTED.
+- Item 5 (P38) — NOT-STARTED.
+- Closing runs — NOT-STARTED.
+- Deaths / resumes: none.
