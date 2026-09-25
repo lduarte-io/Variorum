@@ -9,6 +9,7 @@
 //  window-hosted S2 pattern), and MINOR 2's two-editor voice flip.
 //
 
+import Dependencies
 import Foundation
 import Testing
 import UIKit
@@ -115,6 +116,109 @@ struct MobileLivenessTests {
             #expect(editors.live === libraryEditor)
             #expect(libraryEditor.isLive)
             #expect(!shelfEditor.isLive)
+        }
+    }
+
+    /// **18k C5 — 17e's P26, the finder's exact interleaving: a grant that
+    /// is SUSPENDED INSIDE ITS FLUSH when the newer request lands.**
+    ///
+    /// The two pins above run the stale grant as a LATER ENTRY, which only
+    /// the entry guard sees. P26's mechanism is the other window: the stale
+    /// grant has already stood the siblings down and set `live`, and is
+    /// awaiting the shared coordinator's write when she taps back; the newer
+    /// grant completes; then the stale one resumes. Only the re-checks AFTER
+    /// each suspension stop it installing the pen on the editor she left —
+    /// and no pin held them (18k C5's mutation M-P26 deleted both and every
+    /// liveness pin stayed green).
+    ///
+    /// The order is FORCED, never timed: the store is held busy by a write
+    /// on another thread, so the stale grant's flush cannot land until the
+    /// test lets it, and the newer grant runs to its own fresh read in the
+    /// meantime (the `DatabaseQueue` serialises that read behind the held
+    /// write too, which is why the store is released only once both grants
+    /// are waiting).
+    ///
+    /// RED-ON-OLD (the pre-`6bc4f187` grant — mutation M-P26, recorded in
+    /// the 18k C5 record): the hidden Shelf editor ends up live and editable
+    /// beside the visible Library one.
+    @Test func aGrantSuspendedInsideItsFlushNeverResumesIntoThePen() async throws {
+        try await withEditorWorld { session, db in
+            let post = try await session.runner.run { ops in
+                try ops.createPost(title: "the stale continuation", profile: .blog)
+            }
+            let minted = try await session.runner.run { ops in
+                try ops.newBlock(in: post.id, text: "Base.", at: .end)
+            }
+            let (shelfEditor, shelfStorage) = makeEditor(session, postID: post.id)
+            let (libraryEditor, libraryStorage) = makeEditor(session, postID: post.id)
+            let editors = MobileLivenessAuthority()
+            await editors.register(shelfEditor, tab: .shelf)
+            await editors.register(libraryEditor, tab: .library)
+            await shelfEditor.loadOnce()
+            await libraryEditor.loadOnce()
+            #expect(editors.live === libraryEditor, "the Library tab holds the pen")
+
+            // She types on the Library tab; the shared coordinator holds it
+            // for its debounce (the harness clock never fires), so the next
+            // grant's flush is a REAL write — the window P26 lives in.
+            typeAtEnd(libraryEditor, libraryStorage, " Typed.")
+            #expect(libraryEditor.autosave.isDirty)
+
+            // Hold the store: a write on another thread that waits for the
+            // test's word. Everything queued behind it waits with it.
+            let gate = DispatchSemaphore(value: 0)
+            let holding = LockIsolated(false)
+            DispatchQueue.global().async {
+                try? db.write { _ in
+                    holding.setValue(true)
+                    gate.wait()
+                }
+            }
+            for _ in 0..<2000 where !holding.value {
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(holding.value, "the store is held")
+
+            // Tap 1 — to the Shelf. Its grant stands the Library down, sets
+            // `live`, and suspends inside the flush the held store blocks.
+            let toShelf = editors.beginHandoff()
+            let first = Task { await editors.tabDidBecomeVisible(.shelf, handoff: toShelf) }
+            for _ in 0..<2000 where editors.live !== shelfEditor {
+                await Task.yield()
+            }
+            #expect(editors.live === shelfEditor, "tap 1's grant is mid-flush")
+
+            // Tap 2 — straight back to the Library, while tap 1 still waits.
+            let toLibrary = editors.beginHandoff()
+            let second = Task { await editors.tabDidBecomeVisible(.library, handoff: toLibrary) }
+            for _ in 0..<2000 where editors.live !== libraryEditor {
+                await Task.yield()
+            }
+            #expect(editors.live === libraryEditor, "tap 2's grant is at its fresh read")
+
+            // Let the store go: tap 1's write lands, then tap 2's read; both
+            // grants resume, the stale one first or second — either way.
+            gate.signal()
+            await first.value
+            await second.value
+
+            #expect(editors.live === libraryEditor, "liveness follows the last REQUESTED tab")
+            #expect(libraryEditor.isLive, "the visible editor holds the pen")
+            #expect(!shelfEditor.isLive,
+                    "the stale grant resumed after its flush and must install nothing")
+            #expect(
+                typeEdit(
+                    libraryEditor, libraryStorage,
+                    range: NSRange(location: 0, length: 0), replacement: "x"),
+                "the visible editor accepts her keystroke")
+            #expect(
+                !typeEdit(
+                    shelfEditor, shelfStorage,
+                    range: NSRange(location: 0, length: 0), replacement: "x"),
+                "the hidden editor's gate refuses — ONE live editor anywhere")
+            // Nothing she typed was lost: the held flush landed.
+            #expect(try await storedText(db, variantID: minted.variant.id) == "Base. Typed.",
+                    "the stale grant's flush is never wasted — only its pen is refused")
         }
     }
 
