@@ -2292,3 +2292,17 @@ the receipt — instead of a store row. Every assertion after the wait is byte-u
 Not a load-flake: the mechanism is named and forced. **Green: `BoundaryFluidityTests` 14/14**
 (`18k-c6-fluid-new.log`).
 
+**MUTATION PROOFS for the rewritten pin (named before they run; the pre-mutation state is `d195e748`,
+committed + pushed; each mutation in the working tree only, the file restored from HEAD after each,
+only `BoundaryFluidityTests` run):**
+- **M1 — the receipt becomes a refusal:** `runStructural`'s receipt line always `model.refuse(note)`.
+  Expected RED (`kind == .receipt`, `current == nil`).
+- **M2 — no receipt is spoken:** `runStructural`'s `if let note` arm emptied. Expected RED (`#require
+  spoken`).
+- **M3 — the keystroke schedules nothing:** the keystroke router's compound arm
+  (`EditorViewModel`, `planCrossBlockEdit` → `scheduleCrossBlockCompound`) replaced by `_ = compound`.
+  Expected RED (`#require pendingCrossBlockTask`).
+- **P — the timing perturbation, against the REAL rewritten pin:** the 100-ms sleep between the
+  commit and the receipt re-applied. Expected GREEN (the old form went red under it).
+Results PENDING.
+
