@@ -257,3 +257,81 @@ table: instance × host/path, each cell FIXED-with-named-pin or provably SAFE.
 
 ---
 
+
+## UNIT C1 BRIEF — the autosave-coordinator registry release (self-contained; read in this order)
+
+**You are the C1 implementer (`opus-implementer`), ONE unit, this session only.** Read, in order:
+1. `CLAUDE.md` (auto-loaded) — the invariants, testing expectations, no commit trailers.
+2. THIS FILE: the kickoff corrections, THE LEDGER (row C1), THE KICKOFF SITTING, **ENVIRONMENT
+   TRAPS (binding, verbatim for you)**, CAST & DISCIPLINE, and this brief.
+3. `notes/codebase-health-review-2026-09-21.md` §6 (the finding) — a REVIEW record: re-trace every
+   claim yourself before acting on it (the hallucination guard).
+4. The code: `App/Variorum/Shared/AppSession.swift` (`autosave(forPost:)`, `Hold`,
+   `releaseAutosave(forPost:)`, `openAutosaveCount`, `flushExistingAutosave`), the Mac quit/lock
+   roads (`QuitFinalizeRegistry`, `Workspace/SavepointOnLeave.swift`, `MacWillLock.swift`,
+   `VariorumAppDelegate.swift`), `AutosaveCoordinator.swift`, and every acquisition site:
+   `EditorViewModel.swift:49` · `TakesViewModel.swift:59` · `BlockTOCView.swift:36` ·
+   `CanvasViewModel.swift:120` · `CompareBoardView.swift:203` and `:327` ·
+   `BookIndexEditModel.swift:57` · **`Registry/ShellActions.swift:109`** (the eighth site the review
+   missed — kickoff correction 4) — plus the phone's one release (`MobileQuickNote.swift:1031`) as
+   the precedent.
+
+**The finding (review §6.1):** every Mac surface takes a coordinator via `autosave(forPost:)` and
+none releases, so `postAutosaves` + one `quitFinalize` closure per DISTINCT note touched this session
+accumulate forever; every screen lock and every ⌘Q serially walks them all (`savepointOnLeaving` →
+an awaited `closeAutoCommit` write per post).
+
+**THE DANGER THAT OUTRANKS THE LEAK — read twice.** `Hold.holders` counts acquisitions, and the
+map's one guarantee is ONE coordinator per post (13b 1a's N3; the S3 ladder's BLOCKER). **An
+OVER-release (more releases than acquisitions for a post, or a release while another surface still
+holds that coordinator) is a TEXT-LOSS class:** the dropped coordinator lives on inside the surviving
+surface, that surface's keystrokes go into a coordinator the ⌘Q / lock / `flushEveryOpenPost` walks
+can no longer reach, and the next surface to open the note mints a SECOND pipeline that can flush a
+stale buffer over a newer one. **Under-release merely keeps today's leak.** So: exactly ONE release
+per acquisition, at the owner's genuine end of life (its teardown — `stopObserving`/`onDisappear`/
+dismantle, whichever is the site's real end), ordered flush-then-release; sites that acquire more
+than once per owner (CompareBoardView has two acquisitions — find out whether they are per-render or
+per-lifetime) must pair each. Where a site's lifetime cannot be established cleanly, DO NOT release
+there — record it as a named residual (under-release is the safe side). `ShellActions:109` should
+prefer `flushExistingAutosave(forPost:)` if its caller only needs a flush (read the 13l LR-MINOR-2
+doc on `Hold.holders` — `toggleSeal` was judged fine because its post is open by definition; decide
+with the trace, record why).
+
+**Also verify, and pin:** (a) the LEAVING savepoint (13j J11, `SavepointOnLeave`) still lands for a
+note closed with unsaved changes — i.e., release never runs before the leaving road has flushed and
+savepointed (the conservative `isDirty` refusal is the backstop, not the plan); (b) ⌘Q / lock still
+finalize every note that is STILL open; (c) a note opened in two surfaces, one closed, keeps ONE
+coordinator the other surface's typing reaches (the N3 pin shape — `openAutosaveCount` stays 1 and a
+⌘Q walk flushes the survivor's edit).
+
+**Pins (red-on-old, verified by behavioural revert):** `openAutosaveCount` and
+`QuitFinalizeRegistry.count` across an open→close cycle per surface family (old code ratchets; fixed
+returns to baseline) + the three verifications above. **Use-shaped evidence (the unit's acceptance):**
+on the DEV-STORE Debug build, open and close ~20 notes through Write/Takes/Canvas/Compare/book Index,
+then read the two counts (a DEBUG print or oracle you add and REMOVE, or an existing oracle) — before
+(on a build of the pre-fix tree) and after — and time a ⌘Q-less finalize walk if cheaply observable
+(the lock road via its test seam is acceptable; never lock her real session). Record the numbers.
+
+**Closing runs (tests at the END, never at the start):** `swift test` is NOT needed unless you touch
+`Sources/` (you should not); the Mac suites for every touched surface + the pins' suite + the
+acceptance spine's eleven Tutorial suites (names in ENVIRONMENT TRAPS), each read by its "Test run
+with N tests" line. `AppSession` is SHARED — build the iOS target
+(`xcodebuild build -scheme VariorumMobile -destination generic/platform=iOS`) and run the phone's
+quick-note suites that exercise `releaseAutosave`. No full Mac suite (the orchestrator runs finals).
+
+**CHECKPOINT RULES (restated, binding from your first commit):** write `## UNIT C1 RECORD` with its
+`### LIVE STATUS` at the END of this file in your FIRST commit, and flip it in the same commit as each
+piece (`DONE (hash)` · `IN-PROGRESS — what remains` · `NOT-STARTED`); unverified claims marked
+**PENDING**. Commit per coherent piece and PUSH after every commit; stage pathspec-limited, never
+`git add -A`; NO commit trailers. Synchronous foreground waits only — the grep-poll loop, never
+`tail -f | grep -m1`, never a backgrounded run you end your turn on (ending your turn = your death).
+Never spawn subagents (one Sonnet lookup for EXTERNAL facts only). No behavioural revert starts until
+the record names it and the pre-revert state is COMMITTED; restore with `git checkout -- <file>` of
+that commit, verify by `git diff`. Every death/resume noted in the record. If the worktree moves under
+you (files you did not change changing), write nothing, report, stop.
+
+**Scope fence:** C1 only. Do not fix C2–C6 items you notice — record them in your record's
+"noticed, not touched" list. Zero `Sources/` (if the fix seems to want it, stop and report). Zero
+`Sync/`. PROVISIONAL-and-continue for non-gating ambiguity (QUESTIONS from **#146**); stop-and-report
+for anything product-flavoured or author-only. **Your final message:** a short summary pointing at
+your record — the record is the deliverable.
