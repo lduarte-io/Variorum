@@ -1781,6 +1781,47 @@ so reading pins ride unmodified; a pin that ASSIGNED a reset changes ONE line to
   `.preferredColorScheme(.dark)` on a view) → arm three red.
 - **The unit's pins, fixed tree (`DerivedData/18k-c4-new2.log`): `✔ Test run with 33 tests in 3 suites
   passed after 19.903 seconds`** (12 two-window + 18 structural + 3 palette).
+- The palette pin's TEETH — DONE (`DerivedData/18k-c4-palette-teeth.log`): the three named mutations
+  applied together on `c85b48c8` → `✘ Test run with 3 tests in 1 suite failed … with 3 issues`, each arm
+  red on its own mutation and naming it (arm one: the fourth writer `MarkdownStyling.palette =
+  .systemFallback` in `RootView.swift`; arm two: the pane face `tokens.map { _ in
+  MarkdownStyling.Palette.systemFallback }`; arm three: `RootView.swift:1057 … preferredColorScheme(.dark)`).
+  Restored by `git checkout -- RootView.swift Surface/PaneSurface.swift`; `git diff --quiet HEAD` true.
+- **THE FIRST CLOSING RUN, AND WHAT IT CHANGED** (`DerivedData/18k-c4-closing1.log`, 64 suites): `✘ Test
+  run with 413 tests in 64 suites failed after 232.849 seconds with 6 issues` — two are KnownIssues row
+  65's macOS-27 deltas (`LibraryPanelHostTests`' "inspector" composition pin; `RefontViewportTests.
+  aShrinkingRefontKeepsTheLineAtTheViewportTop`, 42034 vs 42128 — its 94 pt), and **four were THIS
+  unit's own pins, all one mechanism: an UNKEYED slot read while another suite's surface of the same
+  kind was live** — the structural pins' final "nothing stands" checks (`chapterCountFrame`,
+  `titleShown`, `beginTitleEditing` — other suites' live Index/detail answered) and the mounted
+  post-detail pin (`sideColumnDividerFrame → (679,0,1,750)`, another suite's detail with a panel open).
+  That is precisely the axis this record says C4 does not fix — biting the unit's own pins. Three
+  changes followed, each traced:
+  1. **The container's order — last LIVE writer answers** (was: the most recent FIRST registration).
+     The first design would have changed every existing unkeyed reader's live behaviour under parallel
+     suites: a surface mounted later by another suite would have shadowed a pin's own surface for its
+     whole life, where before C4 the pin's own next write won. The last-writer order is exactly what the
+     bare static answered while every writer stood (ShellRouter's own publish order), so no reader's
+     live behaviour moves; the only change is the one C4 exists for — a teardown hands the slot back
+     instead of clearing it or leaving a stale value. `publish` keeps the common case (the owner is
+     already the newest) an in-place write. The structural pin became `theLastLiveWriterAnswersAsTheStaticDid`.
+  2. **The structural pins' "afterwards" checks on UNKEYED slots** say THIS test's registration is gone
+     (`!= rect(1)`, `!= "older"`, …), not "nothing stands"; their "the older answers after the newer
+     leaves" checks are synchronous (no other suite can interleave) and stand as written.
+  3. **The two-window pins split in two** (the rig shared as `protocol DebugOracleWindowRig`):
+     `DebugOracleTwoWindowTests` keeps the six pins over slots KEYED by a live uuid the pin minted (exact
+     under parallel suites — always on); `DebugOracleSingletonWindowTests` takes the seven over UNKEYED
+     slots and is OPT-IN — the drills' pattern (`ProtectionMigrationDrillTests`), `.enabled(if:
+     VARIORUM_ORACLE_SINGLETON_WINDOWS == "1")`, run alone with `TEST_RUNNER_VARIORUM_ORACLE_SINGLETON_
+     WINDOWS=1`. The Read host's first-paint arm moved into the opt-in face/selection pin (it is
+     unkeyed); the shell seam left the rail pin for its own opt-in pin (`aShellInTwoWindowsKeepsTheOpen
+     ShellsSeam`). The always-on guard for the unkeyed slots is the structural arm.
+  **Fixed tree after the three:** always-on `✔ Test run with 27 tests in 3 suites passed after 11.788
+  seconds` (`18k-c4-new3.log`: 6 keyed + 18 structural + 3 palette); opt-in, alone, `✔ Test run with 7
+  tests in 1 suite passed after 10.051 seconds` (`18k-c4-new-singletons.log`). **PENDING:** the FINAL
+  pin forms re-measured RED on the pre-fix tree (a scratch worktree at `0a84adbc` with the two final
+  files copied in); a behavioural revert of the fix's release road on the final tree for the structural
+  pins (M-norelease: every oracle's `release(owner:)` a no-op); the closing run.
 - The two-window pins (red first where reachable) — WRITTEN AND MEASURED RED ON THE PRE-FIX TREE (this
   commit). `VariorumTests/DebugOracleTwoWindowTests.swift`, 12 tests, written against the read names the
   tree ALREADY has so each compiles on both sides; every one mounts the same kind of surface in TWO real

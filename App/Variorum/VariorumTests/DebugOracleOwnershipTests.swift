@@ -4,12 +4,17 @@
 //
 //  18k UNIT C4 — **the owner-keyed registration rule, as arithmetic.**
 //
-//  `DebugOracleTwoWindowTests` holds the rule where it matters — twelve real
-//  pairs of windows, each measured red on the pre-fix tree. These pins hold
-//  the SHAPE underneath them, the way `ShellDoorOwnershipTests` holds the
-//  shell's door (13u4 UNIT S3) and the card half of `StampOracleOwnership
-//  Tests` holds the catalog's (UNIT S2): no mount, one turn, every rule
-//  stated as a check.
+//  `DebugOracleTwoWindowTests` (always on — the keyed oracles) and
+//  `DebugOracleSingletonWindowTests` (opt-in — the unkeyed ones) hold the
+//  rule where it matters: thirteen real pairs of windows, each measured red
+//  on the pre-fix tree. These pins hold the SHAPE underneath them, the way
+//  `ShellDoorOwnershipTests` holds the shell's door (13u4 UNIT S3) and the
+//  card half of `StampOracleOwnershipTests` holds the catalog's (UNIT S2):
+//  no mount, one turn, every rule stated as a check — and, being
+//  synchronous, they are the ALWAYS-ON guard for the unkeyed slots, which
+//  no other suite can interleave with. (Where a slot is unkeyed, the
+//  "afterwards" checks say THIS test's registration is gone rather than
+//  "nothing stands": another suite's live surface may rightly answer.)
 //
 //  Two parts:
 //    · the container itself (`OwnedRegistrations` / `OwnedSlot` /
@@ -39,20 +44,24 @@ struct DebugOracleOwnershipTests {
 
     // MARK: - The container
 
-    /// RULE ONE: the most recent registrant answers — and re-publishing
-    /// replaces its value IN PLACE, so a body that re-runs never jumps the
-    /// queue past a window mounted after it.
-    @Test func theNewestRegistrantAnswersAndARepublishKeepsItsPlace() {
+    /// RULE ONE: while every writer is still on screen, the LAST write
+    /// answers — exactly what the bare static answered before C4, so no
+    /// reader's live behaviour moves. A re-publish replaces the owner's value
+    /// (it never stacks) and makes it the newest.
+    @Test func theLastLiveWriterAnswersAsTheStaticDid() {
         var store = OwnedRegistrations<String, Int>()
         let first = UUID(), second = UUID()
         store.publish(1, for: "k", owner: first)
         store.publish(2, for: "k", owner: second)
         #expect(store["k"] == 2)
         store.publish(11, for: "k", owner: first)
-        #expect(store["k"] == 2, "the older owner's re-report does not jump past the newer")
+        #expect(store["k"] == 11, "the older owner wrote last, so it answers")
+        store.release(owner: first)
+        #expect(store["k"] == 2, "…and when it leaves, the other's own value is back")
         store.publish(22, for: "k", owner: second)
-        #expect(store["k"] == 22, "…and the newer one's replaces its own value")
-        #expect(store.current == ["k": 22])
+        store.publish(23, for: "k", owner: second)
+        store.release(owner: second)
+        #expect(store["k"] == nil, "a re-publish replaced rather than stacked: one release, gone")
     }
 
     /// RULE TWO, the whole defect: a teardown takes only its own — from
@@ -243,7 +252,10 @@ struct DebugOracleOwnershipTests {
         #expect(BookIndexGeometry.paneContentSpans[book]
                 == BookIndexContentSpan(low: 100, high: 100, reports: 1))
         BookIndexGeometry.release(owner: older)
-        #expect(BookIndexGeometry.chapterCountFrame == nil && BookIndexGeometry.noteMenuFrame == nil)
+        // The two glyph frames are UNKEYED: another suite's live Index may
+        // answer now (the parallel-suites axis this unit does not fix), so
+        // the claim is that THIS test's registrations are gone.
+        #expect(BookIndexGeometry.chapterCountFrame != rect(1) && BookIndexGeometry.noteMenuFrame != rect(1))
         #expect(BookIndexGeometry.columnFrames[book] == nil)
         #expect(BookIndexGeometry.paneSelectionWashHeights[post] == nil)
         #expect(BookIndexGeometry.paneNoteHeights[post] == nil)
@@ -294,10 +306,11 @@ struct DebugOracleOwnershipTests {
         #expect(ReadModeOracle.firstEditRowPaintedAt == olderPaint,
                 "a later row of the same host never moves its first paint")
         ReadModeOracle.release(owner: older)
-        #expect(ReadModeOracle.face == nil && ReadModeOracle.selectedBlockID == nil)
+        // The host state and the first paint are UNKEYED (see the Index pin).
+        #expect(ReadModeOracle.selectedBlockID != "s1")
+        #expect(ReadModeOracle.firstEditRowPaintedAt != olderPaint)
         #expect(ReadModeOracle.pageBlockFrames[block] == nil && ReadModeOracle.editBlockFrames[block] == nil)
         #expect(ReadModeOracle.faceFrames[post] == nil && ReadModeOracle.indexColumnFrames[post] == nil)
-        #expect(ReadModeOracle.firstEditRowPaintedAt == nil)
     }
 
     /// `LibraryPanelOracle` — including the message, quick-entry and
@@ -317,7 +330,8 @@ struct DebugOracleOwnershipTests {
         #expect(LibraryPanelOracle.quickEntryFrame == rect(1) && LibraryPanelOracle.bookLineFrame == rect(1))
         #expect(LibraryPanelOracle.noteRowFrames[post] == rect(1))
         LibraryPanelOracle.release(owner: older)
-        #expect(LibraryPanelOracle.rootFrame == nil && LibraryPanelOracle.noteRowFrames[post] == nil)
+        // `rootFrame` is UNKEYED (see the Index pin); the row is this test's own key.
+        #expect(LibraryPanelOracle.rootFrame != rect(1) && LibraryPanelOracle.noteRowFrames[post] == nil)
     }
 
     /// `PostDetailOracle`'s four singletons, through their doors.
@@ -342,8 +356,11 @@ struct DebugOracleOwnershipTests {
         PostDetailOracle.beginTitleEditing?()
         #expect(opened == ["older"])
         PostDetailOracle.release(owner: older)
-        #expect(PostDetailOracle.inspectorPanel == nil && PostDetailOracle.titleShown == nil)
-        #expect(PostDetailOracle.beginTitleEditing == nil && PostDetailOracle.sideColumnDividerFrame == nil)
+        // All four are UNKEYED (see the Index pin): THIS test's are gone. (The
+        // door is a closure — it has no value to compare — so its release is
+        // the container's rule, held above, and the mounted pin's.)
+        #expect(PostDetailOracle.inspectorPanel != .versions && PostDetailOracle.titleShown != "older")
+        #expect(PostDetailOracle.sideColumnDividerFrame != rect(1))
     }
 
     /// `ShellGeometry`, `CommitBarGeometry`, `CanvasArrivalOracle`,

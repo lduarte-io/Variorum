@@ -26,11 +26,15 @@
 //  this type is the same idea once, so the rest of the oracles do not grow a
 //  fourth, fifth and twelfth copy that could drift.
 //
-//    · A registration is `(key, owner, value)`. Per key, the registrants
-//      stand in the order they FIRST registered; the LAST one is the answer
-//      — "the most recently mounted surface", which is what a pin that has
-//      just mounted one means. Re-publishing replaces the owner's value IN
-//      PLACE and keeps its place (a body that re-runs never jumps the queue).
+//    · A registration is `(key, owner, value)`. Per key, the LIVE
+//      registrants stand in the order they last wrote; the most recent
+//      writer is the answer — exactly what the bare static answered before
+//      C4 while everyone who wrote to it was still on screen, so no reader's
+//      live behaviour moves (a first design kept an owner's FIRST place, and
+//      the closing run showed why not: under parallel suites a later mount
+//      would have shadowed an earlier pin's own surface for its whole life —
+//      a new flake class for every existing reader). Re-publishing replaces
+//      the owner's value (it never stacks) and makes it the newest.
 //    · `withdraw` and `release` take ONLY the owner's own — so the survivor
 //      of a two-window pair answers again the moment the other leaves. A
 //      reverse index keeps a surface's teardown proportional to what it
@@ -88,14 +92,21 @@ struct OwnedRegistrations<Key: Hashable, Value> {
         standing[key]?.first { $0.owner == owner }?.value
     }
 
-    /// Register (or replace) this owner's value under `key`.
+    /// Register (or replace) this owner's value under `key` — it becomes
+    /// the answer, as the last write always was.
     mutating func publish(_ value: Value, for key: Key, owner: UUID) {
+        // The common case — a surface re-reporting a row it already answers
+        // for — stays an in-place write (these arrive at geometry rate).
+        if let last = standing[key]?.indices.last, standing[key]![last].owner == owner {
+            standing[key]![last].value = value
+            return
+        }
         if let index = standing[key]?.firstIndex(where: { $0.owner == owner }) {
-            standing[key]![index].value = value
+            standing[key]!.remove(at: index)
         } else {
-            standing[key, default: []].append(Standing(owner: owner, value: value))
             keysByOwner[owner, default: []].insert(key)
         }
+        standing[key, default: []].append(Standing(owner: owner, value: value))
     }
 
     /// This owner stops answering for `key` — nobody else's entry moves.
