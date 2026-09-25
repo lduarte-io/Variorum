@@ -563,8 +563,32 @@ struct PagedReadViewTests {
     @Test func theBarKeepsItsScrubberAndSpeaksApproximately() async throws {
         try await withHostedPages(posts: 12) { session, _, window, hosting, model, _ in
             await settle(window, hosting, until: { count(PageFrameNSView.self, in: hosting) >= 2 })
-            #expect(count(NSSlider.self, in: hosting) == 1,
+            // 18k C6 (KnownIssues row 65): this was `count(NSSlider) == 1`,
+            // and on macOS 27 a SwiftUI `Slider` is no NSView at all — the
+            // count read 0 while the scrubber rendered and a track click
+            // jumped pages (13y's kickoff walk). `ComposedSliders` says why
+            // the composition is the road, and what keeps it honest.
+            let scrubbers = ComposedSliders.find(in: hosting.rootView.body)
+            #expect(scrubbers.count == 1,
                     "the paginated sub-mode keeps a scrubber over the page domain")
+            // …and it WORKS: the setter a track click calls moves the pages
+            // the surface draws. (The view's page model is its `@State`, and
+            // the root view's body reads the instance the hosted graph holds.)
+            let scrub = try #require(scrubbers.first ?? nil, "the scrubber drives a binding")
+            func drawnPages() -> [Int] {
+                var numbers: [Int] = []
+                func walk(_ view: NSView) {
+                    if let page = view as? PageFrameNSView { numbers.append(page.pageNumber) }
+                    for sub in view.subviews { walk(sub) }
+                }
+                walk(hosting)
+                return numbers.sorted()
+            }
+            #expect(drawnPages() == [1, 2], "the book opens on its first leaf")
+            scrub.wrappedValue = 1
+            await settle(window, hosting, until: { (drawnPages().first ?? 0) > 2 })
+            #expect((drawnPages().first ?? 0) > 2,
+                    "scrubbed to the track's end, the leaf is the book's last: \(drawnPages())")
 
             // The bar's line, read off the model that computes it: the total
             // wears a "~" while any post is still a guess (R112's honesty

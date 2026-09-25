@@ -616,7 +616,14 @@ struct OutlineWritingSurfaceTests {
                 for sub in view.subviews { n += count(type, in: sub) }
                 return n
             }
-            #expect(count(NSSlider.self, in: hosting) == 0,
+            // 18k C6 (KnownIssues row 65's class): this arm was
+            // `count(NSSlider) == 0`, which on macOS 27 cannot fail — a
+            // SwiftUI `Slider` is no NSView there, so a restored slider would
+            // have read 0 too (hollow). It reads the composition instead
+            // (`ComposedSliders`); the progress arm below is unchanged,
+            // because `ProgressView` is still an `NSProgressIndicator` on 27
+            // (measured), so it kept its teeth.
+            #expect(ComposedSliders.find(in: hosting.rootView.body).isEmpty,
                     "no jump slider — a horizontal scrollbar on a vertical page")
             #expect(count(NSProgressIndicator.self, in: hosting) == 0,
                     "no progress bar — she ruled it out fully, bugginess unchased")
@@ -1029,12 +1036,25 @@ struct SpreadBookViewTests {
     /// case her A6 complaint was actually about). RED on the pre-13d code,
     /// which rendered no slider at all.
     @Test func theSpreadKeepsItsBarWithFormsAndTheJumpScrubber() async throws {
-        try await withHostedSpread(posts: 6) { _, _, window, hosting, _ in
+        try await withHostedSpread(posts: 6) { _, postIDs, window, hosting, model in
             await settle(window, hosting, until: { countReadSurfaces(in: hosting) >= 2 })
-            #expect(count(NSSlider.self, in: hosting) == 1,
+            // 18k C6 (KnownIssues row 65): this was `count(NSSlider) == 1`,
+            // and on macOS 27 a SwiftUI `Slider` is no NSView at all.
+            // `ComposedSliders` says why the composition is the road. The
+            // form picker's count below is unchanged — a segmented `Picker`
+            // is still an `NSSegmentedControl` on 27 (measured).
+            let scrubbers = ComposedSliders.find(in: hosting.rootView.body)
+            #expect(scrubbers.count == 1,
                     "the jump scrubber is back beside the leaf-turn controls")
             #expect(count(NSSegmentedControl.self, in: hosting) == 1,
                     "the bar's Write | Takes form picker is rendered (A44)")
+            // …and it WORKS: the setter a track click calls opens the spread
+            // the far end of the track names — the last note on the left.
+            let scrub = try #require(scrubbers.first ?? nil, "the scrubber drives a binding")
+            #expect(model.leftPage?.postID == postIDs.first)
+            scrub.wrappedValue = 1
+            #expect(model.leftPage?.postID == postIDs.last,
+                    "scrubbed to the track's end, the spread opens on the book's last note")
         }
     }
 

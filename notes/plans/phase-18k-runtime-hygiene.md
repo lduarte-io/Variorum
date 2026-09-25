@@ -2157,7 +2157,7 @@ free number. **Your final message:** a short summary pointing at your record.
 | 1 | The reading, in this session's own context, in the brief's order | **DONE** — CLAUDE.md + canon, TEXTKIT2 §5, this file's corrections/ledger/traps/cast + C1–C4 closings and adjudications, KnownIssues row 65 + the re-font RESOLVED row, 13y's kickoff adjudication (lines 381–413), 13u4's UNIT F2 RECORD whole |
 | 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | **TRACED** — REAL on 27 (the mechanism below). **Pin committed RED on the pre-fix tree** (`JumpViewportLayoutTests`, 3 issues + the Refont shrink pin's 1 — `18k-c6-jumppin-prefix.log`). **FIXED** in `JumpPrimitive.scroll(to:)` (one bounded re-assert) — both pins GREEN (`18k-c6-jumppin-fixed.log`, 7/2); behavioural revert R1 RED (4 issues, identical) → restored GREEN. **Item 1 CLOSED: FIXED** (the family re-run on the final tree rides the closing runs) |
 | 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | **TRACED — HARNESS** (the pin's wait predicate precedes its asserted event by one awaited hop); pin RE-MECHANIZED (wait on the scheduled compound) — green 14/14; M1/M2/M3 RED at their targets, P (the delay) GREEN. **Item 2 CLOSED: HARNESS, re-mechanized** |
-| 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | PENDING |
+| 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | **RE-MECHANIZED** (`ComposedSliders` — composition nodes + the node's own binding driving the surface) — green; **plus the Outline's zero-slider arm, found HOLLOW in the same class and re-mechanized the same way**; mutation proofs PENDING |
 | 5 | `LibraryPanelHostTests`' "inspector" pin — history, narrow, mutation proof | PENDING |
 | 6 | Closing runs (the five suites isolated + in-suite, the touched surfaces, the eleven Tutorial suites) | PENDING |
 | 7 | The record complete (verdicts, disposition, held walk steps, noticed-not-touched) | PENDING |
@@ -2315,4 +2315,55 @@ only `BoundaryFluidityTests` run):**
   `quitTimeFinalizeLandsAScheduledCrossBlockCompound`), 5 issues in all (`18k-c6-fluid-M3.log`).
 - **P → GREEN**, 14/14, the suite 1.280 s against 0.45 s unperturbed, so the delay did run
   (`18k-c6-fluid-P.log`).
+
+### ITEMS 3–4 — the two `count(NSSlider) == 1` scrubber pins — PIN MECHANISM (+ one hollow sibling)
+
+**What IS in the hierarchy on 27 — measured, not assumed** (scratch probes, reverted):
+- The paged Read bar hosted (`18k-c6-slider-explore.log`): `NSHostingView<PagedReadView>` · 2 ×
+  `AppKitPlatformViewHost<…PageFrameView>` · 2 × `PageFrameNSView` · `KeyViewProxy` · 3 ×
+  `_FocusRingView` — **no NSView for the Slider, nor for the ◀ ▶ buttons**: SwiftUI draws the bar.
+- A bare `Slider` + linear/spinner `ProgressView` + segmented `Picker` + `Toggle` hosted
+  (`18k-c6-bare-controls.log`): `NSSlider` **0** · `NSProgressIndicator` **2** · `NSSegmentedControl`
+  **1** · `NSButton` 0. So on 27 only the `Slider` left AppKit among the controls these pins count.
+- **The accessibility tree is not a road in this environment** (`18k-c6-slider-explore2.log`): the
+  hosting view answers `AXGroup` with **0** children, and 750 `accessibilityHitTest`s along the bar all
+  answer that same group. In-process, with no assistive client attached, SwiftUI builds no
+  accessibility nodes, and the terminal host has no Accessibility grant for an out-of-process client.
+- The composition: a `Mirror` walk of `PagedReadView.body` finds **exactly one** node whose own type is
+  `SwiftUI.Slider<EmptyView, EmptyView>`, holding its `Binding<Double>` (found by TYPE). Naive
+  text-searching of the dump hits **24** lines, one per ancestor whose generic signature names it
+  (`18k-c6-slider-explore3.log`).
+
+**The re-mechanization — `App/Variorum/VariorumTests/ComposedSliders.swift` (new, test-only).** It counts
+`Slider` NODES in a view's composition, and hands back each node's `Binding<Double>` found by type,
+never by SwiftUI's internal field names (item 5 is what trusting an OS-internal name costs). The walk
+stays inside the composition: it descends SwiftUI's own values and storage classes, never the app's
+captured models, and visits each SwiftUI class once. It reads `hosting.rootView.body`, i.e. the
+composition the hosted surface renders. It is the road `SurfaceComposition` already sanctions
+(`ProtectionSurfaceRenderTests.swift`'s header: it proves COMPOSED, not VISIBLE; the hosted window
+beside it proves the surface builds and lays out).
+- **`PagedReadViewTests.theBarKeepsItsScrubberAndSpeaksApproximately`**: exactly one composed
+  scrubber, **and it works**. The drawn leaves open at `[1, 2]` (read off `PageFrameNSView.pageNumber`,
+  the surface's own answer). Setting the scrubber's own binding to the track's end redraws the book's
+  last leaf. This part is new: the old pin only counted. The view's page model is its `@State`, and the
+  root view's body reads the instance the hosted graph installed, as the moving pages prove.
+- **`SpreadBookViewTests.theSpreadKeepsItsBarWithFormsAndTheJumpScrubber`**: exactly one composed
+  scrubber, and it works. The spread opens on the first note; the binding set to 1 opens it on the last
+  (`BookViewModel.scrubIndex`'s rule). The segmented-picker count is unchanged, since it is still AppKit
+  on 27.
+- **Found in the sweep, same class: `OutlineWritingSurfaceTests.outlineCarriesNoBottomChrome`'s
+  `count(NSSlider) == 0` arm was HOLLOW on 27.** A restored slider would also have read 0, so that arm
+  could not fail. It now reads `ComposedSliders.find(in: hosting.rootView.body).isEmpty`. Its
+  `NSProgressIndicator == 0` arm is unchanged and still has teeth (measured above). The sweep over
+  every AppKit-control count in `VariorumTests` (`NSSlider · NSProgressIndicator · NSSegmentedControl ·
+  NSButton · NSPopUpButton · NSSwitch · NSStepper · NSTextField · …`) found only these three `NSSlider`
+  arms, the one progress arm, the spread's segmented count, and `PagesArrowKeysTests`' `NSTextField`
+  lookups (still AppKit; green).
+- **Green:** `PagedReadViewTests` + `SpreadBookViewTests` + `OutlineWritingSurfaceTests`, **21 tests / 3
+  suites passed** (`18k-c6-scrub-new.log`).
+- **The recorded noise:** evaluating a body outside SwiftUI's graph logs SwiftUI's *"Accessing
+  Environment<…>'s value outside of being installed on a View"* notice (48 lines across the three pins).
+  That is the composition road's standing cost, and the inspector pin pays it too. It is harmless here:
+  both reads (`ThemeStore?`, `colorScheme`) fall back to defaults that do not decide whether a slider is
+  composed.
 
