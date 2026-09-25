@@ -3777,7 +3777,7 @@ the box. To her eye it is a gap top, and it is the W-4 shape. **Pin first:** `Re
 green. **The refinement (PROVISIONAL, QUESTIONS #147):** a line counts as hers while its baseline is at or below the
 probe (TK2's `glyphOrigin.y` — 14 of 17 pt Terminal, 17 of 22 Study, measured); a line whose baseline has scrolled
 off yields to the next line with text. **Built — the pins GREEN** (`18k-c6b-pins-fixed2.log`: 27 tests / 6 suites —
-the eight `RefontGapTopTests` cases incl. the sliver, `JumpViewportLayoutTests`, `RefontViewportTests`,
+the ten `RefontGapTopTests` cases incl. the sliver, `JumpViewportLayoutTests`, `RefontViewportTests`,
 `JumpCorrectionLoopTests`, `FragmentLinesTests` + the new pure pin `theReadingLineIsTheFirstWhoseBaselineIsStillOnScreen`,
 `ScrollAnchorTests` with its ground truth moved to the baseline too). One pure function carries the rule,
 `FragmentLines.readingLineIndex(atLocalY:baselines:)`; the capture's old box test is gone (the baseline subsumes
@@ -3852,7 +3852,7 @@ the session's Open strip.
 |---|---|---|
 | `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift` | `topVisibleOffset()`: the reading line is the first whose baseline is at or below the probe, in a paragraph with text; else the first paragraph with text below, inside the viewport; else the old answer. Two private helpers (`isBlankParagraph`, `firstReadableLineStart`) | the probe point and its container conversion, `restoreTopVisibleOffset`, `keepingReadingPosition`, `parkAnchorRestore`, every `consume*`, the storage seam, `renderFull` |
 | `App/Variorum/Variorum/Features/Editor/JumpPrimitive.swift` | `JumpCorrectionLoop.run` gains a `maxScroll: () -> Double` overload (the Double form forwards, byte-identical behaviour); `jump` reads its scroll range from the current frame at every use (the loop's clamp, `scroll(to:)`'s `wanted`, C6's `reachable`); `FragmentLines.readingLineIndex(atLocalY:baselines:)` (pure) | the estimate, `lineSpan`, the ≤ 6 bound, `landingInset`, C6's re-assert, every signature and caller |
-| `VariorumTests/RefontGapTopTests.swift` | NEW — 4 tests / 9 cases (the capture and the re-font across four zones of her note's gap, a typed note, the straddle guard) | — |
+| `VariorumTests/RefontGapTopTests.swift` | NEW — 4 tests / 10 cases (the capture and the re-font across four zones of her note's gap, a typed note, the straddle guard) | — |
 | `VariorumTests/JumpViewportLayoutTests.swift` | + W-2's pin (×2 voices, the bundled story) | C6's pin |
 | `VariorumTests/JumpAndUndoTests.swift` | + the pure `readingLineIndex` pin | the loop and line pins |
 | `VariorumTests/ScrollAnchorTests.swift` | the block-at-the-top ground truth (baseline) | the three other pins, the stops |
