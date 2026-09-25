@@ -3425,7 +3425,18 @@ All three sort after every dated name; among themselves `…-a1-pre13x-…` sort
   - **R-tight** — only the parse's tightening reverted (`tail.isEmpty || tail.hasPrefix("-")`, no read-back), the
     listing's date filter kept. Expected: ONLY `theListingIsTheAppsOwnNamesOnly` red (the two stamp-first foreign
     names listed and offered).
-  - PENDING.
+- **Behavioural reverts — DONE, every one exactly as named** (each restored with `git checkout HEAD --`, `git
+  status` clean after each; logs `DerivedData/18k-c7-R-{full,pass,narrow,tight}.log`):
+  - **R-full: `Test run with 8 tests in 1 suite failed … with 21 issues`** — 7 red, the per-test counts identical to
+    the pre-fix run (7 · 6 · 2 · 2 · 1 · 1 · 2), the face guard green.
+  - **R-pass: `failed … with 2 issues`** — ONLY `theCopyIsTheActsFileEvenBesideANewerStampedCopy` (the far folder
+    got the day-ahead copy). Fix 2 is load-bearing on its own.
+  - **R-narrow: `failed … with 6 issues`** — the hourly check (2), the prune (1), the far due-check (1), the listing
+    (2); both W-3 pins and the pass-through pin GREEN (the pass-through alone fixes the copy). Fix 1 is load-bearing
+    on its own.
+  - **R-tight: `failed … with 2 issues`** — ONLY the listing pin: `…-130000-a1-window.sqlite` and
+    `…-140000-drill.sqlite` listed as the app's own, and both offered for deletion by the Castle listing. The
+    tightening is load-bearing on its own.
 - Dev-store use evidence (a scratch second folder, `cmp`, its check) — PENDING.
 - The remedy sentence for her — PENDING.
 - Closing runs — PENDING.
