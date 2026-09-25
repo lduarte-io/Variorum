@@ -40,17 +40,19 @@ here touches distribution, signing or `/Applications` before this run's own clos
 
 | Row | Item | Source | Unit kind → acceptance evidence | Cold review seat | Status |
 |---|---|---|---|---|---|
-| **C0** | Ledger housekeeping (review §7): rows 56/57's DURABLE owner (her confirmation); row 27's stale owner → 13o; row 28's fork list gains the conductor band + the tutorial-seeder scaffolding; file the review's new rows with owners (T2 · StableSurface's asyncAfter · the warming assessment → 12; the EditorViewModel decomposition → 18m; accessibility → the Design & UI review row); the PurgeJanitor split → 18a | review §7; KICKOFF 1 C0 + D1's paragraph | records → the ledger's header rule holds (no blank owner) | — (orchestrator's records) | NOT-STARTED |
+| **C0** | Ledger housekeeping (review §7): rows 56/57's DURABLE owner (her confirmation); row 27's stale owner → 13o; row 28's fork list gains the conductor band + the tutorial-seeder scaffolding; file the review's new rows with owners (T2 · StableSurface's asyncAfter · the warming assessment → 12; the EditorViewModel decomposition → 18m; accessibility → the Design & UI review row); the PurgeJanitor split → 18a | review §7; KICKOFF 1 C0 + D1's paragraph | records → the ledger's header rule holds (no blank owner) | — (orchestrator's records) | **DONE** `5fea5e81` |
 | **C1** | The autosave-coordinator registry release — 7 Mac holders + the `ShellActions` flush site mint and never release | review §6.1 | runtime/lifecycle → red-on-old count pin (`openAutosaveCount` / `QuitFinalizeRegistry.count` across open→close) + the dev-store measurement: counts after opening many notes, before/after; the lock/⌘Q finalize walk | Opus (Fable if the diff reaches the editor seam) | **DONE** — FIXED `a8b27b11` |
-| **C2** | The inline editor's height binding written inside `makeNSView`/`updateNSView` — MEASURE FIRST (ledger row "The Outline's SHADOW `InlineEditorSurface`", the surviving double realization) | review §5.1 A2 | trace → the instrumented chain on the long-note fixture; the pin is the double-realization count IF confirmed; else the deferral lands as hygiene and the row is NOT claimed | Fable if the seam is touched, else Opus | NOT-STARTED |
+| **C2** | The inline editor's height binding written inside `makeNSView`/`updateNSView` — MEASURE FIRST (ledger row "The Outline's SHADOW `InlineEditorSurface`", the surviving double realization) | review §5.1 A2 | trace → the instrumented chain on the long-note fixture; the pin is the double-realization count IF confirmed; else the deferral lands as hygiene and the row is NOT claimed | Fable if the seam is touched, else Opus | **DONE** — hypothesis DISPROVED; deferral as hygiene; the shadow row CLOSED resolved-by `f8610cb9` |
 | **C3** | The mechanical state-write deferrals (~14 geometry actions, the `BookIndexView` twin first, Canvas's observed geometry writes, window registration WITH the sticky-key ruling) | review §5.1 A3/A4/A5 | hygiene → per-site verdict table (the 13u4 S3 form) + a before/after `Modifying state during view update` count on a bounded run; behaviour byte-identical; walk of Canvas drag + the book Index | Opus | **DONE** — DISMISSED AS HOLLOW (measured; comments only) |
-| **C4** | The DEBUG-oracle ownership sweep (owner-keyed registration on the three reference shapes) + the `MarkdownStyling.palette` three-writer comment-plus-pin | review §5.2 | harness → the two-window cross-clear pins per oracle (red-on-old where reachable; structural where teardown order cannot be forced — S2's precedent) | Opus | NOT-STARTED |
-| **C5** | 17e's concurrency five (R-18k-1): row 59 Canvas focused-block fact · P26 phone liveness race · P27 ⌘⇧M frozen-projection merge · P33 ⌥⌘Z in-flight latch · P38 backup single-flight latch | 17e + KnownIssues row 59 | runtime/concurrency → red-on-old pins per item (P26 on the MOBILE suite); walks: Canvas select → ⌘K Block History on that block; ⌥⌘Z double-press | Fable (P27 is `EditorSurfaceController`, the seam's pair) | NOT-STARTED |
+| **C4** | The DEBUG-oracle ownership sweep (owner-keyed registration on the three reference shapes) + the `MarkdownStyling.palette` three-writer comment-plus-pin | review §5.2 | harness → the two-window cross-clear pins per oracle (red-on-old where reachable; structural where teardown order cannot be forced — S2's precedent) | Opus | **DONE** — FIXED (12 oracle types) |
+| **C5** | 17e's concurrency five (R-18k-1): row 59 Canvas focused-block fact · P26 phone liveness race · P27 ⌘⇧M frozen-projection merge · P33 ⌥⌘Z in-flight latch · P38 backup single-flight latch | 17e + KnownIssues row 59 | runtime/concurrency → red-on-old pins per item (P26 on the MOBILE suite); walks: Canvas select → ⌘K Block History on that block; ⌥⌘Z double-press | Fable (P27 is `EditorSurfaceController`, the seam's pair) | **DONE** — row 59/P27/P33/P38 FIXED; P26 pinned (already fixed) |
 | **→18o** | The rest of 17e + 17t + row 66 (#138(f) ruled) + row 64 (#136(b) record-only) — a SEPARATE 18 entry run right after 18k (R-18k-1/2/4/5) | the sitting | its own record + ladder | Fable (17t = custody) | NOT-STARTED — opens at 18k's close |
-| **C6** | KnownIssues row 65 — the FIVE macOS-27 test deltas: TRACE `RefontViewportTests.aShrinkingRefontKeepsTheLineAtTheViewportTop` (94-pt drift — possibly REAL, the editor seam) and `BoundaryFluidityTests.theKeystrokePathRoutesCrossBlockDeletesIntoTheCompound` (intermittent); RE-MECHANIZE the two `NSSlider` scrubber pins and `LibraryPanelHostTests`' "inspector" reflection pin | ledger row 65 | trace + pin re-mechanization → the full Mac suite reads GREEN (no "modulo"); a Refont fix, if owed, walks on the Copper Beeches fixture (13u4 F2's own walk) | **Fable** (Refont / BoundaryFluidity are the editor seam) | NOT-STARTED |
+| **C6** | KnownIssues row 65 — the FIVE macOS-27 test deltas: TRACE `RefontViewportTests.aShrinkingRefontKeepsTheLineAtTheViewportTop` (94-pt drift — possibly REAL, the editor seam) and `BoundaryFluidityTests.theKeystrokePathRoutesCrossBlockDeletesIntoTheCompound` (intermittent); RE-MECHANIZE the two `NSSlider` scrubber pins and `LibraryPanelHostTests`' "inspector" reflection pin | ledger row 65 | trace + pin re-mechanization → the full Mac suite reads GREEN (no "modulo"); a Refont fix, if owed, walks on the Copper Beeches fixture (13u4 F2's own walk) | **Fable** (Refont / BoundaryFluidity are the editor seam) | **DONE** — row 65 CLOSED (a real 27 regression fixed) |
+| **C6b** | The held walks' W-4/W-2: the re-font reading position at a paragraph-GAP top edge; a jump whose own layout grows the document (re-owned into the run 2026-09-25) | the held walks | editor seam → red-on-old pins + the Copper Beeches walk, both voices | Fable | **DONE** — both pre-existing, FIXED (`EditorViewModel.topVisibleOffset` · `JumpPrimitive`); #147 PROVISIONAL |
+| **C7** | The held walks' W-3: the backup listing sorted by NAME (five readers; the second folder got the wrong file; the prune kept A1 copies over dated ones) | the held walks | data safety → `BackupOwnFilesTests` red-on-old + a dev-store scratch-folder run | Fable (the ladder) | **DONE** — FIXED `ff0e67c2`; her real store verified exposed |
 
-**Run order:** C0 (orchestrator, first — records only) → C1 → C2 → C3 → C4 → C6 → C5 → the ladder →
-the closeout. One `opus-implementer` per unit, fresh, strictly sequential; C3 follows C2 because C2
+**Run order (as run):** C0 → C1 → C2 → C3 → C4 → C6 → C5 → THE HELD WALKS (TCC granted mid-run) → C7 →
+C6b → the ladder → the finals → the closeout → the refresh → 18o. One `opus-implementer` per unit, fresh, strictly sequential; C3 follows C2 because C2
 measures the warning family C3 then sweeps.
 
 ---
@@ -209,7 +211,8 @@ COMMITTED · every death and resume noted in the record.
 - C5 — DONE, ACCEPTED (four FIXED, P26 pinned-already-fixed; dispositions in 17e).
 - THE WALKS — DONE (adjudicated below): C1 · C2 · C3 · C5 PASS; C6 FINDINGS W-4/W-2 → **C6b**; W-3 (backup second folder) → **C7**; W-1 (a canvas grab glyph) → 12.
 - C7 — DONE, ACCEPTED (the name-sorted backup listing — five readers fixed by one rule + the act's own file passed through; her real store verified exposed: 11 hourly copies).
-- C6b — IN-PROGRESS.
+- C6b — DONE, ACCEPTED (W-4/W-2 pre-existing, FIXED; #147 PROVISIONAL).
+- THE LADDER — ROUND 1 IN-PROGRESS (Fable; the combined diff `1b7858eb^..HEAD`).
 - NEXT: C7 → C6b → the ladder (Fable, one combined diff) → finals → closeout → refresh → 18o.
 - Deaths / resumes: none.
 
@@ -711,7 +714,8 @@ walks are BUNDLED for her morning (granting Ghostty those permissions is her cal
   **W-4** (the previous paragraph's last line left on top after a comments toggle when the page top sits in a paragraph
   gap — the step's own pre-fix symptom) and **W-2** (the place lost after a gap round trip). Four findings for her,
   none fixed.
-- **C1 item 3:** should a note edited inside a book (or as a Compare peer) get a leaving savepoint when
+- **QUESTIONS #147 (PROVISIONAL, C6b):** when the page's top edge cuts a line BELOW its letters (only descenders showing), the line she is reading is the NEXT one — "the baseline decides".
+- **C1 item 3 — RULED (R-18k-6), built at 18o:** should a note edited inside a book (or as a Compare peer) get a leaving savepoint when
   she leaves the BOOK, the way a note gets one when she leaves the note? Today: only ⌘Q/lock/idle.
 
 ## UNIT C2 BRIEF — the inline editor's height binding (MEASURE FIRST; self-contained; read in this order)
@@ -3931,3 +3935,35 @@ committed (the NSLog patch lived only in the scratch worktree, removed; `C6bScra
 scratchpad). The scratch worktree and its DerivedData are removed; `git worktree list` shows only `main` and `mobile`.
 - Deaths / resumes: none.
 - **C6b — DONE (implementer), awaiting the orchestrator's spot-check.**
+
+### UNIT C6b — ORCHESTRATOR ADJUDICATION (2026-09-25; the unit CLOSES here)
+
+**Verified:** commits through `57e1bce1`, pushed, zero trailers, tree clean, scratch worktree removed,
+zero instances. Scope: `EditorViewModel.topVisibleOffset()` + `JumpPrimitive.swift` + tests —
+`EditorTextView`/`BlockRangeIndex` untouched. **ACCEPTED:** W-4 (the capture named the line whose
+fragment BOX held the edge — a TK2 fragment's box includes its paragraph's trailing spacing, and her
+note keeps a blank paragraph between every two) and W-2 (the jump's scroll range read ONCE from a
+stale frame after a whole-note re-font under-estimate, so the loop's clamped-at-edge branch reported
+convergence 2,368 pt short) are BOTH PRE-EXISTING (the C6-parent road red identically) and FIXED:
+the reading line is the first whose BASELINE is on screen in a paragraph with text; the range is read
+live per use (a closure overload of `JumpCorrectionLoop.run`, the `Double` form forwarding, its pins
+unmodified). Pins `RefontGapTopTests` (4/10) + two more, reverts red as named. **One existing pin's
+EXPECTATION rebuilt** (`ScrollAnchorTests.theAnchorNamesTheBlockAtTheViewportTopNotTheOneBelow`, which
+encoded the old box rule) — accepted because the 13c 1A inset bug it exists to catch still turns it red,
+verified twice; flagged for the ladder. #147 PROVISIONAL → her bundle. Walk: every row PASS, both
+voices, measured by a line-position tool. KnownIssues' W-4/W-2 row CLOSED this commit. The TK2 facts
+(fragment frames carry trailing spacing; `glyphOrigin.y` is the baseline; a whole-document re-font
+re-estimates height LOW) join C2's and C6's for the closeout's `TEXTKIT2_NOTES.md` paragraph. O-2 (the
+ring drawn high after ⌘↓) → KnownIssues, owner 12.
+
+## THE LADDER (ONE Fable ladder over the run's COMBINED diff)
+
+**The diff under review:** `git diff 1b7858eb^..HEAD -- App Sources Tests Tools` (the run's first
+commit's parent through the ladder's opening; records excluded from the code review, not from reading).
+Every unit's RECORD and ORCHESTRATOR ADJUDICATION above is the reviewer's map; the adjudications name
+the review targets the orchestrator flagged. **Reviewer: `fable-reviewer`** (the diff touches the editor
+seam — C6/C6b's `JumpPrimitive` + `EditorViewModel`, C5's `EditorSurfaceController` — and the autosave
+custody seam, C1). Cross-model flow (the implementers were Opus): the reviewer makes the final call on
+disputes and implements its confirmed findings' fixes itself, after the orchestrator's authorization.
+**Findings file:** `notes/plans/18k-ladder-round1.md`, written INCREMENTALLY by the reviewer (the
+resiliency protocol's reviewer rule). Cap three rounds; a fresh reviewer per round.
