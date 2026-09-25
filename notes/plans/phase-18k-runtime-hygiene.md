@@ -2155,7 +2155,7 @@ free number. **Your final message:** a short summary pointing at your record.
 | # | Piece | Status |
 |---|---|---|
 | 1 | The reading, in this session's own context, in the brief's order | **DONE** — CLAUDE.md + canon, TEXTKIT2 §5, this file's corrections/ledger/traps/cast + C1–C4 closings and adjudications, KnownIssues row 65 + the re-font RESOLVED row, 13y's kickoff adjudication (lines 381–413), 13u4's UNIT F2 RECORD whole |
-| 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | PENDING |
+| 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | **TRACED** — REAL on 27 (the mechanism below); the fix's site + red-on-old PENDING |
 | 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | PENDING |
 | 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | PENDING |
 | 5 | `LibraryPanelHostTests`' "inspector" pin — history, narrow, mutation proof | PENDING |
@@ -2163,3 +2163,51 @@ free number. **Your final message:** a short summary pointing at your record.
 | 7 | The record complete (verdicts, disposition, held walk steps, noticed-not-touched) | PENDING |
 
 - Deaths / resumes: none.
+
+### ITEM 1 — `RefontViewportTests.aShrinkingRefontKeepsTheLineAtTheViewportTop` — THE TRACE
+
+**Reproduced isolated on 27 (`18k-c6-refont-iso1.log`):** `topVisibleOffset() → 42034 == before → 42128`,
+1 issue, the other five pins green. **The "94-pt drift" is 94 CHARACTERS, not points** — one line of
+the fixture's 14-pt mono at 900 pt — so the pin's own facts line says it plainly: after the shrink
+the viewport's top line is the line ABOVE the one she was reading (`42034` = block 119's last line,
+`42128` = block 120's second line).
+
+**Where it happens — a scratch trace on the pin's own rig, `JumpPrimitive.jump` temporarily
+instrumented (never committed; `18k-c6-trace{2,3}.log`):**
+
+```
+pin's first jump (tall) to b120 = 42056:
+  scroll(11102.49) → layoutViewport → clip 11102.49 (frame 20963 → 21137.5)   minY(target) = 10995.67
+  scroll(10995.67) → layoutViewport → clip 11024.67 (frame 21137.5 → 21166.5) minY(target) = 10995.67
+  loop: |minY − requested top| < 1 ⇒ "converged"   — but the clip sits 29 pt BELOW the target line
+  ⇒ top line read = 42128 (b120's 2nd line) — the pin's `before` is itself one line off b120
+the re-font's settle-hop restore to 42128 (the park, spent on the first display pass):
+  scroll(11082.75) → layoutViewport → clip 11082.75 (frame 20892)             minY = 10854.63
+  scroll(10854.63) → layoutViewport → clip 10831.41 (frame 20892 → 20868.5)   minY = 10854.63
+  loop: "converged"  — but the clip sits 23.23 pt ABOVE the target line (one 17-pt line + the 7-pt gap)
+  next turn: frame +11, clip +10.78, target +10.78 (a content-preserving compensation; offset kept)
+  ⇒ top line read = 42034 (b119's last line) — THE RED
+a manual re-jump to 42128 on the settled geometry: both scrolls land where requested ⇒ exact (0.00)
+```
+
+**The mechanism, isolated:** on macOS 27 **`NSTextViewportLayoutController.layoutViewport()` moves the
+clip view by (≈) the height change its own layout pass causes** — +29 with the frame +29, −23.23 with
+the frame −23.5 — while the target line's `minY` (just laid out by the loop's single-fragment
+`.ensuresLayout`) does not move. `JumpCorrectionLoop` judges convergence as `|minY − top| < 1` where
+`top` is the value it REQUESTED, never the clip's actual origin, so it reports converged with the
+viewport displaced by that delta. **Isolation (`18k-c6-trace4.log`):** a plain flipped document view in
+an `NSScrollView` keeps its clip origin across ±29/−59-pt frame changes, and a bare `setFrameSize` on
+the editor at mid-scroll moves nothing either — the displacement lives only inside TK2's viewport
+layout, when that pass changes the laid-out geometry (unsettled geometry: a whole-document re-font,
+or a jump into a region only estimated so far). On macOS 26 the same road was exact (F2's pins
+green, the tree unchanged — 13y's attribution-by-construction).
+
+**Verdict — REAL (small) on 27, and the pin's measurement is RIGHT.** The pin drives the product's
+own road (the real coordinator → `keepingReadingPosition` → the park → the settle hop →
+`JumpPrimitive`), and what it reads is what she would see: after a shrinking re-font the line she was
+reading sits one line + one paragraph gap below the viewport top. Not a blank page (row 53's
+dramatic half stays fixed — `herFixtureGestureLeavesThePageDrawn` is green) — a one-line slip of her
+place, which F2's promise ("the same line at the viewport top") rules out. The primitive is shared,
+so any landing whose loop ends on unsettled geometry inherits the slip (the pin's own first jump
+shows it: asked for b120, it landed b120's second line).
+
