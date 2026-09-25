@@ -1208,3 +1208,31 @@ real-store Variorum instance.
 `EditorTextView`/`BlockRangeIndex`. The DEBUG oracles are C4's (list them, don't touch). QUESTIONS:
 check the end marker for the next free number. **Your final message:** a short summary pointing at
 your record.
+
+## UNIT C3 RECORD — the mechanical state-write deferrals (implementer: `opus-implementer`, 2026-09-25)
+
+**NOT DONE (first line, per the brief):** PENDING — written at close. Known already: the hands-on GUI
+walk and its captures are HELD (this host has no Screen Recording / Accessibility — C1's finding);
+the in-app scripted / harness evidence stands in, and her walk steps are listed at close.
+
+### READING (done in-session before any code)
+
+CLAUDE.md + canon (auto-loaded); this file's kickoff corrections, THE LEDGER (row C3), ENVIRONMENT
+TRAPS, CAST & DISCIPLINE, the C1 and C2 records' closing sections + both ORCHESTRATOR ADJUDICATIONS,
+and the C3 brief; the health review §5.1 (A3/A4/A5 mine; A1 18l's; A2 C2's); `WindowRegistry.swift`
+whole (the sticky-key ruling: NO resign door — `keyWindowID` moves only on another window's
+become-key or the key window's unregister; `theStickyKeySurvivesAppDeactivation` pins it); C2's
+warning-set script (`DerivedData/18k-c2-warnset.sh`, 16 suites) and its closing-run log (50
+warnings across 61 suites, attributed by nearest started test — mostly pane-mounting tests).
+
+### LIVE STATUS
+
+- Reading — DONE (this commit).
+- Phase 0, THE MECHANISM — which write shapes SwiftUI actually flags (a scratch experiment, never
+  committed) — IN-PROGRESS.
+- Phase 1, THE ENUMERATION — every `.onGeometryChange` / `.onScrollGeometryChange` / `onAppear` /
+  representable / window-registration write in the Mac app, with its trigger — NOT-STARTED.
+- Phase 2, the BEFORE count on C2's 16-suite set + a second set (named when chosen) — NOT-STARTED.
+- Phase 3, the deferrals (the `BookIndexView` twin first) — NOT-STARTED.
+- Phase 4, the AFTER count, `CanvasDragTrackingTests` ×3 both sides, closing runs — NOT-STARTED.
+- Deaths / resumes: none.
