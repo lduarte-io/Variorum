@@ -3738,3 +3738,19 @@ Each is a working-tree edit only, the pins run, then the file is restored to `a8
   `RefontGapTopTests` red exactly as on the pre-fix tree (19 issues; 47510 / 47524 / 42034), the W-2 pin green.
 - **R-W2** — `jump`'s `maxScroll()` reads the ENTRY frame again (`docHeight − clip height`). Expected: the W-2
   pin red as on the pre-fix tree (4 issues; ~1,624 / ~2,384 pt), `RefontGapTopTests` green.
+
+**R-W4 RESULT: RED — 19 issues, byte-identical to the pre-fix tree** (47510 ×3 · 47524 ×6 · 42034 ×2 across the
+capture, re-font and typed-note cases; the straddle guard green), and the W-2 pin GREEN (`18k-c6b-R-W4.log`, 6 tests /
+2 suites). Restored → `git status` clean. **R-W2 RESULT: RED — 4 issues** (1,641.6 pt Terminal · 2,384.2 pt Study; the
+Terminal number is +17 pt on the pre-fix 1,624.6 because the W-4 fix now anchors the text line under the blank line,
+one blank line lower), the five gap pins GREEN (`18k-c6b-R-W2.log`). Restored → clean.
+
+**The closing set's first run found ONE pin that encoded the old gap choice** (`18k-c6b-closing1.log`: 576 tests / 71
+suites, 1 issue): `ScrollAnchorTests.theAnchorNamesTheBlockAtTheViewportTopNotTheOneBelow` (13c 1A's defect 2 — the
+container-inset error). Its ground truth was "the last entry whose FRAGMENT top is at or above the viewport top", and
+its scroll to 500 rests the edge in block 19's trailing spacing (block 19's only line ends at 497; the probe is 501) —
+so it answered block 19, whose text is entirely off screen, where the fixed capture names block 20. **Re-mechanized**,
+not the product: the ground truth is now "the first entry with text at or below the probe". The defect the pin exists
+for still bites at BOTH stops — **mutation M-inset** (named here, run after the commit that carries this line): drop
+`topVisibleOffset()`'s container conversion (`top + 1` for `top + 1 - origin.y`); expected red at 200 (block 8 for 7)
+and at 500 (block 21 for 20). Result: PENDING.

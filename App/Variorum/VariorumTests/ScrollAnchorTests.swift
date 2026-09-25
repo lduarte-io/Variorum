@@ -138,19 +138,33 @@ struct ScrollAnchorTests {
                 let layoutManager = try #require(textView.textLayoutManager)
                 let origin = textView.textContainerOrigin
 
-                /// Ground truth: the last entry whose text top (view space)
-                /// is at or above the viewport top.
+                /// Ground truth: the first entry that still has TEXT at or
+                /// below the anchor's probe (one point under the viewport
+                /// top) — the block she is reading.
+                ///
+                /// 18k C6b (W-4) re-mechanized this from "the last entry whose
+                /// FRAGMENT top is at or above the viewport top". A TK2 layout
+                /// fragment includes its paragraph's trailing spacing, so that
+                /// definition answered the block ABOVE whenever the edge sat
+                /// in the gap below it — a block with none of its text on
+                /// screen, and the very choice the held walks' W-4 traced (the
+                /// previous paragraph's last line restored to the top). The
+                /// defect this pin exists for is unchanged and still bites:
+                /// the uncorrected container point names the block BELOW at
+                /// BOTH stops (the scroll to 200 lands on a line, the one to
+                /// 500 in a gap) — proven by that mutation in the C6b record.
+                /// Every block here is one line with no blank paragraph, so
+                /// "has text below the probe" is the last line's bottom.
                 @MainActor func topEntry(_ top: CGFloat) -> Int {
-                    var tops: [CGFloat] = []
+                    var textBottoms: [CGFloat] = []
                     layoutManager.enumerateTextLayoutFragments(
                         from: layoutManager.documentRange.location, options: []
                     ) { fragment in
-                        tops.append(fragment.layoutFragmentFrame.minY + origin.y)
+                        let lastLine = fragment.textLineFragments.last?.typographicBounds.maxY ?? 0
+                        textBottoms.append(fragment.layoutFragmentFrame.minY + origin.y + lastLine)
                         return true
                     }
-                    var answer = 0
-                    for (i, y) in tops.enumerated() where y <= top + 1 { answer = i }
-                    return answer
+                    return textBottoms.firstIndex { $0 > top + 1 } ?? textBottoms.count - 1
                 }
                 @MainActor func entry(containing offset: Int) -> Int {
                     var start = 0
