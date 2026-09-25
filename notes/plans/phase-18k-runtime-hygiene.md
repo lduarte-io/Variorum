@@ -41,7 +41,7 @@ here touches distribution, signing or `/Applications` before this run's own clos
 | Row | Item | Source | Unit kind → acceptance evidence | Cold review seat | Status |
 |---|---|---|---|---|---|
 | **C0** | Ledger housekeeping (review §7): rows 56/57's DURABLE owner (her confirmation); row 27's stale owner → 13o; row 28's fork list gains the conductor band + the tutorial-seeder scaffolding; file the review's new rows with owners (T2 · StableSurface's asyncAfter · the warming assessment → 12; the EditorViewModel decomposition → 18m; accessibility → the Design & UI review row); the PurgeJanitor split → 18a | review §7; KICKOFF 1 C0 + D1's paragraph | records → the ledger's header rule holds (no blank owner) | — (orchestrator's records) | NOT-STARTED |
-| **C1** | The autosave-coordinator registry release — 7 Mac holders + the `ShellActions` flush site mint and never release | review §6.1 | runtime/lifecycle → red-on-old count pin (`openAutosaveCount` / `QuitFinalizeRegistry.count` across open→close) + the dev-store measurement: counts after opening many notes, before/after; the lock/⌘Q finalize walk | Opus (Fable if the diff reaches the editor seam) | NOT-STARTED |
+| **C1** | The autosave-coordinator registry release — 7 Mac holders + the `ShellActions` flush site mint and never release | review §6.1 | runtime/lifecycle → red-on-old count pin (`openAutosaveCount` / `QuitFinalizeRegistry.count` across open→close) + the dev-store measurement: counts after opening many notes, before/after; the lock/⌘Q finalize walk | Opus (Fable if the diff reaches the editor seam) | **DONE** — FIXED `a8b27b11` |
 | **C2** | The inline editor's height binding written inside `makeNSView`/`updateNSView` — MEASURE FIRST (ledger row "The Outline's SHADOW `InlineEditorSurface`", the surviving double realization) | review §5.1 A2 | trace → the instrumented chain on the long-note fixture; the pin is the double-realization count IF confirmed; else the deferral lands as hygiene and the row is NOT claimed | Fable if the seam is touched, else Opus | NOT-STARTED |
 | **C3** | The mechanical state-write deferrals (~14 geometry actions, the `BookIndexView` twin first, Canvas's observed geometry writes, window registration WITH the sticky-key ruling) | review §5.1 A3/A4/A5 | hygiene → per-site verdict table (the 13u4 S3 form) + a before/after `Modifying state during view update` count on a bounded run; behaviour byte-identical; walk of Canvas drag + the book Index | Opus | NOT-STARTED |
 | **C4** | The DEBUG-oracle ownership sweep (owner-keyed registration on the three reference shapes) + the `MarkdownStyling.palette` three-writer comment-plus-pin | review §5.2 | harness → the two-window cross-clear pins per oracle (red-on-old where reachable; structural where teardown order cannot be forced — S2's precedent) | Opus | NOT-STARTED |
@@ -178,9 +178,11 @@ COMMITTED · every death and resume noted in the record.
 
 ## LIVE STATUS (the orchestrator's; flipped at every state change)
 
-- C0 — NOT-STARTED.
+- C0 — DONE (`5fea5e81`).
 - The kickoff sitting — DONE (R-18k-1…5, above).
-- C1–C6 — NOT-STARTED.
+- C1 — DONE, ACCEPTED (`a8b27b11`; adjudication below). GUI walk HELD (TCC).
+- C2 — IN-PROGRESS (brief appended; implementer spawned).
+- C3–C6 — NOT-STARTED.
 - Deaths / resumes: none.
 
 ---
@@ -613,3 +615,138 @@ the crash report, and the instrumentation script that produced them (`c1_instrum
 tree, build Debug, launch the binary with `C1_WALK=1`).
 - Deaths / resumes: none.
 - **C1 — DONE (implementer), awaiting the orchestrator's spot-check; the hands-on GUI walk HELD.**
+
+### UNIT C1 — ORCHESTRATOR ADJUDICATION (2026-09-25 night; the unit CLOSES here)
+
+**Verified by spot-check, not trusted:** 13 commits `8ae18857`…`77635dd7`, all pushed, **zero trailers**
+(grep over every message), tree clean, zero app instances at hand-back (her real-store app is QUIT —
+her R-18k-3 promise kept; the closing refresh window is open). Diff scope matches the record exactly
+(8 app files + 2 test files; zero `Sources/`, zero `Sync/`). The `AppSession` change was read line by
+line: on the Mac an entry leaves ONLY through `dropAfterLeaving`, which requires a leaving savepoint
+that LANDED, zero holders, an unchanged acquisition count (a mid-flight re-open cancels the drop), and
+a clean coordinator — every arm errs toward keeping. The phone's release rule is byte-unchanged under
+`#else`. The over-release text-loss class is PINNED (mutation M2 turns all seven guards red; the
+two-surface pin shows the loss). **ACCEPTED — C1 FIXED** (`a8b27b11`; pins `af9041e7`/`732bfa23`,
+red-on-old by behavioural revert R1, 25 issues both times). The design choice (drop-through-leaving,
+not plain release) goes beyond the brief's letter and is the correct reading of its "verify the
+leaving savepoint" clause — the trace found three J11 roads a plain release would have silently cost;
+it is flagged FOR THE LADDER as the unit's highest-value review target.
+
+**Use evidence:** in-app scripted walk on the dev store — 20 notes × all seven modes: coordinators
+20 → 0, ⌘Q closures 20 → 0, holds 137 → 96-acquired-96-released, finalize walk 62 ms → 0.07 ms. The
+**GUI walk + captures are HELD**: this session's terminal host (Ghostty) holds NEITHER Screen
+Recording NOR Accessibility, so NO session tonight can drive or capture the app. **This binds every
+remaining unit:** use evidence tonight is in-app scripted/harness evidence, recorded as such; the GUI
+walks are BUNDLED for her morning (granting Ghostty those permissions is her call — never a session's).
+
+**Hand-back items dispositioned:**
+1. **The Open strip's tenth row traps (Debug)** — `EditorCommands.swift:780` builds
+   `Character("\(index + 1)")` for every open note; since pre-13u Act 10 (`a9772471`) the strip holds
+   up to 20, so "10" is two characters and the grapheme `_debugPrecondition` traps; Release most likely
+   builds a malformed shortcut instead. A real defect, pre-existing, recorded with owner **18o**
+   (correctness singles — a KnownIssues row filed this commit; pin before fix there).
+2. **The phone's same leak** (`MobileEditorViewModel.swift:187`) → KnownIssues, owner **the mobile app
+   project row** (18m's hoist touches the phone's conductor; the touch rule may take it earlier).
+3. **A note edited inside a book is never "left"** — its leaving savepoint comes only at ⌘Q, lock, or
+   the 2 h idle backstop. Behaviour UNCHANGED by C1; a product-shaped question → **her morning bundle**
+   (below), not decided.
+4. `Tools/WalkKit/README.md`'s "the terminal host has Accessibility" is false for Ghostty → morning
+   bundle (the fix is her TCC grant, or a README correction if she moves the walks elsewhere).
+5. A model SwiftUI re-shows after `teardown()` stays unobserved — pre-existing, noted for the ladder.
+6. A stale worktree at `/private/tmp/claude-501/u1-baseline-tree` — not this run's; left untouched.
+
+## HER MORNING BUNDLE (accumulating; the checkpoint report carries it)
+
+- **QUESTIONS #146** — the signed-out-first phone's sample book (decided PROVISIONALLY at her
+  instruction; 18o builds it).
+- **TCC for walks:** Ghostty has neither Screen Recording nor Accessibility — every GUI walk of this run
+  is HELD for her grant (or her walking it herself); the list of held walks grows below per unit.
+  Held so far: C1 (open/close many notes; ⌘Q feels instant).
+- **C1 item 3:** should a note edited inside a book (or as a Compare peer) get a leaving savepoint when
+  she leaves the BOOK, the way a note gets one when she leaves the note? Today: only ⌘Q/lock/idle.
+
+## UNIT C2 BRIEF — the inline editor's height binding (MEASURE FIRST; self-contained; read in this order)
+
+**You are the C2 implementer (`opus-implementer`), ONE unit, this session only.** Read, in order:
+1. `CLAUDE.md` (auto-loaded) — invariants, testing expectations, no commit trailers.
+2. THIS FILE: the kickoff corrections, THE LEDGER (row C2), **ENVIRONMENT TRAPS (binding, verbatim
+   for you)**, CAST & DISCIPLINE, the UNIT C1 RECORD's closing section (what changed before you — the
+   tree moved; do not re-derive it), and this brief.
+3. `notes/codebase-health-review-2026-09-21.md` §5.1 (A2 is your finding; A1/A3 are context — A1 is
+   18l's, A3 is C3's, NOT yours) — a REVIEW record: re-trace every claim before acting on it.
+4. `notes/KnownIssuesAndTechDebt.md`'s row beginning "The Outline's SHADOW `InlineEditorSurface`
+   row is RESOLVED in its ROUTER half" — the surviving double realization (262-block note, the
+   representable realizes twice ~40 ms apart; three causes already ELIMINATED by measurement: the
+   height publish, the `active` write, `StableSurface` bypassed). Read what 13u2 UNIT B measured —
+   its record is `notes/plans/phase-13u2-*.md`'s UNIT B RECORD / TRACE B-1 (grep for "B-1").
+5. The code: `App/Variorum/Variorum/Features/Editor/EditorView.swift` — `InlineEditorSurface`
+   (`makeNSView` installs a closure that WRITES the `@Binding height` synchronously; `install` calls
+   `remeasure()` inside `makeNSView`; `updateNSView` calls `remeasure()` → the binding write happens
+   INSIDE SwiftUI's view update; the host's `@State inlineHeight = 24` at `:52`, read at `:123–124`
+   in the same body). Contrast the SAME coordinator's storage-notification road, which already defers
+   (`DispatchQueue.main.async { self?.remeasure() }`). And `Core/Views/StableSurface.swift` (the 60 pt
+   placeholder ceiling, `loaded`), plus the book Outline host that mounts this surface.
+
+**The hypothesis (review §5.1 A2 — UNPROVEN):** a dropped/ignored mid-update binding write leaves the
+editor framed at 24 pt → under `StableSurface`'s 60 pt placeholder ceiling → `loaded` never flips →
+the near-band decides on a false frame → a SECOND realization. It would explain the surviving double
+realization AND why only long notes show it. Note 13u2 UNIT B eliminated the Outline row's publish —
+NOT this representable's binding.
+
+**Phase 1 — MEASURE FIRST (the hallucination guard; no product line changes in this phase).** Build
+the instrument: DEBUG-only counters/signposts (added, committed as "WIP: probe", and REMOVED before
+close) for makeNSView count per mount, each binding write (value, and whether SwiftUI applied it —
+read `inlineHeight` on the next body pass), `StableSurface`'s `loaded` flip, and the realization
+count. Run it on the row's long-note fixture (a ~262-block note in the book Outline, dev-store Debug
+build or a mounted-harness rig — the row's own pins show the harness shape; the Sherlock sample
+book's long stories are the dev store's fixture). Record the chain step by step with numbers.
+  - **If CONFIRMED:** the red-on-old pin is the double-realization count (or the `loaded` flip) on
+    that fixture; the fix follows (Phase 2); the row's surviving half is claimed RESOLVED with the
+    numbers.
+  - **If DISPROVED:** record exactly which link broke, with numbers. The deferral still lands as
+    warning-class hygiene (Phase 2), but the row is NOT claimed — its text is amended with your
+    measurement (what is now eliminated, a fourth cause) and the owner stays 12.
+
+**Phase 2 — the fix:** defer the binding write out of `makeNSView`/`updateNSView` exactly as the
+coordinator's storage road already does (the pattern is in the file) — a coalescing hop so a burst
+of updates reports once, with the `abs(Δ) > 0.5` equality gate preserved. **The overlay/sink delivery
+law binds (the constitution's application notes, below in this file):** the FIRST height must still
+be delivered — wiring is the delivery — so the deferral must not strand the initial report (a mount
+that reports nothing leaves 24 pt forever, which is exactly the bug class). Pin that: a freshly
+mounted long note reaches its measured height within N turns. Then measure the
+`Modifying state during view update` count on a bounded run touching the book Outline / spread /
+pool inline editors, before and after (log grep over one fixed suite set — name it, run it both
+sides) and record both numbers.
+
+**Seam note:** `InlineEditorSurface` wires `EditorViewModel.attach` and the storage delegate — the
+editor seam's neighbour. Change ONLY the height-report timing; if the fix wants anything in
+`EditorTextView`, `EditorViewModel`'s storage seam, `BlockRangeIndex` or `PaneSurface`, STOP and
+report (the ladder is Fable either way; the fence is about scope).
+
+**Use-shaped evidence:** this session's terminal host holds NO Screen Recording and NO Accessibility
+(C1's finding — do not try to drive or capture the GUI; a System Events call hangs on a consent
+prompt). So the evidence is an IN-APP scripted run on the dev-store Debug build (C1's pattern — see
+its record: temporary probes, never committed) or a mounted-harness rig: a long Sherlock story in the
+book Outline, the inline editor made live, typing, scrolled away and back — the realization count and
+the settled height read out. The GUI walk is HELD for the author's morning; write the steps she
+should walk into your record. **Closing runs (tests at the END):** the
+suites for the book Outline / reading flow / Index / spread / pool inline editors + your pins + the
+eleven Tutorial suites (names in ENVIRONMENT TRAPS), each read by its "Test run with N tests" line;
+no full Mac suite.
+
+**CHECKPOINT RULES (restated, binding from your first commit):** write `## UNIT C2 RECORD` with its
+`### LIVE STATUS` at the END of this file in your FIRST commit, and flip it in the same commit as each
+piece (`DONE (hash)` · `IN-PROGRESS — what remains` · `NOT-STARTED`); unverified claims marked
+**PENDING**. Commit per coherent piece and PUSH after every commit; stage pathspec-limited, never
+`git add -A`; NO commit trailers (no Co-Authored-By, no Claude-Session). Synchronous foreground waits
+only — the grep-poll loop, never `tail -f | grep -m1`, never a backgrounded run you end your turn on
+(ending your turn = your death). Never spawn subagents (one Sonnet lookup for EXTERNAL facts only).
+No behavioural revert starts until the record names it and the pre-revert state is COMMITTED; restore
+from that commit, verify by `git diff`. Every death/resume noted in the record. If the worktree moves
+under you, write nothing, report, stop. Never touch `/Applications`, never build Release, never quit
+or kill the author's real-store app.
+
+**Scope fence:** C2 only (C3's ~14 geometry actions are NOT yours — list them under "noticed, not
+touched"). Zero `Sources/`, zero `Sync/`. PROVISIONAL-and-continue for non-gating ambiguity
+(QUESTIONS — the next free number is **#147**; check the end marker); stop-and-report for anything
+product-flavoured. **Your final message:** a short summary pointing at your record.
