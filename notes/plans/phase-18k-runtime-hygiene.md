@@ -2991,7 +2991,8 @@ own DerivedData (`App/Variorum/DerivedData/18k-walks/`). Captures: `notes/plans/
 - The Debug build — DONE (`** BUILD SUCCEEDED **`, `DerivedData/18k-walks-build.log`).
 - C1 — DONE, **PASS** (table below).
 - C2 — DONE in Terminal, **PASS** (table below); the Study repeat rides the C6 voice flip.
-- C3 — IN-PROGRESS. C6 · C5 — NOT-STARTED.
+- C3 — DONE, **PASS with one FINDING (W-1, pre-existing, not 18k's diff) and one step-text correction** (table below).
+- C6 — IN-PROGRESS. C5 — NOT-STARTED.
 - Deaths / resumes: none.
 
 **The dev store as found:** custody posture **standard** ("Your Apple account holds a key") — the app opened
@@ -3025,3 +3026,34 @@ Window 1440×1000 at (0,33). Log: `walks/app-run2.log` (the relaunched instance)
 | 8 | Book (spread) view; a note on a page goes live and takes typing | `c2-09a-spread` · `c2-09d-about-click2` · `c2-09e/f` (crops paired in `tmp/pair.png`) · `c2-09g-about-cleaned` | Typing 40 characters at the end of *About this book* wrapped one new line and the page (and its ring) grew with it; deleting them shrank it back. (A first click placed just past the last glyph of the read-tier page did nothing; a click on a word made it live — recorded, not a finding: the click missed the text.) | PASS |
 
 All typed text was deleted; the story and *About this book* read as before.
+
+### C3 — the state-write deferrals (comments only; the walk confirms the measurement) — Terminal voice
+
+Warnings counted from `walks/app-run2.log` (`OS_ACTIVITY_DT_MODE=YES`), before and after each act.
+
+| # | Step | Captures | What I saw | Verdict |
+|---|---|---|---|---|
+| 1 | The console | `walks/app-run2.log` | 0 lines at C3's start (C2's whole run included) | — |
+| 2 | Sherlock ▸ **Index**: window 1440 → 1000 → 1440, then the pane scrolled top to bottom (8 × 60 lines, then 24 × 150 to the book's end) | `c3-01-index` · `c3-02a/b` · `c3-03-index-scroll1…8` (tiled `tmp/grid.png`) · `c3-04-index-bottom` | Every frame drew text, no blank pane, no rows jumping; the pane ended on *Copper Beeches*' last paragraph. **0** warnings | PASS |
+| 3 | The same in **Outline** | `c3-05-outline` · `c3-06a/b` · `c3-07a/b` | Top and bottom frames drawn whole. **0** warnings | PASS |
+| 4 | A note (*three ways of working*, 5 blocks) in **Canvas**: drag cards, scroll the board, resize | `c3-08a…n` · `c3-09*` · `c3-10*` · `c3-11a/b/c` | **Mount: exactly 5 warnings in one 4-ms burst — one per card**; a 1-card note (*Walk test*) mounts with exactly **1**; every remount and a second window on the same note repeat it (5), and the main window's one-card canvas prints 1 when another window closes over it (a Write-mode CONTROL of the same open/close prints 0). Canvas cards ARE `PaneSurface` panes (`CanvasView.swift:845`) — C3's own adjudication attributes every warning to `PaneSurface` (18l's family), so **the step's "expect none" is mis-stated for Canvas** (a record correction, not a product defect). **Drag, board scroll and resize add 0.** Every drag that took landed EXACTLY where released, measured relative to another placed card (card 1 by (+150, +100) → the gap moved (+149, +100); card 2 → (−179, 40) against (−179, 39) expected); the board then re-centres the content, so the screen position shifts — by design as far as this walk can tell. **But see W-1.** | PASS on the warnings (with the correction) · **FINDING W-1** |
+| 5 | Note in a new window (the Open strip's context menu ▸ Open in New Window), close it; File ▸ New Window, close it; switch to Finder and back | `c3-13a-new-note-window` · `c3-13b-file-new-window` · `c3-14a/b` | Both windows opened and closed cleanly (the note window opened in its Canvas mode — its 5 cards, 5 warnings; the shelf window 0). With the main window in Write, open + close printed **0**; after Finder and back the window is **pixel-identical** — *Walk test* still live, ring and caret in place (the sticky key) | PASS |
+| 6 | The control: a note in **Takes** | `c3-15-takes-control` | **+2** — *Walk test*'s one block carries two takes, so two panes: the `PaneSurface` family prints, as expected | PASS (control) |
+
+**Every warning of the run, by timestamp** (26 in all): 13:17:20 ×5 (Canvas mount, 5 cards) · 13:22:56 ×1 (1-card Canvas) · 13:23:52 ×5 (remount) · 13:27:02 ×5 + 13:27:03 ×1 (the bank hidden → the 5 cards re-laid; the 1-card canvas) · 13:27:45 ×5 (the note window's Canvas) · 13:28:03 ×1 and 13:28:27 ×1 (the main 1-card canvas as each other window closed) · 13:29:13 ×2 (Takes). **All of them are pane mounts or re-renders; none is a geometry action, a scroll, a resize, a drag or a window registration** — C3's measurement, confirmed by use.
+
+**FINDING W-1 (Canvas — the ⠿ grab glyph of ONE card refused every drag; pre-existing, NOT 18k's diff):** on
+*three ways of working*, card 5 (*FORK THE PIECE*) — after being dragged out of the bank once and moved once on the
+board — refused **eight** consecutive drags started ON its ⠿ glyph (`c3-08e` · `c3-08f` · `c3-08g` · `c3-08i` ·
+`c3-08k` · `c3-08m` · `c3-08q` · `c3-10b` — each diffed pixel-identical to the frame before, bar the caret blink),
+including across a note switch and a fresh Canvas mount, live or not. In the same minutes the glyphs of cards 1
+and 2 and the *Walk test* card dragged on the first try, live or not, and card 5 itself moved AT ONCE when grabbed
+on the same header strip ~75 pt right of the glyph (`c3-10c`). The glyph and the strip are ONE `.gesture` on ONE
+`contentShape(Rectangle())` header (`CanvasView.swift:792–830`), so the code as read does not explain it; the drop
+points were not on the bank strip. 18k's Canvas diff is C4's DEBUG-oracle ownership and C5's one-line focus
+report — the drag code is untouched. The canvas drag road is already on the flake list (`CanvasDragTrackingTests`).
+Not reproduced on a second card; recorded for the orchestrator, not traced further, not fixed.
+
+**Canvas residue:** the three cards placed on *three ways of working* were returned to the bank (`c3-12d/e/f`,
+`c3-12g` — its bank layout as found). The *Walk test* card stays placed: with an empty bank the toolbar shows no
+bank chip to drop onto (*Walk test* is itself walk residue).
