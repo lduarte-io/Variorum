@@ -740,6 +740,14 @@ code does not have, which is the class that costs the next session the most time
 
 ### Items
 
+### 18k's C5 — the dispositions (2026-09-25; the record is `notes/plans/phase-18k-runtime-hygiene.md`'s UNIT C5 RECORD + its ORCHESTRATOR ADJUDICATION)
+
+- **KnownIssues row 59 (Canvas focused-block fact) — FIXED** (`bc5e8cf9`; pin `CanvasFocusedBlockFactTests`, `4eb91dad` — red-on-old 5 issues, behavioural revert identical).
+- **P26 (the phone's liveness grant) — ALREADY FIXED by `6bc4f187` (2026-08-30); the missing pin ADDED** (`ebd690e6`: `MobileLivenessTests.aGrantSuspendedInsideItsFlushNeverResumesIntoThePen` — green on HEAD; deleting only the post-suspension guards turns it red, 2 issues). No product code changed.
+- **P27 (⌘⇧M read the frozen `slots`) — FIXED** (`dee61938`; pin `FannedDefaultsTests.aFanArrivingWhileSheIsTypingIsCarriedByTheMerge`, `98880463` — red-on-old 2 issues, revert identical). The ceremony branch's sibling residue → KnownIssues, owner 18o.
+- **P33 (⌥⌘Z had no in-flight latch) — FIXED, and ⇧⌥⌘Z shared the shape** (`65aa05fa`; pins in `DestructiveUndoWarningTests`, `8a172f7a` — red-on-old 9 issues, revert identical; the undo-only mutation reds the redo pin alone). One session latch for both doors; the refusal is the phone's sentence, now `StructuralUndoCopy.anotherIsLanding` (the phone forwards byte-identically).
+- **P38 (`StoreBackup.run` had no single-flight latch) — FIXED** (`3f480486`; `BackupSingleFlightTests`, `824dfebf` — red-on-old 3, revert 3, each mutation its own pin). The double run reproduced 80/80 on old; the false "failed" consequence P38 describes was NOT reproducible (0/80) — recorded plainly, the latch closes the race regardless.
+
 #### P23. SegmentationRules splits on "\n" only, so a CRLF file imports as ONE block instead of one block per paragraph
 
 `Sources/VariorumCore/Domain/SegmentationRules.swift:67` · **MAJOR** · CONFIRMED · correctness · finder confidence 0.95

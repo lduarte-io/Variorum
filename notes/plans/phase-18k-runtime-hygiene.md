@@ -89,6 +89,14 @@ measures the warning family C3 then sweeps.
   TOMBSTONE AT LAUNCH** (her pick of the recommended option) — the launch road declines on a
   tombstoned seeded book exactly as the tutorial door's silent ensure already does. Built at 18o
   (KnownIssues row 66), pin-before-fix.
+- **R-18k-6 — a note edited INSIDE A BOOK gets its leaving savepoint when she moves to another
+  note** (asked from C1's noticed item 3, late the same night; her words: *"a note edited inside a
+  book should get a savepoint when you open it"*, clarified at once to the option **"When I move to
+  another note"**). Built at **18o** (KnownIssues row filed `4fd19cb6`); Compare peers follow the
+  same rule, PROVISIONAL.
+- **R-18k-7 — the TCC grants:** she granted Ghostty Accessibility + Screen Recording mid-run; both
+  read true without a restart (`AX: true SCREEN: true`), so the held walks run INSIDE this run after
+  C5, before the ladder (`notes/handoffs/18k-held-walks-handoff.md` is the walk session's brief).
 - **Her standing posture for the night:** *"just bring me the issues now, your session will be
   running overnight"* — every remaining ambiguity is PROVISIONAL-and-continue; anything needing her
   hands (a Touch-ID-gated custody walk, a product call) is HELD and bundled for the morning.
@@ -185,7 +193,9 @@ COMMITTED · every death and resume noted in the record.
 - C3 — DONE, ACCEPTED (premise DISMISSED AS HOLLOW by measurement — all warnings are `PaneSurface`'s, 18l's; comment corrections only).
 - C4 — DONE, ACCEPTED (12 oracle types owner-keyed; 13 two-window pins red-on-old; palette guard).
 - C6 — DONE, ACCEPTED (row 65 CLOSED; the re-font drift a REAL 27 regression, fixed in `JumpPrimitive`).
-- C5 — IN-PROGRESS (brief appended; implementer spawned).
+- C5 — DONE, ACCEPTED (four FIXED, P26 pinned-already-fixed; dispositions in 17e).
+- THE WALKS — IN-PROGRESS (walk session spawned; `notes/handoffs/18k-held-walks-handoff.md`).
+- NEXT: the ladder (Fable, one combined diff) → finals → closeout → refresh → 18o.
 - Deaths / resumes: none.
 
 ---
@@ -2945,3 +2955,18 @@ None (the GUI walk is HELD — see the first line). The evidence is the harness 
   `18k-c5-ios-build` · `18k-c5-phone-closing`.
 - Deaths / resumes: none.
 - **C5 — DONE (implementer), awaiting the orchestrator's spot-check; the hands-on GUI walk HELD.**
+
+### UNIT C5 — ORCHESTRATOR ADJUDICATION (2026-09-25; the unit CLOSES here)
+
+**Verified by spot-check:** C5's commits through `36984601`, pushed, zero trailers (checked over every
+message since `5d831922`), tree clean, no scratch worktree, zero app instances. Scope: 14 files — zero
+`Sources/`, zero `Sync/`; `EditorSurfaceController` (P27, the seam's pair) changed only in the unfanned
+branch's authorization read. **ACCEPTED — C5 DONE:** row 59, P27, P33 (+ the redo door), P38 FIXED
+with red-on-old pins (revert-identical); P26 found already fixed by `6bc4f187` and given its missing
+pin. The closing Mac set's 2 issues are `ModeSwitchCarryTests`' top-of-Write arm — the flake list's
+member — ADJUDICATED by the paired interleaved protocol against `5d831922` (both trees green 2/2
+interleaved, 10/10 isolated). Dispositions copied into 17e (this commit); KnownIssues row 59 CLOSED;
+the ceremony-branch residue → 18o; the phone's popped-screen residue → the mobile app row. **FOR THE
+FABLE LADDER:** P27's store read (a short await before `runStructural`'s in-flight flag — the same gap
+the carry-all/seam roads already carry) and P33's shared latch. **Walks:** run next by the walk
+session (R-18k-7).
