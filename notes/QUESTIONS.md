@@ -1875,4 +1875,26 @@ timestamp 1790290761 both sides of the refresh), so the truncate guard stands an
 fallback stays closed. The window record: `notes/plans/13y-deploy-checklist.md` §10.
 **CLOSED.**
 
-*(Next free number: **#145**.)*
+#145 — **THE SIGNUP AUTO-ENTITLEMENT ACT'S TWO PRODUCT RESIDUES (2026-09-24 — the act:
+her word at the 13y window's tail, `maintenance/beta-signup-auto-entitle.sql`, recorded
+on 13t's row; both residues surfaced by the act's same-day Opus cold review, F-3/F-6,
+dispositions in the 13y checklist §10's tail-act record):** **(a) DOES THE CAPTCHA KNOB
+ARM BEFORE THE FRIENDS BETA?** The 14c runbook recorded CAPTCHA (hCaptcha/Turnstile on
+the auth endpoints) as "the escalation if signup abuse ever appears." With signup now
+auto-entitling, the beta's perimeter is the public signup door rather than a list you
+grant by hand — the standing fences are the 13y abuse guard (500k pool · 50k/day ·
+2k/call), the auth rate limits, required email confirmation, and your per-account
+kill-switch. Practical exposure before 13r's public build is low (no distributed app
+exists). Options: (i) leave CAPTCHA unarmed until abuse appears (the runbook's original
+stance — the recorded lean, since the fences are layered and the beta is small); (ii)
+arm it at the beta's start (one Supabase dashboard toggle + the app's auth calls must
+carry the token — a small client change, so it wants a slot if chosen). **(b) WHAT DOES
+A FRAGMENTS-ONLY SUITE ACCOUNT HOLD, AND WHAT STARTS THE VARIORUM TRIAL CLOCK?** —
+for 13t's kickoff, not now: `auth.users` is the SUITE's table, so a Fragments-only
+signup now mints a Variorum `hosted_sync` row (harmless under open-at-v1), and 13t's
+recorded trial key (`auth.users.created_at`) would start the Variorum clock at a
+Fragments signup — and reset on delete-and-re-signup. The trial-mechanics decision is
+13t's (with the purchase channel); this entry just makes sure the suite-scope fact is
+on its kickoff table.
+
+*(Next free number: **#146**.)*

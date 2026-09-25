@@ -236,7 +236,12 @@ expected_vault_facts (fact, expected) as (
     ('privilege:variorum_definer:UPDATE', true),
     ('privilege:variorum_definer:SELECT', true),
     ('privilege:anon:UPDATE', false),
-    ('trigger:key_vault_require_proof_hash', true)
+    ('trigger:key_vault_require_proof_hash', true),
+    -- Signup auto-entitlement (maintenance, 2026-09-24; the act's cold
+    -- review F-4): the auth.users trigger is LOAD-BEARING for the beta —
+    -- lost, every new signup lands unentitled while the function's INFO
+    -- row still reads clean. A fact row makes its absence a MISMATCH.
+    ('trigger:auth.users:variorum_signup_auto_entitle', true)
 ),
 observed_vault_facts as (
   select 'privilege:authenticated:UPDATE' as fact,
@@ -267,6 +272,14 @@ observed_vault_facts as (
            join pg_namespace n on n.oid = c.relnamespace
            where n.nspname = 'public' and c.relname = 'key_vault'
              and t.tgname = 'key_vault_require_proof_hash' and not t.tgisinternal)
+  union all
+  select 'trigger:auth.users:variorum_signup_auto_entitle',
+         exists (
+           select 1 from pg_trigger t
+           join pg_class c on c.oid = t.tgrelid
+           join pg_namespace n on n.oid = c.relnamespace
+           where n.nspname = 'auth' and c.relname = 'users'
+             and t.tgname = 'variorum_signup_auto_entitle' and not t.tgisinternal)
 ),
 function_rows as (
   select
@@ -333,7 +346,11 @@ vault_policy_rows as (
 vault_fact_rows as (
   select
     'vault-fact'                       as kind,
-    'key_vault.' || e.fact             as object,
+    -- The auth-schema signup-trigger fact carries its own table in the
+    -- fact name (2026-09-24); only the key_vault-scoped facts take the
+    -- historical 'key_vault.' prefix.
+    case when e.fact like 'trigger:auth.users:%' then e.fact
+         else 'key_vault.' || e.fact end as object,
     ''                                 as acl,
     coalesce(o.observed::text, 'absent') as observed,
     e.expected::text                   as expected,

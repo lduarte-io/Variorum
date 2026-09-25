@@ -266,6 +266,53 @@ signup end, landed early for the friends beta); pinned, sweep-registered (60 OK 
 live-verified INCLUDING a behavioral probe signup (trigger fired, probe account deleted).
 NO marker; the 13y window's own record above is untouched by it.
 
+**THE TAIL ACT'S OPUS COLD REVIEW (same day, at her word — R-cor-14's spirit honored
+after her governance question caught the gap; reviewer: a fresh Opus session, zero
+implementation context, REVIEW_PROMPT.md verbatim over `76bd876e..dfea7098`): 1 MAJOR ·
+5 MINOR · 2 NIT + a scope note — every finding dispositioned here, fixes landed and
+REDEPLOYED (create-or-replace; the re-run wrote zero entitlement rows, proving the fix
+live), suite 77/77, red-on-old at the exact F-1/F-2 arms:**
+- **F-1 MAJOR (backfill re-grants revoked accounts on a re-run) — AGREE, FIXED:** traced
+  — `entitlement_set(false)` DELETEs the row and the blanket every-user backfill cannot
+  distinguish a gap from a revocation; the header's "safe to re-run" and the pin's
+  "kill-switch safe" were both false of the artifact-as-a-whole. The spent backfill
+  (ran once, verified no-op) is REMOVED; a future gap repair is a deliberate act scoped
+  to the gap's `created_at` window, stated in the header; the pin's no-blanket-insert
+  arm is the red-on-old.
+- **F-2 MINOR (suite-wide signup outage class: a trigger error aborts GoTrue's insert)
+  — AGREE, FIXED (the reviewer's optional arm taken as the spec-defensible failure
+  mode):** the containment arm — `exception when others` → warning + `return new` — a
+  bookkeeping failure degrades to an unentitled signup (typed, repairable by
+  `entitlement_set`), never a signup outage for Variorum AND Fragments; the coupling is
+  stated in the header and on 13t's row.
+- **F-3 MINOR (the 14c runbook's and 14d's recorded abuse posture now false) — AGREE,
+  FIXED (records):** dated annotations on both naming the 13y guard as the successor
+  fence; the CAPTCHA-arming question is HERS — QUESTIONS #145(a).
+- **F-4 MINOR (the sweep watched the function, not the trigger) — AGREE, FIXED:** the
+  asserted fact row `trigger:auth.users:variorum_signup_auto_entitle` (a lost trigger is
+  now a MISMATCH, never silence); sweep 60→61 OK, pinned.
+- **F-5 MINOR (count-comparison verification is the wrong shape) — AGREE, FIXED:** the
+  tail's coverage read is now the two anti-joins (unentitled-users · orphaned-grants);
+  the probe's row fate recorded (entitlement row deleted BEFORE its auth row — no
+  orphan).
+- **F-6 MINOR (a Fragments-only suite signup mints a Variorum entitlement; trial-clock
+  semantics unowned) — AGREE, RECORDED:** product silence for 13t's kickoff —
+  QUESTIONS #145(b); the header's "ruled trial" softened to the recorded LEAN.
+- **NIT-1 (anonymous sign-ins would earn grants if the config ever flips) — AGREE,
+  FIXED:** the `is_anonymous` guard, pinned.
+- **NIT-2 (stale pending-proof comment; the `beta-` filename) — AGREE, HALF-FIXED:**
+  the tail now records the landed proof; the FILENAME STAYS with the reason in the
+  header (three records cite the path; a rename buys nothing functional) — the
+  cheaper honest road, disposition recorded here.
+- **Scope note (is a new server default "a default's meaning" under the Fable rider?)
+  — MOOT with the reason recorded:** the act was built, adjudicated and fixed by Fable
+  end-to-end; the rider's purpose (Fable judgment on meaning-bearing sync defaults) was
+  satisfied by construction.
+- **The reviewer's clean bill** (search_path pinned against the GoTrue-search_path
+  class; no caller-controlled input; the trigger never re-grants; deliberate grants
+  never overwritten; sweep arithmetic; no marker owed) stands as the act's second
+  witness.
+
 **THE WINDOW CLOSED 2026-09-24.** Marker 9 live; both devices current and syncing;
 #144 ratified in full at the summary (her question round on (a) answered first — the
 QUESTIONS entry carries the ratification); the pre-13x §10 caveat RETIRED-BY-12; the

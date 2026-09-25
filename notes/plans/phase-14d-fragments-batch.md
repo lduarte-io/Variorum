@@ -201,6 +201,13 @@ contract file's state, the parity line, the handoff note).
   gate (a fresh account can write nothing to the mirror until a plan
   activates; the auth tables + one vault row are the designed open
   surface; the runbook §5 rate limits are the abuse posture).
+  *(⚠️ The entitlement-gate half of this safety story is SUPERSEDED
+  2026-09-24: signup auto-entitles — `maintenance/beta-signup-auto-
+  entitle.sql`, her open-at-v1 posture's signup end. The successor
+  fence is 13y's minimal abuse guard; the runbook's abuse-posture
+  section carries the full dated supersession, and the CAPTCHA-arm
+  question is QUESTIONS #145(a). Caught stale by the act's Opus cold
+  review, F-3.)*
 - **The site handler SHIPPED (the stargazing.tech agent's report,
   relayed by her):** `https://stargazing.tech/auth/confirm` — one URL,
   all types (signup / email_change / recovery, invite/magiclink

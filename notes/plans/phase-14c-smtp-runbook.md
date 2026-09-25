@@ -156,6 +156,19 @@ open door's server-side write surface is the auth tables plus one
 escalation if signup abuse ever appears — recorded as the future knob,
 not configured now.
 
+> **⚠️ SUPERSEDED 2026-09-24 (signup auto-entitlement — her word at the
+> 13y window's tail; the record rides 13t's row; caught stale by the
+> act's Opus cold review, F-3):** a fresh signup is now ENTITLED ON
+> ARRIVAL (`maintenance/beta-signup-auto-entitle.sql` — her ruled
+> open-at-v1 posture's signup end, landed early for the friends beta),
+> so the paragraph above's "can WRITE nothing" no longer holds. **The
+> successor fence is 13y's minimal abuse guard** (500k-row lifetime
+> pool · 50k/rolling-24h · 2,000/call, live at marker 9) plus the §5
+> rate limits, required email confirmation, and the per-account
+> kill-switch (`entitlement_set(...,false)`). The CAPTCHA knob above is
+> unchanged and unconfigured — whether it arms BEFORE the beta is hers:
+> QUESTIONS #145(a).
+
 ## 6. Auth email templates — DRAFT COPY FOR HER RATIFY
 ## *(SUPERSEDED 2026-08-16 at the 14d Step 0 act: she ratified a
 ## humanized revision — her own confirm-signup rewrite + plainer

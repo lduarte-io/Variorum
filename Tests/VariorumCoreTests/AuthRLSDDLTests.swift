@@ -880,16 +880,40 @@ struct AuthRLSDDLTests {
                 "every new function carries its footgun revoke pair")
         #expect(sql.contains("drop trigger if exists variorum_signup_auto_entitle on auth.users;"))
         #expect(sql.contains("after insert on auth.users"),
-                "the grant fires at signup and ONLY at signup — a revoked account is never re-granted")
+                "the grant fires at signup and ONLY at signup — the trigger never re-grants a revoked account")
         #expect(sql.contains("on conflict (user_id, feature) do nothing"),
-                "a deliberate entitlement_set state wins over the default; re-runs are no-ops")
-        #expect(sql.contains("'signup-auto-backfill'"),
-                "pre-trigger signups are backfilled")
-        // The sweep's expected set must know the new trigger function, or
-        // its full-enumeration arm reports it UNEXPECTED on the next run.
+                "a deliberate entitlement_set state wins over the default")
+        // THE KILL-SWITCH RE-RUN SAFETY (the act's cold review, F-1 — the
+        // MAJOR): entitlement_set(false) DELETEs the row, so any blanket
+        // every-user insert cannot distinguish a pre-trigger gap from a
+        // deliberate revocation — a re-run of the original backfill would
+        // have silently re-granted every revoked account. The artifact
+        // must therefore write NO entitlement rows outside the trigger:
+        // a gap repair is a deliberate act scoped to the gap's
+        // created_at window, never a file this header invites re-running.
+        #expect(!sql.contains("signup-auto-backfill")
+                && !sql.contains("from auth.users u"),
+                "no blanket entitlement insert may live in a re-runnable artifact (F-1)")
+        // THE CONTAINMENT ARM (F-2): a bookkeeping failure degrades to an
+        // unentitled signup (typed, repairable), never a suite-wide
+        // signup outage — an AFTER INSERT error would abort GoTrue's own
+        // insert for Variorum AND Fragments signups alike.
+        #expect(sql.contains("exception when others then"),
+                "the entitlement insert can never abort the suite's signup door")
+        #expect(sql.contains("raise warning"),
+                "a contained failure is logged, not swallowed silently")
+        // The anonymous guard (NIT-1): config-dependent signups never
+        // earn an open-ended grant.
+        #expect(sql.contains("coalesce(new.is_anonymous, false)"))
+        // The sweep must know BOTH halves (F-4): the function as an INFO
+        // registry row, and the trigger as an ASSERTED fact row — an INFO
+        // row can never fail, and a lost trigger silently unentitles
+        // every new signup while sync refuses typed.
         let sweep = try Self.sqlFile("maintenance/14c-post-deploy-grant-sweep.sql")
         #expect(sweep.contains("('signup_auto_entitle()'"),
                 "the sweep's registry carries the signup trigger function as an INFO row")
+        #expect(sweep.contains("('trigger:auth.users:variorum_signup_auto_entitle', true)"),
+                "the trigger itself is an asserted sweep fact — its loss is a MISMATCH, never silence (F-4)")
     }
 
     /// THE POST-DEPLOY GRANT SWEEP (I-3's other half; live-probe
