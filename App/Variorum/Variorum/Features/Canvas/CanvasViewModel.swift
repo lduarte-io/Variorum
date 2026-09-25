@@ -685,6 +685,19 @@ final class CanvasViewModel {
     /// order mode clicks are sequence clicks, never focus.
     func focus(blockID: String, variantID: String) {
         guard !orderMode else { return }
+        // 18k C5 (KnownIssues row 59): the card she clicked is the note's
+        // current block — the fact every writing surface reports through the
+        // router, and the one the ⌘K "Block History" row falls through to here
+        // (this board's handler takes only ⌘S and the switcher). Reported
+        // BEFORE the ring's switch, as the Takes board reports: a click on the
+        // card that already holds the ring changes nothing in the authority,
+        // but the fact may have moved meanwhile. No caret offset (nil is
+        // UNKNOWN, U-20's rule — the memory keeps a known offset for the same
+        // block); a canvas caret reporter would be a design act, as Blocks'
+        // row records. A scraps-area canvas is not the router's note, and the
+        // router ignores it.
+        session.commandRouter.noteFocusedBlock(
+            blockID, variantID: variantID, postID: containerID)
         switch authority.focus(paneKey(blockID: blockID, variantID: variantID)) {
         case .unchanged:
             return
