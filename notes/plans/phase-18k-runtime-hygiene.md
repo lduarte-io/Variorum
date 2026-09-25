@@ -2155,7 +2155,7 @@ free number. **Your final message:** a short summary pointing at your record.
 | # | Piece | Status |
 |---|---|---|
 | 1 | The reading, in this session's own context, in the brief's order | **DONE** — CLAUDE.md + canon, TEXTKIT2 §5, this file's corrections/ledger/traps/cast + C1–C4 closings and adjudications, KnownIssues row 65 + the re-font RESOLVED row, 13y's kickoff adjudication (lines 381–413), 13u4's UNIT F2 RECORD whole |
-| 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | **TRACED** — REAL on 27 (the mechanism below); the fix's site + red-on-old PENDING |
+| 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | **TRACED** — REAL on 27 (the mechanism below). **Pin committed RED on the pre-fix tree** (`JumpViewportLayoutTests`, 3 issues + the Refont shrink pin's 1 — `18k-c6-jumppin-prefix.log`). The fix PENDING |
 | 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | PENDING |
 | 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | PENDING |
 | 5 | `LibraryPanelHostTests`' "inspector" pin — history, narrow, mutation proof | PENDING |
@@ -2210,4 +2210,27 @@ dramatic half stays fixed — `herFixtureGestureLeavesThePageDrawn` is green) �
 place, which F2's promise ("the same line at the viewport top") rules out. The primitive is shared,
 so any landing whose loop ends on unsettled geometry inherits the slip (the pin's own first jump
 shows it: asked for b120, it landed b120's second line).
+
+**THE FIX'S SITE — decided on measurement, before a fix line (the candidate was evaluated in scratch
+and reverted; its instrumented diff is kept in session scratch).** Two sites were weighed:
+(a) the primitive — `JumpPrimitive.jump`'s `scroll(to:)` re-asserts the requested origin once when
+TK2's viewport layout displaced it (a pure clamp at a shrunken maximum excluded); or (b) the one
+consumer — `consumePendingAnchorRestore` re-jumps when the landing reads off. **(a) is chosen**: the
+defect is the primitive's (its loop assumes the scroll it requests is the scroll it gets), all seven
+`JumpPrimitive.jump` call sites inherit it on 27, and (b) would leave six of them one line off on
+unsettled geometry. The candidate's measured blast radius (`18k-c6-candA-family.log`, the 35-suite
+jump/landing family + the eleven Tutorial suites): **299 tests / 35 suites green**; the re-assert fired
+**9 times, all on unsettled geometry** — 8 inside `RefontViewportTests`, 1 in
+`EditorWindowSmokeTests.tenThousandWordPostStaysSnappyAndAnchored` (a 3,441-pt displacement on a
+non-final iteration, which the old loop happened to re-steer out of — why that pin never went red) —
+and **one re-assert sufficed 9 of 9** (`18k-c6-candA-once.log`: the second `layoutViewport()` never
+displaced). On settled geometry — every other landing in the family — the clip is where it was asked
+to be, the branch never runs, and the road is byte-identical.
+
+**THE RED-ON-OLD PIN, measured on the pre-fix tree** (`App/Variorum/VariorumTests/JumpViewportLayoutTests.swift`,
+`aJumpIntoEstimatedGeometryLandsItsLineAtTheViewportTop` — the primitive's own promise, on the Refont
+rig's fixture): **3 issues** — the line **29.0 pt** from the viewport top; `topVisibleOffset() → 42128`
+vs `target → 42056`, twice (right after the jump, and after four display passes). Beside it
+`RefontViewportTests.aShrinkingRefontKeepsTheLineAtTheViewportTop` red as on 13y's kickoff
+(`42034` vs `42128`). `18k-c6-jumppin-prefix.log`: 7 tests / 2 suites, 4 issues.
 
