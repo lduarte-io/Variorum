@@ -223,9 +223,28 @@ enum JumpPrimitive {
         else { return }
 
         func scroll(to y: Double) {
-            clip.scroll(to: NSPoint(x: 0, y: min(max(0, y), maxScroll)))
+            let wanted = min(max(0, y), maxScroll)
+            clip.scroll(to: NSPoint(x: 0, y: wanted))
             scrollView.reflectScrolledClipView(clip)
             layoutManager.textViewportLayoutController.layoutViewport()
+            // 18k C6 (macOS 27 — KnownIssues row 65, item 1): the viewport
+            // layout above can MOVE THE CLIP by about the height change its
+            // own pass causes (measured +29 pt with the frame +29, −23.23
+            // with the frame −23.5), while the target line stays put. The
+            // loop below judges convergence against the top it ASKED for, so
+            // it reported "converged" with the line a line-plus-gap off the
+            // top — the re-font restore's one-line slip. Put the clip back
+            // where it was asked to be, once: the geometry that pass settled
+            // no longer changes, so the second layout leaves it (9 of 9
+            // measured). A clamp at a maximum the pass SHRANK is not a
+            // displacement and is left alone. On settled geometry the clip is
+            // already where it was asked to be and none of this runs.
+            let reachable = min(wanted, Double(max(0, textView.frame.height - clip.bounds.height)))
+            if abs(Double(clip.bounds.origin.y) - reachable) >= 0.5 {
+                clip.scroll(to: NSPoint(x: 0, y: wanted))
+                scrollView.reflectScrolledClipView(clip)
+                layoutManager.textViewportLayoutController.layoutViewport()
+            }
         }
 
         // 1. Proportional estimate → 2. single-fragment ensureLayout →

@@ -2155,7 +2155,7 @@ free number. **Your final message:** a short summary pointing at your record.
 | # | Piece | Status |
 |---|---|---|
 | 1 | The reading, in this session's own context, in the brief's order | **DONE** — CLAUDE.md + canon, TEXTKIT2 §5, this file's corrections/ledger/traps/cast + C1–C4 closings and adjudications, KnownIssues row 65 + the re-font RESOLVED row, 13y's kickoff adjudication (lines 381–413), 13u4's UNIT F2 RECORD whole |
-| 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | **TRACED** — REAL on 27 (the mechanism below). **Pin committed RED on the pre-fix tree** (`JumpViewportLayoutTests`, 3 issues + the Refont shrink pin's 1 — `18k-c6-jumppin-prefix.log`). The fix PENDING |
+| 2 | Refont (TRACE item 1) — reproduce on 27, trace park → settle hop → `JumpPrimitive` with numbers | **TRACED** — REAL on 27 (the mechanism below). **Pin committed RED on the pre-fix tree** (`JumpViewportLayoutTests`, 3 issues + the Refont shrink pin's 1 — `18k-c6-jumppin-prefix.log`). **FIXED** in `JumpPrimitive.scroll(to:)` (one bounded re-assert) — both pins GREEN (`18k-c6-jumppin-fixed.log`, 7/2); the behavioural revert PENDING |
 | 3 | BoundaryFluidity (TRACE item 2) — N isolated + in-suite runs, the covariate | PENDING |
 | 4 | The two `NSSlider` scrubber pins — re-mechanize + mutation proof | PENDING |
 | 5 | `LibraryPanelHostTests`' "inspector" pin — history, narrow, mutation proof | PENDING |
@@ -2233,4 +2233,19 @@ rig's fixture): **3 issues** — the line **29.0 pt** from the viewport top; `to
 vs `target → 42056`, twice (right after the jump, and after four display passes). Beside it
 `RefontViewportTests.aShrinkingRefontKeepsTheLineAtTheViewportTop` red as on 13y's kickoff
 (`42034` vs `42128`). `18k-c6-jumppin-prefix.log`: 7 tests / 2 suites, 4 issues.
+
+**THE FIX (`App/Variorum/Variorum/Features/Editor/JumpPrimitive.swift`, `jump`'s local `scroll(to:)` —
+EDITOR SEAM, named plainly for the Fable ladder).** After the loop's `scroll → reflect →
+layoutViewport()`, if the clip is not where it was asked to be (≥ 0.5 pt from the requested top, the
+requested top re-clamped to the frame the pass left — so a clamp at a SHRUNKEN maximum is not
+mistaken for a displacement), scroll back to the requested top once and lay out the viewport again.
+**What did NOT change:** the pure `JumpCorrectionLoop` (byte-identical, its pins untouched), the
+closure's measurement, `lineSpan`, the estimate, `maxScroll`, the ≤ 6-iteration bound, `landingInset`,
+every signature — the primitive's contract ("lands the LINE containing `offset` at the viewport top")
+is unchanged; the fix makes it true again on 27. **P1:** the extra work is one viewport layout
+(viewport-bounded, never document-scale — no `ensureLayout` added) and only on a displaced scroll.
+**TK2 discipline:** no TK1 API reached for. `EditorTextView`, the storage seam, `BlockRangeIndex`,
+`EditorViewModel` and `keepingReadingPosition` are NOT in the diff. Zero `Sources/`, zero `Sync/`.
+**Pins after the fix** (`18k-c6-jumppin-fixed.log`): `JumpViewportLayoutTests` 1/1 green and
+`RefontViewportTests` 6/6 green — **7 tests / 2 suites passed**.
 
