@@ -343,7 +343,28 @@ final class EditorSurfaceController {
             } else if leadingArity > 1 || trailingArity > 1 {
                 await runCarryAllMerge(leadingID: leadingID, trailingID: trailingID)
             } else {
-                await runInstantMerge(leadingID: leadingID, trailingID: trailingID)
+                // **18k C5 (17e P27) — "unfanned" is AUTHORIZED BY THE STORE,
+                // never by `slots`.** The projection is frozen while the
+                // editor is busy, so a take born on either block mid-burst
+                // reads as no fan here — and the instant merge below never
+                // reads the store (`ops.merge` has no fan fence), so it would
+                // release that take to lineage unsaid. The slots stay the
+                // cheap hint for the fanned branch above (whose road re-reads
+                // truth and falls back); THIS branch asks the store, the seam
+                // keystroke's own shape (`runSeamMerge`). The ceremony branch
+                // is untouched — its stale read can only refuse, never act.
+                let fans: (leading: [Variant], trailing: [Variant])
+                do {
+                    fans = try await liveActiveFans(leadingID, trailingID)
+                } catch {
+                    model.showOperationError(error)
+                    return
+                }
+                if fans.leading.count > 1 || fans.trailing.count > 1 {
+                    await runCarryAllMerge(leadingID: leadingID, trailingID: trailingID)
+                } else {
+                    await runInstantMerge(leadingID: leadingID, trailingID: trailingID)
+                }
             }
 
         case .makeBlockAcrossBlocks(let indices, let blockIDs, let startCut, let endCut):
