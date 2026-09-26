@@ -71,21 +71,7 @@ struct ReadEditPane: View {
                         // Ladder R1-3 (the Outline lesson, rows 47/53): the
                         // ForEach IDENTITY (the placement id) is the landing
                         // anchor — no explicit `.id` on the row.
-                        ReadEditBlock(
-                            model: model, tokens: tokens, indicator: indicator,
-                            row: row, ordinal: i + 1,
-                            selected: selectedBlockID == row.blockID,
-                            carryGeometry: carryGeometry,
-                            onTap: { offset in
-                                onSelect(row.blockID)
-                                if let variantID = row.variantID, !row.variantLocked {
-                                    // 18l U0: the click's own place (the
-                                    // stored-text offset under the pointer).
-                                    model.makeLive(
-                                        row.blockID, variantID: variantID, clickOffset: offset)
-                                }
-                            },
-                            onPlace: { frame in rowMoved(row.placementID, frame) })
+                        blockRow(row, ordinal: i + 1)
                     }
                 }
                 .frame(maxWidth: 640, alignment: .leading)
@@ -146,6 +132,33 @@ struct ReadEditPane: View {
             // ladder's R2-12 class).
             .onDisappear { landing.end() }
         }
+    }
+
+    /// One block row (factored out of the `ForEach` so the type-checker is
+    /// handed one expression at a time).
+    private func blockRow(_ row: Queries.TOCRow, ordinal: Int) -> ReadEditBlock {
+        ReadEditBlock(
+            model: model, tokens: tokens, indicator: indicator,
+            row: row, ordinal: ordinal,
+            selected: selectedBlockID == row.blockID,
+            carryGeometry: carryGeometry,
+            onTap: { offset in
+                // 18l U1 (ladder round 1, MAJOR-1): HER click ends a landing
+                // in flight, as her scroll does — a landing watching the
+                // block she clicked would "correct" the centre its tier swap
+                // moved, and scroll the page under her caret.
+                landing.userTookOver("her click in the pane")
+                onSelect(row.blockID)
+                if let variantID = row.variantID, !row.variantLocked {
+                    // 18l U0: the click's own place (the stored-text offset
+                    // under the pointer).
+                    model.makeLive(row.blockID, variantID: variantID, clickOffset: offset)
+                }
+            },
+            // …and so does her TYPING in the live pane (the click-through's
+            // block is live from its mount).
+            onHerEdit: { landing.userTookOver("her edit in the live pane") },
+            onPlace: { frame in rowMoved(row.placementID, frame) })
     }
 
     /// A realized row said where it is (host space), or that it went away.
@@ -235,6 +248,12 @@ private struct ReadEditBlock: View {
     let carryGeometry: ReadCarryGeometry
     /// 18l U0: the click, with the stored-text offset it names.
     let onTap: (Int) -> Void
+    /// 18l U1 (ladder round 1, MAJOR-1): she typed in THIS row's live pane —
+    /// the host ends a landing in flight. Called from the pane's edit report
+    /// (this file's closure; `PaneSurfaceView` itself is untouched). NOT the
+    /// pane's programmatic caret placement at mount, nor a blur: those are
+    /// reflows the landing's watch should still correct.
+    let onHerEdit: () -> Void
     /// 18l U1: where this row is (host space) at every geometry change, and
     /// nil when it goes away — the landing's evidence and the manifest's
     /// measurement. Rides the row's EXISTING observer (no new one per row).
@@ -269,6 +288,7 @@ private struct ReadEditBlock: View {
                     role: ReadEditPane.role, variantID: variantID,
                     onFocusRequest: { model.makeLive(row.blockID, variantID: variantID) },
                     onEdit: { newText in
+                        onHerEdit()
                         model.paneEdited(
                             variantID: variantID,
                             oldText: row.text ?? "", newText: newText)

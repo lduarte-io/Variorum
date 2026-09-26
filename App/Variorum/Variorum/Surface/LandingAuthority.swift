@@ -549,10 +549,12 @@ final class LandingAuthority {
         armAfterEvent()
     }
 
-    /// She scrolled: the landing ends where she put the page.
-    func userTookOver() {
+    /// She scrolled: the landing ends where she put the page. (18l U1: or
+    /// she clicked or typed inside the surface — `act` names it in the DEBUG
+    /// story only; the signpost says `handedover` either way.)
+    func userTookOver(_ act: String = "the user scrolled") {
         guard isPending else { return }
-        finish(.handedover, why: "the user scrolled")
+        finish(.handedover, why: act)
     }
 
     /// The surface is going away mid-landing — end it rather than letting its

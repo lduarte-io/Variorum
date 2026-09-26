@@ -398,6 +398,56 @@ struct ReadNoteLandingTests {
             #endif
             #expect(abs(settled.minY - afterSwap.minY) <= 1,
                     "the page did not move under her click: \(afterSwap.minY) → \(settled.minY)")
+            #if DEBUG
+            #expect(ReadLandingStory.trace.last { $0.contains(" DONE: ") }?
+                        .contains("her click in the pane") == true,
+                    "…because her click ENDED the landing (end=handedover)")
+            #endif
+        }
+    }
+
+    /// **…and so does her TYPING in the click-through's live pane** (the
+    /// review's case (b)): a paragraph click on the page flips to `edit` with
+    /// that block LIVE and lands it centred; she types at once, inside the
+    /// hold — her words wrap the paragraph onto another line, its height
+    /// grows, and a landing still watching would re-centre it under her
+    /// caret. Red when the pane's edit report does not end the landing (the
+    /// fix pass's own revert, recorded in the ladder file).
+    @Test func typingInTheClickThroughsLivePaneDuringTheHoldDoesNotMoveThePage() async throws {
+        let paragraph = String(repeating: Self.narrative, count: 5) + "\n"
+        let texts = (0..<80).map { "Paragraph \($0). " + paragraph }
+        try await mounted(face: .read, texts: texts, landingIndex: 40) { world in
+            let target = world.blockIDs[40]
+            let drawn = await world.poll(timeout: 8) {
+                ReadModeOracle.pageBlockFrames[target] != nil
+            }
+            try #require(drawn, "the page landed the block")
+            _ = await world.poll(timeout: 1.5) { false }
+            let onPage = try #require(ReadModeOracle.pageBlockFrames[target])
+            world.click(at: world.windowCenter(of: onPage))
+            let live = await world.poll(timeout: 4) {
+                ReadModeOracle.face == .edit
+                    && ReadModeTests.editablePanes(in: world.hosting).count == 1
+                    && world.model.liveBlockID == target
+            }
+            try #require(live, "the click-through opened edit with the block live")
+            let pane = try #require(ReadModeTests.editablePanes(in: world.hosting).first)
+            pane.setSelectedRange(NSRange(location: (pane.string as NSString).length, length: 0))
+            pane.insertText(
+                " And then she wrote one sentence more, long enough to carry the paragraph "
+                    + "onto a line it did not have before, and then some more words to be sure.",
+                replacementRange: NSRange(location: NSNotFound, length: 0))
+            await world.turn()
+            let afterEdit = try #require(ReadModeOracle.editBlockFrames[target])
+            _ = await world.poll(timeout: 3) { false }
+            let settled = try #require(ReadModeOracle.editBlockFrames[target])
+            print("[18l U1 MAJOR-1b] typed in the hold: top \(afterEdit.minY) h \(afterEdit.height) "
+                + "→ 3 s later top \(settled.minY) h \(settled.height)")
+            #if DEBUG
+            print("[18l U1 MAJOR-1b] the story: \(ReadLandingStory.trace.suffix(5).joined(separator: " | "))")
+            #endif
+            #expect(abs(settled.minY - afterEdit.minY) <= 1,
+                    "the page did not move under her typing: \(afterEdit.minY) → \(settled.minY)")
         }
     }
 }
