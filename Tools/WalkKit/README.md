@@ -221,3 +221,13 @@ swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
 - A NOTE WINDOW opened from the Open strip's context menu ("Open in New Window") is 800×720 and opens in the note's
   remembered mode; `click (first button whose subrole is "AXCloseButton") of (first window whose size is {800, 720})`
   closes exactly that one.
+
+## VisualWalk (18l U-VIS, 2026-09-26)
+
+`Tools/VisualWalk/` is the opt-in visual regression harness built on this kit — it CONSUMES
+`guard.sh` in place (one guard, one home) and adds what the guard cannot see: a check for
+FOREIGN SYSTEM DIALOGS over the work area before any click, and key-window verification before
+any typing (a consent prompt holding keyboard focus turns a ⏎ into Allow — met live at U-VIS).
+Run: `VARIORUM_VISUAL_WALK=1 Tools/VisualWalk/visual-walk.sh --build --voices terminal,study`
+(`--selftest` proves it can red; `--list` shows the scenario table). A consent dialog on screen
+is the AUTHOR'S to answer — never a session's, whatever it blocks.

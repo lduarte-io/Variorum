@@ -188,6 +188,13 @@ two-phase-sized-units line — flagged to the author at the kickoff sitting (Q3)
   `/usr/bin/log show --predicate 'eventMessage CONTAINS "landing surface"'` filtered on `end=`;
   `walk-scroll` positive line count = DOWN. Screenshots into gitignored dirs
   (`notes/plans/18l-screens/…`).
+- **SYSTEM DIALOGS (added at U-VIS's incident, 2026-09-26):** before any GUI burst, check for
+  foreign dialogs over the work area (the VisualWalk helper does; `guard.sh` CANNOT see them);
+  never click a point a system dialog covers; never type unless OUR window is key (a consent
+  prompt with keyboard focus turns a ⏎ into Allow). **A consent dialog is ANSWERED BY THE AUTHOR
+  ONLY — never by a session**, whatever it blocks; if one appears, record it, work around it or
+  hold, and put it at the top of her bundle. And never osascript an app that is not ours (U0b's
+  accidental Finder call is what minted the stale prompt).
 - **NO GUI DRIVING WHILE THE AUTHOR IS AT THE MACHINE — hardened 2026-09-26 after a live incident
   (18l U0, ~01:37 local):** a double `cliclick` meant for the dev-store window fired while she was
   actively using the Mac; the dev window had gone off the current Space, her `/Applications`
@@ -219,7 +226,7 @@ two-phase-sized-units line — flagged to the author at the kickoff sitting (Q3)
 | 4 | WRITE: removing a newline collapses the top padding (block 4/4 → 3/3 captures) — KnownIssues row 87 | U0b | **CLOSED 2026-09-26** — fixed (`998f7d7d` ReadingAnchor; B1–B3 pre-existing, B4 our-commit(`4ae12a59`)), double-walked, ladder closed (R1 0/0/2/2 all agreed → the reviewer's four fixes `f207f97a..cd01c428` incl. the delegate refinement → sanity PASS `f81dcc67`, 110/14 blast radius) |
 | 4b | B5 (U0b's find): ⏎ after a ⌘↓ landing on invalidated geometry moves the page (+109/+166 pt, both builds, differential road, UNTRACED) | U-VIS scenario + the U3 `layoutViewport()` exam (or its own slot — decided at U3) | open — KnownIssues row filed, owner 18l |
 | 5 | NOTE-OPEN lands middle/end instead of the start, ignoring where she was (her 2026-09-26 report) — product rule = R-18l-1 | U0c | **CLOSED 2026-09-26** — built to R-18l-1 (+ the #150 pair, confirmed by orchestrator AND reviewer), double-walked, ladder PASS in one round (0/0/0/3 NIT `452ab9ea` — no fix pass owed; NIT-1/2 are closeout-pen doc lines, NIT-3 = the Persian-search observation is 13o's recorded deferral, row 27, designed behavior) |
-| 6 | The opt-in VISUAL REGRESSION HARNESS (env-gated; real window; geometry assertions — first-visible-line y, caret line, glyph box inside the surface, click lands on the clicked line; seeded with U0/U0b/U0c reproductions) | U-VIS | open |
+| 6 | The opt-in VISUAL REGRESSION HARNESS (env-gated; real window; geometry assertions — first-visible-line y, caret line, glyph box inside the surface, click lands on the clicked line; seeded with U0/U0b/U0c reproductions) | U-VIS | **BUILT + WALKED** (`Tools/VisualWalk/`; 10 scenarios × 2 voices, 0 unexplained failures; can-red proven twice — the selftest and her own −24 pt on a reverted scratch tree; B5 measured in Study; orchestrator ran a subset + the selftest by hand: exit 0 / exit 1 as owed) — Opus review pending |
 | 7 | Note Read adopts the F3 shape (`LandingPolicy.readNote`, block manifest, aim/hold/correct/watchdog in BOTH faces; resting anchors KEPT — page 0.08, edit `.center`) | U1 | open |
 | 8 | Takes' landing half adopts the authority (aim kind grows: top · minimal-reveal · viewport-fraction); the restore half BYTE-PRESERVED (R-Q20/R-Q21); ~15 gesture-end pins + projection arm ride UNMODIFIED (the 3C proof). **MAY-take (U0c's find):** a Takes pane born live reports AppKit's END before its `.start` landing, so the persisted copy holds the take's END until the note leaves (no viewport effect) — else 12 at the closeout | U2 | open |
 | 9 | PanePublisher frame-synchronous / state-deferred (her ratified shape; gate = walk the boards under load, REVERT on any felt regression; measure the ~1,989-warning count both ways — C3 says they are ALL `PaneSurface`'s) | U3 | open |
@@ -1734,3 +1741,49 @@ reproduction is history-dependent, so the XFAIL/XPASS label is honest but the tr
 **(e)** a full two-voice run takes ~15 minutes and leaves tray residue; **(f)** my own machinery slip
 (the `17bed3e2` record duplication), repaired from the last good version. **U-VIS — DONE (implementer);
 the cold review follows.**
+
+### U-VIS — ORCHESTRATOR ACCEPTANCE (2026-09-26; verify-never-trust)
+
+**Claims verified:** all 12 commits pushed; the plan-file duplication slip verified REPAIRED
+(every `##` section appears exactly once; `59689c4e` restored from `d5162751` with no other
+writer in between — honest machinery note, no history rewritten). **The acceptance is a run in
+the ORCHESTRATOR'S OWN HANDS:** `--only note-reopen,write-newline-roundtrip --voices terminal`
+→ both PASS (7 and 9 assertions, 0 fail, exit 0; the report's measured values match the
+implementer's evidence run) and `--selftest` → the planted failure FAILS, captured, **exit 1** —
+the tripwire fires. The harness is real.
+
+**Adjudications (R-18l-4):** the review cast is **OPUS** per the brief's letter (the oracle
+endpoint is DEBUG-only and read-only; it CALLS `topVisibleOffset()`/`PaneMeasurement.height`
+but modifies no seam body — if the Opus round flags a seam concern, a Fable pass follows).
+**B5's measured recipe lands on KnownIssues row 88** (deterministic in the full STUDY pass;
+frame +94 pt for one new line; the text above the caret slides ~30 pt; scroll unchanged —
+U0b's "corrected under a fixed clip" hypothesis now measured; the trace stays with the row's
+owner). **THE STALE CONSENT PROMPT is a HELD-FOR-HER item** (morning bundle, top): a macOS
+dialog "Ghostty wants access to control Finder" sits on screen at ~(734,222), left by U0b's
+accidental Finder osascript; two exploration clicks landed on it harmlessly, one gave it
+keyboard focus (a ⏎ would have pressed Allow — focus was taken back at once); NO session may
+answer a consent dialog (author-only, the traps' own rule); recommended answer when she wakes:
+**Don't Allow** (nothing in the tooling needs Finder control). The traps gain the dialog rule;
+WalkKit's README gains the VisualWalk pointer. Ledger row 6 flips to BUILT+WALKED — Opus
+review is the remaining gate.
+
+## MORNING BUNDLE (accumulating — the handoff's first section copies this)
+
+1. **A macOS consent prompt is on your screen, unanswered:** "Ghostty wants access to control
+   Finder" (~734,222). Left by an accidental script call; nothing needs the grant —
+   recommended: **Don't Allow**. (No session will touch it; it may cover click points for
+   future GUI runs until dismissed.)
+2. **#149** — the 13g surface-rule carve-out (R-18l-5): formatted read tiers may seed a caret
+   through the pinned translation, vs. switching those tiers to the dimmed-marker face.
+3. **#150** — U0c's two refinements of your R-18l-1 (first open seeds no fact — `t-11` is the
+   measured reason; a re-open restores the page without revealing an off-page caret).
+4. **S3, a taste call** — the read tier and the live pane wrap slightly differently, so a
+   clicked block shifts a little as it goes live (the caret still lands right). Share metrics,
+   or keep the tiers distinct? (KnownIssues row, Design & UI review owner.)
+5. **The U-VIS design ratification** — the design note + the built harness (its first full run:
+   10 scenarios × 2 voices, 0 unexplained failures; it can red — proven twice).
+6. **Your four sitting rulings to confirm as standing:** R-18l-1 (note-open), R-18l-2 (facts),
+   R-18l-3 (run all, split if heavy), R-18l-5 (the carve-out) — plus R-18l-4 discharged.
+7. **B5 / KnownIssues row 88** — the one UNTRACED find (⏎ after ⌘↓ on invalidated geometry
+   moves the text above the caret ~30 pt; Study, deterministic recipe in the harness); owner
+   18l, trace at U3 or its own slot — or re-owned at closeout if the round splits.
