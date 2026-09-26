@@ -216,7 +216,8 @@ two-phase-sized-units line — flagged to the author at the kickoff sitting (Q3)
 | 1 | The Index click lands the caret on the EMPTY paragraph (deterministic — *"a refusal of clicking into the text"*) — KnownIssues row 86 | U0(1) | **CLOSED 2026-09-26** — fixed (pre-existing; `IndexClickCaretTests`, R-U0-1 red 26), walked twice, ladder closed (R1 0/0/2/4-agreed-fixed + sanity PASS `2753e741`) |
 | 2 | The book view clips the last line's descenders with a note expanded (her capture) | U0(2) | **CLOSED 2026-09-26** — both mechanisms fixed (the width door + the settle net), walked twice, KnownIssues row 75 closed with it; same ladder |
 | 3 | The editor-regression SWEEP over 13u2…13y/18k (her ask: *"investigate editor regressions that must've happened during recent fixes"*) — every finding reproduced, traced, pinned, fixed or owned | U0(3) | **CLOSED 2026-09-26** — S1–S9 with ATTRIBUTION per finding (U0 RECORD); S3 → KnownIssues (taste call, morning bundle) · S5 → KnownIssues (12) · row 75 closed |
-| 4 | WRITE: removing a newline collapses the top padding (block 4/4 → 3/3 captures) — KnownIssues row 87 | U0b | open |
+| 4 | WRITE: removing a newline collapses the top padding (block 4/4 → 3/3 captures) — KnownIssues row 87 | U0b | **BUILT + WALKED** (impl. + orch.; B1/B2/B3 pre-existing, B4 our-commit(`4ae12a59`); fix `998f7d7d` ReadingAnchor; `WriteTopAirTests` 14 red-on-old) — Fable review pending |
+| 4b | B5 (U0b's find): ⏎ after a ⌘↓ landing on invalidated geometry moves the page (+109/+166 pt, both builds, differential road, UNTRACED) | U-VIS scenario + the U3 `layoutViewport()` exam (or its own slot — decided at U3) | open — KnownIssues row filed, owner 18l |
 | 5 | NOTE-OPEN lands middle/end instead of the start, ignoring where she was (her 2026-09-26 report) — product rule = sitting Q1 | U0c | open |
 | 6 | The opt-in VISUAL REGRESSION HARNESS (env-gated; real window; geometry assertions — first-visible-line y, caret line, glyph box inside the surface, click lands on the clicked line; seeded with U0/U0b/U0c reproductions) | U-VIS | open |
 | 7 | Note Read adopts the F3 shape (`LandingPolicy.readNote`, block manifest, aim/hold/correct/watchdog in BOTH faces; resting anchors KEPT — page 0.08, edit `.center`) | U1 | open |
@@ -988,3 +989,27 @@ fragment — P1-bounded, but a new per-scroll cost); **(d)** the live corner dra
 only); **(e)** B5 is real, seen on both builds, untraced — the round trip's ⏎ half on a long note after
 ⌘↓ still moves the page on invalidated geometry. **U0b — DONE (implementer); the Fable cold review
 follows.**
+
+### U0b — ORCHESTRATOR ACCEPTANCE (the hands-on walk, 2026-09-26 overnight; verify-never-trust)
+
+**Claims verified against git:** commits `b4b978cd…5241d8d4` present and pushed, tree clean, the
+pin file exists, LIVE STATUS flipped with hashes and red counts (6 tests / 14 issues red-on-old;
+two targeted reverts R-full / R-top red in their own shapes; the hollow width-reflow row
+dismissed and kept as a labelled guard — the guard discipline working as written).
+**The walk, on a fresh Debug build of `5241d8d4`** (dev store, zero other instances, per-step
+*[removed for publication]*
+captures' shape) — open in Write (block 2/2) → ⏎ (3/3, empty tail, caret on it) → ⌫ (2/2, the
+quiet "Empty block deleted — ⌥⌘Z undoes it" receipt): **the first line's y is IDENTICAL in all
+three captures; the top air never moves.** Acceptance captures beside the unit's:
+`notes/plans/18l-screens/u0b/u0b-step{0,2}.png`. The note left as found; instance quit.
+
+**Orchestrator adjudications (R-18l-4):** KnownIssues row 87 CLOSED (the ladder-pending re-open
+clause, row 86's form); **B5 filed as a NEW KnownIssues row, owner 18l** (⏎ after a ⌘↓ landing
+on invalidated geometry moves the page ~+109/+166 pt — on the DIFFERENTIAL road, both builds,
+untraced; U-VIS seeds it as a scenario; the trace rides U3's `layoutViewport()` examination or
+its own slot — the round decides at U3); **B6 folded into the U0c brief** (the 262/262
+remembered-caret reproduction of her shape is CONFIRMED evidence; `ReadingAnchor` now exists for
+the in-session reopen restore — the offset-only teardown anchor is U0c's to upgrade); the
+walker facts added to the traps (corner drags near the screen's bottom edge land on the
+overlay scroller; ≥2.5 s between steps or the guard fires on the walker's own clicks). Ledger
+row 4 flips to BUILT+WALKED — the Fable cold review is the remaining gate.
