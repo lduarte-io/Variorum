@@ -10,7 +10,7 @@ Read EXPLICITLY, never auto-loaded:
 - `notes/SyncSpec.md` — authoritative for everything sync. Read in full before touching `Sources/VariorumCore/Sync/`, `Server/`, custody/keychain code, a repair, or any schema change (§12 lockstep). OverallModel §6 carries S1–S5 for everyone else.
 - `notes/TEXTKIT2_NOTES.md` — before any editor-seam work (`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, the read tier) and after every macOS point update.
 - `notes/DetailedPlanForPhases.md` (master plan) and `notes/KnownIssuesAndTechDebt.md` — at every kickoff and closeout, and whenever a row changes.
-- `notes/PhaseCloseoutArchive.md` · `notes/AppSpecDeltaArchive.md` · `notes/ProcessHistory.md` — canon archives, as binding as the files they left. `notes/source/` is history, not truth.
+- `notes/AppSpecRulingsArchive.md` (the narrative behind every AppSpec rule) · `notes/AppSpecDeltaArchive.md` · `notes/PhaseCloseoutArchive.md` · `notes/ProcessHistory.md` — canon archives, as binding as the files they left; a delta lands in the spec as a contract line plus a pointer to its ruling, never a paragraph of history. `notes/source/` is history, not truth.
 
 If code conflicts with the spec, align to the spec or propose a deliberate spec change. Never invent product behavior; where the spec is silent, propose options.
 
