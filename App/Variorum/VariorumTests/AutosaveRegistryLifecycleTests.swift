@@ -134,6 +134,36 @@ private final class MountedEditor {
         textView.setSelectedRange(NSRange(location: (textView.string as NSString).length, length: 0))
         textView.insertText(text, replacementRange: textView.selectedRange())
     }
+
+    /// **The surface's death puts the process's text state back** (18k UNIT C8 —
+    /// the test-isolation leak this suite introduced; the trace is the C8 RECORD
+    /// in `notes/plans/phase-18k-runtime-hygiene.md`).
+    ///
+    /// Dropping this helper does NOT free its text stack: the dead view's
+    /// `NSTextStorage` / `NSTextContentStorage` / `NSTextLayoutManager` sit in a
+    /// main-thread autorelease pool the test runner keeps open under async test
+    /// bodies, and live on for the rest of the run (measured: alive 3 s later;
+    /// `leaks --traceTree` roots the content storage in a pool page chained to
+    /// `_main_thread`). The open-tail pins leave that storage holding their
+    /// TYPED text, which teardown's finalize crystallized and stamped with block
+    /// id `00000000-0000-0000-0000-000000000001` — the id `.incrementing` gives
+    /// every harness world's first block. AppKit uniques content-equal attribute
+    /// dictionaries process-wide, so every later harness storage's first block
+    /// was handed THIS storage's live dictionary (and its paragraph-style
+    /// object), and AppKit's paragraph fixing in the later editor found nothing
+    /// to re-apply: `MacIdentityAuditWiringTests.appKitWidensAnInsertionsReported
+    /// RangeToTheParagraph` read `{2,1}` for `{2,5}` in every full run after this
+    /// suite joined the target.
+    ///
+    /// So the helper empties its storage as it dies — the delegates detached
+    /// FIRST, so the empty-out is never reported to the torn-down model as her
+    /// edit (no autosave, no selection memory, no savepoint can come of it). Every
+    /// assertion in this file reads the store, never the surface after this point.
+    isolated deinit {
+        textView.delegate = nil
+        textView.textStorage?.delegate = nil
+        textView.textStorage?.setAttributedString(NSAttributedString())
+    }
 }
 
 // MARK: - The count pins (red on the pre-fix tree)
