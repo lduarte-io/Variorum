@@ -4071,7 +4071,7 @@ worktree. Final message: a short summary pointing at your record.
 | 4 | TRACE — the leaked state (which global/key, set where, never restored) | **WIDENING: DONE** (the TRACE section below) — in-process, not a persisted key: T1/T2's dropped `MountedEditor` leaves its TK2 text stack alive for the rest of the run, holding a run stamped with block id `…0001` that every `.incrementing` world's first block shares; AppKit's attribute uniquing hands the victim those dictionaries and its paragraph fixing becomes a no-op. **Soak: no leaked state found** (no reproduction to trace; THE SOAK below) |
 | 5 | FIX the leaker (tests only) | **DONE** — `VariorumTests/AutosaveRegistryLifecycleTests.swift`, the file's private `MountedEditor` helper gains an `isolated deinit`: detach the text view's delegate and the storage's delegate, then empty the storage (`setAttributedString(NSAttributedString())`). The leaker puts back exactly the state E1 proved is the leak, at the moment its test drops the surface. Zero `Sources/`, zero app code, zero `Sync/`; no test body touched |
 | 6 | PROOF — the reproducing combination red before, green after, ×3 | **Pair `AutosaveRegistryReleaseGuardTests` + `MacIdentityAuditWiringTests`: RED 3/3 on the clean pre-fix tree** (scratch suites out of the target, rebuilt; `18k-c8-pair-prefix-r{1,2,3}.log`, 12 tests / 2 suites, 1 issue each — the `{2,1}` report) → **GREEN 3/3 with the fix** (`18k-c8-pair-fixed-r{1,2,3}.log`); the file's three suites 22/22 (`18k-c8-file-fixed.log`). **Behavioural revert R-C8 — RAN** (named in `36127aee` before it ran; the pre-revert state was that commit): the deinit's empty-out line commented out in the working tree only, rebuilt, the pair → **RED, 1 issue, the identical `{2,1}` report** (`18k-c8-R-C8.log`); the file restored from HEAD (`git status` clean), rebuilt, the pair → **GREEN** (`18k-c8-R-C8-restored.log`). The fix's one load-bearing line is the empty-out; the delegate detaches are its safety, not its effect. The soak's "reproducing combination" does not exist (row 3 + the SOAK section) |
-| 7 | ONE full Mac suite on the final tree | **RUNNING** (`36127aee` + this record commit; zero app instances) — PENDING |
+| 7 | ONE full Mac suite on the final tree | **HELD for a zero-instance window** — PENDING. At 21:30 a real-store instance was live (`/Applications/Variorum.app`, pid 35345, launched 21:15 — hers; never touched). A 15-minute run puts the Debug host's windows in front of her and can take her keystrokes, and its timing-sensitive members want the zero-instance window the finals used (ENVIRONMENT TRAPS). Polling for her app to close |
 
 - Deaths / resumes: none.
 
@@ -4104,12 +4104,13 @@ paragraph-style OBJECT per run, `18k-c8-probe2-{clean,T1}.log`, `18k-c8-E7.log`)
 
 **Why T1's stack is still alive minutes later.** Weak references (scratch `C8E8T1Long`): after 3 s the
 view, model, delegate and session are gone, but **T1's `NSTextStorage`, `NSTextLayoutManager` and
-`NSTextContentStorage` are alive**; a no-typing control's view is gone too. `leaks --traceTree` on the parked
+`NSTextContentStorage` are alive**; a no-typing control's view is gone too (its storage was not measured at 3 s). `leaks --traceTree` on the parked
 survivor (`E9-*-tree.txt`, session scratch): the content storage (which owns the storage and the layout
 manager) is held by an **autorelease-pool page whose chain roots at `_main_thread`, five pages deep** — a
 long-lived main-thread pool the test runner keeps open under async test bodies — and the container by the dead
-view's `NSTextViewSharedData`. (Two further `leaks` referrers are not owners: a stale slot in an array's spare
-capacity, and the probe's own adjacent `weak var`s.) Bare TK2 views dropped the same way are freed within 2 s
+view's `NSTextViewSharedData`. (Two further `leaks` referrers are read as non-owners: a slot inside a SwiftUI hosting view's `_subviews`
+array storage — a subviews array holds views, so a text-storage pointer there is stale memory — and the
+probe's own adjacent `weak var`s, which an ObjC weak slot stores as the raw pointer.) Bare TK2 views dropped the same way are freed within 2 s
 (`C8E3c`); an explicit `autoreleasepool` frees them within 0.5 s (`C8E3b`). **Not a product leak:** the app's
 main thread runs under the run loop's per-iteration pool; this lifetime is the test context's.
 
@@ -4129,7 +4130,7 @@ empties the storage it leaves in the process.
 
 **The red, read from the finals' run 2** (`mac2.log`, session scratch): `[seed 21 step 15 focus] block 0001
 strips 4 cards for a fan of 5` — ONE mid-sequence check of the strip's realized card count, right after a
-`focus` step, inside a 14-minute run; the same seed's other 24 checks and seed 7 green. Run 1 of the finals
+`focus` step, inside a 14-minute run; the same seed's other 23 checks (24 steps) and seed 7 green. Run 1 of the finals
 (same order, same predecessors) was green. The signature appears in no archived log before run 2 (15
 earlier logs carry the soak, every one green).
 **What was tried (all on this unit's tree, all green):** alone ×10 in one process; alone ×6 under 12
