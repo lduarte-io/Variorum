@@ -500,7 +500,9 @@ scn_read-landing() {
   vw_settle rl
   vw_require '[[ ${PV[mode]} == Read ]]' "Read on A Scandal in Bohemia" || return
   local face ord tag
-  for face in edit read; do
+  # RL_FACES orders the faces (default edit,read): each run's FIRST face is the truly cold one — the
+  # second arrives after the face switch has already landed its parked block (a partly warm column).
+  for face in ${(s:,:)${RL_FACES:-edit,read}}; do
     if [[ ${PV[face]} != $face ]]; then
       # The face switch's segments are AXRadioButtons (measured); "read" is also the sidebar's mode
       # row item, which sits left of the Read host — so only matches right of the sidebar count.
