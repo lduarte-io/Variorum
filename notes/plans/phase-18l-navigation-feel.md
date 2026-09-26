@@ -1804,6 +1804,26 @@ in chat; she sends it at the orchestrator's word, after the closeout push). The 
 prompt is RESOLVED (she clicked Don't Allow) — bundle item 1 closes. She may step away for
 the walk windows; the per-step guard keeps her return safe at any moment.
 
+## U1 RECORD (implementer: `opus-implementer`, 2026-09-26)
+
+**NOT DONE (first line — written at the open, RE-STATED at the close):** PENDING — the close
+re-states this line against what shipped.
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | Reading (the brief's list, in order, own context) | DONE — this file whole (HER KICKOFF MESSAGE, SITTING RECORD R-18l-1…5, ENVIRONMENT TRAPS, THE LEDGER, the U0 · U0b · U0c · U-VIS RECORDs + acceptances, the MORNING BUNDLE); the charter's KICKOFF 2 U1 bullet in full (`post-13u-health-rounds.md`) + §W; the health review §1 whole (§1.1 map, §1.2 the one-shot-aim diagnosis, §1.3 item 1, §1.4 the warming refusal, §1.5 traps); the 13u4 UNIT F3 BRIEF + RECORD whole (`phase-13u4-restyle.md`); `TEXTKIT2_NOTES.md` §2–§3; `SessionResiliencyProtocol.md` (implementer half + addenda); the code: `Surface/LandingAuthority.swift` whole, `Surface/BookHeightManifest.swift`, `Surface/ProseHeightModel.swift`, `Surface/ViewportCarry.swift`, `Surface/IndexProseColumn.swift`, `Surface/ReadTierClickPlace.swift` (the tier's metrics), `BookIndexView`'s F3 adoption (the pane column, `IndexPaneRow`, `land`/`paneFacts`, `BookIndexPaneNote`'s reservation), `BookIndexPaneHeights.swift` whole, `BookViewModel`'s Outline + Index heights plumbing and `flowExtents`, `ReadingFlowView`'s `FlowExtentsCache` + its landing adoption, `Core/Views/StableSurface.swift`'s `NearBand`, `ReadModeView.swift` + `ReadEditPane.swift` end to end, `NoteIndexColumn`'s landing, `BlockTOCViewModel` (rows, prime, liveness), `Queries.blockExtents` + `Queries.TOCRow`, `Shared/FlowParagraph.swift`; the pins that ride this surface (`ReadLandingTests`, `ReadModeTests`, `ReadArrivalMeasureTests`, `ReadPageRoomTests`, `ModeSwitchCarryTests`' Read arms, `LandingAuthorityTests`/`LandingSignpostTests`) |
+| 2 | The red-on-old pins (written BEFORE the fix, run on the pre-fix tree) | NOT-STARTED |
+| 3 | The fix — `LandingPolicy.readNote` (+ the edit face's), the per-note block manifest, rows at asserted heights, the authority's loop in BOTH faces | NOT-STARTED |
+| 4 | The behavioural revert (red-on-old by revert) | NOT-STARTED |
+| 5 | The measured acceptance — cold + warm deep-click trials on the real long-note fixture, the Console line | NOT-STARTED |
+| 6 | The walk (both voices) + captures | NOT-STARTED |
+| 7 | Closing runs (touched suites + the eleven Tutorial suites) | NOT-STARTED |
+| 8 | Self-assessment | NOT-STARTED |
+
+- Deaths / resumes: none.
+
 ## MORNING BUNDLE (accumulating — the handoff's first section copies this)
 
 1. ~~A macOS consent prompt on screen~~ **RESOLVED at her check-in** — she clicked Don't
