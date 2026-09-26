@@ -2025,3 +2025,25 @@ covered visible-row clicks, the click-through, the carry and the hand-over). **U
 7. **B5 / KnownIssues row 88** — the one UNTRACED find (⏎ after ⌘↓ on invalidated geometry
    moves the text above the caret ~30 pt; Study, deterministic recipe in the harness); owner
    18l, trace at U3 or its own slot — or re-owned at closeout if the round splits.
+
+### U1 — ORCHESTRATOR ACCEPTANCE (2026-09-26; verify-never-trust)
+
+**Claims verified:** all 15 commits pushed, tree clean, pins present, LIVE STATUS flipped.
+**The walk, in the orchestrator's own hands on a fresh build of `2eff1b27`:** *A Case of
+Identity* (137 blocks) — first open at the START (U0c holding); Read ▸ edit; a deep outline
+click (row 24) landed the block AT the center anchor, visually confirmed; the Console signpost
+now SPEAKS on note Read — two lines captured live (`surface=ReadNoteEdit … end=settled top=0
+hops=0` for both the mode entry and the deep click). The health review §1.2 diagnostic is
+FLIPPED in my hands as well as the implementer's.
+
+**JUDGMENT CALL 1 — CONFIRMED (PROVISIONAL, QUESTIONS #151, hers to overturn):** the charter's
+placeholder-manifest half was BUILT, MEASURED WORSE (a 59-pt cold miss + a ~1 s jump — failing
+the charter's own hops=0 line), and rejected; the watch alone shipped. The charter's remedy
+assumed the Index's disease (whole-note rows, heights oscillating by tens of thousands of
+points); Read's rows are BLOCKS and the lazy estimate is near-exact on real prose (calibration
+0.975–0.996). The acceptance metric outranks the letter, on measurement — the round's standing
+hierarchy (R-18l-5's own form). The honest baseline is also recorded: §1.2's stutter did NOT
+reproduce on the real story pre-fix; U1's durable gain is the WATCH (signpost + watchdog +
+hand-over) and the synthetic-note class fixed. Ledger row 7 flips to BUILT+WALKED — the Opus
+cold review is the remaining gate; the review cast stays OPUS (no seam body touched;
+`LandingAuthority` gained two surface names + policies, data not loop).
