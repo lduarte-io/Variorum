@@ -1806,8 +1806,20 @@ the walk windows; the per-step guard keeps her return safe at any moment.
 
 ## U1 RECORD (implementer: `opus-implementer`, 2026-09-26)
 
-**NOT DONE (first line — written at the open, RE-STATED at the close):** PENDING — the close
-re-states this line against what shipped.
+**NOT DONE (first line — re-stated at the close against what shipped):** (1) **the charter's
+"rows as placeholders at asserted heights" is NOT built** — it was built in the working tree,
+MEASURED (a cold landing on her story stood 59 pt off, then needed a correction hop, where the
+pre-fix lazy column lands exactly in one step) and REJECTED; the lazy columns stay and the
+authority watches them (JUDGMENT CALL 1 — PROVISIONAL, **QUESTIONS #151**, the orchestrator's
+confirmation and her bundle); (2) the contents column (`NoteIndexColumn`'s one-shot `.center`)
+is NOT adopted — recorded, the charter's "else record" (JC 5); (3) the authority's aim KIND is
+NOT grown — the fraction's arithmetic lives beside note Read (`ReadLandingResidual`), for
+18l-b U2 to hoist (JC 2); (4) the health review §1.2's stutter is NOT reproduced on the real
+fixture before the fix (piece 2b) — the only reproduction is the harness's synthetic shape,
+which the fix corrects; (5) no KnownIssues / AppSpec / TEXTKIT2 / canon / review edits — drafted
+under OWED AT CLOSE; (6) zero `Sources/`, `Shared/`, `Sync/`, schema, mobile — no core / iOS /
+mobile runs owed; the U3 rider and row 85 untouched; (7) the `pages` form (`NotePagesView`, the
+book's paged engine) is not a scroll landing and is untouched.
 
 ### LIVE STATUS
 
@@ -1821,10 +1833,179 @@ re-states this line against what shipped.
 | 4 | The behavioural revert (red-on-old by revert) | **DONE — R-watch RED exactly as predicted: 4 tests / 10 issues** (`App/Variorum/DerivedData/18l-u1-R-watch.log`): the synthetic edit-face arrival MISSED again (block 201 never drew — the pre-fix shape, byte for byte) and all four watched arms red (story `NONE`), while the three real-story/page residual arms stayed green (0.18 / 0.02 / −0.03 pt — the lazy column's own exact landing, as pre-fix) and the arithmetic (6) + calibration (3) suites green; restored with `git checkout HEAD --`, `git status` clean. The named plan it ran to: **R-watch, named before it runs** (the pre-revert state is THIS commit): both faces' `land` put back to the one-shot `proxy.scrollTo(placementID, anchor:)` (the authority neither asked nor told), everything else kept. Expected RED: the synthetic edit-face arrival (the block never draws — the pre-fix miss) and all four `expectWatched` arms (no landing is watched, so no story line); GREEN: the three real-story/page residual arms (the lazy column lands them exactly, as pre-fix), the arithmetic and calibration suites. Working-tree edit only; restored by `git checkout HEAD --` of the two committed files; `git status` clean after |
 | 5 | The measured acceptance — cold + warm deep-click trials on the real long-note fixture, the Console line | **DONE** — the harness's `read-landing` scenario on the stamped post-fix build (product code `5e7cbf34`), *A Scandal in Bohemia* (262 blocks), 1440×1000, a fresh launch per voice: six runs × {Terminal, Study} (`vis-walks/2026-09-26/155949` · `160626` · `162649` edit-first; `161316` · `162000` · `163324` read-first) — **72 of 72 landings `end=settled top=0` with `hops=0`**, every one at its anchor at +1.5 s and +6 s (|rl| ≤ 0.2 pt). **Truly cold** (the run's first face — `derived=251`, nothing below the first screen ever drawn): **edit 6/6 · page 6/6**; the second face's first click (its column already landed once by the face switch): 6/6 + 6/6; the rest warm or second-region: 48/48. **THE CONSOLE FLIP:** pre-fix ZERO `landing` lines (piece 2b); post-fix 21 in ten minutes of Read (every landing, the face switches' parked ones included), e.g. `2026-09-26 16:39:32.127 Df Variorum[26040:6f85f2] [io.lduarte.Variorum:landing] landing surface=ReadNoteEdit rows=262 target=208 offset=16943 total=20749 derived=155 exact=0 hops=0 content=1 ms=1032 end=settled top=0` |
 | 6 | The walk (both voices) + captures | **DONE** — the stamped post-fix build (`905ee936`; product code `5e7cbf34` + the policy doc line), dev store, every act through VisualWalk's guarded doors; captures + `walk.txt` under `notes/plans/18l-screens/u1/walk/{terminal,study}/` (gitignored). THE WALK table below. Plus the harness's standing regression cover over the surfaces the diff reaches — `vis-walks/2026-09-26/164901/`: **note-reopen PASS · mode-roundtrip PASS · read-landing PASS · readedit-click XFAIL (S3 alone, its owned row — unchanged), both voices, exit 0**. The dev store's voice restored to Terminal (read back by the probe) |
-| 7 | Closing runs (touched suites + the eleven Tutorial suites) | NOT-STARTED |
-| 8 | Self-assessment | NOT-STARTED |
+| 7 | Closing runs (touched suites + the eleven Tutorial suites) | **DONE** on the final product tree (`905ee936`), zero app instances, the machine author-free: `App/Variorum/DerivedData/18l-u1-closing.sh` = the three new suites + the Read surfaces (`ReadLandingTests` R1-3, `ReadModeTests`, `ReadArrivalMeasureTests` R1-9, `ReadPageRoomTests`, `NewModesTests`, `PageTurnKeysRuleTests`, `PagesArrowKeysHostTests`, `BlocksWorkbenchTests`, `BlockTOCTests`, `BlockTOCStatusTests`) + the landing family (`LandingAuthorityTests`, `LandingSignpostTests`, `BookIndexLandingTests`, `BookOutlineLandingTests`, `ReadingFlowLandingTests`, `ModeSwitchCarryTests`, `NoteOpenLandingTests` — U0c's R-18l-1 pins, `CurrentBlockContinuityTests`, `IndexClickCaretTests`) + the oracle/probe suites the diff reaches (`VisualWalkProbeTests`, `DebugOracleOwnershipTests`, `DebugOracleScopingTests`, `DebugOracleTwoWindowTests`) + the eleven Tutorial suites: **✔ Test run with 210 tests in 37 suites passed** (`18l-u1-closing1.log`; 37 `Suite … started` counted against 37 asked; 0 skipped — the two `skipped` lines are AppIntents metadata warnings); 170 `Modifying state during view update` lines (the pane-mounting family, U3's class — none from this diff's files); zero warnings in the touched files. Every pre-existing pin rode UNMODIFIED except `LandingSignpostTests`' surface count (3 → 5 — its own "the next adds its case here" line). Core / iOS / mobile: not owed |
+| 8 | Self-assessment | DONE (below) |
 
 - Deaths / resumes: none.
+- **Machinery notes (honesty):** (1) a persistent macOS banner (*"App Running in Background — "Claude" is running in the background"*, Notification Center, top-right) held Notification Center's FULL-SCREEN overlay window on screen, and VisualWalk's foreign-dialog rule refused every click of the first baseline run (`151232/`, aborted, nothing clicked). Not a consent dialog and never touched: the rule was narrowed to the banner's COLUMN (`vis-foreign`, `3e8a17aa` — the top-right 440 × 480 stays covered, so no click can land on a notification; the Screenshot surface's precedent, answered narrower); every later run's first click was probed as having reached the app. (2) Read's face segments are AXRadioButtons, not AXButtons (measured) — `read-landing` presses them by AX right of the sidebar, and `readedit-click`'s latent `AXButton` lookup (never exercised: its note opened on edit) was corrected in the same commit (`9bea5c6d`). (3) One harness run (`164901/`) outlived the Bash tool's 600-s limit and was moved to the background BY THE TOOL; I waited on it in the FOREGROUND by polling its output file for the report line (the resiliency protocol's rule — the turn never ended on it). (4) The design-(A) experiment lived only in the working tree and was removed with `git checkout HEAD --` of two COMMITTED files (`git status` clean after); R-watch the same way.
+
+### THE ADOPTION MAP — what each face does now
+
+| Face | Before (pre-fix) | After |
+|---|---|---|
+| **Read ▸ read (the calm page, continuous)** — `ReadPageColumn.land` | one unanimated `scrollTo(placementID, anchor: 0.08 or the carried fraction)`, the request nil'd, nothing watched, nothing logged | the SAME act, handed to `LandingAuthority` (`LandingPolicy.readNote`, surface `ReadNote`): the block's distance from where its anchor puts it (`ReadLandingResidual`, clamped by the page's ends) is reported from the row's EXISTING geometry observer; the column's content height re-arms the quiet interval; a correction re-aims (blind allowed — the lazy column may not have built the block); a scroll of hers ends it (`handedover`); the watchdog ends a landing that cannot arrive (`gaveup`); every landing files the shipping signpost with the face's manifest facts |
+| **Read ▸ edit (the editable index surface)** — `ReadEditPane.land` | the same one-shot at `.center` (or the carried fraction) | the same adoption under `LandingPolicy.readNoteEdit` (surface `ReadNoteEdit`) |
+| **Both** | — | the columns stay LAZY (JC 1); `.onDisappear { landing.end() }` (R2-12); the face switch's parked landing (a request set while the other face was mounted) is watched too; the U0c opening arm is UNTOUCHED — whether a seed scrolls is still `CommandRouter.openingLanding`'s answer, and a landing that happens now is watched |
+| **Read ▸ read, `pages` form** (`NotePagesView`) | the book's paged engine | untouched (no scroll landing) |
+| **The contents column** (`NoteIndexColumn`) | one-shot `.center` on uniform one-line rows | untouched — recorded (JC 5) |
+
+### THE TRIAL TABLE (F3's form) — pre-fix vs post-fix, the real fixture
+
+| | Pre-fix (probe-only build `0bf54efe`) | Post-fix (`905ee936`) |
+|---|---|---|
+| Harness pin, synthetic shape, edit arrival | **RED** — block 201 never drew; the pane stopped at 212–215 | **GREEN** — `settled at top=0.0 after 1 hops, 1005 ms` |
+| Harness pin, real story, both faces | 0.0 / 0.02 pt — exact, **no story** | 0.18 / 0.02 pt, **`settled … after 0 hops`** |
+| App, cold deep click, both voices | the run's first face (edit) 2/2 and the second face's first click (page) 2/2 at the anchor (|rl| ≤ 0.2) — **no signpost** | **edit 6/6, page 6/6 `end=settled top=0 hops=0`**, at the anchor at +1.5 s and +6 s |
+| App, the rest (second face / second region / warm) | 8/8 at the anchor — no signpost | **48/48 `settled hops=0`** + the 12 second-face first clicks 12/12 |
+| Console, ten minutes of Read | **0 `landing` lines** | **21** (every landing, the face switches' parked ones included) |
+| Design (A) — rows at asserted heights (the charter's letter), harness | — | **real story: 59 pt off, then 1 hop (path [59, 0]); synthetic [100, 0]; 65–79 rows realized** — rejected |
+
+### THE WALK (USE) — both voices, `18l-screens/u1/walk/{terminal,study}/`
+
+| Voice | Row | What the app did | Signpost | Capture |
+|---|---|---|---|---|
+| Terminal | W1 — *A Case of Identity* opened, then ⌘3 (a mode switch right after the first open) | the page at the start, block 1 washed | `ReadNoteEdit target=0 … exact=1 hops=0 end=settled top=0` (block 1, centred ⇒ clamped home at the page's top) | `w1-first-open-read-edit` |
+| Study | W1 — Case re-launched: its remembered mode is Read, so this IS the first open in Read (R-18l-1: seeds nothing) | the page at the start | **none** — no landing asked, none made (U0c's arm, composed) | `w1-…` |
+| both | W2 — a VISIBLE column row (18) in edit; the face switch to read (its parked landing); a visible row (24) in read | each block at its face's anchor (rl 0.0 / −0.1 / −0.1) | 3 × `settled hops=0` | `w2-*` |
+| both | W3 — a deep row (209) in read via the filter; then a paragraph CLICK on the page (R-cor-7's click-through) | 209 at 0.08; the edit face opens with the clicked block LIVE and centred (rl 0.1 / −0.0) | `ReadNote … settled`, `ReadNoteEdit … content=4 … settled hops=0` | `w3-read-209`, `w3-clickthrough-edit` |
+| both | W4 — ⌘1 Write, ⌘3 back (the 13u2b carry) | the carried block back at its fraction (~0.5) | `ReadNoteEdit … settled hops=0` | `w4-write`, `w4-read-carried` |
+| both | W5 — a deep row (245), then HER wheel 0.35 s later (one guarded act) | the page where her wheel put it | **`end=handedover`** at 569 / 546 ms | `w5-handedover` |
+
+### JUDGMENT CALLS (each reversible, the reversal named)
+
+1. **The lazy columns are KEPT; the authority watches them — the charter's "rows as
+   placeholders at asserted heights" is NOT built (PROVISIONAL, QUESTIONS #151).** The
+   charter's shape was written from the review §1.2's diagnosis ("a one-shot aim against
+   SwiftUI's lazy estimate … the identical jump every time"), a diagnosis *without a repro*.
+   Measured here: on her story the lazy column's `scrollTo` lands exactly, in one step, cold and
+   warm (12/12 pre-fix; a burst of captures shows no intermediate frame). The F3 shape exists
+   for the Index, whose rows were whole NOTES loading their text asynchronously (the column
+   oscillated by tens of thousands of points); a note's rows are its blocks, drawn from text in
+   hand, so the lazy column realizes each at its real height as it lands. Built and measured
+   anyway (working tree): asserted-height rows made the real story's cold arrival stand 59 pt off
+   and need a correction hop a second later — a visible regression and a miss of the charter's
+   own acceptance line (`hops=0` cold) — and a plain column puts a geometry observer on EVERY
+   row that fires on every scroll frame, where the lazy column's fire only for the realized ones
+   (P1). *Reverse by* the working-tree experiment's shape (`ExperimentRow` in the record's log
+   name: a `VStack` of `NearBand` rows at `ReadNoteHeights.height`), accepting the hop.
+2. **The anchor is carried as ARITHMETIC in the surface, not as an authority concept.** The
+   authority converges a reported number to 0; note Read reports its block's distance from its
+   face's anchor (`ReadLandingResidual`, `ViewportCarry.topInset` — the carry's own definition),
+   clamped by the page's ends. The aim KIND is 18l-b U2's to grow (the charter); this is the
+   fraction arm's pure, pinned arithmetic for U2 to hoist. *Reverse by* nothing — U2 moves it.
+3. **`correctsAnUnreportedTarget` TRUE (the Outline's answer).** A lazy column's missed block
+   never reports; the second aim is what reached the synthetic miss (1 hop). Budget 3 and the
+   watchdog keep a hopeless landing honest. The other constants are the measured family's and
+   the trials kept them (72/72 settled at the one-second hold). *Reverse by* `false` (the
+   synthetic miss then ends `gaveup` after the watchdog, honestly, without arriving).
+4. **Two surface words, one per face** (`ReadNote`, `ReadNoteEdit`) with identical constants —
+   the charter allowed a second policy "if its `.center` anchor wants its own constants"; it did
+   not, but a Console line must say which face landed. *Reverse by* one case for both.
+5. **The contents column is not adopted** — its rows are uniform one-line handles, its one-shot
+   `.center` was never implicated, and its landing is not the reading position. *Reverse by*
+   a sixth surface case and the same watch.
+6. **The manifest's lengths are read off the rows the host already holds** (`BlockTOCViewModel.rows`
+   — `renderPost`'s take, the one `Queries.blockExtents` resolves), as `Queries.BlockExtent`
+   values (scalars = SQLite `LENGTH()`'s code points), ONCE per block-id list — no second
+   statement for text in memory, and nothing at autosave rate. `Sources/` untouched. *Reverse by*
+   a `Queries.blockExtents(db, containerIDs: [postID])` read per id list.
+7. **The manifest feeds the FACTS only** (the signpost's `offset/total/derived/exact`) — with
+   the rows lazy, no row stands on it. The calibration pin holds it within a fifth of what the
+   rows draw (0.975 / 0.996 / 0.988), so `offset=` is an honest estimate and `derived=` the
+   honest count of blocks the face has never drawn (251 cold → 155 warm).
+8. **The harness grew the `read-landing` scenario (in the seeded order) and one DEBUG probe
+   read (`rl`)** — the brief's "one table row IF cheap": it was, and it is the unit's trial
+   instrument and a standing tripwire. `ReadModeView.pageRestingAnchor` names the page's 0.08
+   (unchanged) so the probe reads the product's constant.
+
+### COST SHAPE (P1 / P3), stated
+
+- **The extents:** O(the note's text) ONCE per block-id list, at a LANDING (never at a rows
+  delivery, so never at autosave rate — pinned: an autosave-shaped re-delivery takes nothing).
+- **The manifest:** arithmetic over the rows in hand at a LANDING — O(rows), no read, no layout;
+  a per-block derived memo dropped on a new measure / voice / type scale.
+- **Per scroll frame:** only the REALIZED rows' existing geometry observer does anything new
+  (one closure: a box write, a no-op-guarded height learn, one string compare); the face's one
+  scroll-geometry observer writes a box and, only while a landing is pending, one residual.
+  P3 unchanged — the columns realize exactly what they realized before (14–15 rows on a landing).
+
+### THE DRIFT CLASS (row 64's lesson), answered
+
+Nothing she SEES stands on arithmetic: the lazy column draws every visible row at its real
+height. The manifest's derived heights govern only the signpost's facts; a row that draws
+reports its measured height (MEASURED > DERIVED), a new measure/voice/scale drops everything
+learned (the stamp), and the lengths are taken again whenever the block-id list changes. The one
+staleness: a block whose TEXT changes while the note stays in Read keeps its old length until the
+id list changes — and that block is by construction the realized one, measured.
+
+### SEAM FILES THIS DIFF TOUCHES (the reviewer reads this first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `Surface/LandingAuthority.swift` | two `LandingSurface` cases (`ReadNote`, `ReadNoteEdit` — the closed vocabulary), two policies | `LandingSettle.decide`, the loop, the signpost's format and its content-free guard |
+| `Features/ReadMode/ReadNoteLanding.swift` | NEW — `ReadLandingResidual` (pure), `ReadScrollFacts`, `ReadNoteHeightModel` (pure), `ReadNoteHeights` (the per-face manifest), `ReadLandingBox`, the DEBUG `ReadLandingStory`, `LandingAuthority.readNote(_:)` | — |
+| `Features/ReadMode/ReadEditPane.swift` | the authority + box; `land` hands the SAME act to it; the scroll observer; `onScrollPhaseChange`; `onDisappear { landing.end() }`; `ReadEditBlock.onPlace` from its EXISTING observer + `onDisappear` | the `LazyVStack`, the rows, `PaneSurfaceView`'s mount and every argument, the click road (U0), the carry's capture |
+| `Features/ReadMode/ReadModeView.swift` | the host holds the two manifests; `ReadPageColumn` the same adoption as the edit face; `ReadPageBlock.onPlace`; `ReadCarryGeometry.viewportFrame`; `pageRestingAnchor` named | the seed, `select`, the U0c opening arm, the carry, the click-through, `landIfPending`, the page's look |
+| `Core/Views/VisualWalkProbe.swift` | the DEBUG `rl` read (+ `import SwiftUI`) | every existing field |
+| `Tools/VisualWalk/` | `read-landing` (+ seeded order, README row), the Notification-Center column rule, `readedit-click`'s AX role | the guard order, the stamp, every other scenario |
+| Tests | NEW `ReadNoteLandingTests` (4), `ReadNoteHeightsTests.swift` (`ReadNoteLandingArithmeticTests` 6, `ReadNoteHeightsCalibrationTests` 3); `LandingSignpostTests`' count | every other pin byte-unmodified |
+
+**Not the editor seam:** `EditorTextView`, `EditorViewModel`, `PaneSurface`/`PaneTextView`,
+`PaneTextAuthority`, `BlockRangeIndex`, `runStructural`, `JumpPrimitive` — none in the diff (the
+edit face HOSTS the live pane exactly as before). **Review cast per the brief: OPUS.** (The
+cast's letter also names "landing … code" for Fable; the authority's loop is untouched — two
+vocabulary cases and two policies — the orchestrator's call if it reads that line strictly.)
+Zero `Sources/`, `Shared/`, `Sync/`, schema, `Server/`, mobile.
+
+### NOTICED, NOT TOUCHED
+
+1. **The health review §1.2's note-Read diagnosis did not reproduce** on the real fixture
+   (piece 2b) — the review is not this unit's pen; a dated line there is the orchestrator's.
+2. **The face switch lands the other face on the selected block** (a request parked for the
+   unmounted face) — pre-existing, now watched; noted because the trials' "second face" rows
+   ride it.
+3. **A mode switch right after a first open lands block 1** (W1 Terminal — the opening ends at
+   the switch, so the seed scrolls to the first row; clamped home, the page at its start) — U0c's
+   rules composed exactly; nothing visible.
+4. **`readedit-click`'s AX lookup was latently wrong** (fixed, machinery note 2).
+
+### OWED AT CLOSE (drafted for the orchestrator)
+
+- **THE LEDGER row 7:** BUILT+WALKED as (B) — the watch in both faces, the manifest for the
+  facts, the lazy columns kept (#151); the cold line met: 12/12 truly cold `hops=0`.
+- **QUESTIONS #151** → her bundle (the one departure from the charter's letter, with both
+  measurements).
+- **AppSpec:** none required (no contract line names landing internals); optional §12 pointer:
+  *"note Read's landings are watched by the one landing authority (18l U1)."*
+- **KnownIssues:** none opened, none closed (no row owned note Read's landing).
+- **The health review §1.2** (optional, the orchestrator's pen): a dated line that note Read's
+  one-shot was measured exact on the real fixture at 18l U1; the synthetic class is the one
+  reproduction, now corrected.
+- **MOBILE PARITY:** the phone's long-note Read inherits THIS shape, not the Index's — the one
+  authority watching its lazy column's own landing, the fraction residual, the signpost; a
+  `notes/MobileSoul.md` row (the mobile project's pen). Nothing mobile-visible changed.
+
+### SELF-ASSESSMENT
+
+Strong: the unit measured before it built and built what the measurement said — a pre-fix app
+baseline (12/12 exact, zero Console lines, a burst of captures), the charter's own shape built
+and measured on the real story (59 pt off + a hop) before being rejected, and a post-fix table
+of 72/72 `settled hops=0` with the Console flip captured; red-on-old is the pre-fix pin run
+(RED 2/2) AND a named behavioural revert that red exactly as predicted (4 tests / 10 issues);
+the resting anchors, the U0c opening arm, the carry and the click road are untouched; the diff
+is off the editor seam. **Weakest points for the reviewer:** (a) **JC 1 departs from the
+charter's letter** — the evidence is strong but it is a ratified unit's shape, so the
+orchestrator must confirm it (and #151 carries it to her); (b) the red-on-old rests on a
+SYNTHETIC shape — the real fixture had nothing to fix before, so the unit's user-visible gain on
+her story is the watch itself (the signpost, the hand-over, the watchdog) plus robustness for
+shapes like the synthetic; (c) the residual trusts SwiftUI's `scrollTo(_:anchor:)` fraction
+semantics and a zero content inset (verified only by 72 settles at |rl| ≤ 0.2 and the pins, not
+by an inset-bearing window); (d) `correctsAnUnreportedTarget` true allows blind re-aims on a
+lazy column (budget 3; the Index measured blind hops FLINGING its oscillating column — note Read's
+column does not oscillate, but a pathological note could make three blind hops visible); (e) the
+harness scenario's filter road is a real user road but not the only deep-click road (the walk
+covered visible-row clicks, the click-through, the carry and the hand-over). **U1 — DONE
+(implementer); the cold review follows.**
 
 ## MORNING BUNDLE (accumulating — the handoff's first section copies this)
 
