@@ -26,8 +26,12 @@
 //  report is made, never WHAT triggers one).
 //
 //  **The pin:** the real Outline, the seeded note focused and live, the window
-//  narrowed and widened — after each settle the editor's FRAME must be the
-//  height of the text it now holds, in both voices.
+//  walked through fifteen widths — after each settle the editor's FRAME must be
+//  the height of the text it now holds, in both voices, in both directions.
+//  RED ON OLD (the behavioural revert R-U0-2, re-run on this form): 9 of 30 steps
+//  — SHORT by up to 132 pt (her clip) and TALL by up to 88 pt (the gap
+//  KnownIssues row 75 recorded after a narrow → restore, which C2 attributed to
+//  TextKit's measure variance: on this rig it is the same missing trigger).
 //
 
 import AppKit
@@ -154,20 +158,25 @@ struct InlineEditorWidthReflowTests {
         }
         await harness.settle(window, hosting, turns: 20)
 
-        // Three widths, each settled: the start, much narrower (the text
-        // re-wraps into MORE lines), and back (fewer again).
-        for (step, width) in [("mounted", 1200.0), ("narrowed", 820.0), ("narrowed more", 700.0), ("widened", 1200.0)] {
-            if step != "mounted" { harness.resize(window, hosting, width: width) }
-            await harness.settle(window, hosting, turns: 30)
+        // A walk of window widths, each settled: narrowings (the text re-wraps
+        // into MORE lines — her clip) and widenings (FEWER — the gap under the
+        // last line, KnownIssues row 75's shape), in an order that crosses
+        // both directions from several starting wraps. Measured on the pre-fix
+        // road: 9 of these 30 steps stranded — 7 SHORT (−17 … −132 pt) and 2
+        // TALL (+51, +88) — and none on the fixed road.
+        let widths: [CGFloat] = [1200, 700, 820, 1200, 640, 900, 1100, 760, 1200, 600, 1200, 820, 700, 1000, 1200]
+        for (step, width) in widths.enumerated() {
+            harness.resize(window, hosting, width: width)
+            await harness.settle(window, hosting, turns: 25)
             let live = try #require(harness.editor(in: hosting), "the note is live")
             let text = PaneMeasurement.height(of: live)
-            print("[18l U0 item 2] \(voice) · \(step): frame \(live.frame.height) · text \(text) · width \(live.frame.width)")
+            print("[18l U0 item 2] \(voice) · step \(step) at \(Int(width)): frame \(live.frame.height) · text \(text)")
             #expect(live.frame.height >= text - 0.5, Comment(rawValue:
-                "\(voice) · \(step): the frame (\(live.frame.height) pt) is SHORTER than the text it "
-                    + "holds (\(text) pt) — the last line is cut through"))
+                "\(voice) · step \(step) (\(Int(width)) pt): the frame (\(live.frame.height) pt) is SHORTER "
+                    + "than the text it holds (\(text) pt) — the last line is cut through"))
             #expect(live.frame.height <= text + 0.5, Comment(rawValue:
-                "\(voice) · \(step): the frame (\(live.frame.height) pt) is TALLER than the text it "
-                    + "holds (\(text) pt) — a gap under the last line"))
+                "\(voice) · step \(step) (\(Int(width)) pt): the frame (\(live.frame.height) pt) is TALLER "
+                    + "than the text it holds (\(text) pt) — a gap under the last line"))
         }
     }
 }
