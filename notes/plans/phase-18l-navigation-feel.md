@@ -362,7 +362,7 @@ U0b and U0c are NOT this session's (findings for them are recorded, never built)
 | # | Piece | Status |
 |---|---|---|
 | 1 | Reading (the brief's list, in order, in this session's own context) | DONE — this file whole; the charter's KICKOFF 2 (U0 in full + the rest for context); KnownIssues rows 85/86/87/89/90; `notes/TEXTKIT2_NOTES.md` whole; 18k UNIT C2 brief+record+adjudication, UNIT C6 brief+record+adjudication, UNIT C6b brief+record+adjudication, the held-walk C6 rows; the three captures in `notes/plans/18l-inputs/`; `BookIndexView.swift`, `BookIndexEditModel.swift`, `Surface/PaneSurface.swift`, `EditorView.swift` (`InlineEditorSurface`) end to end; `Tools/WalkKit/README.md` |
-| 2 | Item 1 — the Index click: REPRODUCE on the dev-store Debug build | NOT-STARTED |
+| 2 | Item 1 — the Index click: REPRODUCE on the dev-store Debug build | IN-PROGRESS — dev build `DerivedData/18l-u0-walk` (HEAD `4dfd84eb`) launched (pid 68582, dev store); reached the Sherlock book's Outline, then GUI driving STOPPED (the incident line below). Reproduction continues by HARNESS until the machine is author-free |
 | 3 | Item 1 — trace + bisect by harness | NOT-STARTED |
 | 4 | Item 1 — red-on-old pin, fix, behavioural revert | NOT-STARTED |
 | 5 | Item 2 — the clipped descenders: reproduce, trace, pin, fix, revert | NOT-STARTED |
@@ -372,3 +372,4 @@ U0b and U0c are NOT this session's (findings for them are recorded, never built)
 | 9 | Self-assessment | NOT-STARTED |
 
 - Deaths / resumes: none.
+- **INCIDENT (machinery honesty, ~01:37 local):** a walk double-click (`cliclick c:318,226`, meant for the dev window's `index` tab) fired while the author was at the machine; her `/Applications` window covered that point and my dev window had left the current Space, so the click MAY have landed in her real-store window (worst case a mode/tab switch). Reported to the orchestrator at once; she was told. GUI driving stopped; harness-only until the machine is author-free; the per-step rule is ENVIRONMENT TRAPS' hardened entry (`615b833a`).
