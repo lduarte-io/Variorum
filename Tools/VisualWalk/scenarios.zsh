@@ -53,7 +53,7 @@ scn_note-reopen() {
   vw_cap 01-first-open
   vw_expect_near "first open: page at the top (clip)" "${PV[clip]}" 0 0.5
   vw_expect_eq "first open: first visible line is the note's first" "${PV[top]}" 0
-  vw_expect_eq "first open: caret at the start" "${PV[sel]}" "0,0"
+  vw_expect_eq "first open: caret at the start (QUESTIONS #150(a) — the first open seeds no fact; PROVISIONAL)" "${PV[sel]}" "0,0"
   vw_write_scroll 40
   vw_require '(( ${PV[clip]} > 200 ))' "the wheel moved the page mid-note" || return
   vw_snap left; vw_cap 02-left-mid-note
@@ -167,6 +167,7 @@ vw_def mode-roundtrip "A Scandal in Bohemia, Write, wheel-scrolled, caret on scr
 scn_mode-roundtrip() {
   vw_write_open "A Scandal in Bohemia" || return
   vw_write_scroll 20
+  vw_require '[[ -n ${PV[mid]} ]]' "a text line in the viewport's lower half" || return
   local c=(${(s:,:)PV[colX]}) y=$(( (PV[midY] + PV[midY1]) / 2 ))
   vw_free_x $(( c[1] + 40 )) $(( c[1] + 120 )) $y
   vw_click $FREE_X $y "a mid-page line (caret on screen)"
@@ -197,11 +198,12 @@ vw_click_read_tier() {  # key(rtI|rtR) label band-top-offset — clicks the LOWE
     (( q[2] >= band_top && q[2] + q[4] <= band_bot )) && fit+=($r)
   done
   vw_require '(( ${#fit} >= 2 ))' "two read-tier blocks fully on screen ($key)" || return
-  # The lower target is the lowest block of FIVE or more lines (≥ 100 pt): tall enough that the
-  # known read-tier re-wrap (S3: the live pane drops the tier's 4-pt line spacing, so line k rises
-  # 4k pt) must show on its last line — a standing measurement of S3, not a coin toss on block size.
+  # The lower target is the lowest block of EIGHT or more lines (≥ 200 pt; else 5+, else 3+): tall
+  # enough that the known read-tier re-wrap (S3: the live pane drops the tier's 4-pt line spacing, so
+  # line k rises ~4k pt) shows on its last line in both voices — a standing measurement of S3, not a
+  # coin toss on block size (round 1: a 5-line block's shift stayed inside its line in Study).
   local low= up= i min
-  for min in 100 50; do
+  for min in 200 100 50; do
     low= up=
     for (( i = ${#fit}; i >= 1; i-- )); do
       local q=(${(s:,:)fit[i]})
@@ -217,20 +219,34 @@ vw_click_read_tier() {  # key(rtI|rtR) label band-top-offset — clicks the LOWE
   vw_free_x $L[1] $(( L[1] + L[3] * 0.5 )) $y; x=$FREE_X
   vw_click $x $y "$label: the last line of a block"
   vw_settle; vw_cap 01-last-line
-  vw_expect_eq "$label last line: a pane went live under the caret" "${PV[fr]}" pane
-  vw_expect_eq "$label last line: the caret is NOT on the empty line under the text" \
-    "$([[ ${PV[nl]} == 1 && ${PV[caretEnd]} == 1 ]] && print on-the-blank-line || print on-text)" on-text
-  # (Not "the block's last live line": the live pane shows the markdown markers the tier hides, so
-  # it can wrap the block one line longer — S3 again; the character is the pinned half, in-suite.)
-  vw_expect_eq "$label last line: the caret is on a TEXT line (not the empty one)" \
-    "$(( PV[caretLine] < PV[caretTextLines] ))" 1
-  vw_expect_between "$label last line: the clicked line stays under the pointer (click y in its box)" \
-    $y $(( PV[caretY0] - 1 )) $(( PV[caretY1] + 1 )) "$KI_S3"
+  vw_assert_last_line_click "$label" $y
   # 2. the block ABOVE, on its FIRST line.
   y=$(( U[2] + 8 ))
   vw_free_x $U[1] $(( U[1] + U[3] * 0.5 )) $y; x=$FREE_X
   vw_click $x $y "$label: the first line of the block above"
   vw_settle; vw_cap 02-first-line
+  vw_assert_first_line_click "$label" $x $y
+}
+
+# Rule (c) for a click on a block's LAST line, from the probe's answer (PV). Factored so a headless
+# pin can feed it planted answers (pins/read-tier-assertions.zsh).
+vw_assert_last_line_click() {   # label click-y
+  local label=$1 y=$2
+  vw_expect_eq "$label last line: a pane went live under the caret" "${PV[fr]}" pane
+  vw_expect_eq "$label last line: the caret is NOT on the empty line under the text" \
+    "$([[ ${PV[nl]} == 1 && ${PV[caretEnd]} == 1 ]] && print on-the-blank-line || print on-text)" on-text
+  # WHICH line (round 1, MINOR-1 — plain, so a wrong-line landing reds): the block's last text line,
+  # or the one before it, because the live pane shows the markdown markers the tier hides and can wrap
+  # the block one line longer (S3). The pre-fix Read ▸ edit landing (line 0) reds here.
+  local last=$(( PV[caretTextLines] - 1 ))
+  vw_expect_between "$label last line: the caret on the block's last text line (or the one S3's wrap adds)" \
+    "${PV[caretLine]}" $(( last - 1 )) $last
+  vw_expect_between "$label last line: the clicked line stays under the pointer (click y in its box)" \
+    $y $(( PV[caretY0] - 1 )) $(( PV[caretY1] + 1 )) "$KI_S3"
+}
+
+vw_assert_first_line_click() {  # label click-x click-y
+  local label=$1 x=$2 y=$3
   vw_expect_eq "$label first line: a pane went live" "${PV[fr]}" pane
   vw_expect_eq "$label first line: the caret is on the first line" "${PV[caretLine]}" 0
   vw_expect_eq "$label first line: not at the block's end" "${PV[caretEnd]}" 0
@@ -337,7 +353,9 @@ scn_b5-return-after-cmd-down() {
   vw_keys "⏎ at the tail" 'key code 36'
   vw_settle; vw_cap 02-return
   vw_expect_eq "⏎ at the tail: an empty block below" "${PV[blk]#*/}" $(( blocks + 1 ))
-  vw_expect_page_still tail "⏎ at the tail" "$KI_B5"
+  # KNOWN only where it reproduced — the Study pass (round 1, MINOR-2); plain in Terminal, so a move
+  # there reds and a standing non-reproduction stops producing an XPASS every run.
+  vw_expect_page_still tail "⏎ at the tail" "$([[ $VOICE == study ]] && print -r -- $KI_B5)"
   vw_keys "⌫ (restore)" 'key code 51'
   vw_settle; vw_cap 03-restored
   vw_expect_eq "restore: text back" "${PV[len]}" $len0
@@ -347,7 +365,7 @@ scn_b5-return-after-cmd-down() {
 vw_def b5-refont "A Scandal in Bohemia, Write" \
   "a voice switch (the whole-document re-font) · ⌘↓ · ⏎ at the tail · ⌫ · the voice switched back" \
   "(a) the ⏎ at the tail must not move the page" \
-  "$KI_B5's re-font road (U0b named it) — not reproduced at U-VIS's first runs; XFAIL when it moves"
+  "pass — $KI_B5's re-font road (U0b named it) never reproduced at U-VIS, so it is asserted PLAIN (round 1, MINOR-2): a move here is a FAIL"
 scn_b5-refont() {
   vw_write_open "A Scandal in Bohemia" || return
   local here=${PV[voice]} other len0=${PV[len]}
@@ -361,7 +379,7 @@ scn_b5-refont() {
   vw_keys "⏎ at the tail" 'key code 36'
   vw_settle; vw_cap 02-return
   vw_expect_eq "⏎ at the tail: an empty block below" "${PV[blk]#*/}" $(( blocks + 1 ))
-  vw_expect_page_still tail "⏎ at the tail (after a re-font)" "$KI_B5"
+  vw_expect_page_still tail "⏎ at the tail (after a re-font)"
   vw_keys "⌫ (restore)" 'key code 51'
   vw_settle
   vw_expect_eq "restore: text back" "${PV[len]}" $len0

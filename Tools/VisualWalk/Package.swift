@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 //
 // 18l U-VIS — the env-flagged WRAPPER around the visual walk (the keychain-drill gating pattern:
 // `.enabled(if: VARIORUM_VISUAL_WALK == "1")`). Its own tiny package, so no default suite — not the
@@ -6,12 +6,13 @@
 //
 //     cd Tools/VisualWalk && VARIORUM_VISUAL_WALK=1 swift test
 //
-// Unset, both tests report SKIPPED with their reason. Set, they drive the REAL dev-store window
-// through `visual-walk.sh` (README.md) and take ~25 minutes.
+// Always on (no GUI): the headless pins, `pins/*.zsh`. Unset, the two GUI tests report SKIPPED with
+// their reason; set, they drive the REAL dev-store window through `visual-walk.sh` (README.md) —
+// the self-test, then the seeded walk in both voices (~15 minutes, measured).
 import PackageDescription
 
 let package = Package(
     name: "VisualWalk",
-    platforms: [.macOS(.v15)],
+    platforms: [.macOS(.v26)],
     targets: [.testTarget(name: "VisualWalkTests", path: "Tests/VisualWalkTests")]
 )

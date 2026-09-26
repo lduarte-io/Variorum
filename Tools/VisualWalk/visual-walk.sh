@@ -1,15 +1,16 @@
 #!/bin/zsh
 # Tools/VisualWalk/visual-walk.sh — the OPT-IN visual regression harness (18l U-VIS).
 #
-#   VARIORUM_VISUAL_WALK=1 Tools/VisualWalk/visual-walk.sh [--build] [--voices terminal,study]
+#   VARIORUM_VISUAL_WALK=1 Tools/VisualWalk/visual-walk.sh [--build] [--voices terminal,study]   (~15 min)
 #                                                          [--only name,name] [--selftest] [--list]
 #
 # Drives its OWN dev-store Debug build (io.lduarte.Variorum.debug, launched with the DEBUG oracle
 # endpoint on) through the seeded scenarios in scenarios.zsh, asserting MEASURED GEOMETRY read from
 # the app itself; captures + a per-scenario PASS/FAIL report land in notes/plans/vis-walks/<date>/.
 # Exit: 0 no FAIL / ERROR (XFAIL and XPASS are reported, never red — an XPASS is flagged loudly in the
-# report: a known issue did not reproduce) · 1 a FAIL or ERROR · 4 aborted (a guard fired; nothing
-# further was touched) · 5 refused (a precondition). README.md says what each scenario asserts.
+# report: a known issue did not reproduce) · 1 a FAIL or ERROR · 4 aborted (a guard fired, or the
+# harness could not go on — the run folder's `aborted` says which) · 5 refused (a precondition; nothing
+# launched). README.md says what each scenario asserts.
 
 emulate -L zsh
 setopt pipe_fail

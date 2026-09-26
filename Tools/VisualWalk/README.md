@@ -15,7 +15,7 @@ Captures ride beside the numbers as evidence; nothing is ever decided by compari
 ## Run it
 
 ```
-# the seeded scenarios, both voices (~20 min); the dev app is built first if --build
+# the seeded scenarios, both voices (~15 min, measured); --build compiles AND stamps the dev app first
 VARIORUM_VISUAL_WALK=1 Tools/VisualWalk/visual-walk.sh --build --voices terminal,study
 
 # one or two scenarios, the voice the dev store already speaks
@@ -24,7 +24,8 @@ VARIORUM_VISUAL_WALK=1 Tools/VisualWalk/visual-walk.sh --only note-reopen,index-
 # the harness's own tripwire: a planted, knowingly wrong expectation — must exit 1
 VARIORUM_VISUAL_WALK=1 Tools/VisualWalk/visual-walk.sh --selftest
 
-# the same as an env-flagged test (skipped unless the flag is set; its own package — no default suite)
+# the same as an env-flagged test (its own package — no default suite). Without the flag it runs only
+# the HEADLESS pins (pins/*.zsh: the guard order, the build stamp, the abort's voice, rule (c)'s rows)
 cd Tools/VisualWalk && VARIORUM_VISUAL_WALK=1 swift test
 
 Tools/VisualWalk/visual-walk.sh --list      # the scenario table
@@ -33,7 +34,20 @@ Tools/VisualWalk/visual-walk.sh --list      # the scenario table
 Output: `notes/plans/vis-walks/<date>/<HHMMSS>/` (gitignored) — `report.md` (the per-scenario table and
 every assertion with its measured and expected values), `report.tsv`, `run.log` (every act and guard),
 `probes.log` (every oracle answer), and the captures `<voice>/<scenario>/NN-*.png`.
-Exit: **0** no FAIL/ERROR · **1** a FAIL or ERROR · **4** aborted (a guard fired) · **5** refused.
+Exit: **0** no FAIL/ERROR · **1** a FAIL or ERROR · **4** aborted (a guard fired, or the harness could
+not go on — `aborted` in the run folder says which, and names the dev-store voice if it was left
+switched) · **5** refused (a precondition; nothing launched).
+
+## The build under test (the stamp)
+
+`build.sh` (what `--build` runs) compiles the Debug app and stamps it with what it was compiled FROM:
+App/ and the core (Sources/ + the package manifests), each as the committed tree plus any uncommitted
+diff. The report's header names that origin, and the driver **refuses** a build that is not this
+tree's. `VW_DD=<derived data>` points the harness at a SCRATCH build — how it proves it can red on a
+real reverted fix (`build.sh --src <worktree> --dd <worktree>/dd`, then `VW_DD=<worktree>/dd …`) — and
+that build may differ from the tree **only under App/**: its core is what opens the dev store, and the
+standing trap is absolute — **an old build must NEVER open the dev store** (bisect old trees by
+harness in a scratch worktree with an in-memory store instead).
 
 ## When to run it (the standing cadence, design decision 6)
 
@@ -43,19 +57,28 @@ red = the OS moved (her attribution question, answered by construction).
 
 ## Preconditions (loud refusals, never workarounds)
 
-`VARIORUM_VISUAL_WALK=1`; her `/Applications` app NOT running; no other Variorum instance; this
-terminal holds Accessibility + Screen Recording (granting is hers); the machine author-free (10 s with
-no input — it waits up to a minute). A system dialog on screen is noted and never touched.
+`VARIORUM_VISUAL_WALK=1`; her `/Applications` app NOT running; no other Variorum instance; a stamped
+build of THIS tree; this terminal holds Accessibility, Screen Recording and the Automation grant for
+System Events (all three CHECKED, never prompted — `helpers/vis-tcc.swift`; granting is hers); the
+machine author-free (10 s with no input — it waits up to a minute). The dev app itself is sent no
+Apple Event (it quits through its own menu, by accessibility, addressed to its pid). A system dialog
+on screen is noted and never touched. Never ask the Automation state of a target whose consent prompt
+is PENDING — the check blocks until she answers it (measured with Finder).
 
 ## The per-step safety (every GUI act)
 
-`Tools/WalkKit/guard.sh`, consumed in place (one guard, one home): her app absent · HID idle ≥ 2 s · our
-pid frontmost · our window on this Space with the click point inside it — plus two rules this harness
-adds, born of a real incident (a stale "wants access to control Finder" consent prompt sat over the
+`Tools/WalkKit/guard.sh`, consumed in place (one guard, one home), IN THIS ORDER: `guard.sh --author`
+(her app absent · HID idle ≥ 2 s) BEFORE anything touches the GUI; only then the activation; then the
+target checks (our pid frontmost · our window on this Space with the click point inside it); then the
+act. "Someone is at the machine" ends the run — it is never retried with a re-activation (that would
+move HER keyboard focus). Plus two rules this harness adds, born of a real incident (a stale "wants access to control Finder" consent prompt sat over the
 window; a click landed on it and it took keyboard focus, so a ⏎ would have pressed *Allow*):
 **never click a point any system dialog covers** (`helpers/vis-foreign.swift`), and **never type
 unless the probe says our window is key**. Settings controls are pressed by AXPress (no screen point).
-A guard that fires aborts the run (exit 4); the app it launched is quit by identity/pid.
+A guard that fires aborts the run (exit 4) — as does Ctrl-C — and the app it launched is quit; if the
+pass had switched the dev store's voice, the abort restores it only when no author refusal caused it
+and the author checks pass again, and otherwise writes "RESTORE OWED" (a Study store reds KnownIssues
+row 90's pins on the next Mac suite).
 
 ## The assertions (her three rules)
 
@@ -67,7 +90,9 @@ within 12 pt of the click; never the blank line under the text).
 
 Statuses: **PASS** · **FAIL** (a regression) · **XFAIL** (an OWNED KnownIssues row reproduced — shown
 with its number, not red) · **XPASS** (a known row did NOT reproduce — flagged; re-examine the row) ·
-**ERROR** (a fixture or harness precondition — red).
+**ERROR** (a fixture or harness precondition — red). A KNOWN label is placed only where the row
+REPRODUCES (S3 on both read-tier hosts; B5 on the carve road in Study) — elsewhere the same assertion
+is plain, so a standing non-reproduction does not raise an XPASS every run.
 
 ## The seeded scenarios (`scenarios.zsh`; add one = a `vw_def` row + a `scn_<name>` function)
 
@@ -81,19 +106,23 @@ with its number, not red) · **XPASS** (a known row did NOT reproduce — flagge
 | `index-click` | U0 item 1 (row 86) | a read-tier click in the book Index goes live with the caret ON the clicked line, never the blank line |
 | `readedit-click` | U0 item 1 | the same on Read ▸ edit |
 | `outline-narrow-restore` | U0 item 2 | the live inline note keeps its whole text at 1440 → 1100 → 900 → back |
-| `b5-return-after-cmd-down` | row 88 (B5) | ⏎ at the tail after ⌘↓ on a carve-invalidated layout must not move the page — known, intermittent |
-| `b5-refont` | row 88's re-font road | the same after a whole-document re-font |
+| `b5-return-after-cmd-down` | row 88 (B5) | ⏎ at the tail after ⌘↓ on a carve-invalidated layout must not move the page — KNOWN in Study (where it reproduces), plain in Terminal |
+| `b5-refont` | row 88's re-font road | the same after a whole-document re-font — plain (it has never reproduced) |
 | `selftest-red` (`--selftest`) | the guard rule | a planted wrong expectation must FAIL |
 
-Fixtures are the dev store's sample library (Sherlock). Mutating scenarios restore their text; the
-carve leaves its empty block in the note's tray (the walks' accepted residue). Chrome controls are
-found by their accessibility labels (`helpers/vis-ax.swift`), never by remembered coordinates.
+Fixtures are the dev store's sample library (Sherlock). Mutating scenarios restore their TEXT, but not
+every identity (N9): each pass per voice leaves, in *About this book* and *A Scandal in Bohemia*'s
+trays, the carve's empty blocks and — `write-divide-merge`'s ⌫ at the seam being a MERGE (a fresh
+block, both sources released to lineage) — two released blocks, and swaps one fixture block's
+identity; leaving an edited note appends its quiet `closeAutoCommit` savepoints. Harmless to the
+geometry; the walks' accepted residue. Chrome controls are found by their accessibility labels
+(`helpers/vis-ax.swift`), never by remembered coordinates.
 
 ## The pieces
 
 `visual-walk.sh` (entry, preconditions, per-voice FRESH launches — a pass's first opens are real first
-opens) · `lib.zsh` (acts, guard, probe + settle, assertions, report) · `scenarios.zsh` (the table) ·
+opens) · `build.sh` (compile + stamp) · `lib.zsh` (acts, guard, probe + settle, assertions, report,
+the stamp's verdict) · `scenarios.zsh` (the table) · `pins/` (the headless pins) ·
 `helpers/` (`vis-probe` asks the app, `vis-win` finds its window, `vis-foreign` lists system dialogs,
 `vis-ax` finds/presses a control by label, `vis-tcc` checks the grants; compiled into `bin/`,
-gitignored) · `Package.swift` + `Tests/` (the env-flagged wrapper). `VW_DD=<derived data>` points the
-harness at another build — how it was shown to RED on a real reverted fix (U-VIS RECORD).
+gitignored) · `Package.swift` + `Tests/` (the env-flagged wrapper + the always-on headless pins).

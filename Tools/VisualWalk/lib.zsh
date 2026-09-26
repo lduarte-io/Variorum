@@ -191,8 +191,6 @@ vw_settle() {   # [flags…]
 vw_snap() { local k; for k in ${(k)PV}; do SNAP[$1.$k]=${PV[$k]}; done; SNAP[$1._line]=$PV_LINE }
 vw_get() { print -r -- ${SNAP[$1.$2]} }
 
-# rect "x,y,w,h" → the four numbers
-vw_rect() { print -r -- ${(s:,:)1} }
 
 # --- The acts (every GUI act: the step gap, the AUTHOR checks, THEN the activation, then the target ---
 # checks, then the act — U-VIS round 1, MAJOR-1: activating first moved her keyboard focus before the
@@ -382,10 +380,6 @@ vw_expect_eq() {     # label measured expected [known]
   vw_row $ok "$1" "${2:-∅}" "${3:-∅}" "=" "$4"
 }
 
-vw_expect_ne() {     # label measured forbidden [known]
-  local ok=0; [[ $2 != $3 ]] && ok=1
-  vw_row $ok "$1" "${2:-∅}" "≠$3" "≠" "$4"
-}
 
 vw_expect_between() { # label value lo hi [known]
   local v=$2 ok=0
