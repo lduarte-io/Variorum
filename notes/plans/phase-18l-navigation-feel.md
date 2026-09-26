@@ -366,6 +366,92 @@ editor-seam by definition → a FABLE cold review follows; your self-assessment 
 | U0 (session 1 — brief above) | SPAWNING |
 | U0b → U0c → U-VIS → U1 → U2 → U3 → U4 | NOT-STARTED (briefs written just-in-time, one ahead) |
 
+## U0b BRIEF (session 2 — WRITE: removing a newline collapses the top padding; written by the orchestrator 2026-09-26, spawned after U0's ladder round settles)
+
+You are the `opus-implementer` for **18l UNIT U0b**. One acceptance unit: her report — *"when I am
+in write and remove a newline, the editor's height adjusts removing the whitespace between the
+*[removed for publication]*
+`notes/plans/18l-inputs/2026-09-25-write-{before,after}-removing-newline.png` — block 4/4 (caret
+on an empty last block, first line ~40 pt below the masthead's divider) → one backspace → block
+3/3, the first line ~14 pt below it; the page's top air GONE. KnownIssues row 87.
+
+**Read first, in this order:** (1) THIS file whole — especially HER KICKOFF MESSAGE, THE SITTING
+RECORD (R-18l-1/2/4), ENVIRONMENT TRAPS (they bind verbatim, including the per-step GUI guard and
+the history-bar walker fact in the U0 acceptance), CAST & DISCIPLINE, BASELINES, the **U0 RECORD
+whole** (the freshest editor-seam facts: the settle net, `onWidthReflow`, the C2-pin adaptation —
+your diff must not fight them) and the U0 ladder round-1 file if it exists
+(`notes/plans/18l-u0-ladder-round1.md`). (2) The charter's U0b section
+(`notes/plans/post-13u-health-rounds.md` KICKOFF 2). (3) `notes/TEXTKIT2_NOTES.md` in full —
+mandatory (editor seam); §3's 27.0 findings and the new settle-net line are your era. (4) The 18k
+C6/C6b records (`notes/plans/phase-18k-runtime-hygiene.md`) — `topVisibleOffset()`'s
+baseline-decides rule and the jump primitive's re-assert are on the candidate road. (5) The code:
+the Write surface's TOP INSET / first-block air (trace where the ~40 pt above the first line comes
+from — `EditorTextView`'s container inset, the masthead seam, or a first-block spacing rule), the
+typewriter room (the tail's page of air — its sizing may share machinery with the top), the
+deletion road for an empty last block (`wholeBlockDeletion` / the seam carve / `deleteBlock`'s
+`.emptyWithNothingUnshown`), and any scroll-anchor restore that runs after a structural delete
+(`ScrollAnchorController` / `parkAnchorRestore` / `JumpPrimitive`).
+
+**The unit:** REPRODUCE first (her exact shape: a short note, an empty last block, caret on it,
+one backspace — dev store, both voices); TRACE the mechanism yourself (is the top air a real
+INSET that changes with block count, or a scroll offset the deletion's re-render moves? — the two
+have different fixes and her capture cannot distinguish them); **ATTRIBUTION per the U0 sweep's
+required column** (macOS-27 / our-commit(hash) / pre-existing / undetermined(why) — her build was
+13y's, pre-18k, so 18k commits cannot be the ORIGIN, but check whether 18k C6b's
+`topVisibleOffset` change ALTERS the shape on today's tree); pin red-on-old, verified by
+behavioral revert; fix; WALK (both voices: her repro sequence; a long note's same gesture
+mid-note and at the tail; add-then-remove round trip — the first line must not move when the act
+doesn't move it). Product fence: WHERE the page rests after a deletion at the tail may interact
+with R-18l-1 (note-open = start) and #116(c)'s caret-visible doctrine — if your fix wants to
+CHANGE a ruled resting rule rather than stop an un-asked-for jump, STOP and report (that fork is
+the orchestrator's). Discipline: identical to the U0 brief's paragraph (checkpoint protocol from
+the first commit; `## U0b RECORD` appended to THIS file; commit+push per piece; no subagents;
+synchronous waits; tests at end; pathspec-limited staging). Your diff is editor-seam → a FABLE
+cold review follows.
+
+## U-VIS DESIGN NOTE (the orchestrator's proposal, 2026-09-26 — owed to her in-file per her sitting follow-up; PROVISIONAL under R-18l-4: the overnight build proceeds on this design, hers to overturn at the morning bundle)
+
+**What it is (her words bind):** an OPT-IN visual regression harness — *"tests that can run
+(don't have to be part of the suite that run every time) where screenshots are taken of edits,
+clicks, if the editor has moved unexpectedly between clicks, etc."*
+
+**The design, in six decisions:**
+1. **An EXTERNAL driver over the real window, not a mounted-surface test.** KnownIssues rows 35
+   (whole surfaces crash/hang under the in-process click rig) and 89 (pointer-injection suites go
+   red under real machine input) are exactly the classes an in-suite harness would inherit. So
+   U-VIS is `Tools/VisualWalk/`: a driver script in the WalkKit mold (cliclick + osascript +
+   `walk-cap`), launching its OWN dev-store Debug build, with the U0 incident's `guard.sh`
+   promoted into it (per-step: her app absent · HID idle · dev pid frontmost · window on this
+   Space) — the walk discipline, mechanized once.
+2. **Assertions on MEASURED GEOMETRY, pictures as evidence beside them.** Pixel-diffing screenshots
+   is voice/palette/AA-fragile; the app already knows its own geometry. The driver reads a small
+   DEBUG oracle surface (existing oracles first — `topVisibleOffset`'s line, the caret's line, the
+   last fragment's bottom, the surface frame; any NEW oracle follows 18k C4's owner-keyed shape)
+   and asserts HER three rules: (a) the first visible line's y and the caret's line move ONLY when
+   the act moves them; (b) the last line's glyph box lies inside the surface — no clipped
+   descenders, no gap beyond the designed air; (c) a click lands the caret on the clicked line.
+3. **The scripted acts, seeded from this round's reproductions** (each a standing tripwire):
+   typing into a block · a newline added then removed at the tail (U0b's shape) · a click on a
+   read-tier line in Index and in Read ▸ edit (U0's) · a window narrow → restore (U0's item 2) ·
+   a divide and a merge · a mode switch round trip (Write → Read → Write) · a note close → reopen
+   (U0c's, asserting R-18l-1 once built). Growable by adding a scenario block to one table.
+4. **Opt-in gating:** the driver runs by hand or by an env-flagged wrapper test
+   (`VARIORUM_VISUAL_WALK=1`, the keychain-drill gating pattern) — NEVER in the default suite.
+   Its preconditions refuse loudly (author-free, zero real-store instances, Accessibility +
+   Screen Recording granted).
+5. **Output:** captures + a per-scenario PASS/FAIL report (the assertion values printed) into a
+   gitignored folder (`notes/plans/vis-walks/<date>/`); non-zero exit on any failure. The record
+   of a run that gates a close is pasted into the closing record (numbers, not pictures).
+6. **The standing cadence:** on demand at phase closes touching the editor, and ONCE AFTER EVERY
+   macOS UPDATE on the then-unchanged tree — which makes TK2 NOTES §5's re-verify rule executable
+   and answers her attribution question by construction next time (tree unchanged + suite red =
+   the OS moved).
+
+**Deliberately NOT in v1:** pixel-diff baselines (fragile), phone scenarios (the phone has no
+driver road; a parity row at close), and any default-suite membership. **Sizing:** one unit
+(driver + oracle endpoints + the seeded scenarios + one full evidenced run); its first run doubles
+as U0/U0b/U0c's standing evidence.
+
 ## U0 RECORD (implementer: `opus-implementer`, 2026-09-26)
 
 **NOT DONE (first line):** (1) no whole-old-tree harness bisect — every Mac test run launches the
