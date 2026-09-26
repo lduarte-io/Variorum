@@ -188,6 +188,18 @@ two-phase-sized-units line — flagged to the author at the kickoff sitting (Q3)
   `/usr/bin/log show --predicate 'eventMessage CONTAINS "landing surface"'` filtered on `end=`;
   `walk-scroll` positive line count = DOWN. Screenshots into gitignored dirs
   (`notes/plans/18l-screens/…`).
+- **NO GUI DRIVING WHILE THE AUTHOR IS AT THE MACHINE — hardened 2026-09-26 after a live incident
+  (18l U0, ~01:37 local):** a double `cliclick` meant for the dev-store window fired while she was
+  actively using the Mac; the dev window had gone off the current Space, her `/Applications`
+  instance was frontmost and covered the point, so the click may have landed in HER app
+  (window-relative ~(263,171) — the note header/mode-tab strip; worst case a mode/tab switch or a
+  selection; nothing destructive; her app never quit/killed; reported to her the same minute).
+  THE RULE, binding every walk step from now on: (1) check HID idle BEFORE EVERY GUI step, not
+  once per walk — recent input (< a few seconds) means STOP and wait or go harness-only; (2)
+  verify the TARGET window immediately before each click — the dev pid is frontmost AND its
+  window is on the current Space at the expected frame (a screen point alone is never a target);
+  (3) any doubt → harness-only until the machine is genuinely author-free (the drives rule:
+  unlocked + author-free + own `caffeinate -d`).
 - Backups: WAL-safe, UTC names, ALWAYS before touching the real store; into the SUBFOLDER
   `Backups/safety-copies/` (R-18k-8), never loose in `Backups/`. Drives need unlocked +
   author-free + own `caffeinate -d`.
