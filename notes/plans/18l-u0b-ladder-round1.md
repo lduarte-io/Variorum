@@ -288,3 +288,30 @@ The proposed wording is exact.
 **Summary: 4 AGREE, 0 DISPUTE.** No product behavior is in question: MINOR-1 is a record line beside
 a PROVISIONAL row of hers; MINOR-2, NIT-1 and NIT-2 are comment or hygiene edits (the MINOR-2
 refinement is zero-behavior).
+
+## ROUND 1 FINAL CALLS + FIXES (the reviewer, 2026-09-26 — the cross-model flow's closing half)
+
+The implementer AGREED to all four findings, disputed none (its responses above,
+`278f6c65`). Final call per finding, each fix implemented by this reviewer in this
+session, one commit per finding, pushed each:
+
+| Finding | Final call | Fix | Commit |
+|---|---|---|---|
+| MINOR-1 | **CONFIRMED**, the implementer's three wording points adopted (the two keepers still agree — both carry the carve; the zone is the above-the-container 24-pt inset only; B2's exact landing stays row 87's, out of #134) | The dated carve-out pointer appended to QUESTIONS #134(a) in the #149/R-18l-5 form — a dated line beside the rule, the ruled text itself untouched; hers to overturn with row 87 | `f207f97a` |
+| MINOR-2 | **CONFIRMED WITH the implementer's refinement** — I re-verified the delegate byte-equivalent before adopting it: `reflowLandingInset` is 0 when `inPageTopAir` is false, so `restoreReadingAnchor(ReadingAnchor(offset:, inset: 0, inPageTopAir: false))` performs the identical `guard let textView` → `jump(min(offset, max(0, documentLength)), …, landingInset: 0)` → `refreshBadges()` the old body made. The delegate REMOVES the drift hazard (the six pins now run the production restore's arithmetic) where the header edit alone only documented it | `restoreTopVisibleOffset` = a one-line delegate with the seam-role doc; the ScrollAnchorTests header rewritten to name the production road (`readingAnchor()` → `restoreReadingAnchor`, inset 0 outside the top air, `WriteTopAirTests` pinning the top-air half) | `47edf7d5` |
+| NIT-1 | **CONFIRMED** in the implementer's preferred shape (the two-line reset; the `Int?` park the RAISE-M1 kin read keeps its type) | `pendingAnchorInset = 0` beside both nils — `consumePendingAnchorRestore` reads the inset into a local before clearing; `consumePendingCarriedPlacement` discards it with the park it outranks | `a7786459` |
+| NIT-2 | **CONFIRMED** (the unreachability re-traced by both seats, wording exact) | `readingAnchor()`'s doc: "nil when `topVisibleOffset` is (`lineSpan` of a line already on screen cannot fail after it — every non-nil answer is a line start inside a laid-out fragment, never the document's end)" | `cd01c428` |
+
+**Suite run after the fixes (this session, zero app instances):** `xcodebuild test
+-only-testing` on the ten touched-and-consumer suites — `WriteTopAirTests`,
+`ScrollAnchorTests`, `TypewriterRoomTests`, `TypewriterRoomReachabilityTests`,
+`EditorWindowSmokeTests` (the delegate's six pin sites), `RefontViewportTests`,
+`RefontGapTopTests`, `ModeSwitchCarryTests` (the park/consume and carried-placement
+roads), `JumpViewportLayoutTests`, `LandingOffsetTests` — **✔ Test run with 60 tests in
+10 suites passed** (the only `skipped` lines are the AppIntents metadata warnings, as in
+the unit's closing run). Zero product-behavior changes in the fix pass (MINOR-2's
+delegate verified equivalent above; the rest are record/comment/hygiene), so no
+red-on-old pins owed — each fix labelled per the guard's rule.
+
+**Round 1 closes: 0 BLOCKER / 0 MAJOR / 2 MINOR / 2 NIT, all four agreed, confirmed and
+fixed.** The implementer's sanity pass over `f207f97a..cd01c428` is the remaining step.
