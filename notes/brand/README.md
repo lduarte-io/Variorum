@@ -72,6 +72,12 @@ upright), `the-crow-tree`, `standing-book-sketch`. Three are repeating **pattern
 (partial figures at the edges continue the motif): `girl-and-the-fan`,
 `stepping-off-the-book`, `hanging-from-a-book`. One incoming duplicate was dropped —
 her file (15) was byte-identical to (14).
+**In-app use, 2026-09-26 (17u):** `girl-and-the-fan` tiled the Mac's locked lobby from pre-13u
+Act 10 item 7 until she retired it at her word — *"I don't like the art that's on the Variorum locked
+screen — the tesselating tiles of the art with the humanoid figures and the book. make sure that
+doesn't appear anywhere anymore"* — so the figure tiles are OUT of the app (a grep pin holds the
+lobby's asset out); the lobby now draws an animated monochrome glyph rain (`GlyphRainBackdrop`).
+The pieces stay here as brand archive; any future home is hers to name.
 
 **The poster series** (second drop, same day — nine `poster-*` pieces): bold flat
 silhouette figures wrestling the serif V and its fans on the red — the register where

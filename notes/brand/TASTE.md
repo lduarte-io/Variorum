@@ -111,7 +111,9 @@ worse") — the wispy direction is dead on arrival with her, always.
   which is literally the product's idea. 13q's neighborhood; slotting hers.
 - **The pattern tiles.** Three concept pieces tile seamlessly (`girl-and-the-fan`,
   `stepping-off-the-book`, `hanging-from-a-book`) — natural endpapers: website
-  backgrounds, onboarding backdrops, loading states, merch.
+  backgrounds, onboarding backdrops, loading states, merch. *(Not the app's lock screen: the
+  lobby wore `girl-and-the-fan` from pre-13u Act 10 until 2026-09-26, when she retired the
+  figure tiles from the app at her word — 17u; the lobby now draws a monochrome glyph rain.)*
 - **The pixel pet (13q).** If it ships, decide whether pixel art is a deliberate fourth
   register or whether the pet gets drawn in the ink-figure storybook style instead —
   both defensible; flagged only so the sitting decides rather than inherits.
