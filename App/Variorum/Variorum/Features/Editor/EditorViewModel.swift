@@ -2418,12 +2418,14 @@ final class EditorViewModel {
     private func consumePendingAnchorRestore(deliveredBy generation: Int) {
         guard let offset = pendingAnchorRestore else { return }
         guard generation >= pendingAnchorGeneration else { return }  // a stale hop leaves it (R1-5's rule)
+        let landingInset = pendingAnchorInset
         pendingAnchorRestore = nil
+        pendingAnchorInset = 0  // the inset dies with its park (round-1 NIT-1)
         guard let textView, let scrollView else { return }
         JumpPrimitive.jump(
             toOffset: min(offset, max(0, index.documentLength)),
             textView: textView, scrollView: scrollView,
-            landingInset: pendingAnchorInset)
+            landingInset: landingInset)
     }
 
     private func consumePendingReveal(deliveredBy generation: Int) {
@@ -2532,6 +2534,7 @@ final class EditorViewModel {
             blockHeight: max(1, last.bottom - first.top),
             viewportHeight: Double(scrollView.contentView.bounds.height))
         pendingAnchorRestore = nil
+        pendingAnchorInset = 0  // the inset dies with its park (round-1 NIT-1)
         let caret = pendingRevealOffset
         pendingRevealOffset = nil
         JumpPrimitive.jump(
