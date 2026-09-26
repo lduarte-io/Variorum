@@ -50,6 +50,7 @@ here touches distribution, signing or `/Applications` before this run's own clos
 | **C6** | KnownIssues row 65 — the FIVE macOS-27 test deltas: TRACE `RefontViewportTests.aShrinkingRefontKeepsTheLineAtTheViewportTop` (94-pt drift — possibly REAL, the editor seam) and `BoundaryFluidityTests.theKeystrokePathRoutesCrossBlockDeletesIntoTheCompound` (intermittent); RE-MECHANIZE the two `NSSlider` scrubber pins and `LibraryPanelHostTests`' "inspector" reflection pin | ledger row 65 | trace + pin re-mechanization → the full Mac suite reads GREEN (no "modulo"); a Refont fix, if owed, walks on the Copper Beeches fixture (13u4 F2's own walk) | **Fable** (Refont / BoundaryFluidity are the editor seam) | **DONE** — row 65 CLOSED (a real 27 regression fixed) |
 | **C6b** | The held walks' W-4/W-2: the re-font reading position at a paragraph-GAP top edge; a jump whose own layout grows the document (re-owned into the run 2026-09-25) | the held walks | editor seam → red-on-old pins + the Copper Beeches walk, both voices | Fable | **DONE** — both pre-existing, FIXED (`EditorViewModel.topVisibleOffset` · `JumpPrimitive`); #147 PROVISIONAL |
 | **C7** | The held walks' W-3: the backup listing sorted by NAME (five readers; the second folder got the wrong file; the prune kept A1 copies over dated ones) | the held walks | data safety → `BackupOwnFilesTests` red-on-old + a dev-store scratch-folder run | Fable (the ladder) | **DONE** — FIXED `ff0e67c2`; her real store verified exposed |
+| **C8** | The test-isolation leak 18k introduced (the finals' full-Mac reds absent on the pre-18k base) | the finals | harness → the reproducing pair red→green 3/3 + the owed full Mac run | Fable (round 3, R-18k-9/10) | FIX ACCEPTED + REVIEWED — closes on the full run at her quit |
 
 **Run order (as run):** C0 → C1 → C2 → C3 → C4 → C6 → C5 → THE HELD WALKS (TCC granted mid-run) → C7 →
 C6b → the ladder → the finals → the closeout → the refresh → 18o. One `opus-implementer` per unit, fresh, strictly sequential; C3 follows C2 because C2
@@ -233,10 +234,9 @@ COMMITTED · every death and resume noted in the record.
 - C6b — DONE, ACCEPTED (W-4/W-2 pre-existing, FIXED; #147 PROVISIONAL).
 - THE LADDER — CLOSED at two rounds (R1 0/0/0/3 NIT, NIT 1 fixed `0ebc3b5e`; R2 0/0/0/0).
 - THE FINALS — core **1723/180 ALL PASSED** (+1 = the post-13y auto-entitlement act's `AuthRLSDDL` pin, `b58414eb`/`7152fcd5` — not 18k's; 18k touched no `Sources/`/`Tests/`) · iOS **BUILD SUCCEEDED** · mobile **643/109, exactly the 4 known** (+1 = C5's P26 pin) · full Mac **RED-IN-CONTEXT → UNIT C8** (below).
-- C8 — DONE, ACCEPTED (the widening leak fixed in its leaker; the soak red unreproduced); the full Mac run HELD for her quit.
-- THE C8 COLD REVIEW + ADJUDICATION AUDIT (FABLE, R-18k-9/10) — IN-PROGRESS.
+- C8 — FIX ACCEPTED + REVIEWED (round 3); the unit CLOSES on the owed full Mac run (held for her quit).
+- THE C8 COLD REVIEW + ADJUDICATION AUDIT (FABLE, R-18k-9/10) — DONE: 0/0/0/4 NIT, C8 approved, the audit PASSES (round 3, below).
 - THEN, at ONE zero-instance window (her quit): the full Mac run → the closeout → the refresh. Next phase at her word (likely 18l, carrying U0/U0b/U-VIS; then 18o — a fresh Fable orchestrator).
-- NEXT: C7 → C6b → the ladder (Fable, one combined diff) → finals → closeout → refresh → 18o.
 - Deaths / resumes: none.
 
 ---
@@ -4255,3 +4255,17 @@ typed-and-stamped editor under the shared `.incrementing` ids can repeat this) �
 (filed this commit). **Next: the FABLE cold review of C8 + the audit of every orchestrator adjudication
 (R-18k-9/10) — it needs no zero-instance window (reading + targeted suites; the reviewer is told to
 leave the full suite for the window).**
+
+**ROUND 3 (2026-09-25; opened by her rulings R-18k-9/10, scoped to C8's diff + an audit of every
+orchestrator adjudication) — findings file `notes/plans/18k-ladder-round3.md` (`1a175a21`), FABLE.**
+Verdict: **0 BLOCKER · 0 MAJOR · 0 MINOR · 4 NIT; C8 APPROVED; THE ADJUDICATION AUDIT PASSES** (all ten
+adjudications + THE FINALS audited sound — the Opus orchestrator seat's record, checked by Fable, per
+her remedy). The reviewer re-derived C8's mechanism independently (incl. the discriminator: only tests
+that TYPE-then-crystallize the world's first block leak) and re-ran the reproducing pair green. **The
+four NITs, all records, landed this commit:** (1) THE FINALS' verdict now says C8 explained the widening
+red only (the soak red → the owed full run); (2) LIVE STATUS's stale "NEXT" line removed, C8's ledger row
+added, its status stated as closing on the full run; (3)(i) `BookOutlineLandingTests`' `writingEditor`
+doc annotated (the harness double is gone since `f8610cb9`) and (3)(ii) C7's item 5 CLOSED AS MOOT —
+`SnapshotPairTests.theLockTimeCopyIsKeylessCiphertextPairedAndCheckedAtTheNextRun` is exactly that
+test; (4) the handoff draft is REWRITTEN at the closeout, not committed as drafted. **R-18k-9's gate is
+MET: the refresh may follow the owed full Mac run at the zero-instance window.** No further round.

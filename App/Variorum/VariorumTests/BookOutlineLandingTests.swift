@@ -121,6 +121,11 @@ private func withLandingBook<T>(
 /// probe, recorded in the plan's UNIT A2 RECORD). So the shadow here is the
 /// harness's, and "the first `EditorTextView`" is the wrong question: the
 /// right one is which editor holds the note's text.
+///
+/// *(18k C2, 2026-09-25: the harness double itself is GONE since `f8610cb9`
+/// (13u2b UNIT 1) — bisected, 2 of 2 each side; the shadow-editor row is
+/// closed. The helper stays: asking for the editor that holds the note's text
+/// is still the right question, whatever the mount count.)*
 @MainActor
 private func writingEditor(in view: NSView) -> EditorTextView? {
     var found: [EditorTextView] = []
