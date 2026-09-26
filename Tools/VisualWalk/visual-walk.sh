@@ -7,9 +7,9 @@
 # Drives its OWN dev-store Debug build (io.lduarte.Variorum.debug, launched with the DEBUG oracle
 # endpoint on) through the seeded scenarios in scenarios.zsh, asserting MEASURED GEOMETRY read from
 # the app itself; captures + a per-scenario PASS/FAIL report land in notes/plans/vis-walks/<date>/.
-# Exit: 0 all pass (XFAIL allowed) · 1 a FAIL or ERROR · 3 only XPASS (a known issue did not
-# reproduce — re-examine its row) · 4 aborted (a guard fired; nothing further was touched) ·
-# 5 refused (a precondition). README.md beside this file says what each scenario asserts.
+# Exit: 0 no FAIL / ERROR (XFAIL and XPASS are reported, never red — an XPASS is flagged loudly in the
+# report: a known issue did not reproduce) · 1 a FAIL or ERROR · 4 aborted (a guard fired; nothing
+# further was touched) · 5 refused (a precondition). README.md says what each scenario asserts.
 
 emulate -L zsh
 setopt pipe_fail
@@ -45,8 +45,14 @@ done
 [[ $WK/wl2 -nt $WK/wl2.swift ]] || swiftc -O -o $WK/wl2 $WK/wl2.swift || refuse "cannot compile WalkKit's wl2 (guard.sh needs it)"
 tcc=$($VW_BIN/vis-tcc)
 [[ $tcc == "AX 1 SCREEN 1" ]] || refuse "this terminal lacks Accessibility / Screen Recording ($tcc) — granting is the author's"
-idle=$(ioreg -c IOHIDSystem | awk '/HIDIdleTime/ {print int($NF/1000000000); exit}')
-(( idle >= 10 )) || refuse "HID idle ${idle}s — someone is at the machine (the harness needs it author-free)"
+# Author-free: 10 s without input (the command that launched us counts — so wait up to a minute).
+for i in {1..12}; do
+  idle=$(ioreg -c IOHIDSystem | awk '/HIDIdleTime/ {print int($NF/1000000000); exit}')
+  (( idle >= 10 )) && break
+  (( i == 1 )) && print -u2 "waiting for 10 s without input (HID idle ${idle}s) …"
+  sleep 5
+done
+(( idle >= 10 )) || refuse "HID idle ${idle}s after a minute — someone is at the machine (the harness needs it author-free)"
 foreign=$($VW_BIN/vis-foreign 0)
 [[ -n $foreign ]] && print -u2 "NOTE: system dialog(s) on screen — the harness will never click or type into them: $foreign"
 
@@ -101,5 +107,4 @@ vw_report
 print -u2 "\nreport: $RUN_DIR/report.md"
 column -t -s $'\t' $RUN_DIR/report.tsv >&2
 (( RUN_FAILS + RUN_ERRORS )) && exit 1
-(( RUN_XPASS )) && exit 3
 exit 0

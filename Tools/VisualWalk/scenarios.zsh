@@ -310,7 +310,7 @@ scn_outline-narrow-restore() {
 vw_def b5-return-after-cmd-down "A Scandal in Bohemia, Write" \
   "a blank line mid-page · ⏎ + ⌫ (the carve's full re-render invalidates layout) · ⌘↓ · ⏎ at the tail · ⌫" \
   "(a) the ⏎ at the tail must not move the page (the lines above the caret)" \
-  "pass — $KI_B5 did NOT reproduce here at U-VIS (2026-09-26, both roads; U0b measured +109/+166 on 998f7d7d): a red means B5 is back"
+  "$KI_B5 — INTERMITTENT: U0b measured +109/+166 on 998f7d7d; U-VIS's first full run reproduced it once in Study (the lines above the caret moved down ~30 pt under a fixed clip — U0b's hypothesis, measured) and not in Terminal, nor in two no-probe runs. XFAIL when it moves, XPASS when it does not"
 scn_b5-return-after-cmd-down() {
   vw_write_open "A Scandal in Bohemia" || return
   vw_write_scroll 30
@@ -336,7 +336,7 @@ scn_b5-return-after-cmd-down() {
   vw_keys "⏎ at the tail" 'key code 36'
   vw_settle; vw_cap 02-return
   vw_expect_eq "⏎ at the tail: an empty block below" "${PV[blk]#*/}" $(( blocks + 1 ))
-  vw_expect_page_still tail "⏎ at the tail"
+  vw_expect_page_still tail "⏎ at the tail" "$KI_B5"
   vw_keys "⌫ (restore)" 'key code 51'
   vw_settle; vw_cap 03-restored
   vw_expect_eq "restore: text back" "${PV[len]}" $len0
@@ -346,7 +346,7 @@ scn_b5-return-after-cmd-down() {
 vw_def b5-refont "A Scandal in Bohemia, Write" \
   "a voice switch (the whole-document re-font) · ⌘↓ · ⏎ at the tail · ⌫ · the voice switched back" \
   "(a) the ⏎ at the tail must not move the page" \
-  "pass — $KI_B5's re-font road; did NOT reproduce at U-VIS (2026-09-26): a red means B5 is back"
+  "$KI_B5's re-font road (U0b named it) — not reproduced at U-VIS's first runs; XFAIL when it moves"
 scn_b5-refont() {
   vw_write_open "A Scandal in Bohemia" || return
   local here=${PV[voice]} other len0=${PV[len]}
@@ -360,7 +360,7 @@ scn_b5-refont() {
   vw_keys "⏎ at the tail" 'key code 36'
   vw_settle; vw_cap 02-return
   vw_expect_eq "⏎ at the tail: an empty block below" "${PV[blk]#*/}" $(( blocks + 1 ))
-  vw_expect_page_still tail "⏎ at the tail (after a re-font)"
+  vw_expect_page_still tail "⏎ at the tail (after a re-font)" "$KI_B5"
   vw_keys "⌫ (restore)" 'key code 51'
   vw_settle
   vw_expect_eq "restore: text back" "${PV[len]}" $len0

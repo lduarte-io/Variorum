@@ -254,8 +254,8 @@ vw_cap() {     # name
 # Every assertion is one row: status · label · measured · expected · tolerance · known.
 # `known` names an OWNED KnownIssues row: a failure is then XFAIL (reported, not red), and a pass is
 # XPASS (loud — the known issue did not reproduce; re-examine the row).
-# zsh prints a float result as "24." — the report reads "24.0".
-vw_num() { [[ $1 == (|-)<->. ]] && print -r -- "${1}0" || print -r -- $1 }
+# zsh prints float results as "24." or "745.89999999999998" — the report reads one decimal.
+vw_num() { [[ $1 == (|-)<->.<-> || $1 == (|-)<->. ]] && printf '%.1f' $1 || print -r -- $1 }
 
 vw_row() {   # pass(0/1) label measured expected tol known
   local st
@@ -346,7 +346,7 @@ vw_report() {
     print -r -- "- tree: \`$(git -C $REPO rev-parse --short HEAD)\`$(git -C $REPO diff --quiet HEAD -- App || print ' (App/ has uncommitted changes)')"
     print -r -- "- macOS $(sw_vers -productVersion) ($(sw_vers -buildVersion)) · build \`${APP#$REPO/}\`"
     print -r -- "- voices: ${VW_VOICES:-current} · scenarios: $([[ -n $VW_SELFTEST ]] && print 'SELF-TEST (planted failure)' || print ${VW_SELECTED:-all seeded})"
-    print -r -- "- result: **$(( RUN_FAILS + RUN_ERRORS )) failing** (FAIL $RUN_FAILS · ERROR $RUN_ERRORS) · XPASS $RUN_XPASS"
+    print -r -- "- result: **$(( RUN_FAILS + RUN_ERRORS )) failing** (FAIL $RUN_FAILS · ERROR $RUN_ERRORS)$( (( RUN_XPASS )) && print " · **XPASS $RUN_XPASS — a known issue did not reproduce in these scenarios; re-examine its row**")"
     [[ -f $RUN_DIR/aborted ]] && print -r -- "- **$(cat $RUN_DIR/aborted)**"
     print -r -- ""
     print -r -- "| scenario | voice | status | assertions | FAIL | XFAIL | XPASS | note |"
