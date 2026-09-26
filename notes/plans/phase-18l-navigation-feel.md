@@ -1065,9 +1065,9 @@ IN PROGRESS; nothing below is verified unless it carries a hash or a log.
 | # | Piece | Status |
 |---|---|---|
 | 1 | Reading (the brief's list, in order, own context) | DONE — this file whole (HER KICKOFF MESSAGE, SITTING RECORD R-18l-1/2/4/5, ENVIRONMENT TRAPS, the U0 + U0b RECORDs + acceptances); `18l-u0-ladder-round1.md` + `18l-u0b-ladder-round1.md` whole; KnownIssues' note-open row; `TEXTKIT2_NOTES.md` whole; R-Q1/R-Q20/R-Q21 (`use-report-round-2026-09-12.md` §7); 17o batch b's RAISE-M1 record + round-3 R3-1 (`use-report-round-2026-09-06.md`); QUESTIONS #97 · #98 · #116 · #134 · #147 · #149; `SessionResiliencyProtocol.md` (implementer half); the code: `CurrentBlockMemory`, `CommandRouter` whole, `EditorRouter` whole, `EditorViewModel` (teardown, `applyProjection`, `applyFocusSeeds`, the parks + the hop, `topVisibleOffset`/`readingAnchor`, `updateCaretContext`), `EditorSurfaceController.renderFull`, `JumpPrimitive`'s `ReadingAnchor`, `PostDetailView` (mount/registration/`jump(to:)`), `RootView`'s post arm, `ShellRouter` (adopt/park/spend), `WorkspaceModel` whole, `TakesChoreographer.consumeLandings`, `TakesViewModel` (focus/landing/pane reports), `ReadModeView` (seed/select/reports), `BlockTOCView`'s pane report, `BlocksWorkbenchView`/`CanvasViewModel` reports, `BookView.editHere`, `PaneCaretLanding` |
-| 2 | Trace the opening-viewport decision per mode | IN-PROGRESS |
-| 3 | Reproduce her two shapes (+ what the trace predicts) | NOT-STARTED |
-| 4 | The END-jump: find the tail writer (or disprove it) — attribution + red-on-old pin | NOT-STARTED |
+| 2 | Trace the opening-viewport decision per mode | DONE — THE TRACE below (the per-mode opening map) |
+| 3 | Reproduce her two shapes (+ what the trace predicts) | DONE — in the app on the pre-fix build (`DerivedData/18l-u0c-prefix`, HEAD `ac52081d` = product code `985371b2`), Terminal: END (Write `pre-a6`, Takes `pre-c2`), MIDDLE (`pre-b4`), the in-session END after scrolling to the top (`pre-a10`); and in the harness (the scratch probe — below) |
+| 4 | The END-jump: find the tail writer (or disprove it) — attribution + red-on-old pin | TRACED — the non-click-writer hypothesis is DISPROVED for the single-window app (below); what derives the tail landing is the note-open landing over a caret she left there. The red-on-old pins are the rule's own (piece 6) — PENDING |
 | 5 | Build R-18l-1 (first-open set; re-open restore by the standing machinery + the place) | NOT-STARTED |
 | 6 | Pins (end-jump red-on-old; first-open / re-open / deep-link per mode; R-Q20/R-Q21 + RAISE-M1 ride unmodified) | NOT-STARTED |
 | 7 | Walk (both voices; her shapes; first-open vs re-open per door; a deep link) | NOT-STARTED |
@@ -1075,3 +1075,76 @@ IN PROGRESS; nothing below is verified unless it carries a hash or a log.
 | 9 | Self-assessment | NOT-STARTED |
 
 - Deaths / resumes: none.
+
+### THE TRACE (inputs → the opening viewport; every claim read at the code, then measured)
+
+**Who decides the opening viewport, per mode, from what stored fact.** A note opens when a pane's
+`PostDetailView` appears (every door — Library, shelf, Open strip, ⌘K, ← →, ⌘⇧n — funnels through
+`ShellRouter.adopt` → `WorkspaceModel.select` → the pane's detail) and calls
+`CommandRouter.registerDetail`. For a note DIFFERENT from the active one, `registerDetail` seeds the
+LIVE fact (`focusedBlock`) from `CurrentBlockMemory.current(for:)` — the session dict, else the
+PERSISTED `currentBlock.<id>` (`blockID|variantID|utf16Offset`, written at block changes and when a
+note leaves the screen, read at the next launch). Every mode's arrival then reads that one fact:
+
+| Mode | The arrival's landing | Stored inputs |
+|---|---|---|
+| **Write** | `applyProjection(.initialRender)` reads the fact BEFORE the fill; `applyFocusSeeds`' bare arrival puts the caret at the fact's block start + offset and PARKS `revealLanding` — at the N14 settle hop, if the caret's line is off screen, `JumpPrimitive.jump` puts it at the viewport TOP (#98(a)'s shape) with the typewriter room below | the fact; the session scroll anchor `EditorRouter.scrollAnchors[post]` (session-only, an OFFSET, written at `teardown`; parked by `renderFull`'s cold mount and consumed BEFORE the reveal — RAISE-M1) |
+| **Takes** | `TakesChoreographer.consumeLandings`' N9 arm rings the fact's block (`landAuthorityFocus`, the pane's caret at the remembered offset) and `landArticle` REVEALS its row at the nearest page edge (R-Q1); no fact ⇒ the first slot, `.start`, no scroll | the fact; `takesArticlePlaces` + `takesArticleCurrentRows` (session-only — R-Q20/R-Q21 decide restore vs landing) |
+| **Read** (both faces) | the rows' first delivery seeds `select(fact's block ?? rows[0], scrollFace: true)` — the edit face lands it CENTERED, the page at 0.08 | the fact (no page memory) |
+| **Blocks** | focuses the fact's row (the context panel); no scroll | the fact |
+| **Lenses · Compare · Canvas** | no current-block viewport landing (landings are enabled on THE takes board only; Canvas has its own fit-all arrival) | — |
+
+**Her two shapes, reproduced in the app on the pre-fix build** (captures `notes/plans/18l-screens/u0c/pre/`, gitignored):
+- **END** — *A Case of Identity* (137 blocks, no memory): ⌘↓ → ⏎ (the segmentation chip ON: an EMPTY
+  block 138 below, the caret in it — the note now visibly ends with a newline; `pre-a3`) → quit (by
+  identity) → the persisted memory read back by `defaults read`: block 138, offset 0 → relaunch →
+  Library → the note: **the empty last line at the viewport top and NOTHING else on screen**
+  (`pre-a6`, block 138/138). Put in Takes the same way (`pre-c1`) → relaunch → the board opens at the
+  END, block 138's pane live at the foot (`pre-c2`) — *"multiple modes"*.
+- **MIDDLE** — *A Scandal in Bohemia*: a click on "I know where it is." (block 199) → quit → relaunch →
+  Library → block 199 at the viewport top (`pre-b4`) — the ruled saved-caret landing.
+- **The IN-SESSION END (the trace's prediction):** in the same run, *A Case of Identity* scrolled by
+  the wheel to its first line WITHOUT a click (`pre-a9`) → the Open strip's other note → back through
+  the Open strip → **the END again, the blank screen** (`pre-a10`). The cold mount restored the page
+  she left (the top), then the parked reveal found the remembered caret (block 138) off that page and
+  jumped to it — *"it's ignoring where I previously was"*, in one session.
+
+**The END-jump's "wrong-stamp writer" hypothesis — DISPROVED for the single-window app.** A scratch
+probe (`U0cOpenProbeTests`, never committed: 40-block note × {last block ending in `\n`, an empty
+last block, plain} × {Write, Takes, Read}; the real `PostDetailView`, open → wait → leave → re-open,
+touching nothing; `DerivedData/18l-u0c-probe1.log`) found **no non-click road that stamps the tail**:
+Write's arrival reports block 1 / offset 0 (the fill's end-of-document report is overwritten by the
+landing in the same turn — `renderFull`'s `updateCaretContext` then `applyFocusSeeds`), Takes' N9
+fall-through reports block 1, Read's seed reports nothing, and every left/re-open leaves the memory
+at block 1. Every other writer of `noteFocusedBlock` (Write's caret, the boards' pane caret + ring,
+Read's selection + click-through, Blocks' row click, Canvas' card click) follows a click, a keystroke
+or a structural act. **What derives the tail landing** is the caret she left there — typing at the
+end (the journaling norm), the ⏎ at the end (chip ON: an empty last block holding the caret; chip
+OFF: an empty open tail whose caret reports no block, so the memory keeps the last block's END), or a
+click in the empty room below the text (which puts an NSTextView's caret at the document end —
+*"when i hadn't clicked anywhere in particular"*) — plus the note-open landing over the remembered
+caret. **That is why the trailing newline correlates:** the newline and the tail memory are born of
+ONE gesture. The two landings that turn it into her screen: (1) across sessions, the note-open
+landing at the remembered caret (the one R-18l-1 supersedes); (2) in session, the re-open's parked
+caret reveal overriding the restored page (`pre-a10`).
+
+**Two smaller facts the probe measured (recorded, not this unit's surface):** (i) a Takes pane BORN
+live reports AppKit's END of its take (`string =` in `makeNSView`) before its `.start` landing
+applies, so the PERSISTED copy holds block 1's END (`off 113`) until the note leaves (the leaving
+`persist` heals it; only a hard kill keeps it — within block 1, no viewport effect); (ii) an
+in-session re-open of a note left at its very top lands 24 pt down (`clip 0.0` → `clip 24.0`): the
+teardown anchor is an offset, replayed as "that line at the viewport top" (U0b's B6 hand-forward).
+
+**ATTRIBUTION (the four-value column):**
+- **The note-open END/MIDDLE landing across sessions — pre-existing (by design until R-18l-1).** The
+  persisted memory + `registerDetail`'s restore: `c174d194` (2026-09-01, the correction round batch C,
+  rows 39/49); the offset inside the block: `a0aade08` (2026-09-07, 17o b, U-20); the reveal:
+  `d3bcbd33` (2026-09-07); Takes' article landing: `68632d31` (2026-09-07). All before the
+  13u2…18k window; macOS-independent (a stored fact and a jump's arithmetic). Her build (13y or 18k)
+  makes no difference.
+- **The in-session re-open END — pre-existing.** The cold mount restores the anchor exactly since
+  `c60d1d66` (2026-09-07, RAISE-M1) and the reveal runs at every remembered landing since `67fdced1`
+  (2026-09-08, 17o d row 47); before those the anchor clamped at ~24 pt and the reveal still jumped to
+  the caret. Before the window; macOS-independent.
+- **The re-open's lost top air — pre-existing** (`02052d8c` Phase 7's offset anchor + `01e26020`
+  13c 1A's inset conversion + `c60d1d66`'s exact cold-mount restore; U0b's B6).
