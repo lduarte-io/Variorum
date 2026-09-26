@@ -310,7 +310,7 @@ scn_outline-narrow-restore() {
 vw_def b5-return-after-cmd-down "A Scandal in Bohemia, Write" \
   "a blank line mid-page · ⏎ + ⌫ (the carve's full re-render invalidates layout) · ⌘↓ · ⏎ at the tail · ⌫" \
   "(a) the ⏎ at the tail must not move the page (the lines above the caret)" \
-  "$KI_B5 — INTERMITTENT: U0b measured +109/+166 on 998f7d7d; U-VIS's first full run reproduced it once in Study (the lines above the caret moved down ~30 pt under a fixed clip — U0b's hypothesis, measured) and not in Terminal, nor in two no-probe runs. XFAIL when it moves, XPASS when it does not"
+  "$KI_B5 — HISTORY-DEPENDENT: U0b measured +109/+166 on 998f7d7d; U-VIS reproduced it in the FULL Study pass on both full runs, identical numbers (45591 @ 298 → 45509 @ 302: the lines above the caret slid ~30 pt down under an unmoved clip — U0b's hypothesis, measured); not in Terminal, not from a fresh launch, not after outline or Read ▸ edit alone. XFAIL when it moves, XPASS when it does not"
 scn_b5-return-after-cmd-down() {
   vw_write_open "A Scandal in Bohemia" || return
   vw_write_scroll 30
