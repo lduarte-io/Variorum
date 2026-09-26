@@ -1057,8 +1057,20 @@ row 4 flips to BUILT+WALKED — the Fable cold review is the remaining gate.
 
 ## U0c RECORD (implementer: `opus-implementer`, 2026-09-26)
 
-**NOT DONE (first line):** *(kept current; the final list replaces this line at close)* — the unit is
-IN PROGRESS; nothing below is verified unless it carries a hash or a log.
+**NOT DONE (first line):** (1) **the build departs from the sitting record's gloss** *"the remembered
+caret itself survives (editing state), only the OPENING viewport changes"* — it was built to that
+letter first (`5d7c8bb6`) and the walk measured it putting the blank END back on screen at the first
+⌘1 (`walk/letter/t-11`); the build now reads R-18l-1 by its supersession sentence (the first open
+seeds NO fact) — **flagged for the orchestrator, PROVISIONAL, QUESTIONS #150(a)**; (2) the re-open's
+caret reveal is not run when the re-open restored her page — against the brief's "a re-open restores
+by the standing machinery" where that machinery contradicts "restores where you were" (`pre-a10`) —
+**flagged, #150(b)**; (3) no whole-old-tree bisect (the C7 dev-store trap, as U0/U0b) — attribution
+rests on line history + the pre-fix app reproduction + red pins; (4) Takes' transient END report
+(the TRACE's (i)) NOT fixed — owner proposed below; (5) Read's first open and the room re-open are
+pinned, not walked; the shelf door walked in Terminal only; (6) no KnownIssues / AppSpec / canon
+edits — the note-open row's close, the canon line and the R-cor-3 pointer are drafted below for the
+orchestrator; (7) zero `Sources/`, `Shared/`, `Sync/`, schema — no core / iOS / mobile runs owed;
+(8) the U3 rider (`PaneSurface`'s render restore) and row 85 (O-2) untouched — U0c touches neither.
 
 ### LIVE STATUS
 
@@ -1071,8 +1083,8 @@ IN PROGRESS; nothing below is verified unless it carries a hash or a log.
 | 5 | Build R-18l-1 (first-open set; re-open restore by the standing machinery + the place) | DONE (`5d7c8bb6`) — THE BUILD below; `NoteOpenLandingTests` **11/11 GREEN** on the fixed tree (`App/Variorum/DerivedData/18l-u0c-pin-fixed3.log`); the three behavioural reverts RED in their named shapes (below); the ruled pins' first run green (`18l-u0c-neighbors1.log`, 97 tests / 10 suites: TakesArticleScrollTests (R-Q20/R-Q21), LandingOffsetTests (RAISE-M1), CurrentBlockContinuityTests, ModeSwitchCarryTests, ScrollAnchorTests, WriteTopAirTests, ReadModeTests, CommandRouterTests, TakesLandingTests + the new suite — every one byte-unmodified) |
 | 6 | Pins (end-jump red-on-old; first-open / re-open / deep-link per mode; R-Q20/R-Q21 + RAISE-M1 ride unmodified) | DONE — 11 tests (the room pin added at `this commit`); the A/B sections re-shaped at `5d7c8bb6` to the ruled letter (the caret SURVIVES; the viewport opens at the start) — their viewport arms are the red-on-old cores, re-proved by R-open; the two router pins are state-transition pins of the new bookkeeping (new API). The pre-fix run: `NoteOpenLandingTests` (10 tests) committed RED on the pre-fix tree (this commit; `App/Variorum/DerivedData/18l-u0c-pin-prefix1.log`): **8 red / 18 issues**, the 2 guards green — the router's first open restores the earlier run's fact (block 5 @12) and a re-open restores it too; Write's first open: clip **2904.0** (the ⏎ shape — caret 8691/8691), **2880.0** (the last line's end), **1588.0** (the middle); Takes: article clip **1866.0**, the empty last block's pane live; Read: the last block selected, scrolls **[1149, 3819]**; re-open at the top: **24.0**; re-open after scrolling away from a tail caret: **2904.0**; re-open mid-note: left 1391.0 → back **24.0**; the mode-round-trip-after-re-open guard and the deep-link guard green |
 | 7 | Walk (both voices; her shapes; first-open vs re-open per door; a deep link) | DONE — PASS on the supersession build (product code `cf5334cf`, build `DerivedData/18l-u0c-walk` at `26d0a5f6`), both voices — THE WALK below |
-| 8 | Closing runs (touched suites + the eleven Tutorial suites) | NOT-STARTED |
-| 9 | Self-assessment | NOT-STARTED |
+| 8 | Closing runs (touched suites + the eleven Tutorial suites) | **DONE** on the final product tree (`3c6f7d47`), zero app instances, machine idle (HID 79 s): `App/Variorum/DerivedData/18l-u0c-closing.sh` = U0b's closing set (the jump / anchor / landing / re-font / typewriter family, the structural and seam suites, the editor family, the eleven Tutorial suites) + `NoteOpenLandingTests` + the note-open / landing / workspace / detail consumers (TakesArticleScrollTests — R-Q20/R-Q21 — CommandRoutingTests' suites, ReadModeTests, the Shell/Pane/Window/Workspace/NoteBox/Masthead/BlockHistory/Library panel suites): **✔ Test run with 989 tests in 146 suites passed** (`18l-u0c-closing1.log`), 146 suites counted, 0 skipped (the two `skipped` lines are AppIntents metadata warnings). 1139 `Modifying state during view update` lines — the Takes/pane family's (U3's class): `TakesArticleScrollTests`' neighbour run alone logged 1016, and the new suite logs FEWER on the fixed tree (100) than on the pre-fix one (124). Every ruled pin rode UNMODIFIED — `LandingOffsetTests` (RAISE-M1 + R3-1), `TakesArticleScrollTests` (R-Q20/R-Q21), `CurrentBlockContinuityTests`, `ModeSwitchCarryTests`, `ScrollAnchorTests`, `WriteTopAirTests`. Core / iOS / mobile: not owed |
+| 9 | Self-assessment | DONE (below) |
 
 - Deaths / resumes: none.
 
@@ -1309,3 +1321,111 @@ store, deliberate:** *A Case of Identity*'s empty block 138 (my repro's ⏎) was
 end (`s-12` → `s-13`: 137/137, the tray ⌫ 1); today's entry minted an empty journal note
 **2026-09-26**; the memories of Case / Scandal moved with the walk. The voice restored to Terminal
 and read back (`1, 0`); every dev instance quit by identity; `pgrep` clean.
+
+### FINDINGS — mechanism × ATTRIBUTION × disposition
+
+| # | Finding | Mechanism | ATTRIBUTION | Disposition |
+|---|---|---|---|---|
+| C1 | **Her report** — a note's first open (a new session) lands at the caret an earlier session left: the END with one line / a blank screen after ⏎ at the end; the Sherlock MIDDLE; in Write, Takes and Read | `registerDetail` seeds the live fact from the PERSISTED memory; every mode's entry landing reveals it (Write's `revealLanding` → the line at the top; Takes' `landArticle`; Read's scroll) | **pre-existing** — by design until R-18l-1 (`c174d194` 2026-09-01; `a0aade08` · `d3bcbd33` · `68632d31` 2026-09-07), all before the 13u2…18k window; macOS-independent | **FIXED** `cf5334cf` · pins `theRunsFirstOpenOfANoteRestoresNothingAnEarlierRunLeft`, `writeOpensAtTheStart` ×3, `takesOpensAtTheStart`, `readOpensAtTheStart`, `aModeSwitchRightAfterAFirstOpenStaysAtTheStart` · pre-fix RED 8/18 (`fe4473bf`'s run), R-letter RED 7/16 |
+| C2 | **Her in-session END** — a re-open after reading back up from a caret at the end lands at the end again (`pre-a10`) | the cold mount restores the page, then the parked caret reveal (#98(a)) jumps to the caret off that page | **pre-existing** (`c60d1d66` + `67fdced1`, 2026-09-07/08) | **FIXED** `5d7c8bb6` (`openingLanding`) · pins `aReopenAfterScrollingAwayFromTheCaretComesBackToThePageSheLeft`, `aReopenMidNoteComesBackToThePageExactly` · R-open2 RED 4/4 |
+| C3 | A re-open of a page left at its top loses the 24-pt top air; mid-note it snaps by the edge's cut | the teardown anchor was an OFFSET replayed as "line at the top" (U0b's B6) | **pre-existing** (`02052d8c` + `01e26020` + `c60d1d66`) | **FIXED** `5d7c8bb6` (`EditorRouter.scrollPlaces`, `ReadingAnchor.exactLandingInset`) · pins `aReopenOfANoteLeftAtItsTopKeepsTheTopAir` + mid-note · R-place RED 3/3 |
+| C4 | A page left resting in the typewriter room re-opens at the note's TOP | no reading line in the room ⇒ no anchor saved | **pre-existing** (the A22 batch-5 nil) | **FIXED** `5d7c8bb6` (`placeBelowTheLastLine`) · pin `aReopenOfANoteLeftRestingBelowItsLastLineComesBackThere` · R-room RED (0.0) |
+| C5 | The "non-click writer stamps the tail" hypothesis | — | — | **DISPROVED** (THE TRACE — the no-click probe; every writer of the fact enumerated) |
+| C6 | A Takes pane BORN live reports AppKit's END of its take before its `.start` landing, so the PERSISTED memory holds that END until the note leaves (a hard kill keeps it) | `makeNSView`'s `string =` notifies the selection before `noteLiveness` applies the landing | **pre-existing** (#97's class, 17o b) | **NOT FIXED — OWNED, PROPOSED U2** (Takes' landing half, the Fable-reviewed pane landing unit) or 12; no viewport effect (within the landing block; healed by the leaving `persist`) |
+| C7 | The letter-reading build's mode-switch END (`walk/letter/t-11`) | the surviving caret is what a mode switch enters on | **our-commit(`5d7c8bb6`)** — this unit's own first build, never installed | **FIXED** `cf5334cf` · pin `aModeSwitchRightAfterAFirstOpenStaysAtTheStart` (R-letter RED: Write clip 2904.0) |
+
+### THE OPENING-LANDING MAP, AFTER (per mode)
+
+| Mode | The run's FIRST open | A RE-open this run | A mode switch / deep link |
+|---|---|---|---|
+| Write | caret + page at the start (top air), no reveal | the page she left, exactly (`scrollPlaces`), her caret where she left it, no reveal; no page ⇒ the standing reveal | standing (RAISE-M1 anchor — now exact — then #98(a)); deep links reveal their targets |
+| Takes | the first slot rung, the article at the top | the ring on her block, the article at R-Q1's restored place (no landing asked) | standing (N9 + reveal; the bloom arm) |
+| Read (both faces) | the first row, no scroll | scrolls to this run's current block | standing (carry / fact / click-through) |
+| Blocks · Lenses · Compare · Canvas | unchanged (no current-block viewport landing; Blocks focuses no row with no fact) | unchanged | unchanged |
+
+### SEAM FILES THIS DIFF TOUCHES (the Fable reviewer reads this first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `Registry/CommandRouter.swift` | `registerDetail`: the per-run `notesOpenedThisRun` set; the first open seeds NO fact, a re-open `sessionFact`; `NoteOpening` + `openingLanding(postID:fact:)`; `noteMode` ends the opening on a switch; `unregisterDetail` clears it; two docs | `noteFocusedBlock`, `currentBlock(for:)`'s body, the carry, the parcels |
+| `Registry/CurrentBlockMemory.swift` | `sessionFact(for:)`; the header | `current`, `remember`, `persist`, `forget`, the persisted format |
+| `EditorRouter.swift` | `scrollPlaces: [String: ReadingAnchor]`; `scrollAnchors` an offset-only facade over it | `takesArticlePlaces`, `takesArticleCurrentRows` |
+| `Features/Editor/EditorViewModel.swift` | `teardown` writes the place (loaded full-document editors only; the room as `placeBelowTheLastLine`); the bare arrival skips the reveal on an opening landing; `parkAnchorRestore`'s doc | `topVisibleOffset`, `readingAnchor`, `restoreReadingAnchor`, the parks' consumers, the hop order, `revealLanding` |
+| `Features/Editor/EditorSurfaceController.swift` | `renderFull`'s saved-anchor branch restores `exactLandingInset` (cold park and warm jump) | the live `readingAnchor` branch, the caret by identity, `runStructural`, the differential road |
+| `Features/Takes/TakesChoreographer.swift` | the N9 arm asks no `landArticle` on an opening landing | the bloom arm, `landAuthorityFocus`, `TakesArticleScroll`'s step machine, R-Q20/R-Q21 |
+| `Features/ReadMode/ReadModeView.swift` | the seed scrolls on an opening landing only when it restored this run's place | `select`, the carry, the click-through, `landIfPending` |
+| `Features/Library/LibraryCatalogView.swift` · `LibraryInfoPanel.swift` | docs only | — |
+| `VariorumTests/NoteOpenLandingTests.swift` | NEW — 12 tests | — |
+
+`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, `PaneTextAuthority`, `JumpPrimitive`: untouched.
+Zero `Sources/`, `Shared/`, `Sync/`, schema. No TK1 API (the one new layout read is
+`JumpPrimitive.lineSpan` at teardown — single-fragment, P1).
+
+### JUDGMENT CALLS (each reversible in a line)
+
+1. **The run's first open seeds NO fact** (the supersession reading) — *reverse by* `let restored =
+   currentBlocks.current(for: postID)` in `registerDetail` (the letter-reading; `walk/letter/t-11`
+   is its measured cost). QUESTIONS #150(a). Against the sitting record's gloss — FLAGGED.
+2. **A re-open's page wins over an off-page caret** (no reveal on an opening landing) — *reverse by*
+   dropping `!isOpeningLanding` in `applyFocusSeeds`. #150(b). Scope: note-open only — the
+   mode-round-trip guard pin keeps #98(a) there.
+3. **A re-open restores THIS run's fact only** (`sessionFact`) — #150(e).
+4. **Every cold mount restores the page EXACTLY** (`exactLandingInset`) — mode round trips included
+   (the line where it sat, not snapped to the top: ≤ one line's difference; #116's carry still
+   outranks). *Reverse by* `reflowLandingInset` in `renderFull`'s saved branch.
+5. **The room re-opens at the end** (the last line's place, clamped at the hop's live maximum) — #150(d).
+6. **`scrollAnchors` kept as an offset-only facade** so the RAISE-M1 pins ride byte-unmodified.
+7. **An opening's own landing = an arrival on exactly the seeded fact** — a place reported since the
+   note arrived lands by the standing rules (which is also what keeps the RAISE-M1 / R3-1 rigs, which
+   register and then report, on the standing road).
+8. **Only a loaded full-document editor writes the page at teardown** — a transient mount (a detail
+   opening in another mode mounts Write for a beat) or an inline editor never erases it.
+9. **← → is a re-open** (#150(c)) — by construction (any re-registration of a note already opened).
+
+### NOTICED, NOT TOUCHED
+
+1. **C6** (Takes' transient END report) — proposed owner U2 (or 12). 2. **Two windows share ONE
+   `activePostID`** (the router is session-scoped): with a note window open, the other window's note
+   reports nothing, so its memory freezes — the recorded two-windows keying family; not investigated.
+3. **`LandingOffsetTests`' header** still states 17o's "ONE rule: every door into Write lands at the
+   REMEMBERED CARET OFFSET" — true for every door but the note-open since R-18l-1; a ruled pin's doc,
+   left byte-unmodified (the orchestrator's edit if wanted). 4. **The Library's search** found no hit
+   for "Persian" (a word in *A Case of Identity*'s last block) in either scope on the walk, and the
+   scope's segmented control did not take `cliclick` — not investigated (walk tooling or search; not
+   this unit's surface). 5. **The book's edit-here door** (`BookView.editHere`) still lands the
+   remembered block — an in-book editing door that names its place, not a note-open (kept by design;
+   the orchestrator may classify it otherwise).
+
+### OWED AT CLOSE (drafted for the orchestrator)
+
+- **AppSpec §12** (a contract line + pointer): *"Opening a note (R-18l-1, 18l U0c — the plan file's
+  U0c RECORD): the session's first open shows the start in every mode (the note-open door no longer
+  lands at the remembered caret — 17o's rule is superseded for this act); a re-open this session
+  restores the page she left (Write's session place with its inset, Takes' R-Q1 place, Read's
+  this-run current block), never revealing a caret off it; ← → and every door into a note already
+  opened this session is a re-open; deep links keep their targets. QUESTIONS #150."*
+- **KnownIssues**: the note-open row → CLOSED at 18l U0c (with the ladder-pending re-open clause, as
+  rows 86/87).
+- **R-cor-3** (the Act 10 correction round's Library peek, *"the place where your cursor was
+  saved"*): a dated pointer that R-18l-1 supersedes it for the session's first open.
+- **MOBILE PARITY**: the phone's note open is its own (PL-22's family) — R-18l-1 wants a
+  `notes/MobileSoul.md` row (the mobile project's).
+
+### SELF-ASSESSMENT
+
+Strong: the mechanism is traced per mode and REPRODUCED in the app on the pre-fix build in both of
+her shapes (and a third, in-session, that the trace predicted); the wrong-stamp hypothesis is
+disproved by a probe rather than assumed; every fix has a red-on-old pin and a named behavioural
+revert that went red in its predicted shape (R-letter 7/16, R-open 4/4, R-place 3/3, R-room); the
+ruled pins ride byte-unmodified (989 / 146 green); the walk is use-shaped, per-step guarded, both
+voices, and it CAUGHT the first build's reading error before a reviewer or she did. Weakest points
+for the reviewer: **(a)** judgment call 1 departs from the sitting record's gloss — the evidence is
+`t-11` and the ruling's own supersession sentence, but it is a call the orchestrator should
+confirm; **(b)** judgment call 2 departs from the brief's "standing machinery" phrase for re-opens
+(the caret may sit off screen after a re-open until she types — #98(c)'s trade, scoped to
+re-opens); **(c)** judgment call 4 changes mode-round-trip landings by up to a line (exact instead of
+snapped); **(d)** the room restore clamps at the hop's live maximum (the end, not the exact room
+offset); **(e)** the pins share `UserDefaults.standard` with the test host (post id "0", cleaned on
+`defer`, the R1-7 class); **(f)** attribution is by line history (the C7 trap); **(g)** a machinery
+slip mid-unit (a revert's `git checkout HEAD --` over uncommitted edits) — repaired and re-verified
+within minutes, recorded above. **U0c — DONE (implementer); the Fable cold review follows.**
