@@ -1607,3 +1607,11 @@ artistic liberty here."*
 `TravellingDotsIndicatorTests`) and her look at the refreshed install — the acceptance evidence
 for a decoration is USE. **Owed:** the standing Opus cold review for a 17-entry (no editor seam,
 no custody, no `Sync/` — Opus suffices), unless she waives it for a decoration.
+
+**THE INSTALL REFRESH — DONE 2026-09-26T05:4xZ** (her quit's window; zero instances checked before
+the copy and before the install): A1 safety copy `Backups/safety-copies/17u-refresh-20260926T054253Z`
+in the app's container (6 files — the store, its `-wal`/`-shm`, three key files — each `cmp`-identical
+to the live file) · Release built from `92615e6b` · the product bundle carries NO endpaper resource ·
+`/Applications` binary `79c7688b…` (18k's) → **`7f7ff281b4a566ef…`** · `codesign --verify --deep
+--strict` OK on the product AND the installed copy · both keychain access groups present
+*[removed for publication]*
