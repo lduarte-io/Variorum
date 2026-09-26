@@ -789,12 +789,19 @@ rows 1–3 flip to BUILT+WALKED — the Fable cold review is the remaining gate.
 | # | Piece | Status |
 |---|---|---|
 | 1 | Reading (the brief's list, in order, own context) | DONE — this file whole (HER KICKOFF MESSAGE, SITTING RECORD R-18l-1/2/4/5, ENVIRONMENT TRAPS, CAST, BASELINES, the U0 RECORD whole + its acceptance); `18l-u0-ladder-round1.md` whole; the charter's KICKOFF 2 (U0 + U0b); `TEXTKIT2_NOTES.md` whole; the 18k C6 brief + record ITEM 1 and the C6b brief + record + adjudication; KnownIssues row 87; `SessionResiliencyProtocol.md`; both captures; the code: `EditorTextView.swift` whole (the 24-pt top inset `makeEditor`, the typewriter room, β1), `JumpPrimitive.swift` whole, `ViewportCarry.swift`, `EditorSurfaceController` (`renderFull`, `runStructural`, `applyStructuralResult`, the A7 carve `planEmptyBlockDeletion`/`runEmptyBlockDeletion`, `insertEmptyBlock`, the typed Return's act), `EditorViewModel` (`topVisibleOffset` + helpers, `restoreTopVisibleOffset`, `keepingReadingPosition`, the parks and their consumers, `teardown`, the keystroke's carve dispatch), `EditorView.swift`'s `ScrollAnchorController`, `EditorDocument.swift` |
-| 2 | Reproduce (harness, her shape, both voices) | IN-PROGRESS |
-| 3 | Trace + attribution | IN-PROGRESS — hypothesis (PENDING measurement): the carve is `seam: nil` → `renderFull` → `topVisibleOffset()` names offset 0 at a page resting at scroll 0 → `JumpPrimitive.jump(0)` lands line 0 AT the viewport top = scroll 24 (the container's top inset) — the page's top air is a SCROLL offset the re-render moves, not an inset change |
-| 4 | Pin red-on-old | NOT-STARTED |
+| 2 | Reproduce (harness, her shape, both voices) | DONE — `WriteTopAirTests` RED on today's tree `b4b978cd` (`DerivedData/18l-u0b-pin-prefix2.log`: 7 tests, 6 red, **14 issues**): her gesture — the page scrolls **24.0 pt** (Terminal AND Study; exactly the container's top inset) and the first line moves 24.0; the round trip — ⏎ moves nothing, ⌫ moves 24.0; a long note's same gesture mid-note and at the tail — the page moves **5.0 pt** (the edge's offset inside its line, snapped away); the siblings — a LIVE resize at the page top 24.0, a re-font (voice switch) at the page top 24.0; a NON-live width reflow at the page top GREEN (hollow as a defect — below) |
+| 3 | Trace + attribution | TRACE CONFIRMED by the pins' numbers (the carve is `seam: nil` → `renderFull` → the anchor restore lands the line AT the top: 24.0 = the inset exactly). **Attribution run NEXT — the 13y-road revert (named below, pre-revert state = the pin commit)** |
+| 4 | Pin red-on-old | DONE — `WriteTopAirTests` committed RED (this commit) |
 | 5 | Fix + behavioural revert | NOT-STARTED |
 | 6 | Walk (both voices: her sequence; a long note mid + tail; add-then-remove) | NOT-STARTED |
 | 7 | Closing runs (touched suites + the eleven Tutorial suites) | NOT-STARTED |
 | 8 | Self-assessment | NOT-STARTED |
 
 - Deaths / resumes: none.
+
+**THE ATTRIBUTION REVERT (named before it runs; the pre-revert state is the pin commit):** **R-13y** —
+18k's two road changes behaviourally reverted in the working tree ONLY, so the Write road is her 13y
+build's: `JumpPrimitive.jump`'s C6 re-assert forced off (`if false, …`) and its C6b live scroll range
+read ONCE at entry; `topVisibleOffset()`'s C6b reading-line branches forced off (`if false, …` — the
+box rule answers, exactly 13y's body). Then `WriteTopAirTests` runs; expected: RED with the same
+shape (the mechanism predates 18k); then `git checkout HEAD --` both files and `git status` clean.
