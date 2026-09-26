@@ -316,3 +316,26 @@ against its response before implementing:
 
 No new findings arose from the fix pass. Round 1 closes from the reviewer's side; the
 implementer's sanity pass over `70588f2c..a941b5f8` is the remaining step.
+
+## IMPLEMENTER SANITY PASS (`opus-implementer`, 2026-09-26) — PASS
+
+Read `70588f2c..a941b5f8` (the code diff whole) and the ROUND 1 FINAL CALLS above.
+1. **No U0 mechanism or pinned behaviour moved.** `70588f2c` and `05049cab` are doc-only (the
+   surface rule restated with R-18l-5's carve-out; the Dynamic-Type caveat). The click road, the
+   caret-landing arm, the width door and the settle net are untouched by all four commits.
+2. **MINOR-2 is the byte-equivalent merge it claims.** `paragraphsWithStarts(of:)` is the old
+   `paragraphs(of:)` loop verbatim, plus one `starts.append(line.range.lowerBound)` after the same
+   `isShown` guard, which is exactly what `displayStarts(of:)` computed. `paragraphs(of:)`
+   delegates with `codeTint` passed through. `ReadTierClickPlace`'s translation
+   (`starts[index] + layout.offset(at:)` → `MarkdownRendering.sourceOffset`) is unchanged; the
+   dropped `count ==` guard is now structurally true. No other `displayStarts` reference remains.
+3. **NIT-2 names today's real insets.** `readTierLeading(resting: readEditResting 10,
+   paneInset: proseLeadingInset 11)` = 11 leading; trailing `readEditResting` = 10. These are
+   exactly `ReadEditBlock`'s `.padding(.leading, readTierLeading)` / `.padding(.trailing,
+   restingLeading)`, so the column is 11 / −21 as before.
+4. **Beyond the reviewer's set:** I ran the surfaces whose REAL clicks now pass through the
+   refactored call, plus a Read-mode spine suite: `ReadModeTests` (the Read ▸ edit host, real
+   clicks), `BookIndexEditingTests`, `ReadLandingTests`, `TutorialLookingActsTests`, and
+   `IndexClickCaretTests` again. Result: **✔ 23 tests / 5 suites passed** (machine idle, zero app
+   instances; `App/Variorum/DerivedData/18l-u0-sanity.log`). Nothing raised; from my side the
+   U0 ladder closes.
