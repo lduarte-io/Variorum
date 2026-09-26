@@ -1929,4 +1929,12 @@ dispositioned: (a) ruled, (b) held for 13t's kickoff by her word.**
 **The alternative (a):** switch the book Index and Read ▸ edit read tiers to the dimmed-marker face (display == stored, the rule's letter kept whole) — a visible look change on two surfaces you read daily: markers reappear, dimmed, on text you currently see clean.
 **Reversing is contained either way:** (a) is a face flip per tier; (b) is what stands.
 
-*(Next free number: **#150**.)*
+#150 — **OPENING A NOTE: THE START ON THE SESSION'S FIRST OPEN, WHERE YOU WERE ON A RE-OPEN — FIVE CALLS INSIDE YOUR RULING (2026-09-26, 18l U0c; the record is `notes/plans/phase-18l-navigation-feel.md`'s U0c RECORD). PROVISIONAL under your overnight mandate R-18l-4 — each one line to change.**
+Your R-18l-1 is built: a note's first open this session shows its START in every mode (Write's page at its top air, Takes' article at the top, Read's page and index at the top), and a re-open this session puts back the page you left — exactly, top air and all. What caused it is traced and recorded: the app opened a note at the caret you left there (sessions ago), and the reveal put that caret's line at the top of the screen — the END of a note you last pressed ⏎ at shows its empty last line and nothing else; your Sherlock middle was the same rule. Nothing wrote a caret you never placed.
+**(a) Where the CARET goes on a first open — BUILT: where you left it** (your earlier "the place where your cursor was saved", and the sitting record's "the remembered caret survives"): only the page opens at the start. What you'd notice: typing before you click goes in at that old place (the page follows your typing there), and switching mode before you click enters the next mode on that block (Takes shows it). **Alternative:** the caret opens at the start with the page, and the note remembers wherever you go from there.
+**(b) A re-open whose caret is OFF the page you left — BUILT: the page wins**; the caret stays where it was until you type or click. **Alternative:** jump to the caret, which is what put the END back on your screen after you had scrolled up to read (measured in the app, same session).
+**(c) ← → back/forward counts as a RE-open** (built) — so does the Open strip, ⌘⇧1–9, a split pane taking focus and a second window: any door into a note already opened this session.
+**(d) A page left resting in the empty room below a note's last line** re-opens at the note's END (its last line at the top) — the nearest page there is to a blank screen. **Alternative:** the note's top.
+**(e) Read keeps no page memory of its own**, so on a re-open it scrolls to your current block only when this session put you there; a first open never scrolls to it.
+
+*(Next free number: **#151**.)*
