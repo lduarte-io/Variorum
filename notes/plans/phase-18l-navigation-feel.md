@@ -1184,3 +1184,15 @@ LOADED full-document editor (a transient mount or an inline editor never erases 
 editor's place); `renderFull`'s cold mount (and its warm fallback) restores `exactLandingInset`.
 `scrollAnchors` survives as an offset-only facade over it (the RAISE-M1 pins seed through it and
 ride unmodified; an offset lands at inset 0 — exactly as before).
+
+**THE BEHAVIOURAL REVERTS (named before they run; the pre-revert state is `5d7c8bb6`):**
+- **R-open** — `CommandRouter.openingLanding` answers nil always (the opening arm off; every mode
+  lands its opening by the standing reveal). Expected RED: Write's three first opens (clip at the
+  remembered line), Takes' first open (the article at the end), Read's first open (scrolled), the
+  re-open after scrolling away (the END), the re-open mid-note (the reveal to block 1), and the two
+  router pins' `openingLanding` arms; GREEN: the re-open at the top (the place alone keeps it), the
+  two guards.
+- **R-place** — `teardown` stores the place with its inset thrown away (`inset: 0, inPageTopAir:
+  false` — the old offset anchor). Expected RED: the re-open at the top (24.0) and mid-note (the
+  line snapped, ~7 pt); everything else GREEN.
+Each is a working-tree edit only, then `git checkout HEAD --` the file and `git status` clean.
