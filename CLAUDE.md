@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-LIVE rules only; the dated record behind them is `notes/ProcessHistory.md` (canon, not loaded; it holds this file's pre-trim text verbatim).
+This file provides guidance to Claude Code when working with code in this repository. It carries the live rules; the dated history of the decisions behind them is `notes/ProcessHistory.md` (canon, not loaded).
 
 ## Source of truth
 
