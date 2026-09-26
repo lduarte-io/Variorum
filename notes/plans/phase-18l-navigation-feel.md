@@ -328,3 +328,24 @@ editor-seam by definition → a FABLE cold review follows; your self-assessment 
 | Kickoff sitting (Q1–Q3) | DONE — R-18l-1 · R-18l-2 · R-18l-3 above (this commit) |
 | U0 (session 1 — brief above) | SPAWNING |
 | U0b → U0c → U-VIS → U1 → U2 → U3 → U4 | NOT-STARTED (briefs written just-in-time, one ahead) |
+
+## U0 RECORD (implementer: `opus-implementer`, 2026-09-26)
+
+**NOT DONE (first line, kept current):** everything below marked NOT-STARTED / IN-PROGRESS / PENDING.
+U0b and U0c are NOT this session's (findings for them are recorded, never built).
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | Reading (the brief's list, in order, in this session's own context) | DONE — this file whole; the charter's KICKOFF 2 (U0 in full + the rest for context); KnownIssues rows 85/86/87/89/90; `notes/TEXTKIT2_NOTES.md` whole; 18k UNIT C2 brief+record+adjudication, UNIT C6 brief+record+adjudication, UNIT C6b brief+record+adjudication, the held-walk C6 rows; the three captures in `notes/plans/18l-inputs/`; `BookIndexView.swift`, `BookIndexEditModel.swift`, `Surface/PaneSurface.swift`, `EditorView.swift` (`InlineEditorSurface`) end to end; `Tools/WalkKit/README.md` |
+| 2 | Item 1 — the Index click: REPRODUCE on the dev-store Debug build | NOT-STARTED |
+| 3 | Item 1 — trace + bisect by harness | NOT-STARTED |
+| 4 | Item 1 — red-on-old pin, fix, behavioural revert | NOT-STARTED |
+| 5 | Item 2 — the clipped descenders: reproduce, trace, pin, fix, revert | NOT-STARTED |
+| 6 | Item 3 — the regression sweep (table) | NOT-STARTED |
+| 7 | Walk (both voices) + captures | NOT-STARTED |
+| 8 | Closing runs (touched suites + TutorialWalkTests) | NOT-STARTED |
+| 9 | Self-assessment | NOT-STARTED |
+
+- Deaths / resumes: none.
