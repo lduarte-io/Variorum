@@ -20,7 +20,18 @@ for w in list {
     guard layer >= 1, (w[kCGWindowOwnerPID as String] as? Int) != pid,
           !["Dock", "Window Server", "Screenshot"].contains(owner) else { continue }
     let b = w[kCGWindowBounds as String] as! [String: Double]
-    let r = CGRect(x: b["X"]!, y: b["Y"]!, width: b["Width"]!, height: b["Height"]!)
+    var r = CGRect(x: b["X"]!, y: b["Y"]!, width: b["Width"]!, height: b["Height"]!)
+    // Notification Center hosts its banners in a FULL-SCREEN overlay window, so its bounds say "the
+    // whole screen" while the banner itself sits in the top-right notification column (18l U1,
+    // 2026-09-26 15:13: a persistent "App Running in Background" banner, ~345×100 pt at the top
+    // right, held that overlay on screen for minutes and refused every click of a walk at x = 300).
+    // The Screenshot surface's class, answered narrower: the COLUMN stays covered — no click may
+    // land on a notification — and the rest of the screen is not. A walk whose click did not reach
+    // the app would ERROR (the act's effect is probed), never pass silently.
+    if owner == "Notification Center", let screen = CGDisplayBounds(CGMainDisplayID()) as CGRect?,
+       r.width >= screen.width - 1, r.height >= screen.height - 1 {
+        r = CGRect(x: screen.maxX - 440, y: screen.minY, width: 440, height: min(screen.height, 480))
+    }
     if let point, !r.contains(point) { continue }
     if point != nil { covering = true }
     print("\(Int(r.minX)) \(Int(r.minY)) \(Int(r.width)) \(Int(r.height)) \(layer) \(owner.replacingOccurrences(of: " ", with: "_"))")
