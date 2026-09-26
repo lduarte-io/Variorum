@@ -220,3 +220,73 @@ NIT. The three fixes are mechanically sound, correctly fenced, pinned red-on-old
 verified reverts, and match the charter's unit shape. Per the cross-model flow these
 findings go to the implementer verbatim; MINOR-1's doc rewrite and any fixes I confirm
 after its response are mine to implement in this session on the orchestrator's word.
+
+---
+
+## IMPLEMENTER RESPONSES (round 1)
+
+*(`opus-implementer`, 2026-09-26. Each claim re-read at the code before answering; no fix
+implemented — per the cross-model flow the reviewer makes the final call and implements.)*
+
+### MINOR-1 — AGREE, with one addendum the fix's wording should carry
+
+Verified: the header (`MarkdownRendering.swift:7–14`) is byte-unchanged by U0, and my
+`sourceOffset` doc's "exactly the case the surface rule above names as needing a translation"
+is wrong — the rule names no translation; it names the dimmed face as the way the case never
+arises. The rewrite as proposed is right, and the gloss should go.
+
+**Addendum — the drift is older than U0, and the rule is DESIGN LAW, not only a header.** The
+binding text is the 13g plan's F-5 record (`notes/plans/phase-13g-formatting-lists-checkboxes.md`
+~line 406: *"The surface rule her question pinned (record it as design law): EDITING surfaces
+(and the read-cheap tier, whose click seeds a caret offset) render the dimmed-marker styled
+face — display == stored, always."*). The two `Text` tiers in question already rendered the
+FORMATTED face (`FlowParagraph`) with a click that made the block live from the Act 10
+correction round (`c768c08e`, 2026-09-01) — after 13g — so the header's closing sentence ("this
+is where the second face lives, and it lives NOWHERE else") was already stale before U0. U0 made
+those clicks seed an offset (her report requires the click to land where she clicked), which is
+where the letter of the law is now crossed. Two ways to square it, and they differ in what she
+SEES, so I would not settle it by a doc edit alone:
+- **(a)** the Index / Read ▸ edit read tiers render the DIMMED-MARKER face (display == stored;
+  no translation needed; the law holds as written) — a visible look change on two surfaces;
+- **(b)** keep the formatted face and record the carve-out: a formatted read-cheap tier may seed
+  an offset ONLY through the pinned translation (`sourceOffset(forDisplayOffset:in:)`) — what U0
+  built and what she sees today.
+
+I recommend (b) as the PROVISIONAL reading under R-18l-4 (it preserves today's look and her
+ruled click behaviour), with the header rewritten as proposed, the 13g plan's design-law entry
+given the same one-line delta, and **a QUESTIONS row (a)/(b) for her morning bundle** — flagged
+here, not filed by me (the orchestrator/reviewer's call where it lands).
+
+### MINOR-2 — AGREE
+
+Verified: one click runs `render` twice (`paragraphs(of:)`, then `displayStarts(of:)`) plus a
+third tokenizer scan + walk in `sourceOffset`; the only thing keeping the two public entry points
+agreeing is the shared private `isShown`, and a divergence degrades silently to offset 0 at the
+`count ==` guard. A single `paragraphsWithStarts(of:)` built from one render removes both the
+duplicate render and the lockstep obligation; `ReadTierClickPlace` is its only caller, so the
+change is local. (If the reviewer wants it tighter still, that API could also hand back the one
+`Rendered` so the display→source step reuses it — optional; the per-click cost is block-bounded
+either way.) Correctly labelled not bug-class: no divergence exists today, no pin possible.
+
+### NIT-1 — AGREE (the doc line, not the look change)
+
+Verified: Study's tier fonts are `.custom("Iowan Old Style", size: 16, relativeTo: .body)`
+(`VoiceTokens.swift:366–368`, `:403`), the replica measures the fixed
+`EditorTypography.current.font`. At this machine's default size the two agree — the
+replica-fidelity arm (±0.5 pt, both voices) measures it — and that arm is the tripwire if a
+system text size ever makes them diverge. The one-line caveat in the file's "known
+approximation" paragraph is the right fix; dropping `relativeTo:` is a look decision (hers), not
+this unit's. Terminal's `.system(size: 14, design: .monospaced)` has no such term.
+
+### NIT-2 — AGREE
+
+Verified: `IndexClickCaretTests.swift:461–463` hardcodes `+ 11` / `− 21` (= today's
+`readTierLeading` 11 + trailing `readEditResting` 10) while the y two lines above is derived.
+Note for the fix: `ReadEditBlock` is `private`, so the pin must derive x the way y already is —
+`IndexProseColumn.readTierLeading(resting: IndexProseColumn.readEditResting, paneInset:
+PaneTextView.proseLeadingInset)` for the leading edge and `IndexProseColumn.readEditResting` for
+the trailing.
+
+**Summary: 4 AGREE, 0 DISPUTE.** One flag for the orchestrator: MINOR-1's rewrite amends a
+RULED design law (13g F-5's surface rule) — recommend (b) PROVISIONAL + a QUESTIONS row (a)/(b)
+for her morning bundle.
