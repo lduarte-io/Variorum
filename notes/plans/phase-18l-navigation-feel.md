@@ -218,10 +218,10 @@ two-phase-sized-units line — flagged to the author at the kickoff sitting (Q3)
 | 3 | The editor-regression SWEEP over 13u2…13y/18k (her ask: *"investigate editor regressions that must've happened during recent fixes"*) — every finding reproduced, traced, pinned, fixed or owned | U0(3) | **CLOSED 2026-09-26** — S1–S9 with ATTRIBUTION per finding (U0 RECORD); S3 → KnownIssues (taste call, morning bundle) · S5 → KnownIssues (12) · row 75 closed |
 | 4 | WRITE: removing a newline collapses the top padding (block 4/4 → 3/3 captures) — KnownIssues row 87 | U0b | **CLOSED 2026-09-26** — fixed (`998f7d7d` ReadingAnchor; B1–B3 pre-existing, B4 our-commit(`4ae12a59`)), double-walked, ladder closed (R1 0/0/2/2 all agreed → the reviewer's four fixes `f207f97a..cd01c428` incl. the delegate refinement → sanity PASS `f81dcc67`, 110/14 blast radius) |
 | 4b | B5 (U0b's find): ⏎ after a ⌘↓ landing on invalidated geometry moves the page (+109/+166 pt, both builds, differential road, UNTRACED) | U-VIS scenario + the U3 `layoutViewport()` exam (or its own slot — decided at U3) | open — KnownIssues row filed, owner 18l |
-| 5 | NOTE-OPEN lands middle/end instead of the start, ignoring where she was (her 2026-09-26 report) — product rule = sitting Q1 | U0c | open |
+| 5 | NOTE-OPEN lands middle/end instead of the start, ignoring where she was (her 2026-09-26 report) — product rule = R-18l-1 | U0c | **BUILT + WALKED** (impl. + orch.; all pre-existing; `NoteOpenLandingTests` 12, red-on-old 8/18; the two #150 PROVISIONALs confirmed by the orchestrator) — Fable review pending |
 | 6 | The opt-in VISUAL REGRESSION HARNESS (env-gated; real window; geometry assertions — first-visible-line y, caret line, glyph box inside the surface, click lands on the clicked line; seeded with U0/U0b/U0c reproductions) | U-VIS | open |
 | 7 | Note Read adopts the F3 shape (`LandingPolicy.readNote`, block manifest, aim/hold/correct/watchdog in BOTH faces; resting anchors KEPT — page 0.08, edit `.center`) | U1 | open |
-| 8 | Takes' landing half adopts the authority (aim kind grows: top · minimal-reveal · viewport-fraction); the restore half BYTE-PRESERVED (R-Q20/R-Q21); ~15 gesture-end pins + projection arm ride UNMODIFIED (the 3C proof) | U2 | open |
+| 8 | Takes' landing half adopts the authority (aim kind grows: top · minimal-reveal · viewport-fraction); the restore half BYTE-PRESERVED (R-Q20/R-Q21); ~15 gesture-end pins + projection arm ride UNMODIFIED (the 3C proof). **MAY-take (U0c's find):** a Takes pane born live reports AppKit's END before its `.start` landing, so the persisted copy holds the take's END until the note leaves (no viewport effect) — else 12 at the closeout | U2 | open |
 | 9 | PanePublisher frame-synchronous / state-deferred (her ratified shape; gate = walk the boards under load, REVERT on any felt regression; measure the ~1,989-warning count both ways — C3 says they are ALL `PaneSurface`'s) | U3 | open |
 | 10 | The macOS-27 `layoutViewport()` clip-displacement examination of `PaneSurface`'s render restore (TEXTKIT2_NOTES §3's hand-forward) | U3 rider | open |
 | 11 | The one-liners: Outline `.onDisappear { landing.end() }`; `LandingTarget.utf16Offset` wired-or-deleted (lean: delete + comment naming the `FocusedBlock` road; PROVISIONAL, QUESTIONS row); `FlowStoryRow` reads `BookHeightManifest.resolve` (D1) unless 13i took it — check first | U4 | open |
@@ -1429,3 +1429,33 @@ offset); **(e)** the pins share `UserDefaults.standard` with the test host (post
 `defer`, the R1-7 class); **(f)** attribution is by line history (the C7 trap); **(g)** a machinery
 slip mid-unit (a revert's `git checkout HEAD --` over uncommitted edits) — repaired and re-verified
 within minutes, recorded above. **U0c — DONE (implementer); the Fable cold review follows.**
+
+### U0c — ORCHESTRATOR ACCEPTANCE (the hands-on walk, 2026-09-26 overnight; verify-never-trust)
+
+**Claims verified against git:** all 11 commits present and pushed, tree clean, the pin file and
+#150 exist, LIVE STATUS fully flipped, the reverts' logs named. **The walk, on a fresh Debug
+build of `aa317d99`** (dev store, per-step guard via the now-durable `Tools/WalkKit/guard.sh`):
+- **First open → START, PASS.** *A Scandal in Bohemia*, first open this run from the Library:
+  block 1/262, the page at its very top — the persisted MIDDLE caret (this orchestrator's own U0
+  walk left it mid-note) did not move the viewport.
+- **In-session re-open → the exact page, PASS.** Wheel-scrolled deep into the note, left to the
+  Library (captured — the leave is evidenced), re-opened: the same page, same first line.
+  Captures `notes/plans/18l-screens/u0c/u0c-{firstopen,scrolled,mid-library,reopen2}.png`.
+
+**The two PROVISIONAL judgment calls — CONFIRMED by the orchestrator under R-18l-4** (the
+reviewer weighs them independently): (1) the supersession reading (a first open seeds NO fact) —
+the evidence is measured and pinned (`t-11`; R-letter red 7/16), and a start that evaporates one
+⌘1 later is not the START her sentence asked for; (2) the re-open restores the PAGE without
+revealing an off-page caret — "restores where you were" read literally. Both ride QUESTIONS
+#150 for her morning bundle. The book's `editHere` door's classification (an in-book editing
+door naming its place, not a note-open) is also confirmed.
+
+**Orchestrator adjudications:** the KnownIssues note-open row CLOSED (ladder-pending clause,
+rows 86/87's form); **the R-cor-3 dated pointer landed** (the Act 10 plan — the Library peek's
+"place where your cursor was saved" superseded for the session's first open); the Takes-born-live
+persisted-END residue OWNED (ledger row 8's cell — U2 may-take, else 12 at the closeout); the
+AppSpec §12 contract line and the MOBILE PARITY row ride the CLOSEOUT as drafted in OWED AT
+CLOSE. The machinery slip (a revert's `git checkout HEAD --` over uncommitted edits — the exact
+class the resiliency protocol's addendum 11 names) was self-repaired and recorded; noted here so
+the next brief's traps line lands with emphasis. Ledger row 5 flips to BUILT+WALKED — the Fable
+cold review is the remaining gate.

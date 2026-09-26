@@ -48,6 +48,11 @@ it.
   the place where your cursor was saved at any point (no need to render a whole write surface with
   takes, blocks, everything). Or we can make it so that the library just has a view and you have to
   click into it to edit it - that's the safer choice, and the read view + metadata still has value.
+  *(DATED POINTER, 2026-09-26 — 18l U0c, her ruling R-18l-1 + QUESTIONS #150: the "place where your
+  cursor was saved" landing is SUPERSEDED for the SESSION'S FIRST open of a note, which now shows
+  the START in every mode; an in-session re-open restores the page she left. The caret memory
+  itself survives for re-opens and the panes' entry caret. The binding record is
+  `notes/plans/phase-18l-navigation-feel.md`'s U0c RECORD.)*
   QUALITY is what this phsae most needs to emphasize. also, when I click on a book, i just still see
   the last note i clicked on - obviously bad. a book could show the outline that it has or something
   rather than just showing the text. I'm open to good ideas in this area for usefulness, and what
