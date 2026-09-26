@@ -409,7 +409,14 @@ construction). Her rulings:
   display == stored, always. READ-ONLY surfaces with NO editing
   gestures (Read mode; exports are markdown by definition) may
   render fully formatted — display ≠ stored is safe exactly where
-  no gesture maps clicks to text offsets.
+  no gesture maps clicks to text offsets. *(CARVE-OUT ruled
+  2026-09-26, 18l U0 — R-18l-5, PROVISIONAL, QUESTIONS #149: a
+  formatted read tier MAY seed a caret when the click's offset
+  travels only through the pinned display→source translation
+  (`MarkdownRendering.sourceOffset` + the replica-fidelity pin) —
+  the rationale clause's own condition, discharged by machinery;
+  the binding record is `notes/plans/phase-18l-navigation-feel.md`'s
+  sitting record.)*
 
 Honesty notes she took with the ruling: the bridge pushes literal
 syntax to Fragments (it IS the text); word counts count marker

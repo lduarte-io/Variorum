@@ -1923,4 +1923,10 @@ dispositioned: (a) ruled, (b) held for 13t's kickoff by her word.**
 #148 — **ONE SENTENCE IN THE BACKUP LOG: WHAT THE SECOND FOLDER'S ROW SAYS WHEN A RUN'S OWN BACKUP FAILED (2026-09-25, the 18k ladder round 1, NIT 1). PROVISIONAL — built; copy is yours.**
 **The case:** since C7 the second folder is handed the run's OWN snapshot, never one re-discovered by listing. When the beside-the-library backup FAILS and the far folder is due, the far leg copies nothing and said *"There is no snapshot to copy yet."* — false whenever older copies exist beside the library (only THIS run made none). **The provisional wording:** *"This run made no snapshot to copy."* One string in `StoreBackup.performSecondLeg`; pinned (`BackupRunTests.aFailedPrimaryLegLeavesTheFarFolderAnHonestSentence`, red-on-old by the old string); reversing or rewording is one line.
 
-*(Next free number: **#149**.)*
+#149 — **MAY A FORMATTED READ TIER TAKE A CARET CLICK? The 13g surface rule's carve-out (2026-09-26, 18l U0's ladder round 1, MINOR-1 — ruled R-18l-5, PROVISIONAL under your overnight mandate R-18l-4; yours to overturn at the morning bundle).**
+**The case:** your Index-click fix works by mapping a click on the fully-formatted read tier back to the stored text (a pinned display→source translation), and the caret lands where you clicked. But 13g F-5's design law says a surface whose click SEEDS A CARET must show the dimmed-marker face so display == stored — a letter the fixed tiers now cross (they show the reading face AND place carets). The rule's own rationale says formatted faces are safe *"exactly where no gesture maps clicks to text offsets"* — and U0 built exactly that mapping, pinned for fidelity in both voices.
+**The provisional ruling (b), as built and as you see it today:** the read tiers KEEP the formatted face; a click may place a caret ONLY through the pinned translation. The 13g F-5 entry carries the dated pointer; the `MarkdownRendering` header states the carve-out.
+**The alternative (a):** switch the book Index and Read ▸ edit read tiers to the dimmed-marker face (display == stored, the rule's letter kept whole) — a visible look change on two surfaces you read daily: markers reappear, dimmed, on text you currently see clean.
+**Reversing is contained either way:** (a) is a face flip per tier; (b) is what stands.
+
+*(Next free number: **#150**.)*

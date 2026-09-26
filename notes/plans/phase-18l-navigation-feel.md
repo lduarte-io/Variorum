@@ -267,6 +267,19 @@ two-phase-sized-units line — flagged to the author at the kickoff sitting (Q3)
   a fresh session. Machine setup: her app quit (zero real-store instances), a detached
   `caffeinate -dims` running (pid noted in the orchestrator's log), GUI driving authorized with
   the per-step checks binding.
+- **R-18l-5 (orchestrator, PROVISIONAL under R-18l-4 — the U0 ladder's MINOR-1 escalation,
+  2026-09-26): THE 13g SURFACE RULE GAINS A CARVE-OUT, option (b).** The read tiers KEEP the
+  fully-formatted face AND may seed a caret, provided the click's offset travels ONLY through the
+  pinned display→source translation (`MarkdownRendering.sourceOffset` + the replica-fidelity
+  pin). Why this is the rule's own answer, not its repeal: F-5's rationale clause reads *"display
+  ≠ stored is safe exactly where no gesture maps clicks to text offsets"* — U0 built exactly that
+  mapping, pinned both ways, so the hazard the letter fenced is discharged by machinery rather
+  than by hiding markers. The alternative (a) — switching the Index and Read ▸ edit tiers to the
+  dimmed-marker face — is a visible look change she never asked for; her report demanded the
+  caret land where she clicked ON the formatted face she has been reading for weeks. HERS TO
+  OVERTURN: QUESTIONS #149 (the (a)/(b) pair, morning bundle); the 13g F-5 entry carries the
+  dated pointer; the reviewer's MINOR-1 fix writes the carve-out into the MarkdownRendering
+  header in the rule's own terms.
 - **Her follow-up at the sitting (2026-09-26, verbatim — the round's bar):** *"there was supposed
   to be a new plan made as well for a style of testing to deal with the different editor
   regressions and ensuring that clicking around and editing doesn't lead to jumps that are not
