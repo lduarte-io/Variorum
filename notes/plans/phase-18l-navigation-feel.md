@@ -1070,7 +1070,7 @@ IN PROGRESS; nothing below is verified unless it carries a hash or a log.
 | 4 | The END-jump: find the tail writer (or disprove it) — attribution + red-on-old pin | TRACED — the non-click-writer hypothesis is DISPROVED for the single-window app (below); what derives the tail landing is the note-open landing over a caret she left there. The red-on-old pins are the rule's own (piece 6) — PENDING |
 | 5 | Build R-18l-1 (first-open set; re-open restore by the standing machinery + the place) | DONE (`5d7c8bb6`) — THE BUILD below; `NoteOpenLandingTests` **11/11 GREEN** on the fixed tree (`App/Variorum/DerivedData/18l-u0c-pin-fixed3.log`); the three behavioural reverts RED in their named shapes (below); the ruled pins' first run green (`18l-u0c-neighbors1.log`, 97 tests / 10 suites: TakesArticleScrollTests (R-Q20/R-Q21), LandingOffsetTests (RAISE-M1), CurrentBlockContinuityTests, ModeSwitchCarryTests, ScrollAnchorTests, WriteTopAirTests, ReadModeTests, CommandRouterTests, TakesLandingTests + the new suite — every one byte-unmodified) |
 | 6 | Pins (end-jump red-on-old; first-open / re-open / deep-link per mode; R-Q20/R-Q21 + RAISE-M1 ride unmodified) | DONE — 11 tests (the room pin added at `this commit`); the A/B sections re-shaped at `5d7c8bb6` to the ruled letter (the caret SURVIVES; the viewport opens at the start) — their viewport arms are the red-on-old cores, re-proved by R-open; the two router pins are state-transition pins of the new bookkeeping (new API). The pre-fix run: `NoteOpenLandingTests` (10 tests) committed RED on the pre-fix tree (this commit; `App/Variorum/DerivedData/18l-u0c-pin-prefix1.log`): **8 red / 18 issues**, the 2 guards green — the router's first open restores the earlier run's fact (block 5 @12) and a re-open restores it too; Write's first open: clip **2904.0** (the ⏎ shape — caret 8691/8691), **2880.0** (the last line's end), **1588.0** (the middle); Takes: article clip **1866.0**, the empty last block's pane live; Read: the last block selected, scrolls **[1149, 3819]**; re-open at the top: **24.0**; re-open after scrolling away from a tail caret: **2904.0**; re-open mid-note: left 1391.0 → back **24.0**; the mode-round-trip-after-re-open guard and the deep-link guard green |
-| 7 | Walk (both voices; her shapes; first-open vs re-open per door; a deep link) | IN-PROGRESS — Terminal first pass on the letter-reading build DONE (it found `t-11`; THE WALK'S FIRST PASS above); the supersession build's walk (both voices) PENDING |
+| 7 | Walk (both voices; her shapes; first-open vs re-open per door; a deep link) | DONE — PASS on the supersession build (product code `cf5334cf`, build `DerivedData/18l-u0c-walk` at `26d0a5f6`), both voices — THE WALK below |
 | 8 | Closing runs (touched suites + the eleven Tutorial suites) | NOT-STARTED |
 | 9 | Self-assessment | NOT-STARTED |
 
@@ -1218,7 +1218,7 @@ Each is a working-tree edit only, then `git checkout HEAD --` the file and `git 
 ### THE WALK'S FIRST PASS FOUND THE LETTER-READING WRONG — and the build returned to the supersession reading (Terminal, the fixed build `5d7c8bb6`)
 
 The first walk pass (Terminal, fresh launch, captures `18l-screens/u0c/walk/`, gitignored) passed
-every opening row: Scandal's first open from the Library at its START with the caret remembered at
+every opening row (these captures now live in `walk/letter/`): Scandal's first open from the Library at its START with the caret remembered at
 block 199 (`t-01`; pre-fix `pre-b4` landed block 199 at the top), A Case of Identity's first open at
 its START (`t-02`; pre-fix `pre-a6`, the blank END), the page left mid-note → the Open strip's
 other note → back: both re-opens **pixel-identical** to the pages left (`t-04` = `t-01`, `t-05` =
@@ -1273,3 +1273,39 @@ re-open **24.0** (the reveal to block 1 wins over the room's place); the first-o
 it (that arm is the seeding — R-letter's). R-place and R-room stand as run (their mechanism, the
 teardown place, is unchanged by the seeding). QUESTIONS #150 rewritten to the built reading, (a)
 carrying the letter-reading as the alternative with `t-11` as the measured reason.
+
+### THE WALK (USE) — the supersession build, dev-store Debug, per-step guarded, both voices
+
+Build `App/Variorum/DerivedData/18l-u0c-walk` at `26d0a5f6` (product code `cf5334cf`). Each session
+is a FRESH LAUNCH (a new run: every note's first open). Staged by the local preferences only (the
+WalkKit appearance-staging precedent): *A Case of Identity*'s mode (`postMode.<id>`) and, before
+the Takes rows, its persisted memory re-set to the empty last block 138 (the ⏎-at-the-end shape an
+earlier session leaves). "Identical" = a text-body crop diff with an EMPTY bounding box, or the
+text-row tops measured equal. Captures `notes/plans/18l-screens/u0c/walk/` (gitignored); the pre-fix
+repros `…/u0c/pre/`; the letter-reading pass `…/u0c/walk/letter/`.
+
+| Voice | Door · row | Result | Verdict | Captures |
+|---|---|---|---|---|
+| Terminal | **Library → *A Scandal in Bohemia*** (first open; remembered caret block 199 — the MIDDLE shape) | the START, top air showing, block 1/262 (pre-fix: block 199 at the top) | **PASS** | `t-01` (pre `pre-b4`) |
+| Terminal | **Library → *A Case of Identity*** (first open; remembered caret the empty last block — the END shape) | the START, block 1/138 (pre-fix: the empty last line alone on a blank screen) | **PASS** | `t-02` (pre `pre-a6`) |
+| Terminal | Case wheel-scrolled mid-note (no click) → **Open strip → Scandal** (re-open) | the page she left — IDENTICAL to `t-01` | **PASS** | `t-03`, `t-04` |
+| Terminal | **Open strip → Case** (re-open) | the mid-note page she left — IDENTICAL to `t-03` | **PASS** | `t-05` |
+| Terminal | **⌥⌘[ → Scandal, ⌥⌘] → Case** (history = re-open, #150(c)) | both IDENTICAL to the pages left (bodies and titles) | **PASS** | `t-06`, `t-07` |
+| Terminal | **Shelf → today's entry** (first open — it minted today's journal note) → Open strip → Case → **Shelf → today's entry** (re-open) | the new note at its start; Case IDENTICAL on the way through; the re-open IDENTICAL | **PASS** | `t-08`, `t-09`, `t-10` |
+| Terminal | **a deep link** — Scandal ▸ Blocks, row 13 ▸ the panel's *open in Write* | block 13 at the top, its ring on — the target, unchanged | **PASS** | `t-11a`, `t-11` |
+| Terminal | **Takes: Library → Case** on a fresh launch (first open, remembered caret the empty last block) → **⌘1** | Takes at the top with block 1's pane live; ⌘1 → Write at the START, block 1/138 (the letter build: the blank END — `letter/t-11`) | **PASS** | `t-12`, `t-13` (pre `pre-c2`) |
+| Terminal | **her in-session END** — Case ⌘↓ (the caret at the end), wheel back to the top, Open strip away → back | the top page she left (text rows 368/402/436 = the first open's; 0.5 pt from the wheel's own settle), the caret still block 138/138 | **PASS** | `t-14a`, `t-14`, `t-15` (pre `pre-a10`) |
+| Study | Library → Scandal (first open; remembered caret block 13) | the START, block 1/262 | **PASS** | `s-01` |
+| Study | Library → Case (first open; remembered caret the empty last block) | the START, block 1/138 | **PASS** | `s-02` |
+| Study | Case mid-note → Open strip → Scandal → Open strip → Case → ⌥⌘[ | every re-open IDENTICAL to the page left | **PASS** | `s-03`…`s-06` |
+| Study | her in-session END (Case ⌘↓, read back to the top, away, back) | the top page, rows identical to the first open's (166/203/384); caret block 138/138 kept | **PASS** | `s-07`, `s-08` |
+| Study | a deep link — Scandal ▸ Blocks ▸ double-click row 13 | block 13 at the top — unchanged | **PASS** | `s-09a`, `s-09b`, `s-09` |
+| Study | Takes: Library → Case on a fresh launch (first open, the END shape) → ⌘1 | Takes at the top, block 1 live; ⌘1 → Write at the START | **PASS** | `s-10`, `s-11` |
+
+**Not walked (pin only, stated):** Read's first open (`readOpensAtTheStart`, both faces' scroll
+views measured 0.0), a page left resting in the typewriter room (`aReopenOfANoteLeftRestingBelowItsLastLineComesBackThere`),
+the shelf door in Study (the same registration road as Terminal's). **Walk residue in the dev
+store, deliberate:** *A Case of Identity*'s empty block 138 (my repro's ⏎) was carved back at the
+end (`s-12` → `s-13`: 137/137, the tray ⌫ 1); today's entry minted an empty journal note
+**2026-09-26**; the memories of Case / Scandal moved with the walk. The voice restored to Terminal
+and read back (`1, 0`); every dev instance quit by identity; `pgrep` clean.

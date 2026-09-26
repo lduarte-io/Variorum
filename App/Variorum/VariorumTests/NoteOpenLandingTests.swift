@@ -300,7 +300,7 @@ struct NoteOpenLandingTests {
         }
     }
 
-    /// THE WALK'S FINDING, pinned (`18l-screens/u0c/walk/t-11`): a first open
+    /// THE WALK'S FINDING, pinned (`18l-screens/u0c/walk/letter/t-11`): a first open
     /// that keeps an earlier run's caret as the live fact shows the start —
     /// and the very next mode switch enters on that caret and reveals it, the
     /// blank END again. The first open restores no fact, so ⌘1 right after it

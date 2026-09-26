@@ -73,7 +73,7 @@ final class CommandRouter {
             // Read's first row), and the memory follows whatever she does next
             // — a mode switch included (measured on the walk: keeping the old
             // caret as the live fact put the blank END back on screen at the
-            // first ⌘1 — `18l-screens/u0c/walk/t-11`). A RE-open restores what
+            // first ⌘1 — `18l-screens/u0c/walk/letter/t-11`). A RE-open restores what
             // THIS run knows (`sessionFact`), never an earlier run's place. The
             // memory itself is untouched (persisted, and read by the doors that
             // name a place on purpose). The OPENING is recorded beside the fact
