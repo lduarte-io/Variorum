@@ -1,6 +1,6 @@
 # 18k — RUNTIME HYGIENE (was "RUN C")
 
-**STATUS: OPEN 2026-09-25 — kickoff; the ledger below is the plan; LIVE STATUS is the truth.**
+**STATUS: CLOSED 2026-09-25 (late) — all units DONE, three Fable ladder rounds (the last auditing the Opus orchestrator seat — PASSED), finals green modulo the adjudicated pointer class, the install refreshed. The CLOSEOUT section at the end is the summary; the author handoff is `notes/handoffs/phase-18k-handoff.md`.**
 
 An 18 entry run under `/architect-phase` with the RUN A discipline (one roster, each item
 independently scoped, cast, run and closed). **18k's items are its OWN (C0–C6) — her 2026-09-22
@@ -239,7 +239,7 @@ COMMITTED · every death and resume noted in the record.
 - THE LADDER — CLOSED at two rounds (R1 0/0/0/3 NIT, NIT 1 fixed `0ebc3b5e`; R2 0/0/0/0).
 - THE FINALS — core **1723/180 ALL PASSED** (+1 = the post-13y auto-entitlement act's `AuthRLSDDL` pin, `b58414eb`/`7152fcd5` — not 18k's; 18k touched no `Sources/`/`Tests/`) · iOS **BUILD SUCCEEDED** · mobile **643/109, exactly the 4 known** (+1 = C5's P26 pin) · full Mac **RED-IN-CONTEXT → UNIT C8** (below).
 - C8 — DONE: CLOSED on the closing full run (widening red gone, soak red absent).
-- THE REFRESH — IN-PROGRESS.
+- THE REFRESH — DONE (below). **18k CLOSED.** Next at her word: likely 18l (U0/U0b/U-VIS first), then 18o with a fresh Fable orchestrator.
 - THE C8 COLD REVIEW + ADJUDICATION AUDIT (FABLE, R-18k-9/10) — DONE: 0/0/0/4 NIT, C8 approved, the audit PASSES (round 3, below).
 - THEN, at ONE zero-instance window (her quit): the full Mac run → the closeout → the refresh. Next phase at her word (likely 18l, carrying U0/U0b/U-VIS; then 18o — a fresh Fable orchestrator).
 - Deaths / resumes: none.
@@ -4285,3 +4285,32 @@ while the author was at the machine, then **GREEN 3 of 3 isolated with the machi
 whole run** (HID idle bracketed: 47→171 s, 178→305 s, 305→436 s); the same product tree passed all
 three in the two earlier full runs; 18k touched none of their files. Filed on KnownIssues (owner 12) +
 an ENVIRONMENT TRAPS line. **The gate reads: GREEN modulo the adjudicated pointer class — no 18k red.**
+
+## CLOSEOUT (2026-09-25 late)
+
+**Units:** C0 · C1 · C2 · C3 · C4 · C5 · C6 · C6b · C7 · C8 — all DONE (the ledger); the held walks
+driven and captured once she granted Ghostty the two TCC permissions. **Ladder:** three Fable rounds —
+R1 0/0/0/3 NIT (NIT 1 fixed, #148) · R2 0/0/0/0 · R3 (her R-18k-9/10) 0/0/0/4 NIT, C8 approved, **the
+audit of the Opus orchestrator seat's adjudications PASSED**. **Finals:** core **1723/180 ALL PASSED** ·
+iOS **BUILD SUCCEEDED** · mobile **643/109, exactly the 4 known** · full Mac **3168/522 — the five
+macOS-27 deltas GONE, C8's widening red GONE, the soak red absent; the only reds the three
+pointer-injection suites, adjudicated ENVIRONMENTAL (green 3/3 idle)**. **Canon deltas:**
+`TEXTKIT2_NOTES.md` gains the macOS 27.0 measured findings (`601e7f14`); the architect-phase skill's
+environment line gains R-18k-8's subfolder. **Zero schema, zero migrations, zero `Sync/`, zero
+`Sources/` — marker 9 unchanged.**
+
+**THE INSTALL REFRESH — DONE 2026-09-26T05:09Z** (her quit's window, zero instances re-checked before
+every step): A1 safety copy `Backups/safety-copies/18k-refresh-20260926T050909Z` (6 files — the store,
+its `-wal`/`-shm`, three key files — each `cmp`-identical to the live file; R-18k-8's first use) ·
+Release built from `11e7614f` in a clean throwaway worktree (removed after, DerivedData too) ·
+`/Applications` binary `9e15f8bf…` (= 13y's recorded install — custody chain clean) →
+**`79c7688b9625f61df64c7af0ef42d90464ab0cdad5ff0ede6f6c37ebaa7ee203`** · `codesign --verify --deep
+--strict` OK on the product AND the installed copy · both keychain access groups present and identical
+*[removed for publication]*
+
+**MOBILE PARITY:** the phone owes its own autosave-registry release (the Mac's C1 shape — KnownIssues,
+the mobile row); the ⌥⌘Z refusal sentence lives in `StructuralUndoCopy` and the phone forwards it
+byte-identically (nothing owed). Everything else is Mac-app/DEBUG — nothing else mobile-visible.
+
+**Hard stop.** The next phase is hers to kick off (her stated lean: 18l, carrying her three evening
+reports + the visual harness; then 18o under a fresh Fable orchestrator).

@@ -39,7 +39,7 @@ round closes, its closeout may strike its row here; this file is otherwise not e
 
 | Entry | Record file | Status |
 |---|---|---|
-| **18k** — runtime hygiene (was "RUN C") | `notes/plans/phase-18k-runtime-hygiene.md` | **in progress** (opened 2026-09-25) |
+| **18k** — runtime hygiene (was "RUN C") | `notes/plans/phase-18k-runtime-hygiene.md` | **DONE 2026-09-25** (handoff `notes/handoffs/phase-18k-handoff.md`) |
 | **18o** — correctness & honesty singles (17e's remainder + 17t; minted at 18k's kickoff sitting, R-18k-1) | `notes/plans/phase-18o-correctness-singles.md` | pending — runs right after 18k |
 | **18l** — navigation feel | `notes/plans/phase-18l-navigation-feel.md` | pending — **likely NEXT after 18k** (her word 2026-09-25, carrying the new U0: the Index click lands on the empty paragraph); 18o after it |
 | **18m** — the editor-conductor hoist | `notes/plans/phase-18m-editor-conductor-hoist.md` | pending |
