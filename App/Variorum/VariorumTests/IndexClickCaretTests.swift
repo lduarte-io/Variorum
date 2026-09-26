@@ -457,9 +457,17 @@ struct IndexClickCaretTests {
                 let top = IndexProseColumn.readTierTop(
                     resting: IndexProseColumn.readEditRestingTop,
                     paneInset: PaneTextView.proseTopInset)
+                // The x insets DERIVED exactly as the y is (ladder round 1,
+                // NIT-2 — they were hardcoded 11/21): the tier's leading is
+                // `readTierLeading` over the surface's resting padding, the
+                // trailing the resting padding alone (`ReadEditBlock`'s own
+                // constants, private to its file).
+                let leading = IndexProseColumn.readTierLeading(
+                    resting: IndexProseColumn.readEditResting,
+                    paneInset: PaneTextView.proseLeadingInset)
                 let column = CGRect(
-                    x: row.minX + 11, y: row.minY + top,
-                    width: row.width - 21,
+                    x: row.minX + leading, y: row.minY + top,
+                    width: row.width - leading - IndexProseColumn.readEditResting,
                     height: row.height - top - IndexProseColumn.readEditRestingTop)
                 let clicked = rig.windowPoint(Self.point(on: line, of: column))
                 rig.click(at: clicked)
