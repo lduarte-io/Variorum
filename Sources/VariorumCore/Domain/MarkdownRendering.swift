@@ -143,6 +143,91 @@ public enum MarkdownRendering {
     public static func render(_ source: String) -> Rendered {
         guard !source.isEmpty else { return Rendered(text: "", runs: [], lines: []) }
 
+        var display = ""
+        display.reserveCapacity(source.utf16.count)
+        var displayLength = 0
+        var runs: [Run] = []
+        var lines: [Line] = []
+        walkLines(source) { line, _ in
+            let rendered = line.rendered
+            display += rendered.text
+            let lineLower = displayLength
+            displayLength += rendered.text.utf16.count
+            lines.append(Line(
+                range: lineLower..<displayLength, style: rendered.style,
+                indentLevel: rendered.indentLevel))
+            for run in rendered.runs {
+                runs.append(Run(
+                    range: (run.range.lowerBound + lineLower)..<(run.range.upperBound + lineLower),
+                    emphasis: run.emphasis, url: run.url))
+            }
+            if let terminator = line.terminator {
+                // The terminator is copied VERBATIM — a "\r\n" is one
+                // Character and stays one.
+                display.append(terminator)
+                displayLength += terminator.utf16Width
+            }
+            return true
+        }
+        return Rendered(text: display, runs: runs, lines: lines)
+    }
+
+    /// **Where a DISPLAY offset came from in the stored text** (18l UNIT U0 —
+    /// her report: *"I click on top of a line of text [in the book Index] and
+    /// my cursor moves to the empty paragraph"*). The read-cheap tiers of the
+    /// two Index surfaces draw THIS transform's display — markers hidden — and
+    /// a click on them now seeds the live pane's caret, which is exactly the
+    /// case the surface rule above names as needing a translation. This is
+    /// that translation, read off the SAME walk `render` builds the display
+    /// from (`walkLines`), so the two can never disagree about a line.
+    ///
+    /// The rule, per line: the answer is the LAST source boundary that landed
+    /// at or before `displayOffset` — so a caret shown just before a word lands
+    /// just before that word, inside any marker that precedes it (`**bold**`:
+    /// display 0 → source 2, after the opening `**`), and a caret after the
+    /// word lands after its closing marker. A display offset past the end
+    /// answers the text's end; one inside a multi-unit terminator answers its
+    /// line's end. UTF-16 in, UTF-16 out, both grapheme-aligned.
+    public static func sourceOffset(forDisplayOffset displayOffset: Int, in source: String) -> Int {
+        guard !source.isEmpty else { return 0 }
+        let target = max(0, displayOffset)
+        var answer = source.utf16.count
+        var displayLength = 0
+        walkLines(source) { line, offsets in
+            let lower = displayLength
+            let length = line.rendered.text.utf16.count
+            let next = lower + length + (line.terminator?.utf16Width ?? 0)
+            displayLength = next
+            guard target < next || line.terminator == nil else { return true }
+            let local = min(target - lower, length)
+            // `landed` is non-decreasing over the line's source boundaries.
+            var boundary = 0
+            for (index, landed) in line.rendered.landed.enumerated() where landed <= local {
+                boundary = index
+            }
+            answer = offsets[line.sourceStart + boundary]
+            return false
+        }
+        return answer
+    }
+
+    /// One source line as `render` walks it: its rendering, the CHARACTER
+    /// index its first character has in the source (the rendering's `landed`
+    /// table counts boundaries from there; the walk hands the visitor the
+    /// source's UTF-16 offset per character boundary), and the terminator
+    /// that ended it (nil on the last line).
+    private struct WalkedLine {
+        let rendered: RenderedLine
+        let sourceStart: Int
+        let terminator: Character?
+    }
+
+    /// THE walk (18l U0 — factored out of `render`, byte-for-byte the loop it
+    /// was): one tokenizer scan, then every line in order, blank ones
+    /// included. `visit` returns false to stop early.
+    private static func walkLines(
+        _ source: String, _ visit: (WalkedLine, _ offsets: [Int]) -> Bool
+    ) {
         let chars = Array(source)
         var offsets: [Int] = [0]
         offsets.reserveCapacity(chars.count + 1)
@@ -153,12 +238,6 @@ public enum MarkdownRendering {
         // which is exactly the order a line needs them in.
         let spans = MarkdownSyntax.spans(in: source)
         var spanIndex = 0
-
-        var display = ""
-        display.reserveCapacity(source.utf16.count)
-        var displayLength = 0
-        var runs: [Run] = []
-        var lines: [Line] = []
 
         var lineStart = 0
         var index = 0
@@ -175,27 +254,13 @@ public enum MarkdownRendering {
             }
             let rendered = renderLine(
                 chars, offsets, from: lineStart, to: index, spans: mine)
-            display += rendered.text
-            let lineLower = displayLength
-            displayLength += rendered.text.utf16.count
-            lines.append(Line(
-                range: lineLower..<displayLength, style: rendered.style,
-                indentLevel: rendered.indentLevel))
-            for run in rendered.runs {
-                runs.append(Run(
-                    range: (run.range.lowerBound + lineLower)..<(run.range.upperBound + lineLower),
-                    emphasis: run.emphasis, url: run.url))
-            }
-            if index < chars.count {
-                // The terminator is copied VERBATIM — a "\r\n" is one
-                // Character and stays one.
-                display.append(chars[index])
-                displayLength += chars[index].utf16Width
-            }
+            let line = WalkedLine(
+                rendered: rendered, sourceStart: lineStart,
+                terminator: index < chars.count ? chars[index] : nil)
+            guard visit(line, offsets) else { return }
             lineStart = index + 1
             index += 1
         }
-        return Rendered(text: display, runs: runs, lines: lines)
     }
 
     // MARK: - One line
@@ -205,6 +270,11 @@ public enum MarkdownRendering {
         let runs: [Run]
         let style: LineStyle
         var indentLevel: Int = 0
+        /// Where each of the line's source character BOUNDARIES landed in the
+        /// line's display (index 0 = the line's start, the last = its end) —
+        /// the table the walk already built to place spans, kept so
+        /// `sourceOffset(forDisplayOffset:in:)` can read it back (18l U0).
+        var landed: [Int] = []
     }
 
     /// One replacement inside a line, in CHARACTER indices (so the walk that
@@ -323,7 +393,8 @@ public enum MarkdownRendering {
             runs.append(Run(range: from..<to, emphasis: emphasis, url: url))
         }
         runs.sort { $0.range.lowerBound < $1.range.lowerBound }
-        return RenderedLine(text: text, runs: runs, style: style, indentLevel: indentLevel)
+        return RenderedLine(
+            text: text, runs: runs, style: style, indentLevel: indentLevel, landed: landed)
     }
 
     /// The character index a UTF-16 offset names (binary search — `offsets`
