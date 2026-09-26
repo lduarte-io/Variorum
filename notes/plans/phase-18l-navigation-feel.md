@@ -199,7 +199,10 @@ two-phase-sized-units line — flagged to the author at the kickoff sitting (Q3)
   verify the TARGET window immediately before each click — the dev pid is frontmost AND its
   window is on the current Space at the expected frame (a screen point alone is never a target);
   (3) any doubt → harness-only until the machine is genuinely author-free (the drives rule:
-  unlocked + author-free + own `caffeinate -d`).
+  unlocked + author-free + own `caffeinate -d`). **Her go-ahead, 2026-09-26 (after the incident,
+  verbatim): "i've now quit my app so the implementer can do its own GUI driving and i won't be
+  touching my computer again for quite a while. so go ahead freely" — zero real-store instances
+  verified by pgrep at that moment; GUI driving resumed with the per-step checks still binding.**
 - Backups: WAL-safe, UTC names, ALWAYS before touching the real store; into the SUBFOLDER
   `Backups/safety-copies/` (R-18k-8), never loose in `Backups/`. Drives need unlocked +
   author-free + own `caffeinate -d`.
