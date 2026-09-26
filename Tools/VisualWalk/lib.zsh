@@ -14,9 +14,11 @@ typeset -g VW_ROOT=${${(%):-%x}:A:h}
 typeset -g REPO=${VW_ROOT:h:h}
 typeset -g WK=$REPO/Tools/WalkKit
 typeset -g VW_BIN=$VW_ROOT/bin
-typeset -g DD=$REPO/App/Variorum/DerivedData/vis-walk
+# The build under test: this tree's own Debug build by default; VW_DD points the harness at another
+# derived-data folder (a scratch build with a fix reverted — how the harness proves it can red).
+typeset -g DD=${VW_DD:-$REPO/App/Variorum/DerivedData/vis-walk}
 typeset -g APP=$DD/Build/Products/Debug/Variorum.app
-typeset -g APP_PATTERN='DerivedData/vis-walk/Build/Products/Debug/Variorum.app/Contents/MacOS'
+typeset -g APP_PATTERN="$APP/Contents/MacOS"
 typeset -g PID= WID=
 typeset -gi PROBE_ID=0
 typeset -gA PV            # the last probe's values
@@ -343,7 +345,7 @@ vw_report() {
     print -r -- ""
     print -r -- "- tree: \`$(git -C $REPO rev-parse --short HEAD)\`$(git -C $REPO diff --quiet HEAD -- App || print ' (App/ has uncommitted changes)')"
     print -r -- "- macOS $(sw_vers -productVersion) ($(sw_vers -buildVersion)) · build \`${APP#$REPO/}\`"
-    print -r -- "- voices: ${VW_VOICES:-current} · scenarios: ${VW_SELECTED:-all}${VW_SELFTEST:+ · SELF-TEST}"
+    print -r -- "- voices: ${VW_VOICES:-current} · scenarios: $([[ -n $VW_SELFTEST ]] && print 'SELF-TEST (planted failure)' || print ${VW_SELECTED:-all seeded})"
     print -r -- "- result: **$(( RUN_FAILS + RUN_ERRORS )) failing** (FAIL $RUN_FAILS · ERROR $RUN_ERRORS) · XPASS $RUN_XPASS"
     [[ -f $RUN_DIR/aborted ]] && print -r -- "- **$(cat $RUN_DIR/aborted)**"
     print -r -- ""

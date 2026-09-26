@@ -369,7 +369,7 @@ scn_b5-refont() {
 
 # --- SELF-TEST: the harness must be able to RED (run with --selftest) -----------------------------------
 vw_def selftest-red "whatever is on screen" "none (a quiet second)" \
-  "a KNOWINGLY WRONG expectation: the first visible line moved 40 pt — must FAIL, be captured, exit non-zero" fail
+  "a KNOWINGLY WRONG expectation: the window's top moved 40 pt — must FAIL, be captured, exit non-zero" fail
 scn_selftest-red() {
   vw_settle; vw_snap before; vw_cap 01-before
   sleep 1
