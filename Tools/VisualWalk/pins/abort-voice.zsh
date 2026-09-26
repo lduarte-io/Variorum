@@ -10,7 +10,7 @@ trap 'rm -rf $T' EXIT
 mkdir -p $T/wk $T/bin
 print '#!/bin/zsh\nprint -r -- "guard $*" >> $VW_PIN_LOG\nexit ${STUB_AUTHOR_RC:-0}' > $T/wk/guard.sh
 # The app, asked (a notification — no input event): it answers with the voice the STORE now speaks.
-print '#!/bin/zsh\nprint "vis id=$1 voice=${STUB_APP_VOICE:-study} key=1"' > $T/bin/vis-probe
+print '#!/bin/zsh\n[[ -n $STUB_PROBE_DEAD ]] && { print "vis id=$1 timeout=1"; exit 2 }\nprint "vis id=$1 voice=${STUB_APP_VOICE:-study} key=1"' > $T/bin/vis-probe
 chmod +x $T/wk/guard.sh $T/bin/vis-probe
 fails=0
 run_case() {   # name reason author_rc check [last-voice-the-harness-saw]
@@ -18,6 +18,7 @@ run_case() {   # name reason author_rc check [last-voice-the-harness-saw]
   ( export VW_PIN_LOG=$T/log STUB_AUTHOR_RC=$3
     source $VW/lib.zsh
     WK=$T/wk VW_BIN=$T/bin RUN_DIR=$T/run PID=$$ FOUND_VOICE=terminal LAST_VOICE=${5:-study} VOICE=study
+    VOICE_IN_FLIGHT=${6:-}
     vw_set_voice() { print -r -- "SET VOICE $1" >> $VW_PIN_LOG }
     vw_quit_app() { print -r -- "QUIT" >> $VW_PIN_LOG }
     vw_abort "$2" ) >/dev/null 2>&1
@@ -39,5 +40,9 @@ run_case "the report carries the abort" "probe timed out" 4 '[[ $report == *"ABO
 run_case "an abort inside a voice switch (the cache still says terminal) names the voice the store speaks" \
   "guard: someone is at the machine — STOP" 0 \
   '[[ $aborted == *"voice left at study (found terminal)"*"RESTORE OWED"* && $log != *"SET VOICE"* ]]' terminal
+# ...and when the app cannot be asked (the probe times out), a switch still IN FLIGHT is named as possible.
+STUB_PROBE_DEAD=1 run_case "an abort inside a switch the app cannot confirm names the possible voice" \
+  "guard: someone is at the machine — STOP" 0 \
+  '[[ $aborted == *"possibly left at study"*"RESTORE OWED"* ]]' terminal study
 print "abort-voice pins: $fails failing"
 (( fails == 0 ))

@@ -39,7 +39,7 @@ vw_log() { print -r -- "[$(strftime %H:%M:%S $EPOCHSECONDS)] $*" | tee -a $RUN_D
 # voice is a SYNCED dev-store setting the passes flip, and a Study store left behind reds KnownIssues
 # row 90's C2 pins on the next Mac suite — so an abort names it, and restores it only when no author
 # refusal caused the abort and the author checks pass NOW.
-typeset -g FOUND_VOICE= LAST_VOICE= ABORTING=
+typeset -g FOUND_VOICE= LAST_VOICE= ABORTING= VOICE_IN_FLIGHT=
 
 vw_abort() {
   if [[ -n $ABORTING ]]; then vw_log "nested abort (inside the abort's own clean-up): $*"; exit 9; fi
@@ -54,6 +54,17 @@ vw_abort() {
 }
 
 vw_voice_after_abort() {   # <reason>
+  # ASK the app before comparing (round 2, MINOR-R2-1): the cached LAST_VOICE is the last probe's, and
+  # an abort that lands inside a voice switch (after the press, before the confirming probe) would
+  # otherwise read the OLD voice and record nothing. One probe is a distributed notification — no
+  # input event, safe while she is at the machine — and `vw_probe_raw` cannot nest an abort.
+  if [[ -n $PID ]] && kill -0 $PID 2>/dev/null; then VIS_PROBE_TIMEOUT=2 vw_probe_raw >/dev/null 2>&1; fi
+  # A switch in flight whose outcome the app could not tell us: the store MAY speak the new voice.
+  if [[ -n $VOICE_IN_FLIGHT && $LAST_VOICE != $VOICE_IN_FLIGHT && $VOICE_IN_FLIGHT != $FOUND_VOICE ]]; then
+    local line="dev store voice possibly left at $VOICE_IN_FLIGHT (a switch was in flight; found $FOUND_VOICE) — RESTORE OWED unless Settings shows $FOUND_VOICE (KnownIssues row 90)"
+    print -r -- "$line" >> $RUN_DIR/aborted; vw_log "$line"
+    return 0
+  fi
   [[ -z $FOUND_VOICE || -z $LAST_VOICE || $LAST_VOICE == $FOUND_VOICE ]] && return 0
   local line="dev store voice left at $LAST_VOICE (found $FOUND_VOICE)"
   local author_caused=0
@@ -337,6 +348,7 @@ vw_free_x() {   # lo hi y
 vw_set_voice() {   # terminal|study
   vw_keys "Settings…" "tell (first application process whose unix id is $PID) to click menu item \"Settings…\" of menu 1 of menu bar item 2 of menu bar 1"
   sleep 1.5
+  VOICE_IN_FLIGHT=$1        # from the press until a probe confirms it (MINOR-R2-1's belt and braces)
   vw_ax_press $1 AXRadioButton || vw_abort "the $1 voice control was not found in Settings"
   sleep 1.5
   vw_act_note "close Settings"
@@ -345,6 +357,7 @@ vw_set_voice() {   # terminal|study
   sleep 1
   vw_probe
   [[ ${PV[voice]} == $1 ]] || vw_abort "the voice did not become $1 (${PV[voice]})"
+  VOICE_IN_FLIGHT=
 }
 
 # --- Captures (evidence beside the numbers) ----------------------------------------------------------
