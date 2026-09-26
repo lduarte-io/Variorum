@@ -29,14 +29,19 @@
 //    registration keyed by its subject with no record of who registered
 //    it"; a pull-read has no registration). The one static is the process's
 //    own observer token.
-//  - Reads lay out NOTHING by default: no `.ensuresLayout`, the settle net's
-//    O(1) last-fragment idiom, so asking does not change what it measures.
-//    The ONE exception is opt-in per request (`measure`): the pane/inline
-//    editor's full measurement through the app's ONE measurement brain
-//    (`PaneMeasurement.height` — what the inline editor already runs per
-//    keystroke), taken AFTER the frame is read, so the frame it is compared
-//    against is the one the surface had. Never on the full-document editor
-//    (document scale — P1).
+//  - Reads lay out NOTHING and, by default, touch NOTHING OFF SCREEN (U-VIS
+//    round 1, MINOR-8 — on the full-document editor the tail is not laid out,
+//    and asking TextKit to vend it on every probe could perturb the very
+//    height estimate a B5-class move rides on): no `.ensuresLayout`; the
+//    viewport-bounded first/middle/blank lines; the caret's line only while
+//    the caret sits inside the laid-out viewport (else `caretState=off`); the
+//    LAST fragment only on request (`last` — the settle net's O(1) read, for
+//    surfaces whose end is on screen). The ONE layout it may cause is opt-in
+//    per request too (`measure`): the pane/inline editor's full measurement
+//    through the app's ONE measurement brain (`PaneMeasurement.height` — what
+//    the inline editor already runs per keystroke), taken AFTER the frame is
+//    read, so the frame it is compared against is the one the surface had.
+//    Never on the full-document editor (document scale — P1).
 //  - The line is numbers and fixed words (plus an 8-character note-id prefix
 //    so a re-open can be matched) — never prose.
 //
@@ -58,6 +63,16 @@ enum VisualWalkProbe {
 
     private static var observer: NSObjectProtocol?
     private static var session: (@MainActor () -> AppSession?)?
+
+    /// The env gate's witness (`VisualWalkProbeTests`): is the observer registered?
+    static var isInstalled: Bool { observer != nil }
+
+    /// Removes the observer — the pin's cleanup door (a harness run never uninstalls).
+    static func uninstall() {
+        if let observer { DistributedNotificationCenter.default().removeObserver(observer) }
+        observer = nil
+        session = nil
+    }
 
     /// Called once from `applicationDidFinishLaunching` (DEBUG). A no-op
     /// unless the harness launched this process.
@@ -82,7 +97,8 @@ enum VisualWalkProbe {
     // MARK: - The answer
 
     /// `request` = "<id>[ flag …]"; flags: `measure` (the pane/inline full
-    /// measure) · `rt` (the read tiers' text columns on screen).
+    /// measure) · `last` (the last fragment's O(1) read) · `rt` (the read
+    /// tiers' text columns on screen).
     static func answer(to request: String) -> String {
         let parts = request.split(separator: " ").map(String.init)
         let flags = Set(parts.dropFirst())
@@ -116,7 +132,7 @@ enum VisualWalkProbe {
             line["fr"] = "text"
         }
         textFacts(textView, measure: flags.contains("measure") && model?.scrollView == nil,
-                  into: &line)
+                  last: flags.contains("last"), into: &line)
         if let model {
             line["blk"] = "\(model.caretOrdinal.map(String.init) ?? "-")/\(model.blockCount)"
             if model.scrollView != nil {
@@ -131,7 +147,10 @@ enum VisualWalkProbe {
 
     // MARK: - One text view's geometry (TK2 only; nothing laid out unless `measure`)
 
-    private static func textFacts(_ tv: NSTextView, measure: Bool, into line: inout Line) {
+    /// One text view's facts (internal for `VisualWalkProbeTests`, which runs it
+    /// on a bare TK2 view — the arithmetic this harness trusts after every macOS
+    /// update, TEXTKIT2_NOTES §5).
+    static func textFacts(_ tv: NSTextView, measure: Bool, last: Bool, into line: inout Line) {
         guard let layoutManager = tv.textLayoutManager,
               let content = layoutManager.textContentManager,
               let storage = tv.textStorage
@@ -219,7 +238,14 @@ enum VisualWalkProbe {
         let location = selection.location
         line["caretEnd"] = location >= length ? "1" : "0"
         let probe = location >= length && length > 0 ? length - 1 : location
-        if let target = content.location(docStart, offsetBy: max(0, probe)) {
+        let target = content.location(docStart, offsetBy: max(0, probe))
+        let viewport = layoutManager.textViewportLayoutController.viewportRange
+        let onScreen = target.map { target in
+            viewport.map { $0.contains(target) || $0.endLocation.compare(target) == .orderedSame }
+                ?? false
+        } ?? false
+        if !onScreen { line["caretState"] = "off" }
+        if onScreen, let target {
             var fragmentFound: NSTextLayoutFragment?
             layoutManager.enumerateTextLayoutFragments(from: target, options: []) { fragment in
                 fragmentFound = fragment
@@ -252,15 +278,17 @@ enum VisualWalkProbe {
         // The LAST line: the last layout fragment, read in O(1) exactly as the
         // settle net reads it (`InlineEditorSurface`), and its last line with
         // text (the glyph box whose descenders must not be clipped).
-        var lastFragment: NSTextLayoutFragment?
-        layoutManager.enumerateTextLayoutFragments(
-            from: content.documentRange.endLocation, options: [.reverse]
-        ) { fragment in
-            lastFragment = fragment
-            return false
-        }
-        if let fragment = lastFragment {
-            recordLast(fragment, origin: origin, in: tv, suffix: "", into: &line)
+        if last || measure {
+            var lastFragment: NSTextLayoutFragment?
+            layoutManager.enumerateTextLayoutFragments(
+                from: content.documentRange.endLocation, options: [.reverse]
+            ) { fragment in
+                lastFragment = fragment
+                return false
+            }
+            if let fragment = lastFragment {
+                recordLast(fragment, origin: origin, in: tv, suffix: "", into: &line)
+            }
         }
 
         // Opt-in: the ONE measurement brain, AFTER the frame was read above.

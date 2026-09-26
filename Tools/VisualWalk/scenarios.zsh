@@ -107,6 +107,7 @@ scn_write-newline-roundtrip() {
   vw_write_open "About this book" || return
   vw_require '(( ${PV[clip]} < 0.5 ))' "the short note rests at its top" || return
   vw_snap top; vw_cap 01-open
+  vw_probe last      # the note's end is on screen (a short note) — its last line is asked for
   local c=(${(s:,:)PV[colX]}) blocks=${PV[blk]#*/} len0=${PV[len]}
   local y=$(( PV[lastGlyphY] - 7 ))
   vw_free_x $(( c[2] - 60 )) $(( c[2] - 10 )) $y
