@@ -1054,3 +1054,24 @@ the in-session reopen restore — the offset-only teardown anchor is U0c's to up
 walker facts added to the traps (corner drags near the screen's bottom edge land on the
 overlay scroller; ≥2.5 s between steps or the guard fires on the walker's own clicks). Ledger
 row 4 flips to BUILT+WALKED — the Fable cold review is the remaining gate.
+
+## U0c RECORD (implementer: `opus-implementer`, 2026-09-26)
+
+**NOT DONE (first line):** *(kept current; the final list replaces this line at close)* — the unit is
+IN PROGRESS; nothing below is verified unless it carries a hash or a log.
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | Reading (the brief's list, in order, own context) | DONE — this file whole (HER KICKOFF MESSAGE, SITTING RECORD R-18l-1/2/4/5, ENVIRONMENT TRAPS, the U0 + U0b RECORDs + acceptances); `18l-u0-ladder-round1.md` + `18l-u0b-ladder-round1.md` whole; KnownIssues' note-open row; `TEXTKIT2_NOTES.md` whole; R-Q1/R-Q20/R-Q21 (`use-report-round-2026-09-12.md` §7); 17o batch b's RAISE-M1 record + round-3 R3-1 (`use-report-round-2026-09-06.md`); QUESTIONS #97 · #98 · #116 · #134 · #147 · #149; `SessionResiliencyProtocol.md` (implementer half); the code: `CurrentBlockMemory`, `CommandRouter` whole, `EditorRouter` whole, `EditorViewModel` (teardown, `applyProjection`, `applyFocusSeeds`, the parks + the hop, `topVisibleOffset`/`readingAnchor`, `updateCaretContext`), `EditorSurfaceController.renderFull`, `JumpPrimitive`'s `ReadingAnchor`, `PostDetailView` (mount/registration/`jump(to:)`), `RootView`'s post arm, `ShellRouter` (adopt/park/spend), `WorkspaceModel` whole, `TakesChoreographer.consumeLandings`, `TakesViewModel` (focus/landing/pane reports), `ReadModeView` (seed/select/reports), `BlockTOCView`'s pane report, `BlocksWorkbenchView`/`CanvasViewModel` reports, `BookView.editHere`, `PaneCaretLanding` |
+| 2 | Trace the opening-viewport decision per mode | IN-PROGRESS |
+| 3 | Reproduce her two shapes (+ what the trace predicts) | NOT-STARTED |
+| 4 | The END-jump: find the tail writer (or disprove it) — attribution + red-on-old pin | NOT-STARTED |
+| 5 | Build R-18l-1 (first-open set; re-open restore by the standing machinery + the place) | NOT-STARTED |
+| 6 | Pins (end-jump red-on-old; first-open / re-open / deep-link per mode; R-Q20/R-Q21 + RAISE-M1 ride unmodified) | NOT-STARTED |
+| 7 | Walk (both voices; her shapes; first-open vs re-open per door; a deep link) | NOT-STARTED |
+| 8 | Closing runs (touched suites + the eleven Tutorial suites) | NOT-STARTED |
+| 9 | Self-assessment | NOT-STARTED |
+
+- Deaths / resumes: none.
