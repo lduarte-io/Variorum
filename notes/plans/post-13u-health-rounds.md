@@ -248,6 +248,29 @@ their diffs drift onto the seam.** Sequential, one agent at a time.
      bisect by harness over the 13u2…13y/18k commits that touched the book surfaces, the inline editor,
      `PaneSurface`, the read-tier → live swap and landing — and report every regression found, not only
      these two. Each finding: reproduced, traced, pinned red-on-old, fixed or owned.
+- **U0b — WRITE: removing a newline collapses the top padding** (her report, 2026-09-25, verbatim:
+  *"when I am in write and remove a newline, the editor's height adjusts removing the whitespace between
+  *[removed for publication]*
+  **`notes/plans/18l-inputs/2026-09-25-write-before-removing-newline.png`** (block 4/4, the caret on an
+  empty last block; the first line sits ~40 pt below the masthead's divider) and
+  **`…-write-after-removing-newline.png`** (one backspace later — block 3/3: the first line has jumped UP
+  to ~14 pt below the divider; the page's top air is gone). Reproduce, trace (a height/inset change on a
+  block deletion at the note's end — the Write surface's top inset, the typewriter room, and the
+  18k C6/C6b jump/anchor changes are all on the candidate list; her build is 13y's, pre-18k), pin
+  red-on-old, walk. Part of U0's regression sweep; the editor seam → Fable review.
+- **U-VIS — a VISUAL REGRESSION HARNESS (her standing ask, 2026-09-25, verbatim: *"in general, 18l
+  should become responsible for devising some tests that can run (don't have to be part of the suite
+  that run every time) where screenshots are taken of edits, clicks, if the editor has moved
+  unexpectedly between clicks, etc."*).** An OPT-IN suite (gated like the keychain drills — an env flag,
+  run on demand, never in the default run) that drives the REAL window on the dev-store Debug build
+  (Accessibility + Screen Recording are granted to Ghostty since 18k; `Tools/WalkKit/` is the base) and
+  captures before/after each scripted act — typing, a newline added and removed, a click on a line
+  (assert the caret lands ON that line), a block divided/merged, a mode switch — and ASSERTS on
+  measured geometry, not only pictures: the first visible line's y and the caret's line must not move
+  unless the act moves them; the last line's full glyph box lies inside the surface (no clipped
+  descenders); a click lands on the clicked line. Captures to a gitignored folder with a short report.
+  Seed it with U0/U0b's three reproductions so each is a standing tripwire. Its design is 18l's to
+  propose; its first run is the evidence for U0/U0b.
 - **U4 — the one-liners** (review §1.3 items 2/4): the book Outline gains
   `.onDisappear { landing.end() }` (R2-12 parity with the flow and Index); `LandingTarget.utf16Offset`
   is wired or deleted (recommend delete + a comment naming the `FocusedBlock` road that actually
