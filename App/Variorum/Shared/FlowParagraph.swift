@@ -48,9 +48,7 @@ nonisolated struct FlowParagraph: Equatable {
         let ns = rendered.text as NSString
         var result: [FlowParagraph] = []
         for line in rendered.lines {
-            let raw = ns.substring(
-                with: NSRange(location: line.range.lowerBound, length: line.range.count))
-            guard !raw.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
+            guard isShown(line, in: ns) else { continue }
             // Built by CONCATENATION rather than by indexing into an
             // existing string: the runs are ascending and disjoint (the
             // transform's pinned property), so walking them is exact, and no
@@ -79,6 +77,27 @@ nonisolated struct FlowParagraph: Equatable {
                 text: attributed, style: line.style, indentLevel: line.indentLevel))
         }
         return result
+    }
+
+    /// The flow's ONE blank-line rule — a display line of nothing but
+    /// whitespace is not drawn. Shared by `paragraphs(of:)` and
+    /// `displayStarts(of:)` so the two can never disagree about which lines
+    /// are paragraphs (18l U0).
+    private static func isShown(_ line: MarkdownRendering.Line, in display: NSString) -> Bool {
+        let raw = display.substring(
+            with: NSRange(location: line.range.lowerBound, length: line.range.count))
+        return !raw.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    /// **Where each paragraph of `paragraphs(of: source)` starts in the
+    /// RENDERED display** (UTF-16), in the same order — 18l UNIT U0: a click
+    /// on a read-cheap block names a paragraph and an offset inside it, and
+    /// `MarkdownRendering.sourceOffset(forDisplayOffset:in:)` carries that
+    /// display offset back to the stored text. Same render, same blank rule.
+    static func displayStarts(of source: String) -> [Int] {
+        let rendered = MarkdownRendering.render(source)
+        let ns = rendered.text as NSString
+        return rendered.lines.filter { isShown($0, in: ns) }.map(\.range.lowerBound)
     }
 
     private static func container(

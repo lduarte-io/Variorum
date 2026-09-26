@@ -215,6 +215,21 @@ struct IndexClickCaretTests {
             window.orderOut(nil)
             window.close()
         }
+
+        /// A frame the column reports, read only once it has STOPPED moving —
+        /// after a ring move the block that went back to read-cheap shrinks
+        /// and the live pane converges over a few turns, and a click aimed
+        /// through a frame read mid-settle lands a few points off (measured).
+        func settled(_ read: () -> CGRect?) async -> CGRect? {
+            var last = read()
+            for _ in 0..<40 {
+                await poll(timeout: 0.1) { false }
+                let now = read()
+                if let now, let then = last, now == then { return now }
+                last = now
+            }
+            return last
+        }
     }
 
     private static func panel(_ root: some View) -> Rig {
@@ -232,17 +247,38 @@ struct IndexClickCaretTests {
         return Rig(window: window, hosting: hosting)
     }
 
+    /// A store in `voice`, its `ThemeStore` STARTED — so the tokens the read
+    /// tier draws with and the one text-surface typography the replica reads
+    /// (`EditorDocument.baseFont`) are the voice's, as in the app. The
+    /// process-global typography is put back afterwards (batch 1's MINOR-3
+    /// class: suites share it).
     private static func withStore<T>(
-        _ body: @MainActor (AppSession, AppDatabase) async throws -> T
+        voice: ThemeVoice,
+        _ body: @MainActor (AppSession, AppDatabase, ThemeStore) async throws -> T
     ) async throws -> T {
         let db = try AppDatabase.inMemory()
+        let current = EditorTypography.current
+        let adopted = EditorTypography.isAdopted
+        defer {
+            EditorTypography.current = current
+            EditorTypography.isAdopted = adopted
+        }
         return try await withDependencies {
             $0.database = db
             $0.uuid = .incrementing
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 18))
         } operation: { @MainActor in
-            try await body(AppSession(database: db), db)
+            let session = AppSession(database: db)
+            try session.operations.setThemeVoice(voice)
+            let theme = ThemeStore(session: session)
+            let started = Task { await theme.start() }
+            defer { started.cancel() }
+            for _ in 0..<200 where !(theme.settings.voice == voice && EditorTypography.isAdopted) {
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+            #expect(theme.settings.voice == voice, "the store speaks \(voice)")
+            return try await body(session, db, theme)
         }
     }
 
@@ -273,8 +309,22 @@ struct IndexClickCaretTests {
     }
 
     /// What the click must produce, stated once for both surfaces.
+    ///
+    /// `windowPoint` is where the click went, in window coordinates. On the
+    /// FIRST line it gives an independent ground truth for the caret's
+    /// CHARACTER, not only its line: the live pane's prose starts at the read
+    /// tier's leading edge (13u2 UNIT B's alignment, `IndexProseColumn`), in
+    /// the same font, and its first line holds the read tier's first line's
+    /// words — so the pane's OWN click-to-caret answer at the click's x, on
+    /// its first line, names the character she was over. (The y is the
+    /// pane's own first line rather than the click's: when the ring LEAVES
+    /// a block above, that block shrinks back to read-cheap and the whole
+    /// column below moves up under the pointer — measured, ~10 pt here. And
+    /// below the first line the tiers' line pitches differ by the read tier's
+    /// 4-pt line spacing, so there only the line is compared.)
     private static func expectCaret(
-        in pane: PaneTextView, onLine line: IndexClickedLine, block: String, surface: String
+        in pane: PaneTextView, onLine line: IndexClickedLine, block: String, surface: String,
+        windowPoint: CGPoint
     ) {
         let (caret, lines) = caretLine(in: pane)
         let expected = line == .first ? 0 : lines - 1
@@ -290,62 +340,95 @@ struct IndexClickCaretTests {
                 + "the click was on line \(expected)"))
         #expect(pane.selectedRange().location < length || !pane.string.hasSuffix("\n"),
                 "\(surface) · \(block) · \(line) line: never parked at the block's END")
+        if line == .first {
+            let x = pane.convert(windowPoint, from: nil).x
+            let truth = pane.characterIndexForInsertion(
+                at: NSPoint(x: x, y: pane.textContainerOrigin.y + 4))
+            print("[18l U0 pin] \(where_): the pane's own answer at the click point \(truth)")
+            #expect(abs(at - truth) <= 1, Comment(rawValue:
+                "\(where_): the caret is the character under the pointer — \(at), "
+                    + "where the pane itself answers \(truth)"))
+        }
     }
 
     // MARK: - The book Index (her report's surface)
 
-    @Test(arguments: [IndexClickedLine.first, .last])
-    func aClickOnABookIndexLineLandsTheCaretOnThatLine(_ line: IndexClickedLine) async throws {
-        try await Self.withStore { session, db in
-            let reading = try session.operations.createReading(name: "the index", kind: .curated)
-            let note = try Self.mintNote(session, title: "a story")
-            try session.operations.addPostToReading(note.postID, to: reading.id)
-            let readingID = reading.id
-            let model = BookViewModel(session: session, readingID: readingID)
-            await model.adopt(try await db.read { try Queries.assembleReading($0, readingID: readingID) })
-            let structure = BookStructureModel(session: session, readingID: readingID)
-            structure.adopt(.init(
-                reading: try await db.read { try Queries.reading($0, id: readingID) },
-                sections: [], deletedSections: [], assignments: [:]))
-            structure.mode = .index
-            #if DEBUG
-            BookIndexGeometry.reset()
-            #endif
-            let rig = Self.panel(
-                BookView(session: session, readingID: readingID, model: model, structure: structure)
-                    .environment(ThemeStore(session: session)))
-            defer { rig.close() }
-            #if DEBUG
-            // The middle block (a trailing newline under it) and the LAST
-            // block (none) — one fresh landing each, the ring moving between.
-            for target in [note.blocks[1], note.blocks[2]] {
-                #expect(await rig.poll { BookIndexGeometry.paneReadTierFrames[target.blockID] != nil },
-                        "the pane laid the block out read-cheap")
-                await rig.poll(timeout: 0.3) { false }
-                let column = try #require(BookIndexGeometry.paneReadTierFrames[target.blockID])
-                print("[18l U0 pin] book Index column \(column) · click \(Self.point(on: line, of: column))")
-                rig.click(at: rig.windowPoint(global: Self.point(on: line, of: column)))
-                let identifier = "pane:\(BookIndexEditModel.columnID)|\(target.variantID)"
-                let live = await rig.poll {
-                    editablePanes(in: rig.hosting).first?.identifier?.rawValue == identifier
-                }
-                #expect(live, "the clicked block went live")
-                await rig.poll(timeout: 0.3) { false }
-                let pane = try #require(editablePanes(in: rig.hosting).first)
-                Self.expectCaret(
-                    in: pane, onLine: line,
-                    block: target.text.hasSuffix("\n") ? "a block over a blank line" : "the last block",
-                    surface: "book Index")
-            }
-            #endif
+    @Test(arguments: [ThemeVoice.terminal, .study], [IndexClickedLine.first, .last])
+    func aClickOnABookIndexLineLandsTheCaretOnThatLine(
+        _ voice: ThemeVoice, _ line: IndexClickedLine
+    ) async throws {
+        try await Self.withStore(voice: voice) { session, db, theme in
+            try await Self.bookIndexCase(voice, line, session, db, theme)
         }
+    }
+
+    /// The book Index case's body — a function of its own (the compiler's
+    /// region-isolation pass crashed on it as one inline closure).
+    private static func bookIndexCase(
+        _ voice: ThemeVoice, _ line: IndexClickedLine,
+        _ session: AppSession, _ db: AppDatabase, _ theme: ThemeStore
+    ) async throws {
+        let reading = try session.operations.createReading(name: "the index", kind: .curated)
+        let note = try Self.mintNote(session, title: "a story")
+        try session.operations.addPostToReading(note.postID, to: reading.id)
+        let readingID = reading.id
+        let model = BookViewModel(session: session, readingID: readingID)
+        await model.adopt(try await db.read { try Queries.assembleReading($0, readingID: readingID) })
+        let structure = BookStructureModel(session: session, readingID: readingID)
+        structure.adopt(.init(
+            reading: try await db.read { try Queries.reading($0, id: readingID) },
+            sections: [], deletedSections: [], assignments: [:]))
+        structure.mode = .index
+        #if DEBUG
+        BookIndexGeometry.reset()
+        #endif
+        let rig = Self.panel(
+            BookView(session: session, readingID: readingID, model: model, structure: structure)
+                .environment(theme))
+        defer { rig.close() }
+        #if DEBUG
+        // The middle block (a trailing newline under it) and the LAST
+        // block (none) — one fresh landing each, the ring moving between.
+        for target in [note.blocks[1], note.blocks[2]] {
+            #expect(await rig.poll { BookIndexGeometry.paneReadTierFrames[target.blockID] != nil },
+                    "the pane laid the block out read-cheap")
+            let column = try #require(await rig.settled {
+                BookIndexGeometry.paneReadTierFrames[target.blockID]
+            })
+            print("[18l U0 pin] book Index column \(column) · click \(Self.point(on: line, of: column))")
+            // THE REPLICA'S AGREEMENT, measured: the fix lays the block
+            // out again to find the clicked character, so its geometry must
+            // be the geometry SwiftUI drew — the whole block's height, at
+            // the column's own width, in this voice.
+            let replica = ReadTierClickPlace.height(
+                of: target.text, columnWidth: column.width, font: EditorDocument.baseFont)
+            #expect(abs(replica - column.height) <= 0.5, Comment(rawValue:
+                "\(voice): the click's replica lays the block out at \(replica) pt; "
+                    + "the read tier drew it at \(column.height)"))
+            let clicked = rig.windowPoint(global: Self.point(on: line, of: column))
+            rig.click(at: clicked)
+            let identifier = "pane:\(BookIndexEditModel.columnID)|\(target.variantID)"
+            let live = await rig.poll {
+                editablePanes(in: rig.hosting).first?.identifier?.rawValue == identifier
+            }
+            #expect(live, "the clicked block went live")
+            await rig.poll(timeout: 0.3) { false }
+            let pane = try #require(editablePanes(in: rig.hosting).first)
+            Self.expectCaret(
+                in: pane, onLine: line,
+                block: target.text.hasSuffix("\n") ? "a block over a blank line" : "the last block",
+                surface: "book Index · \(voice)", windowPoint: clicked)
+        }
+        #endif
     }
 
     // MARK: - The note's Read ▸ edit (the same read-tier → live swap)
 
-    @Test(arguments: [IndexClickedLine.first, .last])
-    func aClickOnAReadEditLineLandsTheCaretOnThatLine(_ line: IndexClickedLine) async throws {
-        try await Self.withStore { session, _ in
+    @Test(arguments: [ThemeVoice.terminal, .study], [IndexClickedLine.first, .last])
+    func aClickOnAReadEditLineLandsTheCaretOnThatLine(
+        _ voice: ThemeVoice, _ line: IndexClickedLine
+    ) async throws {
+        try await Self.withStore(voice: voice) { session, _, theme in
             let note = try Self.mintNote(session, title: "a story")
             ReadModeView.remember(.edit, postID: note.postID)
             #if DEBUG
@@ -355,7 +438,7 @@ struct IndexClickCaretTests {
             let model = BlockTOCViewModel(session: session, postID: note.postID)
             let rig = Self.panel(
                 ReadModeView(session: session, postID: note.postID, model: model)
-                    .environment(ThemeStore(session: session)))
+                    .environment(theme))
             defer {
                 rig.close()
                 UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(note.postID))
@@ -365,11 +448,12 @@ struct IndexClickCaretTests {
             #expect(await rig.poll { !model.rows.isEmpty && ReadModeOracle.selectedBlockID != nil })
             for target in [note.blocks[1], note.blocks[2]] {
                 #expect(await rig.poll { ReadModeOracle.editBlockFrames[target.blockID] != nil })
-                await rig.poll(timeout: 0.3) { false }
                 // The oracle's frame is the whole BLOCK row (its padding
                 // included); the text column sits inside it by the read tier's
                 // own padding (`IndexProseColumn`).
-                let row = try #require(ReadModeOracle.editBlockFrames[target.blockID])
+                let row = try #require(await rig.settled {
+                    ReadModeOracle.editBlockFrames[target.blockID]
+                })
                 let top = IndexProseColumn.readTierTop(
                     resting: IndexProseColumn.readEditRestingTop,
                     paneInset: PaneTextView.proseTopInset)
@@ -377,7 +461,8 @@ struct IndexClickCaretTests {
                     x: row.minX + 11, y: row.minY + top,
                     width: row.width - 21,
                     height: row.height - top - IndexProseColumn.readEditRestingTop)
-                rig.click(at: rig.windowPoint(Self.point(on: line, of: column)))
+                let clicked = rig.windowPoint(Self.point(on: line, of: column))
+                rig.click(at: clicked)
                 let live = await rig.poll {
                     editablePanes(in: rig.hosting).first?.identifier?.rawValue
                         == "pane:\(ReadEditPane.role)|\(target.variantID)"
@@ -388,7 +473,7 @@ struct IndexClickCaretTests {
                 Self.expectCaret(
                     in: pane, onLine: line,
                     block: target.text.hasSuffix("\n") ? "a block over a blank line" : "the last block",
-                    surface: "note Read ▸ edit")
+                    surface: "note Read ▸ edit · \(voice)", windowPoint: clicked)
             }
             #endif
         }

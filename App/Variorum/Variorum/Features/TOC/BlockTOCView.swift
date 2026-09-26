@@ -260,13 +260,22 @@ final class BlockTOCViewModel {
         Task { await autosave.flushNow() }
     }
 
-    func makeLive(_ blockID: String, variantID: String) {
+    func makeLive(_ blockID: String, variantID: String, clickOffset: Int? = nil) {
         let key = PaneTextAuthority.PaneKey(
             columnID: "toc", blockID: blockID, variantID: variantID)
         // 17o batch b (U-20): the pane enters the note's current block where
         // she was — armed before the focus, and only for that block (a click
         // into another block brought its own place).
         armPaneCaretLanding(blockID: blockID, variantID: variantID)
+        // **18l U0: a click on a read-cheap `Text` brings its place HERE** —
+        // a `Text` is no text view, so the pane's own click road (the flag
+        // `PaneTextView.clickBroughtPlace`) never ran for Read ▸ edit, and the
+        // entry rule above landed every click at the take's START. The
+        // click's own offset outranks the entry rule, exactly as a click on a
+        // TK2 read pane already does.
+        if let clickOffset {
+            paneCaretLanding = (variantID: variantID, landing: .offset(clickOffset))
+        }
         switch authority.focus(key) {
         case .unchanged:
             return

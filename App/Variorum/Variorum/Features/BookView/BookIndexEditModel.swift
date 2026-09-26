@@ -65,7 +65,12 @@ final class BookIndexEditModel {
     /// The click (or a landing): THIS block goes live; whatever was live
     /// returns to read-cheap, its pending text flushed through its own
     /// post's coordinator.
-    func makeLive(postID: String, blockID: String, variantID: String) {
+    ///
+    /// **18l U0 — `clickOffset`: where a CLICK put its caret** (the stored-text
+    /// offset under her pointer, `ReadTierClickTarget`). A landing passes
+    /// none, and its pane keeps the shipped `.leave` exactly as before.
+    func makeLive(postID: String, blockID: String, variantID: String, clickOffset: Int? = nil) {
+        paneCaretLanding = clickOffset.map { (variantID: variantID, landing: .offset($0)) }
         let key = PaneTextAuthority.PaneKey(
             columnID: Self.columnID, blockID: blockID, variantID: variantID, context: postID)
         switch authority.focus(key) {
@@ -77,6 +82,17 @@ final class BookIndexEditModel {
                 Task { await leaving.flushNow() }
             }
         }
+    }
+
+    /// **18l U0 — the landing the pane about to go live is handed**: a click's
+    /// own place, armed at `makeLive`, for that take only; everything else
+    /// `.leave` (the shipped END — the landings' behaviour, byte-unchanged).
+    /// `@ObservationIgnored`: read at the render the ring move already caused,
+    /// never watched (the `BlockTOCViewModel` twin's rule).
+    @ObservationIgnored private var paneCaretLanding: (variantID: String, landing: PaneCaretLanding)?
+
+    func caretLanding(forVariant variantID: String) -> PaneCaretLanding {
+        paneCaretLanding.map { $0.variantID == variantID ? $0.landing : .leave } ?? .leave
     }
 
     func blur() {

@@ -1403,7 +1403,10 @@ private struct BookIndexPaneNote: View {
                     edit.paneEdited(
                         postID: entry.postID, variantID: variantID,
                         oldText: row.text ?? "", newText: newText)
-                })
+                },
+                // 18l U0 (her Index-click report): the click's own place —
+                // `.leave` for every other road, byte-unchanged.
+                caretOnGoingLive: edit.caretLanding(forVariant: variantID))
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
                     BookIndexGeometry.recordProseLeading(
@@ -1423,12 +1426,14 @@ private struct BookIndexPaneNote: View {
                 //  draws the indicator itself, so this was a second ring.)
         } else {
             let paragraphs = FlowParagraph.paragraphs(of: text, codeTint: tokens.codeTint)
-            VStack(alignment: .leading, spacing: 8) {
+            // 18l U0: the two metrics the click's replica lays out with — one
+            // number each (`ReadTierClickPlace`), so they cannot drift apart.
+            VStack(alignment: .leading, spacing: ReadTierClickPlace.paragraphSpacing) {
                 ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
                     Text(paragraph.text)
                         .font(font(paragraph))
                         .foregroundStyle(tokens.ink)
-                        .lineSpacing(4)
+                        .lineSpacing(ReadTierClickPlace.lineSpacing)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, paragraph.indent)
                 }
@@ -1451,11 +1456,25 @@ private struct BookIndexPaneNote: View {
             .padding(.top, Self.readTierTop)
             .padding(.bottom, Self.restingTop)
             .contentShape(Rectangle())
-            .onTapGesture {
+            // **18l U0 — the click brings its PLACE** (her report: *"I click
+            // on top of a line of text [and] my cursor moves to the empty
+            // paragraph"*). The bare tap knew which block and never where, so
+            // the pane it woke parked its caret at the take's END — the blank
+            // line under the text in her notes. `ReadTierClickTarget` reads
+            // the tap's point in this tier's own geometry and names the
+            // stored-text offset under it; the pane lands there.
+            .modifier(ReadTierClickTarget(
+                source: text,
+                textInsets: EdgeInsets(
+                    top: Self.readTierTop, leading: Self.readTierLeading,
+                    bottom: Self.restingTop, trailing: Self.resting)
+            ) { offset in
                 guard let variantID = row.variantID, !row.variantLocked else { return }
                 onTap()
-                edit.makeLive(postID: entry.postID, blockID: row.blockID, variantID: variantID)
-            }
+                edit.makeLive(
+                    postID: entry.postID, blockID: row.blockID, variantID: variantID,
+                    clickOffset: offset)
+            })
         }
     }
 

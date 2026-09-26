@@ -64,10 +64,13 @@ struct ReadEditPane: View {
                             row: row, ordinal: i + 1,
                             selected: selectedBlockID == row.blockID,
                             carryGeometry: carryGeometry,
-                            onTap: {
+                            onTap: { offset in
                                 onSelect(row.blockID)
                                 if let variantID = row.variantID, !row.variantLocked {
-                                    model.makeLive(row.blockID, variantID: variantID)
+                                    // 18l U0: the click's own place (the
+                                    // stored-text offset under the pointer).
+                                    model.makeLive(
+                                        row.blockID, variantID: variantID, clickOffset: offset)
                                 }
                             })
                     }
@@ -158,7 +161,8 @@ private struct ReadEditBlock: View {
     /// selected or live one) writes into it, so this is one report a scroll
     /// frame rather than one a realized row.
     let carryGeometry: ReadCarryGeometry
-    let onTap: () -> Void
+    /// 18l U0: the click, with the stored-text offset it names.
+    let onTap: (Int) -> Void
 
     /// The block's DISPLAY text — the authority's overlay over the store
     /// row, so a just-blurred block is never staler here than its buffer.
@@ -215,12 +219,13 @@ private struct ReadEditBlock: View {
                 //  visible in the walk's captures. One editing mark, one
                 //  drawer: `PaneDecoration.resolve`, inside the pane.)
             } else {
-                VStack(alignment: .leading, spacing: 8) {
+                // 18l U0: the click replica's two metrics, one number each.
+                VStack(alignment: .leading, spacing: ReadTierClickPlace.paragraphSpacing) {
                     ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
                         Text(paragraph.text)
                             .font(font(paragraph))
                             .foregroundStyle(tokens.ink)
-                            .lineSpacing(4)
+                            .lineSpacing(ReadTierClickPlace.lineSpacing)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.leading, paragraph.indent)
                     }
@@ -246,7 +251,17 @@ private struct ReadEditBlock: View {
                     selected ? AnyShapeStyle(tokens.wash) : AnyShapeStyle(.clear),
                     in: RoundedRectangle(cornerRadius: 8))
                 .contentShape(Rectangle())
-                .onTapGesture { onTap() }
+                // **18l U0 — the click brings its PLACE** (the book Index's
+                // twin — one component, `ReadTierClickTarget`). The bare tap
+                // woke the pane at the take's START, whichever line she clicked.
+                .modifier(ReadTierClickTarget(
+                    source: text,
+                    textInsets: EdgeInsets(
+                        top: ReadEditBlock.readTierTop,
+                        leading: ReadEditBlock.readTierLeading,
+                        bottom: ReadEditBlock.restingTop,
+                        trailing: ReadEditBlock.restingLeading),
+                    onClick: onTap))
                 .help(row.variantLocked
                     ? "This take is locked — unlock it in Takes to write here"
                     : "Click to write in this block right here — one block is live at a time")
