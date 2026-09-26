@@ -105,10 +105,16 @@ is plain, so a standing non-reproduction does not raise an XPASS every run.
 | `mode-roundtrip` | the design note | Write → Read → Write returns the page and the caret exactly |
 | `index-click` | U0 item 1 (row 86) | a read-tier click in the book Index goes live with the caret ON the clicked line, never the blank line |
 | `readedit-click` | U0 item 1 | the same on Read ▸ edit |
-| `outline-narrow-restore` | U0 item 2 | the live inline note keeps its whole text at 1440 → 1100 → 900 → back |
+| `outline-narrow-restore` | U0 item 2(a) | the live inline note keeps its whole text at 1440 → 1100 → 900 → back |
+| `outline-long-story-settle` | U0 item 2(b) | the 212-block story, live, holds its SETTLED layout after each resize (its end scrolled into view) |
 | `b5-return-after-cmd-down` | row 88 (B5) | ⏎ at the tail after ⌘↓ on a carve-invalidated layout must not move the page — KNOWN in Study (where it reproduces), plain in Terminal |
 | `b5-refont` | row 88's re-font road | the same after a whole-document re-font — plain (it has never reproduced) |
 | `selftest-red` (`--selftest`) | the guard rule | a planted wrong expectation must FAIL |
+
+**Every seeded U0/U0b/U0c tripwire has been shown to RED on its own regression** — scratch builds with
+the fix reverted (`build.sh --src`, `VW_DD`): R-full (U0b/U0c), R-U0-1 (both click scenarios), R-U0-2+3
+(the short note's cut tail — R-U0-2 alone is healed by the settle net), R-U0-3 (the long story).
+The U-VIS record holds the numbers.
 
 Fixtures are the dev store's sample library (Sherlock). Mutating scenarios restore their TEXT, but not
 every identity (N9): each pass per voice leaves, in *About this book* and *A Scandal in Bohemia*'s
