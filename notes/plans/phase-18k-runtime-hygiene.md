@@ -4037,3 +4037,21 @@ Claude-Session); synchronous foreground waits (grep-poll), never end your turn m
 (one Sonnet lookup for external facts only); commit the pre-revert state before any revert; never quit
 or kill a real-store instance, never build Release, never touch `/Applications`; clean up any scratch
 worktree. Final message: a short summary pointing at your record.
+
+## UNIT C8 RECORD — the test-isolation leak 18k introduced (implementer: `opus-implementer`, 2026-09-25)
+
+**NOT DONE (first line, per the brief):** PENDING — written at the unit's close.
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | The reading, in this session's own context | **DONE** — CLAUDE.md + canon; this file's ENVIRONMENT TRAPS, CAST & DISCIPLINE, THE FINALS, the C8 BRIEF, the C4 / C6 / C6b RECORDS + adjudications; KnownIssues' per-note-defaults rows (36, 37) and the DEBUG-oracle parallel-suites row (76); the two victims at the code (`IdentityProjectionAuditTests.swift:258`, `TakesBoardSoakTests.swift:180`) and the harness (`EditorTestSupport.swift`) |
+| 2 | The run ORDER, from the finals' own logs | **DONE** — both full runs start the 522 suites in ONE stable order (effectively serial in the log); the widening victim is suite #193, the soak #440. 18k-touched suites before the widening victim: 30 (the C1 autosave pair, the C4 oracle pair, C7/C5's DataSafety, the C6 scrubber files, …); `RefontGapTopTests` / `JumpViewportLayoutTests` / `InlineHeightReportTests` run AFTER it, so they cannot be its leaker |
+| 3 | FIND — the victim + candidate predecessors in one invocation, bisected | PENDING |
+| 4 | TRACE — the leaked state (which global/key, set where, never restored) | PENDING |
+| 5 | FIX the leaker (tests only) | PENDING |
+| 6 | PROOF — the reproducing combination red before, green after, ×3 | PENDING |
+| 7 | ONE full Mac suite on the final tree | PENDING |
+
+- Deaths / resumes: none.
