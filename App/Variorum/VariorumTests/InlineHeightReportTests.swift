@@ -174,7 +174,14 @@ struct InlineHeightReportTests {
             await converge(window)
             let narrow = PaneMeasurement.height(of: h.textView)
             #expect(narrow > wide + 1000, "the narrower column is taller: \(narrow) vs \(wide)")
-            #expect(log.reports.count == 1, "one report: \(log.reports)")
+            // **18l U0 — this arm read `count == 1` ("one report") until the
+            // settle net landed.** The pass still reports once; what follows
+            // it now is the SETTLE's report, when TextKit's first full measure
+            // after the reflow (the 631 pt the paragraph below recorded as
+            // "not an equality") settles somewhere else — exactly the gap this
+            // arm's own note left open, now closed. So: at least the pass's
+            // one report, and at most one more per settle.
+            #expect((1...3).contains(log.reports.count), "the pass's report (+ a settle's): \(log.reports)")
             // The report is the height the pass's OWN layout produced — on the
             // narrow side of the midpoint. The old road measured before that
             // layout and reported the WIDE height, which nothing re-reported.
@@ -184,6 +191,72 @@ struct InlineHeightReportTests {
             // measurement brain's and not this report's timing.)
             #expect((log.reports.first ?? 0) > (wide + narrow) / 2,
                     "carrying the reflowed height, not the stranded wide one: \(log.reports) — wide \(wide), narrow \(narrow)")
+            // …and since 18l U0, the LAST report is the height the text settled
+            // to (the settle net; `aReflowsLateSettleIsReportedToo` pins it).
+            #expect(abs((log.reports.last ?? 0) - narrow) <= 0.5,
+                    "the frame follows the settle: \(log.reports) — settled \(narrow)")
+        }
+    }
+
+    /// **18l U0 — A REFLOW'S LATE SETTLE IS REPORTED TOO** (item 2's residual:
+    /// the brief's named suspect, TEXTKIT2 §3's first-full-measure fact).
+    ///
+    /// TextKit 2's full measure on the turn after a width change can be far
+    /// from the layout the next display pass settles to — measured here, a
+    /// narrowing 700 → 420 first measured 18,713 pt where the text is 19,344
+    /// (a FRESH view of the same text at the same width — the ground truth —
+    /// agrees with the settled number, never the first), and in the app
+    /// 22,884 where it settled at 23,082 once a scroll laid the story's end
+    /// out. The coordinator reported the first number and nothing re-reported
+    /// the settle: a frame SHORT of its text cuts the tail (her capture — the
+    /// descenders, then the lines under them not drawn at all), and a frame
+    /// TALLER than its text leaves a blank gap under it (KnownIssues row 75).
+    ///
+    /// RED ON OLD (Terminal, the suite's own voice): the frame keeps the first
+    /// measure after every step — 631 pt SHORT at 420 (C2's own number), 229
+    /// pt TALL back at 700.
+    @Test func aReflowsLateSettleIsReportedToo() async throws {
+        try await withInlineEditor(seedBlocks: corpus) { h in
+            let (window, coordinator, log) = await mounted(h)
+            defer { coordinator.uninstall(); window.orderOut(nil); window.close() }
+            for _ in 0..<20 where log.reports.isEmpty { await turn() }
+            await converge(window)
+            for width in [420.0, 700.0, 520.0] as [CGFloat] {
+                log.reports = []
+                h.textView.frame.size.width = width
+                for _ in 0..<20 where log.reports.isEmpty { await turn() }
+                // TextKit settles over SEVERAL display passes (measured: at 520
+                // the full measure was still moving after four) — wait until
+                // two passes in a row measure the same, bounded.
+                var settled = PaneMeasurement.height(of: h.textView)
+                for _ in 0..<24 {
+                    await converge(window)
+                    let next = PaneMeasurement.height(of: h.textView)
+                    if abs(next - settled) < 0.5 { break }
+                    settled = next
+                }
+                await converge(window)
+                // For the record only: a FRESH TK2 view of the same text at the
+                // same container width. The claim is about THIS view — its frame
+                // must hold what it draws, i.e. its own settled layout — and
+                // TextKit's settled layout was measured off a fresh view's by
+                // up to 338 pt at 520 (TEXTKIT2 §3's layout-history class, the
+                // fenced measurement brain's, not this report's).
+                let fresh = NSTextView(usingTextLayoutManager: true)
+                fresh.textContainerInset = h.textView.textContainerInset
+                fresh.textContainer?.widthTracksTextView = false
+                fresh.textContainer?.lineFragmentPadding =
+                    h.textView.textContainer?.lineFragmentPadding ?? 5
+                fresh.textContainer?.size = NSSize(
+                    width: h.textView.textContainer?.size.width ?? 0,
+                    height: .greatestFiniteMagnitude)
+                fresh.textStorage?.setAttributedString(h.textView.attributedString())
+                let truth = PaneMeasurement.height(of: fresh)
+                print("[18l U0 settle] at \(Int(width)): reports \(log.reports) · frame \(h.textView.frame.height) · settled \(settled) · fresh \(truth)")
+                #expect(abs(h.textView.frame.height - settled) <= 0.5, Comment(rawValue:
+                    "at \(Int(width)) pt the frame (\(h.textView.frame.height)) is not the height its "
+                        + "text settled to (\(settled)) — reports \(log.reports)"))
+            }
         }
     }
 
