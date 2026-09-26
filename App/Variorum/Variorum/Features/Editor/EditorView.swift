@@ -935,7 +935,7 @@ final class ScrollAnchorController {
     private let model: EditorViewModel
     private weak var scrollView: NSScrollView?
     private var tokens: [NSObjectProtocol] = []
-    private var stableAnchor: Int?
+    private var stableAnchor: ReadingAnchor?
     private var lastWidth: CGFloat = 0
     private var inLiveResize = false
 
@@ -981,11 +981,13 @@ final class ScrollAnchorController {
             // the pixel offset now points at different text — restore.
             lastWidth = width
             if let anchor = stableAnchor {
-                model.restoreTopVisibleOffset(anchor)
+                model.restoreReadingAnchor(anchor)
             }
         } else {
-            // Ordinary scrolling: keep the anchor current.
-            stableAnchor = model.topVisibleOffset() ?? stableAnchor
+            // Ordinary scrolling: keep the anchor current — with its place
+            // (18l U0b: a page resting in its top air keeps it across the
+            // reflow; `ReadingAnchor.reflowLandingInset`).
+            stableAnchor = model.readingAnchor() ?? stableAnchor
         }
         model.refreshBadges()
         // 13c 1E (the phantom fix, PROVISIONAL — QUESTIONS #39): the
@@ -998,7 +1000,7 @@ final class ScrollAnchorController {
 
     private func liveResizeStarted(windowID: ObjectIdentifier?) {
         guard let window, windowID == ObjectIdentifier(window) else { return }
-        stableAnchor = model.topVisibleOffset() ?? stableAnchor
+        stableAnchor = model.readingAnchor() ?? stableAnchor
         inLiveResize = true
     }
 
@@ -1007,7 +1009,7 @@ final class ScrollAnchorController {
         inLiveResize = false
         lastWidth = scrollView?.contentView.bounds.width ?? lastWidth
         if let anchor = stableAnchor {
-            model.restoreTopVisibleOffset(anchor)
+            model.restoreReadingAnchor(anchor)
         }
     }
 }

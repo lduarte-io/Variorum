@@ -122,6 +122,54 @@ nonisolated enum FragmentLines {
     }
 }
 
+/// **A reading position WITH ITS PLACE on the page** (18l U0b — KnownIssues
+/// row 87, her *"remove a newline … removing the whitespace between the
+/// topmost line in the editor and the line at the top of the editor"*).
+///
+/// Every keeper of the reading position captured the OFFSET of the line she
+/// is reading (`topVisibleOffset`) and replayed it through
+/// `JumpPrimitive.jump`, whose contract is "that line AT the viewport top". An
+/// offset cannot say where the line SAT, and two places are not "at the top":
+///
+/// - **The page's own top air.** At rest the page is scrolled to 0 and the
+///   text container's 24-pt top inset shows above the first line (R9's
+///   "generous top air"). Replaying offset 0 put the first line at the top —
+///   the page scrolled by exactly that inset — on a backspace that deleted an
+///   empty block (A7's carve lands through the full re-render), on a live
+///   window resize, and on a voice switch. Measured: 24.0 pt in both voices.
+/// - **Anywhere, for the full re-render.** A structural result that lands
+///   through `renderFull` changed nothing above the anchor that the offset does
+///   not carry, so the page must not move at all — the everyday gestures'
+///   differential road's promise ("untouched text never moves", author
+///   decision 2026-07-07), kept on the fallback road too. Snapping her line to
+///   the top moved a wheel-scrolled page by the edge's offset inside its line.
+///
+/// Pure: the capture is the model's (it owns the geometry); this is the
+/// arithmetic each restore reads, one rule per kind of restore.
+nonisolated struct ReadingAnchor: Equatable, Sendable {
+    /// The line she is reading (`EditorViewModel.topVisibleOffset` — the 18k
+    /// C6b reading-line rule, unchanged).
+    let offset: Int
+    /// That line's top minus the viewport's top edge at capture, in view
+    /// points: positive when the line sat below the edge (the page's top air;
+    /// a paragraph gap), negative when the edge cut it.
+    let inset: Double
+    /// The viewport's top edge sat ABOVE the text container — in the page's
+    /// top air, above every line of the note, where no text layout can move
+    /// anything (it is the container's inset).
+    let inPageTopAir: Bool
+
+    /// The full re-render's landing: the line exactly where it was.
+    var exactLandingInset: Double { inset }
+
+    /// A RE-LAYOUT's landing (a width reflow, a re-font): the ruled rule —
+    /// her reading line AT the top (13c 1A; 13u4 F2; 18k C6b and #147) —
+    /// everywhere that rule was written for, and the page's top air kept as it
+    /// was, which the rule never meant to take away (the first line was never
+    /// at the top there in the first place).
+    var reflowLandingInset: Double { inPageTopAir ? inset : 0 }
+}
+
 @MainActor
 enum JumpPrimitive {
     /// **Where the line containing `offset` sits**, in the text view's own

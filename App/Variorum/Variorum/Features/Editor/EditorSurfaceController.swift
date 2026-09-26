@@ -160,7 +160,15 @@ final class EditorSurfaceController {
             // all tail by construction; a post with blocks has none.
             tail = new.isEmpty ? "" : nil
         }
-        let anchor = model.topVisibleOffset()
+        // 18l U0b (KnownIssues row 87): the reading position WITH ITS PLACE.
+        // This restore replayed only the line, through the jump's "line at
+        // the viewport TOP" — so a page resting in its top air lost it (her
+        // backspace on an empty last block: A7's carve lands here, 24 pt, the
+        // container's inset exactly) and a wheel-scrolled page snapped by the
+        // edge's offset inside its line. A full re-render changed nothing
+        // above the anchor that the offset does not carry: the line goes back
+        // exactly where it was (`ReadingAnchor.exactLandingInset`).
+        let anchor = model.readingAnchor()
         // The caret BY IDENTITY across the rewrite (the Act 10 correction
         // round, rows 39/49): replacing the storage wholesale parks the
         // insertion point at the document's END, and a full render that
@@ -181,8 +189,9 @@ final class EditorSurfaceController {
         textView.undoManager?.removeAllActions()
         if let anchor {
             JumpPrimitive.jump(
-                toOffset: min(anchor, max(0, model.index.documentLength)),
-                textView: textView, scrollView: model.scrollView)
+                toOffset: min(anchor.offset, max(0, model.index.documentLength)),
+                textView: textView, scrollView: model.scrollView,
+                landingInset: anchor.exactLandingInset)
         } else if let saved = model.session.editorRouter.scrollAnchors[model.postID] {
             if model.loaded {
                 // A warm re-render whose live anchor came back nil (the page

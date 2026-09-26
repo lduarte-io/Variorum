@@ -2329,13 +2329,20 @@ final class EditorViewModel {
     /// inside the view she left and moves nothing (her row 7's page half).
     /// QUESTIONS #98 carries the product edge (the caret OFF the restored
     /// view: the top landing, built PROVISIONAL).
-    func parkAnchorRestore(_ offset: Int) {
+    ///
+    /// `landingInset` (18l U0b): where the line lands below the viewport top —
+    /// 0 (the line AT the top) for the cold mount's session anchor, which is
+    /// an offset only; the re-font keeper's `ReadingAnchor.reflowLandingInset`
+    /// (the page's top air kept).
+    func parkAnchorRestore(_ offset: Int, landingInset: Double = 0) {
         guard scrollView != nil else { return }  // the inline editors scroll in their host
         pendingAnchorRestore = offset
+        pendingAnchorInset = landingInset
         pendingAnchorGeneration = overlayGeometryGeneration
     }
 
     @ObservationIgnored private(set) var pendingAnchorRestore: Int?  // read by the RAISE-M1 pins' kin
+    @ObservationIgnored private var pendingAnchorInset: Double = 0
     @ObservationIgnored private var pendingAnchorGeneration = 0
 
     // MARK: - A RE-FONT IS A REFLOW (13u4 UNIT F2 — KnownIssues row 53)
@@ -2396,10 +2403,15 @@ final class EditorViewModel {
             apply()
             return
         }
-        let anchor = topVisibleOffset()
+        // 18l U0b: the place, not only the line — a page resting in its top
+        // air keeps it across the re-font (`ReadingAnchor.reflowLandingInset`;
+        // everywhere else the line lands at the top exactly as before).
+        let anchor = readingAnchor()
         apply()
         overlayGeometryGeneration &+= 1
-        if let anchor { parkAnchorRestore(anchor) }
+        if let anchor {
+            parkAnchorRestore(anchor.offset, landingInset: anchor.reflowLandingInset)
+        }
         overlayLayoutDidSettle()
     }
 
@@ -2410,7 +2422,8 @@ final class EditorViewModel {
         guard let textView, let scrollView else { return }
         JumpPrimitive.jump(
             toOffset: min(offset, max(0, index.documentLength)),
-            textView: textView, scrollView: scrollView)
+            textView: textView, scrollView: scrollView,
+            landingInset: pendingAnchorInset)
     }
 
     private func consumePendingReveal(deliveredBy generation: Int) {
@@ -4156,6 +4169,34 @@ final class EditorViewModel {
         JumpPrimitive.jump(
             toOffset: min(offset, max(0, index.documentLength)),
             textView: textView, scrollView: scrollView)
+        refreshBadges()
+    }
+
+    /// **The reading position WITH ITS PLACE** (18l U0b — `ReadingAnchor`
+    /// carries the why): the line `topVisibleOffset` names, how far below the
+    /// viewport's top edge it sat, and whether the edge was in the page's own
+    /// top air. One single-fragment layout of a line already on screen (the
+    /// `lineSpan` idiom — P1); nil exactly when `topVisibleOffset` is.
+    func readingAnchor() -> ReadingAnchor? {
+        guard let offset = topVisibleOffset(), let textView, let scrollView,
+              let line = JumpPrimitive.lineSpan(ofOffset: offset, in: textView)
+        else { return nil }
+        let top = Double(scrollView.contentView.bounds.origin.y)
+        return ReadingAnchor(
+            offset: offset,
+            inset: line.top - top,
+            inPageTopAir: top < Double(textView.textContainerOrigin.y))
+    }
+
+    /// A re-layout's restore of a captured place (the width reflow's and the
+    /// live resize's — `ScrollAnchorController`): the reading line at the
+    /// top, the page's top air kept (`ReadingAnchor.reflowLandingInset`).
+    func restoreReadingAnchor(_ anchor: ReadingAnchor) {
+        guard let textView else { return }
+        JumpPrimitive.jump(
+            toOffset: min(anchor.offset, max(0, index.documentLength)),
+            textView: textView, scrollView: scrollView,
+            landingInset: anchor.reflowLandingInset)
         refreshBadges()
     }
 

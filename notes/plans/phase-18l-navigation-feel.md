@@ -790,9 +790,9 @@ rows 1–3 flip to BUILT+WALKED — the Fable cold review is the remaining gate.
 |---|---|---|
 | 1 | Reading (the brief's list, in order, own context) | DONE — this file whole (HER KICKOFF MESSAGE, SITTING RECORD R-18l-1/2/4/5, ENVIRONMENT TRAPS, CAST, BASELINES, the U0 RECORD whole + its acceptance); `18l-u0-ladder-round1.md` whole; the charter's KICKOFF 2 (U0 + U0b); `TEXTKIT2_NOTES.md` whole; the 18k C6 brief + record ITEM 1 and the C6b brief + record + adjudication; KnownIssues row 87; `SessionResiliencyProtocol.md`; both captures; the code: `EditorTextView.swift` whole (the 24-pt top inset `makeEditor`, the typewriter room, β1), `JumpPrimitive.swift` whole, `ViewportCarry.swift`, `EditorSurfaceController` (`renderFull`, `runStructural`, `applyStructuralResult`, the A7 carve `planEmptyBlockDeletion`/`runEmptyBlockDeletion`, `insertEmptyBlock`, the typed Return's act), `EditorViewModel` (`topVisibleOffset` + helpers, `restoreTopVisibleOffset`, `keepingReadingPosition`, the parks and their consumers, `teardown`, the keystroke's carve dispatch), `EditorView.swift`'s `ScrollAnchorController`, `EditorDocument.swift` |
 | 2 | Reproduce (harness, her shape, both voices) | DONE — `WriteTopAirTests` RED on today's tree `b4b978cd` (`DerivedData/18l-u0b-pin-prefix2.log`: 7 tests, 6 red, **14 issues**): her gesture — the page scrolls **24.0 pt** (Terminal AND Study; exactly the container's top inset) and the first line moves 24.0; the round trip — ⏎ moves nothing, ⌫ moves 24.0; a long note's same gesture mid-note and at the tail — the page moves **5.0 pt** (the edge's offset inside its line, snapped away); the siblings — a LIVE resize at the page top 24.0, a re-font (voice switch) at the page top 24.0; a NON-live width reflow at the page top GREEN (hollow as a defect — below) |
-| 3 | Trace + attribution | TRACE CONFIRMED by the pins' numbers (the carve is `seam: nil` → `renderFull` → the anchor restore lands the line AT the top: 24.0 = the inset exactly). **Attribution run NEXT — the 13y-road revert (named below, pre-revert state = the pin commit)** |
+| 3 | Trace + attribution | DONE — the mechanism (THE TRACE below) confirmed by the pins' numbers; **R-13y RED with the same shape** (`18l-u0b-R-13y.log`: 14 issues — 24.0 ×10, mid 5.0 ×2, tail 5.0 Terminal / **25.0** Study: 13y's road without C6's re-assert lands the tail a line further off); restored, `git status` clean. **R-room probe** (the test's own room switched off, test-side only, restored): her two short-note pins GREEN — the page cannot scroll past 0 without the typewriter room, so the room is what lets her short note collapse. ATTRIBUTION: **pre-existing** (below) |
 | 4 | Pin red-on-old | DONE — `WriteTopAirTests` committed RED (this commit) |
-| 5 | Fix + behavioural revert | NOT-STARTED |
+| 5 | Fix + behavioural revert | FIX DONE (this commit) — `ReadingAnchor` (the reading position with its place); `renderFull` restores EXACTLY; the re-layout keepers (live resize / width reflow, re-font) keep the ruled line-at-the-top rule except in the page's top air. `WriteTopAirTests` **7/7 GREEN** (`18l-u0b-pin-fixed1.log`). Behavioural reverts R-full / R-top NAMED below, NOT YET RUN (PENDING) |
 | 6 | Walk (both voices: her sequence; a long note mid + tail; add-then-remove) | NOT-STARTED |
 | 7 | Closing runs (touched suites + the eleven Tutorial suites) | NOT-STARTED |
 | 8 | Self-assessment | NOT-STARTED |
@@ -805,3 +805,12 @@ build's: `JumpPrimitive.jump`'s C6 re-assert forced off (`if false, …`) and it
 read ONCE at entry; `topVisibleOffset()`'s C6b reading-line branches forced off (`if false, …` — the
 box rule answers, exactly 13y's body). Then `WriteTopAirTests` runs; expected: RED with the same
 shape (the mechanism predates 18k); then `git checkout HEAD --` both files and `git status` clean.
+
+**THE BEHAVIOURAL REVERTS (named before they run; the pre-revert state is the fix commit):**
+- **R-full** — `EditorViewModel.readingAnchor()` captures `inset: 0` (the place thrown away: every
+  restore is the old line-at-the-top). Expected: `WriteTopAirTests` red exactly as on the pre-fix
+  tree (14 issues: 24.0 ×10, 5.0 ×4), the non-live width guard green.
+- **R-top** — `ReadingAnchor.reflowLandingInset` answers 0 always (the keepers' top-air carve
+  removed; the full re-render's exact restore kept). Expected: ONLY the live-resize and re-font pins
+  red (4 issues, 24.0); her gesture, the round trip, mid-note and tail GREEN.
+Each is a working-tree edit only, then `git checkout HEAD --` the file and `git status` clean.
