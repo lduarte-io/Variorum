@@ -793,7 +793,7 @@ rows 1–3 flip to BUILT+WALKED — the Fable cold review is the remaining gate.
 | 3 | Trace + attribution | DONE — the mechanism (THE TRACE below) confirmed by the pins' numbers; **R-13y RED with the same shape** (`18l-u0b-R-13y.log`: 14 issues — 24.0 ×10, mid 5.0 ×2, tail 5.0 Terminal / **25.0** Study: 13y's road without C6's re-assert lands the tail a line further off); restored, `git status` clean. **R-room probe** (the test's own room switched off, test-side only, restored): her two short-note pins GREEN — the page cannot scroll past 0 without the typewriter room, so the room is what lets her short note collapse. ATTRIBUTION: **pre-existing** (below) |
 | 4 | Pin red-on-old | DONE — `WriteTopAirTests` committed RED (this commit) |
 | 5 | Fix + behavioural revert | FIX DONE (this commit) — `ReadingAnchor` (the reading position with its place); `renderFull` restores EXACTLY; the re-layout keepers (live resize / width reflow, re-font) keep the ruled line-at-the-top rule except in the page's top air. `WriteTopAirTests` **7/7 GREEN** (`18l-u0b-pin-fixed1.log`). Behavioural reverts DONE: **R-full RED — 14 issues, identical to the pre-fix run** (`18l-u0b-R-full.log`); **R-top RED — exactly the live-resize and re-font pins, 4 issues (24.0)**, her gesture / round trip / mid / tail GREEN (`18l-u0b-R-top.log`); each restored with `git checkout HEAD --`, `git status` clean |
-| 6 | Walk (both voices: her sequence; a long note mid + tail; add-then-remove) | IN-PROGRESS — builds: pre-fix `DerivedData/18l-u0b-prefix` (the 4 product files at `642a9a00` = today's shipped road) and fixed `DerivedData/18l-u0b-walk` (HEAD `95a16746`, product code `998f7d7d`); neighbours green first (`18l-u0b-neighbors1.log`: 84 tests / 10 suites — the anchor/jump/re-font/typewriter/carve family) |
+| 6 | Walk (both voices: her sequence; a long note mid + tail; add-then-remove) | **DONE — PASS** on the fixed build (THE WALK below; every row both voices, measured by row signature); the pre-fix build reproduced her shape first (row 2) and, en route, a 40.0-pt tail snap on ⌫ |
 | 7 | Closing runs (touched suites + the eleven Tutorial suites) | NOT-STARTED |
 | 8 | Self-assessment | NOT-STARTED |
 
@@ -814,3 +814,157 @@ shape (the mechanism predates 18k); then `git checkout HEAD --` both files and `
   removed; the full re-render's exact restore kept). Expected: ONLY the live-resize and re-font pins
   red (4 issues, 24.0); her gesture, the round trip, mid-note and tail GREEN.
 Each is a working-tree edit only, then `git checkout HEAD --` the file and `git status` clean.
+
+### THE TRACE (inputs → wrong state; every number from a run in this session)
+
+**The top air is a SCROLL offset, not an inset that changes with the block count** — the brief's
+fork, decided by measurement. Write's text container carries a fixed 24-pt top inset
+(`EditorTextView.makeEditor`, R9's "generous top air"); at rest the page is scrolled to 0 so that air
+shows above the first line. The inset never changed (the pins read `textContainerOrigin.y` = 24 before
+and after); the clip's origin did — by exactly 24.0.
+1. Caret on her EMPTY last block; ⌫ deletes the separator before it → `shouldChangeText` refuses the
+   cross-block keystroke and plans A7's carve (`planEmptyBlockDeletion` → `runEmptyBlockDeletion`).
+2. The carve runs through `runStructural` with `seam: nil` → `applyStructuralResult` → **`renderFull`**
+   (the full re-render; the everyday gestures' differential road — her ⏎ took it, `seam: .divide` —
+   has no restore step at all, which is why ⏎ never moved anything).
+3. `renderFull` captures `topVisibleOffset()` — at scroll 0 the probe is 23 pt ABOVE the container, the
+   first fragment answers, and the reading line is line 0: **offset 0** — then replaces the storage and
+   replays it through `JumpPrimitive.jump(toOffset: 0)`, whose contract is "the line AT the viewport
+   top". Line 0's top is at view y 24 → the loop converges to **scroll 24**: the page's air, gone.
+   The anchor names the LINE; it never knew where the line SAT.
+4. The same restore on a wheel-scrolled long note snaps the reading line to the top: the page moves by
+   the edge's offset inside that line (the pins' 5.0), or, at a gap top, by the gap (40.0 pt measured
+   in the app on the pre-fix build — `pre/s-tail-0{1,2}`).
+5. The class, beyond her path: the same line-at-the-top replay drives the two re-layout keepers —
+   `ScrollAnchorController`'s live-resize restore and `keepingReadingPosition`'s re-font park — so a
+   page resting in its top air lost it to a window drag-resize (24.0) and to a voice switch (24.0).
+**Why her SHORT note could collapse at all:** without the typewriter room a note shorter than the page
+has a frame floored at the viewport, `maxScroll` is 0 and the jump clamps there (the **R-room** probe:
+her two pins GREEN with the room off). L5's room (`314ac454`, 2026-07-30) grew the document by a page,
+so the jump's 24 became reachable.
+
+### ATTRIBUTION (the U0 sweep's required column)
+
+- **Her report (the carve at the page top) — pre-existing.** Evidence: **R-13y** — 18k's two road
+  changes (C6's re-assert, C6b's live range and reading-line rule) reverted behaviourally → RED with
+  the same 24.0 in both voices: her 13y build's road collapses identically, so 18k neither caused nor
+  altered it (C6b's rule changes WHICH line mid-note, never offset 0 at the page top). Line history: the
+  restore is `renderFull`'s since Phase 7 (`02052d8c`, 2026-07-06); it lands the line at the INSET-
+  converted top since 13c 1A (`01e26020`, 2026-07-25 — before it, both halves carried the same inset
+  error and cancelled, so offset 0 restored to scroll 0); the carve lands through the full re-render
+  since 13c 1B (`7df0795d`, 2026-07-25); a short note can scroll past 0 since L5 (`314ac454`,
+  2026-07-30; R-room). All before the 13u2…18k window. macOS-independent (arithmetic on the inset and
+  the clamp). No whole-old-tree run (the C7 dev-store trap, as U0 and C6b).
+- **The mid-note / tail snap on the same gesture — pre-existing** (the same restore since Phase 7; R-13y
+  red: 5.0 Terminal, 25.0 Study — 13y's road without C6's re-assert lands the Study tail a line further off).
+- **The live-resize collapse — pre-existing** (`ScrollAnchorController` since Phase 7 `02052d8c`; the
+  collapse since 13c 1A's conversion `01e26020`).
+- **The re-font collapse — our-commit(`4ae12a59`)** — 13u4 UNIT F2 (2026-09-21), inside the window.
+  **R-F2**: the pre-fix road with the re-font keeper switched off (pre-F2: a re-font kept the pixel
+  offset, so scroll 0 stayed 0) → the re-font pin GREEN, her gesture's still RED (`18l-u0b-R-F2.log`).
+  F2's keeper replays "the line at the top", which at the page top means scroll 24.
+
+### THE FIX (`998f7d7d`) — the reading position carries its PLACE
+
+`ReadingAnchor` (pure, `JumpPrimitive.swift`): the offset `topVisibleOffset` names (the C6b rule,
+UNCHANGED), the line's `inset` below the viewport's top edge at capture, and `inPageTopAir` (the edge
+above the text container — the container's inset, where no text layout can move anything).
+`EditorViewModel.readingAnchor()` captures it (one single-fragment `lineSpan` of a line on screen — P1).
+Two landings, one per kind of restore:
+- **The full re-render (`renderFull`) lands EXACTLY** (`exactLandingInset`) — a structural result
+  changed nothing above the anchor that the offset does not carry, so the page does not move: the
+  differential road's promise ("untouched text never moves", 2026-07-07) kept on the fallback road.
+- **The re-layout keepers** (`ScrollAnchorController`'s width/live-resize restore via
+  `restoreReadingAnchor`; `keepingReadingPosition`'s park via `parkAnchorRestore(_:landingInset:)`)
+  keep the RULED rule — the reading line AT the top (13c 1A · 13u4 F2 · 18k C6b · #147) — everywhere it
+  was written for, and keep the page's top air as it was (`reflowLandingInset`): the first line was never
+  at the top there. The cold mount's session anchor stays an offset (inset 0 — U0c's road, untouched).
+`JumpPrimitive.jump`'s `landingInset` (13u2b UNIT 3's own parameter) carries both; no new scroll machinery.
+
+### THE WALK (USE) — dev-store Debug, per-step guarded (`guard.sh`), both voices, measured
+
+Fixed build `DerivedData/18l-u0b-walk` (HEAD `95a16746`; product code `998f7d7d`). "Moved" is MEASURED:
+`DerivedData/c6bmeasure.py` lists each text row's ink in points below the masthead hairline with a
+pixel signature, so a line is followed across captures. Captures `notes/plans/18l-screens/u0b/{pre,walk}/`
+(gitignored). Settings as found: Terminal · Rose & moss · 1440×1000 — **left as found** (voice restored
+to Terminal and read back `1, 0`).
+
+| Voice | Row | Before → after (the first line's / reference rows' ink, pt below the hairline) | Verdict |
+|---|---|---|---|
+*[removed for publication]*
+| Study | her sequence (same) | **29.5 → 29.5 → 29.5** (pre-fix: 29.5 → **5.5**) | **PASS** (`walk/s-her-0*`; pre `pre/s-her-0*`) |
+| Study → Terminal | **a voice switch at the page top** (the re-font sibling) | Terminal's resting 27.5 kept (the fix's pin reads 24.0 red-on-old) | **PASS** (`walk/t-refont-at-top`) |
+| Terminal | **long note mid-note** (*A Scandal in Bohemia*, 262 blocks; wheel-scrolled so the edge cuts a line; click a blank line mid-page → ⏎ → ⌫) | every row above the act identical across ⏎ and ⌫ (the edge's sliver 0.5–4.0 included); rows below +24 on ⏎ (the act's own block), back on ⌫ | **PASS** (`walk/t-mid-0*`) |
+| Study | long note mid-note (edge in a gap) | rows above identical across ⏎ and ⌫; below +30 on ⏎, back on ⌫ | **PASS** (`walk/s-mid-0*`) |
+| Terminal | **long note at the tail** (⌘↓ → ⏎ → ⌫) | **⌫ moved nothing**; the ⏎ moved the page **+109 pt** — FINDING B5 below (not the carve; seen on the pre-fix build too) | ⌫ **PASS**; ⏎ → B5 |
+| Study | long note at the tail (⌘↓ → ⏎ → ⌫) | ⌫ moved nothing; ⏎ **+166 pt** (B5) | ⌫ **PASS**; ⏎ → B5 |
+| Study | long note at the tail on SETTLED geometry (⌘↓, wheel ±3 lines, then ⏎ → ⌫) | all rows identical across ⏎ AND ⌫ | **PASS** (`walk/s-tail2-0*`) |
+| Study | **a window resize at the page top** (AX `set size` 1440 → 1300 → 1440 — the non-live road) | the top air kept at 1300; rows identical after the round trip | **PASS** (`walk/s-resize-0*`) |
+| — | a LIVE corner drag | NOT walked: the drag point (1437,1114) hit the overlay scroller, not the resize edge (the window's corner sits on the screen's bottom edge); the pin drives AppKit's own live-resize notifications (red-on-old 24.0) | pin only — stated |
+| Study (pre-fix build) | the pre-fix tail on settled geometry (⌘↓ → ⏎ → ⌫) | ⌫ moved the page **40.0 pt** (the reading line snapped to the top at a gap edge) | the mid/tail snap, in the app, pre-fix |
+
+**Round trip (add-then-remove): the first line never moved in either voice on the short note**; on the
+long note the ⌫ half never moved anything; the ⏎ half is B5 on unsettled geometry only.
+
+### THE SWEEP — finding × mechanism × ATTRIBUTION × disposition
+
+| # | Finding | Mechanism | ATTRIBUTION | Disposition |
+|---|---|---|---|---|
+| B1 | **Her report** — ⌫ on an empty block at the page top collapses the top air (24.0, both voices) | A7's carve lands through `renderFull`, whose anchor replays offset 0 as "line at the top" | **pre-existing** (R-13y red identically; `02052d8c` + `01e26020` + `7df0795d` + `314ac454`, all before the window) | **FIXED** `998f7d7d` · pins `WriteTopAirTests.removingTheEmptyLastBlockKeepsTheTopAir`, `addThenRemoveLeavesTheFirstLineWhereItWas` · R-full red |
+| B2 | Every `seam: nil` structural act (the carve, the delete compound, the cross-block compound, takes↔blocks, the W confirm, a full projection re-render) snaps a scrolled page by the edge's offset in its line (5.0 pins; 40.0 in the app) | the same restore | **pre-existing** (Phase 7's restore; R-13y red) | **FIXED** `998f7d7d` · pins `aMidNoteCarveMovesNothingOnThePage`, `aTailCarveOnALongNoteMovesNothingOnThePage` · R-full red |
+| B3 | A LIVE window resize at the page top collapses the air (24.0) | `ScrollAnchorController`'s live-resize restore, the same line-at-the-top replay | **pre-existing** (`02052d8c` + `01e26020`) | **FIXED** `998f7d7d` · pin `aLiveResizeAtThePageTopKeepsTheTopAir` · R-top red |
+| B4 | A voice switch (re-font) at the page top collapses the air (24.0) | 13u4 F2's keeper parks offset 0 for the line-at-the-top jump | **our-commit(`4ae12a59`)** (R-F2: pre-F2 road green) | **FIXED** `998f7d7d` · pin `aRefontAtThePageTopKeepsTheTopAir` · R-top red |
+| B4b | A NON-live width reflow at the page top | a frame-only change at scroll 0 posts no clip bounds notification; the width branch never runs | — | **DISMISSED AS HOLLOW** (green on both sides; kept as a guard pin, labelled); walked PASS by an AX resize round trip |
+| B5 | **⏎ right after a ⌘↓ landing moves the page** (+109 Terminal, +166 Study on the fixed build; +190 on the pre-fix build) — only when a full re-render (or re-font) had invalidated the layout before the ⌘↓; on settled geometry ⏎ moves nothing | NOT TRACED — the typed Return's DIFFERENTIAL road (no restore step), so a TK2 geometry settle: the ⌘↓ landed on estimated heights and the edit's layout pass corrected them under a fixed clip (TEXTKIT2 §2's estimate class) or 27's `layoutViewport()` clip displacement (§3) | **undetermined** — seen on the pre-fix build (not this diff); no 26.x to compare; untraced | **OWNED — PROPOSED:** a KnownIssues row, owner 18l (U-VIS seeds it as a scenario — "⌘↓ after a full re-render, then ⏎"; the trace belongs with U3's `layoutViewport()` examination or its own unit); **not built** (a second mechanism, outside U0b's surface) |
+| B6 | **U0c's shape reproduced on the shipped road**: opening *A Scandal in Bohemia* (pre-fix build) landed at the END with ONE line on screen (`pre/s-tail-nav.png`) — the remembered caret was at 262/262 (my earlier ⌘↓), the landing put its line at the top, the typewriter room below | the note-open landing over `CurrentBlockMemory` (R-18l-1's subject) | — (U0c's) | **U0c's session** — recorded, nothing built. Also for U0c: the session anchor across teardown (`scrollAnchors[postID]`) is still an OFFSET, so an in-session re-open of a note left resting in its top air replays offset 0 as "line at the top"; `ReadingAnchor` now exists for it |
+
+### SEAM FILES THIS DIFF TOUCHES (the Fable reviewer reads this first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `Features/Editor/JumpPrimitive.swift` | NEW pure `ReadingAnchor` (offset · inset · `inPageTopAir`; `exactLandingInset`, `reflowLandingInset`) | `JumpCorrectionLoop`, `FragmentLines`, `lineSpan`, `jump` (its body and every signature), C6's re-assert, C6b's live range |
+| `Features/Editor/EditorViewModel.swift` | `readingAnchor()`, `restoreReadingAnchor(_:)`; `keepingReadingPosition` parks the place (`parkAnchorRestore(_:landingInset:)`, default 0); `consumePendingAnchorRestore` jumps with the parked inset | `topVisibleOffset()` (byte-unchanged — C6b's rule), `restoreTopVisibleOffset`, `teardown`'s session anchor, the reveal and carried-placement parks, the storage seam |
+| `Features/Editor/EditorSurfaceController.swift` | `renderFull` captures `readingAnchor()` and lands with `exactLandingInset` | the cold mount's saved-anchor branch, the caret by identity, `runStructural`, the carve, the differential road |
+| `Features/Editor/EditorView.swift` (`ScrollAnchorController`) | `stableAnchor: ReadingAnchor?`; captures `readingAnchor()`, restores through `restoreReadingAnchor` | the width/live-resize branching, the long-block consideration, the inline editor (U0's) |
+| `VariorumTests/WriteTopAirTests.swift` | NEW — 7 tests × 2 voices (her gesture, the round trip, mid-note, tail, non-live width guard, live resize, re-font) | — |
+
+`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, `PaneTextAuthority`, `runStructural`: untouched.
+Zero `Sources/`, `Sync/`, `Shared/`, schema. No TK1 API (the new read is `JumpPrimitive.lineSpan`,
+the existing single-fragment `.ensuresLayout` idiom).
+
+### JUDGMENT CALLS (each reversible in a line)
+
+1. **The full re-render lands EXACTLY, not "line at the top"** — B2 fixed with B1. The brief's own walk
+   criterion ("the first line must not move when the act doesn't move it", mid-note and at the tail)
+   and the 2026-07-07 decision ("untouched text never moves") are the basis; no ruling makes a
+   structural re-render snap. *Reverse by* `landingInset: anchor.reflowLandingInset` in `renderFull`
+   (keeps B1's fix, drops B2's).
+2. **The re-layout keepers keep the ruled line-at-the-top rule** (13u4 F2, 18k C6b, #147 untouched —
+   `RefontGapTopTests` and `RefontViewportTests` ride unmodified and green) **except in the page's top
+   air.** Reading that zone as "not a reading position the rule meant to take" is my call, stated for the
+   ladder: before the act the first line was 24 pt BELOW the top, so the rule's own promise ("the same
+   line at the top") was never true there. *Reverse by* `reflowLandingInset → 0` (R-top's shape).
+3. **"The page's top air" = the edge above the text container** (`clipTop < textContainerOrigin.y`):
+   geometry no text layout moves, O(1). An edge inside the FIRST line (below 24) is not top air and keeps
+   the ruled rule.
+4. **B3/B4 fixed inside U0b** (the siblings): the same mechanism on the same surface, one capture rule,
+   no extra code beyond consuming it; leaving them would hand her the same symptom through a voice switch.
+   Pinned red-on-old, R-top red.
+5. **The session anchor across teardown stays an offset** (U0c's road — B6).
+
+### NOTICED, NOT TOUCHED
+
+1. **B5** (⏎ after ⌘↓ on invalidated geometry) — proposed owner above; the orchestrator's KnownIssues edit.
+2. **B6** — U0c's session: the note-open end landing reproduced; the Int session anchor.
+3. **The carve's caret** lands at the NEXT block's start mid-note (`caretLandingAfterRemoving`), not back
+   at the end of the block above — the carve's ruled landing (13c 1B), unchanged; noted only.
+*[removed for publication]*
+   starters:", one per build) and eleven empty blocks in the tray (the walk's carves; *A Scandal in
+   Bohemia* back at 262 blocks). Nothing else changed; the voice restored to Terminal.
+5. **Walker fact for `Tools/WalkKit/README.md`** (the orchestrator's): the dev window's bottom-right
+   corner sits on the screen's bottom edge at 1440×1000 @ (0,117) on this 1728×1117 screen, so a corner
+   drag lands on the overlay scroller — a live resize needs the RIGHT edge (with a guard that admits a
+   point just outside the window) or a smaller window first. Also: `osascript` to Finder hung on an
+   AppleEvent timeout — avoid it on walks.
+6. **`guard.sh` fires on the walker's OWN synthetic input** (HID idle resets on `cliclick`) — wait ≥ 2.5 s
+   between steps, as the U0 walk did.
