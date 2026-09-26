@@ -227,6 +227,27 @@ their diffs drift onto the seam.** Sequential, one agent at a time.
   suspect; 18k C6b's `topVisibleOffset` baseline rule is NOT on this road but read its record), fix
   with a red-on-old pin, and walk it (both voices; lines at the top, middle and bottom of a note; the
   first and last line of a block). **The editor seam → a Fable review.** This unit runs FIRST in 18l.
+  **HER FOLLOW-UP, the same evening (verbatim):** *"additionally, the bottom line of text in Read view is
+  very slightly cut off at the bottom - in this image, it's clear that the G's in the final line of text
+  in book view with a note extended are slightly cut off towards the bottom. also, I'm clicking DIRECTLY
+  on the line of text and I always go to an empty line when I click, so it's not a slight mislick, it's
+  a refusal of clicking into the text. I think that 13l will have to investigate editor regressions
+  that must've happened during recent fixes."* (Her "13l" read as **18l** — 13l closed 2026-08-24; the
+  orchestrator told her so the same turn.) Her capture:
+  **`notes/plans/18l-inputs/2026-09-25-book-last-line-descenders-clipped.png`** — the book view, *about
+  this text* expanded, the last line's descenders ("tagged") cut at the bottom edge. So U0 carries
+  THREE things, and its first act is the investigation she asked for:
+  1. **The click REFUSES the text** — clicking DIRECTLY on a line always lands the caret on an empty
+     line; never a near-miss. (Treat as deterministic, not a hit-test tolerance problem.)
+  2. **The last line's descenders are CLIPPED** in the book view with a note expanded (her capture).
+     A context fact from 18k C2: TK2's first full measure after window entry / width change / edit can
+     differ from the settled layout, and the inline editor has no convergence re-report — a frame sized
+     from an unsettled SHORT measure would clip exactly like this (C2 measured the TALL direction; this
+     may be the short one). Her build is 13y's, i.e. PRE-C2 — check both before and after C2's deferral.
+  3. **An editor-regression SWEEP** (her ask): identify which recent fix introduced (1) and (2) —
+     bisect by harness over the 13u2…13y/18k commits that touched the book surfaces, the inline editor,
+     `PaneSurface`, the read-tier → live swap and landing — and report every regression found, not only
+     these two. Each finding: reproduced, traced, pinned red-on-old, fixed or owned.
 - **U4 — the one-liners** (review §1.3 items 2/4): the book Outline gains
   `.onDisappear { landing.end() }` (R2-12 parity with the flow and Index); `LandingTarget.utf16Offset`
   is wired or deleted (recommend delete + a comment naming the `FocusedBlock` road that actually
