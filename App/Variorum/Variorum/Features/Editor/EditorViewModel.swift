@@ -4184,7 +4184,9 @@ final class EditorViewModel {
     /// carries the why): the line `topVisibleOffset` names, how far below the
     /// viewport's top edge it sat, and whether the edge was in the page's own
     /// top air. One single-fragment layout of a line already on screen (the
-    /// `lineSpan` idiom — P1); nil exactly when `topVisibleOffset` is.
+    /// `lineSpan` idiom — P1); nil when `topVisibleOffset` is (`lineSpan` of
+    /// a line already on screen cannot fail after it — every non-nil answer
+    /// is a line start inside a laid-out fragment, never the document's end).
     func readingAnchor() -> ReadingAnchor? {
         guard let offset = topVisibleOffset(), let textView, let scrollView,
               let line = JumpPrimitive.lineSpan(ofOffset: offset, in: textView)
