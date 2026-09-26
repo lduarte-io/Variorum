@@ -63,6 +63,8 @@ struct ReadNoteLandingTests {
 
     private func mounted(
         face: ReadModeView.Face,
+        texts: [String]? = nil,
+        landingIndex: Int = ReadNoteLandingTests.landingIndex,
         _ body: @escaping (ReadModeTests.World) async throws -> Void
     ) async throws {
         let db = try AppDatabase.inMemory()
@@ -76,8 +78,8 @@ struct ReadNoteLandingTests {
             let post = try session.operations.createPost(title: "a scandal in bohemia")
             var blocks: [String] = []
             var variants: [String] = []
-            for i in 0..<Self.blockCount {
-                let minted = try session.operations.newBlock(in: post.id, text: Self.text(i))
+            for text in texts ?? (0..<Self.blockCount).map({ Self.text($0) }) {
+                let minted = try session.operations.newBlock(in: post.id, text: text)
                 blocks.append(minted.block.id)
                 variants.append(minted.variant.id)
             }
@@ -94,7 +96,7 @@ struct ReadNoteLandingTests {
             let router = session.commandRouter
             _ = router.registerDetail(postID: post.id, mode: .read) { _ in }
             router.noteFocusedBlock(
-                blocks[Self.landingIndex], variantID: variants[Self.landingIndex], postID: post.id)
+                blocks[landingIndex], variantID: variants[landingIndex], postID: post.id)
             let model = BlockTOCViewModel(session: session, postID: post.id)
             let window = NSPanel(
                 contentRect: NSRect(x: 120, y: 120, width: 1100, height: 750),
@@ -346,6 +348,56 @@ struct ReadNoteLandingTests {
             #expect(abs(b) <= Self.restTolerance,
                     "…and it is still there 1.5 s later — \(b) pt away")
             expectWatched(.readNote, maxHops: 0)
+        }
+    }
+
+    // MARK: - U1 ladder round 1, MAJOR-1 — her click inside the landing's hold
+
+    /// **A click into the landed block while the landing is still pending
+    /// must not move the page.** The edit face's home is the block CENTRED,
+    /// so it depends on the block's own height; her click swaps the block
+    /// from the read tier to the live pane, whose line metrics differ
+    /// (KnownIssues' S3 row), so its height changes while its top stays — and
+    /// a landing still watching would "correct" the centre by half the change
+    /// and scroll the page under the caret she just placed. The pane's own
+    /// contract: *"clicking what you can see must not move it under you."*
+    /// Her act ends the landing, as her scroll already did (`end=handedover`).
+    ///
+    /// The review's pin (ladder round 1): uniform five-sentence paragraphs, the
+    /// arrival at block 41, a REAL click on its middle 0.15 s and 0.45 s after
+    /// its frame first appears (both inside the one-second hold), the block's
+    /// top sampled right after the swap and 3 s later. RED on `2eff1b27`
+    /// (5.0 pt, both delays, measured by the reviewer); green on the pre-U1
+    /// tree, which never watched a landing at all.
+    @Test(arguments: [0.15, 0.45])
+    func aClickIntoTheLandedBlockDuringTheHoldDoesNotMoveThePage(_ delay: Double) async throws {
+        let paragraph = String(repeating: Self.narrative, count: 5) + "\n"
+        let texts = (0..<80).map { "Paragraph \($0). " + paragraph }
+        try await mounted(face: .edit, texts: texts, landingIndex: 40) { world in
+            let target = world.blockIDs[40]
+            let arrived = await world.poll(timeout: 8) {
+                ReadModeOracle.editBlockFrames[target] != nil
+            }
+            try #require(arrived, "the landed block drew")
+            try await Task.sleep(for: .milliseconds(Int(delay * 1000)))
+            let frame = try #require(ReadModeOracle.editBlockFrames[target])
+            world.click(at: world.windowCenter(of: frame))
+            let live = await world.poll(timeout: 4) {
+                ReadModeTests.editablePanes(in: world.hosting).count == 1
+                    && world.model.liveBlockID == target
+            }
+            try #require(live, "the click made the landed block live")
+            await world.turn()
+            let afterSwap = try #require(ReadModeOracle.editBlockFrames[target])
+            _ = await world.poll(timeout: 3) { false }
+            let settled = try #require(ReadModeOracle.editBlockFrames[target])
+            print("[18l U1 MAJOR-1] click at +\(delay) s: after the swap top=\(afterSwap.minY) "
+                + "h=\(afterSwap.height); 3 s later top=\(settled.minY) h=\(settled.height)")
+            #if DEBUG
+            print("[18l U1 MAJOR-1] the story: \(ReadLandingStory.trace.suffix(6).joined(separator: " | "))")
+            #endif
+            #expect(abs(settled.minY - afterSwap.minY) <= 1,
+                    "the page did not move under her click: \(afterSwap.minY) → \(settled.minY)")
         }
     }
 }
