@@ -515,6 +515,46 @@ driver road; a parity row at close), and any default-suite membership. **Sizing:
 (driver + oracle endpoints + the seeded scenarios + one full evidenced run); its first run doubles
 as U0/U0b/U0c's standing evidence.
 
+## U-VIS BRIEF (session 4 — the visual regression harness, built to the DESIGN NOTE above; written by the orchestrator 2026-09-26 one-ahead — spawned after U0c's ladder settles)
+
+You are the `opus-implementer` for **18l UNIT U-VIS**. One acceptance unit: build the harness THE
+DESIGN NOTE ABOVE specifies — read it as your contract (its six decisions are settled,
+PROVISIONAL under R-18l-4; deviations are STOP-and-report, not judgment calls). Her verbatim ask
+is in the charter's U-VIS section and the design note's first line.
+
+**Read first:** (1) THIS file whole — the DESIGN NOTE (your contract), ENVIRONMENT TRAPS
+(verbatim binding; the walker facts in the U0/U0b acceptance sections), the U0 · U0b · U0c
+RECORDs (your scenarios' reproductions, measured numbers, and fixtures — the replica notes, the
+Sherlock shapes). (2) `Tools/WalkKit/` WHOLE — README, `guard.sh`/`click.sh`/`keys.sh`/`wl2.swift`
+(committed at `75ce81cd`; your driver PROMOTES these into `Tools/VisualWalk/` or consumes them in
+place — either is fine, say which and why), `capture-windows.swift`, `scroll.swift`. (3) The
+DEBUG oracles you will read (18k C4's owner-keyed shape binds any NEW oracle;
+`notes/plans/phase-18k-runtime-hygiene.md` UNIT C4): `topVisibleOffset`'s line,
+the caret facts, the last fragment's bottom, the surface frame — find the existing endpoints
+first; add the smallest new one only where none exists. (4) KnownIssues rows 35 · 88 · 89 (the
+classes your externals-not-in-process design exists to dodge; row 88 = B5, one of your seeded
+scenarios).
+
+**The build:** `Tools/VisualWalk/` — a scenario table (each row: name · fixture · scripted acts ·
+the geometry assertions from the design note's three rules) · the driver (launches its OWN
+dev-store Debug build; per-step guard; captures + a per-scenario PASS/FAIL report with the
+measured values into a gitignored `notes/plans/vis-walks/<date>/`; non-zero exit on failure) ·
+the seeded scenarios (the design note's list: typing · U0b's newline round-trip · U0's two click
+scenarios · the narrow→restore · a divide and a merge · the mode-switch round trip · U0c's
+note-open first/re-open — plus **B5** (row 88): ⌘↓ then ⏎ on invalidated geometry, asserted
+EXPECTED-FAIL or PASS as the tree actually behaves, honestly labelled either way) · the env-flag
+wrapper (`VARIORUM_VISUAL_WALK=1`, keychain-drill gating; NEVER default-run membership). **The
+harness must prove it can RED:** one deliberate self-test (an assertion against a knowingly-wrong
+expected value, or a scenario against a scratch build with a fix reverted) demonstrating a
+failure is caught, captured, and reported non-zero — a tripwire that cannot fire is hollow by
+the standing guard rule. **Acceptance:** the full seeded run on the current tree, evidenced
+(the report + captures), plus the self-test's red. Zero `Sources/` changes expected EXCEPT
+minimal DEBUG oracle endpoints (owner-keyed; if anything wider looks necessary, stop and
+report); zero `Sync/`. Discipline: the U0 brief's paragraph verbatim (`## U-VIS RECORD` in THIS
+file; checkpoint from first commit; no subagents; synchronous waits; pathspec-limited). Review:
+Opus cold review unless the diff's oracle endpoints touch the editor seam beyond DEBUG — then
+Fable (R-cor-14's letter; expected: the DEBUG-only blast radius keeps it Opus).
+
 ## U0 RECORD (implementer: `opus-implementer`, 2026-09-26)
 
 **NOT DONE (first line):** (1) no whole-old-tree harness bisect — every Mac test run launches the
