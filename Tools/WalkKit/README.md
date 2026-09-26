@@ -231,3 +231,9 @@ any typing (a consent prompt holding keyboard focus turns a ⏎ into Allow — m
 Run: `VARIORUM_VISUAL_WALK=1 Tools/VisualWalk/visual-walk.sh --build --voices terminal,study`
 (`--selftest` proves it can red; `--list` shows the scenario table). A consent dialog on screen
 is the AUTHOR'S to answer — never a session's, whatever it blocks.
+
+**The ORDER of a guarded step (U-VIS round 1, MAJOR-1, 2026-09-26):** `guard.sh --author` (her app
+absent · HID idle ≥ 2 s) runs FIRST, before anything touches the GUI; only then activate the dev app;
+then the full `guard.sh <pid> [x y]`; then act. An exit 4 ("someone is at the machine") ends the walk —
+it is never retried with a re-activation (activating moves HER keyboard focus). `click.sh` / `keys.sh`
+follow this order; so does every VisualWalk act (`pins/guard-order.zsh` pins it headlessly).

@@ -51,6 +51,7 @@ vw_launch() {
   [[ -d $APP ]] || vw_abort "no Debug build at $APP (run with --build)"
   if pgrep -f '/Applications/Variorum.app/Contents/MacOS' >/dev/null; then vw_abort "her app is running — STOP"; fi
   if [[ -n $(vw_instances) ]]; then vw_abort "another Variorum instance is running: $(vw_instances | tr '\n' ' ')"; fi
+  vw_author_check             # `open -n` takes focus — never while she is at the machine
   open -n --env VARIORUM_VISUAL_WALK=1 $APP
   local i
   for i in {1..40}; do PID=$(pgrep -f $APP_PATTERN | head -1); [[ -n $PID ]] && break; sleep 0.5; done
@@ -123,18 +124,51 @@ vw_get() { print -r -- ${SNAP[$1.$2]} }
 # rect "x,y,w,h" → the four numbers
 vw_rect() { print -r -- ${(s:,:)1} }
 
-# --- The acts (every GUI act: the step gap, then WalkKit's guard, then the act) ------------------------
-vw_guarded() {   # <guard args…> — retries a transient guard (idle / focus) twice, never her app
+# --- The acts (every GUI act: the step gap, the AUTHOR checks, THEN the activation, then the target ---
+# checks, then the act — U-VIS round 1, MAJOR-1: activating first moved her keyboard focus before the
+# check that she is at the machine, and an idle refusal was retried with re-activation) -----------------
+
+# The author checks alone (her app absent · HID idle), touching nothing. Any refusal ENDS the run.
+vw_author_check() {
+  $WK/guard.sh --author >> $RUN_DIR/run.log 2>&1
+  local rc=$?
+  case $rc in
+    0) return 0 ;;
+    3) vw_abort "guard: her app is running — STOP" ;;
+    4) vw_abort "guard: someone is at the machine — STOP (nothing activated; never retried)" ;;
+    *) vw_abort "guard --author exit $rc (see run.log)" ;;
+  esac
+}
+
+# The target checks, after the activation. Only a LOST FOCUS (5) is retried — and only after the author
+# checks pass again; an author refusal (3, 4) and the deterministic ones (6 not on this Space, 7 point
+# outside the window — N5) abort at once.
+vw_guarded() {   # <guard args…>
   local rc tries=0
   while true; do
-    $WK/guard.sh $PID "$@" >> $RUN_DIR/run.log 2>&1; rc=$?
-    (( rc == 0 )) && return 0
-    (( rc == 3 )) && vw_abort "guard: her app is running — STOP (no retry)"
-    (( ++tries > 2 )) && vw_abort "guard refused $tries times (exit $rc — see run.log)"
-    vw_log "guard exit $rc — waiting 5 s, then re-activating (try $tries)"
-    sleep 5
+    $WK/guard.sh $PID "$@" >> $RUN_DIR/run.log 2>&1
+    rc=$?
+    case $rc in
+      0) return 0 ;;
+      3) vw_abort "guard: her app is running — STOP" ;;
+      4) vw_abort "guard: someone is at the machine — STOP (never re-activated)" ;;
+      5) ;;
+      *) vw_abort "guard refused (exit $rc — see run.log)" ;;
+    esac
+    (( ++tries > 2 )) && vw_abort "guard: our app would not stay frontmost ($tries tries)"
+    vw_log "guard exit 5 (not frontmost) — re-checking the author, then re-activating (try $tries)"
+    sleep 2
+    vw_author_check
     vw_activate
   done
+}
+
+# THE step door: gap → author checks → activate → target checks. Every GUI act starts here.
+vw_step() {   # [x y]
+  sleep $STEP_GAP
+  vw_author_check
+  vw_activate
+  vw_guarded "$@"
 }
 
 vw_activate() {
@@ -163,7 +197,7 @@ vw_our_window_is_key() {
 vw_click() {   # x y [label]
   local x=${1%.*} y=${2%.*}
   vw_act_note "click ($x,$y) ${3:-}"
-  sleep $STEP_GAP; vw_activate; vw_guarded $x $y
+  vw_step $x $y
   vw_no_foreign_at $x $y
   vw_probe
   if [[ ${PV[key]} != 1 ]]; then
@@ -180,7 +214,7 @@ vw_click() {   # x y [label]
 vw_keys() {    # label, then System Events statements
   local label=$1; shift
   vw_act_note "keys: $label"
-  sleep $STEP_GAP; vw_activate; vw_guarded
+  vw_step
   vw_our_window_is_key
   local -a args=(-e 'tell application "System Events"')
   local st; for st in "$@"; do args+=(-e "$st"); done
@@ -192,21 +226,21 @@ vw_keys() {    # label, then System Events statements
 # SwiftUI Settings controls answer only this). Guarded like every GUI act.
 vw_ax_press() {  # label [role]
   vw_act_note "AX press: $1"
-  sleep $STEP_GAP; vw_activate; vw_guarded
+  vw_step
   $VW_BIN/vis-ax $PID "$1" ${2:--} press >> $RUN_DIR/run.log
 }
 
 vw_scroll() {  # x y n — WalkKit's walk-scroll: TEN wheel events of n lines each (positive = down)
   local x=${1%.*} y=${2%.*}
   vw_act_note "scroll $3 lines at ($x,$y)"
-  sleep $STEP_GAP; vw_activate; vw_guarded $x $y
+  vw_step $x $y
   vw_no_foreign_at $x $y
   $VW_BIN/walk-scroll $x $y $3 >/dev/null
 }
 
 vw_resize() {  # width height — the non-live road (AX set size)
   vw_act_note "resize window to $1x$2"
-  sleep $STEP_GAP; vw_activate; vw_guarded
+  vw_step
   osascript -e "tell application \"System Events\" to set size of window 1 of (first application process whose unix id is $PID) to {$1, $2}" >/dev/null
   vw_window
 }
@@ -238,6 +272,7 @@ vw_set_voice() {   # terminal|study
   vw_ax_press $1 AXRadioButton || vw_abort "the $1 voice control was not found in Settings"
   sleep 1.5
   vw_act_note "close Settings"
+  vw_step
   osascript -e "tell application \"System Events\" to tell (first application process whose unix id is $PID) to click (first button whose subrole is \"AXCloseButton\") of window \"Variorum Dev Settings\"" >/dev/null 2>&1
   sleep 1
   vw_probe

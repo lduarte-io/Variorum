@@ -5,18 +5,36 @@ import Foundation
 import Testing
 
 private let enabled = ProcessInfo.processInfo.environment["VARIORUM_VISUAL_WALK"] == "1"
-private let driver = URL(fileURLWithPath: #filePath)
+private let root = URL(fileURLWithPath: #filePath)
     .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-    .appendingPathComponent("visual-walk.sh")
+private let driver = root.appendingPathComponent("visual-walk.sh")
 
 /// Runs the driver with `arguments`, streaming its output, and answers its exit status.
 private func walk(_ arguments: [String]) throws -> Int32 {
+    try zsh([driver.path] + arguments)
+}
+
+private func zsh(_ arguments: [String]) throws -> Int32 {
     let process = Process()
     process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-    process.arguments = [driver.path] + arguments
+    process.arguments = arguments
     try process.run()
     process.waitUntilExit()
     return process.terminationStatus
+}
+
+/// The HEADLESS pins (`pins/*.zsh`): the harness's own machinery driven through stubs — nothing
+/// touches the GUI, so they are always on (no flag). Each script exits 0 when every case holds.
+@Suite("The visual walk's headless pins (always on — no GUI)")
+struct VisualWalkHeadlessPins {
+    static let pins: [String] = ((try? FileManager.default.contentsOfDirectory(
+        atPath: root.appendingPathComponent("pins").path)) ?? []).filter { $0.hasSuffix(".zsh") }.sorted()
+
+    @Test("every headless pin holds", arguments: pins)
+    func pinHolds(_ pin: String) throws {
+        #expect(try zsh([root.appendingPathComponent("pins").appendingPathComponent(pin).path]) == 0,
+                "pins/\(pin) — its output names the failing case")
+    }
 }
 
 @Suite(
