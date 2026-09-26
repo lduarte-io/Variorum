@@ -48,9 +48,7 @@ done
 # grant for System Events, which every act and every guard speaks to (launched first: a target must
 # run to be asked; launching sends no Apple Event).
 open -g -b com.apple.systemevents; sleep 1
-tcc=$(vw_timeout 15 $VW_BIN/vis-tcc com.apple.systemevents)
-[[ ${${(f)tcc}[1]} == "AX 1 SCREEN 1" ]] || refuse "this terminal lacks Accessibility / Screen Recording (${${(f)tcc}[1]}) — granting is the author's"
-[[ $tcc == *"AE:com.apple.systemevents granted"* ]] || refuse "no standing Automation grant for System Events (${${(f)tcc}[2]:-the check timed out — a consent prompt pending?}) — the first act would mint a consent prompt; granting is the author's"
+grants=$(vw_grants_verdict) || refuse "$grants"
 foreign=$($VW_BIN/vis-foreign 0)
 [[ -n $foreign ]] && print -u2 "NOTE: system dialog(s) on screen — the harness will never click or type into them: $foreign"
 

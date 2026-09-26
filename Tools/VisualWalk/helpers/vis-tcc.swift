@@ -10,6 +10,10 @@ import CoreGraphics
 import CoreServices
 import Foundation
 
+// LINE-buffered even into a pipe (round 2, MINOR-R2-3): the driver runs this under a time limit, and
+// a check that blocks on a PENDING consent prompt is killed by SIGALRM, which flushes nothing — every
+// line already known must be out before the next question is asked.
+setvbuf(stdout, nil, _IOLBF, 0)
 print("AX \(AXIsProcessTrusted() ? 1 : 0) SCREEN \(CGPreflightScreenCaptureAccess() ? 1 : 0)")
 for spec in CommandLine.arguments.dropFirst() {
     let quitOnly = spec.hasSuffix("@quit")
