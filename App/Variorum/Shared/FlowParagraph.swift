@@ -44,11 +44,26 @@ nonisolated struct FlowParagraph: Equatable {
     /// `codeTint` is 13k K10's chip; nil (the default) keeps every existing
     /// caller and pin composing exactly as it did.
     static func paragraphs(of source: String, codeTint: Color? = nil) -> [FlowParagraph] {
+        paragraphsWithStarts(of: source, codeTint: codeTint).paragraphs
+    }
+
+    /// **The same paragraphs WITH where each starts in the rendered display**
+    /// (UTF-16) — one render, one loop, for the caller that also needs the
+    /// click translation's coordinates (`ReadTierClickPlace`). One loop
+    /// cannot disagree with itself about which lines are paragraphs, which
+    /// is the point (18l U0 ladder round 1, MINOR-2: this replaced a separate
+    /// `displayStarts(of:)` that re-rendered and re-filtered — two public
+    /// entry points held in lockstep only by the shared blank rule).
+    static func paragraphsWithStarts(
+        of source: String, codeTint: Color? = nil
+    ) -> (paragraphs: [FlowParagraph], starts: [Int]) {
         let rendered = MarkdownRendering.render(source)
         let ns = rendered.text as NSString
         var result: [FlowParagraph] = []
+        var starts: [Int] = []
         for line in rendered.lines {
             guard isShown(line, in: ns) else { continue }
+            starts.append(line.range.lowerBound)
             // Built by CONCATENATION rather than by indexing into an
             // existing string: the runs are ascending and disjoint (the
             // transform's pinned property), so walking them is exact, and no
@@ -76,28 +91,15 @@ nonisolated struct FlowParagraph: Equatable {
             result.append(FlowParagraph(
                 text: attributed, style: line.style, indentLevel: line.indentLevel))
         }
-        return result
+        return (result, starts)
     }
 
     /// The flow's ONE blank-line rule — a display line of nothing but
-    /// whitespace is not drawn. Shared by `paragraphs(of:)` and
-    /// `displayStarts(of:)` so the two can never disagree about which lines
-    /// are paragraphs (18l U0).
+    /// whitespace is not drawn (18l U0).
     private static func isShown(_ line: MarkdownRendering.Line, in display: NSString) -> Bool {
         let raw = display.substring(
             with: NSRange(location: line.range.lowerBound, length: line.range.count))
         return !raw.trimmingCharacters(in: .whitespaces).isEmpty
-    }
-
-    /// **Where each paragraph of `paragraphs(of: source)` starts in the
-    /// RENDERED display** (UTF-16), in the same order — 18l UNIT U0: a click
-    /// on a read-cheap block names a paragraph and an offset inside it, and
-    /// `MarkdownRendering.sourceOffset(forDisplayOffset:in:)` carries that
-    /// display offset back to the stored text. Same render, same blank rule.
-    static func displayStarts(of source: String) -> [Int] {
-        let rendered = MarkdownRendering.render(source)
-        let ns = rendered.text as NSString
-        return rendered.lines.filter { isShown($0, in: ns) }.map(\.range.lowerBound)
     }
 
     private static func container(

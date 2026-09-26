@@ -76,11 +76,11 @@ enum ReadTierClickPlace {
     static func sourceOffset(
         at point: CGPoint, in source: String, columnWidth: CGFloat, font: NSFont
     ) -> Int {
-        let paragraphs = FlowParagraph.paragraphs(of: source)
-        let starts = FlowParagraph.displayStarts(of: source)
-        guard !paragraphs.isEmpty, paragraphs.count == starts.count, columnWidth > 1 else {
-            return 0
-        }
+        // One render answers both questions (which paragraphs, and where each
+        // starts in the display) — one loop cannot disagree with itself about
+        // which lines are paragraphs (ladder round 1, MINOR-2).
+        let (paragraphs, starts) = FlowParagraph.paragraphsWithStarts(of: source)
+        guard !paragraphs.isEmpty, columnWidth > 1 else { return 0 }
         var top: CGFloat = 0
         for (index, paragraph) in paragraphs.enumerated() {
             let layout = ParagraphLayout(
