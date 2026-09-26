@@ -118,6 +118,80 @@ struct ReadNoteLandingTests {
         }
     }
 
+    /// **The REAL long-note fixture** — the sample library's own *A Scandal in
+    /// Bohemia*, seeded exactly as her store has it (one block per paragraph,
+    /// the blank line between them kept as content), and the same row-39
+    /// arrival at block `landingIndex + 1`.
+    private func mountedOnTheStory(
+        face: ReadModeView.Face,
+        _ body: @escaping (ReadModeTests.World) async throws -> Void
+    ) async throws {
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_782_950_400)
+        let tick = LockIsolated(0)
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 1661))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let mark = LockIsolated(false)
+            _ = await SampleLibrarySeeder.seedIfNeeded(
+                session: session,
+                loadMark: { mark.value },
+                saveMark: { flag in mark.setValue(flag) })
+            let bookID = try await db.read { db in
+                try #require(Queries.readings(db)
+                    .first { $0.name == SampleLibrarySeeder.bookName }).id
+            }
+            let entries = try await db.read { db in
+                try Queries.assembleReading(db, readingID: bookID)
+            }
+            let story = try #require(entries.first { $0.title == "A Scandal in Bohemia" })
+            let toc = try await db.read { db in try Queries.blockTOC(db, post: story.postID) }
+            let blocks = toc.map(\.blockID)
+            let variants = toc.map { $0.variantID ?? "" }
+            try #require(blocks.count > Self.landingIndex + 20, "the story is long")
+            ReadModeView.remember(face, postID: story.postID)
+            #if DEBUG
+            ReadModeOracle.reset()
+            #endif
+            let router = session.commandRouter
+            _ = router.registerDetail(postID: story.postID, mode: .read) { _ in }
+            router.noteFocusedBlock(
+                blocks[Self.landingIndex], variantID: variants[Self.landingIndex],
+                postID: story.postID)
+            let model = BlockTOCViewModel(session: session, postID: story.postID)
+            let window = NSPanel(
+                contentRect: NSRect(x: 120, y: 120, width: 1100, height: 750),
+                styleMask: [.titled, .nonactivatingPanel], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            window.isFloatingPanel = true
+            window.becomesKeyOnlyIfNeeded = false
+            window.hidesOnDeactivate = false
+            let hosting = NSHostingView(rootView: AnyView(
+                ReadModeView(session: session, postID: story.postID, model: model)
+                    .environment(ThemeStore(session: session))))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            let world = ReadModeTests.World(
+                session: session, postID: story.postID, blockIDs: blocks, variantIDs: variants,
+                model: model, window: window, hosting: hosting)
+            defer { world.close() }
+            print("[18l U1] the real story: \(blocks.count) blocks, landing on block \(Self.landingIndex + 1)")
+            await world.poll { !model.rows.isEmpty && ReadModeOracle.selectedBlockID != nil }
+            try await body(world)
+        }
+    }
+
     /// Where the landed block sits against where its face's anchor puts it:
     /// the block's `anchor`-point at the viewport's `anchor`-point
     /// (`ViewportCarry`'s definition, which IS `scrollTo(_:anchor:)`'s). 0 is
@@ -136,8 +210,18 @@ struct ReadNoteLandingTests {
         await world.poll(timeout: 8) { frames()[target] != nil }
         // The landing's own time to settle (the authority's hold is a second;
         // a correction adds one more), then a look — and another later, so a
-        // landing that arrives and then slides is caught.
-        _ = await world.poll(timeout: 3) { false }
+        // landing that arrives and then slides is caught. The path on the way
+        // is printed: every distinct place the landed block stood (a stutter
+        // is a landing that arrives through a second place).
+        var path: [Int] = []
+        _ = await world.poll(timeout: 3) {
+            if let block = frames()[target], let face = ReadModeOracle.faceFrames[world.postID] {
+                let r = Int(Self.residual(block: block, face: face, anchor: anchor).rounded())
+                if path.last != r { path.append(r) }
+            }
+            return false
+        }
+        print("[18l U1] the landed block's path (pt from its anchor): \(path)")
         let first = frames()[target].flatMap { block in
             ReadModeOracle.faceFrames[world.postID].map {
                 Self.residual(block: block, face: $0, anchor: anchor)
@@ -176,6 +260,33 @@ struct ReadNoteLandingTests {
                     "the landing arrived at the centre — it is \(a) pt away")
             #expect(abs(b) <= Self.restTolerance,
                     "…and it is still there 1.5 s later — \(b) pt away")
+        }
+    }
+
+    /// **The same two promises on the REAL story** (`mountedOnTheStory`).
+    @Test func onTheRealStoryTheEditFaceLandsAColdFarBlockCentredAndItStays() async throws {
+        try await mountedOnTheStory(face: .edit) { world in
+            let (first, second) = await settledResidual(
+                world, frames: { ReadModeOracle.editBlockFrames }, anchor: 0.5)
+            print("[18l U1] the real story, edit face: distance from centre "
+                + "= \(String(describing: first)) then \(String(describing: second)) pt")
+            let a = try #require(first, "the landed block drew")
+            let b = try #require(second)
+            #expect(abs(a) <= Self.restTolerance, "arrived at the centre — \(a) pt away")
+            #expect(abs(b) <= Self.restTolerance, "…and stayed — \(b) pt away")
+        }
+    }
+
+    @Test func onTheRealStoryTheReadFaceLandsAColdFarBlockAtItsAnchorAndItStays() async throws {
+        try await mountedOnTheStory(face: .read) { world in
+            let (first, second) = await settledResidual(
+                world, frames: { ReadModeOracle.pageBlockFrames }, anchor: 0.08)
+            print("[18l U1] the real story, read face: distance from its anchor "
+                + "= \(String(describing: first)) then \(String(describing: second)) pt")
+            let a = try #require(first, "the landed block drew")
+            let b = try #require(second)
+            #expect(abs(a) <= Self.restTolerance, "arrived at the anchor — \(a) pt away")
+            #expect(abs(b) <= Self.restTolerance, "…and stayed — \(b) pt away")
         }
     }
 

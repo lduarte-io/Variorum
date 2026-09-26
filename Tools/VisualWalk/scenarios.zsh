@@ -446,6 +446,71 @@ scn_b5-refont() {
   vw_set_voice $here
 }
 
+# --- S11: note Read's deep landing arrives at its anchor and holds (18l U1 — the F3 shape on note Read) ---
+# The deep click is the contents column's own road: filter the column to ONE block by a word only that
+# block holds, click its row — the face lands it. The fixture's words are unique to their blocks in the
+# sample library's *A Scandal in Bohemia* (262 blocks; checked against `SherlockAdventures.txt`, whole
+# story, case-insensitive substring): 209 "substitution", 123 "inextricable", 245 "superscribed".
+# Each face's FIRST click is cold (its column freshly mounted in a fresh launch; nothing below the
+# first screen ever drawn); the rest are warm. Measured two ways: the probe's `rl` (the landed block
+# against its face's SHIPPED anchor — edit centred, read at 0.08) at +1.5 s (logged) and +6 s
+# (asserted), and the SHIPPING signpost her Console reads (`landing surface=ReadNote…` — the health
+# review §1.2's diagnostic: note Read used to emit NOTHING).
+vw_def read-landing "A Scandal in Bohemia ▸ Read, BOTH faces, deep clicks through the contents column's filter" \
+  "edit: 209 (cold) · 123 (a second, never-drawn region) · 209 (warm) · read: 245 (cold) · 123 · 245 (warm)" \
+  "each landed block rests at its face's anchor (±3 pt) 6 s after the click; each landing's signpost says end=settled" pass
+typeset -gA RL_WORD=(209 substitution 123 inextricable 245 superscribed)
+
+# The signpost her Console reads for the landing just made (the last `end=` line of the window).
+vw_read_signpost() {   # seconds-back
+  /usr/bin/log show --last ${1}s --style compact \
+    --predicate 'eventMessage CONTAINS "landing surface=ReadNote"' 2>/dev/null \
+    | grep -o 'landing surface=ReadNote.*end=[a-z]* top=-\{0,1\}[0-9]*' | tail -1
+}
+
+vw_read_deep_click() {   # face ordinal tag
+  local face=$1 ord=$2 tag=$3 word=${RL_WORD[$2]}
+  local lens; lens=($($VW_BIN/vis-ax $PID "⌕" AXStaticText)) \
+    || { vw_require false "the contents column's filter (its ⌕)"; return 1 }
+  vw_click $(( lens[1] + lens[3] + 40 )) $(( lens[2] + lens[4] / 2 )) "the column's filter field"
+  vw_keys "select the filter's text" 'keystroke "a" using command down'
+  vw_keys "type: $word" "keystroke \"$word\""
+  sleep 1.2
+  local row; row=($($VW_BIN/vis-ax $PID "$ord" AXStaticText)) \
+    || { vw_require false "the filtered column row $ord"; return 1 }
+  (( row[1] < WIN_X + 700 )) || { vw_require false "row $ord is the COLUMN's (x ${row[1]})"; return 1 }
+  local t0=$EPOCHSECONDS
+  vw_click $(( row[1] + row[3] + 60 )) $(( row[2] + row[4] / 2 )) "row $ord (block $ord, $tag)"
+  sleep 1.5
+  vw_probe rl; vw_cap $face-$ord-$tag-1s5
+  vw_log "  $face $ord ($tag) +1.5 s: rl=${PV[rl]} rlH=${PV[rlH]} rlVis=${PV[rlVis]}"
+  sleep 4.5
+  vw_probe rl; vw_cap $face-$ord-$tag-6s
+  vw_expect_near "$face ▸ block $ord ($tag): at its anchor 6 s after the click (pt)" "${PV[rl]}" 0 3
+  local sp; sp=$(vw_read_signpost $(( EPOCHSECONDS - t0 + 3 )))
+  vw_log "  signpost: ${sp:-none}"
+  vw_expect_eq "$face ▸ block $ord ($tag): the signpost [${sp:-none}]" "${${(M)sp:#*end=settled*}:+settled}" settled
+}
+
+scn_read-landing() {
+  vw_open_note "A Scandal in Bohemia"
+  vw_keys "⌘3 (Read)" 'keystroke "3" using command down'
+  vw_settle rl
+  vw_require '[[ ${PV[mode]} == Read ]]' "Read on A Scandal in Bohemia" || return
+  local face ord tag
+  for face in edit read; do
+    if [[ ${PV[face]} != $face ]]; then vw_ax_press $face AXButton; vw_settle rl; fi
+    vw_require '[[ ${PV[face]} == $face ]]' "Read ▸ $face" || return
+    sleep 2
+    local -a plan
+    [[ $face == edit ]] && plan=(209:cold 123:second 209:warm) || plan=(245:cold 123:second 245:warm)
+    local step
+    for step in $plan; do
+      vw_read_deep_click $face ${step%%:*} ${step#*:} || return
+    done
+  done
+}
+
 # --- SELF-TEST: the harness must be able to RED (run with --selftest) -----------------------------------
 vw_def selftest-red "whatever is on screen" "none (a quiet second)" \
   "a KNOWINGLY WRONG expectation: the window's top moved 40 pt — must FAIL, be captured, exit non-zero" fail

@@ -798,9 +798,17 @@ private struct ReadPageColumn: View {
     }
 }
 
+extension ReadModeView {
+    /// The `read` face's standing anchor, named where the host's other
+    /// callers can read it (the page column is file-private; 18l U1's DEBUG
+    /// landing probe measures a landing against it). The value is the page's
+    /// shipped one, unchanged.
+    static let pageRestingAnchor = UnitPoint(x: 0.5, y: 0.08)
+}
+
 extension ReadPageColumn {
     /// This page's own standing anchor: near the top, with a little air above.
-    static let restingAnchor = UnitPoint(x: 0.5, y: 0.08)
+    static let restingAnchor = ReadModeView.pageRestingAnchor
 
     /// The landing: the block's row identity (its placement id), unanimated,
     /// anchored near the top of the page — or, when a mode switch carried a

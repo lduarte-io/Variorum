@@ -98,7 +98,7 @@ enum VisualWalkProbe {
 
     /// `request` = "<id>[ flag …]"; flags: `measure` (the pane/inline full
     /// measure) · `last` (the last fragment's O(1) read) · `rt` (the read
-    /// tiers' text columns on screen).
+    /// tiers' text columns on screen) · `rl` (note Read's landing — 18l U1).
     static func answer(to request: String) -> String {
         let parts = request.split(separator: " ").map(String.init)
         let flags = Set(parts.dropFirst())
@@ -118,6 +118,9 @@ enum VisualWalkProbe {
         line["win"] = Self.format(Self.screen(window.frame))
         line["key"] = window.isKeyWindow ? "1" : "0"
         if flags.contains("rt") { readTierColumns(in: window, into: &line) }
+        if flags.contains("rl") {
+            readLanding(activePostID: session?()?.commandRouter.activePostID, into: &line)
+        }
         let responder = window.firstResponder
         guard let textView = responder as? NSTextView else {
             line["fr"] = responder == nil ? "none" : "other"
@@ -400,6 +403,39 @@ enum VisualWalkProbe {
         line["rtR"] = columns(ReadModeOracle.editBlockFrames
             .filter { $0.key != live }.values
             .map { toScreen(column($0), dx: offset.dx, dy: offset.dy) })
+    }
+
+    // MARK: - Where note Read's landing put its block (18l U1)
+
+    /// **`rl` — note Read's LANDING, measured the way the pins measure it**
+    /// (`ReadNoteLandingTests.residual`): the selected block's frame against
+    /// where its face's SHIPPED resting anchor puts it — the block's
+    /// anchor-point at the viewport's anchor-point (`ViewportCarry`'s
+    /// definition, which IS `scrollTo(_:anchor:)`'s). `rl=<pt>` (0 is home,
+    /// positive below it) · `undrawn` (the block never drew: the landing
+    /// missed it) · `none` (no Read host) · `nosel` / `noface`. Reads the
+    /// existing `ReadModeOracle` frames only — nothing laid out, nothing
+    /// registered. The anchor is the face's STANDING one, so a landing that
+    /// carried a mode switch's fraction is not what this measures, and a
+    /// block within one anchor's reach of the note's ends is clamped by the
+    /// page's own edges — the trials this serves land deep blocks.
+    private static func readLanding(activePostID: String?, into line: inout Line) {
+        guard let face = ReadModeOracle.face else { line["rl"] = "none"; return }
+        guard let selected = ReadModeOracle.selectedBlockID else { line["rl"] = "nosel"; return }
+        line["rlSel"] = String(selected.prefix(8))
+        let faces = ReadModeOracle.faceFrames
+        guard let viewport = activePostID.flatMap({ faces[$0] })
+                ?? (faces.count == 1 ? faces.values.first : nil)
+        else { line["rl"] = "noface"; return }
+        let frames = face == .edit ? ReadModeOracle.editBlockFrames : ReadModeOracle.pageBlockFrames
+        guard let block = frames[selected] else { line["rl"] = "undrawn"; return }
+        let anchor = face == .edit ? ReadEditPane.restingAnchor.y : ReadModeView.pageRestingAnchor.y
+        let rest = viewport.minY + CGFloat(ViewportCarry.topInset(
+            fraction: Double(anchor), blockHeight: Double(block.height),
+            viewportHeight: Double(viewport.height)))
+        line["rl"] = num(block.minY - rest)
+        line["rlH"] = num(block.height)
+        line["rlVis"] = block.maxY > viewport.minY && block.minY < viewport.maxY ? "1" : "0"
     }
 
     private static func scrollViews(in view: NSView?) -> [NSScrollView] {
