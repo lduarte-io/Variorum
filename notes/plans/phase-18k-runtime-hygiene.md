@@ -4059,7 +4059,16 @@ worktree. Final message: a short summary pointing at your record.
 
 ## UNIT C8 RECORD — the test-isolation leak 18k introduced (implementer: `opus-implementer`, 2026-09-25)
 
-**NOT DONE (first line, per the brief):** PENDING — written at the unit's close.
+**NOT DONE (first line, per the brief):** (1) **The ONE full Mac suite on the final tree was NOT RUN** — held
+for a zero-instance window: from 21:15 her real-store app was live (`/Applications/Variorum.app`, pid 35345,
+never touched) and she was at the machine (input idle 0 s at 21:49); a 15-minute suite puts the Debug host's
+windows in front of her and can take her keystrokes, and its timing-sensitive members want the zero-instance
+window the finals used. **So the unit does not close here**: the full run is owed (the command and what it
+should read are under CLOSING RUNS). (2) **The seed-21 soak red was NOT reproduced and NOT traced** — 22 soak
+executions outside the full run, all green (THE SOAK); no leaker exists to fix on the evidence. (3) No GUI
+walk or captures: a test-isolation unit with zero product change (the evidence of its kind is the runs). (4)
+No KnownIssues / QUESTIONS / canon edit — no product call arose; the harness class is handed to the
+orchestrator under NOTICED.
 
 ### LIVE STATUS
 
@@ -4143,4 +4152,83 @@ settle, one step after focus moves) is a realization-timing race, not a leaked v
 full run below, which is this unit's only remaining evidence on it. If the full run reads it red again, it
 is adjudicated there, not assumed.
 
+### DISPOSITION
+
+| Red | Verdict | Leaker · leaked state | Evidence |
+|---|---|---|---|
+| `MacIdentityAuditWiringTests.appKitWidensAnInsertionsReportedRangeToTheParagraph` (`{2,1}` for `{2,5}`, full runs 1 and 2) | **FIXED — in the LEAKER** | C1's `AutosaveRegistryReleaseGuardTests`, its two open-tail pins (T1, T2), through the file's `MountedEditor`: the dropped editor's TK2 stack outlives the test and keeps a typed run stamped with the shared `.incrementing` block id alive; AppKit's attribute uniquing hands its dictionaries to every later harness world's first block | pair RED 3/3 pre-fix → GREEN 3/3; R-C8 RED (identical) → GREEN; E1 |
+| `TakesBoardSoakTests.randomizedBoardSoakHoldsEveryInvariant(seed: 21)` (`count 4 ≠ fanCount 5`, full run 2 only) | **NOT REPRODUCED — no leaker found** (22 executions, 0 reds; the widening leaker ruled out) | none on the evidence; read as a realization-timing race, marked as reading | THE SOAK; the held full run is the remaining evidence |
+
+**The victim is not changed** — it asserts AppKit's behaviour on a fresh storage, which is exactly the state a
+suite that owns its own storage should be able to rely on; the process-global state it met was put there by
+another suite, and that suite now puts it back. **Product behaviour is not implicated:** the app sets no global
+here; the report's width does not reach block identity (13l's clamp stamps the VERDICT's range, TEXTKIT2 §3);
+and the long-lived autorelease pool is the test runner's context, not the app's run loop.
+
+### FILES THIS DIFF TOUCHES (for the cold reviewer — read this first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `App/Variorum/VariorumTests/AutosaveRegistryLifecycleTests.swift` | the file-private `MountedEditor` helper gains an `isolated deinit` (27 lines, 3 of code): `textView.delegate = nil`, `textView.textStorage?.delegate = nil`, `textView.textStorage?.setAttributedString(NSAttributedString())`, with the mechanism in its doc comment | every test body, every assertion, `withRegistryWorld`, `type(_:)`, the init's wiring |
+| `notes/plans/phase-18k-runtime-hygiene.md` | this record | the brief and every other unit's record (the only removed line in the file is the orchestrator's own LIVE STATUS flip) |
+
+**Zero `Sources/`, zero app code (`App/Variorum/Variorum/`), zero `Shared/`, zero `Sync/`, zero `Server/`.** The
+scratch instruments (`ZZC8ScratchProbe.swift`, `C8ScratchLeakers.swift` — the probe, the one-test copies, the
+E1–E9 experiments) were never committed and live only in the session scratchpad; the product and test files
+they read are byte-identical to HEAD.
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **The fix lives in the helper's `deinit`, not in T1/T2's bodies.** Both leaking pins drop a `MountedEditor`,
+   and so will any future pin in this file; the deinit runs at exactly the test's own `surface = nil`, on the
+   main actor, so no test body changes and no future user can forget it. *Reverse by* an explicit
+   `surface?.close()` before each `surface = nil`.
+2. **Empty the storage rather than change the world's ids.** Giving this suite a UUID base that no other world
+   mints would also stop the collision, but it hides the leak rather than putting the state back, and any other
+   content-equal survivor would still couple suites. *Reverse by* a non-`.incrementing` uuid generator in
+   `withRegistryWorld`.
+3. **Delegates detached before the empty-out.** `teardown()` leaves the model's text view attached, so an
+   empty-out through a live delegate would reach the torn-down model as an edit (an autosave, a selection
+   memory). The detaches are the fix's safety; R-C8 shows the empty-out alone is its effect.
+4. **The soak is recorded, not fixed.** With no reproduction there is no mechanism to trace and no pin to make
+   red; fixing something would be the hollow-row failure mode the pin-before-fix rule exists to stop.
+
+### CLOSING RUNS
+
+| Run | Result |
+|---|---|
+| The reproducing pair (`-only-testing:VariorumTests/AutosaveRegistryReleaseGuardTests -only-testing:VariorumTests/MacIdentityAuditWiringTests`), final tree | **✔ 12 tests / 2 suites, ×3** (plus R-C8's restored run) |
+| The leaker's file (the three suites in `AutosaveRegistryLifecycleTests.swift` + `AutosaveRegistryReleaseTests`) | **✔ 22 tests / 3 suites** |
+| **THE FULL MAC SUITE — OWED (held, NOT DONE line (1))** | at a zero-instance window, from `App/Variorum/`: `xcodebuild test -scheme Variorum -destination 'platform=macOS'`. **Expected:** `Test run with 3168 tests in 522 suites` (the finals' count; C8 adds no test) and **no `appKitWidensAnInsertionsReportedRangeToTheParagraph` red**. A seed-21 soak red there is adjudicated at that run (THE SOAK), not assumed; any other red is a finding |
+
+### NOTICED, NOT TOUCHED (C8's scope fence)
+
+1. **The class, for the harness family (owner 12 is the natural home — the orchestrator's to file):** in this
+   test process a dropped TK2 editor can outlive its test for the rest of the run (a main-thread autorelease
+   pool the runner keeps open under async bodies), and every hosted world mints the SAME `.incrementing` ids —
+   so a dropped storage carrying a stamped run is content-equal to the next world's, and AppKit's attribute
+   uniquing couples them through object identity. C8 closed the one instance 18k introduced. Any other helper
+   that drops a typed-and-stamped editor can repeat it; a sweep was not in this brief.
+2. **Measured TK2/AppKit facts** (for `TEXTKIT2_NOTES.md` at the closeout, beside C2/C6/C6b's, if the
+   orchestrator wants them): AppKit's paragraph fixing on insertion WIDENS the reported edited range only when
+   the inserted run's paragraph-style OBJECT differs from the paragraph's governing one (equal values do not
+   prevent it) — and which object a run carries is decided by process-wide attribute-dictionary uniquing, so the
+   13l widening pin measures object identity, not only AppKit's rule. A bare TK2 `NSTextView` dropped in a test
+   body is freed within 2 s; an explicit `autoreleasepool` frees it within 0.5 s.
+3. The finals' base-tree side effect (the pre-C7 backup tick against the dev store) was not repeated: this
+   unit built no old tree.
+
+### CAPTURES
+
+None (NOT DONE (3)). Logs in `App/Variorum/DerivedData/` (gitignored): the bisection `18k-c8-w-{all,A,B,A1,A2,
+A1a,A1b}.log` and the per-suite pairs `18k-c8-w-Autosave*.log`; the one-test pairs `18k-c8-leakT{1..7}.log`;
+the process-boundary test `18k-c8-{victim-alone1,guard-alone1,victim-alone2}.log`; the probes
+`18k-c8-probe-{clean,afterguard}.log`, `18k-c8-probe2-{clean,T1}.log`, `18k-c8-E7.log`; the experiments
+`18k-c8-{E1,E2,E3,E3b,E3c,E8,E9,E9b}.log` and `18k-c8-C8E{4,5,6}*.log`; the soak runs
+`18k-c8-soak-{alone-x10,load-x6,guard-r1..3,touched-r1..2}.log`; the proof `18k-c8-pair-{prefix,fixed}-r{1,2,3}.log`,
+`18k-c8-R-C8{,-restored}.log`, `18k-c8-file-fixed.log`; the builds `18k-c8-bft*.log`. Session scratchpad
+(`…/scratchpad/c8/`): the run-order tables, the `leaks --traceTree` outputs `E9-*-tree.txt`, the scratch
+suites, the Debug-domain snapshots.
+
 - Deaths / resumes: none.
+- **C8 — the leaker FIXED and proven; the full Mac suite HELD for a zero-instance window (owed); awaiting the orchestrator.**
