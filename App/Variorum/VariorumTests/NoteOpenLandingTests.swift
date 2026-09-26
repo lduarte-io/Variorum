@@ -438,6 +438,39 @@ struct NoteOpenLandingTests {
         }
     }
 
+    /// A page left resting in the TYPEWRITER ROOM below the last line has no
+    /// reading line (`topVisibleOffset` answers nil there), so a teardown there
+    /// kept no anchor and the re-open fell back to the note's TOP. The place is
+    /// now the last line with its negative inset, and the page comes back at
+    /// the note's END. Measured: the settled page rested 137 pt below the last
+    /// line's top, and at the re-open's settle hop the room's maximum scroll is
+    /// the last line's top — so the restore lands the last line at the viewport
+    /// top (the jump's live clamp, C6b), the end she left, never the start. Red
+    /// with the room's place thrown away (R-room): the page at 0.
+    @Test func aReopenOfANoteLeftRestingBelowItsLastLineComesBackThere() async throws {
+        try await withWorld(rng: 11) { w in
+            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
+            let window = newWindow()
+            defer { window.orderOut(nil); window.close() }
+            let hosting = open(w, in: window)
+            let first = try await writeArrived(w, window, hosting)
+            let scroll = try #require(first.enclosingScrollView)
+            let lastLine = try #require(JumpPrimitive.lineSpan(ofOffset: w.index.documentLength, in: first))
+            let left = lastLine.bottom + 120  // below the last line, in the room
+            scroll.contentView.scroll(to: NSPoint(x: 0, y: left))
+            scroll.reflectScrolledClipView(scroll.contentView)
+            _ = await Self.settle(window, hosting, timeout: 0.5) { false }
+            #expect(abs(try clipY(first) - left) <= 0.5, "she rests in the room at \(left)")
+            await leave(window)
+            let again = try await writeArrived(w, window, open(w, in: window))
+            let clip = try clipY(again)
+            print("[U0c reopen in the room] left \(left) · back \(clip)")
+            #expect(clip >= lastLine.top - 1,
+                    "the page comes back at the note's END — the room she left, or its last line at the top (red with R-room: the start, \(clip))")
+            await leave(window)
+        }
+    }
+
     /// The re-open's rule is the OPENING's only: a mode round trip after it is
     /// the standing machinery again — the RAISE-M1 anchor, then #98(a)'s reveal
     /// of a caret off the restored view. GUARD (green on both sides): the

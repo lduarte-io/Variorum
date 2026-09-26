@@ -1068,8 +1068,8 @@ IN PROGRESS; nothing below is verified unless it carries a hash or a log.
 | 2 | Trace the opening-viewport decision per mode | DONE — THE TRACE below (the per-mode opening map) |
 | 3 | Reproduce her two shapes (+ what the trace predicts) | DONE — in the app on the pre-fix build (`DerivedData/18l-u0c-prefix`, HEAD `ac52081d` = product code `985371b2`), Terminal: END (Write `pre-a6`, Takes `pre-c2`), MIDDLE (`pre-b4`), the in-session END after scrolling to the top (`pre-a10`); and in the harness (the scratch probe — below) |
 | 4 | The END-jump: find the tail writer (or disprove it) — attribution + red-on-old pin | TRACED — the non-click-writer hypothesis is DISPROVED for the single-window app (below); what derives the tail landing is the note-open landing over a caret she left there. The red-on-old pins are the rule's own (piece 6) — PENDING |
-| 5 | Build R-18l-1 (first-open set; re-open restore by the standing machinery + the place) | DONE (this commit) — THE BUILD below; `NoteOpenLandingTests` **10/10 GREEN** on the fixed tree (`App/Variorum/DerivedData/18l-u0c-pin-fixed1.log`); behavioural reverts + the ruled pins' runs PENDING |
-| 6 | Pins (end-jump red-on-old; first-open / re-open / deep-link per mode; R-Q20/R-Q21 + RAISE-M1 ride unmodified) | IN-PROGRESS — `NoteOpenLandingTests` (10 tests) committed RED on the pre-fix tree (this commit; `App/Variorum/DerivedData/18l-u0c-pin-prefix1.log`): **8 red / 18 issues**, the 2 guards green — the router's first open restores the earlier run's fact (block 5 @12) and a re-open restores it too; Write's first open: clip **2904.0** (the ⏎ shape — caret 8691/8691), **2880.0** (the last line's end), **1588.0** (the middle); Takes: article clip **1866.0**, the empty last block's pane live; Read: the last block selected, scrolls **[1149, 3819]**; re-open at the top: **24.0**; re-open after scrolling away from a tail caret: **2904.0**; re-open mid-note: left 1391.0 → back **24.0**; the mode-round-trip-after-re-open guard and the deep-link guard green |
+| 5 | Build R-18l-1 (first-open set; re-open restore by the standing machinery + the place) | DONE (`5d7c8bb6`) — THE BUILD below; `NoteOpenLandingTests` **11/11 GREEN** on the fixed tree (`App/Variorum/DerivedData/18l-u0c-pin-fixed3.log`); the three behavioural reverts RED in their named shapes (below); the ruled pins' first run green (`18l-u0c-neighbors1.log`, 97 tests / 10 suites: TakesArticleScrollTests (R-Q20/R-Q21), LandingOffsetTests (RAISE-M1), CurrentBlockContinuityTests, ModeSwitchCarryTests, ScrollAnchorTests, WriteTopAirTests, ReadModeTests, CommandRouterTests, TakesLandingTests + the new suite — every one byte-unmodified) |
+| 6 | Pins (end-jump red-on-old; first-open / re-open / deep-link per mode; R-Q20/R-Q21 + RAISE-M1 ride unmodified) | DONE — 11 tests (the room pin added at `this commit`); the A/B sections re-shaped at `5d7c8bb6` to the ruled letter (the caret SURVIVES; the viewport opens at the start) — their viewport arms are the red-on-old cores, re-proved by R-open; the two router pins are state-transition pins of the new bookkeeping (new API). The pre-fix run: `NoteOpenLandingTests` (10 tests) committed RED on the pre-fix tree (this commit; `App/Variorum/DerivedData/18l-u0c-pin-prefix1.log`): **8 red / 18 issues**, the 2 guards green — the router's first open restores the earlier run's fact (block 5 @12) and a re-open restores it too; Write's first open: clip **2904.0** (the ⏎ shape — caret 8691/8691), **2880.0** (the last line's end), **1588.0** (the middle); Takes: article clip **1866.0**, the empty last block's pane live; Read: the last block selected, scrolls **[1149, 3819]**; re-open at the top: **24.0**; re-open after scrolling away from a tail caret: **2904.0**; re-open mid-note: left 1391.0 → back **24.0**; the mode-round-trip-after-re-open guard and the deep-link guard green |
 | 7 | Walk (both voices; her shapes; first-open vs re-open per door; a deep link) | NOT-STARTED |
 | 8 | Closing runs (touched suites + the eleven Tutorial suites) | NOT-STARTED |
 | 9 | Self-assessment | NOT-STARTED |
@@ -1196,3 +1196,21 @@ ride unmodified; an offset lands at inset 0 — exactly as before).
   false` — the old offset anchor). Expected RED: the re-open at the top (24.0) and mid-note (the
   line snapped, ~7 pt); everything else GREEN.
 Each is a working-tree edit only, then `git checkout HEAD --` the file and `git status` clean.
+
+**THE REVERTS, RUN (each restored with `git checkout HEAD --`, `git status` clean):**
+- **R-open** (`18l-u0c-R-open.log`): **RED — 7 tests / 8 issues, exactly the predicted shapes**:
+  Write's three first opens at clip **2904.0 / 2880.0 / 1588.0** (the pre-fix numbers, identical),
+  Takes **1866.0**, Read **[1149, 3819]**, the re-open after scrolling away **2904.0**, the
+  re-open mid-note **1391 → 24.0**, and the first router pin's `openingLanding` arm; GREEN: the
+  re-open at the top (the place alone keeps it — as predicted), both guards, and the second router
+  pin (it asserts the opening's record, not its landing — my prediction listed it; it has no
+  `openingLanding` arm).
+- **R-place** (`18l-u0c-R-place.log`): **RED — 3 tests / 3 issues**: the re-open at the top
+  **24.0**, mid-note **1391 → 1384 (7.0)** as predicted, and — beyond the prediction, the same
+  mechanism — the scrolled-away re-open's page lands at **24.0** (its page was the top: the air
+  eaten). Everything else green.
+- **R-room** (`18l-u0c-R-room.log`, the room's place dropped from `teardown`): the new
+  `aReopenOfANoteLeftRestingBelowItsLastLineComesBackThere` **RED — back 0.0** (the note's top)
+  where the fixed tree comes back at **2880.0** (the last line at the viewport top; she left the
+  page at 3017.0, and at the re-open's settle hop the room's maximum scroll is the last line's top —
+  the jump's live clamp; the pin asserts the END, never the start, and says why).
