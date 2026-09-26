@@ -368,22 +368,240 @@ editor-seam by definition → a FABLE cold review follows; your self-assessment 
 
 ## U0 RECORD (implementer: `opus-implementer`, 2026-09-26)
 
-**NOT DONE (first line, kept current):** everything below marked NOT-STARTED / IN-PROGRESS / PENDING.
-U0b and U0c are NOT this session's (findings for them are recorded, never built).
+**NOT DONE (first line):** (1) no whole-old-tree harness bisect — every Mac test run launches the
+tree's own app as the test host, which opens the DEV STORE at launch (18k C7's trap; an old build must
+never open it), so attribution rests on LINE HISTORY plus red pins and behavioural reverts on today's
+tree (C6b's stated constraint, the same); (2) U0b and U0c were NOT investigated (not this session's);
+(3) no KnownIssues / TEXTKIT2_NOTES / canon edits — every row close and the measured TK2 fact are
+handed to the orchestrator below; (4) the book Index LANDING's caret (sweep S4) and the tiers'
+vertical-metric mismatch (S3) are OWNED elsewhere, not fixed; (5) the U3 rider (`PaneSurface`'s render
+restore under 27's `layoutViewport()` displacement) was NOT examined — U0 does not touch `PaneSurface`;
+(6) row 85 (O-2) not taken — U0 does not touch the ring's refresh. Closing runs: see LIVE STATUS 8.
 
 ### LIVE STATUS
 
 | # | Piece | Status |
 |---|---|---|
-| 1 | Reading (the brief's list, in order, in this session's own context) | DONE — this file whole; the charter's KICKOFF 2 (U0 in full + the rest for context); KnownIssues rows 85/86/87/89/90; `notes/TEXTKIT2_NOTES.md` whole; 18k UNIT C2 brief+record+adjudication, UNIT C6 brief+record+adjudication, UNIT C6b brief+record+adjudication, the held-walk C6 rows; the three captures in `notes/plans/18l-inputs/`; `BookIndexView.swift`, `BookIndexEditModel.swift`, `Surface/PaneSurface.swift`, `EditorView.swift` (`InlineEditorSurface`) end to end; `Tools/WalkKit/README.md` |
-| 2 | Item 1 — the Index click: REPRODUCE | **DONE — REPRODUCED BY HARNESS** (GUI paused, the incident below): `IndexClickCaretTests` (real clicks through `NSApp.sendEvent`, the canvas rig's window) on her note's shape (every block but the last ends in `\n`) — the book Index parks EVERY click at the block's END (366 of 366: the EMPTY line under the text, whichever line was clicked; the last block's END = its last line); the note's Read ▸ edit parks every click at the block's START (line 0). 9 issues, `DerivedData/18l-u0-pin1-prefix2.log`. The charter's first suspect (a vertically offset hit-test / the 13c 1A inset class) is RULED OUT by measurement: a y-scan of clicks across the block seam switches block 1 → none (the 8-pt spacing) → block 2 exactly at the frames' edges (`18l-u0-probe2.log`) — **and REPRODUCED IN THE APP** once the author left the machine (her go-ahead, orchestrator `eee99b8f`): the pre-fix walk build (`4dfd84eb`), Study, Sherlock ▸ Index, a click on the line *"mind. He was, I take it…"* of *A Scandal in Bohemia*'s first paragraph → the caret on the EMPTY LINE under the paragraph, her report exactly (`18l-screens/u0/repro/item1-prefix-study-click.png`). The same capture shows the swap's reflow (sweep S3) |
-| 3 | Item 1 — trace + bisect by harness | **DONE — TRACED; ATTRIBUTION: pre-existing** (details in ITEM 1 below). The road: the read tier is SwiftUI `Text` + a bare `.onTapGesture` (knows the block, never the point) → `makeLive` → a freshly mounted `PaneSurfaceView` whose `caretOnGoingLive` is `.leave` (book Index) / the note's entry rule `.start` (Read ▸ edit) — so the caret goes where `string =` left it (the END: the empty line under a trailing `\n`) or to line 0. Line history (`git log -L`): the tap handler is `c768c08e` (2026-09-01, the Index edits in place), the `.leave`/`.start` landing branch `a0aade08`/`3ded9683`/`41a75000` (17o batch b, 2026-09-07) — BOTH before the 13u2…18k window; inside the window `blockView` changed only at `7d44eda6` (13u2 B, tier paddings) and `9fe6ae5d` (18k C4, oracle owners), neither on the road. A whole-old-tree harness run is NOT possible here: every Mac test run launches the tree's own app as the test host, which opens the DEV STORE at launch (18k C7's trap) — an old build must never open it — so the bisect is the line history plus the red pin on HEAD (C6b's constraint, stated) |
-| 4 | Item 1 — red-on-old pin, fix, behavioural revert | **DONE** — pin RED on the pre-fix tree (`51824a08`, 9 issues); core support `83f6f317`; THE FIX `7553dd93` (`Surface/ReadTierClickPlace.swift` + `ReadTierClickTarget` on both read tiers; the book Index hands the pane `.offset`, landings keep `.leave`; Read ▸ edit lets the click outrank the entry rule). Pins GREEN both voices (`18l-u0-pin3-fixed.log`). **R-U0-1 RED — 26 issues** (`18l-u0-R1.log`: both hosts `clickOffset: nil` → the book Index at END, the empty line in both voices, 339–345 chars from the pointer; Read ▸ edit at START, line 0, 21–28 chars off on the first line) → restored from `7553dd93` (`git status` clean) → GREEN (`18l-u0-R1-restored.log`). Walk PENDING (row 7) |
-| 5 | Item 2 — the clipped descenders: reproduce, trace, pin, fix, revert | **DONE** — **TRACED + PINNED RED** (details in ITEM 2 below): the Outline's live note (`InlineEditorSurface`) re-measured only on a storage edit or a SwiftUI update pass; a WIDTH change re-wraps the text with neither, and the update pass a resize runs saw an INTERMEDIATE width (traced: `updateNSView` at 902 pt, the final 629 pt applied in layout after it) — so the frame kept the old wrap's height and the longer wrap was cut through. `InlineEditorWidthReflowTests` RED on the pre-fix tree, both voices (`18l-u0-pin4-prefix.log`: a 820→700 narrowing left the frame 51 pt SHORT in Terminal, 66 pt in Study — three lines each, her capture's magnitude). The same strand measured on the PRE-C2 road (`EditorView.swift`'s road reverted in the working tree: identical 17-pt short at 1200→820) — C2 changed when a report is made, never what triggers one. The brief's named suspect (TK2's first-measure variance) did not show in any non-width event (focus, typing, a voice switch — frame == text at +3 and +30 turns, both voices). **THE FIX (this commit):** `InlineEditorSurface.Coordinator.install` composes the height onto the text view's own width door (`onWidthReflow`, fired from `setFrameSize` after the prose column is placed): the model's overlay handler first, then the one coalescing hop — pins GREEN both voices (`18l-u0-pin4-fixed.log`). **R-U0-2 RED — 2 issues, identical to the pre-fix tree** (`18l-u0-R2.log`: 248 over 299 pt Terminal, 290 over 356 pt Study) → restored from `0d9ac91d` (`git status` clean) → GREEN (`18l-u0-R2-restored.log`). Walk PENDING (row 7) · **REPRODUCED IN THE APP on the pre-fix build:** Study, Sherlock ▸ Outline, *About this book* live, the window narrowed 1440 → 1180 → 1000 → 900 pt: at 900 the last paragraph's FOURTH line is cut through its middle and the rest is not drawn, the editing ring (drawn at the text's real extent) hanging below the visible text — her capture's shape (`18l-screens/u0/repro/item2-prefix-study-narrow3.png`; 1180 and 1000 converged — the strand is order-dependent, as traced) · **PIN STRENGTHENED (this commit) to both directions:** a fifteen-width walk per voice; the same behavioural revert (R-U0-2b) RED — 6 issues, 4 SHORT (−51 … −102 pt Terminal, −66/−88 Study) AND 2 TALL (+51 Terminal, +66 Study) (`18l-u0-R2b.log`) → restored → GREEN (`18l-u0-pin5-fixed.log`). **The TALL direction is KnownIssues row 75's shape** (C2's ~85-pt gap after a narrow → restore, attributed there to TK2's measure variance): on this rig it is the SAME missing width trigger, and the fix closes it (30 of 30 steps exact on the fixed road, both voices). Row 75's close is the orchestrator's (a KnownIssues edit) · **ITEM 2's SECOND MECHANISM — the brief's named suspect, now TRACED (this commit: its pin, RED):** an instrumented dev-store build (scratch, never committed) logged the live 212-block story after a 1000→1440 resize: the width hop reported **22,884 pt** (TextKit's first full measure at the new width) where the laid-out end settled at **23,082 pt** once a scroll laid it out — and NOTHING re-reported: the frame 198 pt short (the tail cut — her capture's shape), and after widenings frames TALLER than the text (the blank page above the column's footer seen 5 of ~9 times on the width-hop build — KnownIssues row 75's shape at its extreme). Pin `InlineHeightReportTests.aReflowsLateSettleIsReportedToo` (the bare inline rig, three reflows): RED on this tree — **631 pt SHORT at 420, 229 pt TALL at 700, 126 pt at 520** (`18l-u0-pin6-prefix-final.log`). The same run shows C2's `anUpdatePassReportsOnTheTurnAfterItNeverInsideIt` red on its NEW last-report arm (631 pt) — that pin's count arm is adapted (next commit, recorded). **A HARNESS FACT found on the way (sweep S7):** C2's two inline pins go RED when the DEV STORE's voice is Study — the test host adopts the dev store's typography at launch (my walk had left it Study; restored to Terminal, they pass 4/4) · **THE SETTLE NET (this commit):** `InlineEditorSurface.Coordinator` composes onto the text view's display-pass door (`onLayoutSettle` ← `viewWillDraw`, the model's overlay refresh first): an O(1) read of the LAST layout fragment's bottom; when it has moved since the last look and differs from the last report, the one report hop runs (edge-triggered; bounded 8 per occasion — re-armed by a width change, the mount, a storage edit). Inline suites GREEN: `InlineHeightReportTests` 5/5 (the settle reports land: 18,713 → 19,344 · 11,168 → 10,929 · 14,844 → 14,718), `InlineEditorWidthReflowTests`, `InlineEditorWindowTests` — 9/3 (`18l-u0-settle-fixed.log`). **R-U0-3 RED — 4 issues, identical to the pre-net tree** (631 / 229 / 126 + the update-pass last-report arm, `18l-u0-R3.log`) → restored from `8b86232a` (clean) → GREEN (`18l-u0-R3-restored.log`). The app re-walk of the blank-end experiment on a build with the net: PENDING (row 7) |
-| 6 | Item 3 — the regression sweep (table) | NOT-STARTED |
-| 7 | Walk (both voices) + captures | IN-PROGRESS — the fixed build (`5004003c`, product `0d9ac91d`), dev store, per-step guard. **Item 1 PASS, both voices** (Sherlock ▸ Index): Study — a mid-paragraph line of *A Scandal in Bohemia* (`walk/s-index-click-midline.png`: the caret at "I take it, t|he", the character under the pointer), the next block's first line (`s-index-click-firstline-next.png`), a block's LAST line directly above its empty separator (`s-index-click-lastline-above-separator.png`: "twel|ve", never the blank); Terminal — the same three shapes (`t-index-click-midline.png` "abhorrent |to", `t-index-click-next-firstline.png`, `t-index-click-lastline-above-separator.png` "questionabl|e"). **Item 2 PASS, both voices, on the short note** (*About this book* live in Outline, the window narrowed 1440→1180→1000→900→820 in Terminal and in Study, and a replay of the pre-fix repro's exact sequence: the whole text drawn at every step, "tagged"'s descenders whole — `t-outline-about-live-w*.png`, `s-outline-about-live-w1180.png`, `rep2/`, `rep2/far2-*`). **ONE residual observed once, not reproduced** (sweep S6 below): after a live voice switch plus narrowing and a far scroll, Study at 900 showed the last line cut once (`s-outline-about-live-w900-scrolledup.png`); a 2-pt width nudge re-measured it whole; the identical sequence replayed twice drew whole. The long-note row and the note Read ▸ edit row PENDING — **GUI driving stopped again at ~03:50 local: HID input resumed and Ghostty came frontmost (someone at the machine); harness-only until author-free** |
-| 8 | Closing runs (touched suites + TutorialWalkTests) | NOT-STARTED |
-| 9 | Self-assessment | NOT-STARTED |
+| 1 | Reading (the brief's list, in order, own context) | DONE — this file whole; the charter's KICKOFF 2; KnownIssues rows 85/86/87/89/90 (+75, found relevant); `TEXTKIT2_NOTES.md` whole; 18k C2 / C6 / C6b briefs + records + adjudications + the held-walk C6 rows; the three captures; `BookIndexView.swift`, `BookIndexEditModel.swift`, `Surface/PaneSurface.swift`, `EditorView.swift` (`InlineEditorSurface`) end to end; `ReadEditPane.swift`, `BlockTOCView.swift` (the caret-landing half), `StableSurface.swift`, `Tools/WalkKit/README.md` |
+| 2 | Item 1 — reproduce | DONE — harness (`51824a08`, 9 issues) and in the app on the pre-fix build (ITEM 1) |
+| 3 | Item 1 — trace + attribution | DONE — pre-existing (ITEM 1) |
+| 4 | Item 1 — pin, fix, revert | DONE — pin `51824a08` · core `83f6f317` · fix `7553dd93` · R-U0-1 RED 26 → green (`653877ce`) |
+| 5 | Item 2 — reproduce, trace, pin, fix, revert (TWO mechanisms) | DONE — (a) the missing width trigger: pin `54fb5d47` (+ both directions `f46ceac8`), fix `0d9ac91d`, R-U0-2 / R-U0-2b RED → green; (b) the unsettled first measure (the brief's named suspect): pin `08aa8d0c`, fix `8b86232a` (the settle net), R-U0-3 RED → green (`17e07015`) |
+| 6 | Item 3 — the regression sweep | DONE — THE SWEEP below (with ATTRIBUTION per finding) |
+| 7 | Walk (both voices) + captures | DONE — PASS on the final product code (THE WALK below); captures `notes/plans/18l-screens/u0/` (gitignored) |
+| 8 | Closing runs | PENDING (the touched Mac suites + the eleven Tutorial suites, core `swift test`, iOS build — `Shared/` and `Sources/` are touched) |
+| 9 | Self-assessment | DONE (below) — final line PENDING the closing runs |
 
 - Deaths / resumes: none.
-- **INCIDENT (machinery honesty, ~01:37 local):** a walk double-click (`cliclick c:318,226`, meant for the dev window's `index` tab) fired while the author was at the machine; her `/Applications` window covered that point and my dev window had left the current Space, so the click MAY have landed in her real-store window (worst case a mode/tab switch). Reported to the orchestrator at once; she was told. GUI driving stopped; harness-only until the machine is author-free; the per-step rule is ENVIRONMENT TRAPS' hardened entry (`615b833a`).
+- **INCIDENT (machinery honesty, ~01:37 local):** a walk double-click (`cliclick c:318,226`, meant for the
+  dev window's `index` tab) fired while the author was at the machine; her `/Applications` window covered
+  that point and my dev window had left the current Space, so the click MAY have landed in her real-store
+  window (worst case a mode/tab switch). Reported to the orchestrator at once; she was told. GUI driving
+  stopped until her go-ahead (`eee99b8f`), then resumed under the hardened per-step rule (`615b833a`),
+  mechanized as `guard.sh` (her app absent · HID idle ≥ 2 s · the dev pid frontmost · the dev window on
+  this Space with the click point inside it) — which fired once more (~03:50, HID input: someone at the
+  machine) and stopped the walk until the orchestrator's R-18l-4 all-clear.
+
+### ITEM 1 — the click REFUSES the text (KnownIssues row 86)
+
+**The mechanism (traced at the code, then measured).** The two index-like surfaces — the book Index
+and the note's Read ▸ edit — draw each block at rest as read-cheap SwiftUI `Text`
+(`FlowParagraph`, markers hidden) and upgrade the clicked one to THE live pane (P-3). The upgrade was a
+bare `.onTapGesture { … makeLive(…) }`: it knew WHICH block, never WHERE. The freshly mounted
+`PaneSurfaceView` then placed its caret by its host's rule: the book Index passed no
+`caretOnGoingLive`, i.e. `.leave` — the selection `string =` leaves, the END of the take — and in her
+notes the END is the EMPTY LINE under the text, because the sample library keeps the blank line between
+paragraphs as content (211 of 212 blocks end in `\n`); Read ▸ edit passed the note's entry rule
+(`PaneCaretLanding.entering` → `.start`, or the remembered offset on the current block). A click whose
+place never reaches the pane is exactly her *"refusal of clicking into the text"*; the second click
+worked because by then the pane was a real text view. `PaneCaretLanding`'s own doc says *"a click
+always keeps the place the click brought"* — true of TK2 read panes, unreachable from a `Text`.
+**The charter's first suspect is RULED OUT by measurement:** a y-scan of real clicks across the block
+seam switched block 1 → none (the 8-pt gap) → block 2 exactly at the frames' edges — no vertical
+offset in the hit-test (`18l-u0-probe2.log`). (One rig fact on the way, recorded in the pin: SwiftUI's
+`.global` frame is the WINDOW's y-down space, titlebar included.)
+
+**Reproduced:** the pin RED (`51824a08`, 9 issues: the Index at 366 of 366 — the empty line, whichever
+line was clicked; Read ▸ edit at line 0); in the app on the pre-fix build, Study, Sherlock ▸ Index, a
+click on *"mind. He was, I take it…"* → the caret on the empty line under the paragraph
+(`18l-screens/u0/repro/item1-prefix-study-click.png`).
+
+**ATTRIBUTION: pre-existing.** Line history (`git log -L`): the tap road is `c768c08e` (2026-09-01,
+the Index edits in place — its first form), the `.leave` / `.start` landing branch `a0aade08` ·
+`3ded9683` · `41a75000` (17o batch b, 2026-09-07), the k−1 blank lines older still (Phase 10 Step 9,
+2026-07-12) — all before the 13u2…18k window. Inside the window `blockView` changed only at `7d44eda6`
+(13u2 B, tier paddings) and `9fe6ae5d` (18k C4, oracle owners), neither on the road. The mechanism is
+macOS-independent (a tap with no point; a text view's selection after `string =`). Whole-old-tree
+harness bisect barred (first line). It reads as a regression because the Index only became editable at
+`c768c08e` and she met it on the Sherlock notes.
+
+**THE FIX (`7553dd93`, on core support `83f6f317`) — the click brings its PLACE.**
+`Surface/ReadTierClickPlace.swift` (new): the tap's location, in the read tier's own geometry, is laid
+out again OFF-SCREEN exactly as the tier drew it — `FlowParagraph`'s display, the voice's body font,
+the tier's `lineSpacing(4)`, its 8-pt paragraph gap and list indents (both now named constants the two
+tiers draw with), at the column's measured width — TextKit 2's own click-to-caret question
+(`textSelectionNavigation.textSelections(interactingAt:…)`) names the display character, and
+`MarkdownRendering.sourceOffset(forDisplayOffset:in:)` (new, core, pure — read off the SAME walk
+`render` builds the display from; the loop factored into `walkLines` byte-for-byte) carries it back to
+the stored text. `ReadTierClickTarget` replaces the bare tap on both tiers; the book Index hands the pane
+`.offset(place)` for that take (`BookIndexEditModel.caretLanding(forVariant:)`, `.leave` for every
+landing — byte-unchanged); Read ▸ edit lets the click's offset outrank the entry rule
+(`BlockTOCViewModel.makeLive(_:variantID:clickOffset:)`). One off-screen block layout per click (P1:
+bounded by the block clicked); TK2 API only.
+
+**Pins — `IndexClickCaretTests` (new), 2 tests × {Terminal, Study} × {first line, last line}**, real
+clicks on her note's shape, a block over a blank line AND the last block: the caret is on the clicked
+line, never parked at the END; on the first line the caret is the SAME character the live pane's own
+hit-test names at the click's x (±1); and (book Index) the replica's block height is within 0.5 pt of
+the frame SwiftUI drew — the replica's fidelity is measured, not assumed (a point release that moves
+SwiftUI's text metrics goes red). Core: `MarkdownRenderingSourceOffsetTests` (6; the 11 render pins ride
+unmodified). **R-U0-1** (both hosts `clickOffset: nil`): RED 26 issues, the pre-fix shape in both voices
+(339–345 chars from the pointer at the Index; 21–28 on Read ▸ edit's first line) → restored → green.
+
+### ITEM 2 — the clipped descenders (her capture) — TWO mechanisms, both fixed
+
+**(a) The missing width trigger.** The Outline's (and the spread's) live note is `InlineEditorSurface`,
+a content-sized TK2 view whose frame height is whatever its coordinator last REPORTED. It re-measured on
+a storage edit or a SwiftUI update pass only; a WIDTH change re-wraps the text with neither, and the
+update pass a resize runs was traced measuring an INTERMEDIATE width (`updateNSView` at 902 pt, the
+final 629 pt applied in layout after it). So the frame kept the old wrap's height: narrowing cut the
+tail (her capture — descenders, then lines not drawn); widening left a gap (KnownIssues row 75's tall
+side). **Pin `InlineEditorWidthReflowTests`** (new; the real Outline, her *About this book*, a
+fifteen-width walk per voice) RED on the pre-fix tree — `54fb5d47` (51 / 66 pt short), strengthened to
+both directions `f46ceac8` (R-U0-2b: 4 SHORT −51…−102 pt, 2 TALL +51/+66). **Fix `0d9ac91d`:** the
+coordinator composes the height onto the text view's own width door (`onWidthReflow`, fired from
+`setFrameSize` once the prose column is placed — the model's overlay handler first, then the one
+coalescing hop). **R-U0-2** RED (identical) → green. **Also reproduced in the app on the pre-fix build**
+(Study, 1440 → 900: the last paragraph's fourth line cut through its middle, the ring hanging below it —
+`repro/item2-prefix-study-narrow3.png`). **ATTRIBUTION: pre-existing** — the trigger set is the
+inline editor's since its birth (`8c700402`, Phase 10 Step 3, 2026-07-12); 17p b's lane re-report
+(`4e21cde0`) and its removal at 13u3 A1 (`f93d1bd9`, in the window) concerned decoration-lane changes,
+never width; and the strand measured identically on the PRE-C2 road (`EditorView.swift` reverted to
+`48297899`'s behaviour in the working tree: the same 17-pt short at 1200 → 820) — C2 changed WHEN a
+report is made, never WHAT triggers one.
+
+**(b) The unsettled first measure — the brief's named suspect.** On the width-hop build the walk found
+the long live story's end BLANK after a resize + scroll (5 of ~9; 0 of 6 on the pre-hop build — the
+hop measured at the earliest, most unsettled moment). An instrumented scratch build (never committed)
+logged it: after 1000 → 1440 the report carried **22,884 pt** (TextKit's first full measure at the new
+width) where the laid-out end settled at **23,082 pt** once a scroll laid it out — and nothing
+re-reported, so the frame kept the first number: short → the tail cut; tall → a blank page above the
+footer. In the bare inline rig the same class is large: **631 pt SHORT at 420, 229 pt TALL at 700,
+126 pt at 520** (a fresh TK2 view of the same text at the same width agrees with the SETTLED numbers at
+420/700 — and TextKit's own settled layout sat 338 pt off a fresh view's at 520: layout-history
+dependent, the fenced measurement brain's, recorded not chased). **Pin
+`InlineHeightReportTests.aReflowsLateSettleIsReportedToo`** RED on the width-hop tree (`08aa8d0c`). **Fix
+`8b86232a` — THE SETTLE NET:** the coordinator composes onto the display-pass door (`onLayoutSettle` ←
+`viewWillDraw`, the model's overlay refresh first) an O(1) read of the LAST layout fragment's bottom;
+when it has MOVED since the last look and disagrees with the last report, the one report hop runs.
+Edge-triggered (a stable disagreement can never spin), bounded 8 per occasion (re-armed by a width
+change, the mount, a storage edit), terminating (a report changes only the height, which moves no
+fragment). **R-U0-3** (`displayPassSettled` returns at once) RED 4, identical → green. **ATTRIBUTION:
+undetermined** — the class is TextKit's own (§2 documents wrong fragment heights since 15.6; §3 records
+the first-measure fact from 18k C2 on 27.0), no commit in the window changed `PaneMeasurement`, and no
+26.x tree or OS is available to measure its magnitude before 27.0. **For TEXTKIT2_NOTES §3 (the
+orchestrator's canon edit):** *on 27.0 the inline editor's first full `.ensuresLayout` measure after a
+reflow can be 1–5 % off the layout the next display pass settles to (bare rig 631 / 229 / 126 pt; the
+app 198 pt on 23k) — the inline editor now re-reports on the display pass (the settle net); re-measure
+at 27.1.*
+
+**One existing pin adapted (flag for the Fable ladder):** C2's
+`anUpdatePassReportsOnTheTurnAfterItNeverInsideIt` asserted `reports.count == 1`; with the settle net
+the pass still reports once and the SETTLE reports after it — the pin's own note had recorded the 631 pt
+as "not an equality". Now: `(1...3).contains(count)`, the first report still on the narrow side of the
+midpoint (its teeth against the stranded wide height kept), plus a new arm — the LAST report equals the
+settled height (RED on the pre-net tree, 631 pt).
+
+**Harness fact (sweep S5):** C2's two inline pins go RED when the DEV STORE's voice is Study — the
+test host adopts the dev store's typography at launch. My walk had left the dev voice Study mid-session;
+back in Terminal (as found), the suite passes. My pins pin their own voice (their own store +
+`ThemeStore`, the global restored after).
+
+### THE WALK (USE) — dev-store Debug, per-step guarded, both voices
+
+Final product code = `8b86232a` (build `DerivedData/18l-u0-walk` at `17e07015`); the item-1 rows
+were walked on `0d9ac91d`'s product code (item 1's code unchanged since). Captures under
+`notes/plans/18l-screens/u0/` (gitignored). Settings as found: Terminal voice, window 1440×1000; left the same.
+
+| Voice | Surface · row | Result | Captures (`walk/`) |
+|---|---|---|---|
+| Study | Index · a mid-paragraph line | the caret at the clicked character (*"I take it, t\|he"*) | `s-index-click-midline` |
+| Study | Index · the next block's FIRST line | on that line | `s-index-click-firstline-next` |
+| Study | Index · a block's LAST line, directly above its empty separator (her trigger) | on the line (*"twel\|ve"*), never the blank | `s-index-click-lastline-above-separator` |
+| Terminal | Index · the same three shapes | all three on their lines (*"abhorrent \|to"*, *"questionabl\|e"*) | `t-index-click-*` |
+| Study | Read ▸ edit · a mid line, then the next block's first lines | on the clicked character (*"introdu\|ce"*, *"happiness\|,"*) | `s-readedit-click-*` |
+| Terminal | Read ▸ edit · a block's last line | *"q\|uestionable memory."* (was: line 0) | `t-readedit-click-lastline` |
+| Terminal | Outline · *About this book* live · 1440 → 1180 → 1000 → 900 → 820 | whole text at every width, "tagged" whole | `t-outline-about-live-w*` |
+| Study | Outline · *About this book* live · the pre-fix repro's own sequence + far scrolls | whole at every step | `rep2/`, `net-s-about/` |
+| Terminal / Study | Outline · *Copper Beeches* (212 blocks) live · 1440 ↔ 1000 ×3, scrolled to the end each time | the story's end drawn, the footer after it — **12 of 12** (the width-hop build: blank 5 of ~9) | `net-t-blank/`, `net-s-blank/` |
+
+### THE SWEEP — finding × mechanism × ATTRIBUTION × disposition
+
+| # | Finding | Mechanism | ATTRIBUTION | Disposition |
+|---|---|---|---|---|
+| S1 | Index / Read ▸ edit click lands on the empty line / at the block's start (row 86 — item 1) | a bare tap with no point; the pane's `.leave` (END = the blank line) / entry rule | **pre-existing** (line history: `c768c08e` 2026-09-01 + 17o b 2026-09-07, both before the window; macOS-independent) | **FIXED** `7553dd93` · pins `IndexClickCaretTests` (+ core `MarkdownRenderingSourceOffsetTests`) · R-U0-1 red 26 |
+| S2 | The live note's frame not re-measured on a width change — the tail cut (her capture) / a gap (row 75's tall side) | the trigger set never included width; the update pass can measure an intermediate width | **pre-existing** (the trigger set since `8c700402`, 2026-07-12; identical on the pre-C2 road) | **FIXED** `0d9ac91d` · pin `InlineEditorWidthReflowTests` · R-U0-2/2b red |
+| S2b | TextKit's first full measure after a reflow differs from the settled layout; nothing re-reported (the brief's named suspect; the once-seen Study clip; the blank end on the width-hop build) | TK2 layout-history variance, no convergence re-report on the inline editor | **undetermined** — TK2's class (§2 since 15.6; measured on 27.0 by 18k C2); no commit in the window changed `PaneMeasurement`; no 26.x to compare | **FIXED** `8b86232a` (the settle net) · pin `aReflowsLateSettleIsReportedToo` · R-U0-3 red · §3 line handed over |
+| S3 | A click on the Index / Read ▸ edit read tier REFLOWS the block under the pointer (the live pane: TK2 line metrics, no 4-pt line spacing, dimmed markers shown — the text jumps a few lines' worth) | the two tiers' VERTICAL metrics were never aligned (13u2 B aligned the leading x only) | **pre-existing** (the tiers since `c768c08e`; 13u2 B `7d44eda6` touched paddings only) | **OWNED — PROPOSED:** 12 (Hardening) or an 18l rider; whether the live pane should match the read tier's line spacing is a TASTE call → HELD-FOR-HER as a question, not built |
+| S4 | A book Index LANDING (a Read click-through, `requestLanding`) parks the caret at the block END — her blank line | the landing's pane gets `.leave`; `LandingTarget.utf16Offset` is not wired | **pre-existing** (`c768c08e`) | **OWNED — U4** (ledger row 11: `LandingTarget.utf16Offset` wired-or-deleted is exactly the question of where a landing's caret goes); measured by a scratch probe (caret 329 of 329 → the blank line) |
+| S5 | C2's inline pins go RED when the dev store's voice is Study | the test host adopts the dev store's typography at launch; the pins read the process-global | **our-commit(`48297899`)** — the C2 pins' harness never pinned its voice | **OWNED — PROPOSED 12** (the harness-calibration family, beside rows 36 / 88) |
+| S6 | KnownIssues row 75 (the ~85-pt tall gap after narrow → restore) | S2's tall side + S2b | as S2 / S2b | **FIXED by S2 + S2b** — pins show the tall strands red-on-old (+51/+66; +229); **the row's close is the orchestrator's** |
+| S7 | The U3 rider: `PaneSurface`'s render-restore `layoutViewport()` under 27's clip displacement | — | — | **NOT EXAMINED** — U0 does not touch `PaneSurface`; stays U3's |
+| S8 | Row 85 (O-2, the ⌘↓ ring drawn high) | — | — | **NOT TAKEN** — U0 does not touch the ring's refresh; stays 12 |
+| S9 | U0b (Write top padding) / U0c (note-open landing) | not investigated | — | their sessions, unchanged |
+
+### SEAM FILES THIS DIFF TOUCHES (the Fable reviewer reads this first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `Features/Editor/EditorView.swift` (`InlineEditorSurface.Coordinator`) | the width door composition (`onWidthReflow`) + the settle net (`onLayoutSettle` composition, `displayPassSettled`, `lastReportedHeight`, the budget); `remeasure` records its report | `EditorTextView`, `EditorViewModel`'s storage seam, `BlockRangeIndex`, `PaneSurface`, `PaneMeasurement`, `scheduleRemeasure`'s newest-wins, the binding gate |
+| `Surface/ReadTierClickPlace.swift` | NEW — the click's place (the off-screen replica) + `ReadTierClickTarget` | — |
+| `Features/BookView/BookIndexView.swift` | the read tier's tap → `ReadTierClickTarget`; `caretOnGoingLive` wired; the two tier metrics named; a DEBUG frame oracle | the pane, landing, manifest, liveness authority |
+| `Features/BookView/BookIndexEditModel.swift` | `makeLive(…, clickOffset:)` + `caretLanding(forVariant:)` | the authority, flush, landing |
+| `Features/ReadMode/ReadEditPane.swift` · `Features/TOC/BlockTOCView.swift` | the same tap; `makeLive(_:variantID:clickOffset:)` — a click outranks the entry rule | `PaneCaretLanding.entering`, `notePaneCaret` |
+| `Shared/FlowParagraph.swift` | `displayStarts(of:)` + the blank rule as one private function | the transform (byte-identical) |
+| `Sources/VariorumCore/Domain/MarkdownRendering.swift` | `sourceOffset(forDisplayOffset:in:)`; the walk factored into `walkLines` | `render`'s output (11 pins unmodified) |
+| Tests | NEW `IndexClickCaretTests`, `InlineEditorWidthReflowTests`, `MarkdownRenderingSourceOffsetTests`; `InlineHeightReportTests` + 1 test, 1 arm adapted | — |
+
+Zero `Sync/`, zero schema, zero `Server/`. No TK1 API (the replica is `NSTextContentStorage` +
+`NSTextLayoutManager`; the net reads `enumerateTextLayoutFragments(options: [.reverse])`).
+
+### JUDGMENT CALLS (each reversible in a line)
+
+1. **A click's place is found by an off-screen REPLICA of the read tier**, not handed to the live pane's
+   own hit-test: the live pane lays the take out differently (markers shown, tighter lines), so a point
+   passed through drifts a line per few lines down a long paragraph. The replica's agreement with what
+   SwiftUI drew is pinned (±0.5 pt, both voices). *Reverse by* passing the point to the pane
+   (`characterIndexForInsertion`) — simpler, measurably worse below a paragraph's first line.
+2. **Headings are measured in the body font** (the tier's title/heading fonts live only in SwiftUI):
+   a click inside a heading lands on that heading's line with its x approximate. Stated in the file.
+3. **Read ▸ edit: a click outranks the entry rule** even on the note's current block (it used to land
+   at the remembered offset there). `PaneCaretLanding`'s own ruled doc says a click keeps the place it
+   brought; this makes that true for the `Text` tier. *Reverse by* consulting the entry rule when the
+   clicked block is the current block.
+4. **Both item-2 fixes live in the inline coordinator**, not `PaneMeasurement` (fenced). *Reverse by*
+   the width hop alone (the settle net is what makes the walk's 12/12).
+5. **The settle net is edge-triggered on the last fragment's bottom** (O(1) per display pass) with an
+   8-per-occasion budget. *Reverse by* a fixed N-pass re-measure after a width change (costlier, misses
+   the scroll-into-view settle the app showed).
+6. **C2's update-pass pin's count arm adapted** (above) — flagged.
+
+### NOTICED, NOT TOUCHED
+
+1. The book Index landing's caret (S4 → U4). 2. The tiers' vertical metrics (S3 → her call).
+3. The C2 harness voice leak (S5 → 12). 4. `InlineEditorSurface`'s two compositions assume the model's
+`attach` runs before `install` (true in `makeNSView`); a re-attach would drop them — not a road today.
+5. Deep links / Read click-through still use `.leave` (U4). 6. KnownIssues row 75 → close as FIXED by U0
+(the orchestrator's edit). 7. The TEXTKIT2 §3 paragraph for S2b (above) — canon, the orchestrator's.
+
+### SELF-ASSESSMENT
+
+Strong: every fix has a traced mechanism, a red-on-old pin and a behavioural revert red identically;
+the walk is use-shaped, both voices, per-step guarded, on the final product code; attribution is stated
+per finding with its evidence and its limits. Weakest points for the reviewer: (a) the replica is a
+second LAYOUT of the read tier's text (not a second measurement brain for any frame — it only answers
+"which character"), pinned for fidelity but approximate for headings; (b) the settle net adds per-display-
+pass work to the inline editor (O(1)) and composes two model doors in `install`; (c) the adapted C2 pin;
+(d) the item-1 attribution rests on line history, not an old-tree run (barred). The width hop alone
+measured WORSE in the app than the pre-hop road (the blank end, 5 of ~9) until the net landed — the two
+must ship together. Closing runs: PENDING.
