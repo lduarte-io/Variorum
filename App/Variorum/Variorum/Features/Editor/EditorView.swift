@@ -675,7 +675,33 @@ struct InlineEditorSurface: NSViewRepresentable {
             let overlaysReflow = textView.onWidthReflow
             textView.onWidthReflow = { [weak self] in
                 overlaysReflow?()
+                self?.settleHealsLeft = Self.settleHealBudget
                 self?.scheduleRemeasure()
+            }
+            // **18l U0 — THE SETTLE NET (item 2's residual: the brief's named
+            // suspect).** TextKit 2's full measure on the turn after a width
+            // change (or a window entry) can be far from the layout its later
+            // passes settle to — measured in the app, 22,884 pt reported where
+            // the story settled at 23,082 once a scroll laid its end out (the
+            // tail cut: her capture's shape), and in the pins 631 pt SHORT and
+            // 229 pt TALL (the TALL side is KnownIssues row 75's gap). The pane
+            // component heals this class through `PanePublisher`; this surface
+            // had no heal. So every display pass (`viewWillDraw` → the model's
+            // `onLayoutSettle` door, composed like the width door above: the
+            // model's overlay refresh first) reads the LAST layout fragment's
+            // bottom — O(1), the layout already there, no `ensureLayout` — and
+            // when that bottom has MOVED since the last look and no longer
+            // matches what was last reported, it schedules the one report hop.
+            // EDGE-triggered (only a moved bottom re-arms), so a stable
+            // disagreement between the O(1) read and the full measure can never
+            // spin; BOUNDED per occasion (`settleHealBudget`, re-armed by a
+            // width change, the mount, and a storage edit); and terminating,
+            // because a report changes only the frame's HEIGHT, which moves no
+            // fragment.
+            let overlaysSettle = textView.onLayoutSettle
+            textView.onLayoutSettle = { [weak self] in
+                overlaysSettle?()
+                self?.displayPassSettled()
             }
             //
             // Every storage change (typing, projections, structural
@@ -693,10 +719,48 @@ struct InlineEditorSurface: NSViewRepresentable {
                     // only lets it share the hop with the other triggers).
                     // Text storage is edited on the main thread, so the
                     // notification arrives there (the canary's pattern).
-                    MainActor.assumeIsolated { self?.scheduleRemeasure() }
+                    MainActor.assumeIsolated {
+                        self?.settleHealsLeft = Self.settleHealBudget
+                        self?.scheduleRemeasure()
+                    }
                 }
             }
             // The FIRST height — scheduled, never written inside the mount.
+            settleHealsLeft = Self.settleHealBudget
+            scheduleRemeasure()
+        }
+
+        /// 18l U0 — the settle net's bookkeeping (see `install`).
+        /// How many settle-triggered reports one occasion may make. TextKit
+        /// was measured settling over up to four display passes after a
+        /// reflow; the budget is generous so a real settle always lands, and
+        /// finite so nothing can re-measure the post forever.
+        static let settleHealBudget = 8
+        private var settleHealsLeft = 0
+        /// The height the last report carried (nil before the first).
+        private var lastReportedHeight: CGFloat?
+        /// The laid-out bottom the last display pass saw.
+        private var lastSeenBottomHeight: CGFloat?
+
+        /// A display pass happened: has the laid-out text's bottom moved off
+        /// what was last reported? O(1) — the last layout fragment only, and
+        /// only the layout TextKit already holds.
+        func displayPassSettled() {
+            guard let textView, let layoutManager = textView.textLayoutManager else { return }
+            var bottom: CGFloat?
+            layoutManager.enumerateTextLayoutFragments(
+                from: layoutManager.documentRange.endLocation, options: [.reverse]
+            ) { fragment in
+                bottom = fragment.layoutFragmentFrame.maxY
+                return false
+            }
+            guard let bottom else { return }
+            let height = max(bottom + textView.textContainerInset.height * 2, 24)
+            if let seen = lastSeenBottomHeight, abs(seen - height) < 0.5 { return }
+            lastSeenBottomHeight = height
+            guard let reported = lastReportedHeight, abs(reported - height) > 0.5,
+                  settleHealsLeft > 0 else { return }
+            settleHealsLeft -= 1
             scheduleRemeasure()
         }
 
@@ -706,7 +770,9 @@ struct InlineEditorSurface: NSViewRepresentable {
             // the storage-edit notification, because its heights change on
             // model-driven storage writes, not only on width).
             guard let textView else { return }
-            reportHeight?(max(PaneMeasurement.height(of: textView), 24))
+            let height = max(PaneMeasurement.height(of: textView), 24)
+            lastReportedHeight = height
+            reportHeight?(height)
         }
 
         func uninstall() {
