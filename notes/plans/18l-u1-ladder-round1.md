@@ -240,3 +240,13 @@ the column before narrowing.
 `ScratchReviewStaleSeedTests` (MINOR-1), lived only in a `git archive` copy of `2eff1b27` in the session
 scratchpad, on an in-memory store, with zero app instances before each run. Their shapes are stated in
 full above, for the fix pass to write as real pins.)*
+
+## ORCHESTRATOR ARBITRATION (same-model ladder; 2026-09-26)
+
+ALL SIX FINDINGS CONFIRMED (0 dismissed). Riders, sent to the implementer and binding: MAJOR-1
+first, the reviewer's hand-over shape, with the HARD BOUNDARY — the fix stays in `ReadEditPane`'s
+closures; needing `PaneSurfaceView`'s callbacks is STOP-and-report (round 2 would go to Fable);
+the specified pin red-on-old first. MINOR-1's forget-on-derealize (or the policy flag, reasoned);
+MINOR-2 the trace reset + placement-id match; MINOR-3 the implementer's reasoned pick,
+PROVISIONAL until #151; both NITs. Round 2 = a FRESH reviewer over the fix diff (Opus unless the
+seam boundary was crossed).
