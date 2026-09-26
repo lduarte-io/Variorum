@@ -4,14 +4,20 @@ import Foundation
 /// (Phase 13g, batch 4 — L11, over the author's ruling **F-5** and the
 /// SURFACE RULE her clarifying question pinned).
 ///
-/// **The surface rule, restated because this file is the half that depends on
-/// it.** EDITING surfaces — and the read-cheap tier, whose click seeds a caret
-/// offset — render the DIMMED-MARKER face (`MarkdownStyling`), where display
-/// == stored byte for byte and no offset ever needs translating. READ-ONLY
-/// surfaces with NO editing gestures may render FULLY FORMATTED, markers
-/// hidden: display ≠ stored is safe exactly where no gesture maps a click to a
-/// text offset. Read is A43's reading surface, so this is where the second
-/// face lives, and it lives NOWHERE else.
+/// **The surface rule (13g F-5 design law), restated because this file is the
+/// half that depends on it — WITH its 18l carve-out.** EDITING surfaces render
+/// the DIMMED-MARKER face (`MarkdownStyling`), where display == stored byte
+/// for byte and a caret needs no translating; so does the pane component's
+/// read tier, a TK2 surface whose click seeds a caret offset directly.
+/// READ-ONLY renderings of THIS transform's display (markers hidden) rest on
+/// F-5's rationale clause — display ≠ stored is safe exactly where no gesture
+/// maps a click to a text offset — and since 18l U0 one more case is legal
+/// (ruling **R-18l-5**, PROVISIONAL, QUESTIONS #149): a formatted read-cheap
+/// `Text` tier (the book Index, the note's Read ▸ edit) MAY seed a caret from
+/// a click, PROVIDED the offset travels ONLY through this file's pinned
+/// display→source translation, `sourceOffset(forDisplayOffset:in:)` — the
+/// hazard the rule fences is discharged by that machinery, never waived. No
+/// other road from a formatted display to a stored-text offset is legal.
 ///
 /// **What this is, and what it can never be.** A pure function, no GRDB and no
 /// AppKit: text in, a DISPLAY STRING plus semantic runs and per-line styles
@@ -176,10 +182,11 @@ public enum MarkdownRendering {
     /// her report: *"I click on top of a line of text [in the book Index] and
     /// my cursor moves to the empty paragraph"*). The read-cheap tiers of the
     /// two Index surfaces draw THIS transform's display — markers hidden — and
-    /// a click on them now seeds the live pane's caret, which is exactly the
-    /// case the surface rule above names as needing a translation. This is
-    /// that translation, read off the SAME walk `render` builds the display
-    /// from (`walkLines`), so the two can never disagree about a line.
+    /// a click on them now seeds the live pane's caret. That is legal ONLY
+    /// through this translation (the surface rule's 18l carve-out, R-18l-5 —
+    /// the header above carries the rule whole), which is read off the SAME
+    /// walk `render` builds the display from (`walkLines`), so the two can
+    /// never disagree about a line.
     ///
     /// The rule, per line: the answer is the LAST source boundary that landed
     /// at or before `displayOffset` — so a caret shown just before a word lands
