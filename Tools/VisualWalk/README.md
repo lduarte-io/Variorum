@@ -42,7 +42,7 @@ switched) · **5** refused (a precondition; nothing launched).
 
 `build.sh` (what `--build` runs) compiles the Debug app and stamps it with what it was compiled FROM:
 App/ and the core (Sources/ + the package manifests), each as the committed tree plus any uncommitted
-diff. The report's header names that origin, and the driver **refuses** a build that is not this
+diff or untracked file (names and contents — both build systems compile untracked sources). The report's header names that origin, and the driver **refuses** a build that is not this
 tree's. `VW_DD=<derived data>` points the harness at a SCRATCH build — how it proves it can red on a
 real reverted fix (`build.sh --src <worktree> --dd <worktree>/dd`, then `VW_DD=<worktree>/dd …`) — and
 that build may differ from the tree **only under App/**: its core is what opens the dev store, and the

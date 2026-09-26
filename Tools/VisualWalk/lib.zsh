@@ -129,7 +129,8 @@ vw_quit_app() {
 
 # --- The BUILD STAMP (U-VIS round 1, MINOR-3/4) -------------------------------------------------------
 # A build is identified by what it was compiled FROM: the Mac app (App/) and the core the app links
-# (Sources/ + the package manifests), each as its committed tree PLUS any uncommitted diff over it.
+# (Sources/ + the package manifests), each as its committed tree PLUS any uncommitted diff over it PLUS
+# any untracked, non-ignored file under it (names and contents).
 # `build.sh` writes the stamp beside the build; the report prints it; and the driver REFUSES a binary
 # that is not the current tree's — the standing trap "an old build must NEVER open the dev store",
 # enforced rather than trusted. A `VW_DD` scratch build (a fix reverted to prove the harness can red)
@@ -138,11 +139,23 @@ vw_quit_app() {
 vw_tree_state() {   # <tree> → "commit=… app=… core=… dirty=…" (one line)
   local t=$1 commit app core dirty
   commit=$(git -C $t rev-parse HEAD)
-  app=$( { git -C $t rev-parse HEAD:App; git -C $t diff HEAD -- App } | shasum | cut -c1-12)
+  app=$( { git -C $t rev-parse HEAD:App; git -C $t diff HEAD -- App; vw_untracked $t App } \
+         | shasum | cut -c1-12)
   core=$( { git -C $t rev-parse HEAD:Sources HEAD:Package.swift HEAD:Package.resolved
-            git -C $t diff HEAD -- Sources Package.swift Package.resolved } | shasum | cut -c1-12)
-  dirty=$(git -C $t diff HEAD --name-only -- App Sources Package.swift Package.resolved | tr '\n' ',' )
+            git -C $t diff HEAD -- Sources Package.swift Package.resolved
+            vw_untracked $t Sources Package.swift Package.resolved } | shasum | cut -c1-12)
+  dirty=$( { git -C $t diff HEAD --name-only -- App Sources Package.swift Package.resolved
+             git -C $t ls-files --others --exclude-standard -- App Sources Package.swift Package.resolved } \
+           | tr '\n' ',' )
   print -r -- "commit=$commit app=$app core=$core dirty=${dirty%,}"
+}
+
+# UNTRACKED, non-ignored files under <paths>, NAMES AND CONTENTS (round 2, MINOR-R2-2): both build
+# systems compile them (SwiftPM takes every source under Sources/; the app's groups are file-system
+# synchronized), so a recreated or scratch file is part of what a build came from.
+vw_untracked() {   # <tree> <paths…>
+  local t=$1; shift
+  (cd $t && git ls-files --others --exclude-standard -z -- "$@" | xargs -0 shasum 2>/dev/null)
 }
 
 # 0 = launchable; else prints why not. Args: stamp-line current-line scratch(0|1)
