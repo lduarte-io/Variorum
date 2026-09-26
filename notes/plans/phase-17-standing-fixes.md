@@ -89,6 +89,7 @@ once. Claim a letter here first.
 | **17d** | Purge & sync honesty (P8/P9/P28/P31; P30 dissolved 2026-09-04) | **CLOSED 2026-09-22 — RUN B** (dispositions in the entry; the live-round leg PASSED at her 2026-09-22 morning round) |
 | 17e | The 2026-08-30 sweep's remaining group (has since gained rows: P6's undo-side residue, the launch seeder's cross-device deletion, the canvas router fact, the content-replacement undo row) | **RIDING 18k + 18o (her ruling R-18k-1, 2026-09-25):** the concurrency five (row 59 · P26 · P27 · P33 · P38) = 18k's C5; the rest (P23 · P29 · P32 · P34 · P35 · P37 · (12) · row 66 · row 64 record-only) = 18o; (11) verified partly discharged by 18d. This entry stays the BINDING record; dispositions land here at each run's close |
 | **17t** | **The two unwired protection doors** (KnownIssues rows "The typed NEAR-EMPTY sync confirmation" + "COPY ALL on the recovery phrase") — minted 2026-09-25 at the 18k kickoff sitting (R-18k-2, her words *"17t and add that to an 18"*) | **RIDES 18o** (right after 18k); the custody Fable rider fires |
+| **17u** | **The locked lobby's backdrop** — her 2026-09-25 between-rounds ask: the tessellating endpaper tile (the humanoid figures and the book) OUT of the app everywhere, replaced by an animated monochrome glyph rain. Built in the author-attended Fable session the same day (a one-file view + a pure brain, the asset removed, a grep pin) | **BUILT 2026-09-25** — the entry below; **the standing Opus cold review is OWED** (a decorative surface, no editor seam / custody / `Sync/` — Opus suffices) unless she waives it |
 | **17f** | **CLOSED 2026-08-31 — the pre-13u round's Act 5.** 8 of 9 items FIXED (each with its evidence class named: three red-on-old drills, two grep-verified dead-code removals, one hoist, one canon correction, one documented mechanism); **P50 DISMISSED AS HOLLOW by measurement** — the WAL it claimed was checkpointed away measures byte-identical before and after `lock()`. Per-item dispositions in the entry below | **closed** |
 | **17c** | **CLOSED 2026-08-31 — the pre-13u round's Acts 3+4.** All 4 read-layer items (P18–P21) FIXED with revert-verified red-on-old pins (query plans and statement counts, never timings); the P20 index landed as its own schema commit and is NOT a §12 lockstep event (marker stays 7). Per-item dispositions with before/after numbers in the entry below; one residual (`container_block(block_id)`) re-routed to **12** in KnownIssues | **closed** |
 | **17g** | **CLOSED 2026-08-30 — the `13p-fix` session** (author's live session of 2026-08-30: an issue she found testing the refreshed 13p install). That session owns this letter and writes its own entry; it does **not** fold into 17a. | **closed** |
@@ -1568,3 +1569,41 @@ carries (c)'s honesty nearly for free), and the rescue's own sync posture (the f
 ordinary local rows that push normally). **The pre-pass is `PurgeJanitor` — `Sync/`, the standing
 Fable rider.** Pin-before-fix binds: the build RE-BASES the (a) pin to (b)'s expectation, which
 is red-on-old by construction (today's code drops; the new expectation rescues).
+
+## 17u — THE LOCKED LOBBY'S BACKDROP (her 2026-09-25 between-rounds ask; built the same day in the author-attended Fable session)
+
+**Her words, verbatim:** *"I don't like the art that's on the Variorum locked screen — the tesselating
+tiles of the art with the humanoid figures and the book. make sure that doesn't appear anywhere
+anymore and replace the lock screen decoration with code that animates a view of top down lines of
+code, kind of a matrix style decoration of letters and numbers flickering … it should be in black
+and white on the lock screen and shouldn't be distracting from the central pane … you have some
+artistic liberty here."*
+
+**What shipped:**
+1. **The tile is gone from the app.** `App/Variorum/Variorum/Resources/lobby-endpaper.svg` (the
+   `girl-and-the-fan` endpaper, placed by pre-13u Act 10 item 7) is removed from the repo and so
+   from the bundle; `StoreLockView`'s loader, its bundle-locator class and the tiled `Image` are
+   gone with it. It was the ONLY consumer on either platform (the phone's lobby never carried it).
+   The brand ORIGINAL at `notes/brand/concept-art/girl-and-the-fan.svg` is untouched — brand
+   archive, not the app, and hers to keep or cut. **Pin:** `GlyphRainTests.theTessellatingEndpaperTileIsGoneFromTheApp`
+   walks `App/Variorum` for the asset name and both names in every Swift source.
+2. **`GlyphRainBackdrop`** (`App/Variorum/Variorum/GlyphRainBackdrop.swift`): columns of
+   monospaced glyphs — digits, letters, a little code punctuation — falling top-down at unequal
+   speeds, each a head with a trail fading to nothing, trail glyphs flickering ~1.4 Hz, the head
+   ~5 Hz, at ~14 frames a second (the stepped cadence is the look). **Monochrome by construction:**
+   the one ink is the voice's `ink` token over the voice's `room` — black on paper in light, white
+   on the black room in dark (R51) — no literal colour, so the 18j pin stands. **Not distracting
+   by construction:** the head never exceeds 30 % (light) / 42 % (dark) of the ink, the trail
+   decays quadratically, and a radial wash of the room rises behind the card (centred on the
+   upper third where the card sits) so the pane stays the loudest thing. Reduce Motion pauses the
+   timeline on one populated still frame. The backdrop is hit-test-transparent and hidden from
+   accessibility. **The brain is pure** (`GlyphRain.cells(at:)` — a function of grid, time and
+   seed, the travelling-dots idiom): five pins cover the alphabet, determinism, on-grid sparse
+   frames, one falling head per column, and slow flicker.
+
+**Schema: zero. `Sync/`: zero. Copy: zero strings changed** (the lobby's sentences are still
+`ProtectionCopy`'s). Evidence: the focused Mac suites (`GlyphRainTests`,
+`ProtectionSurfaceRenderTests`, `NoLiteralColourTests`, `CopyRegisterPinTests`,
+`TravellingDotsIndicatorTests`) and her look at the refreshed install — the acceptance evidence
+for a decoration is USE. **Owed:** the standing Opus cold review for a 17-entry (no editor seam,
+no custody, no `Sync/` — Opus suffices), unless she waives it for a decoration.

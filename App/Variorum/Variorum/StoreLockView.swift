@@ -11,12 +11,12 @@
 //  … maybe throw one of the tesselating background art photos on there
 //  with a calm white box in the middle for it, aware that the prompt will
 //  appear") ────────────────────────────────────────────────────────────────
-//  · The backdrop is one of the brand's TESSELLATING endpaper pieces
-//    (`girl-and-the-fan` — TASTE.md's named seamless tile, the fan being
-//    the brand's own image), scaled to an endpaper grain and washed almost
-//    to the paper, so the room reads as the library's endpaper rather than
-//    as a poster. If the asset ever fails to load, the lobby composes calm
-//    without it — nothing here may block an unlock.
+//  · The backdrop is `GlyphRainBackdrop` — falling monochrome columns of
+//    letters and numbers, the voice's ink over the voice's room, washed
+//    back behind the card (17u, 2026-09-25: her ask replaced the item-7
+//    tessellating endpaper tile, which she did not like; the asset left
+//    the bundle and a pin keeps it out). Pure decoration — nothing here
+//    may block an unlock.
 //  · The content is a CALM CARD (the W8-2 grammar), placed in the UPPER
 //    third — the system Touch ID dialog lands centered on the screen, so
 //    the essentials sit above where it appears and are never occluded.
@@ -34,11 +34,6 @@
 import SwiftUI
 import VariorumCore
 
-/// The endpaper's bundle anchor: `Bundle(for:)` finds the APP bundle even
-/// when this view is hosted from a test runner (whose `Bundle.main` is the
-/// runner, not the app).
-private final class LobbyEndpaperLocator {}
-
 struct StoreLockView: View {
     @Bindable var lobby: StoreLobby
 
@@ -55,24 +50,11 @@ struct StoreLockView: View {
     /// No session exists yet, so the lobby speaks the leading voice.
     private var tokens: VoiceTokens { .fallback(for: scheme) }
 
-    /// The endpaper tile, loaded once per lobby (a 32 KB bundled SVG). At
-    /// an endpaper grain: the art's natural 1024 pt would read as a poster.
-    @State private var endpaper: NSImage?
-
     var body: some View {
         ZStack {
             tokens.room.ignoresSafeArea()
-            if let endpaper {
-                Image(nsImage: endpaper)
-                    .resizable(resizingMode: .tile)
-                    .ignoresSafeArea()
-                    .opacity(scheme == .dark ? 0.08 : 0.55)
-                    .allowsHitTesting(false)
-                // The wash: the pattern stays an undertone, never a poster.
-                tokens.room.opacity(scheme == .dark ? 0.5 : 0.35)
-                    .ignoresSafeArea()
-                    .allowsHitTesting(false)
-            }
+            GlyphRainBackdrop(tokens: tokens, scheme: scheme)
+                .ignoresSafeArea()
             VStack(spacing: 0) {
                 Spacer(minLength: 24)
                 card
@@ -83,7 +65,6 @@ struct StoreLockView: View {
                 Spacer(minLength: 24)
             }
         }
-        .task { loadEndpaper() }
         .task {
             // The biometric demand asks as the lobby appears — once; the
             // button below re-asks. (The prompt is the mode's whole point.)
@@ -273,36 +254,5 @@ struct StoreLockView: View {
         let typed = passphrase
         passphrase = ""
         Task { await lobby.unlock(passphrase: typed) }
-    }
-
-    private func loadEndpaper() {
-        guard endpaper == nil,
-              let url = Bundle(for: LobbyEndpaperLocator.self)
-                  .url(forResource: "lobby-endpaper", withExtension: "svg"),
-              let image = NSImage(contentsOf: url)
-        else { return }
-        // The endpaper grain: the art's own 1024 pt reads as a poster; a
-        // ~340 pt tile reads as a pattern. RASTERIZED at 2× — SwiftUI's
-        // tiling draws bitmap reps; an SVG rep tiles as nothing (measured).
-        let tile = NSSize(width: 340, height: 340)
-        guard let rep = NSBitmapImageRep(
-            bitmapDataPlanes: nil, pixelsWide: 680, pixelsHigh: 680,
-            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true,
-            isPlanar: false, colorSpaceName: .deviceRGB,
-            bytesPerRow: 0, bitsPerPixel: 0)
-        else { return }
-        rep.size = tile
-        NSGraphicsContext.saveGraphicsState()
-        if let context = NSGraphicsContext(bitmapImageRep: rep) {
-            NSGraphicsContext.current = context
-            image.draw(
-                in: NSRect(origin: .zero, size: tile),
-                from: .zero, operation: .sourceOver, fraction: 1)
-            context.flushGraphics()
-        }
-        NSGraphicsContext.restoreGraphicsState()
-        let raster = NSImage(size: tile)
-        raster.addRepresentation(rep)
-        endpaper = raster
     }
 }
