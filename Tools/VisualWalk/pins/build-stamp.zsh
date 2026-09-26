@@ -22,6 +22,17 @@ git checkout -q -- App/a.swift
 print migration >> Sources/VariorumCore/Persistence/m.swift;  s_core=$(vw_tree_state $T)
 git checkout -q -- Sources
 print notes > notes.md && git add notes.md && git commit -qm notes-only; s_notes=$(vw_tree_state $T)
+# Round 2, MINOR-R2-2: UNTRACKED sources are compiled too (SwiftPM takes every .swift under Sources/; the
+# app project's groups are file-system synchronized) — a recreated or scratch file must move the stamp.
+s1=$(vw_tree_state $T)
+print '// a migration the tree does not have' > Sources/VariorumCore/Persistence/Migration99.swift
+s_untracked_core=$(vw_tree_state $T)
+print '// v2' > Sources/VariorumCore/Persistence/Migration99.swift
+s_untracked_core2=$(vw_tree_state $T)
+rm Sources/VariorumCore/Persistence/Migration99.swift
+print '// a view the tree does not have' > App/NewView.swift
+s_untracked_app=$(vw_tree_state $T)
+rm App/NewView.swift
 
 field() { local kv; for kv in ${(s: :)1}; do [[ ${kv%%=*} == $2 ]] && print -r -- ${kv#*=}; done }
 check "an uncommitted App/ edit changes app, not core" \
@@ -38,5 +49,13 @@ check "a build whose core differs → refused"            '! verdict "$s_core" "
 check "a scratch build differing only in App/ → launched" 'verdict "$s_app" "$s1" 1'
 check "a scratch build with a different core → refused (never opens the dev store)" '! verdict "$s_core" "$s1" 1'
 
+check "an untracked core file changes core and is named dirty" \
+  '[[ $(field $s_untracked_core core) != $(field $s1 core) && $(field $s_untracked_core dirty) == *Migration99.swift* ]]'
+check "an untracked file's CONTENT is in the hash (not only its name)" \
+  '[[ $(field $s_untracked_core2 core) != $(field $s_untracked_core core) ]]'
+check "a scratch build carrying an untracked core file → refused" '! verdict "$s_untracked_core" "$s1" 1'
+check "an untracked App/ file changes app, not core, and is named" \
+  '[[ $(field $s_untracked_app app) != $(field $s1 app) && $(field $s_untracked_app core) == $(field $s1 core) && $(field $s_untracked_app dirty) == *NewView.swift* ]]'
+check "the tree's own build with an untracked App/ file since → refused" '! verdict "$s1" "$s_untracked_app" 0'
 print "build-stamp pins: $fails failing"
 (( fails == 0 ))
