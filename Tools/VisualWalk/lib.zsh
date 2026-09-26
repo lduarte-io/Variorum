@@ -189,11 +189,11 @@ vw_grants_verdict() {
   local out rc
   out=$(vw_timeout ${VW_TCC_LIMIT:-15} $VW_BIN/vis-tcc com.apple.systemevents); rc=$?
   if (( rc == 142 )); then   # 128 + SIGALRM
-    print -r -- "the Automation check for System Events timed out after ${VW_TCC_LIMIT:-15}s — a consent prompt may be pending on screen (the author's to answer)${out:+; it had answered: ${${(f)out}[1]}}"
+    print -r -- "the Automation check for System Events timed out after ${VW_TCC_LIMIT:-15}s — a consent prompt may be pending on screen (the author's to answer)${out:+; it had answered: ${${(@f)out}[1]}}"
     return 1
   fi
   (( rc == 0 )) || { print -r -- "the grants check failed (exit $rc): $out"; return 1 }
-  local first=${${(f)out}[1]} ae=${(M)${(f)out}:#AE:*}
+  local first=${${(@f)out}[1]} ae=${(M)${(@f)out}:#AE:*}
   [[ $first == "AX 1 SCREEN 1" ]] || { print -r -- "this terminal lacks Accessibility / Screen Recording ($first) — granting is the author's"; return 1 }
   [[ $ae == "AE:com.apple.systemevents granted" ]] || { print -r -- "no standing Automation grant for System Events (${ae:-no answer}) — the first act would mint a consent prompt; granting is the author's"; return 1 }
   return 0
