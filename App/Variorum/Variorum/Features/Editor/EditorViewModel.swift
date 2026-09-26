@@ -4164,12 +4164,17 @@ final class EditorViewModel {
         return found
     }
 
+    /// The OFFSET-ONLY restore — since 18l U0b a one-line delegate to
+    /// `restoreReadingAnchor` (a zero inset outside the top air lands the
+    /// same `jump(landingInset: 0)` this always made), kept as the PINS'
+    /// seam: the anchor-family suites replay captured offsets through here,
+    /// and the delegate means they exercise the PRODUCTION restore's
+    /// arithmetic rather than a sibling copy (the U0b ladder's MINOR-2
+    /// drift hazard — a future edit to `restoreReadingAnchor` must move
+    /// these pins with it). Production code captures `readingAnchor()` and
+    /// restores the place; nothing in the app calls this.
     func restoreTopVisibleOffset(_ offset: Int) {
-        guard let textView else { return }
-        JumpPrimitive.jump(
-            toOffset: min(offset, max(0, index.documentLength)),
-            textView: textView, scrollView: scrollView)
-        refreshBadges()
+        restoreReadingAnchor(ReadingAnchor(offset: offset, inset: 0, inPageTopAir: false))
     }
 
     /// **The reading position WITH ITS PLACE** (18l U0b — `ReadingAnchor`

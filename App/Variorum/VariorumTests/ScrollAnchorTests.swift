@@ -6,9 +6,15 @@
 //  (her A4: "the editor jumps around when one block is taller than the
 //  screen").
 //
-//  The anchor is `topVisibleOffset()` (read on every scroll) →
-//  `restoreTopVisibleOffset()` (replayed on every width reflow: sidebar
-//  toggle, split divider, window resize, live-resize end). It is the
+//  The anchor is `topVisibleOffset()` (read on every scroll) → the jump
+//  primitive (replayed on every width reflow: sidebar toggle, split
+//  divider, window resize, live-resize end). Since 18l U0b the PRODUCTION
+//  road is `readingAnchor()` → `restoreReadingAnchor(_:)` — the reading
+//  position carries its PLACE (`ReadingAnchor`), landing inset 0
+//  everywhere but the page's top air — and these pins drive
+//  `restoreTopVisibleOffset(_:)`, the offset-only seam that DELEGATES to
+//  that same restore, so they exercise the production arithmetic
+//  (`WriteTopAirTests` pins the top-air half). It is the
 //  Phase 6 memo's standing rule — "never px-anchor across reflow, restore
 //  by text location" — and it had two independent defects, both traced and
 //  reproduced before either was touched:
