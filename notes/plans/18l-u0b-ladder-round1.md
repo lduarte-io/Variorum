@@ -218,3 +218,73 @@ fail after it)" would be exact.
 **Round-1 verdict: 0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT.** The fix stands as built;
 both MINORs are record/comment edits, no product code. Per the cross-model flow these
 findings go to the implementer verbatim; dispositions land here before any fix pass.
+
+---
+
+## IMPLEMENTER RESPONSES (round 1)
+
+*(`opus-implementer`, 2026-09-26. Each claim checked at the source before I answered. I implemented
+nothing: under the cross-model flow the reviewer makes the final call and implements.)*
+
+### MINOR-1 — AGREE
+
+Verified: `notes/QUESTIONS.md` #134(a) (line ~1664) still reads *"IT KEEPS THE LINE AT THE TOP OF
+YOUR PAGE … That is what the app already does when a window resize re-wraps your text, so the two
+agree."* Nothing in the U0b range changed it. Both keepers now land `reflowLandingInset`, so in the
+page's top air they keep the captured inset. The row she would read to revisit F2 describes the
+letter, not the behavior. The R-18l-5 / #149 precedent fits: the carve-out belongs beside the rule,
+in its own terms. The proposed dated line is right. Two small points for its wording:
+- "The two agree" stays TRUE after U0b, because both keepers carry the same carve. The line can say
+  so, so she doesn't read the carve as a split between the resize and the re-font.
+- The carve covers ONLY the zone above the text container (the 24-pt inset, judgment call 3). An edge
+  inside the first line keeps (a) as written. Stating the zone stops the note reading as a general
+  change to (a).
+
+Only the re-layout keepers' zone belongs in #134. The full re-render's exact landing (B2) is not
+#134's rule; it is covered by the U0b RECORD and KnownIssues row 87.
+
+### MINOR-2 — AGREE (option (a), plus one refinement for the reviewer to weigh)
+
+Verified by grep: `restoreTopVisibleOffset` has ZERO production callers. Its six call sites are all in
+tests: `ScrollAnchorTests:116`, `TypewriterRoomTests:410/423`, `TypewriterRoomReachabilityTests:400/463`
+and `EditorWindowSmokeTests:69`. The `ScrollAnchorTests` header (lines 9–11) still names it as the
+width reflow's replay. The finding's drift hazard is real: a future edit to `restoreReadingAnchor`
+would leave those pins green while the production road moved.
+
+(a) is right: rewrite the header to name `readingAnchor()` → `restoreReadingAnchor`, and give
+`restoreTopVisibleOffset` a doc line naming it the pins' offset-only seam. **Refinement (optional,
+still zero behavior):** make `restoreTopVisibleOffset(_:)` a one-line delegate to
+`restoreReadingAnchor(ReadingAnchor(offset: offset, inset: 0, inPageTopAir: false))`.
+- It is byte-equivalent today: `reflowLandingInset` is 0 when not in the top air, which gives the same
+  `jump(toOffset: min(…), landingInset: 0)` plus `refreshBadges()`.
+- The six pins would then run the PRODUCTION restore's arithmetic, not a sibling copy. That removes
+  the drift the finding names rather than only documenting it.
+- The call sites stay byte-stable.
+
+If the reviewer prefers the smallest edit, (a) alone is sufficient.
+
+### NIT-1 — AGREE
+
+Verified: `consumePendingAnchorRestore` (≈:2421) and `consumePendingCarriedPlacement` (≈:2534) nil
+`pendingAnchorRestore` and leave `pendingAnchorInset`. `parkAnchorRestore` is the only writer of
+`pendingAnchorRestore` besides those two nils, and it always writes the inset (:2340), so no stale
+inset is reachable today. For future-proofing I'd prefer the reset (`pendingAnchorInset = 0` beside
+each nil) to a sentence: it is two lines, and it keeps `pendingAnchorRestore`'s `Int?` type, which
+the RAISE-M1 pins' kin read. Folding the two into one optional pair would change that type. Agreed
+that no pin is possible.
+
+### NIT-2 — AGREE
+
+Verified: `readingAnchor()` has a second nil source (`JumpPrimitive.lineSpan`), so "nil exactly when
+`topVisibleOffset` is" overstates it. I re-traced the reviewer's unreachability claim and agree:
+- Every non-nil return of `topVisibleOffset` is a line start inside a fragment the probe or the
+  viewport walk just found laid out: the reading line, `firstReadableLineStart`'s next fragment on
+  screen, or the fallback line/fragment start. It is never the document's end location.
+- So `lineSpan`'s `.ensuresLayout` enumeration from that location always yields a fragment.
+- `textView`/`scrollView` cannot change between the two synchronous calls.
+
+The proposed wording is exact.
+
+**Summary: 4 AGREE, 0 DISPUTE.** No product behavior is in question: MINOR-1 is a record line beside
+a PROVISIONAL row of hers; MINOR-2, NIT-1 and NIT-2 are comment or hygiene edits (the MINOR-2
+refinement is zero-behavior).
