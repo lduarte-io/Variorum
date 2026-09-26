@@ -779,3 +779,22 @@ KnownIssues row (owner 12, the harness-calibration family); S3 filed as a new Kn
 (owner: the Design & UI review project row, flagged AS A TASTE CALL for her — the tiers' shared
 metrics are product); the TEXTKIT2_NOTES §3 settle-net line added (a measurement record). Ledger
 rows 1–3 flip to BUILT+WALKED — the Fable cold review is the remaining gate.
+
+## U0b RECORD (implementer: `opus-implementer`, 2026-09-26)
+
+**NOT DONE (first line):** PENDING — written at the close.
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | Reading (the brief's list, in order, own context) | DONE — this file whole (HER KICKOFF MESSAGE, SITTING RECORD R-18l-1/2/4/5, ENVIRONMENT TRAPS, CAST, BASELINES, the U0 RECORD whole + its acceptance); `18l-u0-ladder-round1.md` whole; the charter's KICKOFF 2 (U0 + U0b); `TEXTKIT2_NOTES.md` whole; the 18k C6 brief + record ITEM 1 and the C6b brief + record + adjudication; KnownIssues row 87; `SessionResiliencyProtocol.md`; both captures; the code: `EditorTextView.swift` whole (the 24-pt top inset `makeEditor`, the typewriter room, β1), `JumpPrimitive.swift` whole, `ViewportCarry.swift`, `EditorSurfaceController` (`renderFull`, `runStructural`, `applyStructuralResult`, the A7 carve `planEmptyBlockDeletion`/`runEmptyBlockDeletion`, `insertEmptyBlock`, the typed Return's act), `EditorViewModel` (`topVisibleOffset` + helpers, `restoreTopVisibleOffset`, `keepingReadingPosition`, the parks and their consumers, `teardown`, the keystroke's carve dispatch), `EditorView.swift`'s `ScrollAnchorController`, `EditorDocument.swift` |
+| 2 | Reproduce (harness, her shape, both voices) | IN-PROGRESS |
+| 3 | Trace + attribution | IN-PROGRESS — hypothesis (PENDING measurement): the carve is `seam: nil` → `renderFull` → `topVisibleOffset()` names offset 0 at a page resting at scroll 0 → `JumpPrimitive.jump(0)` lands line 0 AT the viewport top = scroll 24 (the container's top inset) — the page's top air is a SCROLL offset the re-render moves, not an inset change |
+| 4 | Pin red-on-old | NOT-STARTED |
+| 5 | Fix + behavioural revert | NOT-STARTED |
+| 6 | Walk (both voices: her sequence; a long note mid + tail; add-then-remove) | NOT-STARTED |
+| 7 | Closing runs (touched suites + the eleven Tutorial suites) | NOT-STARTED |
+| 8 | Self-assessment | NOT-STARTED |
+
+- Deaths / resumes: none.
