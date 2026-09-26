@@ -216,7 +216,7 @@ two-phase-sized-units line — flagged to the author at the kickoff sitting (Q3)
 | 1 | The Index click lands the caret on the EMPTY paragraph (deterministic — *"a refusal of clicking into the text"*) — KnownIssues row 86 | U0(1) | **CLOSED 2026-09-26** — fixed (pre-existing; `IndexClickCaretTests`, R-U0-1 red 26), walked twice, ladder closed (R1 0/0/2/4-agreed-fixed + sanity PASS `2753e741`) |
 | 2 | The book view clips the last line's descenders with a note expanded (her capture) | U0(2) | **CLOSED 2026-09-26** — both mechanisms fixed (the width door + the settle net), walked twice, KnownIssues row 75 closed with it; same ladder |
 | 3 | The editor-regression SWEEP over 13u2…13y/18k (her ask: *"investigate editor regressions that must've happened during recent fixes"*) — every finding reproduced, traced, pinned, fixed or owned | U0(3) | **CLOSED 2026-09-26** — S1–S9 with ATTRIBUTION per finding (U0 RECORD); S3 → KnownIssues (taste call, morning bundle) · S5 → KnownIssues (12) · row 75 closed |
-| 4 | WRITE: removing a newline collapses the top padding (block 4/4 → 3/3 captures) — KnownIssues row 87 | U0b | **BUILT + WALKED** (impl. + orch.; B1/B2/B3 pre-existing, B4 our-commit(`4ae12a59`); fix `998f7d7d` ReadingAnchor; `WriteTopAirTests` 14 red-on-old) — Fable review pending |
+| 4 | WRITE: removing a newline collapses the top padding (block 4/4 → 3/3 captures) — KnownIssues row 87 | U0b | **CLOSED 2026-09-26** — fixed (`998f7d7d` ReadingAnchor; B1–B3 pre-existing, B4 our-commit(`4ae12a59`)), double-walked, ladder closed (R1 0/0/2/2 all agreed → the reviewer's four fixes `f207f97a..cd01c428` incl. the delegate refinement → sanity PASS `f81dcc67`, 110/14 blast radius) |
 | 4b | B5 (U0b's find): ⏎ after a ⌘↓ landing on invalidated geometry moves the page (+109/+166 pt, both builds, differential road, UNTRACED) | U-VIS scenario + the U3 `layoutViewport()` exam (or its own slot — decided at U3) | open — KnownIssues row filed, owner 18l |
 | 5 | NOTE-OPEN lands middle/end instead of the start, ignoring where she was (her 2026-09-26 report) — product rule = sitting Q1 | U0c | open |
 | 6 | The opt-in VISUAL REGRESSION HARNESS (env-gated; real window; geometry assertions — first-visible-line y, caret line, glyph box inside the surface, click lands on the clicked line; seeded with U0/U0b/U0c reproductions) | U-VIS | open |
@@ -378,8 +378,9 @@ editor-seam by definition → a FABLE cold review follows; your self-assessment 
 | This plan file + KnownIssues row for U0c | DONE (`fcf97ad5`) |
 | Kickoff sitting (Q1–Q3) | DONE — R-18l-1 · R-18l-2 · R-18l-3 above |
 | U0 (session 1) | **CLOSED 2026-09-26 (overnight)** — built · double-walked · ladder round 1 (0 BLOCKER / 0 MAJOR / 2 MINOR / 4 findings all agreed; the reviewer's four fixes `70588f2c..a941b5f8`) · sanity PASS (`2753e741`); R-18l-5 ruled en route (#149, morning bundle) |
-| U0b (session 2 — brief above) | SPAWNING |
-| U0c → U-VIS → U1 → U2 → U3 → U4 | NOT-STARTED (briefs written just-in-time, one ahead) |
+| U0b (session 2) | **CLOSED 2026-09-26 (overnight)** — built · double-walked · ladder R1 (0/0/2/2, all agreed; reviewer fixes incl. the pin-sites-run-production-arithmetic delegate) · sanity PASS; row 87 closed, B5 filed (row 88, owner 18l), #134(a) carries the dated carve-out pointer |
+| U0c (session 3 — brief above; B6's evidence folded in) | SPAWNING |
+| U-VIS → U1 → U2 → U3 → U4 | NOT-STARTED (briefs written just-in-time, one ahead) |
 
 ## U0b BRIEF (session 2 — WRITE: removing a newline collapses the top padding; written by the orchestrator 2026-09-26, spawned after U0's ladder round settles)
 
