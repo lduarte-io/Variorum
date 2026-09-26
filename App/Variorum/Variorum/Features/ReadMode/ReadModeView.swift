@@ -121,6 +121,11 @@ struct ReadModeView: View {
     @State private var pendingLanding: LandingTarget?
     /// The registry's `readEditAttached` token while `edit` is on screen.
     @State private var editToken: UUID?
+    /// 18l U1: each face's block manifest (`ReadNoteHeights`) — held HERE,
+    /// for as long as the note is in Read, so a face switch keeps what an
+    /// earlier visit to that face measured. Unobserved reference boxes.
+    @State private var editHeights = ReadNoteHeights(face: .edit)
+    @State private var pageHeights = ReadNoteHeights(face: .page)
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -424,7 +429,8 @@ struct ReadModeView: View {
                 selectedBlockID: selectedBlockID,
                 paneTarget: $paneTarget,
                 carryGeometry: carryGeometry,
-                onSelect: { blockID in select(blockID, scrollFace: false) })
+                onSelect: { blockID in select(blockID, scrollFace: false) },
+                heights: editHeights)
         case .read:
             switch form {
             case .continuous:
@@ -435,6 +441,7 @@ struct ReadModeView: View {
                     pageTarget: $pageTarget,
                     carriedBlockID: selectedBlockID,
                     carryGeometry: carryGeometry,
+                    heights: pageHeights,
                     onOpenInEdit: { row in openInEdit(row) })
             case .pages:
                 // Row 82: a page's paragraph is the same door as the
@@ -636,6 +643,10 @@ final class ReadCarryGeometry {
 
     func noteViewport(_ frame: CGRect) { viewport = frame }
 
+    /// The face's own frame in the host space — 18l U1: a face's landing
+    /// reads a row's place against it (the same rectangle the carry uses).
+    var viewportFrame: CGRect { viewport }
+
     func noteRow(_ blockID: String, _ frame: CGRect) { carried = (blockID, frame) }
 
     /// The selection moved: what was measured is about another row now. (The
@@ -737,7 +748,15 @@ private struct ReadPageColumn: View {
     /// current one) — only that row measures itself.
     let carriedBlockID: String?
     let carryGeometry: ReadCarryGeometry
+    /// 18l U1: this face's block manifest, held by the host.
+    let heights: ReadNoteHeights
     let onOpenInEdit: (Queries.TOCRow) -> Void
+
+    /// **18l U1 — THE ONE LANDING AUTHORITY**: the page used to aim once and
+    /// clear the request (the health review §1.1: *"no brain"*); it now asks
+    /// the authority, which watches the landing and files the signpost.
+    @State private var landing = LandingAuthority.readNote(.readNote)
+    @State private var box = ReadLandingBox()
 
     private var totalWords: Int {
         model.rows.reduce(0) { $0 + Queries.wordCount($1.text ?? "") }
@@ -758,7 +777,8 @@ private struct ReadPageColumn: View {
                             text: row.text ?? "", ordinal: i + 1,
                             carried: row.blockID == carriedBlockID,
                             carryGeometry: carryGeometry,
-                            onOpenInEdit: { onOpenInEdit(row) })
+                            onOpenInEdit: { onOpenInEdit(row) },
+                            onPlace: { frame in rowMoved(row.placementID, frame) })
                     }
                     Text("· · ·")
                         .font(page.serif)
@@ -767,6 +787,11 @@ private struct ReadPageColumn: View {
                         .frame(maxWidth: .infinity)
                 }
                 .frame(maxWidth: 700)
+                // 18l U1: the rows' measure (the manifest wraps at it; a box).
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+                    box.contentWidth = width
+                    heights.stand(contentWidth: width, typeScale: typeScale)
+                }
                 .padding(.horizontal, 60)
                 .padding(.vertical, 46)
                 .background(page.paper)
@@ -781,6 +806,25 @@ private struct ReadPageColumn: View {
             // paints `tokens.room` for the `edit` face, whose column and pane
             // cover it; this is the one face where the room shows.
             .background(ReadingPageTokens.room(voice: tokens.voice, dark: dark))
+            // 18l U1: the landing listens to the page (the edit face's twin).
+            .onScrollGeometryChange(for: ReadScrollFacts.self) { geometry in
+                ReadScrollFacts(
+                    offset: geometry.contentOffset.y,
+                    contentHeight: geometry.contentSize.height,
+                    viewportHeight: geometry.containerSize.height,
+                    insetTop: geometry.contentInsets.top,
+                    insetBottom: geometry.contentInsets.bottom)
+            } action: { old, new in
+                box.scroll = new
+                if old.contentHeight != new.contentHeight { landing.contentChanged(new.contentHeight) }
+                if let target = landing.anchor, let residual = box.residual(target) {
+                    landing.noteTop(target, residual)
+                }
+            }
+            .onScrollPhaseChange { _, phase in
+                if phase == .interacting { landing.userTookOver() }
+            }
+            .onDisappear { landing.end() }
             .onChange(of: pageTarget) { _, target in
                 guard let target else { return }
                 // Ladder R1-3: unanimated, on the row's identity (the Outline
@@ -813,13 +857,37 @@ extension ReadPageColumn {
     /// The landing: the block's row identity (its placement id), unanimated,
     /// anchored near the top of the page — or, when a mode switch carried a
     /// height for this block, at that fraction of the viewport instead
-    /// (13u2b UNIT 3; `scrollTo`'s anchor IS the fraction, so nothing about
-    /// the landing's mechanism changes).
+    /// (13u2b UNIT 3; `scrollTo`'s anchor IS the fraction). **18l U1: the
+    /// authority now watches it** — the edit face's `land`, line for line.
     private func land(_ target: ReadLanding, _ proxy: ScrollViewProxy) {
-        guard let placementID = model.rows
+        let rows = model.rows
+        guard let placementID = rows
             .first(where: { $0.blockID == target.blockID })?.placementID
         else { return }
-        proxy.scrollTo(placementID, anchor: target.anchor ?? Self.restingAnchor)
+        let anchor = target.anchor ?? Self.restingAnchor
+        box.anchorY = anchor.y
+        heights.stand(contentWidth: box.contentWidth, typeScale: typeScale)
+        heights.adopt(postID: postID, rows: rows)
+        let facts = LandingFacts(
+            manifest: heights.manifest(rows, width: box.contentWidth), anchor: placementID)
+        landing.land(placementID, facts: facts) { id in proxy.scrollTo(id, anchor: anchor) }
+        if let residual = box.residual(placementID) { landing.noteTop(placementID, residual) }
+    }
+
+    /// A realized row said where it is (host space), or that it went away.
+    private func rowMoved(_ placementID: String, _ frame: CGRect?) {
+        guard let frame else {
+            box.rows[placementID] = nil
+            return
+        }
+        box.rows[placementID] = (frame.minY - carryGeometry.viewportFrame.minY, frame.height)
+        heights.learn(placementID, height: frame.height)
+        guard landing.anchor == placementID, let residual = box.residual(placementID) else { return }
+        #if DEBUG
+        ReadLandingStory.trace.append(
+            "[ReadNote] target residual=\(Int(residual.rounded())) hops=\(landing.corrections)")
+        #endif
+        landing.noteTop(placementID, residual)
     }
 }
 
@@ -868,6 +936,9 @@ private struct ReadPageBlock: View {
     let carried: Bool
     let carryGeometry: ReadCarryGeometry
     let onOpenInEdit: () -> Void
+    /// 18l U1: where this row is (host space), nil when it goes away — rides
+    /// the row's EXISTING observer.
+    let onPlace: (CGRect?) -> Void
 
     @State private var hovering = false
 
@@ -914,7 +985,9 @@ private struct ReadPageBlock: View {
             $0.frame(in: .named(ReadModeView.probeSpace))
         } action: { frame in
             if carried { carryGeometry.noteRow(blockID, frame) }
+            onPlace(frame)
         }
+        .onDisappear { onPlace(nil) }
         .help("Click to edit this paragraph — the page turns to edit with this block live")
         .environment(\.openURL, OpenURLAction { url in
             MarkdownLink.open(url.absoluteString) ? .handled : .discarded

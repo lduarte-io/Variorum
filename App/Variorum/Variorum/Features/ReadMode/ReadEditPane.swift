@@ -48,6 +48,18 @@ struct ReadEditPane: View {
     /// A block was clicked: the host selects it (and reports the fact); the
     /// pane makes it live.
     let onSelect: (String) -> Void
+    /// 18l U1: this face's block manifest, held by the host (so a face
+    /// switch keeps what an earlier visit learned).
+    let heights: ReadNoteHeights
+
+    /// **18l U1 — THE ONE LANDING AUTHORITY** (`Surface/LandingAuthority.swift`).
+    /// The pane used to aim ONCE and clear the request; nothing looked again
+    /// (the health review §1.1: *"no brain"*). What stays here is the pane's
+    /// own act — the unanimated `scrollTo` — and what only it knows (where a
+    /// block is against its anchor); the watching is the authority's.
+    @State private var landing = LandingAuthority.readNote(.readNoteEdit)
+    /// The landing's bookkeeping — never render state (see the class).
+    @State private var box = ReadLandingBox()
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -72,15 +84,43 @@ struct ReadEditPane: View {
                                     model.makeLive(
                                         row.blockID, variantID: variantID, clickOffset: offset)
                                 }
-                            })
+                            },
+                            onPlace: { frame in rowMoved(row.placementID, frame) })
                     }
                 }
                 .frame(maxWidth: 640, alignment: .leading)
+                // 18l U1: the rows' measure — the manifest's derived heights
+                // wrap at it. Written only when it moves (a box, not state).
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+                    box.contentWidth = width
+                    heights.stand(contentWidth: width, typeScale: 1)
+                }
                 .padding(.horizontal, 34)
                 .padding(.vertical, 26)
                 .frame(maxWidth: .infinity, alignment: .center)
             }
             .background(tokens.surface)
+            // 18l U1: the landing listens to the page — where it is and how
+            // far it can go (the residual's clamp), and any change in the
+            // column's content height (rows realizing under the aim) re-arms
+            // the quiet interval; a scroll of HERS ends the landing.
+            .onScrollGeometryChange(for: ReadScrollFacts.self) { geometry in
+                ReadScrollFacts(
+                    offset: geometry.contentOffset.y,
+                    contentHeight: geometry.contentSize.height,
+                    viewportHeight: geometry.containerSize.height,
+                    insetTop: geometry.contentInsets.top,
+                    insetBottom: geometry.contentInsets.bottom)
+            } action: { old, new in
+                box.scroll = new
+                if old.contentHeight != new.contentHeight { landing.contentChanged(new.contentHeight) }
+                if let target = landing.anchor, let residual = box.residual(target) {
+                    landing.noteTop(target, residual)
+                }
+            }
+            .onScrollPhaseChange { _, phase in
+                if phase == .interacting { landing.userTookOver() }
+            }
             .onChange(of: paneTarget) { _, target in
                 guard let target else { return }
                 // CENTER, deliberately: a landed block sits mid-viewport with
@@ -101,7 +141,27 @@ struct ReadEditPane: View {
                 land(target, proxy)
                 paneTarget = nil
             }
+            // A landing in flight ends with the face (a face or mode switch
+            // mid-landing) — silent, by the authority's own rule (the 13u2b
+            // ladder's R2-12 class).
+            .onDisappear { landing.end() }
         }
+    }
+
+    /// A realized row said where it is (host space), or that it went away.
+    private func rowMoved(_ placementID: String, _ frame: CGRect?) {
+        guard let frame else {
+            box.rows[placementID] = nil
+            return
+        }
+        box.rows[placementID] = (frame.minY - carryGeometry.viewportFrame.minY, frame.height)
+        heights.learn(placementID, height: frame.height)
+        guard landing.anchor == placementID, let residual = box.residual(placementID) else { return }
+        #if DEBUG
+        ReadLandingStory.trace.append(
+            "[ReadNoteEdit] target residual=\(Int(residual.rounded())) hops=\(landing.corrections)")
+        #endif
+        landing.noteTop(placementID, residual)
     }
 }
 
@@ -115,12 +175,24 @@ extension ReadEditPane {
     /// scroll reader lands on, unanimated (the Outline lesson) — at this
     /// pane's resting anchor, or at the viewport fraction a mode switch
     /// carried for this very block (13u2b UNIT 3). `scrollTo`'s anchor IS
-    /// that fraction, so the landing's mechanism is untouched.
+    /// that fraction, so the ACT is untouched; **18l U1: the authority now
+    /// watches it** — the block's distance from that anchor is what it
+    /// converges, and the facts it files are this face's block manifest's.
     private func land(_ target: ReadLanding, _ proxy: ScrollViewProxy) {
-        guard let placementID = model.rows
+        let rows = model.rows
+        guard let placementID = rows
             .first(where: { $0.blockID == target.blockID })?.placementID
         else { return }
-        proxy.scrollTo(placementID, anchor: target.anchor ?? Self.restingAnchor)
+        let anchor = target.anchor ?? Self.restingAnchor
+        box.anchorY = anchor.y
+        heights.stand(contentWidth: box.contentWidth, typeScale: 1)
+        heights.adopt(postID: model.postID, rows: rows)
+        let facts = LandingFacts(
+            manifest: heights.manifest(rows, width: box.contentWidth), anchor: placementID)
+        landing.land(placementID, facts: facts) { id in proxy.scrollTo(id, anchor: anchor) }
+        // The seed (`LandingAuthority.tops`' reason): a block already where
+        // its anchor puts it reports nothing when the aim moves nothing.
+        if let residual = box.residual(placementID) { landing.noteTop(placementID, residual) }
     }
 }
 
@@ -163,6 +235,10 @@ private struct ReadEditBlock: View {
     let carryGeometry: ReadCarryGeometry
     /// 18l U0: the click, with the stored-text offset it names.
     let onTap: (Int) -> Void
+    /// 18l U1: where this row is (host space) at every geometry change, and
+    /// nil when it goes away — the landing's evidence and the manifest's
+    /// measurement. Rides the row's EXISTING observer (no new one per row).
+    let onPlace: (CGRect?) -> Void
 
     /// The block's DISPLAY text — the authority's overlay over the store
     /// row, so a just-blurred block is never staler here than its buffer.
@@ -280,7 +356,9 @@ private struct ReadEditBlock: View {
             $0.frame(in: .named(ReadModeView.probeSpace))
         } action: { frame in
             if selected || isLive { carryGeometry.noteRow(row.blockID, frame) }
+            onPlace(frame)
         }
+        .onDisappear { onPlace(nil) }
         .environment(\.openURL, OpenURLAction { url in
             MarkdownLink.open(url.absoluteString) ? .handled : .discarded
         })

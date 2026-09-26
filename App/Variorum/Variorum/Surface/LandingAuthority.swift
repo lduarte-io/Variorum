@@ -78,6 +78,14 @@ nonisolated enum LandingSurface: String, Equatable, CaseIterable {
     /// the correct location"*). The trace's compensator 4, which this file's
     /// own header left to *"its next touch"*; this is that touch.
     case bookIndex = "BookIndex"
+    /// **18l UNIT U1 — note Read's `read` face (the calm page) and its
+    /// `edit` face, the fourth and fifth adopters** (the health review's
+    /// §1.3 item 1; this file's header named Takes and the Index as the next
+    /// touches, and note Read had no brain at all). TWO words, not one: a
+    /// line pasted from her Console must say which face landed — the two
+    /// differ in anchor (0.08 · centred), rows and chrome.
+    case readNote = "ReadNote"
+    case readNoteEdit = "ReadNoteEdit"
 }
 
 nonisolated struct LandingPolicy: Equatable {
@@ -179,6 +187,38 @@ nonisolated struct LandingPolicy: Equatable {
         surface: .bookIndex, tolerance: 2, settleInterval: 0.25, minimumHold: 1.0,
         maxWait: 0.6, correctionBudget: 3, timeBudget: 6,
         correctionPace: .spacedByTheHold, correctsAnUnreportedTarget: false,
+        correctionWord: "HOP")
+
+    /// **Note Read's two faces** (18l UNIT U1). PROVISIONAL until the unit's
+    /// trials measure them (the record's trial table is where each number
+    /// earns its place) — the starting point is the measured family's:
+    ///
+    /// - tolerance 2, the quiet interval, the one-second hold, the ceiling:
+    ///   the Outline's and the Index's.
+    /// - **`correctsAnUnreportedTarget` TRUE — the Outline's answer, for the
+    ///   Outline's reason:** these columns are LAZY, and a block the lazy
+    ///   column never built has nothing to report; a second aim is how the
+    ///   column reaches it (the harness's measured miss: the arrival at block
+    ///   201 of a note whose first screen is short lines stopped 11–14 blocks
+    ///   past it, and the block never drew). The Index said no because its
+    ///   rows were whole notes loading asynchronously and blind hops flung an
+    ///   oscillating column; a note's rows are its blocks, drawn from text in
+    ///   hand.
+    /// - **budget 3, the Index's:** a landing that cannot arrive stops and
+    ///   says so rather than thrashing.
+    static let readNote = LandingPolicy(
+        surface: .readNote, tolerance: 2, settleInterval: 0.25, minimumHold: 1.0,
+        maxWait: 0.6, correctionBudget: 3, timeBudget: 4,
+        correctionPace: .spacedByTheHold, correctsAnUnreportedTarget: true,
+        correctionWord: "HOP")
+
+    /// The `edit` face's — the same numbers under its own name (its resting
+    /// anchor is the centre, which the surface's residual carries; nothing in
+    /// the loop differs).
+    static let readNoteEdit = LandingPolicy(
+        surface: .readNoteEdit, tolerance: 2, settleInterval: 0.25, minimumHold: 1.0,
+        maxWait: 0.6, correctionBudget: 3, timeBudget: 4,
+        correctionPace: .spacedByTheHold, correctsAnUnreportedTarget: true,
         correctionWord: "HOP")
 
     /// How long after a decision the next look runs.

@@ -192,6 +192,15 @@ struct ReadNoteLandingTests {
         }
     }
 
+    #if DEBUG
+    /// The last landing's DONE line in the DEBUG story (`ReadLandingStory`),
+    /// nil when no note Read landing has finished — the pre-fix tree's
+    /// answer, since nothing watched a note Read landing at all.
+    static func lastStory() -> String? {
+        ReadLandingStory.trace.last { $0.contains(" DONE: ") }
+    }
+    #endif
+
     /// Where the landed block sits against where its face's anchor puts it:
     /// the block's `anchor`-point at the viewport's `anchor`-point
     /// (`ViewportCarry`'s definition, which IS `scrollTo(_:anchor:)`'s). 0 is
@@ -244,6 +253,9 @@ struct ReadNoteLandingTests {
         print("[18l U1] realized rows \(indices.first.map { $0 + 1 } ?? -1)…"
             + "\(indices.last.map { $0 + 1 } ?? -1) (\(indices.count)); on screen "
             + "\(onScreen.map { $0 + 1 }); face \(face)")
+        #if DEBUG
+        print("[18l U1] the landing's story: \(Self.lastStory() ?? "NONE")")
+        #endif
         return (first, second)
     }
 
