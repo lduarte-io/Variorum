@@ -92,7 +92,7 @@ vw_probe_raw() {   # [flags…] → PV / PV_LINE; non-zero on timeout
   PV_LINE=$out
   PV=()
   local tok
-  for tok in ${(z)out}; do [[ $tok == *=* ]] && PV[${tok%%=*}]=${tok#*=}; done
+  for tok in ${(s: :)out}; do [[ $tok == *=* ]] && PV[${tok%%=*}]=${tok#*=}; done
   [[ -n $RUN_DIR ]] && print -r -- "$out" >> $RUN_DIR/probes.log
   return 0
 }
@@ -194,7 +194,7 @@ vw_ax_press() {  # label [role]
   $VW_BIN/vis-ax $PID "$1" ${2:--} press >> $RUN_DIR/run.log
 }
 
-vw_scroll() {  # x y lines (positive = down)
+vw_scroll() {  # x y n — WalkKit's walk-scroll: TEN wheel events of n lines each (positive = down)
   local x=${1%.*} y=${2%.*}
   vw_act_note "scroll $3 lines at ($x,$y)"
   sleep $STEP_GAP; vw_activate; vw_guarded $x $y
@@ -222,11 +222,24 @@ vw_open_note() {   # title — ⌘K, type, ⏎ (the reliable navigation road)
 typeset -g FREE_X=
 vw_free_x() {   # lo hi y
   local f x
-  for f in 0.3 0.5 0.7 0.85 0.15; do
+  for f in 0.3 0.5 0.7 0.85 0.15 0.05 0.95 0.02 0.98; do
     x=$(printf '%.0f' $(( $1 + ($2 - $1) * f )))
     $VW_BIN/vis-foreign $PID $x ${3%.*} >/dev/null && { FREE_X=$x; return 0 }
   done
   vw_abort "every click point on y=$3 between $1 and $2 is under a system dialog"
+}
+
+# The design voice is a SYNCED store setting (never a defaults write): Settings ▸ General, by AXPress.
+vw_set_voice() {   # terminal|study
+  vw_keys "Settings…" "tell (first application process whose unix id is $PID) to click menu item \"Settings…\" of menu 1 of menu bar item 2 of menu bar 1"
+  sleep 1.5
+  vw_ax_press $1 AXRadioButton || vw_abort "the $1 voice control was not found in Settings"
+  sleep 1.5
+  vw_act_note "close Settings"
+  osascript -e "tell application \"System Events\" to tell (first application process whose unix id is $PID) to click (first button whose subrole is \"AXCloseButton\") of window \"Variorum Dev Settings\"" >/dev/null 2>&1
+  sleep 1
+  vw_probe
+  [[ ${PV[voice]} == $1 ]] || vw_abort "the voice did not become $1 (${PV[voice]})"
 }
 
 # --- Captures (evidence beside the numbers) ----------------------------------------------------------
@@ -239,11 +252,14 @@ vw_cap() {     # name
 # Every assertion is one row: status · label · measured · expected · tolerance · known.
 # `known` names an OWNED KnownIssues row: a failure is then XFAIL (reported, not red), and a pass is
 # XPASS (loud — the known issue did not reproduce; re-examine the row).
+# zsh prints a float result as "24." — the report reads "24.0".
+vw_num() { [[ $1 == (|-)<->. ]] && print -r -- "${1}0" || print -r -- $1 }
+
 vw_row() {   # pass(0/1) label measured expected tol known
   local st
   if [[ -n $6 ]]; then st=$([[ $1 == 1 ]] && print XPASS || print XFAIL)
   else st=$([[ $1 == 1 ]] && print PASS || print FAIL); fi
-  SCN_ROWS+=("$st	$2	$3	$4	$5	$6")
+  SCN_ROWS+=("$st	$2	$(vw_num $3)	$4	$5	$6")
   vw_log "  $st  $2  measured=$3 expected=$4 tol=$5 ${6:+known=$6}"
 }
 
@@ -251,7 +267,7 @@ vw_expect_near() {   # label measured expected tol [known]
   local m=$2 e=$3 t=$4
   if [[ -z $m || -z $e || $m == - || $e == - ]]; then vw_row 0 "$1" "${m:-∅}" "${e:-∅}" "$t" "$5"; return; fi
   local ok=0; (( abs(m - e) <= t )) && ok=1
-  vw_row $ok "$1" "$m" "$e" "±$t" "$5"
+  vw_row $ok "$1" "$m" "$(vw_num $e)" "±$t" "$5"
 }
 
 vw_expect_eq() {     # label measured expected [known]
@@ -267,7 +283,7 @@ vw_expect_ne() {     # label measured forbidden [known]
 vw_expect_between() { # label value lo hi [known]
   local v=$2 ok=0
   [[ -n $v ]] && (( v >= $3 && v <= $4 )) && ok=1
-  vw_row $ok "$1" "${v:-∅}" "[$3, $4]" "∈" "$5"
+  vw_row $ok "$1" "${v:-∅}" "[$(vw_num $3), $(vw_num $4)]" "∈" "$5"
 }
 
 vw_require() {       # condition-string message — a FIXTURE/harness precondition, not the product
@@ -312,7 +328,7 @@ vw_scenario_end() {
     print -r -- "|---|---|---|---|---|---|"
     for row in $SCN_ROWS; do print -r -- "| ${row//	/ | } |"; done
     print -r -- ""
-    print -r -- "Captures: $(cd $SCN_DIR && ls *.png 2>/dev/null | tr '\n' ' ')"
+    print -r -- "Captures (\`${SCN_DIR#$RUN_DIR/}/\`): $(print -r -- $SCN_DIR/*.png(N:t))"
     print -r -- ""
   } >> $RUN_DIR/details.md
   RUN_SUMMARY+=("$SCN	$VOICE	$SCN_STATUS	${#SCN_ROWS}	$fails	$xfail	$xpass	$SCN_NOTE")

@@ -15,6 +15,9 @@ let wantRole = args.count > 3 && args[3] != "-" ? args[3] : nil
 let press = args.count > 4 && args[4] == "press"
 // VIS_AX_MINX: only matches whose left edge is at or right of this x (skip the sidebar's twin label).
 let minX = Double(ProcessInfo.processInfo.environment["VIS_AX_MINX"] ?? "") ?? -1e9
+// VIS_AX_PREFIX=1: a label that STARTS with the query matches (SwiftUI folds a card's title and its
+// preview into one label: "About this book, “The Adventures…”").
+let prefix = ProcessInfo.processInfo.environment["VIS_AX_PREFIX"] == "1"
 func attr(_ e: AXUIElement, _ name: String) -> AnyObject? {
     var v: AnyObject?; return AXUIElementCopyAttributeValue(e, name as CFString, &v) == .success ? v : nil
 }
@@ -27,7 +30,8 @@ while !queue.isEmpty, visited < 20000 {
     let names = [attr(e, kAXTitleAttribute), attr(e, kAXDescriptionAttribute),
                  role == "AXStaticText" ? attr(e, kAXValueAttribute) : nil]
         .compactMap { $0 as? String }.map { $0.lowercased() }
-    if names.contains(label), wantRole == nil || wantRole == role,
+    if names.contains(where: { $0 == label || (prefix && $0.hasPrefix(label)) }),
+       wantRole == nil || wantRole == role,
        let pv = attr(e, kAXPositionAttribute), let sv = attr(e, kAXSizeAttribute) {
         var p = CGPoint.zero, s = CGSize.zero
         AXValueGetValue(pv as! AXValue, .cgPoint, &p); AXValueGetValue(sv as! AXValue, .cgSize, &s)

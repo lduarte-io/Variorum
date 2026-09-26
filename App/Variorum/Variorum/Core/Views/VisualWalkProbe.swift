@@ -170,10 +170,13 @@ enum VisualWalkProbe {
             ?? docStart
         // Also the MIDDLE line: the first line WITH TEXT whose top is at or
         // below the viewport's middle and whose bottom is on screen — a
-        // click target "on top of a line of text" mid-page.
+        // click target "on top of a line of text" mid-page — and the first
+        // BLANK line there (a block's end in a note that keeps a blank line
+        // between paragraphs: the ⏎-then-⌫ carve's target).
         typealias Seen = (offset: Int, top: CGFloat, bottom: CGFloat, blank: Bool)
         var first: Seen?
         var middle: Seen?
+        var blankBelow: Seen?   // the first BLANK line in the lower half — a block's end in her notes
         let midC = (topC + bottomC) / 2
         var scanned = 0
         layoutManager.enumerateTextLayoutFragments(from: start, options: []) { fragment in
@@ -188,7 +191,8 @@ enum VisualWalkProbe {
                                   textLine.characterRange.length == 0 || isBlank(textLine, in: fragment))
                 if first == nil, top >= topC - 0.5 { first = seen }
                 if middle == nil, top >= midC, bottom <= bottomC, !seen.blank { middle = seen }
-                if first != nil, middle != nil { return false }
+                if blankBelow == nil, top >= midC, bottom <= bottomC, seen.blank { blankBelow = seen }
+                if first != nil, middle != nil, blankBelow != nil { return false }
             }
             return scanned < 400
         }
@@ -204,6 +208,11 @@ enum VisualWalkProbe {
             line["mid"] = "\(middle.offset)"
             line["midY"] = num(screenY(middle.top + origin.y, in: tv))
             line["midY1"] = num(screenY(middle.bottom + origin.y, in: tv))
+        }
+        if let blankBelow {
+            line["blank"] = "\(blankBelow.offset)"
+            line["blankY"] = num(screenY(blankBelow.top + origin.y, in: tv))
+            line["blankY1"] = num(screenY(blankBelow.bottom + origin.y, in: tv))
         }
 
         // The caret's line (a collapsed or ranged selection: its location).
@@ -325,24 +334,44 @@ enum VisualWalkProbe {
                    width: row.width - leading - IndexProseColumn.readEditResting,
                    height: row.height - top - IndexProseColumn.readEditRestingTop)
         }
-        guard let live = ReadModeOracle.liveBlockID,
-              let liveRow = ReadModeOracle.editBlockFrames[live],
-              let pane = panes.first(where: {
-                  $0.identifier?.rawValue.hasPrefix("pane:\(ReadEditPane.role)") == true })
-        else {
+        let live = ReadModeOracle.liveBlockID
+        var offset: (dx: CGFloat, dy: CGFloat, how: String)?
+        if let live, let liveRow = ReadModeOracle.editBlockFrames[live],
+           let pane = panes.first(where: {
+               $0.identifier?.rawValue.hasPrefix("pane:\(ReadEditPane.role)") == true }) {
+            // The pane's prose origin, in the window's y-down space.
+            let prose = pane.convert(
+                NSPoint(x: PaneTextView.proseLeadingInset, y: PaneTextView.proseTopInset), to: nil)
+            let liveColumn = column(liveRow)
+            offset = (prose.x - liveColumn.minX, window.frame.height - prose.y - liveColumn.minY, "pane")
+        } else if let post = session?()?.commandRouter.activePostID,
+                  let face = ReadModeOracle.faceFrames[post] {
+            // No live pane (Read ▸ edit at rest): the face — the edit column — is one scroll
+            // view; the AppKit scroll view whose size is the face's IS it, and its window
+            // origin minus the face's host-space origin is the same offset.
+            for scroll in scrollViews(in: window.contentView) {
+                let r = scroll.convert(scroll.bounds, to: nil)
+                if abs(r.width - face.width) < 1.5, abs(r.height - face.height) < 1.5 {
+                    offset = (r.minX - face.minX, window.frame.height - r.maxY - face.minY, "face")
+                    break
+                }
+            }
+        }
+        guard let offset else {
             line["rtR"] = ReadModeOracle.editBlockFrames.isEmpty ? "none" : "uncal"
             return
         }
-        // The pane's prose origin, in the window's y-down space.
-        let prose = pane.convert(
-            NSPoint(x: PaneTextView.proseLeadingInset, y: PaneTextView.proseTopInset), to: nil)
-        let proseDown = CGPoint(x: prose.x, y: window.frame.height - prose.y)
-        let liveColumn = column(liveRow)
-        let dx = proseDown.x - liveColumn.minX
-        let dy = proseDown.y - liveColumn.minY
-        line["rtRcal"] = "\(num(dx)),\(num(dy))"
+        line["rtRcal"] = "\(offset.how):\(num(offset.dx)),\(num(offset.dy))"
         line["rtR"] = columns(ReadModeOracle.editBlockFrames
-            .filter { $0.key != live }.values.map { toScreen(column($0), dx: dx, dy: dy) })
+            .filter { $0.key != live }.values
+            .map { toScreen(column($0), dx: offset.dx, dy: offset.dy) })
+    }
+
+    private static func scrollViews(in view: NSView?) -> [NSScrollView] {
+        guard let view else { return [] }
+        var out: [NSScrollView] = view is NSScrollView ? [view as! NSScrollView] : []
+        for sub in view.subviews { out += scrollViews(in: sub) }
+        return out
     }
 
     private static func editablePanes(in view: NSView?) -> [PaneTextView] {

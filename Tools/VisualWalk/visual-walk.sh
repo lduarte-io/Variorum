@@ -70,18 +70,6 @@ elif [[ -n $VW_SELECTED ]]; then run_list=(${(s:,:)VW_SELECTED})
 else run_list=($SCN_ORDER); fi
 for n in $run_list; do (( $+functions[scn_$n] )) || refuse "no scenario named $n (--list)"; done
 
-vw_set_voice() {   # terminal|study — Settings ▸ the design voice, by AXPress (no screen click)
-  vw_keys "Settings…" "tell (first application process whose unix id is $PID) to click menu item \"Settings…\" of menu 1 of menu bar item 2 of menu bar 1"
-  sleep 1.5
-  vw_ax_press $1 AXRadioButton || vw_abort "the $1 voice control was not found in Settings"
-  sleep 1.5
-  vw_act_note "close Settings"
-  osascript -e "tell application \"System Events\" to tell (first application process whose unix id is $PID) to click (first button whose subrole is \"AXCloseButton\") of window \"Variorum Dev Settings\"" >/dev/null 2>&1
-  sleep 1
-  vw_probe
-  [[ ${PV[voice]} == $1 ]] || vw_abort "the voice did not become $1 (${PV[voice]})"
-}
-
 VOICE=setup; vw_launch
 typeset -g FOUND_VOICE=${PV[voice]}
 typeset -a voices

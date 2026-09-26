@@ -142,7 +142,7 @@ scn_write-divide-merge() {
   local blocks=${PV[blk]#*/} len0=${PV[len]} sel0=${PV[sel]}
   vw_require '[[ ${PV[caretEnd]} == 0 ]]' "the caret inside the text" || return
   vw_keys "⏎ (divide)" 'key code 36'
-  vw_settle; vw_cap 02-divided
+  vw_settle; vw_snap divided; vw_cap 02-divided
   vw_expect_eq "divide: one more block" "${PV[blk]#*/}" $(( blocks + 1 ))
   vw_expect_page_still before "divide"
   local lineH=$(( $(vw_get before caretY1) - $(vw_get before caretY0) ))
@@ -153,7 +153,9 @@ scn_write-divide-merge() {
   vw_settle; vw_cap 03-merged
   vw_expect_eq "merge: block count back" "${PV[blk]#*/}" $blocks
   vw_expect_eq "merge: text restored (length)" "${PV[len]}" $len0
-  vw_expect_eq "merge: caret back where it was" "${PV[sel]}" $sel0
+  # The cut snaps to a word edge (S4-22), so a mid-word caret divides at the word's end: the caret
+  # after the merge belongs at the JOIN — where ⏎ put it — not at the click (first run: 9423 vs 9420).
+  vw_expect_eq "merge: the caret at the join (where the divide put it)" "${PV[sel]}" "$(vw_get divided sel)"
   vw_expect_page_still before "merge"
   vw_expect_near "merge: caret line y" "${PV[caretY0]}" "$(vw_get before caretY0)" 0.5
 }
@@ -194,11 +196,18 @@ vw_click_read_tier() {  # key(rtI|rtR) label band-top-offset — clicks the LOWE
     (( q[2] >= band_top && q[2] + q[4] <= band_bot )) && fit+=($r)
   done
   vw_require '(( ${#fit} >= 2 ))' "two read-tier blocks fully on screen ($key)" || return
-  local low= up= i
-  for (( i = ${#fit}; i >= 1; i-- )); do
-    local q=(${(s:,:)fit[i]})
-    if [[ -z $low ]]; then (( q[4] >= 50 )) && low=$fit[i]
-    else up=$fit[i]; break; fi
+  # The lower target is the lowest block of FIVE or more lines (≥ 100 pt): tall enough that the
+  # known read-tier re-wrap (S3: the live pane drops the tier's 4-pt line spacing, so line k rises
+  # 4k pt) must show on its last line — a standing measurement of S3, not a coin toss on block size.
+  local low= up= i min
+  for min in 100 50; do
+    low= up=
+    for (( i = ${#fit}; i >= 1; i-- )); do
+      local q=(${(s:,:)fit[i]})
+      if [[ -z $low ]]; then (( q[4] >= min )) && low=$fit[i]
+      else up=$fit[i]; break; fi
+    done
+    [[ -n $low && -n $up ]] && break
   done
   vw_require '[[ -n $low && -n $up ]]' "a multi-line block with one above it ($key)" || return
   local L=(${(s:,:)low}) U=(${(s:,:)up})
@@ -210,10 +219,12 @@ vw_click_read_tier() {  # key(rtI|rtR) label band-top-offset — clicks the LOWE
   vw_expect_eq "$label last line: a pane went live under the caret" "${PV[fr]}" pane
   vw_expect_eq "$label last line: the caret is NOT on the empty line under the text" \
     "$([[ ${PV[nl]} == 1 && ${PV[caretEnd]} == 1 ]] && print on-the-blank-line || print on-text)" on-text
-  vw_expect_eq "$label last line: the caret is on the block's last text line" \
-    "${PV[caretLine]}" "$(( PV[caretTextLines] - 1 ))"
-  vw_expect_near "$label last line: the clicked line stays under the pointer (pt)" \
-    "$(( (PV[caretY0] + PV[caretY1]) / 2 ))" $y 9 "$KI_S3"
+  # (Not "the block's last live line": the live pane shows the markdown markers the tier hides, so
+  # it can wrap the block one line longer — S3 again; the character is the pinned half, in-suite.)
+  vw_expect_eq "$label last line: the caret is on a TEXT line (not the empty one)" \
+    "$(( PV[caretLine] < PV[caretTextLines] ))" 1
+  vw_expect_between "$label last line: the clicked line stays under the pointer (click y in its box)" \
+    $y $(( PV[caretY0] - 1 )) $(( PV[caretY1] + 1 )) "$KI_S3"
   # 2. the block ABOVE, on its FIRST line.
   y=$(( U[2] + 8 ))
   vw_free_x $U[1] $(( U[1] + U[3] * 0.5 )) $y; x=$FREE_X
@@ -253,6 +264,8 @@ scn_readedit-click() {
   vw_settle rt
   if [[ ${PV[face]} != edit ]]; then vw_ax_press edit AXButton; vw_settle rt; fi
   vw_require '[[ ${PV[mode]} == Read && ${PV[face]} == edit ]]' "Read ▸ edit" || return
+  # The host space is calibrated on the live pane, which mounts after the rows land.
+  local i; for i in {1..16}; do [[ ${PV[rtR]} == (uncal|none) ]] || break; sleep 0.5; vw_probe rt; done
   vw_require '[[ ${PV[rtR]} != uncal && ${PV[rtR]} != none ]]' "the read tier's columns (calibrated on the live pane)" || return
   vw_click_read_tier rtR "Read▸edit" 200
 }
@@ -265,19 +278,20 @@ scn_outline-narrow-restore() {
   vw_open_note "the adventures of sherlock holmes"
   vw_ax_press outline AXButton
   vw_settle
-  local t attempt y
-  for attempt in 1 2; do
-    t=($(VIS_AX_MINX=$(( WIN_X + 520 )) $VW_BIN/vis-ax $PID "about this book" AXStaticText)) \
-      || { vw_require false "the About this book card"; return }
-    vw_click $(( t[1] - 12 )) $(( t[2] + t[4] / 2 )) "the card's disclosure (toggle)"
+  # The collapsed card is ONE button whose label folds the title and its preview ("About this book,
+  # “The Adventures…”"); its ▸ sits 21 pt in, 22 pt down. Expanded, the title is its own text.
+  local card t y
+  card=($(VIS_AX_MINX=$(( WIN_X + 520 )) VIS_AX_PREFIX=1 $VW_BIN/vis-ax $PID "about this book," AXButton))
+  if [[ -n $card ]]; then
+    vw_click $(( card[1] + 21 )) $(( card[2] + 22 )) "the card's ▸ (expand inline)"
     vw_settle
-    t=($(VIS_AX_MINX=$(( WIN_X + 520 )) $VW_BIN/vis-ax $PID "about this book" AXStaticText))
-    y=$(( t[2] + t[4] + 22 ))
-    vw_free_x $(( t[1] + 10 )) $(( t[1] + 300 )) $y
-    vw_click $FREE_X $y "into the note's first line"
-    vw_settle
-    [[ ${PV[fr]} == inline ]] && break
-  done
+  fi
+  t=($(VIS_AX_MINX=$(( WIN_X + 520 )) $VW_BIN/vis-ax $PID "about this book" AXStaticText)) \
+    || { vw_require false "the expanded About this book note"; return }
+  y=$(( t[2] + t[4] + 22 ))
+  vw_free_x $(( t[1] + 10 )) $(( t[1] + 300 )) $y
+  vw_click $FREE_X $y "into the note's first line"
+  vw_settle
   vw_require '[[ ${PV[fr]} == inline ]]' "the expanded note is the live inline editor" || return
   local w0=$WIN_W h0=$WIN_H w n=0
   for w in $w0 1100 900 $w0; do
@@ -294,18 +308,25 @@ scn_outline-narrow-restore() {
 
 # --- S9: B5 — ⏎ right after a ⌘↓ landing on invalidated geometry (KnownIssues row 88) ---------------------
 vw_def b5-return-after-cmd-down "A Scandal in Bohemia, Write" \
-  "⏎ + ⌫ mid-note (the carve's full re-render invalidates layout) · ⌘↓ · ⏎ at the tail · ⌫" \
-  "(a) the ⏎ at the tail must not move the page (the lines above the caret)" "$KI_B5"
+  "a blank line mid-page · ⏎ + ⌫ (the carve's full re-render invalidates layout) · ⌘↓ · ⏎ at the tail · ⌫" \
+  "(a) the ⏎ at the tail must not move the page (the lines above the caret)" \
+  "pass — $KI_B5 did NOT reproduce here at U-VIS (2026-09-26, both roads; U0b measured +109/+166 on 998f7d7d): a red means B5 is back"
 scn_b5-return-after-cmd-down() {
   vw_write_open "A Scandal in Bohemia" || return
   vw_write_scroll 30
-  local c=(${(s:,:)PV[colX]}) y=$(( (PV[midY] + PV[midY1]) / 2 )) len0=${PV[len]}
-  vw_free_x $(( c[2] - 40 )) $(( c[2] - 5 )) $y
-  vw_click $FREE_X $y "past a mid-page line's end"
+  # U0b's walk, exactly: a BLANK line mid-page (a block's end in a note that keeps the blank line
+  # between paragraphs) → ⏎ (an empty block below) → ⌫ (A7's carve, which lands through the FULL
+  # re-render — the invalidation B5 needs) → ⌘↓ → ⏎ at the tail.
+  vw_require '[[ -n ${PV[blank]} ]]' "a blank line in the viewport's lower half" || return
+  local c=(${(s:,:)PV[colX]}) y=$(( (PV[blankY] + PV[blankY1]) / 2 )) len0=${PV[len]}
+  vw_free_x $(( c[1] + 20 )) $(( c[1] + 200 )) $y
+  vw_click $FREE_X $y "a blank line mid-page (a block's end)"
   vw_settle
-  vw_keys "⏎ (empty block)" 'key code 36'
+  local blocks0=${PV[blk]#*/}
+  vw_keys "⏎ (an empty block below)" 'key code 36'
   vw_settle
-  vw_keys "⌫ (the carve → full re-render)" 'key code 51'
+  vw_require '[[ ${PV[blk]#*/} == $(( blocks0 + 1 )) ]]' "⏎ at the block's end minted an empty block" || return
+  vw_keys "⌫ (the carve → the full re-render)" 'key code 51'
   vw_settle
   vw_require '[[ ${PV[len]} == $len0 ]]' "the mid-note round trip restored the text" || return
   vw_keys "⌘↓" 'key code 125 using command down'
@@ -315,10 +336,35 @@ scn_b5-return-after-cmd-down() {
   vw_keys "⏎ at the tail" 'key code 36'
   vw_settle; vw_cap 02-return
   vw_expect_eq "⏎ at the tail: an empty block below" "${PV[blk]#*/}" $(( blocks + 1 ))
-  vw_expect_page_still tail "⏎ at the tail" "$KI_B5"
+  vw_expect_page_still tail "⏎ at the tail"
   vw_keys "⌫ (restore)" 'key code 51'
   vw_settle; vw_cap 03-restored
   vw_expect_eq "restore: text back" "${PV[len]}" $len0
+}
+
+# --- S10: B5's re-font road — ⏎ after ⌘↓ when a whole-document RE-FONT invalidated the layout ----------
+vw_def b5-refont "A Scandal in Bohemia, Write" \
+  "a voice switch (the whole-document re-font) · ⌘↓ · ⏎ at the tail · ⌫ · the voice switched back" \
+  "(a) the ⏎ at the tail must not move the page" \
+  "pass — $KI_B5's re-font road; did NOT reproduce at U-VIS (2026-09-26): a red means B5 is back"
+scn_b5-refont() {
+  vw_write_open "A Scandal in Bohemia" || return
+  local here=${PV[voice]} other len0=${PV[len]}
+  [[ $here == terminal ]] && other=study || other=terminal
+  vw_set_voice $other
+  vw_settle
+  vw_require '[[ ${PV[mode]} == Write && ${PV[fr]} == editor ]]' "back in Write after Settings" || { vw_set_voice $here; return }
+  vw_keys "⌘↓" 'key code 125 using command down'
+  vw_settle; vw_snap tail; vw_cap 01-refont-cmd-down
+  local blocks=${PV[blk]#*/}
+  vw_keys "⏎ at the tail" 'key code 36'
+  vw_settle; vw_cap 02-return
+  vw_expect_eq "⏎ at the tail: an empty block below" "${PV[blk]#*/}" $(( blocks + 1 ))
+  vw_expect_page_still tail "⏎ at the tail (after a re-font)"
+  vw_keys "⌫ (restore)" 'key code 51'
+  vw_settle
+  vw_expect_eq "restore: text back" "${PV[len]}" $len0
+  vw_set_voice $here
 }
 
 # --- SELF-TEST: the harness must be able to RED (run with --selftest) -----------------------------------
@@ -335,4 +381,4 @@ scn_selftest-red() {
 
 # The seeded run's order: the note-open pair FIRST (a fresh launch is every note's first open).
 SCN_ORDER=(note-reopen write-typing write-newline-roundtrip write-divide-merge mode-roundtrip
-           index-click readedit-click outline-narrow-restore b5-return-after-cmd-down)
+           index-click readedit-click outline-narrow-restore b5-return-after-cmd-down b5-refont)
