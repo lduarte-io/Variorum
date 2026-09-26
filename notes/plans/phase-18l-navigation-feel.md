@@ -959,8 +959,8 @@ the existing single-fragment `.ensuresLayout` idiom).
 3. **The carve's caret** lands at the NEXT block's start mid-note (`caretLandingAfterRemoving`), not back
    at the end of the block above — the carve's ruled landing (13c 1B), unchanged; noted only.
 *[removed for publication]*
-   starters:", one per build) and eleven empty blocks in the tray (the walk's carves; *A Scandal in
-   Bohemia* back at 262 blocks). Nothing else changed; the voice restored to Terminal.
+   *[removed for publication]*
+   note, ten on *A Scandal in Bohemia*, which is back at 262 blocks). Nothing else changed; the voice restored to Terminal.
 5. **Walker fact for `Tools/WalkKit/README.md`** (the orchestrator's): the dev window's bottom-right
    corner sits on the screen's bottom edge at 1440×1000 @ (0,117) on this 1728×1117 screen, so a corner
    drag lands on the overlay scroller — a live resize needs the RIGHT edge (with a guard that admits a
