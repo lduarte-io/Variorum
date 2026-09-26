@@ -298,7 +298,9 @@ scn_readedit-click() {
   vw_open_note "The Red-Headed League"
   vw_keys "⌘3 (Read)" 'keystroke "3" using command down'
   vw_settle rt
-  if [[ ${PV[face]} != edit ]]; then vw_ax_press edit AXButton; vw_settle rt; fi
+  # (18l U1: the face segments are AXRadioButtons — measured; the AXButton lookup never matched and
+  # was latent only because this note opened on edit.)
+  if [[ ${PV[face]} != edit ]]; then vw_ax_press edit AXRadioButton; vw_settle rt; fi
   vw_require '[[ ${PV[mode]} == Read && ${PV[face]} == edit ]]' "Read ▸ edit" || return
   # The host space is calibrated on the live pane, which mounts after the rows land.
   local i; for i in {1..16}; do [[ ${PV[rtR]} == (uncal|none) ]] || break; sleep 0.5; vw_probe rt; done
@@ -500,12 +502,11 @@ scn_read-landing() {
   local face ord tag
   for face in edit read; do
     if [[ ${PV[face]} != $face ]]; then
-      # The face switch's two segments: "edit" is found by its label; "read" by its place beside it
-      # (its label is shared with the note's own ⌘3 mode tab, which AX finds first).
-      local seg; seg=($($VW_BIN/vis-ax $PID edit AXButton)) \
-        || { vw_require false "the face switch's edit segment"; return }
-      if [[ $face == edit ]]; then vw_ax_press edit AXButton
-      else vw_click $(( seg[1] + seg[3] * 3 / 2 )) $(( seg[2] + seg[4] / 2 )) "the face switch's read segment"; fi
+      # The face switch's segments are AXRadioButtons (measured); "read" is also the sidebar's mode
+      # row item, which sits left of the Read host — so only matches right of the sidebar count.
+      export VIS_AX_MINX=$(( WIN_X + 300 ))
+      vw_ax_press $face AXRadioButton
+      unset VIS_AX_MINX
       vw_settle rl
     fi
     vw_require '[[ ${PV[face]} == $face ]]' "Read ▸ $face" || return
