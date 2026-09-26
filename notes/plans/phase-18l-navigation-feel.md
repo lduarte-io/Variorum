@@ -556,6 +556,52 @@ file; checkpoint from first commit; no subagents; synchronous waits; pathspec-li
 Opus cold review unless the diff's oracle endpoints touch the editor seam beyond DEBUG — then
 Fable (R-cor-14's letter; expected: the DEBUG-only blast radius keeps it Opus).
 
+## U1 BRIEF (session 5 — note Read adopts the F3 shape; written by the orchestrator 2026-09-26 one-ahead — spawned after U-VIS's review settles; re-check against the U-VIS RECORD before spawning)
+
+You are the `opus-implementer` for **18l UNIT U1**. One acceptance unit, PHASE-SIZED: the note
+Read mode (BOTH faces) adopts the landing shape 13u4 UNIT F3 proved on the book Index — heights
+known before the aim, one authority watching the landing. **The charter's U1 text is your unit
+charter, read it IN FULL:** `notes/plans/post-13u-health-rounds.md` KICKOFF 2, the U1 bullet
+(the `LandingPolicy.readNote`, the per-note BLOCK manifest from the already-cached
+`Queries.blockExtents` through `ProseHeightModel`, rows as placeholders at asserted heights, the
+authority's aim/hold/correct/watchdog loop replacing the one-shot `scrollTo` in BOTH faces
+(`ReadModeView.land`, `ReadEditPane.land`), the signpost for free; **the shipped resting anchors
+KEPT — page 0.08, edit `.center`: where a landing puts the block is PRODUCT, not this round's
+call**; the contents columns may adopt the same aim if cheap, else record).
+
+**Read first, beyond the charter:** (1) THIS file whole — the SITTING RECORD, ENVIRONMENT TRAPS
+(verbatim binding), and the **U0c RECORD**: Read's opening landing changed there
+(`ReadModeView`'s seed/select and the `openingLanding` arm) — your adoption COMPOSES with the
+opening arm, never fights it (a first open still shows the start; a landing asked for still
+lands; if the two want different machinery, stop and report the fork). (2)
+`notes/codebase-health-review-2026-09-21.md` §1 whole — §1.2's diagnosis IS your unit's target
+(the one-shot aim against a lazy estimate, the identical jump every time, the no-`landing`-line
+Console signature); §1.3 item 1 your shape; §1.4 the warming refusal (OUT of scope, §W's
+protocol). (3) The 13u4 **UNIT F3 BRIEF + RECORD** in `notes/plans/phase-13u4-restyle.md` — the
+pattern being transplanted AND the acceptance protocol's form (the cold-trial table; red-on-old
+by behavioral revert on a probe-only tree). (4) The code: `Surface/LandingAuthority.swift` whole
+(a new `LandingSurface` case is a CLOSED-enum addition — the signpost stays content-free),
+`Surface/BookHeightManifest.swift` + `ProseHeightModel`, `BookIndexView`'s F3 adoption (the
+worked example one surface over), `ReadModeView` + `ReadEditPane` end to end,
+`Queries.blockExtents` (`Sources/VariorumCore/Queries/PageExtents.swift`) and
+`BookViewModel.flowExtents` (the cache-key precedent for a PER-NOTE cache home). (5)
+`notes/TEXTKIT2_NOTES.md` §2–§3.
+
+**Acceptance is MEASURED, F3's own protocol:** cold and warm deep-click runs on the real
+long-note fixture (a Sherlock story; U0c's walk facts name the fixtures), N-of-N settling at the
+anchor with `hops=0` cold, the warm set too, plus a hands-on walk (both voices); and the review
+§1.2 Console diagnostic FLIPS — the note-Read stutter path now EMITS `landing` lines (capture
+the log line in the record). P1: the manifest consult is ∝ the note, once per note model
+(the `flowExtents` cache shape); nothing new at autosave rate. Zero `Sync/`; `Sources/` only if
+a `Queries` read needs a new bounded form (say so; schema untouched). Discipline: the U0 brief's
+paragraph verbatim (`## U1 RECORD` in THIS file; checkpoint from first commit; pathspec-limited;
+no subagents; synchronous waits; tests at END + `TutorialWalkTests`). Review per the charter:
+**Opus cold review unless your diff drifts onto the editor seam** (`EditorTextView` /
+`PaneSurface` / `PaneTextAuthority` bodies) — state plainly which it is. NOTE FOR THE RECORD:
+after U1 closes, the orchestrator makes the R-18l-3 SEAM JUDGMENT (continue to U2/U3/U4 in this
+round, or close 18l and hand the remainder to 18l-b) — your record's final state is that
+judgment's input; close it self-contained.
+
 ## U0 RECORD (implementer: `opus-implementer`, 2026-09-26)
 
 **NOT DONE (first line):** (1) no whole-old-tree harness bisect — every Mac test run launches the
