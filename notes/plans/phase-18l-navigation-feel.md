@@ -1070,7 +1070,7 @@ IN PROGRESS; nothing below is verified unless it carries a hash or a log.
 | 4 | The END-jump: find the tail writer (or disprove it) — attribution + red-on-old pin | TRACED — the non-click-writer hypothesis is DISPROVED for the single-window app (below); what derives the tail landing is the note-open landing over a caret she left there. The red-on-old pins are the rule's own (piece 6) — PENDING |
 | 5 | Build R-18l-1 (first-open set; re-open restore by the standing machinery + the place) | DONE (`5d7c8bb6`) — THE BUILD below; `NoteOpenLandingTests` **11/11 GREEN** on the fixed tree (`App/Variorum/DerivedData/18l-u0c-pin-fixed3.log`); the three behavioural reverts RED in their named shapes (below); the ruled pins' first run green (`18l-u0c-neighbors1.log`, 97 tests / 10 suites: TakesArticleScrollTests (R-Q20/R-Q21), LandingOffsetTests (RAISE-M1), CurrentBlockContinuityTests, ModeSwitchCarryTests, ScrollAnchorTests, WriteTopAirTests, ReadModeTests, CommandRouterTests, TakesLandingTests + the new suite — every one byte-unmodified) |
 | 6 | Pins (end-jump red-on-old; first-open / re-open / deep-link per mode; R-Q20/R-Q21 + RAISE-M1 ride unmodified) | DONE — 11 tests (the room pin added at `this commit`); the A/B sections re-shaped at `5d7c8bb6` to the ruled letter (the caret SURVIVES; the viewport opens at the start) — their viewport arms are the red-on-old cores, re-proved by R-open; the two router pins are state-transition pins of the new bookkeeping (new API). The pre-fix run: `NoteOpenLandingTests` (10 tests) committed RED on the pre-fix tree (this commit; `App/Variorum/DerivedData/18l-u0c-pin-prefix1.log`): **8 red / 18 issues**, the 2 guards green — the router's first open restores the earlier run's fact (block 5 @12) and a re-open restores it too; Write's first open: clip **2904.0** (the ⏎ shape — caret 8691/8691), **2880.0** (the last line's end), **1588.0** (the middle); Takes: article clip **1866.0**, the empty last block's pane live; Read: the last block selected, scrolls **[1149, 3819]**; re-open at the top: **24.0**; re-open after scrolling away from a tail caret: **2904.0**; re-open mid-note: left 1391.0 → back **24.0**; the mode-round-trip-after-re-open guard and the deep-link guard green |
-| 7 | Walk (both voices; her shapes; first-open vs re-open per door; a deep link) | NOT-STARTED |
+| 7 | Walk (both voices; her shapes; first-open vs re-open per door; a deep link) | IN-PROGRESS — Terminal first pass on the letter-reading build DONE (it found `t-11`; THE WALK'S FIRST PASS above); the supersession build's walk (both voices) PENDING |
 | 8 | Closing runs (touched suites + the eleven Tutorial suites) | NOT-STARTED |
 | 9 | Self-assessment | NOT-STARTED |
 
@@ -1214,3 +1214,54 @@ Each is a working-tree edit only, then `git checkout HEAD --` the file and `git 
   where the fixed tree comes back at **2880.0** (the last line at the viewport top; she left the
   page at 3017.0, and at the re-open's settle hop the room's maximum scroll is the last line's top —
   the jump's live clamp; the pin asserts the END, never the start, and says why).
+
+### THE WALK'S FIRST PASS FOUND THE LETTER-READING WRONG — and the build returned to the supersession reading (Terminal, the fixed build `5d7c8bb6`)
+
+The first walk pass (Terminal, fresh launch, captures `18l-screens/u0c/walk/`, gitignored) passed
+every opening row: Scandal's first open from the Library at its START with the caret remembered at
+block 199 (`t-01`; pre-fix `pre-b4` landed block 199 at the top), A Case of Identity's first open at
+its START (`t-02`; pre-fix `pre-a6`, the blank END), the page left mid-note → the Open strip's
+other note → back: both re-opens **pixel-identical** to the pages left (`t-04` = `t-01`, `t-05` =
+`t-03`, a text-body diff with an empty bounding box), ⌥⌘[ / ⌥⌘] the same (`t-06`, `t-07`), the Blocks
+panel's *open in Write* (a deep link) landing block 199 at the top (`t-09`), and Takes' first open
+at the top (`t-10`; pre-fix `pre-c2`, the END). **Then ONE ⌘1 from that Takes first open landed
+Write on the blank END** (`t-11`): the letter-reading kept the remembered caret (block 138, the
+empty last block) as the live fact, and a MODE SWITCH is not an opening — every mode enters on the
+current block and Write reveals it (#98(a)). Her report, one keystroke later.
+
+**So the build now reads R-18l-1 by its supersession sentence** — *"This SUPERSEDES the
+every-door-into-Write-lands-at-the-caret rule (17o) for the NOTE-OPEN act"*, and that 17o rule is
+exactly *"every door into Write lands at the REMEMBERED CARET OFFSET … and the arrival REVEALS it"*
+(`LandingOffsetTests`' header): the session's FIRST open of a note seeds NO fact, so every mode
+arrives as a note with nothing remembered does (Write's caret AND page at the start; Takes' first
+slot; Read's first row) and whatever she does next is what the memory follows — a mode switch
+included. A RE-open restores THIS run's fact only (`CurrentBlockMemory.sessionFact`), never an
+earlier run's. The memory machinery itself survives untouched (persisted, restored on re-opens,
+read by the book's edit-here door and the panes' entry caret) — the sense in which I read *"the
+remembered caret itself survives (editing state)"*. **This is a PROVISIONAL call against the
+sitting record's gloss, flagged for the orchestrator** (QUESTIONS #150(a) carries both readings
+with `t-11` as the measured reason). Her earlier R-cor-3 (the Library peek's *"the place where your
+cursor was saved"*) is superseded for the session's first open by the same ruling — flagged for
+canon hygiene. The opening machinery (`NoteOpening`, `openingLanding`) is unchanged and still
+decides the re-open arm (the page she left wins over a caret reveal).
+
+**THE SUPERSESSION BUILD (this commit) — pins and reverts:** `registerDetail` seeds nothing on the
+run's first open and only `sessionFact` on a re-open; `NoteOpening.seededThisRun` retired (a seeded
+fact is now always this run's; Read scrolls on an opening landing iff `seeded != nil`). The pin
+file's A/B sections are back to the start-landing expectations (`fe4473bf`'s, whose pre-fix run is
+their red-on-old evidence: 8 red / 18 issues) plus the opening-record arms, and a new pin pins the
+walk's finding — `aModeSwitchRightAfterAFirstOpenStaysAtTheStart` (Takes first open → ⌘1 → Write
+at 0.0). **`NoteOpenLandingTests` 12/12 GREEN** (`18l-u0c-pin-fixed5.log`). **R-letter** (the
+first open seeding `current(for:)` again — the letter-reading, one line, `18l-u0c-R-letter.log`):
+**RED 7 tests / 16 issues** — both router pins, Write's three first opens on the caret arm (8691 /
+8690 / 4926 where 0 is owed — their clip arm stays 0.0, the opening's no-reveal), Takes (no live
+pane at the top: the ring sits on the unrealized last block), Read (the last block selected,
+scrolled [1149, 3819]), and **the mode-switch pin: Write clip 2904.0** — `t-11`'s blank END,
+reproduced in the harness; the re-open and guard pins green.
+
+**Machinery honesty (a mistake, caught and repaired in the same minute):** the R-letter revert's
+`git checkout HEAD -- CommandRouter.swift` restored the COMMITTED file over the uncommitted
+supersession edits (the trap the resiliency protocol names). The four edits (the seeding + its
+comment, `NoteOpening`'s field, two docs) were re-applied from this session's own record of them
+and re-verified: 12/12 green on the re-applied tree (`18l-u0c-pin-fixed5.log`). Every later revert
+runs only on a COMMITTED tree.

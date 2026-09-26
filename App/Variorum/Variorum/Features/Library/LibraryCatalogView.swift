@@ -298,11 +298,11 @@ struct LibraryCatalogView: View {
 
     /// Open a hit at its own kind's destination — the one opening road the
     /// title click, the double-click, the context menu and the panel's Open
-    /// door all take. A NOTE's caret lands where it last was (batch C's
-    /// `CurrentBlockMemory`, restored by `CommandRouter.registerDetail` —
-    /// editing state that survives), and since 18l U0c the PAGE is her R-18l-1's:
-    /// the session's first open of a note shows its START, a re-open this
-    /// session the page she left (`CommandRouter.openingLanding`).
+    /// door all take. Where a NOTE lands is the note-open door's one rule (18l
+    /// U0c, her R-18l-1 — `CommandRouter.registerDetail`): the session's first
+    /// open of a note shows its START; a re-open this session restores the
+    /// page she left. (Batch E's "lands where the caret last was" — her R-cor-3
+    /// — is superseded for the session's first open by that ruling.)
     private func openHit(_ hit: Queries.CatalogHit) {
         withAnimation(Self.panelAnimation) { model.closeInfo() }
         onOpen(hit.kind == .book ? .reading(hit.id) : .post(hit.id))

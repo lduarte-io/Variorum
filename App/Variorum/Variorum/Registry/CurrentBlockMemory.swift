@@ -21,13 +21,14 @@
 //
 //  **18l U0c — her R-18l-1 bounds the note-open half:** *"First open of a
 //  note each session shows the start; re-opening a note you already visited
-//  this session restores where you were."* The remembered caret SURVIVES as
-//  editing state — the note-open door (`CommandRouter.registerDetail`) still
-//  restores it, and the caret, the ring and the selection still land on it —
-//  and only the OPENING'S VIEWPORT changes: the page this run left for the
-//  note, else its start, never a reveal of the remembered place
-//  (`CommandRouter.openingLanding`). `sessionFact` is how an opening tells
-//  THIS run's place from an earlier run's.
+//  this session restores where you were."* So the NOTE-OPEN door
+//  (`CommandRouter.registerDetail`) restores only THIS run's fact
+//  (`sessionFact`), and the run's first open of a note restores none — it
+//  arrives at its start in every mode, and the memory follows her from
+//  there. The memory itself is untouched: still persisted, and still read by
+//  the doors that name a place on purpose — the book's edit-here door
+//  (`BookView.editHere`) and the panes' entry caret
+//  (`PaneCaretLanding.entering`), both through `currentBlock(for:)`.
 //
 //  Pure: a value type over a dictionary plus the defaults it persists to.
 //  The router owns one and writes through it; nothing else decides.
@@ -63,9 +64,11 @@ struct CurrentBlockMemory {
 
     /// **THIS RUN's fact only** — the session dict, never the persisted copy
     /// behind it (18l U0c, her R-18l-1: *"re-opening a note you already visited
-    /// this session restores where you were"*). The note's opening asks it:
-    /// what an EARLIER run persisted is where she was then — editing state
-    /// that survives, but never a place an opening scrolls to.
+    /// this session restores where you were"*). The note-open door reads this:
+    /// what an EARLIER run persisted is where she was then, and her ruling puts
+    /// the session's first open of a note at its START — so a re-open that
+    /// found nothing reported this run (a glance, a mode with no caret) lands
+    /// at the start too, never falls back to that older place.
     func sessionFact(for postID: String) -> FocusedBlock? {
         facts[postID]
     }

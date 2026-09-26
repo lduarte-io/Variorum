@@ -293,16 +293,16 @@ struct ReadModeView: View {
             // lagging case the carried block's offset was never held, so
             // there is nothing to lose either way.
             // 18l U0c — HER R-18l-1: when this seed is the note's OPENING
-            // landing (`CommandRouter.openingLanding`), the current block is
-            // still selected (editing state) but the face scrolls to it only
-            // when it is THIS run's place — Read keeps no page of its own, so
-            // on a re-open this run's current block IS where she was. A place
-            // an earlier session left is never scrolled to: the note opens at
-            // its start (it used to open centred on that block — the middle or
-            // the end). A carried place and every non-opening seed land as ruled.
+            // landing (`CommandRouter.openingLanding`), the face scrolls to the
+            // current block only on a re-open that restored THIS run's place —
+            // Read keeps no page of its own, so this run's current block IS
+            // where she was. The session's first open restores no fact (the
+            // first row, the page at its start — it used to open centred on the
+            // block an earlier session left: the middle or the end). A carried
+            // place and every non-opening seed land as ruled.
             let opening = carried == nil
                 ? session.commandRouter.openingLanding(postID: postID, fact: fact) : nil
-            let scrolls = opening.map { $0.seededThisRun } ?? true
+            let scrolls = opening.map { $0.seeded != nil } ?? true
             select(target, scrollFace: scrolls, report: carried != nil,
                    anchor: carried.map { ViewportCarry.anchor($0.fraction) })
         }

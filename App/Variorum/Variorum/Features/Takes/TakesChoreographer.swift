@@ -207,14 +207,14 @@ final class TakesChoreographer {
                 // would fight a restored position for nothing.
                 //
                 // 18l U0c — HER R-18l-1, an outrank ABOVE the landing, never an
-                // edit inside it: when this entry is the note's OPENING landing
-                // (`CommandRouter.openingLanding`) the ring still lands on the
-                // current block (editing state), and the page is the ruling's —
-                // the article place this run left (R-Q1's restore, which a
-                // landing on the very block she was in never outranks under
-                // R-Q21), else the top. No reveal is asked for: the board used
-                // to open at the END of a note whose caret an earlier session
-                // left there (`18l-screens/u0c/pre/pre-c2`). A mode switch ends
+                // edit inside it. The session's FIRST open brings no fact (the
+                // fall-through above — the first slot, the top), where the board
+                // used to open at the END of a note whose caret an earlier
+                // session left there (`18l-screens/u0c/pre/pre-c2`). A RE-open's
+                // entry is the note's OPENING landing
+                // (`CommandRouter.openingLanding`): the ring lands on the block
+                // she was in and the page is the article place this run left
+                // (R-Q1's restore) — no reveal is asked for. A mode switch ends
                 // the opening, so every other entry reveals exactly as ruled.
                 let opening = model.session.commandRouter
                     .openingLanding(postID: model.postID, fact: fact)

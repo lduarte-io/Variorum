@@ -2262,21 +2262,20 @@ final class EditorViewModel {
             //
             // 18l U0c — HER R-18l-1: *"First open of a note each session shows
             // the start; re-opening a note you already visited this session
-            // restores where you were."* When this arrival is the note's
-            // OPENING landing (`CommandRouter.openingLanding`), the viewport is
-            // the ruling's, never the reveal's: the page this run left for the
-            // note — which this cold mount has just parked from the session's
-            // places — else the note's start (nothing parked: the page rests at
-            // its top air). The caret still lands at the remembered place above
-            // (editing state that survives; typing or a click reveals it). The
-            // two shapes the reveal made of her notes, both measured on the
-            // pre-fix build: the run's first open landed a caret an earlier
-            // session left at the note's END as the only line on screen
-            // (`18l-screens/u0c/pre/pre-a6`), and a re-open hauled the page she
-            // had read back up to its top down to that caret again (`pre-a10`).
-            // A MODE ROUND TRIP is not an opening (the router ends it at the
-            // switch), and neither is a place someone chose since the note
-            // arrived — #98(a)'s reveal stands for both.
+            // restores where you were."* The session's FIRST open arrives with
+            // no fact at all (`CommandRouter.registerDetail`), so it lands at
+            // the start and reveals nothing — where the pre-fix build landed a
+            // caret an earlier session left at the note's END as the only line
+            // on screen (`18l-screens/u0c/pre/pre-a6`). On a RE-open that is
+            // the note's OPENING landing (`CommandRouter.openingLanding`), the
+            // viewport is the page this run left for the note — which this
+            // cold mount has just parked from the session's places — and the
+            // reveal is not run: it hauled the page she had read back up to
+            // its top down to her caret at the END again (`pre-a10`). The caret
+            // itself still lands where she left it this run (typing or a click
+            // reveals it). A MODE ROUND TRIP is not an opening (the router ends
+            // it at the switch), and neither is a place someone chose since the
+            // note arrived — #98(a)'s reveal stands for both.
             let isOpeningLanding = session.commandRouter
                 .openingLanding(postID: postID, fact: arrivalFact) != nil
             if remembered != nil, !isOpeningLanding {

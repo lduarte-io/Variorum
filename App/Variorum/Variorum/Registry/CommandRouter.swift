@@ -63,22 +63,29 @@ final class CommandRouter {
             // session dict has been taking every report; the persisted copy is
             // written at block changes and here).
             if let leaving = activePostID { currentBlocks.persist(postID: leaving) }
-            let restored = currentBlocks.current(for: postID)
             // 18l U0c — HER R-18l-1: *"First open of a note each session shows
             // the start; re-opening a note you already visited this session
-            // restores where you were."* The fact below is restored exactly as
-            // before — the remembered caret survives as editing state — and
-            // the note's OPENING is recorded beside it, so each mode's arrival
-            // can tell its own opening landing from every other landing and
-            // decide only the VIEWPORT differently (`openingLanding`). Every
+            // restores where you were."* — which SUPERSEDES, for the note-open
+            // act, 17o's "every door into Write lands at the remembered caret
+            // and reveals it". So the run's FIRST open of a note seeds NO fact:
+            // every mode arrives exactly as a note with nothing remembered
+            // does (Write's caret and page at the start, Takes' first slot,
+            // Read's first row), and the memory follows whatever she does next
+            // — a mode switch included (measured on the walk: keeping the old
+            // caret as the live fact put the blank END back on screen at the
+            // first ⌘1 — `18l-screens/u0c/walk/t-11`). A RE-open restores what
+            // THIS run knows (`sessionFact`), never an earlier run's place. The
+            // memory itself is untouched (persisted, and read by the doors that
+            // name a place on purpose). The OPENING is recorded beside the fact
+            // (`openingLanding`) so a re-open's arrival lands the page she left
+            // rather than revealing a caret she had scrolled away from. Every
             // door into a note (the Library, the shelf, the Open strip, ⌘K,
             // ← →, ⌘⇧n, a split pane taking focus) reaches this registration,
             // so the rule is door-agnostic by construction; a door that names a
-            // block carries its own landing and is not an opening's landing.
+            // block carries its own landing and never read this fact.
             let reopening = !notesOpenedThisRun.insert(postID).inserted
-            opening = NoteOpening(
-                postID: postID, isReopen: reopening, mode: mode, seeded: restored,
-                seededThisRun: restored != nil && currentBlocks.sessionFact(for: postID) == restored)
+            let restored = reopening ? currentBlocks.sessionFact(for: postID) : nil
+            opening = NoteOpening(postID: postID, isReopen: reopening, mode: mode, seeded: restored)
             focusedOffset = restored?.utf16Offset
             // R1-9: the observed half carries NO offset — the caret-rate half
             // above is the only home, so the two lifetimes cannot be confused.
@@ -166,15 +173,12 @@ final class CommandRouter {
         let isReopen: Bool
         /// The mode the detail registered in: the opening's own surface.
         let mode: PostMode
-        /// The fact the opening restored — the arrival that lands on exactly
-        /// this is the OPENING's landing; a report since (a click, a door that
-        /// names its block by reporting it) is a place someone chose, and it
-        /// lands by the standing rules.
+        /// The fact the opening restored — nil on the run's first open, THIS
+        /// run's place on a re-open. The arrival that lands on exactly this is
+        /// the OPENING's landing; a report since (a click, a door that names
+        /// its block by reporting it) is a place someone chose, and it lands by
+        /// the standing rules.
         let seeded: FocusedBlock?
-        /// The seeded fact is THIS run's (the session memory held it) — vs a
-        /// place an earlier run persisted. Where a surface keeps no page of its
-        /// own (Read), this run's current block IS where she was.
-        let seededThisRun: Bool
     }
 
     @ObservationIgnored private(set) var opening: NoteOpening?
@@ -183,12 +187,12 @@ final class CommandRouter {
     /// mode's arrival with the fact it is about to land on (Write's bare
     /// arrival, Takes' N9 entry arm, Read's seed). Non-nil ⇒ her R-18l-1
     /// decides the VIEWPORT: the page THIS RUN left for the note (Write's
-    /// session place, Takes' article place, Read's this-run current block),
-    /// else the note's START — never a reveal of a caret that an earlier run,
-    /// or a page she has since scrolled away from, left somewhere else. The
-    /// caret, the ring and the selection still land on the fact (editing
-    /// state). Nil ⇒ not an opening (a mode switch, another note, or a fact
-    /// someone placed since the note arrived) — the standing machinery.
+    /// session place, Takes' article place, Read's this-run current block —
+    /// Read keeps no page of its own), else the note's START — never a reveal
+    /// of a caret she has since scrolled away from. The caret, the ring and the
+    /// selection still land on the fact. Nil ⇒ not an opening (a mode switch,
+    /// another note, or a fact someone placed since the note arrived) — the
+    /// standing machinery.
     func openingLanding(postID: String, fact: FocusedBlock?) -> NoteOpening? {
         guard let opening, opening.postID == postID, opening.seeded == fact else { return nil }
         return opening
@@ -269,9 +273,10 @@ final class CommandRouter {
     /// memory (this run's, else the persisted one). The doors that name a place
     /// on purpose read it (the book's edit-here door, the panes' entry caret);
     /// a mode entering a mounted note reads the live `focusedBlock`, which this
-    /// seeded. (Since 18l U0c a note's OPENING lands its caret here but never
-    /// scrolls to it — `openingLanding`.) Both carry the caret's offset (17o
-    /// batch b): the live fact merges it on read, the memory persists it.
+    /// seeded. (Since 18l U0c the NOTE-OPEN door no longer lands here — the
+    /// run's first open seeds nothing, a re-open this run's place:
+    /// `registerDetail`.) Both carry the caret's offset (17o batch b): the live
+    /// fact merges it on read, the memory persists it.
     func currentBlock(for postID: String) -> FocusedBlock? {
         if let fact = focusedBlock, fact.postID == postID { return fact }
         return currentBlocks.current(for: postID)

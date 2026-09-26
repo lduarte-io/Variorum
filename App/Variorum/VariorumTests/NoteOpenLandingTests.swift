@@ -184,34 +184,31 @@ struct NoteOpenLandingTests {
         Double(try #require(editor.enclosingScrollView).contentView.bounds.minY)
     }
 
-    // MARK: - A. The router records the OPENING — and the remembered caret survives
+    // MARK: - A. The router: the run's FIRST open restores nothing; a re-open restores THIS run's
 
-    /// STATE-TRANSITION pin of the rule's bookkeeping (new API, so not a
-    /// red-on-old pin — the mounted pins below carry the behaviour's red).
-    /// The run's first open of a note restores the fact exactly as before (the
-    /// remembered caret survives as editing state — her earlier R-cor-3: *"the
-    /// place where your cursor was saved"*) and records the opening; an
-    /// arrival on that very fact is the opening's landing; a place reported
-    /// since is not; a mode switch ends the opening; a re-open this run is
-    /// recorded as one, seeded with this run's place.
-    @Test func theOpeningIsRecordedAndTheRememberedCaretSurvives() async throws {
+    /// The arm every mode inherits: a note arriving for the first time this run
+    /// carries no current-block fact, whatever an earlier run persisted — so
+    /// Write lands at the start, Takes rings the first block, Read selects the
+    /// first row, and whatever she does next is what the memory follows. Red
+    /// on the pre-fix tree (`fe4473bf`'s run): the persisted fact came back
+    /// live. The opening's record (new API) rides beside it.
+    @Test func theRunsFirstOpenOfANoteRestoresNothingAnEarlierRunLeft() async throws {
         try await withWorld(count: 5, rng: 1) { w in
             rememberFromAnEarlierRun(w, entry: 4, offset: 12)
-            let earlier = FocusedBlock(
-                postID: w.postID, blockID: w.blocks[4], variantID: w.variants[4], utf16Offset: 12)
             let token = w.router.registerDetail(postID: w.postID, mode: .write) { _ in }
-            #expect(w.router.focusedBlock == earlier, "the remembered caret survives as editing state")
+            #expect(w.router.focusedBlock == nil,
+                    "the first open this run lands at the START (red-on-old: the earlier run's block 5 @12 — \(String(describing: w.router.focusedBlock)))")
             let first = try #require(w.router.opening)
-            #expect(!first.isReopen && first.mode == .write && first.seeded == earlier && !first.seededThisRun,
-                    "the run's FIRST open, seeded with an EARLIER run's place: \(first)")
-            #expect(w.router.openingLanding(postID: w.postID, fact: earlier) != nil,
-                    "an arrival on the seeded fact is the opening's own landing")
-            // A place reported since the note arrived is a place someone chose.
+            #expect(!first.isReopen && first.mode == .write && first.seeded == nil,
+                    "the run's FIRST open, seeded with nothing: \(first)")
+            #expect(w.router.openingLanding(postID: w.postID, fact: nil) != nil,
+                    "an arrival on the (absent) seeded fact is the opening's own landing")
+            // …and what she does THIS run is what a re-open restores.
             w.router.noteFocusedBlock(w.blocks[2], variantID: w.variants[2], postID: w.postID, utf16Offset: 7)
-            #expect(w.router.openingLanding(postID: w.postID, fact: w.router.focusedBlock) == nil)
-            // The detail reporting its OWN mode keeps the opening; a switch ends it.
+            #expect(w.router.openingLanding(postID: w.postID, fact: w.router.focusedBlock) == nil,
+                    "a place reported since the note arrived is a place someone chose")
             w.router.noteMode(.write)
-            #expect(w.router.opening != nil)
+            #expect(w.router.opening != nil, "the detail reporting its own mode keeps the opening")
             w.router.noteMode(.takes)
             #expect(w.router.opening == nil, "a mode switch ends the opening")
             w.router.unregisterDetail(token)
@@ -220,30 +217,28 @@ struct NoteOpenLandingTests {
             let again = w.router.registerDetail(postID: w.postID, mode: .takes) { _ in }
             let thisRun = FocusedBlock(
                 postID: w.postID, blockID: w.blocks[2], variantID: w.variants[2], utf16Offset: 7)
-            #expect(w.router.focusedBlock == thisRun, "a re-open restores where she was this run")
+            #expect(w.router.focusedBlock == thisRun, "a re-open this run restores where she was this run")
             let reopen = try #require(w.router.opening)
-            #expect(reopen.isReopen && reopen.seeded == thisRun && reopen.seededThisRun,
-                    "…recorded as a RE-open seeded with this run's place: \(reopen)")
+            #expect(reopen.isReopen && reopen.seeded == thisRun, "…recorded as a RE-open: \(reopen)")
             w.router.unregisterDetail(again)
             #expect(w.router.opening == nil, "the detail leaving ends it")
             w.router.forgetCurrentBlock(for: "another note")
         }
     }
 
-    /// A re-open after a visit that reported nothing (a glance in a mode with
-    /// no caret) still carries the earlier run's caret as editing state — and
-    /// the opening knows that place is NOT this run's, so no surface scrolls
-    /// to it. STATE-TRANSITION pin (new API).
-    @Test func aReopenAfterAVisitThatReportedNothingKnowsTheCaretIsAnEarlierRuns() async throws {
+    /// A re-open reads THIS run's memory only: a visit that reported nothing
+    /// (a mode with no caret, a glance) re-opens at the start — never at the
+    /// place an earlier run persisted. Red on the pre-fix tree (`fe4473bf`'s
+    /// run): the earlier run's block came back on the re-open.
+    @Test func aReopenNeverRestoresAnEarlierRunsPlace() async throws {
         try await withWorld(count: 5, rng: 2) { w in
             rememberFromAnEarlierRun(w, entry: 4, offset: 12)
             let first = w.router.registerDetail(postID: w.postID, mode: .lenses) { _ in }
             w.router.unregisterDetail(first)
-            let again = w.router.registerDetail(postID: w.postID, mode: .read) { _ in }
-            let reopen = try #require(w.router.opening)
-            #expect(reopen.isReopen, "the second registration this run is a re-open")
-            #expect(reopen.seeded?.blockID == w.blocks[4] && !reopen.seededThisRun,
-                    "the caret is still the earlier run's (editing state) — not a place this run knows")
+            let again = w.router.registerDetail(postID: w.postID, mode: .write) { _ in }
+            #expect(w.router.focusedBlock == nil,
+                    "nothing this run said where she was — the start (red-on-old: \(String(describing: w.router.focusedBlock)))")
+            #expect(w.router.opening?.isReopen == true)
             w.router.unregisterDetail(again)
         }
     }
@@ -261,27 +256,24 @@ struct NoteOpenLandingTests {
     func writeOpensAtTheStart(_ remembered: Remembered) async throws {
         try await withWorld(emptyLastBlock: remembered == .emptyLastBlock, rng: 3) { w in
             let last = w.blocks.count - 1
-            let entry: Int
-            let offset: Int
             switch remembered {
-            case .emptyLastBlock: (entry, offset) = (last, 0)
-            case .endOfTheLastLine: (entry, offset) = (last, w.index.range(ofEntryAt: last).length)
-            case .middle: (entry, offset) = (34, 5)
+            case .emptyLastBlock: rememberFromAnEarlierRun(w, entry: last, offset: 0)
+            case .endOfTheLastLine:
+                rememberFromAnEarlierRun(w, entry: last, offset: w.index.range(ofEntryAt: last).length)
+            case .middle: rememberFromAnEarlierRun(w, entry: 34, offset: 5)
             }
-            rememberFromAnEarlierRun(w, entry: entry, offset: offset)
             UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(w.postID)")
             let window = newWindow()
             defer { window.orderOut(nil); window.close() }
             let hosting = open(w, in: window)
             let editor = try await writeArrived(w, window, hosting)
             let clip = try clipY(editor)
-            let caret = w.index.range(ofEntryAt: entry).location + offset
-            print("[U0c write first open \(remembered.rawValue)] clip \(clip) · caret \(editor.selectedRange().location) of \(w.index.documentLength) (remembered \(caret))")
+            print("[U0c write first open \(remembered.rawValue)] clip \(clip) · caret \(editor.selectedRange().location) of \(w.index.documentLength)")
             #expect(clip <= 0.5,
                     "the page opens at its START, the top air showing (red-on-old: the remembered line at the viewport top — clip \(clip))")
-            #expect(editor.selectedRange().location == caret,
-                    "…and the caret is where she left it — editing state survives, only the opening viewport changed")
-            #expect(w.router.focusedBlock?.blockID == w.blocks[entry])
+            #expect(editor.selectedRange().location == 0,
+                    "…with the caret at the note's start (red-on-old: \(editor.selectedRange().location))")
+            #expect(w.router.focusedBlock?.blockID == w.blocks[0], "and block 1 is the current block")
             await leave(window)
         }
     }
@@ -293,38 +285,50 @@ struct NoteOpenLandingTests {
             let window = newWindow()
             defer { window.orderOut(nil); window.close() }
             let hosting = open(w, in: window)
-            #expect(await Self.settle(window, hosting) { Self.firstArticlePane(in: hosting) != nil },
-                    "the board draws its article")
+            #expect(await Self.settle(window, hosting) { Self.liveArticlePane(in: hosting) != nil },
+                    "the board rings a pane")
             _ = await Self.settle(window, hosting, timeout: 2) { false }  // the landing's steps
-            let pane = try #require(Self.firstArticlePane(in: hosting))
-            let article = try #require(Self.articleScrollView(of: pane, in: hosting))
+            let live = try #require(Self.liveArticlePane(in: hosting))
+            let article = try #require(Self.articleScrollView(of: live, in: hosting))
             let clip = Double(article.contentView.bounds.minY)
-            let factBlock = w.router.focusedBlock?.blockID
-            print("[U0c takes first open] article clip \(clip) · fact \(String(describing: factBlock))")
+            let liveID = live.identifier?.rawValue ?? "-"
+            print("[U0c takes first open] article clip \(clip) · live \(liveID)")
             #expect(clip <= 0.5, "the article opens at the top (red-on-old: revealed at the end — \(clip))")
-            #expect(factBlock == w.blocks.last,
-                    "…and the current block is still the one she left (the ring's editing state)")
+            #expect(liveID.hasSuffix("|\(w.variants[0])"),
+                    "block 1's pane takes the ring — the first slot (red-on-old: the empty last block's)")
             await leave(window)
         }
     }
 
-    /// Any of the article's panes (read or live) — the article's scroll view is
-    /// read from it.
-    private static func firstArticlePane(in root: NSView) -> PaneTextView? {
-        views(PaneTextView.self, in: root)
-            .first { $0.identifier?.rawValue.hasPrefix("pane:article|") == true }
+    /// THE WALK'S FINDING, pinned (`18l-screens/u0c/walk/t-11`): a first open
+    /// that keeps an earlier run's caret as the live fact shows the start —
+    /// and the very next mode switch enters on that caret and reveals it, the
+    /// blank END again. The first open restores no fact, so ⌘1 right after it
+    /// stays at the start. Red on the pre-fix tree (the Takes first open was
+    /// already at the END) and on the letter-reading build (`5d7c8bb6`: the
+    /// Takes first open at the top, then ⌘1 → the END).
+    @Test func aModeSwitchRightAfterAFirstOpenStaysAtTheStart() async throws {
+        try await withWorld(emptyLastBlock: true, rng: 12) { w in
+            rememberFromAnEarlierRun(w, entry: w.blocks.count - 1, offset: 0)
+            UserDefaults.standard.set(PostMode.takes.rawValue, forKey: "postMode.\(w.postID)")
+            let window = newWindow()
+            defer { window.orderOut(nil); window.close() }
+            let hosting = open(w, in: window)
+            #expect(await Self.settle(window, hosting) { Self.liveArticlePane(in: hosting) != nil })
+            _ = await Self.settle(window, hosting, timeout: 1.5) { false }
+            #expect(w.router.requestMode(.write, postID: w.postID))
+            let editor = try await writeArrived(w, window, hosting)
+            let clip = try clipY(editor)
+            print("[U0c mode switch after first open] Write clip \(clip) · caret \(editor.selectedRange().location) of \(w.index.documentLength)")
+            #expect(clip <= 0.5, "⌘1 right after the first open stays at the start (red: the blank END — \(clip))")
+            await leave(window)
+        }
     }
 
-    /// The outermost scroll view between an article pane and the root (the
-    /// Takes suites' own rule).
-    private static func articleScrollView(of pane: NSView, in root: NSView) -> NSScrollView? {
-        var outermost: NSScrollView?
-        var current: NSView? = pane.superview
-        while let node = current, node != root {
-            if let scroll = node as? NSScrollView { outermost = scroll }
-            current = node.superview
-        }
-        return outermost
+    /// The article's LIVE pane, if one is realized.
+    private static func liveArticlePane(in root: NSView) -> PaneTextView? {
+        views(PaneTextView.self, in: root)
+            .first { $0.isEditable && $0.identifier?.rawValue.hasPrefix("pane:article|") == true }
     }
 
     @Test func readOpensAtTheStart() async throws {
@@ -344,13 +348,25 @@ struct NoteOpenLandingTests {
             _ = await Self.settle(window, hosting, timeout: 1.5) { false }
             let offsets = Self.views(NSScrollView.self, in: hosting).map { Double($0.contentView.bounds.minY) }
             print("[U0c read first open] selected \(ReadModeOracle.selectedBlockID ?? "-") · scrolls \(offsets)")
+            #expect(ReadModeOracle.selectedBlockID == w.blocks[0],
+                    "the first row is current (red-on-old: the earlier run's last block)")
             #expect(offsets.allSatisfy { $0 <= 0.5 },
                     "the page and its index column open at the top (red-on-old: scrolled to the end — \(offsets))")
-            #expect(ReadModeOracle.selectedBlockID == w.blocks.last,
-                    "…with her current block still selected (editing state)")
             #endif
             await leave(window)
         }
+    }
+
+    /// The outermost scroll view between an article pane and the root (the
+    /// Takes suites' own rule).
+    private static func articleScrollView(of pane: NSView, in root: NSView) -> NSScrollView? {
+        var outermost: NSScrollView?
+        var current: NSView? = pane.superview
+        while let node = current, node != root {
+            if let scroll = node as? NSScrollView { outermost = scroll }
+            current = node.superview
+        }
+        return outermost
     }
 
     // MARK: - C. The RE-open this run: the page she left

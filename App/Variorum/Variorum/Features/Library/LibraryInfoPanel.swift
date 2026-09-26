@@ -19,9 +19,9 @@
 //  So the panel is exactly that: a NOTE shows its title, ONE calm facts line
 //  (words · blocks · last edited — nothing more, C-6), ONE generous **Open**
 //  door that lands where the caret last was (batch C's `CurrentBlockMemory`,
-//  read by the mounting detail — no door of its own here; since 18l U0c the
-//  PAGE opens at the note's start on the session's first open and where she
-//  was on a re-open, her R-18l-1 — the caret still lands in place), and the note's
+//  read by the mounting detail — no door of its own here; since 18l U0c her
+//  R-18l-1 supersedes that for the session's FIRST open, which shows the
+//  note's start, while a re-open this session lands where she was), and the note's
 //  RENDERED TEXT, read-cheap: a lazy stack of per-block rows on the
 //  `FlowParagraph` tier (the same SwiftUI `Text` tier the note's Read page
 //  uses — never the TK2 `ReadPostView`, so row 54's provisional-width first
