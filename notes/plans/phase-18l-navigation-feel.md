@@ -1791,12 +1791,23 @@ answer a consent dialog (author-only, the traps' own rule); recommended answer w
 WalkKit's README gains the VisualWalk pointer. Ledger row 6 flips to BUILT+WALKED — Opus
 review is the remaining gate.
 
+## HER CHECK-IN (2026-09-26, mid-U1 — rulings verbatim-faithful)
+
+Her words: *"excellent! continue through U1, I prefer a clean seam and the context cutoff is
+more for guidance anyway. I saw the prompt and clicked Don't Allow. Would it be best if I
+stepped away from the computer for your GUI driving to finish U1? sounds good on the plan,
+please give me the kickoff message here in chat and I'll send the kickoff at your word."*
+Applied: **R-18l-3's split CONFIRMED at the pre-declared seam** — 18l closes after U1
+(ladder + acceptance + the closeout ritual incl. the install refresh); **18l-b** (U2 · U3 ·
+U4 · the B5 trace) runs under a FRESH orchestrator on her paste of the kickoff (given to her
+in chat; she sends it at the orchestrator's word, after the closeout push). The consent
+prompt is RESOLVED (she clicked Don't Allow) — bundle item 1 closes. She may step away for
+the walk windows; the per-step guard keeps her return safe at any moment.
+
 ## MORNING BUNDLE (accumulating — the handoff's first section copies this)
 
-1. **A macOS consent prompt is on your screen, unanswered:** "Ghostty wants access to control
-   Finder" (~734,222). Left by an accidental script call; nothing needs the grant —
-   recommended: **Don't Allow**. (No session will touch it; it may cover click points for
-   future GUI runs until dismissed.)
+1. ~~A macOS consent prompt on screen~~ **RESOLVED at her check-in** — she clicked Don't
+   Allow. (The traps' system-dialog rules remain standing law for every future run.)
 2. **#149** — the 13g surface-rule carve-out (R-18l-5): formatted read tiers may seed a caret
    through the pinned translation, vs. switching those tiers to the dimmed-marker face.
 3. **#150** — U0c's two refinements of your R-18l-1 (first open seeds no fact — `t-11` is the
