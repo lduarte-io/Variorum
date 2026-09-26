@@ -124,8 +124,9 @@ one backspace later with the air collapsed).
 Core **1723/180 ALL PASSED** · iOS **BUILD SUCCEEDED** · mobile **643/109 with exactly the 4
 known** · full Mac **3168/522** (the only reds: three pointer-injection suites that fail when
 someone is using the machine during the run — KnownIssues row 89; green 3/3 idle). Install:
-`/Applications/Variorum.app` refreshed 2026-09-26 05:09 UTC, Release from `11e7614f`, binary
-`79c7688b…`. **Her 2026-09-25 reports were made on the PRE-18k install (13y's `9e15f8bf…`), so
+`/Applications/Variorum.app` = **`c09f81be…`** (17u's glyph-rain refresh from `6efd9cbc`,
+2026-09-26 — it superseded 18k's `79c7688b…` of 05:09 UTC the same morning; 17u touched the lobby
+only). **Her 2026-09-25 reports were made on the PRE-18k install (13y's `9e15f8bf…`), so
 U0/U0b predate 18k; her U0c report's build is a kickoff-sitting question** (18k C6/C6b changed
 `JumpPrimitive` and `topVisibleOffset()` — exactly the reading-position machinery — so whether U0c
 reproduces on `79c7688b…` bounds the bisect window).
@@ -210,18 +211,120 @@ two-phase-sized-units line — flagged to the author at the kickoff sitting (Q3)
 | 11 | The one-liners: Outline `.onDisappear { landing.end() }`; `LandingTarget.utf16Offset` wired-or-deleted (lean: delete + comment naming the `FocusedBlock` road; PROVISIONAL, QUESTIONS row); `FlowStoryRow` reads `BookHeightManifest.resolve` (D1) unless 13i took it — check first | U4 | open |
 | 12 | MAY-take: KnownIssues row 85 (the ⌘↓ ring drawn too high, O-2) — decide at the touching unit, record either way | rider | open |
 
-## THE SITTING RECORD (kickoff, 2026-09-26 — her rulings land here verbatim-faithful)
+## THE SITTING RECORD (kickoff, 2026-09-26 — her rulings, verbatim-faithful)
 
 - **CAST ratified in her kickoff message** (quoted above): Opus 5.5 implements, Fable cold-reviews
   the editor-seam diffs. Standing default confirmed.
-- **Q1 (U0c's product rule), Q2 (U0c's build/surface facts), Q3 (sizing/split)** — asked at the
-  sitting; answers PENDING → recorded here when given.
+- **R-18l-1 (Q1 — U0c's product rule): START ON FIRST OPEN, RESTORE IN-SESSION.** Her selection of
+  the offered option: *"First open of a note each session shows the start; re-opening a note you
+  already visited this session restores where you were."* This SUPERSEDES the
+  every-door-into-Write-lands-at-the-caret rule (17o) for the NOTE-OPEN act only, and bounds the
+  RAISE-M1 session anchor to in-session re-opens. In-app deep links (a fan panel's "go there", a
+  Read sentence click, a search hit) still land at their targets — stated in the question she
+  answered. The remembered caret itself survives (editing state), only the OPENING viewport
+  changes. Takes' own R-Q20/R-Q21 pair: the "restore in-session" half IS that pair's memory; the
+  first-open-per-session half now outranks it at the session's first open of a note — flag any
+  pin this collides with to the orchestrator rather than editing it silently.
+- **R-18l-2 (Q2 — U0c's facts): seen AFTER this morning's update too; multiple modes.** Her words,
+  verbatim: *"it was in multiple modes, and different notes had different behaviors. notes with a
+  newline at the end tended to jump to the end, the sherlock holmes note went to the middle (maybe
+  that was the saved carat behavaior, but the note jumping to the end of the note did that even
+  when i hadn't clicked anywhere in particular)"*. Read: (1) the END-jump correlates with a
+  TRAILING NEWLINE / empty tail block and does NOT require a remembered caret there — so a
+  landing target is being DERIVED from the tail (an empty last block as "current block", a stamp
+  written by a non-click path, or the tail's crystallization state), which is the U0c trace's
+  first suspect; (2) the Sherlock MIDDLE case is plausibly the ruled saved-caret restore doing its
+  job — under R-18l-1 that becomes correct only for in-session re-opens; (3) 18k C6/C6b's changes
+  (`JumpPrimitive`, `topVisibleOffset()`) are INSIDE the suspect window (still reproduces on
+  `c09f81be…`), though the behavior may equally predate them — bisect, don't assume.
+- **R-18l-3 (Q3 — sizing): RUN ALL, SPLIT IF HEAVY.** Her selection of the recommended option:
+  strictly sequential U0 family → U-VIS → U1 → U2 → U3 → U4; if the round runs heavy after U1, the
+  remainder closes as a follow-on 18l-b under a fresh orchestrator at a clean seam — declared now,
+  never a silent split.
+- **Her follow-up at the sitting (2026-09-26, verbatim — the round's bar):** *"there was supposed
+  to be a new plan made as well for a style of testing to deal with the different editor
+  regressions and ensuring that clicking around and editing doesn't lead to jumps that are not
+  supposed to be created - have you located that note? … I know that this phase came out of a
+  session examining the editor core for high levels of commit and churn and I think it's just a
+  hard problem we're getting closer to having solved but I do want it to be handled well and
+  thoroughly - the inability to click on text to edit it in index mode did alarm me."* The
+  testing-style plan IS U-VIS (the charter's unit, her 2026-09-25 verbatim ask; ledger row 6) —
+  located, confirmed to her at the sitting; its DESIGN is this round's to propose (a design note
+  lands in this file before U-VIS builds, per the charter's "its design is 18l's to propose").
+  Her "handled well and thoroughly" bar and the Index-click alarm are the round's tone: U0 runs
+  first, the sweep reports every regression found (never only the reported ones), and U-VIS seeds
+  each reproduction as a standing tripwire.
+
+## U0 BRIEF (session 1 — the Index click refusal + the clipped descenders + the regression sweep; written by the orchestrator 2026-09-26)
+
+You are the `opus-implementer` for **18l UNIT U0**. One acceptance unit; U0b and U0c are LATER
+sessions — if your sweep finds their mechanisms, RECORD the findings in your record for those
+sessions and do not build their fixes.
+
+**Read first, in this order (reading is never delegated):**
+(1) `notes/plans/post-13u-health-rounds.md` KICKOFF 2, its **U0 section IN FULL** — your unit's
+charter, her two verbatim reports, and the three things U0 carries. (2) THIS file whole (it is
+short): HER KICKOFF MESSAGE, BINDING PRINCIPLES, CAST & DISCIPLINE, BASELINES, ENVIRONMENT TRAPS
+(they bind you verbatim), THE LEDGER rows 1–3, THE SITTING RECORD (R-18l-2's facts touch your
+sweep). (3) `notes/KnownIssuesAndTechDebt.md` rows: the Index-click row (her report, owner 18l),
+the Write-padding row, the note-open row (U0c — context only), row 85 (the O-2 ring — a MAY-take),
+row 89 (the pointer-injection idle rule). (4) **`notes/TEXTKIT2_NOTES.md` IN FULL** — mandatory
+for editor-seam work; §3's macOS-27 findings are your era's facts (the `layoutViewport()` clip
+displacement; the baseline-decides rule #147; the fragment-frame/trailing-spacing fact; the
+first-full-measure-differs fact — the last is the descender clip's named suspect). (5) The 18k
+records for the era you are sweeping: `notes/plans/phase-18k-runtime-hygiene.md` UNIT C2 (the
+inline editor's unsettled measure — the ~85-pt-TALL residual is KnownIssues-owned; your descender
+clip may be the SHORT direction of the same class), UNIT C6 + C6b (the jump primitive fix, the
+`topVisibleOffset()` reading-line rule, the walk protocol). (6) The captures:
+`notes/plans/18l-inputs/` (all three). (7) The code, read end to end before touching it:
+`BookIndexView.swift` (the pane, the read-tier rows, F1/F3's landing adoption),
+`Surface/PaneSurface.swift` + `InlineEditorSurface` (the inline editor the book's editing tier
+mounts; the read-tier → live-editor swap), the click → caret road (where a read-tier click
+converts its point and hands the caret to the live editor — trace it yourself; the 13c 1A
+container-inset class that `ScrollAnchorTests` guards is the FIRST suspect, per the charter),
+`Surface/LandingAuthority.swift` (context; your unit does not tune policies).
+
+**Your three items (the charter's numbering):**
+1. **The click REFUSES the text** — deterministic (her words: *"it's a refusal of clicking into
+   the text"*, never a near-miss). REPRODUCE first on the dev-store Debug build (Sherlock ▸ Index ▸
+   click a line; walker facts in ENVIRONMENT TRAPS). Then FIND WHEN it regressed — bisect by
+   HARNESS in a scratch worktree (in-memory store; an old build must never open the dev store)
+   over the 13u2…13y/18k commits that touched the book surfaces, the inline editor, `PaneSurface`,
+   the read-tier → live swap and landing. Trace the mechanism yourself; fix with a red-on-old pin
+   verified by behavioral revert; walk it (both voices; lines at the top, middle and bottom of a
+   note; the first and last line of a block; a line directly above/below an empty separator
+   paragraph — Sherlock's blank-between-blocks shape is the trigger fixture).
+2. **The clipped descenders** (her capture) — the book view with a note expanded cuts the last
+   line's descenders. Check BOTH sides of 18k C2's height-write deferral (her build was pre-C2);
+   the named suspect is TK2's first-full-measure-differs fact (a frame sized from an unsettled
+   SHORT measure clips exactly like this; C2 measured the TALL direction). Same discipline:
+   reproduce → trace → pin red-on-old → fix → walk (both voices, a short note and a long one, the
+   last line with and without descenders).
+3. **The regression SWEEP** (her ask, verbatim in the charter): identify what ELSE regressed in
+   the 13u2…13y/18k window on the book surfaces, the inline editor, `PaneSurface`, the read-tier →
+   live swap and landing — macOS-27 deltas and recent fixes are CO-EQUAL suspects (her kickoff
+   words + 18k C6's precedent: one of five deltas was a REAL 27 regression). Each finding:
+   reproduced, traced, pinned red-on-old, FIXED (if in your unit's scope) or OWNED (a ledger row
+   with a named owner — U0b/U0c findings go to their sessions). The sweep's deliverable is a
+   table: finding × mechanism × disposition.
+
+**Discipline (the resiliency protocol, restated — it binds you):** commit per coherent piece,
+push after EVERY commit, NO trailers; append a `## U0 RECORD` section to THIS file with LIVE
+STATUS from your FIRST commit (per-piece lines: DONE (hash) / IN-PROGRESS / NOT-STARTED; every
+unverified claim marked PENDING); records before final verification; synchronous foreground waits
+only (poll the log — never end your turn awaiting a background run); NEVER spawn subagents; tests
+at the END (the touched Mac suites + `TutorialWalkTests`, suite-level `-only-testing`), never the
+full suite at start. Pathspec-limited staging. PROVISIONAL-and-continue for non-gating ambiguity
+(log to `notes/QUESTIONS.md`); STOP and report for gating ambiguity, any product-behavior
+invention, anything wanting `Sources/VariorumCore/Sync/`, and every author-only call. Your diff is
+editor-seam by definition → a FABLE cold review follows; your self-assessment closes your record.
 
 ## LIVE STATUS (orchestrator; flipped per piece)
 
 | Piece | Status |
 |---|---|
 | Preflight (canon + charter + KnownIssues + QUESTIONS + resiliency + TK2 notes + health review §1 + sizing guidance + 18k handoff + captures + code headers + F3 record) | DONE (this session, 2026-09-26) |
-| This plan file + KnownIssues row for U0c | DONE (this commit) |
-| Kickoff sitting (Q1–Q3) | IN PROGRESS |
-| U0 (incl. U0c per Q1/Q2) → U0b → U-VIS → U1 → U2 → U3 → U4 | NOT-STARTED |
+| This plan file + KnownIssues row for U0c | DONE (`fcf97ad5`) |
+| Kickoff sitting (Q1–Q3) | DONE — R-18l-1 · R-18l-2 · R-18l-3 above (this commit) |
+| U0 (session 1 — brief above) | SPAWNING |
+| U0b → U0c → U-VIS → U1 → U2 → U3 → U4 | NOT-STARTED (briefs written just-in-time, one ahead) |
