@@ -246,3 +246,12 @@ Automation check timed out — a consent prompt may be pending (the author's to 
 | NIT-R2-11 — zero-pins; the exit-5 retry unpinned | `d019f170` | `thePinsAreFound()` (≥ 5 pins); `guard-order.zsh` case 5: a lost focus (5) → the author check BEFORE each re-activation, then the click — 9/9 |
 
 **Closing evidence:** every headless pin green (abort-voice 7/7 · build-stamp 14/14 · grants-verdict 6/6 · guard-order 9/9 · read-tier-assertions 5/5; the package's always-on suite `✔ Test run with 4 tests in 2 suites passed`); the app suites the diff reaches on the rebuilt, stamped build (`d019f170`): `✔ Test run with 120 tests in 20 suites passed after 58.047 seconds`, `** TEST SUCCEEDED **`, 0 skipped (`App/Variorum/DerivedData/18l-uvis-closing3.log`); **the wrapper run** (`App/Variorum/DerivedData/18l-uvis-wrapper-r2fix.log`): `✔ Test run with 4 tests in 2 suites passed after 1016.473 seconds` — the zero-pins guard + the 5 headless pins, `theHarnessCanRed()` (the planted failure exit 1), `theSeededWalkPasses()`; the final run `notes/plans/vis-walks/2026-09-26/142035/` on the stamped build `d019f170` (11 scenarios × 2 voices): **0 FAIL · 0 ERROR · 0 XPASS**, XFAIL 5 = S3 ×4 + B5 in Study (identical numbers to round 1's final run — the new paragraph rows PASS in both voices, the menu quit clean every time: no `quit-fallback`). Zero `Sources/`, `Shared/`, `Sync/`, schema. **The ladder closes on this pass** (the orchestrator's word), NIT-R2-7 routed to the orchestrator.
+
+## LADDER CLOSED (orchestrator, 2026-09-26)
+
+Round 1: 0/1/8/9, all confirmed at arbitration, all fixed (MAJOR-1 guard-before-activate pinned
+red-on-old in harness AND WalkKit). Round 2: every round-1 fix VERIFIED; new 0/0/3/8, all fixed
+or dispositioned in the fix table (incl. the honest 6/6-too-early slip, corrected at 715bd642).
+No new BLOCKER/MAJOR at any round — no round 3 earned. Final evidence: headless pins 7/14/6/9/5
+green; app suites 120/20; wrapper 4/2 with the full two-voice run 0 FAIL / 0 ERROR / 0 XPASS
+(the 5 XFAILs are the two honestly-labelled knowns: S3 ×4, B5 Study). U-VIS CLOSES.
