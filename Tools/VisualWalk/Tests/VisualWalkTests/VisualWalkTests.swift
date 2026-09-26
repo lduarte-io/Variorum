@@ -30,6 +30,11 @@ struct VisualWalkHeadlessPins {
     static let pins: [String] = ((try? FileManager.default.contentsOfDirectory(
         atPath: root.appendingPathComponent("pins").path)) ?? []).filter { $0.hasSuffix(".zsh") }.sorted()
 
+    /// A moved or emptied `pins/` folder must not pass as zero cases (round 2, NIT-R2-11).
+    @Test func thePinsAreFound() {
+        #expect(Self.pins.count >= 5, "pins/*.zsh — found \(Self.pins)")
+    }
+
     @Test("every headless pin holds", arguments: pins)
     func pinHolds(_ pin: String) throws {
         #expect(try zsh([root.appendingPathComponent("pins").appendingPathComponent(pin).path]) == 0,

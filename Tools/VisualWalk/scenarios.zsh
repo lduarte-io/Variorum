@@ -254,6 +254,9 @@ vw_assert_last_line_click() {   # label click-y
   # or the one before it, because the live pane shows the markdown markers the tier hides and can wrap
   # the block one line longer (S3). The pre-fix Read ▸ edit landing (line 0) reds here.
   local last=$(( PV[caretTextLines] - 1 ))
+  # ...in the block's LAST paragraph (round 2, NIT-R2-5): the line count is paragraph-relative, so a
+  # multi-paragraph block's first paragraph could satisfy it; the pane holds one block.
+  vw_expect_eq "$label last line: the caret in the block's LAST paragraph" "${PV[caretFragLast]}" 1
   vw_expect_between "$label last line: the caret on the block's last text line (or the one S3's wrap adds)" \
     "${PV[caretLine]}" $(( last - 1 )) $last
   vw_expect_between "$label last line: the clicked line stays under the pointer (click y in its box)" \
@@ -263,6 +266,7 @@ vw_assert_last_line_click() {   # label click-y
 vw_assert_first_line_click() {  # label click-x click-y
   local label=$1 x=$2 y=$3
   vw_expect_eq "$label first line: a pane went live" "${PV[fr]}" pane
+  vw_expect_eq "$label first line: the caret in the block's FIRST paragraph" "${PV[caretFragFirst]}" 1
   vw_expect_eq "$label first line: the caret is on the first line" "${PV[caretLine]}" 0
   vw_expect_eq "$label first line: not at the block's end" "${PV[caretEnd]}" 0
   vw_expect_between "$label first line: y inside the caret's line box" $y \
@@ -383,7 +387,7 @@ scn_outline-long-story-settle() {
 vw_def b5-return-after-cmd-down "A Scandal in Bohemia, Write" \
   "a blank line mid-page · ⏎ + ⌫ (the carve's full re-render invalidates layout) · ⌘↓ · ⏎ at the tail · ⌫" \
   "(a) the ⏎ at the tail must not move the page (the lines above the caret)" \
-  "$KI_B5 — HISTORY-DEPENDENT: U0b measured +109/+166 on 998f7d7d; U-VIS reproduced it in the FULL Study pass on both full runs, identical numbers (45591 @ 298 → 45509 @ 302: the lines above the caret slid ~30 pt down under an unmoved clip — U0b's hypothesis, measured); not in Terminal, not from a fresh launch, not after outline or Read ▸ edit alone. XFAIL when it moves, XPASS when it does not"
+  "$KI_B5 — HISTORY-DEPENDENT: U0b measured +109/+166 on 998f7d7d; U-VIS reproduced it in the FULL Study pass on both full runs, identical numbers (45591 @ 298 → 45509 @ 302: the lines above the caret slid ~30 pt down under an unmoved clip — U0b's hypothesis, measured); not in Terminal, not from a fresh launch, not after outline or Read ▸ edit alone. XFAIL when it moves, XPASS when it does not (Study; plain in Terminal)"
 scn_b5-return-after-cmd-down() {
   vw_write_open "A Scandal in Bohemia" || return
   vw_write_scroll 30

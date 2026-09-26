@@ -42,6 +42,8 @@ vw_log() { print -r -- "[$(strftime %H:%M:%S $EPOCHSECONDS)] $*" | tee -a $RUN_D
 typeset -g FOUND_VOICE= LAST_VOICE= ABORTING= VOICE_IN_FLIGHT=
 
 vw_abort() {
+  # A nested abort (a refusal, or a second Ctrl-C, inside the abort's own clean-up) exits 9 at once —
+  # the first abort already recorded the run and sent the quit (round 2, NIT-R2-8; README's exit table).
   if [[ -n $ABORTING ]]; then vw_log "nested abort (inside the abort's own clean-up): $*"; exit 9; fi
   ABORTING=1
   vw_log "ABORT: $*"
@@ -118,11 +120,18 @@ vw_quit_app() {
   # the only Apple Events the harness sends go to System Events, whose grant the preconditions check
   # without prompting (U-VIS round 1, MINOR-6 — `vis-tcc` measured the dev app's Automation grant
   # "undetermined" even for the quit event, so nothing is sent to the dev app itself). Fallback: TERM.
+  # The app menu's quit item by its PREFIX (round 2, NIT-R2-6 — the display name may change).
   osascript -e 'with timeout of 20 seconds' \
-    -e "tell application \"System Events\" to tell (first application process whose unix id is $PID) to click menu item \"Quit Variorum Dev\" of menu 1 of menu bar item 2 of menu bar 1" \
+    -e "tell application \"System Events\" to tell menu 1 of menu bar item 2 of menu bar 1 of (first application process whose unix id is $PID) to click (first menu item whose name starts with \"Quit \")" \
     -e 'end timeout' >/dev/null 2>&1
   local i; for i in {1..30}; do kill -0 $PID 2>/dev/null || break; sleep 0.5; done
-  kill -0 $PID 2>/dev/null && { vw_log "the menu quit did not finish — TERM by pid"; kill -TERM $PID; sleep 2 }
+  if kill -0 $PID 2>/dev/null; then
+    # Visible in the REPORT, not only run.log: the app has no SIGTERM handler, so this skips the
+    # ordinary quit path (applicationShouldTerminate's flush, closeAutoCommit).
+    local note="the menu quit did not finish — the app was TERMINATED by pid (its quit path skipped)"
+    vw_log "$note"; print -r -- "$note" >> $RUN_DIR/quit-fallback
+    kill -TERM $PID; sleep 2
+  fi
   vw_log "quit pid $PID; instances now: $(vw_instances | wc -l | tr -d ' ')"
   PID=
 }
@@ -494,6 +503,7 @@ vw_report() {
     print -r -- "- voices: ${VW_VOICES:-current} · scenarios: $([[ -n $VW_SELFTEST ]] && print 'SELF-TEST (planted failure)' || print ${VW_SELECTED:-all seeded})"
     print -r -- "- result: $([[ -f $RUN_DIR/aborted ]] && print '**ABORTED** · ')**$(( RUN_FAILS + RUN_ERRORS )) failing** (FAIL $RUN_FAILS · ERROR $RUN_ERRORS)$( (( RUN_XPASS )) && print " · **XPASS $RUN_XPASS — a known issue did not reproduce in these scenarios; re-examine its row**")"
     [[ -f $RUN_DIR/aborted ]] && print -r -- "- **$(cat $RUN_DIR/aborted)**"
+    [[ -f $RUN_DIR/quit-fallback ]] && print -r -- "- **$(sort -u $RUN_DIR/quit-fallback)**"
     print -r -- ""
     print -r -- "| scenario | voice | status | assertions | FAIL | XFAIL | XPASS | note |"
     print -r -- "|---|---|---|---|---|---|---|---|"

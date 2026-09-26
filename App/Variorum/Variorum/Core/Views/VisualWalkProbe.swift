@@ -256,6 +256,13 @@ enum VisualWalkProbe {
                 let fragmentStart = content.offset(from: docStart, to: fragment.rangeInElement.location)
                 let lines = fragment.textLineFragments
                 line["caretState"] = fragment.state == .layoutAvailable ? "laid" : "est"
+                // Which PARAGRAPH of the view (round 2, NIT-R2-5): a pane holds one block, so a
+                // click on a block's last line lands in its LAST fragment and on its first line in its
+                // FIRST — line counts alone are paragraph-relative. Two location compares, no read.
+                line["caretFragFirst"] = fragment.rangeInElement.location
+                    .compare(docStart) == .orderedSame ? "1" : "0"
+                line["caretFragLast"] = fragment.rangeInElement.endLocation
+                    .compare(content.documentRange.endLocation) == .orderedSame ? "1" : "0"
                 if let i = FragmentLines.lineIndex(
                     atLocalOffset: max(0, location - fragmentStart),
                     lineRanges: lines.map(\.characterRange)) {

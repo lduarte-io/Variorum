@@ -36,7 +36,10 @@ every assertion with its measured and expected values), `report.tsv`, `run.log` 
 `probes.log` (every oracle answer), and the captures `<voice>/<scenario>/NN-*.png`.
 Exit: **0** no FAIL/ERROR · **1** a FAIL or ERROR · **4** aborted (a guard fired, or the harness could
 not go on — `aborted` in the run folder says which, and names the dev-store voice if it was left
-switched) · **5** refused (a precondition; nothing launched).
+switched) · **5** refused (a precondition; nothing launched) · **9** a second abort (a refusal or
+another Ctrl-C) inside the first abort's clean-up — the first already recorded the run and sent the quit.
+Ctrl-C, TERM and HUP (the terminal closing) all abort the same way. If the app's menu quit ever fails,
+the report says the app was TERMINATED (its quit path skipped) — never silently.
 
 ## The build under test (the stamp)
 
@@ -63,7 +66,9 @@ System Events (all three CHECKED, never prompted — `helpers/vis-tcc.swift`; gr
 machine author-free (10 s with no input — it waits up to a minute). The dev app itself is sent no
 Apple Event (it quits through its own menu, by accessibility, addressed to its pid). A system dialog
 on screen is noted and never touched. Never ask the Automation state of a target whose consent prompt
-is PENDING — the check blocks until she answers it (measured with Finder).
+is PENDING — the check blocks until she answers it (measured with Finder); so every check runs under a
+time limit, and a check that times out is reported as exactly that — "a consent prompt may be pending"
+— never as a missing Accessibility grant (round 2, MINOR-R2-3).
 
 ## The per-step safety (every GUI act)
 
@@ -121,7 +126,15 @@ every identity (N9): each pass per voice leaves, in *About this book* and *A Sca
 trays, the carve's empty blocks and — `write-divide-merge`'s ⌫ at the seam being a MERGE (a fresh
 block, both sources released to lineage) — two released blocks, and swaps one fixture block's
 identity; leaving an edited note appends its quiet `closeAutoCommit` savepoints. Harmless to the
-geometry; the walks' accepted residue. Chrome controls are found by their accessibility labels
+geometry; the walks' accepted residue.
+
+**Read-tier targets and stale frames.** The Index / Read ▸ edit oracles keep a row's last frame until
+its surface leaves, so a lazily de-realized row can leave a GHOST. Frames that overlap any other frame
+are dropped as suspect (rows never overlap); a ghost overlapping nothing is caught after the click — the
+live pane must stand within 12 pt of the frame, else a harness ERROR (red), never a product PASS. Two
+edges, both fail-closed: frames are compared BY VALUE, so a ghost byte-identical to a live row survives
+as "itself" (the post-click check still catches it); and the probe lists at most 40 frames top-down, so
+accumulated ghosts could crowd the band's lower rows out (an ERROR, not a false pass). Chrome controls are found by their accessibility labels
 (`helpers/vis-ax.swift`), never by remembered coordinates.
 
 ## The pieces

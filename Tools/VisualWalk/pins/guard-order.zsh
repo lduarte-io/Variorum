@@ -14,7 +14,12 @@ mkdir -p $T/wk $T/bin $T/run
 cat > $T/wk/guard.sh <<'G'
 #!/bin/zsh
 if [[ $1 == --author ]]; then print -r -- "guard --author" >> $VW_PIN_LOG; exit ${STUB_AUTHOR_RC:-0}; fi
-print -r -- "guard $*" >> $VW_PIN_LOG; exit ${STUB_GUARD_RC:-0}
+print -r -- "guard $*" >> $VW_PIN_LOG
+# STUB_GUARD_SEQ ("5 0"): one exit code per target-guard run, in order (a lost focus, then fine).
+if [[ -n $STUB_GUARD_SEQ ]]; then
+  seq=(${=$(<$STUB_GUARD_SEQ)}); print -r -- "${seq[2,-1]}" > $STUB_GUARD_SEQ; exit ${seq[1]:-0}
+fi
+exit ${STUB_GUARD_RC:-0}
 G
 print '#!/bin/zsh\nexit 0' > $T/bin/vis-foreign
 print '#!/bin/zsh\nprint "vis id=$1 key=1 fr=editor win=0.0,0.0,100.0,100.0"' > $T/bin/vis-probe
@@ -27,7 +32,7 @@ run_case() {   # name author_rc guard_rc act… ; then the checks as a zsh expre
   local name=$1 arc=$2 grc=$3; shift 3
   local act=$1; shift
   : > $T/log
-  ( export VW_PIN_LOG=$T/log STUB_AUTHOR_RC=$arc STUB_GUARD_RC=$grc
+  ( export VW_PIN_LOG=$T/log STUB_AUTHOR_RC=$arc STUB_GUARD_RC=$grc STUB_GUARD_SEQ
     source $VW/lib.zsh
     WK=$T/wk VW_BIN=$T/bin RUN_DIR=$T/run STEP_GAP=0 PID=99999 WIN_X=0 WIN_Y=0 WIN_W=100 WIN_H=100
     osascript() { print -r -- "osascript $*" >> $VW_PIN_LOG }
@@ -57,6 +62,12 @@ run_case "point outside the window (7) → abort, no retry" 0 7 'vw_click 10 10'
 #    never re-activate.
 run_case "idle refusal from the target guard (4) → abort, no re-activation" 0 4 'vw_click 10 10' \
   '[[ $(count "osascript") == 1 && $(count "cliclick") == 0 && $log == *"status 4"* ]]'
+
+# 5. A LOST FOCUS (5) is the one retry — and the author check comes BEFORE each re-activation (round 2,
+#    NIT-R2-11: the retry path was unpinned).
+print "5 0" > $T/seq
+STUB_GUARD_SEQ=$T/seq run_case "lost focus (5) → author check, THEN re-activate, then the click" 0 0 'vw_click 10 10' \
+  '[[ $(count "osascript") == 2 && $(count "guard --author") == 2 && $log == *"guard --author"*"osascript"*"guard 99999 10 10"*"guard --author"*"osascript"*"guard 99999 10 10"*"cliclick c:10,10"* ]]'
 
 print "guard-order pins: $fails failing"
 (( fails == 0 ))

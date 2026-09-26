@@ -10,7 +10,8 @@
 # Exit: 0 no FAIL / ERROR (XFAIL and XPASS are reported, never red — an XPASS is flagged loudly in the
 # report: a known issue did not reproduce) · 1 a FAIL or ERROR · 4 aborted (a guard fired, or the
 # harness could not go on — the run folder's `aborted` says which) · 5 refused (a precondition; nothing
-# launched). README.md says what each scenario asserts.
+# launched) · 9 a second abort inside the first's clean-up (the first already recorded the run).
+# README.md says what each scenario asserts.
 
 emulate -L zsh
 setopt pipe_fail
@@ -85,6 +86,7 @@ vw_selfcheck
 # Ctrl-C is the author at the machine: stop, quit the app, name what is owed — touch nothing else.
 trap 'vw_abort "interrupted (SIGINT) — the author is at the machine"' INT
 trap 'vw_abort "terminated (SIGTERM)"' TERM
+trap 'vw_abort "hung up (SIGHUP — the terminal closed)"' HUP
 [[ -n $foreign ]] && print -r -- "System dialog(s) on screen at start (never touched): $foreign" > $RUN_DIR/foreign.txt
 vw_log "run $RUN_DIR — voices: $VW_VOICES"
 
