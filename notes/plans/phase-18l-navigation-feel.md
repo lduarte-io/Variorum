@@ -1519,7 +1519,7 @@ cold review is the remaining gate.
 | 2 | The oracle endpoint (DEBUG, env-gated, pull-only) | DONE (`e949e2a1`, grown `8ac80daf`) — `Core/Views/VisualWalkProbe.swift` + one DEBUG line in `VariorumAppDelegate`; verified against captures (coordinates exact to the point) |
 | 3 | `Tools/VisualWalk/` — driver, scenario table, report, env gate | DONE (`5e79c641`, fixed `8ac80daf`) — every scenario ran end to end in Terminal; the foreign-dialog rule added after the incident below |
 | 4 | The seeded scenarios | DONE in Terminal (ten: the design note's list + B5 on two roads); the both-voice full run is piece 6 — PENDING |
-| 5 | The self-test RED (caught, captured, reported non-zero) | NOT-STARTED |
+| 5 | The self-test RED (caught, captured, reported non-zero) | (a) THE PLANTED FAILURE — DONE: `--selftest` (a knowingly wrong expectation) → FAIL, two captures, report, **exit 1** (`vis-walks/2026-09-26/112606-selftest/`). (b) THE TEETH — IN-PROGRESS, named before it runs: **R-full-scratch** = U0b's R-full (`EditorViewModel.readingAnchor()` captures `inset: 0`), applied ONLY in a scratch worktree at `4ccfd13c` (`scratchpad/rfull-tree`, its own derived data; the main tree untouched), then `write-newline-roundtrip` run against that build with `VW_DD`; expected RED: the ⌫ carve's first line up 24.0 pt (clip 24) — U0b's measured collapse. Worktree removed after |
 | 6 | The full seeded run on the current tree, both voices, evidenced | NOT-STARTED |
 | 7 | The env-flag wrapper test (`VARIORUM_VISUAL_WALK=1`) | NOT-STARTED |
 | 8 | Closing runs (the app suites the diff could reach + `TutorialWalkTests`) | NOT-STARTED |
