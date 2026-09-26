@@ -315,3 +315,47 @@ red-on-old pins owed — each fix labelled per the guard's rule.
 
 **Round 1 closes: 0 BLOCKER / 0 MAJOR / 2 MINOR / 2 NIT, all four agreed, confirmed and
 fixed.** The implementer's sanity pass over `f207f97a..cd01c428` is the remaining step.
+
+## IMPLEMENTER SANITY PASS (`opus-implementer`, 2026-09-26) — PASS
+
+I read the full diff `f207f97a..cd01c428` (QUESTIONS.md; `EditorViewModel.swift` ×3; the
+`ScrollAnchorTests` header) and the ROUND 1 FINAL CALLS above.
+1. **The MINOR-2 delegate is byte-equivalent on every input the six pin sites can pass.**
+   - The old body was `guard let textView` → `jump(toOffset: min(offset, max(0,
+     index.documentLength)), textView:, scrollView: scrollView)` (default `landingInset: 0`) →
+     `refreshBadges()`.
+   - `restoreReadingAnchor` (:4204) is the same guard, the same `min(anchor.offset, max(0,
+     documentLength))`, the same text and scroll views, then `refreshBadges()`. Its
+     `landingInset: anchor.reflowLandingInset` is `inPageTopAir ? inset : 0` (JumpPrimitive:170).
+   - The delegate always builds `inset: 0, inPageTopAir: false`, so the inset is 0 whatever
+     `offset` a site passes. All six sites pass an offset only: `ScrollAnchorTests:116`,
+     `TypewriterRoomTests:410/423`, `TypewriterRoomReachabilityTests:400/463`,
+     `EditorWindowSmokeTests:69`. None can reach the top-air arm.
+   - Identical for all inputs, and it now runs the production arithmetic.
+2. **The NIT-1 resets cannot race the consume's read.** `consumePendingAnchorRestore` is
+   main-actor and synchronous.
+   - It copies `pendingAnchorInset` into a local BEFORE the reset, and the jump reads the local.
+   - A park re-entering from inside `JumpPrimitive.jump` (a `layoutViewport()` pass arming a
+     settle hop) could only write AFTER the reset, so its fresh inset survives. Before, the jump
+     read the property AFTER the nil, so the reset-first order is strictly safer.
+   - `consumePendingCarriedPlacement` never reads the inset; it discards it with the park it
+     outranks, as intended.
+   - `parkAnchorRestore` (the only setter) still writes both fields.
+   - The RAISE-M1 cold mount parks inset 0 and the re-font keeper parks `reflowLandingInset`,
+     both unchanged.
+3. **No U0b mechanism moved.**
+   - `renderFull`'s exact landing, `readingAnchor()`'s capture, `restoreReadingAnchor` and the
+     keepers' `reflowLandingInset` are all untouched by the four commits.
+   - `topVisibleOffset()` and `JumpPrimitive` are byte-unchanged.
+   - NIT-2 and the header are comments only.
+   - The #134(a) line records the carve exactly as built (the 24-pt zone only; the keepers still
+     agree; B2 stays row 87's) and leaves the ruled text untouched.
+4. **Blast radius beyond the reviewer's ten suites.** The consume change sits on the cold-mount
+   (RAISE-M1) park, and the standing rule names the Tutorial suites. So I ran
+   `CurrentBlockContinuityTests`, `FocusHandoffTests`, `EditorSessionTests` and **the eleven
+   Tutorial suites**.
+   - Result: **✔ Test run with 110 tests in 14 suites passed**, 14 suites counted. The machine was
+     idle and no app instances were running (`App/Variorum/DerivedData/18l-u0b-sanity.log`).
+   - I re-ran none of the reviewer's ten: 60/10 was green on this exact tree.
+
+Nothing raised. From my side, the U0b ladder closes.
