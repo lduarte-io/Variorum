@@ -43,8 +43,13 @@ for h in vis-probe vis-win vis-foreign vis-ax vis-tcc; do
 done
 [[ $VW_BIN/walk-scroll -nt $WK/scroll.swift ]] || swiftc -O -o $VW_BIN/walk-scroll $WK/scroll.swift || refuse "cannot compile WalkKit's scroll.swift"
 [[ $WK/wl2 -nt $WK/wl2.swift ]] || swiftc -O -o $WK/wl2 $WK/wl2.swift || refuse "cannot compile WalkKit's wl2 (guard.sh needs it)"
-tcc=$($VW_BIN/vis-tcc)
-[[ $tcc == "AX 1 SCREEN 1" ]] || refuse "this terminal lacks Accessibility / Screen Recording ($tcc) — granting is the author's"
+# The grants (checked, never prompted — MINOR-6): Accessibility, Screen Recording, and the Automation
+# grant for System Events, which every act and every guard speaks to (launched first: a target must
+# run to be asked; launching sends no Apple Event).
+open -g -b com.apple.systemevents; sleep 1
+tcc=$(vw_timeout 15 $VW_BIN/vis-tcc com.apple.systemevents)
+[[ ${${(f)tcc}[1]} == "AX 1 SCREEN 1" ]] || refuse "this terminal lacks Accessibility / Screen Recording (${${(f)tcc}[1]}) — granting is the author's"
+[[ $tcc == *"AE:com.apple.systemevents granted"* ]] || refuse "no standing Automation grant for System Events (${${(f)tcc}[2]:-the check timed out — a consent prompt pending?}) — the first act would mint a consent prompt; granting is the author's"
 foreign=$($VW_BIN/vis-foreign 0)
 [[ -n $foreign ]] && print -u2 "NOTE: system dialog(s) on screen — the harness will never click or type into them: $foreign"
 
@@ -78,12 +83,16 @@ done
 RUN_DIR=$REPO/notes/plans/vis-walks/$(strftime %Y-%m-%d $EPOCHSECONDS)/$(strftime %H%M%S $EPOCHSECONDS)$([[ -n $VW_SELFTEST ]] && print -- -selftest)
 mkdir -p $RUN_DIR
 vw_selfcheck
+# Ctrl-C is the author at the machine: stop, quit the app, name what is owed — touch nothing else.
+trap 'vw_abort "interrupted (SIGINT) — the author is at the machine"' INT
+trap 'vw_abort "terminated (SIGTERM)"' TERM
 [[ -n $foreign ]] && print -r -- "System dialog(s) on screen at start (never touched): $foreign" > $RUN_DIR/foreign.txt
 vw_log "run $RUN_DIR — voices: $VW_VOICES"
 
 
 VOICE=setup; vw_launch
-typeset -g FOUND_VOICE=${PV[voice]}
+FOUND_VOICE=${PV[voice]}
+print -r -- $FOUND_VOICE > $RUN_DIR/voice-found
 typeset -a voices
 [[ $VW_VOICES == current ]] && voices=($FOUND_VOICE) || voices=(${(s:,:)VW_VOICES})
 vw_log "found voice: $FOUND_VOICE; passes: $voices"

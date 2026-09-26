@@ -35,13 +35,39 @@ typeset -g STEP_GAP=${VW_STEP_GAP:-2.6}   # >= 2.5 s: guard.sh fires on the walk
 vw_log() { print -r -- "[$(strftime %H:%M:%S $EPOCHSECONDS)] $*" | tee -a $RUN_DIR/run.log >&2 }
 
 # --- Abort (the guard fired, or the harness cannot go on) -------------------------------------------
+# THE VOICE the dev store spoke when the run began, and the last one a probe saw (round 1, MINOR-5): the
+# voice is a SYNCED dev-store setting the passes flip, and a Study store left behind reds KnownIssues
+# row 90's C2 pins on the next Mac suite — so an abort names it, and restores it only when no author
+# refusal caused the abort and the author checks pass NOW.
+typeset -g FOUND_VOICE= LAST_VOICE= ABORTING=
+
 vw_abort() {
+  if [[ -n $ABORTING ]]; then vw_log "nested abort (inside the abort's own clean-up): $*"; exit 9; fi
+  ABORTING=1
   vw_log "ABORT: $*"
   print -r -- "ABORTED: $*" >> $RUN_DIR/aborted
   [[ -n $SCN ]] && { SCN_STATUS=ERROR; SCN_NOTE="aborted: $*"; vw_scenario_end }
+  vw_voice_after_abort "$*"
   vw_report
   vw_quit_app
   exit 4
+}
+
+vw_voice_after_abort() {   # <reason>
+  [[ -z $FOUND_VOICE || -z $LAST_VOICE || $LAST_VOICE == $FOUND_VOICE ]] && return 0
+  local line="dev store voice left at $LAST_VOICE (found $FOUND_VOICE)"
+  local author_caused=0
+  [[ $1 == *"her app"* || $1 == *"at the machine"* || $1 == *interrupted* ]] && author_caused=1
+  if (( ! author_caused )) && [[ -n $PID ]] && kill -0 $PID 2>/dev/null \
+     && $WK/guard.sh --author >> $RUN_DIR/run.log 2>&1; then
+    if ( vw_set_voice $FOUND_VOICE ) >> $RUN_DIR/run.log 2>&1; then
+      line="$line — RESTORED to $FOUND_VOICE"; LAST_VOICE=$FOUND_VOICE
+    fi
+  fi
+  [[ $LAST_VOICE != $FOUND_VOICE ]] && \
+    line="$line — RESTORE OWED before any Mac suite (KnownIssues row 90: the C2 inline pins red on a Study dev store)"
+  print -r -- "$line" >> $RUN_DIR/aborted
+  vw_log "$line"
 }
 
 # --- The app (its OWN dev-store Debug build, launched with the probe on) ----------------------------
@@ -64,6 +90,7 @@ vw_launch() {
   sleep 2
   vw_window
   vw_log "launched pid $PID, window $WID (${WIN_X},${WIN_Y} ${WIN_W}x${WIN_H})"
+
 }
 
 vw_window() {
@@ -75,14 +102,16 @@ vw_window() {
 vw_quit_app() {
   [[ -z $PID ]] && return
   kill -0 $PID 2>/dev/null || { PID=; return }
-  # Quit by identity only when ours is the ONLY dev instance (the UNIT D/E rule), else by PID.
-  if [[ $(pgrep -f 'Variorum.app/Contents/MacOS' | wc -l | tr -d ' ') == 1 ]]; then
-    osascript -e 'with timeout of 20 seconds' -e 'tell application id "io.lduarte.Variorum.debug" to quit' -e 'end timeout' >/dev/null 2>&1
-  else
-    kill -TERM $PID
-  fi
+  # Quit through the app's OWN menu, by accessibility, addressed to OUR pid (never a blind ⌘Q — the
+  # 13u3 UNIT D rule): the ordinary quit path runs (applicationShouldTerminate flushes the buffers), and
+  # the only Apple Events the harness sends go to System Events, whose grant the preconditions check
+  # without prompting (U-VIS round 1, MINOR-6 — `vis-tcc` measured the dev app's Automation grant
+  # "undetermined" even for the quit event, so nothing is sent to the dev app itself). Fallback: TERM.
+  osascript -e 'with timeout of 20 seconds' \
+    -e "tell application \"System Events\" to tell (first application process whose unix id is $PID) to click menu item \"Quit Variorum Dev\" of menu 1 of menu bar item 2 of menu bar 1" \
+    -e 'end timeout' >/dev/null 2>&1
   local i; for i in {1..30}; do kill -0 $PID 2>/dev/null || break; sleep 0.5; done
-  kill -0 $PID 2>/dev/null && { vw_log "quit did not finish — TERM by pid"; kill -TERM $PID; sleep 2 }
+  kill -0 $PID 2>/dev/null && { vw_log "the menu quit did not finish — TERM by pid"; kill -TERM $PID; sleep 2 }
   vw_log "quit pid $PID; instances now: $(vw_instances | wc -l | tr -d ' ')"
   PID=
 }
@@ -123,6 +152,10 @@ vw_stamp_verdict() {
   return 0
 }
 
+# A command under a wall-clock limit (macOS ships no `timeout`): an Automation check for a target
+# whose consent prompt is PENDING blocks until it is answered — measured with Finder at U-VIS.
+vw_timeout() { perl -e 'alarm shift; exec @ARGV' "$@" }
+
 # --- The probe ---------------------------------------------------------------------------------------
 vw_probe_raw() {   # [flags…] → PV / PV_LINE; non-zero on timeout
   (( PROBE_ID++ ))
@@ -132,6 +165,7 @@ vw_probe_raw() {   # [flags…] → PV / PV_LINE; non-zero on timeout
   PV=()
   local tok
   for tok in ${(s: :)out}; do [[ $tok == *=* ]] && PV[${tok%%=*}]=${tok#*=}; done
+  [[ -n ${PV[voice]} && ${PV[voice]} != unadopted ]] && LAST_VOICE=${PV[voice]}
   [[ -n $RUN_DIR ]] && print -r -- "$out" >> $RUN_DIR/probes.log
   return 0
 }
@@ -418,7 +452,7 @@ vw_report() {
     print -r -- "- **build under test:** \`${APP#$REPO/}\` — compiled from \`${B[commit]:0:8}\`${B[dirty]:+ + uncommitted \`${B[dirty]}\`} (app \`${B[app]}\` · core \`${B[core]}\`)${VW_SCRATCH:+ — **a SCRATCH build (VW_DD): its App/ differs from the tree; its core is the tree's**}"
     print -r -- "- tree at run time: \`$(git -C $REPO rev-parse --short HEAD)\` · macOS $(sw_vers -productVersion) ($(sw_vers -buildVersion))"
     print -r -- "- voices: ${VW_VOICES:-current} · scenarios: $([[ -n $VW_SELFTEST ]] && print 'SELF-TEST (planted failure)' || print ${VW_SELECTED:-all seeded})"
-    print -r -- "- result: **$(( RUN_FAILS + RUN_ERRORS )) failing** (FAIL $RUN_FAILS · ERROR $RUN_ERRORS)$( (( RUN_XPASS )) && print " · **XPASS $RUN_XPASS — a known issue did not reproduce in these scenarios; re-examine its row**")"
+    print -r -- "- result: $([[ -f $RUN_DIR/aborted ]] && print '**ABORTED** · ')**$(( RUN_FAILS + RUN_ERRORS )) failing** (FAIL $RUN_FAILS · ERROR $RUN_ERRORS)$( (( RUN_XPASS )) && print " · **XPASS $RUN_XPASS — a known issue did not reproduce in these scenarios; re-examine its row**")"
     [[ -f $RUN_DIR/aborted ]] && print -r -- "- **$(cat $RUN_DIR/aborted)**"
     print -r -- ""
     print -r -- "| scenario | voice | status | assertions | FAIL | XFAIL | XPASS | note |"
