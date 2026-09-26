@@ -338,6 +338,47 @@ scn_outline-narrow-restore() {
   done
 }
 
+# --- S8b: the LONG live story settles to its laid-out end after a resize (U0 item 2's SECOND mechanism) ---
+# U0's (b): TextKit's first full measure after a reflow can be 1–5 % off the layout the next display
+# passes settle to (the app: 22,884 pt reported where the story settled at 23,082 once a scroll laid its
+# end out), and nothing re-reported — the tail cut, or a blank page above the footer. The settle net
+# re-reports on the display pass. A short note cannot show it; the 212-block story does.
+vw_def outline-long-story-settle "The Adventures of Sherlock Holmes ▸ Outline, The Adventure of the Copper Beeches live (212 blocks)" \
+  "the navigator lands the story live · 1440 → 1000 → 1440 → 1000 → back, scrolled to the story's end each time" \
+  "(b) at every width, with the end laid out by the scroll, the frame holds the laid-out text (frame − laid-out bottom ±1 pt) and the end is on screen" pass
+scn_outline-long-story-settle() {
+  vw_open_note "the adventures of sherlock holmes"
+  vw_ax_press outline AXButton
+  vw_settle
+  local nav; nav=($($VW_BIN/vis-ax $PID "⠿, the adventure of the copper beeches" AXButton)) \
+    || { vw_require false "the navigator's Copper Beeches row"; return }
+  vw_click $(( nav[1] + 80 )) $(( nav[2] + nav[4] / 2 )) "the navigator: The Adventure of the Copper Beeches"
+  vw_settle
+  if [[ ${PV[fr]} != inline ]]; then   # the landing did not make it live: click its first line
+    local t; t=($(VIS_AX_MINX=$(( WIN_X + 520 )) $VW_BIN/vis-ax $PID "the adventure of the copper beeches" AXStaticText)) \
+      || { vw_require false "the expanded story's title"; return }
+    local y=$(( t[2] + t[4] + 22 ))
+    vw_free_x $(( t[1] + 10 )) $(( t[1] + 300 )) $y
+    vw_click $FREE_X $y "into the story's first line"
+    vw_settle
+  fi
+  vw_require '[[ ${PV[fr]} == inline ]] && (( ${PV[len]} > 40000 ))' "the long story is the live inline editor" || return
+  local w0=$WIN_W h0=$WIN_H w n=0
+  for w in 1000 $w0 1000 $w0; do
+    vw_resize $w $h0
+    sleep 1.5
+    vw_free_x $(( WIN_X + 600 )) $(( WIN_X + WIN_W - 60 )) $(( WIN_Y + WIN_H / 2 ))
+    vw_scroll $FREE_X $(( WIN_Y + WIN_H / 2 )) 300          # to the book's end — the story's end
+    sleep 1.5
+    vw_probe last            # NO measure: the laid-out bottom the scroll produced, read O(1)
+    vw_cap w$w-$(( ++n ))
+    vw_expect_near "width $w: the frame holds the settled layout (frame − laid-out bottom − inset)" \
+      "$(( PV[frameH] - PV[lastFrag] - PV[insetH] ))" 0 1
+    vw_expect_between "width $w: the story's last line is on screen (its glyph box drawn)" \
+      "${PV[lastGlyphY]}" $WIN_Y $(( WIN_Y + WIN_H ))
+  done
+}
+
 # --- S9: B5 — ⏎ right after a ⌘↓ landing on invalidated geometry (KnownIssues row 88) ---------------------
 vw_def b5-return-after-cmd-down "A Scandal in Bohemia, Write" \
   "a blank line mid-page · ⏎ + ⌫ (the carve's full re-render invalidates layout) · ⌘↓ · ⏎ at the tail · ⌫" \
@@ -415,4 +456,5 @@ scn_selftest-red() {
 
 # The seeded run's order: the note-open pair FIRST (a fresh launch is every note's first open).
 SCN_ORDER=(note-reopen write-typing write-newline-roundtrip write-divide-merge mode-roundtrip
-           index-click readedit-click outline-narrow-restore b5-return-after-cmd-down b5-refont)
+           index-click readedit-click outline-narrow-restore outline-long-story-settle
+           b5-return-after-cmd-down b5-refont)
