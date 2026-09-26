@@ -110,6 +110,7 @@ is plain, so a standing non-reproduction does not raise an XPASS every run.
 | `mode-roundtrip` | the design note | Write → Read → Write returns the page and the caret exactly |
 | `index-click` | U0 item 1 (row 86) | a read-tier click in the book Index goes live with the caret ON the clicked line, never the blank line |
 | `readedit-click` | U0 item 1 | the same on Read ▸ edit |
+| `read-landing` | 18l U1 (the F3 shape on note Read) | deep clicks through the contents column's filter, both faces (`RL_FACES` orders them; the first is truly cold): each landed block rests at its face's anchor (±3 pt) 6 s later, and its SHIPPING signpost (`landing surface=ReadNote…`) says `end=settled` — the probe's `rl` read |
 | `outline-narrow-restore` | U0 item 2(a) | the live inline note keeps its whole text at 1440 → 1100 → 900 → back |
 | `outline-long-story-settle` | U0 item 2(b) | the 212-block story, live, holds its SETTLED layout after each resize (its end scrolled into view) |
 | `b5-return-after-cmd-down` | row 88 (B5) | ⏎ at the tail after ⌘↓ on a carve-invalidated layout must not move the page — KNOWN in Study (where it reproduces), plain in Terminal |

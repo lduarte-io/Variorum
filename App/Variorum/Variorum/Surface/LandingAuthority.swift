@@ -189,9 +189,12 @@ nonisolated struct LandingPolicy: Equatable {
         correctionPace: .spacedByTheHold, correctsAnUnreportedTarget: false,
         correctionWord: "HOP")
 
-    /// **Note Read's two faces** (18l UNIT U1). PROVISIONAL until the unit's
-    /// trials measure them (the record's trial table is where each number
-    /// earns its place) — the starting point is the measured family's:
+    /// **Note Read's two faces** (18l UNIT U1). The measured family's numbers,
+    /// and the unit's trials kept them (`notes/plans/phase-18l-navigation-feel.md`,
+    /// U1 RECORD): on her *A Scandal in Bohemia*, both voices, 72 of 72 deep
+    /// landings `end=settled top=0` with ZERO hops in ~1.03 s — the hold, during
+    /// which nothing on the page moves — and the harness's one reproducible miss
+    /// arrives with the one blind correction below.
     ///
     /// - tolerance 2, the quiet interval, the one-second hold, the ceiling:
     ///   the Outline's and the Index's.

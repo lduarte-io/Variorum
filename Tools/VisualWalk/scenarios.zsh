@@ -536,5 +536,5 @@ scn_selftest-red() {
 
 # The seeded run's order: the note-open pair FIRST (a fresh launch is every note's first open).
 SCN_ORDER=(note-reopen write-typing write-newline-roundtrip write-divide-merge mode-roundtrip
-           index-click readedit-click outline-narrow-restore outline-long-story-settle
+           index-click readedit-click read-landing outline-narrow-restore outline-long-story-settle
            b5-return-after-cmd-down b5-refont)
