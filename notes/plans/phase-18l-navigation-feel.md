@@ -423,6 +423,53 @@ the first commit; `## U0b RECORD` appended to THIS file; commit+push per piece; 
 synchronous waits; tests at end; pathspec-limited staging). Your diff is editor-seam → a FABLE
 cold review follows.
 
+## U0c BRIEF (session 3 — NOTE-OPEN lands mid-note or at the end; built to R-18l-1; written by the orchestrator 2026-09-26 one-ahead — re-check against the U0b RECORD before spawning)
+
+You are the `opus-implementer` for **18l UNIT U0c**. One acceptance unit: her kickoff report
+(HER KICKOFF MESSAGE above, verbatim) — opening a note sometimes lands mid-note or at the end
+(one line of text at the top, blank below); it should show the START. **The ruled product rule is
+R-18l-1 (THE SITTING RECORD): START on the session's FIRST open of a note; restore
+where-she-was on a RE-open within the session; in-app deep links (fan "go there", a Read sentence
+click, a search hit) land at their targets unchanged; the remembered caret survives as editing
+state — only the OPENING VIEWPORT changes.** R-18l-2 carries her repro facts: multiple modes;
+notes with a TRAILING NEWLINE tend to jump to the END *"even when i hadn't clicked anywhere in
+particular"* (so the end-jump needs no remembered caret there — a landing target is being
+DERIVED from the tail; your trace's first suspect); Sherlock opened to the MIDDLE (plausibly the
+ruled saved-caret restore — correct under R-18l-1 only for in-session re-opens); still
+reproduces on the post-18k install.
+
+**Read first, in this order:** (1) THIS file whole — R-18l-1/2/4/5, ENVIRONMENT TRAPS (verbatim
+binding), the U0 and U0b RECORDs + both ladder files (the freshest seam facts). (2) The charter's
+U0c-adjacent text (the KnownIssues note-open row is the canonical statement). (3)
+`notes/TEXTKIT2_NOTES.md` in full (editor seam — mandatory). (4) The rulings your build must not
+break: 17o batch b's RAISE-M1 (Write's session scroll anchor) and R-Q20/R-Q21
+(`notes/plans/use-report-round-2026-09-12.md`, the R-8 section — the Takes entry-landing/memory
+pair; **byte-preserved machinery: R-18l-1 adds a first-open-per-session outrank ABOVE it, never
+an edit inside it — flag any pin collision to the orchestrator rather than editing a pin
+silently**). (5) The code: `CurrentBlockMemory` (`currentBlock.<id>` = blockID|variantID|offset)
+and every WRITER of it (a non-click writer stamping the tail is the end-jump's likeliest
+mechanism — find who writes it on close/leaving/savepoint roads); `CommandRouter`'s open/landing
+roads; each mode's entry landing (Write's caret-anchored entry, Takes' `TakesArticleScroll`
+restore half, Read's landing); the Open strip / Library / shelf door roads into a note.
+
+**The unit, in order:** (1) TRACE the opening-viewport decision per mode — who decides, from
+what stored fact. (2) REPRODUCE both her shapes (a trailing-newline fixture note → END; a
+mid-note-caret note → MIDDLE) and any others the trace predicts. (3) The END-jump is a BUG
+independent of the rule change if the memory holds a tail the author never placed — ATTRIBUTION
+(the four-value column, U0's evidence bars) and a red-on-old pin for that mechanism REGARDLESS
+of the new rule (the wrong-stamp writer stays wrong even under R-18l-1's restore-in-session
+arm). (4) BUILD R-18l-1: a per-app-run (in-memory, never persisted, never synced) first-open
+set; the session's first open of a note shows the START in every mode; a re-open restores by the
+standing machinery; deep links and back/forward history keep their targets (**PROVISIONAL call
+you may make: ← → history counts as re-open, not first open** — log it to QUESTIONS with one
+line either way). (5) Pins: the end-jump red-on-old; state-transition pins for
+first-open/re-open/deep-link per mode; the R-Q20/R-Q21 and RAISE-M1 pins ride UNMODIFIED (any
+that cannot is a STOP-and-flag, not an edit). (6) WALK, both voices: her exact shapes (trailing
+newline; Sherlock), first-open vs re-open per door (Library, shelf, Open strip), a deep link
+landing unchanged. Discipline: the U0 brief's paragraph verbatim (checkpoint from first commit;
+`## U0c RECORD` in THIS file; commit+push per piece; no subagents; synchronous waits; tests at
+end; pathspec-limited). Editor seam → Fable review.
+
 ## U-VIS DESIGN NOTE (the orchestrator's proposal, 2026-09-26 — owed to her in-file per her sitting follow-up; PROVISIONAL under R-18l-4: the overnight build proceeds on this design, hers to overturn at the morning bundle)
 
 **What it is (her words bind):** an OPT-IN visual regression harness — *"tests that can run
