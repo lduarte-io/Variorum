@@ -1742,6 +1742,21 @@ reproduction is history-dependent, so the XFAIL/XPASS label is honest but the tr
 (the `17bed3e2` record duplication), repaired from the last good version. **U-VIS — DONE (implementer);
 the cold review follows.**
 
+### U-VIS — ROUND-1 FIX PASS (implementer; the orchestrator confirmed every finding of `notes/plans/18l-uvis-ladder-round1.md`, `bdc770c8`)
+
+LIVE STATUS (flipped per piece; the fix table lands in the ladder file at the end):
+
+| # | Piece | Findings | Status |
+|---|---|---|---|
+| F1 | Guard BEFORE activate; an author-at-the-machine refusal aborts, never re-activates; relaunch + Settings close guarded; WalkKit `click.sh`/`keys.sh` the same order; headless stub-rig pin red on the old order | MAJOR-1, N5 | NOT-STARTED |
+| F2 | The probe reads nothing off-screen on the document editor (the last-fragment read opt-in; an off-screen caret reports `caretState=off`); the probe's facts factored for an in-suite pin; the env-gate + TK2-arithmetic pins | MINOR-8 (fix), N7 | NOT-STARTED |
+| F3 | The build stamp (App/, Sources/, the package manifests + the uncommitted diff) printed in the report; the driver REFUSES a binary that is not the current tree's (a `VW_DD` scratch build may differ only under `App/`) | MINOR-3, MINOR-4 | NOT-STARTED |
+| F4 | Abort/INT/TERM: quit, record the voice left, restore only when the author checks pass; the Automation grants checked without prompting | MINOR-5, MINOR-6 | NOT-STARTED |
+| F5 | Plain last-line line-index row; `b5-refont` plain; the NITs as written | MINOR-1, MINOR-2, N1–N4, N6, N8, N9 | NOT-STARTED |
+| F6 | B5's discriminating re-run (the full Study pass under the gated probe) → KnownIssues row 88 either way | MINOR-8 (measurement) | NOT-STARTED |
+| F7 | U0 item 2(b) seeded (the long story's settle); teeth runs for items 1, 2a, 2b (R-U0-1, R-U0-2, R-U0-3 in scratch worktrees) | MINOR-7 | NOT-STARTED |
+| F8 | The final wrapper run (both voices) + the touched suites; the fix table in the ladder file | — | NOT-STARTED |
+
 ### U-VIS — ORCHESTRATOR ACCEPTANCE (2026-09-26; verify-never-trust)
 
 **Claims verified:** all 12 commits pushed; the plan-file duplication slip verified REPAIRED
