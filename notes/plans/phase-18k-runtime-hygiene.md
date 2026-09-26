@@ -212,7 +212,8 @@ COMMITTED · every death and resume noted in the record.
 - THE WALKS — DONE (adjudicated below): C1 · C2 · C3 · C5 PASS; C6 FINDINGS W-4/W-2 → **C6b**; W-3 (backup second folder) → **C7**; W-1 (a canvas grab glyph) → 12.
 - C7 — DONE, ACCEPTED (the name-sorted backup listing — five readers fixed by one rule + the act's own file passed through; her real store verified exposed: 11 hourly copies).
 - C6b — DONE, ACCEPTED (W-4/W-2 pre-existing, FIXED; #147 PROVISIONAL).
-- THE LADDER — ROUND 1 DONE (0/0/0/3 NIT; NIT 1 fixed `0ebc3b5e`, #148). ROUND 2 IN-PROGRESS.
+- THE LADDER — CLOSED at two rounds (R1 0/0/0/3 NIT, NIT 1 fixed `0ebc3b5e`; R2 0/0/0/0).
+- THE FINALS — IN-PROGRESS (core → iOS build → mobile → full Mac; zero instances).
 - NEXT: C7 → C6b → the ladder (Fable, one combined diff) → finals → closeout → refresh → 18o.
 - Deaths / resumes: none.
 
@@ -3982,3 +3983,11 @@ traps loudly if a storage edit ever arrives off-main — today impossible) and N
 intent dropped before `busy` renders; the human road closed by `.disabled`) RECORDED as deliberate
 trades. No new BLOCKER/MAJOR. **ROUND 2 (a fresh reviewer; a real pass over the fix and what it
 touched) opens next**; round 3 is owed only if round 2 raises a new BLOCKER/MAJOR.
+
+**ROUND 2 (2026-09-25) — findings file `notes/plans/18k-ladder-round2.md` (`cfa3b7b1`).** Verdict:
+**0 BLOCKER · 0 MAJOR · 0 MINOR · 0 NIT.** The fix under re-review (`0ebc3b5e`) confirmed at the code;
+every production hunk re-read independently; a release-projection script (16 files change in Release
+= exactly the units' named fixes; the 19 sweep view files byte-identical); 318 test executions / 43
+suite runs green, zero skipped. One dismissal SHARPENED in its file (not a finding — no red-on-old pin
+possible): the Release-build over-release shape is exactly the recorded trade and needs a pairing bug
+that does not exist. **THE LADDER CLOSES at two rounds** (no new BLOCKER/MAJOR — the rule's own stop).
