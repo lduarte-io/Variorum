@@ -326,3 +326,15 @@ row 88 that the reproduction was taken under probing until the measurement above
   and the `17bed3e2` duplication is repaired (no `##` section appears twice).
 - **B5 honesty:** labelled against its owned row, measured numbers carried, trace left with its owner;
   row 88 amended in the orchestrator's acceptance commit.
+
+## ORCHESTRATOR ARBITRATION (same-model ladder — the orchestrator arbitrates; 2026-09-26)
+
+ALL 18 FINDINGS CONFIRMED (0 dismissed). Riders on the fix pass, sent to the implementer and
+binding: MAJOR-1 first and exactly as written, INCLUDING the same guard-before-activate fix in
+`Tools/WalkKit/click.sh`/`keys.sh` (one guard discipline, both homes), pinned by the headless
+stub rig red-on-old; MINOR-8's discriminating re-run REQUIRED with row 88 updated honestly
+either way; MINOR-3+4 land together (the report records the BUILT tree; the driver REFUSES a
+binary that mismatches HEAD — the old-build trap enforced); MINOR-6's check must not itself
+trigger the consent prompt; MINOR-7 seeds item 2(b) and produces teeth for items 1/2; b5-refont
+loses the KNOWN label (MINOR-2) so XPASS stops being noise. Round 2 = a FRESH opus-reviewer over
+the fix diff; a new BLOCKER/MAJOR there earns round 3 (cap three).
