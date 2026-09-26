@@ -1506,3 +1506,23 @@ CLOSE. The machinery slip (a revert's `git checkout HEAD --` over uncommitted ed
 class the resiliency protocol's addendum 11 names) was self-repaired and recorded; noted here so
 the next brief's traps line lands with emphasis. Ledger row 5 flips to BUILT+WALKED — the Fable
 cold review is the remaining gate.
+
+## U-VIS RECORD (implementer: `opus-implementer`, 2026-09-26)
+
+**NOT DONE (first line):** PENDING — filled at close.
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | Reading (own context, the brief's order) | DONE — this file whole (HER KICKOFF MESSAGE, SITTING RECORD, ENVIRONMENT TRAPS, the U-VIS DESIGN NOTE + BRIEF, the U0 · U0b · U0c RECORDs + acceptances); the charter's U-VIS section (`post-13u-health-rounds.md` KICKOFF 2); `Tools/WalkKit/` whole (README, `guard.sh`, `click.sh`, `keys.sh`, `wl2.swift`, `capture-windows.swift`, `scroll.swift`); 18k UNIT C4 brief + record + adjudication (the owner-keyed shape); KnownIssues rows 35 (the in-process click rig) · 88 (B5) · 89 (pointer injection); `TEXTKIT2_NOTES.md` whole; `SessionResiliencyProtocol.md`; the code the probe reads (`JumpPrimitive`/`FragmentLines`/`ReadingAnchor`, `EditorViewModel.topVisibleOffset`, `PaneMeasurement`, the settle net's O(1) last-fragment read, `BookIndexGeometry.paneReadTierFrames`, `ReadModeOracle`, `IndexClickCaretTests`' click geometry, `CommandRouter.activeMode`, `VariorumAppDelegate`) |
+| 2 | The oracle endpoint (DEBUG, env-gated, pull-only) | NOT-STARTED — design: a request/answer probe over distributed notifications, installed only when the app is launched with `VARIORUM_VISUAL_WALK=1`; reads the key window's first-responder text view (TK2 API only) + existing oracles at request time; content-free `key=value` answer |
+| 3 | `Tools/VisualWalk/` — driver, scenario table, report, env gate | NOT-STARTED |
+| 4 | The seeded scenarios (typing · U0b newline round trip · U0 Index click · U0 Read ▸ edit click · narrow→restore · divide + merge · mode round trip · U0c first open / re-open · B5) | NOT-STARTED |
+| 5 | The self-test RED (caught, captured, reported non-zero) | NOT-STARTED |
+| 6 | The full seeded run on the current tree, both voices, evidenced | NOT-STARTED |
+| 7 | The env-flag wrapper test (`VARIORUM_VISUAL_WALK=1`) | NOT-STARTED |
+| 8 | Closing runs (the app suites the diff could reach + `TutorialWalkTests`) | NOT-STARTED |
+| 9 | Self-assessment | NOT-STARTED |
+
+- Deaths / resumes: none.
