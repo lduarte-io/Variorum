@@ -39,3 +39,7 @@ notes/plans/13y-screens/
 notes/plans/18k-screens/
 notes/plans/18l-screens/
 Tools/WalkKit/wl2
+# 18l U-VIS: the visual harness — compiled helpers and run reports (captures) are local
+Tools/VisualWalk/bin/
+Tools/VisualWalk/.build/
+notes/plans/vis-walks/

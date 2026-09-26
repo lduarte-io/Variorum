@@ -40,6 +40,11 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
         // controller's own init applies it too, and neither order matters.
         appearance.apply()
         sanitizeWindowFrames()
+        #if DEBUG
+        // 18l U-VIS: the visual harness's oracle endpoint — registers nothing
+        // unless the harness launched this process (`VARIORUM_VISUAL_WALK=1`).
+        VisualWalkProbe.installIfRequested { [weak self] in self?.session }
+        #endif
     }
 
     func applicationDidBecomeActive(_ notification: Notification) {
