@@ -499,7 +499,15 @@ scn_read-landing() {
   vw_require '[[ ${PV[mode]} == Read ]]' "Read on A Scandal in Bohemia" || return
   local face ord tag
   for face in edit read; do
-    if [[ ${PV[face]} != $face ]]; then vw_ax_press $face AXButton; vw_settle rl; fi
+    if [[ ${PV[face]} != $face ]]; then
+      # The face switch's two segments: "edit" is found by its label; "read" by its place beside it
+      # (its label is shared with the note's own ⌘3 mode tab, which AX finds first).
+      local seg; seg=($($VW_BIN/vis-ax $PID edit AXButton)) \
+        || { vw_require false "the face switch's edit segment"; return }
+      if [[ $face == edit ]]; then vw_ax_press edit AXButton
+      else vw_click $(( seg[1] + seg[3] * 3 / 2 )) $(( seg[2] + seg[4] / 2 )) "the face switch's read segment"; fi
+      vw_settle rl
+    fi
     vw_require '[[ ${PV[face]} == $face ]]' "Read ▸ $face" || return
     sleep 2
     local -a plan
