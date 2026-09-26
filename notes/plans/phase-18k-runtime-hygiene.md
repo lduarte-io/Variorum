@@ -233,7 +233,9 @@ COMMITTED · every death and resume noted in the record.
 - C6b — DONE, ACCEPTED (W-4/W-2 pre-existing, FIXED; #147 PROVISIONAL).
 - THE LADDER — CLOSED at two rounds (R1 0/0/0/3 NIT, NIT 1 fixed `0ebc3b5e`; R2 0/0/0/0).
 - THE FINALS — core **1723/180 ALL PASSED** (+1 = the post-13y auto-entitlement act's `AuthRLSDDL` pin, `b58414eb`/`7152fcd5` — not 18k's; 18k touched no `Sources/`/`Tests/`) · iOS **BUILD SUCCEEDED** · mobile **643/109, exactly the 4 known** (+1 = C5's P26 pin) · full Mac **RED-IN-CONTEXT → UNIT C8** (below).
-- C8 — IN-PROGRESS. Then **the C8 cold review + the orchestrator-adjudication audit, FABLE (R-18k-9/10)** → the closeout → the refresh. 18o → a fresh Fable orchestrator at her word.
+- C8 — DONE, ACCEPTED (the widening leak fixed in its leaker; the soak red unreproduced); the full Mac run HELD for her quit.
+- THE C8 COLD REVIEW + ADJUDICATION AUDIT (FABLE, R-18k-9/10) — IN-PROGRESS.
+- THEN, at ONE zero-instance window (her quit): the full Mac run → the closeout → the refresh. Next phase at her word (likely 18l, carrying U0/U0b/U-VIS; then 18o — a fresh Fable orchestrator).
 - NEXT: C7 → C6b → the ladder (Fable, one combined diff) → finals → closeout → refresh → 18o.
 - Deaths / resumes: none.
 
@@ -4232,3 +4234,24 @@ suites, the Debug-domain snapshots.
 
 - Deaths / resumes: none.
 - **C8 — the leaker FIXED and proven; the full Mac suite HELD for a zero-instance window (owed); awaiting the orchestrator.**
+
+### UNIT C8 — ORCHESTRATOR ADJUDICATION (2026-09-25 night)
+
+**Verified:** commits `90f5b38f`…`368c97aa`, pushed, zero trailers; diff = ONE test file
+(`AutosaveRegistryLifecycleTests.swift`, +30 — `MountedEditor`'s `isolated deinit` detaching the
+delegates and emptying the storage); zero app code, zero `Sources/`. **ACCEPTED (widening red):** the
+leaker is C1's own `AutosaveRegistryReleaseGuardTests` (its two open-tail pins) — a dropped test editor
+survives in the test runner's long-lived autorelease pool, its storage holding a typed-and-crystallized
+tail stamped with the `.incrementing` harness's first block id; AppKit's process-wide reuse of
+content-equal attribute dictionaries lets a later suite's text share that paragraph-style object, so
+attribute fixing has nothing to re-apply (`{2,1}` not `{2,5}`). NOT a product leak. Pair red 3/3 → green
+3/3; revert R-C8 red identically. **The seed-21 soak red: NOT reproduced** in 22 executions (alone,
+under 12-way load, after the guard suite, after all 49 preceding touched suites) — no leaker found,
+nothing fixed, recorded as unexplained; the owed full run judges it. **The full Mac run is HELD** —
+correctly: her real-store app has been open since 21:15 with her at the machine (a 15-minute run
+raises the test host's windows and could take her keystrokes). **The full run and the install refresh
+now share ONE zero-instance window, at her quit.** The wider harness class (any dropped,
+typed-and-stamped editor under the shared `.incrementing` ids can repeat this) → KnownIssues, owner 12
+(filed this commit). **Next: the FABLE cold review of C8 + the audit of every orchestrator adjudication
+(R-18k-9/10) — it needs no zero-instance window (reading + targeted suites; the reviewer is told to
+leave the full suite for the window).**
