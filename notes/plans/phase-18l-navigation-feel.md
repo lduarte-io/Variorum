@@ -1265,3 +1265,11 @@ supersession edits (the trap the resiliency protocol names). The four edits (the
 comment, `NoteOpening`'s field, two docs) were re-applied from this session's own record of them
 and re-verified: 12/12 green on the re-applied tree (`18l-u0c-pin-fixed5.log`). Every later revert
 runs only on a COMMITTED tree.
+
+**R-open, re-run on the committed supersession tree** (`18l-u0c-R-open2.log`; its first run above
+was on the letter build): **RED 4 tests / 4 issues — the re-open arm exactly**: the router pin's
+`openingLanding` arm, the scrolled-away re-open **2904.0**, mid-note **1391 → 24.0**, the room
+re-open **24.0** (the reveal to block 1 wins over the room's place); the first-open pins GREEN under
+it (that arm is the seeding — R-letter's). R-place and R-room stand as run (their mechanism, the
+teardown place, is unchanged by the seeding). QUESTIONS #150 rewritten to the built reading, (a)
+carrying the letter-reading as the alternative with `t-11` as the measured reason.
