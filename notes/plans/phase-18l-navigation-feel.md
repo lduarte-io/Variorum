@@ -256,6 +256,17 @@ two-phase-sized-units line — flagged to the author at the kickoff sitting (Q3)
   strictly sequential U0 family → U-VIS → U1 → U2 → U3 → U4; if the round runs heavy after U1, the
   remainder closes as a follow-on 18l-b under a fresh orchestrator at a clean seam — declared now,
   never a silent split.
+- **R-18l-4 — THE OVERNIGHT MANDATE (her last message before sleep, 2026-09-26, verbatim):** *"I'm
+  stepping away and going to sleep for the evening - rule everything provisionally in my absence
+  and continue your progress through the night. If this phase ends before I wake, ensure there's
+  a handoff for me to use to communicate with a fresh session so I don't have to wake you."*
+  Applied as the skill's away-run rule: PROVISIONAL-and-continue everything short of an
+  author-only hard stop; anything genuinely hers is HELD and BUNDLED into the morning checklist
+  (the handoff's first section); if the round closes overnight, the author handoff
+  (`notes/handoffs/phase-18l-handoff.md`) is written per the closeout ritual — self-contained for
+  a fresh session. Machine setup: her app quit (zero real-store instances), a detached
+  `caffeinate -dims` running (pid noted in the orchestrator's log), GUI driving authorized with
+  the per-step checks binding.
 - **Her follow-up at the sitting (2026-09-26, verbatim — the round's bar):** *"there was supposed
   to be a new plan made as well for a style of testing to deal with the different editor
   regressions and ensuring that clicking around and editing doesn't lead to jumps that are not
