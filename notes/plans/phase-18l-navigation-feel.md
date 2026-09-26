@@ -389,8 +389,8 @@ restore under 27's `layoutViewport()` displacement) was NOT examined — U0 does
 | 5 | Item 2 — reproduce, trace, pin, fix, revert (TWO mechanisms) | DONE — (a) the missing width trigger: pin `54fb5d47` (+ both directions `f46ceac8`), fix `0d9ac91d`, R-U0-2 / R-U0-2b RED → green; (b) the unsettled first measure (the brief's named suspect): pin `08aa8d0c`, fix `8b86232a` (the settle net), R-U0-3 RED → green (`17e07015`) |
 | 6 | Item 3 — the regression sweep | DONE — THE SWEEP below (with ATTRIBUTION per finding) |
 | 7 | Walk (both voices) + captures | DONE — PASS on the final product code (THE WALK below); captures `notes/plans/18l-screens/u0/` (gitignored) |
-| 8 | Closing runs | PENDING (the touched Mac suites + the eleven Tutorial suites, core `swift test`, iOS build — `Shared/` and `Sources/` are touched) |
-| 9 | Self-assessment | DONE (below) — final line PENDING the closing runs |
+| 8 | Closing runs | **DONE** on the final tree (`0e1cbd65`, product code `8b86232a`), zero app instances, the machine idle (HID 721 s): **Mac — 59 suites named literally (the touched and neighbouring suites: the Index, Read ▸ edit / TOC, the inline editor's hosts, the C6/C6b jump family, and the eleven Tutorial suites): ✔ Test run with 341 tests in 59 suites passed**, 0 skipped (`DerivedData/18l-u0-closing1.log`); 112 `Modifying state during view update` lines, all from pane-mounting tests (32 in the new parameterized pins, whose live panes publish through `PanePublisher` — the A1 family, U3's). **Core `swift test`: 1729 tests / 181 suites passed** (`18l-u0-core.log`; +6 = `MarkdownRenderingSourceOffsetTests`). **iOS: BUILD SUCCEEDED** (`18l-u0-ios.log`). **Mobile (the suites that consume `FlowParagraph` / `MarkdownRendering`): 34 tests / 8 suites passed with 2 known issues** — the phone tutorial's duplicate-divide lesson, KnownIssues row 51 (`18l-u0-mobile.log`) |
+| 9 | Self-assessment | DONE (below) |
 
 - Deaths / resumes: none.
 - **INCIDENT (machinery honesty, ~01:37 local):** a walk double-click (`cliclick c:318,226`, meant for the
@@ -529,7 +529,7 @@ were walked on `0d9ac91d`'s product code (item 1's code unchanged since). Captur
 | Study | Index · the next block's FIRST line | on that line | `s-index-click-firstline-next` |
 | Study | Index · a block's LAST line, directly above its empty separator (her trigger) | on the line (*"twel\|ve"*), never the blank | `s-index-click-lastline-above-separator` |
 | Terminal | Index · the same three shapes | all three on their lines (*"abhorrent \|to"*, *"questionabl\|e"*) | `t-index-click-*` |
-| Study | Read ▸ edit · a mid line, then the next block's first lines | on the clicked character (*"introdu\|ce"*, *"happiness\|,"*) | `s-readedit-click-*` |
+| Study | Read ▸ edit · a mid line; then a line of the next block (after the first click's block went live and reflowed, the pointer sat on that block's line 2) | on the clicked character each time (*"introdu\|ce"*, *"happiness\|,"*) | `s-readedit-click-*` |
 | Terminal | Read ▸ edit · a block's last line | *"q\|uestionable memory."* (was: line 0) | `t-readedit-click-lastline` |
 | Terminal | Outline · *About this book* live · 1440 → 1180 → 1000 → 900 → 820 | whole text at every width, "tagged" whole | `t-outline-about-live-w*` |
 | Study | Outline · *About this book* live · the pre-fix repro's own sequence + far scrolls | whole at every step | `rep2/`, `net-s-about/` |
@@ -604,4 +604,4 @@ second LAYOUT of the read tier's text (not a second measurement brain for any fr
 pass work to the inline editor (O(1)) and composes two model doors in `install`; (c) the adapted C2 pin;
 (d) the item-1 attribution rests on line history, not an old-tree run (barred). The width hop alone
 measured WORSE in the app than the pre-hop road (the blank end, 5 of ~9) until the net landed — the two
-must ship together. Closing runs: PENDING.
+must ship together. Closing runs green (LIVE STATUS 8). **U0 — DONE (implementer); the Fable cold review follows.**
