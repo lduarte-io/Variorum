@@ -213,9 +213,9 @@ two-phase-sized-units line — flagged to the author at the kickoff sitting (Q3)
 
 | # | Item | Unit | Status |
 |---|---|---|---|
-| 1 | The Index click lands the caret on the EMPTY paragraph (deterministic — *"a refusal of clicking into the text"*) — KnownIssues row 86 | U0(1) | open |
-| 2 | The book view clips the last line's descenders with a note expanded (her capture) | U0(2) | open |
-| 3 | The editor-regression SWEEP over 13u2…13y/18k (her ask: *"investigate editor regressions that must've happened during recent fixes"*) — every finding reproduced, traced, pinned, fixed or owned | U0(3) | open |
+| 1 | The Index click lands the caret on the EMPTY paragraph (deterministic — *"a refusal of clicking into the text"*) — KnownIssues row 86 | U0(1) | **BUILT + WALKED** (impl. + orch.; pre-existing; pins `IndexClickCaretTests` R-U0-1 red 26) — Fable review pending |
+| 2 | The book view clips the last line's descenders with a note expanded (her capture) | U0(2) | **BUILT + WALKED** (two mechanisms: the width trigger, pre-existing; the settle net, undetermined/TK2) — Fable review pending |
+| 3 | The editor-regression SWEEP over 13u2…13y/18k (her ask: *"investigate editor regressions that must've happened during recent fixes"*) — every finding reproduced, traced, pinned, fixed or owned | U0(3) | **DONE** — S1–S9 with ATTRIBUTION per finding (U0 RECORD); S3 → KnownIssues (taste call, morning bundle) · S5 → KnownIssues (12) · row 75 closed |
 | 4 | WRITE: removing a newline collapses the top padding (block 4/4 → 3/3 captures) — KnownIssues row 87 | U0b | open |
 | 5 | NOTE-OPEN lands middle/end instead of the start, ignoring where she was (her 2026-09-26 report) — product rule = sitting Q1 | U0c | open |
 | 6 | The opt-in VISUAL REGRESSION HARNESS (env-gated; real window; geometry assertions — first-visible-line y, caret line, glyph box inside the surface, click lands on the clicked line; seeded with U0/U0b/U0c reproductions) | U-VIS | open |
@@ -605,3 +605,30 @@ pass work to the inline editor (O(1)) and composes two model doors in `install`;
 (d) the item-1 attribution rests on line history, not an old-tree run (barred). The width hop alone
 measured WORSE in the app than the pre-hop road (the blank end, 5 of ~9) until the net landed — the two
 must ship together. Closing runs green (LIVE STATUS 8). **U0 — DONE (implementer); the Fable cold review follows.**
+
+### U0 — ORCHESTRATOR ACCEPTANCE (the hands-on walk, 2026-09-26 overnight; the verify-never-trust pass)
+
+**Claims verified against git before the walk:** all commits `4dfd84eb…3fd62455` present and pushed,
+tree clean, the five new files exist, the record's LIVE STATUS fully flipped with hashes and red
+counts. **The walk, on a fresh Debug build of `3fd62455` (dev store, zero other instances, machine
+idle, per-step guard):**
+- **Item 1 PASS.** Sherlock ▸ Index, read tier: a click ON "eclipses" (line 2 of A Scandal in
+  Bohemia's first paragraph) went live with the caret ON that line at the clicked word — not the
+  empty paragraph, not the block end; a second click on a lower line of the NEXT block ("were
+  sufficient to absorb…") landed the caret on that line likewise. One click each; her "refusal"
+  shape is gone in my hands.
+- **Item 2 PASS.** Outline, About this book LIVE: window 1440 → 1000 — the note re-wrapped whole,
+  last line's descenders intact, no cut tail; 1000 → 1440 — no anomalous gap under the last line
+  (row 75's tall side). Final capture kept at `notes/plans/18l-screens/u0/orch-walk-widen-restore.png`.
+- **Observed en route, consistent with the record:** the live pane re-wraps slightly under the
+  pointer on going live — the S3 class, recorded, deliberately not built, HELD for her (the
+  morning bundle). Also one walker fact for the traps: the ← → history bar appears after the
+  first navigation and pushes the shelf rows ~17 pt down — measure click targets from a capture
+  taken in the CURRENT navigation state.
+
+**Orchestrator adjudications landed with this acceptance (R-18l-4 provisional authority):**
+row 75 CLOSED — RESOLVED at 18l U0 (S2 + S2b, pins named in the row); S5 filed as a new
+KnownIssues row (owner 12, the harness-calibration family); S3 filed as a new KnownIssues row
+(owner: the Design & UI review project row, flagged AS A TASTE CALL for her — the tiers' shared
+metrics are product); the TEXTKIT2_NOTES §3 settle-net line added (a measurement record). Ledger
+rows 1–3 flip to BUILT+WALKED — the Fable cold review is the remaining gate.
