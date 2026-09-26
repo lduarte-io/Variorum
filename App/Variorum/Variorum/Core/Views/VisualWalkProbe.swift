@@ -53,6 +53,7 @@
 
 #if DEBUG
 import AppKit
+import SwiftUI  // `UnitPoint.y` — the faces' resting anchors (18l U1's `rl`)
 
 @MainActor
 enum VisualWalkProbe {
