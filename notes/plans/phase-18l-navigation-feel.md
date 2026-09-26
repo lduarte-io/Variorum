@@ -306,7 +306,18 @@ container-inset class that `ScrollAnchorTests` guards is the FIRST suspect, per 
    words + 18k C6's precedent: one of five deltas was a REAL 27 regression). Each finding:
    reproduced, traced, pinned red-on-old, FIXED (if in your unit's scope) or OWNED (a ledger row
    with a named owner — U0b/U0c findings go to their sessions). The sweep's deliverable is a
-   table: finding × mechanism × disposition.
+   table: finding × mechanism × **ATTRIBUTION** × disposition. **The ATTRIBUTION column is
+   REQUIRED per finding** (her sitting follow-up, 2026-09-26: *"it is unclear to me which of these
+   bugs come from the upgrade to mac os 27 - that could definitely be a significant part of it"*)
+   and takes exactly one of: **macOS-27** (the harness bisect reproduces it on EVERY tree in the
+   window including the oldest, and the machine's 26.x era never showed it — the OS is the moving
+   part; 18k's clean attribution point stands: the machine moved 26.x → 27.0 with the tree
+   unchanged since RUN B's all-green finals) · **our-commit(hash)** (the bisect flips at a named
+   commit) · **pre-existing** (reproduces on trees older than the window) · **undetermined(why)**
+   (stated honestly with what blocked the bisect). An OS-attributed finding still gets FIXED the
+   same way (we own the defensive workaround — C6's `JumpPrimitive` re-assert is the form); the
+   attribution changes the fix's shape and what TEXTKIT2_NOTES §3 records for the 27.1 re-verify,
+   never whether it is fixed.
 
 **Discipline (the resiliency protocol, restated — it binds you):** commit per coherent piece,
 push after EVERY commit, NO trailers; append a `## U0 RECORD` section to THIS file with LIVE
