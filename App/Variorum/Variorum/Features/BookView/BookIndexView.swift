@@ -60,6 +60,7 @@ enum BookIndexGeometry {
     private static var washHeightStore = OwnedRegistrations<String, CGFloat>()
     private static var noteHeightStore = OwnedRegistrations<String, CGFloat>()
     private static var proseLeadingStore = OwnedRegistrations<String, CGFloat>()
+    private static var readTierFrameStore = OwnedRegistrations<String, CGRect>()
     private static var anchorTopStore = OwnedRegistrations<String, CGFloat>()
     private static var contentSpanStore = OwnedRegistrations<String, BookIndexContentSpan>()
 
@@ -83,6 +84,13 @@ enum BookIndexGeometry {
     /// pane's MEASURED internal inset (`PaneTextView.proseLeadingInset`).
     /// Keyed by the BLOCK's id (the subject-keyed rule).
     static var paneProseLeading: [String: CGFloat] { proseLeadingStore.current }
+    /// **18l UNIT U0 (her Index-click report): the rectangle a READ-TIER
+    /// block's prose occupies**, in the window's own space (`.global`) — the
+    /// text column alone, padding excluded, exactly the view `paneProseLeading`
+    /// reads its x from. *"I click on top of a line of text"* is a claim about
+    /// a point inside this rectangle, so a pin clicks there. Keyed by the
+    /// BLOCK's id (the subject-keyed rule).
+    static var paneReadTierFrames: [String: CGRect] { readTierFrameStore.current }
     /// **13u4 UNIT F1 (her item 10): where every PANE ROW's top sits**, in the
     /// pane scroll's own space — visible-relative, so a row landed at the top
     /// reads ≈ 0 and a landing that missed reads the distance it missed by.
@@ -138,6 +146,10 @@ enum BookIndexGeometry {
         proseLeadingStore.publish(x, for: blockID, owner: owner)
     }
 
+    static func recordReadTierFrame(_ blockID: String, _ frame: CGRect, owner: UUID) {
+        readTierFrameStore.publish(frame, for: blockID, owner: owner)
+    }
+
     static func recordAnchor(_ anchorID: String, top: CGFloat, owner: UUID) {
         anchorTopStore.publish(top, for: anchorID, owner: owner)
     }
@@ -163,6 +175,7 @@ enum BookIndexGeometry {
         washHeightStore.release(owner: owner)
         noteHeightStore.release(owner: owner)
         proseLeadingStore.release(owner: owner)
+        readTierFrameStore.release(owner: owner)
         anchorTopStore.release(owner: owner)
         contentSpanStore.release(owner: owner)
     }
@@ -175,6 +188,7 @@ enum BookIndexGeometry {
         noteMenuSlot.forget()
         columnFrameStore.forgetAll()
         proseLeadingStore.forgetAll()
+        readTierFrameStore.forgetAll()
         washHeightStore.forgetAll()
         noteHeightStore.forgetAll()
         anchorTopStore.forgetAll()
@@ -1426,6 +1440,8 @@ private struct BookIndexPaneNote: View {
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
                 BookIndexGeometry.recordProseLeading(
                     row.blockID, frame.minX, owner: oracleOwner ?? DebugOracleOwner.unowned)
+                BookIndexGeometry.recordReadTierFrame(
+                    row.blockID, frame, owner: oracleOwner ?? DebugOracleOwner.unowned)
             }
             #endif
             // 13u2 UNIT B: the read tier's prose sits at the SAME column as
