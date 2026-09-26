@@ -4055,10 +4055,62 @@ worktree. Final message: a short summary pointing at your record.
 |---|---|---|
 | 1 | The reading, in this session's own context | **DONE** — CLAUDE.md + canon; this file's ENVIRONMENT TRAPS, CAST & DISCIPLINE, THE FINALS, the C8 BRIEF, the C4 / C6 / C6b RECORDS + adjudications; KnownIssues' per-note-defaults rows (36, 37) and the DEBUG-oracle parallel-suites row (76); the two victims at the code (`IdentityProjectionAuditTests.swift:258`, `TakesBoardSoakTests.swift:180`) and the harness (`EditorTestSupport.swift`) |
 | 2 | The run ORDER, from the finals' own logs | **DONE** — both full runs start the 522 suites in ONE stable order (effectively serial in the log); the widening victim is suite #193, the soak #440. 18k-touched suites before the widening victim: 30 (the C1 autosave pair, the C4 oracle pair, C7/C5's DataSafety, the C6 scrubber files, …); `RefontGapTopTests` / `JumpViewportLayoutTests` / `InlineHeightReportTests` run AFTER it, so they cannot be its leaker |
-| 3 | FIND — the victim + candidate predecessors in one invocation, bisected | PENDING |
-| 4 | TRACE — the leaked state (which global/key, set where, never restored) | PENDING |
+| 3 | FIND — the victim + candidate predecessors in one invocation, bisected | **WIDENING RED: FOUND.** All 30 touched predecessors + the victim → red (`18k-c8-w-all.log`, 232 tests / 31 suites, the widening red + the flake-list 3424 cell); half B (Canvas/DataSafety/DebugOracle/DestructiveUndo/FannedDefaults, 18 suites) green; half A red → A1 (Autosave ×3 + BlockHistory/BookCard/BookIndex) red, A2 (BookOutline/Book×4/BoundaryFluidity) green → the autosave triple red, the other three green → **`AutosaveRegistryReleaseGuardTests` + the victim alone: RED** (`18k-c8-w-AutosaveRegistryReleaseGuardTests.log`, 12 tests / 2 suites); `AutosaveRegistryLifecycleTests` and `AutosaveRegistryReleaseTests` each paired: green. Within the suite (scratch one-test copies, never committed — the traps keep selectors suite-level): **T1 `theOpenTailOfANoteLeftMidParagraphIsInItsLeavingSavepoint` and T2 `theOpenTailIsSavepointedByQuitAtTheLatest` each RED with the victim; the other five green** (`18k-c8-leakT{1..7}.log`). **Soak red: PENDING** |
+| 4 | TRACE — the leaked state (which global/key, set where, never restored) | **WIDENING: DONE** (the TRACE section below) — in-process, not a persisted key: T1/T2's dropped `MountedEditor` leaves its TK2 text stack alive for the rest of the run, holding a run stamped with block id `…0001` that every `.incrementing` world's first block shares; AppKit's attribute uniquing hands the victim those dictionaries and its paragraph fixing becomes a no-op. **Soak: PENDING** |
 | 5 | FIX the leaker (tests only) | PENDING |
 | 6 | PROOF — the reproducing combination red before, green after, ×3 | PENDING |
 | 7 | ONE full Mac suite on the final tree | PENDING |
+
+- Deaths / resumes: none.
+
+### THE TRACE — the widening red (inputs → wrong state; every number from a run in this session)
+
+**In-process, not a key.** Victim alone green; guard suite alone, then the victim alone in a FRESH process:
+green (`18k-c8-guard-alone1.log` → `18k-c8-victim-alone2.log`); the Debug domain before/after the guard suite
+differs only in the host's backup-tick log (no per-note key moved). So the state lives in the process.
+
+**Not an app global.** A scratch probe (never committed) dumped every attribute run of the victim's storage,
+its typing attributes, `EditorTypography.current`/`isAdopted`, `ParagraphGap.current`, the storage class and
+`fixesAttributesLazily` around the victim's exact insertion, clean and after the guard suite: **every value is
+byte-identical; only AppKit's report differs** (`will {2,1}` → `did {2,5}` clean; `did {2,1}` after;
+`18k-c8-probe-clean.log` / `18k-c8-probe-afterguard.log`).
+
+**The mechanism — object identity, which AppKit's uniquing decides** (the probe re-run with the
+paragraph-style OBJECT per run, `18k-c8-probe2-{clean,T1}.log`, `18k-c8-E7.log`):
+- Clean: block 0 and block 1 carry one paragraph-style object; the separator and the typed X carry ANOTHER
+  (the typing attributes'). AppKit's paragraph fixing re-applies the governing style over `{2..7}` — equal
+  values, so nothing visible moves — and the report widens to `{2,5}`.
+- After T1: the victim's block 0 AND its separator carry **T1's paragraph-style object** (`9c0` in
+  `18k-c8-E7.log`), and X is uniqued onto that same object, so the fixing finds nothing to do: `{2,1}`.
+- Why T1's object: T1's surviving storage holds `"a paragraph she never finished"` — TYPED, so in the typing
+  attributes' paragraph-style object — which teardown's finalize crystallized and stamped with block id
+  **`00000000-0000-0000-0000-000000000001`**, the id `.incrementing` gives EVERY harness world's first block
+  (the victim's included). That live run dictionary is content-equal to the victim's block-0 dictionary (same
+  font, an equal paragraph style, same ink, same id string), and T1's typing dictionary (alive in the dead
+  view's `NSTextViewSharedData`) is content-equal to the victim's separator dictionary. AppKit's process-wide
+  attribute-dictionary uniquing hands the victim T1's live dictionaries.
+
+**Why T1's stack is still alive minutes later.** Weak references (scratch `C8E8T1Long`): after 3 s the
+view, model, delegate and session are gone, but **T1's `NSTextStorage`, `NSTextLayoutManager` and
+`NSTextContentStorage` are alive**; a no-typing control's view is gone too. `leaks --traceTree` on the parked
+survivor (`E9-*-tree.txt`, session scratch): the content storage (which owns the storage and the layout
+manager) is held by an **autorelease-pool page whose chain roots at `_main_thread`, five pages deep** — a
+long-lived main-thread pool the test runner keeps open under async test bodies — and the container by the dead
+view's `NSTextViewSharedData`. (Two further `leaks` referrers are not owners: a stale slot in an array's spare
+capacity, and the probe's own adjacent `weak var`s.) Bare TK2 views dropped the same way are freed within 2 s
+(`C8E3c`); an explicit `autoreleasepool` frees them within 0.5 s (`C8E3b`). **Not a product leak:** the app's
+main thread runs under the run loop's per-iteration pool; this lifetime is the test context's.
+
+**The deciding experiments** (scratch suites paired with the victim, suite-level selectors):
+- **E1 — T1's body with its surviving storage emptied at the end: victim GREEN** (`18k-c8-E1.log`). The
+  storage's content is the leaked state.
+- E2 — a live `NSTextStorage` in the plain base attributes, kept in a static: green (the naive form does not
+  reproduce: no id, no shared paragraph-style object).
+- E4/E5 — typing into a bare `makeEditor` view / a bare TK2 view, then dropping it: green (no model, so no
+  crystallize-and-stamp, and those views die within seconds).
+
+**Set where / never restored:** `MountedEditor.type(_:)` (the test file's own helper) types the open tail;
+`model.teardown()` crystallizes and stamps it; the test's `surface = nil` drops the helper, and nothing
+empties the storage it leaves in the process.
 
 - Deaths / resumes: none.
