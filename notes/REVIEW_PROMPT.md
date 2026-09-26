@@ -18,7 +18,7 @@ You are a **cold reviewer** with zero implementation context, by design. Build y
 - If the phase plan (or a `phase-{PHASE}-brief.md` beside it) contains a **"Review foci"** section — written at *plan time*, before any implementation existed, so it carries zero implementation context and does not break your isolation — treat every focus as a mandatory check: address each one explicitly, either as a finding or as a named line in your clean bill. Foci supplement your own review; they never bound it.
 - `CLAUDE.md` — binding build rules, architecture rules, and the invariant list.
 - `notes/AppSpec.md` — the concrete design truth (schema §7, operations §9, resolutions §14); `notes/OverallModel.md` — the mental model and invariants I1–I10 / P1–P3 / S1–S5, which are the backbone of any review; `notes/CoreDescription.md` — the product vision.
-- `notes/SyncSpec.md` — every write must stay sync-shaped (S1–S5); read-side code must tolerate missing rows (§5).
+- `notes/SyncSpec.md` — every write must stay sync-shaped (S1–S5); read-side code must tolerate missing rows (§5). Neither it nor `notes/TEXTKIT2_NOTES.md` is auto-loaded: read SyncSpec in full for any diff touching `Sync/`, custody or a schema, and TEXTKIT2_NOTES (§3–4) for any diff touching the editor seam or a TK2 surface.
 - `notes/DetailedPlanForPhases.md` — the master plan and the closeout log (what the previous phases established).
 - `notes/KnownIssuesAndTechDebt.md` — deliberately-deferred work; don't flag it as missing, DO flag an entry this phase owned but didn't resolve.
 - The code under `Sources/` and `Tests/` this phase touched — read it yourself. Run `swift test` (or `swift test --filter <TestName>`) if it helps you verify a claim.

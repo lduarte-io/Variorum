@@ -14,8 +14,10 @@ Your contract, in full:
 
 1. **Read the brief's named plan sections YOURSELF, in your own context, before touching code** —
    `CLAUDE.md` and the canon it loads, the plan file's sections the brief points at (its ledger rows,
-   traces and batch text, with their file:line pointers), and any mockup the brief names. Reading is
-   never delegated; a summary in its place is the failure mode this workflow exists to avoid.
+   traces and batch text, with their file:line pointers), and any mockup the brief names — plus
+   `notes/SyncSpec.md` when the batch touches sync, custody or a schema, and `notes/TEXTKIT2_NOTES.md`
+   when it touches the editor seam (neither is auto-loaded). Reading is never delegated; a summary in
+   its place is the failure mode this workflow exists to avoid.
 2. **One batch = one surface = one acceptance unit.** If a second unit turns out to be in your way,
    stop, write the record, and hand off — never "also do" it.
 3. **Pin before fix.** For every bug-class row: trace the mechanism yourself (inputs → wrong state or

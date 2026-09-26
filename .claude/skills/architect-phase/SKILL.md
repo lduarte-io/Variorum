@@ -1,6 +1,6 @@
 ---
 name: architect-phase
-description: Run a feature/design-heavy Variorum phase under the 13b-proven architect shape — the orchestrator holds an architect mandate, spawns fresh Fable implementer sessions per batch, keeps repo-first records, runs the review ladder, and bundles author questions into sittings. Use when the author invokes it for a phase (e.g. /architect-phase 13c); preserved from Phase 13b at her direction (2026-07-22).
+description: Run a feature/design-heavy Variorum phase under the architect shape — the orchestrator holds an architect mandate, spawns a fresh implementer session per batch (CLAUDE.md's standing cast), keeps repo-first records, runs the review ladder, and bundles author questions into sittings. Use when the author invokes it for a phase (e.g. /architect-phase 18l).
 argument-hint: "[phase number, e.g. 13c — omit to take the master plan's current-phase pointer]"
 ---
 
@@ -135,9 +135,19 @@ and CLAUDE.md conflict, CLAUDE.md wins.
 
 ## The cast and the context budget
 
-- **All-Fable by default** (orchestrator, implementers, reviewers) —
-  the author confirms the cast at each phase kickoff per CLAUDE.md's
-  model policy.
+- **The cast is CLAUDE.md's standing default** — Fable orchestrates
+  (you) and cold-reviews (`fable-reviewer`; `opus-reviewer` where the
+  diff has no editor seam, custody, `Sync/` or default's-meaning
+  content), Opus implements (`opus-implementer`), both at xhigh; any
+  change inside `Sources/VariorumCore/Sync/` is Fable work — and the
+  author confirms or redirects it at each phase kickoff. (13b–13c ran
+  other casts; that history is `notes/ProcessHistory.md`'s.)
+- **Preflight before the first spawn:** CLAUDE.md and its auto-loaded
+  canon, the master plan, KnownIssues, `notes/QUESTIONS.md`, the phase
+  plan, `notes/SessionResiliencyProtocol.md` — plus `notes/SyncSpec.md`
+  and `notes/TEXTKIT2_NOTES.md` whenever the phase touches their seams
+  (they are NOT auto-loaded; a batch brief that touches sync or the
+  editor seam names them as required reading for the implementer).
 - **A FRESH implementer session per batch** (the ~500k
   context-degradation rule), briefed ONLY by the plan file's named
   sections — self-contained briefs are what make cutovers safe. Never
@@ -271,18 +281,26 @@ touching the real store (the A1 rail) — written into the SUBFOLDER
 `Backups/safety-copies/`, never loose in `Backups/` (her ruling R-18k-8,
 2026-09-25: the app's own listing lives at the top level); drives need unlocked +
 author-free + own `caffeinate -d`; screenshots in gitignored dirs;
-never `git checkout` over uncommitted work; never push.
+never `git checkout` over uncommitted work; push after every commit
+(CLAUDE.md's push rule + the resiliency protocol) — never force-push,
+never rewrite history.
 
 ## Closeout (the standing CLAUDE.md ritual, unabridged)
 
 Results + counts in the plan file; master plan table + pointer +
-closeout-log paragraph; canonical-doc deltas applied exactly as the
-author ruled them (never beyond); KnownIssues rows resolved or
-re-owned; every ledger row dispositioned or re-owned — no orphans; the
-author handoff (`notes/handoffs/phase-NN-handoff.md`, her checklist at
-the top, self-contained — if a question would need this session's
-context, the docs are incomplete); the next phase's plan + kickoff
-message authored just-in-time; hard stop — the author kicks off what's
+closeout-log paragraph, the superseded pointer, prior closeout and
+AppSpec §14's outgoing delta rolled into `notes/PhaseCloseoutArchive.md`
+/ `notes/AppSpecDeltaArchive.md`; canonical-doc deltas applied exactly
+as the author ruled them (never beyond — and as a CONTRACT line plus a
+pointer to the plan's ruling, never a paragraph of history: AppSpec's
+size is a context cost every session pays); KnownIssues rows resolved
+or re-owned; every ledger row dispositioned or re-owned — no orphans;
+the MOBILE PARITY line (a `notes/MobileSoul.md` ledger row, or the
+words "nothing mobile-visible"); the author handoff
+(`notes/handoffs/phase-NN-handoff.md`, her checklist at the top,
+self-contained — if a question would need this session's context, the
+docs are incomplete); the next phase's plan + kickoff message authored
+just-in-time; commit + push; hard stop — the author kicks off what's
 next.
 
 Two deploy-adjacent rules proven in 13b (added 2026-07-22): schema/

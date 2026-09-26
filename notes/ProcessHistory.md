@@ -1,0 +1,183 @@
+# Process History — CLAUDE.md as it stood before the 2026-09-26 context trim
+
+**Status: CANON, not context-loaded.** On 2026-09-26 the author asked for the instruction-file trim (the harness warned: six auto-loaded files at 235k chars against a 150k limit — roughly 60k tokens paid by every session and every subagent before any work). The rewrite kept every LIVE rule in `CLAUDE.md` and moved the dated provenance — the per-phase model-policy table for Phases 8–14 (all closed), the front-loaded-planning paragraph (its briefs all consumed), the verbatim ruling quotes and the dated amendment notes — here, exactly as they stood. **Every ruling recorded below binds exactly as it did in `CLAUDE.md`**; the trim changed what is LOADED, never what is TRUE (the 2026-08-01 lean-docs precedent, the 2026-09-06 load trim's second act). Below is the pre-trim file, byte-verbatim from commit `0cd62b6a`.
+
+---
+
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Source of truth (authoritative)
+
+These documents define **Variorum**. When implementing, refactoring, or making decisions, treat them as canonical:
+
+- Vision for the app: @notes/CoreDescription.md
+- App Spec: @notes/AppSpec.md
+- System Mental Model: @notes/OverallModel.md
+- Sync Architecture: @notes/SyncSpec.md
+- Detailed Build Plan: `notes/DetailedPlanForPhases.md` — **NOT auto-loaded** (author ruling 2026-09-06, the context-load trim: ~28k tokens every session and subagent were paying for a file only kickoffs and closeouts use); orchestrators/coordinators read it explicitly at kickoff and closeout, as the preflight list below already requires.
+- Known Issues & Tech Debt: `notes/KnownIssuesAndTechDebt.md` — **NOT auto-loaded** (same ruling, ~12k tokens); read it explicitly whenever a session adds, resolves or re-owns a row, and at every kickoff preflight.
+- TextKit 2 build companion (editor phases): @notes/TEXTKIT2_NOTES.md
+
+Original source material (requirements verbatim, original spec, design rationale, chat transcript) is preserved in `notes/source/` — history, not truth.
+
+If code conflicts with the spec/model, call it out explicitly and align the implementation to the spec/model (or propose a deliberate spec/model change).
+
+## Core product principles (non-negotiable)
+
+- **The atomic unit is the block.** Nothing owns blocks; everything points at them. Every view is a traversal of one graph — never a bespoke subsystem.
+- **Canonical persisted truth lives in SQLite (GRDB), rows-as-truth.** Every mutation flows through the transactional operations API — never ad-hoc row edits.
+- UI state is a **projection**, not a source of truth.
+- **Mutation is local and ephemeral; permanence is explicit and append-only.** The only mutable text in the system is `variant.working_text`.
+- **Coarse, not forensic.** Lineage is `(fromBlock, toBlock, type)`. Anything that tracks word-level change is out of scope by definition.
+- **Cost ∝ viewport + edit, never document/corpus size.** Performance invariants (P1–P3) are as load-bearing as data invariants.
+- Avoid denormalization: names/labels/text are never copied across entities (lineage copies like pool-drag are *deliberate operations*, not denormalization).
+
+## Invariants (must be enforced in Domain / Operations)
+
+Defined precisely in @notes/OverallModel.md §4–6 and @notes/AppSpec.md §5. By ID: **I1–I10** (data: variants never span blocks; single ownership; chosen-variant-on-pointer; newlines are content; commits append-only; lock ⊥ commit; no nesting; posts are edges-only; cross-block = edges; live block ⇒ live variant), **P1–P3** (performance), **S1–S5** (sync-shaped writes). Violating one quietly corrupts a whole class of views — enforce via pure domain rules and DB constraints, not views.
+
+## Architecture rules
+
+Settled: **SwiftUI + Observation + swift-dependencies** (no TCA). The editor core is AppKit — a TextKit 2 `NSTextView` wrapped for SwiftUI; SwiftUI does all chrome.
+
+- One feature = one self-contained module under `App/Features/`, composed at the app level — new features are new modules, not additions to existing ones.
+- View models are `@Observable`, hold projections, and call operations; **no business rules in view models, no side effects constructed in them.**
+- All persistence and side effects happen in injected dependencies (`@Dependency(\.database)`, etc.).
+- Views render state and send actions only; no business logic in views.
+- Use injected dependencies for time/identity (`@Dependency(\.date)`, `@Dependency(\.uuid)`) so logic is testable and IDs/timestamps are deterministic under test.
+- Store IDs or lightweight derived values in state, never copies of persisted text.
+- **Cross-feature interactions route through parent composition — and the feature-to-feature prohibition binds STATE AND OWNERSHIP, never rendering** *(rule refined 2026-08-30, pre-13u Act 2 / sweep finding P39, author-ratified — measured at 57 violations of the old wording, 55 benign, hiding the 2 real defects; a rule ignored that often protects nothing, which is OverallModel §9's own doctrine applied to our canon)*: a feature never **constructs** a sibling feature's view model, never **holds a reference** to one, never calls its business logic, and never owns its lifecycle — parents (`RootView`) construct; features receive view models, values, and closures. A view **rendering** a sibling's view is legal composition, not a violation. **Why the line sits exactly there:** a cross-feature *view-model* reference destroys testability and isolation (lifecycle entanglement, hidden mutation paths, un-mockable seams); a *view* reference does not — without this stated reason, the next reader cannot tell this clarification from a relaxation. **Placement (the positive half, binding):** a view component consumed by two or more features moves to the shared home — `App/Variorum/Variorum/Core/Views/` for Mac-only chrome, `App/Variorum/Shared/` for cross-platform — at the next touch of work on it, never parked indefinitely in the feature folder that minted it (the hoist-at-next-touch rule, the forked-brains KnownIssues row's own discipline).
+- Domain rules (invariant enforcement, churn math, boundary snapping, segmentation) are **pure functions** in `VariorumCore/Domain`, tested independently.
+- TextKit 2 discipline (editor phases): never touch TK1 APIs (`.layoutManager` etc.); opt into TK2 explicitly; install the fallback canary from the first editor commit. See @notes/TEXTKIT2_NOTES.md §4.
+
+## Source of truth & persistence
+
+- **SQLite via GRDB 7 is the canonical local persisted truth.** WAL mode; all DB I/O off the main thread; reads via the reader pool.
+- UI reads from local data only (GRDB ValueObservation for live projections).
+- Sync is **early** (Phase 5 — the author journals from her phone soon after) and its architecture is settled in @notes/SyncSpec.md: remote is a sync peer; the server is dumb (CAS + changefeed); all merge intelligence is client-side. Schema v1 already contains the sync machinery (`sync_version`, outbox triggers, fractional-index positions) — honor it in every phase; don't build the *engine* before Phase 5.
+
+## Build workflow (how phases work)
+
+This is the workflow — keep it.
+
+- **`notes/DetailedPlanForPhases.md`** is the master plan: the phase table, a "current phase" pointer, and the most recently closed phase's one-paragraph closeout (what shipped, test results, what was deferred and where it went). *(Lean-docs rule — author, 2026-08-01, the Fragments precedent: the full pointer thread and all earlier closeouts live verbatim in `notes/PhaseCloseoutArchive.md`, and AppSpec §14's dated deltas roll into `notes/AppSpecDeltaArchive.md` the same way. Both archives are CANON — exactly as binding as the files they left — just not context-loaded into every session.)*
+- **`notes/plans/`** holds one execution plan per phase/sub-phase, each **self-contained for a fresh Claude session**: goal, references, file-level steps, **tests for every step**, verification. Written **just-in-time, one phase ahead** — never plan the whole app up front.
+- **Closeout ritual** at the end of each phase: record results in the plan file, mark it complete, update the master plan's table + pointer, **roll the superseded pointer + the prior phase's closeout paragraph + AppSpec §14's outgoing delta into their archives** (`notes/PhaseCloseoutArchive.md` / `notes/AppSpecDeltaArchive.md` — the 2026-08-01 lean-docs rule), **write the next phase's execution plan AND a kickoff message at the top of that plan file** (self-contained: what a fresh session should read, do first, and verify), **write the author handoff** (below), **add the MOBILE PARITY LINE (author-invited 2026-08-04):** a row in `notes/MobileSoul.md`'s parity ledger naming what the phase shipped that the iPhone app owes a version of — or the explicit words "nothing mobile-visible" in the closeout paragraph (a closeout without this line is incomplete), and commit per convention. The closeout of phase N is the starting context for phase N+1.
+- **The author handoff (author decision, 2026-07-07) — the LAST thing every phase writes:** `notes/handoffs/phase-NN-handoff.md`, a self-contained checkpoint document a **fresh session** can answer the author's questions from — what shipped and why it's shaped that way, test counts, findings + dispositions in brief, PROVISIONALs awaiting her, and **exactly what the author must do next, as a checklist, at the top**. Rationale: a finished phase session may be hundreds of thousands of cold-cache tokens — waking it to ask about a finding is never worth it. The completeness bar: **if a question about the phase could only be answered by the original session's context, documentation is missing — fix the docs, never rely on the session.**
+- **Schema/model changes get their own commit** before code that uses them, so rollbacks are clean.
+- **The installed app:** `/Applications/Variorum.app` is the author's launchable real-store build — the ONLY copy she launches (Xcode's Run button is the fenced dev store by design; keep the scheme's Run config on Debug). Any phase or session that changes the Mac app ends by refreshing it: `xcodebuild -scheme Variorum -configuration Release build`, then copy the product to `/Applications` (one command, ~a minute — adopted at the 2026-07-11 9c sitting; the author may revise).
+- **Bug fixes and tech debt do NOT go in the master plan — STANDING FIXES live in Phase 17** (author decision 2026-08-30, verbatim: *"that phase will be standing quick bug fixes… when I notice a quick bug or issue or something that I want fixed, it'll be added as an entry like 17a, 17b, 17c, etc. … basically, I want to be able to active phase discipline and share where random fixes and changes are going in one cohesive phase, without it polluting the detailed plan for phases document with bug fixes / tech debt rather than product advancement"*). **`notes/DetailedPlanForPhases.md` is PRODUCT ADVANCEMENT ONLY** — what changes what the app *is* — and carries exactly one pointer row to `notes/plans/phase-17-standing-fixes.md`. Fixes become **lettered entries (17a, 17b, 17c…)** in that file, each independently scoped, cast, run and closed; **the phase itself never closes.** A 17-entry is a valid **owner** under the KnownIssues rule below, exactly as a phase number is. *(This is the companion to the same-day lean-docs ruling that created `notes/FuturePhases.md`: that one moves work out of the master plan by TIME, this one by KIND.)* Standing rule inside every entry: **pin before fix** — the hallucination guard's red-on-old pin binds there exactly as in a phase review, and a pin that passes on both sides dismisses the item as hollow rather than fixing it. **A 17 entry may run as ONE session, but an OPUS cold review is ALWAYS mandatory, and a FABLE cold review whenever the diff touches `Sync/`, custody/keychain code, or the editor seam** (author, 2026-09-01, R-cor-14; her practice — a few entries at a time under a Fable orchestrator — is recorded in `notes/PhaseSizingGuidance.md` §5).
+- **`notes/KnownIssuesAndTechDebt.md`** tracks deliberately-deferred work only. Rule: no new entry without naming the **owner** that resolves it — a phase number, **or an unslotted first-class project row on the master plan's phase table** (the mobile app, the Apple Notes import, the standalone Design & UI review). If nothing owns it, fix it now instead of parking it. *(The owner clause was widened 2026-07-26 — 13c Stage 1 ladder, R2-7 — because her 2026-07-25 mobile ruling created a kind of owner the original "phase" wording had no word for. The rule's purpose is that nothing sits unowned; a named project row satisfies it exactly as a phase number does. A blank owner is still forbidden. That file's own header carries the same wording.)*
+- **Phase sizing & acceptance — GUIDANCE TO RAISE, not an absolute rule** *(author, 2026-09-01, R-cor-13; the full text, the unit table per kind, how a split runs, the run-history sanity check and the 17-entry review rule live in `notes/PhaseSizingGuidance.md` — read it when in doubt)*: the unit of work is an ACCEPTANCE UNIT (verified on its own by evidence of its kind — use for UI, a live round for sync, a drill for custody, the state-transition suite for operations); **one unit per implementer session; a phase names its units and their evidence at plan time and holds at most two phase-sized units under one theme (a third is a split sharing the sitting); a batch closes only on use-shaped evidence, never a pin or mount smoke alone; the install refresh follows the walk or drill.** A plan or session outside this says so to her rather than proceeding or splitting silently.
+
+## Autonomous phase execution (2026-07-06 amendment — active only in `/run-phase` coordinator sessions)
+
+The author can delegate phase execution to a coordinator session via the `/run-phase` skill (`.claude/skills/run-phase/SKILL.md`). This is a deliberate process amendment (adapted from the author's ClipFarm workflow), not drift. **Second shape (author decision 2026-07-22, at the 13b Stage 4 kickoff sitting): `/architect-phase` (`.claude/skills/architect-phase/SKILL.md`) preserves the Phase 13b architect/orchestrator pattern for feature- and design-heavy phases** — an architect mandate over author-ratified rulings, fresh Fable implementer sessions per batch, repo-first records, the same review ladder, author sittings with question bundling. `/run-phase` remains the shape for spec-driven phases with a fully-made plan; the author picks the shape at each kickoff. The rules below govern `/run-phase`; the skill file governs `/architect-phase` (CLAUDE.md's author-only calls and standing rules bind both). The rules:
+
+- **The coordinator knows the whole picture before anything else happens.** Preflight reading is mandatory and complete: this file, `notes/CoreDescription.md`, `notes/OverallModel.md`, `notes/AppSpec.md`, `notes/SyncSpec.md`, `notes/DetailedPlanForPhases.md`, `notes/KnownIssuesAndTechDebt.md`, `notes/QUESTIONS.md`, and the current phase plan in `notes/plans/` — plus `notes/TEXTKIT2_NOTES.md` for editor-adjacent phases (6, 7, 9+).
+- **Cast per phase: the coordinator (writes no feature code) + ONE implementer agent + ONE cold reviewer agent at a time**, strictly sequential — never two agents working concurrently. (Amended 2026-07-07: the review ladder spawns a FRESH cold reviewer per round — at most three reviewer sessions per phase, still one at a time.) Subagents never spawn subagents, except the single Sonnet lookup helper allowed below. No fan-outs, no swarms, no Workflow tool, no extra verifiers. **This is also the token budget:** the whole point of the three-session shape is that it replaces a manual flow that worked because it was only ever two chats — keep it that lean.
+- **Model policy (author-settled 2026-07-06; amended later the same day at the forward-planning session — Fable token supply is now constrained, so Fable is spent where its judgment pays most: cold reviews, which caught both Phase 5 BLOCKERs, and the single riskiest implementation).** Per-phase assignments:
+  - **Phase 8:** coordinator **Opus** · implementer **Fable** · cold reviewer **Fable** (author, 2026-07-07 — revised from Opus/Fable: Phase 8 is where the engine meets real networks, real scheduling, and the fault-injection amendments, and surfacing sync issues is worth Fable end-to-end; the Phase 9 contingency below covers this phase too if the budget disagrees). *Standing rider from the same call:* any change **inside `Sources/VariorumCore/Sync/` itself** is **sync-engine surgery** and is Fable work in *every* phase while tokens last — in Opus-implemented phases the coordinator stops and reports rather than letting the implementer touch it.
+  - **Phase 9:** coordinator **Opus** · implementer **Fable** · cold reviewer **Fable**. Pre-agreed contingency (author, 2026-07-06): if Fable is exhausted/unavailable, the implementer falls back to Opus and any remaining Fable goes to the review — no mid-phase renegotiation.
+  - **Phases 9b (Fragments bridge) and 9c (auth alignment):** implementer **Fable** · cold reviewer **Fable** (author, 2026-07-07 — both phases' cores are sync-engine surgery, so the standing rider makes any other assignment incoherent). Each runs as its own fresh `/run-phase` invocation with a fresh implementer (author-confirmed the same day). Phase 9's contingency wording applies unchanged if Fable is exhausted.
+  - **Phase 9d (editor visibility & QoL, out-of-band; runs BEFORE 9b):** implemented **directly by Fable in the author-attended session of 2026-07-09** — her call ("a lot of unknowns, Fable tends to do better on judgment calls"); deliberately NOT a `/run-phase` cast (no coordinator, no cold reviewer — the author is present and the scope is UI faces over existing tested machinery). A `/run-phase`-style cold review may be requested afterwards if she wants one; not owed by default.
+  - **Phases 10 and 11:** coordinator **Opus** · implementer **Fable** · cold reviewer **Fable** (author, 2026-07-11 at the 9c gate sitting — the Fable budget reset larger than expected, and these are the two most interpretation- and UI-heavy phases left; supersedes the 2026-07-07 Opus-implements assignment). Same-model review flow, fresh reviewer per ladder round.
+  - **Phase 12:** coordinator **Opus** · implementer **Opus** · cold reviewer **Fable** under the cross-model review flow (mechanical scope; the Sync/ rider still routes any engine surgery to Fable).
+  - **Phase 13:** two-stage (author, 2026-07-17 — refines the 9d-shape default): the exploratory/design/plan-authoring **sittings** are author-attended **Fable** sessions (design iteration wants the author present, not a coordinator relay); once the plan is fully made, **execution runs as an ordinary `/run-phase` cast** — the author invokes it; staffing decided 2026-07-18, amended the same day by her direct R54 edit in the plan file: coordinator **Fable** · implementer **Fable** · cold reviewer **Fable** (all-Fable; the 10/11 same-model review flow), running **fully autonomously** (author ruling: mid-phase ambiguities — product-flavored included — get PROVISIONAL-and-continue, never a stop-and-ask; her one planned touchpoint is the end-of-phase taste checkpoint; the standing author-only calls remain hard stops).
+  - **Phase 13b (Make It Work — author, 2026-07-20, Sitting 9 batch 16):** architect/orchestrator **Fable** (the author-attended session) · implementer **Fable** (a FRESH session per stage — the context-degradation rule) · cold reviewer **Fable** (standard fresh-reviewer ladder on build stages; Stage 0 is read-only and gates on the author's ratification instead) — her direct call ("all Fable… the really crucial work of making the app actually WORK in practice"). **The architect mandate (R117):** the author granted Fable architectural ownership for 13b — the binding principles (capability registry, fire-and-DO, one text surface + liveness authority, the friction doctrine, tutorial-as-spec) live in `notes/plans/phase-13b-make-it-work.md` and bind all 13b work; product-flavored calls remain hers per the standing author-only list.
+  - **Phase 13c (book forms, conversions & carried work — author, 2026-07-25 at the kickoff sitting, ruling K1):** **ALL-OPUS under `/architect-phase`** — orchestrator · a fresh implementer per batch · a fresh cold reviewer per ladder round, every one of them Opus. Her reason, in her words: *"previous I was going to run this phase with Fable but now that Opus 5 has come out, I want to give it a go with this phase."* This supersedes the all-Fable pre-confirmation of 2026-07-22; the Fable-credits question that motivated it is moot. She was offered `/run-phase` and `/architect-phase` at the same sitting and ruled the latter. The 13b architect mandate's shape carries over — the binding principles are the constitution copied verbatim into `notes/plans/phase-13c-book-forms-and-conversions.md`.
+  - **Phases 13d–13h (the roadmap she set the same sitting, ruling K3 — the refusal/ergonomics floor · takes & block management · workspace · formatting+lists · the LLM folder bridge):** **cast decided at each kickoff**, as always. Nothing is pre-assigned; the master plan's phase table carries their scope.
+  - **Phase 14:** implementer **Fable** · cold reviewer **Fable** (author, 2026-07-11 — security-critical, and it inherits 9c's auth core). **Later phases:** decided at each kickoff; default Opus-implements/Fable-reviews under the cross-model review flow, falling back to an Opus reviewer with the hardened `notes/REVIEW_PROMPT.md` + Review-foci checks when the budget ends. The author may redirect at any kickoff. *(This used to read "Phase 15 onward". **Phase 15 no longer exists**: her 2026-07-25 ruling superseded its row — the iPhone app became an unslotted, separately-planned first-class project, `notes/plans/mobile-app-plan.md`, starting at her word, and its cast is that project's own kickoff call.)*
+
+  Reading discipline is model-independent: the implementer always does its own spec reading, in its own context, before touching code (reading is never delegated to a cheaper agent). The exposure cap is unchanged by the amendment: coordinator + two agents, nothing else, ever, of any model; the lookup exception below adds only Sonnet.
+- **Front-loaded planning (author-settled 2026-07-06, same session):** `notes/plans/phase-09-structural-gestures.md` is pre-written (Fable), and `notes/plans/phase-10-brief.md` / `phase-11-brief.md` / `phase-12-brief.md` are design briefs. The closeout ritual's "write the next phase's plan" duty adapts: **Phase 8's closeout reconciles the pre-written Phase 9 plan** (its Reconciliation checklist) instead of authoring one; **each later closeout authors the NEXT phase's just-in-time plan FROM the corresponding brief** (9's closeout → the 9b bridge plan from `phase-09b-fragments-bridge-brief.md`; 9b's → the 10 plan; 10's → the 11 plan; 11's → the 12 plan) — the brief's author-ratified decisions are binding, its open interpretations are the plan's to answer. The just-in-time rule is satisfied by reconciliation/incorporation, never by ignoring the brief. **Phases 13–15 additionally have orientation sketches** (`phase-13/14/15-brief.md`, author-requested 2026-07-07) — tradeoff framing only, expected to partially stale, binding nothing beyond the spec decisions they cite; their just-in-time plans treat them as a head start, not a contract.
+- **Lookup exception (author-settled 2026-07-06):** the implementer and the cold reviewer may each run **at most one Sonnet lookup subagent at a time**, strictly for **external facts** — web searches, Apple documentation, API signatures/availability — returning facts and quotes. Reading the repo's canonical docs, the phase plan, code, or the diff under review is never delegated: that reading is what the phase buys, and a summary in its place is the failure mode this workflow exists to avoid. Lookup agents are read-only (no file edits, no commits) and never spawn agents of their own.
+- **Hard stop after every phase.** One `/run-phase` invocation = one phase (implement → cold review → adjudicate → closeout), ending in a checkpoint report to the author. Never auto-advance to the next phase; the author kicks off each one. (Product and quality stay in her loop by construction.)
+- **Two reviews per phase:** review 1 = the implementer's self-assessment in-session; review 2 = a cold reviewer running `notes/REVIEW_PROMPT.md` **verbatim** with zero implementation context (the coordinator never summarizes the work to the reviewer — the isolation is the point). In **same-model phases** findings are adjudicated implementer-vs-reviewer, the coordinator arbitrates against the spec docs (the spec wins), and the implementer applies the fixes. **Cross-model review flow (author, 2026-07-07 — applies whenever the reviewer is Fable and the implementer is not):** findings go to the implementer verbatim as always and it returns agree/dispute with rationale — but the coordinator does not arbitrate: the responses go back to the **reviewer**, which makes the final call on each finding (a dispute is a reason to recheck, or to dismiss as wrong — the spec outranks both agents) and **implements the fixes for its confirmed findings itself, in its own session**. Rationale: an implementer that could wrongly dismiss a finding could equally lack the understanding to fix it, and findings escalated to the author without context aren't useful. After the reviewer's fix pass the suite must be green, and the implementer gets one sanity pass over the reviewer's diff (it holds context the reviewer doesn't; anything it raises returns to the reviewer for the final word). Either way: **every finding gets a written disposition** in the phase plan's closeout, and a dispute that turns on undefined product behavior goes to `notes/QUESTIONS.md` — neither agent decides product.
+- **Review rounds — the ladder (author, 2026-07-07; supersedes "max two"):** round 1 = the cold review; fixes; round 2 = the reviewer **re-reviews** (a real pass over the fixes and what they touched, not a rubber-stamp confirmation). **If round 2 surfaces any NEW BLOCKER/MAJOR finding**, its fixes get **round 3** — a full pass focused on those fixes ("still-HIGH fixes get the pass they deserve"). Hard cap three rounds; anything open after round 3 is recorded for the author, never looped on. **Every round's reviewer is a BRAND-NEW cold agent (author, 2026-07-07):** rounds 2 and 3 spawn fresh reviewers running `notes/REVIEW_PROMPT.md` verbatim — their anchor is the closeout's recorded findings + dispositions from prior rounds (recorded there precisely so a fresh reviewer picks up the thread cold). At most three reviewer sessions per phase, strictly sequential, never concurrent, never a swarm. In cross-model phases each round's reviewer runs that flow (the reviewer's fix pass stands in where the implementer's would, and the implementer's sanity pass rides each round).
+- **The hallucination guard (author, 2026-07-07 — adopted from her Fragments protocol; over-review invents findings when there's nothing left to find):** no finding is fixed until whoever fixes it has **traced the concrete mechanism themselves** (inputs → wrong state/output), and every bug-class fix must land with a **red-on-old pin** — a test that fails on the pre-fix code and passes after. A pin that passes on both sides exposes the finding as hollow: it is dismissed as such, recorded, and not fixed. Architectural/cleanliness/clarity findings need no test pin — but they still need the traced mechanism (what concretely degrades, where) and a written justification in the disposition.
+- **PROVISIONAL rule** (the autonomous variant of "propose options instead of implementing assumptions"): ambiguity that doesn't gate the phase's core → document 2–3 options in the phase plan, implement the most spec-defensible one, mark it **PROVISIONAL**, log it in `notes/QUESTIONS.md` for the checkpoint's ratify list. Ambiguity that gates the core → stop and report instead.
+- **Author-only calls — never made autonomously, by coordinator or subagent:**
+  - inventing product behavior, or changing/contradicting the canonical docs beyond recording the closeout's deltas and the author's explicit in-session decisions;
+  - violating or relaxing any invariant (I1–I10, P1–P3, S1–S5) or performance budget;
+  - adding any new third-party dependency (license vetting is hers);
+  - anything requiring her accounts, credentials, or machine-side GUI steps (Supabase setup, Xcode project creation, signing, TCC prompts);
+  - adjudicating a Phase 6-class gate (the TK2 viability decision memo is hers to accept);
+  - deleting or overwriting anything she created; any history REWRITE or force-push. *(Plain `git push` is NO LONGER author-only — author rule change 2026-08-03, see the push rule in Environment notes. This line previously read "pushing to origin"; that reservation is superseded.)*
+
+## Testing expectations
+
+- New **domain invariants or business rules** must land with tests (Swift Testing).
+- Operations get exact state-transition tests (rows read/written); view models get focused coverage for core flows and edge cases.
+- UI-only changes may be untested early; domain logic may not.
+- Tests run at the **END** of a step/phase — **never run the full suite at the start of a session.** The previous phase's recorded closeout result is the baseline.
+- Editor milestones additionally re-verify against the current Tahoe point release per the matrix in @notes/TEXTKIT2_NOTES.md §5 (TK2 behavior shifts between point releases).
+
+## Product behavior guardrails
+
+- **Do not invent product behavior.**
+- If the spec/model does not define behavior, propose options instead of implementing assumptions.
+- Prefer surfacing uncertainty over silently choosing.
+- In the technical phases, views are built functional and unstyled — zero investment in visual polish until the UI design phase (with the author).
+
+## Code hygiene
+
+- No global singletons; everything flows through injected dependencies.
+- Keep helpers and utilities small, explicit, and purpose-driven.
+- Avoid "god state" or dumping grounds for logic.
+- If a function/view model is getting long, you're probably mixing concerns — split it.
+
+## Guidelines for the build
+
+1. **Every action should be traceable to a spec behavior.** If you can't point to the section of @notes/AppSpec.md (or CoreDescription/OverallModel) that justifies it, question whether it belongs.
+2. **Domain rules are pure functions, tested independently.** Never bury a business rule inside a view model body or a view.
+3. **One feature = one module.**
+4. **Model changes get their own commit.**
+5. **If something feels complex, it's probably wrong — the model should be opinionated but not complicated.** An operation that's tortured to express means the schema is wrong, not the operation.
+
+## Project structure
+
+```
+variorum/
+├── Package.swift               # VariorumCore package (GRDB 7, swift-dependencies)
+├── Sources/VariorumCore/
+│   ├── Models/                 # Value models + GRDB record types
+│   ├── Persistence/            # Database stack, migrations, triggers
+│   ├── Domain/                 # Pure domain rule functions (invariant enforcement)
+│   ├── Operations/             # The transactional operations API (AppSpec §9)
+│   ├── Queries/                # Read-side traversals + ValueObservation
+│   └── Sync/                   # Push/pull engine per SyncSpec (from Phase 5)
+├── Tests/VariorumCoreTests/
+├── App/                        # Thin Xcode app target (arrives Phase 6)
+│   ├── Variorum/               # Entry point, root composition, shared views
+│   └── Features/               # One folder per feature module (Editor, Library, …)
+└── notes/                      # Canonical docs (+ notes/plans/, notes/source/)
+```
+
+## Commands
+
+```bash
+# Core package — the fast inner loop (no Xcode project needed)
+swift build
+swift test
+swift test --filter <TestName>
+
+# App (from Phase 6; requires the Xcode app target)
+xcodebuild -scheme Variorum -destination 'platform=macOS' build
+xcodebuild test -scheme Variorum -destination 'platform=macOS'
+xcodebuild clean -scheme Variorum
+```
+
+## Environment notes
+
+- **NO COMMIT TRAILER (author, 2026-09-04, verbatim: *"make a note to stop including that Commit trailer of Co-authered by claude with a claude session link attached at the same time - I'm tired of it appearing and at a later date I'll go through and strip them from the repo's existing commits"*):** commit messages in this repo end with NO `Co-Authored-By:` line and NO `Claude-Session:` line — this overrides the harness's default attribution reminder here. The existing trailers are hers to strip later (a history rewrite — author-only); never rewrite them yourself.
+- **Walk tooling (2026-09-04):** `cliclick` 5.1 is installed (`/opt/homebrew/bin/cliclick`; click/type/drag/scroll in one binary; Accessibility is granted to the terminal host) and `Tools/WalkKit/` holds the window-capture + scroll helpers and the osascript recipe with its pitfalls — for hands-on walks of the DEV-STORE Debug build only (`io.lduarte.Variorum.debug`), never `/Applications/Variorum.app`.
+- **Push after committing (author rule change, 2026-08-03 — "we've been leaving pushing for me to do, but i want you to start doing it at regular intervals"):** sessions push `origin` at regular intervals — at minimum at the end of each working bout, and always after a closeout commit — on whichever branch they work (`main` here; `mobile` in the `~/dev/variorum-mobile` worktree). History rewrites and force-pushes remain author-only; never rewrite what has been pushed.
+- **The repo lives at `~/dev/variorum` — outside iCloud sync, permanently** (2026-07-06 emergency move: iCloud Desktop sync choking on `.build`'s tiny files froze the whole machine). `~/Desktop/variorum` is only a convenience symlink. Never relocate the repo, or write build artifacts, into an iCloud-synced folder (Desktop/Documents).
+- **Dev machine (this one): the author's M3 Mac, now on macOS 27.0 with Xcode 26 (recorded at the 13y closeout per that kickoff's fact; the five adjudicated macOS-27 suite deltas live in the 13y plan's ENVIRONMENT ACTS list) — development and acceptance are one machine.** The Intel Air era ended 2026-07-06 (transition executed ahead of the planned before-Phase-6 date); all Air-era constraints (dev/acceptance machine split, Air-motivated deployment target, Xcode-26-on-Intel) are permanently moot.
+- **Deployment targets: macOS 26 / iOS 26** (author decision 2026-07-06: no older-OS support). Build SDK and runtime OS now match, so no availability-gating for Tahoe APIs.
+- TextKit 2 behavior remains version- and point-release-gated: re-verify editor milestones after each macOS point update per the matrix in @notes/TEXTKIT2_NOTES.md §5.
+- If the author's help is needed (Xcode GUI steps, signing, Supabase setup, a device test, an adjudication call), pause and ask rather than working around it.
+- **Session resiliency (author-instructed 2026-08-31, after the pre-13u overnight run survived four agent deaths, a harness restart and a system crash with zero commits lost): `notes/SessionResiliencyProtocol.md` binds every orchestrator and implementer session — the checkpoint protocol (commit per piece, a LIVE STATUS record from the first commit, push after each, synchronous foreground waits only) and the recovery protocol (verify git before concluding loss; uncommitted edits survive deaths and are adopted; resume by message, else a fresh continuation briefed from the record). The ORCHESTRATOR reads it at every kickoff and at any limit warning; implementer briefs RESTATE the checkpoint rules in their own text instead of sending the implementer to the file (author ruling 2026-09-06 — the recovery half only matters at a death, which is the orchestrator's to run).**
