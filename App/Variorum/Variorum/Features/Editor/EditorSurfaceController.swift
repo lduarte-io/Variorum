@@ -192,14 +192,20 @@ final class EditorSurfaceController {
                 toOffset: min(anchor.offset, max(0, model.index.documentLength)),
                 textView: textView, scrollView: model.scrollView,
                 landingInset: anchor.exactLandingInset)
-        } else if let saved = model.session.editorRouter.scrollAnchors[model.postID] {
+        } else if let saved = model.session.editorRouter.scrollPlaces[model.postID] {
+            // 18l U0c: the page she left, WITH ITS PLACE — the line exactly
+            // where it sat (`exactLandingInset`), so a re-open (her R-18l-1:
+            // "restores where you were") keeps a page's top air and a
+            // wheel-scrolled page's cut; an offset-only anchor (inset 0) lands
+            // exactly as it always did.
             if model.loaded {
                 // A warm re-render whose live anchor came back nil (the page
                 // scrolled into the typewriter room): the frame is honest —
                 // restore now, as always.
                 JumpPrimitive.jump(
-                    toOffset: min(saved, max(0, model.index.documentLength)),
-                    textView: textView, scrollView: model.scrollView)
+                    toOffset: min(saved.offset, max(0, model.index.documentLength)),
+                    textView: textView, scrollView: model.scrollView,
+                    landingInset: saved.exactLandingInset)
             } else {
                 // The COLD mount (17o batch b's ladder, round 2 — RAISE-M1):
                 // the storage was just replaced and the text view's frame is
@@ -208,7 +214,7 @@ final class EditorSurfaceController {
                 // never restored — every mode round trip re-topped the page
                 // on the caret's block. Park it for the N14 settle hop, the
                 // first moment the frame is honest (the reveal's own road).
-                model.parkAnchorRestore(saved)
+                model.parkAnchorRestore(saved.offset, landingInset: saved.exactLandingInset)
             }
         }
         model.updateCaretContext()

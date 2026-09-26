@@ -594,8 +594,17 @@ final class EditorViewModel {
     /// tests can await text safety deterministically (Phase 10 Step 3).
     @discardableResult
     func teardown() -> Task<Void, Never>? {
-        if let anchor = topVisibleOffset() {
-            session.editorRouter.scrollAnchors[postID] = anchor
+        // 18l U0c: the page she leaves, WITH ITS PLACE (`EditorRouter.scrollPlaces`
+        // — a re-open restores it exactly). Only a loaded full-document editor
+        // speaks for the page: a surface torn down before its first render (a
+        // detail opening in another mode mounts Write for a beat) or an inline
+        // editor (no scroll view of its own) must not erase what the page's
+        // own editor left. A loaded page with no reading line — resting in the
+        // typewriter room below the last line — is kept as the LAST line's
+        // place (`placeBelowTheLastLine`), never left to an older page: where
+        // she was is the end.
+        if loaded, scrollView != nil {
+            session.editorRouter.scrollPlaces[postID] = readingAnchor() ?? placeBelowTheLastLine()
         }
         // 13u2b UNIT 3: the probe goes with the surface whose geometry it
         // reads (a torn-down editor has no viewport to answer about).
@@ -2250,7 +2259,27 @@ final class EditorViewModel {
             // 6927 pt). Everything the reveal does beyond that is its own
             // visibility guard's: a remembered 0 the viewport already shows
             // still moves nothing.
-            if remembered != nil {
+            //
+            // 18l U0c — HER R-18l-1: *"First open of a note each session shows
+            // the start; re-opening a note you already visited this session
+            // restores where you were."* When this arrival is the note's
+            // OPENING landing (`CommandRouter.openingLanding`), the viewport is
+            // the ruling's, never the reveal's: the page this run left for the
+            // note — which this cold mount has just parked from the session's
+            // places — else the note's start (nothing parked: the page rests at
+            // its top air). The caret still lands at the remembered place above
+            // (editing state that survives; typing or a click reveals it). The
+            // two shapes the reveal made of her notes, both measured on the
+            // pre-fix build: the run's first open landed a caret an earlier
+            // session left at the note's END as the only line on screen
+            // (`18l-screens/u0c/pre/pre-a6`), and a re-open hauled the page she
+            // had read back up to its top down to that caret again (`pre-a10`).
+            // A MODE ROUND TRIP is not an opening (the router ends it at the
+            // switch), and neither is a place someone chose since the note
+            // arrived — #98(a)'s reveal stands for both.
+            let isOpeningLanding = session.commandRouter
+                .openingLanding(postID: postID, fact: arrivalFact) != nil
+            if remembered != nil, !isOpeningLanding {
                 revealLanding(landing, textView: textView)
             }
             // 13u2b UNIT 3: and if she arrived here by a MODE SWITCH that
@@ -2331,8 +2360,9 @@ final class EditorViewModel {
     /// view: the top landing, built PROVISIONAL).
     ///
     /// `landingInset` (18l U0b): where the line lands below the viewport top —
-    /// 0 (the line AT the top) for the cold mount's session anchor, which is
-    /// an offset only; the re-font keeper's `ReadingAnchor.reflowLandingInset`
+    /// the cold mount's session place lands EXACTLY (`exactLandingInset`, 18l
+    /// U0c — an offset-only anchor's inset is 0, the line AT the top, as it
+    /// always was); the re-font keeper's `ReadingAnchor.reflowLandingInset`
     /// (the page's top air kept).
     func parkAnchorRestore(_ offset: Int, landingInset: Double = 0) {
         guard scrollView != nil else { return }  // the inline editors scroll in their host
@@ -4196,6 +4226,21 @@ final class EditorViewModel {
             offset: offset,
             inset: line.top - top,
             inPageTopAir: top < Double(textView.textContainerOrigin.y))
+    }
+
+    /// **The page resting in the typewriter room, as a place** (18l U0c). Below
+    /// the last line there is no reading line (`topVisibleOffset` answers nil —
+    /// the A22 batch-5 measurement), so the page she leaves there is kept as
+    /// the LAST line and how far ABOVE the viewport's top edge it sat (a
+    /// negative inset). `JumpPrimitive` resolves the document's end to that
+    /// line (17o b's R2-1), so the exact restore puts the clip back in the room
+    /// where she left it. One single-fragment layout (P1).
+    func placeBelowTheLastLine() -> ReadingAnchor? {
+        guard loaded, let textView, let scrollView,
+              let line = JumpPrimitive.lineSpan(ofOffset: index.documentLength, in: textView)
+        else { return nil }
+        let top = Double(scrollView.contentView.bounds.origin.y)
+        return ReadingAnchor(offset: index.documentLength, inset: line.top - top, inPageTopAir: false)
     }
 
     /// A re-layout's restore of a captured place (the width reflow's and the

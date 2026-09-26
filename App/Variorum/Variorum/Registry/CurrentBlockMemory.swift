@@ -14,10 +14,20 @@
 //  every surface already reports — Write's caret block, Takes' live pane,
 //  Read's selection, Blocks' focused row). This is its MEMORY: the last
 //  fact per note, kept when the detail unmounts and restored when the note
-//  mounts again — so a note reopened from the Library (batch E's "Open lands
-//  where the caret was") and a mode entered a week later both know where
-//  she was. Persisted per note like the mode memory (`postMode.<id>` — the
-//  scroll-position class: local, never synced).
+//  mounts again IN THE SAME RUN — a note re-opened this session and a mode
+//  entered inside one both know where she was. Persisted per note like the
+//  mode memory (`postMode.<id>` — the scroll-position class: local, never
+//  synced).
+//
+//  **18l U0c — her R-18l-1 bounds the note-open half:** *"First open of a
+//  note each session shows the start; re-opening a note you already visited
+//  this session restores where you were."* The remembered caret SURVIVES as
+//  editing state — the note-open door (`CommandRouter.registerDetail`) still
+//  restores it, and the caret, the ring and the selection still land on it —
+//  and only the OPENING'S VIEWPORT changes: the page this run left for the
+//  note, else its start, never a reveal of the remembered place
+//  (`CommandRouter.openingLanding`). `sessionFact` is how an opening tells
+//  THIS run's place from an earlier run's.
 //
 //  Pure: a value type over a dictionary plus the defaults it persists to.
 //  The router owns one and writes through it; nothing else decides.
@@ -49,6 +59,15 @@ struct CurrentBlockMemory {
         return FocusedBlock(
             postID: postID, blockID: String(blockID), variantID: variantID,
             utf16Offset: offset)
+    }
+
+    /// **THIS RUN's fact only** — the session dict, never the persisted copy
+    /// behind it (18l U0c, her R-18l-1: *"re-opening a note you already visited
+    /// this session restores where you were"*). The note's opening asks it:
+    /// what an EARLIER run persisted is where she was then — editing state
+    /// that survives, but never a place an opening scrolls to.
+    func sessionFact(for postID: String) -> FocusedBlock? {
+        facts[postID]
     }
 
     /// A surface reported where she is — remember it for its note.

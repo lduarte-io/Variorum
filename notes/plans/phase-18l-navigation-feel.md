@@ -1068,7 +1068,7 @@ IN PROGRESS; nothing below is verified unless it carries a hash or a log.
 | 2 | Trace the opening-viewport decision per mode | DONE — THE TRACE below (the per-mode opening map) |
 | 3 | Reproduce her two shapes (+ what the trace predicts) | DONE — in the app on the pre-fix build (`DerivedData/18l-u0c-prefix`, HEAD `ac52081d` = product code `985371b2`), Terminal: END (Write `pre-a6`, Takes `pre-c2`), MIDDLE (`pre-b4`), the in-session END after scrolling to the top (`pre-a10`); and in the harness (the scratch probe — below) |
 | 4 | The END-jump: find the tail writer (or disprove it) — attribution + red-on-old pin | TRACED — the non-click-writer hypothesis is DISPROVED for the single-window app (below); what derives the tail landing is the note-open landing over a caret she left there. The red-on-old pins are the rule's own (piece 6) — PENDING |
-| 5 | Build R-18l-1 (first-open set; re-open restore by the standing machinery + the place) | NOT-STARTED |
+| 5 | Build R-18l-1 (first-open set; re-open restore by the standing machinery + the place) | DONE (this commit) — THE BUILD below; `NoteOpenLandingTests` **10/10 GREEN** on the fixed tree (`App/Variorum/DerivedData/18l-u0c-pin-fixed1.log`); behavioural reverts + the ruled pins' runs PENDING |
 | 6 | Pins (end-jump red-on-old; first-open / re-open / deep-link per mode; R-Q20/R-Q21 + RAISE-M1 ride unmodified) | IN-PROGRESS — `NoteOpenLandingTests` (10 tests) committed RED on the pre-fix tree (this commit; `App/Variorum/DerivedData/18l-u0c-pin-prefix1.log`): **8 red / 18 issues**, the 2 guards green — the router's first open restores the earlier run's fact (block 5 @12) and a re-open restores it too; Write's first open: clip **2904.0** (the ⏎ shape — caret 8691/8691), **2880.0** (the last line's end), **1588.0** (the middle); Takes: article clip **1866.0**, the empty last block's pane live; Read: the last block selected, scrolls **[1149, 3819]**; re-open at the top: **24.0**; re-open after scrolling away from a tail caret: **2904.0**; re-open mid-note: left 1391.0 → back **24.0**; the mode-round-trip-after-re-open guard and the deep-link guard green |
 | 7 | Walk (both voices; her shapes; first-open vs re-open per door; a deep link) | NOT-STARTED |
 | 8 | Closing runs (touched suites + the eleven Tutorial suites) | NOT-STARTED |
@@ -1148,3 +1148,39 @@ teardown anchor is an offset, replayed as "that line at the viewport top" (U0b's
   the caret. Before the window; macOS-independent.
 - **The re-open's lost top air — pre-existing** (`02052d8c` Phase 7's offset anchor + `01e26020`
   13c 1A's inset conversion + `c60d1d66`'s exact cold-mount restore; U0b's B6).
+
+### THE BUILD — R-18l-1 as ruled: the caret survives, only the OPENING's viewport changes
+
+**The note's OPENING, recorded where the fact is restored** (`CommandRouter.registerDetail`): a
+per-app-run set `notesOpenedThisRun` (in memory — never persisted, never synced) and a
+`NoteOpening` value beside the restored fact: `isReopen` (the run had opened the note before),
+the registered `mode`, the `seeded` fact, and `seededThisRun` (the session memory held it — vs a
+place an earlier run persisted, `CurrentBlockMemory.sessionFact`). **The restored fact is
+byte-unchanged** — the remembered caret survives as editing state, her R-cor-3's *"the place
+where your cursor was saved"* with it. `openingLanding(postID:fact:)` answers "is this arrival
+the opening's own landing?" — the opening's note AND the very fact it seeded (a place reported
+since the note arrived is a place someone chose, and lands by the standing rules); a mode switch
+ends the opening (`noteMode`, the registration's own mode reported back keeps it), and so does
+the detail leaving. Every door reaches `registerDetail`, so the rule is door-agnostic.
+
+**Per mode — the VIEWPORT only, each an outrank ABOVE the standing landing, never an edit inside it:**
+- **Write** (`applyFocusSeeds`' bare arrival): an opening landing parks NO caret reveal. The page
+  is the one this run left for the note — the cold mount's parked session place — else the
+  note's start (nothing parked: the page rests in its top air). The caret still lands at the
+  remembered place.
+- **Takes** (`TakesChoreographer.consumeLandings`' N9 arm): the ring still lands on the current
+  block; an opening landing asks for no `landArticle` — the article is R-Q1's restored place this
+  run (R-Q20/R-Q21's step machine untouched), else the top.
+- **Read** (the seed): the current block is still selected; an opening landing scrolls to it only
+  when it is THIS run's place (Read keeps no page of its own — on a re-open this run's current
+  block IS where she was).
+- **Blocks · Lenses · Compare · Canvas**: no current-block viewport landing exists — unchanged.
+
+**The page she left, WITH ITS PLACE** (U0b's `ReadingAnchor`, handed forward by B6):
+`EditorRouter.scrollPlaces` (session-only) replaces the offset-only anchor; `teardown` writes
+`readingAnchor()` — or, for a page resting in the typewriter room below the last line (no reading
+line there), `placeBelowTheLastLine()` (the last line and its negative inset) — and only for a
+LOADED full-document editor (a transient mount or an inline editor never erases the page's
+editor's place); `renderFull`'s cold mount (and its warm fallback) restores `exactLandingInset`.
+`scrollAnchors` survives as an offset-only facade over it (the RAISE-M1 pins seed through it and
+ride unmodified; an offset lands at inset 0 — exactly as before).

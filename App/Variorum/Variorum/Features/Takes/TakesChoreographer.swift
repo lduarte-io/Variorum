@@ -205,7 +205,22 @@ final class TakesChoreographer {
                 // Only when the fact named it — the fall-through to the first
                 // slot is already at the top and asking for a scroll there
                 // would fight a restored position for nothing.
-                if current != nil { model.board.landArticle(on: slot.placementID) }
+                //
+                // 18l U0c — HER R-18l-1, an outrank ABOVE the landing, never an
+                // edit inside it: when this entry is the note's OPENING landing
+                // (`CommandRouter.openingLanding`) the ring still lands on the
+                // current block (editing state), and the page is the ruling's —
+                // the article place this run left (R-Q1's restore, which a
+                // landing on the very block she was in never outranks under
+                // R-Q21), else the top. No reveal is asked for: the board used
+                // to open at the END of a note whose caret an earlier session
+                // left there (`18l-screens/u0c/pre/pre-c2`). A mode switch ends
+                // the opening, so every other entry reveals exactly as ruled.
+                let opening = model.session.commandRouter
+                    .openingLanding(postID: model.postID, fact: fact)
+                if current != nil, opening == nil {
+                    model.board.landArticle(on: slot.placementID)
+                }
             }
         }
     }

@@ -62,9 +62,33 @@ final class EditorRouter {
     /// reported a caret is still the only editor there is, and falling back
     /// keeps every door's behaviour outside the Outline byte-identical.
     var editingOrActive: EditorViewModel? { editing ?? active }
-    /// Top visible text location per post (UTF-16 offset) — content-anchored
-    /// reopen restore (accepted memo: never px-anchor).
-    @ObservationIgnored var scrollAnchors: [String: Int] = [:]
+    /// **The page she left, per post — the reading line WITH ITS PLACE** (18l
+    /// U0c; `ReadingAnchor` is U0b's). Content-anchored (the accepted memo:
+    /// never px-anchored — the line she was reading, by offset), and since U0c
+    /// it also carries how far below the viewport's top edge that line sat, so
+    /// a re-open (her R-18l-1: *"restores where you were"*) and a mode round
+    /// trip put the page back EXACTLY: an offset alone replayed "that line at
+    /// the viewport top", which ate a page's 24-pt top air on every re-open and
+    /// snapped a wheel-scrolled page by the edge's cut into its line.
+    /// Session-only, never persisted, never synced; written at the Write
+    /// editor's `teardown`, restored by `renderFull`'s cold mount.
+    @ObservationIgnored var scrollPlaces: [String: ReadingAnchor] = [:]
+
+    /// **The OFFSET-ONLY view of `scrollPlaces`** — kept as the pins' seam (the
+    /// RAISE-M1 pins seed a session anchor as a bare offset and ride
+    /// unmodified). Reading drops the place; writing an offset stores it as the
+    /// reading line AT the top (inset 0, not in the top air) — exactly what an
+    /// offset anchor always meant. An entry whose offset is unchanged keeps its
+    /// place. Nothing in the app writes through here.
+    var scrollAnchors: [String: Int] {
+        get { scrollPlaces.mapValues(\.offset) }
+        set {
+            scrollPlaces = scrollPlaces.filter { newValue[$0.key] != nil }
+            for (postID, offset) in newValue where scrollPlaces[postID]?.offset != offset {
+                scrollPlaces[postID] = ReadingAnchor(offset: offset, inset: 0, inPageTopAir: false)
+            }
+        }
+    }
 
     /// **Where the TAKES board's article was left, per note** (17p batch a,
     /// ledger row 1 — her ruling R-Q1: *"it should remember your scroll

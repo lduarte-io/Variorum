@@ -64,6 +64,21 @@ final class CommandRouter {
             // written at block changes and here).
             if let leaving = activePostID { currentBlocks.persist(postID: leaving) }
             let restored = currentBlocks.current(for: postID)
+            // 18l U0c — HER R-18l-1: *"First open of a note each session shows
+            // the start; re-opening a note you already visited this session
+            // restores where you were."* The fact below is restored exactly as
+            // before — the remembered caret survives as editing state — and
+            // the note's OPENING is recorded beside it, so each mode's arrival
+            // can tell its own opening landing from every other landing and
+            // decide only the VIEWPORT differently (`openingLanding`). Every
+            // door into a note (the Library, the shelf, the Open strip, ⌘K,
+            // ← →, ⌘⇧n, a split pane taking focus) reaches this registration,
+            // so the rule is door-agnostic by construction; a door that names a
+            // block carries its own landing and is not an opening's landing.
+            let reopening = !notesOpenedThisRun.insert(postID).inserted
+            opening = NoteOpening(
+                postID: postID, isReopen: reopening, mode: mode, seeded: restored,
+                seededThisRun: restored != nil && currentBlocks.sessionFact(for: postID) == restored)
             focusedOffset = restored?.utf16Offset
             // R1-9: the observed half carries NO offset — the caret-rate half
             // above is the only home, so the two lifetimes cannot be confused.
@@ -129,6 +144,54 @@ final class CommandRouter {
         // 13u2b UNIT 3: the detail is gone, so any place captured for a mode
         // switch inside it has no arrival left to consume it.
         carriedPlace = nil
+        // 18l U0c: …and its opening is over.
+        opening = nil
+    }
+
+    // MARK: - The note's OPENING (18l U0c — her R-18l-1)
+
+    /// **The notes this app run has opened** — in memory, never persisted,
+    /// never synced: "each session" in her ruling is one run of the app. A
+    /// note in here re-opens where she was THIS run; a note not yet in here is
+    /// the session's first open and arrives at its start.
+    @ObservationIgnored private var notesOpenedThisRun: Set<String> = []
+
+    /// How the mounted detail's note ARRIVED — kept for exactly the opening:
+    /// the surface the detail opened in (its remembered mode). A mode switch
+    /// ends it (`noteMode` — a mode round trip is the standing machinery's,
+    /// never an opening's), and so does the detail leaving.
+    struct NoteOpening: Equatable {
+        let postID: String
+        /// The run had opened this note before (a re-open) — vs its first open.
+        let isReopen: Bool
+        /// The mode the detail registered in: the opening's own surface.
+        let mode: PostMode
+        /// The fact the opening restored — the arrival that lands on exactly
+        /// this is the OPENING's landing; a report since (a click, a door that
+        /// names its block by reporting it) is a place someone chose, and it
+        /// lands by the standing rules.
+        let seeded: FocusedBlock?
+        /// The seeded fact is THIS run's (the session memory held it) — vs a
+        /// place an earlier run persisted. Where a surface keeps no page of its
+        /// own (Read), this run's current block IS where she was.
+        let seededThisRun: Bool
+    }
+
+    @ObservationIgnored private(set) var opening: NoteOpening?
+
+    /// **Is this arrival the note-OPENING's own landing?** Asked by each
+    /// mode's arrival with the fact it is about to land on (Write's bare
+    /// arrival, Takes' N9 entry arm, Read's seed). Non-nil ⇒ her R-18l-1
+    /// decides the VIEWPORT: the page THIS RUN left for the note (Write's
+    /// session place, Takes' article place, Read's this-run current block),
+    /// else the note's START — never a reveal of a caret that an earlier run,
+    /// or a page she has since scrolled away from, left somewhere else. The
+    /// caret, the ring and the selection still land on the fact (editing
+    /// state). Nil ⇒ not an opening (a mode switch, another note, or a fact
+    /// someone placed since the note arrived) — the standing machinery.
+    func openingLanding(postID: String, fact: FocusedBlock?) -> NoteOpening? {
+        guard let opening, opening.postID == postID, opening.seeded == fact else { return nil }
+        return opening
     }
 
     // MARK: - Where the caret is (the post-13l polish round, ledger row 33)
@@ -202,10 +265,13 @@ final class CommandRouter {
     /// header has the whole argument. Session-scoped, persisted per note.
     @ObservationIgnored private var currentBlocks = CurrentBlockMemory()
 
-    /// Where she last was in a note — mounted or not. The Library's Open
-    /// door (batch E) lands here; a mode entering a mounted note reads the
-    /// live `focusedBlock`, which this seeded. Both carry the caret's offset
-    /// (17o batch b): the live fact merges it on read, the memory persists it.
+    /// Where she last was in a note — mounted or not: the live fact, else the
+    /// memory (this run's, else the persisted one). The doors that name a place
+    /// on purpose read it (the book's edit-here door, the panes' entry caret);
+    /// a mode entering a mounted note reads the live `focusedBlock`, which this
+    /// seeded. (Since 18l U0c a note's OPENING lands its caret here but never
+    /// scrolls to it — `openingLanding`.) Both carry the caret's offset (17o
+    /// batch b): the live fact merges it on read, the memory persists it.
     func currentBlock(for postID: String) -> FocusedBlock? {
         if let fact = focusedBlock, fact.postID == postID { return fact }
         return currentBlocks.current(for: postID)
@@ -366,6 +432,10 @@ final class CommandRouter {
     func noteMode(_ mode: PostMode) {
         guard detailToken != nil else { return }
         activeMode = mode
+        // 18l U0c: a switch to another mode ends the note's opening — the
+        // arriving surface is a mode round trip's (the registration's own
+        // mode reported back by the detail's first `onChange` keeps it).
+        if let current = opening, current.mode != mode { opening = nil }
         // Round-2 MINOR-R2 (the aborted-round window): a parked parcel is
         // valid for exactly the ROUND that parked it, and the round is
         // over the moment the detail reports any mode other than the
