@@ -111,8 +111,20 @@ measures the warning family C3 then sweeps.
   C8's diff gets its own ladder round — a fresh cold reviewer (`opus-reviewer` if the diff is
   tests-only; `fable-reviewer` if it reaches a test seam on the editor/custody side), running
   `notes/REVIEW_PROMPT.md` verbatim, findings file `notes/plans/18k-ladder-round3.md` — and the install
-  refresh waits for its disposition. (This is the run's third ladder round, opened by her ruling, not
+  refresh waits for its disposition. *(Its seat amended by R-18k-10: FABLE, with the adjudication
+  audit.)* (This is the run's third ladder round, opened by her ruling, not
   by a round-2 BLOCKER/MAJOR; it is scoped to C8.)
+- **R-18k-10 — THE ORCHESTRATOR WAS OPUS 5.5, NOT FABLE — recorded, and her remedy** (2026-09-25,
+  her question: *"I've had this entire orchestration run on Opus 5.5 instead of Fable, as is my usual
+  orchestrating cast. Was the cold review that has already happened run with Fable?"*). **Verified by
+  transcript, not label:** ladder rounds 1 and 2 ran `claude-fable-5` on every call (193 / 100); the
+  implementers ran `claude-opus-5-5` as intended. The deviation is the ORCHESTRATOR SEAT: every
+  orchestrator judgment in this record (kickoff corrections, the split proposal, each unit's
+  acceptance, re-owning W-3/W-4/W-2 into the run, the finals diagnosis) is Opus's. **Her remedy
+  (the recommended option):** C8's cold review is **FABLE regardless of scope** (supersedes R-18k-9's
+  Opus-if-tests-only arm), and that same Fable reviewer also **AUDITS the orchestrator's adjudications**
+  — every `ORCHESTRATOR ADJUDICATION` section + THE FINALS diagnosis — before the refresh; the Opus
+  orchestrator finishes the closeout; **18o gets a fresh FABLE orchestrator at her word.**
 - **Her standing posture for the night:** *"just bring me the issues now, your session will be
   running overnight"* — every remaining ambiguity is PROVISIONAL-and-continue; anything needing her
   hands (a Touch-ID-gated custody walk, a product call) is HELD and bundled for the morning.
@@ -221,7 +233,7 @@ COMMITTED · every death and resume noted in the record.
 - C6b — DONE, ACCEPTED (W-4/W-2 pre-existing, FIXED; #147 PROVISIONAL).
 - THE LADDER — CLOSED at two rounds (R1 0/0/0/3 NIT, NIT 1 fixed `0ebc3b5e`; R2 0/0/0/0).
 - THE FINALS — core **1723/180 ALL PASSED** (+1 = the post-13y auto-entitlement act's `AuthRLSDDL` pin, `b58414eb`/`7152fcd5` — not 18k's; 18k touched no `Sources/`/`Tests/`) · iOS **BUILD SUCCEEDED** · mobile **643/109, exactly the 4 known** (+1 = C5's P26 pin) · full Mac **RED-IN-CONTEXT → UNIT C8** (below).
-- C8 — IN-PROGRESS. Then **the C8 cold review (R-18k-9)** → the closeout → the refresh.
+- C8 — IN-PROGRESS. Then **the C8 cold review + the orchestrator-adjudication audit, FABLE (R-18k-9/10)** → the closeout → the refresh. 18o → a fresh Fable orchestrator at her word.
 - NEXT: C7 → C6b → the ladder (Fable, one combined diff) → finals → closeout → refresh → 18o.
 - Deaths / resumes: none.
 
