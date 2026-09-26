@@ -213,7 +213,8 @@ COMMITTED · every death and resume noted in the record.
 - C7 — DONE, ACCEPTED (the name-sorted backup listing — five readers fixed by one rule + the act's own file passed through; her real store verified exposed: 11 hourly copies).
 - C6b — DONE, ACCEPTED (W-4/W-2 pre-existing, FIXED; #147 PROVISIONAL).
 - THE LADDER — CLOSED at two rounds (R1 0/0/0/3 NIT, NIT 1 fixed `0ebc3b5e`; R2 0/0/0/0).
-- THE FINALS — IN-PROGRESS (core → iOS build → mobile → full Mac; zero instances).
+- THE FINALS — core **1723/180 ALL PASSED** (+1 = the post-13y auto-entitlement act's `AuthRLSDDL` pin, `b58414eb`/`7152fcd5` — not 18k's; 18k touched no `Sources/`/`Tests/`) · iOS **BUILD SUCCEEDED** · mobile **643/109, exactly the 4 known** (+1 = C5's P26 pin) · full Mac **RED-IN-CONTEXT → UNIT C8** (below).
+- C8 — IN-PROGRESS.
 - NEXT: C7 → C6b → the ladder (Fable, one combined diff) → finals → closeout → refresh → 18o.
 - Deaths / resumes: none.
 
@@ -3991,3 +3992,48 @@ every production hunk re-read independently; a release-projection script (16 fil
 suite runs green, zero skipped. One dismissal SHARPENED in its file (not a finding — no red-on-old pin
 possible): the Release-build over-release shape is exactly the recorded trade and needs a pairing bug
 that does not exist. **THE LADDER CLOSES at two rounds** (no new BLOCKER/MAJOR — the rule's own stop).
+
+## THE FINALS — the full-Mac adjudication (2026-09-25) and UNIT C8
+
+**Full Mac on the final tree, twice (zero instances):** run 1 `3168 tests / 522 suites, 1 issue`; run 2
+`3168/522, 2 issues`. **All five macOS-27 deltas are GONE (C6).** The reds:
+`MacIdentityAuditWiringTests.appKitWidensAnInsertionsReportedRangeToTheParagraph` (AppKit's own
+edited-range report reads `{2,1}` instead of the widened `{2,5}` — runs 1 AND 2) and
+`TakesBoardSoakTests.randomizedBoardSoakHoldsEveryInvariant(seed: 21)` (`count 4 ≠ fanCount 5` — run
+2). **Isolated: green 5/5 and 3/3.** **The base tree (`3a07b875`, pre-18k, scratch worktree + own
+DerivedData, full suite once):** `3089/510, 6 issues` = the four known 27 deltas + two
+`NoLiteralColourTests` offenders caused by the worktree's `/private` path prefix (an artifact of the
+scratch location, not code) — **neither of the two reds appears on base.** Verdict: a **test-isolation
+leak INTRODUCED BY 18k** — a new or changed suite leaves process-global state (the leading suspect: a
+re-font/typography or settings global — `EditorTypography.current`, the paragraph-gap / inline-comments
+settings, a shared `UserDefaults` key — that later storage inherits, making AppKit's attribute fixing a
+no-op) which two later suites read. Product behaviour is not implicated by this evidence (both tests are
+green alone; the widening test spies on AppKit's delegate report), but the leak is 18k's and is fixed
+before closeout. Side effect recorded: the base run's test host ran the pre-C7 backup tick against the
+DEV store only.
+
+## UNIT C8 BRIEF — the test-isolation leak 18k introduced (self-contained)
+
+**You are the C8 implementer (`opus-implementer`), ONE unit.** Read: `CLAUDE.md`; THIS FILE's ENVIRONMENT
+TRAPS, CAST & DISCIPLINE, the section above, and the RECORDS of C4, C6 and C6b (their new suites are
+the leading suspects: `RefontGapTopTests`, `JumpViewportLayoutTests`, `InlineHeightReportTests`,
+`DebugOracleOwnershipTests`, `AutosaveRegistryLifecycleTests`, `MarkdownPaletteWritersTests`, the
+C5/C7 pins); KnownIssues' per-note-defaults and DEBUG-oracle parallel-suites rows (the class).
+**Task:** (1) FIND the leaking suite: run the victim WITH candidate predecessors in one invocation
+(`-only-testing` several suites, literal selectors; confirm the "Test run with N tests" line) —
+bisect the 18k-added/changed suites until one predecessor reproduces each red deterministically (the
+widening red and the seed-21 soak red may have different leakers). (2) TRACE the leaked state (which
+global/key, set where, never restored). (3) FIX THE LEAKER (restore what it sets — `defer`, a scrubbed
+suite, an injected seam), never the victim, unless the victim itself reads state it should own; a
+product-code change is out of scope — if the trace says the PRODUCT leaks (a global the app itself never
+resets), STOP and report. (4) PROOF: the reproducing pair red before, green after; both victims green in
+the reproducing combination 3×; then ONE full Mac suite run on the final tree — the unit closes only on
+a full run reading GREEN except any documented known-flake member, adjudicated. **Scope:** tests only
+(plus a test seam if unavoidable, stated); zero `Sources/`, zero `Sync/`.
+**CHECKPOINT RULES (binding from your first commit):** `## UNIT C8 RECORD` + `### LIVE STATUS` at the END
+of this file in your FIRST commit, flipped with each piece; PENDING for unverified claims; commit per
+piece + push after each; pathspec-limited staging; NO commit trailers (no Co-Authored-By, no
+Claude-Session); synchronous foreground waits (grep-poll), never end your turn mid-run; no subagents
+(one Sonnet lookup for external facts only); commit the pre-revert state before any revert; never quit
+or kill a real-store instance, never build Release, never touch `/Applications`; clean up any scratch
+worktree. Final message: a short summary pointing at your record.
