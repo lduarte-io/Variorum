@@ -1516,9 +1516,9 @@ cold review is the remaining gate.
 | # | Piece | Status |
 |---|---|---|
 | 1 | Reading (own context, the brief's order) | DONE — this file whole (HER KICKOFF MESSAGE, SITTING RECORD, ENVIRONMENT TRAPS, the U-VIS DESIGN NOTE + BRIEF, the U0 · U0b · U0c RECORDs + acceptances); the charter's U-VIS section (`post-13u-health-rounds.md` KICKOFF 2); `Tools/WalkKit/` whole (README, `guard.sh`, `click.sh`, `keys.sh`, `wl2.swift`, `capture-windows.swift`, `scroll.swift`); 18k UNIT C4 brief + record + adjudication (the owner-keyed shape); KnownIssues rows 35 (the in-process click rig) · 88 (B5) · 89 (pointer injection); `TEXTKIT2_NOTES.md` whole; `SessionResiliencyProtocol.md`; the code the probe reads (`JumpPrimitive`/`FragmentLines`/`ReadingAnchor`, `EditorViewModel.topVisibleOffset`, `PaneMeasurement`, the settle net's O(1) last-fragment read, `BookIndexGeometry.paneReadTierFrames`, `ReadModeOracle`, `IndexClickCaretTests`' click geometry, `CommandRouter.activeMode`, `VariorumAppDelegate`) |
-| 2 | The oracle endpoint (DEBUG, env-gated, pull-only) | NOT-STARTED — design: a request/answer probe over distributed notifications, installed only when the app is launched with `VARIORUM_VISUAL_WALK=1`; reads the key window's first-responder text view (TK2 API only) + existing oracles at request time; content-free `key=value` answer |
-| 3 | `Tools/VisualWalk/` — driver, scenario table, report, env gate | NOT-STARTED |
-| 4 | The seeded scenarios (typing · U0b newline round trip · U0 Index click · U0 Read ▸ edit click · narrow→restore · divide + merge · mode round trip · U0c first open / re-open · B5) | NOT-STARTED |
+| 2 | The oracle endpoint (DEBUG, env-gated, pull-only) | DONE (`e949e2a1`, grown `8ac80daf`) — `Core/Views/VisualWalkProbe.swift` + one DEBUG line in `VariorumAppDelegate`; verified against captures (coordinates exact to the point) |
+| 3 | `Tools/VisualWalk/` — driver, scenario table, report, env gate | DONE (`5e79c641`, fixed `8ac80daf`) — every scenario ran end to end in Terminal; the foreign-dialog rule added after the incident below |
+| 4 | The seeded scenarios | DONE in Terminal (ten: the design note's list + B5 on two roads); the both-voice full run is piece 6 — PENDING |
 | 5 | The self-test RED (caught, captured, reported non-zero) | NOT-STARTED |
 | 6 | The full seeded run on the current tree, both voices, evidenced | NOT-STARTED |
 | 7 | The env-flag wrapper test (`VARIORUM_VISUAL_WALK=1`) | NOT-STARTED |
@@ -1526,3 +1526,16 @@ cold review is the remaining gate.
 | 9 | Self-assessment | NOT-STARTED |
 
 - Deaths / resumes: none.
+- **INCIDENT (machinery honesty, 10:45 local) — a stale system consent prompt on screen.** A macOS
+  TCC prompt, *"“Ghostty” wants access to control “Finder”… A program running within Ghostty would like
+  to use AppleScript"* (UserNotificationCenter, layer 8, 260×298 at (734,222)), sat over the middle of
+  the dev window. It predates this session (the owning process started Sep 24; no Finder AppleEvent in
+  this session's `tccd` log; U0b's record notes an `osascript` to Finder that *"hung on an AppleEvent
+  timeout"* — the likely origin). Two exploration clicks at (868,459) landed on it (its log shows
+  `sendAction:` at both times) — **neither on a button** (it still stands, unanswered: Allow/Don't
+  Allow sit at y≈476–505), but the second left it holding keyboard focus, so a ⏎ would have pressed
+  **Allow**. Caught by the probe's `key=0`; focus handed back by a click on our own titlebar; the
+  prompt is LEFT for the author (a TCC decision is hers). **The harness now refuses to click any point
+  a foreign dialog covers (`vis-foreign`), refuses to type unless the probe says OUR window is key, and
+  presses Settings by AXPress (no screen point)** — the guard's gap, mechanized. Recorded for the
+  WalkKit traps (the orchestrator's pen): `guard.sh` does not see foreign dialogs.
