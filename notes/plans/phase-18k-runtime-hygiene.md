@@ -50,7 +50,7 @@ here touches distribution, signing or `/Applications` before this run's own clos
 | **C6** | KnownIssues row 65 — the FIVE macOS-27 test deltas: TRACE `RefontViewportTests.aShrinkingRefontKeepsTheLineAtTheViewportTop` (94-pt drift — possibly REAL, the editor seam) and `BoundaryFluidityTests.theKeystrokePathRoutesCrossBlockDeletesIntoTheCompound` (intermittent); RE-MECHANIZE the two `NSSlider` scrubber pins and `LibraryPanelHostTests`' "inspector" reflection pin | ledger row 65 | trace + pin re-mechanization → the full Mac suite reads GREEN (no "modulo"); a Refont fix, if owed, walks on the Copper Beeches fixture (13u4 F2's own walk) | **Fable** (Refont / BoundaryFluidity are the editor seam) | **DONE** — row 65 CLOSED (a real 27 regression fixed) |
 | **C6b** | The held walks' W-4/W-2: the re-font reading position at a paragraph-GAP top edge; a jump whose own layout grows the document (re-owned into the run 2026-09-25) | the held walks | editor seam → red-on-old pins + the Copper Beeches walk, both voices | Fable | **DONE** — both pre-existing, FIXED (`EditorViewModel.topVisibleOffset` · `JumpPrimitive`); #147 PROVISIONAL |
 | **C7** | The held walks' W-3: the backup listing sorted by NAME (five readers; the second folder got the wrong file; the prune kept A1 copies over dated ones) | the held walks | data safety → `BackupOwnFilesTests` red-on-old + a dev-store scratch-folder run | Fable (the ladder) | **DONE** — FIXED `ff0e67c2`; her real store verified exposed |
-| **C8** | The test-isolation leak 18k introduced (the finals' full-Mac reds absent on the pre-18k base) | the finals | harness → the reproducing pair red→green 3/3 + the owed full Mac run | Fable (round 3, R-18k-9/10) | FIX ACCEPTED + REVIEWED — closes on the full run at her quit |
+| **C8** | The test-isolation leak 18k introduced (the finals' full-Mac reds absent on the pre-18k base) | the finals | harness → the reproducing pair red→green 3/3 + the owed full Mac run | Fable (round 3, R-18k-9/10) | **DONE** — closed on the closing full run |
 
 **Run order (as run):** C0 → C1 → C2 → C3 → C4 → C6 → C5 → THE HELD WALKS (TCC granted mid-run) → C7 →
 C6b → the ladder → the finals → the closeout → the refresh → 18o. One `opus-implementer` per unit, fresh, strictly sequential; C3 follows C2 because C2
@@ -134,6 +134,10 @@ measures the warning family C3 then sweeps.
 
 ## ENVIRONMENT TRAPS (every batch brief carries this section verbatim — the skill's rule; carried from RUN A's, updated for macOS 27)
 
+- **(added at the closeout) POINTER suites need an IDLE machine:** the pointer-injection tests (Blocks
+  single-click, the canvas chip drag, the slot-height handle, `CanvasDragTrackingTests`) go red when real
+  mouse/keyboard input lands during the run — a trusted full-Mac run happens with nobody at the machine;
+  bracket suspicious reds with `ioreg -c IOHIDSystem` HIDIdleTime.
 - **(added at C7) Every Mac test run launches the DEV app as test host, and that launch runs the dev
   store's backup tick** — which writes into the dev store's configured second folder,
   `~/Documents/Variorum/Backups/`, in the author's real home folder. Harmless, but know it: files
@@ -234,7 +238,8 @@ COMMITTED · every death and resume noted in the record.
 - C6b — DONE, ACCEPTED (W-4/W-2 pre-existing, FIXED; #147 PROVISIONAL).
 - THE LADDER — CLOSED at two rounds (R1 0/0/0/3 NIT, NIT 1 fixed `0ebc3b5e`; R2 0/0/0/0).
 - THE FINALS — core **1723/180 ALL PASSED** (+1 = the post-13y auto-entitlement act's `AuthRLSDDL` pin, `b58414eb`/`7152fcd5` — not 18k's; 18k touched no `Sources/`/`Tests/`) · iOS **BUILD SUCCEEDED** · mobile **643/109, exactly the 4 known** (+1 = C5's P26 pin) · full Mac **RED-IN-CONTEXT → UNIT C8** (below).
-- C8 — FIX ACCEPTED + REVIEWED (round 3); the unit CLOSES on the owed full Mac run (held for her quit).
+- C8 — DONE: CLOSED on the closing full run (widening red gone, soak red absent).
+- THE REFRESH — IN-PROGRESS.
 - THE C8 COLD REVIEW + ADJUDICATION AUDIT (FABLE, R-18k-9/10) — DONE: 0/0/0/4 NIT, C8 approved, the audit PASSES (round 3, below).
 - THEN, at ONE zero-instance window (her quit): the full Mac run → the closeout → the refresh. Next phase at her word (likely 18l, carrying U0/U0b/U-VIS; then 18o — a fresh Fable orchestrator).
 - Deaths / resumes: none.
@@ -4269,3 +4274,14 @@ doc annotated (the harness double is gone since `f8610cb9`) and (3)(ii) C7's ite
 `SnapshotPairTests.theLockTimeCopyIsKeylessCiphertextPairedAndCheckedAtTheNextRun` is exactly that
 test; (4) the handoff draft is REWRITTEN at the closeout, not committed as drafted. **R-18k-9's gate is
 MET: the refresh may follow the owed full Mac run at the zero-instance window.** No further round.
+
+## THE CLOSING FULL MAC RUN (2026-09-25, her quit's zero-instance window) — C8 CLOSES
+
+`3168 tests / 522 suites, 11 issues` (1,043 s). **C8 VERIFIED:** the widening red (`appKitWidens…`) is
+GONE and the seed-21 soak red did NOT recur. The 11 issues are THREE pointer-injection tests
+(`BlocksWorkbenchFaceTests`' single-click — a flake-list member — `CanvasBankHostedTests`' chip drag,
+`TakesSlotDragTests`' slot-height handle), **adjudicated ENVIRONMENTAL:** red in 2 of 3 isolated runs
+while the author was at the machine, then **GREEN 3 of 3 isolated with the machine idle through each
+whole run** (HID idle bracketed: 47→171 s, 178→305 s, 305→436 s); the same product tree passed all
+three in the two earlier full runs; 18k touched none of their files. Filed on KnownIssues (owner 12) +
+an ENVIRONMENT TRAPS line. **The gate reads: GREEN modulo the adjudicated pointer class — no 18k red.**
