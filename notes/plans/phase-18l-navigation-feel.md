@@ -782,7 +782,7 @@ rows 1–3 flip to BUILT+WALKED — the Fable cold review is the remaining gate.
 
 ## U0b RECORD (implementer: `opus-implementer`, 2026-09-26)
 
-**NOT DONE (first line):** PENDING — written at the close.
+**NOT DONE (first line):** (1) no whole-old-tree harness bisect (the C7 dev-store trap, as U0/C6b) — attribution rests on R-13y / R-F2 / R-room plus line history; (2) the LIVE corner-drag resize was not walked in the app (the drag hit the overlay scroller) — B3 rests on its pin (AppKit's own live-resize notifications, red-on-old 24.0) and a walked AX resize round trip; (3) **B5** (⏎ right after a ⌘↓ on invalidated geometry moves the page) NOT traced and NOT built — a second mechanism on the differential road, owner proposed below; (4) U0c NOT investigated beyond recording B6; (5) no KnownIssues / TEXTKIT2_NOTES / WalkKit / canon edits — row 87's close, B5's row and the walker facts are handed to the orchestrator; (6) no core / iOS / mobile runs — zero `Sources/`, zero `Shared/`; (7) the U3 rider (`PaneSurface`'s render restore) and row 85 (O-2) untouched — U0b touches neither.
 
 ### LIVE STATUS
 
@@ -794,8 +794,8 @@ rows 1–3 flip to BUILT+WALKED — the Fable cold review is the remaining gate.
 | 4 | Pin red-on-old | DONE — `WriteTopAirTests` committed RED (this commit) |
 | 5 | Fix + behavioural revert | FIX DONE (this commit) — `ReadingAnchor` (the reading position with its place); `renderFull` restores EXACTLY; the re-layout keepers (live resize / width reflow, re-font) keep the ruled line-at-the-top rule except in the page's top air. `WriteTopAirTests` **7/7 GREEN** (`18l-u0b-pin-fixed1.log`). Behavioural reverts DONE: **R-full RED — 14 issues, identical to the pre-fix run** (`18l-u0b-R-full.log`); **R-top RED — exactly the live-resize and re-font pins, 4 issues (24.0)**, her gesture / round trip / mid / tail GREEN (`18l-u0b-R-top.log`); each restored with `git checkout HEAD --`, `git status` clean |
 | 6 | Walk (both voices: her sequence; a long note mid + tail; add-then-remove) | **DONE — PASS** on the fixed build (THE WALK below; every row both voices, measured by row signature); the pre-fix build reproduced her shape first (row 2) and, en route, a 40.0-pt tail snap on ⌫ |
-| 7 | Closing runs (touched suites + the eleven Tutorial suites) | NOT-STARTED |
-| 8 | Self-assessment | NOT-STARTED |
+| 7 | Closing runs (touched suites + the eleven Tutorial suites) | **DONE** on the final tree (product code `998f7d7d`), zero app instances, machine idle: `DerivedData/18l-u0b-closing.sh` — 18k C6b's closing set (the jump / anchor / landing / re-font / typewriter family, the structural and seam suites, the eleven Tutorial suites) + `WriteTopAirTests` + the `renderFull` / structural-door consumers (`StructuralRewriteDoorTests` … `ReviewRound3FixTests`, `BlockDeletionAndRedoTests`, `DeferredProjectionRetryTests`, `FocusHandoffTests`) + the typed Return's (`ReturnKeyTraceTests`, `TypedReturnTests`): **✔ Test run with 694 tests in 87 suites passed** (`18l-u0b-closing1.log`), 0 skipped (the two `skipped` lines are AppIntents metadata warnings), 87 suites counted; 50 `Modifying state during view update` lines (the pane-mounting family, U3's — C6b's closing set logged 51). Every pre-existing pin of the anchor family (`RefontGapTopTests`, `RefontViewportTests`, `ScrollAnchorTests`, `LandingOffsetTests`, `JumpViewportLayoutTests`, `ModeSwitchCarryTests`) rode UNMODIFIED. Core / iOS / mobile: not owed (zero `Sources/`, zero `Shared/`) |
+| 8 | Self-assessment | DONE (below) |
 
 - Deaths / resumes: none.
 
@@ -968,3 +968,23 @@ the existing single-fragment `.ensuresLayout` idiom).
    AppleEvent timeout — avoid it on walks.
 6. **`guard.sh` fires on the walker's OWN synthetic input** (HID idle resets on `cliclick`) — wait ≥ 2.5 s
    between steps, as the U0 walk did.
+
+### SELF-ASSESSMENT
+
+Strong: the mechanism is traced and MEASURED (24.0 = the container's inset exactly, both voices, in the
+harness and in the app on the pre-fix build); the brief's fork (inset vs scroll offset) is decided by
+the pins' numbers; every row has a red-on-old pin, two named behavioural reverts red exactly as
+predicted (R-full identical 14; R-top exactly the two keeper pins), and the attribution is per finding
+with three discriminating runs (R-13y, R-F2, R-room). The fix adds no scroll machinery — it hands the
+place the capture already had to the `landingInset` the jump already takes — and leaves
+`topVisibleOffset()` byte-unchanged, so C6b's rule and #147 ride as ruled. Weakest points for the
+reviewer: **(a)** judgment call 1 — the full re-render now restores EXACTLY where it used to snap the
+reading line to the top; that is broader than her report (B2) and is justified by the brief's own walk
+criterion and the 2026-07-07 decision, not by a ruling that names `renderFull`; **(b)** judgment call 2
+— reading the page's top air as outside the ruled line-at-the-top rule for the two re-layout keepers
+(B3/B4 fixed inside U0b as siblings of one mechanism); **(c)** `readingAnchor()` adds one
+single-fragment `lineSpan` per scroll event through `ScrollAnchorController` (a laid-out, on-screen
+fragment — P1-bounded, but a new per-scroll cost); **(d)** the live corner drag was not walked (pin
+only); **(e)** B5 is real, seen on both builds, untraced — the round trip's ⏎ half on a long note after
+⌘↓ still moves the page on invalidated geometry. **U0b — DONE (implementer); the Fable cold review
+follows.**
