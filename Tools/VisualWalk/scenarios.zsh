@@ -192,10 +192,21 @@ vw_click_read_tier() {  # key(rtI|rtR) label band-top-offset — clicks the LOWE
   local key=$1 label=$2
   vw_probe rt
   local band_top=$(( WIN_Y + $3 )) band_bot=$(( WIN_Y + WIN_H - 20 ))
-  local -a fit; local r
-  for r in ${(s:;:)PV[$key]}; do
-    local q=(${(s:,:)r})
-    (( q[2] >= band_top && q[2] + q[4] <= band_bot )) && fit+=($r)
+  # The oracles keep a row's LAST frame after the lazy column lets the row go (C4 releases a surface's
+  # rows only when the surface leaves), so a note whose page scrolled after its first layout carries
+  # STALE frames standing over live ones (found at round 1's discriminating run: a 360-pt ghost of a
+  # de-realized paragraph over a run of one-line rows). Rows never overlap, so any frame that overlaps
+  # another is suspect — both are dropped, and what remains is unambiguous.
+  local -a all fit; local r o
+  all=(${(s:;:)PV[$key]})
+  for r in $all; do
+    local q=(${(s:,:)r}) clash=0
+    for o in $all; do
+      [[ $o == $r ]] && continue
+      local p=(${(s:,:)o})
+      (( q[2] < p[2] + p[4] && p[2] < q[2] + q[4] )) && { clash=1; break }
+    done
+    (( ! clash && q[2] >= band_top && q[2] + q[4] <= band_bot )) && fit+=($r)
   done
   vw_require '(( ${#fit} >= 2 ))' "two read-tier blocks fully on screen ($key)" || return
   # The lower target is the lowest block of EIGHT or more lines (≥ 200 pt; else 5+, else 3+): tall
@@ -219,12 +230,16 @@ vw_click_read_tier() {  # key(rtI|rtR) label band-top-offset — clicks the LOWE
   vw_free_x $L[1] $(( L[1] + L[3] * 0.5 )) $y; x=$FREE_X
   vw_click $x $y "$label: the last line of a block"
   vw_settle; vw_cap 01-last-line
+  # The pane that went live must stand where the frame said the block was (the tiers share their first
+  # line's top — 13u2 B): a frame that was a stale ghost is the HARNESS's error, never the product's.
+  vw_require '(( abs(PV[topY] - L[2]) <= 12 ))' "the clicked frame was the block's live place (pane top ${PV[topY]} vs frame ${L[2]})" || return
   vw_assert_last_line_click "$label" $y
   # 2. the block ABOVE, on its FIRST line.
   y=$(( U[2] + 8 ))
   vw_free_x $U[1] $(( U[1] + U[3] * 0.5 )) $y; x=$FREE_X
   vw_click $x $y "$label: the first line of the block above"
   vw_settle; vw_cap 02-first-line
+  vw_require '(( abs(PV[topY] - U[2]) <= 12 ))' "the clicked frame was the block's live place (pane top ${PV[topY]} vs frame ${U[2]})" || return
   vw_assert_first_line_click "$label" $x $y
 }
 
@@ -272,11 +287,11 @@ scn_index-click() {
 }
 
 # --- S7: the same click on Read ▸ edit (U0 item 1's second host) -----------------------------------------
-vw_def readedit-click "A Scandal in Bohemia ▸ Read ▸ edit" \
+vw_def readedit-click "The Red-Headed League ▸ Read ▸ edit (its first open in the pass: no landing scroll, so no stale rows)" \
   "click a block's LAST line · click the block above on its FIRST line" \
   "(c) as the Index" "the last line's post-swap y: $KI_S3"
 scn_readedit-click() {
-  vw_open_note "A Scandal in Bohemia"
+  vw_open_note "The Red-Headed League"
   vw_keys "⌘3 (Read)" 'keystroke "3" using command down'
   vw_settle rt
   if [[ ${PV[face]} != edit ]]; then vw_ax_press edit AXButton; vw_settle rt; fi
