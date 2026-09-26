@@ -653,14 +653,30 @@ struct InlineEditorSurface: NSViewRepresentable {
             self.reportHeight = reportHeight
             badges = BadgeOverlayController(model: model, textView: textView)
             decor = BlockDecorOverlayController(model: model, textView: textView)
-            // (13u3 UNIT A1: the decoration lane's second pass is GONE with
-            // the lane — a decoration can no longer move this surface's
-            // prose column, so there is no re-report to compose here. A real
-            // WIDTH change re-measures through the update pass SwiftUI runs
-            // for it — measured at 18k C2: `updateNSView` fired on each step
-            // of a window resize. `onWidthReflow`, which this line used to
-            // name, re-derives the OVERLAYS (the model wires it), not the
-            // height.)
+            // **18l U0 (her clipped-descenders report) — A WIDTH CHANGE
+            // RE-MEASURES, on its own door.** A width change re-wraps the text
+            // with NO storage edit, and the update pass SwiftUI runs for a
+            // resize is not guaranteed to see the final width: traced, the one
+            // `updateNSView` of a narrowing saw the view at an INTERMEDIATE
+            // width, measured the old wrap, and the final frame arrived in
+            // layout with nothing left to re-measure — so the frame kept the
+            // old wrap's height and the new, longer wrap was cut through (her
+            // capture; up to three lines, measured). The comment this replaces
+            // said an update pass always covered it (18k C2's measurement on
+            // one live-resize drag — true of THAT road, not of every width
+            // change). The text view already announces every width change
+            // after placing its prose column for it (`onWidthReflow`, fired
+            // from `setFrameSize`); the model wires that door for its
+            // OVERLAYS (attach runs before this install), and the height is
+            // composed onto it here — the model's handler first, then the one
+            // coalescing hop, which measures at the new width on the next
+            // turn. Termination: a report changes only the frame's HEIGHT, and
+            // the door fires only when the WIDTH changed.
+            let overlaysReflow = textView.onWidthReflow
+            textView.onWidthReflow = { [weak self] in
+                overlaysReflow?()
+                self?.scheduleRemeasure()
+            }
             //
             // Every storage change (typing, projections, structural
             // rewrites) can change the content height; re-measure after
