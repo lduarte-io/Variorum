@@ -290,3 +290,29 @@ the trailing.
 **Summary: 4 AGREE, 0 DISPUTE.** One flag for the orchestrator: MINOR-1's rewrite amends a
 RULED design law (13g F-5's surface rule) — recommend (b) PROVISIONAL + a QUESTIONS row (a)/(b)
 for her morning bundle.
+
+---
+
+## ROUND 1 FINAL CALLS + FIXES (the reviewer, per the cross-model flow — 2026-09-26)
+
+The implementer AGREED to all four findings, disputed none. Final calls, each re-checked
+against its response before implementing:
+
+| Finding | Final call | Fix | Hash |
+|---|---|---|---|
+| MINOR-1 | **CONFIRMED**, fix shaped by **R-18l-5** (the orchestrator's PROVISIONAL ruling on the implementer's escalation — option (b): the read tiers KEEP the formatted face; a click may seed a caret ONLY through the pinned translation; QUESTIONS #149, hers to overturn). The header rewritten in the rule's own terms — the 13g F-5 law, the rationale clause, the carve-out, the pointers; the `sourceOffset` gloss now names the carve-out instead of claiming the rule "names" a translation. Doc-only, no behavior. | `MarkdownRendering.swift` header + `sourceOffset` doc | `70588f2c` |
+| MINOR-2 | **CONFIRMED.** `FlowParagraph.paragraphsWithStarts(of:)` — paragraphs AND display starts from ONE render and ONE loop; `displayStarts(of:)` deleted with its lockstep hazard; `paragraphs(of:)` delegates (byte-identical output); `ReadTierClickPlace` reads both from the one call and the now-impossible count-mismatch guard is gone. The implementer's optional extra (handing back the `Rendered` to skip the third walk too) deliberately NOT taken — the third walk IS the pinned translation, core-side, and the per-click cost is block-bounded either way; lean wins. Refactor proof: every consumer pin rides UNMODIFIED and green (below). | `FlowParagraph.swift` + `ReadTierClickPlace.swift` | `a9e4ff8f` |
+| NIT-1 | **CONFIRMED** as the doc line only — the Dynamic-Type assumption named in the known-approximation paragraph, the fidelity pin cited as the tripwire; `relativeTo:` untouched (the look is hers, exactly as the implementer said). | `ReadTierClickPlace.swift` header | `05049cab` |
+| NIT-2 | **CONFIRMED.** The Read ▸ edit pin's x insets derived from `IndexProseColumn` (`readTierLeading(resting: readEditResting, paneInset: proseLeadingInset)` = today's 11; trailing `readEditResting` = 10) exactly as the y already was — the hardcoded 11/21 reproduced, now tracking the production constants. Test-fidelity fix; the pin's geometry is unchanged today by construction. | `IndexClickCaretTests.swift` | `a941b5f8` |
+
+**Verification runs after the fix pass (all green):**
+- Core `swift test --filter MarkdownRendering` → **17 tests / 2 suites passed** (the 11
+  untouched render pins + the 6 source-offset pins).
+- Mac `xcodebuild -only-testing` the three ladder suites **plus** FlowParagraph's pinned
+  Mac consumers (`FormattingSurfacesTests`, `ReadRenderingTests`) → **29 tests / 5 suites
+  passed**, zero edits to any consumer suite (the refactor's 3C-style proof).
+- Mobile `-only-testing:VariorumMobileTests/MobileReadTests` (the shared file's phone
+  consumer) → **7 tests / 1 suite passed**.
+
+No new findings arose from the fix pass. Round 1 closes from the reviewer's side; the
+implementer's sanity pass over `70588f2c..a941b5f8` is the remaining step.
