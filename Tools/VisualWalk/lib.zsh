@@ -87,6 +87,42 @@ vw_quit_app() {
   PID=
 }
 
+# --- The BUILD STAMP (U-VIS round 1, MINOR-3/4) -------------------------------------------------------
+# A build is identified by what it was compiled FROM: the Mac app (App/) and the core the app links
+# (Sources/ + the package manifests), each as its committed tree PLUS any uncommitted diff over it.
+# `build.sh` writes the stamp beside the build; the report prints it; and the driver REFUSES a binary
+# that is not the current tree's — the standing trap "an old build must NEVER open the dev store",
+# enforced rather than trusted. A `VW_DD` scratch build (a fix reverted to prove the harness can red)
+# may differ from the tree ONLY under App/: its core — persistence, migrations, operations — must be
+# the current tree's, because the dev store it opens is the current tree's.
+vw_tree_state() {   # <tree> → "commit=… app=… core=… dirty=…" (one line)
+  local t=$1 commit app core dirty
+  commit=$(git -C $t rev-parse HEAD)
+  app=$( { git -C $t rev-parse HEAD:App; git -C $t diff HEAD -- App } | shasum | cut -c1-12)
+  core=$( { git -C $t rev-parse HEAD:Sources HEAD:Package.swift HEAD:Package.resolved
+            git -C $t diff HEAD -- Sources Package.swift Package.resolved } | shasum | cut -c1-12)
+  dirty=$(git -C $t diff HEAD --name-only -- App Sources Package.swift Package.resolved | tr '\n' ',' )
+  print -r -- "commit=$commit app=$app core=$core dirty=${dirty%,}"
+}
+
+# 0 = launchable; else prints why not. Args: stamp-line current-line scratch(0|1)
+vw_stamp_verdict() {
+  local stamp=$1 current=$2 scratch=$3
+  [[ -z $stamp ]] && { print "the build carries no stamp — build it with --build (or build.sh)"; return 1 }
+  local -A S C; local kv
+  for kv in ${(s: :)stamp}; do S[${kv%%=*}]=${kv#*=}; done
+  for kv in ${(s: :)current}; do C[${kv%%=*}]=${kv#*=}; done
+  if [[ ${S[core]} != ${C[core]} ]]; then
+    print "the build's CORE (Sources/, the manifests) is not this tree's (built from ${S[commit]:0:8}, dirty '${S[dirty]}'; the tree is ${C[commit]:0:8}) — an old or foreign build must never open the dev store"
+    return 1
+  fi
+  if (( ! scratch )) && [[ ${S[app]} != ${C[app]} ]]; then
+    print "the build's App/ is not this tree's (built from ${S[commit]:0:8}, dirty '${S[dirty]}'; the tree is ${C[commit]:0:8}${C[dirty]:+, dirty '${C[dirty]}'}) — rebuild with --build"
+    return 1
+  fi
+  return 0
+}
+
 # --- The probe ---------------------------------------------------------------------------------------
 vw_probe_raw() {   # [flags…] → PV / PV_LINE; non-zero on timeout
   (( PROBE_ID++ ))
@@ -378,8 +414,9 @@ vw_report() {
   {
     print -r -- "# Visual walk — $(basename $RUN_DIR)"
     print -r -- ""
-    print -r -- "- tree: \`$(git -C $REPO rev-parse --short HEAD)\`$(git -C $REPO diff --quiet HEAD -- App || print ' (App/ has uncommitted changes)')"
-    print -r -- "- macOS $(sw_vers -productVersion) ($(sw_vers -buildVersion)) · build \`${APP#$REPO/}\`"
+    local -A B; local kv; for kv in ${(s: :)BUILD_STAMP}; do B[${kv%%=*}]=${kv#*=}; done
+    print -r -- "- **build under test:** \`${APP#$REPO/}\` — compiled from \`${B[commit]:0:8}\`${B[dirty]:+ + uncommitted \`${B[dirty]}\`} (app \`${B[app]}\` · core \`${B[core]}\`)${VW_SCRATCH:+ — **a SCRATCH build (VW_DD): its App/ differs from the tree; its core is the tree's**}"
+    print -r -- "- tree at run time: \`$(git -C $REPO rev-parse --short HEAD)\` · macOS $(sw_vers -productVersion) ($(sw_vers -buildVersion))"
     print -r -- "- voices: ${VW_VOICES:-current} · scenarios: $([[ -n $VW_SELFTEST ]] && print 'SELF-TEST (planted failure)' || print ${VW_SELECTED:-all seeded})"
     print -r -- "- result: **$(( RUN_FAILS + RUN_ERRORS )) failing** (FAIL $RUN_FAILS · ERROR $RUN_ERRORS)$( (( RUN_XPASS )) && print " · **XPASS $RUN_XPASS — a known issue did not reproduce in these scenarios; re-examine its row**")"
     [[ -f $RUN_DIR/aborted ]] && print -r -- "- **$(cat $RUN_DIR/aborted)**"

@@ -45,6 +45,26 @@ done
 [[ $WK/wl2 -nt $WK/wl2.swift ]] || swiftc -O -o $WK/wl2 $WK/wl2.swift || refuse "cannot compile WalkKit's wl2 (guard.sh needs it)"
 tcc=$($VW_BIN/vis-tcc)
 [[ $tcc == "AX 1 SCREEN 1" ]] || refuse "this terminal lacks Accessibility / Screen Recording ($tcc) — granting is the author's"
+foreign=$($VW_BIN/vis-foreign 0)
+[[ -n $foreign ]] && print -u2 "NOTE: system dialog(s) on screen — the harness will never click or type into them: $foreign"
+
+if [[ -n $VW_BUILD ]]; then
+  [[ -n ${VW_DD:-} ]] && refuse "--build builds THIS tree into the default folder; a VW_DD scratch build is made with build.sh --src <tree> --dd <dir>"
+  $VW_ROOT/build.sh || refuse "the Debug build failed ($DD.build.log)"
+fi
+[[ -d $APP ]] || refuse "no Debug build at $APP — run with --build"
+
+# The build under test must be THIS tree's (MINOR-3/4): stamped, and a VW_DD scratch build may differ
+# only under App/ — its core is what opens the dev store.
+typeset -g BUILD_STAMP=$(cat $DD/vis-walk.stamp 2>/dev/null) VW_SCRATCH=${VW_DD:+1}
+verdict=$(vw_stamp_verdict "$BUILD_STAMP" "$(vw_tree_state $REPO)" ${VW_SCRATCH:-0}) || refuse "$verdict"
+
+typeset -a run_list
+if [[ -n $VW_SELFTEST ]]; then run_list=(selftest-red)
+elif [[ -n $VW_SELECTED ]]; then run_list=(${(s:,:)VW_SELECTED})
+else run_list=($SCN_ORDER); fi
+for n in $run_list; do (( $+functions[scn_$n] )) || refuse "no scenario named $n (--list)"; done
+
 # Author-free: 10 s without input (the command that launched us counts — so wait up to a minute).
 for i in {1..12}; do
   idle=$(ioreg -c IOHIDSystem | awk '/HIDIdleTime/ {print int($NF/1000000000); exit}')
@@ -53,15 +73,6 @@ for i in {1..12}; do
   sleep 5
 done
 (( idle >= 10 )) || refuse "HID idle ${idle}s after a minute — someone is at the machine (the harness needs it author-free)"
-foreign=$($VW_BIN/vis-foreign 0)
-[[ -n $foreign ]] && print -u2 "NOTE: system dialog(s) on screen — the harness will never click or type into them: $foreign"
-
-if [[ -n $VW_BUILD ]]; then
-  print -u2 "building the Debug app into $DD …"
-  (cd $REPO/App/Variorum && xcodebuild -scheme Variorum -configuration Debug -destination 'platform=macOS' \
-     -derivedDataPath $DD build > $DD.build.log 2>&1) || refuse "the Debug build failed ($DD.build.log)"
-fi
-[[ -d $APP ]] || refuse "no Debug build at $APP — run with --build"
 
 # --- The run --------------------------------------------------------------------------------------------
 RUN_DIR=$REPO/notes/plans/vis-walks/$(strftime %Y-%m-%d $EPOCHSECONDS)/$(strftime %H%M%S $EPOCHSECONDS)$([[ -n $VW_SELFTEST ]] && print -- -selftest)
@@ -70,11 +81,6 @@ vw_selfcheck
 [[ -n $foreign ]] && print -r -- "System dialog(s) on screen at start (never touched): $foreign" > $RUN_DIR/foreign.txt
 vw_log "run $RUN_DIR — voices: $VW_VOICES"
 
-typeset -a run_list
-if [[ -n $VW_SELFTEST ]]; then run_list=(selftest-red)
-elif [[ -n $VW_SELECTED ]]; then run_list=(${(s:,:)VW_SELECTED})
-else run_list=($SCN_ORDER); fi
-for n in $run_list; do (( $+functions[scn_$n] )) || refuse "no scenario named $n (--list)"; done
 
 VOICE=setup; vw_launch
 typeset -g FOUND_VOICE=${PV[voice]}
