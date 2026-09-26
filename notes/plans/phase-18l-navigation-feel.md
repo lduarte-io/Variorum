@@ -1085,6 +1085,14 @@ only); **(e)** B5 is real, seen on both builds, untraced — the round trip's �
 ⌘↓ still moves the page on invalidated geometry. **U0b — DONE (implementer); the Fable cold review
 follows.**
 
+*(DATED NOTE, 2026-09-26, the orchestrator's pen — U-VIS ladder NIT-R2-7 routed here: the U0
+record's item-2 sentence "the width fix without the net measured worse … the two must ship
+together" stands for what it measured (the width hop ALONE was worse in the app). U-VIS's teeth
+runs added the OTHER direction: with ONLY the width door reverted (R-U0-2) and the settle net
+kept, both item-2 harness scenarios still PASS — the net alone covers that revert's assertions
+at the walked widths. Both facts are true; neither weakens the shipped pair. The measurement is
+`notes/plans/18l-uvis-ladder-round1.md`'s MINOR-7 fix table.)*
+
 ### U0b — ORCHESTRATOR ACCEPTANCE (the hands-on walk, 2026-09-26 overnight; verify-never-trust)
 
 **Claims verified against git:** commits `b4b978cd…5241d8d4` present and pushed, tree clean, the
