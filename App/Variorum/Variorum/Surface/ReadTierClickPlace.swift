@@ -49,7 +49,14 @@
 //  SwiftUI holds) — a click inside a heading lands on that heading's line,
 //  with its x approximate; a heading-bearing multi-paragraph block stacks the
 //  paragraphs under the heading a few points off. Prose, lists and emphasis
-//  are measured in their drawn faces.
+//  are measured in their drawn faces. A second assumption, named (ladder
+//  round 1, NIT-1): Study's tier font is Dynamic-Type-relative
+//  (`relativeTo: .body`, `VoiceTokens`) while the replica measures the fixed
+//  `EditorTypography` face — the two agree at the system's DEFAULT text size
+//  (dev = acceptance, today's machine), and on a system scaled away from it
+//  the fidelity pin below goes red rather than clicks silently drifting.
+//  Whether the tier fonts should scale at all is a look call (hers), not
+//  this file's.
 //
 //  Cost: one block laid out, off-screen, per click (P1 — bounded by the block
 //  clicked, never the note). TextKit 2 API only (TEXTKIT2 §4.2).
