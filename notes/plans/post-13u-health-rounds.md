@@ -41,7 +41,7 @@ round closes, its closeout may strike its row here; this file is otherwise not e
 |---|---|---|
 | **18k** — runtime hygiene (was "RUN C") | `notes/plans/phase-18k-runtime-hygiene.md` | **in progress** (opened 2026-09-25) |
 | **18o** — correctness & honesty singles (17e's remainder + 17t; minted at 18k's kickoff sitting, R-18k-1) | `notes/plans/phase-18o-correctness-singles.md` | pending — runs right after 18k |
-| **18l** — navigation feel | `notes/plans/phase-18l-navigation-feel.md` | pending |
+| **18l** — navigation feel | `notes/plans/phase-18l-navigation-feel.md` | pending — **likely NEXT after 18k** (her word 2026-09-25, carrying the new U0: the Index click lands on the empty paragraph); 18o after it |
 | **18m** — the editor-conductor hoist | `notes/plans/phase-18m-editor-conductor-hoist.md` | pending |
 | **18n** — structure singles (was "RUN D") | `notes/plans/phase-18n-structure-singles.md` | pending (flexible slot) |
 
@@ -210,6 +210,23 @@ their diffs drift onto the seam.** Sequential, one agent at a time.
   a valid close for this unit, recorded with the observation that forced it. Measure the
   warning-count before/after (the A1 apportionment hypothesis: expect the majority of ~1,989 to
   fall); record the number either way.
+- **U0 — FIRST: the book Index click lands the caret on the EMPTY paragraph, not the line clicked**
+  (her report, 2026-09-25, during 18k's closeout — verbatim: *"it's a regression that's quite annoying
+  honestly and it'll 100% be on the next session that runs. While in index mode on a book, clicking
+  onto text isn't working correctly. When I'm in sherlock holmes and I click on top of a line of text,
+  my cursor moves to the empty paragraph / block between the text and then I have to try clicking
+  again to get onto the actual text. Maybe that should be part of 18l? In which case I would probably
+  run 18l next."*). Seen on her INSTALLED build — 13y's `9e15f8bf…`, so it PREDATES 18k (none of 18k's
+  changes were installed when she reported it). The Sherlock stories keep a blank paragraph between
+  every two (18k C6b measured: 211 of *Copper Beeches*' 212 blocks end in a newline), which is exactly
+  the target a vertically-offset hit-test would land on. **Unit shape:** REPRODUCE first (dev-store
+  Debug, Sherlock ▸ Index ▸ click on a line; Accessibility + Screen Recording are granted to Ghostty
+  since 18k), find WHEN it regressed (bisect by harness, never an old build on the dev store), trace
+  the click → caret road (the read-tier → live-editor swap; the click's point converted through the
+  surface's geometry — the 13c 1A container-inset class that `ScrollAnchorTests` guards is the first
+  suspect; 18k C6b's `topVisibleOffset` baseline rule is NOT on this road but read its record), fix
+  with a red-on-old pin, and walk it (both voices; lines at the top, middle and bottom of a note; the
+  first and last line of a block). **The editor seam → a Fable review.** This unit runs FIRST in 18l.
 - **U4 — the one-liners** (review §1.3 items 2/4): the book Outline gains
   `.onDisappear { landing.end() }` (R2-12 parity with the flow and Index); `LandingTarget.utf16Offset`
   is wired or deleted (recommend delete + a comment naming the `FocusedBlock` road that actually
