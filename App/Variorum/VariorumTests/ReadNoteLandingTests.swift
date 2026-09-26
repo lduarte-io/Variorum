@@ -259,6 +259,27 @@ struct ReadNoteLandingTests {
         return (first, second)
     }
 
+    /// **The landing was WATCHED** — the Console flip's pin (the health
+    /// review §1.2: note Read's landings printed NOTHING, having no
+    /// authority). The DEBUG story's last DONE line is this face's, it
+    /// SETTLED, and it spent at most `maxHops` corrections. Red on the fixed
+    /// tree when the faces' one-shot `scrollTo` is put back (R-watch — the
+    /// record's revert): no landing is watched, so no line exists.
+    private func expectWatched(_ surface: LandingSurface, maxHops: Int) {
+        #if DEBUG
+        let line = Self.lastStory()
+        #expect(line?.hasPrefix("[\(surface.rawValue)] ") == true,
+                "this face's landing was watched — its story: \(line ?? "NONE")")
+        #expect(line?.contains("DONE: settled") == true, "…and it SETTLED: \(line ?? "NONE")")
+        let hops = line.flatMap { l -> Int? in
+            guard let r = l.range(of: " after ") else { return nil }
+            return Int(l[r.upperBound...].prefix { $0.isNumber })
+        }
+        #expect(hops.map { $0 <= maxHops } == true,
+                "…spending at most \(maxHops) correction(s): \(line ?? "NONE")")
+        #endif
+    }
+
     /// **`edit`: the far block lands CENTRED, and stays.**
     @Test func theEditFaceLandsAColdFarBlockCentredAndItStays() async throws {
         try await mounted(face: .edit) { world in
@@ -272,10 +293,17 @@ struct ReadNoteLandingTests {
                     "the landing arrived at the centre — it is \(a) pt away")
             #expect(abs(b) <= Self.restTolerance,
                     "…and it is still there 1.5 s later — \(b) pt away")
+            // The lazy column's first aim misses this shape (the pre-fix
+            // tree's red); the watched landing's second aim reaches it.
+            expectWatched(.readNoteEdit, maxHops: LandingPolicy.readNoteEdit.correctionBudget)
         }
     }
 
-    /// **The same two promises on the REAL story** (`mountedOnTheStory`).
+    /// **The same two promises on the REAL story** (`mountedOnTheStory`) —
+    /// and the charter's acceptance line, `hops=0` COLD: the lazy column's
+    /// own first aim is exact on her story, so a correction here is a
+    /// regression (the asserted-height rows the record measured and
+    /// rejected stood 59 pt off and needed one).
     @Test func onTheRealStoryTheEditFaceLandsAColdFarBlockCentredAndItStays() async throws {
         try await mountedOnTheStory(face: .edit) { world in
             let (first, second) = await settledResidual(
@@ -286,6 +314,7 @@ struct ReadNoteLandingTests {
             let b = try #require(second)
             #expect(abs(a) <= Self.restTolerance, "arrived at the centre — \(a) pt away")
             #expect(abs(b) <= Self.restTolerance, "…and stayed — \(b) pt away")
+            expectWatched(.readNoteEdit, maxHops: 0)
         }
     }
 
@@ -299,6 +328,7 @@ struct ReadNoteLandingTests {
             let b = try #require(second)
             #expect(abs(a) <= Self.restTolerance, "arrived at the anchor — \(a) pt away")
             #expect(abs(b) <= Self.restTolerance, "…and stayed — \(b) pt away")
+            expectWatched(.readNote, maxHops: 0)
         }
     }
 
@@ -315,6 +345,7 @@ struct ReadNoteLandingTests {
                     "the landing arrived at the page's anchor — it is \(a) pt away")
             #expect(abs(b) <= Self.restTolerance,
                     "…and it is still there 1.5 s later — \(b) pt away")
+            expectWatched(.readNote, maxHops: 0)
         }
     }
 }
