@@ -171,7 +171,7 @@ struct GlyphRainBackdrop: View {
     /// The head's strength as a fraction of the ink; everything else is
     /// dimmer. Dark can carry a touch more without shouting (R51's black
     /// room swallows a lot).
-    nonisolated static func peakOpacity(dark: Bool) -> Double { dark ? 0.42 : 0.30 }
+    nonisolated static func peakOpacity(dark: Bool) -> Double { dark ? 0.50 : 0.38 }
 
     var body: some View {
         SwiftUI.TimelineView(.animation(minimumInterval: Self.frameInterval, paused: reduceMotion)) { context in

@@ -89,7 +89,7 @@ once. Claim a letter here first.
 | **17d** | Purge & sync honesty (P8/P9/P28/P31; P30 dissolved 2026-09-04) | **CLOSED 2026-09-22 — RUN B** (dispositions in the entry; the live-round leg PASSED at her 2026-09-22 morning round) |
 | 17e | The 2026-08-30 sweep's remaining group (has since gained rows: P6's undo-side residue, the launch seeder's cross-device deletion, the canvas router fact, the content-replacement undo row) | **RIDING 18k + 18o (her ruling R-18k-1, 2026-09-25):** the concurrency five (row 59 · P26 · P27 · P33 · P38) = 18k's C5; the rest (P23 · P29 · P32 · P34 · P35 · P37 · (12) · row 66 · row 64 record-only) = 18o; (11) verified partly discharged by 18d. This entry stays the BINDING record; dispositions land here at each run's close |
 | **17t** | **The two unwired protection doors** (KnownIssues rows "The typed NEAR-EMPTY sync confirmation" + "COPY ALL on the recovery phrase") — minted 2026-09-25 at the 18k kickoff sitting (R-18k-2, her words *"17t and add that to an 18"*) | **RIDES 18o** (right after 18k); the custody Fable rider fires |
-| **17u** | **The locked lobby's backdrop** — her 2026-09-25 between-rounds ask: the tessellating endpaper tile (the humanoid figures and the book) OUT of the app everywhere, replaced by an animated monochrome glyph rain. Built in the author-attended Fable session the same day (a one-file view + a pure brain, the asset removed, a grep pin) | **BUILT 2026-09-25** — the entry below; **the standing Opus cold review is OWED** (a decorative surface, no editor seam / custody / `Sync/` — Opus suffices) unless she waives it |
+| **17u** | **The locked lobby's backdrop** — her 2026-09-25 between-rounds ask: the tessellating endpaper tile (the humanoid figures and the book) OUT of the app everywhere, replaced by an animated monochrome glyph rain. Built in the author-attended Fable session the same day (a one-file view + a pure brain, the asset removed, a grep pin) | **CLOSED 2026-09-26** — the entry below; **the standing Opus cold review WAIVED by her** (verbatim: *"we don't need an Opus cold review on this purely cosmetic change"*); installed `c09f81be…` |
 | **17f** | **CLOSED 2026-08-31 — the pre-13u round's Act 5.** 8 of 9 items FIXED (each with its evidence class named: three red-on-old drills, two grep-verified dead-code removals, one hoist, one canon correction, one documented mechanism); **P50 DISMISSED AS HOLLOW by measurement** — the WAL it claimed was checkpointed away measures byte-identical before and after `lock()`. Per-item dispositions in the entry below | **closed** |
 | **17c** | **CLOSED 2026-08-31 — the pre-13u round's Acts 3+4.** All 4 read-layer items (P18–P21) FIXED with revert-verified red-on-old pins (query plans and statement counts, never timings); the P20 index landed as its own schema commit and is NOT a §12 lockstep event (marker stays 7). Per-item dispositions with before/after numbers in the entry below; one residual (`container_block(block_id)`) re-routed to **12** in KnownIssues | **closed** |
 | **17g** | **CLOSED 2026-08-30 — the `13p-fix` session** (author's live session of 2026-08-30: an issue she found testing the refreshed 13p install). That session owns this letter and writes its own entry; it does **not** fold into 17a. | **closed** |
@@ -1615,3 +1615,12 @@ to the live file) · Release built from `92615e6b` · the product bundle carries
 `/Applications` binary `79c7688b…` (18k's) → **`7f7ff281b4a566ef…`** · `codesign --verify --deep
 --strict` OK on the product AND the installed copy · both keychain access groups present
 *[removed for publication]*
+
+**HER VERDICT + THE ONE TWEAK (2026-09-26):** *"I really like it. and yeah, we don't need an Opus cold
+review on this purely cosmetic change. Can you make it just a little bit darker for me + reinstall?"*
+— the review is WAIVED (her call, a cosmetic surface; the owed line above is discharged), and
+`GlyphRainBackdrop.peakOpacity` moved 0.30 → 0.38 (light) / 0.42 → 0.50 (dark) — one constant, no
+behaviour, no re-run of the suites at her word. **Second refresh:** A1 safety copy
+`Backups/safety-copies/17u-refresh2-20260926T055347Z` (6 files, `cmp`-identical) · `/Applications`
+`7f7ff281…` → **`c09f81be9eab5a6e…`** · codesign OK on product and install · both access groups present.
+**17u CLOSED.**
