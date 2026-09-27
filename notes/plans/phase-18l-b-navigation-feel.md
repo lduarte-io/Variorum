@@ -1015,3 +1015,79 @@ guard's idle threshold — the guard working as written.
 
 The Fable cold review over U3's diff (`545375bc..HEAD`, what ships + the built-then-reverted
 pair for completeness) is the remaining gate; ladder file `notes/plans/18lb-u3-ladder-round1.md`.
+
+## U4 BRIEF (session 3 — the one-liners; written by the orchestrator 2026-09-27 at U3's ladder close)
+
+You are the `opus-implementer` for **18l-b UNIT U4**. One acceptance unit, the round's smallest:
+the charter's three one-liners (`notes/plans/post-13u-health-rounds.md` KICKOFF 2, the U4 bullet
+— your unit charter), each landed alone, each pin-preserving.
+
+**Read first, in this order (reading is never delegated):**
+(1) THIS file whole — HER KICKOFF MESSAGE, BINDING PRINCIPLES, CAST & DISCIPLINE, BASELINES,
+ENVIRONMENT TRAPS (verbatim binding), THE LEDGER (rows 7–8), the U2 and U3 RECORDs + acceptances
+(the freshest landing-family facts: the aim kind, the watch, `fileEnding`, the fixture order).
+(2) The charter's U4 bullet + the health review §1.3 items 2 and 4 (the D1 collapse's reasoning;
+the `utf16Offset` dead-field finding).
+(3) The 18l record's **U0 RECORD sweep row S4** (`notes/plans/phase-18l-navigation-feel.md`) —
+the NEW evidence your `utf16Offset` decision weighs: a book-Index LANDING (the Read ▸ Scroll
+click-through, `requestLanding`) parks the caret at the block END via `.leave` — her blank-line
+artifact, measured by a scratch probe (caret 329 of 329) — because the landing carries no offset;
+the 18l ledger row 11's own words: *"`LandingTarget.utf16Offset` wired-or-deleted is exactly the
+question of where a landing's caret goes."* Also U0's fix machinery (`ReadTierClickPlace`,
+`MarkdownRendering.sourceOffset`) — the pinned display→source translation a wire could ride.
+(4) KnownIssues rows 42 (the U2 amendment), 58 (chip wrap vs the manifest — your D1 item's
+neighbour: a changed height source must not re-enter its drift class), 95–97 (U3's new rows).
+(5) The code: `Shared/LandingTarget.swift` (the field + its doc); every `requestLanding` /
+`pendingLanding` / `requestLiveBlock` consumer (`BookViewModel`, `BookView`, `BookIndexView`,
+`BookIndexEditModel`, `ReadModeView`, `BlockHistoryPane` — grep the tree yourself); the Read ▸
+Scroll click-through road end to end (the sentence click → `LandingTarget` → the Index's landing
+→ `caretLanding(forVariant:)`/`.leave`); `Features/BookView/ReadingFlowView.swift` whole
+(`FlowStoryRow` :1066, its `FlowHeightEstimate.honestHeight` read :1146, the manifest read the
+same file makes, `BookHeightManifest.resolve`, `FlowExtentsCache`); the book Outline's landing
+adoption (`BookView`/the outline column — find the missing `.onDisappear { landing.end() }`
+against the flow's and Index's R2-12 lines); the pins that ride these surfaces
+(`BookOutlineLandingTests`, `ReadingFlowLandingTests`, `BookIndexLandingTests`,
+`IndexClickCaretTests`, `LandingAuthorityTests`).
+
+**The unit, in order — three items, each its own commit:**
+1. **The Outline's `.onDisappear { landing.end() }`** (R2-12 parity — the flow and the Index
+   both carry it, citing the ladder line; the Outline is the one adopter without it). One line +
+   its citation comment. Evidence: the R2-12 pins' form if one exists to extend cheaply; else
+   the parity is the evidence (say so).
+2. **`LandingTarget.utf16Offset` — wired or deleted, decided on the trace, PROVISIONAL either
+   way (QUESTIONS #153):** TRACE the click-through road first — does the Read ▸ Scroll sentence
+   click KNOW an offset today (U0's `ReadTierClickPlace` exists on the read tiers; does this
+   road's face have the machinery, or would wiring need new translation work)? Then decide:
+   **wire** (the click's offset rides the landing and the Index's pane lands the caret at the
+   clicked place — S4's artifact dies; the charter's lean reversed on U0's evidence) or
+   **delete** (+ the comment naming the `FocusedBlock` road, the charter's lean — and then say
+   what happens to S4's blank-line artifact: `.leave` stands, or the landing's caret parks at
+   `.start` as a cheaper artifact fix — a smaller, separate call, stated). Build the most
+   spec-defensible option, mark PROVISIONAL, log #153 with both readings and your measured
+   reason (the U0c #150 form). **Product fence: where a landing's caret goes is
+   product-adjacent — your warrant is her U0 report's class (the caret on the blank line is the
+   artifact she reported); anything beyond that class is a STOP.**
+3. **`FlowStoryRow` reads `BookHeightManifest.resolve`** instead of `FlowHeightEstimate
+   .honestHeight` (D1 — verified live at this round's kickoff, :1146): the health review calls
+   it small, mechanical, pin-preserving — the two agree today only by accident of a nil
+   argument. The proof is `BookOutlineLandingTests` + `ReadingFlowLandingTests` riding
+   UNMODIFIED and green (row 58's drift class is the hazard: a changed height source that moves
+   landings reds them — a red here is a FINDING, not a nudge to edit a pin).
+
+**WALK (USE, cheap, per-step guarded, both voices):** the Outline — open a book, land deep via
+the outline, switch modes mid-landing (the `.onDisappear` road), return; Read ▸ Scroll — expand
+stories, deep-click a sentence (the click-through's caret: capture where it lands, before/after
+if item 2 wires), scroll the flow (heights honest, no jump); the harness as regression cover
+(the full seeded suite, both voices — the baseline: 0 FAIL / 0 ERROR / 0 XPASS, XFAIL 5).
+
+**Discipline (the resiliency protocol, restated — it binds you):** commit per item, push after
+EVERY commit, NO trailers; append a `## U4 RECORD` section to THIS file with LIVE STATUS from
+your FIRST commit (unverified claims PENDING); records before final verification; synchronous
+foreground waits only; NEVER spawn subagents; commit before any behavioral revert;
+pathspec-limited staging; tests at the END (the landing family + the book/flow suites + the
+eleven Tutorial suites, suite-level `-only-testing`). PROVISIONAL-and-continue for non-gating
+ambiguity; STOP and report for gating ambiguity, product-behavior invention beyond the stated
+fence, anything wanting `Sync/`, and every author-only call. **Review: `opus-reviewer`** per her
+kickoff — unless your diff drifts onto the editor seam (`EditorTextView` / `PaneSurface` bodies /
+`PaneTextAuthority`) or a default's meaning: state plainly which it is. Your self-assessment
+closes your record.
