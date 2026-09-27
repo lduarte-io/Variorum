@@ -24,8 +24,9 @@
 //  caret at a character is #149's product question), so the landing carries no
 //  offset and `LandingTarget.utf16Offset` — set by no production site — is
 //  deleted; the arriving pane puts a landing's caret at the landed block's
-//  START, which is the value's own documented contract (*"the landing then
-//  puts the caret at the block's start"*), what note Read's twin click-through
+//  START, which is the rule the value was designed with — its deleted field's
+//  doc, quoted at #153 (*"the landing then puts the caret at the block's
+//  start"*), what note Read's twin click-through
 //  does on a block she was NOT last in (`ReadModeView.openInEdit` → the entry
 //  rule's `.start`; the block she was last in lands at her remembered caret
 //  there — #153's (a′), not built), QUESTIONS #97's built (a), and exactly

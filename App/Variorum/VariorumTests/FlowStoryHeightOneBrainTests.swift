@@ -39,6 +39,9 @@ import Foundation
 import Testing
 @testable import Variorum
 
+// (The residual is TWO-SIDED — a rule typed into the private row OR a hand-built
+// input in `heightManifest`'s `.post` case would each pass this pin; the defence
+// on both sides is structural: one call, one builder — the U4 ladder's NIT-R2-3.)
 @Suite("18l-b U4 — a flow story stands at the manifest's own height (D1: one brain)")
 struct FlowStoryHeightOneBrainTests {
     @Test @MainActor func theRowsHeightIsTheManifestsHeightForEveryInput() {

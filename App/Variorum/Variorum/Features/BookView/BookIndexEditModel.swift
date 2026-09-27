@@ -170,7 +170,8 @@ final class BookIndexEditModel {
         // the text: her U0 report's artifact on the Index's other road in.
         // No face on this road hands on where inside the block she clicked
         // (`LandingTarget` carries no offset — #153 has the trace), so the
-        // landing takes the value's own documented rule — the block's start —
+        // landing takes the rule the value was DESIGNED with (its deleted
+        // field's doc; #153 quotes it) — the block's start —
         // which is also the entry rule's `.start` arm in note Read's twin
         // click-through (`ReadModeView.openInEdit`: a block she was NOT last
         // in; the block she was last in lands at her remembered caret there —

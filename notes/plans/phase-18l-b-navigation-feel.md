@@ -1219,7 +1219,9 @@ her ruling owns (#153 carries it, PROVISIONAL). If the orchestrator reads #97's 
    *Reverse by* a per-road caret on `LandingTarget` (a field this unit just deleted — which is why it is not the call).
 4. **Item 3 keeps `FlowHeightEstimate.honestHeight` as a FORWARD through the one brain** rather than deleting it: its
    `ReadingFlowEstimateTests` arms ride unmodified. *Reverse by* deleting it and moving those four arms onto `storyInput`
-   (a pin edit).
+   (a pin edit). *(Ladder round-1 MINOR-1's fix INVERTED this shape, 2026-09-27: the static is now the ONE rule and the
+   row is a single CALL to it — so this reversal recipe is stale; deleting the static would now force the row to copy
+   the rule back inline, which is exactly MINOR-1's defect. The ladder file carries the fix.)*
 5. **Item 3's agreement pin reds only on degenerate inputs no production road writes** — stated as the drift made
    visible, not a user-visible defect; the landing suites riding unmodified are the brief's proof. *Reverse by* dropping
    the pin (the collapse still holds by construction).
@@ -1234,7 +1236,10 @@ her ruling owns (#153 carries it, PROVISIONAL). If the orchestrator reads #97's 
   transition. Nothing new at any rate.
 - Item 3: `FlowStoryRow`'s body builds one small `Input` + a short id string per evaluation where it compared one width
   before — O(1), the same `memory.size` observation dependency; the manifest (built per landing) is unchanged in cost.
-  P3 unchanged — the flow realizes exactly what it did (the twelve-story mount pin: 1 surface).
+  P3 unchanged — the flow realizes exactly what it did (the twelve-story mount pin: 1 surface). *(Ladder round-1
+  MINOR-1's fix, 2026-09-27: the Input build now lives inside `FlowHeightEstimate.honestHeight` — the row is one call;
+  same cost, one address. LIVE STATUS row 4's and the SEAM FILES `ReadingFlowView` row's item-3 shape read with this
+  bracket.)*
 
 ### NOTICED, NOT TOUCHED
 
