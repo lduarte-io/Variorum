@@ -175,9 +175,9 @@ struct OutlineLandingTeardownTests {
             let doneAfter = BookOutlineGeometry.trace.filter { $0.contains(" DONE: ") }
             print("[18l-b U4 item 1] DONE lines after the switch: \(doneAfter); "
                 + "story tail: \(BookOutlineGeometry.trace.suffix(12))")
-            #expect(doneAfter.isEmpty,
-                    "the Outline's landing ended WITH the Outline — no DONE written by a landing "
-                        + "whose surface was gone: \(doneAfter)")
+            #expect(doneAfter.isEmpty, Comment(rawValue:
+                "the Outline's landing ended WITH the Outline — no DONE written by a landing "
+                    + "whose surface was gone: \(doneAfter)"))
             #endif
         }
     }
