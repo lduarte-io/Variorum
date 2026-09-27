@@ -267,11 +267,11 @@ re-opens its named rows; none gates U2/U3/U4 as scoped.
 | 1 | The authority grows the AIM KIND (top · minimal-reveal · viewport-fraction); `ReadLandingResidual`'s fraction arithmetic hoisted (U1 JC 2's hand-forward) | U2 | **CLOSED 2026-09-27** — `658e2815`; arithmetic pins unmodified; ladder closed (MINOR-1's guard pin makes the declared kinds fail on drift) |
 | 2 | Takes' landing half (`articleLandingStep` / `revealDecision` / `revealAnchor`) onto the authority under a `takesArticle` policy; restore half BYTE-PRESERVED (R-Q20/R-Q21); ~15 gesture-end pins + projection arm ride UNMODIFIED (3C) | U2 | **CLOSED 2026-09-27** — `b25f74ad` + the bloom-race fix `20d80980` (pre-existing stall found at the orchestrator's acceptance, traced by run, fixed red-first); triple-walked; ladder closed one round (0/0/3/4, all confirmed, five reviewer fixes, sanity PASS 681/101; `notes/plans/18lb-u2-ladder-round1.md`); row-42 amendment + the head-reveal row landed |
 | 3 | MAY-take: C6 — the born-live pane's transient END report poisons the persisted memory until the note leaves (18l ledger row 8's cell) | U2 | **NOT TAKEN 2026-09-27** (the diff stands on none of its road) — 12's at the closeout |
-| 4 | PanePublisher frame-synchronous / state-deferred (her ratified shape; gate = walk the boards under load, REVERT on any felt regression); the warning count measured both ways (~1,989, all `PaneSurface`'s per 18k C3) | U3 | open |
-| 5 | The macOS-27 `layoutViewport()` clip-displacement exam of `PaneSurface`'s render restore (TK2 §3's hand-forward) | U3 rider | open |
-| 6 | B5 (row 88): ⏎ after a ⌘↓ landing on invalidated geometry — TRACE (deterministic Study recipe in the harness) | decided at U3 (rides the exam or its own slot) | open |
+| 4 | PanePublisher frame-synchronous / state-deferred (her ratified shape; gate = walk the boards under load, REVERT on any felt regression); the warning count measured both ways (~1,989, all `PaneSurface`'s per 18k C3) | U3 | **CLOSED AS REVERTED 2026-09-27 — a valid close under her gate** (built `e113dd56`, measured set B 1,106 → 0 — the WHOLE family; reverted `b60e5d6d` at the Takes mount's collapsed article, 5/5 vs 0/5 on frame evidence); the warning family's fork filed for her as QUESTIONS #152; her morning confirm rides the bundle |
+| 5 | The macOS-27 `layoutViewport()` clip-displacement exam of `PaneSurface`'s render restore (TK2 §3's hand-forward) | U3 rider | **CLOSED 2026-09-27 — PROVABLY SAFE** (two measured grounds incl. the adversarial arm; the observation seam + `PaneRenderRestoreClipTests` kept as the point-release tripwire; the TK2 §3 line landed) |
+| 6 | B5 (row 88): ⏎ after a ⌘↓ landing on invalidated geometry — TRACE (deterministic Study recipe in the harness) | **RULED at U3 (orchestrator): its OWN SLOT — U-B5, after U4** (the exam proved it a NEIGHBOUR: Write's differential ⏎ road, no pane, the opposite symptom; the fixture ERROR fixed at U3 so the full-pass recipe stands); row 88 re-owned to U-B5 | open — U-B5 |
 | 7 | The one-liners: Outline `.onDisappear { landing.end() }` · `LandingTarget.utf16Offset` wire-or-delete (S4's click-through END evidence in hand; PROVISIONAL, QUESTIONS row) · `FlowStoryRow` → `BookHeightManifest.resolve` (13i did NOT take it — verified at this kickoff) | U4 | open |
-| 8 | MAY-take: KnownIssues row 85 (the ⌘↓ ring drawn too high, O-2) — decide at the unit that touches the landing-settle/overlay refresh; record either way | rider | open |
+| 8 | MAY-take: KnownIssues row 85 (the ⌘↓ ring drawn too high, O-2) — decide at the unit that touches the landing-settle/overlay refresh; record either way | rider | **NOT TAKEN at U2 and U3** (neither diff touches Write's ring/overlay refresh) — stays 12; U-B5 is the last chance to re-decide |
 
 ## LIVE STATUS (orchestrator; flipped per piece)
 
@@ -280,7 +280,8 @@ re-opens its named rows; none gates U2/U3/U4 as scoped.
 | Preflight (canon + the 18l record WHOLE + the charter's KICKOFF 2 + all seven 18l ladder files + the 18l handoff + KnownIssues whole + QUESTIONS #146–#151 + the resiliency protocol + TK2 notes whole + the master plan + health review §1/§5 + R-Q20/R-Q21 + the R-8 brief's code map + the seam headers: `PaneSurface`/`PanePublisher`, `LandingAuthority`, `TakesArticleScroll`, `LandingTarget`, `ReadNoteLanding`) | DONE (this session, 2026-09-26) |
 | This record file + the U2 brief | DONE (this commit) |
 | U2 (session 1) | **CLOSED 2026-09-27** — built · triple-walked · bloom-race stall traced PRE-EXISTING and fixed red-first · ladder one round 0/0/3/4 all confirmed + five reviewer fixes + sanity PASS 681/101; KnownIssues row 42 amended, the head-reveal row filed |
-| U3 (session 2) | IN FLIGHT — brief below (written 2026-09-27 at U2's close) |
+| U3 (session 2) | **CLOSED AS REVERTED 2026-09-27** (a valid close; record + acceptance below) — the Fable ladder (round 1) is the remaining gate |
+| U-B5 (after U4) | RULED IN at U3 — the B5 trace's own slot; brief written after U4's ladder settles |
 | U4 (session 3) | NOT-STARTED |
 | B5 decision | at U3 |
 | Closeout | NOT-STARTED |
@@ -963,3 +964,50 @@ mount back to two presented states.
 **Strongest evidence.** The unit measured before and after with the same bounded command and the numbers are exact and deterministic: set B **1,106 · 1,106 → 0 · 0 → 1,106** (before, built, reverted), and the 191-suite set **0 (built) vs 2,393 (reverted)** — 18k C3's attribution confirmed from the other side, the A1 hypothesis exceeded (all of the family, not the majority). The ratified contract was pinned red-first (4/4, 12 issues on the old publisher, the mounted pin at the flagged mechanism itself) and a named behavioural revert reddened exactly its predicted nine. The felt gate was decided on presented frames, A/B against a pre-U3 build on the same dev store (the stamp rule admitting it), with a per-state classifier: the collapse is 5 of 5 vs 0 of 5, its frame is in the record, and the same instrument shows Compare's one-line collapse is pre-existing — so the revert is attributed to exactly the regression the shape introduced, not to noise. The rider's verdict rests on two measured grounds, including an adversarial arm that removes every production safeguard and still moves no clip, and its numbers are byte-identical across the revert. The fixture fix is proven by the full seeded suite reading the baseline exactly, and the closing set is 1114/191 green on what ships.
 
 **Weakest points, for the reviewer.** (a) **The felt judgment is mine and the instrument's, not hers**: 50–83 ms is visible in the frames, but her gate is her felt experience — the orchestrator's walk and her morning confirm are the real close (the shape is one `git revert` of `b60e5d6d` away). (b) The A/B ran in Terminal/light for the Takes-mount repeats; the post-revert walk covered both voices × both appearances, but the SHAPE was only walked in Terminal/light before the gate fired. (c) The typing-growth act never ran on either build (the safety rule skipped it) — the ring-follows-typing question stays unmeasured. (d) The adversarial rider arm's non-vacuity threshold (the viewport's first fragment moving > 20 pt; measured 25) is fixture-specific. (e) The fixture fix is sighted beside one intermittent `read-landing` signpost miss that I cannot attribute (1 of 3); a reviewer may prefer the ⌘↑ reset (JC 4 names the reversal). (f) The B5 report's "neighbour" verdict is reasoned from the recorded B5 measurements and the code roads, not from a new trace of the ⏎ pass. **U3 — DONE (implementer), closed as REVERTED under her gate; the Fable cold review follows.**
+
+### U3 — ORCHESTRATOR ACCEPTANCE (2026-09-27; verify-never-trust) — CLOSED AS REVERTED, a valid close
+
+**Claims verified against git and disk:** 15 commits pushed, tree clean, no trailers; the revert's
+byte claims re-run by this seat — `git diff 545375bc..HEAD -- PaneSurfaceTests.swift` EMPTY,
+`PaneSurface.swift` = 35 changed lines (the rider's observation seam only); the set-B logs read
+**1,106 → 0 → 1,106** exactly (before / built / reverted — the WHOLE warning family, 18k C3's
+attribution confirmed from the other side and the A1 hypothesis exceeded); the closing run
+`1114 tests in 191 suites passed` read; the felt evidence's classification read (the shipped
+build's Takes mount = **2 states, 117–133 ms**, both voices — the collapse classifier finds none).
+
+**The walk (the acceptance's use-shaped half): HELD AT THE GUARD, deliberately.** This seat's
+harness pass refused (`guard: someone is at the machine — STOP`) — the author is at the machine
+and the per-step rule held exactly as designed; no GUI was driven. The hold is honest and cheap:
+the SHIPPED felt surface (the publisher) is **byte-identical to the U2-final tree** this seat
+walked three times at U2's acceptance; the implementer's post-revert walk classified all four
+voice × appearance combos at two clean mount states; and the felt gate's REAL close is her
+sentence — **her morning confirm rides the bundle** (the shape is one `git show` away —
+`e113dd56` + `8a93eb24` — if she rules the 50–83 ms collapse not felt).
+
+**Orchestrator adjudications:**
+- **The REVERT close is ACCEPTED** — her gate's letter, honored on frame evidence (5/5 vs 0/5,
+  A/B against a pre-U3 build, per-state pixel classification), not on taste. The measurement
+  survives the revert: the warning family is now a MEASURED, understood cost with a fork that is
+  hers — filed as **QUESTIONS #152** (accept-and-document · defer only the flagged make/update
+  writes, unbuilt-and-unmeasured · re-attempt with the SLOT answered — the implementer's drafts,
+  never re-decided here).
+- **The rider's verdict is ACCEPTED** (PROVABLY SAFE, two measured grounds, the adversarial arm
+  the stronger); the TK2 §3 line lands with this acceptance (a measurement record, the 18l
+  settle-net precedent); the tripwire pins stay.
+- **THE B5 RULING (the roster's decided-at-U3, mine):** B5 takes **its OWN SLOT — U-B5, run
+  after U4.** The exam's evidence rules the rider road out (Write's full-document editor, the
+  differential ⏎ road, no pane, no app-side `layoutViewport()`, the OPPOSITE symptom), and the
+  report's instrument-then-decide scope is adopted as U-B5's shape: instrument the ⏎'s pass in
+  the deterministic Study recipe, then choose between the anchor-preserving correction (the
+  `ScrollAnchorController`/`topVisibleOffset` family) and pre-edit layout of the region above the
+  caret. Fable review (the Write editor seam). If U-B5 runs long, the round closes at a clean
+  seam with row 88 re-owned honestly and the trace progress recorded — never silently dropped.
+- **JC 1–5 ACCEPTED** (the frames-not-eyes instrument; the whole revert; the kept rider seam; the
+  ORDER fixture fix over the ⌘↑ reset — with its recorded cost, the 1-of-3 note-Read signpost
+  miss, filed as its own KnownIssues row, owner 12, the U2 FP-2 filing shape named as the known
+  remedy); row 85 NOT TAKEN accepted; **KnownIssues landed with this acceptance:** the warning-
+  family row (owner: her #152 ruling / 12), Compare's pre-existing mount collapse (12), the
+  note-Read signpost miss (12), row 88 re-owned to U-B5, row 92 gains the `ReadModeTests` name.
+
+The Fable cold review over U3's diff (`545375bc..HEAD`, what ships + the built-then-reverted
+pair for completeness) is the remaining gate; ladder file `notes/plans/18lb-u3-ladder-round1.md`.
