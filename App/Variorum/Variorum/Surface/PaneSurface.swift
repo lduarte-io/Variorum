@@ -540,6 +540,25 @@ final class PaneTextView: NSTextView, MarkdownFormattable, ProseGutterSurface {
         renderRestoresRun += 1
     }
 
+    /// **18l-b U3 — the flagged shape's observation seam** (the R3-4
+    /// lesson again: a pin asserts the MECHANISM, never an outcome
+    /// incidental machinery could satisfy). SwiftUI flags exactly one
+    /// write shape in this app — a `@State` written through a `@Binding`
+    /// while a representable's `makeNSView`/`updateNSView` body runs (18k
+    /// UNIT C3's M1; its M2 put every "Modifying state during view update"
+    /// line in the app inside THIS pane's two bodies). The representable
+    /// raises `representableUpdateDepth` for the length of each body, and
+    /// every height STATE write the publisher makes is counted — and
+    /// counted again when it lands inside that bracket.
+    var representableUpdateDepth = 0
+    private(set) var stateWrites = 0
+    private(set) var stateWritesInsideUpdate = 0
+
+    func noteStateWrite() {
+        stateWrites += 1
+        if representableUpdateDepth > 0 { stateWritesInsideUpdate += 1 }
+    }
+
     private weak var observedScrollView: NSScrollView?
 
     override func viewDidMoveToWindow() {
@@ -1152,6 +1171,9 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
 
     func makeNSView(context: Context) -> PaneTextView {
         let view = PaneTextView.makeTakeSurface()
+        // 18l-b U3: the flagged shape's bracket (see `noteStateWrite`).
+        view.representableUpdateDepth += 1
+        defer { view.representableUpdateDepth -= 1 }
         view.delegate = context.coordinator
         context.coordinator.onMeasuredHeight = onMeasuredHeight
         context.coordinator.install(
@@ -1208,6 +1230,9 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     }
 
     func updateNSView(_ view: PaneTextView, context: Context) {
+        // 18l-b U3: the flagged shape's bracket (see `noteStateWrite`).
+        view.representableUpdateDepth += 1
+        defer { view.representableUpdateDepth -= 1 }
         context.coordinator.onEdit = onEdit
         context.coordinator.onCommandClick = onCommandClick
         context.coordinator.onFocusRequest = onFocusRequest
@@ -1515,7 +1540,12 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
                     guard let view, view.frame.height != height else { return }
                     view.setFrameSize(NSSize(width: view.frame.width, height: height))
                 },
-                writeHeight: publishHeight,
+                // 18l-b U3: every height state write is counted on its way
+                // out (the flagged shape's seam — `noteStateWrite`).
+                writeHeight: { [weak view] height in
+                    view?.noteStateWrite()
+                    publishHeight(height)
+                },
                 // N2: the canary message is PUBLISHED into the rendered
                 // banner (it used to land in a private var nothing read).
                 writeCanary: { [weak view] message in
