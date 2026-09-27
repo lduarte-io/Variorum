@@ -264,9 +264,9 @@ re-opens its named rows; none gates U2/U3/U4 as scoped.
 
 | # | Item | Unit | Status |
 |---|---|---|---|
-| 1 | The authority grows the AIM KIND (top · minimal-reveal · viewport-fraction); `ReadLandingResidual`'s fraction arithmetic hoisted (U1 JC 2's hand-forward) | U2 | open |
-| 2 | Takes' landing half (`articleLandingStep` / `revealDecision` / `revealAnchor`) onto the authority under a `takesArticle` policy; restore half BYTE-PRESERVED (R-Q20/R-Q21); ~15 gesture-end pins + projection arm ride UNMODIFIED (3C) | U2 | open |
-| 3 | MAY-take: C6 — the born-live pane's transient END report poisons the persisted memory until the note leaves (18l ledger row 8's cell) | U2 | open — else 12 at the closeout |
+| 1 | The authority grows the AIM KIND (top · minimal-reveal · viewport-fraction); `ReadLandingResidual`'s fraction arithmetic hoisted (U1 JC 2's hand-forward) | U2 | **BUILT+WALKED 2026-09-27** — `658e2815`; the arithmetic pins rode unmodified; the Fable ladder is the remaining gate |
+| 2 | Takes' landing half (`articleLandingStep` / `revealDecision` / `revealAnchor`) onto the authority under a `takesArticle` policy; restore half BYTE-PRESERVED (R-Q20/R-Q21); ~15 gesture-end pins + projection arm ride UNMODIFIED (3C) | U2 | **BUILT+WALKED 2026-09-27** — `b25f74ad` + the bloom-race fix `20d80980` (a pre-existing stall found at the orchestrator's acceptance, traced, fixed red-first); triple-walked (implementer both voices + orchestrator ×3); the Fable ladder is the remaining gate |
+| 3 | MAY-take: C6 — the born-live pane's transient END report poisons the persisted memory until the note leaves (18l ledger row 8's cell) | U2 | **NOT TAKEN 2026-09-27** (the diff stands on none of its road) — 12's at the closeout |
 | 4 | PanePublisher frame-synchronous / state-deferred (her ratified shape; gate = walk the boards under load, REVERT on any felt regression); the warning count measured both ways (~1,989, all `PaneSurface`'s per 18k C3) | U3 | open |
 | 5 | The macOS-27 `layoutViewport()` clip-displacement exam of `PaneSurface`'s render restore (TK2 §3's hand-forward) | U3 rider | open |
 | 6 | B5 (row 88): ⏎ after a ⌘↓ landing on invalidated geometry — TRACE (deterministic Study recipe in the harness) | decided at U3 (rides the exam or its own slot) | open |
@@ -279,7 +279,7 @@ re-opens its named rows; none gates U2/U3/U4 as scoped.
 |---|---|
 | Preflight (canon + the 18l record WHOLE + the charter's KICKOFF 2 + all seven 18l ladder files + the 18l handoff + KnownIssues whole + QUESTIONS #146–#151 + the resiliency protocol + TK2 notes whole + the master plan + health review §1/§5 + R-Q20/R-Q21 + the R-8 brief's code map + the seam headers: `PaneSurface`/`PanePublisher`, `LandingAuthority`, `TakesArticleScroll`, `LandingTarget`, `ReadNoteLanding`) | DONE (this session, 2026-09-26) |
 | This record file + the U2 brief | DONE (this commit) |
-| U2 (session 1) | NOT-STARTED — brief below |
+| U2 (session 1) | **BUILT+WALKED 2026-09-27** — record + bloom-race fix pass below; the Fable ladder (round 1) is the remaining gate |
 | U3 (session 2) | NOT-STARTED — brief written after U2's ladder settles |
 | U4 (session 3) | NOT-STARTED |
 | B5 decision | at U3 |
@@ -637,3 +637,34 @@ itself be a placeholder (J1's finding (2)), so the hold that follows may begin o
 as the geometry road's own hold can today (the passing trace's step 4 entered its hold on stale frames), and the
 hold then re-aims as designed; (d) filing pre-watch endings adds Console lines on every gesture that ends a
 not-yet-aimed landing (a click in the first ~100 ms of an entry) — informative, but more lines than before.
+
+### U2 — ORCHESTRATOR ACCEPTANCE, SECOND PASS (2026-09-27; verify-never-trust) — **THE GATE LIFTS**
+
+**Claims verified:** all 8 fix-pass commits present and pushed, tree clean, no trailers; the five
+evidence logs on disk and read (the bloom-red suite run shows the 6 issues = the two red-first
+pins' 3+3; the pre-U2 attribution log holds the `[wait ×5] restore=wanted` line verbatim; the
+closing `680 tests in 101 suites passed`); the diff footprint is the landing half + the new pins
+only (94 lines in `TakesArticleScroll`, 111 in the watch pins — no restore-body hunk).
+
+**THE WALK, in the orchestrator's own hands (the acceptance):** three fresh passes of
+`takes-landing` on the fixed tree — Terminal (`notes/plans/vis-walks/2026-09-27/012240/`), Study
+(`012505/`), Terminal again on the race road (`012756/`): **18/18 rows PASS**; row F settled with
+the watch's correction every time (`hops=1 end=settled top=0` ×3); row C still files nothing (the
+stand-down stays silent, as ruled). The stall's specific state (my run 1: the page at the
+restore's true target, the bloom ringed below the fold, the Console silent) is closed by the
+re-look, and its SILENT class is closed by the filing — a recurrence would now speak
+(`hops=0 … top=-9999`), which is the standing-tripwire shape this round keeps building.
+*(One machinery fact for the traps: the harness's instance check greps the process table and can
+self-match a caller's own compound command line containing the pattern text — run the driver in a
+command that does not spell `Variorum.app/Contents/MacOS`.)*
+
+**Orchestrator adjudications:** ATTRIBUTION ACCEPTED — **pre-existing, by run** (reachable since
+the 17q ladder's W-1 + R1-2, 2026-09-13; U2 changed neither odds nor outcome — what U2 changed is
+that the silence became legible); fixed anyway under my stated criterion (cheap, on the diff's own
+report road, every ordering contract in place). **FP-1…FP-4 ACCEPTED** (FP-1's duplicated `± 2`,
+the `-9999` never-aimed sentinel, and FP-2's added Console lines are the reviewer's to weigh
+independently); my run-1 candidate stands EXCLUDED by the implementer's trace — recorded as such.
+**Ledger rows 1–2 flip to BUILT+WALKED** (the aim kind + the fraction hoist; the landing half on
+the authority with the restore byte-preserved and the ~15 gesture-end pins unmodified); row 3
+(C6 not taken → 12 at the closeout) stands. **The Fable cold review over the COMBINED diff
+(`334bf74c..43a879b1`) is the remaining gate**; ladder file `notes/plans/18lb-u2-ladder-round1.md`.
