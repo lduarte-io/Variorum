@@ -413,3 +413,27 @@ for gating ambiguity, any product-behavior invention (where a landing PUTS a blo
 anything wanting `Sources/VariorumCore/Sync/`, and every author-only call. Your diff is the
 landing family on the editor seam's neighborhood → a **FABLE cold review** follows; your
 self-assessment closes your record.
+
+## U2 RECORD (implementer: `opus-implementer`, 2026-09-26)
+
+**NOT DONE (first line — kept honest at every commit):** PENDING — the unit is in flight; this
+line is rewritten at the close against what shipped.
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | Reading (the brief's "Read first" list, in order, own context) | DONE — this file whole (HER KICKOFF MESSAGE, BINDING PRINCIPLES, CAST & DISCIPLINE, BASELINES, THE UNIT ROSTER, ENVIRONMENT TRAPS, THE LEDGER, HER OPEN ITEMS, the U2 BRIEF); the charter's KICKOFF 2 whole (`post-13u-health-rounds.md`, the U2 bullet + its read-first Takes lines); the 18l record's SITTING RECORD (R-18l-1…5), U0c RECORD whole (THE TRACE's Takes row, C6, the `openingLanding` arm) + its acceptance, U1 RECORD whole (the adoption map, JC 1–8, the round-1 fix pass) + both U1 ladder files; R-Q1/R-Q20/R-Q21 (`use-report-round-2026-09-12.md` §7) + the R-8 brief and record (the mount-ordering trace, piece 1, piece 6) + the 17q ladder's three rounds' findings and dispositions (R1-1/R1-2/W-1/W-2, R2-1/R2-2/R2-3, R3-1 — the `.holding` machinery's origin); `TEXTKIT2_NOTES.md` whole; the 13u2 UNIT E record (the split, the structural arm, #113) + its walk and adjudication; KnownIssues lines 36 · 42 · 85 · 90 · 92; `SessionResiliencyProtocol.md` whole; QUESTIONS #113 · #151 (next free #152); the code end to end: `TakesArticleScroll.swift` whole, `TakesBoardLayout.swift` whole, `TakesChoreographer.swift` whole, `TakesBoardView` (init, the article column, the geometry hook, the spend, `.onDisappear`), `TakesViewModel` (init's snapshot, `adopt`, `teardown`, `focus`, `landAuthorityFocus`, the article forwarders, `paneEdited`), `EditorRouter.swift` whole, `Surface/LandingAuthority.swift` whole, `Surface/ViewportCarry.swift` whole, `ReadNoteLanding.swift` whole, `ReadEditPane`/`ReadPageColumn` landings; the pins: `TakesArticleScrollTests` whole (40), `TakesLandingTests` (in `CommandRoutingTests.swift`), `ArticleLandingProjectionArmTests`, `LandingAuthorityTests`/`LandingSignpostTests`, `ReadNoteHeightsTests` (`ReadNoteLandingArithmeticTests`) |
+| 2 | Step 1 — the AIM KIND (policy data) + the fraction arithmetic hoisted (address change, forwards) | NOT-STARTED |
+| 3 | Step 2 — the red-on-old pin(s) for the NEW watch behaviour, committed and run RED on the pre-fix tree | NOT-STARTED |
+| 4 | Step 2 — the landing half onto the authority (`takesArticle` policy + `LandingSurface.takesArticle`; the watch; the signpost) | NOT-STARTED |
+| 5 | The behavioural revert (named before it runs; on a COMMITTED tree) | NOT-STARTED |
+| 6 | The 3C proof (every pre-existing pin rides UNMODIFIED; the one sanctioned surface-count edit called out) | NOT-STARTED |
+| 7 | May-takes: C6 (ledger row 3) · row 85 (O-2) — decided and recorded | NOT-STARTED |
+| 8 | The WALK (USE, both voices, per-step guarded) + the Takes signpost captured from Console | NOT-STARTED |
+| 9 | The harness as regression cover (`VARIORUM_VISUAL_WALK=1 Tools/VisualWalk/visual-walk.sh`, both voices) | NOT-STARTED |
+| 10 | Closing runs (the touched Mac suites + the landing family + the eleven Tutorial suites) | NOT-STARTED |
+| 11 | Self-assessment | NOT-STARTED |
+
+- Deaths / resumes: none so far.
+- Reverts in flight: none.
