@@ -10,6 +10,10 @@
 //  cursor in the right place but doesn't move you there"*).
 //
 //  ONE rule: every door into Write lands at the REMEMBERED CARET OFFSET
+//  (SUPERSEDED for the NOTE-OPEN act, 2026-09-26 — R-18l-1, 18l U0c, AppSpec
+//  §12: the session's first open shows the START and seeds no fact; a re-open
+//  restores the page. These pins cover the doors WITHIN an open note, which
+//  keep the rule as written.)
 //  inside the note's current block, and the arrival REVEALS it. Surfaces
 //  with no caret report nil and land at the block's start, exactly as today.
 //
