@@ -154,10 +154,21 @@ struct PanePublishShapeTests {
 
     // MARK: - The mechanism, on a real mount (the flagged shape, counted)
 
-    private func pump(_ turns: Int = 4) {
+    /// Layout passes AND real suspensions: a nested runloop pump inside a
+    /// main-actor test body runs AppKit's display cycle but can never drain
+    /// the main dispatch queue (the body is itself a main-queue item), and
+    /// the publisher's deferred turn is a main-queue item — so the state
+    /// write only lands when the body suspends (the precedent:
+    /// `aGapOrVoiceChangeRestoresTheRenderTierWithNoUserEvent`).
+    private func settle(_ turns: Int = 6) async {
         for _ in 0..<turns {
-            RunLoop.main.run(until: Date().addingTimeInterval(0.04))
+            pump()
+            try? await Task.sleep(for: .milliseconds(20))
         }
+    }
+
+    private func pump() {
+        RunLoop.main.run(until: Date().addingTimeInterval(0.03))
     }
 
     private func findPane(_ view: NSView) -> PaneTextView? {
@@ -191,7 +202,7 @@ struct PanePublishShapeTests {
         window.contentViewController = host
         defer { window.contentViewController = nil }
         host.view.layoutSubtreeIfNeeded()
-        pump(6)
+        await settle()
         host.view.layoutSubtreeIfNeeded()
 
         let pane = try #require(findPane(host.view))
@@ -205,9 +216,9 @@ struct PanePublishShapeTests {
         // The adopt-remeasure road: new text through a SwiftUI update.
         let writesBefore = pane.stateWrites
         box.text = paragraphs(24)
-        pump(6)
+        await settle()
         host.view.layoutSubtreeIfNeeded()
-        pump(4)
+        await settle(4)
         let grown = max(PaneMeasurement.height(of: pane), 24)
         #expect(grown > measured + 100, "non-vacuity: the adopted text really grew (\(measured) → \(grown))")
         #expect(pane.stateWrites > writesBefore, "non-vacuity: the adopted text re-published its height")
