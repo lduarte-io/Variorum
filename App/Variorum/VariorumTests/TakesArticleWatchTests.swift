@@ -562,4 +562,115 @@ struct TakesArticleWatchTests {
         #expect(line == "landing surface=TakesArticle rows=262 target=200 offset=-1 total=90000 "
                 + "derived=230 exact=0 hops=1 content=4 ms=1260 end=settled top=0")
     }
+
+    // MARK: - The acceptance's finding: the BLOOM door over a restore that
+    //         arrived BETWEEN geometry reports (the fix pass, 2026-09-27)
+
+    private func geo(_ offset: CGFloat) -> TakesBoardLayout.ArticleGeometry {
+        TakesBoardLayout.ArticleGeometry(offset: offset, content: 12_000, viewport: 782)
+    }
+
+    /// The app's order at the bloom door's mount, as the instrumented walk
+    /// traced it (`18lb-u2-bloomdiag-trace.txt`): the FIRST geometry reads a
+    /// her-positioned memory and the restore wants its row before the column
+    /// holds any; then the projection brings the bloom door's landing (never
+    /// weighed against the memory — 17q R1-2); the restore aims.
+    private func bloomOverAPendingRestore() -> (TakesArticleScroll, TakesBoardLayout.ArticlePlace, [String]) {
+        let scroll = TakesArticleScroll(lastCurrentRow: "hers")
+        let place = TakesBoardLayout.ArticlePlace(rowID: "r", into: 33, rowHeight: 50)
+        let order = ["a", "r", "b", "last"]
+        _ = scroll.consumeArticleGeometry(geo(0), remembered: place, positionedByUser: false, order: nil)
+        scroll.landArticle(on: "last", kind: .bloom)
+        return (scroll, place, order)
+    }
+
+    /// **RED ON THE U2 TREE (`9367048e`) — and on the pre-U2 road, by the
+    /// same gate.** The restore ARRIVES between geometry reports: the last
+    /// geometry report of the mount carries the rows' PREVIOUS frames (the
+    /// 17q ladder's W-2: every scroll-geometry report carries the row frames
+    /// of the step before), so it re-aims; SwiftUI's own re-resolution then
+    /// puts the remembered row exactly where it sat — and the rows report
+    /// that AFTER the last geometry report, with nothing left to change the
+    /// geometry again. The restore only ever looks at a geometry report, so it
+    /// stays `.wanted` forever, the page right; and a `.wanted` restore never
+    /// readies a landing — so the bloomed, ringed block is never revealed and
+    /// nothing is filed (the orchestrator's run 1: the page at the restore's
+    /// own target, `clip 9867`, block 262 below it, no TakesArticle line).
+    /// A row report now lets a restore that a landing is WAITING on look again
+    /// with the geometry it last saw — the restore's own decision, through its
+    /// own door, byte-unchanged — so the bloom readies, is watched and reveals.
+    @Test func aBloomWaitingOnARestoreThatArrivedBetweenGeometryReportsStillReveals() {
+        let (scroll, place, order) = bloomOverAPendingRestore()
+        // The rows realize at the aim's estimate; the geometry report reads
+        // the remembered row off its place and re-aims.
+        scroll.noteArticleRowFrame("a", CGRect(x: 0, y: -280, width: 680, height: 300))
+        scroll.noteArticleRowFrame("r", CGRect(x: 0, y: 300, width: 680, height: 50))
+        #expect(scroll.consumeArticleGeometry(geo(8491), remembered: place, positionedByUser: false, order: order)
+                == .scrollToRow("r", anchorY: TakesBoardLayout.ArticlePlace.anchorY(into: 33, rowHeight: 50, viewport: 782)))
+        #expect(scroll.articleRestore == .wanted(place), "non-vacuity: the restore still wants its row")
+        // SwiftUI's re-resolution: the row where it sat — reported by the
+        // ROWS, after the last geometry report; no geometry report follows.
+        scroll.noteArticleRowFrame("a", CGRect(x: 0, y: -17, width: 680, height: 50))
+        scroll.noteArticleRowFrame("r", CGRect(x: 0, y: 33, width: 680, height: 50))
+        scroll.noteArticleRowFrame("last", CGRect(x: 0, y: 964, width: 680, height: 118))
+        // What every row report runs (the view's report road).
+        let step = scroll.articleLandingReport(order: order)
+        #expect(step == .reveal("last", .foot),
+                "the bloom readies once its restore has arrived — on the old road `.wait`, forever (\(step))")
+        #expect(scroll.articleRestore == .settled,
+                "the restore recorded its arrival (a hold) and the bloom's own scroll ended it (\(scroll.articleRestore))")
+        #expect(scroll.articleLanding == "last", "the bloom is being watched, not dropped")
+        #if DEBUG
+        #expect(scroll.landingStory.lines.contains("last LAND"), "…and the watch has it: \(scroll.landingStory.lines)")
+        #endif
+    }
+
+    /// **The same arrival with NO landing waiting changes nothing** (the
+    /// guard for her R-Q21: a plain round trip's restore cadence is the
+    /// byte-preserved restore's own — the re-look runs only for a landing
+    /// that waits on it).
+    @Test func aRestoreWithNoLandingWaitingIsLeftToItsOwnCadence() {
+        let scroll = TakesArticleScroll(lastCurrentRow: "hers")
+        let place = TakesBoardLayout.ArticlePlace(rowID: "r", into: 33, rowHeight: 50)
+        let order = ["a", "r", "b", "last"]
+        _ = scroll.consumeArticleGeometry(geo(0), remembered: place, positionedByUser: false, order: nil)
+        scroll.noteArticleRowFrame("r", CGRect(x: 0, y: 300, width: 680, height: 50))
+        _ = scroll.consumeArticleGeometry(geo(8491), remembered: place, positionedByUser: false, order: order)
+        scroll.noteArticleRowFrame("r", CGRect(x: 0, y: 33, width: 680, height: 50))
+        #expect(scroll.articleLandingReport(order: order) == .done)
+        #expect(scroll.articleRestore == .wanted(place),
+                "no landing waits on it: the restore still advances only at a geometry report")
+    }
+
+    /// **A landing that ends BEFORE its first decided step now SAYS so** (the
+    /// acceptance's second ask: a pre-watch death was invisible). Her gesture,
+    /// her scroll or a lost row ending a landing the watch never took files
+    /// the same content-free line as a watched one — `hops=0`, the target
+    /// never having reported (`top=-9999`) — and the DEBUG story names the
+    /// act. RED on the U2 tree: nothing filed. R-Q21's stand-down stays
+    /// SILENT by design (`aStoodDownEntryLandingIsNeverWatched`: a landing that
+    /// stands down was never asked of the page).
+    @Test func aLandingThatEndsBeforeItsFirstStepIsFiledNotSilent() {
+        #if DEBUG
+        let (byGesture, _, _) = bloomOverAPendingRestore()
+        byGesture.clearArticleLanding()
+        #expect(byGesture.articleLanding == nil)
+        #expect(byGesture.landingStory.lines.contains("last DONE: her gesture"),
+                "her gesture before the first step is filed (\(byGesture.landingStory.lines))")
+
+        let (byScroll, place, _) = bloomOverAPendingRestore()
+        _ = byScroll.articleGeometryArrived(geo(300), remembered: place, positionedByUser: true)
+        #expect(byScroll.articleLanding == nil)
+        #expect(byScroll.landingStory.lines.contains("last DONE: her scroll"),
+                "her scroll before the first step is filed (\(byScroll.landingStory.lines))")
+
+        let lost = TakesArticleScroll()
+        _ = lost.consumeArticleGeometry(geo(0), remembered: nil, positionedByUser: false)
+        lost.noteArticleRowFrame("a", CGRect(x: 0, y: 18, width: 680, height: 50))
+        lost.landArticle(on: "gone")
+        #expect(lost.articleLandingStep(order: ["a"]) == .done)
+        #expect(lost.landingStory.lines.last == "gone DONE: the row left the note",
+                "a row that left the note before the first step is filed (\(lost.landingStory.lines))")
+        #endif
+    }
 }
