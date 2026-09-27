@@ -86,6 +86,10 @@ struct ReadNoteLandingTests {
             ReadModeView.remember(face, postID: post.id)
             #if DEBUG
             ReadModeOracle.reset()
+            // Ladder round 1, MINOR-2: the landing story is a process-global
+            // log — every mount starts it empty (the Outline's and the flow's
+            // landing suites' own pattern), and a read matches its own target.
+            ReadLandingStory.trace = []
             #endif
             // The row-39 road (`ReadLandingTests`' own): she was in block 201
             // elsewhere, then ⌘3 — the host ARRIVES on the current block and
@@ -164,6 +168,10 @@ struct ReadNoteLandingTests {
             ReadModeView.remember(face, postID: story.postID)
             #if DEBUG
             ReadModeOracle.reset()
+            // Ladder round 1, MINOR-2: the landing story is a process-global
+            // log — every mount starts it empty (the Outline's and the flow's
+            // landing suites' own pattern), and a read matches its own target.
+            ReadLandingStory.trace = []
             #endif
             let router = session.commandRouter
             _ = router.registerDetail(postID: story.postID, mode: .read) { _ in }
@@ -198,8 +206,15 @@ struct ReadNoteLandingTests {
     /// The last landing's DONE line in the DEBUG story (`ReadLandingStory`),
     /// nil when no note Read landing has finished — the pre-fix tree's
     /// answer, since nothing watched a note Read landing at all.
-    static func lastStory() -> String? {
-        ReadLandingStory.trace.last { $0.contains(" DONE: ") }
+    static func lastStory(_ placementID: String? = nil) -> String? {
+        ReadLandingStory.trace.last {
+            $0.contains(" DONE: ") && (placementID.map($0.contains) ?? true)
+        }
+    }
+
+    /// The placement id — the landing's anchor, which its story lines carry.
+    static func placement(_ world: ReadModeTests.World, block index: Int) -> String? {
+        world.model.rows.first { $0.blockID == world.blockIDs[index] }?.placementID
     }
     #endif
 
@@ -256,7 +271,7 @@ struct ReadNoteLandingTests {
             + "\(indices.last.map { $0 + 1 } ?? -1) (\(indices.count)); on screen "
             + "\(onScreen.map { $0 + 1 }); face \(face)")
         #if DEBUG
-        print("[18l U1] the landing's story: \(Self.lastStory() ?? "NONE")")
+        print("[18l U1] the landing's story: \(Self.lastStory(Self.placement(world, block: Self.landingIndex)) ?? "NONE")")
         #endif
         return (first, second)
     }
@@ -267,9 +282,13 @@ struct ReadNoteLandingTests {
     /// SETTLED, and it spent at most `maxHops` corrections. Red on the fixed
     /// tree when the faces' one-shot `scrollTo` is put back (R-watch — the
     /// record's revert): no landing is watched, so no line exists.
-    private func expectWatched(_ surface: LandingSurface, maxHops: Int) {
+    private func expectWatched(
+        _ surface: LandingSurface, _ world: ReadModeTests.World, maxHops: Int
+    ) {
         #if DEBUG
-        let line = Self.lastStory()
+        let target = Self.placement(world, block: Self.landingIndex)
+        #expect(target != nil, "the landed block's placement id")
+        let line = Self.lastStory(target ?? "no such placement")
         #expect(line?.hasPrefix("[\(surface.rawValue)] ") == true,
                 "this face's landing was watched — its story: \(line ?? "NONE")")
         #expect(line?.contains("DONE: settled") == true, "…and it SETTLED: \(line ?? "NONE")")
@@ -297,7 +316,7 @@ struct ReadNoteLandingTests {
                     "…and it is still there 1.5 s later — \(b) pt away")
             // The lazy column's first aim misses this shape (the pre-fix
             // tree's red); the watched landing's second aim reaches it.
-            expectWatched(.readNoteEdit, maxHops: LandingPolicy.readNoteEdit.correctionBudget)
+            expectWatched(.readNoteEdit, world, maxHops: LandingPolicy.readNoteEdit.correctionBudget)
         }
     }
 
@@ -316,7 +335,7 @@ struct ReadNoteLandingTests {
             let b = try #require(second)
             #expect(abs(a) <= Self.restTolerance, "arrived at the centre — \(a) pt away")
             #expect(abs(b) <= Self.restTolerance, "…and stayed — \(b) pt away")
-            expectWatched(.readNoteEdit, maxHops: 0)
+            expectWatched(.readNoteEdit, world, maxHops: 0)
         }
     }
 
@@ -330,7 +349,7 @@ struct ReadNoteLandingTests {
             let b = try #require(second)
             #expect(abs(a) <= Self.restTolerance, "arrived at the anchor — \(a) pt away")
             #expect(abs(b) <= Self.restTolerance, "…and stayed — \(b) pt away")
-            expectWatched(.readNote, maxHops: 0)
+            expectWatched(.readNote, world, maxHops: 0)
         }
     }
 
@@ -347,7 +366,7 @@ struct ReadNoteLandingTests {
                     "the landing arrived at the page's anchor — it is \(a) pt away")
             #expect(abs(b) <= Self.restTolerance,
                     "…and it is still there 1.5 s later — \(b) pt away")
-            expectWatched(.readNote, maxHops: 0)
+            expectWatched(.readNote, world, maxHops: 0)
         }
     }
 
@@ -399,7 +418,7 @@ struct ReadNoteLandingTests {
             #expect(abs(settled.minY - afterSwap.minY) <= 1,
                     "the page did not move under her click: \(afterSwap.minY) → \(settled.minY)")
             #if DEBUG
-            #expect(ReadLandingStory.trace.last { $0.contains(" DONE: ") }?
+            #expect(Self.lastStory(world.model.rows[40].placementID)?
                         .contains("her click in the pane") == true,
                     "…because her click ENDED the landing (end=handedover)")
             #endif
