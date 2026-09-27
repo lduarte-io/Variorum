@@ -1132,13 +1132,19 @@ dropped, where its Outline branch parks a `WriteIntent` AT that offset).
 - Read ▸ Scroll: nothing — a SwiftUI `Text` tap has no point. Wiring = a THIRD `ReadTierClickPlace` tier for the
   reading page's own type (16-pt system serif, `lineSpacing(6)`, 13-pt gaps, the flow column's width — none of it the
   Index tier's metrics the replica is built on), `ReadTierClickTarget` on the flow's block, and a new fidelity pin.
-- Read ▸ Pages: CoreText knows a COMPOSED-string index under the click (`characterIndex(at:)`), but no translation from
-  the paginator's composition back to a block's stored text exists (U0's `MarkdownRendering.sourceOffset` maps the
-  reading transform's display, not the page composition) — new machinery and a pin.
-- Both would let READ'S OWN SURFACES seed a caret: R-18l-5's carve-out (#149, PROVISIONAL, hers) covers "the read
-  tiers" (the Index and Read ▸ edit); Read is her A43 reading surface whose F-5 docs say a click maps to a block, never
-  to a text offset (and L10: *"Read has no competing gesture at all: no caret to place"*). Extending the carve-out to
-  Read is beyond the brief's fence (her U0 report's CLASS — the caret on the blank line).
+- Read ▸ Pages: **the offset is nearly in hand — a CHEAP wire, stated plainly because the record's first draft of this
+  line said otherwise (corrected at the code before any decision rested on it):** CoreText names the composed-string
+  index under the click (`PageLeafView.characterIndex(at:)`), and `PagePaginator.compose` lays each block down as
+  `MarkdownRendering.render(text).text` at a known display range (`PageBlockRange`) — the very display space U0's pinned
+  `MarkdownRendering.sourceOffset(forDisplayOffset:in:)` reads (`FlowParagraph.paragraphsWithStarts` starts from the same
+  `render`). So `index − range.location` → `sourceOffset(…, in: the block's stored text)` is the stored offset: the hit
+  returns it, `onBlockClick` carries it, the field stays. A few lines and a pin.
+- Both would let READ'S OWN SURFACES seed a caret at a CHARACTER — 13g F-5's law, whose carve-out (R-18l-5, #149,
+  PROVISIONAL, hers) grants that only to "the read tiers" (the Index and Read ▸ edit); Read is her A43 reading surface
+  whose F-5 docs say a click maps to a block, never to a text offset (and L10: *"Read has no competing gesture at all: no
+  caret to place"*). Wiring Pages ALONE would also split her two Read faces (Pages at the clicked character, Scroll at
+  the block's start). Both are product calls beyond the brief's fence (her U0 report's CLASS — the caret on the blank
+  line), whatever the wire costs.
 - The one producer that DOES hold an offset — the note box's remembered caret — gets it from the `FocusedBlock` road
   (`CommandRouter.currentBlock(for:)`), which already carries it to every door that reads it; landing there instead of
   at the start is "where she was", a product step past the artifact class — recorded as #153's (b), not built.
