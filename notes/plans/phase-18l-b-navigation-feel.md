@@ -1147,15 +1147,14 @@ dropped, where its Outline branch parks a `WriteIntent` AT that offset).
   line), whatever the wire costs.
 - The one producer that DOES hold an offset — the note box's remembered caret — gets it from the `FocusedBlock` road
   (`CommandRouter.currentBlock(for:)`), which already carries it to every door that reads it; landing there instead of
-  at the start is "where she was", a product step past the artifact class — recorded as #153's (b), not built.
+  at the start is "where she was", a product step past the artifact class — recorded as #153's (b), not built *[amended at the U4 ladder's round 1, MINOR-2: now its own option, #153's (a′) — the entry rule, #149-independent, no Read-face wiring; still not built]*.
 
 **Decided — (a) DELETE + `.start`, the most spec-defensible option, PROVISIONAL:** the artifact class dies on every
 road into the Index by landing (click-through, paged, note box) with one line; `.start` is (1) the value's OWN documented
 contract since Act 10 batch B (*"a SwiftUI `Text` paragraph cannot — the landing then puts the caret at the block's
 start"* — never true: the pane went live `.leave` from birth, `c768c08e`), (2) 17o batch b's stated rule (*"a surface
-with no caret lands at the block's start as today"*), (3) note Read's TWIN click-through (`ReadModeView.openInEdit`
-reports the block first, so the edit face's entry rule lands `.start` — the 17o ladder's recorded asymmetry, now closed on
-the book's side), (4) QUESTIONS #97's built (a), and (5) exactly where the landing puts her EYES — the landed block's top
+with no caret lands at the block's start as today"*), (3) note Read's TWIN click-through on a block she was NOT last in (`ReadModeView.openInEdit`
+reports the block first, so the edit face's entry rule lands `.start` there — *[amended at the U4 ladder's round 1, MINOR-2: on the block she WAS last in the twin lands her remembered caret (the memory keeps a known offset for a nil report on the same block), so the asymmetry is closed only for the other blocks; the full twin is #153's (a′), filed, not built]*), (4) QUESTIONS #97's built (a), and (5) exactly where the landing puts her EYES — the landed block's top
 at the page's top, where an END can sit below the fold for a block taller than the page. The charter's lean (delete) is
 taken; its bare form (c) — `.leave` kept — would leave her artifact standing on this road. **Unchanged:** a CLICK inside
 the Index brings its own place (U0's `.offset`); a pane's own focus request arms nothing (`.leave`); every other

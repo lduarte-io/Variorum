@@ -6,8 +6,9 @@
 //  **the scrolled-open door's ONE value.** A click on a sentence anywhere
 //  read-cheap names where it wants to land — the note, and the block under
 //  the click — and the arriving editing surface performs the landing: the
-//  mode switch, the reveal, and making THAT block live, its caret at the
-//  block's start. Built once here for the book (Read ▸ Scroll → the editable
+//  mode switch, the reveal, and making THAT block live, the consumer placing
+//  its caret (the book Index: the block's start — QUESTIONS #153). Built
+//  once here for the book (Read ▸ Scroll → the editable
 //  Index); the note's own version (batch C: Read → the Index edit surface,
 //  Write) consumes the same value.
 //

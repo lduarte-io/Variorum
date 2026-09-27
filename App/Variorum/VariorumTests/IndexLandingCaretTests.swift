@@ -26,8 +26,10 @@
 //  deleted; the arriving pane puts a landing's caret at the landed block's
 //  START, which is the value's own documented contract (*"the landing then
 //  puts the caret at the block's start"*), what note Read's twin click-through
-//  does (`ReadModeView.openInEdit` → the entry rule's `.start`), QUESTIONS
-//  #97's built (a), and exactly where the landing puts her eyes (the block's
+//  does on a block she was NOT last in (`ReadModeView.openInEdit` → the entry
+//  rule's `.start`; the block she was last in lands at her remembered caret
+//  there — #153's (a′), not built), QUESTIONS #97's built (a), and exactly
+//  where the landing puts her eyes (the block's
 //  top at the page's top). A CLICK still brings its own place (U0), and every
 //  other road keeps `.leave`.
 //
