@@ -776,3 +776,28 @@ staging. PROVISIONAL-and-continue for non-gating ambiguity (QUESTIONS); STOP and
 gating ambiguity, any product-behavior invention, anything wanting `Sync/`, and every author-only
 call. Your diff is `PaneSurface` — the editor seam by definition → a **FABLE cold review**
 follows; your self-assessment closes your record.
+
+## U3 RECORD (implementer: `opus-implementer`, 2026-09-27)
+
+**NOT DONE (first line — kept current against what shipped):** IN PROGRESS — nothing is claimed
+until its row below says DONE with a hash; every unverified claim is marked PENDING.
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | Reading (the brief's "Read first" list, in order, own context) | DONE — this file whole (HER KICKOFF MESSAGE, BINDING PRINCIPLES, CAST & DISCIPLINE, BASELINES, THE UNIT ROSTER, ENVIRONMENT TRAPS, THE LEDGER, HER OPEN ITEMS, the U2 BRIEF + RECORD + bloom-race fix pass + both acceptances, the U3 BRIEF); the charter's KICKOFF 2 whole (`post-13u-health-rounds.md` — the U3 bullet); `codebase-health-review-2026-09-21.md` §5.1 whole (A1's three options and the starvation risk; A2's deferral precedent); `TEXTKIT2_NOTES.md` IN FULL (§3's 27.0 findings — the `layoutViewport()` clip displacement, the first-full-measure fact, the settle net); the 18k record's UNIT C2 (brief, record, adjudication — the sibling deferral, newest-wins, M1–M4) and UNIT C3 (brief, record, adjudication — M1's one flagged shape, M2's attribution: every warning inside `PaneSurface`'s make/update, set B's 1,126–1,135); KnownIssues rows 13 · 42 (with the U2 amendment) · 85 · 88 · 90 · 92; the code: `Surface/PaneSurface.swift` WHOLE (`PaneMeasurement` — fenced; `PanePublisher`; `PaneTextView`; `PaneSurfaceView`/`PaneSurfaceRepresentable` + its `Coordinator` — `install`, `reconvergeIfDiverged`, `scheduleRenderRestore`'s `layoutViewport()` = the rider's caller), `Core/Views/StableSurface.swift` whole, `InlineEditorSurface` + its coordinator (`EditorView.swift` — U0's width door + settle net, C2's hop), `JumpPrimitive.jump` (18k C6's re-assert) + `JumpViewportLayoutTests`' header, the ten pane mounts across the composers, `PaneSurfaceTests.swift` (the `PanePublishDoorTests` suite + the F1 walk), `TakesCardHeightTests`' publisher-adjacent pins; `Tools/VisualWalk/scenarios.zsh`'s B5 pair, `read-landing`, `takes-landing` and the seeded order |
+| 2 | MEASURE FIRST — the warning count BEFORE (bounded, reproducible) | DONE — **set B, 18k C3's 39-suite run, verbatim: `cd App/Variorum && ./DerivedData/18k-c3-setB.sh`** (the script names its 39 suites literally; all 39 grep-verified to exist today), counted by `grep -c 'Modifying state during view update'` over the xcodebuild log; zero app instances, HID idle 26 min. On `545375bc` (app code = U2's final `79a73919`): **1,106 · 1,106** (two runs — deterministic on this tree; C3 saw 1,126–1,135 on its tree), `✔ Test run with 187 tests in 39 suites passed` both (`App/Variorum/DerivedData/18lb-u3-setB-before{,2}.log`). A second, larger reference on the same app code: U2's 101-suite closing set read 1,817 · 1,818 · 1,819 over its three runs (`18lb-u2-closing{1,2}.log`, `18lb-u2-sanity-r1.log`) |
+| 3 | BUILD the ratified shape (frame lever synchronous, state write deferred) | NOT-STARTED |
+| 4 | Pins — the new contract through the injectable scheduler + the mounted mechanism pin; red-on-old; the sanctioned edits named | NOT-STARTED |
+| 5 | MEASURE AFTER (the same command) | NOT-STARTED |
+| 6 | THE RIDER — `layoutViewport()` clip-displacement exam of the render restore | NOT-STARTED |
+| 7 | THE B5 QUESTION — REPORT, not decide | NOT-STARTED |
+| 8 | The B5 harness fixture fix (Tools/ only) + a full seeded run | NOT-STARTED |
+| 9 | Row 85 (O-2 ring) decision | NOT-STARTED |
+| 10 | THE FELT GATE + the walk (USE, both voices, both appearances, under load, per-step guarded) | NOT-STARTED |
+| 11 | Closing runs | NOT-STARTED |
+| 12 | Self-assessment | NOT-STARTED |
+
+- Deaths / resumes: none.
+- Reverts in flight: none.
