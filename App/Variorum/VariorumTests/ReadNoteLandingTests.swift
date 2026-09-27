@@ -370,6 +370,52 @@ struct ReadNoteLandingTests {
         }
     }
 
+    // MARK: - U1 ladder round 1, MINOR-3 — the facts' offsets are in the content space
+
+    /// **The manifest's offsets are the column's CONTENT-SPACE tops**
+    /// (`BookHeightManifest.leading`'s contract: *"everything above the first
+    /// row … so offsets are absolute in the column's content space"*). A
+    /// landing on the FIRST block has nothing above it — its `offset=` must be
+    /// exactly where the face draws that block's top: the edit column's 26-pt
+    /// lead; the page's two paddings, its header row and one row gap. RED on
+    /// `2eff1b27`, which passed `leading: 0` on both faces (every offset low).
+    @Test(arguments: [ReadModeView.Face.edit, .read])
+    func theFirstBlocksOffsetIsWhereTheFaceDrawsIt(_ face: ReadModeView.Face) async throws {
+        try await mounted(face: face, landingIndex: 0) { world in
+            let target = world.blockIDs[0]
+            let frames: () -> [String: CGRect] = {
+                face == .edit ? ReadModeOracle.editBlockFrames : ReadModeOracle.pageBlockFrames
+            }
+            await world.poll(timeout: 6) { frames()[target] != nil }
+            _ = await world.poll(timeout: 1.5) { false }
+            #if DEBUG
+            let placement = try #require(Self.placement(world, block: 0))
+            let lines = ReadLandingStory.trace
+            let land = try #require(lines.lastIndex { $0.hasSuffix("\(placement) LAND") },
+                                    "the first block's landing was watched")
+            let manifest = try #require(lines[land...].first { $0.contains("] manifest ") })
+            let offset = try #require(manifest.split(separator: " ")
+                .first { $0.hasPrefix("offset=") }.flatMap { Int($0.dropFirst("offset=".count)) })
+            let block = try #require(frames()[target])
+            let viewport = try #require(ReadModeOracle.faceFrames[world.postID])
+            // The block's content-space top: its place in the viewport plus how
+            // far the face's own scroll view is scrolled (the AppKit scroll view
+            // the face IS — the one whose size is the face's; the page face's
+            // first block rests at 0.08, which is below the page's top air).
+            func scrollViews(_ v: NSView) -> [NSScrollView] {
+                (v is NSScrollView ? [v as! NSScrollView] : []) + v.subviews.flatMap(scrollViews)
+            }
+            let scroll = try #require(scrollViews(world.hosting).first {
+                abs($0.frame.width - viewport.width) < 1.5 && abs($0.frame.height - viewport.height) < 1.5
+            }, "the face's own scroll view")
+            let drawn = block.minY - viewport.minY + scroll.contentView.bounds.origin.y
+            print("[18l U1 MINOR-3] \(face): the story's offset=\(offset), the block drawn at \(drawn) — \(manifest)")
+            #expect(abs(CGFloat(offset) - drawn) <= 1,
+                    "the manifest's offset is the drawn content-space top: \(offset) vs \(drawn)")
+            #endif
+        }
+    }
+
     // MARK: - U1 ladder round 1, MAJOR-1 — her click inside the landing's hold
 
     /// **A click into the landed block while the landing is still pending
