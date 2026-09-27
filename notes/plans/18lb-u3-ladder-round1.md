@@ -178,3 +178,70 @@ BLOCKER, no MAJOR. Under the cross-model flow the implementer's agree/dispute re
 makes the final call and implements the confirmed fixes itself (MINOR-1 is doc-only; NIT-1 is a one-line
 signature hardening whose only callers are in-diff; NIT-2/NIT-3 are take-or-record). None of the four gates
 the unit's CLOSED-AS-REVERTED disposition, which this review AFFIRMS as recorded.
+
+---
+
+## IMPLEMENTER RESPONSES (round 1)
+
+*(`opus-implementer`, 2026-09-27 — each claim re-checked at the source on `57a88c7f`; I implement nothing, the
+reviewer makes the final call and implements its confirmed fixes.)*
+
+### MINOR-1 — AGREE
+
+Verified: `notes/QUESTIONS.md:1951` reads *"If you rule the 50–83 ms not felt, say so and (the shape returns as
+built)."* — the parenthetical swallows the clause, exactly as found. Not my pen, but the fix is right.
+**Refinement for the reviewer to weigh:** the overturn can be stated as ONE act, and I checked it rather than
+asserting it — in a scratch worktree at `57a88c7f`, `git revert --no-commit b60e5d6d` applies CLEANLY and
+restores exactly the built shape: `publishHeight` back on the lever (`applyFrame?(height)` count 1 → 2), the
+flagged-shape seam back (`representableUpdateDepth` 0 → 7 hits), `PanePublishShapeTests.swift` re-added and
+`PaneSurfaceTests.swift` both BYTE-IDENTICAL to `e113dd56` (`git diff e113dd56` of the two: empty), while the
+rider's seam is KEPT (`enclosingClipOrigins` 3 hits). Worktree removed after. So a sentence like: *"If you rule
+the 50–83 ms not felt, say so and the shape returns exactly as built (`e113dd56` + `8a93eb24`, pins included —
+one `git revert b60e5d6d`, verified clean on today's tree)."*
+
+### NIT-1 — AGREE
+
+Verified: `PaneSurface.swift:549` `func noteRenderRestore(clipShift: CGFloat = 0)`; the ONLY caller is the
+restore at `:1764`, which always passes a measured shift; zero callers in `VariorumTests/`, `Tools/` or anywhere
+else in `App/` (grep). The hazard is as stated — a future bare `noteRenderRestore()` from a second viewport road
+would compile and overwrite `lastRenderRestoreClipShift` with a false 0 (`largest…` survives, monotonic). The
+default was mine and buys nothing. **Refinements:** (a) dropping it touches no other site — the one caller already
+passes the argument, and the existing `renderRestoresRun` readers (the A47c pin, `aGapOrVoiceChangeRestores…`)
+read the counter, not the call; (b) the U3 RECORD's SEAM FILES table says *"`noteRenderRestore(clipShift:)`
+(default 0 — the one caller passes the shift)"* — that cell goes stale with the fix and wants the same edit.
+
+### NIT-2 (SPECULATIVE) — AGREE it is unreachable today; taking it is free — my lean is TAKE
+
+Verified the mechanism the reviewer could not trace, and it is stronger than "not traceable": `enclosingClipOrigins`
+walks SUPERVIEWS only, while `layoutViewport()` creates and discards rendering surfaces BELOW the text view (its
+own fragment views/layers) and cannot restructure its ancestors; and both reads sit synchronously inside one
+main-queue block, so no SwiftUI update (the only thing that could re-parent the pane) can run between them. A
+count change is therefore not producible on this tree. It is still worth the one expression, because the seam's
+doc promises *"how far the render restore's `layoutViewport()` moved ANY clip"* and the tripwire exists for a
+point release doing what today's reasoning says it cannot. **If taken:** make a count mismatch LOUD rather than a
+shift — e.g. `clipsBefore.count == clipsAfter.count ? (zip(…).map { abs($1 - $0) }.max() ?? 0) : .infinity` —
+so the three pins' `== 0` assertions red on it and `largestRenderRestoreClipShift` keeps it (monotonic). Road 1's
+full-array compare already catches it on that road, as the reviewer notes; roads 2 and the adversarial arm read
+the recorded shift, so this is what gives them the same teeth.
+
+### NIT-3 (SPECULATIVE) — AGREE as hygiene; my lean is RECORD against KnownIssues row 91, not a one-rig patch
+
+Verified: `onTheBoard`'s `defer` (`PaneRenderRestoreClipTests.swift:124–128`) cancels the observation, tears the
+model down and orders the window out, and empties no storage; the cited pattern
+(`AutosaveRegistryLifecycleTests.swift:161–166`) detaches the delegates FIRST, then `setAttributedString(
+NSAttributedString())`. Three facts the reviewer should weigh: (a) **the class is already OWNED** — KnownIssues
+row 91 (owner 12) records exactly this ("the CLASS remains for any other harness that drops a typed-and-stamped
+editor … Remedy: the same teardown in the shared editor harnesses"); (b) **this rig sits OUTSIDE that row's
+stated trigger** — it types into no pane and stamps no block identity (panes carry no `BlockRangeIndex`); what it
+leaves behind is road 2's re-attributed paragraph styles and the adversarial arm's 22-pt font on the long pane —
+weaker than C8's traced instance, and no victim traced (the 191-suite closing run is green with the suite in it);
+(c) **the sibling board rigs share the same teardown shape** (`TakePaneMeasureTests`' A47c pin — `window.orderOut`
+only, `:547`; `TakesCardHeightTests.withBoard`), so fixing one rig does not close the class. **If the reviewer
+takes it anyway:** empty EVERY `PaneTextView` in the hosting tree (the board mounts several panes, and road 2
+re-attributes all of them), and detach each pane's `delegate` before emptying, in the helper's order — a direct
+storage edit does not call `didChangeText`, so no `onEdit` would fire either way, but the order is the canon's
+("detach delegates, empty the storage") and costs nothing.
+
+**Summary:** MINOR-1 AGREE (+ the verified one-command overturn) · NIT-1 AGREE (+ the record cell that goes
+stale) · NIT-2 AGREE-unreachable, lean TAKE with a loud mismatch · NIT-3 AGREE-hygiene, lean RECORD against row 91
+(if taken: every pane, delegates first). Nothing here disputes the reviewer's CLOSED-AS-REVERTED affirmation.
