@@ -16,7 +16,11 @@
 //  reading flow). Takes and the book Index adopt at their next touch — their
 //  ~15 timing pins and `KnownIssuesAndTechDebt` row 49's residues are owner
 //  12's, and four surfaces in one phase is the over-scope the sizing guidance
-//  names.
+//  names. *(Discharged since: the book Index at 13u4 UNIT F1, note Read's two
+//  faces at 18l U1, the Takes article at 18l-b U2 — with the AIM KIND
+//  (`LandingPolicy.aim`, `LandingAim.swift`) and `watch(…)` for a surface
+//  whose own step machine makes the first aim; its ~15 gesture-end pins rode
+//  unmodified.)*
 //
 //  **What a landing IS, in one paragraph** (the row-53 discipline, which is
 //  the thing being hoisted): put an anchor at the top of a page with ONE

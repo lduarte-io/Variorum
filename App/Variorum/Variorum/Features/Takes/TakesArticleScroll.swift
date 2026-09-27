@@ -41,6 +41,22 @@
 //  (17q piece 6, her ruling R-Q21) — it is read only by this brain, so it
 //  lives here now and `TakesBoardLayout` forwards it.
 //
+//  **18l-b UNIT U2 — the LANDING half adopts the ONE landing authority**
+//  (`Surface/LandingAuthority.swift`, policy `.takesArticle`; the charter's
+//  U2 bullet, `notes/plans/post-13u-health-rounds.md` KICKOFF 2). The
+//  reveal's pure arithmetic moved to the authority's side as the
+//  `.minimalReveal` aim kind (`Surface/LandingAim.swift`; the old names here
+//  are typealiases and forwards), and each landing is WATCHED from its first
+//  decided step: reports re-arm a quiet interval, corrections come from
+//  quiet, the watchdog ends what cannot arrive, the landing ends when it has
+//  settled, and the content-free signpost files (`landing
+//  surface=TakesArticle …`). **The RESTORE half is byte-preserved** —
+//  `ArticlePlace`, `ArticleRestore`, `consumeArticleGeometry`,
+//  `restoreStep`, the `.holding` machinery, the 24-aim budget,
+//  `articleLastCurrentRow` — her rulings R-Q20/R-Q21 are its contract; the
+//  watch reaches her scroll through `articleGeometryArrived`, a door in
+//  front of the unchanged decision.
+//
 
 import CoreGraphics
 import Foundation
@@ -260,7 +276,9 @@ final class TakesArticleScroll {
     }
 
     /// Her hand ends a landing. The request is otherwise kept through the
-    /// column's settling passes (see `ArticleLandingStep`).
+    /// column's settling passes (see `ArticleLandingStep`) — since 18l-b U2,
+    /// until the one landing authority's watch settles it or gives it up;
+    /// her hand ends it sooner, and hands the watched landing over (once).
     ///
     /// **THE RULE (settled at the 17p batch-a ladder's final word, so the
     /// next arm is not guesswork):** a landing is a REVEAL kept alive only
@@ -438,6 +456,19 @@ final class TakesArticleScroll {
     /// STAYS and re-aims as the column settles (bounded), and it ends at HER
     /// HAND — a scroll, a click into another pane, an edit — never at a
     /// frame that may be a placeholder.
+    ///
+    /// **18l-b U2 — the "measurement is complete" signal now exists: the one
+    /// landing authority's QUIET INTERVAL** (row 53's discipline). The step
+    /// still decides every aim, but it is spent at the landing's arrival
+    /// (`.onChange` of `articleLanding`), at its first decided step, and at
+    /// each correction the watch asks for from quiet — no longer once per
+    /// row report (measured: the per-report road spent all 64 aims in ~70 ms
+    /// inside one layout storm on an uneven note and never arrived). A
+    /// placeholder frame that later moves off screen is still caught — its
+    /// report re-arms the quiet, and the correction follows it. And the
+    /// request now ENDS when the watch settles it (its row home through the
+    /// hold and a quiet interval), gives up (the watchdog, or the bound), or
+    /// hands it over (her hand) — not only at her hand.
     enum ArticleLandingStep: Equatable {
         /// Nothing pending (or the row is gone from the note).
         case done
