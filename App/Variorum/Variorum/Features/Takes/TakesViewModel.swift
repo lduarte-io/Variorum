@@ -477,7 +477,7 @@ final class TakesViewModel {
         // this makes a road nobody enumerated impossible rather than
         // improbable. It runs FIRST, before `consumeLandings` below can make
         // a new landing against this projection.
-        board.article.noteProjectionArrived(new)
+        board.noteProjectionArrived(new)
         refreshWordCounts(old: projection, new: new)
         projection = new
         // THE CONVERGENCE HALF of the buffer-authoritative discipline
@@ -537,7 +537,7 @@ final class TakesViewModel {
         articleTornDown = true
         // 18l-b U2: a landing the one authority is watching ends SILENTLY
         // with the board (nothing landed; no story to file).
-        board.article.endArticleLandingWatch()
+        board.endArticleLandingWatch()
         if let autosaveToken {
             autosave.stopObserving(autosaveToken)
             self.autosaveToken = nil

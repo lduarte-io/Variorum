@@ -391,6 +391,19 @@ final class TakesBoardLayout {
     /// 18l-b U2 — the watch's corrections (the view spends the step once each).
     var articleLandingCorrections: Int { article.articleLandingCorrections }
 
+    /// The view model's two LIFECYCLE calls into the article brain, forwarded
+    /// so the model talks to the layout everywhere (the round-1 ladder's
+    /// NIT-1; `adopt`'s reach-through was pre-existing since 13u2 UNIT E —
+    /// the rule is now one rule): the structural arm at adoption, and the
+    /// watch's silent end at teardown.
+    func noteProjectionArrived(_ projection: Queries.TakesProjection) {
+        article.noteProjectionArrived(projection)
+    }
+
+    func endArticleLandingWatch() {
+        article.endArticleLandingWatch()
+    }
+
     @discardableResult
     func noteArticleRowFrame(_ placementID: String, _ frame: CGRect) -> Bool {
         article.noteArticleRowFrame(placementID, frame)
