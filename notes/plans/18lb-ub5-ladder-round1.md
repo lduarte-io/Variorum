@@ -158,3 +158,49 @@ clarity-class with the degradation stated above.
 - F1 — pending implementer response.
 - F2 — pending implementer response.
 - F3 — pending implementer response.
+
+---
+
+## IMPLEMENTER RESPONSES (round 1) — `opus-implementer`, 2026-09-27
+
+Every claim re-checked at the source on `a2eaac45` (pulled first). I implement nothing; the reviewer makes the final
+call and implements its confirmed fixes.
+
+**F1 · MINOR — AGREE.** Verified: `EditorSurfaceController.swift:3076–3084` (the pointers are exact) still says
+*"untouched text never moves, no scroll restore step exists at all"*, and six lines below it my paragraph describes a
+restore step that now exists (`keepUntouchedReadingLine`, called at :3113). The second clause is false as written;
+the first is the promise the keeper enforces. My miss — I added the paragraph without amending the sentence it
+contradicts. **Refinements for the pen:**
+- Scope check done: `grep 'no scroll restore step\|no scroll-restore step\|no restore step'` over `App/` finds ONLY
+  this line (:3080). The other three copies of the 2026-07-07 words are promise-framed and still true —
+  `JumpPrimitive.swift:143` and `:175` (`ReadingAnchor`'s docs) and `EditorViewModel.swift:4262` (already qualified:
+  *"true while TextKit keeps laid-out geometry where it laid it out"*). `StructuralSeamEdit.swift`'s header makes no
+  restore claim. So the fix is the one parenthetical; nothing else needs touching.
+- Keep "untouched text never moves" as the promise, date it, and replace only the false clause — the reviewer's
+  suggested wording is right; a slightly tighter form that reads as one sentence with the paragraph below it:
+  *"…known seams — untouched text never moves (the 2026-07-07 promise); there is no unconditional restore step — since
+  18l-b U-B5 the keeper below puts the untouched reading line back iff TextKit moved it, KnownIssues row 88)…"*.
+- Doc-only: no pin owed (clarity class), no behaviour, `StructuralSeamEdit`/the oracle untouched.
+
+**F2 · NIT — AGREE.** Verified: two rows end "Runs LAST" — `book-landings` (stale since this unit appended
+`b5-more-roads`) and `b5-more-roads` (true: `SCN_ORDER`'s last entry). **Refinement — the line pointers are off:** the
+rows are `Tools/VisualWalk/README.md:127–128` (the file has 159 lines, not 542+) and `SCN_ORDER` is
+`scenarios.zsh:845–847` (not 650–653). Suggested wording for `book-landings`' row: *"Runs after `takes-landing` (18l-b
+U-B5 appended `b5-more-roads` last)"*. The `read-landing` row's "Runs AFTER the B5 pair" is still true — leave it.
+
+**F3 · NIT (optional) — AGREE, and I lean toward taking it rather than declining.** Verified: the indices are hard-coded
+at `WriteFloatingViewportTests.swift:144/148` (the pin) and `:274/279` (`UntouchedLineKeeperTests`' `tailReturn`
+helper) — the reviewer's pointers (310–315, 440–446) are off; the file has 361 lines. The trap is real but by a
+different mechanism than stated: `BlockRangeIndex.range(ofEntryAt:)` (`Shared/EditorBrain/BlockRangeIndex.swift:74–81`)
+ends in `preconditionFailure("entry index out of range")`, not an array subscript — same outcome, and in the test
+host it kills the whole xcodebuild test process, taking every later suite in a closing set down with it, which is a
+little worse than one crashed suite. **Refinements if taken:** guard BOTH sites (the pin and the `tailReturn` helper),
+right after the editor mounts: `try #require(h.model.index.entries.count > 150, "the fixture: A Scandal in Bohemia
+carries at least 151 blocks")`. The fence test (`anActThatWritesAboveTheReadingLineKeepsItsOwnMovement`, indices
+30/40 on its own 80-block synthetic note) is self-sizing and needs nothing. Adding the `#require` does not touch any
+assertion, so the pin's red-on-old evidence stands unchanged (it is a premise, not a verdict). If declined, record it
+as "declined — the bundled fixture is deliberately stable".
+
+No disputes. Nothing in the clean bill contradicts my record; clean-bill item 1's note that the trace's stack came
+from the instrumented tree (the shipped `EditorTextView` has no `setSelectedRanges` override) is accurate — the
+override was instrument-only and removed with it.
