@@ -268,8 +268,8 @@ each commit pushed, no trailers. **Nothing touched `PaneSurfaceView` or any seam
 
 **Closing runs on the fixed tree (`66dcf17d`):** the U1 closing set (`App/Variorum/DerivedData/18l-u1-closing.sh`)
 — **✔ Test run with 214 tests in 37 suites passed** (`18l-u1-r1fix-closing.log`; 37 suites started / 37
-asked; +4 = the MAJOR-1 click pin ×2 delays, the typing pin, the leading pin ×2, the stale-seed pin, minus
-nothing), `** TEST SUCCEEDED **`. **The harness, one `read-landing` pass, both voices, on the stamped fixed
+asked; +4 test functions = the MAJOR-1 click pin (2 cases), the typing pin, the leading pin (2 cases), the
+stale-seed pin; NIT-1 replaced a test in place), `** TEST SUCCEEDED **`. **The harness, one `read-landing` pass, both voices, on the stamped fixed
 build** (`vis-walks/2026-09-26/183207/`): **Terminal PASS 12/12 · Study PASS 12/12 — 12 of 12 signposts
 `hops=0 … end=settled top=0`, exit 0**; the warm steps settle at 0 hops with the stale seed gone (each
 aim arrived and reported). Every pre-existing pin rode unmodified (LandingAuthorityTests' surface count
