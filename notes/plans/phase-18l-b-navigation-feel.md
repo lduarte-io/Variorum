@@ -1418,4 +1418,4 @@ follows; your self-assessment closes your record.
 | 9 | Self-assessment | NOT-STARTED |
 
 - Deaths / resumes: none.
-- Reverts in flight: none. Instrumented working tree: none yet.
+- Reverts in flight: none. **Instrumented working tree: YES (uncommitted, by design)** — `Features/Editor/B5Trace.swift` (untracked, new) + DEBUG-gated hooks in `EditorTextView`, `EditorViewModel`, `EditorSurfaceController`, `EditorView` (`ScrollAnchorController`), `LongBlockLayout`; a copy at `App/Variorum/DerivedData/18lb-ub5/` (gitignored). Restore: `git checkout HEAD --` the five files + `rm` the new one; `git status` clean.
