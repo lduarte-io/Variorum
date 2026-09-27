@@ -42,8 +42,10 @@ fileprivate struct PaneLiveFlipHost: View {
 }
 
 /// The sanity pass's RAISE-2: a host that passes NO landing at all — the
-/// six hosts outside R1-3's trace (the fan/stack cards, Compare, Canvas, the
-/// Write panel, the Book Index) and every post-structural ring landing.
+/// hosts outside R1-3's trace (the fan/stack cards, Compare, Canvas, the
+/// Write panel) and every post-structural ring landing. (The Book Index was
+/// one of them until 18l U0 — a click's `.offset` — and 18l-b U4 — a
+/// landing's `.start`, QUESTIONS #153; it now passes a landing.)
 fileprivate struct PaneBareHost: View {
     let box: PaneLiveBox
     let text: String
