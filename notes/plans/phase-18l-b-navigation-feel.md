@@ -280,9 +280,9 @@ re-opens its named rows; none gates U2/U3/U4 as scoped.
 | Preflight (canon + the 18l record WHOLE + the charter's KICKOFF 2 + all seven 18l ladder files + the 18l handoff + KnownIssues whole + QUESTIONS #146–#151 + the resiliency protocol + TK2 notes whole + the master plan + health review §1/§5 + R-Q20/R-Q21 + the R-8 brief's code map + the seam headers: `PaneSurface`/`PanePublisher`, `LandingAuthority`, `TakesArticleScroll`, `LandingTarget`, `ReadNoteLanding`) | DONE (this session, 2026-09-26) |
 | This record file + the U2 brief | DONE (this commit) |
 | U2 (session 1) | **CLOSED 2026-09-27** — built · triple-walked · bloom-race stall traced PRE-EXISTING and fixed red-first · ladder one round 0/0/3/4 all confirmed + five reviewer fixes + sanity PASS 681/101; KnownIssues row 42 amended, the head-reveal row filed |
-| U3 (session 2) | **CLOSED AS REVERTED 2026-09-27** (a valid close; record + acceptance below) — the Fable ladder (round 1) is the remaining gate |
+| U3 (session 2) | **CLOSED AS REVERTED 2026-09-27, ladder CLOSED** (one round 0/0/1/3, all confirmed, zero disputes; reviewer fixes `ec998abf`/`e99e3d88`/`04a30237`; sanity PASS 75/9; `notes/plans/18lb-u3-ladder-round1.md`) |
 | U-B5 (after U4) | RULED IN at U3 — the B5 trace's own slot; brief written after U4's ladder settles |
-| U4 (session 3) | NOT-STARTED |
+| U4 (session 3) | IN FLIGHT — brief below (written 2026-09-27 at U3's ladder close) |
 | B5 decision | at U3 |
 | Closeout | NOT-STARTED |
 

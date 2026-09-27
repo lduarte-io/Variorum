@@ -318,3 +318,19 @@ HID idle 2,249 s at start (`App/Variorum/DerivedData/18lb-u3-sanity-r1.log`). Co
 green on the fixed tree.
 
 **Nothing returns to the reviewer as a mechanism question.** The one wording observation above is optional.
+
+## LADDER CLOSED (orchestrator, 2026-09-27)
+
+Round 1: 0 BLOCKER / 0 MAJOR / 1 MINOR / 3 NIT (two SPECULATIVE) — all four CONFIRMED at the
+reviewer's final call with zero disputes; MINOR-1 fixed doc-only (`ec998abf` — the orchestrator's
+own garbled #152 sentence, now naming the verified one-command overturn `git revert b60e5d6d`,
+re-checked by the reviewer on the POST-fix tree), NIT-1 taken (`e99e3d88`), NIT-2 taken on the
+implementer's firmer ground (`04a30237`, the loud `.infinity`), NIT-3 recorded-not-taken on row
+91's ownership. Sanity pass PASS at the widest radius yet (75/9, mechanism-absence proven by
+class extraction at both revisions). The sanity pass's one optional wording note (the record
+cell's bracket names the round + ladder file rather than a calendar date) is DISPOSITIONED
+RECORD-ONLY here: the round-and-file pointer is a date-equivalent citation and both forms are
+honest — no edit owed. No new BLOCKER/MAJOR anywhere — no round 2 earned. **The U3 ladder
+CLOSES; U3 stands CLOSED AS REVERTED** (her gate's letter, honored on frame evidence; the whole
+warning family measured and its fork hers at #152; the rider PROVABLY SAFE with its tripwire;
+the B5 fixture fixed; what ships is observation, pins, and the scenario order).
