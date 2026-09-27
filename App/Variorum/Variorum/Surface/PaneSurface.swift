@@ -576,9 +576,35 @@ final class PaneTextView: NSTextView, MarkdownFormattable, ProseGutterSurface {
     /// asserts the wire fired AND the restore ran, never only a heal that
     /// incidental machinery could satisfy.
     private(set) var renderRestoresRun = 0
+    /// **18l-b U3 (the TK2 §3 rider):** how far the render restore's
+    /// `layoutViewport()` moved any CLIP this pane sits inside — the last
+    /// restore's, and the largest seen. macOS 27 measured
+    /// `layoutViewport()` moving the full-document editor's clip by the
+    /// height change its own pass causes (18k C6); this restore is the other
+    /// caller, and these two numbers are how a pin — and the next point
+    /// release's re-verify (TK2 §5) — ask whether it ever does the same to a
+    /// pane.
+    private(set) var lastRenderRestoreClipShift: CGFloat = 0
+    private(set) var largestRenderRestoreClipShift: CGFloat = 0
 
-    func noteRenderRestore() {
+    func noteRenderRestore(clipShift: CGFloat = 0) {
         renderRestoresRun += 1
+        lastRenderRestoreClipShift = clipShift
+        largestRenderRestoreClipShift = max(largestRenderRestoreClipShift, clipShift)
+    }
+
+    /// The vertical bounds origin of every clip view this pane sits inside,
+    /// innermost first — a pane is never a scroll view's document itself;
+    /// it rides inside SwiftUI scroll views (and, on the rail's tall cards,
+    /// a capped wrapper inside one).
+    func enclosingClipOrigins() -> [CGFloat] {
+        var origins: [CGFloat] = []
+        var ancestor = superview
+        while let view = ancestor {
+            if let clip = view as? NSClipView { origins.append(clip.bounds.origin.y) }
+            ancestor = view.superview
+        }
+        return origins
     }
 
     /// **18l-b U3 — the flagged shape's observation seam** (the R3-4
@@ -1808,8 +1834,14 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
                 self.renderRestoreScheduled = false
                 guard let view = self.view, self.publisher != nil,
                       view.window != nil else { return }
+                // 18l-b U3 (the TK2 §3 rider): the clips are read on both
+                // sides of the viewport layout — the observation only; the
+                // exam's verdict and its mechanism are in the U3 record.
+                let clipsBefore = view.enclosingClipOrigins()
                 view.textLayoutManager?.textViewportLayoutController.layoutViewport()
-                view.noteRenderRestore()
+                let clipsAfter = view.enclosingClipOrigins()
+                view.noteRenderRestore(
+                    clipShift: zip(clipsBefore, clipsAfter).map { abs($1 - $0) }.max() ?? 0)
             }
         }
     }
