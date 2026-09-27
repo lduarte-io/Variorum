@@ -1094,7 +1094,7 @@ closes your record.
 
 ## U4 RECORD (implementer: `opus-implementer`, 2026-09-27)
 
-**NOT DONE (first line — against what shipped):** PENDING — written at the unit's close.
+**NOT DONE (first line — against what shipped):** (1) **#153's (b) is NOT built** — no clicked place rides a landing (Read ▸ Scroll would need a third `ReadTierClickPlace` tier; Read ▸ Pages' wire is cheap — CoreText's index + `PageBlockRange` + U0's `sourceOffset` — but either lets Read's own pages seed a caret at a character, #149's open question, and Pages alone would split her two Read faces): product calls beyond the brief's fence, hers; (2) the sidebar note box's "edit here" in Index now lands at the block's START (was the END, the blank line) — NOT at her remembered caret, which the `FocusedBlock` memory holds and its Outline branch already uses: named in #153, not built; (3) **THE KEYBOARD STALL** (2 Terminal sightings at `mode-roundtrip` in the harness, then 10/10 across both builds) is recorded, NOT traced — outside this unit's surface and not on its road; owner proposed 12; (4) row 85 (O-2, Write's ⌘↓ ring) NOT touched — no Write ring/overlay refresh in this diff; stays 12 (U-B5 its last chance); (5) no KnownIssues / AppSpec / TEXTKIT2_NOTES / canon edits — QUESTIONS #153 (filed, as the brief asks) and #97's dated pointer are the only ledger edits; the rest is drafted under OWED AT CLOSE; (6) zero `Sources/`, `Sync/`, schema, `EditorTextView`, `BlockRangeIndex`, `PaneTextAuthority`; `PaneSurface.swift` gets ONE DOC LINE (its `PaneCaretLanding` host list), no body — core runs not owed; the iOS build (`LandingTarget` is `Shared/`) is in LIVE STATUS 7.
 
 ### LIVE STATUS
 
@@ -1106,8 +1106,8 @@ closes your record.
 | 4 | Item 3 — `FlowStoryRow` reads `BookHeightManifest.resolve` (D1) | DONE — **the two rules, traced:** the row stood at `FlowHeightEstimate.honestHeight` (remembered at this width, else the estimate) while the column's manifest — every flow landing's offsets — resolved the story through `BookHeightManifest.resolve` (measured > remembered > derived; a non-positive or non-finite answer falls through). They agree on every REACHABLE input today (a story's input has no measured arm — the flow passes `height: nil` for stories on purpose; and no production road remembers a non-positive story height: `StableSurface` remembers only above its placeholder ceiling, the empty read remembers 20, a persisted record refuses ≤ 0). **Pin** `FlowStoryHeightOneBrainTests` (NEW; the contract "for every input the row's height IS the manifest's") committed first (`e26bc74a`), run on the pre-fix tree: **RED, exactly and only the 6 degenerate combinations** (a remembered height ≤ 0 at the matching width — row 0/−5, manifest the estimate), the 30 reachable ones already agreeing (`18lb-u4-item3-red.log`) — the drift made visible, NOT a user-visible defect. **Fix `2442731b`** — ONE input builder, `FlowHeightEstimate.storyInput(id:remembered:columnWidth:estimate:)`, asked per ROW (`FlowStoryRow.honestHeight` = `BookHeightManifest.resolve(storyInput(…)).0`) and per COLUMN (`heightManifest`'s `.post` case) — the Outline's `outlineRowInput` / the Index's `indexPaneRowInput` shape; `FlowHeightEstimate.honestHeight` kept as a forward through it (its `ReadingFlowEstimateTests` arms ride unmodified). **THE PROOF — green, the pre-existing pin files UNMODIFIED** (`git diff 3389fedb..HEAD` of `ReadingFlowLandingTests` · `BookOutlineLandingTests` · `ReadingFlowEstimateTests` · `BookIndexEditingTests` · `IndexClickCaretTests` · `BookIndexLandingTests`: empty): **30 tests / 5 suites** (`FlowStoryHeightOneBrainTests` · `ReadingFlowLandingTests` 8 · `BookOutlineLandingTests` · `BookOutlineRowsTests` · `ReadingFlowEstimateTests`) in 58.9 s (`18lb-u4-item3-proof.log`) — the flow landings at `top=0`, ≤ 1 re-land, the twelve-story mount realizing 1 surface: row 58's drift class did not re-enter. Cost: the row's body builds one small value + a string id per evaluation (O(1), same observation dependency on `memory.size` as before) |
 | 5 | The walk (USE, both voices, per-step guarded) | DONE — **driven through VisualWalk's guarded doors as the NEW seeded scenario `book-landings`** (`cdb9f3f0`, fixture fixes `6d1164f5`; appended LAST in `SCN_ORDER` so no earlier recipe changes; README row) on the stamped build of this tree (`cdb9f3f0`: app `6a42e0ec8ad7`, core `4b9d3b2f7991`), the machine author-free (HID idle 88 min, zero instances, own `caffeinate -d`): **PASS 7/7 in BOTH voices** — `notes/plans/vis-walks/2026-09-27/081039/` (report.md, run.log, captures `{terminal,study}/book-landings/01…06`). Her Console, verbatim (Terminal · Study): **A — the Outline landing ended by a mode switch** (the navigator's Copper Beeches row, Index 0.3 s later, one guarded act): the Index landed the story (`landing surface=BookIndex rows=26 target=25 … hops=1 … end=settled top=0` — the click took) and **NO `BookOutline` line** in either voice; **A's control** (back in Outline, Beryl Coronet's row, no switch): `landing surface=BookOutline rows=26 target=23 offset=1975 total=36475 derived=1 exact=1 hops=0 content=2 ms=1026 end=settled top=0` · `… offset=2256 total=41829 … hops=0 … end=settled top=0`; **B — Read ▸ Scroll, the carry lands the story on the flow's manifest**: `landing surface=ReadingFlow rows=28 target=23 offset=28670 total=69990 derived=24 exact=0 hops=2 content=6 ms=1488 end=settled top=0` · `… offset=101317 total=142637 derived=20 … hops=2 … ms=1825 end=settled top=0`; **C — the click-through on the story's third paragraph** ("He was a man of about fifty…", a block over her blank line — `nl=1` asserted): the Index pane live with **`sel=0,0`, caret line 0, first paragraph — "on-text", never the blank line** (the Index's block landing `landing surface=BookIndex rows=26 target=-1 offset=-1 … hops=0 … end=settled top=0`); capture `04` read by this seat: the paragraph live at the pane's top in its ring, the caret before "He", the ring's empty last line empty; **D — back to the flow + a long wheel up through the stories above**: the carry's landing `… hops=2 … end=settled top=0`, and the page two seconds after the wheel BYTE-IDENTICAL to the page at +1.5 s (`cmp`) in both voices — heights honest, nothing jumped. The dev store's voice restored to Terminal (run.log). **THE SCENARIO'S TEETH, and the `hops=2` attribution, on a pre-U4 scratch build** (a worktree at the kickoff tree `3389fedb` — App/ differs, the core `4b9d3b2f7991` is this tree's, so the stamp rule admits it; built by `build.sh --src`, run by `VW_DD`, the worktree removed after): **`book-landings` FAILS 4/7 in BOTH voices, exactly the predicted rows** (`vis-walks/2026-09-27/081642/`) — **A:** the pre-U4 Outline filed `landing surface=BookOutline rows=26 target=25 offset=2149 total=22400 derived=0 exact=1 hops=0 content=0 ms=1007 end=settled top=0` (Study `… offset=2455 total=25597 … ms=1016 …`) about a second after the switch — a "settled" landing in her Console for an Outline already gone (item 1's artifact, seen from her side); **C:** the click-through's caret at **`593,0` of a 593-character block — ON THE BLANK LINE**, caret line 10 (Terminal) / 8 (Study) (S4, reproduced in her own Sherlock). The control, B and D pass on both builds; **the flow's `hops=2` is identical on the pre-U4 build** (`… derived=17/18 … hops=2 … end=settled top=0`) — pre-existing, the flow's own corrections from quiet over estimated stories (budget 6), not item 3's (which is behaviour-preserving on every reachable input) |
 | 6 | The harness as regression cover (the full seeded suite, both voices) | DONE — the full seeded suite (14 scenarios with `book-landings`), both voices, on the stamped build of this tree: `notes/plans/vis-walks/2026-09-27/082126/`. **Study: 0 FAIL · 0 ERROR · 0 XPASS**, XFAIL 3 (S3 on `index-click` + `readedit-click`, B5 on its measured recipe), `takes-landing` and `book-landings` PASS. **Terminal: `mode-roundtrip` FAIL, then 7 ERRORs** — its ⌘3 never reached Read and the pass drifted from there (THE KEYBOARD STALL below: an intermittent harness sighting, NOT attributed to U4 — measured on both builds). **Terminal re-covered, the same build, clean:** the pass's prefix `note-reopen … mode-roundtrip` 5/5 PASS (`090324/`) and `index-click … read-landing` in pass order (`091039/`: `index-click` + `readedit-click` XFAIL (S3, labelled), the outline pair, the B5 pair (plain in Terminal) and `read-landing` PASS); `takes-landing` + `book-landings` PASS in `082126`. **So every seeded scenario has a clean run on this build in both voices, reading the baseline exactly: 0 FAIL · 0 ERROR · 0 XPASS, XFAIL 5 = the two labelled knowns (S3 ×4, B5 in Study).** The dev store's voice ends Terminal (read back from each run.log); zero instances after |
-| 7 | Closing runs (the landing family + the book/flow suites + the eleven Tutorial suites) | NOT-STARTED |
-| 8 | Self-assessment | NOT-STARTED |
+| 7 | Closing runs (the landing family + the book/flow suites + the eleven Tutorial suites) | IN-PROGRESS — `App/Variorum/DerivedData/18lb-u4-closing.sh`: U3's 191 grep-verified suites (U2's 101 — the landing family, the whole Takes board family, the Read + book landing family, the eleven Tutorial suites — ∪ the pane family) ∪ the 27 book/flow/read suites it lacked ∪ U4's three new ones = **221 suite type names, each grep-verified as a `@Suite`**; zero instances, the machine author-free: result PENDING. The iOS build (`LandingTarget` is `Shared/`): PENDING |
+| 8 | Self-assessment | DONE (below) |
 
 - Deaths / resumes: none.
 - Reverts in flight: none.
@@ -1187,3 +1187,101 @@ before the next click — a main thread parked in `NSTextView`'s mouse-tracking 
 `nextEventMatchingMask:`) would confirm the shape. **Proposed owner: 12 (Hardening)** beside KnownIssues row 92's
 real-input class — or the orchestrator's call whether it wants a KnownIssues row now (a real user would meet it as
 "my keystrokes went nowhere until I clicked again"; no report of hers names it).
+
+### SEAM FILES THIS DIFF TOUCHES (`git diff 3389fedb..HEAD` — the reviewer reads this first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `Features/BookView/BookView.swift` | item 1: `.onDisappear { landing.end() }` beside the Outline's `.onAppear`, citing R2-12 | the Outline's landing, its policy, `landOutlineReveal`, every other modifier |
+| `Features/BookView/BookIndexEditModel.swift` | item 2: one private `goLive(…caret:)` both roads share; `takePendingLiveBlock` arms `.start`; docs | `makeLive(…clickOffset:)`'s signature and its `.offset` arm (U0), `caretLanding(forVariant:)`, the authority, flush, teardown |
+| `Shared/LandingTarget.swift` | item 2: `utf16Offset` DELETED (set by no production site), the comment naming the `FocusedBlock` road; header | `postID`, `blockID`, every producer's call (all used the two-field init) |
+| `Features/BookView/BookIndexView.swift` · `Features/Tray/BlockHistoryPane.swift` · `Surface/PaneSurface.swift` | comments only — the three places that named the Index landing as `.leave` or cited the deleted field (PaneSurface: ONE doc line in the `PaneCaretLanding` host list) | every body |
+| `Features/BookView/ReadingFlowView.swift` | item 3: `FlowHeightEstimate.storyInput` (ONE input builder); `FlowStoryRow.honestHeight` = `BookHeightManifest.resolve(storyInput(…)).0`; `heightManifest`'s `.post` case through the same builder; `honestHeight(remembered:…)` a forward | the estimate, the reservation, the near/far virtualization, `StableSurface`, the landing, the manifest's other rows |
+| Tests | NEW `OutlineLandingTeardownTests` (1), `IndexLandingCaretTests` (2), `FlowStoryHeightOneBrainTests` (1) | every pre-existing pin file byte-unmodified (`git diff 3389fedb..HEAD -- App/Variorum/VariorumTests/` touches only the three new files) |
+| `Tools/VisualWalk/` | NEW seeded scenario `book-landings` (appended LAST) + README row | every other scenario, the guard order, `lib.zsh` |
+| `notes/QUESTIONS.md` | #153 filed; #97 gains a dated pointer | — |
+
+**The review cast — my call, stated plainly: `opus-reviewer` (her kickoff's), the diff does NOT drift onto the editor
+seam or a default's meaning.** No `EditorTextView`, `PaneSurface` body, `PaneTextAuthority`, `BlockRangeIndex` or
+read-tier drawing is touched (one doc line in `PaneSurface.swift`); `PaneCaretLanding`'s DEFAULT (`.leave`) is unchanged
+for every host that passes nothing — item 2 changes what ONE host (the book Index's landing) passes, inside the #97 edge
+her ruling owns (#153 carries it, PROVISIONAL). If the orchestrator reads #97's START/END as "a default's meaning", item
+2 is the one piece a Fable eye would weigh.
+
+### JUDGMENT CALLS (each reversible, the reversal named)
+
+1. **Item 1's pin takes the MODE-SWITCH road, not R2-12's window teardown** — the Outline's authority is `BookView`'s
+   `@State`, so a torn-down window takes it along (safe); a mode switch is the Outline's own leak. *Reverse by* a
+   teardown-form pin (it would pass on both trees — hollow for this surface).
+2. **Item 2 builds #153 (a): delete + `.start`** (THE ITEM-2 TRACE AND DECISION). *Reverse by* one line —
+   `takePendingLiveBlock`'s `caret: .start` → `nil` (`.leave`, option (c)); (b) is a unit of its own.
+3. **Item 2's `.start` rides every Index landing road** (the flow's click-through, the paged click-through, the note
+   box's "edit here") — they share `requestLanding` → `takePendingLiveBlock`, and all three parked on the blank line.
+   *Reverse by* a per-road caret on `LandingTarget` (a field this unit just deleted — which is why it is not the call).
+4. **Item 3 keeps `FlowHeightEstimate.honestHeight` as a FORWARD through the one brain** rather than deleting it: its
+   `ReadingFlowEstimateTests` arms ride unmodified. *Reverse by* deleting it and moving those four arms onto `storyInput`
+   (a pin edit).
+5. **Item 3's agreement pin reds only on degenerate inputs no production road writes** — stated as the drift made
+   visible, not a user-visible defect; the landing suites riding unmodified are the brief's proof. *Reverse by* dropping
+   the pin (the collapse still holds by construction).
+6. **The walk is the NEW seeded scenario `book-landings`** (the U2 precedent) — a standing tripwire proven to red 4/7 on
+   the pre-U4 build, with two controls so row A's zero-line claim cannot pass vacuously. *Reverse by* removing its
+   `SCN_ORDER` entry (the scenario is self-contained and last).
+
+### COST SHAPE (P1 / P3), stated
+
+- Item 1: one `end()` per Outline disappearance (a cancel and four assignments). Nothing at scroll or keystroke rate.
+- Item 2: one enum assignment per landing; the pane's `.start` arm is an existing `setSelectedRange` on the liveness
+  transition. Nothing new at any rate.
+- Item 3: `FlowStoryRow`'s body builds one small `Input` + a short id string per evaluation where it compared one width
+  before — O(1), the same `memory.size` observation dependency; the manifest (built per landing) is unchanged in cost.
+  P3 unchanged — the flow realizes exactly what it did (the twelve-story mount pin: 1 surface).
+
+### NOTICED, NOT TOUCHED
+
+1. **THE KEYBOARD STALL** (its own section above) — a Write-editor road sighting; owner proposed 12.
+2. **The flow's landings take `hops=2` on the Sherlock book** (`derived=17–24` estimated stories above the target) —
+   identical on the pre-U4 build; the flow's own corrections from quiet (row 100), inside its budget of 6.
+3. **A re-born live Index pane re-applies its host's landing** (`paneCaretLanding` persists for its take until the next
+   `makeLive`): pre-existing shape — U0's click `.offset` and the old `.leave` re-landed the same way; with `.start` a
+   re-born pane lands at the block's start where it used to land on the blank line.
+4. **Terminal's navigator row label carries the selection marker** once its note is focused (`⠿, <marker>, <name>`) —
+   an AX-label fact the walk met (the control moved to another story); not a product issue.
+
+### OWED AT CLOSE (drafted for the orchestrator — nothing below was applied)
+
+- **THE LEDGER:** row 7 → **CLOSED** (item 1 red-first + fix; item 2 decided on the trace, #153 PROVISIONAL (a) delete
+  + `.start`; item 3 collapsed with every landing pin unmodified; walked both voices; the new tripwire reds 4/7 pre-U4);
+  row 8 (O-2) — not touched at U4 either; U-B5 remains its last chance.
+- **KnownIssues:** (a) a row for THE KEYBOARD STALL if the orchestrator wants it tracked now (owner 12, beside row 92's
+  real-input class); (b) row 58's drift class — the flow's half is now one brain (an optional line on the row: "the
+  reading flow's story rows read the manifest's precedence since 18l-b U4 (D1)").
+- **AppSpec:** none required (no contract line names the Index landing's caret); an optional §12 pointer beside U0's:
+  *"a landing into the book Index puts the caret at the landed block's start (#153, PROVISIONAL)."*
+- **MOBILE PARITY:** nothing mobile-visible (`LandingTarget` is `Shared/` but no phone surface builds one; the phone's
+  book surfaces are their own).
+- **Her bundle:** #153 joins #149–#152 (one line to change either way).
+
+### SELF-ASSESSMENT
+
+**Strongest evidence.** Every item was pinned before it was fixed and each pin ran RED on the tree that preceded its
+fix — item 1: `DONE: settled at top=0.0 after 0 hops, 1014 ms` written by an Outline landing whose surface was gone;
+item 2: caret **224 of 224 / 247 of 247**, on the empty line; item 3: exactly the 6 degenerate combinations, the 30
+reachable ones already agreeing — and each fix turned exactly its pin green. Item 2's decision stands on a trace of all
+three `requestLanding` producers, not on the charter's lean, and the one factual slip in my first draft (Pages' wire
+"impossible") was caught at the code and corrected in the record, #153 and three comments before anything rested on
+it. The walk is USE through the guarded harness in both voices and her Console's lines are quoted verbatim; the new
+`book-landings` scenario was run against a pre-U4 scratch build and reds **4/7 in both voices, exactly the two claims
+it guards** (the phantom `BookOutline end=settled`; the caret at 593 of 593), so it is a standing tripwire with teeth.
+Every pre-existing pin file is byte-unmodified.
+
+**Weakest points, for the reviewer.** (a) **#153 is a product-adjacent call made PROVISIONAL**: `.start` is the most
+defensible of the three readings on the record I found, but "where the caret goes" is hers — the note box's "edit here"
+in particular now lands at the block's start where its Outline branch lands at her remembered caret, an asymmetry I
+chose not to close (beyond the fence). (b) **The keyboard stall is unexplained**: two sightings on this build, none in 5
+tries on the pre-U4 build, then 10/10 across both — I attribute it away from U4 by construction (no Write, no event
+handling in the diff) and by its clustering in time, not by a captured stack. (c) Item 3's agreement pin reds only on
+inputs production never writes — honest as a drift guard, weak as a defect pin. (d) Item 1's pin reads the DEBUG story
+(R2-12's own form); the Release signpost's silence is walked (`book-landings` row A), not unit-pinned. (e) The walk's
+row C clicks the story the carry landed at the top — a deep landing, but on the flow's first screen, not after a long
+scroll. **U4 — DONE (implementer), pending the closing runs; the `opus-reviewer` cold review follows.**
