@@ -322,6 +322,10 @@ nonisolated struct LandingFacts: Equatable {
     /// does not know the row.
     var targetIndex: Int = -1
     /// The target's computed top in the column's content space; −1 unknown.
+    /// (18l U1: on note Read — `ReadNote`, `ReadNoteEdit` — the rows stand at
+    /// the lazy column's own realization, not at the manifest, so `offset`
+    /// and `total` are the manifest's MODEL of that column: its own geometry
+    /// where `exact=1`, an estimate over never-drawn blocks elsewhere.)
     var offset: CGFloat = -1
     /// The column's whole computed content height.
     var total: CGFloat = 0

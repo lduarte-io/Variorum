@@ -82,7 +82,7 @@ struct ReadEditPane: View {
                     heights.stand(contentWidth: width, typeScale: 1)
                 }
                 .padding(.horizontal, 34)
-                .padding(.vertical, 26)
+                .padding(.vertical, Self.columnLead)
                 .frame(maxWidth: .infinity, alignment: .center)
             }
             .background(tokens.surface)
@@ -184,6 +184,11 @@ extension ReadEditPane {
     /// the pane's top edge (batch B's nit on the book's flush landing).
     static let restingAnchor = UnitPoint.center
 
+    /// The column's top padding — above the first block row in the scroll's
+    /// content space (the landing manifest's `leading`, ladder round 1,
+    /// MINOR-3). The value the column always had.
+    static let columnLead: CGFloat = 26
+
     /// The landing: the block's ROW IDENTITY (its placement id) is what the
     /// scroll reader lands on, unanimated (the Outline lesson) — at this
     /// pane's resting anchor, or at the viewport fraction a mode switch
@@ -201,7 +206,8 @@ extension ReadEditPane {
         heights.stand(contentWidth: box.contentWidth, typeScale: 1)
         heights.adopt(postID: model.postID, rows: rows)
         let facts = LandingFacts(
-            manifest: heights.manifest(rows, width: box.contentWidth), anchor: placementID)
+            manifest: heights.manifest(rows, width: box.contentWidth, leading: Self.columnLead),
+            anchor: placementID)
         landing.land(placementID, facts: facts) { id in proxy.scrollTo(id, anchor: anchor) }
         // The seed (`LandingAuthority.tops`' reason): a block already where
         // its anchor puts it reports nothing when the aim moves nothing.

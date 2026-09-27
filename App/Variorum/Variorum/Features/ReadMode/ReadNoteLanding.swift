@@ -216,9 +216,18 @@ final class ReadNoteHeights {
 
     /// The column as heights and offsets — built at a LANDING only
     /// (arithmetic over the rows in hand, ∝ rows; no read, no layout).
-    func manifest(_ rows: [Queries.TOCRow], width: CGFloat) -> BookHeightManifest {
+    ///
+    /// `leading` is everything above the first block row in the scroll's
+    /// CONTENT space (the manifest's contract — ladder round 1, MINOR-3): the
+    /// edit column's top padding; the page's two paddings, its header row and
+    /// one row gap. The offsets are then absolute, and a landing whose rows
+    /// above are all measured (`exact=1`) states the column's own geometry.
+    /// Where rows above are arithmetic they are the manifest's MODEL of a
+    /// column that stands at SwiftUI's own realization (the rows are lazy —
+    /// QUESTIONS #151), which `LandingFacts`' doc says.
+    func manifest(_ rows: [Queries.TOCRow], width: CGFloat, leading: CGFloat) -> BookHeightManifest {
         BookHeightManifest(
-            width: width, spacing: metrics.rowSpacing, leading: 0,
+            width: width, spacing: metrics.rowSpacing, leading: leading,
             inputs: rows.map { input($0.placementID) })
     }
 
@@ -289,6 +298,9 @@ final class ReadLandingBox {
     var scroll = ReadScrollFacts()
     /// The rows' stack width — the manifest's measure.
     var contentWidth: CGFloat = 0
+    /// The page face's header row height, measured (the page's `leading`
+    /// includes it — ladder round 1, MINOR-3). The edit face has no header.
+    var headerHeight: CGFloat = 0
     /// The pending landing's anchor fraction.
     var anchorY: CGFloat = 0.5
     /// Where each realized row last said it was (viewport-relative top,

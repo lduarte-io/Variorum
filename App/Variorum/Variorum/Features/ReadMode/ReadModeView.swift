@@ -768,6 +768,11 @@ private struct ReadPageColumn: View {
                 LazyVStack(alignment: .leading, spacing: 14 * typeScale) {
                     ReadPageHeader(session: session, postID: postID, page: page,
                                    words: totalWords)
+                        // 18l U1 (ladder round 1, MINOR-3): the header is part
+                        // of the page's `leading` — measured, never guessed.
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
+                            box.headerHeight = $0
+                        }
                     // Ladder R1-3: the ForEach identity (the placement id)
                     // is the landing anchor — no explicit `.id` on the row.
                     ForEach(Array(model.rows.enumerated()), id: \.element.placementID) { i, row in
@@ -793,11 +798,11 @@ private struct ReadPageColumn: View {
                     heights.stand(contentWidth: width, typeScale: typeScale)
                 }
                 .padding(.horizontal, 60)
-                .padding(.vertical, 46)
+                .padding(.vertical, Self.pagePadding)
                 .background(page.paper)
                 .clipShape(RoundedRectangle(cornerRadius: 6))
                 .shadow(color: .black.opacity(dark ? 0 : 0.10), radius: 12, y: 3)
-                .padding(.vertical, 28)
+                .padding(.vertical, Self.roomPadding)
                 .frame(maxWidth: .infinity)
             }
             // 13u2 UNIT B (her item 19): the room behind the CREAM PAGE is the
@@ -854,6 +859,12 @@ extension ReadPageColumn {
     /// This page's own standing anchor: near the top, with a little air above.
     static let restingAnchor = ReadModeView.pageRestingAnchor
 
+    /// The paper's own vertical padding, and the room's around the paper —
+    /// named so the landing manifest's `leading` reads the numbers the page
+    /// draws with (ladder round 1, MINOR-3). The values it always had.
+    static let pagePadding: CGFloat = 46
+    static let roomPadding: CGFloat = 28
+
     /// The landing: the block's row identity (its placement id), unanimated,
     /// anchored near the top of the page — or, when a mode switch carried a
     /// height for this block, at that fraction of the viewport instead
@@ -868,8 +879,12 @@ extension ReadPageColumn {
         box.anchorY = anchor.y
         heights.stand(contentWidth: box.contentWidth, typeScale: typeScale)
         heights.adopt(postID: postID, rows: rows)
+        // Everything above the first block in the content space: the room's
+        // and the paper's padding, the header row, and one row gap.
+        let leading = Self.roomPadding + Self.pagePadding + box.headerHeight + 14 * typeScale
         let facts = LandingFacts(
-            manifest: heights.manifest(rows, width: box.contentWidth), anchor: placementID)
+            manifest: heights.manifest(rows, width: box.contentWidth, leading: leading),
+            anchor: placementID)
         landing.land(placementID, facts: facts) { id in proxy.scrollTo(id, anchor: anchor) }
         if let residual = box.residual(placementID) { landing.noteTop(placementID, residual) }
     }

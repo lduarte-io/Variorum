@@ -109,13 +109,15 @@ struct ReadNoteLandingArithmeticTests {
         #expect(blank == (heights.metrics.blockChrome + heights.metrics.emptyLine).rounded(),
                 "a blank take stands its one line")
         heights.learn("p0", height: 321)
-        let manifest = heights.manifest(rows, width: 600)
+        let manifest = heights.manifest(rows, width: 600, leading: 0)
         #expect(manifest.height(of: "p0") == 321 && manifest.source(of: "p0") == .measured)
         #expect(manifest.source(of: "p2") == .derived)
         #expect(manifest.derivedCount == 2)
         #expect(manifest.offset(of: "p1") == 321 + heights.metrics.rowSpacing)
+        #expect(heights.manifest(rows, width: 600, leading: 26).offset(of: "p0") == 26,
+                "the leading puts the first row where the column draws it (MINOR-3)")
         heights.stand(contentWidth: 400, typeScale: 1)
-        #expect(heights.manifest(rows, width: 400).source(of: "p0") == .derived,
+        #expect(heights.manifest(rows, width: 400, leading: 0).source(of: "p0") == .derived,
                 "a height measured at another measure is not this row's height here")
         #expect(heights.derived("p0") > long, "narrower, so the long paragraph wraps taller")
     }
@@ -180,7 +182,7 @@ struct ReadNoteLandingArithmeticTests {
         let rows = Self.rows(["To Sherlock Holmes she is always the woman.\n",
                               "I had seen little of Holmes lately.\n"])
         heights.adopt(postID: "a scandal in bohemia", rows: rows)
-        let facts = LandingFacts(manifest: heights.manifest(rows, width: 684), anchor: "p1")
+        let facts = LandingFacts(manifest: heights.manifest(rows, width: 684, leading: 153), anchor: "p1")
         for surface in [LandingSurface.readNote, .readNoteEdit] {
             let line = LandingSignpost.line(
                 surface: surface, facts: facts, corrections: 0, contentMoves: 1,
