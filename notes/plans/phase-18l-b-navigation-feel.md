@@ -1408,14 +1408,64 @@ follows; your self-assessment closes your record.
 | # | Piece | Status |
 |---|---|---|
 | 1 | Reading (the brief's "Read first" list, in order, own context) | DONE — this file whole (HER KICKOFF MESSAGE, BINDING PRINCIPLES, CAST & DISCIPLINE, BASELINES, THE UNIT ROSTER, HER OPEN ITEMS, ENVIRONMENT TRAPS, THE LEDGER, the U2 BRIEF + RECORD + bloom-race fix pass + both acceptances, the U3 BRIEF + RECORD (THE B5 REPORT) + acceptance, the U4 BRIEF + RECORD + acceptance, the U-B5 BRIEF); KnownIssues rows 42 · 85 · 88 whole; the 18l record's U0b BRIEF + RECORD whole + acceptance, U0's ITEM 2 (the settle net), U-VIS's probe endpoint + TABLE + B5's HONEST VERDICT; the 18k C6 RECORD whole + adjudication and the C6b RECORD whole + adjudication; `TEXTKIT2_NOTES.md` IN FULL; `SessionResiliencyProtocol.md` whole; the code: `EditorTextView.swift` whole (the ⏎ door, `setFrameSize`/`applyFrameHeight`/the room, β1, `makeEditor`, `TypewriterScrollView`), `JumpPrimitive.swift` whole (`ReadingAnchor`, C6's re-assert, C6b's live range), `StructuralSeamEdit.swift` whole, `EditorSurfaceController` (`applyDifferential`, `renderFull`, `insertEmptyBlock`, the typed Return's act, `runStructural`, `applyStructuralResult`, `applyDifferentialStructural`, the oracle), `EditorViewModel` (`attach`'s wiring, `setSurfaceContent`, `applySeamEdit`, `adoptRewrite`, `storageDidEdit`, `typedReturnAct`/`runTypedReturn`, the arrival landing + `revealLanding`, `parkAnchorRestore`, `keepingReadingPosition`, the consumers, `jumpToDocumentEnd`, `updateCaretContext`, `overlayLayoutDidSettle`, `refreshBadges`, `refreshDecorations`, `topVisibleOffset` + helpers, `readingAnchor`, `restoreReadingAnchor`), `EditorView.swift`'s coordinator + `ScrollAnchorController`, `LongBlockLayout.swift` whole, `VisualWalkProbe.swift` (the facts the recipe reads); `Tools/VisualWalk/` (README, `visual-walk.sh`, `build.sh`, the B5 pair + the seeded order) |
-| 2 | INSTRUMENT the deterministic recipe (frame · clip · the first visible line's document y · its fragment's estimated-vs-laid-out state, across the tail ⏎'s edit and display pass) | IN-PROGRESS — a TEMPORARY DEBUG + env-gated instrument (working tree only, never committed; restored by `git checkout HEAD --`), run on the recipe (the Study pass through `b5-refont`) |
-| 3 | TRACE the mechanism | NOT-STARTED |
+| 2 | INSTRUMENT the deterministic recipe (frame · clip · the first visible line's document y · its fragment's estimated-vs-laid-out state, across the tail ⏎'s edit and display pass) | DONE — a TEMPORARY DEBUG + env-gated instrument (`B5Trace`, working tree only, never committed; a copy in `App/Variorum/DerivedData/18lb-ub5/`): a content-free `os.Logger` line (category `B5`) at the ⌘↓ and ⏎ keyDowns (with a CENSUS of the fragments above the viewport — laid-out vs estimated), around `applySeamEdit`, the structural result, `layout()`, `prepareContent`, `viewWillDraw`, `setFrameSize`, the settle hop, the long-block pass and every clip-bounds change; each line carries frame · clip · usage height · the viewport's bounds and range · a REFERENCE line (the first visible line at the ⏎) with its container y, its screen y and its fragment's state · the first visible line · the last fragment. Run on the recipe — the Study pass through `b5-refont`, the stamped instrumented build (`notes/plans/vis-walks/2026-09-27/102834/`): **B5 REPRODUCED (XFAIL 2), at its LARGE size — the first visible line 45591 → 44477, ~1,100 characters of text** (U-VIS's round-1 final run's magnitude); `b5-refont` PASS. Trace: `DerivedData/18lb-ub5/trace1.txt` (B5) · `trace1-refont.txt` (the re-font road) |
+| 3 | TRACE the mechanism | DONE — THE TRACE below |
 | 4 | ATTRIBUTE (macOS-27 / our-commit / pre-existing / undetermined) | NOT-STARTED |
 | 5 | FIX inside the fence (red-on-old: the harness's Study XFAIL → PASS on the fix and red on its revert; an in-suite pin if the trace admits one) | NOT-STARTED |
 | 6 | Row 85 (O-2) — the last-chance may-take decision | NOT-STARTED |
 | 7 | WALK (USE, both voices, per-step guarded) + the full seeded harness both voices | NOT-STARTED |
 | 8 | Closing runs (the jump/anchor/typewriter family, `WriteTopAirTests` + kin, the eleven Tutorial suites) | NOT-STARTED |
 | 9 | Self-assessment | NOT-STARTED |
+
+### THE TRACE (inputs → the page moved; every number from the instrumented run `102834`)
+
+**The act, located to one call.** The tail ⏎ (caret at the note's end, the segmentation chip ON) is claimed by the
+typed Return (`TypedReturn.act` → `.emptyBlock(.below, …)`) and lands through `insertEmptyBlock` →
+`runStructural` → `applyStructuralResult` → **the DIFFERENTIAL road** (`seam: .divide`, an empty successor —
+`StructuralSeamEdit` derives ONE storage edit: `"\n"` appended at the document end), whose storage write is
+`EditorViewModel.applySeamEdit` (`beginEditing` · `replaceCharacters` · `setAttributes` · the markdown restyle ·
+`endEditing`). The reference line is the first visible line at the ⏎ (offset 45591):
+
+| # | Where | clip | usage | frame | ref line (container y · state · SCREEN y) | first visible line |
+|---|---|---|---|---|---|---|
+| 17 | ⏎ keyDown | 18462.9 | 18940.8 | 19749.5 | 18456.8 · laid · **17.9** | 45591 |
+| 19 | `applySeamEdit` entry | 18462.9 | 18940.8 | 19749.5 | 18456.8 · laid · **17.9** | 45591 |
+| **20** | **`applySeamEdit` exit** | **18462.9** | **19633.2** | 19749.5 | **19119.2 · laid · 680.3 — MOVED +662.4** | **44477** |
+| 22–25 | the next `layout()` (the frame follows usage) | 18462.9 | 19633.2 | 20442.0 | 19119.2 · 680.3 | 44477 |
+| 26–33 | display pass · settle hop · display | 18462.9 | 19633.2 | 20442.0 | 19119.2 · 680.3 | 44477 |
+
+**Mechanism: TextKit re-estimates the geometry ABOVE the viewport while it processes the edit, and re-bases the
+laid-out viewport onto the new estimate — in document space, under a clip nothing moves.** Between the entry and
+the exit of `applySeamEdit` nothing lays anything out (the storage is inside `beginEditing`), so the move is
+TextKit's own processing of the edit at `endEditing`: the one-line edit grew TK2's usage height by **+692.4 pt**
+(one line is ~24–30) and moved the laid-out fragment of a line FAR above the edit by **+662.4 pt** — its state
+still `layoutAvailable`, only its origin re-derived. The clip stayed at 18462.9 through every later pass, so the
+screen shows text ~a page EARLIER (captures `02-return` vs `01-cmd-down`: "You have but to name it." from
+near the top to near the bottom; the new caret block off-screen below, footer `block 263/263`). The next
+`layout()` then viewport-lays out what now sits under the unmoved clip (the viewport range 45510…46376 →
+44018…45640) and the frame follows usage; nothing ever re-reads the reading line.
+
+**Why only after a full re-render (the recipe's precondition), measured by the census.** At the ⏎, the fragments
+above the viewport: **n=510 · laid 39 · estimated 471 · laid-out run directly above the viewport = 0** (the
+fragment right above the viewport's first is estimated, `45509@18404.8`). The carve's `renderFull` had replaced
+the whole storage (every fragment back to an estimate), its exact restore laid out an island mid-note, and ⌘↓
+(`moveToEndOfDocument:` + AppKit's reveal) laid out ONLY the last page — positioned on the estimate of the ~470
+paragraphs between. The viewport's island FLOATS on estimates. **The re-font road, the contrast:** at its ⏎ the
+census reads **laid 164 · estimated 346 · laid-out run above the viewport = 164** (the first estimate far above,
+`31120@11968`): the edit grew usage by exactly one line (+24.0) and the reference line did not move — `b5-refont`
+PASS. On settled geometry there is nothing above the viewport left to re-estimate.
+
+**The asymmetry the U3 report named, now measured on both sides.** The ⌘↓'s own landing moved the fragments
++8 pt as its viewport layout settled — and the CLIP followed (+8: `18454.9 → 18462.9`, screen y unchanged): that
+is TextKit's compensation inside a viewport-layout pass (18k C6's +29 / −23.23 finding, from its benign side).
+The edit's re-estimation runs in edit PROCESSING, outside any viewport pass, so no compensation exists — and the
+differential road has, by its own 2026-07-07 design, **no restore step at all** ("untouched text never moves" was
+true only while TextKit kept laid-out geometry where it was). The U3 report's hypothesis holds with a correction:
+it is not the ⏎'s PASS that corrects estimates; the ⏎'s EDIT re-bases the island.
+
+**The magnitude is TextKit's re-estimate, so it is history-dependent** (U-VIS ~30 pt · U0b +109/+166 · this run
+662.4): how many paragraphs are laid out where decides how far the estimate moves on re-estimation. That is
+exactly row 88's "the magnitude follows that history".
 
 - Deaths / resumes: none.
 - Reverts in flight: none. **Instrumented working tree: YES (uncommitted, by design)** — `Features/Editor/B5Trace.swift` (untracked, new) + DEBUG-gated hooks in `EditorTextView`, `EditorViewModel`, `EditorSurfaceController`, `EditorView` (`ScrollAnchorController`), `LongBlockLayout`; a copy at `App/Variorum/DerivedData/18lb-ub5/` (gitignored). Restore: `git checkout HEAD --` the five files + `rm` the new one; `git status` clean.
