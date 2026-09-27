@@ -68,6 +68,18 @@ struct PaneRenderRestoreClipTests {
         return nil
     }
 
+    /// The document-space top of the first layout fragment inside the
+    /// viewport TextKit last laid out.
+    private static func firstViewportFragmentTop(_ layoutManager: NSTextLayoutManager) -> CGFloat? {
+        guard let range = layoutManager.textViewportLayoutController.viewportRange else { return nil }
+        var top: CGFloat?
+        layoutManager.enumerateTextLayoutFragments(from: range.location, options: []) { fragment in
+            top = fragment.layoutFragmentFrame.minY
+            return false
+        }
+        return top
+    }
+
     private var longText: String {
         (1...28).map { i in
             "Paragraph \(i). " + Array(
@@ -163,6 +175,7 @@ struct PaneRenderRestoreClipTests {
             pane.fireConvergenceOccasion()                    // THE OCCASION
             await turns(6)
 
+            print("U3-RIDER road 1: clips \(clipsBefore) → \(pane.enclosingClipOrigins()) · visible top \(visibleBefore) → \(pane.visibleRect.minY) · frame \(pane.frame.height) · restores \(restoresBefore) → \(pane.renderRestoresRun) · last shift \(pane.lastRenderRestoreClipShift)")
             #expect(pane.renderRestoresRun > restoresBefore,
                     "non-vacuity: the render restore RAN (\(restoresBefore) → \(pane.renderRestoresRun))")
             #expect(pane.lastRenderRestoreClipShift == 0,
@@ -198,6 +211,7 @@ struct PaneRenderRestoreClipTests {
             await turns(8)
             window.layoutIfNeeded(); window.displayIfNeeded()
             await turns(6)
+            print("U3-RIDER road 2: frame \(heightBefore) → \(pane.frame.height) · restores \(restoresBefore) → \(pane.renderRestoresRun) · largest shift \(pane.largestRenderRestoreClipShift) · clips \(pane.enclosingClipOrigins())")
             #expect(pane.frame.height > heightBefore + 20,
                     "non-vacuity: the re-font really changed the geometry (\(heightBefore) → \(pane.frame.height))")
             #expect(pane.renderRestoresRun > restoresBefore,
@@ -220,16 +234,25 @@ struct PaneRenderRestoreClipTests {
     @Test func textKitsViewportLayoutOverUnmeasuredGrowthOnANestedPane() async throws {
         try await onTheBoard { pane, window in
             let storage = try #require(pane.textStorage)
+            let layoutManager = try #require(pane.textLayoutManager)
             let frameBefore = pane.frame
             let clipsBefore = pane.enclosingClipOrigins()
+            // Where the viewport's first laid-out line sits in the document,
+            // before — the geometry the pass is about to change.
+            let viewportTopBefore = Self.firstViewportFragmentTop(layoutManager)
             storage.beginEditing()
             storage.addAttribute(
                 .font, value: NSFont.systemFont(ofSize: 22),
                 range: NSRange(location: 0, length: storage.length))
             storage.endEditing()
-            pane.textLayoutManager?.textViewportLayoutController.layoutViewport()
+            layoutManager.textViewportLayoutController.layoutViewport()
+            let viewportTopAfter = Self.firstViewportFragmentTop(layoutManager)
             let clipsAfter = pane.enclosingClipOrigins()
             let shift = zip(clipsBefore, clipsAfter).map { abs($1 - $0) }.max() ?? 0
+            print("U3-RIDER adversarial: clips \(clipsBefore) → \(clipsAfter) · frame \(frameBefore.height) → \(pane.frame.height) · viewport's first fragment top \(viewportTopBefore.map { "\($0)" } ?? "nil") → \(viewportTopAfter.map { "\($0)" } ?? "nil")")
+            #expect(viewportTopBefore != nil && viewportTopAfter != nil
+                    && abs(viewportTopAfter! - viewportTopBefore!) > 20,
+                    "non-vacuity: the pass REALLY changed the laid-out geometry around the viewport (\(String(describing: viewportTopBefore)) → \(String(describing: viewportTopAfter)))")
             #expect(pane.frame == frameBefore,
                     "a pane is not vertically resizable: the pass cannot resize it (\(frameBefore) → \(pane.frame))")
             #expect(shift == 0,

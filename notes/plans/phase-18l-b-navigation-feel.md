@@ -791,8 +791,8 @@ until its row below says DONE with a hash; every unverified claim is marked PEND
 | 3 | BUILD the ratified shape (frame lever synchronous, state write deferred) | DONE (this commit) — `PanePublisher.publishHeight` now measures, pulls the FRAME LEVER (`applyFrame` — AppKit's own frame, in the same pass) and schedules the turn; the turn (unchanged) re-measures and writes the `@State`, then chases a frame that did not take with the lever inside `healTurnBudget`. The convergence loop, the budget, the coalescing, `invalidate`, the canary (kept synchronous — reason in its doc), `deliverMeasuredHeight`'s hop (kept — now a second hop), `PaneMeasurement` (FENCED — untouched) and every caller are byte-unchanged; the docs that stated the superseded synchronous reasoning (the file header, the publisher's type doc, the lever's doc, the make closure, `deliverMeasuredHeight`, `remeasure`) now state the ratified shape |
 | 4 | Pins — the new contract through the injectable scheduler + the mounted mechanism pin; red-on-old; the sanctioned edits named | IN-PROGRESS — **RED-FIRST DONE (`8a93eb24`, run on the pre-U3 publisher): `✘ 26 tests in 3 suites … 12 issues` — EXACTLY the four new pins** (`App/Variorum/DerivedData/18lb-u3-redfirst.log`): the frame-now pin (frames `[]`, heights `[46]` before any turn, `[46, 46]` after, a turn still pending), the burst pin (heights `[46, 60]` synchronously — the stale first number written), the heal pin (4 state writes, 2 lever pulls, against 3/3), and **the mounted mechanism pin: the MOUNT wrote its state inside `makeNSView` (1) and the adopted text once more inside `updateNSView` (2)**; the 22 others green (the old publisher pins, the F1 walk). **GREEN on the shape (this commit): `✔ 26 tests in 3 suites passed`** (`18lb-u3-green2.log`). The mounted pin's harness was corrected before its green run (`pump` → `settle`, yielding): its first run on the shape read `stateWrites 0` and the SwiftUI slot 1,517 pt off — a nested runloop pump in a main-actor test body never drains the main queue, so the deferred turn never ran (the precedent `aGapOrVoiceChangeRestoresTheRenderTierWithNoUserEvent` yields for the same reason); its red arm (`stateWritesInsideUpdate`) is synchronous on the old road and does not depend on it — re-proven by R-sync below. **THE SANCTIONED EDITS (named out loud — each pin's own text pinned the synchronous state write as the contract; each edit marked in place):** `PanePublishDoorTests` (in `PaneSurfaceTests.swift`) — (1) `everyPublishCoalescesIntoOneDeferredTurn` ("the sync height write is the working path" → no state before the turn; `[46, 46]` → `[46]`); (2) `theHealReSchedulesWhileTheFrameIsShortAndStopsAtTheBound` ("one sync write + one per healed turn" → one per healed turn); (3) `theHealStopsAsSoonAsTheFrameConverges` (`[46, 46]` → `[46]`); (4) `aDroppedSynchronousWriteIsRepublishedOnTheDeferredTurn` RENAMED `aStateWriteThatDoesNotTakeIsRepublishedOnTheNextTurn` (the dropped write is now the turn's, re-made on the next turn — the net it states, kept); (5) `anInvalidatedPublisherStopsWriting` ("only the pre-invalidate sync write" → none). The canary's arms in (1) and (5) are byte-unchanged. **R-sync RUN (named in `ca7df08d` before it ran): `✘ 26 tests in 3 suites … 19 issues` — EXACTLY the predicted nine red** (the four new pins — the mounted one reading `stateWritesInsideUpdate` **1** at the mount and **2** after the adopted text, so the yielding harness keeps its red arm — and the five sanctioned edits), **the predicted seventeen green** (`18lb-u3-R-sync.log`); restored by `git checkout HEAD --` of the one file, `git status` clean, `applyFrame?(height)` back (grep 2). **THE BLAST RADIUS (the closing set run early, on `7c07fd4d` — the shape, before the rider): `App/Variorum/DerivedData/18lb-u3-closing.sh` = U2's 101 suites ∪ every suite whose file mounts a pane or a pane composer (191 suite type names, each grep-verified): `✘ Test run with 1115 tests in 191 suites failed after 555.833 seconds with 6 issues`, ZERO `Modifying state during view update` lines in the whole run** (`18lb-u3-blast1.log`). The two reds are both POINTER-INJECTION pins — `BlocksWorkbenchFaceTests.aSingleClickOnARowActsWithinTheBudgetAndADoubleStillOpens` (5 issues; row 92 names this very suite) and `ReadModeTests.aRealClickOnAPageReachesTheHostWithTheBlockUnderIt` (1; it posts a real click) — and HID idle read **0 s** at the run's end (someone was at the machine: idle 1,073 s at the start, input at ~03:53). Attribution by an idle-machine isolated re-run: PENDING. Every other pin — the Takes board family, the card-height pins, the Compare/Lenses/Canvas/workbench/Index/Read/Write-panel suites, the eleven Tutorial suites — green UNMODIFIED |
 | 5 | MEASURE AFTER (the same command) | DONE — **the same command** (`cd App/Variorum && ./DerivedData/18k-c3-setB.sh`, grep-counted) on `ca7df08d` (app code = the shape, `e113dd56`), zero app instances: **0 · 0** (two runs), `✔ Test run with 187 tests in 39 suites passed` both (`18lb-u3-setB-after{,2}.log`). **BEFORE 1,106 · 1,106 → AFTER 0 · 0 — the WHOLE family falls, not the majority:** 18k C3's attribution (every flagged line inside `PaneSurface`'s make/update) confirmed from the other side, and the A1 apportionment hypothesis ("expect the majority to fall") exceeded |
-| 6 | THE RIDER — `layoutViewport()` clip-displacement exam of the render restore | IN-PROGRESS — the instrument (this commit, unrun): `PaneTextView.enclosingClipOrigins()` + `lastRenderRestoreClipShift`/`largestRenderRestoreClipShift`, read on both sides of `scheduleRenderRestore`'s `layoutViewport()` (an observation only — the restore's call and its gating unchanged); NEW `VariorumTests/PaneRenderRestoreClipTests.swift` on the A47c rig (a REAL `TakesBoardView`, a long take scrolled to its TAIL): ROAD 1 the kill + the occasion, ROAD 2 the paragraph-gap re-font (geometry really changes), and an ADVERSARIAL arm that is NOT a production road (unmeasured font growth written straight into the storage, then the bare call) asking TextKit itself whether a nested, non-resizable pane's clip can move. RUN + verdict: PENDING |
-| 7 | THE B5 QUESTION — REPORT, not decide | NOT-STARTED |
+| 6 | THE RIDER — `layoutViewport()` clip-displacement exam of the render restore | DONE (this commit) — **VERDICT: PROVABLY SAFE, the mechanism stated in THE RIDER below; the instrument stays as a tripwire.** `PaneRenderRestoreClipTests` **3/3 green** with numbers (`App/Variorum/DerivedData/18lb-u3-rider2.log`; the first run `18lb-u3-rider1.log` 13/3 green with the two pointer suites): ROAD 1 (the A47c kill + the occasion, tail-scrolled long pane on the real board) — the one enclosing clip **2094 → 2094**, the visible top **2074 → 2074**, restore ran (1 → 2), shift **0**; ROAD 2 (the paragraph-gap re-font — the geometry really changes, the pane **2753 → 3617 pt**) — restore ran, largest shift **0**, clip 2094; ADVERSARIAL (NOT a production road — unmeasured font growth, then the bare call) — the pass REALLY changed the laid-out geometry (the viewport's first fragment **2055 → 2080**) while the frame held (**2753 → 2753**) and the clip held (**2094 → 2094**) |
+| 7 | THE B5 QUESTION — REPORT, not decide | DONE (this commit) — **REPORTED, NOT DECIDED (THE B5 REPORT below): B5 is a NEIGHBOUR of the exam's mechanism, not the mechanism itself, and the exam's (null) fix cannot close it** — different surface (the full-document editor), a road with no app-side `layoutViewport()` and no pane, and the OPPOSITE symptom (B5's clip measured unmoved while the text slides; the exam's mechanism moves the clip while the line stays). The recommendation for the orchestrator's ruling: its own slot. Nothing was built toward B5 |
 | 8 | The B5 harness fixture fix (Tools/ only) + a full seeded run | NOT-STARTED |
 | 9 | Row 85 (O-2 ring) decision | NOT-STARTED |
 | 10 | THE FELT GATE + the walk (USE, both voices, both appearances, under load, per-step guarded) | NOT-STARTED |
@@ -815,3 +815,81 @@ harness now yields, so this also re-proves the corrected pin's red arm) and the 
 three door pins (the F1 walk, its counting rule, the coordinator-holds-no-state guard) and all fourteen
 `PaneSurfaceTests`. Restored by `git checkout HEAD -- App/Variorum/Variorum/Surface/PaneSurface.swift`;
 `git status` clean after.
+
+### THE RIDER — the macOS-27 `layoutViewport()` clip displacement at the render restore (ledger row 5)
+
+**The caller.** `PaneSurfaceRepresentable.Coordinator.scheduleRenderRestore` (A47c) — on a deferred turn after a
+convergence OCCASION (`reconvergeIfDiverged(restoreRender: true)`: a click on the pane, the enclosing scroll view's
+end-of-live-scroll, a liveness transition) or a whole-storage RE-FONT (`restoreRenderTier()`: the voice or
+paragraph-gap branch of `updateNSView`) — calls `textViewportLayoutController.layoutViewport()` to rebuild the pane's
+per-fragment rendering surfaces. The only other caller in the app is `JumpPrimitive.jump`'s scroll step (18k C6's
+subject, re-asserted there). Write's ⌘↓ is AppKit's own `moveToEndOfDocument:` (not overridden; grep).
+
+**The finding under examination (TK2 §3, 18k C6's `JumpViewportLayoutTests` header):** on 27 the call moves the
+clip by about the height change its OWN pass causes — measured on the full-document editor as +29 pt with the
+document frame +29 and −23.23 with the frame −23.5 — while the line stays put; a plain flipped view and a bare
+`setFrameSize` move nothing; "the displacement lives only inside TK2's viewport layout, and only when that pass
+changes the laid-out geometry".
+
+**VERDICT — PROVABLY SAFE, on two independent grounds, each measured:**
+1. **The driver cannot exist on a pane.** The editor whose clip moved is a scroll view's DOCUMENT and is vertically
+   resizable: its frame follows its laid-out text, so a pass that changes the laid-out height changes the document
+   frame inside the pass, and TextKit moves the clip with it. A pane is neither: `PaneTextView.makeSurface` sets
+   `isVerticallyResizable = false`, its frame is SwiftUI's (and, since this unit, the publisher's lever — outside
+   the restore), and it rides INSIDE SwiftUI scroll views, never as their document. **The adversarial arm removed
+   every production safeguard and asked TextKit directly:** unmeasured font growth written straight into the
+   storage, then the bare call — the pass REALLY changed the laid-out geometry (the viewport's first fragment
+   2055 → 2080 in the pane's space), the frame held (2753 → 2753), and **the clip held (2094 → 2094, shift 0).** On
+   a pane the call has nothing to resize and moves no clip.
+2. **The production roads never hand the pass unmeasured geometry anyway.** Every road into the restore measures
+   the WHOLE (pane-scale) document with `.ensuresLayout` before it schedules the restore — `reconvergeIfDiverged`
+   measures, then schedules; the re-font branch re-attributes, re-measures, then asks — so the pass lays out only
+   geometry already laid out. The one write that can land between the measure and the restore is the liveness
+   road's ink (`applyStyle`'s `textColor` — the A47c kill), a colour, which changes no geometry. ROAD 1 is that exact
+   sequence on the rig where A47c was traced: clip 2094 → 2094, the visible text byte-still (top 2074 → 2074),
+   shift 0. ROAD 2 is the one production road whose geometry DOES change (2753 → 3617 pt): its restore moved no
+   clip either (largest shift 0).
+
+**Does anything re-read the clip?** Nothing needs to: the restore moves none. The clips' only readers are
+SwiftUI's own scroll-geometry observers (the Takes article's geometry hook → `consumeArticleGeometry`, the
+landing authority's reports), which would see any move as an ordinary scroll report — so if a future point release
+ever did move one, the Takes article's restore/landing machinery would at least SEE it; the pane's restore itself
+reads nothing after its call. **The tripwire (kept):** the restore now reads every enclosing clip on both sides of
+the call (`enclosingClipOrigins`, `lastRenderRestoreClipShift`/`largestRenderRestoreClipShift` — an observation,
+the call and its gating unchanged), and the three pins go red the day a point release teaches TextKit to move a
+nested pane's clip (TK2 §5's re-verify posture). **Proposed TK2 §3 line (canon — the orchestrator's to land at the
+closeout):** *"`PaneSurface`'s render restore — the other `layoutViewport()` caller — was examined at 18l-b U3:
+PROVABLY SAFE on 27.0. A pane is never vertically resizable nor a scroll view's document, so its pass cannot resize
+it and moves no clip even over unmeasured growth (adversarial arm: fragments 2055 → 2080, frame and clip fixed); and
+every production road re-measures before the restore. Pinned: `PaneRenderRestoreClipTests`."*
+
+### THE B5 REPORT (ledger row 6 — REPORT, not decide; the ruling is the orchestrator's)
+
+**Is B5 the exam's mechanism, its neighbour, or unrelated? — A NEIGHBOUR.** The evidence:
+- **Different surface and road.** B5 (KnownIssues row 88) is WRITE — the full-document `EditorTextView` — on the
+  DIFFERENTIAL road: a ⏎ at the tail right after ⌘↓, after the carve's full re-render invalidated the layout. No
+  pane is mounted in its recipe (Write's takes panel is closed; `scn_b5-return-after-cmd-down` never opens it), so
+  the render restore cannot run there; and its road contains NO app-side `layoutViewport()` at all (the app's only
+  callers are the pane restore and `JumpPrimitive`; ⌘↓ is AppKit's own `moveToEndOfDocument:`; the ⏎ is an ordinary
+  edit whose viewport layout is TextKit's implicit one).
+- **The opposite symptom.** The exam's mechanism MOVES THE CLIP while the line stays (18k: +29 clip for a +29
+  frame). B5 was measured at U-VIS with the CLIP UNMOVED while the text above the caret slid ~30 pt down (the frame
+  +94 pt for one ~20-pt line — about 74 pt of estimate settling in one pass).
+- **What they share — the subsystem.** Both are macOS 27's TextKit settling ESTIMATED geometry inside a layout pass
+  after a whole-document invalidation. The exam's adversarial arm even reproduced B5's SHAPE on a pane — laid-out
+  geometry moving under a fixed clip (2055 → 2080) — but only by removing the measure-before-restore ordering that
+  every production pane road has. In the full-document editor there is no such ordering on the ⏎ road: after the
+  ⌘↓ landing the region above the tail stands on estimates, and the ⏎'s implicit pass corrects them with nothing
+  holding the first visible line in place. **The jump road compensates (the clip moves — 18k C6, then re-asserted);
+  the edit road does not (the text moves).** That asymmetry, not the pane restore, is B5's open question.
+- **Would the exam's fix close B5?** No — there is no fix (PROVABLY SAFE), and a pane-restore fix could not reach
+  the Write editor in any case. Nothing was built toward B5 (the STOP line was not reached).
+
+**RECOMMENDATION (not a decision):** B5 takes **its own slot** after U3 (or re-owns honestly at the closeout),
+scoped to the full-document editor's differential road: instrument the ⏎'s layout pass in the deterministic Study
+harness pass (frame, clip, the first visible line's document y and its fragment's estimated-vs-laid-out state,
+before and after the edit's display pass), then decide between an anchor-preserving correction around the edit (the
+`ScrollAnchorController`/`topVisibleOffset` family — hold the first visible line where it was across the edit) and
+laying out the region above the caret before the edit lands. Its natural home is the Write editor seam's owner (the
+landing/settle family, 12, or a dedicated 18l-b slot), with a Fable review. The harness scenario stays its standing
+tripwire (item 8 below makes it ERROR-free).
