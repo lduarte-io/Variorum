@@ -614,14 +614,21 @@ final class TakesArticleScroll {
     /// restore keeps its own cadence (her R-Q21's plain round trip is not
     /// touched — pinned); her scroll is not this door (the geometry road's).
     /// Cost: only while a bloom waits on a restore, one dictionary read per
-    /// row report; the slot order once, at the arrival.
+    /// row report; the slot order built once HERE at the arrival (the ready
+    /// step's own read then follows its own P1 contract).
     private func restoreLooksAgainForAWaitingLanding(order: @autoclosure () -> [String]) {
         guard articleLanding != nil, case .wanted(let place) = articleRestore,
               let rowID = place.rowID, let frame = articleRowFrames[rowID],
               abs(frame.minY - place.into) <= 2,     // the restore's own settle criterion
-              let geometry = lastArticleGeometry, order().contains(rowID)
+              let geometry = lastArticleGeometry
         else { return }
-        _ = consumeArticleGeometry(geometry, remembered: nil, positionedByUser: false, order: order())
+        // Built ONCE, past every cheap guard, and passed as the value (the
+        // round-1 ladder's NIT-3 — the autoclosure re-wrap was re-mapping it
+        // inside `restoreStep`'s gone-row check too); the ready step's own
+        // read that follows stays its own P1 contract.
+        let order = order()
+        guard order.contains(rowID) else { return }
+        _ = consumeArticleGeometry(geometry, remembered: nil, positionedByUser: false, order: order)
     }
 
     /// **The watch's CORRECTIONS, as an observed count.** The authority
