@@ -1482,6 +1482,15 @@ struct BookView: View {
             // click focuses AND reveals, so the arrival is unfolded by her
             // own act, never by the reveal.
             .onAppear { landOutlineReveal(proxy) }
+            // Ladder R2-12 (the flow's and the Index's own line, brought here at
+            // 18l-b U4 — the health review's §1.3 item 4): a pending landing dies
+            // WITH the Outline. The authority is `BookView`'s `@State`, so a mode
+            // switch mid-landing left it alive with its check armed: it finished
+            // `DONE: settled` on the last report a second later (or aimed through
+            // the dead proxy until the watchdog filed `gave up`) — a landing, and
+            // a signpost line, for a surface already gone. Silent by the
+            // authority's own rule. Pinned: `OutlineLandingTeardownTests`.
+            .onDisappear { landing.end() }
             .onChange(of: model.pendingReveal) { _, _ in landOutlineReveal(proxy) }
             .onChange(of: model.pendingChapterReveal) { _, _ in landOutlineReveal(proxy) }
             // Row 73 (the correction round, batch G): a reveal that arrived
