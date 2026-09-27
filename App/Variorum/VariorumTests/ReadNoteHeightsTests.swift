@@ -122,16 +122,42 @@ struct ReadNoteLandingArithmeticTests {
         #expect(heights.derived("p0") > long, "narrower, so the long paragraph wraps taller")
     }
 
-    /// The extent is `Queries.blockExtents`' numbers, read off the take in
-    /// hand: Unicode scalars (SQLite `LENGTH()`'s code points) and newlines.
-    @Test func theExtentIsTheQueriesOwnNumbers() {
-        let row = Queries.TOCRow(
-            blockID: "b", placementID: "p", name: nil, variantID: "v",
-            text: "“Quite so,” said he.\nA second line.\n", hasFan: false, variantLocked: false)
-        let extent = ReadNoteHeightModel.extent(postID: "note", row: row)
-        #expect(extent.characters == "“Quite so,” said he.\nA second line.\n".unicodeScalars.count)
-        #expect(extent.newlines == 2)
-        #expect(extent.containerID == "note" && extent.blockID == "b")
+    /// **The extent IS `Queries.blockExtents`' numbers** (ladder round 1,
+    /// NIT-1 — the first cut restated the implementation): a note seeded
+    /// with a multi-paragraph block, a blank take and characters outside the
+    /// Basic Multilingual Plane, its extents read BOTH ways — SQL's `LENGTH()`
+    /// over the rendered take, and `ReadNoteHeightModel.extent` over the TOC
+    /// rows the Read host holds — must agree block for block.
+    @MainActor
+    @Test func theExtentIsTheQueriesOwnNumbers() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 151))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "extents")
+            for text in [
+                "“Quite so,” said he.\n",
+                "A first paragraph.\n\nA second, after a blank line.\nA third line.\n",
+                "",
+                "Fraktur 𝔄𝔅ℭ, a fox 🦊 and a family 👨‍👩‍👧 outside the BMP.\n",
+                "No newline at all",
+            ] {
+                _ = try session.operations.newBlock(in: post.id, text: text)
+            }
+            let (rows, extents) = try await db.read { db in
+                (try Queries.blockTOC(db, post: post.id),
+                 try Queries.blockExtents(db, containerIDs: [post.id]))
+            }
+            try #require(rows.count == 5 && extents.count == 5, "five blocks both ways")
+            for (row, sql) in zip(rows, extents) {
+                let mine = ReadNoteHeightModel.extent(postID: post.id, row: row)
+                #expect(mine == sql, "block \(row.blockID): mine \(mine) vs SQL \(sql)")
+            }
+        }
     }
 
     /// **U1 ladder round 1, MINOR-1 — a stale seed cannot fake a settle.**
