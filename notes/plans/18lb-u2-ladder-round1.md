@@ -343,3 +343,32 @@ FocusHandoffTests · EditorRouterActiveTests): **✔ 31 tests in 4 suites passed
 
 **Round 2:** not earned by content — no new BLOCKER/MAJOR arose in round 1 or in this fix pass; the
 ladder's round-2 re-review of the fixes is the orchestrator's call per the standing rules.
+
+---
+
+## IMPLEMENTER SANITY PASS (round 1 fixes) — `opus-implementer`, 2026-09-27, over `79b33ac3..82fa2280`
+
+**VERDICT: PASS — nothing raised; no mechanism moved.** Read in my own context: the five fix commits'
+full code diff (`1ac258d9` · `7c8d8da2` · `45f35296` · `9e1d79b1` · `79a73919`) and the ROUND 1 FINAL
+CALLS table.
+
+| Check | What I verified at the source | Result |
+|---|---|---|
+| **The watch, the re-look, the ordering contracts** | The fix diff's hunks in `TakesArticleScroll.swift` are four, all in the landing half: one doc block above `articleLandingAttempts` (`:492`, NIT-4), and the re-look's doc line + guard + body (`:627–641`, NIT-3). `landArticle`, the resolver, `articleLandingStep`, `articleLandingReport`, `articleGeometryArrived`, `fileEnding`, `beginWatch`, `reportWatchedLanding`, `watchedLandingEnded`, `clearArticleLanding`, `noteProjectionArrived`'s body — not in the diff. `TakesChoreographer`, `EditorRouter`, `TakesBoardView` — not in the diff | **unchanged** |
+| **The restore half** | No hunk touches `ArticlePlace`, `ArticleRestore`, `consumeArticleGeometry`, `restoreStep`, the `.holding` machinery, the 24-aim budget, `articlePlaceNow`, `rememberStep`, `articleRowFramesMoved`, `articleLastCurrentRow` | **byte-preserved** |
+| **NIT-1 is address-only** | Two one-line forwards on `TakesBoardLayout` (`noteProjectionArrived(_:)` → `article.noteProjectionArrived(_:)`, `endArticleLandingWatch()` → `article.endArticleLandingWatch()`), bodies pure delegation; the two VM call sites (`adopt` `:480`, `teardown` `:540`) rerouted `board.article.X` → `board.X`, argument and call ORDER unchanged (`adopt` still runs the structural arm FIRST, before `refreshWordCounts` and `consumeLandings`; `teardown` still ends the watch after `articleTornDown = true` and before the autosave stop). No other caller of either name changed (`ArticleLandingProjectionArmTests` still calls `TakesArticleScroll.noteProjectionArrived` directly — the brain's own API, untouched) | **address-only** |
+| **NIT-3 is behaviour-identical on the re-look road** | Before: `guard …, let geometry = …, order().contains(rowID) else { return }` then `consumeArticleGeometry(…, order: order())`. After: the same cheap guards in the same order, then `let order = order()` ONCE, `guard order.contains(rowID) else { return }`, and the VALUE passed to `consumeArticleGeometry`'s `order: @autoclosure () -> [String]?` (the closure captures the array). Same early-return condition, same argument to the restore (`restoreStep`'s gone-row check sees the identical array and, the row being contained, proceeds exactly as before), same return (discarded — the hold's `.wait` by the guard's construction). Only the number of maps changed (3 → 2 at the arrival: the re-look's one + the ready step's own P1 read) | **behaviour-identical** |
+| **The two test edits are the unit's own new file (3C intact)** | `git diff 79b33ac3..82fa2280 --stat -- App/Variorum/VariorumTests/` names ONE file: `LandingAimTests.swift`, created at this unit (`658e2815`); no pre-existing pin file touched. `everyShippedPolicyNamesTheAimItAlreadyHad`: the five original expectations preserved as switch arms, `.takesArticle` added, plus a `policy.surface == surface` check — strictly stronger. The new GUARD `theDeclaredAimKindsMatchWhatEachSurfaceComputes`: arithmetic re-derived by hand — `ReadLandingBox` with viewport 700, offset 500, content 5700 (so `maxOffset` = 5000, `minOffset` = 0), anchor 0.5, row (330, 100) → rest 300, wanted 530, residual **30** = the dispatcher's `.viewportFraction` answer on the same sighting; `.top` → 330; the reveal → 0 (the row 330–430 inside 700). Green both sides by design, stated as such — a guard, not a red-on-old, correctly labelled | **3C intact** |
+| **The doc changes say what is true** | MINOR-1's `aim` doc (the dispatcher binds on the Takes watch; declarative + guarded elsewhere) and NIT-4's fence doc match the code as I left it and as I verified it in my round-1 responses | **true** |
+
+**Blast radius — the reviewer's two sets covered the landing family (79/7) and four teardown-road suites
+(31/4); the one change with a wider reach is NIT-1's `adopt` reroute, which EVERY Takes model runs on
+every projection, so I ran the unit's whole closing set** (`App/Variorum/DerivedData/18lb-u2-closing.sh`:
+the 101 suites — every suite in a file that mounts a `TakesBoardView`/`TakesViewModel`, the Read + book
+landing family, the eleven Tutorial suites) on `82fa2280`, zero app instances: **✔ Test run with 681
+tests in 101 suites passed after 445.433 seconds** (`18lb-u2-sanity-r1.log`, `exit 0`; 680 + the new guard
+pin; 7 skipped by design — the env-gated `DebugOracleSingletonWindowTests`; 102 `Suite … started` lines).
+No harness re-walk: nothing in the fix diff changes a landing's scroll, timing or filing.
+
+**Record precision (no action owed):** the reviewer's table notes the U2 RECORD's pre-fix word "the slot
+order once" and corrects it in the table rather than the record — agreed; the record stays the record.
