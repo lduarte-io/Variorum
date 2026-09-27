@@ -2246,8 +2246,10 @@ private struct OutlinePostRow: View {
     /// the RESERVATION, and `StableSurface.reserved` refuses it there
     /// (`stableSurfaceWidthTolerance`, ladder R1-1 — pinned twice, once on a
     /// persisted record). The reading flow makes the same split for the same
-    /// reason through one brain (`FlowHeightEstimate.honestHeight`, R2-1),
-    /// where it has an estimate to fall back to and the Outline has none.
+    /// reason through one brain (`FlowHeightEstimate.honestHeight`, R2-1 — the
+    /// rule its story row calls, and since 18l-b U4 the manifest's own
+    /// precedence over `FlowHeightEstimate.storyInput`), where it has an
+    /// estimate to fall back to and the Outline has none.
     /// **13u2b UNIT 1 — and the ESTIMATE arm arrived here.** The order is
     /// now remembered-at-this-width → the lengths estimate → a remembered
     /// size from another width → the unmeasured constant

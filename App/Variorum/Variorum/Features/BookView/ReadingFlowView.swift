@@ -791,8 +791,8 @@ nonisolated enum FlowHeightEstimate {
 
     /// **A story's height question, as a manifest INPUT — built in ONE place
     /// for both askings** (18l-b U4; the post-13u health review's D1, §1.3
-    /// item 2): the ROW's own body (`FlowStoryRow` — what the far placeholder
-    /// and the reservation stand at) and the COLUMN's manifest
+    /// item 2): the ROW (`FlowStoryRow`, through `honestHeight` below — what
+    /// the far placeholder and the reservation stand at) and the COLUMN's manifest
     /// (`ReadingFlowView.heightManifest` — the offsets a landing aims by).
     /// The row used to answer through its own two-arm rule while the column
     /// resolved through `BookHeightManifest.resolve`; the two agreed only
@@ -817,10 +817,14 @@ nonisolated enum FlowHeightEstimate {
     /// the far placeholder and as the surface's reservation: the remembered
     /// size when it was taken at this width, else the estimate at this width.
     /// **Through the one brain since 18l-b U4** (`storyInput` →
-    /// `BookHeightManifest.resolve`); the name stays as the flow's word for it
-    /// (its pins speak it — `ReadingFlowEstimateTests` rides unmodified).
+    /// `BookHeightManifest.resolve`), and **the ROW's one rule**: `FlowStoryRow`
+    /// calls exactly this (it holds no rule of its own — the U4 ladder's round
+    /// 1, MINOR-1), so the pins that speak this name bind production:
+    /// `ReadingFlowEstimateTests` (R2-1, the width gate) and
+    /// `FlowStoryHeightOneBrainTests` (this == the column's `storyInput`
+    /// resolved, for every input).
     static func honestHeight(remembered: CGSize?, columnWidth: CGFloat, estimate: CGFloat) -> CGFloat {
-        // `resolve` reads no id — the row's own is `FlowRows.anchor(postID)`.
+        // `resolve` reads no id (the manifest's row carries `FlowRows.anchor`).
         BookHeightManifest.resolve(storyInput(
             id: "", remembered: remembered, columnWidth: columnWidth, estimate: estimate)).0
     }
@@ -1166,15 +1170,16 @@ private struct FlowStoryRow: View {
     /// The height this story stands at until its text is measured HERE:
     /// its remembered size when that was taken at this width, else the
     /// estimate at this width (R2-1 — the one brain for the placeholder
-    /// and the reservation). **18l-b U4 (D1): read off the column's manifest
-    /// precedence** — `BookHeightManifest.resolve` of the very input the
-    /// column's manifest builds for this story (`FlowHeightEstimate
-    /// .storyInput`), so the height the row stands at and the height a
-    /// landing aims by are ONE answer, never two rules that happen to agree.
+    /// and the reservation). **18l-b U4 (D1): the row holds NO rule of its
+    /// own** — it calls the pinned `FlowHeightEstimate.honestHeight`, which
+    /// is `BookHeightManifest.resolve` of the very input the column's
+    /// manifest builds for this story (`FlowHeightEstimate.storyInput`), so
+    /// the height the row stands at and the height a landing aims by are ONE
+    /// answer (the U4 ladder's round 1, MINOR-1: the first cut inlined a
+    /// second copy of that expression here, and the pins read the other one).
     private var honestHeight: CGFloat {
-        BookHeightManifest.resolve(FlowHeightEstimate.storyInput(
-            id: FlowRows.anchor(entry.postID), remembered: memory.size(entry.postID),
-            columnWidth: width, estimate: estimate)).0
+        FlowHeightEstimate.honestHeight(
+            remembered: memory.size(entry.postID), columnWidth: width, estimate: estimate)
     }
 
     /// What the surface reserves from its first frame — the honest height

@@ -233,3 +233,13 @@ one road, under its own PROVISIONAL, inside her U0 report's class. Opus was the 
 **The fix pass:** the U4 implementer (same-model flow — the implementer fixes; dispositions land
 here first). **Round 2 = a FRESH `opus-reviewer` over the fix diff** (the ladder's letter); a new
 BLOCKER/MAJOR there earns round 3 (cap three).
+
+## FIX PASS (implementer — the U4 `opus-implementer`; 2026-09-27) — self-contained for round 2
+
+The fix diff is `ecc2c969..<the pass's last commit>`; every line below names its commit and its evidence.
+
+| Finding | Fix | Commit | Evidence |
+|---|---|---|---|
+| MINOR-1 | IN-PROGRESS — `FlowStoryRow.honestHeight` calls the pinned `FlowHeightEstimate.honestHeight` (the row holds no rule; its body is byte-identical to its pre-U4 call); the static's doc names it the row's one rule; `FlowStoryHeightOneBrainTests`' column side built through `FlowHeightEstimate.storyInput` (the production builder), its header rewritten; `BookView.swift`'s surface-placeholder doc and KnownIssues row 58's U4 line corrected (the row edit on the orchestrator's delegated pen, citing the arbitration) | PENDING | the teeth check R-two-arm: PENDING |
+| MINOR-2 | NOT-STARTED | — | — |
+| NIT-1 | NOT-STARTED | — | — |

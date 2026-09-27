@@ -16,14 +16,22 @@
 //  for one height is KnownIssues row 58's drift class — a row standing at one
 //  number while the landing aims by another.
 //
-//  What this pins is the contract the collapse makes true by construction:
-//  **for EVERY input, the row's height IS the manifest's height** for that
-//  story. RED ON OLD only on the degenerate inputs (a remembered height of 0
-//  or less at this width: the row stood at it, the manifest fell through to
-//  the estimate) — inputs no production road produces today, stated plainly:
-//  this is the drift made visible, not a user-visible defect. The proof the
-//  collapse moved nothing she sees is `ReadingFlowLandingTests` +
-//  `BookOutlineLandingTests` + `ReadingFlowEstimateTests` riding unmodified.
+//  **What this pins, and why it binds PRODUCTION on both sides** (the U4
+//  ladder's round 1, MINOR-1 — the first cut read a hand-built column input and
+//  a static the row no longer called, so a row reverted to its own rule stayed
+//  green): the ROW's side is `FlowHeightEstimate.honestHeight` — the one rule
+//  `FlowStoryRow` calls (it holds none of its own); the COLUMN's side is
+//  `FlowHeightEstimate.storyInput` — the builder `ReadingFlowView.heightManifest`
+//  calls — resolved by the manifest. **For EVERY input, the row's height IS the
+//  manifest's height.** Green by construction on this tree (the row's rule is
+//  `resolve` of that builder); it REDS the day the row's rule gets a precedence
+//  of its own — shown at the ladder's fix pass by restoring the pre-U4 two-arm
+//  rule in the working tree (red on exactly the 6 degenerate combinations below,
+//  a remembered height ≤ 0 at the matching width). Those inputs are ones no
+//  production road writes today, stated plainly: this is the drift made
+//  visible, not a user-visible defect. The proof that the collapse moved
+//  nothing she sees is `ReadingFlowLandingTests` + `BookOutlineLandingTests` +
+//  `ReadingFlowEstimateTests` riding unmodified.
 //
 
 import CoreGraphics
@@ -48,21 +56,17 @@ struct FlowStoryHeightOneBrainTests {
         for width in widths {
             for remembered in memories {
                 for estimate in estimates {
+                    // The ROW: the one rule `FlowStoryRow` calls.
                     let row = FlowHeightEstimate.honestHeight(
                         remembered: remembered, columnWidth: width, estimate: estimate)
-                    // The column's manifest input for a story, exactly as the
-                    // column builds it (`ReadingFlowView.heightManifest`): the
-                    // remembered size only at THIS width, the estimate as the
-                    // derived arm, no measured arm.
+                    // The COLUMN: the builder `ReadingFlowView.heightManifest`
+                    // calls for a story, resolved by the manifest itself.
                     let manifest = BookHeightManifest(
                         width: width, spacing: ReadingFlowView.rowSpacing,
                         leading: ReadingFlowView.columnLead,
-                        inputs: [BookHeightManifest.Input(
-                            id: "flow-story",
-                            remembered: remembered.flatMap {
-                                FlowHeightEstimate.remembered($0, appliesAt: width) ? $0.height : nil
-                            },
-                            derived: estimate)])
+                        inputs: [FlowHeightEstimate.storyInput(
+                            id: "flow-story", remembered: remembered,
+                            columnWidth: width, estimate: estimate)])
                     let column = manifest.height(of: "flow-story")
                     if column != row {
                         disagreements.append(
