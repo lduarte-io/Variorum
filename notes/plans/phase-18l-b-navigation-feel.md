@@ -1102,7 +1102,7 @@ closes your record.
 |---|---|---|
 | 1 | Reading (the brief's "Read first" list, in order, own context) | DONE — this file whole (HER KICKOFF MESSAGE, BINDING PRINCIPLES, CAST & DISCIPLINE, BASELINES, THE UNIT ROSTER, HER OPEN ITEMS, ENVIRONMENT TRAPS, THE LEDGER, the U2 BRIEF + RECORD + bloom-race fix pass + both acceptances, the U3 BRIEF + RECORD + acceptance, the U4 BRIEF); the charter's KICKOFF 2 (`post-13u-health-rounds.md` — the U4 bullet) + the health review §1 (§1.1–§1.5; §1.3 items 2 and 4 in full); the 18l record's SITTING RECORD (R-18l-5 — the #149 carve-out), the U0 RECORD whole (ITEM 1's mechanism + fix — `ReadTierClickPlace`, `MarkdownRendering.sourceOffset`; THE SWEEP's S4 row) + its acceptance; QUESTIONS #97 (the START/END edge — the Book Index's landing listed among the `.leave` hosts "by inheritance, never by ruling") · #149 · #150 (the form) · #151 · #152 (next free **#153**); the 17o ladder's "considered and cleared" on the `read`-face click-through asymmetry (`use-report-round-2026-09-06.md`); KnownIssues rows 42 · 58 · 95 · 96 · 97; `SessionResiliencyProtocol.md` whole; `TEXTKIT2_NOTES.md` whole; the code: `Shared/LandingTarget.swift`, every `requestLanding` / `pendingLanding` / `requestLiveBlock` consumer (`BookViewModel`, `BookView` ×3 producers — the flow's `onWake`, the paged `onWake`, the note box's `editHere`; `BookIndexView.landOrSeed` + the pane row's `takePendingLiveBlock` + `blockView`'s `caretOnGoingLive`; `BookIndexEditModel` whole; `ReadModeView.openInEdit`/`landIfPending`; `BlockHistoryPane`'s `FocusedBlock` doc), `CommandRouter`'s `focusedBlock`/`noteFocusedBlock`/`currentBlock(for:)`, `PaneCaretLanding` + `noteLiveness`, `Surface/ReadTierClickPlace.swift` whole, `PageLeafView`'s hit test, `ReadingFlowView.swift` whole (`FlowStoryRow`, `heightManifest`, `FlowHeightEstimate`), `Surface/BookHeightManifest.swift` whole, `BookViewModel`'s `outlineRowInput`/`indexPaneRowInput` (the row-side `resolve` pattern), `SurfaceSizeMemory.remember`/`StableSurface`'s remember guard, `BookView`'s Outline body + its authority, `Surface/LandingAuthority.swift` whole; the pins: `BookOutlineLandingTests` · `ReadingFlowLandingTests` · `BookIndexLandingTests` · `IndexClickCaretTests` · `BookIndexEditingTests` · `ReadingFlowEstimateTests` · `LandingAuthorityTests` (suite list) |
 | 2 | Item 1 — the Outline's `.onDisappear { landing.end() }` (R2-12 parity): red-first pin → fix → green | DONE — **the mechanism (traced at the code):** the Outline's `LandingAuthority` is `BookView`'s `@State`, not the Outline body's, so a MODE SWITCH mid-landing removes the rows and the scroll view but leaves the authority armed; nothing reports any more, and its next look decides on the target's last report — `DONE: settled` after the hold (or corrections through the dead `ScrollViewProxy` until `gave up`), and in Release a signpost line for a surface already gone. (A window close is safe: the `@State` dies with `BookView` and the work item captures `[weak self]`.) **Pin** `OutlineLandingTeardownTests.aModeSwitchMidLandingLeavesTheOutlinesLandingNoDoneToWrite` (NEW file — R2-12's own form on the Outline's road; harness copied so `BookOutlineLandingTests` rides byte-unmodified), committed first (`a39bd5cb`, compile fix `3e02eeb2`) and run on the pre-fix tree: **RED, 1 issue** — `DONE: settled at top=0.0 after 0 hops, 1014 ms` written after the switch, every premise green (the landing began; nothing before the switch; still in Index) (`App/Variorum/DerivedData/18lb-u4-item1-red.log`). **Fix `9bf7f460`** — `.onDisappear { landing.end() }` beside the Outline's `.onAppear`, citing R2-12. **GREEN**: `DONE lines after the switch: []` (`18lb-u4-item1-green.log`). The pre-fix run IS the behavioural revert (the two trees differ by exactly the fix's line + its comment) |
-| 3 | Item 2 — `LandingTarget.utf16Offset` wired-or-deleted, decided on the trace (#153, PROVISIONAL) | NOT-STARTED |
+| 3 | Item 2 — `LandingTarget.utf16Offset` wired-or-deleted, decided on the trace (#153, PROVISIONAL) | DONE — **DELETED + the landing's caret at the block's START** (THE ITEM-2 TRACE AND DECISION below). **Pins** `IndexLandingCaretTests` (NEW file; `BookIndexEditingTests` rides byte-unmodified) committed first (`aab07c13`) and run on the pre-fix tree: **RED, 5 issues** — the model armed `.leave` where `.start` is owed (its two guard arms — a click still `.offset(17)`, a focus request `.leave` — green); the mounted road (exactly the flow's `onWake`: `requestLanding` + mode → Index) parked the caret at **224 of 224** (the click-through) and **247 of 247** (a block-less landing), both ON THE EMPTY LINE — S4 reproduced in this fixture's numbers (`18lb-u4-item2-red.log`). **Fix `b4841ad1`** — `BookIndexEditModel.takePendingLiveBlock` goes live with `.start` through one private `goLive(…caret:)` both roads share (`makeLive(clickOffset:)`'s signature and U0's `.offset` arm unchanged); `LandingTarget.utf16Offset` deleted, the comment naming the `FocusedBlock` road; three docs that named the Index landing as `.leave` amended (`PaneCaretLanding`'s host list — a DOC line in `PaneSurface.swift`, no body; `BookIndexView`'s call-site comment; `BlockHistoryPane`'s `FocusedBlock` doc, which cited the deleted field); QUESTIONS **#153** filed, **#97** gains a dated pointer (its `.leave` list named this host). **GREEN**: caret **0 of 224** and **0 of 247**, the model pin green (`18lb-u4-item2-green.log`). The pre-fix run IS the behavioural revert (the trees differ by the `.start` line and the deletion of a field nothing set, plus comments) |
 | 4 | Item 3 — `FlowStoryRow` reads `BookHeightManifest.resolve` (D1) | NOT-STARTED |
 | 5 | The walk (USE, both voices, per-step guarded) | NOT-STARTED |
 | 6 | The harness as regression cover (the full seeded suite, both voices) | NOT-STARTED |
@@ -1111,3 +1111,48 @@ closes your record.
 
 - Deaths / resumes: none.
 - Reverts in flight: none.
+
+### THE ITEM-2 TRACE AND DECISION (#153, PROVISIONAL — the brief's "decide on the trace")
+
+**The click-through road, inputs → the wrong caret (read at the code, then measured by the pin).** Read ▸ Scroll:
+`FlowPostView` draws each block as SwiftUI `Text` paragraphs under ONE `.contentShape(Rectangle()).onTapGesture {
+onWake(block.blockID) }` — a tap with NO location (its own doc: *"the click maps to a block, never to a text offset (a
+SwiftUI `Text` cannot say where inside itself)"*) → `FlowStoryRow.onWake` → `BookView`'s flow `onWake` →
+`model.requestLanding(LandingTarget(postID:blockID:))` + `structure.mode = .index` → `BookIndexView.landOrSeed` →
+`edit.requestLiveBlock(landing)` + the note selected and scrolled → the note's pane row adopts its rows →
+`edit.takePendingLiveBlock` → `makeLive(…)` with no click offset → `caretLanding(forVariant:)` = `.leave` →
+`PaneSurfaceView(caretOnGoingLive: .leave)` → `noteLiveness(true)`'s `.leave` arm moves nothing → the selection stays
+where `string =` left it: the take's END, which in her notes is AFTER the trailing `\n` — the empty line. **Measured:**
+U0's probe 329 of 329; this unit's pin 224 of 224 (and 247 of 247 for a block-less landing). The same `requestLanding`
+door is taken by **Read ▸ Pages** (`PageLeafView.mouseDown` → `hit(at:)` → a blockID only) and by the sidebar note box's
+**"edit here" in Index** (`BookView.editHere` — a remembered blockID; its `remembered?.utf16Offset` is in hand and
+dropped, where its Outline branch parks a `WriteIntent` AT that offset).
+
+**Does the road KNOW an offset today? No face does, and wiring one is new translation work AND a product question:**
+- Read ▸ Scroll: nothing — a SwiftUI `Text` tap has no point. Wiring = a THIRD `ReadTierClickPlace` tier for the
+  reading page's own type (16-pt system serif, `lineSpacing(6)`, 13-pt gaps, the flow column's width — none of it the
+  Index tier's metrics the replica is built on), `ReadTierClickTarget` on the flow's block, and a new fidelity pin.
+- Read ▸ Pages: CoreText knows a COMPOSED-string index under the click (`characterIndex(at:)`), but no translation from
+  the paginator's composition back to a block's stored text exists (U0's `MarkdownRendering.sourceOffset` maps the
+  reading transform's display, not the page composition) — new machinery and a pin.
+- Both would let READ'S OWN SURFACES seed a caret: R-18l-5's carve-out (#149, PROVISIONAL, hers) covers "the read
+  tiers" (the Index and Read ▸ edit); Read is her A43 reading surface whose F-5 docs say a click maps to a block, never
+  to a text offset (and L10: *"Read has no competing gesture at all: no caret to place"*). Extending the carve-out to
+  Read is beyond the brief's fence (her U0 report's CLASS — the caret on the blank line).
+- The one producer that DOES hold an offset — the note box's remembered caret — gets it from the `FocusedBlock` road
+  (`CommandRouter.currentBlock(for:)`), which already carries it to every door that reads it; landing there instead of
+  at the start is "where she was", a product step past the artifact class — recorded as #153's (b), not built.
+
+**Decided — (a) DELETE + `.start`, the most spec-defensible option, PROVISIONAL:** the artifact class dies on every
+road into the Index by landing (click-through, paged, note box) with one line; `.start` is (1) the value's OWN documented
+contract since Act 10 batch B (*"a SwiftUI `Text` paragraph cannot — the landing then puts the caret at the block's
+start"* — never true: the pane went live `.leave` from birth, `c768c08e`), (2) 17o batch b's stated rule (*"a surface
+with no caret lands at the block's start as today"*), (3) note Read's TWIN click-through (`ReadModeView.openInEdit`
+reports the block first, so the edit face's entry rule lands `.start` — the 17o ladder's recorded asymmetry, now closed on
+the book's side), (4) QUESTIONS #97's built (a), and (5) exactly where the landing puts her EYES — the landed block's top
+at the page's top, where an END can sit below the fold for a block taller than the page. The charter's lean (delete) is
+taken; its bare form (c) — `.leave` kept — would leave her artifact standing on this road. **Unchanged:** a CLICK inside
+the Index brings its own place (U0's `.offset`); a pane's own focus request arms nothing (`.leave`); every other
+`PaneCaretLanding` host. **Product fence:** the one behaviour moved is where a landing's caret parks (END → START), inside
+her U0 report's class; nothing beyond it was built. **#97 note:** its `.leave` list named "the Book Index's
+clicked-block-goes-live landing" — that one host moves to (a); a dated pointer rides #97.
