@@ -1717,10 +1717,13 @@ reaching the ring's layout-forcing decoration walk), the attribution is BY RUN (
 road holds the line; D2: the ring off never reaches the premises), and the fix respects the fence
 (the caret's line never held; the act's own movement shipped; pinned 10.0 pt with the keeper out).
 
-**The walk: HELD AT THE GUARD** — the author returned to the machine mid-attempt (HID idle 0 s;
-nothing activated, the guard's order held). The orchestrator's hands-on pass (the three B5
-scenarios in Study + the pin suites) discharges at the next author-free window; the unit does not
-CLOSE before it. The Fable cold review (read-heavy) proceeds in parallel.
+**The walk: HELD AT THE GUARD, then DISCHARGED the same afternoon** — the author returned to the
+machine mid-attempt (HID idle 0 s; nothing activated, the guard's order held); at the next
+author-free window (HID idle 25 min) the orchestrator's own pass ran clean: **the three B5
+scenarios in Study, 14/14 assertions PASS** (`b5-return-after-cmd-down` 4/4 PLAIN — the retired
+XFAIL; `b5-refont` 4/4; `b5-more-roads` 6/6 — the mid-note and settled-tail guards holding to
+±0.5 pt). Her B5 gesture no longer moves the page in this seat's hands. The Fable cold review ran
+in parallel (round 1: 0/0/1/2, the unit standing).
 
 **Adjudications made now (repo-first, before the reviewer sees them):** row 85's last-chance
 decision ACCEPTED (five ⌘↓ landings traced, the ring correct in every one — an honest
