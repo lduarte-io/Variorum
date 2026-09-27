@@ -15,7 +15,7 @@ typeset -ga SCN_ORDER
 vw_def() { SCN_ORDER+=($1); SCN_TABLE[$1]="fixture: $2 · acts: $3 · asserts: $4 · expect: $5" }
 
 # Known, OWNED rows the table cites (KnownIssuesAndTechDebt.md):
-typeset -g KI_B5='KI row 88 (B5: ⏎ after ⌘↓ on invalidated geometry; owner 18l)'
+typeset -g KI_B5='KI row 88 (B5: ⏎ after ⌘↓ on invalidated geometry — FIXED at 18l-b U-B5: the differential road keeps the untouched reading line)'
 typeset -g KI_S3='KI "read tier re-wraps under the pointer" (18l U0 S3; owner the Design & UI review)'
 
 # --- shared scenario helpers -------------------------------------------------------------------------
@@ -389,7 +389,7 @@ scn_outline-long-story-settle() {
 vw_def b5-return-after-cmd-down "A Scandal in Bohemia, Write" \
   "a blank line mid-page · ⏎ + ⌫ (the carve's full re-render invalidates layout) · ⌘↓ · ⏎ at the tail · ⌫" \
   "(a) the ⏎ at the tail must not move the page (the lines above the caret)" \
-  "$KI_B5 — HISTORY-DEPENDENT: U0b measured +109/+166 on 998f7d7d; U-VIS reproduced it in the FULL Study pass on both full runs, identical numbers (45591 @ 298 → 45509 @ 302: the lines above the caret slid ~30 pt down under an unmoved clip — U0b's hypothesis, measured); not in Terminal, not from a fresh launch, not after outline or Read ▸ edit alone. XFAIL when it moves, XPASS when it does not (Study; plain in Terminal)"
+  "pass — $KI_B5. HISTORY: U0b measured +109/+166 on 998f7d7d; U-VIS reproduced it in the FULL Study pass (the lines above the caret slid under an unmoved clip); 18l-b U-B5 traced it (TextKit re-bases a viewport that floats on estimates when a layout-forcing read lays out the new paragraph — +438.8/+662.4 pt measured on this recipe) and fixed it. PLAIN in both voices since: a move here is a FAIL"
 scn_b5-return-after-cmd-down() {
   vw_write_open "A Scandal in Bohemia" || return
   vw_write_scroll 30
@@ -415,9 +415,11 @@ scn_b5-return-after-cmd-down() {
   vw_keys "⏎ at the tail" 'key code 36'
   vw_settle; vw_cap 02-return
   vw_expect_eq "⏎ at the tail: an empty block below" "${PV[blk]#*/}" $(( blocks + 1 ))
-  # KNOWN only where it reproduced — the Study pass (round 1, MINOR-2); plain in Terminal, so a move
-  # there reds and a standing non-reproduction stops producing an XPASS every run.
-  vw_expect_page_still tail "⏎ at the tail" "$([[ $VOICE == study ]] && print -r -- $KI_B5)"
+  # PLAIN in both voices (18l-b U-B5): the KNOWN label it carried in Study (U-VIS round 1, MINOR-2 —
+  # where it reproduced, every full pass) is retired with the fix — the differential road now keeps the
+  # untouched reading line (`keepUntouchedReadingLine`), measured XPASS on this recipe and red again on
+  # the fix's revert (R-keep, a scratch build), so a move here is a regression and must FAIL.
+  vw_expect_page_still tail "⏎ at the tail"
   vw_keys "⌫ (restore)" 'key code 51'
   vw_settle; vw_cap 03-restored
   vw_expect_eq "restore: text back" "${PV[len]}" $len0
@@ -775,6 +777,60 @@ scn_selftest-red() {
     "$w[2]" "$(( wb[2] + 40 ))" 0.5
 }
 
+# --- S14: B5's OTHER roads — mid-note on invalidated geometry, the tail on settled geometry (18l-b U-B5) ---
+# The fix's walk rows made standing (her B5 gestures beyond the recipe above): after the carve's full
+# re-render, a ⏎ at ANOTHER blank line mid-page (the island the exact restore laid out floats on
+# estimates too); then ⌘↓ with the region above the tail SETTLED by a small wheel round trip (U0b's
+# "settled geometry" row) and ⏎ at the tail. Neither act writes above the first visible line, so it
+# must not move. Starts from ⌘↑ so any earlier scenario's resting place cannot put the page in the
+# typewriter room (the U3 fixture lesson). Appended LAST: no earlier recipe changes.
+vw_def b5-more-roads "A Scandal in Bohemia, Write" \
+  "⌘↑ · wheel mid-note · a blank line: ⏎ + ⌫ (the carve) · another blank line: ⏎ (mid-note, invalidated) + ⌫ · ⌘↓ · wheel ±3 · ⏎ at the tail (settled) · ⌫" \
+  "(a) neither ⏎ moves the first visible line (offset + y)" pass
+scn_b5-more-roads() {
+  vw_write_open "A Scandal in Bohemia" || return
+  vw_keys "⌘↑ (start at the top)" 'key code 126 using command down'
+  vw_settle
+  vw_write_scroll 30
+  vw_require '[[ -n ${PV[blank]} ]]' "a blank line in the viewport's lower half" || return
+  local c=(${(s:,:)PV[colX]}) y=$(( (PV[blankY] + PV[blankY1]) / 2 )) len0=${PV[len]}
+  vw_free_x $(( c[1] + 20 )) $(( c[1] + 200 )) $y
+  vw_click $FREE_X $y "a blank line mid-page (a block's end)"
+  vw_settle
+  local blocks0=${PV[blk]#*/}
+  vw_keys "⏎ (an empty block below)" 'key code 36'
+  vw_settle
+  vw_require '[[ ${PV[blk]#*/} == $(( blocks0 + 1 )) ]]' "⏎ at the block's end minted an empty block" || return
+  vw_keys "⌫ (the carve → the full re-render)" 'key code 51'
+  vw_settle
+  vw_require '[[ ${PV[len]} == $len0 && -n ${PV[blank]} ]]' "the carve restored the text and a blank line is on the page" || return
+  # Mid-note, on the geometry the full re-render left: another blank line, ⏎.
+  y=$(( (PV[blankY] + PV[blankY1]) / 2 ))
+  vw_free_x $(( c[1] + 20 )) $(( c[1] + 200 )) $y
+  vw_click $FREE_X $y "a blank line mid-page, after the full re-render"
+  vw_settle; vw_snap mid; vw_cap 01-mid-before
+  vw_keys "⏎ mid-note (invalidated geometry)" 'key code 36'
+  vw_settle; vw_cap 02-mid-return
+  vw_expect_eq "⏎ mid-note: an empty block below" "${PV[blk]#*/}" $(( blocks0 + 1 ))
+  vw_expect_page_still mid "⏎ mid-note on invalidated geometry"
+  vw_keys "⌫ (restore)" 'key code 51'
+  vw_settle
+  vw_require '[[ ${PV[len]} == $len0 ]]' "the mid-note round trip restored the text" || return
+  # The tail on SETTLED geometry: ⌘↓, then the wheel up and back down lays out the region above it.
+  vw_keys "⌘↓" 'key code 125 using command down'
+  vw_settle
+  vw_write_scroll -3
+  vw_write_scroll 3
+  vw_settle; vw_snap tail; vw_cap 03-tail-settled
+  vw_require '[[ ${PV[caretEnd]} == 1 ]]' "the caret still at the end after the wheel" || return
+  vw_keys "⏎ at the tail (settled geometry)" 'key code 36'
+  vw_settle; vw_cap 04-tail-return
+  vw_expect_page_still tail "⏎ at the tail on settled geometry"
+  vw_keys "⌫ (restore)" 'key code 51'
+  vw_settle; vw_cap 05-restored
+  vw_expect_eq "restore: text back" "${PV[len]}" $len0
+}
+
 # The seeded run's order: the note-open pair FIRST (a fresh launch is every note's first open).
 # 18l-b U3 (the B5 fixture): `read-landing` runs AFTER the B5 pair. Seeded before it at 18l U1, its deep
 # click left *A Scandal in Bohemia*'s current block at 245, so B5's `vw_write_open` re-opened the note
@@ -785,6 +841,7 @@ scn_selftest-red() {
 # and no act of any scenario changed. `read-landing`'s own faces still mount cold in the pass (its first
 # Read open); `takes-landing` stages its own first open by a relaunch, so it is order-independent.
 # 18l-b U4: `book-landings` runs LAST (appended — no earlier scenario's recipe changes).
+# 18l-b U-B5: `b5-more-roads` appended after it, for the same reason.
 SCN_ORDER=(note-reopen write-typing write-newline-roundtrip write-divide-merge mode-roundtrip
            index-click readedit-click outline-narrow-restore outline-long-story-settle
-           b5-return-after-cmd-down b5-refont read-landing takes-landing book-landings)
+           b5-return-after-cmd-down b5-refont read-landing takes-landing book-landings b5-more-roads)
