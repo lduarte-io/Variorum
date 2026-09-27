@@ -1411,7 +1411,7 @@ follows; your self-assessment closes your record.
 | 2 | INSTRUMENT the deterministic recipe (frame · clip · the first visible line's document y · its fragment's estimated-vs-laid-out state, across the tail ⏎'s edit and display pass) | DONE — a TEMPORARY DEBUG + env-gated instrument (`B5Trace`, working tree only, never committed; a copy in `App/Variorum/DerivedData/18lb-ub5/`): a content-free `os.Logger` line (category `B5`) at the ⌘↓ and ⏎ keyDowns (with a CENSUS of the fragments above the viewport — laid-out vs estimated), around `applySeamEdit`, the structural result, `layout()`, `prepareContent`, `viewWillDraw`, `setFrameSize`, the settle hop, the long-block pass and every clip-bounds change; each line carries frame · clip · usage height · the viewport's bounds and range · a REFERENCE line (the first visible line at the ⏎) with its container y, its screen y and its fragment's state · the first visible line · the last fragment. Run on the recipe — the Study pass through `b5-refont`, the stamped instrumented build (`notes/plans/vis-walks/2026-09-27/102834/`): **B5 REPRODUCED (XFAIL 2), at its LARGE size — the first visible line 45591 → 44477, ~1,100 characters of text** (U-VIS's round-1 final run's magnitude); `b5-refont` PASS. Trace: `DerivedData/18lb-ub5/trace1.txt` (B5) · `trace1-refont.txt` (the re-font road) |
 | 3 | TRACE the mechanism | DONE — THE TRACE below |
 | 4 | ATTRIBUTE (macOS-27 / our-commit / pre-existing / undetermined) | NOT-STARTED |
-| 5 | FIX inside the fence (red-on-old: the harness's Study XFAIL → PASS on the fix and red on its revert; an in-suite pin if the trace admits one) | NOT-STARTED |
+| 5 | FIX inside the fence (red-on-old: the harness's Study XFAIL → PASS on the fix and red on its revert; an in-suite pin if the trace admits one) | IN-PROGRESS — CANDIDATE in the working tree (with the instrument): R1-1's deferral extended to the road it cannot see — the indicator arm defers to the settle hop while one of the model's storage writes is being processed (`storageWriteInFlight` = R1-1's depth OR `suppressEditProcessing`); run A (instrumented, the recipe) PENDING |
 | 6 | Row 85 (O-2) — the last-chance may-take decision | NOT-STARTED |
 | 7 | WALK (USE, both voices, per-step guarded) + the full seeded harness both voices | NOT-STARTED |
 | 8 | Closing runs (the jump/anchor/typewriter family, `WriteTopAirTests` + kin, the eleven Tutorial suites) | NOT-STARTED |
@@ -1462,6 +1462,28 @@ The edit's re-estimation runs in edit PROCESSING, outside any viewport pass, so 
 differential road has, by its own 2026-07-07 design, **no restore step at all** ("untouched text never moves" was
 true only while TextKit kept laid-out geometry where it was). The U3 report's hypothesis holds with a correction:
 it is not the ⏎'s PASS that corrects estimates; the ⏎'s EDIT re-bases the island.
+
+**THE ROAD INSIDE THE EDIT — found by the second and third instrumented runs (`105239/` +438.8 pt, `111052/`
++438.8 pt, both XFAIL on the same recipe) and the in-process rig:** the move happens inside
+`super.setSelectedRanges`, which TextKit ITSELF calls during the edit's processing — the captured stack:
+`-[NSTextLayoutManager _fixSelectionAfterChangeInCharacterRange:changeInLength:]` → `EditorTextView.setSelectedRanges`
+(the caret at the end rides the appended `"\n"`: 46376 → 46377). The insertion-point refresh inside it moves nothing
+(`ipt<`/`ipt>` identical); what follows it is `NSTextViewDidChangeSelection` → `EditorSurfaceDelegate
+.textViewDidChangeSelection` → `EditorViewModel.updateCaretContext()`, and with the EDITING INDICATOR ON (the dev
+store's ring — capture `01-cmd-down`) the caret has changed blocks (past the pre-edit index's end), so the arm runs
+`refreshDecorations()` SYNCHRONOUSLY — whose opening queries are layout-FORCING (`textLayoutFragment(for:)` at the
+viewport's top and bottom edges; the bottom edge sits in the typewriter room below all text). That is exactly 13u3
+R1-1's hazard (a layout-forcing geometry query inside `processEditing` — TEXTKIT2 §2's estimation class, sampled
+once as the `_estimatedTextLocationForVerticalOffset` spin), on the one road R1-1's guard cannot see: R1-1 defers
+the arm while `storageDidEdit` is on the stack (`inStorageEditTransaction`, depth > 0), but TextKit's selection fix
+runs AFTER that delegate returned, still inside the write — the depth reads 0 there. **The rig proves the road
+deterministically** (`B5ScratchRigTests`, `DerivedData/18lb-ub5-rig4.log`, indicator ON): `ucc.decor<` sits between
+`seam<` and `seam>`, inside `ssr`, and it is the call that lays out the new last paragraph (`last` `0.0 E` → `L`,
+usage re-estimated in the same call) — but on the rig's history TextKit does not re-base the island (0.0 pt, both
+voices, key window or not). So: **the road is ours and deterministic; whether the forced estimate re-bases the island,
+and by how much, is TextKit's and history-dependent** (it never did in Terminal — the monospace estimate is close to
+exact — and did in every full Study pass). A typed character at the tail after the same recipe (the throwaway
+`zz-b5-type`, run 3) moved NOTHING: the caret stays in its block, so the arm never fires.
 
 **The magnitude is TextKit's re-estimate, so it is history-dependent** (U-VIS ~30 pt · U0b +109/+166 · this run
 662.4): how many paragraphs are laid out where decides how far the estimate moves on re-estimation. That is
