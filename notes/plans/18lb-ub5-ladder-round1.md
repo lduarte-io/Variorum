@@ -237,3 +237,36 @@ changes, zero product-code bodies touched). Per the ladder rules the round close
 implementer's one sanity pass over this reviewer's three fix commits (`67449457`, `b9fd26b8`,
 `c6dc1175`) is the remaining cross-model step, anything it raises returning to this reviewer for the
 final word.
+
+---
+
+## IMPLEMENTER SANITY PASS (over `67449457`, `b9fd26b8`, `c6dc1175`) — `opus-implementer`, 2026-09-27
+
+**VERDICT: PASS — no mechanism moved; nothing raised.** Pulled to `40469890`; read the three commits' full diffs and
+the ROUND 1 FINAL CALLS table.
+
+- **No mechanism moved.** `git diff 34622758..HEAD -- App Tools Sources` touches exactly three files: the F1 comment in
+  `EditorSurfaceController.swift` (the only changed product lines are the three `///` doc lines replacing the false
+  clause — no code token), the F2 README row, and the F3 test file. `EditorViewModel.swift` and `JumpPrimitive.swift`
+  are byte-unchanged since the unit's close (`34622758`): `keepUntouchedReadingLine`, its witness, `applySeamEdit`,
+  `readingAnchor`, and the pure `ReadingAnchor.isUntouched`/`displacement` arms are as shipped; in the controller, the
+  capture (`let reading = …`), the differential/full split, the caret placement and the keep call are byte-unchanged
+  (the hunk is inside the doc comment above `applyStructuralResult`).
+- **F1 is comment-only and reads right:** the promise kept and dated ("untouched text never moves, the 2026-07-07
+  promise"), the false clause replaced with "no UNCONDITIONAL restore step — since 18l-b U-B5 the keeper below puts the
+  untouched reading line back iff TextKit moved it, KnownIssues row 88" — consistent with the keeper paragraph beneath
+  it and with `keepUntouchedReadingLine`'s own doc.
+- **F2 is Markdown-only:** `book-landings`' row now says it runs after `takes-landing`; `b5-more-roads` keeps "Runs
+  LAST", which matches `SCN_ORDER`'s last entry (`scenarios.zsh:845–847`, untouched by the fix pass).
+- **F3's guards are premise-first on both roads, zero assertions changed:** the pin's `#require(entries.count > 150)`
+  (`WriteFloatingViewportTests.swift:144`) precedes its first hard-coded index (`:150`, then `:154`); the `tailReturn`
+  helper's (`:281`) precedes `:284` and the carve branch's `:289` — so both `carve` arguments pass it before any
+  `range(ofEntryAt:)`. The fence test's indices (`:348/:357`) sit on its own 80-block synthetic note and correctly got
+  none. The diff is pure additions (`#require` + comments); every `#expect`, every premise `#require`, every number is
+  unchanged, and the added read (`index.entries.count`) causes no layout — the red-on-old evidence stands.
+- **Blast radius run (my call, beyond the reviewer's 4/2):** the two touched suites + the five riding pins
+  (`WriteTopAirTests`, `RefontViewportTests`, `JumpViewportLayoutTests`, `ScrollAnchorTests`, `NoteOpenLandingTests`)
+  + `DifferentialApplyTests` + `TypedReturnTests`, because F1's file recompiles into the app these exercise — on
+  `40469890`, zero app instances, HID idle 676 s before / 867 s after: **`✔ Test run with 56 tests in 9 suites passed
+  after 86.705 seconds`**, `EXIT=0` (`App/Variorum/DerivedData/18lb-ub5-sanity1.log`). No harness re-run: nothing
+  GUI-facing changed (a comment, a README row, two test premises).
