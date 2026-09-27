@@ -214,3 +214,14 @@ stated margin. This is test hygiene, and it is not bug-class.
 in this session's scratchpad. The MAJOR-1 red reproduction ran there against an in-memory store, with
 zero Variorum instances running before the run. A read-only listing of the on-screen Notification
 Center windows (NIT-3) ran as a throwaway script in the same scratchpad.)*
+
+## LADDER CLOSED (orchestrator, 2026-09-26)
+
+Round 1: 0/1/3/2, all confirmed at arbitration, all fixed red-first with the ReadEditPane
+boundary held. Round 2: all six VERIFIED-FIXED; new 0/0/0/5 NIT — no round 3 earned. The five
+NITs dispositioned at adjudication: NIT-1 the collapsed M1/m1 log citations CORRECTED in the
+round-1 fix table (the reviewer's independent re-reproduction stands as the red's evidence);
+NIT-2 the `LandingFacts` doc precision applied; NIT-3 the README's NC-panel limit marked
+UNMEASURED; NIT-4 the MINOR-3 PROVISIONAL clause added to #151; NIT-5 record-only (no flake in
+five runs; hardening optional, the next touch's). One MAJOR-1 re-walk by the orchestrator
+follows before U1's close (the finding postdated the first acceptance walk). U1's ladder CLOSES.

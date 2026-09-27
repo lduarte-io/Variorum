@@ -221,7 +221,10 @@ final class ReadNoteHeights {
     /// CONTENT space (the manifest's contract — ladder round 1, MINOR-3): the
     /// edit column's top padding; the page's two paddings, its header row and
     /// one row gap. The offsets are then absolute, and a landing whose rows
-    /// above are all measured (`exact=1`) states the column's own geometry.
+    /// above are all measured (`exact=1`) states the column's geometry for
+    /// the rows ABOVE the target; `total` still omits the bottom paddings
+    /// and the page's footer, and `exact` says nothing about rows below
+    /// (round-2 NIT-2's precision).
     /// Where rows above are arithmetic they are the manifest's MODEL of a
     /// column that stands at SwiftUI's own realization (the rows are lazy —
     /// QUESTIONS #151), which `LandingFacts`' doc says.

@@ -1943,5 +1943,6 @@ Your R-18l-1 is built: a note's first open this session shows its START in every
 **Why not the placeholder rows (b):** built and measured the same evening — on your story they made a cold landing arrive **59 points off** and then **jump home a second later** (the rows around the target trading their computed heights for their real ones), on a surface that currently lands in one step; and a plain column asks every one of the note's rows where it is on every scroll frame, where the lazy column asks only the ones on screen.
 **The alternatives:** (b) the charter's letter — placeholder rows (accepting the correction jump on a first visit, until a note's rows have been seen once); (c) (b) plus the warming you ruled for §W (rows pre-drawn off screen at idle) — that is §W's decision, never this round's.
 **Where it lives:** `Features/ReadMode/ReadNoteLanding.swift`, `ReadEditPane.land`, `ReadPageColumn.land` (`ReadModeView.swift`); `LandingPolicy.readNote`/`.readNoteEdit`.
+**Rides this ruling (the ladder's round-2 NIT-4):** the block manifest's `LandingFacts.offset` semantics were fixed as the REAL top padding, PROVISIONAL until you rule here — if you pick (b), the manifest is already ready (that was half the reason for the choice); if you keep (a), the padding fix simply stands.
 
 *(Next free number: **#152**.)*
