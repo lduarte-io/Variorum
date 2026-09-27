@@ -384,3 +384,16 @@ row side only; the column side carries its mirror image.**
 **All three round-1 findings are FIXED as arbitrated; no behaviour moved; no pre-existing assertion was edited; the fix
 pass introduced no BLOCKER, MAJOR or MINOR.** Three record/comment NITs above (none earns round 3). **The U4 ladder
 CLOSES at this verdict plus the orchestrator's dispositions of NIT-R2-1…3.**
+
+## LADDER CLOSED (orchestrator, 2026-09-27)
+
+Round 1 (`opus-reviewer`): 0/0/2 MINOR/1 NIT — all three CONFIRMED at arbitration (the item-2
+Fable eye landed there; the seam call confirmed), all three fixed by the implementer with the
+required R-two-arm teeth check red on exactly its six predicted inputs. Round 2 (a FRESH
+`opus-reviewer`): all round-1 fixes VERIFIED as arbitrated, no behavior moved, no pre-existing
+assertion edited; new findings 0/0/0/3 NIT — no round 3 earned. The three round-2 NITs
+dispositioned at adjudication (`4dac126b`, the orchestrator's doc-only pen: the circular pointers
+reworded; the U4 RECORD's two dated brackets; the two-sided residual stated) — every added line a
+comment, verified by diff. **The U4 ladder CLOSES; U4 CLOSES with it** (three one-liners
+red-first · #153 PROVISIONAL (a) with (a′) hers to pick · every pre-existing pin byte-unmodified
+through both rounds · double-walked · the `book-landings` tripwire standing).
