@@ -2091,3 +2091,9 @@ the U2/U3/U4 briefs' matter + B5 — the kickoff is in her hands. **MOBILE PARIT
 `notes/MobileSoul.md` row this commit — the phone owes R-18l-1's note-open twin; its long-note
 Read inherits U1's watched-lazy shape (never the Index's manifest); everything else is
 Mac-app/DEBUG/tooling. Install refresh: recorded below at the refresh commit.
+
+**INSTALL REFRESH (the closeout's last act, 2026-09-27 01:02–01:10 UTC):** zero-instance window
+held throughout; A1 safety copy `Backups/safety-copies/18l-refresh-20260927T010212Z` (6 files,
+byte-verified); Release from `1c720578`; `/Applications/Variorum.app` binary `c09f81be` →
+**`c05400e8`**; codesign OK; both keychain access groups present. **18l (FIRST HALF) — CLOSED.
+HARD STOP; 18l-b at her paste.**
