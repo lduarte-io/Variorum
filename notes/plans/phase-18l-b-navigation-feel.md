@@ -1178,7 +1178,7 @@ click released — the shape of a mouse-tracking loop that its own mouseUp did n
 current build 5/5 (`085508`, `085733`, `085923`, `090113`, and inside the full-order prefix `090324`) and the pre-U4
 scratch build (the kickoff tree `3389fedb`) 5/5 (`085328`, `085828`, `090018`, `090208`, prefix `090654`), alternated.
 So: intermittent, clustered in time (both failures before 08:50; none after), and never caught on the pre-U4 build in
-its 5 tries — which cannot convict or clear a 2-in-6 intermittent by rate. **By construction U4's diff is not on the
+its 5 tries — which cannot convict or clear a 2-in-7 intermittent (the current build: 2 FAIL, 5 PASS) by rate. **By construction U4's diff is not on the
 road:** a note opened in Write outside any book; U4 touches the book Outline's `onDisappear`, the book Index's landing
 caret, the reading flow's row height, and an unused field of a value only book/Read doors build — no Write view, no
 `EditorTextView`, no event handling. **Not traced further** (a Write-editor event-handling investigation is a unit of its
