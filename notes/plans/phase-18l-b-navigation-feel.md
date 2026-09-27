@@ -1091,3 +1091,23 @@ fence, anything wanting `Sync/`, and every author-only call. **Review: `opus-rev
 kickoff — unless your diff drifts onto the editor seam (`EditorTextView` / `PaneSurface` bodies /
 `PaneTextAuthority`) or a default's meaning: state plainly which it is. Your self-assessment
 closes your record.
+
+## U4 RECORD (implementer: `opus-implementer`, 2026-09-27)
+
+**NOT DONE (first line — against what shipped):** PENDING — written at the unit's close.
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | Reading (the brief's "Read first" list, in order, own context) | DONE — this file whole (HER KICKOFF MESSAGE, BINDING PRINCIPLES, CAST & DISCIPLINE, BASELINES, THE UNIT ROSTER, HER OPEN ITEMS, ENVIRONMENT TRAPS, THE LEDGER, the U2 BRIEF + RECORD + bloom-race fix pass + both acceptances, the U3 BRIEF + RECORD + acceptance, the U4 BRIEF); the charter's KICKOFF 2 (`post-13u-health-rounds.md` — the U4 bullet) + the health review §1 (§1.1–§1.5; §1.3 items 2 and 4 in full); the 18l record's SITTING RECORD (R-18l-5 — the #149 carve-out), the U0 RECORD whole (ITEM 1's mechanism + fix — `ReadTierClickPlace`, `MarkdownRendering.sourceOffset`; THE SWEEP's S4 row) + its acceptance; QUESTIONS #97 (the START/END edge — the Book Index's landing listed among the `.leave` hosts "by inheritance, never by ruling") · #149 · #150 (the form) · #151 · #152 (next free **#153**); the 17o ladder's "considered and cleared" on the `read`-face click-through asymmetry (`use-report-round-2026-09-06.md`); KnownIssues rows 42 · 58 · 95 · 96 · 97; `SessionResiliencyProtocol.md` whole; `TEXTKIT2_NOTES.md` whole; the code: `Shared/LandingTarget.swift`, every `requestLanding` / `pendingLanding` / `requestLiveBlock` consumer (`BookViewModel`, `BookView` ×3 producers — the flow's `onWake`, the paged `onWake`, the note box's `editHere`; `BookIndexView.landOrSeed` + the pane row's `takePendingLiveBlock` + `blockView`'s `caretOnGoingLive`; `BookIndexEditModel` whole; `ReadModeView.openInEdit`/`landIfPending`; `BlockHistoryPane`'s `FocusedBlock` doc), `CommandRouter`'s `focusedBlock`/`noteFocusedBlock`/`currentBlock(for:)`, `PaneCaretLanding` + `noteLiveness`, `Surface/ReadTierClickPlace.swift` whole, `PageLeafView`'s hit test, `ReadingFlowView.swift` whole (`FlowStoryRow`, `heightManifest`, `FlowHeightEstimate`), `Surface/BookHeightManifest.swift` whole, `BookViewModel`'s `outlineRowInput`/`indexPaneRowInput` (the row-side `resolve` pattern), `SurfaceSizeMemory.remember`/`StableSurface`'s remember guard, `BookView`'s Outline body + its authority, `Surface/LandingAuthority.swift` whole; the pins: `BookOutlineLandingTests` · `ReadingFlowLandingTests` · `BookIndexLandingTests` · `IndexClickCaretTests` · `BookIndexEditingTests` · `ReadingFlowEstimateTests` · `LandingAuthorityTests` (suite list) |
+| 2 | Item 1 — the Outline's `.onDisappear { landing.end() }` (R2-12 parity): red-first pin → fix → green | IN-PROGRESS — the pin `OutlineLandingTeardownTests` (NEW file, R2-12's own form on the Outline's road — a MODE SWITCH mid-landing, since the Outline's authority is `BookView`'s `@State` and outlives its body) committed on the pre-fix tree; its red run PENDING |
+| 3 | Item 2 — `LandingTarget.utf16Offset` wired-or-deleted, decided on the trace (#153, PROVISIONAL) | NOT-STARTED |
+| 4 | Item 3 — `FlowStoryRow` reads `BookHeightManifest.resolve` (D1) | NOT-STARTED |
+| 5 | The walk (USE, both voices, per-step guarded) | NOT-STARTED |
+| 6 | The harness as regression cover (the full seeded suite, both voices) | NOT-STARTED |
+| 7 | Closing runs (the landing family + the book/flow suites + the eleven Tutorial suites) | NOT-STARTED |
+| 8 | Self-assessment | NOT-STARTED |
+
+- Deaths / resumes: none.
+- Reverts in flight: none.
