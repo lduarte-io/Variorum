@@ -1313,3 +1313,83 @@ pre-existing shape).
 
 The `opus-reviewer` ladder over `3389fedb..2aa43836` is the remaining gate; ladder file
 `notes/plans/18lb-u4-ladder-round1.md`.
+
+## U-B5 BRIEF (session 4 — the B5 trace, its own slot per the U3 ruling; written by the orchestrator 2026-09-27; RE-CHECK against the U4 ladder's outcome before spawning)
+
+You are the `opus-implementer` for **18l-b UNIT U-B5**. One acceptance unit: TRACE, ATTRIBUTE and
+(if the trace's fix stays inside the stated fence) FIX **B5** — KnownIssues row 88: *"⏎ right
+after a ⌘↓ landing moves the page when a full re-render had invalidated the layout first"* (+109
+Terminal / +166 Study measured at U0b's walk on `998f7d7d`; the harness's Study recipe measures
+the text above the caret sliding ~30 pt DOWN under an UNMOVED clip while the frame grows +94 pt
+for one ~20-pt line). UNTRACED until you; the deterministic recipe exists.
+
+**Read first, in this order (reading is never delegated):**
+(1) THIS file whole — ENVIRONMENT TRAPS (verbatim binding), THE LEDGER row 6, the U3 RECORD's
+**THE B5 REPORT** (your unit's foundation: B5 is Write's full-document editor on the DIFFERENTIAL
+road; no pane, no app-side `layoutViewport()`; the OPPOSITE symptom of the pane exam's mechanism;
+*"the jump road compensates (the clip moves — 18k C6, then re-asserted); the edit road does not
+(the text moves). That asymmetry … is B5's open question"*), and the U2/U4 records (the freshest
+landing facts).
+(2) KnownIssues row 88 WHOLE (the full measurement history: U0b's find, U-VIS's fixed-clip
+measurement, the probe ruled out of the recipe) + rows 85 (O-2 — your may-take, ITS LAST CHANCE
+this round) and 42.
+(3) The 18l record (`notes/plans/phase-18l-navigation-feel.md`): the **U0b RECORD whole** (B5's
+birth — the walk rows, `ReadingAnchor`, the differential road's promise; B1–B4's mechanisms are
+your neighbours), the U0 RECORD's settle-net section (the inline editor's convergence re-report —
+the class's other face), and 18k C6/C6b's records (`notes/plans/phase-18k-runtime-hygiene.md` —
+the jump primitive's re-assert and `topVisibleOffset()`'s reading-line rule: the compensation the
+edit road LACKS).
+(4) `notes/TEXTKIT2_NOTES.md` IN FULL (mandatory — §2's estimate class and §3's 27.0 findings are
+the two named suspects; your ATTRIBUTION column decides between them, or honestly neither).
+(5) The code: `EditorTextView` (the ⏎'s road: `insertNewline` → the typed-Return door →
+crystallization / content insert — trace which arm her recipe's tail ⏎ takes with the chip's
+state; the typewriter room), `EditorViewModel` (`topVisibleOffset`, `readingAnchor`, the parks,
+the DIFFERENTIAL road's apply — where a structural/text change lands WITHOUT a restore step),
+`EditorSurfaceController` (`renderFull` vs the differential apply), `JumpPrimitive` whole (C6's
+re-assert — the compensation's worked example), `ScrollAnchorController`. The pins that ride:
+`WriteTopAirTests`, `RefontViewportTests`, `JumpViewportLayoutTests`, `ScrollAnchorTests`,
+`NoteOpenLandingTests` — every one rides UNMODIFIED (a collision is a STOP-and-flag).
+
+**The unit, in order:**
+1. **INSTRUMENT the recipe** (the row's own command: `VARIORUM_VISUAL_WALK=1
+   Tools/VisualWalk/visual-walk.sh --voices study` — the full pass reproduces B5
+   deterministically; `probes.log` holds frame/clip/line around the act; a DEBUG-oracle
+   instrument on the ⏎'s pass follows 18k C4's owner-keyed shape if you need more than the probe
+   gives): capture, across the tail-⏎'s edit and its display pass — the frame, the clip, the
+   first visible line's document y, and its fragment's estimated-vs-laid-out state before/after.
+2. **TRACE the mechanism yourself** — why does the text above the caret slide under an unmoved
+   clip ONLY when a full re-render (or re-font) invalidated the layout before the ⌘↓? The U3
+   report's hypothesis (the region above the tail stands on ESTIMATES after the ⌘↓ landing, and
+   the ⏎'s implicit pass corrects them with nothing holding the first visible line) is a
+   HYPOTHESIS, not a trace.
+3. **ATTRIBUTE** (the four-value column, U0's evidence bars): macOS-27 / our-commit(hash) /
+   pre-existing / undetermined(why) — B5 was seen on BOTH sides of U0b's fix and predates it;
+   the 26.x question may be unanswerable (say so honestly if so).
+4. **FIX, inside this fence:** untouched text above the caret must not move when the act does
+   not move it (the differential road's own 2026-07-07 promise, and U0b's walk criterion). The
+   candidate shapes the U3 report names — an anchor-preserving correction around the edit (the
+   `ReadingAnchor`/`topVisibleOffset` family, U0b's worked example) or laying out the region
+   above the caret before the edit lands (P1: bounded how? — say). **Where the CARET's own line
+   rests after a tail-⏎ is SHIPPED BEHAVIOR — do not redesign it; a fix that wants to change a
+   ruled resting rule is a STOP** (U0b's product fence, verbatim). Red-on-old: the harness
+   scenario flips XFAIL → PASS in Study **and reds on your fix's revert**; plus an in-suite
+   deterministic pin if your trace admits one (state honestly if only the harness can hold it).
+5. **May-take, ITS LAST CHANCE: row 85** (the ⌘↓ ring drawn too high — the overlay refreshing
+   before the landing settles is the suspect, and your instrument is pointed at exactly that
+   window). Take it with its own red-on-old pin if your trace reaches the ring's refresh; else
+   one line, and the row stays 12's.
+6. **WALK (USE, both voices, per-step guarded):** her exact B5 gestures (the carve road and the
+   re-font road, mid-note and at the tail, settled and invalidated geometry); the full seeded
+   harness both voices (the baseline shifts: B5's Study XFAIL becomes PASS on your fix — update
+   the scenario's expectation to PLAIN with the reason at the line, the U-VIS MINOR-2 form).
+   KnownIssues row 88's close is drafted for the orchestrator, never applied.
+
+**Discipline (the resiliency protocol, restated — it binds you):** commit per coherent piece,
+push after EVERY commit, NO trailers; append a `## U-B5 RECORD` section to THIS file with LIVE
+STATUS from your FIRST commit (unverified claims PENDING); records before final verification;
+synchronous foreground waits only; NEVER spawn subagents; commit before any behavioral revert;
+pathspec-limited staging; tests at the END (the jump/anchor/typewriter family, `WriteTopAirTests`
++ kin, the eleven Tutorial suites). PROVISIONAL-and-continue for non-gating ambiguity; STOP and
+report for gating ambiguity, any ruled-resting-rule change, anything wanting `Sync/`, and every
+author-only call. Your diff is the Write editor seam by definition → a **FABLE cold review**
+follows; your self-assessment closes your record.
