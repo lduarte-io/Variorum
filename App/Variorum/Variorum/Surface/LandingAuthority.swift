@@ -91,6 +91,14 @@ nonisolated enum LandingSurface: String, Equatable, CaseIterable {
 nonisolated struct LandingPolicy: Equatable {
     /// The surface's name in the story and the signpost.
     var surface: LandingSurface
+    /// **18l-b U2 — the AIM KIND: where this surface's landing puts its
+    /// target, stated as data** (`Surface/LandingAim.swift`). The number the
+    /// authority converges to zero is the target's distance from THAT home —
+    /// `LandingAim.residual(policy.aim, …)` answers it per kind. `.top` for the
+    /// three book adopters (their shipped aim, so their construction reads
+    /// unchanged); `.viewportFraction` for note Read's two faces;
+    /// `.minimalReveal` for the Takes article.
+    var aim: LandingAimKind = .top
     /// Within this many points of the top, a landing is DONE.
     var tolerance: CGFloat
     /// The quiet interval: this long with no event — no anchor report, no
@@ -223,7 +231,7 @@ nonisolated struct LandingPolicy: Equatable {
     /// - **`seedsFromLastReport` FALSE** (ladder round 1, MINOR-1): the face
     ///   seeds each landing from the block's CURRENT place (see the field).
     static let readNote = LandingPolicy(
-        surface: .readNote, tolerance: 2, settleInterval: 0.25, minimumHold: 1.0,
+        surface: .readNote, aim: .viewportFraction, tolerance: 2, settleInterval: 0.25, minimumHold: 1.0,
         maxWait: 0.6, correctionBudget: 3, timeBudget: 4,
         correctionPace: .spacedByTheHold, correctsAnUnreportedTarget: true,
         seedsFromLastReport: false, correctionWord: "HOP")
@@ -232,7 +240,7 @@ nonisolated struct LandingPolicy: Equatable {
     /// anchor is the centre, which the surface's residual carries; nothing in
     /// the loop differs).
     static let readNoteEdit = LandingPolicy(
-        surface: .readNoteEdit, tolerance: 2, settleInterval: 0.25, minimumHold: 1.0,
+        surface: .readNoteEdit, aim: .viewportFraction, tolerance: 2, settleInterval: 0.25, minimumHold: 1.0,
         maxWait: 0.6, correctionBudget: 3, timeBudget: 4,
         correctionPace: .spacedByTheHold, correctsAnUnreportedTarget: true,
         seedsFromLastReport: false, correctionWord: "HOP")

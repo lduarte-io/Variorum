@@ -30,8 +30,9 @@
 //  what `scrollTo(_:anchor:)` does — clamped by the page's own ends, so a
 //  block the page cannot bring to its anchor (the first block, centred) is
 //  home where the page stops. The authority growing an aim KIND is 18l-b
-//  U2's (the charter: top · minimal-reveal · viewport-fraction); this is the
-//  fraction arm's arithmetic, pure and pinned, ready to be hoisted there.
+//  U2's (the charter: top · minimal-reveal · viewport-fraction); this was the
+//  fraction arm's arithmetic, pure and pinned — and U2 hoisted it there
+//  (`LandingAim.ViewportFraction`; the old name below is a typealias).
 //
 //  **The per-note block MANIFEST** (`ReadNoteHeights`): what the column
 //  knows about each block's height — MEASURED (a row that drew) > DERIVED
@@ -55,30 +56,13 @@ import VariorumCore
 
 // MARK: - Where a block is, against where its face's anchor puts it (pure)
 
-nonisolated enum ReadLandingResidual {
-    /// **The landed block's distance from its resting place, in points** —
-    /// 0 is home; positive means the block sits BELOW it (the page must
-    /// scroll down to bring it home).
-    ///
-    /// - `blockTop`: the block's top relative to the viewport's top.
-    /// - `anchorY`: the fraction (`ViewportCarry` — the block's anchor-point
-    ///   at the viewport's anchor-point; 0.08 the page, 0.5 the edit face).
-    /// - `offset` / `minOffset` / `maxOffset`: where the page is and how far
-    ///   it can go. A resting place the page cannot reach is replaced by the
-    ///   nearest one it can — so the first block of a note, "centred", is
-    ///   home at the page's top rather than a landing that can never finish.
-    static func residual(
-        blockTop: CGFloat, blockHeight: CGFloat, viewportHeight: CGFloat, anchorY: CGFloat,
-        offset: CGFloat, minOffset: CGFloat, maxOffset: CGFloat
-    ) -> CGFloat {
-        let rest = CGFloat(ViewportCarry.topInset(
-            fraction: Double(anchorY), blockHeight: Double(blockHeight),
-            viewportHeight: Double(viewportHeight)))
-        let wanted = offset + blockTop - rest
-        let reachable = min(max(wanted, minOffset), max(minOffset, maxOffset))
-        return reachable - offset
-    }
-}
+/// **The fraction arm's arithmetic — HOISTED at 18l-b U2** to the authority's
+/// side (`Surface/LandingAim.swift`, `LandingAim.ViewportFraction`, the
+/// `.viewportFraction` aim kind's pure brain), exactly as U1's JC 2 handed it
+/// forward. This name stays at its old address as a typealias (the 3C parity
+/// pattern), so `ReadLandingBox.residual` and the arithmetic pins
+/// (`ReadNoteLandingArithmeticTests`) read it unmodified.
+typealias ReadLandingResidual = LandingAim.ViewportFraction
 
 /// What the face's scroll view says about the page, read at geometry
 /// cadence into the landing's box (never observed state).

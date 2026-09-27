@@ -720,7 +720,11 @@ struct TakesBoardView: View {
     private func spendArticleLanding(_ column: ScrollViewProxy) {
         switch model.articleLandingStep() {
         case .reveal(let rowID, let aim):
-            column.scrollTo(rowID, anchor: aim == .head ? .top : .bottom)
+            // 18l-b U2: the edge's anchor through the aim kind's ONE
+            // vocabulary door (`ViewportCarry.anchor` — 0 the head, 1 the
+            // foot): `UnitPoint(x: 0.5, y: 0)` / `(0.5, 1)`, exactly the
+            // `.top` / `.bottom` this line always passed.
+            column.scrollTo(rowID, anchor: LandingAim.MinimalReveal.anchor(aim))
         case .wait, .done:
             break
         }

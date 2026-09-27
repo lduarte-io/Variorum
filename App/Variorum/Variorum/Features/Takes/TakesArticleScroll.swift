@@ -365,41 +365,23 @@ final class TakesArticleScroll {
     }
 
     // MARK: - The landing REVEALS (17p batch a, ledger row 1 — her ruling R-Q1)
+    //
+    // **18l-b U2: the reveal's pure arithmetic lives on the AUTHORITY's side
+    // now** — `LandingAim.MinimalReveal` (`Surface/LandingAim.swift`), the
+    // `.minimalReveal` aim kind's brain, its bodies moved there unchanged
+    // with their measured reasons. These names stay at their old addresses
+    // (the 3C parity pattern): a typealias per type, a one-line forward per
+    // function, so every pin reads them unmodified.
 
-    /// What a landing may ask the article for. **Never a top anchor:** her
-    /// words on the shipped behaviour were *"the page keeps trying to jump to
-    /// the bottom and now show the text above"* — anchoring a slot's top at
-    /// the viewport's top is exactly what pushed every earlier block off the
-    /// screen, and the typewriter room made the LAST block a legal place to
-    /// stop. A landing now either does nothing or reveals, minimally.
-    enum ArticleReveal: Equatable {
-        /// The slot is already fully on screen; the page does not move.
-        case none
-        /// The slot is not fully on screen: scroll the minimum that shows it
-        /// (`anchor: nil`), never to the top.
-        case reveal
-    }
+    /// What a landing may ask the article for — `LandingAim.MinimalReveal
+    /// .Decision` (`.none` · `.reveal`; never a top anchor, her R-Q1).
+    typealias ArticleReveal = LandingAim.MinimalReveal.Decision
 
-    /// **THE RULE, pure.** `rowFrame` is the row's frame in the article scroll
-    /// view's own space (`.scrollView`), i.e. `minY == 0` is the viewport's
-    /// top edge. A row we have no frame for is one a lazy column has not
-    /// realized — which is proof it is NOT on screen, so it reveals; and a
-    /// viewport we have not measured yet decides nothing, so it reveals too
-    /// and the view's own minimal scroll settles the rest.
+    /// **THE RULE, pure** — `LandingAim.MinimalReveal.decision`.
     nonisolated static func revealDecision(
         rowFrame: CGRect?, viewportHeight: CGFloat
     ) -> ArticleReveal {
-        guard viewportHeight > 0, let rowFrame else { return .reveal }
-        // A row TALLER than the viewport can never be fully on screen; it is
-        // revealed when its top is (nothing above it could stay visible
-        // anyway, so "minimal" and "top" coincide for that one shape).
-        if rowFrame.height > viewportHeight {
-            return rowFrame.minY >= -0.5 && rowFrame.minY < viewportHeight - 0.5
-                ? .none : .reveal
-        }
-        // A generous pixel of slack: a row flush with an edge is on screen.
-        return rowFrame.minY >= -0.5 && rowFrame.maxY <= viewportHeight + 0.5
-            ? .none : .reveal
+        LandingAim.MinimalReveal.decision(rowFrame: rowFrame, viewportHeight: viewportHeight)
     }
 
     /// **THE LANDING, as a bounded step machine** (the 17p batch-a
@@ -429,17 +411,11 @@ final class TakesArticleScroll {
         case reveal(String, ArticleRevealAim)
     }
 
-    /// Which edge of the page a reveal puts the row at — the MINIMAL scroll
-    /// stated as an edge: a row below the fold comes up to the foot (the rows
-    /// above it stay), a row above the fold comes down to the head. A row the
-    /// column has not realized is placed by which side of the realized rows
-    /// it lies on. A model-side word, mapped to a SwiftUI anchor by the view.
-    /// Never the far edge: her words on the shipped behaviour were *"the page
-    /// keeps trying to jump to the bottom and now show the text above"*.
-    enum ArticleRevealAim: Equatable {
-        case head
-        case foot
-    }
+    /// Which edge of the page a reveal puts the row at — `LandingAim
+    /// .MinimalReveal.Edge` (`.head` · `.foot`; the minimal scroll stated as
+    /// an edge, never the far one), mapped to a SwiftUI anchor through
+    /// `LandingAim.MinimalReveal.anchor(_:)` by the view.
+    typealias ArticleRevealAim = LandingAim.MinimalReveal.Edge
 
     /// Bounded, so a request can never loop: every aim is one idempotent
     /// scroll, and the column settles in a handful of passes.
@@ -489,22 +465,12 @@ final class TakesArticleScroll {
                 realizedRows: Set(articleRowFrames.keys)))
     }
 
-    /// Pure: which edge reaches the row. A realized row goes by its frame —
-    /// above the fold → `.head`, else `.foot`. An unrealized row lies beyond
-    /// the realized rows on one side — below them → `.foot` (it lands at the
-    /// foot with the rows above it still showing), above them → `.head`. A
-    /// shape that says neither takes `.foot` (a landing is a block she was
-    /// working in, and the page opens at the top).
+    /// Pure: which edge reaches the row — `LandingAim.MinimalReveal.edge`.
     nonisolated static func revealAnchor(
         for placementID: String, rowFrame: CGRect?, order: [String], realizedRows: Set<String>
     ) -> ArticleRevealAim {
-        if let rowFrame { return rowFrame.minY < 0 ? .head : .foot }
-        guard let target = order.firstIndex(of: placementID) else { return .foot }
-        let indices = order.indices.filter { realizedRows.contains(order[$0]) }
-        guard let low = indices.min(), let high = indices.max() else { return .foot }
-        if target > high { return .foot }
-        if target < low { return .head }
-        return .foot
+        LandingAim.MinimalReveal.edge(
+            for: placementID, rowFrame: rowFrame, order: order, realizedRows: realizedRows)
     }
 
     /// The realized article rows' frames in the scroll view's own space, and
