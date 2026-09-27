@@ -132,6 +132,45 @@ struct ReadNoteLandingArithmeticTests {
         #expect(extent.containerID == "note" && extent.blockID == "b")
     }
 
+    /// **U1 ladder round 1, MINOR-1 — a stale seed cannot fake a settle.**
+    /// The authority seeds a landing from where the target last said it was
+    /// (`tops`) — a fact on columns whose every row exists and reports; on a
+    /// LAZY column the block the face landed once may since have gone away,
+    /// and its old "I am home" is no longer true. The review's pin, exactly:
+    /// land X and hear it at 0.1 (settles); land X again with an aim that
+    /// moves nothing and NO report — the second landing must go LOOKING for
+    /// its block (a blind correction, the policy's own reason) and must not
+    /// file `settled top=0` on the strength of the old report. RED on
+    /// `2eff1b27`: `X LAND | X DONE: settled at top=0.1 after 0 hops`.
+    @MainActor
+    @Test func aStaleSeedCannotFakeASettle() async throws {
+        #if DEBUG
+        var story: [String] = []
+        for policy in [LandingPolicy.readNote, .readNoteEdit] {
+            story = []
+            let landing = LandingAuthority(
+                policy: policy,
+                storyboard: LandingStoryboard(
+                    note: { story.append($0) }, dump: { story.joined(separator: " | ") }))
+            var aims = 0
+            landing.land("X", aim: { _ in aims += 1 })
+            landing.noteTop("X", 0.1)
+            try await Task.sleep(for: .milliseconds(1400))
+            #expect(story.contains { $0.contains("X DONE: settled") }, "the first landing settled")
+            let second = story.count
+            landing.land("X", aim: { _ in aims += 1 })
+            try await Task.sleep(for: .milliseconds(1400))
+            let after = story[second...]
+            print("[18l U1 MINOR-1] \(policy.surface.rawValue), the second landing: \(after.joined(separator: " | "))")
+            #expect(after.contains { $0.hasPrefix("HOP 1") },
+                    "the second landing went looking for its block (a blind correction)")
+            #expect(!after.contains { $0.contains("DONE: settled") },
+                    "…and did not settle on the first landing's old report")
+            landing.end()
+        }
+        #endif
+    }
+
     /// **The signpost stays content-free on the new surfaces** — a manifest
     /// built from a note's real prose cannot put a word of it in the line.
     @MainActor
