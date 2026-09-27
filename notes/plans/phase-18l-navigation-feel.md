@@ -227,7 +227,7 @@ two-phase-sized-units line — flagged to the author at the kickoff sitting (Q3)
 | 4b | B5 (U0b's find): ⏎ after a ⌘↓ landing on invalidated geometry moves the page (+109/+166 pt, both builds, differential road, UNTRACED) | U-VIS scenario + the U3 `layoutViewport()` exam (or its own slot — decided at U3) | open — KnownIssues row filed, owner 18l |
 | 5 | NOTE-OPEN lands middle/end instead of the start, ignoring where she was (her 2026-09-26 report) — product rule = R-18l-1 | U0c | **CLOSED 2026-09-26** — built to R-18l-1 (+ the #150 pair, confirmed by orchestrator AND reviewer), double-walked, ladder PASS in one round (0/0/0/3 NIT `452ab9ea` — no fix pass owed; NIT-1/2 are closeout-pen doc lines, NIT-3 = the Persian-search observation is 13o's recorded deferral, row 27, designed behavior) |
 | 6 | The opt-in VISUAL REGRESSION HARNESS (env-gated; real window; geometry assertions — first-visible-line y, caret line, glyph box inside the surface, click lands on the clicked line; seeded with U0/U0b/U0c reproductions) | U-VIS | **CLOSED 2026-09-26** — `Tools/VisualWalk/` (11 scenarios × 2 voices, 0 FAIL/ERROR/XPASS; can-red proven; every seeded U0-family tripwire teeth-verified on reverted scratch builds); ladder closed at two rounds (R1 0/1/8/9 all fixed incl. the guard-before-activate MAJOR in harness AND WalkKit; R2 verified + 0/0/3/8 all fixed; no round 3 earned); orchestrator ran subset + selftest by hand |
-| 7 | Note Read adopts the F3 shape — SHIPPED AS THE WATCH (both faces through `LandingAuthority`, signpost/watchdog/hand-over; anchors KEPT; the placeholder half built, measured worse, rejected — JC1/#151) | U1 | **BUILT + WALKED** (impl. 72/72 settled hops=0 + orch. hands-on; pre-fix baseline honest: §1.2 did not reproduce on real prose) — Opus review pending |
+| 7 | Note Read adopts the F3 shape — SHIPPED AS THE WATCH (both faces through `LandingAuthority`; the placeholder half rejected on measurement — JC1/#151) | U1 | **CLOSED 2026-09-26** — double-walked + the post-ladder MAJOR-1 re-walk (`end=handedover top=0` in the orchestrator's hands); ladder two rounds, all fixed |
 | 8 | Takes' landing half adopts the authority (aim kind grows: top · minimal-reveal · viewport-fraction); the restore half BYTE-PRESERVED (R-Q20/R-Q21); ~15 gesture-end pins + projection arm ride UNMODIFIED (the 3C proof). **MAY-take (U0c's find):** a Takes pane born live reports AppKit's END before its `.start` landing, so the persisted copy holds the take's END until the note leaves (no viewport effect) — else 12 at the closeout | U2 | open |
 | 9 | PanePublisher frame-synchronous / state-deferred (her ratified shape; gate = walk the boards under load, REVERT on any felt regression; measure the ~1,989-warning count both ways — C3 says they are ALL `PaneSurface`'s) | U3 | open |
 | 10 | The macOS-27 `layoutViewport()` clip-displacement examination of `PaneSurface`'s render restore (TEXTKIT2_NOTES §3's hand-forward) | U3 rider | open |
@@ -388,7 +388,7 @@ editor-seam by definition → a FABLE cold review follows; your self-assessment 
 | U0b (session 2) | **CLOSED 2026-09-26 (overnight)** — built · double-walked · ladder R1 (0/0/2/2, all agreed; reviewer fixes incl. the pin-sites-run-production-arithmetic delegate) · sanity PASS; row 87 closed, B5 filed (row 88, owner 18l), #134(a) carries the dated carve-out pointer |
 | U0c (session 3) | **CLOSED 2026-09-26 (overnight)** — built · double-walked · ladder PASS one round (0/0/0/3 NIT; both #150 PROVISIONALs confirmed independently); the note-open KnownIssues row closed; NIT-1/NIT-2 ride the closeout pen (the `scrollAnchors` doc parenthetical; the `LandingOffsetTests` header edit beside the AppSpec §12 line) |
 | U-VIS (session 4) | **CLOSED 2026-09-26 (overnight)** — built to the design note; ladder two rounds, no round 3 earned; the harness is a standing instrument from here on (post-macOS-update cadence per the design note's decision 6) |
-| U1 (session 5) | **BUILT + WALKED** — Opus review round 1 IN FLIGHT; 18l CLOSES at this unit's ladder (her check-in ruling) |
+| U1 (session 5) | **CLOSED 2026-09-26** — ladder two rounds (R1 0/1/3/2 fixed; R2 verified + 5 NITs dispositioned); 18l CLOSED at this seam per her check-in |
 | U2 → U3 → U4 | NOT-STARTED — the R-18l-3 SEAM JUDGMENT follows U1's close |
 
 ## U0b BRIEF (session 2 — WRITE: removing a newline collapses the top padding; written by the orchestrator 2026-09-26, spawned after U0's ladder round settles)
@@ -2058,3 +2058,36 @@ reproduce on the real story pre-fix; U1's durable gain is the WATCH (signpost + 
 hand-over) and the synthetic-note class fixed. Ledger row 7 flips to BUILT+WALKED — the Opus
 cold review is the remaining gate; the review cast stays OPUS (no seam body touched;
 `LandingAuthority` gained two surface names + policies, data not loop).
+
+### U1 — ORCHESTRATOR RE-WALK AFTER THE LADDER (MAJOR-1's gesture, 2026-09-26) + U1 CLOSE
+
+The MAJOR-1 gesture driven in my own hands on the final tree (one chained click burst inside the
+hold: outline row 24 → 500 ms → a click into the landing block's prose): the signpost read
+`end=handedover top=0` at 698 ms — her act ENDED the landing — and the settled capture shows
+block 24 pixel-still where the landing put it, live, caret at the click point. **U1 CLOSED:**
+built · double-walked (+ the post-ladder re-walk) · ladder two rounds (R1 0/1/3/2 all confirmed
+and fixed red-first inside the ReadEditPane boundary; R2 all VERIFIED-FIXED + 0/0/0/5 NIT
+dispositioned at adjudication) · #151 carries JC1 for her. The R-18l-3 split fires HERE (her
+check-in): 18l closes at this seam; U2 · U3 · U4 + the B5 trace are 18l-b's.
+
+## 18l CLOSEOUT (FIRST HALF — 2026-09-26)
+
+**Shipped:** U0 (the Index click's place — off-screen replica + `MarkdownRendering.sourceOffset`;
+the descender clip's two mechanisms — the width door + the settle net; the S1–S9 sweep with
+per-finding ATTRIBUTION) · U0b (`ReadingAnchor` — the reading position carries its PLACE; the
+top air survives every restore road) · U0c (note-open per R-18l-1: START on the session's first
+open, exact-page restore in-session; all mechanisms pre-existing) · U-VIS (`Tools/VisualWalk/`,
+the standing opt-in geometry harness; can-red proven; every U0-family fix teeth-verified) · U1
+(note Read's landings WATCHED through the one authority, signposted in Console; the placeholder
+half rejected on measurement — #151). **Ladders:** five, every finding dispositioned in writing;
+0 unresolved; no round ever reached the cap. **KnownIssues:** rows 75 · 86 · 87 · the note-open
+row CLOSED; rows 88 (B5) re-owned to **18l-b**; S3 filed (Design & UI review) · S5 filed (12).
+**Canon:** AppSpec §12 gains R-18l-1's contract line (this commit); the 13g F-5 carve-out
+pointer (R-18l-5, #149) and the R-cor-3 dated pointer landed in-phase. **Machinery:** the
+per-step walk guard durable in WalkKit; ENVIRONMENT TRAPS hardened twice (the stray-click and
+consent-dialog incidents, both recorded honestly). **Open for her:** the MORNING BUNDLE above
+(#149 · #150 · #151 · S3 · the U-VIS ratification · the rulings confirms). **18l-b's scope:**
+the U2/U3/U4 briefs' matter + B5 — the kickoff is in her hands. **MOBILE PARITY:** one
+`notes/MobileSoul.md` row this commit — the phone owes R-18l-1's note-open twin; its long-note
+Read inherits U1's watched-lazy shape (never the Index's manifest); everything else is
+Mac-app/DEBUG/tooling. Install refresh: recorded below at the refresh commit.
