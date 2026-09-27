@@ -413,10 +413,11 @@ final class TakesArticleScroll {
         // note-wide split, a keystroke that grows a row) must not be fought
         // by a re-aim; and on a board that never held this is a no-op.
         endArticleHold()
-        // 18l-b U2: …and it hands a WATCHED landing over — once (the
-        // authority's `userTookOver` is a no-op with nothing pending, so the
-        // arms and the structural arm can never double-file).
-        watch.userTookOver(act)
+        // 18l-b U2: …and it hands the landing over — once, watched or not (a
+        // landing the watch never took is filed too — the fix pass; with
+        // nothing pending this files nothing, so the arms and the structural
+        // arm can never double-file).
+        if let landing = articleLanding { fileEnding(landing, handedOver: true, act) }
         articleLanding = nil
     }
 
@@ -507,8 +508,9 @@ final class TakesArticleScroll {
         guard articleReadyForLanding else { return .wait }
         let order = order()
         guard order.contains(landing) else {
-            // 18l-b U2: a watched landing whose row left the note says so.
-            watch.giveUp("the row left the note")
+            // 18l-b U2: a landing whose row left the note says so — watched
+            // or not (the fix pass).
+            fileEnding(landing, handedOver: false, "the row left the note", order: order)
             articleLanding = nil   // the row is gone from the note
             return .done
         }
@@ -526,7 +528,7 @@ final class TakesArticleScroll {
         }
         guard articleLandingAimsLeft > 0 else {
             // 18l-b U2: the reveal's whole bound spent — an honest `gaveup`.
-            watch.giveUp("the reveal's aims ran out")
+            fileEnding(landing, handedOver: false, "the reveal's aims ran out", order: order)
             articleLanding = nil
             return .done
         }
@@ -575,6 +577,7 @@ final class TakesArticleScroll {
     /// note's slot order is never built.
     func articleLandingReport(order: @autoclosure () -> [String]) -> ArticleLandingStep {
         guard let landing = articleLanding, watch.anchor == landing else {
+            restoreLooksAgainForAWaitingLanding(order: order())
             return articleLandingStep(order: order())
         }
         if let content = lastArticleGeometry?.content, content != watchedContent {
@@ -583,6 +586,42 @@ final class TakesArticleScroll {
         }
         reportWatchedLanding(landing)
         return .wait
+    }
+
+    /// **A restore a landing is WAITING on looks again when the rows report**
+    /// (the 18l-b U2 acceptance's finding — the bloom door's landing stranded,
+    /// traced in the plan's U2 RECORD). The restore only ever looks at a
+    /// GEOMETRY report, and every geometry report carries the rows' PREVIOUS
+    /// frames (the 17q ladder's W-2): when SwiftUI's own re-resolution of the
+    /// restore's last aim puts its row exactly where the memory says, the
+    /// geometry report of that move reads the row at its old place, and the
+    /// rows report the arrival AFTER it — with nothing left to change the
+    /// geometry, the restore stays `.wanted` forever with the page right. A
+    /// `.wanted` restore never readies a landing, so the one landing that
+    /// waits on it — the fan panel's BLOOM (17q R1-2: it rides through the
+    /// restore and reveals afterwards) — was never spent: the block bloomed,
+    /// rung and off the page, and nothing filed (measured in the orchestrator's
+    /// acceptance walk: the page at the restore's own target, block 262 below).
+    ///
+    /// So a row report, while a landing waits on a `.wanted` restore whose
+    /// row now sits where it sat (the restore's own settle — its top at
+    /// `into` ± 2), hands the restore the geometry it last saw, through its
+    /// OWN door (`consumeArticleGeometry` — the byte-preserved decision, body
+    /// untouched): it records the arrival exactly as it would at a geometry
+    /// report (a hold), and the landing's step then readies. Guarded to that
+    /// one case, so the step it returns is by construction the hold's `.wait`
+    /// — nothing to scroll, nothing to remember. With NO landing waiting the
+    /// restore keeps its own cadence (her R-Q21's plain round trip is not
+    /// touched — pinned); her scroll is not this door (the geometry road's).
+    /// Cost: only while a bloom waits on a restore, one dictionary read per
+    /// row report; the slot order once, at the arrival.
+    private func restoreLooksAgainForAWaitingLanding(order: @autoclosure () -> [String]) {
+        guard articleLanding != nil, case .wanted(let place) = articleRestore,
+              let rowID = place.rowID, let frame = articleRowFrames[rowID],
+              abs(frame.minY - place.into) <= 2,     // the restore's own settle criterion
+              let geometry = lastArticleGeometry, order().contains(rowID)
+        else { return }
+        _ = consumeArticleGeometry(geometry, remembered: nil, positionedByUser: false, order: order())
     }
 
     /// **The watch's CORRECTIONS, as an observed count.** The authority
@@ -606,7 +645,9 @@ final class TakesArticleScroll {
         _ geometry: ArticleGeometry, remembered: ArticlePlace?, positionedByUser: Bool,
         order: @autoclosure () -> [String]? = nil
     ) -> ArticleRestoreStep {
-        if positionedByUser { watch.userTookOver("her scroll") }
+        if positionedByUser, let landing = articleLanding {
+            fileEnding(landing, handedOver: true, "her scroll")
+        }
         return consumeArticleGeometry(
             geometry, remembered: remembered, positionedByUser: positionedByUser, order: order())
     }
@@ -631,14 +672,8 @@ final class TakesArticleScroll {
     /// realized. Once per landing (O(rows) — the step already built the
     /// order), never per report.
     private func beginWatch(_ landing: String, order: [String]) {
-        let index = order.firstIndex(of: landing) ?? -1
-        let exactAbove = index >= 0 && order[..<index].allSatisfy { articleRowFrames[$0] != nil }
-        let facts = LandingFacts(
-            rows: order.count, targetIndex: index, offset: -1,
-            total: lastArticleGeometry?.content ?? 0,
-            derived: max(order.count - articleRowFrames.count, 0), exactAbove: exactAbove)
         watchedContent = lastArticleGeometry?.content
-        watch.watch(landing, facts: facts) { [weak self] _ in
+        watch.watch(landing, facts: watchFacts(landing, order: order)) { [weak self] _ in
             self?.articleLandingCorrections += 1
         }
         // The seed (`seedsFromLastReport` is false on this lazy column): the
@@ -657,6 +692,35 @@ final class TakesArticleScroll {
         } else {
             watch.nudge()
         }
+    }
+
+    /// **Every ENDING files — watched or not** (the U2 acceptance's second
+    /// ask: a landing that died before its first decided step was invisible).
+    /// A watched landing hands over or gives up through the watch; one the
+    /// watch never took is taken and ended at once, so her Console says it
+    /// too — `hops=0`, and `top=-9999` (its row never reported: it was never
+    /// aimed). The DEBUG story names the act. Not for R-Q21's stand-down (a
+    /// landing that stands down was never asked of the page — the resolver
+    /// clears it itself, silently, by design), a superseded landing (the
+    /// authority's own `land` precedent), or a teardown (R2-12's class).
+    private func fileEnding(
+        _ landing: String, handedOver: Bool, _ why: String, order: [String]? = nil
+    ) {
+        if watch.anchor != landing {
+            let slots = order ?? landingProjection?.slots.map(\.placementID) ?? []
+            watch.watch(landing, facts: watchFacts(landing, order: slots)) { _ in }
+        }
+        if handedOver { watch.userTookOver(why) } else { watch.giveUp(why) }
+    }
+
+    /// The signpost's facts for a landing (see `beginWatch`).
+    private func watchFacts(_ landing: String, order: [String]) -> LandingFacts {
+        let index = order.firstIndex(of: landing) ?? -1
+        let exactAbove = index >= 0 && order[..<index].allSatisfy { articleRowFrames[$0] != nil }
+        return LandingFacts(
+            rows: order.count, targetIndex: index, offset: -1,
+            total: lastArticleGeometry?.content ?? 0,
+            derived: max(order.count - articleRowFrames.count, 0), exactAbove: exactAbove)
     }
 
     /// The watch ENDED a landing with a story (settled · gave up · handed
