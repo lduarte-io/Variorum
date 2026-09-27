@@ -654,8 +654,8 @@ scn_takes-landing() {
 # heights — its landings settle on them. Row A's zero-line claim has TWO controls, so it cannot pass
 # vacuously: the Index's landing proves the navigator click took (its target is the story's row), and
 # a plain navigator landing back in Outline proves the log read sees BookOutline lines at all.
-vw_def book-landings "The Adventures of Sherlock Holmes ▸ The Adventure of the Copper Beeches (the book's last story)" \
-  "Outline: the navigator's row, then Index 0.3 s later (one guarded act) · Outline · the navigator (the control) · Read (Scroll) · click the story's third paragraph · Read · a long wheel" \
+vw_def book-landings "The Adventures of Sherlock Holmes ▸ The Copper Beeches (the book's last story) + The Beryl Coronet" \
+  "Outline: Copper Beeches' navigator row, then Index 0.3 s later (one guarded act) · Outline · Beryl Coronet's navigator row (the control) · Read (Scroll — the carry lands Beryl Coronet) · click its third paragraph · Read · a long wheel" \
   "A: a landing its mode switch ended files NO BookOutline line (the Index's landing lands the story; the control settles); B: the flow's landing settles; C: the click-through's live pane holds its caret at the block's START, never on the blank line under its text" pass
 
 # Every signpost of <surface> in the last N seconds (the shipping line, content-free).
@@ -680,13 +680,18 @@ scn_book-landings() {
     || { vw_require false "the navigator's Copper Beeches row"; return }
 
   # Row A — ONE guarded act: the navigator's row (focus + reveal: an Outline landing), then the book's
-  # Index 0.3 s later — inside the landing's one-second hold, so it cannot have finished on its own.
+  # Index 0.3 s after the last click — inside the landing's one-second hold, so it cannot have finished
+  # on its own. The row is clicked TWICE, 0.8 s apart (the walker fact: a single click is sometimes
+  # swallowed by the activation — measured here in Study; the act is idempotent, and the second
+  # landing supersedes the first silently).
   x=$(( nav[1] + 80 )) y=$(( nav[2] + nav[4] / 2 ))
-  vw_act_note "the navigator's Copper Beeches row, then Index 0.3 s later — one guarded act"
+  vw_act_note "the navigator's Copper Beeches row (twice), then Index 0.3 s later — one guarded act"
   vw_step $x $y
   vw_no_foreign_at $x $y
   vw_our_window_is_key
   t0=$EPOCHSECONDS
+  cliclick c:$x,$y
+  sleep 0.8
   cliclick c:$x,$y
   sleep 0.3
   $VW_BIN/vis-ax $PID index AXButton press >> $RUN_DIR/run.log \
@@ -699,13 +704,15 @@ scn_book-landings() {
   vw_book_signposts BookOutline $(( EPOCHSECONDS - t0 + 1 ))
   vw_expect_eq "A · the Outline's landing ended WITH the Outline: BookOutline lines since the click" ${#BS_LINES} 0
 
-  # Row A's control — back in Outline, a plain navigator landing (no switch) files its line.
+  # Row A's control — back in Outline, a plain navigator landing (no switch) files its line. Another
+  # story's row: a FOCUSED note's row wears the voice's selection marker in its label (Terminal's is
+  # non-empty — measured), so Copper Beeches' own row no longer answers to its bare name.
   vw_ax_press outline AXButton
   vw_settle
-  nav=($($VW_BIN/vis-ax $PID "⠿, the adventure of the copper beeches" AXButton)) \
-    || { vw_require false "the navigator's Copper Beeches row (the control)"; return }
+  nav=($($VW_BIN/vis-ax $PID "⠿, the adventure of the beryl coronet" AXButton)) \
+    || { vw_require false "the navigator's Beryl Coronet row (the control)"; return }
   t0=$EPOCHSECONDS
-  vw_click $(( nav[1] + 80 )) $(( nav[2] + nav[4] / 2 )) "the navigator's Copper Beeches row (the control)"
+  vw_click $(( nav[1] + 80 )) $(( nav[2] + nav[4] / 2 )) "the navigator's Beryl Coronet row (the control)"
   sleep 3; vw_settle; vw_cap 02-outline-control-landing
   vw_book_signposts BookOutline $(( EPOCHSECONDS - t0 + 1 ))
   vw_expect_eq "A · control: a landing the Outline keeps files end=settled [${BS_LAST:-none}]" \
@@ -720,9 +727,11 @@ scn_book-landings() {
   vw_book_signposts ReadingFlow $(( EPOCHSECONDS - t0 + 1 ))
   vw_expect_eq "B · the flow's landing settles [${BS_LAST:-none}]" "${${(M)BS_LAST:#*end=settled*}:+settled}" settled
 
-  # Row C — the click-through: the story's third paragraph (a block over her blank line).
-  local p; p=($(VIS_AX_PREFIX=1 VIS_AX_MINX=$(( WIN_X + 300 )) $VW_BIN/vis-ax $PID "“you have erred, perhaps" AXStaticText)) \
+  # Row C — the click-through: the landed story's (Beryl Coronet's — the control focused it, so the
+  # carry landed it) third paragraph, a block over her blank line.
+  local p; p=($(VIS_AX_PREFIX=1 VIS_AX_MINX=$(( WIN_X + 300 )) $VW_BIN/vis-ax $PID "he was a man of about fifty" AXStaticText)) \
     || { vw_require false "the story's third paragraph on the flow's page"; return }
+  vw_require '(( p[2] > WIN_Y + 60 && p[2] + 20 < WIN_Y + WIN_H ))' "the third paragraph is on screen (y ${p[2]})" || return
   x=$(( p[1] + (p[3] > 400 ? 200 : p[3] / 2) )) y=$(( p[2] + (p[4] > 40 ? 12 : p[4] / 2) ))
   t0=$EPOCHSECONDS
   vw_click $x $y "the third paragraph's first line (the click-through)"
