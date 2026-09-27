@@ -1703,3 +1703,27 @@ but the one place the rule reaches the act's own line. (f) Candidate 1's hazard 
 road) is left standing by design (not a B5 fix) — owner 12, drafted. (g) `b5-more-roads` is two guards, not teeth.
 **U-B5 — DONE (implementer); the Fable cold review follows.**
 
+
+### U-B5 — ORCHESTRATOR ACCEPTANCE, FIRST PASS (2026-09-27; verify-never-trust) — WALK HELD AT THE GUARD
+
+**Claims verified against git and disk:** 14 commits pushed, tree clean, no trailers; the commit
+chain honest (the withdrawn candidate 1 and the keyboard-stall derailment are IN the history, not
+smoothed over); the diff footprint as recorded (the only test file in the range is the new
+`WriteFloatingViewportTests.swift` — every riding pin byte-unmodified by construction); the
+evidence logs on disk (`18lb-ub5-pin-prefix{1,2}`, `R-keep`, `D1`, `D2`, `closing1`,
+`release-compile` + the `18lb-ub5/` instrument copies). The record read whole: the trace is
+located to ONE call with a captured stack (TextKit's `_fixSelectionAfterChangeInCharacterRange:`
+reaching the ring's layout-forcing decoration walk), the attribution is BY RUN (D1: the pre-18c
+road holds the line; D2: the ring off never reaches the premises), and the fix respects the fence
+(the caret's line never held; the act's own movement shipped; pinned 10.0 pt with the keeper out).
+
+**The walk: HELD AT THE GUARD** — the author returned to the machine mid-attempt (HID idle 0 s;
+nothing activated, the guard's order held). The orchestrator's hands-on pass (the three B5
+scenarios in Study + the pin suites) discharges at the next author-free window; the unit does not
+CLOSE before it. The Fable cold review (read-heavy) proceeds in parallel.
+
+**Adjudications made now (repo-first, before the reviewer sees them):** row 85's last-chance
+decision ACCEPTED (five ⌘↓ landings traced, the ring correct in every one — an honest
+no-reproduction beats a hollow fix; the row stays 12's, its may-take chain exhausted this round);
+the two NOTICED owner-12 drafts (R1-1's class on the selection-fix road; `applyDifferential`'s
+missing restore step) and the row-88 close ride the closeout pen after the ladder.
