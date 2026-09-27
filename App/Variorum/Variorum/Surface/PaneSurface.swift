@@ -1761,8 +1761,16 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
                 let clipsBefore = view.enclosingClipOrigins()
                 view.textLayoutManager?.textViewportLayoutController.layoutViewport()
                 let clipsAfter = view.enclosingClipOrigins()
+                // A clip COUNT change across the call would be a hierarchy
+                // change the pass should be incapable of (it builds rendering
+                // surfaces BELOW the text view, and both reads share this one
+                // main-queue block) — recorded LOUD, never zip-truncated into
+                // a silent 0, so the pins' == 0 arms catch it (ladder round 1,
+                // NIT-2).
                 view.noteRenderRestore(
-                    clipShift: zip(clipsBefore, clipsAfter).map { abs($1 - $0) }.max() ?? 0)
+                    clipShift: clipsBefore.count == clipsAfter.count
+                        ? (zip(clipsBefore, clipsAfter).map { abs($1 - $0) }.max() ?? 0)
+                        : .infinity)
             }
         }
     }

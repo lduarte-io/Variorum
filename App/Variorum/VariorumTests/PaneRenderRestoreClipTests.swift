@@ -248,7 +248,11 @@ struct PaneRenderRestoreClipTests {
             layoutManager.textViewportLayoutController.layoutViewport()
             let viewportTopAfter = Self.firstViewportFragmentTop(layoutManager)
             let clipsAfter = pane.enclosingClipOrigins()
-            let shift = zip(clipsBefore, clipsAfter).map { abs($1 - $0) }.max() ?? 0
+            // The seam's own loud-mismatch rule, mirrored (ladder round 1,
+            // NIT-2): a clip-count change is a shift, never a silent 0.
+            let shift = clipsBefore.count == clipsAfter.count
+                ? (zip(clipsBefore, clipsAfter).map { abs($1 - $0) }.max() ?? 0)
+                : CGFloat.infinity
             print("U3-RIDER adversarial: clips \(clipsBefore) → \(clipsAfter) · frame \(frameBefore.height) → \(pane.frame.height) · viewport's first fragment top \(viewportTopBefore.map { "\($0)" } ?? "nil") → \(viewportTopAfter.map { "\($0)" } ?? "nil")")
             #expect(viewportTopBefore != nil && viewportTopAfter != nil
                     && abs(viewportTopAfter! - viewportTopBefore!) > 20,
