@@ -264,8 +264,8 @@ re-opens its named rows; none gates U2/U3/U4 as scoped.
 
 | # | Item | Unit | Status |
 |---|---|---|---|
-| 1 | The authority grows the AIM KIND (top · minimal-reveal · viewport-fraction); `ReadLandingResidual`'s fraction arithmetic hoisted (U1 JC 2's hand-forward) | U2 | **BUILT+WALKED 2026-09-27** — `658e2815`; the arithmetic pins rode unmodified; the Fable ladder is the remaining gate |
-| 2 | Takes' landing half (`articleLandingStep` / `revealDecision` / `revealAnchor`) onto the authority under a `takesArticle` policy; restore half BYTE-PRESERVED (R-Q20/R-Q21); ~15 gesture-end pins + projection arm ride UNMODIFIED (3C) | U2 | **BUILT+WALKED 2026-09-27** — `b25f74ad` + the bloom-race fix `20d80980` (a pre-existing stall found at the orchestrator's acceptance, traced, fixed red-first); triple-walked (implementer both voices + orchestrator ×3); the Fable ladder is the remaining gate |
+| 1 | The authority grows the AIM KIND (top · minimal-reveal · viewport-fraction); `ReadLandingResidual`'s fraction arithmetic hoisted (U1 JC 2's hand-forward) | U2 | **CLOSED 2026-09-27** — `658e2815`; arithmetic pins unmodified; ladder closed (MINOR-1's guard pin makes the declared kinds fail on drift) |
+| 2 | Takes' landing half (`articleLandingStep` / `revealDecision` / `revealAnchor`) onto the authority under a `takesArticle` policy; restore half BYTE-PRESERVED (R-Q20/R-Q21); ~15 gesture-end pins + projection arm ride UNMODIFIED (3C) | U2 | **CLOSED 2026-09-27** — `b25f74ad` + the bloom-race fix `20d80980` (pre-existing stall found at the orchestrator's acceptance, traced by run, fixed red-first); triple-walked; ladder closed one round (0/0/3/4, all confirmed, five reviewer fixes, sanity PASS 681/101; `notes/plans/18lb-u2-ladder-round1.md`); row-42 amendment + the head-reveal row landed |
 | 3 | MAY-take: C6 — the born-live pane's transient END report poisons the persisted memory until the note leaves (18l ledger row 8's cell) | U2 | **NOT TAKEN 2026-09-27** (the diff stands on none of its road) — 12's at the closeout |
 | 4 | PanePublisher frame-synchronous / state-deferred (her ratified shape; gate = walk the boards under load, REVERT on any felt regression); the warning count measured both ways (~1,989, all `PaneSurface`'s per 18k C3) | U3 | open |
 | 5 | The macOS-27 `layoutViewport()` clip-displacement exam of `PaneSurface`'s render restore (TK2 §3's hand-forward) | U3 rider | open |
@@ -279,8 +279,8 @@ re-opens its named rows; none gates U2/U3/U4 as scoped.
 |---|---|
 | Preflight (canon + the 18l record WHOLE + the charter's KICKOFF 2 + all seven 18l ladder files + the 18l handoff + KnownIssues whole + QUESTIONS #146–#151 + the resiliency protocol + TK2 notes whole + the master plan + health review §1/§5 + R-Q20/R-Q21 + the R-8 brief's code map + the seam headers: `PaneSurface`/`PanePublisher`, `LandingAuthority`, `TakesArticleScroll`, `LandingTarget`, `ReadNoteLanding`) | DONE (this session, 2026-09-26) |
 | This record file + the U2 brief | DONE (this commit) |
-| U2 (session 1) | **BUILT+WALKED 2026-09-27** — record + bloom-race fix pass below; the Fable ladder (round 1) is the remaining gate |
-| U3 (session 2) | NOT-STARTED — brief written after U2's ladder settles |
+| U2 (session 1) | **CLOSED 2026-09-27** — built · triple-walked · bloom-race stall traced PRE-EXISTING and fixed red-first · ladder one round 0/0/3/4 all confirmed + five reviewer fixes + sanity PASS 681/101; KnownIssues row 42 amended, the head-reveal row filed |
+| U3 (session 2) | IN FLIGHT — brief below (written 2026-09-27 at U2's close) |
 | U4 (session 3) | NOT-STARTED |
 | B5 decision | at U3 |
 | Closeout | NOT-STARTED |
@@ -668,3 +668,111 @@ independently); my run-1 candidate stands EXCLUDED by the implementer's trace �
 the authority with the restore byte-preserved and the ~15 gesture-end pins unmodified); row 3
 (C6 not taken → 12 at the closeout) stands. **The Fable cold review over the COMBINED diff
 (`334bf74c..43a879b1`) is the remaining gate**; ladder file `notes/plans/18lb-u2-ladder-round1.md`.
+
+## U3 BRIEF (session 2 — PanePublisher, the ratified shape + the layoutViewport exam + the B5 decision; written by the orchestrator 2026-09-27 at U2's close)
+
+You are the `opus-implementer` for **18l-b UNIT U3**. One acceptance unit: `PanePublisher` adopts
+her RATIFIED shape — verbatim from the charter: *"attempt the frame-synchronous / state-deferred
+shape, walk the boards under load, and revert on any felt regression"* (health review §5.1 A1 —
+the pane's visible AppKit frame is set synchronously so NO PANE EVER VISIBLY WAITS; only the
+SwiftUI state write defers; the existing convergence loop and `deliverMeasuredHeight`'s existing
+deferral stay as the net). **The GATE is her sentence: a REVERT is a VALID CLOSE for this unit**,
+recorded with the observation that forced it — never argued around. The charter's U3 bullet is
+your unit charter (`notes/plans/post-13u-health-rounds.md` KICKOFF 2).
+
+**Read first, in this order (reading is never delegated):**
+(1) THIS file whole — HER KICKOFF MESSAGE, BINDING PRINCIPLES, CAST & DISCIPLINE, BASELINES,
+ENVIRONMENT TRAPS (verbatim binding — the per-step GUI guard, the system-dialog rules, the
+zero-instance rule for timing-sensitive measurement), THE LEDGER rows 4–6 + 8, and the **U2
+RECORD + bloom-race fix pass + both acceptance sections** (the freshest landing-family facts;
+U2's diff must not be fought).
+(2) The charter's U3 bullet + `notes/codebase-health-review-2026-09-21.md` §5.1 whole (A1 is the
+ruling's origin and names the starvation risk a deferred-only publish carries — the reason the
+sync write existed; A2's deferral precedent in the same coordinator).
+(3) `notes/TEXTKIT2_NOTES.md` IN FULL (editor seam — mandatory). §3's macOS-27 findings are your
+era: **the `layoutViewport()` clip-displacement finding is your RIDER's subject** (*"`PaneSurface`'s
+render restore is the other `layoutViewport()` caller and was NOT examined (18l's)"*), and the
+first-full-measure-differs fact + the U0 settle net are neighbours your diff must not fight.
+(4) The 18k records (`notes/plans/phase-18k-runtime-hygiene.md`): UNIT C3 (the state-write
+deferral sweep + the warning-count attribution — **all ~1,989 `Modifying state during view
+update` lines are `PaneSurface`'s**, the A1 apportionment hypothesis your measurement tests),
+UNIT C2 (the inline editor's height-binding deferral — the sibling shape).
+(5) KnownIssues rows: 88 (B5 — the deterministic Study recipe, the fixed-clip measurement, the
+probe ruled out; YOUR RIDER's neighbour), 85 (the O-2 ring may-take — decide if your diff touches
+the overlay/ring refresh), 90 (the dev-store voice trap), 92 (pointer-injection idle), the
+autosave-rate panes row (13), and row 42's fresh U2 amendment.
+(6) The code, end to end before touching it: `Surface/PaneSurface.swift` WHOLE — `PanePublisher`
+(the publish door: `publishHeight`'s synchronous write + the deferred convergence turns, the
+frame lever `applyFrame`, `healTurnBudget`, `convergenceSlack`, the injectable `Scheduler`),
+`PaneMeasurement` (FENCED — the one measurement brain, no body edits), `PaneTextView` +
+`PaneSurfaceView`'s coordinator (`install`, the width-gated layout hook, the A47/A47b render
+restore — **find its `layoutViewport()` call: that is the rider's caller**), and the composers
+that mount panes by the dozen (the Takes board, Compare/Lenses, the book Index pane,
+`StableSurface`'s interaction); `Features/Editor/EditorView.swift`'s `InlineEditorSurface`
+coordinator (U0's width door + settle net — a neighbour, not your surface);
+`VariorumTests`' pane/publisher suites (find `PanePublisher`'s own pins — the injectable
+scheduler is the state-transition seam).
+
+**The unit, in order:**
+1. **MEASURE FIRST — the warning count BEFORE, on a bounded, REPRODUCIBLE run** (a named suite
+   set at a zero-instance window; state the exact command). The A1 hypothesis: the majority of
+   ~1,989 falls. The record needs BOTH numbers whatever they say.
+2. **BUILD the ratified shape:** the pane's visible height answer stays synchronous through the
+   FRAME lever (AppKit's own frame — the path SwiftUI does not flag); the SwiftUI STATE write
+   (`writeHeight`) defers to the next main-queue turn; the convergence loop, the budget, the
+   coalescing and `invalidate` semantics stay as the net. The canary's publish keeps its shape
+   unless the same hazard binds it — say which and why. `PaneMeasurement` untouched.
+3. **Pins:** `PanePublisher`'s state-transition pins through the injectable scheduler — the new
+   contract stated as tests (a mid-layout publish writes NO state synchronously but the frame
+   answers; the state lands on the drained turn; convergence still heals a dropped frame; the
+   budget still bounds). Where the OLD behavior is pinned by an existing test, that pin's edit is
+   SANCTIONED ONLY if its own text pins the synchronous write as the contract — name each such
+   edit out loud (the ratified change is her ruling; the 3C rule still governs everything else).
+   A red-on-old pin exists here in the honest direction: the warning-generating shape (a state
+   write inside a layout pass) — pin by the mechanism your measurement instruments, if it can be
+   made deterministic; else the before/after count IS the measurement evidence, stated as such.
+4. **MEASURE AFTER** — the same bounded run, the same command; record both numbers side by side.
+5. **THE RIDER (ledger row 5):** the macOS-27 `layoutViewport()` clip-displacement examination of
+   `PaneSurface`'s render restore. Under TK2 §3's finding (the viewport layout moves the clip by
+   its own pass's height change; `JumpPrimitive.scroll(to:)` re-asserts once — the C6 form),
+   examine the restore's caller: can its `layoutViewport()` displace the clip under a restored
+   pane, and does anything re-read it? Verdict FIXED (with a red-on-old pin, the C6 re-assert
+   form) or PROVABLY-SAFE (with the mechanism stated) — never "looked fine".
+6. **THE B5 QUESTION (ledger row 6) — REPORT, do not decide:** with the exam's facts in hand,
+   state whether B5's mechanism (row 88: the frame grows under an unmoved clip on the
+   differential road after a ⌘↓ landing on invalidated geometry) is the exam's own mechanism, its
+   neighbour, or unrelated — with evidence. If the exam's fix would close B5, say so and STOP for
+   the orchestrator's ruling before building beyond the rider's scope. The ruling on where the
+   trace lands is the orchestrator's (the roster: decided at U3).
+7. **The B5 HARNESS FIXTURE fix (U2's hand-forward, Tools/ only):** `b5-return-after-cmd-down`
+   (Terminal) ERRORs in full-order runs because `read-landing` leaves the note's current block at
+   245 and B5's precondition then lands in the typewriter room (identical pre-U2 — not a product
+   bug). Fix the FIXTURE (a start reset in the scenario, e.g. ⌘↑ before the scroll, or the
+   scenario order) so the full seeded run is ERROR-free; verify by a full seeded run.
+8. **Row 85 (O-2 ring) decision:** your unit touches the overlay/refresh neighbourhood — decide
+   the may-take honestly and record either way (a take needs its own red-on-old pin; not-taken
+   needs one line saying why).
+9. **THE FELT GATE + the walk (USE, both voices, BOTH APPEARANCES, per-step guarded):** walk the
+   boards UNDER LOAD — big fans (many takes on one block), Compare pairs, the book Index with
+   long notes, the Takes board, expand-all — watching for ANY felt regression: a pane visibly
+   waiting at mount, a flash of placeholder height, a slower fan bloom. **On ANY felt regression:
+   REVERT (a valid close), record the observation, keep the measurement numbers.** Then the
+   harness as regression cover (the full seeded suite, both voices — also proving your item-7
+   fixture fix: expected 0 ERROR now). The orchestrator's own walk follows; her morning confirm
+   rides the bundle (the felt gate is HER sentence — your walk and the orchestrator's close it
+   PROVISIONALLY).
+
+**Cost shape stated in your record** (P1/P3): the change moves WHEN a state write lands, never
+what is measured; nothing new at autosave rate; the frame lever's budget unchanged.
+
+**Discipline (the resiliency protocol, restated — it binds you):** commit per coherent piece,
+push after EVERY commit, NO trailers; append a `## U3 RECORD` section to THIS file with LIVE
+STATUS from your FIRST commit (DONE (hash) / IN-PROGRESS / NOT-STARTED; unverified claims
+PENDING); records before final verification; synchronous foreground waits only; NEVER spawn
+subagents; commit before any behavioral revert; tests at the END (the pane/publisher family, the
+composers' suites, the eleven Tutorial suites — suite-level `-only-testing`; the closing set's
+baseline is U2's 101 suites — extend it with the pane family you touch); pathspec-limited
+staging. PROVISIONAL-and-continue for non-gating ambiguity (QUESTIONS); STOP and report for
+gating ambiguity, any product-behavior invention, anything wanting `Sync/`, and every author-only
+call. Your diff is `PaneSurface` — the editor seam by definition → a **FABLE cold review**
+follows; your self-assessment closes your record.
