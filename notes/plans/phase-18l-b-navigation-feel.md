@@ -562,3 +562,14 @@ settled ground; the Fable reviewer weighs them independently):**
 
 Ledger rows 1–2 stay open pending the F trace; the Fable cold review follows the fix pass over
 the COMBINED diff.
+
+### U2 — THE BLOOM-RACE FIX PASS (implementer, opened 2026-09-27 at `7ab1c1f6`)
+
+**LIVE STATUS (this pass):**
+
+| # | Piece | Status |
+|---|---|---|
+| B1 | Reproduce (GUI loop + a headless shape) | IN-PROGRESS — **TEMPORARY DIAGNOSTICS ARE IN THE WORKING TREE, UNCOMMITTED BY DESIGN** (a public `bloomdiag` Logger in `TakesArticleScroll.swift`, one line each in `TakesChoreographer.swift`'s bloom arm and `TakesViewModel.focus`'s `.migrated` arm, and a throwaway `zz-bloom-loop` scenario in `Tools/VisualWalk/scenarios.zsh`); a successor restores them with `git checkout HEAD -- <those four files>`. First loop (the instrumented build, Terminal, E→F ×8): **8/8 PASS** — no reproduction yet; a headless app-order probe (bare model, a her-positioned memory at four depths, the bloom door) 4/4 PASS |
+| B2 | Trace + attribute | NOT-STARTED |
+| B3 | Fix (red-on-old pin + behavioural revert) or record | NOT-STARTED |
+| B4 | The pre-watch death's visibility | NOT-STARTED |
