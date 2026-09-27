@@ -158,6 +158,7 @@ clarity-class with the degradation stated above.
 - F1 — pending implementer response.
 - F2 — pending implementer response.
 - F3 — pending implementer response.
+*(Superseded by ROUND 1 FINAL CALLS + FIXES below.)*
 
 ---
 
@@ -204,3 +205,35 @@ as "declined — the bundled fixture is deliberately stable".
 No disputes. Nothing in the clean bill contradicts my record; clean-bill item 1's note that the trace's stack came
 from the instrumented tree (the shipped `EditorTextView` has no `setSelectedRanges` override) is accurate — the
 override was instrument-only and removed with it.
+
+---
+
+## ROUND 1 FINAL CALLS + FIXES (the reviewer, 2026-09-27 — cross-model flow: 3 AGREE, 0 DISPUTE; every implementer correction re-verified at the source before adoption)
+
+**Corrections verified before adopting:** F1's scope grep re-run by this reviewer — the false clause
+exists ONLY at `EditorSurfaceController.swift:3080` (the `WriteFloatingViewportTests.swift:18` hit is
+the trace narrative's historical "no restore step by design", accurate as history; `JumpPrimitive.swift:143/:175`
+and `EditorViewModel.swift:4262` are promise-framed or already qualified — all four read at source).
+F2's pointers corrected and confirmed: `README.md:127–128`, `SCN_ORDER` at `scenarios.zsh:845–847`
+(the round-1 findings' 542/650 pointers were diff-output line numbers — my error, the implementer's
+correction stands). F3's mechanism corrected and confirmed: `BlockRangeIndex.range(ofEntryAt:)`
+(`Shared/EditorBrain/BlockRangeIndex.swift:74–81`) ends in `preconditionFailure` — a whole-process
+kill, worse than the review's subscript claim; the true sites are `WriteFloatingViewportTests.swift:144/148`
+and `:274/279`.
+
+| Finding | Final call | Fix | Hash |
+|---|---|---|---|
+| F1 (MINOR — the door's stale "no scroll restore step exists at all") | **CONFIRMED, fixed** | the one parenthetical at `EditorSurfaceController.swift:3080` amended: the promise dated ("untouched text never moves, the 2026-07-07 promise"), the false clause replaced with the keeper hand-off ("no UNCONDITIONAL restore step — since 18l-b U-B5 the keeper below puts the untouched reading line back iff TextKit moved it, KnownIssues row 88"); doc-only, no behavior, no pin owed (clarity class) | `67449457` |
+| F2 (NIT — README's double "Runs LAST") | **CONFIRMED, fixed** | `book-landings`' row now ends "Runs after `takes-landing` (18l-b U-B5 appended `b5-more-roads` last)"; the `read-landing` row's "Runs AFTER the B5 pair" left as-is (still true) | `b9fd26b8` |
+| F3 (NIT — unguarded fixture indices in the pin) | **TAKEN** (ruled on the implementer's argument: `preconditionFailure` kills the whole xcodebuild test process, taking every later suite of a closing set with it — a premise `#require` is cheap insurance and touches no assertion, so the red-on-old evidence stands unchanged) | `try #require(h.model.index.entries.count > 150, "the fixture: A Scandal in Bohemia carries at least 151 blocks")` at BOTH sites, each placed BEFORE the first `range(ofEntryAt:)` call on its road (the pin: before its jump, covering 144 and the 150 site after it; `tailReturn`: before its jump, covering the `carve` branch's 150 site too) — verified by placement | `c6dc1175` |
+
+**Suite run after the fixes (this reviewer, machine author-free — HID idle 310 s at the run; zero
+GUI driven):** `WriteFloatingViewportTests` + `UntouchedLineKeeperTests` — **`Test run with 4 tests
+in 2 suites passed after 10.791 seconds`, `** TEST SUCCEEDED **`** (the same run compile-checks F1's
+comment edit in the app target). F2 is Markdown-only; `scenarios.zsh` untouched by the fix pass.
+
+**Round 2: NOT EARNED** — no new BLOCKER or MAJOR arose in the fix pass (three doc/premise-class
+changes, zero product-code bodies touched). Per the ladder rules the round closes here; the
+implementer's one sanity pass over this reviewer's three fix commits (`67449457`, `b9fd26b8`,
+`c6dc1175`) is the remaining cross-model step, anything it raises returning to this reviewer for the
+final word.
