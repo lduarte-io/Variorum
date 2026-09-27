@@ -259,3 +259,128 @@ is that the row now holds no rule, only the one call.
 **CLOSING RUN (the touched suites — the flow/landing set, the new pins, the pane file's two suites; each name grep-verified as a `@Suite`):** `FlowStoryHeightOneBrainTests` · `ReadingFlowEstimateTests` · `ReadingFlowEstimateMeasureTests` · `ReadingFlowLandingTests` · `TrailingFlowRowsTests` · `BookHeightManifestTests` · `BookOutlineLandingTests` · `BookOutlineRowsTests` · `OutlineLandingTeardownTests` · `IndexLandingCaretTests` · `BookIndexLandingTests` · `BookIndexEditingTests` · `IndexClickCaretTests` · `LandingAuthorityTests` · `LandingSignpostTests` · `PaneSurfaceTests` · `PanePublishDoorTests` — **`✔ Test run with 93 tests in 17 suites passed after 124.125 seconds`**, `** TEST SUCCEEDED **`, zero `✘`, zero skipped (`App/Variorum/DerivedData/18lb-u4-lr1-closing.log`). No behaviour moved in this pass: MINOR-1 restores the row's pre-U4 call (byte-identical) over the same one-brain rule; MINOR-2 and NIT-1 are words.
 
 **For round 2 (what to weigh):** (1) MINOR-1's residual, stated — a rule typed INTO the private `FlowStoryRow` (bypassing the static) is beyond a pure pin; the defence is structural (the row holds one call, byte-identical to pre-U4). (2) (a′)'s one line is quoted in #153 but NOT built — (a) stands PROVISIONAL. (3) Beyond the arbitration's named sites, this pass also corrected the same twin overstatement in `IndexLandingCaretTests`' header (a U4-new file) and the U4 RECORD (two bracketed, dated amendments) — same finding, same words, stated here so nothing is silent. Deaths / resumes: none. Reverts in flight: none (R-two-arm ran and was restored).
+
+## ROUND 2 — cold review of the fix pass (a FRESH `opus-reviewer`, 2026-09-27)
+
+**Reviewer:** `opus-reviewer` (Opus, xhigh), zero implementation context, not the round-1 seat; `notes/REVIEW_PROMPT.md`
+run verbatim over the fix diff **`ecc2c969..76630ac9`** (code = `App/`; the notes commits read as the record). Anchors
+read in own context: this file whole (round 1, the ARBITRATION, the FIX PASS table), the `## U4 BRIEF` / `## U4 RECORD`
+(+ acceptance) and the ENVIRONMENT TRAPS / LEDGER of `phase-18l-b-navigation-feel.md`, QUESTIONS #153 at HEAD,
+KnownIssues row 58 at HEAD. Code read at HEAD and against `3389fedb` (pre-U4) and `ecc2c969` (round-1 head):
+`ReadingFlowView.swift` (`heightManifest` :382–408, `FlowHeightEstimate.remembered`/`storyInput`/`honestHeight`
+:788–830, `FlowStoryRow` :1120–1193), `BookHeightManifest.swift` (`Input`, `init`, `resolve` :77–153),
+`FlowStoryHeightOneBrainTests.swift` (whole), `ReadingFlowEstimateTests.swift:144–156`, `LandingTarget.swift` (whole,
+both trees), `BookIndexEditModel.swift:65–181`, `IndexLandingCaretTests.swift:1–38`, `PaneSurfaceTests.swift:42–50`,
+`PaneSurface.swift:869–907` (`PaneCaretLanding` + `entering`), `CurrentBlockMemory.swift` (whole),
+`CommandRouter.currentBlock(for:)` :280–283, `BookView.editHere` :837–855 and the placeholder doc :2232–2266.
+Evidence logs read: `App/Variorum/DerivedData/18lb-u4-lr1-R-two-arm.log`, `18lb-u4-lr1-closing.log`. **No tests were
+run by this seat** (the two logs carry the exact `-only-testing` invocations and timestamps after the last code commit;
+a working-tree revert would break this seat's read-only rule, and a test host beside a possibly-live session is a trap).
+
+**Seam call (first, as the contract asks): the fix diff stays off Fable's mandatory scope.** `git diff --stat
+ecc2c969..76630ac9` touches no `Sources/`, `Sync/`, `Server/`, `Tools/`, schema, custody, `EditorTextView`,
+`BlockRangeIndex`, `PaneTextAuthority` or `PaneSurface.swift`; the one code change is a read-cheap SwiftUI row's height
+property (`FlowStoryRow`, not the editor seam); no default's meaning moves (every other App line is a comment or doc).
+
+### (1) Round-1 findings — each FIXED as arbitrated
+
+- **MINOR-1 — FIXED, structural.** (a) `FlowStoryRow.honestHeight` (ReadingFlowView.swift:1180–1183) is now ONE call
+  to `FlowHeightEstimate.honestHeight(remembered: memory.size(entry.postID), columnWidth: width, estimate: estimate)` —
+  byte-identical to the pre-U4 body (`git show 3389fedb:` lines 1145–1148), verified. The static (:826–830) is the only
+  copy of the rule: `resolve(storyInput(…)).0`; grep shows its production caller is the row alone, and `storyInput`'s
+  production callers are the static and `heightManifest`'s `.post` case (:401). (b) The pin's column side is built by
+  `FlowHeightEstimate.storyInput` (FlowStoryHeightOneBrainTests.swift:67–69), no hand-built `Input` remains; its
+  `#expect` is unchanged. (c) **The teeth check is honest:** named before it ran (`39a31df9` 10:00:30, after the fix
+  `a4e05f39` 10:00:08); the log's invocation is exactly the two suites; the one issue lists exactly six disagreements —
+  `remembered (450, −5)` × {26000, 800, 20} → row −5, and `remembered (600, 0)` × the same → row 0, manifest the
+  estimate each time — which is precisely what the pre-U4 two-arm body returns and `resolve` refuses; all seven
+  `ReadingFlowEstimateTests` green in the same run (R2-1's width gate agrees on reachable inputs). Result recorded at
+  `fcf3b60a` 10:03:43; `git status` clean now. (d) R2-1's pins (`ReadingFlowEstimateTests:146–152`) bind production
+  again, since the row calls the function they call. (e) KnownIssues row 58's U4 line and BookView.swift:2249–2251 are
+  now true; row 58 cites the arbitration, as the delegated pen required.
+- **MINOR-2 — FIXED, framing only.** #153's (a) sentence is exact (note Read lands `.start` on any block but the one
+  she was last in, where it lands her remembered caret). **(a′) is present as its own option** with its evidence and
+  its one line; I re-traced it at the code: `ReadModeView.openInEdit` reports the clicked block with a nil offset →
+  `CurrentBlockMemory.remember` keeps a known offset only for the SAME block (:80–92) → `PaneCaretLanding.entering`
+  (PaneSurface.swift:903–906) answers `.offset(known)` / `.start` for the current block, nil otherwise; the Index
+  version (`entering(currentBlock(for:), block:) ?? .start`) yields the identical outcome in all three cases (same block
+  with/without an offset, another block) even though the book road does not report the block first, and matches
+  `editHere`'s Outline branch (`remembered?.utf16Offset ?? 0`, BookView.swift:845–848). It reads the `FocusedBlock`
+  memory, never a Read-face click place — #149-independent, as stated. **(a′) is NOT built:** `takePendingLiveBlock`
+  still passes `caret: .start` (BookIndexEditModel.swift:179); (a) stands PROVISIONAL. The note-box rider is gone from
+  (b). `LandingTarget`'s header now defers the caret to the consumer, so its "it carries no decision" is true again.
+- **NIT-1 — FIXED, doc lines only, sanction named.** `git diff -U0` of `PaneSurfaceTests.swift`: every changed line is a
+  `///` line of `PaneBareHost`'s doc; the commit message and the fix table both name the arbitration's sanction.
+
+### (2) No behaviour moved; no pre-existing assertion edited
+
+- The only executable change in the fix diff is the row's property. Round-1 tree: `resolve(storyInput(id: anchor, …)).0`;
+  fix tree: `resolve(storyInput(id: "", …)).0` through the static. `resolve` reads only `measured` / `remembered` /
+  `derived` (BookHeightManifest.swift:145–153), so the two are equal for every input — no behaviour moved (and the
+  per-body anchor-string build round 1 noted is gone).
+- Test files in the range: `FlowStoryHeightOneBrainTests` (U4-new; body's column construction changed per the
+  arbitration, `#expect` untouched), `IndexLandingCaretTests` (U4-new; header comment only), `PaneSurfaceTests`
+  (pre-existing; doc lines only). Across the whole unit (`3389fedb..76630ac9`) the only pre-existing test file touched is
+  `PaneSurfaceTests`, doc-only. No pre-existing assertion edited.
+- Closing run `18lb-u4-lr1-closing.log` (10:07–10:10, after the last code commit `d8b0dd2a` 10:05): the 17 suites the
+  table names, `✔ Test run with 93 tests in 17 suites passed after 124.125 seconds`, `** TEST SUCCEEDED **`, zero `✘`.
+- Hygiene: no trailers in the six fix commits; `origin/main` = `76630ac9`; zero `Sources/` / `Sync/` / `Tools/`.
+
+### (3) NEW findings (severity-ranked) — **0 BLOCKER · 0 MAJOR · 0 MINOR · 3 NIT**, all record/comment-only, none bug-class (no pin claimed)
+
+**NIT-R2-1 · BookIndexEditModel.swift:173 + IndexLandingCaretTests.swift:26–28 · "the value's own documented rule /
+contract" now points at a doc that no longer exists, and the value now points back at this consumer.**
+- *Traced:* the quoted contract (*"the landing then puts the caret at the block's start"*) was the doc of
+  `LandingTarget.utf16Offset` (`git show 3389fedb:App/Variorum/Shared/LandingTarget.swift`), deleted with the field in
+  U4; grep at HEAD finds the phrase only in these two comments and #153. The MINOR-2 fix then reworded `LandingTarget`'s
+  header to *"the consumer placing its caret (the book Index: the block's start — QUESTIONS #153)"*. So a reader of
+  `takePendingLiveBlock` who follows "the value's own documented rule" to `LandingTarget` finds no rule there, only a
+  pointer back to `takePendingLiveBlock` — a circular citation, introduced when the fix pass edited the neighbouring
+  words of both comments and left this clause. #153 already words it correctly (*"the rule that door was designed
+  with"*).
+- *Fix (comment-only):* "the rule the value was designed with (its deleted field's doc, Act 10 batch B: *'…the block's
+  start'*)" in both places. Next touch is fine.
+
+**NIT-R2-2 · phase-18l-b-navigation-feel.md, U4 RECORD — MINOR-1's passages were not amended while MINOR-2's were; one
+of them now prescribes the defect as a reversal.**
+- *Traced:* the fix pass amended the RECORD openly (bracketed notes) for MINOR-2 only. JUDGMENT CALL 4 still reads
+  *"keeps `FlowHeightEstimate.honestHeight` as a FORWARD … Reverse by deleting it and moving those four arms onto
+  `storyInput`"* — after the fix the static is the row's one rule, so that reversal, followed as written, forces the
+  row to re-inline the expression: exactly MINOR-1's two-copy shape. LIVE STATUS row 4 and the SEAM FILES
+  `ReadingFlowView` row ("`FlowStoryRow.honestHeight` = `BookHeightManifest.resolve(storyInput(…)).0`; … a forward")
+  and COST SHAPE item 3 ("a short id string per evaluation") describe the round-1 shape (semantically still equal, so
+  this is accuracy, not error — except JC 4's recipe).
+- *Fix (record-only):* one bracketed amendment on JC 4 ("[amended at the ladder's round 1, MINOR-1: the static is now
+  the row's one rule — deleting it means moving the row's call onto `resolve(storyInput(…))` in the SAME edit, never an
+  inline copy]") and one on the SEAM FILES row pointing at this file's fix table.
+
+**NIT-R2-3 · FlowStoryHeightOneBrainTests.swift:19–25 + this file's "For round 2 (1)" · the residual is stated for the
+row side only; the column side carries its mirror image.**
+- *Traced:* the pin binds the two FUNCTIONS production calls, not the two call sites. The ladder names the row-side
+  residual (a rule typed into the private `FlowStoryRow`). The column side is symmetric: `heightManifest`'s `.post` case
+  (ReadingFlowView.swift:398–403, a private property) could hand-build an `Input` with its own precedence — the pre-U4
+  column's own shape was a hand-built input — and this pin stays green; mounted `ReadingFlowLandingTests` would see it
+  only on reachable inputs. The header's "binds PRODUCTION on both sides" is accurate at the function level, silent on
+  this.
+- *Fix (record-only, optional):* one clause beside the stated residual — "and likewise a hand-built input at
+  `heightManifest`'s `.post` case; both call sites are single calls, which is the structural defence." No code or pin
+  change (a pure pin reaches neither private site).
+
+### CLEAN BILL (round 2)
+
+1. MINOR-1's fix is behaviour-identical to both the round-1 tree and the pre-U4 row body, and the static is the single
+   copy of the rule; the width gate stays independently pinned by R2-1's `aRememberedSizeAppliesOnlyAtItsOwnWidth`
+   (now production-bound again), so switching the pin's column side to `storyInput` lost no coverage.
+2. The teeth check's red is honest and exact (six disagreements, the two-arm body's signature), its suite partner green,
+   the revert restored; the pin's header states plainly that it is green by construction and what reds it.
+3. #153 is now accurate on all three options; (a′)'s one line is correct at the code in every case; nothing (a′)
+   describes was built.
+4. The doc edits (`PaneBareHost`, `PaneCaretLanding`-adjacent comments, `LandingTarget`'s header, BookView:2249, row 58)
+   match the code at HEAD.
+5. No `Sources/`, `Sync/`, schema, editor-seam or default's-meaning content; the six commits pushed, trailer-free.
+
+### VERDICT (round 2)
+
+**All three round-1 findings are FIXED as arbitrated; no behaviour moved; no pre-existing assertion was edited; the fix
+pass introduced no BLOCKER, MAJOR or MINOR.** Three record/comment NITs above (none earns round 3). **The U4 ladder
+CLOSES at this verdict plus the orchestrator's dispositions of NIT-R2-1…3.**
