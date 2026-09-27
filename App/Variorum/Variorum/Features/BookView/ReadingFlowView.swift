@@ -396,12 +396,11 @@ struct ReadingFlowView: View {
                     id: row.id, measured: heights.height(of: row.id),
                     derived: FlowRowHeights.end)
             case .post(let entry):
-                BookHeightManifest.Input(
-                    id: row.id,
-                    remembered: memory.size(entry.postID).flatMap {
-                        FlowHeightEstimate.remembered($0, appliesAt: width) ? $0.height : nil
-                    },
-                    derived: estimate(for: entry.postID))
+                // 18l-b U4 (D1): the SAME input the row stands on
+                // (`FlowStoryRow.honestHeight`) — one brain, two askings.
+                FlowHeightEstimate.storyInput(
+                    id: row.id, remembered: memory.size(entry.postID),
+                    columnWidth: width, estimate: estimate(for: entry.postID))
             }
         }
         return BookHeightManifest(
@@ -790,14 +789,40 @@ nonisolated enum FlowHeightEstimate {
         abs(size.width - columnWidth) <= stableSurfaceWidthTolerance
     }
 
+    /// **A story's height question, as a manifest INPUT — built in ONE place
+    /// for both askings** (18l-b U4; the post-13u health review's D1, §1.3
+    /// item 2): the ROW's own body (`FlowStoryRow` — what the far placeholder
+    /// and the reservation stand at) and the COLUMN's manifest
+    /// (`ReadingFlowView.heightManifest` — the offsets a landing aims by).
+    /// The row used to answer through its own two-arm rule while the column
+    /// resolved through `BookHeightManifest.resolve`; the two agreed only
+    /// because a story's input carries no measured arm (and no production road
+    /// remembers a non-positive height) — KnownIssues row 58's drift class.
+    /// Now both read `BookHeightManifest.resolve` of THIS input (the Outline's
+    /// and the Index's shape: `outlineRowInput` / `indexPaneRowInput`). The
+    /// remembered arm is offered only at THIS width (R2-1); the derived arm is
+    /// the estimate at this width.
+    static func storyInput(
+        id: String, remembered: CGSize?, columnWidth: CGFloat, estimate: CGFloat
+    ) -> BookHeightManifest.Input {
+        BookHeightManifest.Input(
+            id: id,
+            remembered: remembered.flatMap {
+                Self.remembered($0, appliesAt: columnWidth) ? $0.height : nil
+            },
+            derived: estimate)
+    }
+
     /// The height a story STANDS at before its text is measured here — as
     /// the far placeholder and as the surface's reservation: the remembered
     /// size when it was taken at this width, else the estimate at this width.
+    /// **Through the one brain since 18l-b U4** (`storyInput` →
+    /// `BookHeightManifest.resolve`); the name stays as the flow's word for it
+    /// (its pins speak it — `ReadingFlowEstimateTests` rides unmodified).
     static func honestHeight(remembered: CGSize?, columnWidth: CGFloat, estimate: CGFloat) -> CGFloat {
-        if let remembered, Self.remembered(remembered, appliesAt: columnWidth) {
-            return remembered.height
-        }
-        return estimate
+        // `resolve` reads no id — the row's own is `FlowRows.anchor(postID)`.
+        BookHeightManifest.resolve(storyInput(
+            id: "", remembered: remembered, columnWidth: columnWidth, estimate: estimate)).0
     }
 
     /// What a story's surface RESERVES from its first frame: the honest
@@ -1141,10 +1166,15 @@ private struct FlowStoryRow: View {
     /// The height this story stands at until its text is measured HERE:
     /// its remembered size when that was taken at this width, else the
     /// estimate at this width (R2-1 — the one brain for the placeholder
-    /// and the reservation).
+    /// and the reservation). **18l-b U4 (D1): read off the column's manifest
+    /// precedence** — `BookHeightManifest.resolve` of the very input the
+    /// column's manifest builds for this story (`FlowHeightEstimate
+    /// .storyInput`), so the height the row stands at and the height a
+    /// landing aims by are ONE answer, never two rules that happen to agree.
     private var honestHeight: CGFloat {
-        FlowHeightEstimate.honestHeight(
-            remembered: memory.size(entry.postID), columnWidth: width, estimate: estimate)
+        BookHeightManifest.resolve(FlowHeightEstimate.storyInput(
+            id: FlowRows.anchor(entry.postID), remembered: memory.size(entry.postID),
+            columnWidth: width, estimate: estimate)).0
     }
 
     /// What the surface reserves from its first frame — the honest height
