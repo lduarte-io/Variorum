@@ -140,8 +140,9 @@ nonisolated struct FocusedBlock: Hashable, Sendable {
     /// **Where the caret was inside the block, UTF-16** — nil means UNKNOWN
     /// (a surface that holds no caret: Blocks' row, the outline's card, an
     /// old two-field memory), which every landing spells "the block's start".
-    /// Zero is a real place, not unknown. `LandingTarget.utf16Offset` is the
-    /// same idea one door over — the name is shared on purpose.
+    /// Zero is a real place, not unknown. This is THE road a caret's offset
+    /// travels on (`LandingTarget` carries none since 18l-b U4 — QUESTIONS
+    /// #153; its field of this name was set by no production site).
     var utf16Offset: Int?
 }
 

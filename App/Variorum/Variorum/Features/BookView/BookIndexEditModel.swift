@@ -62,15 +62,26 @@ final class BookIndexEditModel {
         return coordinator
     }
 
-    /// The click (or a landing): THIS block goes live; whatever was live
-    /// returns to read-cheap, its pending text flushed through its own
-    /// post's coordinator.
+    /// The click (or a pane's own focus request): THIS block goes live;
+    /// whatever was live returns to read-cheap, its pending text flushed
+    /// through its own post's coordinator.
     ///
     /// **18l U0 — `clickOffset`: where a CLICK put its caret** (the stored-text
-    /// offset under her pointer, `ReadTierClickTarget`). A landing passes
-    /// none, and its pane keeps the shipped `.leave` exactly as before.
+    /// offset under her pointer, `ReadTierClickTarget`). Nil — a pane's own
+    /// focus request — arms nothing, and its pane keeps `.leave`. A LANDING
+    /// goes live through `takePendingLiveBlock`, which arms the block's START.
     func makeLive(postID: String, blockID: String, variantID: String, clickOffset: Int? = nil) {
-        paneCaretLanding = clickOffset.map { (variantID: variantID, landing: .offset($0)) }
+        goLive(
+            postID: postID, blockID: blockID, variantID: variantID,
+            caret: clickOffset.map(PaneCaretLanding.offset))
+    }
+
+    /// THIS block goes live, its pane handed `caret` for that take (nil ⇒
+    /// `.leave`) — the one road both the click and the landing take.
+    private func goLive(
+        postID: String, blockID: String, variantID: String, caret: PaneCaretLanding?
+    ) {
+        paneCaretLanding = caret.map { (variantID: variantID, landing: $0) }
         let key = PaneTextAuthority.PaneKey(
             columnID: Self.columnID, blockID: blockID, variantID: variantID, context: postID)
         switch authority.focus(key) {
@@ -84,9 +95,10 @@ final class BookIndexEditModel {
         }
     }
 
-    /// **18l U0 — the landing the pane about to go live is handed**: a click's
-    /// own place, armed at `makeLive`, for that take only; everything else
-    /// `.leave` (the shipped END — the landings' behaviour, byte-unchanged).
+    /// **18l U0 — the landing the pane about to go live is handed**, for that
+    /// take only: a CLICK's own place (armed at `makeLive`); a LANDING's block
+    /// START (armed at `takePendingLiveBlock` — 18l-b U4, QUESTIONS #153,
+    /// PROVISIONAL); everything else `.leave` (a pane's own focus request).
     /// `@ObservationIgnored`: read at the render the ring move already caused,
     /// never watched (the `BlockTOCViewModel` twin's rule).
     @ObservationIgnored private var paneCaretLanding: (variantID: String, landing: PaneCaretLanding)?
@@ -149,7 +161,20 @@ final class BookIndexEditModel {
             return nil
         }
         pendingLiveBlock = nil
-        makeLive(postID: postID, blockID: row.blockID, variantID: variantID)
+        // **18l-b U4 (18l U0's sweep S4; QUESTIONS #153, PROVISIONAL) — a
+        // LANDING's caret parks at the block's START.** It went live with
+        // `.leave` — the selection where AppKit's `string =` left it, the
+        // take's END — and her notes keep the blank line between paragraphs
+        // as content, so a Read ▸ Scroll click-through (the paged reader's,
+        // the note box's "edit here") put the caret on the EMPTY line under
+        // the text: her U0 report's artifact on the Index's other road in.
+        // No face on this road can say where inside the block she clicked
+        // (`LandingTarget` has no offset to carry), so the landing takes the
+        // value's own documented rule — the block's start — which is also
+        // note Read's twin click-through (`ReadModeView.openInEdit` → the
+        // entry rule's `.start`), QUESTIONS #97's (a), and exactly where the
+        // landing puts her eyes: the landed block's top at the page's top.
+        goLive(postID: postID, blockID: row.blockID, variantID: variantID, caret: .start)
         return row.blockID
     }
 

@@ -1404,8 +1404,9 @@ private struct BookIndexPaneNote: View {
                         postID: entry.postID, variantID: variantID,
                         oldText: row.text ?? "", newText: newText)
                 },
-                // 18l U0 (her Index-click report): the click's own place —
-                // `.leave` for every other road, byte-unchanged.
+                // 18l U0 (her Index-click report): the click's own place; a
+                // LANDING's block start (18l-b U4, #153); `.leave` for a pane's
+                // own focus request.
                 caretOnGoingLive: edit.caretLanding(forVariant: variantID))
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in

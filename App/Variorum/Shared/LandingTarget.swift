@@ -4,11 +4,10 @@
 //
 //  The Act 10 correction round, batch B (row 38 — 13u item 17 pulled in):
 //  **the scrolled-open door's ONE value.** A click on a sentence anywhere
-//  read-cheap names where it wants to land — the note, the block under
-//  the click, and (when the surface knows it) the UTF-16 offset inside
-//  that block — and the arriving editing surface performs the landing:
-//  the mode switch, the reveal, and making THAT block live with the caret
-//  there. Built once here for the book (Read ▸ Scroll → the editable
+//  read-cheap names where it wants to land — the note, and the block under
+//  the click — and the arriving editing surface performs the landing: the
+//  mode switch, the reveal, and making THAT block live, its caret at the
+//  block's start. Built once here for the book (Read ▸ Scroll → the editable
 //  Index); the note's own version (batch C: Read → the Index edit surface,
 //  Write) consumes the same value.
 //
@@ -25,8 +24,20 @@ nonisolated struct LandingTarget: Equatable, Sendable {
     /// note (a title, a whole-note tap): the landing then means the
     /// note's first block.
     var blockID: String? = nil
-    /// The caret's place inside the block, UTF-16, when the surface can
-    /// say (a TK2 read tier can; a SwiftUI `Text` paragraph cannot — the
-    /// landing then puts the caret at the block's start).
-    var utf16Offset: Int? = nil
+
+    // **No caret OFFSET rides this value** (18l-b U4 — the `utf16Offset`
+    // field DELETED; QUESTIONS #153, PROVISIONAL). It was declared with a
+    // paragraph of intent and set by no production site (the post-13u health
+    // review's §1.3 item 4), and no face on its road can say where inside a
+    // block she clicked: Read ▸ Scroll's paragraph is a SwiftUI `Text` under a
+    // bare tap, and the paged leaf's CoreText index has no translation back to
+    // the stored text. The caret offsets that DO exist travel on the
+    // `FocusedBlock` road through `CommandRouter` (`focusedBlock` /
+    // `currentBlock(for:)` — the note's remembered place, read by the
+    // `WriteIntent` doors and `PaneCaretLanding.entering`), never on this
+    // value. The book Index puts a landing's caret at the landed block's
+    // START (`BookIndexEditModel.takePendingLiveBlock`). A clicked place
+    // riding a landing is #153's alternative — a replica of the reading
+    // page's type (`ReadTierClickPlace` for a third face) and #149's
+    // carve-out extended to Read's own surfaces — hers to rule.
 }

@@ -874,7 +874,8 @@ extension PaneTextView {
 /// caused. `.leave` is the DEFAULT and the shipped behaviour: the selection
 /// stays where AppKit's `string =` left it — the END — which is what every
 /// host that passes nothing (the fan/stack cards, Compare, Canvas, the Write
-/// panel, the Book Index's Act 10 row-22 landing) and every post-structural
+/// panel; the Book Index's Act 10 row-22 landing too, until 18l-b U4 moved it
+/// to `.start` — QUESTIONS #153) and every post-structural
 /// ring landing (the survivor, the merged block, the divide successors, the
 /// moved take) had before this ladder and keeps. The hosts whose panes
 /// REPORT their caret to the note's memory pass an explicit landing, because
