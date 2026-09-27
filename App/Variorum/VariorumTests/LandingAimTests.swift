@@ -31,11 +31,22 @@ struct LandingAimTests {
     /// block at a viewport fraction; the takes article reveals minimally.
     /// Nothing about where any of them PUTS a block moved (that is product).
     @Test func everyShippedPolicyNamesTheAimItAlreadyHad() {
-        #expect(LandingPolicy.bookOutline.aim == .top)
-        #expect(LandingPolicy.readingFlow.aim == .top)
-        #expect(LandingPolicy.bookIndex.aim == .top)
-        #expect(LandingPolicy.readNote.aim == .viewportFraction)
-        #expect(LandingPolicy.readNoteEdit.aim == .viewportFraction)
+        // Exhaustive over the closed surface vocabulary on purpose (ladder
+        // round 1, NIT-2): the NEXT adopter is a COMPILE ERROR here rather
+        // than a silent omission — the surface-count pin's own "the next
+        // adds its case here", made structural.
+        for surface in LandingSurface.allCases {
+            let (policy, aim): (LandingPolicy, LandingAimKind) = switch surface {
+            case .bookOutline: (.bookOutline, .top)
+            case .readingFlow: (.readingFlow, .top)
+            case .bookIndex: (.bookIndex, .top)
+            case .readNote: (.readNote, .viewportFraction)
+            case .readNoteEdit: (.readNoteEdit, .viewportFraction)
+            case .takesArticle: (.takesArticle, .minimalReveal)
+            }
+            #expect(policy.surface == surface, "\(surface): the shipped policy under its own name")
+            #expect(policy.aim == aim, "\(surface): the aim it already had")
+        }
         #expect(LandingAimKind.allCases.count == 3,
                 "top · minimal-reveal · viewport-fraction — the charter's three")
     }
