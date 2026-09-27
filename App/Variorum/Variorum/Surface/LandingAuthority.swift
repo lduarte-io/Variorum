@@ -122,6 +122,17 @@ nonisolated struct LandingPolicy: Equatable {
     /// the page did not move, and row 100's measurement is that corrections
     /// issued blind are the instability rather than the cure.
     var correctsAnUnreportedTarget: Bool
+    /// **May a landing START from where its target last said it was?**
+    /// (`tops` — see the property.) True on the three book adopters, where
+    /// every row exists and reports on every scroll, so the last report IS a
+    /// fact. **False on note Read's two faces (18l U1, ladder round 1,
+    /// MINOR-1):** their columns are LAZY — a block landed once may since
+    /// have gone away, and its old "I am home" would let a later landing that
+    /// never finds it end `settled top=0`, suppressing the very correction a
+    /// lazy column needs and filing an untrue signpost. Those faces seed a
+    /// landing THEMSELVES, from the target's current place when it is on the
+    /// column now (and nothing when it is not).
+    var seedsFromLastReport: Bool = true
     /// **The surface's own word for a correction, in the DEBUG story.** A
     /// shared authority would naturally print one word; these two are kept
     /// because the suites READ them — the flow's `aRevealOfTheTwelfthStory…`
@@ -209,11 +220,13 @@ nonisolated struct LandingPolicy: Equatable {
     ///   hand.
     /// - **budget 3, the Index's:** a landing that cannot arrive stops and
     ///   says so rather than thrashing.
+    /// - **`seedsFromLastReport` FALSE** (ladder round 1, MINOR-1): the face
+    ///   seeds each landing from the block's CURRENT place (see the field).
     static let readNote = LandingPolicy(
         surface: .readNote, tolerance: 2, settleInterval: 0.25, minimumHold: 1.0,
         maxWait: 0.6, correctionBudget: 3, timeBudget: 4,
         correctionPace: .spacedByTheHold, correctsAnUnreportedTarget: true,
-        correctionWord: "HOP")
+        seedsFromLastReport: false, correctionWord: "HOP")
 
     /// The `edit` face's — the same numbers under its own name (its resting
     /// anchor is the centre, which the surface's residual carries; nothing in
@@ -222,7 +235,7 @@ nonisolated struct LandingPolicy: Equatable {
         surface: .readNoteEdit, tolerance: 2, settleInterval: 0.25, minimumHold: 1.0,
         maxWait: 0.6, correctionBudget: 3, timeBudget: 4,
         correctionPace: .spacedByTheHold, correctsAnUnreportedTarget: true,
-        correctionWord: "HOP")
+        seedsFromLastReport: false, correctionWord: "HOP")
 
     /// How long after a decision the next look runs.
     func pause(elapsed: TimeInterval) -> TimeInterval {
@@ -501,8 +514,9 @@ final class LandingAuthority {
         contentMoves = 0
         began = Date()
         lastDecision = Date()
-        // The seed (see `tops`).
-        lastTop = tops[anchorID]
+        // The seed (see `tops`) — where the policy allows it (18l U1: a lazy
+        // column's surface seeds from the target's CURRENT place instead).
+        lastTop = policy.seedsFromLastReport ? tops[anchorID] : nil
         #if DEBUG
         storyboard?.note("\(anchorID) LAND")
         if facts.rows > 0 {
