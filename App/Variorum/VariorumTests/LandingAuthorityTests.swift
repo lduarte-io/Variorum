@@ -245,7 +245,7 @@ struct LandingSignpostTests {
         #expect(!LandingSignpost.isContentFree("landing rows=4 end=finished"))
         #expect(!LandingSignpost.isContentFree("landing rows"))
         #expect(!LandingSignpost.isContentFree("BookOutline landed at the top"))
-        #expect(LandingSurface.allCases.count == 5,
-                "five surfaces have adopted the authority (18l U1: note Read's two faces); the next adds its case here")
+        #expect(LandingSurface.allCases.count == 6,
+                "six surfaces have adopted the authority (18l-b U2: the Takes article); the next adds its case here")
     }
 }

@@ -382,6 +382,15 @@ final class TakesBoardLayout {
         article.articleLandingStep(order: order())
     }
 
+    /// 18l-b U2 — the view's report roads (a row frame, the geometry): the
+    /// step until the watch has the landing, a report to the watch after.
+    func articleLandingReport(order: @autoclosure () -> [String]) -> ArticleLandingStep {
+        article.articleLandingReport(order: order())
+    }
+
+    /// 18l-b U2 — the watch's corrections (the view spends the step once each).
+    var articleLandingCorrections: Int { article.articleLandingCorrections }
+
     @discardableResult
     func noteArticleRowFrame(_ placementID: String, _ frame: CGRect) -> Bool {
         article.noteArticleRowFrame(placementID, frame)
@@ -395,11 +404,14 @@ final class TakesBoardLayout {
         article.forgetArticleRowFrame(placementID)
     }
 
+    /// 18l-b U2: through the watch's her-scroll door
+    /// (`TakesArticleScroll.articleGeometryArrived`), which hands a watched
+    /// landing over and then runs the restore's decision byte-unchanged.
     func consumeArticleGeometry(
         _ geometry: ArticleGeometry, remembered: ArticlePlace?, positionedByUser: Bool,
         order: @autoclosure () -> [String]? = nil
     ) -> ArticleRestoreStep {
-        article.consumeArticleGeometry(
+        article.articleGeometryArrived(
             geometry, remembered: remembered, positionedByUser: positionedByUser,
             order: order())
     }

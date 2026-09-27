@@ -86,6 +86,11 @@ nonisolated enum LandingSurface: String, Equatable, CaseIterable {
     /// differ in anchor (0.08 · centred), rows and chrome.
     case readNote = "ReadNote"
     case readNoteEdit = "ReadNoteEdit"
+    /// **18l-b UNIT U2 — the Takes ARTICLE column, the sixth adopter** (this
+    /// file's header named Takes as a next touch). Its aim kind is the
+    /// minimal reveal (her R-Q1); its landing is spent by the article's own
+    /// step machine and WATCHED here (`LandingAuthority.watch`).
+    case takesArticle = "TakesArticle"
 }
 
 nonisolated struct LandingPolicy: Equatable {
@@ -242,6 +247,35 @@ nonisolated struct LandingPolicy: Equatable {
     static let readNoteEdit = LandingPolicy(
         surface: .readNoteEdit, aim: .viewportFraction, tolerance: 2, settleInterval: 0.25, minimumHold: 1.0,
         maxWait: 0.6, correctionBudget: 3, timeBudget: 4,
+        correctionPace: .spacedByTheHold, correctsAnUnreportedTarget: true,
+        seedsFromLastReport: false, correctionWord: "HOP")
+
+    /// **The Takes article's** (18l-b UNIT U2). Note Read's numbers — the
+    /// closest sibling: a LAZY column of blocks drawn from text in hand — with
+    /// two differences, each for a stated reason:
+    ///
+    /// - **`aim: .minimalReveal`** — her R-Q1: home is ANY place where the row
+    ///   is fully on screen (`LandingAim.MinimalReveal.residual` is exactly 0
+    ///   there), and a reveal moves the page minimally to the nearest edge.
+    /// - **`tolerance: 0.5`, not 2** — the reveal decision's own half-point
+    ///   slack, so "within tolerance" and "the article's `.none`" are ONE
+    ///   rule (every non-zero residual is beyond it — pinned in
+    ///   `LandingAimTests`); at 2 the authority could call a row home that
+    ///   the reveal rule still calls clipped.
+    ///
+    /// The rest, as note Read's: `correctsAnUnreportedTarget` TRUE (a block
+    /// the lazy column never built reports nothing, and a correction is how
+    /// the column reaches it — the measured shape: U1's synthetic note on
+    /// this column, block 201 never drawn); budget 3 and the four-second
+    /// watchdog (a landing that cannot arrive stops and says so);
+    /// `.spacedByTheHold` (a correction issued inside a content storm is
+    /// undone — row 100's lesson, measured again here: the article's old
+    /// per-report re-aim spent all 64 of its aims in ~70 ms inside ONE
+    /// layout storm); `seedsFromLastReport` FALSE (the column is lazy — the
+    /// surface seeds each watch from the row's CURRENT frame).
+    static let takesArticle = LandingPolicy(
+        surface: .takesArticle, aim: .minimalReveal, tolerance: 0.5, settleInterval: 0.25,
+        minimumHold: 1.0, maxWait: 0.6, correctionBudget: 3, timeBudget: 4,
         correctionPace: .spacedByTheHold, correctsAnUnreportedTarget: true,
         seedsFromLastReport: false, correctionWord: "HOP")
 
@@ -517,6 +551,35 @@ final class LandingAuthority {
         mayFinish: @escaping () -> Bool = { true },
         aim: @escaping (String) -> Void
     ) {
+        begin(anchorID, facts: facts, mayFinish: mayFinish, aim: aim)
+        aim(anchorID)
+        armAfterEvent()
+    }
+
+    /// **Watch a landing whose FIRST aim the surface has already made** (18l-b
+    /// U2 — the Takes article). `land` is "aim, then watch"; a surface whose
+    /// own step machine decides the first aim (the article's
+    /// `articleLandingStep`, where the restore's ordering contracts live —
+    /// her R-Q20's landing-wins, the restore's settled gate) hands the
+    /// landing over at that first decided step instead, and the authority
+    /// watches from there exactly as it watches a landing it aimed itself:
+    /// the quiet interval, the hold, a correction through `aim`, the
+    /// watchdog, the signpost. Nothing is aimed here — the surface just did.
+    func watch(
+        _ anchorID: String, facts: LandingFacts = LandingFacts(),
+        mayFinish: @escaping () -> Bool = { true },
+        aim: @escaping (String) -> Void
+    ) {
+        begin(anchorID, facts: facts, mayFinish: mayFinish, aim: aim)
+        armAfterEvent()
+    }
+
+    /// The landing's state, reset for a new anchor — `land`'s first half,
+    /// shared with `watch` (byte-for-byte the lines `land` always ran first).
+    private func begin(
+        _ anchorID: String, facts: LandingFacts,
+        mayFinish: @escaping () -> Bool, aim: @escaping (String) -> Void
+    ) {
         check?.cancel()
         self.anchor = anchorID
         self.facts = facts
@@ -538,8 +601,6 @@ final class LandingAuthority {
                 + "derived=\(facts.derived) exactAbove=\(facts.exactAbove ? "Y" : "N")")
         }
         #endif
-        aim(anchorID)
-        armAfterEvent()
     }
 
     /// A row reported where its top sits. Recorded for every row (the seed);
@@ -582,6 +643,23 @@ final class LandingAuthority {
         guard isPending else { return }
         finish(.handedover, why: act)
     }
+
+    /// **The surface's own word that its landing cannot arrive** (18l-b U2):
+    /// the Takes article's step machine ends a landing whose row has left the
+    /// note, or whose reveal has spent its whole bound — an honest `gaveup`,
+    /// filed like the watchdog's, rather than a landing that silently stops.
+    func giveUp(_ why: String) {
+        guard isPending else { return }
+        finish(.gaveup, why: why)
+    }
+
+    /// **Told when a landing ENDS with a story** — settled, given up or
+    /// handed over; never at `end()` (a surface going away, or a landing
+    /// superseded, has nothing to tell). With the anchor that ended, so a
+    /// surface that keeps its own request (the Takes article's
+    /// `articleLanding`) can let go of exactly that one. Nil on every surface
+    /// that reads `isPending` instead (the five before 18l-b U2).
+    var onFinish: ((String, LandingOutcome) -> Void)?
 
     /// The surface is going away mid-landing — end it rather than letting its
     /// check re-arm against a dead proxy (ladder R2-12's class).
@@ -673,10 +751,14 @@ final class LandingAuthority {
                 contentMoves: contentMoves, elapsed: elapsed, outcome: outcome, top: lastTop)
             Self.log.notice("\(line, privacy: .public)")
         }
+        let ended = anchor
         check?.cancel()
         check = nil
         anchor = nil
         aim = nil
         mayFinish = { true }
+        // 18l-b U2: last, with the authority already idle, so a surface
+        // answering it may start the next landing at once.
+        if let ended { onFinish?(ended, outcome) }
     }
 }

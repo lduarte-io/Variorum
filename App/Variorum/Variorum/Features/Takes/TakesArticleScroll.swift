@@ -63,8 +63,36 @@ final class TakesArticleScroll {
     /// the NEXT mount's snapshot; this one is this mount's question.
     @ObservationIgnored let articleLastCurrentRow: String?
 
+    /// **18l-b U2 — THE ONE LANDING AUTHORITY WATCHES THIS COLUMN'S LANDINGS**
+    /// (`Surface/LandingAuthority.swift`, policy `.takesArticle`, surface
+    /// `TakesArticle`). The article's own step machine still decides every
+    /// AIM — which row, which edge, whether the restore has settled, her
+    /// R-Q20/R-Q21 — and hands the landing to the watch at its FIRST decided
+    /// step (`articleLandingStep`); from there the watch owns what happens
+    /// between aims: a report re-arms a quiet interval instead of spending an
+    /// aim (`articleLandingReport` — the article's old per-report re-aim spent
+    /// its whole 64-aim bound in ~70 ms inside one layout storm), a
+    /// correction is issued from quiet (`articleLandingCorrections`, spent
+    /// through the same step), the watchdog ends a landing that cannot
+    /// arrive, her hand hands it over, and the landing ENDS when it has
+    /// settled — filing the content-free signpost her Console never had from
+    /// Takes. The watch is `@ObservationIgnored` machinery: nothing renders
+    /// from it.
+    @ObservationIgnored private let watch: LandingAuthority
+    /// The watch's verbose DEBUG story, per board (never a process-global:
+    /// KnownIssues row 53's class). Empty in Release — nothing writes it.
+    @ObservationIgnored let landingStory: TakesLandingStory
+
     init(lastCurrentRow: String? = nil) {
         self.articleLastCurrentRow = lastCurrentRow
+        let story = TakesLandingStory()
+        self.landingStory = story
+        #if DEBUG
+        self.watch = LandingAuthority(policy: .takesArticle, storyboard: story.storyboard)
+        #else
+        self.watch = LandingAuthority(policy: .takesArticle)
+        #endif
+        watch.onFinish = { [weak self] anchor, _ in self?.watchedLandingEnded(anchor) }
     }
 
     // MARK: - The article's landing (17o batch b, ledger row 8)
@@ -106,6 +134,10 @@ final class TakesArticleScroll {
     @ObservationIgnored private(set) var articleLandingKind: ArticleLandingKind = .entry
 
     func landArticle(on placementID: String, kind: ArticleLandingKind = .entry) {
+        // 18l-b U2: a new landing supersedes a watched one SILENTLY — the
+        // authority's own `land` does the same; the new landing is watched
+        // from ITS first decided step.
+        watch.end()
         articleLanding = placementID
         articleLandingKind = kind
         articleLandingAimsLeft = Self.articleLandingAttempts
@@ -350,10 +382,12 @@ final class TakesArticleScroll {
     func noteProjectionArrived(_ projection: Queries.TakesProjection) {
         defer { landingProjection = projection }
         guard articleLanding != nil, let judged = landingProjection else { return }
-        if judged != projection { clearArticleLanding() }
+        // 18l-b U2: the same ending, named for the watch's story (`act` is
+        // DEBUG-story text only; the signpost says `handedover`).
+        if judged != projection { clearArticleLanding(endedBy: "a content change") }
     }
 
-    func clearArticleLanding() {
+    func clearArticleLanding(endedBy act: String = "her gesture") {
         // The 17q ladder's round 3 (R3-1): her hand ends the restore's HOLD
         // exactly as it ends the landing — here, in the ONE funnel every arm
         // above already reaches, so the road table is the hold's completeness
@@ -361,6 +395,10 @@ final class TakesArticleScroll {
         // note-wide split, a keystroke that grows a row) must not be fought
         // by a re-aim; and on a board that never held this is a no-op.
         endArticleHold()
+        // 18l-b U2: …and it hands a WATCHED landing over — once (the
+        // authority's `userTookOver` is a no-op with nothing pending, so the
+        // arms and the structural arm can never double-file).
+        watch.userTookOver(act)
         articleLanding = nil
     }
 
@@ -438,15 +476,26 @@ final class TakesArticleScroll {
         guard articleReadyForLanding else { return .wait }
         let order = order()
         guard order.contains(landing) else {
+            // 18l-b U2: a watched landing whose row left the note says so.
+            watch.giveUp("the row left the note")
             articleLanding = nil   // the row is gone from the note
             return .done
         }
         let frame = articleRowFrames[landing]
         if frame == nil, articleRowFrames.isEmpty { return .wait }
+        // **18l-b U2 — the landing's FIRST DECIDED STEP hands it to the
+        // authority** (past every ordering gate: her R-Q20 landing-wins has
+        // run at `landArticle`, the restore has settled or holds, the note
+        // still holds the row, the column has laid something out). From here
+        // the watch owns what happens between aims; this function still
+        // decides each one.
+        if watch.anchor != landing { beginWatch(landing, order: order) }
         if Self.revealDecision(rowFrame: frame, viewportHeight: articleViewportHeight) == .none {
-            return .wait   // on screen now; the request stays until her hand
+            return .wait   // on screen now; the watch settles it (or her hand ends it)
         }
         guard articleLandingAimsLeft > 0 else {
+            // 18l-b U2: the reveal's whole bound spent — an honest `gaveup`.
+            watch.giveUp("the reveal's aims ran out")
             articleLanding = nil
             return .done
         }
@@ -471,6 +520,120 @@ final class TakesArticleScroll {
     ) -> ArticleRevealAim {
         LandingAim.MinimalReveal.edge(
             for: placementID, rowFrame: rowFrame, order: order, realizedRows: realizedRows)
+    }
+
+    // MARK: - THE WATCH (18l-b U2 — the landing half on the ONE authority)
+
+    /// **The view's REPORT roads** — a realized row's frame arriving, the
+    /// article's scroll geometry — ask HERE, never `articleLandingStep`
+    /// directly. Until the watch has taken this landing they spend the step
+    /// exactly as they always did (that is how a landing's FIRST decided step
+    /// is reached — the rows it needs arrive by report). Once the watch has
+    /// it, **a report is a REPORT**: the target's residual (the aim kind's
+    /// one question — `LandingAim.residual`) and the column's content height
+    /// go to the authority, which re-arms its quiet interval, and nothing is
+    /// aimed. Measured on the pre-watch tree (U1's synthetic note on this
+    /// column, entered on block 201 of 260): one aim per row report spent the
+    /// whole 64-aim bound in ~70 ms inside the FIRST layout storm — 58 of
+    /// them before the proxy's first scroll had even moved the page — and the
+    /// block never drew. The re-aim now comes from quiet
+    /// (`articleLandingCorrections`), through the same step.
+    ///
+    /// `order` is an autoclosure for P1's reason on `articleLandingStep`:
+    /// with nothing pending, or with the watch holding the landing, the
+    /// note's slot order is never built.
+    func articleLandingReport(order: @autoclosure () -> [String]) -> ArticleLandingStep {
+        guard let landing = articleLanding, watch.anchor == landing else {
+            return articleLandingStep(order: order())
+        }
+        if let content = lastArticleGeometry?.content, content != watchedContent {
+            watchedContent = content
+            watch.contentChanged(content)
+        }
+        reportWatchedLanding(landing)
+        return .wait
+    }
+
+    /// **The watch's CORRECTIONS, as an observed count.** The authority
+    /// decides, at quiet, that the watched landing must be aimed again (its
+    /// row off its home, or never seen); the view answers each increment by
+    /// spending the step once (`TakesBoardView`'s `.onChange` — the one
+    /// scroll mechanism, `spendArticleLanding`). Observed on purpose: it
+    /// moves at most `LandingPolicy.takesArticle.correctionBudget` times per
+    /// landing, never at scroll rate.
+    private(set) var articleLandingCorrections = 0
+
+    /// **Her SCROLL, told to the watch first** (the geometry hook's road —
+    /// `TakesBoardLayout.consumeArticleGeometry` forwards here). Her hand is
+    /// `articleScroll.isPositionedByUser`, exactly the flag the restore's
+    /// decision already reads; the watch hands the landing over ONCE (a
+    /// no-op on every later frame, and with nothing watched), and then the
+    /// restore's decision runs BYTE-UNCHANGED (`consumeArticleGeometry` —
+    /// the byte-preserved restore half; its own `articleLanding = nil` on
+    /// her hand stands).
+    func articleGeometryArrived(
+        _ geometry: ArticleGeometry, remembered: ArticlePlace?, positionedByUser: Bool,
+        order: @autoclosure () -> [String]? = nil
+    ) -> ArticleRestoreStep {
+        if positionedByUser { watch.userTookOver("her scroll") }
+        return consumeArticleGeometry(
+            geometry, remembered: remembered, positionedByUser: positionedByUser, order: order())
+    }
+
+    /// The board is going away mid-landing (`TakesViewModel.teardown`): the
+    /// watch ends SILENTLY — nothing landed and the surface is gone, so there
+    /// is no story to tell (the authority's `end()` rule, ladder R2-12's
+    /// class).
+    func endArticleLandingWatch() {
+        watch.end()
+    }
+
+    /// The column's content height the watch last heard about.
+    @ObservationIgnored private var watchedContent: CGFloat?
+
+    /// Hand the landing to the watch at its first decided step, with the
+    /// column's facts for the signpost — honest ones: the article has no
+    /// height manifest, so `offset` is the manifest-less unknown (−1, the
+    /// Index-F1 form), `total` is the column's MEASURED content height,
+    /// `derived` the rows the column holds no frame for right now (they stand
+    /// on SwiftUI's estimate), `exact` whether every row above the target is
+    /// realized. Once per landing (O(rows) — the step already built the
+    /// order), never per report.
+    private func beginWatch(_ landing: String, order: [String]) {
+        let index = order.firstIndex(of: landing) ?? -1
+        let exactAbove = index >= 0 && order[..<index].allSatisfy { articleRowFrames[$0] != nil }
+        let facts = LandingFacts(
+            rows: order.count, targetIndex: index, offset: -1,
+            total: lastArticleGeometry?.content ?? 0,
+            derived: max(order.count - articleRowFrames.count, 0), exactAbove: exactAbove)
+        watchedContent = lastArticleGeometry?.content
+        watch.watch(landing, facts: facts) { [weak self] _ in
+            self?.articleLandingCorrections += 1
+        }
+        // The seed (`seedsFromLastReport` is false on this lazy column): the
+        // row's CURRENT place, or nothing when the column has not built it.
+        reportWatchedLanding(landing)
+    }
+
+    /// The watched target's residual, by the policy's aim kind — or, when the
+    /// row is not realized, a nudge (the column moved; the target has nothing
+    /// to say yet, and the authority's unreported rule decides).
+    private func reportWatchedLanding(_ landing: String) {
+        let sighting = LandingAim.Sighting(
+            rowFrame: articleRowFrames[landing], viewportHeight: articleViewportHeight)
+        if let residual = LandingAim.residual(watch.policy.aim, sighting) {
+            watch.noteTop(landing, residual)
+        } else {
+            watch.nudge()
+        }
+    }
+
+    /// The watch ENDED a landing with a story (settled · gave up · handed
+    /// over): the request is spent. Only THAT landing — a newer one set since
+    /// stands (`landArticle` ends a superseded watch silently, so this never
+    /// fires for it anyway).
+    private func watchedLandingEnded(_ anchor: String) {
+        if articleLanding == anchor { articleLanding = nil }
     }
 
     /// The realized article rows' frames in the scroll view's own space, and
@@ -963,4 +1126,33 @@ final class TakesArticleScroll {
             anchorY: ArticlePlace.anchorY(
                 into: place.into, rowHeight: height, viewport: geometry.viewport))
     }
+}
+
+/// **The Takes article watch's DEBUG story** (18l-b U2) — one per board, so a
+/// pin reads ITS board's landing and never a neighbour's (the process-global
+/// trace hazard KnownIssues row 53 names, and 18l U1's MINOR-2). The
+/// storyboard the authority writes through (`LAND`, the correction `HOP`s,
+/// `DONE: …`), bounded like every DEBUG log; the dump is the current
+/// landing's lines, which the authority also `NSLog`s at the finish for
+/// `log show` (`TakesArticle landing — …`). In Release nothing writes it.
+@MainActor
+final class TakesLandingStory {
+    private(set) var lines: [String] = []
+
+    #if DEBUG
+    func note(_ line: String) {
+        lines.append(line)
+        DebugOracleLog.bound(&lines)
+    }
+
+    var storyboard: LandingStoryboard {
+        LandingStoryboard(
+            note: { [weak self] in self?.note($0) },
+            dump: { [weak self] in
+                guard let self else { return "" }
+                let start = self.lines.lastIndex(where: { $0.hasSuffix(" LAND") }) ?? 0
+                return self.lines[start...].joined(separator: " | ")
+            })
+    }
+    #endif
 }

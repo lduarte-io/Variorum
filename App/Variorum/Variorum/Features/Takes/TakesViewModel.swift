@@ -535,6 +535,9 @@ final class TakesViewModel {
         // R2-2): the rows' departures that follow — or precede, the order is
         // not SwiftUI's promise — must not write a place she never saw.
         articleTornDown = true
+        // 18l-b U2: a landing the one authority is watching ends SILENTLY
+        // with the board (nothing landed; no story to file).
+        board.article.endArticleLandingWatch()
         if let autosaveToken {
             autosave.stopObserving(autosaveToken)
             self.autosaveToken = nil
@@ -758,6 +761,17 @@ final class TakesViewModel {
     func articleLandingStep() -> TakesBoardLayout.ArticleLandingStep {
         board.articleLandingStep(order: projection.slots.map(\.placementID))
     }
+
+    /// 18l-b U2 — the view's REPORT roads (a row frame, the article's
+    /// geometry): the step until the one landing authority is watching the
+    /// landing, a report to it afterwards (`TakesArticleScroll
+    /// .articleLandingReport`). Lazily ordered for the same P1 reason.
+    func articleLandingReport() -> TakesBoardLayout.ArticleLandingStep {
+        board.articleLandingReport(order: projection.slots.map(\.placementID))
+    }
+
+    /// 18l-b U2 — the watch's corrections; the view spends the step once each.
+    var articleLandingCorrections: Int { board.articleLandingCorrections }
 
     /// How many aims the current landing issued (the pins' non-vacuity).
     var articleLandingAims: Int { board.articleLandingAims }

@@ -300,4 +300,266 @@ struct TakesArticleWatchTests {
                     "block 201 came to rest ON SCREEN (drawn \(drawn.first ?? -1)…\(drawn.last ?? -1))")
         }
     }
+
+    // MARK: - The watch's story (new with the watch — DEBUG, per board)
+
+    #if DEBUG
+    private func story(_ model: TakesViewModel) -> [String] {
+        model.board.article.landingStory.lines
+    }
+
+    private func doneLines(_ model: TakesViewModel) -> [String] {
+        story(model).filter { $0.contains(" DONE: ") }
+    }
+    #endif
+
+    /// **The landing's whole life, told once** — the entry landing on a far
+    /// block is watched from its first decided step (`LAND`), and ENDS
+    /// `settled` exactly once, with the Console line's shape. (The red-on-old
+    /// for the lifetime is `aRevealedLandingIsOver…` above; this pins the
+    /// story the watch files.)
+    @Test func aSettledLandingTellsItsStoryOnceAndEndsSettled() async throws {
+        #if DEBUG
+        try await withSession(blocks: 12) { session, fixture, db, mount in
+            let router = session.commandRouter
+            let token = enterOn(fixture.blocks[11], router, fixture.postID)
+            defer {
+                router.unregisterDetail(token)
+                router.forgetCurrentBlock(for: fixture.postID)
+            }
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window, hosting) = await mount(model)
+            let deadline = Date().addingTimeInterval(4)
+            while model.articleLanding != nil, Date() < deadline {
+                await settle(window, hosting, until: { false }, maxTurns: 2)
+            }
+            await settle(window, hosting, until: { false }, maxTurns: 10)
+            let row = model.projection.slots[11].placementID
+            print("[18l-b U2 story] \(story(model).joined(separator: " | "))")
+            #expect(story(model).contains("\(row) LAND"), "the watch took the landing on its row")
+            #expect(doneLines(model).count == 1, "ONE ending (\(doneLines(model)))")
+            #expect(doneLines(model).first?.contains("DONE: settled at top=0.0") == true,
+                    "settled at home — the row fully on screen (\(doneLines(model)))")
+            #expect(story(model).contains { $0.hasPrefix("manifest rows=12 target=11 offset=-1") },
+                    "the signpost's facts: 12 rows, the target's INDEX, no manifest offset (−1)")
+        }
+        #endif
+    }
+
+    #if DEBUG
+    /// A landing asked for AFTER the entry landing has ended, on the note's
+    /// FIRST block (above the page once the entry revealed the last one) —
+    /// so the pin acts inside a watch it has just seen begin, never racing a
+    /// hold that began during the mount.
+    private func landFresh(
+        _ model: TakesViewModel, _ window: NSWindow, _ hosting: NSView
+    ) async -> String? {
+        let deadline = Date().addingTimeInterval(4)
+        while model.articleLanding != nil, Date() < deadline {
+            await settle(window, hosting, until: { false }, maxTurns: 2)
+        }
+        guard model.articleLanding == nil else { return nil }
+        let row = model.projection.slots[0].placementID
+        model.board.landArticle(on: row)
+        await settle(window, hosting, until: { self.story(model).contains("\(row) LAND") }, maxTurns: 10)
+        return story(model).contains("\(row) LAND") ? row : nil
+    }
+    #endif
+
+    /// **Her scroll hands a watched landing over — ONCE** (the her-hand rule
+    /// the board already had — `isPositionedByUser` on the geometry road —
+    /// now also ends the watch; every later her-hand frame, and every arm
+    /// after it, is a no-op for the watch). The model's own road is the
+    /// geometry hook's: `consumeArticleGeometry(_:positionedByUser: true)`.
+    @Test func herScrollHandsTheWatchedLandingOverOnce() async throws {
+        #if DEBUG
+        try await withSession(blocks: 12) { session, fixture, db, mount in
+            let router = session.commandRouter
+            let token = enterOn(fixture.blocks[11], router, fixture.postID)
+            defer {
+                router.unregisterDetail(token)
+                router.forgetCurrentBlock(for: fixture.postID)
+            }
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window, hosting) = await mount(model)
+            guard let row = await landFresh(model, window, hosting) else {
+                Issue.record("non-vacuity: the fresh landing was never handed to the watch — \(story(model))")
+                return
+            }
+            #expect(model.articleLanding == row, "non-vacuity: the watched landing is pending")
+            let mine = { self.doneLines(model).filter { $0.hasPrefix("\(row) ") } }
+            #expect(mine().isEmpty, "non-vacuity: nothing has ended it yet")
+
+            let geometry = TakesBoardLayout.ArticleGeometry(offset: 400, content: 3000, viewport: 619)
+            _ = model.consumeArticleGeometry(geometry, positionedByUser: true)
+            _ = model.consumeArticleGeometry(geometry, positionedByUser: true)
+            model.toggleExpanded(fixture.blocks[5].block)   // an arm, after her scroll
+            await settle(window, hosting, until: { false }, maxTurns: 40)   // past any hold
+            #expect(model.articleLanding == nil, "her scroll ended the landing")
+            #expect(mine() == ["\(row) DONE: her scroll"],
+                    "handed over ONCE, by her scroll — never re-filed (\(mine()))")
+        }
+        #endif
+    }
+
+    /// **The enumerated arms and the structural arm hand a watched landing
+    /// over through the ONE funnel** (`clearArticleLanding`): a gesture door
+    /// files `her gesture`; a content change (`noteProjectionArrived`) files
+    /// `a content change` — each once.
+    @Test func theArmsHandTheWatchedLandingOverThroughTheOneFunnel() async throws {
+        #if DEBUG
+        try await withSession(blocks: 12) { session, fixture, db, mount in
+            let router = session.commandRouter
+            let token = enterOn(fixture.blocks[11], router, fixture.postID)
+            defer {
+                router.unregisterDetail(token)
+                router.forgetCurrentBlock(for: fixture.postID)
+            }
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window, hosting) = await mount(model)
+            guard let row = await landFresh(model, window, hosting) else {
+                Issue.record("non-vacuity: the fresh landing was never handed to the watch — \(story(model))")
+                return
+            }
+            let mine = { self.doneLines(model).filter { $0.hasPrefix("\(row) ") } }
+            model.toggleExpanded(fixture.blocks[5].block)
+            #expect(model.articleLanding == nil, "the bloom door ended it")
+            #expect(mine() == ["\(row) DONE: her gesture"], "\(mine())")
+
+            // A second landing on the same row, ended by a CONTENT change (a
+            // block minted — the shape a sync arrival or an undo in another
+            // window makes).
+            model.board.landArticle(on: row)
+            await settle(window, hosting, until: {
+                self.story(model).filter { $0 == "\(row) LAND" }.count == 2
+            }, maxTurns: 10)
+            #expect(story(model).filter { $0 == "\(row) LAND" }.count == 2,
+                    "non-vacuity: the second landing was watched")
+            _ = try session.operations.newBlock(in: fixture.postID, text: "A block minted elsewhere.")
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: fixture.postID) })
+            #expect(model.articleLanding == nil, "the structural arm ended it")
+            #expect(mine() == ["\(row) DONE: her gesture", "\(row) DONE: a content change"],
+                    "each landing ended once, each by its own door (\(mine()))")
+            await settle(window, hosting, until: { false }, maxTurns: 10)
+        }
+        #endif
+    }
+
+    /// **Her R-Q21 plain round trip is never watched** — the entry landing
+    /// STANDS DOWN before any step (the page she left comes back at rest),
+    /// so no landing is handed to the authority and no signpost is filed:
+    /// the ordering contract (the stand-down at `landArticle`, before
+    /// anything moves) outranks the watch by construction. The app's order
+    /// (a bare model; the projection from the view's `.task`).
+    @Test func aStoodDownEntryLandingIsNeverWatched() async throws {
+        #if DEBUG
+        try await withSession(blocks: 60) { session, fixture, db, mount in
+            let router = session.commandRouter
+            let hers = fixture.blocks[40]
+            router.forgetCurrentBlock(for: fixture.postID)
+            let token = router.registerDetail(postID: fixture.postID, mode: .takes) { _ in }
+            defer {
+                router.unregisterDetail(token)
+                router.forgetCurrentBlock(for: fixture.postID)
+            }
+            router.noteFocusedBlock(hers.block, variantID: hers.variant, postID: fixture.postID, utf16Offset: 0)
+            let projection = try await db.read { try Queries.takesProjection($0, post: fixture.postID) }
+            let hersRow = try #require(projection.slots.first { $0.blockID == hers.block }?.placementID)
+            session.editorRouter.takesArticlePlaces[fixture.postID] = .top
+            session.editorRouter.takesArticleCurrentRows[fixture.postID] = hersRow
+
+            let bare = TakesViewModel(session: session, postID: fixture.postID, defaults: fixture.defaults)
+            let (window, hosting) = await mount(bare)
+            await settle(window, hosting, until: { false }, maxTurns: 30)
+            #expect(bare.authority.livePane?.blockID == hers.block, "non-vacuity: the entry ring is on her block")
+            #expect(bare.board.articleLanding == nil, "the entry landing stood down (her R-Q21)")
+            #expect(!story(bare).contains { $0.hasSuffix(" LAND") },
+                    "never handed to the watch: \(story(bare))")
+        }
+        #endif
+    }
+
+    // MARK: - The watch at the model level (no window): the correction and
+    //         the watchdog
+
+    private func freshScroll() -> TakesArticleScroll { TakesArticleScroll() }
+
+    private func settleRestore(_ scroll: TakesArticleScroll) {
+        _ = scroll.consumeArticleGeometry(
+            TakesBoardLayout.ArticleGeometry(offset: 0, content: 3000, viewport: 700),
+            remembered: nil, positionedByUser: false)
+    }
+
+    /// **A QUIET MISS IS CORRECTED** — the target never reports (the column
+    /// has not built it), and no report arrives at all: after the quiet
+    /// interval the watch asks for ONE correction (the view spends the step
+    /// on it). A target at home asks for none.
+    @Test func aQuietMissEarnsACorrectionAndAHomeTargetNone() async throws {
+        let scroll = freshScroll()
+        settleRestore(scroll)
+        scroll.noteArticleRowFrame("a", CGRect(x: 0, y: 18, width: 680, height: 60))
+        scroll.landArticle(on: "far")
+        #expect(scroll.articleLandingStep(order: ["a", "far"]) == .reveal("far", .foot),
+                "the first decided step aims — and hands the landing to the watch")
+        #expect(scroll.articleLandingCorrections == 0)
+        try await Task.sleep(for: .milliseconds(450))
+        #expect(scroll.articleLandingCorrections == 1,
+                "after the quiet interval, ONE correction for a target never seen (\(scroll.articleLandingCorrections))")
+        #expect(scroll.articleLanding == "far", "the landing is still being watched")
+
+        let home = freshScroll()
+        settleRestore(home)
+        home.noteArticleRowFrame("a", CGRect(x: 0, y: 18, width: 680, height: 60))
+        home.noteArticleRowFrame("b", CGRect(x: 0, y: 84, width: 680, height: 60))
+        home.landArticle(on: "b")
+        #expect(home.articleLandingStep(order: ["a", "b"]) == .wait, "on screen: nothing to aim")
+        try await Task.sleep(for: .milliseconds(1500))
+        #expect(home.articleLandingCorrections == 0, "a target at home is never corrected")
+        #expect(home.articleLanding == nil, "…and the watch settled it after the hold")
+        #if DEBUG
+        #expect(home.landingStory.lines.last?.hasPrefix("b DONE: settled at top=0.0 after 0 hops") == true,
+                "\(home.landingStory.lines)")
+        #endif
+    }
+
+    /// **THE WATCHDOG** — a watched landing whose row never comes home ends
+    /// `gaveup` at the policy's time budget (the corrections spent first),
+    /// rather than living until her hand.
+    @Test func aLandingThatCannotArriveEndsAtTheWatchdog() async throws {
+        let scroll = freshScroll()
+        settleRestore(scroll)
+        scroll.noteArticleRowFrame("a", CGRect(x: 0, y: 18, width: 680, height: 60))
+        scroll.landArticle(on: "far")
+        _ = scroll.articleLandingStep(order: ["a", "far"])
+        let budget = LandingPolicy.takesArticle.timeBudget
+        try await Task.sleep(for: .milliseconds(Int((budget + 0.9) * 1000)))
+        #expect(scroll.articleLanding == nil, "the watchdog ended it")
+        #expect(scroll.articleLandingCorrections == LandingPolicy.takesArticle.correctionBudget,
+                "every correction was asked for first (\(scroll.articleLandingCorrections))")
+        #if DEBUG
+        #expect(scroll.landingStory.lines.last?.hasPrefix("far DONE: gave up at top=unrealized after 3 hops") == true,
+                "\(scroll.landingStory.lines)")
+        #endif
+    }
+
+    /// **The Takes policy and its word** — the aim kind, the tolerance that
+    /// makes "home" and the reveal's `.none` one rule, the family's numbers,
+    /// and the signpost stays content-free on the new surface.
+    @Test func theTakesArticlePolicyAndItsSignpost() {
+        let policy = LandingPolicy.takesArticle
+        #expect(policy.surface == .takesArticle && LandingSurface.takesArticle.rawValue == "TakesArticle")
+        #expect(policy.aim == .minimalReveal)
+        #expect(policy.tolerance == 0.5, "the reveal decision's own half-point slack")
+        #expect(policy.settleInterval == 0.25 && policy.minimumHold == 1.0 && policy.maxWait == 0.6)
+        #expect(policy.correctionBudget == 3 && policy.timeBudget == 4)
+        #expect(policy.correctionPace == .spacedByTheHold)
+        #expect(policy.correctsAnUnreportedTarget && !policy.seedsFromLastReport)
+        let line = LandingSignpost.line(
+            surface: .takesArticle,
+            facts: LandingFacts(rows: 262, targetIndex: 200, offset: -1, total: 90_000, derived: 230, exactAbove: false),
+            corrections: 1, contentMoves: 4, elapsed: 1.26, outcome: .settled, top: 0)
+        #expect(LandingSignpost.isContentFree(line), "\(line)")
+        #expect(line == "landing surface=TakesArticle rows=262 target=200 offset=-1 total=90000 "
+                + "derived=230 exact=0 hops=1 content=4 ms=1260 end=settled top=0")
+    }
 }

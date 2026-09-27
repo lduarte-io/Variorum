@@ -609,7 +609,10 @@ struct TakesBoardView: View {
                                 $0.frame(in: .scrollView)
                             } action: { frame in
                                 model.noteArticleRowFrame(slot.placementID, frame)
-                                spendArticleLanding(column)
+                                // 18l-b U2: a REPORT — the step until the
+                                // one authority watches the landing, a
+                                // report to it after (never an aim per row).
+                                spendArticleLanding(column, asReport: true)
                             }
                     }
                     if !model.projection.slots.isEmpty {
@@ -688,7 +691,7 @@ struct TakesBoardView: View {
                 case .remember, .wait:
                     break
                 }
-                spendArticleLanding(column)
+                spendArticleLanding(column, asReport: true)
             }
             // 17o batch b (ledger row 8, her words: *"open takes mode in write
             // from the takes menu is also not automatically navigating you to
@@ -701,6 +704,11 @@ struct TakesBoardView: View {
             // screen, and only AFTER the scroll memory has been restored — so
             // a landing can never be the reason the page jumps to the bottom.
             .onChange(of: model.articleLanding, initial: true) { _, _ in
+                spendArticleLanding(column)
+            }
+            // 18l-b U2: the one landing authority's CORRECTION — issued from
+            // quiet, spent through the same step (the one scroll mechanism).
+            .onChange(of: model.articleLandingCorrections) { _, _ in
                 spendArticleLanding(column)
             }
             }
@@ -716,9 +724,14 @@ struct TakesBoardView: View {
     /// the scroll it is told to. Re-entered from the geometry hook, the
     /// landing's change, AND each row's frame report, so the request re-aims
     /// as the lazy column realizes and measures its rows (the 17p batch-a
-    /// adjudication, J1).
-    private func spendArticleLanding(_ column: ScrollViewProxy) {
-        switch model.articleLandingStep() {
+    /// adjudication, J1). **18l-b U2:** the geometry hook and the row reports
+    /// are REPORTS (`asReport`) — they spend the step only until the one
+    /// landing authority is watching the landing (its first decided step);
+    /// after that they report to the watch, and the re-aim comes from the
+    /// watch's quiet (`articleLandingCorrections`) instead of once per row
+    /// report inside a layout storm.
+    private func spendArticleLanding(_ column: ScrollViewProxy, asReport: Bool = false) {
+        switch asReport ? model.articleLandingReport() : model.articleLandingStep() {
         case .reveal(let rowID, let aim):
             // 18l-b U2: the edge's anchor through the aim kind's ONE
             // vocabulary door (`ViewportCarry.anchor` — 0 the head, 1 the
