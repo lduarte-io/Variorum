@@ -114,6 +114,47 @@ struct LandingAimTests {
         }
     }
 
+    /// **GUARD (ladder round 1, MINOR-1) — green on both sides by design,
+    /// stated as such, never a red-on-old:** the aim kind is enforced by
+    /// MECHANISM only on the Takes watch (the one production caller of the
+    /// dispatcher); on the five older adopters the policy's `aim` field is
+    /// DECLARATIVE — their surfaces compute the same hoisted bodies at their
+    /// own call shape. This pin makes a DRIFT of a declared kind fail
+    /// something: for a sighting on which the three kinds answer three
+    /// DIFFERENT numbers (top 330 · minimal-reveal 0 · fraction 30), the
+    /// dispatcher keyed on each shipped policy's declared aim must answer
+    /// exactly what that surface's own road computes.
+    @MainActor
+    @Test func theDeclaredAimKindsMatchWhatEachSurfaceComputes() {
+        let row = CGRect(x: 0, y: 330, width: 680, height: 100)
+        var sighting = LandingAim.Sighting(rowFrame: row, viewportHeight: 700)
+        sighting.fraction = 0.5
+        sighting.offset = 500
+        sighting.maxOffset = 5000
+        // The book three report the row's top (the `.top` arm's identity).
+        for policy in [LandingPolicy.bookOutline, .readingFlow, .bookIndex] {
+            #expect(LandingAim.residual(policy.aim, sighting) == row.minY,
+                    "\(policy.surface): the declared kind answers the row's top")
+        }
+        // Note Read's faces compute through their box (`ReadLandingBox
+        // .residual` → the hoisted `ViewportFraction` body); the dispatcher
+        // keyed on the DECLARED kind must agree with the box's own road.
+        let box = ReadLandingBox()
+        box.scroll.viewportHeight = 700
+        box.scroll.offset = 500
+        box.scroll.contentHeight = 5700   // maxOffset = 5700 − 700 = 5000
+        box.anchorY = 0.5
+        box.rows["b"] = (top: 330, height: 100)
+        for policy in [LandingPolicy.readNote, .readNoteEdit] {
+            #expect(LandingAim.residual(policy.aim, sighting) == box.residual("b"),
+                    "\(policy.surface): the declared kind is the box's own arithmetic")
+        }
+        // The Takes watch consults the dispatcher itself (the one mechanism
+        // road); its declared kind is the reveal, whose home this sighting is.
+        #expect(LandingAim.residual(LandingPolicy.takesArticle.aim, sighting) == 0,
+                "TakesArticle: fully on screen is the reveal's home")
+    }
+
     /// **The hoist is a MOVE — the old names ARE the new types** (the 3C
     /// parity pattern's address proof; the behaviour proof is the old pins
     /// riding unmodified).

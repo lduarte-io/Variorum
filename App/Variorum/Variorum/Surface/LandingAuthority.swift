@@ -102,9 +102,16 @@ nonisolated struct LandingPolicy: Equatable {
     var surface: LandingSurface
     /// **18l-b U2 — the AIM KIND: where this surface's landing puts its
     /// target, stated as data** (`Surface/LandingAim.swift`). The number the
-    /// authority converges to zero is the target's distance from THAT home —
-    /// `LandingAim.residual(policy.aim, …)` answers it per kind. `.top` for the
-    /// three book adopters (their shipped aim, so their construction reads
+    /// authority converges to zero is the target's distance from THAT home.
+    /// `LandingAim.residual(policy.aim, …)` answers it per kind **for a
+    /// surface that asks the dispatcher** (the Takes watch); the five older
+    /// adopters compute the same hoisted bodies at their own call shape —
+    /// the book three report the row's top (the `.top` arm's identity), note
+    /// Read's box calls `ViewportFraction.residual` directly — so on them
+    /// this field is DECLARATIVE, guarded by `LandingAimTests`' agreement
+    /// pin (`theDeclaredAimKindsMatchWhatEachSurfaceComputes` — ladder round
+    /// 1, MINOR-1: a drifted declaration fails there). `.top` for the three
+    /// book adopters (their shipped aim, so their construction reads
     /// unchanged); `.viewportFraction` for note Read's two faces;
     /// `.minimalReveal` for the Takes article.
     var aim: LandingAimKind = .top
