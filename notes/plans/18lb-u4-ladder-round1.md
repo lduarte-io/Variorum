@@ -243,3 +243,15 @@ The fix diff is `ecc2c969..<the pass's last commit>`; every line below names its
 | MINOR-1 | IN-PROGRESS — `FlowStoryRow.honestHeight` calls the pinned `FlowHeightEstimate.honestHeight` (the row holds no rule; its body is byte-identical to its pre-U4 call); the static's doc names it the row's one rule; `FlowStoryHeightOneBrainTests`' column side built through `FlowHeightEstimate.storyInput` (the production builder), its header rewritten; `BookView.swift`'s surface-placeholder doc and KnownIssues row 58's U4 line corrected (the row edit on the orchestrator's delegated pen, citing the arbitration) | PENDING | the teeth check R-two-arm: PENDING |
 | MINOR-2 | NOT-STARTED | — | — |
 | NIT-1 | NOT-STARTED | — | — |
+
+**THE TEETH CHECK, named before it runs (the arbitration's requirement; the pre-revert state is `a4e05f39`, committed
++ pushed): R-two-arm.** In the working tree only, the ROW's rule — `FlowHeightEstimate.honestHeight`'s body, the one
+rule `FlowStoryRow.honestHeight` calls since this fix (the row's own body is byte-identical to its pre-U4 call, so "the
+row reverted to the old two-arm rule" is exactly this body) — restored to the pre-U4 two-arm body (`if let remembered,
+Self.remembered(remembered, appliesAt: columnWidth) { return remembered.height }; return estimate`). **Expected RED:**
+`FlowStoryHeightOneBrainTests` on exactly the 6 degenerate combinations (a remembered height of 0 at 600 / −5 at 450,
+× the three estimates: row 0 / −5, manifest the estimate). **Expected GREEN:** `ReadingFlowEstimateTests` (R2-1's width
+gate — reachable inputs, on which the two rules agree). Restored by `git checkout HEAD --
+App/Variorum/Variorum/Features/BookView/ReadingFlowView.swift`; `git status` clean after. **The residual, stated:** a
+rule typed INTO the private `FlowStoryRow` (bypassing the static) is beyond a pure pin's reach — the structural defence
+is that the row now holds no rule, only the one call.
