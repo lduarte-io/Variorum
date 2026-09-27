@@ -1730,3 +1730,46 @@ decision ACCEPTED (five ⌘↓ landings traced, the ring correct in every one �
 no-reproduction beats a hollow fix; the row stays 12's, its may-take chain exhausted this round);
 the two NOTICED owner-12 drafts (R1-1's class on the selection-fix road; `applyDifferential`'s
 missing restore step) and the row-88 close ride the closeout pen after the ladder.
+
+## 18l-b CLOSEOUT (2026-09-27)
+
+**Shipped:** **U2** — the aim kind as authority policy data (`Surface/LandingAim.swift`: top ·
+minimal-reveal · viewport-fraction; U1's fraction arithmetic and the Takes reveal rule hoisted as
+pure moves) and the Takes article's landings WATCHED by the one authority (`.takesArticle`; her
+Console speaks on Takes; every landing ending FILES, pre-watch deaths included), the restore half
+byte-preserved per R-Q20/R-Q21, plus the bloom-race stall found at this seat's acceptance walk,
+traced PRE-EXISTING by run and fixed red-first (`restoreLooksAgainForAWaitingLanding`) ·
+**U3 — CLOSED AS REVERTED under her gate, a valid close:** the ratified frame-synchronous /
+state-deferred PanePublisher shape was BUILT and MEASURED (the WHOLE `Modifying state during view
+update` family: 1,106 → 0 on set B, 2,393 → 0 on the 191-suite set) and REVERTED on frame
+evidence (the Takes mount's collapsed article, 50–83 ms, 5/5 vs 0/5); the fork is hers at
+QUESTIONS #152, the shape recoverable at `e113dd56` + `8a93eb24`; what ships is the rider —
+the render restore's `layoutViewport()` PROVABLY SAFE on 27.0 with a tripwire — and the harness
+fixture fix · **U4** — the three one-liners red-first (the Outline's `.onDisappear` parity; the
+book-Index landing's caret END → START with `LandingTarget.utf16Offset` deleted, #153 PROVISIONAL
+(a) with the ladder's (a′) hers to pick; `FlowStoryRow` onto the manifest, the one-brain collapse
+made structural at the ladder) · **U-B5** — **B5 TRACED AND FIXED** (KnownIssues row 88 CLOSED):
+the mechanism located by instrument to one call, attributed by run (the road our-commit
+`79b334ab`; the substrate pre-existing; TextKit's half undetermined), the untouched-line keeper
+inside the fence, the harness's B5 row PLAIN with teeth. **Ladders:** four, every finding
+dispositioned in writing (U2 one round 0/0/3/4 · U3 one round 0/0/1/3 · U4 two rounds 0/0/2/1 +
+0/0/0/3 · U-B5 one round 0/0/1/2); zero disputes anywhere; no ladder reached the cap.
+**KnownIssues:** rows 88 CLOSED · 42 amended (U2) + the head-reveal row (95-era numbering) ·
+95/96/97/98 filed en route (the warning family with her #152 fork · Compare's pre-existing mount
+collapse · the note-Read signpost miss · the keyboard stall, three sightings) · two new owner-12
+rows at this close (the R1-1 selection-fix road; the projection road's restore-less rewrite) ·
+row 85 exhausted honestly with a sharpened suspect. **Canon:** ZERO AppSpec deltas (no author
+ruling minted canon — every product-adjacent call is PROVISIONAL in her bundle); TEXTKIT2_NOTES
+§3 gained two measurement records (the rider's provably-safe line; the U-B5 re-base rule); the
+harness baseline is now **XFAIL 4 = S3 ×4 only** (B5's XFAIL retired), 16 seeded scenarios
+(`takes-landing`, `book-landings`, `b5-more-roads` joined; `read-landing` reordered).
+**Machinery:** the harness instance-check self-match trap and the walker facts recorded in the
+acceptances. **Open for her — THE BUNDLE (the handoff's first section):** #149 · #150 · #151
+(the 18l first-half trio, unchanged) · **#152** (the warning-family fork) · **#153** (the landing
+caret: (a) as built · (a′) the ladder's option) · the U3 felt-gate confirm (her sentence; my walk
+closed it provisionally) · the standing-rulings confirms carried from 18l. **MOBILE PARITY:
+nothing mobile-visible** (U2's aim kind is Mac `Surface/` vocabulary; U3 reverted; U4's
+`LandingTarget` is `Shared/` but no phone surface builds one; U-B5's keeper is the Mac editor's —
+the phone's structural road is not this controller; each unit's record states it). **18m is NEXT
+at her paste** (her 2026-09-27 resequence — the kickoff prompt is in the handoff verbatim; 18o
+slides later with its ruled builds owned). Install refresh: recorded below at the refresh commit.
