@@ -138,6 +138,12 @@ struct WriteFloatingViewportTests {
             layoutManager.ensureLayout(for: layoutManager.documentRange)
             await draw(h)
 
+            // The fixture premise BEFORE the first hard-coded index below:
+            // `range(ofEntryAt:)` ends in `preconditionFailure`, which would
+            // kill the whole test process instead of failing this premise.
+            try #require(h.model.index.entries.count > 150,
+                         "the fixture: A Scandal in Bohemia carries at least 151 blocks")
+
             // U0b's walk: a blank line mid-note (block 150's end) → ⏎ → ⌫.
             let blocks = try h.storeSlots().count
             JumpPrimitive.jump(
@@ -270,6 +276,10 @@ struct UntouchedLineKeeperTests {
             let layoutManager = try #require(h.textView.textLayoutManager)
             layoutManager.ensureLayout(for: layoutManager.documentRange)
             await draw(h)
+            // The same fixture premise as the pin's, before the first
+            // hard-coded index (`range(ofEntryAt:)` traps the process).
+            try #require(h.model.index.entries.count > 150,
+                         "the fixture: A Scandal in Bohemia carries at least 151 blocks")
             JumpPrimitive.jump(
                 toOffset: h.model.index.range(ofEntryAt: 144).location,
                 textView: h.textView, scrollView: scrollView)
