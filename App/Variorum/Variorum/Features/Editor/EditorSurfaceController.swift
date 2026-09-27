@@ -3077,7 +3077,9 @@ final class EditorSurfaceController {
     /// door (author decision 2026-07-07, superseding the full-re-render
     /// PROVISIONAL): the everyday gestures apply DIFFERENTIALLY (minimal
     /// text edits derived from the op result's known seams — untouched text
-    /// never moves, no scroll restore step exists at all); the W ceremony's
+    /// never moves, the 2026-07-07 promise; no UNCONDITIONAL restore step —
+    /// since 18l-b U-B5 the keeper below puts the untouched reading line
+    /// back iff TextKit moved it, KnownIssues row 88); the W ceremony's
     /// confirm (seam == nil) and any seam whose expected shape the fresh
     /// projection doesn't match re-render fully from the store. Both
     /// strategies clear text-undo (stale-offset replays don't care which
