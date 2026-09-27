@@ -170,9 +170,8 @@ final class BookIndexEditModel {
         // the text: her U0 report's artifact on the Index's other road in.
         // No face on this road hands on where inside the block she clicked
         // (`LandingTarget` carries no offset — #153 has the trace), so the
-        // landing takes the
-        // value's own documented rule — the block's start — which is also
-        // note Read's twin click-through (`ReadModeView.openInEdit` → the
+        // landing takes the value's own documented rule — the block's
+        // start — which is also note Read's twin click-through (`ReadModeView.openInEdit` → the
         // entry rule's `.start`), QUESTIONS #97's (a), and exactly where the
         // landing puts her eyes: the landed block's top at the page's top.
         goLive(postID: postID, blockID: row.blockID, variantID: variantID, caret: .start)
