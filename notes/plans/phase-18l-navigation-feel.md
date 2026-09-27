@@ -1985,6 +1985,17 @@ Zero `Sources/`, `Shared/`, `Sync/`, schema, `Server/`, mobile.
   authority watching its lazy column's own landing, the fraction residual, the signpost; a
   `notes/MobileSoul.md` row (the mobile project's pen). Nothing mobile-visible changed.
 
+### ROUND-1 FIX PASS (2026-09-26 — the ladder file `notes/plans/18l-u1-ladder-round1.md` carries the table)
+
+All six confirmed findings fixed, each pin red-first: **MAJOR-1** her click / her edit in Read ▸ edit's
+pane ends a landing in flight (`5a7e5ce5`; `ReadEditPane`'s closures only — `PaneSurfaceView` untouched);
+**MINOR-1** `LandingPolicy.seedsFromLastReport` false on note Read (`901392d9`); **MINOR-2** the story reset
+per mount + matched by placement id (`6f1172c7`); **MINOR-3 — option (a), PROVISIONAL (one line, as the
+orchestrator asked): the manifest keeps its place with the REAL content-space leading and a documented
+meaning for note Read's offset/total, rather than honest unknowns, until #151 rules** (`7678a362`);
+**NIT-1** (`9e887d50`), **NIT-2** (`66dcf17d`). Closing set 214 / 37 green; harness `read-landing` 12/12 +
+12/12. Round 2 is a fresh reviewer's.
+
 ### SELF-ASSESSMENT
 
 Strong: the unit measured before it built and built what the measurement said — a pre-fix app
