@@ -489,6 +489,16 @@ final class TakesArticleScroll {
 
     /// Bounded, so a request can never loop: every aim is one idempotent
     /// scroll, and the column settles in a handful of passes.
+    ///
+    /// **Since 18l-b U2 this bound is a FENCE, not the cadence** (the
+    /// round-1 ladder's NIT-4): in the app a landing spends aims only at its
+    /// arrival, its first decided step and ≤ 3 of the watch's quiet
+    /// corrections — the watch's budget is the live bound — so the app never
+    /// nears 64. Direct callers of the step still can (the pure gone-row /
+    /// bounded-aims pin spends all 64), and the step's two terminal branches
+    /// stay as fences the same way: in the app the projection arm
+    /// (`noteProjectionArrived`, first in `adopt`) ends a landing before the
+    /// step can meet its row gone from a new projection.
     nonisolated static let articleLandingAttempts = 64
     @ObservationIgnored private var articleLandingAimsLeft = articleLandingAttempts
     /// Observation seam (the `measuredHeightWrites` precedent — a plain
