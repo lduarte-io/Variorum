@@ -269,9 +269,9 @@ re-opens its named rows; none gates U2/U3/U4 as scoped.
 | 3 | MAY-take: C6 — the born-live pane's transient END report poisons the persisted memory until the note leaves (18l ledger row 8's cell) | U2 | **NOT TAKEN 2026-09-27** (the diff stands on none of its road) — 12's at the closeout |
 | 4 | PanePublisher frame-synchronous / state-deferred (her ratified shape; gate = walk the boards under load, REVERT on any felt regression); the warning count measured both ways (~1,989, all `PaneSurface`'s per 18k C3) | U3 | **CLOSED AS REVERTED 2026-09-27 — a valid close under her gate** (built `e113dd56`, measured set B 1,106 → 0 — the WHOLE family; reverted `b60e5d6d` at the Takes mount's collapsed article, 5/5 vs 0/5 on frame evidence); the warning family's fork filed for her as QUESTIONS #152; her morning confirm rides the bundle |
 | 5 | The macOS-27 `layoutViewport()` clip-displacement exam of `PaneSurface`'s render restore (TK2 §3's hand-forward) | U3 rider | **CLOSED 2026-09-27 — PROVABLY SAFE** (two measured grounds incl. the adversarial arm; the observation seam + `PaneRenderRestoreClipTests` kept as the point-release tripwire; the TK2 §3 line landed) |
-| 6 | B5 (row 88): ⏎ after a ⌘↓ landing on invalidated geometry — TRACE (deterministic Study recipe in the harness) | **RULED at U3 (orchestrator): its OWN SLOT — U-B5, after U4** (the exam proved it a NEIGHBOUR: Write's differential ⏎ road, no pane, the opposite symptom; the fixture ERROR fixed at U3 so the full-pass recipe stands); row 88 re-owned to U-B5 | open — U-B5 |
+| 6 | B5 (row 88): ⏎ after a ⌘↓ landing on invalidated geometry — TRACE (deterministic Study recipe in the harness) | **CLOSED 2026-09-27 at U-B5 — TRACED + FIXED** (the mechanism stack-located: TextKit re-bases a floating island under an unmoved clip when a forcing read lays out the new paragraph; attribution by run — the road our-commit `79b334ab`, the substrate pre-existing, TextKit's half undetermined; the keeper `161b66aa`, pin red-first 80.0 pt, R-keep red exactly, the harness row PLAIN with teeth 45591→44477; ladder one round 0/0/1/2 clean; row 88 closed) | **CLOSED** |
 | 7 | The one-liners: Outline `.onDisappear { landing.end() }` · `LandingTarget.utf16Offset` wire-or-delete (S4's click-through END evidence in hand; PROVISIONAL, QUESTIONS row) · `FlowStoryRow` → `BookHeightManifest.resolve` (13i did NOT take it — verified at this kickoff) | U4 | **CLOSED 2026-09-27** — all three red-first; #153 PROVISIONAL (a) with (a′) added as her option at the ladder; ladder closed two rounds (R1 0/0/2/1 all confirmed + fixed with the R-two-arm teeth check; R2 verified + 0/0/0/3 NIT dispositioned at adjudication; `notes/plans/18lb-u4-ladder-round1.md`) |
-| 8 | MAY-take: KnownIssues row 85 (the ⌘↓ ring drawn too high, O-2) — decide at the unit that touches the landing-settle/overlay refresh; record either way | rider | **NOT TAKEN at U2 and U3** (neither diff touches Write's ring/overlay refresh) — stays 12; U-B5 is the last chance to re-decide |
+| 8 | MAY-take: KnownIssues row 85 (the ⌘↓ ring drawn too high, O-2) — decide at the unit that touches the landing-settle/overlay refresh; record either way | rider | **EXHAUSTED HONESTLY 2026-09-27** — not taken at U2/U3/U4; at U-B5's last chance, five ⌘↓ landings traced on invalidated geometry with the ring correct in every one (no reproduction to pin — a hollow fix refused); stays 12, with U-B5's trace note added to the row's suspect (a settle without a clip move leaves no bounds notification; the keeper's jump now provides one on the B5 road) |
 
 ## LIVE STATUS (orchestrator; flipped per piece)
 
@@ -285,7 +285,7 @@ re-opens its named rows; none gates U2/U3/U4 as scoped.
 | U4 (session 3) | **CLOSED 2026-09-27** — ladder two rounds, closed clean (R1 0/0/2/1 fixed; R2 0/0/0/3 dispositioned) |
 | U-B5 (session 4) | IN FLIGHT — brief above, re-checked against the U4 ladder (nothing in it moves U-B5's surface) |
 | B5 decision | at U3 |
-| Closeout | NOT-STARTED |
+| Closeout | IN FLIGHT 2026-09-27 — the ritual below |
 
 ## U2 BRIEF (session 1 — Takes' landing half adopts the authority; written by the orchestrator 2026-09-26)
 

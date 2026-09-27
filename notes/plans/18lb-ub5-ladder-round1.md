@@ -270,3 +270,17 @@ the ROUND 1 FINAL CALLS table.
   `40469890`, zero app instances, HID idle 676 s before / 867 s after: **`✔ Test run with 56 tests in 9 suites passed
   after 86.705 seconds`**, `EXIT=0` (`App/Variorum/DerivedData/18lb-ub5-sanity1.log`). No harness re-run: nothing
   GUI-facing changed (a comment, a README row, two test premises).
+
+## LADDER CLOSED (orchestrator, 2026-09-27)
+
+Round 1: 0 BLOCKER / 0 MAJOR / 1 MINOR / 2 NIT — all three CONFIRMED at the reviewer's final call
+with zero disputes (the implementer's pointer and mechanism corrections adopted after source
+re-verification; the reviewer named its own diff-line-number error openly); F1 fixed doc-only
+(`67449457` — the one false 2026-07-07 clause dated and handed to the keeper paragraph), F2 fixed
+(`b9fd26b8`), F3 RULED TAKE (`c6dc1175` — the `#require` premise guards placement-verified before
+every trapping call, zero assertion edits). Implementer sanity pass PASS at the widest set (56/9;
+mechanism-absence by byte comparison — the keeper, its capture/keep sites, `applySeamEdit` and
+the pure arms all unchanged). No new BLOCKER/MAJOR — no round 2 earned. **The U-B5 ladder
+CLOSES; U-B5 CLOSES with it** (B5 traced by instrument to one call · attributed by run · fixed
+inside the fence with red-first + revert evidence · the harness's B5 row PLAIN with teeth · the
+orchestrator's own walk 14/14 in Study).
