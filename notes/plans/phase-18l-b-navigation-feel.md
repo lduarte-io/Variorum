@@ -1410,11 +1410,11 @@ follows; your self-assessment closes your record.
 | 1 | Reading (the brief's "Read first" list, in order, own context) | DONE — this file whole (HER KICKOFF MESSAGE, BINDING PRINCIPLES, CAST & DISCIPLINE, BASELINES, THE UNIT ROSTER, HER OPEN ITEMS, ENVIRONMENT TRAPS, THE LEDGER, the U2 BRIEF + RECORD + bloom-race fix pass + both acceptances, the U3 BRIEF + RECORD (THE B5 REPORT) + acceptance, the U4 BRIEF + RECORD + acceptance, the U-B5 BRIEF); KnownIssues rows 42 · 85 · 88 whole; the 18l record's U0b BRIEF + RECORD whole + acceptance, U0's ITEM 2 (the settle net), U-VIS's probe endpoint + TABLE + B5's HONEST VERDICT; the 18k C6 RECORD whole + adjudication and the C6b RECORD whole + adjudication; `TEXTKIT2_NOTES.md` IN FULL; `SessionResiliencyProtocol.md` whole; the code: `EditorTextView.swift` whole (the ⏎ door, `setFrameSize`/`applyFrameHeight`/the room, β1, `makeEditor`, `TypewriterScrollView`), `JumpPrimitive.swift` whole (`ReadingAnchor`, C6's re-assert, C6b's live range), `StructuralSeamEdit.swift` whole, `EditorSurfaceController` (`applyDifferential`, `renderFull`, `insertEmptyBlock`, the typed Return's act, `runStructural`, `applyStructuralResult`, `applyDifferentialStructural`, the oracle), `EditorViewModel` (`attach`'s wiring, `setSurfaceContent`, `applySeamEdit`, `adoptRewrite`, `storageDidEdit`, `typedReturnAct`/`runTypedReturn`, the arrival landing + `revealLanding`, `parkAnchorRestore`, `keepingReadingPosition`, the consumers, `jumpToDocumentEnd`, `updateCaretContext`, `overlayLayoutDidSettle`, `refreshBadges`, `refreshDecorations`, `topVisibleOffset` + helpers, `readingAnchor`, `restoreReadingAnchor`), `EditorView.swift`'s coordinator + `ScrollAnchorController`, `LongBlockLayout.swift` whole, `VisualWalkProbe.swift` (the facts the recipe reads); `Tools/VisualWalk/` (README, `visual-walk.sh`, `build.sh`, the B5 pair + the seeded order) |
 | 2 | INSTRUMENT the deterministic recipe (frame · clip · the first visible line's document y · its fragment's estimated-vs-laid-out state, across the tail ⏎'s edit and display pass) | DONE — a TEMPORARY DEBUG + env-gated instrument (`B5Trace`, working tree only, never committed; a copy in `App/Variorum/DerivedData/18lb-ub5/`): a content-free `os.Logger` line (category `B5`) at the ⌘↓ and ⏎ keyDowns (with a CENSUS of the fragments above the viewport — laid-out vs estimated), around `applySeamEdit`, the structural result, `layout()`, `prepareContent`, `viewWillDraw`, `setFrameSize`, the settle hop, the long-block pass and every clip-bounds change; each line carries frame · clip · usage height · the viewport's bounds and range · a REFERENCE line (the first visible line at the ⏎) with its container y, its screen y and its fragment's state · the first visible line · the last fragment. Run on the recipe — the Study pass through `b5-refont`, the stamped instrumented build (`notes/plans/vis-walks/2026-09-27/102834/`): **B5 REPRODUCED (XFAIL 2), at its LARGE size — the first visible line 45591 → 44477, ~1,100 characters of text** (U-VIS's round-1 final run's magnitude); `b5-refont` PASS. Trace: `DerivedData/18lb-ub5/trace1.txt` (B5) · `trace1-refont.txt` (the re-font road) |
 | 3 | TRACE the mechanism | DONE — THE TRACE below |
-| 4 | ATTRIBUTE (macOS-27 / our-commit / pre-existing / undetermined) | NOT-STARTED |
-| 5 | FIX inside the fence (red-on-old: the harness's Study XFAIL → PASS on the fix and red on its revert; an in-suite pin if the trace admits one) | IN-PROGRESS — **candidate 1 WITHDRAWN on measurement:** R1-1's deferral extended to the road it cannot see (the indicator arm deferring while one of the model's storage writes is processed) — run A (`112731/`, instrumented): the in-write walk no longer ran (`last` stayed `E` through `seam>`) and B5 STILL moved, +182.0 pt, now at the NEXT pre-viewport-pass forcing read (between `seam>` and the result's caret placement: the post-edit `refreshBadges` → `refreshDecorations`). So the trigger is not "inside processing": it is ANY layout-forcing query that lays out the new paragraph before the viewport pass that consumes the edit — a road with several doors. **Candidate 2 — the keeper (the brief's first named shape), in the working tree:** `applyStructuralResult` captures `readingAnchor()` before a differential rewrite; after the result's synchronous work (caret placed, context refreshed) `keepUntouchedReadingLine` restores the line EXACTLY (`exactLandingInset`, renderFull's vocabulary) iff it is untouched (starts before the edit) and moved ≥ 0.5 pt; pure half on `ReadingAnchor` (`isUntouched`, `displacement`); a DEBUG witness `untouchedLineRestores`. **Run A2 (`114046/`, instrumented): B5 XPASS — the first visible line held EXACTLY (45591 @ 298.1 → 298.1), and the trace shows the keeper WORKING, not B5 absent:** TextKit's re-base happened INSIDE `refreshDecorations` (`ucc.decor<` → `ucc.decor>`: MOVED +438.8, inside the seam write — the direct observation of the mechanism), then the keeper's jump (`to=45510 inset=-11.9`, two iterations) moved the clip +438.8 (18447.4 → 18886.2) and the line back to screen 18.1 = before, stable through the next layout, display and settle hop. **The in-suite pin (red-first, this commit):** `WriteFloatingViewportTests.aTailReturnOnAFloatingViewportLeavesTheLinesAboveItStill` — the rig reproduces B5 once TextKit has layout history (the story laid out once first; found by the scratch rig's history variants, `DerivedData/18lb-ub5-rig5.log`: history 1 and 3 re-based and the keeper restored, history 0 and 2 did not re-base); the dev store's ring ON; her column's size; the real roads (the typed Return, the carve through `renderFull`, `moveToEndOfDocument:`, the real coordinator). **RED on the pre-fix tree, deterministic (2/2): Study 80.0 pt** (`37.06 → 117.06` pt below the edge; usage 18199.8 → 18309.8 for one new line), both premises held (the island floats — laid-out run above the viewport 0; TextKit re-estimated — usage grew > 3 lines); Terminal GREEN (a guard: B5 never reproduced there) (`DerivedData/18lb-ub5-pin-prefix{1,2}.log`). **THE FIX (this commit):** `ReadingAnchor.isUntouched(byEditAt:)` + `displacement(lineTop:viewportTop:)` (pure, `JumpPrimitive.swift`); `EditorViewModel.keepUntouchedReadingLine(_:editStartingAt:)` + the DEBUG witness `untouchedLineRestores`; `EditorSurfaceController.applyStructuralResult` captures `readingAnchor()` before a seamed rewrite and, when the DIFFERENTIAL strategy landed, keeps the line after the caret is placed (before any pending projection applies); `applyDifferentialStructural` returns where the edit began (`Int?` in place of `Bool`). **GREEN:** `WriteFloatingViewportTests` + the new `UntouchedLineKeeperTests` (the pure rule · the witness on the B5 road = 1 and on a non-floating page = 0 · the fence: an act that writes ABOVE the reading line keeps its own movement — measured 10.0 pt, one empty block's line — and the keeper stays out) — **4 tests / 2 suites, 6 cases, passed** (`DerivedData/18lb-ub5-pin-fixed2.log`). **R-keep RUN (`DerivedData/18lb-ub5-R-keep.log`): RED — exactly the predicted 3 issues** (the pin's Study case 80.0 pt; `theKeeperRunsExactlyWhereTextKitMovedTheLine(true)`: moved 80.0, restores 0 where 1 is owed); every other case green; restored by `git checkout HEAD --`, `git status` clean, the call greps back (1). The harness half (the Study XFAIL → PASS, red on the revert): PENDING |
-| 6 | Row 85 (O-2) — the last-chance may-take decision | NOT-STARTED |
+| 4 | ATTRIBUTE (macOS-27 / our-commit / pre-existing / undetermined) | DONE — ATTRIBUTION below (our-commit `79b334ab` for the road that shows it, by run D1; TextKit's half undetermined — no 26.x) |
+| 5 | FIX inside the fence (red-on-old: the harness's Study XFAIL → PASS on the fix and red on its revert; an in-suite pin if the trace admits one) | DONE (pin `8b9be390` red-first · fix `161b66aa` · harness `1b893262`) — **candidate 1 WITHDRAWN on measurement:** R1-1's deferral extended to the road it cannot see (the indicator arm deferring while one of the model's storage writes is processed) — run A (`112731/`, instrumented): the in-write walk no longer ran (`last` stayed `E` through `seam>`) and B5 STILL moved, +182.0 pt, now at the NEXT pre-viewport-pass forcing read (between `seam>` and the result's caret placement: the post-edit `refreshBadges` → `refreshDecorations`). So the trigger is not "inside processing": it is ANY layout-forcing query that lays out the new paragraph before the viewport pass that consumes the edit — a road with several doors. **Candidate 2 — the keeper (the brief's first named shape), in the working tree:** `applyStructuralResult` captures `readingAnchor()` before a differential rewrite; after the result's synchronous work (caret placed, context refreshed) `keepUntouchedReadingLine` restores the line EXACTLY (`exactLandingInset`, renderFull's vocabulary) iff it is untouched (starts before the edit) and moved ≥ 0.5 pt; pure half on `ReadingAnchor` (`isUntouched`, `displacement`); a DEBUG witness `untouchedLineRestores`. **Run A2 (`114046/`, instrumented): B5 XPASS — the first visible line held EXACTLY (45591 @ 298.1 → 298.1), and the trace shows the keeper WORKING, not B5 absent:** TextKit's re-base happened INSIDE `refreshDecorations` (`ucc.decor<` → `ucc.decor>`: MOVED +438.8, inside the seam write — the direct observation of the mechanism), then the keeper's jump (`to=45510 inset=-11.9`, two iterations) moved the clip +438.8 (18447.4 → 18886.2) and the line back to screen 18.1 = before, stable through the next layout, display and settle hop. **The in-suite pin (red-first, this commit):** `WriteFloatingViewportTests.aTailReturnOnAFloatingViewportLeavesTheLinesAboveItStill` — the rig reproduces B5 once TextKit has layout history (the story laid out once first; found by the scratch rig's history variants, `DerivedData/18lb-ub5-rig5.log`: history 1 and 3 re-based and the keeper restored, history 0 and 2 did not re-base); the dev store's ring ON; her column's size; the real roads (the typed Return, the carve through `renderFull`, `moveToEndOfDocument:`, the real coordinator). **RED on the pre-fix tree, deterministic (2/2): Study 80.0 pt** (`37.06 → 117.06` pt below the edge; usage 18199.8 → 18309.8 for one new line), both premises held (the island floats — laid-out run above the viewport 0; TextKit re-estimated — usage grew > 3 lines); Terminal GREEN (a guard: B5 never reproduced there) (`DerivedData/18lb-ub5-pin-prefix{1,2}.log`). **THE FIX (this commit):** `ReadingAnchor.isUntouched(byEditAt:)` + `displacement(lineTop:viewportTop:)` (pure, `JumpPrimitive.swift`); `EditorViewModel.keepUntouchedReadingLine(_:editStartingAt:)` + the DEBUG witness `untouchedLineRestores`; `EditorSurfaceController.applyStructuralResult` captures `readingAnchor()` before a seamed rewrite and, when the DIFFERENTIAL strategy landed, keeps the line after the caret is placed (before any pending projection applies); `applyDifferentialStructural` returns where the edit began (`Int?` in place of `Bool`). **GREEN:** `WriteFloatingViewportTests` + the new `UntouchedLineKeeperTests` (the pure rule · the witness on the B5 road = 1 and on a non-floating page = 0 · the fence: an act that writes ABOVE the reading line keeps its own movement — measured 10.0 pt, one empty block's line — and the keeper stays out) — **4 tests / 2 suites, 6 cases, passed** (`DerivedData/18lb-ub5-pin-fixed2.log`). **R-keep RUN (`DerivedData/18lb-ub5-R-keep.log`): RED — exactly the predicted 3 issues** (the pin's Study case 80.0 pt; `theKeeperRunsExactlyWhereTextKitMovedTheLine(true)`: moved 80.0, restores 0 where 1 is owed); every other case green; restored by `git checkout HEAD --`, `git status` clean, the call greps back (1). The harness half: DONE (row 7 — the Study row PASS plain on the fix, FAIL on the R-keep scratch build) |
+| 6 | Row 85 (O-2) — the last-chance may-take decision | DONE — **NOT TAKEN, stays 12** (ROW 85 below: five ⌘↓ landings on invalidated geometry traced, the ring correct in every one; no reproduction to pin) |
 | 7 | WALK (USE, both voices, per-step guarded) + the full seeded harness both voices | DONE — **the full seeded suite on the fixed tree** (the stamped clean build of `1b893262`, app `4f9d4b733b6e`, core `4b9d3b2f7991`, `dirty=` empty; the machine author-free, HID idle 26 min at the start): `notes/plans/vis-walks/2026-09-27/121540/` — **both voices 15/15 scenarios, 0 FAIL · 0 ERROR · 0 XPASS, XFAIL 4 = S3 ×4 only** (`index-click` + `readedit-click`, labelled); **`b5-return-after-cmd-down` PASS in Study, PLAIN** (the baseline's B5 XFAIL retired: XFAIL 5 → 4); the new `b5-more-roads` PASS 6/6 both voices; the dev store's voice restored to Terminal (run.log). The harness's TEETH (R-keep as a scratch build, `VW_DD`): first attempt `125012/` DERAILED by U4's KEYBOARD STALL at `mode-roundtrip` (a click on a mid-page Write line, then ⌘3 never took — the recorded intermittent row, owner 12; not this unit's road) → every later precondition ERRORed, the Settings voice control was not found (ABORT, exit 4), the app terminated by pid, **the dev store's voice left at STUDY (RESTORE OWED — in hand)**; **re-run `125735/`: `b5-return-after-cmd-down` FAILS in Study on the revert — the plain assertion reds: 45591 → 44477 (the ~1,100-character slide), exit 1 — the teeth, proven;** everything else as the fixed tree (S3 ×2 XFAIL; `b5-refont` PASS); **`b5-more-roads` PASS on the revert too — its two rows are GUARDS** (the mid-note ⏎ after the carve and the tail ⏎ on settled geometry did not move on either build; kept as standing cover, labelled as guards). **The dev store's voice RESTORED to Terminal** (a one-act throwaway scenario, removed after; the app's probe read `voice now: terminal`, 13:08:04). **THE WALK (USE) — her B5 gestures, both voices, per-step guarded (VisualWalk's doors), on the fixed build (`121540/`):** the carve road at the tail on invalidated geometry (`b5-return-after-cmd-down`: Terminal 4/4, Study 4/4 — the page byte-for-byte the pre-⏎ page in capture `study/b5-return-after-cmd-down/02-return` vs `01-cmd-down`: "You have but to name it." at the same place, footer `block 263/263`) · the re-font road at the tail (`b5-refont`: 4/4 both) · the carve road mid-note on invalidated geometry and the tail on settled geometry (`b5-more-roads`: 6/6 both) · a mid-note divide on settled geometry (`write-divide-merge`: 11/11 both) · the short note's ⏎/⌫ at the page top (`write-newline-roundtrip`: 9/9 both). The before-fix picture, same recipe: captures `102834/study/b5-return-after-cmd-down/01` vs `02` (the page slid ~a screenful, the new caret block off-screen). (An empty block's editing ring is not visible after the ⏎ on either build — shipped: the pre-U-B5 capture `082126/study/write-newline-roundtrip/02-return` shows the same.) |
-| 8 | Closing runs (the jump/anchor/typewriter family, `WriteTopAirTests` + kin, the eleven Tutorial suites) | NOT-STARTED |
+| 8 | Closing runs (the jump/anchor/typewriter family, `WriteTopAirTests` + kin, the eleven Tutorial suites) | IN-PROGRESS — `App/Variorum/DerivedData/18lb-ub5-closing.sh` (154 suite type names, each grep-verified: U0b's 87 — the jump/anchor/landing/re-font/typewriter family, the structural and seam suites, the typed Return's, `WriteTopAirTests`, the eleven Tutorial suites — ∪ U0c's 59 landing/pane extras incl. `NoteOpenLandingTests` ∪ this unit's two ∪ `IndicatorGutterTests`, the four `SeamEdit…` suites, `GestureSoakTests`), zero instances, the dev store's voice Terminal: PENDING |
 | 9 | Self-assessment | NOT-STARTED |
 
 ### THE TRACE (inputs → the page moved; every number from the instrumented run `102834`)
@@ -1437,7 +1437,10 @@ typed Return (`TypedReturn.act` → `.emptyBlock(.below, …)`) and lands throug
 **Mechanism: TextKit re-estimates the geometry ABOVE the viewport while it processes the edit, and re-bases the
 laid-out viewport onto the new estimate — in document space, under a clip nothing moves.** Between the entry and
 the exit of `applySeamEdit` nothing lays anything out (the storage is inside `beginEditing`), so the move is
-TextKit's own processing of the edit at `endEditing`: the one-line edit grew TK2's usage height by **+692.4 pt**
+TextKit's own processing of the edit at `endEditing` *[refined by the later runs — THE ROAD INSIDE THE EDIT below: the
+layout-forcing read that provokes the re-estimate inside that processing is OURS (the editing ring's decoration walk,
+reached through TextKit's own selection fix), and with it deferred the same re-base happens at the next forcing read
+after the edit (run A) — TextKit re-estimates; our reads make it do so before a viewport pass]*: the one-line edit grew TK2's usage height by **+692.4 pt**
 (one line is ~24–30) and moved the laid-out fragment of a line FAR above the edit by **+662.4 pt** — its state
 still `layoutAvailable`, only its origin re-derived. The clip stayed at 18462.9 through every later pass, so the
 screen shows text ~a page EARLIER (captures `02-return` vs `01-cmd-down`: "You have but to name it." from
@@ -1520,3 +1523,151 @@ walks both shape which fragments TextKit has laid out and provoke the re-estimat
 (it keys on the line having moved, whatever moved it). Both restored by `git checkout HEAD --`; `git status` clean.
 
 - Reverts in flight: none. **Instrumented working tree: NO — removed before the pin (the instrument, the throwaway scenario and the scratch rig are kept in `App/Variorum/DerivedData/18lb-ub5/` — `keeper-plus-instrument-final.patch`, `B5Trace-v3.swift`, `B5ScratchRigTests-final.swift`; the clean keeper at `keeper-clean.patch`).** *(History of this line:)* Instrumented working tree: YES (uncommitted, by design) — `Features/Editor/B5Trace.swift` (untracked, new) + DEBUG-gated hooks in `EditorTextView`, `EditorViewModel`, `EditorSurfaceController`, `EditorView` (`ScrollAnchorController`), `LongBlockLayout`, `JumpPrimitive` (v2: armed from the first ⏎ too; `renderFull` + the jump bracketed) + a THROWAWAY scenario `zz-b5-type` appended to `Tools/VisualWalk/scenarios.zsh` + a scratch rig `VariorumTests/B5ScratchRigTests.swift` (untracked); copies at `App/Variorum/DerivedData/18lb-ub5/` (gitignored). Restore: `git checkout HEAD --` the tracked files + `rm` the two new ones; `git status` clean. **The scratch rig's first run (`DerivedData/18lb-ub5-rig1.log`): the recipe replayed in-process reproduces the PRECONDITION (the viewport's island on ~462 estimated fragments, laid-out run above it 0, both voices) but NOT the move (0.0 pt) — so the floating island is necessary, not sufficient; the trigger of TextKit's re-estimation needs more history (v2 run next).**
+
+### ATTRIBUTION (U0's four-value column, with its evidence bars)
+
+| Half of the mechanism | Value | Evidence |
+|---|---|---|
+| **The road that SHOWS it** — the tail ⏎ lands on the differential structural rewrite, which has no restore step | **our-commit(`79b334ab`)** — 18c batch 2 (2026-09-07): U-1 made the Return key structural AND gave `insertEmptyBlock` a stated seam (`.divide` with an empty successor — "the P1 half of 18c batch 2"). Before it the insert took `seam: nil` → `renderFull`, whose anchor restore holds the page, and ⏎ at the tail was a text newline | the diff of `79b334ab` (`seam: nil` → `.divide`); **D1 by run**: the pin with the insert back on `seam: nil` and no keeper holds the line (GREEN) |
+| The road it rides — the differential rewrite without a restore step | pre-existing (Phase 9 `29816875`, 2026-07-07 — "NO scroll-restore step exists on this path", the author's directive) | git history |
+| The precondition — the viewport's island floats on estimates | pre-existing (the carve lands through `renderFull` since 13c 1B `7df0795d`; `renderFull` replaces the whole storage since Phase 7; ⌘↓ is AppKit's `moveToEndOfDocument:`) | the census, every instrumented run; U0b's ATTRIBUTION rows |
+| The provocation — a layout-forcing read that lays out the new paragraph before the viewport pass | pre-existing (the decoration pass's opening `textLayoutFragment(for:)` reads, Phase 13 C1; the indicator arm on the selection road, R14; the post-edit `refreshBadges` → `refreshDecorations` on the differential road) — **and her editing ring takes part in BOTH halves** | the stack (run 3), the `ucc.decor` bracket (A2), run A (the next door); **D2 by run**: the ring off → no floating island (40 laid-out fragments above), no re-estimate (+30.0 = the line) |
+| **TextKit's half — re-estimating the floating stretch and re-basing the laid-out island in document space, OUTSIDE a viewport pass, under an unmoved clip** | **undetermined** — no 26.x OS or tree can run on this machine (TK2 §5); the estimate class is TextKit's own (§2, documented since 15.6), and on 27.0 its viewport pass COMPENSATES such shifts by moving the clip (18k C6's measured finding — the same machinery's other door; seen here as the ⌘↓ landing's +8 pt followed by the clip). Whether 26.x re-based on this road cannot be said | — |
+
+**The magnitude history, read with the mechanism:** U0b +109/+166 (`998f7d7d`), U-VIS ~30 pt, this unit 662.4 · 438.8
+· 438.8 · 182.0 (run A, at the second door) · 80.0 (the rig) — TextKit's re-estimate of a floating stretch, whose
+size follows how much of the note is laid out where. Terminal never: the monospace estimate is close to exact.
+
+### THE FIX, and why this shape (the brief's first named candidate)
+
+`EditorSurfaceController.applyStructuralResult` captures `readingAnchor()` (the line the viewport's top is reading,
+with its place — U0b's `ReadingAnchor`) before a seamed rewrite; when the DIFFERENTIAL strategy landed, after the
+result's synchronous work (the caret placed, its context refreshed — the last layout-forcing reads of that turn) and
+before any pending projection applies, `EditorViewModel.keepUntouchedReadingLine` restores it EXACTLY through
+`JumpPrimitive.jump(…, landingInset: exactLandingInset)` — `renderFull`'s own restore — iff the line is UNTOUCHED (it
+starts strictly before the edit, `ReadingAnchor.isUntouched`) and it MOVED on screen by ≥ 0.5 pt
+(`ReadingAnchor.displacement`). Nothing else moves: the caret rests where the act put it (the fence — the page
+returns to the one the act leaves on settled geometry, where the new line sits below the last one); a line the act
+writes or pushes is never held (its own movement is shipped — pinned: 10.0 pt, the keeper out); the full strategy
+keeps `renderFull`'s restore; on settled geometry the check is one single-fragment read and no jump runs.
+
+**Why not the root (the provocation):** candidate 1 closed the in-processing door and B5 moved at the next one (run
+A, +182.0). The doors are several (the indicator arm inside TextKit's selection fix; the post-edit badge/decoration
+refresh; the caret-context refresh after the caret is placed; any future geometry read in that window); closing all of
+them means deferring EVERY decoration refresh after EVERY edit to the settle hop — a change to when every decoration
+on this surface appears (one display pass later), not a B5 fix, and still not a guarantee against the next read.
+**Why not "lay out the region above the caret before the edit lands" (the brief's second candidate):** the floating
+stretch is ~470 paragraphs (tens of thousands of characters) between the mid-note island and the end — its layout
+scales with the document (P1 forbids it), and bounding it to a page above would leave the estimates further up that
+TextKit re-bases on.
+
+### COST SHAPE (P1 / P3), stated
+
+- Per differential structural act (divide, extract, makeBlock, merge, the typed Return's insert — every ⏎ in Write):
+  one `readingAnchor()` before (the `topVisibleOffset` probe + one single-fragment `lineSpan` of a line already on
+  screen — the read `ScrollAnchorController` already makes on every scroll event) and one `lineSpan` after.
+  Viewport-bounded; nothing at autosave or keystroke rate beyond acts that already run a structural flight.
+- Only when TextKit moved the line: one `JumpPrimitive.jump` (≤ 6 viewport layouts; measured 2 in A2) — the bounded
+  primitive every landing on this surface uses.
+- P3 unchanged.
+
+### SEAM FILES THIS DIFF TOUCHES (`git diff b811760a..HEAD -- App Tools`; the Fable reviewer reads this first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `Features/Editor/JumpPrimitive.swift` | `ReadingAnchor.isUntouched(byEditAt:)`, `displacement(lineTop:viewportTop:)` — pure, two lines of arithmetic | `JumpCorrectionLoop`, `FragmentLines`, `lineSpan`, `jump` (C6's re-assert, C6b's live range), `exactLandingInset`, `reflowLandingInset` |
+| `Features/Editor/EditorViewModel.swift` | `keepUntouchedReadingLine(_:editStartingAt:)` + the DEBUG witness `untouchedLineRestores` (beside `restoreReadingAnchor`) | `topVisibleOffset()`, `readingAnchor()`, `restoreReadingAnchor`, `applySeamEdit`, `updateCaretContext` (the R1-1 arm byte-unchanged — candidate 1 withdrawn), `refreshDecorations`, the parks, the storage seam |
+| `Features/Editor/EditorSurfaceController.swift` | `applyStructuralResult`: the capture before a seamed rewrite + the keep after the caret placement (differential strategy only); `applyDifferentialStructural` returns the edit's start (`Int?` for `Bool` — its one caller) | `renderFull` (its exact restore), `runStructural`, `insertEmptyBlock` and every seam, `StructuralSeamEdit`, the oracle, `applyDifferential` |
+| `VariorumTests/WriteFloatingViewportTests.swift` | NEW — the red-first pin (2 cases) + `UntouchedLineKeeperTests` (the pure rule · the witness 1/0 · the act-moves-it fence) | — |
+| `Tools/VisualWalk/scenarios.zsh`, `README.md` | B5's Study expectation PLAIN (reason at the line; `KI_B5` names the fix); NEW seeded `b5-more-roads` (appended last; its rows are guards — green on the revert too) | every other scenario, `lib.zsh`, the guard order |
+
+`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, `PaneTextAuthority`, `runStructural`, `JumpCorrectionLoop`:
+untouched. Zero `Sources/`, `Shared/`, `Sync/`, schema. No TK1 API (the new reads are `JumpPrimitive.lineSpan`'s
+existing single-fragment idiom).
+
+### JUDGMENT CALLS (each reversible, the reversal named)
+
+1. **The fix is the anchor-preserving keeper, not the provocation's doors** (THE FIX above; candidate 1 measured
+   insufficient). *Reverse by* removing the keep call (R-keep's shape) — B5 returns (pin + harness red).
+2. **"Untouched" = the reading line STARTS strictly before the edit.** An edit that begins inside the first visible
+   line (a divide in it) leaves that line's top to the text before it, so it is held; an edit at or above its start
+   moves it and is the act's. *Reverse by* `offset + lineLength <= editLocation` (hold only lines wholly before the
+   edit) — narrower, and a divide in the first visible line would then be unkept on a floating page.
+3. **Exact landing (`exactLandingInset`), not the re-layout keepers' "line at the top".** A structural act on the
+   differential road promises the page does not move; `renderFull` already lands exactly (U0b JC 1). *Reverse by*
+   `reflowLandingInset`.
+4. **The keep runs AFTER the caret placement and its context refresh, BEFORE `applyPendingIfClean`** — after the last
+   forcing reads of the turn (so a re-base provoked by the caret-context refresh is caught), before a deferred
+   projection could re-map offsets. *Reverse by* moving it into `applyDifferentialStructural` right after the edit
+   (then run A's second door would escape it).
+5. **The pin gives TextKit layout history (the whole story laid out once) and turns the ring on** — the two things the
+   rig needed to reproduce what the app's full pass does every time (found by the history variants; D2 shows the ring
+   is part of it). *Reverse by* dropping either — the pin then fails its own PREMISES (not its line), by design, so it
+   cannot pass vacuously.
+6. **`b5-more-roads` joins the seeded suite although its rows are guards** (green on the revert): the brief's walk
+   rows made standing, labelled honestly. *Reverse by* removing its `SCN_ORDER` entry.
+7. **No QUESTIONS row:** no product rule was decided — the keeper enforces the 2026-07-07 promise and the U0b walk
+   criterion, the caret's resting is untouched, and the act's own movement is preserved and pinned.
+
+### ROW 85 (O-2, the ⌘↓ ring drawn too high) — the last-chance decision: NOT TAKEN, stays 12
+
+My instrument watched the ⌘↓ landing's window on invalidated geometry five times (runs 1–3, A, A2): each landing's
+settle moved the laid-out fragments (+8 pt in run 1) and TextKit moved the CLIP with them in the same pass, and the
+clip's bounds notification (`ScrollAnchorController.boundsChanged` → `refreshBadges` → `refreshDecorations`) re-ran
+the decoration pass AFTER the shift; every `01-cmd-down` capture shows the ring exactly around the last block. O-2 did
+not reproduce, the trace does not reach a stale ring refresh, and a take needs its own red-on-old pin on a
+reproduction this unit does not have. (What the trace does add to row 85's suspect: a settle that shifts the text
+WITHOUT a clip move — B5's own shape — would leave no bounds notification to re-run the pass; after the fix the
+keeper's jump provides one on this road.)
+
+### NOTICED, NOT TOUCHED
+
+1. **The R1-1 hazard's other road:** the editing ring's layout-forcing decoration walk runs INSIDE the storage's edit
+   processing through TextKit's own selection fix (`-[NSTextLayoutManager _fixSelectionAfterChangeInCharacterRange:…]`
+   → `setSelectedRanges` → `textViewDidChangeSelection` → `updateCaretContext`) during every one of the model's
+   programmatic writes (`setSurfaceContent`, `applySeamEdit`, `programmaticReplace`) that moves the caret's block —
+   AFTER `storageDidEdit` returned, so R1-1's depth guard reads 0 there. The sampled R1-1 spin's precondition class
+   (`_estimatedTextLocationForVerticalOffset`), on a road it cannot see. The one-line guard was built and measured
+   (candidate 1: `inStorageEditTransaction || suppressEditProcessing`) — free (the in-write walk is always redundant
+   with the post-write one) but NOT a B5 fix, so it did not ship. Proposed owner: 12 (R1-1's family), with the
+   candidate and its `EditorDecorTransactionTests`-shaped pin (the widened oracle) drafted in the U-B5 record.
+2. **The same TextKit re-base on the OTHER restore-less road:** `applyDifferential` (projection deliveries — a take
+   switch, `restoreCommit`, a sync landing) writes storage with no restore step; on a floating viewport a delivery
+   that is followed by a forcing read could slide the page the same way. Unexamined (not B5's road). The TYPING road
+   was measured once: a character typed at the tail after the recipe moved nothing (`zz-b5-type`, run 3 — the caret
+   stays in its block, the ring arm never fires). Proposed owner: 12.
+3. **U4's KEYBOARD STALL, one more sighting** (`125012/`, Study, `mode-roundtrip`: a click on a mid-page Write line,
+   then ⌘3 never took; the pass derailed and aborted; the app did not answer its menu quit and was terminated by pid)
+   — on the R-keep scratch build (the pre-fix road). No `sample` was taken (the harness drove on). Its row (owner 12)
+   may take the sighting.
+4. **An empty block's editing ring is not visible** after ⏎ makes it (both builds; the pre-U-B5 capture
+   `082126/study/write-newline-roundtrip/02-return` shows the same) — shipped, noted only.
+5. **The harness's full seeded run is now ~33 min** for both voices (15 scenarios each).
+
+### OWED AT CLOSE (drafted for the orchestrator — nothing below was applied)
+
+- **THE LEDGER:** row 6 → **CLOSED — TRACED + FIXED** (the keeper, `161b66aa`; pin `8b9be390` red-first; R-keep red
+  exactly; the harness's Study row PLAIN, PASS on the fix and FAIL on the revert); row 8 → **NOT TAKEN at U-B5 either —
+  stays 12** (ROW 85 above).
+- **KnownIssues row 88 → CLOSED** (proposed text): *"RESOLVED 18l-b U-B5 (2026-09-27): traced — a full re-render
+  leaves the end island floating on ~470 estimated paragraphs after ⌘↓; the tail ⏎'s differential rewrite is followed by
+  a layout-forcing read (the editing ring's decoration walk, inside TextKit's own selection fix, or the post-edit
+  refresh) that makes TextKit re-estimate that stretch and re-base the laid-out island in document space under an
+  unmoved clip (+438.8/+662.4 pt measured). FIXED by the differential road's keeper (`keepUntouchedReadingLine` — the
+  untouched reading line restored exactly iff TextKit moved it). Pins `WriteFloatingViewportTests` (red-first 80.0 pt)
+  + `UntouchedLineKeeperTests`; the harness's `b5-return-after-cmd-down` is PLAIN in both voices (FAIL on the fix's
+  revert). Attribution: our-commit `79b334ab` for the road that shows it (D1 by run); TextKit's re-base undetermined
+  (no 26.x)."* Plus two NEW rows, owner 12: NOTICED 1 (the R1-1 hazard on the selection-fix road, candidate drafted)
+  and NOTICED 2 (the projection road's restore-less rewrite); NOTICED 3 as a sighting line on the keyboard-stall row.
+- **TEXTKIT2_NOTES §3 (canon — a measurement record, the orchestrator's pen):** *"On 27.0 a layout-forcing read that
+  lays out a NEW paragraph right after an edit — outside any viewport pass — can make TextKit re-estimate the estimated
+  stretch ABOVE a viewport island that floats on estimates (a full storage replacement, then one island laid out, then
+  ⌘↓) and re-base the laid-out island in document space (+80…+662 pt measured) without moving the clip; the viewport
+  pass compensates the same kind of shift by moving the clip (18k C6), an edit has no such pass. The rule: a road that
+  writes storage with no restore step keeps the reading line itself (Write's differential structural rewrite:
+  `keepUntouchedReadingLine`, 18l-b U-B5)."*
+- **The harness baseline moves:** the full seeded run reads **XFAIL 4 = S3 ×4 only** (B5's Study XFAIL retired);
+  `b5-more-roads` (guards) joins it.
+- **AppSpec:** none (no contract line moves — the promise is the 2026-07-07 one). **MOBILE PARITY:** nothing
+  mobile-visible (the phone's editor is its own; its structural road is not this controller). **QUESTIONS:** none.
+
