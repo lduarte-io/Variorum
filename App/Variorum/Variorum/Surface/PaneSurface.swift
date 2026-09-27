@@ -546,7 +546,7 @@ final class PaneTextView: NSTextView, MarkdownFormattable, ProseGutterSurface {
     private(set) var lastRenderRestoreClipShift: CGFloat = 0
     private(set) var largestRenderRestoreClipShift: CGFloat = 0
 
-    func noteRenderRestore(clipShift: CGFloat = 0) {
+    func noteRenderRestore(clipShift: CGFloat) {
         renderRestoresRun += 1
         lastRenderRestoreClipShift = clipShift
         largestRenderRestoreClipShift = max(largestRenderRestoreClipShift, clipShift)
