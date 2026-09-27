@@ -18,9 +18,10 @@
 //  measured caret 329 of 329.
 //
 //  **The decision (#153, PROVISIONAL — the trace is in the U4 RECORD):** no
-//  face on this road knows WHERE in the block she clicked (Read ▸ Scroll's
-//  paragraph is a SwiftUI `Text` with a bare tap; the paged leaf's CoreText
-//  index has no road back to the stored text), so the landing carries no
+//  face on this road hands on WHERE in the block she clicked (Read ▸ Scroll's
+//  paragraph is a SwiftUI `Text` with a bare tap; the paged leaf passes a
+//  block, not its CoreText index — cheap to wire, but a Read click seeding a
+//  caret at a character is #149's product question), so the landing carries no
 //  offset and `LandingTarget.utf16Offset` — set by no production site — is
 //  deleted; the arriving pane puts a landing's caret at the landed block's
 //  START, which is the value's own documented contract (*"the landing then

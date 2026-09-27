@@ -168,8 +168,9 @@ final class BookIndexEditModel {
         // as content, so a Read ▸ Scroll click-through (the paged reader's,
         // the note box's "edit here") put the caret on the EMPTY line under
         // the text: her U0 report's artifact on the Index's other road in.
-        // No face on this road can say where inside the block she clicked
-        // (`LandingTarget` has no offset to carry), so the landing takes the
+        // No face on this road hands on where inside the block she clicked
+        // (`LandingTarget` carries no offset — #153 has the trace), so the
+        // landing takes the
         // value's own documented rule — the block's start — which is also
         // note Read's twin click-through (`ReadModeView.openInEdit` → the
         // entry rule's `.start`), QUESTIONS #97's (a), and exactly where the

@@ -28,10 +28,12 @@ nonisolated struct LandingTarget: Equatable, Sendable {
     // **No caret OFFSET rides this value** (18l-b U4 — the `utf16Offset`
     // field DELETED; QUESTIONS #153, PROVISIONAL). It was declared with a
     // paragraph of intent and set by no production site (the post-13u health
-    // review's §1.3 item 4), and no face on its road can say where inside a
+    // review's §1.3 item 4), and no face on its road SAYS where inside a
     // block she clicked: Read ▸ Scroll's paragraph is a SwiftUI `Text` under a
-    // bare tap, and the paged leaf's CoreText index has no translation back to
-    // the stored text. The caret offsets that DO exist travel on the
+    // bare tap (it cannot), and the paged leaf hands its host a block, not the
+    // CoreText index under the click (it could, cheaply — but a Read click
+    // seeding a caret at a character is #149's product question, and #153
+    // carries the trace). The caret offsets that DO exist travel on the
     // `FocusedBlock` road through `CommandRouter` (`focusedBlock` /
     // `currentBlock(for:)` — the note's remembered place, read by the
     // `WriteIntent` doors and `PaneCaretLanding.entering`), never on this
