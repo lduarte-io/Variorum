@@ -123,6 +123,7 @@ is plain, so a standing non-reproduction does not raise an XPASS every run.
 | `outline-long-story-settle` | U0 item 2(b) | the 212-block story, live, holds its SETTLED layout after each resize (its end scrolled into view) |
 | `b5-return-after-cmd-down` | row 88 (B5) | ⏎ at the tail after ⌘↓ on a carve-invalidated layout must not move the page — KNOWN in Study (where it reproduces), plain in Terminal |
 | `b5-refont` | row 88's re-font road | the same after a whole-document re-font — plain (it has never reproduced) |
+| `takes-landing` | 18l-b U2 (the Takes article's landing on the one authority) | its shipping signpost (`landing surface=TakesArticle…`): the first open in Takes asks no landing (U0c); the N9 entry landing on the last block, R-Q20's win (the page at the top) and the fan panel's bloom door each file `end=settled`; R-Q21's plain round trip files nothing; her wheel inside the hold files `end=handedover` |
 | `selftest-red` (`--selftest`) | the guard rule | a planted wrong expectation must FAIL |
 
 **Every seeded U0/U0b/U0c tripwire has been shown to RED on its own regression** — scratch builds with

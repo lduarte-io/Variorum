@@ -522,6 +522,129 @@ scn_read-landing() {
   done
 }
 
+# --- S13: the Takes article's landing, WATCHED by the one authority (18l-b U2) ------------------------
+# The Takes article's landings now file the shipping signpost (`landing surface=TakesArticle …` — the
+# surface never had one) and END when they settle. Six rows, in her rulings' terms: U0c's first open in
+# Takes (the top, NO landing asked, so no line); the N9 entry landing on a deep current block (revealed,
+# `end=settled`); R-Q21's plain round trip (it STANDS DOWN — no line; the page she left); R-Q20's landing
+# wins (the current block moved while away → the landing outranks the memory: the page opens at the top,
+# `target=0 … end=settled`); HER SCROLL inside the hold ends a landing (`end=handedover`); and the fan
+# panel's bloom door (17o row 8 — `Open Takes mode`, a bloom landing, never weighed against the memory).
+# The row A precondition is a real FIRST open in Takes: when the note's remembered mode is not Takes, the
+# scenario leaves it in Takes and relaunches (a new run) — so it is self-contained in any pass.
+vw_def takes-landing "A Scandal in Bohemia, first open this run in Takes (its remembered mode — staged by a relaunch when needed)" \
+  "first open (Takes) · ⌘1 · ⌘↓ · ⌘2 · ⌘1 · ⌘2 · ⌘1 · ⌘↑ · ⌘2 · ⌘1 · ⌘↓ · ⌘2 + her wheel 0.7 s later · ⌘1 · ⌘⇧T · Open Takes mode" \
+  "the first open asks no landing (no TakesArticle line); the entry landing, R-Q20's win and the bloom each file end=settled; R-Q21's round trip files nothing; her wheel inside the hold files end=handedover" pass
+
+# Every TakesArticle signpost in the last N seconds (the shipping line, content-free).
+vw_takes_signposts() {   # seconds-back
+  /usr/bin/log show --last ${1}s --style compact \
+    --predicate 'eventMessage CONTAINS "landing surface=TakesArticle"' 2>/dev/null \
+    | grep -o 'landing surface=TakesArticle.*end=[a-z]* top=-\{0,1\}[0-9]*'
+}
+
+# The lines filed since t0 (with a second of slack for the log's delivery).
+vw_takes_since() {   # t0 → TK_LINES (array) + TK_LAST
+  sleep 1.5
+  TK_LINES=("${(@f)$(vw_takes_signposts $(( EPOCHSECONDS - $1 + 1 )))}")
+  TK_LINES=(${TK_LINES:#})
+  TK_LAST=${TK_LINES[-1]:-}
+  local l; for l in $TK_LINES; do vw_log "  signpost: $l"; done
+  (( ${#TK_LINES} )) || vw_log "  signpost: none"
+}
+typeset -ga TK_LINES; typeset -g TK_LAST=
+
+# "settled" when the line is a settled landing on the note's LAST block (target = rows − 1).
+vw_takes_on_last() {   # line
+  local rows=${${1##*rows=}%% *} target=${${1##*target=}%% *}
+  [[ $1 == *end=settled* && -n $rows && $target == $(( rows - 1 )) ]] && print settled
+}
+
+vw_takes_mode() {   # 1|2 → ⌘1 / ⌘2, settled
+  vw_keys "⌘$1" "keystroke \"$1\" using command down"
+  sleep 1.2
+  vw_settle
+}
+
+scn_takes-landing() {
+  local t0
+  # Row A — U0c: the session's FIRST open of the note, in its remembered mode (Takes): the top, no landing.
+  vw_open_note "A Scandal in Bohemia"
+  if [[ ${PV[mode]} != Takes ]]; then
+    vw_log "  the note's remembered mode is ${PV[mode]} — leaving it in Takes and relaunching (a new run)"
+    vw_takes_mode 2
+    vw_quit_app; sleep 2; vw_launch
+    vw_open_note "A Scandal in Bohemia"
+  fi
+  vw_require '[[ ${PV[mode]} == Takes ]]' "the first open this run lands in Takes (the note's remembered mode)" || return
+  t0=$EPOCHSECONDS; sleep 2; vw_cap 01-first-open-in-takes
+  vw_takes_since $(( t0 - 6 ))
+  vw_expect_eq "A · the first open in Takes asks NO landing (U0c's opening arm): TakesArticle lines" ${#TK_LINES} 0
+
+  # Row B — the N9 entry landing on a deep current block: revealed at the page's edge, watched, settled.
+  vw_takes_mode 1
+  vw_keys "⌘↓ (the caret to the note's end — the current block is the last)" 'key code 125 using command down'
+  vw_settle
+  t0=$EPOCHSECONDS
+  vw_takes_mode 2
+  sleep 2.5; vw_cap 02-entry-landing-deep
+  vw_takes_since $t0
+  vw_expect_eq "B · the entry landing on the LAST block is watched and SETTLES [${TK_LAST:-none}]" "$(vw_takes_on_last "$TK_LAST")" settled
+
+  # Row C — R-Q21's plain round trip: the entry landing stands down; nothing is filed; the page she left.
+  vw_takes_mode 1
+  t0=$EPOCHSECONDS
+  vw_takes_mode 2
+  sleep 2.5; vw_cap 03-plain-round-trip
+  vw_takes_since $t0
+  vw_expect_eq "C · R-Q21's plain round trip STANDS DOWN: TakesArticle lines since the return" ${#TK_LINES} 0
+  if cmp -s $SCN_DIR/02-entry-landing-deep.png $SCN_DIR/03-plain-round-trip.png; then
+    vw_log "  C · evidence: the round trip's capture is BYTE-IDENTICAL to the landed page's (cmp)"
+  else
+    vw_log "  C · evidence: the two captures differ in bytes (cmp) — read them (the caret's blink, the ring)"
+  fi
+
+  # Row D — R-Q20's landing wins: the current block moved to the first while away; the page opens at the TOP.
+  vw_takes_mode 1
+  vw_keys "⌘↑ (the caret to the note's start — the current block is the first)" 'key code 126 using command down'
+  vw_settle
+  t0=$EPOCHSECONDS
+  vw_takes_mode 2
+  sleep 2.5; vw_cap 04-landing-wins-at-the-top
+  vw_takes_since $t0
+  vw_expect_eq "D · R-Q20: the landing outranks the memory and settles at once on the first block [${TK_LAST:-none}]" "${${(M)TK_LAST:#*target=0*hops=0*end=settled*}:+settled}" settled
+
+  # Row E — HER wheel inside the landing's hold ends it (ONE guarded act: ⌘2, then 0.35 s, then her wheel).
+  vw_takes_mode 1
+  vw_keys "⌘↓ (the caret to the end again)" 'key code 125 using command down'
+  vw_settle
+  local x=$(( WIN_X + WIN_W * 6 / 10 )) y=$(( WIN_Y + WIN_H / 2 ))
+  vw_act_note "⌘2 then HER wheel 0.7 s later at ($x,$y) — one guarded act"
+  vw_step $x $y
+  vw_no_foreign_at $x $y
+  vw_our_window_is_key
+  t0=$EPOCHSECONDS
+  osascript -e 'tell application "System Events" to keystroke "2" using command down' >/dev/null
+  # 0.7 s: after the board has mounted and taken its landing (the watch begins at the landing's first
+  # decided step), inside the watch's one-second hold.
+  sleep 0.7
+  $VW_BIN/walk-scroll $x $y -3 >/dev/null
+  sleep 2.5; vw_settle; vw_cap 05-her-wheel-hands-over
+  vw_takes_since $t0
+  vw_expect_eq "E · her wheel inside the hold hands the landing over [${TK_LAST:-none}]" "${${(M)TK_LAST:#*end=handedover*}:+handedover}" handedover
+
+  # Row F — the fan panel's bloom door (17o row 8): Write's takes panel on the caret's block → Open Takes mode.
+  vw_takes_mode 1
+  vw_keys "⌘⇧T (the takes panel on the caret's block)" 'keystroke "t" using {command down, shift down}'
+  sleep 1.5
+  t0=$EPOCHSECONDS
+  vw_ax_press "Open Takes mode" AXButton || { vw_require false "the takes panel's Open Takes mode door"; return }
+  sleep 3; vw_settle; vw_cap 06-bloom-door
+  vw_require '[[ ${PV[mode]} == Takes ]]' "the bloom door switched to Takes" || return
+  vw_takes_since $t0
+  vw_expect_eq "F · the bloom door's landing on the LAST block is watched and settles [${TK_LAST:-none}]" "$(vw_takes_on_last "$TK_LAST")" settled
+}
+
 # --- SELF-TEST: the harness must be able to RED (run with --selftest) -----------------------------------
 vw_def selftest-red "whatever is on screen" "none (a quiet second)" \
   "a KNOWINGLY WRONG expectation: the window's top moved 40 pt — must FAIL, be captured, exit non-zero" fail
@@ -537,4 +660,4 @@ scn_selftest-red() {
 # The seeded run's order: the note-open pair FIRST (a fresh launch is every note's first open).
 SCN_ORDER=(note-reopen write-typing write-newline-roundtrip write-divide-merge mode-roundtrip
            index-click readedit-click read-landing outline-narrow-restore outline-long-story-settle
-           b5-return-after-cmd-down b5-refont)
+           b5-return-after-cmd-down b5-refont takes-landing)
