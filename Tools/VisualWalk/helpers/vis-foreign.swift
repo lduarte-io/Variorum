@@ -28,9 +28,21 @@ for w in list {
     // The Screenshot surface's class, answered narrower: the COLUMN stays covered — no click may
     // land on a notification — and the rest of the screen is not. A walk whose click did not reach
     // the app would ERROR (the act's effect is probed), never pass silently.
+    // (Ladder round 1, NIT-2: narrowed ONLY while every other Notification Center window lies inside
+    // that column — an open NC panel, the widget sidebar, raises windows elsewhere, and then the whole
+    // screen stays covered.)
     if owner == "Notification Center", let screen = CGDisplayBounds(CGMainDisplayID()) as CGRect?,
        r.width >= screen.width - 1, r.height >= screen.height - 1 {
-        r = CGRect(x: screen.maxX - 440, y: screen.minY, width: 440, height: min(screen.height, 480))
+        let column = CGRect(x: screen.maxX - 440, y: screen.minY, width: 440, height: min(screen.height, 480))
+        let othersInside = list.allSatisfy { o in
+            guard (o[kCGWindowOwnerName as String] as? String) == "Notification Center",
+                  (o[kCGWindowLayer as String] as? Int ?? 0) >= 1,
+                  let ob = o[kCGWindowBounds as String] as? [String: Double] else { return true }
+            let orr = CGRect(x: ob["X"]!, y: ob["Y"]!, width: ob["Width"]!, height: ob["Height"]!)
+            let fullScreen = orr.width >= screen.width - 1 && orr.height >= screen.height - 1
+            return fullScreen || column.contains(orr)
+        }
+        if othersInside { r = column }
     }
     if let point, !r.contains(point) { continue }
     if point != nil { covering = true }

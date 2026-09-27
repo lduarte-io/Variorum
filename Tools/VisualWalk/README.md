@@ -79,7 +79,13 @@ act. "Someone is at the machine" ends the run — it is never retried with a re-
 move HER keyboard focus). Plus two rules this harness adds, born of a real incident (a stale "wants access to control Finder" consent prompt sat over the
 window; a click landed on it and it took keyboard focus, so a ⏎ would have pressed *Allow*):
 **never click a point any system dialog covers** (`helpers/vis-foreign.swift`), and **never type
-unless the probe says our window is key**. Settings controls are pressed by AXPress (no screen point).
+unless the probe says our window is key**. One narrowing, measured (18l U1): Notification Center hosts
+its banners in a FULL-SCREEN overlay window, so a banner left on screen (e.g. *"App Running in
+Background"*) would refuse every click; while every other Notification Center window lies inside the
+top-right notification column, the rule covers that column (440 × 480 pt) instead of the screen — no
+click may land on a notification. Its limit: an open NC panel (the widget sidebar) raises windows
+outside the column, and then the whole screen stays covered. No consent prompt is NC-owned, so the
+consent rule is untouched. Settings controls are pressed by AXPress (no screen point).
 A guard that fires aborts the run (exit 4) — as does Ctrl-C — and the app it launched is quit; if the
 pass had switched the dev store's voice, the abort restores it only when no author refusal caused it
 and the author checks pass again, and otherwise writes "RESTORE OWED" (a Study store reds KnownIssues
