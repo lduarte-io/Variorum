@@ -202,3 +202,34 @@ decision-record fix, a doc line); none is bug-class, so none claims a red-on-old
     (message bodies grep-clean); ledger row 8 (O-2) correctly left to U-B5; the only QUESTIONS edits are #153 and
     #97's dated pointer, both accurate to the code except as MINOR-2 notes; no KnownIssues row owned by U4 is left
     unresolved.
+
+## ORCHESTRATOR ARBITRATION (same-model ladder — the orchestrator arbitrates against the spec; 2026-09-27)
+
+**ALL THREE FINDINGS CONFIRMED (0 dismissed).** This arbitration is also where item 2's promised
+Fable eye lands (the U4 acceptance's cast adjudication): the seam call is CONFIRMED on its
+evidence — the default (`.leave`) and the entry rule are untouched; one host's argument moved on
+one road, under its own PROVISIONAL, inside her U0 report's class. Opus was the right cast.
+
+- **MINOR-1 — CONFIRMED, fix as proposed.** The one-brain claim must be structural, not
+  narrative: the production row calls the pinned static (`FlowStoryRow.honestHeight` →
+  `FlowHeightEstimate.honestHeight`), and the agreement pin's column side goes through the
+  production builder (`storyInput`). Teeth check REQUIRED: with the row's body reverted to the
+  old two-arm rule in the working tree, the strengthened pin must RED (the reviewer's own
+  hollow-pin demonstration, closed) — restored clean after. Row 58's "agreement pin" line and
+  the `BookView.swift:2249` doc corrected in the same pass (the row edit is the orchestrator's
+  ledger pen delegated for this one line — cite this arbitration).
+- **MINOR-2 — CONFIRMED as the framing fix, and ONLY the framing fix.** #153's (a) sentence
+  corrected (the note-Read twin lands the remembered offset on the CURRENT block, `.start` only
+  on others); the reviewer's one-line entry-rule option added as **(a′)** — "START, except the
+  block you were last in lands at your remembered caret" — with its evidence (it matches the
+  note-Read twin exactly, matches `editHere`'s Outline branch, needs no Read-face wiring, is
+  #149-independent); the two comments tightened. **(a′) is NOT built** — (a) stands as shipped
+  and PROVISIONAL; swapping to (a′) is exactly the one-line product pick #153 exists to hand
+  her. PROVISIONAL-and-continue's letter.
+- **NIT-1 — CONFIRMED, take now** (the fix pass is a touch): the `PaneSurfaceTests:44–46` host
+  doc corrected — DOC LINES ONLY in a pre-existing test file, sanctioned as such and named out
+  loud; zero assertion edits.
+
+**The fix pass:** the U4 implementer (same-model flow — the implementer fixes; dispositions land
+here first). **Round 2 = a FRESH `opus-reviewer` over the fix diff** (the ladder's letter); a new
+BLOCKER/MAJOR there earns round 3 (cap three).
