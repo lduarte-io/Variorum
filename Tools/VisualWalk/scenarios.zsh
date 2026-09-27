@@ -645,6 +645,115 @@ scn_takes-landing() {
   vw_expect_eq "F · the bloom door's landing on the LAST block is watched and settles [${TK_LAST:-none}]" "$(vw_takes_on_last "$TK_LAST")" settled
 }
 
+# --- S14: the BOOK's landings at 18l-b U4 ----------------------------------------------------------------
+# Item 1: the Outline's landing ends WITH the Outline (R2-12 parity) — a mode switch inside its one-second
+# hold used to leave the authority (BookView's @State) armed, so it filed `landing surface=BookOutline …
+# end=settled` for a surface already gone. Item 2 (#153): a Read ▸ Scroll click-through lands in the Index
+# with the clicked block live and its caret at the block's START — it used to park at the END, the blank
+# line under the text (U0's sweep S4). Item 3 (D1): the flow's stories stand at the manifest's own
+# heights — its landings settle on them. Row A's zero-line claim has TWO controls, so it cannot pass
+# vacuously: the Index's landing proves the navigator click took (its target is the story's row), and
+# a plain navigator landing back in Outline proves the log read sees BookOutline lines at all.
+vw_def book-landings "The Adventures of Sherlock Holmes ▸ The Adventure of the Copper Beeches (the book's last story)" \
+  "Outline: the navigator's row, then Index 0.3 s later (one guarded act) · Outline · the navigator (the control) · Read (Scroll) · click the story's third paragraph · Read · a long wheel" \
+  "A: a landing its mode switch ended files NO BookOutline line (the Index's landing lands the story; the control settles); B: the flow's landing settles; C: the click-through's live pane holds its caret at the block's START, never on the blank line under its text" pass
+
+# Every signpost of <surface> in the last N seconds (the shipping line, content-free).
+vw_book_signposts() {   # surface seconds-back → BS_LINES (array) + BS_LAST
+  sleep 1.5
+  BS_LINES=("${(@f)$(/usr/bin/log show --last ${2}s --style compact \
+    --predicate "eventMessage CONTAINS \"landing surface=$1 \"" 2>/dev/null \
+    | grep -o "landing surface=$1 .*end=[a-z]* top=-\{0,1\}[0-9]*")}")
+  BS_LINES=(${BS_LINES:#})
+  BS_LAST=${BS_LINES[-1]:-}
+  local l; for l in $BS_LINES; do vw_log "  signpost: $l"; done
+  (( ${#BS_LINES} )) || vw_log "  signpost ($1): none"
+}
+typeset -ga BS_LINES; typeset -g BS_LAST=
+
+scn_book-landings() {
+  local t0 nav x y
+  vw_open_note "the adventures of sherlock holmes"
+  vw_ax_press outline AXButton
+  vw_settle
+  nav=($($VW_BIN/vis-ax $PID "⠿, the adventure of the copper beeches" AXButton)) \
+    || { vw_require false "the navigator's Copper Beeches row"; return }
+
+  # Row A — ONE guarded act: the navigator's row (focus + reveal: an Outline landing), then the book's
+  # Index 0.3 s later — inside the landing's one-second hold, so it cannot have finished on its own.
+  x=$(( nav[1] + 80 )) y=$(( nav[2] + nav[4] / 2 ))
+  vw_act_note "the navigator's Copper Beeches row, then Index 0.3 s later — one guarded act"
+  vw_step $x $y
+  vw_no_foreign_at $x $y
+  vw_our_window_is_key
+  t0=$EPOCHSECONDS
+  cliclick c:$x,$y
+  sleep 0.3
+  $VW_BIN/vis-ax $PID index AXButton press >> $RUN_DIR/run.log \
+    || { vw_require false "the book's index button"; return }
+  sleep 5.5; vw_settle; vw_cap 01-outline-landing-ended-by-index
+  vw_book_signposts BookIndex $(( EPOCHSECONDS - t0 + 1 ))
+  local rows=${${BS_LAST##*rows=}%% *} target=${${BS_LAST##*target=}%% *}
+  vw_require '[[ -n $rows && $target == $(( rows - 1 )) ]]' \
+    "the navigator click took: the Index landed the book's LAST story [${BS_LAST:-none}]" || return
+  vw_book_signposts BookOutline $(( EPOCHSECONDS - t0 + 1 ))
+  vw_expect_eq "A · the Outline's landing ended WITH the Outline: BookOutline lines since the click" ${#BS_LINES} 0
+
+  # Row A's control — back in Outline, a plain navigator landing (no switch) files its line.
+  vw_ax_press outline AXButton
+  vw_settle
+  nav=($($VW_BIN/vis-ax $PID "⠿, the adventure of the copper beeches" AXButton)) \
+    || { vw_require false "the navigator's Copper Beeches row (the control)"; return }
+  t0=$EPOCHSECONDS
+  vw_click $(( nav[1] + 80 )) $(( nav[2] + nav[4] / 2 )) "the navigator's Copper Beeches row (the control)"
+  sleep 3; vw_settle; vw_cap 02-outline-control-landing
+  vw_book_signposts BookOutline $(( EPOCHSECONDS - t0 + 1 ))
+  vw_expect_eq "A · control: a landing the Outline keeps files end=settled [${BS_LAST:-none}]" \
+    "${${(M)BS_LAST:#*end=settled*}:+settled}" settled
+
+  # Row B — Read ▸ Scroll: the carry lands the story on the flow's manifest heights.
+  t0=$EPOCHSECONDS
+  export VIS_AX_MINX=$(( WIN_X + 300 ))
+  vw_ax_press read AXButton || { unset VIS_AX_MINX; vw_require false "the book's read button"; return }
+  unset VIS_AX_MINX
+  sleep 3; vw_settle; vw_cap 03-read-scroll-landed
+  vw_book_signposts ReadingFlow $(( EPOCHSECONDS - t0 + 1 ))
+  vw_expect_eq "B · the flow's landing settles [${BS_LAST:-none}]" "${${(M)BS_LAST:#*end=settled*}:+settled}" settled
+
+  # Row C — the click-through: the story's third paragraph (a block over her blank line).
+  local p; p=($(VIS_AX_PREFIX=1 VIS_AX_MINX=$(( WIN_X + 300 )) $VW_BIN/vis-ax $PID "“you have erred, perhaps" AXStaticText)) \
+    || { vw_require false "the story's third paragraph on the flow's page"; return }
+  x=$(( p[1] + (p[3] > 400 ? 200 : p[3] / 2) )) y=$(( p[2] + (p[4] > 40 ? 12 : p[4] / 2) ))
+  t0=$EPOCHSECONDS
+  vw_click $x $y "the third paragraph's first line (the click-through)"
+  sleep 3; vw_settle; vw_cap 04-click-through-caret
+  vw_book_signposts BookIndex $(( EPOCHSECONDS - t0 + 1 ))
+  vw_require '[[ ${PV[fr]} == pane ]]' "the click-through made a pane live under the keyboard" || return
+  vw_require '[[ ${PV[nl]} == 1 ]]' "the landed block carries her blank line (ends in a newline)" || return
+  vw_expect_eq "C · the caret is NOT on the empty line under the text" \
+    "$([[ ${PV[nl]} == 1 && ${PV[caretEnd]} == 1 ]] && print on-the-blank-line || print on-text)" on-text
+  vw_expect_eq "C · the caret at the landed block's START (#153)" "${PV[sel]}" "0,0"
+  vw_expect_eq "C · …on its first line, in its first paragraph" "${PV[caretLine]}/${PV[caretFragFirst]}" "0/1"
+
+  # Row D — back to the flow, a long wheel: the page holds still once the scroll stops (evidence).
+  t0=$EPOCHSECONDS
+  export VIS_AX_MINX=$(( WIN_X + 300 ))
+  vw_ax_press read AXButton || { unset VIS_AX_MINX; vw_require false "the book's read button"; return }
+  unset VIS_AX_MINX
+  sleep 3; vw_settle
+  vw_book_signposts ReadingFlow $(( EPOCHSECONDS - t0 + 1 ))
+  vw_expect_eq "D · the flow's landing (the carry back) settles [${BS_LAST:-none}]" "${${(M)BS_LAST:#*end=settled*}:+settled}" settled
+  x=$(( WIN_X + WIN_W * 6 / 10 )) y=$(( WIN_Y + WIN_H / 2 ))
+  vw_scroll $x $y -60
+  sleep 1.5; vw_cap 05-flow-after-wheel
+  sleep 2; vw_cap 06-flow-two-seconds-later
+  if cmp -s $SCN_DIR/05-flow-after-wheel.png $SCN_DIR/06-flow-two-seconds-later.png; then
+    vw_log "  D · evidence: the page two seconds after the wheel is BYTE-IDENTICAL (cmp) — nothing moved"
+  else
+    vw_log "  D · evidence: the two captures differ in bytes (cmp) — read them"
+  fi
+}
+
 # --- SELF-TEST: the harness must be able to RED (run with --selftest) -----------------------------------
 vw_def selftest-red "whatever is on screen" "none (a quiet second)" \
   "a KNOWINGLY WRONG expectation: the window's top moved 40 pt — must FAIL, be captured, exit non-zero" fail
@@ -666,6 +775,7 @@ scn_selftest-red() {
 # U-VIS run order its recipe was MEASURED on (KnownIssues row 88: "the recipe IS the full Study pass"),
 # and no act of any scenario changed. `read-landing`'s own faces still mount cold in the pass (its first
 # Read open); `takes-landing` stages its own first open by a relaunch, so it is order-independent.
+# 18l-b U4: `book-landings` runs LAST (appended — no earlier scenario's recipe changes).
 SCN_ORDER=(note-reopen write-typing write-newline-roundtrip write-divide-merge mode-roundtrip
            index-click readedit-click outline-narrow-restore outline-long-story-settle
-           b5-return-after-cmd-down b5-refont read-landing takes-landing)
+           b5-return-after-cmd-down b5-refont read-landing takes-landing book-landings)
