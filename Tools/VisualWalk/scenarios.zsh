@@ -658,6 +658,14 @@ scn_selftest-red() {
 }
 
 # The seeded run's order: the note-open pair FIRST (a fresh launch is every note's first open).
+# 18l-b U3 (the B5 fixture): `read-landing` runs AFTER the B5 pair. Seeded before it at 18l U1, its deep
+# click left *A Scandal in Bohemia*'s current block at 245, so B5's `vw_write_open` re-opened the note
+# there (R-18l-1: a re-open lands the page she left) and its 30-line scroll ended in the typewriter room,
+# where no blank line exists — a precondition ERROR in every full Terminal pass since U1 (18l-b U2's
+# record: byte-identical on the pre-U2 build). After the B5 pair, every scenario before B5 is exactly the
+# U-VIS run order its recipe was MEASURED on (KnownIssues row 88: "the recipe IS the full Study pass"),
+# and no act of any scenario changed. `read-landing`'s own faces still mount cold in the pass (its first
+# Read open); `takes-landing` stages its own first open by a relaunch, so it is order-independent.
 SCN_ORDER=(note-reopen write-typing write-newline-roundtrip write-divide-merge mode-roundtrip
-           index-click readedit-click read-landing outline-narrow-restore outline-long-story-settle
-           b5-return-after-cmd-down b5-refont takes-landing)
+           index-click readedit-click outline-narrow-restore outline-long-story-settle
+           b5-return-after-cmd-down b5-refont read-landing takes-landing)

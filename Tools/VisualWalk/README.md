@@ -118,11 +118,11 @@ is plain, so a standing non-reproduction does not raise an XPASS every run.
 | `mode-roundtrip` | the design note | Write → Read → Write returns the page and the caret exactly |
 | `index-click` | U0 item 1 (row 86) | a read-tier click in the book Index goes live with the caret ON the clicked line, never the blank line |
 | `readedit-click` | U0 item 1 | the same on Read ▸ edit |
-| `read-landing` | 18l U1 (the F3 shape on note Read) | deep clicks through the contents column's filter, both faces (`RL_FACES` orders them; the first is truly cold): each landed block rests at its face's anchor (±3 pt) 6 s later, and its SHIPPING signpost (`landing surface=ReadNote…`) says `end=settled` — the probe's `rl` read |
 | `outline-narrow-restore` | U0 item 2(a) | the live inline note keeps its whole text at 1440 → 1100 → 900 → back |
 | `outline-long-story-settle` | U0 item 2(b) | the 212-block story, live, holds its SETTLED layout after each resize (its end scrolled into view) |
 | `b5-return-after-cmd-down` | row 88 (B5) | ⏎ at the tail after ⌘↓ on a carve-invalidated layout must not move the page — KNOWN in Study (where it reproduces), plain in Terminal |
 | `b5-refont` | row 88's re-font road | the same after a whole-document re-font — plain (it has never reproduced) |
+| `read-landing` | 18l U1 (the F3 shape on note Read) | deep clicks through the contents column's filter, both faces (`RL_FACES` orders them; the first is truly cold): each landed block rests at its face's anchor (±3 pt) 6 s later, and its SHIPPING signpost (`landing surface=ReadNote…`) says `end=settled` — the probe's `rl` read. Runs AFTER the B5 pair (18l-b U3): its deep click moves the note's current block, which put B5's precondition in the typewriter room |
 | `takes-landing` | 18l-b U2 (the Takes article's landing on the one authority) | its shipping signpost (`landing surface=TakesArticle…`): the first open in Takes asks no landing (U0c); the N9 entry landing on the last block, R-Q20's win (the page at the top) and the fan panel's bloom door each file `end=settled`; R-Q21's plain round trip files nothing; her wheel inside the hold files `end=handedover` |
 | `selftest-red` (`--selftest`) | the guard rule | a planted wrong expectation must FAIL |
 
