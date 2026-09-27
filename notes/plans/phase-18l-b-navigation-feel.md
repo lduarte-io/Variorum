@@ -525,7 +525,7 @@ seat; machine author-free, HID idle 19 min at start, zero instances, own `caffei
   viewport (empty visible rect; `clip=9867` — the page where E's wheel left it), the bloomed
   block NEVER revealed. Her original row-8 complaint (*"open takes mode … is also not
   automatically navigating you to where the take is"*), returned as a race.
-- **Run 2 (`.../234400s folder`): 6/6 PASS** — F `hops=1 end=settled`, the implementer's shape.
+- **Run 2 (`notes/plans/vis-walks/2026-09-26/234323/`): 6/6 PASS** — F `hops=1 end=settled`, the implementer's shape.
   So the miss is INTERMITTENT (1 of 2 in this seat's hands; 0 of ~3 in the implementer's).
 
 **The finding (routed to the implementer to trace — speculation is not a trace):** the shape
