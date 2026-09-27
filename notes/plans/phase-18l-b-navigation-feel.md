@@ -501,3 +501,64 @@ self-assessment closes your record.
 **Strongest evidence.** The unit measured the old road before it replaced it: the U1 synthetic form on the article column went RED on the pre-watch tree, and a temporary trace found the mechanism — all 64 aims spent in ~70 ms inside one layout storm, one per row report, before the page had moved — which is exactly the discipline the authority exists to supply. Red-on-old is double: the two pins committed and run red first (2/2), and a named behavioural revert (R-watch) red in exactly its predicted seven tests / 14 issues while every pre-existing Takes landing pin stayed green. The 3C proof holds by `git diff`: the only pre-existing test line touched is the sanctioned surface count, and the restore half has no hunk. The walk is USE through the guarded harness in both voices (6/6 + 6/6), her Console's lines captured verbatim, and the harness scenario's teeth proven on a pre-U2 scratch build (4/6 red) — which also produced the strongest product evidence: the captures of where every landing puts its block are byte-identical before and after. The closing set is 677 / 101 green; the full seeded harness is 0 FAIL / 0 XPASS with its two ERRORs attributed by measurement (one pre-existing and identical on the pre-U2 build, one a flake that passed on re-run).
 
 **Weakest points, for the reviewer.** (a) **JC 3 is a behaviour change the 3C proof cannot see**: the landing now ENDS at the watch's settle, so a no-hand relayout after the settle is no longer re-revealed; `theLandingWaitsForRows…StaysUntilHerHand` passes unmodified because it drives the step synchronously and never runs the clock — its name now overstates the app. I believe this is the brief's intent (the watch), but it is the one place where "pins ride unmodified" and "behaviour unchanged" diverge. (b) **JC 1 changes the re-aim CADENCE** for every watched landing (from per-report to per-quiet): every mounted landing pin still passes, and the synthetic note improves from a miss to `aims 2`, but a landing whose first aim lands on placeholder frames now waits a quiet interval (≥ 0.25 s) before its correction where it used to re-aim at once — no walked road showed it, and no pin measures that latency. (c) **JC 2 reads "move `articleLandingStep` onto it" narrowly** — the body stays; if the orchestrator reads the charter literally, the hoist is a design act of its own. (d) The article reports EVERY realized row to the watch while a landing is watched (not only the target) — bounded and short-lived, but more re-arms per frame than the other adopters pay. (e) `onFinish` is a new authority API (a callback) where the five older adopters poll `isPending` — the one shape difference among the adopters. (f) The walk's row E depends on a 0.7-s timing between ⌘2 and her wheel (it passed 2/2 at 844/838 ms, inside the hold); a slower machine could file `settled` there — a harness timing, not a product claim. **U2 — DONE (implementer); the Fable cold review follows.**
+
+### U2 — ORCHESTRATOR ACCEPTANCE, FIRST PASS (2026-09-26; verify-never-trust) — **ONE FINDING BLOCKS THE CLOSE**
+
+**Claims verified against git and disk before the walk:** all 16 commits present and pushed, tree
+clean, no trailers; the 3C proof re-run by diff (the ONE pre-existing test line changed is the
+sanctioned surface count — it lives in `LandingAuthorityTests.swift`, which is why the diff stat
+names that file); the restore half hunk-free (the one new symbol NEAR it, `articleGeometryArrived`,
+is a door IN FRONT of the byte-unchanged `consumeArticleGeometry`); **the "24-aim budget" question
+resolved at the code — there are TWO budgets** (`articleRestoreAttempts = 24`, byte-preserved;
+`articleLandingAttempts = 64`, the landing half's own), so the charter, the header and the report
+all agree; the red logs read (prefix RED 2/2; R-watch 63 tests / 5 suites / exactly 14 issues;
+closing `677 tests in 101 suites passed` + `** TEST SUCCEEDED **`); the walk and harness run
+folders exist with the claimed shapes.
+
+**THE WALK, in the orchestrator's own hands** (the seeded `takes-landing` scenario driven by this
+seat; machine author-free, HID idle 19 min at start, zero instances, own `caffeinate`):
+- **Run 1 (`notes/plans/vis-walks/2026-09-26/233747/`): 5/6 PASS, row F FAIL.** A–E passed with
+  the record's exact signpost shapes (B `end=settled top=0`; C no line; D `target=0 exact=1
+  settled`; E `end=handedover`). **F — the bloom door — FAILED FUNCTIONALLY:** no TakesArticle
+  line at all (not even `gaveup`), and the probes + capture show the miss is real — the ring on
+  block 262 (`fr=pane len=373`, footer `block 262/262`) with the pane at y≈1270, BELOW the
+  viewport (empty visible rect; `clip=9867` — the page where E's wheel left it), the bloomed
+  block NEVER revealed. Her original row-8 complaint (*"open takes mode … is also not
+  automatically navigating you to where the take is"*), returned as a race.
+- **Run 2 (`.../234400s folder`): 6/6 PASS** — F `hops=1 end=settled`, the implementer's shape.
+  So the miss is INTERMITTENT (1 of 2 in this seat's hands; 0 of ~3 in the implementer's).
+
+**The finding (routed to the implementer to trace — speculation is not a trace):** the shape
+matches the record's own NOTICED 4 — E ends with HER WHEEL, so the remembered place is
+her-positioned (`isPositionedByUser`), and the restore decision's her-hand line can end the
+arriving bloom landing at the next geometry report BEFORE the watch has it; a landing that dies
+pre-watch files NOTHING (NOTICED 4's "with the watch it files `handedover`" does not hold there)
+and the reveal never runs. Whether the FUNCTIONAL miss pre-exists on the old road (the same
+her-hand line is byte-unchanged restore machinery — but the old per-report re-aim may win the
+race more often) is exactly what the trace must attribute. **The acceptance gate holds until
+this is traced, attributed, and either fixed red-on-old (if U2's, or cheap and in-scope) or
+honestly recorded with an owner — her bar for this round is "click around everywhere with no
+issues", and an intermittently-silent bloom door misses it.**
+
+**Orchestrator arbitrations on the flagged judgment calls (recorded now so the fix pass builds on
+settled ground; the Fable reviewer weighs them independently):**
+- **JC 3 (the lifetime is the watch's) — CONFIRMED.** Adopting the authority IS adopting its
+  lifecycle: the authority's header defines a landing as done when the quiet interval passes with
+  the target home, every adopter ends at settle, and the old kept-until-her-hand lifetime was
+  machinery shape, not a ruling (R-Q20/R-Q21 rule the landing-vs-memory decision; the gesture-end
+  pins rule that her hand ends a landing, and they ride green). KnownIssues row 42's residue (1)
+  documents the old lifetime's own hazard. Architecture, not product; no QUESTIONS row.
+- **JC 2 (the step's body stays; arithmetic + lifecycle moved) — CONFIRMED** as the
+  spec-defensible reading: P-9's one-concern line is the constitution's own, no ordering contract
+  changed owner, and the 40 pins calling the step in place IS the 3C proof working. The charter's
+  letter is discharged by the reveal bodies' move + the watch; a protocol hoist of the step body
+  would be a design act nobody needs.
+- **JC 1 (per-quiet corrections) — CONFIRMED** on the measurement (64 aims in ~70 ms, 58 before
+  the first scroll took effect — row 100's lesson on this surface).
+- **JC 6 — the brief's premise stands CORRECTED** (the orchestrator's error, recorded): the
+  article column IS lazy (`LazyVStack`), so `seedsFromLastReport` false is right per U1 MINOR-1.
+- **C6 NOT TAKEN (stays 12 at the closeout) and row 85 NOT TOUCHED (stays 12) — both ACCEPTED**;
+  the diff demonstrably stands on neither road.
+
+Ledger rows 1–2 stay open pending the F trace; the Fable cold review follows the fix pass over
+the COMBINED diff.
