@@ -1398,3 +1398,24 @@ pathspec-limited staging; tests at the END (the jump/anchor/typewriter family, `
 report for gating ambiguity, any ruled-resting-rule change, anything wanting `Sync/`, and every
 author-only call. Your diff is the Write editor seam by definition → a **FABLE cold review**
 follows; your self-assessment closes your record.
+
+## U-B5 RECORD (implementer: `opus-implementer`, 2026-09-27)
+
+**NOT DONE (first line — against what shipped):** PENDING (written at close).
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | Reading (the brief's "Read first" list, in order, own context) | DONE — this file whole (HER KICKOFF MESSAGE, BINDING PRINCIPLES, CAST & DISCIPLINE, BASELINES, THE UNIT ROSTER, HER OPEN ITEMS, ENVIRONMENT TRAPS, THE LEDGER, the U2 BRIEF + RECORD + bloom-race fix pass + both acceptances, the U3 BRIEF + RECORD (THE B5 REPORT) + acceptance, the U4 BRIEF + RECORD + acceptance, the U-B5 BRIEF); KnownIssues rows 42 · 85 · 88 whole; the 18l record's U0b BRIEF + RECORD whole + acceptance, U0's ITEM 2 (the settle net), U-VIS's probe endpoint + TABLE + B5's HONEST VERDICT; the 18k C6 RECORD whole + adjudication and the C6b RECORD whole + adjudication; `TEXTKIT2_NOTES.md` IN FULL; `SessionResiliencyProtocol.md` whole; the code: `EditorTextView.swift` whole (the ⏎ door, `setFrameSize`/`applyFrameHeight`/the room, β1, `makeEditor`, `TypewriterScrollView`), `JumpPrimitive.swift` whole (`ReadingAnchor`, C6's re-assert, C6b's live range), `StructuralSeamEdit.swift` whole, `EditorSurfaceController` (`applyDifferential`, `renderFull`, `insertEmptyBlock`, the typed Return's act, `runStructural`, `applyStructuralResult`, `applyDifferentialStructural`, the oracle), `EditorViewModel` (`attach`'s wiring, `setSurfaceContent`, `applySeamEdit`, `adoptRewrite`, `storageDidEdit`, `typedReturnAct`/`runTypedReturn`, the arrival landing + `revealLanding`, `parkAnchorRestore`, `keepingReadingPosition`, the consumers, `jumpToDocumentEnd`, `updateCaretContext`, `overlayLayoutDidSettle`, `refreshBadges`, `refreshDecorations`, `topVisibleOffset` + helpers, `readingAnchor`, `restoreReadingAnchor`), `EditorView.swift`'s coordinator + `ScrollAnchorController`, `LongBlockLayout.swift` whole, `VisualWalkProbe.swift` (the facts the recipe reads); `Tools/VisualWalk/` (README, `visual-walk.sh`, `build.sh`, the B5 pair + the seeded order) |
+| 2 | INSTRUMENT the deterministic recipe (frame · clip · the first visible line's document y · its fragment's estimated-vs-laid-out state, across the tail ⏎'s edit and display pass) | IN-PROGRESS — a TEMPORARY DEBUG + env-gated instrument (working tree only, never committed; restored by `git checkout HEAD --`), run on the recipe (the Study pass through `b5-refont`) |
+| 3 | TRACE the mechanism | NOT-STARTED |
+| 4 | ATTRIBUTE (macOS-27 / our-commit / pre-existing / undetermined) | NOT-STARTED |
+| 5 | FIX inside the fence (red-on-old: the harness's Study XFAIL → PASS on the fix and red on its revert; an in-suite pin if the trace admits one) | NOT-STARTED |
+| 6 | Row 85 (O-2) — the last-chance may-take decision | NOT-STARTED |
+| 7 | WALK (USE, both voices, per-step guarded) + the full seeded harness both voices | NOT-STARTED |
+| 8 | Closing runs (the jump/anchor/typewriter family, `WriteTopAirTests` + kin, the eleven Tutorial suites) | NOT-STARTED |
+| 9 | Self-assessment | NOT-STARTED |
+
+- Deaths / resumes: none.
+- Reverts in flight: none. Instrumented working tree: none yet.
