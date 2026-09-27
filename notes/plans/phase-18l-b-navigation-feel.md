@@ -982,7 +982,11 @@ the SHIPPED felt surface (the publisher) is **byte-identical to the U2-final tre
 walked three times at U2's acceptance; the implementer's post-revert walk classified all four
 voice × appearance combos at two clean mount states; and the felt gate's REAL close is her
 sentence — **her morning confirm rides the bundle** (the shape is one `git show` away —
-`e113dd56` + `8a93eb24` — if she rules the 50–83 ms collapse not felt).
+`e113dd56` + `8a93eb24` — if she rules the 50–83 ms collapse not felt). **DISCHARGED the same
+hour:** she stepped away and said so; this seat's held pass ran on the shipped tree —
+`takes-landing` **6/6 PASS** (`notes/plans/vis-walks/2026-09-27/063430/`; the bloom door
+`hops=1 end=settled`); the first attempt's instant abort was her just-left input inside the
+guard's idle threshold — the guard working as written.
 
 **Orchestrator adjudications:**
 - **The REVERT close is ACCEPTED** — her gate's letter, honored on frame evidence (5/5 vs 0/5,
