@@ -270,7 +270,7 @@ re-opens its named rows; none gates U2/U3/U4 as scoped.
 | 4 | PanePublisher frame-synchronous / state-deferred (her ratified shape; gate = walk the boards under load, REVERT on any felt regression); the warning count measured both ways (~1,989, all `PaneSurface`'s per 18k C3) | U3 | **CLOSED AS REVERTED 2026-09-27 — a valid close under her gate** (built `e113dd56`, measured set B 1,106 → 0 — the WHOLE family; reverted `b60e5d6d` at the Takes mount's collapsed article, 5/5 vs 0/5 on frame evidence); the warning family's fork filed for her as QUESTIONS #152; her morning confirm rides the bundle |
 | 5 | The macOS-27 `layoutViewport()` clip-displacement exam of `PaneSurface`'s render restore (TK2 §3's hand-forward) | U3 rider | **CLOSED 2026-09-27 — PROVABLY SAFE** (two measured grounds incl. the adversarial arm; the observation seam + `PaneRenderRestoreClipTests` kept as the point-release tripwire; the TK2 §3 line landed) |
 | 6 | B5 (row 88): ⏎ after a ⌘↓ landing on invalidated geometry — TRACE (deterministic Study recipe in the harness) | **RULED at U3 (orchestrator): its OWN SLOT — U-B5, after U4** (the exam proved it a NEIGHBOUR: Write's differential ⏎ road, no pane, the opposite symptom; the fixture ERROR fixed at U3 so the full-pass recipe stands); row 88 re-owned to U-B5 | open — U-B5 |
-| 7 | The one-liners: Outline `.onDisappear { landing.end() }` · `LandingTarget.utf16Offset` wire-or-delete (S4's click-through END evidence in hand; PROVISIONAL, QUESTIONS row) · `FlowStoryRow` → `BookHeightManifest.resolve` (13i did NOT take it — verified at this kickoff) | U4 | open |
+| 7 | The one-liners: Outline `.onDisappear { landing.end() }` · `LandingTarget.utf16Offset` wire-or-delete (S4's click-through END evidence in hand; PROVISIONAL, QUESTIONS row) · `FlowStoryRow` → `BookHeightManifest.resolve` (13i did NOT take it — verified at this kickoff) | U4 | **BUILT+WALKED 2026-09-27** — all three red-first (`9bf7f460` · `b4841ad1` · `2442731b`); #153 PROVISIONAL (a) delete + `.start`, decided on the full three-producer trace; every pre-existing pin file byte-unmodified; the `book-landings` tripwire reds 4/7 pre-U4; the Opus ladder is the remaining gate |
 | 8 | MAY-take: KnownIssues row 85 (the ⌘↓ ring drawn too high, O-2) — decide at the unit that touches the landing-settle/overlay refresh; record either way | rider | **NOT TAKEN at U2 and U3** (neither diff touches Write's ring/overlay refresh) — stays 12; U-B5 is the last chance to re-decide |
 
 ## LIVE STATUS (orchestrator; flipped per piece)
@@ -282,7 +282,7 @@ re-opens its named rows; none gates U2/U3/U4 as scoped.
 | U2 (session 1) | **CLOSED 2026-09-27** — built · triple-walked · bloom-race stall traced PRE-EXISTING and fixed red-first · ladder one round 0/0/3/4 all confirmed + five reviewer fixes + sanity PASS 681/101; KnownIssues row 42 amended, the head-reveal row filed |
 | U3 (session 2) | **CLOSED AS REVERTED 2026-09-27, ladder CLOSED** (one round 0/0/1/3, all confirmed, zero disputes; reviewer fixes `ec998abf`/`e99e3d88`/`04a30237`; sanity PASS 75/9; `notes/plans/18lb-u3-ladder-round1.md`) |
 | U-B5 (after U4) | RULED IN at U3 — the B5 trace's own slot; brief written after U4's ladder settles |
-| U4 (session 3) | IN FLIGHT — brief below (written 2026-09-27 at U3's ladder close) |
+| U4 (session 3) | **BUILT+WALKED 2026-09-27** — record below; the `opus-reviewer` ladder (round 1) is the remaining gate |
 | B5 decision | at U3 |
 | Closeout | NOT-STARTED |
 
@@ -1285,3 +1285,31 @@ inputs production never writes — honest as a drift guard, weak as a defect pin
 (R2-12's own form); the Release signpost's silence is walked (`book-landings` row A), not unit-pinned. (e) The walk's
 row C clicks the story the carry landed at the top — a deep landing, but on the flow's first screen, not after a long
 scroll. The closing set is **1287 tests / 221 suites green** and the iOS build succeeds. **U4 — DONE (implementer); the `opus-reviewer` cold review follows.**
+
+### U4 — ORCHESTRATOR ACCEPTANCE (2026-09-27; verify-never-trust)
+
+**Claims verified:** 21 commits pushed, tree clean, no trailers; the 3C claim re-run by diff (no
+pre-existing test file in the range — only the three new ones); the footprint as recorded
+(`PaneSurface.swift` = one doc line; `LandingTarget.utf16Offset` deleted with its comment).
+**The walk, in the orchestrator's own hands:** `book-landings` **7/7 PASS**
+(`notes/plans/vis-walks/2026-09-27/094021/` era run — the Outline files NOTHING after a mode
+switch while its stay-behind control files `end=settled`; the click-through caret `0,0`,
+on-text, first paragraph — S4's artifact dead in my hands; the flow settles at `hops=2`, its
+pre-existing shape).
+
+**Orchestrator adjudications:**
+- **The review cast stays `opus-reviewer`, her kickoff's own assignment** ("Opus on U4" — made
+  knowing U4 carried the utf16Offset question). The implementer's honest flag (item 2 sits
+  inside #97's START/END edge) is answered by the same-model ladder's own structure: the
+  ORCHESTRATOR (Fable) arbitrates every finding against the spec, so item 2 gets its Fable eye
+  at arbitration by construction — and this seat has already read the trace: (a) is the
+  spec-defensible reading (the value's own documented contract, 17o b's stated rule, the twin
+  click-through's behavior, #97's built (a)), PROVISIONAL and hers at #153.
+- **The keyboard stall gets its KnownIssues row NOW** (owner 12, beside row 92's real-input
+  class) — two sightings is thin, but "my keystrokes went nowhere until I clicked again" is a
+  feel bug she could meet; the sample-before-next-click discriminator rides the row.
+- **Row 58 gains the D1 one-brain line** (the flow's half of its class collapsed).
+- Ledger row 7 flips to BUILT+WALKED; row 8 (O-2) stands not-taken with U-B5 its last chance.
+
+The `opus-reviewer` ladder over `3389fedb..2aa43836` is the remaining gate; ladder file
+`notes/plans/18lb-u4-ladder-round1.md`.
