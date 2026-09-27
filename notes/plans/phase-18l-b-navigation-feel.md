@@ -1773,3 +1773,11 @@ nothing mobile-visible** (U2's aim kind is Mac `Surface/` vocabulary; U3 reverte
 the phone's structural road is not this controller; each unit's record states it). **18m is NEXT
 at her paste** (her 2026-09-27 resequence — the kickoff prompt is in the handoff verbatim; 18o
 slides later with its ruled builds owned). Install refresh: recorded below at the refresh commit.
+
+**INSTALL REFRESH (the closeout's last act, 2026-09-27 ~22:19–22:25 UTC):** zero-instance window
+held throughout (pgrep clean before the A1 copy, before the install, verified by the
+self-match-proof pattern); A1 safety copy
+`Backups/safety-copies/18lb-refresh-20260927T221852Z` (6 files, byte-verified by `cmp`); Release
+from `5a1564a5`; `/Applications/Variorum.app` binary **`c05400e8` → `07806a68`**; codesign OK
+(deep, strict); both keychain access groups present. **18l-b — CLOSED. HARD STOP; 18m at her
+paste** (the kickoff in the handoff and in chat).
