@@ -610,8 +610,8 @@ makes F's restore a real restore, and so what puts the bloom in the stall's reac
   plain round trip's cadence too; this reaches only the one landing that WAITS on the restore. *Reverse by*
   removing the one call (R-relook's shape). **The one duplicated number:** the guard restates the restore's
   settle criterion (`into` ± 2) so that the door's step is by construction the hold's `.wait`; if the restore's
-  tolerance ever moves, the guard must move with it (named at both sites' docs? — at the guard's; the restore's
-  body is untouched by rule). A reviewer may prefer a shared helper; that is a restore-body edit.
+  tolerance ever moves, the guard must move with it (said at the guard, the one site this pass could write — the
+  restore's body is untouched by rule). A reviewer may prefer a shared helper; that is a restore-body edit.
 - **FP-2 — every ending files, watched or not; three stay silent by design** (R-Q21's stand-down — the ruled
   "the page she left" is not a landing that ended; a supersede — the authority's own precedent; a teardown —
   R2-12). A pre-watch ending reads `hops=0 … top=-9999`, so her Console tells "ended before it ever aimed"
