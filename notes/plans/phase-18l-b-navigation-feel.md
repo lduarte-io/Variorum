@@ -801,3 +801,17 @@ until its row below says DONE with a hash; every unverified claim is marked PEND
 
 - Deaths / resumes: none.
 - Reverts in flight: none.
+
+### THE BEHAVIOURAL REVERT (named before it runs; the pre-revert state is `e113dd56`, committed + pushed)
+
+**R-sync** — in the working tree only, `PanePublisher.publishHeight`'s one changed line restored to its
+pre-U3 body (`writeHeight?(height)` in place of `applyFrame?(height)`): the synchronous STATE write back,
+the synchronous lever gone; everything else (the seams, the docs, the pins) as committed. **Expected
+RED — 9 tests:** all four `PanePublishShapeTests` (the frame-now pin: heights `[46]` before any turn and
+no lever; the burst pin: `[46, 60]` synchronously; the heal pin: 4 writes / 2 lever pulls; the mounted
+pin: state written INSIDE the representable's body at the mount and again at the adopted text — the
+harness now yields, so this also re-proves the corrected pin's red arm) and the five sanctioned
+`PanePublishDoorTests` edits (each now pins the ratified contract). **Expected GREEN — 17:** the other
+three door pins (the F1 walk, its counting rule, the coordinator-holds-no-state guard) and all fourteen
+`PaneSurfaceTests`. Restored by `git checkout HEAD -- App/Variorum/Variorum/Surface/PaneSurface.swift`;
+`git status` clean after.
