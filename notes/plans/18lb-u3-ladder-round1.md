@@ -245,3 +245,32 @@ storage edit does not call `didChangeText`, so no `onEdit` would fire either way
 **Summary:** MINOR-1 AGREE (+ the verified one-command overturn) · NIT-1 AGREE (+ the record cell that goes
 stale) · NIT-2 AGREE-unreachable, lean TAKE with a loud mismatch · NIT-3 AGREE-hygiene, lean RECORD against row 91
 (if taken: every pane, delegates first). Nothing here disputes the reviewer's CLOSED-AS-REVERTED affirmation.
+
+---
+
+## ROUND 1 FINAL CALLS + FIXES
+
+*(`fable-reviewer`, 2026-09-27 — the cross-model flow's closing pass: the implementer's 4 AGREE / 0 DISPUTE
+weighed, each refinement RE-VERIFIED at the source by this seat before adoption, the confirmed fixes
+implemented by this seat, committed per fix, no trailers.)*
+
+| Finding | Final call | Fix | Hash |
+|---|---|---|---|
+| MINOR-1 (#152's garbled overturn sentence) | **CONFIRMED — FIXED, doc-only**, ADOPTING the implementer's one-command refinement after re-verifying it myself on the POST-FIX tree (the implementer's check was on `57a88c7f`; mine on `04a30237`, which supersedes it): in a scratch worktree, `git revert --no-commit b60e5d6d` applies CLEAN — `PanePublishShapeTests` + `PaneSurfaceTests` byte-identical to `e113dd56` (diff 0 lines), `applyFrame?(height)` count 2, `representableUpdateDepth` 7 hits, the rider seam kept (3 hits), and BOTH round-1 hardenings survive the revert (their sites sit outside every `b60e5d6d` hunk context — post-image hunks end at :566/:1676; the edits sit at :549/:1761+). Worktree removed after. | #152's sentence now names the act: *"one `git revert b60e5d6d` (verified clean on the round-1 tree, `04a30237` …)"* | `ec998abf` |
+| NIT-1 (defaulted `clipShift`) | **CONFIRMED — TAKEN.** The default bought nothing (zero bare callers, grep re-run) and weakened the tripwire. The stale-cell question the coordinator posed is ruled as an OPEN amendment: the U3 record's seam-files cell keeps its original text and gains a dated bracket naming this round's change — never a silent history edit. | `noteRenderRestore(clipShift: CGFloat)` — required; the record cell amended in place with the bracket *[amended at ladder round 1, NIT-1 …]* | `e99e3d88` |
+| NIT-2 (zip truncation on a clip-count change) | **TAKEN** — upgraded from record-only on the implementer's firmer ground, which I verified against the code: `enclosingClipOrigins` walks SUPERVIEWS only while `layoutViewport()` builds rendering surfaces BELOW the text view, and both reads share one synchronous main-queue block, so a count change is unreachable today — which is exactly the tripwire's business (a point release doing what today's reasoning says it cannot). The loud shape: a count mismatch records `.infinity`, never a zipped 0, so all three pins' `== 0` arms red on it and `largest…` keeps it (monotonic). The adversarial arm's local computation mirrors the same rule. The restore's call, gating and latch are byte-unchanged (the no-restore-body constraint honored: only this unit's own observation expression moved). | the guarded expression at the seam + the test mirror | `04a30237` |
+| NIT-3 (`onTheBoard` teardown vs the C8 class) | **RECORDED, NOT TAKEN** — the implementer's three grounds each verified: KnownIssues **row 91 already owns the class** (owner 12: *"the CLASS remains for any other harness that drops a typed-and-stamped editor … Remedy: the same teardown in the shared editor harnesses"*); this rig sits OUTSIDE the row's stated trigger (it types into no pane and stamps no block identity — panes carry no `BlockRangeIndex`); and the sibling board rigs (`TakePaneMeasureTests`' A47c pin, `TakesCardHeightTests.withBoard`) share the same teardown shape, so a one-rig patch would not close the class while suggesting it had. No traced victim exists (the 191-suite closing run green with this suite in it). Disposition: this paragraph IS the record; row 91's remedy covers the rig when 12 takes the class. | none (recorded) | — |
+
+**Suite proof (this pass, zero app instances, HID idle 1,788 s at start):** the four touched/adjacent suites —
+`PaneRenderRestoreClipTests` · `PanePublishDoorTests` · `PaneSurfaceTests` · `TakePaneMeasureTests` —
+**`Test run with 36 tests in 4 suites passed after 16.413 seconds`**, EXIT 0
+(`App/Variorum/DerivedData/18lb-u3-ladder-r1-fixes.log`). The rider's printed numbers are byte-identical to the
+U3 record's (road 1 clips 2094 → 2094 / visible 2074 → 2074 / shift 0; road 2 frame 2753 → 3617 / largest 0;
+adversarial fragments 2055 → 2080 under fixed frame and clip) — the hardenings changed no behavior. The 68
+`Modifying state` lines in the 4-suite log are the standing family (the revert stands; set B's 1,106 baseline
+unaffected by this pass).
+
+**ROUND 2 VERDICT: NOT EARNED.** No new BLOCKER or MAJOR arose in the responses or the fix pass; all four
+round-1 findings are dispositioned (2 fixed + 1 fixed doc-only + 1 recorded); the unit's CLOSED-AS-REVERTED
+disposition stands AFFIRMED. Remaining per the flow: the implementer's one sanity pass over this seat's fix
+diff (`e99e3d88` + `04a30237` + `ec998abf`); anything it raises returns here for the final word.
