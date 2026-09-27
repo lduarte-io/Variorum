@@ -222,3 +222,98 @@ agree/dispute returns to this reviewer, which makes the final call and implement
 itself (each with its pin where one is possible — MINOR-1/-3 and the NITs are doc/record-class, no pin
 owed; MINOR-2 is recorded, not fixed, by its own label). No new BLOCKER/MAJOR ⇒ no round 3 is earned by
 this round's content; round 2 re-reviews the fix pass per the ladder.
+
+---
+
+## IMPLEMENTER RESPONSES (round 1) — `opus-implementer`, 2026-09-27, over `bd409b15`
+
+Every claim re-checked at the source in my own context (grep + read at the cited lines, tree at
+`bd409b15`); nothing implemented — under the cross-model flow the final call and the confirmed fixes are
+the reviewer's. **Tally: 6 AGREE · 1 AGREE-with-a-premise-correction (NIT-1) · 0 DISPUTE.**
+
+**MINOR-1 — AGREE.** Verified: `LandingAim.residual(` has exactly ONE production caller
+(`TakesArticleScroll.swift:690`, `reportWatchedLanding`); `ReadLandingBox.residual`
+(`ReadNoteLanding.swift:301`) calls `ReadLandingResidual.residual` — the hoisted body, not the dispatcher;
+the three book adopters report their row's top in their own bodies; `policy.aim` is read in production
+only through `watch.policy.aim`. The inaccurate sentence is MINE, at `LandingAuthority.swift:106`
+("`LandingAim.residual(policy.aim, …)` answers it per kind") — it states the dispatcher as the road for
+every adopter. **Refinements for the reviewer's fix:** (a) fix the sentence where it lies — the `aim`
+field's doc — e.g. *"…answers it per kind for a surface that asks the dispatcher (the Takes watch); the
+five older adopters compute the same bodies at their own call shape — the book three report the row's top
+(the `.top` arm's identity), note Read's box calls `ViewportFraction.residual` directly — so on them the
+field is declarative"*; (b) if the reviewer wants the declared kind to bite on note Read without touching
+its road, a GUARD pin (green both sides, stated as such — not a red-on-old) is cheap: for a handful of
+sightings, `ReadLandingBox.residual` equals `LandingAim.residual(LandingPolicy.readNote.aim, …)` — that
+makes a drift of `readNote.aim` fail something. Routing note Read through the dispatcher is
+behaviour-neutral too, but it is U1's surface and not owed inside U2's fence — agree with "not owed".
+
+**MINOR-2 (SPECULATIVE) — AGREE, record-not-fix.** The internal mechanism verified at the source:
+`reportWatchedLanding` (`:686–695`) answers an unrealized target with `watch.nudge()` (`:638` — re-arms
+only), so `lastTop` keeps the last residual and `LandingSettle.decide(top: 0, …)` can settle on it. I also
+found no reachable input: while a landing is watched, her hand ends it on the geometry road, a content
+change ends it through the projection arm, the landing's own reveal re-reports the target, and the one
+remaining mover — the restore's HOLD re-aiming its remembered place (a bloom watched while the restore
+holds, whose first step found the row on screen and so never spent the reveal that would end the hold) —
+re-aims the SAME absolute anchor, a sub-row move, never the page-sized move de-realization needs.
+**Refinement:** if it ever surfaces, the retraction has a natural Takes-side hook — the row's departure
+(`forgetArticleRowFrame(placementID)` with `placementID == articleLanding` and the watch holding it) — and
+the authority-side shape is a `forgetTop`-style call that sets `lastTop = nil` and re-arms, which then
+routes through `correctsAnUnreportedTarget` (true on Takes and on note Read) into a blind correction by
+direction: the same fix serves both surfaces that share the shape. Agree it cannot enter the fix protocol
+without a reachable red.
+
+**MINOR-3 — AGREE.** Verified: the two literals are `TakesArticleScroll.swift:621` (the re-look's guard,
+`abs(frame.minY - place.into) <= 2`) and `:1180` (`restoreStep`'s `atItsPlace`, the byte-preserved body).
+The coupling is real and one-directional in its harm, as the finding says (a tighter restore re-opens the
+stall for the band between the two numbers). **Refinement for the owner line:** name BOTH sites by symbol
+(`restoreLooksAgainForAWaitingLanding`'s guard ↔ `restoreStep`'s `atItsPlace`) in the KnownIssues row-42
+amendment, with the unification's shape stated (one `nonisolated static let articleRestoreSettleTolerance`
+read by both — a restore-half edit, so owner 12 with the row, or U2's successor on the landing family). The
+guard's own comment already names the coupling; the finding's disposition (recorded, no pin — both sides
+green today) is right.
+
+**NIT-1 — AGREE on the fix, with one PREMISE CORRECTION.** The reach-through is real
+(`TakesViewModel.swift:540`, `board.article.endArticleLandingWatch()`), but it is NOT the only one: `adopt`
+reaches through the same way at `:480` (`board.article.noteProjectionArrived(new)`, 13u2 UNIT E's
+structural arm — pre-existing). The file's forward convention covers the PRE-MOVE names (the split's 3C
+list: "every pre-move name, at its old address"); the two post-split entry points the VIEW MODEL calls for
+its own lifecycle reach through, and the NEW names the VIEW reads (`articleLandingReport`,
+`articleLandingCorrections`) got forwards. So the honest statement is "two VM-lifecycle reach-throughs, one
+of them pre-existing". **Refinement:** if the reviewer adds a forward, add both
+(`noteProjectionArrived` and `endArticleLandingWatch`) so the convention reads as one rule; or keep both
+reach-throughs and write the rule down at the forwards' header ("VM lifecycle calls reach the brain
+directly"). Either is fine by me; one-of-two would be a new inconsistency.
+
+**NIT-2 — AGREE.** Verified: `LandingAimTests.everyShippedPolicyNamesTheAimItAlreadyHad` (`:33–41`) pins
+five policies; it was written at step 1, before `.takesArticle` existed. **Refinement:** adding
+`#expect(LandingPolicy.takesArticle.aim == .minimalReveal)` keeps the name TRUE (the minimal reveal IS the
+aim the Takes article already had — her R-Q1). A sturdier shape: drive the assertion from
+`LandingSurface.allCases` through an exhaustive `switch surface { case .bookOutline: … }` returning each
+shipped policy, so the NEXT adopter is a compile error here rather than a silent omission (the surface-count
+pin's own "the next adds its case here" idea, made structural).
+
+**NIT-3 — AGREE, and the count is slightly higher than stated.** Verified: at the arrival report the slot
+order is built in the re-look's guard (`order().contains(rowID)`, `:622`), again inside `restoreStep`'s
+gone-row check (reached before the `atItsPlace` return, since the restore is `.wanted` not `.holding`), and
+a THIRD time by `articleLandingReport`'s own `return articleLandingStep(order: order())` (the step now
+ready, so past its guards). So three O(rows) maps, once, at the one arrival moment — still cost-only and
+not per report (every other report exits at the cheap frame guard before any `order()`). **Refinement:**
+hoist `let order = order()` in the re-look past the cheap guards and pass the value through
+`consumeArticleGeometry(…, order: order)` (the autoclosure then captures the array — no re-map); the
+step's own evaluation is its P1 contract and should stay. The doc word "once" becomes true for the
+re-look's part; the record's cost line can say "the slot order, at the arrival" without a count.
+
+**NIT-4 — AGREE (keep the fence, say so at the constant).** Verified at `:492` and the two spend roads: a
+watched landing's aims come only from the arrival's `.onChange(of: articleLanding)` step, the first decided
+step on the report road, and ≤ 3 quiet corrections — so at most ~5 per landing in the app (the arrival
+`.onChange` and the first report can each aim once if both land before the watch holds it). The 64 bound
+is still REACHABLE by direct callers — the pure pin `theLandingEndsForAGoneRowAndAfterItsBoundedAims` spends
+all 64 — so it is a live fence in the step's contract, dead only in the app's current cadence.
+**Refinement:** the same sentence covers the step's gone-row `gaveup` in practice — the projection arm
+(`noteProjectionArrived`, first in `adopt`) ends a landing before any step can see its row gone from a new
+projection — so both terminal branches read as fences; one sentence at `articleLandingAttempts` naming
+the watch's ≤ 3 corrections as the live bound would carry both.
+
+**No new finding raised from this re-check.** (One record precision the reviewer may fold into NIT-3's fix:
+the U2 RECORD's fix-pass line "the slot order once, at the arrival" is the doc sentence NIT-3 names — the
+same word, in the record.)
