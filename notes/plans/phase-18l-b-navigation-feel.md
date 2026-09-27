@@ -893,3 +893,29 @@ before and after the edit's display pass), then decide between an anchor-preserv
 laying out the region above the caret before the edit lands. Its natural home is the Write editor seam's owner (the
 landing/settle family, 12, or a dedicated 18l-b slot), with a Fable review. The harness scenario stays its standing
 tripwire (item 8 below makes it ERROR-free).
+
+### THE FELT GATE'S VERDICT — REVERT (her sentence: *"revert on any felt regression"*; a revert is a valid close)
+
+**The breadth walk (every board, both builds, Terminal, light — `vis-walks/2026-09-27/044941/` this build, `045302/`
+pre-U3; presented states / onset→settle ms):** Takes mount **pre 2 / 117 · U3 3 / 100 — the collapsed article again (5
+of 5 U3 runs now, 0 of 5 pre)**; Compare mount pre 3 / 133 · U3 3 / 100 — **both builds** present a collapsed column
+(every block cut to one 24-pt line) for one to two frames: PRE-EXISTING, not this unit's (noted for 12, below);
+Compare pair pre 14 / 267 · U3 13 / 267; Lenses mount 2 / 117 · 2 / 83; book Index mount 4 / 483 · 4 / 533; expand all
+(stack, 12-take fan) 1 · 1 (one presented change on both); the two recorded scrolls 9–11 states on both. The typing
+act was SKIPPED on both builds by the walk's own safety rule (no pane held the keyboard after a programmatic ring
+step, so nothing was typed blind), and the Index click made no pane first responder on either build — both
+recorded, neither claimed.
+
+**THE REVERT, named before it runs (the pre-revert state is committed + pushed at `ca512af9`):** the ratified shape
+comes out WHOLE — `PanePublisher.publishHeight` back to its synchronous state write, the docs that stated the
+ratified shape back to their pre-U3 text, the flagged-shape observation seam (`representableUpdateDepth`,
+`stateWrites`/`stateWritesInsideUpdate`, the make/update brackets, the `writeHeight` wrapper) removed, the five
+sanctioned `PanePublishDoorTests` edits restored BYTE-FOR-BYTE, and `PanePublishShapeTests.swift` deleted (it pins
+the reverted contract; it stays recoverable at `8a93eb24`/`e113dd56`). **Kept:** the rider's observation seam and
+`PaneRenderRestoreClipTests` (independent of the shape; PROVABLY SAFE; a point-release tripwire) and the B5 fixture
+fix (Tools/). Mechanically: `git checkout 545375bc -- PaneSurface.swift PaneSurfaceTests.swift`, `git rm
+PanePublishShapeTests.swift`, then the rider's seam re-applied to `PaneSurface.swift` exactly as committed at
+`051ee76b`. **Expected after:** `git diff 545375bc -- App/Variorum/VariorumTests/PaneSurfaceTests.swift` EMPTY;
+`git diff 545375bc -- PaneSurface.swift` = the rider's seam only; the pane/publisher suites green on the old
+contract; set B back to the warning family's ~1,106 (the measurement that shows the revert is real); the Takes
+mount back to two presented states.
