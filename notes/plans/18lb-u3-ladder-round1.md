@@ -274,3 +274,47 @@ unaffected by this pass).
 round-1 findings are dispositioned (2 fixed + 1 fixed doc-only + 1 recorded); the unit's CLOSED-AS-REVERTED
 disposition stands AFFIRMED. Remaining per the flow: the implementer's one sanity pass over this seat's fix
 diff (`e99e3d88` + `04a30237` + `ec998abf`); anything it raises returns here for the final word.
+
+---
+
+## IMPLEMENTER SANITY PASS (over the reviewer's fix diff `e99e3d88` + `04a30237` + `ec998abf`)
+
+*(`opus-implementer`, 2026-09-27, on `873382eb` — read in full, re-checked at the source, one run of my own.)*
+
+**VERDICT: PASS — no mechanism moved.**
+
+- **The publisher and the measurement brain:** `PanePublisher` and `PaneMeasurement` are BYTE-IDENTICAL to `545375bc`
+  (each class body extracted at both revisions and `diff`ed: empty). `PaneSurfaceTests.swift` vs `545375bc`: 0 lines.
+- **The restore's call, gating and latch:** `scheduleRenderRestore` extracted at `545375bc` and at HEAD and `diff`ed
+  — the `renderRestoreScheduled` latch, the `DispatchQueue.main.async` hop, the `self`/`view`/`publisher`/`window`
+  guards and the `layoutViewport()` call are identical; the ONLY lines that differ are the observation (the two
+  `enclosingClipOrigins()` reads and the `noteRenderRestore(clipShift:)` argument). The full `545375bc..HEAD` diff of
+  `PaneSurface.swift` is exactly two hunks — the seam's stored state + `enclosingClipOrigins()` (observation-only:
+  pure superview reads) and those restore lines. `noteRenderRestore`'s one caller is still the restore (grep).
+- **NIT-1 (`e99e3d88`):** the default is gone and nothing else moved; the whole test target compiled against the
+  required parameter (a bare caller anywhere would have failed the build my run made).
+- **NIT-2 (`04a30237`):** on equal clip counts the new expression is the old one verbatim, so no green-path number can
+  change — confirmed by the rider's printed values in my run, byte-identical to the U3 record's: road 1 clips
+  2094 → 2094 / visible 2074 → 2074 / restores 1 → 2 / shift 0; road 2 frame 2753 → 3617 / largest 0; adversarial
+  fragments 2055 → 2080 under frame 2753 and clip 2094. The adversarial arm's local mirror is the same rule.
+- **MINOR-1 (`ec998abf`):** QUESTIONS #152's "Recoverable exactly" sentence now parses whole and names the one act
+  (`git revert b60e5d6d`, with what it restores and keeps). Doc-only.
+- **The record-cell amendment (`e99e3d88`):** OPEN, not silent — the original text is kept and a bracket follows it:
+  *"[amended at ladder round 1, NIT-1: the default DROPPED — every caller states its shift;
+  `18lb-u3-ladder-round1.md`]"*. **One wording observation, no mechanism (the reviewer's call):** the FINAL CALLS table
+  calls it a "dated bracket", but the bracket names the round and the file rather than a calendar date (the round
+  itself is dated 2026-09-27 in this file's header). Adding "2026-09-27" inside the bracket would make the table's
+  word literally true; leaving it is also honest.
+
+**Blast radius (my call, stated):** the reviewer's four suites covered the seam's own pins, the publisher, the pane
+surface and the A47c rig. The fix touches the restore, which every pane reaches through real OCCASIONS (liveness
+flips, scroll-ends, clicks) on the composers — so I ran the rider suite (to read its numbers myself) plus the
+suites that drive restores through those roads on real boards: `TakesCardHeightTests` (the uncapped pane's
+occasions), `TakesArticleScrollTests` (the article's liveness flips), `PaneMountWindowTests`, `PaneTextCompareTests`,
+`WriteTakesPanelTests`, `CompareOnePlacementTests`, `CanvasTakesSwitcherTests`, `TutorialTakesActsTests` —
+**`✔ Test run with 75 tests in 9 suites passed after 65.824 seconds`**, EXIT 0, 0 skipped, zero app instances,
+HID idle 2,249 s at start (`App/Variorum/DerivedData/18lb-u3-sanity-r1.log`). Combined with the reviewer's
+36/4, every suite that mounts the restore's roads that this unit's closing set named as the pane family's core is
+green on the fixed tree.
+
+**Nothing returns to the reviewer as a mechanism question.** The one wording observation above is optional.
