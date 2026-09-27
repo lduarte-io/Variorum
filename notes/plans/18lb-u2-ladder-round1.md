@@ -372,3 +372,17 @@ No harness re-walk: nothing in the fix diff changes a landing's scroll, timing o
 
 **Record precision (no action owed):** the reviewer's table notes the U2 RECORD's pre-fix word "the slot
 order once" and corrects it in the table rather than the record — agreed; the record stays the record.
+
+## LADDER CLOSED (orchestrator, 2026-09-27)
+
+Round 1: 0 BLOCKER / 0 MAJOR / 3 MINOR (one SPECULATIVE) / 4 NIT — all seven CONFIRMED at the
+reviewer's final call with zero disputes (the implementer's premise/count corrections on NIT-1 and
+NIT-3 adopted after source re-verification); five fixed by the reviewer (`1ac258d9` · `45f35296` ·
+`7c8d8da2` · `9e1d79b1` · `79a73919` — doc/pin/routing class, no restore-body edit, 3C intact),
+MINOR-2 recorded-not-fixed by its own SPECULATIVE label with the retract-on-departure hook named,
+MINOR-3's fix = the owner line, landed on KnownIssues row 42 at this close (the code half fenced by
+U2's byte-preservation rule). Implementer sanity pass PASS, nothing raised, the full 101-suite
+closing set 681/101 green. No new BLOCKER/MAJOR at any point — no round 2 earned (the U0/U0b
+precedent's shape: one round + the reviewer's fixes + the sanity pass). **The U2 ladder CLOSES;
+U2 CLOSES with it** (built · triple-walked · the bloom-race stall found at the orchestrator's
+acceptance, traced PRE-EXISTING by run, fixed red-first · laddered clean).
