@@ -572,17 +572,14 @@ struct PanePublishDoorTests {
         publisher.publishHeight()
         publisher.publishCanary("fell back to TextKit 1")
         publisher.publishCanary("fell back to TextKit 1")
-        // 18l-b U3 (SANCTIONED EDIT — this line pinned the synchronous state
-        // write as the working path; her ratified shape moves it to the turn,
-        // the frame lever answering synchronously instead).
-        #expect(heights.isEmpty, "no height STATE write before the turn (the ratified shape)")
+        #expect(heights == [46], "the sync height write is the working path")
         #expect(canaries.count == 2, "each canary fire writes synchronously")
         #expect(scheduler.pending == 1, "three publishes, ONE deferred turn")
 
         scheduler.drainOneTurn()
         #expect(publisher.deferredTurns == 1)
         #expect(canaries.count == 3, "exactly one coalesced canary echo")
-        #expect(heights == [46], "the state lands on the one deferred turn; converged, so it stops")
+        #expect(heights == [46, 46], "one heal re-publish; converged, so it stops")
         #expect(scheduler.pending == 0, "a converged heal schedules nothing further")
     }
 
@@ -607,10 +604,8 @@ struct PanePublishDoorTests {
         }
         #expect(turns == PanePublisher.healTurnBudget,
                 "the heal retried the whole budget and no further")
-        // 18l-b U3 (SANCTIONED EDIT — the count pinned "one sync write";
-        // the ratified shape writes the state on the turns only).
-        #expect(heights.count == PanePublisher.healTurnBudget,
-                "one state write per healed turn, none synchronous")
+        #expect(heights.count == PanePublisher.healTurnBudget + 1,
+                "one sync write + one per healed turn")
         #expect(scheduler.pending == 0, "the bound holds — no perpetual turn")
     }
 
@@ -630,23 +625,13 @@ struct PanePublishDoorTests {
         rendered = 46 - PanePublisher.convergenceSlack  // exactly within slack
         scheduler.drainOneTurn()
         #expect(scheduler.pending == 0, "converged frame ⇒ no further turns")
-        // 18l-b U3 (SANCTIONED EDIT — `[46, 46]` counted the synchronous
-        // state write before the turn's; the ratified shape has the turn's
-        // alone).
-        #expect(heights == [46])
+        #expect(heights == [46, 46])
     }
 
-    /// The hole the door exists for: a state write that does not TAKE is
-    /// re-made on a later turn, so the pane ends framed at its measured
-    /// height.
-    ///
-    /// **18l-b U3 (SANCTIONED EDIT — this pin's name and text pinned a
-    /// SYNCHRONOUS write, dropped as SwiftUI may drop one made during an
-    /// update pass, re-made on the deferred turn).** Under the ratified shape
-    /// there is no synchronous state write to drop; the write is the turn's,
-    /// and the same convergence loop re-makes a turn's write that did not
-    /// take on the turn after — the net this pin states, kept.
-    @Test func aStateWriteThatDoesNotTakeIsRepublishedOnTheNextTurn() {
+    /// The hole the door exists for: a synchronous write DROPPED (as
+    /// SwiftUI may drop one made during an update pass) is re-made on the
+    /// deferred turn, so the pane ends framed at its measured height.
+    @Test func aDroppedSynchronousWriteIsRepublishedOnTheDeferredTurn() {
         let scheduler = ManualScheduler()
         var landed: CGFloat = 0
         var dropNext = true
@@ -659,9 +644,7 @@ struct PanePublishDoorTests {
             writeCanary: { _ in }, schedule: { scheduler.schedule($0) })
 
         publisher.publishHeight()
-        #expect(landed == 0, "no state written before the turn")
-        scheduler.drainOneTurn()
-        #expect(landed == 0, "the turn's write was dropped — the bug's state")
+        #expect(landed == 0, "the sync write was dropped — the bug's state")
         scheduler.drainOneTurn()
         #expect(landed == 46, "the heal re-published and it landed")
         #expect(scheduler.pending == 0, "and then converged")
@@ -799,15 +782,12 @@ struct PanePublishDoorTests {
         publisher.publishCanary("fell back")
         publisher.invalidate()
         scheduler.drainOneTurn()
-        // 18l-b U3 (SANCTIONED EDIT — `[46]` was "the pre-invalidate sync
-        // write"; the ratified shape makes none, so a pane torn down before
-        // its turn writes no height state at all).
-        #expect(heights.isEmpty, "no state write before the turn, and the torn-down turn writes none")
+        #expect(heights == [46], "only the pre-invalidate sync write")
         #expect(canaries == ["fell back"], "no echo after teardown")
         #expect(scheduler.pending == 0)
 
         publisher.publishHeight()
-        #expect(heights.isEmpty, "and nothing publishes afterwards")
+        #expect(heights == [46], "and nothing publishes afterwards")
         #expect(scheduler.pending == 0)
     }
 }

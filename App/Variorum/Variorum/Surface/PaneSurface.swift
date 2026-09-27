@@ -34,14 +34,6 @@
 //  own mid-update class), the heal's chase now pulls the AppKit frame
 //  directly on a divergent turn (the frame lever).
 //
-//  Since 18l-b U3 (the author's RATIFIED frame-synchronous / state-deferred
-//  shape, the health review §5.1 A1) the lever is also every height
-//  publish's synchronous answer, and the SwiftUI state write waits for the
-//  publisher's deferred turn — the deliberate synchronous state write this
-//  header's publisher used to make (and the whole of the app's "Modifying
-//  state during view update" family, 18k UNIT C3) is gone. `PanePublisher`
-//  carries the reasoning.
-//
 //  Why a full-document `ensureLayout` is legitimate HERE (ladder round 3,
 //  NIT-A — verified P1-safe, not a violation): every composer of this
 //  component passes ONE take's / one post-read's text, so "the document"
@@ -166,7 +158,10 @@ enum PaneMeasurement {
 ///
 /// The shape (why a helper, not two repairs): a publish added to this
 /// coordinator later inherits the discipline STRUCTURALLY — there is no
-/// second way out. Deferred turns COALESCE (one per turn, however many
+/// second way out. Each publish (a) writes synchronously, the common
+/// working path a deferred-only publish would starve under a busy main
+/// queue, and (b) is re-made on a later main-queue turn, where a write
+/// always lands. Deferred turns COALESCE (one per turn, however many
 /// publishes of either kind fired — MINOR-F's un-coalesced canary echo
 /// dies here), and the height re-publish is a real CONVERGENCE loop
 /// (MINOR-E): it re-measures, compares against what the pane actually
@@ -174,24 +169,6 @@ enum PaneMeasurement {
 /// a shortfall that survives the budget is not a dropped write (a
 /// composer deliberately constraining the frame would otherwise spin the
 /// main queue for the pane's whole life).
-///
-/// **The height publish is FRAME-SYNCHRONOUS / STATE-DEFERRED (18l-b U3 —
-/// the author's ratified shape, the health review §5.1 A1).** Until U3 a
-/// height publish also wrote its `@State` SYNCHRONOUSLY, by documented
-/// choice: a deferred-only publish could starve under a busy main queue,
-/// leaving a pane visibly at its old height while it waited. That
-/// synchronous write was, measured, the whole of the app's "Modifying
-/// state during view update" family (18k UNIT C3: every flagged line sat
-/// inside this pane's `makeNSView`/`updateNSView`, where the mount and the
-/// adopt-remeasure publish). The ratified shape keeps the synchronous
-/// answer and moves it off SwiftUI's books: the pane's VISIBLE height is
-/// AppKit's own frame, pulled in the same pass (the frame lever below —
-/// the path SwiftUI does not flag), so no pane ever visibly waits on the
-/// queue; only the SwiftUI STATE write defers, to the turn this publisher
-/// already ran, which re-measures and writes the newest number outside any
-/// update. What a busy queue can now delay is the SwiftUI slot around the
-/// pane (its card, its ring, its neighbours' positions) — never the pane's
-/// own text. The canary keeps its synchronous write (see `publishCanary`).
 @MainActor
 final class PanePublisher {
     /// Deferred work runs on the next main-queue turn; tests inject a
@@ -217,13 +194,9 @@ final class PanePublisher {
     /// an equal-value @State write invalidates nothing and the frame never
     /// moves — a heal that fires forever and heals nothing (her void, on
     /// the 1F build). A chase turn that still renders divergent now applies
-    /// the frame DIRECTLY to the view; SwiftUI's next layout re-imposes the
-    /// same value, so the two authorities agree instead of fighting.
-    /// **Since 18l-b U3 the lever is also the publish's synchronous ANSWER**
-    /// (`publishHeight`): pulled in the pass that measured, including a
-    /// layout pass or a representable's update — an AppKit frame write,
-    /// which SwiftUI neither flags nor drops — while the state follows on
-    /// the deferred turn.
+    /// the frame DIRECTLY to the view (deferred turn — never inside a
+    /// SwiftUI update); SwiftUI's next layout re-imposes the same value, so
+    /// the two authorities agree instead of fighting.
     private var applyFrame: ((CGFloat) -> Void)?
     private var writeHeight: ((CGFloat) -> Void)?
     private var writeCanary: ((String) -> Void)?
@@ -252,30 +225,16 @@ final class PanePublisher {
         self.schedule = schedule
     }
 
-    /// Measure and publish the pane's height — **the ratified shape (18l-b
-    /// U3, her sentence: *"attempt the frame-synchronous / state-deferred
-    /// shape, walk the boards under load, and revert on any felt
-    /// regression"*):** the VISIBLE height answers in this same pass through
-    /// AppKit's own frame (the lever — the path SwiftUI does not flag), and
-    /// the SwiftUI STATE write waits for the deferred turn, which re-measures
-    /// and writes the newest number there, never inside a view update. The
-    /// heal then runs until the rendered frame agrees (or the budget runs
-    /// out), exactly as before.
+    /// Measure and publish the pane's height, then heal until the rendered
+    /// frame agrees (or the budget runs out).
     func publishHeight() {
         guard let height = measure?() else { return }
-        applyFrame?(height)
+        writeHeight?(height)
         healTurnsLeft = Self.healTurnBudget
         scheduleTurn()
     }
 
     /// Publish a canary message (sync) plus ONE coalesced echo next turn.
-    ///
-    /// **Kept synchronous at 18l-b U3, deliberately.** The same hazard
-    /// binds it in principle (a fallback can fire inside an update), but it
-    /// is not the warning family (it fires only on a TextKit 1 fallback —
-    /// zero times in every measured run), the banner is SwiftUI content with
-    /// no AppKit frame to answer for it, and its deferred echo already makes
-    /// the write land. The diagnostic's immediacy is the point of it.
     func publishCanary(_ message: String) {
         writeCanary?(message)
         pendingCanary = message
@@ -605,25 +564,6 @@ final class PaneTextView: NSTextView, MarkdownFormattable, ProseGutterSurface {
             ancestor = view.superview
         }
         return origins
-    }
-
-    /// **18l-b U3 — the flagged shape's observation seam** (the R3-4
-    /// lesson again: a pin asserts the MECHANISM, never an outcome
-    /// incidental machinery could satisfy). SwiftUI flags exactly one
-    /// write shape in this app — a `@State` written through a `@Binding`
-    /// while a representable's `makeNSView`/`updateNSView` body runs (18k
-    /// UNIT C3's M1; its M2 put every "Modifying state during view update"
-    /// line in the app inside THIS pane's two bodies). The representable
-    /// raises `representableUpdateDepth` for the length of each body, and
-    /// every height STATE write the publisher makes is counted — and
-    /// counted again when it lands inside that bracket.
-    var representableUpdateDepth = 0
-    private(set) var stateWrites = 0
-    private(set) var stateWritesInsideUpdate = 0
-
-    func noteStateWrite() {
-        stateWrites += 1
-        if representableUpdateDepth > 0 { stateWritesInsideUpdate += 1 }
     }
 
     private weak var observedScrollView: NSScrollView?
@@ -1238,9 +1178,6 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
 
     func makeNSView(context: Context) -> PaneTextView {
         let view = PaneTextView.makeTakeSurface()
-        // 18l-b U3: the flagged shape's bracket (see `noteStateWrite`).
-        view.representableUpdateDepth += 1
-        defer { view.representableUpdateDepth -= 1 }
         view.delegate = context.coordinator
         context.coordinator.onMeasuredHeight = onMeasuredHeight
         context.coordinator.install(
@@ -1249,14 +1186,11 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
                 let resolved = max(measured, 24)
                 height = resolved
                 // QoL batch 2: the composer's copy leaves on a DEFERRED
-                // turn. Until 18l-b U3 this closure ran inside SwiftUI
-                // updates (the width-gated layout hook, updateNSView's
-                // adopt-remeasure) — the mid-update hazard `PanePublisher`
-                // exists for; since U3 it runs only on the publisher's own
-                // deferred turn, and the copy's hop is KEPT (the charter:
-                // "deliverMeasuredHeight's existing deferral stays") — so a
-                // composer can never be handed a height mid-update whichever
-                // road calls here.
+                // turn — this closure runs inside SwiftUI updates (the
+                // width-gated layout hook, updateNSView's adopt-remeasure),
+                // which is exactly the mid-update hazard `PanePublisher`
+                // exists for. A composer writing an @Observable model here
+                // would re-open it one layer out.
                 coordinator?.deliverMeasuredHeight(resolved)
             },
             publishCanary: { canaryMessage = $0 })
@@ -1300,9 +1234,6 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     }
 
     func updateNSView(_ view: PaneTextView, context: Context) {
-        // 18l-b U3: the flagged shape's bracket (see `noteStateWrite`).
-        view.representableUpdateDepth += 1
-        defer { view.representableUpdateDepth -= 1 }
         context.coordinator.onEdit = onEdit
         context.coordinator.onCommandClick = onCommandClick
         context.coordinator.onFocusRequest = onFocusRequest
@@ -1610,12 +1541,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
                     guard let view, view.frame.height != height else { return }
                     view.setFrameSize(NSSize(width: view.frame.width, height: height))
                 },
-                // 18l-b U3: every height state write is counted on its way
-                // out (the flagged shape's seam — `noteStateWrite`).
-                writeHeight: { [weak view] height in
-                    view?.noteStateWrite()
-                    publishHeight(height)
-                },
+                writeHeight: publishHeight,
                 // N2: the canary message is PUBLISHED into the rendered
                 // banner (it used to land in a private var nothing read).
                 writeCanary: { [weak view] message in
@@ -1671,11 +1597,8 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         /// Hand the composer this pane's measured content height on the
         /// NEXT main-queue turn. Deferred for the same reason
         /// `scheduleRenderRestore` is (and on the same latch): the publish
-        /// this rides could fire inside a SwiftUI update, and a composer's
-        /// model write there is the dropped/undefined-write class. (Since
-        /// 18l-b U3 the state write it rides is itself on the publisher's
-        /// deferred turn, so this hop is a second one — kept by the charter,
-        /// a sink contract that must not depend on its caller's timing.)
+        /// this rides can fire inside a SwiftUI update, and a composer's
+        /// model write there is the dropped/undefined-write class.
         /// Coalesced — a burst of publishes delivers once, with the last
         /// value — and equality-gated, so a converged pane goes silent.
         ///
@@ -1742,14 +1665,12 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
 
         /// Measure and publish, through the ONE door. The Stage 4 gate's
         /// clipped-pane failure (the batch-12/AD-7 class, one
-        /// publish-timing hole over) is closed inside `PanePublisher`: the
-        /// frame answered synchronously + the state written on a bounded,
-        /// coalesced convergence heal (18l-b U3's ratified shape). No loop —
-        /// neither write triggers a remeasure (`updateNSView` remeasures
-        /// only on string/font change; the layout hook is width-gated, and
-        /// the same-width divergence check below publishes only when the
-        /// frame and the measurement disagree — and a frame the lever just
-        /// set to the measurement agrees with it by construction).
+        /// publish-timing hole over) is closed inside `PanePublisher`:
+        /// synchronous write + a bounded, coalesced convergence heal. No
+        /// loop — a height write triggers no remeasure (`updateNSView`
+        /// remeasures only on string/font change; the layout hook is
+        /// width-gated, and the same-width divergence check below
+        /// publishes only when the frame and the measurement disagree).
         func remeasure() {
             publisher?.publishHeight()
         }
