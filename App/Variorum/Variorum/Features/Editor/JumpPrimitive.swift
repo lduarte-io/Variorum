@@ -168,6 +168,24 @@ nonisolated struct ReadingAnchor: Equatable, Sendable {
     /// was, which the rule never meant to take away (the first line was never
     /// at the top there in the first place).
     var reflowLandingInset: Double { inPageTopAir ? inset : 0 }
+
+    /// **18l-b U-B5 (KnownIssues row 88) — the differential road's keeper.**
+    /// A line the act did not write: its start lies strictly BEFORE the edit
+    /// that began at `editLocation`, so nothing the act did can move it — the
+    /// 2026-07-07 promise ("untouched text never moves"). A line at or after
+    /// the edit is the act's to move (a paragraph inserted above it pushes it
+    /// down) and is never "kept".
+    func isUntouched(byEditAt editLocation: Int) -> Bool { offset < editLocation }
+
+    /// How far the line has moved ON SCREEN since the capture: where it sits
+    /// below the viewport's top edge now, less where it sat (`inset`). Zero on
+    /// settled geometry; non-zero when TextKit re-based the laid-out text under
+    /// a clip nothing moved (the U-B5 trace — a floating viewport re-estimated
+    /// by a layout-forcing query that runs after the edit and before the
+    /// viewport pass that consumes it).
+    func displacement(lineTop: Double, viewportTop: Double) -> Double {
+        (lineTop - viewportTop) - inset
+    }
 }
 
 @MainActor

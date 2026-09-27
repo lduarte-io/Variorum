@@ -4254,6 +4254,53 @@ final class EditorViewModel {
         refreshBadges()
     }
 
+    /// **The differential road's KEEPER — 18l-b U-B5, KnownIssues row 88** (her
+    /// B5: ⏎ right after a ⌘↓ landing moved the page — measured +438.8 and
+    /// +662.4 pt on the full Study recipe, the new caret block off-screen below).
+    ///
+    /// The differential structural rewrite (author decision 2026-07-07) has no
+    /// restore step because "untouched text never moves" — true while TextKit
+    /// keeps laid-out geometry where it laid it out. It does not, when the
+    /// viewport's laid-out island FLOATS on estimates (a full re-render threw
+    /// every fragment back to an estimate, a jump laid out one island, ⌘↓ laid
+    /// out the last page — ~470 estimated paragraphs between): the first
+    /// layout-forcing query after the edit that lays out the new paragraph —
+    /// the indicator's decoration walk inside TextKit's own selection fix, or
+    /// the structural result's badge/decoration refresh after it — makes
+    /// TextKit re-estimate that stretch and re-base the island in DOCUMENT
+    /// space, under a clip nothing moves (the jump road's viewport layout
+    /// compensates by moving the clip — 18k C6; an edit has no such pass).
+    ///
+    /// So: the line the viewport's top was reading goes back EXACTLY where it
+    /// sat — renderFull's own restore (`ReadingAnchor.exactLandingInset`) — but
+    /// ONLY when the act did not write it (`isUntouched`) and ONLY when it
+    /// actually moved. On settled geometry nothing moves, the check is one
+    /// single-fragment read of a line already on screen, and no jump runs (P1:
+    /// viewport-bounded; the jump itself is the bounded primitive). Where the
+    /// CARET rests is untouched: the act placed it before this runs, and the
+    /// page returns to the one the act would have left on settled geometry.
+    func keepUntouchedReadingLine(_ anchor: ReadingAnchor, editStartingAt location: Int) {
+        guard anchor.isUntouched(byEditAt: location),
+              let textView, let scrollView,
+              let line = JumpPrimitive.lineSpan(ofOffset: anchor.offset, in: textView)
+        else { return }
+        let moved = anchor.displacement(
+            lineTop: line.top, viewportTop: Double(scrollView.contentView.bounds.origin.y))
+        guard abs(moved) >= 0.5 else { return }
+        #if DEBUG
+        untouchedLineRestores += 1
+        #endif
+        JumpPrimitive.jump(
+            toOffset: anchor.offset, textView: textView, scrollView: scrollView,
+            landingInset: anchor.exactLandingInset)
+    }
+
+    #if DEBUG
+    /// The keeper's WITNESS (the β1 counter's shape): how many times it found an
+    /// untouched line moved and put it back — zero on every settled-geometry act.
+    @ObservationIgnored private(set) var untouchedLineRestores = 0
+    #endif
+
     // MARK: - Messages
 
     /// **REFUSE — nothing happened, and this says why.** Always shown,

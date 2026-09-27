@@ -3082,11 +3082,23 @@ final class EditorSurfaceController {
     /// projection doesn't match re-render fully from the store. Both
     /// strategies clear text-undo (stale-offset replays don't care which
     /// strategy rewrote) and place the caret BY IDENTITY.
+    ///
+    /// **The differential strategy KEEPS the untouched reading line (18l-b
+    /// U-B5 — KnownIssues row 88):** the line the viewport's top is reading is
+    /// captured BEFORE the rewrite, and once the result's synchronous work is
+    /// done (the caret placed, its context refreshed — the last layout-forcing
+    /// reads of this turn) `keepUntouchedReadingLine` puts it back exactly if
+    /// TextKit moved it. A no-op on settled geometry; the full strategy
+    /// restores through `renderFull`'s own anchor, unchanged.
     private func applyStructuralResult(
         _ fresh: [Queries.RenderedBlock], outcome: StructuralOutcome
     ) {
-        if let seam = outcome.seam, applyDifferentialStructural(seam, fresh: fresh) {
+        let reading = outcome.seam == nil ? nil : model.readingAnchor()
+        var differentialEditStart: Int?
+        if let seam = outcome.seam,
+           let editStart = applyDifferentialStructural(seam, fresh: fresh) {
             // Differential landed; bookkeeping done inside.
+            differentialEditStart = editStart
         } else {
             renderFull(fresh, preserveTail: true)
         }
@@ -3096,6 +3108,9 @@ final class EditorSurfaceController {
             let offset = range.location + min(max(0, outcome.caretOffset), range.length)
             textView.setSelectedRange(NSRange(location: offset, length: 0))
             model.updateCaretContext()
+        }
+        if let reading, let differentialEditStart {
+            model.keepUntouchedReadingLine(reading, editStartingAt: differentialEditStart)
         }
         model.applyPendingIfClean()
     }
@@ -3110,11 +3125,13 @@ final class EditorSurfaceController {
     /// edit would assume (seam shape, non-seam geometry, or the retained
     /// bytes; a concurrent sync apply landed between the op and the fetch)
     /// — and the caller then re-renders fully from the store, truth, in
-    /// EVERY build.
+    /// EVERY build. On success it returns where the edit BEGAN (pre-edit
+    /// document coordinates) — the line the keeper may hold is one that
+    /// starts before it (18l-b U-B5).
     private func applyDifferentialStructural(
         _ seam: StructuralSeam, fresh: [Queries.RenderedBlock]
-    ) -> Bool {
-        guard let textView = model.textView, textView.textStorage != nil else { return false }
+    ) -> Int? {
+        guard let textView = model.textView, textView.textStorage != nil else { return nil }
         let edit = StructuralSeamEdit.derive(
             seam, oldIndex: model.index,
             oldTextAt: { [weak model] i in
@@ -3122,7 +3139,7 @@ final class EditorSurfaceController {
                 return model.viewText(model.index.range(ofEntryAt: i))
             },
             fresh: fresh)
-        guard let edit else { return false }
+        guard let edit else { return nil }
 
         // Apply: one storage edit, then the attribute re-bracketing — the
         // storage bytes move through the model's seam primitive (the
@@ -3141,7 +3158,7 @@ final class EditorSurfaceController {
         textView.undoManager?.removeAllActions()
         verifyDifferentialOracle(fresh)
         model.refreshBadges()
-        return true
+        return edit.replaceRange.location
     }
 
     /// The DEBUG-ONLY oracle (author-directed posture): after every

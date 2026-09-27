@@ -188,3 +188,174 @@ struct WriteFloatingViewportTests {
         }
     }
 }
+
+// MARK: - The keeper's own contract (landed WITH the fix; the pin above is the red-first one)
+
+@MainActor
+@Suite("The differential road's keeper holds only untouched lines that moved (18l-b U-B5)", .serialized)
+struct UntouchedLineKeeperTests {
+    private func pump(_ seconds: TimeInterval = 0.05) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    private func draw(_ h: EditorHarness) async {
+        for _ in 0..<4 {
+            h.textView.needsDisplay = true
+            h.textView.window?.display()
+            pump(0.02)
+            try? await Task.sleep(for: .milliseconds(30))
+        }
+    }
+
+    private func lineY(_ offset: Int, _ h: EditorHarness, _ scrollView: NSScrollView) throws -> Double {
+        let span = try #require(JumpPrimitive.lineSpan(ofOffset: offset, in: h.textView))
+        return span.top - Double(scrollView.contentView.bounds.minY)
+    }
+
+    /// **The pure rule.** A line is the keeper's only when it starts strictly
+    /// BEFORE the edit (text the act did not write — and whose place the act
+    /// does not move); its displacement is where it sits now less where it sat.
+    @Test func theRuleIsTheLinesStartBeforeTheEditAndItsScreenPlace() {
+        let anchor = ReadingAnchor(offset: 100, inset: 12, inPageTopAir: false)
+        #expect(anchor.isUntouched(byEditAt: 101))
+        #expect(anchor.isUntouched(byEditAt: 5_000))
+        #expect(!anchor.isUntouched(byEditAt: 100), "an edit AT the line's start writes before it — the act moves it")
+        #expect(!anchor.isUntouched(byEditAt: 40), "an edit above the line is the act's own movement")
+        #expect(anchor.displacement(lineTop: 1_012, viewportTop: 1_000) == 0, "sitting where it sat")
+        #expect(anchor.displacement(lineTop: 1_092, viewportTop: 1_000) == 80, "TextKit re-based it 80 pt down")
+        #expect(anchor.displacement(lineTop: 1_092, viewportTop: 1_080) == 0, "the clip followed — nothing to keep")
+        let cut = ReadingAnchor(offset: 7, inset: -9.5, inPageTopAir: false)
+        #expect(cut.displacement(lineTop: 490.5, viewportTop: 500) == 0, "an edge that cuts the line keeps its cut")
+    }
+
+    /// Her story, her column, the ring on, the story laid out once (TextKit's
+    /// history), the page mid-note; `carve` runs U0b's ⏎ + ⌫ there (the full
+    /// re-render that makes the end island FLOAT); then ⌘↓. Returns the
+    /// reading line's offset and place before the tail ⏎, and after it.
+    private func tailReturn(
+        carve: Bool, _ body: @MainActor (EditorHarness, NSScrollView, Int, Double, Double) throws -> Void
+    ) async throws {
+        let current = EditorTypography.current
+        let adopted = EditorTypography.isAdopted
+        let palette = MarkdownStyling.palette
+        defer {
+            EditorTypography.current = current
+            EditorTypography.isAdopted = adopted
+            MarkdownStyling.palette = palette
+        }
+        let chrome = EditorSurfaceChrome(voice: .study, dark: false, inlineComments: false)
+        let story = try #require(
+            try SampleLibrarySeeder.loadStories().first { $0.title.contains("Scandal in Bohemia") })
+        try await withEditor(seedBlocks: SegmentationRules.bulkSegments(story.text, mode: .paragraph)) { h in
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1209, height: 806),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let scrollView = try #require(h.textView.enclosingScrollView)
+            let coordinator = EditorSurface.Coordinator(model: h.model)
+            defer {
+                coordinator.uninstall()
+                window.orderOut(nil)
+                window.close()
+            }
+            window.contentView = scrollView
+            window.orderFrontRegardless()
+            pump()
+            EditorTypography.adopt(chrome.typography)
+            coordinator.applyChrome(chrome, to: h.textView, scrollView: scrollView)
+            coordinator.install(scrollView: scrollView, textView: h.textView)
+            await draw(h)
+            h.model.appearance.indicator = .outline
+            window.makeFirstResponder(h.textView)
+            let layoutManager = try #require(h.textView.textLayoutManager)
+            layoutManager.ensureLayout(for: layoutManager.documentRange)
+            await draw(h)
+            JumpPrimitive.jump(
+                toOffset: h.model.index.range(ofEntryAt: 144).location,
+                textView: h.textView, scrollView: scrollView)
+            await draw(h)
+            if carve {
+                h.textView.setSelectedRange(NSRange(
+                    location: h.model.index.range(ofEntryAt: 150).upperBound, length: 0))
+                h.textView.insertNewline(nil)
+                await h.flush()
+                await draw(h)
+                h.textView.deleteBackward(nil)
+                await h.flush()
+                await draw(h)
+            }
+            h.textView.moveToEndOfDocument(nil)
+            await draw(h)
+            await draw(h)
+            let reference = try #require(h.model.topVisibleOffset())
+            let before = try lineY(reference, h, scrollView)
+            h.textView.insertNewline(nil)
+            await h.flush()
+            await draw(h)
+            try body(h, scrollView, reference, before, try lineY(reference, h, scrollView))
+        }
+    }
+
+    /// **The witness, both ways.** On B5's road (the island floats) TextKit
+    /// moves the reading line and the keeper puts it back — exactly once; on a
+    /// page that does NOT float (no full re-render before ⌘↓, so the end sits
+    /// on laid-out text) nothing moves and the keeper never runs.
+    @Test(arguments: [true, false])
+    func theKeeperRunsExactlyWhereTextKitMovedTheLine(_ carve: Bool) async throws {
+        try await tailReturn(carve: carve) { h, _, _, before, after in
+            #expect(abs(after - before) < 0.5, "the reading line held (\(before) → \(after))")
+            #expect(h.model.untouchedLineRestores == (carve ? 1 : 0),
+                    "carve \(carve): the keeper ran \(h.model.untouchedLineRestores) time(s)")
+        }
+    }
+
+    /// **The fence — the act's own movement is shipped.** A ⏎ at the END of a
+    /// block ABOVE the viewport's reading line (the caret put there without
+    /// scrolling) inserts an empty block above that line: the act MOVES it,
+    /// one block down, and the keeper must stay out (the line starts after the
+    /// edit). A synthetic note, every line laid out (settled geometry).
+    @Test func anActThatWritesAboveTheReadingLineKeepsItsOwnMovement() async throws {
+        let note = (0..<80).map { p in
+            (0..<(18 + (p &* 29) % 40)).map { "word\(($0 &+ p) % 409)" }.joined(separator: " ") + " ¶\(p)."
+        }
+        try await withEditor(seedBlocks: note) { h in
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 900, height: 700),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let scrollView = try #require(h.textView.enclosingScrollView)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            window.contentView = scrollView
+            window.orderFrontRegardless()
+            pump()
+            let layoutManager = try #require(h.textView.textLayoutManager)
+            layoutManager.ensureLayout(for: layoutManager.documentRange)
+            await draw(h)
+            JumpPrimitive.jump(
+                toOffset: h.model.index.range(ofEntryAt: 40).location,
+                textView: h.textView, scrollView: scrollView)
+            await draw(h)
+            let reference = try #require(h.model.topVisibleOffset())
+            let before = try lineY(reference, h, scrollView)
+            // Block 30's end is above the viewport: the caret goes there, the
+            // page does not move, and ⏎ makes the empty block below IT.
+            let blocks = try h.storeSlots().count
+            h.textView.setSelectedRange(NSRange(
+                location: h.model.index.range(ofEntryAt: 30).upperBound, length: 0))
+            h.textView.insertNewline(nil)
+            await h.flush()
+            await draw(h)
+            #expect(try h.storeSlots().count == blocks + 1, "the premise: the empty block was made")
+            // The reference's TEXT moved one character on (the separator); its
+            // line moved down by the new block's line.
+            let after = try lineY(reference + 1, h, scrollView)
+            // (Measured: exactly one empty block's line — 10.0 pt in this harness's
+            // default typography.)
+            #expect(after - before >= 5, "the act pushed the line down (\(before) → \(after)) — shipped")
+            #expect(h.model.untouchedLineRestores == 0, "the keeper stayed out of a line the act moved")
+        }
+    }
+}
