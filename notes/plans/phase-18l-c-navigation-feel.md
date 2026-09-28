@@ -1945,6 +1945,48 @@ in doubt.)
 **Weakest points, for the reviewer.** (a) **The Takes entry landing's first step now carries three banded special cases** (the band's edge, the second aim, the resting-page rule) on top of the ride-through deferral — each gated on the entry kind, each pinned and reverted, but it is the seam's most intricate step; a wrong resting-page judgement falls back to the watch's correction of an unreported target (a hop, never a stuck landing), and a missed second aim falls back the same way (HONEST BOUNDARY 9). (b) **The second aim spends one report outside the watch** (`articleLandingReport` returns the reveal before `reportWatchedLanding` for that report). (c) **(A) vs (B) is a real product reading** (#158 (1)): a plain round trip keeps her page and reveals her block only when that page lost it — Write's shape — at the price of a quiet-interval delay before that reveal (HONEST BOUNDARY 3). (d) **Read's carried top sits up to 0.7 pt above the band's edge** (fraction space; within the probe's ±1). (e) The flash's timing is wall-clock in the faces, so the pins read state and the oracle, never an opacity mid-flight (HONEST BOUNDARY 5). (f) The ~70 lines in `EditorViewModel` (JUDGMENT CALL 9) sit in a file P-9 watches. **U8 — DONE (implementer); the Fable cold review follows.**
 
 
+### ORCHESTRATOR ACCEPTANCE — U8 (verify + the hands-on walk, 2026-09-28)
+
+**Hand-back VERIFIED against git, all claims matched:** 23 commits `45054bba..058d7755`, tree
+clean, pushed, zero instances; 27 files with the core touch exactly the setting pair +
+its test (`Operations+Appearance` +15, `AppearanceQueries` +13, `ThemeAndShelfQueryTests`
++34 — within the brief's allowance); zero `Shared/`/`Sync/`/schema/mobile; all 23
+`18lc-u8-*.log` on disk with R-U8-RO's 8 issues in shape; the walk runs (`145753`,
+`153724`) on disk; #158 filed; the walk build verified to BE the final product tree by
+commit times (last product commit `6e72ee74` 14:31, binary 14:33; later commits record-only).
+The record's discipline is the phase's best: the first green attempt MEASURED the 17q race
+(271→571) and answered it with the watch-quiet deferral, and all four unpredicted revert
+reds are traced.
+
+**THE HANDS-ON WALK (WalkKit, per-step guard; captures `u8walk/01…08` in the session
+scratchpad):**
+- **A REAL FIND BEFORE ANY SWITCH — the dev store's takemania was CORRUPTED:** block 1 read
+  `HydeHydeHydeHydeHydeHydeHydeHyde## The will` (eight literal "Hyde" prefixes; the note at
+  2,939w). Mechanism, now physical: in the failing full-suite `takes-find` runs, row A's ⌘F
+  field never held the keyboard and the scenario TYPED "Hyde" anyway — into the live
+  block's prose; and once the store carried the prefixes, every later run's match-count
+  precondition was poisoned REGARDLESS of build, which is why the pre-U8 scratch build
+  "failed identically." NOTICED 6's order-dependency diagnosis gains this second, dominant
+  mechanism; the close's harness-row owner must (1) make the scenario refuse to type until
+  the probe confirms the field holds the keyboard, and (2) heal or re-seed the fixture on a
+  failed precondition. **The fixture healed by hand at the walk** (the 32-character prefix
+  selected and deleted; block 1 back to `## The will`, the note back to 2,938w).
+- **The caret rule seen:** caret set in block 4 (Write), the page scrolled to the note's
+  END, ⌘2 → Takes mounted with the caret's block RINGED LIVE mid-page, the caret preserved
+  inside it, comfortably banded — road A's death visible (the pane exists; typing would
+  edit).
+- **The flash caught mid-flight:** ⌘1 → Write landed on the caret's LINE ("had swelled his
+  indignation…") wearing the wash-fill + accent-border rect over exactly that line, the
+  caret inside; the immediate second capture shows the SAME highlight fainter — the
+  opacity-only fade, in use. The line rested well inside the band.
+- **Read's carry seen:** ⌘3 → the page stayed on the text I was reading (the eyesore ¶
+  through Mr. Seek), the current block's row washed; no caret jump, no start jump.
+- One capture raced the ⌘2 transition (the switch renders >0.5 s after the keystroke) —
+  a walk-timing fact, not a defect; the settled capture followed.
+
+**U8 ACCEPTED at the walk; the FABLE cold review follows (the ladder's round 1 — the
+mechanical window: everything since `45054bba`).**
+
 ## ORCHESTRATOR RESUME MAP (written 2026-09-28 at her compaction warning — the transcript-proof state; a post-compaction orchestrator re-orients from THIS section + the ledger + LIVE STATUS, verifying against git, never trusting)
 
 **Seat:** Fable `/architect-phase 18l-c` orchestrator (the session that took her kickoff). Her
