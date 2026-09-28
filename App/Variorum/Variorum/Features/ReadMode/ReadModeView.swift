@@ -890,6 +890,11 @@ extension ReadModeView {
     /// landing probe measures a landing against it). The value is the page's
     /// shipped one, unchanged.
     static let pageRestingAnchor = UnitPoint(x: 0.5, y: 0.08)
+
+    /// The room around the calm page's paper — named here so the host's other
+    /// callers read the one number the page draws with (18l-c U8: the DEBUG
+    /// probe's comfort-band read; the page column's `roomPadding` IS this).
+    static let pageRoomPadding: CGFloat = 28
 }
 
 extension ReadPageColumn {
@@ -900,7 +905,7 @@ extension ReadPageColumn {
     /// named so the landing manifest's `leading` reads the numbers the page
     /// draws with (ladder round 1, MINOR-3). The values it always had.
     static let pagePadding: CGFloat = 46
-    static let roomPadding: CGFloat = 28
+    static let roomPadding: CGFloat = ReadModeView.pageRoomPadding
 
     /// **18l-c U8 (b): the calm page's comfort band** — the room above the
     /// paper at rest (its resting top air) and two of the page's lines below

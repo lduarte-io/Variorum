@@ -139,6 +139,17 @@ enum VisualWalkProbe {
                     .split(separator: "|").first.map { String($0.dropFirst(5)) } ?? "-"
             }
         }
+        // 18l-c U8: which arrival-flash faces have drawn at full strength, per
+        // surface (`ArrivalFlashOracle` — a count of distinct faces, so a walk
+        // reads "one more flashed" across a mode switch) — always on (cheap);
+        // and, on request (`band`), where the mode switch RESTED its target on
+        // the surface now showing (the comfort band's two edges, measured).
+        line["af"] = arrivalFlashSummary()
+        if flags.contains("band") {
+            bandFacts(mode: session?()?.commandRouter.activeMode,
+                      activePostID: session?()?.commandRouter.activePostID,
+                      in: window, into: &line)
+        }
         let responder = window.firstResponder
         guard let textView = responder as? NSTextView else {
             line["fr"] = responder == nil ? "none" : "other"
@@ -461,6 +472,92 @@ enum VisualWalkProbe {
         line["rl"] = num(block.minY - rest)
         line["rlH"] = num(block.height)
         line["rlVis"] = block.maxY > viewport.minY && block.minY < viewport.maxY ? "1" : "0"
+    }
+
+    // MARK: - The mode switch's feel (18l-c U8)
+
+    /// `af=w<n>.t<n>.re<n>.rp<n>` — how many DISTINCT flash faces have drawn at
+    /// full strength, per surface (Write's decor layer · the Takes article cell
+    /// · note Read's edit face · its calm page). A face key is per board/row,
+    /// so a mode switch's flash raises its surface's count.
+    private static func arrivalFlashSummary() -> String {
+        var counts = ["write": 0, "takes": 0, "read-edit": 0, "read-page": 0]
+        for (key, seen) in ArrivalFlashOracle.seen where seen.peakFill >= 0.9 && seen.peakStroke >= 0.9 {
+            let surface = String(key.split(separator: "|").first ?? "")
+            if counts[surface] != nil { counts[surface, default: 0] += 1 }
+        }
+        return "w\(counts["write"]!).t\(counts["takes"]!).re\(counts["read-edit"]!).rp\(counts["read-page"]!)"
+    }
+
+    /// **`band` — where the mode switch RESTED its target**, on the surface now
+    /// showing: `bS` the surface, `bT` the target's top below the viewport's
+    /// top edge, `bB` the room between its bottom and the viewport's foot,
+    /// `bAir` the surface's resting top air (the band's top edge). Write: the
+    /// caret's LINE (one fragment laid out — the caret's, which a landing has
+    /// just put on screen); Takes: the live article cell (the pane ± the cell's
+    /// padding); note Read's edit face: the selected row (the oracle's frames).
+    /// `bRoom` is the band's bottom edge (two of the base font's lines).
+    private static func bandFacts(
+        mode: PostMode?, activePostID: String?, in window: NSWindow, into line: inout Line
+    ) {
+        switch mode {
+        case .write?:
+            guard let editor = allViews(EditorTextView.self, in: window.contentView)
+                    .first(where: { $0.enclosingScrollView != nil }),
+                  let clip = editor.enclosingScrollView?.contentView,
+                  let span = JumpPrimitive.lineSpan(ofOffset: editor.selectedRange().location, in: editor)
+            else { line["bS"] = "write-none"; return }
+            line["bS"] = "write"
+            line["bT"] = num(CGFloat(span.top) - clip.bounds.minY)
+            line["bB"] = num(clip.bounds.height - (CGFloat(span.bottom) - clip.bounds.minY))
+            line["bAir"] = num(editor.textContainerOrigin.y)
+        case .takes?:
+            guard let pane = editablePanes(in: window.contentView)
+                    .first(where: { $0.identifier?.rawValue.hasPrefix("pane:article|") == true }),
+                  let clip = outermostScroll(of: pane, in: window.contentView)?.contentView
+            else { line["bS"] = "takes-none"; return }
+            let frame = pane.convert(pane.bounds, to: clip)
+            let pad = TakesBoardView.articleCellPadding
+            line["bS"] = "takes"
+            line["bT"] = num(frame.minY - pad - clip.bounds.minY)
+            line["bB"] = num(clip.bounds.height - (frame.maxY + pad - clip.bounds.minY))
+            line["bAir"] = num(TakesArticleScroll.articleTopAir)
+        case .read?:
+            let frames = ReadModeOracle.face == .edit
+                ? ReadModeOracle.editBlockFrames : ReadModeOracle.pageBlockFrames
+            guard let selected = ReadModeOracle.selectedBlockID, let block = frames[selected],
+                  let viewport = activePostID.flatMap({ ReadModeOracle.faceFrames[$0] })
+            else { line["bS"] = "read-none"; return }
+            line["bS"] = ReadModeOracle.face == .edit ? "read-edit" : "read-page"
+            line["bT"] = num(block.minY - viewport.minY)
+            line["bB"] = num(viewport.maxY - block.maxY)
+            line["bAir"] = num(ReadModeOracle.face == .edit
+                ? ReadEditPane.columnLead : ReadModeView.pageRoomPadding)
+        default:
+            line["bS"] = "none"
+            return
+        }
+        // The band's bottom edge: `ComfortBand.bottomLines` of the base font's
+        // line (the calm page scales its own by its type scale — not read here).
+        line["bRoom"] = num(ComfortBand.bottomLines
+            * TypewriterRoom.lineHeight(of: EditorDocument.baseFont))
+    }
+
+    private static func allViews<V: NSView>(_ type: V.Type, in view: NSView?) -> [V] {
+        guard let view else { return [] }
+        var out: [V] = (view as? V).map { [$0] } ?? []
+        for sub in view.subviews { out += allViews(type, in: sub) }
+        return out
+    }
+
+    private static func outermostScroll(of view: NSView, in root: NSView?) -> NSScrollView? {
+        var outermost: NSScrollView?
+        var current: NSView? = view.superview
+        while let node = current, node !== root {
+            if let scroll = node as? NSScrollView { outermost = scroll }
+            current = node.superview
+        }
+        return outermost
     }
 
     private static func scrollViews(in view: NSView?) -> [NSScrollView] {

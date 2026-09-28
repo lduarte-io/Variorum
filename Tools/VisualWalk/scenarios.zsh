@@ -576,7 +576,7 @@ scn_read-landing() {
 # scenario leaves it in Takes and relaunches (a new run) — so it is self-contained in any pass.
 vw_def takes-landing "A Scandal in Bohemia, first open this run in Takes (its remembered mode — staged by a relaunch when needed)" \
   "first open (Takes) · ⌘1 · ⌘↓ · ⌘2 · ⌘1 · ⌘2 · ⌘1 · ⌘↑ · ⌘2 · ⌘1 · ⌘↓ · ⌘2 + her wheel 0.7 s later · ⌘1 · ⌘⇧T · Open Takes mode" \
-  "the first open asks no landing (no TakesArticle line); the entry landing, R-Q20's win and the bloom each file end=settled; R-Q21's round trip files nothing; her wheel inside the hold files end=handedover" pass
+  "the first open asks no landing (no TakesArticle line); the entry landing, R-Q20's win and the bloom each file end=settled; a plain round trip's entry landing rides through and settles with no hop (R-18l-13 — it used to stand down and file nothing); her wheel inside the hold files end=handedover" pass
 
 # Every TakesArticle signpost in the last N seconds (the shipping line, content-free).
 vw_takes_signposts() {   # seconds-back
@@ -633,13 +633,18 @@ scn_takes-landing() {
   vw_takes_since $t0
   vw_expect_eq "B · the entry landing on the LAST block is watched and SETTLES [${TK_LAST:-none}]" "$(vw_takes_on_last "$TK_LAST")" settled
 
-  # Row C — R-Q21's plain round trip: the entry landing stands down; nothing is filed; the page she left.
+  # Row C — a plain round trip. RE-ARMED AS THE RULED CHANGE (18l-c U8, her R-18l-13 — "caret anchors
+  # the editing modes"): OLD, the entry landing STOOD DOWN and filed nothing ("R-Q21's plain round trip
+  # STANDS DOWN: TakesArticle lines since the return == 0"); NEW, it rides through the page she left, is
+  # WATCHED, and — her block (the last, revealed by row B) being on that page — settles with NO hop.
   vw_takes_mode 1
   t0=$EPOCHSECONDS
   vw_takes_mode 2
   sleep 2.5; vw_cap 03-plain-round-trip
   vw_takes_since $t0
-  vw_expect_eq "C · R-Q21's plain round trip STANDS DOWN: TakesArticle lines since the return" ${#TK_LINES} 0
+  local c_ok=
+  [[ $(vw_takes_on_last "$TK_LAST") == settled && $TK_LAST == *hops=0* ]] && c_ok=settled
+  vw_expect_eq "C · a plain round trip's entry landing rides through and settles on the last block with no hop (R-18l-13) [${TK_LAST:-none}]" "$c_ok" settled
   if cmp -s $SCN_DIR/02-entry-landing-deep.png $SCN_DIR/03-plain-round-trip.png; then
     vw_log "  C · evidence: the round trip's capture is BYTE-IDENTICAL to the landed page's (cmp)"
   else
@@ -1022,6 +1027,79 @@ scn_b5-more-roads() {
   vw_expect_eq "restore: text back" "${PV[len]}" $len0
 }
 
+# --- S17: the mode switch's FEEL at 18l-c U8 (her R-18l-13 + R-18l-7 + her band question) -------------------
+# A mode switch lands at the caret's block (Takes joins Write), rests it inside the comfort band (the surface's
+# resting top air above, two of its lines below — never the extreme edge), and flashes it (a brief highlight
+# that fades in about a second — default ON). The probe's `band` read (`bS` the surface, `bT` the target's top
+# below the viewport's top, `bB` the room under it, `bAir`/`bRoom` the band's two edges) and its flash summary
+# (`af=w<n>.t<n>.re<n>.rp<n>` — distinct faces drawn at full strength, per surface). Captures mid-flash.
+vw_def mode-switch-feel "takemania (the Jekyll book), Write ⇄ Takes ⇄ Read" \
+  "Write: ⌘↓ (caret on the last block) · her wheel to the page's top (the caret off it) · ⌘2 · ⌘1 · ⌘3 · ⌘1" \
+  "each switch rests its target INSIDE the comfort band and flashes it: Takes' landed block (at the band's foot — R-Q20 from the top), Write's caret line (AT the top air — it was off the page she left), Read's landed row; the flash count of each surface rises by one" pass
+
+vw_af() {   # surface letter(s) w|t|re|rp → the count in PV[af]
+  local af=${PV[af]:-w0.t0.re0.rp0}
+  case $1 in
+    w) print -r -- ${${af#w}%%.*} ;;
+    t) print -r -- ${${af#*.t}%%.*} ;;
+    re) print -r -- ${${af#*.re}%%.*} ;;
+    rp) print -r -- ${af#*.rp} ;;
+  esac
+}
+
+# Inside the band: bT ≥ bAir − 1 and bB ≥ bRoom − 1.
+vw_expect_in_band() {   # label
+  vw_expect_between "$1 · top at or below the top air (bT=${PV[bT]} bAir=${PV[bAir]})" ${PV[bT]:-0} $(( ${PV[bAir]:-0} - 1 )) 100000
+  vw_expect_between "$1 · two lines of room under it (bB=${PV[bB]} bRoom=${PV[bRoom]})" ${PV[bB]:-0} $(( ${PV[bRoom]:-0} - 1 )) 100000
+}
+
+scn_mode-switch-feel() {
+  vw_open_note "takemania"
+  vw_require '[[ ${PV[post]} != none ]]' "takemania opened (the Jekyll book is seeded — Help ▸ Restore makes it)" || return
+  [[ ${PV[mode]} != Write ]] && vw_takes_mode 1
+  vw_require '[[ ${PV[mode]} == Write ]]' "the note is in Write" || return
+  vw_keys "⌘↓ (the caret to the note's end — the current block is the last)" 'key code 125 using command down'
+  vw_settle
+  local x=$(( WIN_X + WIN_W * 6 / 10 )) y=$(( WIN_Y + WIN_H / 2 ))
+  vw_scroll $x $y -60
+  vw_scroll $x $y -60
+  vw_settle band
+  vw_require '[[ ${PV[caretState]} == off ]]' "the page wheeled to the top, the caret (the last block) off it" || return
+  vw_cap 00-write-top-caret-off
+  local t0=$(vw_af t) w0=$(vw_af w) r0=$(( $(vw_af re) + $(vw_af rp) ))
+
+  # Row A — ⌘2: Takes lands the last block (R-Q20 — the current block moved since takes-find), banded foot.
+  vw_keys "⌘2 (Takes)" 'keystroke "2" using command down'
+  sleep 0.7; vw_cap 01-takes-mid-flash
+  sleep 2.2; vw_settle band; vw_cap 02-takes-landed
+  vw_expect_eq "A · Takes is the surface the band was read on" "${PV[bS]}" takes
+  vw_expect_in_band "A · Takes' landed block"
+  vw_expect_eq "A · the Takes flash drew once (af ${PV[af]})" $(( $(vw_af t) - t0 )) 1
+
+  # Row B — ⌘1: Write puts back the page it left (the top) and the caret (the last block) is off it — the
+  # reveal rests the caret's line AT the top air, never flush.
+  vw_keys "⌘1 (Write)" 'keystroke "1" using command down'
+  sleep 0.5; vw_cap 03-write-mid-flash
+  sleep 2; vw_settle band; vw_cap 04-write-landed
+  vw_expect_eq "B · Write is the surface the band was read on" "${PV[bS]}" write
+  vw_expect_near "B · the caret's line rests AT the top air (the top clamp)" ${PV[bT]:-0} ${PV[bAir]:-0} 1
+  vw_expect_eq "B · the Write flash drew once (af ${PV[af]})" $(( $(vw_af w) - w0 )) 1
+
+  # Row C — ⌘3: Read carries the page (R-18l-13: "read carries the page"), banded; its landed row flashes.
+  vw_keys "⌘3 (Read)" 'keystroke "3" using command down'
+  sleep 0.8; vw_cap 05-read-mid-flash
+  sleep 2.2; vw_settle band; vw_cap 06-read-landed
+  vw_expect_eq "C · a Read face is the surface the band was read on" "${${PV[bS]}/read-page/read-edit}" read-edit
+  vw_expect_in_band "C · Read's landed row"
+  vw_expect_eq "C · the Read flash drew once (af ${PV[af]})" $(( $(vw_af re) + $(vw_af rp) - r0 )) 1
+
+  # Row D — ⌘1: back to Write from Read (the carry); banded, flashed again.
+  vw_keys "⌘1 (Write)" 'keystroke "1" using command down'
+  sleep 2.5; vw_settle band; vw_cap 07-write-again
+  vw_expect_in_band "D · Write's caret line after Read's carry"
+  vw_expect_eq "D · the Write flash drew again (af ${PV[af]})" $(( $(vw_af w) - w0 )) 2
+}
+
 # The seeded run's order: the note-open pair FIRST (a fresh launch is every note's first open).
 # 18l-b U3 (the B5 fixture): `read-landing` runs AFTER the B5 pair. Seeded before it at 18l U1, its deep
 # click left *A Scandal in Bohemia*'s current block at 245, so B5's `vw_write_open` re-opened the note
@@ -1035,7 +1113,8 @@ scn_b5-more-roads() {
 # 18l-b U-B5: `b5-more-roads` appended after it, for the same reason.
 # 18l-c U7: `takes-find` appended after it, for the same reason (its fixture is takemania, which no
 # earlier scenario touches; its one keystroke is undone).
+# 18l-c U8: `mode-switch-feel` appended after it (takemania again; it moves only the caret and the page).
 SCN_ORDER=(note-reopen write-typing write-newline-roundtrip write-divide-merge mode-roundtrip
            index-click readedit-click outline-narrow-restore outline-long-story-settle
            b5-return-after-cmd-down b5-refont read-landing takes-landing book-landings b5-more-roads
-           takes-find)
+           takes-find mode-switch-feel)
