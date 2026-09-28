@@ -51,3 +51,39 @@
 12. **Review foci**: the plan carries no "Review foci" section (checked in all three 18l plan files); the record's own pointed asks — JUDGMENT CALLS 10–11 and the band's first step — got the deepest read (items 3 and 5 above), and the implementer's self-named weak points (a)–(f) were each checked: (a) the trio, sound and fail-soft; (b) the second aim's one report outside the watch — a one-report-wide gap whose next report re-arms normally, no traceable degradation; (c) properly #158 (1); (d) within the probe's tolerance, recorded; (e) the wall-clock timing is honestly bounded by the pins reading state + oracle; (f) the ~70 EditorViewModel lines are consumers-of-private-hop-steps, correctly argued.
 
 **Owed at close (confirmed, not findings)**: the AppSpec §12 R-18l-13 contract line + §7's NOT-seeded list gaining `arrival_flash` (drafted in the record, deliberately proposed to the author at close); KnownIssues row 94's re-word; QUESTIONS #150's close; the TEXTKIT2_NOTES harness fact; the `/Applications` refresh — all correctly owed to the orchestrator's closeout, none silently landed.
+
+---
+
+## THE IMPLEMENTER'S AGREE/DISPUTE (returned 2026-09-28; checked against `1be605d0`, changed nothing)
+
+**Totals: 6 AGREE, zero disputes.** Additions for the reviewer's final call:
+- **R1-1:** a FOURTH pin has the same problem — `theEntryRingsOwnRoadAlsoComesBackWhereSheLeftIt`
+  (:1310, re-arm table R-3; old: her block stays off the page + top ±1 row; new: the restore ran
+  then her block revealed) — suggested `theEntryRingsOwnRoadComesBackThenRevealsHerBlock`. Naming
+  caveats: `theTopStandDownHoldsInTheAppsOrderToo` has byte-unchanged arms beyond the flipped
+  `same` arm (name the whole pin, e.g. `aTopMemoryInTheAppsOrderKeepsEveryEntryLandingAlive`);
+  `aPageLeftAtRestComesBackAtRest…` is half still true (the top restore issues no scroll) —
+  `…ComesBackAtRestThenRevealsHerBlock` keeps both halves. The U8 RECORD's re-arm table
+  (~1692–1698) cites all four old names — update to "old → new" in the same commit; OLDER
+  records citing old names are history and stay (`18lb-u2-ladder-round1.md:148`,
+  `use-report-round-2026-09-12.md:5948`, `phase-17-standing-fixes.md`).
+- **R1-2:** site correction `ReadModeView.swift:880`; prefers the named constant
+  `ArrivalFlash.stateLifetime` WITH the `+ 0.1` margin folded in (all three sites add the same
+  0.1 — one home for the margin too).
+- **R1-3:** bounding is pin-safe (every oracle-reading pin calls `reset()` first —
+  `TakesEntryBandTests` :483/:515/:538, `ModeSwitchFeelTests` :392); `flashes` keys end in the
+  start time so oldest-past-cap trims cheap; `seen` is orderless — clear-on-overflow.
+- **R1-4:** the park's condition IS #98(a)'s own trigger set three lines above (~2279), widened
+  only by `pendingCarriedPlacement` (a mode-switch fact by construction, 13u2b UNIT 3) — the doc
+  line should say "the same trigger set as #98(a)'s reveal" rather than claim a new
+  exhaustiveness argument. One clause to weigh: #98(a)'s comment names "a place someone chose
+  since the note arrived"; no road found that re-runs the bare arrival without a mode switch,
+  not exhaustively traced — if one exists it already reveals under #98(a) and would now band and
+  flash too — a possible #158 "what flashes" sub-question, not a bug.
+- **R1-5:** confirmed (`ReadModeView.swift:452–457`, `onOpenInEdit` only); HONEST BOUNDARY 10 or
+  row 94's re-word; a gap in its own boundaries list, owned.
+- **R1-6:** both callers of `endArticleLandingWatch()` are teardown (`TakesViewModel.teardown`
+  :540 via `TakesBoardLayout` :404) so a nil is safe, but leans to the one-word doc fix.
+
+**State: handed to the reviewer for FINAL CALLS + its own fix implementation; the implementer's
+sanity pass follows.**
