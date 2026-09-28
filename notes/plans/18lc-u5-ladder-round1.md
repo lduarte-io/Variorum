@@ -169,3 +169,35 @@ No BLOCKER. No MAJOR. I traced no wrong behavior anywhere in the diff.
 un-pinnable per the hallucination guard), no BLOCKER/MAJOR. The fix, the rider, the pins and the
 evidence are solid; per the ladder this round's findings go to the implementer verbatim, its
 agree/dispute returns to this reviewer for the final call and the fixes.**
+
+---
+
+## FINAL DISPOSITIONS + FIX TABLE (the reviewer's final calls, 2026-09-28 — cross-model flow: findings to the implementer verbatim, its agree/dispute back, the reviewer decides and implements)
+
+The implementer AGREED on all three, offering two corrections. Both were verified at the code
+before adoption, per the authorization's own instruction:
+- **Correction 1 VERIFIED RIGHT:** `IndexTierMetricsTests` line 441 computes the TOP
+  (`readTierTop`) and correctly reads `proseTopInset` — only line 443's BOTTOM was misnamed. The
+  round-1 finding's "swap both 441/443" over-reached; the fix touches 443 alone.
+- **Correction 2 VERIFIED RIGHT by arithmetic:** for a block over N trailing blanks, exact − model
+  = (0.5 + N − N/2 − 1)·pitch = **(N−1)/2 · pitch** — the model counts the extra newlines as
+  paragraphs, each adding its half-line tail, so the under-reserve is half what the round-1
+  finding said (which neglected the tails). The doc clause carries the corrected magnitude.
+
+| Finding | Final call | What was done | Commit |
+|---|---|---|---|
+| F1 (MINOR — the U0 pin's hand-copied foot + the bottom's misnamed inset) | **CONFIRMED, correction 1 adopted** | `IndexClickCaretTests.swift`: the Read ▸ edit column's foot now reads `IndexProseColumn.readTierBottom(resting: readEditRestingTop, paneInset: PaneTextView.proseBottomInset)` (was a hand copy of `readEditRestingTop`; value-identical today, the drift seam closed, a header comment says why); `IndexTierMetricsTests.swift:443`: `proseTopInset` → `proseBottomInset` (same constant by definition — name only); line 441 untouched | `9cf71665` |
+| F2 (NIT — the garbled doubled comment) | **CONFIRMED** | The stale two-line duplicate tail deleted (`IndexTierMetricsTests.swift`); the surviving sentence is complete; comment-only | `58d0d021` |
+| F3 (NIT — the estimate's ≥2-blanks direction undocumented) | **CONFIRMED, correction 2 adopted** | `ProseHeightModel.shownBlankLines`' doc names both directions — ~(N−1)/2 lines SHORT over N ≥ 2 trailing blanks, ~half a line LONG for a no-trailing-newline multi-paragraph block; the plan file's RIDER HONEST BOUNDARY 3 gains a dated bracketed amendment pointing at the code doc. No formula touched | `f776f79d` |
+
+**Post-fix suite run** (machine author-free — HID idle 1,506 s, zero instances; suite-level
+`-only-testing`): `IndexClickCaretTests` + `IndexTierMetricsTests` + `IndexProseColumnTests` +
+`PaneLineMetricsScopeTests` — **✔ 16 tests in 4 suites passed, with exactly the 4 named known
+issues** (the TK2 ≥2-blanks residual, −10.0/−20.0, byte-unchanged by these fixes), `** TEST
+SUCCEEDED **`. The U0 real-click suite green with the vocabulary foot in place is the live proof
+of F1's value-identity claim. All three fixes are cleanliness/doc class — no behavior moved, no
+pin owed (stated in round 1), none turned behavior-bearing.
+
+**Round 1 CLOSED (reviewer): 3/3 findings confirmed and fixed, zero disputes, no new
+BLOCKER/MAJOR — no round 3 earned. The implementer's sanity pass over this fix diff
+(`9cf71665` + `58d0d021` + `f776f79d`) is the remaining step.**
