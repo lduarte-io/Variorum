@@ -845,7 +845,13 @@ tests at end — the touched suites + the harness; no subagents; synchronous wai
 
 ### RIDER (#154 ruled (b) — the two index faces SHOW stored blank lines at rest; implementer: the resumed `opus-implementer`, 2026-09-27)
 
-**NOT DONE (first line):** PENDING — filled at close.
+**NOT DONE (first line):** (1) **ONE residual, TextKit 2's own, not built around:** a block stored over TWO or more
+blank lines (or one that is only a newline) — TK2 lays the live editor's LAST blank line short when an empty paragraph
+precedes it, so a click there still moves the block below UP by **10 pt (Terminal) / 20 pt (Study)**; pinned as a
+named KNOWN ISSUE (it announces itself the day TK2 stops doing it); **zero blocks of that shape in the whole sample
+library** (measured, all twelve stories). (2) Markdown markers still change on going live (the held 18e's). (3) No
+KnownIssues / TEXTKIT2_NOTES / QUESTIONS / canon edits — drafted under OWED AT CLOSE (RIDER). (4) The base record's
+HONEST BOUNDARY 1 and NOT-DONE (1) (the stored blank line, +30 / +25) are SUPERSEDED by this rider, as ruled.
 
 #### RIDER LIVE STATUS
 
@@ -858,8 +864,8 @@ tests at end — the touched suites + the harness; no subagents; synchronous wai
 | R4 | Behavioural reverts (the rider committed `0b62e8cd` first; restores by checkout) | DONE — each RED in its predicted shape, restored, no revert in flight: **R-U5r-1** (the vocabulary's switch back to `.folded`) RED **49 + the 4 known** — the block below +25 / +30 / +40 again, the second paragraph's lines −25 / −30 after a middle blank, a click on the (no longer drawn) blank line lands on text (caret 353–366 of 393), U0's re-armed last-line click one line high, the scope pin (`18lc-u5r-R1.log`); **R-U5r-2** (the REPLICA alone ignores the rule) RED **51 + 4** — its fidelity arm off by exactly the blank run (25 / 30 pt), the blank-line click mapped to the text above, the lines after a middle blank (`18lc-u5r-R2.log`); **R-U5r-3** (the HEIGHT MODELS alone ignore it) RED **3 + 4** — the pure model pin (Δ 0 vs one line + gap = 30) AND U1's own edit-face calibration on the real *A Scandal in Bohemia* falls OUT of its band in both voices (Σderived/Σdrawn **0.754** Terminal / **0.762** Study vs 0.97 / 0.99 with the rider — the band is 0.8…1.25) (`18lc-u5r-R3.log`) |
 | R5 | Harness: the block-below row + the re-armed last-line click; the seeded run, both voices | DONE — built `5145fd26`: the probe's `rtI`/`rtR` frames carry the block's id as a fifth field and a new `blankH` (one stored blank line in this voice, from the vocabulary); `vw_click_read_tier` aims at the last TEXT line (`bottom − 8 − blankH`, the fixture's shape a checked precondition: the pane's text ends in `\n`) and asserts **three new rows** — the block BELOW the first click does not move; the first target, back at rest, does not move when the ring goes up; the block below the first target does not move through the ring's move. **Seeded run on the stamped rider build (app `c428ce868838`), both voices, the full order in fresh launches: Terminal 15 / 15 PASS · Study 15 / 15 PASS** — `index-click` / `readedit-click` 14 / 14 each, every new row at **0.0 pt** (Terminal Index 883.0 = 883.0 below, 737.0 = 737.0 the target at rest; Read ▸ edit 1105 / 923; Study 989 / 813, 878 / 760). The tripwires `book-landings` and `read-landing` PASS in both voices. **Two ERRORs on the way, traced, not the rider:** (1) Terminal `b5-more-roads` (`230614/`) — a ⏎ after a click never landed (len and block count unchanged, caret parked on the clicked blank line) at load average 22–24 (another agent's builds): **KnownIssues row 98's signature, a FOURTH sighting**; its stuck keystroke then landed LATE (at the quit) and minted an empty block in the dev store's *Scandal*, and the immediate retry (`231127/`) met the same class once more (1 FAIL + ERROR), leaving a second — **(2) Study `read-landing` (`231924/`) then refused its precondition** (*"the filtered column row 209"*): the two stray blocks had shifted every ordinal after block 35 by +2. REPAIRED in the app (Write, the harness's own carve road, per-step guarded: 264 → 262 blocks, len 46378 → 46376 — the harness's own earlier restore values); re-runs PASS (`232630/`, `233414/`). The harness had no `sample` before the quit (row 98's discriminator) — missed. **The new rows' red-on-old (a scratch build — a worktree at `80d415e2` with ONLY `IndexProseColumn.blankLines` flipped back to `.folded`, App/ only, the core hash identical as the harness requires — `vis-walks/2026-09-27/233956/`): `index-click` and `readedit-click` FAIL 3 each — every new row off by exactly **+25.0 pt** (one stored blank line, Terminal) on both hosts, the "target back at rest" row catching the second clicked block's own blank line.** Worktree removed. DONE |
 | R6 | Walk (both voices) incl. the no-op proof on a note with no stored blank lines | DONE — RIDER WALK below (the stamped rider build `c428ce868838`; a scratch build of the pre-rider commit `774c7cb7` for the no-op proof); captures `notes/plans/18l-screens/18lc-u5/walk/{rider-terminal,rider-study,prerider-terminal,prerider-study,fix}/`; the dev store's voice restored to Terminal; zero instances; scratch worktrees removed |
-| R7 | Closing runs (touched Mac suites + Tutorial; iOS build + the phone's `FlowParagraph` consumers — `Shared/` is touched) | NOT-STARTED |
-| R8 | Honest boundaries + self-assessment | NOT-STARTED |
+| R7 | Closing runs (touched Mac suites + Tutorial; iOS build + the phone's `FlowParagraph` consumers — `Shared/` is touched) | DONE on the final product code (tree `6af7e016`), zero app instances, the machine idle through it (HID 125 → 612 s; the other agent's load had dropped to ~4): **51 suites named literally** — the base's 49 + the Library panel's two (`FlowParagraph`'s other Mac consumer) — **✔ 345 tests in 51 suites passed with 4 known issues** (exactly the TK2 residual's four cases), `** TEST SUCCEEDED **`, 0 tests skipped (`App/Variorum/DerivedData/18lc-u5r-closing1.log`); **iOS `VariorumMobile` BUILD SUCCEEDED** (`18lc-u5r-ios.log`); **the phone's `FlowParagraph` consumer `MobileReadTests` 7 / 7 passed, unmodified** (`18lc-u5r-mobile.log`); VisualWalk's headless pins 4 tests / 2 suites + `read-tier-assertions` 5 / 5. No core run owed (zero `Sources/`) |
+| R8 | Honest boundaries + self-assessment | DONE (below) |
 
 #### RIDER WALK (USE) — dev-store Debug, both voices, per-step guarded through VisualWalk's act doors; the machine author-free (her app absent; the load was another agent's builds)
 
@@ -896,3 +902,92 @@ whose rule is *"a stored block normally ends in ONE separator newline that rende
 exactly these two hosts (one line + one gap per Sherlock block, ~5–6k pt per story) → FIX, host-scoped.
 `BookHeightManifest` (the Outline — measures the inline editor's stored text, no `FlowParagraph` tier) and
 `FlowHeightEstimate` (Read ▸ Scroll — keeps the folded default) are untouched → SAFE by construction.
+
+#### RIDER — HONEST BOUNDARIES (with numbers)
+
+1. **TK2's short last blank line** (NOT DONE 1): Study −20 pt / Terminal −10 pt, only for a block stored over ≥ 2
+   blank lines (or a lone newline). Why not imitated: the rest tier would have to copy a layout ANOMALY (bare TK2,
+   plain 0/0 style: `A\n\n` stands 50 pt where three 22-pt lines stand 66 — the final extra line fragment after an
+   empty paragraph is a 14-pt box overlapping the line above), and it would be wrong the day TK2 fixes it. The pin
+   names it (`withKnownIssue`, non-intermittent), so a fix upstream reds loudly.
+2. **The resting Index grows** by one drawn blank line per stored one — Sherlock +3,400…+6,525 pt per story in
+   Terminal (Blue Carbuncle +5,325 / +6,390 Study). The two host height models count it (R-U5r-3 shows the U1
+   calibration leaves its band without it: 0.75 / 0.76), and both landing tripwires (`book-landings`,
+   `read-landing`) PASS in both voices on the rider build.
+3. **The height model's blank term is an approximation, stated at the code:** the extent carries a newline COUNT,
+   so a block with a newline is modelled as its old paragraphs plus ONE drawn blank line — exact for the sample
+   library's shape (`text\n`), unchanged for her own notes (no newline), off by about half a line for a block with
+   internal newlines and no trailing one (a measured row replaces the estimate as soon as it draws).
+4. **A whitespace-only stored line** (`"   "`) now draws as its spaces (one line) where the tier folded it — display
+   == stored, the ruling's letter; rare.
+5. Markers (the held 18e) — unchanged by the rider.
+
+#### RIDER — SEAM FILES THIS DIFF TOUCHES (the Fable reviewer reads this first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `Shared/FlowParagraph.swift` (the phone compiles it) | `BlankLines { folded, shown }`; a DEFAULTED `blankLines:` on `paragraphs(of:)` / `paragraphsWithStarts(of:)`; the blank guard now reads it | every existing caller and its output (`.folded` default — the page, the flow, the Library panel, the phone; `MobileReadTests` 7 / 7 unmodified) |
+| `Core/Views/FlowParagraphFace.swift` | `drawnText` (a blank line draws one space — one line tall) | `font(_:)` |
+| `Surface/IndexProseColumn.swift` | `blankLines = .shown` — the ONE name; header note | the column arithmetic, `lines` |
+| `Surface/ReadTierClickPlace.swift` | reads the rule; a blank paragraph laid out as one space, offset 0, no TEXT line | the translation, text paragraphs' layout |
+| `Features/BookView/BookIndexView.swift` · `Features/ReadMode/ReadEditPane.swift` | the two read tiers draw with the rule (`drawnText`) | the live pane, paddings, click road, landing (`BookIndexEditModel` untouched — ledger row 8's fence) |
+| `Surface/ProseHeightModel.swift` · `Features/BookView/BookIndexPaneHeights.swift` · `Features/ReadMode/ReadNoteLanding.swift` | `Metrics.blankLines` (default `.folded`) + one line + gap under `.shown`; the two index builders set it | the Outline manifest, the flow, Read's page face (all `.folded`) |
+| `Core/Views/VisualWalkProbe.swift` (DEBUG) | `rtI`/`rtR` frames carry the block id (fifth field); `blankH` | the calibration, every other key |
+| Tests / Tools | `IndexTierMetricsTests` re-armed (0.0, 5 shapes, the blank-click arm, the known issue); `PaneLineMetricsScopeTests` +3; U0's `IndexClickCaretTests` click point re-armed (NAMED — assertions byte-unchanged); VisualWalk `scenarios.zsh` + README | every other suite |
+
+Zero `Sync/`, schema, `Server/`, core. No TK1 API, no rendering attributes, no identity stamp moved.
+
+#### RIDER — JUDGMENT CALLS (each reversible in a line)
+
+1. **The TK2 residual is pinned, not imitated** (BOUNDARY 1). *Reverse by* modelling TK2's short last line in the rest
+   tier (not recommended).
+2. **The height model adds one drawn blank line per block with a newline** (BOUNDARY 3). *Reverse by* a per-block
+   trailing-newline count in `Queries.BlockExtent` (a core query change — exact, but core).
+3. **U0's last-line click re-armed** to the last TEXT line (the drawn blank line under it is now a legitimate target
+   that lands ON the blank line — pinned separately). *Reverse* is not meaningful once (b) stands.
+4. **A blank line draws as one space** (`drawnText`) — an empty `Text` stands at no height. *Reverse by* a fixed-height
+   spacer (a second number to keep equal to the line height — worse).
+5. **The harness aims by the fixture's shape** (one stored blank line under each Sherlock paragraph, `blankH`) with the
+   shape a checked precondition (`nl=1` after the click), rather than a new per-block DEBUG oracle for trailing blanks.
+6. **The fixture repair** — two stray empty blocks carved from the dev store's *A Scandal in Bohemia* through the app's
+   own ⌫ carve, per-step guarded, restoring the harness's baseline (262 blocks, len 46376); the carved blocks sit in
+   that note's tray (the harness's documented residue class).
+
+#### RIDER — NOTICED, NOT TOUCHED
+
+1. **KnownIssues row 98 — a FOURTH and FIFTH sighting, and a NEW consequence:** under load average 22–24 (another
+   agent's builds) a ⏎ after a click in Write sat unprocessed, then **landed LATE** (released at the harness's quit)
+   and minted a persisted empty block in the dev store — a stuck keystroke can MUTATE the document after the act that
+   sent it is over. The harness shut the app before a `sample` (the row's discriminator) — missed twice.
+2. **Harness robustness:** `read-landing` addresses blocks by ORDINAL (`RL_WORD`), so any residue that inserts a placed
+   block shifts it into a precondition ERROR (met once, repaired). Addressing by the filter word's own row would hold.
+3. **TK2 geometry fact (for §3):** an empty paragraph's line reports typographic bounds that INCLUDE the `lineSpacing`
+   above it (`26–52` for a box drawn `30–52`); text lines' do not. The pin compares TEXT lines for that reason.
+4. The book Index's calibration pin (`BookIndexColumnHeightsTests`) uses a fixture with no stored blank lines, so it
+   cannot see the rider's model term; Read's (Sherlock) does — the new pure model pin covers both hosts.
+
+#### RIDER — OWED AT CLOSE (drafted for the orchestrator)
+
+- **QUESTIONS #154** — mark BUILT (b) at this rider (`0b62e8cd`), with the TK2 residual named.
+- **KnownIssues row 89** — close as RESOLVED (U5 + the rider), or re-word to the TK2 residual; the residual itself wants
+  an owner if it gets a row (12, the TK2 family, is the natural one).
+- **KnownIssues row 98** — the fourth/fifth sightings and the late-landing mutation (NOTICED 1).
+- **TEXTKIT2_NOTES §3 (27.0)** — the extra line fragment after an EMPTY last paragraph is a short box overlapping the
+  line above (`A\n\n` 50 pt vs 66 at 0/0; the live pane's `text\n\n` −10 / −20 pt against a resting model), and an
+  empty paragraph's line bounds include the `lineSpacing` above; pinned (`IndexTierMetricsTests`, known issue).
+- The ONE Fable ladder over base + rider.
+
+#### RIDER — SELF-ASSESSMENT
+
+**Strong:** the ruling is built exactly as scoped — ONE name (`IndexProseColumn.blankLines`) read by the two hosts, their
+replica and their height models, a defaulted parameter everywhere else, and a source-walk pin holding the scope (the
+phone never names it; `MobileReadTests` rides unmodified); the pin re-armed to 0.0 and red-on-old on the base tree (26
+issues), three reverts each red in shape (49 / 51 / 3 — the last caught by U1's own Sherlock calibration too); the
+harness's new rows red by +25 on a rider-reverted scratch build; her captures' blocks walked in both voices with every
+row identical and the block below 0.0; the no-op proof is pixel-exact (0 differing pixels, four comparisons against the
+real pre-rider commit). **Weakest points for the reviewer:** (a) the TK2 residual is a true exception to *"nothing
+moves, for any note"* — honest, pinned, absent from the sample library, but hers to know; (b) the height model's
+blank term is count-based, not exact for every shape; (c) a `Shared/` file changed (defaulted, pinned, phone suite
+green); (d) the harness's last-text-line aim depends on the fixture's one-blank-line shape (checked, not assumed);
+(e) I repaired her dev store's fixture by hand (via the app, logged). **U5 RIDER — DONE (implementer); the orchestrator's
+re-walk, then the ONE Fable ladder over base + rider.**
