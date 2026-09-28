@@ -1369,3 +1369,61 @@ Fable cold review follows your hand-back.
 
 - Deaths / resumes: none.
 - Reverts in flight: none.
+
+## ORCHESTRATOR RESUME MAP (written 2026-09-28 at her compaction warning — the transcript-proof state; a post-compaction orchestrator re-orients from THIS section + the ledger + LIVE STATUS, verifying against git, never trusting)
+
+**Seat:** Fable `/architect-phase 18l-c` orchestrator (the session that took her kickoff). Her
+standing word: she stepped away so sessions may drive the GUI (per-step guard always); she is
+reachable and answers question batches fast; **18m stays next at her paste after this round.**
+
+**DONE (all pushed):** U5 whole (base + #154(b) rider + ladder one round 0/0/1/3 + fix pass +
+sanity, zero disputes — records `18lc-u5-ladder-round1.md`); the #153 (a′) seam act
+(`4861947c`, revert-verified); U6 whole (takemania + ladder rounds 1+2, 0/0/4/8 and 0/0/2/4,
+all fixed, zero disputes, adjudicated closed — records `18lc-u6-ladder-round{1,2}.md`); the
+six stale domain comments corrected (orchestrator, `471358d6`). KnownIssues rows 89/#154
+closed gate-passed; #149–#156 all dispositioned (#150/#151/#152 ruled; #153/#154 built-closed;
+#155/#156 PROVISIONAL in her bundle); R-18l-13 settled (caret anchors editing modes, Read
+carries the page, no button — U8 builds it).
+
+**IN FLIGHT:** U7 (search in Takes) — a fresh opus-implementer building to the U7 DESIGN
+BRIEF's ten decisions; checkpoint order sent at the compaction warning. On its hand-back:
+verify against git → orchestrator hands-on walk (takemania is the fixture; search "Hyde") →
+FABLE cold review (REVIEW_PROMPT verbatim, {PHASE}=18l-c, the mechanical window note names the
+un-reviewed commits since `2deb24d8`'s predecessor... precisely: the window is everything
+since `14493cfb..` not yet reviewed minus U6's closed rounds — state it as "since `2deb24d8`,
+plus the orchestrator's `471358d6` comment fixes") → cross-model flow (findings verbatim to
+the implementer, agree/dispute back, the reviewer finals + implements, implementer sanity
+pass) → close U7 in the ledger.
+
+**THEN U8** (one design, three halves — R-18l-13's caret rule + the arrival flash (U8a,
+default ON + a setting, the wash vocabulary, ~0.3 s hold + 0.7–0.9 s opacity fade as named
+constants, Reduce Motion) + the comfort band (U8b — resting top air … ~2 lines from the
+bottom; ruled carries exact mid-band); the Takes memory's switch-outranking pins re-armed AS
+THE RULED CHANGE, each named; MAY-take KnownIssues row 94; ledger rows 4/5/5b/6/7. Editor
+seam → Fable review. Write its brief from the roster's U8 text + THE SITTING RECORD.
+
+**THEN THE CLOSEOUT RITUAL** (CLAUDE.md's, whole): results in this file; master plan row 18 +
+running order (18m next at her paste); the closeout-log paragraph (the outgoing 13y paragraph
+rolls to the archive); canon deltas — likely NONE beyond what landed live (TK2 §3 lines are
+in; zero schema, zero Sync/, marker stays 9; check AppSpec §12/§14 for whether R-18l-13
+earns a contract line — the mode-switch rule is arguably §12 surface contract: PROPOSE it to
+her at the closeout sitting rather than landing it silently, since R-18l-13 was ruled in
+chat, and canon deltas land as contract line + pointer); KnownIssues sweep (open rows this
+round owns: NONE left — verify; the U6-noticed undo-tray observation goes in her bundle, not
+a row); QUESTIONS #155/#156 + the disclaimer polish + U7's decision-6 confirm = HER BUNDLE;
+MOBILE PARITY line (expect: nothing mobile-visible beyond the Jekyll book seeding on the
+phone's first-write road — SAY that); the author handoff
+`notes/handoffs/phase-18l-c-handoff.md` (her checklist at top; the U-VIS harness runs as
+standing regression cover); **the install refresh LAST** at a zero-instance window behind the
+A1 rail (safety copy into `Backups/safety-copies/`, Release build, copy, codesign verify,
+never while her instance lives) — takemania reaches her real store at that refresh (its
+launch seed will also SYNC to her other devices; the #156 recency consequence is in her
+bundle BEFORE she meets it). Then commit, push, hard stop — she kicks off 18m.
+
+**Standing facts a successor must not re-derive:** the visual harness baseline is 15 scenarios
+× 2 voices ALL PASS (S3 retired; run `VARIORUM_VISUAL_WALK=1 Tools/VisualWalk/visual-walk.sh`
+as regression cover after each unit); WalkKit + guard.sh drive the dev-store walks (build
+walk-cap from Tools/WalkKit; the vis-walk DerivedData build is the current walk build; verify
+by symbol before walking); commits carry NO trailers; pathspec staging always; the same-file
+co-editing convention with implementers (pathspec saves it); her question-tool batches are
+≤4 with recommended-first; record her words VERBATIM same turn.
