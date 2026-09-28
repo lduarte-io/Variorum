@@ -504,10 +504,10 @@ record.
 | 2 | Machine state at start | DONE — her real-store app IS RUNNING (`/Applications/Variorum.app`, pid 18511): the walk guard and the VisualWalk harness both refuse while it lives, so the WALK and the HARNESS RUN are PENDING until a zero-instance, author-free window; everything else runs harness-first through `xcodebuild` test windows |
 | 3 | TRACE — both her shapes, measured per host | DONE — THE TRACE below (the pin's red run on `05983838`, `App/Variorum/DerivedData/18lc-u5-pin-red.log`) |
 | 4 | Red-on-old pin (the tiers' per-line geometry, both hosts, both voices) | DONE — `IndexTierMetricsTests` (2 tests × 2 voices × 3 shapes = 12 cases) RED on the pre-fix tree: **104 issues, all 12 cases** (commit: this one) |
-| 5 | THE CONSOLIDATION (one metrics home; read tier + replica + the live pane's paragraph style where hosted by the two index tiers) | IN-PROGRESS — the HOME landed `05983838` (`IndexProseColumn.lines` = `ProseLineMetrics(4, 8)`; both read tiers, the replica and Read's height manifest consume it, byte-same numbers); the PANE's adoption (host parameter + the trailing/bottom edges) is next |
+| 5 | THE CONSOLIDATION (one metrics home; read tier + replica + the live pane's paragraph style where hosted by the two index tiers) | DONE — the HOME `05983838`; the PANE's adoption this commit: `PaneSurfaceView.lineMetrics` (nil ⇒ the Write base style, byte for byte), handed `IndexProseColumn.lines` by the two index hosts only, which also pay back the pane's trailing (`livePaneTrailing`, a 5 / 1 pt bleed) and bottom (`livePaneBottom`) insets; the book pane's height model, Read's manifest and the harness probe read the same edges. Pin GREEN: 12 of 12 cases at 0.0 pt (`18lc-u5-pin-green1.log`). The stored blank line = QUESTIONS #154 (PROVISIONAL (a), no change) |
 | 6 | Harness: the four S3 XFAILs → plain PASS (labels removed) | NOT-STARTED |
 | 7 | Closing runs (touched Mac suites + `TutorialWalkTests`) | NOT-STARTED |
-| 8 | Walk (both voices) | PENDING — her app is running (row 2) |
+| 8 | Walk (both voices) | NOT-STARTED — CLEARED by the orchestrator's relay (she quit her app and is stepping away); the per-step guard binds every GUI step |
 | 9 | Self-assessment | NOT-STARTED |
 
 - Deaths / resumes: none.

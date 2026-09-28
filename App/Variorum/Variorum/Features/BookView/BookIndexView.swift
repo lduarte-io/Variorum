@@ -1208,6 +1208,22 @@ private struct BookIndexPaneNote: View {
     @MainActor static var livePaneTop: CGFloat {
         IndexProseColumn.livePaneTop(resting: restingTop, paneInset: PaneTextView.proseTopInset)
     }
+    /// 18l-c U5: the two edges 13u2 B left — the pane's prose ENDS where the
+    /// read tier's does (one measure, one wrap; negative = the pane's frame
+    /// reaches past the row by its own inset's excess), and its last line
+    /// sits as far above the next block as the read tier's.
+    @MainActor static var livePaneTrailing: CGFloat {
+        IndexProseColumn.livePaneTrailing(
+            resting: resting, paneInset: PaneTextView.proseTrailingInset)
+    }
+    @MainActor static var readTierBottom: CGFloat {
+        IndexProseColumn.readTierBottom(
+            resting: restingTop, paneInset: PaneTextView.proseBottomInset)
+    }
+    @MainActor static var livePaneBottom: CGFloat {
+        IndexProseColumn.livePaneBottom(
+            resting: restingTop, paneInset: PaneTextView.proseBottomInset)
+    }
     /// 13u4 UNIT F3: everything of this row that is NOT the block column — the
     /// title/date header with its padding, the body `VStack`'s gap under it,
     /// and the note's own vertical padding. The reservation is a whole-ROW
@@ -1407,7 +1423,10 @@ private struct BookIndexPaneNote: View {
                 // 18l U0 (her Index-click report): the click's own place; a
                 // LANDING's block start (18l-b U4, #153); `.leave` for a pane's
                 // own focus request.
-                caretOnGoingLive: edit.caretLanding(forVariant: variantID))
+                caretOnGoingLive: edit.caretLanding(forVariant: variantID),
+                // 18l-c U5 (her report: the whitespace moved as she clicked in):
+                // the read tier's own line metrics — the tiers' ONE vocabulary.
+                lineMetrics: IndexProseColumn.lines)
                 #if DEBUG
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
                     BookIndexGeometry.recordProseLeading(
@@ -1419,10 +1438,13 @@ private struct BookIndexPaneNote: View {
                 // the read tier's did — the host pays back only the remainder
                 // of the pane's own inset, so clicking into a block does not
                 // step the text sideways (it stepped ~11 pt here, measured).
+                // 18l-c U5: …and ENDS where it did, and stands as far above the
+                // next block — the trailing and bottom insets paid back too (the
+                // pane's measure was 11 pt short and its foot 6 pt deep).
                 .padding(.leading, Self.livePaneLeading)
-                .padding(.trailing, Self.resting)
+                .padding(.trailing, Self.livePaneTrailing)
                 .padding(.top, Self.livePaneTop)
-                .padding(.bottom, Self.restingTop)
+                .padding(.bottom, Self.livePaneBottom)
                 // (17o batch c's host ring RETIRED at 13u2 UNIT B — the pane
                 //  draws the indicator itself, so this was a second ring.)
         } else {
@@ -1456,7 +1478,7 @@ private struct BookIndexPaneNote: View {
             .padding(.leading, Self.readTierLeading)
             .padding(.trailing, Self.resting)
             .padding(.top, Self.readTierTop)
-            .padding(.bottom, Self.restingTop)
+            .padding(.bottom, Self.readTierBottom)
             .contentShape(Rectangle())
             // **18l U0 — the click brings its PLACE** (her report: *"I click
             // on top of a line of text [and] my cursor moves to the empty
@@ -1469,7 +1491,7 @@ private struct BookIndexPaneNote: View {
                 source: text,
                 textInsets: EdgeInsets(
                     top: Self.readTierTop, leading: Self.readTierLeading,
-                    bottom: Self.restingTop, trailing: Self.resting)
+                    bottom: Self.readTierBottom, trailing: Self.resting)
             ) { offset in
                 guard let variantID = row.variantID, !row.variantLocked else { return }
                 onTap()

@@ -90,14 +90,6 @@ nonisolated struct ProseLineMetrics: Equatable, Sendable {
         style.paragraphSpacing = textKitParagraphSpacing
         return style
     }
-
-    /// Does `style` lay lines out exactly as these metrics say? (The pane's
-    /// change gate — a style carrying other numbers must be re-applied.)
-    func describes(_ style: NSParagraphStyle?) -> Bool {
-        guard let style else { return false }
-        return style.lineSpacing == lineSpacing
-            && style.paragraphSpacing == textKitParagraphSpacing
-    }
 }
 
 nonisolated enum IndexProseColumn {

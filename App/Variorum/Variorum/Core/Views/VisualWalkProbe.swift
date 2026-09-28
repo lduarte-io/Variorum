@@ -368,10 +368,12 @@ enum VisualWalkProbe {
             resting: IndexProseColumn.readEditRestingTop, paneInset: PaneTextView.proseTopInset)
         let leading = IndexProseColumn.readTierLeading(
             resting: IndexProseColumn.readEditResting, paneInset: PaneTextView.proseLeadingInset)
+        let bottom = IndexProseColumn.readTierBottom(
+            resting: IndexProseColumn.readEditRestingTop, paneInset: PaneTextView.proseBottomInset)
         func column(_ row: CGRect) -> CGRect {
             CGRect(x: row.minX + leading, y: row.minY + top,
                    width: row.width - leading - IndexProseColumn.readEditResting,
-                   height: row.height - top - IndexProseColumn.readEditRestingTop)
+                   height: row.height - top - bottom)
         }
         let live = ReadModeOracle.liveBlockID
         var offset: (dx: CGFloat, dy: CGFloat, how: String)?

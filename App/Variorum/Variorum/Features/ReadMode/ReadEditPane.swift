@@ -241,6 +241,21 @@ private struct ReadEditBlock: View {
         IndexProseColumn.livePaneTop(
             resting: restingTop, paneInset: PaneTextView.proseTopInset)
     }
+    /// 18l-c U5: the two edges 13u2 B left — one measure, one foot (the book
+    /// Index's twin; `IndexProseColumn` says why the trailing one may be
+    /// negative).
+    @MainActor static var livePaneTrailing: CGFloat {
+        IndexProseColumn.livePaneTrailing(
+            resting: restingLeading, paneInset: PaneTextView.proseTrailingInset)
+    }
+    @MainActor static var readTierBottom: CGFloat {
+        IndexProseColumn.readTierBottom(
+            resting: restingTop, paneInset: PaneTextView.proseBottomInset)
+    }
+    @MainActor static var livePaneBottom: CGFloat {
+        IndexProseColumn.livePaneBottom(
+            resting: restingTop, paneInset: PaneTextView.proseBottomInset)
+    }
 
     let model: BlockTOCViewModel
     let tokens: VoiceTokens
@@ -306,15 +321,21 @@ private struct ReadEditBlock: View {
                             blockID: row.blockID, variantID: variantID,
                             offset: range.location)
                     },
-                    caretOnGoingLive: model.caretLanding(forVariant: variantID))
+                    caretOnGoingLive: model.caretLanding(forVariant: variantID),
+                    // 18l-c U5 (her report: *"some words get compressed and
+                    // there's different spacing"*): the read tier's own line
+                    // metrics — the tiers' ONE vocabulary.
+                    lineMetrics: IndexProseColumn.lines)
                     // 13u2 UNIT B (her item 19): the live pane's PROSE lands
                     // exactly where the read tier's did — the host pays back
                     // only the remainder of the pane's own inset, so clicking
-                    // into a block does not step the text sideways.
+                    // into a block does not step the text sideways. 18l-c U5:
+                    // on the trailing and bottom edges too (one measure — the
+                    // pane's was 11 pt short — and one foot).
                     .padding(.leading, ReadEditBlock.livePaneLeading)
-                    .padding(.trailing, ReadEditBlock.restingLeading)
+                    .padding(.trailing, ReadEditBlock.livePaneTrailing)
                     .padding(.top, ReadEditBlock.livePaneTop)
-                    .padding(.bottom, ReadEditBlock.restingTop)
+                    .padding(.bottom, ReadEditBlock.livePaneBottom)
                 // (17o batch c's own host ring RETIRED at 13u2 UNIT B: the
                 //  pane draws the indicator itself, in the same shape and the
                 //  same token, so this overlay was a SECOND concentric ring —
@@ -343,7 +364,7 @@ private struct ReadEditBlock: View {
                 .padding(.leading, ReadEditBlock.readTierLeading)
                 .padding(.trailing, ReadEditBlock.restingLeading)
                 .padding(.top, ReadEditBlock.readTierTop)
-                .padding(.bottom, ReadEditBlock.restingTop)
+                .padding(.bottom, ReadEditBlock.readTierBottom)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 // **THE FIRST-CLICK HIGHLIGHT** (her item 19): a block chosen
                 // from the index column washes, and that is NOT the editing
@@ -363,7 +384,7 @@ private struct ReadEditBlock: View {
                     textInsets: EdgeInsets(
                         top: ReadEditBlock.readTierTop,
                         leading: ReadEditBlock.readTierLeading,
-                        bottom: ReadEditBlock.restingTop,
+                        bottom: ReadEditBlock.readTierBottom,
                         trailing: ReadEditBlock.restingLeading),
                     onClick: onTap))
                 .help(row.variantLocked

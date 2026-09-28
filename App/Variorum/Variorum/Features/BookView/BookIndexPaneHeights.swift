@@ -205,9 +205,14 @@ final class BookIndexPaneHeights {
     /// them so a reader can check each one against the surface:
     /// the block column's `VStack(spacing: 8)` and each paragraph's
     /// `.lineSpacing(4)`; the note's `.padding(.horizontal, 10)`; the block
-    /// row's `readTierLeading` / `resting` / `readTierTop` / `restingTop`.
+    /// row's `readTierLeading` / `resting` / `readTierTop` / `readTierBottom`.
+    /// 18l-c U5: the paragraphs' line spacing is READ from the tiers' one
+    /// vocabulary (`IndexProseColumn.lines`) rather than restated — the live
+    /// pane lays out with the same number now, and two copies of one number
+    /// is the drift seam that vocabulary closes. (`blockGap` is the note's
+    /// own block column, a host spacing, not a line metric.)
     static let blockGap: CGFloat = 8
-    static let paragraphLineSpacing: CGFloat = 4
+    static let paragraphLineSpacing: CGFloat = IndexProseColumn.lines.lineSpacing
     static let noteHorizontalPadding: CGFloat = 10
 
     /// The metrics at a pane content width.
@@ -248,7 +253,9 @@ final class BookIndexPaneHeights {
         let blockTop = IndexProseColumn.readTierTop(
             resting: IndexProseColumn.bookIndexRestingTop,
             paneInset: PaneTextView.proseTopInset)
-        metrics.blockChrome = blockTop + IndexProseColumn.bookIndexRestingTop
+        metrics.blockChrome = blockTop + IndexProseColumn.readTierBottom(
+            resting: IndexProseColumn.bookIndexRestingTop,
+            paneInset: PaneTextView.proseBottomInset)
         metrics.emptyBlockLine = lineHeight + paragraphLineSpacing
         metrics.emptyNote = lineHeight + paragraphLineSpacing
         return metrics

@@ -864,6 +864,18 @@ extension PaneTextView {
     /// below its own top edge. No fragment padding on this axis; the
     /// container inset alone.
     static let proseTopInset: CGFloat = takeSurfaceInset
+
+    /// **18l-c U5 — the same two facts on the OTHER two edges**, which 13u2 B
+    /// did not need and nobody paid back: where a pane's prose ENDS, short of
+    /// its own trailing edge, and how far its last line's bottom sits above
+    /// its own bottom edge. A take pane's placement is SYMMETRIC (its
+    /// `ProseGutter` is `minGutter: takeSurfaceInset` both sides, and AppKit's
+    /// fragment padding pads both ends of a line), so these are the leading
+    /// and top numbers again — named, so a host that must line up with an
+    /// edge reads THAT edge's name, and pinned against a real surface
+    /// (`IndexProseColumnTests`).
+    static let proseTrailingInset: CGFloat = proseLeadingInset
+    static let proseBottomInset: CGFloat = proseTopInset
 }
 
 // MARK: - Where a pane's caret lands when it takes the ring
@@ -1074,6 +1086,19 @@ struct PaneSurfaceView: View {
     /// caret sits inside a pane that liveness already reached. Nothing but
     /// the takes board's room click sets it.
     var caretToEndToken: Int = 0
+    /// **18l-c U5 — HOW THIS PANE SPACES ITS LINES, when its HOST says**
+    /// (her report: *"when you click onto text to edit, the whitespace around
+    /// it moves around"*). nil — every host but two, and the default — is the
+    /// Write editor's base paragraph style (`EditorDocument.baseParagraphStyle`),
+    /// byte for byte as before: the Takes cards and article, the lenses,
+    /// Compare, the Write takes panel, Canvas, the Blocks workbench. The two
+    /// index-like hosts (the book Index, the note's Read ▸ edit) render a block
+    /// at rest as read-cheap `Text` and swap in THIS pane on a click, so they
+    /// hand it their read tier's own metrics (`IndexProseColumn.lines`) and the
+    /// block goes live without re-spacing under her pointer. A surface's
+    /// metrics are its host's call, through this one parameter — never a
+    /// global, never a per-view guess.
+    var lineMetrics: ProseLineMetrics? = nil
     @State private var height: CGFloat = 24
     @State private var canaryMessage: String?
     /// 13d batch 4 (A23/A24): the two this-Mac editor-behaviour settings.
@@ -1112,7 +1137,8 @@ struct PaneSurfaceView: View {
                 onSelectionChange: onSelectionChange,
                 caretOnGoingLive: caretOnGoingLive, menuItems: menuItems,
                 onMeasuredHeight: onMeasuredHeight,
-                caretToEndToken: caretToEndToken)
+                caretToEndToken: caretToEndToken,
+                lineMetrics: lineMetrics)
                 // EXACT height, not a floor (13b 3F, AD-7): an
                 // NSViewRepresentable ACCEPTS a tall proposal, so in any
                 // composition whose row is taller than the text (the margin
@@ -1174,11 +1200,36 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     var menuItems: (() -> [PaneTextView.MenuItemSpec])?
     var onMeasuredHeight: ((CGFloat) -> Void)?
     var caretToEndToken: Int = 0
+    /// 18l-c U5: the host's line metrics (nil = the Write editor's base
+    /// style — every host but the two index-like tiers).
+    var lineMetrics: ProseLineMetrics?
+
+    /// The paragraph style this pane lays out with — the host's, or the ONE
+    /// base style every other surface shares.
+    private var paragraphStyle: NSParagraphStyle {
+        lineMetrics?.paragraphStyle ?? EditorDocument.baseParagraphStyle
+    }
+
+    /// The base attributes this pane writes — `EditorDocument.baseAttributes`
+    /// exactly, with the paragraph style swapped only when the host set one.
+    private var baseAttributes: [NSAttributedString.Key: Any] {
+        var attributes = EditorDocument.baseAttributes
+        if lineMetrics != nil { attributes[.paragraphStyle] = paragraphStyle }
+        return attributes
+    }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
     func makeNSView(context: Context) -> PaneTextView {
         let view = PaneTextView.makeTakeSurface()
+        // 18l-c U5: the host's line metrics, BEFORE the string arrives — the
+        // text takes the typing attributes, so every character (and every one
+        // she types later) carries them. No host metrics ⇒ nothing written:
+        // the factory's base style stands byte for byte.
+        if lineMetrics != nil {
+            view.defaultParagraphStyle = paragraphStyle
+            view.typingAttributes = baseAttributes
+        }
         view.delegate = context.coordinator
         context.coordinator.onMeasuredHeight = onMeasuredHeight
         context.coordinator.install(
@@ -1257,16 +1308,25 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         // font test alone could never notice it — the style test is the
         // second half of the same "our base attributes moved" question, and
         // the re-attribution below is exactly what a gap change needs.
+        //
+        // 18l-c U5: the test is against THIS pane's style — the host's line
+        // metrics where it set them, else the base — and it now asks the line
+        // spacing too (the index hosts' style carries 4; every other pane's is
+        // the base's 0 on both sides, so for them this is the same decision it
+        // always was). A host's style changing is the same "our base
+        // attributes moved" question, and takes the same road.
+        let style = paragraphStyle
         if view.font != EditorDocument.baseFont
-            || view.defaultParagraphStyle?.paragraphSpacing
-                != EditorDocument.baseParagraphStyle.paragraphSpacing {
+            || view.defaultParagraphStyle?.paragraphSpacing != style.paragraphSpacing
+            || view.defaultParagraphStyle?.lineSpacing != style.lineSpacing {
+            let attributes = baseAttributes
             view.font = EditorDocument.baseFont
-            view.defaultParagraphStyle = EditorDocument.baseParagraphStyle
-            view.typingAttributes = EditorDocument.baseAttributes
+            view.defaultParagraphStyle = style
+            view.typingAttributes = attributes
             if let storage = view.textStorage, storage.length > 0 {
                 storage.beginEditing()
                 storage.addAttributes(
-                    EditorDocument.baseAttributes,
+                    attributes,
                     range: NSRange(location: 0, length: storage.length))
                 // 13g batch 2 (L7): the base refresh flattens the markdown
                 // face; re-derive it in the same transaction, in the new voice.

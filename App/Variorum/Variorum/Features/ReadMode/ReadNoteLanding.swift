@@ -248,7 +248,10 @@ final class ReadNoteHeights {
             prose = contentWidth - leading - IndexProseColumn.readEditResting
             metrics.blockChrome = IndexProseColumn.readTierTop(
                 resting: IndexProseColumn.readEditRestingTop,
-                paneInset: PaneTextView.proseTopInset) + IndexProseColumn.readEditRestingTop
+                paneInset: PaneTextView.proseTopInset)
+                + IndexProseColumn.readTierBottom(
+                    resting: IndexProseColumn.readEditRestingTop,
+                    paneInset: PaneTextView.proseBottomInset)
             metrics.rowSpacing = 2
         case .page:
             // `ReadPageBlock`: the page serif at `(16 × scale).rounded()`,
