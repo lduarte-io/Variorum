@@ -2079,8 +2079,9 @@ struct TakesArticleScrollTests {
     /// `aPageLeftAtRestComesBackAtRestThenRevealsHerBlock`, re-armed with it).
     /// (Named `theTopStandDownHoldsInTheAppsOrderToo` until the U8 ladder's
     /// R1-1 rename — the stand-down is retired; the new name covers all four
-    /// arms: the same-block entry, the moved-block win, the first entry and
-    /// the bloom each keep their landing alive at a TOP memory.)
+    /// arms: the same-block entry, the moved-block win and the bloom each
+    /// keep their landing alive at a TOP memory, and the first entry at NONE
+    /// — its arm is the no-memory control (`remembered: nil`).)
     @Test func aTopMemoryInTheAppsOrderKeepsEveryLandingAlive() {
         // The app's order at a TOP memory, the SAME block: R-18l-13 — it lives.
         let same = freshBoard("top-app-same", lastCurrentRow: "was-here")

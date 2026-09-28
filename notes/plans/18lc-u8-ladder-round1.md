@@ -170,3 +170,15 @@ renamed `aTopMemoryInTheAppsOrderKeepsEveryLandingAlive`'s doc says all four arm
 their landing alive at a TOP memory" — the first-entry arm runs with NO memory
 (`remembered: nil`, the no-memory control). "at a TOP memory or none" would make the doc
 exact; the name reads fine either way.
+
+---
+
+## THE REVIEWER'S FINAL WORD (round close)
+
+The sanity item is CONFIRMED — verified against the arm's own body (`remembered: nil`,
+"no memory ⇒ nothing to stand down for") — and LANDED: the doc note now says the three
+memory arms hold at a TOP memory and the first entry at NONE, naming it the no-memory
+control. Doc-only, inside a comment this round itself added; the pin body and name are
+untouched, so no run is owed beyond the two 112/10 greens already recorded. Nothing else
+was raised. **Round 1 CLOSES: 6 findings, 6 confirmed-and-fixed, zero disputes, sanity
+CLEAN, one sanity doc word landed.**
