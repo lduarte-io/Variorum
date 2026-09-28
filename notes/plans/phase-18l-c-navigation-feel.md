@@ -1615,6 +1615,53 @@ FABLE cold review follows (editor seam).
 - Reverts in flight: none.
 - Machine at start (2026-09-28): zero `Variorum.app` instances (pgrep, by path), HID idle 1322 s — the author away (her overnight authorization).
 
+### THE TRACE (road A on the mode-switch door) AND THE DESIGN, decided before a line was built
+
+**Road A, traced at the code (U7's pin measured it on a mounted board):** a mode switch into Takes mounts a
+fresh board; `TakesChoreographer.consumeLandings`' N9 arm rings the note's current block and — when the entry is
+not the note's OPENING (R-18l-1: a note-open never reaches this line) — calls `landArticle(on:)` with the `.entry`
+kind. `TakesArticleScroll.resolveEntryLandingAgainstTheMemory` then weighs it: a DIFFERENT block than the one
+current at the last showing outranks the memory (R-Q20 — the restore never runs, the page opens at the top, the
+landing reveals); the SAME block STANDS DOWN (`articleLanding = nil` — R-Q21's "exactly as she left it"). When
+she had scrolled her block off that page, the restored page does not hold its row, the lazy column never builds
+its pane, and the take the authority calls live has no text view: *"tapping keys won't make you edit"*. **The
+stand-down IS road A**, and R-18l-13 supersedes exactly it.
+
+**Since R-18l-1 (18l U0c) the `.entry` kind is the mode-switch landing by construction** — the opening's arrival
+never calls `landArticle` (`openingLanding` non-nil ⇒ no landing, the page is the restore's). So the unit keys
+all three halves on that kind (Takes) and on the same non-opening arrival fact on Write and Read (their bare
+arrivals / seeds); clicks (`.bloom`), find steps (`.find`) and note-opens keep their shipped reveals. (The book
+spread's Takes page mounts the same board, but the book registers no note detail — traced: no `registerDetail`
+in `Features/BookView/` — so the router's current-block fact is never that page's note and its N9 arm makes no
+entry landing; the kind stays the note mode switch's alone.)
+
+**THE CARET RULE, as built — design (A), PROVISIONAL on its one open edge (QUESTIONS #158):** the same-block
+entry no longer stands down; it RIDES THROUGH THE RESTORE exactly as the bloom door has since 17q R1-2 — the page
+she left comes back, and the entry landing then reveals her block only if that page does not hold it (banded).
+Write's own arrival is the same shape (its session anchor, then #98(a)'s reveal of a caret off it — "Takes joins
+Write", #116(c)), so the memory still PLACES the page when the caret's block is on it and never OUTRANKS the
+caret. R-Q20's moved-block win is untouched (the restore never runs; ONE move). **(B), the alternative:** a mode
+switch never consults the memory at all — the page always opens at the top and reveals the block (every plain
+round trip moves the page, R-Q21's exact page gone on this road); one line (`landingOutranks` answers true for
+every entry). Built (A) because it is Write's shape and moves the page least.
+
+**THE BAND (b):** one pure brain, `Surface/ComfortBand.swift` — a surface's resting TOP AIR at the top edge and
+`bottomLines = 2` of its own line height at the bottom (NAMED CONSTANTS); a target resting inside stays EXACTLY
+where it is; outside, it is clamped to the nearest edge; a target TALLER than the band keeps its resolved place
+(the carry's tall-block rule and R-Q1's tall-row rule stand — a named boundary). Per surface: Write (top air =
+the text container's own 24-pt inset, read live; the reveal's "line at the top" clamps to it — and the carried
+placement clamps), Takes (top air = the article column's 18-pt top padding, now ONE named constant — KnownIssues
+row 94's remedy sketch, taken on this road), Read's two faces (a carried fraction clamped in fraction space).
+
+**THE FLASH (a):** one pure brain, `Surface/ArrivalFlash.swift` — `hold` 0.3 s, `fade` 0.8 s (NAMED CONSTANTS),
+opacity only, as a pure `opacity(at:)` both faces sample; the face is the BLOCK-HIGHLIGHT's own vocabulary (the
+`wash` fill + the `accent` border — Write's `renderSelection` face, legible over a surface that is already washed,
+the way Read ▸ edit's selected row is); Write draws it as a decor-layer rect over the caret's LINE (an overlay
+below the text — never a rendering attribute), Takes over the landed block's cell, Read over the landed row
+(both faces). Setting: `arrival_flash` (synced, read-time default ON, "1"/"0" — the `seams_visible` /
+`follow_the_scroll` shape of the `receipt_style` precedent). Reduce Motion: the DISCREET NON-ANIMATED variant —
+the highlight shows unanimated for the same total and then goes (JUDGMENT CALL; "no flash" is one line).
+
 ## ORCHESTRATOR RESUME MAP (written 2026-09-28 at her compaction warning — the transcript-proof state; a post-compaction orchestrator re-orients from THIS section + the ledger + LIVE STATUS, verifying against git, never trusting)
 
 **Seat:** Fable `/architect-phase 18l-c` orchestrator (the session that took her kickoff). Her
