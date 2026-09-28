@@ -38,8 +38,18 @@ struct TakesFindBar: View {
                 .frame(maxWidth: 300)
                 // ⏎ steps forward, ⇧⏎ back — the Write bar's keys. The field
                 // KEEPS the keyboard, so ⏎ keeps stepping (decision 1).
+                // The ⇧ is read off the EVENT that fired this submit (the
+                // Return keyDown, `NSApp.currentEvent`) — its flags carry
+                // what was pressed WITH the key, so a quick ⇧-tap, a key
+                // repeat or a macro cannot lose the release race. The class
+                // property reads the LIVE session state and loses it: under
+                // a transient synthetic ⇧⏎ it read no shift and the step
+                // went FORWARD (the U7 ladder round 1's sanity item; runs
+                // 090640 red · 093149 green; revert-verified 094111). Live
+                // state stays the fallback for a submit no event fired.
                 .onSubmit {
-                    if NSEvent.modifierFlags.contains(.shift) { find.previous() } else { find.next() }
+                    let flags = NSApp.currentEvent?.modifierFlags ?? NSEvent.modifierFlags
+                    if flags.contains(.shift) { find.previous() } else { find.next() }
                 }
                 // Esc closes; the keyboard goes back to the live take.
                 .onExitCommand { find.close() }

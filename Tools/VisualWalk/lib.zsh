@@ -48,6 +48,10 @@ vw_abort() {
   ABORTING=1
   vw_log "ABORT: $*"
   print -r -- "ABORTED: $*" >> $RUN_DIR/aborted
+  # 18l-c U7 ladder (the sanity pass's optional, taken): an abort inside a scenario that was
+  # HOLDING a synthetic modifier (the held-modifier rule — WalkKit README) must not leave it
+  # down on her machine; releasing an un-pressed key is a no-op.
+  osascript -e 'tell application "System Events" to key up shift' >/dev/null 2>&1
   [[ -n $SCN ]] && { SCN_STATUS=ERROR; SCN_NOTE="aborted: $*"; vw_scenario_end }
   vw_voice_after_abort "$*"
   vw_report

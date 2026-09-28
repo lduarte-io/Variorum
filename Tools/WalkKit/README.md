@@ -250,6 +250,11 @@ the act's moment; a human's keeps resetting. Only resume when it climbs.
 dequeues the key, so an app road that reads `NSEvent.modifierFlags` — the LIVE session state, not
 the event's own flags — sees no modifier and acts unmodified (the Takes find's ⇧⏎ stepped
 FORWARD). A modifier the app must SEE at action time is held the way a hand holds it: `key down
-shift` · the key · `key up shift` as separate acts (the VisualWalk `takes-find` D2 rows). If a
-guard aborts inside that window the synthetic session shift stays down until any real shift press
-clears it — keep the window small.
+shift` · the key · `key up shift` as separate acts. If a guard aborts inside that window the
+synthetic session shift stays down until any real shift press clears it — keep the window small
+(`vw_abort` releases a held synthetic shift as a belt). **App-side, the robust road is reading
+the EVENT's own flags** (`NSApp.currentEvent?.modifierFlags` in the handler — the Takes find
+bar since the U7 ladder; runs 090640 red · 093149 green · revert 094111): the event carries what
+was pressed WITH the key, so even the transient form drives it, and a human's quick ⇧-tap cannot
+lose the release race. The held-modifier rule remains for roads that genuinely read the LIVE
+state (`NSEvent.modifierFlags` the class property) and for driving other apps.
