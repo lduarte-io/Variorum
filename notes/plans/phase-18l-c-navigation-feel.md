@@ -547,7 +547,8 @@ record.
 | U5 (session 1, base + the #154 rider) | **CLOSED 2026-09-28** — built · double-walked · ladder one round 0/0/1/3 clean (zero disputes; sanity PASS); rows 89 + #154 closed with the gate PASSED |
 | The #153 (a′) seam act (ledger row 8) | **DONE 2026-09-28 (`4861947c`)** — the one line built (the landing takes the note's entry rule), the pin's (a′) arm added, behavioural revert RED in the predicted shape (`.start ≠ .offset(42)`, the new arm alone) then restored; row-36 entry scrubs added to all three suite tests (a stale persisted key from the pre-scrub run surfaced the class — noted at the row); suite 3/3 green |
 | U6 (session 2) | **CLOSED 2026-09-28** — built · double-walked · ladder two rounds closed at adjudication (records `18lc-u6-ladder-round{1,2}.md`) |
-| U7 (brief first) → U8 | NOT-STARTED |
+| U7 (brief first) | **CLOSED 2026-09-28** — built to the ten decisions · orchestrator-walked · FABLE ladder one round 0/0/1/5 cross-model, zero disputes, sanity CLEAN + the raised item measured-and-fixed (records `18lc-u7-ladder-round1.md`) |
+| U8 (session 4) | IN FLIGHT — brief below (THE U8 BRIEF), spawned 2026-09-28 |
 
 ## U5 RECORD (implementer: `opus-implementer`, 2026-09-27)
 
@@ -1502,6 +1503,94 @@ her prose (the field veto covering the ⌘G road too; #157 (1) amended with the 
 idle CLIMBS before concluding anyone is at the machine (README line added); the scope chip
 took a plain guarded `cliclick` click cleanly (the AXPress quirk is the harness's own road).
 **U7 ACCEPTED at the walk; the FABLE cold review follows (the ladder's round 1).**
+
+## THE U8 BRIEF (orchestrator → a fresh `opus-implementer`, 2026-09-28; ONE unit, ONE session — mode-switch feel, three halves of one design)
+
+**READ FIRST, in order, in your own context (reading is never delegated):** (1) this file's
+HER KICKOFF MESSAGE (items 3 and 4 are yours), BINDING PRINCIPLES (P-1…P-9), THE SITTING
+RECORD **whole** — R-18l-13 is your ruled center, her verbatim words included — the unit
+roster's **U8 entry** (the design text this brief builds to), ENVIRONMENT TRAPS (verbatim
+binding), THE LEDGER rows 4 / 5 / 5b / 6 / 7, the U7 RECORD's **LEDGER ROW 7** section and
+HONEST BOUNDARIES row 8 (road A is YOURS to remove), and the U5/U7 records' shapes (what a
+unit record owes). (2) `notes/SessionResiliencyProtocol.md` whole — commit per piece from the
+first commit, LIVE STATUS from the first commit, push after every commit, no trailers,
+pathspec-limited staging, **stage ONLY your `## U8 RECORD` region of this file** (the
+orchestrator co-edits it). (3) `notes/TEXTKIT2_NOTES.md` whole (editor seam). (4) The code:
+`Features/Takes/TakesArticleScroll.swift` WHOLE (the landing half AND the restore half — you
+change the mode-switch ENTRY rule, the R-Q21 page restore for re-opens SURVIVES),
+`TakesViewModel` + `TakesChoreographer` + `TakesBoardView` (entry roads), `EditorRouter`
+(the article memories, 17q), `Surface/LandingAuthority.swift` + `LandingAim.swift`,
+`Surface/PaneSurface.swift` (the flash face rides panes; U7's `findFace` shows the
+one-nil-default-parameter pattern), Write's caret anchor (#116(c) — the rule Takes JOINS),
+Note Read's carry + Index's landing (`BookIndexEditModel.takePendingLiveBlock`), the wash
+vocabulary (`TakesCellChrome`, the changing-block wash tokens in `Theme/`),
+`Queries/AppearanceQueries.swift` + `ReceiptStyleCopy.swift`/`AppSettingsView` (the synced-
+setting precedent for the flash's switch), KnownIssues rows 94 and 98, QUESTIONS #150/#153/
+#157 (context), and the pins you will re-arm: the Takes memory's switch-outranking pins
+(R-Q20/R-Q21's mode-switch arms), `TakesFindBoardTests.ledgerRowSevenTracedAndAFindStepMakesTheTakeTypeable`
+(trace half) and `escWithNoBuiltPaneForTheRingIsANamedBoundary` (the `withKnownIssue`
+tripwire — it is DESIGNED to red when you land; that red is your confirmation, not a
+regression).
+
+**THE THREE HALVES (one design; the roster's U8 entry is the binding text):**
+- **(0) THE CARET RULE (R-18l-13, settled, NOT provisional):** entering an EDITING mode by a
+  mode switch lands at the caret's block — Takes joins Write's anchor; a mode's private
+  scroll memory NEVER outranks a mode switch (it survives only for note re-opens, where the
+  page wins — #150(b) ratified); Read's page-continuity carry STANDS (switching to Read keeps
+  the text she was looking at). Consequence you own: ledger row 7's road A dies on the
+  mode-switch door (the entry landing reveals the caret's block, so the ring's row is always
+  built and typing works — her "tapping keys won't make you edit" ends here). The two pins
+  above and every pin asserting the OLD outranking are re-armed AS THE RULED CHANGE, each
+  named in your record with its old and new assertion — never silently edited.
+- **(a) THE FLASH:** after a mode switch's entry landing settles, a brief highlight on the
+  caret's line (Write) / the current block's face (Takes, Read, Index) — the EXISTING
+  landing/wash vocabulary, never a new color system; **hold ≈ 0.3 s, opacity-only fade
+  ≈ 0.7–0.9 s, both NAMED CONSTANTS** (taste = one line); **default ON with a setting to turn
+  it off (her ruling)** — follow the `receipt_style` precedent (a synced `setting` key,
+  read-time default, enum value, no seed; the ONE allowed `Sources/` touch is that key's read
+  in Queries + its write through the existing settings road; if you find a strong reason the
+  switch should be LOCAL instead, PROPOSE before building — the in-batch fork rule); respects
+  Reduce Motion (no flash, or a discreet non-animated variant — your call, recorded).
+- **(b) THE COMFORT BAND:** a MODE-SWITCH landing clamps its resolved reveal so the target
+  line rests inside a band — the surface's resting top air at the top edge, ~2 lines of room
+  at the bottom, both NAMED CONSTANTS; a mid-band carry stays EXACT (the ruled
+  viewport-fraction carries untouched inside the band); scope is mode-switch landings ONLY
+  (clicks, find steps, note-opens keep their shipped reveals). Any ruled pin the clamp
+  collides with (`ModeSwitchCarry`, R-Q20/R-Q21) is FLAGGED to the orchestrator before you
+  change it, never edited silently — except the two named above, which this brief re-arms as
+  the ruled change.
+- **MAY-take rider:** KnownIssues row 94 (the Takes head reveal eats the 18-pt top inset —
+  its remedy sketch IS this band's top edge). Decide at the unit; record either way; if
+  taken, its own pin.
+
+**FENCES:** U7's find machinery is CLOSED — `TakesFindPlan`/`TakesFindController`/
+`TakesFindBar` and `PaneFindFace` are not yours except where the flash face composes beside
+them; the `.find` landing kind stays weighed-against-nothing; zero `Shared/`, zero `Sync/`,
+zero schema, zero mobile; the ONE `Sources/` touch is the setting key named above; no mass
+on `TakesViewModel` (P-9 — U7's four-line door is the pattern); no TK1 API, no rendering
+attributes (a flash on a READ tier rides the attributed string or a SwiftUI overlay — prefer
+the overlay/wash road the changing-block wash already owns; TEXTKIT2_NOTES binds the live
+pane). A sealed/locked note changes nothing here (landings are reads).
+
+**EVIDENCE OF ITS KIND:** state-transition/hosted pins per mode-switch road (Write→Takes,
+Takes→Write, editing→Read carry, Read→editing caret, re-open page-wins UNCHANGED — the
+#150 arms stay green); the two named re-arms red-then-green with the change; the band's
+three arms (top clamp, bottom clamp, mid-band exact) per surface it touches; the flash's
+face pin + the setting arm + the Reduce Motion arm; behavioural reverts NAMED BEFORE THEY
+RUN for each bug-class piece, each red in its predicted shape; the seeded VisualWalk suite
+(now 16 scenarios — `takes-find` joined) as regression cover on the final tree, plus a walk
+row or scenario extension showing the flash+band on a real switch (takemania is the
+fixture); the walk in both voices, author-free with the per-step guard (synthetic keystrokes
+reset HIDIdleTime — space guarded acts ≥ 2 s, WalkKit README bottom). Zero instances at
+runs; the vis-walk build re-stamped after product changes before any walk row counts.
+
+**RECORD:** open a `## U8 RECORD` section in this file (LIVE STATUS from the first commit,
+the U5/U7 records are the mold: NOT DONE first line, the built shape against this brief,
+judgment calls with reversals named, cost shape, honest boundaries, noticed-not-touched,
+owed-at-close drafts — the AppSpec §12 contract-line DRAFT for R-18l-13 goes to the
+orchestrator, never landed by you). PROVISIONAL-and-continue per CLAUDE.md; anything gating
+the core stops and reports. Hand back to the orchestrator when the record is DONE; the
+FABLE cold review follows (editor seam).
 
 ## ORCHESTRATOR RESUME MAP (written 2026-09-28 at her compaction warning — the transcript-proof state; a post-compaction orchestrator re-orients from THIS section + the ledger + LIVE STATUS, verifying against git, never trusting)
 
