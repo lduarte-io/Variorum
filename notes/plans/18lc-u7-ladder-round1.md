@@ -141,6 +141,45 @@ the implementer's sanity pass** (its window: `0c335261..HEAD`, the reviewer's fi
 plus this record). No new BLOCKER/MAJOR arose during the fix pass; round cap status stays 1 of 3
 unless the sanity pass raises one.
 
+## THE SANITY PASS'S ONE ITEM — RULED AND LANDED (the reviewer's final word, 2026-09-28; the round's last act)
+
+The sanity pass came back CLEAN on the reviewer's window (its own run 65/5 TEST SUCCEEDED, the
+one designed known issue; `a2873078`) and raised one product-robustness item plus one optional,
+both left to the reviewer's final word.
+
+**The item — the ⇧⏎ road's release race — CONFIRMED, and the implementer's unmeasured
+hypothesis MEASURED TRUE, so the fix landed rather than a named edge (`3723268b`).** The
+mechanism: `onSubmit` read `NSEvent.modifierFlags` — the LIVE session state — which a quickly
+released ⇧ loses (a fast ⇧-tap, a key repeat, a macro, and every transient synthetic form; run
+`090640` measured the step going FORWARD). The fix: read the EVENT that fired the submit —
+`NSApp.currentEvent?.modifierFlags` (live state as the fallback for a submit no event fired).
+The unmeasured half measured directly: with the event read in place, the walk's TRANSIENT
+`using shift down` — the quick tap's own shape — steps BACK, so `NSApp.currentEvent` inside
+SwiftUI's `onSubmit` IS the Return keyDown carrying the pressed flags. **Evidence, walk-level
+(the road no hosted pin can drive):** D2 returned to the transient one-act form as the STANDING
+red-on-old — `090640` RED on the live-state read (4_of_23, forward) · `093149` GREEN Terminal ·
+`093611` GREEN Study · **behavioural revert R-S1** (the live-state read restored in the working
+tree, rebuilt stamp): **RED in exactly the predicted shape** (`094111`: D2 `4_of_23` forward +
+the two downstream path echoes) · restored · **the final tree's confirming run `094627`:
+takes-find PASS 25/25 in BOTH voices**, voice restored to terminal, zero instances. The
+held-modifier D2 form retires (the event read makes the transient form the stronger, standing
+test); the WalkKit README's held-modifier lesson now carries the resolution — the app-side
+robust road is the event's own flags; the held rule remains for roads that genuinely read the
+live state and for driving other apps.
+
+**The optional — TAKEN (`3723268b`):** `vw_abort` releases a held synthetic shift (a no-op when
+none is down), closing the stuck-modifier window the D2 held form had accepted.
+
+**Closing runs after the sanity act:** the five touched suites — **65 tests / 5 suites, TEST
+SUCCEEDED, exactly the one designed known issue**; the seeded `takes-find` 25/25 × 2 voices on
+the final tree (`094627`). One honest process note: the revert's `git checkout --` also swept
+the then-uncommitted fix off `TakesFindBar.swift` — re-applied from the record before
+committing; the final tree's walk run is the proof the committed form is the fixed one.
+
+**ROUND 1 FULLY CLOSED: 0/0/1/5, all six confirmed and landed, the sanity item confirmed,
+measured and landed, zero disputes, cap 1 of 3.** Remaining for the orchestrator: #157 (7)
+rides her bundle; the walk stamps (`090640`–`094627`) are local-only evidence cited here.
+
 ## THE IMPLEMENTER'S SANITY PASS (2026-09-28, window `0c335261..6ab89a8f`)
 
 **Verdict: CLEAN** — files match the stated list exactly (product = `TakesFindController.swift`
