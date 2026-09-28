@@ -1717,7 +1717,7 @@ Runs over the named suites only (logs `App/Variorum/DerivedData/18lc-u8-R*.log`)
 | R-U8-8 | Read's flash never wired (`landing.onArrived` left nil on the edit face) | `ModeSwitchFeelTests.aModeSwitchIntoReadFlashesTheLandedRow` |
 | R-U8-9 | the setting's gate dropped on Takes (`arrivalFlash(_:)` ignores `themeSettings.arrivalFlash`) | `TakesEntryBandTests.withTheSettingOffTheArrivalDrawsNoFlash` |
 
-Reverts in flight: R-U8-1 again (batch A2 — the two find-board pins now model her hand in showing 1); restore = `git checkout -- App/Variorum/Variorum/Features/Takes/TakesArticleScroll.swift`.
+Reverts in flight: batch B (R-U8-3 TakesArticleScroll · R-U8-4 EditorViewModel · R-U8-5 ReadEditPane · R-U8-9 TakesBoardView); restore = `git checkout --` of those four files.
 
 ## ORCHESTRATOR RESUME MAP (written 2026-09-28 at her compaction warning — the transcript-proof state; a post-compaction orchestrator re-orients from THIS section + the ledger + LIVE STATUS, verifying against git, never trusting)
 
