@@ -1428,3 +1428,16 @@ walk-cap from Tools/WalkKit; the vis-walk DerivedData build is the current walk 
 by symbol before walking); commits carry NO trailers; pathspec staging always; the same-file
 co-editing convention with implementers (pathspec saves it); her question-tool batches are
 ≤4 with recommended-first; record her words VERBATIM same turn.
+
+**HER OVERNIGHT AUTHORIZATION (2026-09-28, verbatim, post-compaction):** *"i'm stepping away
+for the night, so run everything overnight provisionally according to normal standards and
+know that the machine is free for you to use."* Read under the skill's away-run rule:
+PROVISIONAL-and-continue everything short of an author-only hard stop; anything genuinely
+hers is HELD and BUNDLED for the morning sitting (the bundle already holds #155, #156's date
+fork, the disclaimer polish, U7's decision-6 confirm, the divide→merge→undo-twice tray
+observation; the R-18l-13 canon-delta proposal joins it at closeout). GUI driving free with
+the per-step guard as always. The overnight plan is THIS map's own sequence: U7 hand-back →
+walk → Fable ladder → cross-model → close; U8 brief → spawn → its flow; then the closeout
+ritual with the install refresh LAST behind the A1 rail at a verified zero-instance window
+(her app quit; verify by pgrep + store discrimination anyway, never trust). She kicks off
+18m at her return.
