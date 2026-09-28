@@ -842,3 +842,35 @@ The build, precisely:
 Discipline: your standing brief's paragraph binds unchanged (append to your `## U5 RECORD`
 under a `### RIDER` heading; commit+push per piece; pins red-on-old by behavioural revert;
 tests at end — the touched suites + the harness; no subagents; synchronous waits).
+
+### RIDER (#154 ruled (b) — the two index faces SHOW stored blank lines at rest; implementer: the resumed `opus-implementer`, 2026-09-27)
+
+**NOT DONE (first line):** PENDING — filled at close.
+
+#### RIDER LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| R0 | Reading: the U5 ORCHESTRATOR ACCEPTANCE + the U5 RIDER BRIEF whole; the transform's walk (a trailing `\n` DOES yield a final empty display line — `"text\n"` displays `["text", ""]`, the pane's own two lines); the height-model consumers traced (below); TK2's blank-line geometry probed under the vocabulary's 4/4 style | DONE |
+| R1 | The pin re-armed to the new truth (block below moves 0.0, every shape; + two blank shapes) — run on the BASE tree = the red-on-old | NOT-STARTED |
+| R2 | The build: the host-scoped blank rule (`FlowParagraph.BlankLines`, `.folded` default; the vocabulary names `.shown`); the hosts + the replica; the two host height models; the scope pin | NOT-STARTED |
+| R3 | U0's `IndexClickCaretTests` click point re-armed (the "last line" is the last TEXT line once the blank line is drawn) — named, not silent | NOT-STARTED |
+| R4 | Behavioural reverts | NOT-STARTED |
+| R5 | Harness: the block-below row + the re-armed last-line click; the seeded run, both voices | NOT-STARTED |
+| R6 | Walk (both voices) incl. the no-op proof on a note with no stored blank lines | NOT-STARTED |
+| R7 | Closing runs (touched Mac suites + Tutorial; iOS build + the phone's `FlowParagraph` consumers — `Shared/` is touched) | NOT-STARTED |
+| R8 | Honest boundaries + self-assessment | NOT-STARTED |
+
+**Measured before building (bare TK2, the pane's 4/4 style, lines as typographic boxes):** a leading blank, any
+number of MIDDLE blanks, and ONE trailing blank land exactly where a resting `VStack` puts them if each blank is one
+line of the voice 8 pt from its neighbours (Study `"A\n\nB"`: A 0–22, the blank's box ends 52, B 60–82; the model
+0 / 30 / 60, height 82 — exact). **Two or more TRAILING blanks are TK2's own anomaly:** the final extra line
+fragment after an empty paragraph gets a 14-pt box overlapping the line above (Study `"A\n\n"`: 54 pt tall, the
+model 82). To be measured in the real pane (the pin's `overTwoBlankLines` shape) before it is dispositioned.
+
+**The consumers of the read tier's heights (brief point 5), traced:** `BookIndexPaneHeights` (the book Index pane's
+reservation — F3) and `ReadNoteHeights` (`.edit` face — U1's manifest) both model a block with `ProseHeightModel`,
+whose rule is *"a stored block normally ends in ONE separator newline that renders nothing"* — false under (b) for
+exactly these two hosts (one line + one gap per Sherlock block, ~5–6k pt per story) → FIX, host-scoped.
+`BookHeightManifest` (the Outline — measures the inline editor's stored text, no `FlowParagraph` tier) and
+`FlowHeightEstimate` (Read ▸ Scroll — keeps the folded default) are untouched → SAFE by construction.
