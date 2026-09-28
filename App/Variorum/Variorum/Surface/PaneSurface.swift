@@ -580,11 +580,41 @@ final class PaneTextView: NSTextView, MarkdownFormattable, ProseGutterSurface {
 
     private weak var observedScrollView: NSScrollView?
 
+    /// **18l-c U7 — the keyboard survives a RE-PARENT.** True while a LIVE
+    /// pane that held the keyboard is detached from its window.
+    ///
+    /// Traced on the find's own road (a step onto a row the landing reveals —
+    /// the `TakesFindBoardTests` ⌘G pin, instrumented): the pane is born live,
+    /// its attach-claim below takes the keyboard (`become ok`), and then
+    /// SwiftUI DETACHES and re-attaches the same view during the reveal's
+    /// layout pass (`willMove(toWindow: nil)` while first responder). AppKit
+    /// drops a detached first responder to the WINDOW, and the attach-claim is
+    /// one-shot — so the take stayed live, selected and on screen with no
+    /// keyboard: the ledger-row-7 shape (*"tapping keys won't make you edit"*)
+    /// by a second road. A re-parent is not her hand moving the keyboard, so
+    /// the pane takes back what it held — and ONLY when nothing else has taken
+    /// it meanwhile (the window itself holds it), and only while it is still
+    /// the live pane.
+    private var heldKeyboardWhenDetached = false
+
+    override func viewWillMove(toWindow newWindow: NSWindow?) {
+        if newWindow == nil, isEditable, let window, window.firstResponder === self {
+            heldKeyboardWhenDetached = true
+        }
+        super.viewWillMove(toWindow: newWindow)
+    }
+
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         if claimsKeyboardOnAttach, let window {
             claimsKeyboardOnAttach = false
+            heldKeyboardWhenDetached = false
             window.makeFirstResponder(self)
+        } else if heldKeyboardWhenDetached, let window {
+            heldKeyboardWhenDetached = false
+            if isEditable, window.firstResponder === window || window.firstResponder == nil {
+                window.makeFirstResponder(self)
+            }
         }
         observeEnclosingScrollView()
     }
