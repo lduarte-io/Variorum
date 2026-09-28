@@ -547,52 +547,25 @@ record.
 
 ## U5 RECORD (implementer: `opus-implementer`, 2026-09-27)
 
-**NOT DONE (first line):** PENDING — filled at close.
+**NOT DONE (first line):** (1) **the stored blank line still moves the block below** — a paragraph stored over a blank line (the sample library's shape: every Sherlock paragraph) grows by one line when it goes live, **+30 pt Study / +25 pt Terminal**, in both index hosts; it is CONTENT a live editor must show, not a metric, so U5 left it exactly as it was and logged the fork as **QUESTIONS #154 (PROVISIONAL (a) — no change)**. On her Sherlock captures that is the remaining part of *"a larger space seems to be added"*; the compression, the re-wrap and the unpaid 6-pt foot are gone. (2) Marker-bearing lines still change on going live (the held 18e's; walked, not chased). (3) No KnownIssues / TEXTKIT2_NOTES / canon edits — row 89's disposition and the §3 line are handed to the orchestrator (OWED AT CLOSE). (4) Ledger row 8 (#153 (a′), `takePendingLiveBlock`) NOT touched, per the orchestrator's fence. (5) No core / iOS / mobile runs — the diff has zero `Sources/`, `Shared/`, mobile or `Sync/` files.
 
 ### LIVE STATUS
 
 | # | Piece | Status |
 |---|---|---|
 | 1 | Reading (the brief's list, in order, own context) | DONE — this file whole; the 18l U0 RECORD whole + its orchestrator acceptance + `18l-u0-ladder-round1.md`; KnownIssues rows 89 / 92 / 94 / 95 / 96 (the file whole in two pages); `TEXTKIT2_NOTES.md` whole; `SessionResiliencyProtocol.md` whole; the code: `ReadTierClickPlace`, `FlowParagraph` (+ its Mac face), `IndexProseColumn`, `BookIndexView` (the pane rows + `blockView`), `ReadEditPane` (`ReadEditBlock`), `BlockTOCView` (`makeLive`/`caretLanding`), `PaneSurface.swift` end to end, `EditorDocument` (base attributes), `EditorTypography`, `EditorBehaviorSettings` (`ParagraphGap`), `ProseGutter`, `IndexClickCaretTests`, `IndexProseColumnTests`, `Tools/VisualWalk/` (README, the click scenarios + `KI_S3`); her two captures |
-| 2 | Machine state at start | DONE — her real-store app IS RUNNING (`/Applications/Variorum.app`, pid 18511): the walk guard and the VisualWalk harness both refuse while it lives, so the WALK and the HARNESS RUN are PENDING until a zero-instance, author-free window; everything else runs harness-first through `xcodebuild` test windows |
+| 2 | Machine state at start | DONE — her real-store app WAS RUNNING at start (pid 18511), so the build, trace, pins and reverts ran harness-first through `xcodebuild` test windows; the orchestrator's relay then cleared the machine (she quit her app, then left) and the harness run + the walk ran author-free under the per-step guard |
 | 3 | TRACE — both her shapes, measured per host | DONE — THE TRACE below (the pin's red run on `05983838`, `App/Variorum/DerivedData/18lc-u5-pin-red.log`) |
-| 4 | Red-on-old pin (the tiers' per-line geometry, both hosts, both voices) | DONE — `IndexTierMetricsTests` (2 tests × 2 voices × 3 shapes = 12 cases) RED on the pre-fix tree: **104 issues, all 12 cases** (commit: this one) |
-| 5 | THE CONSOLIDATION (one metrics home; read tier + replica + the live pane's paragraph style where hosted by the two index tiers) | DONE — the HOME `05983838`; the PANE's adoption this commit: `PaneSurfaceView.lineMetrics` (nil ⇒ the Write base style, byte for byte), handed `IndexProseColumn.lines` by the two index hosts only, which also pay back the pane's trailing (`livePaneTrailing`, a 5 / 1 pt bleed) and bottom (`livePaneBottom`) insets; the book pane's height model, Read's manifest and the harness probe read the same edges. Pin GREEN: 12 of 12 cases at 0.0 pt (`18lc-u5-pin-green1.log`). The stored blank line = QUESTIONS #154 (PROVISIONAL (a), no change) |
+| 4 | Red-on-old pin (the tiers' per-line geometry, both hosts, both voices) | DONE — `IndexTierMetricsTests` (2 tests × 2 voices × 3 shapes = 12 cases) RED on the pre-fix tree: **104 issues, all 12 cases** (`ff49968d`, run on `05983838`) |
+| 5 | THE CONSOLIDATION (one metrics home; read tier + replica + the live pane's paragraph style where hosted by the two index tiers) | DONE — the HOME `05983838`; the PANE's adoption `337bef70`: `PaneSurfaceView.lineMetrics` (nil ⇒ the Write base style, byte for byte), handed `IndexProseColumn.lines` by the two index hosts only, which also pay back the pane's trailing (`livePaneTrailing`, a 5 / 1 pt bleed) and bottom (`livePaneBottom`) insets; the book pane's height model, Read's manifest and the harness probe read the same edges. Pin GREEN: 12 of 12 cases at 0.0 pt (`18lc-u5-pin-green1.log`). The stored blank line = QUESTIONS #154 (PROVISIONAL (a), no change) |
 | 5b | Behavioural reverts on the final tree (fix committed `337bef70` first — restores by `git checkout -- <file>`) | DONE — each RED in its predicted shape, then restored (tree clean after): **R-U5-1** (hosts pass `lineMetrics: nil`) RED **80** — wrap and edges exact, lines −4k, Terminal's paragraph step −1, the block below −14…−33 / +4…+14 (`18lc-u5-R1.log`); **R-U5-2** (trailing pad back to `resting`) RED **24** — right edge −11, wrap different, tops exact (`18lc-u5-R2.log`); **R-U5-3** (bottom pad back to `restingTop`) RED **12** — the block below +6 in every case, lines and edges exact (`18lc-u5-R3.log`). No revert in flight |
-| 5c | The scope + home pins | DONE (this commit) — `PaneLineMetricsScopeTests` (3: a pane with no host metrics lays out with the Write base style in all three places a style lives; a pane handed the index metrics lays out with them; a SOURCE WALK — only `BookIndexView.swift` and `ReadEditPane.swift` pass `lineMetrics:`) — her ratification's *"Write and Takes untouched"* as a pin; `IndexProseColumnTests` +3 (the trailing/foot arithmetic; the pane's trailing/bottom insets MEASURED off a real surface's placement; the vocabulary's TK2 style drawing the tier's 4-pt line / 8-pt paragraph spacing, both voices — a TEXTKIT2 §5 tripwire). Run: **11 tests / 3 suites passed** (`18lc-u5-pins2.log`). Guards, not bug pins: they pass on both sides by design, stated |
+| 5c | The scope + home pins | DONE (`ac12e228`) — `PaneLineMetricsScopeTests` (3: a pane with no host metrics lays out with the Write base style in all three places a style lives; a pane handed the index metrics lays out with them; a SOURCE WALK — only `BookIndexView.swift` and `ReadEditPane.swift` pass `lineMetrics:`) — her ratification's *"Write and Takes untouched"* as a pin; `IndexProseColumnTests` +3 (the trailing/foot arithmetic; the pane's trailing/bottom insets MEASURED off a real surface's placement; the vocabulary's TK2 style drawing the tier's 4-pt line / 8-pt paragraph spacing, both voices — a TEXTKIT2 §5 tripwire). Run: **11 tests / 3 suites passed** (`18lc-u5-pins2.log`). Guards, not bug pins: they pass on both sides by design, stated |
 | 6 | Harness: the four S3 XFAILs → plain PASS (labels removed) | DONE — labels RETIRED `ab2aab28`; the seeded RUN on the stamped build (app=`031008b779da`, the U5 product code), each voice in fresh launches split for the tool's time limit, the full run's order kept: **Terminal 15 / 15 PASS** (`vis-walks/2026-09-27/201145/`, `201707/`); **Study 15 / 15 PASS** (`202855/`, `203443/`, `204736/`), **0 XFAIL, 0 FAIL in both voices**. The four formerly-XFAIL rows (*"the clicked line stays under the pointer"*, `index-click` + `readedit-click` × 2 voices) PASS: Terminal Index y 680 in the caret's box [670, 689], Read ▸ edit 1050 in [1040, 1059]; Study Index 751 in [736, 760], Read ▸ edit 1054 in [1039, 1063]; the caret on EXACTLY the block's last line in all four. **Honest: one harness ERROR on the way** — Study's first `book-landings` attempt (`204127/`) failed its own PRECONDITION (*"the navigator click took"* — the navigator's Copper Beeches row click did not take and the Index landed row 1: the walker's swallowed-click class, recorded in the scenario's own comment); a re-run in the same order PASSED 7 / 7 (`204736/`). Not U5's road (no navigator, Outline, landing or `BookIndexEditModel` line in the diff) — NOTICED, below. The dev store's voice restored to Terminal after every Study launch |
-| 7 | Closing runs (touched Mac suites + `TutorialWalkTests`) | NOT-STARTED |
-| 8 | Walk (both voices) | DONE — THE WALK below: 8 rows × 2 voices, per-step guarded through VisualWalk's own act doors, on the stamped U5 build; captures `notes/plans/18l-screens/18lc-u5/walk/{terminal,study}/` (gitignored); the dev store's voice restored to Terminal; zero instances after |
-| 9 | Self-assessment | NOT-STARTED |
+| 7 | Closing runs (touched Mac suites + `TutorialWalkTests`) | DONE on the final product code (tree `5a8ce937`), zero app instances, the machine idle through it (HID 112 → 555 s): **49 suites named literally** — the Index + Read ▸ edit hosts and pins (incl. U0's `IndexClickCaretTests` + `IndexLandingCaretTests` riding UNMODIFIED), the pane component and its Takes / Compare consumers, both height models, the probe, `ChromeLineLimitTests`, and the eleven Tutorial suites — **✔ 330 tests in 49 suites passed**, 0 skipped (`App/Variorum/DerivedData/18lc-u5-closing1.log`); 1,309 `Modifying state during view update` lines (the documented `PanePublisher` family, #152 (a); U5 does not touch it). VisualWalk's headless pins: 4 tests / 2 suites green. No core / iOS run owed (zero `Sources/`, `Shared/`) |
+| 8 | Walk (both voices) | DONE — THE WALK below: 4 rows × 2 voices (8 rows), per-step guarded through VisualWalk's own act doors, on the stamped U5 build; captures `notes/plans/18l-screens/18lc-u5/walk/{terminal,study}/` (gitignored); the dev store's voice restored to Terminal; zero instances after |
+| 9 | Self-assessment | DONE (below) |
 
 - Deaths / resumes: none.
-
-### THE WALK (USE) — dev-store Debug (the stamped U5 build, app `031008b779da`), both voices, per-step guarded
-
-Driven through VisualWalk's own act doors (a scratch step-helper sourcing `Tools/VisualWalk/lib.zsh`, never
-committed — every click: the step gap, `guard.sh --author`, activation, the target guard, the foreign-dialog
-check; her app absent, zero other instances, HID idle ≥ 2 s at every step). The orchestrator's relay cleared
-the machine (she quit her app and left). Line tops are MEASURED from each 2× capture (ink rows in a fixed
-prose-column box, window points; a scratch PIL script — the WalkKit "count text-row tops" method), the caret
-from the probe. The dev store's voice was found Terminal and left Terminal. Captures:
-`notes/plans/18l-screens/18lc-u5/walk/{terminal,study}/` (gitignored).
-
-| Voice | Row (her shapes first) | Result, measured | Captures |
-|---|---|---|---|
-| Terminal | Sherlock ▸ Index ▸ Blue Carbuncle ▸ *"So much so…"* (her capture 1's block), a mid-paragraph click on line 2 | caret line 1 of 2, click y 970 inside its box [960, 977], x 998.6 vs 1000; EVERY line above and both of the block's own lines at their resting tops (824.5 / 845.5 — the caret bar over line 2 reads 843.0); the block below **+25.0 pt = exactly the stored blank line** (8 + 17), nothing else | `t01-carbuncle-rest` → `t02-carbuncle-live-somuchso` |
-| Terminal | the same story ▸ *"No, no. No crime…"* (her capture 2's block, 8 lines here), its LAST line — directly above its blank separator | caret line 7 of 8 (the last), y 912 in [902, 919], x 799.5 vs 800; all 8 lines at their resting tops and **the wrap identical line for line**; the block below +25.0 (the blank line) | `t03-carbuncle-live-nono-lastline` |
-| Terminal | *A Scandal in Bohemia* ¶1, line 1 — the MARKER-BEARING line (`_the_`, the known boundary) | the dimmed `_the_` appears and the line's words shift right two characters; this line had room, so nothing re-wrapped: every line top unchanged; the block below +25 | `t04-scandal-rest` → `t05-scandal-live-marker-line` |
-| Terminal | the note's Read ▸ edit ▸ Blue Carbuncle ▸ *"No, no…"* LAST line (above its blank separator) | caret line 7 of 8, y 981 in [965.5, 982.5], x 723 vs 720; every line above and in the block unchanged to the point; the block below +25 | `t06-readedit-rest` → `t07-readedit-live-nono-lastline` |
-| Study | Index ▸ Blue Carbuncle ▸ *"So much so…"* line 2 — HER capture 1, same voice, same wrap | caret line 1 of 2, y 1025 in [1014, 1036], x 898 vs 900 (*"entirel\|y"*); both lines at rest's tops (875.5 / 901.5); the block below **+30.0 = exactly the stored blank line** (8 + 22) — where her capture showed the lines pulled together and a larger gap | `s01-carbuncle-rest` → `s02-carbuncle-live-somuchso` |
-| Study | *"No, no…"* (7 lines — HER capture 2's block), its last line *"such."* | caret line 6 of 7, y 961 in [946, 968], x 710.6 vs 715; the wrap IDENTICAL to rest (*"…events may / be expected…"*, *"…experience of / such."* — her capture showed it re-wrapped *"…events / may be…"* and compressed); every line top unchanged; the block below +30 | `s03-carbuncle-live-nono-lastline` |
-| Study | *A Scandal in Bohemia* ¶1 line 1 — the marker line, on a FULL line | the boundary's visible form: `_the_` widens the first line, *"her"* drops to line 2 and the words re-flow down the paragraph (15 lines at rest, 15 live, every line top unchanged — the count held here); CONTENT, the held 18e's — recorded, not chased | `s04-scandal-rest` → `s05-scandal-live-marker-line` |
-| Study | the note's Read ▸ edit ▸ *"So much so…"* line 2, mid-paragraph | caret line 1 of 2, y 832 in [821.5, 843.5], x 800.1 vs 800; the block's lines at rest's tops; the block below +29.5 — i.e. the blank line's +30 with the WHOLE page 0.5 pt higher (one device pixel, uniform above and below; Terminal's same row read 0.0; within the pins' ±1 — noted, not chased) | `s06-readedit-rest` → `s07-readedit-live-somuchso` |
-
-**Walker facts met** (the record's, for the next walker): a click right after the step door's activation was
-swallowed four times of ~14 (the known class — every read-tier click here is idempotent, so a second click was
-the rule, verified by the probe's `fr=pane`); the probe's `rtI` list (40 frames, top-down) was CROWDED OUT by
-stale ghost frames of rows the pane had scrolled past (the README's documented edge) — so this walk measured
-line tops from the captures instead.
 
 ### THE TRACE (inputs → the wrong geometry; every number from the pin's red run on `05983838`, the real hosts, real clicks)
 
@@ -639,3 +612,167 @@ leading x and the first line's top only — the trace confirms both are exact (l
 component's birth (13b 1a) and the read tier's `lineSpacing(4)` since the index tiers (`c768c08e`); the
 trailing/bottom insets were never paid (13u2 B, `7d44eda6`, paid leading/top). macOS-independent (the
 numbers are two style values and two paddings) — no bisect owed.
+
+### THE CONSOLIDATION — the shape
+
+**ONE home: `Surface/IndexProseColumn.swift`**, which already owned "where the index tiers' prose sits" (13u2 B's
+leading/top) and now owns the rest of the geometry both tiers must agree on:
+- **`ProseLineMetrics`** (new value type) — `lineSpacing` + `paragraphGap` (the read tier's own visible numbers)
+  and the one derivation a TextKit 2 style needs, `textKitParagraphSpacing = gap − lineSpacing` (measured on 27.0:
+  TK2 lays a paragraph's `lineSpacing` ABOVE the next paragraph's first line too, so `4 / 8` drew 12 pt between
+  paragraphs where SwiftUI's `VStack(spacing: 8)` draws 8), plus `paragraphStyle`.
+- **`IndexProseColumn.lines = ProseLineMetrics(4, 8)`** — U0's two named constants PROMOTED (they lived on
+  `ReadTierClickPlace`), the read tier's SHIPPED values, byte-same.
+- **The two edges 13u2 B left:** `livePaneTrailing` (resting − the pane's trailing inset — NEGATIVE on both hosts,
+  −5 / −1: the pane's frame reaches past its row by its own inset's excess, `ProseGutter`'s bleed doctrine on the
+  other axis, so the prose ENDS where the read tier's does) and `readTierBottom` / `livePaneBottom` (the top's split,
+  on the foot). `PaneTextView.proseTrailingInset` / `proseBottomInset` are named beside the leading/top ones and
+  measured off a real surface.
+
+**Consumers — every reader of those numbers now reads the home:** both read tiers (`BookIndexPaneNote.blockView`,
+`ReadEditBlock`) draw with it; the click replica (`ReadTierClickPlace`) lays out with it; the book pane's height
+model (`BookIndexPaneHeights`, whose `paragraphLineSpacing` was a third copy of the 4) and Read's manifest
+(`ReadNoteLanding`) read it; the harness probe's column arithmetic names the same foot. **The live pane is handed it
+by its HOST** — `PaneSurfaceView.lineMetrics: ProseLineMetrics?` (nil = `EditorDocument.baseParagraphStyle`, byte for
+byte), threaded into the representable: set as `defaultParagraphStyle` + typing attributes BEFORE the string at
+`makeNSView` (so every character, and every one she types, carries it), and the `updateNSView` re-font gate now
+compares against the pane's intended style (the host's, or the base — lineSpacing added to the comparison; for every
+base host both sides read 0, the same decision it always was). Exactly two callers pass it — the book Index and Read
+▸ edit — source-walk-pinned. No `BlockRangeIndex`, `EditorTextView`, `PanePublisher`, `PaneMeasurement`, landing,
+liveness or caret-landing line moved.
+
+### PINS AND RED EVIDENCE
+
+| Pin | What it holds | Red-on-old |
+|---|---|---|
+| `IndexTierMetricsTests` (2 × {Terminal, Study} × {prose, paragraphs, overBlankLine} = 12 cases, real clicks) | after a real click turns a read-tier block live: the pane's WRAP (every line start), every line's TOP (±1), its prose LEFT and RIGHT edges (±0.5), and the block below (0, or EXACTLY one stored blank line = gap + one line, ±1) equal the read tier's — the replica's height vs SwiftUI's frame carried as the fidelity arm (±0.5) | **RED 104 / 12 cases** on `05983838` (the pre-fix tree) → GREEN 12 / 12 at 0.0 pt; reverts **R-U5-1** (no line metrics) RED 80 · **R-U5-2** (trailing pad) RED 24 · **R-U5-3** (bottom pad) RED 12, each in its predicted shape (LIVE STATUS 5b) |
+| `PaneLineMetricsScopeTests` (3) | a pane with no host metrics keeps the Write base style in storage, typing attributes and default; one handed the index metrics wears them; only two files pass `lineMetrics:` | guard, green both sides by design (it pins the "Write and Takes untouched" half of her ratification) |
+| `IndexProseColumnTests` +3 | the trailing/foot arithmetic; the pane's trailing/bottom insets measured off a real surface; the vocabulary's TK2 style drawing 4-pt lines / 8-pt paragraphs in both voices | guard + a TEXTKIT2 §5 tripwire (a point release that stops laying `lineSpacing` above a paragraph reds it) |
+| U0's `IndexClickCaretTests` (8), `IndexLandingCaretTests` | the click's caret + replica fidelity; the landing's caret | rode **UNMODIFIED**, green in the closing run — no pin asserted the tiers' divergence |
+
+### THE HARNESS
+
+The four S3 XFAILs are plain PASS in both voices (LIVE STATUS 6 — `KI_S3` deleted, the assertion plain, the headless
+pin now reds a risen line). **A limit worth the orchestrator's eye:** the harness asserts the CLICKED line stays under
+the pointer; it does not measure the block BELOW. That is why the four rows could flip while a stored blank line still
+moves the next block (#154) — the pin measures it; the harness does not (NOTICED 3).
+
+### THE WALK (USE) — dev-store Debug (the stamped U5 build, app `031008b779da`), both voices, per-step guarded
+
+Driven through VisualWalk's own act doors (a scratch step-helper sourcing `Tools/VisualWalk/lib.zsh`, never
+committed — every click: the step gap, `guard.sh --author`, activation, the target guard, the foreign-dialog
+check; her app absent, zero other instances, HID idle ≥ 2 s at every step). The orchestrator's relay cleared
+the machine (she quit her app and left). Line tops are MEASURED from each 2× capture (ink rows in a fixed
+prose-column box, window points; a scratch PIL script — the WalkKit "count text-row tops" method), the caret
+from the probe. The dev store's voice was found Terminal and left Terminal. Captures:
+`notes/plans/18l-screens/18lc-u5/walk/{terminal,study}/` (gitignored).
+
+| Voice | Row (her shapes first) | Result, measured | Captures |
+|---|---|---|---|
+| Terminal | Sherlock ▸ Index ▸ Blue Carbuncle ▸ *"So much so…"* (her capture 1's block), a mid-paragraph click on line 2 | caret line 1 of 2, click y 970 inside its box [960, 977], x 998.6 vs 1000; EVERY line above and both of the block's own lines at their resting tops (824.5 / 845.5 — the caret bar over line 2 reads 843.0); the block below **+25.0 pt = exactly the stored blank line** (8 + 17), nothing else | `t01-carbuncle-rest` → `t02-carbuncle-live-somuchso` |
+| Terminal | the same story ▸ *"No, no. No crime…"* (her capture 2's block, 8 lines here), its LAST line — directly above its blank separator | caret line 7 of 8 (the last), y 912 in [902, 919], x 799.5 vs 800; all 8 lines at their resting tops and **the wrap identical line for line**; the block below +25.0 (the blank line) | `t03-carbuncle-live-nono-lastline` |
+| Terminal | *A Scandal in Bohemia* ¶1, line 1 — the MARKER-BEARING line (`_the_`, the known boundary) | the dimmed `_the_` appears and the line's words shift right two characters; this line had room, so nothing re-wrapped: every line top unchanged; the block below +25 | `t04-scandal-rest` → `t05-scandal-live-marker-line` |
+| Terminal | the note's Read ▸ edit ▸ Blue Carbuncle ▸ *"No, no…"* LAST line (above its blank separator) | caret line 7 of 8, y 981 in [965.5, 982.5], x 723 vs 720; every line above and in the block unchanged to the point; the block below +25 | `t06-readedit-rest` → `t07-readedit-live-nono-lastline` |
+| Study | Index ▸ Blue Carbuncle ▸ *"So much so…"* line 2 — HER capture 1, same voice, same wrap | caret line 1 of 2, y 1025 in [1014, 1036], x 898 vs 900 (*"entirel\|y"*); both lines at rest's tops (875.5 / 901.5); the block below **+30.0 = exactly the stored blank line** (8 + 22) — where her capture showed the lines pulled together and a larger gap | `s01-carbuncle-rest` → `s02-carbuncle-live-somuchso` |
+| Study | *"No, no…"* (7 lines — HER capture 2's block), its last line *"such."* | caret line 6 of 7, y 961 in [946, 968], x 710.6 vs 715; the wrap IDENTICAL to rest (*"…events may / be expected…"*, *"…experience of / such."* — her capture showed it re-wrapped *"…events / may be…"* and compressed); every line top unchanged; the block below +30 | `s03-carbuncle-live-nono-lastline` |
+| Study | *A Scandal in Bohemia* ¶1 line 1 — the marker line, on a FULL line | the boundary's visible form: `_the_` widens the first line, *"her"* drops to line 2 and the words re-flow down the paragraph (15 lines at rest, 15 live, every line top unchanged — the count held here); CONTENT, the held 18e's — recorded, not chased | `s04-scandal-rest` → `s05-scandal-live-marker-line` |
+| Study | the note's Read ▸ edit ▸ *"So much so…"* line 2, mid-paragraph | caret line 1 of 2, y 832 in [821.5, 843.5], x 800.1 vs 800; the block's lines at rest's tops; the block below +29.5 — i.e. the blank line's +30 with the WHOLE page 0.5 pt higher (one device pixel, uniform above and below; Terminal's same row read 0.0; within the pins' ±1 — noted, not chased) | `s06-readedit-rest` → `s07-readedit-live-somuchso` |
+
+**Walker facts met** (the record's, for the next walker): a click right after the step door's activation was
+swallowed four times of ~14 (the known class — every read-tier click here is idempotent, so a second click was
+the rule, verified by the probe's `fr=pane`); the probe's `rtI` list (40 frames, top-down) was CROWDED OUT by
+stale ghost frames of rows the pane had scrolled past (the README's documented edge) — so this walk measured
+line tops from the captures instead.
+
+
+### HONEST BOUNDARIES (with numbers)
+
+1. **The stored blank line (QUESTIONS #154, PROVISIONAL (a)).** A block stored as `text\n` shows its blank line live:
+   the block below moves **+30.0 pt (Study) / +25.0 pt (Terminal)** — exactly `paragraphGap + one line`, pinned and
+   walked on both hosts. Every Sherlock paragraph but a story's last has one; her own typed notes mostly do not.
+2. **Markdown markers (the held 18e).** Live lines show their dimmed markers: `_the_` is two characters wider; on a
+   line with room nothing moves (Terminal, walked), on a full line the paragraph's words re-flow (Study, walked —
+   15 lines stayed 15 there; a marker can also add a line). Headings (the tier's title/heading fonts vs the pane's
+   body font + `# `) and lists (the tier's `•` + 16-pt indent vs the stored `- ` at the margin) are the same class —
+   not in Sherlock, so not walked this unit.
+3. **The ParagraphGap dial and the inline-comments room no longer reach an INDEX-hosted live pane** — the read tier
+   has never honoured either, and before U5 a live index block under "paragraph-tall" spaced its paragraphs
+   differently from every resting block around it (exactly her *"change appearance when you start editing"*).
+   Every other surface keeps both (pinned). JUDGMENT CALL 3.
+4. **Dynamic Type** (U0 ladder NIT-1): Study's tier font is `relativeTo: .body`; the pane's is fixed — identical at
+   this machine's default size (the fidelity arm is the tripwire).
+5. **One −0.5 pt uniform page shift** on one Study Read ▸ edit click (walk row 8) — one device pixel, the whole page,
+   Terminal's same row 0.0 — noted, not chased (NOTICED 4).
+
+### SEAM FILES THIS DIFF TOUCHES (the Fable reviewer reads this first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `Surface/PaneSurface.swift` | `PaneSurfaceView.lineMetrics` + the representable's `paragraphStyle` / `baseAttributes`; `makeNSView` sets the host style before the string (only when set); the `updateNSView` re-font gate compares against the pane's intended style (+ line spacing); `proseTrailingInset` / `proseBottomInset` named | `PanePublisher`, `PaneMeasurement`, `PaneCaretLanding` and the liveness transition, the render restore, the canary, the text-adopt road, every other host's style |
+| `Surface/IndexProseColumn.swift` | `ProseLineMetrics`; `lines`; `livePaneTrailing`, `readTierBottom`, `livePaneBottom`; the header | 13u2 B's leading/top functions (byte-unchanged) |
+| `Surface/ReadTierClickPlace.swift` | the two constants read from the home; `lines(of:columnWidth:font:)` (the pin's read of the replica) | the click translation, the replica's layout, `height(of:)` |
+| `Features/BookView/BookIndexView.swift` · `Features/ReadMode/ReadEditPane.swift` | the read tiers draw from the home; the live pane is handed `lines` and its trailing/bottom host padding pays the pane's insets back; the read tiers' foot named | the click road, the caret landing, `BookIndexEditModel` (untouched — ledger row 8's fence), selection, the wash |
+| `Features/BookView/BookIndexPaneHeights.swift` · `Features/ReadMode/ReadNoteLanding.swift` · `Core/Views/VisualWalkProbe.swift` | the same numbers read from the home (byte-same values) | every height formula, the manifests, the probe's calibration |
+| Tests / Tools | NEW `IndexTierMetricsTests.swift` (+ `PaneLineMetricsScopeTests`); `IndexProseColumnTests` +3; VisualWalk's `KI_S3` retired | U0's pins, every other suite |
+
+Zero `Sync/`, schema, `Server/`, core, `Shared/`, mobile. No TK1 API (the pins' bare layouts are `NSTextContentStorage` +
+`NSTextLayoutManager`). No rendering attributes; the style is an ordinary paragraph attribute written where the base
+one always was (TEXTKIT2 §3's clamp rule is about identity stamps and is not on this road — no stamp moved).
+
+### JUDGMENT CALLS (each reversible in a line)
+
+1. **The trailing edge: the PANE bleeds; the read tier does not move.** The pane's frame reaches past its row by 5 pt
+   (book) / 1 pt (Read ▸ edit), so its prose ends at the tier's; the ring and the `.background` wash span 11 pt further
+   right than before (symmetric about the prose now). *Reverse by* `readTierTrailing = max(resting, 11)` — the resting
+   column narrows 5 / 1 pt instead (a look change at rest, the product fence's side).
+2. **The TK2 mapping lives in the vocabulary** (`gap − lineSpacing`), pinned by measurement — not a second number.
+3. **An index-hosted live pane ignores the ParagraphGap dial and the inline-comments room**, because its read tier
+   does (BOUNDARY 3) — her ratified goal (*"it is the goal for it to not change appearance when you start editing"*).
+   *Reverse by* composing `ParagraphGap.current.extraSpacing` into `IndexProseColumn.lines` — and then the READ tier
+   must honour it too, or the shift returns; that pairing is hers to want.
+4. **The stored blank line stays a real line** — QUESTIONS #154 (a) — with (b) show blank lines at rest, (c) draw the
+   line into the existing gap (does not fit), (d) re-seed the sample library without it, laid out for her.
+5. **The height models read the home** rather than keeping their copies — byte-same numbers, a drift seam closed.
+
+### NOTICED, NOT TOUCHED
+
+1. **Ledger row 8 / #153 (a′)** — `takePendingLiveBlock` untouched (the orchestrator's fence); no collision with this
+   diff (`BookIndexEditModel.swift` is not in it).
+2. **VisualWalk `book-landings` precondition ERROR, Study, 1 of 2** — the navigator's Copper Beeches click did not take
+   (the Index landed row 1); re-run PASS. The scenario already clicks twice; an AXPress road for the navigator row would
+   harden it (the harness-calibration family — the orchestrator's call).
+3. **The harness does not measure the block below a click** (THE HARNESS) — a plain row *"the block below moves by at
+   most the stored blank line"* would make it hold U5's whole claim. Proposed, not built (scope).
+4. **The −0.5 pt page shift** on one Study Read ▸ edit click (BOUNDARY 5) — if it ever grows, U1's Read ▸ edit landing
+   watch (the page moved as a whole when the clicked row grew by its blank line) is the first place to look.
+5. **The probe's `rtI` 40-frame list is crowded out by stale ghosts after a long in-pane scroll** (the README's
+   documented edge) — met by the walk, which measured from captures instead.
+6. **Swallowed first clicks after activation** — ~4 of ~14 walk clicks (the known class; idempotent rows re-clicked).
+7. The Blocks workbench's panel is ONE TK2 pane in both states (no `Text` tier) — no two-tier seam, unaffected.
+
+### OWED AT CLOSE (drafted for the orchestrator)
+
+- **KnownIssues row 89** — the metric class RESOLVED at 18l-c U5 (pins `IndexTierMetricsTests`, reverts R-U5-1/2/3); the
+  remainder is #154's stored-blank-line fork (hers) — close the row, or re-word it to #154's residual with her as owner.
+- **TEXTKIT2_NOTES §3 (27.0)** — *a TK2 paragraph style's `lineSpacing` is laid ABOVE the next paragraph's first line as
+  well as between a paragraph's own lines (`lineSpacing 4, paragraphSpacing 8` → paragraphs 12 pt apart; SwiftUI's
+  `Text.lineSpacing` sits only between a paragraph's lines), and a paragraph's last line carries none; a surface matching
+  a SwiftUI tier therefore sets `paragraphSpacing = gap − lineSpacing` (`ProseLineMetrics`; pinned in
+  `IndexProseColumnTests` — re-measure at 27.1).*
+- The Fable cold review (editor seam).
+
+### SELF-ASSESSMENT
+
+**Strong:** the trace is measured, not argued — one pin, both hosts, both voices, three block shapes, and its numbers
+explain both of her shapes (the same class on two block shapes, identical per host); the fix is the row's own remedy
+built as a consolidation (one home that four readers consume; the pane takes it through one host parameter, nil
+elsewhere), not a patch; every component of the fix has teeth (three reverts, each red in its predicted shape); the
+other hosts' byte-unchanged claim is pinned two ways; the harness's four XFAILs are plain PASS in both voices; the walk
+is her exact captures' blocks, in her voice, measured to the point. **Weakest points for the reviewer:** (a) the
+trailing BLEED — a pane frame that overhangs its row is new on these two hosts (`ProseGutter`'s doctrine, but
+negative host padding rather than the type's `bleed`), and the ring moved; (b) the `updateNSView` gate's added
+line-spacing comparison runs for every pane on every update (a Double compare; equal for base hosts); (c) the
+stored blank line is the part of her book-mode report that remains — honest, pinned and escalated as #154 rather than
+invented around, but it is what she will still see on Sherlock; (d) the walk's line tops come from capture ink, so the
+caret bar reads as a −2.5 / −4.5 pt "shift" on the clicked line — explained per row, and the probe's caret box
+agrees. **U5 — DONE (implementer); the Fable cold review follows.**
