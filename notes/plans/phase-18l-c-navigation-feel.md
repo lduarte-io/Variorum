@@ -1440,4 +1440,7 @@ the per-step guard as always. The overnight plan is THIS map's own sequence: U7 
 walk → Fable ladder → cross-model → close; U8 brief → spawn → its flow; then the closeout
 ritual with the install refresh LAST behind the A1 rail at a verified zero-instance window
 (her app quit; verify by pgrep + store discrimination anyway, never trust). She kicks off
-18m at her return.
+18m at her return. **Her addendum, same sitting, verbatim:** *"my app is also already quit
+and ready for reinstall when the phase is done"* — the zero-instance window is hers-granted
+for the whole night; the refresh still verifies zero instances by pgrep + PATH + store
+discrimination at execution time before the A1 safety copy, as always.
