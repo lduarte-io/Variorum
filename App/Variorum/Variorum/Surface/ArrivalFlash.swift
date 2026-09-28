@@ -176,13 +176,33 @@ enum ArrivalFlashOracle {
     private(set) static var seen: [String: Seen] = [:]
     private(set) static var flashes: [String: Seen] = [:]
 
+    /// Bounded like every DEBUG oracle (the `DebugOracleLog` class — a long
+    /// DEBUG session must not accrete an entry per flash forever; the U8
+    /// ladder's R1-3). PIN-SAFE by the readers' own discipline: every pin
+    /// that reads the oracle calls `reset()` first, and the walk probe's
+    /// per-run counts sit orders of magnitude below the cap.
+    private static let cap = 256
+
     static func note(
         _ key: String, part: ArrivalFlashFace.Part, opacity: Double, startedAt: Date? = nil
     ) {
+        // `seen` is orderless — on overflow it can only clear (never before
+        // the entry being written).
+        if seen[key] == nil, seen.count >= cap { seen = [:] }
         seen[key] = Self.adding(seen[key], part: part, opacity: opacity)
         if let startedAt {
             let event = "\(key)|\(startedAt.timeIntervalSinceReferenceDate)"
+            if flashes[event] == nil, flashes.count >= cap { trimOldestFlashes() }
             flashes[event] = Self.adding(flashes[event], part: part, opacity: opacity)
+        }
+    }
+
+    /// The event keys END in the flash's start time, so the oldest half trims
+    /// cheap — and a mid-flight event (the newest) is never the one dropped.
+    private static func trimOldestFlashes() {
+        let started: (String) -> Double = { Double($0.split(separator: "|").last ?? "") ?? 0 }
+        for key in flashes.keys.sorted(by: { started($0) < started($1) }).prefix(cap / 2) {
+            flashes.removeValue(forKey: key)
         }
     }
 
