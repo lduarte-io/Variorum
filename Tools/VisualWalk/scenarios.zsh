@@ -16,7 +16,8 @@ vw_def() { SCN_ORDER+=($1); SCN_TABLE[$1]="fixture: $2 · acts: $3 · asserts: $
 
 # Known, OWNED rows the table cites (KnownIssuesAndTechDebt.md):
 typeset -g KI_B5='KI row 88 (B5: ⏎ after ⌘↓ on invalidated geometry — FIXED at 18l-b U-B5: the differential road keeps the untouched reading line)'
-typeset -g KI_S3='KI "read tier re-wraps under the pointer" (18l U0 S3; owner the Design & UI review)'
+# (KI_S3 — "the read tier re-wraps under the pointer" — RETIRED at 18l-c U5: the tiers speak one metrics
+#  vocabulary, `IndexProseColumn.lines`, and the four XFAILs it labelled are plain assertions again.)
 
 # --- shared scenario helpers -------------------------------------------------------------------------
 
@@ -210,9 +211,10 @@ vw_click_read_tier() {  # key(rtI|rtR) label band-top-offset — clicks the LOWE
   done
   vw_require '(( ${#fit} >= 2 ))' "two read-tier blocks fully on screen ($key)" || return
   # The lower target is the lowest block of EIGHT or more lines (≥ 200 pt; else 5+, else 3+): tall
-  # enough that the known read-tier re-wrap (S3: the live pane drops the tier's 4-pt line spacing, so
-  # line k rises ~4k pt) shows on its last line in both voices — a standing measurement of S3, not a
-  # coin toss on block size (round 1: a 5-line block's shift stayed inside its line in Study).
+  # enough that a regression of the tiers' shared metrics (18l U0's S3, FIXED at 18l-c U5 — the live
+  # pane had dropped the tier's 4-pt line spacing, so line k rose ~4k pt) shows on its last line in
+  # both voices — a standing tripwire, not a coin toss on block size (round 1: a 5-line block's shift
+  # stayed inside its line in Study).
   local low= up= i min
   for min in 200 100 50; do
     low= up=
@@ -252,15 +254,18 @@ vw_assert_last_line_click() {   # label click-y
     "$([[ ${PV[nl]} == 1 && ${PV[caretEnd]} == 1 ]] && print on-the-blank-line || print on-text)" on-text
   # WHICH line (round 1, MINOR-1 — plain, so a wrong-line landing reds): the block's last text line,
   # or the one before it, because the live pane shows the markdown markers the tier hides and can wrap
-  # the block one line longer (S3). The pre-fix Read ▸ edit landing (line 0) reds here.
+  # the block one line longer (CONTENT, not a metric — the held 18e's; 18l-c U5 aligned every metric,
+  # so a marker-free block lands on exactly `last`). The pre-fix Read ▸ edit landing (line 0) reds.
   local last=$(( PV[caretTextLines] - 1 ))
   # ...in the block's LAST paragraph (round 2, NIT-R2-5): the line count is paragraph-relative, so a
   # multi-paragraph block's first paragraph could satisfy it; the pane holds one block.
   vw_expect_eq "$label last line: the caret in the block's LAST paragraph" "${PV[caretFragLast]}" 1
-  vw_expect_between "$label last line: the caret on the block's last text line (or the one S3's wrap adds)" \
+  vw_expect_between "$label last line: the caret on the block's last text line (or the one a hidden marker's wrap adds)" \
     "${PV[caretLine]}" $(( last - 1 )) $last
+  # PLAIN since 18l-c U5 (it was the four S3 XFAILs): the live pane lays the block out with the read
+  # tier's own metrics, so the clicked line does not move under the pointer.
   vw_expect_between "$label last line: the clicked line stays under the pointer (click y in its box)" \
-    $y $(( PV[caretY0] - 1 )) $(( PV[caretY1] + 1 )) "$KI_S3"
+    $y $(( PV[caretY0] - 1 )) $(( PV[caretY1] + 1 ))
 }
 
 vw_assert_first_line_click() {  # label click-x click-y
@@ -276,8 +281,8 @@ vw_assert_first_line_click() {  # label click-x click-y
 
 vw_def index-click "The Adventures of Sherlock Holmes ▸ Index, scrolled into A Scandal in Bohemia" \
   "click a block's LAST line (above its blank separator) · click the block above on its FIRST line" \
-  "(c) a pane goes live with the caret ON the clicked line — never the blank line; first-line caret under the pointer" \
-  "the last line's post-swap y: $KI_S3"
+  "(c) a pane goes live with the caret ON the clicked line — never the blank line; first-line caret under the pointer; the clicked line stays under the pointer (18l-c U5)" \
+  pass
 scn_index-click() {
   vw_open_note "the adventures of sherlock holmes"
   vw_ax_press index AXButton || { vw_require false "the book's index button"; return }
@@ -293,7 +298,7 @@ scn_index-click() {
 # --- S7: the same click on Read ▸ edit (U0 item 1's second host) -----------------------------------------
 vw_def readedit-click "The Red-Headed League ▸ Read ▸ edit (its first open in the pass: no landing scroll, so no stale rows)" \
   "click a block's LAST line · click the block above on its FIRST line" \
-  "(c) as the Index" "the last line's post-swap y: $KI_S3"
+  "(c) as the Index" pass
 scn_readedit-click() {
   vw_open_note "The Red-Headed League"
   vw_keys "⌘3 (Read)" 'keystroke "3" using command down'

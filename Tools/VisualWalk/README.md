@@ -104,8 +104,10 @@ within 12 pt of the click; never the blank line under the text).
 Statuses: **PASS** · **FAIL** (a regression) · **XFAIL** (an OWNED KnownIssues row reproduced — shown
 with its number, not red) · **XPASS** (a known row did NOT reproduce — flagged; re-examine the row) ·
 **ERROR** (a fixture or harness precondition — red). A KNOWN label is placed only where the row
-REPRODUCES (S3 on both read-tier hosts; B5 on the carve road in Study) — elsewhere the same assertion
-is plain, so a standing non-reproduction does not raise an XPASS every run.
+REPRODUCES — elsewhere the same assertion is plain, so a standing non-reproduction does not raise an
+XPASS every run. **None stands today:** B5's label retired with its fix (18l-b U-B5), and S3's four
+(the read-tier click's post-swap line, both hosts × both voices) with the tiers' one metrics
+vocabulary (18l-c U5) — those assertions are plain, and a regression of either reds.
 
 ## The seeded scenarios (`scenarios.zsh`; add one = a `vw_def` row + a `scn_<name>` function)
 
@@ -116,7 +118,7 @@ is plain, so a standing non-reproduction does not raise an XPASS every run.
 | `write-newline-roundtrip` | U0b (row 87) | ⏎ then ⌫ at a short note's end keep the first line and the page's top air |
 | `write-divide-merge` | the design note | ⏎ mid-line divides, ⌫ merges back; the page never moves; the caret lands at the join |
 | `mode-roundtrip` | the design note | Write → Read → Write returns the page and the caret exactly |
-| `index-click` | U0 item 1 (row 86) | a read-tier click in the book Index goes live with the caret ON the clicked line, never the blank line |
+| `index-click` | U0 item 1 (row 86) + 18l-c U5 (row 89) | a read-tier click in the book Index goes live with the caret ON the clicked line, never the blank line — and the clicked line stays under the pointer (plain since U5; it was S3's XFAIL) |
 | `readedit-click` | U0 item 1 | the same on Read ▸ edit |
 | `outline-narrow-restore` | U0 item 2(a) | the live inline note keeps its whole text at 1440 → 1100 → 900 → back |
 | `outline-long-story-settle` | U0 item 2(b) | the 212-block story, live, holds its SETTLED layout after each resize (its end scrolled into view) |

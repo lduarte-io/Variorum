@@ -2,7 +2,8 @@
 # pins/read-tier-assertions.zsh — HEADLESS pin for rule (c) on a read-tier click (U-VIS round 1,
 # MINOR-1): the last-line click must RED when the caret lands on the wrong TEXT line — the pre-fix
 # Read ▸ edit landing (line 0) — and on the blank line under the text (the pre-fix Index landing);
-# the known re-wrap (S3) alone stays XFAIL. Planted probe answers; nothing touches the GUI.
+# and, since 18l-c U5 retired S3's label, when the clicked line has RISEN under the pointer (the tiers'
+# old metric shift). Planted probe answers; nothing touches the GUI.
 emulate -L zsh
 VW=${0:A:h:h}
 source $VW/lib.zsh
@@ -25,12 +26,12 @@ check "the pre-fix Index landing (the blank line under the text) REDS" '[[ " $(s
 
 SCN_ROWS=(); plant fr=pane nl=1 caretEnd=0 caretLine=4 caretTextLines=5 caretY0=670 caretY1=687 caretFragLast=1
 vw_assert_last_line_click Index 700 >/dev/null 2>&1
-check "the right line, risen under the pointer (S3) → XFAIL only, never red" \
-  '[[ " $(statuses) " != *" FAIL "* && " $(statuses) " == *" XFAIL "* ]]'
+check "the right line, risen under the pointer (the S3 shift, FIXED at 18l-c U5) → REDS" \
+  '[[ " $(statuses) " == *" FAIL "* && " $(statuses) " != *" XFAIL "* ]]'
 
 SCN_ROWS=(); plant fr=pane nl=1 caretEnd=0 caretLine=4 caretTextLines=6 caretY0=684 caretY1=701 caretFragLast=1
 vw_assert_last_line_click Index 700 >/dev/null 2>&1
-check "the one extra line S3's marker wrap adds → still the clicked line" '[[ " $(statuses) " != *" FAIL "* ]]'
+check "the one extra line a hidden marker's wrap adds (content, the 18e boundary) → still the clicked line" '[[ " $(statuses) " != *" FAIL "* ]]'
 
 # Round 2, NIT-R2-5: a MULTI-paragraph block whose first paragraph has two lines — the pre-fix landing
 # (line 0 of paragraph 1) satisfies the paragraph-relative line range; the paragraph row must red it.
