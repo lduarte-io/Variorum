@@ -3,7 +3,8 @@
 //  Shared (Variorum + VariorumMobile)
 //
 //  pre-13x ladder round 1, F2 (MINOR-8) — ONE road to RESTORE a seeded book
-//  (Sherlock, *Encryption Explained*): mint what is MISSING through the
+//  (Sherlock, *Encryption Explained*, and since 18l-c U6 *The Strange Case of
+//  Dr Jekyll and Mr Hyde* — takemania's book): mint what is MISSING through the
 //  seeder's own resumable seed, never touching a copy the reader has —
 //  the Mac's Help ▸ Restore door's brain (5a's `ShellActions.restoreSeeded
 //  Book`, hoisted here at this touch per the shared-home rule) and, since
@@ -115,13 +116,15 @@ nonisolated enum SeededBookRestore {
         case OperationError.duplicateBookName(let existing):
             return BookNameCopy.refusal(existing: existing)
         // 18l-c U6 ladder F1: the book REFUSES new notes — "try again" can
-        // never succeed there, so the line names what to change (the app's
-        // own finished/note-cap words; nothing was minted — the scripted
-        // note mints through `newPostInReading`).
+        // never succeed there, so the line names what to change. Nothing was
+        // minted (the scripted note mints through `newPostInReading`, the
+        // imported road asks `assertReadingAcceptsPosts` first — R2-M2).
+        // PLATFORM-NEUTRAL words (R2-N1): this is the shared home, and the
+        // phone's restore row speaks these lines too — no Mac-only control.
         case OperationError.lockedReading:
-            return "The book is finished — reopen it (its settings), then restore again."
+            return "The book is finished — reopen it, then restore again."
         case OperationError.readingAtCapacity:
-            return "The book is at its note cap — extend the cap in its settings, then restore again."
+            return "The book is at its note cap — raise the cap, then restore again."
         // 18l-c U6 ladder F12: a scripted history stopped partway (a script
         // bug the pins catch first): a half-built note may stand — the next
         // restore trashes it and mints a whole one.

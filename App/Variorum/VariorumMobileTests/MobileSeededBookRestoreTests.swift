@@ -55,6 +55,11 @@ struct MobileSeededBookRestoreTests {
             (SampleLibrarySeeder.LoadError.resourceMissing, "resourceMissing"),
             (CancellationError(), "CancellationError"),
             (OperationError.readingNotFound(id: "a-book-id"), "readingNotFound"),
+            // 18l-c U6 ladder R2-N1: the book-refuses arms, and F12's stopped
+            // script history — on BOTH faces (the phone renders these lines too).
+            (OperationError.lockedReading(id: "a-book-id"), "lockedReading"),
+            (OperationError.readingAtCapacity(id: "a-book-id"), "readingAtCapacity"),
+            (Takemania.ScriptError.displayedTakeNotInFan(blockID: "a-block-id"), "displayedTakeNotInFan"),
         ]
         for (error, name) in cases {
             let line = SeededBookRestore.failureLine(for: error)
@@ -62,5 +67,10 @@ struct MobileSeededBookRestoreTests {
         }
         #expect(SeededBookRestore.failureLine(for: OperationError.duplicateBookName(name: "Encryption Explained"))
                 == BookNameCopy.refusal(existing: "Encryption Explained"))
+        // R2-N1: the approved platform-neutral words, exactly.
+        #expect(SeededBookRestore.failureLine(for: OperationError.lockedReading(id: "b"))
+                == "The book is finished — reopen it, then restore again.")
+        #expect(SeededBookRestore.failureLine(for: OperationError.readingAtCapacity(id: "b"))
+                == "The book is at its note cap — raise the cap, then restore again.")
     }
 }
