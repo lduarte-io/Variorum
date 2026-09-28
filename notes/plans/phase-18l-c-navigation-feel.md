@@ -480,12 +480,58 @@ record.
 |---|---|---|
 | 1 | Reading (the brief's list, in order, own context) | DONE — this file whole; the 18l U0 RECORD whole + its orchestrator acceptance + `18l-u0-ladder-round1.md`; KnownIssues rows 89 / 92 / 94 / 95 / 96 (the file whole in two pages); `TEXTKIT2_NOTES.md` whole; `SessionResiliencyProtocol.md` whole; the code: `ReadTierClickPlace`, `FlowParagraph` (+ its Mac face), `IndexProseColumn`, `BookIndexView` (the pane rows + `blockView`), `ReadEditPane` (`ReadEditBlock`), `BlockTOCView` (`makeLive`/`caretLanding`), `PaneSurface.swift` end to end, `EditorDocument` (base attributes), `EditorTypography`, `EditorBehaviorSettings` (`ParagraphGap`), `ProseGutter`, `IndexClickCaretTests`, `IndexProseColumnTests`, `Tools/VisualWalk/` (README, the click scenarios + `KI_S3`); her two captures |
 | 2 | Machine state at start | DONE — her real-store app IS RUNNING (`/Applications/Variorum.app`, pid 18511): the walk guard and the VisualWalk harness both refuse while it lives, so the WALK and the HARNESS RUN are PENDING until a zero-instance, author-free window; everything else runs harness-first through `xcodebuild` test windows |
-| 3 | TRACE — both her shapes, measured per host | IN-PROGRESS |
-| 4 | Red-on-old pin (the tiers' per-line geometry, both hosts, both voices) | NOT-STARTED |
-| 5 | THE CONSOLIDATION (one metrics home; read tier + replica + the live pane's paragraph style where hosted by the two index tiers) | NOT-STARTED |
+| 3 | TRACE — both her shapes, measured per host | DONE — THE TRACE below (the pin's red run on `05983838`, `App/Variorum/DerivedData/18lc-u5-pin-red.log`) |
+| 4 | Red-on-old pin (the tiers' per-line geometry, both hosts, both voices) | DONE — `IndexTierMetricsTests` (2 tests × 2 voices × 3 shapes = 12 cases) RED on the pre-fix tree: **104 issues, all 12 cases** (commit: this one) |
+| 5 | THE CONSOLIDATION (one metrics home; read tier + replica + the live pane's paragraph style where hosted by the two index tiers) | IN-PROGRESS — the HOME landed `05983838` (`IndexProseColumn.lines` = `ProseLineMetrics(4, 8)`; both read tiers, the replica and Read's height manifest consume it, byte-same numbers); the PANE's adoption (host parameter + the trailing/bottom edges) is next |
 | 6 | Harness: the four S3 XFAILs → plain PASS (labels removed) | NOT-STARTED |
 | 7 | Closing runs (touched Mac suites + `TutorialWalkTests`) | NOT-STARTED |
 | 8 | Walk (both voices) | PENDING — her app is running (row 2) |
 | 9 | Self-assessment | NOT-STARTED |
 
 - Deaths / resumes: none.
+
+### THE TRACE (inputs → the wrong geometry; every number from the pin's red run on `05983838`, the real hosts, real clicks)
+
+**The two tiers, side by side (read at the code, then measured).** Resting, both hosts draw a block as
+`FlowParagraph` paragraphs — SwiftUI `Text` in the voice's body font, `.lineSpacing(4)`, 8 pt apart in a
+`VStack`, BLANK display lines DROPPED — padded by `IndexProseColumn` (leading `max(resting, 11)`, top
+`max(resting, 6)`, trailing `resting`, bottom `resting`). Live, the same block is a `PaneSurfaceView`
+built by `PaneTextView.makeSurface`, whose paragraph style is the WRITE editor's base
+(`EditorDocument.baseParagraphStyle`: `lineSpacing` 0, `paragraphSpacing` = half the font size — 7 pt
+Terminal, 8 Study — plus this Mac's gap dial), its prose inset 6 + 5 (container inset + AppKit's
+`lineFragmentPadding`) on EVERY side, the stored text shown whole. 13u2 B paid back the leading and top
+insets in the host padding; nobody paid the trailing or the bottom, and nothing aligned the line metrics.
+
+**Measured (pin `IndexTierMetricsTests`, window 1200×800; the per-case lines are the log's `[18l-c U5 trace]`):**
+
+| Shape (the clicked block) | voice | per-line Δtop (live − rest) | prose right edge | wrap | block below moved |
+|---|---|---|---|---|---|
+| one prose paragraph (her own notes' shape), 6 / 5 lines | Terminal / Study | 0, −4, −8 … −20 / … −16 | **−11 pt** (both) | different | **−14 / −10 pt** (rises) |
+| two paragraphs in one block, 10 / 8 lines | Terminal / Study | −4 per line, and the paragraph step −1 (Terminal 7-pt gap vs 8) / 0 | −11 | different | **−27 / −18 pt** |
+| one paragraph over a STORED blank line (the sample library's shape — 211 of 212 blocks), 6 / 5 lines | Terminal / Study | −4 per line | −11 | different | **+10 / +20 pt** (drops) |
+
+**The book Index and Read ▸ edit measured IDENTICALLY, number for number** — one mechanism set, two hosts.
+The mechanism, three metric deltas and one content fact:
+1. **Line spacing** — the pane lays lines 4 pt tighter (TK2 `lineSpacing` 0 vs the tier's 4): line *k*
+   rises 4*k* pt. This is her *"words get compressed"*.
+2. **The measure** — the pane's prose ENDS 11 pt short of the tier's (its trailing inset 6 + 5, unpaid),
+   so every block re-wraps under the pointer. Her *"different spacing"*, and the words that jump lines.
+3. **The bottom** — the pane's 6-pt bottom container inset sits ON TOP of the host's resting 6: every
+   live block is 6 pt taller at its foot. (And Terminal's paragraph gap is 7, not the tier's 8.)
+4. **The stored blank line (content, not a metric)** — the sample library keeps the blank line between
+   two paragraphs as CONTENT (`"text\n"`), which `FlowParagraph` drops at rest and a live editor must
+   show: one more line (Study 8 + 22 = 30 pt, Terminal 7 + 17 = 24 pt today).
+
+**Her two shapes fall out of it.** A block over a stored blank line — every Sherlock paragraph — GROWS on
+going live: the blank line + the unpaid 6 pt outweigh the compression on a short block (her book capture's
+two-line *"So much so…"*: 30 + 6 − 2×4 = **+28 pt**, the gap she saw open under it). A block with no blank
+line under it — her own notes' shape — or a long one SHRINKS: 4 pt a line (a 17-line block: 36 − 68 =
+−32 pt; the U0 sweep's 64 pt was the harness's 17-line pointer drift) and re-wraps. So *"compressed"*
+and *"a larger space added"* are the SAME class seen on two block shapes; neither is host-specific (both
+hosts measure alike), and which one she meets depends on the block, not the mode. 13u2 B aligned the
+leading x and the first line's top only — the trace confirms both are exact (left Δ 0, line 0 Δ 0).
+
+**ATTRIBUTION: pre-existing** — the pane's paragraph style has been the Write editor's since the pane
+component's birth (13b 1a) and the read tier's `lineSpacing(4)` since the index tiers (`c768c08e`); the
+trailing/bottom insets were never paid (13u2 B, `7d44eda6`, paid leading/top). macOS-independent (the
+numbers are two style values and two paddings) — no bisect owed.
