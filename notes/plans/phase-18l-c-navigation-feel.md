@@ -1437,6 +1437,13 @@ Zero `Sources/` (core), `Shared/`, `Sync/`, schema, `Server/`, mobile. No TK1 AP
 5. **The inactive selection vs the paint** (#157 (3)) — seen in the walk.
 6. **A narrow window:** the marker, like the ⑂ badge, can clip at the window's edge.
 7. **The Takes query is its own session slot** — not the machine's find pasteboard the Write bar shares with other apps.
+8. *(Added at the ladder — R1 M1, ruled to road (b) by the reviewer, the fork hers as #157 (7).)* **Esc when the
+   ring's take has no built pane** — road A's state (a mode round trip whose restored page doesn't hold the ring's
+   block), or after scrolling far from the live take while the bar is open: the bar closes and the keyboard has no
+   pane to go to. The window holds it until she clicks a take or scrolls the ring's row back, and that newly built
+   live pane claims the keyboard (shipped behaviour). Esc never moves the page (decision 1's "her place kept").
+   U8's R-18l-13 removes the entry half; the scroll-away half is the lazy column's general class. Pinned as a named
+   boundary (`TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary`, `withKnownIssue`).
 
 ### NOTICED, NOT TOUCHED
 

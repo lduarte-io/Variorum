@@ -305,6 +305,72 @@ struct TakesFindBoardTests {
         }
     }
 
+    /// **R1-M1's ruled boundary (the U7 ladder's round 1, road (b))** — Esc
+    /// when the ring's take has no built pane: `close()` sends the hand-back
+    /// to the live take, no realized pane consumes it, the bar unmounts and
+    /// the WINDOW holds the keyboard until she clicks a take or the ring's
+    /// row scrolls back in (that born-live pane then claims it — shipped).
+    /// Esc never moves the page — decision 1's "her place kept" — so the
+    /// other half is pinned PLAIN below. The fork is QUESTIONS #157 (7);
+    /// U8's R-18l-13 removes the entry way into this state. `withKnownIssue`,
+    /// non-intermittent: the day Esc starts landing the keyboard here ((b)
+    /// flipped to (a), or U8's rule), this pin says so LOUDLY — re-read the
+    /// boundary (HONEST BOUNDARIES 8) before believing it.
+    @Test func escWithNoBuiltPaneForTheRingIsANamedBoundary() async throws {
+        try await withSession(blocks: 60) { session, fixture, db, mount in
+            let router = session.commandRouter
+            let target = fixture.blocks[39]
+            let token = enterOn(target, router, fixture.postID)
+            defer {
+                router.unregisterDetail(token)
+                router.forgetCurrentBlock(for: fixture.postID)
+            }
+            // Showing 1: the entry reveals block 40; she scrolls to the top; leaves.
+            let first = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window1, hosting1) = await mount(first)
+            let article1 = try #require(articleScrollView(in: hosting1))
+            let deadline1 = Date().addingTimeInterval(4)
+            while !(pane(target.variant, in: hosting1).map { isOnScreen($0, article1) } ?? false),
+                  Date() < deadline1 {
+                await settle(window1, hosting1, until: { false }, maxTurns: 2)
+            }
+            article1.contentView.scroll(to: .zero)
+            article1.reflectScrolledClipView(article1.contentView)
+            await settle(window1, hosting1, until: { false }, maxTurns: 12)
+            window1.contentView = nil
+            first.teardown()
+            window1.orderOut(nil)
+
+            // Showing 2 — the round trip: the ring on block 40, its row unbuilt.
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window, hosting) = await mount(model)
+            await settle(window, hosting, until: { false }, maxTurns: 16)
+            let ring = try #require(model.focusedPane, "precondition: the entry ring landed")
+            #expect(ring.blockID == target.block && model.isPaneLive(ring),
+                    "precondition: the trace state — the authority says LIVE")
+            #expect(pane(target.variant, in: hosting) == nil,
+                    "precondition: no pane was built for the live take")
+
+            // ⌘F, then Esc — the hand-back has nowhere to land.
+            model.find.open()
+            await settle(window, hosting, until: { model.find.fieldHoldsKeyboard }, maxTurns: 20)
+            #expect(model.find.fieldHoldsKeyboard, "precondition: the field took the keyboard")
+            model.find.close()
+            await settle(window, hosting,
+                         until: { window.firstResponder is PaneTextView }, maxTurns: 12)
+            withKnownIssue(
+                "R1-M1 (b): Esc's hand-back has no built pane to reach — the window keeps the keyboard until a click or the row scrolls back (HONEST BOUNDARIES 8, QUESTIONS #157 (7))"
+            ) {
+                #expect(window.firstResponder is PaneTextView,
+                        "the keyboard reached a pane — (b) was flipped or U8 landed: re-read the boundary")
+            }
+            // The ruled half that HOLDS today, pinned plain: her place kept —
+            // Esc did not move the page to the ring's row.
+            #expect(pane(target.variant, in: hosting) == nil,
+                    "Esc never moves the page (decision 1's 'her place kept')")
+        }
+    }
+
     // MARK: - ⌘G from the board: the take takes the keyboard
 
     /// ⌘G through the ROUTER (the menu's own road — `dispatch(.find(.next))`)
