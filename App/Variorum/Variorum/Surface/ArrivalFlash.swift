@@ -121,8 +121,12 @@ struct ArrivalFlashFace: View {
             shape
                 .opacity(opacity)
                 #if DEBUG
-                .onAppear { ArrivalFlashOracle.note(oracleKey, part: part, opacity: opacity) }
-                .onChange(of: opacity) { _, new in ArrivalFlashOracle.note(oracleKey, part: part, opacity: new) }
+                .onAppear {
+                    ArrivalFlashOracle.note(oracleKey, part: part, opacity: opacity, startedAt: startedAt)
+                }
+                .onChange(of: opacity) { _, new in
+                    ArrivalFlashOracle.note(oracleKey, part: part, opacity: new, startedAt: startedAt)
+                }
                 #endif
         }
         .allowsHitTesting(false)
@@ -144,6 +148,13 @@ struct ArrivalFlashFace: View {
 /// walk probe's): the strongest opacity each face part has shown since the
 /// last reset, and how many times it was drawn. A face never mounted (the
 /// setting off, a find step, a note-open) leaves no key.
+///
+/// `seen` is per FACE (the pins' exact keys); `flashes` is per flash EVENT
+/// (the face key + the arrival's start), which is what the walk probe counts —
+/// a face key alone collapses two flashes of one row, and an
+/// `ObjectIdentifier` inside a key can be REUSED by a later object at a freed
+/// address (measured at U8: the full walk's second Write flash in
+/// `mode-switch-feel` counted 0 under the per-face count).
 @MainActor
 enum ArrivalFlashOracle {
     struct Seen: Equatable {
@@ -153,17 +164,31 @@ enum ArrivalFlashOracle {
     }
 
     private(set) static var seen: [String: Seen] = [:]
+    private(set) static var flashes: [String: Seen] = [:]
 
-    static func note(_ key: String, part: ArrivalFlashFace.Part, opacity: Double) {
-        var entry = seen[key] ?? Seen()
+    static func note(
+        _ key: String, part: ArrivalFlashFace.Part, opacity: Double, startedAt: Date? = nil
+    ) {
+        seen[key] = Self.adding(seen[key], part: part, opacity: opacity)
+        if let startedAt {
+            let event = "\(key)|\(startedAt.timeIntervalSinceReferenceDate)"
+            flashes[event] = Self.adding(flashes[event], part: part, opacity: opacity)
+        }
+    }
+
+    private static func adding(_ entry: Seen?, part: ArrivalFlashFace.Part, opacity: Double) -> Seen {
+        var entry = entry ?? Seen()
         switch part {
         case .fill: entry.peakFill = max(entry.peakFill, opacity)
         case .stroke: entry.peakStroke = max(entry.peakStroke, opacity)
         }
         entry.draws += 1
-        seen[key] = entry
+        return entry
     }
 
-    static func reset() { seen = [:] }
+    static func reset() {
+        seen = [:]
+        flashes = [:]
+    }
 }
 #endif

@@ -139,9 +139,9 @@ enum VisualWalkProbe {
                     .split(separator: "|").first.map { String($0.dropFirst(5)) } ?? "-"
             }
         }
-        // 18l-c U8: which arrival-flash faces have drawn at full strength, per
-        // surface (`ArrivalFlashOracle` — a count of distinct faces, so a walk
-        // reads "one more flashed" across a mode switch) — always on (cheap);
+        // 18l-c U8: how many arrival flashes have drawn at full strength, per
+        // surface (`ArrivalFlashOracle.flashes` — a count of flash events, so a
+        // walk reads "one more flashed" across a mode switch) — always on (cheap);
         // and, on request (`band`), where the mode switch RESTED its target on
         // the surface now showing (the comfort band's two edges, measured).
         line["af"] = arrivalFlashSummary()
@@ -476,13 +476,15 @@ enum VisualWalkProbe {
 
     // MARK: - The mode switch's feel (18l-c U8)
 
-    /// `af=w<n>.t<n>.re<n>.rp<n>` — how many DISTINCT flash faces have drawn at
-    /// full strength, per surface (Write's decor layer · the Takes article cell
-    /// · note Read's edit face · its calm page). A face key is per board/row,
-    /// so a mode switch's flash raises its surface's count.
+    /// `af=w<n>.t<n>.re<n>.rp<n>` — how many flash EVENTS have drawn at full
+    /// strength, per surface (Write's decor layer · the Takes article cell ·
+    /// note Read's edit face · its calm page). Counted per event (a face key +
+    /// its arrival's start — `ArrivalFlashOracle.flashes`), so every mode
+    /// switch's flash raises its surface's count, even on a row or an object
+    /// address seen before.
     private static func arrivalFlashSummary() -> String {
         var counts = ["write": 0, "takes": 0, "read-edit": 0, "read-page": 0]
-        for (key, seen) in ArrivalFlashOracle.seen where seen.peakFill >= 0.9 && seen.peakStroke >= 0.9 {
+        for (key, seen) in ArrivalFlashOracle.flashes where seen.peakFill >= 0.9 && seen.peakStroke >= 0.9 {
             let surface = String(key.split(separator: "|").first ?? "")
             if counts[surface] != nil { counts[surface, default: 0] += 1 }
         }

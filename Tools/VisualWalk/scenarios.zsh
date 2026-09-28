@@ -1032,7 +1032,7 @@ scn_b5-more-roads() {
 # resting top air above, two of its lines below — never the extreme edge), and flashes it (a brief highlight
 # that fades in about a second — default ON). The probe's `band` read (`bS` the surface, `bT` the target's top
 # below the viewport's top, `bB` the room under it, `bAir`/`bRoom` the band's two edges) and its flash summary
-# (`af=w<n>.t<n>.re<n>.rp<n>` — distinct faces drawn at full strength, per surface). Captures mid-flash.
+# (`af=w<n>.t<n>.re<n>.rp<n>` — flash events drawn at full strength, per surface). Captures mid-flash.
 vw_def mode-switch-feel "takemania (the Jekyll book), Write ⇄ Takes ⇄ Read" \
   "Write: ⌘↓ then ⌥↑ ×12 (the caret on a block a dozen paragraphs above the end) · her wheel to the page's top (the caret off it) · ⌘2 · ⌘1 · ⌘3 · ⌘1" \
   "each switch rests its target INSIDE the comfort band and flashes it: Takes' landed block (at the band's foot — R-Q20 from the top), Write's caret line (AT the top air — it was off the page she left), Read's landed row; the flash count of each surface rises by one" pass

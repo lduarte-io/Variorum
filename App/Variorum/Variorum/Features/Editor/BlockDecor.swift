@@ -1050,8 +1050,9 @@ final class BlockDecorOverlayController {
             reduceMotion: NSWorkspace.shared.accessibilityDisplayShouldReduceMotion)
         #if DEBUG
         let key = "write|\(ObjectIdentifier(self))"
-        ArrivalFlashOracle.note(key, part: .fill, opacity: 1)
-        ArrivalFlashOracle.note(key, part: .stroke, opacity: 1)
+        let startedAt = Date()
+        ArrivalFlashOracle.note(key, part: .fill, opacity: 1, startedAt: startedAt)
+        ArrivalFlashOracle.note(key, part: .stroke, opacity: 1, startedAt: startedAt)
         #endif
         guard plan.animated else {
             DispatchQueue.main.asyncAfter(deadline: .now() + plan.total) { [weak self, weak view] in
