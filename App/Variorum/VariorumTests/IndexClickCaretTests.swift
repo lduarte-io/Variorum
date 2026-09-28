@@ -487,10 +487,18 @@ struct IndexClickCaretTests {
                 let leading = IndexProseColumn.readTierLeading(
                     resting: IndexProseColumn.readEditResting,
                     paneInset: PaneTextView.proseLeadingInset)
+                // The FOOT through the vocabulary, exactly as the tier pads it
+                // (18l-c U5 ladder R1, F1 — this was a hand copy of
+                // `readEditRestingTop`, value-identical today and a drift seam
+                // the moment it is not: the re-armed last-line click aims off
+                // this column's bottom).
+                let bottom = IndexProseColumn.readTierBottom(
+                    resting: IndexProseColumn.readEditRestingTop,
+                    paneInset: PaneTextView.proseBottomInset)
                 let column = CGRect(
                     x: row.minX + leading, y: row.minY + top,
                     width: row.width - leading - IndexProseColumn.readEditResting,
-                    height: row.height - top - IndexProseColumn.readEditRestingTop)
+                    height: row.height - top - bottom)
                 let clicked = rig.windowPoint(Self.point(on: line, of: column, text: target.text))
                 rig.click(at: clicked)
                 let live = await rig.poll {

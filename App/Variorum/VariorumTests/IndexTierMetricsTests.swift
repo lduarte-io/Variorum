@@ -440,7 +440,7 @@ struct IndexTierMetricsTests {
             let top = IndexProseColumn.readTierTop(
                 resting: IndexProseColumn.readEditRestingTop, paneInset: PaneTextView.proseTopInset)
             let bottom = IndexProseColumn.readTierBottom(
-                resting: IndexProseColumn.readEditRestingTop, paneInset: PaneTextView.proseTopInset)
+                resting: IndexProseColumn.readEditRestingTop, paneInset: PaneTextView.proseBottomInset)
             let leading = IndexProseColumn.readTierLeading(
                 resting: IndexProseColumn.readEditResting, paneInset: PaneTextView.proseLeadingInset)
             let column = CGRect(
