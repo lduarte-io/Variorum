@@ -1207,3 +1207,22 @@ guard, harness/pins first.
 ### SELF-ASSESSMENT
 
 **Strong:** the history is REAL — every row from the operations her gestures reach, on the quiet facade, and the pins hold its exact shape (47 · 10/37 · 2 · 9 edges by origin · 5 tray · 5 originals · 12/10 savepoints), so a script step that silently stops doing its job reds loudly. The traced calls were measured, not assumed: the tray and janitor windows forced the seed-relative clock (the 1886 revert ships an EMPTY tray — R-U6-4); the dedupe's defense leg forced keeping the book out of the facts list, which is also the literal "zero dedupe extension" (R-U6-2); title-last completeness has a revert that shows the mark set over a half-built note (R-U6-1) and a heal pinned by its own revert (R-U6-3). Zero `Sync/`, zero `Sources/`, zero editor seam; the facts the engine receives are byte-identical. Her road for the full experience — delete takemania, Help ▸ Restore — was walked twice, in both voices, and a divide and a merge were played by hand and undone. **Weakest points for the reviewer:** (a) #155 is a real product call made provisionally (the plan's text assumed the book would sit in the dedupe's list — the trace says that would undo the disclaimer's own advice); (b) the script's step count makes `interruptAfterStep: 40` a positional seam — a future edit to the early sittings moves which op it stops at (the pin's assertions do not depend on where); (c) `Calendar.current` in the script means stamps depend on the device's time zone (by design — "a person's hours" are local); the pins assert zone-robust properties only; (d) three pins that asserted "two seeded books" were re-armed (named in row 6) — a changed fact, not a relaxed one; (e) the walk found and fixed the small-hours savepoints mid-walk, so the Terminal rows 1–8 ran on the earlier build and rows 9c/9e on the fixed one (App/ diff between them: the script's clock only).
+
+### U6 — ORCHESTRATOR ACCEPTANCE (the hands-on walk, 2026-09-28; verify-never-trust)
+
+**Claims verified:** tree clean, `main` == `origin/main` at `4fe7c464`, the 14 commits present,
+QUESTIONS #155 filed, the U6 RECORD complete with LIVE STATUS flipped. **My walk** (dev-store
+Debug — the vis-walk build re-verified carrying the Takemania symbols; guard per step; captures
+`notes/plans/18l-screens/18lc-u6/orch-walk/`): ⌘K → takemania opens AT ITS START (R-18l-1 in
+use) — 47 blocks · 2,938 words, in *the strange case of dr jekyll and mr hyde*, tagged, the
+tray door at 5; Write shows a take badge beside plain paragraphs and the prose reads like a
+real worked document (the "## The will" chapter, no tutorial voice); Takes ▸ the fanned block
+opens to **"✓ chosen Stevenson" beside a labelled "tighter" take whose prose is a genuine
+authorial rewrite** — her ask ("various takes… more like a real document than a tutorial")
+met in the exact spirit. The implementer's double-voice walk covered the lineage doors, Block
+History's named savepoints and the delete→Restore round trip; my spot-check confirms the feel.
+**Acceptance verdict: U6 BUILT + WALKED — the `opus-reviewer` ladder is the remaining gate.**
+Bundled for her from this unit: the disclaimer wording (hers to polish), #155 (a)/(i) (the
+dedupe-list and phone-restore PROVISIONALs), and the noticed divide→merge→⌥⌘Z-twice tray
+behaviour (pre-existing, consistent with tombstone-flip inverses — surfaced for her awareness,
+not filed as a defect).
