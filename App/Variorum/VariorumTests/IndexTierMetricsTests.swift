@@ -405,6 +405,92 @@ struct IndexTierMetricsTests {
     }
 }
 
+// MARK: - Every OTHER pane is byte-unchanged (her ratification's own terms)
+
+/// **Her ratification (2026-09-27, in-session):** *"yeah that's fine, it is
+/// the goal for it to not change appearance when you start editing"* — the
+/// block being edited in the two index-like faces adopts the reading rows'
+/// spacing, and Write and Takes stay untouched. The second half is pinned
+/// here: a pane whose host hands it no line metrics lays out with the Write
+/// editor's base style exactly (Takes cards and article, lenses, Compare, the
+/// Write takes panel, Canvas, the Blocks workbench), and only the two index
+/// hosts hand it any.
+@MainActor
+@Suite("18l-c U5 — every other pane keeps the Write editor's base style")
+struct PaneLineMetricsScopeTests {
+    private static func mountedPane(_ view: PaneSurfaceView) async -> PaneTextView? {
+        let hosting = NSHostingView(rootView: view.frame(width: 400))
+        hosting.frame = NSRect(x: 0, y: 0, width: 400, height: 300)
+        for _ in 0..<20 {
+            hosting.layoutSubtreeIfNeeded()
+            if let pane = Self.pane(in: hosting) { return pane }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        return nil
+    }
+
+    private static func pane(in view: NSView) -> PaneTextView? {
+        if let pane = view as? PaneTextView { return pane }
+        for sub in view.subviews { if let found = pane(in: sub) { return found } }
+        return nil
+    }
+
+    /// The three places a pane's paragraph style lives — the stored text, the
+    /// style it types with, and the view's default.
+    private static func styles(_ pane: PaneTextView) -> [NSParagraphStyle?] {
+        [
+            pane.textStorage?.attribute(.paragraphStyle, at: 0, effectiveRange: nil)
+                as? NSParagraphStyle,
+            pane.typingAttributes[.paragraphStyle] as? NSParagraphStyle,
+            pane.defaultParagraphStyle,
+        ]
+    }
+
+    @Test func aPaneWithNoHostMetricsLaysOutWithTheWriteBaseStyle() async throws {
+        let pane = try #require(await Self.mountedPane(PaneSurfaceView(text: "one\ntwo", isLive: true)))
+        let base = EditorDocument.baseParagraphStyle
+        for style in Self.styles(pane) {
+            #expect(style?.lineSpacing == base.lineSpacing, "no line spacing a host did not ask for")
+            #expect(style?.paragraphSpacing == base.paragraphSpacing, "the Write editor's own gap")
+        }
+    }
+
+    @Test func aPaneHandedTheIndexMetricsLaysOutWithThem() async throws {
+        let pane = try #require(await Self.mountedPane(
+            PaneSurfaceView(text: "one\ntwo", isLive: true, lineMetrics: IndexProseColumn.lines)))
+        for style in Self.styles(pane) {
+            #expect(style?.lineSpacing == IndexProseColumn.lines.lineSpacing)
+            #expect(style?.paragraphSpacing == IndexProseColumn.lines.textKitParagraphSpacing)
+        }
+    }
+
+    /// Only the two index-like hosts hand a pane line metrics — a third
+    /// caller is a look change on a surface she did not rule on, and must say
+    /// so here first.
+    @Test func onlyTheTwoIndexHostsHandAPaneLineMetrics() throws {
+        let app = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+        var callers: Set<String> = []
+        for root in ["Variorum", "Shared"] {
+            let walker = try #require(FileManager.default.enumerator(
+                at: app.appendingPathComponent(root), includingPropertiesForKeys: nil))
+            for case let file as URL in walker
+            where file.pathExtension == "swift" && file.lastPathComponent != "PaneSurface.swift" {
+                let source = try String(contentsOf: file, encoding: .utf8)
+                let code = source.split(separator: "\n").filter {
+                    let line = $0.trimmingCharacters(in: .whitespaces)
+                    return !line.hasPrefix("//") && !line.hasPrefix("*")
+                }
+                if code.contains(where: { $0.contains("lineMetrics:") }) {
+                    callers.insert(file.lastPathComponent)
+                }
+            }
+        }
+        #expect(callers == ["BookIndexView.swift", "ReadEditPane.swift"],
+                "the hosts handing a pane line metrics: \(callers.sorted())")
+    }
+}
+
 private extension CGFloat {
     func rounded(toPlaces places: Int) -> CGFloat {
         let scale = CGFloat(pow(10, Double(places)))

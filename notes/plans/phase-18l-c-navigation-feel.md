@@ -269,7 +269,14 @@ flips those four XFAILs to plain PASS. Tree at this kickoff: `main` == `origin/m
   off-scope affordance (a match in a take that is not shown) and find-only-vs-replace are the
   sitting's questions — recorded in THE SITTING RECORD below, built to her answers. Editor-seam
   adjacent (the landing family + the Takes board) → Fable review.
-- **U8 — MODE-SWITCH FEEL: the arrival flash + the comfort band** (her issues 3 and 4). **(a) THE
+- **U8 — MODE-SWITCH FEEL: the caret rule + the arrival flash + the comfort band** (her issues 3
+  and 4, joined by R-18l-13 at the #150 sitting — three halves of ONE design: where a mode
+  switch lands · inside what band · shown how). **(0) THE CARET RULE (R-18l-13, THE SITTING
+  RECORD — read it whole):** Takes' entry joins Write's caret anchor (the caret's block, banded,
+  flashed); a mode's private scroll memory never outranks a mode switch (it survives for note
+  re-opens, where the page wins); Read's page-continuity carry stands. The Takes memory pins
+  that assert the superseded outranking are re-armed to pin THIS rule — a ruled change, each
+  named in the unit record. **(a) THE
   FLASH:** after a mode switch's entry landing settles, a brief temporary highlight on the caret's
   line (Write) / the current block's face (Takes, Read, Index) — the existing landing/wash
   vocabulary reused, never a new color system; fades after an instant; **default ON with a
@@ -343,6 +350,7 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
 | 3 | Search in Takes — the design brief in this file first; chosen-takes-only default ON; the off-scope affordance + find-vs-replace per the sitting | U7 | open |
 | 4 | The mode-switch arrival flash — default ON, a setting to turn off; the existing wash vocabulary; fade constants named | U8 | open |
 | 5 | The comfort band — no mode-switch landing rests the target line at the extreme top/bottom; ruled carries exact mid-band; pin collisions flagged, never edited | U8 | open |
+| 5b | **R-18l-13 — the mode-switch caret rule** (her 2026-09-27 ruling at the #150 sitting): Takes' entry joins Write's caret anchor; a mode's scroll memory never outranks a mode switch (re-opens only); Read's carry stands; the old-outranking pins re-armed AS THE RULED CHANGE, each named in the record | U8 (one design with rows 4–5) | open |
 | 6 | MAY-take: KnownIssues row 94 (the Takes head reveal eats the 18-pt top inset — the band's top edge is its remedy sketch); decide at U8, record either way | U8 rider | open |
 | 7 | Her cursor-loss report's OTHER half — *"tapping keys won't make you edit (the take that you are navigated to isn't active)"*: trace at U7 whether a find-navigation landing should focus/activate the landed take, and what today's non-activation is (R-Q20/R-Q21 territory — any change to ruled machinery is flagged, not made) | U7 | open |
 | 8 | Her #153 ruling (a′), OWED THIS ROUND: the Index landing's caret takes the note's entry rule (START, except the last-in block → remembered caret) — one line in `BookIndexEditModel.takePendingLiveBlock` + the `IndexLandingCaretTests` arm re-pinned to (a′); applied at the next clean seam, never beside U5's in-flight diff; QUESTIONS #153 closes on landing | seam act (orchestrator or the next unit) | open |
@@ -413,10 +421,44 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
     13g F-5 entry's dated pointer is now the rule's settled state.
   - **U3 FELT-GATE CONFIRMED.** Her answer after an evening of clicking through the app: the
     boards feel right — the reverted close is FINAL; nothing further owed on 18l-b U3.
-  - Deliberately NOT asked (lower stakes, standing as built, hers whenever she likes):
-    **#150** (the five note-open refinements inside her own R-18l-1 — each one line to flip)
-    and **#151** (note Read's watch-without-placeholders — built as (a), measured better than
-    the alternative). Both stay open in QUESTIONS.
+  - Deliberately NOT asked at that batch (then asked at her request, minutes later — below):
+    **#150** and **#151**.
+- **THE #150/#151 SITTING (2026-09-27, in-session — at her ask, via the question tool):**
+  - **#150(a) RATIFIED as built** — first open: the caret at the start with the page.
+  - **#150(b) RATIFIED FOR RE-OPENS, and it opened a NEW RULING (below).** Her answer, verbatim:
+    *"I do want the page to win, but if the carat is in one position then that leads back to the
+    issue I brought up with moving between write & takes - if you're switching between modes, I
+    think you should go back to the carat because otherwise you can get lost. Does your read on
+    my original issue match what I'm saying here & consistent with this? I do agree that simply
+    clicking away and clicking back shouldn't move you back to your cursor, but moving between
+    the panes was feeling confusing. If you think it's better product to not move back to the
+    carat between modes, I'm open to that, but we'd have to have a button like 'jump to cursor'
+    and that seems like just more machinery. Thoughts?"* So: a note RE-OPEN keeps the page she
+    left (as built, ratified — "clicking away and clicking back"); the MODE-SWITCH half is
+    R-18l-13.
+  - **R-18l-13 — THE MODE-SWITCH CARET RULE (her ruling, scope confirmed at the follow-up
+    question: "Caret anchors editing modes"):** switching modes inside an open note anchors the
+    EDITING modes to the caret — **Takes joins Write**: entering either lands at the caret's
+    block, comfort-banded (U8b) and flashed (U8a); **a mode's private scroll memory never
+    outranks a mode switch** — it survives only for NOTE RE-OPENS, where the page wins
+    (#150(b)); **Read keeps its page-continuity carry** (switching to Read keeps the text she
+    was looking at — a reading mode follows the page, and she is never lost there because the
+    page followed her). This SUPERSEDES the Takes entry-memory's mode-switch outranking half
+    (17q / R-Q20/R-Q21's within-session restore on the mode-switch road; the pair's machinery
+    and its re-open role SURVIVE) — a ruled change: the pins that assert the old outranking are
+    re-armed to pin this rule as part of U8, each named in its record, never silently edited.
+    The "jump to cursor" button alternative was hers to keep and she leaned against it;
+    declined with the ruling (a door you must find to fix being lost is more machinery than
+    not getting lost). **Built at U8 — its scope grows to three halves of ONE design: where a
+    mode switch lands (this rule) · inside what band (U8b) · shown how (U8a's flash).**
+  - **#150(d) RATIFIED as built** — a page left resting in the empty room below the last line
+    re-opens at the note's END (its last line at the top); **(e) RATIFIED as built** — a visit
+    that marked no place re-opens at the START. **(c) stands as built** (every door into an
+    already-opened note is a re-open; part of the (b) reading she ratified).
+  - **#151 RATIFIED (a) — the watch alone.** Note Read's landings stay watched with lazy rows
+    (72/72 measured); the placeholder rows stay rejected on their measured 59-pt
+    correction jump; (c)'s warming stays §W's own decision. The NIT-4 manifest-offset fix
+    simply stands (its own text's "if you keep (a)" arm).
 
 ## U5 BRIEF (session 1 — the tiers' one metrics vocabulary; written by the orchestrator 2026-09-27)
 
@@ -506,6 +548,7 @@ record.
 | 4 | Red-on-old pin (the tiers' per-line geometry, both hosts, both voices) | DONE — `IndexTierMetricsTests` (2 tests × 2 voices × 3 shapes = 12 cases) RED on the pre-fix tree: **104 issues, all 12 cases** (commit: this one) |
 | 5 | THE CONSOLIDATION (one metrics home; read tier + replica + the live pane's paragraph style where hosted by the two index tiers) | DONE — the HOME `05983838`; the PANE's adoption this commit: `PaneSurfaceView.lineMetrics` (nil ⇒ the Write base style, byte for byte), handed `IndexProseColumn.lines` by the two index hosts only, which also pay back the pane's trailing (`livePaneTrailing`, a 5 / 1 pt bleed) and bottom (`livePaneBottom`) insets; the book pane's height model, Read's manifest and the harness probe read the same edges. Pin GREEN: 12 of 12 cases at 0.0 pt (`18lc-u5-pin-green1.log`). The stored blank line = QUESTIONS #154 (PROVISIONAL (a), no change) |
 | 5b | Behavioural reverts on the final tree (fix committed `337bef70` first — restores by `git checkout -- <file>`) | DONE — each RED in its predicted shape, then restored (tree clean after): **R-U5-1** (hosts pass `lineMetrics: nil`) RED **80** — wrap and edges exact, lines −4k, Terminal's paragraph step −1, the block below −14…−33 / +4…+14 (`18lc-u5-R1.log`); **R-U5-2** (trailing pad back to `resting`) RED **24** — right edge −11, wrap different, tops exact (`18lc-u5-R2.log`); **R-U5-3** (bottom pad back to `restingTop`) RED **12** — the block below +6 in every case, lines and edges exact (`18lc-u5-R3.log`). No revert in flight |
+| 5c | The scope + home pins | DONE (this commit) — `PaneLineMetricsScopeTests` (3: a pane with no host metrics lays out with the Write base style in all three places a style lives; a pane handed the index metrics lays out with them; a SOURCE WALK — only `BookIndexView.swift` and `ReadEditPane.swift` pass `lineMetrics:`) — her ratification's *"Write and Takes untouched"* as a pin; `IndexProseColumnTests` +3 (the trailing/foot arithmetic; the pane's trailing/bottom insets MEASURED off a real surface's placement; the vocabulary's TK2 style drawing the tier's 4-pt line / 8-pt paragraph spacing, both voices — a TEXTKIT2 §5 tripwire). Run: **11 tests / 3 suites passed** (`18lc-u5-pins2.log`). Guards, not bug pins: they pass on both sides by design, stated |
 | 6 | Harness: the four S3 XFAILs → plain PASS (labels removed) | NOT-STARTED |
 | 7 | Closing runs (touched Mac suites + `TutorialWalkTests`) | NOT-STARTED |
 | 8 | Walk (both voices) | NOT-STARTED — CLEARED by the orchestrator's relay (she quit her app and is stepping away); the per-step guard binds every GUI step |
