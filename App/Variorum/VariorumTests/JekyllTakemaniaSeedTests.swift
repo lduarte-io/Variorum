@@ -211,12 +211,15 @@ struct JekyllTakemaniaSeedTests {
             #expect(shape.fannedBlocks == 10, "blocks with two or more live takes")
             #expect(shape.unfannedBlocks == 37)
             #expect(shape.archivedTakes == 2, "the eyesore's first try; Hyde's exit with the dialogue")
-            #expect(shape.labels.isSuperset(of: [
-                "Stevenson", "tighter", "short", "scroll", "no face", "plainer",
-                "the maid tells it", "the stick first", "shorter", "five blows",
-                "open ending", "Stevenson\u{2019}s close", "Lanyon next", "sat up", "one hand",
-                "cut to the door",
-            ]))
+            // The 18 distinct labels on the placed blocks' live takes (archived
+            // included) — EXACT (the U6 ladder's F9: the record had said it
+            // three ways).
+            #expect(shape.labels == [
+                "Stevenson", "tighter", "first try", "short", "scroll", "no face", "plainer",
+                "with the dialogue", "cut to the door", "the maid tells it", "the stick first",
+                "shorter", "five blows", "open ending", "Stevenson\u{2019}s close", "Lanyon next",
+                "sat up", "one hand",
+            ])
 
             // Lineage: real edges from real divides, merges and an extract.
             #expect(shape.lineage == ["divide": 4, "merge": 4, "extract": 1])
