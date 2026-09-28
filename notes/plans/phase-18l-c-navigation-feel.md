@@ -1443,8 +1443,8 @@ Zero `Sources/` (core), `Shared/`, `Sync/`, schema, `Server/`, mobile. No TK1 AP
 1. **`BookOutlineLandingTests.openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded` reds at 3424 in large runs** (green alone) — pre-existing (row 10), KnownIssues row 58's number; a row-58 sighting for the orchestrator.
 2. **VisualWalk: the scope chip's FIRST AXPress in a fresh launch returns failure** (`AXUIElementPerformAction` → exit 2) and may or may not land; the scenario verifies by the probe and retries. A harness fact, possibly SwiftUI's lazily built accessibility tree (the Study pass, whose launch had already AX-pressed Settings, never saw it).
 3. **Road B likely reaches the N9 entry landing too** (the same born-live attach-claim, the same reveal) — fixed by the same line; not separately pinned for N9.
-5. **The harness's shared `vw_set_voice` meets the same AXPress quirk** — the Settings radio's press returned a failure code while landing (`074442/`, probe id 191 `voice=terminal`), so the helper aborted a pass whose rows were all green. `takes-find` verifies its own chip press by the probe and retries; the shared helper does not (not this unit's to change — a VisualWalk hardening line for the orchestrator).
 4. **The Write bar's query and the Takes bar's do not meet** — the Write bar reads the machine's find pasteboard; a search typed in Write is not in the Takes field. A small follow-up if she reaches for it.
+5. **The harness's shared `vw_set_voice` meets the same AXPress quirk** — the Settings radio's press returned a failure code while landing (`074442/`, probe id 191 `voice=terminal`), so the helper aborted a pass whose rows were all green. `takes-find` verifies its own chip press by the probe and retries; the shared helper does not (not this unit's to change — a VisualWalk hardening line for the orchestrator).
 
 ### OWED AT CLOSE (drafted for the orchestrator — nothing below was applied)
 
