@@ -1737,6 +1737,80 @@ Runs over the named suites only (logs `App/Variorum/DerivedData/18lc-u8-R*.log`)
 
 Reverts in flight: none.
 
+### THE BUILT SHAPE AGAINST THE BRIEF
+
+| Brief item | Built |
+|---|---|
+| (0) the caret rule — Takes joins Write's anchor; the memory never outranks a mode switch; re-opens keep the page; Read's carry stands | the entry landing's same-block stand-down RETIRED (`TakesArticleScroll.resolveEntryLandingAgainstTheMemory`): it rides through the restored page and reveals her block when that page does not hold it — road A closed on the mode-switch door (R-1: the ring's pane built, on screen, live, holding the keyboard). Its first step defers to the one authority's quiet (the measured 17q race — `articleEntryRidesThrough`). R-Q20's moved-block win, the restore machinery and the re-open road (R-18l-1's opening never calls `landArticle`) untouched; `NoteOpenLandingTests` (the #150 arms) and `ModeSwitchCarryTests` ride unmodified and green. The one open edge ((A) as built / (B)) is QUESTIONS #158 (1) |
+| the two named pins + every old-outranking pin re-armed AS THE RULED CHANGE, each named old → new | 11 pins + the VisualWalk `takes-landing` row C (THE RE-ARMED PINS table; the harness row in its own commit `e6b86322`); the tripwire's designed red confirmed (R-2 red on the pre-U8 tree, then restaged on its remaining state) |
+| (a) the flash — after the entry landing settles; the existing vocabulary; 0.3 s hold + 0.7–0.9 s opacity fade as NAMED constants; default ON + a setting (the `receipt_style` precedent); Reduce Motion | `Surface/ArrivalFlash.swift` (`holdSeconds 0.3`, `fadeSeconds 0.8`, the pure cosine `opacity(at:)`); the block highlight's face (wash + accent border); fires at the landing's ARRIVAL — the one authority's first quiet look that finds the target home (`LandingAuthority.onArrived`, additive) on Takes and Read, the settle hop's last step on Write; `arrival_flash` synced, read-time default ON, "1"/"0", its read in Queries + its write through `upsertSetting` (the one `Sources/` touch); the Editor pane's "Switching modes" toggle; Reduce Motion = unanimated for the same total (JUDGMENT CALL 4) |
+| (b) the band — the resting top air above, ~2 lines below, NAMED; mid-band exact; mode-switch landings ONLY | `Surface/ComfortBand.swift` (`bottomLines = 2`; the top air is each surface's own number: Write's `textContainerOrigin.y`, Takes' `articleTopAir` 18 — newly one named constant the padding draws with, Read's `columnLead` 26 / `pageRoomPadding` 28); applied only on the entry kind (Takes), the bare mode-switch arrival (Write), the non-opening seed (Read); clicks, blooms, find steps and note-opens untouched. Measured: Takes foot room 34.0 / head 18.0; Write top 24.0 / room 34.0 / mid exact 250.5 → 250.5; Read 25.5 / room 33.5 |
+| collisions with ruled pins flagged, never edited silently | `ModeSwitchCarryTests` PIN B: the band moves its Read reading 0.0 → 0.044 (the 26-pt top air), inside the pin's 0.06 tolerance — green and UNMODIFIED; FLAGGED here for the orchestrator. No R-Q20 pin collided (arms (a)/(d)/(f) byte-unchanged) |
+| MAY-take: KnownIssues row 94 | TAKEN on the road it was sighted on (R-Q20's entry landing, and every entry landing): the head reveal rests the row at the 18-pt top air (measured 18.0; R-U8-3 reds it back to 0.0). The residual — a BLOOM or FIND head reveal still rests its row flush (their shipped reveal, the brief's scope) — is the row's re-worded remainder (OWED AT CLOSE) |
+| fences: U7's find CLOSED · `.find` weighed against nothing · zero `Shared/` · `Sync/` · schema · mobile · no mass on `TakesViewModel` · no TK1 · no rendering attributes | held: `TakesFind*` / `PaneFindFace` untouched (the find pins only re-armed/timed); zero `Shared/`, `Sync/`, schema, migrations, mobile, `Server/`; `TakesViewModel` +0 lines (the board reads `model.board.article`); no TK1 API; the Write flash is a decor-layer overlay view below the text, the Takes/Read flashes SwiftUI backgrounds/overlays |
+
+### SEAM FILES THIS DIFF TOUCHES (the Fable reviewer reads this first — `git diff 45054bba..HEAD -- App Sources Tests Tools`)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `Features/Takes/TakesArticleScroll.swift` | the resolver's same-block arm rides through (`articleEntryRidesThrough`) and that landing's first step defers to the watch; the entry kind's banded decision / residual / reveal anchor (`entryBand`, `landingIsBanded`, `revealAnchor(for:_:)`); `articleTopAir`; the arrival record (`articleArrival`, `watchedLandingArrived` via `onArrived`); docs of the landing half | the restore's decision bodies (`consumeArticleGeometry`'s branches, `restoreStep`, the hold, the budgets, `ArticlePlace`), `landingOutranks`, the `.bloom`/`.find` kinds' behaviour (a comment line in `consumeArticleGeometry` only) |
+| `Surface/LandingAuthority.swift` | `onArrived` (nil default — every surface that does not ask runs byte-unchanged): told once at the first quiet look finding the target within tolerance, or at a `settled` end | the decision (`LandingSettle`), the policies, the signpost, `onFinish` |
+| `Features/Editor/EditorViewModel.swift` | `pendingModeSwitchArrival` (the bare arrival that is not an opening); the hop's reveal and carry banded while it is set (`restCaretLineInTheBand`, `writeBand`); the hop's last step `consumeModeSwitchArrival` (the flash + `arrivalFlashes` / `lastArrivalFlashLine` seams) | every other landing road, the anchor restore, the opening arm, `JumpPrimitive`, `BlockRangeIndex`, `EditorTextView`, `runStructural`, the identity oracle |
+| `Features/Editor/BlockDecor.swift` | `EditorAppearance.arrivalFlash`; `BlockDecorOverlayController.flashArrival` (one `DecorRectView` below the text, `NSAnimationContext` opacity fade) | every other decoration |
+| `Features/ReadMode/ReadNoteLanding.swift` · `ReadModeView.swift` · `ReadEditPane.swift` | `ReadLanding.modeSwitch`; the box's `band` / `reband` (the fraction clamped with the row's real height, read by the aim); both faces' `onArrived` + the row faces; `ReadModeView.pageRoomPadding` named once | the faces' resting anchors, the watch policies, `select`'s other roads, the column click, the `read` → `edit` click-through |
+| `Features/Takes/TakesBoardView.swift` | the column's top padding reads `articleTopAir`; the reveal's anchor from the article brain; the arrival face on the landed cell | every gesture, the find bar, the rail, the room |
+| `Surface/ComfortBand.swift` · `ArrivalFlash.swift` · `Features/Settings/ArrivalFlashCopy.swift` | NEW — the two pure brains (+ the flash's SwiftUI face and its DEBUG oracle) and the setting's words | — |
+| `Theme/ThemeStore.swift` · `Settings/AppSettingsView.swift` · `SettingsShape.swift` | the setter; the toggle; the catalog row | every other setting |
+| `Core/Views/VisualWalkProbe.swift` (DEBUG) | the opt-in `band` read + the `af` flash summary | every other key |
+| `Sources/…/AppearanceQueries.swift` · `Operations+Appearance.swift` | `ThemeSettings.arrivalFlash` (its read) · `setArrivalFlash` (through `upsertSetting`) — the ONE `Sources/` touch | every other key; the schema; the outbox triggers |
+| Tests / Tools | NEW `ComfortBandAndFlashTests`, `TakesEntryBandTests`, `ModeSwitchFeelTests`, the core arm; RE-ARMED (named) the 11 Takes pins + `takes-landing` row C; the new `mode-switch-feel` scenario | every other pin |
+
+### JUDGMENT CALLS (each reversible, the reversal named)
+
+1. **The caret rule's open edge is (A), ride-through** (QUESTIONS #158 (1)). *Reverse by* `landingOutranks` answering true for every entry — (B), the memory never consulted on a mode switch.
+2. **The ride-through's first step defers to the watch** — the price is a reveal ~0.25–0.6 s after the page arrives when her block is off the page she left (the quiet interval), never a pull on a stale frame. *Reverse by* deleting the `if articleEntryRidesThrough { return .wait }` line (R-U8-2 shows what returns: the 300-pt pull).
+3. **The flash's face is wash + accent border**, not the wash alone (#158 (3)) — the border is what reads over Read ▸ edit's already-washed row. *Reverse by* dropping the `.stroke` part (and Write's border colour).
+4. **Reduce Motion = unanimated, same total** (#158 (4)). *Reverse by* `plan(reduceMotion:)` returning a zero-length plan (no flash).
+5. **The flash fires at ARRIVAL** (the authority's first quiet look at home — ~0.25–0.6 s after the landing starts), not at the landing's `settled` end (≥ 1 s — the hold): early enough to read as "the transition's", late enough never to flash a placeholder frame. *Reverse by* flashing from `onFinish(.settled)` instead.
+6. **The setting is a Bool "1"/"0"** (the `seams_visible` / `follow_the_scroll` shape of the `receipt_style` precedent) rather than a new enum — the ONE `Sources/` touch stays two files (no `Models/Enums.swift` change). *Reverse by* an enum when a third value is wanted (e.g. a "discreet" mode).
+7. **The band's tall-target rule**: a target taller than the band keeps its resolved place (the carry's #116(c) and R-Q1's tall-row rule stand). *Reverse by* clamping a tall target's first line instead.
+8. **Row 94 taken on the entry road only** — the bloom/find head reveals keep their shipped edge (the band's scope). *Reverse by* applying the band's top air to every Takes head reveal (`landingIsBanded` → every kind).
+9. **Write's additions live in `EditorViewModel`** (~70 lines, most of them docs) — the consumers they bend are its private hop steps, so a separate file could not reach them. *Reverse by* hoisting the hop's three landing consumers into their own type — a structural move worth its own unit.
+
+### COST SHAPE (P1 / P3), stated
+
+- **At rest: zero** — no flash state, no face, nothing ticks; the band is arithmetic on a landing that already runs.
+- **A mode switch:** the band = a clamp on the landing's own numbers (O(1)); Takes' anchor estimate reads the realized rows' frames once (O(realized rows) — the viewport); Write's rest = one `JumpPrimitive.lineSpan` (one fragment) and at most one jump; Read's re-band = O(1) per report while its landing is pending.
+- **The flash:** ONE face on screen for 1.1 s — a SwiftUI `TimelineView` sampling a pure curve on one row (Takes/Read), one layer-backed view with one `NSAnimationContext` fade (Write); unmounted when the one-shot state clears.
+- **P3:** unchanged — the flash and band touch no liveness; exactly one live pane, the authority's.
+
+### HONEST BOUNDARIES
+
+1. **A target taller than the band** keeps its resolved place — a very long block landed by a mode switch can still rest with its first line flush (the carry's / R-Q1's own tall rules).
+2. **Bloom and find head reveals still eat the article's 18-pt top air** (row 94's remainder — the band's scope is the mode switch).
+3. **The ride-through's reveal of a block off the page she left comes after a quiet interval** (~0.25–0.6 s): the page arrives, then moves once. The alternative (B) would be one move from the top every time.
+4. **The calm page's bottom room** uses the base font's line at the page's type scale; the probe's `bRoom` reads the unscaled line (the page face is walked, not pinned — the edit face is pinned).
+5. **The flash is timed by wall clock in the faces** (`Date()`), so a pin reads its state and its oracle, not its opacity mid-flight; the curve itself is pinned purely.
+6. **The mid-band Takes pin is NOT green on both sides** — measured by R-U8-3: the shipped unbanded reveal moved a page 130 pt on entering a block already in view (NOTICED 1).
+
+### NOTICED, NOT TOUCHED
+
+1. **The shipped (unbanded) Takes reveal can move a page whose target is already in view** — R-U8-3 measured 130 pt on entering block 3 of a fresh board (a first step judging an unrealized/placeholder row and aiming its `.bottom` edge). The band's anchor happens to clamp at the page's top there; bloom and find reveals still use the shipped rule, so the class may reach them (the landing family, owner 12).
+2. **The harness cannot drive her scroll-away inside a mounted Takes board** — a programmatic clip scroll is undone by the bound `ScrollPosition` re-applying the landing's target (J1(c)), and a synthesized wheel (`TypewriterRoomReachabilityTests`' recipe) is not routed into SwiftUI's scroll view there. R-2 stages the boundary's STATE through the N9 door instead; the scroll-away road itself remains walk-only.
+3. **A still-watched landing corrects the page after a harness clip scroll** (the harness is not "her hand") — the pins that stage a page must end the landing first (`clearArticleLanding()`); two U7 pins now do (R-U8-1's finding).
+4. **DEBUG flash-oracle keys can outlive their board** (the runner's autorelease pool — TEXTKIT2 §3's C8 note): the Takes keys carry the board's identity and the hosted Write/Read pins use random ids.
+5. **QUESTIONS #150** says its entry "CLOSES when U8 lands" — left for the orchestrator's close.
+
+### OWED AT CLOSE (drafted for the orchestrator — nothing below was applied)
+
+- **AppSpec §12 — the contract-line DRAFT for R-18l-13** (her ruling in chat; the closeout proposes it to her rather than landing it silently): *"**Mode switches (R-18l-13, 18l-c U8):** switching modes inside an open note anchors the EDITING modes to the caret — Write and Takes land at the caret's block (a mode's own remembered page may place the page, but never hides the caret; a note RE-open keeps the page she left, R-18l-1); Read carries the page. A mode switch's landing rests its target inside a comfort band (the surface's resting top air above, two of its lines below; mid-band places stay exact) and marks it with a brief arrival flash (≈0.3 s hold, ≈0.8 s fade; default on — `arrival_flash`, synced; Reduce Motion shows it unanimated). `notes/plans/phase-18l-c-navigation-feel.md` (U8), QUESTIONS #158."* — and §7's NOT-seeded list gains `arrival_flash`.
+- **THE LEDGER:** rows 4, 5, 5b built + walked (ladder pending); row 6 (row 94) TAKEN on the entry road; row 7's road A CLOSED on the mode-switch door (R-1).
+- **KnownIssues row 94:** close on its sighted road, or re-word to the remainder — "the BLOOM and FIND head reveals still rest the row flush (their shipped reveal; the band is the mode switch's)", owner 12.
+- **QUESTIONS #150:** close (R-18l-13 built); **#158** filed (her bundle).
+- **TEXTKIT2_NOTES** (a SwiftUI fact beside §3's, for the harness family): *"A mounted SwiftUI `ScrollView` whose position is BOUND (`.scrollPosition`) re-applies its last `scrollTo` target on relayout, undoing a programmatic `NSClipView.scroll(to:)`; a synthesized `CGEvent` scroll-wheel sent to its `NSScrollView` does not move it in a test host. A pin that stages 'her scroll' there must end the landing first and cannot de-realize a row by scrolling (18l-c U8)."*
+- **MOBILE PARITY:** nothing mobile-visible (the Mac's three surfaces; the phone's mode feel is the mobile catch-up's). The `arrival_flash` setting syncs to the phone, which ignores it.
+- **The Fable cold review** (editor seam: `EditorViewModel`'s hop, `LandingAuthority`, the Takes landing half).
+
 
 ## ORCHESTRATOR RESUME MAP (written 2026-09-28 at her compaction warning — the transcript-proof state; a post-compaction orchestrator re-orients from THIS section + the ledger + LIVE STATUS, verifying against git, never trusting)
 
