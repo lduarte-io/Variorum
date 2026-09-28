@@ -1793,6 +1793,27 @@ assertion.
 | R-U8-11 | `isOnTheRestingPage` answers false | the resting-page pin's first arm (`.reveal`) |
 | R-U8-12 | the report's second-aim branch removed | the second-aim pin (the report `.wait`); the foot pin's no-hop assertion (the watch corrects instead) |
 
+**THE RESULTS (fix committed `32ee8cb2`; each restored by `git checkout --`, tree clean after each):**
+- **R-U8-RO** (`18lc-u8-RO.log`, 8 issues): every predicted red in shape — the edge pin `.foot`; the resting-page
+  pin's first arm `.reveal("c", .head)` + 1 aim (its guard arm GREEN, as predicted); the second-aim pin (the anchor
+  0.947 — the 60-pt estimate — not the exact edge 1.0; the report `.wait`); the foot pin 1 correction. **And the
+  hosted R-Q20 pin RED in BOTH voices** (the uncertain one): `HOP 1 at 338 ms (top was -6.0)` Terminal, `-6.5`
+  Study — the walk's row D reproduced in-process (a stronger reproduction than the walk's, which hopped in Study
+  only).
+- **R-U8-10** (`18lc-u8-R10.log`, 2 issues): the edge pin `.foot` — **and one UNPREDICTED red, traced:** the head pin
+  `aBlockAboveThePageSheLeftRestsAtTheTopAirNeverFlush` — row top **535** (sent to the foot). Mechanism: the second
+  aim fires when the row reports AT the head edge (minY 0), and asks `landingEdge` which way to rest it; R-Q1's rule
+  reads minY 0 as "not above" → `.foot`. The band's edge rule and the second aim are one design — the revert table
+  should have said so.
+- **R-U8-11** (`18lc-u8-R11.log`, 5 issues): the resting-page pin's first arm `.reveal` — **and two UNPREDICTED reds,
+  both traced to mechanism 3:** the hosted R-Q20 pin in both voices (1 hop, `top was -6.0` / `-6.5`: at rest the
+  step "reveals" block 1, SwiftUI's head aim of the unrealized row lands it 6 pt above the page's top, the second
+  aim's "at the edge" test (±1) declines, and the watch corrects — the hop; the resting-page rule is what makes row D
+  settle at once), and `anEntryAlreadyInsideTheBandDoesNotMove` (the page hauled **90.5** — the third block's
+  instance of the same road).
+- **R-U8-12** (`18lc-u8-R12.log`, 2 issues): exactly as predicted — the second-aim pin's report `.wait`; the foot pin
+  1 correction (the watch corrected instead).
+
 ### THE BUILT SHAPE AGAINST THE BRIEF
 
 | Brief item | Built |
