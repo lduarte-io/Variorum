@@ -201,3 +201,13 @@ pin owed (stated in round 1), none turned behavior-bearing.
 **Round 1 CLOSED (reviewer): 3/3 findings confirmed and fixed, zero disputes, no new
 BLOCKER/MAJOR — no round 3 earned. The implementer's sanity pass over this fix diff
 (`9cf71665` + `58d0d021` + `f776f79d`) is the remaining step.**
+
+## THE SANITY PASS (the implementer, 2026-09-28 — appended by the orchestrator at the U6 round's F11)
+
+**SANITY PASS.** The implementer read all three fix commits (`9cf71665` · `58d0d021` ·
+`f776f79d`): nothing behavior-bearing slipped in — F1's foot is value-identical (max(6,6)=6)
+with the column geometry and the re-armed click unchanged and line 441 correctly untouched;
+F2 comment-only; F3 doc-only with both named directions verified (the (N−1)/2 short arm and
+the half-line-long no-trailing-newline arm). No further run owed: the reviewer's 16/4 green
+covers the only two test files touched. **ROUND 1 CLOSED WHOLE: 3/3 confirmed and fixed, zero
+disputes, no round 2 earned.**
