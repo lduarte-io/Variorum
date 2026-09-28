@@ -148,10 +148,14 @@ enum TakesFindFaces {
 
     static var bar: Bar?
     static var markers: [String: String] = [:]
+    /// Where each marker is drawn, in window space (SwiftUI's `.global`) — the
+    /// pin that holds it OUT of the prose (her R-Q2) reads the x.
+    static var markerFrames: [String: CGRect] = [:]
 
     static func reset() {
         bar = nil
         markers = [:]
+        markerFrames = [:]
     }
 }
 #endif
@@ -183,7 +187,13 @@ extension View {
         self.onChange(of: words, initial: true) { _, words in
             TakesFindFaces.markers[blockID] = words
         }
-        .onDisappear { TakesFindFaces.markers[blockID] = nil }
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            TakesFindFaces.markerFrames[blockID] = frame
+        }
+        .onDisappear {
+            TakesFindFaces.markers[blockID] = nil
+            TakesFindFaces.markerFrames[blockID] = nil
+        }
         #else
         self
         #endif

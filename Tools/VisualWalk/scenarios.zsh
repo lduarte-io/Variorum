@@ -918,14 +918,19 @@ vw_takes_find_chip() { print -r -- "only chosen takes: $1" }
 # the SwiftUI button refuses (measured once, Terminal: `AXUIElementPerformAction` failed, the scope unmoved)
 # falls back to a guarded click at the chip's own frame (vis-ax reports it).
 vw_takes_find_press_chip() {   # on|off
-  local label=$(vw_takes_find_chip $1) want
+  local label=$(vw_takes_find_chip $1) want out rc try
   [[ $1 == on ]] && want=0 || want=1
-  if vw_ax_press "$label" AXButton; then
+  for try in 1 2 3; do
+    vw_act_note "AX press: $label (try $try)"
+    vw_step
+    out=$($VW_BIN/vis-ax $PID "$label" AXButton press 2>&1); rc=$?
+    vw_log "  vis-ax press: rc=$rc out=${out:-none}"
     sleep 1.2; vw_probe
     [[ ${PV[tfs]} == $want ]] && return 0
-  fi
-  vw_log "  the chip's AXPress did not take (tfs=${PV[tfs]}) — clicking its own frame"
-  local f=(${(s: :)$($VW_BIN/vis-ax $PID "$label" AXButton 2>/dev/null)})
+  done
+  out=$($VW_BIN/vis-ax $PID "$label" AXButton 2>&1); rc=$?
+  vw_log "  the chip's AXPress did not take (tfs=${PV[tfs]}) — its frame: rc=$rc out=${out:-none}"
+  local -a f=(${=out})
   (( ${#f} >= 4 )) || return 1
   vw_click $(( f[1] + f[3] / 2 )) $(( f[2] + f[4] / 2 )) "the scope chip"
   sleep 1.2; vw_probe

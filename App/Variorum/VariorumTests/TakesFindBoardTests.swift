@@ -437,6 +437,16 @@ struct TakesFindBoardTests {
             #expect(model.find.offScopeCount(forBlock: fanned.block) == 1)
             #expect(TakesFindFaces.markers[fanned.block] == "1 in another take",
                     "the block SAYS a take it is not showing holds a match")
+            // …in the MARGIN, never over the prose (her R-Q2: nothing is drawn
+            // over a take's pane). Found by the walk: the first build drew it
+            // across the block's first lines. Horizontal only — SwiftUI's
+            // `.global` and AppKit's window space share their x.
+            let shownPane = try #require(pane(fixture.blocks[2].variant, in: hosting),
+                                         "the fanned block's article pane")
+            let proseRight = shownPane.convert(shownPane.bounds, to: nil).maxX
+            let marker = try #require(TakesFindFaces.markerFrames[fanned.block], "the marker drew")
+            #expect(marker.minX >= proseRight,
+                    "the marker starts right of the take's pane (\(marker.minX) vs \(proseRight))")
             #expect(!model.expandedBlocks.contains(fanned.block),
                     "nothing expands before she steps there")
 
