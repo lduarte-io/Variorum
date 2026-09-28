@@ -1427,14 +1427,15 @@ private struct BookIndexPaneNote: View {
                 //  draws the indicator itself, so this was a second ring.)
         } else {
             let paragraphs = FlowParagraph.paragraphs(of: text, codeTint: tokens.codeTint)
-            // 18l U0: the two metrics the click's replica lays out with — one
-            // number each (`ReadTierClickPlace`), so they cannot drift apart.
-            VStack(alignment: .leading, spacing: ReadTierClickPlace.paragraphSpacing) {
+            // 18l U0 / 18l-c U5: the tiers' ONE metrics vocabulary
+            // (`IndexProseColumn.lines`) — the click's replica lays out with
+            // it and the live pane is handed it, so they cannot drift apart.
+            VStack(alignment: .leading, spacing: IndexProseColumn.lines.paragraphGap) {
                 ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
                     Text(paragraph.text)
                         .font(font(paragraph))
                         .foregroundStyle(tokens.ink)
-                        .lineSpacing(ReadTierClickPlace.lineSpacing)
+                        .lineSpacing(IndexProseColumn.lines.lineSpacing)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, paragraph.indent)
                 }

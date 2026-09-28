@@ -235,11 +235,13 @@ final class ReadNoteHeights {
         case .edit:
             // `ReadEditBlock`'s read tier: the voice's body font (`tokens.body`
             // — the same two faces `EditorTypography` resolves), `lineSpacing`
-            // and paragraph gap from `ReadTierClickPlace`, padded by the tier's
-            // `IndexProseColumn` numbers; the column's `LazyVStack(spacing: 2)`.
+            // and paragraph gap from the tiers' ONE vocabulary
+            // (`IndexProseColumn.lines`, 18l-c U5 — U0's constants promoted),
+            // padded by the tier's `IndexProseColumn` numbers; the column's
+            // `LazyVStack(spacing: 2)`.
             font = EditorTypography.current.font
-            lineSpacing = ReadTierClickPlace.lineSpacing
-            metrics.prose.paragraphGap = ReadTierClickPlace.paragraphSpacing
+            lineSpacing = IndexProseColumn.lines.lineSpacing
+            metrics.prose.paragraphGap = IndexProseColumn.lines.paragraphGap
             let leading = IndexProseColumn.readTierLeading(
                 resting: IndexProseColumn.readEditResting,
                 paneInset: PaneTextView.proseLeadingInset)

@@ -321,13 +321,15 @@ private struct ReadEditBlock: View {
                 //  visible in the walk's captures. One editing mark, one
                 //  drawer: `PaneDecoration.resolve`, inside the pane.)
             } else {
-                // 18l U0: the click replica's two metrics, one number each.
-                VStack(alignment: .leading, spacing: ReadTierClickPlace.paragraphSpacing) {
+                // 18l U0 / 18l-c U5: the tiers' ONE metrics vocabulary
+                // (`IndexProseColumn.lines`) — the replica's and the live
+                // pane's, one number each.
+                VStack(alignment: .leading, spacing: IndexProseColumn.lines.paragraphGap) {
                     ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
                         Text(paragraph.text)
                             .font(font(paragraph))
                             .foregroundStyle(tokens.ink)
-                            .lineSpacing(ReadTierClickPlace.lineSpacing)
+                            .lineSpacing(IndexProseColumn.lines.lineSpacing)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.leading, paragraph.indent)
                     }

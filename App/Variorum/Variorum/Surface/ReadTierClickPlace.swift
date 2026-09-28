@@ -71,10 +71,12 @@ enum ReadTierClickPlace {
     /// The read tier's own metrics — what BOTH index-like read tiers draw a
     /// block with (`BookIndexPaneNote.blockView`, `ReadEditBlock`): each
     /// paragraph a `Text` with `.lineSpacing(4)`, the paragraphs 8 apart in a
-    /// `VStack`. Named here so the replica and the drawing share one number
-    /// each; the hosts read them.
-    static let lineSpacing: CGFloat = 4
-    static let paragraphSpacing: CGFloat = 8
+    /// `VStack`. **18l-c U5: read from the tiers' ONE vocabulary**
+    /// (`IndexProseColumn.lines`, where U0's two named constants were
+    /// promoted — byte-same numbers), which the live pane is now handed too.
+    /// (The line spacing is read where each paragraph's style is built,
+    /// `ParagraphLayout`; the gap is how the paragraphs stack.)
+    private static var paragraphSpacing: CGFloat { IndexProseColumn.lines.paragraphGap }
 
     /// Where a click lands in `source`, as a UTF-16 offset into the STORED
     /// text. `point` is in the TEXT COLUMN's own space — x from the prose's
@@ -121,6 +123,29 @@ enum ReadTierClickPlace {
         return heights.reduce(0, +) + paragraphSpacing * CGFloat(heights.count - 1)
     }
 
+    /// **The read tier's LINES, laid out by the replica** (18l-c U5) — each
+    /// text line's top (from the block's first line, in the column's space)
+    /// and where it starts in the DISPLAY text. The tiers' geometry pin
+    /// (`IndexTierMetricsTests`) holds the live pane's lines against these;
+    /// the replica's agreement with what SwiftUI drew is pinned beside it
+    /// (the block's height, ±0.5 pt — `IndexClickCaretTests`).
+    static func lines(
+        of source: String, columnWidth: CGFloat, font: NSFont
+    ) -> [(top: CGFloat, displayStart: Int)] {
+        let (paragraphs, starts) = FlowParagraph.paragraphsWithStarts(of: source)
+        var result: [(top: CGFloat, displayStart: Int)] = []
+        var top: CGFloat = 0
+        for (index, paragraph) in paragraphs.enumerated() {
+            let layout = ParagraphLayout(
+                paragraph, width: max(1, columnWidth - paragraph.indent), font: font)
+            for line in layout.lines() {
+                result.append((top + line.top, starts[index] + line.start))
+            }
+            top += layout.height + paragraphSpacing
+        }
+        return result
+    }
+
     /// One read-tier paragraph, laid out off-screen the way its `Text` was.
     private struct ParagraphLayout {
         let content: NSTextContentStorage
@@ -131,7 +156,7 @@ enum ReadTierClickPlace {
             let string = String(paragraph.text.characters)
             let attributed = NSMutableAttributedString(string: string)
             let style = NSMutableParagraphStyle()
-            style.lineSpacing = ReadTierClickPlace.lineSpacing
+            style.lineSpacing = IndexProseColumn.lines.lineSpacing
             let whole = NSRange(location: 0, length: (string as NSString).length)
             attributed.addAttributes([.font: font, .paragraphStyle: style], range: whole)
             // The emphasis the `Text` draws in its own faces — bold, italic,
@@ -172,6 +197,24 @@ enum ReadTierClickPlace {
                 anchors: [], modifiers: [], selecting: false, bounds: .zero)
             guard let location = selections.first?.textRanges.first?.location else { return 0 }
             return content.offset(from: content.documentRange.location, to: location)
+        }
+
+        /// Each text line's top (in this paragraph's own space) and its first
+        /// character (UTF-16, into this paragraph) — the pin's read.
+        func lines() -> [(top: CGFloat, start: Int)] {
+            var out: [(top: CGFloat, start: Int)] = []
+            manager.enumerateTextLayoutFragments(
+                from: manager.documentRange.location, options: [.ensuresLayout]
+            ) { fragment in
+                let origin = fragment.layoutFragmentFrame.origin.y
+                let base = content.offset(
+                    from: content.documentRange.location, to: fragment.rangeInElement.location)
+                for line in fragment.textLineFragments where line.characterRange.length > 0 {
+                    out.append((origin + line.typographicBounds.minY, base + line.characterRange.location))
+                }
+                return true
+            }
+            return out
         }
 
         private static func face(_ font: NSFont, for intent: InlinePresentationIntent) -> NSFont {
