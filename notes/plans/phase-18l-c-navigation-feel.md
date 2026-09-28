@@ -1345,3 +1345,27 @@ END with suite-level `-only-testing` + the seeded VisualWalk run, synchronous wa
 subagents, PROVISIONAL-and-continue logged to QUESTIONS with STOP for gating calls). The author
 may be at the machine: GUI only under the per-step guard; takemania is your walk fixture.
 Fable cold review follows your hand-back.
+
+## U7 RECORD (implementer: `opus-implementer`, 2026-09-28)
+
+**NOT DONE (first line):** IN PROGRESS — this line is rewritten at the close.
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | Reading (the brief's list, in order, own context) | DONE — this file whole (her kickoff, the sitting record R-18l-6/9/10/13, principles, cast, traps, ledger rows 3 + 7, the U5/U6 records, the U7 design brief + brief); `SessionResiliencyProtocol.md` whole; `TEXTKIT2_NOTES.md` whole; the Takes surface end to end (`TakesViewModel` whole, `TakesBoardLayout` whole, `TakesArticleScroll` whole — the restore half read, not to be touched, `TakesChoreographer` whole, `TakesBoardView` whole, `TakesModels` whole, `TakesBottomBar` whole, `TakesShared`'s `TakesCellView`); `EditorFind.swift` whole + `EditorTextView`'s finder configuration (`usesFindBar`, incremental off — NO compare options set anywhere: the Write bar compares by `NSTextFinder`'s own defaults); `Surface/LandingAuthority.swift` whole + `LandingAim.swift` whole + the 18l-b U2 RECORD (the `.takesArticle` policy, the watch, the bloom-race fix); `Surface/PaneSurface.swift` whole + `PaneTextAuthority.swift`; the capability registry (`Capability.swift` whole, the find family's declarations and availability, `unhandledNote`), `CommandRouter` (attachment, LIFO dispatch, context), `EditorCommands`' Find menu, `EditorRouter.swift` whole; the pins that hold the find family (`CapabilityRegistryTests`' exempt set, `FindAndReplaceTests`' grey-door pin) |
+| 2 | The compare rule MEASURED (the Write bar's `NSTextFinder` defaults) | NOT-STARTED |
+| 3 | `TakesFindPlan` — the pure brain + its unit suite | NOT-STARTED |
+| 4 | The registry: ⌘F · ⌘G · ⇧⌘G act on a mounted Takes board (P-1), the rest of the family stays Write's (R-18l-9) | NOT-STARTED |
+| 5 | `PaneSurface`: the selection landing, the keyboard request, the read-tier match highlights (attributed string, never rendering attributes) | NOT-STARTED |
+| 6 | `TakesFindController` + the model door + the `.find` landing kind (navigation through the one authority) | NOT-STARTED |
+| 7 | The faces: the find bar, the off-scope marker, the highlights threaded, ⌘F/⌘G routed, Esc | NOT-STARTED |
+| 8 | Ledger row 7 — the trace of today's non-activation, pinned | NOT-STARTED |
+| 9 | The landing+focus integration pin (red-on-old) + behavioural reverts | NOT-STARTED |
+| 10 | Closing runs (touched suites + Tutorial) + the seeded VisualWalk run | NOT-STARTED |
+| 11 | Walk (takemania, "Hyde", both voices, author-free only) | NOT-STARTED |
+| 12 | Self-assessment | NOT-STARTED |
+
+- Deaths / resumes: none.
+- Reverts in flight: none.
