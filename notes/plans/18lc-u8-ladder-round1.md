@@ -26,12 +26,12 @@
 
 | # | Finding | Implementer response | Reviewer's final call | Fixed at |
 |---|---|---|---|---|
-| R1-1 | stale pin names (3 → 4) | AGREE + a fourth pin (R-3's) + whole-pin naming caveats + the record-table citation rule | CONFIRMED, WIDENED to four; the implementer's names adopted (one broadened a word for the bloom arm) | pending |
-| R1-2 | flash-lifetime coupling | AGREE; site :880; prefers `ArrivalFlash.stateLifetime` with the 0.1 margin folded in | CONFIRMED; the named constant built as suggested | pending |
-| R1-3 | oracle growth (DEBUG) | AGREE; bounding is pin-safe (every reader resets first); trim `flashes` by start time, clear `seen` on overflow | CONFIRMED; bounded exactly so | pending |
-| R1-4 | mode-switch inference doc | AGREE; the condition IS #98(a)'s own trigger set, widened only by the carry (a mode-switch fact by construction) — say that, not a new exhaustiveness argument; one clause to weigh for #158 | CONFIRMED as doc-only; the implementer's framing ADOPTED over mine (it is the better description); the weighed clause ACCEPTED into #158 (6) | pending |
-| R1-5 | pages-form residual, recorded | AGREE; HONEST BOUNDARY 10 or row 94's re-word; owner the landing family | CONFIRMED; recorded as HONEST BOUNDARY 10 in the U8 RECORD (the close may still fold it into row 94's re-word) | pending |
-| R1-6 | `articleArrival` doc word | AGREE; a teardown nil would also be safe (both callers are teardown) but leans to the doc word | CONFIRMED; the doc word (no code — the lean is right: the brain dies with its board, and zero code moves) | pending |
+| R1-1 | stale pin names (3 → 4) | AGREE + a fourth pin (R-3's) + whole-pin naming caveats + the record-table citation rule | CONFIRMED, WIDENED to four; the implementer's names adopted (one broadened a word for the bloom arm) | `1180c71a` |
+| R1-2 | flash-lifetime coupling | AGREE; site :880; prefers `ArrivalFlash.stateLifetime` with the 0.1 margin folded in | CONFIRMED; the named constant built as suggested | `14ef4d0b` |
+| R1-3 | oracle growth (DEBUG) | AGREE; bounding is pin-safe (every reader resets first); trim `flashes` by start time, clear `seen` on overflow | CONFIRMED; bounded exactly so | `ccca3572` |
+| R1-4 | mode-switch inference doc | AGREE; the condition IS #98(a)'s own trigger set, widened only by the carry (a mode-switch fact by construction) — say that, not a new exhaustiveness argument; one clause to weigh for #158 | CONFIRMED as doc-only; the implementer's framing ADOPTED over mine (it is the better description); the weighed clause ACCEPTED into #158 (6) | `44e2530d` |
+| R1-5 | pages-form residual, recorded | AGREE; HONEST BOUNDARY 10 or row 94's re-word; owner the landing family | CONFIRMED; recorded as HONEST BOUNDARY 10 in the U8 RECORD (the close may still fold it into row 94's re-word) | `44437f48` |
+| R1-6 | `articleArrival` doc word | AGREE; a teardown nil would also be safe (both callers are teardown) but leans to the doc word | CONFIRMED; the doc word (no code — the lean is right: the brain dies with its board, and zero code moves) | `38e8caad` |
 
 ---
 
@@ -132,11 +132,20 @@ sanity pass follows.**
 
 | Piece | Finding | Commit | What landed |
 |---|---|---|---|
-| A | R1-1 | pending | four pin renames (old names in the doc comments) + two in-file cross-refs + the U8 RECORD re-arm table rows R-3/R-6/R-7/R-9 to "old → new" |
-| B | R1-2 | pending | `ArrivalFlash.stateLifetime` (margin folded in) + the three call sites |
-| C | R1-3 | pending | `ArrivalFlashOracle` bounded (trim `flashes` by start time; clear `seen` on overflow) |
-| D | R1-4 | pending | the #98(a)-trigger-set doc line at the park + the one #158 (6) sentence |
-| E | R1-5 | pending | HONEST BOUNDARY 10 in the U8 RECORD |
-| F | R1-6 | pending | the `articleArrival` doc word |
+| A | R1-1 | `1180c71a` | four pin renames (old names in the doc comments) + two in-file cross-refs + the U8 RECORD re-arm table rows R-3/R-6/R-7/R-9 to "old → new"; a repo-wide grep confirms no dangling old-name reference outside history records and untracked DerivedData |
+| B | R1-2 | `14ef4d0b` | `ArrivalFlash.stateLifetime` (margin folded in) + the three call sites |
+| C | R1-3 | `ccca3572` | `ArrivalFlashOracle` bounded at 256 (trim `flashes`' oldest half by the start time its keys end in; clear orderless `seen` on overflow — never the entry being written) |
+| D | R1-4 | `44e2530d` | the #98(a)-trigger-set doc line at the park + the one #158 (6) sentence |
+| E | R1-5 | `44437f48` | HONEST BOUNDARY 10 in the U8 RECORD |
+| F | R1-6 | `38e8caad` | the `articleArrival` doc word ("dies with its board") |
 
-**Suite results (run at the end of the fix pass): pending.**
+**Suite results (the end of the fix pass, `App/Variorum/DerivedData/18lc-u8-ladder-fixes.log`):**
+`✘ Test run with 112 tests in 10 suites passed after 245.392 seconds with 1 known issue` — the ten
+touched suites (`TakesArticleScrollTests` · `TakesArticleWatchTests` · `TakesFindBoardTests` ·
+`TakesEntryBandTests` · `ModeSwitchFeelTests` · `ComfortBandAndFlashTests` · `ModeSwitchCarryTests` ·
+`NoteOpenLandingTests` · `ReadNoteLandingTests` · `ReadLandingTests`), the 1 known issue exactly the
+U7 tripwire (`escWithNoBuiltPaneForTheRingIsANamedBoundary`, designed); all four renamed pins green
+under their new names. No behavioural change was made anywhere in this fix pass (renames, one named
+constant equal by construction to the three expressions it replaced, a DEBUG bound, three doc/record
+edits), so no behavioural revert is owed — the round-1 justifications stand in lieu of pins, per the
+guard. **Fix pass complete; handed back for the implementer's sanity pass.**
