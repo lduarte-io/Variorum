@@ -812,8 +812,8 @@ scn_book-landings() {
 # (`tsel` / `tvis` / `trole`) — reported apart from `fr`/`sel`, because while ⏎ steps the FIELD holds the
 # keyboard (the Write bar's convention, decision 1). Mutates nothing lasting: the one keystroke is undone.
 vw_def takes-find "takemania (The Strange Case of Dr Jekyll and Mr Hyde — seeded; Help ▸ Restore makes it), Takes" \
-  "⌘2 · ⌘F · type Hyde · ⏎ · ⏎⏎ · the scope chip OFF · ⏎ to the first off-scope match · Esc · type X · ⌘Z · ⌘G from the board · the chip back ON" \
-  "⌘F: the field holds the keyboard; a count; ⏎: 1 of N, the take live with the 4-letter match selected and on screen, the field KEEPS the keyboard; ⏎⏎: 3 of N; OFF: the count grows and the scope says so; a step reaches a take its block is not showing — a FAN card, live, match selected; Esc: the keyboard to the take, the match still selected; X replaces it (len −3), ⌘Z restores; ⌘G from the board: the landed take holds the keyboard" pass
+  "⌘2 · ⌘F · type Hyde · ⏎ · ⏎⏎ · ⇧⏎ back · the scope chip OFF · ⏎ to the first off-scope match · Esc · type X · ⌘Z · ⌘G from the board · the chip back ON" \
+  "⌘F: the field holds the keyboard; a count; ⏎: 1 of N, the take live with the 4-letter match selected and on screen, the field KEEPS the keyboard; ⏎⏎: 3 of N; ⇧⏎: 2 of N, back, the field still holding (R1-N4 — provable only against live hardware modifiers); OFF: the count grows and the scope says so; a step reaches a take its block is not showing — a FAN card, live, match selected; Esc: the keyboard to the take, the match still selected; X replaces it (len −3), ⌘Z restores; ⌘G from the board: the landed take holds the keyboard" pass
 
 scn_takes-find() {
   vw_open_note "takemania"
@@ -852,6 +852,16 @@ scn_takes-find() {
   vw_expect_eq "D · ⏎⏎: the count says 3 of $total" "${PV[tf]}" "3_of_$total"
   vw_expect_eq "D · the third match's take is live, its match selected" "${${PV[tsel]:-,}#*,}" 4
   vw_cap 04-third-match
+
+  # Row D2 — ⇧⏎ steps BACK (the ladder's R1-N4: the advertised chord's evidence — `onSubmit` +
+  # `NSEvent.modifierFlags` reads LIVE hardware modifier state, which no hosted pin can synthesize,
+  # so this walk row is the road's one honest proof).
+  vw_keys "⇧⏎ (find previous, from the field)" 'key code 36 using shift down'
+  sleep 2.5; vw_settle
+  vw_expect_eq "D2 · ⇧⏎ steps back: the count says 2 of $total" "${PV[tf]}" "2_of_$total"
+  vw_expect_eq "D2 · the previous match's take is live, its match selected" "${${PV[tsel]:-,}#*,}" 4
+  vw_expect_eq "D2 · the FIELD keeps the keyboard through ⇧⏎" "${PV[fr]}" text
+  vw_cap 04b-shift-return-back
 
   # Row E — the scope chip OFF: every live take is searched; the count grows; the margins say where.
   vw_takes_find_press_chip on || { vw_require false "the scope chip turned the scope off (tfs=${PV[tfs]})"; return }
