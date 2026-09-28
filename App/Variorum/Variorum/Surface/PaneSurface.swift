@@ -552,6 +552,18 @@ final class PaneTextView: NSTextView, MarkdownFormattable, ProseGutterSurface {
         largestRenderRestoreClipShift = max(largestRenderRestoreClipShift, clipShift)
     }
 
+    /// **18l-c U7 — the find paint this pane's storage carries** (observation
+    /// seam, the `renderRestoresRun` precedent): what the read tier painted,
+    /// and how many times the paint actually WROTE — so a pin can assert both
+    /// the shape and that an unchanged face writes nothing.
+    private(set) var findPaint: PaneFindFace.Paint?
+    private(set) var findPaintWrites = 0
+
+    func noteFindPaint(_ paint: PaneFindFace.Paint?) {
+        findPaint = paint
+        findPaintWrites += 1
+    }
+
     /// The vertical bounds origin of every clip view this pane sits inside,
     /// innermost first — a pane is never a scroll view's document itself;
     /// it rides inside SwiftUI scroll views (and, on the rail's tall cards,
@@ -901,6 +913,11 @@ nonisolated enum PaneCaretLanding: Equatable, Sendable {
     case start
     case end
     case offset(Int)
+    /// **18l-c U7 — a find step's landing: the match, SELECTED** (the design
+    /// brief's decision 6 — *"the current match's take goes LIVE with the
+    /// match SELECTED"*, find's native semantics). Clamped to the text like
+    /// `.offset`. Only the Takes board's find controller asks for it.
+    case select(NSRange)
 
     /// **The note's ENTRY rule, pure — ONE copy for both models** (the
     /// ladder's round 2, R2-4; it was duplicated verbatim in
@@ -915,6 +932,68 @@ nonisolated enum PaneCaretLanding: Equatable, Sendable {
     static func entering(_ fact: FocusedBlock?, block blockID: String) -> PaneCaretLanding? {
         guard let fact, fact.blockID == blockID else { return nil }
         return fact.utf16Offset.map(PaneCaretLanding.offset) ?? .start
+    }
+}
+
+// MARK: - The pane's FIND face (18l-c U7 — search in Takes)
+
+/// **What a find running on this pane's HOST asks of the pane** (18l-c U7 —
+/// her R-18l-6, *"we should add a search in takes mode"*; the design brief's
+/// decisions 6 and 7). ONE parameter, nil for every host but the Takes board,
+/// so every other pane is byte-unchanged (pinned — `PaneFindFaceScopeTests`).
+/// Three duties, each the smallest the find needs and none a second liveness
+/// mechanism (P-3 — the authority alone decides which pane is live):
+///
+/// 1. **The matches, painted on the READ tier only** — as `.backgroundColor`
+///    runs in the read pane's attributed string (TEXTKIT2_NOTES §3's own
+///    guidance: highlight on the read-only tier, never through rendering
+///    attributes on a live editor). A LIVE pane is never painted: the
+///    selection IS its current-match affordance, and the live editor stays
+///    clean (decision 7). Change-gated and range-scoped, never a full-range
+///    write (the A47c class), with the occasion restore as the belt.
+/// 2. **A step's REQUEST to a pane that is ALREADY live** — select the match
+///    (and take the keyboard when asked): the next match in the take the ring
+///    is already in has no liveness transition to ride. A monotonic token, and
+///    a pane adopts the token it is born with as its baseline (a remount is
+///    not a step — the room token's `caretToEndToken` precedent). A pane
+///    that goes live FOR the step is landed by `PaneCaretLanding.select`.
+/// 3. **The find field holds the keyboard** — a pane going live on a step
+///    driven FROM the field must not take the keyboard from it, or the next
+///    ⏎ would type a newline into her take instead of stepping (the Write
+///    bar's own convention: ⏎ in the find field selects in the text and keeps
+///    the field; Esc hands the keyboard back — decision 1).
+nonisolated struct PaneFindFace: Equatable {
+    /// The matches in this pane's text, UTF-16.
+    var matches: [NSRange] = []
+    /// The current match, when it is in this pane — the stronger emphasis
+    /// (visible on the read tier: a sealed note, or the ring moved away).
+    var current: NSRange? = nil
+    var matchTint: NSColor = .clear
+    var currentTint: NSColor = .clear
+    var request: Request? = nil
+    var fieldHoldsKeyboard = false
+
+    struct Request: Equatable {
+        /// Monotonic per host; a change is "asked again".
+        var token: Int
+        /// The match to select (nil: keep the selection — Esc's hand-back).
+        var select: NSRange?
+        var claimsKeyboard: Bool
+    }
+
+    /// What the read tier paints — nil when there is nothing to paint.
+    var paint: Paint? {
+        guard !matches.isEmpty || current != nil else { return nil }
+        return Paint(
+            matches: matches, current: current,
+            matchTint: matchTint, currentTint: currentTint)
+    }
+
+    struct Paint: Equatable {
+        var matches: [NSRange]
+        var current: NSRange?
+        var matchTint: NSColor
+        var currentTint: NSColor
     }
 }
 
@@ -1099,6 +1178,10 @@ struct PaneSurfaceView: View {
     /// metrics are its host's call, through this one parameter — never a
     /// global, never a per-view guess.
     var lineMetrics: ProseLineMetrics? = nil
+    /// **18l-c U7 — the pane's FIND face** (`PaneFindFace`): nil everywhere
+    /// but the Takes board while its find runs, so every other pane is
+    /// byte-unchanged.
+    var findFace: PaneFindFace? = nil
     @State private var height: CGFloat = 24
     @State private var canaryMessage: String?
     /// 13d batch 4 (A23/A24): the two this-Mac editor-behaviour settings.
@@ -1138,7 +1221,8 @@ struct PaneSurfaceView: View {
                 caretOnGoingLive: caretOnGoingLive, menuItems: menuItems,
                 onMeasuredHeight: onMeasuredHeight,
                 caretToEndToken: caretToEndToken,
-                lineMetrics: lineMetrics)
+                lineMetrics: lineMetrics,
+                findFace: findFace)
                 // EXACT height, not a floor (13b 3F, AD-7): an
                 // NSViewRepresentable ACCEPTS a tall proposal, so in any
                 // composition whose row is taller than the text (the margin
@@ -1203,6 +1287,9 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     /// 18l-c U5: the host's line metrics (nil = the Write editor's base
     /// style — every host but the two index-like tiers).
     var lineMetrics: ProseLineMetrics?
+    /// 18l-c U7: the host's find face (nil = no find — every host but the
+    /// Takes board while its find runs).
+    var findFace: PaneFindFace?
 
     /// The paragraph style this pane lays out with — the host's, or the ONE
     /// base style every other surface shares.
@@ -1275,6 +1362,14 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         // file already states about layout: a pane's "document" is ONE take
         // or one post-read by construction.
         if let storage = view.textStorage { MarkdownStyling.style(storage) }
+        // 18l-c U7: the find face — the request it is born with is its
+        // BASELINE (a remount is not a step; a pane born live FOR a step is
+        // landed by `caretOnGoingLive`'s `.select`), and a READ pane wears
+        // its matches from the first frame. Before the liveness note, which
+        // reads the face's keyboard rule.
+        context.coordinator.find = findFace
+        context.coordinator.adoptFindBaseline()
+        context.coordinator.paintFind(live: isLive, in: view)
         view.isEditable = isLive
         context.coordinator.noteLiveness(isLive)
         // 13f W7: adopt the CURRENT token as the baseline — a pane born while
@@ -1293,10 +1388,19 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         context.coordinator.onSelectionChange = onSelectionChange
         context.coordinator.onMeasuredHeight = onMeasuredHeight
         context.coordinator.caretOnGoingLive = caretOnGoingLive
+        context.coordinator.find = findFace
         view.variorumMenu = menuItems
+        // 18l-c U7: a pane about to go live sheds its painted matches FIRST,
+        // so the liveness note's selection (and the caret she types at) never
+        // sits in a painted run.
+        context.coordinator.paintFind(live: isLive, in: view)
         view.isEditable = isLive
         context.coordinator.noteLiveness(isLive)
+        let faceBefore = view.appliedFace
         applyFace(to: view)  // before `applyStyle`: its `style` reads the palette
+        // 18l-c U7: a face change re-derives the faced lines, whose clear owns
+        // `.backgroundColor` there — the painted record no longer holds.
+        if view.appliedFace != faceBefore { context.coordinator.findPaintWasReset() }
         applyStyle(to: view)
         applyIdentity(to: view)
         spellcheck.apply(to: view)  // A24 — write-gated, so a same-level
@@ -1332,6 +1436,8 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
                 // face; re-derive it in the same transaction, in the new voice.
                 MarkdownStyling.style(storage)
                 storage.endEditing()
+                // 18l-c U7: the whole-pane restyle owns every run it rewrote.
+                context.coordinator.findPaintWasReset()
             }
             context.coordinator.remeasure()
             // 13d batch 5 (the long-content-panes memo §6 item 5 — her
@@ -1381,11 +1487,19 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             // 13g batch 2 (L7): a fresh string carries only typing
             // attributes — the face is re-derived over the adopted text.
             if let storage = view.textStorage { MarkdownStyling.style(storage) }
+            // 18l-c U7: a fresh string carries no paint either.
+            context.coordinator.findPaintWasReset()
             context.coordinator.remeasure()
         }
+        // 18l-c U7: re-paint over whatever the two roads above re-wrote
+        // (change-gated — a pane whose paint still holds writes nothing).
+        context.coordinator.paintFind(live: isLive, in: view)
         // 13f W7: last, so the text above is settled before the caret is
         // placed against it.
         context.coordinator.applyCaretToEndIfRequested(caretToEndToken, in: view)
+        // 18l-c U7: a find step addressed to this (already live) pane — after
+        // the text is settled, like the room's caret.
+        context.coordinator.applyFindRequestIfAsked(in: view)
     }
 
     private func applyStyle(to view: PaneTextView) {
@@ -1552,13 +1666,115 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
                 case .offset(let landing):
                     view.setSelectedRange(
                         NSRange(location: min(max(0, landing), length), length: 0))
+                case .select(let range):
+                    // 18l-c U7: a find step's landing — the match, selected.
+                    view.setSelectedRange(Self.clamped(range, to: length))
                 }
             }
+            // 18l-c U7: a step driven FROM the find field leaves the keyboard
+            // in the field (the Write bar's convention — ⏎ keeps stepping; Esc
+            // hands it back). The pane is live all the same: ring, selection.
+            if find?.fieldHoldsKeyboard == true { return }
             if let window = view.window {
                 window.makeFirstResponder(view)
             } else {
                 view.claimsKeyboardOnAttach = true
             }
+        }
+
+        // MARK: - The find face (18l-c U7)
+
+        /// The host's find face, refreshed on every render (nil = no find).
+        var find: PaneFindFace?
+        /// What the storage CARRIES now — the change gate's other half. Reset
+        /// by every road that rewrites the storage's attributes.
+        private var paintedFind: PaneFindFace.Paint?
+        /// The last find-request token this pane acted on (or was born with).
+        private var lastFindToken = 0
+
+        /// A pane born while a request is outstanding must not act on it: a
+        /// remount is not a step.
+        func adoptFindBaseline() {
+            lastFindToken = find?.request?.token ?? 0
+        }
+
+        /// The storage's attributes were rewritten under the paint (a fresh
+        /// string, a whole-pane restyle, a face change): nothing is painted.
+        func findPaintWasReset() {
+            paintedFind = nil
+        }
+
+        /// **Paint the matches — the READ tier only** (decision 7). The paint
+        /// is `.backgroundColor` runs in this pane's own attributed string,
+        /// scoped to the match ranges (never a full-range write — the A47c
+        /// class), change-gated against what the storage carries, and removed
+        /// the moment the pane goes live (the selection is the live pane's
+        /// affordance). Removing a run can take a code chip's tint with it, so
+        /// the touched lines are handed back to the markdown face, which owns
+        /// that tint. The text is never touched — the paint can never reach
+        /// the store (`onEdit` hands up the string, and a read pane has none
+        /// to hand).
+        func paintFind(live: Bool, in view: PaneTextView) {
+            let wanted = live ? nil : find?.paint
+            guard wanted != paintedFind, let storage = view.textStorage else { return }
+            let length = storage.length
+            storage.beginEditing()
+            if let old = paintedFind {
+                var touched: [NSRange] = []
+                for range in old.matches + [old.current].compactMap({ $0 }) {
+                    let run = Self.clamped(range, to: length)
+                    guard run.length > 0 else { continue }
+                    storage.removeAttribute(.backgroundColor, range: run)
+                    touched.append(run)
+                }
+                for run in touched { MarkdownStyling.restyle(storage, range: run) }
+            }
+            if let paint = wanted {
+                for range in paint.matches {
+                    let run = Self.clamped(range, to: length)
+                    guard run.length > 0 else { continue }
+                    storage.addAttribute(.backgroundColor, value: paint.matchTint, range: run)
+                }
+                if let current = paint.current {
+                    let run = Self.clamped(current, to: length)
+                    if run.length > 0 {
+                        storage.addAttribute(.backgroundColor, value: paint.currentTint, range: run)
+                    }
+                }
+            }
+            storage.endEditing()
+            paintedFind = wanted
+            view.noteFindPaint(wanted)
+            // The typing attributes follow the selection's run: a pane going
+            // live must never type in a match's colour.
+            if view.typingAttributes[.backgroundColor] != nil {
+                view.typingAttributes.removeValue(forKey: .backgroundColor)
+            }
+            // The occasion's belt (A47c): an attribute write on a scrolled
+            // pane is re-drawn on a deferred turn, viewport-bounded.
+            scheduleRenderRestore()
+        }
+
+        /// A find step addressed to this pane while it is ALREADY live: select
+        /// the match, take the keyboard when asked. Read panes consume the
+        /// token without acting — liveness is the authority's (P-3), and the
+        /// pane that goes live for a step is landed by `.select` instead.
+        func applyFindRequestIfAsked(in view: PaneTextView) {
+            guard let request = find?.request, request.token != lastFindToken else { return }
+            lastFindToken = request.token
+            guard view.isEditable else { return }
+            if let select = request.select {
+                view.setSelectedRange(Self.clamped(select, to: (view.string as NSString).length))
+            }
+            if request.claimsKeyboard, let window = view.window, window.firstResponder !== view {
+                window.makeFirstResponder(view)
+            }
+        }
+
+        /// A range held inside a text of `length` UTF-16 units.
+        nonisolated static func clamped(_ range: NSRange, to length: Int) -> NSRange {
+            let location = min(max(0, range.location), length)
+            return NSRange(location: location, length: min(max(0, range.length), length - location))
         }
 
         /// 13f W7: the last caret-to-end token this pane acted on.
