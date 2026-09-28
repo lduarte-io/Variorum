@@ -161,8 +161,9 @@ final class BookIndexEditModel {
             return nil
         }
         pendingLiveBlock = nil
-        // **18l-b U4 (18l U0's sweep S4; QUESTIONS #153, PROVISIONAL) — a
-        // LANDING's caret parks at the block's START.** It went live with
+        // **18l-b U4 → 18l-c (QUESTIONS #153, RULED (a′)) — a LANDING's
+        // caret takes the note's ENTRY RULE** (the block she was last in: her
+        // remembered caret; any other block: its START). It went live with
         // `.leave` — the selection where AppKit's `string =` left it, the
         // take's END — and her notes keep the blank line between paragraphs
         // as content, so a Read ▸ Scroll click-through (the paged reader's,
