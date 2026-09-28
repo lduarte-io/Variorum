@@ -44,3 +44,38 @@ canon edits correctly deferred under OWED AT CLOSE).
 
 **Round state:** findings sent to the implementer verbatim (same turn as this commit);
 reviewer holds the final call. Round cap status: 1 of 3.
+
+## THE IMPLEMENTER'S AGREE/DISPUTE (returned 2026-09-28; re-read the named code on `68b1357b` before answering)
+
+**Totals: 6 AGREE, zero disputes on mechanism.** On R1-M1 the implementer agrees the
+mechanism (the proposed pin would be RED on this tree) and PREFERS ROAD (b), recorded, on
+three grounds: (1) decision 1 promises Esc keeps "her place" — an unbuilt take can only get
+the keyboard if the page MOVES to it, and moving the page at Esc breaks the promise in
+exactly this case; (2) (a) is not one line — the controller cannot see whether a row is
+built (that is `TakesArticleScroll`'s private `articleRowFrames`), so (a) needs a new forward
+out of the landing half or an UNCONDITIONAL land at every Esc (which moves the page after a
+deliberate scroll-away); (3) the class is wider than find — ANY far scroll away from a live
+take drops its pane and loses the keyboard; the find-specific way in is road A, which U8's
+R-18l-13 removes; a find-only reveal at Esc would be a second partial fix of U8's class. For
+(b) it drafted: HONEST BOUNDARIES row 8 (Esc when the ring's take has no built pane — the
+window holds the keyboard until a click or the row scrolls back and its born-live pane
+claims; Esc never moves the page; U8 removes the entry half; the scroll-away half is the
+lazy column's general class), a QUESTIONS **#157 (7)** fork ((a) as built — the page stays
+put at Esc; (b) Esc brings the take back into view and hands it the keyboard), and the
+reviewer's pin kept as a `withKnownIssue` arm naming the boundary — red the day (b) or U8
+changes the behaviour. On (a) it has no correctness objection IF the reveal fires only when
+the row isn't built (needs the new forward; never unconditional). R1-N1: agree, inert as
+traced (paint nil-gated by `isPresented`, token consumed); clear at next `open()` + fix the
+doc. R1-N2: agree, bind once. R1-N3: agree (`wrapped` resets only in `setQuery`/no-match/the
+step; none of `toggleScope`/`projectionChanged`/`open` touch it); fix = `recount` clears it
+when the re-anchor changes current or the list; copy rides #157 (2). R1-N4: agree it is an
+evidence gap a HOSTED pin cannot close (`NSEvent.modifierFlags` reads live hardware state; a
+synthesized event doesn't set it) — the right evidence is a `takes-find` walk row after row
+D: `key code 36 using shift down`, assert `tf == 2_of_$total`, `tsel=*,4`, `fr == text`.
+R1-N5: agree both; for the 074442 narrative it supplied the honest derivation to quote (the
+artifact's words + `vis-ax.swift` prints a match's frame BEFORE pressing and exits 1 only
+when nothing matched printing nothing, so frame + non-zero exit = exit 2 = AXPress returned
+non-success; "landed anyway" rests on the abort's own probe id 191 `voice=terminal`).
+
+**State: handed to the reviewer for FINAL CALLS + its own fix implementation (the
+cross-model flow); the implementer's sanity pass follows.**
