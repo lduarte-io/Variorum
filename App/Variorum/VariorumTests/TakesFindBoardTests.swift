@@ -534,6 +534,35 @@ struct TakesFindBoardTests {
         }
     }
 
+    // MARK: - R1-N1 — a reopen clears the last session's request
+
+    /// **R1-N1 (the U7 ladder's round 1):** the step/Esc request is the
+    /// hand-back's vehicle, so it cannot be cleared at `close()` (the render
+    /// the close causes delivers it) and LINGERS for its one take — inert
+    /// once its token is consumed — until the next REOPEN clears it. Before
+    /// the fix the request survived the reopen forever (`face(forVariant:)`
+    /// stayed non-nil for that take with the bar closed): RED on the old
+    /// code at the reopen assertion, verified by behavioural revert.
+    @Test func aReopenClearsTheLastSessionsRequest() async throws {
+        try await withSession(blocks: 6) { session, fixture, db, _ in
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let tokens = VoiceTokens.fallback(for: .light)
+            model.find.open()
+            model.find.setQuery("prose")
+            model.find.next()  // the step issues a request to the landed take
+            let landed = try #require(model.find.currentMatch?.variantID)
+            #expect(model.find.face(forVariant: landed, tokens: tokens)?.request != nil,
+                    "non-vacuity: the step's request is outstanding")
+            model.find.close()  // Esc — the hand-back request rides to the live take
+            #expect(model.find.face(forVariant: landed, tokens: tokens)?.request != nil,
+                    "the hand-back's vehicle survives the close, by design")
+            model.find.open()
+            let reopened = try #require(model.find.face(forVariant: landed, tokens: tokens),
+                                        "the bar is open — the take wears a face")
+            #expect(reopened.request == nil, "a reopen starts with no request outstanding")
+        }
+    }
+
     // MARK: - P1 — a settle recounts only what moved
 
     @Test func aSettleRescansOnlyTheTakesWhoseTextMoved() async throws {

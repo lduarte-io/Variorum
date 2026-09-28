@@ -116,6 +116,15 @@ final class TakesFindController {
     func open() {
         if !isPresented {
             model.board.clearArticleLanding()
+            // R1-N1 (the U7 ladder's round 1): the last session's step/Esc
+            // request has done its work (its pane consumed the token, or
+            // adopted it at birth as the baseline) — a REOPEN starts with no
+            // request outstanding, so `face(forVariant:)` goes honestly nil
+            // for that take when the bar next closes. Cleared here and never
+            // at `close()` (the hand-back needs the render the close causes),
+            // and never on ⌘F-while-open (a just-issued step request must not
+            // race its own render).
+            request = nil
             isPresented = true
         }
         fieldFocusRequests += 1
@@ -174,7 +183,11 @@ final class TakesFindController {
 
     /// The find face one take's panes wear. Nil when there is nothing to say
     /// (the bar closed and no request outstanding for this take), so a pane
-    /// off the find is byte-unchanged.
+    /// off the find is byte-unchanged. One honest wrinkle (R1-N1): the LAST
+    /// step's or Esc's request LINGERS for its one take after the bar closes
+    /// — it is the hand-back's vehicle, and it cannot be cleared at `close()`
+    /// (the render the close causes is what delivers it); it is inert once
+    /// its token is consumed, and the next REOPEN clears it (`open()`).
     func face(forVariant variantID: String, tokens: VoiceTokens) -> PaneFindFace? {
         let pending = request?.variantID == variantID ? request?.request : nil
         guard isPresented || pending != nil else { return nil }
@@ -203,9 +216,8 @@ final class TakesFindController {
     /// pane otherwise lands where AppKit leaves it (its hosts pass no
     /// landing; `.leave` keeps every other road byte-unchanged).
     func fanCaretLanding(forVariant variantID: String) -> PaneCaretLanding {
-        if case .select = model.caretLanding(forVariant: variantID) {
-            return model.caretLanding(forVariant: variantID)
-        }
+        let landing = model.caretLanding(forVariant: variantID)
+        if case .select = landing { return landing }
         return .leave
     }
 
