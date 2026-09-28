@@ -1113,3 +1113,58 @@ synchronous waits; pathspec-limited staging; PROVISIONAL-and-continue for non-ga
 logged to QUESTIONS, STOP for gating ones). Your diff has NO editor seam → `opus-reviewer`
 ladder unless it drifts. The author may be at the machine — GUI steps only under the per-step
 guard, harness/pins first.
+
+## U6 RECORD (implementer: `opus-implementer`, 2026-09-28)
+
+**NOT DONE (first line):** IN PROGRESS — nothing is closed yet; this line is rewritten at the unit's end.
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | Reading (the brief's list, in order, own context) | DONE — this file whole (her kickoff, the sitting record R-18l-11/12, principles, cast, traps, ledger row 2, the U6 brief); `SessionResiliencyProtocol.md` whole; the seeder family end to end (`SampleLibrarySeeder`, `SeededBookRestore`, `SampleLibraryEncryptionBook`, the resource forms, `notes/source/sherlock-extract.py`); the doors (`ShellActions` restore road + `paletteActs`, `EditorCommands` Help menu + `menuRendered`, `Capability`, `CapabilityRegistry`); the launch loop (`VariorumApp`) and the phone's first-write road (`MobileFirstWriteFurniture`, its pins, the Settings restore row); the ops I script with (`Operations+Variant` whole, `+Structural` extract/divide/divideW/merge/mergeCeremony, `+Deletion` archive/deleteBlock, `+Import`, `+Block` newBlock, `+Container` create/rename/deleteContainer, `+Placement` chooseVariant); the tray + trash clocks (`PoolAndTray` trayBlocks/preservedOriginals, `TrashWindow`, `PurgeJanitor`'s 30-day roots); READ-ONLY `Sources/VariorumCore/Sync/SampleLibraryDedupe.swift` (the classifier + the defense leg) and QUESTIONS #143/#146; the pins (`SampleLibraryTests` whole, `SampleLibraryDedupeFactsTests`, `PostureSwitchTests`' facts pin, `EncryptionExplainedDrillTests`' seed loop, `MobileFirstWriteFurnitureTests`' marks) |
+| 2 | The source: `notes/source/jekyll-extract.py` → `Shared/SampleLibrary/JekyllAndHyde.txt` (the quiet chapters, boilerplate stripped) | NOT-STARTED |
+| 3 | The seeder generalized for a SCRIPTED note (`Book.scriptedNote`, title-last, the half-built heal) + the Jekyll `Book` + dedupe exclusion | NOT-STARTED |
+| 4 | takemania — the scripted history (`Shared/SampleLibrary/Takemania.swift`) | NOT-STARTED |
+| 5 | The doors: Mac launch (via `Book.all`), Help ▸ Restore through the registry (P-1), the phone's first-write road | NOT-STARTED |
+| 6 | Pins (the seeder-shape suite + the re-armed facts/drill pins) | NOT-STARTED |
+| 7 | QUESTIONS #155 (the dedupe-membership call) | NOT-STARTED |
+| 8 | Closing runs (touched Mac suites + Tutorial; iOS build + the phone's first-write pins) | NOT-STARTED |
+| 9 | Walk (both voices, dev store, author-free only) | NOT-STARTED |
+| 10 | Self-assessment | NOT-STARTED |
+
+- Deaths / resumes: none.
+
+### THE DESIGN CALLS (traced before building; each reversible)
+
+1. **The book stays OUT of the sync dedupe's facts list (PROVISIONAL — QUESTIONS #155).** Traced, not assumed:
+   `SampleLibrarySeeder.allDedupeFacts()` maps `Book.all`, and the facts go to the engine at `SyncSession.configure`.
+   If the Jekyll book joined that list, its copies would read EDITED (a fanned take or a manual savepoint in any note
+   reads the whole copy edited — `SampleCopyClassifier.classify`), so both copies survive as R-18l-12 assumed — BUT the
+   engine's defense leg (`defendEditedSampleCopies`, QUESTIONS #143(b), arm 1 of `meetingStands`: "another same-name
+   copy's reading row is LIVE here") REVIVES a deliberately deleted copy on the other device whenever the other copy
+   still stands. So the disclaimer's own advice — *delete either copy, nothing is lost* — would be undone by the second
+   device. Kept out of the list, the engine never sees the book: two copies are two ordinary books, and deleting one is
+   final. This is ALSO the literal "zero dedupe extension": the facts the engine receives stay byte-identical (Sherlock +
+   *Encryption Explained*). Zero `Sync/` lines; `Book.all` (what seeds) and the dedupe-covered list (what the engine
+   judges) become two named lists.
+2. **The date scheme — two clocks.** The book's skeleton, its front matter and the two quiet chapters carry the
+   novella's publication date (5 January 1886 — Sherlock's m6 precedent: shipped content sorts to the bottom of every
+   recency view). **takemania's history runs on a clock RELATIVE TO THE SEED**, because the tray only lists tombstones
+   inside the 30-day window (`Queries.trayBlocks`' `deleted_at >= cutoff`) and the janitor physically purges 30-day
+   tombstone roots (`PurgeJanitor`) — a history stamped 1886 would ship with an EMPTY tray and its deleted blocks
+   purged at the first janitor pass. So the note is born ~5 weeks before the seed, savepoints land days apart, the
+   deletions in the last days (the tray reads 26–29 days left at seed), and the last session ends the day before —
+   R-18l-12's *"their tray rows age out on the ordinary purge clocks"*, and Block History reads like weeks of work.
+   Consequence, stated: takemania sorts as a recently edited note in the Library's edit sort.
+3. **Completeness without atomicity: title-last.** No app-reachable door runs several operations in one transaction
+   (every op is its own `database.write`), so a half-built takemania is possible (a process death mid-turn, or an op
+   refusing mid-script). Discovery is keyed on TITLES, so the note is minted under a working title, joins the book
+   and wears the tag first (never in the Pool), runs its whole history in ONE runner turn (cancellation cannot split
+   it), and takes the title `takemania` as its LAST act — a half-built one is never "present", so the mark is never set
+   over it. The next occasion trashes the seeder's own half-built note (a book member wearing exactly the working
+   title) and mints afresh.
+4. **Shapes.** takemania is her own notes' shape (paragraph blocks, no stored blank line); the quiet chapters use the
+   same shape (the contrast she asked for is takes vs no takes, not spacing; it also keeps the book clear of U5's TK2
+   ≥2-blank residual entirely). Book order: About this book · Story of the Door · takemania · Henry Jekyll's Full
+   Statement of the Case.
