@@ -212,6 +212,60 @@ struct PaneFindFaceTests {
                 "…and the keyboard stayed with the field, so ⏎ keeps stepping")
     }
 
+    // MARK: - The keyboard survives a re-parent (the second row-7 road)
+
+    /// The hosting view carrying the pane — detached and re-attached the way
+    /// SwiftUI moves a representable's view during a lazy column's layout.
+    private static func reparent(_ window: NSWindow, between: () -> Void = {}) throws {
+        let content = try #require(window.contentView)
+        let host = try #require(content.subviews.first { !($0 is NSTextField) })
+        host.removeFromSuperview()
+        between()
+        content.addSubview(host)
+    }
+
+    /// **RED ON THE PRE-FIX TREE** (the ⌘G pin found it on the find's road;
+    /// this is its component form): a LIVE pane holding the keyboard is
+    /// detached and re-attached — AppKit drops a detached first responder to
+    /// the window — and the pane takes back the keyboard it held.
+    @Test func aLivePaneTakesTheKeyboardBackAfterAReparent() async throws {
+        let rig = PaneRig(text: Self.text)
+        rig.isLive = true
+        rig.landing = .start
+        let (window, pane, _) = try await Self.mount(rig)
+        defer { window.orderOut(nil) }
+        await Self.settle(window)
+        #expect(window.firstResponder === pane, "non-vacuity: the live pane holds the keyboard")
+        try Self.reparent(window) {
+            #expect(window.firstResponder === window, "AppKit drops a detached first responder")
+        }
+        await Self.settle(window)
+        #expect(window.firstResponder === pane, "re-attached, the live pane takes back its keyboard")
+    }
+
+    /// …and never STEALS it: if something else took the keyboard while the
+    /// pane was away, the pane leaves it there; and a READ pane never
+    /// reclaims (it was never the writing surface).
+    @Test func aReparentNeverStealsTheKeyboardAndAReadPaneNeverReclaims() async throws {
+        let rig = PaneRig(text: Self.text)
+        rig.isLive = true
+        rig.landing = .start
+        let (window, pane, field) = try await Self.mount(rig)
+        defer { window.orderOut(nil) }
+        await Self.settle(window)
+        #expect(window.firstResponder === pane)
+        try Self.reparent(window) { window.makeFirstResponder(field) }
+        await Self.settle(window)
+        #expect(window.firstResponder !== pane, "the field took it meanwhile — the pane leaves it")
+
+        rig.isLive = false
+        await Self.settle(window)
+        window.makeFirstResponder(pane)  // a read pane is selectable, so it can hold it
+        try Self.reparent(window)
+        await Self.settle(window)
+        #expect(window.firstResponder !== pane, "a read pane does not reclaim")
+    }
+
     @Test func aRequestSelectsInAnAlreadyLivePaneAndABornRequestIsNotAStep() async throws {
         // Born live WITH a request outstanding: the baseline — nothing acts.
         let rig = PaneRig(
