@@ -23,15 +23,14 @@
 //  block, not its CoreText index — cheap to wire, but a Read click seeding a
 //  caret at a character is #149's product question), so the landing carries no
 //  offset and `LandingTarget.utf16Offset` — set by no production site — is
-//  deleted; the arriving pane puts a landing's caret at the landed block's
-//  START, which is the rule the value was designed with — its deleted field's
-//  doc, quoted at #153 (*"the landing then puts the caret at the block's
-//  start"*), what note Read's twin click-through
-//  does on a block she was NOT last in (`ReadModeView.openInEdit` → the entry
-//  rule's `.start`; the block she was last in lands at her remembered caret
-//  there — #153's (a′), not built), QUESTIONS #97's built (a), and exactly
-//  where the landing puts her eyes (the block's
-//  top at the page's top). A CLICK still brings its own place (U0), and every
+//  deleted; the arriving pane puts a landing's caret by THE NOTE'S ENTRY RULE
+//  — **#153 RULED (a′), her word 2026-09-27 at the 18l-c standing-bundle
+//  sitting:** the block she was LAST IN lands at her remembered caret, any
+//  other block at its START (`PaneCaretLanding.entering`'s one pure copy —
+//  note Read's twin click-through and "edit here" now land identically in
+//  Index and in Outline; the nil arm is QUESTIONS #97's built (a) START,
+//  exactly where the landing puts her eyes: the block's top at the page's
+//  top). A CLICK still brings its own place (U0), and every
 //  other road keeps `.leave`.
 //
 //  RED ON OLD: the landing's pane armed `.leave`, and the caret sat on the
@@ -166,6 +165,11 @@ struct IndexLandingCaretTests {
         try await withStoryBook { session, _, _, postIDs, blocks in
             let edit = BookIndexEditModel(session: session)
             defer { edit.teardown() }
+            // Row-36 hygiene: `.incrementing` ids repeat across worlds and the
+            // current-block memory PERSISTS in the shared domain — scrub on
+            // entry so a neighbour's (or an older run's) leftover never
+            // becomes this landing's "remembered caret".
+            for id in postIDs { session.commandRouter.forgetCurrentBlock(for: id) }
             let target = blocks[postIDs[1]]![1]
             edit.requestLiveBlock(LandingTarget(postID: postIDs[1], blockID: target.blockID))
             let rows = blocks[postIDs[1]]!.map {
@@ -192,6 +196,60 @@ struct IndexLandingCaretTests {
         }
     }
 
+    /// **#153 RULED (a′) — 2026-09-27, her word at the 18l-c standing-bundle
+    /// sitting** (*"START, except your last block"* — note Read's own entry
+    /// rule, now ONE rule on both roads): a landing on the block she was
+    /// LAST IN lands at her REMEMBERED caret; any other block at its START.
+    /// The landing consults `PaneCaretLanding.entering` over the router's
+    /// current-block fact — the same pure copy note Read's twin click-through
+    /// reads, so "edit here" lands identically in Index and Outline.
+    /// RED ON OLD (the (a) build): the landing armed `.start` for EVERY
+    /// block, the remembered-caret arm failing with `.start ≠ .offset(42)`.
+    @Test func aLandingOnTheBlockSheWasLastInLandsAtHerRememberedCaret() async throws {
+        try await withStoryBook { session, _, _, postIDs, blocks in
+            let edit = BookIndexEditModel(session: session)
+            defer { edit.teardown() }
+            let router = session.commandRouter
+            let target = blocks[postIDs[1]]![1]
+
+            // The row-36 defaults class: the memory PERSISTS per note under
+            // the shared `.standard` domain and `.incrementing` ids repeat
+            // across tests — scrub on entry AND exit (the
+            // `BlockHistoryPaneTests.withNote` pattern), or this test's
+            // offset leaks into its neighbours' landings.
+            for id in postIDs { router.forgetCurrentBlock(for: id) }
+            defer { for id in postIDs { router.forgetCurrentBlock(for: id) } }
+
+            // She was last in `target`, caret at offset 42 — the fact takes
+            // only for the note on screen (the router's own guard), so the
+            // detail registers first, exactly as the app's doors do.
+            let token = router.registerDetail(
+                postID: postIDs[1], mode: .write, applyMode: { _ in })
+            defer { router.unregisterDetail(token) }
+            router.noteFocusedBlock(
+                target.blockID, variantID: target.variantID,
+                postID: postIDs[1], utf16Offset: 42)
+
+            let rows = blocks[postIDs[1]]!.map {
+                Queries.TOCRow(
+                    blockID: $0.blockID, placementID: "pl", name: nil,
+                    variantID: $0.variantID, text: $0.text, hasFan: false, variantLocked: false)
+            }
+            edit.requestLiveBlock(LandingTarget(postID: postIDs[1], blockID: target.blockID))
+            #expect(edit.takePendingLiveBlock(postID: postIDs[1], rows: rows) == target.blockID)
+            #expect(edit.caretLanding(forVariant: target.variantID) == .offset(42),
+                    "the block she was last in lands at her remembered caret — #153 (a′)")
+
+            // Any OTHER block still lands at its START — the (a′) rule's
+            // second half, byte-unchanged from the (a) build.
+            let other = blocks[postIDs[1]]![0]
+            edit.requestLiveBlock(LandingTarget(postID: postIDs[1], blockID: other.blockID))
+            #expect(edit.takePendingLiveBlock(postID: postIDs[1], rows: rows) == other.blockID)
+            #expect(edit.caretLanding(forVariant: other.variantID) == .start,
+                    "any other block lands at its START")
+        }
+    }
+
     /// **The road she walks, end to end:** Read ▸ Scroll's sentence click —
     /// exactly what `BookView`'s flow `onWake` does (request the landing,
     /// switch to Index) — on a block that carries her blank line. The live
@@ -201,6 +259,9 @@ struct IndexLandingCaretTests {
     /// empty line (S4's measured 329 of 329, in this fixture's numbers).
     @Test func aReadClickThroughLandsTheCaretAtTheBlocksStartNotOnItsBlankLine() async throws {
         try await withStoryBook { session, db, readingID, postIDs, blocks in
+            // Row-36 hygiene, as above: a leftover remembered caret would turn
+            // this walked landing into the (a′) remembered-place arm.
+            for id in postIDs { session.commandRouter.forgetCurrentBlock(for: id) }
             let model = BookViewModel(session: session, readingID: readingID)
             await model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)

@@ -345,8 +345,8 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
 
 | # | Item | Unit | Status |
 |---|---|---|---|
-| 1 | The Index tiers' metric shift on click-to-edit (her issue 1; KnownIssues row 89 / 18l U0 sweep S3) | U5 | **BUILT + DOUBLE-WALKED 2026-09-27/28** (base `097e356b` + the #154 rider `cc3c577c`; row 89 CLOSED ladder-gated; the Fable ladder over base+rider is the remaining gate) |
-| 1b | Her #154 ruling (b) — stored blank lines drawn at rest on the two index faces; nothing ever moves on a click | U5 rider | **BUILT + DOUBLE-WALKED 2026-09-28** (same gate; the ≥2-blanks TK2 exception filed as its own row, owner 12) |
+| 1 | The Index tiers' metric shift on click-to-edit (her issue 1; KnownIssues row 89 / 18l U0 sweep S3) | U5 | **CLOSED 2026-09-28** — built + double-walked; ladder ONE round 0/0/1/3 (all confirmed + fixed by the reviewer `9cf71665..f776f79d`, both implementer corrections verified-then-adopted, zero disputes, sanity PASS 16/4 with exactly the 4 named known issues); records `notes/plans/18lc-u5-ladder-round1.md` |
+| 1b | Her #154 ruling (b) — stored blank lines drawn at rest on the two index faces; nothing ever moves on a click | U5 rider | **CLOSED 2026-09-28** — same ladder; the ≥2-blanks TK2 exception stands as its own row (owner 12) |
 | 2 | The takemania seeded note — real history through the quiet ops facade; restorable like the others; the dedupe answer RULED = the description's disclaimer (R-18l-12: two-copies note · ships-with-deleted-blocks note · Restore-for-full-experience) | U6 | open |
 | 3 | Search in Takes — the design brief in this file first; chosen-takes-only default ON; the off-scope affordance + find-vs-replace per the sitting | U7 | open |
 | 4 | The mode-switch arrival flash — default ON, a setting to turn off; the existing wash vocabulary; fade constants named | U8 | open |
@@ -544,7 +544,9 @@ record.
 | This plan file + her prompt verbatim + her captures into `18l-inputs/` | DONE (this commit) |
 | Master plan row 18 + KnownIssues rows 89/94 re-owned | DONE (this commit) |
 | Kickoff sitting (the question batch) | IN PROGRESS |
-| U5 → U6 → U7 (brief first) → U8 | NOT-STARTED |
+| U5 (session 1, base + the #154 rider) | **CLOSED 2026-09-28** — built · double-walked · ladder one round 0/0/1/3 clean (zero disputes; sanity PASS); rows 89 + #154 closed with the gate PASSED |
+| The #153 (a′) seam act (ledger row 8) | IN PROGRESS — the orchestrator's, at this clean seam |
+| U6 → U7 (brief first) → U8 | NOT-STARTED |
 
 ## U5 RECORD (implementer: `opus-implementer`, 2026-09-27)
 

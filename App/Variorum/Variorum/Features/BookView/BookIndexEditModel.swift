@@ -170,14 +170,19 @@ final class BookIndexEditModel {
         // the text: her U0 report's artifact on the Index's other road in.
         // No face on this road hands on where inside the block she clicked
         // (`LandingTarget` carries no offset — #153 has the trace), so the
-        // landing takes the rule the value was DESIGNED with (its deleted
-        // field's doc; #153 quotes it) — the block's start —
-        // which is also the entry rule's `.start` arm in note Read's twin
-        // click-through (`ReadModeView.openInEdit`: a block she was NOT last
-        // in; the block she was last in lands at her remembered caret there —
-        // #153's (a′), not built), QUESTIONS #97's (a), and exactly where the
-        // landing puts her eyes: the landed block's top at the page's top.
-        goLive(postID: postID, blockID: row.blockID, variantID: variantID, caret: .start)
+        // landing takes THE NOTE'S ENTRY RULE — **#153 RULED (a′), her word
+        // 2026-09-27 at the 18l-c standing-bundle sitting:** the block she
+        // was LAST IN lands at her remembered caret, any other block at its
+        // START. This is `PaneCaretLanding.entering`'s one pure copy — note
+        // Read's twin click-through and "edit here" now land identically in
+        // Index and in Outline. (The rule's nil arm is #97's (a) START,
+        // exactly where the landing puts her eyes.)
+        goLive(
+            postID: postID, blockID: row.blockID, variantID: variantID,
+            caret: PaneCaretLanding.entering(
+                session.commandRouter.currentBlock(for: postID), block: row.blockID
+            ) ?? .start
+        )
         return row.blockID
     }
 
