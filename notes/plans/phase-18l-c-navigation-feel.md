@@ -2058,3 +2058,51 @@ ritual with the install refresh LAST behind the A1 rail at a verified zero-insta
 and ready for reinstall when the phase is done"* — the zero-instance window is hers-granted
 for the whole night; the refresh still verifies zero instances by pgrep + PATH + store
 discrimination at execution time before the A1 safety copy, as always.
+
+## PHASE RESULTS (the closeout, 2026-09-28 — the orchestrator's summary; every claim's evidence is the unit records above)
+
+**All four units + the seam act CLOSED; every ledger row dispositioned; zero disputes across
+four ladders; every bug-class fix revert-verified.**
+
+- **U5 — the Index tiers' metric consolidation** (her issue 1 → 0.0 pt on her report's shape;
+  ONE named TK2 residual as its own KnownIssues row): ladder one round 0/0/1/3. **#154 (b)**
+  rider built (stored blank lines drawn at rest).
+- **The #153 (a′) seam act** (orchestrator): the Index landing takes the note's entry rule;
+  revert-verified.
+- **U6 — takemania** (47 blocks · 10 fanned · 9 lineage edges · tray 5 · 12 savepoints ·
+  17 sittings; the R-18l-12 disclaimer; restorable like the others): ladder two rounds
+  0/0/4/8 + 0/0/2/4, all fixed (incl. the Restore Pool-orphan bug and the imported-road
+  gate, both red-pinned).
+- **U7 — search in Takes, find-only v1** (the ten-decision design brief; the compare rule
+  MEASURED against the real Write bar — accent-SENSITIVE, pinned as agreement; the off-scope
+  margin marker + bloom road; the keyboard follows where she steps from): FABLE ladder one
+  round 0/0/1/5 cross-model, 6/6 confirmed, the sanity-raised shift-tap race MEASURED TRUE
+  and fixed (the bar reads the submit EVENT's flags). Road B of her "tapping keys won't make
+  you edit" fixed at the component (the SwiftUI re-parent keyboard re-claim).
+- **U8 — mode-switch feel, three halves of one design** (R-18l-13's caret rule with the
+  stand-down retired and the 17q race answered by the watch-quiet deferral; the arrival
+  flash, default ON, `arrival_flash` synced; the comfort band, mode-switch landings only;
+  row 94 taken on the entry road; road A of her report CLOSED on the mode-switch door):
+  FABLE ladder one round 0/0/1/5 cross-model, 6/6 confirmed, sanity CLEAN.
+
+**Counts at close:** U7's closing set 1608 tests / 266 suites (1 pre-existing row-58 red,
+attributed by run); U8's closing set 602 / 99 (5 known, none U8's); the ladder fixes' ten
+suites 112 / 10 twice (reviewer + implementer), the 1 known = the designed U7 tripwire; core
+`AppearanceSettingsTests` 9/9; the seeded VisualWalk suite 17 scenarios × 2 voices
+(`mode-switch-feel` and `takes-find` joined this round; the full-suite `takes-find`
+order-dependency is owned below). **The orchestrator's own hands-on walks accepted every
+unit** — and found the takemania fixture corruption (healed; mechanism recorded in the U8
+acceptance).
+
+**Canon:** zero schema, zero `Sync/`, lockstep marker stays 9. Landed at this close: AppSpec
+§7's NOT-seeded settings list gains `arrival_flash`; §14's delta pointer updated; two
+TEXTKIT2_NOTES facts (U7's re-parent keyboard drop; U8's bound-ScrollPosition harness fact).
+**PROPOSED TO HER, not landed (her bundle):** the two §12 contract lines — the Takes find
+bar (U7's draft) and the mode-switch rule (R-18l-13, U8's draft).
+
+**HER BUNDLE (the morning sitting):** #155 (Jekyll out of the dedupe facts — PROVISIONAL) ·
+#156 (takemania's date fork (a)/(b)/(c)) · the R-18l-12 disclaimer polish · #157 (1)–(7)
+(the find's keyboard/words/colours/slot/⌘G-empty/marker/Esc-off-page) · #158 (1)–(6) (the
+caret rule's (A)/(B), the flash face/Reduce-Motion/what-flashes edges, the band's constants)
+· the two §12 contract-line proposals · the divide→merge→undo-twice tray observation (U6) ·
+#150 closes with R-18l-13 built (recorded, hers to confirm reading).
