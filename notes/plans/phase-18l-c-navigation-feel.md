@@ -345,6 +345,7 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
 | 5 | The comfort band — no mode-switch landing rests the target line at the extreme top/bottom; ruled carries exact mid-band; pin collisions flagged, never edited | U8 | open |
 | 6 | MAY-take: KnownIssues row 94 (the Takes head reveal eats the 18-pt top inset — the band's top edge is its remedy sketch); decide at U8, record either way | U8 rider | open |
 | 7 | Her cursor-loss report's OTHER half — *"tapping keys won't make you edit (the take that you are navigated to isn't active)"*: trace at U7 whether a find-navigation landing should focus/activate the landed take, and what today's non-activation is (R-Q20/R-Q21 territory — any change to ruled machinery is flagged, not made) | U7 | open |
+| 8 | Her #153 ruling (a′), OWED THIS ROUND: the Index landing's caret takes the note's entry rule (START, except the last-in block → remembered caret) — one line in `BookIndexEditModel.takePendingLiveBlock` + the `IndexLandingCaretTests` arm re-pinned to (a′); applied at the next clean seam, never beside U5's in-flight diff; QUESTIONS #153 closes on landing | seam act (orchestrator or the next unit) | open |
 
 ## THE SITTING RECORD (kickoff, 2026-09-27 — her rulings, verbatim-faithful; filled as they land)
 
@@ -395,6 +396,27 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
   the top line and the top of the document is gone :)"* — the row-87 fix (`ReadingAnchor`,
   `998f7d7d`) confirmed felt-gone in her own use; recorded here as the author's live
   verification on top of U0b's closed ladder.
+- **THE STANDING-BUNDLE SITTING (2026-09-27, in-session — she asked for the most important of
+  the 18l/18l-b bundle via the question tool before stepping away; four asked, four answered,
+  each the recommended option):**
+  - **#152 RULED (a) — ACCEPT AND DOCUMENT.** The PanePublisher revert stands; the warning
+    family is a documented cost (KnownIssues row 95 flips to documented-cost, owner 12); the
+    built shape stays recoverable at `e113dd56` + `8a93eb24` if hardening ever re-opens it.
+  - **#153 RULED (a′) — START, EXCEPT THE BLOCK SHE WAS LAST IN, which lands at her remembered
+    caret** (note Read's own rule; "edit here" in Index lands like Outline's). The one line
+    (`PaneCaretLanding.entering(currentBlock(for:), block:) ?? .start` in
+    `BookIndexEditModel.takePendingLiveBlock`) is OWED THIS ROUND — ledger row 8; applied at
+    the next clean seam (never while U5's implementer holds the neighbouring files), with the
+    `IndexLandingCaretTests` arm updated to pin (a′) and QUESTIONS #153 closed on landing.
+  - **#149 RATIFIED (b) — the carve-out stands.** Formatted read tiers may seed a caret through
+    the pinned display→stored translation; R-18l-5 graduates from PROVISIONAL to ratified; the
+    13g F-5 entry's dated pointer is now the rule's settled state.
+  - **U3 FELT-GATE CONFIRMED.** Her answer after an evening of clicking through the app: the
+    boards feel right — the reverted close is FINAL; nothing further owed on 18l-b U3.
+  - Deliberately NOT asked (lower stakes, standing as built, hers whenever she likes):
+    **#150** (the five note-open refinements inside her own R-18l-1 — each one line to flip)
+    and **#151** (note Read's watch-without-placeholders — built as (a), measured better than
+    the alternative). Both stay open in QUESTIONS.
 
 ## U5 BRIEF (session 1 — the tiers' one metrics vocabulary; written by the orchestrator 2026-09-27)
 
