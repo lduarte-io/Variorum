@@ -114,6 +114,19 @@ nonisolated enum SeededBookRestore {
             return "It was stopped before it finished — what came back stays; try again."
         case OperationError.duplicateBookName(let existing):
             return BookNameCopy.refusal(existing: existing)
+        // 18l-c U6 ladder F1: the book REFUSES new notes — "try again" can
+        // never succeed there, so the line names what to change (the app's
+        // own finished/note-cap words; nothing was minted — the scripted
+        // note mints through `newPostInReading`).
+        case OperationError.lockedReading:
+            return "The book is finished — reopen it (its settings), then restore again."
+        case OperationError.readingAtCapacity:
+            return "The book is at its note cap — extend the cap in its settings, then restore again."
+        // 18l-c U6 ladder F12: a scripted history stopped partway (a script
+        // bug the pins catch first): a half-built note may stand — the next
+        // restore trashes it and mints a whole one.
+        case is Takemania.ScriptError:
+            return "It stopped partway through the note's history — the unfinished note goes when you restore again."
         case is OperationError:
             return "The library refused a change partway — what was already restored stays; try again in a moment."
         default:

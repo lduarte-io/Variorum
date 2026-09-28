@@ -13,7 +13,7 @@
 //
 //  ── REAL ROWS, NEVER PAINTED ─────────────────────────────────────────────
 //  Every row here is written by the operations API her own gestures reach —
-//  `createPost`, `newBlock`, `autosave`, `branchVariant`, `newBlankVariant`,
+//  `newPostInReading`, `newBlock`, `autosave`, `branchVariant`, `newBlankVariant`,
 //  `setTakeLabel`, `chooseVariant`, `commit`, `renameCommitPoint`,
 //  `archiveVariant`, `divide`, `divideW`, `merge`, `extract`, `deleteBlock`,
 //  `closeAutoCommit`, `renameContainer` — on the QUIET facade
@@ -231,6 +231,16 @@ nonisolated private final class Script {
         texts[result.variant.id] = result.variant.workingText
     }
 
+    /// A block's live ACTIVE fan, read from the STORE in fan order — what
+    /// `KeepOnTopDivide.compose` requires (never a projection or the script's
+    /// own memory; the same `Queries.activeFans` the Takes board reads).
+    private func liveActiveFan(_ block: String) throws -> [Variant] {
+        @Dependency(\.database) var database
+        return try database.read { db in
+            try Queries.activeFans(db, blockIDs: [block])[block] ?? []
+        }
+    }
+
     private func merge(_ first: String, _ second: String) throws {
         let result = try at { try ops.merge(first, second) }
         texts[result.variant.id] = result.variant.workingText
@@ -246,12 +256,19 @@ nonisolated private final class Script {
         var eyesore: Placed = ("", "")
         var candle = "", ifAnyOneKnows = "", oldestFriends = "", friendsYounger = ""
         try sitting(daysAgo: 34, at: 19, 40) {
-            note = try at { try ops.createPost(title: Takemania.workingTitle) }.id
-            // Never bookless, never untagged — so never in the Pool, even if
-            // the history stops here (design call 3).
+            // The note, its membership and its chapter in ONE transaction
+            // (`newPostInReading`, the op's own no-stray doctrine): a book
+            // that refuses (finished, at its note cap) refuses BEFORE
+            // anything is minted, so nothing is ever left bookless in the
+            // Pool — the U6 ladder's F1 (a create-then-add mint left one
+            // working-titled orphan per Restore press, which neither the heal
+            // nor the stray scan could see). Then the tag. From here on the
+            // note is a book member, so a history stopped at any later step
+            // is the heal's to find (design call 3).
+            note = try at {
+                try ops.newPostInReading(bookID, section: sectionID, title: Takemania.workingTitle)
+            }.id
             try at { _ = try ops.applyTag(tagID, toPost: note) }
-            try at { _ = try ops.addPostToReading(note, to: bookID) }
-            try at { try ops.assignPostToSection(note, in: bookID, section: sectionID) }
             try add(P.headingWill)
             opening = try add(P.openingV1)
             try add(P.willTerms)
@@ -308,14 +325,13 @@ nonisolated private final class Script {
         }
 
         // ── Sitting 5 — cutting the dream down; a plainer Hyde. ──
-        var hydeFacePlainer = ""
         try sitting(daysAgo: 27, at: 22, 5) {
             try save(dream.take, "the whole scroll, before cutting")
             try name(dream.take, "scroll")
             let short = try branch(dream.block, from: dream.take, label: "short", P.dreamShort)
             try choose(dream.block, short)
             try name(hydeFace.take, "Stevenson")
-            hydeFacePlainer = try branch(
+            _ = try branch(
                 hydeFace.block, from: hydeFace.take, label: "plainer", P.hydeFacePlainer)
         }
 
@@ -433,19 +449,25 @@ nonisolated private final class Script {
         // ── Sitting 14 — the Lanyon exchange merged; Hyde's face divided. ──
         try sitting(daysAgo: 7, at: 20, 10) {
             try merge(oldestFriends, friendsYounger)
-            // The fanned block's DEFAULT divide (keep-on-top, U-2 — the
-            // `KeepOnTopDivide` shape, composed from divide-W's parking):
-            // the displayed take is cut; the other take is cut at its very
-            // END, so it rides WHOLE onto the top block; the original is
-            // preserved whole behind both successors.
+            // The fanned block's DEFAULT divide (keep-on-top, U-2), composed
+            // through the ONE Domain brain every divide door uses —
+            // `KeepOnTopDivide.compose` over the block's LIVE ACTIVE fan read
+            // from the store (its own contract; the U6 ladder's F6: composed
+            // by hand, the seeded note would silently stop showing the real
+            // default the day the composition changed). The displayed take
+            // is cut; every other take parks at its END and rides WHOLE onto
+            // the top block; the original is preserved whole behind both.
             let displayed = hydeFace.take
             let cut = try Takemania.offset(
                 of: P.hydeFaceCutMarker, in: texts[displayed] ?? "")
-            let parked = (texts[hydeFacePlainer] ?? "").utf16.count
+            let fan = try liveActiveFan(hydeFace.block)
+            guard let composition = KeepOnTopDivide.compose(
+                displayedID: displayed, cut: cut, fan: fan)
+            else { throw Takemania.ScriptError.markerMissing("the displayed take in its live fan") }
             let result = try at {
                 try ops.divideW(
-                    hydeFace.block, cuts: [displayed: cut, hydeFacePlainer: parked],
-                    displayedVariantID: displayed)
+                    hydeFace.block, cuts: composition.cuts,
+                    displayedVariantID: composition.displayedID)
             }
             if let top = result.first.variants.first {
                 try save(top.id, "after the divide: Hyde\u{2019}s face in two")
