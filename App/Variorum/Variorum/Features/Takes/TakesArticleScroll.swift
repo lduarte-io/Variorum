@@ -236,9 +236,8 @@ final class TakesArticleScroll {
         guard articleLanding == anchor, articleLandingKind == .entry else { return }
         let arrival = ArticleArrival(placementID: anchor, at: Date())
         articleArrival = arrival
-        let total = ArrivalFlash.plan(reduceMotion: false).total
         Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .seconds(total + 0.1))
+            try? await Task.sleep(for: .seconds(ArrivalFlash.stateLifetime))
             if self?.articleArrival == arrival { self?.articleArrival = nil }
         }
     }

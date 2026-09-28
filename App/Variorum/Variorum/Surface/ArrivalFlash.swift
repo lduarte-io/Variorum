@@ -57,6 +57,16 @@ nonisolated enum ArrivalFlash {
     /// roster's ≈ 0.7–0.9 s; the middle of it).
     static let fadeSeconds: TimeInterval = 0.8
 
+    /// **How long a host keeps the flash's one-shot STATE alive** — the
+    /// curve's total plus a small clear margin, in ONE home (the U8 ladder's
+    /// R1-2: three hosts each derived `plan(reduceMotion: false).total + 0.1`,
+    /// leaning silently on both plans sharing `total` — which they do by
+    /// construction (`Plan.total` never reads `animated`; the pure pin
+    /// `reduceMotionIsTheDiscreetUnanimatedVariant` holds it so). The margin
+    /// keeps the face mounted through the curve's own end, so the last frame
+    /// it samples is already 0.
+    static let stateLifetime: TimeInterval = holdSeconds + fadeSeconds + 0.1
+
     /// One flash's timing, decided once from the system's Reduce Motion.
     struct Plan: Equatable, Sendable {
         let hold: TimeInterval

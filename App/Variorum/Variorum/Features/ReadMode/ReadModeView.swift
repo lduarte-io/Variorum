@@ -877,7 +877,7 @@ private struct ReadPageColumn: View {
             // 18l-c U8 (a): the flash is over — its record goes.
             .task(id: arrival) {
                 guard arrival != nil else { return }
-                try? await Task.sleep(for: .seconds(ArrivalFlash.plan(reduceMotion: false).total + 0.1))
+                try? await Task.sleep(for: .seconds(ArrivalFlash.stateLifetime))
                 arrival = nil
             }
         }
