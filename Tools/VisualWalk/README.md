@@ -118,8 +118,8 @@ vocabulary (18l-c U5) — those assertions are plain, and a regression of either
 | `write-newline-roundtrip` | U0b (row 87) | ⏎ then ⌫ at a short note's end keep the first line and the page's top air |
 | `write-divide-merge` | the design note | ⏎ mid-line divides, ⌫ merges back; the page never moves; the caret lands at the join |
 | `mode-roundtrip` | the design note | Write → Read → Write returns the page and the caret exactly |
-| `index-click` | U0 item 1 (row 86) + 18l-c U5 (row 89) | a read-tier click in the book Index goes live with the caret ON the clicked line, never the blank line — and the clicked line stays under the pointer (plain since U5; it was S3's XFAIL) |
-| `readedit-click` | U0 item 1 | the same on Read ▸ edit |
+| `index-click` | U0 item 1 (row 86) + 18l-c U5 (row 89) + U5's rider (#154 (b)) | a read-tier click on a block's last TEXT line (the tier draws the stored blank line under it since the rider — the click steps up over the probe's `blankH`) goes live with the caret ON the clicked line, never the blank line; the clicked line stays under the pointer (plain since U5; it was S3's XFAIL); and the block BELOW each click — found again by its id, the probe's fifth field — does not move at all |
+| `readedit-click` | U0 item 1 + U5's rider | the same on Read ▸ edit |
 | `outline-narrow-restore` | U0 item 2(a) | the live inline note keeps its whole text at 1440 → 1100 → 900 → back |
 | `outline-long-story-settle` | U0 item 2(b) | the 212-block story, live, holds its SETTLED layout after each resize (its end scrolled into view) |
 | `b5-return-after-cmd-down` | row 88 (B5) | ⏎ at the tail after ⌘↓ on a carve-invalidated layout must not move the page — PLAIN in both voices since 18l-b U-B5's fix (it was KNOWN in Study, where it reproduced every full pass; the fix's revert reds it) |

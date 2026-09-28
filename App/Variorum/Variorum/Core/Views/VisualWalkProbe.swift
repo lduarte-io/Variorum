@@ -361,7 +361,12 @@ enum VisualWalkProbe {
             CGRect(x: window.frame.minX + rect.minX + dx, y: windowTop + rect.minY + dy,
                    width: rect.width, height: rect.height)
         }
-        line["rtI"] = columns(BookIndexGeometry.paneReadTierFrames.values.map { toScreen($0) })
+        line["rtI"] = columns(keyed: BookIndexGeometry.paneReadTierFrames.map { ($0.key, toScreen($0.value)) })
+        // 18l-c U5's rider: ONE stored blank line's height in this voice — the
+        // index tiers draw one under every Sherlock paragraph now (#154 (b)),
+        // so a walk aiming at a block's last TEXT line steps up over it.
+        line["blankH"] = num(IndexProseColumn.lines.paragraphGap + ReadTierClickPlace.height(
+            of: "x", columnWidth: 400, font: EditorDocument.baseFont))
         let panes = editablePanes(in: window.contentView)
         line["panes"] = "\(panes.count)"
         let top = IndexProseColumn.readTierTop(
@@ -403,9 +408,9 @@ enum VisualWalkProbe {
             return
         }
         line["rtRcal"] = "\(offset.how):\(num(offset.dx)),\(num(offset.dy))"
-        line["rtR"] = columns(ReadModeOracle.editBlockFrames
-            .filter { $0.key != live }.values
-            .map { toScreen(column($0), dx: offset.dx, dy: offset.dy) })
+        line["rtR"] = columns(keyed: ReadModeOracle.editBlockFrames
+            .filter { $0.key != live }
+            .map { ($0.key, toScreen(column($0.value), dx: offset.dx, dy: offset.dy)) })
     }
 
     // MARK: - Where note Read's landing put its block (18l U1)
@@ -456,10 +461,14 @@ enum VisualWalkProbe {
         return out
     }
 
-    private static func columns(_ rects: [CGRect]) -> String {
-        let sorted = rects.filter { $0.width > 0 && $0.height > 0 }
-            .sorted { $0.minY < $1.minY }.prefix(40)
-        return sorted.isEmpty ? "none" : sorted.map(format).joined(separator: ";")
+    /// The read tiers' columns WITH their block's id (its first 8 characters)
+    /// as a fifth field — 18l-c U5's rider: the walk finds the block BELOW a
+    /// click again after it, to assert it did not move.
+    private static func columns(keyed: [(String, CGRect)]) -> String {
+        let sorted = keyed.filter { $0.1.width > 0 && $0.1.height > 0 }
+            .sorted { $0.1.minY < $1.1.minY }.prefix(40)
+        return sorted.isEmpty
+            ? "none" : sorted.map { "\(format($0.1)),\($0.0.prefix(8))" }.joined(separator: ";")
     }
 
     // MARK: - Coordinates (Quartz global: top-left origin, points — `cliclick`'s)

@@ -188,8 +188,8 @@ scn_mode-roundtrip() {
 # The book Index draws every block at rest as read-cheap text and swaps the clicked one to THE live
 # pane. The regression: the caret landed on the block's END — the blank line under the text.
 vw_click_read_tier() {  # key(rtI|rtR) label band-top-offset — clicks the LOWEST fully visible multi-line block's LAST
-                        # line, then the block ABOVE it on its FIRST line (above: the first swap's reflow
-                        # cannot move it), asserting (c) each time.
+                        # TEXT line, then the block ABOVE it on its FIRST line, asserting (c) each time — and, since
+                        # 18l-c U5's rider (her #154 (b)), that the block BELOW each click does not move at all.
   local key=$1 label=$2
   vw_probe rt
   local band_top=$(( WIN_Y + $3 )) band_bot=$(( WIN_Y + WIN_H - 20 ))
@@ -198,7 +198,7 @@ vw_click_read_tier() {  # key(rtI|rtR) label band-top-offset — clicks the LOWE
   # STALE frames standing over live ones (found at round 1's discriminating run: a 360-pt ghost of a
   # de-realized paragraph over a run of one-line rows). Rows never overlap, so any frame that overlaps
   # another is suspect — both are dropped, and what remains is unambiguous.
-  local -a all fit; local r o
+  local -a all fit clean; local r o
   all=(${(s:;:)PV[$key]})
   for r in $all; do
     local q=(${(s:,:)r}) clash=0
@@ -207,7 +207,9 @@ vw_click_read_tier() {  # key(rtI|rtR) label band-top-offset — clicks the LOWE
       local p=(${(s:,:)o})
       (( q[2] < p[2] + p[4] && p[2] < q[2] + q[4] )) && { clash=1; break }
     done
-    (( ! clash && q[2] >= band_top && q[2] + q[4] <= band_bot )) && fit+=($r)
+    (( clash )) && continue
+    clean+=($r)
+    (( q[2] >= band_top && q[2] + q[4] <= band_bot )) && fit+=($r)
   done
   vw_require '(( ${#fit} >= 2 ))' "two read-tier blocks fully on screen ($key)" || return
   # The lower target is the lowest block of EIGHT or more lines (≥ 200 pt; else 5+, else 3+): tall
@@ -227,15 +229,31 @@ vw_click_read_tier() {  # key(rtI|rtR) label band-top-offset — clicks the LOWE
   done
   vw_require '[[ -n $low && -n $up ]]' "a multi-line block with one above it ($key)" || return
   local L=(${(s:,:)low}) U=(${(s:,:)up})
-  # 1. the LOWER block's LAST line — her trigger: the line right above the blank separator.
-  local y=$(( L[2] + L[4] - 8 )) x
+  # The block BELOW the lower target (18l-c U5's rider): the nearest clean frame under it, by its id.
+  local below= bq
+  for r in $clean; do
+    bq=(${(s:,:)r})
+    (( bq[2] >= L[2] + L[4] - 1 )) || continue
+    if [[ -z $below ]] || (( bq[2] < ${${(s:,:)below}[2]} )); then below=$r; fi
+  done
+  vw_require '[[ -n $below ]]' "a block below the lower target ($key)" || return
+  local B=(${(s:,:)below})
+  # 1. the LOWER block's LAST TEXT line — her trigger: the line right above the blank separator. Since
+  # 18l-c U5's rider the tier DRAWS that stored blank line (#154 (b)), so the frame's bottom is the blank
+  # line and her line sits one stored blank line (`blankH`, the probe's own number) above it — the
+  # fixture's shape (Sherlock keeps ONE blank line under every paragraph), checked after the click.
+  local y=$(( L[2] + L[4] - 8 - PV[blankH] )) x
   vw_free_x $L[1] $(( L[1] + L[3] * 0.5 )) $y; x=$FREE_X
   vw_click $x $y "$label: the last line of a block"
   vw_settle; vw_cap 01-last-line
   # The pane that went live must stand where the frame said the block was (the tiers share their first
   # line's top — 13u2 B): a frame that was a stale ghost is the HARNESS's error, never the product's.
   vw_require '(( abs(PV[topY] - L[2]) <= 12 ))' "the clicked frame was the block's live place (pane top ${PV[topY]} vs frame ${L[2]})" || return
+  vw_require '[[ ${PV[nl]} == 1 ]]' "the clicked block is stored over a blank line (the fixture's shape the click aims above)" || return
   vw_assert_last_line_click "$label" $y
+  vw_probe rt
+  vw_expect_near "$label: the block BELOW the clicked one does not move (18l-c U5's rider)" \
+    "$(vw_top_of $key $B[5])" $B[2] 0.5
   # 2. the block ABOVE, on its FIRST line.
   y=$(( U[2] + 8 ))
   vw_free_x $U[1] $(( U[1] + U[3] * 0.5 )) $y; x=$FREE_X
@@ -243,6 +261,23 @@ vw_click_read_tier() {  # key(rtI|rtR) label band-top-offset — clicks the LOWE
   vw_settle; vw_cap 02-first-line
   vw_require '(( abs(PV[topY] - U[2]) <= 12 ))' "the clicked frame was the block's live place (pane top ${PV[topY]} vs frame ${U[2]})" || return
   vw_assert_first_line_click "$label" $x $y
+  # The ring moved up: the first target went back to rest — and still nothing below moved.
+  vw_probe rt
+  vw_expect_near "$label: the block below the second click (the first target, back at rest) does not move" \
+    "$(vw_top_of $key $L[5])" $L[2] 0.5
+  vw_expect_near "$label: the block below the first target does not move through the ring's move" \
+    "$(vw_top_of $key $B[5])" $B[2] 0.5
+}
+
+# The screen top of the read-tier frame whose block id starts with <id> (the probe's fifth field), from
+# the LAST probe; "-" when the frame is not listed (the lib's missing-value mark — a FAIL, never 0).
+vw_top_of() {   # key id
+  local r q
+  for r in ${(s:;:)PV[$1]}; do
+    q=(${(s:,:)r})
+    [[ $q[5] == $2 ]] && { print -r -- $q[2]; return }
+  done
+  print -- -
 }
 
 # Rule (c) for a click on a block's LAST line, from the probe's answer (PV). Factored so a headless
@@ -280,8 +315,8 @@ vw_assert_first_line_click() {  # label click-x click-y
 }
 
 vw_def index-click "The Adventures of Sherlock Holmes ▸ Index, scrolled into A Scandal in Bohemia" \
-  "click a block's LAST line (above its blank separator) · click the block above on its FIRST line" \
-  "(c) a pane goes live with the caret ON the clicked line — never the blank line; first-line caret under the pointer; the clicked line stays under the pointer (18l-c U5)" \
+  "click a block's LAST TEXT line (directly above its stored blank line, drawn since the rider) · click the block above on its FIRST line" \
+  "(c) a pane goes live with the caret ON the clicked line — never the blank line; first-line caret under the pointer; the clicked line stays under the pointer (18l-c U5); the block BELOW each click does not move at all (18l-c U5's rider, #154 (b))" \
   pass
 scn_index-click() {
   vw_open_note "the adventures of sherlock holmes"
@@ -297,8 +332,8 @@ scn_index-click() {
 
 # --- S7: the same click on Read ▸ edit (U0 item 1's second host) -----------------------------------------
 vw_def readedit-click "The Red-Headed League ▸ Read ▸ edit (its first open in the pass: no landing scroll, so no stale rows)" \
-  "click a block's LAST line · click the block above on its FIRST line" \
-  "(c) as the Index" pass
+  "click a block's LAST TEXT line · click the block above on its FIRST line" \
+  "(c) and the block below, as the Index" pass
 scn_readedit-click() {
   vw_open_note "The Red-Headed League"
   vw_keys "⌘3 (Read)" 'keystroke "3" using command down'
