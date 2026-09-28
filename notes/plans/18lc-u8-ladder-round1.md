@@ -26,12 +26,12 @@
 
 | # | Finding | Implementer response | Reviewer's final call | Fixed at |
 |---|---|---|---|---|
-| R1-1 | stale pin names (3) | — | — | — |
-| R1-2 | flash-lifetime coupling | — | — | — |
-| R1-3 | oracle growth (DEBUG) | — | — | — |
-| R1-4 | mode-switch inference doc | — | — | — |
-| R1-5 | pages-form residual, recorded | — | — | — |
-| R1-6 | `articleArrival` doc word | — | — | — |
+| R1-1 | stale pin names (3 → 4) | AGREE + a fourth pin (R-3's) + whole-pin naming caveats + the record-table citation rule | CONFIRMED, WIDENED to four; the implementer's names adopted (one broadened a word for the bloom arm) | pending |
+| R1-2 | flash-lifetime coupling | AGREE; site :880; prefers `ArrivalFlash.stateLifetime` with the 0.1 margin folded in | CONFIRMED; the named constant built as suggested | pending |
+| R1-3 | oracle growth (DEBUG) | AGREE; bounding is pin-safe (every reader resets first); trim `flashes` by start time, clear `seen` on overflow | CONFIRMED; bounded exactly so | pending |
+| R1-4 | mode-switch inference doc | AGREE; the condition IS #98(a)'s own trigger set, widened only by the carry (a mode-switch fact by construction) — say that, not a new exhaustiveness argument; one clause to weigh for #158 | CONFIRMED as doc-only; the implementer's framing ADOPTED over mine (it is the better description); the weighed clause ACCEPTED into #158 (6) | pending |
+| R1-5 | pages-form residual, recorded | AGREE; HONEST BOUNDARY 10 or row 94's re-word; owner the landing family | CONFIRMED; recorded as HONEST BOUNDARY 10 in the U8 RECORD (the close may still fold it into row 94's re-word) | pending |
+| R1-6 | `articleArrival` doc word | AGREE; a teardown nil would also be safe (both callers are teardown) but leans to the doc word | CONFIRMED; the doc word (no code — the lean is right: the brain dies with its board, and zero code moves) | pending |
 
 ---
 
@@ -87,3 +87,56 @@
 
 **State: handed to the reviewer for FINAL CALLS + its own fix implementation; the implementer's
 sanity pass follows.**
+
+---
+
+## THE REVIEWER'S FINAL CALLS (Fable, 2026-09-28 — all six CONFIRMED, zero dismissed; fixes implemented in this session, per piece, below)
+
+- **R1-1 — CONFIRMED, WIDENED BY ONE.** The implementer's fourth pin is real (verified against the
+  window's own diff: `theEntryRingsOwnRoadAlsoComesBackWhereSheLeftIt`'s new assertions are
+  restore-ran + her-block-REVEALED + aims > 0 — the name's "comes back where she left it" is no
+  longer the pin's point) — adopted. Its naming caveats are both right and both adopted:
+  `theTopStandDownHoldsInTheAppsOrderToo` is named for the WHOLE pin — I broadened the suggestion
+  one word (`aTopMemoryInTheAppsOrderKeepsEveryLandingAlive`, not `…EveryEntryLandingAlive`)
+  because the fourth arm's landing is a BLOOM, not an entry, and it too stays alive;
+  `aPageLeftAtRestComesBackAtRestThenRevealsHerBlock` keeps the still-true half exactly as argued.
+  The four renames land with the OLD name kept in each pin's doc comment as the re-arm's audit
+  trail; the U8 RECORD's re-arm table (rows R-3/R-6/R-7/R-9) updated to "old → new" in the same
+  commit; older records citing old names stay as history (`18lb-u2-ladder-round1.md:148`,
+  `use-report-round-2026-09-12.md`, `phase-17-standing-fixes.md:1528`). No pin owed: a name has no
+  red-on-old — cleanliness class, justification in lieu (the round-1 finding's).
+- **R1-2 — CONFIRMED (NIT).** The implementer's shape is better than my two options and is built:
+  `ArrivalFlash.stateLifetime` with the `+ 0.1` clear margin folded in (one home for the margin
+  too), consumed at the three sites (`TakesArticleScroll.swift:239`, `ReadEditPane.swift:145`,
+  `ReadModeView.swift:880` — its site correction accepted). The reduce-motion-invariance the
+  constant leans on stays pinned by `reduceMotionIsTheDiscreetUnanimatedVariant`.
+- **R1-3 — CONFIRMED (NIT).** Bounded exactly per its pin-safety note (verified: every
+  oracle-reading pin calls `reset()` first): `flashes` trims oldest past the cap by the start time
+  its keys already carry; `seen` (orderless) clears on overflow. DEBUG-only; the walk probe's
+  per-run counts are unaffected at walk scale (a scenario draws single-digit flashes).
+- **R1-4 — CONFIRMED as doc-only, and the implementer's framing ADOPTED OVER MINE.** Its reading
+  is the better one: the park's condition is #98(a)'s own trigger set three lines above, widened
+  only by `pendingCarriedPlacement` (a mode-switch fact by construction, 13u2b UNIT 3) — so the
+  doc line says "the same trigger set as #98(a)'s reveal", not a new exhaustiveness claim. The
+  weighed clause is ACCEPTED into QUESTIONS #158 (6) as one sentence: if a non-mode-switch road
+  into #98(a)'s reveal exists (neither of us found one), it would now band and flash too — hers
+  to weigh with "what flashes", not a bug.
+- **R1-5 — CONFIRMED.** Recorded as HONEST BOUNDARY 10 in the U8 RECORD (the record is the unit's
+  truth; the closeout may still fold it into KnownIssues row 94's re-word — the owner is the
+  landing family, row 12's class, exactly as the implementer says).
+- **R1-6 — CONFIRMED; the doc-word lean adopted.** Both callers of `endArticleLandingWatch()`
+  being teardown makes the nil safe too, but the doc word is equally honest and moves zero code —
+  the right trade for a NIT ("…and it dies with its board").
+
+### The fix record (per piece; every commit pathspec-staged, pushed, no trailers)
+
+| Piece | Finding | Commit | What landed |
+|---|---|---|---|
+| A | R1-1 | pending | four pin renames (old names in the doc comments) + two in-file cross-refs + the U8 RECORD re-arm table rows R-3/R-6/R-7/R-9 to "old → new" |
+| B | R1-2 | pending | `ArrivalFlash.stateLifetime` (margin folded in) + the three call sites |
+| C | R1-3 | pending | `ArrivalFlashOracle` bounded (trim `flashes` by start time; clear `seen` on overflow) |
+| D | R1-4 | pending | the #98(a)-trigger-set doc line at the park + the one #158 (6) sentence |
+| E | R1-5 | pending | HONEST BOUNDARY 10 in the U8 RECORD |
+| F | R1-6 | pending | the `articleArrival` doc word |
+
+**Suite results (run at the end of the fix pass): pending.**
