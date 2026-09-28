@@ -243,8 +243,6 @@ struct IndexTierMetricsTests {
         // gap it follows, then one line of the voice) — REPORTED, since the
         // rider's (b) it is no longer an allowance: the block below must not
         // move by it (or by anything).
-        // gap it follows, then one line of the voice (the replica's own
-        // one-line height).
         let oneLine = ReadTierClickPlace.height(of: "x", columnWidth: 400, font: font)
         let blankLine = IndexProseColumn.lines.paragraphGap + oneLine
         let expectedShift: CGFloat = 0
