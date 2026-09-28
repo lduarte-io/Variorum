@@ -1010,8 +1010,12 @@ struct TakesBoardView: View {
             .overlay(alignment: .topTrailing) {
                 if !(model.projection.fanStyle == .marginGrid && bloomed),
                    let count = model.find.offScopeCount(forBlock: slot.blockID) {
+                    // A ZERO-WIDTH frame at the cell's trailing edge, its content
+                    // leading-aligned: the marker can only run out into the
+                    // margin. (An `alignmentGuide(.trailing)` here did not take —
+                    // the walk found the marker over the prose, pinned red.)
                     TakesFindOffScopeMarker(blockID: slot.blockID, count: count, tokens: tokens)
-                        .alignmentGuide(.trailing) { $0[.leading] }
+                        .frame(width: 0, alignment: .leading)
                         .offset(x: 12, y: 24)
                 }
             }
