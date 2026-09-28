@@ -372,6 +372,70 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
   existing `SampleLibrarySeeder`/`SeededBookRestore` machinery exactly like Sherlock, with its
   own Help ▸ Restore door — findable on the shelf and deletable as a set.
 
+## U5 BRIEF (session 1 — the tiers' one metrics vocabulary; written by the orchestrator 2026-09-27)
+
+You are the `opus-implementer` for **18l-c UNIT U5**. One acceptance unit: her report — clicking
+onto text to edit in Index mode (the book Index AND the note's Read ▸ edit) makes the whitespace
+around it move (*"in the individual note … some words get compressed and there's different
+spacing, in the book mode a larger space seems to be added"*). This is the 18l U0 sweep's S3,
+measured and owned; her report answers the taste call it was held for. **The fix is the row's own
+remedy built as a CONSOLIDATION** (the architecture answer above): ONE metrics vocabulary that
+the read tier, the click replica and the live pane's paragraph style all draw from, scoped to the
+two index-like hosts.
+
+**Read first, in this order (reading is never delegated):** (1) THIS file whole — HER KICKOFF
+MESSAGE, THE ARCHITECTURE ANSWER, BINDING PRINCIPLES, CAST & DISCIPLINE, BASELINES, ENVIRONMENT
+TRAPS (they bind you verbatim — note the author may be AT THE MACHINE: harness-only until the
+per-step guard clears or the orchestrator relays her all-clear; the walk may need to wait),
+THE LEDGER row 1, THE SITTING RECORD. (2) The 18l record
+(`notes/plans/phase-18l-navigation-feel.md`): the **U0 RECORD whole** + its orchestrator
+acceptance (the S3 finding's mechanism and measurements, the replica machinery, the constants U0
+named) and `notes/plans/18l-u0-ladder-round1.md`. (3) `notes/KnownIssuesAndTechDebt.md` row 89 as
+re-owned (+ rows 95/96, the pane-stability neighbours your diff must not disturb). (4)
+`notes/TEXTKIT2_NOTES.md` IN FULL (editor seam — mandatory; §3's 27.0 findings are your era).
+(5) The code end to end: `Surface/ReadTierClickPlace.swift` (the named constants — `lineSpacing`
+4, the 8-pt paragraph gap — and the off-screen replica), `Shared/FlowParagraph.swift`,
+`Features/BookView/BookIndexView.swift` (the read-tier rows + the pane host),
+`Features/ReadMode/ReadEditPane.swift` + `Features/TOC/BlockTOCView.swift` (the note tier),
+`Surface/PaneSurface.swift` and where the live pane's paragraph style / typography is composed
+(trace it yourself), and the visual harness's `index-click` / `readedit-click` scenarios
+(`Tools/VisualWalk/` — the S3-labelled XFAIL rows).
+
+**The unit, in order:** (1) TRACE both her shapes first — measure the tier-vs-pane metric delta
+per host (line spacing, paragraph gap, any host padding asymmetry — 13u2 B aligned the leading x
+only); her two shapes (compression in the note, added space in the book) must fall out of the
+trace or it is not done. (2) THE CONSOLIDATION: promote the U0-named constants to ONE shared
+metrics vocabulary (one named home in the surface layer), consumed by the read tier's rendering,
+the click replica (byte-same numbers, now from the one home), AND the live pane's paragraph
+style WHERE HOSTED by the two index-like tiers — a host parameter through the pane's API, never
+a global; Takes cards, lenses, Compare and snippets byte-unchanged, PINNED so. (3) The U0
+click-fidelity pins (`IndexClickCaretTests`, the replica-fidelity arm) ride unmodified; a pin
+that asserts the tiers' DIVERGENCE is a flag to the orchestrator, never a silent edit. (4) New
+pin: the pane's per-line geometry under the two hosts matches the read tier's within tolerance,
+both voices; red-on-old verified by behavioural revert. (5) The harness: the four S3 XFAILs flip
+to plain PASS (labels removed) — the round's built-in red-on-old; run the seeded suite, both
+voices. (6) WALK (both voices, only when the machine is author-free per the traps): her exact
+screenshot shapes — Sherlock ▸ Index ▸ a mid-paragraph click in *Blue Carbuncle* (the
+surrounding whitespace must not move; capture before/after), a note's Read ▸ edit click, a long
+block, a block above the blank separator; and one marker-bearing line — the KNOWN boundary
+(content changes on going live are the held 18e's): record what it looks like, do not chase it.
+(7) Honest boundaries stated in your record, with numbers. **ATTRIBUTION: pre-existing** (the
+row's line history; the mechanism is macOS-independent — no bisect owed). **Product fence: the
+metric VALUES are the read tier's shipped ones — changing the numbers themselves is hers, not
+yours; if the trace argues the pane cannot adopt them without a visible cost elsewhere, STOP and
+report the fork.**
+
+**Discipline (the resiliency protocol, restated — it binds you):** commit per coherent piece,
+push after EVERY commit, NO trailers; append a `## U5 RECORD` to THIS file with LIVE STATUS from
+your FIRST commit (per-piece: DONE (hash) / IN-PROGRESS / NOT-STARTED; unverified claims
+PENDING); records before final verification; synchronous foreground waits only (poll the log);
+NEVER spawn subagents; tests at the END (the touched Mac suites + `TutorialWalkTests`,
+suite-level `-only-testing`); pathspec-limited staging. PROVISIONAL-and-continue for non-gating
+ambiguity (log to `notes/QUESTIONS.md`); STOP and report for gating ambiguity, product-behavior
+invention, anything wanting `Sources/VariorumCore/Sync/`, and every author-only call. Your diff
+is editor-seam by definition → a FABLE cold review follows; your self-assessment closes your
+record.
+
 ## LIVE STATUS (orchestrator; flipped per piece)
 
 | Piece | Status |
