@@ -776,3 +776,31 @@ stored blank line is the part of her book-mode report that remains — honest, p
 invented around, but it is what she will still see on Sherlock; (d) the walk's line tops come from capture ink, so the
 caret bar reads as a −2.5 / −4.5 pt "shift" on the clicked line — explained per row, and the probe's caret box
 agrees. **U5 — DONE (implementer); the Fable cold review follows.**
+
+### U5 — ORCHESTRATOR ACCEPTANCE (the hands-on walk, 2026-09-27 evening; the verify-never-trust pass)
+
+**Claims verified against git before the walk:** tree clean, `main` == `origin/main` at
+`097e356b`, every reported commit present and pushed, the record's LIVE STATUS fully flipped
+with hashes and red counts, QUESTIONS #154 filed, the closing log ends `** TEST SUCCEEDED **`
+(330/49, 0 skipped). The walk build verified as U5's by symbol (the `vis-walk` Debug dylib
+carries `ProseLineMetrics`, binary stamped tonight 20:09).
+
+**The walk** (dev-store Debug, zero real-store instances, the author away — HID idle confirmed
+before every step through `guard.sh`; captures `notes/plans/18l-screens/18lc-u5/orch-walk/`,
+gitignored):
+- **Book Index PASS.** Sherlock ▸ Index ▸ *A Scandal in Bohemia* ▸ a click mid-paragraph on the
+  17-line first block: before/after captures show EVERY line of the clicked block pixel-stable
+  (same y, same wrap, same line breaks), no compression, no added space around the text; the
+  paragraph below moves down by exactly the stored blank line (~25 pt, Terminal) — #154's
+  documented residue and nothing else. The italic `_the_` marker reveal is the recorded 18e
+  boundary; it did not move the line.
+- **Note Read ▸ edit PASS.** The same note's edit face (her "individual note index") ▸ a click
+  mid-paragraph on block 02: line-for-line identical positions and wrap before/after; block 03
+  moves by exactly the blank line. Her "words get compressed / different spacing" shape is gone
+  in my hands.
+- **R-18l-1 seen working en route:** the note's first open this session showed the START.
+
+**Acceptance verdict: U5 BUILT + DOUBLE-WALKED (implementer both voices; orchestrator's own
+hands).** Ledger row 1 flips to BUILT+WALKED — the Fable cold review is the remaining gate.
+#154 goes to her next (she is reachable tonight); the reviewer spawns after her answer so the
+ladder reviews the final shape.
