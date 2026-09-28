@@ -42,7 +42,16 @@ private func withJekyllWorld<T>(
         }
         $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 42))
     } operation: { @MainActor in
-        try await body(AppSession(database: db), db)
+        let session = AppSession(database: db)
+        // The U6 ladder's F2 — BOTH mark leaves injected (the
+        // `EncryptionBookDoorTests` / `TutorialWalkTests` precedent, RUN A A2
+        // row 8's rule): the restore road reads and WRITES the session's
+        // per-book mark, and the production leaves reach this test host's own
+        // defaults domain. A pin that cares about the mark passes its own
+        // `loadMark`/`saveMark` to the seeder instead.
+        session.seededBookMarkIsSet = { _ in false }
+        session.markSeededBook = { _ in }
+        return try await body(session, db)
     }
 }
 
@@ -172,6 +181,10 @@ struct JekyllTakemaniaSeedTests {
         #expect(text.contains("Help \u{25B8} " + CapabilityRegistry.capability(.restoreJekyllBook).verb),
                 "(1) Restore for the full experience — the door's own name")
         #expect(text.contains("can appear twice"), "(2) the two-devices note")
+        // The U6 ladder's F3: removing a spare copy means its NOTES too —
+        // deleting a book keeps its notes (RecoveryCopy.deleteBookKeepsItsNotes).
+        #expect(text.contains("delete its notes, then the book"))
+        #expect(text.contains("deleting a book on its own keeps its notes"))
         #expect(text.contains("\u{201C}\(SampleLibraryJekyllBook.tagName)\u{201D}"), "the tag sentence")
         #expect(!text.contains("\n\n"), "no stored blank lines (design call 4)")
     }
@@ -373,6 +386,82 @@ struct JekyllTakemaniaSeedTests {
             let again = try await SeededBookRestore.restore(session: session, book: jekyll)
             #expect(again == .alreadyWhole(readingID: bookID))
         }
+    }
+
+    /// **The U6 ladder's F1, pinned — a FINISHED book refuses, and leaves the
+    /// Pool empty.** Restore into a book that refuses new notes (finished, or
+    /// at its note cap) must refuse BEFORE minting. The create-then-add mint
+    /// left the working-titled note bookless and tagged on every press —
+    /// invisible to the heal (it reads book members) and to the stray scan
+    /// (it reads the real title) — so each "try again" added one more.
+    ///
+    /// *Red on the old code:* two presses → two working-titled orphans in the
+    /// Pool. Verified by reverting the fix.
+    @Test("Restore into a FINISHED book refuses before minting — the Pool stays empty, press after press")
+    func restoreIntoAFinishedBookLeavesNoOrphans() async throws {
+        try await withJekyllWorld { session, db in
+            let mark = JekyllMark()
+            guard case .seeded(let bookID, _) = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, book: jekyll, loadMark: mark.load, saveMark: mark.save)
+            else {
+                Issue.record("expected a seed")
+                return
+            }
+            let takemania = try await db.read { db in
+                try #require(try Queries.assembleReading(db, readingID: bookID)
+                    .first { $0.title == Takemania.title }).postID
+            }
+            try await session.runner.run { ops in
+                try ops.deleteContainer(takemania)
+                try ops.lockReading(bookID)
+            }
+            for press in 1...2 {
+                do {
+                    _ = try await SeededBookRestore.restore(session: session, book: jekyll)
+                    Issue.record("press \(press): a finished book must refuse the restore")
+                } catch {
+                    #expect(error as? OperationError == .lockedReading(id: bookID),
+                            "press \(press) refuses with the lock")
+                    #expect(SeededBookRestore.failureLine(for: error).contains("finished"),
+                            "the line names the lock — never a 'try again' that cannot succeed")
+                }
+            }
+            let (pool, workingTitled) = try await db.read { db in
+                (try Queries.poolPosts(db, limit: 100).map(\.postID),
+                 try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM container WHERE title = ? AND deleted_at IS NULL",
+                    arguments: [Takemania.workingTitle]) ?? 0)
+            }
+            #expect(pool.isEmpty, "the Pool stays empty: \(pool.count) orphan(s)")
+            #expect(workingTitled == 0, "nothing was minted")
+            #expect(session.undoStack.depth == 0)
+        }
+    }
+
+    /// **The U6 ladder's F2, pinned — a headless run never leaves this
+    /// book's mark in the test host's defaults.** The test host IS the Debug
+    /// app (`io.lduarte.Variorum.debug`), and the restore road records the
+    /// reader's decision through the session's `markSeededBook` leaf; a
+    /// headless `AppSession` defaults to the `.real` variant, so an uninjected
+    /// leaf writes `SampleLibrarySeeded.Variorum.jekyll-and-hyde` into a
+    /// domain the real app family shares. Nothing but a headless run ever
+    /// writes the `.real` key in the DEBUG domain (the Debug app's own
+    /// bootstrap is the `.dev` variant), so after two restores it must be
+    /// absent — and it reds for ANY headless road that forgets its leaves.
+    ///
+    /// *Red on the old code:* the world without the injection → the key is
+    /// present after the first restore. Verified by reverting the fix (the
+    /// stray it wrote was then deleted by its exact name).
+    @Test("Headless restores never write this machine's mark for the book")
+    func headlessRestoresNeverWriteTheRealMark() async throws {
+        let key = SampleLibrarySeeder.seededDefaultsKey(for: .real, book: jekyll)
+        #expect(key == "SampleLibrarySeeded.Variorum.jekyll-and-hyde")
+        try await withJekyllWorld { session, _ in
+            _ = try await SeededBookRestore.restore(session: session, book: jekyll)
+            _ = try await SeededBookRestore.restore(session: session, book: jekyll)
+        }
+        #expect(UserDefaults.standard.object(forKey: key) == nil,
+                "a headless restore wrote \(key) into the test host's defaults")
     }
 
     /// F10 for the scripted note: deleting the BOOK keeps its notes, and the
