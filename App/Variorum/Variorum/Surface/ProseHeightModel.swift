@@ -102,6 +102,12 @@ nonisolated enum ProseHeightModel {
     /// added — which is the sample library's shape (`text\n`) exactly, and
     /// changes nothing for a block with no newline (her own notes' usual
     /// shape). A measured row replaces the estimate as soon as it draws.
+    /// The error's both directions, named (18l-c U5 ladder R1, F3): a block
+    /// over N ≥ 2 trailing blanks reserves about (N−1)/2 lines SHORT — the
+    /// extra newlines count as paragraphs, each adding its half-line tail,
+    /// not as full blank lines (zero such blocks in the sample library, all
+    /// twelve stories measured at the rider) — and a no-trailing-newline
+    /// multi-paragraph block about half a line LONG.
     static func shownBlankLines(newlines: Int, metrics: Metrics) -> Int {
         metrics.blankLines == .shown && newlines >= 1 ? 1 : 0
     }

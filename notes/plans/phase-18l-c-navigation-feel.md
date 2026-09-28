@@ -918,7 +918,11 @@ exactly these two hosts (one line + one gap per Sherlock block, ~5–6k pt per s
 3. **The height model's blank term is an approximation, stated at the code:** the extent carries a newline COUNT,
    so a block with a newline is modelled as its old paragraphs plus ONE drawn blank line — exact for the sample
    library's shape (`text\n`), unchanged for her own notes (no newline), off by about half a line for a block with
-   internal newlines and no trailing one (a measured row replaces the estimate as soon as it draws).
+   internal newlines and no trailing one (a measured row replaces the estimate as soon as it draws). *[Amended at
+   the ladder (R1 F3, 2026-09-28, the reviewer's finding with the implementer's magnitude correction verified by
+   arithmetic): the OTHER direction named — a block over N ≥ 2 trailing blanks reserves about (N−1)/2 lines SHORT
+   (the extra newlines count as paragraphs, each with its half-line tail, not as full blank lines); zero such
+   blocks in the sample library. The clause now lives at `ProseHeightModel.shownBlankLines`' doc.]*
 4. **A whitespace-only stored line** (`"   "`) now draws as its spaces (one line) where the tier folded it — display
    == stored, the ruling's letter; rare.
 5. Markers (the held 18e) — unchanged by the rider.
