@@ -451,6 +451,17 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
     declined with the ruling (a door you must find to fix being lost is more machinery than
     not getting lost). **Built at U8 — its scope grows to three halves of ONE design: where a
     mode switch lands (this rule) · inside what band (U8b) · shown how (U8a's flash).**
+    **CONFIRMED FINAL by her after a deliberate second look (2026-09-27, in-session — she
+    paused the relay, asked for the honest product case both ways, and then ruled, verbatim):
+    *"agreed, caret anchors the editing modes, read carries the page, no button."* The
+    orchestrator's case as given: the independence only half-exists today (Write is already
+    caret-anchored, #116(c)); the divergence survives only look-don't-touch round trips (any
+    edit re-anchors under 17q's own rule); two-places-at-once is the takes panel's / Compare's
+    job, not mode round-tripping's; the convention (Word's view switching) and the two-line
+    doctrine — open → the page, switch → the caret — argue the same way; and the ruling is the
+    reversible-cheap choice (the memory machinery survives for re-opens, so re-ranking on use
+    evidence is one line, while a shipped button is permanent furniture). NOT PROVISIONAL —
+    a settled author ruling.**
   - **#150(d) RATIFIED as built** — a page left resting in the empty room below the last line
     re-opens at the note's END (its last line at the top); **(e) RATIFIED as built** — a visit
     that marked no place re-opens at the START. **(c) stands as built** (every door into an
