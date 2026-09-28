@@ -1592,6 +1592,29 @@ orchestrator, never landed by you). PROVISIONAL-and-continue per CLAUDE.md; anyt
 the core stops and reports. Hand back to the orchestrator when the record is DONE; the
 FABLE cold review follows (editor seam).
 
+## U8 RECORD (implementer: `opus-implementer`, 2026-09-28)
+
+**NOT DONE (first line):** PENDING — the unit is in flight; this line is rewritten at the close.
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | Reading (the brief's list, in order, own context) | DONE — this file: her kickoff (items 3 + 4), P-1…P-9, THE SITTING RECORD whole (R-18l-13 + the #150/#151 sitting), the roster's U8 entry, ENVIRONMENT TRAPS, THE LEDGER rows 4/5/5b/6/7, the U7 RECORD (LEDGER ROW 7, HONEST BOUNDARIES 8, the record's mold) + the U5 RECORD's mold, THE U8 BRIEF; `SessionResiliencyProtocol.md` whole; `TEXTKIT2_NOTES.md` whole; the code — `TakesArticleScroll` whole (landing + restore halves), `TakesChoreographer` whole, `TakesViewModel` (init, adopt, teardown, focus + the doors, the article forwards, `landAuthorityFocus`), `TakesBoardView` (the article column, the landing spend, the washed cell, the typewriter room), `EditorRouter` whole, `CommandRouter` (registerDetail, the opening, the carry), `LandingAuthority` + `LandingAim` whole, `ViewportCarry` whole, `EditorViewModel`'s arrival + the settle hop (reveal, anchor, carry), `JumpPrimitive` whole, `BlockDecor` (the overlay controller — the selection/indicator faces), `ReadModeView` (the seed + the carry + the calm page's landing), `ReadEditPane` whole, `BookIndexEditModel.takePendingLiveBlock`'s road via #153, `AppearanceQueries` + `Operations+Appearance` + `Enums.ReceiptStyle` + `ThemeStore` + `AppSettingsView` (General/Editor) + `SettingsShape`'s catalog; KnownIssues rows 94 + 98; QUESTIONS #116, #150, #151, #152, #153, #157; the pins: `TakesFindBoardTests` (both named re-arms), `TakesArticleScrollTests`' R-Q20/R-Q21 family, `TakesArticleWatchTests`' stand-down pins, `ModeSwitchCarryTests` |
+| 2 | The trace + the design decisions (below) | IN PROGRESS |
+| 3 | (0) THE CARET RULE — the entry landing never stands down; the old-outranking pins re-armed AS THE RULED CHANGE, each named | NOT STARTED |
+| 4 | The flash's SETTING (`arrival_flash`, the ONE `Sources/` touch — its read in Queries + its write through the existing settings road) + the face in Settings | NOT STARTED |
+| 5 | (a) THE FLASH — the brain (named constants, Reduce Motion) + the faces (Write's caret line, Takes' block, Read's two faces) | NOT STARTED |
+| 6 | (b) THE COMFORT BAND — the brain (named constants) + Takes (row 94's MAY-take) + Write + Read | NOT STARTED |
+| 7 | Behavioural reverts, NAMED BEFORE THEY RUN | NOT STARTED |
+| 8 | Walk (both voices, takemania) + the VisualWalk suite as regression cover + a scenario row for the flash/band | NOT STARTED |
+| 9 | Closing runs (touched suites + Tutorial + core filter for the setting) | NOT STARTED |
+| 10 | Self-assessment | NOT STARTED |
+
+- Deaths / resumes: none.
+- Reverts in flight: none.
+- Machine at start (2026-09-28): zero `Variorum.app` instances (pgrep, by path), HID idle 1322 s — the author away (her overnight authorization).
+
 ## ORCHESTRATOR RESUME MAP (written 2026-09-28 at her compaction warning — the transcript-proof state; a post-compaction orchestrator re-orients from THIS section + the ledger + LIVE STATUS, verifying against git, never trusting)
 
 **Seat:** Fable `/architect-phase 18l-c` orchestrator (the session that took her kickoff). Her
