@@ -453,8 +453,10 @@ struct TakesArticleWatchTests {
     /// any step (`articleLanding == nil`), so it was never handed to the watch
     /// and no `LAND` was told. NEW: it no longer stands down — it is WATCHED
     /// from its first decided step (`LAND`) like every other landing, and it
-    /// reveals her block. RED on the pre-U8 tree: no `LAND`.
-    @Test func aStoodDownEntryLandingIsNeverWatched() async throws {
+    /// reveals her block. RED on the pre-U8 tree: no `LAND`. (Named
+    /// `aStoodDownEntryLandingIsNeverWatched` until the U8 ladder's R1-1
+    /// rename — the old name asserted the retired contract.)
+    @Test func theEntryLandingIsWatchedNeverStoodDown() async throws {
         #if DEBUG
         try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
@@ -658,7 +660,7 @@ struct TakesArticleWatchTests {
     /// act. RED on the U2 tree: nothing filed. (Doc only, 18l-c U8: the
     /// R-Q21 stand-down this line used to exempt is retired by R-18l-13 — an
     /// entry landing is now always asked of the page and filed like the rest;
-    /// `aStoodDownEntryLandingIsNeverWatched` is re-armed to say so.)
+    /// `theEntryLandingIsWatchedNeverStoodDown` is re-armed to say so.)
     @Test func aLandingThatEndsBeforeItsFirstStepIsFiledNotSilent() {
         #if DEBUG
         let (byGesture, _, _) = bloomOverAPendingRestore()

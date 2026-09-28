@@ -1306,8 +1306,11 @@ struct TakesArticleScrollTests {
     /// left comes back first — the memory PLACES the page), and the entry landing
     /// then REVEALS her block, because a mode's private scroll memory never
     /// outranks a mode switch — her block is on screen, its row built, its take
-    /// live. RED on the pre-U8 tree: her block off the page.
-    @Test func theEntryRingsOwnRoadAlsoComesBackWhereSheLeftIt() async throws {
+    /// live. RED on the pre-U8 tree: her block off the page. (Named
+    /// `theEntryRingsOwnRoadAlsoComesBackWhereSheLeftIt` until the U8 ladder's
+    /// R1-1 rename — the page no longer simply ends where she left it when her
+    /// block is off it.)
+    @Test func theEntryRingsOwnRoadComesBackThenRevealsHerBlock() async throws {
         try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
             router.forgetCurrentBlock(for: fixture.postID)
@@ -2073,8 +2076,12 @@ struct TakesArticleScrollTests {
     /// below is byte-unchanged), but its same-block arm no longer STANDS the
     /// entry landing DOWN. OLD: `same.articleLanding == nil`. NEW: the landing
     /// lives — at a page left at rest it reveals her block (the mounted twin is
-    /// `aPageLeftAtRestComesBackAtRestOnTheAppsOrder`, re-armed with it).
-    @Test func theTopStandDownHoldsInTheAppsOrderToo() {
+    /// `aPageLeftAtRestComesBackAtRestThenRevealsHerBlock`, re-armed with it).
+    /// (Named `theTopStandDownHoldsInTheAppsOrderToo` until the U8 ladder's
+    /// R1-1 rename — the stand-down is retired; the new name covers all four
+    /// arms: the same-block entry, the moved-block win, the first entry and
+    /// the bloom each keep their landing alive at a TOP memory.)
+    @Test func aTopMemoryInTheAppsOrderKeepsEveryLandingAlive() {
         // The app's order at a TOP memory, the SAME block: R-18l-13 — it lives.
         let same = freshBoard("top-app-same", lastCurrentRow: "was-here")
         #expect(same.consumeArticleGeometry(
@@ -2127,8 +2134,10 @@ struct TakesArticleScrollTests {
     /// screen). NEW: the page left at rest is where the board starts (the TOP
     /// restore issues no scroll), and the entry landing then REVEALS her block
     /// — the caret anchors the editing modes. RED on the pre-U8 tree: her block
-    /// off the page.
-    @Test func aPageLeftAtRestComesBackAtRestOnTheAppsOrder() async throws {
+    /// off the page. (Named `aPageLeftAtRestComesBackAtRestOnTheAppsOrder`
+    /// until the U8 ladder's R1-1 rename — the at-rest half is still true and
+    /// the name keeps it; the reveal is the half the old name denied.)
+    @Test func aPageLeftAtRestComesBackAtRestThenRevealsHerBlock() async throws {
         try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
             router.forgetCurrentBlock(for: fixture.postID)
