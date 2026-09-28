@@ -198,22 +198,6 @@ struct TakesFindBoardTests {
         TakesFindPlan.ranges(of: needle, in: text)[occurrence]
     }
 
-    /// A synthesized trackpad scroll toward the page's top (the
-    /// `TypewriterRoomReachabilityTests` recipe) — her hand, as the scroll
-    /// view sees it. 18l-c U8.
-    private func wheelUp(in window: NSWindow) -> NSEvent? {
-        let deltaY = 400.0
-        guard let cg = CGEvent(
-            scrollWheelEvent2Source: nil, units: .pixel,
-            wheelCount: 1, wheel1: Int32(deltaY), wheel2: 0, wheel3: 0)
-        else { return nil }
-        cg.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)
-        cg.setDoubleValueField(.scrollWheelEventPointDeltaAxis1, value: deltaY)
-        cg.setIntegerValueField(.eventTargetUnixProcessID, value: Int64(getpid()))
-        _ = window
-        return NSEvent(cgEvent: cg)
-    }
-
     // MARK: - LEDGER ROW 7 — the trace, and the find's answer
 
     /// **LEDGER ROW 7 — road A, now CLOSED on the mode-switch door (18l-c U8,
@@ -312,6 +296,11 @@ struct TakesFindBoardTests {
             let landed = try #require(pane(target.variant, in: hosting),
                                       "the step's landing revealed block 40's row")
             let match = range(of: "kilimanjaro", in: landed.string)
+            // U8: the take is ALREADY live and on screen (R-18l-13 revealed it),
+            // so the loop above exits at once — the step reaches the pane by
+            // its request on the next render (U7's already-live road), which
+            // this waits for (bounded).
+            await settle(window, hosting, until: { landed.selectedRange() == match }, maxTurns: 20)
             #expect(isOnScreen(landed, article), "the match's row is on screen")
             #expect(landed.isEditable, "its take is LIVE")
             #expect(landed.selectedRange() == match, "with the match SELECTED")
@@ -350,10 +339,14 @@ struct TakesFindBoardTests {
     /// ring's row — road A), with the precondition `pane(block 40) == nil`.
     /// That road is GONE: the entry landing now reveals her block, so the same
     /// round trip BUILDS the pane — asserted PLAIN below (and this pin's own
-    /// designed red was U8's confirmation). NEW: the boundary is staged by the
-    /// road that REMAINS — the lazy column's general class — her scrolling far
-    /// from the live take while the bar is open, so the ring's row de-realizes
-    /// under the field that holds the keyboard; Esc then has no pane to reach.
+    /// designed red was U8's confirmation). NEW: the boundary's STATE — the
+    /// ring live on a take whose row the lazy column never built — is staged
+    /// directly through the N9 door (the door road A used), because the one
+    /// natural road that REMAINS into it (her scrolling the ring's row out of
+    /// the column while the bar holds the keyboard — the lazy column's general
+    /// class) is not drivable by this harness (measured at U8: a programmatic
+    /// clip scroll is undone by the bound `ScrollPosition`; a synthesized wheel
+    /// is not routed into SwiftUI's scroll view). Esc then has no pane to reach.
     @Test func escWithNoBuiltPaneForTheRingIsANamedBoundary() async throws {
         try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
@@ -403,18 +396,24 @@ struct TakesFindBoardTests {
             while model.articleLanding != nil, Date() < landingOverBy {
                 await settle(window, hosting, until: { false }, maxTurns: 2)
             }
-            // HER wheel, toward the top — a scroll the view sees as hers (a
-            // programmatic clip scroll is not: the bound `ScrollPosition`
-            // re-applies the landing's target, J1(c), and the live row stays).
-            for _ in 0..<40 where pane(target.variant, in: hosting) != nil {
-                if let wheel = wheelUp(in: window) { article.scrollWheel(with: wheel) }
-                await settle(window, hosting, until: { false }, maxTurns: 1)
-            }
-            await settle(window, hosting, until: { pane(target.variant, in: hosting) == nil },
-                         maxTurns: 30)
-            #expect(pane(target.variant, in: hosting) == nil,
-                    "precondition: scrolled far away, the ring's row de-realized — no pane for the live take")
-            #expect(model.isPaneLive(ring), "precondition: the authority still says LIVE")
+            // THE STATE, staged directly: the ring LIVE on a take whose row the
+            // lazy column has not built (block 56, far below the page). The one
+            // natural road left into it is her scrolling the ring's row out of
+            // the column — which this harness cannot drive (measured at U8: a
+            // programmatic clip scroll is undone by the bound `ScrollPosition`
+            // re-applying the landing's target, J1(c), and a synthesized wheel
+            // is not routed into SwiftUI's scroll view here) — so the ring is
+            // put there through the N9 door itself, the door road A used.
+            let far = fixture.blocks[55]
+            model.landAuthorityFocus(TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesMainColumnID,
+                blockID: far.block, variantID: far.variant))
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            let farRing = try #require(model.focusedPane, "precondition: the ring moved")
+            #expect(farRing.blockID == far.block && model.isPaneLive(farRing),
+                    "precondition: the authority says block 56's take is LIVE")
+            #expect(pane(far.variant, in: hosting) == nil,
+                    "precondition: the column never built block 56's row — no pane for the live take")
 
             // Esc — the hand-back has nowhere to land.
             model.find.close()
@@ -428,7 +427,7 @@ struct TakesFindBoardTests {
             }
             // The ruled half that HOLDS today, pinned plain: her place kept —
             // Esc did not move the page to the ring's row.
-            #expect(pane(target.variant, in: hosting) == nil,
+            #expect(pane(far.variant, in: hosting) == nil,
                     "Esc never moves the page (decision 1's 'her place kept')")
         }
     }

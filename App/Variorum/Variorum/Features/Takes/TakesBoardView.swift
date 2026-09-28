@@ -45,6 +45,8 @@ struct TakesBoardView: View {
     @State private var articleScroll = ScrollPosition()
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    /// 18l-c U8 (a): the arrival flash's discreet, unanimated variant.
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -673,7 +675,10 @@ struct TakesBoardView: View {
                 .frame(maxWidth: articleMeasure, alignment: .leading)
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, 24)
-                .padding(.vertical, 18)
+                // 18l-c U8: the article's resting top air is ONE named constant
+                // (KnownIssues row 94's sketch) — the comfort band's top edge
+                // reads the same number this padding draws.
+                .padding(.vertical, TakesArticleScroll.articleTopAir)
                 if !model.projection.slots.isEmpty {
                     typewriterRoom(viewport: proxy.size.height)
                 }
@@ -756,8 +761,10 @@ struct TakesBoardView: View {
             // 18l-b U2: the edge's anchor through the aim kind's ONE
             // vocabulary door (`ViewportCarry.anchor` — 0 the head, 1 the
             // foot): `UnitPoint(x: 0.5, y: 0)` / `(0.5, 1)`, exactly the
-            // `.top` / `.bottom` this line always passed.
-            column.scrollTo(rowID, anchor: LandingAim.MinimalReveal.anchor(aim))
+            // `.top` / `.bottom` this line always passed — for every kind but
+            // the mode switch's ENTRY, whose row rests at the comfort band's
+            // edge instead (18l-c U8 (b): `TakesArticleScroll.revealAnchor`).
+            column.scrollTo(rowID, anchor: model.board.article.revealAnchor(for: rowID, aim))
         case .wait, .done:
             break
         }
@@ -971,8 +978,26 @@ struct TakesBoardView: View {
             },
             onDiff: { diffPresentation = $0 })
             .padding(Self.articleCellPadding)
+            // 18l-c U8 (a): the mode switch's ARRIVAL FLASH on the block the
+            // entry landing put home — its fill directly behind the pane (in
+            // front of the changing-block wash), its border over the cell's
+            // edge below; nothing at all unless an arrival names this row.
+            .background {
+                if let flash = arrivalFlash(slot) {
+                    ArrivalFlashFace(
+                        part: .fill, startedAt: flash, plan: flashPlan, tokens: tokens,
+                        oracleKey: "takes|\(ObjectIdentifier(model.board.article))|\(slot.placementID)")
+                }
+            }
             .background(washed && markChangingBlock ? tokens.wash : Color.clear)
             .clipShape(RoundedRectangle(cornerRadius: 6))
+            .overlay {
+                if let flash = arrivalFlash(slot) {
+                    ArrivalFlashFace(
+                        part: .stroke, startedAt: flash, plan: flashPlan, tokens: tokens,
+                        oracleKey: "takes|\(ObjectIdentifier(model.board.article))|\(slot.placementID)")
+                }
+            }
             // 13e E3: a picked block SAYS it is picked (boundaries are
             // invisible at rest — a selection that shows nothing is the
             // silent-door class).
@@ -1019,6 +1044,23 @@ struct TakesBoardView: View {
                         .offset(x: 12, y: 24)
                 }
             }
+    }
+
+    /// **18l-c U8 (a): when the mode switch's arrival flash on this row began**
+    /// — nil unless the entry landing's arrival names this row AND her setting
+    /// has the flash on (R-18l-7: default ON, a switch to turn it off).
+    private func arrivalFlash(_ slot: Queries.RenderedBlock) -> Date? {
+        guard themeSettings.arrivalFlash,
+              let arrival = model.board.article.articleArrival,
+              arrival.placementID == slot.placementID
+        else { return nil }
+        return arrival.at
+    }
+
+    /// The flash's timing on this Mac right now — Reduce Motion's discreet,
+    /// unanimated variant when the system asks for it.
+    private var flashPlan: ArrivalFlash.Plan {
+        ArrivalFlash.plan(reduceMotion: reduceMotion)
     }
 
     /// STACK: takes stacked under the block. The card's text routes

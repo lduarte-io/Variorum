@@ -598,6 +598,7 @@ final class LandingAuthority {
         self.mayFinish = mayFinish
         corrections = 0
         contentMoves = 0
+        arrivalTold = false
         began = Date()
         lastDecision = Date()
         // The seed (see `tops`) — where the policy allows it (18l U1: a lazy
@@ -672,6 +673,19 @@ final class LandingAuthority {
     /// that reads `isPending` instead (the five before 18l-b U2).
     var onFinish: ((String, LandingOutcome) -> Void)?
 
+    /// **18l-c U8 — told ONCE per landing, the first time a quiet look finds
+    /// the target HOME** (within the policy's tolerance) — the landing has
+    /// ARRIVED, though its hold may not be over (the rows around it can still
+    /// be loading; the landing still settles or corrects by its own rules). The
+    /// arrival flash's cue: the moment a mode switch's landing has put the
+    /// target where it rests, on the settled geometry a quiet interval implies —
+    /// never a first frame (the placeholder class), and never a whole hold
+    /// later. A landing that settles without a look ever having seen it home
+    /// (a hold-only arrival) is told at its `settled` end. Nil on every surface
+    /// that does not ask — they run byte-unchanged.
+    var onArrived: ((String) -> Void)?
+    private var arrivalTold = false
+
     /// The surface is going away mid-landing — end it rather than letting its
     /// check re-arm against a dead proxy (ladder R2-12's class).
     ///
@@ -704,6 +718,14 @@ final class LandingAuthority {
     private func look() {
         guard let anchor else { return }
         let elapsed = Date().timeIntervalSince(began)
+        // 18l-c U8: the first quiet look that finds the target home tells the
+        // surface it has ARRIVED (once; `onArrived` — nil on the surfaces that
+        // do not ask, so nothing here runs for them).
+        if !arrivalTold, let top = lastTop, abs(top) <= policy.tolerance, let onArrived {
+            arrivalTold = true
+            onArrived(anchor)
+        }
+        guard self.anchor == anchor else { return }   // an arrival may start another landing
         switch LandingSettle.decide(
             top: lastTop, corrections: corrections, elapsed: elapsed,
             mayFinish: mayFinish(), policy: policy
@@ -763,11 +785,17 @@ final class LandingAuthority {
             Self.log.notice("\(line, privacy: .public)")
         }
         let ended = anchor
+        // 18l-c U8: a landing that SETTLES having never been seen home at a
+        // look (it arrived inside its hold with no look between) has arrived
+        // all the same — told here, before the finish, exactly once.
+        let arrivedUntold = outcome == .settled && !arrivalTold
+        arrivalTold = true
         check?.cancel()
         check = nil
         anchor = nil
         aim = nil
         mayFinish = { true }
+        if arrivedUntold, let ended { onArrived?(ended) }
         // 18l-b U2: last, with the authority already idle, so a surface
         // answering it may start the next landing at once.
         if let ended { onFinish?(ended, outcome) }

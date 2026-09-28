@@ -59,6 +59,7 @@
 //
 
 import CoreGraphics
+import SwiftUI
 import Foundation
 import Observation
 import VariorumCore
@@ -109,6 +110,92 @@ final class TakesArticleScroll {
         self.watch = LandingAuthority(policy: .takesArticle)
         #endif
         watch.onFinish = { [weak self] anchor, _ in self?.watchedLandingEnded(anchor) }
+        watch.onArrived = { [weak self] anchor in self?.watchedLandingArrived(anchor) }
+    }
+
+    // MARK: - 18l-c U8 — the mode switch's COMFORT BAND and ARRIVAL FLASH
+    //         (the ENTRY kind only — clicks, blooms and find steps keep R-Q1's
+    //         shipped reveal and never flash)
+
+    /// **THE ARTICLE'S RESTING TOP AIR — one named constant** (KnownIssues row
+    /// 94's remedy sketch: *"the head edge's reveal anchor consults the
+    /// column's resting top inset (one named constant)"*). The column's own
+    /// top padding (`TakesBoardView`'s article pads its rows by exactly this),
+    /// so row 1 at rest sits this far below the viewport's top — the 17p R1-1
+    /// fact that "the TOP is a place of its own". The comfort band's top edge.
+    nonisolated static let articleTopAir: CGFloat = 18
+
+    /// **The band an ENTRY (mode-switch) landing rests its row in** — the
+    /// article's resting top air above, `ComfortBand.bottomLines` of the base
+    /// font's line below (the typewriter room's own line — `TypewriterRoom`).
+    var entryBand: ComfortBand {
+        ComfortBand(
+            topAir: Self.articleTopAir,
+            lineHeight: TypewriterRoom.lineHeight(of: EditorDocument.baseFont))
+    }
+
+    /// Is the PENDING landing banded — a mode switch's entry?
+    private var landingIsBanded: Bool { articleLanding != nil && articleLandingKind == .entry }
+
+    /// The reveal DECISION for the pending landing: the band's for an entry,
+    /// R-Q1's for every other kind (byte-unchanged).
+    private func landingDecision(_ frame: CGRect?) -> ArticleReveal {
+        landingIsBanded
+            ? entryBand.revealDecision(rowFrame: frame, viewport: articleViewportHeight)
+            : Self.revealDecision(rowFrame: frame, viewportHeight: articleViewportHeight)
+    }
+
+    /// **The anchor a REVEAL hands `scrollTo`** — the view's one question at
+    /// the moment it performs a `.reveal` step. For an entry landing, the unit
+    /// point that rests the row at the band's edge (`ComfortBand
+    /// .revealAnchorY`) — the row's measured height when the column holds it,
+    /// else the realized rows' mean (the estimate a lazy column itself makes;
+    /// the watch corrects from quiet with the real frame). Every other kind —
+    /// and a row too tall for the band — keeps the shipped edge anchor.
+    func revealAnchor(for rowID: String, _ edge: ArticleRevealAim) -> UnitPoint {
+        guard landingIsBanded, articleLanding == rowID else {
+            return LandingAim.MinimalReveal.anchor(edge)
+        }
+        let height = articleRowFrames[rowID]?.height ?? meanRealizedRowHeight
+        guard let y = entryBand.revealAnchorY(
+            edge, rowHeight: height, viewport: articleViewportHeight)
+        else { return LandingAim.MinimalReveal.anchor(edge) }
+        return UnitPoint(x: 0.5, y: y)
+    }
+
+    /// The realized rows' mean height (0 when none — the band's anchor then
+    /// treats the row as short, and the watch corrects with its real frame).
+    private var meanRealizedRowHeight: CGFloat {
+        guard !articleRowFrames.isEmpty else { return 0 }
+        return articleRowFrames.values.reduce(0) { $0 + $1.height } / CGFloat(articleRowFrames.count)
+    }
+
+    /// **The mode switch's ARRIVAL — which row the entry landing put home, and
+    /// when** (18l-c U8 (a)). OBSERVED: the article cell for this row renders
+    /// the arrival flash from it (`ArrivalFlash`), sampling the pure curve
+    /// from `at`. Set once per entry landing, when the one authority's first
+    /// quiet look finds the row home (`LandingAuthority.onArrived`); cleared
+    /// when the flash is over, by a new landing, and at teardown. A landing her
+    /// hand ends before it arrives never flashes.
+    struct ArticleArrival: Equatable {
+        let placementID: String
+        let at: Date
+    }
+
+    private(set) var articleArrival: ArticleArrival?
+
+    /// The watch says the landing ARRIVED. Only an ENTRY landing — the mode
+    /// switch's — flashes; a bloom or a find step is her in-mode act (U7's
+    /// decision 9).
+    private func watchedLandingArrived(_ anchor: String) {
+        guard articleLanding == anchor, articleLandingKind == .entry else { return }
+        let arrival = ArticleArrival(placementID: anchor, at: Date())
+        articleArrival = arrival
+        let total = ArrivalFlash.plan(reduceMotion: false).total
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(total + 0.1))
+            if self?.articleArrival == arrival { self?.articleArrival = nil }
+        }
     }
 
     // MARK: - The article's landing (17o batch b, ledger row 8)
@@ -170,6 +257,8 @@ final class TakesArticleScroll {
         articleLandingAimsLeft = Self.articleLandingAttempts
         articleLandingAims = 0
         articleEntryRidesThrough = false
+        // 18l-c U8: a new landing ends any arrival flash still on screen.
+        if articleArrival != nil { articleArrival = nil }
         // **R-Q20 — THE LANDING WINS** (her 2026-09-13 ruling on J3), keyed
         // by R-Q21. A restore still aiming ends here, before it can move the
         // page: on the real board the geometry hook runs before the
@@ -590,7 +679,9 @@ final class TakesArticleScroll {
             // (`articleEntryRidesThrough`).
             if articleEntryRidesThrough { return .wait }
         }
-        if Self.revealDecision(rowFrame: frame, viewportHeight: articleViewportHeight) == .none {
+        // 18l-c U8 (b): an ENTRY landing's "home" is inside the comfort band;
+        // every other kind keeps R-Q1's (`landingDecision`).
+        if landingDecision(frame) == .none {
             return .wait   // on screen now; the watch settles it (or her hand ends it)
         }
         guard articleLandingAimsLeft > 0 else {
@@ -763,7 +854,17 @@ final class TakesArticleScroll {
     private func reportWatchedLanding(_ landing: String) {
         let sighting = LandingAim.Sighting(
             rowFrame: articleRowFrames[landing], viewportHeight: articleViewportHeight)
-        if let residual = LandingAim.residual(watch.policy.aim, sighting) {
+        // 18l-c U8 (b): an ENTRY landing converges to the comfort band (0
+        // anywhere inside it); every other kind to R-Q1's minimal reveal.
+        let banded = landingIsBanded && articleLanding == landing
+        let residual: CGFloat? = banded
+            ? sighting.rowFrame.flatMap { frame in
+                articleViewportHeight > 0
+                    ? entryBand.revealResidual(rowFrame: frame, viewport: articleViewportHeight)
+                    : nil
+            }
+            : LandingAim.residual(watch.policy.aim, sighting)
+        if let residual {
             watch.noteTop(landing, residual)
         } else {
             watch.nudge()
