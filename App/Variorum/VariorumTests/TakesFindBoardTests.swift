@@ -563,6 +563,34 @@ struct TakesFindBoardTests {
         }
     }
 
+    // MARK: - R1-N3 — a recount drops a stale "· wrapped"
+
+    /// **R1-N3 (the U7 ladder's round 1):** "· wrapped" describes the LAST
+    /// STEP; a recount that changes the list (a settle that moved a take's
+    /// text) or moves the current match drops it, so the count face never
+    /// keeps a stale wrap. RED on the old code (the flag survived every
+    /// recount — "1 of 4 · wrapped"), verified by behavioural revert.
+    @Test func aRecountThatChangesTheListDropsTheStaleWrappedWord() async throws {
+        try await withSession(blocks: 3) { session, fixture, db, _ in
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            model.find.open()
+            model.find.setQuery("prose")
+            #expect(model.find.countFace == "3 matches")
+            for _ in 0..<3 { model.find.next() }  // 1 of 3 → 2 of 3 → 3 of 3
+            model.find.next()                     // past the end: wraps
+            #expect(model.find.countFace == "1 of 3 · wrapped", "non-vacuity: the wrap said")
+
+            // A settle moves one take's text: the list changes, the wrap is stale.
+            try session.operations.autosave(
+                fixture.blocks[1].variant,
+                text: "Paragraph 2, rewritten prose and more prose.", charDelta: 20)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: fixture.postID) })
+            model.find.projectionChanged()
+            #expect(model.find.countFace == "1 of 4",
+                    "the recount re-anchored and DROPPED the stale '· wrapped'")
+        }
+    }
+
     // MARK: - P1 — a settle recounts only what moved
 
     @Test func aSettleRescansOnlyTheTakesWhoseTextMoved() async throws {

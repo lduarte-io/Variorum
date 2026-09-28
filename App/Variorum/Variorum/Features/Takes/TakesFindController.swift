@@ -350,6 +350,7 @@ final class TakesFindController {
             cacheQuery = ""
             if !matches.isEmpty { matches = [] }
             if current != nil { current = nil }
+            if wrapped { wrapped = false }  // R1-N3: no matches, no wrap story
             if !matchesByVariant.isEmpty { matchesByVariant = [:] }
             if !offScopeCounts.isEmpty { offScopeCounts = [:] }
             return
@@ -370,9 +371,16 @@ final class TakesFindController {
             return ranges
         }
         cache = kept
-        if found != matches { matches = found }
+        let listChanged = found != matches
+        if listChanged { matches = found }
         let anchored = keepingCurrent ? TakesFindPlan.reanchor(old, in: found) : nil
-        if anchored != current { current = anchored }
+        let currentMoved = anchored != current
+        if currentMoved { current = anchored }
+        // R1-N3 (the U7 ladder's round 1): "· wrapped" describes the LAST
+        // STEP. A recount that changes the list or moves the current match
+        // makes that description stale — drop it; an unchanged recount keeps
+        // the step's own words. (The copy itself stays #157 (2)'s.)
+        if wrapped, listChanged || currentMoved { wrapped = false }
         var byVariant: [String: [NSRange]] = [:]
         for match in found { byVariant[match.variantID, default: []].append(match.range) }
         if byVariant != matchesByVariant { matchesByVariant = byVariant }
