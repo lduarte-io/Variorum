@@ -1912,6 +1912,7 @@ in doubt.)
 7. **Read's page ends at its last row** (no typewriter room), so a mode switch landing Read on the note's LAST block cannot give it the band's bottom room — measured 26.7 of 34 pt in the first walk (`114955`); the band cannot make room the page does not have. Write and Takes have their rooms and are unaffected.
 8. **Read's carried top rests within 1 pt of the band's top edge, not on it** — 25.3–25.8 pt against the 26-pt `columnLead` in the walks (the carry is clamped in FRACTION space; the probe's tolerance is 1 pt). Sub-pixel-scale, recorded rather than chased.
 9. **The Takes second aim needs the row to report AT the shipped edge (±1 pt).** Where SwiftUI's aim of an unrealized row misses the edge by more — measured: the note's first block, aimed from REST, landed 6 pt above the page's top — the second aim declines and the watch's correction (a hop) is the fallback. The resting-page rule removes the one road measured (a reveal at rest); others would show as a hop, never a wrong resting place.
+10. **Read's PAGED form (`NotePagesView`) neither bands nor flashes a mode switch — and never carried** (the ladder's R1-5, a gap in this list owned at the round): the paged face consumes no `pageTarget`, so it has no landing machinery at all — a mode switch into Read while the pages form is remembered gets no carry, no band, no flash, exactly as it got no carry before U8. Pre-existing, not this unit's change; the owner is the landing family (row 12's class), and the close may fold it into KnownIssues row 94's re-word.
 
 ### NOTICED, NOT TOUCHED
 
