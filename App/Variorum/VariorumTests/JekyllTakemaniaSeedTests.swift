@@ -429,7 +429,10 @@ struct JekyllTakemaniaSeedTests {
             #expect(stopped.halfBuiltNoteIDs.count == 1)
             #expect(!stopped.presentTitles.contains("Henry Jekyll\u{2019}s Full Statement of the Case"),
                     "the stop also held back the chapter after takemania — the seed resumes it too")
-            let halfBuilt = try #require(stopped.halfBuiltNoteIDs.first)
+            // Not a `#require`: on the title-first shape the id is missing, and
+            // the rest of this pin must still run to show what follows — the
+            // mark set over a half-built takemania.
+            let halfBuilt = stopped.halfBuiltNoteIDs.first
             #expect(try await db.read { db in try Queries.poolPosts(db, limit: 100).isEmpty },
                     "even stopped, the note is a book member — never in the Pool")
 
@@ -444,13 +447,17 @@ struct JekyllTakemaniaSeedTests {
             #expect(minted == 2, "takemania, and the last chapter the stopped seed never reached")
             #expect(mark.value)
             try await db.read { db in
-                let trashed = try String.fetchOne(
-                    db, sql: "SELECT deleted_at FROM container WHERE id = ?", arguments: [halfBuilt])
-                #expect(trashed != nil, "the half-built note went to the Trash")
+                if let halfBuilt {
+                    let trashed = try String.fetchOne(
+                        db, sql: "SELECT deleted_at FROM container WHERE id = ?", arguments: [halfBuilt])
+                    #expect(trashed != nil, "the half-built note went to the Trash")
+                }
                 let entries = try Queries.assembleReading(db, readingID: bookID).compactMap(\.title)
                 #expect(entries.filter { $0 == Takemania.title }.count == 1)
                 #expect(!entries.contains(Takemania.workingTitle))
-                #expect(try Self.shape(db, bookID: bookID, now: Date()).fannedBlocks == 10, "and the new one is whole")
+                // The mark is set — so what it was set over must be WHOLE.
+                #expect(try Self.shape(db, bookID: bookID, now: Date()).fannedBlocks == 10,
+                        "the marked takemania is whole, never the half-built one")
             }
         }
     }
