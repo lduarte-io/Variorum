@@ -244,16 +244,16 @@ flips those four XFAILs to plain PASS. Tree at this kickoff: `main` == `origin/m
   including NAMED ones (`renameCommitPoint`), their dates spread so the history reads like weeks
   of work (the `\.date` dependency is injectable; Sherlock's period stamps are the precedent);
   reads like a real document, never a tutorial. Restorable and discoverable *"like the others"*:
-  the `SampleLibrarySeeder`/`SeededBookRestore` machinery + a Help ▸ Restore door. **Recorded
-  consideration the unit must decide (not silently):** the sample-library pristine-copy dedupe
-  (SyncSpec §7) classifies a copy with savepoints/extra takes as EDITED — a book born with
-  history is never dedupe-retired, so the two-device seed race Sherlock's dedupe nets is OPEN
-  for takemania. Options at the unit: seed it Mac-side only and record the residual beside
-  KnownIssues row 33 (owner 18a, the dedupe family — the lean; the sync gate already narrows the
-  race), or extend the dedupe (that is `Sync/` — STOP and hand it to the orchestrator per the
-  rider). `opus-reviewer` unless the diff drifts. **Runs second, deliberately: it hands U7 its
-  test fixture** (a search-in-takes needs a heavily-fanned note to be tested against, and hands
-  her a playground while U7/U8 build).
+  the `SampleLibrarySeeder`/`SeededBookRestore` machinery + a Help ▸ Restore door. **The dedupe
+  consideration is RULED — R-18l-12 (THE SITTING RECORD): a DISCLAIMER in the book's
+  description, not machinery.** The pristine-copy dedupe (SyncSpec §7) classifies a copy with
+  savepoints/extra takes as EDITED, so a book born with history is never auto-retired — and by
+  her ruling that stays SO: zero `Sync/`, zero dedupe extension; the book's front-matter note
+  carries the two-copies possibility, the ships-with-deleted/Leaving-blocks fact, and the
+  Restore-for-the-full-experience pointer (R-18l-12's three items; wording PROVISIONAL, hers to
+  polish). `opus-reviewer` unless the diff drifts onto the seam. **Runs second, deliberately:
+  it hands U7 its test fixture** (a search-in-takes needs a heavily-fanned note to be tested
+  against, and hands her a playground while U7/U8 build).
 - **U7 — SEARCH IN TAKES** (her ruling: *"I think that we should add a search in takes mode, yes
   that will be this phase"*; the round's phase-sized unit; **THE DESIGN BRIEF lands in this file
   and is her-visible BEFORE the unit builds** — her *"yes you can make a design brief if you have
@@ -339,7 +339,7 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
 | # | Item | Unit | Status |
 |---|---|---|---|
 | 1 | The Index tiers' metric shift on click-to-edit (her issue 1; KnownIssues row 89 / 18l U0 sweep S3 — the taste call her message answers; the harness XFAILs it ×4 every run) | U5 | open |
-| 2 | The takemania seeded note — real history through the quiet ops facade; restorable like the others; the dedupe consideration decided out loud | U6 | open |
+| 2 | The takemania seeded note — real history through the quiet ops facade; restorable like the others; the dedupe answer RULED = the description's disclaimer (R-18l-12: two-copies note · ships-with-deleted-blocks note · Restore-for-full-experience) | U6 | open |
 | 3 | Search in Takes — the design brief in this file first; chosen-takes-only default ON; the off-scope affordance + find-vs-replace per the sitting | U7 | open |
 | 4 | The mode-switch arrival flash — default ON, a setting to turn off; the existing wash vocabulary; fade constants named | U8 | open |
 | 5 | The comfort band — no mode-switch landing rests the target line at the extreme top/bottom; ruled carries exact mid-band; pin collisions flagged, never edited | U8 | open |
@@ -371,6 +371,30 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
   takemania note (optionally a couple of quieter chapter notes for contrast), riding the
   existing `SampleLibrarySeeder`/`SeededBookRestore` machinery exactly like Sherlock, with its
   own Help ▸ Restore door — findable on the shelf and deletable as a set.
+- **R-18l-12 (2026-09-27, in-session — takemania's dedupe consideration RULED: A DISCLAIMER, NOT
+  MACHINERY.** Her words, verbatim: *"I think the two device seeding race in regards to
+  takemania could probably be covered with a disclaimer of some sort in the book's description.
+  it should probably also note that the note has blocks that are already leaving and being
+  deleted, restore it for the full experience, and whatever disclaimer is needed for the
+  sample-library dedupe because it is a unique case and I don't think we need a \*lot\* of
+  machinery for the sample library dedupe if a disclaimer of some sort would work (in whatever
+  direction is most helpful)."* Applied at U6: NO dedupe extension, zero `Sync/`; the book's
+  front-matter/description note (the Sherlock "about this text" chapter's form) carries three
+  things — (1) this note ships with blocks already deleted and Leaving ON PURPOSE (its history
+  is the exhibit), and their tray rows age out on the ordinary purge clocks, so **Help ▸
+  Restore for the full experience** after playing or after time; (2) on a second device the
+  book can appear twice (a book born with history reads as edited to the sample-library
+  dedupe, so it is never auto-retired) — delete either copy, nothing is lost, Restore re-seeds
+  it fresh; (3) the wording direction is the unit's to draft, PROVISIONAL, copy hers to polish.)*
+- **U5 LOOK-CHANGE RATIFIED (2026-09-27, in-session), her words:** *"yeah that's fine, it is the
+  goal for it to not change appearance when you start editing, so it makes sense that it'll look
+  different than before."* — the block being edited in the two index-like faces adopts the
+  reading rows' spacing; Write and Takes untouched (confirmed to her, pinned byte-unchanged).
+- **HER IN-HANDS CONFIRM of 18l U0b (2026-09-27, in-session), verbatim:** *"confirmed that the
+  previous bug where in write when you delete a newline it was removing the whitespace between
+  the top line and the top of the document is gone :)"* — the row-87 fix (`ReadingAnchor`,
+  `998f7d7d`) confirmed felt-gone in her own use; recorded here as the author's live
+  verification on top of U0b's closed ladder.
 
 ## U5 BRIEF (session 1 — the tiers' one metrics vocabulary; written by the orchestrator 2026-09-27)
 
