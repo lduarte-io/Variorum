@@ -804,3 +804,41 @@ gitignored):
 hands).** Ledger row 1 flips to BUILT+WALKED — the Fable cold review is the remaining gate.
 #154 goes to her next (she is reachable tonight); the reviewer spawns after her answer so the
 ladder reviews the final shape.
+
+## U5 RIDER BRIEF (#154 ruled (b) — show stored blank lines at rest; written by the orchestrator 2026-09-27, for the RESUMED U5 implementer)
+
+Her ruling (the #154 sitting, minutes after the acceptance): **(b) — the two index faces stop
+hiding stored blank lines.** Display == stored on the book Index and note Read ▸ edit, so
+NOTHING ever moves on a click, for any note. One rider, one session, then my re-walk and the
+ONE Fable ladder over the whole U5 diff (base + rider).
+
+The build, precisely:
+1. **The two hosts stop folding blank lines at rest** — `FlowParagraph`'s blank rule becomes a
+   HOST CHOICE for the book Index and note Read ▸ edit only: a stored trailing blank line (or
+   several — display all; display == stored) renders as a real empty line at rest, exactly as
+   the live pane draws it, so rest == live to 0.0 pt INCLUDING the blank line. **The shared
+   transform keeps its default** — the read PAGE (Read ▸ read, both faces), the book Read, and
+   the PHONE's `MobileReadPage` are byte-untouched (a parameter through the two hosts, never a
+   new global; pin the scope the way `PaneLineMetricsScopeTests` pins `lineMetrics`).
+2. **The pins re-arm to the new truth:** `IndexTierMetricsTests`' block-below arm flips from
+   "moves by exactly the blank line" to "moves by 0.0" (red-on-old: today's tree folds the
+   line, so the rest-vs-live delta is 25/30 pt — the pin fails before the rider by
+   construction; state the numbers). The click replica (`ReadTierClickPlace`) must agree with
+   the new rest layout — its fidelity pin rides or is re-armed with the same reasoning, named.
+3. **The harness gains the block-below row** your record suggested (NOTICED item 1): the
+   `index-click` / `readedit-click` scenarios assert the block below the clicked one MOVES 0.0
+   on going live. Run the seeded suite both voices.
+4. **Walk** (both voices, machine author-free per the traps): Sherlock ▸ Index at rest shows
+   the blank line under each paragraph (capture beside the old rest for her eye); a click
+   moves NOTHING including the block below; Read ▸ edit the same; a note WITHOUT trailing
+   blanks (the field guide or a journal note) renders byte-identically to before the rider —
+   capture that too (the no-op proof for her own notes).
+5. **Honest boundaries:** the resting Index gets taller where blank lines are stored (Sherlock
+   ~one line per paragraph) — state the measured page-height delta for one story; landings/
+   height manifests that consume the read tier's heights (`ProseHeightModel`/`FlowHeightEstimate`
+   roads) must be checked for the new rest heights — trace who reads them and state fixed/safe
+   per consumer (the F3 landing family must not regress; run `book-landings` + `read-landing`
+   scenarios as the tripwire).
+Discipline: your standing brief's paragraph binds unchanged (append to your `## U5 RECORD`
+under a `### RIDER` heading; commit+push per piece; pins red-on-old by behavioural revert;
+tests at end — the touched suites + the harness; no subagents; synchronous waits).
