@@ -16,13 +16,17 @@
 //    · the same WRAP (every line starts at the same character),
 //    · every line at the same HEIGHT (no compression),
 //    · the same MEASURE (the prose's left and right edges),
-//  and the block below does not move — except by the one thing no metric can
-//  align, which this pin measures and names rather than hides: a STORED blank
-//  line under the text (the sample library keeps one under every paragraph —
-//  the "Sherlock shape") is a real line in a live editor, where the read tier
-//  folds it into its paragraph gap (QUESTIONS #154, PROVISIONAL). That shape's
-//  block below moves by EXACTLY one blank line — its paragraph gap plus one
-//  line of the voice — and by nothing more.
+//  and the block below does not move AT ALL — for every shape, including a
+//  block stored over one or more BLANK lines (the sample library keeps one under
+//  every paragraph — the "Sherlock shape"). Until 18l-c U5's rider the read tier
+//  folded a stored blank line into its paragraph gap while the live editor had to
+//  show it, so that shape's block below dropped by one blank line (25 / 30 pt);
+//  her #154 ruling, option (b): the two index faces SHOW stored blank lines at
+//  rest — display == stored — and nothing moves on a click, for any note.
+//
+//  "Text lines" on both sides are the lines that carry a character other than a
+//  newline; a blank line is held by the block-below arm (its height is the only
+//  thing about it that can differ) and by the replica's fidelity arm.
 //
 //  The read tier's lines come from the click's REPLICA
 //  (`ReadTierClickPlace.lines`), whose agreement with what SwiftUI drew is
@@ -72,6 +76,10 @@ enum IndexTierShape: String, CaseIterable, CustomStringConvertible, Sendable {
     /// One prose paragraph over a STORED blank line — the sample library's
     /// shape, every block but a story's last.
     case overBlankLine
+    /// A blank line BETWEEN two paragraphs of one block (`A\n\nB`).
+    case aroundBlankLine
+    /// Two stored blank lines under the text (`A\n\n`) — "or several".
+    case overTwoBlankLines
     var description: String { rawValue }
 
     var text: String {
@@ -79,6 +87,8 @@ enum IndexTierShape: String, CaseIterable, CustomStringConvertible, Sendable {
         case .prose: storyProse[1]
         case .paragraphs: storyProse[1] + "\n" + storyProse[2]
         case .overBlankLine: storyProse[1] + "\n"
+        case .aroundBlankLine: storyProse[1] + "\n\n" + storyProse[2]
+        case .overTwoBlankLines: storyProse[1] + "\n\n"
         }
     }
 }
@@ -117,13 +127,14 @@ private func proseOf(_ pane: PaneTextView, toSpace: (NSPoint) -> CGPoint) -> Pan
         return result
     }
     let origin = pane.textContainerOrigin
+    let text = pane.string as NSString
     layout.enumerateTextLayoutFragments(
         from: layout.documentRange.location, options: [.ensuresLayout]
     ) { fragment in
         let frame = fragment.layoutFragmentFrame
         let base = content.offset(
             from: content.documentRange.location, to: fragment.rangeInElement.location)
-        for line in fragment.textLineFragments where line.characterRange.length > 0 {
+        for line in fragment.textLineFragments where carriesText(line, base: base, in: text) {
             let y = origin.y + frame.minY + line.typographicBounds.minY
             result.tops.append(toSpace(NSPoint(x: origin.x, y: y)).y)
             result.starts.append(base + line.characterRange.location)
@@ -134,6 +145,17 @@ private func proseOf(_ pane: PaneTextView, toSpace: (NSPoint) -> CGPoint) -> Pan
     result.left = toSpace(NSPoint(x: pane.proseLeft + padding, y: origin.y)).x
     result.right = toSpace(NSPoint(x: pane.proseRight - padding, y: origin.y)).x
     return result
+}
+
+/// A TEXT line — one that carries a character other than a newline (a blank
+/// line's fragment carries only its `\n`, the extra line after a trailing
+/// newline carries nothing).
+@MainActor
+private func carriesText(_ line: NSTextLineFragment, base: Int, in text: NSString) -> Bool {
+    let range = NSRange(
+        location: base + line.characterRange.location, length: line.characterRange.length)
+    guard range.length > 0, NSMaxRange(range) <= text.length else { return false }
+    return !text.substring(with: range).trimmingCharacters(in: .newlines).isEmpty
 }
 
 @MainActor
@@ -217,12 +239,15 @@ struct IndexTierMetricsTests {
         let read = ReadTierClickPlace.lines(of: text, columnWidth: column.width, font: font)
         let readTops = read.map { column.minY + $0.top }
         let readStarts = read.map(\.displayStart)
-        // The stored blank line's height, in the vocabulary: the paragraph
+        // The stored blank line's height, in the vocabulary (the paragraph
+        // gap it follows, then one line of the voice) — REPORTED, since the
+        // rider's (b) it is no longer an allowance: the block below must not
+        // move by it (or by anything).
         // gap it follows, then one line of the voice (the replica's own
         // one-line height).
         let oneLine = ReadTierClickPlace.height(of: "x", columnWidth: 400, font: font)
         let blankLine = IndexProseColumn.lines.paragraphGap + oneLine
-        let expectedShift: CGFloat = shape == .overBlankLine ? blankLine : 0
+        let expectedShift: CGFloat = 0
         let shift = nextTopAfter - nextTop
         let deltas = zip(pane.tops, readTops).map { ($0 - $1).rounded(toPlaces: 1) }
         print("[18l-c U5 trace] \(label): read tier \(read.count) lines · pane \(pane.tops.count) lines"
@@ -231,7 +256,7 @@ struct IndexTierMetricsTests {
             + " · left Δ \((pane.left - column.minX).rounded(toPlaces: 1))"
             + " · right Δ \((pane.right - column.maxX).rounded(toPlaces: 1))"
             + " · block below moved \(shift.rounded(toPlaces: 1)) pt"
-            + " (the stored blank line accounts for \(expectedShift.rounded(toPlaces: 1)))")
+            + " (one stored blank line is \(blankLine.rounded(toPlaces: 1)) pt)")
         #expect(pane.starts == readStarts, Comment(rawValue:
             "\(label): the live pane wraps where the read tier did — pane line starts "
                 + "\(pane.starts), read tier \(readStarts)"))
@@ -247,11 +272,9 @@ struct IndexTierMetricsTests {
         #expect(abs(pane.right - column.maxX) <= 0.5, Comment(rawValue:
             "\(label): the prose ENDS at \(pane.right) live, \(column.maxX) at rest — "
                 + "a different measure re-wraps her lines"))
-        #expect(abs(shift - expectedShift) <= 1, Comment(rawValue:
-            "\(label): the block below moved \(shift) pt; "
-                + (shape == .overBlankLine
-                    ? "exactly the stored blank line (\(expectedShift) pt) is the boundary"
-                    : "it must not move at all")))
+        #expect(abs(shift - expectedShift) <= 0.5, Comment(rawValue:
+            "\(label): the block below moved \(shift) pt — it must not move at all "
+                + "(#154 (b): the index faces show stored blank lines at rest)"))
     }
 
     // MARK: - The book Index
