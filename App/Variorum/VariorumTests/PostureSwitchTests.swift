@@ -1199,7 +1199,9 @@ struct PostureSwitchTests {
         #expect(scripted.drainEngine(transport: mirror).sampleLibraryFacts.isEmpty, "the scripted world's leaves are inert")
         scripted.sampleLibraryFacts = SampleLibrarySeeder.allDedupeFacts()
         let engine = scripted.drainEngine(transport: mirror)
-        #expect(engine.sampleLibraryFacts.map(\.bookName) == SampleLibrarySeeder.Book.all.map(\.name),
+        // 18l-c U6 (re-armed): the facts are the DEDUPE-COVERED books, no
+        // longer `Book.all` (the takemania book is seeded, not judged).
+        #expect(engine.sampleLibraryFacts.map(\.bookName) == SampleLibrarySeeder.Book.dedupeCovered.map(\.name),
                 "the drain engine carries exactly the leaves' facts, in order")
         #expect(engine.sampleLibraryFacts.count == 2, "Sherlock + Encryption Explained")
 

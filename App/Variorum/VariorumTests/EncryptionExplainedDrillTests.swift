@@ -78,13 +78,17 @@ struct EncryptionExplainedDrillTests {
     func aFreshStoreSeedsTheTutorialWithTheNewChapterAndBothBooksAndRestoreReseeds() async throws {
         try await withDrillWorld { session, db in
             let books = try await seedEverything(session)
-            #expect(books.count == 2)
+            // 18l-c U6 (re-armed, a changed fact of that unit): `Book.all`
+            // grew a THIRD seeded book — the takemania book — so the Mac's
+            // launch shape seeds three.
+            #expect(books.count == SampleLibrarySeeder.Book.all.count && books.count == 3)
 
-            // THE SHELF: the field guide + the two seeded books.
+            // THE SHELF: the field guide + the seeded books.
             let shelf = try await db.read { db in try Queries.readings(db).map(\.name) }
             #expect(shelf.contains(TutorialSeeder.bookName))
             #expect(shelf.contains(SampleLibrarySeeder.bookName))
             #expect(shelf.contains(SampleLibraryEncryptionBook.name))
+            #expect(shelf.contains(SampleLibraryJekyllBook.name))
 
             // THE CHAPTER: copy §7's two lessons under "keeping it private".
             let guide = try await db.read { db in

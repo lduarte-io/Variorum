@@ -55,9 +55,15 @@ struct SampleLibraryDedupeFactsTests {
     /// in seeding order: Sherlock's first (byte-identical to the single
     /// facts above), *Encryption Explained*'s second, carrying ITS reserved
     /// identities and ITS bundled manifest under the one shared recipe.
+    ///
+    /// 18l-c U6 (re-armed, a changed fact of that unit): the list is the
+    /// DEDUPE-COVERED books, no longer `Book.all` — the takemania book is
+    /// seeded but deliberately not judged (QUESTIONS #155), so the engine's
+    /// list stays exactly these two.
     @Test func theListCarriesBothBooksInSeedingOrder() throws {
         let list = SampleLibrarySeeder.allDedupeFacts()
-        #expect(list.count == SampleLibrarySeeder.Book.all.count && list.count == 2)
+        #expect(list.count == SampleLibrarySeeder.Book.dedupeCovered.count && list.count == 2)
+        #expect(!list.contains { $0.bookName == SampleLibraryJekyllBook.name })
         #expect(list[0].bookName == SampleLibrarySeeder.bookName && list[0].tagPath == SampleLibrarySeeder.tagName)
         #expect(list[1].bookName == SampleLibraryEncryptionBook.name && list[1].tagPath == SampleLibraryEncryptionBook.tagName)
         let manifest = try SampleLibrarySeeder.manifest(for: .encryptionExplained)
