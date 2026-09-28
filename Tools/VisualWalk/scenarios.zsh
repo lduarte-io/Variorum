@@ -1034,7 +1034,7 @@ scn_b5-more-roads() {
 # below the viewport's top, `bB` the room under it, `bAir`/`bRoom` the band's two edges) and its flash summary
 # (`af=w<n>.t<n>.re<n>.rp<n>` — distinct faces drawn at full strength, per surface). Captures mid-flash.
 vw_def mode-switch-feel "takemania (the Jekyll book), Write ⇄ Takes ⇄ Read" \
-  "Write: ⌘↓ (caret on the last block) · her wheel to the page's top (the caret off it) · ⌘2 · ⌘1 · ⌘3 · ⌘1" \
+  "Write: ⌘↓ then ⌥↑ ×12 (the caret on a block a dozen paragraphs above the end) · her wheel to the page's top (the caret off it) · ⌘2 · ⌘1 · ⌘3 · ⌘1" \
   "each switch rests its target INSIDE the comfort band and flashes it: Takes' landed block (at the band's foot — R-Q20 from the top), Write's caret line (AT the top air — it was off the page she left), Read's landed row; the flash count of each surface rises by one" pass
 
 vw_af() {   # surface letter(s) w|t|re|rp → the count in PV[af]
@@ -1058,17 +1058,25 @@ scn_mode-switch-feel() {
   vw_require '[[ ${PV[post]} != none ]]' "takemania opened (the Jekyll book is seeded — Help ▸ Restore makes it)" || return
   [[ ${PV[mode]} != Write ]] && vw_takes_mode 1
   vw_require '[[ ${PV[mode]} == Write ]]' "the note is in Write" || return
-  vw_keys "⌘↓ (the caret to the note's end — the current block is the last)" 'key code 125 using command down'
+  vw_keys "⌘↓ (the caret to the note's end)" 'key code 125 using command down'
   vw_settle
+  # A MID-NOTE block (U8's first run): Read's page ENDS below its last row (no typewriter room), so the note's
+  # last block cannot rest two lines above Read's foot — the band cannot make room the page does not have (a
+  # boundary, the record's HONEST BOUNDARIES). ⌥↑ is the text system's paragraph-back; a dozen presses put the
+  # caret on a block with the page's room below it.
+  local i
+  for i in {1..12}; do vw_keys "⌥↑ (a paragraph back, $i of 12)" 'key code 126 using option down'; done
+  vw_settle
+  vw_require '[[ ${PV[caretEnd]} == 0 ]]' "the caret left the note's end (a mid-note block)" || return
   local x=$(( WIN_X + WIN_W * 6 / 10 )) y=$(( WIN_Y + WIN_H / 2 ))
   vw_scroll $x $y -60
   vw_scroll $x $y -60
   vw_settle band
-  vw_require '[[ ${PV[caretState]} == off ]]' "the page wheeled to the top, the caret (the last block) off it" || return
+  vw_require '[[ ${PV[caretState]} == off ]]' "the page wheeled to the top, the caret (a mid-note block) off it" || return
   vw_cap 00-write-top-caret-off
   local t0=$(vw_af t) w0=$(vw_af w) r0=$(( $(vw_af re) + $(vw_af rp) ))
 
-  # Row A — ⌘2: Takes lands the last block (R-Q20 — the current block moved since takes-find), banded foot.
+  # Row A — ⌘2: Takes lands the caret's block (R-Q20 — the current block moved since takes-find), banded foot.
   vw_keys "⌘2 (Takes)" 'keystroke "2" using command down'
   sleep 0.7; vw_cap 01-takes-mid-flash
   sleep 2.2; vw_settle band; vw_cap 02-takes-landed
@@ -1076,7 +1084,7 @@ scn_mode-switch-feel() {
   vw_expect_in_band "A · Takes' landed block"
   vw_expect_eq "A · the Takes flash drew once (af ${PV[af]})" $(( $(vw_af t) - t0 )) 1
 
-  # Row B — ⌘1: Write puts back the page it left (the top) and the caret (the last block) is off it — the
+  # Row B — ⌘1: Write puts back the page it left (the top) and the caret (a mid-note block) is off it — the
   # reveal rests the caret's line AT the top air, never flush.
   vw_keys "⌘1 (Write)" 'keystroke "1" using command down'
   sleep 0.5; vw_cap 03-write-mid-flash
