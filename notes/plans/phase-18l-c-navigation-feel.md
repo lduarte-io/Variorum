@@ -348,12 +348,12 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
 | 1 | The Index tiers' metric shift on click-to-edit (her issue 1; KnownIssues row 89 / 18l U0 sweep S3) | U5 | **CLOSED 2026-09-28** — built + double-walked; ladder ONE round 0/0/1/3 (all confirmed + fixed by the reviewer `9cf71665..f776f79d`, both implementer corrections verified-then-adopted, zero disputes, sanity PASS 16/4 with exactly the 4 named known issues); records `notes/plans/18lc-u5-ladder-round1.md` |
 | 1b | Her #154 ruling (b) — stored blank lines drawn at rest on the two index faces; nothing ever moves on a click | U5 rider | **CLOSED 2026-09-28** — same ladder; the ≥2-blanks TK2 exception stands as its own row (owner 12) |
 | 2 | The takemania seeded note — real history through the quiet ops facade; restorable like the others; the dedupe answer RULED = the description's disclaimer (R-18l-12) | U6 | **CLOSED 2026-09-28** — built (47 blocks · 10 fanned/37 plain · 9 lineage edges · tray 5 · 12 savepoints, 10 named · 17 sittings) · double-walked · ladder TWO rounds (0/0/4/8 all fixed incl. the Pool-orphan restore bug with red pins; 0/0/2/4 all fixed incl. the imported-road gate; zero disputes) · her bundle: the disclaimer polish, #155, #156's (a)/(b)/(c) date fork |
-| 3 | Search in Takes — the design brief in this file first; chosen-takes-only default ON; the off-scope affordance + find-vs-replace per the sitting | U7 | open |
+| 3 | Search in Takes — the design brief in this file first; chosen-takes-only default ON; the off-scope affordance + find-vs-replace per the sitting | U7 | **CLOSED 2026-09-28** — built to the ten decisions (find-only v1, the compare rule MEASURED against the real Write bar and pinned as agreement) · orchestrator-walked hands-on (takemania "Hyde": 23 chosen / 28 all, the margin marker, the off-scope bloom, Esc typeability, the session slot) · FABLE ladder ONE round 0/0/1/5 (cross-model: 6 AGREE zero disputes; R1-M1 ruled (b) with the boundary trio + live tripwire; the reviewer implemented all fixes with reverts red in shape; sanity CLEAN; the sanity's raised shift-tap race MEASURED TRUE and fixed — the bar reads the submit event's flags, revert R-S1 red in shape, takes-find 25/25 both voices on the final tree) · records `notes/plans/18lc-u7-ladder-round1.md`; her bundle: #157 (1)–(7) |
 | 4 | The mode-switch arrival flash — default ON, a setting to turn off; the existing wash vocabulary; fade constants named | U8 | open |
 | 5 | The comfort band — no mode-switch landing rests the target line at the extreme top/bottom; ruled carries exact mid-band; pin collisions flagged, never edited | U8 | open |
 | 5b | **R-18l-13 — the mode-switch caret rule** (her 2026-09-27 ruling at the #150 sitting): Takes' entry joins Write's caret anchor; a mode's scroll memory never outranks a mode switch (re-opens only); Read's carry stands; the old-outranking pins re-armed AS THE RULED CHANGE, each named in the record | U8 (one design with rows 4–5) | open |
 | 6 | MAY-take: KnownIssues row 94 (the Takes head reveal eats the 18-pt top inset — the band's top edge is its remedy sketch); decide at U8, record either way | U8 rider | open |
-| 7 | Her cursor-loss report's OTHER half — *"tapping keys won't make you edit (the take that you are navigated to isn't active)"*: trace at U7 whether a find-navigation landing should focus/activate the landed take, and what today's non-activation is (R-Q20/R-Q21 territory — any change to ruled machinery is flagged, not made) | U7 | open |
+| 7 | Her cursor-loss report's OTHER half — *"tapping keys won't make you edit (the take that you are navigated to isn't active)"*: trace at U7 whether a find-navigation landing should focus/activate the landed take, and what today's non-activation is (R-Q20/R-Q21 territory — any change to ruled machinery is flagged, not made) | U7 → U8 | **TRACED at U7, two roads (the U7 RECORD's LEDGER ROW 7 section):** road B (the SwiftUI re-parent dropping a born-live pane's keyboard) FOUND AND FIXED at the component (`0c89aa6c`, red-first, four edges pinned); road A (the entry ring onto a row the restored page never built) TRACED AND PINNED, not changed — it is R-Q20/R-Q21 + N9 ruled machinery and **U8's R-18l-13 owns the fix**; the find answers it on its own road (a step reveals + lands live + selected + typeable, pinned end-to-end); the Esc-onto-unbuilt-pane edge is HONEST BOUNDARIES row 8 + #157 (7) with a live tripwire pin |
 | 8 | Her #153 ruling (a′): the Index landing's caret takes the note's entry rule — one line + the pin's (a′) arm | seam act (orchestrator) | **CLOSED 2026-09-28** (`4861947c`; revert-verified red `.start ≠ .offset(42)`; QUESTIONS #153 closed; the diff rides the next unit's ladder window) |
 
 ## THE SITTING RECORD (kickoff, 2026-09-27 — her rulings, verbatim-faithful; filled as they land)
@@ -1518,15 +1518,11 @@ closed gate-passed; #149–#156 all dispositioned (#150/#151/#152 ruled; #153/#1
 #155/#156 PROVISIONAL in her bundle); R-18l-13 settled (caret anchors editing modes, Read
 carries the page, no button — U8 builds it).
 
-**IN FLIGHT:** U7 (search in Takes) — a fresh opus-implementer building to the U7 DESIGN
-BRIEF's ten decisions; checkpoint order sent at the compaction warning. On its hand-back:
-verify against git → orchestrator hands-on walk (takemania is the fixture; search "Hyde") →
-FABLE cold review (REVIEW_PROMPT verbatim, {PHASE}=18l-c, the mechanical window note names the
-un-reviewed commits since `2deb24d8`'s predecessor... precisely: the window is everything
-since `14493cfb..` not yet reviewed minus U6's closed rounds — state it as "since `2deb24d8`,
-plus the orchestrator's `471358d6` comment fixes") → cross-model flow (findings verbatim to
-the implementer, agree/dispute back, the reviewer finals + implements, implementer sanity
-pass) → close U7 in the ledger.
+**IN FLIGHT:** none — **U7 CLOSED 2026-09-28** (ledger row 3's close entry is the summary;
+the ladder record `notes/plans/18lc-u7-ladder-round1.md` closed at ONE round 0/0/1/5 +
+the sanity item, zero disputes, every fix revert-verified; row 7 flipped to its traced
+disposition — road B fixed at U7, road A is U8's R-18l-13). The whole post-hand-back flow
+this paragraph used to prescribe ran exactly as written.
 
 **THEN U8** (one design, three halves — R-18l-13's caret rule + the arrival flash (U8a,
 default ON + a setting, the wash vocabulary, ~0.3 s hold + 0.7–0.9 s opacity fade as named
