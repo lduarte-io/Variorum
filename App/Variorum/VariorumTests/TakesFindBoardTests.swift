@@ -247,7 +247,12 @@ struct TakesFindBoardTests {
             #expect(entered.isEditable && window1.firstResponder === entered,
                     "non-vacuity: on arrival the ring's take holds the keyboard")
 
-            // Her scroll away — to the top — then leaving the board.
+            // Her scroll away — to the top — then leaving the board. Her HAND
+            // ends the entry landing first (in the app her wheel scroll is
+            // `isPositionedByUser` and ends it; the harness's clip scroll is not
+            // seen as hers — the `TakesArticleScrollTests` pattern; U8: without
+            // it a still-watched landing corrects the page back before she leaves).
+            first.clearArticleLanding()
             article1.contentView.scroll(to: .zero)
             article1.reflectScrolledClipView(article1.contentView)
             await settle(window1, hosting1, until: { false }, maxTurns: 12)
@@ -365,6 +370,7 @@ struct TakesFindBoardTests {
                   Date() < deadline1 {
                 await settle(window1, hosting1, until: { false }, maxTurns: 2)
             }
+            first.clearArticleLanding()   // her hand (see the pin above)
             article1.contentView.scroll(to: .zero)
             article1.reflectScrolledClipView(article1.contentView)
             await settle(window1, hosting1, until: { false }, maxTurns: 12)
