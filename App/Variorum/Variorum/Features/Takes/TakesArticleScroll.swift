@@ -146,28 +146,73 @@ final class TakesArticleScroll {
     }
 
     /// **The anchor a REVEAL hands `scrollTo`** — the view's one question at
-    /// the moment it performs a `.reveal` step. For an entry landing, the unit
-    /// point that rests the row at the band's edge (`ComfortBand
-    /// .revealAnchorY`) — the row's measured height when the column holds it,
-    /// else the realized rows' mean (the estimate a lazy column itself makes;
-    /// the watch corrects from quiet with the real frame). Every other kind —
-    /// and a row too tall for the band — keeps the shipped edge anchor.
+    /// the moment it performs a `.reveal` step. For an entry landing whose row
+    /// the column has REALIZED, the unit point that rests it at the band's edge
+    /// (`ComfortBand.revealAnchorY`, from its measured height — exact). For a
+    /// row not yet realized, the shipped edge anchor: exact whatever the row's
+    /// height (SwiftUI places it with its own measure), and the band follows
+    /// at once from the row's real height when it reports at that edge
+    /// (`bandedSecondAim`). Measured at U8: an anchor computed from an
+    /// ESTIMATED height (the realized rows' mean — a lone 28-pt placeholder at
+    /// the first step) put a 220-pt row 6 pt into the top air and cost a
+    /// correction hop. Every other kind — and a row too tall for the band —
+    /// keeps the shipped edge anchor.
     func revealAnchor(for rowID: String, _ edge: ArticleRevealAim) -> UnitPoint {
-        guard landingIsBanded, articleLanding == rowID else {
-            return LandingAim.MinimalReveal.anchor(edge)
-        }
-        let height = articleRowFrames[rowID]?.height ?? meanRealizedRowHeight
-        guard let y = entryBand.revealAnchorY(
-            edge, rowHeight: height, viewport: articleViewportHeight)
+        guard landingIsBanded, articleLanding == rowID,
+              let height = articleRowFrames[rowID]?.height,
+              let y = entryBand.revealAnchorY(edge, rowHeight: height, viewport: articleViewportHeight)
         else { return LandingAim.MinimalReveal.anchor(edge) }
         return UnitPoint(x: 0.5, y: y)
     }
 
-    /// The realized rows' mean height (0 when none — the band's anchor then
-    /// treats the row as short, and the watch corrects with its real frame).
-    private var meanRealizedRowHeight: CGFloat {
-        guard !articleRowFrames.isEmpty else { return 0 }
-        return articleRowFrames.values.reduce(0) { $0 + $1.height } / CGFloat(articleRowFrames.count)
+    /// **Is an UNREPORTED row on the page at rest?** — the 17p R1-1 fact ("the
+    /// TOP is a place of its own"), stated as evidence: at the page's rest
+    /// (offset 0) the viewport shows everything from the article's top air
+    /// down, so a row that comes BEFORE a realized row sitting on screen at or
+    /// below the top air is on screen too, whatever its height. Measured at U8:
+    /// an entry landing's first step, with ONE placeholder row realized and its
+    /// target not yet reported, "revealed" rows that were on the page at rest —
+    /// the first block (KnownIssues row 94's own sighting: the `.top` anchor ate
+    /// the air; under the band, a 6-pt miss and a hop) and the third (the page
+    /// hauled 90 pt). The evidence is the realized rows' frames, never the
+    /// offset alone: a geometry the page cannot have (any realized row above the
+    /// top air while at rest) proves nothing and the shipped direction rule
+    /// decides.
+    private func isOnTheRestingPage(_ landing: String, order: [String]) -> Bool {
+        guard (lastArticleGeometry?.offset ?? .infinity) <= 0.5, articleViewportHeight > 0,
+              let index = order.firstIndex(of: landing),
+              // At rest nothing sits above the top air — a realized row that
+              // does is a geometry the page cannot have, and proves nothing.
+              articleRowFrames.values.allSatisfy({ $0.minY >= Self.articleTopAir - 1 })
+        else { return false }
+        return articleRowFrames.contains { id, frame in
+            guard let other = order.firstIndex(of: id), other > index else { return false }
+            return frame.minY >= Self.articleTopAir - 1 && frame.minY < articleViewportHeight
+        }
+    }
+
+    /// **The band's second aim, pending** — set when a banded reveal aims an
+    /// UNREALIZED row at the shipped edge; the row's first report AT that edge
+    /// (its real height now known) spends one more aim that rests it in the
+    /// band (`articleLandingReport`) — the same layout storm, not a quiet
+    /// interval later, so the landing reads as one motion.
+    @ObservationIgnored private var bandedSecondAim: ArticleRevealAim?
+
+    /// **Which edge a reveal reaches for.** A banded row that FITS the band
+    /// goes by the band: its top above the band's top edge (in the top air, or
+    /// above the viewport) → the head; otherwise → the foot. (R-Q1's own rule,
+    /// `minY < 0 ? head : foot`, answers `.foot` for a row resting in the top
+    /// air — which would send a row that needed a few points of air to the
+    /// page's BOTTOM; pinned `aBandedRowInTheTopAirIsRevealedAtTheHeadNeverTheFoot`.)
+    /// Every other case — unrealized rows, rows too tall for the band, every
+    /// other kind — keeps R-Q1's rule.
+    private func landingEdge(_ landing: String, frame: CGRect?, order: [String]) -> ArticleRevealAim {
+        if landingIsBanded, let frame, articleViewportHeight > 0,
+           entryBand.fits(height: frame.height, viewport: articleViewportHeight) {
+            return frame.minY < entryBand.topAir ? .head : .foot
+        }
+        return Self.revealAnchor(
+            for: landing, rowFrame: frame, order: order, realizedRows: Set(articleRowFrames.keys))
     }
 
     /// **The mode switch's ARRIVAL — which row the entry landing put home, and
@@ -257,6 +302,7 @@ final class TakesArticleScroll {
         articleLandingAimsLeft = Self.articleLandingAttempts
         articleLandingAims = 0
         articleEntryRidesThrough = false
+        bandedSecondAim = nil
         // 18l-c U8: a new landing ends any arrival flash still on screen.
         if articleArrival != nil { articleArrival = nil }
         // **R-Q20 — THE LANDING WINS** (her 2026-09-13 ruling on J3), keyed
@@ -679,6 +725,11 @@ final class TakesArticleScroll {
             // (`articleEntryRidesThrough`).
             if articleEntryRidesThrough { return .wait }
         }
+        // 18l-c U8 (b): an unreported row ABOVE an on-screen row, at the page's
+        // REST, is on screen too — nothing to reveal (`isOnTheRestingPage`).
+        if landingIsBanded, frame == nil, isOnTheRestingPage(landing, order: order) {
+            return .wait
+        }
         // 18l-c U8 (b): an ENTRY landing's "home" is inside the comfort band;
         // every other kind keeps R-Q1's (`landingDecision`).
         if landingDecision(frame) == .none {
@@ -698,11 +749,11 @@ final class TakesArticleScroll {
         // reveal would haul the page back. Decided here, the one place a
         // reveal is decided (F-1), never beside the view's scroll.
         endArticleHold()
-        return .reveal(
-            landing,
-            Self.revealAnchor(
-                for: landing, rowFrame: frame, order: order,
-                realizedRows: Set(articleRowFrames.keys)))
+        let edge = landingEdge(landing, frame: frame, order: order)
+        // 18l-c U8 (b): an unrealized row is aimed at the EXACT shipped edge;
+        // the band follows from its real height when it reports there.
+        if landingIsBanded, frame == nil { bandedSecondAim = edge }
+        return .reveal(landing, edge)
     }
 
     /// Pure: which edge reaches the row — `LandingAim.MinimalReveal.edge`.
@@ -737,6 +788,24 @@ final class TakesArticleScroll {
         guard let landing = articleLanding, watch.anchor == landing else {
             restoreLooksAgainForAWaitingLanding(order: order())
             return articleLandingStep(order: order())
+        }
+        // 18l-c U8 (b): the band's second aim — the row the shipped edge just
+        // placed has reported AT that edge, so its real height is known: one
+        // more aim rests it in the band, now (`bandedSecondAim`).
+        if let edge = bandedSecondAim, let frame = articleRowFrames[landing],
+           articleViewportHeight > 0 {
+            let atTheEdge = edge == .head
+                ? abs(frame.minY) <= 1
+                : abs(frame.maxY - articleViewportHeight) <= 1
+            if atTheEdge {
+                bandedSecondAim = nil
+                if landingDecision(frame) != .none, articleLandingAimsLeft > 0 {
+                    articleLandingAimsLeft -= 1
+                    articleLandingAims += 1
+                    endArticleHold()
+                    return .reveal(landing, landingEdge(landing, frame: frame, order: order()))
+                }
+            }
         }
         if let content = lastArticleGeometry?.content, content != watchedContent {
             watchedContent = content

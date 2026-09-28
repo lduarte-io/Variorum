@@ -105,12 +105,20 @@ struct TakesEntryBandTests {
     private func withSession(
         blocks: Int,
         flashOn: Bool = true,
+        voice: ThemeVoice = .terminal,
+        text: @escaping @MainActor (Int) -> String = { TakesEntryBandTests.proseText($0) },
         _ body: @MainActor (
             _ session: AppSession, _ fixture: Fixture, _ db: AppDatabase,
             _ mount: @MainActor (TakesViewModel) async -> (NSWindow, NSView)
         ) async throws -> Void
     ) async throws {
         let db = try AppDatabase.inMemory()
+        let typography = EditorTypography.current
+        let adopted = EditorTypography.isAdopted
+        defer {
+            EditorTypography.current = typography
+            EditorTypography.isAdopted = adopted
+        }
         let start = Date(timeIntervalSince1970: 1_782_864_000)
         let tick = LockIsolated(0)
         let suiteName = "TakesEntryBand-\(UUID().uuidString)"
@@ -133,10 +141,11 @@ struct TakesEntryBandTests {
             let post = try session.operations.createPost(title: "entry band fixture")
             var made: [(block: String, variant: String)] = []
             for i in 1...blocks {
-                let minted = try session.operations.newBlock(in: post.id, text: Self.proseText(i))
+                let minted = try session.operations.newBlock(in: post.id, text: text(i))
                 made.append((minted.block.id, minted.variant.id))
             }
             if !flashOn { try session.operations.setArrivalFlash(false) }
+            if voice != .terminal { try session.operations.setThemeVoice(voice) }
             // Her settings, as the app hands them down (the one store every
             // surface reads — a board with no store reads the defaults).
             let theme = ThemeStore(session: session)
@@ -165,6 +174,7 @@ struct TakesEntryBandTests {
                 windows.append(window)
                 await self.settle(window, hosting, until: {
                     !self.articlePanes(in: hosting).isEmpty && theme.settings.arrivalFlash == flashOn
+                        && theme.settings.voice == voice && EditorTypography.isAdopted
                 })
                 await self.settle(window, hosting, until: { false }, maxTurns: 8)
                 return (window, hosting)
@@ -232,6 +242,8 @@ struct TakesEntryBandTests {
             let bottom = row.maxY + cellInset   // the cell's bottom (the row's)
             print("[18l-c U8 band foot] row \(row.minY)…\(row.maxY) · viewport \(viewport) · room \(viewport - bottom) · aims \(model.articleLandingAims)")
             #expect(model.articleLandingAims > 0, "non-vacuity: the landing aimed")
+            #expect(model.articleLandingCorrections == 0,
+                    "no correction hop: the edge, then the band from the row's real height")
             #expect(abs((viewport - bottom) - band.bottomRoom) <= 3,
                     """
                     the row rests \(band.bottomRoom) pt (two lines) above the foot — measured \
@@ -291,6 +303,142 @@ struct TakesEntryBandTests {
                     measured \(top) (row 94's shape: 0, the air eaten)
                     """)
         }
+    }
+
+    // MARK: - (b) THE BAND — R-Q20's landing at the top (the VisualWalk `takes-landing` row D shape)
+
+    /// A first block as long as *A Scandal in Bohemia*'s first paragraph.
+    nonisolated private static func longFirst(_ i: Int) -> String {
+        guard i == 1 else { return proseText(i) }
+        return String(repeating: "To Sherlock Holmes she is always the woman. I have seldom heard him "
+            + "mention her under any other name. In his eyes she eclipses and predominates the "
+            + "whole of her sex. ", count: 5)
+    }
+
+    /// **R-Q20's landing on the FIRST block settles at once — no hop — in both
+    /// voices.** She left Takes with the page at the note's end (the entry had
+    /// revealed the last block), moved to the first block in Write, and came
+    /// back: R-Q20 — the page opens at the top and the landing needs nothing.
+    /// The seeded walk's `takes-landing` row D measured ONE hop in Study on the
+    /// first U8 run (`vis-walks/2026-09-28/114955`); this pins the shape
+    /// in-process, with the landing's own story printed.
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func rq20sLandingOnALongFirstBlockSettlesWithoutAHop(_ voice: ThemeVoice) async throws {
+        try await withSession(blocks: 60, voice: voice, text: { Self.longFirst($0) }) {
+            session, fixture, db, mount in
+            let router = session.commandRouter
+            let token = enterOn(fixture.blocks[59], router, fixture.postID)
+            defer { router.unregisterDetail(token); router.forgetCurrentBlock(for: fixture.postID) }
+            let first = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window1, hosting1) = await mount(first)
+            await wait(window1, hosting1, seconds: 4) { first.articleLanding == nil }
+            window1.contentView = nil
+            first.teardown()
+            window1.orderOut(nil)
+            // Write: the caret to the note's start — the current block moves.
+            router.noteFocusedBlock(
+                fixture.blocks[0].block, variantID: fixture.blocks[0].variant,
+                postID: fixture.postID, utf16Offset: 0)
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window, hosting) = await mount(model)
+            let article = try #require(articleScrollView(in: hosting))
+            await wait(window, hosting, seconds: 4) { model.articleLanding == nil }
+            #if DEBUG
+            print("[18l-c U8 R-Q20 \(voice)] story: \(model.board.article.landingStory.lines.suffix(12))")
+            #endif
+            let row = frameInViewport(fixture.blocks[0].variant, hosting, article)
+            print("[18l-c U8 R-Q20 \(voice)] row \(String(describing: row)) · viewport \(article.contentView.bounds.height) · offset \(article.contentView.bounds.minY) · aims \(model.articleLandingAims) · hops \(model.articleLandingCorrections)")
+            #expect(model.board.articleRestoreAims == 0, "R-Q20: the landing won — no restore aim")
+            #expect(model.articleLandingCorrections == 0,
+                    "R-Q20's landing on the first block settles at once — no hop (\(voice))")
+            #expect(article.contentView.bounds.minY < 1, "the page at the top")
+        }
+    }
+
+    // MARK: - (b) THE BAND — the reveal's EDGE (pure)
+
+    /// **A banded row in the TOP AIR is revealed at the HEAD, never the foot.**
+    /// R-Q1's edge rule (`minY < 0 ? head : foot`) answers `.foot` for a row
+    /// whose top sits at 0 ≤ minY < the top air — and a foot reveal would send
+    /// a row that only needed 12 pt of air to the BOTTOM of the page. The band's
+    /// edge is its residual's sign. RED on the first U8 build: `.foot`.
+    @Test func aBandedRowInTheTopAirIsRevealedAtTheHeadNeverTheFoot() {
+        let scroll = TakesArticleScroll()
+        _ = scroll.consumeArticleGeometry(
+            TakesBoardLayout.ArticleGeometry(offset: 900, content: 6000, viewport: 700),
+            remembered: nil, positionedByUser: false)
+        scroll.noteArticleRowFrame("a", CGRect(x: 0, y: -120, width: 680, height: 100))
+        scroll.noteArticleRowFrame("b", CGRect(x: 0, y: 6, width: 680, height: 80))   // in the top air
+        scroll.noteArticleRowFrame("c", CGRect(x: 0, y: 92, width: 680, height: 80))
+        scroll.landArticle(on: "b")   // an ENTRY landing — banded
+        #expect(scroll.articleLandingStep(order: ["a", "b", "c"]) == .reveal("b", .head),
+                "a row 6 pt into the top air comes DOWN to the band's top — the head, never the foot")
+        // …and a row in the bottom room goes up to the band's foot.
+        let low = TakesArticleScroll()
+        _ = low.consumeArticleGeometry(
+            TakesBoardLayout.ArticleGeometry(offset: 900, content: 6000, viewport: 700),
+            remembered: nil, positionedByUser: false)
+        low.noteArticleRowFrame("a", CGRect(x: 0, y: 500, width: 680, height: 80))
+        low.noteArticleRowFrame("b", CGRect(x: 0, y: 610, width: 680, height: 80))   // bottom in the room
+        low.landArticle(on: "b")
+        #expect(low.articleLandingStep(order: ["a", "b"]) == .reveal("b", .foot))
+    }
+
+    /// **An unreported row above an on-screen row, at the page's rest, is on
+    /// screen** — the 17p R1-1 fact ("the TOP is a place of its own") stated as
+    /// evidence: at offset 0 the page shows everything from the top air down, so
+    /// a row BEFORE a realized row sitting on screen is visible too. The step
+    /// used to "reveal" such rows from a lone early row — the first block
+    /// (KnownIssues row 94's own sighting; a 6-pt miss and a hop under the band)
+    /// and the third (the page hauled 90 pt). RED on the first U8 build: `.reveal`.
+    /// Its guard: a geometry the page cannot have (the realized row above the
+    /// top air while at rest) proves nothing — the direction rule decides.
+    @Test func anUnreportedRowAboveAnOnScreenRowAtRestNeedsNoReveal() {
+        let scroll = TakesArticleScroll()
+        _ = scroll.consumeArticleGeometry(
+            TakesBoardLayout.ArticleGeometry(offset: 0, content: 6000, viewport: 700),
+            remembered: nil, positionedByUser: false)
+        scroll.noteArticleRowFrame("e", CGRect(x: 0, y: 300, width: 680, height: 28))  // a lone early row, on screen
+        scroll.landArticle(on: "c")
+        #expect(scroll.articleLandingStep(order: ["a", "b", "c", "d", "e"]) == .wait,
+                "block c comes before an on-screen row at rest — it is on the page")
+        #expect(scroll.articleLandingAims == 0)
+        // The guard: a realized row ABOVE the top air at rest is not evidence.
+        let odd = TakesArticleScroll()
+        _ = odd.consumeArticleGeometry(
+            TakesBoardLayout.ArticleGeometry(offset: 0, content: 6000, viewport: 700),
+            remembered: nil, positionedByUser: false)
+        odd.noteArticleRowFrame("e", CGRect(x: 0, y: 0, width: 680, height: 28))
+        odd.landArticle(on: "c")
+        #expect(odd.articleLandingStep(order: ["a", "b", "c", "d", "e"]) == .reveal("c", .head))
+    }
+
+    /// **An UNREALIZED target is aimed at the exact shipped edge, then rested in
+    /// the band from its REAL height — at once.** The first aim cannot know the
+    /// row's height, and an anchor computed from an estimate misses (measured:
+    /// 6 pt into the top air, then a correction hop); the shipped edge anchor
+    /// is exact whatever the height, and the row's first report AT that edge
+    /// spends one more aim — in the same layout storm, not a quiet interval
+    /// later. RED on the first U8 build (the report asked for nothing).
+    @Test func anUnrealizedTargetIsAimedAtTheEdgeThenRestedInTheBandFromItsRealHeight() {
+        let s = TakesArticleScroll()
+        _ = s.consumeArticleGeometry(
+            TakesBoardLayout.ArticleGeometry(offset: 0, content: 6000, viewport: 700),
+            remembered: nil, positionedByUser: false)
+        s.noteArticleRowFrame("a", CGRect(x: 0, y: 18, width: 680, height: 60))
+        s.landArticle(on: "far")
+        #expect(s.articleLandingStep(order: ["a", "b", "far"]) == .reveal("far", .foot))
+        #expect(s.revealAnchor(for: "far", .foot) == UnitPoint(x: 0.5, y: 1),
+                "unrealized: the exact shipped edge (no estimate)")
+        // The row arrives where the edge put it — its bottom at the foot — real height 90.
+        s.noteArticleRowFrame("far", CGRect(x: 0, y: 610, width: 680, height: 90))
+        #expect(s.articleLandingReport(order: ["a", "b", "far"]) == .reveal("far", .foot),
+                "one more aim, at once — the band from its real height")
+        let y = s.revealAnchor(for: "far", .foot).y
+        #expect(abs(y * (700 - 90) + 90 - (700 - s.entryBand.bottomRoom)) < 0.01,
+                "the anchor rests its bottom two lines above the foot")
+        #expect(s.articleLandingReport(order: ["a", "b", "far"]) == .wait,
+                "…once: the next report is a report")
     }
 
     // MARK: - (b) THE BAND — mid-band exact

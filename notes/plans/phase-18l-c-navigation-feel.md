@@ -1607,7 +1607,7 @@ FABLE cold review follows (editor seam).
 | 5 | (a) THE FLASH — the brain (named constants, Reduce Motion) + the faces (Write's caret line, Takes' block, Read's two faces) | brain + Takes DONE (this commit): `Surface/ArrivalFlash.swift` (0.3 s hold / 0.8 s cosine fade, the pure `opacity(at:)`, Reduce Motion = unanimated for the same total; the `ArrivalFlashFace` fill-behind + border-over; DEBUG `ArrivalFlashOracle`); `LandingAuthority.onArrived` (additive, nil elsewhere — told once at the first quiet look that finds the target home, or at a `settled` end); `TakesArticleScroll.articleArrival` (the ENTRY kind only) → the cell's face, gated on the setting + Reduce Motion. Write + Read DONE (this commit): Write — the bare mode-switch arrival (not an opening) parks `pendingModeSwitchArrival`; the settle hop's last step (`consumeModeSwitchArrival`) flashes the caret's LINE through the decor layer (`BlockDecorOverlayController.flashArrival` — a `DecorRectView` below the text, the block highlight's face, `NSAnimationContext` opacity fade; `arrivalFlashes` / `lastArrivalFlashLine` seams); Read — the seed that is not the note's opening marks its `ReadLanding.modeSwitch`, both faces take `landing.onArrived` for it and draw the face on the landed row (`read-edit|…`, `read-page|…`) |
 | 6 | (b) THE COMFORT BAND — the brain (named constants) + Takes (row 94's MAY-take) + Write + Read | brain + Takes DONE (this commit): `Surface/ComfortBand.swift`; the Takes ENTRY landing's decision/residual/anchor banded (`TakesArticleScroll.entryBand`, `revealAnchor(for:_:)`), `articleTopAir = 18` named and drawn by the column's padding — **KnownIssues row 94 TAKEN on the mode-switch road** (its sighting's road; bloom/find head reveals keep the shipped edge — the residual, recorded); measured: foot room **34.0** (two 17-pt lines), head top **18.0**; Write + Read DONE (this commit): Write — `ComfortBand.restCaretLine` (#98(a) resolved, then banded) in the hop's reveal and after the carried placement, whose block inset is clamped too (top air = the text container's own `textContainerOrigin.y`, read live); Read — `ReadLandingBox.band`/`reband` clamp the carried (or resting) fraction with the row's real height as it arrives, the aim reads the box's anchor (edit face: `columnLead` 26; the calm page: `roomPadding` 28). **Measured (`18lc-u8-wr1.log`, 34 tests / 4 suites green):** Write top 24.0 · bottom room 34.0 · mid 250.5 → 250.5; Read top 25.5 · bottom room 33.5. **`ModeSwitchCarryTests` PIN B — FLAGGED, not changed:** the band moves its Read reading from ~0.0 to 0.044 (a 26-pt top air), inside the pin's own 0.06 tolerance, so it rides green and unmodified; the orchestrator may want its message's "red-on-old: 0.5" wording to mention the band |
 | 7 | Behavioural reverts, NAMED BEFORE THEY RUN | DONE — nine reverts named (`1e79c315`) and run in four batches, every one RED in its predicted shape (results under THE BEHAVIOURAL REVERTS), one unpredicted red recorded honestly (the mid-band pin was not green-on-both-sides), one pin-fidelity gap found and fixed (R-1/R-2 now model her hand); tree clean, none in flight |
-| 8 | Walk (both voices, takemania) + the VisualWalk suite as regression cover + a scenario row for the flash/band | NOT STARTED |
+| 8 | Walk (both voices, takemania) + the VisualWalk suite as regression cover + a scenario row for the flash/band | IN FLIGHT — the harness rows landed (`e6b86322`); the FIRST full run (`114955`) found a band defect in the Takes entry landing's first step (Study row D's hop) — traced, fixed pins-first (THE WALK'S FIRST RUN, below); `takes-find`'s ERROR attributed PRE-EXISTING (order-dependent; the pre-U8 App/ build fails it identically); `mode-switch-feel` C restaged off the note's last block. Next: the named reverts R-U8-10…12, the re-stamped full run in both voices, the hands-on walk |
 | 9 | Closing runs (touched suites + Tutorial + core filter for the setting) | NOT STARTED |
 | 10 | Self-assessment | NOT STARTED |
 
@@ -1737,6 +1737,62 @@ Runs over the named suites only (logs `App/Variorum/DerivedData/18lc-u8-R*.log`)
 
 Reverts in flight: none.
 
+### THE WALK'S FIRST RUN AND WHAT IT FOUND (the Takes band's first step — fixed pins-first)
+
+**The first full VisualWalk run on the committed U8 tree** (`notes/plans/vis-walks/2026-09-28/114955`, build
+`0b73e775`, both voices, every seeded scenario): **5 failing**, each dispositioned —
+- **`takes-find` ERROR ×2** (row A: the find field does not hold the keyboard; its precondition "takemania's chosen
+  takes hold several Hyde matches" fails) — **PRE-EXISTING, not U8's:** alone it passes on the U8 build (`123322`,
+  0 failing); after the scenarios before it, the PRE-U8 App/ (a `VW_DD` scratch build of the tree's core with every
+  U8 App/ file restored to `45054bba` — `124437`) fails it identically. Order-dependent seeded state; NOTICED 6.
+- **`takes-landing` row C** — the re-armed row: RED on that pre-U8 scratch build (`124437`: "∅ ≠ settled" — the
+  stand-down filed nothing), GREEN on U8 in both voices. Red-on-old confirmed for the harness re-arm.
+- **`takes-landing` Study row D — U8's, a real defect:** R-Q20's landing on the FIRST block took ONE hop
+  (`hops=1 ms=1009` — the pre-U8 row settled with none).
+- **`mode-switch-feel` C ×2** (Read's bottom room 26.7 < 33): the scenario's caret was the note's LAST block, which
+  Read's page cannot lift above the column's foot (the page ends) — a staging boundary, not a band miss; the
+  scenario is restaged onto a mid-note block (below, THE WALK).
+
+**The row D trace (in-process first — `TakesEntryBandTests.rq20sLandingOnALongFirstBlockSettlesWithoutAHop`, the
+landing's own story printed):** the Takes band's FIRST step decides with its target UNREALIZED and one placeholder
+row reported, and three things went wrong there —
+1. **The edge.** R-Q1's rule (`minY < 0 ? .head : .foot`) answers `.foot` for a banded row whose top sits IN the
+   top air (0 ≤ minY < 18): a foot reveal sends a row that needed a few points of air to the page's BOTTOM.
+2. **The estimate.** An unrealized target's banded anchor was computed from the realized rows' MEAN height — a lone
+   28-pt placeholder at the first step — so a 220-pt first block landed 6 pt into the top air, and the watch's
+   correction from quiet was the hop.
+3. **The resting page.** At offset 0 with one placeholder row realized BELOW the target, the step "revealed" rows
+   that were already on the page at rest — the first block (KnownIssues row 94's own sighting road) and the third
+   (the page hauled 90 pt).
+
+**The fix (`TakesArticleScroll` only, the entry kind only):** `landingEdge` — a realized banded row that fits goes by
+the band (top above the band's top edge → head, else foot); an UNREALIZED row is aimed at the EXACT shipped edge
+anchor (exact whatever its height) and, when it reports AT that edge, ONE more aim rests it in the band from its
+real height (`bandedSecondAim` — in the same layout storm, not a quiet interval later); `isOnTheRestingPage` — at
+offset 0, an unreported row BEFORE a realized row sitting on screen is on the page (17p R1-1's "the top is a place
+of its own", stated as evidence), GUARDED: any realized row above the top air while at rest is a geometry the page
+cannot have and proves nothing (the shipped pin `theLandingAimsAtTheHeadForARowAboveTheRealizedOnes` stages
+exactly that and caught the first cut of the rule — the direction rule decides there, as shipped).
+**Measured after (`18lc-u8-edge3.log` — the four Takes suites, 69 tests, green + the 1 known):** R-Q20 on a long
+first block: aims 0, hops 0, both voices; foot room 34.0 with 0 corrections (aims 2 — the edge, then the band);
+head 17.5.
+
+**The new pins** (`TakesEntryBandTests`): `aBandedRowInTheTopAirIsRevealedAtTheHeadNeverTheFoot` (pure),
+`anUnreportedRowAboveAnOnScreenRowAtRestNeedsNoReveal` (pure, with its guard arm),
+`anUnrealizedTargetIsAimedAtTheEdgeThenRestedInTheBandFromItsRealHeight` (pure),
+`rq20sLandingOnALongFirstBlockSettlesWithoutAHop` (hosted, both voices), and the foot pin's new "no correction hop"
+assertion.
+
+**Named BEFORE they run** (the fix committed first; each a working-tree edit to the one committed file, restored by
+`git checkout --`; logs `18lc-u8-R*.log`):
+
+| # | Revert | Predicted RED |
+|---|---|---|
+| R-U8-RO | the WHOLE file at its pre-fix version (`TakesArticleScroll.swift` at the commit before the fix — red-on-old for the new pins) | the edge pin (`.foot`); the resting-page pin's first arm (`.reveal`) — its guard arm GREEN (the direction rule's head, as shipped); the second-aim pin (the unrealized anchor is not the exact edge; the report asks nothing); the foot pin's no-hop assertion. The hosted R-Q20 pin: red (1 hop) IF the in-process geometry reproduces the walk's Study hop — stated as uncertain, not predicted |
+| R-U8-10 | `landingEdge` answers R-Q1's rule for every row | the edge pin (`.foot`) only |
+| R-U8-11 | `isOnTheRestingPage` answers false | the resting-page pin's first arm (`.reveal`) |
+| R-U8-12 | the report's second-aim branch removed | the second-aim pin (the report `.wait`); the foot pin's no-hop assertion (the watch corrects instead) |
+
 ### THE BUILT SHAPE AGAINST THE BRIEF
 
 | Brief item | Built |
@@ -1800,6 +1856,11 @@ Reverts in flight: none.
 3. **A still-watched landing corrects the page after a harness clip scroll** (the harness is not "her hand") — the pins that stage a page must end the landing first (`clearArticleLanding()`); two U7 pins now do (R-U8-1's finding).
 4. **DEBUG flash-oracle keys can outlive their board** (the runner's autorelease pool — TEXTKIT2 §3's C8 note): the Takes keys carry the board's identity and the hosted Write/Read pins use random ids.
 5. **QUESTIONS #150** says its entry "CLOSES when U8 lands" — left for the orchestrator's close.
+6. **VisualWalk `takes-find` is ORDER-DEPENDENT** — alone it passes (`123322`); after the seeded scenarios before it,
+   its precondition ("takemania's chosen takes hold several Hyde matches") fails and row A reads `pane`, on the U8
+   build AND on the pre-U8 App/ scratch build (`124437`) alike — earlier scenarios' state (the seeded store is shared
+   across scenarios) moves takemania's chosen takes or the find's scope. Not U8's; U7's harness row (its owner: the
+   18l-c close / the U7 ladder).
 
 ### OWED AT CLOSE (drafted for the orchestrator — nothing below was applied)
 
