@@ -1032,7 +1032,7 @@ scn_b5-more-roads() {
 # resting top air above, two of its lines below — never the extreme edge), and flashes it (a brief highlight
 # that fades in about a second — default ON). The probe's `band` read (`bS` the surface, `bT` the target's top
 # below the viewport's top, `bB` the room under it, `bAir`/`bRoom` the band's two edges) and its flash summary
-# (`af=w<n>.t<n>.re<n>.rp<n>` — flash events drawn at full strength, per surface). Captures mid-flash.
+# (`af=w<n>.t<n>.re<n>.rp<n>` — flash events drawn at full strength, per surface). Captures AT the flash (`vw_cap_on_flash` — the probe polled until the count rises).
 vw_def mode-switch-feel "takemania (the Jekyll book), Write ⇄ Takes ⇄ Read" \
   "Write: ⌘↓ then ⌥↑ ×12 (the caret on a block a dozen paragraphs above the end) · her wheel to the page's top (the caret off it) · ⌘2 · ⌘1 · ⌘3 · ⌘1" \
   "each switch rests its target INSIDE the comfort band and flashes it: Takes' landed block (at the band's foot — R-Q20 from the top), Write's caret line (AT the top air — it was off the page she left), Read's landed row; the flash count of each surface rises by one" pass
@@ -1045,6 +1045,26 @@ vw_af() {   # surface letter(s) w|t|re|rp → the count in PV[af]
     re) print -r -- ${${af#*.re}%%.*} ;;
     rp) print -r -- ${af#*.rp} ;;
   esac
+}
+
+# Capture the moment a flash DRAWS (18l-c U8's walk finding: a fixed sleep after the keystroke sampled the
+# 1.1-s flash before it began or after it ended — the board's mount and the landing's quiet vary run to run;
+# the count said it drew, the picture showed nothing). Polls the probe until the surface's flash count passes
+# `before`, then captures at once (the log says after how many probes); a plain capture, logged, when no flash
+# arrives inside ~3 s — the count assertion that follows reds that case on its own.
+vw_cap_on_flash() {   # surface (w|t|read) · the count before the switch · capture name
+  local i n
+  for i in {1..30}; do
+    vw_probe
+    case $1 in
+      read) n=$(( $(vw_af re) + $(vw_af rp) )) ;;
+      *) n=$(vw_af $1) ;;
+    esac
+    if (( n > $2 )); then vw_cap $3; vw_log "capture $3 at the flash (probe $i)"; return 0; fi
+    sleep 0.1
+  done
+  vw_log "capture $3: no flash inside the wait — a plain capture"
+  vw_cap $3
 }
 
 # Inside the band: bT ≥ bAir − 1 and bB ≥ bRoom − 1.
@@ -1078,7 +1098,7 @@ scn_mode-switch-feel() {
 
   # Row A — ⌘2: Takes lands the caret's block (R-Q20 — the current block moved since takes-find), banded foot.
   vw_keys "⌘2 (Takes)" 'keystroke "2" using command down'
-  sleep 0.7; vw_cap 01-takes-mid-flash
+  vw_cap_on_flash t $t0 01-takes-mid-flash
   sleep 2.2; vw_settle band; vw_cap 02-takes-landed
   vw_expect_eq "A · Takes is the surface the band was read on" "${PV[bS]}" takes
   vw_expect_in_band "A · Takes' landed block"
@@ -1087,7 +1107,7 @@ scn_mode-switch-feel() {
   # Row B — ⌘1: Write puts back the page it left (the top) and the caret (a mid-note block) is off it — the
   # reveal rests the caret's line AT the top air, never flush.
   vw_keys "⌘1 (Write)" 'keystroke "1" using command down'
-  sleep 0.5; vw_cap 03-write-mid-flash
+  vw_cap_on_flash w $w0 03-write-mid-flash
   sleep 2; vw_settle band; vw_cap 04-write-landed
   vw_expect_eq "B · Write is the surface the band was read on" "${PV[bS]}" write
   vw_expect_near "B · the caret's line rests AT the top air (the top clamp)" ${PV[bT]:-0} ${PV[bAir]:-0} 1
@@ -1095,7 +1115,7 @@ scn_mode-switch-feel() {
 
   # Row C — ⌘3: Read carries the page (R-18l-13: "read carries the page"), banded; its landed row flashes.
   vw_keys "⌘3 (Read)" 'keystroke "3" using command down'
-  sleep 0.8; vw_cap 05-read-mid-flash
+  vw_cap_on_flash read $r0 05-read-mid-flash
   sleep 2.2; vw_settle band; vw_cap 06-read-landed
   vw_expect_eq "C · a Read face is the surface the band was read on" "${${PV[bS]}/read-page/read-edit}" read-edit
   vw_expect_in_band "C · Read's landed row"
@@ -1103,7 +1123,8 @@ scn_mode-switch-feel() {
 
   # Row D — ⌘1: back to Write from Read (the carry); banded, flashed again.
   vw_keys "⌘1 (Write)" 'keystroke "1" using command down'
-  sleep 2.5; vw_settle band; vw_cap 07-write-again
+  vw_cap_on_flash w $(( w0 + 1 )) 07-write-again-mid-flash
+  sleep 2.2; vw_settle band; vw_cap 08-write-again
   vw_expect_in_band "D · Write's caret line after Read's carry"
   vw_expect_eq "D · the Write flash drew again (af ${PV[af]})" $(( $(vw_af w) - w0 )) 2
 }
