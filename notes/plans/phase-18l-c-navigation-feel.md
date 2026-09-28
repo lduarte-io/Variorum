@@ -445,3 +445,23 @@ record.
 | Master plan row 18 + KnownIssues rows 89/94 re-owned | DONE (this commit) |
 | Kickoff sitting (the question batch) | IN PROGRESS |
 | U5 → U6 → U7 (brief first) → U8 | NOT-STARTED |
+
+## U5 RECORD (implementer: `opus-implementer`, 2026-09-27)
+
+**NOT DONE (first line):** PENDING — filled at close.
+
+### LIVE STATUS
+
+| # | Piece | Status |
+|---|---|---|
+| 1 | Reading (the brief's list, in order, own context) | DONE — this file whole; the 18l U0 RECORD whole + its orchestrator acceptance + `18l-u0-ladder-round1.md`; KnownIssues rows 89 / 92 / 94 / 95 / 96 (the file whole in two pages); `TEXTKIT2_NOTES.md` whole; `SessionResiliencyProtocol.md` whole; the code: `ReadTierClickPlace`, `FlowParagraph` (+ its Mac face), `IndexProseColumn`, `BookIndexView` (the pane rows + `blockView`), `ReadEditPane` (`ReadEditBlock`), `BlockTOCView` (`makeLive`/`caretLanding`), `PaneSurface.swift` end to end, `EditorDocument` (base attributes), `EditorTypography`, `EditorBehaviorSettings` (`ParagraphGap`), `ProseGutter`, `IndexClickCaretTests`, `IndexProseColumnTests`, `Tools/VisualWalk/` (README, the click scenarios + `KI_S3`); her two captures |
+| 2 | Machine state at start | DONE — her real-store app IS RUNNING (`/Applications/Variorum.app`, pid 18511): the walk guard and the VisualWalk harness both refuse while it lives, so the WALK and the HARNESS RUN are PENDING until a zero-instance, author-free window; everything else runs harness-first through `xcodebuild` test windows |
+| 3 | TRACE — both her shapes, measured per host | IN-PROGRESS |
+| 4 | Red-on-old pin (the tiers' per-line geometry, both hosts, both voices) | NOT-STARTED |
+| 5 | THE CONSOLIDATION (one metrics home; read tier + replica + the live pane's paragraph style where hosted by the two index tiers) | NOT-STARTED |
+| 6 | Harness: the four S3 XFAILs → plain PASS (labels removed) | NOT-STARTED |
+| 7 | Closing runs (touched Mac suites + `TutorialWalkTests`) | NOT-STARTED |
+| 8 | Walk (both voices) | PENDING — her app is running (row 2) |
+| 9 | Self-assessment | NOT-STARTED |
+
+- Deaths / resumes: none.
