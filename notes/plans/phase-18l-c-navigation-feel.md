@@ -562,10 +562,37 @@ record.
 | 5c | The scope + home pins | DONE (this commit) — `PaneLineMetricsScopeTests` (3: a pane with no host metrics lays out with the Write base style in all three places a style lives; a pane handed the index metrics lays out with them; a SOURCE WALK — only `BookIndexView.swift` and `ReadEditPane.swift` pass `lineMetrics:`) — her ratification's *"Write and Takes untouched"* as a pin; `IndexProseColumnTests` +3 (the trailing/foot arithmetic; the pane's trailing/bottom insets MEASURED off a real surface's placement; the vocabulary's TK2 style drawing the tier's 4-pt line / 8-pt paragraph spacing, both voices — a TEXTKIT2 §5 tripwire). Run: **11 tests / 3 suites passed** (`18lc-u5-pins2.log`). Guards, not bug pins: they pass on both sides by design, stated |
 | 6 | Harness: the four S3 XFAILs → plain PASS (labels removed) | DONE — labels RETIRED `ab2aab28`; the seeded RUN on the stamped build (app=`031008b779da`, the U5 product code), each voice in fresh launches split for the tool's time limit, the full run's order kept: **Terminal 15 / 15 PASS** (`vis-walks/2026-09-27/201145/`, `201707/`); **Study 15 / 15 PASS** (`202855/`, `203443/`, `204736/`), **0 XFAIL, 0 FAIL in both voices**. The four formerly-XFAIL rows (*"the clicked line stays under the pointer"*, `index-click` + `readedit-click` × 2 voices) PASS: Terminal Index y 680 in the caret's box [670, 689], Read ▸ edit 1050 in [1040, 1059]; Study Index 751 in [736, 760], Read ▸ edit 1054 in [1039, 1063]; the caret on EXACTLY the block's last line in all four. **Honest: one harness ERROR on the way** — Study's first `book-landings` attempt (`204127/`) failed its own PRECONDITION (*"the navigator click took"* — the navigator's Copper Beeches row click did not take and the Index landed row 1: the walker's swallowed-click class, recorded in the scenario's own comment); a re-run in the same order PASSED 7 / 7 (`204736/`). Not U5's road (no navigator, Outline, landing or `BookIndexEditModel` line in the diff) — NOTICED, below. The dev store's voice restored to Terminal after every Study launch |
 | 7 | Closing runs (touched Mac suites + `TutorialWalkTests`) | NOT-STARTED |
-| 8 | Walk (both voices) | NOT-STARTED — CLEARED by the orchestrator's relay (she quit her app and is stepping away); the per-step guard binds every GUI step |
+| 8 | Walk (both voices) | DONE — THE WALK below: 8 rows × 2 voices, per-step guarded through VisualWalk's own act doors, on the stamped U5 build; captures `notes/plans/18l-screens/18lc-u5/walk/{terminal,study}/` (gitignored); the dev store's voice restored to Terminal; zero instances after |
 | 9 | Self-assessment | NOT-STARTED |
 
 - Deaths / resumes: none.
+
+### THE WALK (USE) — dev-store Debug (the stamped U5 build, app `031008b779da`), both voices, per-step guarded
+
+Driven through VisualWalk's own act doors (a scratch step-helper sourcing `Tools/VisualWalk/lib.zsh`, never
+committed — every click: the step gap, `guard.sh --author`, activation, the target guard, the foreign-dialog
+check; her app absent, zero other instances, HID idle ≥ 2 s at every step). The orchestrator's relay cleared
+the machine (she quit her app and left). Line tops are MEASURED from each 2× capture (ink rows in a fixed
+prose-column box, window points; a scratch PIL script — the WalkKit "count text-row tops" method), the caret
+from the probe. The dev store's voice was found Terminal and left Terminal. Captures:
+`notes/plans/18l-screens/18lc-u5/walk/{terminal,study}/` (gitignored).
+
+| Voice | Row (her shapes first) | Result, measured | Captures |
+|---|---|---|---|
+| Terminal | Sherlock ▸ Index ▸ Blue Carbuncle ▸ *"So much so…"* (her capture 1's block), a mid-paragraph click on line 2 | caret line 1 of 2, click y 970 inside its box [960, 977], x 998.6 vs 1000; EVERY line above and both of the block's own lines at their resting tops (824.5 / 845.5 — the caret bar over line 2 reads 843.0); the block below **+25.0 pt = exactly the stored blank line** (8 + 17), nothing else | `t01-carbuncle-rest` → `t02-carbuncle-live-somuchso` |
+| Terminal | the same story ▸ *"No, no. No crime…"* (her capture 2's block, 8 lines here), its LAST line — directly above its blank separator | caret line 7 of 8 (the last), y 912 in [902, 919], x 799.5 vs 800; all 8 lines at their resting tops and **the wrap identical line for line**; the block below +25.0 (the blank line) | `t03-carbuncle-live-nono-lastline` |
+| Terminal | *A Scandal in Bohemia* ¶1, line 1 — the MARKER-BEARING line (`_the_`, the known boundary) | the dimmed `_the_` appears and the line's words shift right two characters; this line had room, so nothing re-wrapped: every line top unchanged; the block below +25 | `t04-scandal-rest` → `t05-scandal-live-marker-line` |
+| Terminal | the note's Read ▸ edit ▸ Blue Carbuncle ▸ *"No, no…"* LAST line (above its blank separator) | caret line 7 of 8, y 981 in [965.5, 982.5], x 723 vs 720; every line above and in the block unchanged to the point; the block below +25 | `t06-readedit-rest` → `t07-readedit-live-nono-lastline` |
+| Study | Index ▸ Blue Carbuncle ▸ *"So much so…"* line 2 — HER capture 1, same voice, same wrap | caret line 1 of 2, y 1025 in [1014, 1036], x 898 vs 900 (*"entirel\|y"*); both lines at rest's tops (875.5 / 901.5); the block below **+30.0 = exactly the stored blank line** (8 + 22) — where her capture showed the lines pulled together and a larger gap | `s01-carbuncle-rest` → `s02-carbuncle-live-somuchso` |
+| Study | *"No, no…"* (7 lines — HER capture 2's block), its last line *"such."* | caret line 6 of 7, y 961 in [946, 968], x 710.6 vs 715; the wrap IDENTICAL to rest (*"…events may / be expected…"*, *"…experience of / such."* — her capture showed it re-wrapped *"…events / may be…"* and compressed); every line top unchanged; the block below +30 | `s03-carbuncle-live-nono-lastline` |
+| Study | *A Scandal in Bohemia* ¶1 line 1 — the marker line, on a FULL line | the boundary's visible form: `_the_` widens the first line, *"her"* drops to line 2 and the words re-flow down the paragraph (15 lines at rest, 15 live, every line top unchanged — the count held here); CONTENT, the held 18e's — recorded, not chased | `s04-scandal-rest` → `s05-scandal-live-marker-line` |
+| Study | the note's Read ▸ edit ▸ *"So much so…"* line 2, mid-paragraph | caret line 1 of 2, y 832 in [821.5, 843.5], x 800.1 vs 800; the block's lines at rest's tops; the block below +29.5 — i.e. the blank line's +30 with the WHOLE page 0.5 pt higher (one device pixel, uniform above and below; Terminal's same row read 0.0; within the pins' ±1 — noted, not chased) | `s06-readedit-rest` → `s07-readedit-live-somuchso` |
+
+**Walker facts met** (the record's, for the next walker): a click right after the step door's activation was
+swallowed four times of ~14 (the known class — every read-tier click here is idempotent, so a second click was
+the rule, verified by the probe's `fr=pane`); the probe's `rtI` list (40 frames, top-down) was CROWDED OUT by
+stale ghost frames of rows the pane had scrolled past (the README's documented edge) — so this walk measured
+line tops from the captures instead.
 
 ### THE TRACE (inputs → the wrong geometry; every number from the pin's red run on `05983838`, the real hosts, real clicks)
 
