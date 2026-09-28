@@ -62,8 +62,10 @@ nonisolated enum SampleLibraryJekyllBook {
     /// R-18l-12's disclaimer in three plain paragraphs — (1) the tray ships
     /// full on purpose and empties on the ordinary clock, so Restore is how
     /// to get the full experience back; (2) a second device can show the
-    /// book twice, and either copy can go; (3) the tag sentence the other
-    /// seeded books carry. PROVISIONAL wording — hers to polish.
+    /// book twice, and how to remove one copy — its notes AND the book,
+    /// because deleting a book keeps its notes (the U6 ladder's F3; the
+    /// shared tag cannot tell the two copies apart); (3) the tag sentence the
+    /// other seeded books carry. PROVISIONAL wording — hers to polish.
     ///
     /// Paragraphs are separated by ONE newline, so each lands as a block
     /// with no stored blank line (the whole book's shape — the U6 record's
@@ -90,9 +92,10 @@ nonisolated enum SampleLibraryJekyllBook {
         takemania comes back with its full history.
         If you use Variorum on more than one device, this book can appear twice: each device \
         sets it up on its own, and a book that arrives with a history of its own is never \
-        folded into the other copy automatically. Delete whichever copy you don\u{2019}t want \
-        \u{2014} it goes to the Trash like anything else \u{2014} and Restore brings a fresh \
-        one back whenever you like.
+        folded into the other copy automatically. To keep just one, open the copy you \
+        don\u{2019}t want and delete its notes, then the book \u{2014} deleting a book on its \
+        own keeps its notes, and they would wait in the Pool. Both go to the Trash like \
+        anything else you delete.
         Every note here is tagged \u{201C}\(tagName)\u{201D}, so the whole book is findable \
         and removable as a set.
         """
