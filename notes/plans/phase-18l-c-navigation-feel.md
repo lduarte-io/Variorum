@@ -1263,3 +1263,85 @@ not filed as a defect).
 
 **ROUND 2 FIX BATCH — NOTICED, NOT TOUCHED:** four OLDER comments state the same falsified fact R2-N4 corrected in this unit's two (outside the round's window, left as they were): `SampleLibrarySeeder.seededDefaultsKey`'s doc and `AppSession.storeVariant`'s doc (*"Debug and Release share a defaults domain"*), and `AppSession.seededBookMarkIsSet`'s + `SeededBookRestore.ensure`'s *"a domain the real app shares"*. The per-variant key scoping they justify is harmless and still tidy; only the stated reason is wrong (the domains are separate — bundle ids differ, verified read-only). One-line comment fixes each, for whoever next touches those files.
 
+
+## U7 DESIGN BRIEF — SEARCH IN TAKES, find-only v1 (the orchestrator's design, 2026-09-28 — HER-VISIBLE per her "yes you can make a design brief"; she is away, so the build proceeds under the away-run rule with every product call below PROVISIONAL and one line to flip; her rulings R-18l-6 · R-18l-9 · R-18l-10 are the settled frame)
+
+**What it is:** ⌘F inside Takes mode finds text across the open note's takes and walks the
+matches. It is NOT whole-library search (13o's), NOT replace (the Write bar's, incl. Replace
+All in Every Take), NOT the phone's (the mobile catch-up's).
+
+**The design, in ten decisions:**
+1. **The door and the face.** ⌘F in Takes opens a find bar in the shipped bar's visual grammar
+   (field · "N of M" count · next/prev with ⏎/⇧⏎ and ⌘G/⇧⌘G · Esc closes, focus returns to the
+   board, her place kept). No replace field (R-18l-9). Declared in the capability registry with
+   per-mode availability (P-1): Write keeps its own bar; Takes gets this one through the same
+   chord.
+2. **The match model is a PURE BRAIN** (`TakesFindPlan`, app-side beside `TakesReplacePlan`,
+   unit-tested): note projections + query + scope → ordered matches (blockID, takeID, range,
+   on-shown-take) in document order. Case/diacritic-insensitive exactly as the Write bar
+   compares (read `EditorFind`'s options and MATCH them — one rule of sameness across the two
+   bars). Empty query = no matches, no residue. P1: bounded by the open note.
+3. **The scope toggle: "only chosen takes", DEFAULT ON (her ruling).** ON = each block's shown
+   take only. OFF = every LIVE take; archived takes excluded (they are out of view by
+   definition — PROVISIONAL). The toggle's state is session-remembered, one global slot
+   (PROVISIONAL; per-note is one line).
+4. **The off-scope affordance (R-18l-10, her sketch's both halves):** with the toggle OFF, a
+   block whose NON-shown takes hold matches wears a muted count marker on its card ("2 in
+   other takes" — the badge vocabulary, VoiceTokens only); stepping onto such a match with
+   next/prev EXPANDS that block's fan and highlights the take; nothing expands before she
+   navigates there. An expanded fan STAYS open when she steps on (her board state is hers;
+   auto-collapsing behind her is the surprise we avoid — PROVISIONAL, one line to flip).
+5. **Navigation is a LANDING through the one authority** — find-next reveals the match via
+   `LandingAuthority` under the `.takesArticle` policy (U2's machinery: minimal-reveal aim,
+   her hand ends a landing, every ending files). No new scroll mechanics anywhere.
+6. **THE BIGGEST CALL — the current match's take goes LIVE with the match SELECTED.** This is
+   find's native semantics (the Write bar selects; type-to-replace works) and it answers her
+   ledger-row-7 report directly (*"even though your cursor is placed, tapping keys won't make
+   you edit"*): after find-next she can TYPE, immediately. Cost: one pane swap per step
+   (bounded — a click already costs exactly this; P3's one-ring invariant rides the existing
+   authority road). The lighter alternative (highlight-only; ⏎ or a click activates) is stated
+   here and is a contained swap if she prefers calm over immediacy — FLAGGED FOR HER, built as
+   recommended.
+7. **Highlights.** Read-tier cards carry match highlights in their AttributedString (the
+   TEXTKIT2_NOTES rule — never rendering attributes on the live editor); the current match
+   wears the stronger emphasis token. Inside the LIVE pane, the selection IS the current-match
+   affordance and other in-pane matches are deliberately not painted (the live editor stays
+   clean — PROVISIONAL, stated).
+8. **Wrap-around** at the ends, said in the count face (the platform standard); "No matches"
+   is the bar's own quiet face, never a toast (the door speaks, in place).
+9. **The flash stays out of it:** find-nav is IN-mode navigation; U8's mode-switch flash does
+   not fire on find steps.
+10. **Evidence of its kind:** the pure brain's unit suite (ordering, scope, off-scope counts,
+    case rules); face pins (the bar renders from the registry, toggle default ON, the marker's
+    counts); a landing+focus integration pin (find-next lands, focuses, selects — red-on-old
+    by construction on the pre-U7 tree); the WALK on takemania (search "Hyde": multi-block,
+    multi-take, off-scope matches through the fanned blocks) both voices; the seeded VisualWalk
+    suite as regression cover. Editor-seam adjacent (the ring moves, the landing family) →
+    FABLE cold review.
+
+## U7 BRIEF (session 3 — the implementer's charge; written by the orchestrator 2026-09-28)
+
+You are a FRESH `opus-implementer` for **18l-c UNIT U7**. One acceptance unit, PHASE-SIZED:
+search in Takes exactly per THE U7 DESIGN BRIEF above — its ten decisions are your contract;
+deviations are STOP-and-report, never silent. **Read first, in order (never delegated):** (1)
+THIS file whole — HER KICKOFF MESSAGE (her search passage is the product spec), THE SITTING
+RECORD (R-18l-6/9/10/13), THE LEDGER rows 3 and 7, BINDING PRINCIPLES, CAST & DISCIPLINE,
+ENVIRONMENT TRAPS (verbatim binding), the U5/U6 records for the era's facts. (2) The Takes
+surface end to end: `TakesViewModel`, `TakesBoardLayout`, `TakesArticleScroll` (the landing
+watch + restore halves — R-Q20/R-Q21 are author-ruled machinery: your navigation RIDES the
+authority, never edits the restore), `TakesBoardView`, `TakesModels`, `TakesBottomBar`. (3)
+`Features/Editor/EditorFind.swift` WHOLE (the compare options you must match; the bar's face
+grammar; its registry declarations). (4) `Surface/LandingAuthority.swift` + the `.takesArticle`
+policy (U2's record). (5) `notes/TEXTKIT2_NOTES.md` in full (editor seam — mandatory). (6) The
+capability registry (P-1: the door declared once). **Ledger row 7 rides your unit:** trace
+today's non-activation on landings and record it; decision 6 is its designed answer. **Fences:**
+zero `Sync/`; the restore half of `TakesArticleScroll` byte-untouched; R-Q20/R-Q21 pins ride
+UNMODIFIED (a collision is a STOP-flag); `TakesViewModel` is P-9's standing counterexample —
+your additions go in their own file(s) (`TakesFind*.swift`), never more mass on the god object.
+**Discipline:** the standing paragraph verbatim (checkpoint from the FIRST commit, `## U7
+RECORD` in THIS file, commit+push per piece pathspec-limited, NO trailers, pins red-on-old with
+behavioural reverts where a pre-U7 red exists — the landing+focus pin at minimum, tests at the
+END with suite-level `-only-testing` + the seeded VisualWalk run, synchronous waits, no
+subagents, PROVISIONAL-and-continue logged to QUESTIONS with STOP for gating calls). The author
+may be at the machine: GUI only under the per-step guard; takemania is your walk fixture.
+Fable cold review follows your hand-back.
