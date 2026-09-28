@@ -1662,6 +1662,25 @@ below the text — never a rendering attribute), Takes over the landed block's c
 `follow_the_scroll` shape of the `receipt_style` precedent). Reduce Motion: the DISCREET NON-ANIMATED variant —
 the highlight shows unanimated for the same total and then goes (JUDGMENT CALL; "no flash" is one line).
 
+### THE CARET RULE'S RUNS (the pins-first evidence, in order)
+
+- **RED on the pre-U8 product tree** (`18lc-u8-caret-red.log`; the three touched suites, 59 tests): **11 issues
+  + 1 known issue, every one in its predicted shape** — the eight re-armed pins (R-1…R-9 below) red on the
+  stand-down (`pane == nil`, `articleLanding == nil`, no `LAND`, her block off the page, 0 aims); R-4 green on both
+  sides by design (the no-conflict case); the tripwire's known issue reproduced on its restaged road.
+- **The first GREEN attempt measured the 17q race itself** (`18lc-u8-caret-green.log`, 4 issues): with only the
+  stand-down line removed, the ride-through landing's FIRST decided step read her row's frame from before the
+  restored page had settled, judged it off the page and pulled the page to the foot —
+  `aPlainRoundTripComesBackToTheSameLineNotOnlyTheSameRow`: her block left 271 pt below the fold came back at 571
+  (the first showing's reveal place). That is precisely the race the 17q walk measured and the stand-down was
+  written against ("the pin's 60-block note came out restored and her 262-block one came out revealed"). **The
+  answer is not the stand-down back: a ride-through entry landing's FIRST step no longer decides — it hands the
+  landing to the one authority's watch and waits, and the watch decides at QUIET** (its correction spends the
+  step, which then judges settled frames) — the U2 discipline ("a correction is issued from quiet") applied to the
+  one step it did not yet cover. (The tripwire's second issue: a PROGRAMMATIC clip scroll does not de-realize the
+  live row — the bound `ScrollPosition` re-applies the landing's target, J1(c); her HAND is a scroll the view
+  sees as hers, so the pin restages with a synthesized wheel, the `TypewriterRoomReachabilityTests` precedent.)
+
 ## ORCHESTRATOR RESUME MAP (written 2026-09-28 at her compaction warning — the transcript-proof state; a post-compaction orchestrator re-orients from THIS section + the ledger + LIVE STATUS, verifying against git, never trusting)
 
 **Seat:** Fable `/architect-phase 18l-c` orchestrator (the session that took her kickoff). Her
