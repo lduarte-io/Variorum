@@ -1014,6 +1014,9 @@ scn_b5-more-roads() {
 # Read open); `takes-landing` stages its own first open by a relaunch, so it is order-independent.
 # 18l-b U4: `book-landings` runs LAST (appended — no earlier scenario's recipe changes).
 # 18l-b U-B5: `b5-more-roads` appended after it, for the same reason.
+# 18l-c U7: `takes-find` appended after it, for the same reason (its fixture is takemania, which no
+# earlier scenario touches; its one keystroke is undone).
 SCN_ORDER=(note-reopen write-typing write-newline-roundtrip write-divide-merge mode-roundtrip
            index-click readedit-click outline-narrow-restore outline-long-story-settle
-           b5-return-after-cmd-down b5-refont read-landing takes-landing book-landings b5-more-roads)
+           b5-return-after-cmd-down b5-refont read-landing takes-landing book-landings b5-more-roads
+           takes-find)
