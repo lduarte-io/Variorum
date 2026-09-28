@@ -68,6 +68,11 @@ final class MobileFirstWriteFurniture {
         /// defaults under its own key, beside Sherlock's).
         var loadEncryptionBook: (() -> Bool)?
         var saveEncryptionBook: ((Bool) -> Void)?
+        /// 18l-c U6: *The Strange Case of Dr Jekyll and Mr Hyde*'s own mark
+        /// (nil = the device defaults under its own key) — the encryption
+        /// book's shape exactly, including its fallback below.
+        var loadJekyllBook: (() -> Bool)?
+        var saveJekyllBook: ((Bool) -> Void)?
 
         static let deviceDefaults = Marks()
     }
@@ -101,6 +106,9 @@ final class MobileFirstWriteFurniture {
     /// `Outcome.ran`'s two, not inside it (the phone's pins match that
     /// case's shape; the second book records its own line).
     private(set) var encryptionBookOutcome: SampleLibrarySeeder.Outcome?
+    /// 18l-c U6: the same for *The Strange Case of Dr Jekyll and Mr Hyde*
+    /// (takemania's book) — its own line, beside the other two.
+    private(set) var jekyllBookOutcome: SampleLibrarySeeder.Outcome?
     /// The one in-flight occasion. Held (rather than a bare bool) so a
     /// second door firing mid-seed joins the first instead of starting a
     /// second, and so a pin can await deterministically what production
@@ -244,6 +252,25 @@ final class MobileFirstWriteFurniture {
         encryptionBookOutcome = encryptionBook
         Self.log.notice(
             "first write (Encryption Explained): \(String(describing: encryptionBook), privacy: .public)")
+
+        // 18l-c U6 (R-18l-11): the takemania book on the same occasion, the
+        // same gate, its own mark — paced the same way (three notes; the
+        // scripted history is ONE turn, a few hundred small writes). The
+        // encryption book's fallback, verbatim in shape: an injected SAMPLE
+        // mark stands for this book too unless its own mark is injected, so
+        // every pin that skips Sherlock skips this book for the same reason.
+        let loadJekyll = marks.loadJekyllBook ?? marks.loadSample
+        let saveJekyll = marks.saveJekyllBook ?? (marks.loadJekyllBook == nil ? marks.saveSample : nil)
+        let jekyllBook = await Task(priority: .utility) { @MainActor in
+            await SampleLibrarySeeder.seedIfNeeded(
+                session: session, book: .jekyllAndHyde,
+                storeVariant: storeVariant, gate: .unowned,
+                loadMark: loadJekyll, saveMark: saveJekyll,
+                pacing: { await Self.holdWhileWritingLands(session) })
+        }.value
+        jekyllBookOutcome = jekyllBook
+        Self.log.notice(
+            "first write (Jekyll and Hyde): \(String(describing: jekyllBook), privacy: .public)")
 
         return .ran(journal: journal, sample: sample)
     }

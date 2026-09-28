@@ -111,6 +111,8 @@ struct EditorCommands: Commands {
         // pre-13u Act 10: the sample library's restore, beside the
         // tutorial's (the tenth-wave ruling).
         .restoreSampleLibrary, .restoreEncryptionBook,
+        // 18l-c U6: the takemania book's restore, beside the other two.
+        .restoreJekyllBook,
         // 13f batch 3 (W3/A27 + W16): the navigation core's menu doors.
         .openNote, .navigateBack, .navigateForward,
         // 13f batch 4 (W1/A25): the split's.
@@ -818,6 +820,11 @@ struct EditorCommands: Commands {
             // pre-13x 5a: the second seeded book's restore, beside Sherlock's.
             Button(verb(.restoreEncryptionBook)) {
                 creationActions()?.restoreEncryptionBook()
+            }
+            .disabled(!canReachCreationTarget)
+            // 18l-c U6: the takemania book's restore, beside the other two.
+            Button(verb(.restoreJekyllBook)) {
+                creationActions()?.restoreJekyllBook()
             }
             .disabled(!canReachCreationTarget)
             // (The pre-13x batch 0 DEBUG keychain probe door lived here —

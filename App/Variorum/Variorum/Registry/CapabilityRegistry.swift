@@ -1552,6 +1552,15 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
+        // 18l-c U6 (R-18l-11): the takemania book's restore — the same
+        // mint-what's-missing road, the third seeded book.
+        Capability(
+            id: .restoreJekyllBook,
+            verb: "Restore \u{201C}\(SampleLibraryJekyllBook.name)\u{201D}",
+            scope: .app,
+            doors: [.menuBar, .palette],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "", availability: always),
 
         // MARK: Data safety (13l Act 4 — Settings ▸ Data Safety)
         // The `.deleteNow` shape exactly: `.surface`, app scope, always

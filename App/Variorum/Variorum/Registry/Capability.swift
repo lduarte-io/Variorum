@@ -674,6 +674,11 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// pre-13x 5a: *Encryption Explained*'s restore — the same
     /// mint-what's-missing door as Sherlock's, for the second seeded book.
     case restoreEncryptionBook
+    /// 18l-c U6 (R-18l-11): *The Strange Case of Dr Jekyll and Mr Hyde*'s
+    /// restore — the same mint-what's-missing door, for the book that holds
+    /// takemania. A deleted takemania note comes back FRESH, history and all
+    /// (the front matter's R-18l-12 promise).
+    case restoreJekyllBook
     // 13l Act 4 (ledger rows 11–12) — Settings ▸ Data Safety's three acts.
     // `.surface` for the `.deleteNow` reason: their target is the pane you
     // are looking at, and their per-gesture conditions (is a folder set? is a

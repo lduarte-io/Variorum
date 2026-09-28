@@ -138,7 +138,9 @@ nonisolated enum SeededBookRestore {
             let existing = try await session.database.read { db in
                 try SampleLibrarySeeder.discover(db, book: book)
             }
-            if existing.isComplete(for: stories.map(\.title)), let bookID = existing.bookID {
+            // 18l-c U6: the scripted note's title counts toward "whole".
+            let titles = SampleLibrarySeeder.expectedTitles(for: book, stories: stories)
+            if existing.isComplete(for: titles), let bookID = existing.bookID {
                 // This device has the book — its later removal is the
                 // reader's word, and the mark is where that word survives
                 // the tombstone's own purge (the header's note).

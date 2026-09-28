@@ -117,6 +117,25 @@
 //  the book; the callers seed both, and the dedupe engine takes the facts
 //  as a LIST (the batch's one `Sync/` touch, ruled).
 //
+//  ── A THIRD BOOK, AND A NOTE WITH A HISTORY (18l-c U6 — R-18l-11/12) ──
+//  *The Strange Case of Dr Jekyll and Mr Hyde* holds the author's test note
+//  **takemania**, whose history is REAL ROWS written by a scripted run of
+//  the operations API (`Takemania.swift`) — so a `Book` may now name ONE
+//  `ScriptedNote` beside its imported stories. Two consequences, each its
+//  own named rule below:
+//    · **Completeness is title-last.** A scripted note is minted under a
+//      reserved working title and takes its real one as its last act, so
+//      discovery (keyed on titles) never counts a half-written history as
+//      present and the mark is never set over one; the next occasion trashes
+//      the half-built note and mints afresh (`Existing.halfBuiltNoteIDs`).
+//    · **The dedupe does not judge this book** (`Book.joinsPristineDedupe`,
+//      PROVISIONAL — QUESTIONS #155). A book born with history reads EDITED
+//      to the pristine-copy classifier, and the engine's defense leg revives
+//      a deliberately deleted edited copy while its twin stands — which
+//      would undo the very advice R-18l-12's disclaimer gives. Out of the
+//      facts list the engine never sees it: two copies are two ordinary
+//      books, and the facts it receives stay byte-identical (zero `Sync/`).
+//
 //  ── P2, AND THE FIRST-LAUNCH CRITICAL PATH ────────────────────────────
 //  Every write goes through `session.runner` (the serial off-main executor)
 //  and every story is its OWN runner turn, so autosave and anything else
@@ -214,6 +233,13 @@ enum SampleLibrarySeeder {
         /// The clock every write of the seed carries — nil = the ambient
         /// clock (the tutorial's shape: a book about THIS build lands now).
         var clock: Date?
+        /// 18l-c U6: a note minted by a SCRIPTED HISTORY rather than
+        /// imported (takemania) — nil for every book before it.
+        var scriptedNote: ScriptedNote? = nil
+        /// 18l-c U6: whether the sync engine's pristine-copy dedupe judges
+        /// this book (`allDedupeFacts`). True for every book before it; the
+        /// Jekyll book opts OUT (the header's reason; QUESTIONS #155).
+        var joinsPristineDedupe: Bool = true
 
         /// *The Adventures of Sherlock Holmes* — pre-13u Act 3's book, its
         /// values exactly as they shipped.
@@ -247,8 +273,92 @@ enum SampleLibrarySeeder {
             markSuffix: SampleLibraryEncryptionBook.markSuffix,
             clock: nil)
 
-        /// Every seeded book, in seeding order.
-        static let all: [Book] = [.sherlock, .encryptionExplained]
+        /// *The Strange Case of Dr Jekyll and Mr Hyde* — 18l-c U6
+        /// (R-18l-11): the front matter (R-18l-12's disclaimer), the
+        /// novella's first and last chapters as straight text, and between
+        /// them takemania, minted by its scripted history. The book's own
+        /// clock is the novella's publication (Sherlock's m6 precedent);
+        /// takemania's history runs on a seed-relative clock of its own
+        /// (`Takemania`'s header).
+        static let jekyllAndHyde = Book(
+            name: SampleLibraryJekyllBook.name,
+            tagName: SampleLibraryJekyllBook.tagName,
+            frontMatterChapter: SampleLibraryJekyllBook.frontMatterChapter,
+            frontMatterTitle: SampleLibraryJekyllBook.frontMatterTitle,
+            frontMatterText: SampleLibraryJekyllBook.aboutThisBook,
+            resourceName: SampleLibraryJekyllBook.resourceName,
+            profile: "book",
+            markSuffix: SampleLibraryJekyllBook.markSuffix,
+            clock: SampleLibraryJekyllBook.publicationDate,
+            scriptedNote: .takemania,
+            joinsPristineDedupe: false)
+
+        /// Every seeded book, in seeding order — what the Mac's launch and
+        /// the pins iterate.
+        static let all: [Book] = [.sherlock, .encryptionExplained, .jekyllAndHyde]
+
+        /// The books the sync engine's pristine-copy dedupe judges
+        /// (`allDedupeFacts`) — every book whose shipped seed is PRISTINE by
+        /// construction. 18l-c U6: `Book.all` and this list stopped being
+        /// the same list; the engine's facts stay byte-identical.
+        static var dedupeCovered: [Book] { all.filter(\.joinsPristineDedupe) }
+    }
+
+    /// **A note minted by a scripted history** (18l-c U6). One case today;
+    /// the seeder asks it for its title, its reserved working title, its
+    /// chapter, where it stands in the book, and how to mint it.
+    nonisolated enum ScriptedNote: Sendable, Equatable {
+        case takemania
+
+        var title: String { Takemania.title }
+        var workingTitle: String { Takemania.workingTitle }
+        var chapter: String { Takemania.chapter }
+        /// The story it follows in the book's order (appended when absent).
+        var follows: String { Takemania.follows }
+
+        func mint(
+            _ ops: Operations, anchor: Date, bookID: String, sectionID: String, tagID: String,
+            interruptAfterStep: Int?
+        ) throws -> String {
+            try Takemania.mint(
+                ops, anchor: anchor, bookID: bookID, sectionID: sectionID, tagID: tagID,
+                interruptAfterStep: interruptAfterStep)
+        }
+    }
+
+    /// One note of a book's seed, in book order: an imported story, or the
+    /// scripted note. Plain values, so the runner's closures read them
+    /// without touching the seeder's isolation.
+    nonisolated enum PlanEntry: Sendable, Equatable {
+        case story(title: String, text: String)
+        case scripted(ScriptedNote)
+
+        var title: String {
+            switch self {
+            case .story(let title, _): return title
+            case .scripted(let note): return note.title
+            }
+        }
+    }
+
+    /// Every title a COMPLETE copy of `book` holds, beyond its front matter:
+    /// the resource's stories, plus the scripted note's (18l-c U6). What
+    /// discovery's `isComplete` is asked about on every road — the launch
+    /// seed's two reads and the restore door's.
+    static func expectedTitles(for book: Book, stories: [Story]) -> [String] {
+        plan(for: book, stories: stories).map(\.title)
+    }
+
+    /// The seed's order: the stories as the resource lists them, with the
+    /// scripted note (if any) right after the story it follows. A book
+    /// without one plans exactly its stories — every pre-U6 seed unchanged.
+    static func plan(for book: Book, stories: [Story]) -> [PlanEntry] {
+        var entries = stories.map { PlanEntry.story(title: $0.title, text: $0.text) }
+        if let scripted = book.scriptedNote {
+            let index = entries.firstIndex { $0.title == scripted.follows }.map { $0 + 1 }
+            entries.insert(.scripted(scripted), at: index ?? entries.endIndex)
+        }
+        return entries
     }
 
     /// **The seed's OWN segmentation, named rather than inherited** (the
@@ -441,11 +551,14 @@ enum SampleLibrarySeeder {
             hash: BridgeHash.body(_:))
     }
 
-    /// Every seeded book's facts, in seeding order — what `SyncSession.configure`
-    /// hands the engine (pre-13x 5a: the facts became a LIST; the pass runs
-    /// per entry exactly as it ran for one).
+    /// Every DEDUPE-COVERED book's facts, in seeding order — what
+    /// `SyncSession.configure` hands the engine (pre-13x 5a: the facts
+    /// became a LIST; the pass runs per entry exactly as it ran for one).
+    /// 18l-c U6: `Book.dedupeCovered`, not `Book.all` — the Jekyll book is
+    /// seeded everywhere but judged nowhere (the header's reason), so the
+    /// list the engine receives is byte-identical to before it existed.
     nonisolated static func allDedupeFacts() -> [SampleLibraryDedupeFacts] {
-        Book.all.map { dedupeFacts(for: $0) }
+        Book.dedupeCovered.map { dedupeFacts(for: $0) }
     }
 
     // MARK: - Discovery (the idempotence guard)
@@ -485,6 +598,13 @@ enum SampleLibrarySeeder {
         /// to have deleted, so its title mints afresh); smallest id first
         /// where two live tagged notes share a title, for determinism.
         var strayNoteIDsByTitle: [String: String] = [:]
+        /// **The seeder's own half-built scripted note** (18l-c U6 — design
+        /// call 3): members of the book still wearing the scripted note's
+        /// RESERVED working title, which only a history stopped before its
+        /// last act can leave. The scripted mint trashes them (the Trash
+        /// keeps them 30 days) before minting afresh. Empty for every book
+        /// without a scripted note.
+        var halfBuiltNoteIDs: [String] = []
 
         func isComplete(for titles: [String]) -> Bool {
             bookID != nil && titles.allSatisfy { presentTitles.contains($0) }
@@ -499,9 +619,13 @@ enum SampleLibrarySeeder {
         // a reader's own `sherlock holmes/…` child is hers.
         existing.tagID = try Queries.allTags(db).first { $0.path == book.tagName }?.id
         if let bookID = existing.bookID {
-            existing.presentTitles = Set(
-                try Queries.assembleReading(db, readingID: bookID)
-                    .compactMap(\.title))
+            let entries = try Queries.assembleReading(db, readingID: bookID)
+            existing.presentTitles = Set(entries.compactMap(\.title))
+            if let scripted = book.scriptedNote {
+                existing.halfBuiltNoteIDs = entries
+                    .filter { $0.title == scripted.workingTitle }
+                    .map(\.postID)
+            }
             // `(position, id)` order, first wins — deterministic if an
             // older half-run already left two chapters wearing one name.
             for chapter in try Queries.readingSections(db, readingID: bookID)
@@ -705,7 +829,8 @@ enum SampleLibrarySeeder {
             let stories = try await Task.detached(priority: .utility) {
                 try loadStories(for: book)
             }.value
-            let titles = stories.map(\.title)
+            // 18l-c U6: the scripted note's title counts toward "complete".
+            let titles = expectedTitles(for: book, stories: stories)
 
             let known = try await session.database.read { db in try discover(db, book: book) }
             if known.isComplete(for: titles) {
@@ -786,10 +911,19 @@ enum SampleLibrarySeeder {
         var minted: Int
     }
 
+    ///
+    /// **18l-c U6 — the scripted note.** A book's plan may carry ONE note
+    /// minted by a scripted history (takemania): it gets ONE runner turn of
+    /// its own (so cancellation, which lands only between turns, can never
+    /// split its history), its history runs on a clock RELATIVE to this
+    /// seed's own `now` (read here from `\.date`, outside the book's clock),
+    /// and before it mints, the seeder's own half-built note from a stopped
+    /// earlier history goes to the Trash. `interruptScriptAfterStep` is the
+    /// pins' seam for that stopped history — nil in production.
     @discardableResult
     static func seed(
         session: AppSession, book: Book = .sherlock, stories: [Story], existing: Existing,
-        pacing: Pacing? = nil
+        pacing: Pacing? = nil, interruptScriptAfterStep: Int? = nil
     ) async throws -> Seeded {
         let bookName = book.name
         let tagName = book.tagName
@@ -831,24 +965,63 @@ enum SampleLibrarySeeder {
             }
         }
 
-        // One turn per story.
+        // 18l-c U6: the scripted note's "now" — read once, OUTSIDE the book's
+        // clock, so its history lands relative to this seed (the tray and the
+        // janitor age tombstones by the 30-day window; `Takemania`'s header).
+        @Dependency(\.date) var date
+        let anchor = date.now
+        let halfBuilt = existing.halfBuiltNoteIDs
+
+        // One turn per note, in the book's order.
         var minted = 0
-        for story in stories where !present.contains(story.title) {
+        for entry in plan(for: book, stories: stories) where !present.contains(entry.title) {
             try Task.checkCancellation()
             await pacing?()
             let bookID = skeleton.book
             let tagID = skeleton.tag
-            let stray = strays[story.title]
-            try await session.runner.run { _ in
-                try Self.underClock(clock) {
+            let stray = strays[entry.title]
+            switch entry {
+            case .story(let title, let text):
+                try await session.runner.run { _ in
+                    try Self.underClock(clock) {
+                        let quiet = Operations(undoStack: nil)
+                        // m5, again: a run cancelled between `createSection` and
+                        // `importPost` left this story's chapter standing empty.
+                        let sectionID = try chapters[title]
+                            ?? quiet.createSection(in: bookID, name: title).id
+                        try Self.place(
+                            quiet, title: title, text: text, stray: stray,
+                            in: bookID, section: sectionID, tag: tagID, label: label)
+                    }
+                }
+            case .scripted(let scripted):
+                try await session.runner.run { _ in
                     let quiet = Operations(undoStack: nil)
-                    // m5, again: a run cancelled between `createSection` and
-                    // `importPost` left this story's chapter standing empty.
-                    let sectionID = try chapters[story.title]
-                        ?? quiet.createSection(in: bookID, name: story.title).id
-                    try Self.place(
-                        quiet, title: story.title, text: story.text, stray: stray,
-                        in: bookID, section: sectionID, tag: tagID, label: label)
+                    let sectionID = try Self.underClock(clock) {
+                        try chapters[scripted.chapter]
+                            ?? quiet.createSection(in: bookID, name: scripted.chapter).id
+                    }
+                    // F10 holds for the scripted note too: a surviving note
+                    // (the book deleted, the note kept) is RE-MEMBERED, with
+                    // whatever history she has given it since.
+                    if let stray {
+                        try Self.underClock(clock) {
+                            try Self.place(
+                                quiet, title: scripted.title, text: "", stray: stray,
+                                in: bookID, section: sectionID, tag: tagID, label: label)
+                        }
+                        return
+                    }
+                    // Design call 3's heal: a history stopped before its last
+                    // act left a note under the reserved working title — it
+                    // goes to the Trash (30 days, Put back) before a whole one
+                    // is minted.
+                    try withDependencies { $0.date = .constant(anchor) } operation: {
+                        for noteID in halfBuilt { try quiet.deleteContainer(noteID) }
+                    }
+                    _ = try scripted.mint(
+                        quiet, anchor: anchor, bookID: bookID, sectionID: sectionID,
+                        tagID: tagID, interruptAfterStep: interruptScriptAfterStep)
                 }
             }
             minted += 1

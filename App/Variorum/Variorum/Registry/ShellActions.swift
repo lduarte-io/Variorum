@@ -383,6 +383,14 @@ struct ShellActions {
     /// like the tutorial"*).
     func restoreEncryptionBook() { restoreSeededBook(.encryptionExplained) }
 
+    /// 18l-c U6 (R-18l-11) — **Help ▸ Restore “The Strange Case of Dr Jekyll
+    /// and Mr Hyde”**: the takemania book through the same door. Like the
+    /// others it mints only what is MISSING — so a deleted takemania note
+    /// comes back fresh, its whole scripted history with it (the front
+    /// matter's R-18l-12 promise), while a takemania she is still playing
+    /// with is never touched.
+    func restoreJekyllBook() { restoreSeededBook(.jekyllAndHyde) }
+
     /// ONE road for every seeded book (pre-13x 5a generalized Sherlock's):
     /// mint what is missing, open the book, speak the outcome. The noun in
     /// the receipt is the book's ("stories" for Sherlock, "chapters" for the
@@ -627,6 +635,8 @@ struct ShellActions {
         // pre-13u Act 10: the sample library's restore, typeable like the
         // tutorial's.
         .restoreSampleLibrary, .restoreEncryptionBook,
+        // 18l-c U6: the takemania book's restore, typeable like the others.
+        .restoreJekyllBook,
         // The Act 10 correction round (row 15): TAG NOTE, typeable — ⌘⇧I's
         // act (the fold it used to toggle retired with the masthead's second
         // door).
@@ -697,6 +707,7 @@ struct ShellActions {
         case .restoreTutorial: return { restoreTutorial() }
         case .restoreSampleLibrary: return { restoreSampleLibrary() }
         case .restoreEncryptionBook: return { restoreEncryptionBook() }
+        case .restoreJekyllBook: return { restoreJekyllBook() }
         default:
             // NIT-1 (Stage 1 ladder): a future `paletteActs` entry without
             // a wired case must never compile into a silent no-op row —
