@@ -237,3 +237,10 @@ absent · HID idle ≥ 2 s) runs FIRST, before anything touches the GUI; only th
 then the full `guard.sh <pid> [x y]`; then act. An exit 4 ("someone is at the machine") ends the walk —
 it is never retried with a re-activation (activating moves HER keyboard focus). `click.sh` / `keys.sh`
 follow this order; so does every VisualWalk act (`pins/guard-order.zsh` pins it headlessly).
+
+**Synthetic keystrokes RESET HIDIdleTime (18l-c U7 orchestrator walk, 2026-09-28):** a System
+Events `keystroke`/`key code` (and a `cliclick` act) counts as HID activity, so two `keys.sh` /
+`click.sh` calls under ~2 s apart SELF-TRIP the guard's exit 4. Space guarded acts ≥ 2 s apart.
+Distinguishing a self-trip from the author truly at the machine WITHOUT touching the GUI: watch
+`ioreg -c IOHIDSystem` idle for a few seconds — your own trip's idle CLIMBS monotonically from
+the act's moment; a human's keeps resetting. Only resume when it climbs.

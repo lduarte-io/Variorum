@@ -1461,6 +1461,41 @@ Zero `Sources/` (core), `Shared/`, `Sync/`, schema, `Server/`, mobile. No TK1 AP
 **Strongest evidence.** The match rule is not assumed: it is measured against the real Write bar and pinned as agreement over the needles that split rules (case, precomposed and decomposed accents, overlap), which also corrected the brief's own wording by the measurement its governing clause asked for. Every component of the step's road has teeth: seven behavioural reverts, each red in exactly its predicted shape (the landing, the `.select`, the request, the field veto, the re-parent re-claim, the shed paint, the off-scope bloom). Ledger row 7 is TRACED on a mounted board rather than argued, and the integration pins found a second road to her complaint (the re-parent) that no reading would have — fixed red-first at the component. The walk ran in both voices as a standing scenario, and it caught a real defect in this unit's own face (the marker over the prose), which was pinned red and fixed. The 266-suite closing set is green but for one failure attributed by run as pre-existing.
 **Weakest points, for the reviewer.** (a) **The re-parent re-claim touches every live pane in the app**, not only find's — guarded (live, and only when the window holds the keyboard) and pinned both ways, but it is a component-wide behaviour change on the seam. (b) **#157 (1) is a real product reading**: decision 6's "she can TYPE, immediately" holds for ⌘G from the board and after Esc, not right after ⏎ in the field (where the field keeps the keyboard so ⏎ can step again). (c) **The tall-row boundary** (boundary 1) is unmeasured on her longest blocks. (d) **The paint writes storage attributes on read panes** — range-scoped and restored, but it is the attribute-write family A47c warns about; the render restore is the belt, not a proof. (e) `mode == .takes` enables ⌘F a sliver before the board's handler exists. (f) The Terminal walk needed a harness retry at the scope chip (attributed, logged). **U7 — DONE (implementer); the Fable cold review follows.**
 
+### ORCHESTRATOR ACCEPTANCE — U7 (verify + the hands-on walk, 2026-09-28)
+
+**Hand-back VERIFIED against git, all claims matched:** 21 commits `e916f177`→`9dee1a5f`, tree
+clean, pushed, zero instances; the diff stat matches the SEAM FILES table exactly (18 files,
+zero `Sources/`/`Shared/`/`Sync/`); `TakesArticleScroll`'s two hunks additive at exactly lines
+145/322 (the restore half untouched); the closing run's `1608 tests in 266 suites` + the one
+pre-existing Outline 3424 red; R2's revert log red in exactly its predicted shape (3 tests /
+6 issues, the three lost selections); all seven `18lc-u7-R*.log` + the suites list on disk;
+#157 filed. **Decision 2's measured correction CONFIRMED by the orchestrator:** the brief's
+governing clause is "one rule of sameness across the two bars"; the real Write bar is
+accent-SENSITIVE by measurement, so matching it is the ruled design — the "diacritic-
+insensitive" wording was the brief's error, corrected honestly, pinned as agreement.
+
+**THE HANDS-ON WALK (WalkKit-driven, per-step guard, her word "the machine is free"; captures
+in the session scratchpad `u7walk/01…10`):** takemania → Takes → ⌘F → "Hyde" → the bar in the
+chrome vocabulary, **"23 matches"**, read panes wearing the paint → ⏎⏎ → **"2 of 23"**, the
+will-block live+ringed, the current match as the (inactive-grey) selection while the FIELD
+kept the keyboard, the live take's other match unpainted, the un-live block's paint standing →
+the scope chip clicked OFF (first real click landed; no AXPress flake on the cliclick road) →
+**"2 of 28" re-anchored keeping the current match**, the margin marker **"1 in another take"
+IN THE MARGIN under the ⑂2 badge** (the walk-found R-Q2 defect's fix seen directly) → two
+steps to the off-scope match → **"4 of 28", the block bloomed, the un-chosen *tighter* card
+ringed live with its "Hyde" selected**, the marker standing beside the open fan (#157 (6) as
+built) → Esc → the bar closed, the selection turned ACTIVE blue → typed `X` → **"Edward X,"
+in the buffer** (typeability end-to-end — ledger row 7's answer seen in use) → ⌘Z → restored
+byte-clean, re-selected → ⌘G with the bar closed → stepped on the remembered query (#157 (4)).
+**One observed fact worth naming:** my ⌘G presses made while the FIELD still held the keyboard
+stepped (2→3→4) and LEFT the keyboard in the field — a stray keystroke went to the QUERY, not
+her prose (the field veto covering the ⌘G road too; #157 (1) amended with the sentence).
+**Two walk lessons for the kit:** synthetic System-Events keystrokes reset HIDIdleTime, so
+`keys.sh` calls under 2 s apart self-trip the guard's exit 4 — space acts ≥ 2 s and re-check
+idle CLIMBS before concluding anyone is at the machine (README line added); the scope chip
+took a plain guarded `cliclick` click cleanly (the AXPress quirk is the harness's own road).
+**U7 ACCEPTED at the walk; the FABLE cold review follows (the ladder's round 1).**
+
 ## ORCHESTRATOR RESUME MAP (written 2026-09-28 at her compaction warning — the transcript-proof state; a post-compaction orchestrator re-orients from THIS section + the ledger + LIVE STATUS, verifying against git, never trusting)
 
 **Seat:** Fable `/architect-phase 18l-c` orchestrator (the session that took her kickoff). Her
