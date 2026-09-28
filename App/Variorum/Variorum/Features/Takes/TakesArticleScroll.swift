@@ -220,7 +220,9 @@ final class TakesArticleScroll {
     /// the arrival flash from it (`ArrivalFlash`), sampling the pure curve
     /// from `at`. Set once per entry landing, when the one authority's first
     /// quiet look finds the row home (`LandingAuthority.onArrived`); cleared
-    /// when the flash is over, by a new landing, and at teardown. A landing her
+    /// when the flash is over or by a new landing, and it dies with its board
+    /// (this brain is per-mount — nothing clears it at teardown, and nothing
+    /// needs to; the ladder's R1-6). A landing her
     /// hand ends before it arrives never flashes.
     struct ArticleArrival: Equatable {
         let placementID: String
