@@ -79,3 +79,46 @@ non-success; "landed anyway" rests on the abort's own probe id 191 `voice=termin
 
 **State: handed to the reviewer for FINAL CALLS + its own fix implementation (the
 cross-model flow); the implementer's sanity pass follows.**
+
+## FINAL CALLS (fable-reviewer, 2026-09-28 — each verified against the code before ruling; the fix record follows below as the pieces land)
+
+- **R1-M1 → (b) CONFIRMED — the documented boundary, not a reveal.** The reviewer re-checked
+  the implementer's three factual claims before ruling: `articleRowFrames` IS private to
+  `TakesArticleScroll` (line 767), so (a) is a new forward out of the landing half, never one
+  line; an unconditional land at Esc would move the page after a deliberate scroll-away; and
+  the entry way into the state is road A, which U8's R-18l-13 removes. The deciding ground is
+  decision 1's ruled words — *"Esc closes, focus returns to the board, her place kept"* — a
+  page move at Esc contradicts them and would re-rank R-Q21's ruled page restore through a
+  side door. The product fork (should Esc ever bring the take back?) is undefined behavior the
+  canon is silent on → per the flow it goes to QUESTIONS as a question, never a reviewer
+  ruling: **#157 gains (7)** (as-built (a) = the page stays put). Landing: HONEST BOUNDARIES
+  row 8 (the implementer's draft, adopted), #157 (7), and the reviewer's pin as a
+  `withKnownIssue` arm naming the boundary — red the day (b→a) or U8 changes the behaviour.
+  NOT a bug-class fix (no behavior changes), so no revert dance; the pin is the tripwire.
+- **R1-N1 → CONFIRMED.** Clear `request` at the next REOPEN (inside `open()`'s `!isPresented`
+  branch — targeted, so ⌘F-while-open never races a just-issued step request), and the `face`
+  doc corrected to say the hand-back request lingers for its take until the next open (its
+  vehicle; inert once consumed). Pin: after step → close → reopen, the face carries no
+  request — RED on the old code (the request survived the reopen), revert-verified.
+- **R1-N2 → CONFIRMED.** `fanCaretLanding` binds the landing once. Cleanliness, no pin.
+- **R1-N3 → CONFIRMED.** `recount` drops `wrapped` whenever the match list or the re-anchored
+  current CHANGES (an unchanged recount keeps the face's words — the last step's description
+  still holds); the empty-query branch clears it for hygiene. Pin: wrap, then a settle that
+  moves one take's text — the face must not keep "· wrapped" — RED on the old code,
+  revert-verified. The copy taste stays #157 (2)'s.
+- **R1-N4 → CONFIRMED as walk-row evidence** (the implementer is right that a hosted pin
+  cannot prove it: `NSEvent.modifierFlags` reads live hardware state). `takes-find` gains a
+  ⇧⏎ row after row D (`key code 36 using shift down` → the count steps BACK, the live take's
+  4-unit selection, the field keeps the keyboard); README row updated; the scenario run on
+  the re-stamped final build, both voices, machine author-free per the traps.
+- **R1-N5 → CONFIRMED, with the derivation verified by the reviewer at the source:**
+  `vis-ax.swift` prints a match's frame BEFORE pressing and exits 1 only when nothing matched,
+  printing nothing — so 074442's printed `739 267 75 24 AXRadioButton` + non-zero exit is
+  exit 2 (`AXUIElementPerformAction` returned non-success on a FOUND control), which
+  `vw_set_voice` (lib.zsh:394) words as "not found" for every non-zero rc. The record's
+  row-10 sentence is re-worded to quote the artifact and state that derivation; "landed
+  anyway" rests on the abort's own probe (id 191, `voice=terminal`), verified in probes.log.
+  The README's missing sentence break is fixed with the N4 row edit.
+
+**Totals: 6 confirmed as scoped above (R1-M1 on road (b)); zero dismissed; zero to the
+orchestrator (the one product-flavored fork goes to #157 as a question, per the flow).**
