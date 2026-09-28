@@ -299,8 +299,12 @@ struct TakesEntryBandTests {
     /// of a fresh board (on the page at rest, mid-band): the page stays at
     /// rest and her row rests inside the band. (The lazy column may spend an
     /// aim on a row it has not realized at the first step — a scroll the page
-    /// at its top cannot take; measured 2, moving nothing.) Green on both sides
-    /// by design: the band never moves a row that already rests inside it.
+    /// at its top cannot take; measured 2, moving nothing.) **NOT green on
+    /// both sides — measured by R-U8-3 (the band switched off):** the shipped,
+    /// unbanded reveal moved this page 130 pt on the same entry and left the
+    /// row outside the band (a first step judging an unrealized / placeholder
+    /// row and aiming its `.bottom` edge); the banded anchor's aim clamps at
+    /// the page's top instead. Recorded in the U8 RECORD (NOTICED).
     @Test func anEntryAlreadyInsideTheBandDoesNotMove() async throws {
         try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
