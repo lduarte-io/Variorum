@@ -51,6 +51,14 @@ struct ReadEditPane: View {
     /// 18l U1: this face's block manifest, held by the host (so a face
     /// switch keeps what an earlier visit learned).
     let heights: ReadNoteHeights
+    /// 18l-c U8 (a): her arrival-flash switch (R-18l-7 — default ON).
+    var flashOn = true
+
+    /// 18l-c U8 (a): the mode switch's arrival on this face — the row its
+    /// landing put home, and when (the authority's `onArrived`). Cleared when
+    /// the flash is over.
+    @State private var arrival: ReadArrivalFlash?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// **18l U1 — THE ONE LANDING AUTHORITY** (`Surface/LandingAuthority.swift`).
     /// The pane used to aim ONCE and clear the request; nothing looked again
@@ -131,6 +139,12 @@ struct ReadEditPane: View {
             // mid-landing) — silent, by the authority's own rule (the 13u2b
             // ladder's R2-12 class).
             .onDisappear { landing.end() }
+            // 18l-c U8 (a): the flash is over — its record goes.
+            .task(id: arrival) {
+                guard arrival != nil else { return }
+                try? await Task.sleep(for: .seconds(ArrivalFlash.plan(reduceMotion: false).total + 0.1))
+                arrival = nil
+            }
         }
     }
 
@@ -142,6 +156,8 @@ struct ReadEditPane: View {
             row: row, ordinal: ordinal,
             selected: selectedBlockID == row.blockID,
             carryGeometry: carryGeometry,
+            arrivalFlash: flashOn && arrival?.placementID == row.placementID ? arrival?.at : nil,
+            flashPlan: ArrivalFlash.plan(reduceMotion: reduceMotion),
             onTap: { offset in
                 // 18l U1 (ladder round 1, MAJOR-1): HER click ends a landing
                 // in flight, as her scroll does — a landing watching the
@@ -189,6 +205,13 @@ extension ReadEditPane {
     /// MINOR-3). The value the column always had.
     static let columnLead: CGFloat = 26
 
+    /// **18l-c U8 (b): this face's comfort band** — its resting top air (the
+    /// column's own lead, the room above its first row at rest) and two of
+    /// the base font's lines below.
+    @MainActor static var comfortBand: ComfortBand {
+        ComfortBand(topAir: columnLead, lineHeight: TypewriterRoom.lineHeight(of: EditorDocument.baseFont))
+    }
+
     /// The landing: the block's ROW IDENTITY (its placement id) is what the
     /// scroll reader lands on, unanimated (the Outline lesson) — at this
     /// pane's resting anchor, or at the viewport fraction a mode switch
@@ -205,10 +228,25 @@ extension ReadEditPane {
         box.anchorY = anchor.y
         heights.stand(contentWidth: box.contentWidth, typeScale: 1)
         heights.adopt(postID: model.postID, rows: rows)
-        let facts = LandingFacts(
-            manifest: heights.manifest(rows, width: box.contentWidth, leading: Self.columnLead),
-            anchor: placementID)
-        landing.land(placementID, facts: facts) { id in proxy.scrollTo(id, anchor: anchor) }
+        let manifest = heights.manifest(rows, width: box.contentWidth, leading: Self.columnLead)
+        let facts = LandingFacts(manifest: manifest, anchor: placementID)
+        // 18l-c U8: a MODE SWITCH's landing rests inside this face's comfort
+        // band — the column's lead above, two lines below (b) — and flashes
+        // its row when the authority says it arrived (a). Every other landing
+        // keeps its anchor and never flashes.
+        box.unbandedAnchorY = anchor.y
+        box.band = target.modeSwitch ? Self.comfortBand : nil
+        box.estimatedTargetHeight = manifest.rows.first { $0.id == placementID }?.height ?? 0
+        box.reband(placementID)
+        landing.onArrived = target.modeSwitch
+            ? { [placementID] arrived in
+                guard arrived == placementID else { return }
+                arrival = ReadArrivalFlash(placementID: arrived, at: Date())
+            }
+            : nil
+        landing.land(placementID, facts: facts) { [box] id in
+            proxy.scrollTo(id, anchor: UnitPoint(x: 0.5, y: box.anchorY))
+        }
         // The seed (`LandingAuthority.tops`' reason): a block already where
         // its anchor puts it reports nothing when the aim moves nothing.
         if let residual = box.residual(placementID) { landing.noteTop(placementID, residual) }
@@ -267,6 +305,9 @@ private struct ReadEditBlock: View {
     /// selected or live one) writes into it, so this is one report a scroll
     /// frame rather than one a realized row.
     let carryGeometry: ReadCarryGeometry
+    /// 18l-c U8 (a): when this row's arrival flash began (nil: no flash).
+    let arrivalFlash: Date?
+    let flashPlan: ArrivalFlash.Plan
     /// 18l U0: the click, with the stored-text offset it names.
     let onTap: (Int) -> Void
     /// 18l U1 (ladder round 1, MAJOR-1): she typed in THIS row's live pane —
@@ -393,6 +434,23 @@ private struct ReadEditBlock: View {
                 .help(row.variantLocked
                     ? "This take is locked — unlock it in Takes to write here"
                     : "Click to write in this block right here — one block is live at a time")
+            }
+        }
+        // 18l-c U8 (a): the mode switch's arrival flash — its fill behind the
+        // row (behind the selection's own wash, which it joins), its border
+        // over the row's edge, where it reads even on a row already washed.
+        .background {
+            if let arrivalFlash {
+                ArrivalFlashFace(
+                    part: .fill, startedAt: arrivalFlash, plan: flashPlan, tokens: tokens,
+                    cornerRadius: 8, oracleKey: "read-edit|\(row.blockID)")
+            }
+        }
+        .overlay {
+            if let arrivalFlash {
+                ArrivalFlashFace(
+                    part: .stroke, startedAt: arrivalFlash, plan: flashPlan, tokens: tokens,
+                    cornerRadius: 8, oracleKey: "read-edit|\(row.blockID)")
             }
         }
         .overlay(alignment: .topLeading) {

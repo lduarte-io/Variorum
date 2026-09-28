@@ -517,6 +517,18 @@ private struct EditorSettingsPane: View {
                     .lineLimit(6)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            // 18l-c U8 (her R-18l-7): the mode switch's arrival flash. Synced,
+            // like the three above it — the same switch on every device.
+            Section("Switching modes") {
+                Toggle(SettingsCatalog.title("arrivalFlash"), isOn: Binding(
+                    get: { theme.settings.arrivalFlash },
+                    set: { theme.setArrivalFlash($0) }))
+                Text(ArrivalFlashCopy.help)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(6)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Section("While you write") {
                 Toggle(SettingsCatalog.title("hoverHandles"), isOn: $writeHoverHandles)
                 Text("ON: pointing at a block in Write reveals its ⠿ drag handle in the left margin. OFF: the fully clean writing surface. With block seams shown (⌘⇧B), every handle shows regardless. This Mac only.")

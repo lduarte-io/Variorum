@@ -308,8 +308,12 @@ struct ReadModeView: View {
             let opening = carried == nil
                 ? session.commandRouter.openingLanding(postID: postID, fact: fact) : nil
             let scrolls = opening.map { $0.seeded != nil } ?? true
+            // 18l-c U8: a seed that is NOT the note's opening is a MODE
+            // SWITCH's landing — Read's page-continuity carry STANDS (R-18l-13:
+            // "read carries the page"), banded (b) and flashed (a).
             select(target, scrollFace: scrolls, report: carried != nil,
-                   anchor: carried.map { ViewportCarry.anchor($0.fraction) })
+                   anchor: carried.map { ViewportCarry.anchor($0.fraction) },
+                   modeSwitch: opening == nil)
         }
         .onChange(of: face) { _, new in
             Self.remember(new, postID: postID)
@@ -430,7 +434,8 @@ struct ReadModeView: View {
                 paneTarget: $paneTarget,
                 carryGeometry: carryGeometry,
                 onSelect: { blockID in select(blockID, scrollFace: false) },
-                heights: editHeights)
+                heights: editHeights,
+                flashOn: themeStore?.settings.arrivalFlash ?? true)
         case .read:
             switch form {
             case .continuous:
@@ -442,6 +447,7 @@ struct ReadModeView: View {
                     carriedBlockID: selectedBlockID,
                     carryGeometry: carryGeometry,
                     heights: pageHeights,
+                    flashOn: themeStore?.settings.arrivalFlash ?? true,
                     onOpenInEdit: { row in openInEdit(row) })
             case .pages:
                 // Row 82: a page's paragraph is the same door as the
@@ -456,15 +462,16 @@ struct ReadModeView: View {
     // MARK: - The current block (row 39) + the landing (row 38)
 
     private func select(
-        _ blockID: String, scrollFace: Bool, report: Bool = true, anchor: UnitPoint? = nil
+        _ blockID: String, scrollFace: Bool, report: Bool = true, anchor: UnitPoint? = nil,
+        modeSwitch: Bool = false
     ) {
         selectedBlockID = blockID
         // 13u2b UNIT 3: the carried row is the selected one; what was measured
         // for another row is not a fact about this one.
         carryGeometry.expect(blockID)
         if scrollFace {
-            paneTarget = ReadLanding(blockID: blockID, anchor: anchor)
-            pageTarget = ReadLanding(blockID: blockID, anchor: anchor)
+            paneTarget = ReadLanding(blockID: blockID, anchor: anchor, modeSwitch: modeSwitch)
+            pageTarget = ReadLanding(blockID: blockID, anchor: anchor, modeSwitch: modeSwitch)
             columnTarget = blockID
         }
         if report {
@@ -683,6 +690,19 @@ final class ReadCarryGeometry {
 struct ReadLanding: Equatable {
     let blockID: String
     var anchor: UnitPoint?
+    /// 18l-c U8: this landing is a MODE SWITCH's (the seed of a Read mount
+    /// that is not the note's opening) — it rests inside the face's comfort
+    /// band (b) and flashes its row once it has arrived (a). Every other road
+    /// onto a landing (a column click, the `read` → `edit` click-through, an
+    /// opening) keeps its shipped landing and never flashes.
+    var modeSwitch = false
+}
+
+/// **18l-c U8 (a) — a Read face's arrival flash**: which row, and when it
+/// arrived (the face's landing authority said so — `onArrived`).
+struct ReadArrivalFlash: Equatable {
+    let placementID: String
+    let at: Date
 }
 
 /// What a Read geometry probe reports — the slot a frame belongs to.
@@ -750,7 +770,14 @@ private struct ReadPageColumn: View {
     let carryGeometry: ReadCarryGeometry
     /// 18l U1: this face's block manifest, held by the host.
     let heights: ReadNoteHeights
+    /// 18l-c U8 (a): her arrival-flash switch (R-18l-7 — default ON).
+    var flashOn = true
     let onOpenInEdit: (Queries.TOCRow) -> Void
+
+    /// 18l-c U8 (a): the mode switch's arrival on the page — the row its
+    /// landing put home, and when (the authority's `onArrived`).
+    @State private var arrival: ReadArrivalFlash?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// **18l U1 — THE ONE LANDING AUTHORITY**: the page used to aim once and
     /// clear the request (the health review §1.1: *"no brain"*); it now asks
@@ -782,6 +809,10 @@ private struct ReadPageColumn: View {
                             text: row.text ?? "", ordinal: i + 1,
                             carried: row.blockID == carriedBlockID,
                             carryGeometry: carryGeometry,
+                            arrivalFlash: flashOn && arrival?.placementID == row.placementID
+                                ? arrival?.at : nil,
+                            flashPlan: ArrivalFlash.plan(reduceMotion: reduceMotion),
+                            tokens: tokens,
                             onOpenInEdit: { onOpenInEdit(row) },
                             onPlace: { frame in rowMoved(row.placementID, frame) })
                     }
@@ -843,6 +874,12 @@ private struct ReadPageColumn: View {
                 land(target, proxy)
                 pageTarget = nil
             }
+            // 18l-c U8 (a): the flash is over — its record goes.
+            .task(id: arrival) {
+                guard arrival != nil else { return }
+                try? await Task.sleep(for: .seconds(ArrivalFlash.plan(reduceMotion: false).total + 0.1))
+                arrival = nil
+            }
         }
     }
 }
@@ -865,6 +902,15 @@ extension ReadPageColumn {
     static let pagePadding: CGFloat = 46
     static let roomPadding: CGFloat = 28
 
+    /// **18l-c U8 (b): the calm page's comfort band** — the room above the
+    /// paper at rest (its resting top air) and two of the page's lines below
+    /// (the base font's line at this page's type scale).
+    var comfortBand: ComfortBand {
+        ComfortBand(
+            topAir: Self.roomPadding,
+            lineHeight: TypewriterRoom.lineHeight(of: EditorDocument.baseFont) * typeScale)
+    }
+
     /// The landing: the block's row identity (its placement id), unanimated,
     /// anchored near the top of the page — or, when a mode switch carried a
     /// height for this block, at that fraction of the viewport instead
@@ -882,10 +928,24 @@ extension ReadPageColumn {
         // Everything above the first block in the content space: the room's
         // and the paper's padding, the header row, and one row gap.
         let leading = Self.roomPadding + Self.pagePadding + box.headerHeight + 14 * typeScale
-        let facts = LandingFacts(
-            manifest: heights.manifest(rows, width: box.contentWidth, leading: leading),
-            anchor: placementID)
-        landing.land(placementID, facts: facts) { id in proxy.scrollTo(id, anchor: anchor) }
+        let manifest = heights.manifest(rows, width: box.contentWidth, leading: leading)
+        let facts = LandingFacts(manifest: manifest, anchor: placementID)
+        // 18l-c U8: a MODE SWITCH's landing rests inside the page's comfort
+        // band (b) and flashes its row once it has arrived (a) — the edit
+        // face's shape, line for line.
+        box.unbandedAnchorY = anchor.y
+        box.band = target.modeSwitch ? comfortBand : nil
+        box.estimatedTargetHeight = manifest.rows.first { $0.id == placementID }?.height ?? 0
+        box.reband(placementID)
+        landing.onArrived = target.modeSwitch
+            ? { [placementID] arrived in
+                guard arrived == placementID else { return }
+                arrival = ReadArrivalFlash(placementID: arrived, at: Date())
+            }
+            : nil
+        landing.land(placementID, facts: facts) { [box] id in
+            proxy.scrollTo(id, anchor: UnitPoint(x: 0.5, y: box.anchorY))
+        }
         if let residual = box.residual(placementID) { landing.noteTop(placementID, residual) }
     }
 
@@ -950,6 +1010,10 @@ private struct ReadPageBlock: View {
     /// mode switch asks about. Only this row pays for a geometry report.
     let carried: Bool
     let carryGeometry: ReadCarryGeometry
+    /// 18l-c U8 (a): when this row's arrival flash began (nil: no flash).
+    let arrivalFlash: Date?
+    let flashPlan: ArrivalFlash.Plan
+    let tokens: VoiceTokens
     let onOpenInEdit: () -> Void
     /// 18l U1: where this row is (host space), nil when it goes away — rides
     /// the row's EXISTING observer.
@@ -984,6 +1048,22 @@ private struct ReadPageBlock: View {
         .background(
             hovering ? AnyShapeStyle(page.pageMeta.opacity(0.10)) : AnyShapeStyle(.clear),
             in: RoundedRectangle(cornerRadius: 6))
+        // 18l-c U8 (a): the mode switch's arrival flash on the landed row —
+        // the fill behind the words, the border over the row's edge.
+        .background {
+            if let arrivalFlash {
+                ArrivalFlashFace(
+                    part: .fill, startedAt: arrivalFlash, plan: flashPlan, tokens: tokens,
+                    oracleKey: "read-page|\(blockID)")
+            }
+        }
+        .overlay {
+            if let arrivalFlash {
+                ArrivalFlashFace(
+                    part: .stroke, startedAt: arrivalFlash, plan: flashPlan, tokens: tokens,
+                    oracleKey: "read-page|\(blockID)")
+            }
+        }
         .overlay(alignment: .topLeading) {
             if hovering {
                 Text(String(format: "%02d", ordinal))

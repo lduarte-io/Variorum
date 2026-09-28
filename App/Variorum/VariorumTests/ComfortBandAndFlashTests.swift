@@ -83,6 +83,22 @@ struct ComfortBandAndFlashTests {
         #expect(!band.fits(height: 10, viewport: 0), "no viewport, no band")
     }
 
+    // MARK: - Write's caret reveal, banded (#98(a), then the band)
+
+    @Test func writesCaretRevealIsResolvedThenBanded() {
+        // Write's band: the text container's 24-pt top air, two 17-pt lines.
+        let write = ComfortBand(topAir: 24, lineHeight: 17)
+        // Off screen above or below → #98(a)'s "line at the top" → the top air.
+        #expect(write.restCaretLine(top: -300, height: 17, viewport: 700) == 24)
+        #expect(write.restCaretLine(top: 9000, height: 17, viewport: 700) == 24)
+        // On screen, in the top air → the minimum down; in the bottom room →
+        // the minimum up (700 − 34 − 17 = 649).
+        #expect(write.restCaretLine(top: 3, height: 17, viewport: 700) == 24)
+        #expect(write.restCaretLine(top: 675, height: 17, viewport: 700) == 649)
+        // Mid-band: exactly where it is.
+        #expect(write.restCaretLine(top: 312.5, height: 17, viewport: 700) == 312.5)
+    }
+
     // MARK: - The Takes article's minimal reveal, banded
 
     @Test func theBandedRevealIsHomeExactlyInsideTheBand() {

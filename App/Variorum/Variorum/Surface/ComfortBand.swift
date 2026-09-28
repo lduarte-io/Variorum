@@ -104,6 +104,20 @@ nonisolated struct ComfortBand: Equatable, Sendable {
         return clamped / span
     }
 
+    // MARK: - Write's caret reveal, banded (#98(a) — then the band)
+
+    /// **Where a mode switch rests Write's caret LINE** — the shipped #98(a)
+    /// rule resolved first (a line already on screen stays exactly where it
+    /// is; a line off screen lands at the viewport's top, `JumpPrimitive`'s
+    /// contract), then the band clamps it: the off-screen line rests at the
+    /// top air, not flush; a line on screen but in the top air or the bottom
+    /// room moves the minimum into the band; a line mid-band never moves. The
+    /// 1-pt slack is the reveal's own (the ladder's R1-11).
+    func restCaretLine(top: CGFloat, height: CGFloat, viewport: CGFloat) -> CGFloat {
+        let onScreen = top >= -1 && top + height <= viewport + 1
+        return clamp(top: onScreen ? top : 0, height: height, viewport: viewport)
+    }
+
     // MARK: - The Takes article's minimal reveal, banded (her R-Q1, with the
     //         band's edges standing in for the viewport's)
 

@@ -187,6 +187,12 @@ nonisolated enum SettingsCatalog {
                 + "Nothing is stored; exports are identical either way.",
             keywords: ["gap", "spacing", "blank line", "air", "leading", "paragraph"]),
         SettingsRow(
+            id: "arrivalFlash", pane: .editor, title: ArrivalFlashCopy.title,
+            blurb: "A brief highlight on your place after you switch between Write, Takes "
+                + "and Read, fading in about a second. On by default; synced.",
+            keywords: ["flash", "highlight", "cursor", "caret", "mode", "switch", "find my place",
+                       "blink", "pulse", "where am i"]),
+        SettingsRow(
             id: "spellcheck", pane: .editor, title: "Spellchecking",
             blurb: "Off, check while typing, or check and correct. Applies to every writing "
                 + "surface. This Mac only.",

@@ -2286,6 +2286,14 @@ final class EditorViewModel {
             // parked for the same hop, taken from the router now so no other
             // editor rendering in this beat can consume it.
             parkCarriedPlacement(fact: arrivalFact)
+            // 18l-c U8 — a MODE SWITCH's arrival (never a note's opening, and
+            // with a caret she left or a place carried to land): at the same
+            // settle hop the landing rests the caret's line inside the comfort
+            // band (b) and then flashes it (a). Stamped with the generation it
+            // parked under, like its siblings (R1-5's rule).
+            if !isOpeningLanding, remembered != nil || pendingCarriedPlacement != nil {
+                pendingModeSwitchArrival = (landing, overlayGeometryGeneration)
+            }
             updateCaretContext()
             let claim = { [weak textView, weak self] in
                 guard let textView, let window = textView.window else { return false }
@@ -2466,6 +2474,14 @@ final class EditorViewModel {
         pendingRevealOffset = nil
         guard let textView, let scrollView,
               textView.selectedRange().location == offset else { return }
+        // 18l-c U8 (b): a MODE SWITCH's reveal is #98(a) resolved and then
+        // BANDED — the caret's line rests inside the comfort band (the top
+        // air, never flush; two lines of room below) — one landing, never a
+        // second jump after this one.
+        if pendingModeSwitchArrival != nil {
+            restCaretLineInTheBand(offset, textView: textView, scrollView: scrollView)
+            return
+        }
         // Already on screen — the restored scroll anchor put her there, which
         // is the ordinary case for a mode round trip. Leave the page alone:
         // REVEAL means make visible, never "move". (Without this a bare
@@ -2558,10 +2574,19 @@ final class EditorViewModel {
               let last = JumpPrimitive.lineSpan(
                 ofOffset: range.location + max(0, range.length - 1), in: textView)
         else { return }
-        let inset = ViewportCarry.topInset(
+        var inset = ViewportCarry.topInset(
             fraction: placement.fraction,
             blockHeight: max(1, last.bottom - first.top),
             viewportHeight: Double(scrollView.contentView.bounds.height))
+        // 18l-c U8 (b): the carried block rests inside the comfort band — a
+        // carry at the viewport's extreme edge (a block that was flush with,
+        // or cut by, the edge in the mode she left) rests at the band's edge
+        // instead; a mid-band carry is EXACT (the clamp returns it unchanged).
+        if pendingModeSwitchArrival != nil {
+            inset = Double(writeBand(textView).clamp(
+                top: CGFloat(inset), height: CGFloat(max(1, last.bottom - first.top)),
+                viewport: scrollView.contentView.bounds.height))
+        }
         pendingAnchorRestore = nil
         pendingAnchorInset = 0  // the inset dies with its park (round-1 NIT-1)
         let caret = pendingRevealOffset
@@ -2569,6 +2594,12 @@ final class EditorViewModel {
         JumpPrimitive.jump(
             toOffset: range.location, textView: textView, scrollView: scrollView,
             landingInset: inset)
+        // 18l-c U8 (b): …and the caret's line, banded (#116(c)'s caret-wins
+        // for a block taller than the band, with the band's edges).
+        if let caret, pendingModeSwitchArrival != nil {
+            restCaretLineInTheBand(caret, textView: textView, scrollView: scrollView)
+            return
+        }
         guard let caret,
               let span = JumpPrimitive.lineSpan(ofOffset: caret, in: textView)
         else { return }
@@ -2576,6 +2607,73 @@ final class EditorViewModel {
         if span.top < Double(visible.minY) - 1 || span.bottom > Double(visible.maxY) + 1 {
             JumpPrimitive.jump(toOffset: caret, textView: textView, scrollView: scrollView)
         }
+    }
+
+    // MARK: - The mode switch's COMFORT BAND and ARRIVAL FLASH (18l-c U8)
+
+    /// A MODE SWITCH's bare arrival, parked for the settle hop: the caret it
+    /// landed and the geometry generation it parked under. While it is set the
+    /// hop's reveal and carry rest the caret's line inside the comfort band;
+    /// the hop's last step flashes that line and clears it.
+    @ObservationIgnored private var pendingModeSwitchArrival: (caret: Int, generation: Int)?
+
+    /// **Write's comfort band** — the text container's OWN top inset (R9's
+    /// 24-pt top air, read live, never a second copy of the number) and
+    /// `ComfortBand.bottomLines` of the base font's line.
+    private func writeBand(_ textView: NSTextView) -> ComfortBand {
+        ComfortBand(
+            topAir: textView.textContainerOrigin.y,
+            lineHeight: TypewriterRoom.lineHeight(of: EditorDocument.baseFont))
+    }
+
+    /// Rest the LINE holding `offset` where `ComfortBand.restCaretLine` says
+    /// (#98(a) resolved, then banded) — one `JumpPrimitive` jump, and none when
+    /// the line already rests there.
+    private func restCaretLineInTheBand(
+        _ offset: Int, textView: NSTextView, scrollView: NSScrollView
+    ) {
+        guard let span = JumpPrimitive.lineSpan(ofOffset: offset, in: textView) else { return }
+        let visible = scrollView.contentView.bounds
+        let top = CGFloat(span.top) - visible.minY
+        let rest = writeBand(textView).restCaretLine(
+            top: top, height: CGFloat(span.bottom - span.top), viewport: visible.height)
+        guard abs(rest - top) > 0.5 else { return }
+        JumpPrimitive.jump(
+            toOffset: offset, textView: textView, scrollView: scrollView,
+            landingInset: Double(rest))
+    }
+
+    /// **The arrival flash's sink** (18l-c U8 (a)) — the decor layer's
+    /// `BlockDecorOverlayController` installs it; the model hands it the rect
+    /// to flash (the caret's line across the prose column, the block
+    /// highlight's own geometry) and the tokens to flash it in.
+    @ObservationIgnored var arrivalFlashSink: ((CGRect, VoiceTokens) -> Void)?
+
+    /// Observation seam (the `articleLandingAims` precedent — a plain value,
+    /// not DEBUG-gated): the caret LINE the last arrival flash was asked for
+    /// (text-view coordinates), and how many were asked for. The pins' read.
+    @ObservationIgnored private(set) var lastArrivalFlashLine: (top: Double, bottom: Double)?
+    @ObservationIgnored private(set) var arrivalFlashes = 0
+
+    /// The hop's LAST step for a mode switch: the landing has rested (the
+    /// carry, the anchor and the reveal ran above it), so the caret's line
+    /// flashes — her setting permitting (R-18l-7: default ON).
+    private func consumeModeSwitchArrival(deliveredBy generation: Int) {
+        guard let arrival = pendingModeSwitchArrival,
+              generation >= arrival.generation else { return }   // R1-5's rule
+        pendingModeSwitchArrival = nil
+        guard appearance.arrivalFlash, let textView,
+              let span = JumpPrimitive.lineSpan(ofOffset: textView.selectedRange().location, in: textView)
+        else { return }
+        lastArrivalFlashLine = span
+        arrivalFlashes += 1
+        let rect = BlockDecor.indicatorRect(
+            block: CGRect(
+                x: textView.proseLeft, y: CGFloat(span.top),
+                width: textView.proseRight - textView.proseLeft,
+                height: CGFloat(span.bottom - span.top)),
+            textLeft: textView.proseLeft, textRight: textView.proseRight)
+        arrivalFlashSink?(rect, appearance.tokens)
     }
 
     /// The bare arrival's landing offset (rows 39/49): this post's current
@@ -3706,6 +3804,9 @@ final class EditorViewModel {
             consumePendingCarriedPlacement(deliveredBy: generation)
             consumePendingAnchorRestore(deliveredBy: generation)
             consumePendingReveal(deliveredBy: generation)
+            // 18l-c U8 (a): a mode switch's landing has rested — its caret's
+            // line flashes now, never before the page is where it will stay.
+            consumeModeSwitchArrival(deliveredBy: generation)
             // A generation bumped between schedule and run re-arms on its
             // own draw pass — delivered records what this refresh SAW.
             refreshBadges()

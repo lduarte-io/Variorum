@@ -304,7 +304,29 @@ final class ReadLandingBox {
     /// residual's input. A row that goes away takes its entry with it.
     var rows: [String: (top: CGFloat, height: CGFloat)] = [:]
 
+    /// **18l-c U8 (b) — a MODE SWITCH's landing rests inside the face's
+    /// comfort band.** Non-nil only while such a landing is pending: the
+    /// fraction it was handed (the carry, or the face's resting anchor) is
+    /// kept here, and `anchorY` is that fraction CLAMPED with the target row's
+    /// real height as soon as the column knows it (a mid-band fraction comes
+    /// back exactly — the ruled carries are untouched inside the band).
+    var band: ComfortBand?
+    var unbandedAnchorY: CGFloat = 0.5
+    /// The target row's height before the column realizes it (the face's
+    /// manifest estimate), for the clamp's first answer.
+    var estimatedTargetHeight: CGFloat = 0
+
+    /// Re-clamp `anchorY` for the pending banded landing (no-op otherwise).
+    func reband(_ placementID: String) {
+        guard let band, scroll.viewportHeight > 0 else { return }
+        let height = rows[placementID]?.height ?? estimatedTargetHeight
+        anchorY = CGFloat(band.clamp(
+            fraction: Double(unbandedAnchorY), height: Double(height),
+            viewport: Double(scroll.viewportHeight)))
+    }
+
     func residual(_ placementID: String) -> CGFloat? {
+        reband(placementID)
         guard let row = rows[placementID], scroll.viewportHeight > 0 else { return nil }
         return ReadLandingResidual.residual(
             blockTop: row.top, blockHeight: row.height,

@@ -59,6 +59,9 @@ nonisolated struct EditorAppearance: Equatable, Sendable {
     /// byte-identical to before.
     var palette: ThemePalette = .default
     var tint: PaletteTint = .none
+    /// 18l-c U8 (a): her arrival-flash switch (R-18l-7 — default ON), riding
+    /// the settings → appearance road like every other synced look.
+    var arrivalFlash = true
 
     init() {}
 
@@ -70,6 +73,7 @@ nonisolated struct EditorAppearance: Equatable, Sendable {
         self.inlineComments = settings.inlineComments
         self.palette = settings.palette
         self.tint = PaletteTint(settings)
+        self.arrivalFlash = settings.arrivalFlash
     }
 
     /// The four-parameter resolver — the palette-aware road (R1-1); a
@@ -603,6 +607,10 @@ final class BlockDecorOverlayController {
                 Task { await model?.moveBlock(fromEntry: from, toBoundary: to) }
             })
         model.decorSink = { [weak self] state in self?.render(state) }
+        // 18l-c U8 (a): the mode switch's arrival flash draws in THIS layer —
+        // a decoration below the text like every other (never a rendering
+        // attribute, TEXTKIT2 §3).
+        model.arrivalFlashSink = { [weak self] rect, tokens in self?.flashArrival(rect, tokens: tokens) }
         // 13e E7: the pointer's presence reaches the model, so the calm
         // page grows geometry exactly while she is pointing at it (and the
         // hover faces — the handle AND the comment invitation — can exist
@@ -668,6 +676,8 @@ final class BlockDecorOverlayController {
         for view in selectionViews { view.removeFromSuperview() }
         indicatorView?.removeFromSuperview()
         insertionBar?.removeFromSuperview()
+        flashView?.removeFromSuperview()
+        flashView = nil
         seamViews = []
         calloutViews = []
         emojiLabels = []
@@ -1015,6 +1025,65 @@ final class BlockDecorOverlayController {
         guard dragEntryIndex == nil, let textView else { return }
         renderHandles(state, in: textView)
     }
+
+    // MARK: The mode switch's arrival flash (18l-c U8 (a))
+
+    /// The one flash on screen (a new arrival replaces it).
+    private var flashView: DecorRectView?
+
+    /// **Flash the caret's line** — the block highlight's own face (the wash
+    /// fill, the accent border — `renderSelection`'s vocabulary), below the
+    /// text like every decoration here, held for `ArrivalFlash.holdSeconds`
+    /// and then faded by opacity alone over `fadeSeconds` (Reduce Motion: shown
+    /// unanimated for the same total, then removed). Click-through, like every
+    /// `DecorRectView`.
+    func flashArrival(_ rect: CGRect, tokens: VoiceTokens) {
+        guard let textView else { return }
+        flashView?.removeFromSuperview()
+        let view = DecorRectView()
+        flashView = view
+        textView.addSubview(view, positioned: .below, relativeTo: nil)
+        view.frame = rect
+        view.configure(fill: NSColor(tokens.wash), border: NSColor(tokens.accent), cornerRadius: 6)
+        view.alphaValue = 1
+        let plan = ArrivalFlash.plan(
+            reduceMotion: NSWorkspace.shared.accessibilityDisplayShouldReduceMotion)
+        #if DEBUG
+        let key = "write|\(ObjectIdentifier(self))"
+        ArrivalFlashOracle.note(key, part: .fill, opacity: 1)
+        ArrivalFlashOracle.note(key, part: .stroke, opacity: 1)
+        #endif
+        guard plan.animated else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + plan.total) { [weak self, weak view] in
+                MainActor.assumeIsolated { self?.endFlash(view) }
+            }
+            return
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + plan.hold) { [weak self, weak view] in
+            MainActor.assumeIsolated {
+                guard let view, view.superview != nil else { return }
+                NSAnimationContext.runAnimationGroup { context in
+                    context.duration = plan.fade
+                    context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                    view.animator().alphaValue = 0
+                } completionHandler: { [weak self, weak view] in
+                    MainActor.assumeIsolated { self?.endFlash(view) }
+                }
+            }
+        }
+    }
+
+    /// The flash is over: its view goes (only if it is still the one shown).
+    private func endFlash(_ view: DecorRectView?) {
+        guard let view else { return }
+        view.removeFromSuperview()
+        if flashView === view { flashView = nil }
+    }
+
+    #if DEBUG
+    /// The flash view on screen now, for the pins.
+    var arrivalFlashView: NSView? { flashView }
+    #endif
 
     /// Grows/shrinks a view pool in place.
     private func pool<V: NSView>(

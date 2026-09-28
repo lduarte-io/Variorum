@@ -112,6 +112,13 @@ final class ThemeStore {
         run { try $0.setReceiptStyle(style) }
     }
 
+    /// 18l-c U8 (her R-18l-7): the mode switch's arrival flash, on or off. A
+    /// setter and nothing more — every surface reads the landed value from
+    /// `settings` (Takes, Read) or through `EditorAppearance` (Write).
+    func setArrivalFlash(_ on: Bool) {
+        run { try $0.setArrivalFlash(on) }
+    }
+
     /// 18g (her R-Q6): the colour palette. A setter and nothing more, like
     /// `setVoice` beside it — it cannot refuse, so it needs no words. The
     /// CUSTOM SEEDS deliberately do NOT have one here: `setThemeTints` can
