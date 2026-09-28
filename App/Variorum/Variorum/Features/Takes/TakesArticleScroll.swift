@@ -130,10 +130,14 @@ final class TakesArticleScroll {
     /// arms name a row the same way and are revealed the same way; they
     /// differ in ONE thing — what they may lose to the remembered place.
     enum ArticleLandingKind: Equatable {
-        /// The N9 entry arm: the note's CURRENT block, on every entry. Her
-        /// rulings R-Q20/R-Q21 are about THIS landing — it outranks the
-        /// memory when she moved blocks while away, and STANDS DOWN on a
-        /// plain round trip (`resolveEntryLandingAgainstTheMemory`).
+        /// The N9 entry arm: the note's CURRENT block, on every entry — since
+        /// R-18l-1, every MODE-SWITCH entry (a note's opening makes none). Her
+        /// R-Q20 is about THIS landing — it outranks the memory when she moved
+        /// blocks while away. **18l-c U8 (her R-18l-13):** on a plain round
+        /// trip it no longer stands down — it rides through the restore and
+        /// reveals her block if the page she left does not hold it
+        /// (`resolveEntryLandingAgainstTheMemory`); it is the one kind the
+        /// comfort band clamps and the arrival flash marks.
         case entry
         /// The fan-panel bloom door (17o row 8 — *"open takes mode in write
         /// from the takes menu is also not automatically navigating you to
@@ -165,6 +169,7 @@ final class TakesArticleScroll {
         articleLandingKind = kind
         articleLandingAimsLeft = Self.articleLandingAttempts
         articleLandingAims = 0
+        articleEntryRidesThrough = false
         // **R-Q20 — THE LANDING WINS** (her 2026-09-13 ruling on J3), keyed
         // by R-Q21. A restore still aiming ends here, before it can move the
         // page: on the real board the geometry hook runs before the
@@ -175,10 +180,12 @@ final class TakesArticleScroll {
         // no-op. **The condition is "a page to come back to", never "a
         // restore pending"** (the 17q ladder's round 2, R2-1): a TOP memory
         // settles at the first geometry without ever reaching `.wanted`, and
-        // the entry landing that then arrives on the block she was in must
-        // stand down there exactly as it does over a row — measured in USE:
-        // a page left at rest came back with her block revealed at the foot
-        // (captures `39` → `40`). So the resolver is consulted whenever the
+        // the entry landing that then arrives is weighed there exactly as it
+        // is over a row. (18l-c U8, her R-18l-13: the weighing no longer ends
+        // in a stand-down — a same-block entry lives and reveals her block, so
+        // the R2-1 capture `39` → `40` — her block revealed at the foot of a
+        // page left at rest — is now the RULED behaviour, banded.) So the
+        // resolver is consulted whenever the
         // first geometry READ a memory (`articleMemoryAtMount`), the restore
         // still aiming or already settled. The other order (a landing
         // already pending at the first geometry — every pin's, since
@@ -205,34 +212,67 @@ final class TakesArticleScroll {
     ///
     /// The landing names a DIFFERENT block than the one that was current
     /// when the board was last shown ⇒ she MOVED, so the landing wins and
-    /// the restore ends before it can aim. The landing names the SAME block
-    /// ⇒ this is a plain round trip, so **the landing stands down** and the
-    /// restore puts the page back exactly as she left it — the TOP included
-    /// (a page left at rest with her block scrolled off it comes back at
-    /// rest; the memory is the page, not the block).
+    /// the restore ends before it can aim (R-Q20 — unchanged). The landing
+    /// names the SAME block ⇒ a plain round trip: the restore runs and puts
+    /// the page back as she left it, and the landing RIDES THROUGH it.
     ///
-    /// **Why the landing has to stand down and not merely lose the race**
-    /// (the 17q walk measured it, on her 262-block note): the two are not
-    /// exclusive — a kept-alive landing re-aims through the lazy column's
-    /// settling passes, where rows report PLACEHOLDER frames first (J1's
-    /// finding (b)), so it can judge a row that IS on screen to be off it and
-    /// pull the page to the foot AFTER the restore has put it back. The pin's
-    /// 60-block note came out restored and her 262-block one came out
-    /// revealed — the same rule, two outcomes, decided by a race. Her R-Q21
-    /// says *exactly* as she left it, and a race is not exactly.
+    /// **18l-c U8 — HER R-18l-13, THE MODE-SWITCH CARET RULE** (settled at the
+    /// 2026-09-27 #150 sitting, confirmed final: *"agreed, caret anchors the
+    /// editing modes, read carries the page, no button"*): **a mode's private
+    /// scroll memory never outranks a mode switch.** Until U8 the same-block
+    /// arm STOOD THE LANDING DOWN (`articleLanding = nil`), so a round trip
+    /// after she had scrolled her block away brought back a page without it —
+    /// the ring's row never built, the take the authority called live with no
+    /// text view: *"tapping keys won't make you edit"* (ledger row 7's road A,
+    /// traced at U7). The stand-down is RETIRED: the entry landing now rides
+    /// through the restore exactly as the bloom door has since the 17q ladder's
+    /// R1-2 — the page she left comes back, and the landing reveals her block
+    /// only if that page does not hold it (Write's own shape — its session
+    /// anchor, then #98(a)'s reveal of a caret off it; "Takes joins Write").
+    /// The memory still PLACES the page whenever the caret's block is on it; it
+    /// only never OUTRANKS the caret. PROVISIONAL on its one open edge — the
+    /// memory could be skipped on a mode switch altogether (QUESTIONS #158).
     ///
-    /// The accepted consequence, stated: if she left Takes having scrolled
-    /// AWAY from her own block, a plain round trip brings back that page —
-    /// without her block on screen. That is what "the page she left" means,
-    /// and revealing it would be the second move her ruling removes.
+    /// **The race the stand-down was written against** (the 17q walk: a
+    /// kept-alive landing re-aiming through the lazy column's PLACEHOLDER
+    /// frames pulled a restored page to the foot) is the bloom door's road,
+    /// and it has been guarded there since 18l-b U2: the landing's first step
+    /// waits for the restore to settle or hold (`articleReadyForLanding`), and
+    /// from then on the one landing authority's watch re-aims only from QUIET
+    /// (`articleLandingReport`), never per placeholder report.
+    ///
+    /// **What still consults this, by construction:** only the ENTRY kind —
+    /// and since R-18l-1 (18l U0c) an entry landing is made only by a MODE
+    /// SWITCH into Takes (a note's opening never calls `landArticle`: its page
+    /// is the restore's, R-18l-1's "restores where you were", ratified #150(b)).
     private func resolveEntryLandingAgainstTheMemory() {
         guard articleLanding != nil, articleLandingKind == .entry else { return }
         if Self.landingOutranks(articleLanding, lastCurrentRow: articleLastCurrentRow) {
             articleRestore = .settled
         } else {
-            articleLanding = nil
+            // 18l-c U8: the same-block entry RIDES THROUGH the page she left —
+            // and its first step must not judge that page from a frame the
+            // restore has not settled (`articleLandingStep`, the measured race).
+            articleEntryRidesThrough = true
         }
     }
+
+    /// **18l-c U8 — the ride-through entry landing decides from QUIET, never
+    /// from its first step's frame.** Measured on this unit's first green run
+    /// (`aPlainRoundTripComesBackToTheSameLineNotOnlyTheSameRow`): with the
+    /// stand-down gone, the landing's first decided step — reached the moment
+    /// the restore HOLDS — read her row's frame from a pass the restored page
+    /// had not settled yet, judged a row that IS on the page to be off it, and
+    /// revealed it: the page she left 271 pt above her block came back at 571.
+    /// That is the 17q race exactly (J1's placeholder frames). So that one
+    /// step hands the landing to the one authority's watch and asks for
+    /// nothing; the watch looks after a QUIET interval — the row's settled
+    /// place — and a correction then spends the step, which decides with the
+    /// frame the column has settled on (U2's own rule: a correction is issued
+    /// from quiet). A block on the page she left: no correction, no motion. A
+    /// block off it: one reveal, after the quiet. Set by the resolver, per
+    /// landing.
+    @ObservationIgnored private var articleEntryRidesThrough = false
 
     /// **R-Q20, as a rule** (her words on J3: *"the block I came from
     /// wins"*; her reasoning: *"switching between different modes is supposed
@@ -272,8 +312,10 @@ final class TakesArticleScroll {
     /// bloom door's *"go there"* (row 8): measured at the ladder, a bloom on
     /// the block the ring was last in came back with the bloomed block off
     /// the page. So the arms ARE distinguished (`ArticleLandingKind`): an
-    /// entry landing outranks or stands down by this rule; a bloom landing
-    /// rides through the restore and reveals afterwards, as 17p shipped it.
+    /// entry landing outranks by this rule (and, since 18l-c U8's R-18l-13,
+    /// rides through the restore when it does not — the stand-down retired);
+    /// a bloom landing rides through the restore and reveals afterwards, as
+    /// 17p shipped it.
     nonisolated static func landingOutranks(
         _ landing: String?, lastCurrentRow: String?
     ) -> Bool {
@@ -541,7 +583,13 @@ final class TakesArticleScroll {
         // still holds the row, the column has laid something out). From here
         // the watch owns what happens between aims; this function still
         // decides each one.
-        if watch.anchor != landing { beginWatch(landing, order: order) }
+        if watch.anchor != landing {
+            beginWatch(landing, order: order)
+            // 18l-c U8: a ride-through entry (R-18l-13) asks for nothing at its
+            // first step — the watch decides from quiet
+            // (`articleEntryRidesThrough`).
+            if articleEntryRidesThrough { return .wait }
+        }
         if Self.revealDecision(rowFrame: frame, viewportHeight: articleViewportHeight) == .none {
             return .wait   // on screen now; the watch settles it (or her hand ends it)
         }
@@ -630,11 +678,13 @@ final class TakesArticleScroll {
     /// report (a hold), and the landing's step then readies. Guarded to that
     /// one case, so the step it returns is by construction the hold's `.wait`
     /// — nothing to scroll, nothing to remember. With NO landing waiting the
-    /// restore keeps its own cadence (her R-Q21's plain round trip is not
-    /// touched — pinned); her scroll is not this door (the geometry road's).
-    /// Cost: only while a bloom waits on a restore, one dictionary read per
-    /// row report; the slot order built once HERE at the arrival (the ready
-    /// step's own read then follows its own P1 contract).
+    /// restore keeps its own cadence (pinned); her scroll is not this door
+    /// (the geometry road's). **18l-c U8 (her R-18l-13):** a mode round trip's
+    /// ENTRY landing now waits on the restore exactly as the bloom does (the
+    /// stand-down is retired), so this door serves it too — by the same guard,
+    /// unchanged. Cost: only while a landing waits on a restore, one
+    /// dictionary read per row report; the slot order built once HERE at the
+    /// arrival (the ready step's own read then follows its own P1 contract).
     private func restoreLooksAgainForAWaitingLanding(order: @autoclosure () -> [String]) {
         guard articleLanding != nil, case .wanted(let place) = articleRestore,
               let rowID = place.rowID, let frame = articleRowFrames[rowID],
@@ -725,10 +775,10 @@ final class TakesArticleScroll {
     /// A watched landing hands over or gives up through the watch; one the
     /// watch never took is taken and ended at once, so her Console says it
     /// too — `hops=0`, and `top=-9999` (its row never reported: it was never
-    /// aimed). The DEBUG story names the act. Not for R-Q21's stand-down (a
-    /// landing that stands down was never asked of the page — the resolver
-    /// clears it itself, silently, by design), a superseded landing (the
-    /// authority's own `land` precedent), or a teardown (R2-12's class).
+    /// aimed). The DEBUG story names the act. Not for a superseded landing
+    /// (the authority's own `land` precedent) or a teardown (R2-12's class).
+    /// (R-Q21's silent stand-down, once exempted here, is retired by 18l-c
+    /// U8's R-18l-13: an entry landing is always asked of the page now.)
     private func fileEnding(
         _ landing: String, handedOver: Bool, _ why: String, order: [String]? = nil
     ) {
@@ -1138,8 +1188,8 @@ final class TakesArticleScroll {
             // block she moved to while away settles the restore before it
             // can aim (the block she came from wins — the page starts at the
             // top and the landing reveals from there); an entry landing on
-            // the block she was in stands down, and the page comes back
-            // exactly — the TOP included; a bloom landing is not weighed.
+            // the block she was in rides through the restore (18l-c U8, her
+            // R-18l-13 — it used to stand down); a bloom landing is not weighed.
             // With NO memory there is nothing to weigh and nothing to lose.
             // The fact is kept for the mount: a landing arriving AFTER this
             // report (the app's order) is weighed by `landArticle` iff a

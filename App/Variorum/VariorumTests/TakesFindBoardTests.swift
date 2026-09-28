@@ -198,24 +198,43 @@ struct TakesFindBoardTests {
         TakesFindPlan.ranges(of: needle, in: text)[occurrence]
     }
 
+    /// A synthesized trackpad scroll toward the page's top (the
+    /// `TypewriterRoomReachabilityTests` recipe) — her hand, as the scroll
+    /// view sees it. 18l-c U8.
+    private func wheelUp(in window: NSWindow) -> NSEvent? {
+        let deltaY = 400.0
+        guard let cg = CGEvent(
+            scrollWheelEvent2Source: nil, units: .pixel,
+            wheelCount: 1, wheel1: Int32(deltaY), wheel2: 0, wheel3: 0)
+        else { return nil }
+        cg.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)
+        cg.setDoubleValueField(.scrollWheelEventPointDeltaAxis1, value: deltaY)
+        cg.setIntegerValueField(.eventTargetUnixProcessID, value: Int64(getpid()))
+        _ = window
+        return NSEvent(cgEvent: cg)
+    }
+
     // MARK: - LEDGER ROW 7 — the trace, and the find's answer
 
-    /// **LEDGER ROW 7, TRACED — then answered.** Her sequence: in Takes on a
-    /// block, scroll away, go to Write and come back. Her R-Q21 round trip
-    /// restores the page she left (the ruled restore — U8's R-18l-13 is what
-    /// changes the mode-switch half), and the entry ring still lands on her
-    /// block. **The trace:** that block's row is not on the restored page, so
-    /// the lazy column never built its pane — the authority says the take is
-    /// LIVE, and there is NO text view to hold the keyboard: *"tapping keys
-    /// won't make you edit"*, exactly. (Green on both sides: this half is the
-    /// trace of shipped, ruled machinery — nothing here edits it.)
+    /// **LEDGER ROW 7 — road A, now CLOSED on the mode-switch door (18l-c U8,
+    /// her R-18l-13) — then the find's answer.** Her sequence: in Takes on a
+    /// block, scroll away, go to Write and come back.
     ///
-    /// **The answer (decision 6):** she finds a word in that block — ⏎ in the
-    /// field — and the match's take goes LIVE with the match SELECTED and its
-    /// row REVEALED; the field keeps the keyboard (⏎ would step again); Esc
-    /// closes the bar and hands the keyboard to the take, her place kept; and
-    /// a keystroke then EDITS the take. Red on the pre-U7 tree by
-    /// construction (there was no find in Takes), and by behavioural revert.
+    /// **RE-ARMED AS THE RULED CHANGE (U8 — the U8 RECORD names old → new).**
+    /// OLD (the U7 trace, green on both sides then): her R-Q21 round trip
+    /// restored the page she left and the entry landing STOOD DOWN, so block
+    /// 40's row was never built — `pane(block 40) == nil` and no text view held
+    /// the keyboard (*"tapping keys won't make you edit"*). NEW (R-18l-13: *"caret
+    /// anchors the editing modes"*): the entry landing no longer stands down — it
+    /// rides through the restore and REVEALS her block, so its pane is BUILT, on
+    /// screen, LIVE, and it HOLDS THE KEYBOARD: tapping keys edits. RED on the
+    /// pre-U8 tree (the stand-down): `pane == nil`.
+    ///
+    /// **The find's answer (U7's decision 6) rides unchanged:** she finds a word
+    /// in that block — ⏎ in the field — and the match is SELECTED in the live
+    /// take; the field keeps the keyboard (⏎ would step again); Esc closes the
+    /// bar and hands the keyboard to the take, her place kept; and a keystroke
+    /// then EDITS the take.
     @Test func ledgerRowSevenTracedAndAFindStepMakesTheTakeTypeable() async throws {
         try await withSession(blocks: 60, text: {
             $0 == 40
@@ -260,15 +279,24 @@ struct TakesFindBoardTests {
             let ring = try #require(model.focusedPane, "the entry ring landed")
             #expect(ring.blockID == target.block, "…on her block (the note's current block)")
             #expect(model.isPaneLive(ring), "the authority says its take is LIVE")
-            #expect(pane(target.variant, in: hosting) == nil,
-                    """
-                    THE TRACE: the restored page (the top) does not hold block 40's row, \
-                    so the lazy column built no pane for the live take
-                    """)
-            #expect(!(window.firstResponder is PaneTextView),
-                    "…so no text view holds the keyboard: keys cannot edit (her row-7 report)")
+            // R-18l-13 (U8): the entry landing reveals her block — road A is gone.
+            let article2 = try #require(articleScrollView(in: hosting))
+            let revealedBy = Date().addingTimeInterval(4)
+            while !(pane(target.variant, in: hosting).map { isOnScreen($0, article2) } ?? false),
+                  Date() < revealedBy {
+                await settle(window, hosting, until: { false }, maxTurns: 2)
+            }
+            let back = try #require(pane(target.variant, in: hosting),
+                                    """
+                                    R-18l-13: the entry landing revealed block 40, so its pane is BUILT \
+                                    (road A — the pre-U8 stand-down — left it nil)
+                                    """)
+            #expect(isOnScreen(back, article2), "…on screen")
+            await settle(window, hosting, until: { window.firstResponder === back }, maxTurns: 20)
+            #expect(back.isEditable && window.firstResponder === back,
+                    "…LIVE and holding the keyboard: tapping keys edits (her row-7 report, answered)")
 
-            // The answer: find the word, ⏎ in the field.
+            // The find's answer: find the word, ⏎ in the field.
             model.find.open()
             await settle(window, hosting, until: { model.find.fieldHoldsKeyboard }, maxTurns: 20)
             #expect(model.find.fieldHoldsKeyboard, "precondition: the bar's field took the keyboard")
@@ -311,11 +339,21 @@ struct TakesFindBoardTests {
     /// the WINDOW holds the keyboard until she clicks a take or the ring's
     /// row scrolls back in (that born-live pane then claims it — shipped).
     /// Esc never moves the page — decision 1's "her place kept" — so the
-    /// other half is pinned PLAIN below. The fork is QUESTIONS #157 (7);
-    /// U8's R-18l-13 removes the entry way into this state. `withKnownIssue`,
-    /// non-intermittent: the day Esc starts landing the keyboard here ((b)
-    /// flipped to (a), or U8's rule), this pin says so LOUDLY — re-read the
-    /// boundary (HONEST BOUNDARIES 8) before believing it.
+    /// other half is pinned PLAIN below. The fork is QUESTIONS #157 (7).
+    /// `withKnownIssue`, non-intermittent: the day Esc starts landing the
+    /// keyboard here ((b) flipped to (a)), this pin says so LOUDLY — re-read
+    /// the boundary (HONEST BOUNDARIES 8) before believing it.
+    ///
+    /// **RE-ARMED AS THE RULED CHANGE (18l-c U8, her R-18l-13 — the U8 RECORD
+    /// names old → new).** OLD: the state was staged through a MODE ROUND TRIP
+    /// (the entry landing stood down on a restored page that did not hold the
+    /// ring's row — road A), with the precondition `pane(block 40) == nil`.
+    /// That road is GONE: the entry landing now reveals her block, so the same
+    /// round trip BUILDS the pane — asserted PLAIN below (and this pin's own
+    /// designed red was U8's confirmation). NEW: the boundary is staged by the
+    /// road that REMAINS — the lazy column's general class — her scrolling far
+    /// from the live take while the bar is open, so the ring's row de-realizes
+    /// under the field that holds the keyboard; Esc then has no pane to reach.
     @Test func escWithNoBuiltPaneForTheRingIsANamedBoundary() async throws {
         try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
@@ -341,20 +379,44 @@ struct TakesFindBoardTests {
             first.teardown()
             window1.orderOut(nil)
 
-            // Showing 2 — the round trip: the ring on block 40, its row unbuilt.
+            // Showing 2 — the round trip: R-18l-13 reveals block 40 (road A gone).
             let model = try await landingModel(session: session, fixture: fixture, db: db)
             let (window, hosting) = await mount(model)
-            await settle(window, hosting, until: { false }, maxTurns: 16)
+            let article = try #require(articleScrollView(in: hosting))
+            let revealedBy = Date().addingTimeInterval(4)
+            while !(pane(target.variant, in: hosting).map { isOnScreen($0, article) } ?? false),
+                  Date() < revealedBy {
+                await settle(window, hosting, until: { false }, maxTurns: 2)
+            }
             let ring = try #require(model.focusedPane, "precondition: the entry ring landed")
             #expect(ring.blockID == target.block && model.isPaneLive(ring),
-                    "precondition: the trace state — the authority says LIVE")
-            #expect(pane(target.variant, in: hosting) == nil,
-                    "precondition: no pane was built for the live take")
+                    "precondition: the authority says LIVE")
+            #expect(pane(target.variant, in: hosting) != nil,
+                    "R-18l-13: the mode round trip BUILDS the ring's pane — the entry road into this boundary is gone")
 
-            // ⌘F, then Esc — the hand-back has nowhere to land.
+            // ⌘F — the field takes the keyboard (the bar's open also ends the
+            // entry landing: its viewport arm) — then her scroll far away.
             model.find.open()
             await settle(window, hosting, until: { model.find.fieldHoldsKeyboard }, maxTurns: 20)
             #expect(model.find.fieldHoldsKeyboard, "precondition: the field took the keyboard")
+            let landingOverBy = Date().addingTimeInterval(4)
+            while model.articleLanding != nil, Date() < landingOverBy {
+                await settle(window, hosting, until: { false }, maxTurns: 2)
+            }
+            // HER wheel, toward the top — a scroll the view sees as hers (a
+            // programmatic clip scroll is not: the bound `ScrollPosition`
+            // re-applies the landing's target, J1(c), and the live row stays).
+            for _ in 0..<40 where pane(target.variant, in: hosting) != nil {
+                if let wheel = wheelUp(in: window) { article.scrollWheel(with: wheel) }
+                await settle(window, hosting, until: { false }, maxTurns: 1)
+            }
+            await settle(window, hosting, until: { pane(target.variant, in: hosting) == nil },
+                         maxTurns: 30)
+            #expect(pane(target.variant, in: hosting) == nil,
+                    "precondition: scrolled far away, the ring's row de-realized — no pane for the live take")
+            #expect(model.isPaneLive(ring), "precondition: the authority still says LIVE")
+
+            // Esc — the hand-back has nowhere to land.
             model.find.close()
             await settle(window, hosting,
                          until: { window.firstResponder is PaneTextView }, maxTurns: 12)

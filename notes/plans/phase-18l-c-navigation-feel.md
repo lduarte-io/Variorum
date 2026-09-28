@@ -1601,8 +1601,8 @@ FABLE cold review follows (editor seam).
 | # | Piece | Status |
 |---|---|---|
 | 1 | Reading (the brief's list, in order, own context) | DONE — this file: her kickoff (items 3 + 4), P-1…P-9, THE SITTING RECORD whole (R-18l-13 + the #150/#151 sitting), the roster's U8 entry, ENVIRONMENT TRAPS, THE LEDGER rows 4/5/5b/6/7, the U7 RECORD (LEDGER ROW 7, HONEST BOUNDARIES 8, the record's mold) + the U5 RECORD's mold, THE U8 BRIEF; `SessionResiliencyProtocol.md` whole; `TEXTKIT2_NOTES.md` whole; the code — `TakesArticleScroll` whole (landing + restore halves), `TakesChoreographer` whole, `TakesViewModel` (init, adopt, teardown, focus + the doors, the article forwards, `landAuthorityFocus`), `TakesBoardView` (the article column, the landing spend, the washed cell, the typewriter room), `EditorRouter` whole, `CommandRouter` (registerDetail, the opening, the carry), `LandingAuthority` + `LandingAim` whole, `ViewportCarry` whole, `EditorViewModel`'s arrival + the settle hop (reveal, anchor, carry), `JumpPrimitive` whole, `BlockDecor` (the overlay controller — the selection/indicator faces), `ReadModeView` (the seed + the carry + the calm page's landing), `ReadEditPane` whole, `BookIndexEditModel.takePendingLiveBlock`'s road via #153, `AppearanceQueries` + `Operations+Appearance` + `Enums.ReceiptStyle` + `ThemeStore` + `AppSettingsView` (General/Editor) + `SettingsShape`'s catalog; KnownIssues rows 94 + 98; QUESTIONS #116, #150, #151, #152, #153, #157; the pins: `TakesFindBoardTests` (both named re-arms), `TakesArticleScrollTests`' R-Q20/R-Q21 family, `TakesArticleWatchTests`' stand-down pins, `ModeSwitchCarryTests` |
-| 2 | The trace + the design decisions (below) | IN PROGRESS |
-| 3 | (0) THE CARET RULE — the entry landing never stands down; the old-outranking pins re-armed AS THE RULED CHANGE, each named | NOT STARTED |
+| 2 | The trace + the design decisions (below) | DONE (`78b889f1`, `a7998c85`) |
+| 3 | (0) THE CARET RULE — the entry landing never stands down; the old-outranking pins re-armed AS THE RULED CHANGE, each named | DONE (this commit) — `TakesArticleScroll`: the resolver's same-block arm rides through (`articleEntryRidesThrough`), and that landing's first step defers to the watch's quiet (the measured race); docs of the landing half + the choreographer's comment; 11 pins re-armed (table below); red 11 + 1 known on the pre-U8 tree → green 59 / 3 suites + the 1 known issue |
 | 4 | The flash's SETTING (`arrival_flash`, the ONE `Sources/` touch — its read in Queries + its write through the existing settings road) + the face in Settings | NOT STARTED |
 | 5 | (a) THE FLASH — the brain (named constants, Reduce Motion) + the faces (Write's caret line, Takes' block, Read's two faces) | NOT STARTED |
 | 6 | (b) THE COMFORT BAND — the brain (named constants) + Takes (row 94's MAY-take) + Write + Read | NOT STARTED |
@@ -1680,6 +1680,24 @@ the highlight shows unanimated for the same total and then goes (JUDGMENT CALL; 
   one step it did not yet cover. (The tripwire's second issue: a PROGRAMMATIC clip scroll does not de-realize the
   live row — the bound `ScrollPosition` re-applies the landing's target, J1(c); her HAND is a scroll the view
   sees as hers, so the pin restages with a synthesized wheel, the `TypewriterRoomReachabilityTests` precedent.)
+- **GREEN** (`18lc-u8-caret-green2.log`): **59 tests in 3 suites passed, 1 known issue** (the tripwire, staged by
+  its remaining road — her wheel scrolling the ring's row out of the lazy column with the bar open).
+
+### THE RE-ARMED PINS — the ruled change, each named old → new (R-18l-13)
+
+| # | Pin | OLD assertion (the superseded outranking) | NEW assertion (the caret rule) | Red on pre-U8 |
+|---|---|---|---|---|
+| R-1 | `TakesFindBoardTests.ledgerRowSevenTracedAndAFindStepMakesTheTakeTypeable` (trace half) | after the round trip `pane(block 40) == nil` and no text view holds the keyboard (the U7 trace) | the pane is BUILT, on screen, LIVE and the first responder — typing edits; the find half rides unchanged | yes — `pane == nil` |
+| R-2 | `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` | staged by the mode round trip, precondition `pane == nil` | the round trip now asserts the pane BUILT (plain); the boundary restaged by the road that remains — her wheel scrolls the ring's row out while the bar holds the keyboard; `withKnownIssue` unchanged | yes — its designed red: `pane != nil` failed on the pre-U8 tree |
+| R-3 | `TakesArticleScrollTests.theEntryRingsOwnRoadAlsoComesBackWhereSheLeftIt` | `articleLanding == nil`; her block OFF the page she left; top-of-page ±1 row | the restore ran, then her block REVEALED (on screen, landing aims > 0, ring on her block) | yes — off screen, 0 aims |
+| R-4 | `TakesArticleScrollTests.aPlainRoundTripComesBackExactlyWhereSheLeftIt` | `articleLanding == nil` ("stood down") | `articleLandingAims == 0` (rode through, asked nothing — her block on the page); the exact-page assertion unchanged | no — green both sides by design (no conflict ⇒ no change) |
+| R-5 | `TakesArticleScrollTests.aBloomLandingRidesThroughTheRestoreInBothOrders` arm `t` | `t.articleLanding == nil` (entry at a TOP memory, same block) | `t.articleLanding == "was-here"` (lives, as the bloom does); no restore aim unchanged | yes |
+| R-6 | `TakesArticleScrollTests.theTopStandDownHoldsInTheAppsOrderToo` arm `same` | `same.articleLanding == nil` | `== "was-here"`; R-Q20's moved arm + the first-entry + bloom arms byte-unchanged | yes |
+| R-7 | `TakesArticleScrollTests.aPageLeftAtRestComesBackAtRestOnTheAppsOrder` | landing nil, 0 aims, offset < 1, her block off the page | TOP restore issued no scroll (unchanged), the entry landing aimed, her block REVEALED | yes — 0 aims, off screen |
+| R-8 | `TakesArticleScrollTests.theRestoreHoldsThePlaceUntilHerHandOrALanding` arm (e) | `e.articleLanding == nil && holding` | `e.articleLanding == "was-here" && holding` (lives through the hold) | yes |
+| R-9 | `TakesArticleWatchTests.aStoodDownEntryLandingIsNeverWatched` | landing nil, never `LAND` | watched (`LAND` told), her block revealed | yes — no `LAND`, off screen |
+| R-10 | `TakesArticleWatchTests.aLandingThatEndsBeforeItsFirstStepIsFiledNotSilent` | doc only (named the stand-down's silence) | doc only (the stand-down retired) | n/a |
+| R-11 | `TakesArticleScrollTests.aPlainRoundTripComesBackToTheSameLineNotOnlyTheSameRow` | `articleLanding == nil` ("stood down") | `articleLandingAims == 0` after the watch's quiet; the same-LINE assertion unchanged (the pin that measured the race) | the line assertion red on the FIRST green attempt (271 → 571), green with the deferral |
 
 ## ORCHESTRATOR RESUME MAP (written 2026-09-28 at her compaction warning — the transcript-proof state; a post-compaction orchestrator re-orients from THIS section + the ledger + LIVE STATUS, verifying against git, never trusting)
 

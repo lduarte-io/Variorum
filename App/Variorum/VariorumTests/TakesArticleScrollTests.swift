@@ -1295,11 +1295,18 @@ struct TakesArticleScrollTests {
     /// foot — which is what this pin's first version measured without saying
     /// so, so its "mid-page" premise never held), and her scroll takes her
     /// own block OFF the page. She leaves and comes back with nothing
-    /// clicked: the landing stands down, the restore runs, and the page comes
-    /// back exactly as she left it — WITHOUT her block on it. That is the
-    /// resolver's stated consequence ("the page she left"), the implementer's
-    /// second spot-walk shape on her 262-block note, and R-Q21's letter. The
-    /// mid-page arm is `aPlainRoundTripComesBackToTheSameLineNotOnlyTheSameRow`.
+    /// clicked. The mid-page arm is
+    /// `aPlainRoundTripComesBackToTheSameLineNotOnlyTheSameRow`.
+    ///
+    /// **RE-ARMED AS THE RULED CHANGE (18l-c U8, her R-18l-13 — "caret anchors
+    /// the editing modes"; the U8 RECORD names old → new).** OLD (17q): the
+    /// landing STOOD DOWN (`articleLanding == nil`), the restore ran, and the
+    /// page came back exactly as she left it WITHOUT her block on it (the
+    /// resolver's stated consequence). NEW: the restore still runs (the page she
+    /// left comes back first — the memory PLACES the page), and the entry landing
+    /// then REVEALS her block, because a mode's private scroll memory never
+    /// outranks a mode switch — her block is on screen, its row built, its take
+    /// live. RED on the pre-U8 tree: her block off the page.
     @Test func theEntryRingsOwnRoadAlsoComesBackWhereSheLeftIt() async throws {
         try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
@@ -1353,29 +1360,23 @@ struct TakesArticleScrollTests {
                 return
             }
             await settle(windowB, hostingB, until: { false }, maxTurns: 14)
+            let revealedBy = Date().addingTimeInterval(4)
+            while !isOnScreen(hers.variant, hostingB, articleB), Date() < revealedBy {
+                await settle(windowB, hostingB, until: { false }, maxTurns: 2)
+            }
 
-            #expect(second.board.articleLanding == nil, "the landing stood down")
-            #expect(second.board.articleRestoreAims > 0, "the restore ran")
-            #expect(!isOnScreen(hers.variant, hostingB, articleB),
+            #expect(second.board.articleRestoreAims > 0,
+                    "the restore ran — the page she left came back first (the memory places the page)")
+            #expect(isOnScreen(hers.variant, hostingB, articleB),
                     """
-                    the page she left comes back WITHOUT her block on it — the \
-                    resolver's stated consequence, never a second move to reveal it
+                    R-18l-13: the entry landing then REVEALS her block — the memory never \
+                    outranks a mode switch (red on the pre-U8 tree: the landing stood \
+                    down and the page came back without it; top of page was block \(wasAt + 1))
                     """)
-            guard let after = topOfPage(hostingB, articleB) else {
-                Issue.record("no take at the top of the page after the remount")
-                return
-            }
-            guard let isAt = fixture.blocks.firstIndex(where: {
-                $0.variant == after.variantID
-            }) else {
-                Issue.record("the top-of-page take is not one of the fixture's")
-                return
-            }
-            #expect(abs(isAt - wasAt) <= 1,
-                    """
-                    the entry ring's own road comes back where she left it \
-                    (block \(isAt + 1), left on block \(wasAt + 1))
-                    """)
+            #expect(second.articleLandingAims > 0,
+                    "non-vacuity: the entry landing aimed the page (it no longer stands down)")
+            #expect(second.authority.livePane?.blockID == hers.block,
+                    "…and the ring is on her block, its row built")
         }
     }
 
@@ -1478,11 +1479,18 @@ struct TakesArticleScrollTests {
             }
             await settle(windowB, hostingB, until: { false }, maxTurns: 14)
 
-            #expect(second.board.articleLanding == nil,
+            // RE-ARMED AS THE RULED CHANGE (18l-c U8, her R-18l-13 — the U8
+            // RECORD names old → new). OLD: `articleLanding == nil` — the
+            // landing STOOD DOWN on the block she was already in. NEW: the
+            // entry landing no longer stands down; it rides through the restore
+            // and, her block being ON the page she left (mid-page, inside the
+            // comfort band), it asks for NOTHING — zero aims, the page exact.
+            // (Green on both sides by design: R-18l-13 changes nothing when the
+            // memory and the caret agree.)
+            #expect(second.articleLandingAims == 0,
                     """
-                    the landing STOOD DOWN: it named the block she was already \
-                    in, so the restore puts the page back exactly instead of \
-                    racing a reveal through the lazy column's settling passes
+                    the entry landing rode through the restore and aimed nothing — \
+                    her block was already on the page she left (\(second.articleLandingAims) aims)
                     """)
             #expect(second.board.articleRestoreAims > 0,
                     """
@@ -1618,14 +1626,20 @@ struct TakesArticleScrollTests {
         #expect(d.articleRestore == .wanted(left))
         #expect(d.articleLanding == "far")
 
-        // …and an ENTRY landing on the block she was in stands down at a
-        // page left at the TOP as well: the page comes back at rest.
+        // …and an ENTRY landing on the block she was in, at a page left at
+        // the TOP. RE-ARMED AS THE RULED CHANGE (18l-c U8, her R-18l-13 — the
+        // U8 RECORD names old → new). OLD: `t.articleLanding == nil` — it stood
+        // down and the page came back at rest without her block. NEW: it rides
+        // through exactly as the bloom does — the TOP restore still issues no
+        // scroll, and the landing lives to reveal her block if the page at rest
+        // does not show it.
         let t = freshBoard("entry-top-same", lastCurrentRow: "was-here")
         t.landArticle(on: "was-here")
         #expect(t.consumeArticleGeometry(
             geometry(offset: 0), remembered: .top, positionedByUser: false,
             order: ["left", "was-here"]) == .remember(.top))
-        #expect(t.articleLanding == nil, "a plain round trip to a page left at rest comes back at rest")
+        #expect(t.articleLanding == "was-here",
+                "R-18l-13: the entry landing is never stood down by the memory (red on the pre-U8 tree: nil)")
         #expect(t.articleRestoreAims == 0)
     }
 
@@ -1848,7 +1862,20 @@ struct TakesArticleScrollTests {
                 return
             }
             await settle(windowB, hostingB, until: { false }, maxTurns: 16)
-            #expect(second.board.articleLanding == nil, "the entry landing stood down")
+            // RE-ARMED AS THE RULED CHANGE (18l-c U8, her R-18l-13 — the U8
+            // RECORD names old → new). OLD: `articleLanding == nil` — "the entry
+            // landing stood down". NEW: it rides through the restore and, her
+            // block being on the page she left, it asks for NOTHING — zero aims
+            // — while the page comes back to the same LINE (the assertion below,
+            // unchanged). This pin is also the one that MEASURED the 17q race on
+            // the first U8 green attempt (271 → 571): the ride-through's first
+            // step now defers to the watch's quiet (`articleEntryRidesThrough`).
+            let quietBy = Date().addingTimeInterval(2.5)
+            while second.board.articleLanding != nil, Date() < quietBy {
+                await settle(windowB, hostingB, until: { false }, maxTurns: 2)
+            }
+            #expect(second.articleLandingAims == 0,
+                    "the entry landing rode through and aimed nothing (\(second.articleLandingAims) aims)")
             #expect(second.board.articleRestoreAims > 0, "the restore ran")
             guard let intoB = distanceBelowTheFold(hers.variant, hostingB, articleB) else {
                 Issue.record("her block is not realized after the remount")
@@ -2039,18 +2066,26 @@ struct TakesArticleScrollTests {
     /// it down all along (arm `t` of `aBloomLandingRidesThroughTheRestoreIn
     /// BothOrders`), which is why no pin saw it. The condition is now "the
     /// first geometry READ a memory", whichever state the restore is in.
+    ///
+    /// **RE-ARMED AS THE RULED CHANGE (18l-c U8, her R-18l-13 — the U8 RECORD
+    /// names old → new).** The resolver is still consulted in the app's order
+    /// (the ordering contract R2-1 fixed stands, and R-Q20's moved-block arm
+    /// below is byte-unchanged), but its same-block arm no longer STANDS the
+    /// entry landing DOWN. OLD: `same.articleLanding == nil`. NEW: the landing
+    /// lives — at a page left at rest it reveals her block (the mounted twin is
+    /// `aPageLeftAtRestComesBackAtRestOnTheAppsOrder`, re-armed with it).
     @Test func theTopStandDownHoldsInTheAppsOrderToo() {
-        // The app's order at a TOP memory, the SAME block: stands down.
+        // The app's order at a TOP memory, the SAME block: R-18l-13 — it lives.
         let same = freshBoard("top-app-same", lastCurrentRow: "was-here")
         #expect(same.consumeArticleGeometry(
             geometry(offset: 0), remembered: .top, positionedByUser: false, order: nil)
                 == .remember(.top))
         #expect(same.articleRestore == .settled)
         same.landArticle(on: "was-here")
-        #expect(same.articleLanding == nil,
+        #expect(same.articleLanding == "was-here",
                 """
-                a plain round trip to a page left at rest: the landing stands \
-                down (on the round-1 tree it lived and revealed her block)
+                R-18l-13: a mode round trip to a page left at rest keeps the entry \
+                landing, which reveals her block (red on the pre-U8 tree: stood down, nil)
                 """)
         #expect(same.articleRestoreAims == 0)
 
@@ -2084,7 +2119,15 @@ struct TakesArticleScrollTests {
     /// which the view's own `.task` brings — the one order this harness
     /// reproduces by construction; the `.onAppear`-vs-geometry order of W-1 is
     /// the one it cannot). A page left at rest, her ring on a block below the
-    /// fold, a plain round trip: the page comes back AT REST.
+    /// fold, a plain round trip.
+    ///
+    /// **RE-ARMED AS THE RULED CHANGE (18l-c U8, her R-18l-13 — the U8 RECORD
+    /// names old → new).** OLD: the page came back AT REST with her block off
+    /// it (`articleLanding == nil`, zero aims, offset < 1, her block not on
+    /// screen). NEW: the page left at rest is where the board starts (the TOP
+    /// restore issues no scroll), and the entry landing then REVEALS her block
+    /// — the caret anchors the editing modes. RED on the pre-U8 tree: her block
+    /// off the page.
     @Test func aPageLeftAtRestComesBackAtRestOnTheAppsOrder() async throws {
         try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
@@ -2117,18 +2160,18 @@ struct TakesArticleScrollTests {
                 return
             }
             await settle(window, hosting, until: { false }, maxTurns: 16)
+            let revealedBy = Date().addingTimeInterval(4)
+            while !isOnScreen(hers.variant, hosting, article), Date() < revealedBy {
+                await settle(window, hosting, until: { false }, maxTurns: 2)
+            }
             #expect(bare.authority.livePane?.blockID == hers.block,
                     "non-vacuity: the entry ring is on her block")
-            #expect(bare.board.articleLanding == nil,
-                    "the entry landing stood down at a page left at rest")
-            #expect(bare.articleLandingAims == 0, "…and never aimed")
-            #expect(offset(article) < 1,
-                    """
-                    the page comes back AT REST (offset \(offset(article))) — on \
-                    the round-1 tree the landing lived and revealed her block
-                    """)
-            #expect(!isOnScreen(hers.variant, hosting, article),
-                    "her block stays where the page she left had it: off the page")
+            #expect(bare.board.articleRestoreAims == 0,
+                    "the TOP memory issued no restore scroll (unchanged)")
+            #expect(bare.articleLandingAims > 0,
+                    "R-18l-13: the entry landing lived and aimed (red on the pre-U8 tree: stood down, 0 aims)")
+            #expect(isOnScreen(hers.variant, hosting, article),
+                    "R-18l-13: her block is REVEALED (red on the pre-U8 tree: left off the page at rest)")
         }
     }
 
@@ -2526,7 +2569,11 @@ struct TakesArticleScrollTests {
         #expect(d.articleRestore == .settled)
 
         // (e) An ENTRY landing arriving during a hold (the app's order): one
-        // that outranks ends it; one that stands down keeps it.
+        // that outranks ends it; one on the SAME block — RE-ARMED AS THE RULED
+        // CHANGE (18l-c U8, her R-18l-13; the U8 RECORD names old → new) — no
+        // longer stands down: OLD `e.articleLanding == nil`; NEW it LIVES and
+        // the hold keeps the page until the landing's own step spends (arm (c)'s
+        // road: a reveal, if the held page does not show her block, ends the hold).
         let e = freshBoard("hold-entry", lastCurrentRow: "was-here")
         _ = e.consumeArticleGeometry(
             geometry(offset: 0), remembered: place, positionedByUser: false, order: nil)
@@ -2535,8 +2582,8 @@ struct TakesArticleScrollTests {
             geometry(offset: 100), remembered: place, positionedByUser: false, order: nil)
         #expect(e.articleRestore == .holding(place))
         e.landArticle(on: "was-here")
-        #expect(e.articleLanding == nil && e.articleRestore == .holding(place),
-                "a plain round trip: the landing stands down, the hold keeps the page")
+        #expect(e.articleLanding == "was-here" && e.articleRestore == .holding(place),
+                "R-18l-13: the same-block entry lives through the hold (red on the pre-U8 tree: stood down)")
         e.landArticle(on: "far")
         #expect(e.articleLanding == "far" && e.articleRestore == .settled,
                 "she moved: the landing wins and the hold is over before it can fight the reveal")

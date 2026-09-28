@@ -179,8 +179,9 @@ final class TakesChoreographer {
                     // article stays at the top is the defect she reported.
                     // A BLOOM landing (the 17q ladder, R1-2): never weighed
                     // against the remembered page — it rides through the
-                    // restore and reveals afterwards. Only the ENTRY arm
-                    // below stands down on a plain round trip (R-Q21).
+                    // restore and reveals afterwards. (The ENTRY arm below
+                    // used to stand down on a plain round trip — R-Q21; 18l-c
+                    // U8's R-18l-13 retired that: it rides through too.)
                     model.board.landArticle(on: slot.placementID, kind: .bloom)
                 }
             }

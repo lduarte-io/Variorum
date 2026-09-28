@@ -445,12 +445,15 @@ struct TakesArticleWatchTests {
         #endif
     }
 
-    /// **Her R-Q21 plain round trip is never watched** — the entry landing
-    /// STANDS DOWN before any step (the page she left comes back at rest),
-    /// so no landing is handed to the authority and no signpost is filed:
-    /// the ordering contract (the stand-down at `landArticle`, before
-    /// anything moves) outranks the watch by construction. The app's order
-    /// (a bare model; the projection from the view's `.task`).
+    /// **A mode round trip's entry landing on a page left at rest.** The app's
+    /// order (a bare model; the projection from the view's `.task`).
+    ///
+    /// **RE-ARMED AS THE RULED CHANGE (18l-c U8, her R-18l-13 — the U8 RECORD
+    /// names old → new).** OLD (18l-b U2): the entry landing STOOD DOWN before
+    /// any step (`articleLanding == nil`), so it was never handed to the watch
+    /// and no `LAND` was told. NEW: it no longer stands down — it is WATCHED
+    /// from its first decided step (`LAND`) like every other landing, and it
+    /// reveals her block. RED on the pre-U8 tree: no `LAND`.
     @Test func aStoodDownEntryLandingIsNeverWatched() async throws {
         #if DEBUG
         try await withSession(blocks: 60) { session, fixture, db, mount in
@@ -472,9 +475,14 @@ struct TakesArticleWatchTests {
             let (window, hosting) = await mount(bare)
             await settle(window, hosting, until: { false }, maxTurns: 30)
             #expect(bare.authority.livePane?.blockID == hers.block, "non-vacuity: the entry ring is on her block")
-            #expect(bare.board.articleLanding == nil, "the entry landing stood down (her R-Q21)")
-            #expect(!story(bare).contains { $0.hasSuffix(" LAND") },
-                    "never handed to the watch: \(story(bare))")
+            #expect(story(bare).contains { $0.hasSuffix(" LAND") },
+                    "R-18l-13: the entry landing is watched — never stood down (red on the pre-U8 tree): \(story(bare))")
+            if let article = articleScrollView(in: hosting) {
+                #expect(isOnScreen(hers.variant, hosting, article),
+                        "…and her block is revealed")
+            } else {
+                Issue.record("no article scroll view")
+            }
         }
         #endif
     }
@@ -647,9 +655,10 @@ struct TakesArticleWatchTests {
     /// her scroll or a lost row ending a landing the watch never took files
     /// the same content-free line as a watched one — `hops=0`, the target
     /// never having reported (`top=-9999`) — and the DEBUG story names the
-    /// act. RED on the U2 tree: nothing filed. R-Q21's stand-down stays
-    /// SILENT by design (`aStoodDownEntryLandingIsNeverWatched`: a landing that
-    /// stands down was never asked of the page).
+    /// act. RED on the U2 tree: nothing filed. (Doc only, 18l-c U8: the
+    /// R-Q21 stand-down this line used to exempt is retired by R-18l-13 — an
+    /// entry landing is now always asked of the page and filed like the rest;
+    /// `aStoodDownEntryLandingIsNeverWatched` is re-armed to say so.)
     @Test func aLandingThatEndsBeforeItsFirstStepIsFiledNotSilent() {
         #if DEBUG
         let (byGesture, _, _) = bloomOverAPendingRestore()
