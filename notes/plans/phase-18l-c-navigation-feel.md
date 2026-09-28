@@ -1699,6 +1699,26 @@ the highlight shows unanimated for the same total and then goes (JUDGMENT CALL; 
 | R-10 | `TakesArticleWatchTests.aLandingThatEndsBeforeItsFirstStepIsFiledNotSilent` | doc only (named the stand-down's silence) | doc only (the stand-down retired) | n/a |
 | R-11 | `TakesArticleScrollTests.aPlainRoundTripComesBackToTheSameLineNotOnlyTheSameRow` | `articleLanding == nil` ("stood down") | `articleLandingAims == 0` after the watch's quiet; the same-LINE assertion unchanged (the pin that measured the race) | the line assertion red on the FIRST green attempt (271 → 571), green with the deferral |
 
+### THE BEHAVIOURAL REVERTS — NAMED BEFORE THEY RUN
+
+The product tree is committed first (`12c692bb`); each revert is a working-tree edit to ONE committed file,
+restored by `git checkout -- <file>` (never a file this unit is editing uncommitted), tree clean after each.
+Runs over the named suites only (logs `App/Variorum/DerivedData/18lc-u8-R*.log`).
+
+| # | Revert (one file) | Predicted RED (and nothing else) |
+|---|---|---|
+| R-U8-1 | the stand-down back (`TakesArticleScroll.resolveEntryLandingAgainstTheMemory` clears the same-block landing) | the re-armed caret-rule pins (R-1 `pane == nil`, R-3, R-5, R-6, R-7, R-8, R-9) + the band's head pin (her block left off the page) |
+| R-U8-2 | the ride-through's deferral removed (its first step decides from its own frame) | R-11 — the page pulled from where she left it (the 271 → 571 shape) — a RACE, so the prediction is "red in that shape if the race fires on this run", stated honestly |
+| R-U8-3 | the Takes band off (`landingIsBanded` false) | `TakesEntryBandTests`' foot (room ~0) and head (top ~0 — row 94's shape) arms |
+| R-U8-4 | Write's band off (the hop's banded reveal/carry paths skipped) | `ModeSwitchFeelTests`' Write top (0) and bottom (~1 room) arms; mid-band green |
+| R-U8-5 | Read's band off (`box.band` never set) | `ModeSwitchFeelTests`' Read top (~0) and bottom (~0) arms |
+| R-U8-6 | the Takes flash's arrival never recorded (`watchedLandingArrived` returns) | `TakesEntryBandTests.theEntryLandingFlashesItsRowOnceItArrives` (and the OFF arm's non-vacuity "the entry arrived") |
+| R-U8-7 | Write's flash never asked for (`consumeModeSwitchArrival` returns before the flash) | `ModeSwitchFeelTests.aModeSwitchIntoWriteFlashesTheCaretsLineAndAReopenDoesNot` |
+| R-U8-8 | Read's flash never wired (`landing.onArrived` left nil on the edit face) | `ModeSwitchFeelTests.aModeSwitchIntoReadFlashesTheLandedRow` |
+| R-U8-9 | the setting's gate dropped on Takes (`arrivalFlash(_:)` ignores `themeSettings.arrivalFlash`) | `TakesEntryBandTests.withTheSettingOffTheArrivalDrawsNoFlash` |
+
+Reverts in flight: none yet.
+
 ## ORCHESTRATOR RESUME MAP (written 2026-09-28 at her compaction warning — the transcript-proof state; a post-compaction orchestrator re-orients from THIS section + the ledger + LIVE STATUS, verifying against git, never trusting)
 
 **Seat:** Fable `/architect-phase 18l-c` orchestrator (the session that took her kickoff). Her
