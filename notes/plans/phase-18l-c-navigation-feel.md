@@ -345,7 +345,8 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
 
 | # | Item | Unit | Status |
 |---|---|---|---|
-| 1 | The Index tiers' metric shift on click-to-edit (her issue 1; KnownIssues row 89 / 18l U0 sweep S3 — the taste call her message answers; the harness XFAILs it ×4 every run) | U5 | open |
+| 1 | The Index tiers' metric shift on click-to-edit (her issue 1; KnownIssues row 89 / 18l U0 sweep S3) | U5 | **BUILT + DOUBLE-WALKED 2026-09-27/28** (base `097e356b` + the #154 rider `cc3c577c`; row 89 CLOSED ladder-gated; the Fable ladder over base+rider is the remaining gate) |
+| 1b | Her #154 ruling (b) — stored blank lines drawn at rest on the two index faces; nothing ever moves on a click | U5 rider | **BUILT + DOUBLE-WALKED 2026-09-28** (same gate; the ≥2-blanks TK2 exception filed as its own row, owner 12) |
 | 2 | The takemania seeded note — real history through the quiet ops facade; restorable like the others; the dedupe answer RULED = the description's disclaimer (R-18l-12: two-copies note · ships-with-deleted-blocks note · Restore-for-full-experience) | U6 | open |
 | 3 | Search in Takes — the design brief in this file first; chosen-takes-only default ON; the off-scope affordance + find-vs-replace per the sitting | U7 | open |
 | 4 | The mode-switch arrival flash — default ON, a setting to turn off; the existing wash vocabulary; fade constants named | U8 | open |
@@ -991,3 +992,27 @@ blank term is count-based, not exact for every shape; (c) a `Shared/` file chang
 green); (d) the harness's last-text-line aim depends on the fixture's one-blank-line shape (checked, not assumed);
 (e) I repaired her dev store's fixture by hand (via the app, logged). **U5 RIDER — DONE (implementer); the orchestrator's
 re-walk, then the ONE Fable ladder over base + rider.**
+
+### U5 RIDER — ORCHESTRATOR ACCEPTANCE (the re-walk, 2026-09-28 early; verify-never-trust)
+
+**Claims verified:** tree clean, `main` == `origin/main` at `cc3c577c`, every rider commit
+present, the RIDER record complete, the closing log green (345/51 + the 4 named known issues,
+0 skipped), the walk build re-verified fresh (binary 22:52). **My re-walk (dev-store Debug,
+zero real-store instances, guard per step; captures `orch-walk/rider-*`):**
+- **Book Index PASS.** The new rest shows the drawn blank line under each paragraph (airier,
+  matching Write); a mid-paragraph click into *A Scandal in Bohemia*'s first block moved
+  NOTHING — every visible line pixel-identical before/after, the ring simply appearing around
+  the block, drawn blank line included.
+- **Note Read ▸ edit PASS.** The same click shape: block 02's lines identical, block 03 below
+  at the same y in both captures (0.0), the caret under the pointer, the `_the_` marker reveal
+  holding its line (the 18e boundary, unchanged).
+- **R-18l-1 re-seen:** the note re-opened to the page I left (in-session restore) — correct.
+
+**Acceptance verdict: U5 (base + rider) BUILT + DOUBLE-WALKED.** Her report's whole mechanism
+set is now closed on these two surfaces: nothing moves on click-to-edit, for any note. The
+named residual (a block stored over ≥2 blank lines or newline-only — TK2 draws the live last
+blank line short, −10/−20 pt; absent from the sample library) is pinned loud and filed as its
+own KnownIssues row, owner 12. Orchestrator edits landed with this acceptance: KnownIssues
+row 89 CLOSED (ladder-gated), the TK2-exception row filed, row 98's sightings 4–5 + the
+late-landing document mutation recorded, TEXTKIT2_NOTES §3's two measured lines added, #154
+marked BUILT. **The ONE Fable cold ladder over base + rider spawns next — the remaining gate.**
