@@ -80,6 +80,10 @@ nonisolated enum Takemania {
         case markerMissing(String)
         /// The test seam `interruptAfterStep` stopped the history.
         case interrupted(afterStep: Int)
+        /// The keep-on-top divide's displayed take was not in the block's
+        /// live active fan, so `KeepOnTopDivide.compose` declined (its F-3
+        /// guard class) — a script bug, never a reader's state.
+        case displayedTakeNotInFan(blockID: String)
     }
 
     /// Mints takemania into the book and returns its note id. Runs inside
@@ -463,7 +467,7 @@ nonisolated private final class Script {
             let fan = try liveActiveFan(hydeFace.block)
             guard let composition = KeepOnTopDivide.compose(
                 displayedID: displayed, cut: cut, fan: fan)
-            else { throw Takemania.ScriptError.markerMissing("the displayed take in its live fan") }
+            else { throw Takemania.ScriptError.displayedTakeNotInFan(blockID: hydeFace.block) }
             let result = try at {
                 try ops.divideW(
                     hydeFace.block, cuts: composition.cuts,
