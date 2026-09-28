@@ -140,3 +140,27 @@ by design). Tree clean, every commit pushed. **Round 1 CLOSED on the reviewer's 
 the implementer's sanity pass** (its window: `0c335261..HEAD`, the reviewer's five fix commits
 plus this record). No new BLOCKER/MAJOR arose during the fix pass; round cap status stays 1 of 3
 unless the sanity pass raises one.
+
+## THE IMPLEMENTER'S SANITY PASS (2026-09-28, window `0c335261..6ab89a8f`)
+
+**Verdict: CLEAN** — files match the stated list exactly (product = `TakesFindController.swift`
+alone; zero `Sources/`/`Shared/`/`Sync/`/`PaneSurface`/registry/landing-half); the request
+clear sits in `open()`'s `!isPresented` branch only, with the token still monotonic; the
+wrapped rule is the agreed shape (drops on list/current change, empty branch clears, a step
+still sets its own wrap); bind-once correct; the R1-M1 tripwire is the drafted non-intermittent
+`withKnownIssue` with the page-kept half pinned plain; #157 (7) and boundary row 8 match the
+drafts; the 074442 record quotes the artifact; its own run of the five suites — **65 / 5
+TEST SUCCEEDED, exactly 1 known issue** (`18lc-u7-sanity1.log`). Committed and fixed nothing.
+
+**One concern raised TO THE REVIEWER for the final word (the flow's rule), surfaced by
+R1-N4's own measurement — product robustness in the implementer's ORIGINAL code:** the ⇧⏎
+road reads `NSEvent.modifierFlags` in `onSubmit` — the LIVE session state, not the key
+event's own flags; run 090640 proved a quickly-released shift loses that race (the step went
+FORWARD). The walk now holds shift across acts, which proves the held case but hides the
+product's sensitivity to a fast ⇧-tap / key-repeat / macro. Candidate fix:
+`NSApp.currentEvent?.modifierFlags` (the Return keyDown that triggered `onSubmit` carries
+what was pressed regardless of release timing) — UNMEASURED whether `currentEvent` is that
+keyDown inside SwiftUI's `onSubmit`; the old transient walk form is the natural red-on-old.
+Or record it as a named edge. **Optional, harness only:** `vw_abort` does not release a held
+synthetic shift; a one-line `key up shift` in the shared abort path closes the stuck-modifier
+window. Both the reviewer's call.
