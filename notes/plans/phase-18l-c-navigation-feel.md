@@ -2106,3 +2106,12 @@ bar (U7's draft) and the mode-switch rule (R-18l-13, U8's draft).
 caret rule's (A)/(B), the flash face/Reduce-Motion/what-flashes edges, the band's constants)
 · the two §12 contract-line proposals · the divide→merge→undo-twice tray observation (U6) ·
 #150 closes with R-18l-13 built (recorded, hers to confirm reading).
+
+**INSTALL REFRESH (the closeout's last act, 2026-09-28 ~22:52–23:00 UTC):** zero-instance
+window held throughout (pgrep by path clean before the A1 copy, before the build, before the
+install — her app quit at her word, "ready for reinstall"); A1 safety copy
+`Backups/safety-copies/18lc-refresh-20260928T225205Z` (6 files, each byte-verified by `cmp`);
+Release from `f9427a2d`; `/Applications/Variorum.app` binary **`07806a68` → `4e461177`**;
+codesign OK (deep, strict); the keychain access groups present. Takemania and the whole round
+reach her real store at her next launch (the #156 recency consequence is in her bundle,
+handoff item 2, BEFORE she meets it). **18l-c — CLOSED. HARD STOP; 18m at her paste.**
