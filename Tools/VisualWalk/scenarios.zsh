@@ -854,8 +854,8 @@ scn_takes-find() {
   vw_cap 04-third-match
 
   # Row E — the scope chip OFF: every live take is searched; the count grows; the margins say where.
-  vw_ax_press "$(vw_takes_find_chip on)" AXButton || { vw_require false "the scope chip"; return }
-  sleep 1.5; vw_settle
+  vw_takes_find_press_chip on || { vw_require false "the scope chip turned the scope off (tfs=${PV[tfs]})"; return }
+  sleep 1; vw_settle
   local face=${PV[tf]} every
   if [[ $face == *_of_* ]]; then every=${${face#*_of_}%%_*}; else every=${face%%_match*}; fi
   vw_log "  E · the count face: ${PV[tf]} · markers drawn: ${PV[tmk]}"
@@ -906,13 +906,31 @@ scn_takes-find() {
 
   # Tidy: the scope back ON (a session slot — the pass's own launch forgets it anyway), the bar closed.
   vw_keys "⌘F" 'keystroke "f" using command down'; sleep 1; vw_settle
-  vw_ax_press "$(vw_takes_find_chip off)" AXButton >/dev/null 2>&1
+  vw_takes_find_press_chip off || vw_log "  tidy: the chip could not be turned back on (a session slot — the pass's own launch forgets it)"
   sleep 1; vw_keys "Esc" 'key code 53'; sleep 1
 }
 
 # The scope chip's accessibility label in the voice on screen (Terminal's chrome lowercases; the chip's
 # words are lowercase already, so both voices read the same).
 vw_takes_find_chip() { print -r -- "only chosen takes: $1" }
+
+# Press the scope chip whose CURRENT state word is $1: AXPress first, verified by the probe (`tfs`); a press
+# the SwiftUI button refuses (measured once, Terminal: `AXUIElementPerformAction` failed, the scope unmoved)
+# falls back to a guarded click at the chip's own frame (vis-ax reports it).
+vw_takes_find_press_chip() {   # on|off
+  local label=$(vw_takes_find_chip $1) want
+  [[ $1 == on ]] && want=0 || want=1
+  if vw_ax_press "$label" AXButton; then
+    sleep 1.2; vw_probe
+    [[ ${PV[tfs]} == $want ]] && return 0
+  fi
+  vw_log "  the chip's AXPress did not take (tfs=${PV[tfs]}) — clicking its own frame"
+  local f=(${(s: :)$($VW_BIN/vis-ax $PID "$label" AXButton 2>/dev/null)})
+  (( ${#f} >= 4 )) || return 1
+  vw_click $(( f[1] + f[3] / 2 )) $(( f[2] + f[4] / 2 )) "the scope chip"
+  sleep 1.2; vw_probe
+  [[ ${PV[tfs]} == $want ]]
+}
 
 # --- SELF-TEST: the harness must be able to RED (run with --selftest) -----------------------------------
 vw_def selftest-red "whatever is on screen" "none (a quiet second)" \
