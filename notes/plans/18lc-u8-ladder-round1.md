@@ -149,3 +149,24 @@ under their new names. No behavioural change was made anywhere in this fix pass 
 constant equal by construction to the three expressions it replaced, a DEBUG bound, three doc/record
 edits), so no behavioural revert is owed — the round-1 justifications stand in lieu of pins, per the
 guard. **Fix pass complete; handed back for the implementer's sanity pass.**
+
+---
+
+## THE IMPLEMENTER'S SANITY PASS (2026-09-28, window `12284187..ff82d548`)
+
+**Verdict: CLEAN.** Read whole; zero behaviour change confirmed piece by piece (pin bodies
+byte-unchanged with old names as doc audit trail and both cross-references updated;
+`stateLifetime` = the same operands in the same order — bit-identical Double at all three
+sites; the DEBUG bound trims only on a new key at a full dictionary and never the entry
+being written, `split(separator: "|").last` correct despite `|` in face keys; R1-4/R1-6
+comment-only). No dangling references (git grep; the old names live only in the four
+audit-trail doc lines, the re-arm table's old → new rows, this ladder file, and the four
+historical records). Own run on `ff82d548`: the same ten suites — **112 tests / 10 suites
+passed, 1 known issue** (exactly the designed U7 tripwire), `18lc-u8-sanity.log`, exit 0.
+Fixed and committed nothing.
+
+**One OPTIONAL doc wording point raised, the reviewer's call (the flow's rule):** the
+renamed `aTopMemoryInTheAppsOrderKeepsEveryLandingAlive`'s doc says all four arms "keep
+their landing alive at a TOP memory" — the first-entry arm runs with NO memory
+(`remembered: nil`, the no-memory control). "at a TOP memory or none" would make the doc
+exact; the name reads fine either way.
