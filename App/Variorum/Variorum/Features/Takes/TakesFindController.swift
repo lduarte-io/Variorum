@@ -331,6 +331,17 @@ final class TakesFindController {
 
     private func recount(keepingCurrent: Bool = false) {
         let old = keepingCurrent ? currentMatch : nil
+        // An empty query finds nothing and scans nothing (decision 2: "empty
+        // query = no matches, no residue").
+        guard !query.isEmpty else {
+            cache = [:]
+            cacheQuery = ""
+            if !matches.isEmpty { matches = [] }
+            if current != nil { current = nil }
+            if !matchesByVariant.isEmpty { matchesByVariant = [:] }
+            if !offScopeCounts.isEmpty { offScopeCounts = [:] }
+            return
+        }
         if query != cacheQuery {
             cache = [:]
             cacheQuery = query
