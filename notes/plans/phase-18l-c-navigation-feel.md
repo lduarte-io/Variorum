@@ -357,7 +357,20 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
   after a mode transition, default ON, a setting to turn it off.
 - **R-18l-8 (her message): THE S3 TASTE CALL IS ANSWERED** — the whitespace around the clicked
   block must not move on click-to-edit; KnownIssues row 89 re-owns to this round (U5).
-- *(The sitting's question batch and her answers land here before any unit spawns.)*
+- **R-18l-9 (Q1, the sitting's question batch — Takes search scope): FIND-ONLY v1.** Her selection
+  of the recommended option: ⌘F in Takes finds and navigates (next/prev, match counts,
+  highlights); replace stays Write's (`EditorFind`, incl. Replace All in Every Take); a Takes
+  replace can join later if she reaches for it.
+- **R-18l-10 (Q2 — the off-scope match affordance when "only chosen takes" is OFF): INDICATOR +
+  EXPAND ON ARRIVAL.** Her selection of the recommended option (both halves of her own kickoff
+  sketch): blocks whose other takes match wear a clear marker (e.g. "2 matches in other takes"
+  on the card); stepping to such a match with next/prev expands that block's fan and highlights
+  the take; nothing expands until she actually navigates there.
+- **R-18l-11 (Q3 — takemania's home): ITS OWN SMALL SEEDED BOOK.** Her selection of the
+  recommended option: a seeded book *The Strange Case of Dr Jekyll and Mr Hyde* holding the
+  takemania note (optionally a couple of quieter chapter notes for contrast), riding the
+  existing `SampleLibrarySeeder`/`SeededBookRestore` machinery exactly like Sherlock, with its
+  own Help ▸ Restore door — findable on the shelf and deletable as a set.
 
 ## LIVE STATUS (orchestrator; flipped per piece)
 
