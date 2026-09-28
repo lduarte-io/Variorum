@@ -94,7 +94,7 @@ struct AppSettingsView: View {
     static let rowIDsRendered: [SettingsPane: [String]] = [
         .general: ["voice", "palette", "appearance", "receipts"],
         .editor: ["seams", "indicator", "inlineComments", "paragraphGap",
-                  "hoverHandles", "spellcheck", "longBlocks"],
+                  "arrivalFlash", "hoverHandles", "spellcheck", "longBlocks"],
         .takes: ["fanStyle", "followScroll"],
         .writing: ["segmentation", "cadence", "pruning"],
         .shortcuts: [],
