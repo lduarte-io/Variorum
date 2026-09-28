@@ -646,6 +646,23 @@ final class TakesViewModel {
         paneCaretLanding = (variantID: pane.variantID, landing: .end)
     }
 
+    /// **18l-c U7 — a FIND step's focus** (the design brief's decision 6: the
+    /// current match's take goes LIVE with the match SELECTED). The room's
+    /// shape one landing over: it rides `focus` (the ONE authority door —
+    /// migration flush, the current-block report and all) and then names
+    /// where the caret lands, AFTER `focus` armed the entry rule, so the step's
+    /// own place wins. The body of the find lives in `TakesFindController`;
+    /// this is the one line it needs from the landing state this file owns.
+    func focus(_ pane: PaneKey, landingAt landing: PaneCaretLanding) {
+        focus(pane)
+        paneCaretLanding = (variantID: pane.variantID, landing: landing)
+    }
+
+    /// **18l-c U7 — search in Takes** (`TakesFindController`): the board's
+    /// find, its own component (P-9 — the `structure` / `choreography`
+    /// shape). Lazy so the composition can reference `self`.
+    @ObservationIgnored private(set) lazy var find = TakesFindController(model: self)
+
     // MARK: - Where a pane's caret lands when it takes the ring (17o batch b)
 
     /// The note's remembered caret place, for the ONE pane about to go live.

@@ -145,6 +145,13 @@ final class TakesArticleScroll {
         /// stand-down applied to a bloom on the block the ring was last in,
         /// the page came back without the bloomed block on it.
         case bloom
+        /// **18l-c U7 — a FIND step** (the design brief's decision 5: *"a
+        /// find-next is a deliberate landing"*). Weighed against nothing,
+        /// exactly as the bloom door is — the step is her act of asking to go
+        /// there, never an entry her memory could outrank — and named apart
+        /// from it so the kind says which door asked. The resolver consults
+        /// `.entry` alone, so this reveals by the same minimal rule (R-Q1).
+        case find
     }
 
     @ObservationIgnored private(set) var articleLandingKind: ArticleLandingKind = .entry

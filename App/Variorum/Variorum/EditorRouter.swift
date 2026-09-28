@@ -131,4 +131,13 @@ final class EditorRouter {
     /// changes, read ONCE per mount as a snapshot (the value is about the
     /// PREVIOUS showing, so it must not move under this one).
     @ObservationIgnored var takesArticleCurrentRows: [String: String] = [:]
+
+    /// **The Takes find's session slot** (18l-c U7 — the design brief's
+    /// decision 3: the "only chosen takes" toggle is SESSION-remembered, ONE
+    /// global slot, PROVISIONAL — per-note is one line; the query rides beside
+    /// it, the find pasteboard's own reach in one app). It lives here beside
+    /// the article's memories for their reason: the board's model is per-MOUNT
+    /// and dies with a mode round trip. Session-only, never persisted, never
+    /// synced.
+    @ObservationIgnored var takesFind = TakesFindMemory()
 }
