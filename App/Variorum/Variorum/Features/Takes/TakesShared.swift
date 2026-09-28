@@ -189,6 +189,10 @@ struct TakesCellView: View {
     /// composition's ⌘-click behaviour moves. The `Bool` is 13e E2's: ⇧ was
     /// held too, i.e. extend the run rather than toggle this one.
     var onCommandClick: ((Bool) -> Bool)?
+    /// 18l-c U7: the find's face for the take this cell shows — set ONLY by
+    /// the Takes board's article cell (nil on the Lenses board and anywhere
+    /// else, so no other composition's pane moves).
+    var findFace: PaneFindFace?
     let onDiff: (TakesDiffPresentation) -> Void
 
     var body: some View {
@@ -221,7 +225,8 @@ struct TakesCellView: View {
                 // current block WHERE SHE WAS.
                 caretOnGoingLive: model.caretLanding(forVariant: resolved.variantID),
                 menuItems: { menuSpecs(resolved: resolved) },
-                caretToEndToken: caretToEndToken)
+                caretToEndToken: caretToEndToken,
+                findFace: findFace)
                 .background(tinted ? tokens.accent.opacity(0.12) : Color.clear)
                 // **NOTHING is drawn over a take's pane** (17p batch a, row 2
                 // — her ruling R-Q2, "no placeholder anywhere"): an empty

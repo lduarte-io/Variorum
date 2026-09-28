@@ -576,10 +576,27 @@ struct FindAndReplaceTests {
             #expect(CapabilityRegistry.isEnabled(id, in: detail), "\(id) acts in the post editor")
             #expect(!CapabilityRegistry.isEnabled(id, in: inlineBook),
                     "\(id): honestly grey on the book's inline editor")
-            #expect(!CapabilityRegistry.isEnabled(id, in: CapabilityContext(mode: .takes)),
-                    "\(id): v1 is the full-document surface (13e owns the takes-aware act)")
             #expect(!CapabilityRegistry.isEnabled(id, in: CapabilityContext(mode: nil)),
                     "\(id): nothing open, honestly grey")
+        }
+        // **18l-c U7 — THE TAKES ARM, RE-ARMED AS HER RULING** (named in the
+        // unit's record). This arm asserted *"v1 is the full-document surface
+        // (13e owns the takes-aware act)"* for all five; her R-18l-6 made the
+        // FIND itself a Takes act (the board's own bar), and her R-18l-9 kept
+        // REPLACE Write's. So the find half acts in Takes — in the mode AND on
+        // a board mounted with no detail around it (the book spread) — and
+        // the replace half and ⌘E stay honestly grey there.
+        let takesMode = CapabilityContext(mode: .takes)
+        let spreadBoard = CapabilityContext(mode: nil, takesBoardAttached: true)
+        for id in [CapabilityID.findInPost, .findNext, .findPrevious] {
+            #expect(CapabilityRegistry.isEnabled(id, in: takesMode), "\(id): Takes finds (R-18l-6)")
+            #expect(CapabilityRegistry.isEnabled(id, in: spreadBoard),
+                    "\(id): a mounted board finds wherever it is mounted")
+        }
+        for id in [CapabilityID.findAndReplace, .useSelectionForFind, .replaceAllInEveryTake] {
+            #expect(!CapabilityRegistry.isEnabled(id, in: takesMode),
+                    "\(id): find-only v1 — replace stays Write's (R-18l-9)")
+            #expect(!CapabilityRegistry.isEnabled(id, in: spreadBoard))
         }
     }
 

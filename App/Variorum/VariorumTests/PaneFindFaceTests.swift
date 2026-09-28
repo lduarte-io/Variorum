@@ -119,6 +119,33 @@ struct PaneFindFaceTests {
         return runs
     }
 
+    /// Only the Takes board hands a pane a find face (its article cell through
+    /// `TakesCellView`, its fan cards directly) — a third caller would be a
+    /// find on a surface her rulings did not name, and must say so here first
+    /// (the `PaneLineMetricsScopeTests` walk, one parameter over).
+    @Test func onlyTheTakesBoardHandsAPaneAFindFace() throws {
+        let app = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+        var callers: Set<String> = []
+        for root in ["Variorum", "Shared"] {
+            let walker = try #require(FileManager.default.enumerator(
+                at: app.appendingPathComponent(root), includingPropertiesForKeys: nil))
+            for case let file as URL in walker
+            where file.pathExtension == "swift" && file.lastPathComponent != "PaneSurface.swift" {
+                let source = try String(contentsOf: file, encoding: .utf8)
+                let code = source.split(separator: "\n").filter {
+                    let line = $0.trimmingCharacters(in: .whitespaces)
+                    return !line.hasPrefix("//") && !line.hasPrefix("*")
+                }
+                if code.contains(where: { $0.contains("findFace:") }) {
+                    callers.insert(file.lastPathComponent)
+                }
+            }
+        }
+        #expect(callers == ["TakesBoardView.swift", "TakesShared.swift"],
+                "the hosts handing a pane a find face: \(callers.sorted())")
+    }
+
     @Test func aPaneWithNoFindFaceNeverPaints() async throws {
         let rig = PaneRig(text: Self.text)
         let (window, pane, _) = try await Self.mount(rig)

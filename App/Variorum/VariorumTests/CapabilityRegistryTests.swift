@@ -134,10 +134,17 @@ struct CapabilityRegistryTests {
         // no surface is behind another because no surface edits anything
         // here. (Its two siblings, `.openNote` and the back/forward pair,
         // are app-scoped and never reach this loop at all.)
+        // **18l-c U7 — the expiry clause above, MET for the find half** (her
+        // R-18l-6, a RULED change named in the unit's record): the Takes board
+        // hosts its own find, so ⌘F · ⌘G · ⇧⌘G declare `takesAccess:
+        // .native` and LEAVE this list — `takesIsNeverBehindWrite` now holds
+        // them to acting in Takes. Find and Replace, Use Selection for Find
+        // and Replace All in Every Take STAY (her R-18l-9: find-only v1 —
+        // replace is Write's).
         let exempt: Set<CapabilityID> = [
             .previousBlock, .nextBlock, .exportCaretBlock, .switchMode,
             .renameLens, .tagBlock,
-            .findInPost, .findAndReplace, .findNext, .findPrevious, .useSelectionForFind,
+            .findAndReplace, .useSelectionForFind,
             .replaceAllInEveryTake,
             .openPeerPost,
             // 13e E11: `.openBookAtNote` joins `.openPeerPost` — the same

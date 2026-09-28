@@ -177,6 +177,11 @@ struct TakesBoardView: View {
                     .padding(.vertical, 4)
             }
             mergeSelectionBanner
+            // 18l-c U7 (her R-18l-6): the board's find bar, above the article
+            // like the selection banner — opened by ⌘F, closed by Esc.
+            if model.find.isPresented {
+                TakesFindBar(find: model.find, tokens: tokens)
+            }
             singleColumnArticle
             TakesBottomBar(model: model)
         }
@@ -196,6 +201,9 @@ struct TakesBoardView: View {
         .task { await model.refreshArchived() }
         .onChange(of: model.projection) { _, _ in
             Task { await model.refreshArchived() }
+            // 18l-c U7: a settle / arrival while the bar is open recounts
+            // (only the takes whose text moved rescan).
+            model.find.projectionChanged()
         }
         .onAppear {
             model.followTheScroll = themeSettings.followTheScroll
@@ -344,11 +352,23 @@ struct TakesBoardView: View {
         case .saveNoteVersion:
             Task { await model.saveNoteVersion() }
             return true
-        case .find:
-            // QoL batch 3 (L6): v1 finds across the POST's text, which is the
-            // full-document editor's surface; a take card is one take. The
-            // router speaks the declared note (13e owns the takes-aware act).
-            return false
+        case .find(let action):
+            // 18l-c U7 (her R-18l-6): the board's OWN find — ⌘F opens its bar,
+            // ⌘G / ⇧⌘G step. The replace half and ⌘E decline, and the router
+            // speaks their declared note: find-only v1 (her R-18l-9).
+            switch action {
+            case .show:
+                model.find.open()
+                return true
+            case .next:
+                model.find.next()
+                return true
+            case .previous:
+                model.find.previous()
+                return true
+            case .showReplace, .useSelection, .replaceAllInEveryTake:
+                return false
+            }
         }
     }
 
@@ -924,12 +944,13 @@ struct TakesBoardView: View {
         let compactNote = commentRoom < 90
         let noteWidth = min(150, max(commentRoom - 16, 24))
         let picked = model.isSelectedForMerge(slot.blockID)
+        let resolved = model.resolvedTake(column: mainColumn, slot: slot)
         return TakesCellView(
             model: model, tokens: tokens, indicator: indicator,
             slot: slot, column: mainColumn,
             tinted: false, role: "article",
             // 13f W7: the room's landing — nonzero only for the pane it named.
-            caretToEndToken: model.resolvedTake(column: mainColumn, slot: slot)
+            caretToEndToken: resolved
                 .map { model.caretToEndToken(forVariant: $0.variantID) } ?? 0,
             // 13e E3 (her A18): ⌘-click picks this block for a merge. The
             // claim consumes the click, so the ring does not migrate here —
@@ -943,6 +964,10 @@ struct TakesBoardView: View {
                     model.toggleMergeSelection(slot.blockID)
                 }
                 return true
+            },
+            // 18l-c U7: the find's face for the take the article shows.
+            findFace: resolved.flatMap {
+                model.find.face(forVariant: $0.variantID, tokens: tokens)
             },
             onDiff: { diffPresentation = $0 })
             .padding(Self.articleCellPadding)
@@ -977,6 +1002,19 @@ struct TakesBoardView: View {
                         .offset(x: 40)
                 }
             }
+            // 18l-c U7 (R-18l-10's first half): with "only chosen takes" OFF,
+            // the count of matches on takes this block is not showing — in the
+            // right margin under the fan badge, never over the prose (R-Q2),
+            // and standing down where an engaged margin rail sits (the badge's
+            // own rule, for its reason).
+            .overlay(alignment: .topTrailing) {
+                if !(model.projection.fanStyle == .marginGrid && bloomed),
+                   let count = model.find.offScopeCount(forBlock: slot.blockID) {
+                    TakesFindOffScopeMarker(blockID: slot.blockID, count: count, tokens: tokens)
+                        .alignmentGuide(.trailing) { $0[.leading] }
+                        .offset(x: 12, y: 24)
+                }
+            }
     }
 
     /// STACK: takes stacked under the block. The card's text routes
@@ -999,7 +1037,11 @@ struct TakesBoardView: View {
                     // earlier/later read as ▲ ▼ here.
                     reorder: reorderDoors(take: take, slot: slot, axis: .vertical),
                     // 13u3 UNIT H: the same four acts as every other card.
-                    acts: cardActs(take: take))
+                    acts: cardActs(take: take),
+                    // 18l-c U7: the find's face + a step's landing, as the
+                    // other fan cards carry them.
+                    caretOnGoingLive: model.find.fanCaretLanding(forVariant: take.id),
+                    findFace: model.find.face(forVariant: take.id, tokens: tokens))
             }
             fanFooter(slot: slot)
         }
@@ -1445,6 +1487,9 @@ struct TakesBoardView: View {
             role: "mini", variantID: take.id,
             onFocusRequest: { focusPane(slot: slot, take: take) },
             onEdit: { model.paneEdited(variantID: take.id, newText: $0) },
+            // 18l-c U7: a find step onto this card lands with its match
+            // selected (`.leave` on every other road — the shipped END).
+            caretOnGoingLive: model.find.fanCaretLanding(forVariant: take.id),
             // QoL batch 2: ONLY margin grid and slot split subscribe — the
             // two compositions that size a wrapper around the pane.
             onMeasuredHeight: reportsHeight
@@ -1452,7 +1497,9 @@ struct TakesBoardView: View {
                 : nil,
             // 13f W7: the room's landing reaches a fan card too — a
             // slot-split bloom on the last block has no article cell.
-            caretToEndToken: model.caretToEndToken(forVariant: take.id))
+            caretToEndToken: model.caretToEndToken(forVariant: take.id),
+            // 18l-c U7: the find's face for this take.
+            findFace: model.find.face(forVariant: take.id, tokens: tokens))
     }
 
     // MARK: - Small helpers
@@ -1753,6 +1800,10 @@ private struct CollapsibleTakeCard: View {
     /// 13u3 UNIT H: the card's four acts, forwarded the same way — the stack
     /// style's card is the one live-card shape that is not `takeMiniPane`.
     var acts: TakeCardActs?
+    /// 18l-c U7: a find step's landing and the find's face, forwarded to the
+    /// pane exactly as `takeMiniPane` hands them over.
+    var caretOnGoingLive: PaneCaretLanding = .leave
+    var findFace: PaneFindFace?
     @State private var collapsed = false
 
     var body: some View {
@@ -1779,7 +1830,9 @@ private struct CollapsibleTakeCard: View {
                         text: text, isLive: isLive, tokens: tokens,
                         indicator: indicator,
                         role: "card", variantID: take.id,
-                        onFocusRequest: onFocus, onEdit: onEdit)
+                        onFocusRequest: onFocus, onEdit: onEdit,
+                        caretOnGoingLive: caretOnGoingLive,
+                        findFace: findFace)
                 }
             }
         }

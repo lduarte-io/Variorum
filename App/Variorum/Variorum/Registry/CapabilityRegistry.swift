@@ -125,6 +125,21 @@ nonisolated enum CapabilityRegistry {
         ctx.writeEditorOwnsScrollView ? .act : .unavailable
     }
 
+    /// **18l-c U7 — THE FIND ITSELF reaches the Takes board** (her R-18l-6:
+    /// *"I think that we should add a search in takes mode, yes that will be
+    /// this phase"*). ⌘F, ⌘G and ⇧⌘G act on the post detail's full-document
+    /// editor (the family's rule above) AND on a mounted Takes board, which
+    /// hosts its own find bar (`TakesFindBar` — a board of panes has no
+    /// `NSTextFinder` to host, so the board's bar is its own, in the shipped
+    /// bar's grammar). The board's condition is `takesBoard`'s exactly —
+    /// the attachment, or the takes mode that mounts one — so the book
+    /// spread's takes page finds too. The REPLACE half and ⌘E stay on
+    /// `findFamily`: find-only v1 (her R-18l-9 — *"replace stays Write's"*).
+    private static let findInNote: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
+        ctx.writeEditorOwnsScrollView || ctx.takesBoardAttached || ctx.mode == .takes
+            ? .act : .unavailable
+    }
+
     /// The FORMATTING family (13g batch 3 — L8): wherever text is edited.
     ///
     /// Broader than the take family on purpose, and the breadth is a fact
@@ -160,6 +175,13 @@ nonisolated enum CapabilityRegistry {
     }
 
     private static let always: @Sendable (CapabilityContext) -> Capability.Availability = { _ in .act }
+
+    /// 18l-c U7: what ⌘F / ⌘G / ⇧⌘G answer where nothing can find. The find
+    /// acts in Write AND on the Takes board now, so the note names both — a
+    /// refusal must be true (P-2). (The replace half keeps its own note: it is
+    /// still Write's alone.)
+    static let findInNoteNote =
+        "Find works in a note's Write or Takes mode — open one there (⌘1 or ⌘2)."
 
     // MARK: - The table
 
@@ -1099,12 +1121,20 @@ nonisolated enum CapabilityRegistry {
         // recorded future scope, her own L6 rider). The verbs say "in Post"
         // so nothing reads as a rival to ⌘K's "Find Anything…", which
         // searches the library's titles and names and never body text.
+        // *(18l-c U7 — that exemption's expiry clause, met for the FIND half:
+        // the Takes board hosts its own find, so ⌘F · ⌘G · ⇧⌘G declare
+        // `.native` below and leave the exemption; the replace half and ⌘E
+        // keep it — R-18l-9, find-only v1.)*
+        // 18l-c U7 (her R-18l-6): the FIND itself — ⌘F, ⌘G, ⇧⌘G — acts
+        // natively on a mounted Takes board too (`findInNote`), so the three
+        // leave the parity exemption and declare `takesAccess: .native`; the
+        // replace half and ⌘E stay Write's (R-18l-9, find-only v1).
         Capability(
             id: .findInPost, verb: "Find in Note…", scope: .post,
             doors: [.menuBar],
-            shortcutLabel: "⌘F", takesAccess: nil,
-            unavailableNote: "Find works in the note editor — open a note in Write (⌘1).",
-            availability: findFamily),
+            shortcutLabel: "⌘F", takesAccess: .native,
+            unavailableNote: Self.findInNoteNote,
+            availability: findInNote),
         Capability(
             id: .findAndReplace, verb: "Find and Replace…", scope: .post,
             doors: [.menuBar],
@@ -1114,15 +1144,15 @@ nonisolated enum CapabilityRegistry {
         Capability(
             id: .findNext, verb: "Find Next", scope: .post,
             doors: [.menuBar],
-            shortcutLabel: "⌘G", takesAccess: nil,
-            unavailableNote: "Find works in the note editor — open a note in Write (⌘1).",
-            availability: findFamily),
+            shortcutLabel: "⌘G", takesAccess: .native,
+            unavailableNote: Self.findInNoteNote,
+            availability: findInNote),
         Capability(
             id: .findPrevious, verb: "Find Previous", scope: .post,
             doors: [.menuBar],
-            shortcutLabel: "⇧⌘G", takesAccess: nil,
-            unavailableNote: "Find works in the note editor — open a note in Write (⌘1).",
-            availability: findFamily),
+            shortcutLabel: "⇧⌘G", takesAccess: .native,
+            unavailableNote: Self.findInNoteNote,
+            availability: findInNote),
         Capability(
             id: .useSelectionForFind, verb: "Use Selection for Find", scope: .post,
             doors: [.menuBar],
