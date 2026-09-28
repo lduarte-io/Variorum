@@ -46,8 +46,13 @@ private func withJekyllWorld<T>(
         // The U6 ladder's F2 — BOTH mark leaves injected (the
         // `EncryptionBookDoorTests` / `TutorialWalkTests` precedent, RUN A A2
         // row 8's rule): the restore road reads and WRITES the session's
-        // per-book mark, and the production leaves reach this test host's own
-        // defaults domain. A pin that cares about the mark passes its own
+        // per-book mark, and the production leaves write `UserDefaults
+        // .standard` — here the test host's, i.e. the Debug app's domain
+        // (`io.lduarte.Variorum.debug`). That domain is SEPARATE from the
+        // Release app's (`io.lduarte.Variorum` — the bundle ids differ;
+        // verified read-only at the ladder's round 2), so a leaked mark never
+        // reached her real store's seeding; it is still residue a headless
+        // run must not leave. A pin that cares about the mark passes its own
         // `loadMark`/`saveMark` to the seeder instead.
         session.seededBookMarkIsSet = { _ in false }
         session.markSeededBook = { _ in }
@@ -441,16 +446,59 @@ struct JekyllTakemaniaSeedTests {
         }
     }
 
+    /// **The U6 ladder's R2-M2, pinned — the IMPORTED road refuses before
+    /// minting too.** A quiet chapter restored into a finished book: the
+    /// import used to land (and wear the tag) before the membership was
+    /// refused, leaving one tagged orphan in the Pool. `place` now asks the
+    /// book's gate (`assertReadingAcceptsPosts`) before the import.
+    ///
+    /// *Red on the old code:* one press → one "Story of the Door" orphan in
+    /// the Pool. Verified by reverting the fix.
+    @Test("A quiet chapter restored into a FINISHED book refuses before the import — no Pool orphan")
+    func importedRoadRefusesBeforeMinting() async throws {
+        try await withJekyllWorld { session, db in
+            let mark = JekyllMark()
+            guard case .seeded(let bookID, _) = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, book: jekyll, loadMark: mark.load, saveMark: mark.save)
+            else {
+                Issue.record("expected a seed")
+                return
+            }
+            let chapter = try await db.read { db in
+                try #require(try Queries.assembleReading(db, readingID: bookID)
+                    .first { $0.title == "Story of the Door" }).postID
+            }
+            try await session.runner.run { ops in
+                try ops.deleteContainer(chapter)
+                try ops.lockReading(bookID)
+            }
+            await #expect(throws: OperationError.lockedReading(id: bookID)) {
+                _ = try await SeededBookRestore.restore(session: session, book: jekyll)
+            }
+            let (pool, doors) = try await db.read { db in
+                (try Queries.poolPosts(db, limit: 100).map(\.postID),
+                 try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM container WHERE title = ? AND deleted_at IS NULL",
+                    arguments: ["Story of the Door"]) ?? 0)
+            }
+            #expect(pool.isEmpty, "the Pool stays empty: \(pool.count) orphan(s)")
+            #expect(doors == 0, "nothing was imported")
+        }
+    }
+
     /// **The U6 ladder's F2, pinned — a headless run never leaves this
     /// book's mark in the test host's defaults.** The test host IS the Debug
     /// app (`io.lduarte.Variorum.debug`), and the restore road records the
     /// reader's decision through the session's `markSeededBook` leaf; a
     /// headless `AppSession` defaults to the `.real` variant, so an uninjected
-    /// leaf writes `SampleLibrarySeeded.Variorum.jekyll-and-hyde` into a
-    /// domain the real app family shares. Nothing but a headless run ever
-    /// writes the `.real` key in the DEBUG domain (the Debug app's own
-    /// bootstrap is the `.dev` variant), so after two restores it must be
-    /// absent — and it reds for ANY headless road that forgets its leaves.
+    /// leaf writes `SampleLibrarySeeded.Variorum.jekyll-and-hyde` into the
+    /// DEBUG domain. The Release app's domain (`io.lduarte.Variorum`) is a
+    /// different one — the bundle ids differ (verified read-only at the
+    /// ladder's round 2) — so the leak was INERT for her real store: residue,
+    /// not a wrong decision. Nothing but a headless run ever writes the
+    /// `.real` key in the Debug domain (the Debug app's own bootstrap is the
+    /// `.dev` variant), so after two restores it must be absent — and it reds
+    /// for ANY headless road that forgets its leaves.
     ///
     /// *Red on the old code:* the world without the injection → the key is
     /// present after the first restore. Verified by reverting the fix (the

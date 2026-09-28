@@ -1050,6 +1050,15 @@ enum SampleLibrarySeeder {
         if let stray {
             noteID = stray
         } else {
+            // The 18l-c U6 ladder's R2-M2: the book's refusals (finished, at
+            // its note cap, gone, wrong kind) BEFORE the mint — the
+            // `assertReadingAcceptsPosts` gate exists for exactly this road,
+            // read inside the same serialized runner turn. Without it a
+            // restore into a finished book imported the note, tagged it, and
+            // THEN had the membership refused: one tagged orphan left in the
+            // Pool per missing note (the scripted note's F1 class, bounded
+            // here because the next press re-members it as a stray).
+            try quiet.assertReadingAcceptsPosts(bookID)
             noteID = try quiet.importPost(
                 title: title, text: text, undoLabel: label,
                 segmentation: Self.segmentation).container.id
