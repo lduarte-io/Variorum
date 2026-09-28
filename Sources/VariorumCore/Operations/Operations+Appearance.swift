@@ -67,6 +67,21 @@ extension Operations {
         }
     }
 
+    /// **18l-c U8 (her R-18l-7): the mode-switch ARRIVAL FLASH, on or off** —
+    /// *"you should also be able to turn this flash where your cursor is
+    /// setting off, but it should default to on."* The `receipt_style`
+    /// precedent exactly: synced document semantics (upsert-only, never
+    /// tombstoned — the same switch on every device), the default resolved at
+    /// READ time (no seed — `Queries.ThemeSettings.arrivalFlash`), and a
+    /// value that is a token ("1"/"0"), never prose, so `setting.value`'s
+    /// PLAIN classification (AppSpec §7, the 14b constraint) holds. Zero
+    /// schema, so no SyncSpec §12 lockstep event: the marker stays where it is.
+    public func setArrivalFlash(_ on: Bool) throws {
+        try database.write { db in
+            try upsertSetting(db, key: "arrival_flash", value: on ? "1" : "0")
+        }
+    }
+
     // MARK: - The colour palette (18g — her R-Q6 · R-Q11 · R-Q13)
 
     /// **The palette layered UNDER the voice** (`ThemePalette` carries the

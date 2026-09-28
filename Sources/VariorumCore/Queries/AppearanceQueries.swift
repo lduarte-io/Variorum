@@ -34,6 +34,15 @@ extension Queries {
         /// "an optional second"). Absent means DERIVED — the room hue
         /// deepened, which is exactly what a pastel preset does.
         public var customAccent: String?
+        /// 18l-c U8 (her R-18l-7 — *"you should also be able to turn this
+        /// flash where your cursor is setting off, but it should default to
+        /// on"*): the brief highlight a MODE SWITCH leaves on the caret's line /
+        /// the landed block. ON by default, resolved here (no seed — the
+        /// `receipt_style` precedent); stored "1"/"0" (a token, never prose —
+        /// `setting.value`'s PLAIN classification holds); anything but "0"
+        /// reads as ON, so an unrecognized value is her default, never a
+        /// silent OFF.
+        public var arrivalFlash = true
 
         public init() {}
     }
@@ -46,7 +55,7 @@ extension Queries {
                 WHERE key IN ('theme_voice', 'seams_visible', 'editing_indicator',
                               'inline_comments', 'follow_the_scroll', 'fan_style',
                               'receipt_style', 'theme_palette', 'theme_tint',
-                              'theme_accent_tint')
+                              'theme_accent_tint', 'arrival_flash')
                 """)
         var settings = ThemeSettings()
         for row in rows {
@@ -76,6 +85,8 @@ extension Queries {
                 settings.customRoom = ThemeTint.normalize(value)
             case "theme_accent_tint":
                 settings.customAccent = ThemeTint.normalize(value)
+            case "arrival_flash":
+                settings.arrivalFlash = value != "0"
             default:
                 break
             }

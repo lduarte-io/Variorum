@@ -50,6 +50,40 @@ struct AppearanceSettingsTests {
         }
     }
 
+    /// 18l-c U8 (her R-18l-7 — *"you should also be able to turn this flash
+    /// where your cursor is setting off, but it should default to on"*): the
+    /// arrival-flash switch is a `setting` row of the receipt style's kind —
+    /// the DEFAULT resolved at read time (ON, no seed), a round-trip, one row
+    /// ever (upsert-only), the outbox row that makes it synced, and a value
+    /// nobody recognizes reading as her default (ON), never as a silent OFF.
+    @Test func arrivalFlashDefaultsOnRoundTripsAndGarbageReadsAsOn() throws {
+        try withOperations { ops, db in
+            #expect(try db.read { try Queries.themeSettings($0) }.arrivalFlash,
+                    "R-18l-7: the flash defaults ON (no seed — the read-time default)")
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM setting WHERE key = 'arrival_flash'") == 0,
+                    "no seed: the default lives in the read")
+            try ops.setArrivalFlash(false)
+            #expect(try db.read { try Queries.themeSettings($0) }.arrivalFlash == false)
+            #expect(try db.outboxContains("setting", "arrival_flash"),
+                    "synced document semantics, the receipt_style class")
+            try ops.setArrivalFlash(true)
+            #expect(try db.read { try Queries.themeSettings($0) }.arrivalFlash)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM setting WHERE key = 'arrival_flash'") == 1,
+                    "upsert-only — never a second row")
+            #expect(try db.fetchString(
+                "SELECT value FROM setting WHERE key = 'arrival_flash'") == "1",
+                    "E2EE-clean: the stored value is a token, never prose")
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE setting SET value = 'sparkle' WHERE key = 'arrival_flash'")
+            }
+            #expect(try db.read { try Queries.themeSettings($0) }.arrivalFlash,
+                    "an unrecognized value reads as her default (ON), never as a silent OFF")
+        }
+    }
+
     @Test func settersRoundTripAndUpsertNeverDuplicates() throws {
         try withOperations { ops, db in
             try ops.setThemeVoice(.study)
