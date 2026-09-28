@@ -122,3 +122,21 @@ cross-model flow); the implementer's sanity pass follows.**
 
 **Totals: 6 confirmed as scoped above (R1-M1 on road (b)); zero dismissed; zero to the
 orchestrator (the one product-flavored fork goes to #157 as a question, per the flow).**
+
+## THE FIX RECORD (fable-reviewer, 2026-09-28 — commit per piece, pushed each, no trailers, pathspec staging)
+
+| Finding | Landed | Evidence |
+|---|---|---|
+| R1-M1 (b) | `d203c390` — HONEST BOUNDARIES row 8 (plan file), QUESTIONS #157 (7) + header FIVE→SIX, and `TakesFindBoardTests.escWithNoBuiltPaneForTheRingIsANamedBoundary` | the `withKnownIssue` arm records LIVE (the window keeps the keyboard — the boundary's mechanism seen by the pin), the her-place-kept arm pinned PLAIN and green; not a bug-class fix (no behavior changed), the pin is the tripwire that reds the day (b→a) or U8 changes it |
+| R1-N1 + R1-N2 | `e8be430f` — `open()`'s `!isPresented` branch clears the lingering request; the `face` doc states the vehicle wrinkle honestly; `fanCaretLanding` binds once | pin `aReopenClearsTheLastSessionsRequest` GREEN on the fix; **behavioural revert R-N1** (the clear removed, working tree, restored by checkout): **RED 1 in exactly the predicted shape** — `Request(token: 2, select: nil, claimsKeyboard: true) == nil` failed, the Esc hand-back surviving the reopen. (A first revert attempt with a TEST-level `-only-testing` path matched 0 tests — vacuous, discarded; re-run at SUITE level.) |
+| R1-N3 | `2006a44f` — `recount` drops `· wrapped` when the list or the re-anchored current CHANGES (an unchanged recount keeps the last step's words); the empty-query branch clears it | pin `aRecountThatChangesTheListDropsTheStaleWrappedWord` GREEN; **behavioural revert R-N3** RED 1 in exactly the predicted shape — `"1 of 4 · wrapped" == "1 of 4"` failed; restored, tree clean |
+| R1-N4 | `96a079db` + `00f72f13` — `takes-find` row D2 (⇧⏎ steps back from the field) + the shipped-path resume ⏎; README row updated | **the row itself found a real walker fact:** the transient `using shift down` posts down·key·up faster than the app processes the ⏎, so `NSEvent.modifierFlags` (the LIVE state) read no shift and the step went FORWARD (run `090640` — its row-F red was the path perturbation, not a regression). D2 now HOLDS the shift across acts (down · ⏎ · up — the hand's own shape) and resumes the shipped path: **takes-find PASS 25/25 Terminal (`091057`) and Study (`091332`)**; the Study run's voice-restore abort is the known worded-as-not-found class, its own probe id 64 `voice=terminal`, zero instances after. Lesson recorded in the WalkKit README (the held-modifier rule). The ⇧⏎ road is now proven END-TO-END under a genuinely held modifier — R1-N4's SPECULATIVE label retires as *road works; transient-synthetic input cannot drive it* |
+| R1-N5 | `96a079db` (README sentence break) + `2f9c0951` (the row-10 074442 sentence quotes the abort artifact + the verified vis-ax/lib.zsh derivation; probe id 191 carries the landed-anyway claim) | derivation verified at `vis-ax.swift` (frame printed BEFORE pressing; exit 1 prints nothing) and `lib.zsh:394` before adoption |
+
+**Closing run (the five touched suites, after all pieces):** `TakesFindPlanTests` +
+`PaneFindFaceTests` + `TakesFindBoardTests` + `CapabilityRegistryTests` + `FindAndReplaceTests`
+— **65 tests / 5 suites, TEST SUCCEEDED, exactly 1 known issue** (the R1-M1 boundary tripwire,
+by design). Tree clean, every commit pushed. **Round 1 CLOSED on the reviewer's side — over to
+the implementer's sanity pass** (its window: `0c335261..HEAD`, the reviewer's five fix commits
+plus this record). No new BLOCKER/MAJOR arose during the fix pass; round cap status stays 1 of 3
+unless the sanity pass raises one.
