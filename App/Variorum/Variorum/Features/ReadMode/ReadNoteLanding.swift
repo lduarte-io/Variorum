@@ -242,6 +242,9 @@ final class ReadNoteHeights {
             font = EditorTypography.current.font
             lineSpacing = IndexProseColumn.lines.lineSpacing
             metrics.prose.paragraphGap = IndexProseColumn.lines.paragraphGap
+            // 18l-c U5's rider: the tier shows its stored blank lines now (the
+            // `.page` face below keeps the flow's folded rule).
+            metrics.prose.blankLines = IndexProseColumn.blankLines
             let leading = IndexProseColumn.readTierLeading(
                 resting: IndexProseColumn.readEditResting,
                 paneInset: PaneTextView.proseLeadingInset)

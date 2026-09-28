@@ -58,15 +58,25 @@ nonisolated enum ProseHeightModel {
         var lineSpacing: CGFloat = 0
         /// The gap between paragraphs, and between blocks.
         var paragraphGap: CGFloat = 7
+        /// **18l-c U5's rider — whether the surface SHOWS a stored blank line**
+        /// (`FlowParagraph.BlankLines`, the surface's own rule). `.folded` (the
+        /// default — the Outline, the flow) is the model's founding sentence
+        /// above: a block's separator newline renders nothing. `.shown` (the
+        /// two index hosts since her #154 ruling (b)) draws it as one real
+        /// empty line, so a block with a newline stands one line and one gap
+        /// taller — the sample library's shape, one per paragraph.
+        var blankLines: FlowParagraph.BlankLines = .folded
 
         init(
             charsPerLine: Double = 80, linePitch: CGFloat = 19,
-            lineSpacing: CGFloat = 0, paragraphGap: CGFloat = 7
+            lineSpacing: CGFloat = 0, paragraphGap: CGFloat = 7,
+            blankLines: FlowParagraph.BlankLines = .folded
         ) {
             self.charsPerLine = charsPerLine
             self.linePitch = linePitch
             self.lineSpacing = lineSpacing
             self.paragraphGap = paragraphGap
+            self.blankLines = blankLines
         }
     }
 
@@ -84,6 +94,18 @@ nonisolated enum ProseHeightModel {
         return max(paragraphs, full + paragraphs * 0.5)
     }
 
+    /// The blank lines a block stands under a surface that SHOWS them
+    /// (`Metrics.blankLines == .shown`): its separator newline, drawn as one
+    /// line. **An approximation, stated:** the extent carries a newline COUNT,
+    /// not where the newlines sit, so the model keeps its founding reading of
+    /// the others (paragraph breaks) and adds exactly the one line the rider
+    /// added — which is the sample library's shape (`text\n`) exactly, and
+    /// changes nothing for a block with no newline (her own notes' usual
+    /// shape). A measured row replaces the estimate as soon as it draws.
+    static func shownBlankLines(newlines: Int, metrics: Metrics) -> Int {
+        metrics.blankLines == .shown && newlines >= 1 ? 1 : 0
+    }
+
     /// The prose's height from its blocks' lengths — **unrounded**, and `nil`
     /// when nothing renders (a note of blank takes, or of none). The caller
     /// names the empty answer, applies any calibration, rounds and floors.
@@ -94,8 +116,9 @@ nonisolated enum ProseHeightModel {
         for extent in rendered {
             let lines = Self.lines(
                 characters: extent.characters, newlines: extent.newlines, metrics: metrics)
-            let paragraphs = CGFloat(Self.paragraphs(newlines: extent.newlines))
-            total += CGFloat(lines) * metrics.linePitch - paragraphs * metrics.lineSpacing
+            let blanks = CGFloat(Self.shownBlankLines(newlines: extent.newlines, metrics: metrics))
+            let paragraphs = CGFloat(Self.paragraphs(newlines: extent.newlines)) + blanks
+            total += (CGFloat(lines) + blanks) * metrics.linePitch - paragraphs * metrics.lineSpacing
                 + (paragraphs - 1) * metrics.paragraphGap
         }
         total += CGFloat(rendered.count - 1) * metrics.paragraphGap

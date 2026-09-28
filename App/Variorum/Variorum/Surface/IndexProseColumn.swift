@@ -50,9 +50,10 @@
 //  What NO metric can align, stated so nobody chases it: a live editor shows
 //  the STORED text, so a line whose markdown markers the read tier hides
 //  (`**bold**`, `# heading`, `- item`) still changes on going live (the held
-//  18e's), and a stored BLANK line — the sample library keeps one under every
-//  paragraph — is a real line in the live pane where the read tier folds it
-//  into its paragraph gap (QUESTIONS #154, PROVISIONAL).
+//  18e's). A stored BLANK line is no longer on that list: since the rider (her
+//  #154 ruling (b)) the read tier SHOWS it too (`blankLines`), so display ==
+//  stored and a click moves nothing — save one TextKit 2 anomaly the rider
+//  records (the live editor's last line after an empty paragraph).
 //
 
 import AppKit
@@ -100,6 +101,18 @@ nonisolated enum IndexProseColumn {
     /// SHIPPED ones (18l U0 named them on `ReadTierClickPlace`; U5 promoted
     /// them here) — changing them is a look call, hers.
     static let lines = ProseLineMetrics(lineSpacing: 4, paragraphGap: 8)
+
+    /// **THE READ TIER SHOWS STORED BLANK LINES** (18l-c U5's rider — her #154
+    /// ruling, option (b), verbatim-faithful: *the two index faces stop hiding
+    /// stored blank lines; display == stored, so nothing ever moves on a
+    /// click, for any note*). A live editor must show the stored text, blank
+    /// lines included; the read tier used to fold them into its paragraph gap,
+    /// so a block stored over a blank line (every Sherlock paragraph) grew by
+    /// that line — 30 pt Study, 25 Terminal — the moment it went live. Both
+    /// hosts, the click's replica and the two hosts' height models read THIS
+    /// name; every other `FlowParagraph` surface keeps the flow's `.folded`
+    /// default (pinned: `PaneLineMetricsScopeTests`).
+    static let blankLines: FlowParagraph.BlankLines = .shown
 
     /// **The two surfaces' RESTING padding** — what each chose for itself
     /// before the two tiers had to agree, named here so a pin can read them

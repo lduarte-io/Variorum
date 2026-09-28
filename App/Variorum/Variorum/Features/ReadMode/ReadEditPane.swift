@@ -291,7 +291,10 @@ private struct ReadEditBlock: View {
     /// stood one line tall for its first frame and grew after — the lazy
     /// column's estimate drift that moved a far landing by ~180 pt.
     private var paragraphs: [FlowParagraph] {
-        FlowParagraph.paragraphs(of: text, codeTint: tokens.codeTint)
+        // 18l-c U5's rider (her #154 (b)): stored blank lines drawn as real
+        // empty lines — display == stored, so nothing moves on a click.
+        FlowParagraph.paragraphs(
+            of: text, codeTint: tokens.codeTint, blankLines: IndexProseColumn.blankLines)
     }
 
     private var isLive: Bool {
@@ -347,7 +350,7 @@ private struct ReadEditBlock: View {
                 // pane's, one number each.
                 VStack(alignment: .leading, spacing: IndexProseColumn.lines.paragraphGap) {
                     ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
-                        Text(paragraph.text)
+                        Text(paragraph.drawnText)
                             .font(font(paragraph))
                             .foregroundStyle(tokens.ink)
                             .lineSpacing(IndexProseColumn.lines.lineSpacing)

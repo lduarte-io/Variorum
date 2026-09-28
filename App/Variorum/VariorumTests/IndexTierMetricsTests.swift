@@ -272,9 +272,47 @@ struct IndexTierMetricsTests {
         #expect(abs(pane.right - column.maxX) <= 0.5, Comment(rawValue:
             "\(label): the prose ENDS at \(pane.right) live, \(column.maxX) at rest — "
                 + "a different measure re-wraps her lines"))
-        #expect(abs(shift - expectedShift) <= 0.5, Comment(rawValue:
-            "\(label): the block below moved \(shift) pt — it must not move at all "
-                + "(#154 (b): the index faces show stored blank lines at rest)"))
+        let blockBelow = {
+            #expect(abs(shift - expectedShift) <= 0.5, Comment(rawValue:
+                "\(label): the block below moved \(shift) pt — it must not move at all "
+                    + "(#154 (b): the index faces show stored blank lines at rest)"))
+        }
+        if shape == .overTwoBlankLines {
+            // **The rider's ONE residual, TextKit 2's own (measured on 27.0 —
+            // the RIDER record):** after an EMPTY last paragraph, TK2 lays the
+            // extra line fragment that follows the final newline as a short
+            // box overlapping the line above (bare TK2, plain style: `A\n\n`
+            // stands 50 pt where three 22-pt lines stand 66). So the LIVE
+            // editor draws a block's last stored blank line short when another
+            // blank line precedes it, while the read tier draws both whole —
+            // measured −10 pt (Terminal) / −20 pt (Study). Not imitated: a read
+            // tier copying a layout anomaly would go wrong the day TK2 fixes
+            // it. Known, not hidden — and the day this stops reproducing,
+            // Swift Testing says so (a known issue that is not recorded fails).
+            withKnownIssue(
+                "TK2's extra line after an empty last paragraph stands short (27.0) — #154 (b)'s one residual",
+                isIntermittent: false, blockBelow)
+        } else {
+            blockBelow()
+        }
+    }
+
+    /// The middle of a read-tier column's LAST line — the blank line under its
+    /// text, for a block stored over one (the tier draws it since the rider).
+    private static func onItsBlankLine(_ column: CGRect) -> CGPoint {
+        let oneLine = ReadTierClickPlace.height(
+            of: "x", columnWidth: 400, font: EditorDocument.baseFont)
+        return CGPoint(x: column.minX + column.width * 0.3, y: column.maxY - oneLine / 2)
+    }
+
+    /// Display == stored: what she clicked is where the caret goes — the
+    /// blank line under the text, i.e. the stored text's end.
+    private static func expectCaretOnTheBlankLine(_ pane: PaneTextView, text: String, label: String) {
+        let length = (text as NSString).length
+        #expect(text.hasSuffix("\n"), "the fixture's block above ends over a blank line")
+        #expect(pane.selectedRange().location == length, Comment(rawValue:
+            "\(label): a click on the shown blank line lands ON it — caret "
+                + "\(pane.selectedRange().location) of \(length)"))
     }
 
     // MARK: - The book Index
@@ -347,6 +385,20 @@ struct IndexTierMetricsTests {
         Self.expectOneVocabulary(
             "book Index · \(voice) · \(shape)", shape: shape, text: target.text,
             column: column, nextTop: nextTop, nextTopAfter: nextTopAfter, pane: livePane)
+        // The new truth's other half (the rider): a click ON a blank line the
+        // tier now shows lands ON it — the block above ends over one.
+        let above = note.blocks[0]
+        let aboveColumn = try #require(await rig.settled {
+            BookIndexGeometry.paneReadTierFrames[above.blockID]
+        })
+        rig.click(at: rig.windowPoint(global: Self.onItsBlankLine(aboveColumn)))
+        #expect(await rig.poll {
+            editablePanes(in: rig.hosting).first?.identifier?.rawValue
+                == "pane:\(BookIndexEditModel.columnID)|\(above.variantID)"
+        }, "the block above went live")
+        Self.expectCaretOnTheBlankLine(
+            try #require(editablePanes(in: rig.hosting).first), text: above.text,
+            label: "book Index · \(voice) · \(shape)")
         #endif
     }
 
@@ -423,6 +475,23 @@ struct IndexTierMetricsTests {
             Self.expectOneVocabulary(
                 "note Read ▸ edit · \(voice) · \(shape)", shape: shape, text: target.text,
                 column: column, nextTop: nextTop, nextTopAfter: nextTopAfter, pane: livePane)
+            // The rider's other half: a click ON a shown blank line lands on it.
+            let above = note.blocks[0]
+            let aboveRow = try #require(await rig.settled {
+                ReadModeOracle.editBlockFrames[above.blockID]
+            })
+            let aboveColumn = CGRect(
+                x: aboveRow.minX + leading, y: aboveRow.minY + top,
+                width: aboveRow.width - leading - IndexProseColumn.readEditResting,
+                height: aboveRow.height - top - bottom)
+            rig.click(at: rig.windowPoint(Self.onItsBlankLine(aboveColumn)))
+            #expect(await rig.poll {
+                editablePanes(in: rig.hosting).first?.identifier?.rawValue
+                    == "pane:\(ReadEditPane.role)|\(above.variantID)"
+            }, "the block above went live")
+            Self.expectCaretOnTheBlankLine(
+                try #require(editablePanes(in: rig.hosting).first), text: above.text,
+                label: "note Read ▸ edit · \(voice) · \(shape)")
             #endif
         }
     }
@@ -511,6 +580,97 @@ struct PaneLineMetricsScopeTests {
         }
         #expect(callers == ["BookIndexView.swift", "ReadEditPane.swift"],
                 "the hosts handing a pane line metrics: \(callers.sorted())")
+    }
+
+    // MARK: - The rider's blank rule is the two index hosts' alone
+
+    /// Every Swift file under `root`, as (name, code lines — comments dropped).
+    private static func codeLines(under root: String) throws -> [(String, [Substring])] {
+        let app = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+        let walker = try #require(FileManager.default.enumerator(
+            at: app.appendingPathComponent(root), includingPropertiesForKeys: nil))
+        var out: [(String, [Substring])] = []
+        for case let file as URL in walker where file.pathExtension == "swift" {
+            let source = try String(contentsOf: file, encoding: .utf8)
+            out.append((file.lastPathComponent, source.split(separator: "\n").filter {
+                let line = $0.trimmingCharacters(in: .whitespaces)
+                return !line.hasPrefix("//") && !line.hasPrefix("*")
+            }))
+        }
+        return out
+    }
+
+    /// **18l-c U5's rider (her #154 (b)):** the two index faces SHOW stored
+    /// blank lines — and only they. The read page, the book's Read, the Library
+    /// panel and the PHONE keep the flow's folded default, byte for byte. So:
+    /// the vocabulary's name is read by exactly the two hosts, the click's
+    /// replica and the two hosts' height models; nobody passes `.shown` by
+    /// hand; and the phone never names the rule at all.
+    @Test func onlyTheTwoIndexHostsShowStoredBlankLines() throws {
+        var readers: Set<String> = []
+        var literal: [String] = []
+        for root in ["Variorum", "Shared"] {
+            for (name, lines) in try Self.codeLines(under: root) {
+                if lines.contains(where: { $0.contains("IndexProseColumn.blankLines") }) {
+                    readers.insert(name)
+                }
+                if lines.contains(where: { $0.contains("blankLines: .shown") }) {
+                    literal.append(name)
+                }
+            }
+        }
+        #expect(readers == [
+            "BookIndexView.swift", "ReadEditPane.swift", "ReadTierClickPlace.swift",
+            "BookIndexPaneHeights.swift", "ReadNoteLanding.swift",
+        ], "the readers of the index tiers' blank rule: \(readers.sorted())")
+        #expect(literal.isEmpty, "a hand-passed .shown: \(literal)")
+        let phone = try Self.codeLines(under: "VariorumMobile")
+            .filter { $0.1.contains(where: { $0.contains("blankLines") }) }.map(\.0)
+        #expect(phone.isEmpty, "the phone names the blank rule: \(phone)")
+    }
+
+    /// **The two hosts' HEIGHT MODELS count the line the tier now draws**
+    /// (the rider's brief point 5): a far row's reservation — the book Index
+    /// pane's (F3) and Read ▸ edit's manifest (U1) — must stand at the new
+    /// resting height, or every Sherlock story stands ~one line and one gap
+    /// per paragraph short until it draws. Under `.shown` a block with a
+    /// newline stands exactly one line of the model (its pitch less the line
+    /// spacing a last line never carries) and one gap taller; a block with NO
+    /// newline — her own notes' usual shape — is byte-unchanged; the Outline's
+    /// and the flow's models keep `.folded`.
+    @MainActor
+    @Test func theHostHeightModelsCountTheShownBlankLine() {
+        let folded = ProseHeightModel.Metrics(
+            charsPerLine: 70, linePitch: 26, lineSpacing: 4, paragraphGap: 8)
+        var shown = folded
+        shown.blankLines = .shown
+        func height(_ newlines: Int, _ metrics: ProseHeightModel.Metrics) -> CGFloat {
+            ProseHeightModel.height(extents: [Queries.BlockExtent(
+                containerID: "p", blockID: "b", characters: 420, newlines: newlines)],
+                metrics: metrics) ?? 0
+        }
+        let delta: CGFloat = height(1, shown) - height(1, folded)
+        let oneLineAndAGap: CGFloat = 26 - 4 + 8
+        #expect(delta == oneLineAndAGap, "one shown blank line: one line + one gap")
+        let unchanged: Bool = height(0, shown) == height(0, folded)
+        #expect(unchanged, "no newline, no change (her own notes)")
+        #expect(ProseHeightModel.Metrics().blankLines == .folded, "the default folds")
+        #expect(BookIndexPaneHeights.metrics(columnWidth: 640).prose.blankLines == .shown)
+        #expect(ReadNoteHeights.metrics(face: .edit, contentWidth: 640, typeScale: 1)
+            .prose.blankLines == .shown)
+        #expect(ReadNoteHeights.metrics(face: .page, contentWidth: 640, typeScale: 1)
+            .prose.blankLines == .folded, "Read's page face keeps the flow's rule")
+    }
+
+    /// The shared transform's DEFAULT still folds — and the host choice shows.
+    @Test func theSharedTransformStillFoldsByDefault() {
+        let stored = "one\n\ntwo\n"
+        #expect(FlowParagraph.paragraphs(of: stored).count == 2, "folded: the two text lines")
+        let shown = FlowParagraph.paragraphs(of: stored, blankLines: .shown)
+        #expect(shown.map { String($0.text.characters) } == ["one", "", "two", ""],
+                "shown: every stored line, the blank ones empty (display == stored)")
+        #expect(IndexProseColumn.blankLines == .shown)
     }
 }
 

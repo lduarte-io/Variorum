@@ -1448,13 +1448,16 @@ private struct BookIndexPaneNote: View {
                 // (17o batch c's host ring RETIRED at 13u2 UNIT B — the pane
                 //  draws the indicator itself, so this was a second ring.)
         } else {
-            let paragraphs = FlowParagraph.paragraphs(of: text, codeTint: tokens.codeTint)
+            // 18l-c U5's rider (her #154 (b)): stored blank lines drawn as real
+            // empty lines — display == stored, so nothing moves on a click.
+            let paragraphs = FlowParagraph.paragraphs(
+                of: text, codeTint: tokens.codeTint, blankLines: IndexProseColumn.blankLines)
             // 18l U0 / 18l-c U5: the tiers' ONE metrics vocabulary
             // (`IndexProseColumn.lines`) — the click's replica lays out with
             // it and the live pane is handed it, so they cannot drift apart.
             VStack(alignment: .leading, spacing: IndexProseColumn.lines.paragraphGap) {
                 ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
-                    Text(paragraph.text)
+                    Text(paragraph.drawnText)
                         .font(font(paragraph))
                         .foregroundStyle(tokens.ink)
                         .lineSpacing(IndexProseColumn.lines.lineSpacing)

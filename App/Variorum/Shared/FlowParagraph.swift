@@ -37,14 +37,32 @@ nonisolated struct FlowParagraph: Equatable {
     /// sit in.
     var indentLevel: Int = 0
 
+    /// **How a surface treats a STORED blank line** (18l-c U5's rider — her
+    /// #154 ruling, option (b)). `.folded` is the flow's own rule and the
+    /// DEFAULT: a blank display line is not drawn and the surface's paragraph
+    /// gap stands in for it — the read page, the book's Read, and the phone's
+    /// read page all keep it, byte for byte. `.shown` draws EVERY stored line,
+    /// a blank one as a real empty line — display == stored — which is what a
+    /// read tier needs when its clicked block turns into a live editor of the
+    /// stored text (the two index-like hosts; `IndexProseColumn.blankLines`):
+    /// a line the rest tier folded would appear under her pointer, and every
+    /// block below would drop by it.
+    enum BlankLines: Sendable, Equatable {
+        case folded
+        case shown
+    }
+
     /// The flow's own paragraph rule, unchanged from before this batch:
     /// blank display lines are DROPPED (the surface has its own spacing —
     /// the paged reader is the face that keeps stored spacing byte for
     /// byte). What is new is that each surviving line arrives rendered.
     /// `codeTint` is 13k K10's chip; nil (the default) keeps every existing
-    /// caller and pin composing exactly as it did.
-    static func paragraphs(of source: String, codeTint: Color? = nil) -> [FlowParagraph] {
-        paragraphsWithStarts(of: source, codeTint: codeTint).paragraphs
+    /// caller and pin composing exactly as it did. `blankLines` (18l-c U5's
+    /// rider) is a HOST's choice — `.folded`, the default, is the rule above.
+    static func paragraphs(
+        of source: String, codeTint: Color? = nil, blankLines: BlankLines = .folded
+    ) -> [FlowParagraph] {
+        paragraphsWithStarts(of: source, codeTint: codeTint, blankLines: blankLines).paragraphs
     }
 
     /// **The same paragraphs WITH where each starts in the rendered display**
@@ -55,14 +73,14 @@ nonisolated struct FlowParagraph: Equatable {
     /// `displayStarts(of:)` that re-rendered and re-filtered — two public
     /// entry points held in lockstep only by the shared blank rule).
     static func paragraphsWithStarts(
-        of source: String, codeTint: Color? = nil
+        of source: String, codeTint: Color? = nil, blankLines: BlankLines = .folded
     ) -> (paragraphs: [FlowParagraph], starts: [Int]) {
         let rendered = MarkdownRendering.render(source)
         let ns = rendered.text as NSString
         var result: [FlowParagraph] = []
         var starts: [Int] = []
         for line in rendered.lines {
-            guard isShown(line, in: ns) else { continue }
+            guard blankLines == .shown || isShown(line, in: ns) else { continue }
             starts.append(line.range.lowerBound)
             // Built by CONCATENATION rather than by indexing into an
             // existing string: the runs are ascending and disjoint (the
@@ -95,7 +113,7 @@ nonisolated struct FlowParagraph: Equatable {
     }
 
     /// The flow's ONE blank-line rule — a display line of nothing but
-    /// whitespace is not drawn (18l U0).
+    /// whitespace is not drawn (18l U0) — where the host folds (`.folded`).
     private static func isShown(_ line: MarkdownRendering.Line, in display: NSString) -> Bool {
         let raw = display.substring(
             with: NSRange(location: line.range.lowerBound, length: line.range.count))

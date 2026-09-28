@@ -88,7 +88,8 @@ enum ReadTierClickPlace {
         // One render answers both questions (which paragraphs, and where each
         // starts in the display) — one loop cannot disagree with itself about
         // which lines are paragraphs (ladder round 1, MINOR-2).
-        let (paragraphs, starts) = FlowParagraph.paragraphsWithStarts(of: source)
+        let (paragraphs, starts) = FlowParagraph.paragraphsWithStarts(
+            of: source, blankLines: IndexProseColumn.blankLines)
         guard !paragraphs.isEmpty, columnWidth > 1 else { return 0 }
         var top: CGFloat = 0
         for (index, paragraph) in paragraphs.enumerated() {
@@ -115,7 +116,7 @@ enum ReadTierClickPlace {
     /// the pins compare it with what SwiftUI actually drew (the replica's
     /// agreement is measured, never assumed).
     static func height(of source: String, columnWidth: CGFloat, font: NSFont) -> CGFloat {
-        let paragraphs = FlowParagraph.paragraphs(of: source)
+        let paragraphs = FlowParagraph.paragraphs(of: source, blankLines: IndexProseColumn.blankLines)
         guard !paragraphs.isEmpty else { return 0 }
         let heights = paragraphs.map {
             ParagraphLayout($0, width: max(1, columnWidth - $0.indent), font: font).height
@@ -132,7 +133,8 @@ enum ReadTierClickPlace {
     static func lines(
         of source: String, columnWidth: CGFloat, font: NSFont
     ) -> [(top: CGFloat, displayStart: Int)] {
-        let (paragraphs, starts) = FlowParagraph.paragraphsWithStarts(of: source)
+        let (paragraphs, starts) = FlowParagraph.paragraphsWithStarts(
+            of: source, blankLines: IndexProseColumn.blankLines)
         var result: [(top: CGFloat, displayStart: Int)] = []
         var top: CGFloat = 0
         for (index, paragraph) in paragraphs.enumerated() {
@@ -151,9 +153,15 @@ enum ReadTierClickPlace {
         let content: NSTextContentStorage
         let manager: NSTextLayoutManager
         let height: CGFloat
+        /// 18l-c U5's rider: a stored BLANK line the tier now shows. The tier
+        /// draws it as one space (`FlowParagraph.drawnText`), so it is laid
+        /// out the same way — one line of the voice — while a click on it
+        /// names the line's own start, and it is no TEXT line of the block.
+        let isBlank: Bool
 
         init(_ paragraph: FlowParagraph, width: CGFloat, font: NSFont) {
-            let string = String(paragraph.text.characters)
+            isBlank = paragraph.text.characters.isEmpty
+            let string = String(paragraph.drawnText.characters)
             let attributed = NSMutableAttributedString(string: string)
             let style = NSMutableParagraphStyle()
             style.lineSpacing = IndexProseColumn.lines.lineSpacing
@@ -192,6 +200,7 @@ enum ReadTierClickPlace {
         /// TextKit 2's own click-to-caret question (`textSelections(
         /// interactingAt:…)`, the one `NSTextView` asks).
         func offset(at point: CGPoint) -> Int {
+            guard !isBlank else { return 0 }
             let selections = manager.textSelectionNavigation.textSelections(
                 interactingAt: point, inContainerAt: manager.documentRange.location,
                 anchors: [], modifiers: [], selecting: false, bounds: .zero)
@@ -202,6 +211,7 @@ enum ReadTierClickPlace {
         /// Each text line's top (in this paragraph's own space) and its first
         /// character (UTF-16, into this paragraph) — the pin's read.
         func lines() -> [(top: CGFloat, start: Int)] {
+            guard !isBlank else { return [] }
             var out: [(top: CGFloat, start: Int)] = []
             manager.enumerateTextLayoutFragments(
                 from: manager.documentRange.location, options: [.ensuresLayout]

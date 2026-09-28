@@ -15,6 +15,14 @@ import SwiftUI
 import VariorumCore
 
 extension FlowParagraph {
+    /// **What a `Text` draws for this paragraph** (18l-c U5's rider): its
+    /// text — or, for a stored BLANK line a host shows (`BlankLines.shown`),
+    /// one space, so the line stands exactly one line of the voice tall, as
+    /// the live editor draws it. (An empty `Text` would stand at no height.)
+    var drawnText: AttributedString {
+        text.characters.isEmpty ? AttributedString(" ") : text
+    }
+
     func font(_ page: ReadingPageTokens) -> Font {
         switch style {
         case .heading(let level):

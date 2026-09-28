@@ -298,14 +298,36 @@ struct IndexClickCaretTests {
 
     /// The point on `line` of a read-tier text column, `xFraction` of the way
     /// across it — inside the line's glyph box, never in a gap.
+    ///
+    /// **RE-ARMED at 18l-c U5's rider (her #154 ruling (b)), named rather than
+    /// silent:** the read tier now DRAWS a block's stored blank lines (display
+    /// == stored), so the column's bottom is no longer the last TEXT line — it
+    /// is the blank line under it, and a click there now rightly lands ON that
+    /// blank line. Her trigger was the last TEXT line, *directly above* the
+    /// blank separator, so the last-line click steps up over the blank run the
+    /// tier now draws (`text`'s trailing newlines × one gap + one line of the
+    /// voice, from the tiers' one vocabulary). The claim, and every assertion,
+    /// is byte-unchanged; only where "the last line" sits moved.
     private static func point(
-        on line: IndexClickedLine, of column: CGRect, xFraction: CGFloat = 0.3
+        on line: IndexClickedLine, of column: CGRect, text: String, xFraction: CGFloat = 0.3
     ) -> CGPoint {
         let x = column.minX + column.width * xFraction
         switch line {
         case .first: return CGPoint(x: x, y: column.minY + 8)
-        case .last: return CGPoint(x: x, y: column.maxY - 8)
+        case .last: return CGPoint(x: x, y: column.maxY - 8 - shownBlankRun(of: text))
         }
+    }
+
+    /// How tall the read tier draws `text`'s trailing blank lines since the
+    /// rider: one paragraph gap + one line of the voice per stored trailing
+    /// newline (the replica's own one-line height).
+    @MainActor
+    private static func shownBlankRun(of text: String) -> CGFloat {
+        let trailing = text.reversed().prefix(while: { $0 == "\n" }).count
+        guard trailing > 0 else { return 0 }
+        let oneLine = ReadTierClickPlace.height(
+            of: "x", columnWidth: 400, font: EditorDocument.baseFont)
+        return CGFloat(trailing) * (IndexProseColumn.lines.paragraphGap + oneLine)
     }
 
     /// What the click must produce, stated once for both surfaces.
@@ -395,7 +417,7 @@ struct IndexClickCaretTests {
             let column = try #require(await rig.settled {
                 BookIndexGeometry.paneReadTierFrames[target.blockID]
             })
-            print("[18l U0 pin] book Index column \(column) · click \(Self.point(on: line, of: column))")
+            print("[18l U0 pin] book Index column \(column) · click \(Self.point(on: line, of: column, text: target.text))")
             // THE REPLICA'S AGREEMENT, measured: the fix lays the block
             // out again to find the clicked character, so its geometry must
             // be the geometry SwiftUI drew — the whole block's height, at
@@ -405,7 +427,7 @@ struct IndexClickCaretTests {
             #expect(abs(replica - column.height) <= 0.5, Comment(rawValue:
                 "\(voice): the click's replica lays the block out at \(replica) pt; "
                     + "the read tier drew it at \(column.height)"))
-            let clicked = rig.windowPoint(global: Self.point(on: line, of: column))
+            let clicked = rig.windowPoint(global: Self.point(on: line, of: column, text: target.text))
             rig.click(at: clicked)
             let identifier = "pane:\(BookIndexEditModel.columnID)|\(target.variantID)"
             let live = await rig.poll {
@@ -469,7 +491,7 @@ struct IndexClickCaretTests {
                     x: row.minX + leading, y: row.minY + top,
                     width: row.width - leading - IndexProseColumn.readEditResting,
                     height: row.height - top - IndexProseColumn.readEditRestingTop)
-                let clicked = rig.windowPoint(Self.point(on: line, of: column))
+                let clicked = rig.windowPoint(Self.point(on: line, of: column, text: target.text))
                 rig.click(at: clicked)
                 let live = await rig.poll {
                     editablePanes(in: rig.hosting).first?.identifier?.rawValue

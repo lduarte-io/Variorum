@@ -244,7 +244,9 @@ final class BookIndexPaneHeights {
             charsPerLine: max(8, Double(prose / max(advance, 1))),
             linePitch: lineHeight + paragraphLineSpacing,
             lineSpacing: paragraphLineSpacing,
-            paragraphGap: blockGap)
+            paragraphGap: blockGap,
+            // 18l-c U5's rider: the tier shows its stored blank lines now.
+            blankLines: IndexProseColumn.blankLines)
         // A block row's OWN vertical padding, and only that: the 8-pt gap
         // BETWEEN blocks is `ProseHeightModel`'s `paragraphGap`, which it
         // already adds once per seam. (Counting it here too was this unit's
