@@ -354,7 +354,7 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
 | 5b | **R-18l-13 — the mode-switch caret rule** (her 2026-09-27 ruling at the #150 sitting): Takes' entry joins Write's caret anchor; a mode's scroll memory never outranks a mode switch (re-opens only); Read's carry stands; the old-outranking pins re-armed AS THE RULED CHANGE, each named in the record | U8 (one design with rows 4–5) | open |
 | 6 | MAY-take: KnownIssues row 94 (the Takes head reveal eats the 18-pt top inset — the band's top edge is its remedy sketch); decide at U8, record either way | U8 rider | open |
 | 7 | Her cursor-loss report's OTHER half — *"tapping keys won't make you edit (the take that you are navigated to isn't active)"*: trace at U7 whether a find-navigation landing should focus/activate the landed take, and what today's non-activation is (R-Q20/R-Q21 territory — any change to ruled machinery is flagged, not made) | U7 | open |
-| 8 | Her #153 ruling (a′), OWED THIS ROUND: the Index landing's caret takes the note's entry rule (START, except the last-in block → remembered caret) — one line in `BookIndexEditModel.takePendingLiveBlock` + the `IndexLandingCaretTests` arm re-pinned to (a′); applied at the next clean seam, never beside U5's in-flight diff; QUESTIONS #153 closes on landing | seam act (orchestrator or the next unit) | open |
+| 8 | Her #153 ruling (a′): the Index landing's caret takes the note's entry rule — one line + the pin's (a′) arm | seam act (orchestrator) | **CLOSED 2026-09-28** (`4861947c`; revert-verified red `.start ≠ .offset(42)`; QUESTIONS #153 closed; the diff rides the next unit's ladder window) |
 
 ## THE SITTING RECORD (kickoff, 2026-09-27 — her rulings, verbatim-faithful; filled as they land)
 
@@ -545,7 +545,7 @@ record.
 | Master plan row 18 + KnownIssues rows 89/94 re-owned | DONE (this commit) |
 | Kickoff sitting (the question batch) | IN PROGRESS |
 | U5 (session 1, base + the #154 rider) | **CLOSED 2026-09-28** — built · double-walked · ladder one round 0/0/1/3 clean (zero disputes; sanity PASS); rows 89 + #154 closed with the gate PASSED |
-| The #153 (a′) seam act (ledger row 8) | IN PROGRESS — the orchestrator's, at this clean seam |
+| The #153 (a′) seam act (ledger row 8) | **DONE 2026-09-28 (`4861947c`)** — the one line built (the landing takes the note's entry rule), the pin's (a′) arm added, behavioural revert RED in the predicted shape (`.start ≠ .offset(42)`, the new arm alone) then restored; row-36 entry scrubs added to all three suite tests (a stale persisted key from the pre-scrub run surfaced the class — noted at the row); suite 3/3 green |
 | U6 → U7 (brief first) → U8 | NOT-STARTED |
 
 ## U5 RECORD (implementer: `opus-implementer`, 2026-09-27)
@@ -1022,3 +1022,94 @@ own KnownIssues row, owner 12. Orchestrator edits landed with this acceptance: K
 row 89 CLOSED (ladder-gated), the TK2-exception row filed, row 98's sightings 4–5 + the
 late-landing document mutation recorded, TEXTKIT2_NOTES §3's two measured lines added, #154
 marked BUILT. **The ONE Fable cold ladder over base + rider spawns next — the remaining gate.**
+
+## U6 BRIEF (session 2 — TAKEMANIA: the seeded Jekyll & Hyde book with real history; written by the orchestrator 2026-09-28)
+
+You are a FRESH `opus-implementer` for **18l-c UNIT U6**. One acceptance unit: her test note —
+verbatim in HER KICKOFF MESSAGE above, the *"there's also one more thing…"* passage; read it
+whole, it is your product spec. The rulings that bind you: **R-18l-11** (its own small seeded
+book *The Strange Case of Dr Jekyll and Mr Hyde* holding the **takemania** note, optionally a
+couple of quieter chapter notes for contrast, riding the existing seeder/restore machinery
+exactly like Sherlock, its own Help ▸ Restore door) and **R-18l-12** (the dedupe answer is A
+DISCLAIMER IN THE BOOK'S DESCRIPTION, never machinery — the three items, verbatim in THE
+SITTING RECORD: the ships-with-deleted/Leaving-blocks note + Restore-for-the-full-experience;
+the two-copies-on-two-devices note; wording PROVISIONAL, hers to polish).
+
+**Read first, in this order (reading is never delegated):** (1) THIS file whole — HER KICKOFF
+MESSAGE, THE SITTING RECORD (R-18l-11/12), BINDING PRINCIPLES, CAST & DISCIPLINE, ENVIRONMENT
+TRAPS (verbatim binding), THE LEDGER row 2. (2) The seeder family end to end:
+`App/Variorum/Shared/SampleLibrary/SampleLibrarySeeder.swift` (the header's whole doctrine —
+reserved identities, discovery-as-the-guard, the QUIET operations facade
+`Operations(undoStack: nil)`, the per-device mark set only after a COMPLETE seed, the sync
+gate, deletion-is-final), `SeededBookRestore.swift`, `SampleLibraryEncryptionBook.swift` (the
+second-book precedent — how a sibling book joins `Book.all`, its Help door in
+`Registry/ShellActions.swift` + `EditorCommands.swift` + the capability registry),
+`SherlockAdventures.txt` (the resource form: boilerplate stripped, attribution front matter).
+(3) `Sources/VariorumCore/Operations/` surface you will script with: `newBlock`, `autosave`,
+`commit` (+ `renameCommitPoint` — NAMED savepoints), `branchVariant`/`newBlankVariant`,
+`setTakeLabel`, `divide`, `divideW`, `merge`, `extract`, `deleteBlock`, `archiveVariant` — the
+AppSpec §9 contracts for each. (4) The source text:
+`notes/plans/18l-inputs/drjekyllandmrhyde-gutenberg-raw.txt` (committed at this kickoff; strip
+the Gutenberg header/licence exactly as Sherlock's precedent did). (5) `SampleLibraryTests`
+(the pin form: pool stays blank, membership counts, the mark).
+
+**THE UNIT — a seeded book whose history is REAL ROWS, never painted:**
+1. **The book:** *The Strange Case of Dr Jekyll and Mr Hyde* (curated), the **takemania** note
+   as its centerpiece plus one or two quieter straight-text chapter notes for contrast (her
+   "optionally" — take it: the contrast is the point of "blocks with takes next to blocks that
+   have no takes" at book scale too). Tagged (one reserved tag, the Sherlock form — e.g.
+   `jekyll and hyde`; your call, recorded). Period entry dates (the novella is January 1886 —
+   Sherlock's period stamps are the precedent; the `\.date` dependency is injectable, so the
+   scripted history's timestamps SPREAD like weeks of real work — savepoints days apart, the
+   final edits "recent". State the date scheme in your record.)
+2. **THE SCRIPTED HISTORY, through the quiet ops facade** (`Operations(undoStack: nil)` — no
+   undo entries for furniture, the seeder's own doctrine). takemania must FEEL heavily worked,
+   her list verbatim: **lineage** (real `derived_from` edges from real ops), **things released
+   that are on the deletion tray** (`deleteBlock` on a few blocks — they land in This Note's
+   Tray as Leaving), **various different takes** (fanned blocks: `branchVariant` with real
+   alternative prose lifted/remixed from the novella — takes that read like genuine authorial
+   alternatives, some labelled via `setTakeLabel`, at least one archived take), **merges and
+   divides have been done** (real `merge` and `divide`/`divideW` calls, so released originals
+   sit behind lineage doors), **blocks with takes next to blocks that have no takes**,
+   **savepoints, savepoints with names** (`commit` + `renameCommitPoint` — names that read like
+   hers: "before the courtroom rewrite", not "Savepoint 3"). *"It should read more like a real
+   document than a tutorial"* — no meta-commentary inside takemania's prose; editorial freedom
+   with the public-domain text is hers-granted. Size judgment: takemania itself a few thousand
+   words (a workable single note), not the whole novella; the quiet chapters carry more of the
+   plain text.
+3. **THE DISCLAIMER (R-18l-12):** the book's front-matter/description note ("About this book",
+   the Sherlock form) carries the three ruled items in calm prose. Wording PROVISIONAL — flag
+   it in your record for her polish; no new QUESTIONS row needed (R-18l-12 is the ruling).
+4. **Restore + discovery "like the others":** a `Book` case (or the encryption book's sibling
+   shape), its Help ▸ Restore door through the registry (P-1: declared, not hand-rendered),
+   reserved identities so discovery guards re-seeding, the mark set only after a COMPLETE seed
+   — including the scripted history (a half-seeded takemania must never be marked done).
+5. **FENCES:** ZERO `Sync/` (R-18l-12 — if anything wants the dedupe manifest or `Sync/`
+   files, STOP and report); zero editor seam; the tutorial spine untouched; the Pool stays
+   blank (the standing pin); seed occasions byte-identical to the Sherlock precedent (Mac
+   launch + the phone's first-write road — the seeder is `Shared/`; if you judge takemania
+   Mac-only-seeded instead, STOP and say why rather than deciding silently: R-18l-12's
+   disclaimer assumed both). P1: the seed is one-time and bounded; note the shelf word-count
+   aggregate cost (KnownIssues row 15's class — Jekyll is ~26k words against Sherlock's 105k;
+   state the measured seed time).
+6. **Pins (the seeder-shape suite, `SampleLibraryTests`' form):** after a fresh seed — the
+   book exists with its notes and disclaimer; takemania holds ≥N fanned blocks (some multi-take
+   with labels, ≥1 archived take) AND unfanned blocks; ≥N `derived_from` edges with origins
+   divide AND merge; the tray holds ≥N Leaving blocks; named savepoints exist (kind manual,
+   message non-nil); the seed is idempotent (the mark short-circuits; a second launch adds
+   nothing); the restore door round-trips (delete the book → Restore re-seeds whole, history
+   included); the Pool stays blank; NOTHING lands on the structural-undo stack. State-transition
+   evidence is your kind's bar (the sizing guidance §1: operations family = state-transition
+   suite).
+7. **WALK (the acceptance):** dev store, both voices — open takemania, see the fans, the tray,
+   the lineage doors, the named savepoints in Block History; play one divide and one merge
+   yourself and confirm the doors behave; captures. The orchestrator re-walks after you.
+
+**Discipline:** the standing paragraph binds verbatim (checkpoint from your FIRST commit —
+`## U6 RECORD` appended to THIS file; commit+push per piece, NO trailers; pins at the end with
+suite-level `-only-testing` from `App/Variorum/`; core `swift test` if you touch `Sources/`
+(you should NOT need to — if a seeder wants a core change, STOP and report); no subagents;
+synchronous waits; pathspec-limited staging; PROVISIONAL-and-continue for non-gating calls
+logged to QUESTIONS, STOP for gating ones). Your diff has NO editor seam → `opus-reviewer`
+ladder unless it drifts. The author may be at the machine — GUI steps only under the per-step
+guard, harness/pins first.
