@@ -244,3 +244,12 @@ Events `keystroke`/`key code` (and a `cliclick` act) counts as HID activity, so 
 Distinguishing a self-trip from the author truly at the machine WITHOUT touching the GUI: watch
 `ioreg -c IOHIDSystem` idle for a few seconds — your own trip's idle CLIMBS monotonically from
 the act's moment; a human's keeps resetting. Only resume when it climbs.
+
+**A transient `using shift down` releases the modifier BEFORE the app processes the keystroke**
+(18l-c U7 ladder round 1, run 090640): System Events posts down·key·up faster than the app
+dequeues the key, so an app road that reads `NSEvent.modifierFlags` — the LIVE session state, not
+the event's own flags — sees no modifier and acts unmodified (the Takes find's ⇧⏎ stepped
+FORWARD). A modifier the app must SEE at action time is held the way a hand holds it: `key down
+shift` · the key · `key up shift` as separate acts (the VisualWalk `takes-find` D2 rows). If a
+guard aborts inside that window the synthetic session shift stays down until any real shift press
+clears it — keep the window small.

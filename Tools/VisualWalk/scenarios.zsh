@@ -854,14 +854,26 @@ scn_takes-find() {
   vw_cap 04-third-match
 
   # Row D2 — ⇧⏎ steps BACK (the ladder's R1-N4: the advertised chord's evidence — `onSubmit` +
-  # `NSEvent.modifierFlags` reads LIVE hardware modifier state, which no hosted pin can synthesize,
-  # so this walk row is the road's one honest proof).
-  vw_keys "⇧⏎ (find previous, from the field)" 'key code 36 using shift down'
+  # `NSEvent.modifierFlags` reads the LIVE modifier state, which no hosted pin can synthesize).
+  # The shift must be HELD the way a hand holds it: a transient `using shift down` posts
+  # down·key·up faster than the app processes the ⏎, so `NSEvent.modifierFlags` read no shift and
+  # the step went FORWARD (measured, run 090640) — held down across acts, the app processes the ⏎
+  # with shift genuinely down, exactly the human road. (If a guard aborts inside this window the
+  # synthetic session shift stays down until any real shift press clears it — the window is three
+  # guarded acts on an author-free machine, accepted.)
+  vw_keys "⇧ down (held — the hand's hold on the modifier)" 'key down shift'
+  vw_keys "⏎ (find previous, ⇧ held)" 'key code 36'
   sleep 2.5; vw_settle
+  vw_keys "⇧ up" 'key up shift'
   vw_expect_eq "D2 · ⇧⏎ steps back: the count says 2 of $total" "${PV[tf]}" "2_of_$total"
   vw_expect_eq "D2 · the previous match's take is live, its match selected" "${${PV[tsel]:-,}#*,}" 4
   vw_expect_eq "D2 · the FIELD keeps the keyboard through ⇧⏎" "${PV[fr]}" text
   vw_cap 04b-shift-return-back
+  # …and one ⏎ forward so every row after D2 walks the SHIPPED path (F's off-scope arrival was
+  # measured from 3 of N; starting it elsewhere reaches a different match — run 090640's F).
+  vw_keys "⏎ (forward again — the shipped path resumes)" 'key code 36'
+  sleep 1.5; vw_settle
+  vw_expect_eq "D2 · ⏎ resumes forward: 3 of $total" "${PV[tf]}" "3_of_$total"
 
   # Row E — the scope chip OFF: every live take is searched; the count grows; the margins say where.
   vw_takes_find_press_chip on || { vw_require false "the scope chip turned the scope off (tfs=${PV[tfs]})"; return }
