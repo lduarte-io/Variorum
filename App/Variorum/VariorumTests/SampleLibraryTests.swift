@@ -818,15 +818,29 @@ struct EncryptionExplainedSeedTests {
             let sherlockMark = Mark()
             sherlockMark.value = true
             let encryptionMark = Mark()
+            // 18l-c U6 ladder F8: EVERY book its OWN mark (the loop used to hand
+            // any non-Sherlock book the encryption book's, so a third book rode
+            // this pin on the wrong mark). Books after this one — the takemania
+            // book today — stand as already seeded, so "only it" stays exact.
+            var marks: [String: Mark] = [
+                SampleLibrarySeeder.Book.sherlock.name: sherlockMark,
+                SampleLibrarySeeder.Book.encryptionExplained.name: encryptionMark,
+            ]
+            for book in SampleLibrarySeeder.Book.all where marks[book.name] == nil {
+                let marked = Mark()
+                marked.value = true
+                marks[book.name] = marked
+            }
             for book in SampleLibrarySeeder.Book.all {
-                let mark = book == .sherlock ? sherlockMark : encryptionMark
+                let mark = try #require(marks[book.name])
                 _ = await SampleLibrarySeeder.seedIfNeeded(
                     session: session, book: book, loadMark: mark.load, saveMark: mark.save)
             }
             try await db.read { db in
                 let names = try Queries.readings(db).map(\.name)
                 #expect(!names.contains(SampleLibrarySeeder.bookName), "Sherlock's mark short-circuits")
-                #expect(names.contains(SampleLibraryEncryptionBook.name), "the new book seeds at the next occasion")
+                #expect(names == [SampleLibraryEncryptionBook.name],
+                        "the new book seeds at the next occasion, and only it")
             }
             #expect(encryptionMark.value)
         }
