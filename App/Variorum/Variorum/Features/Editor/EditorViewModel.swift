@@ -2289,8 +2289,16 @@ final class EditorViewModel {
             // 18l-c U8 — a MODE SWITCH's arrival (never a note's opening, and
             // with a caret she left or a place carried to land): at the same
             // settle hop the landing rests the caret's line inside the comfort
-            // band (b) and then flashes it (a). Stamped with the generation it
-            // parked under, like its siblings (R1-5's rule).
+            // band (b) and then flashes it (a). THE TRIGGER SET IS #98(a)'s
+            // OWN — the reveal above (`remembered != nil, !isOpeningLanding`),
+            // widened only by the carried placement, which is a mode-switch
+            // fact by construction (13u2b UNIT 3) — so the band and the flash
+            // fire on exactly the non-opening arrivals that already reveal,
+            // in practice the mode switch (the U8 ladder's R1-4: this is a
+            // description of #98(a)'s set, not a new exhaustiveness claim; a
+            // road that ever joins that reveal joins this feel with it —
+            // QUESTIONS #158 (6)). Stamped with the generation it parked
+            // under, like its siblings (R1-5's rule).
             if !isOpeningLanding, remembered != nil || pendingCarriedPlacement != nil {
                 pendingModeSwitchArrival = (landing, overlayGeometryGeneration)
             }
