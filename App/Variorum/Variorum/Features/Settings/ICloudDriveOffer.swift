@@ -28,8 +28,9 @@
 //  *Not Now* is the door that answers the question.
 //
 //  THE MARK is per store VARIANT (the `SampleLibrarySeeded.<variant>` shape:
-//  Debug and Release share a defaults domain, so an unscoped key would let
-//  a dev-store offer suppress the real store's). A store that ALREADY has
+//  one BUILD can open either store — the dev fence's opt-in — so within one
+//  build's domain an unscoped key would let a dev-store offer suppress the
+//  real store's; the Debug and Release domains themselves are separate). A store that ALREADY has
 //  a second folder picked when its first run lands is marked silently —
 //  the question is answered by the pick that exists.
 //

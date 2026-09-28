@@ -25,3 +25,22 @@ the last code commit; F6 composes through the Domain helper over a store read on
 resumed U6 session; the orchestrator VERIFIES the batch directly (diffs + the touched suites)
 and closes the round at adjudication (the 18l-b U4 precedent: R2 verified + NITs dispositioned,
 no round 3 without a new B/M). Round cap status: 2 of 3.
+
+## ROUND 2 CLOSED — ORCHESTRATOR ADJUDICATION (2026-09-28)
+
+All six dispositions executed by the fix batch (`ab02fe10..3d398ea7`, hand-back verified):
+R2-M1 records flipped with hashes and the her-bundle line now states the shipped wording;
+R2-M2's gate is in `place`'s mint arm with pin `importedRoadRefusesBeforeMinting` — **revert
+R-R2M2 RED 2 in the predicted shape** (one orphan + one live import), restored; R2-N1's
+platform-neutral lines pinned EXACTLY on both faces (both case lists gain lock/cap/ScriptError
+arms); R2-N2's named error case; R2-N3 — #156 now carries the COMPLETE (a)/(b)/(c) fork with
+(c)'s self-contradicting-dates price stated; R2-N4's comments state the verified fact.
+**Verified directly by the orchestrator:** the commit chain read, the R2-M2 diff read (the gate
+inside the same runner turn), and an own confirming run — `JekyllTakemaniaSeedTests` +
+`SampleLibraryTests` + `EncryptionBookDoorTests`: **39 tests / 3 suites PASSED, TEST
+SUCCEEDED.** The batch's noticed item (six older comments stating the falsified shared-domain
+fact — the reviewer's four plus two more found by grep) was TAKEN BY THE ORCHESTRATOR with
+this adjudication: all six now state the verified reason the variant scoping is load-bearing
+(one BUILD can open either store via the dev fence's opt-in; the Debug and Release domains
+themselves are separate), comment-only, build green. **THE U6 LADDER IS CLOSED AT TWO ROUNDS
+(0/0/4/8 → all fixed; 0/0/2/4 → all fixed; zero disputes, no round 3 earned, cap 2 of 3).**

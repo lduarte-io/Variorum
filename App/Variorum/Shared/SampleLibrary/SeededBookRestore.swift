@@ -72,7 +72,7 @@ nonisolated enum SeededBookRestore {
     /// tombstone; else `restore`. `markIsSet` is the caller's leaf — the
     /// production door reads `SampleLibrarySeeder.isMarkedSeeded` for the
     /// session's store variant; a headless pin never reads the test host's
-    /// defaults (a domain the real app shares).
+    /// defaults (the test host's domain IS the Debug app's — the row-36 class).
     @MainActor
     static func ensure(
         session: AppSession, book: SampleLibrarySeeder.Book, markIsSet: @MainActor () -> Bool

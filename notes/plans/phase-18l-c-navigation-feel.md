@@ -347,7 +347,7 @@ fresh orchestrator at a clean seam (R-18l-3's own mold).
 |---|---|---|---|
 | 1 | The Index tiers' metric shift on click-to-edit (her issue 1; KnownIssues row 89 / 18l U0 sweep S3) | U5 | **CLOSED 2026-09-28** — built + double-walked; ladder ONE round 0/0/1/3 (all confirmed + fixed by the reviewer `9cf71665..f776f79d`, both implementer corrections verified-then-adopted, zero disputes, sanity PASS 16/4 with exactly the 4 named known issues); records `notes/plans/18lc-u5-ladder-round1.md` |
 | 1b | Her #154 ruling (b) — stored blank lines drawn at rest on the two index faces; nothing ever moves on a click | U5 rider | **CLOSED 2026-09-28** — same ladder; the ≥2-blanks TK2 exception stands as its own row (owner 12) |
-| 2 | The takemania seeded note — real history through the quiet ops facade; restorable like the others; the dedupe answer RULED = the description's disclaimer (R-18l-12: two-copies note · ships-with-deleted-blocks note · Restore-for-full-experience) | U6 | open |
+| 2 | The takemania seeded note — real history through the quiet ops facade; restorable like the others; the dedupe answer RULED = the description's disclaimer (R-18l-12) | U6 | **CLOSED 2026-09-28** — built (47 blocks · 10 fanned/37 plain · 9 lineage edges · tray 5 · 12 savepoints, 10 named · 17 sittings) · double-walked · ladder TWO rounds (0/0/4/8 all fixed incl. the Pool-orphan restore bug with red pins; 0/0/2/4 all fixed incl. the imported-road gate; zero disputes) · her bundle: the disclaimer polish, #155, #156's (a)/(b)/(c) date fork |
 | 3 | Search in Takes — the design brief in this file first; chosen-takes-only default ON; the off-scope affordance + find-vs-replace per the sitting | U7 | open |
 | 4 | The mode-switch arrival flash — default ON, a setting to turn off; the existing wash vocabulary; fade constants named | U8 | open |
 | 5 | The comfort band — no mode-switch landing rests the target line at the extreme top/bottom; ruled carries exact mid-band; pin collisions flagged, never edited | U8 | open |
@@ -546,7 +546,8 @@ record.
 | Kickoff sitting (the question batch) | IN PROGRESS |
 | U5 (session 1, base + the #154 rider) | **CLOSED 2026-09-28** — built · double-walked · ladder one round 0/0/1/3 clean (zero disputes; sanity PASS); rows 89 + #154 closed with the gate PASSED |
 | The #153 (a′) seam act (ledger row 8) | **DONE 2026-09-28 (`4861947c`)** — the one line built (the landing takes the note's entry rule), the pin's (a′) arm added, behavioural revert RED in the predicted shape (`.start ≠ .offset(42)`, the new arm alone) then restored; row-36 entry scrubs added to all three suite tests (a stale persisted key from the pre-scrub run surfaced the class — noted at the row); suite 3/3 green |
-| U6 → U7 (brief first) → U8 | NOT-STARTED |
+| U6 (session 2) | **CLOSED 2026-09-28** — built · double-walked · ladder two rounds closed at adjudication (records `18lc-u6-ladder-round{1,2}.md`) |
+| U7 (brief first) → U8 | NOT-STARTED |
 
 ## U5 RECORD (implementer: `opus-implementer`, 2026-09-27)
 

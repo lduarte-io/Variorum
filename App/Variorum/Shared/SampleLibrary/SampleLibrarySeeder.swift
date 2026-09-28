@@ -651,8 +651,9 @@ enum SampleLibrarySeeder {
 
     /// Marks are scoped by store variant, exactly like
     /// `IdleCommitScheduler.markDefaultsKey` and the starter journal's —
-    /// Debug and Release share a defaults domain, so an unscoped key would
-    /// let a dev-store seed suppress the real store's.
+    /// one build can open either store — the dev fence's opt-in — so within one
+    /// build's domain an unscoped key would let a dev-store seed suppress the
+    /// real store's (the Debug and Release domains themselves are separate).
     nonisolated static func seededDefaultsKey(
         for variant: AppDatabase.StoreVariant, book: Book = .sherlock
     ) -> String {

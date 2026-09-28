@@ -15,8 +15,8 @@
 //    NEVER-touched, mint-only posts), so a sweep costs ∝ containers edited
 //    since the previous sweep, never the corpus (P1);
 //  - the mark is per-device, PER-STORE-VARIANT bookkeeping (UserDefaults by
-//    default; debug/release builds share a defaults domain, so an unscoped
-//    key would let a dev-store sweep advance the real store's mark and
+//    default; one build can open either store — the dev fence's opt-in — so
+//    an unscoped key would let a dev-store sweep advance the real store's mark and
 //    skip its window — review round 1). Losing a mark merely widens the
 //    next sweep;
 //  - the mark advances only when every candidate was asked successfully —

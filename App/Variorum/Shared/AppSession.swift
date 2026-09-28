@@ -39,15 +39,17 @@ final class AppSession {
     let database: AppDatabase
     /// pre-13x ladder round 2, F3 (MINOR-N3): which store this session
     /// serves — the seeded books' per-variant marks are read against it
-    /// (Debug and Release share a defaults domain, so an unscoped read would
-    /// let the dev store's mark answer for the real one). The bootstrap
+    /// (one build can open either store — the dev fence's opt-in — so an
+    /// unscoped read would let the dev store's mark answer for the real one;
+    /// the Debug and Release domains themselves are separate, verified at the
+    /// U6 round 2). The bootstrap
     /// hands its variant; a headless session (the pins) defaults to `.real`.
     let storeVariant: AppDatabase.StoreVariant
     /// F3 (MINOR-N3): the seeded books' per-book mark on THIS device, as the
     /// tutorial door's SILENT ensure reads it — the production leaf reads
     /// `SampleLibrarySeeder.isMarkedSeeded` for `storeVariant`; a pin
     /// injects its own, so no headless run ever reads the test host's
-    /// defaults (a domain the real app shares).
+    /// defaults (the test host's domain IS the Debug app's — the row-36 class).
     @ObservationIgnored var seededBookMarkIsSet: @MainActor (SampleLibrarySeeder.Book) -> Bool
     /// **RUN A batch A2, row 8 (17l item 1 / KnownIssues 38): the WRITE half
     /// of the same mark** — how a seeded-book road records, on this device,
