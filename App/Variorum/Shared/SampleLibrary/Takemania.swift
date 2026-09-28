@@ -29,11 +29,16 @@
 //  only tombstones inside the 30-day Trash window (`Queries.trayBlocks`) and
 //  the purge janitor physically removes 30-day tombstone roots — so deletions
 //  stamped in 1886 would ship an EMPTY tray and be purged at the first
-//  janitor pass. Each step is stamped `anchor − daysAgo + minutes` (three
-//  minutes a step): the note is born five weeks before the seed, its
-//  sittings land days apart, the deletions fall in its last three weeks (the
-//  tray reads 10 … 29 days left at seed), and the last sitting is the day
-//  before. Every stamp is in the past.
+//  janitor pass. Each sitting is placed on the LOCAL CALENDAR DAY `daysAgo`
+//  days before the seed, at a time of day of its own (evenings mostly, a
+//  couple of early mornings), three minutes a step — so Block History reads
+//  like a person's sittings whatever hour the seed happens to run (a first
+//  cut placed sittings relative to the seed's own time of day, and a seed at
+//  2 a.m. filed every savepoint in the small hours — seen at the U6 walk).
+//  The note is born five weeks before the seed, the deletions fall in its
+//  last three weeks (the tray reads about 10 … 30 days left at seed), and the
+//  last sitting is the evening before. Every sitting lies on a date BEFORE
+//  the seed's, so every stamp is in the past.
 //
 //  ── COMPLETE, OR NOT THERE (the U6 record's design call 3) ───────────────
 //  The seeder's discovery is keyed on TITLES, and no app-reachable door runs
@@ -110,7 +115,9 @@ nonisolated private final class Script {
     let anchor: Date
     let interruptAfter: Int?
     private(set) var note = ""
-    private var daysAgo: Double = 0
+    /// The current sitting's start — midnight of its local calendar day plus
+    /// its time of day.
+    private var sittingStart = Date.distantPast
     private var minute = 0
     private var steps = 0
     private var texts: [String: String] = [:]
@@ -130,15 +137,25 @@ nonisolated private final class Script {
         }
         steps += 1
         minute += 3
-        let stamp = anchor.addingTimeInterval(-daysAgo * 86_400 + Double(minute) * 60)
+        let stamp = sittingStart.addingTimeInterval(Double(minute) * 60)
         return try withDependencies({ $0.date = .constant(stamp) }, operation: op)
     }
 
-    /// A sitting: its steps, then leaving the note — the everyday cadence's
-    /// quiet savepoint per edited take (`closeAutoCommit`, OverallModel §3).
-    private func sitting(daysAgo: Double, startingAt minute: Int, _ body: () throws -> Void) throws {
-        self.daysAgo = daysAgo
-        self.minute = minute
+    /// A sitting: on the local calendar day `daysAgo` days before the seed,
+    /// starting at `hour:minute`, its steps, then leaving the note — the
+    /// everyday cadence's quiet savepoint per edited take (`closeAutoCommit`,
+    /// OverallModel §3). Every sitting ends before its day does (the longest
+    /// is about an hour, and none starts after 22:30), so it stays on a date
+    /// before the seed's and in the past.
+    private func sitting(
+        daysAgo: Int, at hour: Int, _ minute: Int, _ body: () throws -> Void
+    ) throws {
+        let calendar = Calendar.current
+        let day = calendar.startOfDay(
+            for: calendar.date(byAdding: .day, value: -daysAgo, to: anchor) ?? anchor)
+        sittingStart = calendar.date(
+            bySettingHour: hour, minute: minute, second: 0, of: day) ?? day
+        self.minute = 0
         try body()
         try at { _ = try ops.closeAutoCommit(note) }
     }
@@ -228,7 +245,7 @@ nonisolated private final class Script {
         var opening: Placed = ("", "")
         var eyesore: Placed = ("", "")
         var candle = "", ifAnyOneKnows = "", oldestFriends = "", friendsYounger = ""
-        try sitting(daysAgo: 34, startingAt: 30) {
+        try sitting(daysAgo: 34, at: 19, 40) {
             note = try at { try ops.createPost(title: Takemania.workingTitle) }.id
             // Never bookless, never untagged — so never in the Pool, even if
             // the history stops here (design call 3).
@@ -253,7 +270,7 @@ nonisolated private final class Script {
         var mrSeek = ""
         var fineNight: Placed = ("", "")
         var hydeLeaves: Placed = ("", "")
-        try sitting(daysAgo: 33, startingAt: 45) {
+        try sitting(daysAgo: 33, at: 21, 10) {
             try add(P.headingSeek)
             dream = try add(P.dreamScroll)
             try add(P.hauntTheDoor)
@@ -266,7 +283,7 @@ nonisolated private final class Script {
         // ── Sitting 3 — the eyesore gets Stevenson back; Hyde's face. ──
         var eyesoreStevenson = ""
         var hydeFace: Placed = ("", "")
-        try sitting(daysAgo: 31, startingAt: 0) {
+        try sitting(daysAgo: 31, at: 8, 20) {
             try name(eyesore.take, "first try")
             eyesoreStevenson = try branch(
                 eyesore.block, from: eyesore.take, label: "Stevenson", P.eyesoreStevenson)
@@ -280,7 +297,7 @@ nonisolated private final class Script {
         // ── Sitting 4 — the Carew murder, pasted in whole. ──
         var maid: Placed = ("", "")
         var recognition: Placed = ("", "")
-        try sitting(daysAgo: 29, startingAt: 60) {
+        try sitting(daysAgo: 29, at: 20, 30) {
             try add(P.headingCarew)
             maid = try add(P.maidWhole)
             try add(P.twoOClock)
@@ -292,7 +309,7 @@ nonisolated private final class Script {
 
         // ── Sitting 5 — cutting the dream down; a plainer Hyde. ──
         var hydeFacePlainer = ""
-        try sitting(daysAgo: 27, startingAt: 20) {
+        try sitting(daysAgo: 27, at: 22, 5) {
             try save(dream.take, "the whole scroll, before cutting")
             try name(dream.take, "scroll")
             let short = try branch(dream.block, from: dream.take, label: "short", P.dreamShort)
@@ -307,7 +324,7 @@ nonisolated private final class Script {
         var guestWine: Placed = ("", "")
         var guestCompares: Placed = ("", "")
         var lockedInTheSafe: Placed = ("", "")
-        try sitting(daysAgo: 24, startingAt: 50) {
+        try sitting(daysAgo: 24, at: 19, 15) {
             try divide(maid, before: P.maidCutMarker)
             try add(P.headingLetter)
             try add(P.theCabinet)
@@ -319,7 +336,7 @@ nonisolated private final class Script {
         }
 
         // ── Sitting 7 — the fine night divided; Hyde's exit cut short. ──
-        try sitting(daysAgo: 22, startingAt: 10) {
+        try sitting(daysAgo: 22, at: 7, 50) {
             try divide(fineNight, before: P.fineNightCutMarker)
             try name(hydeLeaves.take, "with the dialogue")
             let toTheDoor = try branch(
@@ -329,7 +346,7 @@ nonisolated private final class Script {
         }
 
         // ── Sitting 8 — a tighter eyesore; Mr. Seek goes; the opener settles. ──
-        try sitting(daysAgo: 20, startingAt: 70) {
+        try sitting(daysAgo: 20, at: 21, 40) {
             _ = try branch(eyesore.block, from: eyesoreStevenson, label: "tighter", P.eyesoreTighter)
             try delete(mrSeek)
             try rewrite(opening.take, P.openingV3)
@@ -342,7 +359,7 @@ nonisolated private final class Script {
         var theDoor: Placed = ("", "")
         var ending: Placed = ("", "")
         var endingFirstVersion = ""
-        try sitting(daysAgo: 17, startingAt: 0) {
+        try sitting(daysAgo: 17, at: 20, 0) {
             try add(P.headingLastNight)
             try add(P.pooleVisits)
             night = try add(P.nightStevenson)
@@ -366,14 +383,14 @@ nonisolated private final class Script {
 
         // ── Sitting 10 — the candle and the thought become one block. ──
         var oathSavepoint = ""
-        try sitting(daysAgo: 15, startingAt: 80) {
+        try sitting(daysAgo: 15, at: 22, 30) {
             try merge(candle, ifAnyOneKnows)
             oathSavepoint = try save(oath.take)
             _ = try branch(guestWine.block, from: guestWine.take, label: "shorter", P.guestWineShorter)
         }
 
         // ── Sitting 11 — the oath shortened; the maid given her own voice. ──
-        try sitting(daysAgo: 12, startingAt: 40) {
+        try sitting(daysAgo: 12, at: 18, 45) {
             try renameSavepoint(oathSavepoint, "before the oath gets shorter")
             try name(oath.take, "Stevenson")
             let shorter = try branch(oath.block, from: oath.take, label: "shorter", P.oathShorter)
@@ -386,7 +403,7 @@ nonisolated private final class Script {
         //    letter's last sentence pulled out to stand alone (the extract
         //    OverallModel §7 names: pull the closing sentence out, fan THAT). ──
         var coldBlood: Placed = ("", "")
-        try sitting(daysAgo: 10, startingAt: 60) {
+        try sitting(daysAgo: 10, at: 21, 20) {
             try save(night.take, "first pass at the weather")
             try name(night.take, "Stevenson")
             let tighter = try branch(night.block, from: night.take, label: "tighter", P.nightTighter)
@@ -404,7 +421,7 @@ nonisolated private final class Script {
         }
 
         // ── Sitting 13 — Guest's fireside goes; the lone sentence fans out. ──
-        try sitting(daysAgo: 9, startingAt: 30) {
+        try sitting(daysAgo: 9, at: 6, 55) {
             try delete(guestWine.block)
             try rewrite(guestCompares.take, P.guestComparesV2)
             try save(coldBlood.take, "keep the blood running cold")
@@ -414,7 +431,7 @@ nonisolated private final class Script {
         }
 
         // ── Sitting 14 — the Lanyon exchange merged; Hyde's face divided. ──
-        try sitting(daysAgo: 7, startingAt: 70) {
+        try sitting(daysAgo: 7, at: 20, 10) {
             try merge(oldestFriends, friendsYounger)
             // The fanned block's DEFAULT divide (keep-on-top, U-2 — the
             // `KeepOnTopDivide` shape, composed from divide-W's parking):
@@ -436,7 +453,7 @@ nonisolated private final class Script {
         }
 
         // ── Sitting 15 — the malady theory goes; five blows; the stick. ──
-        try sitting(daysAgo: 5, startingAt: 50) {
+        try sitting(daysAgo: 5, at: 22, 15) {
             try delete(malady)
             try name(theDoor.take, "Stevenson")
             let fiveBlows = try branch(
@@ -449,7 +466,7 @@ nonisolated private final class Script {
 
         // ── Sitting 16 — the kettle goes; an open ending; a faceless dream. ──
         var openEnding = ""
-        try sitting(daysAgo: 3, startingAt: 80) {
+        try sitting(daysAgo: 3, at: 19, 30) {
             try delete(kettle)
             try name(ending.take, "Stevenson\u{2019}s close")
             openEnding = try branch(ending.block, from: ending.take, label: "open ending", P.endingOpen)
@@ -459,7 +476,7 @@ nonisolated private final class Script {
         }
 
         // ── Sitting 17 — yesterday: the glass goes; one more ending. ──
-        try sitting(daysAgo: 1, startingAt: 60) {
+        try sitting(daysAgo: 1, at: 21, 5) {
             try delete(glass)
             _ = try blank(ending.block, label: "Lanyon next", P.endingLanyonNext)
             try renameSavepoint(endingFirstVersion, "ending as Stevenson closes it")

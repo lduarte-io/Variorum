@@ -73,6 +73,7 @@ private struct TakemaniaShape: Equatable, Sendable {
     var autoSavepoints = 0
     var earliestStamp = ""
     var latestStamp = ""
+    var savepointHours: Set<Int> = []
     var renderedText = ""
     var chosenTexts: [String] = []
 }
@@ -236,6 +237,13 @@ struct JekyllTakemaniaSeedTests {
             #expect(before.timeIntervalSince(earliest) > 30 * 86_400, "the first savepoint is over four weeks old")
             #expect(latest < before && before.timeIntervalSince(latest) < 2 * 86_400,
                     "the last is from the day before the seed, never the future")
+            // The sittings sit on their own local days at a person's hours,
+            // whatever hour the seed runs (the U6 walk's 3:37 am savepoints).
+            let calendar = Calendar.current
+            #expect(calendar.startOfDay(for: latest) < calendar.startOfDay(for: before),
+                    "every sitting lies on a date before the seed's")
+            #expect(shape.savepointHours.allSatisfy { (6...23).contains($0) },
+                    "savepoints at a person's hours: \(shape.savepointHours.sorted())")
 
             // What the note reads as: the chosen takes, the cuts at their exact
             // seams, the merge's rendering join, and none of what was deleted.
@@ -565,6 +573,10 @@ struct JekyllTakemaniaSeedTests {
                 """,
             arguments: [familyJSON])
         for commit in commits {
+            if let stamp = commit["created_at"] as String?,
+               let date = DateFormatter.variorumISO8601.date(from: stamp) {
+                shape.savepointHours.insert(Calendar.current.component(.hour, from: date))
+            }
             let kind = commit["kind"] as String
             if kind == "manual" {
                 shape.manualSavepoints += 1
