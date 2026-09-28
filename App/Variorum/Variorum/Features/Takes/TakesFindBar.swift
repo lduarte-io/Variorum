@@ -82,7 +82,8 @@ struct TakesFindBar: View {
         .onChange(of: find.fieldFocusRequests) { _, _ in fieldFocused = true }
         .recordTakesFindBar(
             count: find.countFace, chosenOnly: find.chosenOnly,
-            chip: Self.scopeChipText(on: find.chosenOnly))
+            chip: Self.scopeChipText(on: find.chosenOnly),
+            currentOffScope: find.currentMatch.map { !$0.onShownTake } ?? false)
     }
 
     // MARK: - The bar's words (registry-sourced where the registry speaks)
@@ -141,6 +142,8 @@ enum TakesFindFaces {
         var count: String
         var chosenOnly: Bool
         var chip: String
+        /// The current match sits on a take its block is not showing.
+        var currentOffScope = false
     }
 
     static var bar: Bar?
@@ -155,11 +158,18 @@ enum TakesFindFaces {
 
 extension View {
     @ViewBuilder
-    func recordTakesFindBar(count: String, chosenOnly: Bool, chip: String) -> some View {
+    func recordTakesFindBar(
+        count: String, chosenOnly: Bool, chip: String, currentOffScope: Bool
+    ) -> some View {
         #if DEBUG
-        self.onChange(of: TakesFindFacesKey(count: count, chosenOnly: chosenOnly, chip: chip), initial: true) {
-            _, face in
-            TakesFindFaces.bar = .init(count: face.count, chosenOnly: face.chosenOnly, chip: face.chip)
+        self.onChange(
+            of: TakesFindFacesKey(
+                count: count, chosenOnly: chosenOnly, chip: chip, currentOffScope: currentOffScope),
+            initial: true
+        ) { _, face in
+            TakesFindFaces.bar = .init(
+                count: face.count, chosenOnly: face.chosenOnly, chip: face.chip,
+                currentOffScope: face.currentOffScope)
         }
         .onDisappear { TakesFindFaces.bar = nil }
         #else
@@ -186,4 +196,5 @@ private struct TakesFindFacesKey: Equatable {
     let count: String
     let chosenOnly: Bool
     let chip: String
+    let currentOffScope: Bool
 }

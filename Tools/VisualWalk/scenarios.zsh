@@ -805,6 +805,115 @@ scn_book-landings() {
   fi
 }
 
+# --- S15: SEARCH IN TAKES (18l-c U7 — her R-18l-6; find-only v1, R-18l-9; the off-scope arrival, R-18l-10)
+# The unit's walk, made standing (18l-b U2's precedent). takemania — the Jekyll book's worked note, many
+# blocks, several fanned — searched for "Hyde". The probe reads the bar's own face (`tf` its count, `tfs` the
+# scope, `tfo` the current match off-scope, `tmk` the margin markers drawn) and the LIVE pane a step landed
+# (`tsel` / `tvis` / `trole`) — reported apart from `fr`/`sel`, because while ⏎ steps the FIELD holds the
+# keyboard (the Write bar's convention, decision 1). Mutates nothing lasting: the one keystroke is undone.
+vw_def takes-find "takemania (The Strange Case of Dr Jekyll and Mr Hyde — seeded; Help ▸ Restore makes it), Takes" \
+  "⌘2 · ⌘F · type Hyde · ⏎ · ⏎⏎ · the scope chip OFF · ⏎ to the first off-scope match · Esc · type X · ⌘Z · ⌘G from the board · the chip back ON" \
+  "⌘F: the field holds the keyboard; a count; ⏎: 1 of N, the take live with the 4-letter match selected and on screen, the field KEEPS the keyboard; ⏎⏎: 3 of N; OFF: the count grows and the scope says so; a step reaches a take its block is not showing — a FAN card, live, match selected; Esc: the keyboard to the take, the match still selected; X replaces it (len −3), ⌘Z restores; ⌘G from the board: the landed take holds the keyboard" pass
+
+scn_takes-find() {
+  vw_open_note "takemania"
+  vw_require '[[ ${PV[post]} != none ]]' "takemania opened (the Jekyll book is seeded — Help ▸ Restore makes it)" || return
+  vw_takes_mode 2
+  vw_require '[[ ${PV[mode]} == Takes ]]' "the note is in Takes" || return
+
+  # Row A — ⌘F opens the bar; its field holds the keyboard.
+  vw_keys "⌘F (find in this note's takes)" 'keystroke "f" using command down'
+  sleep 1; vw_settle
+  vw_expect_eq "A · ⌘F in Takes opens the board's find bar (its count face is on screen)" "${PV[tf]:+open}" open
+  vw_expect_eq "A · the find FIELD holds the keyboard (a text field — not a pane, not the editor)" "${PV[fr]}" text
+  vw_expect_eq "A · 'only chosen takes' is ON by default (her ruling)" "${PV[tfs]}" 1
+  vw_cap 01-bar-open
+
+  # Row B — type Hyde: counted over the chosen takes, nothing navigated yet (incremental navigation off).
+  vw_keys "type: Hyde" 'keystroke "Hyde"'
+  sleep 1; vw_settle
+  local total=${${PV[tf]%%_match*}}
+  vw_log "  B · the count face: ${PV[tf]}"
+  vw_require '[[ $total == <-> ]] && (( total > 3 ))' "takemania's chosen takes hold several Hyde matches (${PV[tf]})" || return
+  vw_cap 02-hyde-counted
+
+  # Row C — ⏎: the first match's take goes LIVE, the match SELECTED and on screen; the field keeps the keyboard.
+  vw_keys "⏎ (find next, from the field)" 'key code 36'
+  sleep 2.5; vw_settle
+  vw_expect_eq "C · ⏎: the count says 1 of $total" "${PV[tf]}" "1_of_$total"
+  vw_expect_eq "C · the landed take is LIVE with a 4-letter match SELECTED (tsel=${PV[tsel]:-none})" "${${PV[tsel]:-,}#*,}" 4
+  vw_expect_eq "C · …and on screen (its row revealed)" "${PV[tvis]:-0}" 1
+  vw_expect_eq "C · the FIELD keeps the keyboard, so ⏎ steps again" "${PV[fr]}" text
+  vw_cap 03-first-match-live-selected
+
+  # Row D — two more ⏎.
+  vw_keys "⏎" 'key code 36'; sleep 1.5
+  vw_keys "⏎" 'key code 36'; sleep 2.5; vw_settle
+  vw_expect_eq "D · ⏎⏎: the count says 3 of $total" "${PV[tf]}" "3_of_$total"
+  vw_expect_eq "D · the third match's take is live, its match selected" "${${PV[tsel]:-,}#*,}" 4
+  vw_cap 04-third-match
+
+  # Row E — the scope chip OFF: every live take is searched; the count grows; the margins say where.
+  vw_ax_press "$(vw_takes_find_chip on)" AXButton || { vw_require false "the scope chip"; return }
+  sleep 1.5; vw_settle
+  local face=${PV[tf]} every
+  if [[ $face == *_of_* ]]; then every=${${face#*_of_}%%_*}; else every=${face%%_match*}; fi
+  vw_log "  E · the count face: ${PV[tf]} · markers drawn: ${PV[tmk]}"
+  vw_expect_eq "E · the chip turned the scope OFF" "${PV[tfs]}" 0
+  vw_require '[[ $every == <-> ]] && (( every > total ))' "takemania's other takes hold more Hyde matches ($every vs $total)" || return
+  vw_cap 05-every-take
+
+  # Row F — step until the current match is on a take its block is NOT showing: its fan opens, its card is live.
+  local steps=0
+  while [[ ${PV[tfo]} != 1 ]] && (( steps < every + 1 )); do
+    vw_keys "⏎ (to an off-scope match)" 'key code 36'
+    sleep 1.2; vw_probe
+    (( steps++ ))
+  done
+  sleep 2; vw_settle
+  vw_expect_eq "F · a step reached a match on a take its block is not showing ($steps steps)" "${PV[tfo]}" 1
+  vw_expect_eq "F · the live pane is that take's FAN card (its fan opened on arrival — trole=${PV[trole]:-none})" \
+    "${${${PV[trole]:-}:#article}:+fan}" fan
+  vw_expect_eq "F · …with the match selected" "${${PV[tsel]:-,}#*,}" 4
+  vw_expect_eq "F · …and on screen" "${PV[tvis]:-0}" 1
+  vw_cap 06-off-scope-fan-opened
+
+  # Row G — Esc: the bar closes, the keyboard goes to the take, the match still selected.
+  vw_keys "Esc (close the bar)" 'key code 53'
+  sleep 1.5; vw_settle
+  vw_expect_eq "G · Esc closed the bar" "${PV[tf]:-closed}" closed
+  vw_expect_eq "G · the take holds the keyboard" "${PV[fr]}" pane
+  vw_expect_eq "G · …with the match still selected (sel=${PV[sel]:-none})" "${${PV[sel]:-,}#*,}" 4
+  vw_cap 07-esc-take-holds-keyboard
+
+  # Row H — a keystroke EDITS the take (her row-7 report, answered); ⌘Z puts it back.
+  local len0=${PV[len]}
+  vw_keys "type: X (replaces the selected match)" 'keystroke "X"'
+  sleep 1; vw_settle
+  local len1=${PV[len]}
+  vw_expect_eq "H · the keystroke replaced the 4-letter match (len $len0 → $len1)" "$(( len0 - len1 ))" 3
+  vw_keys "⌘Z (text undo)" 'keystroke "z" using command down'
+  sleep 1; vw_settle
+  vw_expect_eq "H · ⌘Z restored the take" "${PV[len]}" "$len0"
+  vw_cap 08-typed-and-undone
+
+  # Row I — ⌘G from the BOARD (the bar closed, the query remembered): the landed take holds the keyboard.
+  vw_keys "⌘G (find next, from the take)" 'keystroke "g" using command down'
+  sleep 2.5; vw_settle
+  vw_expect_eq "I · ⌘G from the board: the landed take holds the keyboard" "${PV[fr]}" pane
+  vw_expect_eq "I · …with a 4-letter match selected" "${${PV[sel]:-,}#*,}" 4
+  vw_cap 09-cmd-g-from-the-board
+
+  # Tidy: the scope back ON (a session slot — the pass's own launch forgets it anyway), the bar closed.
+  vw_keys "⌘F" 'keystroke "f" using command down'; sleep 1; vw_settle
+  vw_ax_press "$(vw_takes_find_chip off)" AXButton >/dev/null 2>&1
+  sleep 1; vw_keys "Esc" 'key code 53'; sleep 1
+}
+
+# The scope chip's accessibility label in the voice on screen (Terminal's chrome lowercases; the chip's
+# words are lowercase already, so both voices read the same).
+vw_takes_find_chip() { print -r -- "only chosen takes: $1" }
+
 # --- SELF-TEST: the harness must be able to RED (run with --selftest) -----------------------------------
 vw_def selftest-red "whatever is on screen" "none (a quiet second)" \
   "a KNOWINGLY WRONG expectation: the window's top moved 40 pt — must FAIL, be captured, exit non-zero" fail

@@ -122,6 +122,23 @@ enum VisualWalkProbe {
         if flags.contains("rl") {
             readLanding(activePostID: session?()?.commandRouter.activePostID, into: &line)
         }
+        // 18l-c U7: the Takes find bar's face (`TakesFindFaces` — its count with
+        // spaces as `_`, the scope, whether the current match is off-scope, the
+        // markers on screen) and the LIVE pane a step landed — reported apart
+        // from `fr`/`sel`, because while ⏎ steps the FIELD holds the keyboard.
+        if let bar = TakesFindFaces.bar {
+            line["tf"] = bar.count.isEmpty ? "-" : bar.count.replacingOccurrences(of: " ", with: "_")
+            line["tfs"] = bar.chosenOnly ? "1" : "0"
+            line["tfo"] = bar.currentOffScope ? "1" : "0"
+            line["tmk"] = "\(TakesFindFaces.markers.count)"
+            if let live = editablePanes(in: window.contentView).first {
+                let selection = live.selectedRange()
+                line["tsel"] = "\(selection.location),\(selection.length)"
+                line["tvis"] = live.visibleRect.isEmpty ? "0" : "1"
+                line["trole"] = live.identifier?.rawValue
+                    .split(separator: "|").first.map { String($0.dropFirst(5)) } ?? "-"
+            }
+        }
         let responder = window.firstResponder
         guard let textView = responder as? NSTextView else {
             line["fr"] = responder == nil ? "none" : "other"
