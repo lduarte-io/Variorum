@@ -1226,3 +1226,21 @@ Bundled for her from this unit: the disclaimer wording (hers to polish), #155 (a
 dedupe-list and phone-restore PROVISIONALs), and the noticed divide→merge→⌥⌘Z-twice tray
 behaviour (pre-existing, consistent with tombstone-flip inverses — surfaced for her awareness,
 not filed as a defect).
+
+### FIX PASS (ladder round 1 — the resumed U6 implementer, 2026-09-28; the binding record `notes/plans/18lc-u6-ladder-round1.md` @ `1c048025`, read whole)
+
+| # | Finding (disposition) | Status |
+|---|---|---|
+| F1 | MINOR — a refused membership (finished/full book) leaves a working-titled orphan in the Pool on every Restore press (CONFIRMED-FIX: mint through `newPostInReading`, then tag; the failure line names the lock; red-on-old pin) | NOT-STARTED |
+| F2 | MINOR — `withJekyllWorld` never injected the mark leaves, so restore pins wrote `SampleLibrarySeeded.Variorum.jekyll-and-hyde` into the test host's Debug domain (CONFIRMED-FIX: inject both leaves + red-on-old pin; delete that ONE stray key after verifying its name) | NOT-STARTED — the key verified read-only: the Debug domain `io.lduarte.Variorum.debug` holds `SampleLibrarySeeded.Variorum.jekyll-and-hyde = 1` (the stray, `.real` variant, test-written) beside the dev store's own `SampleLibrarySeeded.Variorum-dev{,.encryption-explained,.jekyll-and-hyde}` (legitimate — the last written by the walk's real Restore door; NEVER touched); the Release domain `io.lduarte.Variorum` holds no Jekyll key |
+| F3 | MINOR — the disclaimer omits that deleting a BOOK keeps its notes (CONFIRMED-FIX the PROVISIONAL wording for accuracy; still hers to polish) | NOT-STARTED |
+| F4 | MINOR — PROVISIONALs 3–5 unlogged; the date scheme's recency is forced by the tray (CONFIRMED: file QUESTIONS #156 with the (a)/(b) fork + the name/contents items; her bundle line here) | NOT-STARTED |
+| F5 | NIT — phone first-write suite + generic iOS build not re-run after `57d04110` (RE-RUN on the final tree, amend row 8) | NOT-STARTED |
+| F6 | NIT — keep-on-top cuts composed by hand (FIX: `KeepOnTopDivide.compose` over the live fan) | NOT-STARTED |
+| F7 | NIT — `BookIndexEditModel` comment lead still says #153 PROVISIONAL/START (FIX: retitle) | NOT-STARTED |
+| F8 | NIT — `SampleLibraryTests.theMarksAreIndependent`'s `Book.all` loop hands Jekyll the encryption mark (FIX: per-book marks) | NOT-STARTED |
+| F9 | NIT — the record states the label count three ways (FIX: 18 distinct) | NOT-STARTED |
+| F10 | NIT — the shelf word-aggregate note (KnownIssues row 15's class) unaddressed (FIX: one line on row 15 + here) | NOT-STARTED |
+| F11 | NIT — the orchestrator's own | n/a (done by the orchestrator at `1c048025`) |
+| F12 | NIT — a mid-history `ScriptError` falls to the "nothing else was touched" arm (FIX: name it in `failureLine`) | NOT-STARTED |
+| Z | Closing: `JekyllTakemaniaSeedTests` + `SampleLibraryTests` (+ `EncryptionExplainedSeedTests`) + the F5 re-runs, final tree | NOT-STARTED |
