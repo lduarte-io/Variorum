@@ -1606,7 +1606,7 @@ FABLE cold review follows (editor seam).
 | 4 | The flash's SETTING (`arrival_flash`, the ONE `Sources/` touch — its read in Queries + its write through the existing settings road) + the face in Settings | DONE — core half `dfe5a895` (`AppearanceSettingsTests` 9/9, the new arm compile-red on the pre-U8 tree); app half (this commit): `ThemeStore.setArrivalFlash`, `EditorAppearance.arrivalFlash` (the settings → appearance road Write reads), the Editor pane's "Switching modes" section + its `SettingsCatalog` row (`arrivalFlash`), `ArrivalFlashCopy` (PROVISIONAL words) |
 | 5 | (a) THE FLASH — the brain (named constants, Reduce Motion) + the faces (Write's caret line, Takes' block, Read's two faces) | brain + Takes DONE (this commit): `Surface/ArrivalFlash.swift` (0.3 s hold / 0.8 s cosine fade, the pure `opacity(at:)`, Reduce Motion = unanimated for the same total; the `ArrivalFlashFace` fill-behind + border-over; DEBUG `ArrivalFlashOracle`); `LandingAuthority.onArrived` (additive, nil elsewhere — told once at the first quiet look that finds the target home, or at a `settled` end); `TakesArticleScroll.articleArrival` (the ENTRY kind only) → the cell's face, gated on the setting + Reduce Motion. Write + Read DONE (this commit): Write — the bare mode-switch arrival (not an opening) parks `pendingModeSwitchArrival`; the settle hop's last step (`consumeModeSwitchArrival`) flashes the caret's LINE through the decor layer (`BlockDecorOverlayController.flashArrival` — a `DecorRectView` below the text, the block highlight's face, `NSAnimationContext` opacity fade; `arrivalFlashes` / `lastArrivalFlashLine` seams); Read — the seed that is not the note's opening marks its `ReadLanding.modeSwitch`, both faces take `landing.onArrived` for it and draw the face on the landed row (`read-edit|…`, `read-page|…`) |
 | 6 | (b) THE COMFORT BAND — the brain (named constants) + Takes (row 94's MAY-take) + Write + Read | brain + Takes DONE (this commit): `Surface/ComfortBand.swift`; the Takes ENTRY landing's decision/residual/anchor banded (`TakesArticleScroll.entryBand`, `revealAnchor(for:_:)`), `articleTopAir = 18` named and drawn by the column's padding — **KnownIssues row 94 TAKEN on the mode-switch road** (its sighting's road; bloom/find head reveals keep the shipped edge — the residual, recorded); measured: foot room **34.0** (two 17-pt lines), head top **18.0**; Write + Read DONE (this commit): Write — `ComfortBand.restCaretLine` (#98(a) resolved, then banded) in the hop's reveal and after the carried placement, whose block inset is clamped too (top air = the text container's own `textContainerOrigin.y`, read live); Read — `ReadLandingBox.band`/`reband` clamp the carried (or resting) fraction with the row's real height as it arrives, the aim reads the box's anchor (edit face: `columnLead` 26; the calm page: `roomPadding` 28). **Measured (`18lc-u8-wr1.log`, 34 tests / 4 suites green):** Write top 24.0 · bottom room 34.0 · mid 250.5 → 250.5; Read top 25.5 · bottom room 33.5. **`ModeSwitchCarryTests` PIN B — FLAGGED, not changed:** the band moves its Read reading from ~0.0 to 0.044 (a 26-pt top air), inside the pin's own 0.06 tolerance, so it rides green and unmodified; the orchestrator may want its message's "red-on-old: 0.5" wording to mention the band |
-| 7 | Behavioural reverts, NAMED BEFORE THEY RUN | NOT STARTED |
+| 7 | Behavioural reverts, NAMED BEFORE THEY RUN | DONE — nine reverts named (`1e79c315`) and run in four batches, every one RED in its predicted shape (results under THE BEHAVIOURAL REVERTS), one unpredicted red recorded honestly (the mid-band pin was not green-on-both-sides), one pin-fidelity gap found and fixed (R-1/R-2 now model her hand); tree clean, none in flight |
 | 8 | Walk (both voices, takemania) + the VisualWalk suite as regression cover + a scenario row for the flash/band | NOT STARTED |
 | 9 | Closing runs (touched suites + Tutorial + core filter for the setting) | NOT STARTED |
 | 10 | Self-assessment | NOT STARTED |
@@ -1717,7 +1717,26 @@ Runs over the named suites only (logs `App/Variorum/DerivedData/18lc-u8-R*.log`)
 | R-U8-8 | Read's flash never wired (`landing.onArrived` left nil on the edit face) | `ModeSwitchFeelTests.aModeSwitchIntoReadFlashesTheLandedRow` |
 | R-U8-9 | the setting's gate dropped on Takes (`arrivalFlash(_:)` ignores `themeSettings.arrivalFlash`) | `TakesEntryBandTests.withTheSettingOffTheArrivalDrawsNoFlash` |
 
-Reverts in flight: batch D (R-U8-2 TakesArticleScroll); batch C red in every predicted shape; restore = `git checkout -- App/Variorum/Variorum/Features/Takes/TakesArticleScroll.swift`.
+**THE RESULTS — every revert RED in its predicted shape, each restored by `git checkout --`, tree clean after each:**
+- **R-U8-1** (`18lc-u8-R1.log`, then `-R1b`): R-3 (off screen, 0 aims), R-5, R-6, R-7 (0 aims, off screen), R-8, R-9
+  (no `LAND`, off screen), the band's head pin (her block left above the page) — **and on its first run NOT R-1/R-2**,
+  which exposed a pin-fidelity gap: their first showing scrolled while its entry landing was still watched, so the
+  (banded) watch corrected the page back before she "left". Both now model her hand (`clearArticleLanding()` before
+  the harness's clip scroll — `TakesArticleScrollTests`' own pattern); re-run **R1b:
+  R-1 `pane == nil`, R-2 `pane != nil` failed — red in shape.**
+- **Batch B** (`18lc-u8-RB.log`, 10 issues incl. the 1 known): **R-U8-3** Takes foot room **0.0**, head top **0.0**
+  (row 94's shape); **R-U8-4** Write top **0.0** (flush), bottom room **1.0**, mid-band still exact; **R-U8-5** Read
+  top **0.0**, bottom room **0.0**; **R-U8-9** a flash drawn with the setting OFF. **One UNPREDICTED red, recorded:**
+  under R-U8-3 `anEntryAlreadyInsideTheBandDoesNotMove` failed — the shipped UNBANDED reveal moved the page **130 pt**
+  on entering block 3 (already in view) and left the row outside the band; the pin's doc claimed "green on both
+  sides" and is corrected to the measurement (NOTICED 1).
+- **Batch C** (`18lc-u8-RC.log`, 7 issues): **R-U8-6** no Takes arrival, no flash (+ the OFF arm's non-vacuity);
+  **R-U8-7** Write `arrivalFlashes 0`; **R-U8-8** Read's row drew nothing.
+- **R-U8-2** (`18lc-u8-RD.log`): the race **fired deterministically** on both plain round trips — R-11 237 → 537 (the
+  300-pt pull) and R-4 (2 aims, the page 8 rows off) — stronger than the prediction's "if it fires".
+
+Reverts in flight: none.
+
 
 ## ORCHESTRATOR RESUME MAP (written 2026-09-28 at her compaction warning — the transcript-proof state; a post-compaction orchestrator re-orients from THIS section + the ledger + LIVE STATUS, verifying against git, never trusting)
 
