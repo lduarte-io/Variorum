@@ -711,6 +711,12 @@ final class MobileEditorViewModel {
         textView?.refreshChrome()
     }
 
+    /// **Is a projection still waiting?** A fact on the model rather than a
+    /// private field a pin cannot see — the Mac's 17b P36 fact, its phone
+    /// twin (18m U2, F-2): a branch that decides whether an external change
+    /// ever reaches the surface should be checkable.
+    var hasDeferredProjection: Bool { pendingProjection != nil }
+
     /// A deferred delivery settles by a FRESH read — the deferred value was
     /// fetched before the flush that just landed; adopting it as-is would
     /// transiently revert the edited block (the Mac's exact posture).
