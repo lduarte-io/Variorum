@@ -1472,3 +1472,29 @@ being no phone GUI walk kit.
 **Not done / owed:** the first line above. F-4 stays OWNED by its KnownIssues row (untouched here).
 O-4 recorded for the ladder. `applyPendingIfClean`'s convergence recorded as a row-28 next-touch
 candidate. KnownIssues row 73's Debug trap met during the walk — 18o's, untouched.
+
+### U2 — ORCHESTRATOR VERIFY PASS + THE RIDER REVERTS (2026-09-29 overnight; verify-never-trust)
+
+**Claims verified against git:** seven code commits `65941ee9..4117689b` + the walk/record
+commits, tree clean at `c915706f`, pushed, no trailers; the 3C proof re-run by diff (the three
+hoist commits touch ZERO test files; the whole window's test-target diff is exactly the two
+rider pin files); `Sources/`, `Server/`, `Sync/` untouched; zero instances; the mobile finals
+649/111 = the attributed baseline exactly (the 4 known + F-1, plus the two new rider pins in
+the count). The walk's tenth-note crash confirmed as KnownIssues row 73's known Debug trap
+(owner 18o) by the implementer's frame check — not this unit's.
+
+**The discipline gap the implementer named, closed by this seat:** the riders' red-on-old was
+shown by run order only, and the standing rule wants BEHAVIORAL REVERTS. Both run by the
+orchestrator on the committed tree, each named before it ran, each restored by
+`git checkout HEAD --` with `git status` clean after:
+- **R-F3** (the Mac call site back to `restyle: nil`): `ProgrammaticReplaceFaceTests` **RED
+  3 tests / 3 issues** — every road's face assertion, exactly the pre-fix shape.
+- **R-F2** (the phone's thrown-read arm back to a bare `return`):
+  `MobileDeferredProjectionRetryTests` **RED 2 tests / 1 issue** — the marker-survival pin
+  red, the over-fire guard green, exactly the pre-fix shape.
+
+Ledger rows 2–3 stand BUILT + WALKED (the implementer's 12/12 typing walk, both voices; this
+seat's revert pass is the acceptance's verification half — a separate hands-on walk is folded
+into the closeout's install-refresh window if wanted; the felt evidence stands on the walk
+plus F-3's felt check). **The FABLE cold review over `25ce55df..c915706f` is the remaining
+gate**; ladder file `notes/plans/18m-u2-ladder-round1.md`.
