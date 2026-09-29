@@ -430,7 +430,7 @@ seam by definition → a **FABLE cold review** follows; your self-assessment clo
 |---|---|
 | Preflight (canon + charter + health review + KnownIssues whole + QUESTIONS + resiliency + TK2 notes + MobileSoul + the 18l/18l-b/18l-c records + both conductors read side by side + EditorBrain) | DONE (this session, 2026-09-29) |
 | This record file (constitution, baselines, conductor map, roster, ledger, traps, U1 brief) | DONE (this commit) |
-| U1 (session 1) | NOT-STARTED — spawn follows this commit |
+| U1 (session 1) | BUILT + VERIFIED 2026-09-29 (the step-2 checkpoint ruled (c)+(c1); steps 3–6 + harness finals done, `3a7b79fd..1734857a`; the orchestrator verify pass landed `6498a40f`; F-1 routed to #155) — **the WALK is HELD at the guard** (her app live); the FABLE ladder round 1 is IN FLIGHT (`notes/plans/18m-u1-ladder-round1.md`) |
 | U2 → U3 → (U4?) | NOT-STARTED — briefs written one-ahead at each close |
 | Closeout | NOT-STARTED |
 
