@@ -1573,3 +1573,322 @@ form). PROVISIONAL-and-continue (QUESTIONS); STOP-and-report for gating ambiguit
 wanting `Sync/`, every author-only call. Zero `Sources/` expected (the table is app-layer
 `Shared/`); zero schema. Your diff is refusal copy on the editor seam's vocabulary → a
 **FABLE cold review** follows; your self-assessment closes your record.
+
+## U3 RECORD (the `opus-implementer`, session 3 — opened 2026-09-29)
+
+**NOT DONE (first line, per the contract): NOTHING IS BUILT. Step 1's checkpoint is written below
+and the unit is STOPPED for the architect's ruling (the brief's hard checkpoint).** No code has
+moved; no revert is in flight; the tree is clean but for this record.
+
+### LIVE STATUS
+
+| Piece | Status |
+|---|---|
+| Preflight reads — this file whole (fences, P-1…P-9, cast, baselines, the conductor map's refusal row, ledger row 4 + O-1, traps, the U1 and U2 RECORDS) + both ladder files; the charter's KICKOFF 3; the health review §2.1 (leak 2), §3, §8; MobileSoul whole (§3, §4 item 4 — the no-redirect law this file calls §4.4 — and the parity ledger); KnownIssues row 28 whole; QUESTIONS' tail (next free **#159**, confirmed); SessionResiliencyProtocol whole; TEXTKIT2_NOTES whole. The code: `Registry/OpsRefusalCopy.swift` whole (all seven enums, every string); `EditorViewModel.operationMessage` + `showOperationError` + the ⌘S door's pre-check + `message(for: BlockRangeIndex.Refusal)` + the typing gate; every Mac seal line (grep); the six mobile sites + the phone's `message(for:)`, `lockedTakeRefusal`, `fanFoldRoads`, the gate and the P3 mapping; `Shared/RecoveryActs.swift` (`DeletionRefusal`) and `RecoveryCopy.sealedPutBackRefusal`; `Shared/EditorBrain/CrossBlockRefusal.swift` + `CrossBlockRefusalRoads.swift` (the worked precedent); `SeededBookRestore.failureLine` (the recorded "OpsRefusalCopy stays Mac-local" rule); `ChipRefusals`/`ReadingsViewModel.message`/`CommentsPanelCopy`/`RefusalCopy`/`TrayRefusalCopy` (the neighbouring families); the core guard order behind `lastActiveVariant`/`variantIsChosen` (`Operations+Deletion.swift`); the pins that ride this surface on both platforms (every test naming `OpsRefusalCopy`, every literal/fragment pin over the sentences below — listed where they bite) | DONE (read in this session, never delegated) |
+| Step 1 — the string classification table · the words-change table · the ONE converged seal sentence · O-1 · the build shape | DONE (this commit) — **AWAITING THE ARCHITECT'S RULING; nothing is built until it lands** |
+| Step 2 — build: hoist (3C) then collapse (sanctioned edits named) + row 28 + QUESTIONS #159 | NOT-STARTED — the proposed shape is § STEP 1-E below |
+| Step 3 — pins: the table-integrity tripwire + the convergence pins red-first | NOT-STARTED — planned in § STEP 1-E |
+| Step 4 — walk (both voices + the phone's simulator evidence) + finals (touched Mac suites, copy/registry families, the eleven Tutorial suites, the FULL mobile suite vs 649/111, the generic-iOS build) | NOT-STARTED |
+
+### STEP 1 — WHAT THE TRACE FOUND BEFORE ANY TABLE (three brief facts corrected, said first)
+
+1. **`MobileTrashModel` :278 is not a switch.** It is already a one-line forward to the SHARED
+   `DeletionRefusal.words(_:act: .putBack)` (`Shared/RecoveryActs.swift`, hoisted at mobile round 2
+   batch 4.5b, A1-18 — "the deletion story's refusals, in one home"). That table is ACT-keyed and
+   its fallback deliberately KEEPS the enum's name (pinned: `MobileTrashTests
+   .theDeletionRefusalsHaveOneHome` asserts `fallback.contains("lockedVariant")`). So of the six,
+   **five are real switches; the sixth is already collapsed onto a shared table.** Proposal: leave
+   it on `DeletionRefusal` (merging the two shared tables would change both the pinned fallback
+   form and the act keying — a design, not a collapse).
+2. **The phone has more `OperationError` switches than six.** Outside the charter's named set:
+   `MobileEditorViewModel.deleteNoteRefusal` (:1014) and the entry-date arm (:1074) ·
+   `MobileQuickNoteCopy.refusal` (`MobileQuickNote` :145) · `MobileTagManager.refusal` (:151) ·
+   `MobileTakesBrowserController.refusalMessage` (:582) · `MobileLensesModel.refusalMessage` (:338) ·
+   `MobileBlockHistoryModel.refusalMessage` (:510) · catch-arms in `MobileTrashModel` (:140/:160),
+   `MobileStarterJournal` (:288), `MobileCreateBook` (:163), `MobileBookDetails` (:155/:174),
+   `MobileStars` (:185), `MobileTakesController` (:248). **Proposal: U3 collapses the named five
+   (the charter's scope) and ENUMERATES these in row 28's new (c) as the next-touch list** — never
+   silently widened.
+3. **The sealed-note sentence has far more than four spellings.** The conductor map's four are
+   real; the full family, found by grep (production code only), is in § STEP 1-C's seal table.
+   Two Mac sites ALREADY speak the converged form proposed below (`ChipRefusals` "This note is
+   sealed — unseal it first." · `CommentsPanelCopy.sealed` "…unseal it to change comments."), and
+   every phone "locked — unlock it to ⟨act⟩" line already IS that form in the phone's own door
+   words — which is the evidence for the proposal.
+
+### STEP 1-A — THE CLASSIFICATION TABLE: `OpsRefusalCopy`'s table (the `enum OpsRefusalCopy` in `Registry/OpsRefusalCopy.swift`, 30 cases + the two fallbacks)
+
+**Scope of "OpsRefusalCopy" (stated because the file holds seven enums):** the hoist is the
+`OpsRefusalCopy` ENUM — the `OperationError` → sentence table. The file's six neighbours
+(`SegmentationFaceCopy`, `WordTargetFaceCopy`, `TakeStructureCopy`, `BlockSelectionCopy`,
+`SplitAtNewlinesCopy`, `CrossBlockEditCopy`) are Mac face copy, not refusal tables, and are dense
+with Mac chords (⌘⇧D, ⌘⇧⏎, ⌥⌘Z, ⌘-click) — **STAYS-LOCAL, whole, untouched** (§4.4; and
+`SeededBookRestore.failureLine`'s recorded rule that the file "carries Mac chords and Mac-only copy
+homes a shared home must not hold" is honoured by moving only what is platform-free).
+
+**Classes:** **SHARED-AS-IS** (no platform word; moves verbatim) · **PARAMETERIZED** (one sentence,
+one platform slot — the `fanRoads` shape) · **STAYS-LOCAL** (a platform's own sentence; the Mac
+half keeps it beside the forward, the `CrossBlockRefusalRoads` shape).
+
+| Case | Current words (Mac, verbatim) | Class | Why |
+|---|---|---|---|
+| `.lockedPost` | "This note is sealed — unseal it to change takes or choices." | **PARAMETERIZED** — the seal stem + the platform's DOOR WORDS | "sealed/unseal" names the Mac's door (Seal/Unseal); the phone's door is "Lock Note/Unlock Note". Converged wording is § STEP 1-C |
+| `.archivedVariant` | "That take is archived — unarchive it first." | SHARED-AS-IS | no door |
+| `.variantNotDeleted` | "That take is already back — it's in the block's fan." | SHARED-AS-IS | no door (noted: `DeletionRefusal` says "That take is already back." — two shared homes, not this unit's to merge) |
+| `.purgeTargetNotDeleted` | "Only things in the Trash can be deleted for good — delete it first, and it waits there \(TrashWindow.days) days." | SHARED-AS-IS | Trash is both platforms'; `TrashWindow` is core |
+| `.deliberateSavepointNeverPruned` | "That's a deliberate ⌘S savepoint — those are never pruned, in any mode." | **STAYS-LOCAL (Mac)** | names ⌘S; the phone's Trash never lists savepoints (`TrashScope.listedKinds`), so it has no road to this refusal and must not be handed a Mac chord (pinned `TrashPurgeDoorsTests` `contains("never pruned")` rides) |
+| `.unsupportedPurgeTarget` | "That isn't something the Trash can delete for good." | SHARED-AS-IS | — |
+| `.lockedVariant` | "That take is locked — unlock it or branch a new take." | SHARED-AS-IS | the TAKE lock's door is "unlock" on BOTH platforms (Lock/Unlock Take); the phone's own sites that name its ⑂ road keep their local arm (§ 1-D) |
+| `.variantIsChosen` | "The note shows this take — choose another take first, and then this one can go. (If it's the block's only take, it's the block you want to delete.)" | SHARED-AS-IS | — |
+| `.variantNotFound` | "That take isn't there any more — it may have just been deleted. The block's History lists deleted takes, with Put back." | SHARED-AS-IS | the phone has Block History with Put back (`MobileBlockHistorySheetView`, PL-14(d)) |
+| `.commitNotFound` | "That saved moment isn't there any more." | SHARED-AS-IS | — |
+| `.versionLinkNotFound` | "These two notes aren't marked as versions — nothing to unmark." | SHARED-AS-IS | — |
+| `.postsAlreadyVersionLinked` | "These two notes are already marked as versions of each other." | SHARED-AS-IS | — |
+| `.postHasNoBlocks` | "There's nothing in that note yet — write a line in it first." | SHARED-AS-IS | — |
+| `.readingNotDeleted` | "That book is already restored — it's back on the shelf." | SHARED-AS-IS | the phone has a shelf |
+| `.readingNotFound` | "That book can't be found — it may have been deleted, or removed on another device." | SHARED-AS-IS | — |
+| `.invalidExtent` | "A word target or note cap must be a positive number — nothing was changed." | SHARED-AS-IS | — |
+| `.invalidTint(v)` | "“v” isn't a colour — a colour is six hex digits, like B9A7E6 or #8A7A3A. Nothing was changed." | SHARED-AS-IS | — |
+| `.fannedBlock` | "This block has more than one take now — divide it again and the take you're in splits while the others stay on the first block (⌥⌘⇧D arranges them differently)." | **PARAMETERIZED** — an optional ARRANGE ROAD | the parenthetical is a Mac ceremony chord; the phone never replicates ceremonies (her exclusion) → the phone passes `nil` and the sentence ends at "first block." (the `deletedRegionExplainer(purgeRoad:)` precedent). The stem is true on the phone (keep-on-top is both platforms' default, U-2) |
+| `.starLimitReached(n)` | "You can star n things at a time — un-star one in the Starred list at the top of the sidebar, and this can take its place." | **STAYS-LOCAL (Mac)** | names the Mac sidebar's list; the phone's star door words it itself (`MobileStars` :185, outside the six) |
+| `.duplicateBookName` | `BookNameCopy.refusal(existing:)` | SHARED-AS-IS | already `Shared/BookNameCopy` |
+| `.blockCarriesUnshownText` | "That block isn't empty after all — it carries a take or a comment that isn't shown here. Nothing was deleted." | SHARED-AS-IS | byte-identical in `operationMessage` |
+| `.lastActiveVariant` | "This block has only one take — a take moves out when there's another one left behind. Divide the block instead (⌘⇧D)." | **PARAMETERIZED** — an optional DIVIDE CHORD; **and its WORDS are a fork** (§ 1-B row L) | "(⌘⇧D)" is a Mac chord; the phone passes `nil` |
+| `.emptyTakeCannotBecomeABlock` | "That take is empty — there's no text to become a block." | SHARED-AS-IS | — |
+| `.noConvertibleTakes` | "This block has no other takes with text in them — nothing to turn into blocks." | SHARED-AS-IS | — |
+| `.blockNotFound` | `BlockSelectionCopy.blockGone` ("One of the blocks you picked … pick again and retry.") | **STAYS-LOCAL (Mac)** | ⌘-click PICK vocabulary — the phone's own comment says so (`MobileStructural`: "⌘-click vocabulary this phone has no door for"); `BlockSelectionCopy` is Mac-local |
+| `.blockNotPlaced` | "That block is no longer in this note — it may have moved while you worked. Nothing was changed here." | SHARED-AS-IS | — |
+| `.blocksNotAdjacent` | "Something sits between these blocks — a block that hasn't arrived yet, or one that landed since you selected. Nothing was changed." | SHARED-AS-IS | (the phone's own arm keeps "paragraphs" + its `nothingWas` slot — § 1-D) |
+| `.noRenderableVariant` | "That block has no text here yet — it may still be arriving from another device. Nothing was changed; try again in a moment." | SHARED-AS-IS | — |
+| `default:` (OperationError) | "Refused: \(error)" | SHARED-AS-IS (the table's fallback) | see § 1-E's `words(for:)` split — each phone site keeps ITS fallback |
+| non-`OperationError` | `String(describing: error)` | SHARED-AS-IS | — |
+
+### STEP 1-B — `EditorViewModel.operationMessage` (:4285), case by case, onto the table
+
+| Case | `operationMessage` (Write's voice) | vs the table | Disposition proposed |
+|---|---|---|---|
+| `.lockedPost` | "This note is sealed — unlock it first." | DIFFERS | converges — § STEP 1-C |
+| `.lockedVariant` | "This take is locked — branch or unlock it." | DIFFERS (same roads, other words) | **the table's words win** (the charter: deleted "in favour of the table") |
+| `.lastActiveVariant` | "A block keeps at least one take — delete the block instead." | DIFFERS — **and each is FALSE at the other's door** | **FORK L below** |
+| `.variantIsChosen` | "This take is shown in the note — choose another take first." | DIFFERS (the table's is 13u3 UNIT H's superset) | the table's words win |
+| `.archivedVariant` | "This take is archived — unarchive it first." | "That…" vs "This…" | the table's words win |
+| `.bufferChangedSinceGesture` | "The text changed while that gesture was landing — nothing was altered; try it again on the current text." | table has NONE (dumps "Refused: …") | **the table GAINS it** (SHARED-AS-IS — no door) |
+| `.blockCarriesUnshownText` | = table | identical | rides |
+| `.fannedBlock` | = table | identical | rides (PARAMETERIZED with the Mac's road → byte-identical) |
+| `.divideSideWouldBeEmpty` | "Every checked take is parked at the same end — one of the two new blocks would have no takes. Split at least one take, or park one at the other end." | table has none | **STAYS-LOCAL (Mac half)** — names the Divide ceremony sheet's controls (checked · parked); ceremonies are Mac-only by her exclusion |
+| `.mergedBlockWouldHaveNoTake` | "The merged block needs at least one take — pair takes with ＋, or check “carry” on one." | table has none | **STAYS-LOCAL (Mac half)** — names ＋ and "carry" on the Merge ceremony sheet |
+| `.takePairedTwice` | "A take can sit in only one pairing (and a paired take can't also carry) — remove the duplicate first." | table has none | **STAYS-LOCAL (Mac half)** — the ceremony sheet's pairing |
+| `.blockNotFound` | `BlockSelectionCopy.blockGone` | identical | rides (Mac half) |
+| `default:` | "The operation was refused: \(opError)" | "Refused: \(error)" | the table's wins |
+| non-OperationError | "Operation failed: \(error)" | `String(describing:)` | the table's wins |
+
+**FORK L — `.lastActiveVariant`: two Mac sentences for one error, each wrong at the other's door.**
+The core raises it from ONE guard (`ensureNotLastActive`) behind three different acts: ARCHIVE
+(`archiveVariant` checks no chosen pointer, so ⌘⇧A on a one-take block lands here — pinned
+`EditorSessionTests.refusalsSurfaceAsMessages`, `contains("keeps at least one take")`), DELETE
+(reached only past `variantIsChosen`), and E5/E6 MOVE-OUT (`takeToBlockBelow` — pinned on the board
+by `TakeStructureDoorTests.aRefusalArrivesInWordsNotAsAnEnumDump`, `contains("only one take")`).
+`operationMessage`'s "delete the block instead" is wrong for E5 — and TODAY Write's own E5 door
+(`moveCaretTakeIntoBlockBelow` → `runStructural` → `showOperationError`) speaks it; the table's
+"a take moves out … Divide the block instead (⌘⇧D)" is wrong for ⌘⇧A and the board's Archive.
+- **L-a** the table's words everywhere — Write's ⌘⇧A would read a move-out sentence; the
+  `EditorSessionTests` fragment pin reds (a sanctioned edit it would need).
+- **L-b** `operationMessage`'s words become the table's — the board's E5 refusal regresses to
+  "delete the block instead" (the 13e batch-3 sentence written FOR that door is lost).
+- **L-c — RECOMMENDED, PROVISIONAL (copy hers):** one act-neutral sentence that names BOTH true
+  roads — composed from the two shipped clauses, no new fact:
+  *"This block has only one take — a block keeps at least one take, so delete the block instead,
+  or divide it (⌘⇧D) to split it into blocks."* (phone: the same with no chord.) True at archive,
+  delete and move-out alike; **both fragment pins ride unmodified** (it carries "only one take" —
+  E5's fact — and "keeps at least one take" — I10's fact — which are exactly what those pins guard).
+
+### STEP 1-C — THE SEALED-NOTE SENTENCE: the family, and the ONE sentence proposed
+
+**The four spellings the conductor map named (verbatim):**
+1. Mac gate (`EditorViewModel.shouldChangeText` :1042 — and the SAME literal at `EditorFind` :373,
+   :398 and `EditorSurfaceController` :2508, :2728): *"This note is sealed — unlock it to edit."*
+2. Mac `operationMessage` (:4290 — Write's op voice; also the ⌘S door's pre-check :3192, held equal
+   by `writesDoorAndFilerSpeakOneSealSentence`): *"This note is sealed — unlock it first."*
+3. `OpsRefusalCopy` (:372 — every table consumer): *"This note is sealed — unseal it to change takes
+   or choices."*
+4. Phone gate (`MobileEditorViewModel.shouldChangeText` :1255): *"This note is locked — unlock it to
+   edit."*
+
+**The rest of the family (grep, production code), each with its present standing:**
+- Mac, already the proposed form: `ChipRefusals` *"This note is sealed — unseal it first."* ·
+  `CommentsPanelCopy.sealed` *"This note is sealed — unseal it to change comments."*
+- Mac, the same "unlock"-verb drift as spelling 1 (the two gesture-worded siblings
+  `SavepointSealedDoorTests`' doc names): `poolDrop` :3031 *"…unlock it to add to it."* ·
+  `RefusalCopy.message(.sealed)` *"…unlock it to restructure."*
+- Mac, other shapes: `CanvasViewModel` :803 *"This note is sealed — order stays frozen until it's
+  unsealed."* · `ImportModel` :245 *"the destination is sealed — unseal it first"* (a clause).
+- **Shared (both platforms' recovery doors):** `DeletionRefusal.words(.lockedPost, .delete)`
+  *"This note is marked complete — unseal it first."* · `RecoveryCopy.sealedPutBackRefusal`
+  *"This note is marked complete — unseal it to put this back."* — a Mac door verb ("unseal") the
+  phone's Trash/Library/Shelf doors speak today.
+- Phone, already the proposed form in phone words ("This note is locked — unlock it to ⟨act⟩."):
+  the four named-six arms (`MobileBlockMenu`, `MobileComments`, `MobileStructural`, `MobileUndoDoor`
+  ("…unlock it first.")), and outside the six `MobileTakesBrowser` (verbs), `MobileBlockHistory`,
+  `MobileTakesController`, `MobileLenses.sealedAdoptRefusal`, `MobileStructural` :93/:227/:457/:528.
+- Phone, off-form: `MobileQuickNote` :153 *"This note is sealed, so it can't take new text. Unseal it
+  in the note to keep writing."* (MAC door words on the phone) · `MobileWriteView.sealedStateLine`
+  *"This note is locked — reading only."* (a state line, not a refusal).
+
+**THE PROPOSAL — (a), RECOMMENDED, PROVISIONAL (copy is hers):** ONE stem in the shared table,
+each platform's door words local (§4.4 — the phone's door is "Unlock Note", the Mac's "Unseal"):
+
+> **"This note is ⟨sealed⟩ — ⟨unseal⟩ it first."** — the table's act-less line (Mac: *"This note is
+> sealed — unseal it first."*; phone: *"This note is locked — unlock it first."*), and a gate or
+> gesture that knows its act fills the act slot: *"…unseal it to edit."* / *"…unlock it to edit."*
+
+It is **the canonical table's string with its act clause removed** — and the removal is the point:
+"to change takes or choices" names a takes door (R2-1's own record says so), yet the table serves
+~20 Mac doors (comments, Canvas order, TOC, savepoints, stars…), and even the Mac tutorial's own
+pinned walk shows the clause false at a TAKES door: ⌘S (a savepoint) on the sealed lesson reads
+"unseal it to change takes or choices". The door verb follows the Mac's door ("Unseal"), which
+spelling 1's "unlock" never matched on the Mac. The form already ships at two Mac sites and at
+every phone seal arm, so the phone's words change NOWHERE.
+- **(b)** the canonical string verbatim as the ONE sentence — false at Write's typing gate and
+  filer and at most table doors; rejected by R2-1's record.
+- **(c)** one literal cross-platform sentence *"This note is sealed — unlock it to ⟨act⟩."* (spelling
+  1 as the ONE) — the phone's noun changes at ~25 pinned sites, and on the Mac "unlock" names no
+  note door.
+
+**The reach, a second small fork:** **R1+ — RECOMMENDED:** the four named spellings (spelling 1's
+five literal sites included) + the Mac's two "unlock"-verb siblings (`poolDrop`, `RefusalCopy.sealed`
+— zero pins assert them) + the named-six phone arms through the builder (zero words). Everything
+else in the family above is ENUMERATED (row 28 (c) + the QUESTIONS row, so her one ruling can
+extend the reach) — notably the shared `DeletionRefusal`/`sealedPutBackRefusal` pair, which is the
+deletion story's pinned act-keyed table (`NoteVersionsPaneTests` holds `contains("marked
+complete")`). **R2:** take the whole family now (more sites, more sanctioned edits, the shared
+pair's signature grows a roads parameter).
+
+### STEP 1-D — THE SIX MOBILE SITES, arm by arm (post-collapse shape proposed)
+
+**The collapse rule proposed (P-a…P-c, for the ruling):** (P-a) the table is the default voice of
+every refusal a site does not word LOCALLY for a platform reason; (P-b) an arm stays local iff it
+names a phone door/road (§4.4) or carries a gesture slot the table has none of (`act`, `nothingWas`,
+`bookName` — `DeletionRefusal`'s own rule: *"the ACT decides the sentence, not just the error"*);
+(P-c) the table answers `String?` (nil = "I have no words"), so **each site keeps ITS OWN fallback**
+for unworded cases — nothing regresses to "Refused: …" where a site had a better form.
+
+| Site | Arm | Class | Post-collapse |
+|---|---|---|---|
+| `MobileMembershipModel.refusal(_:bookName:)` :174 | `.lockedReading` "“B” is finished — reopen it to change what's in it." · `.readingAtCapacity` "“B” is at its note cap." · `.alreadyInReading` "This note is already in “B”." · `.postNotInReading` "This note isn't in “B”." | STAYS-LOCAL | the `bookName` slot (the table has none); its Mac twin `ChipRefusals` is Mac-local too and names Mac doors ("(its settings)") — the pair is a fork ENUMERATED for row 28 (c), not hoisted here |
+| ″ | `default:` "Refused: \(error)" · non-op `String(describing:)` | → table | `words(for: error, roads: .phone) ?? "Refused: \(error)"` |
+| `MobileBlockMenuController.refusalMessage(_:act:)` :363 | `.lockedPost` "This note is locked — unlock it to \(act)." | PARAMETERIZED | the ONE seal stem, phone words, `act` — **zero words change** |
+| ″ | `default:` `DeletionRefusal.fallback(error)` | → table | `words(…) ?? DeletionRefusal.fallback(error)` (its fallback kept) |
+| `MobileCommentsController.refusalMessage` :285 | `.lockedPost` "…unlock it to change comments." | PARAMETERIZED | the stem with act "change comments" — zero words |
+| ″ | `.invalidCommentText` "A comment needs some text." | → table (SHARED-AS-IS) | **the table gains it** — byte-identical to the Mac's `CommentsPanelCopy.needsText` |
+| ″ | `default:` `String(describing:)` | → table | `words(…) ?? String(describing: error)` |
+| `MobileStructuralController.refusalMessage(_:act:nothingWas:)` :886 | `.lockedPost` (act) | PARAMETERIZED | the stem, phone words — zero words |
+| ″ | `.lockedVariant` → `MobileEditorViewModel.lockedTakeRefusal` | STAYS-LOCAL | names the phone's takes-sheet ⑂ road (parity C4a) |
+| ″ | `.invalidCut` "No legal cut spot for that here — cuts land between words, at sentence ends, and at line breaks." | → table (SHARED-AS-IS) | **the table gains it** — byte-identical to the Mac planner's `RefusalCopy(.nothingToDo)`; Mac table consumers stop dumping `invalidCut` |
+| ″ | `.blockNotFound` · `.bufferChangedSinceGesture` · `.blocksNotAdjacent` | STAYS-LOCAL | each carries `nothingWas` (and "selected"/"paragraphs", the phone's own gesture words) |
+| ″ | `default:` `String(describing:)` | → table | `words(…) ?? String(describing: error)` |
+| `MobileTrashModel.refusal` :278 | forward to `DeletionRefusal.words(_:act: .putBack)` | ALREADY ON A SHARED TABLE | **no change** (fact 1 above) |
+| `MobileUndoDoor.refusal` :275 | `.lockedPost` "This note is locked — unlock it first." | → table | the table's own `.lockedPost` with phone words IS this sentence — zero words; the arm goes |
+| ″ | `.lockedVariant` → `lockedTakeRefusal` | STAYS-LOCAL | the ⑂ road |
+| ″ | `default:` `String(describing:)` | → table | `words(…) ?? String(describing: error)` — the Mac's undo door already speaks the table (`ShellActions` :186), so the two undo-failure lines converge |
+
+**The gate lines + `message(for: BlockRangeIndex.Refusal)` (yours to rule — I PROPOSE, not assume):**
+the phone's seal gate line joins the stem (zero words; spelling 4 above). The GATE VOCABULARY
+function exists twice, byte-identical but for one arm — Mac `EditorViewModel.message(for:)` :4253 and
+phone :1874: `.crossesBlockBoundary` (→ `CrossBlockRefusal` with each platform's fan roads) ·
+`.readOnlySlot` "This block hasn't fully synced; it is read-only for now." · `.indexDesync` "The
+editor lost track of block boundaries — reloading from the store." (all SHARED-AS-IS) · `.lockedVariant`
+Mac "This take is locked — branch it or unlock it to edit." / phone `lockedTakeRefusal` (PARAMETERIZED
+— the platform's locked-take gate sentence). **Proposal G — optional, recommended because it is zero
+words and the same duplication class:** it joins as ONE shared `gateMessage(for:lockedTake:fanRoads:)`
+beside the table; both view models keep `message(for:)` as one-line forwards (the pins call
+`model.message(for: .readOnlySlot)`). Say no and it stays as is, enumerated in row 28 (c).
+
+**Optional V — the phone's crystallizer error voice** (U2's `reportOperationError`, today
+`String(describing:)`) speaks the table (the brief's "your table is what those voices SPEAK"; the
+Mac's `showOperationError` speaks it by `operationMessage`'s deletion). Dump → sentence only.
+
+### STEP 1-E — THE WORDS-CHANGE TABLE (every sentence the collapse changes, by the recommended rulings)
+
+| # | Site | Old | New | Why sanctioned | Pin |
+|---|---|---|---|---|---|
+| W1 | Write's op voice `.lockedPost` (every `showOperationError` door + the ⌘S pre-check) | "This note is sealed — unlock it first." | "This note is sealed — unseal it first." | the seal convergence (C-a) | **SANCTIONED EDIT S-1:** `SavepointSealedDoorTests.writesDoorRefusesASealedNoteBeforeOpeningTheField` — its literal (the equality cell rides: door and filer both speak the table) |
+| W2 | the table's `.lockedPost` (every table door) | "…unseal it to change takes or choices." | "…unseal it first." | C-a | **SANCTIONED EDIT S-2:** `TutorialWalkTests.theSealRefusesOutLoudAndTheToastShowsIt` — its literal. (`SavepointSealedDoorTests`' `sealedSentence` and `CommandRoutingTests` :1146 compute from the table and ride) |
+| W3 | Mac typing gate (one literal, five sites) | "…unlock it to edit." | "…unseal it to edit." | C-a, spelling 1 | none (the Mac pins read `contains("sealed")` and ride) |
+| W4 | `poolDrop`; `RefusalCopy(.sealed)` (R1+) | "…unlock it to add to it." / "…unlock it to restructure." | "…unseal it to add to it." / "…unseal it to restructure." | the same verb drift | none |
+| W5 | Write `.lockedVariant` | "This take is locked — branch or unlock it." | "That take is locked — unlock it or branch a new take." | `operationMessage` deleted in favour of the table | none |
+| W6 | Write AND the table `.lastActiveVariant` | the two sentences in FORK L | L-c's one sentence (Mac with "(⌘⇧D)") | FORK L | none — both fragment pins ride |
+| W7 | Write `.variantIsChosen` | "This take is shown in the note — choose another take first." | the table's | table wins | none |
+| W8 | Write `.archivedVariant` | "This take is archived — …" | "That take is archived — …" | table wins | none |
+| W9 | Write fallbacks | "The operation was refused: X" / "Operation failed: X" | "Refused: X" / "X" | table wins (neither is a sentence) | none |
+| W10 | every Mac TABLE door: `.bufferChangedSinceGesture`, `.invalidCut`, `.invalidCommentText`, the ceremony trio | "Refused: ⟨enum⟩" | the sentences above | the table gains them (dump → words; the J8 enum-dump class) | none |
+| P1 | the phone's P3 mapping (`.refuseAwaitingSync`, `MobileEditorViewModel` :1367) — **only if O-1 (a)** | "This block hasn't fully synced; it is read-only for now." | "A block in this selection hasn't arrived yet — nothing was changed. It stays read-only until it syncs." | O-1 | **SANCTIONED EDIT S-3:** `MobileWholeBlockDeleteTests.aRunCoveringANotYetArrivedBlockRefusesAndSaysWhy` — its expectation re-pointed from `message(for: .readOnlySlot)` to the shared `.unsyncedBlock` sentence |
+| P2 | the five phone switches' fallback arms | raw dumps / "Refused: X" / "That couldn't be done — X." | the table's sentence for every table-worded case (§ 1-A's SHARED-AS-IS and PARAMETERIZED rows, the phone's roads); unworded cases keep each site's own fallback | the collapse | none (no phone pin asserts a dump — grep-verified) |
+| (P3′) | optional V | `String(describing:)` | the table | the error voice speaks the table | none |
+
+**Phone seal lines: ZERO words change anywhere** (they already are the stem in the phone's door words).
+
+### STEP 1-F — O-1 (U1's routed input): the gap-refusal pair
+
+**The words.** One condition — a whole-block run containing a not-yet-arrived block — reads two ways:
+Mac (the diagnosis, M7) *"A block in this selection hasn't arrived yet — nothing was changed. It stays
+read-only until it syncs."*; phone (the P3 copy arm) *"This block hasn't fully synced; it is read-only
+for now."* **And the phone already speaks the Mac's sentence for the SAME gap under another shape** —
+a mid-to-mid span over a gap reaches its own diagnosis (P5) and reads `.unsyncedBlock`
+(`MobileCrossBlockEditTests` :609 asserts `contains("hasn't arrived yet")`). So today the phone says
+two sentences for one condition depending on how the span was drawn.
+- **O-1 (a) — RECOMMENDED, PROVISIONAL:** P3 speaks the shared `.unsyncedBlock` sentence (the words
+  change at the MAPPING only — `.refuseAwaitingSync`'s one line; U1's route, arm set and order are
+  untouched, and `Arm.gapFence`'s own doc hands the words to U3). One condition, one sentence, both
+  platforms and both shapes. The gate's `.readOnlySlot` sentence stays for ITS shape (typing into a
+  gap slot — "This block…" is true there). Cost: S-3.
+- **O-1 (b):** keep both platform-worded (zero edits; the within-phone split stays).
+- **The CAUSE-RANKING half — RECORD, do not change (words-about-behaviour):** a run ending on the open
+  tail's separator with a gap inside names the TAIL on the Mac (diagnose step 2 before step 3) and the
+  GAP on the phone (P3 fires above the diagnosis). Both are true. Changing it means RE-ORDERING or
+  RETIRING a declared arm (U1's table — settled ground, not this unit's); under O-1 (a) P3 and the
+  diagnosis differ ONLY in this ranking, so the one-line change, if she wants the Mac's ranking on the
+  phone, is retiring P3 from `phoneArms`. Goes to the QUESTIONS row as a sub-item, not built.
+
+### STEP 1-G — THE BUILD SHAPE (for the ruling; nothing built)
+
+- **NEW `App/Variorum/Shared/OpsRefusalTable.swift`** (a different basename is REQUIRED: two
+  `OpsRefusalCopy.swift` files in one target collide at compile): `enum OpsRefusalCopy` — the shared
+  half: `words(for:roads:) -> String?` (nil = no words; P-c) and `message(for:roads:) -> String`
+  (`words ?? "Refused: …"` / `String(describing:)` — the table's fallbacks unchanged);
+  `struct OpsRefusalRoads` — THREE slots: `seal: SealedNoteCopy.Words`, `divideChord: String?`,
+  `arrangeTakesRoad: String?`; `enum SealedNoteCopy` — the ONE stem,
+  `sentence(act: String?, words: Words)`, `Words { state, unseal }`. No literal in this file names a
+  platform door (the tripwire pins it).
+- **`Variorum/Registry/OpsRefusalCopy.swift` keeps its name and its six neighbour enums**; its
+  `enum OpsRefusalCopy { … }` becomes `extension OpsRefusalCopy` = the Mac half: `SealedNoteCopy.Words.mac`
+  ("sealed"/"unseal"), `OpsRefusalRoads.mac` ("(⌘⇧D)", "(⌥⌘⇧D arranges them differently)"), the Mac-only
+  arms (§ 1-A/1-B STAYS-LOCAL rows), and the forward `static func message(for:) -> String` — so **every
+  Mac call site (~60) and every Mac pin reads exactly as before** (the `CrossBlockRefusalRoads` shape).
+- **NEW `VariorumMobile/Features/Write/MobileRefusalRoads.swift`:** `SealedNoteCopy.Words.phone`
+  ("locked"/"unlock"), `OpsRefusalRoads.phone` (no chords). Each target sees only its own words —
+  **§4.4 becomes a compile-time fact** (the phone cannot name `.mac`).
+- **Commits:** (1) the HOIST — the shared file + the Mac half, **Mac words byte-identical**
+  (`.lockedPost` stays a Mac-half arm with today's sentence until (3)), zero test edits both
+  platforms, row 28's (c) enumeration; Mac `build-for-testing` + the generic-iOS build. (2) PINS
+  red-first — the table-integrity TRIPWIRE (a source walk over `Shared/OpsRefusalTable.swift` with
+  `CopyRegisterPinTests.stringLiteralContents`: bans chord glyphs ⌘ ⌥ ⇧ ⌃ ⏎ ⌫ ⎋ and their `\u{…}`
+  escapes, "Mac"/"iPhone", the note-seal door words "sealed"/"unseal"/"Lock Note"/"Unlock Note", the
+  phone's "⋯"/"⑂"/"takes sheet", the Mac's "sidebar"/"bottom bar"), and the CONVERGENCE pins (Write's
+  filer seal == the table's == the stem; Write's ⌘⇧A speaks the table's `.lastActiveVariant`; a phone
+  default arm speaks the table for a worded case; P3 speaks `.unsyncedBlock` if O-1 (a)) — each run RED
+  on (1). (3) the Mac COLLAPSE — `operationMessage` deleted; the seal stem; the table gains Write's
+  shared cases; the gate/sibling lines through the stem; S-1, S-2 named in the commit. (4) the phone
+  COLLAPSE — the five switches per § 1-D, the phone gate through the stem, P3 (+ S-3), optional G/V.
+  (5) QUESTIONS **#159** (the four spellings + the family quoted; the converged sentence; FORK L;
+  O-1 + its ranking sub-item; one line to overturn each). Then the walk, the finals, and the
+  convergence reverts AFTER the fixes (the U2 verify form).
+
+**DECISIONS REQUESTED (the architect rules; I build nothing until then):**
+1. The seal sentence: **(a)** (recommended) / (b) / (c) — and the reach **R1+** (recommended) / R2.
+2. FORK L: **L-c** (recommended) / L-a / L-b.
+3. The collapse rule P-a…P-c (esp. P-c: the table answers `String?` so each site keeps its fallback).
+4. `MobileTrashModel` stays on `DeletionRefusal` (recommended) — and the six → five-plus-one reading.
+5. O-1: **(a)** (recommended) / (b); the ranking half recorded, not built.
+6. Optional **G** (the gate vocabulary joins, zero words) and optional **V** (the phone's error voice)
+   — yes/no each.
+7. The file layout (a NEW `Shared/OpsRefusalTable.swift`; the Mac file keeps its name as the Mac half).
