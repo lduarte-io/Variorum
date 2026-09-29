@@ -294,7 +294,7 @@ rule binds any split this phase does make: a state struct passed in and returned
 
 | # | Item | Unit | Status |
 |---|---|---|---|
-| 1 | The routing cascade as ONE pure function in `Shared/EditorBrain/` — declared platform capability sets, order as data, a pure table suite pinning the ORDER per platform; both cascades one call; zero behavior change per platform (a differing route is a FINDING) | U1 | **BUILT + LADDER CLOSED 2026-09-29** (one round 0/0/0/1, zero disputes; the NIT agreed, reviewer-fixed pin-first `276fc460`, implementer sanity `d6a8eb7e`; `notes/plans/18m-u1-ladder-round1.md`) — **the WALK is HELD** at the guard (her live app) and re-opens the unit if it overturns; the ready W1–W7 script is in the U1 RECORD |
+| 1 | The routing cascade as ONE pure function in `Shared/EditorBrain/` — declared platform capability sets, order as data, a pure table suite pinning the ORDER per platform; both cascades one call; zero behavior change per platform (a differing route is a FINDING) | U1 | **CLOSED 2026-09-29** — built · ladder one round 0/0/0/1 zero disputes (NIT reviewer-fixed pin-first `276fc460`, sanity `d6a8eb7e`) · **WALKED at her window: 14/14 rows PASS both voices + the VisualWalk subset 6/6 PASS 0 FAIL** (the U1 WALK RUN section) |
 | 2 | Crystallization + the storage primitives + the identity audit hoisted on 3C (thin injected accessor surface; deliberate platform deltas declared; zero test edits both platforms) | U2 | open |
 | 3 | MAY-take: KnownIssues row 74 — the phone's autosave-registry release (the Mac's 18k C1 fix is the model); decide at U2, record either way with its own red-on-old pin if taken | U2 | open |
 | 4 | One refusal table: `OpsRefusalCopy` → `Shared/`; `operationMessage` deleted; the six mobile switches collapse; door-names local (§4.4); the sealed-note sentence converges — PROVISIONAL, QUESTIONS row quoting all four current spellings. **+ U1's O-1 (2026-09-29):** the gap-refusal copy divergence (Mac `.unsyncedBlock` sentence vs the phone's P3 read-only sentence; the tail-vs-gap cause ranking) is this unit's input too | U3 | open |
@@ -1286,11 +1286,19 @@ quit by ⌘Q at the end (pgrep clean).
 
 **14 of 14 rows PASS.** Every receipt/refusal sentence read in use matches the route mapping's
 (the hoist changed no words — the walk's own confirmation of the 3C claim from the felt side).
-The VisualWalk subset (`--only write-newline-roundtrip,write-divide-merge,b5-more-roads`, both
-voices, `--build` from this tree) runs as this record lands; its report is appended below when
-it completes. **U1's USE acceptance: PASS pending only that subset** — ledger row 1 flips to
-CLOSED when the harness report is green (the walk is the gate's substance; the subset is
-regression cover).
+**The VisualWalk subset: PASS, 6/6 scenario-passes, 0 FAIL / 0 XFAIL / 0 XPASS** across
+`write-newline-roundtrip` · `write-divide-merge` · `b5-more-roads` in BOTH voices (runs
+`vis-walks/2026-09-29/031239/` — five passes — and `032801/` — the sixth). Two machinery notes,
+honestly: (1) the FIRST subset attempt refused at the harness's own stamp rule — this seat's
+record commits landed mid-build and the stamper correctly declined a moved tree (the build
+itself succeeded); re-run clean on the quiet tree — the traps gain the lesson: NO commits while
+a stamped harness build is in flight. (2) `b5-more-roads` (Study) aborted once at the per-step
+guard ("someone is at the machine", HID input ~20 s prior — real input; she confirmed in chat
+minutes later and granted the resume) — the guard's abort clicked nothing and the harness quit
+its instance cleanly; the dev store's voice was left at Study by that abort and RESTORED to
+Terminal by hand (verified by capture) before any suite could meet row 91; the re-run PASSED
+and the harness's own voice-restore ran. **U1's USE acceptance: PASS whole. Ledger row 1 —
+CLOSED.**
 
 ### U2 — THE INJECTED-SURFACE RULING (orchestrator, 2026-09-29 — the 4E pattern; the settled ground steps 3–5 proceed on)
 
