@@ -149,7 +149,8 @@ struct RefusalTableConvergenceTests {
             h.model.updateCaretContext()
             await h.model.structural.moveCaretTakeIntoBlockBelow()
             #expect(h.model.statusMessage == Self.onlyTake, "E5, Write side")
-            #expect(try h.storeSlots().count == 1, "nothing moved")
+            let slots = try h.storeSlots()
+            #expect(slots.count == 1, "nothing moved")
         }
     }
 }
