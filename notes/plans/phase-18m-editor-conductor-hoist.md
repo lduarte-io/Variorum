@@ -325,6 +325,11 @@ rule binds any split this phase does make: a state struct passed in and returned
   return at any moment), and the phase-close install refresh has its window when the ritual
   reaches it (instances re-verified at execution time as always). The held U1 walks run NOW,
   before U2's ruling lands.
+- **HER SECOND WORD, minutes later (verbatim):** *"you can go ahead and control my computer
+  freely i'm stepping away for the evening"* — the away-run rule governs the night
+  (PROVISIONAL-and-continue; author-only calls HELD and BUNDLED); GUI driving free with the
+  per-step guard still run as machinery hygiene; anything genuinely hers goes to the bundle
+  for her morning.
 
 ## U1 BRIEF (session 1 — the routing cascade becomes a pure function; written by the orchestrator 2026-09-29)
 
