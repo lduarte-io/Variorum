@@ -983,3 +983,273 @@ behavioral revert. PROVISIONAL-and-continue (QUESTIONS next free #159 — check 
 STOP-and-report for gating ambiguity, any behavior change, anything wanting `Sync/`, every
 author-only call. Your diff is the editor seam by definition → a **FABLE cold review**
 follows; your self-assessment closes your record.
+
+## U2 RECORD (the `opus-implementer`, session 2 — opened 2026-09-29)
+
+**NOT DONE (first line, per the contract): everything after step 2. The unit is STOPPED at the brief's
+HARD CHECKPOINT — the band map (step 1) and the injected-surface proposal (step 2) are below; NOTHING is
+built, no production line has changed, and step 3 waits on the architect's ruling.** No revert is in
+flight. Tree at this checkpoint: `25ce55df` + this record + one `.gitignore` line
+(`notes/plans/18m-screens/` — the traps name it as gitignored and it was not; the probe evidence below
+lives there).
+
+### LIVE STATUS
+
+| Piece | Status |
+|---|---|
+| Preflight reads — this file whole (fences, P-1…P-9, cast, baselines, the conductor map, ledger rows 2/3/6, traps, the SEQUENCING NOTE, the U1 RECORD whole) + `18m-u1-ladder-round1.md`; the charter's KICKOFF 3; health review §2.1/§3/§6.1/§8; KnownIssues rows 28/30/51/70/74; MobileSoul §3–§5; TEXTKIT2_NOTES whole; SessionResiliencyProtocol whole; 18k's UNIT C1 RECORD + adjudication (row 74's model); 17b P36 (the review doc + the standing-fixes entry); 13g's L7 wiring list; all 13 `Shared/EditorBrain/` files; both conductors' bands end to end (Mac `EditorViewModel` :380–:1760 + :4112–:4190, `EditorSurfaceController` :1–:200 + :2870–:3160; phone `MobileEditorViewModel` whole; `MobileStructural` :1–:210); the pin families (Mac `CrystallizationTests`, `SpaceEaterTests`, `EditorTestSupport`, `StructuralGestureTests`' review-round suites; phone `MobileSpaceEaterTests`, `MobileTrailingNewlinesTests`, `MobileEditorTestSupport`; the conductor-name grep over both test trees) | DONE (read in this session, never delegated) |
+| Step 1 — the band map (every difference classed ACCESSOR / DECLARED / FINDING) | DONE (this commit) — below; three FINDINGS + one observation routed |
+| The (iii) first candidate — the phone's missing `structuralInFlight` guards — answered with EVIDENCE | DONE (this commit) — scratch probes run on both platforms, never committed (sources + outputs in `notes/plans/18m-screens/u2/probes/`, gitignored) |
+| Step 2 — the injected-surface proposal | DONE (this commit) — **AWAITING THE ARCHITECT'S RULING; nothing is built until it lands** |
+| Step 3 — build per the ruling (+ row 28's enumeration in the same commit) | NOT-STARTED |
+| Step 4 — row 74's MAY-take, decided and recorded | NOT-STARTED (the lean is stated in the proposal) |
+| Step 5 — walk (or HELD + script) + finals (touched Mac suites + crystallization/seam/structural families + the eleven Tutorial suites + the FULL mobile suite + generic-iOS build) | NOT-STARTED — her real-store app is live (pid 85601), so the walk will very likely HOLD at the guard as U1's did |
+
+### STEP 1 — THE BAND MAP (today's tree, `25ce55df`; Mac body vs phone body, function by function)
+
+Method: each band was extracted from both files and `diff -u`'d mechanically (the diffs are in this
+session's scratchpad; every line below is a CODE difference — comment-only differences are not listed).
+**Classes:** **IDENTICAL** (byte-identical modulo comments) · **ACCESSOR** (the same act through a
+different platform accessor — the injected surface's material) · **DECLARED** (a deliberate platform
+delta with its reason) · **FINDING** (unexplained — routed below, built to TODAY's behavior either way).
+
+**A. Crystallization** (Mac `EditorViewModel` :1468–:1754 · phone `MobileEditorViewModel` :1650–:1863)
+
+| Function | Code differences, Mac vs phone | Class |
+|---|---|---|
+| `armTailIdleMint` (M :1475 · P :1653) | Mac guards `hasOpenTail, !tailText.allSatisfy(\.isWhitespace)`; phone guards `mintableTail` — the same predicate (`mintableTail` IS that expression on both) | IDENTICAL (spelling) |
+| `mintableTail` (M :1489 · P :1665) | none | IDENTICAL |
+| `runSoftNewlineInTail` (M :1527) | Mac-only | **DECLARED** — the ⇧⏎ tail arm (13d batch 4, A15 option B + rider 1; the phone has no soft newline) |
+| `idleMintTail` (M :1544 · P :1673) | (1) guard spelling as above; (2) **Mac-only** `if structuralInFlight { armTailIdleMint(); return }` (:1552); (3) marked text: `textView?.hasMarkedText() == true` vs `textView?.markedTextRange != nil` | (1) IDENTICAL · (2) **DECLARED — see "the (iii) candidate" below** · (3) ACCESSOR |
+| `attachLeadingTailRunIfNeeded` (M :1581 · P :1694) | **Mac-only** `!structuralInFlight` in the first guard; the rest byte-identical (its `setBlockAttribute` is the storage accessor) | **DECLARED — see below** (and F-4) |
+| `crystallizeIfNeeded` (M :1603 · P :1716) | error voice in the mint Task's catch: `self.showOperationError(error)` vs `self.statusMessage = String(describing: error)` | ACCESSOR (error voice) |
+| the mint body inside it (`plan.mints.map { ops.newBlock(…, registeringUndo: false) }`) | byte-identical — and a THIRD copy lives in the Mac's `finalizeWork` (:744), R-13u-3's exception comment and all | IDENTICAL ×3 |
+| `finishMint` (M :1656 · P :1767) | (1) error voice in the quiet-deletions Task (as above); (2) **Mac-only** `updateCaretContext()` after the audit (:1747) | (1) ACCESSOR · (2) **DECLARED** — the Mac maintains an OBSERVED caret context (`caretBlockID`, ordinal, word counts, gesture availability — the status bar and the menus read it) that must republish when the caret's text leaves the tail for a block; the phone keeps no VM-held caret projection (its chrome reads on demand, and a fresh mint carries no fan/comment chrome) |
+| `awaitMintSettle` (M :978 · P :479) | none | IDENTICAL |
+
+**B. The storage primitives** (Mac :900–:1040 + :4131–:4190 · phone :1865–:1979, plus :566–:728)
+
+| Function | Code differences | Class |
+|---|---|---|
+| `viewText` (M :4133 · P :1868) | (1) Mac `surfaceTextReads += 1`; (2) `textView?.textStorage` vs `storage` | (1) **DECLARED** — the Mac's echo pin counts extractions (`EditorSessionTests` :369); the phone's echo pin counts `fullRenderCount` instead · (2) ACCESSOR |
+| `syncTailText` (M :4140 · P :1874) | Mac inline `guard let range = index.tailRange … viewText(range)`; phone `tailText = openTailText`, the same expression factored for the copy door (`copyNote`) | IDENTICAL (factoring) |
+| `programmaticReplace` (M :4150 · P :1879) | (1) `guard let textView, let storage = textView.textStorage` vs `guard let storage` (the phone attaches headless storage under test); (2) caret read `textView.selectedRange()` vs `textView?.selectedRange`; caret write `setSelectedRange` vs `selectedRange =`; (3) base `EditorDocument.baseAttributes` vs `MobileEditorStyle.baseAttributes`; (4) **the phone re-derives the markdown face over the replaced span (`MarkdownFace.restyle`); the Mac does NOT** | (1)–(3) ACCESSOR · (4) **FINDING F-3** |
+| `setBlockAttribute` (M :4182 · P :1914) | storage accessor only | ACCESSOR |
+| `restampProjection` (P :1946) | phone-only | **DECLARED** — iOS strips custom attributes on every insertion path (MobileSoul §5.2), so identity is RE-STAMPED from the index over the report; its Mac twin is `stampProjection` + `tailProjectionRegion` (M :1357/:1365, the consume road), which only CLAMPS to the verdict's region because macOS inherits the attribute — two implementations of TEXTKIT2 §3's one rule (*clamp stamps to the verdict, never the report*), each shaped by its platform's measured truth |
+| `setSurfaceContent` · `applySeamEdit` · `adoptRewrite` · `holdTailIdleClock` (M :904/:914/:950/:971) | Mac-only | **DECLARED** — the N10 controller's storage seam (`EditorSurfaceController` reaches the storage ONLY through them); the phone has no controller, so its executors (`renderFull` :616, `applyDifferential` :671, `displaySlot` :1160) do the same writes inline |
+| `applyDifferential` (Mac: the controller's :124 · P :671) | the replace loop + the index rebuild + the ledger adopt are the same modulo receiver; the post-steps differ: Mac adopts through `adoptRewrite` (which audits BEFORE the undo clear and publishes the post word count) then `updateCaretContext` + `refreshBadges`; phone audits AFTER the undo clear, then the canary checkpoint + `refreshChrome` | ACCESSOR (receiver) + **DECLARED** post-steps (Mac word count/caret context/badges; phone canary/chrome); the audit's position relative to the undo clear is unobservable (the clear touches no storage) |
+| `applyPendingIfClean` (M :992 · P :705) | (1) Mac guards `!structuralInFlight` (twice) — the phone does not; (2) the re-read: `Queries.renderPost` → `applyProjection` vs `Queries.takesProjection` → `ingest`; (3) **the Mac restores the deferred marker when the re-read throws (17b P36) and exposes `hasDeferredProjection`; the phone's failure arm returns bare (`else { return }`) and drops the marker** | (1) **DECLARED** — the Mac's structural flight rewrites the surface itself and so defers deliveries for its duration (Phase 9 round 3 NIT, pinned `externalDeliveriesDeferDuringAStructuralFlight`); the phone's flight settles THROUGH the projection policy (`refreshTakesFromStore` → `ingest`), so there is nothing to defer (the mobile plan's S3 ladder records this corner as deliberate) · (2) **DECLARED** — each platform's ONE projection door (the phone's `ingest` adopts fans, presentations and the peek overlay from one coherent read) · (3) **FINDING F-2** |
+
+**C. The identity audit** (Mac :1442–:1466 · phone :1996–:2003 + :1632–:1648)
+
+| Function | Code differences | Class |
+|---|---|---|
+| `auditIdentityProjection` (M :1442 · P :1996) | storage accessor only | ACCESSOR |
+| `desyncRecovery` (M :1451 · P :1632) | (1) phone-only `MobileEditTrace.desyncRecovery()` first; (2) the assertion text `"editor surface desynced…"` vs `"mobile editor surface desynced…"`; (3) the heal: `renderPost` → `applyProjection` vs `takesProjection` → `ingest` | (1) **DECLARED** — the phone's settling-experiment instrument (E1) · (2) **DECLARED** — the crash log names the platform · (3) **DECLARED** — each platform's one projection door (as B's `applyPendingIfClean` (2)) |
+
+**Not in these bands (named so a reader does not look for them here):** the phone's liveness concept (`isLive`, `standDown`) lives at the gate — U1's pre-arm, untouched; the teardown backstops (Mac `finalizeWork` :647, phone `finish` :464) CONSUME the band (O-4 below) and are not themselves in it.
+
+### The (iii) first candidate — the phone's missing `structuralInFlight` guards — ANSWERED WITH EVIDENCE
+
+**The Mac's recorded reason** (`idleMintTail` :1546, pinned `ReviewRound1FixTests.anIdleMintIsNeverBornMidStructuralFlight`):
+*"a mint born now races the gesture's fetch/rewrite — the mint's row failing the seam shape guard would
+materialize the minted block AND the unconsumed tail (visible duplication), and the late finishMint would
+crystallize a duplicate index entry."* That hazard exists because the Mac's `runStructural`
+(controller :2896) rewrites the surface ITSELF after its op — `applyStructuralResult` → a seam edit or
+`renderFull(preserveTail: true)` — bypassing the projection policy; hence the flight also holds the idle
+clock (:2907), awaits the mint (:2941) and fences keystrokes (:2908/:2913).
+
+**The phone's road is different by construction:** its structural doors (`MobileStructural.divide` :82 and
+siblings) never write the surface — they settle through `refreshTakesFromStore` (VM :1136) → `ingest` →
+`applyProjection`, whose shared policy is `busy: autosave.isDirty || mintInFlight` (VM :578). So a render
+arriving while a mint is in flight DEFERS, and `finishMint`'s trailing `applyPendingIfClean` re-reads
+fresh after the mint has crystallized — the ordering the Mac's guard enforces by hand.
+
+**Probe P-a (scratch, phone, never committed):** the Mac pin's own staging on the phone — two blocks, an
+open tail with text, `structural.divide(atSurfaceCaret: 19)` started, `k` yields, then `idleMintTail()`
+fired — across `k = 0…13`: the flight was provably in flight at the fire for k = 1…13, a mint WAS born
+every time (the phone has no guard), and **every run converged: unique block IDs, surface == store,
+`desyncRecoveryCount == 0`, `identityAuditFailures == 0`, the divide landed and the tail minted** (output:
+`18m-screens/u2/probes/phone-probe-output.txt`, `PROBE-PA`).
+
+**Verdict:** the two absent guards are **DECLARED, by architecture** — the phone's flight settles through
+the policy that already sequences render-after-mint. The reason was never written down; it is now, and
+the hoist will carry it as a declared host fact (Mac `structuralInFlight`, phone `false`), never an
+averaged guard. **But the attach guard has a second job the probe exposed on the phone** — see F-4.
+
+### FINDINGS (routed to the orchestrator; none is U2's to fix — the hoist builds TODAY's behavior)
+
+- **F-2 — the phone never got 17b P36.** Phone `applyPendingIfClean` (:705) nils `pendingProjection`,
+  spawns its re-read, and its failure arm is `guard let fresh = try? … else { return }` — the deferred
+  marker is DROPPED when the read throws, while its two sibling guards put a value back; the Mac's twin
+  was fixed at 17b P36 (`b2203e71`, pinned `DeferredProjectionRetryTests`) and the phone was outside that
+  entry's scope (`ProactiveTechDebtReview-2026-08-30.md` P36 names only `EditorViewModel.swift`). Same
+  trigger as P36 (a lock closing the keyed store mid-settle), same consequence (an external change — a
+  sync-arrived conflict take, a chosen-take flip from another surface — waits for a FURTHER store write
+  before it reaches the surface), same NIT severity; traced by reading (the asymmetry is unambiguous);
+  not probed (staging needs P36's re-lock rig). Owner candidate: the mobile catch-up, or a 17-entry
+  beside P36 — the pin is `DeferredProjectionRetryTests`' phone twin. **Consequence for U2:**
+  `applyPendingIfClean` cannot be hoisted as one body without either fixing the phone (a behavior change)
+  or encoding the drift as a flag; so it stays per-platform in U2 (the proposal below).
+- **F-3 — the Mac's programmatic surface writes drop the markdown face; the phone's keep it.** Mac
+  `programmaticReplace` (:4150) resets the replaced span to `baseAttributes` and never re-derives the
+  face — 13g's L7 wiring list names `applySeamEdit`, `storageDidEdit`, `materialize` and the read tier,
+  not this door — while the phone's twin restyles (mobile batch 2, citing "the Mac `applySeamEdit`'s exact
+  posture"). Two Mac roads reach it: `finishMint`'s tail normalization (whenever the minted text is not
+  byte-identical to the tail — a trimmed trailing space, an excised blank line) and the controller's
+  `applyDifferential` (a take flip from another surface, `restoreCommit`, a sync landing). **Probed
+  (scratch, both platforms):** type `# Title ` ⏎ `B` — the Mac's heading face is present before the mint
+  and GONE after it (`PROBE-MAC-FACE facedBefore=true facedAfter=false`); a differential replace of a
+  slot with `# Heading now` lands unfaced (`PROBE-MAC-DIFF facedAfter=false`); the phone's same typing
+  keeps its face (`PROBE-PHONE-FACE facedAfter=true`). The face returns only when that line is next
+  edited or the note re-renders. Owner candidate: a 17-entry (a Mac-side one-line fix at the door, with
+  the probe as its red-on-old pin). **Consequence for U2:** the hoisted storage door takes the restyle as
+  an injected parameter — the phone passes its face, the Mac passes `nil` (TODAY's behavior), so the gap
+  becomes VISIBLE at the Mac's call site and the fix is that one argument.
+- **F-4 — the phone's structural flight has no keystroke fence, and a keystroke into the block being
+  divided DUPLICATES text in the store.** The Mac's `runStructural` makes the view non-editable and defers
+  typed keys for the flight (:2908/:2913) for exactly this reason (its own comment: *"a stale whole-buffer
+  autosave after a divide would resurrect the moved half — the forbidden text-duplication class"*). The
+  phone's doors flush, then `await` a fan read and the op with the surface still live: a keystroke landing
+  in that window autosaves the block's WHOLE pre-divide text (+ the keystroke) into the variant the op just
+  cut in place, and the settle's `flushNow` writes it back over the first half. **Probe P-b (scratch,
+  phone):** `divide(atSurfaceCaret: 19)` on "First sentence. Second one.", one `X` typed into that block
+  after k yields — for EVERY k ≥ 1 (flight in flight) the store read `["FirstX sentence. Second one.",
+  "Second one.", "Anchor."]` (`DUPLICATED=true`), surface == store, no desync, no refusal; k = 0 (before
+  the flight) is clean. On a device the window is milliseconds and the plausible sources are a fast
+  keystroke after the ⋯ tap or a system edit (autocorrect/dictation commit — KnownIssues row 30's
+  gate-less class); not measured on device. The attach guard's second job is this class for the TAIL
+  (a tail attach mid-flight records the last block's pre-divide text). Not found recorded (grep over
+  `notes/`). Owner candidate: the mobile catch-up (the phone's structural doors) or a 17-entry; the probe
+  is the red-on-old pin's shape. **Consequence for U2:** none to the hoist — the phone's crystallizer gets
+  no flight hold (TODAY's behavior); the fence, if ruled, belongs to the phone's flight, not to the band.
+- **O-4 (observation, not a finding) — the two teardown backstops consume the band differently.** Mac
+  `finalizeWork` mints the residual tail INLINE with the durability kind (no marked-text skip); phone
+  `finish()` calls `idleMintTail()` — whose marked-text skip applies — so a composition open at the
+  moment `finish()` runs leaves the tail to the re-armed clock of a model that is going away. Whether UIKit
+  commits marked text before `teardown` reaches `finish()` is unverified; noted for the mobile catch-up,
+  untouched here (both roads keep their shapes).
+
+### STEP 2 — THE INJECTED-SURFACE PROPOSAL (the architect rules this fork; NOTHING BUILT)
+
+**What the map says the surface must carry.** The platform DIFFERENCES are few — five accessors (the
+storage, marked text, the error voice, the base attributes, the restyle) and four declared arms (the
+Mac's flight hold, the Mac's caret-context republish, each platform's settle road, the Mac's extraction
+counter). But the band is not self-contained: it mutates the TILING the gate and the projection roads
+also own (`index.transferTailPrefixToLastEntry`, `index.crystallize`, the ledger) and touches their
+routing/settle state (`bulkPending`, `pendingEdit`, `forceFullRender`, `storeWriteGeneration`). Whatever
+the shape, that entanglement has to cross the seam — the honest question is HOW.
+
+**A technical constraint that rules one shape out (so the ruling can weigh it).** P-9's preferred form —
+a value state struct passed `inout` — cannot carry the EFFECTFUL band: its storage writes re-enter the
+view model synchronously (`NSTextStorage.processEditing` → `storageDidEdit`; on the Mac, AppKit's
+selection-change delegate → `updateCaretContext`, which READS the tiling; the autosave coordinator's
+observers), and an `inout` access to view-model state that spans such a re-entry is a dynamic
+exclusivity violation — a runtime trap in exactly the paths the pins drive. So the value seam can hold
+the PURE decisions (and does, today: `CrystallizationPlanner`, `CrystallizationReconciler`,
+`BlockRangeIndex`, `EditorSurfaceLedger`), while the choreography needs short accesses on a reference
+type.
+
+**(B) — RECOMMENDED — a shared `TailCrystallizer` that OWNS the band's own state; each view model owns
+one (downward reference only) and passes ITSELF, per call, as a narrow `TailCrystallizerHost`.** No
+stored back-reference anywhere: the crystallizer holds no model; the host arrives as a parameter and is
+captured only by the two Tasks exactly as today's Tasks capture `self` (strong for the mint — the review
+round 1 MINOR 5 posture, "the reconciliation must run even if the view goes away"; weak for the idle
+clock).
+
+- **State that MOVES into the crystallizer** (the band's own): the tail text, `mintInFlight`,
+  `mintTask`, the idle task, `tailIdleDebounce`, `tailIdleSleep`.
+- **The host protocol** (`@MainActor protocol TailCrystallizerHost: AnyObject`), each member classed:
+  - *the tiling, which the VIEW MODEL KEEPS* (its `private(set)`/`private` setters stay exactly as they
+    are — the band gets narrow intention-revealing doors, never a widened setter): `index` (get) ·
+    `transferTailPrefixToLastEntry(_:)` · `crystallizeIndex(minted:remainingTailLength:)` ·
+    `knownSurfaceText(variantID:)` · `recordSurfaceText(variantID:text:)`;
+  - *routing/settle state the band touches, which the view model keeps:* `bulkPending` (get) ·
+    `clearBulkPending()` · `disarmPendingEdit()` · `requestFullRender()` · `noteOwnWritesSettled()`;
+  - *the store doors:* `autosave` · `mintRunner` (`session.runner`) · `postID` · `segmentation`;
+  - **ACCESSORS (the injected differences):** `surfaceStorage` (`textView?.textStorage` · `storage`) ·
+    `hasMarkedText` (`hasMarkedText()` · `markedTextRange != nil`) · `reportOperationError(_:)`
+    (`showOperationError` · `statusMessage = String(describing:)`) · `programmaticReplace(…)` +
+    `clearTextUndo()` (each view model's write door, rebuilt on the shared storage door below with its
+    base attributes and restyle) · `auditIdentityProjection()`;
+  - **DECLARED ARMS:** `holdsTailForStructuralFlight` (Mac `structuralInFlight`; phone `false` — reason:
+    the (iii) answer above) · `didApplyMint()` (Mac `updateCaretContext()`; phone nothing — B's
+    `finishMint` row) · `applyPendingIfClean()` (each platform's settle road, kept per-platform — F-2).
+  - **Honest size: 23 members.** "Thin" holds for the DIFFERENCES (the accessor and declared rows); the
+    rest is the view-model state the band genuinely shares with the gate and the projection roads, made
+    explicit and narrow.
+- **Forwarding (3C — every pin-reached name kept):** both view models keep `tailText` and
+  `mintInFlight` as read forwards, `tailIdleSleep`/`tailIdleDebounce` as read-write forwards (pins SET
+  `tailIdleSleep` — 18 files), and `idleMintTail()` / `armTailIdleMint()` / `mintableTail` /
+  `awaitMintSettle()` / `hasOpenTail` as forwards; `crystallizeIfNeeded` / `finishMint` /
+  `attachLeadingTailRunIfNeeded` become private forwards where their in-file callers need them (the
+  Mac's `finalizeWork` calls `finishMint`; its soft-newline road calls `idleMintTail`/`awaitMintSettle`).
+  The view-model sites that write the tail or cancel the clock outside the band (`.openTail`/`.closeTail`,
+  `syncTailText`, the Mac's `adoptRewrite`, the phone's `renderFull`, `holdTailIdleClock`, the teardown
+  cancels) change to crystallizer calls — compiler-guided, the state is no longer theirs to assign.
+- **What it buys beyond de-duplication:** the tail's lifecycle becomes an object with its own state that
+  a FAKE host can drive — the choreography (skip-and-re-arm, the flight hold, the reconcile-apply order)
+  testable without a mounted editor, which is the U1 table suite's value applied to this band (not built
+  here unless the architect asks; the 3C proof rides the existing pins).
+
+**(A) — the host-protocol MIXIN (the bodies move verbatim into a protocol extension; the view models
+conform).** Smallest diff and the most literal address move (the reviewer diffs bodies 1:1, and every
+name stays on the model automatically). **Not recommended:** the extension can only reach state through
+settable requirements, so ~12 `private`/`private(set)` members (`index`, `tailText`, the ledger,
+`bulkPending`, `pendingEdit`, `mintInFlight`, `mintTask`, `forceFullRender`, `storeWriteGeneration`, the
+idle task, the phone's `session`…) widen to module-settable — which FORMALIZES the god state P-9 and the
+health review §2.1 name rather than splitting any of it. Its one strength is risk; B's receiver changes
+are mechanical and compiler-guided, so the gap is small.
+
+**(C) — value facts + pure fragments only.** Hoist just the pure decisions (the leading-run plan, the
+kind/plan decision, the mint body, the post-reconcile region plan) and leave each view model its
+choreography. P-9's letter exactly, but the choreography — the part that actually drifts (the flight
+hold, the skip-and-re-arm, the apply order) — stays twice; rejected against the charter's purpose (and
+see the exclusivity constraint above for why the value seam cannot take the choreography too).
+
+**(D) — for awareness, not recommended: B plus the TILING itself** (`index` + the ledger moved into the
+shared object). It would thin the host to the accessor and declared rows (~12), at the cost of
+rewriting every tiling mutation in both gates, both consume roads and both projection executors (~40
+sites) — row 70's decomposition territory, beyond U2's charter.
+
+**The rest of the hoist, whichever of A/B is ruled:**
+- **The storage doors — `Shared/EditorBrain/EditorSurfaceStorage.swift`**, `nonisolated enum` over
+  `NSMutableAttributedString` (the `IdentityProjectionAudit` precedent: both platforms' `NSTextStorage`
+  share that Foundation superclass): `text(of:in:)` (viewText's read), `setBlockID(_:over:in:)`
+  (setBlockAttribute), `replace(_:with:blockID:in:base:restyle:)` (programmaticReplace's
+  begin/replace/set/restyle/end core). The view models keep their names and their STATE around it:
+  the Mac's extraction counter (DECLARED), the suppress toggle, the out-of-range guard → `desyncRecovery`,
+  the caret-to-end (ACCESSOR). The Mac passes `restyle: nil` with F-3's pointer at the argument.
+- **The mint body — `TailCrystallizer.mintBlocks(_:in:ops:)`**, `nonisolated static`: the ONE copy of the
+  R-13u-3 no-undo exception, consumed by the crystallizer AND the Mac's `finalizeWork` (three copies → one).
+- **The audit consumer — `IdentityProjectionAudit.audit(index:storage:countingFailure:file:line:)`**,
+  `@MainActor`, DEBUG-only body, count-then-fire (TODAY's order), the call site's `#fileID`/`#line`
+  threaded to the seam (no pin reads them — every muted handler is `{ _, _, _ in }`, grep-verified);
+  both `auditIdentityProjection()`s become that one call and keep their own counters.
+- **Stays per-platform in U2, each for its recorded reason:** `desyncRecovery` (every line is view-model
+  state or a platform road — C's table), `applyPendingIfClean` (F-2 + two DECLARED differences),
+  the projection executors (`renderFull`/`applyDifferential`/`displaySlot` — the Mac's live in the pinned
+  N10 controller beside 18l's reading-anchor and keeper machinery, which this unit must not fight; their
+  shared core is ~8 lines), `restampProjection` and the Mac's `stampProjection` (DECLARED twins), the
+  Mac's N10 seam primitives (DECLARED), `runSoftNewlineInTail` (DECLARED), both teardown backstops (O-4).
+- **File layout:** `Shared/EditorBrain/TailCrystallizer.swift` (the class, the host protocol, the static
+  mint body — every arm's ruling moved with it, as U1 moved the ladder's prose to the arms) ·
+  `Shared/EditorBrain/EditorSurfaceStorage.swift` · `IdentityProjectionAudit.swift` gains the consumer.
+  The two conformances live INSIDE each view model's own file (a same-file extension is what can reach
+  their `private` state for the narrow doors). No project edit (`Shared/` is a synchronized root in both
+  targets).
+- **Commit plan (step 3):** (1) the storage doors + both view models' primitives through them; (2) the
+  audit consumer; (3) the crystallizer + both conformances + the forwards, **with row 28's enumeration
+  in the same commit**; each followed by the Mac `build-for-testing` and the generic-iOS build; then the
+  finals.
+- **Row 74 (step 4) — the lean: NOT TAKEN, to be confirmed at step 4.** Under B the diff touches the
+  phone's teardown road only by ADDRESS (`finish()`'s idle-clock cancel becomes the crystallizer's). A
+  take is a lifecycle behavior change that needs C1's own T1–T5 trace for the phone — whether its
+  leaving-savepoint road leans on the never-released entry (C1's T3 found three such roads on the Mac),
+  and what `flushEveryOpenPost`'s walk costs — which is a unit's worth of trace inside a phase-sized unit.
+  If the architect wants it taken here anyway, it lands as its own commit with the registry-count pin
+  (C1's form) run red on the pre-fix tree first.
+
+**STOP — awaiting the ruling on (A)/(B)/(C)/(D), on the "rest of the hoist" list (in particular: keeping
+`applyPendingIfClean`, `desyncRecovery` and the projection executors per-platform in U2), and on row 74.
+The three findings (F-2, F-3, F-4) and O-4 are the orchestrator's to route.**
