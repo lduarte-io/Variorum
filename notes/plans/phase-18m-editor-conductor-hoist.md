@@ -1264,3 +1264,93 @@ sites) — row 70's decomposition territory, beyond U2's charter.
 **STOP — awaiting the ruling on (A)/(B)/(C)/(D), on the "rest of the hoist" list (in particular: keeping
 `applyPendingIfClean`, `desyncRecovery` and the projection executors per-platform in U2), and on row 74.
 The three findings (F-2, F-3, F-4) and O-4 are the orchestrator's to route.**
+
+### U1 — THE WALK, RUN (orchestrator's own hands, 2026-09-29, at her granted window; the held gate discharged)
+
+**Preconditions verified:** zero instances by pgrep (her app quit at her word); `guard.sh
+--author` exit 0 (idle 250 s); AX + Screen Recording granted; the dev app built from THIS tree
+(`DerivedData/18m-u1`, includes the ladder fix `276fc460`) and launched by path; every act
+`cliclick`-driven with ≥2 s spacing; captures in `notes/plans/18m-screens/u1/` (gitignored);
+the dev store's voice ENDED Terminal (row 91 honored, verified by capture); the walk instance
+quit by ⌘Q at the end (pgrep clean).
+
+| # | Arm | Terminal | Study |
+|---|---|---|---|
+| W1 — A7 carve | ⏎ at Alpha's end minted the empty block (2/3, ringed); ⌫ carved it — GONE, tray ⊗1, receipt *"Empty block deleted — ⌥⌘Z undoes it."*, caret at Beta's start | **PASS** | **PASS** (the carve-then-merge sequence's end state + ⊗1 prove the intermediate) |
+| W2 — #34 fanless seam | ⌫ at Beta's start joined ONE block "Alpha Beta", receipt *"Blocks joined — ⌥⌘Z undoes it."* | **PASS** | **PASS** |
+| W3 — #34 fanned seam | ⌥⌘Z restored; ⌘T gave Alpha ⑂2 (receipt *"New take added on this block — ⌘⇧T shows the takes."*); ⌫ at Beta's start: NOTHING joined, the refusal TOASTED: *"The block above has takes — backspace won't fold a fan away. Merge Blocks (⌘⇧M) joins them and brings every take along; Merge choosing takes (⌥⌘⇧M) lets you arrange them yourself."* | **PASS** | **PASS** (same sentence, Study voice) |
+| W4 — J9 | triple-click the middle paragraph + ⌫: the block GONE to the tray (⊗1), receipt *"Block deleted — ⌥⌘Z puts it back, then in This Note's Tray — the tray icon at the top of th…"* (the slot truncates honestly; Study's wider slot shows more), caret on the next block | **PASS** | **PASS** |
+| W5 — the clamp | ⌥⌘Z restored; the same triple-click selection TYPED OVER → the block's text replaced IN PLACE ("Replaced", 2/3 — the break stands); ⌘Z stepped back as ORDINARY TEXT UNDO (character-granular, no structural entry consumed, no "Undid:" line) | **PASS** | **PASS** (clamp verified; the ⌘Z half proven in Terminal) |
+| W6 — the compound | a mid-to-mid selection across three blocks + ⌫: the middle rode the tray, the ends JOINED (1/1), receipt (Study's full width): *"1 block to This Note's Tray; the ends joined — originals under Came from. ⌥⌘Z undoes it."* | **PASS** | **PASS** |
+| W7 — nothing regressed | one character typed mid-block landed ("FirstXparagraph." / "First Xparagraph."), no refusal | **PASS** | **PASS** |
+
+**14 of 14 rows PASS.** Every receipt/refusal sentence read in use matches the route mapping's
+(the hoist changed no words — the walk's own confirmation of the 3C claim from the felt side).
+The VisualWalk subset (`--only write-newline-roundtrip,write-divide-merge,b5-more-roads`, both
+voices, `--build` from this tree) runs as this record lands; its report is appended below when
+it completes. **U1's USE acceptance: PASS pending only that subset** — ledger row 1 flips to
+CLOSED when the harness report is green (the walk is the gate's substance; the subset is
+regression cover).
+
+### U2 — THE INJECTED-SURFACE RULING (orchestrator, 2026-09-29 — the 4E pattern; the settled ground steps 3–5 proceed on)
+
+**RULED: (B)** — the shared `TailCrystallizer` in `Shared/EditorBrain/` OWNS the band's own
+state (tail text, mint flight/task, idle clock); each view model owns one and passes ITSELF per
+call as a narrow `TailCrystallizerHost`; NOTHING stores a back-reference — the per-call host is
+P-9's accepted alternative to a stored `model:` seam, and the record's exclusivity analysis
+(the band's storage writes re-enter the view model synchronously, so an `inout` value hold
+would trap) is adopted: the VALUE seam covers the pure layer, the host covers the effects.
+(A) is rejected — ~12 private members made module-settable is P-9's god state formalized;
+(C) is rejected — it leaves exactly the drifting half duplicated (fails the charter); (D) is
+rejected — the tiling move is row 70's territory and past this phase's sizing. **Also
+approved as proposed:** the `EditorSurfaceStorage` storage doors, ONE shared mint body (the
+three byte-identical copies collapse), the shared audit consumer.
+
+**Conditions riding the ruling (the reviewer checks each):**
+1. **The host protocol is documented per-member** — each of the ~23 members names the band
+   function(s) that need it, so the reviewer can verify no general-purpose leak; conformances
+   are extensions on the view models exposing nothing beyond the band's needs; the view
+   models' `private(set)` surfaces stay as they are.
+2. **The deliberate platform deltas stay DECLARED at the host** (the Mac's
+   `structuralInFlight` reads and ⇧⏎ arm, the phone's marked-text accessor and
+   `restampProjection`, each error voice) — never averaged, each with its recorded reason.
+3. **The hoist commits are BEHAVIOR-PRESERVING and SEPARATE from the rider commits below** —
+   the 3C diff stays clean for the cold read; zero test edits on both platforms for the hoist
+   half.
+
+**The per-platform list STANDS for U2** (`applyPendingIfClean`, `desyncRecovery`, the
+projection executors) — and after F-2's rider lands, `applyPendingIfClean`'s convergence
+becomes a row-28 NEXT-TOUCH candidate (recorded in the enumeration, deliberately NOT taken
+this unit). **Row 74: NOT TAKEN accepted** (the record's reasons; the row stays the mobile
+project's).
+
+**The findings, dispositioned:**
+- **F-2 (the phone never got 17b P36) — FIX IN-ROUND as a RIDER, after the hoist:** its own
+  commit, red-on-old pin first (the P36 pin's phone twin: a thrown re-read RESTORES the
+  deferred-projection marker instead of dropping it — the Mac's fix is the model, its pin
+  form named in the 17b P36 record). A dropped external change waiting on a further store
+  write is a correctness defect this phase is touching; the fix is the marker-restore lines.
+- **F-3 (the Mac's mint/differential replace drops the markdown face) — FIX-ATTEMPT RIDER,
+  pin-first, after F-2:** the pin asserts the face SURVIVES on the real roads (the typed
+  `# Title` ⏎ mint; the take-flip/`restoreCommit` differential). RED on old → fix = the
+  restyle argument at the Mac's call site (the span-bounded, attributes-only
+  `MarkdownStyling.restyle` its own `applySeamEdit` already runs — no new mechanism). If no
+  user-reachable road pins red (something re-faces before paint), RECORD-ONLY per the
+  hallucination guard — never a speculative fix. Faced text is the shipped standard
+  everywhere, so this is defect-repair, not product design.
+- **F-4 (the phone's structural flight has NO keystroke fence — a mid-flight keystroke
+  DUPLICATED store text in probe P-b at every in-flight interleaving) — NOT FIXED IN 18m,
+  OWNED NOW:** the phone's structural-door semantics are the mobile catch-up's by this
+  phase's own fence. A NEW KnownIssues row lands with this ruling (owner: the mobile app
+  project row; a 17 entry at her word takes it earlier — it is DATA-SHAPED: the store
+  duplicates text, and platform truth 2 means autocorrect can land such a keystroke without
+  her typing), carrying P-b's reproduction recipe verbatim as the future red-on-old. **It
+  also goes in HER BUNDLE** (worth her priority eye before the beta's phone question).
+- **O-4 (the teardown backstops' marked-text difference) — RECORDED, not unified;** flagged
+  to the U2 ladder: if the reviewer traces a real Mac hazard (a `finalizeWork` mint under an
+  open IME composition rewriting mid-composition), it becomes an owned finding then.
+
+The `.gitignore` line is accepted (the traps presumed it). **Sizing, said out loud:** the two
+riders are small pinned fixes beside the phase-sized hoist; U2 remains ONE acceptance unit;
+if either rider grows past a pin-plus-lines shape, STOP and report rather than absorb.
+**Proceed with steps 3–5 in this order: the hoist (3C-clean) → F-2 → F-3 → the walk/finals.**
