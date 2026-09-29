@@ -722,13 +722,29 @@ final class MobileEditorViewModel {
     /// transiently revert the edited block (the Mac's exact posture).
     func applyPendingIfClean() {
         guard !autosave.isDirty, !mintInFlight, pendingProjection != nil else { return }
+        // **18m U2, F-2 — the phone twin of 17b P36: hold the marker while
+        // the re-read runs.** The two guards below both put a value BACK on
+        // their failure paths; the read-failure arm returned bare, so a
+        // thrown read — a lock closing the keyed store while a settle is in
+        // flight (`StoreLockedError`) — dropped the deferred marker and
+        // nothing re-armed it: an externally-changed projection (a
+        // sync-arrived conflict take, a chosen-take flip from another
+        // surface) then waited on a FURTHER store write.
+        let deferred = pendingProjection
         pendingProjection = nil
         let generation = storeWriteGeneration
         Task { [weak self] in
             guard let self else { return }
             guard let fresh = try? await session.database.read({ [postID] in
                 try Queries.takesProjection($0, post: postID)
-            }) else { return }
+            }) else {
+                // The re-read failed: restore the marker, exactly as the two
+                // guards below do with theirs. The value is a stale
+                // photograph, so what this buys is the RETRY — the next
+                // clean moment re-reads (the Mac's P36 line, twinned).
+                pendingProjection = deferred
+                return
+            }
             guard !autosave.isDirty, !mintInFlight else {
                 pendingProjection = fresh.slots
                 return
