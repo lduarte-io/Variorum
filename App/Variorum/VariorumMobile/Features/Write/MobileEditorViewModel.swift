@@ -1864,11 +1864,10 @@ final class MobileEditorViewModel {
 
     // MARK: - Storage primitives
 
-    /// The one counted extraction door (O(the asked range)).
+    /// The one counted extraction door (O(the asked range)) — since 18m U2
+    /// the shared storage door, through the phone's own storage accessor.
     func viewText(_ range: NSRange) -> String {
-        guard let storage else { return "" }
-        guard range.upperBound <= storage.length else { return "" }
-        return storage.attributedSubstring(from: range).string
+        EditorSurfaceStorage.text(of: storage, in: range)
     }
 
     private func syncTailText() {
@@ -1889,22 +1888,20 @@ final class MobileEditorViewModel {
         }
         let caretWasAtEnd = (textView?.selectedRange.location ?? -1) >= storage.length
         suppressEditProcessing = true
-        storage.beginEditing()
-        storage.replaceCharacters(in: range, with: newText)
-        var attributes = MobileEditorStyle.baseAttributes
-        if let blockID { attributes[EditorDocument.blockIDAttribute] = blockID }
-        storage.setAttributes(
-            attributes,
-            range: NSRange(location: range.location, length: (newText as NSString).length))
-        // Batch 2: the `setAttributes` above reset the replaced span to
-        // base, so the markdown face over those lines is re-derived (the
-        // Mac `applySeamEdit`'s exact posture). Attributes only.
-        MarkdownFace.restyle(
-            storage,
-            range: NSRange(location: range.location, length: (newText as NSString).length),
-            base: MobileEditorStyle.baseFont,
-            palette: MobileEditorStyle.markdownPalette)
-        storage.endEditing()
+        // 18m U2: the storage transaction is the shared door, with the
+        // phone's base attributes and its restyle. Batch 2: the base reset
+        // clears the replaced span's face, so the markdown face over those
+        // lines is re-derived inside the same transaction (the Mac
+        // `applySeamEdit`'s exact posture). Attributes only.
+        EditorSurfaceStorage.replace(
+            range, with: newText, blockID: blockID, in: storage,
+            base: MobileEditorStyle.baseAttributes,
+            restyle: { storage, replaced in
+                MarkdownFace.restyle(
+                    storage, range: replaced,
+                    base: MobileEditorStyle.baseFont,
+                    palette: MobileEditorStyle.markdownPalette)
+            })
         suppressEditProcessing = false
         if caretToEndIfWasAtEnd, caretWasAtEnd, let textView {
             textView.selectedRange = NSRange(location: storage.length, length: 0)
@@ -1912,13 +1909,7 @@ final class MobileEditorViewModel {
     }
 
     private func setBlockAttribute(_ blockID: String?, over range: NSRange) {
-        guard range.length > 0, let storage,
-              range.upperBound <= storage.length else { return }
-        if let blockID {
-            storage.addAttribute(EditorDocument.blockIDAttribute, value: blockID, range: range)
-        } else {
-            storage.removeAttribute(EditorDocument.blockIDAttribute, range: range)
-        }
+        EditorSurfaceStorage.setBlockID(blockID, over: range, in: storage)
     }
 
     /// **The boundary-safe re-stamp (batch 2 fix — the walk3 crash's

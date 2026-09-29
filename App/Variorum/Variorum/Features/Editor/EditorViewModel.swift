@@ -4130,11 +4130,12 @@ final class EditorViewModel {
 
     /// Internal (was private) since N10: the surface controller reads
     /// entry texts through the one counted extraction door.
+    /// 18m U2: the read itself is the shared storage door; the COUNT is the
+    /// Mac's own (a DECLARED instrument — the phone's echo pin counts full
+    /// renders instead).
     func viewText(_ range: NSRange) -> String {
         surfaceTextReads += 1  // the Step 1 echo pin counts these
-        guard let storage = textView?.textStorage else { return "" }
-        guard range.upperBound <= storage.length else { return "" }
-        return storage.attributedSubstring(from: range).string
+        return EditorSurfaceStorage.text(of: textView?.textStorage, in: range)
     }
 
     private func syncTailText() {
@@ -4165,14 +4166,13 @@ final class EditorViewModel {
         }
         let caretWasAtEnd = textView.selectedRange().location >= storage.length
         suppressEditProcessing = true
-        storage.beginEditing()
-        storage.replaceCharacters(in: range, with: newText)
-        var attributes = EditorDocument.baseAttributes
-        if let blockID { attributes[EditorDocument.blockIDAttribute] = blockID }
-        storage.setAttributes(
-            attributes,
-            range: NSRange(location: range.location, length: (newText as NSString).length))
-        storage.endEditing()
+        // 18m U2: the storage transaction is the shared door. `restyle: nil`
+        // is TODAY's Mac behaviour, carried as data rather than averaged
+        // away: this door never re-derived the markdown face over the span
+        // it replaces (the phone's twin does) — the band map's FINDING F-3.
+        EditorSurfaceStorage.replace(
+            range, with: newText, blockID: blockID, in: storage,
+            base: EditorDocument.baseAttributes, restyle: nil)
         suppressEditProcessing = false
         if caretToEndIfWasAtEnd, caretWasAtEnd {
             textView.setSelectedRange(NSRange(location: storage.length, length: 0))
@@ -4180,13 +4180,7 @@ final class EditorViewModel {
     }
 
     private func setBlockAttribute(_ blockID: String?, over range: NSRange) {
-        guard range.length > 0, let storage = textView?.textStorage,
-              range.upperBound <= storage.length else { return }
-        if let blockID {
-            storage.addAttribute(EditorDocument.blockIDAttribute, value: blockID, range: range)
-        } else {
-            storage.removeAttribute(EditorDocument.blockIDAttribute, range: range)
-        }
+        EditorSurfaceStorage.setBlockID(blockID, over: range, in: textView?.textStorage)
     }
 
     // MARK: - Scroll anchoring (Step 7; the memo's obligation)
