@@ -1734,7 +1734,10 @@ by `TakeStructureDoorTests.aRefusalArrivesInWordsNotAsAnEnumDump`, `contains("on
 - **Shared (both platforms' recovery doors):** `DeletionRefusal.words(.lockedPost, .delete)`
   *"This note is marked complete — unseal it first."* · `RecoveryCopy.sealedPutBackRefusal`
   *"This note is marked complete — unseal it to put this back."* — a Mac door verb ("unseal") the
-  phone's Trash/Library/Shelf doors speak today.
+  phone's Trash/Library/Shelf doors speak today. *(Round-1 ladder F-1, 2026-09-29: this grep
+  MISSED a third shared member — `VersionActs.words`' "This note is marked complete — unseal it
+  to restore a version." — latent on the phone, which compiles it but has no Versions face
+  (PL-29); row 28 (c) and #159 (1) now carry it.)*
 - Phone, already the proposed form in phone words ("This note is locked — unlock it to ⟨act⟩."):
   the four named-six arms (`MobileBlockMenu`, `MobileComments`, `MobileStructural`, `MobileUndoDoor`
   ("…unlock it first.")), and outside the six `MobileTakesBrowser` (verbs), `MobileBlockHistory`,
