@@ -836,3 +836,39 @@ W4 `WholeBlockDeleteTests.aWholeParagraphSelectionDeletesTheBlock` (the receipt 
 **Not done / owed:** the walk (HELD — see the WALK SCRIPT); F-1 routed to the orchestrator (not
 U1's); O-1 is U3's (ledger row 4). Zero `Sync/`, zero schema, zero layout code touched (TEXTKIT2
 seams untouched: no attribute stamps, no `BlockRangeIndex` region change, no `runStructural` change).
+
+### U1 — ORCHESTRATOR VERIFY PASS + ADJUDICATIONS (2026-09-29; verify-never-trust — the WALK stays HELD)
+
+**Claims verified against git and disk:** all seven commits `7a92b742..1734857a` present and
+pushed, tree clean, no trailers; the 3C proof re-run by diff (the two test targets gained
+exactly the two NEW files, zero existing pin lines); zero `Sources/`, `Server/`, schema; the
+production footprint is the four named files + the new shared route file; both gates' call
+sites read as the one-route-call shape (`EditorEditRoute.route` + `performCrossBlockRoute`, no
+second guards at either site); **F-1 verified end to end** — the offender string ("on the Mac,
+choose Help ▸ Restore") is real at `SampleLibraryJekyllBook.swift:91`, born at 18l-c U6
+(`2772a6f4`, last touched `603e5fdb`), untouched by U1, and the sweep pin
+(`nothingUserFacingNamesTheMac`) is a disk-reading source walk, so its red is tree-independent
+and PRE-EXISTING as claimed.
+
+**Adjudications (repo-first, before the reviewer sees them):**
+- **Condition 1's figure stands CORRECTED to the implementer's ≤ 2 reads** (my ruling's ≤ 3 was
+  the eager option's arithmetic; the pin asserts the true bound — the measured number with a
+  pin beats the ruling's figure, the standing hierarchy).
+- **F-1 — ROUTED TO HER BUNDLE via QUESTIONS #155, not fixed in 18m.** The deep cause is a
+  genuine COLLISION between #155's built (i) (the Jekyll restore door Mac-only; the disclaimer
+  says "on the Mac") and MobileSoul §4.4's no-redirect sweep on a phone-seeded string: the
+  shipped (i) choice cannot pass that pin. Fixing it is her #155 second-half call — (ii) the
+  phone Settings restore row (one row of face code over the shared road, and the sentence
+  stops naming a platform) or keep (i) and the sweep records a dated exception. A dated
+  evidence line lands on #155 with this commit; the disclaimer's WORDING is already her
+  R-18l-12 polish item. **Until she rules, the FULL-mobile baseline reads 647/110 = the 4
+  known + F-1** (stated here so no later unit re-attributes it).
+- **The WALK stays HELD, and the ladder proceeds in parallel** (the 18l-b U3 precedent): her
+  real-store app is live, `guard.sh --author` refuses correctly, and quitting it is hers
+  alone. U1's USE acceptance (the implementer's W1–W7 script + this seat's own hands-on walk +
+  the VisualWalk subset) runs at the next window and GATES the unit's close either way — the
+  ladder is a parallel gate, never a substitute.
+
+Ledger row 1 stays open pending the ladder + the walk; row 6's U1 half (row 28's cascade
+discharge, row 51's build seam) is landed and verified in the hoist's own commit. The FABLE
+cold review over `3975b682..1734857a` follows; ladder file `notes/plans/18m-u1-ladder-round1.md`.
