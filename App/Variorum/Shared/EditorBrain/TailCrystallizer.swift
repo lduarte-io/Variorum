@@ -44,7 +44,10 @@
 //  TEXTKIT2 §3's one rule).
 //
 //  Charter (EditorDocumentCore's): NOTHING here may depend on a platform UI
-//  framework — Foundation + VariorumCore only.
+//  framework — no AppKit/UIKit; Foundation, VariorumCore and UI-free
+//  `Shared/` types only (the 18m U2 ladder's wording: this file also leans
+//  on `AutosaveCoordinator`, `OperationsRunner` and `EditorSurfaceStorage`,
+//  each itself platform-free).
 //
 
 import Foundation

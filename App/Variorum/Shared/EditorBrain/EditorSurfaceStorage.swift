@@ -61,8 +61,9 @@ enum EditorSurfaceStorage {
     /// ONE editing transaction — the characters, then the replaced span reset
     /// to `base` (plus `blockID` when one owns it), then `restyle` over that
     /// span when the platform passes one. The caller owns everything around
-    /// it: the range guard, suppressing its own edit processing across the
-    /// call, and where the caret lands afterwards.
+    /// it: the range guard (an out-of-range range RAISES here — both callers
+    /// guard and heal through `desyncRecovery`), suppressing its own edit
+    /// processing across the call, and where the caret lands afterwards.
     static func replace(
         _ range: NSRange,
         with newText: String,

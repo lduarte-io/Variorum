@@ -1489,7 +1489,6 @@ final class EditorViewModel {
         crystallizer.isMintable(host: self)
     }
 
-
     /// 13d batch 4 (A15, ruled option B, rider 1): ⇧⏎ inside an open tail.
     ///
     /// The mint is `idleMintTail()` ITSELF — the very call the 2 s clock
