@@ -319,6 +319,12 @@ rule binds any split this phase does make: a state struct passed in and returned
 - **Her real-store instance is live at kickoff** — the install refresh is deferred to a window
   she grants; recorded so the closeout ritual plans for it rather than assuming the 18l-c
   pattern (her app was quit then; it is not now).
+- **HER WINDOW GRANT (2026-09-29, mid-U2-checkpoint, verbatim):** *"i have quit my real store so
+  you can do everything"* — zero instances verified by pgrep the same minute. Read as: GUI
+  driving and the held walks are FREE (the per-step guard still binds every act — she may
+  return at any moment), and the phase-close install refresh has its window when the ritual
+  reaches it (instances re-verified at execution time as always). The held U1 walks run NOW,
+  before U2's ruling lands.
 
 ## U1 BRIEF (session 1 — the routing cascade becomes a pure function; written by the orchestrator 2026-09-29)
 
