@@ -3970,13 +3970,18 @@ final class EditorViewModel {
         }
         let caretWasAtEnd = textView.selectedRange().location >= storage.length
         suppressEditProcessing = true
-        // 18m U2: the storage transaction is the shared door. `restyle: nil`
-        // is TODAY's Mac behaviour, carried as data rather than averaged
-        // away: this door never re-derived the markdown face over the span
-        // it replaces (the phone's twin does) — the band map's FINDING F-3.
+        // 18m U2: the storage transaction is the shared door. **Rider F-3:**
+        // the base reset clears the replaced span's markdown face, so the
+        // face over those lines is re-derived inside the same transaction —
+        // the span-bounded, attributes-only restyle `applySeamEdit` already
+        // runs (and the phone's twin always did). Before this, a heading
+        // written through this door — the mint's tail normalization, the
+        // differential road's take flips and restored savepoints — landed
+        // unfaced until its line was next edited (`ProgrammaticReplaceFaceTests`).
         EditorSurfaceStorage.replace(
             range, with: newText, blockID: blockID, in: storage,
-            base: EditorDocument.baseAttributes, restyle: nil)
+            base: EditorDocument.baseAttributes,
+            restyle: { storage, replaced in MarkdownStyling.restyle(storage, range: replaced) })
         suppressEditProcessing = false
         if caretToEndIfWasAtEnd, caretWasAtEnd {
             textView.setSelectedRange(NSRange(location: storage.length, length: 0))

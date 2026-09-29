@@ -17,12 +17,12 @@
 //
 //  **What is deliberately a PARAMETER, and why:** the base attributes (each
 //  platform's voice resolves its own font, ink and paragraph style) and the
-//  markdown RESTYLE over a replaced span. The phone re-derives its face there
-//  (mobile batch 2, "the Mac `applySeamEdit`'s exact posture"); the Mac's
-//  programmatic replace does not — a difference the band map recorded as a
-//  FINDING (F-3), so it is carried as data rather than averaged away: the
-//  Mac passes `nil` at its call site, and the day that finding is ruled, the
-//  fix is that one argument.
+//  markdown RESTYLE over a replaced span — each platform's face is its own
+//  (`MarkdownStyling` on the Mac, `MarkdownFace` with the phone's palette).
+//  The phone always restyled here (mobile batch 2, "the Mac `applySeamEdit`'s
+//  exact posture"); the Mac's programmatic replace did not until 18m U2's
+//  rider F-3 — the band map's finding, pinned red on three user-reachable
+//  roads (`ProgrammaticReplaceFaceTests`) and fixed as exactly this argument.
 //
 //  Charter (EditorDocumentCore's): NOTHING here may depend on a platform UI
 //  framework — both platforms' `NSTextStorage` share the Foundation
