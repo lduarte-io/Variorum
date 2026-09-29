@@ -364,14 +364,15 @@ struct SavepointSealedDoorTests {
     /// fail-open the design deliberately leaves to the filer) — the op road
     /// after ⏎. One gesture must not speak two sentences depending on header
     /// freshness. **Scoped to THIS door, deliberately:** Write's two shipped
-    /// gesture-worded seal refusals (`shouldChangeText`'s "unlock it to
-    /// edit." and `poolDrop`'s "unlock it to add to it.") are NOT in breach
+    /// gesture-worded seal refusals (`shouldChangeText`'s "unseal it to
+    /// edit." and `poolDrop`'s "unseal it to add to it.") are NOT in breach
     /// of this contract and must not be widened into it — their doors
     /// consume the gesture outright, so the door is the gesture's only
     /// worded refusal; this pin is not a surface-wide law. Consequence,
-    /// stated: gesture-wording THIS door later means changing
-    /// `operationMessage`'s shared `lockedPost` case with it, or redding
-    /// this cell honestly.
+    /// stated (18m U3 ladder F-3 — the filer's voice IS the refusal table
+    /// now): gesture-wording THIS door later means changing the table's
+    /// `lockedPost` line (`SealedNoteCopy`) with it, or redding this cell
+    /// honestly.
     @Test func writesDoorAndFilerSpeakOneSealSentence() async throws {
         try await withEditor(seedBlocks: ["draft text"]) { h in
             h.textView.setSelectedRange(NSRange(location: 3, length: 0))
