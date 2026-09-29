@@ -1025,8 +1025,9 @@ lives there).
 | Pre-rider check of the hoist (the band's own pin families, suite-level, against the 3c build) | DONE — Mac **313 tests / 41 suites green, 0 skipped**; phone **257 / 38 with exactly 1 issue = F-1** (the attributed pre-existing sweep red) — the hoist holds before any rider lands |
 | Rider F-2 — the phone's P36 twin | DONE — PIN `067657d2` (RED on the pre-fix behaviour: `theMarkerSurvivesAReadThatThrows` at its final expectation, 2 tests / 1 issue) → FIX this commit: the marker held across the re-read and restored on a thrown read (the Mac's P36 lines, twinned) → **GREEN** (`MobileDeferredProjectionRetryTests` 2/2 with the phone's projection/takes neighbours: 43 tests / 4 suites). Row 28 gains the `applyPendingIfClean` convergence as a NEXT-TOUCH candidate (the ruling's instruction; not taken) — FIX commit `9ba53fa0` |
 | Rider F-3 — the Mac restyle (pin-first on the real roads; record-only if hollow) | DONE — PIN `8ffaaa18` (RED on the pre-fix behaviour on all three user-reachable roads, exactly at the face assertion — 3 tests / 3 issues; premises and road-taken expectations held) → FIX this commit: the Mac's `programmaticReplace` passes `restyle: MarkdownStyling.restyle` (the span-bounded, attributes-only restyle `applySeamEdit` already runs — no new mechanism), inside the same storage transaction → **GREEN** (`ProgrammaticReplaceFaceTests` 3/3 with `SpaceEaterTests`, `EditorSessionTests`, `DifferentialApplyTests`, `StructuralRewriteDoorTests`, `MarkdownFaceTests` (incl. its P1 scan budget), `ReviewRound1FixTests`, `CrystallizationPlannerTests`: 76 tests / 8 suites). The shared door's header re-worded to the new truth |
-| Step 4 — row 74's MAY-take, decided and recorded | NOT-STARTED (the lean is stated in the proposal) |
-| Step 5 — walk (or HELD + script) + finals (touched Mac suites + crystallization/seam/structural families + the eleven Tutorial suites + the FULL mobile suite + generic-iOS build) | NOT-STARTED — her real-store app is live (pid 85601), so the walk will very likely HOLD at the guard as U1's did |
+| Step 4 — row 74's MAY-take | **NOT TAKEN** (the ruling accepted the record's reasons: the hoist touches the phone's teardown road only by ADDRESS — `finish()`'s idle-clock cancel now names the crystallizer — and a take is a lifecycle behaviour change needing C1's own T1–T5 trace for the phone; the row stays the mobile project's) |
+| Step 5a — the typing WALK (dev-store Debug build from `4117689b`, both voices) | **DONE — 12/12 rows PASS** (W1–W6 × Terminal/Study; the section U2 WALK below). Captures `notes/plans/18m-screens/u2/{terminal,study}/` (gitignored). The dev store's voice ENDED Terminal (read-back + capture); the walk instance quit by identity (zero instances after) |
+| Step 5b — finals (touched Mac suites + crystallization/seam/structural families + the eleven Tutorial suites + the FULL mobile suite + generic-iOS build) | IN-PROGRESS |
 
 ### STEP 1 — THE BAND MAP (today's tree, `25ce55df`; Mac body vs phone body, function by function)
 
@@ -1374,3 +1375,43 @@ The `.gitignore` line is accepted (the traps presumed it). **Sizing, said out lo
 riders are small pinned fixes beside the phase-sized hoist; U2 remains ONE acceptance unit;
 if either rider grows past a pin-plus-lines shape, STOP and report rather than absorb.
 **Proceed with steps 3–5 in this order: the hoist (3C-clean) → F-2 → F-3 → the walk/finals.**
+
+### U2 WALK (the implementer's own hands, 2026-09-29 04:28–04:40, at her granted evening window)
+
+**Preconditions verified:** zero instances by pgrep (her app quit at her word); `guard.sh --author`
+exit 0 (idle 3,169 s at the start); the dev app built from THIS tree (`DerivedData/18m-u2`, commit
+`4117689b` — the hoist + both riders) and launched by path; every act through `keys.sh` (the
+author checks → activate → full guard → act) with ≥ 2 s between guarded acts; typing as
+per-character keystrokes 120 ms apart inside one guarded act (every character landed, row by row —
+the 13u3 UNIT B drop did not recur at this spacing); captures in `notes/plans/18m-screens/u2/`.
+Each row runs in a FRESH note (⌘N — a new note is all open tail, the band's home ground; with
+blocks present the chip-on Return is structural and the tail only opens from a newline arriving as
+text, AppSpec §7). The status bar is the oracle: **open tail** while the caret is in the tail,
+**block n/m** once it is a block; "Nw in note" counts blocks only.
+
+| # | Row (what the band must do) | Terminal | Study |
+|---|---|---|---|
+| W1 | **The idle mint** — "First paragraph." typed into a fresh note, then a pause | **PASS** — open tail → **block 1/1**, 2w, bytes and caret unchanged | **PASS** |
+| W2 | **Type-time crystallization** — "One paragraph.⏎Two" in one burst; captured inside the idle window, then after it | **PASS** — mid-typing "One paragraph." is already a block (**2w in note**) while "Two" is the **open tail**; after the pause **block 2/2, 3w** | **PASS** |
+| W3a | **k−1, typed gap** — "Alpha.⏎⏎⏎Beta" | **PASS** — **block 2/2**, both blank lines between them byte-exact through both mints | **PASS** |
+| W3b/c | **k−1, the idle mint's kept-open run** — "Gamma.⏎⏎", pause, then "Delta" | **PASS** — at the pause "Gamma." minted, the typed gap stayed exactly where she left it, caret in the kept-open EMPTY tail (**open tail**, 1w); "Delta" then landed after ONE stored blank line — **block 2/2** (the leading-run attachment made the gap durable content) | **PASS** |
+| W4 | **⇧⏎ in the tail (Mac-only, A15)** — "Soft", a HELD-shift Return, "line" | **PASS** — "Soft⏎line" is ONE block (the editing ring encloses both lines), **block 1/1, 2w block**: the tail minted first, the soft newline stayed content at the caret | **PASS** |
+| W5 | **Bulk paste** — "Pasted one.⏎⏎Pasted two.⏎Pasted three." via `pbcopy` + Edit ▸ Paste (the real menu) into a fresh note | **PASS** — segmented on entry: **block 3/3, 6w**, the pasted blank line kept as "Pasted one."'s trailing content, caret at the end | **PASS** |
+| W6 | **Rider F-3 from the felt side** — "# Heading " (captured faced), then in a fresh note "# Heading ⏎B" in one burst (the typing mint trims the space and rewrites the tail region) | **PASS** — after the mint (**block 2/2**) the heading is STILL faced: dimmed `#` marker, bold, larger type, exactly as typed (on the pre-fix tree it dropped to body style — the pin's red) | **PASS** (Study's serif face, same) |
+
+**12/12 rows PASS.** Machinery notes, honestly: (1) **one guard trip, self-caused** — a burst
+spaced ~0.5 s after the previous synthetic act tripped `guard.sh`'s exit 4; the HID idle then
+climbed monotonically 8 → 13 s (the README's own discriminator — a human's keeps resetting), so the
+walk resumed; the interrupted W6 attempt's capture (the heading faced as typed) is kept as W6a.
+(2) **The dev instance TRAPPED once, and it was NOT this unit's code:** opening the TENTH note of
+the session (one fresh note per row) hit KnownIssues row 73 — `EditorCommands.swift:782`'s
+`Character("10")` for the Open strip's ⌘⇧<n> key equivalents (`_assertionFailure` in
+`Character.init`, crash report `Variorum-2026-09-29-043442.ips`, the frames confirmed), owned by
+**18o**, untouched here. The Study W1 capture was taken before the trap; the instance was
+relaunched clean (Study voice persisted, the Open strip empty) and W2–W6 run in seven notes. Walker
+fact for the kit: keep fewer than ten notes open in a Debug walk until 18o lands. (3) The dev store's
+voice was flipped through Settings' Accessibility road (pane 1, radio group "Design voice") and
+RESTORED to Terminal the same way (read-back `1, 0`, capture). The phone's twin of this band is
+covered by the harness (the full mobile suite — `MobileSpaceEaterTests`, `MobileTrailingNewlinesTests`,
+`MobileEditorCrystallizationTests`, `MobileNoteClipboardTests`, the perf walk's oracles), there
+being no phone GUI walk kit.
