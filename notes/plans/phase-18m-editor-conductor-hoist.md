@@ -2139,3 +2139,13 @@ rewrite; the remaining `OperationError` switches and the sealed/locked family re
 28 (c), `VersionActs` now named); **F-4's keystroke fence (data-shaped — her bundle)**; row
 74's autosave-registry release; the U4-left seeder scaffolding at its touch. The MobileSoul
 ledger row lands with this closeout.
+
+**INSTALL REFRESH (the closeout's last act, 2026-09-29 ~13:54–14:05 UTC):** zero-instance
+window verified by pgrep + path before the A1 copy and again before the install (her app quit
+at her word, the overnight grant covering the refresh); A1 safety copy
+`Backups/safety-copies/18m-refresh-20260929T135412Z` (6 files, each cmp-verified); Release
+from `58e18f7e`; `/Applications/Variorum.app` binary **`4e461177` → `3b116e5c`**; codesign OK
+(deep, strict); the keychain access groups present in the entitlements. Her next launch
+carries the whole phase — the F-3 fix is the one she may SEE (headings staying faced through
+mints, take flips and restored savepoints); everything word-shaped is PROVISIONAL at #159.
+**18m — CLOSED. HARD STOP; 18o and the mobile catch-up at her word.**
