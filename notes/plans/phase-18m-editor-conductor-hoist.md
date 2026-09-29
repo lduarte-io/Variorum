@@ -330,6 +330,13 @@ rule binds any split this phase does make: a state struct passed in and returned
   (PROVISIONAL-and-continue; author-only calls HELD and BUNDLED); GUI driving free with the
   per-step guard still run as machinery hygiene; anything genuinely hers goes to the bundle
   for her morning.
+- **HER OVERNIGHT AUTHORIZATION (later the same night, after the U1 walk and one brief return
+  to the machine that the guard caught correctly, verbatim):** *"ok continue, machine is now
+  not being disturbed again"* and then *"continue overnight and bundle anything for my
+  morning. gone for now"* — the phase runs to its close overnight under the away-run rule;
+  the closeout ritual (the install refresh included, behind the A1 rail at a re-verified
+  zero-instance window) is authorized; HER MORNING BUNDLE accumulates in this file and lands
+  at the top of the author handoff.
 
 ## U1 BRIEF (session 1 — the routing cascade becomes a pure function; written by the orchestrator 2026-09-29)
 
