@@ -449,8 +449,9 @@ seam by definition → a **FABLE cold review** follows; your self-assessment clo
 | Preflight (canon + charter + health review + KnownIssues whole + QUESTIONS + resiliency + TK2 notes + MobileSoul + the 18l/18l-b/18l-c records + both conductors read side by side + EditorBrain) | DONE (this session, 2026-09-29) |
 | This record file (constitution, baselines, conductor map, roster, ledger, traps, U1 brief) | DONE (this commit) |
 | U1 (session 1) | **LADDER CLOSED 2026-09-29** — one round 0/0/0/1, zero disputes (NIT agreed → reviewer fix `276fc460` pin-first → sanity `d6a8eb7e`); the WALK is HELD at the guard and folded into the next drive window (the skill's else-record-and-fold provision; the SEQUENCING NOTE below) |
-| U2 (session 2) | IN FLIGHT — brief below; the injected-surface shape is a pre-declared propose-then-rule checkpoint (the 4E pattern, U1's precedent) |
-| U3 → (U4?) | NOT-STARTED — briefs written one-ahead at each close |
+| U2 (session 2) | **BUILT + VERIFIED 2026-09-29 overnight** — the checkpoint ruled (B); the hoist (3 behavior-preserving commits, zero test edits) + both riders pin-first (F-2, F-3) + the 12/12 typing walk; this seat's verify pass ran BOTH rider reverts (red in predicted shapes); the FABLE ladder round 1 is IN FLIGHT (`notes/plans/18m-u2-ladder-round1.md`) |
+| U3 | brief below (one-ahead); spawns at U2's ladder close |
+| U4? | the sizing call at U3's close, recorded either way |
 | The HELD WALKS (U1's W1–W7 + VisualWalk subset; the orchestrator's own U1 acceptance walk; U2's typing walk when it reaches that step) | HELD at the guard — run at the first author-granted / app-quit window; each unit's close is PROVISIONAL until its walk passes, and a walk finding re-opens its unit as a fix pass |
 | Closeout | NOT-STARTED |
 
@@ -1498,3 +1499,76 @@ seat's revert pass is the acceptance's verification half — a separate hands-on
 into the closeout's install-refresh window if wanted; the felt evidence stands on the walk
 plus F-3's felt check). **The FABLE cold review over `25ce55df..c915706f` is the remaining
 gate**; ladder file `notes/plans/18m-u2-ladder-round1.md`.
+
+## U3 BRIEF (session 3 — one refusal table; written by the orchestrator 2026-09-29 one-ahead, at U2's verify pass; RE-CHECK against the U2 ladder's outcome before spawning)
+
+You are the `opus-implementer` for **18m UNIT U3**: the operations layer's refusal copy gets
+ONE home — `OpsRefusalCopy` hoists to `Shared/`, `EditorViewModel`'s private
+`operationMessage` switch is DELETED onto it, and the six mobile `OperationError` switches
+collapse onto the table — **keeping platform door-names local** (MobileSoul §4.4; the hoisted
+`CrossBlockRefusal`'s `fanRoads:` parameter is the worked precedent). **The charter's U3
+bullet is your unit charter** (`notes/plans/post-13u-health-rounds.md` KICKOFF 3).
+
+**Read first, in this order (reading is never delegated):** (1) THIS file whole — the fences,
+BINDING PRINCIPLES, CAST & DISCIPLINE, BASELINES, THE CONDUCTOR MAP's refusal-copy row (the
+FOUR sealed-note spellings are quoted there; the six mobile switch sites are named with
+lines), THE LEDGER row 4 (O-1 — U1's gap-refusal copy divergence — is this unit's input,
+quoted in the U1 RECORD's STEP 5), ENVIRONMENT TRAPS, the U1 and U2 RECORDS + ladder files
+(the settled ground: `EditorEditRoute`'s diagnose arm and `CrossBlockRefusal` are routing's,
+not yours to move; `TailCrystallizer`'s error-voice host member is U2's — your table is what
+those voices SPEAK). (2) The charter's KICKOFF 3 + the health review §2.1 leak 2 (the
+duplication's record). (3) `notes/MobileSoul.md` §3/§4.4 — the LAW of this unit: a shared
+home must not hold words naming a platform's own doors. (4) `notes/KnownIssuesAndTechDebt.md`
+row 28 (the enumeration — the refusal-copy fork is (c)-class; your commit updates it).
+(5) `notes/QUESTIONS.md` — read the CURRENT next-free number fresh (it was #159 at kickoff).
+(6) The code, END TO END: `Registry/OpsRefusalCopy.swift` whole (725 lines — EVERY string
+read for door-names/chords before anything moves); `EditorViewModel.operationMessage` (:4506)
+and its two callers; the six mobile switch sites (`MobileMembership` :175 · `MobileBlockMenu`
+:364 · `MobileComments` :286 · `MobileStructural` :889 · `MobileTrashModel` :278 ·
+`MobileUndoDoor` :276) and the phone's pinned statics beside them
+(`MobileEditorViewModel.lockedTakeRefusal`, `fanFoldRoads`); the copy-register pins on BOTH
+platforms (grep `OpsRefusalCopy|operationMessage|refusal` over both test trees and read every
+suite you find — `MobileCopyRegisterSweepTests` and the Mac's copy pins are the riding
+surface); the GATE sentences (the two sealed/locked pre-arm lines in both gates — part of the
+sealed convergence; `message(for:)`'s four `BlockRangeIndex.Refusal` cases on the phone are
+GATE vocabulary, and whether any of them joins the table is yours to PROPOSE, not assume).
+
+**The unit, in order:**
+1. **THE STRING CLASSIFICATION TABLE (the checkpoint — the architect rules it):** every
+   string in `OpsRefusalCopy` + `operationMessage` + the six mobile switches + the gate
+   sealed/locked lines, classed: SHARED-AS-IS (no platform word) · PARAMETERIZED (a
+   door-name/chord slot the platform fills — the `fanRoads:` shape) · STAYS-LOCAL (a
+   platform's own sentence, with why). Beside it: **the WORDS-CHANGE TABLE** — every mobile
+   sentence the collapse would change (site × old × new × why the charter sanctions it), and
+   **the ONE converged sealed-note sentence you propose** (the canonical table's string is
+   the spec-defensible default per the charter; all four current spellings quoted; the
+   convergence is PROVISIONAL — copy is hers), plus your proposal for O-1's pair (converge
+   the gap-refusal sentence or keep it platform-worded, with the tail-vs-gap cause-ranking
+   half stated separately — words-about-behavior, treated with care). COMMIT the tables and
+   STOP for the orchestrator's ruling before the collapse lands.
+2. **BUILD per the ruling** on the 3C pattern: the hoist half (the table's address moves;
+   Mac consumers ride on forwards/typealiases; zero test edits) in its own commit(s);
+   the COLLAPSE half (the deletions + the mobile switches onto the table) after — where a
+   COPY PIN asserts an old sentence the ruling converges, that edit is SANCTIONED and named
+   out loud, one by one (the 18l-b U3 sanctioned-edit form); everything else rides
+   unmodified. Row 28's enumeration updates in the hoist commit. A QUESTIONS row lands with
+   the converged sentence (the four spellings quoted; one line to overturn).
+3. **Pins:** a NEW table-integrity pin (the shared table holds no platform door-name — a
+   source-walk over the shared file banning the Mac chord/door vocabulary and the phone's,
+   the MobileSoul §4.4 law as a tripwire; the `StatusSeamVocabularyTests`/`ChromeLineLimitTests`
+   source-walk form) + the convergence pins red-first where behavior (words) changes.
+4. **WALK (USE), both voices + the phone simulator where a face shows:** drive at least the
+   sealed-note refusal (Write gate + one op door), one locked-take refusal, and one mobile
+   refusal face (simulator suite evidence acceptable for the phone), reading each sentence on
+   screen against the ruled table. **Finals:** the touched Mac suites + the copy/registry
+   families + the eleven Tutorial suites, THE FULL MOBILE SUITE (baseline 649/111 = the 4
+   known + F-1), the generic-iOS build.
+
+**Discipline:** the resiliency protocol binds from your first commit — `## U3 RECORD` in THIS
+file, LIVE STATUS per piece, PENDING marks, commit+push per piece, NO trailers, pathspec
+staging, synchronous foreground waits only, NEVER spawn subagents, commit before any
+behavioral revert (run your convergence reverts AFTER the fixes land — the U2 verify pass's
+form). PROVISIONAL-and-continue (QUESTIONS); STOP-and-report for gating ambiguity, anything
+wanting `Sync/`, every author-only call. Zero `Sources/` expected (the table is app-layer
+`Shared/`); zero schema. Your diff is refusal copy on the editor seam's vocabulary → a
+**FABLE cold review** follows; your self-assessment closes your record.
