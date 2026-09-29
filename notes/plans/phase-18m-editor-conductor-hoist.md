@@ -1892,3 +1892,55 @@ two sentences for one condition depending on how the span was drawn.
 6. Optional **G** (the gate vocabulary joins, zero words) and optional **V** (the phone's error voice)
    — yes/no each.
 7. The file layout (a NEW `Shared/OpsRefusalTable.swift`; the Mac file keeps its name as the Mac half).
+
+### U3 — THE CLASSIFICATION RULING (orchestrator, 2026-09-29 overnight — the 4E pattern; the settled ground steps 2–4 proceed on)
+
+**The three brief-corrections are ACCEPTED, each verified by this seat against the tree:**
+(1) `MobileTrashModel` stays on `DeletionRefusal` (read at :277–:280 — it is already the
+shared act-keyed table with its own pins; forcing it onto the ops table would be a second
+brain for one question); (2) the phone's wider switch set (grep-confirmed ~10 files beyond
+the named six) collapses ONLY at the named sites this unit — the remainder becomes a new
+(c) NEXT-TOUCH entry on KnownIssues row 28; (3) the sealed family is wider than the
+conductor map's four — the record's full-family quote is the honest base, and the proposed
+form ALREADY SHIPS at two Mac sites (`MembershipChip.swift:410`, `ImportModel.swift:245`),
+so (a) converges toward an existing form, not an invention.
+
+**The seven decisions, RULED:**
+1. **The sealed sentence: (a), reach R1+** — ONE SENTENCE SHAPE, *"This note is sealed —
+   unseal it first."*, a door that knows what was blocked filling the act (*"…unseal it to
+   edit."*), the platform noun a PARAMETER (the phone keeps *"locked — unlock"*: its shipped
+   vocabulary at ~25 pinned sites, and §4.4's spirit — the noun rides the platform's own
+   doors). R1+ = the four named spellings + the two unpinned Mac siblings; the family's
+   remainder is listed in row 28's (c) entry, next-touch. PROVISIONAL whole — the QUESTIONS
+   row offers (b) the canonical string verbatim and (c) one noun everywhere (the ~25-site
+   cost stated) as her one-line flips. The S-1/S-2 pin edits are SANCTIONED by this ruling,
+   named one by one in the record.
+2. **FORK L: L-c** — one sentence naming both real ways out, the divide chord a Mac-local
+   parameter slot; it repairs a real wrong-door case (Write's move-take-out door speaking
+   "delete the block instead"). In the words-change table; PROVISIONAL in the QUESTIONS row
+   with both old sentences quoted.
+3. **The collapse rule as proposed** — the table answers nothing where it has no words; a
+   site keeps its own fallback; an arm stays local only for a door-name or a context the
+   table lacks. §4.4 by construction; no "Refused: …" regressions.
+4. **Confirmed** (correction 1).
+5. **O-1: (a)** — the phone's gap-fence arm speaks the shared "hasn't arrived yet" sentence
+   (P3 is a declared COPY arm — changing its words is exactly its nature; U1's arm set and
+   order untouched). S-3's pin edit SANCTIONED. The tail-vs-gap CAUSE-RANKING half is
+   RECORDED in the QUESTIONS row, not built (it would retire an arm — U1's settled ground).
+6. **G: YES** (the gate refusals join as one shared function, wording unchanged, the
+   locked-take line per-platform). **V: YES** (the phone's U2 error voice speaks the table
+   instead of dumping `String(describing:)` — a raw error dump is not a face; the change
+   rides the words-change table; the host's error-voice member itself is untouched — the
+   change is inside the phone's conformance).
+7. **The file layout as proposed** (`Shared/OpsRefusalTable.swift` + the Mac file keeping
+   its name as the Mac half + `MobileRefusalRoads.swift`), with ONE condition: the
+   compiler-enforced placement does NOT retire the SOURCE-WALK TRIPWIRE PIN over the shared
+   file — a chord or door word can sneak into a shared STRING without a compile error; the
+   §4.4 ban pin lands as briefed, over the shared file's text, banning BOTH platforms'
+   door/chord vocabularies by name.
+
+**Sizing, said out loud:** the ruling holds U3 at the named sites + R1+; the family remainder
+and the extra switches are row-28 next-touch entries, never silent scope growth. The five
+planned commits stand (hoist → tripwire + red-first convergence pins → Mac collapse → phone
+collapse → QUESTIONS row); walk, finals, and the convergence reverts after the fixes (the U2
+verify form). **Proceed.**
