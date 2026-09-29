@@ -433,3 +433,209 @@ seam by definition → a **FABLE cold review** follows; your self-assessment clo
 | U1 (session 1) | NOT-STARTED — spawn follows this commit |
 | U2 → U3 → (U4?) | NOT-STARTED — briefs written one-ahead at each close |
 | Closeout | NOT-STARTED |
+
+## U1 RECORD (the `opus-implementer`, session 1 — opened 2026-09-29)
+
+**NOT DONE YET (first line, per the contract): steps 3–7 — the build, the table suite, the row
+28/51 edits, the walk and the finals. The unit is PAUSED AT THE STEP-2 CHECKPOINT awaiting the
+architect's ruling on the function shape (below).** No production or test file has been edited;
+no revert is in flight.
+
+### LIVE STATUS
+
+| Piece | Status |
+|---|---|
+| Preflight reads (this file whole; charter KICKOFF 3; health review §2.1/§3/§8; KnownIssues rows 28/51/70/74; MobileSoul §3 + §4 item 4; TEXTKIT2_NOTES whole; SessionResiliencyProtocol whole; both cascades + both consume roads + `fallbackVerdict`s; the Mac planner forwards and `EditorSurfaceController`'s plan/run functions; `MobileStructural` whole-block + compound executors; all 13 `Shared/EditorBrain/` files; the pin suites — Mac `SeamMergeTests`, `WholeBlockDeleteTests`, `BoundaryClampTests`, `CrossBlockCompoundTests`, the find fence pins in `FindAndReplaceTests`, `EditorSeamCostTests`' plan pins; phone `MobileCrossBlockEditTests`, `MobileWholeBlockDeleteTests`' gate pins, the `MobileEditRoutingTests` roster) | DONE (read in this session, never delegated) |
+| Step 1 — trace both cascades; the ARM TABLE | DONE (this commit) — below |
+| Step 2 — the function-shape proposal, options (a)/(b)/(c) | DONE (this commit) — **AWAITING THE ARCHITECT'S RULING; nothing is built until it lands** |
+| Step 3 — build in `Shared/EditorBrain/`, both ladders one call | NOT-STARTED — design per the ruling |
+| Step 4 — the new pure table suite (order per platform + declared capability differences) | NOT-STARTED — planned pins listed under the proposal |
+| Step 5 — findings routed; build to TODAY's behavior | DONE for the trace (no within-platform mis-route found; three observations below, routed) — re-checked at build |
+| Step 6 — row 28's enumeration + row 51's build-seam line, same commit as the hoist | NOT-STARTED |
+| Step 7 — walk (both voices) + finals (touched Mac suites + routing/seam/compound families + the eleven Tutorial suites + FULL mobile suite + generic-iOS build) | NOT-STARTED — every count PENDING |
+
+### STEP 1 — THE ARM TABLE (today's tree, `3975b682`)
+
+The ladder is the body of each gate's `.refuse(.crossesBlockBoundary)` arm — Mac
+`EditorViewModel.shouldChangeText` (:1043; the arm :1097–1201), phone
+`MobileEditorViewModel.shouldChangeText` (:1204; the arm :1245–1373). Both arms first clear
+`pendingEdit` and `bulkPending` (NIT 4's armed-beside doctrine — state, not decision), then walk
+the ladder, then `return false` whatever it answered (the keystroke never half-applies).
+Every claiming arm SCHEDULES its act on the next main-actor turn (Mac
+`scheduleCrossBlockCompound`, `EditorSurfaceController.swift:2019`; phone
+`scheduleGestureCompound`, `MobileEditorViewModel.swift:1474` — both chained, both clearing on
+completion); every refusing arm speaks synchronously (Mac `refuseFeedback` :4468; phone
+`refuse` :2059).
+
+**MAC — seven arms, in this order:**
+
+| # | Arm | Guard (the planner, and what it reads) | Executor hand-off | The RULING its position encodes |
+|---|---|---|---|---|
+| M1 | **find-replace fence** | `textView?.isFindReplacing == true` (a Mac-only fact: `EditorTextView.swift:292`) | refuses: `FindReplaceGate.refusal(single: .crossesBlockBoundary)` (Mac copy; names ⌘⇧M) | QoL batch 3 L6 — *"THE SAFETY CORE, and it runs before every planner: a FIND-DRIVEN replacement never restructures the post"* (:1114). FIRST because every arm below can delete or merge blocks. Pinned: `FindAndReplaceTests.aPlannedMatchThatDriftsAcrossASeamRefusesInsteadOfMerging` (the belt the valve cannot see) + `aTypedCrossBlockEditStillMergesThenEdits` (the flag does not leak). |
+| M2 | **A7 empty-block carve** | `planEmptyBlockDeletion` (`EditorSurfaceController.swift:2331`): replacement empty ∧ `index.emptyBlockDeletion` (one inter-entry separator, a zero-length neighbour; the one BEFORE wins) ∧ entry editable with a variant ∧ `slots[i].activeVariantCount == 1` ∧ `!slots[i].carriesUnshownText` (the frozen projection — ENABLEMENT only; the op re-checks) | `runEmptyBlockDeletion` (:2364 — `deleteBlock(requiring: .emptyWithNothingUnshown)`, receipt *"Empty block deleted — ⌥⌘Z undoes it."*) | 13c 1B, her A7. Before #34 by GEOMETRY: the two are MUTUALLY EXCLUSIVE at every separator (A7 needs an empty neighbour, #34 two texted ones — pinned `SeamMergeTests.theCarveAndTheSeamMergeAreMUTUALLYEXCLUSIVEAtEverySeparator`, and "A7 first, unchanged": `anEmptyBlockAtTheSeamStillTakesTheCarveNotTheMerge`). Exclusive with everything below by construction (J9 excludes length 1; the clamp's nothing-to-do guard declines a lone-separator delete; a lone separator never reaches the compound — `CrossBlockCompoundTests.aLoneSeparatorCanNeverReachTheCompound`). |
+| M3 | **#34 texted-seam merge** | `planSeamMerge` (:2423): replacement empty ∧ `index.textedSeamPair` ∧ both entries have a variant (geometry + liveness ONLY — the fan is read from the STORE at run time) | `runSeamMerge` (:2444 — store fan read; fanless → `runInstantMerge(joining: .deleteKeystroke)` + receipt *"Blocks joined — ⌥⌘Z undoes it."*; fanned → `seamFanRefusal`) | 13d batch 2, her #34 option (ii). Locked takes deliberately do not refuse (merge copies). Same exclusivity as M2. |
+| M4 | **J9 whole-block delete** | `planWholeBlockDeletion` (:1237) → `index.wholeBlockDeletion` (delete-never-type-over; `wholeBlockRun` with length > 1; the GAP fence inside it) | `runWholeBlockDeletion` (:1244 → `runBlockDeleteCompound`: "Delete Blocks", `BlockSelectionCopy.deletedNote`) | 13j J9, her ruling. BELOW the seam carves (exclusive — the carves keep every ruled case). **ABOVE the clamp and ABOVE the compound, and here the order is LOAD-BEARING (not exclusive):** a whole paragraph + its newline + Delete is ALSO a clamp plan (it would empty the block in place) and a whole-block run delete is ALSO a compound plan (all blocks deleted, "Edit Across Blocks", refusing a locked take). J9 keeps #33(a)'s unrestricted delete — *"two gestures, two rulings, in her stated order"* (:1158). Pinned: `WholeBlockDeleteTests.aWholeParagraphSelectionDeletesTheBlock` / `theRouteIsOneUndoEntryAndItRoundTrips` ("Delete Blocks"). |
+| M5 | **#109 shape (i) clamp** | `planClampedInBlockEdit` (`EditorViewModel.swift:1953`) → `CrossBlockCompound.clampedInBlockEdit` (an edge on an inter-block separator; the clamped span inside ONE entry; declines the degenerate lone-separator DELETE) | `runClampedInBlockEdit` (:1984 — CAS, then the ONE ordinary input door `OrdinaryInputEdit`; NOT structural, so ⌘Z is text undo) | Her #109 ruling (2026-09-15). BELOW J9 (J9 declines a type-over — which is exactly why the same span typed over lands here: `WholeBlockDeleteTests.tracePreFix…`, `BoundaryClampTests.typingOverAParagraphWithBothItsNewlinesReplacesItInPlace`). BELOW the carves (they own the lone-separator keystroke; the degenerate guard means this road can never route around them — `BoundaryClampTests.theLoneSeparatorCollapses…`). |
+| M6 | **the cross-block compound** | `planCrossBlockEdit` (`EditorSurfaceController.swift:2543`) → `CrossBlockCompound.plan` (run ≥ 2 by the raw span incl. zero-length entries; clamped contiguity = the tail fence; every entry arrived (gap fence) and editable (R-13u-1)) | `runCrossBlockEdit` (:2568 — `runStructural` + `CrossBlockCompound.apply` with the store fan read; receipt via `StructuralOutcome.note`) | 13u1 UNIT 2, her item 5 (+ #109 shape (ii)'s trim, which lives INSIDE the plan). Last claimant. |
+| M7 | **the diagnosis** (terminal) | `CrossBlockRefusal.message(range:index:slots:)` = `diagnose` (seam → tail → not-editable-in-run → `.surfaceNotSettled`) | refuses (Mac forward supplies `macFanRoads` = `FannedDefaultsCopy.fanFoldRoads`) | 13j J8(b) + the 13u1 U-5 hoist: every decline speaks its ONE real cause (P-2). |
+
+**PHONE — five arms, in this order:**
+
+| # | Arm | Guard | Executor hand-off | The RULING its position encodes |
+|---|---|---|---|---|
+| P1 | **J9 ≡ R18/M11 whole-block delete** | `planWholeBlockDeletion` (:1398) → `index.wholeBlockDeletion` (the SAME shared brain) | `structural.deleteWholeBlockRun` (`MobileStructural.swift:639` — flush, "Delete Blocks" compound, `blocksDeletedStatus` + Undo action; NO confirm by her R13 ruling) | Mobile round 2 batch 1b — the Mac's J9 inherited. First on the phone because there are no seam carves above it (row 51). |
+| P2 | **#109 shape (i) clamp** | `planClampedInBlockEdit` (:1427) → `CrossBlockCompound.clampedInBlockEdit` | `runClampedInBlockEdit` (:1450 — CAS, then `MobileMarkdownActs.inputReplace`, the phone's one input door) | 13u2 UNIT C — *"It sits BELOW the whole-block delete for the Mac's reason"* (:1321). |
+| P3 | **the gap fence's FACE** | `index.wholeBlockRunAwaitsSync(covering:)` (a whole-block run containing a not-yet-arrived block) | refuses: `message(for: .readOnlySlot)` — *"This block hasn't fully synced; it is read-only for now."* | Mobile round 2 batch 1b ladder, MINOR 3(a): *"It sits ABOVE merge-then-edit deliberately"* (:1335) — the compound would decline too (its own gap fence), so the order decides the WORDS: the phone's read-only sentence instead of a residual cause. Pinned: `MobileWholeBlockDeleteTests.aRunCoveringANotYetArrivedBlockRefusesAndSaysWhy`. |
+| P4 | **the cross-block compound** (merge-then-edit, rebuilt at 13u1) | `planCrossBlockEdit` (:1414) → `CrossBlockCompound.plan` | `structural.runCrossBlockEdit` (`MobileStructural.swift:730` — flush, `CrossBlockCompound.apply` with the store fan read, wordless receipt + Undo action) | M22 + 13u1 UNIT 2. |
+| P5 | **the diagnosis** (terminal) | `CrossBlockRefusal.message(range:index:slots:fanRoads: Self.fanFoldRoads)` | refuses (phone roads: *"Merge the blocks deliberately instead (⋯ → Merge…)"*) | 13u1 UNIT 2 U-5. |
+
+**The declared capability differences (facts, not drift):** Mac-only — M1 (the phone's editor
+has no find-and-replace; `isFindReplacing` exists nowhere under `VariorumMobile`), M2 and M3
+(KnownIssues row 51 — deliberately unbuilt on the phone). Phone-only — P3 (on the Mac the same
+condition is answered by the compound's own gap fence and then M7's `.unsyncedBlock`). Shared —
+J9, the clamp, the compound, the diagnosis (the planners were already one brain; only the
+ORDER and the arm SET were prose).
+
+**Pre-arms (above the ladder, per platform — faces, not routing):** Mac —
+`suppressEditProcessing`; the seal (*"This note is sealed — unlock it to edit."*); attribute-only
+(`replacement == nil`); the ⇧⏎ soft-newline verdict input and its `.tail`-verdict mint arm
+(it answers a `.tail` verdict, so it is outside the cross-block ladder by its own verdict).
+Phone — `MobileEditTrace.gate` (instrument); `suppressEditProcessing`; the liveness belt;
+the seal (*"This note is locked — unlock it to edit."*); attribute-only. The other verdict arms
+(`.indexDesync`, the other refusals, the arming default + `MobileEditTrace.armedVerdict`) are
+the verdict switch, not the ladder.
+
+### STEP 5 (trace half) — FINDINGS
+
+**No within-platform mis-route found.** For every shape I traced (lone separator beside an
+empty/texted/fanned/archived/commented/gap/locked block; whole-block runs with and without a
+gap, with and without the tail separator; the J9-vs-clamp and J9-vs-compound overlaps; shape (i)
+and (ii) clamps; mid-to-mid spans; runs reaching the tail), each ladder's answer is what its
+declared arms in their declared order produce, and no answer crosses a ruling. Three
+OBSERVATIONS, routed to the orchestrator (none is a U1 fix — the hoist builds today's behavior):
+
+- **O-1 (copy — U3's territory).** The SAME refusal condition speaks different sentences per
+  platform: a whole-block run containing a not-yet-arrived block — Mac (M7 `.unsyncedBlock`):
+  *"A block in this selection hasn't arrived yet — nothing was changed. It stays read-only until
+  it syncs."*; phone (P3): *"This block hasn't fully synced; it is read-only for now."* And for a
+  run ending ON the open tail's separator with a gap inside it, the Mac's diagnosis names the
+  TAIL (step 2 outranks step 3) while the phone's P3 names the gap. Both refuse with nothing
+  changed; the difference is words, so it belongs beside U3's four sealed-note spellings.
+- **O-2 (shape).** P3 is a COPY arm: it never changes whether a gesture lands (P4 declines the
+  same span on its own gap fence) — only which sentence she reads. The table will declare it
+  as such, so the catch-up does not mistake it for a safety fence.
+- **O-3 (standing, documented).** M2 reads the FROZEN projection for its enablement guards, so
+  a seam keystroke beside a block the projection has not echoed yet declines and reaches M7's
+  `.seamKeystrokeDeclined` — already recorded at `CrossBlockRefusal.Cause.seamKeystrokeDeclined`;
+  noted only so the table suite's Mac pins seed the slots deliberately.
+
+### STEP 2 — THE FUNCTION-SHAPE PROPOSAL (the architect rules this fork; NOTHING BUILT YET)
+
+**The boundary (whatever shape wins):** the route decision begins where the verdict is
+`.refuse(.crossesBlockBoundary)` and ends in a VALUE. It takes the ladder M1–M7 / P1–P5 whole,
+**including M1** (the find fence is IN the route as a Mac arm, because its position — "before
+every planner" — is a ruling about ORDER; its fact `isFindReplacing` is passed in and its words
+stay Mac-local). Everything else stays at the call sites: every pre-arm above (faces and
+instruments), the verdict switch's other arms, the `pendingEdit`/`bulkPending` clears (state),
+every EXECUTOR (the roads, flights, flush contracts, store authorizations) and every SENTENCE
+(the find copy naming ⌘⇧M, the phone's read-only copy, both `fanRoads`, the seal lines).
+
+**(a) A pure `route(facts) -> Route` over PRE-COMPUTED plan options.** The caller runs every
+planner, hands in the optionals, the function picks the first non-nil in declared order.
+*For:* the simplest pure function; trivially table-testable. *Against:* it changes evaluation
+COST and ORDER — every cross-block keystroke would run all planners even when the first claims.
+Today a seam backspace costs `interEntrySeparatorPair`'s O(position) walk and stops; under (a) it
+also pays `wholeBlockRun`'s two O(N) arrays, the clamp's O(N) `entryRanges`, the compound's O(N)
+walk plus up to three surface reads, and the diagnosis's O(N) walk — P1's letter, on the
+keystroke road, multiplied. Behaviour identical (the planners are pure), cost profile not.
+**Not recommended.**
+
+**(b) An ordered declared-arm LIST per platform, walked by each view model.** `[Arm]` is data;
+each VM loops the list and switches arm → its own planner → its own executor, lazily. *For:*
+least code moves; laziness natural; the phone's absent arms are absent list entries. *Against:*
+the walk and the arm→planner mapping live TWICE (the drift class this unit exists to end, one
+level down), and the "input shape × claiming arm" table cannot be pinned purely — only through a
+mounted editor on each platform, which is the "untestable without a live NSTextView" the review
+named and the charter's `EditorEditRoute.route(...) -> Route` is the answer to. **Not
+recommended.**
+
+**(c) — RECOMMENDED — a pure, LAZY `EditorEditRoute.route(...)` that walks the platform's
+declared arm list itself, each arm's planner the SHARED pure brain.** Shape:
+
+```swift
+nonisolated enum EditorEditRoute {
+    enum Arm { case findReplaceFence, emptyBlockCarve, textedSeamMerge,
+               wholeBlockDelete, clampedInBlockEdit, gapFence, crossBlockCompound }
+    static let macArms:   [Arm] = [.findReplaceFence, .emptyBlockCarve, .textedSeamMerge,
+                                   .wholeBlockDelete, .clampedInBlockEdit, .crossBlockCompound]
+    static let phoneArms: [Arm] = [.wholeBlockDelete, .clampedInBlockEdit, .gapFence,
+                                   .crossBlockCompound]
+    enum Route: Equatable {
+        case refuseFindReplace
+        case carveEmptyBlock(EmptyBlockCarve)          // M2's plan (hoisted type, see c1)
+        case mergeTextedSeam(TextedSeamPair)           // M3's plan (hoisted type, see c1)
+        case deleteWholeBlocks([String])
+        case editInBlock(CrossBlockCompound.InBlockEdit)
+        case refuseAwaitingSync                        // P3 — a copy arm
+        case editAcrossBlocks(CrossBlockCompound.Plan)
+        case refuse(CrossBlockRefusal.Cause)           // the terminal diagnosis — never declarable
+    }
+    static func route(range: NSRange, replacement: String, index: BlockRangeIndex,
+                      slots: [Queries.RenderedBlock], findReplacing: Bool, arms: [Arm],
+                      surfaceText: (NSRange) -> String) -> Route
+}
+```
+
+Each arm is tried in list order and only until one claims — today's laziness and today's
+evaluation order exactly; the diagnosis is the fixed terminal (every ladder must end speaking —
+P-2 as structure). Each VM's ladder becomes: clear the two flags, `switch` on
+`route(… arms: Self-platform-list …)`, map each case to its EXISTING executor/sentence, `return
+false`. Arms a platform does not declare can never be returned to it (pinned); its switch
+still names them (Swift exhaustiveness) and answers them with `EditorAssertionSeam.fire` + the
+diagnosis — exactly what that platform says today for the same shape, so even the impossible
+path changes no words. The ORDER RULES move to the data: each `Arm` case carries its ruling in
+its doc comment (the prose above leaves the ladders), and a declared PRECEDENCE table —
+`(before, after, ruling)` pairs: find fence ≺ everything; J9 ≺ clamp; J9 ≺ compound; clamp ≺
+compound; the carves ≺ J9; gap fence ≺ compound — is pinned against BOTH lists, so when the
+catch-up adds `.emptyBlockCarve`/`.textedSeamMerge` to the phone's list (row 51's "one-line list
+addition"), a wrong position fails a named ruling rather than a walk.
+
+**The one sub-fork inside (c), also yours to rule:**
+- **(c1) — recommended:** hoist the two Mac-only plan WRAPPERS into `Shared/EditorBrain/` as
+  pure functions over `(index, slots)` — A7's four enablement guards (~12 lines + their doc
+  comment) and #34's liveness pair (~10 lines). Their GEOMETRY is already shared
+  (`emptyBlockDeletion`, `textedSeamPair`); `EditorSurfaceController.planEmptyBlockDeletion`/
+  `planSeamMerge` become one-line forwards and `EmptyBlockDeletion`/`SeamMerge` typealiases, so
+  every pin that calls them rides unmodified (the 3C proof). The EXECUTORS (`runEmptyBlockDeletion`,
+  `runSeamMerge`, their store authorizations and receipts) stay Mac-side. Result: the route is
+  fully pure over the facts, the table suite pins EVERY arm with its REAL planner and no fakes,
+  and row 51 reduces to exactly what it says — *"the phone needs the two roads and their
+  authorizations, not new brains"*: two list entries plus two phone executors. The phone's list
+  does NOT gain them (never built here).
+- **(c2):** leave the two wrappers Mac-local and inject platform-local planners as closures
+  (`Route` generic over the carve payloads, the phone instantiating `Never`). Smaller move,
+  type-level absence on the phone — but the Mac's carve rows in the table suite would be pinned
+  through test-built closures rather than the Mac's real guards, and the generic `Route` makes
+  every call site noisier.
+
+**Home:** a NEW file `Shared/EditorBrain/EditorEditRoute.swift` (the `Shared` group is a
+filesystem-synchronized root in both app targets — no project edit), not
+`EditorEditRouting.swift`: that file's two residents are the ARMING binding and the assertion
+seam, and a ~250-line route with its ruling docs would bury them. (If (c1) is ruled, the two
+hoisted plans live beside the route in the same file, under their own MARK.)
+
+**The planned table suite (step 4, both lists, one pure file in `VariorumTests` over the shared
+source; plus a one-line phone-target pin that `MobileEditorViewModel` passes `phoneArms`):** the
+two lists pinned literally; the capability differences pinned as declared facts; the precedence
+table satisfied by both lists; input shape × claiming arm per platform — a lone EMPTY separator
+(Mac → carve · phone → `.refuse(.seamKeystrokeDeclined)`), a texted seam (Mac → seam merge ·
+phone → `.refuse(.seamKeystrokeDeclined)`), a FANNED EMPTY seam (Mac → `.refuse(.seamBesideFan)`:
+M2 declines on the fan, M3 on the empty neighbour) beside a FANNED TEXTED seam (Mac → still M3 —
+its fan is the executor's store read, never the plan's), a whole-block run (both → delete), one block + its separator typed over (both
+→ clamp), mid-to-mid (both → compound), a whole run with a gap (phone → `.refuseAwaitingSync` ·
+Mac → `.refuse(.unsyncedBlock)`), a find sweep over a carve-shaped seam (Mac → fence); and the
+ORDER-BITES pins — shapes two arms both plan (J9 + clamp; J9 + compound; fence + carve), with
+the claimant asserted AND a permuted list asserted to answer differently, so the order is
+provably the thing pinned.
+
+**STOP — awaiting the ruling on (a)/(b)/(c) and, if (c), on (c1)/(c2).**
