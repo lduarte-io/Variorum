@@ -116,7 +116,15 @@ final class MobileEditorViewModel {
     /// 13k K9 read). Adopted unconditionally at ingest like fans:
     /// bookkeeping for the decor overlay, never surface bytes.
     @ObservationIgnored private(set) var presentations: [String: BlockPresentation] = [:]
-    @ObservationIgnored private(set) var tailText = ""
+    /// **18m U2 — type-time crystallization's conductor, SHARED** with the
+    /// Mac (`Shared/EditorBrain/TailCrystallizer.swift`): it owns the open
+    /// tail's text, the mint flight and the idle clock; this model owns it (a
+    /// downward reference only) and passes ITSELF per call as the
+    /// crystallizer's host (the conformance at the end of this file). The
+    /// pre-move names are forwards, so every caller and pin reads unchanged.
+    @ObservationIgnored private let crystallizer = TailCrystallizer()
+    /// The open tail's text (the crystallizer's; read-only here, as before).
+    var tailText: String { crystallizer.text }
     @ObservationIgnored private(set) var header: Queries.ContainerHeader?
     @ObservationIgnored private(set) weak var textView: MobileEditorTextView?
     @ObservationIgnored private(set) var storage: NSTextStorage?
@@ -141,8 +149,8 @@ final class MobileEditorViewModel {
     /// cost; churn is approximate by design — SyncSpec §6).
     @ObservationIgnored private var pendingEdit: ArmedEdit?
     @ObservationIgnored private var suppressEditProcessing = false
-    @ObservationIgnored private(set) var mintInFlight = false
-    @ObservationIgnored private var mintTask: Task<Void, Never>?
+    /// One mint batch in flight (the crystallizer's; read-only here, as before).
+    var mintInFlight: Bool { crystallizer.mintInFlight }
     @ObservationIgnored private var bulkPending = false
     @ObservationIgnored private var pendingProjection: [Queries.RenderedBlock]?
     @ObservationIgnored private var forceFullRender = false
@@ -156,13 +164,18 @@ final class MobileEditorViewModel {
     /// fire in debug, this counter lets tests observe without dying.
     @ObservationIgnored private(set) var identityAuditFailures = 0
 
-    // Idle-mint (the Mac's ratified clock, ported): a short quiet gap
-    // crystallizes the open tail — crash loss bounded to seconds; teardown
-    // stays the backstop.
-    @ObservationIgnored var tailIdleDebounce: Duration = .seconds(2)
-    @ObservationIgnored var tailIdleSleep: @Sendable (Duration) async throws -> Void =
-        { try await Task.sleep(for: $0) }
-    @ObservationIgnored private var tailIdleTask: Task<Void, Never>?
+    // Idle-mint (the Mac's ratified clock — one clock since 18m U2, the
+    // shared crystallizer's): a short quiet gap crystallizes the open tail —
+    // crash loss bounded to seconds; teardown stays the backstop. Forwards
+    // (3C): pins set the sleep exactly as before.
+    var tailIdleDebounce: Duration {
+        get { crystallizer.idleDebounce }
+        set { crystallizer.idleDebounce = newValue }
+    }
+    var tailIdleSleep: @Sendable (Duration) async throws -> Void {
+        get { crystallizer.idleSleep }
+        set { crystallizer.idleSleep = newValue }
+    }
 
     var hasOpenTail: Bool { index.tailLength != nil }
 
@@ -462,7 +475,7 @@ final class MobileEditorViewModel {
     /// Teardown backstop: pending tail text mints (the idle plan — typed
     /// gaps survive per the k−1 rule), then everything pending lands.
     func finish() async {
-        tailIdleTask?.cancel()
+        crystallizer.cancelIdleClock()
         if mintableTail {
             idleMintTail()
         } else {
@@ -475,11 +488,10 @@ final class MobileEditorViewModel {
         await autosave.flushNow()
     }
 
-    /// Bounded wait for an in-flight crystallization mint.
+    /// Bounded wait for an in-flight crystallization mint (18m U2: the shared
+    /// crystallizer's).
     func awaitMintSettle() async {
-        while mintInFlight {
-            if let mint = mintTask { await mint.value } else { await Task.yield() }
-        }
+        await crystallizer.awaitMintSettle()
     }
 
     private func observeHeader() async {
@@ -643,7 +655,7 @@ final class MobileEditorViewModel {
         index = newIndex
         slots = new
         ledger.adopt(new)
-        tailText = tail ?? ""
+        crystallizer.setText(tail ?? "")
         fullRenderCount += 1
         textView?.undoManager?.removeAllActions()
         if let caret, let textView {
@@ -1536,14 +1548,14 @@ final class MobileEditorViewModel {
                 return
             }
             restampProjection(over: editedRange)
-            tailText = ""
+            crystallizer.setText("")
         case .closeTail:
             guard index.closeTail() else {
                 recoverFromUnroutableEdit()
                 return
             }
-            tailText = ""
-            tailIdleTask?.cancel()
+            crystallizer.setText("")
+            crystallizer.cancelIdleClock()
         case .refuse:
             // An edit reached the storage without a routable verdict (a
             // UIKit path outside the policed ones). The store is truth:
@@ -1648,22 +1660,25 @@ final class MobileEditorViewModel {
     }
 
     // MARK: - Crystallization (AppSpec §7; the Mac's ported clock + rules)
+    //
+    // **18m U2: the band's BODIES live in the shared `TailCrystallizer`**
+    // (`Shared/EditorBrain/TailCrystallizer.swift` — ONE copy for both
+    // platforms of the idle clock, the mint flight, the leading-run
+    // attachment and the reconcile-and-apply). What stays here: the forwards
+    // every caller and pin reads (3C), and the host conformance at the end of
+    // this file (its DECLARED arms: no structural-flight hold — this
+    // platform's flight settles through the projection policy — and no
+    // caret-context republish).
 
     /// Re-arms the idle-mint clock after tail activity.
     func armTailIdleMint() {
-        tailIdleTask?.cancel()
-        guard mintableTail else { return }
-        tailIdleTask = Task { [weak self, tailIdleSleep, tailIdleDebounce] in
-            guard (try? await tailIdleSleep(tailIdleDebounce)) != nil else { return }
-            guard !Task.isCancelled else { return }
-            self?.idleMintTail()
-        }
+        crystallizer.armIdleMint(host: self)
     }
 
     /// Whether the open tail holds anything the ratified rules would mint
     /// (a whitespace-only tail never mints).
     var mintableTail: Bool {
-        hasOpenTail && !tailText.allSatisfy(\.isWhitespace)
+        crystallizer.isMintable(host: self)
     }
 
     /// The idle-mint — internal so tests fire it deterministically. Typing
@@ -1671,195 +1686,13 @@ final class MobileEditorViewModel {
     /// tail mints, trailing partial paragraph included, tail closes — with
     /// the `.idle` kind preserving a trailing typed newline run (k−1).
     func idleMintTail() {
-        guard mintableTail else { return }
-        // Marked text is an in-progress input-method composition, not yet
-        // the author's text — minting under it would rewrite the region
-        // mid-composition. Skip this tick and re-arm (on iOS multi-stage
-        // input is COMMON, so this guard earns its keep).
-        if textView?.markedTextRange != nil {
-            armTailIdleMint()
-            return
-        }
-        let mode = header?.effectiveSegmentation ?? .paragraph
-        crystallizeIfNeeded(forcedKind: CrystallizationPlanner.kindForDurabilityMint(mode: mode))
+        crystallizer.idleMintTail(host: self)
     }
 
-    /// The leading-run attachment (the 2026-07-12 rule; the Mac's exact
-    /// port): a tail that STARTS with newlines sits after a preceding
-    /// block — those newlines are that block's trailing CONTENT (the k−1
-    /// rule; the tail separator is the +1). Surface bytes never change:
-    /// the block's range grows over the run, and the store follows through
-    /// an ordinary autosave read from the ledger (works even with the view
-    /// gone at teardown).
-    private func attachLeadingTailRunIfNeeded() {
-        guard !mintInFlight, hasOpenTail else { return }
-        guard let last = index.entries.indices.last,
-              index.entries[last].editable,
-              let variantID = index.entries[last].variantID,
-              let knownText = ledger.textByVariant[variantID]
-        else { return }
-        let run = tailText.prefix(while: { $0 == "\n" }).count
-        guard run > 0 else { return }
-        let oldRange = index.range(ofEntryAt: last)
-        index.transferTailPrefixToLastEntry(run)
-        // Ownership moves; bytes don't: the block-ID attribute grows over
-        // the old separator position + run−1 tail newlines.
-        setBlockAttribute(
-            index.entries[last].blockID,
-            over: NSRange(location: oldRange.upperBound, length: run))
-        tailText = String(tailText.dropFirst(run))
-        let newText = knownText + String(repeating: "\n", count: run)
-        ledger.recordEdit(variantID: variantID, text: newText)
-        autosave.record(variantID: variantID, text: newText, charDelta: run)
-    }
-
-    private func crystallizeIfNeeded(forcedKind: CrystallizationPlanner.Kind? = nil) {
-        // While a mint is in flight, keep `bulkPending` ARMED — the
-        // finish re-runs this and a paste-during-mint keeps bulk
-        // semantics (the Mac's MAJOR-3 posture).
-        guard !mintInFlight else { return }
-        attachLeadingTailRunIfNeeded()
-        guard hasOpenTail else {
-            bulkPending = false
-            return
-        }
-        let mode = header?.effectiveSegmentation ?? .paragraph
-        let kind: CrystallizationPlanner.Kind = forcedKind
-            ?? CrystallizationPlanner.kindForTailEdit(mode: mode, bulkPending: bulkPending)
-        guard let plan = CrystallizationPlanner.plan(kind, tail: tailText) else {
-            if forcedKind == nil { bulkPending = false } // consumed: nothing to mint
-            return
-        }
-        bulkPending = false
-        mintInFlight = true
-        let post = postID
-        // Strong self: the reconciliation must run even if the view goes
-        // away mid-flight — the task completes in milliseconds.
-        mintTask = Task { [session] in
-            do {
-                let minted = try await session.runner.run { ops in
-                    try plan.mints.map { text -> CrystallizationReconciler.MintedBlock in
-                        // **R-13u-3's ONE named exception** (13u1 UNIT 2):
-                        // type-time crystallization is not a gesture she
-                        // made — a paragraph becomes a block because she
-                        // typed past it (AppSpec §7's "silently becomes a
-                        // block as you type") — so it registers NO undo
-                        // entry. Registering here would put one on her stack
-                        // per paragraph AND clear the redo future on every
-                        // one, which is the opposite of what ⌥⌘Z is for.
-                        let result = try ops.newBlock(
-                            in: post, text: text, at: .end, registeringUndo: false)
-                        return .init(
-                            blockID: result.block.id,
-                            variantID: result.variant.id,
-                            text: text)
-                    }
-                }
-                self.finishMint(minted, kind: kind)
-            } catch {
-                self.mintInFlight = false
-                self.statusMessage = String(describing: error)
-                self.applyPendingIfClean()
-            }
-        }
-    }
-
-    private func finishMint(
-        _ minted: [CrystallizationReconciler.MintedBlock],
-        kind: CrystallizationPlanner.Kind
-    ) {
-        mintInFlight = false
-        storeWriteGeneration &+= 1 // our mint's writes settled (MAJOR 3's fence)
-        let outcome = CrystallizationReconciler.reconcile(
-            minted: minted, currentTail: tailText, kind: kind)
-
-        // Corrections ride the autosave coordinator (isDirty covers the
-        // window; refusals keep-pending). Compensating deletions are
-        // internal bookkeeping, not an author gesture — undo-stack-free
-        // Operations, so no inverse is ever offered for something she
-        // never did (the Mac's exact posture).
-        for correction in outcome.corrections {
-            ledger.recordEdit(variantID: correction.variantID, text: correction.text)
-            autosave.record(
-                variantID: correction.variantID,
-                text: correction.text,
-                charDelta: correction.text.utf16.count)
-        }
-        if !outcome.corrections.isEmpty {
-            Task { await self.autosave.flushNow() }
-        }
-        if !outcome.deletions.isEmpty {
-            let deletions = outcome.deletions
-            Task { [session] in
-                do {
-                    try await session.runner.run { _ in
-                        let quiet = Operations() // no undo stack, same store
-                        for blockID in deletions {
-                            try quiet.deleteBlock(blockID)
-                        }
-                    }
-                } catch {
-                    self.statusMessage = String(describing: error)
-                }
-            }
-        }
-        if outcome.needsFullRerender {
-            forceFullRender = true
-        }
-        guard !outcome.applied.isEmpty else {
-            applyPendingIfClean()
-            return
-        }
-
-        // View + index application for the applied prefix.
-        guard let region = index.tailRange else {
-            forceFullRender = true
-            applyPendingIfClean()
-            return
-        }
-        var normalized = outcome.applied.map(\.text).joined(separator: EditorDocument.separator)
-        if let newTail = outcome.newTail {
-            normalized += EditorDocument.separator + newTail
-        }
-        if normalized != tailText {
-            programmaticReplace(region, with: normalized, blockID: nil, caretToEndIfWasAtEnd: true)
-            textView?.undoManager?.removeAllActions()
-        }
-        for block in outcome.applied {
-            ledger.recordEdit(variantID: block.variantID, text: block.text)
-        }
-        // A verdict armed before the mint describes a tail that may no
-        // longer exist (see `renderFull`) — the sharpest stale case, since
-        // a `.tail` arming survives into a closed tail.
-        //
-        // `bulkPending` deliberately does NOT go with it here (the one
-        // exception to NIT 4's rule, beside the consume road's conditional
-        // clear): a paste that arrived DURING the mint parked its intent
-        // here on purpose, and `crystallizeIfNeeded()` below is the call
-        // that consumes it.
-        pendingEdit = nil
-        index.crystallize(
-            minted: outcome.applied.map { ($0.blockID, $0.variantID, $0.text.utf16.count) },
-            remainingTailLength: outcome.newTail?.utf16.count)
-        tailText = outcome.newTail ?? ""
-        let firstNew = index.entries.count - outcome.applied.count
-        // ONE tiling walk for the whole mint (13u1 UNIT 1 — the Mac twin's
-        // fix, mirrored): the accessor walks from zero, so stamping M
-        // freshly-minted paragraphs over a note of N blocks cost O(M·N),
-        // and a bulk paste or an import makes M large.
-        let ranges = index.entryRanges()
-        for (offset, block) in outcome.applied.enumerated() {
-            let range = ranges[firstNew + offset]
-            if range.length > 0 {
-                setBlockAttribute(block.blockID, over: range)
-            }
-        }
-        auditIdentityProjection()
-        // New paragraphs may have completed during the flight — and a
-        // paste-during-mint's still-armed bulk flag is honored here.
-        crystallizeIfNeeded()
-        armTailIdleMint()
-        applyPendingIfClean()
+    /// The tail edit's crystallization (the consume road's `.tail` arm) —
+    /// and `finish()`'s attach-only pass.
+    private func crystallizeIfNeeded() {
+        crystallizer.crystallizeIfNeeded(host: self)
     }
 
     // MARK: - Storage primitives
@@ -1871,7 +1704,7 @@ final class MobileEditorViewModel {
     }
 
     private func syncTailText() {
-        tailText = openTailText
+        crystallizer.setText(openTailText)
     }
 
     /// The one mutating door for programmatic slot/tail replacement.
@@ -1906,10 +1739,6 @@ final class MobileEditorViewModel {
         if caretToEndIfWasAtEnd, caretWasAtEnd, let textView {
             textView.selectedRange = NSRange(location: storage.length, length: 0)
         }
-    }
-
-    private func setBlockAttribute(_ blockID: String?, over range: NSRange) {
-        EditorSurfaceStorage.setBlockID(blockID, over: range, in: storage)
     }
 
     /// **The boundary-safe re-stamp (batch 2 fix — the walk3 crash's
@@ -2048,6 +1877,85 @@ final class MobileEditorViewModel {
             "The editor lost track of block boundaries — reloading from the store."
         }
     }
+}
+
+// MARK: - 18m U2: the crystallizer's host (the band's doors — nothing more)
+
+/// **The phone's side of `TailCrystallizerHost`** — each member is the one
+/// line the band needs (the protocol names which band function asks for it),
+/// written in THIS file so the doors reach this model's `private` state
+/// without widening a single setter. `index`, `autosave`, `postID`,
+/// `surfaceKnownText(variantID:)` (the takes overlay's ledger read, the same
+/// read), `auditIdentityProjection()` and `applyPendingIfClean()` are the
+/// model's existing members.
+extension MobileEditorViewModel: TailCrystallizerHost {
+    func transferTailPrefixToLastEntry(_ units: Int) {
+        index.transferTailPrefixToLastEntry(units)
+    }
+
+    func crystallizeIndex(
+        minted: [(blockID: String, variantID: String, length: Int)],
+        remainingTailLength: Int?
+    ) {
+        index.crystallize(minted: minted, remainingTailLength: remainingTailLength)
+    }
+
+    func recordSurfaceText(variantID: String, text: String) {
+        ledger.recordEdit(variantID: variantID, text: text)
+    }
+
+    var pendingBulkEntry: Bool { bulkPending }
+
+    func clearBulkPending() {
+        bulkPending = false
+    }
+
+    func disarmPendingEdit() {
+        pendingEdit = nil
+    }
+
+    func requestFullRender() {
+        forceFullRender = true
+    }
+
+    func noteOwnWritesSettled() {
+        storeWriteGeneration &+= 1
+    }
+
+    var mintRunner: OperationsRunner { session.runner }
+
+    var segmentationMode: Segmentation { header?.effectiveSegmentation ?? .paragraph }
+
+    /// ACCESSOR: the attached storage (tests attach a bare one headless).
+    var surfaceStorage: NSMutableAttributedString? { storage }
+
+    /// ACCESSOR: UIKit's marked-text range (multi-stage input is COMMON here).
+    var surfaceHasMarkedText: Bool { textView?.markedTextRange != nil }
+
+    /// ACCESSOR: the phone's error voice — the status line's description.
+    func reportOperationError(_ error: Error) {
+        statusMessage = String(describing: error)
+    }
+
+    func replaceTailRegion(_ region: NSRange, with normalized: String) {
+        programmaticReplace(region, with: normalized, blockID: nil, caretToEndIfWasAtEnd: true)
+    }
+
+    func clearTextUndo() {
+        textView?.undoManager?.removeAllActions()
+    }
+
+    /// DECLARED — `false`: this platform's structural doors never rewrite the
+    /// surface themselves; they settle through `ingest` → the projection
+    /// policy, whose busy arm defers while a mint is in flight, so the Mac's
+    /// mid-flight duplicate-entry hazard cannot arise here (18m U2 probe P-a:
+    /// 14 interleavings, every one convergent). `TailCrystallizerHost`'s doc
+    /// holds both platforms' reasons side by side.
+    var holdsTailForStructuralFlight: Bool { false }
+
+    /// DECLARED — nothing: this model keeps no caret projection to republish
+    /// (its chrome reads on demand, and a fresh mint carries none).
+    func didApplyMint() {}
 }
 
 // MARK: - The gate delegate (batch 2)
