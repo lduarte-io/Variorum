@@ -1591,7 +1591,8 @@ moved; no revert is in flight; the tree is clean but for this record.
 | Commit 3 — the Mac COLLAPSE: `SealedNoteCopy` + the seal slot; `operationMessage` deleted; L-c; the table gains `.bufferChangedSinceGesture` · `.invalidCut` · `.invalidCommentText`; the ceremony trio to the Mac half; the Mac gate + its two siblings through the stem | DONE (this commit) — the Mac pins GREEN: `RefusalTableConvergenceTests` + `OpsRefusalTableIntegrityTests` + `SavepointSealedDoorTests` (S-1) + `TutorialLibraryActsTests` (S-2) **23 tests / 4 suites passed**; generic-iOS ** BUILD SUCCEEDED ** (the phone untouched yet). The four moved Write sentences checked byte-identical to `operationMessage`'s by script against the pre-collapse tree. **One pin corrected in this commit, said out loud:** `writesTypingGateSpeaksTheStemWithItsAct` first TYPED into the sealed note — but a sealed note's view is not editable (`adoptHeader` :798), so AppKit never asks the gate and `statusMessage` stayed nil on BOTH trees (its commit-2 "red" was the wrong red). It now asks the gate itself (`shouldChangeText(in:replacement:)` — the road the belt answers); its red-on-old is owed to the behavioural revert after the fixes (the U2 verify form) |
 | Commit 4 — the phone COLLAPSE: `MobileRefusalRoads.swift`; the five switches per § 1-D; the phone gate through the stem; P3 → `.unsyncedBlock`; V | DONE (this commit) — `MobileRefusalTableTests` + `MobileWholeBlockDeleteTests` (S-3) **21 tests / 2 suites passed** (iPhone 17 Pro sim). The five switches as ruled: each keeps only its platform arms (MobileMembership's four book arms; MobileStructural's `.lockedVariant` + its three `nothingWas` arms; MobileUndoDoor's `.lockedVariant`), its `.lockedPost` through `SealedNoteCopy` in the phone's words (MobileUndoDoor's act-less line is now the table's own — the same words), `MobileComments`' `.invalidCommentText` and `MobileStructural`'s `.invalidCut` arms retired onto the table (same words), and every `default:` = `OpsRefusalCopy.words(for:roads: .phone) ?? <that site's own fallback>`. **Zero phone seal words changed** |
 | Commit 5 — QUESTIONS #159 | DONE (this commit) — the four spellings + the family remainder quoted; (a) as built with (b)/(c) as her one-line flips; FORK L with both old sentences; the four small Write rewordings and the five newly-shared sentences; O-1 (a) with (b), and the tail-vs-gap ranking recorded as a routing change, not built; next free **#160** |
-| Step 4 — walk (both voices + the phone's simulator evidence) + finals (touched Mac suites, copy/registry families, the eleven Tutorial suites, the FULL mobile suite vs 649/111, the generic-iOS build) | NOT-STARTED |
+| Step 4a — the WALK (the dev-store Debug build from `7e0aca41`, both voices) | **DONE — 10/10 rows PASS** (the § U3 WALK below); captures `notes/plans/18m-screens/u3/{terminal,study}/` (gitignored); the dev store's voice ENDED Terminal (AX read-back `1, 0` + capture `07-voice-restored.png`); the walk instance quit by identity, zero instances after. The phone's faces are evidenced by the simulator suites (the brief's allowance — there is no phone walk kit) |
+| Step 4b — finals (touched Mac suites, copy/registry families, the eleven Tutorial suites, the FULL mobile suite vs 649/111, the generic-iOS build) + the convergence reverts | IN-PROGRESS |
 
 ### STEP 1 — WHAT THE TRACE FOUND BEFORE ANY TABLE (three brief facts corrected, said first)
 
@@ -1947,3 +1948,56 @@ and the extra switches are row-28 next-touch entries, never silent scope growth.
 planned commits stand (hoist → tripwire + red-first convergence pins → Mac collapse → phone
 collapse → QUESTIONS row); walk, finals, and the convergence reverts after the fixes (the U2
 verify form). **Proceed.**
+
+### U3 BUILD NOTES (commits 1–5, the implementer — for the cold read)
+
+- **Commit 1 `59715238` — the HOIST.** `Shared/OpsRefusalTable.swift` (new): `OpsRefusalCopy.words(for:roads:) -> String?` (the
+  table, nil = no words), `message(for:roads:)` (the table's two fallbacks, unchanged), `OpsRefusalRoads` (one-door-word
+  slots), `gateMessage(for:lockedTake:fanRoads:)` (ruling G — both view models' `message(for: BlockRangeIndex.Refusal)` are
+  one-line forwards now; the Mac's locked-take gate line became the named static `EditorViewModel.lockedTakeGateRefusal`).
+  `Variorum/Registry/OpsRefusalCopy.swift` kept its name and its six face-copy neighbours; its `enum OpsRefusalCopy` became
+  a `nonisolated extension` — the Mac half (`OpsRefusalRoads.mac`, `macWords(for:)`, the pre-hoist `message(for:)`). KnownIssues
+  row 28 gained (c). Zero test files.
+- **Commit 2 `e596b275` + `b17c0cf1` — PINS FIRST**, run red on commit 1's code (the LIVE STATUS row has the counts).
+- **Commit 3 `c00038fe` — the Mac COLLAPSE.** `SealedNoteCopy` (the ONE stem, `Words { state, verb }`) + `OpsRefusalRoads.seal`
+  in the shared file; `.lockedPost` moved from the Mac half into the table (act-less); FORK L-c; the table gained
+  `.bufferChangedSinceGesture` · `.invalidCut` · `.invalidCommentText`; the ceremony trio became Mac-half arms;
+  `operationMessage` deleted (`showOperationError` → `OpsRefusalCopy.message(for:)`; the ⌘S door's pre-check likewise, its
+  R2-1 comment re-worded to the new truth); the Mac's typing-gate literal (five sites: `EditorViewModel.shouldChangeText`,
+  `EditorFind` ×2, `EditorSurfaceController` ×2), `poolDrop` and `RefusalCopy(.sealed)` through the stem with their acts;
+  `BlockSelectionCopy.blockGone`'s doc updated (it named the deleted switch).
+- **Commit 4 `833947a6` — the phone COLLAPSE.** `VariorumMobile/Features/Write/MobileRefusalRoads.swift` (new); the five
+  switches per § 1-D; the phone gate through the stem; P3's mapping → the shared `.unsyncedBlock` sentence (U1's route, arm
+  list and order untouched — the mapping line only); ruling V inside the phone's `TailCrystallizerHost` conformance (the
+  host protocol untouched).
+- **Commit 5 `7e0aca41` — QUESTIONS #159.**
+- **Scope held:** zero `Sources/`, `Sync/`, schema; zero phone seal words changed; the family remainder and the wider phone
+  switch set are row 28 (c)'s next-touch list, untouched.
+
+### U3 WALK (the implementer's own hands, 2026-09-29 06:39–06:53, dev-store Debug build from `7e0aca41`)
+
+**Preconditions verified:** zero instances by `pgrep` before launch; `guard.sh --author` exit 0 (idle 7,146 s at the start —
+the machine undisturbed); the app built from THIS tree (`DerivedData/18m-u3`) and launched by path; every act through
+`click.sh` / `keys.sh` (author checks → activate → full guard → act), ≥ 2 s apart; menu rows clicked by System Events name
+where a menu was open. One walk note was staged through the shelf's quick-entry bar ("U3 refusal walk alpha paragraph." — one
+block, one take) and every row ran in it. The oracle is the refusal toast (refusals always toast — 18i).
+
+| # | Row (what she does) | Expected words (the ruled table) | Terminal | Study |
+|---|---|---|---|---|
+| R3 | ⌘⇧A (Archive Take) on the block's ONLY take | *"This block has only one take — a block keeps at least one take, so delete the block instead, or divide it (⌘⇧D) to split it into blocks."* (FORK L-c) | **PASS** | **PASS** |
+| R4 | lock the take (the takes panel's ⋯ → Lock this take), then ⌘S and ⏎ in the name field | *"That take is locked — unlock it or branch a new take."* (Write's op voice now the table's — W5) | **PASS** | **PASS** |
+| R1 | seal the note (note ▾ → Seal), ⌘S in Write | *"This note is sealed — unseal it first."* (the ⌘S door's pre-check = the filer = the table) | **PASS** | **PASS** (the previous toast dismissed first, so the capture is this press's) |
+| R2 | under the seal, Edit ▸ Find ▸ Replace All in Every Take | *"This note is sealed — unseal it to edit."* (the Mac gate spelling through the stem, with its act) | **PASS** | **PASS** |
+| R5 | under the seal, Takes (⌘2), click the take, ⌘S | *"This note is sealed — unseal it first."* (a TABLE door — it said "…to change takes or choices" before) | **PASS** | **PASS** |
+
+**10/10 rows PASS.** Captures `notes/plans/18m-screens/u3/{terminal,study}/02…06-*.png` (+ `00-launch`, `01-staged`,
+`07-voice-restored`). The note was left UNSEALED (Study's run unsealed it) with its one take LOCKED — a harmless walk artifact
+in the dev store. The voice was flipped through Settings' Accessibility road (pane 1, radio group "Design voice") and RESTORED
+to Terminal the same way (read-back `1, 0`). **Machinery notes, honestly:** (1) the ⌘K palette answered "Lock Take" with no
+rows (the take lock is a take-card door, not a palette verb here) — the takes panel's ⋯ menu was the road; (2) a macOS
+**crash-reporter window** ("…quit unexpectedly", a backtrace naming `EditorCommands.body.getter` — the known KnownIssues row 73
+Debug trap from U2's walk, owner 18o) sat on screen to the RIGHT of the dev window (x > 1440) for the whole walk; it is a
+system window, not a consent dialog — never clicked, never over the work area; it is still there for whoever next sits at the
+machine to dismiss. **The phone's faces** are evidenced by the simulator suites (the brief's allowance — no phone walk kit):
+`MobileRefusalTableTests` (the five switches' words, the empty door slots, the seal in the phone's own words, ruling V) and
+S-3 (P3's words), plus the ~25 phone seal pins riding unmodified in the full mobile suite.
