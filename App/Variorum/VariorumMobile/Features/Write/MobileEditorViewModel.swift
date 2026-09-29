@@ -1245,131 +1245,35 @@ final class MobileEditorViewModel {
         case .refuse(.crossesBlockBoundary):
             pendingEdit = nil
             bulkPending = false
-            // **R18 ≡ M11 (round 2, batch 1b) — her gesture stops refusing
-            // and starts working.** A selection covering exactly N WHOLE
-            // blocks (N ≥ 1) plus Delete IS the delete gesture: it routes to
-            // the block-delete compound (ONE undo entry, redo carried)
-            // instead of speaking. The Mac ruled it at 13j J9 — her words,
-            // *"what kind of writing app won't let you delete a paragraph?"*
-            // — and the phone inherits the SAME brain
-            // (`BlockRangeIndex.wholeBlockDeletion`), never a copy.
+            // The keystroke is refused HERE (the storage must not half-apply
+            // a cross-block edit) and whichever road claims it reproduces its
+            // exact intent — the Mac's own shape. **R18 ≡ M11** (round 2,
+            // batch 1b) made her whole-block delete WORK instead of speaking;
+            // **M22** (batch 3) brought merge-then-edit here from the Mac (her
+            // §30 correction — it was a parity gap); **13u1 UNIT 2** rebuilt
+            // that compound to her item 5 rulings, and the phone inherits the
+            // semantics ruled ONCE for both platforms (her own coordination
+            // flag); **13u2 UNIT C** brought #109's clamp.
             //
-            // The keystroke is refused HERE (the storage must not
-            // half-apply it) and the compound reproduces its exact intent
-            // through the structural door — the Mac's own shape.
-            //
-            // **M22 (round 2, batch 3) CLOSED THE OTHER HALF.** A span
-            // covering blocks WHOLE is the delete road above; a span opening
-            // MID-paragraph and running on is the ratified 2026-07-09
-            // MERGE-THEN-EDIT — it MERGES the touched run and applies the
-            // edit, under one compound. That road was Mac-only until this
-            // batch, which was a PARITY GAP (her correction, §30: *"i
-            // thought we added cross block edits on the mac app when there
-            // are no takes, where it just auto merges?"*) and is now the
-            // same shared brain on both platforms
-            // (`CrossBlockCompound`), never a copy.
-            //
-            // **13u1 UNIT 2 REBUILT that brain to her item 5 rulings, and
-            // the phone inherits the semantics with it** (her own
-            // coordination flag: *"the semantics are ruled HERE, once, for
-            // both platforms"*). The conditions are no longer "no takes
-            // anywhere": a span may be FANNED. Blocks the selection covers
-            // WHOLE ride `deleteBlock` — the Trash/tray road, takes
-            // preserved, Put back real, a fanned middle included; the
-            // surviving ends take their CHOSEN takes' edits; the ends JOIN
-            // only where both cuts sit mid-paragraph (R-13u-2) and no fan
-            // hangs on either (#11a, read from the store at run time). What
-            // still refuses: a locked take anywhere in the run — refuse
-            // whole, naming the lock (R-13u-1) — plus the standing gap and
-            // tail fences. The phone's own FACE for the receipt is the
-            // mobile project's, recorded in the 13u1 closeout's parity row.
-            //
-            // Ranges of exactly one character are excluded inside the
-            // whole-block brain, so the seam keystrokes keep every case they
-            // were ruled (and a seam backspace costs nothing here — the
-            // length guard is that brain's first line, before any walk); a
-            // lone separator intersects NO entry, so it can never reach
-            // merge-then-edit either (the Mac's own pinned reasoning).
-            //
-            // **NO CONFIRM HERE, and that is a RULING, not an oversight**
-            // (author, 2026-08-21 — round 2 ladder R13, superseding §24's
-            // MAJOR 1 disposition; her words: *"it's fine to have no
-            // confirm"*). The ladder's finding — a one-keystroke bulk
-            // delete on a phone with no way back — is answered by giving
-            // her the way back instead of ceremony: the structural
-            // undo/redo DOOR (M20; the stack is `Shared/` and already
-            // works here — one undo restores all N in place) and the
-            // per-note tray (M21/R3). A delete you can immediately undo is
-            // an ordinary edit. Do not re-add a confirm to this road
-            // without her word.
-            if let blockIDs = planWholeBlockDeletion(range: range, replacement: replacement) {
-                scheduleGestureCompound { [weak self] in
-                    await self?.structural.deleteWholeBlockRun(blockIDs)
-                }
-            } else if let inBlock = planClampedInBlockEdit(
-                range: range, replacement: replacement) {
-                // **#109's SHAPE (i), her ruling of 2026-09-15** — the phone
-                // inherits the semantics from the SAME shared brain the Mac
-                // consumes (`CrossBlockCompound.clampedInBlockEdit`), never a
-                // copy. A span touching only ONE block's characters plus the
-                // separator at one end clamps to that block's text and edits;
-                // the break she selected stands (R-13u-2's own consequence).
-                // Shape (ii) — the TRIM — needs no arm at all here: it lives
-                // inside `CrossBlockCompound.plan`, so the compound road
-                // below inherits it.
-                //
-                // It sits BELOW the whole-block delete for the Mac's reason:
-                // a whole paragraph plus its newline plus Delete is her J9
-                // gesture and the paragraph GOES.
-                scheduleGestureCompound { [weak self] in
-                    self?.runClampedInBlockEdit(inBlock)
-                }
-            } else if index.wholeBlockRunAwaitsSync(covering: range) {
-                // The gap fence's face (ladder MINOR 3(a)). The span IS a
-                // whole-block run — the geometry is fine and the
-                // cross-block line would send her looking for a boundary
-                // problem that isn't there. The block simply hasn't
-                // arrived, which is the sentence this editor already says
-                // when she types into one.
-                //
-                // **It sits ABOVE merge-then-edit deliberately** (M22): a
-                // gap slot renders with ZERO length, so a run containing one
-                // can pass merge-then-edit's touched-entry guards without
-                // the gap ever being "touched" — and the merge chain would
-                // then reach across it and refuse at `ops.merge`'s adjacency
-                // check with a compound-level error. Both orders end in a
-                // refusal; this one names the real reason. The gap fence's
-                // own doctrine is what settles it: the surface already told
-                // her that block is read-only until it syncs, so the refusal
-                // says that and not something else.
-                refuse(message(for: .readOnlySlot))
-            } else if let compound = planCrossBlockEdit(range: range, replacement: replacement) {
-                // M22 — the ratified 2026-07-09 merge-then-edit, reaching
-                // the phone. The keystroke is refused HERE (the storage must
-                // not half-apply a cross-block edit) and the compound
-                // reproduces its exact intent: merge the run, then apply the
-                // edit to the merged buffer, ONE undo entry. Compare-and-set
-                // against the plan-time surface texts is inside the compound,
-                // so a keystroke landing in the scheduling window makes it
-                // refuse visibly rather than clobber newer text.
-                scheduleGestureCompound { [weak self] in
-                    await self?.structural.runCrossBlockEdit(compound)
-                }
-            } else {
-                // **U-5, the wording half** (13u1 UNIT 2): the phone used to
-                // speak ONE line for every cross-block decline — *"This edit
-                // spans more than one block — edit inside one block for
-                // now"* — carrying an unexecuted instruction in its own doc
-                // comment to re-narrow itself when merge-then-edit landed.
-                // It landed; the line never moved; and after item 5 it would
-                // be false besides (a cross-block edit is the ordinary
-                // gesture now). The hoisted diagnosis names WHICH of its
-                // real causes declined — the same brain the Mac speaks, in
-                // the phone's own roads.
-                refuse(CrossBlockRefusal.message(
-                    range: range, index: index, slots: slots,
-                    fanRoads: Self.fanFoldRoads))
-            }
+            // **18m U1: WHICH road answers is ONE pure decision** —
+            // `EditorEditRoute.route` walks the phone's DECLARED arm list
+            // (`Self.routeArms`) in its ruled order and stops at the first
+            // claim. Every arm's ruling — J9 above the clamp for the Mac's
+            // reason, the gap fence's COPY arm above the compound (MINOR
+            // 3(a)) — lives at `EditorEditRoute.Arm` now, pinned as data. The
+            // phone's list deliberately carries NO seam carves (A7, #34 —
+            // KnownIssues row 51): a seam backspace declines every arm and
+            // the diagnosis speaks, in the phone's own roads. The phone's
+            // editor has no find-and-replace, so its `findReplacing` fact is
+            // `false`, said out loud rather than defaulted.
+            performCrossBlockRoute(
+                EditorEditRoute.route(
+                    range: range, replacement: replacement,
+                    index: index, slots: slots,
+                    findReplacing: false,
+                    arms: Self.routeArms,
+                    surfaceText: { viewText($0) }),
+                range: range)
             return false
         case .refuse(let refusal):
             pendingEdit = nil
@@ -1387,6 +1291,68 @@ final class MobileEditorViewModel {
                 replacementLength: (replacement as NSString).length)
             MobileEditTrace.armedVerdict() // E1 — this consult parked a verdict
             return true
+        }
+    }
+
+    // MARK: - 18m U1: the phone's face on the ONE cross-block route
+
+    /// The phone's DECLARED cross-block ladder (`EditorEditRoute.phoneArms` —
+    /// pinned as this platform's list, so the gate can never quietly walk
+    /// another one, and so the day the catch-up builds row 51's carves the
+    /// change is visible here and in the pin, never inside a ladder).
+    static let routeArms = EditorEditRoute.phoneArms
+
+    /// Maps the route's answer onto the road and the words the phone has
+    /// always had — and RE-DERIVES NOTHING (the 18m U1 ruling's condition
+    /// 3): no second guard lives here; each executor keeps its own flush
+    /// contract and store-time re-checks, byte-untouched. Every claiming road
+    /// runs on the next main-actor turn through the one chained schedule,
+    /// exactly as before.
+    private func performCrossBlockRoute(_ route: EditorEditRoute.Route, range: NSRange) {
+        switch route {
+        case .deleteWholeBlocks(let blockIDs):
+            // **NO CONFIRM HERE, and that is a RULING, not an oversight**
+            // (author, 2026-08-21 — round 2 ladder R13, superseding §24's
+            // MAJOR 1 disposition; her words: *"it's fine to have no
+            // confirm"*). The answer to a one-keystroke bulk delete with no
+            // way back is the way back — the structural undo/redo door (M20)
+            // and the per-note tray (M21/R3). Do not re-add a confirm to this
+            // road without her word (`MobileStructural.deleteWholeBlockRun`
+            // carries the same note at the door).
+            scheduleGestureCompound { [weak self] in
+                await self?.structural.deleteWholeBlockRun(blockIDs)
+            }
+        case .editInBlock(let inBlock):
+            scheduleGestureCompound { [weak self] in
+                self?.runClampedInBlockEdit(inBlock)
+            }
+        case .refuseAwaitingSync:
+            // The gap fence's COPY arm: the span IS a whole-block run; the
+            // block simply hasn't arrived — the sentence this editor already
+            // says when she types into one.
+            refuse(message(for: .readOnlySlot))
+        case .editAcrossBlocks(let compound):
+            // Compare-and-set against the plan-time surface texts is inside
+            // the compound, so a keystroke landing in the scheduling window
+            // makes it refuse visibly rather than clobber newer text.
+            scheduleGestureCompound { [weak self] in
+                await self?.structural.runCrossBlockEdit(compound)
+            }
+        case .refuse(let cause):
+            // **U-5, the wording half** (13u1 UNIT 2): the diagnosis names
+            // WHICH real cause declined — the same brain the Mac speaks, in
+            // the phone's own roads.
+            refuse(CrossBlockRefusal.message(for: cause, fanRoads: Self.fanFoldRoads))
+        case .refuseFindReplace, .carveEmptyBlock, .mergeTextedSeam:
+            // Arms the phone does NOT declare (no find-and-replace; the seam
+            // carves are KnownIssues row 51's), so the route can never return
+            // them here (pinned). Swift's exhaustiveness still asks: DEBUG
+            // stops the world on the impossible state; Release — where the
+            // seam's default handler is a no-op — says exactly what the phone
+            // says today when every declared arm declines.
+            EditorAssertionSeam.fire("the cross-block route answered an arm the phone does not declare")
+            refuse(CrossBlockRefusal.message(
+                range: range, index: index, slots: slots, fanRoads: Self.fanFoldRoads))
         }
     }
 

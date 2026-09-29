@@ -1096,108 +1096,31 @@ final class EditorViewModel {
             return false
         case .refuse(.crossesBlockBoundary):
             // Phase 11, A9: the keystroke is refused HERE (the storage must
-            // not half-apply it) and a compound reproduces its exact intent
-            // through the structural door. **13u1 UNIT 2 — her item 5:**
-            // the two roads that used to split by fan arity are ONE
-            // cross-block compound now (`planCrossBlockEdit` ▸
-            // `CrossBlockCompound`), which takes fanned and unfanned spans
-            // alike: blocks the selection covers WHOLE ride `deleteBlock`
-            // (the Trash/tray road), the surviving ends take their chosen
-            // takes' edits, and the ends join only where both cuts sit
-            // mid-paragraph and no fan hangs on either (R-13u-2 + #11a).
-            // Only two things still refuse: a sealed note (above, before any
-            // plan runs) and a LOCKED take anywhere in the run — refuse
-            // whole, naming the lock (R-13u-1). The gap fence and the tail
-            // keep their own refusals, which are not about the gesture.
+            // not half-apply it) and whichever road claims it reproduces its
+            // exact intent through the structural door — or, for #109's
+            // clamp, through the ONE ordinary input door. **13u1 UNIT 2 —
+            // her item 5:** a cross-block edit is the ordinary gesture now;
+            // only a sealed note (above, before any plan runs) and a LOCKED
+            // take anywhere in the run still refuse (R-13u-1), plus the
+            // standing gap and tail fences, which are not about the gesture.
+            //
+            // **18m U1: WHICH road answers is ONE pure decision** —
+            // `EditorEditRoute.route` walks the Mac's DECLARED arm list
+            // (`Self.routeArms`) in its ruled order and stops at the first
+            // claim. Every arm's ruling — the find fence as the safety core,
+            // A7 and #34 owning the lone separator, J9 above the clamp and the
+            // compound in her stated order — lives at `EditorEditRoute.Arm`
+            // now, pinned as data (`EditorEditRouteTableTests`).
             pendingEdit = nil
             bulkPending = false
-            // QoL batch 3 (L6) — THE SAFETY CORE, and it runs before every
-            // planner: a FIND-DRIVEN replacement never restructures the post.
-            // Below this line a cross-block edit can DELETE and MERGE blocks
-            // — ratified for a deliberate hand-made selection, never for a
-            // machine-driven sweep. `EditorFind` pre-checks every range, so
-            // reaching here under the flag means the text moved underneath a
-            // checked range; it refuses and says so.
-            if textView?.isFindReplacing == true {
-                refuseFeedback(FindReplaceGate.refusal(single: .crossesBlockBoundary))
-                return false
-            }
-            // 13c 1B (A7): the empty-block carve runs FIRST — its range is
-            // exactly one separator, which touches no entry at all, so the
-            // two plans below can never see it (pinned). Deleting an EMPTY
-            // block is the one case where the cross-block refusal buys
-            // nothing: there is no text to lose.
-            if let empty = planEmptyBlockDeletion(range: range, replacement: replacement) {
-                scheduleCrossBlockCompound { [weak self] in
-                    await self?.runEmptyBlockDeletion(empty)
-                }
-            } else if let seam = planSeamMerge(range: range, replacement: replacement) {
-                // 13d batch 2 (#34, her ruling (ii)): the same range shape,
-                // with TEXT on both sides — backspace joins the paragraphs
-                // when neither block has takes, and says why when either
-                // does. Mutually exclusive with the carve above (one needs an
-                // empty neighbour, this needs neither) and invisible to the
-                // two plans below (both collect by intersection, and a lone
-                // separator intersects nothing) — pinned.
-                scheduleCrossBlockCompound { [weak self] in
-                    await self?.runSeamMerge(seam)
-                }
-            } else if let whole = planWholeBlockDeletion(range: range, replacement: replacement) {
-                // 13j J9 (her ruling): a selection covering exactly N WHOLE
-                // blocks + Delete IS the delete gesture — it routes to the
-                // 13e batch-4 delete compound (ONE ⌥⌘Z entry, redo carried)
-                // instead of refusing. It sits BELOW the two seam carves
-                // deliberately: their geometry is a single separator, which
-                // `wholeBlockRun` excludes by construction — so A7's
-                // no-fan/nothing-unshown authorization and #34's fan refusal
-                // keep every case they ruled, and this road can never route
-                // around them. It sits ABOVE the compound because a run of
-                // whole paragraphs plus Delete means "these paragraphs go",
-                // and that road keeps its OWN ruling — #33(a)'s unrestricted
-                // delete, which takes a locked take's block, where the
-                // compound refuses whole for one (R-13u-1). Two gestures,
-                // two rulings, in her stated order.
-                scheduleCrossBlockCompound { [weak self] in
-                    await self?.runWholeBlockDeletion(whole)
-                }
-            } else if let inBlock = planClampedInBlockEdit(
-                range: range, replacement: replacement) {
-                // **#109's SHAPE (i), her ruling of 2026-09-15:** a span
-                // touching only ONE block's characters plus the separator at
-                // one end CLAMPS to that block's text and edits — *"if it's
-                // on the boundary, why not treat it as just part of that one
-                // block?"* The break she selected stands, which is R-13u-2
-                // speaking rather than a compromise of it.
-                //
-                // **It sits BELOW J9 deliberately.** A whole paragraph plus
-                // its newline plus Delete is her J9 gesture and the paragraph
-                // GOES (tray, Put back real); clamping first would have left
-                // an empty block instead. J9 declines a type-over, which is
-                // why the same span typed over lands here and replaces the
-                // block's text in place.
-                //
-                // **And BELOW the seam carves**, which own the one-character
-                // separator keystroke whole: a lone-separator DELETE is A7's
-                // carve or #34's merge, with their own authorizations and
-                // their own refusals, and this road's "nothing to do" guard
-                // declines it so it can never route around them.
-                scheduleCrossBlockCompound { [weak self] in
-                    self?.runClampedInBlockEdit(inBlock)
-                }
-            } else if let compound = planCrossBlockEdit(range: range, replacement: replacement) {
-                // **THE CROSS-BLOCK COMPOUND** (13u1 UNIT 2 — item 5). One
-                // gesture, one structural compound, one ⌥⌘Z entry.
-                scheduleCrossBlockCompound { [weak self] in
-                    await self?.runCrossBlockEdit(compound)
-                }
-            } else {
-                // 13j J8(b): the refusal DIAGNOSES. Every road above declined
-                // for a reason this arm can still see — the range, the index's
-                // tiling and the projection beside it — so the line names that
-                // one reason instead of listing three.
-                refuseFeedback(
-                    CrossBlockRefusal.message(range: range, index: index, slots: slots))
-            }
+            performCrossBlockRoute(
+                EditorEditRoute.route(
+                    range: range, replacement: replacement,
+                    index: index, slots: slots,
+                    findReplacing: textView?.isFindReplacing == true,
+                    arms: Self.routeArms,
+                    surfaceText: { viewText($0) }),
+                range: range)
             return false
         case .refuse(let refusal):
             pendingEdit = nil
@@ -1215,6 +1138,60 @@ final class EditorViewModel {
                 verdict: verdict, range: range, documentLength: index.documentLength,
                 replacementLength: (replacement as NSString).length)
             return true
+        }
+    }
+
+    // MARK: - 18m U1: the Mac's face on the ONE cross-block route
+
+    /// The Mac's DECLARED cross-block ladder (`EditorEditRoute.macArms` —
+    /// pinned as this platform's list, so the gate can never quietly walk
+    /// another one).
+    static let routeArms = EditorEditRoute.macArms
+
+    /// Maps the route's answer onto the road and the words the Mac has
+    /// always had — and RE-DERIVES NOTHING (the ruling's condition 3): no
+    /// second guard lives here; each executor keeps its own store-time
+    /// re-checks (A7's `.emptyWithNothingUnshown`, #34's store fan read, the
+    /// compound's CAS and fan read), byte-untouched. Every claiming road
+    /// runs on the next main-actor turn through the one chained schedule,
+    /// exactly as before.
+    private func performCrossBlockRoute(_ route: EditorEditRoute.Route, range: NSRange) {
+        switch route {
+        case .refuseFindReplace:
+            refuseFeedback(FindReplaceGate.refusal(single: .crossesBlockBoundary))
+        case .carveEmptyBlock(let empty):
+            scheduleCrossBlockCompound { [weak self] in
+                await self?.runEmptyBlockDeletion(empty)
+            }
+        case .mergeTextedSeam(let seam):
+            scheduleCrossBlockCompound { [weak self] in
+                await self?.runSeamMerge(seam)
+            }
+        case .deleteWholeBlocks(let blockIDs):
+            scheduleCrossBlockCompound { [weak self] in
+                await self?.runWholeBlockDeletion(WholeBlockDeletion(blockIDs: blockIDs))
+            }
+        case .editInBlock(let inBlock):
+            scheduleCrossBlockCompound { [weak self] in
+                self?.runClampedInBlockEdit(inBlock)
+            }
+        case .editAcrossBlocks(let compound):
+            scheduleCrossBlockCompound { [weak self] in
+                await self?.runCrossBlockEdit(compound)
+            }
+        case .refuse(let cause):
+            // The terminal diagnosis, in the Mac's roads (`macFanRoads`).
+            refuseFeedback(CrossBlockRefusal.message(for: cause))
+        case .refuseAwaitingSync:
+            // An arm the Mac does NOT declare (the phone's copy arm — the
+            // Mac's own answer to that condition is the diagnosis's
+            // `.unsyncedBlock`), so the route can never return it here
+            // (pinned). Swift's exhaustiveness still asks: DEBUG stops the
+            // world on the impossible state; Release — where the seam's
+            // default handler is a no-op — says exactly what the Mac says
+            // today when every declared arm declines.
+            EditorAssertionSeam.fire("the cross-block route answered an arm the Mac does not declare")
+            refuseFeedback(CrossBlockRefusal.message(range: range, index: index, slots: slots))
         }
     }
 

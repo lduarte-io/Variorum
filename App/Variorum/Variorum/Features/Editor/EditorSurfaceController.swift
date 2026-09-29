@@ -2267,82 +2267,18 @@ final class EditorSurfaceController {
     /// backspace/forward-delete of the ONE separator beside an EMPTY block
     /// deletes that block instead of refusing.
     ///
-    /// **Where the authorization actually lives, since round 3 moved it**
-    /// (13c Stage 1 ladder, R3-1). The four guards below are the
-    /// ENABLEMENT layer: they read `model.slots`, decide fast, and let an
-    /// ordinary seam keystroke fall through to the ratified refusal without
-    /// a noisy message. They are NOT the authorization, because `slots` is
-    /// deliberately held stale whenever the editor is busy
-    /// (`EditorProjectionPolicy.decide` returns `.deferUntilClean` while the
-    /// buffer is dirty or a mint/structural flight is up, and autosave's
-    /// debounce re-arms on every keystroke — so for a whole typing burst
-    /// this array is frozen). A comment arriving in that window — from sync,
-    /// or from her own comments sheet — was invisible to guard 3, and the
-    /// block went with its note.
-    ///
-    /// The authorization is now `Operations.BlockDeletionPrecondition
-    /// .emptyWithNothingUnshown`, re-read INSIDE the tombstone's own
-    /// transaction (see `runEmptyBlockDeletion`). Read the two together:
-    /// what follows says WHY each condition matters; the operation is what
-    /// makes it true at the moment the row is written.
-    ///
-    /// The four guards, and together they are what keeps the carve from
-    /// widening:
-    ///
-    /// 1. the block's SURFACE text is empty (the index's rule) — a block
-    ///    with any text keeps the ratified refusal;
-    /// 2. the block has NO FAN (`activeVariantCount == 1`) — takes are
-    ///    text, and a seam-key must never take one away unseen;
-    /// 3. the block carries NO UNSHOWN TEXT — `carriesUnshownText`, the ONE
-    ///    read that answers the carve's only authorization ("there is no
-    ///    text to lose"). Two kinds live behind it, found one ladder round
-    ///    apart and deliberately wired through one name rather than two
-    ///    parallel guards: an **archived take** (R1-1 — archive is
-    ///    out-of-the-fan, not gone; reachable in three ordinary gestures:
-    ///    branch · archive the one with the prose · blank the survivor) and
-    ///    a **block COMMENT** (R2-1 — `addBlockComment` has no empty-block
-    ///    rule, and a note on an empty block is ordinary: *"I'll rewrite
-    ///    this — see the note"*). Both die in `deleteBlock`'s cascade, and
-    ///    the comment half additionally defeats AppSpec §7's ratified
-    ///    "deleted comments are visible and resurrectable — never skimpy",
-    ///    since `deletedBlockComments` is keyed by block and a tombstoned
-    ///    block is only in the tray;
-    /// 4. the slot is editable (a live variant, unlocked, not a gap).
-    ///
-    /// PROVISIONAL (13c R2-1, QUESTIONS #40): a NAMED or CALLOUT empty
-    /// block still carves. `block.name` and `block.presentation` are
-    /// columns on the block row — the tombstone keeps them, undo and
-    /// `restoreBlock` bring them back with the block, and the tray lists
-    /// the block by its name — so nothing of them becomes unrecoverable,
-    /// which is the line the two counted kinds cross. Guarding on every
-    /// datum attached to a block (tags cascade too) would narrow the carve
-    /// back out of existence and undo A7.
-    ///
-    /// Every one of the four is re-checked in the operation's own
-    /// transaction, so a sync apply — or her comments sheet, or another
-    /// surface — changing any of them between the keystroke and the write
-    /// refuses the whole gesture rather than deleting text nobody saw.
-    struct EmptyBlockDeletion: Sendable, Equatable {
-        let blockID: String
-        let variantID: String
-        let entryIndex: Int
-    }
+    /// **The PLAN — its four ENABLEMENT guards and the why of each — moved to
+    /// the shared brain at 18m U1** (`SeamCarvePlan.emptyBlockDeletion`,
+    /// `Shared/EditorBrain/EditorEditRoute.swift`, ruled (c1)), so the ONE
+    /// cross-block route can decide purely over its facts and the phone's
+    /// future carve inherits it (KnownIssues row 51). The name and this
+    /// forward stay so every caller and pin reads unchanged (the 3C proof);
+    /// the AUTHORIZATION and the road stay here, in `runEmptyBlockDeletion`.
+    typealias EmptyBlockDeletion = SeamCarvePlan.EmptyBlockDeletion
 
     func planEmptyBlockDeletion(range: NSRange, replacement: String) -> EmptyBlockDeletion? {
-        guard replacement.isEmpty,
-              let i = model.index.emptyBlockDeletion(replacing: range, isDeletion: true)
-        else { return nil }
-        let entry = model.index.entries[i]
-        guard entry.editable, let variantID = entry.variantID else { return nil }
-        // No fan: a block with several takes carries text in the ones you
-        // are not looking at, so the "nothing to lose" argument fails.
-        guard i < model.slots.count, model.slots[i].activeVariantCount == 1 else { return nil }
-        // …and nothing the slot does not SHOW (R1-1's archived take, R2-1's
-        // block comments). This is the guard that actually says "there is
-        // no text to lose"; a third kind of unshown prose extends
-        // `carriesUnshownText`, never this line.
-        guard !model.slots[i].carriesUnshownText else { return nil }
-        return EmptyBlockDeletion(blockID: entry.blockID, variantID: variantID, entryIndex: i)
+        SeamCarvePlan.emptyBlockDeletion(
+            replacing: range, with: replacement, index: model.index, slots: model.slots)
     }
 
     /// Runs A7's carve through the one structural door as **ONE
@@ -2357,8 +2293,8 @@ final class EditorSurfaceController {
     /// standing on `model.slots`, an array the projection engine
     /// deliberately freezes while the buffer is dirty or a flight is up. A
     /// comment landing during a typing burst was therefore invisible to
-    /// them, and the block (and its note) went. The plan-time guards below
-    /// stay as the ENABLEMENT layer — fail fast, don't refuse noisily — but
+    /// them, and the block (and its note) went. The plan-time guards (the
+    /// shared `SeamCarvePlan`'s since 18m U1) stay as the ENABLEMENT layer — fail fast, don't refuse noisily — but
     /// the authorization is the operation's now, where it cannot be a
     /// snapshot.
     func runEmptyBlockDeletion(_ plan: EmptyBlockDeletion) async {
@@ -2377,65 +2313,19 @@ final class EditorSurfaceController {
 
     // MARK: - #34 (13d batch 2): backspace at a TEXTED seam
 
-    /// The pair a seam keystroke would join. Geometry + liveness only — the
-    /// fan question is `runSeamMerge`'s, on the store (see below).
-    struct SeamMerge: Sendable, Equatable {
-        let leadingIndex: Int
-        let trailingIndex: Int
-        let leadingBlockID: String
-        let trailingBlockID: String
-    }
+    /// The pair a seam keystroke would join — and her #34 ruling's PLAN
+    /// (geometry + liveness only; the fan is `runSeamMerge`'s store read,
+    /// below). **Moved to the shared brain at 18m U1**
+    /// (`SeamCarvePlan.textedSeamMerge`, `Shared/EditorBrain/EditorEditRoute
+    /// .swift`, ruled (c1)) with the ruling's full text — the precedence at a
+    /// deleted separator, why the plan never decides the fan, why locked
+    /// takes do not refuse. The name and this forward stay so every caller
+    /// and pin reads unchanged (the 3C proof).
+    typealias SeamMerge = SeamCarvePlan.SeamMerge
 
-    /// Her QUESTIONS #34 ruling (13c ratify walk, 2026-07-27), option (ii):
-    /// **backspace at a seam between two TEXTED blocks MERGES when NEITHER
-    /// block has takes, and refuses-and-speaks when either does.** The second
-    /// named exception to the ratified cross-block destructive-edit refusal —
-    /// A7's empty-block carve (13c 1B) is the first, and this one is granted
-    /// on a different argument: not *"there is no text to lose"* but *"basic
-    /// text should behave like basic text"*, her own words at #34.
-    ///
-    /// The precedence at a deleted inter-block separator, in order:
-    /// 1. **A7's carve** — an empty neighbour with nothing unshown: the block
-    ///    goes (exactly as shipped; its guards and #40/#42's rulings are
-    ///    untouched by this batch);
-    /// 2. **this** — both neighbours texted, neither fanned: the ordinary
-    ///    binary MERGE of the two, through the standing gesture path;
-    /// 3. **this, refusing** — both texted, either side fanned: the fan is
-    ///    named and the explicit door pointed at. A keystroke must never fold
-    ///    a fan away, and must never open a sheet.
-    ///
-    /// What this plan deliberately does NOT decide is the fan. There is
-    /// exactly ONE fan rule in the app — the merge ceremony's own threshold
-    /// (S4-23 ruling 4: any live active fan on either side opens the
-    /// ceremony) — and it is read from the STORE, never from `model.slots`,
-    /// which the projection engine deliberately freezes for the length of a
-    /// typing burst. That freeze is what the 13c ladder's R3-1 finding was
-    /// about, one door over: a plan-time guard reading it is an enablement
-    /// hint, never an authorization. Here the authorization is the run's
-    /// truth read, and a fan arriving mid-burst therefore stops the merge
-    /// (pinned).
-    ///
-    /// Locked takes deliberately do NOT refuse: merge COPIES the rendered
-    /// texts and never edits a buffer, so the explicit gesture allows them
-    /// (Phase 3 op semantics, `StructuralGesturePlanner.merge`) and parity is
-    /// the rule for this door too. A sealed post never reaches here —
-    /// `shouldChangeText` refuses at the seal before any plan runs.
     func planSeamMerge(range: NSRange, replacement: String) -> SeamMerge? {
-        guard replacement.isEmpty,
-              let (leading, trailing) = model.index.textedSeamPair(
-                deleting: range, isDeletion: true)
-        else { return nil }
-        let entries = model.index.entries
-        // A gap slot has nothing to merge (the planner's `.gapSlot` refusal);
-        // by geometry a gap is length 0 and so is never a texted seam, but
-        // the pair the merge gesture requires is stated here rather than
-        // inferred.
-        guard entries[leading].variantID != nil, entries[trailing].variantID != nil
-        else { return nil }
-        return SeamMerge(
-            leadingIndex: leading, trailingIndex: trailing,
-            leadingBlockID: entries[leading].blockID,
-            trailingBlockID: entries[trailing].blockID)
+        SeamCarvePlan.textedSeamMerge(
+            replacing: range, with: replacement, index: model.index)
     }
 
     /// Fires exactly where the explicit merge gesture would be INSTANT, and

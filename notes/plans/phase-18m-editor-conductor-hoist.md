@@ -448,10 +448,10 @@ no revert is in flight.
 | Preflight reads (this file whole; charter KICKOFF 3; health review §2.1/§3/§8; KnownIssues rows 28/51/70/74; MobileSoul §3 + §4 item 4; TEXTKIT2_NOTES whole; SessionResiliencyProtocol whole; both cascades + both consume roads + `fallbackVerdict`s; the Mac planner forwards and `EditorSurfaceController`'s plan/run functions; `MobileStructural` whole-block + compound executors; all 13 `Shared/EditorBrain/` files; the pin suites — Mac `SeamMergeTests`, `WholeBlockDeleteTests`, `BoundaryClampTests`, `CrossBlockCompoundTests`, the find fence pins in `FindAndReplaceTests`, `EditorSeamCostTests`' plan pins; phone `MobileCrossBlockEditTests`, `MobileWholeBlockDeleteTests`' gate pins, the `MobileEditRoutingTests` roster) | DONE (read in this session, never delegated) |
 | Step 1 — trace both cascades; the ARM TABLE | DONE (this commit) — below |
 | Step 2 — the function-shape proposal, options (a)/(b)/(c) | DONE (this commit) — **AWAITING THE ARCHITECT'S RULING; nothing is built until it lands** |
-| Step 3 — build in `Shared/EditorBrain/`, both ladders one call | NOT-STARTED — design per the ruling |
+| Step 3 — build in `Shared/EditorBrain/`, both ladders one call | DONE (the hoist commit — see BUILD NOTES below) — Mac `build-for-testing` and the generic-iOS build both green; **every behavior claim PENDING the finals** |
 | Step 4 — the new pure table suite (order per platform + declared capability differences) | NOT-STARTED — planned pins listed under the proposal |
 | Step 5 — findings routed; build to TODAY's behavior | DONE for the trace (no within-platform mis-route found; three observations below, routed) — re-checked at build |
-| Step 6 — row 28's enumeration + row 51's build-seam line, same commit as the hoist | NOT-STARTED |
+| Step 6 — row 28's enumeration + row 51's build-seam line, same commit as the hoist | DONE (the hoist commit) — row 28 (a)'s cascade half recorded DISCHARGED with its count PENDING the finals; row 51 gains its build-seam sentence |
 | Step 7 — walk (both voices) + finals (touched Mac suites + routing/seam/compound families + the eleven Tutorial suites + FULL mobile suite + generic-iOS build) | NOT-STARTED — every count PENDING |
 
 ### STEP 1 — THE ARM TABLE (today's tree, `3975b682`)
@@ -684,3 +684,52 @@ names a platform door, so §4.4 does not force locality — but the CAUSE-RANKIN
 words-about-behavior and U3 treats it with the same care). O-2 is ADOPTED into the table's own
 documentation (condition 5). O-3 stays documented behavior — the table suite seeds slots
 deliberately, as planned. **Proceed with steps 3–7.**
+
+### U1 BUILD NOTES (steps 3 + 6 — the hoist commit)
+
+**What moved, and where (an ADDRESS change — zero behavior intended per platform, PENDING the finals):**
+- **NEW `App/Variorum/Shared/EditorBrain/EditorEditRoute.swift`** — `EditorEditRoute` (`Arm` with each
+  arm's ruling at its declaration; `macArms`; `phoneArms`; `Precedence` + `precedence` + `violations(of:)`;
+  `Route`; `route(range:replacement:index:slots:findReplacing:arms:surfaceText:)`) and, under its own MARK,
+  `SeamCarvePlan` — the Mac's two seam-carve PLANS hoisted verbatim with their full doc (A7's four
+  enablement guards + #40's PROVISIONAL; #34's ruling, precedence list, the fan-is-not-the-plan's
+  doctrine, locked-takes-do-not-refuse). Only `model.slots`/`model.index` became the `slots`/`index`
+  parameters.
+- **`EditorSurfaceController`** — `EmptyBlockDeletion` / `SeamMerge` are now typealiases to the shared
+  structs and `planEmptyBlockDeletion` / `planSeamMerge` one-line forwards (the 3C names every pin
+  calls); `runEmptyBlockDeletion` / `runSeamMerge` (the ROADS and their store-time authorizations)
+  untouched but for one comment word ("below" → the shared plan's).
+- **`EditorViewModel.shouldChangeText`** — the `.crossesBlockBoundary` arm is the two flag clears + ONE
+  `EditorEditRoute.route(… arms: Self.routeArms …)` call + `return false`; `static let routeArms =
+  EditorEditRoute.macArms`; `performCrossBlockRoute(_:range:)` maps each `Route` to the SAME executor
+  and the SAME sentence the ladder had (`FindReplaceGate.refusal(single:)`, `runEmptyBlockDeletion`,
+  `runSeamMerge`, `runWholeBlockDeletion(WholeBlockDeletion(blockIDs:))`, `runClampedInBlockEdit`,
+  `runCrossBlockEdit`, `CrossBlockRefusal.message(for:)` — the Mac forward with `macFanRoads`, byte-equal
+  to the old `message(range:index:slots:)` composition), all through the same `scheduleCrossBlockCompound`.
+- **`MobileEditorViewModel.shouldChangeText`** — the same shape with `static let routeArms =
+  EditorEditRoute.phoneArms`, `findReplacing: false` said out loud, and the phone's executors/sentences
+  (`structural.deleteWholeBlockRun`, `runClampedInBlockEdit`, `message(for: .readOnlySlot)`,
+  `structural.runCrossBlockEdit`, `CrossBlockRefusal.message(for:fanRoads: Self.fanFoldRoads)`) through
+  the same `scheduleGestureCompound`. Her R13 NO-CONFIRM ruling moved from the ladder to the
+  `.deleteWholeBlocks` mapping (the door keeps its own copy of the note).
+- The prose rulings that argued each ladder's order MOVED to `EditorEditRoute.Arm` (condition: "the
+  order's why lives at the data now"); the per-case executor notes stayed at the mappings.
+
+**The ruling's six conditions, as built (for the reviewer):**
+1. **`surfaceText` is bounded and read-only:** a non-escaping parameter, never stored; consulted only by
+   the clamp (ONE read, and only when it claims — the walk then stops) and the compound (AT MOST TWO
+   reads — its surviving ends — and only when reached). **So one route reads the surface at most
+   TWICE**, which is exactly the old ladder's bound. *(Correction to the ruling's "≤ 3": three was the
+   eager option (a)'s figure — clamp read + compound's two — which lazy (c) never pays.)*
+2. **Precedence pins pass vacuously on an absent arm** — stated at `EditorEditRoute.Precedence` and at
+   the pin (step 4).
+3. **The switches re-derive nothing** — each case is one executor call or one sentence; no guard at the
+   call sites.
+4. **The undeclared-arm cases** (Mac: `.refuseAwaitingSync`; phone: `.refuseFindReplace`,
+   `.carveEmptyBlock`, `.mergeTextedSeam`) fire `EditorAssertionSeam` then speak the platform's own
+   diagnosis. **Release behavior is the diagnosis alone** — the seam's default handler is
+   `assertionFailure`, a no-op outside DEBUG — which is exactly what that platform says today when every
+   declared arm declines.
+5. **P3 is declared a COPY arm** in `Arm.gapFence`'s doc, with why the Mac lacks it (M7's
+   `.unsyncedBlock` speaks there; the WORDS differ — O-1, U3's).
+6. **`findReplacing` has no default** — Mac `textView?.isFindReplacing == true`, phone `false`.
