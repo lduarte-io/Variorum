@@ -156,6 +156,16 @@ struct EditorEditRouteTableTests {
             #expect(!rule.ruling.isEmpty, "every constraint names its ruling")
             #expect(rule.before != rule.after)
         }
+        // Ladder round 1 (the NIT, 2026-09-29): the fence's GENERATED rows
+        // cover the PLANNER arms only. The gap fence is a COPY arm — it can
+        // only refuse (O-2) — so L6's "the safety core runs before every
+        // planner" has nothing to guard there, and no ruling has ever placed
+        // the two relative to each other (no platform declares both). A row
+        // claiming L6 for that pair would be an extrapolation wearing a
+        // ruling's name, against the table's own promise.
+        #expect(!EditorEditRoute.precedence.contains {
+            $0.before == .findReplaceFence && $0.after == .gapFence
+        }, "the fence's generated rows pair it with planner arms only")
     }
 
     /// **An ABSENT arm is a VACUOUS PASS — and the rule BITES the day it

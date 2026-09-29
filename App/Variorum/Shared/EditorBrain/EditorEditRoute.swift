@@ -187,8 +187,16 @@ nonisolated enum EditorEditRoute {
     }
 
     static let precedence: [Precedence] = {
+        // The generated fence-first rows cover the PLANNER arms only: the
+        // gap fence is a COPY arm — it can only refuse (O-2) — so L6's "the
+        // safety core runs before every planner" has nothing to guard
+        // there, and no ruling has ever placed the two relative to each
+        // other (no platform declares both; their relative order could
+        // change only a refusal's wording, never whether a gesture lands).
+        // (Ladder round 1's NIT, 2026-09-29 — pinned beside the
+        // every-row-names-its-ruling check.)
         var rules: [Precedence] = Arm.allCases
-            .filter { $0 != .findReplaceFence }
+            .filter { $0 != .findReplaceFence && $0 != .gapFence }
             .map {
                 Precedence(
                     before: .findReplaceFence, after: $0,
