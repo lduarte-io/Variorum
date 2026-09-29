@@ -1004,12 +1004,7 @@ follows; your self-assessment closes your record.
 
 ## U2 RECORD (the `opus-implementer`, session 2 — opened 2026-09-29)
 
-**NOT DONE (first line, per the contract): everything after step 2. The unit is STOPPED at the brief's
-HARD CHECKPOINT — the band map (step 1) and the injected-surface proposal (step 2) are below; NOTHING is
-built, no production line has changed, and step 3 waits on the architect's ruling.** No revert is in
-flight. Tree at this checkpoint: `25ce55df` + this record + one `.gitignore` line
-(`notes/plans/18m-screens/` — the traps name it as gitignored and it was not; the probe evidence below
-lives there).
+**NOT DONE (first line, per the contract): (1) no PHONE GUI walk — there is no phone walk kit; the phone's half of the band is evidenced by the harness (the full mobile suite on the simulator and the band's phone families); (2) the full MAC suite — the brief names the touched suites, the crystallization/seam/structural families and the eleven Tutorial suites, which ran green; (3) the riders' red-on-old is verified by RUN ORDER on the exact pre-fix trees (each PIN commit ran red before its FIX commit — U1 round 1's accepted form), not by a second post-fix revert.** Everything else the brief and the ruling ask for is DONE, committed and pushed: the hoist (three behaviour-preserving commits), rider F-2 (pin → fix), rider F-3 (pin → fix, not hollow), row 74 NOT TAKEN, the walk 12/12 both voices, the finals green. No revert is in flight; the tree is clean; zero instances running.
 
 ### LIVE STATUS
 
@@ -1027,7 +1022,7 @@ lives there).
 | Rider F-3 — the Mac restyle (pin-first on the real roads; record-only if hollow) | DONE — PIN `8ffaaa18` (RED on the pre-fix behaviour on all three user-reachable roads, exactly at the face assertion — 3 tests / 3 issues; premises and road-taken expectations held) → FIX this commit: the Mac's `programmaticReplace` passes `restyle: MarkdownStyling.restyle` (the span-bounded, attributes-only restyle `applySeamEdit` already runs — no new mechanism), inside the same storage transaction → **GREEN** (`ProgrammaticReplaceFaceTests` 3/3 with `SpaceEaterTests`, `EditorSessionTests`, `DifferentialApplyTests`, `StructuralRewriteDoorTests`, `MarkdownFaceTests` (incl. its P1 scan budget), `ReviewRound1FixTests`, `CrystallizationPlannerTests`: 76 tests / 8 suites). The shared door's header re-worded to the new truth |
 | Step 4 — row 74's MAY-take | **NOT TAKEN** (the ruling accepted the record's reasons: the hoist touches the phone's teardown road only by ADDRESS — `finish()`'s idle-clock cancel now names the crystallizer — and a take is a lifecycle behaviour change needing C1's own T1–T5 trace for the phone; the row stays the mobile project's) |
 | Step 5a — the typing WALK (dev-store Debug build from `4117689b`, both voices) | **DONE — 12/12 rows PASS** (W1–W6 × Terminal/Study; the section U2 WALK below). Captures `notes/plans/18m-screens/u2/{terminal,study}/` (gitignored). The dev store's voice ENDED Terminal (read-back + capture); the walk instance quit by identity (zero instances after) |
-| Step 5b — finals (touched Mac suites + crystallization/seam/structural families + the eleven Tutorial suites + the FULL mobile suite + generic-iOS build) | IN-PROGRESS |
+| Step 5b — finals | **DONE** (tree `95e22720`; code last changed at `4117689b`; her machine granted, nobody at it; the dev store's voice Terminal): **Mac run A — the band's families + the three new pin suites + the face suites: `✔ 349 tests in 44 suites passed`, 0 skipped** · **Mac run B — U1's routing/seam/compound families, 18l's keeper pins, the seam-cost pins, `BoundaryFluidityTests`, `BlockDeletionAndRedoTests` and the ELEVEN Tutorial suites: `✔ 241 tests in 25 suites passed`, 0 skipped** · **the FULL mobile suite (iPhone 17 Pro simulator): `649 tests in 111 suites`, 5 issues = EXACTLY the attributed baseline — the 4 known (`MobileTrashTests` ×2, `MobileTutorialWalkTests.theFannedDivideLessonLandsTheDuplicateShape` ×2) + F-1 (`nothingUserFacingNamesTheMac`, U1's attributed pre-existing sweep red); 0 skipped** (the baseline 647/110 + the F-2 suite's 2 tests) · **generic-iOS build `** BUILD SUCCEEDED **`**. **The 3C proof by diff:** the three hoist commits (`65941ee9`, `e22c0ed0`, `d34e4f02`) touch ZERO test files; over `25ce55df..HEAD` the test targets only GAINED the two rider pin files (`ProgrammaticReplaceFaceTests.swift`, `MobileDeferredProjectionRetryTests.swift`); zero `Sources/`, `Server/`, `Sync/`. Row 28's count flipped from PENDING |
 
 ### STEP 1 — THE BAND MAP (today's tree, `25ce55df`; Mac body vs phone body, function by function)
 
@@ -1415,3 +1410,65 @@ RESTORED to Terminal the same way (read-back `1, 0`, capture). The phone's twin 
 covered by the harness (the full mobile suite — `MobileSpaceEaterTests`, `MobileTrailingNewlinesTests`,
 `MobileEditorCrystallizationTests`, `MobileNoteClipboardTests`, the perf walk's oracles), there
 being no phone GUI walk kit.
+
+### U2 SELF-ASSESSMENT (for the FABLE cold reviewer)
+
+**What I claim, and the evidence for each claim:**
+1. *The hoist (3a/3b/3c) moved an ADDRESS, not behaviour, on both platforms.* Every moved body is the
+   pre-move body with its receivers re-pointed — the crystallizer's own state bare, view-model state
+   through the per-call host — in the same order, with the same guards and the same effects. The Mac
+   copy was the superset; the phone's two missing `structuralInFlight` guards are carried as the
+   DECLARED `holdsTailForStructuralFlight == false` (probe P-a is the evidence it is architecture,
+   not drift), its missing caret republish as `didApplyMint() {}`. Evidence: zero test edits in the
+   three hoist commits; the band's own families green BEFORE any rider landed (Mac 313/41, phone
+   257/38 with only F-1) and again at the finals; the walk 12/12.
+2. *P-9 held.* Nothing stores a model: the crystallizer holds only its own state; the view model owns
+   it downward; the host arrives per call. The two Tasks capture the host exactly as the old Tasks
+   captured `self` — strong for the mint and its two follow-up Tasks, weak for the idle clock.
+3. *The ruling's three conditions.* (1) Every one of the 23 host members names the band function that
+   needs it (`TailCrystallizer.swift`'s protocol doc); both conformances live in their model's own file
+   as extensions of narrow doors — no `private`/`private(set)` setter widened (the phone's
+   `surfaceKnownText` was an existing member with the identical ledger read). (2) The deltas are
+   declared at the host with their reasons — the structural-flight hold (both platforms' reasons side
+   by side), the caret-context republish, both marked-text accessors, both error voices, each settle
+   road; the ⇧⏎ arm and `restampProjection` are named in the file header as deliberately OUTSIDE the
+   band. (3) The hoist commits are behaviour-preserving and separate from the rider commits (pin and
+   fix each their own commit).
+4. *The riders are real fixes, not speculation.* F-2: `MobileDeferredProjectionRetryTests` RED on the
+   pre-fix tree (`067657d2`) at the marker expectation, GREEN after `9ba53fa0`. F-3:
+   `ProgrammaticReplaceFaceTests` RED on all three user-reachable roads (`8ffaaa18`) with every
+   road-taken expectation holding, GREEN after `4117689b`, and felt in the walk (W6).
+
+**Where I would look hardest if I were reviewing this cold:**
+- **The Task captures in `TailCrystallizer`.** The idle Task now captures `[weak self, weak host]` and
+  guards the host before calling back; the mint Task captures the host strongly plus `self`
+  implicitly. The corrections-flush Task captures the HOST (`[host] in await host.autosave.flushNow()`)
+  rather than the coordinator alone, deliberately: the old `self.autosave` capture kept the view model
+  alive until that flush landed, and 18k C1's release lives in the view model's `deinit` — capturing
+  only the coordinator would have let the model die (and release its registry hold) before the flush.
+- **`runner` read at Task creation** (`host.mintRunner`) where the old code read `session.runner` inside
+  the Task — `AppSession.runner` is a `let`, so it is the same actor either way.
+- **`finishMint`'s effect order**, now through host doors: corrections (ledger, then autosave) → the
+  flush Task → the quiet deletions Task → the full-render request → the two early exits → the
+  tail-region rewrite + text-undo clear → the ledger → `disarmPendingEdit` → `crystallizeIndex` → the
+  tail text → the stamps → the audit → (Mac) the caret republish → the re-crystallize → the idle clock →
+  the settle. Same as both originals.
+- **Two tiny non-1:1 lines:** the Mac keeps a private read forward `mintTask` purely so `finalizeWork`'s
+  wait loop stays verbatim; the phone's private `setBlockAttribute` was deleted because its only two
+  callers moved (the crystallizer stamps through `EditorSurfaceStorage.setBlockID` itself).
+- **The audit consumer's assertion location:** the seam now reports the view model's `audit(...)` call
+  line instead of its old `fire` line, a few lines away in the same file (no pin reads it — every muted
+  handler is `{ _, _, _ in }`, grep-verified). Its Release profile is unchanged: both call sites stay
+  inside `#if DEBUG`.
+- **F-3 widens what one door does** (the Mac's `programmaticReplace` now re-derives the face over the
+  span it replaced — the span-bounded, attributes-only restyle `applySeamEdit` already runs, inside the
+  same storage transaction). Its cost is ∝ the replaced lines; `MarkdownFaceTests`' P1 scan budget ran
+  green beside it. The differential latency pin (row 26) times the structural divide (`applySeamEdit`),
+  a road F-3 did not change.
+- **The host's width (23).** The accessor and declared rows are the platform differences; the rest is
+  state the band shares with the gate and projection roads. Ruled (B) with that width stated; (D) —
+  moving the tiling too — would thin it and is recorded as row 70's territory.
+
+**Not done / owed:** the first line above. F-4 stays OWNED by its KnownIssues row (untouched here).
+O-4 recorded for the ladder. `applyPendingIfClean`'s convergence recorded as a row-28 next-touch
+candidate. KnownIssues row 73's Debug trap met during the walk — 18o's, untouched.
