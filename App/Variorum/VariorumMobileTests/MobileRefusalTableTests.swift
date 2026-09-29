@@ -1,0 +1,104 @@
+//
+//  MobileRefusalTableTests.swift
+//  VariorumMobileTests
+//
+//  18m U3 — **one refusal table, phone side.** The operations layer's refusal
+//  table (`OpsRefusalCopy`, hoisted to `Shared/OpsRefusalTable.swift`) is the
+//  phone's too now. The five phone refusal switches the charter named
+//  collapse onto it by ONE rule (the U3 CLASSIFICATION RULING): an arm stays
+//  local only for a phone door or a context the table lacks (the act, the
+//  `nothingWas` verb, the book's name); everything else the table has words
+//  for, the phone now says in those words; and where the table has NO words,
+//  each site keeps its OWN fallback — so the collapse can only turn a raw
+//  enum dump into a sentence, never a sentence into a dump.
+//
+//  The first and last tests are RED on the hoist-only tree (the dumps and the
+//  crystallizer's raw error voice); the middle ones are GUARDS that hold on
+//  both sides (the phone's own door words, its own fallbacks).
+//
+
+import Foundation
+import Testing
+import VariorumCore
+@testable import VariorumMobile
+
+@MainActor
+@Suite("18m U3 — the phone's refusal switches speak the one table")
+struct MobileRefusalTableTests {
+    static let blockNotPlaced = "That block is no longer in this note — it may have "
+        + "moved while you worked. Nothing was changed here."
+
+    private struct NotAnOperationError: Error {}
+
+    /// The collapse, as a fact: a case the table words reaches her in words at
+    /// every one of the five sites (it reached her as a raw dump before).
+    @Test func eachSwitchSpeaksTheTableWhereItHasWords() {
+        let gone = OperationError.blockNotPlaced(id: "b")
+        #expect(MobileUndoDoor.refusal(gone) == Self.blockNotPlaced)
+        #expect(MobileBlockMenuController.refusalMessage(gone, act: "name the block")
+                == Self.blockNotPlaced)
+        #expect(MobileCommentsController.refusalMessage(gone) == Self.blockNotPlaced)
+        #expect(MobileStructuralController.refusalMessage(gone, act: "divide the block")
+                == Self.blockNotPlaced)
+        #expect(MobileMembershipModel.refusal(OperationError.readingNotFound(id: "r"), bookName: "B")
+                == "That book can't be found — it may have been deleted, or removed on another device.")
+    }
+
+    /// The table's one-door-word slots are EMPTY on the phone: no ceremony
+    /// road, no chord — the sentence ends at the fact that is true here.
+    @Test func theTablesDoorSlotsStayEmptyOnThePhone() {
+        let fanned = MobileStructuralController.refusalMessage(
+            OperationError.fannedBlock(id: "b"), act: "divide the block")
+        #expect(fanned == "This block has more than one take now — divide it again and the "
+                + "take you're in splits while the others stay on the first block.")
+        let onlyTake = MobileStructuralController.refusalMessage(
+            OperationError.lastActiveVariant(id: "v"), act: "divide the block")
+        #expect(onlyTake == "This block has only one take — a block keeps at least one take, "
+                + "so delete the block instead, or divide it to split it into blocks.")
+        for line in [fanned, onlyTake] {
+            #expect(!line.contains("\u{2318}") && !line.contains("\u{2325}"), "no Mac chord: \(line)")
+            #expect(!line.contains("Mac"), "no redirect: \(line)")
+        }
+    }
+
+    /// GUARD: where the table has no words, each site keeps the fallback it had.
+    @Test func eachSiteKeepsItsOwnFallbackWhereTheTableHasNoWords() {
+        let unworded = OperationError.containerNotFound(id: "c")
+        #expect(MobileBlockMenuController.refusalMessage(unworded, act: "name the block")
+                == DeletionRefusal.fallback(unworded))
+        #expect(MobileUndoDoor.refusal(unworded) == String(describing: unworded))
+        #expect(MobileCommentsController.refusalMessage(unworded) == String(describing: unworded))
+        #expect(MobileStructuralController.refusalMessage(unworded, act: "divide the block")
+                == String(describing: unworded))
+        #expect(MobileMembershipModel.refusal(unworded, bookName: nil) == "Refused: \(unworded)")
+    }
+
+    /// GUARD: the seal keeps the phone's own door words ("Unlock Note") — the
+    /// ONE stem, the platform noun a parameter.
+    @Test func theSealStaysInThePhonesOwnDoorWords() {
+        let sealed = OperationError.lockedPost(id: "p")
+        #expect(MobileUndoDoor.refusal(sealed) == "This note is locked — unlock it first.")
+        #expect(MobileCommentsController.refusalMessage(sealed)
+                == "This note is locked — unlock it to change comments.")
+        #expect(MobileBlockMenuController.refusalMessage(sealed, act: "name the block")
+                == "This note is locked — unlock it to name the block.")
+        #expect(MobileStructuralController.refusalMessage(sealed, act: "divide the block")
+                == "This note is locked — unlock it to divide the block.")
+    }
+
+    /// Ruling V: the crystallizer's error voice (U2's host member, the phone's
+    /// conformance) speaks the table instead of dumping the error — and a
+    /// non-operation error keeps its description.
+    @Test func theCrystallizersErrorVoiceSpeaksTheTable() async throws {
+        try await withEditorWorld { session, _ in
+            let post = try session.operations.createPost(title: "T")
+            let (model, _) = makeEditor(session, postID: post.id)
+            model.reportOperationError(OperationError.blockNotPlaced(id: "b"))
+            #expect(model.statusMessage == Self.blockNotPlaced)
+            model.reportOperationError(OperationError.lockedPost(id: post.id))
+            #expect(model.statusMessage == "This note is locked — unlock it first.")
+            model.reportOperationError(NotAnOperationError())
+            #expect(model.statusMessage == String(describing: NotAnOperationError()))
+        }
+    }
+}

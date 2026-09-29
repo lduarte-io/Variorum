@@ -2119,9 +2119,13 @@ struct TutorialLibraryActsTests {
                 blockID: first.blockID, variantID: first.variantID!))
 
             // ⌘S on the sealed post: the operation's REAL refusal, spoken.
+            // 18m U3 (SANCTIONED EDIT S-2, the U3 CLASSIFICATION RULING): the
+            // registry's seal line converged on ONE sentence — its old act
+            // clause ("to change takes or choices") was false right here,
+            // where ⌘S files a savepoint (PROVISIONAL, QUESTIONS #159).
             await model.commitFocusedTake()
             #expect(session.status.current?.text
-                    == "This note is sealed — unseal it to change takes or choices.",
+                    == "This note is sealed — unseal it first.",
                     "the refusal lands in the one status presentation — that's the lesson")
 
             // Unseal (the bar's door), change a word, seal again. The real

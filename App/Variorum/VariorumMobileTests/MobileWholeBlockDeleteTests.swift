@@ -575,7 +575,13 @@ struct MobileWholeBlockDeleteTests {
             #expect(model.planWholeBlockDeletion(range: whole, replacement: "") == nil)
             await deleteSpan(model, storage, whole)
 
-            #expect(model.statusMessage == model.message(for: BlockRangeIndex.Refusal.readOnlySlot),
+            // 18m U3 (SANCTIONED EDIT S-3, O-1 (a) in the U3 CLASSIFICATION
+            // RULING): the gap fence's copy arm speaks the SHARED
+            // `.unsyncedBlock` sentence — the one the phone already said for
+            // the same gap under a mid-to-mid span, and the Mac's for this
+            // very run (PROVISIONAL, QUESTIONS #159). It still names sync.
+            #expect(model.statusMessage == CrossBlockRefusal.message(
+                        for: .unsyncedBlock, fanRoads: MobileEditorViewModel.fanFoldRoads),
                     "the refusal names sync, not a boundary problem that isn't there")
             let live = try await db.read { [postID = seed.postID] db in
                 try Int.fetchOne(

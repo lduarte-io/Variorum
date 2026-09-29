@@ -343,13 +343,16 @@ struct SavepointSealedDoorTests {
             h.model.commitCaretVariant()
 
             #expect(h.model.savepointAsk == nil, "no field over a sealed commit")
-            // Round 2, R2-1: the SURFACE's own sentence — Write's filer
-            // (`operationMessage`), the exact pre-D words of this keypress —
-            // never the registry's, which this surface's filer does not
-            // speak. The other three cells' `sealedSentence` compare stays
-            // correct for THEM: their surfaces' filers genuinely speak the
-            // registry. The equality cell below holds the contract itself.
-            #expect(h.model.statusMessage == "This note is sealed — unlock it first.",
+            // Round 2, R2-1: the SURFACE's own sentence — Write's filer's
+            // words, which this door speaks at the keypress. **18m U3
+            // (SANCTIONED EDIT S-1, the U3 CLASSIFICATION RULING):** Write's
+            // private filer switch (`operationMessage`) was DELETED onto the
+            // registry and the seal converged on ONE sentence, so the filer
+            // and the registry now speak the same line — this literal moved
+            // from "…unlock it first." to the converged "…unseal it first."
+            // (PROVISIONAL, QUESTIONS #159). The equality cell below holds the
+            // contract itself, unchanged.
+            #expect(h.model.statusMessage == "This note is sealed — unseal it first.",
                     "the same sentence the post-\u{23CE} road speaks")
         }
     }
