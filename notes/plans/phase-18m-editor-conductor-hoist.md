@@ -2053,3 +2053,25 @@ S-3 (P3's words), plus the ~25 phone seal pins riding unmodified in the full mob
 
 **Not done / owed:** the first line above. F-1 stays #155's (not re-attributed). The crash-reporter window left on screen
 from U2's walk (row 73, 18o's) is still there.
+
+### U3 — ORCHESTRATOR VERIFY PASS + ACCEPTANCE SPOT WALK (2026-09-29 overnight; verify-never-trust)
+
+**Claims verified against git:** the five commits `59715238..7e0aca41` + the walk/records
+present and pushed, tree clean at `6c36cdd5`, no trailers; the 3C footprint by diff — the test
+targets gained exactly the three new pin files and changed exactly the three SANCTIONED edits
+(S-1 lives in `SavepointNamingTests.swift` — the file holds the `SavepointSealedDoorTests`
+suite; the cold reviewer verifies the claim independently); zero `Sources/`/`Sync/`/schema;
+QUESTIONS #159 landed (next free #160); row 28 (c) landed in the hoist commit; the convergence
+reverts ran after the fixes with the ONE unpredicted red traced in the record (the
+`MobileUndoDoor` seal arm riding the emptied fallback — a consequence of the collapse, not a
+hole). **The acceptance spot walk, this seat's own hands (dev-store build of `6c36cdd5`,
+guard-checked, machine idle 2081 s):** (1) a sealed note's ⌘S toasts the ruled stem — *"This
+note is sealed — unseal it first."* — under the read-only banner; (2) after unseal, ⌘⇧A on the
+one-take block speaks FORK L-c's sentence verbatim at exactly the door that used to speak the
+wrong one. 2/2; captures `notes/plans/18m-screens/u3/orch*`; the instance quit; the voice was
+never flipped (Terminal throughout); walk residue: one dev-store note "Seal walk test"
+(unsealed). The implementer's 10/10 walk stands as the full felt gate. **The row-73
+crash-reporter window from U2's walk remains on screen, untouched — HER BUNDLE carries it**
+(benign Problem Report for the dev build; dismissing is hers or the next session's at her
+word). Ledger row 4 stays open pending the ladder; the FABLE cold review over
+`60a0f47a..6c36cdd5` follows; ladder file `notes/plans/18m-u3-ladder-round1.md`.
