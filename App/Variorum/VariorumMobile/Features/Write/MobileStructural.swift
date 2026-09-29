@@ -876,13 +876,20 @@ final class MobileStructuralController {
         (model?.index.entries.isEmpty ?? true) ? empty : tail
     }
 
-    /// The everyday refusals in phone words; the rest is still the
-    /// operations layer's own message.
+    /// The everyday refusals in phone words; the rest is the shared refusal
+    /// table's words where it has them (18m U3 — this door dumped the raw
+    /// enum before), and the operations layer's own description where it has
+    /// none.
     ///
     /// `nothingWas` is the verb the ROLLBACK sentence needs — "deleted" at
     /// the two delete doors, "changed" everywhere else. Every door here
     /// runs ONE `session.runner.run` transaction, so a throw means nothing
     /// landed; the word only decides how precisely the sentence can say so.
+    /// It is why the three rollback arms below stay HERE (18m U3's collapse
+    /// rule: an arm stays local for a phone door or a context the table
+    /// lacks) — and `.lockedVariant` stays for the phone's takes-sheet road.
+    /// (`.invalidCut`'s sentence moved to the table: the Mac planner already
+    /// said it byte-for-byte.)
     static func refusalMessage(
         _ error: Error, act: String, nothingWas: String = "changed"
     ) -> String {
@@ -891,12 +898,9 @@ final class MobileStructuralController {
         }
         switch error {
         case .lockedPost:
-            return "This note is locked — unlock it to \(act)."
+            return SealedNoteCopy.sentence(act: act, words: .phone)
         case .lockedVariant:
             return MobileEditorViewModel.lockedTakeRefusal
-        case .invalidCut:
-            return "No legal cut spot for that here — cuts land between words, "
-                + "at sentence ends, and at line breaks."
         // **`blockNotFound`, in words** (round 2 batch 1b ladder, MINOR 2).
         // It dumped the raw enum here because until the whole-block-run
         // door existed, every phone door onto it named the ONE block the
@@ -939,7 +943,7 @@ final class MobileStructuralController {
                 + "arrived yet, or one that landed since you selected. "
                 + "Nothing was \(nothingWas)."
         default:
-            return String(describing: error)
+            return OpsRefusalCopy.words(for: error, roads: .phone) ?? String(describing: error)
         }
     }
 }

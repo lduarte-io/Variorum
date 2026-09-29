@@ -1252,7 +1252,7 @@ final class MobileEditorViewModel {
             return false
         }
         if header?.locked == true {
-            refuse("This note is locked — unlock it to edit.")
+            refuse(SealedNoteCopy.sentence(act: "edit", words: .phone))
             return false
         }
         guard let replacement else { return true } // attribute-only
@@ -1362,9 +1362,17 @@ final class MobileEditorViewModel {
             }
         case .refuseAwaitingSync:
             // The gap fence's COPY arm: the span IS a whole-block run; the
-            // block simply hasn't arrived — the sentence this editor already
-            // says when she types into one.
-            refuse(message(for: .readOnlySlot))
+            // block simply hasn't arrived. **18m U3 (O-1 (a), PROVISIONAL —
+            // QUESTIONS #159):** it speaks the SHARED `.unsyncedBlock`
+            // sentence — the one this editor already says for the same gap
+            // under a mid-to-mid span (its diagnosis), and the Mac's for this
+            // very run — instead of the gate's single-block "This block
+            // hasn't fully synced" line, so one condition reads one way on
+            // both platforms and in both shapes. (Which cause a run ending
+            // on the open tail's separator names FIRST — the Mac's tail, this
+            // arm's gap — is recorded, not changed: it is this arm's POSITION,
+            // U1's settled table.)
+            refuse(CrossBlockRefusal.message(for: .unsyncedBlock, fanRoads: Self.fanFoldRoads))
         case .editAcrossBlocks(let compound):
             // Compare-and-set against the plan-time surface texts is inside
             // the compound, so a keystroke landing in the scheduling window
@@ -1936,9 +1944,11 @@ extension MobileEditorViewModel: TailCrystallizerHost {
     /// ACCESSOR: UIKit's marked-text range (multi-stage input is COMMON here).
     var surfaceHasMarkedText: Bool { textView?.markedTextRange != nil }
 
-    /// ACCESSOR: the phone's error voice — the status line's description.
+    /// ACCESSOR: the phone's error voice. **18m U3 (ruling V):** it speaks
+    /// the shared refusal table — a raw error dump is not a face — and keeps
+    /// the error's description only where the table has no words.
     func reportOperationError(_ error: Error) {
-        statusMessage = String(describing: error)
+        statusMessage = OpsRefusalCopy.words(for: error, roads: .phone) ?? String(describing: error)
     }
 
     func replaceTailRegion(_ region: NSRange, with normalized: String) {

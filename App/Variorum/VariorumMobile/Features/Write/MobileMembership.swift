@@ -171,6 +171,11 @@ final class MobileMembershipModel {
 
     // MARK: - Refusal copy (phone words; no platform names)
 
+    /// The four book arms stay HERE because they carry the book's NAME, a
+    /// context the shared table has no slot for (18m U3's collapse rule);
+    /// everything else the table has words for, it says (18m U3 — this arm
+    /// used to dump "Refused: …"), and where it has none this door keeps its
+    /// own fallback.
     nonisolated static func refusal(_ error: Error, bookName: String?) -> String {
         guard let error = error as? OperationError else { return String(describing: error) }
         let book = bookName.map { "“\($0)”" } ?? "that book"
@@ -184,7 +189,7 @@ final class MobileMembershipModel {
         case .postNotInReading:
             return "This note isn't in \(book)."
         default:
-            return "Refused: \(error)"
+            return OpsRefusalCopy.words(for: error, roads: .phone) ?? "Refused: \(error)"
         }
     }
 

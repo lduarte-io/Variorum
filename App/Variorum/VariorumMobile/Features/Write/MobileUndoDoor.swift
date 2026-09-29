@@ -270,17 +270,21 @@ final class MobileUndoDoor {
             + "Block History at any time."
     }
 
-    /// The everyday refusals in phone words; anything else is the
-    /// operations layer's own message (the phone's standing posture).
+    /// The everyday refusals in phone words. **18m U3:** the shared refusal
+    /// table speaks everything it has words for — the seal included ("This
+    /// note is locked — unlock it first.": the ONE stem in the phone's door
+    /// words, act-less because an undo has no one act to name) — and the
+    /// operations layer's own description stands where it has none. Only the
+    /// locked-take arm stays: it names the phone's takes-sheet road. (The
+    /// Mac's undo door already spoke the table, so the two undo-failure lines
+    /// now read the same but for each platform's door words.)
     static func refusal(_ error: Error) -> String {
         guard let error = error as? OperationError else { return String(describing: error) }
         switch error {
-        case .lockedPost:
-            return "This note is locked — unlock it first."
         case .lockedVariant:
             return MobileEditorViewModel.lockedTakeRefusal
         default:
-            return String(describing: error)
+            return OpsRefusalCopy.words(for: error, roads: .phone) ?? String(describing: error)
         }
     }
 }

@@ -279,20 +279,21 @@ final class MobileCommentsController {
         }
     }
 
-    /// The Mac panel's refusal mapping, phone-grammared: the everyday
-    /// cases speak plainly and name the Mac where the road lives there;
-    /// the rest is the operations layer's own words.
+    /// The Mac panel's refusal mapping, phone-grammared. **18m U3:** the
+    /// seal speaks the ONE stem in the phone's door words with this door's
+    /// act; "A comment needs some text." is the shared refusal table's now
+    /// (both platforms' comment faces already said it byte-for-byte); the
+    /// rest is the table's words where it has them, and the operations
+    /// layer's own description where it has none.
     static func refusalMessage(_ error: Error) -> String {
         guard let error = error as? OperationError else {
             return String(describing: error)
         }
         switch error {
         case .lockedPost:
-            return "This note is locked — unlock it to change comments."
-        case .invalidCommentText:
-            return "A comment needs some text."
+            return SealedNoteCopy.sentence(act: "change comments", words: .phone)
         default:
-            return String(describing: error)
+            return OpsRefusalCopy.words(for: error, roads: .phone) ?? String(describing: error)
         }
     }
 }
