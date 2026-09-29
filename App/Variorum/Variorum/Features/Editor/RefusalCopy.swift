@@ -14,7 +14,9 @@ nonisolated enum RefusalCopy {
     static func message(for refusal: StructuralGesturePlanner.Refusal) -> String {
         switch refusal {
         case .sealed:
-            "This note is sealed — unlock it to restructure."
+            // 18m U3: the ONE seal sentence, with this door's act (the Mac's
+            // door is Unseal — "unlock" named no note door here).
+            SealedNoteCopy.sentence(act: "restructure", words: .mac)
         case .gapSlot:
             "This block hasn't fully synced yet — try again once it arrives."
         case .lockedVariant:

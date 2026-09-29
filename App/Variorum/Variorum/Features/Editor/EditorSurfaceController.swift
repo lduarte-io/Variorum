@@ -2505,7 +2505,7 @@ final class EditorSurfaceController {
     /// One transaction, one undo compound, insurance-committed.
     func deleteInEveryTake() async {
         guard model.header?.locked != true else {
-            model.refuseFeedback("This note is sealed — unlock it to edit.")
+            model.refuseFeedback(SealedNoteCopy.sentence(act: "edit", words: .mac))
             return
         }
         guard let selection = model.textView?.selectedRange(), selection.length > 0 else {
@@ -2725,7 +2725,7 @@ final class EditorSurfaceController {
     func replaceInEveryTake(_ plan: [FindReplaceItem]) async {
         defer { model.findReplaceTask = nil }
         guard model.header?.locked != true else {
-            model.refuseFeedback("This note is sealed — unlock it to edit.")
+            model.refuseFeedback(SealedNoteCopy.sentence(act: "edit", words: .mac))
             return
         }
         guard !plan.isEmpty else { return }

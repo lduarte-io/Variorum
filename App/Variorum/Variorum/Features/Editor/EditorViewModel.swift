@@ -1039,7 +1039,7 @@ final class EditorViewModel {
     func shouldChangeText(in range: NSRange, replacement: String?) -> Bool {
         guard !suppressEditProcessing else { return true }
         if header?.locked == true {
-            refuseFeedback("This note is sealed — unlock it to edit.")
+            refuseFeedback(SealedNoteCopy.sentence(act: "edit", words: .mac))
             return false
         }
         guard let replacement else { return true } // attribute-only
@@ -3028,7 +3028,7 @@ final class EditorViewModel {
     /// consumed (a sealed post refuses visibly).
     func poolDrop(blockID: String, atOffset offset: Int, includeFan: Bool) -> Bool {
         guard header?.locked != true else {
-            refuseFeedback("This note is sealed — unlock it to add to it.")
+            refuseFeedback(SealedNoteCopy.sentence(act: "add to it", words: .mac))
             return true  // consumed: never fall through to a text insert
         }
         let insert = insertPosition(forOffset: offset)
@@ -3174,22 +3174,21 @@ final class EditorViewModel {
         // to refuse at the keypress; the door must not open a field over a
         // gesture the filer will refuse.
         //
-        // **THE SURFACE'S OWN SENTENCE, deliberately — not the registry's**
-        // (round 2, R2-1: the registry's "unseal it to change takes or
-        // choices" answers a takes door, and it is NOT what this surface's
-        // filer speaks). This door is the one seal refusal in Write whose
-        // GESTURE has two refusal moments — here, or at the op after ⏎ when
-        // the seal landed under a stale `header` (the fail-open this guard
-        // deliberately leaves to the filer) — so the two moments must speak
-        // identically, and `operationMessage` is where the filer's words
-        // live. These are also the exact pre-D words of this keypress. The
-        // two gesture-worded siblings ("unlock it to edit." / "unlock it to
+        // **THE FILER'S OWN SENTENCE, deliberately** (round 2, R2-1). This
+        // door is the one seal refusal in Write whose GESTURE has two refusal
+        // moments — here, or at the op after ⏎ when the seal landed under a
+        // stale `header` (the fail-open this guard deliberately leaves to the
+        // filer) — so the two moments must speak identically: this door asks
+        // the filer's voice for its words. **18m U3:** that voice IS the
+        // refusal table now (Write's private switch was deleted onto it, and
+        // the seal converged on ONE sentence — R2-1's objection to the
+        // registry's old takes-worded line is gone with that line). The two
+        // gesture-worded siblings ("…unseal it to edit." / "…unseal it to
         // add to it.") are NOT this rule's: their doors consume the gesture
-        // outright, so the door is those gestures' only worded refusal.
-        // The equality pin (`writesDoorAndFilerSpeakOneSealSentence`) holds
-        // this door alone.
+        // outright, so each names its act. The equality pin
+        // (`writesDoorAndFilerSpeakOneSealSentence`) holds this door alone.
         guard header?.locked != true else {
-            refuse(operationMessage(OperationError.lockedPost(id: postID)))
+            refuse(OpsRefusalCopy.message(for: OperationError.lockedPost(id: postID)))
             return
         }
         savepointAsk = .naming(variantID: variantID)
@@ -4267,49 +4266,12 @@ final class EditorViewModel {
     /// Internal (was private) since N10: the controller's op errors land
     /// in the model's status line.
     func showOperationError(_ error: Error) {
-        statusMessage = operationMessage(error)
-    }
-
-    private func operationMessage(_ error: Error) -> String {
-        guard let opError = error as? OperationError else {
-            return "Operation failed: \(error)"
-        }
-        switch opError {
-        case .lockedPost: return "This note is sealed — unlock it first."
-        case .lockedVariant: return "This take is locked — branch or unlock it."
-        case .lastActiveVariant:
-            return "A block keeps at least one take — delete the block instead."
-        case .variantIsChosen:
-            return "This take is shown in the note — choose another take first."
-        case .archivedVariant: return "This take is archived — unarchive it first."
-        case .bufferChangedSinceGesture:
-            return "The text changed while that gesture was landing — nothing was altered; try it again on the current text."
-        // 13c R3-1: the A7 carve's authorization, re-checked inside the
-        // tombstone's transaction. Reachable when a take or a note lands on
-        // the block between the keystroke and the write — the editor's
-        // projection is deliberately frozen while typing, so the guards that
-        // enabled the gesture could not have seen it.
-        case .blockCarriesUnshownText:
-            return "That block isn't empty after all — it carries a take or a comment that isn't shown here. Nothing was deleted."
-        case .fannedBlock:
-            // 13d Batch 3: the same refusal Write can reach when a take
-            // lands between the plan and the operation (R1-3's
-            // every-refusal-readable class).
-            return "This block has more than one take now — divide it again and the take you're in splits while the others stay on the first block (⌥⌘⇧D arranges them differently)."
-        case .divideSideWouldBeEmpty:
-            return "Every checked take is parked at the same end — one of the two new blocks would have no takes. Split at least one take, or park one at the other end."
-        case .mergedBlockWouldHaveNoTake:
-            return "The merged block needs at least one take — pair takes with ＋, or check “carry” on one."
-        case .takePairedTwice:
-            return "A take can sit in only one pairing (and a paired take can't also carry) — remove the duplicate first."
-        // 13e E2 (her A17): the multi-delete's rollback refusal. It shares
-        // ONE constant with `OpsRefusalCopy`'s case so this surface and the
-        // Takes board cannot drift on the sentence — the two refusal
-        // switches are a standing duplication, and a shared constant is how
-        // a line that MUST match stays matched.
-        case .blockNotFound: return BlockSelectionCopy.blockGone
-        default: return "The operation was refused: \(opError)"
-        }
+        // 18m U3: Write's private refusal switch (`operationMessage`) is
+        // DELETED onto the ONE refusal table — it disagreed with the table on
+        // the sealed-note sentence and four other cases, and held words no
+        // other door had. The table (Shared/OpsRefusalTable.swift, through
+        // the Mac half's `message(for:)`) now speaks for every Mac door.
+        statusMessage = OpsRefusalCopy.message(for: error)
     }
 }
 

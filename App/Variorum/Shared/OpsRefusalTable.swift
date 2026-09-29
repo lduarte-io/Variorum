@@ -37,11 +37,39 @@
 import Foundation
 import VariorumCore
 
+/// **THE ONE SEALED-NOTE SENTENCE** (18m U3 — her copy, PROVISIONAL:
+/// QUESTIONS #159). *"This note is sealed — unseal it first."* — and a door
+/// that knows what the seal refused names it: *"…unseal it to edit."*
+///
+/// Before this the one refusal read FOUR ways across the two apps' gates and
+/// tables (and a dozen more beside them, enumerated in the 18m U3 record):
+/// "unlock it to edit", "unlock it first", "unseal it to change takes or
+/// choices" — whose act clause was false at most of the doors that spoke it —
+/// and the phone's "locked — unlock it to edit". The SHAPE is shared; the
+/// NOUN and the VERB are each platform's own, because they name its door (the
+/// Mac's Seal / Unseal; the phone's Lock Note / Unlock Note — MobileSoul §4
+/// item 4), so they arrive as `Words` from the platform's own target.
+nonisolated enum SealedNoteCopy {
+    /// A platform's door words for the note seal: the state the door puts a
+    /// note in, and the verb of the door that lifts it.
+    struct Words: Sendable, Equatable {
+        let state: String
+        let verb: String
+    }
+
+    static func sentence(act: String? = nil, words: Words) -> String {
+        "This note is \(words.state) — \(words.verb) it "
+            + (act.map { "to \($0)." } ?? "first.")
+    }
+}
+
 /// The ONE-DOOR-WORD slots a platform fills. Each is a sentence's only
 /// platform-shaped fragment; `nil` means the platform has no such door and
 /// the sentence must not promise one (the `deletedRegionExplainer(purgeRoad:)`
 /// precedent).
 nonisolated struct OpsRefusalRoads: Sendable {
+    /// The note seal's door words (`SealedNoteCopy`).
+    let seal: SealedNoteCopy.Words
     /// The DIVIDE chord, spoken in parentheses after the divide road.
     let divideChord: String?
     /// How a fanned divide can be arranged differently — the Mac's ceremony
@@ -57,6 +85,10 @@ nonisolated enum OpsRefusalCopy {
     static func words(for error: Error, roads: OpsRefusalRoads) -> String? {
         guard let error = error as? OperationError else { return nil }
         switch error {
+        // 18m U3 — the ONE seal sentence (the ruling's (a)): the act-less
+        // form, because this table cannot know which door refused.
+        case .lockedPost:
+            return SealedNoteCopy.sentence(words: roads.seal)
         case .archivedVariant:
             return "That take is archived — unarchive it first."
         // 13j batch 3 (the round-5 deleted-take ruling): the recovery
@@ -168,13 +200,19 @@ nonisolated enum OpsRefusalCopy {
         // 13e batch 3 (E5/E6b — her A20/A21): the take↔block doors'
         // three refusals, in words. `lastActiveVariant` has existed
         // since Phase 2 and dumped the raw enum; E5 makes it a door she
-        // will actually meet (a one-take block has nothing to move out),
-        // so it gets its words here beside the two new cases. The divide
+        // will actually meet (a one-take block has nothing to move out).
+        // **18m U3, FORK L-c (PROVISIONAL, QUESTIONS #159):** ONE guard
+        // (`ensureNotLastActive`) raises this behind THREE acts — archive
+        // (⌘⇧A), delete, and E5's move-out — and the two sentences the Mac
+        // used to speak were each wrong at the other's door: E5's "a take
+        // moves out … Divide the block instead" answered an archive, and
+        // Write's "delete the block instead" answered a move-out. So it names
+        // BOTH real roads, keeping each old sentence's fact. The divide
         // chord is a slot.
         case .lastActiveVariant:
-            return "This block has only one take — a take moves out when "
-                + "there's another one left behind. Divide the block instead"
-                + (roads.divideChord.map { " (\($0))" } ?? "") + "."
+            return "This block has only one take — a block keeps at least one take, "
+                + "so delete the block instead, or divide it"
+                + (roads.divideChord.map { " (\($0))" } ?? "") + " to split it into blocks."
         case .emptyTakeCannotBecomeABlock:
             return "That take is empty — there's no text to become a block."
         case .noConvertibleTakes:
@@ -211,6 +249,23 @@ nonisolated enum OpsRefusalCopy {
             return "That block has no text here yet — it may still be "
                 + "arriving from another device. Nothing was changed; "
                 + "try again in a moment."
+        // **18m U3 — the words only ONE switch had** (every other door
+        // dumped "Refused: …"). The compare-and-set refusal was Write's
+        // private switch's alone: a gesture whose buffer moved while it was
+        // landing refuses, and the sentence carries the rollback. (The
+        // phone's structural door keeps its own arm — its `nothingWas`
+        // names "deleted" at its delete doors.)
+        case .bufferChangedSinceGesture:
+            return "The text changed while that gesture was landing — nothing was "
+                + "altered; try it again on the current text."
+        // Byte-identical on both platforms already, in two homes each: the
+        // phone's structural door and the Mac planner's `.nothingToDo` said
+        // this one; both comment faces said the next.
+        case .invalidCut:
+            return "No legal cut spot for that here — cuts land between words, "
+                + "at sentence ends, and at line breaks."
+        case .invalidCommentText:
+            return "A comment needs some text."
         default:
             return nil
         }

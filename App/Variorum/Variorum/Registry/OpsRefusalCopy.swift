@@ -335,11 +335,10 @@ nonisolated enum BlockSelectionCopy {
     /// meets it with NOTHING deleted — which is the fact the words must
     /// carry, or a rolled-back gesture reads as a half-done one.
     ///
-    /// It lives here, in ONE place, because Write's editor keeps its own
-    /// refusal switch (`EditorViewModel.operationMessage`) beside
-    /// `OpsRefusalCopy` and both of this act's hosts must say the same
-    /// sentence — a shared constant is what makes that true by
-    /// construction rather than by proofreading.
+    /// It lives here, in ONE place, because both of this act's hosts must say
+    /// the same sentence. (It was born when Write's editor kept its own
+    /// refusal switch beside `OpsRefusalCopy`; 18m U3 deleted that switch onto
+    /// the table, whose Mac half now speaks this constant for every Mac door.)
     /// Hedge asymmetry (ladder round 2, R2-1): this line's thrower story is
     /// DELETED-only — a pick that merely MOVED is live at its new address
     /// and the delete door deletes it there (#60(c)), so "or moved
@@ -377,15 +376,26 @@ nonisolated enum BlockSelectionCopy {
 /// stayed here is exactly what a shared home must not hold (MobileSoul §4
 /// item 4, read from the other side): the Mac's CHORDS as road values, and
 /// the few sentences that are the Mac's own — a chord in the sentence's
-/// body, a Mac-only surface named, the ⌘-click PICK vocabulary.
+/// body, a Mac-only surface named (the sidebar's star list, the ceremony
+/// sheets' controls), the ⌘-click PICK vocabulary — plus the Mac's
+/// note-seal door words (`SealedNoteCopy.Words.mac`).
 ///
 /// `message(for:)` is the pre-hoist name, kept so every Mac call site and
 /// every Mac pin reads exactly as it did before the hoist — a zero-test-edit
 /// suite is the proof a hoist moved an address and not a behaviour (the 3C
 /// parity pattern; `CrossBlockRefusalRoads` is the worked precedent).
+nonisolated extension SealedNoteCopy.Words {
+    /// The Mac's note-seal door is Seal / Unseal (the bottom bar's note ▾
+    /// group, the ⌘K row "Seal / Unseal Note") — so a sealed note is
+    /// "sealed", and the way out is to "unseal" it.
+    static let mac = SealedNoteCopy.Words(state: "sealed", verb: "unseal")
+}
+
 nonisolated extension OpsRefusalRoads {
-    /// The Mac's chords: ⌘⇧D divides; ⌥⌘⇧D opens Divide choosing takes.
+    /// The Mac's door words and chords: Unseal lifts the seal; ⌘⇧D divides;
+    /// ⌥⌘⇧D opens Divide choosing takes.
     static let mac = OpsRefusalRoads(
+        seal: .mac,
         divideChord: "⌘⇧D",
         arrangeTakesRoad: "⌥⌘⇧D arranges them differently")
 }
@@ -402,8 +412,6 @@ nonisolated extension OpsRefusalCopy {
     static func macWords(for error: Error) -> String? {
         guard let error = error as? OperationError else { return nil }
         switch error {
-        case .lockedPost:
-            return "This note is sealed — unseal it to change takes or choices."
         // 13j batch 6b (J1): the purge op's refusal for a deliberate
         // savepoint — the ⌘S immunity said in the chord that makes one.
         case .deliberateSavepointNeverPruned:
@@ -431,6 +439,23 @@ nonisolated extension OpsRefusalCopy {
         // half-done one. Mac-local: "picked" is the ⌘-click vocabulary.
         case .blockNotFound:
             return BlockSelectionCopy.blockGone
+        // **The ceremony sheets' three refusals** (18m U3 — they lived only
+        // in Write's private switch, `operationMessage`, deleted onto this
+        // table; every other Mac door dumped "Refused: …" for them). Each
+        // names a control on the Divide / Merge choosing-takes sheets —
+        // checked takes, the park-at-an-end placement, ＋ pairings, "carry"
+        // — and ceremonies are Mac-only by her ruled exclusion, so they are
+        // the Mac's own words, never the shared table's.
+        case .divideSideWouldBeEmpty:
+            return "Every checked take is parked at the same end — one of the two new "
+                + "blocks would have no takes. Split at least one take, or park one at "
+                + "the other end."
+        case .mergedBlockWouldHaveNoTake:
+            return "The merged block needs at least one take — pair takes with ＋, or "
+                + "check “carry” on one."
+        case .takePairedTwice:
+            return "A take can sit in only one pairing (and a paired take can't also "
+                + "carry) — remove the duplicate first."
         default:
             return nil
         }

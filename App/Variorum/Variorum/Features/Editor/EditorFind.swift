@@ -370,7 +370,7 @@ extension EditorViewModel {
             // "nothing to find" when the truth is "this note is sealed"
             // would be the lecture-shaped refusal P-2 retired.
             guard header?.locked != true else {
-                refuseFeedback("This note is sealed — unlock it to edit.")
+                refuseFeedback(SealedNoteCopy.sentence(act: "edit", words: .mac))
                 return true
             }
             takesScopeArmed = true
@@ -395,7 +395,7 @@ extension EditorViewModel {
         let takesScope = takesScopeArmed
         takesScopeArmed = false
         guard header?.locked != true else {
-            refuseFeedback("This note is sealed — unlock it to edit.")
+            refuseFeedback(SealedNoteCopy.sentence(act: "edit", words: .mac))
             return
         }
         guard !ranges.isEmpty else {

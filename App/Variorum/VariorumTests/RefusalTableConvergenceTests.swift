@@ -103,14 +103,20 @@ struct RefusalTableConvergenceTests {
     }
 
     /// Spelling 1 of the four: the typing gate names the Mac's own door
-    /// ("Unseal"), with the act it refused.
+    /// ("Unseal"), with the act it refused. The gate is a BELT: a sealed
+    /// note's view is not editable (`adoptHeader`), so AppKit's typing never
+    /// asks it — it answers the roads that consult the model's gate directly
+    /// (the one input path's own door, a find-driven edit). So the pin asks
+    /// the gate itself.
     @Test func writesTypingGateSpeaksTheStemWithItsAct() async throws {
         try await withEditor(seedBlocks: ["alpha"]) { h in
             try h.session.operations.lockPost(h.postID)
             try h.reload()
-            h.type("x", at: 2)
+            let allowed = h.model.shouldChangeText(
+                in: NSRange(location: 2, length: 0), replacement: "x")
+            #expect(!allowed, "the seal refuses the keystroke")
             #expect(h.model.statusMessage == "This note is sealed — unseal it to edit.")
-            #expect(h.documentText == "alpha", "the seal refused the keystroke")
+            #expect(h.documentText == "alpha")
         }
     }
 
