@@ -297,7 +297,7 @@ rule binds any split this phase does make: a state struct passed in and returned
 | 1 | The routing cascade as ONE pure function in `Shared/EditorBrain/` — declared platform capability sets, order as data, a pure table suite pinning the ORDER per platform; both cascades one call; zero behavior change per platform (a differing route is a FINDING) | U1 | open |
 | 2 | Crystallization + the storage primitives + the identity audit hoisted on 3C (thin injected accessor surface; deliberate platform deltas declared; zero test edits both platforms) | U2 | open |
 | 3 | MAY-take: KnownIssues row 74 — the phone's autosave-registry release (the Mac's 18k C1 fix is the model); decide at U2, record either way with its own red-on-old pin if taken | U2 | open |
-| 4 | One refusal table: `OpsRefusalCopy` → `Shared/`; `operationMessage` deleted; the six mobile switches collapse; door-names local (§4.4); the sealed-note sentence converges — PROVISIONAL, QUESTIONS row quoting all four current spellings | U3 | open |
+| 4 | One refusal table: `OpsRefusalCopy` → `Shared/`; `operationMessage` deleted; the six mobile switches collapse; door-names local (§4.4); the sealed-note sentence converges — PROVISIONAL, QUESTIONS row quoting all four current spellings. **+ U1's O-1 (2026-09-29):** the gap-refusal copy divergence (Mac `.unsyncedBlock` sentence vs the phone's P3 read-only sentence; the tail-vs-gap cause ranking) is this unit's input too | U3 | open |
 | 5 | OPTIONAL U4: the tutorial-seeder scaffolding dedup (content stays per-platform; the `MobilePerfFixtureSeeder` third instance enumerated); sizing call at U3's close, recorded either way | U4 | open |
 | 6 | Row 28's fork-list enumeration updated in the SAME commit as each hoist (the touch rule): (a) the conductor band discharged by U1+U2; (b) the seeder scaffolding by U4 or re-recorded as next-touch | U1/U2/U4 | open |
 | 7 | Row 70's disposition at close: the cascade + `operationMessage` rows DISCHARGED; the remaining three decomposition rows re-worded with a named-owner proposal in her bundle | closeout | open |
@@ -639,3 +639,48 @@ the claimant asserted AND a permuted list asserted to answer differently, so the
 provably the thing pinned.
 
 **STOP — awaiting the ruling on (a)/(b)/(c) and, if (c), on (c1)/(c2).**
+
+### U1 — THE FUNCTION-SHAPE RULING (orchestrator, 2026-09-29 — the 4E pattern: the proposal
+came back before the build; this ruling is the settled ground it proceeds on)
+
+**RULED: (c) with (c1).** The reasoning, so the ladder reviews a decision and not a preference:
+(a) is rejected on P1's letter — the keystroke road's cost today is "first claim stops" (a seam
+backspace pays one O(position) walk); eagerly running every planner multiplies that by the
+ladder on every cross-block keystroke, a cost-profile change no hoist may make. (b) is rejected
+on the charter's own purpose — the walk and the arm→planner mapping duplicated per platform is
+the drift class one level down, and an order testable only through a mounted editor is the
+exact untestable state the charter's `route(...) -> Route` exists to end. (c) is the charter's
+letter: pure, lazy, declared lists, the diagnosis as the fixed terminal (P-2 as structure), one
+call per view model. (c1) over (c2) because pins must bite REAL code: a table suite that pins
+the Mac's carve rows through test-built closures is half-hollow by the hallucination guard's
+own standard, and (c1) is row 51's "makes them buildable" half made real — the phone's future
+carves become two list entries + two phone executors, with the enablement brains already
+shared. The `EmptyBlockDeletion`/`SeamMerge` pre-move names stay as typealiases so every
+existing pin rides unmodified (3C). The new-file home (`EditorEditRoute.swift`, not
+`EditorEditRouting.swift`) is approved for the stated reason.
+
+**Conditions riding the ruling (each cheap, each named so the reviewer checks them):**
+1. **`surfaceText` stays a bounded read-only fact source:** the route never stores it, and the
+   record states the read bound (the compound's ≤ 3 reads — today's cost, unchanged). The table
+   suite supplies it as a pure string-backed closure.
+2. **The precedence pins treat an ABSENT arm as a vacuous pass** — "carves ≺ J9" must pass on
+   today's phone list (no carves) and BITE the day row 51 adds them. Say so at the pin.
+3. **The view models' `switch` maps arm → existing executor/sentence and RE-DERIVES NOTHING**
+   — no second guards at the call sites; the executors' own store-time re-checks (A7's
+   op-level `.emptyWithNothingUnshown`, the compound's CAS and store fan reads) are the
+   executors' and ride byte-untouched.
+4. **The undeclared-arm exhaustiveness arms** answer with `EditorAssertionSeam.fire` + the
+   platform's own diagnosis, exactly as proposed — and the record notes Release behavior is
+   the diagnosis alone (the seam's default handler is a no-op outside DEBUG).
+5. **P3 is declared a COPY arm in the table's doc** (O-2 adopted), and the capability-difference
+   fact records WHY the Mac lacks it (M7's `.unsyncedBlock` speaks there).
+6. **`findReplacing` is passed explicitly at both call sites** (no default) — the phone passes
+   `false` and its list cannot fire the fence anyway; both facts pinned.
+
+**The observations, dispositioned:** O-1 (the gap-refusal copy divergence + the tail-vs-gap
+cause ranking) is ROUTED TO U3 — added to ledger row 4's scope as an input beside the four
+sealed-note spellings (U3 decides convergence there, PROVISIONAL, copy hers; neither sentence
+names a platform door, so §4.4 does not force locality — but the CAUSE-RANKING half is
+words-about-behavior and U3 treats it with the same care). O-2 is ADOPTED into the table's own
+documentation (condition 5). O-3 stays documented behavior — the table suite seeds slots
+deliberately, as planned. **Proceed with steps 3–7.**
