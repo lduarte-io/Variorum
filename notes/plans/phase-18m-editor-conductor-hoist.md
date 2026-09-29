@@ -297,8 +297,8 @@ rule binds any split this phase does make: a state struct passed in and returned
 | 1 | The routing cascade as ONE pure function in `Shared/EditorBrain/` — declared platform capability sets, order as data, a pure table suite pinning the ORDER per platform; both cascades one call; zero behavior change per platform (a differing route is a FINDING) | U1 | **CLOSED 2026-09-29** — built · ladder one round 0/0/0/1 zero disputes (NIT reviewer-fixed pin-first `276fc460`, sanity `d6a8eb7e`) · **WALKED at her window: 14/14 rows PASS both voices + the VisualWalk subset 6/6 PASS 0 FAIL** (the U1 WALK RUN section) |
 | 2 | Crystallization + the storage primitives + the identity audit hoisted on 3C (thin injected accessor surface; deliberate platform deltas declared; zero test edits both platforms) | U2 | **CLOSED 2026-09-29 overnight** — (B) built (TailCrystallizer + host, EditorSurfaceStorage, one mint body, the audit consumer; 3 behavior-preserving commits, zero test edits) + riders F-2/F-3 pin-first with this seat's reverts red-in-shape; 12/12 typing walk both voices; ladder ONE round 0/0/0/3 zero disputes (`b312ebb9` reviewer fixes, `60a0f47a` sanity); records `notes/plans/18m-u2-ladder-round1.md` |
 | 3 | MAY-take: KnownIssues row 74 — the phone's autosave-registry release (the Mac's 18k C1 fix is the model); decide at U2, record either way with its own red-on-old pin if taken | U2 | **NOT TAKEN 2026-09-29** (the U2 record's reasons; accepted at the ruling) — the row stays the mobile project's |
-| 4 | One refusal table: `OpsRefusalCopy` → `Shared/`; `operationMessage` deleted; the six mobile switches collapse; door-names local (§4.4); the sealed-note sentence converges — PROVISIONAL, QUESTIONS row quoting all four current spellings. **+ U1's O-1 (2026-09-29):** the gap-refusal copy divergence (Mac `.unsyncedBlock` sentence vs the phone's P3 read-only sentence; the tail-vs-gap cause ranking) is this unit's input too | U3 | open |
-| 5 | OPTIONAL U4: the tutorial-seeder scaffolding dedup (content stays per-platform; the `MobilePerfFixtureSeeder` third instance enumerated); sizing call at U3's close, recorded either way | U4 | open |
+| 4 | One refusal table: `OpsRefusalCopy` → `Shared/`; `operationMessage` deleted; the six mobile switches collapse; door-names local (§4.4); the sealed-note sentence converges — PROVISIONAL, QUESTIONS row quoting all four current spellings. **+ U1's O-1 (2026-09-29):** the gap-refusal copy divergence (Mac `.unsyncedBlock` sentence vs the phone's P3 read-only sentence; the tail-vs-gap cause ranking) is this unit's input too | U3 | **CLOSED 2026-09-29 overnight** — the five ruled commits (`59715238..7e0aca41`: the Shared table + Mac half + MobileRefusalRoads; the sealed stem at R1+; FORK L-c; O-1 (a); rulings G+V; #159); 10/10 implementer walk + this seat's 2/2 spot walk; ladder ONE round 0/0/1/3 zero disputes (fixes `31b52f22`+`d36d57ae`, sanity `6aeec011`); records `notes/plans/18m-u3-ladder-round1.md` |
+| 5 | OPTIONAL U4: the tutorial-seeder scaffolding dedup (content stays per-platform; the `MobilePerfFixtureSeeder` third instance enumerated); sizing call at U3's close, recorded either way | U4 | **LEFT 2026-09-29 (the sizing call, recorded):** the charter's substance (U1–U3) is complete; the mobile catch-up's row-49 work touches `MobileTutorialSeeder` anyway, so the hoist-at-next-touch rule fires THERE with the content work beside it — the natural timing; row 28 (b) carries it (+ the `MobilePerfFixtureSeeder` third instance, named). Not silent: this cell is the record |
 | 6 | Row 28's fork-list enumeration updated in the SAME commit as each hoist (the touch rule): (a) the conductor band discharged by U1+U2; (b) the seeder scaffolding by U4 or re-recorded as next-touch | U1/U2/U4 | open |
 | 7 | Row 70's disposition at close: the cascade + `operationMessage` rows DISCHARGED; the remaining three decomposition rows re-worded with a named-owner proposal in her bundle | closeout | open |
 | 8 | MOBILE PARITY at close — LOAD-BEARING this phase: state exactly what the catch-up can now build on (the shared route function's declared-arm seam; the shared conductor pieces) and what it still owes (row 51's carves as declared absent arms, the refusal-copy faces, row 49's lesson rewrite) | closeout | open |
@@ -450,10 +450,10 @@ seam by definition → a **FABLE cold review** follows; your self-assessment clo
 | This record file (constitution, baselines, conductor map, roster, ledger, traps, U1 brief) | DONE (this commit) |
 | U1 (session 1) | **LADDER CLOSED 2026-09-29** — one round 0/0/0/1, zero disputes (NIT agreed → reviewer fix `276fc460` pin-first → sanity `d6a8eb7e`); the WALK is HELD at the guard and folded into the next drive window (the skill's else-record-and-fold provision; the SEQUENCING NOTE below) |
 | U2 (session 2) | **CLOSED 2026-09-29 overnight** — built · verified (reverts red-in-shape) · walked 12/12 · ladder one round 0/0/0/3 zero disputes · sanity `60a0f47a` |
-| U3 | brief below (one-ahead); spawns at U2's ladder close |
-| U4? | the sizing call at U3's close, recorded either way |
+| U3 (session 3) | **CLOSED 2026-09-29 overnight** — checkpoint ruled · five commits · walked (10/10 + 2/2) · ladder one round 0/0/1/3 zero disputes · sanity `6aeec011` |
+| U4 | **LEFT** (the sizing call — ledger row 5's cell) |
 | The HELD WALKS (U1's W1–W7 + VisualWalk subset; the orchestrator's own U1 acceptance walk; U2's typing walk when it reaches that step) | HELD at the guard — run at the first author-granted / app-quit window; each unit's close is PROVISIONAL until its walk passes, and a walk finding re-opens its unit as a fix pass |
-| Closeout | NOT-STARTED |
+| Closeout | IN FLIGHT 2026-09-29 — the ritual (PHASE RESULTS below → master plan → KnownIssues sweep → handoff → the install refresh LAST) |
 
 ## U1 RECORD (the `opus-implementer`, session 1 — opened 2026-09-29)
 
@@ -2079,3 +2079,63 @@ crash-reporter window from U2's walk remains on screen, untouched — HER BUNDLE
 (benign Problem Report for the dev build; dismissing is hers or the next session's at her
 word). Ledger row 4 stays open pending the ladder; the FABLE cold review over
 `60a0f47a..6c36cdd5` follows; ladder file `notes/plans/18m-u3-ladder-round1.md`.
+
+## PHASE RESULTS (the closeout, 2026-09-29 — the orchestrator's summary; every claim's evidence is the unit records and ladder files above)
+
+**All three charter units CLOSED; U4 LEFT at the recorded sizing call; every ledger row
+dispositioned; ZERO DISPUTES across three ladders; every bug-class fix pin-first with
+behavioral reverts red in their predicted shapes.**
+
+- **U1 — the routing cascade is ONE pure decision** (`Shared/EditorBrain/EditorEditRoute.swift`:
+  declared `macArms`/`phoneArms`, each arm's ruling at its declaration, the ruled order as
+  checkable precedence data with vacuous-pass-until-row-51 teeth, the two Mac carve plans
+  hoisted as shared brains, both gates one route call + a mapping that re-derives nothing).
+  Ladder 0/0/0/1 (the one NIT reviewer-fixed pin-first). Walk 14/14 both voices + the
+  VisualWalk subset 6/6. Zero behavior change proven three ways (zero pin edits, the tables,
+  the walk's sentences).
+- **U2 — the conductor bands live once** (shape (B): `TailCrystallizer` owning the band's
+  state with a 23-member per-call host, every platform delta DECLARED with its reason;
+  `EditorSurfaceStorage`'s three doors; ONE mint body where three byte-identical copies
+  stood; the shared audit consumer). The phone's missing structural-flight guards proved
+  SAFE BY ARCHITECTURE (probe P-a, 14 interleavings) — the reason written down for the first
+  time. **Two rider fixes, pin-first with reverts:** F-2 (the phone gains 17b P36's
+  marker-restore — external changes no longer wait on a further store write) and F-3 (the
+  Mac's programmatic replace keeps the markdown face — headings no longer land unfaced from
+  the mint, take flips, or restored savepoints). Ladder 0/0/0/3. Walk 12/12.
+- **U3 — one refusal table** (`Shared/OpsRefusalTable.swift` + the Mac half keeping its
+  name + `MobileRefusalRoads.swift`; §4.4 enforced by target membership AND a source-walk
+  tripwire; `operationMessage` deleted; the five real mobile switches collapsed with their
+  platform arms kept; the ONE sealed stem at reach R1+ with the platform noun a parameter;
+  FORK L-c repairing a real wrong-door sentence; O-1 (a); the gate vocabulary shared (G);
+  the phone's error voice worded (V)). Every word change PROVISIONAL at **#159**, copy hers.
+  Ladder 0/0/1/3 (the MINOR a genuine enumeration miss — a THIRD shared switch,
+  `VersionActs`, carrying a Mac door verb the phone compiles — now listed where her one
+  ruling can reach it). Walks 10/10 + 2/2.
+- **U4 — LEFT** (ledger row 5's recorded call: the catch-up's row-49 touch is the natural
+  timing; row 28 (b) carries it).
+- **Findings routed en route:** F-1 (the Jekyll disclaimer vs the phone's no-redirect sweep)
+  → dated evidence on her **#155**; F-4 (the phone's structural flight lacks a keystroke
+  fence — store-duplicating, probed) → its own KnownIssues row (mobile project owner,
+  17-at-her-word) + HER BUNDLE; O-4 examined by the U2 ladder, no owned finding.
+
+**Counts at close:** Mac per-unit closing sets 223/20 + 171/20 + 79/11 (U1) · 349/44 + 241/25
+(U2) · 1,145/144 (U3), all green, 0 skipped; the FULL mobile suite ran at EVERY unit's finals
+— 647/110 → 649/111 → 654/112, each exactly the attributed baseline (the 4 known + F-1);
+generic-iOS builds green throughout; core untouched (zero `Sources/` all phase). VisualWalk:
+U1's subset 6/6; the full-suite baseline unchanged from 18l-c. **Zero `Sync/`, zero schema,
+zero `Server/`; the lockstep marker stays 9. Canon: ZERO AppSpec deltas** (nothing contractual
+moved — every product-adjacent word is PROVISIONAL in her bundle at #159); TEXTKIT2_NOTES owed
+nothing (no layout code in the phase). Machinery lessons recorded in the traps: no commits
+mid-stamped-harness-build; a guard abort can leave the dev voice at Study.
+
+**MOBILE PARITY (LOAD-BEARING this phase — the kickoff's own demand):** what the catch-up can
+now BUILD ON — row 51's carves are two declared list entries + two phone executors away (the
+precedence pins already guard their placement); the phone's conductor is a `TailCrystallizerHost`
+conformance over shared machinery, not a copy; the refusal faces compose over
+`OpsRefusalTable` + `MobileRefusalRoads` (the phone's door words the compiler's own fence);
+F-2's retry fix and V's worded error voice are already on the phone; the identity audit and
+storage doors are one brain. What it still OWES — row 51's carves themselves; row 49's lesson
+rewrite; the remaining `OperationError` switches and the sealed/locked family remainders (row
+28 (c), `VersionActs` now named); **F-4's keystroke fence (data-shaped — her bundle)**; row
+74's autosave-registry release; the U4-left seeder scaffolding at its touch. The MobileSoul
+ledger row lands with this closeout.
