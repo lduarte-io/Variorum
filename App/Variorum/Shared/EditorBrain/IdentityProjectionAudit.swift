@@ -132,3 +132,33 @@ nonisolated enum IdentityProjectionAudit {
     static let failureMessage =
         "identity projection audit failed: block-ID attributes disagree with BlockRangeIndex"
 }
+
+#if DEBUG
+extension IdentityProjectionAudit {
+    /// **The CONSUMER, once for both platforms** (18m U2). Both view models
+    /// ran the same five lines around the walk — no storage, nothing to say;
+    /// a clean walk, nothing to say; otherwise count the disagreement, then
+    /// fire the honest road's debug voice — differing only in the accessor
+    /// that reaches the storage. The COUNTER stays each platform's own
+    /// (`identityAuditFailures`, the pins' oracle), so it arrives as
+    /// `countingFailure`, and it runs BEFORE the seam fires — the order both
+    /// consumers always had. The call site's `#fileID`/`#line` are handed to
+    /// the seam, so an assertion still points at the view model that asked.
+    ///
+    /// DEBUG-only, like both call sites always were: in Release neither view
+    /// model's audit does any work at all (the same `#if` wraps each call).
+    @MainActor
+    static func audit(
+        index: BlockRangeIndex,
+        storage: NSMutableAttributedString?,
+        countingFailure: () -> Void,
+        file: StaticString = #fileID,
+        line: UInt = #line
+    ) {
+        guard let storage else { return }
+        guard !isClean(index: index, storage: storage) else { return }
+        countingFailure()
+        EditorAssertionSeam.fire(failureMessage, file: file, line: line)
+    }
+}
+#endif

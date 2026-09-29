@@ -1439,12 +1439,14 @@ final class EditorViewModel {
     ///
     /// DEBUG-only and O(blocks): it runs at the per-keystroke road's end
     /// and at every door that replaces the tiling.
+    ///
+    /// 18m U2: the consumer is the shared `IdentityProjectionAudit.audit`;
+    /// the storage accessor and the counter are this platform's.
     func auditIdentityProjection() {
         #if DEBUG
-        guard let storage = textView?.textStorage else { return }
-        guard !IdentityProjectionAudit.isClean(index: index, storage: storage) else { return }
-        identityAuditFailures += 1
-        EditorAssertionSeam.fire(IdentityProjectionAudit.failureMessage)
+        IdentityProjectionAudit.audit(index: index, storage: textView?.textStorage) {
+            identityAuditFailures += 1
+        }
         #endif
     }
 

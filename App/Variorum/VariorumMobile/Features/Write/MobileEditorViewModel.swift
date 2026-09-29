@@ -1984,12 +1984,15 @@ final class MobileEditorViewModel {
     /// counter's meaning are byte-unchanged by the move; the ONE difference
     /// is that the empty-entry separator hole M15 Q2 closed here is now
     /// closed for both platforms by construction.
+    ///
+    /// **18m U2: the consumer moved too** — `IdentityProjectionAudit.audit`
+    /// runs the guard, the walk, the count-then-fire; what stays here is
+    /// the storage accessor and the counter.
     func auditIdentityProjection() {
         #if DEBUG
-        guard let storage else { return }
-        guard !IdentityProjectionAudit.isClean(index: index, storage: storage) else { return }
-        identityAuditFailures += 1
-        EditorAssertionSeam.fire(IdentityProjectionAudit.failureMessage)
+        IdentityProjectionAudit.audit(index: index, storage: storage) {
+            identityAuditFailures += 1
+        }
         #endif
     }
 
