@@ -1871,33 +1871,15 @@ final class MobileEditorViewModel {
         statusMessage = message
     }
 
+    /// **18m U3 (ruling G):** the gate's four refusals are ONE shared brain
+    /// now (`OpsRefusalCopy.gateMessage`, beside the refusal table); this
+    /// forward supplies the phone's two platform pieces — its locked-take
+    /// line (the takes sheet's ⑂ road) and its fan roads (the ⋯ menu row).
+    /// (The cross-block arm's history — re-narrowed at 13u1 UNIT 2, its
+    /// boundary residual retired at 13u2 UNIT C — moved with it.)
     func message(for refusal: BlockRangeIndex.Refusal) -> String {
-        switch refusal {
-        case .crossesBlockBoundary:
-            // **RE-NARROWED at 13u1 UNIT 2, which is the instruction this
-            // comment used to carry and never executed** (item 8's U-5: *"so
-            // the phone's cross-block refusal names NONE of its four real
-            // causes"*). Merge-then-edit landed at M22 and item 5's compound
-            // has now taken every partially-covered span as well, so the old
-            // sentence — *"This edit spans more than one block — edit inside
-            // one block for now"* — named a limitation the app no longer
-            // has. The live door DIAGNOSES (see the cross-block arm above);
-            // what remains here is the range-less fallback for any future
-            // caller that has neither a range nor the slots. **13u2 UNIT C:**
-            // it used to speak the boundary residual, which #109's clamp law
-            // retired — the surviving cause says only that the surface has
-            // not caught up, which is the honest answer when nobody can name
-            // the condition. ONE brain with the Mac's, in the phone's own
-            // roads.
-            CrossBlockRefusal.message(
-                for: .surfaceNotSettled, fanRoads: Self.fanFoldRoads)
-        case .readOnlySlot:
-            "This block hasn't fully synced; it is read-only for now."
-        case .lockedVariant:
-            Self.lockedTakeRefusal
-        case .indexDesync:
-            "The editor lost track of block boundaries — reloading from the store."
-        }
+        OpsRefusalCopy.gateMessage(
+            for: refusal, lockedTake: Self.lockedTakeRefusal, fanRoads: Self.fanFoldRoads)
     }
 }
 

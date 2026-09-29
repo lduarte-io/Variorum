@@ -9,6 +9,12 @@
 //  copy is shared vocabulary, so it lives in the shared layer. Copy is
 //  sourced from the ops layer's REAL errors, never invented per surface.
 //
+//  **18m U3: the table itself moved to `Shared/OpsRefusalTable.swift`** —
+//  the phone speaks it too now. This file keeps the MAC'S HALF of it (the
+//  `OpsRefusalCopy` extension below: the Mac's chords as roads, the Mac's
+//  own sentences, and the pre-hoist `message(for:)`), plus the Mac face-copy
+//  neighbours that were never refusal tables and are dense with Mac chords.
+//
 
 import Foundation
 import VariorumCore
@@ -364,206 +370,70 @@ nonisolated enum BlockSelectionCopy {
     }
 }
 
-nonisolated enum OpsRefusalCopy {
+// MARK: - The Mac's half of the refusal table (18m U3)
+
+/// **The Mac's half of `OpsRefusalCopy`** (18m U3 — the table itself lives
+/// in `Shared/OpsRefusalTable.swift`, one home for both platforms). What
+/// stayed here is exactly what a shared home must not hold (MobileSoul §4
+/// item 4, read from the other side): the Mac's CHORDS as road values, and
+/// the few sentences that are the Mac's own — a chord in the sentence's
+/// body, a Mac-only surface named, the ⌘-click PICK vocabulary.
+///
+/// `message(for:)` is the pre-hoist name, kept so every Mac call site and
+/// every Mac pin reads exactly as it did before the hoist — a zero-test-edit
+/// suite is the proof a hoist moved an address and not a behaviour (the 3C
+/// parity pattern; `CrossBlockRefusalRoads` is the worked precedent).
+nonisolated extension OpsRefusalRoads {
+    /// The Mac's chords: ⌘⇧D divides; ⌥⌘⇧D opens Divide choosing takes.
+    static let mac = OpsRefusalRoads(
+        divideChord: "⌘⇧D",
+        arrangeTakesRoad: "⌥⌘⇧D arranges them differently")
+}
+
+nonisolated extension OpsRefusalCopy {
+    /// The ops layer's refusals in the Mac's words: its own arms first, then
+    /// the shared table with the Mac's roads.
     static func message(for error: Error) -> String {
-        if let error = error as? OperationError {
-            switch error {
-            case .lockedPost:
-                return "This note is sealed — unseal it to change takes or choices."
-            case .archivedVariant:
-                return "That take is archived — unarchive it first."
-            // 13j batch 3 (the round-5 deleted-take ruling): the recovery
-            // door's double-click / raced-restore path — the
-            // `readingNotDeleted` sentence, one row-kind down. It is a
-            // SUCCESS story told as a refusal, so it says so.
-            case .variantNotDeleted:
-                return "That take is already back — it's in the block's fan."
-            // 13j batch 6b (J1): the purge op's three refusals, worded —
-            // never the raw dump (the J8 bar, in the phase whose bar is
-            // copy truth). The first is the honest impossible-door case:
-            // only things in the Trash can be deleted for good.
-            case .purgeTargetNotDeleted:
-                return "Only things in the Trash can be deleted for good — "
-                    + "delete it first, and it waits there \(TrashWindow.days) days."
-            case .deliberateSavepointNeverPruned:
-                return "That's a deliberate ⌘S savepoint — those are never pruned, "
-                    + "in any mode."
-            case .unsupportedPurgeTarget:
-                return "That isn't something the Trash can delete for good."
-            case .lockedVariant:
-                return "That take is locked — unlock it or branch a new take."
-            // 13u3 UNIT H (the enum-dump straggler this unit's own door
-            // walked straight into). `deleteVariant` checks the CHOSEN
-            // pointer before the last-active guard, so the commonest press
-            // on a take card's Delete — the take the note is showing, and on
-            // a one-take block the ONLY take — raises this; it fell to
-            // `default:` and printed `Refused: variantIsChosen(id: "…")`,
-            // a raw enum with a UUID in it, on a door Write's panel has
-            // offered since Phase 7. The words answer BOTH readers, because
-            // one error serves both states: "choose another first" is the
-            // road on a fan, and on a block with nothing else to show the
-            // thing she means to delete is the block.
-            case .variantIsChosen:
-                return "The note shows this take \u{2014} choose another take first, and then "
-                    + "this one can go. (If it's the block's only take, it's the block "
-                    + "you want to delete.)"
-            // 13u3 ladder round 1, R1-4 — the enum-dump class's two
-            // stragglers, first reachable from a face at UNIT D's rename
-            // door (race-only: the take dying or the moment purged under the
-            // open ask). Worded generically, because `variantNotFound` is
-            // every op's honest answer to a take that is gone.
-            case .variantNotFound:
-                return "That take isn't there any more \u{2014} it may have just been "
-                    + "deleted. The block's History lists deleted takes, with Put back."
-            case .commitNotFound:
-                return "That saved moment isn't there any more."
-            case .versionLinkNotFound:
-                return "These two notes aren't marked as versions — nothing to unmark."
-            // 17o batch d (ledger row 27, J8): the mark door's own refusal
-            // fell to `default:` and printed the raw enum WITH BOTH POST
-            // UUIDs in it — on a click she can make by pressing the row
-            // twice. Its inverse above has spoken since Sitting 9; this is
-            // the missing half of that pair.
-            case .postsAlreadyVersionLinked:
-                return "These two notes are already marked as versions of each other."
-            // Same batch, same class. Since row 17 the VERSION-LINK door no
-            // longer raises this at all (a blockless note gains its anchor
-            // block — her U-19 (1)); what survives are the COPY roads —
-            // Compare's "make outline note" and duplicate-as-version — where
-            // there is genuinely nothing to copy. `VersionActs.words` has its
-            // own sentence for the note-moments family, whose "save a version
-            // of" phrasing belongs only there.
-            case .postHasNoBlocks:
-                return "There's nothing in that note yet — write a line in it first."
-            // 13b Stage 4 ladder round 1, MINOR-2: the two Stage 4 doors
-            // that spoke raw enum dumps get app words. `readingNotDeleted`
-            // is the recovery door's double-click/raced-restore path;
-            // `readingNotFound` is its absent-row sibling AND the shared
-            // `liveReading` guard's refusal (missing OR tombstoned) from
-            // every reading op, so the copy serves both meanings.
-            case .readingNotDeleted:
-                return "That book is already restored — it's back on the shelf."
-            case .readingNotFound:
-                return "That book can't be found — it may have been deleted, "
-                    + "or removed on another device."
-            // The belt behind the extent faces (same finding): the ops
-            // layer refuses non-positive targets/caps typed nowhere the
-            // ONE `ExtentInput.parse` rule now guards.
-            case .invalidExtent:
-                return "A word target or note cap must be a positive number — "
-                    + "nothing was changed."
-            // 18g (her R-Q13's custom hex): the belt behind the palette
-            // field. The refusal shows back what she typed and says the
-            // shape, because "invalid" without an example is the R1-3
-            // class — and it names that nothing moved, since a half-written
-            // pair is exactly what the one-transaction setter prevents.
-            case .invalidTint(let value):
-                return "\u{201C}\(value)\u{201D} isn't a colour — a colour is six hex "
-                    + "digits, like B9A7E6 or #8A7A3A. Nothing was changed."
-            // 13c Stage 1 ladder, R3-1: the empty-block carve's
-            // authorization, re-checked inside the tombstone's own
-            // transaction. Worded here as well as in the editor's own
-            // switch so any future door onto `deleteBlock(requiring:)`
-            // inherits real words rather than the raw dump (the R1-3
-            // class).
-            // 13d Batch 3 (A9): reachable the moment divide has a door
-            // on a board — the fan is read from the store and the op
-            // re-checks it inside its own transaction, so a take arriving
-            // in that window refuses HERE. It dumped the raw enum before.
-            case .fannedBlock:
-                return "This block has more than one take now — divide it again "
-                    + "and the take you're in splits while the others stay on the "
-                    + "first block (⌥⌘⇧D arranges them differently)."
-            // 13f batch 6 (W4): the star cap, refusing honestly rather than
-            // evicting her oldest star. The refusal NAMES the road, which
-            // is the whole reason the cap is a refusal and not a silent
-            // drop (P-2 — a door that fires and says what to do instead).
-            case .starLimitReached(let limit):
-                return "You can star \(limit) things at a time — un-star one in the "
-                    + "\(StarCopy.sectionHeader) list at the top of the sidebar, and "
-                    + "this can take its place."
-            // 13e E13: her round-3 ruling's words, from the one home above.
-            case .duplicateBookName(let existing):
-                return BookNameCopy.refusal(existing: existing)
-            case .blockCarriesUnshownText:
-                return "That block isn't empty after all — it carries a take or "
-                    + "a comment that isn't shown here. Nothing was deleted."
-            // 13e batch 3 (E5/E6b — her A20/A21): the take↔block doors'
-            // three refusals, in words. `lastActiveVariant` has existed
-            // since Phase 2 and dumped the raw enum; E5 makes it a door she
-            // will actually meet (a one-take block has nothing to move out),
-            // so it gets its words here beside the two new cases.
-            case .lastActiveVariant:
-                return "This block has only one take — a take moves out when "
-                    + "there's another one left behind. Divide the block instead (⌘⇧D)."
-            case .emptyTakeCannotBecomeABlock:
-                return "That take is empty — there's no text to become a block."
-            case .noConvertibleTakes:
-                return "This block has no other takes with text in them — "
-                    + "nothing to turn into blocks."
-            // 13e batch 4 (E2 — her A17): `blockNotFound` has existed since
-            // Phase 2 and dumped the raw enum, because until now every door
-            // onto it addressed the ONE block the caret was in and the
-            // surface could not offer a block the store had lost. A
-            // multi-block selection can: it is held across time while the
-            // store moves under it (a sync arrival, another pane, the other
-            // half of a split), and the compound's atomic rollback means she
-            // meets this refusal with NOTHING deleted — which is the fact the
-            // words have to carry, or a rolled-back gesture reads as a
-            // half-done one.
-            case .blockNotFound:
-                return BlockSelectionCopy.blockGone
-            // Ladder round 2 (R2-2): `blockNotFound`'s mid-flight sibling —
-            // the block is live but its placement left this note between a
-            // door's read and its write. First made reachable by the
-            // multi-pick doors; spoke the raw enum until now.
-            case .blockNotPlaced:
-                return "That block is no longer in this note — it may have "
-                    + "moved while you worked. Nothing was changed here."
-            // 13j batch 6 (the enum-dump straggler, routed here from LADDER
-            // A's round-1 sanity pass, which found it falling to `default:`
-            // as "Refused: \(error)" — loud and typed, but a raw dump as a
-            // sentence).
-            //
-            // **Reachability, VERIFIED rather than assumed** (the reviewer's
-            // own gap-slot trace, re-walked in this batch): every structural
-            // op resolves its text through `renderedVariant`, which throws
-            // this when a slot renders NOTHING — a GAP SLOT (`variantID ==
-            // nil` at render) is the shipped case, and the merge, divide,
-            // extract, pool-copy and version doors all pass through it. Its
-            // sibling on that same road, `blockNotFound`, already speaks
-            // (13e E2), so this is the last one; the OTHER errors those
-            // doors raise are worded above. It is unreachable for a healthy
-            // live block (I10 plus the default-variant reassignment
-            // guarantee one), which is exactly why the words describe the
-            // state it really means — text that has not arrived here yet —
-            // rather than blaming her for a block she can see.
-            // **13u1 UNIT 2 (item 8's U-3, the Mac half of the gap
-            // fence's missing face).** The mobile round created this
-            // Mac-side gap and the handback row names it: a span covering
-            // an interior block that has NOT ARRIVED renders that block
-            // with zero length, so the old planner ran straight past it and
-            // the merge chain refused across it — and `operationMessage`
-            // had no case, so she met the RAW `blocksNotAdjacent(first:
-            // second:)` enum dump. The compound's run now fences the gap
-            // before any op runs (it is an index RANGE, not the intersected
-            // set), so this is the belt behind that brace: the ordinary
-            // race, a block landing or leaving between a plan and its
-            // write. The phone has said this sentence since M22; the Mac
-            // says it now, and the two are the same reading.
-            case .blocksNotAdjacent:
-                return "Something sits between these blocks — a block that hasn't "
-                    + "arrived yet, or one that landed since you selected. "
-                    + "Nothing was changed."
-            case .noRenderableVariant:
-                return "That block has no text here yet — it may still be "
-                    + "arriving from another device. Nothing was changed; "
-                    + "try again in a moment."
-            default:
-                return "Refused: \(error)"
-            }
+        macWords(for: error) ?? message(for: error, roads: .mac)
+    }
+
+    /// The Mac's OWN sentences — each names a Mac chord or surface, or
+    /// speaks the Mac's pick vocabulary, so none may live in the shared file.
+    static func macWords(for error: Error) -> String? {
+        guard let error = error as? OperationError else { return nil }
+        switch error {
+        case .lockedPost:
+            return "This note is sealed — unseal it to change takes or choices."
+        // 13j batch 6b (J1): the purge op's refusal for a deliberate
+        // savepoint — the ⌘S immunity said in the chord that makes one.
+        case .deliberateSavepointNeverPruned:
+            return "That's a deliberate ⌘S savepoint — those are never pruned, "
+                + "in any mode."
+        // 13f batch 6 (W4): the star cap, refusing honestly rather than
+        // evicting her oldest star. The refusal NAMES the road, which
+        // is the whole reason the cap is a refusal and not a silent
+        // drop (P-2 — a door that fires and says what to do instead).
+        // The road is the Mac sidebar's list; the phone's star door words
+        // its own.
+        case .starLimitReached(let limit):
+            return "You can star \(limit) things at a time — un-star one in the "
+                + "\(StarCopy.sectionHeader) list at the top of the sidebar, and "
+                + "this can take its place."
+        // 13e batch 4 (E2 — her A17): `blockNotFound` has existed since
+        // Phase 2 and dumped the raw enum, because until now every door
+        // onto it addressed the ONE block the caret was in and the
+        // surface could not offer a block the store had lost. A
+        // multi-block selection can: it is held across time while the
+        // store moves under it (a sync arrival, another pane, the other
+        // half of a split), and the compound's atomic rollback means she
+        // meets this refusal with NOTHING deleted — which is the fact the
+        // words have to carry, or a rolled-back gesture reads as a
+        // half-done one. Mac-local: "picked" is the ⌘-click vocabulary.
+        case .blockNotFound:
+            return BlockSelectionCopy.blockGone
+        default:
+            return nil
         }
-        return String(describing: error)
     }
 }
 

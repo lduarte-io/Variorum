@@ -4250,31 +4250,19 @@ final class EditorViewModel {
     }
 
     /// Internal (was private) since N10: the controller's compounds reuse
-    /// the refusal copy.
+    /// the refusal copy. **18m U3 (ruling G):** the gate's vocabulary is ONE
+    /// shared brain now (`OpsRefusalCopy.gateMessage`); this forward supplies
+    /// the Mac's two platform pieces — its locked-take line and its fan roads.
     func message(for refusal: BlockRangeIndex.Refusal) -> String {
-        switch refusal {
-        case .crossesBlockBoundary:
-            // 13j J8(b), her report: *"the reason is really unclear to me why
-            // right now."* This case used to name THREE causes at once for a
-            // gesture that had exactly one. Both live doors onto it now
-            // DIAGNOSE — they hold the range and the slots, so they call
-            // `CrossBlockRefusal.message(range:index:slots:)`, which asks
-            // which condition actually declined. What remains here is the
-            // range-less fallback for any future caller that has neither.
-            // **13u2 UNIT C:** it used to speak the boundary residual, which
-            // #109's clamp law retired — and a range-less caller could not
-            // claim that geometry anyway. The surviving cause says only that
-            // the surface has not caught up, which is the honest answer when
-            // nobody can name the condition.
-            CrossBlockRefusal.message(for: .surfaceNotSettled)
-        case .readOnlySlot:
-            "This block hasn't fully synced; it is read-only for now."
-        case .lockedVariant:
-            "This take is locked — branch it or unlock it to edit."
-        case .indexDesync:
-            "The editor lost track of block boundaries — reloading from the store."
-        }
+        OpsRefusalCopy.gateMessage(
+            for: refusal,
+            lockedTake: Self.lockedTakeGateRefusal,
+            fanRoads: CrossBlockRefusal.macFanRoads)
     }
+
+    /// The Mac's locked-take GATE line (the phone's names its takes sheet's
+    /// road instead — `MobileEditorViewModel.lockedTakeRefusal`).
+    static let lockedTakeGateRefusal = "This take is locked — branch it or unlock it to edit."
 
     /// Internal (was private) since N10: the controller's op errors land
     /// in the model's status line.
