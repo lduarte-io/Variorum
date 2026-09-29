@@ -453,7 +453,7 @@ no revert is in flight.
 | Step 5 — findings routed; build to TODAY's behavior | DONE for the trace (no within-platform mis-route found; three observations below, routed) — re-checked at build |
 | Step 6 — row 28's enumeration + row 51's build-seam line, same commit as the hoist | DONE (the hoist commit) — row 28 (a)'s cascade half recorded DISCHARGED with its count PENDING the finals; row 51 gains its build-seam sentence |
 | Step 7a — finals (harness) | DONE on tree `66e6f674` (App/ unchanged since), her real-store instance live (pid 85601, untouched), no dev-store instance: **Mac routing/seam/compound families — 40 suites named literally in two runs: `✔ 223 tests in 20 suites` + `✔ 171 tests in 20 suites`, 0 skipped** (`u1-mac-routing-a.log` / `-b.log` in the session scratchpad; the new table suite included); **the eleven Tutorial suites — `✔ 79 tests in 11 suites`**; **the FULL mobile suite (iPhone 17 Pro simulator) — `647 tests in 110 suites`, 5 issues = the 4 KNOWN (`MobileTrashTests` ×2, `MobileTutorialWalkTests.theFannedDivideLessonLandsTheDuplicateShape` ×2 — row 49's) + 1 ATTRIBUTED PRE-EXISTING red, F-1 below; 0 skipped** — the full-mobile baseline RE-ESTABLISHED at 647/110 (18k's 643/109 + 18l-c U6's pin + this unit's 3); the phone twin `MobileEditRouteArmsTests` 3/3 and every phone routing suite green; **generic-iOS build `** BUILD SUCCEEDED **`** (the hoist commit). **The 3C proof: `git diff 3975b682..HEAD` over both test targets adds exactly the two NEW files — zero existing pins edited.** |
-| Step 7b — the walk (both voices, the six felt arms + the VisualWalk subset) | NOT-STARTED — gated on an author-free machine (per-step guard + HID idle) |
+| Step 7b — the walk (both voices, the six felt arms + the VisualWalk subset) | **HELD — NOT RUN.** `Tools/WalkKit/guard.sh --author` answers `GUARD: her app is running — STOP` (exit 3): her real-store `/Applications/Variorum.app` (pid 85601, up since 2026-09-28 23:09) is live, and the guard's first check refuses every GUI step while it is — quitting it is HERS alone, never a session's. The VisualWalk subset consumes the same guard. The ready-to-run script is `U1 WALK SCRIPT` below. **The unit's USE acceptance is therefore OPEN** (the harness evidence below is the floor, never the gate). |
 
 ### STEP 1 — THE ARM TABLE (today's tree, `3975b682`)
 
@@ -750,3 +750,43 @@ deliberately, as planned. **Proceed with steps 3–7.**
   naming a Mac door. The disclaimer's wording is already PROVISIONAL and in her 18l-c bundle
   ("the disclaimer polish"), so the natural owner is that item (or an explicit sweep exemption with a
   ruling) — NOT a hoist unit. Recorded, not fixed.
+
+### U1 WALK SCRIPT (HELD — runnable the moment her app is quit in a window she grants)
+
+**Preconditions (each re-checked, never assumed):** `pgrep -fl 'Variorum.app/Contents/MacOS'` shows no
+`/Applications` instance; `Tools/WalkKit/guard.sh --author` exits 0; Ghostty's AX + Screen Recording
+grants hold; the dev store's voice noted at start and RESTORED to Terminal at the end (row 91).
+Build the dev app from THIS tree: `xcodebuild build -scheme Variorum -destination platform=macOS
+-derivedDataPath App/Variorum/DerivedData/18m-u1` and launch ONLY that path (`open -n`), then every
+act through `click.sh` / `keys.sh` (guard order: author checks → activate → full guard → act; acts
+≥ 2 s apart — synthetic keys reset HID idle). Captures into `notes/plans/18m-screens/u1/<voice>/`.
+Stage prose through the store/quick-entry, never by typing into the TK2 editor (the 13u3 UNIT B fact).
+
+| # | Arm walked | Staging | Act | Must see |
+|---|---|---|---|---|
+| W1 | M2 — A7 carve | a note "Alpha" · (empty) · "Beta" | caret at the empty block's start, ⌫ | the empty block GONE; receipt *"Empty block deleted — ⌥⌘Z undoes it."*; Edit ▸ Undo Delete Block |
+| W2 | M3 — #34 fanless | "Alpha" · "Beta" | caret at "Beta"'s start, ⌫ | ONE block "Alpha Beta"; receipt *"Blocks joined — ⌥⌘Z undoes it."* |
+| W3 | M3 — #34 fanned | "Alpha"(2 takes) · "Beta" | the same ⌫ | nothing joined; the refusal names the fan and ⌘⇧M / ⌥⌘⇧M |
+| W4 | M4 — J9 | three paragraphs | triple-click the middle one, ⌫ | the paragraph GONE to the tray; receipt `BlockSelectionCopy.deletedNote(1)`; ⌥⌘Z restores it |
+| W5 | M5 — the clamp | three paragraphs | select the middle paragraph + its newline, type a word | the block's text replaced IN PLACE, the break stands; ⌘Z is TEXT undo (no ⌥⌘Z entry) |
+| W6 | M6 — the compound | two paragraphs | select mid-first to mid-second, ⌫ | the remainders JOIN into one block; the receipt names the tray / Came from and ⌥⌘Z |
+| W7 | nothing regressed | any block | ordinary typing mid-block | characters land; no refusal line |
+
+Both voices (W1–W7 in Terminal, then Study — re-read every click point from a fresh capture after the
+flip). Then the VisualWalk subset as regression cover:
+`VARIORUM_VISUAL_WALK=1 Tools/VisualWalk/visual-walk.sh --build --voices terminal,study --only write-newline-roundtrip,write-divide-merge,b5-more-roads`
+(its 17w hazards bind: never let a scenario type after a failed keyboard probe).
+
+**The harness floor that stands in the meantime (NOT the gate):** every one of W1–W7's arms is driven
+through the REAL keystroke path (`harness.replace` → `shouldChangeText` → the route → the executor →
+the STORE) by an unmodified pin that ran green in the finals — W1 `SeamMergeTests
+.anEmptyBlockAtTheSeamStillTakesTheCarveNotTheMerge` + `BlockDeletionAndRedoTests`' carve pins; W2
+`SeamMergeTests.backspaceAtATextedSeamMERGESTheTwoBlocks` (the receipt asserted); W3
+`.aFANNEDSeamREFUSESAndNamesTheDoorThatCanFoldIt` + `.aFanArrivingWhileSheIsTypingStillStopsTheMerge`;
+W4 `WholeBlockDeleteTests.aWholeParagraphSelectionDeletesTheBlock` (the receipt asserted) +
+`.theRouteIsOneUndoEntryAndItRoundTrips`; W5 `BoundaryClampTests
+.typingOverAParagraphWithBothItsNewlinesReplacesItInPlace` + `.shapeOneIsOrdinaryTextUndo…`; W6
+`CrossBlockCompoundTests.aSpanFromMidParagraphToMidParagraphJoinsTheRemainders` +
+`.theReceiptNamesBothDestinationsAndStaysShortEnoughToRead`; the find fence
+`FindAndReplaceTests.aPlannedMatchThatDriftsAcrossASeamRefusesInsteadOfMerging`; the phone's arms
+`MobileCrossBlockEditTests` + `MobileWholeBlockDeleteTests` (full mobile suite).
