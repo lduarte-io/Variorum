@@ -452,7 +452,8 @@ no revert is in flight.
 | Step 4 — the new pure table suite (order per platform + declared capability differences) | DONE (the table commit) — `VariorumTests/EditorEditRouteTableTests.swift` **19/19 green** (literal lists; the Mac gate walks `macArms`; capability differences as facts; precedence on both lists + the vacuous-pass-then-bites pin; shape × claimant per platform incl. A7's real guards and O-3's seeded slots; ORDER-BITES by permutation for J9≺clamp (with the laziness proof: 0 surface reads), J9≺compound, fence≺carve; the gap fence as a COPY arm; the every-small-edit property: undeclared arms never answer, ≤ 2 surface reads). Phone twin `VariorumMobileTests/MobileEditRouteArmsTests.swift` (3 pins) — **PENDING the full mobile suite** |
 | Step 5 — findings routed; build to TODAY's behavior | DONE for the trace (no within-platform mis-route found; three observations below, routed) — re-checked at build |
 | Step 6 — row 28's enumeration + row 51's build-seam line, same commit as the hoist | DONE (the hoist commit) — row 28 (a)'s cascade half recorded DISCHARGED with its count PENDING the finals; row 51 gains its build-seam sentence |
-| Step 7 — walk (both voices) + finals (touched Mac suites + routing/seam/compound families + the eleven Tutorial suites + FULL mobile suite + generic-iOS build) | NOT-STARTED — every count PENDING |
+| Step 7a — finals (harness) | DONE on tree `66e6f674` (App/ unchanged since), her real-store instance live (pid 85601, untouched), no dev-store instance: **Mac routing/seam/compound families — 40 suites named literally in two runs: `✔ 223 tests in 20 suites` + `✔ 171 tests in 20 suites`, 0 skipped** (`u1-mac-routing-a.log` / `-b.log` in the session scratchpad; the new table suite included); **the eleven Tutorial suites — `✔ 79 tests in 11 suites`**; **the FULL mobile suite (iPhone 17 Pro simulator) — `647 tests in 110 suites`, 5 issues = the 4 KNOWN (`MobileTrashTests` ×2, `MobileTutorialWalkTests.theFannedDivideLessonLandsTheDuplicateShape` ×2 — row 49's) + 1 ATTRIBUTED PRE-EXISTING red, F-1 below; 0 skipped** — the full-mobile baseline RE-ESTABLISHED at 647/110 (18k's 643/109 + 18l-c U6's pin + this unit's 3); the phone twin `MobileEditRouteArmsTests` 3/3 and every phone routing suite green; **generic-iOS build `** BUILD SUCCEEDED **`** (the hoist commit). **The 3C proof: `git diff 3975b682..HEAD` over both test targets adds exactly the two NEW files — zero existing pins edited.** |
+| Step 7b — the walk (both voices, the six felt arms + the VisualWalk subset) | NOT-STARTED — gated on an author-free machine (per-step guard + HID idle) |
 
 ### STEP 1 — THE ARM TABLE (today's tree, `3975b682`)
 
@@ -733,3 +734,19 @@ deliberately, as planned. **Proceed with steps 3–7.**
 5. **P3 is declared a COPY arm** in `Arm.gapFence`'s doc, with why the Mac lacks it (M7's
    `.unsyncedBlock` speaks there; the WORDS differ — O-1, U3's).
 6. **`findReplacing` has no default** — Mac `textView?.isFindReplacing == true`, phone `false`.
+
+### U1 FINDINGS FROM THE FINALS (routed to the orchestrator — none is U1's to fix)
+
+- **F-1 — PRE-EXISTING, attributed: the phone's no-redirect sweep is RED on the kickoff tree.**
+  `MobileStructuralTests` ▸ "Mobile no-redirect sweep (parity C5)" ▸ `nothingUserFacingNamesTheMac`
+  (`:1137`) finds exactly ONE offender: `Shared/SampleLibrary/SampleLibraryJekyllBook.swift:91`, the
+  Jekyll book's disclaimer literal *"… and, on the Mac, choose Help ▸ Restore “…”: a fresh …"*. The
+  file was written at 18l-c U6 (`2772a6f4`, last touched `603e5fdb`, 2026-09-28) and is untouched by
+  U1; the sweep reads SOURCE TEXT from disk, so its answer is a function of that literal alone and is
+  identical on `3975b682`. It went unseen because 18l-c's closing runs ran the phone's first-write
+  pins, never the full mobile suite (18k's finals predate the file). What it crosses: the parity C5
+  no-redirect ruling (*"redirecting you to the mac to accomplish something is a bit of a red flag"*)
+  — the Jekyll book is seeded on the PHONE's first-write road too, so the phone shows her a sentence
+  naming a Mac door. The disclaimer's wording is already PROVISIONAL and in her 18l-c bundle
+  ("the disclaimer polish"), so the natural owner is that item (or an explicit sweep exemption with a
+  ruling) — NOT a hoist unit. Recorded, not fixed.
