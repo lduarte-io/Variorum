@@ -294,7 +294,7 @@ rule binds any split this phase does make: a state struct passed in and returned
 
 | # | Item | Unit | Status |
 |---|---|---|---|
-| 1 | The routing cascade as ONE pure function in `Shared/EditorBrain/` — declared platform capability sets, order as data, a pure table suite pinning the ORDER per platform; both cascades one call; zero behavior change per platform (a differing route is a FINDING) | U1 | open |
+| 1 | The routing cascade as ONE pure function in `Shared/EditorBrain/` — declared platform capability sets, order as data, a pure table suite pinning the ORDER per platform; both cascades one call; zero behavior change per platform (a differing route is a FINDING) | U1 | **BUILT + LADDER CLOSED 2026-09-29** (one round 0/0/0/1, zero disputes; the NIT agreed, reviewer-fixed pin-first `276fc460`, implementer sanity `d6a8eb7e`; `notes/plans/18m-u1-ladder-round1.md`) — **the WALK is HELD** at the guard (her live app) and re-opens the unit if it overturns; the ready W1–W7 script is in the U1 RECORD |
 | 2 | Crystallization + the storage primitives + the identity audit hoisted on 3C (thin injected accessor surface; deliberate platform deltas declared; zero test edits both platforms) | U2 | open |
 | 3 | MAY-take: KnownIssues row 74 — the phone's autosave-registry release (the Mac's 18k C1 fix is the model); decide at U2, record either way with its own red-on-old pin if taken | U2 | open |
 | 4 | One refusal table: `OpsRefusalCopy` → `Shared/`; `operationMessage` deleted; the six mobile switches collapse; door-names local (§4.4); the sealed-note sentence converges — PROVISIONAL, QUESTIONS row quoting all four current spellings. **+ U1's O-1 (2026-09-29):** the gap-refusal copy divergence (Mac `.unsyncedBlock` sentence vs the phone's P3 read-only sentence; the tail-vs-gap cause ranking) is this unit's input too | U3 | open |
@@ -430,8 +430,10 @@ seam by definition → a **FABLE cold review** follows; your self-assessment clo
 |---|---|
 | Preflight (canon + charter + health review + KnownIssues whole + QUESTIONS + resiliency + TK2 notes + MobileSoul + the 18l/18l-b/18l-c records + both conductors read side by side + EditorBrain) | DONE (this session, 2026-09-29) |
 | This record file (constitution, baselines, conductor map, roster, ledger, traps, U1 brief) | DONE (this commit) |
-| U1 (session 1) | BUILT + VERIFIED 2026-09-29 (the step-2 checkpoint ruled (c)+(c1); steps 3–6 + harness finals done, `3a7b79fd..1734857a`; the orchestrator verify pass landed `6498a40f`; F-1 routed to #155) — **the WALK is HELD at the guard** (her app live); the FABLE ladder round 1 is IN FLIGHT (`notes/plans/18m-u1-ladder-round1.md`) |
-| U2 → U3 → (U4?) | NOT-STARTED — briefs written one-ahead at each close |
+| U1 (session 1) | **LADDER CLOSED 2026-09-29** — one round 0/0/0/1, zero disputes (NIT agreed → reviewer fix `276fc460` pin-first → sanity `d6a8eb7e`); the WALK is HELD at the guard and folded into the next drive window (the skill's else-record-and-fold provision; the SEQUENCING NOTE below) |
+| U2 (session 2) | IN FLIGHT — brief below; the injected-surface shape is a pre-declared propose-then-rule checkpoint (the 4E pattern, U1's precedent) |
+| U3 → (U4?) | NOT-STARTED — briefs written one-ahead at each close |
+| The HELD WALKS (U1's W1–W7 + VisualWalk subset; the orchestrator's own U1 acceptance walk; U2's typing walk when it reaches that step) | HELD at the guard — run at the first author-granted / app-quit window; each unit's close is PROVISIONAL until its walk passes, and a walk finding re-opens its unit as a fix pass |
 | Closeout | NOT-STARTED |
 
 ## U1 RECORD (the `opus-implementer`, session 1 — opened 2026-09-29)
@@ -873,3 +875,111 @@ and PRE-EXISTING as claimed.
 Ledger row 1 stays open pending the ladder + the walk; row 6's U1 half (row 28's cascade
 discharge, row 51's build seam) is landed and verified in the hoist's own commit. The FABLE
 cold review over `3975b682..1734857a` follows; ladder file `notes/plans/18m-u1-ladder-round1.md`.
+
+### SEQUENCING NOTE (orchestrator, 2026-09-29 — PROVISIONAL, recorded rather than silent)
+
+U2 opens while U1's walk is HELD. The warrant: the skill's own batch loop provides for it
+("screenshot-verify where the environment allows — ELSE RECORD AND FOLD INTO THE NEXT DRIVE"),
+the guard's refusal is environmental (her live real-store app), U1's non-walk evidence is
+unusually strong for a zero-behavior-change unit (zero pins edited on both platforms, the
+order-pinning table suite, a clean one-round ladder), and idling the phase on a window only she
+can grant spends the run's autonomy on a low-risk wait. The cost, stated: U2 edits the same two
+view-model files, so a U1 walk finding would land its fix pass on top of U2's changes — accepted
+(the routed surface is now small and pinned). Every held walk runs at the FIRST window and each
+unit's close stays PROVISIONAL until its walk passes.
+
+## U2 BRIEF (session 2 — crystallization, the storage primitives, the identity audit, hoisted on 3C; written by the orchestrator 2026-09-29)
+
+You are the `opus-implementer` for **18m UNIT U2**, the phase-sized unit: the duplicated
+CONDUCTOR bands — crystallization, the storage primitives, the identity-audit consumer — move
+to `Shared/EditorBrain/` on the 3C pattern, with the platform accessor differences becoming a
+THIN injected surface and every deliberate platform delta staying DECLARED, never averaged
+away. **The charter's U2 bullet is your unit charter** (`notes/plans/post-13u-health-rounds.md`
+KICKOFF 3). Zero test edits on both platforms is the proof; the full mobile suite is part of
+your finals.
+
+**Read first, in this order (reading is never delegated):**
+(1) THIS file whole — the fences, BINDING PRINCIPLES (P-9's value-seam rule binds your surface
+design), CAST & DISCIPLINE, BASELINES (the mobile baseline is 647/110 = the 4 known + F-1,
+attributed — never re-attribute it), THE CONDUCTOR MAP (the bands with the deltas I verified),
+THE LEDGER rows 2–3 and 6, ENVIRONMENT TRAPS (verbatim binding), the SEQUENCING NOTE (your
+walk step may be HELD at the guard — if so, record the ready-to-run script and fold it, U1's
+precedent), and the **U1 RECORD whole + `notes/plans/18m-u1-ladder-round1.md`** (the freshest
+seam facts; your diff builds ON U1's routed gates — `performCrossBlockRoute` and
+`EditorEditRoute` are settled ground, untouched by you).
+(2) The charter's KICKOFF 3 + the health review §3 (the ~89%/modulo-accessor claims) and §2.1.
+(3) `notes/KnownIssuesAndTechDebt.md` rows 28 (your commit updates its enumeration — the
+conductor band's (a) completes with your hoist), 74 (your MAY-take, below), 30 (the phone's
+gate-less M12 class — context for `restampProjection`'s reason-to-exist).
+(4) `notes/MobileSoul.md` §3 · `notes/TEXTKIT2_NOTES.md` IN FULL (mandatory — §3's macOS-26/27
+attribute-fixing and widening facts are WHY several of these bands are shaped as they are:
+the clamp-to-the-verdict rule, the phone's re-stamp) · `notes/SessionResiliencyProtocol.md`.
+(5) The code, END TO END before touching it, BOTH platforms side by side:
+`EditorViewModel.swift` :900–:1040 (the storage seam: `setSurfaceContent` · `applySeamEdit` ·
+`adoptRewrite` · `holdTailIdleClock` · `awaitMintSettle` · `applyPendingIfClean`), :1445–:1490
+(the audit consumer + `desyncRecovery`), :1491–:1779 (crystallization incl. `finishMint` and
+the Mac-only `runSoftNewlineInTail`); `MobileEditorViewModel.swift` :566–:780 (projection →
+surface, `applyDifferential`, the pending-text contract), :1666–:1683 (`desyncRecovery`),
+:1684–:1899 (crystallization), :1899–:2037 (the storage primitives + the audit consumer);
+`EditorSurfaceController` where the Mac's differential/renderFull roads consume the seam
+(`applyStructuralResult`, `applyDifferentialStructural`, `renderFull` — U-B5's keeper and the
+anchor capture live here and are PINNED: `WriteFloatingViewportTests`,
+`UntouchedLineKeeperTests` ride unmodified); `Shared/EditorBrain/` whole (the planners and
+reconciler you conduct: `CrystallizationPlanner`, `EditorProjectionEngine`,
+`IdentityProjectionAudit`, `EditorDocumentCore`, `EditorEditRouting`'s `ArmedEdit`/
+`EditorAssertionSeam`); the pin families that ride these bands — Mac: the crystallization/
+tail/mint suites (grep `crystallize|idleMint|attachLeadingTail|finishMint|awaitMintSettle`
+over `VariorumTests/` and read every suite you find), `WriteTopAirTests`, the seam/structural
+suites; phone: `MobileSpaceEaterTests`, the crystallization/first-write suites, the
+`desyncRecoveryCount` oracles (row 30's pins).
+(6) The 18k C1 record (`notes/plans/phase-18k-runtime-hygiene.md`, UNIT C1) if you take row 74
+— the Mac's release-at-end-of-life fix is the model and its pin form (the registry count
+across an open→close cycle) is the required red-on-old shape.
+
+**The unit, in order:**
+1. **MAP the bands byte-honestly:** a per-function table — Mac body vs phone body — classing
+   every difference as (i) ACCESSOR (the injected surface's material: `textView?.textStorage`
+   vs `storage`, `hasMarkedText()` vs `markedTextRange`, `showOperationError` vs
+   `statusMessage =`, `MarkdownStyling.restyle` vs `MarkdownFace.restyle`,
+   `EditorDocument.baseAttributes` vs `MobileEditorStyle.baseAttributes`), (ii) DECLARED
+   platform delta with its recorded reason (the Mac's `structuralInFlight` guards; the ⇧⏎
+   soft-newline arm; the phone's `restampProjection` and its widened-report reason; the
+   phone's liveness concept), or (iii) UNEXPLAINED — a FINDING routed to the orchestrator
+   (mechanism + what each behavior would mean), built to TODAY's behavior per platform either
+   way. **The phone's missing `structuralInFlight` guards in `idleMintTail`/
+   `attachLeadingTailRunIfNeeded` are the first candidate for (iii)** — trace whether the
+   phone HAS an equivalent in-flight hazard on its structural road and answer it with
+   evidence, not a guess.
+2. **PROPOSE THE INJECTED SURFACE BEFORE BUILDING (the architect rules this fork — U1's 4E
+   precedent):** the design space includes a small host protocol the two view models conform
+   to; free functions over a value facts-struct + effect closures; or a generic conductor type
+   the models embed. P-9's rule binds: a VALUE seam (state in, state out) is preferred, and
+   NOTHING may introduce a new `model:`-style mutual back-reference. Name what the surface
+   must expose (storage access, the index/ledger/autosave doors, the tail state, the session
+   runner, the error voice), what stays a platform arm, the forwarding plan (pre-move names as
+   forwards/typealiases so every pin rides), and the hoist's file layout. Commit the proposal
+   into your record and STOP for the orchestrator's ruling.
+3. **BUILD per the ruling**, function by function, commit per coherent piece; the 3C bar
+   throughout (zero test edits both platforms — a pin needing edits is STOP-and-re-trace).
+   Row 28's enumeration (the conductor band's (a) completed) updates in the same commit.
+4. **MAY-take, decided and recorded either way: row 74** — the phone's autosave-registry
+   release. Take it iff your diff already stands on the phone's editor-model teardown road;
+   a take needs its own red-on-old pin (the registry count, C1's form) and the 18k C1
+   semantics (release at the owner's exactly-once end of life; drop only through a landed
+   leaving savepoint; the phone's background flush walks the map — verify the cost shape).
+   Not taken ⇒ one line saying why, and the row stays the mobile project's.
+5. **WALK (USE) + finals:** the typing walk (both voices — type paragraphs past boundaries,
+   the idle mint, a bulk paste, ⇧⏎ in the tail on the Mac, the k−1 blank-line shapes) — if
+   the guard refuses (her live app), record the ready-to-run script and FOLD it (the
+   SEQUENCING NOTE; the harness/simulator evidence carries the interim). Finals: the touched
+   Mac suites + the crystallization/seam/structural families + the eleven Tutorial suites,
+   **the FULL mobile suite** (expect 647/110-class counts = the 4 known + F-1; anything else
+   is attributed before it is accepted), and the generic-iOS build.
+
+**Discipline:** the resiliency protocol binds from your first commit — `## U2 RECORD` in THIS
+file, LIVE STATUS per piece, PENDING marks, commit+push per piece, NO trailers, pathspec
+staging, synchronous foreground waits only, NEVER spawn subagents, commit before any
+behavioral revert. PROVISIONAL-and-continue (QUESTIONS next free #159 — check it fresh);
+STOP-and-report for gating ambiguity, any behavior change, anything wanting `Sync/`, every
+author-only call. Your diff is the editor seam by definition → a **FABLE cold review**
+follows; your self-assessment closes your record.
