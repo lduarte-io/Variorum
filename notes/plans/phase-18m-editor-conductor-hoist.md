@@ -436,10 +436,11 @@ seam by definition → a **FABLE cold review** follows; your self-assessment clo
 
 ## U1 RECORD (the `opus-implementer`, session 1 — opened 2026-09-29)
 
-**NOT DONE YET (first line, per the contract): steps 3–7 — the build, the table suite, the row
-28/51 edits, the walk and the finals. The unit is PAUSED AT THE STEP-2 CHECKPOINT awaiting the
-architect's ruling on the function shape (below).** No production or test file has been edited;
-no revert is in flight.
+**NOT DONE (first line, per the contract): THE WALK — step 7b is HELD, not run: `guard.sh --author`
+exits 3 because her real-store app (pid 85601) is live, and quitting it is hers alone. The unit's USE
+acceptance is therefore OPEN; everything else (steps 1–6 and the harness finals) is DONE and pushed.**
+No revert is in flight. *(History: the unit paused at the step-2 checkpoint; the architect's ruling —
+(c) with (c1), six conditions — is the section below the proposal.)*
 
 ### LIVE STATUS
 
@@ -790,3 +791,48 @@ W4 `WholeBlockDeleteTests.aWholeParagraphSelectionDeletesTheBlock` (the receipt 
 `.theReceiptNamesBothDestinationsAndStaysShortEnoughToRead`; the find fence
 `FindAndReplaceTests.aPlannedMatchThatDriftsAcrossASeamRefusesInsteadOfMerging`; the phone's arms
 `MobileCrossBlockEditTests` + `MobileWholeBlockDeleteTests` (full mobile suite).
+
+### U1 SELF-ASSESSMENT (for the cold reviewer — Fable, per the cast)
+
+**What I claim, and the evidence for each claim:**
+1. *The ladder's decision moved address, not behavior, on both platforms.* Evidence: the route
+   calls exactly the planners the ladders called, with the same inputs (`index`, `slots`, the same
+   `viewText` surface read — the old `[weak self] … ?? ""` / `[model]` captures collapse to one
+   non-escaping `viewText($0)`, equivalent inside a synchronous gate), in the same order, stopping at
+   the same first claim; each mapping calls the same executor through the same chained schedule and
+   speaks the same sentence (`CrossBlockRefusal.message(for:)` is the Mac forward over `macFanRoads`,
+   byte-equal to the old `message(range:index:slots:)` composition; the phone passes
+   `Self.fanFoldRoads` as before). The 3C proof: the finals added two NEW test files and edited none —
+   Mac 223/20 + 171/20 + Tutorial 79/11 green, the full mobile suite 647/110 with only the 4 known +
+   F-1 (pre-existing, attributed).
+2. *The order is now testable purely, and the table bites.* `EditorEditRouteTableTests` (19) drives
+   the REAL carve guards (c1), the permutation pins show a reordered list answers differently for
+   the three overlapping pairs, and the J9-vs-clamp pin shows LAZINESS (0 surface reads when J9
+   claims — an eager route would read once).
+3. *Row 51's carves are buildable, not built.* The phone's list lacks them (pinned in both
+   targets); their plans are shared; the precedence rules that would place them pass vacuously today
+   and bite when they land (pinned).
+
+**Where I would look hardest if I were reviewing this cold:**
+- **The undeclared-arm cases** (Mac `.refuseAwaitingSync`; phone `.refuseFindReplace`,
+  `.carveEmptyBlock`, `.mergeTextedSeam`): the ONLY new runtime lines that are not a 1:1 move. They
+  are unreachable by construction (the route walks only declared arms — pinned by the property
+  sweep) and answer as each platform answers today (assertion seam, then the platform's own
+  diagnosis). If the reviewer prefers these to be a `preconditionFailure`, that would trap in
+  Release — against the repo's refuse-don't-trap doctrine (M-A); I chose the seam deliberately.
+- **`surfaceText` bound:** I state ≤ 2 reads per route, correcting the ruling's "≤ 3" (that figure was
+  option (a)'s eager sum); the property pin asserts ≤ 2 over every small edit of four notes.
+- **The moved doc comments:** A7's and #34's plan docs moved VERBATIM into `SeamCarvePlan` (only
+  `model.slots` → `slots` and one "see `runEmptyBlockDeletion`" → "the Mac's `runEmptyBlockDeletion`");
+  the ladders' order-arguing prose moved to `Arm`'s case docs, lightly re-worded where a sentence
+  referred to "the two plans below"; the phone's R13 NO-CONFIRM ruling stayed at the phone's
+  `.deleteWholeBlocks` mapping (the door keeps its own copy).
+- **The precedence table's "clamp ≺ compound" and the fence-≺-all pairs** are TODAY'S order with the
+  ruling that placed them named; only J9≺clamp, J9≺compound and fence≺carve are proven load-bearing
+  by permutation — the others are exclusive by geometry today and are recorded as rulings, not as
+  proven overlaps. The gap fence ≺ compound pair is a COPY ordering (O-2): permuting it changes no
+  outcome (pinned: `theGapFenceChangesOnlyTheWords`).
+
+**Not done / owed:** the walk (HELD — see the WALK SCRIPT); F-1 routed to the orchestrator (not
+U1's); O-1 is U3's (ledger row 4). Zero `Sync/`, zero schema, zero layout code touched (TEXTKIT2
+seams untouched: no attribute stamps, no `BlockRangeIndex` region change, no `runStructural` change).

@@ -2294,9 +2294,9 @@ final class EditorSurfaceController {
     /// deliberately freezes while the buffer is dirty or a flight is up. A
     /// comment landing during a typing burst was therefore invisible to
     /// them, and the block (and its note) went. The plan-time guards (the
-    /// shared `SeamCarvePlan`'s since 18m U1) stay as the ENABLEMENT layer — fail fast, don't refuse noisily — but
-    /// the authorization is the operation's now, where it cannot be a
-    /// snapshot.
+    /// shared `SeamCarvePlan`'s since 18m U1) stay as the ENABLEMENT layer —
+    /// fail fast, don't refuse noisily — but the authorization is the
+    /// operation's now, where it cannot be a snapshot.
     func runEmptyBlockDeletion(_ plan: EmptyBlockDeletion) async {
         let landing = caretLandingAfterRemoving(plan.entryIndex)
         let landed = await runStructural { ops in
