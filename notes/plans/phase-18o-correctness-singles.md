@@ -1939,8 +1939,19 @@ guards green on both: the hoisted rule's two arms (clears when unmoved; never cl
   `procNotFound` at the test host's launch; the orphaned Debug host from OUR DerivedData build — identified by path and
   xcodebuild's test arguments, never her app, which was not running — ignored a quit-by-identity and was ended by PID;
   the re-run is the evidence.) Restored by `git checkout HEAD --`; `git status` clean.
-- Closing runs (focused Mac suites + the eleven Tutorial suites; iOS generic build; FULL mobile suite — shared files change)
-  — NOT-STARTED.
+- Closing runs — on the final code tree `cf3ea12e` (zero app instances before each; logs in `App/Variorum/DerivedData/`):
+  - **Mac closing set — DONE** (`18o-u5-closing.sh` → `18o-u5-closing.log`; 38 literal suites: the U5 pins
+    (`WordsCopyDoorTests`, `PostureSwitchTests` with both U5 extensions), every suite in every test file that constructs or
+    mounts a touched type (`SyncEnrollmentTests` `KeyDoorTests` `ProtectionSurfaceRenderTests` `ProtectionTierFaceTests`
+    `Phase13pControllerTests`), the protection / enrollment / key-door neighbours (`EncryptionFlowTests` and its eight
+    sibling suites, `Phase13pProtectionBrainTests`' five incl. `ProtectionCopyTests`, `AppleRelinkDoorTests`
+    `ProtectionMigrationTests` `CopyRegisterPinTests` `LobbyVaultRoadTests` `CustodyHandoverTests` `CustodyReleaseTests`) and
+    **the eleven Tutorial suites**; no drills): **`✔ Test run with 306 tests in 38 suites passed`**, 38 asked = 38 ran,
+    0 skipped.
+  - iOS generic build — IN-PROGRESS.
+  - FULL mobile suite (owed: `SyncEnrollmentView`, `KeyDoorView`, `PassphraseSetModel` and the new `WordsCopyDoor.swift`
+    are shared) — NOT-STARTED; expected 656/114 = the 4 known + F-1 (#155's), this unit adding no phone test.
+  - No `swift test`: zero `Sources/` lines.
 - Walk (Protection pane's copy door + the enrollment page's caption where reachable on the dev store) — NOT-STARTED.
 - The re-key DRILL is NOT re-run: no key leg changes (no wrap/unwrap/Keychain write semantics touched) — stated.
 - Deaths / resumes: none.
