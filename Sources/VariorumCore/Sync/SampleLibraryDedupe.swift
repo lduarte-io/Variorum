@@ -302,9 +302,13 @@ extension SyncEngine {
     /// explicit outbox rows, Trash-listed — Put back real); `.edited` keeps
     /// (her words outrank a sample book); `.indeterminate` DECLINES —
     /// err toward keeping, no marker machinery for a state a locally-seeded
-    /// copy can barely reach. A copy that itself arrived this batch never
-    /// reaches here (the F2 quiescence arm above defers the whole pass
-    /// first). A self-retirement never records kill evidence
+    /// copy can barely reach. A copy that itself ARRIVED this batch IS
+    /// reachable on this road (the F2 quiescence arm sits after the
+    /// count==1 early return, so it never runs here — the ladder's R1-1
+    /// correction); its shield is the never-accepted guard alone: every
+    /// pull-applied row gets `recordSeq` inside the same apply, so an
+    /// arrived copy always ranks `> 0` and the guard below declines.
+    /// A self-retirement never records kill evidence
     /// (`writeResolvedRow` is not on this road), so the #143(b) defense
     /// cannot revive what this leg retires — by construction.
     private func retireSignedOutCopyIfOutranked(
