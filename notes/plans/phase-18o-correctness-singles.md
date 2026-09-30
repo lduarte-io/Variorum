@@ -1102,7 +1102,40 @@ trace and its C5 disposition lines · P27's fix `dee61938` · `App/Variorum/Shar
   and the unfanned guard 3 (with the arm's gate gone, the refusal in the open is what every unfanned ⌥⌘⇧M now meets —
   load-bearing, and pinned twice). Each half is pinned by its own pin; both restored clean. No QUESTIONS row: both
   outcomes are the door's ruled behaviour (the sheet for a fan, the refusal for none) — only the fact it reads changed.
-- Row 12b (the microsyntax reads CRLF) — NOT-STARTED.
+- Row 12b (the microsyntax reads CRLF) — DONE: pins `b21b0c7f` · core access `d2a63c43` · fix `cefde52b`.
+  **THE TRACE (at the code, `CaptureMicrosyntax.swift:111`):** `parse` walks `raw.split(separator: "\n")`; `"\r\n"` is
+  ONE `Character` ≠ `"\n"` and a bare `"\r"` is not `"\n"` either, so a CRLF/CR capture is ONE line to the parse.
+  **Rule 5 misread** — a token-only line is never alone on a line, so its breaks stay: `"Paragraph one.\r\n{#dream}\r\n
+  Paragraph two."` parsed to `"Paragraph one.\r\n\r\nParagraph two."`, which U2's CRLF-reading `bulkSegments` stores as
+  `["Paragraph one.\n", "Paragraph two."]` — an invented BLANK PARAGRAPH (the spacing ruling keeps it). **Rule 2
+  misread** — `token(in:at:)`'s scan for `}` crosses the CRLF: `"{#dream\r\nHad a weird dream about the ocean}"` parsed
+  to tag path `"dream\r\nHad a weird dream about the ocean"` and text `""`, so the shelf box took its EMPTY branch —
+  box cleared, `submit()` nil, NOTHING FILED: the capture lost (the pad's `.nothingToFile` twin). Mid-capture, the
+  swallowed words left the note and rode a tag path. **A third consequence of the same reading, found tracing the
+  doors:** both doors derive the first-words title from the PARSED text (`NoteCardFace.suggestedTitle` →
+  `firstWords`, which splits its "first line" on `"\n"`), so a CRLF capture stored a NAME running across the line
+  break with the break inside it (`"Garden plans\r\nthe roses need water"`). Pinned with the rest.
+  **THE FIX:** rule 0 — `parse` reads its input through `SegmentationRules.normalizedLineEndings` FIRST (before the
+  fast path; judgement call 5), so every rule after it sees `"\n"` lines. `normalizedLineEndings` was `internal` in
+  core: **the one legal core line — `public`, body byte-unchanged (`d2a63c43`, its own behaviour-neutral commit)**;
+  `CaptureMicrosyntax.swift` gains `import VariorumCore`. The rule doc gains rule 0 and rule 6's byte-identical promise
+  is restated "apart from rule 0's line endings". Zero phone files (the phone's capture face does not call the parse
+  yet — grep: only `QuickEntryModel.submit` and `QuickNotePad.take`).
+  **Pre-fix (`18o-u3-r12b-prefix.log`):** **`Test run with 8 tests in 2 suites failed … with 22 issues`** — brain:
+  `aTokenOnlyCRLFLineLeavesWithItsLineBreak` 3 · `anUnclosedTokenNeverScansAcrossACRLF` 6 ·
+  `aForeignLineEndingCaptureParsesExactlyAsItsLFTwin` 8; doors: `theShelfBoxInventsNoBlankParagraphWhereACRLFTokenLine
+  Stood` 1 · `anUnclosedTagAtACRLFNeverCostsHerTheCapture` 1 (`submit() → nil`) · `thePadFilesACRLFCaptureLikeItsLFTwin`
+  1 · `theOfferedTitleIsTheFirstLineOfACRLFCapture` 2; the guard `theExoticSeparatorsStayContent` green. **Fixed**
+  (`18o-u3-r12b-fixed.log`): the 8 + `CaptureMicrosyntaxTests` + `CaptureMicrosyntaxDoorTests` (BOTH UNMODIFIED — LF
+  byte-identical, the 3C proof) + `CRLFImportDoorTests` `QuickNoteMintTests` `QuickNoteDoorTests` `QuickNoteParkTests`
+  `QuickNoteWordTests` `CaptureKeysTests` `CaptureHandOffTests` `ContextBarCaptureTests` **`Test run with 75 tests in 12
+  suites passed`**. **R-12b** (`CaptureMicrosyntax.swift` from `b21b0c7f` over the fix, the core `public` kept —
+  `18o-u3-r12b-revert.log`): **`8 tests … failed … with 22 issues`**, identical (3·6·8 · 1·1·1·2), the guard green;
+  restored clean. **M-afterfast** (normalise only AFTER the no-brace fast path, `18o-u3-r12b-m-afterfast.log`): **`…
+  failed … with 3 issues`** — exactly the brace-free arms (the twin test's no-brace fixture ×2, the no-token title
+  arm ×1): the placement is pinned. Restored clean.
+- U2's NOTICED 6 (assigned to ride row 12b at U2's adjudication) — DONE `ff1f85ab`: `SeededBookRestore`'s header
+  residual names the three roads that record (the ensure, the explicit doors, the launch seed since U2) — comment-only.
 - Closing runs — NOT-STARTED.
 - Walks — NOT-STARTED.
 - Deaths / resumes: none.
