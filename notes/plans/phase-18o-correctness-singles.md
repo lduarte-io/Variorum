@@ -191,10 +191,12 @@ onto that seam, STOP, read it, and tell the orchestrator (the ladder seat is alr
 
 18m's (2026-09-29): Mac per-unit closing sets green (U3's widest **1,145/144**); the FULL mobile
 suite **654/112 = the 4 known + F-1** (F-1 is #155's, attributed — NEVER re-attribute); core
-untouched since 18k's finals (**1723/180**); the last full Mac run 18k's **3168/522** (the only
-reds the row-93 pointer-injection class with someone at the machine); iOS generic build green;
-install `/Applications` binary `3b116e5c…` (18m's refresh). VisualWalk baseline unchanged from
-18l-c.
+~~untouched since 18k's finals (1723/180)~~ **1730/181 pre-U1** (this line was stale as written —
+18l U0 `83f6f317` +6/+1 and 18l-c U8 `dfe5a895` +1 touched core after 18k; caught by U1's
+closing-run arithmetic, corrected here 2026-09-29; **1737/182 after U1**, +7/+1 = P34's 2 + P35's
+5); the last full Mac run 18k's **3168/522** (the only reds the row-93 pointer-injection class
+with someone at the machine); iOS generic build green; install `/Applications` binary
+`3b116e5c…` (18m's refresh). VisualWalk baseline unchanged from 18l-c.
 
 ---
 
@@ -202,15 +204,15 @@ install `/Applications` binary `3b116e5c…` (18m's refresh). VisualWalk baselin
 
 | # | Item (source) | Unit | Status |
 |---|---|---|---|
-| 1 | **P29** — the phone's redo door documents a mechanism the code does not have (`MobileUndoDoor.swift:225` false comment; behaviour deliberate, comment owed) | U1 | open |
-| 2 | **P32** — scratch-column picks ARE persisted, so `danglingPick`'s lens-only scoping rests on a false premise (`TakesViewModel.swift:1196`); fix the comment, NAME the UX gap (R-18k-1's letter: "P32's UX gap named" — a QUESTIONS row with options, not a build) | U1 | open |
-| 3 | **P34** — `BoundarySnapping.settle` overrides an exact placement when a strong boundary sits exactly `settlePull` earlier; the absolutist doc parenthetical + the missing boundary pin (doc + pin; behaviour stands PROVISIONAL, QUESTIONS row) | U1 | open |
-| 4 | **P35** — `shelf_pins` never self-heals; a deleted book's pin is stuck forever (`Operations+Appearance.swift:117`; `starred` in the same file is the model) | U1 | open |
-| 5 | **P37** — the tray's ARCHIVED listing silently truncates at 500 while its siblings render markers (`TrayPanel.swift:400`) | U1 | open |
-| 6 | **17e (12)** — `.toggleSidebar` declared `availability: always` while its menu item greys on `activeWindowKind != .full`; a `windowKind` field on `CapabilityContext` makes the grey a registry fact (P-1) | U1 | open |
-| 7 | **Row 84** — a backup copy stamped in the FUTURE silently stops automatic backups and the freshness face never turns stale (`StoreBackup` due-checks; 18k C7's noticed item 1) | U1 | open |
-| 8 | **Row 64 — RECORD-ONLY (R-18k-4, *leave it for now*):** re-verify the documented-behaviour pin (`ContentReplacementRedoTests.anUndoEntryOlderThanARestoreCanStillReviveIntoTheRestoredNote`) green; record the ruling in the ledger + the 17e copy; no build | U1 | open |
-| 9 | **17e (11) — RECORD-ONLY:** partly discharged by 18d (`RecoveryView.swift:489`); the remainder ACCEPTED on KnownIssues' per-note-view-state row (owner 12) — 18o records the disposition in the 17e copy; no build | U1 | open |
+| 1 | **P29** — the phone's redo door documents a mechanism the code does not have (`MobileUndoDoor.swift:225` false comment; behaviour deliberate, comment owed) | U1 | **FIXED (doc-only) `e2a6ecf0`** — no pin (a comment cannot fail a test; none minted) |
+| 2 | **P32** — scratch-column picks ARE persisted, so `danglingPick`'s lens-only scoping rests on a false premise (`TakesViewModel.swift:1196`); fix the comment, NAME the UX gap (R-18k-1's letter: "P32's UX gap named" — a QUESTIONS row with options, not a build) | U1 | **FIXED (doc) + RECORDED `a1479bba`** — QUESTIONS **#160** (options, (i) recommended; OPEN, hers) |
+| 3 | **P34** — `BoundarySnapping.settle` overrides an exact placement when a strong boundary sits exactly `settlePull` earlier; the absolutist doc parenthetical + the missing boundary pin (doc + pin; behaviour stands PROVISIONAL, QUESTIONS row) | U1 | **FIXED (doc) + PINNED `9068f624`/`54f91c72`** — documented-behaviour pins, proven able to fail (M-exact → 3 issues); QUESTIONS **#161** |
+| 4 | **P35** — `shelf_pins` never self-heals; a deleted book's pin is stuck forever (`Operations+Appearance.swift:117`; `starred` in the same file is the model) | U1 | **FIXED `915e8124`** (pins `0ae75e59` — red-on-old 4 issues; R-P35 identical; orchestrator re-ran 47/4 green) |
+| 5 | **P37** — the tray's ARCHIVED listing silently truncates at 500 while its siblings render markers (`TrayPanel.swift:400`) | U1 | **FIXED `6c61d562`** (pins `74d4c45a` — red-on-old 1 issue; R-P37 identical) |
+| 6 | **17e (12)** — `.toggleSidebar` declared `availability: always` while its menu item greys on `activeWindowKind != .full`; a `windowKind` field on `CapabilityContext` makes the grey a registry fact (P-1) | U1 | **FIXED `e724032f`** (pins `b24d801a` — red-on-old 3; R-T12 reds all four, 8 issues). The sweep's second family (creation/restore) NOTICED 1 → KnownIssues at closeout, owner 12's registry-walk family |
+| 7 | **Row 84** — a backup copy stamped in the FUTURE silently stops automatic backups and the freshness face never turns stale (`StoreBackup` due-checks; 18k C7's noticed item 1) | U1 | **FIXED `1c18420d`** (pins `09f9e199` — red-on-old 14 issues; R-84 identical; C7's pins rode UNMODIFIED; widened to the weekly export — judgement call 2, accepted). QUESTIONS **#162** (PROVISIONAL (a)) |
+| 8 | **Row 64 — RECORD-ONLY (R-18k-4, *leave it for now*):** re-verify the documented-behaviour pin (`ContentReplacementRedoTests.anUndoEntryOlderThanARestoreCanStillReviveIntoTheRestoredNote`) green; record the ruling in the ledger + the 17e copy; no build | U1 | **RECORDED** — pin green 5/5 (re-verified by the orchestrator too); closeout adopts the row's option (i) close-as-ruled wording |
+| 9 | **17e (11) — RECORD-ONLY:** partly discharged by 18d (`RecoveryView.swift:489`); the remainder ACCEPTED on KnownIssues' per-note-view-state row (owner 12) — 18o records the disposition in the 17e copy; no build | U1 | **RECORDED** — with the NOTICED-3 correction (postMode/readFace/takesViewMemory evicted by no road); the per-note-view-state row's text amends at closeout |
 | 10 | **P23** — a CRLF file imports as ONE block: `SegmentationRules` splits on `"\n"` only (`Sources/VariorumCore/Domain/SegmentationRules.swift:67`; MAJOR; the family keys on `Character.isNewline` — only the segmenter disagrees) | U2 | open |
 | 11 | **Row 66 / #138(f), RULED R-18k-5 (*honour the tombstone at launch*):** the LAUNCH seeder declines on a tombstoned seeded book exactly as the tutorial door's silent ensure does (`SampleLibrarySeeder.seedIfNeeded`, launch call `VariorumApp.swift:196`) | U2 | open |
 | 12 | **Row 73** — the Open strip's ⌘⇧<n> menu TRAPS at its tenth row in Debug (`EditorCommands.swift:782`; check the `:746` ⌘<n> sibling too); shortcuts for rows 1–9 only (PROVISIONAL), pin mounts the menu with ten open notes | U3 | open |
@@ -473,8 +475,8 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 ## LIVE STATUS (flipped in the same commit as each piece — the resiliency protocol's rule)
 
 - PLAN FILE authored + committed — **DONE** (this commit).
-- U1 the honesty & paper-cuts batch — DONE (implementer), awaiting the orchestrator's spot-check; the walks HELD (her real-store app running — WalkKit `guard.sh --author` exit 3); the UNIT U1 RECORD below carries the dispositions.
-- U2 the import & launch-seed batch — NOT-STARTED.
+- U1 the honesty & paper-cuts batch — **CLOSED (orchestrator adjudication 2026-09-30; all nine rows dispositioned; walks W1–W3 HELD for the first zero-instance window, W4 accepted on its pins)**.
+- U2 the import & launch-seed batch — IN FLIGHT (implementer spawned 2026-09-30).
 - U3 the two Mac doors — NOT-STARTED.
 - U4 the book leaving savepoint (R-18k-6) — NOT-STARTED.
 - U5 17t, the two unwired protection doors — NOT-STARTED.
@@ -585,3 +587,35 @@ QUESTIONS rows landed: **#160 · #161 · #162**; the tail marker reads **#163**.
 - Deaths / resumes: none.
 
 **U1 — DONE (implementer), awaiting the orchestrator's spot-check.**
+
+### UNIT U1 — ORCHESTRATOR ADJUDICATION (2026-09-30; the unit CLOSES here, walks HELD)
+
+**Verified by spot-check, not trusted:** 20 commits `044a6bb0`…`24aabd68`, all pushed, ZERO
+trailers (grep over every message), tree clean at `24aabd68`. Diff scope matches the record's
+seam table exactly — 22 files; **zero `Sources/VariorumCore/Sync/`, zero `Server/`, zero
+schema (marker 9), zero editor-seam files** (grep-verified against the fence list). The P35
+operations diff read line by line: pin-needs-live/unpin-never, the value-guarded no-op, the
+live-list heal ∝ the pins (P1) — exactly the `starred` shape the brief named. **Re-run by this
+seat on the final tree:** `swift test --filter ShelfPinsSelfHealTests|BoundarySnappingTests|
+ContentReplacementRedoTests` → **`Test run with 47 tests in 4 suites passed`**. QUESTIONS
+#160–#162 read in place; the tail marker reads #163. The closing-run counts accepted as
+recorded (core 1737/182 with the 1 standing skip; Mac set 385/49; mobile 654/112 = the
+attributed baseline exactly). The BASELINES core line's staleness was the plan's own error —
+corrected above, credited to U1's arithmetic.
+
+**ACCEPTED — U1 CLOSED**, all nine rows dispositioned (the ledger carries them). Judgement
+calls 1–8 stand as recorded — call 2 (row 84 widened to the weekly export: same clock, same
+run, same pane, one rule) is the correct breadth and is flagged FOR THE LADDER with the
+custody-adjacent line the record names (the Castle lock-time due-check now reads the trusted
+newest). **The GUI walks W1–W3 are HELD, not waived** — her real-store app ran the whole unit
+(pid 21496, untouched; WalkKit's guard refused correctly) — they run at the first verified
+zero-instance window (the closeout refresh's window at the latest), from THE WALK SCRIPT
+above; W4's evidence is the composition pins by the record's own reasoning, accepted.
+**Owners assigned for the noticed items:** NOTICED 1 (the creation/restore silently-gated
+family) → a KnownIssues row at closeout, owner 12 (the registry-walk/harness family, beside
+the status-seam audit row); NOTICED 2 (the three undeclared menu items) → recorded in the
+same row's text; NOTICED 3 (the per-note-view-state row's overstatement) → that row's text
+amended at closeout (owner 12 unchanged); NOTICED 6 (a restored book returns unpinned) → in
+her bundle as an awareness line, not a defect (starred's own documented shape). **FOR THE
+FABLE LADDER:** the lock-time due-check change (custody-adjacent), judgement call 2's
+widening, and 17e (12)'s source-walk pin tightness (call 6).
