@@ -1735,3 +1735,33 @@ WHEN `savepointOnLeaving` is called (two new callers), never what it does.
 - Deaths / resumes: none.
 
 **U4 — DONE (implementer), awaiting the orchestrator's spot-check**
+
+### UNIT U4 — ORCHESTRATOR ADJUDICATION (2026-09-30; the unit CLOSES here)
+
+**Verified by spot-check, not trusted:** 11 commits `88d27529`…`4316a0c2`, pushed, ZERO trailers,
+tree clean. Scope exact and TIGHT for a custody-adjacent unit: 7 code/test files; **zero
+`Sources/`, zero `Shared/`, zero mobile, zero `Sync/`, zero AppSession/Operations/editor-seam
+lines** (fence grep 0); `SavepointOnLeave` +33/−2, its diff read WHOLE by this seat — roads 5–6
+declared in the file's own road registry beside the original four, both wired through the ONE
+entry with weak-session closures, the not-a-leaving list untouched. **Re-run by this seat:**
+the five suites (the U4 pins + `BookLeavingRegistryTests` + C1's `AutosaveRegistryLifecycleTests`)
+→ **26 tests / 5 suites green.** The mid-course pin adjustment (the Outline's registry half moved
+to C1's bare-model shape after a TRACED harness limit — holders measured 1/2 through the mounted
+model's lifetime) is the honest shape, not a weakening: the mounted pins keep the savepoint
+half red-on-old, and the registry half is pinned where lifetimes are deterministic.
+
+**ACCEPTED — U4 CLOSED**, row 14 dispositioned. The design reads her ruling narrowly and
+correctly: the trigger is the note box's state (the book's REAL focused-note authority since
+18d), the trail remembers the CARET's note, and click-out/Read/mode-switch/scroll deliberately
+never count — the spec-defensible narrow reading, PROVISIONAL at #163 with the alternative
+recorded. C1's named residual 1 is PARTLY DISCHARGED (book/Compare notes now retire their
+registry entries through landed leavings — the ⌘Q-walk population shrinks to what is genuinely
+still open). **FOR THE FABLE LADDER (custody-adjacent — this unit is the ladder's first read):**
+judgment call 5 (leaving-the-book includes "Open in the full editor"), call 8 (a swapped-out
+peer's entry retires only at board close though its savepoint lands at the swap), call 12 (an
+Index re-entry can cost one extra quiet savepoint at the Index's later close — dedupe permitting),
+NOTICED 1 (the Outline keeps stale focus after an Index excursion — pre-existing). **NOTICED 3
+(the PHONE was not traced for the same gap)** → the closeout's MOBILE PARITY line states it as
+OWED (the phone's book faces + its leaving roads — the mobile catch-up's trace), never
+"nothing mobile-visible". Walk residue (the u4walk notes' quiet savepoints in their histories)
+→ her bundle's residue line.
