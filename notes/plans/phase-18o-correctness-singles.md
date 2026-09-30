@@ -1541,11 +1541,26 @@ departing surface wrote on its way out) and the entry drops then. So reporting a
   `peerSlots.didSet` report, the `teardown()` report, the board's `onAppear` wire — `onNotesLeft` stays declared, so
   `SavepointOnLeave` compiles unchanged); `BookViewModel`'s trail, `BookNoteTrail` and the two `wire` overloads stay
   (inert with no caller). Restore by `git checkout HEAD -- <the two>`, verified by `git diff`.)
-- The guards' teeth — IN-PROGRESS, three mutations named before they run (each on the committed fixed tree `35983b36`,
+- The guards' teeth — DONE, every mutation restored clean (`git diff HEAD` empty after each):
+  - **M-selected** (`18o-u4-m-selected.log`): **`13 tests … failed … with 2 issues`** — `aNoteSheOnlyLookedAtGetsNothing`
+    RED (the Index's arrival seed entered the trail and the never-savepointed note she only looked at was WRITTEN when
+    she moved on) + the rule row `aNoteOnlyLookedAtIsNeverRemembered`; every other pin green.
+  - **M-empty** (`18o-u4-m-empty.log`): **`13 tests … failed … with 5 issues`** — `aModeSwitchInsideOneNoteIsNotALeaving`
+    RED (1): an Outline → Index switch PUBLISHES an empty note-box frame between the two modes (the Index has not seeded
+    yet), so a rule that read `.empty` as leaving savepoints the note on a mode switch — measured, which is why `.empty`
+    departs nothing; + the rule rows `noNoteIsNotAnotherNote` (3) and `leavingTheBookLeavesTheNoteSheWasInOnce` (1).
+  - **M-idle** (the idle occasion, no flush — `18o-u4-m-idle.log`): a POOR mutation, recorded as such: without the
+    flush the idle op reads the pre-keystroke rows and writes nothing, so the cadence guard stayed green for the wrong
+    reason (the Outline and leave-the-book savepoint halves red instead, 4 issues). Re-run as **M-idle′** — flush, then
+    `idleAutoCommit` (`18o-u4-m-idle-prime.log`): **`7 tests … failed … with 3 issues`** — the cadence guard's **"Idle
+    only" case RED** (the idle occasion writes under "Idle only"; the leaving occasion never does), its "Only when I
+    commit" case green (both occasions are off there), and the Index pin's registry half RED 2 (only
+    `savepointOnLeaving` marks a note LEFT, so another writer never retires the entry).
+- (The mutations' names, as recorded before they ran (each on the committed fixed tree `35983b36`,
   one at a time, restored by `git checkout HEAD --` and verified by `git diff`): **M-selected** — `BookNoteTrail`
   remembers a `.selected` note too (a looked-at note enters the trail); **M-empty** — `.empty` departs the remembered
   note (clicking out / a mode switch's empty frame counts as leaving); **M-idle** — the book's road runs the IDLE
-  occasion (`idleAutoCommit`) instead of the leaving one (the wrong cadence occasion reused).
+  occasion (`idleAutoCommit`) instead of the leaving one (the wrong cadence occasion reused).)
 - QUESTIONS #163 (the Compare-peer PROVISIONAL + the book's note-switch reading) — NOT-STARTED.
 - Closing runs (`AutosaveRegistryLifecycleTests` + `AutosaveRegistryReleaseTests` FULL, `SavepointOnLeaveTests`, the
   book/Compare suites touched, the eleven Tutorial suites; the mobile suite only if a shared file changes — none
