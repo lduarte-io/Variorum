@@ -790,7 +790,13 @@ purged-tombstone residual (#138(e)) stays the recorded gap. The phone's first-wr
 - **THE WALK (IN-PROGRESS — the dev-store Debug build of this tree, `App/Variorum/DerivedData/18o-u1/Build/Products/
   Debug/Variorum.app`, built 03:09 from the final code; captures → `notes/plans/18o-screens/u2/`, gitignored at
   `97e0785b`). The dev store is fenced from the production mirror (A4); WalkKit's guarded order binds every act.**
-  - W1 (P23, both voices): File ▸ Import… the fixture `App/Variorum/DerivedData/18o-u2-walk/CRLF-walk-note.md` (three
+  - **W1 — DONE (dev pid 56737):** File ▸ **Import Files…** → the Open panel → ⌘⇧G the fixture's path → Return →
+    `Import` pressed by name → ⌘K "CRLF-walk-note" (exactly ONE match) → ⏎ → ⌘6 Blocks: **"3 blocks · 21 words"**, rows
+    01 "CRLF walk: the first paragraph, written on Windows." · 02 "The second paragraph, after a blank line." · 03 "The
+    third paragraph, one CRLF later." — one block per paragraph. Captures `W1-p23-crlf-import-three-blocks-terminal.png`
+    and `…-study.png` (voice flipped by the palette's "Use Study Voice", then "Use Terminal Voice" — Terminal
+    RESTORED, re-captured). The dev store keeps the note "CRLF-walk-note" (in no book) as walk residue.
+  - (plan) W1 (P23, both voices): File ▸ Import… the fixture `App/Variorum/DerivedData/18o-u2-walk/CRLF-walk-note.md` (three
     paragraphs, 3 CRLF — `od -c` verified) through the Open panel; open the note; Blocks mode (⌘6) shows THREE blocks;
     capture Terminal + Study (voice restored to Terminal after). Leaves one note "CRLF-walk-note" in the dev store.
   - W2 (row 66, the launch road; faceless — Terminal): delete the *Encryption Explained* book in-app; quit OUR
