@@ -1565,9 +1565,25 @@ departing surface wrote on its way out) and the entry drops then. So reporting a
   DONE (this commit): (1) what counts as moving — (a) built, (b) caret-only, (c) click-out counts too; (2) Compare's
   peers — (a) built, the one-line alternative "peers keep today's timing"; the never-savepointed consequence stated.
   Tail marker → **#164**.
-- Closing runs (`AutosaveRegistryLifecycleTests` + `AutosaveRegistryReleaseTests` FULL, `SavepointOnLeaveTests`, the
-  book/Compare suites touched, the eleven Tutorial suites; the mobile suite only if a shared file changes — none
-  expected) — NOT-STARTED.
+- Closing runs — DONE, on the final code tree `78f9091d` (zero app instances; logs in `App/Variorum/DerivedData/`):
+  - **Mac closing set** (`18o-u4-closing.log`; the list `18o-u4-closing-suites.txt` — every suite in every test file
+    that constructs or mounts a touched type: `BookView(` · `BookViewModel(` · `BookStructureModel(` · `SpreadBookView(` ·
+    `BookIndexView(` · `CompareViewModel(` · `CompareBoardView(` · `SavepointOnLeave.` · `RootView(session` — 35 files,
+    96 suites, + L-d's `AutosaveRegistryReleaseTests` + `BookNoteTrailTests`; it carries C1's
+    `AutosaveRegistryLifecycleTests` + `AutosaveRegistryReleaseGuardTests` WHOLE, J11's `SavepointOnLeaveTests`, the
+    book (`BookViewTests`, `BookIndexEditingTests`, `NoteBoxMountTests`, the landing / outline / index-tier suites,
+    `PaneSplitTests`' eight incl. `PaneBookBlurTests`), Compare (`CompareBoardTests`, `CompareLensesCorrectionTests`,
+    `TakesBoardSoakTests`), `SavepointNamingTests`' seven, the shell (`ShellChromeTests`, `ShellLandingTests`,
+    `WorkspaceNavigationTests`) and **the eleven Tutorial suites**): **`✔ Test run with 466 tests in 98 suites passed
+    after 242.119 seconds with 4 known issues`** — the 4 are `IndexTierMetricsTests`' `withKnownIssue` rows (the TK2
+    `overTwoBlankLines` residual, #154 (b), recorded since 18l-c U5); 0 skipped. (A 99th name, `NoteBoxTests`, is a
+    file, not a type — it selected nothing; its four suites ran on their own: `NoteBoxStateTests`
+    `BookNoteBoxSubjectTests` `NoteBoxHeightTests` `NoteBoxCopyTests` **`✔ Test run with 17 tests in 4 suites passed`**,
+    `18o-u4-closing-notebox.log`.)
+  - **No `swift test`, no iOS build, no mobile suite — owed by nothing:** `git diff --name-only 3c3becc2..HEAD` holds
+    zero `Sources/`, zero `App/Variorum/Shared/`, zero `VariorumMobile/` (every production file is Mac-target:
+    `Features/BookView/`, `Features/Takes/CompareBoardView.swift`, `Workspace/SavepointOnLeave.swift`); the attributed
+    mobile baseline 656/114 stands untouched.
 - Walk (book: edit, switch note, Block History shows the quiet savepoint; leave the book, same for a second note;
   captures `notes/plans/18o-screens/u4/`) — NOT-STARTED.
 - Deaths / resumes: none.
