@@ -194,6 +194,31 @@ struct LaunchSeedTombstoneTests {
         }
     }
 
+    /// **RED-ON-OLD — THE EARLY READ DECIDES TOO.** An account-owned store
+    /// whose tombstone is ALREADY here (it synced before) declines at the
+    /// launch's first read — it neither spends the gate's wait nor leaves the
+    /// decision unrecorded because this launch's round never landed (offline).
+    /// Nothing the round could bring would make a mint right: a copy restored
+    /// elsewhere arrives by sync, not by seed. *Old code:*
+    /// `.awaitingFirstSync`, nothing recorded — and, after a purge in that
+    /// session, the next launch minted.
+    @Test func aTombstoneAlreadyHereDeclinesWithoutWaitingForTheRound() async throws {
+        try await withLaunchWorld { session, db in
+            let book = SampleLibrarySeeder.Book.encryptionExplained
+            _ = try await arrivedThenDeleted(session, book)
+            let mark = LaunchMark()
+            let outcome = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, book: book,
+                gate: SampleLibrarySeeder.SyncGate(
+                    belongsToAnAccount: { true }, hasSyncedCleanly: { false }),
+                firstRoundWait: .milliseconds(30), pollInterval: .milliseconds(5),
+                loadMark: mark.load, saveMark: mark.save)
+            #expect(outcome == .deletedByTheReader, "\(outcome)")
+            #expect(mark.value, "recorded now, not at some later launch")
+            #expect(try await liveCopies(db, book) == 0)
+        }
+    }
+
     /// **RED-ON-OLD — THE DECISION OUTLIVES THE PURGE** (the ensure's A2
     /// property, now the launch's too). The launch that saw the tombstone
     /// recorded it; Delete Now then removes the row itself, and the next
