@@ -743,6 +743,10 @@ struct EditorCommands: Commands {
         // broadcast — with no post open the items are honestly grey; a
         // routed request that finds no detail SPEAKS instead of vanishing).
         CommandGroup(before: .toolbar) {
+            // One digit per mode: `PostMode` is a CLOSED enum of seven, so
+            // "\(i + 1)" is always one character (18o U3 — the Open strip's
+            // row-ten trap cannot happen here; `OpenStripMenuTests.
+            // theModeKeysCanNeverReachTen` is the cap).
             ForEach(Array(PostMode.allCases.enumerated()), id: \.offset) { i, mode in
                 Button(mode.rawValue) { actions?.requestMode(mode) }
                     .keyboardShortcut(KeyEquivalent(Character("\(i + 1)")), modifiers: .command)
@@ -775,7 +779,9 @@ struct EditorCommands: Commands {
             // read `workspace.openNotes.shown`, in the same order.
             Menu(verb(.openNote)) {
                 // 18o U3 (KnownIssues row 73): the rows ARE the strip's menu
-                // table — title, key and act all read the row.
+                // table — title, key and act all read the row. ⌘⇧1…⌘⇧9 on
+                // the first nine; rows past nine render keyless and still
+                // open the note they name.
                 ForEach(router?.workspace.openNotes.menuRows ?? [], id: \.noteID) { row in
                     Button(router?.workspace.label(for: .post(row.noteID)) ?? "") {
                         router?.openStripRow(row)

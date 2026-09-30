@@ -350,10 +350,21 @@ nonisolated struct OpenNotes: Equatable {
     /// carry a key" is answerable without mounting a menu — and without
     /// building a `Character` from the key's text, which is the one step
     /// that can trap.
+    ///
+    /// **Only the first `ordinalCap` rows carry a key** — the model's own key
+    /// cap, which the sidebar's ordinal badges and the ⌘⇧n address already
+    /// honoured. Since Act 10 item 9 the strip holds up to `trackedCap` (20)
+    /// notes, and this menu alone used to key EVERY row: the tenth asked for
+    /// `Character("10")`, two graphemes, which traps the Debug app
+    /// (`_debugPrecondition`, compiled out at -O — the Release app most
+    /// likely built a malformed two-grapheme key). Rows past nine render by
+    /// name, keyless, and still open their note (`ShellRouter.openStripRow`).
     var menuRows: [OpenStripMenuRow] {
         shown.enumerated().map { offset, id in
             let ordinal = offset + 1
-            return OpenStripMenuRow(noteID: id, ordinal: ordinal, keyText: String(ordinal))
+            return OpenStripMenuRow(
+                noteID: id, ordinal: ordinal,
+                keyText: ordinal <= Self.ordinalCap ? String(ordinal) : nil)
         }
     }
 }

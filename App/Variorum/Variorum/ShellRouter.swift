@@ -317,9 +317,13 @@ final class ShellRouter {
     }
 
     /// View ▸ Open Note's row door (18o U3 — KnownIssues row 73): the act a
-    /// menu row's click and key perform.
+    /// menu row's click and key perform. **It opens the note the row NAMES**
+    /// — the row's title, key and act read one captured id, so what the
+    /// menu shows is what it opens. The ordinal road above stops at nine (the
+    /// key cap), so a tenth row asked through it landed nothing — a rendered
+    /// door that could never act (P-2).
     func openStripRow(_ row: OpenStripMenuRow) {
-        openNote(ordinal: row.ordinal)
+        pendingSelection = .post(row.noteID)
     }
 
     // MARK: - The split's doors (13f batch 4, W1/A25)
