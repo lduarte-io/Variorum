@@ -725,10 +725,34 @@ purged-tombstone residual (#138(e)) stays the recorded gap. The phone's first-wr
   the idle durability mint split a TYPED Control-Return into `["a", "b"]` — exactly the editor-newline change the
   brief forbade. Every CRLF door pin stayed green under it (`isNewline` also covers CRLF), so the design choice is
   decided by the guards alone, as stated. Restored by `git checkout HEAD --`, `git status` clean.
-- Row 66 pins (red-on-old) — NOT-STARTED: per book in `Book.all`, a tombstoned copy with no local mark is NOT
-  re-minted at launch; guards: no copy + no tombstone still seeds; the explicit restore door still mints; the decision
-  outlives a purge; the purged-tombstone residual documented.
-- Row 66 fix — NOT-STARTED.
+- Row 66 scaffolding (behaviour-neutral) — DONE `59460a98`: the ensure's rule lifted into ONE predicate,
+  `SampleLibrarySeeder.readerDeletedTheBook(db, book:)` (= `Queries.readingTombstoneExists` on the reserved name), the
+  ensure now reading it (its 8 pins in `EncryptionBookDoorTests` green on this tree, unmodified);
+  `Outcome.deletedByTheReader` declared, unreachable until the fix. Landed first so the pins compile on the pre-fix tree.
+- Row 66 pins — DONE `be0ad315` (+ a `try`-hoist out of two `#expect`s in `14822213` — Swift infers a closure whose only
+  `try` sits inside the macro as non-throwing; assertions unchanged): Mac `LaunchSeedTombstoneTests` (6 tests, three of
+  them parameterized over `Book.all` = Sherlock · Encryption Explained · Jekyll/takemania) + mobile
+  `MobileFirstWriteTombstoneTests` (1). **Pre-fix (red-on-old, the scaffolding tree):** Mac
+  (`18o-u2-r66-mac-prefix.log`, with `EncryptionBookDoorTests`) **`Test run with 14 tests in 2 suites failed … with 13
+  issues`** — `aBookDeletedWhereverIsNotReMintedAtLaunch` 9 (3 per book: outcome `.seeded`, a live copy, a book re-made
+  for the surviving notes) · `aTombstoneThatLandsDuringTheFirstRoundIsHonoured` 2 · `theLaunchsDecisionOutlivesThePurge`
+  2; GREEN (the guards, by design): `aStoreWithNoCopyAndNoTombstoneStillSeeds` ×3 ·
+  `theExplicitRestoreStillMintsAndAWholeCopyReadsPresent` ×3 · `aPurgedTombstoneLeavesNoEvidence_theRecordedGap`, and
+  all 8 ensure pins; mobile (`18o-u2-r66-mobile-prefix.log`) **`1 test … failed … with 2 issues`** (`.seeded`, a live
+  copy).
+- Row 66 fix — DONE `14822213`, `SampleLibrarySeeder.swift` only: `perform` reads `facts` (discover +
+  `readerDeletedTheBook`, ONE read transaction) at BOTH deciding reads — the early read and the latch's read after the
+  account gate — and `decidedWithoutMinting` answers `.alreadyPresent` for a whole copy (first), else
+  `.deletedByTheReader` on a tombstone, recording the decision through the launch's own `save` leaf; the header's
+  "honest residual" amended (dated). **Fixed tree:** Mac `LaunchSeedTombstoneTests` + `EncryptionBookDoorTests` +
+  `SampleLibraryTests` + `JekyllTakemaniaSeedTests` + `SampleLibraryDedupeFactsTests` (`18o-u2-r66-mac-fixed.log`)
+  **`Test run with 49 tests in 5 suites passed`**; mobile `MobileFirstWriteTombstoneTests` +
+  `MobileFirstWriteFurnitureTests` + `MobileSeededBookRestoreTests` **`Test run with 15 tests in 3 suites passed`**.
+- **R-66 REVERT + MUTATION IN FLIGHT (announced before they start):** (1) R-66 = `SampleLibrarySeeder.swift` from
+  `be0ad315` (the scaffolding tree: predicate + case present, `perform` unfixed) over the fix; (2) M-early-only = the
+  fixed tree with the latch-side decision reduced to the old complete-only check (the tombstone read only up front).
+  **Restore = `git checkout HEAD -- App/Variorum/Shared/SampleLibrary/SampleLibrarySeeder.swift`** (the fix is
+  committed). If this line has no result below it, read `git diff` first.
 - Closing runs — NOT-STARTED (core `swift test` whole; the Mac import/quick-note/capture/crystallization/seeder/
   Tutorial suites; the FULL mobile suite).
 - Walks — HELD at start (her app running; guard exit 3).
