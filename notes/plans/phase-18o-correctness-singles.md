@@ -484,7 +484,7 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 
 - PLAN FILE authored + committed — **DONE** (this commit).
 - U1 the honesty & paper-cuts batch — **CLOSED (orchestrator adjudication 2026-09-30; all nine rows dispositioned; walks W1–W3 HELD for the first zero-instance window, W4 accepted on its pins)**.
-- U2 the import & launch-seed batch — IN FLIGHT (implementer spawned 2026-09-30; the UNIT U2 RECORD at the file's end carries its own LIVE STATUS).
+- U2 the import & launch-seed batch — **DONE (implementer, 2026-09-30), awaiting the orchestrator's spot-check** — P23 and row 66 FIXED with red-on-old pins + behavioural reverts; core 1747/183, Mac closing set 292/40, FULL mobile 656/114 = the attributed baseline; walks W1–W3 DONE (the UNIT U2 RECORD at the file's end).
 - U3 the two Mac doors — NOT-STARTED.
 - U4 the book leaving savepoint (R-18k-6) — NOT-STARTED.
 - U5 17t, the two unwired protection doors — NOT-STARTED.
@@ -632,7 +632,14 @@ widening, and 17e (12)'s source-walk pin tightness (call 6).
 
 ## UNIT U2 RECORD — the import & launch-seed batch (implementer: `opus-implementer`, 2026-09-30)
 
-*(The NOT-DONE line lands here as this record's first line at the close.)*
+**NOT DONE (first line, per the contract):** (1) The KnownIssues row-66 edit, the ledger rows 10–11, the 17e copy
+lines and the MOBILE PARITY line are the orchestrator's closeout acts — each is DRAFTED below, none applied. (2) Two
+same-class CRLF edges found OUTSIDE the segmenter are NOTICED, not fixed — the capture microsyntax's line walk and the
+phone box's `one_block` write-back (NOTICED 1–2): other surfaces, a second unit. (3) The #146 signed-out-first road is
+U6's and untouched (zero `Sync/`); the purged-tombstone residual (#138(e)) stays the recorded gap, pinned as such, not
+widened. (4) No QUESTIONS row was needed — both designs follow a standing answer (the family's line-break rule; the
+ensure's tombstone rule), so the tail marker stays **#163**. Everything else the brief asks for is done, walks included
+(her away grant, `c523caa6`, opened the window mid-unit).
 
 ### READING (done in-session before any code)
 
@@ -816,3 +823,118 @@ purged-tombstone residual (#138(e)) stays the recorded gap. The phone's first-wr
     faceless launch road and faces this unit did not touch (the shelf, the book) — one voice (Terminal), by the brief's
     "both voices where the surface has a face".
 - Deaths / resumes: none.
+- The record closed — DONE (this commit).
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder reads this first — verified by `git diff --stat cf887299..HEAD`)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `Sources/VariorumCore/Domain/SegmentationRules.swift` | P23: `normalizedLineEndings` (`"\r\n"`→`"\n"`, then `"\r"`→`"\n"`, a no-CR fast path by UTF-8 byte); `bulkSegments` reads its text through it first (every arm); the type header states which characters are line breaks here and why | `crystallizedBoundary` (type-time — byte-untouched), `trimmedPiece`, the sentence scanner, both split loops, `isBlank` |
+| `App/Variorum/Shared/SampleLibrary/SampleLibrarySeeder.swift` | row 66: `readerDeletedTheBook` (the ensure's rule, lifted — `Queries.readingTombstoneExists` on the reserved name); `Outcome.deletedByTheReader`; `perform`'s two deciding reads go through `facts` (one read transaction) + `decidedWithoutMinting`; the header's residual note amended (dated) | `seed`, `discover`, `withSeedLatch`, the account gate and its wait, the marks' keys, the manifest, `dedupeFacts`/`allDedupeFacts` (byte-identical — the engine sees nothing new), `Book` |
+| `App/Variorum/Shared/SampleLibrary/SeededBookRestore.swift` | the ensure reads `SampleLibrarySeeder.readerDeletedTheBook` (an address change — its 8 pins rode unmodified) | `restore` (the explicit doors — byte-unchanged), `Declined`, `failureLine`, the ensure's mark-first order |
+| `.gitignore` | `notes/plans/18o-screens/` (each phase's own line) | — |
+| Tests (NEW files only) | `Tests/VariorumCoreTests/SegmentationLineEndingTests.swift` · `VariorumTests/CRLFImportDoorTests.swift` · `VariorumTests/LaunchSeedTombstoneTests.swift` · `VariorumMobileTests/MobileCRLFCaptureTests.swift` · `VariorumMobileTests/MobileFirstWriteTombstoneTests.swift` | every existing test file (zero edits) |
+
+**Zero `Sources/VariorumCore/Sync/`** (the dedupe is U6's; `allDedupeFacts` unchanged), zero `Server/`, zero schema /
+migrations (marker 9), zero new settings. **Editor seam untouched** (`EditorTextView`, `BlockRangeIndex`,
+`PaneSurface`, `PaneTextAuthority`, the read tier, `EditorSurfaceController`) — and `Shared/EditorBrain/
+CrystallizationPlanner.swift` is not edited: its `.bulk` plan (a paste into the open tail) calls `bulkSegments`, so it
+now reads a CR/CRLF paste like its LF twin (pinned `aCRLFPasteIntoTheOpenTailSegmentsLikeItsLFTwin`), while its
+`.typing` and `.idle` plans over TYPED text are byte-identical (pinned `theTypedRoadKeepsAControlReturnAsContent`;
+`M-isNewline` shows that guard biting). The phone's `MobileQuickNote` and `MobileFirstWriteFurniture` are untouched —
+they inherit both fixes through the shared brains (pinned).
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **P23 — normalise at `bulkSegments`' entry, never `Character.isNewline`.** The segmenter decides BLOCK boundaries;
+   that family keys on `"\n"` only (`NewlineSplitting`'s doc; `CaptureSurfaceTests`' ⇧⏎ pin), and `isNewline` would
+   have turned a TYPED Control-Return into a block boundary at the idle mint. Proven by mutation (M-isNewline: the two
+   guards red, 3 + 1). *Reverse by* keying the split on `\.isNewline` (and accepting the idle-mint change).
+2. **P23 — `one_block` reads its line endings too** (the text otherwise verbatim), so the one block the rest of the
+   brain sees has the `"\n"` breaks `NewlineSplitting`/`BlockRangeIndex` recognise. Invisible on the page (TextKit
+   breaks a paragraph at either). *Reverse by* normalising only in the `.paragraph`/`.sentence` arm.
+3. **P23 — the fix reaches the editor's open-tail PASTE** (the `.bulk` plan) — the same defect at a sibling bulk door,
+   AppSpec §7's own list ("bulk entry (paste, import, drop, mobile capture) segments on entry"). *Reverse by* moving
+   the normalisation into `importPost`/`importBlocks` (the tail paste then keeps minting one block).
+4. **P23 — the exotic newlines (U+0085, U+2028, U+2029) stay CONTENT**, the family's standing answer, pinned as
+   documented behaviour (`theExoticNewlinesStayContent`).
+5. **P23 — the normalisation mirrors `PlainPaste` rule 1 textually** (the same two steps, same order) rather than
+   sharing code: core cannot see `App/Shared`, and moving `PlainPaste` onto a core function is another surface (NOTICED
+   4).
+6. **Row 66 — the one rule lives on `SampleLibrarySeeder`** (beside `isMarkedSeeded`, the device's evidence; this is
+   the store's), read by the ensure AND the launch — "never a second tombstone-reading rule". *Reverse by* moving the
+   predicate into `SeededBookRestore` (pure address).
+7. **Row 66 — BOTH deciding reads decide** (the early read and the latch's read after the account gate), each pinned
+   by its own mutation (M-early-only → the first-round pin; M-late-only → the early-read pin). The early decision
+   declines an account-owned store BEFORE its first round when the tombstone is already local — safe, because nothing
+   that round could bring would make a mint right (a copy restored elsewhere arrives by sync, never by seed), and it
+   records the decision instead of leaving it to a later launch. *Reverse by* dropping the early decision.
+8. **Row 66 — a WHOLE live copy answers `.alreadyPresent` before the tombstone is consulted** (a book she deleted and
+   then restored): both answers mint nothing and mark; only the outcome's name differs.
+9. **Row 66 — a PARTIAL live copy beside a tombstone is not healed at launch** — the ensure's own answer (it declines
+   on the tombstone before discovery): such a copy is arriving from a device that restored it (sync brings the rest) or
+   is residue of the pre-18o launch's re-mint; Help ▸ Restore completes it on request. *Reverse by* checking the
+   tombstone only when no live book exists.
+10. **Row 66 — the decision is recorded through the launch's OWN mark leaf** (`save`, injectable), never
+    `session.markSeededBook` — the same key in production, and the launch's pins keep their injected-leaf discipline
+    (no headless run writes the test host's defaults — the row-36/42 class).
+11. **Row 66 — the rule reads the reserved NAME** (as the ensure does): a book SHE created with that exact name and
+    deleted also stops the seed on a no-mark device. The seeder's rules make the reserved name the identity.
+12. **Row 66 — the phone's first-write occasion inherits the rule** (same brain — MobileSoul §3), pinned rather than
+    fenced off: her ruling is about what "deleted" means, which is not per-platform.
+13. **The scaffolding landed as its own behaviour-neutral commit** (`59460a98`) so the pins compile on the pre-fix
+    tree and R-66 reverts exactly the behavioural hunk (the U1 R-T12 shape).
+
+### NOTICED, NOT TOUCHED (U2's scope fence)
+
+1. **`CaptureMicrosyntax.parse` walks lines on the literal `"\n"`** (`App/Variorum/Shared/CaptureMicrosyntax.swift:111`)
+   — P23's class at a sibling brain. In a CRLF capture, rule 5 (a token-only line leaves with its newline) never fires
+   and rule 2's one-line promise can be crossed (an unclosed `{#` scans across a CRLF). After this fix the leftover
+   CR/CRLF around a removed token reads as an ordinary line break (an edge run drops), so the common case files
+   cleanly; the rule-2 edge stands. Needs an owner (the microsyntax's next toucher — 12, or a 17 entry).
+2. **The phone box's `one_block` write-back:** in `one_block` mode `MobileQuickNote.adopt` owns the whole capture
+   (`frozenPrefix == ""`), the mint stores LF, but the box's raw text keeps the CRs and the first post-mint keystroke
+   autosaves that raw text back — CRLF returns to the block. No loss (it was CRLF before this unit); paragraph mode (the
+   default) is unaffected (the owned last piece never carries a newline — pinned). `adopt`'s comment "the SNAPSHOT is …
+   what the store holds" is no longer byte-exact for a CR capture. The phone's (the mobile app row's).
+3. **CR/CRLF pasted INSIDE an existing block stays CRLF content** on both platforms — the I4 road, deliberately
+   untouched; the `"\n"`-keyed block brains (Split at Newlines, `TypedReturn`) do not see those breaks. Pre-existing.
+4. **`PlainPaste` rule 1 and `SegmentationRules.normalizedLineEndings` are one rule in two homes** — the next toucher
+   of `PlainPaste` can call the core function (its pins would ride unmodified).
+5. **A no-mark device where she deleted the NOTES but kept the BOOK** re-mints the missing notes into the live book at
+   launch — exactly as the ensure/restore road would; R-18k-5 and the ensure read the BOOK's tombstone only.
+6. **`SeededBookRestore`'s header residual** still says "a device that never ran either road" — there are now three
+   silent/asking roads that record (the launch too). Accurate in substance; a one-word touch-up for the next toucher.
+7. **Walk residue in the dev store:** the note "CRLF-walk-note" (in no book); *Encryption Explained* is a fresh reading
+   (the deleted one in the dev Trash).
+
+### DRAFTED FOR THE CLOSEOUT (the orchestrator's acts — none applied here)
+
+- **KnownIssues row 66 → RESOLVED at 18o U2:** *"Built per R-18k-5 (honour the tombstone at launch): the launch reads
+  the tutorial door's rule — now ONE predicate, `SampleLibrarySeeder.readerDeletedTheBook`, which the ensure reads too —
+  at both deciding reads and declines (`deletedByTheReader`), recording the decision in the mark; the phone's
+  first-write occasion inherits it. Pins `LaunchSeedTombstoneTests` (per `Book.all`) + `MobileFirstWriteTombstoneTests`.
+  The purged-tombstone residual (#138(e)) stays recorded; the SIGNED-OUT-FIRST neighbour is QUESTIONS #146 / 18o U6."*
+- **17e copy lines:** *"P23 — FIXED at 18o U2 (`12d61080`): `bulkSegments` reads CRLF/CR as LF at its entry;
+  `crystallizedBoundary` untouched; pins `SegmentationLineEndingTests` · `CRLFImportDoorTests` · `MobileCRLFCaptureTests`;
+  walk W1."* · *"KnownIssues row 66 — FIXED at 18o U2 (`14822213`, R-18k-5)."*
+- **MOBILE PARITY:** P23 reaches the phone's capture (pinned `MobileCRLFCaptureTests`) and row 66 the phone's
+  first-write occasion (pinned `MobileFirstWriteTombstoneTests`) — both MOBILE-VISIBLE, both through shared brains,
+  zero phone files changed.
+
+### DISPOSITION (one line per ledger row)
+
+10. **P23 — FIXED** `12d61080` (pins `40c3aafc`): core `SegmentationLineEndingTests` (10) — red-on-old **29 issues**
+    (9 tests; the exotic-newline guard green); Mac `CRLFImportDoorTests` (5) — **6 issues** (4 tests; the typed-road
+    guard green); mobile `MobileCRLFCaptureTests` (1) — **3 issues**. R-P23 identical on all three, restored clean;
+    M-isNewline reds exactly the two guards (3 + 1). Walk W1, both voices.
+11. **Row 66 (R-18k-5) — FIXED** `14822213` (scaffolding `59460a98`, pins `be0ad315` + `a45b0655`): Mac
+    `LaunchSeedTombstoneTests` (7; three parameterized over `Book.all`) — red-on-old **15 issues** (4 tests: the row
+    pin 3 per book ×3, the first-round pin 2, the early-read pin 2, the purge pin 2; the three guards green); mobile
+    `MobileFirstWriteTombstoneTests` (1) — **2 issues**. R-66 identical, restored clean; M-early-only and M-late-only
+    each red their own pin alone (2 · 2). Walks W2 (the launch road on a no-mark dev store logs `deletedByTheReader`,
+    the book stays gone, the mark re-recorded) and W3 (Help ▸ Restore still mints).
+
+QUESTIONS rows landed: **none** (no PROVISIONAL arose); the tail marker still reads **#163**.
+
+**U2 — DONE (implementer), awaiting the orchestrator's spot-check.**
