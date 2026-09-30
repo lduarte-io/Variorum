@@ -494,7 +494,7 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 - U1 the honesty & paper-cuts batch — **CLOSED; walks W1–W3 RUN AND PASSED 2026-09-30 under her away grant (the adjudication's walk section), W4 on its pins.**
 - U2 the import & launch-seed batch — **CLOSED (orchestrator adjudication 2026-09-30; rows 10–11 dispositioned; the microsyntax edge adopted as row 12b → U3)**.
 - U3 the two Mac doors (+ row 12b) — **CLOSED (orchestrator adjudication 2026-09-30; rows 12/12b/13 dispositioned; the row-13 design divergence accepted and named a ladder focus)**.
-- U4 the book leaving savepoint (R-18k-6) — IN FLIGHT (implementer spawned 2026-09-30).
+- U4 the book leaving savepoint (R-18k-6) — IN FLIGHT (implementer spawned 2026-09-30; the UNIT U4 RECORD at the end of this file carries its LIVE STATUS).
 - U5 17t, the two unwired protection doors — NOT-STARTED.
 - U6 #146 (Fable seat) — NOT-STARTED (SyncSpec + postmortem re-read precede any line).
 - THE LADDER — NOT-STARTED.
@@ -1382,3 +1382,121 @@ polish/cosmetic family) — the FILED title is already pinned to stop at the bre
 residue (three "2026-09-30" scratch notes + the `u3walk` tag) → her bundle's residue line.
 **ACCEPTED — U3 CLOSED.**
 
+
+---
+
+## UNIT U4 RECORD — the book leaving savepoint, R-18k-6 (implementer: `opus-implementer`, 2026-09-30)
+
+**NOT DONE (first line, per the contract):** PENDING — this line is written at the unit's close.
+
+### READING (done in-session before any code)
+
+`CLAUDE.md` + its auto-loaded canon (OverallModel §3's savepoint occasions; AppSpec §9's quiet auto-commit list —
+`closeAutoCommit` is a CADENCE occasion governed by `savepoint_cadence`) · this file WHOLE (the U1–U3 records, seam
+tables and adjudications; the U4 section; the ledger's row 14) · `notes/KnownIssuesAndTechDebt.md` (the header rule; row
+78 in full, her ruling verbatim) · `notes/SessionResiliencyProtocol.md` whole · `notes/plans/phase-18k-runtime-hygiene.md`
+— THE KICKOFF SITTING (R-18k-6) and the **UNIT C1 RECORD WHOLE** (T1–T5, the fix, LIVE STATUS, DISPOSITION, the three
+named residuals, NOTICED 3, the adjudication), the C1 held-walk results, and `18k-ladder-round1.md`'s C1 stress-trace
+dismissals · `notes/QUESTIONS.md`'s tail (next free **#163**). The code at HEAD `3c3becc2`: `AppSession` (`autosave(forPost:)`,
+`Hold`, `releaseAutosave`, `markLeaving`/`dropAfterLeaving`, `savepointOnLeaving`, `flushExistingAutosave`),
+`Workspace/SavepointOnLeave.swift`, `WorkspaceModel` (`shownNoteIDs`, `reportingDepartures`, `select`), `Operations+Variant`
+(`closeAutoCommit`, `idleAutoCommit`, `autoCommitDirtyVariants`, `isDirty`), `SavepointCadence`, the book —
+`BookView` (the modes, `noteBoxReport`, `publishNoteBox`, `editHere`, `switchMode`, onAppear/onDisappear),
+`BookViewModel` (`focus`, `collapse(All)`, `openSpread`/`releaseFocusIfItLeft…`, `liveFocusedPostID`, the Index reports,
+`carryPlace`), `BookNoteBox` + `NoteBoxState`, `BookIndexView` (`landOrSeed`, `select`, the row's `onSelect`, the
+`edit.livePostID` report, onDisappear), `BookIndexEditModel` whole, `SpreadBookView`'s focus sites, the Outline row's
+live/read-cheap fork; `RootView.paneDetail` (how a book is mounted: `.id(readingID)`, `paneFocused: live`) — and Compare:
+`CompareViewModel` (`peerSlots`, `coordinator(for:)`, `setPeer`, `removePeerSlot`, `releaseLivePane`, `teardown`,
+`isolated deinit`), `CompareBoardView`'s onAppear/onDisappear. The pins' neighbours: `AutosaveRegistryLifecycleTests`,
+`AutosaveRegistryReleaseTests`, `SavepointOnLeaveTests`, `BookIndexEditingTests`' mount, `BookOutlineLandingTests`'
+`writingEditor`, `NoteBoxMountTests`' book mount, `DebugOracleTwoWindowTests`' unmount. **Instance state at start:**
+`pgrep -fl Variorum` → nothing (her away grant stands).
+
+### THE TRACE (inputs → the missing savepoint; every claim re-read at the code)
+
+**Why a note edited in a book is never "left" today.** The Mac's leaving roads are four (`SavepointOnLeave`'s header):
+(1) `WorkspaceModel.reportingDepartures` — which compares `shownNoteIDs`, and `shownNoteIDs` is
+`panes.compactMap { selections[$0]?.noteID }`: a pane showing `.reading(id)` contributes NOTHING, so no note inside a book
+can ever depart that set; (2) a window closing — the same `shownNoteIDs`; (3) ⌘Q (+ the lock, `macWillLock`) — the
+registry's quit closure; (4) the quick note's filing. So a note she edits in a book reaches `savepointOnLeaving` only
+through (3) or the 2 h idle backstop — C1's T3 case 2, pinned green as `aNoteEditedInABookKeepsItsQuitAndLockSavepoint`
+("the lock walk still reached the book-edited note"), and C1's named residual 1 (the entry stays registered until then).
+The same for a Compare PEER: the anchor is the pane's own note (road 1 covers it), a peer is not in `shownNoteIDs`.
+
+**Where the book's note-switch fact actually lives (named, not guessed).** The book has ONE published answer to "which
+note is she in": **the sidebar note box's state** (18d, her U-10 — `NoteBoxState` `.empty` / `.selected(id)` / `.live(id)`),
+computed by `BookView.noteBoxReport` through the pure `BookNoteBox` rule from facts the modes already hold:
+- **Outline** — `BookViewModel.focusedPostID` (the book's single focus authority, 13b 3E: "which POST holds the live
+  inline editor"; `focus(_:)` is the door every click, navigator row, badge tap and "edit here" funnels through);
+  `.live` via `liveFocusedPostID` (nil in an unfocused pane), `.empty` after a click-out / collapse / chapter row.
+- **Book (the spread)** — the same focus authority (the active page); a leaf turn releases focus
+  (`releaseFocusIfItLeftTheSpread`), after which the box points at the left page (`.selected`).
+- **Index** — `BookIndexEditModel.livePostID` (the ONE live pane's note — `authority.livePane?.context`, reported up by
+  `BookIndexView`'s `.onChange(of: edit.livePostID)` → `noteIndexLive`) and the column's selection (`noteIndexSelection`);
+  by the Index's own rule (13u2 UNIT B / QUESTIONS #110) the two never name different notes — a row click on another
+  note BLURS the ring first.
+- **Read** — no editing surface (A43): the box shows nothing (`.empty`), whatever `focus` means for the paged reader.
+The report is also nil in an UNFOCUSED pane (the split's other pane — `paneFocused`). **Scrolling changes none of these
+facts** — the Outline's focus is a click, the Index's selection does not follow scroll ("NO SELECTION-FOLLOW HERE" —
+`BookIndexView`), and a far-scrolled focused note's editor unmounting (`NearViewportObserver`) is a surface letting go, not
+a leaving (C1's release rule keeps the entry).
+
+**Where Compare's fact lives.** `CompareViewModel.peerSlots` — the model's own picked-peer set (`setPeer`,
+`removePeerSlot`, the outline door, the version-peer auto-fill all write it; its `didSet` already acquires every picked
+peer's coordinator). The board being LEFT is its `teardown()` (`CompareBoardView.onDisappear` — a mode switch away from
+Compare, the pane navigating away, the pane going unfocused, the window closing; the board is re-created fresh on the next
+mount, so its peers are genuinely gone).
+
+**The machinery this rides (C1, unchanged).** `savepointOnLeaving(id)`: `markLeaving` (the note is LEFT at the current
+acquisition generation) → flush → `closeAutoCommit` → if it LANDED and nobody held the note as it began,
+`dropAfterLeaving` (same generation, zero holders, clean coordinator). If a surface still holds the note, the savepoint
+lands and the entry stays; that surface's LAST release of a left note re-takes the savepoint (it carries whatever the
+departing surface wrote on its way out) and the entry drops then. So reporting a book/Compare leaving through
+`savepointOnLeaving` is the whole build — "the C1 drop conditions then retire the registry entry for free".
+
+**What `closeAutoCommit` decides (byte-preserved).** One quiet `kind:'auto'` savepoint per live, unlocked take that
+`isDirty` — the buffer differs from the take's last savepoint, OR the take has never been savepointed and is non-empty
+(`Operations+Variant.isDirty`); a sealed or vanished note answers `[]`; `savepoint_cadence` ≠ `.everySession` answers `[]`
+(the cadence gate is INSIDE the op — no caller can miss it). The flush before it runs in every mode.
+
+### THE DESIGN (settled at the code before any line — the ladder reads this)
+
+1. **The book reports a note LEFT through `SavepointOnLeave` exactly as the workspace does** (a signal on the model, a
+   no-op by default, wired by the view to `session.savepointOnLeaving` — `SavepointOnLeave.wire`'s own shape, so a book
+   built in a test or a preview writes nothing). **The rule is a pure type, `BookNoteTrail`**, over the box's state:
+   the trail remembers the note her CARET was last in (`.live(id)` only); **a `.live` in a DIFFERENT note** departs the
+   remembered one (she moved into another note); **a `.selected` naming a different note** departs it too and forgets it
+   (she moved to another note without the caret — the Index column's row click, which releases the ring; a leaf turn in
+   Book mode); `.empty` departs nothing (clicking out is not moving to another note; Read; an unfocused pane); **leaving
+   the book** (`BookView.onDisappear` — the pane navigating away, the split closing, another book taking the pane, the
+   window closing) departs the remembered note. A note only LOOKED at (the Index's arrival seed, a row selected with no
+   caret, a spread page) never enters the trail, so it is never reported — no savepoint for a note her caret never
+   entered, which is also exactly the set of notes today's ⌘Q/lock walk reaches (each note her caret entered holds a
+   registry entry by then). A mode switch within one note keeps the same state → nothing.
+2. **Compare peers follow the same rule, PROVISIONAL (QUESTIONS #163):** a peer that leaves the picked set (swapped out
+   by `setPeer`, removed by `removePeerSlot`) and every picked peer when the board tears down are reported LEFT through the
+   same entry; the ANCHOR never is (it is the pane's own note — road 1's; a mode switch away from Compare is not the
+   anchor's leaving). Every picked peer already holds a registry entry (the pick acquires), so this too savepoints only
+   notes today's ⌘Q/lock walk reaches — earlier.
+3. **Zero change to `AppSession`, `Operations`, the editor seam, `Sync/`, schema or settings.** Files expected:
+   `Features/BookView/BookNoteTrail.swift` (new, pure) · `BookViewModel.swift` (the trail + signal) · `BookView.swift`
+   (feed the box's state; leave on disappear; wire) · `Features/Takes/CompareBoardView.swift` (`CompareViewModel`'s
+   signal; wire in the board's onAppear) · `Workspace/SavepointOnLeave.swift` (two `wire` overloads + the header's mapping).
+
+### LIVE STATUS
+
+- Reading + the trace + the design + this record opened — DONE (this commit).
+- Pins (red-on-old, MOUNTED — they drive only doors that exist on the pre-fix tree: `BookView` hosted with its model,
+  `model.focus`, `requestLanding`, typing into the real live editor / pane, unmounting; `CompareBoardView` hosted,
+  `setPeer`, `paneEdited`) — NOT-STARTED.
+- Pre-fix run of the pins — NOT-STARTED.
+- The fix — NOT-STARTED (the design above).
+- Behavioural revert R-U4 (the production files from the pins commit over the fix) — NOT-STARTED; no revert starts until
+  this line names it and the pre-revert state is committed.
+- QUESTIONS #163 (the Compare-peer PROVISIONAL + the book's note-switch reading) — NOT-STARTED.
+- Closing runs (`AutosaveRegistryLifecycleTests` + `AutosaveRegistryReleaseTests` FULL, `SavepointOnLeaveTests`, the
+  book/Compare suites touched, the eleven Tutorial suites; the mobile suite only if a shared file changes — none
+  expected) — NOT-STARTED.
+- Walk (book: edit, switch note, Block History shows the quiet savepoint; leave the book, same for a second note;
+  captures `notes/plans/18o-screens/u4/`) — NOT-STARTED.
+- Deaths / resumes: none.
