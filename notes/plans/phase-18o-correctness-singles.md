@@ -221,9 +221,10 @@ with someone at the machine); iOS generic build green; install `/Applications` b
 | 7 | **Row 84** — a backup copy stamped in the FUTURE silently stops automatic backups and the freshness face never turns stale (`StoreBackup` due-checks; 18k C7's noticed item 1) | U1 | **FIXED `1c18420d`** (pins `09f9e199` — red-on-old 14 issues; R-84 identical; C7's pins rode UNMODIFIED; widened to the weekly export — judgement call 2, accepted). QUESTIONS **#162** (PROVISIONAL (a)) |
 | 8 | **Row 64 — RECORD-ONLY (R-18k-4, *leave it for now*):** re-verify the documented-behaviour pin (`ContentReplacementRedoTests.anUndoEntryOlderThanARestoreCanStillReviveIntoTheRestoredNote`) green; record the ruling in the ledger + the 17e copy; no build | U1 | **RECORDED** — pin green 5/5 (re-verified by the orchestrator too); closeout adopts the row's option (i) close-as-ruled wording |
 | 9 | **17e (11) — RECORD-ONLY:** partly discharged by 18d (`RecoveryView.swift:489`); the remainder ACCEPTED on KnownIssues' per-note-view-state row (owner 12) — 18o records the disposition in the 17e copy; no build | U1 | **RECORDED** — with the NOTICED-3 correction (postMode/readFace/takesViewMemory evicted by no road); the per-note-view-state row's text amends at closeout |
-| 10 | **P23** — a CRLF file imports as ONE block: `SegmentationRules` splits on `"\n"` only (`Sources/VariorumCore/Domain/SegmentationRules.swift:67`; MAJOR; the family keys on `Character.isNewline` — only the segmenter disagrees) | U2 | open |
-| 11 | **Row 66 / #138(f), RULED R-18k-5 (*honour the tombstone at launch*):** the LAUNCH seeder declines on a tombstoned seeded book exactly as the tutorial door's silent ensure does (`SampleLibrarySeeder.seedIfNeeded`, launch call `VariorumApp.swift:196`) | U2 | open |
+| 10 | **P23** — a CRLF file imports as ONE block: `SegmentationRules` splits on `"\n"` only (`Sources/VariorumCore/Domain/SegmentationRules.swift:67`; MAJOR; the family keys on `Character.isNewline` — only the segmenter disagrees) | U2 | **FIXED `12d61080`** (pins `40c3aafc` — red-on-old core 29 · Mac 6 · mobile 3; R-P23 identical ×3; M-isNewline proves the rejected design breaks the typed-road guards; normalise-at-entry, judgement call 1). Walk W1 both voices |
+| 11 | **Row 66 / #138(f), RULED R-18k-5 (*honour the tombstone at launch*):** the LAUNCH seeder declines on a tombstoned seeded book exactly as the tutorial door's silent ensure does (`SampleLibrarySeeder.seedIfNeeded`, launch call `VariorumApp.swift:196`) | U2 | **FIXED `14822213`** (ONE predicate `readerDeletedTheBook`, both deciding reads, decision recorded in the mark; pins red-on-old Mac 15 · mobile 2; R-66 identical; M-early/M-late each red their own pin). Walks W2 + W3 (explicit restore still mints) |
 | 12 | **Row 73** — the Open strip's ⌘⇧<n> menu TRAPS at its tenth row in Debug (`EditorCommands.swift:782`; check the `:746` ⌘<n> sibling too); shortcuts for rows 1–9 only (PROVISIONAL), pin mounts the menu with ten open notes | U3 | open |
+| 12b | **The microsyntax CRLF edge (adopted from U2's NOTICED 1 — P23's class at a sibling brain, in-theme):** `CaptureMicrosyntax.parse` walks lines on the literal `"\n"` (`App/Variorum/Shared/CaptureMicrosyntax.swift:111`) — in a CRLF capture rule 5 (a token-only line leaves with its newline) never fires and rule 2's one-line promise can be crossed. Fix: read the input through `SegmentationRules.normalizedLineEndings` at `parse`'s entry (App CAN see core; the output already normalises downstream at `bulkSegments`, so no double effect); pins red-on-old for both misread rules | U3 | open |
 | 13 | **Row 79** — ⌥⌘⇧M's CEREMONY branch reads the frozen `slots`: a mid-burst take makes it wrongly refuse "needs a fan", and a mid-burst archive falls through `openMergeCeremony`'s truth read into an INSTANT merge instead of its ruled refusal; the P27 fix (`liveActiveFans`, store-read authorization) is the shape (`EditorSurfaceController`, the `.merge` arm) | U3 | open |
 | 14 | **Row 78 / R-18k-6, RULED:** a note edited INSIDE A BOOK gets its leaving savepoint when she moves into a different note (or leaves the book), through the existing `savepointOnLeaving` road; Compare peers follow the same rule PROVISIONAL (QUESTIONS row) — the 18k C1 RECORD's machinery (`markLeaving`/`dropAfterLeaving`, the acquisition generation) is required reading | U4 | open |
 | 15 | **17t item 1** — the typed NEAR-EMPTY sync confirmation (#86(c), ruled: warn + TYPED phrase, never refuse, never click-through; home #87: "with the rebuilt Replace Keys"): `Sources/VariorumCore/Sync/RekeyRecencyProbe.swift` has ZERO app consumers — wire the warning face + typed confirmation into the rebuilt Replace All Keys. Consume the probe from App; ZERO `Sync/` edits (a needed probe change is a stop-and-report → Fable work) | U5 | open |
@@ -341,6 +342,13 @@ Ledger rows 12–13.
   instant merge. Note for the record + ladder: this adds one more await before `runStructural`'s
   flight flag — the same window the carry-all/seam roads already carry (18k C5 NOTICED 5); a
   second structural act inside it is refused by `runStructural`'s own guard.
+
+- **Row 12b (adopted at U2's adjudication):** `CaptureMicrosyntax.parse` reads its input through
+  `SegmentationRules.normalizedLineEndings` (core, U2's own function) at entry — the ledger row
+  carries the mechanism; pins red-on-old for the two misread rules (a token-only CRLF line
+  leaves with its line break; an unclosed `{#` never scans across a CRLF); the existing
+  microsyntax pins ride UNMODIFIED (LF behaviour byte-identical); both Mac capture doors and
+  the shared brain covered — zero phone files (the phone's capture face is the catch-up's).
 
 **Scope fence:** `EditorSurfaceController` is the editor seam's PAIR — the end Fable ladder
 covers it (per the cast); `EditorTextView`/`BlockRangeIndex`/`PaneSurface` untouched. **Evidence:**
@@ -484,8 +492,8 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 
 - PLAN FILE authored + committed — **DONE** (this commit).
 - U1 the honesty & paper-cuts batch — **CLOSED (orchestrator adjudication 2026-09-30; all nine rows dispositioned; walks W1–W3 HELD for the first zero-instance window, W4 accepted on its pins)**.
-- U2 the import & launch-seed batch — **DONE (implementer, 2026-09-30), awaiting the orchestrator's spot-check** — P23 and row 66 FIXED with red-on-old pins + behavioural reverts; core 1747/183, Mac closing set 292/40, FULL mobile 656/114 = the attributed baseline; walks W1–W3 DONE (the UNIT U2 RECORD at the file's end).
-- U3 the two Mac doors — NOT-STARTED.
+- U2 the import & launch-seed batch — **CLOSED (orchestrator adjudication 2026-09-30; rows 10–11 dispositioned; the microsyntax edge adopted as row 12b → U3)**.
+- U3 the two Mac doors (+ row 12b) — NOT-STARTED (spawns after the U1 held walks run in the open window).
 - U4 the book leaving savepoint (R-18k-6) — NOT-STARTED.
 - U5 17t, the two unwired protection doors — NOT-STARTED.
 - U6 #146 (Fable seat) — NOT-STARTED (SyncSpec + postmortem re-read precede any line).
@@ -936,5 +944,35 @@ they inherit both fixes through the shared brains (pinned).
     the book stays gone, the mark re-recorded) and W3 (Help ▸ Restore still mints).
 
 QUESTIONS rows landed: **none** (no PROVISIONAL arose); the tail marker still reads **#163**.
+
+### UNIT U2 — ORCHESTRATOR ADJUDICATION (2026-09-30; the unit CLOSES here)
+
+**Verified by spot-check, not trusted:** the full range `cf887299..0a082390` read (my away-grant
+commit `c523caa6` landed mid-unit — the first scope diff was re-run over the whole range): 9
+code/test files + the plan + `.gitignore`; **zero `Sources/VariorumCore/Sync/`, zero `Server/`,
+zero editor-seam files, zero trailers** (grep over every message), tree clean, pushed. **Re-run
+by this seat:** `swift test --filter SegmentationLineEndingTests` → **10/1 green**. The
+`SegmentationRules` diff read whole: the normalise-at-entry design (judgement call 1) is the
+RIGHT divergence from the finding's isNewline framing — the block-boundary family keys on `"\n"`
+alone and the M-isNewline mutation PROVES the alternative breaks the typed Control-Return guards;
+the doc at the code carries the reason. Call 7 (both deciding reads decide, each pinned by its
+own mutation) and call 13 (behaviour-neutral scaffolding commit so pins compile pre-fix) are
+exemplary; calls 8–11 accepted as recorded (call 11 — a book SHE created wearing the reserved
+name — is the seeder's standing identity rule, not new exposure). Closing runs accepted: core
+**1747/183** (+10/+1, arithmetic shown), Mac set **292/40**, mobile **656/114 = the attributed
+baseline + this unit's 2** — the walks ran under her away grant with the per-step guard.
+
+**ACCEPTED — U2 CLOSED**, rows 10–11 dispositioned (the ledger carries them). **Owners for the
+noticed items:** NOTICED 1 (the microsyntax CRLF edge) — ADOPTED INTO THE PHASE as ledger row
+12b, riding U3 (P23's class, in-theme, small; the header rule's "unowned ⇒ fix it now" read
+honestly); NOTICED 2 (the phone box's `one_block` CRLF write-back) → the MOBILE APP project row
+at closeout (phone face; no loss); NOTICED 3 (CR inside an existing block stays content) —
+correct under I4, no row; NOTICED 4 (`PlainPaste` rule 1 ↔ core, one rule two homes) — the
+next-toucher note stands, no row (the touch rule owns it); NOTICED 5 — the ensure's own standing
+behaviour, no row; NOTICED 6 — the header touch-up rides row 12b's commit if free, else stays a
+note; NOTICED 7 (walk residue: "CRLF-walk-note" + the deleted *Encryption Explained* in the dev
+Trash) → her bundle's residue line. **FOR THE FABLE LADDER:** judgement call 7's early-decision
+arm (declining an account-owned store BEFORE its first round — traced safe here, worth cold
+eyes), call 2 (`one_block` normalises too), and the drafted KnownIssues row-66 wording.
 
 **U2 — DONE (implementer), awaiting the orchestrator's spot-check.**
