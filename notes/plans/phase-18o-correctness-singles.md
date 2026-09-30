@@ -495,7 +495,7 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 - U2 the import & launch-seed batch — **CLOSED (orchestrator adjudication 2026-09-30; rows 10–11 dispositioned; the microsyntax edge adopted as row 12b → U3)**.
 - U3 the two Mac doors (+ row 12b) — **CLOSED (orchestrator adjudication 2026-09-30; rows 12/12b/13 dispositioned; the row-13 design divergence accepted and named a ladder focus)**.
 - U4 the book leaving savepoint (R-18k-6) — **CLOSED (orchestrator adjudication 2026-09-30; row 14 dispositioned; ladder foci named — the ladder's first read)**.
-- U5 17t, the two unwired protection doors — IN FLIGHT (implementer spawned 2026-09-30).
+- U5 17t, the two unwired protection doors — IN FLIGHT (implementer 2026-09-30; the UNIT U5 RECORD carries its LIVE STATUS — item 1 STOP-AND-REPORT with a documented-behaviour pin + QUESTIONS #164; item 2 building).
 - U6 #146 (Fable seat) — NOT-STARTED (SyncSpec + postmortem re-read precede any line).
 - THE LADDER — NOT-STARTED.
 - CLOSEOUT + the install refresh — NOT-STARTED (refresh window unverified; her app's state unknown).
@@ -1765,3 +1765,130 @@ NOTICED 1 (the Outline keeps stale focus after an Index excursion — pre-existi
 OWED (the phone's book faces + its leaving roads — the mobile catch-up's trace), never
 "nothing mobile-visible". Walk residue (the u4walk notes' quiet savepoints in their histories)
 → her bundle's residue line.
+
+---
+
+## UNIT U5 RECORD — 17t, the two unwired protection doors (implementer: `opus-implementer`, 2026-09-30)
+
+**NOT DONE (first line, per the contract — kept current as the unit runs):** (1) **Item 1 (ledger row 15) — the typed
+near-empty gate is NOT BUILT: STOP-AND-REPORT.** Traced at the code, the hazard her #86(c) ruling guards does not exist on
+the rebuilt Replace All Keys road (THE TRACE below): the road pulls to head FIRST and then re-encrypts the SERVER's own rows
+in place (`sync_reencrypt`) — local content never replaces server content — and the settled postures design (hers, "final
+as of 2026-09-04") DELETED the probe's UI caller for exactly that reason (§13). A typed gate here would warn of a loss that
+cannot happen. The finding is pinned as documented behaviour (green on today's tree = HOLLOW as a defect) and the product
+call goes to her as QUESTIONS #164. Zero `Sync/` lines (the probe is untouched). (2) The ledger rows, KnownIssues 54/55
+edits, the 17t copy lines and the MOBILE PARITY line are the orchestrator's closeout acts — DRAFTED below, none applied.
+
+### READING (done in-session before any code)
+
+`CLAUDE.md` + its auto-loaded canon (CoreDescription, OverallModel, AppSpec) · this file WHOLE (U1–U4 records, seam tables
+and adjudications; the U5 section; ledger rows 15–16) · the 17-file's 17t section · `notes/KnownIssuesAndTechDebt.md`
+(header rule; rows 54 and 55 in full) · `notes/QUESTIONS.md` #86 whole (her (c) ruling verbatim: *"I would add a typed
+confirmation phrase for the near empty case - maybe a 13u item"*) and #87 (the pointer: *"#86(c)'s typed confirmation lands
+with the rebuilt Replace Keys (one home)"*); tail marker **#164** · `notes/SessionResiliencyProtocol.md` whole. **Custody
+seam reading:** `Sources/VariorumCore/Sync/RekeyRecencyProbe.swift` whole (READ-ONLY) + `RekeyRecencyProbeTests`; the
+probe's history (`b21db5bf` — built with its UI caller on the 14c truncate road, 2026-08-31; `e9e27adb` — the caller
+RETIRED at pre-13x 2b.3a, 2026-09-05); `notes/plans/pre-13x-postures-design.md` §0 decision 6, §4 steps 1–3, §5's Replace
+All Keys row, §13 WHAT GETS DELETED, the §13 sweep table; `pre-13x-design-history.md` §G + corner 5; 13u2 UNIT D's roster
+item 8 verdict table (`phase-13u2-feel.md`); `App/Variorum/Shared/PostureSwitch.swift` (the runner's header, `checkDoor`,
+`runCeremony` step 1), `Sources/VariorumCore/Sync/CorpusRotation.swift` `reencryptRemainder` (read-only), every
+`resyncReinitialize`/`truncateAccountData` caller. Item 2: `ProtectionPane.swift` (`PassphraseSetSheet`,
+`ProtectionNoticeBar`, `PhraseOnlySheet`, `PostureSwitchSheet` — the one live Copy All at `:1188`), the three
+`markWordsCopied()` models, `SyncEnrollmentView`, `KeyDoorView`, `PassphraseSetModel`, `SharedPageStyle.PageDoor`,
+`EncryptionViews`/`AuthViews`/`SyncStatusViews` (who renders the shared faces — the phone does too, via Settings ▸ Sync ▸
+the Account sheet), `pre-13x-copy.md` §2a Screen 3 (*"[the words, numbered] · Copy All (sub-line after copying: Copied.
+Your clipboard clears in 60 seconds.)"*) and §4 Regenerate (*"Then 2a's Screens 3/3b"*), decision 23, the pin precedents
+`ProtectionSurfaceRenderTests` (`SurfaceComposition`) and `ComposedSliders` (find a node by its own TYPE, drive what a click
+drives). **Instance state at start:** `pgrep` → no instances (her away grant stands).
+
+### THE TRACE — ITEM 1 (inputs → the loss #86(c) guards; every claim re-read at the code)
+
+**The hazard her ruling answered** (#86(c), 2026-09-01, about the door AS IT WAS): the 14c `AccountRekey` road TRUNCATED the
+server mirror and re-pushed LOCAL truth ("the re-key door is the one local-as-truth road"), so a near-EMPTY store re-keying
+over a full server would have flattened it. T1's probe (`b21db5bf`) warned before that truncate.
+
+**The road today** (`PostureSwitchRunner.replaceAllKeys` → `run(entersCastle: false)` → `runCeremony`, `PostureSwitch.swift`):
+1. **Step 1 PULL TO HEAD** (`:492-510`) — push what this device owes, then `engine.pullToHead()`, up to three rounds until
+   the outbox is empty; refuse otherwise. A near-empty store therefore RECEIVES every server row before anything rotates.
+2. **Step 3 RE-ENCRYPT THE SERVER COPY** (`CorpusRotation.reencryptRemainder`, `CorpusRotation.swift:541-610`) — pulls the
+   SERVER's rows below the rotation seq, opens each under the previous key, re-seals it under the new key AT THE VERSION IT
+   WAS PULLED AT, and writes it back through `sync_reencrypt` (version-neutral; "no truncation" — design §4 step 3). No local
+   row's content is ever written over a server row by this road.
+3. The file's own header (`:11-15`): *"It REPLACES the 14c `AccountRekey` brain: that road TRUNCATED the mirror and re-pushed
+   local truth; this one rotates IN PLACE through `sync_reencrypt` … and never truncates."*
+
+**No other road carries local-as-truth semantics:** `truncateAccountData` has no app caller; `resyncReinitialize`'s one app
+caller is `adoptLibrary` (Connect / *Move It to This Account*) — it re-stamps the owner and enqueues every row for an
+additive push under the account (sync_version 0 inserts), deleting nothing server-side; `VaultBootstrap`/`PurgeJanitor`
+callers are the headless tool and the purge's own reinit, neither a near-empty-clobber door.
+
+**The records' timeline (why the row says "never wired"):** 09-01 her ruling + #87's pointer (the rebuild not yet designed
+in detail) → 09-03 the postures design settled (decision 6: re-encryption in place, version-neutral) and its §13 lists
+*"`RekeyRecencyProbe`'s UI caller"* under WHAT GETS DELETED → 09-05 2b.3a retires the caller: *"the T1 recency guard RETIRED
+with the truncate road it guarded — an in-place rotation clobbers nothing on the server, so there is no server-ahead copy to
+warn about"* → 09-15 13u2 UNIT D's verification greps zero consumers and records NOT BUILT — RETURNS (the retirement's reason
+not cited) → KnownIssues row 54 → R-18k-2 schedules 17t. The design history's §G/corner 5 (09-01) planned the typed gate
+WITH the rebuild; the settled design file "never overrides"-ranks above the history, and it deleted the caller.
+
+**Also the shape does not fit:** the probe reports SERVER-AHEAD counts (`notesOnlyOnServer`, `notesNewerOnServer`,
+`latestServerChange`); it has no notion of "near-empty" (no local count, no threshold) — a near-empty reading would need a
+new rule (product invention) and, if placed in the probe, a `Sync/` edit (Fable work).
+
+**Disposition path (the contract's hollow rule):** the loss is pinned as ABSENT — a near-empty sibling's Replace All Keys over
+a fuller server, the probe reading it exactly as #86(c)'s corner (server ahead by N notes), then every server note still
+live on the server under the NEW keys and pulled into the near-empty copy. Green on today's tree ⇒ the row is HOLLOW as a
+defect; not fixed. The typed gate itself (friction with honest copy, or none) is hers: QUESTIONS #164.
+
+### THE DESIGN — ITEM 2 (settled at the code before any line)
+
+**The Mac shows the twelve words on FIVE surfaces; one has Copy All.** (1) `PostureSwitchSheet` `.wordsShow` (Castle /
+Replace All Keys ceremony; `PostureSwitchModel`) — HAS the door + caption (`ProtectionPane.swift:1188`, the one call
+site). (2) `SyncEnrollmentView` `.wordsShow` (SHARED — sync setup, copy §2a Screen 3, which RULES *Copy All* + the sub-line;
+`SyncEnrollmentModel`) — the caption branch exists, no door. (3) `KeyDoorView` `.wordsShow` (SHARED — Regenerate Twelve
+Words; copy §4: *"Then 2a's Screens 3/3b"*; `KeyDoorModel`) — no door, no caption. (4) `PassphraseSetSheet` `.showPhrase`
+(Mac, 13p-era set sheet; `PassphraseSetModel`) — no door. (5) `PhraseOnlySheet` (Mac, the nudge's phrase-only road; no
+model) — no door. Her need, verbatim at 13u2's roster: *"we NEED a copy all button on the recovery phrase - i had to copy
+them one by one"*, scoped *"everywhere the twelve words are shown"*.
+
+1. **ONE rule, hoisted** — `App/Variorum/Shared/WordsCopyDoor.swift` (a shared-folder file whose whole body is
+   `#if os(macOS)`; the phone compiles it empty, and its UIPasteboard arm lands beside it when the mobile row builds it):
+   `WordsClipboard.copy(_:to:clearAfter:)` is the existing closure's four statements verbatim (clear, write the words
+   joined by one space, read `changeCount`, clear after 60 s ONLY if the count is unmoved) with the pasteboard and the
+   interval injectable for pins (production: `.general`, 60 s — decision 23). `WordsCopyDoor(words:pageStyle:onCopied:)`
+   renders `PageDoor(ProtectionCopy.wordsCopyAll, style:)` — whose nil arm (the Mac, always) is BYTE-FOR-BYTE
+   `Button(title, action:)`, the construction the pane already had — and its one act `copy(to:clearAfter:)` runs the rule
+   then `onCopied()`.
+2. **The existing door moves onto it** (behaviour-neutral: same title, same construction, same four statements, same
+   `markWordsCopied()`), so there is no second copy of the timer.
+3. **The four missing faces gain it**, each reporting to its own flag: (2) `model.markWordsCopied()` — the dead caption
+   branch becomes reachable; (3) `model.markWordsCopied()` + the caption branch added (copy §2a's sub-line); (4)
+   `PassphraseSetModel` gains the siblings' exact `copiedWords` / `markWordsCopied()` + the caption; (5) the flag lives with
+   its presenter (`ProtectionNoticeBar`'s `@State`, beside `phraseWords`), handed in as `copied`/`onCopied`, so the sheet's
+   caption is a pure function of its inputs (pinnable) — `PhraseOnlySheet` loses its `private` for the pin.
+4. **The shared faces' door is `#if os(macOS)`** — the phone renders `SyncEnrollmentView`/`KeyDoorView` too, and the
+   phone's word-screen doors (their UIPasteboard semantics — `expirationDate`, `.localOnly` — a call) are the MOBILE APP
+   ROW's by the brief; the phone's rendering of the two shared faces stays exactly as today.
+
+**Pins (form: `SurfaceComposition` + `ComposedSliders`' find-by-type-and-drive):** per face, the words screen's composition
+carries a `WordsCopyDoor` whose words are the shown words; driving its act (a PRIVATE named pasteboard — her clipboard is
+never touched) puts the words on that board and flips the face's flag, after which the recomposed face carries
+`ProtectionCopy.wordsCopied`. Red-on-old for faces (2)–(5) on a behaviour-neutral scaffolding tree (the door type + the
+hoist + `PassphraseSetModel`'s flag + `PhraseOnlySheet`'s inputs land first, so the pins compile pre-fix — U2/U3's shape);
+guards green on both: the hoisted rule's two arms (clears when unmoved; never clears what something else wrote) and face
+(1)'s door (the one existing road, byte-unchanged).
+
+### LIVE STATUS
+
+- Reading + the item-1 trace + the item-2 design + this record opened — DONE (this commit).
+- Item 1 — the documented-behaviour pin (near-empty sibling's Replace All Keys loses nothing; the probe reads the corner)
+  — NOT-STARTED. Then its teeth (a mutation) + QUESTIONS #164 — NOT-STARTED.
+- Item 2 scaffolding (behaviour-neutral: `WordsCopyDoor.swift`, the hoist, `PassphraseSetModel` flag, `PhraseOnlySheet`
+  inputs) — NOT-STARTED.
+- Item 2 pins (red-on-old on the scaffolding tree) — NOT-STARTED.
+- Item 2 fix (the door in faces 2–5) — NOT-STARTED.
+- R-U5 behavioural revert — NOT-STARTED.
+- Closing runs (focused Mac suites + the eleven Tutorial suites; iOS generic build; FULL mobile suite — shared files change)
+  — NOT-STARTED.
+- Walk (Protection pane's copy door + the enrollment page's caption where reachable on the dev store) — NOT-STARTED.
+- The re-key DRILL is NOT re-run: no key leg changes (no wrap/unwrap/Keychain write semantics touched) — stated.
+- Deaths / resumes: none.
