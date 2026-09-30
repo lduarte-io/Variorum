@@ -498,7 +498,7 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 - U5 17t, the two unwired protection doors — **CLOSED (orchestrator adjudication 2026-09-30; row 15 DISMISSED AS HOLLOW pending her #164, row 16 FIXED; ladder foci named)**.
 - U6 #146 (Fable seat) — **DONE (build closed 2026-09-30; the ladder is its cold review — next)**.
 - THE LADDER — **CLOSED (two rounds, 0 BLOCKER / 0 MAJOR total, zero disputes; every finding dispositioned repo-first)**.
-- CLOSEOUT + the install refresh — IN PROGRESS (the finals' full Mac run in flight; the ritual's edits landing).
+- CLOSEOUT + the install refresh — **DONE 2026-09-30 (the ritual complete: 17-file, KnownIssues, master plan + archive roll, MobileSoul PL-41, health-rounds, PHASE RESULTS with the finals adjudicated, the handoff, the refresh `3b116e5c` → `037ddc82`)**. **18o — CLOSED. HARD STOP; the author kicks off what's next.**
 
 ---
 
@@ -2300,7 +2300,12 @@ marker re-arm); the A5-band corner's recording.
   shared brains (zero phone files changed for the fixes; the phone pins named); OWED and filed:
   the U4 leaving-savepoint twin trace, the word screens' copy doors, the `one_block` CRLF
   write-back.
-- **The install refresh:** PENDING(the closeout's zero-instance window — recorded below when run).
+- **The install refresh: DONE 2026-09-30T16:27–16:3xZ** (zero instances verified by PATH before
+  the A1 copy AND again before the install): A1 safety copy
+  `Backups/safety-copies/18o-refresh-20260930T162750Z` (6 files — the store, its `-wal`/`-shm`,
+  three key files — each `cmp`-identical) · Release built into a throwaway DerivedData (removed) ·
+  `/Applications` binary **`3b116e5c` → `037ddc82`** · `codesign --verify --deep --strict` OK ·
+  both keychain access groups present. It's safe to open Variorum.
 
 **18o — CLOSED. Hard stop after the finals + refresh; the author kicks off what's next**
 (13r paused at its kickoff; 18n holds row 70's remainder + the openNote(ordinal:) cleanup; the
