@@ -1488,8 +1488,22 @@ departing surface wrote on its way out) and the entry drops then. So reporting a
 - Reading + the trace + the design + this record opened — DONE (this commit).
 - Pins (red-on-old, MOUNTED — they drive only doors that exist on the pre-fix tree: `BookView` hosted with its model,
   `model.focus`, `requestLanding`, typing into the real live editor / pane, unmounting; `CompareBoardView` hosted,
-  `setPeer`, `paneEdited`) — NOT-STARTED.
-- Pre-fix run of the pins — NOT-STARTED.
+  `setPeer`, `paneEdited`) — DONE (this commit): `VariorumTests/BookLeavingSavepointTests.swift` (NEW file, two suites):
+  `BookLeavingSavepointTests` — bug pins `movingIntoAnotherNoteInOutlineSavepointsTheNoteSheEdited` ·
+  `movingIntoAnotherNoteInIndexSavepointsTheNoteSheEdited` · `leavingTheBookSavepointsTheNoteSheWasIn` (each with the
+  registry half — C1's `openAutosaveCount` / `quitFinalize.count` extended, C1's own pins untouched); guards
+  `aNoteSheWasInButDidNotChangeGetsNothing` (the dedupe) · `aNoteSheOnlyLookedAtGetsNothing` (never-savepointed takes,
+  so a wrongly-reported note WOULD be written) · `aModeSwitchInsideOneNoteIsNotALeaving` ·
+  `theCadenceSettingStillGovernsTheBooksLeaving` (×2: "Only when I commit", "Idle only");
+  `CompareLeavingSavepointTests` — `aPeerSwappedOutGetsItsLeavingSavepoint` ·
+  `leavingTheBoardSavepointsItsPeersButNotItsAnchor`. The fixture savepoints every take at setup, so any quiet row is
+  the leaving's own.
+- Pre-fix run of the pins — DONE (`18o-u4-pins-prefix.log`, tree `88d27529` + the pins): **`Test run with 9 tests in 2
+  suites failed … with 13 issues`** — the five bug pins RED: Outline 3 (no savepoint · entries 2 ≠ 1 · quit closures
+  2 ≠ 1) · Index 3 (no savepoint · 2 ≠ 0 · 2 ≠ 0) · leave-the-book 3 (no savepoint · 1 ≠ 0 · 1 ≠ 0) · peer swap 1 (no
+  savepoint) · board left 3 (no savepoint · 2 ≠ 1 · 2 ≠ 1); the four guards GREEN (the cadence pin's two cases
+  included) — green on old by construction (nothing was ever reported); their teeth are shown against mutations after
+  the fix. Every premise held on old (the typed text reached the store — the unmount's own flush).
 - The fix — NOT-STARTED (the design above).
 - Behavioural revert R-U4 (the production files from the pins commit over the fix) — NOT-STARTED; no revert starts until
   this line names it and the pre-revert state is committed.
