@@ -1930,9 +1930,15 @@ guards green on both: the hoisted rule's two arms (clears when unmoved; never cl
   `18o-u5-r-u5.log` **`✘ Test run with 52 tests in 2 suites failed … with 4 issues`** — identical to the pre-fix run: the
   four face pins, one issue each at the door requirement; both rule guards, face (1)'s guard and the item-1 pin green.
   Restored by `git checkout HEAD --` the three; `git status` clean.
-- M-receipt (the ledger's named subject — the caption's reachability) — IN-PROGRESS (named before it runs): on the fixed
-  tree, ONLY `SyncEnrollmentView`'s door handed an empty receipt (`{ }` for `{ model.markWordsCopied() }`); run
-  `WordsCopyDoorTests`; expected: the sync-setup pin red on its receipt half alone; restore by `git checkout HEAD --`.
+- M-receipt (the ledger's named subject — the caption's reachability) — DONE, restored clean: on the fixed tree, ONLY
+  `SyncEnrollmentView`'s door handed an empty receipt (`{ }` for `{ model.markWordsCopied() }`) → `18o-u5-m-receipt2.log`
+  **`✘ Test run with 6 tests in 1 suite failed … with 2 issues`** — the sync-setup pin's RECEIPT half alone
+  (`model.copiedWords` false · the caption absent), its door half green (composed, the words on the board); the other five
+  green. So the pin proves the composed door reaches THIS model's `markWordsCopied()` and the branch — not merely that a
+  button exists. (Machinery note: the first M-receipt run, `18o-u5-m-receipt.log`, never started — LaunchServices -600
+  `procNotFound` at the test host's launch; the orphaned Debug host from OUR DerivedData build — identified by path and
+  xcodebuild's test arguments, never her app, which was not running — ignored a quit-by-identity and was ended by PID;
+  the re-run is the evidence.) Restored by `git checkout HEAD --`; `git status` clean.
 - Closing runs (focused Mac suites + the eleven Tutorial suites; iOS generic build; FULL mobile suite — shared files change)
   — NOT-STARTED.
 - Walk (Protection pane's copy door + the enrollment page's caption where reachable on the dev store) — NOT-STARTED.
