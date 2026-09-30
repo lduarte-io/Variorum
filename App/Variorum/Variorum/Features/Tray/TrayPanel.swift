@@ -236,6 +236,14 @@ final class TrayViewModel {
     /// the deleted ones — with no countdown, which is the difference the
     /// section header now names.
     private(set) var archived: [Queries.TrayItem] = []
+    /// **The archived arm's probe row, finally read** (18o U1, 17e P37): it
+    /// was fetched with `window + 1` like its siblings and thrown away by a
+    /// bare `prefix`, so a note with more than `window` archived blocks
+    /// listed exactly `window` with nothing saying more exist. Now the arm
+    /// windows the way the takes arm does and the archived view renders the
+    /// same `truncation` line — KnownIssues' standing rule, *"bounded view
+    /// windows show markers, not more"*.
+    private(set) var archivedTruncated = false
     // (The **Preserved originals** listing LEFT this model at the post-13l
     // polish round, batch 4 — her G5 ruling: *"the tray audits what is
     // LEAVING; lineage holds what is KEPT."* An UNCLOCKED original is not
@@ -445,7 +453,8 @@ final class TrayViewModel {
         deletedTruncated = snapshot.deleted.count > Self.window
         deleted = deletedTruncated
             ? Array(snapshot.deleted.prefix(Self.window)) : snapshot.deleted
-        archived = Array(snapshot.archived.prefix(Self.window))
+        (archived, archivedTruncated) = TrashListing.windowed(
+            snapshot.archived, window: Self.window)
         (takes, takesTruncated) = TrashListing.windowed(
             snapshot.takes, window: Self.window)
         strandedFates = snapshot.strandedFates
@@ -1051,6 +1060,11 @@ struct TrayPanel: View {
         }
         if model.view == .leaving, !rows.blocks.isEmpty, model.deletedTruncated {
             truncation("deleted")
+        }
+        // 18o U1 (17e P37): the archived view's own marker — its listing is
+        // windowed exactly like the two above, and now says so.
+        if model.view == .archived, !rows.blocks.isEmpty, model.archivedTruncated {
+            truncation("archived")
         }
         ForEach(rows.takes) { take in
             takeRow(take)
