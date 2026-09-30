@@ -706,6 +706,11 @@ purged-tombstone residual (#138(e)) stays the recorded gap. The phone's first-wr
   `QuickNoteParkTests` + `CaptureMicrosyntaxDoorTests` + `SpaceEaterTests` **`Test run with 66 tests in 8 suites
   passed`**; mobile `MobileCRLFCaptureTests` + `MobileQuickNoteTests` **`Test run with 35 tests in 2 suites passed`**.
   PENDING: the behavioural revert (R-P23) + the `isNewline` mutation (M-isNewline) — next commit.
+- **R-P23 REVERT IN FLIGHT (announced before it starts):** `Sources/VariorumCore/Domain/SegmentationRules.swift`
+  is overwritten with its `40c3aafc` (pre-fix) content over the committed fix `12d61080`; nothing else is touched.
+  **Restore = `git checkout HEAD -- Sources/VariorumCore/Domain/SegmentationRules.swift`** (the fix is committed, so
+  `git diff` shows exactly what is reverted). If this line is still here with no result below it, the tree may be
+  mid-revert — read `git diff` first.
 - Row 66 pins (red-on-old) — NOT-STARTED: per book in `Book.all`, a tombstoned copy with no local mark is NOT
   re-minted at launch; guards: no copy + no tombstone still seeds; the explicit restore door still mints; the decision
   outlives a purge; the purged-tombstone residual documented.
