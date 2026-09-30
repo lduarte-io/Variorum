@@ -28,6 +28,18 @@
 //  registry half, the counts C1's pins read (`openAutosaveCount`,
 //  `quitFinalize.count`), extended here — C1's own pins ride unmodified.
 //
+//  ONE HARNESS LIMIT, MEASURED (not assumed): a mounted Outline or Book-mode
+//  editor's `EditorViewModel` is still ALIVE after SwiftUI unmounts it, for the
+//  rest of the async test body — its hold on the note never returns there
+//  (`autosaveHolderCount` read 1 after the switch and 2 after an unmount, in
+//  this unit's diagnostic run), the 18k C8 class (the dead view's text stack
+//  sits in an autorelease pool the runner keeps open). In the app it dies
+//  (18k C1's in-app walk: EditorViewModel inits = deinits). So the mounted
+//  Outline pins measure the SAVEPOINT — the ruling's substance — and the
+//  registry drop is measured where the lifetime is deterministic: the Index's
+//  teardown and the Compare board's teardown (mounted, red-on-old), and C1's
+//  own bare-model shape for the Outline's editor (`BookLeavingRegistryTests`).
+//
 //  THE FIXTURE savepoints every take at setup (a manual commit per take), so a
 //  savepoint row that appears afterwards is one the LEAVING wrote, and a take
 //  she did not change gets nothing — `closeAutoCommit`'s dedupe, byte-for-byte.
@@ -269,13 +281,9 @@ struct BookLeavingSavepointTests {
                     == ["Paragraph 1 of note 0, long enough to read like real prose. Typed in the book."],
                     "moving into another note left ONE quiet savepoint for the take she edited — pre-fix, none")
 
-            // The registry half (C1's counts, extended): only the note she is
-            // IN now is registered; the one she left is gone from the ⌘Q/lock
-            // walk once its savepoint landed.
-            await mount.settle { session.openAutosaveCount == 1 }
-            #expect(session.openAutosaveCount == 1,
-                    "the note she left no longer rides the ⌘Q/lock walk — pre-fix it stayed until then")
-            #expect(session.quitFinalize.count == 1)
+            // (The registry half for the Outline's editor is
+            // `BookLeavingRegistryTests` below — see the header's note on why
+            // a mounted inline editor cannot show it.)
         }
     }
 
@@ -350,9 +358,8 @@ struct BookLeavingSavepointTests {
             #expect(try await quietSavepoints(db, postID: postIDs[2])
                     == ["Paragraph 1 of note 2, long enough to read like real prose. Written just before she left."],
                     "leaving the book savepointed the note she was in — pre-fix, nothing until ⌘Q")
-            await mount.settle { session.openAutosaveCount == 0 }
-            #expect(session.openAutosaveCount == 0, "…and the note left the ⌘Q/lock walk")
-            #expect(session.quitFinalize.count == 0)
+            // (The registry half: the Index pin above — leaving the book there
+            // retires every entry — and `BookLeavingRegistryTests` below.)
         }
     }
 
@@ -575,6 +582,87 @@ struct CompareLeavingSavepointTests {
             #expect(session.openAutosaveCount == 1,
                     "the peer left the ⌘Q/lock walk; the anchor stays owed — pre-fix both stayed")
             #expect(session.quitFinalize.count == 1)
+        }
+    }
+}
+
+// MARK: - The registry (18k C1's count pins, extended — C1's own file untouched)
+
+/// C1's shape exactly: bare models whose lifetime the test owns (the discarded
+/// twin included — trace T2), the book's report driven as `BookView` drives it
+/// (the state the note box publishes), and the editor dying the way SwiftUI
+/// kills it (`teardown()`, then the last reference). This is the Outline's and
+/// Book mode's editor; the mounted Index and Compare pins above carry the same
+/// claim through their own teardown.
+@Suite("18o U4 — a book note she left leaves the ⌘Q/lock walk (18k C1's count pins, extended)", .serialized)
+@MainActor
+struct BookLeavingRegistryTests {
+
+    @MainActor
+    private func eventually(_ condition: @MainActor () -> Bool) async {
+        for _ in 0..<400 {
+            if condition() { return }
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+    }
+
+    @Test func aBookNoteSheLeftLeavesTheRegistryOnceItsEditorLetsGo() async throws {
+        try await withLeavingBook { session, db, readingID, postIDs, blocks in
+            let book = BookViewModel(session: session, readingID: readingID)
+            SavepointOnLeave.wire(book: book, session: session)
+            let entries = session.openAutosaveCount
+            let quits = session.quitFinalize.count
+
+            // Her caret goes into note 0: its editor mounts (and a discarded
+            // twin acquires beside it, as SwiftUI's re-init makes one).
+            var editor: EditorViewModel? = EditorViewModel(session: session, postID: postIDs[0])
+            _ = EditorViewModel(session: session, postID: postIDs[0])
+            book.notePlaceChanged(.live(postIDs[0]))
+            let take = blocks[postIDs[0]]![1].variantID
+            editor?.autosave.record(
+                variantID: take,
+                text: "Paragraph 1 of note 0, long enough to read like real prose. Revised.",
+                charDelta: 9)
+
+            // She moves into note 1: the book reports it, and SwiftUI unmounts
+            // note 0's editor.
+            book.notePlaceChanged(.live(postIDs[1]))
+            await editor?.teardown()?.value
+            editor = nil
+            await eventually { session.openAutosaveCount == entries }
+
+            let saved = try await quietSavepoints(db, postID: postIDs[0])
+            #expect(saved == ["Paragraph 1 of note 0, long enough to read like real prose. Revised."])
+            #expect(session.autosaveHolderCount(forPost: postIDs[0]) == 0,
+                    "the editor and its discarded twin each gave back what they took")
+            #expect(session.openAutosaveCount == entries,
+                    "the note she left is out of the registry once its savepoint landed")
+            #expect(session.quitFinalize.count == quits, "…and out of the ⌘Q/lock walk")
+        }
+    }
+
+    /// The other order C1 pins for Write: the leaving lands while the editor
+    /// still holds the note, and the editor dies AFTER — its last release
+    /// re-takes the savepoint and the entry goes then.
+    @Test func aBookNoteLeftWhileItsEditorStillHoldsItGoesWhenTheEditorDoes() async throws {
+        try await withLeavingBook { session, _, readingID, postIDs, _ in
+            let book = BookViewModel(session: session, readingID: readingID)
+            SavepointOnLeave.wire(book: book, session: session)
+            let entries = session.openAutosaveCount
+
+            var editor: EditorViewModel? = EditorViewModel(session: session, postID: postIDs[0])
+            book.notePlaceChanged(.live(postIDs[0]))
+            book.leaveBook()
+            try? await Task.sleep(for: .milliseconds(50))
+            #expect(session.openAutosaveCount == entries + 1,
+                    "a leaving that lands while the editor still holds the note keeps the entry")
+
+            await editor?.teardown()?.value
+            editor = nil
+            await eventually { session.openAutosaveCount == entries }
+            #expect(session.openAutosaveCount == entries,
+                    "the editor letting go of a LEFT note finishes the leaving")
         }
     }
 }

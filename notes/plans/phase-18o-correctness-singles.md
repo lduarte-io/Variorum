@@ -1504,7 +1504,7 @@ departing surface wrote on its way out) and the entry drops then. So reporting a
   savepoint) · board left 3 (no savepoint · 2 ≠ 1 · 2 ≠ 1); the four guards GREEN (the cadence pin's two cases
   included) — green on old by construction (nothing was ever reported); their teeth are shown against mutations after
   the fix. Every premise held on old (the typed text reached the store — the unmount's own flush).
-- The fix — COMMITTED (this commit), verification PENDING: `Features/BookView/BookNoteTrail.swift` (NEW, pure — the
+- The fix — DONE `f3ab836e`, verified (below): `Features/BookView/BookNoteTrail.swift` (NEW, pure — the
   rule over `NoteBoxState`) · `BookViewModel` (`noteTrail`, `onNoteLeft` — no-op by default — `notePlaceChanged(_:)`,
   `leaveBook()`) · `BookView` (onAppear: `SavepointOnLeave.wire(book:)` then `reportNotePlace()`; the
   `noteBoxReport` onChange also reports; onDisappear: `model.leaveBook()`) · `CompareViewModel` (`onNotesLeft`, no-op by
@@ -1513,8 +1513,26 @@ departing surface wrote on its way out) and the entry drops then. So reporting a
   `wire(book:)`, `wire(compare:)`). Pure rule pins `VariorumTests/BookNoteTrailTests.swift` (NEW, 6 — the rule's table;
   a separate file so the behavioural revert below keeps them compiling). Zero `AppSession`, zero `Operations`, zero
   editor seam, zero `Sync/`, schema, settings.
-- Behavioural revert R-U4 (the production files from the pins commit over the fix) — NOT-STARTED; no revert starts until
-  this line names it and the pre-revert state is committed.
+- **Fixed-tree run — DONE (`18o-u4-pins-fixed2.log`): `✔ Test run with 49 tests in 8 suites passed`** —
+  `BookLeavingSavepointTests` 7 · `CompareLeavingSavepointTests` 2 · `BookLeavingRegistryTests` 2 · `BookNoteTrailTests` 6
+  · C1's `AutosaveRegistryLifecycleTests` 9 + `AutosaveRegistryReleaseGuardTests` 7 · L-d's `AutosaveRegistryReleaseTests`
+  6 · J11's `SavepointOnLeaveTests` 10 — **C1's, L-d's and J11's files UNMODIFIED** (`git diff 3c3becc2 --` over the
+  three is empty; `aModeSwitchIsNotALeaving` and `aNoteEditedInABookKeepsItsQuitAndLockSavepoint` ride as they were —
+  the second is still true: the Index's teardown alone is not a leaving). **One mid-course adjustment, traced and
+  recorded (the pins commit after this one):** the first fixed run (`18o-u4-pins-fixed.log`, 47/7, 4 issues) had every
+  SAVEPOINT half green and the two Outline pins' REGISTRY halves red — traced by a diagnostic assertion
+  (`18o-u4-diag1.log`): the note's `autosaveHolderCount` read **1** after the switch and **2** after an unmount, i.e. the
+  mounted inline editor's `EditorViewModel`s are still ALIVE in the harness for the rest of the async test body (18k C8's
+  autorelease-pool class; in the app they die — C1's in-app walk, inits = deinits), so their holds never return there and
+  no drop is observable. The Outline pins keep their savepoint halves (the pre-fix reds that matter — the savepoint row);
+  the registry claim for the Outline's editor moved to C1's own bare-model shape (`BookLeavingRegistryTests`, both
+  orders: the leaving before and after the editor dies); the Index and Compare pins keep theirs (deterministic teardown
+  — mounted and red-on-old). The file header states the measured limit.
+- Behavioural revert R-U4 — NEXT, named here before it runs: the pre-revert state is committed (this commit); R-U4 =
+  `BookView.swift`, `CompareBoardView.swift` and `SavepointOnLeave.swift` checked out from `385fbaeb` (the pins commit)
+  over the fix — the book then never reports its note state and the board never reports a peer, while
+  `BookViewModel`'s trail and `BookNoteTrail` stay (inert, no caller) so the rule pins still compile; restore by
+  `git checkout HEAD -- <the three>`, verified by `git diff`.
 - QUESTIONS #163 (the Compare-peer PROVISIONAL + the book's note-switch reading) — NOT-STARTED.
 - Closing runs (`AutosaveRegistryLifecycleTests` + `AutosaveRegistryReleaseTests` FULL, `SavepointOnLeaveTests`, the
   book/Compare suites touched, the eleven Tutorial suites; the mobile suite only if a shared file changes — none
