@@ -476,7 +476,7 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 
 - PLAN FILE authored + committed — **DONE** (this commit).
 - U1 the honesty & paper-cuts batch — **CLOSED (orchestrator adjudication 2026-09-30; all nine rows dispositioned; walks W1–W3 HELD for the first zero-instance window, W4 accepted on its pins)**.
-- U2 the import & launch-seed batch — IN FLIGHT (implementer spawned 2026-09-30).
+- U2 the import & launch-seed batch — IN FLIGHT (implementer spawned 2026-09-30; the UNIT U2 RECORD at the file's end carries its own LIVE STATUS).
 - U3 the two Mac doors — NOT-STARTED.
 - U4 the book leaving savepoint (R-18k-6) — NOT-STARTED.
 - U5 17t, the two unwired protection doors — NOT-STARTED.
@@ -619,3 +619,77 @@ amended at closeout (owner 12 unchanged); NOTICED 6 (a restored book returns unp
 her bundle as an awareness line, not a defect (starred's own documented shape). **FOR THE
 FABLE LADDER:** the lock-time due-check change (custody-adjacent), judgement call 2's
 widening, and 17e (12)'s source-walk pin tightness (call 6).
+
+---
+
+## UNIT U2 RECORD — the import & launch-seed batch (implementer: `opus-implementer`, 2026-09-30)
+
+*(The NOT-DONE line lands here as this record's first line at the close.)*
+
+### READING (done in-session before any code)
+
+`CLAUDE.md` + its auto-loaded canon (CoreDescription, OverallModel, AppSpec — §7's segmentation/Return contract, §9's
+`newBlock`/import conventions) · this file WHOLE (the U1 RECORD's seam table included) · `notes/KnownIssuesAndTechDebt.md`
+(the header rule; row 66 — "The LAUNCH seeder re-mints a seeded book the reader deleted" — in full, its owner cell's
+R-18k-5 + the #146 neighbour, which is U6's) · `notes/SessionResiliencyProtocol.md` whole · the 17-file's 17e section
+with P23's finder claim AND verifier trace · `notes/QUESTIONS.md` #138(e)/(f) and #146 (next free **#163**) · the
+tutorial door's silent ensure (`SeededBookRestore.ensure`, pre-13x F3 MINOR-N3 + RUN A A2's durable-decision record),
+`SampleLibrarySeeder.swift` whole, the launch call site `VariorumApp.swift:196`, `Queries.readingTombstoneExists`,
+`AppSession.markSeededBook`/`seededBookMarkIsSet`, the phone's `MobileFirstWriteFurniture` (the same brain's second
+occasion). P23's trace: `SegmentationRules.swift` whole, `Operations+Import.swift`, `ImportModel.readFiles`,
+`QuickNoteView.file`, `MobileQuickNote.mintNow`/`adopt`/`frozenPrefix`, `CrystallizationPlanner` (the editor's
+`.bulk`/`.idle` plans call `bulkSegments`), `EditorTextView.paste`, `PlainPaste`, `NewlineSplitting`'s doc,
+`CaptureMicrosyntax.parse`, `CaptureSurfaceTests`' ⇧⏎ pin. **Instance state at start:** her real-store app IS
+RUNNING (`/Applications/Variorum.app/Contents/MacOS/Variorum`, pid 21496 — the same instance U1 met); never touched.
+`Tools/WalkKit/guard.sh --author` refuses every GUI step while it lives (exit 3) → GUI walks HELD; harness-first.
+
+### THE TWO DESIGNS (settled at the code before any line — the ladder reads these)
+
+**P23 — NORMALISE AT THE SEGMENTER'S ENTRY, not `Character.isNewline`.** `bulkSegments` reads `"\r\n"` and a bare
+`"\r"` as `"\n"` before it does anything else (all three arms); `crystallizedBoundary` (type-time) is byte-untouched.
+*Why not `isNewline`:* the family is TWO families. The within-text scanners (`BoundarySnapping`, `MarkdownSyntax`,
+`MarkdownEditing`, `MarkdownRendering`) key on `isNewline`; the BLOCK-BOUNDARY family keys on `"\n"` ONLY —
+`NewlineSplitting`'s own doc: *"Newlines here are `"\n"` only — the separator the whole editor brain uses
+(`BlockRangeIndex`, `crystallizedBoundary`) … Consistent by design (a Control-Return's U+2028 is content everywhere in
+this app, never a block boundary); stated so the mismatch is not 'fixed' into a break the rest of the brain would not
+recognize"*, and `CaptureSurfaceTests`' ⇧⏎ pin says U+2028 "would not segment". The segmenter decides block
+boundaries, so it belongs to the second family — and `isNewline` would ALSO have changed the editor: the tail's
+`.idle(.paragraph)` durability mint runs `bulkSegments` over TYPED text, so a typed Control-Return (U+2028) would have
+become a block boundary at the idle tick while `.typing` kept it content. The CR/CRLF answer is the family's own:
+`PlainPaste` rule 1 — *"`\r\n` and a bare `\r` normalize to `\n` first — a clipboard from Windows or a classic-Mac-era
+file is the same text"*. **U+0085 / U+2028 / U+2029 stay CONTENT** (pinned as documented behaviour).
+*Why the editor's newline handling cannot change:* (1) `crystallizedBoundary` is not touched; (2) a newline inside an
+existing block never reaches `bulkSegments` (a paste into a block is a content edit — `EditorViewModel` arms bulk
+entry only on a `.tail` verdict; Return is content or `TypedReturn`'s structural door); (3) the keyboard cannot type
+`"\r"` or `"\r\n"` (Return inserts `"\n"`; ⌃⏎/⌥⏎ insert U+2028, which stays content), so the `.idle` mint over typed
+text is byte-identical. The one editor road the fix DOES reach is a CRLF/CR **paste into the open tail** (`.bulk` —
+AppSpec §7 names paste as bulk entry): it now segments like the LF paste it is — the same defect at a sibling bulk door,
+pinned. **The phone's capture** (`MobileQuickNote.adopt`) anchors the owned block's STORED text inside the RAW snapshot
+(`frozenPrefix`); the owned last piece never carries a newline, so the invariant `text == frozenPrefix + tail` holds.
+
+**Row 66 — ONE tombstone rule, both silent roads.** The ensure's rule is lifted into one named predicate beside its
+`Declined.deletedByTheReader` (`SeededBookRestore.readerDeletedTheBook` — `Queries.readingTombstoneExists` on the
+book's reserved name), which the ensure and the launch seed BOTH read. The launch reads it at the DECIDING point —
+inside the seed latch, after the account gate's wait (the tombstone can arrive DURING the first round: that is the
+row's own "arrived by sync" road) and after the complete-copy check (a live whole copy stays `.alreadyPresent`); a
+decline RECORDS the decision through the launch's own mark leaf (`save(true)` — A2's "record it while the evidence
+stands", so the decision outlives the purge exactly as the ensure's does) and answers a new `Outcome.declinedByTheReader`.
+The explicit doors (`SeededBookRestore.restore` — Help ▸ Restore, the phone's Settings row) are byte-untouched. The
+purged-tombstone residual (#138(e)) stays the recorded gap. The phone's first-write occasion calls the same
+`seedIfNeeded`, so it inherits the rule (one brain — MobileSoul §3). Zero `Sync/`; the dedupe (U6's) untouched.
+
+### LIVE STATUS
+
+- Reading + this record opened — DONE (this commit).
+- P23 pins (red-on-old) — NOT-STARTED: core `SegmentationRulesTests` (CRLF/CR per arm; exotic newlines stay content;
+  the round-trip) + `ImportOperationTests` (both import doors); Mac door pins (the import model's FILE road, the quick
+  note's `file`, the tail's `.bulk` plan); the phone's capture (`MobileQuickNoteModel.mintNow`).
+- P23 fix (`SegmentationRules.bulkSegments` entry normalisation) — NOT-STARTED.
+- Row 66 pins (red-on-old) — NOT-STARTED: per book in `Book.all`, a tombstoned copy with no local mark is NOT
+  re-minted at launch; guards: no copy + no tombstone still seeds; the explicit restore door still mints; the decision
+  outlives a purge; the purged-tombstone residual documented.
+- Row 66 fix — NOT-STARTED.
+- Closing runs — NOT-STARTED (core `swift test` whole; the Mac import/quick-note/capture/crystallization/seeder/
+  Tutorial suites; the FULL mobile suite).
+- Walks — HELD at start (her app running; guard exit 3).
+- Deaths / resumes: none.
