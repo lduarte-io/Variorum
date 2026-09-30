@@ -291,6 +291,14 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// icon GREY with a tooltip on a bookless note, which is exactly what
     /// `.unavailable` means in this registry.
     var canAscendToBook = false
+    /// **The KEY window's kind** (18o U1 — 17e (12)); nil while no window has
+    /// registered. The sidebar toggle's gate — only a FULL window has a
+    /// sidebar — lived as a per-view if-statement on its View-menu item while
+    /// the registry declared the act `always`: a gate the walk could not see
+    /// (P-1: gating is data, never per-view if-statements). The `paneCount`
+    /// family: a fact about the window she is in, wired by the shell to the
+    /// window registry through `CommandRouter.windowKind`.
+    var windowKind: WindowRegistry.Kind? = nil
 }
 
 // MARK: - The capability declaration

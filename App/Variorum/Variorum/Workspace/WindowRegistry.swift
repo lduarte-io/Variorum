@@ -54,7 +54,9 @@ final class WindowRegistry {
     /// navigates (the architect's ruling (d)), which is why it can be key —
     /// and therefore own the live surface — while never being the target of
     /// a navigation broadcast.
-    enum Kind: Equatable, Sendable {
+    /// `nonisolated` (18o U1 — 17e (12)): pure data, so the nonisolated
+    /// `CapabilityContext` can carry the key window's kind as a registry fact.
+    nonisolated enum Kind: Equatable, Sendable {
         case full
         case noteOnly
         /// 13f batch 6 (W5): the floating QUICK NOTE pad. It mounts no text
@@ -126,6 +128,9 @@ final class WindowRegistry {
     /// The active window's kind — the sidebar toggle's gate (the Act 10
     /// correction round, batch A): only a FULL window has a sidebar, so the
     /// View-menu item is honestly grey while a note-only window is key.
+    /// **Read through the registry since 18o U1 (17e (12)):** the shell wires
+    /// it into `CommandRouter.windowKind`, `.toggleSidebar` declares the rule,
+    /// and the menu asks the registry — never this property directly.
     var activeWindowKind: Kind? { activeWindowID.flatMap { entries[$0]?.kind } }
 
     /// Where an app-wide NAVIGATION broadcast lands (`.variorumOpenPost`,

@@ -1396,7 +1396,12 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .surface],
             shortcutLabel: "\u{2303}\u{2318}S", takesAccess: nil,
             unavailableNote: "Only a full window has a sidebar — this one shows a single note.",
-            availability: always),
+            // 18o U1 (17e (12)): the grey the View-menu item always applied,
+            // declared HERE — it used to be `always` with the real gate living
+            // as a per-view if-statement on the menu item (P-1: gating is
+            // data). The toolbar door needs no gate: only a full window
+            // renders it.
+            availability: { ctx in ctx.windowKind == .full ? .act : .unavailable }),
         Capability(
             id: .closeSplit, verb: "Close Split", scope: .app,
             doors: [.menuBar],

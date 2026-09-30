@@ -307,10 +307,12 @@ struct EditorCommands: Commands {
             // The Act 10 correction round, batch A (row 2): the sidebar is
             // ours (`ShellSplit`), so its toggle is a declared door here, on
             // the platform's own chord, grey while a note-only window is key
-            // (nothing there has a sidebar to show).
+            // (nothing there has a sidebar to show). 18o U1 (17e (12)): that
+            // grey is the REGISTRY's answer now (`.toggleSidebar` declares the
+            // key window's kind), never re-derived here.
             Button(verb(.toggleSidebar)) { windows.activeRouter?.sidebarShown.toggle() }
                 .keyboardShortcut("s", modifiers: [.command, .control])
-                .disabled(session == nil || windows.activeWindowKind != .full)
+                .disabled(!enabled(.toggleSidebar))
             Button(verb(.findAnything)) { windows.creationRouter()?.paletteRequested = true }
                 .keyboardShortcut("k", modifiers: .command)
                 .disabled(!canReachCreationTarget)

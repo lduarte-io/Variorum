@@ -69,6 +69,12 @@ struct CapabilityRegistryTests {
         // family, the navigation core and the star door each opened before
         // their own contexts joined.
         contexts.append(CapabilityContext(mode: nil, canAscendToBook: true))
+        // 18o U1 (17e (12)): the WINDOW gate — a fact about the window she is
+        // in (the key window is a FULL one), not a stack depth or what a pane
+        // shows. Without it `.toggleSidebar` would read `.unavailable`
+        // everywhere the walk looks — the hole every gate above opened before
+        // its own context joined.
+        contexts.append(CapabilityContext(mode: nil, windowKind: .full))
         return contexts
     }
 
@@ -686,5 +692,37 @@ struct CapabilityRegistryTests {
         #expect(gatedFromTheRegistry, "the item's grey is the registry's answer")
         let gatesOnWindowKind = file.contains("activeWindowKind")
         #expect(!gatesOnWindowKind, "no menu item re-derives a window-kind gate")
+    }
+
+    /// The rule, whole (added with the fix — it names the new context field,
+    /// so it cannot compile on the old tree; the two pins above are the
+    /// red-on-old pair): only a FULL key window has a sidebar to toggle.
+    @Test func theSidebarToggleActsOnlyInAFullWindow() {
+        let kinds: [(WindowRegistry.Kind?, Capability.Availability)] = [
+            (.full, .act), (.noteOnly, .unavailable), (.quickNote, .unavailable),
+            (nil, .unavailable),
+        ]
+        for (kind, expected) in kinds {
+            #expect(CapabilityRegistry.availability(
+                .toggleSidebar, in: CapabilityContext(windowKind: kind)) == expected,
+                    "\(String(describing: kind)) → \(expected)")
+        }
+        // The window gate is the sidebar's alone: a full window says nothing
+        // about acts gated on a mode, an editor or a stack.
+        #expect(!CapabilityRegistry.isEnabled(
+            .closeAllTakes, in: CapabilityContext(windowKind: .full)))
+    }
+
+    /// The router carries the key window's kind into the context the menu
+    /// reads — the plumbing the shell's `wireWorkspace` closure feeds.
+    @Test func theRoutersContextCarriesTheKeyWindowsKind() {
+        let router = CommandRouter()
+        #expect(router.currentContext().windowKind == nil, "unwired: no window known")
+        #expect(!router.isEnabled(.toggleSidebar))
+        router.windowKind = { .full }
+        #expect(router.currentContext().windowKind == .full)
+        #expect(router.isEnabled(.toggleSidebar))
+        router.windowKind = { .noteOnly }
+        #expect(!router.isEnabled(.toggleSidebar), "a note-only window is key — grey")
     }
 }

@@ -455,6 +455,9 @@ struct RootView: View {
         session.commandRouter.canStarCurrent = {
             StarTargeting.target(for: windows.activeRouter?.workspace.focusedSelection) != nil
         }
+        // 18o U1 (17e (12)): the key window's kind — the sidebar toggle's
+        // gate, now a registry fact the View-menu item reads back.
+        session.commandRouter.windowKind = { windows.activeWindowKind }
         // 13f batch 5 (W22's button): the first-edit note names its target
         // book by the chooser's own order, and that order floats what she
         // has visited — which lives per window, so it reads the key one too.

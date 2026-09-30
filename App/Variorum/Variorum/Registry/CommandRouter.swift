@@ -737,6 +737,9 @@ final class CommandRouter {
     /// 13f batch 6 (W4): is the focused pane showing a thing a star can
     /// point at? Wired the same way, to the KEY window's workspace.
     @ObservationIgnored var canStarCurrent: () -> Bool = { false }
+    /// 18o U1 (17e (12)): the KEY window's kind — the sidebar toggle's gate
+    /// as a registry fact. Wired the same way, through the window registry.
+    @ObservationIgnored var windowKind: () -> WindowRegistry.Kind? = { nil }
 
     // MARK: - Context assembly
 
@@ -754,7 +757,8 @@ final class CommandRouter {
             canNavigateForward: canNavigateForward(),
             paneCount: paneCount(),
             canOpenBeside: canOpenBeside(),
-            canStarCurrent: canStarCurrent())
+            canStarCurrent: canStarCurrent(),
+            windowKind: windowKind())
     }
 
     func isEnabled(_ id: CapabilityID) -> Bool {
