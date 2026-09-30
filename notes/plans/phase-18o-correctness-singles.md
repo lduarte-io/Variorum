@@ -1925,10 +1925,14 @@ guards green on both: the hoisted rule's two arms (clears when unmoved; never cl
   presenter's `copied`). **Fixed-tree run (`18o-u5-pins-fixed.log`): `✔ Test run with 67 tests in 5 suites passed`** —
   `WordsCopyDoorTests` 6 + `PostureSwitchTests` 46 (incl. both U5 extensions) + `SyncEnrollmentTests` +
   `KeyDoorTests` + `ProtectionSurfaceRenderTests`, every existing pin UNMODIFIED.
-- R-U5 behavioural revert — IN-PROGRESS (named before it runs; pre-revert state committed): R-U5 =
-  `SyncEnrollmentView.swift`, `KeyDoorView.swift`, `ProtectionPane.swift` checked out from `9ba2a45b` (the pins commit —
-  the scaffolding tree: the ONE door + the hoist present, the four faces without it) over the fix; run `WordsCopyDoorTests`
-  + `PostureSwitchTests`; restore by `git checkout HEAD --` the three, verified by `git diff`.
+- R-U5 behavioural revert — DONE, restored clean: `SyncEnrollmentView.swift`, `KeyDoorView.swift`, `ProtectionPane.swift`
+  checked out from `9ba2a45b` (the pins commit — the scaffolding tree) over the fix (exactly the fix's 27 lines out) →
+  `18o-u5-r-u5.log` **`✘ Test run with 52 tests in 2 suites failed … with 4 issues`** — identical to the pre-fix run: the
+  four face pins, one issue each at the door requirement; both rule guards, face (1)'s guard and the item-1 pin green.
+  Restored by `git checkout HEAD --` the three; `git status` clean.
+- M-receipt (the ledger's named subject — the caption's reachability) — IN-PROGRESS (named before it runs): on the fixed
+  tree, ONLY `SyncEnrollmentView`'s door handed an empty receipt (`{ }` for `{ model.markWordsCopied() }`); run
+  `WordsCopyDoorTests`; expected: the sync-setup pin red on its receipt half alone; restore by `git checkout HEAD --`.
 - Closing runs (focused Mac suites + the eleven Tutorial suites; iOS generic build; FULL mobile suite — shared files change)
   — NOT-STARTED.
 - Walk (Protection pane's copy door + the enrollment page's caption where reachable on the dev store) — NOT-STARTED.
