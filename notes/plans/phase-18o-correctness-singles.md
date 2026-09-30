@@ -763,7 +763,28 @@ purged-tombstone residual (#138(e)) stays the recorded gap. The phone's first-wr
   `.awaitingFirstSync`, mark unset); **M-late-only** (the EARLY decision reduced to complete-only, the latch read kept —
   `18o-u2-m-late-only-mac.log`) **`7 tests … failed … with 2 issues`**, both in the new pin. Both deciding reads are
   pinned, each by its own pin. Restored by `git checkout HEAD --`, `git status` clean.
-- Closing runs — NOT-STARTED (core `swift test` whole; the Mac import/quick-note/capture/crystallization/seeder/
-  Tutorial suites; the FULL mobile suite).
-- Walks — HELD at start (her app running; guard exit 3).
+- Closing runs — DONE, on the final code tree `a2166c7f` (logs in `App/Variorum/DerivedData/`):
+  - **Core `swift test` (whole)** (`18o-u2-core.log`): **`✔ Test run with 1747 tests in 183 suites passed`**, 1 skipped
+    (`basicOfflineEditsConvergeOverTheRealServer` — the standing env-gated live-server pin). Arithmetic: U1's corrected
+    baseline 1737/182 + this unit's `SegmentationLineEndingTests` (10 tests / 1 suite) = 1747/183 exactly.
+  - **Mac closing set** (`18o-u2-closing.log`) — 40 literal suites: P23's doors and neighbours (`CRLFImportDoorTests`
+    `ImportFacesTests` `QuickNoteMintTests` `QuickNoteDoorTests` `QuickNoteWindowTests` `QuickNoteWordTests`
+    `QuickNoteParkTests` `CaptureMicrosyntaxDoorTests` `CaptureMicrosyntaxTests` `CaptureKeysTests`
+    `CaptureTextViewKeyTests` `CaptureHandOffTests` `ContextBarCaptureTests` `CrystallizationPlannerTests`
+    `CrystallizationReconcilerTests` `SpaceEaterTests` `RefontGapTopTests`, and the editor's tail-paste drivers
+    `EditorSessionTests` `ReviewRoundFixTests` `GestureSoakTests` `DropAndRefusalCopyTests` `PlainPasteDoorTests`
+    `PlainPasteRuleTests`), row 66's seeder family (`LaunchSeedTombstoneTests` `EncryptionBookDoorTests`
+    `SampleLibraryTests` `EncryptionExplainedSeedTests` `JekyllTakemaniaSeedTests` `SampleLibraryDedupeFactsTests`) and
+    the eleven Tutorial suites — **`✔ Test run with 292 tests in 40 suites passed`**, 0 skipped.
+  - **FULL mobile suite, iPhone 17 Pro simulator** (`18o-u2-mobile.log`): **`✘ Test run with 656 tests in 114 suites
+    failed … with 5 issues (including 4 known issues)`** — EXACTLY the attributed baseline: the 4 known
+    (`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor` ×2,
+    `MobileTutorialStructureWalkTests.theFannedDivideLessonLandsTheDuplicateShape` ×2) + **F-1**
+    (`nothingUserFacingNamesTheMac`, its one offender still `SampleLibraryJekyllBook.swift`'s disclaimer — #155's,
+    attributed, NOT re-attributed); 0 skipped. 656/114 = 18m's 654/112 + this unit's `MobileCRLFCaptureTests` and
+    `MobileFirstWriteTombstoneTests` (1 test / 1 suite each). It runs the phone's capture and first-write occasion
+    through both fixes.
+- Walks — HELD at start (her app running; guard exit 3). **At the closing runs' end her app was GONE** (no
+  `/Applications` instance — not touched by this session; `guard.sh --author` → *"GUARD OK (author: idle 4005s)"*):
+  a walk window opened — IN-PROGRESS below.
 - Deaths / resumes: none.
