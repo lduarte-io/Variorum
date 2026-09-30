@@ -1948,9 +1948,14 @@ guards green on both: the hoisted rule's two arms (clears when unmoved; never cl
     `ProtectionMigrationTests` `CopyRegisterPinTests` `LobbyVaultRoadTests` `CustodyHandoverTests` `CustodyReleaseTests`) and
     **the eleven Tutorial suites**; no drills): **`✔ Test run with 306 tests in 38 suites passed`**, 38 asked = 38 ran,
     0 skipped.
-  - iOS generic build — IN-PROGRESS.
-  - FULL mobile suite (owed: `SyncEnrollmentView`, `KeyDoorView`, `PassphraseSetModel` and the new `WordsCopyDoor.swift`
-    are shared) — NOT-STARTED; expected 656/114 = the 4 known + F-1 (#155's), this unit adding no phone test.
+  - **iOS generic build — DONE** (`18o-u5-ios-build.log`): **`** BUILD SUCCEEDED **`**, no warning in a touched shared file
+    (the phone compiles `WordsCopyDoor.swift` empty and the two shared faces without their Mac-gated door).
+  - **FULL mobile suite, iPhone 17 Pro simulator — DONE** (`18o-u5-mobile.sh` → `18o-u5-mobile.log`): **`✘ Test run with
+    656 tests in 114 suites failed … with 5 issues (including 4 known issues)`** — EXACTLY the attributed baseline: the 4
+    known (`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor` ×2,
+    `MobileTutorialStructureWalkTests.theFannedDivideLessonLandsTheDuplicateShape` ×2) + **F-1**
+    (`nothingUserFacingNamesTheMac`, its one offender still `SampleLibraryJekyllBook.swift`'s disclaimer — #155's,
+    attributed, NOT re-attributed); 0 skipped. 656/114 = U3/U4's count (this unit added no phone test).
   - No `swift test`: zero `Sources/` lines.
 - Walk (Protection pane's copy door + the enrollment page's caption where reachable on the dev store) — NOT-STARTED.
 - The re-key DRILL is NOT re-run: no key leg changes (no wrap/unwrap/Keychain write semantics touched) — stated.
