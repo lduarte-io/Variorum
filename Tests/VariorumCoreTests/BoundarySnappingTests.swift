@@ -140,13 +140,50 @@ struct BoundarySnappingTests {
         // "One. Two three": word edges 5 (strong — sentence start) and 9
         // (plain). Cut 7 is equidistant-raw (2/2): the pull decides for 5.
         // Cut 8 is raw 3-vs-1 for 9; the pull (3−2=1 vs 1) TIES effective
-        // distance and the earlier boundary wins — still 5. Cut 9 is exact:
-        // the deliberate placement always wins.
+        // distance and the earlier boundary wins — still 5. Cut 9 is exact
+        // and wins HERE because the strong boundary sits 4 units earlier —
+        // beyond the pull (4−2=2 > 0). An exact placement does NOT always
+        // win: at a gap of exactly `settlePull` it loses the tie (the pin
+        // below, 18o U1 / 17e P34).
         let text = "One. Two three"
         let interior = [5, 9]
         #expect(BoundarySnapping.settle(7, in: text, among: interior) == 5)
         #expect(BoundarySnapping.settle(8, in: text, among: interior) == 5)
         #expect(BoundarySnapping.settle(9, in: text, among: interior) == 9)
+    }
+
+    /// **18o U1 (17e P34) — the boundary the pull's rule lives on, pinned as
+    /// DOCUMENTED BEHAVIOUR.** A strong boundary exactly `settlePull` units
+    /// EARLIER than an exact word-edge placement also scores zero after the
+    /// pull and takes the tie (earlier wins), so a cut placed right after a
+    /// one-letter word that opens a sentence or paragraph (". I ", ". A ",
+    /// "\nI ") settles back to the sentence start. The behaviour stands
+    /// (the verifier's read: the settle doing its job); the exact-wins
+    /// alternative is QUESTIONS #161, hers — this pin reds if either road
+    /// changes it silently.
+    @Test func aStrongBoundaryExactlySettlePullEarlierTakesAnExactPlacement() {
+        #expect(BoundarySnapping.settlePull == 2, "the fixtures below are built on a pull of 2")
+        let text = "Yes. I went home."
+        #expect(BoundarySnapping.boundaries(in: text, granularity: .word) == [0, 5, 7, 12, 17])
+        #expect(BoundarySnapping.boundaries(in: text, granularity: .sentence) == [0, 5, 17])
+        // 7 is an exact word edge (before "went"); 5 is strong, 2 earlier.
+        #expect(BoundarySnapping.settle(7, in: text, among: [5, 7, 12]) == 5)
+        // The ". A " twin.
+        #expect(BoundarySnapping.settle(6, in: "Hi. A word here.", among: [4, 6, 11]) == 4)
+        // A newline pulls exactly as a sentence end does ("\nI ").
+        #expect(BoundarySnapping.settle(6, in: "Yes\nI went home.", among: [4, 6, 11]) == 4)
+    }
+
+    /// The two guards that bound the configuration above: one unit farther
+    /// and the exact placement wins; a strong boundary LATER than the exact
+    /// placement, inside the pull, loses the tie to it (earlier wins).
+    @Test func anExactPlacementWinsBeyondThePullAndAgainstALaterStrongBoundary() {
+        // "It" instead of "I": the strong boundary sits 3 earlier (3−2=1 > 0).
+        #expect(BoundarySnapping.settle(8, in: "Yes. It went home.", among: [5, 8, 13]) == 8)
+        // "go x\nnext": 3 is exact (before "x"), 5 is strong (after the
+        // newline) 2 LATER — both score zero and the earlier, exact one wins.
+        #expect(BoundarySnapping.boundaries(in: "go x\nnext", granularity: .sentence) == [0, 5, 9])
+        #expect(BoundarySnapping.settle(3, in: "go x\nnext", among: [3, 5]) == 3)
     }
 
     @Test func newlinesPullLikeSentenceEnds() {
