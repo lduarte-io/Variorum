@@ -1028,7 +1028,41 @@ trace and its C5 disposition lines · P27's fix `dee61938` · `App/Variorum/Shar
 ### LIVE STATUS
 
 - Reading + this record opened — DONE (this commit).
-- Row 73 (the Open strip's tenth row) — NOT-STARTED.
+- Row 73 (the Open strip's tenth row) — DONE: scaffolding `060cc060` · pins `112921bc` · fix `ee2e1292`.
+  **THE TRACE (at the code, HEAD `89935c26`):** `EditorCommands.swift:776-787` rendered View ▸ Open Note as
+  `ForEach(openNotes.shown.enumerated())` with `.keyboardShortcut(KeyEquivalent(Character("\(index + 1)")), …)` on
+  EVERY row; `OpenNotes.shown` is every open note (up to `trackedCap` = 20 since Act 10 item 9, `a9772471`), so the
+  tenth row builds `Character("10")` → `Character.init(_: String)`'s `_debugPrecondition` (one grapheme) traps the
+  Debug app — the crash report's frames read exactly `Character.init(_:)` ← `closure … in EditorCommands.body.getter` ←
+  `ForEachState.item(at:offset:)`; compiled out at -O (18k C1's CORRECTION), so Release builds a malformed two-grapheme
+  key. **A SECOND defect on the same row, found tracing it:** the row's click called `router?.openNote(ordinal: 10)`,
+  and `OpenNotes.id(atOrdinal:)` stops at `ordinalCap` (9 — pinned `OpenNotesTests.theOrdinalsCoverTheFirstNineRows`),
+  so rows 10+ were rendered doors that landed nothing (P-2), in Release today and in Debug once the trap is gone.
+  **THE SHAPE (why the pin reds without aborting the runner):** the menu now renders a TABLE,
+  `OpenNotes.menuRows` → `[OpenStripMenuRow(noteID, ordinal, keyText: String?)]`, one item per row — title, key and act
+  all read the row — and the key rides as TEXT; the ONE `Character` conversion is `OpenStripMenuRow.keyboardShortcut`,
+  used only by the menu. The pins read the table (never building a `Character`), so on the old rule the tenth row's
+  `"10"` is a test FAILURE, not a trap. The behaviour-neutral scaffolding `060cc060` expressed the OLD rule through the
+  table (key text on every row, the ordinal act through the new `ShellRouter.openStripRow`) — the Debug trap preserved
+  byte-for-byte — so the pins compile and red on it (U2's call-13 shape). A source-walk guard
+  (`theOpenNoteMenuRendersTheTable`) holds the menu to the table.
+  **THE FIX (`ee2e1292`):** `menuRows` keys only `ordinal <= OpenNotes.ordinalCap` — the model's OWN key cap, which the
+  sidebar's ordinal badges (`SidebarView.openRow`) and the ⌘⇧n address already honoured; rows 10+ render by name,
+  keyless. `openStripRow` opens the note the row NAMES (`pendingSelection = .post(row.noteID)`), so the tenth row acts.
+  **The `:748` ⌘<n> sibling — VERDICT: SAFE BY ITS CAP, not the same class:** the same construction over
+  `PostMode.allCases`, a CLOSED enum of seven, so `"\(i + 1)"` is always one character; pinned as the cap
+  (`theModeKeysCanNeverReachTen` — a tenth mode reds here instead of trapping the Debug app at launch) + a comment at the
+  site; code untouched. Sweep: no other `KeyEquivalent(Character(…))` in the app (grep).
+  **Pre-fix (`18o-u3-r73-prefix.log`, the scaffolding tree):** **`Test run with 6 tests in 1 suite failed … with 25
+  issues`** — `theMenuWithTenOpenNotesKeysOnlyTheFirstNine` 1 · `everyKeyTheMenuWearsIsOneCharacterUpToTheTrackedCap`
+  22 (rows 10–20 × two) · `aRowPastNineStillOpensTheNoteItNames` 2; the three guards green. **Fixed**
+  (`18o-u3-r73-fixed.log`): `OpenStripMenuTests` + `NavigationHistoryTests` `OpenNotesTests` `WorkspaceNamingTests`
+  `WorkspaceModelTests` `NavigationDoorsTests` `CapabilityRegistryTests` `ShellChromeTests` **`Test run with 71 tests in
+  8 suites passed`**. **R-73** (the three production files from `112921bc` over the fix, `18o-u3-r73-revert.log`):
+  **`6 tests … failed … with 25 issues`**, the same three tests with the same counts (1·22·2), the guards green; restored
+  by `git checkout HEAD --`, `git status` clean. No QUESTIONS row: the key cap is the model's standing rule
+  (`ordinalCap`'s own doc: "rows past nine are click/scroll rows"), and a rendered row acting is P-2 — no product
+  decision was made.
 - Row 13 / KnownIssues 79 (⌥⌘⇧M's choice from the store) — NOT-STARTED.
 - Row 12b (the microsyntax reads CRLF) — NOT-STARTED.
 - Closing runs — NOT-STARTED.
