@@ -335,9 +335,12 @@ final class EditorSurfaceController {
             // memory set the pre-pair joins by the MEMORY, not canon
             // (ruling 3's letter). The silent-vanish experience cannot
             // recur either way. Unfanned
-            // pairs keep the instant path byte-unchanged. (The slots' arity
-            // is the door's cheap gate; the open re-reads the true fans and
-            // falls back to the instant path if the projection was stale.)
+            // pairs keep the instant path byte-unchanged. (Neither door
+            // AUTHORIZES from the slots' arity any more: ⌘⇧M's unfanned
+            // branch asks the store (18k C5, P27) and ⌥⌘⇧M's choice is the
+            // ceremony open's own store read (18o U3, KnownIssues row 79);
+            // the arity survives only as the fanned default's hint, whose
+            // road re-reads truth and falls back.)
             //
             // **13j J4b — THE FLIPPED DEFAULT** (her 2026-08-09 ruling): the
             // threshold still forks on the fan, but the fanned side no longer
@@ -350,10 +353,16 @@ final class EditorSurfaceController {
             let trailingArity = trailingIndex < model.slots.count
                 ? model.slots[trailingIndex].activeVariantCount : 1
             if ceremony {
-                guard leadingArity > 1 || trailingArity > 1 else {
-                    model.refuseFeedback(FannedDefaultsCopy.mergeCeremonyNeedsAFan)
-                    return
-                }
+                // **18o U3 (KnownIssues row 79) — the ceremony door's CHOICE is
+                // the STORE's, never `slots`'** (P27's rule, the other branch's
+                // turn). The slots are frozen for a typing burst, so a gate on
+                // them refused "one take each" over a take born mid-burst, and
+                // passed a pair whose fan had been archived meanwhile on to an
+                // open that then merged INSTANTLY. The open reads the true fans
+                // after its flush and decides both ways — the sheet, or the
+                // ruled refusal — so there is ONE read for this one question
+                // (the run door's shape, `openMergeRunChoice`), and the press
+                // no longer reaches `runStructural` at all.
                 await openMergeCeremony(leadingID: leadingID, trailingID: trailingID)
             } else if leadingArity > 1 || trailingArity > 1 {
                 await runCarryAllMerge(leadingID: leadingID, trailingID: trailingID)
@@ -366,8 +375,8 @@ final class EditorSurfaceController {
                 // release that take to lineage unsaid. The slots stay the
                 // cheap hint for the fanned branch above (whose road re-reads
                 // truth and falls back); THIS branch asks the store, the seam
-                // keystroke's own shape (`runSeamMerge`). The ceremony branch
-                // is untouched — its stale read can only refuse, never act.
+                // keystroke's own shape (`runSeamMerge`). (The ceremony branch
+                // above reads the store too since 18o U3 — row 79.)
                 let fans: (leading: [Variant], trailing: [Variant])
                 do {
                     fans = try await liveActiveFans(leadingID, trailingID)
@@ -578,7 +587,9 @@ final class EditorSurfaceController {
         guard fan.count > 1 else {
             // The projection said fanned; the store says otherwise. The
             // ordinary in-place divide is the right act (A keeps its
-            // identity) — `openMergeCeremony`'s own fallthrough, same shape.
+            // identity) — `runCarryAllMerge`'s own fallback, same shape (the
+            // DEFAULT doors fall back to the plain act; the ceremony doors
+            // refuse instead — 18o U3, row 79).
             // The plain road edits a buffer, so a locked take refuses here
             // exactly as the planner would have refused it.
             let entry = model.index.entries.first { $0.blockID == blockID }
@@ -733,7 +744,8 @@ final class EditorSurfaceController {
         }
         guard fans.leading.count > 1 || fans.trailing.count > 1 else {
             // The store says unfanned — the instant merge, byte-unchanged
-            // (the ceremony door's own fallthrough, one road over).
+            // (⌘⇧M's own answer for an unfanned pair, P27's road one branch
+            // over).
             return await runInstantMerge(leadingID: leadingID, trailingID: trailingID)
         }
         guard let composition = CarryAllMerge.compose(
@@ -1453,9 +1465,16 @@ final class EditorSurfaceController {
     /// remembered join or the canon default (ruling 3). The buffer flushes
     /// first so every take's stored text — what the sheet shows and the op
     /// will join — matches the surface. No rows are touched by opening.
-    /// If the true fans turn out unfanned (the slots' arity was a stale
-    /// projection), the instant path runs instead — the threshold rule
-    /// reads truth, not the projection.
+    ///
+    /// **This read IS ⌥⌘⇧M's authorization** (18o U3, KnownIssues row 79):
+    /// the threshold rule reads truth, not the projection. Fanned → the
+    /// sheet; unfanned → the door's ruled refusal
+    /// (`FannedDefaultsCopy.mergeCeremonyNeedsAFan`), NEVER the instant
+    /// merge. The instant fallthrough that stood here dates from 13b 4B,
+    /// when ⌘⇧M itself opened this sheet and an unfanned pair's instant
+    /// merge was that door's everyday answer; since 13j J4b the sheet is
+    /// ⌥⌘⇧M's alone, and a ceremony door that merges on its own is the
+    /// defect, not the fallback.
     private func openMergeCeremony(leadingID: String, trailingID: String) async {
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
@@ -1476,7 +1495,7 @@ final class EditorSurfaceController {
             let (firstFan, secondFan, rendered) = try await liveActiveFansAndRendered(
                 leadingID, trailingID)
             guard firstFan.count > 1 || secondFan.count > 1 else {
-                await runInstantMerge(leadingID: leadingID, trailingID: trailingID)
+                model.refuseFeedback(FannedDefaultsCopy.mergeCeremonyNeedsAFan)
                 return
             }
             let firstRenderedID = rendered.first
