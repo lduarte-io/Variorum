@@ -1136,7 +1136,7 @@ trace and its C5 disposition lines · P27's fix `dee61938` · `App/Variorum/Shar
   arm ×1): the placement is pinned. Restored clean.
 - U2's NOTICED 6 (assigned to ride row 12b at U2's adjudication) — DONE `ff1f85ab`: `SeededBookRestore`'s header
   residual names the three roads that record (the ensure, the explicit doors, the launch seed since U2) — comment-only.
-- Closing runs — IN-PROGRESS, on the final code tree `ff1f85ab` (zero app instances before each; logs in
+- Closing runs — DONE, on the final code tree `ff1f85ab` (zero app instances before each; logs in
   `App/Variorum/DerivedData/`):
   - **Mac closing set** (`18o-u3-closing.sh` → `18o-u3-closing.log`) — 106 literal suites: row 73's menu/router/window
     family (`OpenStripMenuTests`, the five `WorkspaceNavigationTests` suites, `CapabilityRegistryTests`
@@ -1157,7 +1157,12 @@ trace and its C5 disposition lines · P27's fix `dee61938` · `App/Variorum/Shar
     U2's 1747/183 exactly (this unit added no core test). DONE.
   - **iOS generic build** (`18o-u3-ios-build.log`): **`** BUILD SUCCEEDED **`** (`Shared/CaptureMicrosyntax.swift` now
     imports VariorumCore; `SeededBookRestore.swift` comment). DONE.
-  - **FULL mobile suite** (`18o-u3-mobile.log`) — RUNNING; expected 656/114 = the 4 known + F-1 (#155's, attributed).
-    PENDING.
+  - **FULL mobile suite, iPhone 17 Pro simulator** (`18o-u3-mobile.sh` → `18o-u3-mobile.log`): **`✘ Test run with 656
+    tests in 114 suites failed … with 5 issues (including 4 known issues)`** — EXACTLY the attributed baseline: the 4
+    known (`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor` ×2,
+    `MobileTutorialStructureWalkTests.theFannedDivideLessonLandsTheDuplicateShape` ×2) + **F-1**
+    (`nothingUserFacingNamesTheMac`, its one offender still `SampleLibraryJekyllBook.swift`'s disclaimer — #155's,
+    attributed, NOT re-attributed); 0 skipped. 656/114 = U2's count (this unit added no phone test; it compiles and runs
+    the shared `CaptureMicrosyntax` + `SeededBookRestore` changes). DONE.
 - Walks — NOT-STARTED.
 - Deaths / resumes: none.
