@@ -316,6 +316,12 @@ final class ShellRouter {
         }
     }
 
+    /// View ▸ Open Note's row door (18o U3 — KnownIssues row 73): the act a
+    /// menu row's click and key perform.
+    func openStripRow(_ row: OpenStripMenuRow) {
+        openNote(ordinal: row.ordinal)
+    }
+
     // MARK: - The split's doors (13f batch 4, W1/A25)
 
     /// Speech lands in the StatusCenter — wired by the shell, exactly as

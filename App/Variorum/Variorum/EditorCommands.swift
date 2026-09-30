@@ -774,14 +774,13 @@ struct EditorCommands: Commands {
             // and the keys and the sidebar rows can never disagree: both
             // read `workspace.openNotes.shown`, in the same order.
             Menu(verb(.openNote)) {
-                ForEach(
-                    Array((router?.workspace.openNotes.shown ?? []).enumerated()), id: \.element
-                ) { index, noteID in
-                    Button(router?.workspace.label(for: .post(noteID)) ?? "") {
-                        router?.openNote(ordinal: index + 1)
+                // 18o U3 (KnownIssues row 73): the rows ARE the strip's menu
+                // table — title, key and act all read the row.
+                ForEach(router?.workspace.openNotes.menuRows ?? [], id: \.noteID) { row in
+                    Button(router?.workspace.label(for: .post(row.noteID)) ?? "") {
+                        router?.openStripRow(row)
                     }
-                    .keyboardShortcut(
-                        KeyEquivalent(Character("\(index + 1)")), modifiers: [.command, .shift])
+                    .keyboardShortcut(row.keyboardShortcut)
                 }
             }
             .disabled(!enabled(.openNote))
@@ -872,5 +871,14 @@ struct EditorCommands: Commands {
     /// the redo stack is empty.
     static func redoMenuTitle(for topRedoLabel: String?) -> String {
         topRedoLabel.map { "Redo \($0)" } ?? "Redo Structural Change"
+    }
+}
+
+extension OpenStripMenuRow {
+    /// The row's ⌘⇧ key as the menu wears it — the ONE place the table's key
+    /// text becomes a `Character` (18o U3 — KnownIssues row 73). nil = the
+    /// row renders with no shortcut.
+    var keyboardShortcut: KeyboardShortcut? {
+        keyText.map { KeyboardShortcut(KeyEquivalent(Character($0)), modifiers: [.command, .shift]) }
     }
 }

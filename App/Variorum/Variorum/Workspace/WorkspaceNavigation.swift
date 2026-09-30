@@ -342,6 +342,31 @@ nonisolated struct OpenNotes: Equatable {
         guard ordinal >= 1, ordinal <= min(Self.ordinalCap, ids.count) else { return nil }
         return ids[ordinal - 1]
     }
+
+    /// **The Open strip's MENU, as a table** (18o U3 — KnownIssues row 73).
+    /// View ▸ Open Note renders exactly these rows, one menu item per row, in
+    /// strip order: the item's title reads `noteID`, its key reads `keyText`,
+    /// its act reads the row. Held here, as data, so the rule "which rows
+    /// carry a key" is answerable without mounting a menu — and without
+    /// building a `Character` from the key's text, which is the one step
+    /// that can trap.
+    var menuRows: [OpenStripMenuRow] {
+        shown.enumerated().map { offset, id in
+            let ordinal = offset + 1
+            return OpenStripMenuRow(noteID: id, ordinal: ordinal, keyText: String(ordinal))
+        }
+    }
+}
+
+/// One row of View ▸ Open Note (18o U3 — KnownIssues row 73): the note it
+/// names, its 1-based place in the strip, and the TEXT of its ⌘⇧ key — text,
+/// not a `Character`, so the table can be read (and pinned) without ever
+/// constructing one; the menu converts it at the one place it renders it.
+nonisolated struct OpenStripMenuRow: Equatable, Sendable {
+    let noteID: String
+    let ordinal: Int
+    /// The ⌘⇧ key's character, as text; nil where the row carries no key.
+    let keyText: String?
 }
 
 // MARK: - Naming a destination (the chip's and the strip's words)
