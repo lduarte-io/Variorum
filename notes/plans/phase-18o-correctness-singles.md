@@ -787,4 +787,16 @@ purged-tombstone residual (#138(e)) stays the recorded gap. The phone's first-wr
 - Walks — HELD at start (her app running; guard exit 3). **At the closing runs' end her app was GONE** (no
   `/Applications` instance — not touched by this session; `guard.sh --author` → *"GUARD OK (author: idle 4005s)"*):
   a walk window opened — IN-PROGRESS below.
+- **THE WALK (IN-PROGRESS — the dev-store Debug build of this tree, `App/Variorum/DerivedData/18o-u1/Build/Products/
+  Debug/Variorum.app`, built 03:09 from the final code; captures → `notes/plans/18o-screens/u2/`, gitignored at
+  `97e0785b`). The dev store is fenced from the production mirror (A4); WalkKit's guarded order binds every act.**
+  - W1 (P23, both voices): File ▸ Import… the fixture `App/Variorum/DerivedData/18o-u2-walk/CRLF-walk-note.md` (three
+    paragraphs, 3 CRLF — `od -c` verified) through the Open panel; open the note; Blocks mode (⌘6) shows THREE blocks;
+    capture Terminal + Study (voice restored to Terminal after). Leaves one note "CRLF-walk-note" in the dev store.
+  - W2 (row 66, the launch road; faceless — Terminal): delete the *Encryption Explained* book in-app; quit OUR
+    instance by identity; `defaults delete io.lduarte.Variorum.debug SampleLibrarySeeded.Variorum-dev.encryption-
+    explained` (was `1` — "this device never seeded it"); relaunch → the book stays gone, the `sample-library` log line
+    reads `deletedByTheReader`, the key reads `1` again; capture the shelf. **If a successor finds the book missing
+    from the dev shelf:** Help ▸ Restore Encryption Explained brings it back (W3 does exactly that).
+  - W3 (the explicit door, guard): Help ▸ Restore Encryption Explained → the receipt, the book back; capture.
 - Deaths / resumes: none.
