@@ -213,3 +213,22 @@ across entities, or scales with corpus size (the two new repair legs and the pin
 - Finding 1 — (pending)
 - Finding 2 — (pending)
 - Finding 3 — (pending)
+
+---
+
+## DISPOSITIONS (the orchestrator, 2026-09-30 — same-model flow: arbitrated against the spec; all three findings are the Fable seat's own side)
+
+- **R1-1 — CONFIRMED, FIXED `f50f68f2` (doc-only, no pin possible):** the false F2-shield
+  sentence replaced with the true shield (the never-accepted guard; `recordSeq` inside the
+  same apply). The reviewer's trace verified at the code before the edit.
+- **R1-2 — CONFIRMED, THE MUTATION RUN:** M-noSeqGuard (the two `knownSeq` guards dropped)
+  → `Test run with 4 tests in 1 suite failed … with 2 issues` — EXACTLY the restore-guard pin
+  (`aCopyRestoredAfterTheDeletionIsNeverTakenByTheOldTombstone`, both arms), everything else
+  green; restored by `git checkout f50f68f2 --`, diff empty, suite 4/1 green after. The
+  guard's teeth are demonstrated, the U6 record amended. The test doc-comment's "M-noSeqGuard
+  is its teeth" is now TRUE as written — kept.
+- **R1-3 — CONFIRMED, RECORD FIXED:** ledger row 18 now names the true range
+  (`044a6bb0^..HEAD`); round 2's brief carries it. No code change.
+
+**Round 2:** a fresh `fable-reviewer` re-reviews the fixes (`bec30448..HEAD`) per the ladder
+rule; no new BLOCKER/MAJOR arose, so round 3 is not earned unless round 2 finds one.

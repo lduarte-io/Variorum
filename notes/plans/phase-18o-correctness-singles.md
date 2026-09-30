@@ -230,7 +230,7 @@ with someone at the machine); iOS generic build green; install `/Applications` b
 | 15 | **17t item 1** — the typed NEAR-EMPTY sync confirmation (#86(c), ruled: warn + TYPED phrase, never refuse, never click-through; home #87: "with the rebuilt Replace Keys"): `Sources/VariorumCore/Sync/RekeyRecencyProbe.swift` has ZERO app consumers — wire the warning face + typed confirmation into the rebuilt Replace All Keys. Consume the probe from App; ZERO `Sync/` edits (a needed probe change is a stop-and-report → Fable work) | U5 | **DISMISSED AS HOLLOW (the hallucination guard's own rule)** — the rebuilt Replace All Keys pulls to head FIRST then re-encrypts the server's own rows IN PLACE (`sync_reencrypt`); no local row ever overwrites a server row, so #86(c)'s hazard belonged to the RETIRED truncate-and-repush road (the probe's UI caller was DELIBERATELY retired at pre-13x 2b — the §13 sweep table says so verbatim; row 54 mis-filed a ruled retirement as an omission). Evidence pin `671d09bf` GREEN on today's tree (3-of-18 near-empty copy loses nothing; M-noPull reds it 15). **Her call is QUESTIONS #164** ((a) close-as-answered recommended) — only she closes a ruling |
 | 16 | **17t item 2** — COPY ALL on the recovery phrase exists in ONE place (Mac `ProtectionPane`, 60 s clipboard clear): wire the SHARED `SyncEnrollmentView`'s dead "Copied" branch + the Mac call sites (`KeyDoorModel.markWordsCopied` · `SyncEnrollmentModel.markWordsCopied` · `PostureSwitchModel.markWordsCopied` declare it; one call site exists). The phone's three word-screen doors stay the MOBILE APP ROW's — zero phone faces here | U5 | **FIXED for the Mac `ccf6eefc`** (scaffolding `6a11b072`, pins `9ba2a45b` — red-on-old 4 issues, exactly the four faces; R-U5 identical; M-receipt reds the receipt half alone; ONE `WordsCopyDoor` rule, the pane's 60 s clear hoisted verbatim, no second timer; WIDENED to all five Mac words screens — judgment call 3, her ask's own words). QUESTIONS **#165** (Universal Clipboard, OPEN, hers). The phone's word screens stay the MOBILE row's; the words-screen walk HELD (needs her real store — the script in the record) |
 | 17 | **#146, PROVISIONAL (hers to overturn):** the signed-out-first phone's seeded copy — at first sync where the account holds the shipped book DELETED, an UNTOUCHED (pristine, by the dedupe's own test) local copy is retired quietly into this device's Trash; an EDITED copy is never retired. Home: `Sources/VariorumCore/Sync/SampleLibraryDedupe.swift` — **FABLE work, this seat** | U6 | **BUILT (PROVISIONAL #146) `06a95176`** — pins red-on-old 7; R-U6 identical; M-always 3; the wide-comparator incident caught by the EXISTING suites (9 measured) and narrowed to never-accepted; core 1751/184 whole; mobile at the attributed baseline; her ratify + the live round bundled |
-| 18 | The end LADDER (fresh `fable-reviewer` per round over the combined diff; cap three; every finding gets a written disposition here) | ladder | open |
+| 18 | The end LADDER (fresh `fable-reviewer` per round over the combined diff — **the TRUE range is `044a6bb0^..HEAD`, the whole phase; round 1's brief mis-named the base as `cf887299` (U1's adjudication commit), the ladder's R1-3 — the reviewer reviewed the full range anyway, no coverage lost**; cap three; every finding gets a written disposition here) | ladder | **Round 1 DONE (`bec30448`): 0 BLOCKER · 0 MAJOR · 3 MINOR, all on the orchestrator's side — R1-1 doc fixed `f50f68f2` · R1-2 the M-noSeqGuard mutation run (2 issues, exact) · R1-3 this row's range correction. Round 2 (fresh reviewer, the fixes) next** |
 | 19 | Closeout: dispositions copied into the 17-file (17e + 17t); KnownIssues rows 54 · 55 · 64 · 66 · 73 · 78 · 79 · 84 resolved or re-owned; QUESTIONS rows landed (#160+); master plan row 18 + closeout-log paragraph (18m's paragraph rolls to the archive); MOBILE PARITY line; the author handoff; the install refresh per R-18k-3 at a verified zero-instance window (else HELD + bundled) | closeout | open |
 
 ## SIZING (the guidance statement, said out loud per `notes/PhaseSizingGuidance.md`)
@@ -497,7 +497,7 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 - U4 the book leaving savepoint (R-18k-6) — **CLOSED (orchestrator adjudication 2026-09-30; row 14 dispositioned; ladder foci named — the ladder's first read)**.
 - U5 17t, the two unwired protection doors — **CLOSED (orchestrator adjudication 2026-09-30; row 15 DISMISSED AS HOLLOW pending her #164, row 16 FIXED; ladder foci named)**.
 - U6 #146 (Fable seat) — **DONE (build closed 2026-09-30; the ladder is its cold review — next)**.
-- THE LADDER — round 1 spawning (fresh `fable-reviewer` over the phase's combined diff).
+- THE LADDER — round 1 DONE (0/0/3, all orchestrator-side, all fixed/recorded); round 2 (fresh reviewer, fixes-only re-review) IN FLIGHT.
 - CLOSEOUT + the install refresh — NOT-STARTED (refresh window unverified; her app's state unknown).
 
 ---
@@ -2239,8 +2239,10 @@ Zero schema · marker stays 9 · zero server lines · zero app-target lines.
 ### DISPOSITION (ledger row 17)
 
 17. **#146 — BUILT (PROVISIONAL, hers to overturn)** `06a95176` (pins `a7db8013` — red-on-old
-    7 issues; R-U6 identical; M-always reds the edited guard alone; the wide-comparator
-    incident measured 9 and narrowed): the account's deletion retires an untouched
+    7 issues; R-U6 identical; M-always reds the edited guard alone; **M-noSeqGuard run at the
+    ladder's R1-2 — the two `knownSeq` guards dropped reds EXACTLY the restore-guard pin, 2
+    issues, restored clean: the deliberate-restore corner's teeth demonstrated**; the
+    wide-comparator incident measured 9 and narrowed): the account's deletion retires an untouched
     never-accepted local copy at first pull, family-complete into the Trash with explicit
     outbox rows; an edited copy is never retired; a deliberate restore is never taken. Her
     ratify stands bundled at #146; the LIVE two-device round is HERS (the sync-kind
