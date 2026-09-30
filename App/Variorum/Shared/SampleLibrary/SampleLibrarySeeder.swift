@@ -65,7 +65,8 @@
 //  already holds her writing gets it at the next launch too.
 //
 //  ── DELETION IS FINAL, AND THAT IS THE POINT ──────────────────────────
-//  The device mark is set only after a COMPLETE seed. Delete the book (or
+//  The device mark is set only after a COMPLETE seed (or, since 18o U2, when
+//  a launch declines on her recorded deletion — below). Delete the book (or
 //  the notes, or the tag) and nothing puts it back: the mark short-circuits
 //  before discovery ever runs. This is `MobileStarterJournal`'s ruled shape
 //  — *"if they delete that journal book or archive it, it just doesn't
@@ -86,6 +87,21 @@
 //  rule is actually about: a reader who DELETED the library, or renamed
 //  the book, gets it re-minted, because a deleted book and a never-seeded
 //  store are the same local reading.
+//
+//  *(18o U2 — her R-18k-5 on QUESTIONS #138(f), "honour the tombstone at
+//  launch": while the tombstone stands they are NO LONGER the same reading.
+//  The launch reads the tutorial door's own rule (`readerDeletedTheBook` — a
+//  tombstoned reading of the reserved name) at every read that decides, and
+//  declines on it (`Outcome.deletedByTheReader`), recording the decision in
+//  the mark as it goes. That covers the lost mark AND the second device — the
+//  book arrived by sync, so no mark was ever written there — which used to
+//  re-mint a deletion made anywhere at its next launch. What remains is the
+//  purge: once Delete Now's janitor removes the row, a device that never
+//  launched (or opened the tutorial) in between holds no evidence and mints
+//  (#138(e), the recorded gap; the travelling marker was #138(f)'s option
+//  (iii), not taken). A RENAMED book is still minted afresh — the reserved
+//  name is the identity. The phone's first-write occasion rides this same
+//  brain, so it declines the same way.)*
 //
 //  Closing it needs a marker that travels with the STORE rather than the
 //  device — the `setting` table — and `upsertSetting` has no public write
@@ -857,10 +873,13 @@ enum SampleLibrarySeeder {
             // 18l-c U6: the scripted note's title counts toward "complete".
             let titles = expectedTitles(for: book, stories: stories)
 
-            let known = try await session.database.read { db in try discover(db, book: book) }
-            if known.isComplete(for: titles) {
-                save(true)
-                return .alreadyPresent
+            // 18o U2 (R-18k-5): every read that can DECIDE reads the same two
+            // facts — what the store holds, and whether the reader deleted
+            // this book (`readerDeletedTheBook`, the tutorial door's rule) —
+            // and decides the same way (`decidedWithoutMinting`).
+            let known = try await session.database.read { db in try facts(db, book: book) }
+            if let decided = decidedWithoutMinting(known, titles: titles, save: save) {
+                return decided
             }
 
             if gate.belongsToAnAccount() {
@@ -876,21 +895,60 @@ enum SampleLibrarySeeder {
             // between. The read above stays OUTSIDE it — it is a cheap early
             // out and, when an account owns the store, the answer it gives is
             // stale by the length of the wait anyway; the discovery that
-            // DECIDES is this one.
+            // DECIDES is this one. (18o U2: the tombstone too — the book and
+            // her deletion of it can both land IN the first round the gate
+            // waited for, which is the row's own "arrived by sync" road.)
             return try await withSeedLatch(session: session, book: book) {
-                let existing = try await session.database.read { db in try discover(db, book: book) }
-                if existing.isComplete(for: titles) {
-                    save(true)
-                    return .alreadyPresent
+                let known = try await session.database.read { db in try facts(db, book: book) }
+                if let decided = decidedWithoutMinting(known, titles: titles, save: save) {
+                    return decided
                 }
                 let seeded = try await seed(
-                    session: session, book: book, stories: stories, existing: existing, pacing: pacing)
+                    session: session, book: book, stories: stories, existing: known.existing, pacing: pacing)
                 save(true)
                 return .seeded(readingID: seeded.readingID, stories: seeded.minted)
             }
         } catch {
             return .refused(String(describing: error))
         }
+    }
+
+    /// The two facts a launch read decides on, from ONE read transaction —
+    /// what the store holds of the book (`discover`) and whether the reader
+    /// deleted it (`readerDeletedTheBook`) — so they can never disagree.
+    nonisolated private static func facts(
+        _ db: Database, book: Book
+    ) throws -> (existing: Existing, readerDeleted: Bool) {
+        (try discover(db, book: book), try readerDeletedTheBook(db, book: book))
+    }
+
+    /// **What the facts decide WITHOUT a mint — asked at both of the launch's
+    /// reads.** A whole copy is present, first: nothing to mint, whatever an
+    /// older tombstone says (a book she deleted and then restored). Else a
+    /// tombstoned reading of the name is HER word — 18o U2, R-18k-5
+    /// (QUESTIONS #138(f)): *honour the tombstone at launch*, exactly as the
+    /// tutorial door's silent ensure already does (pre-13x F3, MINOR-N3) —
+    /// and the decision is RECORDED in this device's mark while the evidence
+    /// stands (RUN A A2's rule — a purge removes the tombstone, and the mark
+    /// is then what remembers). A partial live copy beside a tombstone is NOT
+    /// healed here, the ensure's answer too: it is a copy arriving from a
+    /// device that restored the book (sync brings the rest), or residue of a
+    /// re-mint only the pre-18o launch could make; Help ▸ Restore completes
+    /// either on request. `nil` = nothing decided: seed what is missing.
+    private static func decidedWithoutMinting(
+        _ facts: (existing: Existing, readerDeleted: Bool),
+        titles: [String],
+        save: (Bool) -> Void
+    ) -> Outcome? {
+        if facts.existing.isComplete(for: titles) {
+            save(true)
+            return .alreadyPresent
+        }
+        if facts.readerDeleted {
+            save(true)
+            return .deletedByTheReader
+        }
+        return nil
     }
 
     /// Polled: `SyncSession` exposes no round-completed closure (the one it

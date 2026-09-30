@@ -186,9 +186,10 @@ struct LaunchSeedTombstoneTests {
                 firstRoundWait: .seconds(60), pollInterval: .milliseconds(5),
                 loadMark: mark.load, saveMark: mark.save)
 
+            let live = try await liveCopies(db, book)
             #expect(round.landed, "the round landed before the launch decided")
             #expect(outcome == .deletedByTheReader, "\(outcome)")
-            #expect(try await liveCopies(db, book) == 0)
+            #expect(live == 0)
             #expect(mark.value)
         }
     }
@@ -232,7 +233,8 @@ struct LaunchSeedTombstoneTests {
                 Issue.record("a fresh store seeds \(book.name): \(outcome)")
                 return
             }
-            #expect(try await liveCopies(db, book) == 1)
+            let live = try await liveCopies(db, book)
+            #expect(live == 1)
             #expect(mark.value)
         }
     }
