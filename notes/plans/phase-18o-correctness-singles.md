@@ -229,7 +229,7 @@ with someone at the machine); iOS generic build green; install `/Applications` b
 | 14 | **Row 78 / R-18k-6, RULED:** a note edited INSIDE A BOOK gets its leaving savepoint when she moves into a different note (or leaves the book), through the existing `savepointOnLeaving` road; Compare peers follow the same rule PROVISIONAL (QUESTIONS row) — the 18k C1 RECORD's machinery (`markLeaving`/`dropAfterLeaving`, the acquisition generation) is required reading | U4 | **FIXED `f3ab836e`** (pins `385fbaeb` — red-on-old 13 issues, all five bug pins; R-U4 9 issues identical; three guard mutations each red their own guard; `BookNoteTrail` pure over the note box's state; roads 5–6 declared in `SavepointOnLeave`'s own registry, ONE entry, zero AppSession/Operations lines; C1/L-d/J11 files UNMODIFIED; orchestrator re-ran 26/5 green). QUESTIONS **#163** (both PROVISIONAL readings). Walks W1–W3 PASS |
 | 15 | **17t item 1** — the typed NEAR-EMPTY sync confirmation (#86(c), ruled: warn + TYPED phrase, never refuse, never click-through; home #87: "with the rebuilt Replace Keys"): `Sources/VariorumCore/Sync/RekeyRecencyProbe.swift` has ZERO app consumers — wire the warning face + typed confirmation into the rebuilt Replace All Keys. Consume the probe from App; ZERO `Sync/` edits (a needed probe change is a stop-and-report → Fable work) | U5 | **DISMISSED AS HOLLOW (the hallucination guard's own rule)** — the rebuilt Replace All Keys pulls to head FIRST then re-encrypts the server's own rows IN PLACE (`sync_reencrypt`); no local row ever overwrites a server row, so #86(c)'s hazard belonged to the RETIRED truncate-and-repush road (the probe's UI caller was DELIBERATELY retired at pre-13x 2b — the §13 sweep table says so verbatim; row 54 mis-filed a ruled retirement as an omission). Evidence pin `671d09bf` GREEN on today's tree (3-of-18 near-empty copy loses nothing; M-noPull reds it 15). **Her call is QUESTIONS #164** ((a) close-as-answered recommended) — only she closes a ruling |
 | 16 | **17t item 2** — COPY ALL on the recovery phrase exists in ONE place (Mac `ProtectionPane`, 60 s clipboard clear): wire the SHARED `SyncEnrollmentView`'s dead "Copied" branch + the Mac call sites (`KeyDoorModel.markWordsCopied` · `SyncEnrollmentModel.markWordsCopied` · `PostureSwitchModel.markWordsCopied` declare it; one call site exists). The phone's three word-screen doors stay the MOBILE APP ROW's — zero phone faces here | U5 | **FIXED for the Mac `ccf6eefc`** (scaffolding `6a11b072`, pins `9ba2a45b` — red-on-old 4 issues, exactly the four faces; R-U5 identical; M-receipt reds the receipt half alone; ONE `WordsCopyDoor` rule, the pane's 60 s clear hoisted verbatim, no second timer; WIDENED to all five Mac words screens — judgment call 3, her ask's own words). QUESTIONS **#165** (Universal Clipboard, OPEN, hers). The phone's word screens stay the MOBILE row's; the words-screen walk HELD (needs her real store — the script in the record) |
-| 17 | **#146, PROVISIONAL (hers to overturn):** the signed-out-first phone's seeded copy — at first sync where the account holds the shipped book DELETED, an UNTOUCHED (pristine, by the dedupe's own test) local copy is retired quietly into this device's Trash; an EDITED copy is never retired. Home: `Sources/VariorumCore/Sync/SampleLibraryDedupe.swift` — **FABLE work, this seat** | U6 | open |
+| 17 | **#146, PROVISIONAL (hers to overturn):** the signed-out-first phone's seeded copy — at first sync where the account holds the shipped book DELETED, an UNTOUCHED (pristine, by the dedupe's own test) local copy is retired quietly into this device's Trash; an EDITED copy is never retired. Home: `Sources/VariorumCore/Sync/SampleLibraryDedupe.swift` — **FABLE work, this seat** | U6 | **BUILT (PROVISIONAL #146) `06a95176`** — pins red-on-old 7; R-U6 identical; M-always 3; the wide-comparator incident caught by the EXISTING suites (9 measured) and narrowed to never-accepted; core 1751/184 whole; mobile at the attributed baseline; her ratify + the live round bundled |
 | 18 | The end LADDER (fresh `fable-reviewer` per round over the combined diff; cap three; every finding gets a written disposition here) | ladder | open |
 | 19 | Closeout: dispositions copied into the 17-file (17e + 17t); KnownIssues rows 54 · 55 · 64 · 66 · 73 · 78 · 79 · 84 resolved or re-owned; QUESTIONS rows landed (#160+); master plan row 18 + closeout-log paragraph (18m's paragraph rolls to the archive); MOBILE PARITY line; the author handoff; the install refresh per R-18k-3 at a verified zero-instance window (else HELD + bundled) | closeout | open |
 
@@ -496,8 +496,8 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 - U3 the two Mac doors (+ row 12b) — **CLOSED (orchestrator adjudication 2026-09-30; rows 12/12b/13 dispositioned; the row-13 design divergence accepted and named a ladder focus)**.
 - U4 the book leaving savepoint (R-18k-6) — **CLOSED (orchestrator adjudication 2026-09-30; row 14 dispositioned; ladder foci named — the ladder's first read)**.
 - U5 17t, the two unwired protection doors — **CLOSED (orchestrator adjudication 2026-09-30; row 15 DISMISSED AS HOLLOW pending her #164, row 16 FIXED; ladder foci named)**.
-- U6 #146 (Fable seat) — IN FLIGHT (this orchestrator's own build, started 2026-09-30; SyncSpec + postmortem + dedupe read whole at prep).
-- THE LADDER — NOT-STARTED.
+- U6 #146 (Fable seat) — **DONE (build closed 2026-09-30; the ladder is its cold review — next)**.
+- THE LADDER — round 1 spawning (fresh `fable-reviewer` over the phase's combined diff).
 - CLOSEOUT + the install refresh — NOT-STARTED (refresh window unverified; her app's state unknown).
 
 ---
@@ -2209,8 +2209,45 @@ Zero schema · marker stays 9 · zero server lines · zero app-target lines.
 
 ### LIVE STATUS
 
-- The record + design — DONE (this commit).
-- Pins (red-on-old, the convergence harness) — NOT-STARTED.
-- The fix — NOT-STARTED.
-- Behavioural revert + finals (`swift test` whole; FULL mobile) — NOT-STARTED.
-- No revert is in flight.
+- The record + design — DONE (`843a878e`).
+- Pins — DONE (`a7db8013`): `SampleLibrarySignedOutRetirementTests` (4) — pre-fix **7 issues**
+  (the scenario pin 5 — the copy survives and Sherlock reappears on the Mac; Put back 2 — the
+  retirement never landed so `restoreReading` refuses `readingNotDeleted`); the two guards
+  (edited survives; a post-deletion restore outranks) GREEN on old. One fixture correction
+  before the baseline (the re-seed reuses the live reserved tag, as the real seeder's discover
+  does — `duplicateTagPath` was the fixture's, not the product's).
+- The fix — DONE (`06a95176`): the new leg + the NARROWED later-intent guard. **The record's
+  own honesty line: the design sketch's comparator (`deadSeq > liveSeq`) was TOO WIDE and the
+  EXISTING convergence suites caught it** — a two-copy meeting's retired loser arrives dead
+  with a seq above the pushed keeper's, and the wide comparator killed the keeper (**measured:
+  9 issues** across the pristine-pair scenarios). The narrowing to NEVER-ACCEPTED
+  (`knownSeq(live) == 0` — the ruling's own "at the device's first sync") is their fix, and a
+  meeting's keeper has always pushed by the time any retirement tombstone can arrive, so the
+  separation is structural, not probabilistic. The doc at the code carries the incident.
+- Behavioural revert **R-U6** — DONE: `SampleLibraryDedupe.swift` from `a7db8013` over the fix
+  → **7 issues, identical to pre-fix**; restored by `git checkout 06a95176 --`, diff empty.
+- Mutation **M-always** (retire without classifying) — DONE: exactly the edited guard red
+  (**3 issues**), everything else green; restored clean. The wide-comparator run above is the
+  second mutation's measurement (M-wide ≡ the first cut, 9 issues in the EXISTING suites).
+- Finals — DONE: core `swift test` WHOLE **1751/184 PASSED** (1747 + this unit's 4); the FULL
+  mobile suite (iPhone 17 Pro) **656/114 = the 4 known + F-1 exactly** (#155's, attributed —
+  the engine is shared, the phone inherits the leg with zero phone lines). Zero schema, marker
+  9, zero server lines, zero app-target lines — the diff is ONE `Sync/` file + one core test
+  file.
+- No revert is in flight; tree clean, everything pushed.
+
+### DISPOSITION (ledger row 17)
+
+17. **#146 — BUILT (PROVISIONAL, hers to overturn)** `06a95176` (pins `a7db8013` — red-on-old
+    7 issues; R-U6 identical; M-always reds the edited guard alone; the wide-comparator
+    incident measured 9 and narrowed): the account's deletion retires an untouched
+    never-accepted local copy at first pull, family-complete into the Trash with explicit
+    outbox rows; an edited copy is never retired; a deliberate restore is never taken. Her
+    ratify stands bundled at #146; the LIVE two-device round is HERS (the sync-kind
+    acceptance's live leg — the convergence suites are the floor).
+
+**FOR THE FABLE LADDER (this seat's own diff — no softer treatment):** the narrowed guard's
+structural claim (a meeting's keeper has always pushed — refute it if you can construct a
+counter-scenario); the `tombstonedParents` arm (live→dead same-batch — reachable only through
+shapes the ordinary pass should own first); the indeterminate-declines-permanently choice (no
+marker re-arm); the A5-band corner's recording.
