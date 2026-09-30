@@ -786,23 +786,33 @@ purged-tombstone residual (#138(e)) stays the recorded gap. The phone's first-wr
     through both fixes.
 - Walks — HELD at start (her app running; guard exit 3). **At the closing runs' end her app was GONE** (no
   `/Applications` instance — not touched by this session; `guard.sh --author` → *"GUARD OK (author: idle 4005s)"*):
-  a walk window opened — IN-PROGRESS below.
-- **THE WALK (IN-PROGRESS — the dev-store Debug build of this tree, `App/Variorum/DerivedData/18o-u1/Build/Products/
-  Debug/Variorum.app`, built 03:09 from the final code; captures → `notes/plans/18o-screens/u2/`, gitignored at
-  `97e0785b`). The dev store is fenced from the production mirror (A4); WalkKit's guarded order binds every act.**
-  - **W1 — DONE (dev pid 56737):** File ▸ **Import Files…** → the Open panel → ⌘⇧G the fixture's path → Return →
+  a walk window opened, and the walks RAN — DONE below.
+- **THE WALK — DONE** (the dev-store Debug build of this tree, `App/Variorum/DerivedData/18o-u1/Build/Products/Debug/
+  Variorum.app`, built 03:09 from the final code; captures in `notes/plans/18o-screens/u2/`, gitignored at `97e0785b`;
+  the dev store is fenced from the production mirror (A4) and its footer read "Sync off (dev store)" throughout;
+  WalkKit's guarded order before every act — `guard.sh --author` then the pid/point guard, acts ≥ 2 s apart; no foreign
+  dialog on screen at the start; no `/Applications` instance at any point; both dev instances quit BY IDENTITY, `pgrep`
+  clean after each).
+  - **W1 — P23, both voices (dev pid 56737):** File ▸ **Import Files…** → the Open panel → ⌘⇧G the fixture's path
+    (`App/Variorum/DerivedData/18o-u2-walk/CRLF-walk-note.md`, three paragraphs, 3 CRLF — `od -c` verified) → Return →
     `Import` pressed by name → ⌘K "CRLF-walk-note" (exactly ONE match) → ⏎ → ⌘6 Blocks: **"3 blocks · 21 words"**, rows
     01 "CRLF walk: the first paragraph, written on Windows." · 02 "The second paragraph, after a blank line." · 03 "The
-    third paragraph, one CRLF later." — one block per paragraph. Captures `W1-p23-crlf-import-three-blocks-terminal.png`
-    and `…-study.png` (voice flipped by the palette's "Use Study Voice", then "Use Terminal Voice" — Terminal
-    RESTORED, re-captured). The dev store keeps the note "CRLF-walk-note" (in no book) as walk residue.
-  - (plan) W1 (P23, both voices): File ▸ Import… the fixture `App/Variorum/DerivedData/18o-u2-walk/CRLF-walk-note.md` (three
-    paragraphs, 3 CRLF — `od -c` verified) through the Open panel; open the note; Blocks mode (⌘6) shows THREE blocks;
-    capture Terminal + Study (voice restored to Terminal after). Leaves one note "CRLF-walk-note" in the dev store.
-  - W2 (row 66, the launch road; faceless — Terminal): delete the *Encryption Explained* book in-app; quit OUR
-    instance by identity; `defaults delete io.lduarte.Variorum.debug SampleLibrarySeeded.Variorum-dev.encryption-
-    explained` (was `1` — "this device never seeded it"); relaunch → the book stays gone, the `sample-library` log line
-    reads `deletedByTheReader`, the key reads `1` again; capture the shelf. **If a successor finds the book missing
-    from the dev shelf:** Help ▸ Restore Encryption Explained brings it back (W3 does exactly that).
-  - W3 (the explicit door, guard): Help ▸ Restore Encryption Explained → the receipt, the book back; capture.
+    third paragraph, one CRLF later." — one block per paragraph. `W1-p23-crlf-import-three-blocks-terminal.png` ·
+    `W1-p23-crlf-import-three-blocks-study.png` (voice flipped by the palette's "Use Study Voice", then "Use Terminal
+    Voice" — **Terminal RESTORED**, re-captured). Residue: the note "CRLF-walk-note" (in no book) stays in the dev store.
+  - **W2 — row 66, the LAUNCH road (faceless; one voice):** shelf ▸ right-click *encryption explained* ▸ **Delete
+    Book** (9 books → 8); quit OUR instance by identity; `defaults delete io.lduarte.Variorum.debug
+    SampleLibrarySeeded.Variorum-dev.encryption-explained` (was `1` — "this device never seeded it", the row's own
+    no-mark device); relaunch (dev pid 57844) → the launch's `sample-library` log (`W2-launch-sample-library.log`):
+    **`sample library (Encryption Explained): deletedByTheReader`** beside Sherlock's and the Jekyll book's
+    `alreadySeeded`; the shelf still reads **8 books, no *encryption explained*** (`W2-r66-launch-honours-tombstone-
+    shelf-terminal.png`); the mark reads `1` again — the decision RECORDED by the launch. (The old build is never run
+    on the dev store — the before/after is the harness's R-66.)
+  - **W3 — the EXPLICIT door, byte-unchanged (guard):** Help ▸ **Restore "Encryption Explained"** → the book minted
+    afresh and opened by the door: *encryption explained · book · 9 chapters · 9 notes*
+    (`W3-explicit-restore-door-still-mints-terminal.png`); the mark `1`. The dev store is back to holding the book (a
+    fresh reading; the deleted one sits in its Trash).
+  - Voices: W1 is the one surface this unit changes the look of (a note's block list) — both voices. W2/W3 are the
+    faceless launch road and faces this unit did not touch (the shelf, the book) — one voice (Terminal), by the brief's
+    "both voices where the surface has a face".
 - Deaths / resumes: none.
