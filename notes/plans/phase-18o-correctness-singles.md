@@ -1585,5 +1585,7 @@ departing surface wrote on its way out) and the entry drops then. So reporting a
     `Features/BookView/`, `Features/Takes/CompareBoardView.swift`, `Workspace/SavepointOnLeave.swift`); the attributed
     mobile baseline 656/114 stands untouched.
 - Walk (book: edit, switch note, Block History shows the quiet savepoint; leave the book, same for a second note;
-  captures `notes/plans/18o-screens/u4/`) — NOT-STARTED.
+  captures `notes/plans/18o-screens/u4/`) — IN-PROGRESS (the dev-store Debug build `DerivedData/18o-u1/…/Debug/
+  Variorum.app`, built 06:22 from the final code tree; zero instances by path; `guard.sh --author` OK, idle 80 min; no
+  foreign dialog on screen).
 - Deaths / resumes: none.
