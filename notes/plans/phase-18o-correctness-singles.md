@@ -1164,5 +1164,19 @@ trace and its C5 disposition lines · P27's fix `dee61938` · `App/Variorum/Shar
     (`nothingUserFacingNamesTheMac`, its one offender still `SampleLibraryJekyllBook.swift`'s disclaimer — #155's,
     attributed, NOT re-attributed); 0 skipped. 656/114 = U2's count (this unit added no phone test; it compiles and runs
     the shared `CaptureMicrosyntax` + `SeededBookRestore` changes). DONE.
-- Walks — NOT-STARTED.
+- Walks — IN-PROGRESS (her away grant; the dev-store Debug build `App/Variorum/DerivedData/18o-u1/Build/Products/Debug/
+  Variorum.app`, built 04:40 from the final code tree — the last code commit is 04:36; zero instances by path before
+  launch; `guard.sh --author` then the pid guard before every act, acts ≥ 3 s apart; no foreign dialog on screen
+  (`W0` full-screen check); `caffeinate -d` for the walk; captures in `notes/plans/18o-screens/u3/`, gitignored):
+  - **W1 — row 73, ten open notes in one window — PASS (Terminal; the menu is system chrome, voice-independent).**
+    Ten notes opened through ⌘K (the Sherlock stories, *A Scandal in Bohemia* … *The Noble Bachelor*); the app
+    SURVIVED the tenth (the pre-fix Debug build trapped exactly here — 18k C1's crash report); the Open strip scrolls
+    with ⌘⇧ badges on rows 1–9 (`W1a-ten-open-notes-strip-terminal.png`). **The real menu read back through
+    Accessibility** (`View ▸ Open Notes (⌘⇧1–9)`, enabled): rows 1–9 `AXMenuItemCmdChar` = "1"…"9" with
+    `AXMenuItemCmdModifiers` = 1 (⇧⌘); row 10 *The Adventure of the Noble Bachelor* — `AXMenuItemCmdChar` = missing
+    value, modifiers 8 (no ⌘) — KEYLESS. The submenu captured open (`W1b-open-notes-submenu-ten-rows.png` + `…-full.png`,
+    which also shows the ⌘1–⌘7 mode keys — the `:748` sibling). **⌘⇧1** opened *A Scandal in Bohemia*
+    (`W1c-…png`); **pressing the keyless tenth row** (AX press on menu item 10) opened *The Adventure of the Noble
+    Bachelor* (`W1d-tenth-row-click-opens-its-note-terminal.png`) — the row acts (P-2); on the old road it asked the
+    ordinal address and landed nothing.
 - Deaths / resumes: none.
