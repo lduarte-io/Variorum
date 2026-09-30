@@ -256,6 +256,11 @@ struct BookView: View {
         // clears it, so a book leaving the pane takes its box with it.
         .onAppear {
             publishNoteBox()
+            // 18o U4 (R-18k-6): the book's leaving road, wired before the
+            // first report (the trail starts empty, so the first can leave
+            // nothing).
+            SavepointOnLeave.wire(book: model, session: session)
+            reportNotePlace()
 #if DEBUG
             // The round-end Fable pass, MAJOR-1's door: a pin that mounts the
             // REAL shell has no road to this book's focus (the model is this
@@ -266,9 +271,16 @@ struct BookView: View {
             BookOutlineGeometry.publishFocusDoor(readingID, owner: oracleOwner) { model.focus($0) }
 #endif
         }
-        .onChange(of: noteBoxReport) { _, _ in publishNoteBox() }
+        .onChange(of: noteBoxReport) { _, _ in
+            publishNoteBox()
+            reportNotePlace()
+        }
         .onDisappear {
             onNoteBox?(readingID, nil, nil)
+            // 18o U4 (R-18k-6): the book leaving its pane is a leaving for the
+            // note she was in (the pane shows something else, the split
+            // closes, another book takes the pane, the window goes).
+            model.leaveBook()
 #if DEBUG
             // 18k C4: THIS book's registrations — its door, its navigator,
             // its rows' anchors — and nothing another window's book still
@@ -822,6 +834,18 @@ struct BookView: View {
         onNoteBox?(
             readingID, report,
             report.map { report in NoteBoxDoor { editHere(report) } })
+    }
+
+    /// **18o U4 (R-18k-6) — the same fact, to the book's leaving road.** The
+    /// box's state IS the book's answer to "which note is she in" (`.live` —
+    /// her caret's note; `.selected` — the note the book points at; `.empty`
+    /// — none: clicked out, Read, an unfocused pane), so moving into another
+    /// note reads exactly what the box shows; `BookNoteTrail` holds the rule.
+    /// Not folded into `publishNoteBox`: the box is a face, this is a
+    /// lifecycle signal, and a clear on the box's side must never read as
+    /// her leaving a note.
+    private func reportNotePlace() {
+        model.notePlaceChanged(noteBoxReport?.state ?? .empty)
     }
 
     /// **The box's one act**, and it is mode-shaped because "live" is:

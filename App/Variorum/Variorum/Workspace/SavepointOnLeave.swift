@@ -26,12 +26,25 @@
 //     which has covered every open post since 13b 1a;
 //  4. **a quick note filing itself** — `QuickNotePad.take()`, the one body
 //     its three triggers share.
+//  5. **a note inside a BOOK** (18o U4 — her R-18k-6: *"When I move to
+//     another note"*) — the shown set above holds a pane's OWN note, and a
+//     pane showing a book contributes none, so the book reports its own:
+//     the note her caret was in is LEFT when she moves into a different note
+//     or leaves the book (`BookViewModel.onNoteLeft`, wired below;
+//     `BookNoteTrail` holds the rule over the note box's state).
+//  6. **a Compare PEER** (18o U4 — the same rule, PROVISIONAL, QUESTIONS
+//     #163) — a peer swapped out of its column, removed, or left with the
+//     board (`CompareViewModel.onNotesLeft`, wired below). The ANCHOR is the
+//     pane's own note: its leaving is road 1's, never the board's.
 //
-//  All four call ONE entry, `AppSession.savepointOnLeaving`, and every rule
+//  All six call ONE entry, `AppSession.savepointOnLeaving`, and every rule
 //  lives below it in `Operations.closeAutoCommit`. **No second lifecycle
 //  mechanism** was added: liveness stays `PaneTextAuthority`'s inside a
 //  surface and the per-post autosave registry's across surfaces; this reads
-//  what the workspace already knows.
+//  what the workspace (and, for 5–6, the book and the board) already knows.
+//  On the Mac a leaving that lands with nobody holding the note also retires
+//  its registry entry (18k C1's drop) — so roads 5–6 retire what used to wait
+//  for ⌘Q.
 //
 //  ── WHAT IS DELIBERATELY *NOT* A LEAVING ────────────────────────────────
 //  · **Closing an Open-strip row** (the ✕). Its own contract says it "closes
@@ -63,6 +76,24 @@ enum SavepointOnLeave {
             for id in ids {
                 Task { @MainActor in await session.savepointOnLeaving(id) }
             }
+        }
+    }
+
+    /// **Road 5 — a book's notes** (18o U4). Idempotent (the book's `onAppear`
+    /// may run more than once); the closure holds only the session.
+    static func wire(book: BookViewModel, session: AppSession) {
+        book.onNoteLeft = { [weak session] id in
+            guard let session else { return }
+            leaving([id], session: session)
+        }
+    }
+
+    /// **Road 6 — a Compare board's peers** (18o U4, PROVISIONAL #163).
+    /// Idempotent; the closure holds only the session.
+    static func wire(compare: CompareViewModel, session: AppSession) {
+        compare.onNotesLeft = { [weak session] ids in
+            guard let session else { return }
+            leaving(ids, session: session)
         }
     }
 

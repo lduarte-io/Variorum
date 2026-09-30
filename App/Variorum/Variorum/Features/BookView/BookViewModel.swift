@@ -1059,6 +1059,32 @@ final class BookViewModel {
         indexLivePostID = postID
     }
 
+    // MARK: - 18o U4 (R-18k-6) — the note she LEAVES inside the book
+
+    /// The note her caret was last in (`BookNoteTrail` holds the rule).
+    /// View state, like the reports above: never persisted, ids only.
+    @ObservationIgnored private var noteTrail = BookNoteTrail()
+
+    /// **The book's LEAVING signal** — raised with a note she has just moved
+    /// off (into a different note, or out of the book). Wired by `BookView`
+    /// to `AppSession.savepointOnLeaving` (`SavepointOnLeave.wire(book:)`); a
+    /// no-op by default, so a book built in a test or a preview writes
+    /// nothing — `WorkspaceModel.onNotesLeft`'s shape, for the notes the
+    /// workspace's shown set cannot see.
+    @ObservationIgnored var onNoteLeft: (String) -> Void = { _ in }
+
+    /// The book's note state as the sidebar box publishes it (`BookView`
+    /// derives it through `BookNoteBox`, from the facts above and the mode).
+    func notePlaceChanged(_ state: NoteBoxState) {
+        if let left = noteTrail.observe(state) { onNoteLeft(left) }
+    }
+
+    /// The book is leaving its pane (the pane shows something else, the split
+    /// closes, the window goes): the note she was in is left.
+    func leaveBook() {
+        if let left = noteTrail.leaveBook() { onNoteLeft(left) }
+    }
+
     /// The facts `BookAnchor` reads, assembled from my own state.
     var anchorPlace: BookAnchor.Place {
         BookAnchor.Place(

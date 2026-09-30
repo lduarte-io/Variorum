@@ -125,8 +125,23 @@ final class CompareViewModel {
             let picked = peerSlots.compactMap(\.postID)
             for postID in picked { _ = coordinator(for: postID) }
             if picked != oldValue.compactMap(\.postID) { restartObservation() }
+            // 18o U4 (R-18k-6's Compare clause, PROVISIONAL #163): a peer
+            // that left the board's columns — swapped out, removed — is LEFT.
+            // The anchor never is (it is the pane's own note; its leaving is
+            // the workspace's).
+            let departed = oldValue.compactMap(\.postID)
+                .filter { !picked.contains($0) && $0 != anchorPostID }
+            if !departed.isEmpty { onNotesLeft(departed) }
         }
     }
+
+    /// **The board's LEAVING signal** (18o U4, PROVISIONAL #163) — raised
+    /// with the PEERS it has just stopped showing: a column swapped to another
+    /// note or removed, and every peer when the board itself goes
+    /// (`teardown`). Wired by `CompareBoardView` to
+    /// `AppSession.savepointOnLeaving` (`SavepointOnLeave.wire(compare:)`); a
+    /// no-op by default, so a board built in a test writes nothing.
+    @ObservationIgnored var onNotesLeft: ([String]) -> Void = { _ in }
     /// S4-3/S4-12 — "follow this post's order": display-only lineage-tied
     /// ordering of the peer columns. SESSION-LOCAL view state (a toggle,
     /// never persisted, never a mode). Default ON — the 11a aligned
@@ -344,6 +359,13 @@ final class CompareViewModel {
             coordinators[postID]?.stopObserving(token)
         }
         coordinatorTokens = [:]
+        // 18o U4 (PROVISIONAL #163): the board going is a leaving for every
+        // peer it was showing — never for the anchor, whose leaving is the
+        // workspace's (a mode switch away from Compare is not one). Reported
+        // before the holds go back; either order ends the same (18k C1: the
+        // last release of a LEFT note re-takes its savepoint).
+        let peers = peerSlots.compactMap(\.postID).filter { $0 != anchorPostID }
+        if !peers.isEmpty { onNotesLeft(peers) }
         // 18k C1: let go of every post this board held — flush first, then
         // exactly one release per acquisition. A board reused after this
         // (a host keeping it across `onDisappear`) re-acquires on its next
@@ -969,6 +991,9 @@ struct CompareBoardView: View {
         .debugProbeScope(session)
         .task { await model.start() }
         .onAppear {
+            // 18o U4 (PROVISIONAL #163): the board's peers leave through the
+            // one leaving road.
+            SavepointOnLeave.wire(compare: model, session: session)
             // 13b 4D (the 4C handoff): ⌘S acts where it's advertised — the
             // one routed command this board consumes; the rest return
             // false and keep falling through (compare's editing is direct

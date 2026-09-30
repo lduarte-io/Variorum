@@ -1504,7 +1504,15 @@ departing surface wrote on its way out) and the entry drops then. So reporting a
   savepoint) · board left 3 (no savepoint · 2 ≠ 1 · 2 ≠ 1); the four guards GREEN (the cadence pin's two cases
   included) — green on old by construction (nothing was ever reported); their teeth are shown against mutations after
   the fix. Every premise held on old (the typed text reached the store — the unmount's own flush).
-- The fix — NOT-STARTED (the design above).
+- The fix — COMMITTED (this commit), verification PENDING: `Features/BookView/BookNoteTrail.swift` (NEW, pure — the
+  rule over `NoteBoxState`) · `BookViewModel` (`noteTrail`, `onNoteLeft` — no-op by default — `notePlaceChanged(_:)`,
+  `leaveBook()`) · `BookView` (onAppear: `SavepointOnLeave.wire(book:)` then `reportNotePlace()`; the
+  `noteBoxReport` onChange also reports; onDisappear: `model.leaveBook()`) · `CompareViewModel` (`onNotesLeft`, no-op by
+  default; `peerSlots.didSet` reports the departed peers — never the anchor; `teardown()` reports every peer before the
+  holds go back) + `CompareBoardView.onAppear` wires it · `SavepointOnLeave` (roads 5 and 6 in the header's mapping;
+  `wire(book:)`, `wire(compare:)`). Pure rule pins `VariorumTests/BookNoteTrailTests.swift` (NEW, 6 — the rule's table;
+  a separate file so the behavioural revert below keeps them compiling). Zero `AppSession`, zero `Operations`, zero
+  editor seam, zero `Sync/`, schema, settings.
 - Behavioural revert R-U4 (the production files from the pins commit over the fix) — NOT-STARTED; no revert starts until
   this line names it and the pre-revert state is committed.
 - QUESTIONS #163 (the Compare-peer PROVISIONAL + the book's note-switch reading) — NOT-STARTED.
