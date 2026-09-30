@@ -227,8 +227,8 @@ with someone at the machine); iOS generic build green; install `/Applications` b
 | 12b | **The microsyntax CRLF edge (adopted from U2's NOTICED 1 — P23's class at a sibling brain, in-theme):** `CaptureMicrosyntax.parse` walks lines on the literal `"\n"` (`App/Variorum/Shared/CaptureMicrosyntax.swift:111`) — in a CRLF capture rule 5 (a token-only line leaves with its newline) never fires and rule 2's one-line promise can be crossed. Fix: read the input through `SegmentationRules.normalizedLineEndings` at `parse`'s entry (App CAN see core; the output already normalises downstream at `bulkSegments`, so no double effect); pins red-on-old for both misread rules | U3 | **FIXED `cefde52b`** (core access `d2a63c43` — `normalizedLineEndings` public, body byte-unchanged; pins `b21b0c7f` — red-on-old 22 issues incl. the swallowed-capture worst case; R-12b identical; M-afterfast pins the placement; both existing microsyntax suites UNMODIFIED). Walk W3 both voices |
 | 13 | **Row 79** — ⌥⌘⇧M's CEREMONY branch reads the frozen `slots`: a mid-burst take makes it wrongly refuse "needs a fan", and a mid-burst archive falls through `openMergeCeremony`'s truth read into an INSTANT merge instead of its ruled refusal; the P27 fix (`liveActiveFans`, store-read authorization) is the shape (`EditorSurfaceController`, the `.merge` arm) | U3 | **FIXED `fbd5c55f`** (pins `539d830f` — red-on-old 4 issues 2/2 + the stale receipt; R-79 identical; M-guard/M-fallthrough each red their own half; `FannedDefaultsTests` UNMODIFIED). **Design divergence ADJUDICATED ACCEPTED** — the U3 adjudication. Walk W2 both voices |
 | 14 | **Row 78 / R-18k-6, RULED:** a note edited INSIDE A BOOK gets its leaving savepoint when she moves into a different note (or leaves the book), through the existing `savepointOnLeaving` road; Compare peers follow the same rule PROVISIONAL (QUESTIONS row) — the 18k C1 RECORD's machinery (`markLeaving`/`dropAfterLeaving`, the acquisition generation) is required reading | U4 | **FIXED `f3ab836e`** (pins `385fbaeb` — red-on-old 13 issues, all five bug pins; R-U4 9 issues identical; three guard mutations each red their own guard; `BookNoteTrail` pure over the note box's state; roads 5–6 declared in `SavepointOnLeave`'s own registry, ONE entry, zero AppSession/Operations lines; C1/L-d/J11 files UNMODIFIED; orchestrator re-ran 26/5 green). QUESTIONS **#163** (both PROVISIONAL readings). Walks W1–W3 PASS |
-| 15 | **17t item 1** — the typed NEAR-EMPTY sync confirmation (#86(c), ruled: warn + TYPED phrase, never refuse, never click-through; home #87: "with the rebuilt Replace Keys"): `Sources/VariorumCore/Sync/RekeyRecencyProbe.swift` has ZERO app consumers — wire the warning face + typed confirmation into the rebuilt Replace All Keys. Consume the probe from App; ZERO `Sync/` edits (a needed probe change is a stop-and-report → Fable work) | U5 | open |
-| 16 | **17t item 2** — COPY ALL on the recovery phrase exists in ONE place (Mac `ProtectionPane`, 60 s clipboard clear): wire the SHARED `SyncEnrollmentView`'s dead "Copied" branch + the Mac call sites (`KeyDoorModel.markWordsCopied` · `SyncEnrollmentModel.markWordsCopied` · `PostureSwitchModel.markWordsCopied` declare it; one call site exists). The phone's three word-screen doors stay the MOBILE APP ROW's — zero phone faces here | U5 | open |
+| 15 | **17t item 1** — the typed NEAR-EMPTY sync confirmation (#86(c), ruled: warn + TYPED phrase, never refuse, never click-through; home #87: "with the rebuilt Replace Keys"): `Sources/VariorumCore/Sync/RekeyRecencyProbe.swift` has ZERO app consumers — wire the warning face + typed confirmation into the rebuilt Replace All Keys. Consume the probe from App; ZERO `Sync/` edits (a needed probe change is a stop-and-report → Fable work) | U5 | **DISMISSED AS HOLLOW (the hallucination guard's own rule)** — the rebuilt Replace All Keys pulls to head FIRST then re-encrypts the server's own rows IN PLACE (`sync_reencrypt`); no local row ever overwrites a server row, so #86(c)'s hazard belonged to the RETIRED truncate-and-repush road (the probe's UI caller was DELIBERATELY retired at pre-13x 2b — the §13 sweep table says so verbatim; row 54 mis-filed a ruled retirement as an omission). Evidence pin `671d09bf` GREEN on today's tree (3-of-18 near-empty copy loses nothing; M-noPull reds it 15). **Her call is QUESTIONS #164** ((a) close-as-answered recommended) — only she closes a ruling |
+| 16 | **17t item 2** — COPY ALL on the recovery phrase exists in ONE place (Mac `ProtectionPane`, 60 s clipboard clear): wire the SHARED `SyncEnrollmentView`'s dead "Copied" branch + the Mac call sites (`KeyDoorModel.markWordsCopied` · `SyncEnrollmentModel.markWordsCopied` · `PostureSwitchModel.markWordsCopied` declare it; one call site exists). The phone's three word-screen doors stay the MOBILE APP ROW's — zero phone faces here | U5 | **FIXED for the Mac `ccf6eefc`** (scaffolding `6a11b072`, pins `9ba2a45b` — red-on-old 4 issues, exactly the four faces; R-U5 identical; M-receipt reds the receipt half alone; ONE `WordsCopyDoor` rule, the pane's 60 s clear hoisted verbatim, no second timer; WIDENED to all five Mac words screens — judgment call 3, her ask's own words). QUESTIONS **#165** (Universal Clipboard, OPEN, hers). The phone's word screens stay the MOBILE row's; the words-screen walk HELD (needs her real store — the script in the record) |
 | 17 | **#146, PROVISIONAL (hers to overturn):** the signed-out-first phone's seeded copy — at first sync where the account holds the shipped book DELETED, an UNTOUCHED (pristine, by the dedupe's own test) local copy is retired quietly into this device's Trash; an EDITED copy is never retired. Home: `Sources/VariorumCore/Sync/SampleLibraryDedupe.swift` — **FABLE work, this seat** | U6 | open |
 | 18 | The end LADDER (fresh `fable-reviewer` per round over the combined diff; cap three; every finding gets a written disposition here) | ladder | open |
 | 19 | Closeout: dispositions copied into the 17-file (17e + 17t); KnownIssues rows 54 · 55 · 64 · 66 · 73 · 78 · 79 · 84 resolved or re-owned; QUESTIONS rows landed (#160+); master plan row 18 + closeout-log paragraph (18m's paragraph rolls to the archive); MOBILE PARITY line; the author handoff; the install refresh per R-18k-3 at a verified zero-instance window (else HELD + bundled) | closeout | open |
@@ -495,8 +495,8 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 - U2 the import & launch-seed batch — **CLOSED (orchestrator adjudication 2026-09-30; rows 10–11 dispositioned; the microsyntax edge adopted as row 12b → U3)**.
 - U3 the two Mac doors (+ row 12b) — **CLOSED (orchestrator adjudication 2026-09-30; rows 12/12b/13 dispositioned; the row-13 design divergence accepted and named a ladder focus)**.
 - U4 the book leaving savepoint (R-18k-6) — **CLOSED (orchestrator adjudication 2026-09-30; row 14 dispositioned; ladder foci named — the ladder's first read)**.
-- U5 17t, the two unwired protection doors — DONE (implementer), awaiting the orchestrator's spot-check (item 1 DISMISSED AS HOLLOW — STOP-AND-REPORT, pinned, QUESTIONS #164; item 2 FIXED for the Mac on five words screens through one rule, QUESTIONS #165; the words-screen walk HELD — the dev store reaches it only through a custody write).
-- U6 #146 (Fable seat) — NOT-STARTED (SyncSpec + postmortem re-read precede any line).
+- U5 17t, the two unwired protection doors — **CLOSED (orchestrator adjudication 2026-09-30; row 15 DISMISSED AS HOLLOW pending her #164, row 16 FIXED; ladder foci named)**.
+- U6 #146 (Fable seat) — IN FLIGHT (this orchestrator's own build, started 2026-09-30; SyncSpec + postmortem + dedupe read whole at prep).
 - THE LADDER — NOT-STARTED.
 - CLOSEOUT + the install refresh — NOT-STARTED (refresh window unverified; her app's state unknown).
 
@@ -2125,4 +2125,37 @@ QUESTIONS rows landed: **#164 · #165**; the tail marker reads **#166**.
 
 - Deaths / resumes: none.
 
-**U5 — DONE (implementer), awaiting the orchestrator's spot-check.**
+**U5 — DONE (implementer), awaiting the orchestrator's spot-check.
+
+### UNIT U5 — ORCHESTRATOR ADJUDICATION (2026-09-30; the unit CLOSES here)
+
+**Verified by spot-check, not trusted:** 12 commits `671d09bf`…`d9e2c1bf`, pushed, ZERO trailers,
+tree clean. Scope exact (7 code/test files; **zero `Sources/`, zero `Sync/`, zero `Server/`,
+zero phone-only, zero key legs** — fence grep 0; the shared faces' door Mac-gated, the iOS
+generic build green). **Re-run by this seat:** `WordsCopyDoorTests` + `PostureSwitchTests` →
+**52 tests / 2 suites green** (the log's one `hmac check failed` line is a fixture's wrong-key
+probe, not a failure).
+
+**ITEM 1's STOP-AND-REPORT — ADJUDICATED CORRECT, the phase's best moment of discipline:** the
+brief ordered a build; the implementer instead traced the premise and found it GONE, and this
+seat VERIFIED the trace at the sources: the pre-13x design's §13 sweep table records
+`RekeyRecencyProbe`'s UI caller as DELIBERATELY RETIRED at 2b ("already gone (2b/3b)… its UI
+caller retired at 2b") because the rebuilt rotation is IN PLACE — `pullToHead` first (with its
+three refusals), then `sync_reencrypt` over the server's own rows, never a truncate-and-repush.
+#86(c)'s hazard ("re-pushes a copy the server is ahead of") was the OLD `AccountRekey` road's,
+and KnownIssues rows 54/17t item 1 mis-read the ruled retirement as an unwired omission (13u2
+UNIT D saw zero consumers without finding the 2b ruling). The hallucination guard's letter
+applies — a pin green on both sides exposes the finding as hollow: RECORD, don't fix. Building
+the typed gate anyway would be a guard for a road that no longer exists — protection theater,
+the exact thing her R13p-16 refused. **Her #86(c) RULING is not closed by this seat** — that is
+#164's, bundled with (a) close-as-answered recommended and (b) build-the-belt-anyway as the
+alternative; row 54's closeout wording carries the dated pointer and the reopen clause.
+
+**ITEM 2 accepted:** the widening to all five words screens (judgment call 3) is her ask's own
+spirit; ONE hoisted rule, no second timer, the dead caption branch now reachable, red-on-old
+exact. **FOR THE FABLE LADDER:** the item-1 dismissal (re-verify the trace cold — it decides a
+ruled row), the five-screen widening, **#165** (Copy All reaches Universal Clipboard beyond the
+60 s clear — pre-existing behaviour now on five screens where it was one: weigh whether (a)
+`currentHostOnly` should land before the phase closes), and the four new clipboard-writing
+faces. **HELD for her bundle:** the words-screen walk (her real store's Regenerate door,
+cancelled before confirm — the record's script); the #164 and #165 calls.**
