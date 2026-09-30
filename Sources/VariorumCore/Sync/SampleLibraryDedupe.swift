@@ -221,6 +221,10 @@ extension SyncEngine {
             db,
             sql: "SELECT id FROM reading WHERE name = ? AND deleted_at IS NULL ORDER BY id",
             arguments: [facts.bookName])
+        if copies.count == 1 {
+            return try retireSignedOutCopyIfOutranked(
+                db, facts: facts, liveCopyID: copies[0], touched: touched)
+        }
         guard copies.count > 1 else { return 0 }
         // The ladder's F2: a copy whose `reading` row arrived in THIS batch
         // is indeterminate for the pass. Its engagement signals — post_tag,
@@ -262,6 +266,76 @@ extension SyncEngine {
                 db, copyID: copyID, arrivingDead: touched.arrivingDeadIDs)
         }
         return repairs
+    }
+
+    /// **18o U6 — the SIGNED-OUT-FIRST retirement (QUESTIONS #146,
+    /// PROVISIONAL — hers to overturn).** The account's deletion wins over
+    /// an UNTOUCHED local copy, and never over a touched one. The live-copy
+    /// pass above cannot see this shape (it meets two LIVE copies; here one
+    /// copy is live and the account's is DEAD), so this leg fires when the
+    /// live same-name count is EXACTLY ONE and a same-name reading arrived
+    /// DEAD in this batch (`arrivingDeadIDs` — a row this store never saw
+    /// live — plus the live→dead `tombstonedParents` arm for completeness).
+    ///
+    /// **The later-intent guard is SyncSpec §3's own seq rule, at its
+    /// NARROWEST true reading:** retire only when the live copy has NEVER
+    /// been server-accepted (`knownSeq == 0`) and the arriving dead row
+    /// has (`> 0`) — the ruling's own words, "at the device's first sync".
+    /// The first cut compared seqs (`deadSeq > liveSeq`) and the EXISTING
+    /// convergence suites caught it wide: a two-copy meeting's retired
+    /// LOSER arrives dead with a seq above the pushed KEEPER's, and the
+    /// wide comparator killed the keeper (measured — 9 issues across the
+    /// pristine-pair scenarios; the narrowing is their fix). A meeting's
+    /// keeper has ALWAYS pushed by the time any retirement tombstone can
+    /// arrive (a retirement postdates the copy being seen), so never-
+    /// accepted separates her scenario from every convergence shape. The
+    /// corners: the signed-out phone (never accepted → fires) · a copy she
+    /// deliberately RESTORED after the deletion (on the restoring device no
+    /// dead row ever arrives again; on a from-scratch device the restored
+    /// copy arrives ACCEPTED → declines) · the A5-band crossing (the copy
+    /// pushed before the hidden tombstone arrived → accepted → declines —
+    /// the ruling's alternative-(i) outcome, seconds-wide, recorded).
+    ///
+    /// **Classification is the ONE existing body** (err toward EDITED, every
+    /// indeterminate leg intact): `.pristine` retires through
+    /// `retireSampleCopy` UNCHANGED (family-complete ordinary tombstones,
+    /// explicit outbox rows, Trash-listed — Put back real); `.edited` keeps
+    /// (her words outrank a sample book); `.indeterminate` DECLINES —
+    /// err toward keeping, no marker machinery for a state a locally-seeded
+    /// copy can barely reach. A copy that itself arrived this batch never
+    /// reaches here (the F2 quiescence arm above defers the whole pass
+    /// first). A self-retirement never records kill evidence
+    /// (`writeResolvedRow` is not on this road), so the #143(b) defense
+    /// cannot revive what this leg retires — by construction.
+    private func retireSignedOutCopyIfOutranked(
+        _ db: Database, facts: SampleLibraryDedupeFacts, liveCopyID: String,
+        touched: TouchedRows
+    ) throws -> Int {
+        var deadThisBatch = touched.arrivingDeadIDs["reading"] ?? []
+        for parent in touched.tombstonedParents where parent.table == "reading" {
+            deadThisBatch.insert(parent.rowID)
+        }
+        guard !deadThisBatch.isEmpty else { return 0 }
+        let deadSameName = try String.fetchAll(
+            db,
+            sql: """
+                SELECT id FROM reading
+                WHERE name = ? AND deleted_at IS NOT NULL
+                  AND id IN (SELECT value FROM json_each(?))
+                """,
+            arguments: [facts.bookName, jsonArray(deadThisBatch)])
+        guard !deadSameName.isEmpty else { return 0 }
+        guard try knownSeq(db, table: "reading", rowID: liveCopyID) == 0 else { return 0 }
+        guard try deadSameName.contains(where: { deadID in
+            try knownSeq(db, table: "reading", rowID: deadID) > 0
+        }) else { return 0 }
+        switch try SampleCopyClassifier.classify(db, copyID: liveCopyID, facts: facts) {
+        case .edited, .indeterminate:
+            return 0
+        case .pristine:
+            return try retireSampleCopy(
+                db, copyID: liveCopyID, arrivingDead: touched.arrivingDeadIDs)
+        }
     }
 
     /// The F2 marker: LOCAL-ONLY (`sync_state`, never synced — it names a
