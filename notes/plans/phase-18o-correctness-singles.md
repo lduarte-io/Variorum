@@ -1528,11 +1528,13 @@ departing surface wrote on its way out) and the entry drops then. So reporting a
   the registry claim for the Outline's editor moved to C1's own bare-model shape (`BookLeavingRegistryTests`, both
   orders: the leaving before and after the editor dies); the Index and Compare pins keep theirs (deterministic teardown
   — mounted and red-on-old). The file header states the measured limit.
-- Behavioural revert R-U4 — NEXT, named here before it runs: the pre-revert state is committed (this commit); R-U4 =
-  `BookView.swift`, `CompareBoardView.swift` and `SavepointOnLeave.swift` checked out from `385fbaeb` (the pins commit)
-  over the fix — the book then never reports its note state and the board never reports a peer, while
-  `BookViewModel`'s trail and `BookNoteTrail` stay (inert, no caller) so the rule pins still compile; restore by
-  `git checkout HEAD -- <the three>`, verified by `git diff`.
+- Behavioural revert R-U4 — IN-PROGRESS, named here before it runs (the pre-revert state is committed, `9a4e5afc`;
+  corrected before starting — the first-named shape would not compile, since the bare-model registry pins call
+  `SavepointOnLeave.wire(book:)`): R-U4 = `BookView.swift` checked out from `385fbaeb` (the pins commit — the book never
+  wires nor reports its note state) + in `CompareBoardView.swift` the THREE behavioural hunks removed (the
+  `peerSlots.didSet` report, the `teardown()` report, the board's `onAppear` wire — `onNotesLeft` stays declared, so
+  `SavepointOnLeave` compiles unchanged); `BookViewModel`'s trail, `BookNoteTrail` and the two `wire` overloads stay
+  (inert with no caller). Restore by `git checkout HEAD -- <the two>`, verified by `git diff`.
 - QUESTIONS #163 (the Compare-peer PROVISIONAL + the book's note-switch reading) — NOT-STARTED.
 - Closing runs (`AutosaveRegistryLifecycleTests` + `AutosaveRegistryReleaseTests` FULL, `SavepointOnLeaveTests`, the
   book/Compare suites touched, the eleven Tutorial suites; the mobile suite only if a shared file changes — none
