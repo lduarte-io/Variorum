@@ -119,8 +119,10 @@ public enum SegmentationRules {
     /// can never read a clipboard differently. A CR followed by a CRLF is
     /// two line endings (`"A\r\r\nB"` → `"A\n\nB"`). Text with no CR byte
     /// passes through untouched (the byte test, because a `Character` test
-    /// would miss `"\r\n"` — the grapheme IS the defect).
-    static func normalizedLineEndings(_ text: String) -> String {
+    /// would miss `"\r\n"` — the grapheme IS the defect). **Public since 18o
+    /// U3** so the app's capture microsyntax reads a capture's lines by this
+    /// same rule (`CaptureMicrosyntax.parse`, ledger row 12b).
+    public static func normalizedLineEndings(_ text: String) -> String {
         guard text.utf8.contains(13) else { return text }
         return text
             .replacingOccurrences(of: "\r\n", with: "\n")
