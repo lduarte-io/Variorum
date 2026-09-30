@@ -104,3 +104,15 @@ with corpus size (the diff is one doc comment + record lines; zero behavior).
 
 - R2-1 (the record's design item 5) — (pending)
 - R2-2 (the stale stubs, NIT) — (pending)
+
+---
+
+## DISPOSITIONS (the orchestrator, 2026-09-30 — the ladder CLOSES here)
+
+- **R2-1 (MINOR) — CONFIRMED, FIXED in place:** the U6 record's design item 5 now carries the
+  bracketed correction naming the true shield and killing the "second net" belief (the plan
+  file is the binding record; #146 is PROVISIONAL and 13y-adjacent, so the map matters).
+- **R2-2 (NIT) — CONFIRMED, STRUCK:** the round-1 file's stale "(pending)" stubs marked
+  superseded.
+- **Round 3 NOT earned** (no new BLOCKER/MAJOR in either round). THE LADDER IS CLOSED:
+  two rounds, 0/0/3+1/1 total, zero disputes, every finding with a repo-first disposition.

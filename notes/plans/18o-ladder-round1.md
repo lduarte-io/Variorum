@@ -210,9 +210,9 @@ across entities, or scales with corpus size (the two new repair legs and the pin
 
 ## DISPOSITIONS (filled after the cross-model exchange / orchestrator arbitration)
 
-- Finding 1 — (pending)
-- Finding 2 — (pending)
-- Finding 3 — (pending)
+- Finding 1 — (SUPERSEDED — the filled DISPOSITIONS section below is the record; R2's NIT)
+- Finding 2 — (SUPERSEDED — the filled DISPOSITIONS section below is the record; R2's NIT)
+- Finding 3 — (SUPERSEDED — the filled DISPOSITIONS section below is the record; R2's NIT)
 
 ---
 
