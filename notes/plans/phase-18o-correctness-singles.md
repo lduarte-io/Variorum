@@ -473,7 +473,7 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 ## LIVE STATUS (flipped in the same commit as each piece — the resiliency protocol's rule)
 
 - PLAN FILE authored + committed — **DONE** (this commit).
-- U1 the honesty & paper-cuts batch — NOT-STARTED (brief = the U1 section above).
+- U1 the honesty & paper-cuts batch — IN-PROGRESS (`opus-implementer`; the UNIT U1 RECORD below carries its own LIVE STATUS).
 - U2 the import & launch-seed batch — NOT-STARTED.
 - U3 the two Mac doors — NOT-STARTED.
 - U4 the book leaving savepoint (R-18k-6) — NOT-STARTED.
@@ -481,3 +481,35 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 - U6 #146 (Fable seat) — NOT-STARTED (SyncSpec + postmortem re-read precede any line).
 - THE LADDER — NOT-STARTED.
 - CLOSEOUT + the install refresh — NOT-STARTED (refresh window unverified; her app's state unknown).
+
+---
+
+## UNIT U1 RECORD — the honesty & paper-cuts batch (implementer: `opus-implementer`, 2026-09-29)
+
+**NOT DONE (first line, per the contract):** PENDING — filled at the unit's close.
+
+### READING (done in-session before any code)
+
+`CLAUDE.md` + its auto-loaded canon (CoreDescription, OverallModel, AppSpec) · this file WHOLE · `notes/KnownIssuesAndTechDebt.md`
+(the header rule; rows 64 and 84 read in full) · `notes/SessionResiliencyProtocol.md` whole · the 17-file's 17e section whole (the
+P29/P32/P34/P35/P37 briefs with their VERIFIER traces; items (11) and (12)) · `notes/plans/phase-18k-runtime-hygiene.md` THE
+KICKOFF SITTING (R-18k-1…R-18k-10) and the UNIT C7 RECORD whole (NOTICED 1 = row 84's mechanism) · `notes/QUESTIONS.md`'s tail
+(next free **#160**) and #146–#159's shape. **Instance state at start:** her real-store app IS RUNNING
+(`/Applications/Variorum.app/Contents/MacOS/Variorum`, pid 21496) — never touched; no Release build, no refresh; GUI only on the
+Debug dev store behind the per-step guard.
+
+### LIVE STATUS
+
+- Reading + this record opened — DONE (this commit).
+- P29 (phone redo-door comment) — NOT-STARTED.
+- P32 (false-premise comment + QUESTIONS row) — NOT-STARTED.
+- P34 (BoundarySnapping doc + boundary pin + QUESTIONS row) — NOT-STARTED.
+- P35 (`setShelfPinned` self-heal) — NOT-STARTED.
+- P37 (tray ARCHIVED truncation marker) — NOT-STARTED.
+- 17e (12) (`CapabilityContext.windowKind`) — NOT-STARTED.
+- Row 84 (future-stamped backup copy) — NOT-STARTED.
+- Row 64 RECORD-ONLY (pin re-verify + R-18k-4) — NOT-STARTED.
+- 17e (11) RECORD-ONLY (disposition line) — NOT-STARTED.
+- Closing runs (focused Mac suites · `swift test` · FULL mobile suite) — NOT-STARTED.
+- Walk captures (`notes/plans/18o-screens/u1/`) — NOT-STARTED.
+- Deaths / resumes: none.
