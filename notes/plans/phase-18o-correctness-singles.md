@@ -1164,7 +1164,7 @@ trace and its C5 disposition lines · P27's fix `dee61938` · `App/Variorum/Shar
     (`nothingUserFacingNamesTheMac`, its one offender still `SampleLibraryJekyllBook.swift`'s disclaimer — #155's,
     attributed, NOT re-attributed); 0 skipped. 656/114 = U2's count (this unit added no phone test; it compiles and runs
     the shared `CaptureMicrosyntax` + `SeededBookRestore` changes). DONE.
-- Walks — IN-PROGRESS (her away grant; the dev-store Debug build `App/Variorum/DerivedData/18o-u1/Build/Products/Debug/
+- Walks — the run (her away grant; the dev-store Debug build `App/Variorum/DerivedData/18o-u1/Build/Products/Debug/
   Variorum.app`, built 04:40 from the final code tree — the last code commit is 04:36; zero instances by path before
   launch; `guard.sh --author` then the pid guard before every act, acts ≥ 3 s apart; no foreign dialog on screen
   (`W0` full-screen check); `caffeinate -d` for the walk; captures in `notes/plans/18o-screens/u3/`, gitignored):
@@ -1179,4 +1179,38 @@ trace and its C5 disposition lines · P27's fix `dee61938` · `App/Variorum/Shar
     (`W1c-…png`); **pressing the keyless tenth row** (AX press on menu item 10) opened *The Adventure of the Noble
     Bachelor* (`W1d-tenth-row-click-opens-its-note-terminal.png`) — the row acts (P-2); on the old road it asked the
     ordinal address and landed nothing.
+  - **W2 — row 79, ⌘⇧M and ⌥⌘⇧M through the real Block menu — PASS, both voices.** A scratch note staged through the
+    shelf's quick-entry bar (`U3 walk alpha.` ⇧⏎ `U3 walk beta.` ⏎ → two blocks, in no book). (a) ⌘A, **Block ▸ Merge
+    choosing takes…** on the UNFANNED pair → the ruled refusal *"These blocks have one take each — ⌘⇧M joins them.
+    Merge choosing takes is for arranging the takes when either side has a fan."*, both blocks intact
+    (`W2a-…-terminal.png`, `W2a-…-study.png`). (b) Caret into block 2, **Block ▸ New Take (Branch)** (the fan badge
+    appears), ⌘A, **Merge choosing takes…** → the sheet *"Merge choosing takes · 2 blocks · 1 + 2 takes"*, pre-paired,
+    Bring every take selected, no rows touched (`W2b-…-terminal.png`, `W2b-…-study.png`); Esc cancelled it. (c) ⌘A,
+    **Block ▸ Merge Blocks** (⌘⇧M's item) → one block wearing the carried fan, receipt *"Blocks merged — the takes you
+    were looking at joined, an…"* (`W2c-merge-blocks-carries-the-fan-terminal.png`). **Not hand-walkable, said
+    plainly:** the mid-burst race itself (a take born or archived INSIDE a typing burst's defer window) — synthetic
+    typing into the TK2 editor drops keys (WalkKit's standing fact) and the window is the autosave debounce; the pins
+    drive exactly that race, P27's precedent (18k C5 THE GUI WALK step 6).
+  - **W3 — row 12b, a CRLF paste through the shelf's quick-entry bar — PASS, both voices.** Her clipboard was EMPTY (no
+    types) before the walk; each fixture was placed with `pbcopy`, pasted with ⌘V, and the box's own AX value read back
+    by bytes (`0d 0a` present — the CRLF reached the model; the box is a plain-text `NSTextView` whose `textDidChange`
+    hands `view.string` straight on); the clipboard was cleared to no types afterwards (as found). (a) **`{#dream⏎U3
+    walk: a weird dream about the ocean}` (CRLF)** — the old parse swallowed it whole into a tag path, cleared the box
+    and filed NOTHING; now ⏎ files it: Blocks mode reads **"2 blocks · 9 words"**, 01 `{#dream` · 02 `U3 walk: a weird
+    dream about the ocean}`, no tag applied (`W3a-crlf-unclosed-tag-capture-in-box-terminal.png`,
+    `W3a-crlf-unclosed-tag-files-two-blocks-terminal.png`). (b) **`U3 walk: paragraph one.⏎{#u3walk}⏎U3 walk: paragraph
+    two.` (CRLF)** → the `u3walk` chip on the note and the two paragraphs ADJACENT in Write (block 1/2) — no blank
+    paragraph where the token line stood (`W3b-…-terminal.png`, `W3b-…-study.png`). A unique tag was used rather than
+    `{#dream}` so the dev store's *dream journal* smart book is not fed walk residue.
+  - Voices: W1 is system menu chrome (voice-independent — one capture set). W2's refusal toast and sheet and W3b's note
+    captured in BOTH voices (flipped by the palette's "Use Study Voice", then **"Use Terminal Voice" — Terminal
+    RESTORED** and re-verified by capture).
+  - Closing state: the dev instance quit BY IDENTITY (`tell application id "io.lduarte.Variorum.debug" to quit`),
+    `pgrep -fl 'Variorum.app/Contents/MacOS'` empty afterwards; no `/Applications` instance at any point; this walk's
+    `caffeinate -d` stopped (the two other `caffeinate` processes are not this session's and were left). **Walk
+    residue in the dev store:** three scratch notes titled *2026-09-30* (in no book): the W2 note (merged, one block
+    carrying a two-take fan), the W3a note (`{#dream` / `U3 walk: …}`), the W3b note (two blocks, a second take on block
+    2, tagged `u3walk` — a NEW tag in the dev taxonomy); the window's Open strip holds the ten Sherlock stories
+    (session state).
+- Walks — DONE (W1 · W2 · W3 above).
 - Deaths / resumes: none.
