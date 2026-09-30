@@ -2281,8 +2281,13 @@ marker re-arm); the A5-band corner's recording.
   her real store — the script in the U5 record).
 - **Finals:** core `swift test` WHOLE **1751/184 PASSED** (+1 standing env-gated skip); FULL
   mobile **656/114 = the 4 known + F-1 (#155's, attributed)**; per-unit Mac closing sets green
-  throughout; **the full-Mac finals run: PENDING(the background run at this closeout — filled
-  below)**; iOS generic build green at every Shared-touching unit.
+  throughout; **the full-Mac finals: `Test run with 3427 tests in 565 suites failed … with 8
+  issues (including 5 known issues)` — the 5 known are the standing withKnownIssue rows
+  (#154(b)'s four + U7's one); the THREE real issues are ONE test,
+  `MastheadLayoutTests.thePathChipAndTheTagClusterNeverIntersectInStudy`, ADJUDICATED
+  LOAD-FLAKE: isolated 3/3 GREEN on the same tree (13/1 each), ZERO masthead/voice files in
+  the phase's diff (grep 0) — the standing load-flaky-geometry family (KnownIssues row 42's
+  list; the sighting appended there)**; iOS generic build green at every Shared-touching unit.
 - **Scope:** zero schema · zero migrations · zero `Server/` lines · marker 9 · the editor seam
   untouched (`EditorTextView`/`BlockRangeIndex`/`PaneSurface`/`PaneTextAuthority` diff-empty);
   the ONE `Sync/` diff is U6's file, the Fable seat's, twice-cold-reviewed.
