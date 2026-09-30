@@ -1888,8 +1888,16 @@ guards green on both: the hoisted rule's two arms (clears when unmoved; never cl
   sibling itself now holds all 18. **Run on today's tree (`18o-u5-item1-pin.log`): `✔ Test run with 45 tests in 1 suite
   passed` — the pin GREEN (1.949 s) ⇒ HOLLOW as a defect: the loss the gate would guard does not occur.** Not fixed (the
   contract's hollow rule).
-- Item 1 — the pin's teeth (M-noPull: step 1's `pullToHead()` removed) — IN-PROGRESS (named before it runs; the
-  pre-mutation state is this commit). Then QUESTIONS #164 — NOT-STARTED.
+- Item 1 — the pin's teeth — DONE: **M-noPull** (step 1's `engine.pullToHead()` commented out in
+  `PostureSwitch.swift:506`; pre-mutation state committed `671d09bf`) → `18o-u5-m-nopull.log` **`✘ Test run with 45 tests
+  in 1 suite failed … with 21 issues`** — the pin RED with exactly **15 issues**, one per note the near-empty copy never
+  received (its local half), while its SERVER half stayed GREEN: even without the pull, the in-place walk alone kept all 18
+  notes live and readable under the new keys — the road's second, independent protection, measured. (The other 6 issues
+  are three existing step-1 pins biting on the same mutation: `aRotationStillFinishingOnAnotherDevice…` 1,
+  `aRefusedCeremonyResumesTheSyncItPausedOnEveryExit` 1, `stepOneDrainsTheOutboxBoundedAtThreeRounds` 4.) Restored by
+  `git checkout HEAD --`, `git status` clean.
+- QUESTIONS **#164** — DONE (this commit): the product call — (a) close as answered, no gate (RECOMMENDED); (b) a typed
+  heads-up with honest copy; (c) hers. Tail marker → **#165**.
 - Item 2 scaffolding (behaviour-neutral: `WordsCopyDoor.swift`, the hoist, `PassphraseSetModel` flag, `PhraseOnlySheet`
   inputs) — NOT-STARTED.
 - Item 2 pins (red-on-old on the scaffolding tree) — NOT-STARTED.
