@@ -3935,3 +3935,109 @@ struct PostureSwitchTests {
     }
 }
 
+
+// MARK: - 18o U5 (ledger row 15 — 17t item 1): #86(c)'s near-empty corner on the REBUILT road
+
+extension PostureSwitchTests {
+    /// 18o U5 — **#86(c)'s NEAR-EMPTY CORNER, ON THE ROAD THAT EXISTS NOW** (a
+    /// documented-behaviour pin; the UNIT U5 RECORD's THE TRACE — ITEM 1).
+    /// Her ruling answered the 14c re-key, which TRUNCATED the mirror and
+    /// re-pushed LOCAL truth: a near-empty store re-keying over a full server
+    /// would have flattened it, and T1's probe warned before that truncate.
+    /// The rebuilt Replace All Keys pulls to head FIRST (§4 step 1) and
+    /// re-encrypts the SERVER's own rows in place (step 3, `sync_reencrypt`),
+    /// so the corner the probe still DETECTS loses nothing: every note the
+    /// fuller server held is still live there under the NEW keys, and the
+    /// near-empty copy ends holding all of them. GREEN ON TODAY'S TREE BY
+    /// DESIGN — this is the evidence that 17t item 1 is hollow as a defect
+    /// (the typed gate itself is hers: QUESTIONS #164); it reds the day a
+    /// local-as-truth road returns to this door.
+    @Test func aNearEmptyCopysReplaceAllKeysLosesNothingTheFullerServerHolds() async throws {
+        let full = try await makeWorld()
+        defer { full.tearDown() }
+        let mirror = try #require(full.mirror)
+        // The fuller server: twelve more notes from the full device, pushed.
+        var serverTitles = full.seededTitles
+        var fuller: [(id: String, title: String)] = []
+        for index in 0..<12 {
+            fuller.append((id: "fuller-\(index)-\(UUID().uuidString.prefix(6))",
+                           title: "Fuller note \(index) — \(UUID().uuidString.prefix(4))"))
+        }
+        for note in fuller { serverTitles[note.id] = note.title }
+        let rows = fuller
+        try await full.view.write { db in
+            for note in rows {
+                try db.execute(
+                    sql: "INSERT INTO container (id, kind, title, created_at, updated_at) VALUES (?, 'post', ?, ?, ?)",
+                    arguments: [note.id, note.title, "2026-09-06T00:00:00Z", "2026-09-06T00:00:00Z"])
+            }
+        }
+        let fullEngine = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: full.keyStore))
+        try await withDependencies { $0.database = full.view } operation: {
+            let report = try await fullEngine.push()
+            #expect(report.accepted >= 12, "the fuller server's notes pushed")
+        }
+
+        // The NEAR-EMPTY copy: a sibling on the same account holding only
+        // its own three notes, never pulled — the corner, exactly.
+        let nearEmpty = try await makeWorld(sharing: full)
+        defer { nearEmpty.tearDown() }
+        for (id, title) in nearEmpty.seededTitles { serverTitles[id] = title }
+        let localBefore = try await nearEmpty.view.read { db in
+            try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM container WHERE kind = 'post'") ?? 0
+        }
+        #expect(localBefore == 3, "the near-empty copy holds three notes of eighteen")
+
+        // (1) The T1 probe reads it exactly as #86(c)'s corner — the server
+        // holds fifteen notes this copy has never seen.
+        let report = try await withDependencies { $0.database = nearEmpty.view } operation: {
+            try await RekeyRecencyProbe(
+                transport: mirror, keyProvider: DeviceKeySyncProvider(store: nearEmpty.keyStore)).assess()
+        }
+        #expect(report.notesOnlyOnServer == 15, "the probe names the corner: \(report)")
+        #expect(RekeyGuardRule.decide(report) == .warnFirst)
+
+        // (2) Replace All Keys, FROM the near-empty copy.
+        let outcome = try await nearEmpty.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: nil)
+        let material = try #require(outcome.material)
+        #expect(!outcome.entersCastle)
+
+        // (3) The server lost NOTHING: every note it held is still there,
+        // live — and a fresh device under the NEW keys reads all eighteen
+        // back in the clear (so each was re-encrypted, not replaced).
+        let stored = await mirror.stored()
+        for id in serverTitles.keys {
+            let row = stored["container/\(id)"]?.row
+            #expect(row != nil, "\(id) is still on the server")
+            #expect(row?.columns["deleted_at"] == nil || row?.columns["deleted_at"] == .null,
+                    "\(id) is still live on the server")
+        }
+        let followerURL = nearEmpty.dir.appendingPathComponent("u5-follower/variorum.sqlite")
+        let follower = try AppDatabase.openStore(at: followerURL, custody: .inMemory(initial: .mint()))
+        let followerEngine = SyncEngine(transport: mirror, keyProvider: FixedKeyProvider(keys: material.syncKeys))
+        try await withDependencies { $0.database = follower } operation: {
+            _ = try await followerEngine.pull()
+        }
+        let followerTitles = try await follower.read { db in
+            try Row.fetchAll(db, sql: "SELECT id, title FROM container WHERE deleted_at IS NULL")
+                .reduce(into: [String: String]()) { acc, row in
+                    let id: String = row["id"]; let title: String? = row["title"]; acc[id] = title
+                }
+        }
+        for (id, title) in serverTitles {
+            #expect(followerTitles[id] == title, "a device under the new keys reads \(id) in the clear")
+        }
+
+        // (4) And the near-empty copy is no longer near-empty: step 1 pulled
+        // the whole server into it before a single key turned.
+        let localAfter = try await nearEmpty.view.read { db in
+            try Row.fetchAll(db, sql: "SELECT id, title FROM container WHERE deleted_at IS NULL")
+                .reduce(into: [String: String]()) { acc, row in
+                    let id: String = row["id"]; let title: String? = row["title"]; acc[id] = title
+                }
+        }
+        for (id, title) in serverTitles {
+            #expect(localAfter[id] == title, "the near-empty copy now holds \(id)")
+        }
+    }
+}

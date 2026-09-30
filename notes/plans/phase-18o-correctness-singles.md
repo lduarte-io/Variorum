@@ -1880,8 +1880,16 @@ guards green on both: the hoisted rule's two arms (clears when unmoved; never cl
 ### LIVE STATUS
 
 - Reading + the item-1 trace + the item-2 design + this record opened — DONE (this commit).
-- Item 1 — the documented-behaviour pin (near-empty sibling's Replace All Keys loses nothing; the probe reads the corner)
-  — NOT-STARTED. Then its teeth (a mutation) + QUESTIONS #164 — NOT-STARTED.
+- Item 1 — the documented-behaviour pin — DONE (this commit): `PostureSwitchTests.aNearEmptyCopysReplaceAllKeysLosesNothingTheFullerServerHolds`
+  (an extension appended to `PostureSwitchTests.swift` — the world builders are file-private; no existing test edited).
+  A full device pushes 15 notes; a sibling on the same account holds only its own 3, never pulled; the probe reads it
+  as #86(c)'s corner (`notesOnlyOnServer == 15`, `RekeyGuardRule` → `.warnFirst`); the sibling runs Replace All Keys;
+  then all 18 notes are still live on the mirror, a fresh device under the NEW keys reads all 18 in the clear, and the
+  sibling itself now holds all 18. **Run on today's tree (`18o-u5-item1-pin.log`): `✔ Test run with 45 tests in 1 suite
+  passed` — the pin GREEN (1.949 s) ⇒ HOLLOW as a defect: the loss the gate would guard does not occur.** Not fixed (the
+  contract's hollow rule).
+- Item 1 — the pin's teeth (M-noPull: step 1's `pullToHead()` removed) — IN-PROGRESS (named before it runs; the
+  pre-mutation state is this commit). Then QUESTIONS #164 — NOT-STARTED.
 - Item 2 scaffolding (behaviour-neutral: `WordsCopyDoor.swift`, the hoist, `PassphraseSetModel` flag, `PhraseOnlySheet`
   inputs) — NOT-STARTED.
 - Item 2 pins (red-on-old on the scaffolding tree) — NOT-STARTED.
