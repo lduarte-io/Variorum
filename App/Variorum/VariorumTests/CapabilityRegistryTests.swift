@@ -654,4 +654,37 @@ struct CapabilityRegistryTests {
         #expect(!CapabilityRegistry.isEnabled(
             .closeAllTakes, in: CapabilityContext(mode: .lenses)))
     }
+
+    // MARK: - 18o U1 — 17e (12): the sidebar toggle's grey is a REGISTRY fact
+
+    /// The View-menu item greyed while a note-only (or quick-note) window was
+    /// key — `.disabled(… windows.activeWindowKind != .full)`, a per-view
+    /// if-statement — while the registry declared `.toggleSidebar` ALWAYS
+    /// available: a gate the walk could not see (P-1: gating is data). With
+    /// no key window known (the default context), there is no sidebar to
+    /// toggle, exactly as the menu has always said. **RED ON OLD** (`always`).
+    @Test func theSidebarToggleIsGreyWhereNoFullWindowIsKey() {
+        #expect(CapabilityRegistry.availability(.toggleSidebar, in: CapabilityContext())
+                == .unavailable,
+                "no key window known ⇒ no sidebar to toggle — the registry says so itself")
+    }
+
+    /// …and the menu reads that fact FROM the registry rather than re-deriving
+    /// it: its item is gated by `enabled(.toggleSidebar)`, and no menu item
+    /// gates on the window registry's kind directly any more. **RED ON OLD.**
+    @Test func theSidebarMenuItemReadsItsGreyFromTheRegistry() {
+        let url = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+            .appendingPathComponent("Variorum/EditorCommands.swift")
+        let file = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+        #expect(!file.isEmpty, "the pin found the file it is about")
+        let gatedFromTheRegistry = file.contains(
+            "Button(verb(.toggleSidebar)) { windows.activeRouter?.sidebarShown.toggle() }\n"
+            + "                .keyboardShortcut(\"s\", modifiers: [.command, .control])\n"
+            + "                .disabled(!enabled(.toggleSidebar))")
+        #expect(gatedFromTheRegistry, "the item's grey is the registry's answer")
+        let gatesOnWindowKind = file.contains("activeWindowKind")
+        #expect(!gatesOnWindowKind, "no menu item re-derives a window-kind gate")
+    }
 }
