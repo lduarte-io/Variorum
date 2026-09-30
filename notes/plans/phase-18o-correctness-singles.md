@@ -1922,8 +1922,13 @@ guards green on both: the hoisted rule's two arms (clears when unmoved; never cl
   existing caption branch (now reachable); (3) `KeyDoorView` `.wordsShow` — the same door (Mac-gated) + the caption branch
   (copy §2a's sub-line) above its written/cancel row; (4) `PassphraseSetSheet` `.showPhrase` and (5) `PhraseOnlySheet` — the
   ceremony sheet's own row shape: `[Copy All] [Copied…] ⟷ [I've written them down]` (4 reads `model.copiedWords`, 5 its
-  presenter's `copied`).
-- R-U5 behavioural revert — NOT-STARTED.
+  presenter's `copied`). **Fixed-tree run (`18o-u5-pins-fixed.log`): `✔ Test run with 67 tests in 5 suites passed`** —
+  `WordsCopyDoorTests` 6 + `PostureSwitchTests` 46 (incl. both U5 extensions) + `SyncEnrollmentTests` +
+  `KeyDoorTests` + `ProtectionSurfaceRenderTests`, every existing pin UNMODIFIED.
+- R-U5 behavioural revert — IN-PROGRESS (named before it runs; pre-revert state committed): R-U5 =
+  `SyncEnrollmentView.swift`, `KeyDoorView.swift`, `ProtectionPane.swift` checked out from `9ba2a45b` (the pins commit —
+  the scaffolding tree: the ONE door + the hoist present, the four faces without it) over the fix; run `WordsCopyDoorTests`
+  + `PostureSwitchTests`; restore by `git checkout HEAD --` the three, verified by `git diff`.
 - Closing runs (focused Mac suites + the eleven Tutorial suites; iOS generic build; FULL mobile suite — shared files change)
   — NOT-STARTED.
 - Walk (Protection pane's copy door + the enrollment page's caption where reachable on the dev store) — NOT-STARTED.
