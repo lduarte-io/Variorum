@@ -107,6 +107,12 @@ struct SyncEnrollmentView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .privacySensitive()
                     .pagePhraseCard(pageStyle)
+                // 18o U5 (17t item 2): copy §2a Screen 3's *Copy All* — the ONE
+                // door (`WordsCopyDoor`); the Mac's arm only (the phone's
+                // word-screen doors are the mobile app row's).
+                #if os(macOS)
+                WordsCopyDoor(words: words, pageStyle: pageStyle) { model.markWordsCopied() }
+                #endif
                 if model.copiedWords {
                     Text(ProtectionCopy.wordsCopied).pageCaption(pageStyle)
                 }

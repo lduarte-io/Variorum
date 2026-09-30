@@ -79,6 +79,12 @@ struct PassphraseSetSheet: View {
                 phraseGrid(words)
                     .privacySensitive()
                 HStack {
+                    // 18o U5 (17t item 2): the ONE Copy All door + its sub-line
+                    // (the ceremony sheet's own row shape).
+                    WordsCopyDoor(words: words, pageStyle: nil) { model.markWordsCopied() }
+                    if model.copiedWords {
+                        Text(ProtectionCopy.wordsCopied).font(.caption).foregroundStyle(.secondary)
+                    }
                     Spacer()
                     Button("I've written them down") {
                         model.acknowledgePhraseWritten()
@@ -1057,6 +1063,12 @@ struct PhraseOnlySheet: View {
             .padding(12)
             .background(RoundedRectangle(cornerRadius: 8).fill(.quaternary.opacity(0.5)))
             HStack {
+                // 18o U5 (17t item 2): the ONE Copy All door; the receipt is
+                // the presenter's, handed in.
+                WordsCopyDoor(words: words, pageStyle: nil, onCopied: onCopied)
+                if copied {
+                    Text(ProtectionCopy.wordsCopied).font(.caption).foregroundStyle(.secondary)
+                }
                 Spacer()
                 Button("I've written them down") { onDone() }
                     .keyboardShortcut(.defaultAction)

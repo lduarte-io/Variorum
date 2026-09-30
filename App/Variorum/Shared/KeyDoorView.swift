@@ -142,6 +142,15 @@ struct KeyDoorView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .privacySensitive()
                     .pagePhraseCard(pageStyle)
+                // 18o U5 (17t item 2): Regenerate runs 2a's Screen 3 (copy §4),
+                // so its *Copy All* and sub-line — the ONE door; the Mac's arm
+                // only (the phone's word-screen doors are the mobile app row's).
+                #if os(macOS)
+                WordsCopyDoor(words: words, pageStyle: pageStyle) { model.markWordsCopied() }
+                #endif
+                if model.copiedWords {
+                    Text(ProtectionCopy.wordsCopied).pageCaption(pageStyle)
+                }
                 HStack {
                     PageDoor(ProtectionCopy.wordsWrittenDoor, style: pageStyle) { model.acknowledgeWordsWritten() }
                     cancel

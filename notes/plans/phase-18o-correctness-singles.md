@@ -1917,7 +1917,12 @@ guards green on both: the hoisted rule's two arms (clears when unmoved; never cl
   one issue each, at their door requirement (the composition holds no `WordsCopyDoor`); GREEN: both rule guards, face (1)'s
   guard (which also proves the walker finds a door where one is composed), the item-1 pin, and every existing
   `PostureSwitchTests` pin.
-- Item 2 fix (the door in faces 2–5) — NOT-STARTED.
+- Item 2 fix — DONE (this commit), verification **PENDING**: (2) `SyncEnrollmentView` `.wordsShow` composes
+  `WordsCopyDoor(words:pageStyle:) { model.markWordsCopied() }` under `#if os(macOS)` between the words card and the
+  existing caption branch (now reachable); (3) `KeyDoorView` `.wordsShow` — the same door (Mac-gated) + the caption branch
+  (copy §2a's sub-line) above its written/cancel row; (4) `PassphraseSetSheet` `.showPhrase` and (5) `PhraseOnlySheet` — the
+  ceremony sheet's own row shape: `[Copy All] [Copied…] ⟷ [I've written them down]` (4 reads `model.copiedWords`, 5 its
+  presenter's `copied`).
 - R-U5 behavioural revert — NOT-STARTED.
 - Closing runs (focused Mac suites + the eleven Tutorial suites; iOS generic build; FULL mobile suite — shared files change)
   — NOT-STARTED.
