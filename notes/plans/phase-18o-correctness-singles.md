@@ -713,12 +713,18 @@ purged-tombstone residual (#138(e)) stays the recorded gap. The phone's first-wr
   `CrystallizationPlannerTests` + `CrystallizationReconcilerTests` + `ImportFacesTests` + `QuickNoteMintTests` +
   `QuickNoteParkTests` + `CaptureMicrosyntaxDoorTests` + `SpaceEaterTests` **`Test run with 66 tests in 8 suites
   passed`**; mobile `MobileCRLFCaptureTests` + `MobileQuickNoteTests` **`Test run with 35 tests in 2 suites passed`**.
-  PENDING: the behavioural revert (R-P23) + the `isNewline` mutation (M-isNewline) — next commit.
-- **R-P23 REVERT IN FLIGHT (announced before it starts):** `Sources/VariorumCore/Domain/SegmentationRules.swift`
-  is overwritten with its `40c3aafc` (pre-fix) content over the committed fix `12d61080`; nothing else is touched.
-  **Restore = `git checkout HEAD -- Sources/VariorumCore/Domain/SegmentationRules.swift`** (the fix is committed, so
-  `git diff` shows exactly what is reverted). If this line is still here with no result below it, the tree may be
-  mid-revert — read `git diff` first.
+- **R-P23 (behavioural revert) — DONE, restored clean:** `SegmentationRules.swift` from `40c3aafc` over the fix →
+  core (`18o-u2-rp23-core.log`) **`Test run with 10 tests in 1 suite failed … with 29 issues`**, the same nine tests
+  with the same counts (1·8·1·2·1·8·4·2·2), the guard green; Mac (`18o-u2-rp23-mac.log`) **`5 tests … failed … with
+  6 issues`** (1·1·1·3, the guard green); mobile (`18o-u2-rp23-mobile.log`) **`1 test … failed … with 3 issues`** —
+  every count identical to the pre-fix run. Restored by `git checkout HEAD --`, `git status` clean.
+- **M-isNewline (the REJECTED design, run as a mutation — proof the guards bite):** the fixed tree with `bulkSegments`'
+  split keyed on `\.isNewline` → core (`18o-u2-m-isnewline-core.log`) **`10 tests … failed … with 3 issues`**, all
+  three in `theExoticNewlinesStayContent` (U+2028, U+2029, U+0085 each became a block boundary); Mac
+  (`18o-u2-m-isnewline-mac.log`) **`5 tests … failed … with 1 issue`** — `theTypedRoadKeepsAControlReturnAsContent`:
+  the idle durability mint split a TYPED Control-Return into `["a", "b"]` — exactly the editor-newline change the
+  brief forbade. Every CRLF door pin stayed green under it (`isNewline` also covers CRLF), so the design choice is
+  decided by the guards alone, as stated. Restored by `git checkout HEAD --`, `git status` clean.
 - Row 66 pins (red-on-old) — NOT-STARTED: per book in `Book.all`, a tombstoned copy with no local mark is NOT
   re-minted at launch; guards: no copy + no tombstone still seeds; the explicit restore door still mints; the decision
   outlives a purge; the purged-tombstone residual documented.
