@@ -2159,3 +2159,58 @@ ruled row), the five-screen widening, **#165** (Copy All reaches Universal Clipb
 `currentHostOnly` should land before the phase closes), and the four new clipboard-writing
 faces. **HELD for her bundle:** the words-screen walk (her real store's Regenerate door,
 cancelled before confirm — the record's script); the #164 and #165 calls.**
+
+## UNIT U6 RECORD — #146, the signed-out-first retirement (implementer: THE FABLE ORCHESTRATOR SEAT itself, per the sitting record's cast call; 2026-09-30)
+
+**Why this seat implements:** the home is `Sources/VariorumCore/Sync/` (CLAUDE.md's standing
+rider: any change there is Fable work); QUESTIONS #146's build note pre-authorizes the cast.
+The end ladder's fresh `fable-reviewer` cold-reviews this diff with everything else; same-model
+disputes are the orchestrator's to arbitrate AGAINST THE SPEC — and this seat's own findings
+get no softer treatment for being its own.
+
+### READING (done before any line — the sitting's prep + this unit's)
+
+`notes/SyncSpec.md` IN FULL (preflight) · `notes/sync-postmortem-fragments.md` IN FULL ·
+`SampleLibraryDedupe.swift` IN FULL (the facts seam, the pass, the classifier, the #143(b)
+defense, `retireSampleCopy`) · `Repairs.swift`'s `runPostApplyRepairs` ordering + `TouchedRows`
+· `SyncEngine.knownSeq`/`recordSeq`/`isEnqueued` · the existing convergence harness
+(`SampleLibraryDedupeRepairTests` — `furniturePair`, `seedCopy`, the helpers) · QUESTIONS #146
+verbatim · KnownIssues row 66's owner cell.
+
+### THE DESIGN (finalized from the sitting's prep; the ruling's words at every arm)
+
+**The ruling (PROVISIONAL #146, hers to overturn):** *the account's deletion wins over an
+UNTOUCHED local copy, and never over a touched one.* A NEW LEG of the per-book dedupe body,
+firing when the live same-name copy count is EXACTLY ONE and a same-name reading row arrived
+DEAD in this batch (`touched.arrivingDeadIDs["reading"]`, plus the live→dead
+`tombstonedParents` arm for completeness):
+
+1. **The later-intent guard (SyncSpec §3's own rule):** retire only when
+   `knownSeq(reading: dead) > knownSeq(reading: live)` — a never-accepted local row ranks 0,
+   which IS the signed-out-first phone. This one comparator answers every corner:
+   the signed-out phone (0 < N → fires) · the deliberate restore (no new dead ARRIVAL after
+   the restore → never fires; and on a THIRD device pulling both, the restored copy's higher
+   seq → declines) · the A5-band crossing (the copy pushed before the hidden tombstone
+   arrived → live seq > dead seq → declines — the ruling's accepted alternative-(i) outcome,
+   RECORDED as the leg's documented corner, seconds-wide).
+2. **The classification is the ONE existing body** (`SampleCopyClassifier.classify` — err
+   toward EDITED, every indeterminate leg intact): `.pristine` → retire; `.edited` → keep
+   (her words outrank a sample book); `.indeterminate` → DECLINE PERMANENTLY (both survive —
+   err toward keeping; no marker machinery for a near-impossible local-copy state, recorded).
+3. **Retirement is `retireSampleCopy` UNCHANGED** — family-complete ordinary tombstones, ONE
+   stamp, explicit outbox rows (§7's rule), Trash-listed; Put back and Help ▸ Restore both
+   real (#85(e)'s recorded fourteen-row corner applies identically, cited not re-decided).
+4. **The #143(b) defense cannot fire on this leg by construction** (a self-retirement never
+   passes `writeResolvedRow`, so no kill is recorded) — its pins must ride UNMODIFIED.
+5. **F2's quiescence rule extends naturally:** a live copy that itself arrived this batch
+   defers exactly as today (the existing arm already re-arms the one-shot marker).
+
+Zero schema · marker stays 9 · zero server lines · zero app-target lines.
+
+### LIVE STATUS
+
+- The record + design — DONE (this commit).
+- Pins (red-on-old, the convergence harness) — NOT-STARTED.
+- The fix — NOT-STARTED.
+- Behavioural revert + finals (`swift test` whole; FULL mobile) — NOT-STARTED.
+- No revert is in flight.
