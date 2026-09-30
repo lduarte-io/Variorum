@@ -493,7 +493,7 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 - PLAN FILE authored + committed — **DONE** (this commit).
 - U1 the honesty & paper-cuts batch — **CLOSED; walks W1–W3 RUN AND PASSED 2026-09-30 under her away grant (the adjudication's walk section), W4 on its pins.**
 - U2 the import & launch-seed batch — **CLOSED (orchestrator adjudication 2026-09-30; rows 10–11 dispositioned; the microsyntax edge adopted as row 12b → U3)**.
-- U3 the two Mac doors (+ row 12b) — IN FLIGHT (implementer spawned 2026-09-30, after the U1 walks).
+- U3 the two Mac doors (+ row 12b) — IN FLIGHT (implementer spawned 2026-09-30, after the U1 walks; reading done, UNIT U3 RECORD opened — its LIVE STATUS is the truth).
 - U4 the book leaving savepoint (R-18k-6) — NOT-STARTED.
 - U5 17t, the two unwired protection doors — NOT-STARTED.
 - U6 #146 (Fable seat) — NOT-STARTED (SyncSpec + postmortem re-read precede any line).
@@ -1001,3 +1001,36 @@ arm (declining an account-owned store BEFORE its first round — traced safe her
 eyes), call 2 (`one_block` normalises too), and the drafted KnownIssues row-66 wording.
 
 **U2 — DONE (implementer), awaiting the orchestrator's spot-check.**
+
+---
+
+## UNIT U3 RECORD — the two Mac doors + the microsyntax CRLF rider (implementer: `opus-implementer`, 2026-09-30)
+
+**NOT DONE (first line, per the contract):** in progress — this line is rewritten at the unit's close.
+
+### READING (done in-session before any code)
+
+`CLAUDE.md` + its auto-loaded canon (CoreDescription, OverallModel, AppSpec — §9's `merge`/`mergeCeremony` contract,
+§12's ceremony-sheet lines) · this file WHOLE (the U1/U2 records, seam tables and adjudications; the U3 section with the
+row-12b bullet) · `notes/KnownIssuesAndTechDebt.md` (the header rule; rows 73 and 79 in full) ·
+`notes/SessionResiliencyProtocol.md` whole · `notes/plans/phase-18k-runtime-hygiene.md` — the UNIT C1 RECORD's "FOUND ON
+THE WAY" (row 73's trace + its CORRECTION: `_debugPrecondition`, compiled out at -O) and the UNIT C5 RECORD whole (THE
+TRACE item 3, NOTICED 1 = row 79's two outcomes, NOTICED 5, JUDGMENT CALL 6) · the 17-file's 17e P27 brief + verifier
+trace and its C5 disposition lines · P27's fix `dee61938` · `App/Variorum/Shared/CaptureMicrosyntax.swift` whole +
+`CaptureMicrosyntaxTests` + `CaptureMicrosyntaxDoorTests` · `SegmentationRules.swift` whole (U2's
+`normalizedLineEndings`). The code at HEAD `89935c26`: `EditorCommands.swift` (the ⌘<n> and ⌘⇧<n> sites),
+`WorkspaceNavigation.swift`'s `OpenNotes` (`ordinalCap`, `id(atOrdinal:)`), `ShellRouter.openNote(ordinal:)`,
+`SidebarView.openRow`, `PostMode`, `EditorSurfaceController`'s `.merge` arm / `openMergeCeremony` / `openMergeRunChoice`
+/ `liveActiveFans(AndRendered)` / `runKeepOnTopDivide`'s cross-reference, `FannedDefaultsCopy`, `FannedDefaultsTests`,
+`MergeCeremonySheetTests`' header, both capture doors (`QuickEntryModel.submit`, `QuickNotePad.take`),
+`NoteCardFace.firstWords`. **Instance state at start:** `pgrep -fl Variorum` → nothing (her away grant stands).
+
+### LIVE STATUS
+
+- Reading + this record opened — DONE (this commit).
+- Row 73 (the Open strip's tenth row) — NOT-STARTED.
+- Row 13 / KnownIssues 79 (⌥⌘⇧M's choice from the store) — NOT-STARTED.
+- Row 12b (the microsyntax reads CRLF) — NOT-STARTED.
+- Closing runs — NOT-STARTED.
+- Walks — NOT-STARTED.
+- Deaths / resumes: none.
