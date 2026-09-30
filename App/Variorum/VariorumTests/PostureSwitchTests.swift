@@ -4041,3 +4041,42 @@ extension PostureSwitchTests {
         }
     }
 }
+
+// MARK: - 18o U5 (ledger row 16 — 17t item 2): the one existing Copy All rides the hoisted rule
+
+extension PostureSwitchTests {
+    /// 18o U5 — GUARD (green on the scaffolding tree and the fixed tree —
+    /// the hoist is behaviour-neutral): the Castle / Replace All Keys
+    /// ceremony's words screen, the ONE place Copy All existed before this
+    /// unit, composes the hoisted `WordsCopyDoor` (the same `Button`, the
+    /// same 60 s clear, now `WordsClipboard`'s), wired to ITS model's
+    /// `markWordsCopied()`, and the caption renders after a copy. The drive
+    /// uses a private pasteboard (`ComposedWordsCopyDoors.click`).
+    @Test func theCeremonysWordsScreenKeepsItsCopyAllThroughTheOneRule() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let controller = makeController(for: world)
+        let tie = VaultTie(
+            hasRecoveryWrap: true,
+            verifyPassphrase: { _ in .match },
+            verifyRecoveryWords: { _ in .match })
+        let model = PostureSwitchModel(
+            mode: .replaceKeys, runner: world.runner, controller: controller,
+            vaultTie: tie, passphraseInHand: "sesame")
+        await model.start()
+        model.continueFromExplain()
+        model.chooseGenerateNewWords()
+        guard case .wordsShow(let words) = model.phase else {
+            Issue.record("Generate New Ones shows twelve fresh words: \(model.phase)"); return
+        }
+        let sheet = PostureSwitchSheet(model: model, onDone: {})
+        await SurfaceComposition.host(sheet, size: NSSize(width: 520, height: 560))
+        #expect(!SurfaceComposition.carries(ProtectionCopy.wordsCopied, in: SurfaceComposition.text(of: sheet.body)))
+        let door = try #require(ComposedWordsCopyDoors.find(in: sheet.body).first,
+                                "the ceremony's words screen composes the ONE Copy All door")
+        #expect(door.words == words)
+        await ComposedWordsCopyDoors.click(door, expecting: words)
+        #expect(model.copiedWords, "the door reports to the ceremony's model")
+        #expect(SurfaceComposition.carries(ProtectionCopy.wordsCopied, in: SurfaceComposition.text(of: sheet.body)))
+    }
+}

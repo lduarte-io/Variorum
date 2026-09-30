@@ -1906,7 +1906,17 @@ guards green on both: the hoisted rule's two arms (clears when unmoved; never cl
   second timer exists); `PassphraseSetModel.copiedWords` / `markWordsCopied()` declared (the siblings' shape; unread
   until the fix); `PhraseOnlySheet` internal with `copied` / `onCopied` inputs (unrendered until the fix) and its
   presenter's `phraseCopied` (reset at each mint). The four faces render NOTHING new yet.
-- Item 2 pins (red-on-old on the scaffolding tree) — NOT-STARTED.
+- Item 2 pins — DONE (this commit): `VariorumTests/WordsCopyDoorTests.swift` (NEW; `ComposedWordsCopyDoors` — find
+  by type + the click against a private pasteboard): guards `theWordsRideOneLineAndClearAfterTheirInterval` ·
+  `anythingCopiedSinceIsNeverCleared`; face pins `syncSetupsWordsScreenCarriesCopyAllAndItsCaptionShows` (2) ·
+  `regenerateWordsScreenCarriesCopyAllAndItsCaptionShows` (3) · `theSetSheetsPhraseScreenCarriesCopyAllAndItsCaptionShows`
+  (4) · `theNudgesPhraseOnlySheetCarriesCopyAllAndItsCaptionFollowsItsFlag` (5); and face (1)'s GUARD
+  `PostureSwitchTests.theCeremonysWordsScreenKeepsItsCopyAllThroughTheOneRule` (a second extension appended to
+  `PostureSwitchTests.swift` — it needs that file's private world). **Pre-fix on the scaffolding tree
+  (`18o-u5-pins-prefix.log`): `✘ Test run with 52 tests in 2 suites failed … with 4 issues`** — the four face pins RED,
+  one issue each, at their door requirement (the composition holds no `WordsCopyDoor`); GREEN: both rule guards, face (1)'s
+  guard (which also proves the walker finds a door where one is composed), the item-1 pin, and every existing
+  `PostureSwitchTests` pin.
 - Item 2 fix (the door in faces 2–5) — NOT-STARTED.
 - R-U5 behavioural revert — NOT-STARTED.
 - Closing runs (focused Mac suites + the eleven Tutorial suites; iOS generic build; FULL mobile suite — shared files change)
