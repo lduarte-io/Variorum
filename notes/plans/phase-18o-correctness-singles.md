@@ -494,7 +494,7 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 - U1 the honesty & paper-cuts batch — **CLOSED; walks W1–W3 RUN AND PASSED 2026-09-30 under her away grant (the adjudication's walk section), W4 on its pins.**
 - U2 the import & launch-seed batch — **CLOSED (orchestrator adjudication 2026-09-30; rows 10–11 dispositioned; the microsyntax edge adopted as row 12b → U3)**.
 - U3 the two Mac doors (+ row 12b) — **CLOSED (orchestrator adjudication 2026-09-30; rows 12/12b/13 dispositioned; the row-13 design divergence accepted and named a ladder focus)**.
-- U4 the book leaving savepoint (R-18k-6) — IN FLIGHT (implementer spawned 2026-09-30; the UNIT U4 RECORD at the end of this file carries its LIVE STATUS).
+- U4 the book leaving savepoint (R-18k-6) — **DONE (implementer), awaiting the orchestrator's spot-check** (row 14 FIXED `f3ab836e`; walks W1–W3 PASS; QUESTIONS #163; the UNIT U4 RECORD at the end of this file).
 - U5 17t, the two unwired protection doors — NOT-STARTED.
 - U6 #146 (Fable seat) — NOT-STARTED (SyncSpec + postmortem re-read precede any line).
 - THE LADDER — NOT-STARTED.
@@ -1387,7 +1387,14 @@ residue (three "2026-09-30" scratch notes + the `u3walk` tag) → her bundle's r
 
 ## UNIT U4 RECORD — the book leaving savepoint, R-18k-6 (implementer: `opus-implementer`, 2026-09-30)
 
-**NOT DONE (first line, per the contract):** PENDING — this line is written at the unit's close.
+**NOT DONE (first line, per the contract):** (1) The ledger row 14, the KnownIssues row-78 edit, the 17-file / closeout
+lines and the MOBILE PARITY line are the orchestrator's closeout acts — each is DRAFTED below, none applied. (2) The walk
+ran in ONE voice (Terminal): this unit changes no face (the note box, Block History and the Compare board are untouched
+surfaces — U2's one-voice reasoning for faceless roads). (3) The Index arm and Book (spread) mode were not hand-walked —
+the walk covers Outline (W1, W2) and Compare (W3); the Index arm is carried by its MOUNTED red-on-old pin, the spread by
+the rule (it reads the same focus authority as Outline). (4) The registry DROP is not observable in the running app
+without instrumentation — the walk shows the savepoints; the drop is pinned (and C1's in-app walk measured the entries
+already). (5) The full Mac suite was not run (the phase finals'). Everything else the brief asks for is done.
 
 ### READING (done in-session before any code)
 
@@ -1584,8 +1591,147 @@ departing surface wrote on its way out) and the entry drops then. So reporting a
     zero `Sources/`, zero `App/Variorum/Shared/`, zero `VariorumMobile/` (every production file is Mac-target:
     `Features/BookView/`, `Features/Takes/CompareBoardView.swift`, `Workspace/SavepointOnLeave.swift`); the attributed
     mobile baseline 656/114 stands untouched.
-- Walk (book: edit, switch note, Block History shows the quiet savepoint; leave the book, same for a second note;
-  captures `notes/plans/18o-screens/u4/`) — IN-PROGRESS (the dev-store Debug build `DerivedData/18o-u1/…/Debug/
-  Variorum.app`, built 06:22 from the final code tree; zero instances by path; `guard.sh --author` OK, idle 80 min; no
-  foreign dialog on screen).
+- **Walk — DONE, all three PASS** (her away grant; the dev-store Debug build `DerivedData/18o-u1/…/Debug/Variorum.app`,
+  built 06:22 from the final code tree — the last code commit is 05:34; zero instances by path before launch (dev pid
+  80703); `guard.sh --author` then the pid/point guard before every act, acts ≥ 2 s apart; no foreign dialog on screen
+  (full-screen check first); `caffeinate -d` for the walk; the book *essays in progress* (2 notes: A "2026-09-13" — one
+  block "A book not", two hand savepoints from Sep 13; B "2026-09-18" — three blocks, an EMPTY first block); captures
+  `notes/plans/18o-screens/u4/`, gitignored; Terminal voice):
+  - **W1 — in a book, edit a note, move into another → the quiet savepoint lands — PASS.** Shelf ▸ *essays in progress*
+    (opens in Outline, the note box "no note selected"); the navigator row A → A live ("editing · 1 of 2 · block 1/1");
+    the box's **history** door BEFORE: 2 savepoints, both "A book not", saved by hand (`W1a-…`). Caret to the block's
+    end; " u4walk" typed (paced keystrokes — landed whole, "A book not u4walk", 4w — `W1b-…`). The navigator row B → B
+    live, A read-cheap (`W1c-…`). Then (after W2's leave, A opened on its own from the Library, Write, block 1/1) A's
+    history reads **3 — "A book not u4walk · sep 30, 2026 at 6:26 am · quiet"** above the two hand savepoints
+    (`W1d-noteA-history-after-switch-terminal.png`). Pre-fix this row would not exist until ⌘Q / the lock / 2 h idle
+    (the old build is never run on the dev store — the before/after is the harness's R-U4).
+  - **W2 — leave the book, a second note → the same — PASS.** In B (caret in its empty first block) "u4book" typed
+    (`W2a-…`); B's history BEFORE leaving: **0** — "no saved moments yet" (`W2b-…`, the control: an unleft note owes
+    its savepoint). Sidebar ▸ **library** — the book left (`W2c-…`). B opened from the Library: its first block's
+    history reads **1 — "u4book · sep 30, 2026 at 6:27 am · quiet"** (`W2d-noteB-history-after-leaving-book-terminal.png`).
+  - **W3 — a Compare peer (PROVISIONAL #163) — PASS.** B ▸ **compare**; "related blocks only" turned OFF (the two notes
+    share no lineage, so the filter would hide the peer's blocks); **＋ choose a note** ▸ A — the peer column ("there is
+    no relationship here"); a click into A's pane (live), " peer" typed → "A book not u4walk peer" (`W3a-…`); the peer
+    column's **✕** (removed — `W3b-…`). A opened from the Open strip: history **4, "2 quiet savepoints · show"** (J11's
+    quiet-run fold — `W3c-…`); expanded: **"A book not u4walk peer · sep 30, 2026 at 6:30 am · quiet"** above the 6:26
+    one (`W3d-peer-history-quiet-run-expanded-terminal.png`). The only road that could write A at 6:30 is the peer's
+    departure (the pane then navigated B → A: road 1 leaves B, and A was the arriving note).
+  - Closing state: A RESTORED to "A book not" through its own history's **Restore** (the 8:35 hand savepoint); B's
+    first block cleared back to EMPTY (six paced backspaces — "0w block · 30w in note", three blocks, as found) and its
+    mode set back to Write; the dev instance quit BY IDENTITY (`tell application id "io.lduarte.Variorum.debug" to
+    quit`) — `pgrep -fl Variorum` empty afterwards; no `/Applications` instance at any point; this walk's `caffeinate
+    -d` stopped (two other `caffeinate` processes are not this session's and were left). **Walk residue:** the walk's
+    quiet savepoints stay in A's and B's histories (A: "A book not u4walk" 6:26 · "A book not u4walk peer" 6:30, and the
+    ⌘Q walk's own "A book not" after the restore; B: "u4book" 6:27 and the quit's empty savepoint) — history is
+    append-only by design; the two notes' TEXT is as found; the Open strip holds the two notes (session state).
 - Deaths / resumes: none.
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder reads this first — CUSTODY-ADJACENT; verified by `git diff --stat 3c3becc2..HEAD`)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `App/Variorum/Variorum/Features/BookView/BookNoteTrail.swift` (NEW) | The pure rule: the caret's note is remembered (`.live` only); `.live` in a different note, or `.selected` naming a different note, reports it LEFT; `.empty` and the same note report nothing; `leaveBook()` reports the remembered note | — |
+| `…/Features/BookView/BookViewModel.swift` | `noteTrail` (`@ObservationIgnored`), `onNoteLeft` (no-op by default), `notePlaceChanged(_:)`, `leaveBook()` — beside the Index reports | `focus`, `collapse(All)`, the spread, the Index reports, `carryPlace`, every observed property |
+| `…/Features/BookView/BookView.swift` | onAppear: `SavepointOnLeave.wire(book:)` then `reportNotePlace()`; the `noteBoxReport` onChange also reports; onDisappear: `model.leaveBook()`; `reportNotePlace()` (the box's state → the model) | `noteBoxReport`, `publishNoteBox`, `editHere`, `switchMode`, every mode's body |
+| `…/Features/Takes/CompareBoardView.swift` | `CompareViewModel`: `onNotesLeft` (no-op by default); `peerSlots.didSet` reports departed peers (never the anchor); `teardown()` reports every peer before the holds go back; the board's onAppear wires it | `coordinator(for:)`, the cache, `releaseLivePane`, `setPeer`/`removePeerSlot` bodies, `teardown`'s flush-then-release, `isolated deinit`, every gesture |
+| `…/Workspace/SavepointOnLeave.swift` | roads 5 (book) and 6 (Compare peers) in the header's mapping; `wire(book:)`, `wire(compare:)` — each a closure onto the existing `leaving(_:session:)` spawn | `wire(workspace:)`, `windowClosing`, `leaving` |
+| Tests (NEW files only) | `VariorumTests/BookLeavingSavepointTests.swift` (three suites: book 7 · Compare 2 · registry 2) · `VariorumTests/BookNoteTrailTests.swift` (6) | every existing test file — C1's `AutosaveRegistryLifecycleTests.swift`, L-d's `AutosaveRegistryReleaseTests.swift` and J11's `SavepointOnLeaveTests.swift` have ZERO diff |
+
+**Zero `AppSession` (C1's registry — `markLeaving`/`dropAfterLeaving`/`savepointOnLeaving`/`releaseAutosave` — byte-
+untouched), zero `Operations` (`closeAutoCommit` byte-untouched), zero editor seam (`EditorTextView`, `BlockRangeIndex`,
+`PaneSurface`, `PaneTextAuthority`, `EditorSurfaceController`), zero `Sources/`, zero `App/Variorum/Shared/`, zero
+`VariorumMobile/`, zero `Sync/`, `Server/`, schema / migrations (marker 9), settings.** The custody-adjacent content is
+WHEN `savepointOnLeaving` is called (two new callers), never what it does.
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **The book's note-switch fact is the note box's state** (`NoteBoxState`, via `BookView.noteBoxReport` / the pure
+   `BookNoteBox`) — the one answer the book already publishes to "which note is she in", so the leaving and the box can
+   never disagree; the shell cannot learn it (it must not hold a feature's view model — the box's own doc), so the book
+   reports its own leavings, as the workspace does its own. *Reverse by* feeding the trail from `focusedPostID` /
+   `indexLivePostID` directly (and re-deriving the mode's rule).
+2. **Only the CARET's note enters the trail** (`.live`): a note she only looked at is never reported. This keeps the
+   reported set to notes that hold a registry entry by then — exactly the set today's ⌘Q/lock walk savepoints — so the
+   fix changes WHEN, never WHICH. (One measured-by-reading edge: a focused Outline note whose editor never mounted — far
+   off the viewport — is reported though it held no entry; `closeAutoCommit` decides as on every road.) Pinned by
+   `aNoteSheOnlyLookedAtGetsNothing` (M-selected reds it). *Reverse by* remembering `.selected` too.
+3. **A `.selected` naming a different note is a move** (the Index's row click, which releases the ring; a leaf turn in
+   Book mode) — PROVISIONAL, QUESTIONS #163 (1)(a); (b) caret-only.
+4. **`.empty` is never a move** — clicking out, Read, an unfocused pane, and (measured, M-empty) the empty frame an
+   Outline → Index switch publishes before the Index seeds. #163 (1)(c) records "clicking out counts" as hers.
+5. **Leaving the book = `BookView.onDisappear`** — the book's view is `.id(readingID)`-stable and stays mounted in an
+   unfocused pane (`paneFocused: false`), so it disappears only when the pane stops showing it: navigating away, the
+   split closing, another book, the window closing. The book's "Open in the full editor" also leaves the book — the
+   note is savepointed while its pane now shows it on its own: the `SavepointOnLeave` header's accepted consequence
+   (the same note shown elsewhere), and C1's generation guard keeps the pane's own entry. *Reverse by* a workspace-side
+   departure for `.reading` selections (a second fact).
+6. **The signal lives on the model, no-op by default, wired by the view** (`SavepointOnLeave.wire(book:)` /
+   `wire(compare:)`) — `WorkspaceModel.onNotesLeft`'s shape: a model built in a test writes nothing (every existing
+   book/Compare test rides unchanged), and dead wiring is caught by the MOUNTED pins (the view wires it; R-U4 reds them).
+7. **Compare reports EVERY departing peer**, not only one her caret was in: every picked peer already holds a registry
+   entry (the pick acquires), so ⌘Q/lock would savepoint each — same WHICH, earlier WHEN (#163 (2)(a)). The anchor never.
+8. **A swapped-out peer's HOLD stays with the board until its teardown** (C1's per-post cache lifetime, unchanged), so
+   the savepoint lands at the swap and the registry entry retires at the board's teardown. *Reverse by* releasing that
+   post from the cache at the swap (flush, then one release) — a new C1-class release site, deliberately not taken.
+9. **The board reports its peers BEFORE its holds go back** — either order ends the same (C1: the last release of a
+   LEFT note re-takes the savepoint and drops the entry).
+10. **The Outline pins' registry half moved to C1's bare-model shape** after a TRACED harness limit (the mounted inline
+    editor's model stays alive for the async test body — holders 1 / 2 measured); the savepoint halves stayed mounted and
+    red-on-old; the Index and Compare mounted pins keep their registry halves red-on-old. Not a weakening: every claim is
+    pinned where its lifetime is deterministic.
+11. **The fixture savepoints every take at setup**, so any quiet row is the leaving's own; the one pin that needs
+    never-savepointed takes (the looked-at note) says so.
+12. **A named consequence of the Index's per-post cache (the C1 ladder's stale-mark class):** after the Index departs a
+    note, re-entering that SAME note inside the same Index session is a cache hit — no new acquisition — so the entry
+    stays marked LEFT; when the Index later tears down (a mode switch included) its release re-takes the savepoint and
+    drops the entry. At worst one extra quiet savepoint (deduped when nothing changed) at a mode switch; nothing can be
+    lost (a drop still needs a landed savepoint, zero holders, an unchanged generation, a clean coordinator), and the next
+    surface's acquisition mints a fresh entry. Named for the ladder.
+13. **One voice for the walk** (no face changed); the Index arm and Book mode are carried by pins/rule, not the walk.
+
+### NOTICED, NOT TOUCHED (U4's scope fence)
+
+1. **The Outline's focus survives an Index excursion to another note** (pre-existing): Outline(A) → Index, work in B →
+   back to Outline mounts A's editor (the book's stale `focusedPostID`) while the carry scrolls to B's anchor. Under this
+   unit that reads as moving back into A — so B is left then (correct by the rule; B's savepoint lands). The stale focus
+   itself is the book's navigation brain's — an owner for the next toucher of the carry (12, or 18n beside row 70).
+2. **C1's named residual 1 is PARTIALLY discharged:** a book / peer note now leaves the ⌘Q/lock walk once it is LEFT
+   (the switch, leaving the book, the peer's departure). What remains registered by design: the note she is still IN
+   (it is open), a swapped-out peer until its board tears down (call 8), and notes the Index cached until the Index tears
+   down. All on the safe side (an entry kept, never dropped early).
+3. **The phone was not traced for the same gap** — the phone's book reading surfaces and its own leaving road
+   (`MobileSavepointOnLeaving`) are the mobile app row's; this unit is Mac-only (zero phone or shared files). Whether a
+   phone book's note switch savepoints is a question for the mobile catch-up.
+4. **A harness fact for future pins (record-only, not a defect):** a mounted Outline/Book-mode `EditorViewModel` stays
+   alive for the rest of the async test body in the Mac test host (18k C8's autorelease-pool class), so no pin can watch
+   its release through a mounted book — use C1's bare-model shape (this file's header says so).
+5. **Walk residue** (named under the walk): the walk's quiet savepoints in the two *essays in progress* notes' histories.
+
+### DRAFTED FOR THE CLOSEOUT (the orchestrator's acts — none applied here)
+
+- **KnownIssues row 78 → RESOLVED at 18o U4:** *"Built per R-18k-6: a note edited inside a book gets its leaving
+  savepoint when she moves into a different note or leaves the book — `BookNoteTrail` over the book's note-box state,
+  through `SavepointOnLeave` (road 5, the one `savepointOnLeaving` entry); Compare peers swapped out, removed, or left
+  with the board likewise (road 6, PROVISIONAL, QUESTIONS #163). Once left, the note leaves the ⌘Q/lock walk (18k C1's
+  drop — its named residual 1 partly discharged). Pins `BookLeavingSavepointTests` · `CompareLeavingSavepointTests` ·
+  `BookLeavingRegistryTests` · `BookNoteTrailTests`; walk W1–W3."*
+- **18k C1 residual line** (wherever the closeout carries C1's residuals): *"Residual 1 (book / Compare-peer notes stay
+  registered until ⌘Q/lock) — partly discharged at 18o U4: they now leave when LEFT; what stays registered is open by
+  design (U4 NOTICED 2)."*
+- **MOBILE PARITY:** *nothing mobile-visible* — every production file is Mac-target; the phone's book road is the mobile
+  app row's (NOTICED 3).
+- **Her bundle:** QUESTIONS #163 (the book's reading of "moving to another note" and the Compare-peer PROVISIONAL).
+
+### DISPOSITION (one line per ledger row)
+
+14. **Row 78 / R-18k-6 — FIXED** `f3ab836e` (pins `385fbaeb`, the registry half's move `9a4e5afc`):
+    `BookLeavingSavepointTests` + `CompareLeavingSavepointTests` (mounted) — red-on-old **13 issues** (the five bug pins:
+    Outline 3 · Index 3 · leave-the-book 3 · peer swap 1 · board left 3; the four guards green); **R-U4** (BookView from
+    the pins commit + the three Compare hunks) **9 issues**, every remaining half at its pre-fix count, restored clean;
+    the guards' teeth by mutation — M-selected (2), M-empty (5), M-idle′ (3); `BookLeavingRegistryTests` (2) +
+    `BookNoteTrailTests` (6) green; C1's / L-d's / J11's suites UNMODIFIED and green; closing set **466/98** (4 known =
+    #154(b)). Walk W1–W3 PASS (Terminal). QUESTIONS **#163** (PROVISIONAL); tail marker **#164**.
+
+- Deaths / resumes: none.
+
+**U4 — DONE (implementer), awaiting the orchestrator's spot-check**
