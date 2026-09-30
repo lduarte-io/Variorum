@@ -133,12 +133,16 @@ nonisolated enum MarkdownInsurance {
         var leg = BackupRunRecord.Leg(outcome: .noDestination)
         leg.destination = BackupDestination.displayPath(target)
         do {
-            let existing = try existingExports(in: target)
-            if !force, let newest = existing.last,
-               let newestDate = date(fromExportURL: newest),
-               now.timeIntervalSince(newestDate) < policy.interval {
+            // 18o U1 (row 84): the newest export stamped no later than now —
+            // the snapshots' one rule (`StoreBackup.stampIsTrusted`): a
+            // future-dated folder is not evidence of freshness.
+            let newest = try existingExports(in: target).reversed().lazy
+                .compactMap { url in self.date(fromExportURL: url).map { (url: url, date: $0) } }
+                .first { StoreBackup.stampIsTrusted($0.date, now: now) }
+            if !force, let newest,
+               now.timeIntervalSince(newest.date) < policy.interval {
                 leg.outcome = .upToDate
-                leg.file = newest.lastPathComponent
+                leg.file = newest.url.lastPathComponent
                 return leg
             }
             // The manifest is the CORE's projection, unchanged and

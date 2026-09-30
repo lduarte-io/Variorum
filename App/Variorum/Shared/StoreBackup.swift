@@ -385,12 +385,12 @@ final class StoreBackup {
                 // today must seed it immediately even though the container's
                 // copy is hours old, and a run that copied yesterday must not
                 // copy again this afternoon.
-                let existing = try existingBackups(in: target)
-                if !force, let newest = existing.last,
-                   let newestDate = date(fromBackupURL: newest),
-                   now.timeIntervalSince(newestDate) < configuration.interval {
+                // 18o U1 (row 84): the newest copy stamped no later than
+                // now — a future stamp is not evidence of freshness.
+                if !force, let newest = try newestTrustedBackup(in: target, now: now),
+                   now.timeIntervalSince(newest.date) < configuration.interval {
                     leg.outcome = .upToDate
-                    leg.file = newest.lastPathComponent
+                    leg.file = newest.url.lastPathComponent
                     return
                 }
                 guard let source else {
@@ -547,10 +547,11 @@ final class StoreBackup {
         configuration: Configuration, now: Date, force: Bool
     ) throws -> PrimarySnapshot {
         dispatchPrecondition(condition: .notOnQueue(.main))
-        if !force, let newest = try existingBackups(in: directory).last,
-           let newestDate = date(fromBackupURL: newest),
-           now.timeIntervalSince(newestDate) < configuration.interval {
-            return .fresh(newest)
+        // 18o U1 (row 84): the newest copy stamped no later than now — a
+        // future stamp is not evidence of freshness (`newestTrustedBackup`).
+        if !force, let newest = try newestTrustedBackup(in: directory, now: now),
+           now.timeIntervalSince(newest.date) < configuration.interval {
+            return .fresh(newest.url)
         }
         // pre-13x 1a (§6): a keyed store's snapshot carries its key's short
         // fingerprint — `variorum-backup-<stamp>-<fp8>.sqlite` — so a folder
@@ -634,9 +635,9 @@ final class StoreBackup {
         defaults: UserDefaults, now: Date
     ) -> URL? {
         guard StoreFilePresence.classify(at: storeURL) == .encryptedOrUnknown else { return nil }
-        if let newest = try? existingBackups(in: directory).last,
-           let newestDate = date(fromBackupURL: newest),
-           now.timeIntervalSince(newestDate) < interval {
+        // 18o U1 (row 84): the same trusted-newest rule as the keyed legs.
+        if let newest = try? newestTrustedBackup(in: directory, now: now),
+           now.timeIntervalSince(newest.date) < interval {
             return nil
         }
         let wal = URL(fileURLWithPath: storeURL.path + "-wal")
@@ -711,6 +712,40 @@ final class StoreBackup {
             }
             .sorted { ($0.date, $0.url.lastPathComponent) < ($1.date, $1.url.lastPathComponent) }
             .map(\.url)
+    }
+
+    /// **A stamp later than now is not evidence of freshness** (18o U1 —
+    /// KnownIssues row 84, 18k C7's NOTICED 1). The ONE rule every freshness
+    /// question in the backup run consults: the due-checks here (primary, the
+    /// second folder, the lock-time copy), the weekly export's
+    /// (`MarkdownInsurance`), and the Data Safety face (`DataSafetyModel`).
+    ///
+    /// A clock that once ran fast leaves a copy stamped ahead of now. Each
+    /// check used to take the newest stamp as-is and ask `now − newest <
+    /// interval` — NEGATIVE for a future stamp, so every check read "fresh"
+    /// until the clock passed the stamp plus a whole interval: the automatic
+    /// backups stopped and nothing said so, and the face (asking the same of
+    /// the same stamp) never turned stale. Treating a future newest as DUE
+    /// instead would not do: the future copy stays the newest by stamp, so
+    /// every hourly check would write again (C7's reader-3 storm). So a
+    /// future-stamped copy is simply not what freshness is read from. The
+    /// copy itself STAYS — a real snapshot with a wrong date is never this
+    /// rule's to delete, and the prune keeps it in the slot its date gives it.
+    nonisolated static func stampIsTrusted(_ stamp: Date, now: Date) -> Bool {
+        stamp <= now
+    }
+
+    /// The newest of the app's own copies whose stamp `stampIsTrusted` —
+    /// what every due-check here reads as "the newest copy".
+    nonisolated static func newestTrustedBackup(
+        in directory: URL, now: Date
+    ) throws -> (url: URL, date: Date)? {
+        for url in try existingBackups(in: directory).reversed() {
+            if let date = date(fromBackupURL: url), stampIsTrusted(date, now: now) {
+                return (url, date)
+            }
+        }
+        return nil
     }
 
     /// Both of the app's names parse (pre-13x 1a): the 13p-era

@@ -527,8 +527,13 @@ extension DataSafetyModel.FolderSummary {
     /// wonder. 13l Act 5 made the threshold a PARAMETER because the pane now
     /// shows two jobs with two cadences; the snapshot's two days is
     /// unchanged (`DataSafetyPane.snapshotStaleAfter`).
-    func isStale(after interval: TimeInterval) -> Bool {
-        guard let newest else { return true }
-        return Date().timeIntervalSince(newest) > interval
+    ///
+    /// 18o U1 (row 84): a newest stamped LATER than now reads stale too — the
+    /// summaries never hand one over any more (they read only trusted
+    /// stamps), and this is the belt: a future date is never evidence of
+    /// freshness (`StoreBackup.stampIsTrusted`).
+    func isStale(after interval: TimeInterval, now: Date = Date()) -> Bool {
+        guard let newest, StoreBackup.stampIsTrusted(newest, now: now) else { return true }
+        return now.timeIntervalSince(newest) > interval
     }
 }

@@ -168,16 +168,23 @@ final class DataSafetyModel {
             lastSuccessAt: sync.status.lastSuccessAt)
     }
 
-    nonisolated static func summarize(_ directory: URL) -> FolderSummary {
+    /// 18o U1 (row 84): `newest` and `oldest` — the face's freshness and its
+    /// reach — read only stamps no later than `now` (`StoreBackup
+    /// .stampIsTrusted`, the due-checks' one rule): a copy stamped ahead of
+    /// the clock is COUNTED (it is a real file) but never shown as the
+    /// newest, so it can no longer hold the row out of the stale colour while
+    /// the copies it can trust grow old.
+    nonisolated static func summarize(_ directory: URL, now: Date = Date()) -> FolderSummary {
         let display = BackupDestination.displayPath(directory)
         guard FileManager.default.fileExists(atPath: directory.path) else {
             return FolderSummary(displayPath: display, exists: false, count: 0)
         }
         let dated = ((try? StoreBackup.existingBackups(in: directory)) ?? [])
             .compactMap(StoreBackup.date(fromBackupURL:))
+        let trusted = dated.filter { StoreBackup.stampIsTrusted($0, now: now) }
         return FolderSummary(
             displayPath: display, exists: true, count: dated.count,
-            newest: dated.max(), oldest: dated.min())
+            newest: trusted.max(), oldest: trusted.min())
     }
 
     nonisolated static func summarizeSecondDestination(
@@ -200,7 +207,9 @@ final class DataSafetyModel {
     /// nil = there is no picked folder, which is also the only state in
     /// which no export can exist (the insurance writes only there — see
     /// `MarkdownInsurance`'s header for why).
-    nonisolated static func summarizeExports(in defaults: UserDefaults) -> FolderSummary? {
+    nonisolated static func summarizeExports(
+        in defaults: UserDefaults, now: Date = Date()
+    ) -> FolderSummary? {
         guard BackupDestination.isSet(in: defaults),
               let resolved = BackupDestination.resolve(in: defaults)
         else { return nil }
@@ -212,9 +221,11 @@ final class DataSafetyModel {
             }
             let dated = ((try? MarkdownInsurance.existingExports(in: folder)) ?? [])
                 .compactMap(MarkdownInsurance.date(fromExportURL:))
+            // 18o U1 (row 84): the snapshots' rule (`summarize`, above).
+            let trusted = dated.filter { StoreBackup.stampIsTrusted($0, now: now) }
             return FolderSummary(
                 displayPath: display, exists: true, count: dated.count,
-                newest: dated.max(), oldest: dated.min())
+                newest: trusted.max(), oldest: trusted.min())
         }
     }
 
