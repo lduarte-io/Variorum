@@ -725,7 +725,7 @@ ROUND slot). 17d's acceptance is complete.
 
 ## 17e — Correctness & honesty singles
 
-**Status: RIDING 18k + 18o (her ruling R-18k-1 at the 18k kickoff sitting, 2026-09-25 — *"plan a single extra session, split items appropriately between them, give it an 18 name"*).** 18k's C5 takes the stale-fact / in-flight concurrency five — **KnownIssues row 59 (Canvas focused-block fact) · P26 · P27 · P33 · P38**; **18o** (correctness & honesty singles, right after 18k) takes **P23 · P29 · P32 · P34 · P35 · P37 · item (12) · KnownIssues row 66** (her #138(f) ruling R-18k-5: *honor the tombstone at launch*) **· KnownIssues row 64** (RECORD-ONLY — her #136(b) ruling R-18k-4: *leave it for now*). **Item (11) is partly DISCHARGED already** (18d wired `forgetCurrentBlock` into the Mac's Delete Now, `RecoveryView.swift:489`; the remainder is ACCEPTED at its arithmetic on KnownIssues' per-note-view-state row, owner 12) — 18o records it. The records are `notes/plans/phase-18k-runtime-hygiene.md` and (when authored) `notes/plans/phase-18o-correctness-singles.md`; dispositions are copied HERE at each run's close.
+**Status: CLOSED 2026-09-30 — both halves ran.** 18k's C5 closed the concurrency five (2026-09-25, the dispositions below); **18o closed the remainder (2026-09-30 — the record is `notes/plans/phase-18o-correctness-singles.md`; a two-round Fable ladder, zero BLOCKER/MAJOR, zero disputes)**. The 18o dispositions are copied below. *(Original ruling R-18k-1 at the 18k kickoff sitting, 2026-09-25 — "plan a single extra session, split items appropriately between them, give it an 18 name".)* 18k's C5 takes the stale-fact / in-flight concurrency five — **KnownIssues row 59 (Canvas focused-block fact) · P26 · P27 · P33 · P38**; **18o** (correctness & honesty singles, right after 18k) takes **P23 · P29 · P32 · P34 · P35 · P37 · item (12) · KnownIssues row 66** (her #138(f) ruling R-18k-5: *honor the tombstone at launch*) **· KnownIssues row 64** (RECORD-ONLY — her #136(b) ruling R-18k-4: *leave it for now*). **Item (11) is partly DISCHARGED already** (18d wired `forgetCurrentBlock` into the Mac's Delete Now, `RecoveryView.swift:489`; the remainder is ACCEPTED at its arithmetic on KnownIssues' per-note-view-state row, owner 12) — 18o records it. The records are `notes/plans/phase-18k-runtime-hygiene.md` and (when authored) `notes/plans/phase-18o-correctness-singles.md`; dispositions are copied HERE at each run's close.
 
 *(Original status line: open, unstarted — 10 items, no pins.)*
 
@@ -744,6 +744,19 @@ code does not have, which is the class that costs the next session the most time
 ### Items
 
 ### 18k's C5 — the dispositions (2026-09-25; the record is `notes/plans/phase-18k-runtime-hygiene.md`'s UNIT C5 RECORD + its ORCHESTRATOR ADJUDICATION)
+
+### 18o — the dispositions (2026-09-30; the record is `notes/plans/phase-18o-correctness-singles.md`, per-unit RECORDS + ADJUDICATIONS)
+
+- **P23 — FIXED at 18o U2** (`12d61080`): `bulkSegments` reads CRLF/CR as LF at its entry (normalise-at-entry, NOT `isNewline` — the M-isNewline mutation proves the rejected design breaks the typed Control-Return guards); `crystallizedBoundary` untouched; pins `SegmentationLineEndingTests` (core, red-on-old 29) · `CRLFImportDoorTests` (Mac, 6) · `MobileCRLFCaptureTests` (phone, 3); walk W1 both voices. The phone's capture inherits through the shared op.
+- **P29 — FIXED at 18o U1 (doc-only)** (`e2a6ecf0`): `MobileUndoDoor.redo()`'s doc states the truth (redo overwrites a since-edited buffer behind a quiet insurance savepoint); no behaviour change owed (A12 named undo alone); no pin possible.
+- **P32 — FIXED (doc) + RECORDED at 18o U1** (`a1479bba`): the false persisted-picks premise corrected at `danglingPick`; the UX gap NAMED with options at QUESTIONS **#160** (OPEN, hers; (i) extend-the-notice recommended). Nothing built, per R-18k-1's letter.
+- **P34 — FIXED (doc) + PINNED at 18o U1** (`9068f624`/`54f91c72`): the "always wins" parenthetical corrected; the strong-boundary-at-exactly-settlePull configuration pinned as documented behaviour (proven able to fail — M-exact 3 issues); the exact-wins alternative is QUESTIONS **#161** (hers; behaviour stands).
+- **P35 — FIXED at 18o U1** (`915e8124`, pins `0ae75e59` red-on-old 4): `setShelfPinned` self-heals like `starred` — pin needs a live book, unpin never does, every write persists the live list; walked (W2: delete-then-pin heals the dead id; Put back returns the book UNPINNED — `starred`'s own documented shape, in her bundle).
+- **P37 — FIXED at 18o U1** (`6c61d562`, pins `74d4c45a` red-on-old 1): the tray's ARCHIVED arm windowed with its truncation marker, its siblings' shape.
+- **17e (11) — RECORDED at 18o U1:** partly discharged at 18d (`RecoveryView.swift:489` wires `forgetCurrentBlock` into Delete Now, evicting `currentBlock.<id>` + persisted surface sizes); the remainder ACCEPTED at its arithmetic on KnownIssues' per-note-view-state row (owner 12). **Correction found at the code:** `postMode.<id>`, `readFace.<id>` and `takesViewMemory.<id>` are evicted by NO production road, Delete Now included — that row's text amended at the 18o closeout; same accepted arithmetic.
+- **17e (12) — FIXED at 18o U1** (`e724032f`, pins `b24d801a` red-on-old 3; the revert reds all four sidebar pins, 8): `CapabilityContext.windowKind`; `.toggleSidebar`'s grey is a registry fact (P-1); walked (W1). The same-class sweep found ONE more silently-gated family (the creation/restore seven) — a KnownIssues row, owner 12's registry-walk family.
+- **KnownIssues row 64 — RECORD-ONLY (R-18k-4, *leave it for now*):** the documented-behaviour pin re-verified green at 18o U1 (5/5, and by the orchestrator 47/4); the row CLOSED as ruled at the 18o closeout; a note-scoped undo is a future design at her word (QUESTIONS #136(b)).
+- **KnownIssues row 66 — FIXED at 18o U2** (`14822213`, R-18k-5 *honour the tombstone at launch*): ONE predicate (`SampleLibrarySeeder.readerDeletedTheBook`) read by the ensure AND the launch at both deciding reads, the decision recorded in the mark; pins Mac 15 · mobile 2 red-on-old; walks W2/W3 (explicit restore still mints). **The #146 neighbour BUILT PROVISIONAL at 18o U6** (the Fable seat, `Sync/` — the signed-out-first retirement; her ratify bundled).
 
 - **KnownIssues row 59 (Canvas focused-block fact) — FIXED** (`bc5e8cf9`; pin `CanvasFocusedBlockFactTests`, `4eb91dad` — red-on-old 5 issues, behavioural revert identical).
 - **P26 (the phone's liveness grant) — ALREADY FIXED by `6bc4f187` (2026-08-30); the missing pin ADDED** (`ebd690e6`: `MobileLivenessTests.aGrantSuspendedInsideItsFlushNeverResumesIntoThePen` — green on HEAD; deleting only the post-suspension guards turns it red, 2 issues). No product code changed.
@@ -1541,8 +1554,23 @@ Her two 2026-09-13 morning rulings built (R-Q20 the landing wins; R-Q17 the card
 
 ## 17t — THE TWO UNWIRED PROTECTION DOORS (minted 2026-09-25 at the 18k kickoff sitting, R-18k-2 — her words: *"17t and add that to an 18"*; RIDES 18o)
 
-**Status: open — rides 18o** (the correctness-singles run right after 18k; record
-`notes/plans/phase-18o-correctness-singles.md`). The custody Fable rider fires on its review.
+**Status: CLOSED 2026-09-30 at 18o U5** (the record's UNIT U5 RECORD + ADJUDICATION; the
+custody Fable rider fired — the phase's two-round Fable ladder covered the diff, zero
+BLOCKER/MAJOR). The two items' fates:
+1. **DISMISSED AS HOLLOW, her call bundled (QUESTIONS #164):** the typed near-empty
+   confirmation's premise is GONE — the rebuilt Replace All Keys pulls to head first, then
+   re-encrypts the server's own rows in place (`sync_reencrypt`); no local row ever overwrites
+   a server row. `RekeyRecencyProbe`'s zero consumers is BY DESIGN (its UI caller deliberately
+   retired at pre-13x 2b — the design's §13 sweep table, verified at the source); rows 54/this
+   item mis-read the ruled retirement as an omission. Evidence pin
+   `PostureSwitchTests.aNearEmptyCopysReplaceAllKeysLosesNothingTheFullerServerHolds` GREEN on
+   today's tree (M-noPull reds it 15). Her #86(c) ruling is closed only at HER word — #164,
+   (a) close-as-answered recommended.
+2. **FIXED for the Mac (`ccf6eefc`):** COPY ALL on all five Mac words screens through ONE
+   `WordsCopyDoor` (the pane's 60 s clear hoisted verbatim, no second timer); the shared
+   enrollment page's dead "Copied" branch reachable; pins red-on-old 4. QUESTIONS **#165**
+   (Universal Clipboard reach — OPEN, hers). The phone's word screens stay the mobile app
+   project row's.
 **Items (the two KnownIssues rows are the brief; both found at 13u2 UNIT D's roster-item-8 verification, 2026-09-15; orphaned when 17l closed 2026-09-21; interim-owned by 18k 2026-09-22):**
 1. **The typed NEAR-EMPTY sync confirmation (#86(c)) was never wired** — `Sources/VariorumCore/Sync/RekeyRecencyProbe.swift` has ZERO app consumers; #86(c)'s ruled home is "with the rebuilt Replace Keys" (#87). Note: the probe lives in `Sync/` — the standing rider.
 2. **COPY ALL on the recovery phrase exists in ONE place** (the Mac's `ProtectionPane`, with the 60 s clipboard clear); three models declare `markWordsCopied()` with one call site, so the SHARED `SyncEnrollmentView`'s "Copied" caption can never show. The Mac wiring + the shared page's dead branch are 17t's; **the phone's three word-screen doors stay the mobile app project row's** (beside PL-23).
