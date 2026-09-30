@@ -491,9 +491,9 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 ## LIVE STATUS (flipped in the same commit as each piece — the resiliency protocol's rule)
 
 - PLAN FILE authored + committed — **DONE** (this commit).
-- U1 the honesty & paper-cuts batch — **CLOSED (orchestrator adjudication 2026-09-30; all nine rows dispositioned; walks W1–W3 HELD for the first zero-instance window, W4 accepted on its pins)**.
+- U1 the honesty & paper-cuts batch — **CLOSED; walks W1–W3 RUN AND PASSED 2026-09-30 under her away grant (the adjudication's walk section), W4 on its pins.**
 - U2 the import & launch-seed batch — **CLOSED (orchestrator adjudication 2026-09-30; rows 10–11 dispositioned; the microsyntax edge adopted as row 12b → U3)**.
-- U3 the two Mac doors (+ row 12b) — NOT-STARTED (spawns after the U1 held walks run in the open window).
+- U3 the two Mac doors (+ row 12b) — IN FLIGHT (implementer spawned 2026-09-30, after the U1 walks).
 - U4 the book leaving savepoint (R-18k-6) — NOT-STARTED.
 - U5 17t, the two unwired protection doors — NOT-STARTED.
 - U6 #146 (Fable seat) — NOT-STARTED (SyncSpec + postmortem re-read precede any line).
@@ -618,6 +618,31 @@ ContentReplacementRedoTests` → **`Test run with 47 tests in 4 suites passed`**
 recorded (core 1737/182 with the 1 standing skip; Mac set 385/49; mobile 654/112 = the
 attributed baseline exactly). The BASELINES core line's staleness was the plan's own error —
 corrected above, credited to U1's arithmetic.
+
+**THE HELD WALKS — RUN 2026-09-30 by the orchestrator under her away grant (zero instances
+verified; the per-step guard OK on every act; the dev-store Debug build from `18o-u1`'s
+DerivedData, 03:09 — postdates U2's last production-code commit, so both units' fixes aboard;
+captures `notes/plans/18o-screens/u1/`, gitignored):**
+- **W1 — PASS.** Full window key → `Toggle Sidebar` menu item reads **true**; ⌃⌘S toggled the
+  sidebar twice; the Quick Note window key → reads **false** (the registry's answer in the real
+  menu); pad closed → **true** again. *(Walker fact: the dev window came up 1440×1000 at Y=117
+  this session, not the README's 1728×1084 — noted for the next walker.)*
+- **W2 — PASS, every leg.** Pinned *essays in progress* (context menu "Pin to Shelf Top"),
+  pinned *field notes*, **deleted field notes** (Delete Book), pinned *dream journal* → the
+  shelf's pinned run read journal · quicknotes · **essays · dream journal** — first-then-third
+  in pin order, the dead id healed by the third pin's write. **Put back from the Trash → field
+  notes returned UNPINNED** (capture `w2b…`) — the documented `starred`-shape consequence
+  (NOTICED 6, in her bundle). The shelf was then restored to its found state (both walk pins
+  unpinned; journal + quicknotes remain as found).
+- **W3 — PASS.** A +3-day future-stamped copy pair placed beside the library's 14 dated copies →
+  Settings ▸ Data Safety read **"Newest: Sep 30, 2026 at 1:42 AM · 15 copies"** — the future
+  copy COUNTED but never named newest, the row never stale-orange (#162 (a) exactly; capture
+  `w3-…`). Fixture removed + Settings reopened → **14 copies**, same newest (`w3c-…`).
+  *(One pre-existing pane fact, not a finding: the summary computes at WINDOW appearance — a
+  pane bounce inside one Settings window re-shows the cached numbers; reopening recomputes.
+  `DataSafetyModel.summarize`'s standing occasions, unchanged by row 84's fix.)*
+- **W4** — accepted on its composition pins per the script's own reasoning (unchanged).
+- Walk residue: none added (the fixture pair removed; the shelf restored; my dev instance quit).
 
 **ACCEPTED — U1 CLOSED**, all nine rows dispositioned (the ledger carries them). Judgement
 calls 1–8 stand as recorded — call 2 (row 84 widened to the weekly export: same clock, same
