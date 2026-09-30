@@ -748,11 +748,21 @@ purged-tombstone residual (#138(e)) stays the recorded gap. The phone's first-wr
   `SampleLibraryTests` + `JekyllTakemaniaSeedTests` + `SampleLibraryDedupeFactsTests` (`18o-u2-r66-mac-fixed.log`)
   **`Test run with 49 tests in 5 suites passed`**; mobile `MobileFirstWriteTombstoneTests` +
   `MobileFirstWriteFurnitureTests` + `MobileSeededBookRestoreTests` **`Test run with 15 tests in 3 suites passed`**.
-- **R-66 REVERT + MUTATION IN FLIGHT (announced before they start):** (1) R-66 = `SampleLibrarySeeder.swift` from
-  `be0ad315` (the scaffolding tree: predicate + case present, `perform` unfixed) over the fix; (2) M-early-only = the
-  fixed tree with the latch-side decision reduced to the old complete-only check (the tombstone read only up front).
-  **Restore = `git checkout HEAD -- App/Variorum/Shared/SampleLibrary/SampleLibrarySeeder.swift`** (the fix is
-  committed). If this line has no result below it, read `git diff` first.
+- **R-66 (behavioural revert) — DONE, restored clean:** `SampleLibrarySeeder.swift` from `be0ad315` (the scaffolding
+  tree) over the fix → Mac (`18o-u2-r66-revert-mac.log`) **`Test run with 6 tests in 1 suite failed … with 13 issues`**
+  (9·2·2 — identical to the pre-fix run, the three guards green); mobile (`18o-u2-r66-revert-mobile.log`) **`1 test …
+  failed … with 2 issues`** — identical. Restored by `git checkout HEAD --`, `git status` clean.
+- **M-early-only (mutation) — DONE, restored clean:** the fixed tree with the LATCH-side decision reduced to the old
+  complete-only check → (`18o-u2-m-early-only-mac.log`) **`6 tests … failed … with 2 issues`**, both in
+  `aTombstoneThatLandsDuringTheFirstRoundIsHonoured` (`.seeded` + a live copy): the latch-side read is load-bearing
+  and pinned.
+- **A seventh pin for the EARLY read** — `aTombstoneAlreadyHereDeclinesWithoutWaitingForTheRound` (an account store
+  whose tombstone is already local declines at the first read and records now, instead of `.awaitingFirstSync` with
+  nothing recorded), committed `a45b0655`; fixed tree **`7 tests … passed`**;
+  R-66 re-run with it (`18o-u2-r66-revert2-mac.log`) **`7 tests … failed … with 15 issues`** (9·2·2·2 — the new pin 2:
+  `.awaitingFirstSync`, mark unset); **M-late-only** (the EARLY decision reduced to complete-only, the latch read kept —
+  `18o-u2-m-late-only-mac.log`) **`7 tests … failed … with 2 issues`**, both in the new pin. Both deciding reads are
+  pinned, each by its own pin. Restored by `git checkout HEAD --`, `git status` clean.
 - Closing runs — NOT-STARTED (core `swift test` whole; the Mac import/quick-note/capture/crystallization/seeder/
   Tutorial suites; the FULL mobile suite).
 - Walks — HELD at start (her app running; guard exit 3).
