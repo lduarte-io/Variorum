@@ -2259,3 +2259,44 @@ structural claim (a meeting's keeper has always pushed — refute it if you can 
 counter-scenario); the `tombstonedParents` arm (live→dead same-batch — reachable only through
 shapes the ordinary pass should own first); the indeterminate-declines-permanently choice (no
 marker re-arm); the A5-band corner's recording.
+
+## PHASE RESULTS (closed 2026-09-30)
+
+**Six units, all closed; every ledger row dispositioned; the two-round Fable ladder zero-dispute.**
+- **Counts:** 15 fixed defects/builds across 17 dispositioned items (7 KnownIssues rows resolved +
+  one narrowed; 17e's ten-item remainder + 17t's pair closed in the 17-file; the ruled builds
+  R-18k-5, R-18k-6 and #146 all landed; ONE item DISMISSED AS HOLLOW with her call bundled at
+  #164). Every bug-class fix red-on-old with a behavioural revert reproducing its pre-fix count
+  EXACTLY (U1: 4·1·3·14 · U2: 29+6+3·15+2 · U3: 25·4·22 · U4: 13/9 · U5: 4 · U6: 7); five
+  guard-mutation runs, each redding exactly its own guard (M-exact 3 · M-isNewline 3+1 ·
+  M-early/M-late 2·2 · M-always 3 · M-noSeqGuard 2 — the last owed by the ladder and run).
+- **The ladder:** round 1 `bec30448` — 0 BLOCKER · 0 MAJOR · 3 MINOR (all the orchestrator's
+  side; fixed, mutation-run, dispositioned); round 2 `f28e3ef5` — all three verified FIXED,
+  1 MINOR + 1 NIT (record-only, corrected in place), round 3 NOT earned. ZERO disputes.
+- **Walks:** U1 W1–W3 (run by the orchestrator under her away grant — the registry grey, the
+  shelf-pins heal + the unpinned Put back, the future-stamp face), U2 W1–W3 (CRLF import both
+  voices; the launch tombstone honoured live; explicit restore mints), U3 W1–W3 (ten notes
+  survive; the ceremony door's both answers; the CRLF capture files), U4 W1–W3 (the three quiet
+  savepoints visible in Block History), U5 W1 (the ceremony sheet; the words screens HELD for
+  her real store — the script in the U5 record).
+- **Finals:** core `swift test` WHOLE **1751/184 PASSED** (+1 standing env-gated skip); FULL
+  mobile **656/114 = the 4 known + F-1 (#155's, attributed)**; per-unit Mac closing sets green
+  throughout; **the full-Mac finals run: PENDING(the background run at this closeout — filled
+  below)**; iOS generic build green at every Shared-touching unit.
+- **Scope:** zero schema · zero migrations · zero `Server/` lines · marker 9 · the editor seam
+  untouched (`EditorTextView`/`BlockRangeIndex`/`PaneSurface`/`PaneTextAuthority` diff-empty);
+  the ONE `Sync/` diff is U6's file, the Fable seat's, twice-cold-reviewed.
+- **Canon:** ZERO deltas applied. ONE contract line PROPOSED to the author (landing only at her
+  word): SyncSpec §7's dedupe paragraph gains the #146 sentence — *"a live never-accepted local
+  copy of a shipped book meeting the account's ARRIVING deletion retires when pristine (into the
+  Trash, outbox-explicit), never when edited — PROVISIONAL #146."*
+- **QUESTIONS:** #160 · #161 · #162 · #163 · #164 · #165 landed; the tail marker reads #166.
+- **MOBILE PARITY:** MobileSoul **PL-41** — P23, row 66 and #146 are MOBILE-VISIBLE through
+  shared brains (zero phone files changed for the fixes; the phone pins named); OWED and filed:
+  the U4 leaving-savepoint twin trace, the word screens' copy doors, the `one_block` CRLF
+  write-back.
+- **The install refresh:** PENDING(the closeout's zero-instance window — recorded below when run).
+
+**18o — CLOSED. Hard stop after the finals + refresh; the author kicks off what's next**
+(13r paused at its kickoff; 18n holds row 70's remainder + the openNote(ordinal:) cleanup; the
+mobile catch-up resumes on PL-40/PL-41's ground).
