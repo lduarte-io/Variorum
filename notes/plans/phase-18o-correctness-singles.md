@@ -1063,7 +1063,45 @@ trace and its C5 disposition lines · P27's fix `dee61938` · `App/Variorum/Shar
   by `git checkout HEAD --`, `git status` clean. No QUESTIONS row: the key cap is the model's standing rule
   (`ordinalCap`'s own doc: "rows past nine are click/scroll rows"), and a rendered row acting is P-2 — no product
   decision was made.
-- Row 13 / KnownIssues 79 (⌥⌘⇧M's choice from the store) — NOT-STARTED.
+- Row 13 / KnownIssues 79 (⌥⌘⇧M's choice from the store) — DONE: pins `539d830f` · fix `fbd5c55f`.
+  **THE TRACE (at the code, HEAD `89935c26`, `EditorSurfaceController.applyStructural`'s `.merge` arm):** the ceremony
+  branch gated on `leadingArity`/`trailingArity` = `model.slots[i].activeVariantCount`, which `EditorProjectionPolicy`
+  freezes while the buffer is dirty (every delivery `.deferUntilClean`). (a) A take BORN mid-burst → arity 1/1 → the
+  guard refused `FannedDefaultsCopy.mergeCeremonyNeedsAFan` ("These blocks have one take each…") while the store held a
+  fan. (b) A take ARCHIVED mid-burst → arity still 2 → `openMergeCeremony` → `flushNow` → `liveActiveFansAndRendered`
+  (the truth) says 1/1 → its fallthrough `runInstantMerge` → an INSTANT merge from the ceremony door, and its receipt
+  read the same stale slots: *"Merged the visible takes — 1 other take stays with the released block…"* about a take
+  that was archived, not active (the pre-fix log shows it). `openMergeCeremony` has ONE caller (this branch); its
+  instant fallthrough dates from 13b 4B, when ⌘⇧M itself opened the sheet and an unfanned pair's instant merge was that
+  door's everyday answer — since 13j J4b the sheet is ⌥⌘⇧M's alone, whose ruled answer for an unfanned pair is the
+  needs-a-fan refusal (`FannedDefaultsTests.theMergeCeremonyDoorOnAnUnfannedPairRefuses`).
+  **THE FIX (`fbd5c55f`) — ONE store read decides, both ways:** the arm's slots guard is removed; `openMergeCeremony`'s
+  existing post-flush read (`liveActiveFansAndRendered` — `liveActiveFans`' sibling, the same fans + the rendered pair)
+  IS the authorization: fanned → the sheet (as ever); unfanned → `mergeCeremonyNeedsAFan`, never the instant merge.
+  This is P27's rule (never authorize from `slots`) in the shape `openMergeRunChoice` (the run door, one branch over)
+  already has: flush, one store read, refuse on no fan. **Judgement call 1 below** says why this and not a second
+  `liveActiveFans` read in the arm. **The await window (the brief's note for the ladder), stated:** this fix adds NO
+  await — the arm previously awaited nothing before its gate and then awaited the open's flush + read; now it awaits
+  only the open's flush + read. And the press no longer reaches `runStructural` at all (the old (b) road reached it
+  through `runInstantMerge`, behind two awaits); the sheet's confirm roads are byte-unchanged and keep
+  `runStructural`'s own in-flight guard. Three doc cross-references that described the retired fallthrough were kept
+  honest (the `.merge` arm's header parenthetical, `runKeepOnTopDivide`'s and `runCarryAllMerge`'s "same shape" notes)
+  — comment-only.
+  **Pre-fix (`18o-u3-r79-prefix.log`):** **`Test run with 4 tests in 1 suite failed … with 4 issues`** —
+  `aTakeBornMidBurstOpensTheCeremonyInsteadOfRefusing` 2 (the false refusal spoken; no sheet) ·
+  `aTakeArchivedMidBurstRefusesInsteadOfMergingInstantly` 2 (one block where two stood; the stale receipt instead of
+  the refusal); the guards `aStandingFanStillOpensTheCeremonyMidBurst` · `anUnfannedPairMidBurstStillRefusesAndKeeps
+  HerTyping` green. **Fixed** (`18o-u3-r79-fixed.log`): the 4 + `FannedDefaultsTests` (UNMODIFIED — P27's pin and
+  guard, `theMergeCeremonyDoorStillOpensTheSheetPrePaired`, `theMergeCeremonyDoorOnAnUnfannedPairRefuses` included) +
+  `FannedDefaultsBoardTests` + `MergeCeremonySheetTests` + `MergeArrangementTests` + `SeamMergeTests` **`Test run with
+  90 tests in 6 suites passed`**. **R-79** (`EditorSurfaceController.swift` from `539d830f` over the fix,
+  `18o-u3-r79-revert.log`): **`4 tests … failed … with 4 issues`**, identical (2·2), guards green; restored by `git
+  checkout HEAD --`, clean. **M-guard** (the fixed tree with ONLY the arm's slots guard put back,
+  `18o-u3-r79-m-guard.log`): **`… failed … with 2 issues`**, all in (a) — (b) green. **M-fallthrough** (the fixed tree
+  with ONLY the instant fallthrough put back, `18o-u3-r79-m-fallthrough.log`): **`… failed … with 5 issues`** — (b) 2
+  and the unfanned guard 3 (with the arm's gate gone, the refusal in the open is what every unfanned ⌥⌘⇧M now meets —
+  load-bearing, and pinned twice). Each half is pinned by its own pin; both restored clean. No QUESTIONS row: both
+  outcomes are the door's ruled behaviour (the sheet for a fan, the refusal for none) — only the fact it reads changed.
 - Row 12b (the microsyntax reads CRLF) — NOT-STARTED.
 - Closing runs — NOT-STARTED.
 - Walks — NOT-STARTED.
