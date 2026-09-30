@@ -473,7 +473,7 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 ## LIVE STATUS (flipped in the same commit as each piece — the resiliency protocol's rule)
 
 - PLAN FILE authored + committed — **DONE** (this commit).
-- U1 the honesty & paper-cuts batch — IN-PROGRESS (`opus-implementer`; the UNIT U1 RECORD below carries its own LIVE STATUS).
+- U1 the honesty & paper-cuts batch — DONE (implementer), awaiting the orchestrator's spot-check; the walks HELD (her real-store app running — WalkKit `guard.sh --author` exit 3); the UNIT U1 RECORD below carries the dispositions.
 - U2 the import & launch-seed batch — NOT-STARTED.
 - U3 the two Mac doors — NOT-STARTED.
 - U4 the book leaving savepoint (R-18k-6) — NOT-STARTED.
@@ -486,7 +486,7 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 
 ## UNIT U1 RECORD — the honesty & paper-cuts batch (implementer: `opus-implementer`, 2026-09-29)
 
-**NOT DONE (first line, per the contract):** PENDING — filled at the unit's close.
+**NOT DONE (first line, per the contract):** (1) **NO GUI WALK and NO CAPTURES** — her real-store app was running the whole session (`/Applications/Variorum.app`, pid 21496, untouched), and WalkKit's own guard refuses every GUI step while it lives (`Tools/WalkKit/guard.sh --author` → *"GUARD: her app is running — STOP"*, exit 3), so the use-shaped walks are HELD for the orchestrator (the U1 section already names them the orchestrator's, "where the machine allows") — the ready script is THE WALK SCRIPT below; `notes/plans/18o-screens/u1/` was not created. (2) The ledger table's rows 1–9, the 17e copies into the 17-file and the KnownIssues edits (rows 64 · 84, and the per-note-view-state row's correction) are the orchestrator's closeout acts — each line is drafted below, none applied. (3) 17e (12)'s same-class sweep found ONE more silently-gated family (the creation/restore menu items) — enumerated, NOT fixed (not one line; NOTICED 1). Everything else the brief asks for is done.
 
 ### READING (done in-session before any code)
 
@@ -520,5 +520,68 @@ Debug dev store behind the per-step guard.
   - **Core `swift test` (whole)** (`18o-u1-core.log`): **`✔ Test run with 1737 tests in 182 suites passed`**, 1 skipped (`basicOfflineEditsConvergeOverTheRealServer` — the standing env-gated live-server pin). Arithmetic: the plan's BASELINES line ("core untouched since 18k's finals, 1723/180") is stale — 18l U0 (`83f6f317`, +6 tests / +1 suite) and 18l-c U8 (`dfe5a895`, +1 test) touched core after 18k; + this unit's 7 tests / 1 suite (P34 +2, P35 +5) = 1737/182 exactly.
   - **Mac closing set** (`18o-u1-closing.log`) — 49 literal suites: the tray (`TrayArchivedTruncationTests` `NoteTrayTests` `TrayFilterTests` `TrayPanelShapeTests` `TrayPanelMoveTests` `TrashPurgeDoorsTests`), the dangling pick (`RecoveryDoorsTests`), the registry + windows (`CapabilityRegistryTests` `ShellChromeTests` `NoteVersionsPaneTests` `WindowRegistryTests` `PaneMountWindowTests` `NoteOnlyWindowTests` `IndependentWorkspaceTests` `TwoWindowMountTests` `QuickNoteWindowTests` `QuickNoteDoorTests` `QuickNoteMintTests`), the backup/Data Safety family (`BackupFutureStampTests` `BackupOwnFilesTests` `BackupRetentionTests` `BackupRunTests` `BackupSingleFlightTests` `DataSafetyRunbookTests` `MarkdownInsuranceTests` `SyncSafetyFaceTests` `SecretCheckTests` `SnapshotPairTests` `ICloudDriveOfferTests` `MarkdownInsuranceFlipTests` `Phase13pBackupEnvelopeTests` `Phase13pInsuranceFaceTests` `StoreBackupTests` `PostureSwitchTests`), the shelf's Mac consumers (`ShelfModelTests` `PromoteAndPaletteTests` `JournalBooksTests` `BookStructureModelTests`) and the eleven Tutorial suites — **`✔ Test run with 385 tests in 49 suites passed`**, 0 skipped.
   - **FULL mobile suite, iPhone 17 Pro simulator** (`18o-u1-mobile.log`): **`✘ Test run with 654 tests in 112 suites failed … with 5 issues (including 4 known issues)`** — EXACTLY the attributed baseline: the 4 known (`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor` ×2, `MobileTutorialStructureWalkTests.theFannedDivideLessonLandsTheDuplicateShape` ×2) + **F-1** (`nothingUserFacingNamesTheMac`, its one offender still `SampleLibraryJekyllBook.swift`'s disclaimer — #155's, attributed, NOT re-attributed); 0 skipped. The count is the 18m baseline's own (U1 added no mobile test); it compiles every shared change (`MobileUndoDoor` doc, `StoreBackup`, `MarkdownInsurance`) and runs the phone's shelf pins through the healed op.
-- Walk captures (`notes/plans/18o-screens/u1/`) — NOT-STARTED.
+- Walk captures (`notes/plans/18o-screens/u1/`) — HELD: her app running, `guard.sh --author` exit 3 (THE WALK SCRIPT below is the orchestrator's).
+- The record closed — DONE (this commit).
 - Deaths / resumes: none.
+
+### THE WALK SCRIPT (HELD — for the orchestrator at a verified zero-instance window; the dev-store Debug build of this tree, WalkKit's guarded order: `guard.sh --author` FIRST, then activate, then `guard.sh <pid> [x y]`, acts ≥ 2 s apart)
+
+- **W1 — 17e (12), the sidebar toggle's grey (voice-independent: system menu chrome; one capture):** with the main (full) window key, read `enabled of menu item "Toggle Sidebar" of menu 1 of menu bar item "View" of menu bar 1` → **true**; ⌃⌘S hides/shows the sidebar. Open a note in its own window (the Open strip's context menu ▸ Open in New Window — the 800×720 window), make it key, read the same item → **false** (the grey, now the registry's answer). Close that window by its AXCloseButton (README's recipe).
+- **W2 — P35, the shelf pins (both voices):** pin two books on the shelf, delete the second (Library ▸ Trash), pin a third → the shelf's pinned books read first-then-third in pin order. Then Put back the deleted book → it returns UNPINNED (the documented consequence the writer's doc states, `starred`'s own; worth her eye — NOTICED 6). Unpin/re-pin on a live book behaves as before.
+- **W3 — row 84, the Data Safety face (the pane is system-styled — one capture per appearance is enough):** in the dev container's `…/Variorum-dev/Backups/`, copy the newest REAL dated copy (and its `.keys.json` pair) to the same name with a stamp THREE DAYS AHEAD (`variorum-backup-<today+3d>-<fp8>.sqlite`); open Settings ▸ Data Safety → "Beside your library" reads **Newest: <today's real copy>** (never the future date), the count includes the stand-in, the row is not orange. Remove the stand-in pair afterwards and re-read the pane. (The test host's launch writes dev copies too — read stamps, not presence: the ENVIRONMENT TRAPS line.)
+- **W4 — P37, the tray's archived marker:** staging > 500 archived blocks in one dev note is a store-polluting fixture, so the marker's evidence is the composition pins (`TrayArchivedTruncationTests`, red-on-old + revert). The cheap regression walk: a note with one archived block → This Note's Tray ▸ Archived shows the row and NO marker, both voices.
+- P29 · P32 · P34 are documentation (P34's behaviour is unchanged and pinned); rows 64 and (11) are records — nothing to walk.
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder reads this first)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `App/Variorum/VariorumMobile/Features/Write/MobileUndoDoor.swift` | P29: `redo()`'s doc only | every line of code |
+| `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift` | P32: `danglingPick`'s doc only | every line of code |
+| `Sources/VariorumCore/Domain/BoundarySnapping.swift` | P34: `settlePull`'s doc only | `settle`, every scanner |
+| `Sources/VariorumCore/Operations/Operations+Appearance.swift` | P35: `setShelfPinned` (public door: liveness for PIN only) + the db-level writer (heal + value-guarded no-op) + `liveShelfPins` | `setStarred`, every other setter, `upsertSetting`, the two in-transaction callers |
+| `App/Variorum/Variorum/Features/Tray/TrayPanel.swift` | P37: `archivedTruncated`; `adopt`'s archived arm windowed; one `truncation("archived")` line | the other arms, every row, the purge doors |
+| `App/Variorum/Variorum/Registry/Capability.swift` · `CapabilityRegistry.swift` · `CommandRouter.swift` · `EditorCommands.swift` · `RootView.swift` · `Workspace/WindowRegistry.swift` | 17e (12): `CapabilityContext.windowKind`; `.toggleSidebar`'s availability; the router closure + `currentContext`; the menu item reads `enabled(.toggleSidebar)`; the shell wires the key window's kind; `WindowRegistry.Kind` `nonisolated` | every other declaration and door; the toolbar door; `activeWindowKind` itself (still the source) |
+| `App/Variorum/Shared/StoreBackup.swift` · `MarkdownInsurance.swift` · `Variorum/Features/Settings/DataSafetyModel.swift` · `DataSafetyPane.swift` | row 84: `stampIsTrusted` + `newestTrustedBackup`; the three `StoreBackup` due-checks, the export's due-check, `summarize`/`summarizeExports`' newest/oldest, `isStale`'s belt | `existingBackups` / `date(fromBackupURL:)` (C7's own-names rule), every prune, retention, the copy/pair/runbook/key-file code, forced runs |
+
+**Zero `Sources/VariorumCore/Sync/`, zero `Server/`, zero schema/migrations (marker 9 unchanged), zero new settings.** Editor seam untouched (`EditorTextView`, `BlockRangeIndex`, `PaneSurface`, `PaneTextAuthority`, `EditorSurfaceController`). **Custody-adjacent, named for the Fable ladder:** the Castle lock-time copy's due-check (`performLockTimeCopyIfDue`) now reads the trusted newest — its WAL/key-file/pair/pending-check legs are byte-untouched; `PostureSwitch`'s offer listing (C7's reader 5) is untouched (it lists through `existingBackups`, which this unit did not change).
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **Row 84 — "ignore future stamps for freshness", not "treat a future newest as due":** the latter alone writes at EVERY hourly check while the future copy stays `.last` by stamp (C7's reader-3 storm). *Reverse by* `stampIsTrusted` returning true and a due arm on `newest.date > now`.
+2. **Row 84 widened to the weekly export** (its due-check + the exports row): the same clock, the same run, the same pane, the same one rule. *Reverse by* restoring `performExport`'s `existing.last` read and `summarizeExports`' `dated.max()`.
+3. **Row 84 — the face counts the future copy but never names it as newest** (PROVISIONAL, QUESTIONS #162); `isStale` reads a future newest stale as a belt.
+4. **P35 — the no-op guard is on the VALUE** (`setStarred`'s shape): an otherwise no-op pin/unpin DOES write when dead ids are present (that write is the heal). *Reverse by* the old per-id early returns (and the heal only on a changing write).
+5. **17e (12) — `windowKind` nil means GREY** (no key window known), matching the menu's old `activeWindowKind != .full`; the walk's sampled contexts gained a full-window context (every gate's own pattern). `WindowRegistry.Kind` became `nonisolated` so the nonisolated context can hold it (pure data).
+6. **17e (12) — the source-walk pin matches the menu item's three lines exactly**: a reformat of those lines reds it loudly (by design — it is the "the grey is read from the registry" fact); a reviewer may prefer a looser predicate.
+7. **P37 — the marker's condition mirrors the deleted marker's** (the view + non-empty rows + the flag); the Archived tab's count still reads the windowed 500 (the Leaving tab's standing shape).
+8. **P34 — the documented-behaviour pin hard-codes a pull of 2** and says so with its own `#expect(settlePull == 2)`.
+
+### NOTICED, NOT TOUCHED (U1's scope fence)
+
+1. **The creation/restore menu family is silently gated the same way `.toggleSidebar` was** — `.newPost` · `.todaysEntry` · `.findAnything` · `.restoreTutorial` · `.restoreSampleLibrary` · `.restoreEncryptionBook` · `.restoreJekyllBook` declare `always` while the menu greys them on `!canReachCreationTarget` (no FULL window exists — a different window fact from `windowKind`; the note-only-KEY case stays enabled by 13f cold review R1-3). The fix is a `hasNavigationTarget` context field + wiring + seven declarations + seven menu edits — not one line, so not taken. Registry-honesty only (the menu greys correctly). Needs an owner (12's registry-walk family, or a 17 entry).
+2. **Three menu items are undeclared in the registry** (the declared ⇔ rendered class, not this row's): New Window (undeclared by 13f 5b ruling (e) — deliberate), **Open the Tutorial** (a literal title, no id) and **Lock Library Now** (rendered only under `bootstrap.canLock`, no id). The walk's `menuRendered` list is hand-kept, so it cannot see them.
+3. **17e (11)'s premise is partly overstated in two places:** `postMode.<id>`, `readFace.<id>` and `takesViewMemory.<id>` are evicted by NO production road, Delete Now included — KnownIssues' per-note-view-state row says Delete Now evicts them, and `CommandRouter.forgetCurrentBlock`'s doc says "One door, every memory". Same accepted arithmetic (tens of bytes a key); the text correction (or the eviction the door's doc invites — two or three lines) is that row's owner's (12). The drafted 17e line above carries it.
+4. **The plan's BASELINES core line is stale:** "core untouched since 18k's finals (1723/180)" — 18l U0 (`83f6f317`) and 18l-c U8 (`dfe5a895`) touched core after 18k, so the pre-U1 core baseline was 1730/181. The closing run's arithmetic above shows it.
+5. **`MobileTutorialSeeder.cleanup`'s unpin-before-delete** (doc :179-180, call :184) is now redundant with P35's heal but harmless — left, as the brief says.
+6. **P35's consequence, for her eye (and the ladder's):** a book deleted and later PUT BACK comes back pinned only if no pin write happened in between (the heal dropped its id) — exactly `starred`'s documented behaviour, which the brief named as the model; stated at the writer's doc, not a QUESTIONS row (the brief's ruling makes the shape). If she wants restored books to keep their pin, the remedy is a restore-side re-pin, a product call.
+7. **`DataSafetyModel`'s summaries read the wall clock** (`now: Date = Date()`), unlike `StoreBackup`'s injected `now` closure — the face pins therefore place fixtures around the real clock. Harmless; a model-level clock seam is the next toucher's if a pin ever needs a fixed now.
+8. **Row 84's future copy keeps a retention slot** (the 14 beside the library; one daily slot of the far folder's 14+4) until the clock passes it — by design (never the rule's to delete), recorded.
+
+### DISPOSITION (one line per ledger row)
+
+1. **P29 — FIXED (doc-only)** `e2a6ecf0`: `MobileUndoDoor.redo()`'s doc states redo overwrites a since-edited buffer behind a quiet insurance savepoint (the undo warning's "set aside"); no behaviour change owed (A12 named undo alone). **No pin — a comment cannot fail a test, and no hollow pin was minted.** The FULL mobile suite green at the attributed baseline.
+2. **P32 — FIXED (doc) + RECORDED** `a1479bba`: `danglingPick`'s doc gives the true reason for the lens-only scope; **QUESTIONS #160** names the silent-fallback gap, options (i) extend the notice + Restore to scratch columns — RECOMMENDED · (ii) prune at archive/delete · (iii) accept; OPEN, nothing built. No pin (doc + question only).
+3. **P34 — FIXED (doc) + PINNED as documented behaviour + RECORDED** `9068f624` · `54f91c72`: `settlePull`'s doc states the one override configuration; `BoundarySnappingTests.aStrongBoundaryExactlySettlePullEarlierTakesAnExactPlacement` + the guard `anExactPlacementWinsBeyondThePullAndAgainstALaterStrongBoundary` — green on today's tree BY DESIGN; proven able to fail: mutation M-exact → 3 issues; **QUESTIONS #161** (exact-wins, hers; PROVISIONAL — behaviour stands).
+4. **P35 — FIXED** `0ae75e59` · `915e8124`: `ShelfPinsSelfHealTests` (5) — red-on-old **4 issues** (3 tests), R-P35 identical, restored clean; zero `Sync/`.
+5. **P37 — FIXED** `74d4c45a` · `6c61d562`: `TrayArchivedTruncationTests` (3) — red-on-old **1 issue** (1 test), R-P37 identical, restored clean.
+6. **17e (12) — FIXED** `b24d801a` · `e724032f`: `CapabilityRegistryTests` +4 (`theSidebarToggleIsGreyWhereNoFullWindowIsKey`, `theSidebarMenuItemReadsItsGreyFromTheRegistry` — red-on-old **3 issues**; `theSidebarToggleActsOnlyInAFullWindow`, `theRoutersContextCarriesTheKeyWindowsKind` — with the fix); R-T12 → **8 issues**, all four red; the same-class sweep enumerated (one more family — NOTICED 1).
+7. **Row 84 — FIXED** `09f9e199` · `1c18420d`: `BackupFutureStampTests` (8) — red-on-old **14 issues** (7 tests), R-84 identical, restored clean; C7's `BackupOwnFilesTests` rode UNMODIFIED (`DataSafetyTests.swift` zero diff) and green; **QUESTIONS #162** (the face's reading, PROVISIONAL (a)).
+8. **Row 64 — RECORDED** `b36e93b2`: R-18k-4 (*leave it for now*) recorded; the documented-behaviour pin re-verified green (5/5); the closeout's two options drafted.
+9. **17e (11) — RECORDED** `b36e93b2`: the disposition line drafted, with the correction found at the code (NOTICED 3).
+
+QUESTIONS rows landed: **#160 · #161 · #162**; the tail marker reads **#163**.
+
+- Deaths / resumes: none.
+
+**U1 — DONE (implementer), awaiting the orchestrator's spot-check.**
