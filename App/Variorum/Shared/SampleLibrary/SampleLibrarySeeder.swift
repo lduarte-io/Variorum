@@ -670,6 +670,23 @@ enum SampleLibrarySeeder {
         UserDefaults.standard.bool(forKey: seededDefaultsKey(for: storeVariant, book: book))
     }
 
+    /// **The reader's decision as the STORE records it — ONE rule for both
+    /// silent roads** (18o U2 lifted it here from the ensure, R-18k-5): the
+    /// tutorial door's ensure (`SeededBookRestore.ensure`, pre-13x F3
+    /// MINOR-N3) and the launch seed (`perform` — *"honour the tombstone at
+    /// launch"*, QUESTIONS #138(f)). A TOMBSTONED reading of the book's
+    /// reserved name — any age, a Delete Now included
+    /// (`Queries.readingTombstoneExists`) — is her deletion, made on this
+    /// device or arrived from another. The explicit doors (Help ▸ Restore, the
+    /// phone's Settings row) are asks and never read it. A physically purged
+    /// row leaves nothing to read, so both roads RECORD the decision in the
+    /// device mark (`isMarkedSeeded`, the other evidence) whenever this answers
+    /// true (RUN A A2); a device that ran neither road between the deletion
+    /// and the purge is the recorded gap (#138(e)).
+    nonisolated static func readerDeletedTheBook(_ db: Database, book: Book) throws -> Bool {
+        try Queries.readingTombstoneExists(db, name: book.name)
+    }
+
     /// RUN A batch A2, row 8 (17l item 1 / KnownIssues 38): the WRITE half —
     /// what `perform` has always done through its `save` leaf, named so the
     /// seeded-book DOORS can record the same decision (see
@@ -759,6 +776,13 @@ enum SampleLibrarySeeder {
         case alreadySeeded
         /// The library is already here (a prior run, or it arrived by sync).
         case alreadyPresent
+        /// 18o U2 (R-18k-5, QUESTIONS #138(f)): the reader DELETED this book
+        /// — a tombstoned reading of its name is on record
+        /// (`readerDeletedTheBook`), made here or arrived by sync — so the
+        /// launch honours it exactly as the tutorial door's ensure does, and
+        /// RECORDS the decision in the mark. Nothing minted; Help ▸ Restore
+        /// still brings it back.
+        case deletedByTheReader
         /// This store belongs to an account whose first clean round has not
         /// landed, so whether the library already exists is not yet
         /// knowable. NOT marked: the next launch asks again.

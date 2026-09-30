@@ -78,8 +78,10 @@ nonisolated enum SeededBookRestore {
         session: AppSession, book: SampleLibrarySeeder.Book, markIsSet: @MainActor () -> Bool
     ) async throws -> EnsureOutcome {
         if markIsSet() { return .declined(.markedSeeded) }
+        // 18o U2: the rule lives ONCE, read by this ensure and the launch seed
+        // alike (R-18k-5) — `SampleLibrarySeeder.readerDeletedTheBook`.
         let deleted = try await session.database.read { db in
-            try Queries.readingTombstoneExists(db, name: book.name)
+            try SampleLibrarySeeder.readerDeletedTheBook(db, book: book)
         }
         if deleted {
             // RUN A batch A2, row 8: RECORD the decision while the evidence
