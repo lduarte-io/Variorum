@@ -1561,7 +1561,10 @@ departing surface wrote on its way out) and the entry drops then. So reporting a
   remembers a `.selected` note too (a looked-at note enters the trail); **M-empty** — `.empty` departs the remembered
   note (clicking out / a mode switch's empty frame counts as leaving); **M-idle** — the book's road runs the IDLE
   occasion (`idleAutoCommit`) instead of the leaving one (the wrong cadence occasion reused).)
-- QUESTIONS #163 (the Compare-peer PROVISIONAL + the book's note-switch reading) — NOT-STARTED.
+- QUESTIONS #163 (the Compare-peer PROVISIONAL, quoting the ruling's own clause, + the book's note-switch reading) —
+  DONE (this commit): (1) what counts as moving — (a) built, (b) caret-only, (c) click-out counts too; (2) Compare's
+  peers — (a) built, the one-line alternative "peers keep today's timing"; the never-savepointed consequence stated.
+  Tail marker → **#164**.
 - Closing runs (`AutosaveRegistryLifecycleTests` + `AutosaveRegistryReleaseTests` FULL, `SavepointOnLeaveTests`, the
   book/Compare suites touched, the eleven Tutorial suites; the mobile suite only if a shared file changes — none
   expected) — NOT-STARTED.
