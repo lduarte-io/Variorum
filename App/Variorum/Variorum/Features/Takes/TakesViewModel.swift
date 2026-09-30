@@ -1530,9 +1530,16 @@ final class TakesViewModel {
 
     /// The pick a lens column MADE for this slot and can no longer show
     /// (`Queries.danglingLensPicks`), or nil where the column is showing what
-    /// it picked. Only LENS columns: a scratch column's picks are view-local
-    /// (`column.picks`), never stored, so they cannot dangle across a
-    /// session — recorded rather than silently scoped.
+    /// it picked. Only LENS columns — because 13j's J5 ruling, as recorded,
+    /// is scoped to a SAVED lens's pick; NOT because a scratch pick cannot
+    /// dangle. It can: a scratch column's picks (`column.picks`) are
+    /// PERSISTED per note in the local view memory (`TakesViewMemory`,
+    /// written by `saveMemory()` on every pick), nothing prunes them when the
+    /// picked take is archived or deleted, and `resolvedTake` then falls
+    /// through to the slot's chosen take with nothing said — across
+    /// relaunches. That gap is NAMED for her, not built: QUESTIONS #160
+    /// (18o U1, 17e P32 — this line used to claim scratch picks are never
+    /// stored).
     func danglingPick(columnID: String, slot: Queries.RenderedBlock) -> Queries.DanglingPick? {
         guard let column = columns.first(where: { $0.id == columnID }),
               case .lens(let lensID) = column.kind
