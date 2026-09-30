@@ -50,13 +50,15 @@
 //
 
 import Foundation
+import VariorumCore
 
 nonisolated enum CaptureMicrosyntax {
     /// What a capture turns out to be: the text that becomes the note, and
     /// the tokens that were taken out of it.
     struct Capture: Equatable, Sendable {
         /// The capture with every parsed token removed — what `importPost`
-        /// is handed. Byte-identical to the input when nothing parsed.
+        /// is handed. Byte-identical to the input when nothing parsed, apart
+        /// from its line endings (rule 0).
         var text: String
         /// Every `{#…}` in the capture, in the order they appeared. Several
         /// are legal; each one applies.
@@ -70,6 +72,17 @@ nonisolated enum CaptureMicrosyntax {
 
     /// THE RULE, stated so a reader never has to infer it from the code:
     ///
+    /// 0. **Line endings are read first** (18o U3 — ledger row 12b): `"\r\n"`
+    ///    and a bare `"\r"` are `"\n"` before any rule below runs —
+    ///    `SegmentationRules.normalizedLineEndings`, the segmenter's own
+    ///    reading (18o U2, 17e P23) and `PlainPaste` rule 1's. `"\r\n"` is
+    ///    ONE Swift `Character` that is not `"\n"`, so without this a capture
+    ///    pasted from a Windows (or classic-Mac) source was a single "line"
+    ///    to rules 2 and 5: an unclosed `{#` scanned across its line breaks —
+    ///    and, opening the capture, could swallow it whole into a tag path —
+    ///    and a token-only line kept its break, a blank paragraph downstream.
+    ///    U+2028, U+2029 and U+0085 stay CONTENT, as everywhere in the
+    ///    block-boundary family (`NewlineSplitting`'s doc).
     /// 1. **Only two shapes parse**, and only with their opener spelled
     ///    exactly: `{#` … `}` and `{t:"` … `"}` (the `t` is read
     ///    case-insensitively — PROVISIONAL #127(b) — because iOS
@@ -96,11 +109,16 @@ nonisolated enum CaptureMicrosyntax {
     ///    leave a blank paragraph at the top of every note captured that
     ///    way (`bulkSegments` stores the blank line as content, by the
     ///    2026-07-12 spacing ruling).
-    /// 6. **Text with no `{` passes through BYTE-IDENTICAL**, and so does
-    ///    text whose braces all turn out to be malformed — the capture is
-    ///    hers, and the app does not tidy it (`PlainPaste`'s own doctrine,
-    ///    one door over).
+    /// 6. **Text with no `{` passes through BYTE-IDENTICAL** apart from rule
+    ///    0's line endings, and so does text whose braces all turn out to be
+    ///    malformed — the capture is hers, and the app does not tidy it
+    ///    (`PlainPaste`'s own doctrine, one door over, whose rule 1 reads line
+    ///    endings exactly as rule 0 does; and the segmenter the text goes to
+    ///    next reads them so anyway).
     static func parse(_ raw: String) -> Capture {
+        // Rule 0 — every rule below is about LINES, so the lines are read
+        // first, by the segmenter's own rule.
+        let raw = SegmentationRules.normalizedLineEndings(raw)
         // The fast path AND the promise: no brace, nothing to do.
         guard raw.contains("{") else {
             return Capture(text: raw, tagPaths: [], title: nil)
