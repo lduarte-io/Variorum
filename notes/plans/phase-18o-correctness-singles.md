@@ -1898,8 +1898,14 @@ guards green on both: the hoisted rule's two arms (clears when unmoved; never cl
   `git checkout HEAD --`, `git status` clean.
 - QUESTIONS **#164** — DONE (this commit): the product call — (a) close as answered, no gate (RECOMMENDED); (b) a typed
   heads-up with honest copy; (c) hers. Tail marker → **#165**.
-- Item 2 scaffolding (behaviour-neutral: `WordsCopyDoor.swift`, the hoist, `PassphraseSetModel` flag, `PhraseOnlySheet`
-  inputs) — NOT-STARTED.
+- Item 2 scaffolding (behaviour-neutral) — DONE (this commit; the Mac target builds — `18o-u5-scaffold-build.log`
+  `** BUILD SUCCEEDED **`, no new warning): `App/Variorum/Shared/WordsCopyDoor.swift` (NEW; whole body `#if os(macOS)`:
+  `WordsClipboard.copy` — the pane's closure's four statements, pasteboard + interval injectable — and `WordsCopyDoor`
+  over `PageDoor`); `PostureSwitchSheet`'s inline Copy All closure → `WordsCopyDoor(words:pageStyle: nil) {
+  model.markWordsCopied() }` (the nil arm IS `Button(title, action:)`; the same statements; the same receipt — so no
+  second timer exists); `PassphraseSetModel.copiedWords` / `markWordsCopied()` declared (the siblings' shape; unread
+  until the fix); `PhraseOnlySheet` internal with `copied` / `onCopied` inputs (unrendered until the fix) and its
+  presenter's `phraseCopied` (reset at each mint). The four faces render NOTHING new yet.
 - Item 2 pins (red-on-old on the scaffolding tree) — NOT-STARTED.
 - Item 2 fix (the door in faces 2–5) — NOT-STARTED.
 - R-U5 behavioural revert — NOT-STARTED.

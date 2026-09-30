@@ -307,6 +307,13 @@ final class PassphraseSetModel {
         phase = .done
     }
 
+    /// 18o U5 (17t item 2): the *Copy All* door's receipt — the flag the
+    /// set sheet's *Copied. Your clipboard clears in 60 seconds.* sub-line
+    /// reads (copy §2a Screen 3), the three ceremony models' exact shape.
+    private(set) var copiedWords = false
+
+    func markWordsCopied() { copiedWords = true }
+
     func acknowledgePhraseWritten() {
         phase = .done
     }

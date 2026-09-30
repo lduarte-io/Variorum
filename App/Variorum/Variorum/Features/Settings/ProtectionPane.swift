@@ -546,6 +546,8 @@ struct ProtectionNoticeBar: View {
 
     @State private var setSheetModel: PassphraseSetModel?
     @State private var phraseWords: [String]?
+    /// 18o U5: the phrase-only sheet's *Copy All* receipt (reset per mint).
+    @State private var phraseCopied = false
     @State private var migrationConfirm: MigrationConfirmModel?
     @Environment(\.openSettings) private var openSettings
 
@@ -600,7 +602,10 @@ struct ProtectionNoticeBar: View {
             get: { phraseWords != nil }, set: { if !$0 { phraseWords = nil } })
         ) {
             if let words = phraseWords {
-                PhraseOnlySheet(words: words) { phraseWords = nil }
+                PhraseOnlySheet(
+                    words: words, copied: phraseCopied,
+                    onCopied: { phraseCopied = true }
+                ) { phraseWords = nil }
             }
         }
     }
@@ -650,7 +655,9 @@ struct ProtectionNoticeBar: View {
                             controller: controller,
                             vaultTie: VaultTie.make(services: services)) {
                         case .extend(let model): setSheetModel = model
-                        case .minted(let words): phraseWords = words
+                        case .minted(let words):
+                            phraseCopied = false
+                            phraseWords = words
                         case .refused: break
                         }
                     }
@@ -1018,8 +1025,14 @@ struct MigrationConfirmSheet: View {
 }
 
 /// The nudge's phrase-only road: the twelve words, shown once.
-private struct PhraseOnlySheet: View {
+/// 18o U5 (17t item 2): internal (a pin composes it); the *Copy All*
+/// receipt is its presenter's (`ProtectionNoticeBar`'s `phraseCopied`),
+/// handed in — this sheet has no model — so the caption is a pure
+/// function of what it is given.
+struct PhraseOnlySheet: View {
     let words: [String]
+    var copied: Bool = false
+    var onCopied: () -> Void = {}
     var onDone: () -> Void
 
     var body: some View {
@@ -1185,19 +1198,9 @@ struct PostureSwitchSheet: View {
                 body(ProtectionCopy.wordsWriteDownBody)
                 wordsGrid(words).privacySensitive()
                 HStack {
-                    Button(ProtectionCopy.wordsCopyAll) {
-                        let pasteboard = NSPasteboard.general
-                        pasteboard.clearContents()
-                        pasteboard.setString(words.joined(separator: " "), forType: .string)
-                        let count = pasteboard.changeCount
-                        model.markWordsCopied()
-                        Task {
-                            try? await Task.sleep(for: .seconds(60))
-                            if NSPasteboard.general.changeCount == count {
-                                NSPasteboard.general.clearContents()
-                            }
-                        }
-                    }
+                    // 18o U5: the ONE Copy All door (`WordsCopyDoor` — this
+                    // closure, hoisted: same `Button`, same 60 s clear).
+                    WordsCopyDoor(words: words, pageStyle: nil) { model.markWordsCopied() }
                     if model.copiedWords {
                         Text(ProtectionCopy.wordsCopied).font(.caption).foregroundStyle(.secondary)
                     }
