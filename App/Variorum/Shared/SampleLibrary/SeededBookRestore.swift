@@ -43,8 +43,10 @@
 //      mark; `AppSession.markSeededBook`). The explicit doors are an ask and
 //      still mint; they mark too, because a device that HAS the book must
 //      treat its later removal as the reader's word.
-//      *The recorded residual:* a device that never ran either road between
-//      the deletion and the purge holds no evidence, and re-mints. The mark
+//      *The recorded residual:* a device that ran none of the roads that
+//      record — this ensure, the explicit doors, and (since 18o U2) the
+//      launch seed — between the deletion and the purge holds no evidence,
+//      and re-mints. The mark
 //      is `UserDefaults` — the seeder's header records the same limit for
 //      "deletion is final" itself, and closing it wants a marker that
 //      travels with the STORE (that file's own note).
