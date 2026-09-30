@@ -48,6 +48,13 @@ design phase. Master plan row 18 carries the mint; `notes/plans/post-13u-health-
   `notes/QUESTIONS.md`; next free number **#160**); author-only calls are hard stops, HELD and
   BUNDLED. Her standing bundle from 18m (#155–#159, row 70's redirect, F-4's priority eye) is
   SURFACED at the closeout, never re-decided here.
+- **HER AWAY GRANT (2026-09-30, after U1's close, verbatim):** *"i've now closed my real store
+  and am stepping away from the computer, so go ahead and run whatever you need to"* — verified
+  the same minute: `pgrep -fl 'Variorum.app/Contents/MacOS'` empty. Read as: the away-run rule
+  governs (PROVISIONAL-and-continue; author-only calls HELD and BUNDLED); GUI driving and the
+  HELD U1 walks are free (the per-step guard still runs as machinery hygiene — she may return
+  at any moment); the phase-close install refresh has its window when the ritual reaches it,
+  instances re-verified at execution time as always. Her app is NEVER relaunched by a session.
 
 ## BINDING PRINCIPLES (the 13b constitution, P-1…P-9 — copied byte-verbatim per the skill's rule; the application notes in `.claude/skills/architect-phase/SKILL.md` bind with them)
 
@@ -139,9 +146,10 @@ onto that seam, STOP, read it, and tell the orchestrator (the ladder seat is alr
 - Instance checks: `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH (the test
   host matches mid-run). Real-store instances are identified by STORE, not path — NEVER quit or
   kill one; no Release builds or `/Applications` refreshes while one lives. Xcode Run = Debug =
-  the fenced dev store (`io.lduarte.Variorum.debug`). **Dated note (this kickoff): her
-  real-store instance state is UNKNOWN — check before every GUI act; assume she may be at the
-  machine at any moment; GUI driving only behind the per-step guard, harness-only when in doubt.**
+  the fenced dev store (`io.lduarte.Variorum.debug`). **Dated note (updated 2026-09-30, her
+  away grant): her real-store app is QUIT at her word and she is away — zero instances verified
+  by pgrep; GUI driving is free behind the per-step guard (run it anyway — she may return);
+  re-verify instances before every Release build / refresh / walk burst as always.**
 - **An old build must NEVER open the dev store** — bisect by harness in a scratch worktree
   (in-memory store), never by running an old build against a live store (the 18k C2 precedent).
 - Mac tests from `App/Variorum/`: `xcodebuild -scheme Variorum -destination 'platform=macOS' test`
