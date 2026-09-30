@@ -124,9 +124,20 @@ public enum BoundarySnapping {
 
     /// How many UTF-16 units of extra reach a sentence end or newline gets
     /// when a cut settles ("pull a little" — deliberately small: about a
-    /// terminator-plus-space's width, so the common landings stay easy
-    /// without ever overriding a deliberate exact placement, which always
-    /// wins at distance zero).
+    /// terminator-plus-space's width, so the common landings stay easy).
+    ///
+    /// **It CAN override an exact placement, in one configuration only**
+    /// (18o U1, 17e P34 — this doc used to say an exact placement always
+    /// wins): a strong boundary exactly `settlePull` units EARLIER than an
+    /// exact word edge also scores zero after the pull, and `settle`'s tie
+    /// goes to the earlier position — so a cut placed right after a
+    /// one-letter word that opens a sentence or paragraph (". I ", ". A ",
+    /// "\nI ") settles back to that sentence's start. A strong boundary
+    /// LATER than the exact placement loses the same tie, and one farther
+    /// than the pull never reaches it. Documented behaviour (the settle
+    /// doing its job), pinned by `BoundarySnappingTests
+    /// .aStrongBoundaryExactlySettlePullEarlierTakesAnExactPlacement`; the
+    /// exact-wins alternative is QUESTIONS #161, the author's.
     public static let settlePull = 2
 
     /// The ruled snap: the nearest of `candidates` wins, except that a
