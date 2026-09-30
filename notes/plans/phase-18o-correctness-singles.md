@@ -1528,13 +1528,24 @@ departing surface wrote on its way out) and the entry drops then. So reporting a
   the registry claim for the Outline's editor moved to C1's own bare-model shape (`BookLeavingRegistryTests`, both
   orders: the leaving before and after the editor dies); the Index and Compare pins keep theirs (deterministic teardown
   — mounted and red-on-old). The file header states the measured limit.
-- Behavioural revert R-U4 — IN-PROGRESS, named here before it runs (the pre-revert state is committed, `9a4e5afc`;
+- Behavioural revert R-U4 — DONE, restored clean (`git checkout HEAD --` the two; `git diff HEAD` empty). Run
+  (`18o-u4-r-u4.log`): **`Test run with 17 tests in 4 suites failed … with 9 issues`** — the five bug pins RED, each with
+  exactly its pre-fix count for the halves it still carries: Outline 1 (no savepoint) · Index 3 (no savepoint · 2 ≠ 0 ·
+  2 ≠ 0) · leave-the-book 1 · peer swap 1 · board left 3 (no savepoint · 2 ≠ 1 · 2 ≠ 1); the four mounted guards green;
+  `BookLeavingRegistryTests` (2) and `BookNoteTrailTests` (6) green — by design, they drive the model and the rule
+  directly, which R-U4 leaves in place (their teeth are the mutations below). The shape as it ran:
+- (R-U4's shape, as named before it ran (the pre-revert state is committed, `9a4e5afc`;
   corrected before starting — the first-named shape would not compile, since the bare-model registry pins call
   `SavepointOnLeave.wire(book:)`): R-U4 = `BookView.swift` checked out from `385fbaeb` (the pins commit — the book never
   wires nor reports its note state) + in `CompareBoardView.swift` the THREE behavioural hunks removed (the
   `peerSlots.didSet` report, the `teardown()` report, the board's `onAppear` wire — `onNotesLeft` stays declared, so
   `SavepointOnLeave` compiles unchanged); `BookViewModel`'s trail, `BookNoteTrail` and the two `wire` overloads stay
-  (inert with no caller). Restore by `git checkout HEAD -- <the two>`, verified by `git diff`.
+  (inert with no caller). Restore by `git checkout HEAD -- <the two>`, verified by `git diff`.)
+- The guards' teeth — IN-PROGRESS, three mutations named before they run (each on the committed fixed tree `35983b36`,
+  one at a time, restored by `git checkout HEAD --` and verified by `git diff`): **M-selected** — `BookNoteTrail`
+  remembers a `.selected` note too (a looked-at note enters the trail); **M-empty** — `.empty` departs the remembered
+  note (clicking out / a mode switch's empty frame counts as leaving); **M-idle** — the book's road runs the IDLE
+  occasion (`idleAutoCommit`) instead of the leaving one (the wrong cadence occasion reused).
 - QUESTIONS #163 (the Compare-peer PROVISIONAL + the book's note-switch reading) — NOT-STARTED.
 - Closing runs (`AutosaveRegistryLifecycleTests` + `AutosaveRegistryReleaseTests` FULL, `SavepointOnLeaveTests`, the
   book/Compare suites touched, the eleven Tutorial suites; the mobile suite only if a shared file changes — none
