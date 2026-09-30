@@ -19,6 +19,17 @@ import Foundation
 /// specifically, so `crystallizedBoundary` takes no mode: `one_block` posts
 /// simply never call it, and how sentence mode interacts with live typing is
 /// an editor-phase question (flagged at Phase 2 closeout, not invented here).
+///
+/// **Which characters are line breaks here (18o U2 — 17e P23).** Both entry
+/// points split on `"\n"` ONLY — they decide BLOCK boundaries, and the block-
+/// boundary family keys on `"\n"` alone (`NewlineSplitting`'s doc: a
+/// Control-Return's U+2028 is content everywhere in this app, never a block
+/// boundary), unlike the within-text scanners (`BoundarySnapping`, the Markdown
+/// family), which read `Character.isNewline`. Foreign line endings are read at
+/// `bulkSegments`' entry (`normalizedLineEndings`: `"\r\n"` and a bare `"\r"`
+/// are `"\n"`, `PlainPaste` rule 1's answer); `crystallizedBoundary` needs no
+/// such read — it plans over TYPED text, and the keyboard types `"\n"` for
+/// Return and U+2028 for ⌃⏎/⌥⏎, never a CR.
 public enum SegmentationRules {
     /// One crystallization step: the completed paragraph to mint as a block,
     /// and the still-open remainder of the tail.
@@ -56,7 +67,18 @@ public enum SegmentationRules {
     /// whole text) drop as before — there is no adjacent piece for them to
     /// separate. Unspaced text segments identically to the pre-ruling
     /// behavior.
+    ///
+    /// **Foreign line endings (18o U2 — 17e P23):** `"\r\n"` and a bare
+    /// `"\r"` read as `"\n"` before anything else, in every mode — so a
+    /// Windows-authored file (or a classic-Mac one, or a clipboard carrying
+    /// either) segments exactly as its LF twin, and no CR is ever stored.
+    /// `"\r\n"` is ONE Swift `Character` that is not `Character("\n")`, which
+    /// is why the split below used to find nothing in such a file and the
+    /// whole document minted as one block. `one_block` still passes the text
+    /// through whole — only its line endings are read. U+0085, U+2028 and
+    /// U+2029 are untouched: CONTENT, as everywhere in this family.
     public static func bulkSegments(_ text: String, mode: Segmentation) -> [String] {
+        let text = normalizedLineEndings(text)
         guard !isBlank(text) else { return [] }
         switch mode {
         case .oneBlock:
@@ -88,6 +110,21 @@ public enum SegmentationRules {
             }
             return blocks
         }
+    }
+
+    /// **Bulk entry's one reading of foreign line endings** (18o U2 — 17e
+    /// P23): `"\r\n"` → `"\n"`, then a bare `"\r"` → `"\n"` — the same two
+    /// steps, in the same order, as `PlainPaste.flattened`'s rule 1 (the
+    /// app-side paste transform, which core cannot see), so the two doors
+    /// can never read a clipboard differently. A CR followed by a CRLF is
+    /// two line endings (`"A\r\r\nB"` → `"A\n\nB"`). Text with no CR byte
+    /// passes through untouched (the byte test, because a `Character` test
+    /// would miss `"\r\n"` — the grapheme IS the defect).
+    static func normalizedLineEndings(_ text: String) -> String {
+        guard text.utf8.contains(13) else { return text }
+        return text
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
     }
 
     // MARK: - Type-time crystallization

@@ -681,10 +681,31 @@ purged-tombstone residual (#138(e)) stays the recorded gap. The phone's first-wr
 ### LIVE STATUS
 
 - Reading + this record opened — DONE (this commit).
-- P23 pins (red-on-old) — NOT-STARTED: core `SegmentationRulesTests` (CRLF/CR per arm; exotic newlines stay content;
-  the round-trip) + `ImportOperationTests` (both import doors); Mac door pins (the import model's FILE road, the quick
-  note's `file`, the tail's `.bulk` plan); the phone's capture (`MobileQuickNoteModel.mintNow`).
-- P23 fix (`SegmentationRules.bulkSegments` entry normalisation) — NOT-STARTED.
+- P23 pins — DONE `40c3aafc` (all three in their OWN files, so every existing suite rides unmodified):
+  core `SegmentationLineEndingTests` (10 — every arm, both import ops, the exotic-newline guard, the spacing promise);
+  Mac `CRLFImportDoorTests` (5 — the finding's FILE road through `ImportModel.importFiles`, `QuickNoteMint.file`,
+  `QuickEntryModel.submit`, the open-tail `.bulk` paste plan, the typed-road guard); mobile `MobileCRLFCaptureTests`
+  (1 — the phone's pre-mint CRLF paste + the box's ownership). **Pre-fix (red-on-old):** core
+  (`18o-u2-p23-core-prefix.log`) **`Test run with 10 tests in 1 suite failed … with 29 issues`** — 9 red
+  (`aCRLFDocumentSegmentsOneBlockPerParagraph` 1 · `aBareCRSegmentsExactlyAsItsLFTwin` 8 ·
+  `sentenceModeReadsACRLFLineBreakAsTheBreakItIs` 1 · `oneBlockKeepsTheTextWholeWithItsLineEndingsReadAsLF` 2 ·
+  `blankForeignTextStillMintsNothingAndEdgeRunsDrop` 1 (its edge-run half; the two blank halves are guards) ·
+  `theSpacingPromiseHoldsForForeignLineEndings` 8 · `aCRLFFileImportsOneBlockPerParagraph` 4 ·
+  `aCRLFDropIntoAPoolSegmentsToo` 2 · `theSentenceAndOneBlockDefaultsReadCRLFThroughTheOp` 2), the guard
+  `theExoticNewlinesStayContent` green; Mac (`18o-u2-p23-mac-prefix.log`) **`Test run with 5 tests in 1 suite failed …
+  with 6 issues`** — the file road 1 · the pad 1 · the bar 1 · the tail paste 3, the guard
+  `theTypedRoadKeepsAControlReturnAsContent` green; mobile (`18o-u2-p23-mobile-prefix.log`) **`Test run with 1 test in 1
+  suite failed … with 3 issues`** (one block, empty frozen prefix, the edit landing in the whole-capture block).
+- P23 fix — DONE (this commit), `Sources/VariorumCore/Domain/SegmentationRules.swift` only: `bulkSegments` reads its
+  text through `normalizedLineEndings` first (`"\r\n"` → `"\n"`, then `"\r"` → `"\n"` — `PlainPaste` rule 1's two
+  steps in its order; a no-CR text passes untouched by a UTF-8 byte test); `crystallizedBoundary` byte-untouched; the
+  type header states which characters are line breaks here and why. **Fixed tree:** core
+  `SegmentationLineEndingTests` + `SegmentationRulesTests` + `ImportOperationTests` + the `NewlineSplitting`/
+  `BoundarySnapping` suites **`Test run with 90 tests in 6 suites passed`**; Mac `CRLFImportDoorTests` +
+  `CrystallizationPlannerTests` + `CrystallizationReconcilerTests` + `ImportFacesTests` + `QuickNoteMintTests` +
+  `QuickNoteParkTests` + `CaptureMicrosyntaxDoorTests` + `SpaceEaterTests` **`Test run with 66 tests in 8 suites
+  passed`**; mobile `MobileCRLFCaptureTests` + `MobileQuickNoteTests` **`Test run with 35 tests in 2 suites passed`**.
+  PENDING: the behavioural revert (R-P23) + the `isNewline` mutation (M-isNewline) — next commit.
 - Row 66 pins (red-on-old) — NOT-STARTED: per book in `Book.all`, a tombstoned copy with no local mark is NOT
   re-minted at launch; guards: no copy + no tombstone still seeds; the explicit restore door still mints; the decision
   outlives a purge; the purged-tombstone residual documented.
