@@ -495,7 +495,7 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 - U2 the import & launch-seed batch — **CLOSED (orchestrator adjudication 2026-09-30; rows 10–11 dispositioned; the microsyntax edge adopted as row 12b → U3)**.
 - U3 the two Mac doors (+ row 12b) — **CLOSED (orchestrator adjudication 2026-09-30; rows 12/12b/13 dispositioned; the row-13 design divergence accepted and named a ladder focus)**.
 - U4 the book leaving savepoint (R-18k-6) — **CLOSED (orchestrator adjudication 2026-09-30; row 14 dispositioned; ladder foci named — the ladder's first read)**.
-- U5 17t, the two unwired protection doors — IN FLIGHT (implementer 2026-09-30; the UNIT U5 RECORD carries its LIVE STATUS — item 1 STOP-AND-REPORT with a documented-behaviour pin + QUESTIONS #164; item 2 building).
+- U5 17t, the two unwired protection doors — DONE (implementer), awaiting the orchestrator's spot-check (item 1 DISMISSED AS HOLLOW — STOP-AND-REPORT, pinned, QUESTIONS #164; item 2 FIXED for the Mac on five words screens through one rule, QUESTIONS #165; the words-screen walk HELD — the dev store reaches it only through a custody write).
 - U6 #146 (Fable seat) — NOT-STARTED (SyncSpec + postmortem re-read precede any line).
 - THE LADDER — NOT-STARTED.
 - CLOSEOUT + the install refresh — NOT-STARTED (refresh window unverified; her app's state unknown).
@@ -1776,8 +1776,15 @@ the rebuilt Replace All Keys road (THE TRACE below): the road pulls to head FIRS
 in place (`sync_reencrypt`) — local content never replaces server content — and the settled postures design (hers, "final
 as of 2026-09-04") DELETED the probe's UI caller for exactly that reason (§13). A typed gate here would warn of a loss that
 cannot happen. The finding is pinned as documented behaviour (green on today's tree = HOLLOW as a defect) and the product
-call goes to her as QUESTIONS #164. Zero `Sync/` lines (the probe is untouched). (2) The ledger rows, KnownIssues 54/55
-edits, the 17t copy lines and the MOBILE PARITY line are the orchestrator's closeout acts — DRAFTED below, none applied.
+call goes to her as QUESTIONS #164. Zero `Sync/` lines (the probe is untouched). (2) **The words-screen walk (the Copy All
+door clicked, the caption seen, the clipboard cleared at 60 s — in the running app) is HELD:** on the dev store every Mac
+words screen sits behind a CUSTODY WRITE (it has no passphrase and no twelve words, so the Castle ceremony asks to set a
+passphrase first, and the set sheet and the nudge's phrase offer land wraps) or behind sync enrollment (fenced by A4 — sync
+setup and Regenerate); landing a credential on her dev store is not a walk's license. What ran: the ceremony sheet the hoist
+touched opens in the real app and cancels with nothing written (W1). The words screens' evidence is the five composition +
+hosted-window pins driving the composed door against a real (private) AppKit pasteboard; THE HELD WALK SCRIPT below is
+ready. (3) The ledger rows, KnownIssues 54/55 edits, the 17t copy lines and the MOBILE PARITY line are the orchestrator's
+closeout acts — DRAFTED below, none applied.
 
 ### READING (done in-session before any code)
 
@@ -1957,6 +1964,165 @@ guards green on both: the hoisted rule's two arms (clears when unmoved; never cl
     (`nothingUserFacingNamesTheMac`, its one offender still `SampleLibraryJekyllBook.swift`'s disclaimer — #155's,
     attributed, NOT re-attributed); 0 skipped. 656/114 = U3/U4's count (this unit added no phone test).
   - No `swift test`: zero `Sources/` lines.
-- Walk (Protection pane's copy door + the enrollment page's caption where reachable on the dev store) — NOT-STARTED.
+- Walk — DONE as far as the dev store reaches without a custody write (W1 below); the words-screen walk HELD (the NOT-DONE
+  line's item 2; THE HELD WALK SCRIPT below).
+- The record closed — DONE (this commit).
 - The re-key DRILL is NOT re-run: no key leg changes (no wrap/unwrap/Keychain write semantics touched) — stated.
 - Deaths / resumes: none.
+
+### THE WALK (her away grant; the dev-store Debug build `DerivedData/18o-u1/…/Debug/Variorum.app`, built 07:56 from the final code tree — the last code commit is `ccf6eefc`, 07:20)
+
+Pre-walk: zero instances by path; `guard.sh --author` → *"GUARD OK (author: idle 4917s)"*; Ghostty's grants re-proved by a
+compiled probe (`AX: true SCREEN: true`); a full-screen capture showed no foreign dialog; **her clipboard read EMPTY (no
+types)** before the walk; `caffeinate -d` for the walk; `guard.sh <pid> [x y]` before every act, acts ≥ 2 s apart; captures
+in `notes/plans/18o-screens/u5/` (gitignored). One voice (Terminal): every surface this unit touched is system chrome on the
+Mac (`pageStyle` is nil there always; the Settings pane and the ceremony sheets are system-styled), U2/U4's reasoning.
+
+- **W1 — the Protection pane and the ceremony sheet the hoist touched — PASS (as far as reachable).** App menu ▸ Settings… ▸
+  pane 7 (protection): the pane renders as found — Standard, *Ways back in*: This Mac ✓, **Encryption passphrase — not set**,
+  **Recovery phrase — not saved**, iCloud key ✓ (`W1a-protection-pane-as-found-terminal.png`). **Use Castle…** → the
+  ceremony sheet opens on copy §2b's explain screen (*"Castle: only you hold the keys."*, `W1b-…`); **Continue** → *"Castle
+  needs a passphrase."* (`W1c-…`) — the words screen (where the hoisted Copy All lives) is past this screen, i.e. past a
+  passphrase WRITE; **Cancel** → the sheet closes and the pane reads back **Not set / Not saved** — nothing written
+  (`W1d-cancelled-pane-unchanged-nothing-written-terminal.png`). No words were generated, nothing reached the clipboard.
+- **Not walkable here, said plainly (the U2-P27 precedent):** the words screens themselves (NOT-DONE item 2), and item 1's
+  near-empty corner (a fuller-server world the dev store cannot stage — its evidence is the documented-behaviour pin and
+  M-noPull).
+- Closing state: the dev instance quit BY IDENTITY (`tell application id "io.lduarte.Variorum.debug" to quit`),
+  `pgrep -fl 'Variorum.app/Contents/MacOS'` empty; no `/Applications` instance at any point; the walk's `caffeinate` stopped;
+  **her clipboard still EMPTY (no types)** — as found. **Walk residue: none** (no note, tag, setting or protection state
+  changed; the Settings pane scroll position is session state).
+
+### THE HELD WALK SCRIPT (the words screens — for the orchestrator or her, on a store that already has a passphrase)
+
+Precondition: a library whose words screens are reachable WITHOUT a new custody write — e.g. her REAL store (enrolled, with
+her passphrase), or the dev store only if she chooses to give it a passphrase. **On her real store the walk writes nothing if
+cancelled before the words are confirmed:** Settings ▸ Account & Encryption ▸ **Regenerate Twelve Words** → type the current
+passphrase → the NEW words screen (nothing lands until the words are confirmed and the act runs) → **Copy All** → the
+sub-line *"Copied. Your clipboard clears in 60 seconds."* appears → paste somewhere scratch to see twelve words on one line
+→ wait 60 s → the clipboard is empty → **Cancel** (the old words stay the account's). The same door + sub-line sit on sync
+setup's Screen 3, the Castle / Replace All Keys ceremony (as before), the set sheet's phrase screen and the nudge's phrase
+sheet. (QUESTIONS #165 is about what that clipboard copy does on her OTHER devices.)
+
+### SEAM FILES THIS DIFF TOUCHES (the ladder reads this first — CUSTODY FACES; verified by `git diff --stat ee6ae1ed..HEAD`)
+
+| File | What changed | What did NOT |
+|---|---|---|
+| `App/Variorum/Shared/WordsCopyDoor.swift` (NEW; shared folder, whole body `#if os(macOS)` — the phone compiles it empty) | `WordsClipboard.copy(_:to:clearAfter:)` — the pane's Copy All closure hoisted: clear, write the words joined by one space, read `changeCount`, clear after 60 s ONLY if unmoved (pasteboard + interval injectable, production `.general` / 60 s); `WordsCopyDoor(words:pageStyle:onCopied:)` over `PageDoor` (nil arm = `Button(title, action:)`) | — |
+| `App/Variorum/Variorum/Features/Settings/ProtectionPane.swift` | `PostureSwitchSheet` `.wordsShow`: the inline closure → `WordsCopyDoor(… pageStyle: nil) { model.markWordsCopied() }` (behaviour-neutral hoist); `PassphraseSetSheet` `.showPhrase`: door + sub-line in the ceremony sheet's row shape; `PhraseOnlySheet`: `private` dropped, `copied`/`onCopied` inputs, door + sub-line; `ProtectionNoticeBar`: `phraseCopied` (@State, reset at each mint) handed to the sheet | every other phase of every sheet, the ceremony's acts, the nudge's offers, `PhraseOffer`, `ProtectionPane` itself, every key act |
+| `App/Variorum/Shared/SyncEnrollmentView.swift` (shared) | `.wordsShow`: the door under `#if os(macOS)` between the words card and the EXISTING caption branch (now reachable) | every other phase; the caption branch's code; the phone's rendering (the door is Mac-gated) |
+| `App/Variorum/Shared/KeyDoorView.swift` (shared) | `.wordsShow`: the door under `#if os(macOS)` + the caption branch (copy §2a's sub-line) above the written/cancel row | every other phase, every authorization road, the replace-keys checkbox |
+| `App/Variorum/Shared/PassphraseSetModel.swift` (shared) | `copiedWords` + `markWordsCopied()` — the three ceremony models' exact shape | `commit`, `extendPhrase`, `skipPhrase`, `VaultTie`, `KeyActPassphrase`, `PhraseOffer` |
+| Tests | `VariorumTests/WordsCopyDoorTests.swift` (NEW — 6); `VariorumTests/PostureSwitchTests.swift` — TWO extensions APPENDED (item 1's pin; face (1)'s guard), **zero existing lines changed** (145 insertions, 0 deletions) | every existing test file and assertion |
+
+**Zero `Sources/` (so zero `Sync/` — `RekeyRecencyProbe` byte-untouched, consumed only by a pin), zero `Server/`, zero schema
+/ migrations (marker 9), zero settings, zero phone-only files (`VariorumMobile/` untouched), zero editor seam.** **Zero key
+legs:** no wrap, unwrap, derive, vault write, rotation, custody-item or Keychain line changed; `PostureSwitch.swift` and
+`CorpusRotation.swift` were only READ (M-noPull was a reverted mutation) — so **the re-key DRILL is not re-run**, as the
+brief says. **The custody-adjacent content, for the ladder:** the twelve words can now reach the system clipboard from
+FOUR MORE Mac screens (sync setup, Regenerate, the set sheet, the nudge's phrase sheet) — through the ONE ruled rule
+(decision 23), byte-identical to the one screen that had it; QUESTIONS #165 names the one thing that rule does not cover
+(Universal Clipboard).
+
+### JUDGMENT CALLS (each one a reviewer can reverse in a line)
+
+1. **Item 1 — STOP-AND-REPORT, no gate built.** The traced loss does not occur on the rebuilt road (pinned: green on today's
+   tree; M-noPull shows even the pull-less road keeps the server whole); the settled design (hers, "final") deleted the
+   probe's UI caller for that reason; a warning saying "those would be lost" would be false; and the probe has no
+   near-empty notion (a threshold would be invented; a probe change would be `Sync/` — Fable work). The product call is
+   #164 (a) close as answered — RECOMMENDED. *Reverse by* her (b) at #164.
+2. **Item 1 — the documented-behaviour pin STAYS in the suite** as a regression guard (it reds the day a local-as-truth
+   road returns to Replace All Keys). *Reverse by* deleting it at #164's close.
+3. **Item 2 widened from the brief's named faces to FIVE Mac surfaces** — `PassphraseSetSheet`'s phrase screen and the
+   nudge's `PhraseOnlySheet` were missed by 13u2's verification (it enumerated `markWordsCopied()` declarations and the
+   phone's screens — whose twins these two are); her need was *"everywhere the twelve words are shown"*, and the row's
+   title (*"exists in ONE place"*) would stay half-true without them. Same door, same rule. *Reverse by* removing the two
+   `WordsCopyDoor` lines (and their captions).
+4. **The shared faces' door is `#if os(macOS)`** — the phone renders `SyncEnrollmentView`/`KeyDoorView` too, and its doors
+   (UIPasteboard's expiry and local-only switches — a call, and #165's twin) are the mobile app row's by the brief.
+5. **The one rule's home is a SHARED-folder file with a Mac-only body**, not `Core/Views/`: the shared faces then reference
+   no Mac-target-only type, and the phone's arm lands beside the Mac's (`#else`) — one rule, one home.
+6. **`PhraseOnlySheet`'s receipt lives with its presenter** (`@State` in `ProtectionNoticeBar`, reset at each mint), handed
+   in — no new model for a model-less sheet, and the caption is a pure function of its inputs (so pinnable).
+7. **`PassphraseSetModel` gains the siblings' `copiedWords`/`markWordsCopied()`** (a shared model; the phone compiles it
+   unused) rather than a view-local flag, so all four model-backed screens read ONE shape.
+8. **`KeyDoorView`'s caption branch sits outside the `#if`**, mirroring `SyncEnrollmentView`'s existing branch (the flag is
+   the model's; on the phone it stays false until the mobile row's door sets it).
+9. **Placement follows each face's grammar:** the shared page family stacks rows — words card · Copy All · sub-line ·
+   *I've written them down* (copy §2a's own order); the Mac sheets use the ceremony sheet's `[Copy All] [Copied…] ⟷
+   [I've written them down]` row, byte-for-byte its construction.
+10. **The pins click the composed door itself** — found by TYPE in the face's composition (`ComposedSliders`' rule, never an
+    OS-internal field), driven through its own `copy(to:clearAfter:)` against a PRIVATE named pasteboard with a short
+    interval; the face's flag moving proves the composed door is wired to THAT face (M-receipt proves it bites).
+11. **Two appended extensions in `PostureSwitchTests.swift`** (item 1's pin; face (1)'s guard) — they need that file's
+    private world; zero existing lines changed there. Every other U5 pin is in its own new file.
+12. **No invented sentence:** the door and sub-line render the existing copy constants (`wordsCopyAll` · `wordsCopied` —
+    copy §2a verbatim), so no QUESTIONS row for wording; #164/#165 are product calls, not copy.
+13. **The words-screen walk HELD rather than a passphrase landed on her dev store** — a credential written into her store is
+    not a walk's to create (NOT-DONE item 2); the held script uses her real store's Regenerate door, cancelled before the
+    act.
+
+### NOTICED, NOT TOUCHED (U5's scope fence)
+
+1. **Universal Clipboard (QUESTIONS #165, OPEN):** `NSPasteboard.general` writes are shared with her nearby Apple devices
+   when Handoff is on; the 60 s clear reaches only the Mac's copy. Existing ruled behaviour, hoisted byte-identically; the
+   one-line alternative (`prepareForNewContents(with: .currentHostOnly)` in `WordsClipboard.copy`) is hers to pick.
+2. **The phone's word screens have NO Copy All — five of them** (`MobilePostureSheets.wordsShow`,
+   `MobileProtectionCeremonies.showPhrase`, `MobilePhraseOnlySheet`, and the shared `SyncEnrollmentView`/`KeyDoorView` as the
+   phone renders them): the mobile app row's (beside PL-23); its arm belongs in `WordsCopyDoor.swift`'s `#else`.
+3. **`RekeyRecencyProbe.swift` stays unconsumed in `Sync/`** (its only reader is this unit's pin) — retired or kept per
+   #164, at a Fable seat (the codebase-health review's dead-file line).
+4. **The records' premise, for the closeout's KnownIssues row-54 text:** the probe's caller was RETIRED at pre-13x 2b.3a with
+   its reason written (*"an in-place rotation clobbers nothing on the server"*), not missed; 13u2 UNIT D's "NOT BUILT —
+   RETURNS" and row 54's "never wired" did not cite it.
+5. **`PassphraseSetSheet` / `PhraseOnlySheet` are 13p-era faces** ("Placeholder voice … 13s re-voices"); their new row adopts
+   the ceremony sheet's shape — 13s's to re-voice with the rest.
+6. **The dev store has no passphrase and no twelve words** — which is why no Mac words screen is reachable there without a
+   custody write; a future walker of these screens needs her real store (cancelled before confirm) or her word to give the
+   dev store a passphrase.
+7. **Machinery:** a Mac test run's host launch can fail with LaunchServices -600 (`procNotFound`) and leave an orphaned
+   Debug host that ignores quit-by-identity; ended by PID after proving path + test arguments (recorded under M-receipt).
+
+### DRAFTED FOR THE CLOSEOUT (the orchestrator's acts — none applied here)
+
+- **KnownIssues row 54 → RESOLVED (dismissed as hollow) at 18o U5:** *"The loss the typed near-empty confirmation guarded
+  cannot occur on the rebuilt Replace All Keys: it pulls to head first and re-encrypts the server's own rows in place
+  (`sync_reencrypt`) — pinned as documented behaviour (`PostureSwitchTests.aNearEmptyCopysReplaceAllKeysLosesNothing
+  TheFullerServerHolds`, green on the tree; M-noPull reds its local half, 15). The probe's UI caller was retired at pre-13x
+  2b.3a for exactly this reason (design §13). Whether a typed heads-up is still wanted is QUESTIONS #164 (OPEN, (a) close as
+  answered recommended); the unconsumed `RekeyRecencyProbe` rides #164 to a Fable seat."*
+- **KnownIssues row 55 → RESOLVED for the Mac at 18o U5; the phone's doors stay the mobile app row's:** *"Copy All now sits
+  on every Mac screen that shows the twelve words — the Castle / Replace All Keys ceremony (as before), sync setup (the dead
+  Copied branch now reachable), Regenerate Twelve Words, the set sheet and the nudge's phrase sheet — through ONE hoisted
+  rule (`Shared/WordsCopyDoor.swift`: `WordsClipboard` + `WordsCopyDoor`, the 60 s clear unchanged). Pins
+  `WordsCopyDoorTests` + `PostureSwitchTests.theCeremonysWordsScreenKeepsItsCopyAllThroughTheOneRule`. The phone's five
+  word screens (three phone faces + the two shared faces as the phone renders them) → the mobile app row, its arm in the same
+  file. QUESTIONS #165 (Universal Clipboard) OPEN."*
+- **17t copy lines:** *"Item 1 — DISMISSED AS HOLLOW at 18o U5 (the loss is absent on the rebuilt road; pinned); the gate is
+  QUESTIONS #164, hers."* · *"Item 2 — FIXED at 18o U5 (`ccf6eefc`; scaffolding `6a11b072`, pins `9ba2a45b`) for the Mac; the
+  phone's doors → the mobile app row."*
+- **MOBILE PARITY:** *MOBILE-VISIBLE, OWED* — the phone shows the twelve words on five screens with no Copy All (the mobile app
+  row's, beside PL-23); this unit changed the SHARED faces only behind `#if os(macOS)`, so the phone's rendering is
+  unchanged (the FULL mobile suite at the attributed baseline, 656/114).
+- **Her bundle:** QUESTIONS **#164** (the typed gate's premise is gone — close as answered?) and **#165** (Universal
+  Clipboard); the HELD words-screen walk (her real store's Regenerate door, cancelled before confirm — optional, 1 minute).
+
+### DISPOSITION (one line per ledger row)
+
+15. **17t item 1 — DISMISSED AS HOLLOW (not fixed; STOP-AND-REPORT)** — the pin
+    `PostureSwitchTests.aNearEmptyCopysReplaceAllKeysLosesNothingTheFullerServerHolds` (`671d09bf`) is GREEN on today's tree
+    (45/1 run): a near-empty copy's Replace All Keys over a fuller server loses nothing (the probe reads the corner, 15 notes;
+    afterwards all 18 live on the mirror under the new keys and in the copy). Teeth: M-noPull → 15 issues (the local half),
+    the server half green even then. Zero `Sync/`. The product call: QUESTIONS **#164** (OPEN).
+16. **17t item 2 — FIXED for the Mac** `ccf6eefc` (scaffolding `6a11b072`, pins `9ba2a45b`): `WordsCopyDoorTests` (6) — the
+    four face pins red-on-old **4 issues** (one each; the two rule guards green); face (1)'s guard green on both trees; **R-U5
+    identical (4)**, restored clean; **M-receipt** reds the sync-setup pin's receipt half alone (2). Closing: Mac set **306/38**
+    (0 skipped, the eleven Tutorial suites included) · iOS generic build green · FULL mobile **656/114** = the attributed
+    baseline. Walk W1 (the ceremony sheet opens/cancels, nothing written); the words-screen walk HELD (script above). The
+    phone's doors → the mobile app row. QUESTIONS **#165** (OPEN).
+
+QUESTIONS rows landed: **#164 · #165**; the tail marker reads **#166**.
+
+- Deaths / resumes: none.
+
+**U5 — DONE (implementer), awaiting the orchestrator's spot-check.**
