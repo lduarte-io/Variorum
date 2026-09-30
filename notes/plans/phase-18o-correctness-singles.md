@@ -1136,6 +1136,28 @@ trace and its C5 disposition lines · P27's fix `dee61938` · `App/Variorum/Shar
   arm ×1): the placement is pinned. Restored clean.
 - U2's NOTICED 6 (assigned to ride row 12b at U2's adjudication) — DONE `ff1f85ab`: `SeededBookRestore`'s header
   residual names the three roads that record (the ensure, the explicit doors, the launch seed since U2) — comment-only.
-- Closing runs — NOT-STARTED.
+- Closing runs — IN-PROGRESS, on the final code tree `ff1f85ab` (zero app instances before each; logs in
+  `App/Variorum/DerivedData/`):
+  - **Mac closing set** (`18o-u3-closing.sh` → `18o-u3-closing.log`) — 106 literal suites: row 73's menu/router/window
+    family (`OpenStripMenuTests`, the five `WorkspaceNavigationTests` suites, `CapabilityRegistryTests`
+    `ShellChromeTests` `ChordLegibilityTests` `NewModesTests`, the nine `CommandRoutingTests` suites, the seven
+    `WindowsTests` suites, the eight `PaneSplitTests` suites, the three `ShellLandingTests` and three `SystemHotKeyTests`
+    suites), row 79's merge-door family (this unit's `MergeCeremonyDoorAuthorityTests` + 18k C5's merge-door list:
+    `FannedDefaultsTests` `FannedDefaultsBoardTests` `SeamMergeTests` `MergeArrangementTests` `MergeCeremonySheetTests`,
+    the four `SeamEdit*`, `BoundaryFluidityTests` `EditorSeamCostTests` `EditorSeamMountedCostTests`
+    `EditorWindowSmokeTests` `GestureSoakTests`, the ten `StructuralGestureTests` suites, the seven planner suites,
+    `DestructiveUndoWarningTests` `BlockDeletionAndRedoTests` `CrossBlockCompoundTests` `MenuFlightDoorAwaitTests`
+    `ReturnKeyUndoSignTests` `ShellConfirmTests` `UndoHintAndRefusalTests`), row 12b's capture family (this unit's two
+    suites + `CaptureMicrosyntaxTests` `CaptureMicrosyntaxDoorTests` `CRLFImportDoorTests` `QuickEntryBarTests`, the four
+    `QuickNoteTests` suites, `QuickNoteParkTests` `TitleSuggestionChipTests`, the three `CaptureSurfaceTests` suites,
+    `ContextBarCaptureTests`) and **the eleven Tutorial suites** — **`✔ Test run with 666 tests in 106 suites passed`**,
+    0 skipped. DONE.
+  - **Core `swift test` (whole — owed by the one `public` line)** (`18o-u3-core.log`): **`✔ Test run with 1747 tests in
+    183 suites passed`**, 1 skipped (`basicOfflineEditsConvergeOverTheRealServer`, the standing env-gated pin) —
+    U2's 1747/183 exactly (this unit added no core test). DONE.
+  - **iOS generic build** (`18o-u3-ios-build.log`): **`** BUILD SUCCEEDED **`** (`Shared/CaptureMicrosyntax.swift` now
+    imports VariorumCore; `SeededBookRestore.swift` comment). DONE.
+  - **FULL mobile suite** (`18o-u3-mobile.log`) — RUNNING; expected 656/114 = the 4 known + F-1 (#155's, attributed).
+    PENDING.
 - Walks — NOT-STARTED.
 - Deaths / resumes: none.
