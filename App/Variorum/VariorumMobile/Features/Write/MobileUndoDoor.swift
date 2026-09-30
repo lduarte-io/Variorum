@@ -221,9 +221,15 @@ final class MobileUndoDoor {
 
     // MARK: - Redo
 
-    /// The undo door's exact mirror. No warning: redo re-applies from
-    /// do-time pre-images and discards nothing she typed (A12 named undo
-    /// alone, deliberately).
+    /// The undo door's exact mirror, with NO warning — A12 named undo alone,
+    /// deliberately. Redo is NOT discard-free, and this door must not say it
+    /// is: it re-applies from do-time pre-images, so a take whose buffer she
+    /// edited since the undo is overwritten by the post-op text — that
+    /// writing is set aside, in the undo warning's own words
+    /// (`discardingUndoDetail`) — behind the quiet insurance savepoint
+    /// `Operations.reapplyStructural` takes first, readable back from the
+    /// block's Block History. (18o U1, 17e P29: this line used to claim the
+    /// opposite; the behaviour is unchanged.)
     func redo() async {
         guard let model else { return }
         guard !inFlight else {

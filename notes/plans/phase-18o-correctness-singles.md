@@ -501,7 +501,7 @@ Debug dev store behind the per-step guard.
 ### LIVE STATUS
 
 - Reading + this record opened — DONE (this commit).
-- P29 (phone redo-door comment) — NOT-STARTED.
+- P29 (phone redo-door comment) — DONE (this commit): `MobileUndoDoor.redo()`'s doc now states the truth its family already states — redo is NOT discard-free (`Operations.reapplyStructural` overwrites a since-edited buffer with the post-op text behind a quiet insurance savepoint, `Operations+UndoInverses.swift:434-446`, its own doc :344-348), the undo warning's "set aside" vocabulary, no warning by A12's letter. Comment-only; zero behaviour; **no pin — a comment cannot fail a test, and a hollow pin is not minted.** Siblings checked: `ShellActions.swift:136` / `StructuralUndoCopy.swift:64` ("redo is untouched" — by the WARNING, true) and `UndoStack.swift:53` (entries restoring no buffer discard nothing on UNDO, true) — no other false copy. PENDING: the FULL mobile suite at the unit's end.
 - P32 (false-premise comment + QUESTIONS row) — NOT-STARTED.
 - P34 (BoundarySnapping doc + boundary pin + QUESTIONS row) — NOT-STARTED.
 - P35 (`setShelfPinned` self-heal) — NOT-STARTED.
