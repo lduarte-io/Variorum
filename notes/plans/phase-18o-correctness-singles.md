@@ -223,9 +223,9 @@ with someone at the machine); iOS generic build green; install `/Applications` b
 | 9 | **17e (11) — RECORD-ONLY:** partly discharged by 18d (`RecoveryView.swift:489`); the remainder ACCEPTED on KnownIssues' per-note-view-state row (owner 12) — 18o records the disposition in the 17e copy; no build | U1 | **RECORDED** — with the NOTICED-3 correction (postMode/readFace/takesViewMemory evicted by no road); the per-note-view-state row's text amends at closeout |
 | 10 | **P23** — a CRLF file imports as ONE block: `SegmentationRules` splits on `"\n"` only (`Sources/VariorumCore/Domain/SegmentationRules.swift:67`; MAJOR; the family keys on `Character.isNewline` — only the segmenter disagrees) | U2 | **FIXED `12d61080`** (pins `40c3aafc` — red-on-old core 29 · Mac 6 · mobile 3; R-P23 identical ×3; M-isNewline proves the rejected design breaks the typed-road guards; normalise-at-entry, judgement call 1). Walk W1 both voices |
 | 11 | **Row 66 / #138(f), RULED R-18k-5 (*honour the tombstone at launch*):** the LAUNCH seeder declines on a tombstoned seeded book exactly as the tutorial door's silent ensure does (`SampleLibrarySeeder.seedIfNeeded`, launch call `VariorumApp.swift:196`) | U2 | **FIXED `14822213`** (ONE predicate `readerDeletedTheBook`, both deciding reads, decision recorded in the mark; pins red-on-old Mac 15 · mobile 2; R-66 identical; M-early/M-late each red their own pin). Walks W2 + W3 (explicit restore still mints) |
-| 12 | **Row 73** — the Open strip's ⌘⇧<n> menu TRAPS at its tenth row in Debug (`EditorCommands.swift:782`; check the `:746` ⌘<n> sibling too); shortcuts for rows 1–9 only (PROVISIONAL), pin mounts the menu with ten open notes | U3 | open |
-| 12b | **The microsyntax CRLF edge (adopted from U2's NOTICED 1 — P23's class at a sibling brain, in-theme):** `CaptureMicrosyntax.parse` walks lines on the literal `"\n"` (`App/Variorum/Shared/CaptureMicrosyntax.swift:111`) — in a CRLF capture rule 5 (a token-only line leaves with its newline) never fires and rule 2's one-line promise can be crossed. Fix: read the input through `SegmentationRules.normalizedLineEndings` at `parse`'s entry (App CAN see core; the output already normalises downstream at `bulkSegments`, so no double effect); pins red-on-old for both misread rules | U3 | open |
-| 13 | **Row 79** — ⌥⌘⇧M's CEREMONY branch reads the frozen `slots`: a mid-burst take makes it wrongly refuse "needs a fan", and a mid-burst archive falls through `openMergeCeremony`'s truth read into an INSTANT merge instead of its ruled refusal; the P27 fix (`liveActiveFans`, store-read authorization) is the shape (`EditorSurfaceController`, the `.merge` arm) | U3 | open |
+| 12 | **Row 73** — the Open strip's ⌘⇧<n> menu TRAPS at its tenth row in Debug (`EditorCommands.swift:782`; check the `:746` ⌘<n> sibling too); shortcuts for rows 1–9 only (PROVISIONAL), pin mounts the menu with ten open notes | U3 | **FIXED `ee2e1292`** (scaffolding `060cc060`; pins `112921bc` — red-on-old 25 issues; R-73 identical; the table shape makes the trap a test failure, not a runner abort; the ⌘<n> mode-key sibling verdicted SAFE by its cap + pinned; **a second real defect on the same row found and fixed** — rows 10+ never OPENED on click, now every row opens the note it names). Walk W1 |
+| 12b | **The microsyntax CRLF edge (adopted from U2's NOTICED 1 — P23's class at a sibling brain, in-theme):** `CaptureMicrosyntax.parse` walks lines on the literal `"\n"` (`App/Variorum/Shared/CaptureMicrosyntax.swift:111`) — in a CRLF capture rule 5 (a token-only line leaves with its newline) never fires and rule 2's one-line promise can be crossed. Fix: read the input through `SegmentationRules.normalizedLineEndings` at `parse`'s entry (App CAN see core; the output already normalises downstream at `bulkSegments`, so no double effect); pins red-on-old for both misread rules | U3 | **FIXED `cefde52b`** (core access `d2a63c43` — `normalizedLineEndings` public, body byte-unchanged; pins `b21b0c7f` — red-on-old 22 issues incl. the swallowed-capture worst case; R-12b identical; M-afterfast pins the placement; both existing microsyntax suites UNMODIFIED). Walk W3 both voices |
+| 13 | **Row 79** — ⌥⌘⇧M's CEREMONY branch reads the frozen `slots`: a mid-burst take makes it wrongly refuse "needs a fan", and a mid-burst archive falls through `openMergeCeremony`'s truth read into an INSTANT merge instead of its ruled refusal; the P27 fix (`liveActiveFans`, store-read authorization) is the shape (`EditorSurfaceController`, the `.merge` arm) | U3 | **FIXED `fbd5c55f`** (pins `539d830f` — red-on-old 4 issues 2/2 + the stale receipt; R-79 identical; M-guard/M-fallthrough each red their own half; `FannedDefaultsTests` UNMODIFIED). **Design divergence ADJUDICATED ACCEPTED** — the U3 adjudication. Walk W2 both voices |
 | 14 | **Row 78 / R-18k-6, RULED:** a note edited INSIDE A BOOK gets its leaving savepoint when she moves into a different note (or leaves the book), through the existing `savepointOnLeaving` road; Compare peers follow the same rule PROVISIONAL (QUESTIONS row) — the 18k C1 RECORD's machinery (`markLeaving`/`dropAfterLeaving`, the acquisition generation) is required reading | U4 | open |
 | 15 | **17t item 1** — the typed NEAR-EMPTY sync confirmation (#86(c), ruled: warn + TYPED phrase, never refuse, never click-through; home #87: "with the rebuilt Replace Keys"): `Sources/VariorumCore/Sync/RekeyRecencyProbe.swift` has ZERO app consumers — wire the warning face + typed confirmation into the rebuilt Replace All Keys. Consume the probe from App; ZERO `Sync/` edits (a needed probe change is a stop-and-report → Fable work) | U5 | open |
 | 16 | **17t item 2** — COPY ALL on the recovery phrase exists in ONE place (Mac `ProtectionPane`, 60 s clipboard clear): wire the SHARED `SyncEnrollmentView`'s dead "Copied" branch + the Mac call sites (`KeyDoorModel.markWordsCopied` · `SyncEnrollmentModel.markWordsCopied` · `PostureSwitchModel.markWordsCopied` declare it; one call site exists). The phone's three word-screen doors stay the MOBILE APP ROW's — zero phone faces here | U5 | open |
@@ -493,8 +493,8 @@ remainder INTERIM; the mobile catch-up resumes on PL-40's ground at her word).
 - PLAN FILE authored + committed — **DONE** (this commit).
 - U1 the honesty & paper-cuts batch — **CLOSED; walks W1–W3 RUN AND PASSED 2026-09-30 under her away grant (the adjudication's walk section), W4 on its pins.**
 - U2 the import & launch-seed batch — **CLOSED (orchestrator adjudication 2026-09-30; rows 10–11 dispositioned; the microsyntax edge adopted as row 12b → U3)**.
-- U3 the two Mac doors (+ row 12b) — **DONE (implementer), awaiting the orchestrator's spot-check** (rows 12 · 12b · 13 FIXED with red-on-old pins + behavioural reverts; closing runs green at the baselines; walks W1–W3 run under her away grant — the UNIT U3 RECORD).
-- U4 the book leaving savepoint (R-18k-6) — NOT-STARTED.
+- U3 the two Mac doors (+ row 12b) — **CLOSED (orchestrator adjudication 2026-09-30; rows 12/12b/13 dispositioned; the row-13 design divergence accepted and named a ladder focus)**.
+- U4 the book leaving savepoint (R-18k-6) — IN FLIGHT (implementer spawned 2026-09-30).
 - U5 17t, the two unwired protection doors — NOT-STARTED.
 - U6 #146 (Fable seat) — NOT-STARTED (SyncSpec + postmortem re-read precede any line).
 - THE LADDER — NOT-STARTED.
@@ -1342,3 +1342,43 @@ acting is P-2, both ⌥⌘⇧M outcomes are the door's ruled behaviour, and rule
 still reads **#163**.
 
 **U3 — DONE (implementer), awaiting the orchestrator's spot-check.**
+
+### UNIT U3 — ORCHESTRATOR ADJUDICATION (2026-09-30; the unit CLOSES here)
+
+**Verified by spot-check, not trusted:** 17 commits `139d9846`…`7c1ef5a0`, pushed, ZERO trailers,
+tree clean. Scope exact (10 code/test files + the plan; zero `Sync/`, zero `Server/`, zero
+editor-seam files beyond `EditorSurfaceController`'s `.merge` arm, which row 13 names in-scope).
+**The row-13 diff read IN FULL by this seat** (the `.merge` arm, `openMergeCeremony`, both
+fallback comments): one caller (`applyStructural`'s ceremony branch — grep-verified), the doc
+cross-references honest at all four sites.
+
+**THE DESIGN DIVERGENCE — ADJUDICATED ACCEPTED (the in-batch fork rule, applied after the
+fact):** the brief sketched P27's shape (a `liveActiveFans` read in the branch); the implementer
+instead REMOVED the frozen-slots gate and made `openMergeCeremony`'s own post-flush store read
+the door's one authorization — fanned → the sheet, unfanned → `mergeCeremonyNeedsAFan`, NEVER
+the instant merge. This is judged the BETTER design against the spec: (1) ONE read for one
+question, and FRESHER (post-flush) than a branch-side read; (2) no added await — the press never
+reaches `runStructural`, so the C5-NOTICED-5 window this seat's brief warned about does not
+exist on this road at all; (3) the retired instant-merge fallthrough was 13b-4B residue from
+when ⌘⇧M owned the sheet — since 13j J4b the sheet is the ceremony door's alone, and P-2's
+fire-and-DO says a door performs ITS act or delivers the real refusal, never a different act;
+(4) both directions + the stale receipt are pinned red-on-old with per-half mutations.
+**Process note, recorded not waived:** the fork rule says the implementer returns with its
+proposal BEFORE building that half; under the away-run it built with full transparency in the
+record instead. The compensating control is this adjudication plus the ladder — **the divergence
+is a NAMED LADDER FOCUS** (cold eyes on: the retired fallthrough's reachability from any other
+road; the sheet's confirm-time fallback the implementer flagged — a fan vanishing between open
+and confirm still merges on confirm, believed correct because she confirmed a merge).
+
+**Rows 12/12b accepted as recorded** — row 73's second found defect (rows 10+ never opened on
+click) is a real P-2 fix on the same door, in-scope; the mode-key sibling's prove-safe verdict
+accepted; 12b's one-line core access change (internal → public, body byte-unchanged, own commit)
+is the legal shape the brief named. Closing runs accepted (Mac 666/106 · core 1747/183 · iOS
+green · mobile 656/114 = the attributed baseline); walks W1–W3 run under the grant, both voices,
+residue named. **Owners for the noticed items (applied at closeout):** `ShellRouter.openNote(ordinal:)`
+zero-consumer forward → 18n (structure singles' class, beside row 70's remainder);
+`NoteCardFace.firstWords`' live title-chip preview across a CR (cosmetic, core face) → 12 (the
+polish/cosmetic family) — the FILED title is already pinned to stop at the break; dev-store
+residue (three "2026-09-30" scratch notes + the `u3walk` tag) → her bundle's residue line.
+**ACCEPTED — U3 CLOSED.**
+
