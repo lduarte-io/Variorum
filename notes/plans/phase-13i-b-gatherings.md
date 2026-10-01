@@ -963,10 +963,14 @@ schema/`Sync/`/migrations (zero).
   to tag. **Mac: BindDoorTests + RuleEditorTests + CapabilityRegistryTests — "Test run with 44
   tests in 3 suites passed", 0 skipped** (the registry walk green with `.editRule`,
   `.bindIntoBook`, `.makeBookFromGathering` declared and rendered).
-- **MUTATION CHECKS — IN FLIGHT** (tree committed at 3e1201ea; each mutation is applied to a
-  committed file and restored by `git checkout --`; a successor reads `git diff` to see what is
-  mutated right now). M1 teaching branch removed + M2 byte-compare `ruleChanged` (one run);
-  M3 wing filter dropped + M4 keeps-collecting dropped (one run). Results: PENDING.
+- **MUTATION CHECKS — DONE, tree restored (no mutation in flight; `git status` clean after each
+  restore by `git checkout --` from 3e1201ea).** Two runs of disjoint single-mechanism mutations
+  over `BindDoorTests` + `RuleEditorTests`: M1 the teaching branch removed from `acceptDrop` → **2
+  red** (the offer pin; the finished-gathering refusal pin); M2 `ruleChanged` by BYTES instead of
+  structure → **1 red** (the unedited-save pin, 3 issues — the non-canonical spelling rewrote and
+  queued an outbox row); M3 the editor's wing filter dropped → **1 red** (the add doors offered
+  another wing's tag); M4 the keeps-collecting sentence dropped from the bind's body → **2 red**
+  (the presented sheet's truth; the words at every count). Every new pin family bites.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
