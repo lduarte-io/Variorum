@@ -1786,3 +1786,10 @@ the sanctioned install refresh → closeout.
   ReadingAssembly/ruleMatchSQL/legacyDraft, SmartCollect, Reading ops, stars, quicknote,
   arrival plumbing). Her overnight conversion recorded in the banner. This plan authored as
   the first act. No revert in flight. U1 spawns next.
+- **CLOSEOUT COMPLETE (2026-10-01):** her outflow ruling recorded + routed; the CLOSED banner;
+  canon deltas applied as her rulings ran (AppSpec §7/§9/§14 + OverallModel §2; 13u4's §14
+  paragraph rolled to the delta archive); KnownIssues +4 (owner 13i-d); QUESTIONS #168;
+  MobileSoul PL-43; the master plan flipped (the superseded pointer + 13i-a's paragraph rolled
+  verbatim); the 13i-c plan + kickoff authored and amended to her outflow ruling; the handoff
+  `notes/handoffs/phase-13i-b-handoff.md`. Nothing uncommitted; no revert in flight; zero app
+  instances; the phase CLOSED. The hard stop follows this commit.
