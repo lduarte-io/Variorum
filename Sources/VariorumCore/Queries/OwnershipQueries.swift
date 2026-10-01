@@ -250,4 +250,97 @@ extension Queries {
     public static func pendingArrivalCount(_ db: Database, readingID: String) throws -> Int {
         try bookArrivals(db, readingID: readingID, limit: 0).count
     }
+
+    // MARK: - HIDE-OWNED (§6) — the ONE fragment every scoped reader composes
+
+    /// **The owned-elsewhere exclusion** — ONE pure SQL fragment (no
+    /// arguments) that keeps out a note some live OWNED book holds as a
+    /// member. Composed by every reader in hide-owned's scope (§6: gathering
+    /// assemblies — and the chip's and the listing page's gathering legs,
+    /// which must never claim a gathering shows a note it hides — tag
+    /// listings, and, at 13o, search: this is its hand-off). The LIBRARY is
+    /// exempt (R32). `alias` names the reader's `container` alias. Cost: one
+    /// `idx_reading_post_post` probe per candidate note.
+    public static func ownedElsewhereExclusion(alias: String = "c") -> String {
+        """
+        NOT EXISTS (SELECT 1 FROM reading_post owx
+                    JOIN reading owr ON owr.id = owx.reading_id AND owr.deleted_at IS NULL
+                     AND owr.kind = 'book' AND owr.owned = 1
+                    WHERE owx.post_id = \(alias).id AND owx.deleted_at IS NULL
+                      AND owx.status = 'member')
+        """
+    }
+
+    /// The global hide-owned default (`hide_owned_default` — SHOW unless "1").
+    public static func hideOwnedDefault(_ db: Database) throws -> Bool {
+        try String.fetchOne(
+            db, sql: "SELECT value FROM setting WHERE key = 'hide_owned_default'") == "1"
+    }
+
+    /// Does this GATHERING hide owned notes — its own toggle, else the global
+    /// default? (Books never hide their members.)
+    public static func hidesOwned(_ db: Database, _ reading: Reading) throws -> Bool {
+        guard reading.kind == .gathering else { return false }
+        return try reading.hideOwned ?? hideOwnedDefault(db)
+    }
+
+    // MARK: - The badge facts (§6 — "silence the common case")
+
+    /// What the badge family says about one note: the book that OWNS it, if
+    /// any (the owned-by badge in gatherings, the Pool, tag listings, the
+    /// Library — click-through via the panel bridge), and the OTHER books it
+    /// is a member of (the shared-membership badge in a book view — hover
+    /// names them). A note with neither is absent from the answer: ordinary
+    /// free notes say nothing, ever.
+    public struct OwnershipFacts: Equatable, Sendable {
+        /// The owning book (the EARLIEST owning claim — §18.4).
+        public let ownedBy: BookRef?
+        /// The books it is a member of other than the one being viewed,
+        /// earliest membership first.
+        public let otherBooks: [BookRef]
+        public var otherBookCount: Int { otherBooks.count }
+    }
+
+    /// **The badge facts for a PAGE of notes** — ONE statement, driven by the
+    /// page's ids (`json_each` `CROSS JOIN` — the `smartMembershipSQL`
+    /// discipline: each id seeks `idx_reading_post_post`, so the work is ∝
+    /// the page, never the corpus; pinned on the plan). `inBook` is the book
+    /// being viewed, left out of `otherBooks` (nil in a listing).
+    public static func ownershipFacts(
+        _ db: Database, postIDs: [String], inBook readingID: String? = nil
+    ) throws -> [String: OwnershipFacts] {
+        guard !postIDs.isEmpty else { return [:] }
+        let json = String(
+            decoding: (try? JSONEncoder().encode(postIDs)) ?? Data("[]".utf8), as: UTF8.self)
+        let rows = try Row.fetchAll(
+            db, sql: ownershipFactsSQL, arguments: [json])
+        var owners: [String: BookRef] = [:]
+        var others: [String: [BookRef]] = [:]
+        var seen: Set<String> = []
+        for row in rows {
+            let postID: String = row["post_id"]
+            let book = BookRef(id: row["reading_id"], name: row["name"])
+            seen.insert(postID)
+            if (row["owned"] as Bool?) == true, owners[postID] == nil { owners[postID] = book }
+            if book.id != readingID { others[postID, default: []].append(book) }
+        }
+        var result: [String: OwnershipFacts] = [:]
+        for postID in seen {
+            let facts = OwnershipFacts(ownedBy: owners[postID], otherBooks: others[postID] ?? [])
+            guard facts.ownedBy != nil || !facts.otherBooks.isEmpty else { continue }
+            result[postID] = facts
+        }
+        return result
+    }
+
+    /// The statement behind `ownershipFacts` — split out so the P1 pin reads
+    /// the shipped text. One placeholder: the page's ids as a JSON array.
+    static let ownershipFactsSQL = """
+        SELECT j.value AS post_id, r.id AS reading_id, r.name AS name, r.owned AS owned
+        FROM json_each(?) j
+        CROSS JOIN reading_post rp ON rp.post_id = j.value AND rp.deleted_at IS NULL
+         AND rp.status = 'member'
+        JOIN reading r ON r.id = rp.reading_id AND r.deleted_at IS NULL AND r.kind = 'book'
+        ORDER BY rp.created_at, rp.id
+        """
 }

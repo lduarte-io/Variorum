@@ -674,8 +674,17 @@ written at the close. Standing scope fence: no face of any kind (U3/U4), zero `S
   `readingSealed`; `lockReading` on a sealed book a no-op; `Queries.sealPreview` +
   `pendingArrivalCount` (the Arrivals face's own predicate). `BookSealTests` 7/7 (lesson 6's
   first sentence pinned there); the lock-op regression sweep 654 tests / 61 suites green.
-- **Piece E — hide-owned (fragment + setter + the setting), the badge facts, `ownership_badges`**
-  — NOT-STARTED.
+- **Piece E — hide-owned (fragment + setter + the setting), the badge facts, `ownership_badges`:**
+  DONE (commit "13i-c U2 piece E"). `setReadingHideOwned` (gatherings only, nil = follow the
+  default, no-op-guarded); `setHideOwnedDefault` / `setOwnershipBadges` (synced, not seeded, the
+  `arrival_flash` pattern; `ThemeSettings.hideOwnedByDefault` (only "1" hides) /
+  `.ownershipBadges` (only "0" silences)); `Queries.ownedElsewhereExclusion` (ONE argument-free
+  fragment) composed by the gathering assembly, the chip's gathering leg, the listing page's
+  gathering leg (`smartMembershipSQL(hidesOwned:)`) and `taggedPostItems` (global default only);
+  the Library untouched (R32 — pinned); `Queries.hidesOwned`, `hideOwnedDefault`;
+  `Queries.ownershipFacts(postIDs:inBook:)` (one page-driven statement, P1 plan-pinned).
+  `OwnershipHideAndBadgesTests` 6/6; the readers/settings regression sweep 370 tests / 39 suites
+  green.
 - **Piece F — `OwnershipDoorTests` rows 1–12, the soak, the R4 ritual + lessons 5/6/8; the shared
   refusal words + the app compile arms; Mac + phone builds + touched suites; the FULL core suite;
   the record closed; ledger row 3** — NOT-STARTED.

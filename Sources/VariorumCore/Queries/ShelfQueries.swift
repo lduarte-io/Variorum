@@ -368,9 +368,12 @@ extension Queries {
             }
             let match = ruleMatchSQL(
                 term, wingID: reading.wingId, starredNoteIDs: try stars.ids(db, for: term))
+            // 13i-c U2 — a gathering that HIDES owned notes never claims to
+            // show one on the chip (the assembly's own exclusion, §6).
+            let hide = try hidesOwned(db, reading) ? [ownedElsewhereExclusion(alias: "c")] : []
             let conditions = (["c.id = ?", "c.deleted_at IS NULL",
                                "c.archived_at IS NULL", "c.kind = 'post'"]
-                              + match.conditions).joined(separator: " AND ")
+                              + match.conditions + hide).joined(separator: " AND ")
             let matches = try Bool.fetchOne(
                 db,
                 sql: "SELECT EXISTS (SELECT 1 FROM container c WHERE \(conditions))",
@@ -429,7 +432,8 @@ extension Queries {
             case .rule(let t): term = t
             }
             let statement = smartMembershipSQL(
-                term, wingID: reading.wingId, starredNoteIDs: try stars.ids(db, for: term))
+                term, wingID: reading.wingId, starredNoteIDs: try stars.ids(db, for: term),
+                hidesOwned: try hidesOwned(db, reading))
             let ids = try String.fetchAll(
                 db, sql: statement.sql,
                 arguments: StatementArguments([json] + statement.arguments))
@@ -442,12 +446,16 @@ extension Queries {
     /// P1 pin can run `EXPLAIN QUERY PLAN` over the REAL statement rather
     /// than a copy of it that could drift away from what ships. The first
     /// argument is always the page's ids as a JSON array.
+    /// 13i-c U2: `hidesOwned` composes the hide-owned exclusion (§6) — a
+    /// gathering that hides owned notes never lists one on a page.
     static func smartMembershipSQL(
-        _ term: RuleTerm?, wingID: String, starredNoteIDs: [String]
+        _ term: RuleTerm?, wingID: String, starredNoteIDs: [String],
+        hidesOwned: Bool = false
     ) -> (sql: String, arguments: [(any DatabaseValueConvertible)?]) {
         let match = ruleMatchSQL(term, wingID: wingID, starredNoteIDs: starredNoteIDs)
+        let hide = hidesOwned ? [ownedElsewhereExclusion(alias: "c")] : []
         let conditions = (["c.deleted_at IS NULL", "c.archived_at IS NULL",
-                           "c.kind = 'post'"] + match.conditions)
+                           "c.kind = 'post'"] + match.conditions + hide)
             .joined(separator: " AND ")
         return (
             """

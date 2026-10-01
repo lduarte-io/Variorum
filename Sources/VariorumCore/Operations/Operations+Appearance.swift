@@ -82,6 +82,28 @@ extension Operations {
         }
     }
 
+    /// **13i-c U2 — the GLOBAL hide-owned default** (the sitting record §6:
+    /// "the HIDE-OWNED toggle is the release valve: per-gathering + a global
+    /// default, scope = gathering assemblies, tag listings, search; Library
+    /// EXEMPT"). The `arrival_flash` precedent exactly: synced document
+    /// semantics (upsert-only, never tombstoned), the default — SHOW —
+    /// resolved at READ time (`Queries.ThemeSettings.hideOwnedByDefault`),
+    /// a token value ("1"/"0"), zero schema.
+    public func setHideOwnedDefault(_ hide: Bool) throws {
+        try database.write { db in
+            try upsertSetting(db, key: "hide_owned_default", value: hide ? "1" : "0")
+        }
+    }
+
+    /// **13i-c U2 — the ownership BADGE family's one switch** (§6 — "toggleable
+    /// as a set"; PROVISIONAL P-13ic-10: synced, the `arrival_flash` class).
+    /// ON by default, resolved at read (`ThemeSettings.ownershipBadges`).
+    public func setOwnershipBadges(_ on: Bool) throws {
+        try database.write { db in
+            try upsertSetting(db, key: "ownership_badges", value: on ? "1" : "0")
+        }
+    }
+
     // MARK: - The colour palette (18g — her R-Q6 · R-Q11 · R-Q13)
 
     /// **The palette layered UNDER the voice** (`ThemePalette` carries the

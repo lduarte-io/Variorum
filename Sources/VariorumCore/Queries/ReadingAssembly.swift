@@ -394,6 +394,12 @@ extension Queries {
             }
             conditions += match.conditions
             arguments += match.arguments
+            // 13i-c U2 — HIDE-OWNED (the sitting record §6): a gathering that
+            // hides owned notes (its own toggle, else the global default —
+            // SHOW) composes the ONE exclusion fragment.
+            if try hidesOwned(db, reading) {
+                conditions.append(ownedElsewhereExclusion(alias: "c"))
+            }
             // A smart reading has no positions; `manual` is meaningless for
             // it — fall back to created_at ascending (PROVISIONAL, see
             // phase closeout).

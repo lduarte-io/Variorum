@@ -43,6 +43,18 @@ extension Queries {
         /// reads as ON, so an unrecognized value is her default, never a
         /// silent OFF.
         public var arrivalFlash = true
+        /// 13i-c U2 (the sitting record §6): the GLOBAL hide-owned default —
+        /// whether gatherings (that do not say otherwise) and tag listings
+        /// HIDE notes an owned book holds. OFF by default — "Global default =
+        /// SHOW, badged (the Welcome lesson depends on it)". Stored "1"/"0";
+        /// only "1" hides, so an unrecognized value is her default. Library
+        /// is EXEMPT (R32), whatever this says.
+        public var hideOwnedByDefault = false
+        /// 13i-c U2 (§6 — "toggleable as a set; silence the common case"):
+        /// the ownership BADGE family on or off as one switch. ON by default
+        /// (PROVISIONAL P-13ic-10 — a synced setting, the `arrival_flash`
+        /// class); anything but "0" reads ON.
+        public var ownershipBadges = true
 
         public init() {}
     }
@@ -55,7 +67,8 @@ extension Queries {
                 WHERE key IN ('theme_voice', 'seams_visible', 'editing_indicator',
                               'inline_comments', 'follow_the_scroll', 'fan_style',
                               'receipt_style', 'theme_palette', 'theme_tint',
-                              'theme_accent_tint', 'arrival_flash')
+                              'theme_accent_tint', 'arrival_flash',
+                              'hide_owned_default', 'ownership_badges')
                 """)
         var settings = ThemeSettings()
         for row in rows {
@@ -87,6 +100,10 @@ extension Queries {
                 settings.customAccent = ThemeTint.normalize(value)
             case "arrival_flash":
                 settings.arrivalFlash = value != "0"
+            case "hide_owned_default":
+                settings.hideOwnedByDefault = value == "1"
+            case "ownership_badges":
+                settings.ownershipBadges = value != "0"
             default:
                 break
             }

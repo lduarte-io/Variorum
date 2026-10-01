@@ -92,13 +92,19 @@ extension Queries {
             tagCondition = "app.tag_id = ?"
             arguments = [tagID]
         }
+        // 13i-c U2 — HIDE-OWNED's tag-listing scope (the sitting record §6):
+        // when the GLOBAL default hides, a tag listing composes the one
+        // exclusion fragment. (The Library is exempt — R32; it never reads
+        // this.)
+        let hide = try Queries.hideOwnedDefault(db)
+            ? " AND " + Queries.ownedElsewhereExclusion(alias: "c") : ""
         var sql = """
             SELECT DISTINCT c.id AS post_id, c.title AS title,
                    c.entry_date AS entry_date, c.created_at AS created_at,
                    COALESCE(c.last_touched_at, c.created_at) AS stamp
             FROM post_tag app
             JOIN container c ON c.id = app.post_id AND c.deleted_at IS NULL
-            WHERE app.deleted_at IS NULL AND \(tagCondition)
+            WHERE app.deleted_at IS NULL AND \(tagCondition)\(hide)
             ORDER BY stamp DESC, c.id DESC
             """
         if let limit {

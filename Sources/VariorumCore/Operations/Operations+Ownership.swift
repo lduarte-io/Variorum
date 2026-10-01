@@ -513,6 +513,26 @@ extension Operations {
         }
     }
 
+    // MARK: - HIDE-OWNED (§6 — the release valve)
+
+    /// A GATHERING's hide-owned toggle (§6): `true` hides notes an owned book
+    /// holds from this gathering's assembly, `false` shows them (badged), and
+    /// nil FOLLOWS the global default (`hide_owned_default`, SHOW unless she
+    /// says otherwise). Gatherings only — a book shows its members, owned or
+    /// not (`wrongReadingKind`). Identity-level metadata: no-op-guarded.
+    public func setReadingHideOwned(_ id: String, _ hide: Bool?) throws {
+        try database.write { db in
+            var reading = try liveReading(db, id)
+            guard reading.kind == .gathering else {
+                throw OperationError.wrongReadingKind(id: id, expected: .gathering)
+            }
+            guard reading.hideOwned != hide else { return }
+            reading.hideOwned = hide
+            reading.updatedAt = date.now
+            try reading.update(db)
+        }
+    }
+
     /// Is the note BOOKLESS — no live member row in any live book? (The
     /// release receipt's question: "Released — it's in the Pool now.")
     func isBookless(_ db: Database, postID: String) throws -> Bool {
