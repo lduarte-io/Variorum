@@ -1373,6 +1373,8 @@ STOP condition met.
   association shapes incl. the flat conjunction, the dead auto-tag, the malformed book rule falling through,
   a gathering's saved filter = its filtered view (same predicate) · the refusals mint nothing · `conjoin`
   pure. **11/11 green** (new surface; mutation checks below).
+- **MUTATION CHECKS — STARTING (against the committed b48ca12e; each restored by `git checkout --`; if
+  this line is the last, read `git diff` to see what is mutated).**
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
