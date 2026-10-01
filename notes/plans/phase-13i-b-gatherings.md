@@ -779,6 +779,27 @@ keeps the walk's book "the door", its tag and seven notes (dev store — harmles
   stand: 104/18 · 83/19 (4 standing known issues) · 148/20 incl. the tutorial spine, 0 skipped.
   Zero instances. No revert in flight; nothing uncommitted. Ledger row 3 flipped. U2 CLOSED.
 
+## ORCHESTRATOR VERIFICATION — U2 (2026-10-01, before U3's spawn)
+
+- Trail verified (8 commits, checkpoint discipline held, pushed, tree clean). The new suites
+  re-run by the orchestrator's hand: `ArrivalQueriesTests` 12/12 · `BookArrivalsTests` 10/10
+  GREEN. Captures reviewed (02: the expanded line on Index, the ruled quiet shape; 13: the
+  Study dark room legible, nothing clipped — and it EVIDENCES P-13ib-U1-1's walk claim: door
+  five back at the door at 7:31 after its 7:28 dismissal). The orchestrator's full hands-on
+  drive rides the END-OF-PHASE acceptance walk (before the sanctioned install refresh);
+  this verification is suites + captures + trail, stated honestly.
+- **Dispositions:** F-U2-1 (books open into Outline, which carries no line) → the MORNING
+  BUNDLE (her call; interim acceptable — Index/Book carry it, 13i-d's Bookcase count closes
+  the gap). F-U2-2 (quiet receipts have no home on Index/Book while no note is live) →
+  recorded; a KnownIssues row at closeout, owner 13i-d (the faces phase; the receipts reach
+  the seam, pinned). F-U2-3 (the conversion sheet's wrong "current N notes stay" count) →
+  U3's charter beside F-1 (the sheet is U3's to rebuild). F-U2-4 (the shelf's quiet receipt
+  draws over its "⌘k" hint — pre-existing) → a KnownIssues row at closeout, owner 13i-d's
+  polish sweep. F-U2-5 (P1 stated ∝ the book's live pair rows) → accepted as the honest
+  letter; no row (the bound is the book, the `assembleReading` class).
+- Noticed in capture 13, cosmetic + pre-existing: the book footer says "1 chapters" —
+  13i-d's vocabulary/polish sweep's, recorded here so it is owned.
+
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
 | # | Item | Status |
