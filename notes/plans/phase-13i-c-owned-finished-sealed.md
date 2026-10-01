@@ -1,136 +1,546 @@
-# Phase 13i-c — OWNED · FINISHED/SEALED · the convert/delete/duplicate doors · the DOOR ENUMERATION · the edit-law refusals
+# Phase 13i-c — OWNED · FINISHED/SEALED · THE OUTFLOW EVENT · the convert/delete/duplicate doors · the DOOR ENUMERATION · the edit-law refusals
 
-## KICKOFF MESSAGE (paste-ready for a fresh session at her word)
+**STATUS: OPEN — kicked off 2026-10-01 by the author's `/architect-phase 13i-c` invocation (her
+app quit and ready). The BINDING DESIGN is `notes/plans/phase-13i-sitting-record-2026-09-30.md`
+(§1 the three-noun ladder, §2 the edit law, §5 Finished/Sealed, §6 Owned + the door enumeration,
+§14.10, §18.3 the Trash lifecycle, §18.4 competing owned books, §20 the remove/release doors, §24
+the finish confirm's one line) read THROUGH the 13i-a execution record
+(`notes/plans/phase-13i-a-schema-event.md` — schema deployed, marker 10; the owned/sealed_at
+columns and the R2 exclusivity repair live) AND the 13i-b record
+(`notes/plans/phase-13i-b-gatherings.md` — intake's owned arms built headless). This file carries
+the EXECUTION: her kickoff rulings (§1), the concrete design (§2–§6), the enumeration checklist
+(§4), the units (§7), the traps (§8), the PROVISIONALs (§9), the ledger (§10), LIVE STATUS.**
 
-> /architect-phase 13i-c — Owned + Finished/Sealed + the convert/delete/duplicate doors + the
-> DOOR ENUMERATION + the edit-law refusals, the third of the 13i five. The binding design is
-> notes/plans/phase-13i-sitting-record-2026-09-30.md (§1 the three-noun ladder, §2 the edit law,
-> §5 Finished/Sealed with Seal-as-edition-zero, §6 Owned + the door-enumeration checklist,
-> §14.10 the book-lock disposition, §18.3 the Trash lifecycle, §18.4 competing owned books,
-> §20 the remove/release doors, §24 the finish confirm's one line) read THROUGH the 13i-a
-> execution record (notes/plans/phase-13i-a-schema-event.md — schema deployed, marker 10; the
-> owned/sealed_at columns and the R2 exclusivity repair already live) AND the 13i-b record
-> (notes/plans/phase-13i-b-gatherings.md — intake's owned arms built headless and waiting for
-> doors; its hand-offs below). Standing cast; preflight per CLAUDE.md.
+**Cast (CLAUDE.md's standing default, confirmed at the kickoff):** the Fable orchestrator-architect
+(this session) IMPLEMENTS U1 itself (the lockstep event is `Sync/` work — the Sync rider; the 13i-a
+precedent); `opus-implementer` at xhigh per unit for U2–U4, one fresh session each; ONE
+`fable-reviewer` ladder over the combined diff (the diff touches `Sync/` and the default's meaning —
+the Fable-review rule binds). Cross-model flow: findings to the implementer verbatim, agree/dispute
+back to the reviewer, which makes the final call and implements its confirmed fixes; the suite green;
+one implementer sanity pass. Hard cap three rounds.
 
-**STATUS: AUTHORED AT THE 13i-b CLOSEOUT (2026-10-01), just-in-time per the master-plan rule —
-the scope list below is the sitting record's §15 line + the hand-offs 13i-b accumulated;
-re-sized at this phase's own kickoff.**
+**The lockstep:** ONE SyncSpec §12 event, marker **10 → 11** — HER authorization at the 13i-b
+closing sitting ("now is the time"). Choreography as at 13i-a: the LADDER first, then HER window
+(mirror first by her hand or the PAT at her word, then the Mac Release + the phone build in the
+SAME window). The `/Applications` refresh HOLDS behind the window (a marker-11 client against the
+marker-10 mirror refuses to sync by design — never strand her daily drive). The checklist is §11.
 
-## Scope (the sitting record §15's 13i-c line + the 13i-b hand-offs)
+**Sizing (PhaseSizingGuidance, said rather than assumed):** FOUR acceptance units, one implementer
+session each, strictly sequential. TWO are phase-sized — U1 (a lockstep event) and U2 (an op
+family); U3 and U4 are door-family UI units (sheets, confirms, choice doors, badges — no new mode,
+board or token pass). Within the guidance's letter; the cross-wing doors that the 13i-a fences also
+named for this phase were RE-SLOTTED to 13i-d at her kickoff word (R-13ic-2) to keep it so.
 
-1. **OWNED (§6):** the convert door (sole/bookless members owned in place; shared members get
-   exclusive diverge-shaped copies, LISTED in the confirm); un-owning both doors; the add doors
-   (bookless → move in clean; membered elsewhere → copy in / move in, severed memberships
-   listed); tags ride copies (hide-owned toggle: per-gathering + global default SHOW-badged,
-   Library EXEMPT); the two-choice delete confirm (book only / book and its N notes, ONE
-   stamp); duplicate (non-owned shallow · owned DEEP only, born non-owned); the badge family
-   (direction ruled, toggleable as a set, silence the common case).
-2. **FINISHED/SEALED (§5):** Finished freezes the ASSEMBLY (rename free; intake pauses — the op
-   half shipped at 13i-b; the FACES and the confirm land here, incl. §24's one line "N waiting
-   at the door will be dismissed"); Sealed = Finished + text immutability; sealing an owned
-   book fork-free; sealing a SHARED book auto-diverges with the LISTED-forks confirm;
-   exact-stamp unseal; Seal designed as EDITION ZERO (nothing may fight §13's future).
-3. **THE DOOR ENUMERATION (§6 — "will be important", hers):** every membership-creating door
-   consults ownership — addPostToReading, every drag road, ⌘K, the Book Panel's drag powers,
-   shelveInDailyJournalBook (an owned-elsewhere note bells, never throws), INTAKE's owned arms
-   (built headless at 13i-b U1 — wire the doors), bind-a-gathering (the owned-notes confirm
-   limb deferred from 13i-b), restoreReading's membership revival, divergePostForReading
-   (allowed — it copies). The record's list is the checklist; missing one is a ladder finding.
-4. **The edit-law refusals (§2):** the refusal/copy work that makes the edit law legible at the
-   doors (editing never forks; adding never copies; copies are ceremonies; ownership removes
-   ambiguity, never changes the rule).
-5. **The remove/release doors' vocabulary (§20):** "Remove from this book" / owned "Release
-   from this book" / a gathering's honest "Remove the #tag" — ops shipped; the per-door
-   vocabulary + receipts land here (faces at 13i-d where they are Bookcase-shaped).
-6. **The Trash lifecycle for books (§18.3):** kind-labeled Trash rows; exact-stamp restores;
-   the delete-book-and-notes road returns WHOLE; shelves never Trash objects.
-7. **Competing owned books (§18.4):** both see the arrival; first claim wins; the loser's row
-   reads "claimed by [Book]" (the R2 repair already converges the race — the FACE lands here).
+---
 
-## The 13i-b hand-offs this phase owns (each recorded in the 13i-b plan/ladder)
+## THE BINDING PRINCIPLES (the 13b constitution, copied per the architect-phase skill; its application notes bind alongside)
 
-- **The three membership readers gain `kind='book'` scoping TOGETHER** (ladder F-R1-7):
-  `membershipElsewhere`, the Pool exclusion, `readingsContaining`'s membership leg — a stray
-  member row on a gathering is sync-reachable; decide the three in one ruling.
-- **`newPostInReading` mints in Home whatever the book's wing** (U1 F-5) — pre-existing,
-  unreachable until wing doors exist; the wing doors are this phase's neighborhood (cross-wing
-  move/copy + tag adoption are 13i-c per the 13i-a fences).
-- **The bind door's owned-notes confirm limb** (fenced out of 13i-b §1): the assembly's owned
-  notes list copy-in / leave-out at the bind.
-- **Intake's owned arms go live** the moment the convert door exists — the decision table and
-  its headless pins are 13i-b U1's; the walk re-verifies them through real doors.
-- **The membership chip's staleness under an intake seat** (U3 F-U3-2) sits with 13i-d unless
-  this phase's chip work (the owned badges touch the same chip) takes it for free — note it.
+- **P-1 — One capability registry.** Every user-facing act is declared
+  exactly once: verb, scope (block/take/post/book), per-mode availability
+  rule, its doors (menu / context / bar / shortcut / palette), and its
+  refusal copy. Surfaces render their doors FROM the registry; gating is
+  data, never per-view if-statements. A registry-walk test asserts every
+  declared door exists and every rendered door is declared. This kills the
+  D3/D4 class structurally — the capability matrix stays green by
+  construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act —
+  including any mode-switch choreography, done visibly for the user — or
+  delivers the operations layer's real refusal. A door that can never act in
+  its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface
+  component (live + read modes; one measurement brain — the width-gated
+  remeasure; the shared canary) that every pane composes; the live editor
+  core's identity machinery (`BlockRangeIndex`, crystallization) becomes its
+  live mode, not a sibling implementation. "What text does this pane show,
+  and is it live" is answered by ONE pure, unit-tested authority
+  (`PaneTextAuthority`); views never re-derive it. Its invariants stated as
+  code: exactly one live pane; the live pane is buffer-authoritative; read
+  panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter
+  may announce that something happened (mode changed, post opened); no
+  listener derives business state or availability from a broadcast, and no
+  flow's correctness depends on broadcast ordering. Cross-feature flows
+  route through composition. (Stage 0's survey enumerates today's
+  notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule
+  marks an under-architected feature. The response is never another patch:
+  write the feature's DESIGN MEMO — intended behavior whole, edge cases
+  enumerated on paper, refusal wordings, undo story — get the author's
+  rulings on the product-flavored edges, then build to the memo. Happy path
+  ships first, but the edges are *decided at design time*, not discovered by
+  the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial
+  flow is the contract for every happy path. It stays green — automated
+  where the harness allows, screenshot-walked otherwise — and any change
+  that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive
+  harness: the ops-layer soaks (exist), the board/view-model invariant soak
+  (Stage 1), the registry walk (P-1), the per-batch scripted screenshot
+  walkthrough. Red-on-old stays absolute: no bug-class fix without a pin
+  that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind
+  the rebuilt layer exactly as they bind the substrate (invalidation ∝
+  realized rows; one live editor; virtualized long views). Overlays, never
+  rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit`
+  (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary.
+  Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing
+  board layout, text authority, and gesture routing splits by concern
+  (`TakesViewModel` at 890 lines is the standing counterexample). Same
+  hygiene rule as the substrate, applied where it was being waived.
 
-## HER OUTFLOW RULING (2026-10-01, the 13i-b closing sitting — THIS PHASE BUILDS IT)
+Also binding whole: the sitting record §1–§25 (every ruling), the §25 tutorial curriculum as
+secondary acceptance criteria (lessons 5, 6, 8 and ritual R4 are THIS phase's sentences — no act
+may make one false; U2 pins R4 headless), SyncSpec in full for U1, and the hallucination guard
+(red-on-old by behavioural revert for every bug-class fix).
 
-Her words, verbatim-faithful: *"can we make the outflow tag distinct from the tag rule? I want
-to be able to choose what the outflow tag is and if there is one at all, not just have it
-automatically made just because the book was once a gathering. you should be able to choose if
-you want a, b, a but not b, tag c, whatever. I realize that it's a sync change and a schema
-jump, but now is the time to do something like that. I feel like it's natural to want that -
-you might want to add my writing, poetry, and horror. While poetry could nest in my writing and
-so could horror, that's still two tags."*
+## §1 THE KICKOFF RULINGS (2026-10-01, at this run's open — recorded verbatim-faithful)
 
-**The ruled shape:** the outflow is a CHOSEN, OPTIONAL set of tags on a book — independent of
-the intake rule, several tags legal (her writing + poetry + horror), none legal. The spawn and
-every door OFFER the choice rather than silently deriving (refining her 13i-b morning ruling).
-**She authorized the schema event** ("now is the time"): the storage shape (a join table or a
-designed column form) is 13i-c's kickoff sitting's, ONE lockstep event marker 10→11,
-mirror-first at her window, `Sync/` under the Fable rider, SyncSpec §12's lockstep discipline
-whole (serializer classifications, repairs if any live-unique index arrives, the fake server's
-mirror, the deploy checklist). The 13i-b-shipped single `auto_tag_id` + sole-tag spawn
-derivation stand until this build replaces them; the migration carries existing `auto_tag_id`
-values into the new shape.
+- **R-13ic-1 — THE OUTFLOW IS ONE JSON COLUMN.** Asked for the shape, she asked first: *"what shape
+  do you think is the best long term? give me advice on this choice and an informed view of the
+  tradeoffs with the perspective that I will be using this app 5 years from now."* The advice given
+  (recorded in short): the join table's advantages — per-tag merge granularity, an indexed reverse
+  lookup, a home for per-tag options — solve problems a per-book tag set edited rarely by one
+  person does not have, at a permanent cost (a new synced table through every lockstep, repair,
+  purge and RLS surface); the JSON column is the rule's own shape (`query_spec` is a JSON tree of
+  tag ids), additive, repair-free, and can grow to carry objects under the same §12 discipline the
+  rule grammar grew under; its one weakness (whole-set CAS — two devices editing one book's
+  outflow offline at once lose one edit, visibly) is the standing metadata class since Phase 5.
+  **She chose the JSON column.** So: `reading.auto_tag_ids TEXT` — a JSON array of tag ids, NULL =
+  no outflow; PLAIN under E2EE (ids, the class of the column it replaces — recorded for her at §9);
+  the migration carries each existing `auto_tag_id` into a one-element array; the old column
+  RETIRES-AS-READ (left in place — SQLite refuses to drop a column that carries a foreign key; the
+  `shelf_pins` precedent) and no writer touches it again.
+- **R-13ic-2 — THE CROSS-WING DOORS GO TO 13i-d**, beside the wing switcher (her pick of the
+  recommended option): no wing can exist until a switcher/mint door does, so move/copy-across-wings
+  + tag adoption would have no reachable use here. This phase keeps ONLY the one-line correctness
+  fix: `newPostInReading` mints the note in the BOOK's wing (13i-b U1 F-5). 13i-d's plan carries
+  the doors at its authoring (the closeout writes the pointer).
+- **R-13ic-3 — UNSEAL REOPENS THE BOOK TOO.** Her pick: *"Unseal reopens the book too"* — one door
+  takes a book from Sealed straight to OPEN: its members unseal on the exact stamp AND the
+  assembly unfreezes (the un-finish catch-up fires). Sealing an open book FINISHES it first in the
+  same gesture (so the ladder reads open → finished → sealed up, and sealed → open in one step
+  down; Reopen on a FINISHED book is the other down-step). The two states never contradict:
+  `unlockReading` on a SEALED book refuses (`readingSealed`) — the one door there is Unseal.
+- **R-13ic-4 — A GATHERING'S EMPTY SAVE REFUSES AND OFFERS DELETE; RULE-LESS GATHERINGS GO TO THE
+  TRASH AT MIGRATION; NO RULE = SHOWS NOTHING.** Her words: *"refuse, offer delete, but are there
+  even any of these gatherings? i'm the only user and i only have a few books. we can maybe just
+  drop the book, it won't drop the note anyway - and then we don't have to keep "grandfathered in"
+  in mind forever"* — then, offered the concrete shape, she picked it: *"Trash them at migration;
+  NULL = shows nothing."* So: v1_20 tombstones every live gathering with no rule (to the Trash —
+  Put back available, no note touched); from then on a gathering with NO rule assembles EMPTY
+  everywhere (assembly, the Pool tuck, the chip, the bind count) — the malformed rule's own closed
+  reading; the mint door requires a rule (the op guards it); the rule editor refuses an empty save
+  on a gathering and offers "Delete this gathering…". The match-all tolerance letter DIES; nothing
+  is grandfathered. (Her post-close ruling 1 and KnownIssues row "A RULE-LESS gathering shows every
+  note…" resolve here.)
 
-## HER WALK POSTURE FOR THE 13i FAMILY (2026-10-01, at her 13i-c start; verbatim-faithful — BINDS 13i-c/d/e)
+**Also recorded at the kickoff (hers, from 13i-b's closing sitting — the charter):** the outflow is
+a CHOSEN, OPTIONAL SET of tags on a book, independent of the intake rule — *"you should be able to
+choose if you want a, b, a but not b, tag c, whatever"*; the spawn OFFERS the choice (prefilled
+with the rule's positive tags — her item (i)) rather than silently deriving.
 
-*"I will be doing a combined walk over all of 13i - I might do some small walks between the
-rounds like this one, but i'm not exhaustively testing each sub round, I'll spend more time
-going through everything new when it's all done. Each phase will still make its own handoff,
-and the final phase will give me a cohesive final list of all the new actions to try out and
-things to look at."*
+## §2 THE SCHEMA EVENT — U1 (Fable; `v1_20_outflow_and_ruleless`, marker 10 → 11)
 
-So, for every remaining 13i letter: the ORCHESTRATOR'S acceptance walks stay mandatory per the
-sizing rule (an implementer's "done" is a claim; the walk is the verification — unchanged);
-HER per-phase walk is light-or-skipped by her own word, with her findings arriving whenever
-she dips in (as the Edit Rule gap did); each phase still writes its own handoff; and **13i-e's
-closeout OWES THE COHESIVE COMBINED LIST — every new action and every thing to look at across
-a–e, one document for her one deep pass.** Each letter's closeout should therefore keep a
-running "for the combined walk" list in its handoff so 13i-e can assemble rather than
-re-derive. This section is carried forward into 13i-d's and 13i-e's plans at their authoring.
+**The migration (ONE, additive — no rebuild):**
+1. `ALTER TABLE reading ADD COLUMN auto_tag_ids TEXT;` — JSON array of tag ids; NULL = none.
+2. Carry-over (live rows only — a dead row's value is irrelevant and an UPDATE on it would repush
+   a tombstone for nothing): `UPDATE reading SET auto_tag_ids = json_array(auto_tag_id) WHERE
+   deleted_at IS NULL AND auto_tag_id IS NOT NULL`. The outbox captures it; the rows push after the
+   window (the engine refuses until the marker reads 11 — the 13i-a pattern). `auto_tag_id` is left
+   as it is: retired-as-read.
+3. **The rule-less sweep (R-13ic-4):** `UPDATE reading SET deleted_at = :now, updated_at = :now WHERE
+   deleted_at IS NULL AND kind = 'gathering' AND query_spec IS NULL` — an ordinary tombstone on a
+   real clock (the Trash's 30-day window reads it); the cascade triggers stamp any stray membership
+   with the exact stamp; the outbox captures the rows. A MALFORMED rule is untouched (it already
+   fails closed and the editor shows it).
+4. `SyncSchema.lockstepVersion = 11`; the `reading` serializer's PLAIN list gains `auto_tag_ids`
+   (the PRAGMA completeness walk demands it); the fake server (registry-derived) mirrors it.
+   **Apply of an OLD mirror row** (NULL / absent `auto_tag_ids`) reads as no outflow — pinned, the
+   13i-a null-normalize class.
 
-## HER POST-CLOSE RULINGS (2026-10-01, after the 13i-b hard stop; verbatim-faithful)
+**The mirror artifact `Server/supabase/14_phase13i_c_outflow.sql`** — ONE transaction: `alter table
+reading add column auto_tag_ids text;` (nullable, no default, no constraint — §2's dumb mirror); the
+marker 10 → 11 as the LAST statement; the re-run guard below the marker; the read-only verify tail
+(`sync_schema_version()` = 11; the column present). No RPC changes: the allowlists and registries
+are TABLE-level and the column is PLAIN (no ciphertext registry entry). The deploy checklist is §11.
 
-1. **A GATHERING REQUIRES A RULE AT CREATION.** Her words: *"how does a freshly minted gathering
-   have no rule? I thought you basically needed a rule just to mint a gathering? … I think it
-   should be a requirement to have it at creation, unless you have any compelling reason against
-   that. I just don't think that a rule-less gathering makes sense."* No compelling reason
-   exists (the NULL=match-all letter is an old-data tolerance, not a product want; "show
-   everything" is the Library's job — her own place/finder boundary). RULED: the mint door
-   requires a rule (the mint flow gains the rule editor inline); the op guards it for
-   gatherings. Two edges for this phase's design: (a) existing rule-less gatherings are
-   GRANDFATHERED at the assembly (the tolerance letter stands for old rows); (b) the rule
-   editor's clear-to-nothing on a GATHERING needs an answer consistent with her ruling (refuse,
-   or offer delete-the-gathering — a rule-less gathering "doesn't make sense"). This RESOLVES
-   #168's open call (a) and nearly moots (b) (the bind/spawn offer on a rule-less gathering
-   becomes unreachable by mint; the malformed arm remains).
-2. **THE RULE EDITOR'S DISCOVERABILITY GAP (her report, with a screenshot of her real store):**
-   the book's own ⚙ Book Settings sheet (Name · Word target · Note cap · Finished) carries NO
-   rule/dial/auto-tag — the ONLY door 13i-b shipped is the SHELF row's right-click "Edit
-   Rule…", and she could not find it from inside the book. The Collecting-pane re-homing was
-   always 13i-d's; her report makes it concrete: the book's settings sheet (and the gathering's)
-   must carry the Collecting section — rule, dial, outflow — or at least a door to it. Slot:
-   with this phase's settings-sheet work (Finished/Sealed land in that same sheet) rather than
-   waiting for 13i-d, since the sheet is already under this phase's hands.
-## Standing constraints
+**The model + ops recast (same unit):**
+- `Reading.autoTagIds: String?` (the raw column) + `Reading.autoTagIDs: [String]` (decoded,
+  tolerant: malformed → `[]`, fail closed). `Reading.autoTagId` stays on the record (the column is
+  still synced) but NO code reads it after this unit — a grep pin (`OutflowRetirementTests`) asserts
+  no production read of `autoTagId`/`auto_tag_id` outside the migration, the serializer and the
+  model.
+- **`Operations.setReadingOutflow(_ id, tagIDs: [String])`** — books only (`wrongReadingKind`);
+  every tag live in the book's wing (`tagNotFound` otherwise — §9's isolation); de-duplicated,
+  ORDER PRESERVED (the chooser's order is hers); `[]` stores NULL; no-op-guarded on the decoded
+  array. Setting it tags NOTHING by itself; clearing never untags (ruled). `setReadingAutoTag(id,
+  tagID:)` becomes a FORWARDER (`tagIDs: tagID.map { [$0] } ?? []`) so the 13i-b rule-editor face
+  keeps compiling and working until U3 rebuilds its row — retired with U3.
+- `createReading(… autoTagIDs: [String] = [])` (the old `autoTagId:` parameter kept as a forwarding
+  convenience, merged in).
+- **`applyAutoTag`** applies EVERY outflow tag the note does not yet wear, each through the one
+  application road (`insertPostTag` — so each fires intake on OTHER living books; this book's pair
+  is already decided). Silent arms unchanged per tag (dead tag, other wing, already worn).
+- **`tagAllMembers(readingID, tagID: nil)`** — nil now means EVERY outflow tag: for each outflow
+  tag, every live MEMBER (archived included) not wearing it, ONE transaction; returns the count of
+  NOTES that newly wear at least one (the receipt's number — PROVISIONAL P-13ic-11); `readingHasNoAutoTag`
+  when the outflow is empty and no tag given. The "also tag the N current members" offer's N =
+  members missing at least one outflow tag (`Queries.outflowMissingMemberCount`).
+- **The spawn's prefill is a pure function:** `RuleGrammar.positiveTagIDs(of:)` — the tag ids NOT
+  under a `not` (her item (i): `#a AND NOT #b` → `#a`; an OR fan → all its tags; star-only → none).
+  `ShelfViewModel.spawnBook` passes `autoTagIDs: positiveTagIDs` headless now (the sole-tag arm and
+  `Queries.tagIsLive`'s role fold into it — dead ids are dropped by `setReadingOutflow`'s own
+  liveness check); U3 lets her EDIT the prefill before the mint.
+- **NO RULE = NOTHING, on a gathering (R-13ic-4):** every `case .none` arm that read "shows every
+  note" flips to the closed reading — `Queries.assembleReading`'s gathering arm, `poolListing`'s
+  tuck, `readingsContaining`'s gathering leg, the bind's count/materialization,
+  `saveFilterAsGathering`'s association (a rule-less gathering's association is NOTHING — the
+  filter alone, as before), the rule editor's empty-state sentence (U3 re-words). Pinned: a
+  NULL-rule gathering assembles empty, tucks nothing, lists on no chip. **The op guards:**
+  `createReading(kind: .gathering, querySpec: nil)` refuses `gatheringRequiresRule`;
+  `setReadingQuerySpec(gathering, nil)` and a write that normalizes to NULL refuse the same (the
+  refusal behind the editor's offer); the two seeders (quicknotes, starred notes) already pass
+  rules — verified by pin. A rule-less gathering can exist live ONLY as a Trash restoree (and then
+  shows nothing until it gets a rule — U3's empty state says so; its bind/spawn doors hide, P-2).
+- The one-line F-5 fix (R-13ic-2): `insertPost` gains a `wingId:` and `newPostInReading` passes
+  the book's — pinned on a non-Home book inserted directly.
+- **Convergence pins (`Phase13icOutflowTests`):** the migration's column + carry-over + the
+  rule-less sweep (its outbox rows asserted; the Trash lists the swept gathering; Put back works
+  and the restoree assembles EMPTY); two clients editing one book's outflow converge by server-wins
+  CAS (documented, the metadata class); an arriving old row with NULL `auto_tag_ids` reads as no
+  outflow and its `auto_tag_id` is ignored; the serializer completeness walk green at marker 11.
 
-Schema: ONE RULED EXCEPTION — her outflow ruling above authorizes ONE further §12 lockstep
-event (marker 10→11) for the chosen multi-tag outflow; everything else stays on 13i-a's bundle
-(any OTHER schema want remains a design error).
-The ops enforce ownership; SyncSpec §7's R2 exclusivity repair converges races (its shape is
-PROVISIONAL #167 — check her ratify before building faces atop it). The sitting's §25 lessons
-5–6, 8 + rituals R4 are this phase's acceptance spine. The 13b constitution binds (copy it in
-at kickoff per the architect-phase skill). Sizing re-checked at kickoff; her word stands: "if
-you distribute everything we've decided through the 5 phases it'll likely be fine."
+## §3 OWNED (U2 — the op family; the sitting §6, §2, §18.4, §20; the brief's round-4 rulings stand)
+
+**One pure Domain rule, `Domain/OwnershipDecision.swift`:** given the TARGET book's `owned` and the
+NOTE's facts (membered in another BOOK? owned elsewhere?) → `.add` (a plain pointer — bookless
+notes "move in clean"; an ordinary note into a plain book), `.needsChoice(.copyOrMove)` (an OWNED
+target, a note membered elsewhere — copy in / move in), `.needsChoice(.copyOnly)` (a PLAIN target,
+a note owned elsewhere — copy in). ONE table read by every membership-creating road (§4). The
+intake table's owned arms (13i-b, shipped) are the same semantics for the event occasions.
+
+**The ops (every one ONE transaction; the standing conventions inherit):**
+- **`setReadingOwned(id, owned: true)` — the CONVERT door.** Refuses a gathering
+  (`wrongReadingKind` — a category error, §6), a finished or sealed book (`lockedReading` —
+  converting diverges members, a structural act; un-finish first — PROVISIONAL P-13ic-2); no-op if
+  owned. For every live MEMBER also membered in another live BOOK: a DIVERGE IN PLACE (the
+  `divergePostForReading` body inlined: a full family copy takes this book's exact slot — position
+  AND chapter; the original's membership here tombstoned; `version_of` + per-block `derived_from`
+  edges; **TAGS RIDE the copy** — ruled §6, P-13ic-5); sole/bookless members become owned in place
+  (no row changes). Then `owned = 1`. Returns `OwnConversionResult { copied: [(original, copy,
+  bookNamesElsewhere)] }`. **No structural-undo entry** (P-13ic-1): the copies are real notes
+  ("conversion-time copies persist as the independent notes they are" — round 4) and un-owning is
+  the symmetric door. `Queries.ownConversionPreview(readingID)` lists the members that WILL fork
+  (name + where else they live) for the confirm — the confirm LISTS them (ruled).
+- **`setReadingOwned(id, owned: false)`** — `owned = 0`; members stay; exclusivity lifts. No-op
+  guarded. (A note still carries its memberships; nothing else moves.)
+- **`addPostToReading` consults ownership** (the ONE choke point every face routes through):
+  `.needsChoice(.copyOrMove)` → throws `noteMemberedElsewhere(postID:, readingID:, elsewhere:
+  [readingID])`; `.needsChoice(.copyOnly)` → throws `noteOwnedElsewhere(postID:, readingID:,
+  owner: readingID)`. A waiting ARRIVAL's seating path inside the same op consults the same table.
+  The refusals carry the names the door needs (`OpsRefusalTable` words — shared, platform-neutral:
+  the phone's membership face inherits honest words for free).
+- **`copyPostIntoReading(postID, into readingID, at:)` — COPY IN, the ceremony.** `copyPost` (the
+  whole family; tags ride — P-13ic-5), its membership row inserted FIRST at the asked position (so
+  this pair is decided before any tag fires intake elsewhere — the `newPostInReading` order), then
+  the auto-tag. The original is untouched. When the act answers an ARRIVAL, the arrival row is
+  tombstoned as a MEMBER-class decision (permanent — a second copy must never be offered on a fresh
+  act; P-13ic-3). Returns the copy. Refuses finished/sealed (`lockedReading`), capacity, a dead
+  note. Registers the `duplicateAsVersion`-shaped undo entry (un-mint the copy; redo revives it
+  exact-row — the diverge precedent).
+- **`movePostIntoReading(postID, into readingID, at:)` — MOVE IN (claim-move).** Tombstones every
+  OTHER live `reading_post` row of the note (members AND arrivals, in books; a gathering has none)
+  — the SEVERED memberships, returned by id so the receipt names them; then the add here (a waiting
+  arrival here flips to member at the asked position; the auto-tag rides). The daily Journal's
+  membership is one of the severed when the note is claimed out of it (§10's ruling). Refuses
+  finished/sealed/capacity. `Queries.moveInPreview(postID)` lists what will be severed for the
+  confirm. No structural-undo entry (the memberships are the `addPostToReading` class; the Trash is
+  not involved — a re-add by hand is the road back; PROVISIONAL P-13ic-12).
+- **The judgment arms:** `seatArrival` consults the table and throws the same two refusals (the
+  faces then offer Copy in / Move in on an owned book's arrival of a membered note, and Copy in /
+  Dismiss on a plain book's arrival of an owned-elsewhere note — §4's "claim-move / copy in /
+  leave" and "copy in / dismiss"). `copyPostIntoReading(answering: pairID)` /
+  `movePostIntoReading(answering: pairID)` take the arrival's row id as the position source.
+- **`shelveInDailyJournalBook` BELLS, never throws (§6):** on `noteOwnedElsewhere` (the Journal
+  plain, the entry claimed elsewhere) or `noteMemberedElsewhere` (an OWNED Journal, the entry
+  membered elsewhere) it inserts an ARRIVAL row for the pair and returns a new
+  `.waitingAtDoor(readingID:)` outcome; ⌘J's note speaks it ("Today's entry opened — it's waiting
+  at the Journal's door, because “X” owns it."). The decided read (ANY row) is unchanged.
+- **The REVIVAL PASS — `enforceOwnershipAfterRevival(db, postIDs:)`, one function, R2's shape
+  applied locally:** after any door that REVIVES membership rows — `restoreContainer` (the note's
+  own memberships), `restoreReading` (the book's), `reapplySmartConversion` (the bind's redo),
+  `reapplyDiverge`, `reapplyMintedContainer` — for every note with more than one live member row
+  where any is owned: the EARLIEST-CREATED membership stands (`created_at, id` — the local "earlier
+  act"; the repair ranks by `server_seq` for the same reason); a later OWNED-side row demotes to
+  `status='arrival'`; a later PLAIN-side row beside a standing owned claim is tombstoned. Nothing
+  destroyed, nothing silent — the book shows the bell, the row is recoverable. (PROVISIONAL
+  P-13ic-9; pinned per door in `OwnershipDoorTests`.)
+- **The bind's owned-notes limb** (fenced out of 13i-b): `convertSmartReadingToCurated(…,
+  ownedNotes: .leaveOut | .copyIn)` — the assembly's notes OWNED ELSEWHERE cannot materialize as a
+  plain book's members: `.leaveOut` (DEFAULT — copies are ceremonies, never silent; P-13ic-4)
+  materializes nothing for them; `.copyIn` mints a family copy per such note (tags ride) in the
+  assembly's slot. `Queries.bindOwnedNotesPreview(readingID)` lists them for the confirm (the sheet
+  gains the limb in U3). The un-bind's inverse takes the copies' rows like any other (they are
+  rows standing on the book; the copies themselves persist as notes — the ceremony's letter).
+- **The remove/release doors (§20):** `removePostFromReading` is unchanged op-side (a membership
+  tombstone; on an owned book the note is bookless by construction and lands in the Pool); it
+  RETURNS whether the note is now bookless so the receipt can say "Released — it's in the Pool
+  now." A gathering has no remove door; the honest door "Remove the #tag" is `removeTag` through
+  the chip (U4) — no new op.
+- **The three membership readers gain `kind='book'` TOGETHER** (ladder F-R1-7, ruled here as one):
+  `membershipElsewhere`, `poolListing`'s exclusion, `readingsContaining`'s membership leg —
+  membership means a BOOK's row; a sync-stray member row on a gathering is never a home.
+- **Hide-owned (§6):** `setReadingHideOwned(gathering, Bool?)` (gatherings only; nil = follow the
+  global default); the global default is the setting `hide_owned_default` ("0" = SHOW, badged —
+  the Welcome lesson depends on it; "1" hides), read in `Queries.AppearanceQueries` with the
+  not-seeded family. Scope: gathering assemblies, tag listings, search; **Library EXEMPT** (R32).
+  The predicate is ONE pure SQL fragment (`Queries.ownedElsewhereExclusion`) every scoped reader
+  composes. (Search is 13o's; the fragment is its hand-off.)
+- **The badge facts:** `Queries.ownershipFacts(for postIDs)` → per note: `ownedBy: (readingID,
+  name)?` and `otherBookCount` + names — one statement for a listing page (P1: ∝ the page).
+- **The setting `ownership_badges`** ("1" default; synced document semantics like `arrival_flash`
+  — P-13ic-10): the badge family toggles as a SET.
+
+## §4 THE DOOR ENUMERATION — the checklist (the sitting §6: "missing one is a ladder finding")
+
+Every membership-creating road, what it consults, and its pin. The ops layer is the choke point;
+a FACE's job is to OFFER the choice the refusal names (P-2 — never a bare refusal where a ceremony
+exists). U2 pins the op rows; U4 pins each face's offer.
+
+| # | road | consults | outcome | pin |
+|---|---|---|---|---|
+| 1 | `addPostToReading` (every hand-add) | the table | plain add · `noteMemberedElsewhere` · `noteOwnedElsewhere` | U2 |
+| 2 | the arrival seat (`seatArrival`) | the table | seat · the two refusals → Copy in / Move in / Dismiss | U2 |
+| 3 | intake's event/backfill/catch-up | the intake table's owned arms (13i-b) | claim · bell | 13i-b pins; U2 re-runs them through a REAL owned book |
+| 4 | `shelveInDailyJournalBook` (⌘J, Today's Entry, the phone's capture, the quick-note filing) | the table | add · `.waitingAtDoor` (never throws) | U2 |
+| 5 | `copyPostIntoReading` / `movePostIntoReading` (the ceremonies) | by construction | copy with tags · severed list | U2 |
+| 6 | the bind (`convertSmartReadingToCurated`) | owned-elsewhere notes in the assembly | leave out (default) · copy in | U2 |
+| 7 | `restoreReading` membership revival | the revival pass | demote / tombstone per R2's shape | U2 |
+| 8 | `restoreContainer` membership revival | the revival pass | same | U2 |
+| 9 | the bind's redo (`reapplySmartConversion`), `reapplyDiverge`, `reapplyMintedContainer` | the revival pass | same | U2 |
+| 10 | `divergePostForReading` | none needed | allowed — it copies | U2 (a control pin) |
+| 11 | `newPostInReading` on an owned book | none needed | the mint is sole by construction (+ the book's wing) | U2 |
+| 12 | `duplicateReading` shallow/deep | the source's ownership | shallow refuses on an owned source | U2 |
+| 13 | sync apply | the R2 repair (13i-a) | converges | `Phase13iRepairTests` (standing) |
+| 14 | the membership chip's Add (Mac) | row 1's refusals | the choice sheet | U4 |
+| 15 | the book Index/Outline DRAG roads (`BookStructureModel` ×2) | row 1 | the choice sheet | U4 |
+| 16 | the Pool's drop onto a book (`PoolPostsView`) | row 1 | the choice sheet | U4 |
+| 17 | the shelf row's drop (`ShelfView`) | row 1 | the choice sheet | U4 |
+| 18 | Manage Notes… (`ManageReadingPostsSheet`) | row 1 | the choice sheet | U4 |
+| 19 | the Arrivals line's Add (`BookArrivals`) | row 2 | Copy in / Move in / Dismiss; the "owned by [Book]" line (§18.4's face) | U4 |
+| 20 | ⌘K | — | NO add-to-book road exists in the palette today (it opens books); nothing to consult — recorded, not invented | U4 (record) |
+| 21 | the Book Panel's drag powers (the sidebar note box, 18d) | — | reorder/assign within a book only — creates no membership; recorded | U4 (record) |
+| 22 | the phone's membership face (`MobileMembership`) | row 1's refusals through the shared words | an honest refusal naming the copy/move ceremony (the sheets are the mobile catch-up's) | MobileSoul row at closeout |
+
+## §5 FINISHED AND SEALED (U2 ops; U3 faces — the sitting §5, §24; R-13ic-3)
+
+- **Finished** = `locked` (shipped): the assembly frozen, intake paused, arrivals dismissed on the
+  finish's stamp (13i-b). The CONFIRM (U3) carries §24's one line — "N waiting at the door will be
+  dismissed" — only when N > 0 (`Queries.pendingArrivalCount`); else the door acts without asking.
+- **`sealReading(id)` — SEAL = Finished + text immutability (EDITION ZERO).** Refuses a gathering;
+  no-op if sealed. In ONE transaction: (1) **the FORKS** — every live member membered in another
+  live BOOK is diverged in place (the `setReadingOwned` body's step; tags ride) — an OWNED book has
+  none (the composition prize: fork-free); (2) if not finished: `locked = 1` + the pending arrivals
+  dismissed (the finish); (3) `sealed_at = now`; (4) every live member post not already sealed is
+  SEALED with `locked_at = now` — the EXACT STAMP (the shared `lockPost` body: dirty buffers insured
+  by one quiet auto commit each — the standing seal insurance); a member already sealed on its
+  own (a different stamp) is untouched. Returns `SealResult { forked: [(original, copy)] }`.
+  `Queries.sealPreview(readingID)` → the notes that WILL fork (named, with where else they live) +
+  the pending-arrival count — the confirm LISTS the forks (ruled: the one copy-as-consequence is
+  never silent) and carries §24's line. No structural-undo entry (unseal is the door).
+- **`unsealReading(id)` (R-13ic-3):** refuses when not sealed (`readingNotSealed`); members whose
+  `locked_at == sealed_at` UNSEAL (the `unlockPost` body); `sealed_at = nil`; `locked = 0`; the
+  un-finish CATCH-UP fires (the book is OPEN again). A member sealed independently stays sealed.
+- **`unlockReading` on a SEALED book refuses `readingSealed`** — the face shows Unseal there, never
+  Reopen (P-2). `lockReading` on a sealed book is a no-op (already finished).
+- **Deleting a sealed book (book-only)** leaves its members' seals in place as real post seals she
+  can unseal per note; Put back on the book restores a sealed book whose stamps still match, so
+  Unseal works again (PROVISIONAL P-13ic-6).
+- **Edition zero (§13's future):** `sealed_at` is the edition's stamp and the members' matching
+  `locked_at` its membership-level freeze; a future "cut an edition" is a saved snapshot of
+  membership + note versions keyed on such a stamp — nothing here forecloses it.
+
+## §6 DELETE · DUPLICATE · THE TRASH (U2 ops; U4 faces — the sitting §6, §18.3)
+
+- **`deleteReading(id)`** unchanged: book only; the cascade frees members (an owned book's notes
+  land in the Pool — "nothing of hers destroyed").
+- **`deleteReadingWithNotes(id)` — "Delete book and its N notes", ONE STAMP:** for each live member
+  post, the `deleteContainer` body on the SAME `now` (versions ride, as that door's letter says);
+  then the reading's tombstone on that `now` (the cascade stamps memberships with it). Offered by
+  the door ONLY on an owned book (ruled — the asymmetry is the concept, visible at the door); the
+  op itself refuses a gathering and nothing else.
+- **`restoreReading` returns WHOLE:** after the reading flips, member posts whose `deleted_at ==`
+  the book's stamp are revived through `restoreContainerRows` (exact-stamp — a note independently
+  deleted later carries a different stamp and stays dead: the standing documented corner) BEFORE
+  the membership revival (the live-post guard then passes), then the revival pass (§3). Each note
+  also lists in the Trash as its own row with its own Put back (an independent road; a note put
+  back alone comes back bookless until the book returns — recorded).
+- **`duplicateReading(id, name:, deep: Bool)`:** a NEW reading row — kind book, the given name
+  (the door asserts it free, E13), profile/sort/grouping/`query_spec`/`max_posts`/`word_target`/
+  `intake_seating`/`auto_tag_ids` COPIED (the book's configuration), same wing; UNSHELVED,
+  unstarred, open, unsealed, `owned = 0` (the duplicate is born non-owned — ruled); chapters copied
+  (fresh ids, positions kept) with the membership → chapter mapping; MEMBER rows copied at their
+  positions (arrivals never). **Shallow** (`deep: false`): the same notes (a sibling pointing at
+  them); refuses on an OWNED source (`ownedBookDuplicatesDeep`). **Deep** (`deep: true`, "with
+  copies"): a family copy per member (tags ride), each copy the member — the divergent fork; the
+  only shape for an owned source. A gathering refuses (§3: no duplicate op). No creation-time
+  backfill (the copied membership IS the state), no structural-undo entry (the Trash is the road —
+  the `createReading` class). PROVISIONAL P-13ic-7. `Queries` gets nothing new: the preview is the
+  member count.
+- **The Trash (§18.3):** book rows are already kind-labeled; a book deleted WITH its notes shows
+  "and N notes" in its row (the exact-stamp count — `Queries.trashBookNoteCount`); Put back's
+  receipt names it. Shelves are never Trash objects (13i-d). The purge family for a book stays
+  version-blind as recorded (the notes' own Trash rows carry their own Delete Now).
+
+## §7 ACCEPTANCE UNITS (four; evidence named before the first spawn)
+
+- **U1 — THE OUTFLOW EVENT + NO-RULE-IS-NOTHING + THE OUTFLOW OPS (Fable, this session; §2
+  whole).** Evidence: the migration pins; the serializer walk at marker 11; `Phase13icOutflowTests`
+  (carry-over, the rule-less sweep's outbox + Trash + restoree-assembles-empty, CAS convergence,
+  null-normalize); the op pins (`setReadingOutflow` guards/no-op, `applyAutoTag` over a set,
+  `tagAllMembers` nil-means-all + N, `positiveTagIDs`, the gathering guards, F-5); the FULL core
+  suite green; Mac + mobile BUILDS green with the touched suites; the mirror artifact + §11
+  checklist line-read; a dev-store walk (the store migrates live; a rule-less gathering lands in
+  the Trash; a book's outflow carried and still tagging; nothing else visibly changed).
+- **U2 — THE OWNED + SEALED OP FAMILY + THE ENUMERATION (`opus-implementer`; §3, §5, §6 whole; the
+  §4 rows 1–12).** Evidence: exact state-transition suites per op; `OwnershipDoorTests` (the §4
+  table, one test per row 1–12, each asserting the consult and the outcome); a headless soak
+  (randomized own/un-own/add/copy/move/seal/unseal/delete/restore sequences — invariants: no note
+  is a member of an owned book AND anywhere else; every seal stamp matches or is independent; no
+  live pair duplicates); **the R4 ritual headless** (`OwnershipRitualTests`: flip a book to Owned →
+  add one of its notes to another book → meet the copy choice → remove a note → find it in the
+  Pool) + lesson sentences 5/6/8 as pins; FULL core suite green; Mac + mobile build.
+- **U3 — THE SETTINGS SHEET + THE OUTFLOW CHOOSER + THE MINT (`opus-implementer`; UI).** The Book
+  Settings sheet (and the gathering's — the SAME pane): Name · Word target · Note cap · a
+  COLLECTING section written as sentences ("Gathers from: …" · "New matches: …" · "Notes written
+  here are tagged: #a #b") with its Edit… door into the rule editor (her discoverability report);
+  the STATE doors — Finished (the §24 confirm line when N > 0) · Seal… (the listed-forks confirm +
+  the line) / Unseal (says it reopens) · Own its notes… (the listed-copies confirm) / Stop owning;
+  the gathering's hide-owned toggle; the rule editor's auto-tag row REBUILT as the OUTFLOW CHOOSER
+  (a multi-tag picker over the wing's live tags, ordered as chosen, "none" legal, independent of
+  the rule; `setReadingAutoTag` retired); the gathering's empty-save refusal + "Delete this
+  gathering…" (R-13ic-4) and its rule-less empty state ("No rule — this gathering shows nothing
+  until it has one"); the MINT door requires a rule (the mint flow carries the editor inline;
+  Create disabled until a term exists; the retired "Create Smart Book" wording may stay until
+  13i-d's sweep); the spawn sheet's outflow chooser prefilled with the positive tags; the shelf
+  row's menu gains Seal/Unseal · Own/Stop owning; the registry declares every act (P-1).
+  Evidence: mounted pins (each confirm's sentences as static copy; the N>0 gate; the chooser's
+  save; the empty-save refusal; the mint's gate) + the registry walk + the orchestrator's dev-store
+  walk, both voices × both appearances, captured.
+- **U4 — THE MEMBERSHIP DOORS' FACES (`opus-implementer`; UI; §4 rows 14–21).** ONE choice sheet
+  (`MembershipChoiceSheet`: copy in / move in with the severed list · copy in only) hosted by every
+  face in rows 14–18; the Arrivals line's Copy in / Move in / Dismiss arms + the "owned by [Book]"
+  line (§18.4); the two-choice delete confirm on an owned book (the shelf menu + the sheet) and
+  the plain book's confirm naming the Trash; Duplicate Book… (with-copies checkbox; owned →
+  with-copies only); the remove/release vocabulary + receipts on the chip, the Index/Outline note
+  row, the note box ("Release from this book" on owned; the gathering's honest "Remove the #tag");
+  the badge family — the shared-membership badge in book views (hover names them), the owned-by
+  badge in gatherings/Pool/tag listings/Library (click-through = open the book at the note, the
+  panel bridge); the `ownership_badges` and `hide_owned_default` Settings rows; the Trash's
+  "and N notes" row + receipt; the registry (P-1); refusal words in the shared table.
+  Evidence: mounted pins per host (each face OFFERS the choice on the refusal — the §4 rows), the
+  registry walk, the tutorial spine green, the orchestrator's walk (R4 by hand: own a book → add
+  its note elsewhere → the choice → release → the Pool; delete an owned book both ways → the Trash
+  → Put back whole), both voices × both appearances, captured.
+
+Then: ONE `fable-reviewer` ladder over the combined diff (REVIEW_PROMPT verbatim, zero framing;
+findings repo-first; cross-model flow; cap three rounds) → HER WINDOW (§11; the install refresh
+rides it) → closeout (canon deltas as ruled: AppSpec §7's column + §9's op lines + §12's doors,
+OverallModel §2 untouched; SyncSpec §7 (no new repair — the entry says so) + the §12 entry AT the
+deploy; the MOBILE PARITY row; KnownIssues rows 67/69 dispositioned; QUESTIONS #169; the master
+plan; 13i-d's plan + kickoff (carrying R-13ic-2's doors and the running for-the-combined-walk
+list); the handoff).
+
+## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
+
+Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
+instances are treated by STORE, never quit/killed; no Release builds or `/Applications` refreshes
+while one lives — and THIS run's refresh is HELD for the deploy window (§11; a marker-11 build
+against the marker-10 mirror refuses to sync). `xcodebuild build-for-testing` compiles without the
+runner; Mac tests from `App/Variorum/` with suite-level `-only-testing` only, confirming the "Test
+run with N tests" line (skips counted — read the `skipped:` lines); zsh `pipestatus`; NEVER a
+custom build configuration (non-"Debug" names strip the DEBUG oracles); suites beside a live
+session flash test windows — prefer zero-instance windows; backups WAL-safe, UTC names, into
+`Backups/safety-copies/` (the A1 rail) before ANY real-store touch; never `git checkout` over
+uncommitted work; push after every commit; never force-push. The dev store
+(`io.lduarte.Variorum.debug`) NEVER syncs (fenced) — sync evidence is the fake-server suites, never
+the production mirror. Foreground waits only; poll logs with `grep -q … && break` loops (the
+`tail -f` trap). Background-wait = death for subagents. Known full-run flake rows (KnownIssues: the
+latency pin, `CanvasDragTrackingTests`, the per-note-defaults family): adjudicate by isolation +
+attribution before treating any red as this phase's. Walk drives (cliclick/WalkKit) are DEV-STORE
+Debug only, author-free, own `caffeinate -d`.
+
+## §9 PROVISIONALS MADE AT THIS KICKOFF (each logged in QUESTIONS #169 at close; each one line to overturn)
+
+- **P-13ic-1 — the Own conversion registers NO structural-undo entry**: its copies are real notes
+  (round 4: "conversion-time copies persist"); Stop owning is the symmetric door. *Alt:* one
+  compound entry un-minting the copies and reviving the originals' rows.
+- **P-13ic-2 — owning a FINISHED or SEALED book refuses** (`lockedReading`): the conversion
+  diverges members, a structural act. *Alt:* allow when no member would fork.
+- **P-13ic-3 — a copy-in that answers an ARRIVAL decides the pair PERMANENTLY** (a member-class
+  tombstone): a fresh act never offers a second copy. *Alt:* the dismissal class (rings again).
+- **P-13ic-4 — the bind's owned-notes limb defaults to LEAVE OUT** (copies are ceremonies, never
+  silent); copy-in is the explicit choice. *Alt:* default copy-in.
+- **P-13ic-5 — TAGS RIDE every OWNERSHIP-CEREMONY copy** (the Own conversion's forks, copy-in, the
+  seal's forks, the deep duplicate) — ruled §6; the OLDER copy doors (`duplicateAsVersion`, the
+  chip's Diverge for book) keep NOT carrying tags (their recorded letter). *Open for her:* should
+  those two carry tags now too?
+- **P-13ic-6 — deleting a sealed book (book-only) leaves its members' seals** as real post seals;
+  Put back restores a sealed book with matching stamps. *Alt:* unseal members at book deletion.
+- **P-13ic-7 — Duplicate copies the book's CONFIGURATION, not its STATE** (rule, outflow, dial,
+  extents, trait, chapters; never finished/sealed/owned/star/shelf), runs no backfill, registers no
+  undo (the Trash is the road). *Alts:* copy the star/shelf; backfill a duplicate born with a rule.
+- **P-13ic-8 — `auto_tag_ids` travels PLAIN** (ids — the class of the column it replaces, and of
+  every reading flag); the disclosure delta is "how many tags a book flows into," content-free.
+  *Alt:* ENCRYPTED like `query_spec` (ids too, sealed by precedent).
+- **P-13ic-9 — the revival pass ranks by `created_at, id`** (the local "earlier act" — R2 ranks by
+  `server_seq` for the same reason). *Alt:* the revived row always yields.
+- **P-13ic-10 — the badge family's one switch is a SYNCED setting** `ownership_badges` (default
+  on; the `arrival_flash` class). *Alt:* local-only.
+- **P-13ic-11 — `tagAllMembers(nil)` means EVERY outflow tag**, and its receipt counts NOTES newly
+  wearing at least one; the offer's N counts members missing any. *Alt:* count applications.
+- **P-13ic-12 — Move in registers no structural-undo entry** (the `addPostToReading` class; the
+  severed list is named in the confirm and the receipt; a re-add by hand is the road back).
+  *Alt:* one entry reviving the severed rows.
+
+## §10 LEDGER (every row owned; statuses flip in the same commit as the work)
+
+| # | Item | Status |
+|---|---|---|
+| 1 | Plan authored; her four kickoff rulings recorded (§1); PROVISIONALs (§9) | DONE (this commit) |
+| 2 | U1 — the outflow event (migration v1_20, model, serializer, marker 11, the mirror artifact + §11 checklist), no-rule-is-nothing, the outflow ops, F-5, the pins | NOT STARTED |
+| 3 | U2 — the Owned + Sealed op family, delete/duplicate/restore-whole, the three readers' scoping, hide-owned + badge facts, `OwnershipDoorTests` rows 1–12, the soak, the R4 ritual | NOT STARTED |
+| 4 | U3 — the settings sheet (Collecting + state doors + confirms), the outflow chooser, the gathering mint/empty-save, the spawn prefill face, the shelf menu doors, the registry | NOT STARTED |
+| 5 | U4 — the membership doors' faces (rows 14–21), the choice sheet, the delete/duplicate doors, remove/release words, the badges, the Settings rows, the Trash row | NOT STARTED |
+| 6 | The ladder (fresh `fable-reviewer`, combined diff; cross-model flow) | NOT STARTED |
+| 7 | Her deploy window (§11) + the install refresh + the phone's tail | HELD for her go |
+| 8 | Closeout + handoff + 13i-d's plan (carrying R-13ic-2's doors + the combined-walk list) | NOT STARTED |
+
+## §11 THE DEPLOY CHECKLIST (HER WINDOW — mirror → Mac → phone, one sitting; the 13i-a shape)
+
+1. The ladder closed green; the full core + Mac + mobile suites green at the tip.
+2. Zero-instance window (SHE quits the real-store app); the A1 WAL-safe safety copy into
+   `Backups/safety-copies/` with a UTC name.
+3. Her one-line PRE-DEPLOY SUMMARY: the §9 PROVISIONALs that touch the wire (P-13ic-8 only).
+4. **The mirror:** `Server/supabase/14_phase13i_c_outflow.sql` whole (her hand via the `!` road —
+   the 13i-a checklist's commands with the file name swapped — or the architect through the PAT at
+   her word; on a live error, the read-fix-re-run road). Verify: `sync_schema_version()` = 11; the
+   column present; the post-deploy grant sweep every-row OK/INFO.
+5. **The Mac:** Release build (lockstep 11) → the A1-railed copy to `/Applications` → codesign
+   verify → SHE relaunches; first open runs `v1_20` (the carry-over; any rule-less gathering to the
+   Trash); her first round pushes the carried rows; verify a clean round.
+6. **The phone:** her Xcode run to device; its first round converges.
+7. Both directions proven live; the §12 running-record entry written THEN; ledger row 7 flipped.
+
+## LIVE STATUS (the resiliency protocol's record — updated per commit; every unverified claim marked PENDING)
+
+- 2026-10-01 · kickoff: preflight complete (CLAUDE.md + canon, the master plan, KnownIssues
+  whole, QUESTIONS #166–#168, the sitting record whole, the 13i-a record + handoff + deploy
+  checklist, the 13i-b record whole + handoff + the ladder's F-R1-7 thread, SyncSpec in full, the
+  resiliency protocol, the sizing guidance; TEXTKIT2_NOTES not required — no editor seam). Code
+  orientation done (IntakeDecision + the intake ops, the reading/conversion/diverge/deletion/lock
+  ops, Repairs' R2, SyncSchema's reading entry, the v1_18 migration, the 13 mirror artifact, the
+  Book Settings sheet, the shelf menu, the chip, the drag roads, the Trash). Her four kickoff
+  rulings recorded (§1). This plan authored as the first act. No revert in flight. U1 (Fable)
+  opens next.
