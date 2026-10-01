@@ -84,18 +84,10 @@ final class ReadingsViewModel {
         await run { ops in try ops.setReadingSort(id, field: field, direction: direction) }
     }
 
-    /// The smart predicate, plainly: encode the v1 vocabulary; nil clears.
-    func setSmartSpec(_ id: String, spec: Queries.SmartQuerySpec?) async {
-        do {
-            let json = try spec.map { try $0.encodedJSON() }
-            try await session.runner.run { ops in
-                try ops.setReadingQuerySpec(id, querySpec: json)
-            }
-            lastError = nil
-        } catch {
-            lastError = Self.message(error)
-        }
-    }
+    // (13i-b U3: `setSmartSpec` — the retired `SmartSpecSheet`'s write, in
+    // the v1 vocabulary — RETIRED with it. The rule's one face is
+    // `RuleEditorModel`, writing the v2 grammar through the same choke
+    // point, `setReadingQuerySpec`.)
 
     // MARK: - Curated membership
 

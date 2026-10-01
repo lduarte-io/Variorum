@@ -677,6 +677,9 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // declaration could not say that. Both are `.surface` acts whose target
     // is the ARRIVAL ROW you point at on the line — the `.archiveNote` class.
     case seatArrival, dismissArrival
+    // 13i-b U3 — THE RULE EDITOR's door (the 13i-b plan §4 item 1): one
+    // act on a shelf row's menu, for a gathering's rule and a book's intake.
+    case editRule
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

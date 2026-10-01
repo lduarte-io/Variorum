@@ -407,9 +407,10 @@ extension Queries {
 
     /// LEGACY (pre-v1_18) spec decoding. Production storage is v2
     /// (`RuleGrammar`) since 13i-a; this survives as the v1_18 migration's
-    /// reader and as the rule-builder faces' DRAFT vehicle until 13i-b's
-    /// grammar faces land (the doors still COLLECT paths in this shape; the
-    /// operation converts to v2 at the write).
+    /// reader. (Two DOORS still hand the write choke point a v1 draft — the
+    /// tag manager's Promote to Book and the phone's create-book — and the
+    /// operation converts it to v2 at the write; the rule EDITOR no longer
+    /// does, since 13i-b U3.)
     static func decodeSpec(_ json: String?) -> SmartQuerySpec? {
         guard let json else { return SmartQuerySpec() }  // no spec = no constraints
         return try? JSONDecoder().decode(SmartQuerySpec.self, from: Data(json.utf8))
@@ -454,62 +455,12 @@ extension Queries {
         return result
     }
 
-    /// The v2 rule read back as the v1 DRAFT shape (13i-a — the interim
-    /// rule-editor faces still collect in the v1 vocabulary until 13i-b's
-    /// grammar faces land). Best-effort by design: only the shapes those
-    /// faces can express come back (top-level AND of — legacy profile/date
-    /// terms, one OR-of-tags group, bare tag conjuncts); tag IDs resolve to
-    /// their LIVE paths. A dead term, a star term or a nested tree has no
-    /// draft spelling — it returns in `undraftable`, and a face that sees
-    /// one must NOT round-trip its edit through the draft (saving the
-    /// draft would silently drop the term).
-    public static func legacyDraft(
-        _ db: Database, querySpec: String?
-    ) throws -> (draft: SmartQuerySpec, undraftable: Bool)? {
-        guard case .rule(let term) = RuleGrammar.read(querySpec) else { return nil }
-        let conjuncts: [RuleTerm] = switch term {
-        case .and(let terms): terms
-        default: [term]
-        }
-        var draft = SmartQuerySpec()
-        var undraftable = false
-        func livePath(_ id: String) throws -> String? {
-            try String.fetchOne(
-                db, sql: "SELECT path FROM tag WHERE id = ? AND deleted_at IS NULL",
-                arguments: [id])
-        }
-        for conjunct in conjuncts {
-            switch conjunct {
-            case .legacyProfile(let p): draft.profile = p
-            case .legacyEntryDateFrom(let d): draft.entryDateFrom = d
-            case .legacyEntryDateTo(let d): draft.entryDateTo = d
-            case .tag(let id):
-                if let path = try livePath(id) {
-                    draft.tagsAll = (draft.tagsAll ?? []) + [path]
-                } else { undraftable = true }
-            case .or(let options):
-                var paths: [String] = []
-                for option in options {
-                    guard case .tag(let id) = option, let path = try livePath(id) else {
-                        undraftable = true
-                        continue
-                    }
-                    paths.append(path)
-                }
-                if !paths.isEmpty { draft.tags = (draft.tags ?? []) + paths }
-            case .and, .not, .star:
-                undraftable = true
-            }
-        }
-        // A single bare tag reads better in the faces' any-of field, and
-        // the two spellings are semantically identical for one tag.
-        if draft.tags == nil, let all = draft.tagsAll, all.count == 1,
-           draft.profile == nil, draft.entryDateFrom == nil, draft.entryDateTo == nil {
-            draft.tags = all
-            draft.tagsAll = nil
-        }
-        return (draft, undraftable)
-    }
+    // (13i-b U3: `legacyDraft` — the v2 rule read back as the v1 DRAFT shape,
+    // for the interim rule faces — RETIRED with its last consumer, the v1
+    // `SmartSpecSheet`. It was best-effort by design and flagged what it
+    // could not spell as `undraftable`; the hazard it guarded (a save
+    // through the draft silently dropping a term) is gone by construction
+    // now: the rule editor's state IS the v2 grammar (`Domain/RuleEditing`).)
 
     /// The v2 rule's SQL half over a `container c` scope — the ONE
     /// implementation (13i-a; `smartMatchSQL`'s successor) shared by reading

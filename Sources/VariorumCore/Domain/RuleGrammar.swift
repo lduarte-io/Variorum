@@ -119,8 +119,9 @@ public enum RuleGrammar {
     }
 
     /// The v1 → v2 conversion (the v1_18 migration's brain, also the
-    /// bridge under every door that still COLLECTS a rule as the v1 draft
-    /// shape until 13i-b's grammar faces land). `resolvePath` answers a v1
+    /// bridge under the doors that still hand the write a v1 draft — the tag
+    /// manager's Promote to Book and the phone's create-book; the rule
+    /// EDITOR writes v2 itself since 13i-b U3). `resolvePath` answers a v1
     /// tag PATH with the tag ID to reference — the caller resolves against
     /// LIVE tags first, then tombstoned (the dead term still displays
     /// "(deleted tag)"), and answers nil for a path no row ever carried
@@ -150,7 +151,7 @@ public enum RuleGrammar {
         return conjuncts.count == 1 ? conjuncts[0] : .and(conjuncts)
     }
 
-    /// Every tag ID the tree references (the rule editor's draft reader and
+    /// Every tag ID the tree references (the rule editor's label read and
     /// 13i-b's intake listener both need the set).
     public static func tagIDs(of term: RuleTerm?) -> Set<String> {
         guard let term else { return [] }

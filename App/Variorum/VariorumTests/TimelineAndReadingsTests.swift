@@ -108,51 +108,54 @@ struct TimelineAndReadingsTests {
         }
     }
 
-    @Test func aUIBuiltSmartSpecRoundTripsUnchanged() async throws {
+    /// **Rewritten at 13i-b U3** — the face this pinned (`SmartSpecSheet`) and
+    /// its v1 draft reader (`Queries.legacyDraft`) RETIRED. The old pin proved
+    /// the v1 vocabulary round-tripped THROUGH a lossy draft; the rule editor's
+    /// state IS the v2 grammar, so the pin now proves the stronger thing — the
+    /// stored rule is exactly the tree she built, a reopened editor shows it
+    /// unchanged (and has nothing to save), the assembly applies it, and
+    /// clearing it restores match-all.
+    @Test func aUIBuiltRuleRoundTripsUnchanged() async throws {
         try await withWorld { session, db in
             let model = ReadingsViewModel(session: session)
             let id = try #require(await model.create(name: "smart", kind: .gathering))
-            // 13i-a: rules reference tag IDs (§19), so the face's paths
-            // resolve at the WRITE — the tags exist first, like the doors'
-            // own flow (pick from existing tags).
             let tag = try session.operations.createTag(name: "life")
-            _ = try session.operations.createTag(parent: tag.id, name: "goals")
-            let spec = Queries.SmartQuerySpec(
-                tags: ["life", "life/goals"],
-                profile: "journal",
-                entryDateFrom: "2026-01-01",
-                entryDateTo: "2026-12-31")
-            await model.setSmartSpec(id, spec: spec)
+            let goals = try session.operations.createTag(parent: tag.id, name: "goals")
 
-            // The stored value is the NORMALIZED v2 rule; the face's own
-            // vocabulary round-trips through the draft reader (13i-a — the
-            // interim contract until 13i-b's grammar faces).
+            // life ∧ (life/goals ∨ ★), built through the editor's own edits.
+            let editor = RuleEditorModel(session: session, readingID: id)
+            await editor.load()
+            editor.add(.tag(tag.id), into: nil)
+            editor.addGroup(.any, seededWith: .tag(goals.id), into: nil)
+            editor.add(.star, into: [1])
+            let built = try #require(editor.draft)
+            #expect(built == .and([.tag(tag.id), .or([.tag(goals.id), .star])]))
+            #expect(await editor.save())
+
             let stored = try await db.read { try Queries.readings($0) }[0].querySpec
-            let maybeSeed: (draft: Queries.SmartQuerySpec, undraftable: Bool)? =
-                try await db.read { [stored] in
-                    try Queries.legacyDraft($0, querySpec: stored)
-                }
-            let seed = try #require(maybeSeed)
-            #expect(seed.undraftable == false)
-            #expect(Set(seed.draft.tags ?? []) == ["life", "life/goals"],
-                    "the face's any-of paths round-trip")
-            #expect(seed.draft.profile == spec.profile)
-            #expect(seed.draft.entryDateFrom == spec.entryDateFrom)
-            #expect(seed.draft.entryDateTo == spec.entryDateTo)
+            #expect(RuleGrammar.decode(stored) == built, "stored exactly as built")
+            let reopened = RuleEditorModel(session: session, readingID: id)
+            await reopened.load()
+            #expect(reopened.draft == built)
+            #expect(reopened.isDirty == false, "an unedited reopen has nothing to save")
 
-            // And the assembly APPLIES it (semantics stay Phase 4's).
-            let match = try session.operations.createPost(
-                title: "m", profile: .journal, entryDate: "2026-06-15")
-            _ = try session.operations.createPost(
-                title: "wrong profile", entryDate: "2026-06-15")
-            try session.operations.applyTag(tag.id, toPost: match.id)
+            // And the assembly APPLIES it (subtree matching: `life` hears
+            // `life/goals`; the star context is U4's wiring, so here only the
+            // tag arm of the any-of can match).
+            let match = try session.operations.createPost(title: "m")
+            let lifeOnly = try session.operations.createPost(title: "life only")
+            try session.operations.applyTag(goals.id, toPost: match.id)
+            try session.operations.applyTag(tag.id, toPost: lifeOnly.id)
             let entries = try await db.read { [id] in
                 try Queries.assembleReading($0, readingID: id)
             }
             #expect(entries.map(\.postID) == [match.id])
 
-            // Clearing restores match-all.
-            await model.setSmartSpec(id, spec: nil)
+            // Clearing (the root's remove) restores match-all.
+            let root = try #require(reopened.rows.first)
+            reopened.remove(root)
+            #expect(reopened.draft == nil)
+            #expect(await reopened.save())
             let all = try await db.read { [id] in
                 try Queries.assembleReading($0, readingID: id)
             }

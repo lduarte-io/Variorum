@@ -18,7 +18,8 @@ struct ShelfView: View {
     /// The REGISTRY capabilities this view's book menu renders (P-1's walk).
     /// The menu's other items (Rename…, Finish, Delete Book…) are the
     /// shelf's own book-management vocabulary and were never registry acts.
-    static let contextMenuCapabilities: [CapabilityID] = [.toggleStar]
+    /// 13i-b U3 adds the rule editor's door (gatherings AND books).
+    static let contextMenuCapabilities: [CapabilityID] = [.toggleStar, .editRule]
 
     let session: AppSession
     let model: ShelfViewModel
@@ -41,7 +42,9 @@ struct ShelfView: View {
     @State private var nameField = ""
     @State private var renameTarget: Reading?
     @State private var manageTarget: Reading?
-    @State private var smartTarget: Reading?
+    /// 13i-b U3: the rule editor — the sheet's item IS its model, so the
+    /// draft can never be rebuilt under her by a shelf re-render.
+    @State private var ruleEditor: RuleEditorModel?
     @State private var extentTarget: Reading?
     /// 13c 2D: the smart→curated offer (C2/N38), and the derived count it
     /// promises will stay (loaded at the press — the shelf's own postCount
@@ -136,8 +139,8 @@ struct ShelfView: View {
         .sheet(item: $manageTarget) { reading in
             ManageReadingPostsSheet(session: session, model: readings, reading: reading)
         }
-        .sheet(item: $smartTarget) { reading in
-            SmartSpecSheet(session: session, model: readings, reading: reading)
+        .sheet(item: $ruleEditor) { editor in
+            RuleEditorSheet(model: editor)
         }
         .sheet(item: $extentTarget) { reading in
             BookExtentSheet(model: model, reading: reading)
@@ -291,10 +294,15 @@ struct ShelfView: View {
             nameField = reading.name
             renameTarget = reading
         }
+        // 13i-b U3: the RULE EDITOR's door, for gatherings AND books — a
+        // book's rule is its intake (the plan §4 item 1). It replaced the v1
+        // "Edit Filter…" sheet, which could silently drop a term on save.
+        Button(CapabilityRegistry.capability(.editRule).verb) {
+            ruleEditor = RuleEditorModel(session: session, readingID: reading.id)
+        }
         if reading.kind == .book {
             Button("Manage Notes…") { manageTarget = reading }
         } else {
-            Button("Edit Filter…") { smartTarget = reading }
             // 13c 2D (C2/N38): the DELIBERATE conversion door, beside the
             // navigator's "+ new chapter" offer. Hidden on a finished book —
             // converting is a structural act on a book declared done, and

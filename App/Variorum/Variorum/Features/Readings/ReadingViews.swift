@@ -2,10 +2,16 @@
 //  ReadingViews.swift
 //  Variorum
 //
-//  The readings faces (Phase 10 Step 6): curated membership management and
-//  the smart-spec editor surfacing the v1 vocabulary plainly. Functional,
-//  unstyled; both sheets are presented by the SHELF since Phase 13's IA
-//  rework (Shelf · Library · Pool · Blocks).
+//  The readings faces (Phase 10 Step 6): curated membership management.
+//  Functional, unstyled; presented by the SHELF since Phase 13's IA rework
+//  (Shelf · Library · Pool · Blocks).
+//
+//  13i-b U3: this file's second sheet — `SmartSpecSheet`, the v1 smart-spec
+//  editor — RETIRED with its draft reader (`Queries.legacyDraft`). It
+//  collected a rule in the v1 vocabulary (profile, dates, any-of tags), so a
+//  v2 rule it could not spell (a star, a not, a nested group) would have
+//  been silently dropped on save. Its successor edits the grammar itself:
+//  `RuleEditor.swift`.
 //
 //  13c 2D: the file's `ReadingsSection` — the Phase 10 SIDEBAR section this
 //  file was named for — was DELETED here. It had been unreferenced since
@@ -109,95 +115,5 @@ struct ManageReadingPostsSheet: View {
         candidates = (try? await session.database.read { db in
             try Queries.library(db, sort: .lastTouched, direction: .desc, limit: 200)
         }) ?? []
-    }
-}
-
-/// The v1 smart vocabulary, plainly: profile, entry-date range, ANY-of
-/// tags with subtree semantics (AND across fields).
-struct SmartSpecSheet: View {
-    let session: AppSession
-    let model: ReadingsViewModel
-    let reading: Reading
-    @State private var profile = ""
-    @State private var dateFrom = ""
-    @State private var dateTo = ""
-    @State private var selectedTagPaths: Set<String> = []
-    @State private var allTags: [Tag] = []
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Filter for “\(reading.name)”").font(.headline)
-            Text("Notes must match every field; empty fields don't constrain.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Form {
-                TextField("Profile (journal, blog, book_chapter, generic)", text: $profile)
-                TextField("Entry date from (yyyy-MM-dd)", text: $dateFrom)
-                TextField("Entry date to (yyyy-MM-dd)", text: $dateTo)
-            }
-            if !allTags.isEmpty {
-                Text("Tagged any of (subtree matches):").font(.caption)
-                List(allTags, id: \.id) { tag in
-                    Toggle(
-                        tag.path,
-                        isOn: Binding(
-                            get: { selectedTagPaths.contains(tag.path) },
-                            set: { on in
-                                if on {
-                                    selectedTagPaths.insert(tag.path)
-                                } else {
-                                    selectedTagPaths.remove(tag.path)
-                                }
-                            }))
-                }
-                .frame(minHeight: 120)
-            }
-            HStack {
-                Button("Clear Filter") {
-                    Task {
-                        await model.setSmartSpec(reading.id, spec: nil)
-                        dismiss()
-                    }
-                }
-                Spacer()
-                Button("Cancel") { dismiss() }
-                Button("Save") {
-                    Task {
-                        await model.setSmartSpec(reading.id, spec: builtSpec())
-                        dismiss()
-                    }
-                }
-                .keyboardShortcut(.defaultAction)
-            }
-        }
-        .padding(16)
-        .frame(minWidth: 420)
-        .task { await load() }
-    }
-
-    /// The UI's fields become exactly the v1 vocabulary — nothing else.
-    private func builtSpec() -> Queries.SmartQuerySpec {
-        Queries.SmartQuerySpec(
-            tags: selectedTagPaths.isEmpty ? nil : selectedTagPaths.sorted(),
-            profile: profile.isEmpty ? nil : profile,
-            entryDateFrom: dateFrom.isEmpty ? nil : dateFrom,
-            entryDateTo: dateTo.isEmpty ? nil : dateTo)
-    }
-
-    private func load() async {
-        allTags = (try? await session.database.read { try Queries.allTags($0) }) ?? []
-        // Seed the fields from the stored rule (13i-a: storage is the v2
-        // grammar; the draft reader hands this face its v1 vocabulary —
-        // round-trip honesty for everything the face can express).
-        let spec = reading.querySpec
-        if let seed = try? await session.database.read({
-            try Queries.legacyDraft($0, querySpec: spec)
-        }) ?? nil {
-            profile = seed.draft.profile ?? ""
-            dateFrom = seed.draft.entryDateFrom ?? ""
-            dateTo = seed.draft.entryDateTo ?? ""
-            selectedTagPaths = Set((seed.draft.tags ?? []) + (seed.draft.tagsAll ?? []))
-        }
     }
 }

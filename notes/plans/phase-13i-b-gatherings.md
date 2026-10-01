@@ -877,6 +877,24 @@ schema/`Sync/`/migrations (zero).
   every-edit-touches-only-its-node property over 15 shapes, legacy never removable through any
   parent, each edit exactly, the rows, the offer's count == `tagAllMembers`' return — **13/13 green
   on first run** (new surface: structural red-on-old).
+- Piece 4 (this commit — **WIP, compiling: Mac TEST BUILD SUCCEEDED; the editor's mounted pins NOT
+  yet written; the bind sheet still the old one — PENDING**): `Features/Readings/RuleEditor.swift`
+  — `RuleEditorCopy` (every word), `RuleEditorModel` (`Identifiable` — the sheet's ITEM is the
+  model, so no shelf re-render can rebuild her draft; edits are `RuleEditing`'s; `save` writes only
+  what changed — dial, auto-tag, then the rule through `setReadingQuerySpec` — and OFFERS
+  `tagAllMembers` on the seam when the rule or the auto-tag was set/changed with an auto-tag in
+  place and `membersMissingTag` > 0), `RuleEditorSheet` (rows with depth/not/remove, the add doors
+  — "+ tag ▾" over the wing's live tags, "+ starred", "+ group ▾" born seeded — the legacy notice,
+  the malformed refusal, and for books the join dial chips + the auto-tag menu), the DEBUG
+  `RuleEditorProbe`. The shelf row's menu: "Edit Rule…" for gatherings AND books (replacing "Edit
+  Filter…"). Registry: `CapabilityID.editRule` (`.contextMenu`, book scope, `always`, `.native`);
+  `ShelfView.contextMenuCapabilities` gains it. **RETIRED:** `SmartSpecSheet`,
+  `ReadingsViewModel.setSmartSpec`, `Queries.legacyDraft` — verified no consumer remains (its only
+  other consumer was the Mac test below). ONE honest test rewrite:
+  `TimelineAndReadingsTests.aUIBuiltSmartSpecRoundTripsUnchanged` (pinned the retired face's lossy
+  round trip) → `aUIBuiltRuleRoundTripsUnchanged` (the editor's exact round trip, the assembly
+  applying it, clearing → match-all). `Queries.SmartQuerySpec` STAYS: two other doors (the tag
+  manager's Promote to Book, the phone's create-book) still hand the choke point a v1 draft.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 

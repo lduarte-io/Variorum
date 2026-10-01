@@ -1551,6 +1551,20 @@ nonisolated enum CapabilityRegistry {
             unavailableNote: ArrivalsCopy.unavailableNote,
             availability: always),
 
+        // 13i-b U3 — THE RULE EDITOR (the 13i-b plan §4 item 1). One door on
+        // the shelf row's menu, for gatherings AND books (a book's rule IS its
+        // intake), replacing the retired v1 "Edit Filter…" sheet. Book scope,
+        // `always`, `takesAccess: .native` for the arrival doors' exact
+        // reason: the row carries its target, never a mode. No key and no
+        // palette row — no ruling asked for one (13i-d re-homes the face
+        // into the Collecting pane and its own doors).
+        Capability(
+            id: .editRule, verb: RuleEditorCopy.editVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: RuleEditorCopy.unavailableNote,
+            availability: always),
+
         Capability(
             id: .newPost, verb: "New Note", scope: .app,
             doors: [.menuBar, .palette],
