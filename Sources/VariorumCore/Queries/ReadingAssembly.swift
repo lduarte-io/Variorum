@@ -213,13 +213,47 @@ extension Queries {
     /// `order` (13c 2D, additive — A31): read this assembly in a DIFFERENT
     /// order than the book's own, without writing anything. See
     /// `ReadingOrder`. nil = the book's stored order, exactly as before.
+    ///
+    /// `filter` (13i-b U4 — the sitting record §18.1, her ORIGINAL sitting
+    /// ask: "being able to filter a book within itself for a subset of the
+    /// tags"; mechanics here, the filter bar's FACE 13i-d's): a VIEW-LOCAL
+    /// tag/star rule over this reading's ASSEMBLY — a read, never membership
+    /// (nothing is written; a member the filter hides is still a member). The
+    /// grammar is the gathering rule's own (`RuleTerm`, the ★ context read
+    /// lazily, wing-scoped to the reading), so "Save this filter as a
+    /// gathering" (`Operations.saveFilterAsGathering`) mints exactly the
+    /// predicate she was looking through. It filters what the reader SEES:
+    /// after the reading's own cap (`max_posts` — a capped book's filtered
+    /// view never reaches past its cap), before the caller's `limit` window.
+    /// nil = unfiltered, byte-identical to before.
     public static func assembleReading(
         _ db: Database, readingID: String, limit: Int? = nil,
-        order: ReadingOrder? = nil
+        order: ReadingOrder? = nil, filter: RuleTerm? = nil
     ) throws -> [ReadingEntry] {
         guard let reading = try Reading.fetchOne(db, key: readingID),
               reading.deletedAt == nil
         else { return [] }
+
+        // A CAPPED reading's filter applies to the capped assembly — the
+        // set she sees — so it runs over the unfiltered read's ids (bounded
+        // by the cap) rather than inside the arm, where it would fill the cap
+        // from members past it.
+        if let filter, reading.maxPosts != nil {
+            let capped = try assembleReading(db, readingID: readingID, order: order)
+            let kept = try filteredIDs(
+                db, capped.map(\.postID), filter: filter, wingID: reading.wingId)
+            let entries = capped.filter { kept.contains($0.postID) }
+            return limit.map { Array(entries.prefix($0)) } ?? entries
+        }
+        var filterClause = ""
+        var filterArguments: [(any DatabaseValueConvertible)?] = []
+        if let filter {
+            var stars = StarContext()
+            let match = ruleMatchSQL(
+                filter, wingID: reading.wingId, starredNoteIDs: try stars.ids(db, for: filter))
+            filterClause = " AND " + match.conditions.joined(separator: " AND ")
+            filterArguments = match.arguments
+        }
 
         // The ONE place the order is decided (A31): the override stands in
         // for the stored pair here and nowhere else, which is what makes
@@ -309,10 +343,11 @@ extension Queries {
                  AND s.reading_id = rp.reading_id
                  AND s.deleted_at IS NULL
                 WHERE rp.reading_id = ? AND rp.deleted_at IS NULL
-                  AND rp.status = 'member'
+                  AND rp.status = 'member'\(filterClause)
                 ORDER BY (s.id IS NULL), s.position, s.id, \(order)
                 """
             arguments.append(readingID)
+            arguments += filterArguments
 
         case .book:
             let order = sortField == .manual
@@ -329,10 +364,11 @@ extension Queries {
                  AND c.archived_at IS NULL
                  AND c.kind = 'post'
                 WHERE rp.reading_id = ? AND rp.deleted_at IS NULL
-                  AND rp.status = 'member'
+                  AND rp.status = 'member'\(filterClause)
                 ORDER BY \(order)
                 """
             arguments.append(readingID)
+            arguments += filterArguments
 
         case .gathering:
             var conditions = [
@@ -368,9 +404,10 @@ extension Queries {
                        c.created_at AS created_at,
                        \(sectionSelect) AS section_path, NULL AS section_id
                 FROM container c
-                WHERE \(conditions.joined(separator: " AND "))
+                WHERE \(conditions.joined(separator: " AND "))\(filterClause)
                 ORDER BY \(order)
                 """
+            arguments += filterArguments
         }
 
         var limited = sql
@@ -395,6 +432,29 @@ extension Queries {
                     sectionID: row["section_id"],
                     createdAt: row["created_at"])
             }
+    }
+
+    /// The ids among `postIDs` the filter keeps (a capped reading's filter —
+    /// see `assembleReading`). ONE statement, the page-driven `CROSS JOIN`
+    /// shape (`smartMembershipSQL`'s measured reason): the id list drives and
+    /// each note is a primary-key seek — ∝ the capped assembly, never the
+    /// corpus.
+    private static func filteredIDs(
+        _ db: Database, _ postIDs: [String], filter: RuleTerm, wingID: String
+    ) throws -> Set<String> {
+        guard !postIDs.isEmpty else { return [] }
+        var stars = StarContext()
+        let match = ruleMatchSQL(
+            filter, wingID: wingID, starredNoteIDs: try stars.ids(db, for: filter))
+        let json = String(decoding: try JSONEncoder().encode(postIDs), as: UTF8.self)
+        return Set(try String.fetchAll(
+            db,
+            sql: """
+                SELECT j.value FROM json_each(?) j
+                CROSS JOIN container c ON c.id = j.value
+                  AND \(match.conditions.joined(separator: " AND "))
+                """,
+            arguments: StatementArguments([json] + match.arguments)))
     }
 
     /// ORDER BY fragment for a stamp-sorted reading: rows missing the stamp

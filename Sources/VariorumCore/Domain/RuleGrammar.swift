@@ -175,4 +175,19 @@ public enum RuleGrammar {
         case .tag, .legacyProfile, .legacyEntryDateFrom, .legacyEntryDateTo: return false
         }
     }
+
+    /// `a ∧ b` as ONE flat conjunction (13i-b U4 — "Save this filter as a
+    /// gathering": the rule = the reading's tag association ∧ the filter, the
+    /// sitting record §18.1). A nil `a` (no association) is the filter alone;
+    /// a top-level AND on either side spreads into the one list, so the
+    /// stored rule reads as the rule editor would draw it (no needless nested
+    /// group). Pure; semantics are exactly `and([a, b])`.
+    public static func conjoin(_ a: RuleTerm?, _ b: RuleTerm) -> RuleTerm {
+        guard let a else { return b }
+        func spread(_ term: RuleTerm) -> [RuleTerm] {
+            if case .and(let terms) = term, !terms.isEmpty { return terms }
+            return [term]
+        }
+        return .and(spread(a) + spread(b))
+    }
 }

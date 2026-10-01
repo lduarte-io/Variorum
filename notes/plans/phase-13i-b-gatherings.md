@@ -1353,6 +1353,26 @@ STOP condition met.
   show · the truly-empty Pool offers no toggle · starring tucks a note, un-starring brings it back (the
   starred gathering present). **"Test run with 9 tests in 3 suites passed", 0 skipped** (with
   `PoolPageTests` + `PoolCardPreviewTests`).
+- Piece 8 (this commit) — **E, the in-book filter MECHANICS (headless).** `Queries.assembleReading(…,
+  filter: RuleTerm?)`: a view-local read over the ASSEMBLY (never membership — no write, no outbox row;
+  nil is byte-identical); the filter is the gathering grammar itself (wing-scoped, the ★ context lazy),
+  inserted into each arm's WHERE so a book keeps its order and its chapters; on a CAPPED reading it runs
+  over the capped assembly's ids instead (`filteredIDs`, the `CROSS JOIN` page-driven shape — ∝ the cap),
+  so a filtered view never reaches a member past the cap; the caller's `limit` applies last.
+  `Operations.saveFilterAsGathering(readingID, filter:, name:)` → `SavedFilterGathering { reading,
+  association: .rule | .autoTag | .none }`, ONE transaction: a gathering whose rule =
+  `RuleGrammar.conjoin(association, filter)` (pure, flat — a top-level AND spreads; an OR stays a term),
+  in the source's wing, unshelved, unstarred; the source untouched (row snapshot pinned). Association
+  (PROVISIONAL P-13ib-U4-6): any reading's READABLE rule (a gathering's or a living book's); a rule-less
+  gathering → the filter alone, exactly (it shows everything in its wing); a book without a readable rule
+  → its LIVE in-wing auto-tag, else none (the filter alone — reported so the face can say it gathers from
+  the whole library); a MALFORMED gathering refuses (`smartFilterUnsatisfiable`, the collect door's
+  wording). No name guard (E13's assert is the door's), no undo entry (`createReading`'s class).
+  `ReadingFilterTests` (11): the book's view narrowed in its own order (tag, ★, ∧¬, ∨), writing nothing ·
+  chapters survive · a gathering's view narrowed · the cap holds and the window applies last · the five
+  association shapes incl. the flat conjunction, the dead auto-tag, the malformed book rule falling through,
+  a gathering's saved filter = its filtered view (same predicate) · the refusals mint nothing · `conjoin`
+  pure. **11/11 green** (new surface; mutation checks below).
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
