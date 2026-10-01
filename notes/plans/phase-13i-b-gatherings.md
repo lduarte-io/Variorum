@@ -1402,8 +1402,11 @@ STOP condition met.
   their first clean round (pinned both ways in `StarredGatheringSeederTests`). The walk therefore made
   the gathering BY HAND ("re-makeable in one gesture" — the ensure's own "present" signature: the
   reserved name, rule ★). F-U4-3 — the Pool's "show" state survived leaving and returning to the Pool
-  (the model is RootView's, so it outlives the page) — contradicting P-13ib-U4-4's "off on every visit";
-  pin + fix NEXT. F-U4-4 — the gathering's navigator footer reads "smart book — it collects notes by its
+  (the model is RootView's, so it outlives the page) — contradicting P-13ib-U4-4's "off on every visit".
+  **FIXED with its pin:** `PoolTuckFaceTests.leavingThePoolTucksTheRunAwayAgain` (leave the page, remount
+  over the SAME model) — **RED on the pre-fix build, 3 issues at the mechanism** (`showsTucked → true`,
+  the toggle still "hide", the tucked row drawn); `PoolPostsModel.tuckAway()` on the page's
+  `onDisappear`; the suite **"Test run with 6 tests in 1 suite passed"** after. F-U4-4 — the gathering's navigator footer reads "smart book — it collects notes by its
   tags…" (pre-existing copy, false for a ★ rule; 13i-d's vocabulary sweep). Remaining: the F-U4-3 fix,
   then Study light/dark and Terminal dark on the fixed build; settings restore + read-back.
 

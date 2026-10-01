@@ -171,6 +171,53 @@ struct PoolTuckFaceTests {
         }
     }
 
+    /// **F-U4-3 (walk-found):** the show state is VIEW state — off on every
+    /// visit (P-13ib-U4-4, the Arrivals expansion's rule). The model is
+    /// RootView's and outlives the page, so leaving the Pool must tuck the run
+    /// away again. RED on the pre-fix build: the remounted page still read
+    /// "hide" and drew the tucked run.
+    @Test func leavingThePoolTucksTheRunAwayAgain() async throws {
+        PoolTuckProbe.reset()
+        try await withPoolWorld { session, db in
+            _ = try await session.runner.run { ops -> String in
+                let tag = try ops.createTag(name: "ideas")
+                _ = try ops.createReading(
+                    name: "ideas", kind: .gathering,
+                    querySpec: try RuleGrammar.encode(.tag(tag.id)))
+                let note = try ops.createPost(title: "gathered")
+                _ = try ops.applyTag(tag.id, toPost: note.id)
+                return note.id
+            }
+            let hosted = try await mounted(session, db)
+            await settle(hosted.window, hosted.hosting) { PoolTuckProbe.drawn.masthead != nil }
+            await hosted.model.toggleTucked()
+            await settle(hosted.window, hosted.hosting) { PoolTuckProbe.drawn.toggle == "hide" }
+            #expect(PoolTuckProbe.drawn.toggle == "hide")
+
+            // Leave the page (another destination replaces it)…
+            hosted.window.contentView = NSView()
+            await settle(hosted.window, hosted.window.contentView!)
+            // …and come back to the SAME model (RootView keeps it).
+            let again = NSHostingView(
+                rootView: PoolPostsView(
+                    session: session, model: hosted.model,
+                    onDuplicateAsVersion: { _ in }, onArchive: { _ in },
+                    readings: ReadingsViewModel(session: session),
+                    tags: TagsViewModel(session: session),
+                    onOpen: { _ in }))
+            again.frame = NSRect(x: 0, y: 0, width: 1000, height: 900)
+            hosted.window.contentView = again
+            defer {
+                hosted.window.orderOut(nil)
+                hosted.window.close()
+            }
+            await settle(hosted.window, again) { PoolTuckProbe.drawn.masthead != nil }
+            #expect(hosted.model.showsTucked == false, "a fresh visit opens tucked")
+            #expect(PoolTuckProbe.drawn.toggle == "show")
+            #expect(PoolTuckProbe.drawn.tuckedRows.isEmpty)
+        }
+    }
+
     @Test func anEmptyButGatheredPoolSaysSo() async throws {
         PoolTuckProbe.reset()
         try await withPoolWorld { session, db in

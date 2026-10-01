@@ -80,6 +80,13 @@ final class PoolPostsModel {
         await loadTags()
     }
 
+    /// Leaving the page tucks the run away again — a fresh visit opens
+    /// tucked (P-13ib-U4-4). The model is RootView's and outlives the page,
+    /// so without this the click outlived the visit (F-U4-3, walk-found).
+    func tuckAway() {
+        showsTucked = false
+    }
+
     /// The rows the page draws: the loose ones, plus the tucked run while it
     /// shows — so the chips/previews reads stay bounded by what is on screen.
     var drawnIDs: [String] {
@@ -288,6 +295,7 @@ struct PoolPostsView: View {
         }
         .background(tokens.surface)
         .task { await model.start() }
+        .onDisappear { model.tuckAway() }
         #if DEBUG
         .onAppear { recordMasthead() }
         .onChange(of: PoolTuckProbe.Face(model)) { _, _ in recordMasthead() }
