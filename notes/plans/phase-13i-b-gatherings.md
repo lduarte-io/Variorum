@@ -971,7 +971,7 @@ schema/`Sync/`/migrations (zero).
   queued an outbox row); M3 the editor's wing filter dropped → **1 red** (the add doors offered
   another wing's tag); M4 the keeps-collecting sentence dropped from the bind's body → **2 red**
   (the presented sheet's truth; the words at every count). Every new pin family bites.
-- **THE WALK — IN PROGRESS** (dev-store Debug build `io.lduarte.Variorum.debug`, built from the clean
+- **THE WALK — DONE, 27 captures, both voices × both appearances** (dev-store Debug build `io.lduarte.Variorum.debug`, built from the clean
   tree at ada13430; machine author-free — HID idle 4,700 s+, AX + Screen Recording granted, her app
   absent, `guard.sh` before every act; captures gitignored under `notes/plans/13ib-screens/u3/`).
   **Terminal · light — DONE (16 captures):** 01 a gathering's shelf menu carries Edit Rule… · Bind
@@ -1001,8 +1001,30 @@ schema/`Sync/`/migrations (zero).
   WHILE OPEN still read "in no book" until re-opened, then "~/bind walk"; pre-existing face
   behaviour newly reachable through U1's intake; not this unit's surface) · a walk-tooling fact: the
   toast's 6 s clock can outlive a guarded click's latency (the first offer press landed after the
-  toast had gone; re-walked with an immediate click — the offer's act works). PENDING: Study light,
-  Study dark, Terminal dark; settings restored; zero instances.
+  toast had gone; re-walked with an immediate click — the offer's act works).
+  **After the F-U3-1 rebuild (fixed build, 71277bd5):** 17a/17b the before/after pair — the pre-fix
+  build's row read "smart", no tag, right after Save (17a); the fixed build's fresh gathering
+  "refresh walk" reads "#spawn13ib · smart · 4w" the moment the editor closes (17b) — the fix's
+  red-on-old evidence is this behavioural before/after on the real app (no mounted pin: the edge is
+  SwiftUI's sheet `onDismiss`). **Study · light:** 18 the book's editor (the voice's own casing —
+  "Collects…", "wait at Arrivals"; the stored rule and `#walked` read back; Save disabled) · 19 the
+  bind sheet (count 2, the truth) · 20 the teaching offer. **Study · dark:** 21 the teaching offer ·
+  22 its act → the bind confirm · 23 the book's editor. **Terminal · dark:** 24 the book's editor ·
+  25 the shelf door's bind sheet (count 2) · 26 the teaching offer. All legible in the black room;
+  tokens only; nothing clipped. **Walk notes:** (1) after closing Settings, activation did not raise
+  the main window above the orchestrator's terminal, so two right-clicks landed in the TERMINAL'S
+  frame (at most opening its context menu); `keys.sh` re-proves the dev app frontmost before every
+  keystroke, so no text reached the terminal — and the Pool shows no stray notes. The helpers were
+  hardened mid-walk: AXRaise the dev window and require it TOPMOST at the point
+  (`CGWindowListCopyWindowInfo`) before every click — worth folding into `Tools/WalkKit` (left for
+  the orchestrator; not this unit's surface). (2) One Escape on the book view's bind sheet did not
+  dismiss it (every other Escape did; the sheet was then cancelled by its own Cancel button through
+  AX) — no mechanism traced, so no speculative fix (the hallucination guard). Her dev settings
+  restored and READ BACK: voice Terminal (AX `1,0`), Appearance Follow system (AX `1,0,0`;
+  `appearanceChoice = system`); the instance quit by identity; zero instances; my `caffeinate`
+  stopped. The dev store keeps the walk's books ("bind walk", "spawn walk", "spawn walk (book)",
+  "refresh walk"), the tags `#bind13ib`/`#spawn13ib`, nine notes, and `#walked` on bind walk's four
+  members (dev store — harmless).
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
