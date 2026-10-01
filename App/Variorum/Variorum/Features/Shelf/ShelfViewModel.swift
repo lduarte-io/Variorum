@@ -24,6 +24,7 @@ final class ShelfViewModel {
     private(set) var pins: [String] = []
     private(set) var wordCounts: [String: Int] = [:]
     private(set) var bookTags: [String: [String]] = [:]
+ var ruleTags: [String: [String]] = [:]
     private(set) var lastError: String?
     /// R98: apply-and-report's REPORT half — not an error, rendered muted.
     private(set) var lastReport: String?
@@ -61,11 +62,13 @@ final class ShelfViewModel {
     /// held observation).
     func refreshAggregates() async {
         do {
-            let (words, tags) = try await session.database.read { db in
-                (try Queries.bookWordCounts(db), try Queries.shelfBookTags(db))
+            let (words, tags, rules) = try await session.database.read { db in
+                (try Queries.bookWordCounts(db), try Queries.shelfBookTags(db),
+                 try Queries.ruleTagPaths(db))
             }
             wordCounts = words
             bookTags = tags
+            ruleTags = rules
         } catch {
             lastError = String(describing: error)
         }
@@ -96,7 +99,8 @@ final class ShelfViewModel {
     func tagsColumn(for book: Queries.ShelfBook) -> [String] {
         // 13u1 UNIT 1 (P40): the smart-book half is `ShelfOrder`'s now — the
         // phone asked the identical question of the identical spec.
-        ShelfOrder.smartQueryTagPaths(of: book.reading) ?? bookTags[book.reading.id] ?? []
+        ShelfOrder.smartQueryTagPaths(of: book.reading, rulePaths: ruleTags)
+            ?? bookTags[book.reading.id] ?? []
     }
 
     /// Bounded progress for the meta column ("62% of 10,000w" — the

@@ -30,6 +30,8 @@ final class MobileShelfViewModel {
     private(set) var pins: [String] = []
     private(set) var dailyBookID: String?
     private(set) var bookTags: [String: [String]] = [:]
+    /// 13i-a: gatherings' rule tags as live paths (rules hold IDs now).
+    private(set) var ruleTags: [String: [String]] = [:]
     private(set) var lastError: String?
     /// The Today door's shelving note (not an error — rendered muted).
     private(set) var lastReport: String?
@@ -80,7 +82,9 @@ final class MobileShelfViewModel {
     /// deliberate fetch, never a held observation).
     func refreshTags() async {
         do {
-            bookTags = try await session.database.read { try Queries.shelfBookTags($0) }
+            (bookTags, ruleTags) = try await session.database.read {
+                (try Queries.shelfBookTags($0), try Queries.ruleTagPaths($0))
+            }
         } catch {
             lastError = String(describing: error)
         }
@@ -106,7 +110,8 @@ final class MobileShelfViewModel {
     ) -> String {
         MobileShelfFaces.meta(
             for: book,
-            tagPaths: MobileShelfFaces.tagPaths(for: book, curatedTags: bookTags),
+            tagPaths: MobileShelfFaces.tagPaths(
+                for: book, curatedTags: bookTags, ruleTags: ruleTags),
             isDaily: showingDailyMarker && book.reading.id == dailyBookID)
     }
 

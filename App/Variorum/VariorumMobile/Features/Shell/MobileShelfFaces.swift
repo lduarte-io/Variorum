@@ -41,13 +41,15 @@ nonisolated enum MobileShelfFaces {
     /// (tagsAll + tags, the Mac's order); curated → the most-applied
     /// member-post paths the caller aggregated (`Queries.shelfBookTags`).
     static func tagPaths(
-        for book: Queries.ShelfBook, curatedTags: [String: [String]]
+        for book: Queries.ShelfBook, curatedTags: [String: [String]],
+        ruleTags: [String: [String]] = [:]
     ) -> [String] {
         // 13u1 UNIT 1 (the sweep's P40): the smart-book rule is shared now
         // (`Shared/ShelfOrder.swift`) — this was a byte-identical copy of
         // the Mac's `ShelfViewModel.tagsColumn`, differing only in where the
         // curated aggregate came from. The face stays here; the brain does not.
-        ShelfOrder.smartQueryTagPaths(of: book.reading) ?? curatedTags[book.reading.id] ?? []
+        ShelfOrder.smartQueryTagPaths(of: book.reading, rulePaths: ruleTags)
+            ?? curatedTags[book.reading.id] ?? []
     }
 
     /// The row's NAME text — the stored name plus the finished STATE

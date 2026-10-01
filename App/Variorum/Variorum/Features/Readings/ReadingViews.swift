@@ -187,14 +187,17 @@ struct SmartSpecSheet: View {
 
     private func load() async {
         allTags = (try? await session.database.read { try Queries.allTags($0) }) ?? []
-        // Seed the fields from the stored spec (round-trip honesty).
-        if let json = reading.querySpec,
-           let spec = try? JSONDecoder().decode(
-               Queries.SmartQuerySpec.self, from: Data(json.utf8)) {
-            profile = spec.profile ?? ""
-            dateFrom = spec.entryDateFrom ?? ""
-            dateTo = spec.entryDateTo ?? ""
-            selectedTagPaths = Set(spec.tags ?? [])
+        // Seed the fields from the stored rule (13i-a: storage is the v2
+        // grammar; the draft reader hands this face its v1 vocabulary —
+        // round-trip honesty for everything the face can express).
+        let spec = reading.querySpec
+        if let seed = try? await session.database.read({
+            try Queries.legacyDraft($0, querySpec: spec)
+        }) ?? nil {
+            profile = seed.draft.profile ?? ""
+            dateFrom = seed.draft.entryDateFrom ?? ""
+            dateTo = seed.draft.entryDateTo ?? ""
+            selectedTagPaths = Set((seed.draft.tags ?? []) + (seed.draft.tagsAll ?? []))
         }
     }
 }

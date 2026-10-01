@@ -60,12 +60,13 @@ nonisolated enum ShelfOrder {
     /// an empty array on purpose: "not a smart book" and "a smart book whose
     /// spec names no tag" are different answers and the caller acts
     /// differently on each.
-    static func smartQueryTagPaths(of reading: Reading) -> [String]? {
+    /// 13i-a: the rule holds tag IDS (v2), so the paths are RESOLVED reads
+    /// — `Queries.ruleTagPaths` builds the map wherever the faces' other
+    /// aggregates load, and this brain keeps only the fallback contract.
+    static func smartQueryTagPaths(
+        of reading: Reading, rulePaths: [String: [String]]
+    ) -> [String]? {
         guard reading.kind == .gathering else { return nil }
-        guard let json = reading.querySpec,
-              let spec = try? JSONDecoder().decode(
-                  Queries.SmartQuerySpec.self, from: Data(json.utf8))
-        else { return [] }
-        return (spec.tagsAll ?? []) + (spec.tags ?? [])
+        return rulePaths[reading.id] ?? []
     }
 }

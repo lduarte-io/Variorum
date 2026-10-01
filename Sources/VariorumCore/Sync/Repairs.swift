@@ -54,6 +54,13 @@ struct TouchedRows {
     var sampleCopyKills: [(copyID: String, stamp: String, verdict: SampleCopyVerdict)] = []
     /// Inline (write-time) repair count, for reporting.
     var inlineRepairs = 0
+    // ——— 13i-a (the wings/shelves/books event) ———
+    /// Post ids named by applied `reading_post` rows — the OWNED-exclusivity
+    /// repair's firing scope (a membership landing is the only act that can
+    /// create the violation from the membership side).
+    var membershipPostIDs: Set<String> = []
+    /// Applied `shelf` rows — the Welcome-keeper repair's firing scope.
+    var shelfIDs: Set<String> = []
 }
 
 /// Apply-time repairs (SyncSpec §7): concurrent offline writes can produce
@@ -340,14 +347,19 @@ extension SyncEngine {
         _ db: Database, _ row: SyncRow, touched: inout TouchedRows
     ) throws -> SyncRow {
         guard case .text(let tagID) = row.columns["tag_id"],
-              let deadPath = try String.fetchOne(
+              let dead = try Row.fetchOne(
                   db,
-                  sql: "SELECT path FROM tag WHERE id = ? AND deleted_at IS NOT NULL",
+                  sql: "SELECT path, wing_id FROM tag WHERE id = ? AND deleted_at IS NOT NULL",
                   arguments: [tagID]),
+              // 13i-a (R-13ia-1): same-(wing, path) is the §7 identity now.
               let keeperID = try String.fetchOne(
                   db,
-                  sql: "SELECT id FROM tag WHERE path = ? AND deleted_at IS NULL AND id <> ? ORDER BY id LIMIT 1",
-                  arguments: [deadPath, tagID])
+                  sql: """
+                      SELECT id FROM tag
+                      WHERE path = ? AND wing_id = ? AND deleted_at IS NULL AND id <> ?
+                      ORDER BY id LIMIT 1
+                      """,
+                  arguments: [dead["path"] as String, dead["wing_id"] as String, tagID])
         else { return row }
         let targetColumn = row.table == "post_tag" ? "post_id" : "block_id"
         guard case .text(let targetID) = row.columns[targetColumn] else { return row }
@@ -483,6 +495,13 @@ extension SyncEngine {
             if case .text(let tagID) = row.columns["tag_id"] {
                 touched.appliedPostTagTagIDs.insert(tagID)
             }
+        // 13i-a: the two new repairs' firing scopes.
+        case "reading_post":
+            if case .text(let postID) = row.columns["post_id"] {
+                touched.membershipPostIDs.insert(postID)
+            }
+        case "shelf":
+            touched.shelfIDs.insert(row.rowID)
         default:
             break
         }
@@ -541,10 +560,17 @@ extension SyncEngine {
         _ db: Database, _ row: SyncRow, touched: inout TouchedRows
     ) throws -> SyncRow {
         guard case .text(let path) = row.columns["path"] else { return row }
+        // 13i-a (R-13ia-1): the vocabulary is PER-WING — the collision is
+        // (wing_id, path); identical paths in two wings are legal twins.
+        // An absent wing column (a pre-window mirror row) reads as '' (Home).
+        let wingID: String = if case .text(let wing) = row.columns["wing_id"] { wing } else { "" }
         guard let rivalID = try String.fetchOne(
             db,
-            sql: "SELECT id FROM tag WHERE path = ? AND deleted_at IS NULL AND id <> ?",
-            arguments: [path, row.rowID])
+            sql: """
+                SELECT id FROM tag
+                WHERE path = ? AND wing_id = ? AND deleted_at IS NULL AND id <> ?
+                """,
+            arguments: [path, wingID, row.rowID])
         else { return row }
 
         var resolved = row
@@ -626,11 +652,38 @@ extension SyncEngine {
         var resolved = row
         let stamp = nowStamp()
         if row.rowID < rivalID {
+            // 13i-a (R1, sitting record §4): before the rival retires, the
+            // kept reading_post row's STATUS resolves to 'member' when
+            // EITHER side was one — a seating outranks the bell, whichever
+            // id sorts smaller. (Only the two rows THIS collision holds are
+            // consulted — an anciently-removed membership never promotes.)
+            if row.table == "reading_post",
+               case .text("arrival") = row.columns["status"],
+               try Bool.fetchOne(
+                   db,
+                   sql: "SELECT status = 'member' FROM reading_post WHERE id = ?",
+                   arguments: [rivalID]) ?? false {
+                resolved.columns["status"] = .text("member")
+            }
             try db.execute(
                 sql: "UPDATE \(row.table) SET deleted_at = ? WHERE id = ?",
                 arguments: [stamp, rivalID])
             try enqueueExplicitly(db, table: row.table, rowID: rivalID)
         } else {
+            if row.table == "reading_post",
+               case .text("member") = row.columns["status"] {
+                // The incoming member retires; the kept rival, if a bell,
+                // is promoted in place (same rule, other keep-shape).
+                try db.execute(
+                    sql: """
+                        UPDATE reading_post SET status = 'member'
+                        WHERE id = ? AND status = 'arrival'
+                        """,
+                    arguments: [rivalID])
+                if db.changesCount > 0 {
+                    try enqueueExplicitly(db, table: "reading_post", rowID: rivalID)
+                }
+            }
             resolved.columns["deleted_at"] = .text(stamp)
             try enqueueExplicitly(db, table: row.table, rowID: resolved.rowID)
         }
@@ -830,6 +883,150 @@ extension SyncEngine {
         // `sampleDedupeOccasion` for why the push path never fires it.
         if try sampleDedupeOccasion(db, touched: touched) {
             repairs += try dedupeSampleLibraryCopies(db, touched: touched)
+        }
+        // 13i-a (R2): OWNED exclusivity — fired by a membership landing or
+        // a reading landing (an arriving owned flag can create the
+        // violation from the book side with zero membership rows in the
+        // batch).
+        if !touched.membershipPostIDs.isEmpty || !touched.readingIDs.isEmpty {
+            repairs += try repairOwnedExclusivity(db, touched: touched)
+        }
+        // 13i-a (R5): the Welcome-shelf keeper — fired by a shelf landing.
+        if !touched.shelfIDs.isEmpty {
+            repairs += try convergeWelcomeShelves(db, touched: touched)
+        }
+        return repairs
+    }
+
+    // MARK: - 13i-a: OWNED exclusivity (R2 — PROVISIONAL #167)
+
+    /// Two devices racing acts that OWNED forbids from co-existing (a note
+    /// membered in an owned book AND anywhere else) converge by the rule
+    /// intake itself uses (sitting record §6): the EARLIEST-ACCEPTED act
+    /// stands, and the later conflicting act repairs to what its door would
+    /// have done knowing the truth —
+    ///   * the later act is the OWNED-side membership → it DEMOTES to an
+    ///     ARRIVAL (the bell: "lives elsewhere — claim / copy in / leave");
+    ///   * the later act is a PLAIN-side membership beside a standing owned
+    ///     one → it is TOMBSTONED (the ownership promise defended at the
+    ///     door; the row is an ordinary recoverable tombstone).
+    /// Rank: a never-accepted row carries no authority (`sync_row_seq` = 0,
+    /// §3's rule — it ranks LAST), then ascending `server_seq`, then id.
+    /// Deterministic on every device; idempotent (the repaired state has no
+    /// violation); every write enqueues explicitly.
+    private func repairOwnedExclusivity(_ db: Database, touched: TouchedRows) throws -> Int {
+        // Scope: the batch's membership posts, plus every member post of a
+        // touched OWNED reading (the flag may have just arrived).
+        let candidatePosts = try String.fetchAll(
+            db,
+            sql: """
+                SELECT DISTINCT post_id FROM reading_post
+                WHERE post_id IN (SELECT value FROM json_each(?))
+                   OR reading_id IN (
+                        SELECT id FROM reading
+                        WHERE id IN (SELECT value FROM json_each(?)) AND owned = 1)
+                """,
+            arguments: [jsonArray(touched.membershipPostIDs), jsonArray(touched.readingIDs)])
+        var repairs = 0
+        let stamp = nowStamp()
+        for postID in candidatePosts.sorted() {
+            let members = try Row.fetchAll(
+                db,
+                sql: """
+                    SELECT rp.id, r.owned AS owned,
+                           COALESCE(s.server_seq, 0) AS seq
+                    FROM reading_post rp
+                    JOIN reading r ON r.id = rp.reading_id AND r.deleted_at IS NULL
+                    LEFT JOIN sync_row_seq s
+                      ON s.table_name = 'reading_post' AND s.row_id = rp.id
+                    WHERE rp.post_id = ? AND rp.deleted_at IS NULL
+                      AND rp.status = 'member'
+                    """,
+                arguments: [postID])
+            guard members.contains(where: { $0["owned"] as Int64 == 1 }),
+                  members.count > 1 else { continue }
+            let ranked = members.sorted { lhs, rhs in
+                let (ls, rs) = (lhs["seq"] as Int64, rhs["seq"] as Int64)
+                let (lRank, rRank) = (ls == 0 ? Int64.max : ls, rs == 0 ? Int64.max : rs)
+                if lRank != rRank { return lRank < rRank }
+                return (lhs["id"] as String) < (rhs["id"] as String)
+            }
+            let earliestIsOwned = (ranked[0]["owned"] as Int64) == 1
+            for (index, member) in ranked.enumerated() {
+                let membershipID: String = member["id"]
+                let owned = (member["owned"] as Int64) == 1
+                if earliestIsOwned {
+                    if index == 0 { continue }  // the standing claim
+                    if owned {
+                        try db.execute(
+                            sql: "UPDATE reading_post SET status = 'arrival' WHERE id = ?",
+                            arguments: [membershipID])
+                    } else {
+                        try db.execute(
+                            sql: "UPDATE reading_post SET deleted_at = ? WHERE id = ?",
+                            arguments: [stamp, membershipID])
+                    }
+                    try enqueueExplicitly(db, table: "reading_post", rowID: membershipID)
+                    repairs += 1
+                } else if owned {
+                    // The note was already membered when the claim arrived:
+                    // every owned-side membership bells instead.
+                    try db.execute(
+                        sql: "UPDATE reading_post SET status = 'arrival' WHERE id = ?",
+                        arguments: [membershipID])
+                    try enqueueExplicitly(db, table: "reading_post", rowID: membershipID)
+                    repairs += 1
+                }
+            }
+        }
+        return repairs
+    }
+
+    // MARK: - 13i-a: the Welcome-shelf keeper (R5)
+
+    /// Two devices' seeders racing the Welcome shelf offline converge on
+    /// the daily keeper's pattern, keyed on the `role='welcome'` marker
+    /// (never the name — she may rename Welcome): per wing, the smallest id
+    /// keeps; the losers' books re-point to the keeper; the losers
+    /// tombstone. Every write enqueues explicitly.
+    private func convergeWelcomeShelves(_ db: Database, touched: TouchedRows) throws -> Int {
+        let wings = try String.fetchAll(
+            db,
+            sql: """
+                SELECT wing_id FROM shelf
+                WHERE role = 'welcome' AND deleted_at IS NULL
+                GROUP BY wing_id HAVING COUNT(*) > 1
+                """)
+        var repairs = 0
+        let stamp = nowStamp()
+        for wing in wings {
+            let duplicates = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT id FROM shelf
+                    WHERE role = 'welcome' AND wing_id = ? AND deleted_at IS NULL
+                    ORDER BY id
+                    """,
+                arguments: [wing])
+            guard duplicates.count > 1, let keeper = duplicates.first else { continue }
+            for loser in duplicates.dropFirst() {
+                let books = try String.fetchAll(
+                    db,
+                    sql: "SELECT id FROM reading WHERE shelf_id = ? AND deleted_at IS NULL",
+                    arguments: [loser])
+                for bookID in books {
+                    try db.execute(
+                        sql: "UPDATE reading SET shelf_id = ? WHERE id = ?",
+                        arguments: [keeper, bookID])
+                    try enqueueExplicitly(db, table: "reading", rowID: bookID)
+                    repairs += 1
+                }
+                try db.execute(
+                    sql: "UPDATE shelf SET deleted_at = ?, updated_at = ? WHERE id = ?",
+                    arguments: [stamp, stamp, loser])
+                try enqueueExplicitly(db, table: "shelf", rowID: loser)
+                repairs += 1
+            }
         }
         return repairs
     }

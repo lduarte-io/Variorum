@@ -415,6 +415,102 @@ extension Queries {
         return try? JSONDecoder().decode(SmartQuerySpec.self, from: Data(json.utf8))
     }
 
+    /// Every live gathering's rule tags as LIVE PATHS, keyed by reading id
+    /// (13i-a — the shelf faces' tag chips; rules hold IDs since v1_18, so
+    /// the display paths are a read, refreshed wherever the faces' other
+    /// aggregates are). Order: bare (AND) conjunct paths first, then any
+    /// OR group's — "tagsAll then tags", the shipped chip order. Dead
+    /// terms simply don't list (the chip row is display, never the rule).
+    public static func ruleTagPaths(_ db: Database) throws -> [String: [String]] {
+        var result: [String: [String]] = [:]
+        for reading in try readings(db) where reading.kind == .gathering {
+            guard case .rule(let term) = RuleGrammar.read(reading.querySpec) else { continue }
+            let conjuncts: [RuleTerm] = switch term {
+            case .and(let terms): terms
+            default: [term]
+            }
+            var bare: [String] = []
+            var grouped: [String] = []
+            func livePath(_ id: String) throws -> String? {
+                try String.fetchOne(
+                    db, sql: "SELECT path FROM tag WHERE id = ? AND deleted_at IS NULL",
+                    arguments: [id])
+            }
+            for conjunct in conjuncts {
+                switch conjunct {
+                case .tag(let id):
+                    if let path = try livePath(id) { bare.append(path) }
+                case .or(let options):
+                    for option in options {
+                        if case .tag(let id) = option, let path = try livePath(id) {
+                            grouped.append(path)
+                        }
+                    }
+                default: break
+                }
+            }
+            result[reading.id] = bare + grouped
+        }
+        return result
+    }
+
+    /// The v2 rule read back as the v1 DRAFT shape (13i-a — the interim
+    /// rule-editor faces still collect in the v1 vocabulary until 13i-b's
+    /// grammar faces land). Best-effort by design: only the shapes those
+    /// faces can express come back (top-level AND of — legacy profile/date
+    /// terms, one OR-of-tags group, bare tag conjuncts); tag IDs resolve to
+    /// their LIVE paths. A dead term, a star term or a nested tree has no
+    /// draft spelling — it returns in `undraftable`, and a face that sees
+    /// one must NOT round-trip its edit through the draft (saving the
+    /// draft would silently drop the term).
+    public static func legacyDraft(
+        _ db: Database, querySpec: String?
+    ) throws -> (draft: SmartQuerySpec, undraftable: Bool)? {
+        guard case .rule(let term) = RuleGrammar.read(querySpec) else { return nil }
+        let conjuncts: [RuleTerm] = switch term {
+        case .and(let terms): terms
+        default: [term]
+        }
+        var draft = SmartQuerySpec()
+        var undraftable = false
+        func livePath(_ id: String) throws -> String? {
+            try String.fetchOne(
+                db, sql: "SELECT path FROM tag WHERE id = ? AND deleted_at IS NULL",
+                arguments: [id])
+        }
+        for conjunct in conjuncts {
+            switch conjunct {
+            case .legacyProfile(let p): draft.profile = p
+            case .legacyEntryDateFrom(let d): draft.entryDateFrom = d
+            case .legacyEntryDateTo(let d): draft.entryDateTo = d
+            case .tag(let id):
+                if let path = try livePath(id) {
+                    draft.tagsAll = (draft.tagsAll ?? []) + [path]
+                } else { undraftable = true }
+            case .or(let options):
+                var paths: [String] = []
+                for option in options {
+                    guard case .tag(let id) = option, let path = try livePath(id) else {
+                        undraftable = true
+                        continue
+                    }
+                    paths.append(path)
+                }
+                if !paths.isEmpty { draft.tags = (draft.tags ?? []) + paths }
+            case .and, .not, .star:
+                undraftable = true
+            }
+        }
+        // A single bare tag reads better in the faces' any-of field, and
+        // the two spellings are semantically identical for one tag.
+        if draft.tags == nil, let all = draft.tagsAll, all.count == 1,
+           draft.profile == nil, draft.entryDateFrom == nil, draft.entryDateTo == nil {
+            draft.tags = all
+            draft.tagsAll = nil
+        }
+        return (draft, undraftable)
+    }
+
     /// The v2 rule's SQL half over a `container c` scope — the ONE
     /// implementation (13i-a; `smartMatchSQL`'s successor) shared by reading
     /// assembly, the Pool, the membership chip and the word counts. The

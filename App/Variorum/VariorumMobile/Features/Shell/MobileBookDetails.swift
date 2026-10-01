@@ -79,14 +79,16 @@ final class MobileBookDetailsModel {
     func refresh() async {
         do {
             let id = readingID
-            let (books, tags, dailyID) = try await session.database.read { db in
+            let (books, tags, rules, dailyID) = try await session.database.read { db in
                 (try Queries.bookshelf(db),
                  try Queries.shelfBookTags(db),
+                 try Queries.ruleTagPaths(db),
                  try Queries.dailyJournalBookID(db))
             }
             book = books.first { $0.reading.id == id }
             if let book {
-                tagPaths = MobileShelfFaces.tagPaths(for: book, curatedTags: tags)
+                tagPaths = MobileShelfFaces.tagPaths(
+                    for: book, curatedTags: tags, ruleTags: rules)
             }
             isDaily = dailyID == id
         } catch {
