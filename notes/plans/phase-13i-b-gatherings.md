@@ -408,7 +408,18 @@ the walk into the morning.
   already flips the same row, materializes the assembly and leaves the rule on the row — and a
   book with a rule is a living book under U1 — so no minimal op-side recast was built (U3 owns
   the door's face and the retirement of the `keepCollecting` "(collecting)" offer).
-- NEXT — the full core suite, the Mac + mobile builds, the Mac suites pinning changed ops.
+- **VERIFICATION (this commit):** the FULL core suite `swift build && swift test` — **"Test run with
+  1840 tests in 193 suites passed"** (1 skipped: the standing Supabase integration test, env-gated;
+  baseline 1772/187 at 13i-a's post-close → +6 suites, the six U1 files). The Mac app `xcodebuild
+  -scheme Variorum -destination 'platform=macOS' build` — **BUILD SUCCEEDED**; the mobile target
+  (`VariorumMobile`, generic iOS Simulator) — **BUILD SUCCEEDED**. Zero instances throughout
+  (`pgrep` clean). Mac suites that exercise a changed op (every `VariorumTests` file calling
+  add/remove/reorder/assign/diverge/lock/unlock/restore/rule-write/star/applyTag/mint/convert/
+  collect), suite-level `-only-testing` by STRUCT name in three batches: **161/30 (4 known issues —
+  the standing `IndexTierMetricsTests` overTwoBlankLines rows) · 140/33 · 79/11 — all passed, 0
+  skipped.** Mobile suites likewise (the iPhone 17 Pro 26.2 simulator; the 16 Pro runtime is 18.3,
+  below target): **101/22 passed, 2 known issues (the standing tutorial fanned-divide rows), 0
+  skipped.**
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
