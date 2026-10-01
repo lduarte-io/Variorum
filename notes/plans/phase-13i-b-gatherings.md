@@ -340,7 +340,11 @@ the walk into the morning.
 2. Her 13i-a carry-overs, still open: the #167 ratify + the three 13i-a §9 PROVISIONALs (the
    handoff's checklist).
 3. The canon-delta PROPOSALS (drafted at closeout, landing at her word).
-4. The install refresh, if no zero-instance window existed overnight.
+4. ~~The install refresh, if no zero-instance window existed overnight~~ — **SANCTIONED mid-kickoff,
+   her words: "my app is quit and ready for reinstall."** The refresh runs at the run's END
+   (after the walks and the ladder, per the sizing rule), behind the A1 rail, with a pgrep
+   re-check at the moment. Her same message pinned the end review: "make sure you do a Fable
+   review at the end" — ledger row 6 is that ladder, `fable-reviewer`, confirmed.
 5. Anything the units add (held taste calls, walk findings).
 
 ## LIVE STATUS (the resiliency protocol's record — updated per commit; every unverified claim marked PENDING)
