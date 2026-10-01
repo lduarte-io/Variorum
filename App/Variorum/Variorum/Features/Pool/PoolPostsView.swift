@@ -258,12 +258,10 @@ struct PoolPostsView: View {
             // which a column of text could not be).
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 6) {
-                    ForEach(model.posts, id: \.postID) { item in
-                        row(item, tucked: false)
-                    }
                     if let empty = PoolTuckCopy.empty(loose: model.looseCount, tucked: model.tuckedCount) {
                         // 13i-b U4: an empty-but-gathered Pool SAYS so (§8) —
-                        // never "the pool is empty" over tucked notes.
+                        // never "the pool is empty" over tucked notes. First,
+                        // under the masthead whose count it explains.
                         Text(tokens.chromeLabel(empty))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
@@ -272,21 +270,22 @@ struct PoolPostsView: View {
                             .padding(.vertical, 18)
                             .frame(maxWidth: .infinity, alignment: .center)
                     }
-                    // The tucked run, on her click: under the Library's quiet
-                    // section-label idiom (gray words over a hairline).
+                    // The tucked run, on her click — at the TOP, right under the
+                    // masthead that opened it (walk-found F-U4-5: at the bottom
+                    // it drowned under a long Pool, the very reason §8 moved the
+                    // count to the masthead). The Library's quiet section-label
+                    // idiom (gray words over a hairline) names both runs.
                     if model.showsTucked, !model.tucked.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(tokens.chromeLabel(PoolTuckCopy.tuckedSection))
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.faint)
-                                .lineLimit(1)
-                            Rectangle().fill(tokens.line).frame(height: 1)
-                        }
-                        .padding(.top, 14)
-                        .padding(.horizontal, 4)
+                        sectionLabel(PoolTuckCopy.tuckedSection, first: true)
                         ForEach(model.tucked, id: \.postID) { item in
                             row(item, tucked: true)
                         }
+                        if !model.posts.isEmpty {
+                            sectionLabel(PoolTuckCopy.looseSection, first: false)
+                        }
+                    }
+                    ForEach(model.posts, id: \.postID) { item in
+                        row(item, tucked: false)
                     }
                 }
                 .padding(.horizontal, 20)
@@ -330,13 +329,26 @@ struct PoolPostsView: View {
         }
     }
 
+    private func sectionLabel(_ words: String, first: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(tokens.chromeLabel(words))
+                .font(tokens.small)
+                .foregroundStyle(tokens.faint)
+                .lineLimit(1)
+            Rectangle().fill(tokens.line).frame(height: 1)
+        }
+        .padding(.top, first ? 4 : 14)
+        .padding(.horizontal, 4)
+    }
+
     #if DEBUG
     private func recordMasthead() {
         PoolTuckProbe.recordFace(
             masthead: PoolTuckCopy.masthead(loose: model.looseCount, tucked: model.tuckedCount),
             toggle: model.tuckedCount > 0 ? PoolTuckCopy.toggle(showing: model.showsTucked) : nil,
             empty: PoolTuckCopy.empty(loose: model.looseCount, tucked: model.tuckedCount),
-            tuckedSection: model.showsTucked && !model.tucked.isEmpty)
+            tuckedSection: model.showsTucked && !model.tucked.isEmpty,
+            looseSection: model.showsTucked && !model.tucked.isEmpty && !model.posts.isEmpty)
     }
     #endif
 
@@ -505,6 +517,9 @@ nonisolated enum PoolTuckCopy {
 
     /// The label over the tucked run while it shows.
     static let tuckedSection = "in gatherings"
+    /// The label over the loose run, drawn only while the tucked run shows
+    /// above it (the empty state's own noun).
+    static let looseSection = "loose notes"
 
     /// The empty state — nil while loose notes list. An EMPTY-BUT-GATHERED
     /// Pool says so (§8); only a Pool with nothing tucked either says it is
@@ -534,6 +549,7 @@ enum PoolTuckProbe {
         var toggle: String?
         var empty: String?
         var tuckedSection = false
+        var looseSection = false
         var looseRows: Set<String> = []
         var tuckedRows: Set<String> = []
     }
@@ -558,12 +574,14 @@ enum PoolTuckProbe {
     static func reset() { drawn = Drawn() }
 
     static func recordFace(
-        masthead: String, toggle: String?, empty: String?, tuckedSection: Bool
+        masthead: String, toggle: String?, empty: String?, tuckedSection: Bool,
+        looseSection: Bool
     ) {
         drawn.masthead = masthead
         drawn.toggle = toggle
         drawn.empty = empty
         drawn.tuckedSection = tuckedSection
+        drawn.looseSection = looseSection
     }
 
     static func forgetFace() {
@@ -571,6 +589,7 @@ enum PoolTuckProbe {
         drawn.toggle = nil
         drawn.empty = nil
         drawn.tuckedSection = false
+        drawn.looseSection = false
     }
 
     static func recordRow(_ postID: String, tucked: Bool) {

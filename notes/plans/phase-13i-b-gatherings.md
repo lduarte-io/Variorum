@@ -1406,7 +1406,15 @@ STOP condition met.
   **FIXED with its pin:** `PoolTuckFaceTests.leavingThePoolTucksTheRunAwayAgain` (leave the page, remount
   over the SAME model) — **RED on the pre-fix build, 3 issues at the mechanism** (`showsTucked → true`,
   the toggle still "hide", the tucked row drawn); `PoolPostsModel.tuckAway()` on the page's
-  `onDisappear`; the suite **"Test run with 6 tests in 1 suite passed"** after. F-U4-4 — the gathering's navigator footer reads "smart book — it collects notes by its
+  `onDisappear`; the suite **"Test run with 6 tests in 1 suite passed"** after. The AFTER on the real
+  app: 05b-1 shown ("hide") → shelf → back → 05b-2 "show", tucked. F-U4-5 (walk-found, a placement
+  correction on this unit's own face): with 90 loose notes the revealed run rendered BELOW all of them —
+  the click showed nothing on screen. Her §8 reason for moving the count to the masthead was "it would
+  drown under a long Pool"; the run now stands at the TOP, under the masthead that opened it, labelled
+  "in gatherings", and the loose run below it wears "loose notes" (the empty state's own noun) only while
+  the run shows; an empty-but-gathered Pool keeps its sentence first. Pins extended (both labels while
+  shown, none while tucked, no loose label with nothing loose) — face suite **6/6 green**; the walk's
+  captures are its geometry evidence (P-13ib-U4-4 now names the placement). F-U4-4 — the gathering's navigator footer reads "smart book — it collects notes by its
   tags…" (pre-existing copy, false for a ★ rule; 13i-d's vocabulary sweep). Remaining: the F-U4-3 fix,
   then Study light/dark and Terminal dark on the fixed build; settings restore + read-back.
 

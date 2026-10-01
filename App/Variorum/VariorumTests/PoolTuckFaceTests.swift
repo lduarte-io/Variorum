@@ -148,6 +148,7 @@ struct PoolTuckFaceTests {
             #expect(drawn.looseRows == Set(loose))
             #expect(drawn.tuckedRows.isEmpty, "tucked — behind the count")
             #expect(drawn.tuckedSection == false)
+            #expect(drawn.looseSection == false, "no labels while nothing is revealed")
             #expect(drawn.empty == nil)
 
             // The one click.
@@ -159,6 +160,9 @@ struct PoolTuckFaceTests {
             #expect(drawn.tuckedRows == Set(tucked))
             #expect(drawn.looseRows == Set(loose), "the loose notes stay where they were")
             #expect(drawn.tuckedSection)
+            // F-U4-5: the revealed run stands at the TOP, so the loose run
+            // below it wears its own label.
+            #expect(drawn.looseSection)
             #expect(drawn.toggle == "hide")
 
             // …and back.
@@ -248,6 +252,7 @@ struct PoolTuckFaceTests {
                 PoolTuckProbe.drawn.tuckedRows.count == 2
             }
             #expect(PoolTuckProbe.drawn.tuckedRows == Set(gathered))
+            #expect(PoolTuckProbe.drawn.looseSection == false, "no loose run to label")
         }
     }
 
