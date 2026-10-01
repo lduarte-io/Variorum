@@ -300,8 +300,12 @@ words "nothing mobile-visible"); the author handoff
 (`notes/handoffs/phase-NN-handoff.md`, her checklist at the top,
 self-contained — if a question would need this session's context, the
 docs are incomplete); the next phase's plan + kickoff message authored
-just-in-time; commit + push; hard stop — the author kicks off what's
-next.
+just-in-time; the build-debris tidy — delete this phase's
+`App/Variorum/DerivedData/<tag>/` walk/build folders (gitignored,
+~1–2 GB each; unswept they reached 84 GB by 2026-10-01), keeping the
+small `.log`/`.sh` evidence files and any folder a still-open phase
+uses, after confirming no build is running; commit + push; hard stop
+— the author kicks off what's next.
 
 Two deploy-adjacent rules proven in 13b (added 2026-07-22): schema/
 mirror changes are SyncSpec §12 lockstep events whose MIRROR DEPLOY
