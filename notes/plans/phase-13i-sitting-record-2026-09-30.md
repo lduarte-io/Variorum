@@ -472,6 +472,40 @@ reordering §7, the 13o handoff §12 all verified.)*
    instruction: *"the future manuscript capability / potential should be saved too"*) — each a
    valid KnownIssues owner from today, each pointing back at this record (§5/§6/§10/§13).
 
+## 20. FOURTH PASS — the last items (2026-09-30)
+
+- **WITHIN-SHELF REORDER — RULED IN** (her ask: get it done ahead of time): drag books within a
+  shelf, plus context-menu **Send to Top / Send to Bottom** — and her rider honored by the
+  mechanism itself: ONE position sequence per shelf, display sorted (starred first, then
+  position), so Send to Top writes the smallest position and an unstarred book tops the unstarred
+  run — *"send to top would still be underneath starred"* — while a starred book sent to top tops
+  the starred run. No special cases. Doors: drag + the context menu; slot 13i-d (positions are
+  13i-a's columns either way).
+- **QUICKNOTES — RECOMMENDED SHAPE (proposed, standing unless she objects; her conflict
+  recorded):** Quicknotes stays an ORDINARY seeded gathering on `#quicknote` — no special
+  identity, no delete guard. The reasoning: the quick-entry door's contract is that it TAGS what
+  it mints `#quicknote` (a fact of the door, like an auto-tag); the gathering merely shows the
+  tag. Unlike the daily Journal (whose guard earned its place because ⌘J FILES INTO it — a
+  destination), Quicknotes is not a destination: nothing files into it, so deleting the gathering
+  breaks nothing — quick notes still land, still tagged, still findable in the tag's own listing,
+  and the gathering is re-makeable in one gesture. Two special books is one more than the design
+  needs. **Her removal question CONFIRMED yes:** removing the `#quicknote` tag from a note removes
+  it from Quicknotes instantly — a gathering is derived, and evict-on-untag is its definition.
+- **REMOVING A NOTE FROM A BOOK — the doors, enumerated** (her question; the OP exists —
+  `removePostFromReading`, a membership tombstone; the note lives on in its other books or the
+  Pool, tags untouched, and tombstone-means-decided keeps intake from re-adding):
+  **"Remove from this book"** on the note row's context menu in the book's Index/Outline, on the
+  Book Panel's row menu, and in the sidebar note box's book context. On an OWNED book the same
+  door reads **"Release from this book"** (the note goes bookless, to the Pool) — the vocabulary
+  carries the ownership distinction. On a GATHERING there is no remove door, because there is no
+  membership — the honest door is offered instead: *"Remove the #video-ideas tag."* All three
+  speak receipts; slot 13i-c (refusals/ops) + 13i-d (faces).
+- **Binding preserves identity — RATIFIED** (§19.6 stands as ruled).
+- **The IMPORTS WING — her lean recorded for 13h's kickoff:** *"I think it should exist as the
+  default option when importing, but not something for 13i to solve either way."* 13h's rows
+  updated to carry the lean; this sitting hands over the machinery and nothing more.
+
 **NEXT:** her UI iteration pass on the mockup; then `/architect-phase 13i-a` per the split addendum
 (the sitting that R-cor-13 required has now RUN — this record is it). §16 is FULLY RULED; what
-stands PROPOSED-unless-she-objects is exactly §19's defaults and harvest, nothing else.
+stands PROPOSED-unless-she-objects is §19's defaults and harvest plus §20's Quicknotes shape,
+nothing else.

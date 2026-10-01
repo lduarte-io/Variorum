@@ -47,7 +47,7 @@ confirmed priority list.** **Rows marked 🟣 need her; 🚀 is the launch.**
 | 11 | 🟣 📱 | **Mobile catch-up → mobile launch** — resume per the handoff (the HANDBACK CHECKLIST first), the owed reviews + batches through 10, then her polish bar and the parity-ledger burn-down | `notes/plans/mobile-round-2-orchestrator-handoff.md` |
 | 12 | 🟣 💻 **13t** | **The sync tier — subscription on** (launch clock = mobile's) | 13t's row |
 | 13 | 🟣 💻 **13m** | **The variorum edition** — file sharing (pre-req to collaboration; feeds the blog surface) | 13m's row |
-| 14 | 🟣 💻 **13h** | **Folder bridge & import** — building INTO the Imports library if 13i rules it | 13h's row + `notes/plans/phase-13h-folder-design-note.md` |
+| 14 | 🟣 💻 **13h** | **Folder bridge & import** — the Imports WING is THIS phase's call (13i built the wings machinery, deliberately did not rule the wing; her lean, 2026-09-30: *"it should exist as the default option when importing"* — sitting record §20) | 13h's row + `notes/plans/phase-13h-folder-design-note.md` |
 | 15 | 🟣 💻 **13q** | **Delight** | 13q's row + brief |
 
 **✔ THE PRE-13u ROUND RAN 2026-08-30 → 09-01 between 13p and 13u1** (its one product-visible deliverable, the sample library *The Adventures of Sherlock Holmes* default-on in every store — plus, at her rulings, the eight-mode note row with Index and Read, the Blocks workbench, the cohesive Book redesign, the Snippets groups, and the security-clarity centerpiece — record: `notes/plans/pre-13u-round.md`). **⚠️ AMENDED 2026-08-30 (her stated plan, same day as the Phase 17 ruling).** The table above is
