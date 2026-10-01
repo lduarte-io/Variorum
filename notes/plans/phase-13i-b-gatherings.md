@@ -802,12 +802,138 @@ keeps the walk's book "the door", its tag and seven notes (dev store — harmles
 
 ## U3 RECORD — the rule editor + the two strengthening doors + the teaching moment (opus-implementer, 2026-10-01)
 
-**NOT DONE BY THIS UNIT (first line, per the contract):** IN PROGRESS — this line is finalized at
-the close. Fenced from the start: the Collecting pane's sentence face (13i-d), every ownership arm
-(13i-c), the gathering assembly's STAR context (U4 — see F-U3 findings when written), the Bookcase,
-schema/`Sync/`/migrations (zero).
+**NOT DONE BY THIS UNIT (first line, per the contract):** the gathering assembly's STAR context
+(U4's — so a GATHERING rule's ★ arm shows nothing yet, and a bind of such a gathering materializes
+none of its star matches: F-U3-3); the op's dead `keepCollecting`/`collectingName` parameters
+(fenced — no Operations change beyond P-13ib-6: F-U3-4); the Collecting pane's sentence face and
+any book-view/gear door for the editor (13i-d re-homes it); every ownership arm (13i-c — nothing
+built or hinted); no mounted pin for F-U3-1 (its evidence is the walk's before/after pair — the edge
+is SwiftUI's sheet `onDismiss`); no QUESTIONS.md entries written (the plan logs PROVISIONALs at
+close — each below carries its QUESTIONS-ready paragraph); no phone face; the WalkKit hardening the
+walk proved necessary (F-U3-5 — tooling, not this surface); zero `Sync/`, schema, migrations — no
+STOP condition met.
 
-**UNIT STATUS: IN PROGRESS.**
+**UNIT STATUS: CLOSED 2026-10-01 — every evidence item of the plan §5 U3 row green and walked (below).**
+
+### What U3 built (the design as shipped — a fresh session's map)
+
+- **`Domain/RuleEditing.swift`** — the editor's brain: path-addressed edits over `RuleTerm` ITSELF
+  (add · addGroup born seeded · remove with upward pruning of groups THIS removal empties ·
+  toggleNegation one layer — `.not` is a wrapper node · setCombinator), the row projection the face
+  draws, `carriesLegacy`, `needsWrite` (structural equality; a malformed rule is never overwritten).
+  A group holding a grandfathered term carries no remove door (`isRemovable`). Every stored shape is
+  an editor state — "saving never silently drops a term" holds by construction (pinned as a
+  property over a corpus). `Queries.membersMissingTag` — the offer's N, `tagAllMembers`' own
+  predicate.
+- **`Features/Readings/RuleEditor.swift`** — `RuleEditorCopy` · `RuleEditorModel` (`Identifiable`:
+  the sheet's ITEM is the model; `load()` idempotent; `save()` writes only what changed — dial,
+  auto-tag, then the rule through `setReadingQuerySpec` — and OFFERS `tagAllMembers` on the seam) ·
+  `RuleEditorSheet` · the DEBUG `RuleEditorProbe`. Door: the shelf row's "Edit Rule…" for gatherings
+  AND books (`.editRule`); the shelf refreshes its aggregates when the editor closes (F-U3-1).
+  RETIRED: `SmartSpecSheet`, `ReadingsViewModel.setSmartSpec`, `Queries.legacyDraft` (no consumer
+  remains; `Queries.SmartQuerySpec` stays — Promote to Book and the phone's create-book still hand
+  the choke point a v1 draft).
+- **`BookOrderAndConversion.swift`'s bind half** — `BindOffer` (the sheet's item, CARRYING the count
+  — F-U2-3's fix shape), `BindCopy`, `BindIntoBookSheet`, the DEBUG `BindDoorProbe`. Doors: the
+  shelf's "Bind into a Book…" (`.bindIntoBook`; hidden on a finished gathering) and "Make a Book from
+  This Gathering…" (`.makeBookFromGathering` → a name prompt → `ShelfViewModel.spawnBook`, one runner
+  closure: the live rule read inside it, E13's guard, `createReading(kind: .book, querySpec:,
+  wingId:)`); the book navigator's "+ new chapter" on a gathering → `structure.openBindOffer(
+  followUp: .createChapter, order:)`. `ShelfViewModel.bind` / `BookStructureModel.bind(order:)`.
+- **The teaching moment** — `BookStructureModel.acceptDrop` (the one brain behind the navigator's and
+  Outline's post drags) answers a POST drag on a GATHERING with `offerToBind`: an OFFER ("Turn into a
+  book to arrange by hand?" — the sitting record §3 verbatim) whose act opens the bind confirm; a
+  finished gathering hears the refusal. Index/Book/Read carry no post drag (nothing to hang there).
+- **P-13ib-6** — `revertSmartConversion` tombstones every live pair row on the reverted row and
+  hands the ids (a `LockIsolated` box) to `reapplySmartConversion`.
+
+### PROVISIONALs made in U3 (each QUESTIONS-ready; the morning bundle carries them)
+
+- **P-13ib-U3-1 — Grandfathered terms are read-only all the way down.** A legacy (date/profile) term
+  has no door, and a GROUP that holds one has no remove door either (removing the group would take
+  the old term with it); there is no "clear the whole rule" door, so a rule carrying an old term
+  can't be emptied from this face. *Options:* (a) BUILT; (b) a legacy row gets a remove door (a
+  deliberate act, not a silent drop); (c) a whole-rule "clear" door. *QUESTIONS paragraph:* "An old
+  gathering's rule can carry a date or profile term the editor shows but can't edit. Should you be
+  able to (a) never remove it here — built; (b) remove it with its own ✕; or (c) clear the whole
+  rule in one go?"
+- **P-13ib-U3-2 — The spawn asks for a name, prefilled "<gathering> (book)".** (Book names are unique
+  by her E13 ruling, so the sibling can't share the gathering's name.) *Options:* (a) a prompt,
+  prefilled — BUILT; (b) mint "<gathering> (book)" silently, rename later; (c) prefill something
+  else. *QUESTIONS paragraph:* "Making a book from a gathering asks for the new book's name,
+  suggesting '<gathering> (book)'. Keep the prompt, skip it with that default, or suggest another
+  name?"
+- **P-13ib-U3-3 — P-13ib-6's reach, read through its own law.** The ruling names "every live member
+  row"; built for EVERY live pair row, waiting ARRIVALS included ("a gathering holds nothing" — a
+  gathering has no door). The redo revives exactly the rows the undo took (the ids exist only at
+  undo time), so a member she removed by hand BEFORE the undo stays removed after the redo (the old
+  redo revived every do-time row). *Options:* (a) BUILT; (b) members only — an arrival stays live
+  on the reverted gathering (invisible; it would block that pair's next bind); (c) the redo also
+  revives do-time rows removed before the undo. *QUESTIONS paragraph:* "Undoing a bind empties the
+  gathering again — members and anything waiting at its door alike — and redo brings back exactly
+  what the undo took. OK as built, or should a waiting arrival survive the undo?"
+- **P-13ib-U3-4 — The teaching offer's act opens the bind CONFIRM** (the count + the keeps-collecting
+  truth), never a one-click bind; on a FINISHED gathering the drag hears a refusal instead (an
+  offer that can only fail is not offered). *Options:* (a) BUILT; (b) the offer's button binds
+  directly; (c) no answer at all on a finished gathering. *QUESTIONS paragraph:* "Dragging a note
+  inside a gathering asks 'Turn into a book to arrange by hand?' and its button opens the usual
+  Bind confirmation. Should the button bind straight away instead?"
+- **P-13ib-U3-5 — When the save offers "also tag the N current members now":** on a BOOK, when the
+  save set or changed the rule OR the auto-tag, an auto-tag is in place, and N > 0 — N counts the
+  members not yet wearing the tag (exactly what `tagAllMembers` will tag). No offer when N = 0 or
+  nothing relevant changed. *Options:* (a) BUILT; (b) only when the auto-tag itself changed; (c) a
+  standing "tag the N members" button on the row instead of an offer. *QUESTIONS paragraph:* "Saving
+  a book's rule or auto-tag offers to tag the members who don't wear the tag yet. Ask only when the
+  auto-tag changes, keep asking on rule edits too (built), or show a standing button instead?"
+- **P-13ib-U3-6 — An empty rule clears the rule.** Removing a rule's last term (or a group's last
+  term up to the root) stores NO RULE — on a gathering that is the standing "shows every note"
+  (the editor's empty state says so), on a book "collects nothing by itself". The editor never
+  mints an empty group ("+ group" is born with its first term). *Options:* (a) BUILT; (b) refuse to
+  save an empty rule on a gathering. *QUESTIONS paragraph:* "Taking the last term out of a
+  gathering's rule leaves it with no rule, which shows every note (as a new gathering does). Fine,
+  or should the editor refuse to save a gathering with no rule?"
+- **P-13ib-U3-7 — The words** (13s re-voices): "Edit Rule…" (one verb, both kinds) · "Bind into a
+  Book…" · "Make a Book from This Gathering…" · the bind body's truth sentence "It stays the same
+  book on your shelf — same name, same star — and it keeps collecting after you bind it: new notes
+  that match its rule join at the end." · the bind refusal "That's already a book — only a
+  gathering binds into one." · the receipts "“X” is a book now — N notes bound in, in the order you
+  had them. It keeps collecting." / "Made “X” — N notes joined, and it keeps collecting." · the
+  offer "Also tag the N current members with #tag now? — Tag Them".
+
+### FINDINGS (for the orchestrator; none is a STOP condition)
+
+- **F-U3-1 (FIXED, walk-found):** the shelf's tags column and word counts are one-shot aggregates;
+  a saved rule left the row reading "smart", no tag, until the shelf was re-entered (the retired
+  sheet had the same gap). `onDismiss` refresh on the editor's sheet; evidence = the walk's
+  before/after pair (17a pre-fix build, 17b fixed build).
+- **F-U3-2 (recorded — a face, not this unit's):** the note masthead's membership chip loads
+  one-shot (on open / on popover show), so a note seated by INTAKE while it is open still reads "in
+  no book" until re-opened. Pre-existing behaviour, newly reachable through U1's intake (a tagging
+  act from the masthead seats the open note). Owner suggestion: 13i-d (the faces/chip) or a
+  standing-fixes entry.
+- **F-U3-3 (U4 MUST CARRY IT):** `assembleReading`'s gathering arm passes no star context, so a
+  GATHERING rule's ★ term matches nothing today — the editor offers ★ on gatherings (ruled grammar),
+  and the BIND materializes through the same assembly (as does its count), so binding a `tag ∧ ★`
+  gathering would mint zero star matches. Books' intake already passes the live star list (U1), so
+  the walk's `tag ∧ ★` seat on a BOOK is real. U4's "wire every assembly/pool/chip call site that can
+  meet a star term" must include `assembleReading` (→ the bind's materialization and
+  `SmartConversionCount`).
+- **F-U3-4 (fenced, recorded):** `convertSmartReadingToCurated(keepCollecting:collectingName:)`
+  still accepts the dead "(collecting)" parameters (no door passes them since U3; core pins still
+  exercise them). Retire at the next op touch (owner: the orchestrator's call — 13i-c touches the
+  bind's owned-notes confirm).
+- **F-U3-5 (walk tooling):** after Settings closes, activating the dev app did not raise its main
+  window above another app's window, and `guard.sh` checks frontmost + point-in-window but not
+  OCCLUSION — two right-clicks landed in the orchestrator's terminal frame (harmless: keystrokes
+  are re-guarded). The mid-walk hardening (AXRaise + a topmost-window-at-point check via
+  `CGWindowListCopyWindowInfo`) belongs in `Tools/WalkKit`.
+- **F-U3-6 (pre-existing, already owned):** the shelf's report line persists and draws over the ⌘k
+  hint — F-U2-4's class (13i-d polish). The finished-gathering drag refusal reuses "This book is
+  locked — unlock it first." (the shared `lockedReading` words; 13i-d's vocabulary sweep).
+- **Tutorial (P-6):** no lesson sentence went false. The seeded lessons name no convert/filter door
+  and never say a bound book stops collecting; "promoted into a smart book that collects everything
+  wearing it" stays true (13i-d's vocabulary sweep owns "smart"). No lesson prose rewritten — no
+  re-seed consequence.
 
 ### U3 LIVE STATUS (per commit; every unverified claim PENDING)
 
@@ -1025,6 +1151,21 @@ schema/`Sync/`/migrations (zero).
   stopped. The dev store keeps the walk's books ("bind walk", "spawn walk", "spawn walk (book)",
   "refresh walk"), the tags `#bind13ib`/`#spawn13ib`, nine notes, and `#walked` on bind walk's four
   members (dev store — harmless).
+- **CLOSE (this commit) — the final verification, after the last code edit (71277bd5's F-U3-1
+  line):** the FULL core suite `swift build --build-tests && swift test` — **"Test run with 1868
+  tests in 195 suites passed"** (1 skipped: the standing env-gated Supabase integration test;
+  baseline 1852/194 at U2's close → +16 tests / +1 suite: `RuleEditingTests` 13 + 3 new conversion
+  pins). The mobile target (`VariorumMobile`, generic iOS Simulator) — **BUILD SUCCEEDED**. The Mac
+  app built inside the Mac suite runs; suite-level `-only-testing` by struct name, counts read
+  exactly: **A — readings / conversion / shelf / book view / registry: "Test run with 144 tests in
+  19 suites passed", 0 skipped, 0 known issues** (BindDoor, RuleEditor, CapabilityRegistry,
+  BookOrderConversion, DuplicateBookNameDoor, BookAscentDeclaration, CalloutSwatch,
+  CalloutEmojiPicker, TimelineAndReadings, BookArrivals, BookStructureModel, JournalBooks, BookDrop,
+  BookView, BookFocusFold, OutlineWritingSurface, SpreadBookView, ShelfModel, PromoteAndPalette);
+  **B — the status seam, the router and THE TUTORIAL SPINE (all eleven `TutorialWalkTests`
+  suites): "Test run with 94 tests in 13 suites passed", 0 skipped, 0 known issues.** Zero instances
+  throughout; `git status` clean. Ledger row 4 flipped. No revert in flight; nothing uncommitted.
+  U3 CLOSED.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
@@ -1033,7 +1174,7 @@ schema/`Sync/`/migrations (zero).
 | 1 | Plan authored; kickoff PROVISIONALs recorded (§6) | DONE (this commit) |
 | 2 | U1 — intake + auto-tag + judgment ops + ruleSQL wing scoping + the R3 ritual spine | **DONE 2026-10-01** — the U1 RECORD above (design map · P-13ib-U1-1…9 · F-1…F-6); evidence: `IntakeDecisionTests` 13 · `IntakeOperationsTests` 42 · `ArrivalMemberHygieneTests` 6 (red-on-old 6/6) · `RuleWingScopingTests` 3 (red-on-old 2/3, the third the control) · `IntakeSoakTests` 6 seeds × 300 steps · `GatheringRitualTests` 3 (R3 + lessons 3–4); 5+2 mutation checks bite; core 1840/193 green; Mac + mobile build; changed-op Mac suites 380/74 + mobile 101/22 pass. **F-1 is U3's to carry (a shipped sentence now false)** |
 | 3 | U2 — the Arrivals face | **DONE 2026-10-01** — the U2 RECORD above (design map · P-13ib-U2-1…5 · F-U2-1…5 · THE WALK, 15 captures, both voices × both appearances); evidence: `ArrivalQueriesTests` 12 (incl. the EXPLAIN-plan pin) · `BookArrivalsTests` 10 mounted (absent/present on Index AND Book, gone on Outline/Read, expansion + both doors, Add at the END unsectioned, Dismiss, the capacity refusal on the seam, already-judged, vanish) · the registry walk (`BookArrivalsLine` the two acts' one renderer); 2 mutation checks bite; core 1852/194 green; Mac + mobile build; book-surface + registry + tutorial Mac suites 335/57 pass (4 standing known issues). **F-U2-3 joins F-1 in U3's charter** (the conversion sheet's wrong count) |
-| 4 | U3 — the rule editor + bind/spawn + the teaching moment | IN PROGRESS — the U3 RECORD above |
+| 4 | U3 — the rule editor + bind/spawn + the teaching moment | **DONE 2026-10-01** — the U3 RECORD above (design map · P-13ib-U3-1…7 · F-U3-1…6 · THE WALK, 27 captures, both voices × both appearances); evidence: `RuleEditingTests` 13 (the every-edit-touches-only-its-node property; unedited/malformed write nothing; legacy never removable) · P-13ib-6 pins 2 (red-on-old watched) + the §19.6 identity pin · `BindDoorTests` 8 (F-U2-3 red-on-old through the real shelf, mechanism confirmed by experiment; F-1's truth; identity + keeps collecting; spawn; the teaching offer) · `RuleEditorTests` 8 mounted · the registry walk (`.editRule`, `.bindIntoBook`, `.makeBookFromGathering`); 4 mutation checks bite; core 1868/195 green; Mac + mobile build; Mac suites 144/19 + 94/13 incl. the tutorial spine. **F-U3-3 is U4's to carry** (the gathering assembly's star context also feeds the bind) |
 | 5 | U4 — starred gathering · Quicknotes verify · Pool tuck · filter mechanics | NOT STARTED |
 | 6 | The ladder (fresh `fable-reviewer`, combined diff) | NOT STARTED |
 | 7 | Closeout + morning bundle + handoff (canon deltas PROPOSED, not applied) | NOT STARTED |
@@ -1074,6 +1215,11 @@ schema/`Sync/`/migrations (zero).
    into Outline, where the ruled line does not stand — should Outline carry it too? hers) and F-U2-2
    (a QUIET receipt has no visible home on Index/Book while no note is live — the 18i seam's
    placement).
+   **U3:** P-13ib-U3-1…7 (the U3 RECORD — legacy terms read-only all the way down, the spawn's name
+   prompt, P-13ib-6's reach incl. arrivals and the exact redo, the teaching offer opening the
+   confirm, when the tag-members offer asks, an empty rule clearing the rule, the words); F-U3-2
+   (the note chip doesn't hear an intake seat while the note is open — a face, owner 13i-d) and
+   F-U3-4 (the op's dead "(collecting)" parameters).
 
 ## LIVE STATUS (the resiliency protocol's record — updated per commit; every unverified claim marked PENDING)
 
