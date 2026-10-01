@@ -395,11 +395,20 @@ the walk into the morning.
   no demotion, no physical row loss; a removed member returns only by hand-add or a restore's
   revival; a finished book holds no bell; a gathering holds no rows; capacity never exceeded;
   I2/I10) — GREEN, telemetry asserting intake seated AND belled on every seed.
-- **SOAK MUTATION CHECK IN FLIGHT (announced here):** single reverts of the capacity arm
-  (`IntakeDecision.swift`) and of the shelf count's member filter (`Queries/ShelfQueries.swift`)
-  against the committed tree, restored by `git checkout --`. If this line still reads IN FLIGHT,
-  any diff in those two files is a mutation to discard.
-- NEXT — `GatheringRitualTests`.
+- **SOAK MUTATION CHECK — DONE, tree restored (no revert in flight).** S1 (the capacity arm
+  removed) → caught on seed 1 (the capped book's assembly disagreed with its member rows); S2 (the
+  shelf count without its member filter) → 1,319 issues. Both restored by `git checkout --`;
+  `git status` clean before the next piece.
+- Piece 7 (this commit): **`GatheringRitualTests` (3) — the acceptance spine, GREEN.** R3 as one
+  headless walk (tag two → the gathering shows both and holds no rows → untag one, it LEAVES →
+  bind in place: same row id, name, star, rule on the row → a third tagged note JOINS (keeps
+  collecting) → reorder → untag the other, it STAYS); lessons 3 and 4, each sentence a comment
+  above the behaviour that makes it true. Lesson 4's "copy it in" clause is 13i-c's arm (no op
+  exists; nothing here makes it false). **The bind needed NO recast:** `convertSmartReadingToCurated`
+  already flips the same row, materializes the assembly and leaves the rule on the row — and a
+  book with a rule is a living book under U1 — so no minimal op-side recast was built (U3 owns
+  the door's face and the retirement of the `keepCollecting` "(collecting)" offer).
+- NEXT — the full core suite, the Mac + mobile builds, the Mac suites pinning changed ops.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
