@@ -192,7 +192,8 @@ extension Operations {
 
     /// A live application of a live tag at-or-under the REFERENCED tag's
     /// subtree (the `ruleMatchSQL` tag test, single-post form — the root is
-    /// reached by ID, §19's rule).
+    /// reached by ID, §19's rule). Wing-scoped exactly as `ruleSQL` is
+    /// (13i-b U1 — the two probes must never disagree about a term).
     private func hasLiveTagApplication(
         _ db: Database, postID: String, underTagID tagID: String
     ) throws -> Bool {
@@ -203,6 +204,7 @@ extension Operations {
                  JOIN tag applied ON applied.id = pt.tag_id AND applied.deleted_at IS NULL
                  JOIN tag root ON root.id = ? AND root.deleted_at IS NULL
                 WHERE pt.post_id = ? AND pt.deleted_at IS NULL
+                  AND applied.wing_id = root.wing_id
                   AND (applied.path = root.path
                        OR substr(applied.path, 1, length(root.path) + 1) = root.path || '/'))
                 """,

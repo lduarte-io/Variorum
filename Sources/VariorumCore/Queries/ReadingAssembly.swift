@@ -558,11 +558,17 @@ extension Queries {
             // (§19's rulings: the rule holds the ID, so renameTag can
             // never break it; a dead or missing tag matches NOTHING —
             // the root join fails). The applied-tag walk is v1's own.
+            // 13i-b U1 (the 13i-a §9 hand-off a): the walk is WING-SCOPED —
+            // tags are per-wing since v1_18 (R-13ia-1), so another wing's
+            // same-path twin is a different tag and never satisfies this
+            // term ("nothing should cross wings", the sitting record §9).
+            // Pinned by direct row insertion (`RuleWingScopingTests`).
             return ("""
                 EXISTS (SELECT 1 FROM post_tag pt
                          JOIN tag applied ON applied.id = pt.tag_id AND applied.deleted_at IS NULL
                          JOIN tag root ON root.id = ? AND root.deleted_at IS NULL
                         WHERE pt.post_id = c.id AND pt.deleted_at IS NULL
+                          AND applied.wing_id = root.wing_id
                           AND (applied.path = root.path
                                OR substr(applied.path, 1, length(root.path) + 1) = root.path || '/'))
                 """, [id])

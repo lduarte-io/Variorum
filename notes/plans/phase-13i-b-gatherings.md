@@ -331,8 +331,20 @@ the walk into the morning.
   record §3/§4/§14/§19/§20/§24 (+ §1–§25 read through), the 13i-a record §3/§4/§9, the resiliency
   protocol, SyncSpec whole (convergence-adjacent: R1's status-aware pair dedupe is the posture §2.7
   leans on). No revert in flight. No subagents.
-- Piece 1 (this commit): the record opened. NEXT — piece 2: `Domain/IntakeDecision.swift` + the
-  intake engine (`Operations+Intake.swift`) + the hooks.
+- Piece 1 (2205c2bf): the record opened.
+- Piece 2 (this commit) — **the §9 hand-off (a), FIXED with its pin.** `ruleSQL`'s tag term gains
+  `applied.wing_id = root.wing_id`; so does its single-post twin `hasLiveTagApplication` in
+  `Operations+SmartCollect.swift` (the collect door's probe — left unscoped, the two probes would
+  disagree about one term: the door would report `alreadyMatched` for a note the gathering does
+  not show). Pin `RuleWingScopingTests` (3): the cross-wing state inserted by direct rows (a
+  second wing's same-path twin tag applied to a Home note). **Red-on-old watched:** 2 of 3 red on
+  the pre-fix tree (the gathering showed the note / the Pool lost it; the collect door said
+  `alreadyMatched`), the control green; all 3 green after. Neighbor suites (assembly, collect,
+  tagsAll, wings migration, membership chip, quicknote — 54 tests / 7 suites) green.
+  Deliberately untouched: `assembleReading`'s GROUPING-tag `sectionSelect` (a display walk, not
+  the rule predicate; no door can mint the state) — recorded, not hardened.
+- NEXT — piece 3: `Domain/IntakeDecision.swift` + the intake engine (`Operations+Intake.swift`)
+  + the hooks.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
