@@ -44,3 +44,29 @@ builds would refuse against a marker-10 mirror — so NOTHING deploys early, and
 - [ ] `notes/plans/phase-13i-a-schema-event.md` ledger row 13 flipped with the window's record.
 - [ ] The memory file updated; commit + push.
 - [ ] 13i-b's plan is the next kickoff's (at her word).
+
+## THE `!` ROAD (2026-10-01 — the classifier blocked the session's own POST, the 13j precedent; these run by HER hand, output read in-conversation)
+
+Each command sources the stored token and is self-contained. Run from the repo root.
+
+**0 — the read-only marker probe (expect `[{"marker":9}]`):**
+```
+! cd ~/dev/variorum && set -a && source .env.supabase.local && set +a && REF=$(echo "$VARIORUM_SUPABASE_URL" | sed -E 's|https://([a-z0-9]+)\.supabase\.co.*|\1|') && curl -s -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" -d '{"query":"select sync_schema_version() as marker;"}'
+```
+
+**1 — THE DEPLOY (the file WHOLE, one session; expect `[]`; an error rolls back whole and the
+marker stays 9 — read, fix, re-run):**
+```
+! cd ~/dev/variorum && set -a && source .env.supabase.local && set +a && REF=$(echo "$VARIORUM_SUPABASE_URL" | sed -E 's|https://([a-z0-9]+)\.supabase\.co.*|\1|') && jq -Rs '{query: .}' < Server/supabase/13_phase13i_wings.sql | curl -s -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" -d @-
+```
+
+**2 — the verification tail (expect marker 10; wing/shelf present with RLS forced; the nine
+reading columns; the allowlist + ciphertext probes true):**
+```
+! cd ~/dev/variorum && set -a && source .env.supabase.local && set +a && REF=$(echo "$VARIORUM_SUPABASE_URL" | sed -E 's|https://([a-z0-9]+)\.supabase\.co.*|\1|') && curl -s -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" -d '{"query":"select sync_schema_version() as marker, (select count(*) from wing) as wings, (select count(*) from shelf) as shelves, (select relrowsecurity and relforcerowsecurity from pg_class where relname = $$wing$$) as wing_rls, (select relrowsecurity and relforcerowsecurity from pg_class where relname = $$shelf$$) as shelf_rls, (select count(*) from information_schema.columns where table_name = $$reading$$ and column_name in ($$wing_id$$,$$shelf_id$$,$$shelf_position$$,$$starred$$,$$owned$$,$$sealed_at$$,$$hide_owned$$,$$intake_seating$$,$$auto_tag_id$$)) as reading_cols, (select pg_get_functiondef($$sync_pull(bigint,text,text,text,int,text)$$::regprocedure) like $$%''wing'', ''shelf''%$$) as allowlist_grew, (select pg_get_functiondef($$key_vault_update(jsonb, int, text, text)$$::regprocedure) like $$%\"shelf\": [\"name\", \"glyph\"]%$$) as cipher_grew;"}'
+```
+
+**3 — the grant sweep (expect every row OK/INFO, wing + shelf rows included):**
+```
+! cd ~/dev/variorum && set -a && source .env.supabase.local && set +a && REF=$(echo "$VARIORUM_SUPABASE_URL" | sed -E 's|https://([a-z0-9]+)\.supabase\.co.*|\1|') && jq -Rs '{query: .}' < Server/supabase/maintenance/14c-post-deploy-grant-sweep.sql | curl -s -X POST "https://api.supabase.com/v1/projects/$REF/database/query" -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" -d @- | jq -r '.[] | select(.verdict != null) | "\(.verdict) \(.item // .relname // "")"' | sort | uniq -c
+```
