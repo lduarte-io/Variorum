@@ -200,7 +200,8 @@ struct BindDoorTests {
 
             let bookID = try #require(made)
             #expect(shelf.lastError == nil)
-            #expect(shelf.lastReport == BindCopy.spawned("the door (book)", count: 2))
+            #expect(shelf.lastReport
+                    == BindCopy.spawned("the door (book)", count: 2, collects: true))
             let book = try #require(try await db.read { try Queries.reading($0, id: bookID) })
             #expect(book.kind == .book)
             #expect(book.querySpec == source.querySpec, "the rule copied")
@@ -286,6 +287,69 @@ struct BindDoorTests {
                 await shelf.spawnBook(from: negated.id, named: "everything else (book)"))
             #expect(try await db.read { try Queries.reading($0, id: book)?.autoTagId } == nil,
                     "a book must never flow out the tag its rule excludes")
+        }
+    }
+
+    /// **Ladder F-R1-3 (confirmed):** the spawn's words must tell the truth
+    /// for a gathering without a READABLE rule. A rule-less gathering shows
+    /// EVERY note in its wing, but NULL on a BOOK means "collects nothing by
+    /// itself" (the kill switch's own asymmetry) — so the spawned sibling
+    /// starts empty and never collects, while the pre-fix door promised "the
+    /// notes it matches now join it, and new matches keep joining" and the
+    /// receipt claimed "it keeps collecting." The honest gate is
+    /// `RuleGrammar.read == .rule` (the implementer's refinement: a MALFORMED
+    /// rule runs no intake either, P-13ib-5). Whether such a gathering should
+    /// offer the spawn at all is HERS (bundled beside F-U4-7); the words tell
+    /// the truth either way.
+    ///
+    /// RED-ON-OLD (watched): the pre-fix receipt said "0 notes joined, and it
+    /// keeps collecting." — the contains-check below failed.
+    @Test func spawnFromARuleLessGatheringNeverClaimsItCollects() async throws {
+        try await withBindWorld { session, db in
+            let ops = session.operations
+            // "Create Smart Book" mints exactly this shape (F-U4-7): no rule.
+            _ = try ops.createPost(title: "a loose note")  // the gathering shows it
+            let bare = try ops.createReading(name: "everything", kind: .gathering)
+            let shelf = ShelfViewModel(session: session)
+            let book = try #require(
+                await shelf.spawnBook(from: bare.id, named: "everything (book)"))
+            let row = try #require(try await db.read { try Queries.reading($0, id: book) })
+            #expect(row.querySpec == nil)
+            #expect(try await db.read { db in
+                try Int.fetchOne(
+                    db,
+                    sql: "SELECT COUNT(*) FROM reading_post WHERE reading_id = ?",
+                    arguments: [book]) ?? -1
+            } == 0, "non-vacuity of the lie: nothing joins — NULL on a book collects nothing")
+            let report = try #require(shelf.lastReport)
+            #expect(!report.contains("keeps collecting"),
+                    "the receipt must not claim a collecting that cannot happen")
+            #expect(!report.contains("joined"),
+                    "nothing joined — the receipt says what the book IS: born empty")
+            #expect(report == BindCopy.spawned("everything (book)", count: 0, collects: false))
+
+            // The sheet's body for this gathering speaks the same truth —
+            // and the MALFORMED cell (the implementer's refinement: an
+            // unreadable rule runs no intake either) never promises joins.
+            let bareBody = BindCopy.spawnMessage(for: RuleGrammar.read(bare.querySpec))
+            #expect(bareBody.contains("no rule") && bareBody.contains("starts empty"))
+            #expect(!bareBody.contains("join it"))
+            let malformedBody = BindCopy.spawnMessage(for: .malformed)
+            #expect(malformedBody.contains("can\u{2019}t read")
+                    && malformedBody.contains("starts empty"))
+            #expect(!malformedBody.contains("join it") && !malformedBody.contains("keep joining"))
+            // A readable rule keeps the standing promise.
+            #expect(BindCopy.spawnMessage(for: .rule(.star)).contains("keep joining"))
+
+            // The malformed cell end-to-end: the receipt is the born-empty
+            // truth there too (assembleReading fails closed → 0 seated).
+            let broken = try ops.createReading(
+                name: "broken", kind: .gathering, querySpec: "not json {{")
+            let brokenBook = try #require(
+                await shelf.spawnBook(from: broken.id, named: "broken (book)"))
+            #expect(try await db.read { try Queries.reading($0, id: brokenBook) } != nil)
+            #expect(shelf.lastReport
+                    == BindCopy.spawned("broken (book)", count: 0, collects: false))
         }
     }
 

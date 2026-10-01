@@ -187,7 +187,8 @@ final class ShelfViewModel {
     func spawnBook(from gatheringID: String, named name: String) async -> String? {
         let database = session.database
         do {
-            let (book, seated) = try await session.runner.run { ops -> (Reading, Int) in
+            let (book, seated, collects) = try await session.runner.run {
+                ops -> (Reading, Int, Bool) in
                 guard let gathering = try database.read({
                     try Queries.reading($0, id: gatheringID)
                 }) else { throw OperationError.readingNotFound(id: gatheringID) }
@@ -195,6 +196,12 @@ final class ShelfViewModel {
                     throw OperationError.wrongReadingKind(id: gatheringID, expected: .gathering)
                 }
                 try ops.assertBookNameIsFree(name)
+                // Ladder F-R1-3's gate: only a READABLE rule collects — the
+                // receipt must not promise what a NULL or unreadable rule
+                // cannot do (P-13ib-5: intake runs iff the rule reads).
+                let collects = if case .rule = RuleGrammar.read(gathering.querySpec) {
+                    true
+                } else { false }
                 // HER MORNING RULING (13i-b, 2026-10-01 — P-13ib-3
                 // overruled): "the spawn isn't adding the auto tag? it
                 // should." The derivation is the pure Domain rule
@@ -220,10 +227,10 @@ final class ShelfViewModel {
                 let seated = try database.read {
                     try Queries.assembleReading($0, readingID: book.id).count
                 }
-                return (book, seated)
+                return (book, seated, collects)
             }
             lastError = nil
-            lastReport = BindCopy.spawned(book.name, count: seated)
+            lastReport = BindCopy.spawned(book.name, count: seated, collects: collects)
             await refreshAggregates()
             return book.id
         } catch let error as OperationError {

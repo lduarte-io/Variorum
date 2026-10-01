@@ -210,13 +210,42 @@ nonisolated enum BindCopy {
 
     // The spawn ("Make a book from this gathering" — the sitting record §3).
     static func spawnTitle(_ name: String) -> String { "Make a book from \u{201C}\(name)\u{201D}" }
-    static let spawnMessage =
-        "A new book with the same rule: the notes it matches now join it, and new matches "
-        + "keep joining. The gathering stays as it is."
+
+    /// The spawn sheet's body, per the gathering's RULE STATE (ladder
+    /// F-R1-3): the collecting promise is true only of a READABLE rule —
+    /// NULL on a BOOK means "collects nothing by itself" (the kill switch's
+    /// own asymmetry) and a malformed rule runs no intake (P-13ib-5), so
+    /// those arms speak the born-empty truth instead of promising joins.
+    /// Whether a rule-less gathering should offer the spawn at all is hers
+    /// (bundled beside F-U4-7); these words tell the truth either way.
+    static func spawnMessage(for rule: RuleGrammar.ReadResult) -> String {
+        switch rule {
+        case .rule:
+            return "A new book with the same rule: the notes it matches now join it, and "
+                + "new matches keep joining. The gathering stays as it is."
+        case .none:
+            return "This gathering has no rule \u{2014} it shows every note. The new book "
+                + "starts empty and collects nothing by itself until you give it a rule "
+                + "(Edit Rule\u{2026}). The gathering stays as it is."
+        case .malformed:
+            return "This gathering\u{2019}s rule is stored in a form this version "
+                + "can\u{2019}t read, so the new book starts empty and won\u{2019}t collect "
+                + "until the rule is fixed. The gathering stays as it is."
+        }
+    }
+
     /// PROVISIONAL (P-13ib-U3-2): the sibling's suggested name.
     static func spawnDefaultName(_ name: String) -> String { "\(name) (book)" }
     static let spawnConfirm = "Make Book"
-    static func spawned(_ name: String, count: Int) -> String {
+
+    /// The spawn's receipt. `collects` is the same F-R1-3 gate (a READABLE
+    /// rule rode the copy): false speaks the born-empty truth — nothing
+    /// joined, nothing will, until a rule lands.
+    static func spawned(_ name: String, count: Int, collects: Bool) -> String {
+        guard collects else {
+            return "Made \u{201C}\(name)\u{201D} \u{2014} it starts empty; give it a rule "
+                + "(Edit Rule\u{2026}) and it will collect."
+        }
         let notes = count == 1 ? "1 note" : "\(count) notes"
         return "Made \u{201C}\(name)\u{201D} \u{2014} \(notes) joined, and it keeps collecting."
     }

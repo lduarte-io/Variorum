@@ -181,8 +181,11 @@ struct ShelfView: View {
                 }
             }
             Button("Cancel", role: .cancel) {}
-        } message: { _ in
-            Text(BindCopy.spawnMessage)
+        } message: { source in
+            // Ladder F-R1-3: the body tells the truth per the gathering's
+            // rule state (a rule-less or unreadable rule spawns a book that
+            // starts empty and does not collect).
+            Text(BindCopy.spawnMessage(for: RuleGrammar.read(source.querySpec)))
         }
         .overlay(alignment: .bottomLeading) {
             if let error = model.lastError ?? readings.lastError {
