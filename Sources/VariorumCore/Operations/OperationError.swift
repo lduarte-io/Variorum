@@ -86,6 +86,11 @@ public enum OperationError: Error, Equatable, Sendable {
     /// the book has none set (the "also tag the N current members" offer
     /// exists only beside an auto-tag; the bulk door names its tag).
     case readingHasNoAutoTag(id: String)
+    /// 13i-c (R-13ic-4, her post-close ruling: "I just don't think that a
+    /// rule-less gathering makes sense"): a GATHERING is minted with a rule
+    /// and keeps one — the mint and the rule write both refuse NULL. (A book
+    /// may carry no rule: "collects nothing by itself".)
+    case gatheringRequiresRule(id: String)
 
     // Structural operations (Phase 3).
     /// Extract's span is not a boundary-adjacent prefix/suffix of the

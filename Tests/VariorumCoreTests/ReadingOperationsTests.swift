@@ -62,7 +62,7 @@ struct ReadingOperationsTests {
                 sectionID: foreignSection.id, readingID: reading.id)) {
                 _ = try ops.newPostInReading(reading.id, section: foreignSection.id)
             }
-            let smart = try ops.createReading(name: "Smart", kind: .gathering)
+            let smart = try ops.createReading(name: "Smart", kind: .gathering, querySpec: try RuleGrammar.encode(.star))  // 13i-c: minted with a rule
             #expect(throws: OperationError.wrongReadingKind(id: smart.id, expected: .book)) {
                 _ = try ops.newPostInReading(smart.id)
             }
@@ -100,7 +100,7 @@ struct ReadingOperationsTests {
             let pool = try ops.createPool()
 
             // Smart readings assemble by query, never by hand.
-            let smart = try ops.createReading(name: "S", kind: .gathering)
+            let smart = try ops.createReading(name: "S", kind: .gathering, querySpec: try RuleGrammar.encode(.star))  // 13i-c: minted with a rule
             #expect(throws: OperationError.wrongReadingKind(id: smart.id, expected: .book)) {
                 try ops.addPostToReading(post.id, to: smart.id)
             }

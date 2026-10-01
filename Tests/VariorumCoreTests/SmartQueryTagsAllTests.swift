@@ -95,12 +95,16 @@ struct SmartQueryTagsAllTests {
         #expect(try decoded.encodedJSON() == json)
     }
 
-    @Test func emptyTagsAllIsNoConstraint() throws {
+    /// 13i-c (R-13ic-4) — an HONEST FLIP: an empty v1 draft normalizes to NO
+    /// rule, and a gathering cannot be minted without one (a rule-less
+    /// gathering "doesn't make sense" — her ruling); the match-all letter
+    /// this pin held is retired.
+    @Test func emptyTagsAllIsNoRuleAndAGatheringRefusesToBeMintedWithout() throws {
         try withOperations { ops, db in
-            let world = try seedTaggedWorld(ops)
-            let book = try assembled(ops, db, spec: .init(tagsAll: []))
-            #expect(book.contains(world.stars) && book.contains(world.dreams)
-                    && book.contains(world.both))
+            _ = try seedTaggedWorld(ops)
+            #expect(throws: OperationError.self) {
+                try assembled(ops, db, spec: .init(tagsAll: []))
+            }
         }
     }
 }

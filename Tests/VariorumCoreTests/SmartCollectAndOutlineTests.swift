@@ -12,9 +12,8 @@ struct SmartCollectTests {
     private func smartReading(
         _ ops: Operations, spec: Queries.SmartQuerySpec
     ) throws -> Reading {
-        let reading = try ops.createReading(name: "smart", kind: .gathering)
-        try ops.setReadingQuerySpec(reading.id, querySpec: try spec.encodedJSON())
-        return reading
+        // 13i-c (R-13ic-4): a gathering is minted WITH its rule.
+        try ops.createReading(name: "smart", kind: .gathering, querySpec: try spec.encodedJSON())
     }
 
     private func assembledPostIDs(

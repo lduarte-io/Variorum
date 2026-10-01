@@ -210,11 +210,21 @@ struct ReadingFilterTests {
             #expect(Set(try view(db, saved.reading.id, nil))
                     == Set(try view(db, gathering.id, .star)))
 
-            // A rule-less gathering shows everything in its wing: ∧ is the
-            // filter alone, exactly.
-            let all = try ops.createReading(name: "everything", kind: .gathering)
-            let fromAll = try ops.saveFilterAsGathering(all.id, filter: .tag(w.y.id), name: "y")
-            #expect(fromAll.association == .rule)
+            // 13i-c (R-13ic-4, an HONEST FLIP): a rule-less gathering shows
+            // NOTHING and has no association — the saved rule is the filter
+            // alone, reported as `.none` so the face says the new gathering
+            // looks across the whole wing. (Reachable only as a Trash
+            // restoree: the mint refuses a rule-less gathering.)
+            #expect(throws: OperationError.self) {
+                try ops.createReading(name: "everything", kind: .gathering)
+            }
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE reading SET query_spec = NULL WHERE id = ?",
+                    arguments: [gathering.id])
+            }
+            let fromAll = try ops.saveFilterAsGathering(gathering.id, filter: .tag(w.y.id), name: "y")
+            #expect(fromAll.association == .none)
             #expect(try rule(db, fromAll.reading.id) == .tag(w.y.id))
         }
     }

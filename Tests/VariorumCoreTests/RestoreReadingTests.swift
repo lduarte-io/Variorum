@@ -222,7 +222,7 @@ struct RestoreReadingTests {
         try withOperations { ops, db in
             let first = try ops.createReading(name: "alpha", kind: .book)
             let second = try ops.createReading(name: "beta", kind: .book)
-            let third = try ops.createReading(name: "gamma", kind: .gathering)
+            let third = try ops.createReading(name: "gamma", kind: .gathering, querySpec: try RuleGrammar.encode(.star))  // 13i-c: minted with a rule
             try ops.deleteReading(first.id)
             try ops.deleteReading(second.id)
             try ops.deleteReading(third.id)

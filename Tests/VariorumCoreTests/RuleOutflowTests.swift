@@ -2,51 +2,55 @@ import Testing
 
 @testable import VariorumCore
 
-/// 13i-b ladder F-R1-2 — `RuleGrammar.soleOutflowTagID`, the SPAWN door's
-/// pure outflow derivation (her morning ruling's "exactly ONE distinct tag",
-/// sharpened by the ladder: the sole reference must be POSITIVE — `NOT #a`
-/// must never become the outflow of a book whose rule excludes it).
+/// 13i-c — `RuleGrammar.positiveTagIDs`, the SPAWN door's outflow PREFILL
+/// (her 13i-b closing-sitting ruling: the outflow is a CHOSEN set the spawn
+/// offers, prefilled with the rule's POSITIVE tags — her item (i): `#a AND
+/// NOT #b` → `#a`; several tags legal). It REPLACES 13i-b's single-tag
+/// `soleOutflowTagID` (F-R1-2's parity letter is kept inside it: a tag
+/// counts only when some reference sits under an EVEN number of `not`s).
 ///
-/// The broken cell's red-on-old is BEHAVIOURAL, through the Mac spawn door
-/// (`BindDoorTests.spawnFromANegatedRuleLeavesTheOutflowUnset` — watched red
-/// on the pre-fix `ShelfViewModel`); these pin the pure table every arm.
-@Suite("13i-b F-R1-2 — the spawn outflow's sole-positive-tag rule")
+/// The behavioural pin is the Mac spawn door (`BindDoorTests`); these pin the
+/// pure table every arm — an HONEST REWRITE of the 13i-b suite to the ruled
+/// truth (the sole-tag letter was superseded, not broken).
+@Suite("13i-c — the spawn prefill's positive-tags rule")
 struct RuleOutflowTests {
     @Test func aBareTagIsTheOutflow() {
-        #expect(RuleGrammar.soleOutflowTagID(of: .tag("a")) == "a")
+        #expect(RuleGrammar.positiveTagIDs(of: .tag("a")) == ["a"])
     }
 
-    @Test func aNegatedSoleTagIsNever() {
-        #expect(RuleGrammar.soleOutflowTagID(of: .not(.tag("a"))) == nil)
-        #expect(RuleGrammar.soleOutflowTagID(of: .and([.not(.tag("a")), .star])) == nil,
+    @Test func aNegatedTagIsNever() {
+        #expect(RuleGrammar.positiveTagIDs(of: .not(.tag("a"))) == [])
+        #expect(RuleGrammar.positiveTagIDs(of: .and([.not(.tag("a")), .star])) == [],
                 "★ ∧ NOT #a — the implementer's named same-cell")
     }
 
     @Test func doubleNegationIsPositiveParityNotPresence() {
-        #expect(RuleGrammar.soleOutflowTagID(of: .not(.not(.tag("a")))) == "a")
+        #expect(RuleGrammar.positiveTagIDs(of: .not(.not(.tag("a")))) == ["a"])
     }
 
-    @Test func twoDistinctTagsHaveNoSingleHonestOutflow() {
-        // Her letter: "references exactly ONE distinct tag" — #a ∧ NOT #b
-        // references two, so it stays unset (the bundled PROVISIONAL's
-        // ambiguous arm; the editor's row is one click).
-        #expect(RuleGrammar.soleOutflowTagID(of: .and([.tag("a"), .not(.tag("b"))])) == nil)
-        #expect(RuleGrammar.soleOutflowTagID(of: .or([.tag("a"), .tag("b")])) == nil)
+    @Test func herItemOneAAndNotBFlowsOutAOnly() {
+        #expect(RuleGrammar.positiveTagIDs(of: .and([.tag("a"), .not(.tag("b"))])) == ["a"])
     }
 
-    @Test func aTagBesideAStarIsStillSole() {
-        #expect(RuleGrammar.soleOutflowTagID(of: .and([.tag("a"), .star])) == "a")
+    @Test func anOrFanPrefillsEveryTagInTreeOrder() {
+        // Her ruling: several tags are legal ("my writing, poetry, and
+        // horror … that's still two tags") — the prefill carries all of
+        // them, in the order the rule names them.
+        #expect(RuleGrammar.positiveTagIDs(of: .or([.tag("b"), .tag("a")])) == ["b", "a"])
     }
 
-    @Test func mixedPolarityOfOneTagCountsItsPositiveReference() {
-        #expect(RuleGrammar.soleOutflowTagID(of: .or([.tag("a"), .not(.tag("a"))])) == "a")
+    @Test func aTagBesideAStarIsStillTheOutflow() {
+        #expect(RuleGrammar.positiveTagIDs(of: .and([.tag("a"), .star])) == ["a"])
     }
 
-    @Test func noRuleStarOnlyAndTheDeadTermAnswerNil() {
-        #expect(RuleGrammar.soleOutflowTagID(of: nil) == nil)
-        #expect(RuleGrammar.soleOutflowTagID(of: .star) == nil)
-        // `tagIDs` already drops the deliberate dead term (`""`), so an
-        // empty-id rule can never nominate an outflow.
-        #expect(RuleGrammar.soleOutflowTagID(of: .tag("")) == nil)
+    @Test func mixedPolarityOfOneTagCountsItsPositiveReferenceOnce() {
+        #expect(RuleGrammar.positiveTagIDs(of: .or([.tag("a"), .not(.tag("a")), .tag("a")])) == ["a"])
+    }
+
+    @Test func noRuleStarOnlyAndTheDeadTermAnswerEmpty() {
+        #expect(RuleGrammar.positiveTagIDs(of: nil) == [])
+        #expect(RuleGrammar.positiveTagIDs(of: .star) == [])
+        // The deliberate dead term (`""`) can never nominate an outflow.
+        #expect(RuleGrammar.positiveTagIDs(of: .tag("")) == [])
     }
 }

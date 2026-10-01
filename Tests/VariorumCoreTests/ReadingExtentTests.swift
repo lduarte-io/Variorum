@@ -68,7 +68,7 @@ struct ReadingExtentTests {
             #expect(throws: OperationError.self) {
                 try ops.assertReadingAcceptsPosts("no-such-reading")
             }
-            let smart = try ops.createReading(name: "auto", kind: .gathering)
+            let smart = try ops.createReading(name: "auto", kind: .gathering, querySpec: try RuleGrammar.encode(.star))  // 13i-c: minted with a rule
             #expect(throws: OperationError.wrongReadingKind(id: smart.id, expected: .book)) {
                 try ops.assertReadingAcceptsPosts(smart.id)
             }

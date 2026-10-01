@@ -343,7 +343,7 @@ struct RuleEditorTests {
             #expect(said.kind == .offer)
             #expect(said.text == "Also tag the 2 current members with #work now?")
             #expect(said.action?.label == RuleEditorCopy.tagMembersAction)
-            #expect(try await db.read { try Queries.reading($0, id: book.id)?.autoTagId } == work.id)
+            #expect(try await db.read { try Queries.reading($0, id: book.id)?.autoTagIDs } == [work.id])
 
             said.action?.perform()
             await settle(until: { session.status.spoken?.text != said.text })

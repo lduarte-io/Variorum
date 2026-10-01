@@ -374,13 +374,14 @@ extension Queries {
             var conditions = [
                 "c.deleted_at IS NULL", "c.archived_at IS NULL", "c.kind = 'post'",
             ]
-            // The v1 letter kept exactly: NULL = no rule (match-all);
-            // MALFORMED fails closed (the gathering shows nothing).
+            // 13i-c (R-13ic-4): NO rule shows NOTHING — the match-all
+            // tolerance letter died with the rule-less sweep (v1_20); a
+            // rule-less gathering lives only as a Trash restoree until it
+            // gets a rule. MALFORMED fails closed as before.
             let match: (conditions: [String], arguments: [(any DatabaseValueConvertible)?])
             var stars = StarContext()
             switch RuleGrammar.read(reading.querySpec) {
-            case .malformed: return []
-            case .none: match = ruleMatchSQL(nil, wingID: reading.wingId, starredNoteIDs: [])
+            case .malformed, .none: return []
             case .rule(let term):
                 // 13i-b U4 (F-U3-3): the ★ term's context — read only when
                 // the rule carries one, so a held observation of a star

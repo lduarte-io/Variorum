@@ -48,7 +48,12 @@ extension Operations {
                 throw OperationError.smartFilterUnsatisfiable(
                     readingID: readingID,
                     reason: "its filter is unreadable (malformed) — edit the filter first")
-            case .none: term = nil
+            case .none:
+                // 13i-c (R-13ic-4): no rule shows nothing and has no tag to
+                // apply — a Trash restoree's state; give it a rule first.
+                throw OperationError.smartFilterUnsatisfiable(
+                    readingID: readingID,
+                    reason: "it has no rule yet — give it one first")
             case .rule(let t): term = t
             }
             // 13i-b U4 (F-U3-3): the ★ term's context, so a starred note is

@@ -51,7 +51,7 @@ struct BookNameGuardTests {
     /// a smart "Ideas" are exactly the pair 13k K4 surfaced (#53(l)).
     @Test func theKindOfTheSittingBookIsIrrelevant() throws {
         try withOperations { ops, _ in
-            _ = try ops.createReading(name: "Ideas", kind: .gathering)
+            _ = try ops.createReading(name: "Ideas", kind: .gathering, querySpec: try RuleGrammar.encode(.star))  // 13i-c: minted with a rule
             #expect(throws: OperationError.duplicateBookName(name: "Ideas")) {
                 try ops.assertBookNameIsFree("Ideas")
             }
@@ -97,7 +97,7 @@ struct BookNameGuardTests {
     @Test func createAndRenameStillAcceptDuplicateNamesThemselves() throws {
         try withOperations { ops, db in
             _ = try ops.createReading(name: "Ideas", kind: .book)
-            let second = try ops.createReading(name: "Ideas", kind: .gathering)
+            let second = try ops.createReading(name: "Ideas", kind: .gathering, querySpec: try RuleGrammar.encode(.star))  // 13i-c: minted with a rule
             #expect(second.name == "Ideas")
 
             let third = try ops.createReading(name: "Orbit", kind: .book)

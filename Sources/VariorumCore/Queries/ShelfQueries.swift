@@ -93,12 +93,11 @@ extension Queries {
         // extent sheet offers it).
         var stars = StarContext()  // 13i-b U4: the ★ term's context (F-U3-3)
         for reading in try readings(db) where reading.kind == .gathering {
-            // Malformed rules fail closed (skipped); NO rule counts every
-            // post — the v1 letter per site.
-            let term: RuleTerm?
+            // Malformed rules fail closed (skipped); NO rule counts NOTHING
+            // (13i-c, R-13ic-4 — the match-all letter is retired).
+            let term: RuleTerm
             switch RuleGrammar.read(reading.querySpec) {
-            case .malformed: continue
-            case .none: term = nil
+            case .malformed, .none: continue
             case .rule(let t): term = t
             }
             let match = ruleMatchSQL(
@@ -298,8 +297,7 @@ extension Queries {
         for reading in try readings(db) where reading.kind == .gathering {
             let term: RuleTerm?
             switch RuleGrammar.read(reading.querySpec) {
-            case .malformed: continue  // shows nothing — tucks nothing
-            case .none: term = nil      // shows every note in its wing
+            case .malformed, .none: continue  // shows nothing — tucks nothing (13i-c, R-13ic-4)
             case .rule(let t): term = t
             }
             let match = ruleMatchSQL(
@@ -351,12 +349,11 @@ extension Queries {
             arguments: [postID])
         var stars = StarContext()  // 13i-b U4: the ★ term's context (F-U3-3)
         for reading in try readings(db) where reading.kind == .gathering {
-            // Malformed fails closed (skipped); NO rule matches every
-            // post, so the chip lists the gathering (the v1 letter).
-            let term: RuleTerm?
+            // Malformed fails closed (skipped); NO rule matches NOTHING
+            // (13i-c, R-13ic-4), so neither lists on the chip.
+            let term: RuleTerm
             switch RuleGrammar.read(reading.querySpec) {
-            case .malformed: continue
-            case .none: term = nil
+            case .malformed, .none: continue
             case .rule(let t): term = t
             }
             let match = ruleMatchSQL(
@@ -416,10 +413,9 @@ extension Queries {
         var result: [String: [String]] = [:]
         var stars = StarContext()  // 13i-b U4: the ★ term's context (F-U3-3)
         for reading in try readings(db) where reading.kind == .gathering {
-            let term: RuleTerm?
+            let term: RuleTerm
             switch RuleGrammar.read(reading.querySpec) {
-            case .malformed: continue  // fails closed (the v1 letter)
-            case .none: term = nil
+            case .malformed, .none: continue  // both show nothing (13i-c, R-13ic-4)
             case .rule(let t): term = t
             }
             let statement = smartMembershipSQL(

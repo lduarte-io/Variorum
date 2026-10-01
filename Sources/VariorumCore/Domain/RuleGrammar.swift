@@ -176,39 +176,35 @@ public enum RuleGrammar {
         }
     }
 
-    /// **The SPAWN door's outflow derivation** (her morning ruling, 13i-b —
-    /// *"the spawn isn't adding the auto tag? it should"* — read as: where
-    /// the copied rule references exactly ONE distinct tag; ladder F-R1-2
-    /// sharpened the letter): the sole tag qualifies only when the rule
-    /// references exactly one distinct tag id AND references it POSITIVELY
-    /// somewhere — under an EVEN number of `not`s — so `NOT #a` can never
-    /// make #a the outflow of a book whose rule excludes it. A rule naming
-    /// two distinct tags (`#a ∧ NOT #b`) stays nil: her letter names ONE
-    /// distinct tag, and the ambiguous arm is the bundled PROVISIONAL (the
-    /// editor's auto-tag row is one click). Pure; liveness is the caller's
-    /// (`Queries.tagIsLive`).
-    public static func soleOutflowTagID(of term: RuleTerm?) -> String? {
-        let ids = tagIDs(of: term)
-        guard ids.count == 1, let sole = ids.first else { return nil }
-        return referencesPositively(term, tagID: sole) ? sole : nil
-    }
-
-    /// Whether some reference to `tagID` sits under an even number of `not`s
-    /// (`NOT NOT #a` is positive — parity, not presence).
-    private static func referencesPositively(
-        _ term: RuleTerm?, tagID: String, negated: Bool = false
-    ) -> Bool {
-        guard let term else { return false }
-        switch term {
-        case .and(let ts), .or(let ts):
-            return ts.contains { referencesPositively($0, tagID: tagID, negated: negated) }
-        case .not(let t):
-            return referencesPositively(t, tagID: tagID, negated: !negated)
-        case .tag(let id):
-            return id == tagID && !negated
-        case .star, .legacyProfile, .legacyEntryDateFrom, .legacyEntryDateTo:
-            return false
+    /// **The SPAWN door's outflow PREFILL** (13i-c — her 13i-b closing-sitting
+    /// ruling: the outflow is a chosen set the spawn OFFERS, prefilled with
+    /// the rule's POSITIVE tags — her item (i): `#a AND NOT #b` → `#a`; and
+    /// several tags are legal, so an OR fan prefills all of them). A tag
+    /// counts when SOME reference to it sits under an EVEN number of `not`s
+    /// (`NOT NOT #a` is positive — parity, not presence; the 13i-b ladder's
+    /// F-R1-2 letter kept: `NOT #a` can never flow out the tag the rule
+    /// excludes). Order = first positive appearance in the tree, de-duplicated
+    /// — deterministic, so the chooser opens the same way every time. Pure;
+    /// liveness is the caller's (`Queries.tagIsLive`); the deliberate dead
+    /// term `""` never nominates. This REPLACES 13i-b's `soleOutflowTagID`
+    /// (its single-tag letter was superseded by her multi-tag ruling).
+    public static func positiveTagIDs(of term: RuleTerm?) -> [String] {
+        var ordered: [String] = []
+        var seen: Set<String> = []
+        func walk(_ term: RuleTerm, negated: Bool) {
+            switch term {
+            case .and(let ts), .or(let ts):
+                for t in ts { walk(t, negated: negated) }
+            case .not(let t):
+                walk(t, negated: !negated)
+            case .tag(let id):
+                if !negated, !id.isEmpty, seen.insert(id).inserted { ordered.append(id) }
+            case .star, .legacyProfile, .legacyEntryDateFrom, .legacyEntryDateTo:
+                break
+            }
         }
+        if let term { walk(term, negated: false) }
+        return ordered
     }
 
     /// `a ∧ b` as ONE flat conjunction (13i-b U4 — "Save this filter as a

@@ -203,28 +203,22 @@ final class ShelfViewModel {
                 // must not name Edit Rule (the editor refuses a malformed
                 // rule by design).
                 let ruleState = RuleGrammar.read(gathering.querySpec)
-                // HER MORNING RULING (13i-b, 2026-10-01 — P-13ib-3
-                // overruled): "the spawn isn't adding the auto tag? it
-                // should." The derivation is the pure Domain rule
-                // `RuleGrammar.soleOutflowTagID` (ladder F-R1-2: exactly ONE
-                // distinct tag, referenced POSITIVELY — a NOT-#a rule must
-                // never flow out the tag it excludes; an OR fan, star-only
-                // or two-tag rule stays unset, the editor's row one click).
-                // The view model adds only the liveness fact: the tag must
-                // be LIVE in the gathering's wing — a dead reference would
-                // make the outflow a silent no-op from birth.
-                var autoTagID: String?
-                if let sole = RuleGrammar.soleOutflowTagID(
-                       of: RuleGrammar.decode(gathering.querySpec)),
-                   try database.read({
-                       try Queries.tagIsLive($0, id: sole, wingID: gathering.wingId)
-                   }) {
-                    autoTagID = sole
+                // 13i-c (R-13ic-1 — her closing-sitting outflow ruling,
+                // refining the 13i-b morning one): the spawn's outflow is
+                // the rule's POSITIVE tags — every one of them (several are
+                // legal), never a tag the rule excludes (F-R1-2's letter
+                // kept inside `positiveTagIDs`). The view model adds only the
+                // liveness fact: a dead reference would make an outflow a
+                // silent no-op from birth, so it is dropped. (U3 lets her
+                // EDIT this prefill in the spawn sheet before the mint.)
+                let outflow = try database.read { db in
+                    try RuleGrammar.positiveTagIDs(of: RuleGrammar.decode(gathering.querySpec))
+                        .filter { try Queries.tagIsLive(db, id: $0, wingID: gathering.wingId) }
                 }
                 let book = try ops.createReading(
                     name: name, kind: .book,
                     querySpec: gathering.querySpec, wingId: gathering.wingId,
-                    autoTagId: autoTagID)
+                    autoTagIDs: outflow)
                 let seated = try database.read {
                     try Queries.assembleReading($0, readingID: book.id).count
                 }

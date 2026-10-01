@@ -45,6 +45,9 @@ struct AuthRLSDDLTests {
         // registry-carrying RPC bodies redefined — the CANONICAL bodies
         // for those six live HERE now (the 13y fold-in precedent).
         "13_phase13i_wings.sql",
+        // 13i-c (the outflow event, marker 11 — R-13ic-1): ONE additive
+        // column on reading; no table, no RPC change.
+        "14_phase13i_c_outflow.sql",
     ]
 
     /// The DATA RPCs — every function 11 re-creates with `key_proof` beside

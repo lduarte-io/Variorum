@@ -260,12 +260,14 @@ extension Operations {
     /// The shared mint behind `createPost`, `createOrOpenJournalEntry`,
     /// and `importPost` (internal, one shape — Phase 11b).
     func insertPost(
-        _ db: Database, title: String?, profile: Profile?, entryDate: String?
+        _ db: Database, title: String?, profile: Profile?, entryDate: String?,
+        wingId: String = ""
     ) throws -> Container {
         let now = date.now
         var post = Container(
             id: newID(), ownerId: currentOwnerID(), kind: .post, title: title,
-            profile: profile, entryDate: entryDate, createdAt: now, updatedAt: now)
+            profile: profile, entryDate: entryDate, wingId: wingId,
+            createdAt: now, updatedAt: now)
         // A journal post defaults to one-block-per-entry (AppSpec §7): the
         // journal restriction is a profile seed, never a data-model split.
         if profile == .journal {

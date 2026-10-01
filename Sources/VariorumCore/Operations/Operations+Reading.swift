@@ -18,30 +18,44 @@ extension Operations {
         wordTarget: Int? = nil,
         wingId: String = "",
         intakeSeating: IntakeSeating? = nil,
-        autoTagId: String? = nil
+        autoTagId: String? = nil,
+        autoTagIDs: [String] = []
     ) throws -> Reading {
         let now = date.now
+        // 13i-c (R-13ic-1): the OUTFLOW is a set; the single-tag parameter
+        // is a forwarding convenience (the 13i-b call sites and pins ride
+        // unmodified — the 3C parity proof), merged in front of the set.
+        let outflow = (autoTagId.map { [$0] } ?? []) + autoTagIDs
         return try database.write { db -> Reading in
             let id = newID()
             // 13i-b U1: the two Collecting settings are a BOOK's (a gathering
             // has no membership to seat and no notes written "here").
-            if intakeSeating != nil || autoTagId != nil, kind != .book {
+            if intakeSeating != nil || !outflow.isEmpty, kind != .book {
                 throw OperationError.wrongReadingKind(id: id, expected: .book)
             }
-            if let autoTagId {
-                let tag = try liveTag(db, autoTagId)
+            for tagID in outflow {
+                let tag = try liveTag(db, tagID)
                 guard tag.wingId == wingId else {
-                    throw OperationError.tagNotFound(id: autoTagId)
+                    throw OperationError.tagNotFound(id: tagID)
                 }
+            }
+            let spec = try normalizedRuleSpec(db, querySpec, wingID: wingId)
+            // 13i-c (R-13ic-4): a GATHERING is born WITH a rule — "I just
+            // don't think that a rule-less gathering makes sense." (A rule
+            // that normalizes to NULL counts as none; undecodable bytes are
+            // a malformed rule, stored raw — that letter stands.)
+            if kind == .gathering, spec == nil {
+                throw OperationError.gatheringRequiresRule(id: id)
             }
             let reading = Reading(
                 id: id, ownerId: currentOwnerID(), name: name, kind: kind,
                 profile: profile, sortField: sortField, sortDir: sortDir,
                 groupingTagId: groupingTagId,
-                querySpec: try normalizedRuleSpec(db, querySpec, wingID: wingId),
+                querySpec: spec,
                 maxPosts: maxPosts,
                 wordTarget: wordTarget, wingId: wingId,
-                intakeSeating: intakeSeating, autoTagId: autoTagId,
+                intakeSeating: intakeSeating,
+                autoTagIds: Reading.encodeOutflow(outflow),
                 createdAt: now, updatedAt: now)
             try reading.insert(db)
             // CREATION-TIME BACKFILL (the 13i-b plan §2.3, the sitting §4): a
@@ -164,8 +178,15 @@ extension Operations {
         try database.write { db in
             var reading = try liveReading(db, id)
             let previous = reading.querySpec
-            reading.querySpec = try normalizedRuleSpec(
-                db, querySpec, wingID: reading.wingId)
+            let normalized = try normalizedRuleSpec(db, querySpec, wingID: reading.wingId)
+            // 13i-c (R-13ic-4): a gathering KEEPS a rule — clearing it is
+            // refused here (the editor's empty-save refusal + its "Delete
+            // this gathering…" offer stand on this guard). A book may be
+            // cleared: that is its kill switch ("collects nothing by itself").
+            if reading.kind == .gathering, normalized == nil {
+                throw OperationError.gatheringRequiresRule(id: id)
+            }
+            reading.querySpec = normalized
             let now = date.now
             reading.updatedAt = now
             try reading.update(db)
@@ -419,7 +440,11 @@ extension Operations {
                         sectionID: sectionID, readingID: readingID)
                 }
             }
-            let post = try insertPost(db, title: title, profile: profile, entryDate: entryDate)
+            // 13i-c (R-13ic-2's one-line fix of 13i-b U1 F-5): the note is
+            // born in the BOOK's wing — a book never spans wings (§9).
+            let post = try insertPost(
+                db, title: title, profile: profile, entryDate: entryDate,
+                wingId: reading.wingId)
             let now = date.now
             try ReadingPost(
                 id: newID(), readingId: readingID, postId: post.id,

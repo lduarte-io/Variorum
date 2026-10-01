@@ -208,9 +208,11 @@ struct BindDoorTests {
             #expect(book.querySpec == source.querySpec, "the rule copied")
             #expect(book.wingId == source.wingId)
             // HER MORNING RULING (2026-10-01, P-13ib-3 OVERRULED: "the
-            // spawn isn't adding the auto tag? it should") — an HONEST
-            // TEST EDIT: a one-tag rule's sole tag becomes the outflow.
-            #expect(book.autoTagId == tag.id, "the sole rule tag is the auto-tag")
+            // spawn isn't adding the auto tag? it should"), refined by her
+            // closing-sitting OUTFLOW RULING (13i-c R-13ic-1): the spawn's
+            // outflow is the rule's positive tags — here the one tag.
+            #expect(book.autoTagIDs == [tag.id], "the rule's positive tag is the outflow")
+            #expect(book.autoTagId == nil, "the retired single-tag column is never written")
             #expect(book.intakeSeating == nil, "intake on, joining quietly (nil reads AUTO)")
             // Creation-time BACKFILL seated the current matches as MEMBERS.
             let rows = try await db.read { db in
@@ -238,11 +240,11 @@ struct BindDoorTests {
         }
     }
 
-    /// The ruling's AMBIGUOUS ARM (PROVISIONAL, her bundle): a rule naming
-    /// SEVERAL tags (an OR fan) or none has no single honest outflow — the
-    /// spawn leaves the auto-tag unset; and a rule whose sole tag is DEAD
-    /// never becomes a silent no-op outflow.
-    @Test func theSpawnLeavesTheAutoTagUnsetWhereNoSoleLiveTagExists() async throws {
+    /// 13i-c (R-13ic-1 — an HONEST FLIP of 13i-b's ambiguous arm): a rule
+    /// naming SEVERAL tags prefills ALL of them ("my writing, poetry, and
+    /// horror … that's still two tags" — hers), in the rule's order; and a
+    /// DEAD tag is dropped, never a silent no-op outflow.
+    @Test func theSpawnPrefillsEveryPositiveTagAndDropsADeadOne() async throws {
         try await withBindWorld { session, db in
             let ops = session.operations
             let a = try ops.createTag(name: "a")
@@ -252,8 +254,8 @@ struct BindDoorTests {
                 querySpec: try RuleGrammar.encode(.or([.tag(a.id), .tag(b.id)])))
             let shelf = ShelfViewModel(session: session)
             let fanBook = try #require(await shelf.spawnBook(from: fan.id, named: "fan (book)"))
-            #expect(try await db.read { try Queries.reading($0, id: fanBook)?.autoTagId } == nil,
-                    "an OR fan has no single honest outflow")
+            #expect(try await db.read { try Queries.reading($0, id: fanBook)?.autoTagIDs } == [a.id, b.id],
+                    "an OR fan flows out every tag it names, in order")
 
             let dead = try ops.createTag(name: "dead")
             let deadRule = try ops.createReading(
@@ -261,8 +263,8 @@ struct BindDoorTests {
                 querySpec: try RuleGrammar.encode(.tag(dead.id)))
             try ops.deleteTag(dead.id)
             let deadBook = try #require(await shelf.spawnBook(from: deadRule.id, named: "gone (book)"))
-            #expect(try await db.read { try Queries.reading($0, id: deadBook)?.autoTagId } == nil,
-                    "a dead sole tag never becomes a silent outflow")
+            #expect(try await db.read { try Queries.reading($0, id: deadBook)?.autoTagIDs } == [],
+                    "a dead tag never becomes a silent outflow")
         }
     }
 
@@ -286,7 +288,7 @@ struct BindDoorTests {
             let shelf = ShelfViewModel(session: session)
             let book = try #require(
                 await shelf.spawnBook(from: negated.id, named: "everything else (book)"))
-            #expect(try await db.read { try Queries.reading($0, id: book)?.autoTagId } == nil,
+            #expect(try await db.read { try Queries.reading($0, id: book)?.autoTagIDs } == [],
                     "a book must never flow out the tag its rule excludes")
         }
     }

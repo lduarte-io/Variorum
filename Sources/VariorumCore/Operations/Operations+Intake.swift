@@ -289,31 +289,37 @@ extension Operations {
     // MARK: - AUTO-TAG (the outflow, the plan §2.6)
 
     /// A note MINTED inside the book, or ADDED to it by hand (P-13ib-1),
-    /// wears the book's auto-tag — in the caller's transaction, through the
-    /// one application road, so the tagging act fires intake on OTHER books
-    /// (this book's own pair is already decided). Silent when there is no
-    /// outflow: no auto-tag, a DANGLING one (a deleted tag — the read-time
-    /// fallback class), a tag of another wing (unreachable — the belt), or
-    /// a note already wearing it.
+    /// wears the book's OUTFLOW — EVERY tag of the set (13i-c, R-13ic-1: her
+    /// "my writing, poetry, and horror … that's still two tags") — in the
+    /// caller's transaction, each through the one application road, so each
+    /// tagging act fires intake on OTHER books (this book's own pair is
+    /// already decided). Silent per tag when there is nothing to do: a
+    /// DANGLING id (a deleted tag — the read-time fallback class), a tag of
+    /// another wing (unreachable — the belt), or a note already wearing it.
     func applyAutoTag(_ db: Database, book: Reading, postID: String, now: Date) throws {
-        guard let tagID = book.autoTagId,
-              let tag = try Tag.fetchOne(db, key: tagID), tag.deletedAt == nil,
-              let post = try Container.fetchOne(db, key: postID),
-              post.deletedAt == nil, post.wingId == tag.wingId,
-              try liveApplication(db, table: "post_tag", tagID: tagID,
-                                  targetColumn: "post_id", targetID: postID) == nil
+        let outflow = book.autoTagIDs
+        guard !outflow.isEmpty,
+              let post = try Container.fetchOne(db, key: postID), post.deletedAt == nil
         else { return }
-        try insertPostTag(db, tagID: tagID, postID: postID, now: now)
+        for tagID in outflow {
+            guard let tag = try Tag.fetchOne(db, key: tagID), tag.deletedAt == nil,
+                  post.wingId == tag.wingId,
+                  try liveApplication(db, table: "post_tag", tagID: tagID,
+                                      targetColumn: "post_id", targetID: postID) == nil
+            else { continue }
+            try insertPostTag(db, tagID: tagID, postID: postID, now: now)
+        }
     }
 
     /// **"Also tag the N current members now"** (the sitting record §4,
     /// ruled; also its bulk door, "apply a tag to every member"): applies
-    /// `tagID` — nil means the book's own auto-tag — to every live MEMBER
-    /// not already wearing it, in ONE transaction (one receipt at the door),
-    /// each application through the one road (so each fires intake on other
-    /// books). Arrivals are not members and are not tagged. Returns how many
-    /// notes newly wear the tag. A finished book is allowed — finishing
-    /// freezes the assembly, never the notes' tags.
+    /// `tagID` — nil means EVERY tag of the book's OUTFLOW (13i-c,
+    /// PROVISIONAL P-13ic-11) — to every live MEMBER not already wearing it,
+    /// in ONE transaction (one receipt at the door), each application
+    /// through the one road (so each fires intake on other books). Arrivals
+    /// are not members and are not tagged. Returns how many NOTES newly wear
+    /// at least one of the tags (the receipt's number). A finished book is
+    /// allowed — finishing freezes the assembly, never the notes' tags.
     @discardableResult
     public func tagAllMembers(_ readingID: String, tagID: String? = nil) throws -> Int {
         try database.write { db in
@@ -321,31 +327,36 @@ extension Operations {
             guard reading.kind == .book else {
                 throw OperationError.wrongReadingKind(id: readingID, expected: .book)
             }
-            guard let tagID = tagID ?? reading.autoTagId else {
+            let tagIDs = tagID.map { [$0] } ?? reading.autoTagIDs
+            guard !tagIDs.isEmpty else {
                 throw OperationError.readingHasNoAutoTag(id: readingID)
             }
-            let tag = try liveTag(db, tagID)
-            guard tag.wingId == reading.wingId else {
-                throw OperationError.tagNotFound(id: tagID)
-            }
-            let postIDs = try String.fetchAll(
-                db,
-                sql: """
-                    SELECT rp.post_id FROM reading_post rp
-                    JOIN container c ON c.id = rp.post_id AND c.deleted_at IS NULL
-                     AND c.kind = 'post' AND c.wing_id = ?
-                    WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
-                      AND NOT EXISTS (SELECT 1 FROM post_tag pt
-                                      WHERE pt.post_id = rp.post_id AND pt.tag_id = ?
-                                        AND pt.deleted_at IS NULL)
-                    ORDER BY rp.position, rp.id
-                    """,
-                arguments: [tag.wingId, readingID, tagID])
             let now = date.now
-            for postID in postIDs {
-                try insertPostTag(db, tagID: tagID, postID: postID, now: now)
+            var touched: Set<String> = []
+            for tagID in tagIDs {
+                let tag = try liveTag(db, tagID)
+                guard tag.wingId == reading.wingId else {
+                    throw OperationError.tagNotFound(id: tagID)
+                }
+                let postIDs = try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT rp.post_id FROM reading_post rp
+                        JOIN container c ON c.id = rp.post_id AND c.deleted_at IS NULL
+                         AND c.kind = 'post' AND c.wing_id = ?
+                        WHERE rp.reading_id = ? AND rp.deleted_at IS NULL AND rp.status = 'member'
+                          AND NOT EXISTS (SELECT 1 FROM post_tag pt
+                                          WHERE pt.post_id = rp.post_id AND pt.tag_id = ?
+                                            AND pt.deleted_at IS NULL)
+                        ORDER BY rp.position, rp.id
+                        """,
+                    arguments: [tag.wingId, readingID, tagID])
+                for postID in postIDs {
+                    try insertPostTag(db, tagID: tagID, postID: postID, now: now)
+                    touched.insert(postID)
+                }
             }
-            return postIDs.count
+            return touched.count
         }
     }
 
@@ -369,28 +380,39 @@ extension Operations {
         }
     }
 
-    /// The OUTFLOW (§4): the tag notes written here wear. A live tag of the
-    /// book's own wing (another wing's tag does not exist from here — §9's
-    /// total isolation); nil clears. Books only. No-op-guarded. Setting it
-    /// tags NOTHING by itself — the "also tag the N current members" offer
-    /// is `tagAllMembers`; clearing it never untags (ruled).
-    public func setReadingAutoTag(_ id: String, tagID: String?) throws {
+    /// THE OUTFLOW (§4; 13i-c R-13ic-1 — a CHOSEN, OPTIONAL SET, independent
+    /// of the intake rule): the tags notes written here wear. Every id a
+    /// live tag of the book's own wing (another wing's tag does not exist
+    /// from here — §9's total isolation; `tagNotFound`); de-duplicated,
+    /// ORDER PRESERVED (the chooser's order is hers); `[]` clears to NULL.
+    /// Books only. No-op-guarded on the decoded set. Setting it tags
+    /// NOTHING by itself — the "also tag the N current members" offer is
+    /// `tagAllMembers`; clearing it never untags (ruled).
+    public func setReadingOutflow(_ id: String, tagIDs: [String]) throws {
         try database.write { db in
             var reading = try liveReading(db, id)
             guard reading.kind == .book else {
                 throw OperationError.wrongReadingKind(id: id, expected: .book)
             }
-            if let tagID {
+            for tagID in tagIDs {
                 let tag = try liveTag(db, tagID)
                 guard tag.wingId == reading.wingId else {
                     throw OperationError.tagNotFound(id: tagID)
                 }
             }
-            guard reading.autoTagId != tagID else { return }
-            reading.autoTagId = tagID
+            let encoded = Reading.encodeOutflow(tagIDs)
+            guard reading.autoTagIds != encoded else { return }
+            reading.autoTagIds = encoded
             reading.updatedAt = date.now
             try reading.update(db)
         }
+    }
+
+    /// The 13i-b single-tag setter, kept as a FORWARDER onto the set (so the
+    /// 13i-b rule-editor face and its pins ride until U3 rebuilds the row as
+    /// the outflow chooser — the parity pattern). nil clears.
+    public func setReadingAutoTag(_ id: String, tagID: String?) throws {
+        try setReadingOutflow(id, tagIDs: tagID.map { [$0] } ?? [])
     }
 
     // MARK: - The judgment ops (the plan §2.5)

@@ -785,6 +785,42 @@ extension AppDatabase {
                   AND deleted_at IS NULL
                 """)
         }
+        // **13i-c — THE OUTFLOW EVENT (SyncSpec §12 lockstep, marker 10→11;
+        // the plan `notes/plans/phase-13i-c-owned-finished-sealed.md` §2).**
+        // Her two rulings at the kickoff: R-13ic-1 — the outflow is a CHOSEN,
+        // OPTIONAL SET of tags on a book, stored as ONE JSON column
+        // (`auto_tag_ids`, the rule's own shape); R-13ic-4 — a gathering
+        // REQUIRES a rule, so every live rule-less gathering goes to the
+        // Trash here (a tombstone, Put back available, no note touched) and
+        // "no rule" means SHOWS NOTHING from now on — nothing grandfathered.
+        // Additive: no rebuild. The outbox captures every row this touches;
+        // they push after her window (the engine refuses until the marker
+        // reads 11 — the 13i-a pattern).
+        migrator.registerMigration("v1_20_outflow_and_ruleless") { db in
+            try db.execute(sql: "ALTER TABLE reading ADD COLUMN auto_tag_ids TEXT;")
+            // 1 — carry every LIVE book's single outflow into a one-element
+            // array. `auto_tag_id` is left as it is: retired-as-read (the
+            // shelf_pins precedent; SQLite refuses to drop a column that
+            // carries a foreign key). Dead rows are not rewritten — their
+            // value is irrelevant and an UPDATE would repush a tombstone.
+            try db.execute(sql: """
+                UPDATE reading SET auto_tag_ids = json_array(auto_tag_id)
+                WHERE deleted_at IS NULL AND auto_tag_id IS NOT NULL;
+                """)
+            // 2 — the rule-less sweep (R-13ic-4). A real clock: the Trash's
+            // 30-day window reads the stamp. The reading cascade triggers
+            // stamp any stray membership with the exact stamp (a gathering
+            // holds nothing by design; a sync stray dies with it). A
+            // MALFORMED rule is untouched — it already fails closed and the
+            // editor shows it.
+            let now = DateFormatter.variorumISO8601.string(from: Date())
+            try db.execute(
+                sql: """
+                    UPDATE reading SET deleted_at = ?, updated_at = ?
+                    WHERE deleted_at IS NULL AND kind = 'gathering' AND query_spec IS NULL
+                    """,
+                arguments: [now, now])
+        }
         return migrator
     }
 }

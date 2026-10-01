@@ -63,24 +63,37 @@ extension Operations {
                     readingID: readingID,
                     reason: "its rule is unreadable (malformed) — edit the rule first")
             case (.gathering, .none):
-                // A rule-less gathering shows every note in its wing, so
-                // "everything ∧ filter" IS the filter — exact, not a fallback.
+                // 13i-c (R-13ic-4): a rule-less gathering SHOWS NOTHING (it
+                // can exist live only as a Trash restoree); its association
+                // is nothing, so the saved rule is the filter alone — the
+                // face must say so (the `.none` reading).
                 association = nil
-                kind = .rule
+                kind = .none
             case (.book, _):
-                if let tagID = source.autoTagId,
-                   let tag = try Tag.fetchOne(db, key: tagID),
-                   tag.deletedAt == nil, tag.wingId == source.wingId {
-                    association = .tag(tagID)
+                // 13i-c (R-13ic-1): the OUTFLOW is a set — every live tag of
+                // it is what notes written there wear, so the association
+                // is their conjunction (ALL of them ride each note).
+                let live = try source.autoTagIDs.filter { tagID in
+                    guard let tag = try Tag.fetchOne(db, key: tagID) else { return false }
+                    return tag.deletedAt == nil && tag.wingId == source.wingId
+                }
+                if !live.isEmpty {
+                    association = live.count == 1 ? .tag(live[0]) : .and(live.map { .tag($0) })
                     kind = .autoTag
                 } else {
                     association = nil
                     kind = .none
                 }
             }
+            let spec = try RuleGrammar.encode(RuleGrammar.conjoin(association, filter))
+            // 13i-c (R-13ic-4): the minted GATHERING needs a rule — an empty
+            // filter over no association would mint a rule-less one.
+            guard spec != nil else {
+                throw OperationError.gatheringRequiresRule(id: readingID)
+            }
             let gathering = Reading(
                 id: newID(), ownerId: currentOwnerID(), name: name, kind: .gathering,
-                querySpec: try RuleGrammar.encode(RuleGrammar.conjoin(association, filter)),
+                querySpec: spec,
                 wingId: source.wingId,
                 createdAt: now, updatedAt: now)
             try gathering.insert(db)

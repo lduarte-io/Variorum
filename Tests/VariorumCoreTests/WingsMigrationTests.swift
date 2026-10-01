@@ -43,7 +43,11 @@ struct WingsMigrationTests {
     @Test func theKindRecastPreservesCASTombstonesAndStamps() throws {
         let queue = try oldStore { db in
             try reading(db, id: "A1", name: "hand-made", kind: "curated", syncVersion: 7)
-            try reading(db, id: "A2", name: "collected", kind: "smart", syncVersion: 3)
+            // 13i-c (v1_20): a RULE-LESS smart row would now be swept to the
+            // Trash by the chain (R-13ic-4), so this recast fixture carries
+            // a rule — its subject is the kind/CAS/stamp preservation.
+            try reading(db, id: "A2", name: "collected", kind: "smart",
+                        spec: #"{"tags":["x"]}"#, syncVersion: 3)
             try reading(db, id: "A3", name: "gone", kind: "curated",
                         syncVersion: 5, deletedAt: "2026-09-01T00:00:00.000Z")
         }

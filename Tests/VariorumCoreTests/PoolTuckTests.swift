@@ -105,17 +105,35 @@ struct PoolTuckTests {
             // A MALFORMED rule shows nothing, so it tucks nothing.
             _ = try ops.createReading(name: "broken", kind: .gathering, querySpec: "{not json")
             #expect(try listing(db).tuckedCount == 0)
-            // NO rule shows every note in its wing — the empty-but-gathered
-            // Pool (the face says so).
-            let all = try ops.createReading(name: "everything", kind: .gathering)
+            // 13i-c (R-13ic-4, an HONEST FLIP of the 13i-b letter): a
+            // gathering is MINTED with a rule, and a rule-less one — reachable
+            // only as a Trash restoree — shows NOTHING, so it tucks nothing.
+            #expect(throws: OperationError.self) {
+                try ops.createReading(name: "everything", kind: .gathering)
+            }
+            let t = try ops.createTag(name: "t")
+            let ruled = try ops.createReading(
+                name: "ruled", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(t.id)))
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE reading SET query_spec = NULL WHERE id = ?", arguments: [ruled.id])
+            }
+            #expect(try listing(db).tuckedCount == 0, "no rule shows nothing — tucks nothing")
+            // A real rule tucks its matches — within its OWN wing only
+            // (nothing crosses wings).
+            _ = try ops.applyTag(t.id, toPost: note.id)
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE reading SET query_spec = ? WHERE id = ?",
+                    arguments: [try RuleGrammar.encode(.tag(t.id)), ruled.id])
+            }
             let pool = try listing(db)
             #expect(pool.looseCount == 0)
             #expect(pool.tucked.map(\.postID) == [note.id])
-            // …within its OWN wing only (nothing crosses wings).
             try db.write { db in
                 try db.execute(
                     sql: "UPDATE reading SET wing_id = 'other-wing' WHERE id = ?",
-                    arguments: [all.id])
+                    arguments: [ruled.id])
             }
             #expect(try listing(db).tuckedCount == 0)
         }

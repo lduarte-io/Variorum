@@ -50,7 +50,9 @@ struct ReadingAssemblyQueryTests {
         // Phase 10 (additive): the readings-management face's listing.
         try withOperations { ops, db in
             _ = try ops.createReading(name: "zeta", kind: .book)
-            _ = try ops.createReading(name: "alpha", kind: .gathering)
+            _ = try ops.createReading(
+                name: "alpha", kind: .gathering,
+                querySpec: try RuleGrammar.encode(.star))  // 13i-c: minted with a rule
             let dead = try ops.createReading(name: "dead", kind: .book)
             try ops.deleteReading(dead.id)
             let readings = try db.read { try Queries.readings($0) }
@@ -289,14 +291,26 @@ struct ReadingAssemblyQueryTests {
         }
     }
 
-    @Test func smartWithNoSpecMatchesAllPostsAndMalformedMatchesNone() throws {
+    /// 13i-c (R-13ic-4) — an HONEST FLIP of the v1 letter: a gathering with
+    /// NO rule shows NOTHING (the mint refuses one; the state is reachable
+    /// only as a Trash restoree), exactly as a malformed one does.
+    @Test func smartWithNoSpecMatchesNoPostsAndMalformedMatchesNone() throws {
         try withOperations { ops, db in
             let p1 = try ops.createPost()
             let p2 = try ops.createPost()
             _ = try ops.createPool()  // never a smart-reading member
-            let unconstrained = try ops.createReading(name: "all", kind: .gathering)
+            #expect(throws: OperationError.self) {
+                try ops.createReading(name: "all", kind: .gathering)
+            }
+            let unconstrained = try ops.createReading(
+                name: "all", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            try db.write { db in
+                try db.execute(sql: "UPDATE reading SET query_spec = NULL WHERE id = ?",
+                               arguments: [unconstrained.id])
+            }
             let all = try db.read { try Queries.assembleReading($0, readingID: unconstrained.id) }
-            #expect(all.map(\.postID) == [p1.id, p2.id])  // created_at fallback order
+            #expect(all.isEmpty, "no rule shows nothing")
+            _ = (p1, p2)
 
             let malformed = try ops.createReading(
                 name: "broken", kind: .gathering, querySpec: "{not json")

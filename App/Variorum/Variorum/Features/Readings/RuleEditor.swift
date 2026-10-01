@@ -155,7 +155,9 @@ final class RuleEditorModel: Identifiable {
     private var storedSeating: IntakeSeating { reading?.intakeSeating ?? .auto }
     var ruleChanged: Bool { RuleEditing.needsWrite(draft: draft, stored: storedSpec) }
     var seatingChanged: Bool { isBook && seating != storedSeating }
-    var autoTagChanged: Bool { isBook && autoTagID != reading?.autoTagId }
+    // 13i-c interim (until U3's outflow chooser): the row shows the set's
+    // FIRST tag and writes a one-element set through the forwarder.
+    var autoTagChanged: Bool { isBook && autoTagID != reading?.autoTagIDs.first }
     var isDirty: Bool { ruleChanged || seatingChanged || autoTagChanged }
 
     /// What the add menus offer — the wing's live tags, then the star. Never
@@ -185,7 +187,7 @@ final class RuleEditorModel: Identifiable {
             guard let reading = try Queries.reading(db, id: id) else { return (nil, [], [:]) }
             let tags = try Queries.allTags(db).filter { $0.wingId == reading.wingId }
             var ids = Array(RuleGrammar.tagIDs(of: RuleGrammar.decode(reading.querySpec)))
-            if let auto = reading.autoTagId { ids.append(auto) }
+            ids += reading.autoTagIDs
             return (reading, tags, try Queries.tagPaths(db, ids: ids))
         }
         guard let (reading, tags, paths) = fetched, let reading else { return }
@@ -204,7 +206,7 @@ final class RuleEditorModel: Identifiable {
         stored = RuleGrammar.read(reading.querySpec)
         if case .rule(let term) = stored { draft = term } else { draft = nil }
         seating = reading.intakeSeating ?? .auto
-        autoTagID = reading.autoTagId
+        autoTagID = reading.autoTagIDs.first
     }
 
     // MARK: The edits (each one `RuleEditing`'s)

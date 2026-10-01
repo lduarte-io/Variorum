@@ -200,7 +200,7 @@ struct DivergeForBookTests {
             let post = try ops.createPost(title: "p")
             _ = try ops.newBlock(in: post.id, text: "Text.")
 
-            let smart = try ops.createReading(name: "Smart", kind: .gathering)
+            let smart = try ops.createReading(name: "Smart", kind: .gathering, querySpec: try RuleGrammar.encode(.star))  // 13i-c: minted with a rule
             #expect(throws: OperationError.self) {
                 try ops.divergePostForReading(post.id, in: smart.id)
             }

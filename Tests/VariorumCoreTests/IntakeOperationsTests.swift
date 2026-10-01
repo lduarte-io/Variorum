@@ -863,8 +863,9 @@ struct IntakeOperationsTests {
             #expect(throws: OperationError.readingHasNoAutoTag(id: book.id)) {
                 try ops.tagAllMembers(book.id)
             }
-            let gathering = try ops.createReading(name: "g", kind: .gathering)
             let t = try ops.createTag(name: "t")
+            let gathering = try ops.createReading(
+                name: "g", kind: .gathering, querySpec: try rule(.tag(t.id)))  // 13i-c: minted with a rule
             #expect(throws: OperationError.wrongReadingKind(id: gathering.id, expected: .book)) {
                 try ops.tagAllMembers(gathering.id, tagID: t.id)
             }
@@ -884,7 +885,8 @@ struct IntakeOperationsTests {
         try withOperations { ops, db in
             let t = try ops.createTag(name: "t")
             let book = try ops.createReading(name: "b", kind: .book)
-            let gathering = try ops.createReading(name: "g", kind: .gathering)
+            let gathering = try ops.createReading(
+                name: "g", kind: .gathering, querySpec: try rule(.tag(t.id)))  // 13i-c: minted with a rule
             #expect(throws: OperationError.wrongReadingKind(id: gathering.id, expected: .book)) {
                 try ops.setReadingAutoTag(gathering.id, tagID: t.id)
             }
@@ -892,7 +894,8 @@ struct IntakeOperationsTests {
                 try ops.setReadingIntakeSeating(gathering.id, .arrivals)
             }
             #expect(throws: OperationError.self) {
-                try ops.createReading(name: "g2", kind: .gathering, autoTagId: t.id)
+                try ops.createReading(name: "g2", kind: .gathering,
+                                      querySpec: try rule(.tag(t.id)), autoTagId: t.id)
             }
             // Another wing's tag does not exist from here (§9).
             try db.write { db in
@@ -909,7 +912,10 @@ struct IntakeOperationsTests {
             try ops.setReadingAutoTag(book.id, tagID: t.id)
             try ops.setReadingIntakeSeating(book.id, .arrivals)
             let set = try #require(try db.read { try Queries.reading($0, id: book.id) })
-            #expect(set.autoTagId == t.id)
+            // 13i-c (R-13ic-1): the forwarder writes the SET; the old column
+            // is retired-as-read and stays NULL.
+            #expect(set.autoTagIDs == [t.id])
+            #expect(set.autoTagId == nil)
             #expect(set.intakeSeating == .arrivals)
             try db.clearOutbox()
             try ops.setReadingAutoTag(book.id, tagID: t.id)

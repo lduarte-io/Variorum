@@ -36,6 +36,7 @@ struct StarredNotesGatheringTests {
             #expect(row.locked == false)
             #expect(row.owned == false)
             #expect(row.autoTagId == nil)
+            #expect(row.autoTagIDs == [])
             #expect(row.intakeSeating == nil)
             // A gathering holds nothing.
             #expect(try db.fetchInt(

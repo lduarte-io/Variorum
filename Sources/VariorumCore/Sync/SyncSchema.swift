@@ -135,7 +135,7 @@ public enum SyncSchema {
     /// constant together with the mirror file's marker in every future
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
-    public static let lockstepVersion = 10
+    public static let lockstepVersion = 11
     /// The synced tables, in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs
@@ -226,6 +226,12 @@ public enum SyncSchema {
                 // is ids and operators, sealed all the same).
                 "wing_id", "shelf_id", "shelf_position", "starred", "owned",
                 "sealed_at", "hide_owned", "intake_seating", "auto_tag_id",
+                // 13i-c (v1_20, marker 10→11 — R-13ic-1): the CHOSEN
+                // multi-tag outflow, a JSON array of tag ids. PLAIN like
+                // the single-tag column it retires (ids, content-free —
+                // PROVISIONAL P-13ic-8); `auto_tag_id` stays classified
+                // because it stays a column, retired-as-read.
+                "auto_tag_ids",
                 "created_at", "updated_at", "deleted_at",
             ],
             encrypted: ["name", "query_spec"]),
