@@ -1309,6 +1309,25 @@ STOP condition met.
   QuicknotesTheReceiptSaysThePool`. Core quicknote + star suites **26 tests / 3 suites green**; Mac
   `QuickNoteMintTests` + `QuickNoteWordTests` + `NodSetTests` **"Test run with 19 tests in 3 suites
   passed", 0 skipped**.
+- Piece 6 (this commit) — **D, the Pool tuck: the CORE split.** `Queries.poolListing(db, window:)` →
+  `PoolListing { loose, tucked, looseCount, tuckedCount }` by ONE statement (`poolListingSQL`): every
+  bookless note (no live MEMBER row — an arrival is not a home) classified ONCE by the OR of the live
+  gatherings' rules (each the assembly's own letter: no rule = every note in its wing, malformed = tucks
+  nothing, the ★ context through `StarContext`, each rule's truth COALESCEd to 0), then
+  `ROW_NUMBER`/`COUNT(*) OVER (PARTITION BY shown)` — exact class sizes, ≤ `window` rows per class,
+  newest touched first. `poolPosts(limit:)` = `poolListing(window:).loose` (the phone and every pin read
+  the one split). P1 stated in the doc and pinned on the PLAN. `PoolTuckTests` (7): lesson 10 against
+  the store's own truth (loose ∪ tucked = the bookless set exactly; tucked = what gatherings show; the
+  member in neither) · exact counts beyond the window · un-tag / un-star untuck at once · each
+  gathering's letter (none · malformed · no-rule = empty-but-gathered · wing-scoped) · an arrival is not a
+  home · **a legacy term over a NULL column never hides a note (traced: the old exclusion `NOT (<rule>)`
+  went NULL for a `{"profile":…}` rule against a profile-less note — every `createPost`/`importPost` note
+  — and the note vanished from the Pool though no gathering showed it; red-on-old check NEXT, revert
+  PENDING)** · the EXPLAIN plan (posts by `idx_container_kind`, the membership probe on
+  `idx_reading_post_post`, tag terms on `uq_tag_path_live` + `uq_post_tag_live` — the shipped rule
+  predicate's own plan, ∝ the taxonomy — no SCAN of `rp`/`pt`, no block/variant). **7/7 green**; with
+  the neighbours (star context, wing scoping, quicknote, shelf queries, membership, the intake SOAK whose
+  invariants include Pool agreement, the ritual, pool tray) **80 tests / 12 suites green**.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 

@@ -195,49 +195,133 @@ extension Queries {
     /// ratified NULL-spec rule — such a book empties the Pool). Newest
     /// touched first; bounded like every held listing.
 
+    ///
+    /// 13i-b U4: the Pool's LOOSE class — `poolListing(window:).loose`, so the
+    /// Mac's tuck face, the phone's listing and every pin read ONE split.
     public static func poolPosts(_ db: Database, limit: Int) throws -> [TimelineItem] {
-        var exclusions: [String] = ["""
-            NOT EXISTS (SELECT 1 FROM reading_post rp
-                         WHERE rp.post_id = c.id AND rp.deleted_at IS NULL
-                           AND rp.status = 'member')
-            """]
-        var arguments: [(any DatabaseValueConvertible)?] = []
-        var stars = StarContext()  // 13i-b U4: the ★ term's context (F-U3-3)
-        for reading in try readings(db) where reading.kind == .gathering {
-            switch RuleGrammar.read(reading.querySpec) {
-            case .none:
-                // No rule matches every post — nothing is bookless (the
-                // v1 empty-spec rule).
-                return []
-            case .malformed:
-                // Fails closed: the gathering shows nothing, so it
-                // excludes nothing here (the v1 letter).
-                continue
-            case .rule(let term):
-                let match = ruleMatchSQL(
-                    term, wingID: reading.wingId, starredNoteIDs: try stars.ids(db, for: term))
-                exclusions.append("NOT (" + match.conditions.joined(separator: " AND ") + ")")
-                arguments += match.arguments
+        try poolListing(db, window: limit).loose
+    }
+
+    /// **THE POOL, SPLIT** (13i-b U4 — the sitting record §8; lesson 10: "The
+    /// Pool is every note with no book. Notes that show in gatherings tuck
+    /// behind the count in its masthead — one click shows them.").
+    ///
+    /// The DEFINITION is untouched — the Pool is every live, unarchived note
+    /// with no live MEMBER row (a gathering gives a note no home; an arrival
+    /// is not membership). The VIEW splits it: `tucked` = the bookless notes
+    /// some live gathering shows (by its rule, in its wing — the assembly's
+    /// own predicate, the ★ context included); `loose` = the rest. Each class
+    /// carries its EXACT size (never the window's) and its own window of rows,
+    /// newest touched first.
+    public struct PoolListing: Equatable, Sendable {
+        public let loose: [TimelineItem]
+        public let tucked: [TimelineItem]
+        public let looseCount: Int
+        public let tuckedCount: Int
+
+        public init(
+            loose: [TimelineItem], tucked: [TimelineItem], looseCount: Int, tuckedCount: Int
+        ) {
+            self.loose = loose
+            self.tucked = tucked
+            self.looseCount = looseCount
+            self.tuckedCount = tuckedCount
+        }
+    }
+
+    /// ONE statement (`poolListingSQL` — split out so the P1 pin reads the
+    /// shipped statement): every bookless note is classified ONCE by the OR of
+    /// the live gatherings' rules (`shown`), then window functions number and
+    /// count each class, and at most `window` rows per class come back.
+    ///
+    /// Per-gathering letters, each the assembly's own: NO rule shows every
+    /// note in its wing; a MALFORMED rule shows nothing (fails closed — it
+    /// tucks nothing); a rule's truth is COALESCEd to 0, so a legacy term over
+    /// a NULL column (a profile/date term on a note without one) reads FALSE
+    /// exactly as the assembly's WHERE reads it. *(Fixed with the split, red
+    /// on the old read: the pre-U4 exclusion `NOT (<rule>)` went NULL there,
+    /// which dropped the note from the Pool though no gathering showed it.)*
+    ///
+    /// **P1, said exactly:** one pass over the live notes (the container
+    /// table's post rows — the class the Library's own sorted listing pays,
+    /// never text), one indexed membership probe per note
+    /// (`idx_reading_post_post`), then for each BOOKLESS note one rule probe
+    /// per live gathering (a tag term is the shipped rule predicate's plan —
+    /// the wing's live tags by `uq_tag_path_live`, each a `(tag, note)`
+    /// application seek on `uq_post_tag_live`, so ∝ the taxonomy; a ★ term an
+    /// `IN` over at most `Operations.starLimit` ids) — so cost ∝ notes +
+    /// bookless × gatherings × terms × tags-in-wing, plus one sort of the
+    /// bookless set; the result is ≤ 2 × `window` rows. Gatherings and tags
+    /// are author-scale; nothing reads text. This is the shipped Pool's own class
+    /// (it already ran every gathering's rule over every bookless note per
+    /// tick); the split adds the tucked class's count, not a new dimension.
+    public static func poolListing(_ db: Database, window: Int) throws -> PoolListing {
+        let statement = try poolListingSQL(db)
+        let rows = try Row.fetchAll(
+            db, sql: statement.sql,
+            arguments: StatementArguments(statement.arguments + [window]))
+        var loose: [TimelineItem] = []
+        var tucked: [TimelineItem] = []
+        var looseCount = 0
+        var tuckedCount = 0
+        for row in rows {
+            let item = TimelineItem(
+                postID: row["id"], title: row["title"],
+                entryDate: row["entry_date"], createdAt: row["created_at"],
+                stamp: row["stamp"], profile: row["profile"])
+            if (row["shown"] as Int) == 1 {
+                tucked.append(item)
+                tuckedCount = row["n"]
+            } else {
+                loose.append(item)
+                looseCount = row["n"]
             }
         }
-        return try Row.fetchAll(
-            db,
-            sql: """
-                SELECT id, title, entry_date, created_at, profile,
-                       COALESCE(last_touched_at, created_at) AS stamp
+        return PoolListing(
+            loose: loose, tucked: tucked, looseCount: looseCount, tuckedCount: tuckedCount)
+    }
+
+    /// The statement behind `poolListing`. The LAST placeholder is the window.
+    static func poolListingSQL(
+        _ db: Database
+    ) throws -> (sql: String, arguments: [(any DatabaseValueConvertible)?]) {
+        var shownTerms: [String] = []
+        var arguments: [(any DatabaseValueConvertible)?] = []
+        var stars = StarContext()
+        for reading in try readings(db) where reading.kind == .gathering {
+            let term: RuleTerm?
+            switch RuleGrammar.read(reading.querySpec) {
+            case .malformed: continue  // shows nothing — tucks nothing
+            case .none: term = nil      // shows every note in its wing
+            case .rule(let t): term = t
+            }
+            let match = ruleMatchSQL(
+                term, wingID: reading.wingId, starredNoteIDs: try stars.ids(db, for: term))
+            shownTerms.append(
+                "COALESCE((" + match.conditions.joined(separator: " AND ") + "), 0)")
+            arguments += match.arguments
+        }
+        let shown = shownTerms.isEmpty ? "0" : "(" + shownTerms.joined(separator: " OR ") + ")"
+        return ("""
+            SELECT id, title, entry_date, created_at, profile, stamp, shown, n FROM (
+              SELECT id, title, entry_date, created_at, profile, stamp, shown,
+                     ROW_NUMBER() OVER (PARTITION BY shown ORDER BY stamp DESC, id DESC) AS rn,
+                     COUNT(*) OVER (PARTITION BY shown) AS n
+              FROM (
+                SELECT c.id AS id, c.title AS title, c.entry_date AS entry_date,
+                       c.created_at AS created_at, c.profile AS profile,
+                       COALESCE(c.last_touched_at, c.created_at) AS stamp,
+                       CASE WHEN \(shown) THEN 1 ELSE 0 END AS shown
                 FROM container c
                 WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL
-                  AND \(exclusions.joined(separator: " AND "))
-                ORDER BY stamp DESC, id DESC
-                LIMIT ?
-                """,
-            arguments: StatementArguments(arguments + [limit])
-        ).map {
-            TimelineItem(
-                postID: $0["id"], title: $0["title"],
-                entryDate: $0["entry_date"], createdAt: $0["created_at"],
-                stamp: $0["stamp"], profile: $0["profile"])
-        }
+                  AND NOT EXISTS (SELECT 1 FROM reading_post rp
+                                   WHERE rp.post_id = c.id AND rp.deleted_at IS NULL
+                                     AND rp.status = 'member')
+              )
+            )
+            WHERE rn <= ?
+            ORDER BY shown, stamp DESC, id DESC
+            """, arguments)
     }
 
     /// The books holding a post — the R35 membership chip's feed ("this
