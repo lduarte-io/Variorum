@@ -1,5 +1,12 @@
 # Phase 13i — Smart-book identity (BRIEF; the problem's shape, nothing decided)
 
+> **⚠️ THE DESIGN SITTING RAN 2026-09-30 — the binding record is
+> `notes/plans/phase-13i-sitting-record-2026-09-30.md`**, which dispositions every knot and open
+> agenda line below item by item (its §14) and carries the ruled shape: the Gathering / Book /
+> Owned Book ladder, event-driven intake with Arrivals, Finished/Sealed, the Bookcase with shelves
+> and the Welcome shelf, total wing isolation, and the daily Journal's 13i-e rulings. This brief
+> remains the sitting's raw material and history; read it THROUGH the record.
+
 **Status: BRIEF ONLY — authored 2026-07-30 at the 13f kickoff sitting,
 at the author's direction, verbatim:** *"i would make a new phase with
 a short brief on what you know about the shape of the problem

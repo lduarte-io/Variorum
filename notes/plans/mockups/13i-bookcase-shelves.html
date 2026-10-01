@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bookcase Shelves</title>
+<style>
+  :root {
+    --room:#fdfdfb; --ink:#1c1b22; --muted:#8e8b94; --accent:#5b4fc0;
+    --hair:#e9e7ef; --chipbg:#f1effa; --wash:#f8f7fd; --capture:#b9b6c2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --room:#000; --ink:#e8e6f0; --muted:#77747f; --accent:#9d92ee;
+      --hair:#221f30; --chipbg:#161327; --wash:#0d0b16; --capture:#4b4858;
+    }
+  }
+  :root[data-theme="dark"] {
+    --room:#000; --ink:#e8e6f0; --muted:#77747f; --accent:#9d92ee;
+    --hair:#221f30; --chipbg:#161327; --wash:#0d0b16; --capture:#4b4858;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:var(--room); color:var(--ink);
+    font-family: ui-serif, "Iowan Old Style", Georgia, serif;
+    padding:40px 16px 80px; line-height:1.45;
+  }
+  .frame { max-width:1020px; margin:0 auto; }
+  .memo { font-family:-apple-system, system-ui, sans-serif; font-size:12.5px; color:var(--muted); margin:28px 0 10px; max-width:640px; }
+  .memo b { color:var(--ink); font-weight:600; }
+  h1.doc { font-size:15px; font-family:-apple-system,system-ui,sans-serif; font-weight:600; color:var(--muted); letter-spacing:.02em; margin-bottom:4px; }
+  .themebtn { position:fixed; top:14px; right:16px; font:12px -apple-system,system-ui,sans-serif; color:var(--muted); background:none; border:1px solid var(--hair); border-radius:6px; padding:4px 10px; cursor:pointer; }
+
+  /* ——— the bookcase surface ——— */
+  .surface { border:1px solid var(--hair); border-radius:10px; background:var(--room); padding:26px 34px 30px; margin:10px 0 46px; }
+  .masthead { display:flex; align-items:baseline; gap:10px; border-bottom:1px solid var(--hair); padding-bottom:14px; }
+  .masthead .title { color:var(--accent); font-weight:700; font-size:24px; }
+  .masthead .stats { color:var(--muted); font-size:14px; }
+  .masthead .doors { margin-left:auto; color:var(--accent); font-size:14.5px; white-space:nowrap; }
+  .masthead .doors span { margin-left:18px; cursor:pointer; }
+
+  /* shelf strip */
+  .strip { display:flex; flex-wrap:wrap; gap:6px 28px; padding:16px 2px 8px; align-items:baseline; }
+  .chip {
+    font-family:-apple-system, system-ui, sans-serif; font-size:12.5px; letter-spacing:.03em;
+    padding:2px 0 5px; cursor:pointer; color:var(--muted); user-select:none;
+  }
+  .chip .g { margin-right:7px; font-size:12px; opacity:.85; }
+  .chip:hover { color:var(--ink); }
+  .chip.active { color:var(--accent); font-weight:600; box-shadow:0 1.5px 0 0 var(--accent); }
+  .chip .ct { color:var(--capture); font-weight:400; margin-left:6px; font-size:10.5px; opacity:0; transition:opacity .12s; }
+  .chip:hover .ct, .chip.active .ct { opacity:1; }
+  .chip.home .ct::after { content:" · default"; letter-spacing:0; }
+  .chip.new { color:var(--capture); }
+  .chip.dragover { outline:1px solid var(--hair); outline-offset:5px; border-radius:2px; }
+
+  /* shelf sections */
+  .shelf { margin-top:10px; }
+  .shelfhead {
+    display:flex; align-items:baseline; gap:8px; cursor:pointer;
+    padding:14px 0 6px; user-select:none;
+  }
+  .shelfhead .nm {
+    font-family:-apple-system, system-ui, sans-serif; font-size:11.5px; font-weight:600;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+  }
+  .shelfhead .ct { font-family:-apple-system,system-ui,sans-serif; font-size:11.5px; color:var(--capture); }
+  .shelfhead .chev { color:var(--capture); font-size:10px; transition:transform .15s; }
+  .shelf.collapsed .chev { transform:rotate(-90deg); }
+  .shelf.collapsed .row { display:none; }
+  .solo .shelfhead { display:none; }   /* solo view: the strip names the shelf */
+  .solo .shelf.hidden { display:none; }
+
+  /* book rows — the existing idiom */
+  .row {
+    display:flex; align-items:baseline; gap:14px;
+    padding:13px 2px; border-bottom:1px solid var(--hair);
+  }
+  .row .pin { width:14px; color:var(--muted); flex:none; }
+  .row .pin svg { width:11px; height:11px; fill:currentColor; opacity:.7; }
+  .row .nm { font-size:19px; font-weight:500; cursor:pointer; }
+  .row .tag { color:var(--accent); font-family:-apple-system,system-ui,sans-serif; font-size:12.5px; }
+  .row .meta { margin-left:auto; color:var(--muted); font-size:13.5px; white-space:nowrap; font-family:-apple-system,system-ui,sans-serif;}
+  .row .meta .arr { color:var(--accent); font-weight:600; }
+  .row .meta .mode { font-style:italic; }
+
+  .capture {
+    margin-top:22px; border:1.5px dashed var(--hair); border-radius:8px;
+    padding:14px 18px; color:var(--capture); font-size:16px; font-style:italic;
+  }
+
+  /* overflow dropdown mock */
+  .dd { position:relative; display:inline-block; }
+  .panel {
+    margin-top:8px; width:270px; border:1px solid var(--hair); border-radius:10px;
+    background:var(--room); box-shadow:0 8px 28px rgba(20,16,50,.10);
+    font-family:-apple-system,system-ui,sans-serif; font-size:13px; overflow:hidden;
+  }
+  .panel .search { padding:9px 12px; border-bottom:1px solid var(--hair); color:var(--capture); }
+  .panel .it { display:flex; padding:8px 12px; cursor:pointer; }
+  .panel .it:hover { background:var(--wash); }
+  .panel .it .ct { margin-left:auto; color:var(--capture); }
+  .panel .it .dflt { margin-left:8px; color:var(--accent); font-size:11px; }
+  .panel .mk { border-top:1px solid var(--hair); padding:8px 12px; color:var(--accent); }
+
+  .note { font-family:-apple-system,system-ui,sans-serif; font-size:13px; color:var(--muted); max-width:680px; margin:8px 0 26px; }
+  .note b { color:var(--ink); font-weight:600; }
+  .why { border-left:2px solid var(--hair); padding:2px 0 2px 14px; margin:14px 0; }
+  hr.sp { border:none; border-top:1px solid var(--hair); margin:40px 0; }
+</style>
+</head>
+<body>
+<button class="themebtn" onclick="tgl()">light / dark</button>
+<div class="frame">
+
+<h1 class="doc">13i design sitting — the Bookcase &amp; shelves (mockup, 2026-09-30)</h1>
+<p class="memo">Four states below. <b>State A is live</b> — click the shelf names, click a shelf
+header in All view to collapse it. The row idiom (serif name · tag chip · muted right meta) is kept
+from the shipped Shelf; everything new is the strip and the section headers.</p>
+
+<!-- ═══════════ STATE A — the recommended shape ═══════════ -->
+<p class="memo"><b>STATE A — the Bookcase, opening on your default shelf (solo), All one click away.</b></p>
+
+<div class="surface solo" id="case">
+  <div class="masthead">
+    <span class="title">Bookcase</span>
+    <span class="stats">· 8 books · 3 gatherings · 4 shelves · 1 finished</span>
+    <span class="doors"><span>Today’s Entry</span><span>+ New Book</span></span>
+  </div>
+
+  <div class="strip" id="strip">
+    <span class="chip" data-s="all">All <span class="ct">11</span></span>
+    <span class="chip home active" data-s="work"><span class="g">❧</span>The Work <span class="ct">3</span></span>
+    <span class="chip" data-s="journal"><span class="g">✶</span>Journal <span class="ct">2</span></span>
+    <span class="chip" data-s="reading"><span class="g">❦</span>From Variorum <span class="ct">3</span></span>
+    <span class="chip" data-s="ideas"><span class="g">✦</span>Ideas <span class="ct">3</span></span>
+    <span class="chip new">+ shelf</span>
+  </div>
+
+  <div class="shelf" data-s="work">
+    <div class="shelfhead"><span class="chev">▾</span><span class="nm">The Work</span><span class="ct">3</span></div>
+    <div class="row"><span class="pin"></span><span class="nm">my book :)</span><span class="tag">#todos</span><span class="meta">3 notes · 450w · <span class="mode">owned</span></span></div>
+    <div class="row"><span class="pin"></span><span class="nm">research — gothic houses</span><span class="tag">#research</span><span class="meta">12 notes · 3,104w</span></div>
+    <div class="row"><span class="pin"></span><span class="nm">cut material</span><span class="tag"></span><span class="meta">5 notes · 1,220w</span></div>
+  </div>
+
+  <div class="shelf hidden" data-s="journal">
+    <div class="shelfhead"><span class="chev">▾</span><span class="nm">Journal</span><span class="ct">2</span></div>
+    <div class="row"><span class="pin"><svg viewBox="0 0 24 24"><path d="M16 3l5 5-6 6 1 4-3 1-3-3-5 5-1-1 5-5-3-3 1-3 4 1z"/></svg></span><span class="nm">Quicknotes</span><span class="tag">#quicknote</span><span class="meta"><span class="mode">gathering</span> · 4w</span></div>
+    <div class="row"><span class="pin"></span><span class="nm">Journal</span><span class="tag">#happy</span><span class="meta">19 notes · 5,273w</span></div>
+  </div>
+
+  <div class="shelf hidden" data-s="reading">
+    <div class="shelfhead"><span class="chev">▾</span><span class="nm">❦ From Variorum</span><span class="ct">3</span></div>
+    <div class="row"><span class="pin"></span><span class="nm">The Strange Case of Dr Jekyll and Mr Hyde</span><span class="tag">#jekyll and hyde</span><span class="meta">4 notes · 4 ch · 12,642w · <span class="mode">finished</span></span></div>
+    <div class="row"><span class="pin"></span><span class="nm">the adventures of sherlock holmes</span><span class="tag">#sherlock holmes</span><span class="meta">14 notes · 13 ch · 105,337w</span></div>
+    <div class="row"><span class="pin"></span><span class="nm">the field guide</span><span class="tag">#tutorial</span><span class="meta">34 notes · 9 ch · 246% of 4000w</span></div>
+  </div>
+
+  <div class="shelf hidden" data-s="ideas">
+    <div class="shelfhead"><span class="chev">▾</span><span class="nm">Ideas</span><span class="ct">3</span></div>
+    <div class="row"><span class="pin"></span><span class="nm">video ideas</span><span class="tag">#video ideas</span><span class="meta"><span class="mode">gathering</span> · 23 notes</span></div>
+    <div class="row"><span class="pin"></span><span class="nm">talking heads</span><span class="tag">#type/talking head</span><span class="meta"><span class="mode">gathering</span> · 8 notes</span></div>
+    <div class="row"><span class="pin"></span><span class="nm">Encryption Explained</span><span class="tag">#encryption explained</span><span class="meta"><span class="arr">2 arrivals</span> · <span class="mode">living</span> · 9 notes · 9 ch · 2,161w</span></div>
+  </div>
+
+  <div class="capture">new note — just start typing · ⏎ opens it · ⇧⏎ new paragraph</div>
+</div>
+
+<div class="note">
+  <b>What State A claims:</b> the Bookcase opens <b>solo on your default shelf</b> (right-click any
+  shelf name: <i>Rename · Set Glyph · Make Default · Delete</i> — deleting a shelf returns its books
+  to the first shelf, never touches a book; “default” shows beside the count on hover). <b>All</b>
+  stacks every shelf with collapsible headers — a real bookcase read top to bottom. Shelf names are
+  also <b>drop targets</b>: drag a book row onto one to re-shelve it (a hairline square outline
+  appears around the name while dragging over — the only container the strip ever draws). Drag the
+  names themselves, or the rows in the overflow panel, to reorder shelves. “2 arrivals” on
+  <i>Encryption Explained</i> is the inbox surfacing on the bookcase — accent-colored because it
+  asks for judgment; everything else stays muted. The right-meta word carries the vocabulary:
+  <i>gathering · living · owned · finished · sealed</i>.
+  <div class="why" style="margin-top:14px;"><b>The strip’s look (this revision):</b> no pills, no
+  fills, no borders — shelf names are set exactly like a mode row: quiet sans, generous spacing,
+  the active one accented with a thin rule beneath, counts whispered on hover only. The optional
+  <b>glyph is one grapheme, monochrome</b> — the callout frame’s ruled precedent — drawn from a
+  curated case of printer’s ornaments (❧ ❦ ☙ ✶ ✦ ❖ † ◆) with free Unicode entry for anything else
+  (a black heart, a dot, a hieroglyph). No emoji, no color: the glyph inherits the text’s ink, so
+  the strip stays typographic — ornament, not decoration.</div>
+</div>
+
+<hr class="sp">
+
+<!-- ═══════════ STATE B — fresh store ═══════════ -->
+<p class="memo"><b>STATE B — a fresh store: one shelf, the verb still visible</b> (your ruling). The
+strip exists from birth with the starter shelf named “First Shelf” (renamable — the name is yours to
+rule); the header shows even when it is the only one, so shelves are discovered by seeing, not by
+reading a manual.</p>
+
+<div class="surface">
+  <div class="masthead">
+    <span class="title">Bookcase</span>
+    <span class="stats">· 3 books</span>
+    <span class="doors"><span>Today’s Entry</span><span>+ New Book</span></span>
+  </div>
+  <div class="strip">
+    <span class="chip active" data-s="all">All <span class="ct">3</span></span>
+    <span class="chip home">First Shelf <span class="ct">3</span></span>
+    <span class="chip new">+ shelf</span>
+  </div>
+  <div class="shelf">
+    <div class="shelfhead"><span class="chev">▾</span><span class="nm">First Shelf</span><span class="ct">3</span></div>
+    <div class="row"><span class="pin"></span><span class="nm">Quicknotes</span><span class="tag">#quicknote</span><span class="meta"><span class="mode">living</span></span></div>
+    <div class="row"><span class="pin"></span><span class="nm">Journal</span><span class="tag"></span><span class="meta">2 notes · 310w</span></div>
+    <div class="row"><span class="pin"></span><span class="nm">the field guide</span><span class="tag">#tutorial</span><span class="meta">34 notes · 9 ch</span></div>
+  </div>
+  <div class="capture">new note — just start typing</div>
+</div>
+
+<hr class="sp">
+
+<!-- ═══════════ STATE C — many shelves ═══════════ -->
+<p class="memo"><b>STATE C — a decent number of shelves.</b> The strip wraps to a second line
+happily; past roughly ten, the trailing chips fold into a <b>“⋯ more” chip whose panel has
+type-to-filter search</b> — your dropdown-with-search instinct as the overflow road, not the
+everyday one. The panel is also where <i>✓ default</i> is visible at a glance.</p>
+
+<div class="surface">
+  <div class="masthead">
+    <span class="title">Bookcase</span>
+    <span class="stats">· 64 books · 14 shelves</span>
+    <span class="doors"><span>Today’s Entry</span><span>+ New Book</span></span>
+  </div>
+  <div class="strip">
+    <span class="chip" data-s="all">All <span class="ct">64</span></span>
+    <span class="chip home active">The Work <span class="ct">3</span></span>
+    <span class="chip">Journal <span class="ct">2</span></span>
+    <span class="chip">Reading <span class="ct">9</span></span>
+    <span class="chip">Ideas <span class="ct">6</span></span>
+    <span class="chip">Essays <span class="ct">5</span></span>
+    <span class="chip">Poetry <span class="ct">4</span></span>
+    <span class="chip">Archive drafts <span class="ct">8</span></span>
+    <span class="chip">Letters <span class="ct">3</span></span>
+    <span class="chip active" style="background:none;border:1px solid var(--hair);">⋯ 6 more</span>
+  </div>
+  <div class="dd">
+    <div class="panel">
+      <div class="search">find a shelf…</div>
+      <div class="it">Recipes <span class="ct">4</span></div>
+      <div class="it">Teaching <span class="ct">7</span></div>
+      <div class="it">The Work <span class="dflt">✓ default</span><span class="ct">3</span></div>
+      <div class="it">Travel <span class="ct">2</span></div>
+      <div class="it">Video scripts <span class="ct">6</span></div>
+      <div class="it">Zines <span class="ct">2</span></div>
+      <div class="mk">+ New Shelf…</div>
+    </div>
+  </div>
+  <div style="height:14px"></div>
+</div>
+
+<hr class="sp">
+
+<!-- ═══════════ STATE D — the Pool with gatherings ═══════════ -->
+<p class="memo"><b>STATE D — the Pool, once gatherings exist</b> (proposal for your “probably
+should” lean): the Pool’s definition stays honest — bookless notes — but notes a gathering shows
+are tucked behind one muted, self-explaining line, so Quicknotes’ matches never double-list. One
+click reveals them in place; nothing moved, nothing lost, and the line itself teaches <i>why</i>.</p>
+
+<div class="surface">
+  <div class="masthead">
+    <span class="title">Pool</span>
+    <span class="stats">· 2 notes · 14 in gatherings <span style="color:var(--accent);cursor:pointer;">show</span></span>
+  </div>
+  <div class="shelf">
+    <div class="row"><span class="pin"></span><span class="nm">a stray thought about lighthouses</span><span class="tag"></span><span class="meta">210w · 2d</span></div>
+    <div class="row"><span class="pin"></span><span class="nm">packing list — iceland</span><span class="tag"></span><span class="meta">88w · 3w</span></div>
+  </div>
+  <div style="font-family:-apple-system,system-ui,sans-serif;font-size:13px;color:var(--capture);padding:16px 2px 2px;">
+    the masthead carries the tucked count (your note: a bottom line drowns under a long Pool) —
+    an empty-but-gathered Pool says it in the empty state instead: “everything here appears in
+    gatherings · show”
+  </div>
+</div>
+
+<!-- ═══════════ why ═══════════ -->
+<div class="note">
+  <div class="why"><b>Why not browser-style tabs as the primary?</b> Tabs truncate past ~8, hide
+  every shelf you are not on, and have no “All” that reads like a bookcase. The chip strip IS the
+  tab idea, but it wraps instead of truncating, carries counts, takes drops, and keeps the stacked
+  All view one click away.</div>
+  <div class="why"><b>Why not a dropdown as the primary?</b> A dropdown hides the whole shelf
+  vocabulary behind a click — with one shelf you would never learn shelves exist, which fails your
+  “the verb stays visible” ruling. It survives as the overflow panel, where search earns its place.</div>
+  <div class="why"><b>Free riders:</b> ⌘K already gives “go to shelf” for nothing; the sidebar item
+  renames Shelf → Bookcase in the same vocabulary sweep as wings; pinned books keep floating to the
+  top of their own shelf.</div>
+</div>
+
+</div>
+<script>
+  const cs = document.getElementById('case');
+  document.getElementById('strip').addEventListener('click', e => {
+    const chip = e.target.closest('.chip'); if (!chip || chip.classList.contains('new')) return;
+    document.querySelectorAll('#strip .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const s = chip.dataset.s;
+    const shelves = cs.querySelectorAll('.shelf');
+    if (s === 'all') { cs.classList.remove('solo'); shelves.forEach(x => x.classList.remove('hidden')); }
+    else { cs.classList.add('solo'); shelves.forEach(x => x.classList.toggle('hidden', x.dataset.s !== s)); }
+  });
+  document.querySelectorAll('.shelfhead').forEach(h =>
+    h.addEventListener('click', () => h.parentElement.classList.toggle('collapsed')));
+  function tgl(){ const r = document.documentElement;
+    r.dataset.theme = (r.dataset.theme === 'dark') ? 'light' : 'dark'; }
+</script>
+</body>
+</html>
