@@ -110,40 +110,93 @@ struct QuicknoteShelfTests {
         }
     }
 
-    /// The #37(iii) precedent's two halves: a DANGLING designation reads as
-    /// none (so a book she threw away is not resurrected), and a LIVE
-    /// designation is never replaced (a book she renamed stays hers).
+    /// A LIVE designation is never replaced (a book she renamed stays hers),
+    /// and a dead one is never handed back as if it were live.
     ///
-    /// DISCRIMINATING REVERT (verified): drop the liveness clause from
-    /// `Queries.quicknotesBookID`'s designation read and the first half
-    /// fails — the second filing hands back the DELETED book's id.
-    @Test func aDanglingDesignationMintsAfreshAndALiveOneIsNeverReplaced() throws {
+    /// 13i-b U4 — HONEST TEST EDIT: this pin's first half used to assert the
+    /// 13g re-mint ("a DANGLING designation mints afresh"), the behaviour §20
+    /// retires; that half now lives, inverted, in
+    /// `deletingQuicknotesIsHerWordAndTheNextQuickNoteStillLandsTagged`.
+    ///
+    /// DISCRIMINATING REVERT (verified at 13g): drop the liveness clause from
+    /// `Queries.quicknotesBookID`'s designation read and the dead book's id
+    /// comes back as if it were live.
+    @Test func aLiveDesignationIsNeverReplacedAndADeadOneNeverReadsLive() throws {
         try withOperations { ops, db in
             let note = try ops.importPost(title: nil, text: "One.").container
-            guard case .filed(_, let firstBook) = ops.fileAsQuicknote(note.id) else {
+            guard case .filed(_, let book) = ops.fileAsQuicknote(note.id) else {
                 Issue.record("expected .filed")
                 return
             }
-            try ops.deleteReading(firstBook)
-
-            let second = try ops.importPost(title: nil, text: "Two.").container
-            guard case .filed(_, let secondBook) = ops.fileAsQuicknote(second.id) else {
-                Issue.record("expected .filed")
-                return
-            }
-            #expect(secondBook != firstBook)
-            #expect(try db.read { try Queries.quicknotesBookID($0) } == secondBook)
-
             // Now it is LIVE and she has made it her own — renaming it must
             // not cause a rival to be minted beside it.
-            try ops.renameReading(secondBook, name: "My jots")
-            let third = try ops.importPost(title: nil, text: "Three.").container
-            guard case .filed(_, let thirdBook) = ops.fileAsQuicknote(third.id) else {
+            try ops.renameReading(book, name: "My jots")
+            let second = try ops.importPost(title: nil, text: "Two.").container
+            guard case .filed(_, let again) = ops.fileAsQuicknote(second.id) else {
                 Issue.record("expected .filed")
                 return
             }
-            #expect(thirdBook == secondBook)
-            #expect(try db.read { try Queries.reading($0, id: secondBook)?.name } == "My jots")
+            #expect(again == book)
+            #expect(try db.read { try Queries.reading($0, id: book)?.name } == "My jots")
+
+            try ops.deleteReading(book)
+            #expect(try db.read { try Queries.quicknotesBookID($0) } == nil)
+        }
+    }
+
+    /// **13i-b U4 — §20, ratified at §23: Quicknotes is ORDINARY.** "No special
+    /// identity, no delete guard … deleting the gathering breaks nothing — quick
+    /// notes still land, still tagged, still findable in the tag's own listing,
+    /// and the gathering is re-makeable in one gesture." The 13g self-create
+    /// read a DANGLING designation as "none" and minted a fresh Quicknotes at
+    /// the next quick note — the daily Journal's comes-back trait (lesson 9),
+    /// which §20 explicitly withholds ("Two special books is one more than the
+    /// design needs"). Her deletion is her word now (PROVISIONAL P-13ib-U4-2).
+    ///
+    /// RED ON THE PRE-U4 TREE (watched): the second filing re-minted the
+    /// gathering — one live reading, the note shown by it (so not in the
+    /// Pool), and the restored original then sat BESIDE the re-mint while the
+    /// designation pointed at the twin.
+    @Test func deletingQuicknotesIsHerWordAndTheNextQuickNoteStillLandsTagged() throws {
+        try withOperations { ops, db in
+            let first = try ops.importPost(title: nil, text: "One.").container
+            guard case .filed(let tagID, let book) = ops.fileAsQuicknote(first.id) else {
+                Issue.record("expected .filed")
+                return
+            }
+            try ops.deleteReading(book)
+
+            let second = try ops.importPost(title: nil, text: "Two.").container
+            let outcome = ops.fileAsQuicknote(second.id)
+            if case .filed = outcome {
+                Issue.record("the filing claimed a Quicknotes landing after she deleted it: \(outcome)")
+            }
+            if case .refused = outcome { Issue.record("expected the note filed, got \(outcome)") }
+            #expect(outcome == .taggedOnly(tagID: tagID))
+            // Nothing came back.
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL") == 0)
+            // Still lands, still tagged…
+            let tags = try db.read { try Queries.postTags($0, postID: second.id) }
+            #expect(tags.map(\.id) == [tagID])
+            // …still findable in the tag's own listing…
+            let tagged = try db.read { try Queries.everythingTagged($0, tagID: tagID).postIDs }
+            #expect(Set(tagged) == Set([first.id, second.id]))
+            // …and shown by no gathering now, so the Pool lists it.
+            let pool = try db.read { try Queries.poolPosts($0, limit: 50).map(\.postID) }
+            #expect(pool.contains(second.id))
+
+            // Restoring it is the ordinary Trash door — and the filing door
+            // then finds THAT book again (no twin was ever minted).
+            try ops.restoreReading(book)
+            let third = try ops.importPost(title: nil, text: "Three.").container
+            guard case .filed(_, let again) = ops.fileAsQuicknote(third.id) else {
+                Issue.record("expected .filed once it is back")
+                return
+            }
+            #expect(again == book)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM reading WHERE deleted_at IS NULL") == 1)
         }
     }
 

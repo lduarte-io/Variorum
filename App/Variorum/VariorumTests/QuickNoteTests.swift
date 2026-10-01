@@ -79,6 +79,41 @@ struct QuickNoteMintTests {
         }
     }
 
+    /// **13i-b U4 (§20 — Quicknotes is ordinary; P-13ib-U4-2):** once she has
+    /// deleted the Quicknotes gathering, a filed pad is tagged and lands in
+    /// the Pool — no gathering comes back, and the receipt names where the note
+    /// IS rather than claiming the Quicknotes landing that did not happen.
+    @Test func afterSheDeletesQuicknotesTheReceiptSaysThePool() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 3))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let first = try #require(
+                await QuickNoteMint.file("First.", session: session).postID)
+            let book = try #require(try await db.read { db in
+                try Queries.readingsContaining(db, postID: first).first?.id
+            })
+            try await session.runner.run { ops in try ops.deleteReading(book) }
+
+            let second = try #require(
+                await QuickNoteMint.file("Second.", session: session).postID)
+            let (live, pool, tags) = try await db.read { db in
+                (try Queries.readings(db),
+                 try Queries.poolPosts(db, limit: 50).map(\.postID),
+                 try Queries.postTags(db, postID: second).map(\.path))
+            }
+            #expect(live.isEmpty, "her deletion stands — nothing re-minted")
+            #expect(pool.contains(second))
+            #expect(tags == [Operations.quicknoteTagPath])
+            #expect(session.status.spoken?.text == QuickNoteCopy.filedTaggedOnly)
+            #expect(!QuickNoteCopy.filedTaggedOnly.contains("Quicknotes"))
+        }
+    }
+
     /// The typed text is CONTENT, segmented by the standing rule — so the
     /// sticky needs no segmentation rule of its own and the 2026-07-12
     /// spacing ruling rides free.

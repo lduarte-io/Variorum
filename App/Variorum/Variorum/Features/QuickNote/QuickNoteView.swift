@@ -486,6 +486,10 @@ enum QuickNoteMint {
             switch filing {
             case .filed, .alreadyTagged:
                 session.status.receipt(QuickNoteCopy.filedNote)  // 18i: it landed
+            case .taggedOnly:
+                // 13i-b U4: tagged, and no Quicknotes gathering shows it (she
+                // deleted it) — so the line names where it IS.
+                session.status.receipt(QuickNoteCopy.filedTaggedOnly)
             case .refused(let reason):
                 session.status.refuse(QuickNoteCopy.refusedFilingLine(reason))
             }
@@ -550,6 +554,13 @@ nonisolated enum QuickNoteCopy {
     /// book holds, and a collected note is held (Stage B's MAJOR 3 — derived
     /// membership counts). One untag puts it back there.
     static let filedNote = "Filed in Quicknotes — tagged #quicknote."
+    /// 13i-b U4 (§20 — Quicknotes is ordinary; P-13ib-U4-2): the line for a
+    /// filing that tagged the note while NO Quicknotes gathering shows it —
+    /// she deleted it, and her deletion stands. `filedNote` would claim a
+    /// landing that did not happen; this says what did: the tag, and where an
+    /// untagged-by-any-gathering note is found (the Pool, bookless by
+    /// definition).
+    static let filedTaggedOnly = "Filed in the Pool — tagged #quicknote."
     /// 13g cold review R1-3: the FILING-refusal line. `filedNote` claims the
     /// Quicknotes landing, which is exactly what a `.refused` outcome says
     /// did NOT happen — the note is minted and durable, carries no tag, and

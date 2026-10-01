@@ -1286,6 +1286,29 @@ STOP condition met.
   purge's state; her deletion recorded in the mark; an account store waits for its first clean round and
   is NOT marked; a synced account store seeds; the mark is per variant). The phone's occasion: DEFERRED
   (see the record's not-done line).
+- Piece 5 (this commit) — **C, Quicknotes VERIFIED; one special-casing found and FIXED (PROVISIONAL
+  P-13ib-U4-2).** Verified ordinary: `kind = gathering`, rule `#quicknote` by tag ID, NO delete guard
+  (`deleteReading` is the plain tombstone; no face hides the door; no face reads the designation), NO
+  sync keeper (zero `Sync/` mentions), unshelved at mint (no `shelf_id`), evict-on-untag derived (pinned
+  since 13g, `theBookCOLLECTSTheTagAndRemovingTheTagLEAVESIt`, still green). FOUND: the filing door read
+  a dangling `quicknote_book` designation as "none" and MINTED A FRESH Quicknotes at the next quick note
+  — the daily Journal's comes-back trait (lesson 9), which §20 withholds ("no special identity, no delete
+  guard … deleting the gathering breaks nothing — quick notes still land, still tagged, still findable in
+  the tag's own listing, and the gathering is re-makeable in one gesture"; "two special books is one more
+  than the design needs"). **Pinned first:** `QuicknoteShelfTests.deletingQuicknotesIsHerWordAndTheNext
+  QuickNoteStillLandsTagged` — **RED on the pre-fix tree, 5 issues at the mechanism** (the filing claimed
+  `.filed`; one live reading re-minted; the note shown by the twin so not in the Pool; after restoring
+  the original the designation pointed at the twin and two live Quicknotes stood). **Fix:**
+  `ensureQuicknotesBook` → `String?` — a designation that names nothing live is her decision
+  (`Queries.quicknotesBookWasDesignated`, the synced setting row — the decision travels with the store);
+  `fileAsQuicknote` gains `.taggedOnly(tagID:)`; the pad's receipt for it is
+  `QuickNoteCopy.filedTaggedOnly` "Filed in the Pool — tagged #quicknote." (the success line would claim
+  a landing that did not happen). GREEN after. **ONE honest test edit:** `aDanglingDesignationMintsAfresh
+  AndALiveOneIsNeverReplaced` asserted the retired re-mint → `aLiveDesignationIsNeverReplacedAndADead
+  OneNeverReadsLive` (its live-designation half kept whole). Mac pin `QuickNoteMintTests.afterSheDeletes
+  QuicknotesTheReceiptSaysThePool`. Core quicknote + star suites **26 tests / 3 suites green**; Mac
+  `QuickNoteMintTests` + `QuickNoteWordTests` + `NodSetTests` **"Test run with 19 tests in 3 suites
+  passed", 0 skipped**.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 

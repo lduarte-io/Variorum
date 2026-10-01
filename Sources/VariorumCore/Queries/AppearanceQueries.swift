@@ -313,13 +313,23 @@ extension Queries {
             .map(\.id)
     }
 
-    /// The designated QUICKNOTES book (13g batch 7 — her R6-4). The daily
-    /// book's twin in every respect, including the dangling rule: an id
-    /// pointing at a deleted book reads as none, which is exactly what lets
-    /// `ensureQuicknotesBook` mint a fresh one rather than resurrect a book
-    /// she threw away.
+    /// The designated QUICKNOTES book (13g batch 7 — her R6-4). An id
+    /// pointing at a deleted book reads as none (the dangling rule). Since
+    /// 13i-b U4 that no longer licenses a fresh mint: §20 rules Quicknotes
+    /// ordinary, so a deleted one stays deleted
+    /// (`quicknotesBookWasDesignated`, `Operations.ensureQuicknotesBook`).
     public static func quicknotesBookID(_ db: Database) throws -> String? {
         try designatedBookID(db, key: "quicknote_book")
+    }
+
+    /// Whether this store was EVER given a Quicknotes book — the designation
+    /// row exists, live target or not (13i-b U4: a designation that names a
+    /// dead reading is her deletion, never an invitation to mint a twin —
+    /// `Operations.ensureQuicknotesBook`). The setting travels with the store
+    /// (synced), so the decision does too.
+    static func quicknotesBookWasDesignated(_ db: Database) throws -> Bool {
+        try Bool.fetchOne(
+            db, sql: "SELECT EXISTS (SELECT 1 FROM setting WHERE key = 'quicknote_book')") ?? false
     }
 
     /// The one designation read (the `setting` key → a LIVE reading id).

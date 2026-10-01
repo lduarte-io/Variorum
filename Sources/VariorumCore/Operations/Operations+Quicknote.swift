@@ -29,6 +29,11 @@ extension Operations {
     public enum QuicknoteFiling: Equatable, Sendable {
         /// The note wears the tag; the smart book is on the shelf.
         case filed(tagID: String, readingID: String)
+        /// The note wears the tag and NO Quicknotes gathering shows it —
+        /// she deleted the one this store was given (13i-b U4, §20: her
+        /// deletion is her word; the note still lands, tagged, and the
+        /// tag's own listing and the Pool find it).
+        case taggedOnly(tagID: String)
         /// The note already wore the tag (a re-file, or her own hand).
         case alreadyTagged(tagID: String)
         /// Anything else — races and store failures. A short human phrase,
@@ -69,6 +74,7 @@ extension Operations {
             let readingID = try ensureQuicknotesBook()
             do {
                 _ = try applyTag(tagID, toPost: postID)
+                guard let readingID else { return .taggedOnly(tagID: tagID) }
                 return .filed(tagID: tagID, readingID: readingID)
             } catch OperationError.alreadyTagged {
                 return .alreadyTagged(tagID: tagID)
@@ -99,15 +105,29 @@ extension Operations {
         }
     }
 
-    /// The designated quicknotes book, minted + designated + pinned if there
-    /// is none (or the designation dangles at a deleted book). Same shape,
-    /// same reason, as `insertDailyJournalBook`.
-    func ensureQuicknotesBook() throws -> String {
+    /// The designated quicknotes book, minted + designated + pinned the
+    /// FIRST time a store files a quick note.
+    ///
+    /// **13i-b U4 — her deletion is her word** (the sitting record §20,
+    /// ratified §23: Quicknotes is an ORDINARY gathering, "no special
+    /// identity, no delete guard … deleting the gathering breaks nothing —
+    /// quick notes still land, still tagged, still findable in the tag's own
+    /// listing, and the gathering is re-makeable in one gesture"). The 13g
+    /// shape read a DANGLING designation as "none" and minted a fresh book —
+    /// the daily Journal's comes-back trait, which §20 withholds from
+    /// Quicknotes. Now a designation that names a reading no longer live (in
+    /// the Trash, purged, or not yet arrived by sync) answers nil: nothing is
+    /// minted, and the caller files the note tagged-only. Restoring the book
+    /// from the Trash is the ordinary door back (the designation was never
+    /// moved). PROVISIONAL P-13ib-U4-2.
+    func ensureQuicknotesBook() throws -> String? {
         if let existing = try database.read({ try Queries.quicknotesBookID($0) }) {
             return existing
         }
-        return try database.write { db in
+        return try database.write { db -> String? in
             if let raced = try Queries.quicknotesBookID(db) { return raced }
+            // A designation exists but names nothing live: she decided.
+            if try Queries.quicknotesBookWasDesignated(db) { return nil }
             let now = date.now
             // 13i-a: the rule is stored v2 and references the tag BY ID
             // (§19's ruling), so the tag row must exist before the rule
