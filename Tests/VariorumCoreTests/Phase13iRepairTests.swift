@@ -280,10 +280,21 @@ struct Phase13iRepairTests {
     /// A owns note N in book X (accepted FIRST); B plainly adds N to book
     /// Y offline. The later plain membership is TOMBSTONED everywhere —
     /// the ownership promise defended at the door.
+    ///
+    /// 13i-c U2 — the FIXTURE re-ordered, the subject untouched: B used to
+    /// pull A's claim and THEN hand-add, a road the ownership consult now
+    /// refuses at the door by design (`noteOwnedElsewhere` — the 13i-c plan
+    /// §4 row 1). The race this pins is B adding WITHOUT having seen the
+    /// claim, so B pulls the note before A claims it and never pulls again.
     @Test func aLaterPlainAddBesideAStandingOwnedClaimTombstones() async throws {
         let (a, b, server) = try furniturePair()
-        let (postID, ownedID): (String, String) = try a.with { ops, db in
-            let post = try ops.createPost(title: "the claimed note")
+        let postID: String = try a.with { ops, _ in
+            try ops.createPost(title: "the claimed note").id
+        }
+        try await a.push()
+        _ = try await b.pull()
+        let ownedID: String = try a.with { ops, db in
+            let post = try #require(try db.read { try Container.fetchOne($0, key: postID) })
             let owned = try ops.createReading(name: "the Owned", kind: .book)
             try db.write { database in
                 try database.execute(
@@ -295,10 +306,9 @@ struct Phase13iRepairTests {
                         """,
                     arguments: [owned.id, post.id, "2026-09-30T00:00:01.000Z"])
             }
-            return (post.id, owned.id)
+            return owned.id
         }
-        try await a.push()
-        _ = try await b.pull()
+        try await a.push()   // the claim is accepted FIRST; B never pulls it
         let plainID: String = try b.with { ops, _ in
             let plain = try ops.createReading(name: "the plain book", kind: .book)
             _ = try ops.addPostToReading(postID, to: plain.id)

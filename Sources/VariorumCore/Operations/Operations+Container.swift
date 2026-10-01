@@ -94,6 +94,15 @@ extension Operations {
         /// read and the write) and store failures. Carries a short human
         /// phrase, never an error dump (see `residualReason`).
         case refused(String)
+        /// 13i-c U2 (the sitting record §6: "`shelveInDailyJournalBook` (an
+        /// owned-elsewhere note bells, never throws)"): the ownership table
+        /// would not let the entry in as a plain member — the Journal is
+        /// plain and another book OWNS the entry, or the Journal is OWNED and
+        /// the entry lives in other books — so it WAITS AT THE JOURNAL'S DOOR
+        /// as an arrival for her judgment (copy in / move in / dismiss). The
+        /// entry still opens; the door names the owner from
+        /// `Queries.ownershipFacts`.
+        case waitingAtDoor(readingID: String)
     }
 
     /// **THE SECOND HALF OF THE DAILY DOOR** (Phase 13c, batch 1D — ledger
@@ -181,6 +190,16 @@ extension Operations {
             return .bookAtCapacity
         } catch OperationError.wrongReadingKind {
             return .wrongKind
+        } catch let OperationError.noteOwnedElsewhere(_, readingID, _),
+                let OperationError.noteMemberedElsewhere(_, readingID, _) {
+            // 13i-c U2 — the bell, never a throw (§6): the pair is rung at
+            // the door unless something decided it meanwhile.
+            do {
+                return try bellAtDailyDoor(postID: postID, readingID: readingID)
+                    ? .waitingAtDoor(readingID: readingID) : .alreadyDecided
+            } catch {
+                return .refused(Self.residualReason(error))
+            }
         } catch {
             return .refused(Self.residualReason(error))
         }

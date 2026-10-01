@@ -632,9 +632,19 @@ written at the close. Standing scope fence: no face of any kind (U3/U4), zero `S
   note; the chip listed `[g, g, quiet]`), GREEN after `AND r.kind='book'` in `membershipElsewhere`,
   the Pool's exclusion (a correlated reading probe — the P1 plan pin `PoolTuckTests` still green)
   and `readingsContaining`'s membership leg. Filtered run: 58 tests / 5 suites green.
-- **Piece B — the membership roads:** `OperationError` cases, `addPostToReading`/`seatArrival`
-  consults, copy-in / move-in (+ the answering arms), `shelveInDailyJournalBook`'s bell, Own /
-  Stop owning, the previews — NOT-STARTED.
+- **Piece B — the membership roads:** DONE (commit "13i-c U2 piece B"). The five
+  `OperationError` cases; `Operations+Ownership.swift` (the consult, `ceremonyCopy` + tags as
+  rows, `forkInPlace`, `setReadingOwned` both ways, copy-in + its answering arm + undo/redo,
+  move-in + its answering arm, the daily bell); `addPostToReading` + `seatArrival` consult after
+  the capacity gate; `shelveInDailyJournalBook` → `.waitingAtDoor(readingID:)`;
+  `removePostFromReading` → `Bool` (bookless); `copyPost` born in the source's wing;
+  `Queries/OwnershipQueries.swift` (`noteMemberships`, `sharedMembers`, `ownConversionPreview`,
+  `moveInPreview`). `OwnershipOperationsTests` 20/20 green; every core suite naming a touched op
+  (639 tests / 67 suites) green after ONE honest fixture re-order:
+  `Phase13iRepairTests.aLaterPlainAddBesideAStandingOwnedClaimTombstones` pulled A's claim onto B
+  and THEN hand-added — a road row 1's consult now refuses by design; the race it pins is B adding
+  WITHOUT having seen the claim, so B now pulls the note before A claims it (repair untouched).
+  App compile arms for `.waitingAtDoor` + the refusal words: PENDING (piece F).
 - **Piece C — the revival pass + its six call sites, the bind's owned-notes limb, restore-whole,
   delete-with-notes, duplicate, the Trash count** — NOT-STARTED.
 - **Piece D — Seal / Unseal, the lock/unlock guards** — NOT-STARTED.

@@ -92,6 +92,34 @@ public enum OperationError: Error, Equatable, Sendable {
     /// may carry no rule: "collects nothing by itself".)
     case gatheringRequiresRule(id: String)
 
+    // Ownership (13i-c U2 — the sitting record §1, §2, §6, §18.4; the 13i-c
+    // plan §3). The ONE choke point every membership road routes through
+    // (`addPostToReading`, the arrival seat) consults `OwnershipDecision`;
+    // where a plain pointer would break an ownership promise it refuses with
+    // the choice the door must OFFER instead (P-2 — never a bare refusal
+    // where a ceremony exists). Each carries the ids the door needs to name
+    // the books.
+    /// An OWNED book met a note that lives in other books: the door offers
+    /// COPY IN (the original keeps its lives) or MOVE IN (`elsewhere`'s
+    /// memberships severed, listed) — §6. `elsewhere` lists the other live
+    /// books holding the note as a member, earliest membership first.
+    case noteMemberedElsewhere(postID: String, readingID: String, elsewhere: [String])
+    /// A PLAIN book met a note an owned book (`owner`) holds: only a COPY can
+    /// come in — §4/§6's "copy in / dismiss".
+    case noteOwnedElsewhere(postID: String, readingID: String, owner: String)
+    /// The book is SEALED (§5 — Finished + text immutability): `unlockReading`
+    /// (Reopen) refuses there, because the ONE door down from Sealed is
+    /// Unseal, which reopens the book too (R-13ic-3).
+    case readingSealed(id: String)
+    /// `unsealReading` addressed a book that is not sealed (the
+    /// `readingNotDeleted` class — a door that silently succeeded would teach
+    /// that it did something).
+    case readingNotSealed(id: String)
+    /// A SHALLOW duplicate of an OWNED book would point a second book at its
+    /// notes — the one thing owning forbids; an owned book duplicates only
+    /// "with copies" (§6).
+    case ownedBookDuplicatesDeep(id: String)
+
     // Structural operations (Phase 3).
     /// Extract's span is not a boundary-adjacent prefix/suffix of the
     /// rendered variant's text (a middle span is a divide), or it is blank,

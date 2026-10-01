@@ -430,7 +430,15 @@ extension Operations {
     /// book is finished too), the note is gone, or the book is at capacity
     /// (`readingAtCapacity` — the bell keeps ringing). No auto-tag: an
     /// arrival came through the rule (intake's own seats never tag either —
-    /// PROVISIONAL P-13ib-U1-3). The copy-in arm is 13i-c's.
+    /// PROVISIONAL P-13ib-U1-3).
+    ///
+    /// 13i-c U2 (the plan §4 row 2): the seat CONSULTS OWNERSHIP after the
+    /// capacity gate, exactly as a hand-add does — an owned book's bell for a
+    /// note that lives elsewhere refuses `noteMemberedElsewhere` (the face
+    /// offers Copy in / Move in / Dismiss — `copyPostIntoReading(answering:)`,
+    /// `movePostIntoReading(answering:)`, `dismissArrival`), and a plain
+    /// book's bell for a note an owned book holds refuses `noteOwnedElsewhere`
+    /// (Copy in / Dismiss). The arrival stands untouched either way.
     @discardableResult
     public func seatArrival(_ pairID: String) throws -> ReadingPost {
         try database.write { db in
@@ -449,6 +457,7 @@ extension Operations {
                try liveMemberCount(db, readingID: reading.id) >= cap {
                 throw OperationError.readingAtCapacity(id: reading.id)
             }
+            try consultOwnership(db, book: reading, postID: row.postId)
             row.position = try readingPosition(db, readingID: reading.id, at: .end)
             row.sectionId = nil
             row.status = .member

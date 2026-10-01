@@ -628,12 +628,16 @@ extension Operations {
         let source = try livePost(db, sourceID)
         let now = date.now
 
+        // 13i-c U2: the copy is born in the SOURCE's wing — a copy door is
+        // never a wing crossing (the sitting record §9's total isolation;
+        // the explicit cross-wing doors are 13i-d's). Unreachable until a
+        // second wing exists; pinned on the ownership ceremonies.
         var copy = Container(
             id: newID(), ownerId: currentOwnerID(), kind: .post,
             title: source.title, profile: source.profile, entryDate: source.entryDate,
             locked: false, floatingNotes: source.floatingNotes,
             segmentationDefault: source.segmentationDefault,
-            lastTouchedAt: now,
+            lastTouchedAt: now, wingId: source.wingId,
             createdAt: now, updatedAt: now)
         try copy.insert(db)
 

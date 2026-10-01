@@ -344,7 +344,19 @@ extension Operations {
 
     // MARK: - Curated membership
 
-    /// A HAND-ADD. Two 13i-b U1 additions, both in this transaction:
+    /// A HAND-ADD — THE ONE CHOKE POINT every face's add routes through
+    /// (13i-c U2: the 13i-c plan §4 row 1). It CONSULTS OWNERSHIP
+    /// (`OwnershipDecision`) after the standing gates: where a plain pointer
+    /// would break an ownership promise it refuses with the choice the door
+    /// must offer — `noteMemberedElsewhere` (an OWNED book meeting a note
+    /// that lives in other books: copy in / move in) or `noteOwnedElsewhere`
+    /// (a PLAIN book meeting a note an owned book holds: copy in). A bookless
+    /// note moves in clean anywhere; an ordinary note joins a plain book
+    /// beside its other books. The capacity gate speaks FIRST — a full book
+    /// cannot take a copy either, so offering one would be a door that can
+    /// never act (P-2).
+    ///
+    /// Two 13i-b U1 additions, both in this transaction:
     /// - a note WAITING at this book's door (a live arrival) is SEATED — the
     ///   same row flips to member at the place she asked (her judgment "add
     ///   it"; refusing "already in this book" would be false — an arrival is
@@ -374,6 +386,10 @@ extension Operations {
             if let maxPosts = reading.maxPosts, liveCount >= maxPosts {
                 throw OperationError.readingAtCapacity(id: readingID)
             }
+            // 13i-c U2 — the ownership consult (both arms below: a fresh row
+            // AND a waiting arrival's seat — "a waiting ARRIVAL's seating
+            // path inside the same op consults the same table", the plan §3).
+            try consultOwnership(db, book: reading, postID: postID)
 
             let now = date.now
             let membership: ReadingPost
@@ -546,7 +562,17 @@ extension Operations {
         }
     }
 
-    public func removePostFromReading(_ postID: String, from readingID: String) throws {
+    /// REMOVE FROM THIS BOOK — on an owned book the same door reads
+    /// "Release from this book" (§20; the vocabulary is the faces'). A
+    /// membership tombstone, member-class (tombstone-means-decided keeps
+    /// intake from re-adding); the note lives on in its other books or the
+    /// Pool, tags untouched. 13i-c U2: RETURNS whether the note is now
+    /// BOOKLESS (no live member row in any live book — on an owned book that
+    /// is true by construction), so the receipt can say "Released — it's in
+    /// the Pool now." A gathering has no remove door (no membership — the
+    /// honest door is removing the tag, `removeTag`).
+    @discardableResult
+    public func removePostFromReading(_ postID: String, from readingID: String) throws -> Bool {
         try database.write { db in
             let reading = try liveReading(db, readingID)
             guard !reading.locked else {
@@ -557,6 +583,7 @@ extension Operations {
             }
             membership.deletedAt = date.now
             try membership.update(db)
+            return try isBookless(db, postID: postID)
         }
     }
 
