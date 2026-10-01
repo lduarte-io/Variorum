@@ -1579,6 +1579,25 @@ and BEFORE the ladder (so the ladder reviews this diff cold like every other):
 **Evidence:** the three touched Mac suites 28/3 GREEN; the FULL core suite **1907/199 GREEN**
 (1 standing skip) — the pre-ladder baseline. Ledger row 5.5 below.
 
+## THE LADDER (round 1 filed 2026-10-01 — `notes/plans/13ib-ladder-round1.md`; 1 MAJOR · 4 MINOR · 3 NIT, clean bill otherwise)
+
+**The architect's ruling on F-R1-1 (made BEFORE the fix session, spec-derived, PROVISIONAL —
+bundled beside P-13ib-U3-3):** an un-bind's residue must rank as the DISMISSAL class, never as
+left-as-member. Ground: her ratified U1-1 semantics ("if there's a new tag on there, i might
+want it to come in") — an un-bind says "I take back the binding," not "these notes never
+belong"; the bind sheet's keeps-collecting promise must survive a re-bind. Mechanism:
+`revertSmartConversion` flips each row IT tombstones to the dismissal-reading shape
+(status `arrival` + tombstone in one write); redo pre-images carry (id, status) so the
+round-trip is exact. A member she REMOVED BY HAND before the undo keeps its member-class
+tombstone — removed stays out, exactly as ratified. The pin is the reviewer's own
+(bind → undo → untag → re-bind → re-tag → a live pair row).
+
+**F-R1-3's question half** (should a rule-less gathering offer spawn at all) → the MORNING
+BUNDLE beside F-U4-7; the wording fix proceeds. **F-R1-4** (two canon letters) → the closeout
+delta drafts. **Flow:** findings to a fresh implementer voice VERBATIM for agree/dispute; the
+reviewer makes the final calls and implements its confirmed fixes itself (authorized); round 2
+re-reviews the fixes under a FRESH reviewer; then one implementer sanity pass.
+
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
 | # | Item | Status |
