@@ -556,6 +556,66 @@ the walk HELD (above).** Commits `b4cb639b` (core) + `19eb55c0` (Mac).
 - **Tutorial (P-6):** no lesson sentence went false; no lesson prose rewritten — no re-seed
   consequence.
 
+## U2 BRIEF — THE OWNED + SEALED OP FAMILY + THE DOOR ENUMERATION (`opus-implementer`; read this whole file first)
+
+**Read, in your own context, before any code:** CLAUDE.md + its canon; this plan WHOLE (§1 her
+rulings · §3 Owned · §4 the enumeration rows 1–12 · §5 Finished/Sealed · §6 delete/duplicate/Trash
+· §7 the U2 row's evidence · §8 traps · §9 the PROVISIONALs already made · the U1 RECORD);
+`notes/plans/phase-13i-sitting-record-2026-09-30.md` §1, §2, §5, §6, §14.10, §18.3, §18.4, §20,
+§24 (the binding design); `notes/plans/phase-13i-b-gatherings.md` §2 + its U1 RECORD (intake as
+built — your owned arms' host); `notes/SyncSpec.md` §7's OWNED-exclusivity paragraph (R2 — the
+revival pass mirrors its shape locally; you write ZERO `Sync/` lines); `notes/SessionResiliencyProtocol.md`.
+Code to orient on: `Domain/IntakeDecision.swift`, `Operations+Intake.swift`,
+`Operations+Reading.swift`, `Operations+ReadingConversion.swift`, `Operations+Diverge.swift`
+(the inlined-copy pattern you reuse), `Operations+Versions.swift` (`copyPost`), `Operations+Locks.swift`
+(`lockPost`/`unlockPost` bodies to share), `Operations+Container.swift` (`deleteContainer`,
+`restoreContainerRows`, `shelveInDailyJournalBook`), `Sync/Repairs.swift`'s
+`repairOwnedExclusivity` (read-only — the semantics you mirror), `Queries/ShelfQueries.swift`
+(`poolListing`, `readingsContaining`), `Queries/Trash.swift`, `Queries/AppearanceQueries.swift` +
+`Operations+Appearance.swift` (`setArrivalFlash` — the not-seeded setting pattern for the two new
+keys), `Tests/VariorumCoreTests/IntakeOperationsTests.swift` + `Phase13iRepairTests.swift` (the
+harness idioms).
+
+**Scope (ONE unit — operations/domain, headless):** everything §3, §5 and §6 name as an OP or a
+QUERY, plus §4 rows 1–12, the three readers' `kind='book'` scoping, the two settings
+(`hide_owned_default` "0"=SHOW, `ownership_badges` "1"; synced, not-seeded, read in
+`Queries.AppearanceQueries` like `arrival_flash`), the hide-owned SQL fragment, the badge-facts
+query, the `OpsRefusalTable` words for every new refusal (platform-neutral sentences — name no Mac
+door). NOT yours: any face (U3/U4), any `Sync/` line, any schema (a need for either is a STOP —
+write the record and report). Suggested homes: `Domain/OwnershipDecision.swift`,
+`Operations+Ownership.swift` (own/un-own, the add consult, copy-in, move-in, the judgment arms,
+the revival pass, the bind limb), `Operations+Seal.swift`, the delete/duplicate ops beside
+`deleteReading` in `Operations+Reading.swift`, `Queries/OwnershipQueries.swift` (previews, facts,
+the fragment, `trashBookNoteCount`). New `OperationError` cases (each with words):
+`noteMemberedElsewhere(postID:readingID:elsewhere:)`, `noteOwnedElsewhere(postID:readingID:owner:)`,
+`readingSealed(id:)`, `readingNotSealed(id:)`, `ownedBookDuplicatesDeep(id:)`;
+`DailyBookShelving` gains `.waitingAtDoor(readingID:)`.
+
+**The design forks reserved for the architect** (the implementer proposes, the architect rules —
+stop and report BEFORE building that half if you find one): any place where §3/§5/§6 are silent
+on a product-flavored edge. Everything the sections DO say is settled — build it; a doubt about a
+settled line goes in your FINDINGS, not into a different build.
+
+**Evidence (the §7 U2 row, restated):** exact state-transition suites per op; `OwnershipDoorTests`
+(rows 1–12 of §4 — one test per row, named for the row, each asserting the consult AND the
+outcome); the headless soak (`OwnershipSoakTests`: randomized own/un-own/add/copy/move/seal/unseal/
+delete/restore over several books; invariants — no note live-membered in an owned book AND
+elsewhere; every member's seal stamp equals its book's or is independent; no duplicate live pair;
+I10 untouched); `OwnershipRitualTests` (the R4 ritual headless + lesson sentences 5/6/8 as pins);
+the FULL core suite green at the END; the Mac app + the phone BUILD (`xcodebuild -scheme Variorum
+-destination 'platform=macOS' build` from `App/Variorum/`; `-scheme VariorumMobile -destination
+'generic/platform=iOS Simulator' build`) and every Mac/mobile suite that exercises a changed op.
+A pin green on both sides of a claimed fix is hollow — record, don't fix.
+
+**Your record:** a `## U2 RECORD` section in THIS file directly above `## §8 ENVIRONMENT TRAPS`,
+in the U1 RECORD's shape — the NOT-DONE line FIRST, the design map as shipped, PROVISIONALs (each
+with a QUESTIONS-ready paragraph; numbered P-13ic-U2-n), FINDINGS (for the orchestrator; name the
+owner you suggest), then your LIVE STATUS (per commit; unverified claims PENDING). Flip ledger
+row 3 in the same commit as the close. Commit per piece, `git pull --rebase` then push after every
+commit, foreground waits only, no subagents (one Sonnet read-only lookup at most). The §8 traps
+bind verbatim: zero instances before any suite that mounts windows; never touch `/Applications`;
+the dev store never syncs; `pipestatus`; never a custom build configuration.
+
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
 
 Instance checks use `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store
