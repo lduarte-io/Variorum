@@ -214,6 +214,70 @@ struct IntakeOperationsTests {
         }
     }
 
+    // MARK: - The OWNED arms (§4, §6) — headless: no door mints owned until 13i-c
+
+    private func markOwned(_ db: AppDatabase, _ readingID: String) throws {
+        try db.write { db in
+            try db.execute(sql: "UPDATE reading SET owned = 1 WHERE id = ?", arguments: [readingID])
+        }
+    }
+
+    @Test func anOwnedLivingBookClaimsAFreeNoteAndBellsAMemberedOne() throws {
+        try withOperations { ops, db in
+            let work = try ops.createTag(name: "work")
+            let owned = try livingBook(ops, .tag(work.id), name: "owned")
+            try markOwned(db, owned.id)
+            let elsewhere = try ops.createReading(name: "elsewhere", kind: .book)
+
+            let free = try ops.createPost(title: "free")
+            _ = try ops.applyTag(work.id, toPost: free.id)
+            let membered = try ops.createPost(title: "membered")
+            try ops.addPostToReading(membered.id, to: elsewhere.id)
+            _ = try ops.applyTag(work.id, toPost: membered.id)
+
+            let all = try rows(db, owned.id)
+            #expect(all.map(\.postId) == [free.id, membered.id])
+            #expect(all.map(\.status) == [.member, .arrival])   // claim · bell
+            // A bell never touches the other membership (claim-move is 13i-c's).
+            #expect(try members(db, elsewhere.id) == [membered.id])
+        }
+    }
+
+    @Test func aPlainLivingBookBellsANoteOwnedElsewhereButSeatsAPlainlyMemberedOne() throws {
+        try withOperations { ops, db in
+            let work = try ops.createTag(name: "work")
+            let plain = try livingBook(ops, .tag(work.id), name: "plain")
+            let ownedHome = try ops.createReading(name: "owned home", kind: .book)
+            try markOwned(db, ownedHome.id)
+            let otherHome = try ops.createReading(name: "other home", kind: .book)
+
+            let owned = try ops.createPost(title: "owned elsewhere")
+            try ops.addPostToReading(owned.id, to: ownedHome.id)
+            _ = try ops.applyTag(work.id, toPost: owned.id)
+            let shared = try ops.createPost(title: "membered elsewhere")
+            try ops.addPostToReading(shared.id, to: otherHome.id)
+            _ = try ops.applyTag(work.id, toPost: shared.id)
+
+            let all = try rows(db, plain.id)
+            #expect(all.map(\.postId) == [owned.id, shared.id])
+            #expect(all.map(\.status) == [.arrival, .member])    // bell · multi-membership
+        }
+    }
+
+    @Test func aDeadOwnedBookOwnsNothing() throws {
+        try withOperations { ops, db in
+            let work = try ops.createTag(name: "work")
+            let plain = try livingBook(ops, .tag(work.id), name: "plain")
+            let ownedHome = try ops.createReading(name: "owned home", kind: .book)
+            try markOwned(db, ownedHome.id)
+            let n = try ops.createPost(title: "n")
+            try ops.addPostToReading(n.id, to: ownedHome.id)
+            try ops.deleteReading(ownedHome.id)
+            _ = try ops.applyTag(work.id, toPost: n.id)
+            #expect(try rows(db, plain.id).map(\.status) == [.member])
+        }
+    }
+
     // MARK: - Decided pairs (tombstone-means-decided, §4 / §20 / §24)
 
     @Test func aLiveRowIsNeverDuplicatedByAnotherAct() throws {

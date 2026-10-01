@@ -384,7 +384,22 @@ the walk into the morning.
   an index after a failed count `#expect` crashed the test process and swallowed later reports —
   every such count is now a `try #require` (10 sites); the re-run reports all 52 with zero crash
   lines. Intake suites unmutated: 61 tests / 4 suites green.
-- NEXT — the soak, then `GatheringRitualTests`.
+- Piece 6 (this commit): the owned arms at the OPS level, headless by direct `owned = 1` writes (3
+  transitions: an owned living book claims a free note and bells a membered one without touching
+  the other membership; a plain living book bells an owned-elsewhere note and seats a plainly
+  membered one; a dead owned book owns nothing) — `IntakeOperationsTests` now 42. **The soak**
+  `IntakeSoakTests` — 6 seeds × 300 steps over 15 acts (tag/untag, star/unstar, mint, hand-add,
+  remove, seat, dismiss, finish/un-finish, rule edits incl. none + malformed, tagAllMembers,
+  delete/restore book, archive/unarchive), the invariants asserted after EVERY step (no duplicate
+  live pair; assembly/shelf count/chip/Pool agree with the live MEMBER rows exactly; no eviction,
+  no demotion, no physical row loss; a removed member returns only by hand-add or a restore's
+  revival; a finished book holds no bell; a gathering holds no rows; capacity never exceeded;
+  I2/I10) — GREEN, telemetry asserting intake seated AND belled on every seed.
+- **SOAK MUTATION CHECK IN FLIGHT (announced here):** single reverts of the capacity arm
+  (`IntakeDecision.swift`) and of the shelf count's member filter (`Queries/ShelfQueries.swift`)
+  against the committed tree, restored by `git checkout --`. If this line still reads IN FLIGHT,
+  any diff in those two files is a mutation to discard.
+- NEXT — `GatheringRitualTests`.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
