@@ -223,7 +223,7 @@ extension Operations {
             name: Self.defaultDailyJournalBookName, kind: .book,
             // The shared mint-mark: the Journal-keeper repair's predicate
             // filters on exactly this constant (pre-13u Act 0).
-            profile: Queries.dailyJournalBookProfile, sortField: .entryDate, sortDir: .asc,
+            profile: Queries.dailyJournalBookProfile, sortField: .entryDate, sortDir: .desc,
             createdAt: now, updatedAt: now)
         try book.insert(db)
         try setDailyJournalBook(db, book.id)

@@ -425,3 +425,15 @@ with `grep -q … && break` loops (the `tail -f` trap). Background-wait = death 
   sweep 63 OK/4 INFO); the live 42501 finding repaired by her hand; `/Applications` refreshed;
   her round clean at 2:59 AM. All records applied; the phase CLOSED. Nothing uncommitted; no
   revert in flight.
+
+## POST-CLOSE ADDENDUM (2026-10-01, her ruling at the window's close)
+
+**Her words, verbatim-faithful: "yes, journal should show most recent first … and yeah, change
+the default."** Built as her live instruction (a ruled one-liner, not a phase): the three
+journal mint doors (the daily mint, the Mac's Create Journal Book, the phone's journal kind)
+now stamp `entry_date` **DESC**; **v1_19_journals_newest_first** flips EXISTING daily/
+journal-trait books still wearing the mint's exact ascending shape — a hand-set order is never
+overridden (pinned: `mintShapedJournalsFlipToNewestFirstAndHandSetOrdersSurvive`). Zero schema,
+no §12 event (ordinary synced metadata; both devices converge by CAS). Pins updated on all
+three targets; core 1772/187 green. Lands on her devices at their next build refresh (the
+flip runs at first launch).

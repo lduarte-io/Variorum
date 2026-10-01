@@ -768,6 +768,23 @@ extension AppDatabase {
                     """, arguments: [designated])
             }
         }
+        // **Her ruling (2026-10-01, at the 13i-a window's close, verbatim
+        // intent: "journal should show most recent first … change the
+        // default"):** journals read NEWEST FIRST. The three mint doors now
+        // stamp `entry_date` DESC; this migration flips EXISTING daily and
+        // journal-trait books that still wear the mint's exact ascending
+        // shape — a hand-set order (any other field/direction) is hers and
+        // never overridden. Ordinary synced metadata writes (CAS; both her
+        // devices run the same flip and converge); zero schema, no §12
+        // event.
+        migrator.registerMigration("v1_19_journals_newest_first") { db in
+            try db.execute(sql: """
+                UPDATE reading SET sort_dir = 'desc'
+                WHERE profile IN ('daily', 'journal')
+                  AND sort_field = 'entry_date' AND sort_dir = 'asc'
+                  AND deleted_at IS NULL
+                """)
+        }
         return migrator
     }
 }

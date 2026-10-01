@@ -140,7 +140,7 @@ final class MobileCreateBookModel {
                     return try ops.createReading(
                         name: bookName, kind: .book,
                         profile: Queries.journalTraitProfile,
-                        sortField: .entryDate, sortDir: .asc)
+                        sortField: .entryDate, sortDir: .desc)
                 }.id
             case .smartFromTags:
                 let paths = selectedTagPaths.sorted()

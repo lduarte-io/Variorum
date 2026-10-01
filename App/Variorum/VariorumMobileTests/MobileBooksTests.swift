@@ -91,7 +91,7 @@ struct MobileBookCreateTests {
             #expect(journalRow.kind == .book)
             #expect(journalRow.profile == "journal")
             #expect(journalRow.sortField == .entryDate)
-            #expect(journalRow.sortDir == .asc)
+            #expect(journalRow.sortDir == .desc)  // her 2026-10-01 newest-first ruling
             #expect(model.lastError == nil)
         }
     }

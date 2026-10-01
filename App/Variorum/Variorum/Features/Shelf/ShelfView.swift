@@ -112,7 +112,7 @@ struct ShelfView: View {
                     await readings.create(
                         name: name.isEmpty ? "Untitled Journal" : name,
                         kind: .book, profile: Queries.journalTraitProfile,
-                        sortField: .entryDate, sortDir: .asc)
+                        sortField: .entryDate, sortDir: .desc)
                 }
             }
             Button("Cancel", role: .cancel) {}

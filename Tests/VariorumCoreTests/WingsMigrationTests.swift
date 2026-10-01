@@ -141,6 +141,29 @@ struct WingsMigrationTests {
                 "a path no row ever carried becomes the deliberate dead term")
     }
 
+    /// Her 2026-10-01 ruling: journals read NEWEST FIRST — v1_19 flips
+    /// existing mint-shaped daily/journal books and NEVER a hand-set order.
+    @Test func mintShapedJournalsFlipToNewestFirstAndHandSetOrdersSurvive() throws {
+        let queue = try oldStore { db in
+            try db.execute(sql: """
+                INSERT INTO reading (id, name, kind, profile, sort_field, sort_dir,
+                                     created_at, updated_at)
+                VALUES ('J1', 'Journal', 'curated', 'journal', 'entry_date', 'asc', ?, ?),
+                       ('J2', 'By title on purpose', 'curated', 'journal', 'manual', 'asc', ?, ?),
+                       ('J3', 'Already newest', 'curated', 'journal', 'entry_date', 'desc', ?, ?),
+                       ('B1', 'plain book', 'curated', NULL, 'entry_date', 'asc', ?, ?)
+                """, arguments: [Self.now, Self.now, Self.now, Self.now,
+                                   Self.now, Self.now, Self.now, Self.now])
+        }
+        try AppDatabase.migrator.migrate(queue)
+        let dirs = try queue.read { db in
+            try Row.fetchAll(db, sql: "SELECT id, sort_dir FROM reading ORDER BY id")
+                .map { $0["sort_dir"] as String }
+        }
+        #expect(dirs == ["asc", "desc", "asc", "desc"],
+                "B1 (no trait) and J2 (hand-set field) untouched; J1 flips; J3 already there")
+    }
+
     /// Ladder R1 B-2's pin, client half (red-on-old): a PRE-WINDOW mirror
     /// row arrives with EXPLICIT NULL in columns the local schema declares
     /// NOT NULL with a default (`to_jsonb` serves present nulls — Postgres

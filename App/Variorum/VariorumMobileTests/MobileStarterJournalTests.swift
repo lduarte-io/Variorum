@@ -112,7 +112,7 @@ struct MobileStarterJournalTests {
                     "the seeded book must BE the daily mint's shape — the repair's predicate")
             #expect(facts.1 == [readingID], "…and the one keeper candidate in the store")
             #expect(facts.0.sortField == .entryDate)
-            #expect(facts.0.sortDir == .asc, "the ensure's dated-notebook order")
+            #expect(facts.0.sortDir == .desc, "her 2026-10-01 ruling: newest first")
         }
     }
 

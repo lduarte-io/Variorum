@@ -258,7 +258,8 @@ struct ContainerOperationsTests {
             // §3 — convergence keys on it, never the name).
             #expect(book.profile == "daily")
             #expect(book.sortField == .entryDate)
-            #expect(book.sortDir == .asc)
+            // Her 2026-10-01 ruling: journals read newest first.
+            #expect(book.sortDir == .desc)
             #expect(try db.read { try Queries.dailyJournalBookID($0) } == bookID)
             #expect(try db.read { try Queries.shelfPins($0) } == [bookID])
             #expect(try db.fetchInt("SELECT COUNT(*) FROM reading_post WHERE deleted_at IS NULL") == 1)
