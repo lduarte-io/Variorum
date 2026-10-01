@@ -461,6 +461,11 @@ struct BookArrivalsTests {
             await settle(hosted.window, hosted.hosting) {
                 ArrivalsLineProbe.drawn[readingID]?.rows.count == 1
             }
+            // The line WAS there, open on its one row — so "gone" below is
+            // the judgment's doing, never a line that never drew (the M2
+            // mutation check found this pin silent without it).
+            #expect(ArrivalsLineProbe.drawn[readingID]?.line == "1 at the door")
+            #expect(ArrivalsLineProbe.drawn[readingID]?.rows.count == 1)
             let waiting = try #require(hosted.arrivals.door.rows.first)
             await hosted.arrivals.seat(
                 waiting, book: hosted.structure.reading, chaptered: false)

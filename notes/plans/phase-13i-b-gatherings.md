@@ -606,7 +606,7 @@ the close with everything not done.
   manifest-measured content) and `SpreadBookView` (atop both pages); both params default nil.
   `CapabilityRegistryTests`' surface union gains `BookArrivalsLine` (a justified edit, commented).
   (Superseded by piece 4: the pins are written and green.)
-- Piece 4 (this commit): **the mounted pins** — `VariorumTests/BookArrivalsTests.swift` (9): the
+- Piece 4 (this commit): **the mounted pins** — `VariorumTests/BookArrivalsTests.swift` (10): the
   words pure (line, the "arrived …" stamp = `TimeStampFace.relative`, receipts, refusals naming
   their roads, never the enum; `isShown`/`hidden`) · the line ABSENT with nothing waiting (Index
   AND Book — nothing draws, not even a hairline) · PRESENT as "3 at the door", collapsed, on Index
@@ -624,8 +624,27 @@ the close with everything not done.
   forget would erase the new record). **Mac: `BookArrivalsTests` + `CapabilityRegistryTests` —
   "Test run with 38 tests in 2 suites passed", 0 skipped** (one pin edited before green: its
   "no parenthesis" check was too blunt for the capacity sentence's own "(the gear)" — it now
-  checks for enum residue). NEXT: a teeth check on the absent pin (announced below before it
-  runs), then the neighbour suites, the core suite, the builds, the walk.
+  checks for enum residue). (The count is 10 tests, not 9 — corrected in piece 5.)
+- Piece 5 (this commit): **MUTATION CHECKS — DONE, tree restored (no revert in flight;** each run
+  against the committed tree, restored by `git checkout --`, `git status` clean after each). M1
+  `ArrivalsLineFace.isShown` → always true: **4 red** (the absent pin on BOTH Index and Book, the
+  pure `isShown(.none)` check, the vanish pin, and the seat pin's door). M2 the Book (spread)
+  wiring dropped: **1 red** (`theLineSaysHowManyWaitAtopIndexAndBook`'s Book leg) — and it showed
+  `whenTheLastArrivalIsJudgedTheLineVanishes` (mounted on Book) passing silently without the line
+  ever drawing, so that pin now asserts the line WAS there, open on its row, before the judgment.
+  **Mac suites, suite-level `-only-testing` by struct name, counts read exactly:** the book
+  surfaces A1 — **104 tests / 18 suites passed, 0 skipped** (BookArrivals, BookView, Spread,
+  OutlineWritingSurface, BookFocusFold, BookRedesignMount, BookIndexEditing,
+  BookIndexColumnHeights, BookCardHeightStability, BookLeavingSavepoint/Registry,
+  BookOrderConversion, BookStructureModel, BookDrop, JournalBooks, DebugOracleTwoWindow,
+  AscentDoor/Routing); A2 — **83 / 19 passed, 4 known issues (the standing `IndexTierMetricsTests`
+  overTwoBlankLines rows), 0 skipped** (BookIndexLanding, BookOutlineCost/Landing/Rows,
+  IndexClickCaret, IndexLandingCaret, IndexTierMetrics, PaneLineMetricsScope,
+  InlineEditorWidthReflow, NoteBoxComposition/Geometry, OutlineLandingTeardown, OutlineRoom,
+  PaneSurface, PanePublishDoor, PagedReadView, NavigatorReadRows, PaneBookBlur, PaneMount); B —
+  the registry, the seam and **the tutorial spine** — **148 / 20 passed, 0 skipped**
+  (CapabilityRegistry, StatusCenter, CommandRouter, ChordLegibility, the four declaration suites,
+  and ALL eleven `TutorialWalkTests` suites). Zero instances throughout. NEXT: the dev-store walk.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
