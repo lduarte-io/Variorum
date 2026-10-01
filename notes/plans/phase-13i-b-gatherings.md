@@ -323,7 +323,125 @@ the walk into the morning.
 
 ## U1 RECORD — intake + auto-tag + the judgment ops (opus-implementer, 2026-10-01)
 
-**NOT DONE BY THIS UNIT (first line, per the contract):** PENDING — filled at close.
+**NOT DONE BY THIS UNIT (first line, per the contract):** no dev-store GUI walk (U1 is an op
+family with no face; its evidence-of-kind is the plan §5's headless set — the first VISIBLE walk of
+intake is U2's orchestrator walk); no face of any kind (U2/U3/U4); NOT the conversion sheet's
+now-false sentence (FINDING F-1 below — U3's, and it must land before the run's install); no
+QUESTIONS.md entries written (the plan §6 logs PROVISIONALs at close — each below carries its
+QUESTIONS-ready paragraph); the gathering assembly's star context (U4's — intake alone passes the
+live star list today); zero `Sync/`, `Server/`, migrations, schema — none was needed, no STOP
+condition met.
+
+**UNIT STATUS: CLOSED 2026-10-01 — every evidence item of the plan §5 U1 row green (below).**
+
+### What U1 built (the design as shipped — a fresh session's map)
+
+- **`Domain/IntakeDecision.swift`** — the pure table (§2.1): `intakeRuns` (live · book · readable
+  rule · unfinished — P-13ib-5) and `verdict(book:note:occasion:)` → `seat` / `arrival` /
+  `nothing`, over `PairState` (`fresh` · `live` · `leftAsMember` · `dismissed`), the ownership
+  facts, capacity, the dial (nil = AUTO), and the occasion (`event` / `backfill` / `catchUp`).
+- **`Operations+Intake.swift`** — `insertPostTag` is THE ONE `post_tag` insert road (applyTag
+  (toPost:), the gathering collect door, auto-tag, tagAllMembers); the tagging event (candidates =
+  live, unfinished BOOKS with a readable rule IN THE NOTE'S WING whose rule references a tag
+  at-or-above the applied one — wing-scoped; each probed with `matchesRule` + the live star list);
+  the starring event (a NOTE newly starred; books whose rule carries a star term); `intakeSweep`
+  (backfill/catch-up over the rule's current matches with NO pair row of any kind, creation
+  order); materialization (END, unsectioned, insert-only); `applyAutoTag`; `tagAllMembers`;
+  `setReadingIntakeSeating` / `setReadingAutoTag` (books only, wing-scoped tag, no-op-guarded);
+  `seatArrival` / `dismissArrival`; `dismissPendingArrivals`.
+- **Hooks in existing ops:** `createReading` (+ `intakeSeating:` / `autoTagId:`; a BOOK born with a
+  rule backfills — the op the spawn/from-tag doors will call), `setReadingQuerySpec` (NULL→rule =
+  backfill; any other CHANGED rule = catch-up; byte-identical = nothing), `lockReading` (dismisses
+  live arrivals on the finish stamp), `unlockReading` (catch-up iff it was finished),
+  `restoreReading` (catch-up AFTER the exact-stamp revival), `addPostToReading` (seats a waiting
+  arrival; auto-tag), `newPostInReading` (auto-tag after the membership), `setStarred` (the star
+  event), `collectPostIntoSmartReading` (now through the one road). `liveMembership` is
+  MEMBER-ONLY; `livePairRow` is the any-status uniqueness question; `assignPostToSection` filters
+  members. New refusals: `arrivalNotFound`, `readingHasNoAutoTag` (copy is the faces' — U2/U3).
+- **The §9 hand-off (a):** `ruleSQL` + its single-post twin wing-scoped.
+- **The bind needs no recast:** `convertSmartReadingToCurated` already IS the op-side bind
+  (same row, assembly materialized, rule left on the row ⇒ a living book).
+
+### PROVISIONALs made in U1 (each QUESTIONS-ready; the morning bundle carries them)
+
+- **P-13ib-U1-1 — A DISMISSAL yields to a FRESH applying act, and only as an ARRIVAL.** *(A spot
+  where the rulings pull two ways — recorded per the brief.)* The sitting record §4 and this
+  plan's §2.1 say ANY pair row decides ("intake only ever inserts fresh pairs"); §24 (and this
+  plan's §2.4, U2's walk script, and the brief) say "a dismissed arrival returns only on a FRESH
+  tagging act." Under the strict reading the second sentence is false (a dismissed note could
+  never return by intake). Built: on an EVENT, a pair whose only history is dismissal records
+  (tombstoned `arrival` rows) rings again as a NEW arrival row — never auto-seated over her "no";
+  a pair with a tombstoned MEMBER row (removed, diverged) stays decided against every occasion
+  (§20's "keeps intake from re-adding"); backfill and catch-up honour ANY row (the un-finish
+  covers the gap only). *QUESTIONS paragraph:* "When a note you dismissed from a book's Arrivals
+  is tagged again (or starred again, for a star rule), should it (a) come back to Arrivals —
+  BUILT; (b) never come back by itself (only by adding it by hand); or (c) come back, and so
+  should a note you REMOVED from the book? Removing stays permanent in (a) and (b)."
+- **P-13ib-U1-2 — A hand-add of a note WAITING at the door seats that arrival** (the same row →
+  member, at the position asked, auto-tag riding) instead of refusing "already in this book"
+  (false — an arrival is never a member). *Options:* (a) seat it — BUILT; (b) refuse with a new
+  "it's waiting at the door — add it from Arrivals" refusal; (c) the old `alreadyInReading`.
+- **P-13ib-U1-3 — Intake seats and the judgment "Add" never apply the AUTO-TAG.** Auto-tag covers
+  notes that did NOT come through the rule (minted here — ruled; added by hand — P-13ib-1).
+  *Options:* (a) BUILT; (b) the judgment "Add" tags like a hand-add while intake's own seats
+  don't; (c) every seat tags (no loop either way — intake is insert-only and pairs are decided —
+  but a book's outflow would then chain into other books' intake).
+- **P-13ib-U1-4 — The join dial and capacity govern BACKFILL too.** "Birth = intent" seats only
+  where the table would seat; a book born with "wait at Arrivals" sends its current matches to
+  Arrivals (§4: "a living book whose order is guarded routes EVERYTHING through judgment"); a
+  capped birth seats up to the cap and bells the rest. *Option (b):* backfill ignores the dial.
+- **P-13ib-U1-5 — A malformed → readable rule edit is a CATCH-UP**, not a backfill (the book
+  "had" a rule; while malformed its intake ran nothing, so the gap is judgment). Only a NULL →
+  rule write (and a book born with a rule) is backfill. *Option (b):* any first-READABLE rule
+  backfills.
+- **P-13ib-U1-6 — Which acts a rule HEARS:** a tagging act is heard only by books whose rule
+  references a tag at-or-above the applied tag (the plan §2.2's "rules referencing the applied
+  tag's subtree", read through §19's subtree matching); a starring act only by rules with a star
+  term. So `NOT #x` never hears `#y`, and an act never sweeps in an unrelated undecided match.
+  *Option (b):* every living book probes every act (state-ish — an unrelated tagging would pull
+  in old matches).
+- **P-13ib-U1-7 — Judgment on a FINISHED book:** `seatArrival` refuses (`lockedReading` —
+  finished freezes the assembly); `dismissArrival` is allowed (only a sync race can put a bell on
+  a finished book, and dismissing is what finishing does). *Option (b):* both refuse.
+- **P-13ib-U1-8 — `tagAllMembers` scope:** live MEMBER rows whose note is live (archived members
+  included — they are counted on the shelf), never arrivals; allowed on a finished book (tags are
+  not the assembly); `nil` tag = the book's auto-tag, refusing `readingHasNoAutoTag` when unset.
+  The two Collecting setters are likewise allowed on a finished book (they are not the assembly).
+- **P-13ib-U1-9 — Silent outflow no-ops:** no auto-tag, a DANGLING one (its tag deleted — the
+  read-time fallback class), a tag of another wing (unreachable belt), a note already wearing it.
+
+### FINDINGS (for the orchestrator; none is a STOP condition)
+
+- **F-1 (U3 MUST CARRY IT — a shipped sentence U1 made false):** `SmartConversionOfferSheet`
+  (`App/Variorum/Variorum/Features/Readings/BookOrderAndConversion.swift:184`) tells her "New tag
+  matches will stop arriving here." — FALSE since U1 (the bound book keeps collecting, §14.6), and
+  its default-ON "Keep a fresh smart book collecting this filter" toggle now DOUBLE-collects (the
+  sibling gathering shows the match AND the bound book seats it). U3's bind door retires this
+  sheet; if U3 does not land before the run's install refresh, this sentence ships false. Not
+  fixed here (a face; one unit = one surface). It is the ONLY such copy (grep across `App/`).
+- **F-2 (existing data, morning bundle):** every book converted from a smart book BEFORE 13i-b
+  kept its rule as provenance (N38-A), so from U1 it is a LIVING book (ruled — §14.6 "it keeps
+  collecting"). Intake is event-driven: nothing moves until her next fresh tagging/starring act
+  matching it; if such a conversion also minted a "(collecting)" sibling, a fresh match will show
+  in the sibling AND seat in the book. Her real store was not inspected (never touched).
+- **F-3 (mobile parity / version skew):** intake fires only on LOCAL acts (apply mode runs no
+  operations; zero `Sync/` lines, per §2.7). The phone shares VariorumCore, so it runs intake from
+  its NEXT build; tagging acts made on today's marker-10 phone build are not heard by any living
+  book (a later catch-up — un-finish, rule edit, restore — bells them). No convergence hazard
+  (no conflicting rows), and both devices acting on one pair converge through R1.
+- **F-4 (U3's bind undo story):** `revertSmartConversion` tombstones only the rows the bind
+  minted; rows INTAKE seated after the bind stay live on the reverted gathering (the pre-existing
+  "a row she added by hand after converting is hers" class, now reachable without her hand).
+  Invisible in the gathering's assembly, but they count as membership to the Pool exclusion and
+  `readingsContaining`'s membership leg (which can then list that gathering twice). U3 should
+  decide the undo's reach when it rebuilds the door.
+- **F-5 (13i-c's wing doors):** `newPostInReading` mints the note in Home (`insertPost` takes no
+  wing) whatever the book's wing — pre-existing, unreachable (no op mints a non-Home wing);
+  `applyAutoTag`'s wing belt makes it silent rather than cross-wing.
+- **F-6 (recorded readings, no action):** restoring a NOTE (`restoreContainer`) revives its tags
+  but is not an applying act — no intake fires; copy doors (diverge, duplicateAsVersion) carry no
+  tags and fire nothing; archiving/unarchiving is not an act (an archived note is never seated —
+  the ambient-view rule; it can be belled later by a catch-up).
 
 ### U1 LIVE STATUS (per commit; every unverified claim PENDING)
 
@@ -420,13 +538,19 @@ the walk into the morning.
   skipped.** Mobile suites likewise (the iPhone 17 Pro 26.2 simulator; the 16 Pro runtime is 18.3,
   below target): **101/22 passed, 2 known issues (the standing tutorial fanned-divide rows), 0
   skipped.**
+- **CLOSE (this commit):** `createReading`'s new kind refusal names the minted id (the id is minted
+  first — the same UUID order as before). Re-verified AT THE END, after the last code edit: the
+  FULL core suite **"Test run with 1840 tests in 193 suites passed"** (1 skipped — the standing
+  env-gated Supabase integration test); Mac app BUILD SUCCEEDED; mobile BUILD SUCCEEDED; zero
+  instances. The record above carries the design map, P-13ib-U1-1…9 and F-1…F-6. Ledger row 2
+  flipped. No revert in flight; nothing uncommitted. U1 CLOSED.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
 | # | Item | Status |
 |---|---|---|
 | 1 | Plan authored; kickoff PROVISIONALs recorded (§6) | DONE (this commit) |
-| 2 | U1 — intake + auto-tag + judgment ops + ruleSQL wing scoping + the R3 ritual spine | NOT STARTED |
+| 2 | U1 — intake + auto-tag + judgment ops + ruleSQL wing scoping + the R3 ritual spine | **DONE 2026-10-01** — the U1 RECORD above (design map · P-13ib-U1-1…9 · F-1…F-6); evidence: `IntakeDecisionTests` 13 · `IntakeOperationsTests` 42 · `ArrivalMemberHygieneTests` 6 (red-on-old 6/6) · `RuleWingScopingTests` 3 (red-on-old 2/3, the third the control) · `IntakeSoakTests` 6 seeds × 300 steps · `GatheringRitualTests` 3 (R3 + lessons 3–4); 5+2 mutation checks bite; core 1840/193 green; Mac + mobile build; changed-op Mac suites 380/74 + mobile 101/22 pass. **F-1 is U3's to carry (a shipped sentence now false)** |
 | 3 | U2 — the Arrivals face | NOT STARTED |
 | 4 | U3 — the rule editor + bind/spawn + the teaching moment | NOT STARTED |
 | 5 | U4 — starred gathering · Quicknotes verify · Pool tuck · filter mechanics | NOT STARTED |
@@ -445,7 +569,9 @@ the walk into the morning.
    (after the walks and the ladder, per the sizing rule), behind the A1 rail, with a pgrep
    re-check at the moment. Her same message pinned the end review: "make sure you do a Fable
    review at the end" — ledger row 6 is that ladder, `fable-reviewer`, confirmed.
-5. Anything the units add (held taste calls, walk findings).
+5. Anything the units add (held taste calls, walk findings). **U1:** P-13ib-U1-1…9 (the U1 RECORD —
+   U1-1 is the reconciliation of §4's tombstone-means-decided with §24's "returns on a fresh act");
+   F-2 (pre-13i-b converted books are now living) and F-3 (the phone runs intake from its next build).
 
 ## LIVE STATUS (the resiliency protocol's record — updated per commit; every unverified claim marked PENDING)
 

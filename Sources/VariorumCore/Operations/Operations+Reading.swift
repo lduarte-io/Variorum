@@ -22,10 +22,11 @@ extension Operations {
     ) throws -> Reading {
         let now = date.now
         return try database.write { db -> Reading in
+            let id = newID()
             // 13i-b U1: the two Collecting settings are a BOOK's (a gathering
             // has no membership to seat and no notes written "here").
             if intakeSeating != nil || autoTagId != nil, kind != .book {
-                throw OperationError.wrongReadingKind(id: "", expected: .book)
+                throw OperationError.wrongReadingKind(id: id, expected: .book)
             }
             if let autoTagId {
                 let tag = try liveTag(db, autoTagId)
@@ -34,7 +35,7 @@ extension Operations {
                 }
             }
             let reading = Reading(
-                id: newID(), ownerId: currentOwnerID(), name: name, kind: kind,
+                id: id, ownerId: currentOwnerID(), name: name, kind: kind,
                 profile: profile, sortField: sortField, sortDir: sortDir,
                 groupingTagId: groupingTagId,
                 querySpec: try normalizedRuleSpec(db, querySpec, wingID: wingId),
