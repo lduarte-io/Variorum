@@ -686,3 +686,11 @@ tester ever asks what № does, THAT is the finding).
 
 **NEXT: awaiting her kickoff of `/architect-phase 13i-a`.** Nothing in this record remains
 proposed — every section through §25 is ruled or ratified.
+
+## 26. THE 13i-a KICKOFF (2026-09-30, same day — the run opened)
+
+She invoked `/architect-phase 13i-a`; the execution record is **`notes/plans/phase-13i-a-schema-event.md`**,
+whose §1 carries her TWO kickoff rulings made at that open (recorded there verbatim-faithful):
+**R-13ia-1 — tags are PER-WING**, with her cross-wing adoption rider (a moved note's tag converts
+to the destination wing's same-path tag's id); **R-13ia-2 — Home is VIRTUAL** (the built-in
+default wing, no row; undeletable and convergence-proof by construction).
