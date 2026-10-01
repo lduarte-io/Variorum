@@ -65,7 +65,7 @@ struct IntakeOperationsTests {
             let application = try ops.applyTag(work.id, toPost: note.id)
 
             let all = try rows(db, book.id)
-            #expect(all.count == 2)
+            try #require(all.count == 2)
             let seated = try #require(all.last)
             #expect(seated.postId == note.id)
             #expect(seated.status == .member)
@@ -192,6 +192,7 @@ struct IntakeOperationsTests {
             _ = try ops.applyTag(work.id, toPost: second.id)
 
             let all = try rows(db, book.id)
+            try #require(all.count == 2)
             #expect(all.map(\.postId) == [first.id, second.id])
             #expect(all.map(\.status) == [.member, .arrival])
             #expect(all[1].deletedAt == nil)
@@ -226,7 +227,7 @@ struct IntakeOperationsTests {
             _ = try ops.applyTag(work.id, toPost: note.id)   // → arrival (full)
             _ = try ops.applyTag(sub.id, toPost: note.id)    // a second act: still one bell
             let mine = try rows(db, book.id).filter { $0.postId == note.id }
-            #expect(mine.count == 1)
+            try #require(mine.count == 1)
             #expect(mine[0].status == .arrival)
         }
     }
@@ -241,7 +242,7 @@ struct IntakeOperationsTests {
             try ops.removeTag(work.id, fromPost: note.id)
             _ = try ops.applyTag(work.id, toPost: note.id)   // a FRESH act
             let all = try rows(db, book.id)
-            #expect(all.count == 1)                          // the tombstone alone
+            try #require(all.count == 1)                     // the tombstone alone
             #expect(all[0].deletedAt != nil)
             #expect(all[0].status == .member)
         }
@@ -268,7 +269,7 @@ struct IntakeOperationsTests {
             // A fresh act it hears (a child of the rule's tag): back at the door.
             _ = try ops.applyTag(child.id, toPost: note.id)
             let all = try rows(db, book.id)
-            #expect(all.count == 2)
+            try #require(all.count == 2)
             #expect(all[0].id == bell.id && all[0].deletedAt != nil)
             #expect(all[1].status == .arrival && all[1].deletedAt == nil)
         }
@@ -352,7 +353,7 @@ struct IntakeOperationsTests {
             try ops.setStarred(.post(note.id), starred: true)
             try ops.dismissArrival(try #require(try rows(db, book.id).first).id)
             try ops.setStarred(.post(note.id), starred: true)   // already starred: no write, no act
-            #expect(try rows(db, book.id).count == 1)
+            try #require(try rows(db, book.id).count == 1)
             #expect(try rows(db, book.id)[0].deletedAt != nil)
             // A real fresh act (un-star, star) rings again.
             try ops.setStarred(.post(note.id), starred: false)
@@ -417,7 +418,7 @@ struct IntakeOperationsTests {
 
             try ops.setReadingQuerySpec(book.id, querySpec: try rule(.tag(work.id)))
             let all = try rows(db, book.id)
-            #expect(all.count == 3)
+            try #require(all.count == 3)
             #expect(all[2].postId == fresh.id && all[2].status == .member)
             #expect(try members(db, book.id) == [kept.id, fresh.id])
         }
@@ -553,6 +554,7 @@ struct IntakeOperationsTests {
             try ops.lockReading(book.id)
             let finished = try #require(try db.read { try Queries.reading($0, id: book.id) })
             let all = try rows(db, book.id)
+            try #require(all.count == 2)
             #expect(all[0].deletedAt == nil && all[0].status == .member)
             #expect(all[1].status == .arrival)
             #expect(all[1].deletedAt == finished.updatedAt)    // the finish's own stamp
@@ -613,6 +615,7 @@ struct IntakeOperationsTests {
             let n = try ops.createPost(title: "n")
             _ = try ops.applyTag(work.id, toPost: n.id)
             let all = try rows(db, book.id)
+            try #require(all.count == 2)
             let bell = all[1]
 
             #expect(throws: OperationError.readingAtCapacity(id: book.id)) {
@@ -670,7 +673,7 @@ struct IntakeOperationsTests {
             let minted = try ops.newPostInReading(source.id, title: "minted")
             #expect(try liveTagIDs(db, minted.id) == [essay.id])
             #expect(try members(db, source.id) == [minted.id])
-            #expect(try rows(db, source.id).count == 1)       // its own pair: decided first
+            try #require(try rows(db, source.id).count == 1)  // its own pair: decided first
             #expect(try members(db, listener.id) == [minted.id])
             let application = try #require(try db.read {
                 try PostTag.fetchOne($0, sql: "SELECT * FROM post_tag WHERE post_id = ?",

@@ -376,11 +376,14 @@ the walk into the morning.
 - Piece 5 (9325d2c1): the exact state-transition suites — `IntakeDecisionTests` (every arm of the
   pure table; owned arms headless) + `IntakeOperationsTests` (39 transitions) — **52 green on
   first run**.
-- **MUTATION CHECK IN FLIGHT (this commit announces it):** temporary behavioural reverts of single
-  mechanisms in `Domain/IntakeDecision.swift` / `Operations+Intake.swift` /
-  `Operations+Reading.swift` against the COMMITTED tree (restore = `git checkout --` on those
-  files; nothing else is uncommitted). If this line still reads IN FLIGHT, run `git diff` — any
-  diff in those three files is a mutation to discard.
+- **MUTATION CHECK — DONE, tree restored (no revert in flight).** Five single-mechanism reverts
+  against the committed tree, each restored by `git checkout --`: M1 dismissal never yields to a
+  fresh act → 5 pins red; M2 the tagging event without the star context → 1 red; M3 finishing
+  without the dismissal sweep → 2 red; M4 catch-up seats instead of belling → 6 red; M5 every act
+  heard by every rule → 2 red. The first pass exposed a HARNESS weakness, fixed in this commit:
+  an index after a failed count `#expect` crashed the test process and swallowed later reports —
+  every such count is now a `try #require` (10 sites); the re-run reports all 52 with zero crash
+  lines. Intake suites unmutated: 61 tests / 4 suites green.
 - NEXT — the soak, then `GatheringRitualTests`.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
