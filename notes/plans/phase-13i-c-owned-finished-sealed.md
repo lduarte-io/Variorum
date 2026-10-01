@@ -687,7 +687,11 @@ written at the close. Standing scope fence: no face of any kind (U3/U4), zero `S
   green.
 - **Piece F — `OwnershipDoorTests` rows 1–12, the soak, the R4 ritual + lessons 5/6/8; the shared
   refusal words + the app compile arms; Mac + phone builds + touched suites; the FULL core suite;
-  the record closed; ledger row 3** — NOT-STARTED.
+  the record closed; ledger row 3:** IN-PROGRESS. `OwnershipDoorTests` 12/12 DONE (one per row,
+  each asserting the consult + the outcome + the exclusivity invariant). The app compile arms
+  DONE (2509647d — Mac + phone builds green then). REMAINING: the soak, the ritual + lessons, the
+  shared refusal words (+ a `bookSeal` road — the integrity walk bans the bare "sealed"/"unseal"
+  stems in the shared file), the Mac/phone builds + touched suites, the FULL core suite, the close.
 - No revert in flight.
 
 ## §8 ENVIRONMENT TRAPS (binding; the standing invariant core, carried per the skill)
