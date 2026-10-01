@@ -568,7 +568,7 @@ membership-chip state, no Collecting pane, no rule editor, no finish-confirm lin
 P-13ib-2 / 13i-d / U3 / 13i-c); no phone face (the mobile catch-up's); zero Operations, `Sync/`,
 schema, migrations — the one core change is the Queries read support; no STOP condition met.
 
-**UNIT STATUS: OPEN — closing (the final verification below is PENDING until its line flips).**
+**UNIT STATUS: CLOSED 2026-10-01 — every evidence item of the plan §5 U2 row green and walked (below).**
 
 ### What U2 built (the design as shipped — a fresh session's map)
 
@@ -769,9 +769,15 @@ keeps the walk's book "the door", its tag and seven notes (dev store — harmles
   and ALL eleven `TutorialWalkTests` suites). Zero instances throughout. 
 - Piece 6 (this commit): **the walk — DONE** (THE WALK above: 15 captures, both voices × both
   appearances, every U2 evidence row walked live on the dev store); the record's body written
-  (the design map, P-13ib-U2-1…5, F-U2-1…5). NEXT — the FINAL VERIFICATION, **PENDING**: the full
-  core suite, the Mac app build, the mobile target build (no code has changed since the Mac suites
-  above ran green).
+  (the design map, P-13ib-U2-1…5, F-U2-1…5).
+- **CLOSE (this commit) — the final verification, after the last code edit:** the FULL core suite
+  `swift build && swift test` — **"Test run with 1852 tests in 194 suites passed"** (1 skipped: the
+  standing env-gated Supabase integration test; baseline 1840/193 at U1's close → +12 tests / +1
+  suite, `ArrivalQueriesTests`); the Mac app `xcodebuild -scheme Variorum -destination
+  'platform=macOS' build` — **BUILD SUCCEEDED**; the mobile target (`VariorumMobile`, generic iOS
+  Simulator) — **BUILD SUCCEEDED**. The Mac suites (piece 5) ran after the last app/test edit and
+  stand: 104/18 · 83/19 (4 standing known issues) · 148/20 incl. the tutorial spine, 0 skipped.
+  Zero instances. No revert in flight; nothing uncommitted. Ledger row 3 flipped. U2 CLOSED.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
@@ -779,7 +785,7 @@ keeps the walk's book "the door", its tag and seven notes (dev store — harmles
 |---|---|---|
 | 1 | Plan authored; kickoff PROVISIONALs recorded (§6) | DONE (this commit) |
 | 2 | U1 — intake + auto-tag + judgment ops + ruleSQL wing scoping + the R3 ritual spine | **DONE 2026-10-01** — the U1 RECORD above (design map · P-13ib-U1-1…9 · F-1…F-6); evidence: `IntakeDecisionTests` 13 · `IntakeOperationsTests` 42 · `ArrivalMemberHygieneTests` 6 (red-on-old 6/6) · `RuleWingScopingTests` 3 (red-on-old 2/3, the third the control) · `IntakeSoakTests` 6 seeds × 300 steps · `GatheringRitualTests` 3 (R3 + lessons 3–4); 5+2 mutation checks bite; core 1840/193 green; Mac + mobile build; changed-op Mac suites 380/74 + mobile 101/22 pass. **F-1 is U3's to carry (a shipped sentence now false)** |
-| 3 | U2 — the Arrivals face | NOT STARTED |
+| 3 | U2 — the Arrivals face | **DONE 2026-10-01** — the U2 RECORD above (design map · P-13ib-U2-1…5 · F-U2-1…5 · THE WALK, 15 captures, both voices × both appearances); evidence: `ArrivalQueriesTests` 12 (incl. the EXPLAIN-plan pin) · `BookArrivalsTests` 10 mounted (absent/present on Index AND Book, gone on Outline/Read, expansion + both doors, Add at the END unsectioned, Dismiss, the capacity refusal on the seam, already-judged, vanish) · the registry walk (`BookArrivalsLine` the two acts' one renderer); 2 mutation checks bite; core 1852/194 green; Mac + mobile build; book-surface + registry + tutorial Mac suites 335/57 pass (4 standing known issues). **F-U2-3 joins F-1 in U3's charter** (the conversion sheet's wrong count) |
 | 4 | U3 — the rule editor + bind/spawn + the teaching moment | NOT STARTED |
 | 5 | U4 — starred gathering · Quicknotes verify · Pool tuck · filter mechanics | NOT STARTED |
 | 6 | The ladder (fresh `fable-reviewer`, combined diff) | NOT STARTED |
@@ -816,6 +822,11 @@ keeps the walk's book "the door", its tag and seven notes (dev store — harmles
 9. Anything the remaining units add (held taste calls, walk findings). **U1:** P-13ib-U1-1…9 (the U1 RECORD —
    U1-1 is the reconciliation of §4's tombstone-means-decided with §24's "returns on a fresh act");
    F-2 (pre-13i-b converted books are now living) and F-3 (the phone runs intake from its next build).
+   **U2:** P-13ib-U2-1…5 (the U2 RECORD — where the line stands, archived waiting notes, the
+   expansion as view state, the 30-row window with no bulk dismiss, the words); F-U2-1 (a book opens
+   into Outline, where the ruled line does not stand — should Outline carry it too? hers) and F-U2-2
+   (a QUIET receipt has no visible home on Index/Book while no note is live — the 18i seam's
+   placement).
 
 ## LIVE STATUS (the resiliency protocol's record — updated per commit; every unverified claim marked PENDING)
 
