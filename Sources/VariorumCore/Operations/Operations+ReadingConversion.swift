@@ -37,8 +37,6 @@ extension Operations {
         /// The membership rows minted, in materialized order. Posts that
         /// already carried a live membership row are NOT here (see below).
         public let membershipIDs: [String]
-        /// The fresh smart book minted to keep collecting, when asked for.
-        public let collectingReading: Reading?
     }
 
     /// Pre-images captured at do-time, so the inverse restores exact rows
@@ -48,15 +46,18 @@ extension Operations {
         let sortDir: SortDirection
     }
 
-    /// Turns a smart book into a hand-shaped one: its CURRENT results
-    /// become real `reading_post` rows in the order she is looking at, and
-    /// `kind` flips to `curated`.
+    /// **THE BIND** (13i-b's recast of 13c 2D's conversion): a gathering's
+    /// CURRENT assembly becomes real `reading_post` rows in the order she is
+    /// looking at, and `kind` flips to book — the SAME row (§19.6). The rule
+    /// stays on the row, so the bound book is a LIVING book: it keeps
+    /// collecting (the sitting record §14.6).
     ///
-    /// - `keepCollecting`: also mint a fresh smart book carrying the SAME
-    ///   filter, so the tag keeps flowing somewhere while this book freezes
-    ///   into hand-shape (the second half of her sentence).
-    /// - `collectingName`: that book's name; blank/nil defaults to
-    ///   `"<name> (collecting)"`.
+    /// *(Ladder F-R1-5: the `keepCollecting`/`collectingName` parameters and
+    /// the "(collecting)" sibling they minted are RETIRED — the sibling's
+    /// reason was N38 shape A's "the converted book stops collecting", which
+    /// §14.6 superseded; a reachable dead door that double-collected. The
+    /// deliberate sibling road is the SPAWN door.)*
+    ///
     /// - `order` *(13c K6 review, K2)*: the A31 view-order override the
     ///   caller's surface is currently LOOKING through, if any. "The order
     ///   she is looking at" stopped being synonymous with the stored sort
@@ -92,17 +93,14 @@ extension Operations {
     ///   act on a book declared done; un-finish first (the standing
     ///   `lockedReading` bucket every other structural reading op uses).
     /// - **Posts already carrying a live membership row are skipped.** No
-    ///   ordinary door can produce one on a smart reading (`addPostToReading`
-    ///   refuses `wrongReadingKind`), but undo leaves the possibility open —
-    ///   its inverse tombstones only what IT minted, so a hand-added row
-    ///   could survive a re-conversion — and `uq_reading_post_live` would
-    ///   otherwise make that second conversion throw. Defensive, cheap, and
-    ///   it makes convert → undo → hand-add → convert a legal sequence.
+    ///   ordinary door can produce one on a gathering (`addPostToReading`
+    ///   refuses `wrongReadingKind`) and the bind's own undo takes every
+    ///   live row (P-13ib-6), but a sync-arrived stray can stand there —
+    ///   and `uq_reading_post_live` would otherwise make the bind throw.
+    ///   Defensive, cheap.
     @discardableResult
     public func convertSmartReadingToCurated(
         _ readingID: String,
-        keepCollecting: Bool = false,
-        collectingName: String? = nil,
         order: Queries.ReadingOrder? = nil
     ) throws -> SmartConversionResult {
         let now = date.now
@@ -142,32 +140,9 @@ extension Operations {
                 reading.updatedAt = now
                 try reading.update(db)
 
-                // The fresh collector: the same filter, the same sectioning
-                // story, the same ORDER it had — but deliberately NOT the
-                // extents or the finish state. A book born at its cap (or
-                // born finished) could not collect anything, which is the
-                // one thing this book exists to do.
-                var collecting: Reading?
-                if keepCollecting {
-                    let trimmed = (collectingName ?? "")
-                        .trimmingCharacters(in: .whitespacesAndNewlines)
-                    let fresh = Reading(
-                        id: newID(), ownerId: currentOwnerID(),
-                        name: trimmed.isEmpty ? "\(reading.name) (collecting)" : trimmed,
-                        kind: .gathering,
-                        profile: reading.profile,
-                        sortField: preImage.sortField, sortDir: preImage.sortDir,
-                        groupingTagId: reading.groupingTagId,
-                        querySpec: reading.querySpec,
-                        createdAt: now, updatedAt: now)
-                    try fresh.insert(db)
-                    collecting = fresh
-                }
-
                 return (
                     SmartConversionResult(
-                        reading: reading, membershipIDs: membershipIDs,
-                        collectingReading: collecting),
+                        reading: reading, membershipIDs: membershipIDs),
                     preImage)
             }
 
@@ -189,31 +164,27 @@ extension Operations {
         // id (ladder F-R1-1: the revert flips its rows to the dismissal
         // class, so the redo must restore what each row WAS — a member
         // returns a member, a waiting arrival returns waiting).
-        let collectingID = result.collectingReading?.id
         let takenAtRevert = LockIsolated<[(id: String, status: MembershipStatus)]>([])
         undoStack?.register(
             label: "Convert to Book",
             inverse: {
                 let taken = try $0.revertSmartConversion(
                     readingID: readingID,
-                    sortField: preImage.sortField, sortDir: preImage.sortDir,
-                    collectingReadingID: collectingID)
+                    sortField: preImage.sortField, sortDir: preImage.sortDir)
                 takenAtRevert.setValue(taken)
             },
             redo: {
                 try $0.reapplySmartConversion(
-                    readingID: readingID, taken: takenAtRevert.value,
-                    collectingReadingID: collectingID)
+                    readingID: readingID, taken: takenAtRevert.value)
             })
         return result
     }
 
     // MARK: - The two halves of the undo entry
 
-    /// Inverse of `convertSmartReadingToCurated` (the BIND): put the fresh
-    /// collector back in its tombstone, restore `kind` + the stored sort pair
-    /// from the do-time pre-images — and **tombstone EVERY live row standing
-    /// on the book**, on one stamp (P-13ib-6, 13i-b U3 — the architect's
+    /// Inverse of `convertSmartReadingToCurated` (the BIND): restore `kind`
+    /// + the stored sort pair from the do-time pre-images — and **tombstone
+    /// EVERY live row standing on the book**, on one stamp (P-13ib-6, 13i-b U3 — the architect's
     /// ruling, PROVISIONAL): a gathering holds nothing (the sitting record §1),
     /// and since 13i-b U1 a bound book keeps collecting, so rows the bind
     /// never minted stand there by the time an undo comes — intake's seats,
@@ -255,8 +226,7 @@ extension Operations {
     @discardableResult
     func revertSmartConversion(
         readingID: String,
-        sortField: SortField, sortDir: SortDirection,
-        collectingReadingID: String?
+        sortField: SortField, sortDir: SortDirection
     ) throws -> [(id: String, status: MembershipStatus)] {
         try database.write { db in
             guard var reading = try Reading.fetchOne(db, key: readingID),
@@ -283,13 +253,6 @@ extension Operations {
             // row`), so `standing`'s elements still carry each row's
             // undo-time status.
             let taken = standing.map { (id: $0.id, status: $0.status) }
-            if let collectingReadingID,
-               var fresh = try Reading.fetchOne(db, key: collectingReadingID),
-               fresh.deletedAt == nil {
-                fresh.deletedAt = now
-                fresh.updatedAt = now
-                try fresh.update(db)
-            }
             guard reading.kind != .gathering || reading.sortField != sortField
                 || reading.sortDir != sortDir
             else { return taken }
@@ -318,8 +281,7 @@ extension Operations {
     /// a pair that somehow already has a live row is skipped rather than
     /// duplicated (`uq_reading_post_live`).
     func reapplySmartConversion(
-        readingID: String, taken: [(id: String, status: MembershipStatus)],
-        collectingReadingID: String?
+        readingID: String, taken: [(id: String, status: MembershipStatus)]
     ) throws {
         try database.write { db in
             guard var reading = try Reading.fetchOne(db, key: readingID),
@@ -345,13 +307,6 @@ extension Operations {
                 membership.status = row.status
                 membership.deletedAt = nil
                 try membership.update(db)
-            }
-            if let collectingReadingID,
-               var fresh = try Reading.fetchOne(db, key: collectingReadingID),
-               fresh.deletedAt != nil {
-                fresh.deletedAt = nil
-                fresh.updatedAt = now
-                try fresh.update(db)
             }
             guard reading.kind != .book || reading.sortField != .manual else { return }
             reading.kind = .book

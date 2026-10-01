@@ -16,8 +16,9 @@ import Testing
 /// - conversion materializes exactly what she was LOOKING at, in that order,
 ///   and the book is an ordinary curated book from that instant;
 /// - it is ONE transaction — a refusal leaves nothing half-converted;
-/// - what rides the row untouched (spec, grouping tag, extents, finish) and
-///   what deliberately does not ride the fresh collector (extents, lock);
+/// - what rides the row untouched (spec, grouping tag, extents, finish) —
+///   and no sibling is ever minted (ladder F-R1-5 retired the
+///   "(collecting)" offer's dead parameters with their pins);
 /// - undo is exact-row and redo ping-pongs on the same ids (the 1B contract);
 /// - the order override is a way of LOOKING: `assembleReading(order: X)`
 ///   returns byte-identically to `setReadingSort(X)` + `assembleReading()`,
@@ -207,72 +208,30 @@ struct SmartConversionTests {
         }
     }
 
-    // MARK: - The fresh-smart-book offer (the second half of her sentence)
+    // MARK: - The bind mints no sibling and keeps collecting (13i-b; ladder F-R1-5)
 
-    @Test func keepCollectingMintsASecondSmartBookOnTheSameFilter() throws {
+    /// *(Ladder F-R1-5 — the retirement's pin, replacing the three
+    /// "(collecting)"-offer pins: the sibling's reason was N38 shape A's
+    /// stops-collecting, superseded by §14.6, and the dead parameters could
+    /// still mint a door-less double-collector.)* The bind touches exactly
+    /// ONE reading row — the gathering's own, flipped in place (§19.6) —
+    /// and the BOUND book itself keeps collecting: the rule rides the row,
+    /// so intake seats a fresh tagging act's match at the END. The deliberate
+    /// sibling road is the SPAWN door (`BindDoorTests`).
+    @Test func theBindMintsNoSiblingAndTheBoundBookKeepsCollecting() throws {
         try withOperations { ops, db in
             let (reading, posts, tag) = try smartBookWithTaggedPosts(ops, count: 2)
-            try ops.setReadingSort(reading.id, field: .entryDate, direction: .desc)
-            let spec = try db.read { try Queries.reading($0, id: reading.id)?.querySpec }
+            let before = try db.read { try Queries.readings($0).count }
 
-            let result = try ops.convertSmartReadingToCurated(
-                reading.id, keepCollecting: true)
-            let fresh = try #require(result.collectingReading)
+            _ = try ops.convertSmartReadingToCurated(reading.id)
+            #expect(try db.read { try Queries.readings($0).count } == before,
+                    "one row, flipped in place — never a second book")
 
-            #expect(fresh.kind == .gathering)
-            #expect(fresh.name == "collected (collecting)")
-            #expect(fresh.querySpec == spec)
-            // The order it HAD, not the converted book's forced manual.
-            #expect(fresh.sortField == .entryDate)
-            #expect(fresh.sortDir == .desc)
-            // Deliberately NOT carried: a collector born capped or finished
-            // could not collect, which is the one thing it exists to do.
-            #expect(fresh.maxPosts == nil)
-            #expect(fresh.wordTarget == nil)
-            #expect(fresh.locked == false)
-
-            // It really collects — and since 13i-b U1 so does the converted
-            // book: the sitting record §14.6 RECAST the conversion as Bind
-            // into a book, which KEEPS COLLECTING ("her 2026-07-30 words
-            // honored over N38 shape A's stops-collecting; the '(collecting)'
-            // offer dies" — its face retires at U3). The rule rides the row
-            // (asserted above), the row is a book, so intake seats the
-            // tagging act's match at the END. The pre-13i-b assertion here
-            // ("the converted book froze") is the superseded shape A.
             let newcomer = try ops.createPost(title: "later")
             _ = try ops.applyTag(tag.id, toPost: newcomer.id)
-            let bound = try db.read {
-                try Queries.assembleReading($0, readingID: reading.id)
-            }
-            #expect(bound.map(\.postID) == [posts[1].id, posts[0].id, newcomer.id])
-            let collecting = try db.read {
-                try Queries.assembleReading($0, readingID: fresh.id)
-            }
-            #expect(collecting.contains { $0.postID == newcomer.id })
-        }
-    }
-
-    @Test func aBlankCollectingNameFallsBackToTheDefaultAndAGivenOneIsUsed() throws {
-        try withOperations { ops, _ in
-            let (a, _, _) = try smartBookWithTaggedPosts(ops, tag: "a", count: 0)
-            let blank = try ops.convertSmartReadingToCurated(
-                a.id, keepCollecting: true, collectingName: "   ")
-            #expect(blank.collectingReading?.name == "collected (collecting)")
-
-            let (b, _, _) = try smartBookWithTaggedPosts(ops, tag: "b", count: 0)
-            let named = try ops.convertSmartReadingToCurated(
-                b.id, keepCollecting: true, collectingName: "still #b")
-            #expect(named.collectingReading?.name == "still #b")
-        }
-    }
-
-    @Test func withoutTheOfferNoSecondBookExists() throws {
-        try withOperations { ops, db in
-            let (reading, _, _) = try smartBookWithTaggedPosts(ops, count: 1)
-            let before = try db.read { try Queries.readings($0).count }
-            let result = try ops.convertSmartReadingToCurated(reading.id)
-            #expect(result.collectingReading == nil)
-            #expect(try db.read { try Queries.readings($0).count } == before)
+            #expect(try db.read { try Queries.assembleReading($0, readingID: reading.id) }
+                .map(\.postID) == [posts[0].id, posts[1].id, newcomer.id],
+                "§14.6: the bound book seats the fresh match at the end")
         }
     }
 
@@ -284,7 +243,7 @@ struct SmartConversionTests {
             try ops.lockReading(reading.id)
 
             #expect(throws: OperationError.self) {
-                try ops.convertSmartReadingToCurated(reading.id, keepCollecting: true)
+                try ops.convertSmartReadingToCurated(reading.id)
             }
             // Nothing half-converted: no memberships, no second book, kind
             // untouched.
@@ -322,9 +281,7 @@ struct SmartConversionTests {
             let (reading, posts, _) = try smartBookWithTaggedPosts(ops, count: 3)
             try ops.setReadingSort(reading.id, field: .createdAt, direction: .desc)
 
-            let result = try ops.convertSmartReadingToCurated(
-                reading.id, keepCollecting: true)
-            let freshID = try #require(result.collectingReading?.id)
+            let result = try ops.convertSmartReadingToCurated(reading.id)
 
             #expect(stack.topLabel == "Convert to Book")
             try stack.undo(with: ops)
@@ -334,7 +291,6 @@ struct SmartConversionTests {
             #expect(undone.sortField == .createdAt)
             #expect(undone.sortDir == .desc)
             #expect(try liveMemberships(db, reading.id).isEmpty)
-            #expect(try db.read { try Queries.reading($0, id: freshID) } == nil)
             // Still a working smart book afterwards.
             #expect(
                 try db.read { try Queries.assembleReading($0, readingID: reading.id) }
@@ -353,7 +309,6 @@ struct SmartConversionTests {
             #expect(revived.map(\.id) == result.membershipIDs)
             #expect(revived.allSatisfy { $0.status == .member },
                     "members return as members — the redo restores statuses, not only ids")
-            #expect(try db.read { try Queries.reading($0, id: freshID) } != nil)
         }
     }
 
@@ -607,15 +562,13 @@ struct SmartConversionTests {
         try withOperations { ops, db in
             let (reading, _, _) = try smartBookWithTaggedPosts(ops, count: 2)
             try db.write { try $0.execute(sql: "DELETE FROM sync_outbox") }
-            let result = try ops.convertSmartReadingToCurated(
-                reading.id, keepCollecting: true)
+            let result = try ops.convertSmartReadingToCurated(reading.id)
 
             let queued = try db.read { db in
                 try Row.fetchAll(db, sql: "SELECT table_name, row_id FROM sync_outbox")
                     .map { ($0["table_name"] as String, $0["row_id"] as String) }
             }
             #expect(queued.contains { $0 == ("reading", reading.id) })
-            #expect(queued.contains { $0 == ("reading", result.collectingReading!.id) })
             for id in result.membershipIDs {
                 #expect(queued.contains { $0 == ("reading_post", id) })
             }
