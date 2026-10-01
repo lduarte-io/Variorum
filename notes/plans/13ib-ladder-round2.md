@@ -285,3 +285,99 @@ new assertion groups included; 0 issues); the FULL core suite — **"Test run wi
 tests in 200 suites passed"** (unchanged — the fix touches only the Mac target's words);
 zero instances (`pgrep` clean). No `Sync/`, schema, migration, editor-seam or
 `VariorumCore` line in the round-2 fix diff; no attribution trailers.
+
+## THE IMPLEMENTER'S SANITY PASS (the cross-model flow's last step — 2026-10-01)
+
+*The implementer voice (opus-implementer; the same session as both rounds' agree/dispute).
+No code changed. Scope: `git diff 2bc3c205..70b8606a` — the six fix commits df25b855 ·
+c5f84d88 · 223ffaa8 · 665431ad · 27723b9b · 70b8606a. I read the whole diff (sources, tests,
+records) against my own round-1 and round-2 verdicts.*
+
+**OUTCOME: CLEAN BILL.** Every fix matches what I agreed to. Two record-class observations
+follow; neither is a regression, and neither is a finding against the fix diff.
+
+### Fix by fix, against my verdicts
+
+- **F-R1-1 (df25b855) — matches.**
+  - `revertSmartConversion` flips each taken row to `status='arrival'` in the same write as
+    its tombstone.
+  - The pre-images are correct by construction: `for var row in standing` mutates copies, so
+    `standing` still holds the undo-time statuses for the `(id, status)` box.
+  - `reapplySmartConversion` restores each row's captured status.
+  - A member removed by hand before the undo is untouched, because `standing` reads
+    `deleted_at IS NULL` only.
+  - My three asks all landed:
+    - the new pin asserts EXACTLY a live arrival, not "arrival or seat";
+    - BOTH member redo pins gain a status assertion, so a redo that forgets statuses now
+      fails them;
+    - the remove-then-re-add corner and the cross-device race are recorded in the op's doc
+      and in the bundle.
+- **F-R1-2 (c5f84d88) — matches.** It is the polarity check I recommended, not the
+  positive-walk widening: `#a ∧ NOT #b` stays unset. Polarity is the parity of `not`s. The
+  rule is pure Domain (`RuleGrammar.soleOutflowTagID`), and the view model keeps only the
+  liveness fact. The table pins every arm I named, including `★ ∧ NOT #a`.
+- **F-R1-3 (223ffaa8) + NEW-R2-1 (70b8606a) — match.**
+  - The gate is `RuleGrammar.read == .rule`, and my malformed cell is included.
+  - The sheet branches on the item's row; the receipt reads the same `ReadResult`, computed
+    once inside the runner.
+  - The malformed receipt names no door and mirrors its sheet. The `.none` arm keeps Edit
+    Rule, which is true: a NULL spec edits fine.
+  - The NEW-R2-1 pin uses INDEPENDENT strings, with Edit Rule as the positive control, as
+    I asked.
+- **F-R1-4 — record-only, matches.** The drafted (a) names the dismissal CLASS, including
+  the un-bind's residue. The drafted (b) carries `(id, status)`.
+- **F-R1-5 (665431ad) — matches my corrected census.** Two pins die whole; three keep their
+  real subjects trimmed; `withoutTheOfferNoSecondBookExists` folds into the retirement pin
+  `theBindMintsNoSiblingAndTheBoundBookKeepsCollecting`, which checks one row flipped in
+  place plus a fresh match seating at the end. A grep over `Sources/`, `App/` (Mac, Shared,
+  mobile, Mac tests) and `Tests/` finds zero residue beyond the one doc mention recording the
+  retirement.
+- **F-R1-6 / F-R1-7 — record-only, as disposed.** F-R1-7 is carried across its three readers
+  for 13i-c.
+- **F-R1-8 (27723b9b) — acceptable.** It uses a doc line plus a DEBUG `assert` rather than
+  the `precondition` I floated; release behaviour is unchanged, and that was a deliberate
+  recorded choice. No caller or test passes a zero window (grep, including the mobile
+  `listingLimit`).
+
+### Suites re-proven by my own hand (2026-10-01, HEAD 13ee7c2a, zero instances before and after)
+
+- **Core:** `swift test --filter` over SmartConversion, RuleOutflow, GatheringRitual,
+  IntakeOperations, IntakeDecision, IntakeSoak (6 seeds × 300), ArrivalMemberHygiene and
+  PoolTuck — **"Test run with 102 tests in 8 suites passed"**.
+- **Mac:** `xcodebuild … test -only-testing:VariorumTests/BindDoorTests
+  -only-testing:VariorumTests/RuleEditorTests` — **"Test run with 20 tests in 2 suites
+  passed"**, no skipped lines, `** TEST SUCCEEDED **`.
+
+### Two record-class observations (for the reviewer's final word; neither reopens the ladder)
+
+1. **The ruling's second clause is held by construction but has no pin.** The clause: a
+   member she REMOVED BY HAND before the undo keeps its member-class tombstone. Nothing
+   asserts it. The sequence would be:
+   - bind;
+   - remove A by hand;
+   - untag A, so a re-bind cannot re-materialize it;
+   - undo;
+   - re-bind;
+   - re-tag A;
+   - expect NO row: `.leftAsMember` stays silent.
+
+   This would be a CONTROL pin: green on both sides by nature, so not red-on-old. It guards
+   against a future revert that grows to flip tombstoned rows too. Optional; it could ride
+   the closeout's structure singles. (`GatheringRitualTests`' hand-removal at `:152` is not
+   under an undo.)
+2. **A residue of F-R1-3's class that predates the fix diff: a rule carrying only LEGACY
+   terms.**
+   - The cell is a grandfathered v1_18 `{"profile":…}` or date-bound rule with no tag or
+     star term. No live door mints one any more: Promote to Book and the phone's create-book
+     hand over tag-only v1 drafts.
+   - Such a rule reads as `.rule`, so the spawn sheet ("new matches keep joining"), the spawn
+     receipt ("it keeps collecting") and the BIND sheet's keeps-collecting sentence all
+     promise collection.
+   - But no applying act can reach that book. The tagging event's `appliedTag` returns false
+     on an empty root set (`Operations+Intake.swift:200`). The starring event needs a star
+     term (`:74`). That is P-13ib-U1-6 by design.
+   - So such a book collects only at catch-up occasions (rule edit, un-finish, restore), and
+     only through Arrivals.
+   - This dates from U1/U3 and the fix diff does not touch it. It concerns words, and only on
+     grandfathered data. I recommend a bundle or closeout line, owned by 13i-d's vocabulary
+     sweep or by whatever retires the legacy terms, rather than a ladder fix.
