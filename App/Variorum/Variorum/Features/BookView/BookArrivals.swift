@@ -249,6 +249,10 @@ struct BookArrivalsLine: View {
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    #if DEBUG
+    /// This line's own name in the DEBUG probe (DEBUG-only; see the probe).
+    @State private var probeOwner = UUID()
+    #endif
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -310,7 +314,7 @@ struct BookArrivalsLine: View {
         .onAppear { recordLine() }
         .onChange(of: model.door) { _, _ in recordLine() }
         .onChange(of: model.expanded) { _, _ in recordLine() }
-        .onDisappear { ArrivalsLineProbe.forget(model.readingID) }
+        .onDisappear { ArrivalsLineProbe.forget(model.readingID, owner: probeOwner) }
         #endif
     }
 
@@ -354,17 +358,19 @@ struct BookArrivalsLine: View {
         #if DEBUG
         .onAppear {
             ArrivalsLineProbe.recordRow(
-                model.readingID, arrival.id,
+                model.readingID, owner: probeOwner, arrival.id,
                 [ArrivalsCopy.addVerb, ArrivalsCopy.dismissVerb])
         }
-        .onDisappear { ArrivalsLineProbe.forgetRow(model.readingID, arrival.id) }
+        .onDisappear {
+            ArrivalsLineProbe.forgetRow(model.readingID, owner: probeOwner, arrival.id)
+        }
         #endif
     }
 
     #if DEBUG
     private func recordLine() {
         ArrivalsLineProbe.recordLine(
-            model.readingID,
+            model.readingID, owner: probeOwner,
             text: ArrivalsCopy.line(count: model.door.count),
             expanded: model.expanded)
     }
@@ -379,9 +385,17 @@ struct BookArrivalsLine: View {
 /// own `onAppear`, keyed by the book; cleared on disappear — so "absent" is
 /// an honest answer: nothing drew. DEBUG only; the shipping face carries none
 /// of it.
+///
+/// **Owned per line instance** (the 18k C4 `oracleOwner` shape): SwiftUI
+/// mounts an arriving surface BEFORE it unmounts the departing one (the
+/// `BookView` note-box comment records the same order), so a switch from
+/// Index to Book would otherwise have the departing line's `onDisappear`
+/// erase what the arriving line had just recorded. A record names its owner;
+/// a forget clears only its own.
 @MainActor
 enum ArrivalsLineProbe {
     struct Drawn: Equatable {
+        var owner: UUID
         var line: String?
         var expanded = false
         /// Arrival row id → the door verbs that row drew.
@@ -392,20 +406,35 @@ enum ArrivalsLineProbe {
 
     static func reset() { drawn = [:] }
 
-    static func recordLine(_ readingID: String, text: String, expanded: Bool) {
-        drawn[readingID, default: Drawn()].line = text
-        drawn[readingID, default: Drawn()].expanded = expanded
+    /// This owner's entry for the book, or a fresh one (a different owner's
+    /// record is a departing line's, and the arriving one replaces it).
+    private static func claim(_ readingID: String, _ owner: UUID) -> Drawn {
+        if let entry = drawn[readingID], entry.owner == owner { return entry }
+        return Drawn(owner: owner)
     }
 
-    static func recordRow(_ readingID: String, _ rowID: String, _ verbs: [String]) {
-        drawn[readingID, default: Drawn()].rows[rowID] = verbs
+    static func recordLine(_ readingID: String, owner: UUID, text: String, expanded: Bool) {
+        var entry = claim(readingID, owner)
+        entry.line = text
+        entry.expanded = expanded
+        drawn[readingID] = entry
     }
 
-    static func forgetRow(_ readingID: String, _ rowID: String) {
+    static func recordRow(
+        _ readingID: String, owner: UUID, _ rowID: String, _ verbs: [String]
+    ) {
+        var entry = claim(readingID, owner)
+        entry.rows[rowID] = verbs
+        drawn[readingID] = entry
+    }
+
+    static func forgetRow(_ readingID: String, owner: UUID, _ rowID: String) {
+        guard drawn[readingID]?.owner == owner else { return }
         drawn[readingID]?.rows[rowID] = nil
     }
 
-    static func forget(_ readingID: String) {
+    static func forget(_ readingID: String, owner: UUID) {
+        guard drawn[readingID]?.owner == owner else { return }
         drawn[readingID] = nil
     }
 }

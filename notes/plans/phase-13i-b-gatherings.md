@@ -605,7 +605,27 @@ the close with everything not done.
   passes it to `BookIndexView` (the line ABOVE the pane's scroll view — never inside the
   manifest-measured content) and `SpreadBookView` (atop both pages); both params default nil.
   `CapabilityRegistryTests`' surface union gains `BookArrivalsLine` (a justified edit, commented).
-  NEXT: the mounted pins, then the suites, then the walk.
+  (Superseded by piece 4: the pins are written and green.)
+- Piece 4 (this commit): **the mounted pins** — `VariorumTests/BookArrivalsTests.swift` (9): the
+  words pure (line, the "arrived …" stamp = `TimeStampFace.relative`, receipts, refusals naming
+  their roads, never the enum; `isShown`/`hidden`) · the line ABSENT with nothing waiting (Index
+  AND Book — nothing draws, not even a hairline) · PRESENT as "3 at the door", collapsed, on Index
+  and on Book, and GONE on Outline and Read (the ruled surfaces only) · expands inline to one row
+  per arrival ROW with exactly [Add, Dismiss] (no copy-in arm), folds back · Add seats the SAME
+  row → member, at the END, unsectioned, the assembly ends with it after the chapter's members,
+  the door answers one fewer, a RECEIPT on the seam naming where · Dismiss tombstones (status
+  stays arrival, membership untouched), the emptied door folds shut, a receipt · the CAPACITY
+  refusal (a full book under the quiet dial — intake waited at the door) spoken as a REFUSAL toast
+  in the op's own terms, the bell still ringing · a row already judged refuses honestly
+  ("already judged"), touching nothing · the last judgment makes the line vanish and the book's
+  projection carries the seated note · the registry: the line is the two acts' one renderer,
+  `.surface` only, book scope, no key, verbs = the drawn verbs. The probe is OWNED per line
+  instance (SwiftUI mounts the arriving surface before unmounting the departing one — a bare
+  forget would erase the new record). **Mac: `BookArrivalsTests` + `CapabilityRegistryTests` —
+  "Test run with 38 tests in 2 suites passed", 0 skipped** (one pin edited before green: its
+  "no parenthesis" check was too blunt for the capacity sentence's own "(the gear)" — it now
+  checks for enum residue). NEXT: a teeth check on the absent pin (announced below before it
+  runs), then the neighbour suites, the core suite, the builds, the walk.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
