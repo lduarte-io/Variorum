@@ -424,6 +424,54 @@ reordering §7, the 13o handoff §12 all verified.)*
    are self-authored · the tutorial's Work story teaches "the Work is a SHELF; a wing when you
    want true separation" (her wings-stay-big imagining, taught).
 
+## 19. THIRD PASS — her final rulings + the last anything-else harvest (2026-09-30)
+
+**Her rulings:**
+- **NEW BOOKS LAND UNSHELVED, not on Welcome** (her words: *"new books shouldn't land on the
+  welcome shelf — they should land in 'All' until you move them to a distinct shelf"*). This
+  SUPERSEDES §17(a)'s landing clause and §7's dangling-reads-as-first-shelf line: a dangling/NULL
+  shelf pointer means UNSHELVED; unshelved books show in All (their own run) and in no shelf's
+  solo view; **Welcome holds the SEEDED content only**. Deleting a shelf now returns its books to
+  UNSHELVED (no longer "the first shelf"). §17(a)'s "Your books second shelf" design note
+  DISSOLVES — her ruling achieves the round-6 separation outright.
+- **The masthead collapse — (c) RULED CLOSED:** click to collapse, click to expand, hover to
+  reveal while collapsed; the state REMEMBERED (a small local memory, never a Settings-pane row).
+- **(d) RATIFIED:** tags + star, with and/or/not; no churn-shaped rules inside books — her words:
+  *"we'll make sure that search is good and maybe add a very capable search within a book if
+  needed"* (13o's within-a-book scope already carries this; her sentence added to its row).
+
+**Completing (d) — three mechanism details (PROPOSED defaults; standing unless she objects):**
+- **Subtree matching:** a tag term matches the tag AND its descendants (`video/` matches
+  `video/ideas`) — the app's standing tag-subtree convention; wanting only the exact tag means
+  naming the leaf.
+- **Rules reference TAG IDs, never paths** — `renameTag` can never break a rule; the rule's
+  display derives from the live path. A term whose tag is deleted matches nothing and reads
+  "(deleted tag)"; machinery never rewrites a rule.
+- **Unstar/untag are NON-EVENTS for intake** (rows are truth; eviction never) — only the applying
+  act fires. (A gathering, being derived, reflects unstar/untag instantly as always.)
+
+**The final harvest (PROPOSED, each cheap now; standing unless she objects):**
+1. **Context mint:** + New Book while a shelf is solo'd lands ON that shelf (you're looking at
+   where you're filing); from All, unshelved. Without this, a book minted in solo view lands
+   invisibly outside the current view.
+2. **The unshelved run renders LAST in All** (the unsectioned-renders-last convention); the
+   new-book flash/scroll covers discovery (the 18l arrival idiom).
+3. **Journal and Quicknotes start UNSHELVED** — they are her working objects, not samples;
+   Welcome = the field guide + the classics trio, nothing else.
+4. **Starred GATHERINGS join the upper-left Starred section** exactly as starred books do (one
+   star, every shelf citizen).
+5. **Arrivals under Finished are inert, kept:** finishing pauses intake AND judgment — pending
+   arrivals stay, untouched, visible if looked at; un-finishing finds them plus the gap's
+   catch-up (§4).
+6. **Binding preserves identity:** the gathering's row IS the book's row (same id; the mode
+   flips) — name, star, shelf spot, glyphless chip, everything survives the bind.
+7. **The 13h question stays DELIBERATELY OPEN:** this sitting built the wings machinery but did
+   NOT rule an Imports wing into existence — 13h's own kickoff decides it on the machinery
+   (its row's "if 13i rules it" resolves to: the machinery yes, the Imports wing itself is 13h's).
+8. **EDITIONS and TEMPLATES now have DURABLE FUTURE ROWS** in `notes/FuturePhases.md` (her
+   instruction: *"the future manuscript capability / potential should be saved too"*) — each a
+   valid KnownIssues owner from today, each pointing back at this record (§5/§6/§10/§13).
+
 **NEXT:** her UI iteration pass on the mockup; then `/architect-phase 13i-a` per the split addendum
-(the sitting that R-cor-13 required has now RUN — this record is it). Of §16, only (c) — a UI-pass
-detail — and (d) — explained, standing unless she objects — remain anything but RULED.
+(the sitting that R-cor-13 required has now RUN — this record is it). §16 is FULLY RULED; what
+stands PROPOSED-unless-she-objects is exactly §19's defaults and harvest, nothing else.
