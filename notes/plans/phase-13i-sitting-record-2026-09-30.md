@@ -539,6 +539,37 @@ browsing: infinite scroll or an old-timey pager; "Library should show anything";
 report after the tutorial re-seed is the proof case); the day filter gains a RANGE; the
 many-books case (a bounded books section with its own scroll — her lean — or count + click-through).
 
-**NEXT:** the UI iteration continues on mockup v2 (pick a direction, mark it up); then
-`/architect-phase 13i-a`. Standing PROPOSED-unless-she-objects: §19's defaults and harvest, §20's
-Quicknotes shape, §21's arrivals-exempt-from-details.
+## 22. THE CENSUS ROUND (2026-09-30) — Direction A ruled; the place/finder boundary
+
+- **DIRECTION A — RULED** (*"I still prefer option A — I don't want the sidebar to become more
+  full"*; and on v2 overall: *"the shape of it is right… you're right that the web ui elements
+  are what was throwing it off."*)
+- **THE PLACE/FINDER BOUNDARY (proposed, standing — the answer to her observation** *"Shelf is
+  starting to look a lot more like Library, but for books… we haven't perhaps made the necessary
+  adjustments and decisions to support it being that way yet"***):** the Library is the FINDER
+  (derived order, search, time filters); the Bookcase is a PLACE (hand-arranged, stable). The
+  dividing rule: **search boxes and time filters never come to the Bookcase; facet-soloing and a
+  view-local sort overlay may.** The full finding experience over books is Library's Books
+  section + 13o's facets — already handed over. This rule is what stops the two surfaces
+  converging.
+- **THE CENSUS LINE (her idea, shaped; built into mockup v3):** the masthead counts move to
+  their own quiet second line where **each term is a filter** — click "3 gatherings" to solo
+  gatherings, click again to clear (ink + weight, the same idiom; a shelf with no matches folds
+  away). The **⋯** opens the full census as a dropdown with counts — owned · living · sealed —
+  her "prune those in particular" want, kept off the line so the line stays three terms. The
+  RULED COLLAPSE GESTURE now applies to this line (fold to ··, remembered). Of her two floated
+  shapes (visible selectable line vs glyph-dropdown-only), the built shape is the line + the ⋯
+  tail — the dropdown-only alternative stands recorded.
+- **THE BOOKCASE SORT (her want, shaped):** `order · shelf order ▾` at the census line's right —
+  view-local: **shelf order (default) · last edited** — an overlay that never rewrites the
+  arrangement (A31's view-local precedent, one level up). **Mechanism note:** a book's "last
+  edited" is DERIVED (max over its members' touch stamps), computed or cached LOCALLY — never a
+  synced column on `reading` (a per-keystroke book-row write would storm the outbox).
+- **THE SPEC CAUTION — hers, binding on every 13i-d brief:** *"I would caution the spec to not
+  build EXACTLY to these details because there's still rounded edges, for example, that the
+  regular app doesn't have. the shape of it is right."* The mockup fixes the SHAPE and idiom;
+  the build uses the app's own tokens, spacing, type and corner conventions throughout.
+
+**NEXT:** the UI iteration continues on mockup v3; then `/architect-phase 13i-a`. Standing
+PROPOSED-unless-she-objects: §19's defaults and harvest, §20's Quicknotes shape, §21's
+arrivals-exempt-from-details, §22's boundary rule + census line + sort overlay.

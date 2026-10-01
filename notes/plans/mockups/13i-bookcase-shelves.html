@@ -46,6 +46,15 @@
   .mw.detailsbtn { margin-left:auto; }
   .mw.dragover { outline:1px solid var(--hair); outline-offset:5px; border-radius:2px; }
 
+  /* the census line — counts that are also quiet facet filters */
+  .census { display:flex; flex-wrap:wrap; gap:4px 18px; align-items:baseline; padding:12px 2px 0;
+    font-family:-apple-system,system-ui,sans-serif; font-size:12.5px; color:var(--muted); }
+  .census .ct { cursor:pointer; user-select:none; }
+  .census .ct:hover { color:var(--ink); }
+  .census .ct.active { color:var(--ink); font-weight:600; }
+  .census .more { color:var(--capture); }
+  .census .sortw { margin-left:auto; color:var(--capture); }
+
   /* shelf sections in All — the Library's own section-label idiom */
   .shelf { margin-top:6px; }
   .shelfhead { display:flex; align-items:baseline; gap:8px; cursor:pointer; padding:16px 0 2px; user-select:none;
@@ -107,8 +116,15 @@ unless you give a shelf one (From Variorum demonstrates). Selection = ink + weig
 <div class="surface solo" id="case">
   <div class="masthead">
     <span class="title">Bookcase</span>
-    <span class="stats" id="stats" title="click to collapse — the state is remembered">· 8 books · 3 gatherings · 4 shelves · 1 finished</span>
     <span class="doors"><span>Today’s Entry</span><span>+ New Book</span></span>
+  </div>
+
+  <div class="census" id="census" title="the census line — each term solos its kind; click again to clear; the ruled collapse gesture folds this whole line to ··">
+    <span class="ct" data-k="book">8 books</span>
+    <span class="ct" data-k="gathering">3 gatherings</span>
+    <span class="ct" data-f="finished">1 finished</span>
+    <span class="ct more" title="the full census: owned · living · sealed, with counts">⋯</span>
+    <span class="sortw" title="view-local, never touching your arrangement">order · shelf order ▾</span>
   </div>
 
   <div class="moderow" id="strip">
@@ -123,35 +139,44 @@ unless you give a shelf one (From Variorum demonstrates). Selection = ink + weig
 
   <div class="shelf" data-s="work">
     <div class="shelfhead"><span class="chev">▾</span><span class="nm">The Work</span></div>
-    <div class="row"><span class="nm">my book :)</span><span class="tag">#todos</span><span class="meta">3 notes · 450w · <span class="mode">owned</span></span></div>
-    <div class="row"><span class="nm">research — gothic houses</span><span class="tag">#research</span><span class="meta">12 notes · 3,104w</span></div>
-    <div class="row"><span class="nm">cut material</span><span class="tag"></span><span class="meta">5 notes · 1,220w</span></div>
+    <div class="row" data-kind="book" data-f="owned"><span class="nm">my book :)</span><span class="tag">#todos</span><span class="meta">3 notes · 450w · <span class="mode">owned</span></span></div>
+    <div class="row" data-kind="book"><span class="nm">research — gothic houses</span><span class="tag">#research</span><span class="meta">12 notes · 3,104w</span></div>
+    <div class="row" data-kind="book"><span class="nm">cut material</span><span class="tag"></span><span class="meta">5 notes · 1,220w</span></div>
   </div>
 
   <div class="shelf hidden" data-s="journal">
     <div class="shelfhead"><span class="chev">▾</span><span class="nm">Journal</span></div>
-    <div class="row"><span class="nm">Quicknotes</span><span class="tag">#quicknote</span><span class="meta"><span class="mode">gathering</span> · 4w</span></div>
-    <div class="row"><span class="nm">Journal</span><span class="tag">#happy</span><span class="meta">19 notes · 5,273w</span></div>
+    <div class="row" data-kind="gathering"><span class="nm">Quicknotes</span><span class="tag">#quicknote</span><span class="meta"><span class="mode">gathering</span> · 4w</span></div>
+    <div class="row" data-kind="book"><span class="nm">Journal</span><span class="tag">#happy</span><span class="meta">19 notes · 5,273w</span></div>
   </div>
 
   <div class="shelf hidden" data-s="variorum">
     <div class="shelfhead"><span class="chev">▾</span><span class="nm">❦ From Variorum</span></div>
-    <div class="row"><span class="nm">The Strange Case of Dr Jekyll and Mr Hyde</span><span class="tag">#classics</span><span class="meta">4 notes · 4 ch · 12,642w · <span class="mode">finished</span></span></div>
-    <div class="row"><span class="nm">the adventures of sherlock holmes</span><span class="tag">#classics</span><span class="meta">14 notes · 13 ch · 105,337w · <span class="mode">owned</span></span></div>
-    <div class="row"><span class="nm">the field guide</span><span class="tag">#tutorial</span><span class="meta">34 notes · 9 ch</span></div>
+    <div class="row" data-kind="book" data-f="finished"><span class="nm">The Strange Case of Dr Jekyll and Mr Hyde</span><span class="tag">#classics</span><span class="meta">4 notes · 4 ch · 12,642w · <span class="mode">finished</span></span></div>
+    <div class="row" data-kind="book" data-f="owned"><span class="nm">the adventures of sherlock holmes</span><span class="tag">#classics</span><span class="meta">14 notes · 13 ch · 105,337w · <span class="mode">owned</span></span></div>
+    <div class="row" data-kind="book"><span class="nm">the field guide</span><span class="tag">#tutorial</span><span class="meta">34 notes · 9 ch</span></div>
   </div>
 
   <div class="shelf hidden" data-s="ideas">
     <div class="shelfhead"><span class="chev">▾</span><span class="nm">Ideas</span></div>
-    <div class="row"><span class="nm">video ideas</span><span class="tag">#video ideas</span><span class="meta"><span class="mode">gathering</span> · 23 notes</span></div>
-    <div class="row"><span class="nm">talking heads</span><span class="tag">#type/talking head</span><span class="meta"><span class="mode">gathering</span> · 8 notes</span></div>
-    <div class="row"><span class="nm">Encryption Explained</span><span class="tag">#encryption explained</span><span class="meta keeparr"><span class="arr">2 arrivals</span> · <span class="mode">living</span> · 9 notes · 9 ch</span></div>
+    <div class="row" data-kind="gathering"><span class="nm">video ideas</span><span class="tag">#video ideas</span><span class="meta"><span class="mode">gathering</span> · 23 notes</span></div>
+    <div class="row" data-kind="gathering"><span class="nm">talking heads</span><span class="tag">#type/talking head</span><span class="meta"><span class="mode">gathering</span> · 8 notes</span></div>
+    <div class="row" data-kind="book" data-f="living"><span class="nm">Encryption Explained</span><span class="tag">#encryption explained</span><span class="meta keeparr"><span class="arr">2 arrivals</span> · <span class="mode">living</span> · 9 notes · 9 ch</span></div>
   </div>
 
   <div class="capture">new note — just start typing · ⏎ opens it · ⇧⏎ new paragraph</div>
 </div>
 
 <div class="note">
+  <b>THE CENSUS LINE (this revision — her idea made structural):</b> the counts leave the masthead
+  and become their own quiet second line, where each term is a FILTER — click “3 gatherings” to
+  solo gatherings across the current view, click again to clear (selection = ink + weight, the
+  same idiom; in the build, a shelf with no matches folds away). The ⋯ opens the full census as a
+  dropdown with counts — owned · living · sealed — for the longer tail, so the line itself stays
+  three terms. The ruled collapse gesture now applies to THIS line (fold to ··, remembered). At
+  its right end, <b>order · shelf order ▾</b> — the view-local sort: shelf order (default) · last
+  edited. It overlays, never rewrites your arrangement — A31's view-local precedent, one level up.
+  <br><br>
   <b>Direction A's claims:</b> the shelf line is read-quiet — muted words, the active one in ink
   and weight, generous space doing the separating. Counts live on HOVER (and in the overflow
   panel), “default” lives in the right-click, glyphs are opt-in per shelf and monochrome. The
@@ -279,8 +304,16 @@ sketch).</p>
   });
   document.querySelectorAll('.shelfhead').forEach(h =>
     h.addEventListener('click', () => h.parentElement.classList.toggle('collapsed')));
-  const st = document.getElementById('stats'); let open = true; const full = st.textContent;
-  st.addEventListener('click', () => { open = !open; st.textContent = open ? full : '··'; });
+  document.querySelectorAll('#census .ct:not(.more)').forEach(t => t.addEventListener('click', () => {
+    const was = t.classList.contains('active');
+    document.querySelectorAll('#census .ct').forEach(x => x.classList.remove('active'));
+    const rows = cs.querySelectorAll('.row'); rows.forEach(r => r.style.display = '');
+    if (was) return;
+    t.classList.add('active');
+    const k = t.dataset.k, f = t.dataset.f;
+    rows.forEach(r => { const ok = k ? r.dataset.kind === k : r.dataset.f === f;
+      r.style.display = ok ? '' : 'none'; });
+  }));
   function tgl(){ const r = document.documentElement;
     r.dataset.theme = (r.dataset.theme === 'dark') ? 'light' : 'dark'; }
 </script>
