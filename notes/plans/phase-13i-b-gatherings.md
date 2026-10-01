@@ -373,8 +373,15 @@ the walk into the morning.
   .keepCollectingMintsASecondSmartBookOnTheSameFilter` asserted "the converted book froze" — the
   superseded N38 shape A; the sitting record §14.6 rules the bound book KEEPS COLLECTING, and the
   pin now asserts the newcomer seated at the end of it.
-- NEXT — piece 5: the exact state-transition suites (`IntakeDecisionTests`,
-  `IntakeOperationsTests`), then the soak, then `GatheringRitualTests`.
+- Piece 5 (9325d2c1): the exact state-transition suites — `IntakeDecisionTests` (every arm of the
+  pure table; owned arms headless) + `IntakeOperationsTests` (39 transitions) — **52 green on
+  first run**.
+- **MUTATION CHECK IN FLIGHT (this commit announces it):** temporary behavioural reverts of single
+  mechanisms in `Domain/IntakeDecision.swift` / `Operations+Intake.swift` /
+  `Operations+Reading.swift` against the COMMITTED tree (restore = `git checkout --` on those
+  files; nothing else is uncommitted). If this line still reads IN FLIGHT, run `git diff` — any
+  diff in those three files is a mutation to discard.
+- NEXT — the soak, then `GatheringRitualTests`.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
