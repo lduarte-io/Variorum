@@ -12,7 +12,7 @@ struct SmartCollectTests {
     private func smartReading(
         _ ops: Operations, spec: Queries.SmartQuerySpec
     ) throws -> Reading {
-        let reading = try ops.createReading(name: "smart", kind: .smart)
+        let reading = try ops.createReading(name: "smart", kind: .gathering)
         try ops.setReadingQuerySpec(reading.id, querySpec: try spec.encodedJSON())
         return reading
     }
@@ -111,7 +111,16 @@ struct SmartCollectTests {
 
     @Test func missingFilterTagRefusesByName() throws {
         try withOperations { ops, _ in
+            // 13i-a: rules reference tag IDs (§19), so "the missing tag"
+            // is one that EXISTED when the rule was written and was
+            // deleted since — the tombstone still knows the path the
+            // refusal names. (A path that never existed converts to the
+            // dead term and refuses with the generic sentence instead.)
+            let ghost = try ops.createTag(name: "ghost")
+            let ghostTag = try ops.createTag(parent: ghost.id, name: "tag")
             let reading = try smartReading(ops, spec: .init(tags: ["ghost/tag"]))
+            try ops.deleteTag(ghostTag.id)
+            try ops.deleteTag(ghost.id)
             let post = try ops.createPost(title: "orphan")
             #expect {
                 try ops.collectPostIntoSmartReading(post.id, into: reading.id)
@@ -125,9 +134,9 @@ struct SmartCollectTests {
 
     @Test func wrongKindAndLockedReadingRefuse() throws {
         try withOperations { ops, _ in
-            let curated = try ops.createReading(name: "hand-picked", kind: .curated)
+            let curated = try ops.createReading(name: "hand-picked", kind: .book)
             let post = try ops.createPost(title: "p")
-            #expect(throws: OperationError.wrongReadingKind(id: curated.id, expected: .smart)) {
+            #expect(throws: OperationError.wrongReadingKind(id: curated.id, expected: .gathering)) {
                 try ops.collectPostIntoSmartReading(post.id, into: curated.id)
             }
             let smart = try smartReading(ops, spec: .init(tags: ["x"]))

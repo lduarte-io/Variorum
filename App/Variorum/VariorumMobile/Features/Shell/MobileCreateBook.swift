@@ -130,7 +130,7 @@ final class MobileCreateBookModel {
             case .notes:
                 id = try await session.runner.run { ops in
                     try ops.assertBookNameIsFree(bookName)
-                    return try ops.createReading(name: bookName, kind: .curated)
+                    return try ops.createReading(name: bookName, kind: .book)
                 }.id
             case .journal:
                 // The Mac create alert's journal shape, byte-mirrored:
@@ -138,8 +138,8 @@ final class MobileCreateBookModel {
                 id = try await session.runner.run { ops in
                     try ops.assertBookNameIsFree(bookName)
                     return try ops.createReading(
-                        name: bookName, kind: .curated,
-                        profile: Queries.dailyJournalBookProfile,
+                        name: bookName, kind: .book,
+                        profile: Queries.journalTraitProfile,
                         sortField: .entryDate, sortDir: .asc)
                 }.id
             case .smartFromTags:
@@ -149,7 +149,7 @@ final class MobileCreateBookModel {
                 id = try await session.runner.run { ops in
                     try ops.assertBookNameIsFree(bookName)
                     return try ops.createReading(
-                        name: bookName, kind: .smart, querySpec: json)
+                        name: bookName, kind: .gathering, querySpec: json)
                 }.id
             }
             lastError = nil

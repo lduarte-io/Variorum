@@ -21,6 +21,10 @@ struct MigrationTests {
         // Phase 13j (v1_14, the purge §12 lockstep event, marker 6→7):
         // the purge intent — "this is going, everywhere".
         "purge_intent",
+        // 13i-a (v1_18, the wings/shelves/books §12 event, marker 9→10):
+        // in-store libraries + Bookcase shelves. The Home wing is VIRTUAL
+        // (no row; '' pointers) — the table holds additional wings only.
+        "wing", "shelf",
     ]
 
     static let expectedIndexes: Set<String> = [
@@ -55,6 +59,8 @@ struct MigrationTests {
         // savepoints written in a window, so the arm is driven by the DAY
         // and not walked per note. LOCAL only, no §12 event, marker 8.
         "idx_commit_created",
+        // 13i-a (v1_18): the shelf strip's per-wing order walk.
+        "idx_shelf_wing",
     ]
 
     // Tables synced to the server — all carry sync_version (AppSpec §6).
@@ -65,6 +71,8 @@ struct MigrationTests {
         "canvas_layout", "lens", "lens_choice",
         "block_comment", "reading_section",
         "purge_intent",
+        // 13i-a (v1_18): the wings/shelves event's two tables.
+        "wing", "shelf",
     ]
 
     @Test func allTablesExist() throws {
@@ -125,8 +133,10 @@ struct MigrationTests {
                 "a v1_16 store walks the savepoints per note")
         try AppDatabase.migrator.migrate(queue)
         let after = try indexes()
-        #expect(after.subtracting(before) == ["idx_commit_created"],
-                "v1_17 adds exactly one index")
+        // 13i-a: the full chain past v1_16 now adds v1_17's day-search
+        // index AND v1_18's shelf-order index.
+        #expect(after.subtracting(before) == ["idx_commit_created", "idx_shelf_wing"],
+                "v1_17 + v1_18 add exactly these indexes")
         #expect(after == Self.expectedIndexes)
     }
 

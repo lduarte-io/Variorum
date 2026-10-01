@@ -19,6 +19,9 @@ public struct ReadingPost: VariorumRecord {
     public var createdAt: Date
     public var deletedAt: Date?
     public var syncVersion: Int
+    /// 13i-a (v1_18): member = seated membership (truth, counted, ordered);
+    /// arrival = intake's bell waiting at the door (sitting record §4).
+    public var status: MembershipStatus
 
     public init(
         id: String,
@@ -26,6 +29,7 @@ public struct ReadingPost: VariorumRecord {
         postId: String,
         position: String,
         sectionId: String? = nil,
+        status: MembershipStatus = .member,
         createdAt: Date,
         deletedAt: Date? = nil,
         syncVersion: Int = 0
@@ -35,6 +39,7 @@ public struct ReadingPost: VariorumRecord {
         self.postId = postId
         self.position = position
         self.sectionId = sectionId
+        self.status = status
         self.createdAt = createdAt
         self.deletedAt = deletedAt
         self.syncVersion = syncVersion

@@ -59,7 +59,7 @@ struct SyncPushTests {
             let v1 = try db.fetchString("SELECT default_variant_id FROM block WHERE id = ?", [b1.id])!
             _ = try ops.commit(v1)
             _ = try ops.merge(b1.id, b2.id)  // edges
-            let reading = try ops.createReading(name: "book", kind: .curated, maxPosts: nil)
+            let reading = try ops.createReading(name: "book", kind: .book, maxPosts: nil)
             _ = try ops.addPostToReading(post.id, to: reading.id)
             // Phase 13 (A1): the lockstep event's chapter table.
             let chapter = try ops.createSection(in: reading.id, name: "ch. I")
@@ -88,6 +88,29 @@ struct SyncPushTests {
             let doomed = try ops.newBlock(in: pool.id, text: "doomed", at: .end).block
             try ops.deleteBlock(doomed.id)
             _ = try ops.requestPurge([SyncPurgeTarget(table: "block", rowID: doomed.id)])
+
+            // 13i-a (v1_18): wing + shelf rows — direct SQL (their ops
+            // arrive at 13i-b/d); names + a glyph so the ciphertext walk
+            // sees every encrypted column of both tables.
+            try db.write { database in
+                try database.execute(
+                    sql: """
+                        INSERT INTO wing (id, owner_id, name, position, created_at, updated_at)
+                        VALUES ('0W000000-0000-4000-8000-000000000W01',
+                                (SELECT owner_id FROM container LIMIT 1), 'the Work',
+                                'a1', '2026-09-30T00:00:00.000Z', '2026-09-30T00:00:00.000Z')
+                        """)
+                try database.execute(
+                    sql: """
+                        INSERT INTO shelf (id, owner_id, wing_id, name, glyph, role, position,
+                                           created_at, updated_at)
+                        VALUES ('05000000-0000-4000-8000-0000000005E1',
+                                (SELECT owner_id FROM container LIMIT 1),
+                                '0W000000-0000-4000-8000-000000000W01', 'Welcome', '~',
+                                'welcome', 'a1',
+                                '2026-09-30T00:00:00.000Z', '2026-09-30T00:00:00.000Z')
+                        """)
+            }
         }
 
         try await a.push()

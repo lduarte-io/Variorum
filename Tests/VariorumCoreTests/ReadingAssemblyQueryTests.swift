@@ -12,7 +12,7 @@ struct ReadingAssemblyQueryTests {
             let p1 = try ops.createPost(title: "one")
             let p2 = try ops.createPost(title: "two")
             let p3 = try ops.createPost(title: "three")
-            let reading = try ops.createReading(name: "book", kind: .curated)
+            let reading = try ops.createReading(name: "book", kind: .book)
             try ops.addPostToReading(p1.id, to: reading.id)
             try ops.addPostToReading(p3.id, to: reading.id)
             try ops.addPostToReading(p2.id, to: reading.id, at: .after(p1.id))
@@ -24,7 +24,7 @@ struct ReadingAssemblyQueryTests {
 
     @Test func maxPostsCapsTheAssembly() throws {
         try withOperations { ops, db in
-            let reading = try ops.createReading(name: "capped", kind: .curated, maxPosts: 2)
+            let reading = try ops.createReading(name: "capped", kind: .book, maxPosts: 2)
             let p1 = try ops.createPost()
             let p2 = try ops.createPost()
             try ops.addPostToReading(p1.id, to: reading.id)
@@ -49,9 +49,9 @@ struct ReadingAssemblyQueryTests {
     @Test func readingsListsLiveRowsByName() throws {
         // Phase 10 (additive): the readings-management face's listing.
         try withOperations { ops, db in
-            _ = try ops.createReading(name: "zeta", kind: .curated)
-            _ = try ops.createReading(name: "alpha", kind: .smart)
-            let dead = try ops.createReading(name: "dead", kind: .curated)
+            _ = try ops.createReading(name: "zeta", kind: .book)
+            _ = try ops.createReading(name: "alpha", kind: .gathering)
+            let dead = try ops.createReading(name: "dead", kind: .book)
             try ops.deleteReading(dead.id)
             let readings = try db.read { try Queries.readings($0) }
             #expect(readings.map(\.name) == ["alpha", "zeta"])
@@ -64,7 +64,7 @@ struct ReadingAssemblyQueryTests {
     /// restored one and a name never seen answer false.
     @Test func readingTombstoneExistsReadsTheExactNameAcrossAnyAge() throws {
         try withOperations { ops, db in
-            let live = try ops.createReading(name: "Encryption Explained", kind: .curated)
+            let live = try ops.createReading(name: "Encryption Explained", kind: .book)
             #expect(try db.read { try Queries.readingTombstoneExists($0, name: "Encryption Explained") } == false)
             #expect(try db.read { try Queries.readingTombstoneExists($0, name: "never seen") } == false)
             try ops.deleteReading(live.id)
@@ -87,7 +87,7 @@ struct ReadingAssemblyQueryTests {
         // Phase 10 (additive): a held observation windows its standing
         // fetch (the observeLibrary discipline — the book view's bound).
         try withOperations { ops, db in
-            let reading = try ops.createReading(name: "windowed", kind: .curated)
+            let reading = try ops.createReading(name: "windowed", kind: .book)
             var ids: [String] = []
             for i in 0..<5 {
                 let post = try ops.createPost(title: "p\(i)")
@@ -99,7 +99,7 @@ struct ReadingAssemblyQueryTests {
             }
             #expect(windowed.map(\.postID) == Array(ids.prefix(3)))
             // The window and the extent cap combine as min(maxPosts, limit).
-            let capped = try ops.createReading(name: "capped", kind: .curated, maxPosts: 2)
+            let capped = try ops.createReading(name: "capped", kind: .book, maxPosts: 2)
             for id in ids.prefix(2) { try ops.addPostToReading(id, to: capped.id) }
             let wideWindow = try db.read {
                 try Queries.assembleReading($0, readingID: capped.id, limit: 5)
@@ -119,7 +119,7 @@ struct ReadingAssemblyQueryTests {
 
     @Test func tombstonedPostsAndMembershipsAreExcluded() throws {
         try withOperations { ops, db in
-            let reading = try ops.createReading(name: "r", kind: .curated)
+            let reading = try ops.createReading(name: "r", kind: .book)
             let p1 = try ops.createPost()
             let p2 = try ops.createPost()
             let p3 = try ops.createPost()
@@ -135,7 +135,7 @@ struct ReadingAssemblyQueryTests {
         // Domain archive = kept, out of view (AppSpec §6) — PROVISIONAL
         // read-time interpretation, phase closeout.
         try withOperations { ops, db in
-            let reading = try ops.createReading(name: "r", kind: .curated)
+            let reading = try ops.createReading(name: "r", kind: .book)
             let p1 = try ops.createPost()
             let p2 = try ops.createPost()
             try ops.addPostToReading(p1.id, to: reading.id)
@@ -149,8 +149,8 @@ struct ReadingAssemblyQueryTests {
     @Test func aPostMayLiveInManyReadings() throws {
         try withOperations { ops, db in
             let post = try ops.createPost(title: "shared")
-            let r1 = try ops.createReading(name: "a", kind: .curated)
-            let r2 = try ops.createReading(name: "b", kind: .curated)
+            let r1 = try ops.createReading(name: "a", kind: .book)
+            let r2 = try ops.createReading(name: "b", kind: .book)
             try ops.addPostToReading(post.id, to: r1.id)
             try ops.addPostToReading(post.id, to: r2.id)
             let inR1 = try db.read { try Queries.assembleReading($0, readingID: r1.id) }
@@ -184,7 +184,7 @@ struct ReadingAssemblyQueryTests {
     @Test func entryDateSortOrdersJournalsAndSortsUndatedLast() throws {
         try withOperations { ops, db in
             let reading = try ops.createReading(
-                name: "journal", kind: .curated, sortField: .entryDate, sortDir: .asc)
+                name: "journal", kind: .book, sortField: .entryDate, sortDir: .asc)
             let later = try ops.createPost(entryDate: "2026-07-02")
             let earlier = try ops.createPost(entryDate: "2026-07-01")
             let undated = try ops.createPost()
@@ -197,7 +197,7 @@ struct ReadingAssemblyQueryTests {
     @Test func createdAtSortFollowsCreationOrder() throws {
         try withOperations { ops, db in
             let reading = try ops.createReading(
-                name: "r", kind: .curated, sortField: .createdAt, sortDir: .desc)
+                name: "r", kind: .book, sortField: .createdAt, sortDir: .desc)
             let first = try ops.createPost()
             let second = try ops.createPost()
             try ops.addPostToReading(first.id, to: reading.id)
@@ -210,7 +210,7 @@ struct ReadingAssemblyQueryTests {
     @Test func lastTouchedSortReordersOnAnyEdit() throws {
         try withOperations { ops, db in
             let reading = try ops.createReading(
-                name: "r", kind: .curated, sortField: .lastTouched, sortDir: .desc)
+                name: "r", kind: .book, sortField: .lastTouched, sortDir: .desc)
             let a = try ops.createPost()
             let b = try ops.createPost()
             let blockA = try ops.newBlock(in: a.id, text: "aaaa")
@@ -227,7 +227,7 @@ struct ReadingAssemblyQueryTests {
     @Test func lastMajorRevisionSortIgnoresTypoFixes() throws {
         try withOperations { ops, db in
             let reading = try ops.createReading(
-                name: "r", kind: .curated, sortField: .lastMajorRevision, sortDir: .desc)
+                name: "r", kind: .book, sortField: .lastMajorRevision, sortDir: .desc)
             let a = try ops.createPost()
             let b = try ops.createPost()
             let blockA = try ops.newBlock(in: a.id, text: String(repeating: "a", count: 400))
@@ -254,7 +254,7 @@ struct ReadingAssemblyQueryTests {
             let spec = try Queries.SmartQuerySpec(
                 profile: "journal", entryDateFrom: "2026-06-01", entryDateTo: "2026-06-30"
             ).encodedJSON()
-            let reading = try ops.createReading(name: "june journal", kind: .smart, querySpec: spec)
+            let reading = try ops.createReading(name: "june journal", kind: .gathering, querySpec: spec)
             let entries = try db.read { try Queries.assembleReading($0, readingID: reading.id) }
             #expect(entries.map(\.postID) == [juneEntry.id])
         }
@@ -277,7 +277,7 @@ struct ReadingAssemblyQueryTests {
             _ = untagged
 
             let spec = try Queries.SmartQuerySpec(tags: ["life/goals"]).encodedJSON()
-            let reading = try ops.createReading(name: "goals", kind: .smart, querySpec: spec)
+            let reading = try ops.createReading(name: "goals", kind: .gathering, querySpec: spec)
             let entries = try db.read { try Queries.assembleReading($0, readingID: reading.id) }
             #expect(Set(entries.map(\.postID)) == [atRoot.id, deeper.id])
 
@@ -294,12 +294,12 @@ struct ReadingAssemblyQueryTests {
             let p1 = try ops.createPost()
             let p2 = try ops.createPost()
             _ = try ops.createPool()  // never a smart-reading member
-            let unconstrained = try ops.createReading(name: "all", kind: .smart)
+            let unconstrained = try ops.createReading(name: "all", kind: .gathering)
             let all = try db.read { try Queries.assembleReading($0, readingID: unconstrained.id) }
             #expect(all.map(\.postID) == [p1.id, p2.id])  // created_at fallback order
 
             let malformed = try ops.createReading(
-                name: "broken", kind: .smart, querySpec: "{not json")
+                name: "broken", kind: .gathering, querySpec: "{not json")
             let none = try db.read { try Queries.assembleReading($0, readingID: malformed.id) }
             #expect(none.isEmpty)
         }
@@ -313,7 +313,7 @@ struct ReadingAssemblyQueryTests {
             _ = mid
             let spec = try Queries.SmartQuerySpec(profile: "journal").encodedJSON()
             let reading = try ops.createReading(
-                name: "latest two", kind: .smart,
+                name: "latest two", kind: .gathering,
                 sortField: .entryDate, sortDir: .desc, querySpec: spec, maxPosts: 2)
             let entries = try db.read { try Queries.assembleReading($0, readingID: reading.id) }
             #expect(entries.map(\.postID) == [new.id, mid.id])
@@ -341,7 +341,7 @@ struct ReadingAssemblyQueryTests {
             try ops.applyTag(book.id, toPost: atRoot.id)
 
             let reading = try ops.createReading(
-                name: "the book", kind: .curated, groupingTagId: book.id)
+                name: "the book", kind: .book, groupingTagId: book.id)
             for post in [inCh1, inCh1Deep, inCh2, atRoot, unsectioned] {
                 try ops.addPostToReading(post.id, to: reading.id)
             }
@@ -370,7 +370,7 @@ struct ReadingAssemblyQueryTests {
                 profile: "journal", entryDateFrom: "2026-06-01", entryDateTo: "2026-06-30"
             ).encodedJSON()
             let reading = try ops.createReading(
-                name: "smart grouped", kind: .smart, sortField: .entryDate,
+                name: "smart grouped", kind: .gathering, sortField: .entryDate,
                 groupingTagId: book.id, querySpec: spec)
             let entries = try db.read { try Queries.assembleReading($0, readingID: reading.id) }
             #expect(entries.map(\.postID) == [inSection.id, outside.id])
@@ -387,7 +387,7 @@ struct ReadingAssemblyQueryTests {
             let post = try ops.createPost()
             try ops.applyTag(ch1.id, toPost: post.id)
             let reading = try ops.createReading(
-                name: "r", kind: .curated, groupingTagId: book.id)
+                name: "r", kind: .book, groupingTagId: book.id)
             try ops.addPostToReading(post.id, to: reading.id)
             try ops.deleteTag(book.id)
             let entries = try db.read { try Queries.assembleReading($0, readingID: reading.id) }
@@ -405,7 +405,7 @@ struct ReadingAssemblyQueryTests {
             try ops.applyTag(ch1.id, toPost: post.id)
             try ops.applyTag(ch2.id, toPost: post.id)
             let reading = try ops.createReading(
-                name: "r", kind: .curated, groupingTagId: book.id)
+                name: "r", kind: .book, groupingTagId: book.id)
             try ops.addPostToReading(post.id, to: reading.id)
 
             // Two sections match: the lexically smallest path wins.

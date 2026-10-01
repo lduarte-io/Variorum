@@ -472,7 +472,7 @@ struct WorkspaceModelTests {
             let session = AppSession(database: db)
             let (post, book) = try await session.runner.run { ops in
                 (try ops.createPost(title: "The Long Way Home"),
-                 try ops.createReading(name: "Field Notes", kind: .curated))
+                 try ops.createReading(name: "Field Notes", kind: .book))
             }
             let workspace = WorkspaceModel()
             workspace.visit(.reading(book.id))
@@ -508,7 +508,7 @@ struct WorkspaceModelTests {
             let session = AppSession(database: db)
             let (post, book) = try await session.runner.run { ops in
                 (try ops.createPost(title: "The Long Way Home"),
-                 try ops.createReading(name: "Field Notes", kind: .curated))
+                 try ops.createReading(name: "Field Notes", kind: .book))
             }
             let workspace = WorkspaceModel()
             workspace.visit(.reading(book.id))

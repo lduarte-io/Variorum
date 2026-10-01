@@ -1032,7 +1032,7 @@ enum SampleLibrarySeeder {
                     bookID = known
                 } else {
                     bookID = try quiet.createReading(
-                        name: bookName, kind: .curated, profile: profile).id
+                        name: bookName, kind: .book, profile: profile).id
                 }
                 let tagID = try existing.tagID ?? quiet.createTag(name: tagName).id
                 if !present.contains(frontTitle) {

@@ -27,8 +27,28 @@ public enum CommitKind: String, Codable, Sendable, DatabaseValueConvertible {
     case manual, auto
 }
 
+/// The 13i recast (sitting record §1, migrated at v1_18): a BOOK holds
+/// membership rows as truth; a GATHERING is a saved rule assembled at read,
+/// holding nothing. The old values ('curated','smart') exist in no live
+/// store past v1_18 and in no mirror past the marker-10 window.
 public enum ReadingKind: String, Codable, Sendable, DatabaseValueConvertible {
-    case curated, smart
+    case book, gathering
+}
+
+/// `reading_post.status` (13i-a, v1_18): a MEMBER is seated membership —
+/// truth, ordered, counted by capacity; an ARRIVAL is intake's bell waiting
+/// at the door (sitting record §4) — visible, synced, never rendered as a
+/// member. Dismissing an arrival tombstones its row (tombstone-means-
+/// decided); seating flips it to member and mints its position.
+public enum MembershipStatus: String, Codable, Sendable, DatabaseValueConvertible {
+    case member, arrival
+}
+
+/// `reading.intake_seating` — the per-book join dial (sitting record §4):
+/// new matches join quietly at the end, or wait at Arrivals for judgment.
+/// NULL on gatherings (they have no membership to seat).
+public enum IntakeSeating: String, Codable, Sendable, DatabaseValueConvertible {
+    case auto, arrivals
 }
 
 public enum SortField: String, Codable, Sendable, DatabaseValueConvertible {

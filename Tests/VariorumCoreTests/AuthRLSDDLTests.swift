@@ -40,6 +40,11 @@ struct AuthRLSDDLTests {
         "10_phase13j_purge.sql",
         "11_pre13x_postures.sql",
         "12_phase13y_tenant_seq.sql",
+        // 13i-a (the wings/shelves/books event, marker 10): wing + shelf
+        // born multi-tenant; the additive mirror columns; the six
+        // registry-carrying RPC bodies redefined — the CANONICAL bodies
+        // for those six live HERE now (the 13y fold-in precedent).
+        "13_phase13i_wings.sql",
     ]
 
     /// The DATA RPCs — every function 11 re-creates with `key_proof` beside
@@ -56,7 +61,13 @@ struct AuthRLSDDLTests {
     /// their own file (13j: `purge_intent` in 10). The reborn pin below
     /// reads each table's own bearer.
     private static func bearingFile(of tableName: String) -> String {
-        tableName == "purge_intent" ? "10_phase13j_purge.sql" : "09_phase14c_multitenant.sql"
+        switch tableName {
+        case "purge_intent": "10_phase13j_purge.sql"
+        // 13i-a: the two wings/shelves tables are BORN at 13, on 09's
+        // exact posture.
+        case "wing", "shelf": "13_phase13i_wings.sql"
+        default: "09_phase14c_multitenant.sql"
+        }
     }
 
     /// The RLS/grant surface: 04 (the auth flip) + the lockstep events
@@ -1888,7 +1899,15 @@ struct AuthRLSDDLTests {
         let json = String(overlay[open.upperBound..<close.lowerBound])
         let decoded = try #require(try JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: [String]])
         let listed = decoded.mapValues { Set($0) }
-        let registry = Dictionary(uniqueKeysWithValues: SyncSchema.tablesCarryingCiphertext.map { ($0.name, $0.encryptedColumns) })
+        // The overlay is a SUPERSEDED pre-13x artifact (12 folded it); its
+        // map is pinned against the registry AS OF ITS ERA — tables born
+        // at 13i-a (wing, shelf) are subtracted, exactly as the floor pin
+        // freezes 12's era. The LIVE map's exactness pin is the canonical
+        // body's (`theCompletionGuardLivesInTheCanonicalTwelveBody`,
+        // resolved through the composition — 13's body since 13i-a).
+        let registry = Dictionary(uniqueKeysWithValues: SyncSchema.tablesCarryingCiphertext
+            .filter { !["wing", "shelf"].contains($0.name) }
+            .map { ($0.name, $0.encryptedColumns) })
         #expect(listed == registry, "the SQL's map is the registry's encrypted columns per table: SQL \(listed) vs registry \(registry)")
         #expect(!registry.isEmpty && registry.count < SyncSchema.tables.count,
                 "the pin isn't vacuous: some tables carry ciphertext, some carry none")
@@ -2233,7 +2252,14 @@ struct AuthRLSDDLTests {
         let open = try #require(sql.range(of: "select owner_id, max(server_seq) from ("))
         let close = try #require(sql.range(of: ") seq_sources", range: open.upperBound..<sql.endIndex))
         let floor = String(sql[open.upperBound..<close.lowerBound])
-        for table in SyncSchema.tables {
+        // The floor is a 13y DEPLOY-TIME act over the tables that existed
+        // AT 13y — it ran once, at the 12 window, and 13i-a's wing/shelf
+        // mirrors are born EMPTY under counters that already exist, so no
+        // floor ever covers them. The oracle is therefore the 12-era
+        // registry, frozen here (13i-a; a FUTURE table joins this
+        // subtraction the same way).
+        let bornAfterTheFloor: Set<String> = ["wing", "shelf"]
+        for table in SyncSchema.tables where !bornAfterTheFloor.contains(table.name) {
             #expect(floor.contains("select owner_id, server_seq from \(table.name)"),
                     "the floor must read \(table.name)'s seqs")
         }
@@ -2246,8 +2272,9 @@ struct AuthRLSDDLTests {
         // Exactly the registry's tables + the three extra sources — one
         // SELECT branch each, nothing extra.
         let branchCount = floor.components(separatedBy: "select ").count - 1
-        #expect(branchCount == SyncSchema.tables.count + 3,
-                "the floor has \(branchCount) branches; expected \(SyncSchema.tables.count) tables + 3 extra sources")
+        let floorTables = SyncSchema.tables.count - bornAfterTheFloor.count
+        #expect(branchCount == floorTables + 3,
+                "the floor has \(branchCount) branches; expected \(floorTables) 13y-era tables + 3 extra sources")
         #expect(sql.contains("group by owner_id"))
         #expect(sql.contains("set last_seq = greatest(sync_tenant_seq.last_seq, excluded.last_seq)"),
                 "a re-run can only raise a floor, never lower one")

@@ -64,7 +64,7 @@ struct SerializerCompletenessTests {
             _ = try ops.setLensChoice(lens: lens.id, block: mergedBlock, variant: mergedVariant)
             // Phase 13 (A1): fixture row for the lockstep event's table.
             _ = try ops.addBlockComment(to: mergedBlock, text: "take 1 preferred")
-            let reading = try ops.createReading(name: "book", kind: .curated, maxPosts: nil)
+            let reading = try ops.createReading(name: "book", kind: .book, maxPosts: nil)
             _ = try ops.addPostToReading(post.id, to: reading.id)
             // Phase 13 (A1): chapter fixture + a sectioned membership.
             let chapter = try ops.createSection(in: reading.id, name: "I / leaving")
@@ -93,6 +93,28 @@ struct SerializerCompletenessTests {
                         "2026-08-19T00:00:00.000Z", "2026-08-19T00:00:00.000Z",
                         "2026-08-19T00:00:00.000Z",
                     ])
+            }
+            // 13i-a (v1_18): wing + shelf fixture rows so every walk and
+            // round-trip sees the two new tables. Direct SQL — their ops
+            // arrive at 13i-b/d; the walk needs A row each. The shelf
+            // points at the minted wing (a non-Home pointer exercises the
+            // column); the Welcome role exercises the seed marker.
+            try db.write { database in
+                try database.execute(
+                    sql: """
+                        INSERT INTO wing (id, owner_id, name, position, created_at, updated_at)
+                        VALUES ('0W000000-0000-4000-8000-000000000W01', NULL, 'the Work',
+                                'a1', '2026-09-30T00:00:00.000Z', '2026-09-30T00:00:00.000Z')
+                        """)
+                try database.execute(
+                    sql: """
+                        INSERT INTO shelf (id, owner_id, wing_id, name, glyph, role, position,
+                                           created_at, updated_at)
+                        VALUES ('05000000-0000-4000-8000-0000000005E1', NULL,
+                                '0W000000-0000-4000-8000-000000000W01', 'Welcome', '~',
+                                'welcome', 'a1',
+                                '2026-09-30T00:00:00.000Z', '2026-09-30T00:00:00.000Z')
+                        """)
             }
             return db
         }

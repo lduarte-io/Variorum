@@ -67,7 +67,7 @@ struct SampleLibraryDedupeRepairTests {
     ) throws -> (bookID: String, postIDs: [String: String]) {
         try client.with { ops, _ in
             let book = try ops.createReading(
-                name: Self.bookName, kind: .curated, profile: "book")
+                name: Self.bookName, kind: .book, profile: "book")
             let tag = try ops.createTag(name: Self.tagPath)
             var postIDs: [String: String] = [:]
             for note in Self.notes {
@@ -772,7 +772,7 @@ struct SampleLibraryDedupeListTests {
     @discardableResult
     private func seedEncryptionCopy(_ client: SyncClient) throws -> (bookID: String, postIDs: [String: String]) {
         try client.with { ops, _ in
-            let book = try ops.createReading(name: Self.encryptionBookName, kind: .curated, profile: "book")
+            let book = try ops.createReading(name: Self.encryptionBookName, kind: .book, profile: "book")
             let tag = try ops.createTag(name: Self.encryptionTagPath)
             var postIDs: [String: String] = [:]
             for note in Self.encryptionNotes {
@@ -792,7 +792,7 @@ struct SampleLibraryDedupeListTests {
     private func seedSherlockCopy(_ client: SyncClient) throws -> String {
         try client.with { ops, _ in
             let book = try ops.createReading(
-                name: SampleLibraryDedupeRepairTests.bookName, kind: .curated, profile: "book")
+                name: SampleLibraryDedupeRepairTests.bookName, kind: .book, profile: "book")
             let tag = try ops.createTag(name: SampleLibraryDedupeRepairTests.tagPath)
             for note in SampleLibraryDedupeRepairTests.notes {
                 let section = try ops.createSection(in: book.id, name: note.title)

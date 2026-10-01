@@ -155,8 +155,8 @@ final class ReadingsViewModel {
         case .wrongReadingKind(_, let expected):
             // 13c 2D: the message used to state the CURATED direction only,
             // which read as nonsense on the conversion door's refusal (a
-            // curated book asked to convert throws `expected: .smart`).
-            return expected == .smart
+            // curated book asked to convert throws `expected: .gathering`).
+            return expected == .gathering
                 ? "That's already a hand-shaped book — only smart books convert."
                 : "Only hand-shaped (curated) books hold a note list you pick by hand."
         case .postNotInReading:

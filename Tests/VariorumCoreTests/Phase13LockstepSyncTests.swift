@@ -36,7 +36,7 @@ struct Phase13SyncConvergenceTests {
             let block = try ops.newBlock(in: post.id, text: "Prose.", at: .end).block
             _ = try ops.addBlockComment(to: block.id, text: "take 1 preferred")
             let reading = try ops.createReading(
-                name: "orbit", kind: .curated, wordTarget: 10_000)
+                name: "orbit", kind: .book, wordTarget: 10_000)
             _ = try ops.addPostToReading(post.id, to: reading.id)
             let chapter = try ops.createSection(in: reading.id, name: "I / leaving")
             try ops.assignPostToSection(post.id, in: reading.id, section: chapter.id)
@@ -96,7 +96,7 @@ struct Phase13SyncConvergenceTests {
             let block = try ops.newBlock(in: post.id, text: "Prose.", at: .end).block
             _ = try ops.newBlock(in: post.id, text: "Sibling.", at: .end)
             let comment = try ops.addBlockComment(to: block.id, text: "dies with the block")
-            let reading = try ops.createReading(name: "orbit", kind: .curated)
+            let reading = try ops.createReading(name: "orbit", kind: .book)
             let chapter = try ops.createSection(in: reading.id, name: "I")
             return (block.id, comment.id, reading.id, chapter.id)
         }
@@ -125,7 +125,7 @@ struct Phase13SyncConvergenceTests {
         let world = try a.with { ops, _ -> (postID: String, readingID: String, sectionID: String) in
             let post = try ops.createPost(title: "post", profile: .generic)
             _ = try ops.newBlock(in: post.id, text: "Prose.", at: .end)
-            let reading = try ops.createReading(name: "orbit", kind: .curated)
+            let reading = try ops.createReading(name: "orbit", kind: .book)
             _ = try ops.addPostToReading(post.id, to: reading.id)
             let chapter = try ops.createSection(in: reading.id, name: "I")
             return (post.id, reading.id, chapter.id)
@@ -220,7 +220,7 @@ struct Phase13SyncConvergenceTests {
     @Test func aSectionRacingItsReadingsDeletionJoinsTheCascadeOnBothSides() async throws {
         let (_, a, b) = try makePair()
         let readingID = try a.with { ops, _ -> String in
-            try ops.createReading(name: "orbit", kind: .curated).id
+            try ops.createReading(name: "orbit", kind: .book).id
         }
         try await syncBoth(a, b)
 

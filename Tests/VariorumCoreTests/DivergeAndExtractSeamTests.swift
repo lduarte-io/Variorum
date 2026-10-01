@@ -31,7 +31,7 @@ struct DivergeForBookTests {
     private func world(
         _ ops: Operations, chaptered: Bool = true
     ) throws -> (book: String, post: String, section: String?, other: String) {
-        let book = try ops.createReading(name: "Orbit", kind: .curated)
+        let book = try ops.createReading(name: "Orbit", kind: .book)
         let section = chaptered
             ? try ops.createSection(in: book.id, name: "One").id : nil
         let first = try ops.createPost(title: "first")
@@ -43,7 +43,7 @@ struct DivergeForBookTests {
         try ops.addPostToReading(post.id, to: book.id)
         if let section { try ops.assignPostToSection(post.id, in: book.id, section: section) }
         // A second book, so the ORIGINAL provably lives on somewhere.
-        let other = try ops.createReading(name: "Field Notes", kind: .curated)
+        let other = try ops.createReading(name: "Field Notes", kind: .book)
         try ops.addPostToReading(post.id, to: other.id)
         return (book.id, post.id, section, other.id)
     }
@@ -200,12 +200,12 @@ struct DivergeForBookTests {
             let post = try ops.createPost(title: "p")
             _ = try ops.newBlock(in: post.id, text: "Text.")
 
-            let smart = try ops.createReading(name: "Smart", kind: .smart)
+            let smart = try ops.createReading(name: "Smart", kind: .gathering)
             #expect(throws: OperationError.self) {
                 try ops.divergePostForReading(post.id, in: smart.id)
             }
 
-            let book = try ops.createReading(name: "Orbit", kind: .curated)
+            let book = try ops.createReading(name: "Orbit", kind: .book)
             // Not a member yet.
             #expect(throws: OperationError.self) {
                 try ops.divergePostForReading(post.id, in: book.id)
@@ -223,7 +223,7 @@ struct DivergeForBookTests {
     /// the op's own doc; pinned here so it cannot regress into a refusal.
     @Test func aBookAtItsPostCapCanStillDiverge() throws {
         try withOperations { ops, db in
-            let book = try ops.createReading(name: "Small", kind: .curated)
+            let book = try ops.createReading(name: "Small", kind: .book)
             let post = try ops.createPost(title: "only")
             _ = try ops.newBlock(in: post.id, text: "Text.")
             try ops.addPostToReading(post.id, to: book.id)

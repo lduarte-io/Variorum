@@ -333,7 +333,7 @@ struct MastheadStampTests {
             let session = AppSession(database: db)
             let post = try session.operations.createPost(title: "The Boscombe Valley Mystery")
             _ = try session.operations.newBlock(in: post.id, text: "a block, so the mode can host.")
-            let book = try session.operations.createReading(name: "the field guide", kind: .curated)
+            let book = try session.operations.createReading(name: "the field guide", kind: .book)
             _ = try session.operations.addPostToReading(post.id, to: book.id)
             for name in tags {
                 let tag = try session.operations.createTag(name: name)

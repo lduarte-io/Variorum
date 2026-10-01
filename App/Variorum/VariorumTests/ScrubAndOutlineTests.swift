@@ -68,7 +68,7 @@ struct ScrubAndOutlineTests {
     @Test func scrubTargetReadsTheAssembledListVerbatim() async throws {
         try await withWorld { session, db in
             let readingID = try await session.runner.run { ops -> String in
-                let reading = try ops.createReading(name: "book", kind: .curated, maxPosts: nil)
+                let reading = try ops.createReading(name: "book", kind: .book, maxPosts: nil)
                 for i in 1...5 {
                     let post = try ops.createPost(title: "chapter \(i)", profile: .bookChapter)
                     _ = try ops.newBlock(in: post.id, text: "Chapter \(i) text.", at: .end)

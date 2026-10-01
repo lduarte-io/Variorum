@@ -328,7 +328,7 @@ struct IndexTierMetricsTests {
         _ voice: ThemeVoice, _ shape: IndexTierShape,
         _ session: AppSession, _ db: AppDatabase, _ theme: ThemeStore
     ) async throws {
-        let reading = try session.operations.createReading(name: "the index", kind: .curated)
+        let reading = try session.operations.createReading(name: "the index", kind: .book)
         let note = try Self.mintNote(session, shape: shape)
         try session.operations.addPostToReading(note.postID, to: reading.id)
         let readingID = reading.id

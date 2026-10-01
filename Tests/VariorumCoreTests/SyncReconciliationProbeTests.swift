@@ -875,7 +875,7 @@ struct SyncReconciliationProbeTests {
     private func seedCopy(_ client: SyncClient) throws -> (bookID: String, postIDs: [String: String]) {
         try client.with { ops, _ in
             let book = try ops.createReading(
-                name: Self.sampleBookName, kind: .curated, profile: "book")
+                name: Self.sampleBookName, kind: .book, profile: "book")
             let tag = try ops.createTag(name: Self.sampleTagPath)
             var postIDs: [String: String] = [:]
             for note in Self.sampleNotes {
@@ -1234,7 +1234,7 @@ struct SyncReconciliationProbeTests {
         let editedVariant = try firstVariantID(b, postID: editedPost)
         try b.with { ops, _ in
             let personal = try ops.createReading(
-                name: "her collection", kind: .curated, profile: "collection")
+                name: "her collection", kind: .book, profile: "collection")
             _ = try ops.addPostToReading(editedPost, to: personal.id)
             try ops.autosave(editedVariant, text: "Rewritten in her own words.", charDelta: 20)
         }

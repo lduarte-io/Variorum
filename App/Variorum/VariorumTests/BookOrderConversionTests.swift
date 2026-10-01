@@ -98,9 +98,9 @@ struct BookOrderConversionTests {
         // place she is choosing an order would be a small lie.
         let now = Date(timeIntervalSince1970: 1_782_864_000)
         let smart = Reading(
-            id: "s", name: "collected", kind: .smart, createdAt: now, updatedAt: now)
+            id: "s", name: "collected", kind: .gathering, createdAt: now, updatedAt: now)
         let curated = Reading(
-            id: "c", name: "book", kind: .curated, createdAt: now, updatedAt: now)
+            id: "c", name: "book", kind: .book, createdAt: now, updatedAt: now)
         #expect(BookOrderChoices.storedLabel(for: smart) == "as collected")
         #expect(BookOrderChoices.storedLabel(for: curated) == "Manual order")
         #expect(BookOrderChoices.storedLabel(for: nil) == "book's order")
@@ -110,7 +110,7 @@ struct BookOrderConversionTests {
 
     @Test func theViewOrderChangesWhatTheBookModelHoldsWithoutTouchingTheBook() async throws {
         try await withBooksWorld { session, db in
-            let reading = try session.operations.createReading(name: "book", kind: .curated)
+            let reading = try session.operations.createReading(name: "book", kind: .book)
             let late = try session.operations.createPost(
                 title: "late", entryDate: "2026-09-01")
             let early = try session.operations.createPost(
@@ -137,7 +137,7 @@ struct BookOrderConversionTests {
 
     @Test func savingTheOrderMakesItTheBooksOwn() async throws {
         try await withBooksWorld { session, db in
-            let reading = try session.operations.createReading(name: "book", kind: .curated)
+            let reading = try session.operations.createReading(name: "book", kind: .book)
             let structure = BookStructureModel(session: session, readingID: reading.id)
             await structure.saveOrder(.init(field: .lastTouched, direction: .desc))
             let row = try #require(await db.read { try Queries.reading($0, id: reading.id) })
@@ -149,7 +149,7 @@ struct BookOrderConversionTests {
 
     @Test func aFinishedBookRefusesToSaveAnOrderAndSaysSo() async throws {
         try await withBooksWorld { session, db in
-            let reading = try session.operations.createReading(name: "book", kind: .curated)
+            let reading = try session.operations.createReading(name: "book", kind: .book)
             try session.operations.lockReading(reading.id)
             let structure = BookStructureModel(session: session, readingID: reading.id)
             await structure.saveOrder(.init(field: .entryDate, direction: .asc))
@@ -165,7 +165,7 @@ struct BookOrderConversionTests {
             let tag = try session.operations.createTag(name: "work")
             let spec = try Queries.SmartQuerySpec(tags: ["work"]).encodedJSON()
             let reading = try session.operations.createReading(
-                name: "collected", kind: .smart, querySpec: spec)
+                name: "collected", kind: .gathering, querySpec: spec)
             let post = try session.operations.createPost(title: "one")
             _ = try session.operations.applyTag(tag.id, toPost: post.id)
 
@@ -203,7 +203,7 @@ struct BookOrderConversionTests {
             let tag = try session.operations.createTag(name: "work")
             let spec = try Queries.SmartQuerySpec(tags: ["work"]).encodedJSON()
             let reading = try session.operations.createReading(
-                name: "collected", kind: .smart, querySpec: spec)
+                name: "collected", kind: .gathering, querySpec: spec)
             var postIDs: [String] = []
             for i in 0..<3 {
                 let post = try session.operations.createPost(title: "p\(i)")
@@ -231,7 +231,7 @@ struct BookOrderConversionTests {
             let tag = try session.operations.createTag(name: "work")
             let spec = try Queries.SmartQuerySpec(tags: ["work"]).encodedJSON()
             let reading = try session.operations.createReading(
-                name: "collected", kind: .smart, querySpec: spec)
+                name: "collected", kind: .gathering, querySpec: spec)
             for i in 0..<2 {
                 let post = try session.operations.createPost(title: "p\(i)")
                 _ = try session.operations.applyTag(tag.id, toPost: post.id)
@@ -258,7 +258,7 @@ struct BookOrderConversionTests {
             let tag = try session.operations.createTag(name: "work")
             let spec = try Queries.SmartQuerySpec(tags: ["work"]).encodedJSON()
             let reading = try session.operations.createReading(
-                name: "collected", kind: .smart,
+                name: "collected", kind: .gathering,
                 sortField: .entryDate, sortDir: .desc, querySpec: spec)
             let post = try session.operations.createPost(title: "one")
             _ = try session.operations.applyTag(tag.id, toPost: post.id)
@@ -273,7 +273,7 @@ struct BookOrderConversionTests {
                 try stack.undo(with: ops)
             }
             let back = try #require(await db.read { try Queries.reading($0, id: reading.id) })
-            #expect(back.kind == .smart)
+            #expect(back.kind == .gathering)
             #expect(back.sortField == .entryDate)
             #expect(back.sortDir == .desc)
             // The collector it minted went with it.
@@ -284,13 +284,13 @@ struct BookOrderConversionTests {
     @Test func aRefusedConversionSpeaksAndClearsTheReport() async throws {
         try await withBooksWorld { session, _ in
             let reading = try session.operations.createReading(
-                name: "already hand-shaped", kind: .curated)
+                name: "already hand-shaped", kind: .book)
             let model = ShelfViewModel(session: session)
             await model.convertToCurated(
                 reading.id, keepCollecting: false, collectingName: nil)
             #expect(model.lastReport == nil)
             // The direction-aware message: a CURATED book asked to convert
-            // throws `expected: .smart`, and the old copy stated the other
+            // throws `expected: .gathering`, and the old copy stated the other
             // direction ("Only curated readings hold a hand-picked post
             // list"), which read as nonsense here.
             #expect(model.lastError == "That's already a hand-shaped book — only smart books convert.")
@@ -311,7 +311,7 @@ struct BookOrderConversionTests {
         // first character. The pin is on the CONTAINMENT, not on the
         // remedy: any future control that over-runs the column fails here.
         try await withBooksWorld { session, db in
-            let reading = try session.operations.createReading(name: "orbit", kind: .curated)
+            let reading = try session.operations.createReading(name: "orbit", kind: .book)
             let post = try session.operations.createPost(title: "one")
             try session.operations.addPostToReading(post.id, to: reading.id)
 
@@ -360,7 +360,7 @@ struct BookOrderConversionTests {
             let tag = try session.operations.createTag(name: "work")
             let spec = try Queries.SmartQuerySpec(tags: ["work"]).encodedJSON()
             let reading = try session.operations.createReading(
-                name: "collected", kind: .smart, querySpec: spec)
+                name: "collected", kind: .gathering, querySpec: spec)
             for i in 0..<3 {
                 let post = try session.operations.createPost(title: "p\(i)")
                 _ = try session.operations.applyTag(tag.id, toPost: post.id)

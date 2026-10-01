@@ -303,7 +303,7 @@ struct MobileDeletionTests {
         try await withEditorWorld { session, db in
             let postID = try await makePost(session, blocks: ["A chapter."])
             let readingID = try await session.runner.run { ops in
-                let book = try ops.createReading(name: "A Book", kind: .curated)
+                let book = try ops.createReading(name: "A Book", kind: .book)
                 _ = try ops.addPostToReading(postID, to: book.id)
                 return book.id
             }
@@ -352,7 +352,7 @@ struct MobileDeletionTests {
     @Test func theBookDetailsDeleteRowPresentsTheRealConfirm() async throws {
         try await withEditorWorld { session, db in
             let readingID = try await session.runner.run { ops in
-                try ops.createReading(name: "Field Notes", kind: .curated).id
+                try ops.createReading(name: "Field Notes", kind: .book).id
             }
 
             try await withHostedSurface(
@@ -388,7 +388,7 @@ struct MobileDeletionTests {
     @Test func theShelfRowsConfirmReallyPresents() async throws {
         try await withEditorWorld { session, db in
             let readingID = try await session.runner.run { ops in
-                try ops.createReading(name: "Shelf Book", kind: .curated).id
+                try ops.createReading(name: "Shelf Book", kind: .book).id
             }
             let shelf = MobileShelfViewModel(session: session)
             let stars = MobileStarsModel(session: session)

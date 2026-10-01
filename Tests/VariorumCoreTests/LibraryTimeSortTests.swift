@@ -127,8 +127,8 @@ struct LibraryTimeSortTests {
     /// the note sort would be the second query this batch refuses to write.
     @Test func booksAndBlocksKeepTheirOwnOrderUnderEverySort() throws {
         try withOperations { ops, db in
-            _ = try ops.createReading(name: "zebra book", kind: .curated)
-            _ = try ops.createReading(name: "apple book", kind: .curated)
+            _ = try ops.createReading(name: "zebra book", kind: .book)
+            _ = try ops.createReading(name: "apple book", kind: .book)
             let post = try ops.createPost(title: "carrier")
             let first = try ops.newBlock(in: post.id, text: "first")
             let second = try ops.newBlock(in: post.id, text: "second")

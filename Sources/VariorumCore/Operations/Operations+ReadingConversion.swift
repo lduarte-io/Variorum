@@ -32,7 +32,7 @@ extension Operations {
     /// What a conversion did — for callers, and for exact state-transition
     /// tests (the minted rows are named, not counted).
     public struct SmartConversionResult: Equatable, Sendable {
-        /// The converted book, post-flip (`kind == .curated`).
+        /// The converted book, post-flip (`kind == .book`).
         public let reading: Reading
         /// The membership rows minted, in materialized order. Posts that
         /// already carried a live membership row are NOT here (see below).
@@ -109,8 +109,8 @@ extension Operations {
         let (result, preImage): (SmartConversionResult, SmartConversionPreImage) =
             try database.write { db in
                 var reading = try liveReading(db, readingID)
-                guard reading.kind == .smart else {
-                    throw OperationError.wrongReadingKind(id: readingID, expected: .smart)
+                guard reading.kind == .gathering else {
+                    throw OperationError.wrongReadingKind(id: readingID, expected: .gathering)
                 }
                 guard !reading.locked else {
                     throw OperationError.lockedReading(id: readingID)
@@ -137,7 +137,7 @@ extension Operations {
 
                 let preImage = SmartConversionPreImage(
                     sortField: reading.sortField, sortDir: reading.sortDir)
-                reading.kind = .curated
+                reading.kind = .book
                 reading.sortField = .manual
                 reading.updatedAt = now
                 try reading.update(db)
@@ -154,7 +154,7 @@ extension Operations {
                     let fresh = Reading(
                         id: newID(), ownerId: currentOwnerID(),
                         name: trimmed.isEmpty ? "\(reading.name) (collecting)" : trimmed,
-                        kind: .smart,
+                        kind: .gathering,
                         profile: reading.profile,
                         sortField: preImage.sortField, sortDir: preImage.sortDir,
                         groupingTagId: reading.groupingTagId,
@@ -236,10 +236,10 @@ extension Operations {
                 fresh.updatedAt = now
                 try fresh.update(db)
             }
-            guard reading.kind != .smart || reading.sortField != sortField
+            guard reading.kind != .gathering || reading.sortField != sortField
                 || reading.sortDir != sortDir
             else { return }
-            reading.kind = .smart
+            reading.kind = .gathering
             reading.sortField = sortField
             reading.sortDir = sortDir
             reading.updatedAt = now
@@ -291,8 +291,8 @@ extension Operations {
                 fresh.updatedAt = now
                 try fresh.update(db)
             }
-            guard reading.kind != .curated || reading.sortField != .manual else { return }
-            reading.kind = .curated
+            guard reading.kind != .book || reading.sortField != .manual else { return }
+            reading.kind = .book
             reading.sortField = .manual
             reading.updatedAt = now
             try reading.update(db)

@@ -184,7 +184,7 @@ final class ShelfViewModel {
     func addPost(_ postID: String, to readingID: String) async {
         do {
             let kind = books.first { $0.reading.id == readingID }?.reading.kind
-            if kind == .smart {
+            if kind == .gathering {
                 let result = try await session.runner.run { ops in
                     try ops.collectPostIntoSmartReading(postID, into: readingID)
                 }

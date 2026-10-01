@@ -58,7 +58,7 @@ struct ObservationQueryTests {
 
     @Test func observeReadingFollowsMembershipAndMemberMetadata() async throws {
         try await withOperationsAsync { ops, db in
-            let reading = try ops.createReading(name: "book", kind: .curated)
+            let reading = try ops.createReading(name: "book", kind: .book)
             let p1 = try ops.createPost(title: "first")
             let p2 = try ops.createPost(title: "second")
             try ops.addPostToReading(p1.id, to: reading.id)

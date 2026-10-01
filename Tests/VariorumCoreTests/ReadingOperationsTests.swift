@@ -22,7 +22,7 @@ struct ReadingOperationsTests {
     @Test func createReadingInsertsTheExpectedRow() throws {
         try withOperations { ops, db in
             let reading = try ops.createReading(
-                name: "2026 Journal", kind: .curated, profile: "journal",
+                name: "2026 Journal", kind: .book, profile: "journal",
                 sortField: .entryDate, maxPosts: 365)
             let fetched = try db.read { db in try Reading.fetchOne(db, key: reading.id) }
             #expect(fetched == reading)
@@ -34,7 +34,7 @@ struct ReadingOperationsTests {
 
     @Test func newPostInReadingMintsPostAndMembershipAtomically() throws {
         try withOperations { ops, db in
-            let reading = try ops.createReading(name: "Orbit", kind: .curated)
+            let reading = try ops.createReading(name: "Orbit", kind: .book)
             let existing = try ops.createPost(title: "already here")
             _ = try ops.addPostToReading(existing.id, to: reading.id)
             let section = try ops.createSection(in: reading.id, name: "Part One")
@@ -56,14 +56,14 @@ struct ReadingOperationsTests {
                 _ = try ops.newPostInReading(reading.id, title: "stray?")
             }
             try ops.unlockReading(reading.id)
-            let other = try ops.createReading(name: "Elsewhere", kind: .curated)
+            let other = try ops.createReading(name: "Elsewhere", kind: .book)
             let foreignSection = try ops.createSection(in: other.id, name: "Foreign")
             #expect(throws: OperationError.sectionNotInReading(
                 sectionID: foreignSection.id, readingID: reading.id)) {
                 _ = try ops.newPostInReading(reading.id, section: foreignSection.id)
             }
-            let smart = try ops.createReading(name: "Smart", kind: .smart)
-            #expect(throws: OperationError.wrongReadingKind(id: smart.id, expected: .curated)) {
+            let smart = try ops.createReading(name: "Smart", kind: .gathering)
+            #expect(throws: OperationError.wrongReadingKind(id: smart.id, expected: .book)) {
                 _ = try ops.newPostInReading(smart.id)
             }
             #expect(try db.fetchInt("SELECT COUNT(*) FROM container") == containersBefore,
@@ -79,7 +79,7 @@ struct ReadingOperationsTests {
 
     @Test func addPostAppendsInOrderAndReturnsTheMembership() throws {
         try withOperations { ops, db in
-            let reading = try ops.createReading(name: "Book", kind: .curated)
+            let reading = try ops.createReading(name: "Book", kind: .book)
             let first = try ops.createPost(title: "one")
             let second = try ops.createPost(title: "two")
             let third = try ops.createPost(title: "three")
@@ -100,12 +100,12 @@ struct ReadingOperationsTests {
             let pool = try ops.createPool()
 
             // Smart readings assemble by query, never by hand.
-            let smart = try ops.createReading(name: "S", kind: .smart)
-            #expect(throws: OperationError.wrongReadingKind(id: smart.id, expected: .curated)) {
+            let smart = try ops.createReading(name: "S", kind: .gathering)
+            #expect(throws: OperationError.wrongReadingKind(id: smart.id, expected: .book)) {
                 try ops.addPostToReading(post.id, to: smart.id)
             }
 
-            let curated = try ops.createReading(name: "C", kind: .curated)
+            let curated = try ops.createReading(name: "C", kind: .book)
 
             // Only posts are members; a pool is not a post.
             #expect(throws: OperationError.wrongContainerKind(id: pool.id, expected: .post)) {
@@ -119,7 +119,7 @@ struct ReadingOperationsTests {
             }
 
             // Extent constraint: a full fixed-length reading refuses.
-            let bounded = try ops.createReading(name: "B", kind: .curated, maxPosts: 1)
+            let bounded = try ops.createReading(name: "B", kind: .book, maxPosts: 1)
             try ops.addPostToReading(post.id, to: bounded.id)
             let overflow = try ops.createPost()
             #expect(throws: OperationError.readingAtCapacity(id: bounded.id)) {
@@ -137,7 +137,7 @@ struct ReadingOperationsTests {
 
     @Test func removeTombstonesAndReAddingWorksUnderTheLiveUniqueIndex() throws {
         try withOperations { ops, db in
-            let reading = try ops.createReading(name: "R", kind: .curated)
+            let reading = try ops.createReading(name: "R", kind: .book)
             let post = try ops.createPost()
 
             let original = try ops.addPostToReading(post.id, to: reading.id)
@@ -154,7 +154,7 @@ struct ReadingOperationsTests {
 
     @Test func removeMissingMembershipThrows() throws {
         try withOperations { ops, _ in
-            let reading = try ops.createReading(name: "R", kind: .curated)
+            let reading = try ops.createReading(name: "R", kind: .book)
             let post = try ops.createPost()
             #expect(throws: OperationError.postNotInReading(postID: post.id, readingID: reading.id)) {
                 try ops.removePostFromReading(post.id, from: reading.id)
@@ -164,7 +164,7 @@ struct ReadingOperationsTests {
 
     @Test func reorderMovesAMembershipBetweenNeighbors() throws {
         try withOperations { ops, db in
-            let reading = try ops.createReading(name: "R", kind: .curated)
+            let reading = try ops.createReading(name: "R", kind: .book)
             let posts = try (0..<4).map { _ in try ops.createPost() }
             for post in posts {
                 try ops.addPostToReading(post.id, to: reading.id)
@@ -183,7 +183,7 @@ struct ReadingOperationsTests {
 
     @Test func lockedReadingFreezesRemovalAndReorder() throws {
         try withOperations { ops, _ in
-            let reading = try ops.createReading(name: "R", kind: .curated)
+            let reading = try ops.createReading(name: "R", kind: .book)
             let post = try ops.createPost()
             try ops.addPostToReading(post.id, to: reading.id)
             try ops.lockReading(reading.id)
@@ -210,7 +210,7 @@ struct ReadingOperationsTests {
 
     @Test func deleteReadingCascadesToMembershipsButNeverPosts() throws {
         try withOperations { ops, db in
-            let reading = try ops.createReading(name: "R", kind: .curated)
+            let reading = try ops.createReading(name: "R", kind: .book)
             let post = try ops.createPost()
             let membership = try ops.addPostToReading(post.id, to: reading.id)
 

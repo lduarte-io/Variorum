@@ -91,7 +91,7 @@ struct TimelineAndReadingsTests {
     @Test func readingCRUDThroughTheUIPathEmitsExactStateTransitions() async throws {
         try await withWorld { session, db in
             let model = ReadingsViewModel(session: session)
-            let id = try #require(await model.create(name: "book", kind: .curated))
+            let id = try #require(await model.create(name: "book", kind: .book))
             var readings = try await db.read { try Queries.readings($0) }
             #expect(readings.map(\.name) == ["book"])
 
@@ -111,7 +111,7 @@ struct TimelineAndReadingsTests {
     @Test func aUIBuiltSmartSpecRoundTripsUnchanged() async throws {
         try await withWorld { session, db in
             let model = ReadingsViewModel(session: session)
-            let id = try #require(await model.create(name: "smart", kind: .smart))
+            let id = try #require(await model.create(name: "smart", kind: .gathering))
             let spec = Queries.SmartQuerySpec(
                 tags: ["life", "life/goals"],
                 profile: "journal",
@@ -148,7 +148,7 @@ struct TimelineAndReadingsTests {
     @Test func curatedMembershipAddRemoveReorderThroughTheUIPath() async throws {
         try await withWorld { session, db in
             let model = ReadingsViewModel(session: session)
-            let id = try #require(await model.create(name: "book", kind: .curated))
+            let id = try #require(await model.create(name: "book", kind: .book))
             let a = try session.operations.createPost(title: "a")
             let b = try session.operations.createPost(title: "b")
             let c = try session.operations.createPost(title: "c")

@@ -133,7 +133,7 @@ struct NoteVersionsTests {
         try withOperations { ops, db in
             let note = try ops.createPost(title: "the note")
             _ = try ops.newBlock(in: note.id, text: "The first thing I wrote.")
-            let book = try ops.createReading(name: "a book", kind: .curated)
+            let book = try ops.createReading(name: "a book", kind: .book)
             _ = try ops.addPostToReading(note.id, to: book.id)
 
             let version = try ops.saveNoteVersion(note.id).post

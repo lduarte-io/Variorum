@@ -129,7 +129,7 @@ struct StarActingTests {
             let session = AppSession(database: db)
             let (note, book) = try await session.runner.run { ops in
                 (try ops.createPost(title: "The Long Way Home"),
-                 try ops.createReading(name: "Field Notes", kind: .curated))
+                 try ops.createReading(name: "Field Notes", kind: .book))
             }
             let stars = StarsModel(session: session)
             let task = Task { await stars.start() }

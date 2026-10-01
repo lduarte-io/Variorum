@@ -48,7 +48,7 @@ private func withIndexBook<T>(
         $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 22))
     } operation: { @MainActor in
         let session = AppSession(database: db)
-        let reading = try session.operations.createReading(name: "the index", kind: .curated)
+        let reading = try session.operations.createReading(name: "the index", kind: .book)
         var postIDs: [String] = []
         var blocks: [String: [(blockID: String, variantID: String)]] = [:]
         for p in 0..<5 {

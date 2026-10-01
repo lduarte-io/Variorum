@@ -30,6 +30,11 @@ public enum OperationError: Error, Equatable, Sendable {
     case lockedPost(id: String)
     case lockedVariant(id: String)
     case lockedReading(id: String)
+    /// 13i-a: the daily Journal's journal trait is CONSTITUTIVE — its
+    /// profile IS the 'daily' marker (the identity memo §3), so the
+    /// per-book trait toggle refuses on it rather than silently demoting
+    /// the marker (PROVISIONAL, the 13i-a plan §9).
+    case dailyJournalTraitIsConstitutive(id: String)
 
     // Variant lifecycle.
     /// I10: removing a live block's last live active variant is deleting the

@@ -98,9 +98,9 @@ struct LibraryPreviewBrainTests {
         #expect(LibraryPreview.factsLine(
             words: 1_200, blocks: 3, edited: "2026-09-01", sealed: true, archived: true)
             == "1,200 words · 3 blocks · edited 2026-09-01 · sealed · archived")
-        #expect(LibraryPreview.bookFactsLine(kind: .curated, finished: false, chapters: 0, notes: 1)
+        #expect(LibraryPreview.bookFactsLine(kind: .book, finished: false, chapters: 0, notes: 1)
                 == "book · 1 note")
-        #expect(LibraryPreview.bookFactsLine(kind: .smart, finished: true, chapters: 2, notes: 13)
+        #expect(LibraryPreview.bookFactsLine(kind: .gathering, finished: true, chapters: 2, notes: 13)
                 == "smart book · 2 chapters · 13 notes · finished")
     }
 
@@ -114,7 +114,7 @@ struct LibraryPreviewBrainTests {
             let first = try ops.createPost(title: "the first")
             let second = try ops.createPost(title: "the second")
             let stray = try ops.createPost(title: "a stray")
-            let book = try ops.createReading(name: "the book", kind: .curated)
+            let book = try ops.createReading(name: "the book", kind: .book)
             for post in [scandal, first, second, stray] {
                 _ = try ops.addPostToReading(post.id, to: book.id)
             }
@@ -147,7 +147,7 @@ struct LibraryPreviewBrainTests {
             let ops = session.operations
             let a = try ops.createPost(title: "alpha")
             let b = try ops.createPost(title: "beta")
-            let book = try ops.createReading(name: "flat", kind: .curated)
+            let book = try ops.createReading(name: "flat", kind: .book)
             _ = try ops.addPostToReading(a.id, to: book.id)
             _ = try ops.addPostToReading(b.id, to: book.id)
             let read = try await db.read { [id = book.id] db in
@@ -320,7 +320,7 @@ struct LibraryPanelHostTests {
             _ = try ops.newBlock(in: note.id, text: "A note's text.")
             let one = try ops.createPost(title: "chapter one's note")
             let two = try ops.createPost(title: "chapter two's note")
-            let book = try ops.createReading(name: "the book", kind: .curated)
+            let book = try ops.createReading(name: "the book", kind: .book)
             _ = try ops.addPostToReading(one.id, to: book.id)
             _ = try ops.addPostToReading(two.id, to: book.id)
             let chapterOne = try ops.createSection(in: book.id, name: "one")

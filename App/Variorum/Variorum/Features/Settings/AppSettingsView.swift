@@ -1007,7 +1007,7 @@ struct PromoteTagsSheet: View {
                     // the mint, for that guard's own reason.
                     try ops.assertBookNameIsFree(bookName)
                     return try ops.createReading(
-                        name: bookName, kind: .smart,
+                        name: bookName, kind: .gathering,
                         querySpec: try Self.spec(paths: paths, joinAll: all).encodedJSON())
                 }
                 dismiss()

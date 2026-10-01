@@ -127,7 +127,7 @@ struct SampleLibraryTests {
             try await db.read { db in
                 let book = try Queries.reading(db, id: bookID)
                 #expect(book?.name == SampleLibrarySeeder.bookName)
-                #expect(book?.kind == .curated)
+                #expect(book?.kind == .book)
 
                 // 13 chapters: the front matter, then one per story — and
                 // every chapter carries exactly one note (this is the first
@@ -385,7 +385,7 @@ struct SampleLibraryTests {
             let half = try await session.runner.run {
                 ops -> (book: String, chapter: String) in
                 let book = try ops.createReading(
-                    name: SampleLibrarySeeder.bookName, kind: .curated, profile: "book")
+                    name: SampleLibrarySeeder.bookName, kind: .book, profile: "book")
                 let chapter = try ops.createSection(in: book.id, name: scandalTitle)
                 return (book.id, chapter.id)
             }
@@ -756,7 +756,7 @@ struct EncryptionExplainedSeedTests {
             #expect(mark.value)
             try await db.read { db in
                 let book = try #require(try Queries.reading(db, id: bookID))
-                #expect(book.name == SampleLibraryEncryptionBook.name && book.kind == .curated)
+                #expect(book.name == SampleLibraryEncryptionBook.name && book.kind == .book)
                 let sections = try Queries.readingSections(db, readingID: bookID)
                 #expect(sections.count == 9)
                 #expect(sections.first?.name == SampleLibraryEncryptionBook.frontMatterChapter)

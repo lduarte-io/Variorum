@@ -28,8 +28,8 @@ struct MobileBookPinTests {
     @Test func pinAndUnpinReorderTheShelf() async throws {
         try await withEditorWorld { session, db in
             let (aster, zebra) = try await session.runner.run { ops -> (String, String) in
-                (try ops.createReading(name: "Aster", kind: .curated).id,
-                 try ops.createReading(name: "Zebra", kind: .curated).id)
+                (try ops.createReading(name: "Aster", kind: .book).id,
+                 try ops.createReading(name: "Zebra", kind: .book).id)
             }
             let model = MobileShelfViewModel(session: session)
             let observation = Task { await model.start() }
@@ -76,7 +76,7 @@ struct MobileBookCreateTests {
                 try Queries.reading(db, id: essays)
             })
             #expect(essaysRow.name == "Essays", "the name lands trimmed")
-            #expect(essaysRow.kind == .curated)
+            #expect(essaysRow.kind == .book)
             #expect(essaysRow.profile == nil)
             #expect(essaysRow.sortField == .manual)
             #expect(essaysRow.sortDir == .asc)
@@ -88,7 +88,7 @@ struct MobileBookCreateTests {
             let journalRow = try #require(await db.read { db in
                 try Queries.reading(db, id: journal)
             })
-            #expect(journalRow.kind == .curated)
+            #expect(journalRow.kind == .book)
             #expect(journalRow.profile == "journal")
             #expect(journalRow.sortField == .entryDate)
             #expect(journalRow.sortDir == .asc)
@@ -120,7 +120,7 @@ struct MobileBookCreateTests {
             let bookID = try #require(await model.create())
 
             let row = try #require(await db.read { db in try Queries.reading(db, id: bookID) })
-            #expect(row.kind == .smart)
+            #expect(row.kind == .gathering)
             #expect(row.querySpec == #"{"tags":["sea"]}"#, "the OR spec, canonical JSON")
             let assembled = try await db.read { db in
                 try Queries.assembleReading(db, readingID: bookID)
@@ -164,7 +164,7 @@ struct MobileBookDetailsTests {
     @Test func finishAndReopenFlipTheStateAndTheFaces() async throws {
         try await withEditorWorld { session, db in
             let bookID = try await session.runner.run { ops in
-                try ops.createReading(name: "Poems", kind: .curated)
+                try ops.createReading(name: "Poems", kind: .book)
             }.id
             let model = MobileBookDetailsModel(session: session, readingID: bookID)
             await model.refresh()
@@ -193,7 +193,7 @@ struct MobileBookDetailsTests {
     @Test func renameTrimsGatesBlankAndWorksOnAFinishedBook() async throws {
         try await withEditorWorld { session, db in
             let bookID = try await session.runner.run { ops -> String in
-                let book = try ops.createReading(name: "Old", kind: .curated)
+                let book = try ops.createReading(name: "Old", kind: .book)
                 try ops.lockReading(book.id)
                 return book.id
             }
@@ -227,10 +227,10 @@ struct MobileBookDetailsTests {
         try await withEditorWorld { session, db in
             let (_, journalID) = try await session.runner.run { ops -> (String, String) in
                 let smart = try ops.createReading(
-                    name: "Everything", kind: .smart, querySpec: #"{"tags":["x"]}"#)
+                    name: "Everything", kind: .gathering, querySpec: #"{"tags":["x"]}"#)
                 try ops.setDailyJournalBook(smart.id)
                 let journal = try ops.createReading(
-                    name: "Mornings", kind: .curated, profile: "journal",
+                    name: "Mornings", kind: .book, profile: "journal",
                     sortField: .entryDate, sortDir: .asc)
                 return (smart.id, journal.id)
             }
@@ -267,9 +267,9 @@ struct MobileBookDetailsTests {
                     querySpec: nil, maxPosts: nil, wordTarget: nil, locked: false,
                     createdAt: Date(), updatedAt: Date(), deletedAt: nil, syncVersion: 0)
             }
-            #expect(MobileBookDetailsModel.showsDailyDoor(reading(.curated, "journal")))
-            #expect(!MobileBookDetailsModel.showsDailyDoor(reading(.curated, nil)))
-            #expect(!MobileBookDetailsModel.showsDailyDoor(reading(.smart, "journal")))
+            #expect(MobileBookDetailsModel.showsDailyDoor(reading(.book, "journal")))
+            #expect(!MobileBookDetailsModel.showsDailyDoor(reading(.book, nil)))
+            #expect(!MobileBookDetailsModel.showsDailyDoor(reading(.gathering, "journal")))
         }
     }
 
@@ -281,13 +281,13 @@ struct MobileBookDetailsTests {
     @Test func theIdentityBlockDisplaysTagsForBothKinds() async throws {
         try await withEditorWorld { session, db in
             let (curatedID, smartID) = try await session.runner.run { ops -> (String, String) in
-                let curated = try ops.createReading(name: "Essays", kind: .curated)
+                let curated = try ops.createReading(name: "Essays", kind: .book)
                 let post = try ops.createPost(title: "Tagged")
                 _ = try ops.addPostToReading(post.id, to: curated.id)
                 let tag = try ops.createTag(name: "sea")
                 _ = try ops.applyTag(tag.id, toPost: post.id)
                 let smart = try ops.createReading(
-                    name: "By Water", kind: .smart, querySpec: #"{"tags":["sea"]}"#)
+                    name: "By Water", kind: .gathering, querySpec: #"{"tags":["sea"]}"#)
                 return (curated.id, smart.id)
             }
             let curated = MobileBookDetailsModel(session: session, readingID: curatedID)
@@ -336,7 +336,7 @@ struct MobileBookNameGuardTests {
     @Test func creatingRefusesAnExistingBookNameInEveryKind() async throws {
         try await withEditorWorld { session, db in
             _ = try await session.runner.run { ops in
-                try ops.createReading(name: "Ideas", kind: .curated)
+                try ops.createReading(name: "Ideas", kind: .book)
             }
             let tagPath = try await session.runner.run { ops -> String in
                 try ops.createTag(name: "sea").path
@@ -390,8 +390,8 @@ struct MobileBookNameGuardTests {
     @Test func renamingRefusesAnotherBooksNameButNeverItsOwn() async throws {
         try await withEditorWorld { session, db in
             let poems = try await session.runner.run { ops -> String in
-                _ = try ops.createReading(name: "Ideas", kind: .curated)
-                return try ops.createReading(name: "Poems", kind: .curated).id
+                _ = try ops.createReading(name: "Ideas", kind: .book)
+                return try ops.createReading(name: "Poems", kind: .book).id
             }
             let model = MobileBookDetailsModel(session: session, readingID: poems)
             await model.refresh()

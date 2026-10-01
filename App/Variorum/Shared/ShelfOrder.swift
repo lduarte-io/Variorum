@@ -61,7 +61,7 @@ nonisolated enum ShelfOrder {
     /// spec names no tag" are different answers and the caller acts
     /// differently on each.
     static func smartQueryTagPaths(of reading: Reading) -> [String]? {
-        guard reading.kind == .smart else { return nil }
+        guard reading.kind == .gathering else { return nil }
         guard let json = reading.querySpec,
               let spec = try? JSONDecoder().decode(
                   Queries.SmartQuerySpec.self, from: Data(json.utf8))

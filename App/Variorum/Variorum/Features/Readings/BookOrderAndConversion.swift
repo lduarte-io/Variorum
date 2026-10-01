@@ -67,7 +67,7 @@ enum BookOrderChoices {
         guard let reading else { return "book's order" }
         let stored = Queries.ReadingOrder(
             field: reading.sortField, direction: reading.sortDir)
-        if reading.kind == .smart, reading.sortField == .manual { return "as collected" }
+        if reading.kind == .gathering, reading.sortField == .manual { return "as collected" }
         return label(for: stored)
     }
 }

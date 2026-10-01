@@ -345,7 +345,7 @@ struct ProductionRoundShapeSweepTests {
                     db,
                     sql: """
                         SELECT id FROM reading
-                        WHERE kind = 'curated' AND profile = 'journal' AND deleted_at IS NULL
+                        WHERE kind = 'book' AND profile = 'daily' AND deleted_at IS NULL
                         """)
             }
             #expect(liveJournals == [journalA.bookID],

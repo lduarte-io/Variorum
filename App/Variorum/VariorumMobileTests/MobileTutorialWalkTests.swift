@@ -258,7 +258,7 @@ struct MobileTutorialBookShapeTests {
                     "the tag IS the restore identity — every lesson wears it")
             #expect(taggedIDs.count == lessonIDs.count + 1,
                     "…plus exactly the loose practice note")
-            #expect(reading?.kind == .curated)
+            #expect(reading?.kind == .book)
             #expect(pins.contains(bookID),
                     "the guide is pinned — the shelf's pin face, taught by wearing it")
         }
@@ -390,7 +390,7 @@ struct MobileTutorialDoorTests {
                 return post
             }
             let userBook = try await session.runner.run { ops in
-                try ops.createReading(name: "my book", kind: .curated)
+                try ops.createReading(name: "my book", kind: .book)
             }
             let userRows = try await db.read { [postID = userPost.id] db in
                 try userPostRows(db, postID: postID)
@@ -1094,7 +1094,7 @@ struct MobileTutorialLibraryWalkTests {
         try await withPocketGuideWorld { session, db, bookID in
             // A rival book, unpinned — pin order must beat name order.
             _ = try await session.runner.run { ops in
-                try ops.createReading(name: "a rival almanac", kind: .curated)
+                try ops.createReading(name: "a rival almanac", kind: .book)
             }
             let shelf = MobileShelfViewModel(session: session)
             let observation = Task { await shelf.start() }

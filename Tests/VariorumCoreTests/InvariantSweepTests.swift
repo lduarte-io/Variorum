@@ -265,7 +265,7 @@ private struct Sweep {
             switch Int.random(in: 0..<3, using: &rng) {
             case 0:
                 _ = try ops.createReading(
-                    name: text(), kind: .curated,
+                    name: text(), kind: .book,
                     maxPosts: Bool.random(using: &rng) ? Int.random(in: 1...4, using: &rng) : nil)
             case 1:
                 if let reading = try random("SELECT id FROM reading WHERE deleted_at IS NULL"),

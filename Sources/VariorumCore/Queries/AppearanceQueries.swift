@@ -106,13 +106,20 @@ extension Queries {
             .flatMap(Segmentation.init(rawValue:)) ?? .paragraph
     }
 
-    /// The shelf's pin list (R38), in pin order. Malformed JSON reads as
-    /// no pins (fail-open — pins are presentation, never truth).
+    /// The STARRED books (13i-a — starred absorbs pins, sitting record §7;
+    /// the storage is `reading.starred` since v1_18, the migration converted
+    /// the old `shelf_pins` setting and no reader of it remains). The name
+    /// survives until 13i-d's vocabulary sweep. Order: (name, id) — starred
+    /// books float first under the shelf's own chosen order (§24), so this
+    /// list is a SET in a stable order, not a pin-time sequence.
     public static func shelfPins(_ db: Database) throws -> [String] {
-        guard let json = try String.fetchOne(
-            db, sql: "SELECT value FROM setting WHERE key = 'shelf_pins'")
-        else { return [] }
-        return (try? JSONDecoder().decode([String].self, from: Data(json.utf8))) ?? []
+        try String.fetchAll(
+            db,
+            sql: """
+                SELECT id FROM reading
+                WHERE starred = 1 AND deleted_at IS NULL
+                ORDER BY name COLLATE NOCASE, id
+                """)
     }
 
     // MARK: - Stars (13f W4)
@@ -221,7 +228,16 @@ extension Queries {
     /// user doors (AppSpec §14 item 10's "starting a 'new' journal as a
     /// separate notebook"), which is why the predicate below needs a
     /// second leg.
-    public static let dailyJournalBookProfile = "journal"
+    public static let dailyJournalBookProfile = "daily"
+
+    /// The JOURNAL TRAIT's profile (13i-a; the sitting record §10): "entries
+    /// date-stamped at creation, named by their day, sorted by entry date" —
+    /// what `profile='journal'` has always meant, now distinct from THE
+    /// daily Journal's own marker above. The deliberate-second-notebook
+    /// doors (the Mac's "Create Journal Book", the phone's journal kind)
+    /// mint THIS; only the one daily mint writes 'daily'. 13i-e's Collecting
+    /// pane exposes it as the per-book settings row.
+    public static let journalTraitProfile = "journal"
 
     /// **The daily mint's SIGNATURE — the Journal-keeper repair's "same
     /// book" predicate, as one pure function** (pre-13u Act 0, R-pre13u-1;
@@ -259,9 +275,15 @@ extension Queries {
     public static func isDailyJournalMintShape(
         kind: ReadingKind, profile: String?, name: String
     ) -> Bool {
-        kind == .curated
-            && profile == dailyJournalBookProfile
-            && BookNaming.sameName(name, Operations.defaultDailyJournalBookName)
+        // 13i-a RE-KEY (the identity memo §3, built at the sitting's §10
+        // ruling): the marker IS the identity — kind + profile='daily',
+        // the NAME LEG DROPPED (names are never keys; a RENAMED daily
+        // Journal now converges with a fresh phone mint, closing
+        // QUESTIONS #85(a)'s corner). The `name` parameter stays so the
+        // wire-column call sites read unchanged; it is deliberately
+        // unread.
+        _ = name
+        return kind == .book && profile == dailyJournalBookProfile
     }
 
     /// **The Journal-keeper repair's candidate set**: every live reading
@@ -277,7 +299,7 @@ extension Queries {
             db,
             sql: """
                 SELECT * FROM reading
-                WHERE kind = 'curated' AND profile = ? AND deleted_at IS NULL
+                WHERE kind = 'book' AND profile = ? AND deleted_at IS NULL
                 ORDER BY id
                 """,
             arguments: [dailyJournalBookProfile])

@@ -117,7 +117,7 @@ struct InlineEditorWidthReflowTests {
         }
         // Her note, as the sample library stores it: the front matter, one
         // block per paragraph, the blank line between them kept as content.
-        let reading = try session.operations.createReading(name: "sherlock", kind: .curated)
+        let reading = try session.operations.createReading(name: "sherlock", kind: .book)
         let about = try session.operations.createPost(title: SampleLibrarySeeder.frontMatterTitle)
         let paragraphs = SampleLibrarySeeder.attributionText.components(separatedBy: "\n\n")
         for (i, paragraph) in paragraphs.enumerated() {

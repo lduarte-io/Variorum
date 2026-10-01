@@ -76,8 +76,8 @@ extension Operations {
     ) throws -> DivergeResult {
         let result: DivergeResult = try database.write { db in
             let reading = try liveReading(db, readingID)
-            guard reading.kind == .curated else {
-                throw OperationError.wrongReadingKind(id: readingID, expected: .curated)
+            guard reading.kind == .book else {
+                throw OperationError.wrongReadingKind(id: readingID, expected: .book)
             }
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: readingID)

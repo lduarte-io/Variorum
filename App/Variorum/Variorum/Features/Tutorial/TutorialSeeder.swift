@@ -261,7 +261,7 @@ enum TutorialSeeder {
         }
 
         let book = try ops.createReading(
-            name: bookName, kind: .curated, profile: "collection",
+            name: bookName, kind: .book, profile: "collection",
             wordTarget: 4000)
 
         // Chapters, in reading order.

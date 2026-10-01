@@ -197,7 +197,7 @@ struct MobileShelfPerfTests {
         try await withEditorWorld { session, _ in
             for index in 0..<6 {
                 _ = try await session.runner.run { ops in
-                    try ops.createReading(name: "Book \(index)", kind: .curated)
+                    try ops.createReading(name: "Book \(index)", kind: .book)
                 }
             }
             let shelf = MobileShelfViewModel(session: session)

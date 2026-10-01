@@ -50,7 +50,7 @@ private func withPagedWorld<T>(
         $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 11))
     } operation: { @MainActor in
         let session = AppSession(database: db)
-        let reading = try session.operations.createReading(name: "paged book", kind: .curated)
+        let reading = try session.operations.createReading(name: "paged book", kind: .book)
         var postIDs: [String] = []
         for p in 0..<posts {
             let post = try session.operations.createPost(title: "post \(p)")

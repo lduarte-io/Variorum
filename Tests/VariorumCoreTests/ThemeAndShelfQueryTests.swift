@@ -211,8 +211,8 @@ struct AppearanceSettingsTests {
 
     @Test func shelfPinsAppendRemoveAndSurviveMalformedJSON() throws {
         try withOperations { ops, db in
-            let one = try ops.createReading(name: "journal", kind: .curated)
-            let two = try ops.createReading(name: "orbit", kind: .curated)
+            let one = try ops.createReading(name: "journal", kind: .book)
+            let two = try ops.createReading(name: "orbit", kind: .book)
             try ops.setShelfPinned(one.id, pinned: true)
             try ops.setShelfPinned(two.id, pinned: true)
             try ops.setShelfPinned(one.id, pinned: true)  // idempotent
@@ -221,17 +221,23 @@ struct AppearanceSettingsTests {
             try ops.setShelfPinned(one.id, pinned: false)
             #expect(try db.read { try Queries.shelfPins($0) } == [two.id])
 
+            // 13i-a: the star lives ON the row (`reading.starred`); the
+            // old setting is retired-as-read, so corrupting it changes
+            // NOTHING — the sturdier form of "presentation, never truth".
             try db.write { db in
-                try db.execute(sql: "UPDATE setting SET value = 'not json' WHERE key = 'shelf_pins'")
+                try db.execute(sql: """
+                    INSERT INTO setting (key, value) VALUES ('shelf_pins', 'not json')
+                    ON CONFLICT (key) DO UPDATE SET value = excluded.value
+                    """)
             }
-            #expect(try db.read { try Queries.shelfPins($0) } == [],
-                    "malformed pins read as none — presentation, never truth")
+            #expect(try db.read { try Queries.shelfPins($0) } == [two.id],
+                    "the retired setting cannot touch the listing")
         }
     }
 
     @Test func dailyJournalBookDanglesToNil() throws {
         try withOperations { ops, db in
-            let book = try ops.createReading(name: "Journal", kind: .curated, profile: "journal")
+            let book = try ops.createReading(name: "Journal", kind: .book, profile: "journal")
             try ops.setDailyJournalBook(book.id)
             #expect(try db.read { try Queries.dailyJournalBookID($0) } == book.id)
             try ops.deleteReading(book.id)
@@ -281,7 +287,7 @@ struct ThemeTintTests {
 struct ShelfQueryTests {
     @Test func bookshelfCountsPostsAndChapters() throws {
         try withOperations { ops, db in
-            let book = try ops.createReading(name: "orbit", kind: .curated)
+            let book = try ops.createReading(name: "orbit", kind: .book)
             _ = try ops.createSection(in: book.id, name: "I")
             _ = try ops.createSection(in: book.id, name: "II")
             for index in 0..<3 {
@@ -297,7 +303,7 @@ struct ShelfQueryTests {
 
     @Test func bookWordCountsSumTheRenderedTakesOnly() throws {
         try withOperations { ops, db in
-            let book = try ops.createReading(name: "orbit", kind: .curated)
+            let book = try ops.createReading(name: "orbit", kind: .book)
             let post = try ops.createPost(title: "p", profile: .generic)
             let made = try ops.newBlock(in: post.id, text: "one two three", at: .end)
             // A second take with MORE words — unchosen, must not count.
@@ -321,7 +327,7 @@ struct ShelfQueryTests {
         #expect(Queries.wordCount("a  b") == 2, "the old SQL counted 3")
         #expect(Queries.wordCount("  ") == 0)
         try withOperations { ops, db in
-            let book = try ops.createReading(name: "orbit", kind: .curated)
+            let book = try ops.createReading(name: "orbit", kind: .book)
             let post = try ops.createPost(title: "p", profile: .generic)
             _ = try ops.newBlock(in: post.id, text: "first line\nsecond  line", at: .end)
             _ = try ops.addPostToReading(post.id, to: book.id)
@@ -336,7 +342,7 @@ struct ShelfQueryTests {
         // the shelf number must agree; and a word target on a SMART book
         // must show real progress, never a perpetual 0%.
         try withOperations { ops, db in
-            let book = try ops.createReading(name: "orbit", kind: .curated)
+            let book = try ops.createReading(name: "orbit", kind: .book)
             let live = try ops.createPost(title: "live", profile: .generic)
             _ = try ops.newBlock(in: live.id, text: "three live words", at: .end)
             _ = try ops.addPostToReading(live.id, to: book.id)
@@ -350,7 +356,7 @@ struct ShelfQueryTests {
             _ = try ops.newBlock(in: tagged.id, text: "two words", at: .end)
             try ops.applyTag(stars.id, toPost: tagged.id)
             let smart = try ops.createReading(
-                name: "star-notes", kind: .smart,
+                name: "star-notes", kind: .gathering,
                 querySpec: try Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON(),
                 wordTarget: 100)
 
@@ -374,11 +380,11 @@ struct ShelfQueryTests {
                 try ops.applyTag(stars.id, toPost: post.id)
             }
             let smart = try ops.createReading(
-                name: "star-notes", kind: .smart,
+                name: "star-notes", kind: .gathering,
                 querySpec: try Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON(),
                 maxPosts: 2)
 
-            let curated = try ops.createReading(name: "orbit", kind: .curated)
+            let curated = try ops.createReading(name: "orbit", kind: .book)
             let a = try ops.createPost(title: "a", profile: .generic)
             _ = try ops.newBlock(in: a.id, text: "alpha beta gamma", at: .end)
             _ = try ops.addPostToReading(a.id, to: curated.id)
@@ -406,7 +412,7 @@ struct ShelfQueryTests {
     @Test func poolPostsAreExactlyTheBooklessLivePosts() throws {
         try withOperations { ops, db in
             let inBook = try ops.createPost(title: "in a book", profile: .generic)
-            let book = try ops.createReading(name: "b", kind: .curated)
+            let book = try ops.createReading(name: "b", kind: .book)
             _ = try ops.addPostToReading(inBook.id, to: book.id)
             let floating = try ops.createPost(title: "floating", profile: .generic)
             let archived = try ops.createPost(title: "archived", profile: .generic)
@@ -446,7 +452,7 @@ struct ShelfQueryTests {
 
             // The promotion (R30: tags → a saved smart book).
             let smart = try ops.createReading(
-                name: "star-notes", kind: .smart,
+                name: "star-notes", kind: .gathering,
                 querySpec: try Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())
 
             pool = try db.read { try Queries.poolPosts($0, limit: 50) }
@@ -464,7 +470,7 @@ struct ShelfQueryTests {
 
             // A MALFORMED spec matches nothing (fail closed — the ratified
             // rule): the pool is unaffected by a corrupt book.
-            _ = try ops.createReading(name: "corrupt", kind: .smart, querySpec: "not json")
+            _ = try ops.createReading(name: "corrupt", kind: .gathering, querySpec: "not json")
             pool = try db.read { try Queries.poolPosts($0, limit: 50) }
             #expect(Set(pool.map(\.postID)) == [tagged.id, plain.id])
         }
@@ -473,8 +479,8 @@ struct ShelfQueryTests {
     @Test func readingsContainingFeedsTheMembershipChip() throws {
         try withOperations { ops, db in
             let post = try ops.createPost(title: "shared", profile: .generic)
-            let one = try ops.createReading(name: "alpha", kind: .curated)
-            let two = try ops.createReading(name: "beta", kind: .curated)
+            let one = try ops.createReading(name: "alpha", kind: .book)
+            let two = try ops.createReading(name: "beta", kind: .book)
             _ = try ops.addPostToReading(post.id, to: one.id)
             _ = try ops.addPostToReading(post.id, to: two.id)
             let books = try db.read { try Queries.readingsContaining($0, postID: post.id) }
@@ -488,7 +494,7 @@ struct ShelfQueryTests {
 
     @Test func shelfBookTagsRankMemberTagsByFrequency() throws {
         try withOperations { ops, db in
-            let book = try ops.createReading(name: "orbit", kind: .curated)
+            let book = try ops.createReading(name: "orbit", kind: .book)
             let sailing = try ops.createTag(parent: nil, name: "sailing")
             let rare = try ops.createTag(parent: nil, name: "rare")
             for index in 0..<3 {
@@ -504,7 +510,7 @@ struct ShelfQueryTests {
 
     @Test func searchCatalogFindsBooksPostsAndBlocks() throws {
         try withOperations { ops, db in
-            let book = try ops.createReading(name: "Orbit", kind: .curated)
+            let book = try ops.createReading(name: "Orbit", kind: .book)
             let post = try ops.createPost(title: "the storm chapter", profile: .generic)
             let made = try ops.newBlock(in: post.id, text: "Prose.", at: .end)
             try ops.setBlockName(made.block.id, name: "the storm thesis")

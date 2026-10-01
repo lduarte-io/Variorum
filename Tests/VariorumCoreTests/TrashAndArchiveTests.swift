@@ -49,7 +49,7 @@ struct TrashAndArchiveTests {
             try ops.deleteBlock(gone.block.id)
             let deadPost = try ops.createPost(title: "deleted note")
             try ops.deleteContainer(deadPost.id)
-            let book = try ops.createReading(name: "b", kind: .curated)
+            let book = try ops.createReading(name: "b", kind: .book)
             try ops.deleteReading(book.id)
 
             let inWindow = harnessNow
@@ -183,7 +183,7 @@ struct TrashAndArchiveTests {
             let block = try ops.newBlock(in: post.id, text: "block text")
             let keeper = try ops.newBlock(in: post.id, text: "keeps the note alive")
             let take = try ops.branchVariant(keeper.block.id, from: keeper.variant.id)
-            let book = try ops.createReading(name: "book", kind: .curated)
+            let book = try ops.createReading(name: "book", kind: .book)
             try ops.deleteBlock(block.block.id)
             try ops.deleteVariant(take.id)
             try ops.deleteReading(book.id)

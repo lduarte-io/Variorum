@@ -550,7 +550,7 @@ struct MobileWalkTests {
             // The shelf she'd cold-launch onto: a tagged essays book, a
             // finished book, a smart collector.
             let seed = try await session.runner.run { ops -> (essays: String, poems: String) in
-                let essays = try ops.createReading(name: "Essays", kind: .curated)
+                let essays = try ops.createReading(name: "Essays", kind: .book)
                 let life = try ops.createTag(name: "life")
                 let goals = try ops.createTag(parent: life.id, name: "goals")
                 for index in 1...2 {
@@ -558,10 +558,10 @@ struct MobileWalkTests {
                     _ = try ops.addPostToReading(post.id, to: essays.id)
                     _ = try ops.applyTag(goals.id, toPost: post.id)
                 }
-                let poems = try ops.createReading(name: "Poems", kind: .curated)
+                let poems = try ops.createReading(name: "Poems", kind: .book)
                 try ops.lockReading(poems.id)
                 _ = try ops.createReading(
-                    name: "reading notes", kind: .smart,
+                    name: "reading notes", kind: .gathering,
                     querySpec: #"{"tags":["books"]}"#)
                 return (essays.id, poems.id)
             }
@@ -586,7 +586,7 @@ struct MobileWalkTests {
             let poems = try #require(shelf.books.first { $0.reading.id == seed.poems })
             #expect(tokens.chromeLabel(shelf.rowName(for: poems)) == "poems ✓",
                     "✓ finished is a STATE on the name")
-            let smart = try #require(shelf.books.first { $0.reading.kind == .smart })
+            let smart = try #require(shelf.books.first { $0.reading.kind == .gathering })
             #expect(tokens.chromeLabel(shelf.rowMeta(for: smart)) == "smart · #books")
 
             // TODAY: create-or-open + the shared daily-book shelving door.
@@ -652,7 +652,7 @@ struct MobileWalkTests {
         try await withEditorWorld { session, db in
             // A chaptered book: two chapters, three notes.
             let seed = try await session.runner.run { ops -> (bookID: String, noteID: String) in
-                let book = try ops.createReading(name: "The Long Field", kind: .curated)
+                let book = try ops.createReading(name: "The Long Field", kind: .book)
                 let one = try ops.createSection(in: book.id, name: "Openings")
                 let two = try ops.createSection(in: book.id, name: "Middles")
                 let n1 = try ops.createPost(title: "What the rain kept")

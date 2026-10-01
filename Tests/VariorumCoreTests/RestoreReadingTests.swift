@@ -14,7 +14,7 @@ struct RestoreReadingTests {
     private func makeBook(
         _ ops: Operations, posts: Int = 3
     ) throws -> (reading: Reading, postIDs: [String]) {
-        let reading = try ops.createReading(name: "orbit", kind: .curated)
+        let reading = try ops.createReading(name: "orbit", kind: .book)
         var postIDs: [String] = []
         for index in 0..<posts {
             let post = try ops.createPost(title: "post \(index)", profile: .generic)
@@ -169,13 +169,20 @@ struct RestoreReadingTests {
         // flip restores the book and its query spec; membership is derived,
         // so the exact-stamp sweeps match nothing.
         try withOperations { ops, db in
+            // 13i-a: the write normalizes the v1 draft to the v2 rule
+            // (the tag by ID), so the identity assertion reads the STORED
+            // value back rather than the draft bytes.
+            let stars = try ops.createTag(name: "stars")
             let spec = try Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON()
-            let smart = try ops.createReading(name: "star-notes", kind: .smart, querySpec: spec)
+            let smart = try ops.createReading(name: "star-notes", kind: .gathering, querySpec: spec)
+            let stored = try db.read { try Queries.reading($0, id: smart.id) }?.querySpec
+            #expect(stored == (try RuleGrammar.encode(.tag(stars.id))),
+                    "the draft normalized to the v2 rule, the tag by ID")
             try ops.deleteReading(smart.id)
             try ops.restoreReading(smart.id)
             let restored = try db.read { try Queries.reading($0, id: smart.id) }
             #expect(restored?.deletedAt == nil)
-            #expect(restored?.querySpec == spec, "the spec IS the smart book's identity")
+            #expect(restored?.querySpec == stored, "the spec IS the smart book's identity")
         }
     }
 
@@ -213,9 +220,9 @@ struct RestoreReadingTests {
 
     @Test func deletedReadingsListsNewestFirstAndBounded() throws {
         try withOperations { ops, db in
-            let first = try ops.createReading(name: "alpha", kind: .curated)
-            let second = try ops.createReading(name: "beta", kind: .curated)
-            let third = try ops.createReading(name: "gamma", kind: .smart)
+            let first = try ops.createReading(name: "alpha", kind: .book)
+            let second = try ops.createReading(name: "beta", kind: .book)
+            let third = try ops.createReading(name: "gamma", kind: .gathering)
             try ops.deleteReading(first.id)
             try ops.deleteReading(second.id)
             try ops.deleteReading(third.id)

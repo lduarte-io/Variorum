@@ -72,9 +72,9 @@ final class MobileMembershipModel {
 
     /// Curated before smart, name order inside each group.
     nonisolated static func ordered(_ memberships: [Reading]) -> [Reading] {
-        let curated = memberships.filter { $0.kind == .curated }
+        let curated = memberships.filter { $0.kind == .book }
             .sorted { ($0.name, $0.id) < ($1.name, $1.id) }
-        let smart = memberships.filter { $0.kind == .smart }
+        let smart = memberships.filter { $0.kind == .gathering }
             .sorted { ($0.name, $0.id) < ($1.name, $1.id) }
         return curated + smart
     }
@@ -82,7 +82,7 @@ final class MobileMembershipModel {
     /// Which doors a row carries (P-2 made pinnable): remove exists only
     /// where a membership ROW exists to remove.
     nonisolated static func rowCarriesRemove(_ reading: Reading) -> Bool {
-        reading.kind == .curated
+        reading.kind == .book
     }
 
     // MARK: - Reads
@@ -97,10 +97,10 @@ final class MobileMembershipModel {
             books = Self.ordered(membership)
             let memberIDs = Set(membership.map(\.id))
             addableBooks = all.filter {
-                $0.kind == .curated && !$0.locked && !memberIDs.contains($0.id)
+                $0.kind == .book && !$0.locked && !memberIDs.contains($0.id)
             }
             addableSmartBooks = all.filter {
-                $0.kind == .smart && !$0.locked && !memberIDs.contains($0.id)
+                $0.kind == .gathering && !$0.locked && !memberIDs.contains($0.id)
             }
         } catch {
             status = String(describing: error)
@@ -283,7 +283,7 @@ struct MobileMembershipSheet: View {
                         .font(tokens.body)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
-                    if book.kind == .smart {
+                    if book.kind == .gathering {
                         Text(tokens.chromeLabel("smart"))
                             .font(tokens.small)
                             .foregroundStyle(tokens.faint)

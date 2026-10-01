@@ -157,7 +157,7 @@ struct NoteBoxGeometryTests {
             try session.operations.setThemeVoice(voice)
             let post = try session.operations.createPost(title: "a note")
             _ = try session.operations.newBlock(in: post.id, text: "so the rail has a note.")
-            let book = try session.operations.createReading(name: "a book", kind: .curated)
+            let book = try session.operations.createReading(name: "a book", kind: .book)
             // The store — started and RESTORED by the one helper (round 2's
             // NIT-2): this arm adopts the DB's voice on the store's first
             // emission and used to leave it standing process-wide, with only
@@ -223,7 +223,7 @@ struct NoteBoxGeometryTests {
             let session = AppSession(database: db)
             let post = try session.operations.createPost(title: "a note")
             _ = try session.operations.newBlock(in: post.id, text: "text.")
-            let book = try session.operations.createReading(name: "a book", kind: .curated)
+            let book = try session.operations.createReading(name: "a book", kind: .book)
             let theme = ThemeStore(session: session)
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: 230, height: 900),
@@ -292,7 +292,7 @@ private func withOutlineBook<T>(
         $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 18))
     } operation: { @MainActor in
         let session = AppSession(database: db)
-        let reading = try session.operations.createReading(name: "the box's book", kind: .curated)
+        let reading = try session.operations.createReading(name: "the box's book", kind: .book)
         var postIDs: [String] = []
         for p in 0..<posts {
             let post = try session.operations.createPost(title: "note \(p)")

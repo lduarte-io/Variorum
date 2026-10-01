@@ -32,7 +32,7 @@ struct QuicknoteShelfTests {
             #expect(tags.map(\.path) == [Operations.quicknoteTagPath])
             #expect(tags.first?.id == tagID)
             #expect(book?.name == Operations.defaultQuicknoteBookName)
-            #expect(book?.kind == .smart)
+            #expect(book?.kind == .gathering)
             #expect(pins.contains(readingID))
             // Designated the daily book's way — so the SECOND quick note
             // finds it rather than minting a rival.
@@ -40,8 +40,8 @@ struct QuicknoteShelfTests {
         }
     }
 
-    /// DISCRIMINATING REVERT (verified): mint the book `kind: .curated`
-    /// instead of `.smart` in `ensureQuicknotesBook` and this test fails on
+    /// DISCRIMINATING REVERT (verified): mint the book `kind: .book`
+    /// instead of `.gathering` in `ensureQuicknotesBook` and this test fails on
     /// its FIRST assembly — a curated book collects nothing, because
     /// membership would have to be a row somebody wrote.
     @Test func theBookCOLLECTSTheTagAndRemovingTheTagLEAVESIt() throws {

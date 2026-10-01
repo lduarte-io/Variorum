@@ -264,7 +264,7 @@ struct TrashSurfaceTests {
             let blockID = try #require(editor.model.slots.first?.blockID)
             try await editor.session.runner.run { (ops: Operations) in
                 try ops.deleteBlock(blockID)
-                let book = try ops.createReading(name: "orbit", kind: .curated)
+                let book = try ops.createReading(name: "orbit", kind: .book)
                 try ops.deleteReading(book.id)
                 let doomed = try ops.createPost(title: "doomed")
                 try ops.deleteContainer(doomed.id)

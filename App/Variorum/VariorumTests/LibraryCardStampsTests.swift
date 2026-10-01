@@ -172,7 +172,7 @@ struct LibraryCardStampsTests {
             #expect(barePair.listDay == nil)
 
             // A BOOK row carries neither (`detail` there is the word "book").
-            let book = try session.operations.createReading(name: "the field guide", kind: .curated)
+            let book = try session.operations.createReading(name: "the field guide", kind: .book)
             await model.search()
             let bookHit = try #require(model.hits.first { $0.kind == .book && $0.id == book.id })
             for sort in LibrarySortFace.offered {

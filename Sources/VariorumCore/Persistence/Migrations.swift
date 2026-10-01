@@ -1,3 +1,4 @@
+import Foundation
 import GRDB
 
 extension AppDatabase {
@@ -560,6 +561,212 @@ extension AppDatabase {
             try db.execute(sql: """
                 CREATE INDEX idx_commit_created ON commit_point(created_at);
                 """)
+        }
+        // **Phase 13i-a — THE SCHEMA EVENT (the ONE 13i lockstep bundle;
+        // SyncSpec §12 marker 9→10; the binding design is the 13i sitting
+        // record §11 + the execution plan `notes/plans/phase-13i-a-schema-event.md`).**
+        // Everything 13i b–e will consume lands in this one migration (the
+        // author's 2026-08-25 bundling rule): WINGS (the virtual-Home shape,
+        // R-13ia-2 — '' means Home everywhere; the table holds additional
+        // wings only), SHELVES (+ reading.shelf_id/shelf_position), the
+        // gathering/book RECAST of reading.kind (her migration freedom:
+        // "there will never be a better time to do it than now"), PER-WING
+        // tags (R-13ia-1 — uniqueness (wing_id, path)), starred-absorbs-pins,
+        // the OWNED flag, SEALED's stamp, the hide-owned toggle, the intake
+        // join dial + auto-tag, reading_post.status (member|arrival), the
+        // query_spec v1→v2 recast (Domain/RuleGrammar.swift), and the daily
+        // Journal's 'daily' marker on the designated book (the identity
+        // memo's edge 1).
+        migrator.registerMigration("v1_18_wings_shelves_books") { db in
+            // 1 — the two new tables (shelf BEFORE the reading rebuild:
+            // reading.shelf_id references it).
+            try db.execute(sql: """
+                CREATE TABLE wing (
+                  id           TEXT PRIMARY KEY,
+                  owner_id     TEXT,
+                  name         TEXT NOT NULL,
+                  position     TEXT NOT NULL,
+                  created_at   TEXT NOT NULL,
+                  updated_at   TEXT NOT NULL,
+                  deleted_at   TEXT,
+                  sync_version INTEGER NOT NULL DEFAULT 0
+                );
+                CREATE TABLE shelf (
+                  id           TEXT PRIMARY KEY,
+                  owner_id     TEXT,
+                  wing_id      TEXT NOT NULL DEFAULT '',
+                  name         TEXT NOT NULL,
+                  glyph        TEXT,
+                  role         TEXT,
+                  position     TEXT NOT NULL,
+                  created_at   TEXT NOT NULL,
+                  updated_at   TEXT NOT NULL,
+                  deleted_at   TEXT,
+                  sync_version INTEGER NOT NULL DEFAULT 0
+                );
+                CREATE INDEX idx_shelf_wing ON shelf(wing_id, position);
+                """)
+            try createOutboxCaptureTriggers(db, table: "wing", pk: "id")
+            try createOutboxCaptureTriggers(db, table: "shelf", pk: "id")
+
+            // 2 — the additive columns. '' = the virtual Home wing, so no
+            // existing row is rewritten and nothing repushes (R-13ia-2).
+            try db.execute(sql: """
+                ALTER TABLE container ADD COLUMN wing_id TEXT NOT NULL DEFAULT '';
+                ALTER TABLE tag ADD COLUMN wing_id TEXT NOT NULL DEFAULT '';
+                ALTER TABLE reading_post ADD COLUMN status TEXT NOT NULL DEFAULT 'member'
+                  CHECK (status IN ('member','arrival'));
+                """)
+
+            // 3 — per-wing tag uniqueness (R-13ia-1). The NOT NULL ''
+            // sentinel is load-bearing here: NULLs are distinct in SQLite
+            // unique indexes, so a nullable wing column could never carry
+            // this constraint for Home.
+            try db.execute(sql: """
+                DROP INDEX uq_tag_path_live;
+                CREATE UNIQUE INDEX uq_tag_path_live ON tag(wing_id, path) WHERE deleted_at IS NULL;
+                """)
+
+            // 4 — the reading REBUILD: the kind CHECK can only change this
+            // way. The copy preserves sync_version (CAS keeps working) and
+            // deleted_at; updated_at is deliberately untouched everywhere in
+            // this migration (a recast is housekeeping, not her edit — the
+            // Library must not resort). GRDB runs migrations with foreign
+            // keys off and checks at the end, which is what makes the
+            // drop-and-rename legal under reading_post/reading_section FKs.
+            try db.execute(sql: """
+                CREATE TABLE reading_new (
+                  id              TEXT PRIMARY KEY,
+                  owner_id        TEXT,
+                  name            TEXT NOT NULL,
+                  kind            TEXT NOT NULL CHECK (kind IN ('book','gathering')),
+                  profile         TEXT,
+                  sort_field      TEXT NOT NULL DEFAULT 'manual'
+                                    CHECK (sort_field IN ('manual','entry_date','created_at','last_touched','last_major_revision')),
+                  sort_dir        TEXT NOT NULL DEFAULT 'asc' CHECK (sort_dir IN ('asc','desc')),
+                  grouping_tag_id TEXT,
+                  query_spec      TEXT,
+                  max_posts       INTEGER,
+                  locked          INTEGER NOT NULL DEFAULT 0,
+                  created_at      TEXT NOT NULL,
+                  updated_at      TEXT NOT NULL,
+                  deleted_at      TEXT,
+                  sync_version    INTEGER NOT NULL DEFAULT 0,
+                  word_target     INTEGER,
+                  wing_id         TEXT NOT NULL DEFAULT '',
+                  shelf_id        TEXT REFERENCES shelf(id),
+                  shelf_position  TEXT,
+                  starred         INTEGER NOT NULL DEFAULT 0,
+                  owned           INTEGER NOT NULL DEFAULT 0,
+                  sealed_at       TEXT,
+                  hide_owned      INTEGER,
+                  intake_seating  TEXT CHECK (intake_seating IN ('auto','arrivals') OR intake_seating IS NULL),
+                  auto_tag_id     TEXT REFERENCES tag(id) ON DELETE SET NULL,
+                  FOREIGN KEY (grouping_tag_id) REFERENCES tag(id) ON DELETE SET NULL
+                );
+                INSERT INTO reading_new (id, owner_id, name, kind, profile, sort_field, sort_dir,
+                                         grouping_tag_id, query_spec, max_posts, locked,
+                                         created_at, updated_at, deleted_at, sync_version, word_target)
+                SELECT id, owner_id, name,
+                       CASE kind WHEN 'smart' THEN 'gathering' ELSE 'book' END,
+                       profile, sort_field, sort_dir, grouping_tag_id, query_spec, max_posts,
+                       locked, created_at, updated_at, deleted_at, sync_version, word_target
+                FROM reading;
+                DROP TABLE reading;
+                ALTER TABLE reading_new RENAME TO reading;
+                """)
+            // The rebuild dropped reading's four triggers with the old
+            // table — recreate all of them (the trigger walk pins this).
+            try db.execute(sql: """
+                CREATE TRIGGER cascade_reading_tombstone
+                AFTER UPDATE OF deleted_at ON reading
+                WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL
+                BEGIN
+                  UPDATE reading_post SET deleted_at = NEW.deleted_at
+                    WHERE reading_id = NEW.id AND deleted_at IS NULL;
+                END;
+                CREATE TRIGGER cascade_reading_tombstone_section
+                AFTER UPDATE OF deleted_at ON reading
+                WHEN OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL
+                BEGIN
+                  UPDATE reading_section SET deleted_at = NEW.deleted_at
+                    WHERE reading_id = NEW.id AND deleted_at IS NULL;
+                END;
+                """)
+            try createOutboxCaptureTriggers(db, table: "reading", pk: "id")
+
+            // 5 — the copy fired NO outbox triggers, so the recast values
+            // would never reach the mirror: enqueue EVERY reading row
+            // explicitly (the §7 repairs' own pattern; tombstoned rows
+            // included — the mirror converges whole; both devices run this
+            // same migration and meet by ordinary server-wins CAS).
+            try db.execute(sql: """
+                INSERT OR REPLACE INTO sync_outbox (table_name, row_id, queued_at)
+                SELECT 'reading', id, strftime('%Y-%m-%dT%H:%M:%fZ', 'now') FROM reading;
+                """)
+
+            // 6 — query_spec v1 → v2 (Domain/RuleGrammar.fromLegacy). Paths
+            // resolve against LIVE tags first (all tags are Home's at this
+            // moment), then tombstoned (deterministically the smallest id —
+            // the dead term still displays "(deleted tag)"), else the
+            // deliberate dead term ''. Shape preserved exactly; an empty v1
+            // spec becomes NULL (both mean match-all).
+            let specs = try Row.fetchAll(
+                db, sql: "SELECT id, query_spec FROM reading WHERE query_spec IS NOT NULL")
+            for row in specs {
+                let id: String = row["id"]
+                let json: String = row["query_spec"]
+                guard let v1 = try? JSONDecoder().decode(
+                    Queries.SmartQuerySpec.self, from: Data(json.utf8))
+                else {
+                    // Malformed v1 read as no constraints (today's
+                    // tolerance) — store the same meaning: no rule.
+                    try db.execute(
+                        sql: "UPDATE reading SET query_spec = NULL WHERE id = ?", arguments: [id])
+                    continue
+                }
+                let v2 = RuleGrammar.fromLegacy(
+                    tags: v1.tags, tagsAll: v1.tagsAll, profile: v1.profile,
+                    entryDateFrom: v1.entryDateFrom, entryDateTo: v1.entryDateTo
+                ) { path in
+                    (try? String.fetchOne(db, sql: """
+                        SELECT id FROM tag WHERE path = ? AND wing_id = ''
+                        ORDER BY (deleted_at IS NOT NULL), id LIMIT 1
+                        """, arguments: [path])) ?? nil
+                }
+                try db.execute(
+                    sql: "UPDATE reading SET query_spec = ? WHERE id = ?",
+                    arguments: [try RuleGrammar.encode(v2), id])
+            }
+
+            // 7 — pinned books become STARRED (sitting record §7; the
+            // shelf_pins setting is retired-as-read — the key stays, since
+            // settings never tombstone, and no reader remains after 13i-a).
+            let pins = try String.fetchOne(
+                db, sql: "SELECT value FROM setting WHERE key = 'shelf_pins'")
+                .flatMap { (try? JSONDecoder().decode([String].self, from: Data($0.utf8))) } ?? []
+            if !pins.isEmpty {
+                try db.execute(
+                    sql: """
+                        UPDATE reading SET starred = 1
+                        WHERE deleted_at IS NULL AND id IN (\(databaseQuestionMarks(count: pins.count)))
+                        """,
+                    arguments: StatementArguments(pins))
+            }
+
+            // 8 — THE DAILY MARKER (the identity memo §3, edge 1): the
+            // currently designated daily book gains profile='daily' —
+            // idempotent, same-value CAS-safe on every device; the
+            // designation setting stays truth until 13i-e rewires its
+            // readers. From here the daily MINT writes 'daily' and the §7
+            // keeper repair keys on the marker, never the name.
+            if let designated = try String.fetchOne(
+                db, sql: "SELECT value FROM setting WHERE key = 'daily_journal_book'") {
+                try db.execute(sql: """
+                    UPDATE reading SET profile = 'daily'
+                    WHERE id = ? AND deleted_at IS NULL AND profile = 'journal'
+                    """, arguments: [designated])
+            }
         }
         return migrator
     }

@@ -229,7 +229,7 @@ struct LibraryCardNameTests {
             _ = try session.operations.newBlock(in: bare.id, text: "bare words")
             let entry = try session.operations.createOrOpenJournalEntry(entryDate: "2026-01-15")
             _ = try session.operations.newBlock(in: entry.container.id, text: "diary")
-            let book = try session.operations.createReading(name: "Orbit", kind: .curated)
+            let book = try session.operations.createReading(name: "Orbit", kind: .book)
             _ = try session.operations.addPostToReading(named.id, to: book.id)
 
             let model = LibraryCatalogModel(session: session, defaults: try self.scrubbed("plan"))
@@ -270,7 +270,7 @@ struct LibraryCardNameTests {
         try await withLibrary { session, db in
             let post = try session.operations.createPost(title: nil)
             _ = try session.operations.newBlock(in: post.id, text: "Only the words.")
-            let book = try session.operations.createReading(name: "Orbit", kind: .curated)
+            let book = try session.operations.createReading(name: "Orbit", kind: .book)
             _ = try session.operations.addPostToReading(post.id, to: book.id)
 
             let withBooks = try await db.read { try NoteCards.load($0, postIDs: [post.id]) }

@@ -156,7 +156,7 @@ extension NotePickerSource {
         NotePickerSource { query in
             let needle = query.trimmingCharacters(in: .whitespacesAndNewlines)
             return readings
-                .filter { $0.kind == .curated }
+                .filter { $0.kind == .book }
                 .filter {
                     needle.isEmpty || $0.name.localizedCaseInsensitiveContains(needle)
                 }

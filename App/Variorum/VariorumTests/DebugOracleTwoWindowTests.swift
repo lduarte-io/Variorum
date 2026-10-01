@@ -142,7 +142,7 @@ extension DebugOracleWindowRig {
     /// The book's world, seeded by hand (the `BookRedesignMountTests`
     /// pattern): a curated book with two notes and one chapter.
     func book(_ session: AppSession) throws -> (readingID: String, postIDs: [String]) {
-        let reading = try session.operations.createReading(name: "a book in two windows", kind: .curated)
+        let reading = try session.operations.createReading(name: "a book in two windows", kind: .book)
         var postIDs: [String] = []
         for p in 0..<2 {
             let post = try session.operations.createPost(title: "note \(p)")

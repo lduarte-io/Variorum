@@ -35,11 +35,11 @@ struct SmartBookMembershipTests {
         try withOperations { ops, db in
             let stars = try seedTag(ops, path: "stars")
             let dreams = try seedTag(ops, path: "dreams")
-            let starBook = try ops.createReading(name: "star-notes", kind: .smart)
+            let starBook = try ops.createReading(name: "star-notes", kind: .gathering)
             try ops.setReadingQuerySpec(
                 starBook.id,
                 querySpec: Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())
-            let dreamBook = try ops.createReading(name: "dream-notes", kind: .smart)
+            let dreamBook = try ops.createReading(name: "dream-notes", kind: .gathering)
             try ops.setReadingQuerySpec(
                 dreamBook.id,
                 querySpec: Queries.SmartQuerySpec(tags: ["dreams"]).encodedJSON())
@@ -68,12 +68,12 @@ struct SmartBookMembershipTests {
     @Test func theBoundedReadAgreesWithThePerNoteChipRowForRow() throws {
         try withOperations { ops, db in
             let stars = try seedTag(ops, path: "life/stars")
-            let book = try ops.createReading(name: "starred", kind: .smart)
+            let book = try ops.createReading(name: "starred", kind: .gathering)
             // Subtree semantics: a tag AT or UNDER the path matches.
             try ops.setReadingQuerySpec(
                 book.id,
                 querySpec: Queries.SmartQuerySpec(tags: ["life"]).encodedJSON())
-            let curated = try ops.createReading(name: "hand-made", kind: .curated)
+            let curated = try ops.createReading(name: "hand-made", kind: .book)
 
             let tagged = try ops.createPost(title: "Tagged")
             _ = try ops.applyTag(stars.id, toPost: tagged.id)
@@ -83,7 +83,7 @@ struct SmartBookMembershipTests {
             try db.read { database in
                 for id in [tagged.id, untagged.id] {
                     let chip = try Queries.readingsContaining(database, postID: id)
-                        .filter { $0.kind == .smart }.map(\.name)
+                        .filter { $0.kind == .gathering }.map(\.name)
                     let page = try Queries.smartBookMembership(
                         database, postIDs: [tagged.id, untagged.id])[id] ?? []
                     #expect(chip == page, "the card and the chip must agree for \(id)")
@@ -98,7 +98,7 @@ struct SmartBookMembershipTests {
     @Test func anArchivedNoteMatchesNoSmartBook() throws {
         try withOperations { ops, db in
             let stars = try seedTag(ops, path: "stars")
-            let book = try ops.createReading(name: "starred", kind: .smart)
+            let book = try ops.createReading(name: "starred", kind: .gathering)
             try ops.setReadingQuerySpec(
                 book.id,
                 querySpec: Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())
@@ -121,7 +121,7 @@ struct SmartBookMembershipTests {
     /// page reads as nothing rather than as everything.
     @Test func aMalformedSpecIsSkippedAndAnEmptyPageReadsAsNothing() throws {
         try withOperations { ops, db in
-            let broken = try ops.createReading(name: "broken", kind: .smart)
+            let broken = try ops.createReading(name: "broken", kind: .gathering)
             try db.write { database in
                 try database.execute(
                     sql: "UPDATE reading SET query_spec = ? WHERE id = ?",
@@ -142,7 +142,7 @@ struct SmartBookMembershipTests {
     @Test func onlyThePagesOwnNotesComeBack() throws {
         try withOperations { ops, db in
             let stars = try seedTag(ops, path: "stars")
-            let book = try ops.createReading(name: "starred", kind: .smart)
+            let book = try ops.createReading(name: "starred", kind: .gathering)
             try ops.setReadingQuerySpec(
                 book.id,
                 querySpec: Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())
@@ -180,8 +180,11 @@ struct SmartBookMembershipTests {
             let post = try ops.createPost(title: "Anything")
             _ = try ops.applyTag(stars.id, toPost: post.id)
 
+            // 13i-a: the statement takes the v2 rule (the tag by ID) + the
+            // wing scope; the plan pin's subject — the join order — is
+            // unchanged.
             let statement = Queries.smartMembershipSQL(
-                Queries.SmartQuerySpec(tags: ["stars"]))
+                .tag(stars.id), wingID: "")
             let json = String(
                 decoding: try JSONEncoder().encode([post.id]), as: UTF8.self)
             let plan = try db.read { database in

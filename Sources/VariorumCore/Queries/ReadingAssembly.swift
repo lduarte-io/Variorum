@@ -242,7 +242,7 @@ extension Queries {
         // section); a chapterless curated book — and every smart book
         // (smart readings refuse sections) — assembles exactly as before.
         let hasChapters: Bool
-        if reading.kind == .curated {
+        if reading.kind == .book {
             hasChapters = try Bool.fetchOne(
                 db,
                 sql: """
@@ -283,7 +283,7 @@ extension Queries {
 
         let sql: String
         switch reading.kind {
-        case .curated where hasChapters:
+        case .book where hasChapters:
             // The chapter path. The LEFT JOIN embodies the dangling rule
             // (`sectionAssignments`' live-section join, inlined): a dead or
             // missing section — or, defensively, a foreign reading's
@@ -309,11 +309,12 @@ extension Queries {
                  AND s.reading_id = rp.reading_id
                  AND s.deleted_at IS NULL
                 WHERE rp.reading_id = ? AND rp.deleted_at IS NULL
+                  AND rp.status = 'member'
                 ORDER BY (s.id IS NULL), s.position, s.id, \(order)
                 """
             arguments.append(readingID)
 
-        case .curated:
+        case .book:
             let order = sortField == .manual
                 ? "rp.position, rp.id"
                 : stampOrder(sortField, sortDir)
@@ -328,16 +329,23 @@ extension Queries {
                  AND c.archived_at IS NULL
                  AND c.kind = 'post'
                 WHERE rp.reading_id = ? AND rp.deleted_at IS NULL
+                  AND rp.status = 'member'
                 ORDER BY \(order)
                 """
             arguments.append(readingID)
 
-        case .smart:
+        case .gathering:
             var conditions = [
                 "c.deleted_at IS NULL", "c.archived_at IS NULL", "c.kind = 'post'",
             ]
-            guard let spec = decodeSpec(reading.querySpec) else { return [] }
-            let match = smartMatchSQL(spec)
+            // The v1 letter kept exactly: NULL = no rule (match-all);
+            // MALFORMED fails closed (the gathering shows nothing).
+            let match: (conditions: [String], arguments: [(any DatabaseValueConvertible)?])
+            switch RuleGrammar.read(reading.querySpec) {
+            case .malformed: return []
+            case .none: match = ruleMatchSQL(nil, wingID: reading.wingId)
+            case .rule(let term): match = ruleMatchSQL(term, wingID: reading.wingId)
+            }
             conditions += match.conditions
             arguments += match.arguments
             // A smart reading has no positions; `manual` is meaningless for
@@ -397,9 +405,82 @@ extension Queries {
         return "(\(column) IS NULL), \(column) \(direction), c.id \(direction)"
     }
 
+    /// LEGACY (pre-v1_18) spec decoding. Production storage is v2
+    /// (`RuleGrammar`) since 13i-a; this survives as the v1_18 migration's
+    /// reader and as the rule-builder faces' DRAFT vehicle until 13i-b's
+    /// grammar faces land (the doors still COLLECT paths in this shape; the
+    /// operation converts to v2 at the write).
     static func decodeSpec(_ json: String?) -> SmartQuerySpec? {
         guard let json else { return SmartQuerySpec() }  // no spec = no constraints
         return try? JSONDecoder().decode(SmartQuerySpec.self, from: Data(json.utf8))
+    }
+
+    /// The v2 rule's SQL half over a `container c` scope — the ONE
+    /// implementation (13i-a; `smartMatchSQL`'s successor) shared by reading
+    /// assembly, the Pool, the membership chip and the word counts. The
+    /// caller supplies ambient scoping (live/unarchived/kind) exactly as
+    /// before; this returns the WING scope (a gathering assembles within
+    /// its wing only — sitting record §9) plus the rule's own condition.
+    /// A nil term is NO RULE: wing scope only (the standing match-all).
+    ///
+    /// `starredNoteIDs` is the star term's context (the 'starred' setting's
+    /// note targets, capped at `starLimit`) — no stored rule carries a star
+    /// term until 13i-b builds the starred gathering, and the sites that
+    /// will serve it pass the real list then; the default matches nothing.
+    static func ruleMatchSQL(
+        _ term: RuleTerm?, wingID: String, starredNoteIDs: [String] = []
+    ) -> (conditions: [String], arguments: [(any DatabaseValueConvertible)?]) {
+        var conditions: [String] = ["c.wing_id = ?"]
+        var arguments: [(any DatabaseValueConvertible)?] = [wingID]
+        if let term {
+            let built = ruleSQL(term, starredNoteIDs: starredNoteIDs)
+            conditions.append(built.condition)
+            arguments += built.arguments
+        }
+        return (conditions, arguments)
+    }
+
+    private static func ruleSQL(
+        _ term: RuleTerm, starredNoteIDs: [String]
+    ) -> (condition: String, arguments: [(any DatabaseValueConvertible)?]) {
+        switch term {
+        case .and(let terms):
+            guard !terms.isEmpty else { return ("1", []) }
+            let parts = terms.map { ruleSQL($0, starredNoteIDs: starredNoteIDs) }
+            return ("(" + parts.map(\.condition).joined(separator: " AND ") + ")",
+                    parts.flatMap(\.arguments))
+        case .or(let terms):
+            guard !terms.isEmpty else { return ("0", []) }
+            let parts = terms.map { ruleSQL($0, starredNoteIDs: starredNoteIDs) }
+            return ("(" + parts.map(\.condition).joined(separator: " OR ") + ")",
+                    parts.flatMap(\.arguments))
+        case .not(let inner):
+            let part = ruleSQL(inner, starredNoteIDs: starredNoteIDs)
+            return ("NOT (" + part.condition + ")", part.arguments)
+        case .tag(let id):
+            // Subtree matching THROUGH the referenced tag's LIVE path
+            // (§19's rulings: the rule holds the ID, so renameTag can
+            // never break it; a dead or missing tag matches NOTHING —
+            // the root join fails). The applied-tag walk is v1's own.
+            return ("""
+                EXISTS (SELECT 1 FROM post_tag pt
+                         JOIN tag applied ON applied.id = pt.tag_id AND applied.deleted_at IS NULL
+                         JOIN tag root ON root.id = ? AND root.deleted_at IS NULL
+                        WHERE pt.post_id = c.id AND pt.deleted_at IS NULL
+                          AND (applied.path = root.path
+                               OR substr(applied.path, 1, length(root.path) + 1) = root.path || '/'))
+                """, [id])
+        case .star:
+            guard !starredNoteIDs.isEmpty else { return ("0", []) }
+            let marks = Array(repeating: "?", count: starredNoteIDs.count).joined(separator: ",")
+            return ("c.id IN (\(marks))", starredNoteIDs)
+        case .legacyProfile(let profile):
+            return ("c.profile = ?", [profile])
+        case .legacyEntryDateFrom(let day):
+            return ("c.entry_date >= ?", [day])
+        case .legacyEntryDateTo(let day):
+            return ("c.entry_date <= ?", [day])
+        }
     }
 
     /// The smart predicate's SQL half over a `container c` scope — ONE

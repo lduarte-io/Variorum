@@ -42,12 +42,12 @@ struct SyncMirrorDumpAndResyncTests {
             _ = try ops.applyTag(child.id, toPost: post.id)
             _ = try ops.applyTag(tag.id, toBlock: made.block.id)
 
-            let reading = try ops.createReading(name: "the book", kind: .curated, maxPosts: nil)
+            let reading = try ops.createReading(name: "the book", kind: .book, maxPosts: nil)
             _ = try ops.addPostToReading(post.id, to: reading.id)
             let chapter = try ops.createSection(in: reading.id, name: "I / leaving")
             try ops.assignPostToSection(post.id, in: reading.id, section: chapter.id)
             let spec = try Queries.SmartQuerySpec(profile: "journal").encodedJSON()
-            _ = try ops.createReading(name: "collected", kind: .smart, querySpec: spec)
+            _ = try ops.createReading(name: "collected", kind: .gathering, querySpec: spec)
 
             let ref = try ops.addReference(
                 to: post.id, kind: .url, name: "a source", url: "https://example.org/secret-path")
@@ -63,6 +63,29 @@ struct SyncMirrorDumpAndResyncTests {
             let left = try ops.newBlock(in: pool.id, text: "left half.", at: .end).block
             let right = try ops.newBlock(in: pool.id, text: "right half.", at: .end).block
             _ = try ops.merge(left.id, right.id)
+
+            // 13i-a (v1_18): wing + shelf rows — direct SQL (their ops
+            // arrive at 13i-b/d); names + a glyph so the ciphertext walk
+            // sees every encrypted column of both tables.
+            try db.write { database in
+                try database.execute(
+                    sql: """
+                        INSERT INTO wing (id, owner_id, name, position, created_at, updated_at)
+                        VALUES ('0W000000-0000-4000-8000-000000000W01',
+                                (SELECT owner_id FROM container LIMIT 1), 'the Work',
+                                'a1', '2026-09-30T00:00:00.000Z', '2026-09-30T00:00:00.000Z')
+                        """)
+                try database.execute(
+                    sql: """
+                        INSERT INTO shelf (id, owner_id, wing_id, name, glyph, role, position,
+                                           created_at, updated_at)
+                        VALUES ('05000000-0000-4000-8000-0000000005E1',
+                                (SELECT owner_id FROM container LIMIT 1),
+                                '0W000000-0000-4000-8000-000000000W01', 'Welcome', '~',
+                                'welcome', 'a1',
+                                '2026-09-30T00:00:00.000Z', '2026-09-30T00:00:00.000Z')
+                        """)
+            }
         }
     }
 

@@ -82,7 +82,7 @@ struct CaptureMicrosyntaxDoorTests {
             _ = try session.operations.createTag(name: "dream")
             let spec = try Queries.SmartQuerySpec(tags: ["dream"]).encodedJSON()
             let book = try session.operations.createReading(
-                name: "Dream journal", kind: .smart, querySpec: spec)
+                name: "Dream journal", kind: .gathering, querySpec: spec)
 
             let box = QuickEntryModel(session: session)
             box.text = "Had a weird dream about the ocean {#dream}"

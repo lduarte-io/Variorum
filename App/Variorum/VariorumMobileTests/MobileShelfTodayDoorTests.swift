@@ -51,7 +51,7 @@ struct MobileShelfTodayDoorTests {
         try await withEditorWorld { session, db in
             _ = try await session.runner.run { ops -> String in
                 let book = try ops.createReading(
-                    name: "Journal", kind: .curated, profile: "journal",
+                    name: "Journal", kind: .book, profile: "journal",
                     sortField: .entryDate, sortDir: .asc)
                 try ops.setDailyJournalBook(book.id)
                 return book.id
@@ -80,7 +80,7 @@ struct MobileShelfTodayDoorTests {
     @Test func theBadgeRidesOnlyTheDailyBooksRow() async throws {
         try await withEditorWorld { session, _ in
             _ = try await session.runner.run { ops in
-                try ops.createReading(name: "Essays", kind: .curated).id
+                try ops.createReading(name: "Essays", kind: .book).id
             }
             let surface = todayShelf(session)
             defer { surface.tearDown() }
@@ -129,7 +129,7 @@ struct MobileShelfTodayDoorTests {
         try await withEditorWorld { session, _ in
             _ = try await session.runner.run { ops -> String in
                 let book = try ops.createReading(
-                    name: "Journal", kind: .curated, profile: "journal")
+                    name: "Journal", kind: .book, profile: "journal")
                 try ops.setDailyJournalBook(book.id)
                 return book.id
             }

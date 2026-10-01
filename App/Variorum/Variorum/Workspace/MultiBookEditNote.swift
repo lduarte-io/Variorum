@@ -59,7 +59,7 @@ nonisolated enum MultiBookEditNote {
     /// promise no test can keep.
     static func divergeTarget(_ books: [Reading], recentlyVisited: [String]) -> Reading? {
         BookChooserOrder.ordered(books, recentlyVisited: recentlyVisited)
-            .first { $0.kind == .curated }
+            .first { $0.kind == .book }
     }
 
     static func hasBeenSeen(_ defaults: UserDefaults = .standard) -> Bool {

@@ -51,7 +51,7 @@ enum Fixture {
             arguments: [id, containerId, blockId, position, chosenVariantId, now, now])
     }
 
-    static func reading(_ db: Database, id: String, name: String = "r", kind: String = "curated") throws {
+    static func reading(_ db: Database, id: String, name: String = "r", kind: String = "book") throws {
         try db.execute(
             sql: "INSERT INTO reading (id, name, kind, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
             arguments: [id, name, kind, now, now])

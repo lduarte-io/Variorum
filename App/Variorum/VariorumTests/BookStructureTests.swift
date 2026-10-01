@@ -205,7 +205,7 @@ struct BookStructureModelTests {
         // R2's letter: a finished book opens here by default and shows
         // nothing but the text.
         let open = Reading(
-            id: "r", name: "orbit", kind: .curated, createdAt: Date(), updatedAt: Date())
+            id: "r", name: "orbit", kind: .book, createdAt: Date(), updatedAt: Date())
         var finished = open
         finished.locked = true
         // 13c 2A: a WORKING book opens into OUTLINE — the surface it is
@@ -294,7 +294,7 @@ struct JournalBooksTests {
             // fix — the daily shape is profile+date, and these must not
             // wear it).
             let dreamID = try await session.runner.run { ops in
-                try ops.createReading(name: "Dream Journal", kind: .curated, profile: "journal").id
+                try ops.createReading(name: "Dream Journal", kind: .book, profile: "journal").id
             }
             let structure = BookStructureModel(session: session, readingID: dreamID)
             let first = await structure.newEntry(day: "2026-07-18")
@@ -339,7 +339,7 @@ struct JournalBooksTests {
         // ambiguity, no dream text as the day's journal.
         try await withShellSession2 { session, db in
             let dreamBookID = try await session.runner.run { ops in
-                try ops.createReading(name: "Dream Journal", kind: .curated, profile: "journal").id
+                try ops.createReading(name: "Dream Journal", kind: .book, profile: "journal").id
             }
             let structure = BookStructureModel(session: session, readingID: dreamBookID)
             let dreamID = try #require(await structure.newEntry(day: "2026-07-20"))
@@ -384,7 +384,7 @@ struct JournalBooksTests {
             // Re-designation heals the flow: a new journal book takes over.
             let nextID = try await session.runner.run { ops in
                 let next = try ops.createReading(
-                    name: "Journal II", kind: .curated, profile: "journal")
+                    name: "Journal II", kind: .book, profile: "journal")
                 try ops.setDailyJournalBook(next.id)
                 return next.id
             }
@@ -420,7 +420,7 @@ struct JournalBooksTests {
             // NON-DAILY half: a locked dream journal refuses BEFORE the mint.
             let dreamID = try await session.runner.run { ops -> String in
                 let book = try ops.createReading(
-                    name: "Dream Journal", kind: .curated, profile: "journal")
+                    name: "Dream Journal", kind: .book, profile: "journal")
                 try ops.lockReading(book.id)
                 return book.id
             }
@@ -445,7 +445,7 @@ struct JournalBooksTests {
             // The capacity gate refuses pre-mint the same way.
             let cappedID = try await session.runner.run { ops -> String in
                 let book = try ops.createReading(
-                    name: "Tiny", kind: .curated, profile: "journal", maxPosts: 1)
+                    name: "Tiny", kind: .book, profile: "journal", maxPosts: 1)
                 let filler = try ops.createPost(title: "filler", profile: .generic)
                 _ = try ops.addPostToReading(filler.id, to: book.id)
                 return book.id
@@ -459,12 +459,12 @@ struct JournalBooksTests {
 
     /// Sitting 9 batch 6 (her screenshot: a fresh curated book's navigator
     /// missing ALL its doors): the LIVE start() path must deliver the
-    /// reading — the doors' `reading?.kind == .curated` condition hangs
+    /// reading — the doors' `reading?.kind == .book` condition hangs
     /// off it. Drives the real observation, not adopt().
     @Test func startDeliversTheReadingSoTheNavigatorDoorsCanRender() async throws {
         try await withShellSession2 { session, _ in
             let readingID = try await session.runner.run { ops in
-                try ops.createReading(name: "my book :)", kind: .curated).id
+                try ops.createReading(name: "my book :)", kind: .book).id
             }
             let structure = BookStructureModel(session: session, readingID: readingID)
             let task = Task { await structure.start() }
@@ -474,7 +474,7 @@ struct JournalBooksTests {
                 try await Task.sleep(for: .milliseconds(10))
                 spins += 1
             }
-            #expect(structure.reading?.kind == .curated,
+            #expect(structure.reading?.kind == .book,
                     "the live observation delivers — the + doors' condition is satisfiable")
             #expect(structure.lastError == nil)
         }
@@ -485,7 +485,7 @@ struct JournalBooksTests {
         // reorderSection; no-op drops and foreign payloads touch nothing.
         try await withShellSession2 { session, db in
             let readingID = try await session.runner.run { ops in
-                let reading = try ops.createReading(name: "orbit", kind: .curated)
+                let reading = try ops.createReading(name: "orbit", kind: .book)
                 _ = try ops.createSection(in: reading.id, name: "I")
                 _ = try ops.createSection(in: reading.id, name: "II")
                 _ = try ops.createSection(in: reading.id, name: "III")
@@ -566,7 +566,7 @@ struct BookDropTests {
     ) async throws -> T {
         try await withShellSession2 { session, db in
             let (readingID, sections, posts) = try await session.runner.run { ops in
-                let reading = try ops.createReading(name: "orbit", kind: .curated)
+                let reading = try ops.createReading(name: "orbit", kind: .book)
                 let one = try ops.createSection(in: reading.id, name: "I")
                 let two = try ops.createSection(in: reading.id, name: "II")
                 var posts: [String] = []

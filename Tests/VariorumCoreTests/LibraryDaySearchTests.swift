@@ -220,7 +220,7 @@ struct LibraryDaySearchTests {
             let note = try ops.createPost(title: "shelf note")
             let block = try ops.newBlock(in: note.id, text: "shelf words")
             try ops.setBlockName(block.block.id, name: "shelf")
-            _ = try ops.createReading(name: "shelf", kind: .curated)
+            _ = try ops.createReading(name: "shelf", kind: .book)
 
             // Without a day, the same query answers with all three kinds.
             let open = try db.read { database in

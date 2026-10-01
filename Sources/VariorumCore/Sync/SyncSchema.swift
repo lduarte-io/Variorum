@@ -119,11 +119,23 @@ public enum SyncSchema {
     /// destructive RPCs' 10-minute amr RE-AUTH window; mirror DDL
     /// 12_phase13y_tenant_seq.sql — deploy is the orchestrator's ONE
     /// end-of-phase window under her standing pre-authorization,
-    /// R-13y-2). **Bump this
+    /// R-13y-2); version 10 = the Phase 13i-a WINGS/SHELVES/BOOKS event
+    /// (the ONE 13i bundle — the sitting record §11, the 13i-a plan:
+    /// the `wing` + `shelf` tables born multi-tenant; the additive
+    /// mirror columns — reading's nine, container.wing_id, tag.wing_id,
+    /// reading_post.status; the six registry-carrying RPC bodies
+    /// redefined with the two tables, key_vault_update's ciphertext
+    /// registry gaining wing.name + shelf.name/glyph; AND the marker
+    /// fences the CLIENT-side recasts that ride v1_18 — the
+    /// gathering/book kind values, the v2 query_spec format and the
+    /// per-wing tag uniqueness are meaning changes a marker-9 client
+    /// must never meet; mirror DDL 13_phase13i_wings.sql — deploy is
+    /// HER window, the 13i-a plan §8's checklist, never pre-authorized).
+    /// **Bump this
     /// constant together with the mirror file's marker in every future
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
-    public static let lockstepVersion = 9
+    public static let lockstepVersion = 10
     /// The synced tables, in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs
@@ -137,8 +149,8 @@ public enum SyncSchema {
                 "id", "owner_id", "kind", "profile", "entry_date", "locked",
                 "locked_at", "segmentation_default", "last_touched_at",
                 "last_major_revision_at", "churn_accumulator",
-                "baseline_length", "word_target", "created_at", "updated_at",
-                "archived_at", "deleted_at",
+                "baseline_length", "word_target", "wing_id", "created_at",
+                "updated_at", "archived_at", "deleted_at",
             ],
             encrypted: ["title", "floating_notes"]),
         SyncTable(
@@ -163,8 +175,8 @@ public enum SyncSchema {
         SyncTable(
             "tag",
             plain: [
-                "id", "owner_id", "parent_id", "created_at", "updated_at",
-                "deleted_at",
+                "id", "owner_id", "parent_id", "wing_id", "created_at",
+                "updated_at", "deleted_at",
             ],
             encrypted: ["name", "path"]),
         SyncTable(
@@ -179,11 +191,41 @@ public enum SyncSchema {
                 "id", "container_id", "block_id", "position",
                 "chosen_variant_id", "created_at", "updated_at", "deleted_at",
             ]),
+        // 13i-a (v1_18, the marker-10 bundle — the sitting record §11):
+        // wings and shelves precede reading (reading.shelf_id and
+        // reading.wing_id point at them; FK-friendly order). The virtual
+        // Home wing ('') never syncs because it never exists as a row.
+        // Wing/shelf NAMES are hers (encrypted); the shelf GLYPH is her
+        // chosen grapheme (encrypted — content-adjacent, and a one-char
+        // plain column would leak a distinctive marker per shelf); role /
+        // positions / ids are structure (plain). An apply that meets an
+        // ABSENT new column (a mirror row from before the window) reads it
+        // as its default ('' wing, 'member' status) — pinned.
+        SyncTable(
+            "wing",
+            plain: [
+                "id", "owner_id", "position", "created_at", "updated_at",
+                "deleted_at",
+            ],
+            encrypted: ["name"]),
+        SyncTable(
+            "shelf",
+            plain: [
+                "id", "owner_id", "wing_id", "role", "position", "created_at",
+                "updated_at", "deleted_at",
+            ],
+            encrypted: ["name", "glyph"]),
         SyncTable(
             "reading",
             plain: [
                 "id", "owner_id", "kind", "profile", "sort_field", "sort_dir",
                 "grouping_tag_id", "max_posts", "word_target", "locked",
+                // 13i-a: the bundle's reading columns — ids, flags, stamps,
+                // positions; disclosed structure, never prose (the
+                // query_spec RULE stays encrypted as before — its v2 format
+                // is ids and operators, sealed all the same).
+                "wing_id", "shelf_id", "shelf_position", "starred", "owned",
+                "sealed_at", "hide_owned", "intake_seating", "auto_tag_id",
                 "created_at", "updated_at", "deleted_at",
             ],
             encrypted: ["name", "query_spec"]),
@@ -200,7 +242,7 @@ public enum SyncSchema {
             "reading_post",
             plain: [
                 "id", "reading_id", "post_id", "position", "section_id",
-                "created_at", "deleted_at",
+                "status", "created_at", "deleted_at",
             ]),
         SyncTable(
             "post_tag",

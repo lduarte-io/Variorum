@@ -42,7 +42,7 @@ struct SampleLibrarySignedOutRetirementTests {
     ) throws -> (bookID: String, postIDs: [String: String]) {
         try client.with { ops, db in
             let book = try ops.createReading(
-                name: Self.bookName, kind: .curated, profile: "book")
+                name: Self.bookName, kind: .book, profile: "book")
             // The real seeder DISCOVERS a live reserved tag before minting
             // (a Help ▸ Restore reuses it) — mirror that, or a re-seed
             // trips `duplicateTagPath` the product never meets.

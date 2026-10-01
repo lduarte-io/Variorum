@@ -69,7 +69,7 @@ nonisolated enum MobileShelfFaces {
         for book: Queries.ShelfBook, tagPaths: [String], isDaily: Bool
     ) -> String {
         var parts: [String] = []
-        if book.reading.kind == .smart {
+        if book.reading.kind == .gathering {
             parts.append("smart")
         } else {
             let unit = book.reading.profile == "journal" ? "entr" : "note"

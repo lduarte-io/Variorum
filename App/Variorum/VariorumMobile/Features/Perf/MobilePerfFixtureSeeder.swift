@@ -291,7 +291,7 @@ enum MobilePerfFixtureSeeder {
         }
 
         let fixtureBook = try ops.createReading(
-            name: fixtureBookName, kind: .curated, profile: "collection")
+            name: fixtureBookName, kind: .book, profile: "collection")
 
         // — The corpus: notes spread evenly across six books (the book
         //   COUNT is constant in every world — corpus size is the axis,
@@ -299,7 +299,7 @@ enum MobilePerfFixtureSeeder {
         var corpusBooks: [Reading] = []
         for name in corpusBookNames {
             corpusBooks.append(
-                try ops.createReading(name: name, kind: .curated, profile: "collection"))
+                try ops.createReading(name: name, kind: .book, profile: "collection"))
         }
         var corpusBlocks = 0
         for n in 0..<max(0, corpusNotes) {

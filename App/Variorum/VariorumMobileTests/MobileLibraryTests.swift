@@ -79,7 +79,7 @@ struct MobileLibraryTests {
             let (postID, bookID) = try await session.runner.run { ops -> (String, String) in
                 let post = try ops.createPost(title: "Moonrise essay")
                 _ = try ops.createPost(title: nil, profile: .journal, entryDate: "2026-08-03")
-                let book = try ops.createReading(name: "Moonlight", kind: .curated)
+                let book = try ops.createReading(name: "Moonlight", kind: .book)
                 return (post.id, book.id)
             }
             let model = MobileLibraryViewModel(session: session)
@@ -125,7 +125,7 @@ struct MobileLibraryTests {
             let (booklessID, bookID) = try await session.runner.run { ops -> (String, String) in
                 let bookless = try ops.createPost(title: "floating")
                 let shelved = try ops.createPost(title: "shelved")
-                let book = try ops.createReading(name: "Home", kind: .curated)
+                let book = try ops.createReading(name: "Home", kind: .book)
                 _ = try ops.addPostToReading(shelved.id, to: book.id)
                 return (bookless.id, book.id)
             }

@@ -16,6 +16,10 @@ public struct Tag: VariorumRecord {
     public var updatedAt: Date
     public var deletedAt: Date?
     public var syncVersion: Int
+    /// The wing this tag belongs to (13i-a, v1_18 — R-13ia-1: the tag
+    /// vocabulary is PER-WING; uniqueness is (wing_id, path) over live
+    /// rows). '' = the virtual Home wing.
+    public var wingId: String
 
     public init(
         id: String,
@@ -23,6 +27,7 @@ public struct Tag: VariorumRecord {
         parentId: String? = nil,
         name: String,
         path: String,
+        wingId: String = "",
         createdAt: Date,
         updatedAt: Date,
         deletedAt: Date? = nil,
@@ -33,6 +38,7 @@ public struct Tag: VariorumRecord {
         self.parentId = parentId
         self.name = name
         self.path = path
+        self.wingId = wingId
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.deletedAt = deletedAt

@@ -19,7 +19,7 @@ struct ChapterAssemblyExportTests {
     private func makeBook(
         _ ops: Operations, posts count: Int = 3
     ) throws -> (reading: Reading, postIDs: [String]) {
-        let reading = try ops.createReading(name: "Field Notes", kind: .curated)
+        let reading = try ops.createReading(name: "Field Notes", kind: .book)
         var ids: [String] = []
         for i in 1...count {
             let post = try ops.createPost(title: "P\(i)")
@@ -98,7 +98,7 @@ struct ChapterAssemblyExportTests {
             try ops.newBlock(in: post.id, text: "A body.", at: .end)
             try ops.applyTag(part.id, toPost: post.id)
             let reading = try ops.createReading(
-                name: "Grouped", kind: .curated, groupingTagId: root.id)
+                name: "Grouped", kind: .book, groupingTagId: root.id)
             try ops.addPostToReading(post.id, to: reading.id)
 
             // Chapterless: the Phase 4 tag grouping governs, unchanged.
@@ -133,7 +133,7 @@ struct ChapterAssemblyExportTests {
             try ops.newBlock(in: post.id, text: "S body.", at: .end)
             let spec = try Queries.SmartQuerySpec(profile: "blog").encodedJSON()
             let reading = try ops.createReading(
-                name: "Smart", kind: .smart, querySpec: spec)
+                name: "Smart", kind: .gathering, querySpec: spec)
 
             let before = try db.read { try Queries.assembleReading($0, readingID: reading.id) }
             #expect(before.map(\.postID) == [post.id])

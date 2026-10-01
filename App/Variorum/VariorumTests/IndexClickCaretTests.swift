@@ -390,7 +390,7 @@ struct IndexClickCaretTests {
         _ voice: ThemeVoice, _ line: IndexClickedLine,
         _ session: AppSession, _ db: AppDatabase, _ theme: ThemeStore
     ) async throws {
-        let reading = try session.operations.createReading(name: "the index", kind: .curated)
+        let reading = try session.operations.createReading(name: "the index", kind: .book)
         let note = try Self.mintNote(session, title: "a story")
         try session.operations.addPostToReading(note.postID, to: reading.id)
         let readingID = reading.id

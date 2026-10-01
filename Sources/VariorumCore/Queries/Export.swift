@@ -186,7 +186,7 @@ extension Queries {
     public static func exportReading(_ db: Database, readingID: String) throws -> String {
         guard let reading = try reading(db, id: readingID) else { return "" }
         let entries = try assembleReading(db, readingID: readingID)
-        let chapters = reading.kind == .curated
+        let chapters = reading.kind == .book
             ? try readingSections(db, readingID: readingID) : []
 
         // One grouped shape, two resolutions: chapter groups (by id — the

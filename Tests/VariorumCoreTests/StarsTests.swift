@@ -17,7 +17,7 @@ struct StarsTests {
     @Test func starsAppendInStarTimeAndAreIdempotent() throws {
         try withOperations { ops, db in
             let note = try ops.createPost(title: "the storm", profile: .generic)
-            let book = try ops.createReading(name: "Orbit", kind: .curated)
+            let book = try ops.createReading(name: "Orbit", kind: .book)
 
             try ops.setStarred(.post(note.id), starred: true)
             try ops.setStarred(.reading(book.id), starred: true)
@@ -62,7 +62,7 @@ struct StarsTests {
         try withOperations { ops, db in
             let kept = try ops.createPost(title: "kept", profile: .generic)
             let doomedNote = try ops.createPost(title: "doomed note", profile: .generic)
-            let doomedBook = try ops.createReading(name: "doomed book", kind: .curated)
+            let doomedBook = try ops.createReading(name: "doomed book", kind: .book)
             try ops.setStarred(.post(kept.id), starred: true)
             try ops.setStarred(.post(doomedNote.id), starred: true)
             try ops.setStarred(.reading(doomedBook.id), starred: true)

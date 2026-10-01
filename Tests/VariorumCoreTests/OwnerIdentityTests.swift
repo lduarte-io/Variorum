@@ -41,7 +41,7 @@ struct OwnerIdentityTests {
             let poolBlock = try ops.newBlock(in: pool.id, text: "loose idea", at: .end)
             let copy = try ops.poolDragCopy(poolBlock.block.id, to: post.id, at: .end)
             // Reading, tag, reference.
-            let reading = try ops.createReading(name: "book", kind: .curated)
+            let reading = try ops.createReading(name: "book", kind: .book)
             let tag = try ops.createTag(parent: nil, name: "life")
             let reference = try ops.addReference(to: post.id, kind: .url, url: "https://x.example")
 
@@ -86,7 +86,7 @@ struct OwnerIdentityTests {
             try ops.deleteBlock(doomedBlock.block.id)
             let doomedPost = try ops.createPost(title: "doomed post")
             try ops.deleteContainer(doomedPost.id)
-            let reading = try ops.createReading(name: "kept reading", kind: .curated)
+            let reading = try ops.createReading(name: "kept reading", kind: .book)
             _ = reading
             let doomedTag = try ops.createTag(parent: nil, name: "doomed")
             try ops.deleteTag(doomedTag.id)
@@ -214,7 +214,7 @@ struct OwnerIdentityTests {
                 let post = try theirs.createPost(title: "y's post", profile: .blog)
                 _ = try theirs.newBlock(in: post.id, text: "y's block", at: .end)
             }
-            _ = try ops.createReading(name: "signed-out reading", kind: .curated)
+            _ = try ops.createReading(name: "signed-out reading", kind: .book)
 
             let (foreignToX, foreignToY, firstRow) = try db.read { d in
                 (try Queries.foreignOwnerExists(d, signedIn: x),

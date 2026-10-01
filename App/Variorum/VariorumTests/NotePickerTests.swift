@@ -134,10 +134,10 @@ struct NotePickerSourceTests {
     @Test func theBookSourceOffersTheCuratedShelfSearchedWithFinishedMarked() async {
         let day = Date(timeIntervalSince1970: 1_782_864_000)
         let books = [
-            Reading(id: "a", name: "field notes", kind: .curated, createdAt: day, updatedAt: day),
-            Reading(id: "b", name: "the smart one", kind: .smart, createdAt: day, updatedAt: day),
+            Reading(id: "a", name: "field notes", kind: .book, createdAt: day, updatedAt: day),
+            Reading(id: "b", name: "the smart one", kind: .gathering, createdAt: day, updatedAt: day),
             Reading(
-                id: "c", name: "finished notebook", kind: .curated, locked: true,
+                id: "c", name: "finished notebook", kind: .book, locked: true,
                 createdAt: day, updatedAt: day),
         ]
         let source = NotePickerSource.curatedBooks(books)

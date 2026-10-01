@@ -17,10 +17,13 @@ import Testing
 @Suite("Shelf pins self-heal (18o U1 — 17e P35)")
 struct ShelfPinsSelfHealTests {
     /// The stuck pin: unpinning a deleted book refused on the old tree.
+    /// (13i-a: the star is the row's own column now, so the dead book is
+    /// out of the listing with or without the unpin — the door still
+    /// never throws.)
     @Test func unpinningADeletedBookWorksAndShedsItsID() throws {
         try withOperations { ops, db in
-            let kept = try ops.createReading(name: "kept", kind: .curated)
-            let doomed = try ops.createReading(name: "doomed", kind: .curated)
+            let kept = try ops.createReading(name: "kept", kind: .book)
+            let doomed = try ops.createReading(name: "doomed", kind: .book)
             try ops.setShelfPinned(kept.id, pinned: true)
             try ops.setShelfPinned(doomed.id, pinned: true)
             try ops.deleteReading(doomed.id)
@@ -28,29 +31,35 @@ struct ShelfPinsSelfHealTests {
             #expect(throws: Never.self, "removal never requires a live row") {
                 try ops.setShelfPinned(doomed.id, pinned: false)
             }
-            #expect(try db.read { try Queries.shelfPins($0) } == [kept.id],
-                    "the stored JSON sheds the dead id")
+            #expect(try db.read { try Queries.shelfPins($0) } == [kept.id])
         }
     }
 
-    /// The self-heal proper: ANY pin write persists the live list, so a
-    /// deleted book's id leaves the stored value the next time she pins
-    /// anything — order kept for the survivors.
+    /// 13i-a UPGRADES the heal to by-construction: the star lives ON the
+    /// reading row (`reading.starred` — the pin list is retired), so a
+    /// deleted book leaves the list THE MOMENT it dies (the listing reads
+    /// live rows only) — no write needed — and a RESTORED book comes back
+    /// starred, which the old stored-list could not promise.
     @Test func theNextPinWriteHealsTheStoredList() throws {
         try withOperations { ops, db in
-            let first = try ops.createReading(name: "first", kind: .curated)
-            let doomed = try ops.createReading(name: "doomed", kind: .curated)
-            let later = try ops.createReading(name: "later", kind: .curated)
+            let first = try ops.createReading(name: "first", kind: .book)
+            let doomed = try ops.createReading(name: "doomed", kind: .book)
+            let later = try ops.createReading(name: "later", kind: .book)
             try ops.setShelfPinned(first.id, pinned: true)
             try ops.setShelfPinned(doomed.id, pinned: true)
             try ops.deleteReading(doomed.id)
-            // The READ side is unchanged by this fix (a dead id matches no
-            // shelf row); the STORED list carries it until a write.
-            #expect(try db.read { try Queries.shelfPins($0) } == [first.id, doomed.id])
+            // The flag rides the tombstoned row; the listing is live-only,
+            // so the dead book is gone at once.
+            #expect(try db.read { try Queries.shelfPins($0) } == [first.id])
 
             try ops.setShelfPinned(later.id, pinned: true)
-            #expect(try db.read { try Queries.shelfPins($0) } == [first.id, later.id],
-                    "the dead id is gone and pin order holds")
+            #expect(try db.read { try Queries.shelfPins($0) } == [first.id, later.id])
+
+            // The upgrade the column buys: restore brings the star back.
+            try ops.restoreReading(doomed.id)
+            #expect(try db.read { try Queries.shelfPins($0) }
+                        == [doomed.id, first.id, later.id],
+                    "a restored book comes back starred (name order: doomed · first · later)")
         }
     }
 
@@ -60,7 +69,7 @@ struct ShelfPinsSelfHealTests {
     /// nothing is written.
     @Test func pinningADeadOrAbsentBookStillRefuses() throws {
         try withOperations { ops, db in
-            let doomed = try ops.createReading(name: "doomed", kind: .curated)
+            let doomed = try ops.createReading(name: "doomed", kind: .book)
             try ops.deleteReading(doomed.id)
             #expect(throws: OperationError.readingNotFound(id: doomed.id)) {
                 try ops.setShelfPinned(doomed.id, pinned: true)
@@ -72,17 +81,19 @@ struct ShelfPinsSelfHealTests {
         }
     }
 
-    /// The identity-metadata convention `setStarred` keeps: a write that
-    /// changes nothing writes nothing — no setting update, no outbox row.
+    /// The identity-metadata convention: a write that changes nothing
+    /// writes nothing — since 13i-a that means no READING row update and
+    /// no outbox row for it.
     @Test func aNoOpPinWriteWritesNothing() throws {
         try withOperations { ops, db in
-            let book = try ops.createReading(name: "book", kind: .curated)
-            let other = try ops.createReading(name: "other", kind: .curated)
+            let book = try ops.createReading(name: "book", kind: .book)
+            let other = try ops.createReading(name: "other", kind: .book)
             try ops.setShelfPinned(book.id, pinned: true)
             try db.clearOutbox()
             try ops.setShelfPinned(book.id, pinned: true)   // already pinned
             try ops.setShelfPinned(other.id, pinned: false) // never pinned
-            #expect(try db.outboxContains("setting", "shelf_pins") == false)
+            #expect(try db.outboxContains("reading", book.id) == false)
+            #expect(try db.outboxContains("reading", other.id) == false)
             #expect(try db.read { try Queries.shelfPins($0) } == [book.id])
         }
     }
@@ -92,8 +103,8 @@ struct ShelfPinsSelfHealTests {
     /// transaction — live by then, so the heal keeps it, and heals the rest.
     @Test func anInTransactionEnsurePinsItsFreshBookAndHealsTheRest() throws {
         try withOperations { ops, db in
-            let kept = try ops.createReading(name: "kept", kind: .curated)
-            let doomed = try ops.createReading(name: "doomed", kind: .curated)
+            let kept = try ops.createReading(name: "kept", kind: .book)
+            let doomed = try ops.createReading(name: "doomed", kind: .book)
             try ops.setShelfPinned(kept.id, pinned: true)
             try ops.setShelfPinned(doomed.id, pinned: true)
             try ops.deleteReading(doomed.id)

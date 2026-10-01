@@ -86,7 +86,7 @@ struct MorningListTests {
         let post = try session.operations.createPost(title: "Orbit day")
         _ = try session.operations.newBlock(in: post.id, text: "First words here.")
         _ = try session.operations.newBlock(in: post.id, text: "Second block.")
-        let book = try session.operations.createReading(name: "Orbit", kind: .curated)
+        let book = try session.operations.createReading(name: "Orbit", kind: .book)
         _ = try session.operations.addPostToReading(post.id, to: book.id)
 
         let cards = try await db.read { db in

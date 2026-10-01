@@ -29,7 +29,7 @@ struct MobileShellTests {
     /// tags display LEAF-ONLY (the 13k K3 doctrine).
     @Test func lk5FacesLeadWithCountAndTags() throws {
         func book(
-            _ name: String, kind: ReadingKind = .curated, profile: String? = nil,
+            _ name: String, kind: ReadingKind = .book, profile: String? = nil,
             locked: Bool = false, spec: String? = nil, posts: Int = 0
         ) -> Queries.ShelfBook {
             Queries.ShelfBook(
@@ -54,7 +54,7 @@ struct MobileShellTests {
             == "1 entry · #dreams · daily", "tags outrank the daily marker")
 
         let smart = book(
-            "reading notes", kind: .smart, spec: #"{"tags":["books"]}"#)
+            "reading notes", kind: .gathering, spec: #"{"tags":["books"]}"#)
         #expect(MobileShelfFaces.tagPaths(for: smart, curatedTags: [:]) == ["books"],
                 "a smart book's tags are its own spec")
         #expect(MobileShelfFaces.meta(for: smart, tagPaths: ["books"], isDaily: false)
@@ -66,7 +66,7 @@ struct MobileShellTests {
     @Test func finishedIsAStateOnTheNameNeverAMetaStat() throws {
         let finished = Queries.ShelfBook(
             reading: Reading(
-                id: "p", ownerId: nil, name: "Poems", kind: .curated, profile: nil,
+                id: "p", ownerId: nil, name: "Poems", kind: .book, profile: nil,
                 sortField: .manual, sortDir: .asc, groupingTagId: nil, querySpec: nil,
                 maxPosts: nil, wordTarget: nil, locked: true,
                 createdAt: Date(), updatedAt: Date(), deletedAt: nil, syncVersion: 0),
@@ -84,7 +84,7 @@ struct MobileShellTests {
         func book(_ id: String, _ name: String, profile: String? = nil) -> Queries.ShelfBook {
             Queries.ShelfBook(
                 reading: Reading(
-                    id: id, ownerId: nil, name: name, kind: .curated, profile: profile,
+                    id: id, ownerId: nil, name: name, kind: .book, profile: profile,
                     sortField: .manual, sortDir: .asc, groupingTagId: nil,
                     querySpec: nil, maxPosts: nil, wordTarget: nil, locked: false,
                     createdAt: Date(), updatedAt: Date(), deletedAt: nil,
@@ -107,10 +107,10 @@ struct MobileShellTests {
         try await withEditorWorld { session, _ in
             let (bookID, pinnedID) = try await session.runner.run { ops -> (String, String) in
                 let journal = try ops.createReading(
-                    name: "Journal", kind: .curated, profile: "journal",
+                    name: "Journal", kind: .book, profile: "journal",
                     sortField: .entryDate, sortDir: .asc)
                 try ops.setDailyJournalBook(journal.id)
-                let pinned = try ops.createReading(name: "Essays", kind: .curated)
+                let pinned = try ops.createReading(name: "Essays", kind: .book)
                 try ops.setShelfPinned(pinned.id, pinned: true)
                 return (journal.id, pinned.id)
             }
@@ -141,7 +141,7 @@ struct MobileShellTests {
         try await withEditorWorld { session, db in
             let book = try await session.runner.run { ops -> String in
                 let book = try ops.createReading(
-                    name: "Journal", kind: .curated, profile: "journal",
+                    name: "Journal", kind: .book, profile: "journal",
                     sortField: .entryDate, sortDir: .asc)
                 try ops.setDailyJournalBook(book.id)
                 return book.id
@@ -225,7 +225,7 @@ struct MobileShellTests {
             let model = MobileShelfViewModel(session: session)
             let book = try await session.runner.run { ops -> String in
                 let book = try ops.createReading(
-                    name: "Journal", kind: .curated, profile: "journal")
+                    name: "Journal", kind: .book, profile: "journal")
                 try ops.setDailyJournalBook(book.id)
                 return book.id
             }
@@ -285,7 +285,7 @@ struct MobileShellTests {
     @Test func theBookListGroupsByTheAssemblysOwnSections() async throws {
         try await withEditorWorld { session, _ in
             let readingID = try await session.runner.run { ops -> String in
-                let book = try ops.createReading(name: "The Book", kind: .curated)
+                let book = try ops.createReading(name: "The Book", kind: .book)
                 let one = try ops.createSection(in: book.id, name: "Openings")
                 let two = try ops.createSection(in: book.id, name: "Middles")
                 for (index, section) in [(1, one.id), (2, one.id), (3, two.id)] {

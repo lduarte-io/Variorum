@@ -40,7 +40,7 @@ private func withBookWorld<T>(
         $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
     } operation: { @MainActor in
         let session = AppSession(database: db)
-        let reading = try session.operations.createReading(name: "book", kind: .curated)
+        let reading = try session.operations.createReading(name: "book", kind: .book)
         var postIDs: [String] = []
         for p in 0..<posts {
             let post = try session.operations.createPost(
@@ -591,7 +591,7 @@ struct OutlineWritingSurfaceTests {
         // on the surface it is WRITTEN on; a finished one still opens into
         // the reading flow (R2, untouched).
         let open = Reading(
-            id: "r", name: "orbit", kind: .curated, createdAt: Date(), updatedAt: Date())
+            id: "r", name: "orbit", kind: .book, createdAt: Date(), updatedAt: Date())
         var finished = open
         finished.locked = true
         #expect(BookStructureModel.defaultMode(for: open) == .outline)

@@ -33,7 +33,7 @@ struct SmartConversionTests {
     ) throws -> (reading: Reading, posts: [Container], tag: VariorumCore.Tag) {
         let tag = try ops.createTag(name: path)
         let spec = try Queries.SmartQuerySpec(tags: [path]).encodedJSON()
-        let reading = try ops.createReading(name: "collected", kind: .smart, querySpec: spec)
+        let reading = try ops.createReading(name: "collected", kind: .gathering, querySpec: spec)
         var posts: [Container] = []
         for i in 0..<count {
             let post = try ops.createPost(title: "post \(i)")
@@ -79,7 +79,7 @@ struct SmartConversionTests {
 
             // The row flipped: curated, manual — so NOTHING moves on screen.
             let after = try db.read { try Queries.reading($0, id: reading.id) }
-            #expect(after?.kind == .curated)
+            #expect(after?.kind == .book)
             #expect(after?.sortField == .manual)
             let entries = try db.read {
                 try Queries.assembleReading($0, readingID: reading.id)
@@ -139,7 +139,7 @@ struct SmartConversionTests {
             let child = try ops.createTag(parent: root.id, name: "goals")
             let spec = try Queries.SmartQuerySpec(tags: ["life"]).encodedJSON()
             let reading = try ops.createReading(
-                name: "grouped", kind: .smart, groupingTagId: root.id, querySpec: spec)
+                name: "grouped", kind: .gathering, groupingTagId: root.id, querySpec: spec)
             let post = try ops.createPost(title: "one")
             _ = try ops.applyTag(child.id, toPost: post.id)
 
@@ -151,7 +151,9 @@ struct SmartConversionTests {
             try ops.convertSmartReadingToCurated(reading.id)
 
             let row = try db.read { try Queries.reading($0, id: reading.id) }
-            #expect(row?.querySpec == spec)  // provenance, not thrown away
+            // 13i-a: the stored rule is the normalized v2 value (the tag
+            // by ID); conversion still keeps it on the row untouched.
+            #expect(row?.querySpec == (try RuleGrammar.encode(.tag(root.id))))
             #expect(row?.groupingTagId == root.id)
             // The derived sections SURVIVE — curated assembly honors a
             // grouping tag while the book has no live chapters. Real
@@ -217,7 +219,7 @@ struct SmartConversionTests {
                 reading.id, keepCollecting: true)
             let fresh = try #require(result.collectingReading)
 
-            #expect(fresh.kind == .smart)
+            #expect(fresh.kind == .gathering)
             #expect(fresh.name == "collected (collecting)")
             #expect(fresh.querySpec == spec)
             // The order it HAD, not the converted book's forced manual.
@@ -282,13 +284,13 @@ struct SmartConversionTests {
             // untouched.
             #expect(try liveMemberships(db, reading.id).isEmpty)
             #expect(try db.read { try Queries.readings($0).count } == 1)
-            #expect(try db.read { try Queries.reading($0, id: reading.id)?.kind } == .smart)
+            #expect(try db.read { try Queries.reading($0, id: reading.id)?.kind } == .gathering)
         }
     }
 
     @Test func anAlreadyCuratedBookRefusesAsTheWrongKind() throws {
         try withOperations { ops, _ in
-            let reading = try ops.createReading(name: "hand-shaped", kind: .curated)
+            let reading = try ops.createReading(name: "hand-shaped", kind: .book)
             #expect(throws: OperationError.self) {
                 try ops.convertSmartReadingToCurated(reading.id)
             }
@@ -322,7 +324,7 @@ struct SmartConversionTests {
             try stack.undo(with: ops)
 
             let undone = try #require(try db.read { try Queries.reading($0, id: reading.id) })
-            #expect(undone.kind == .smart)
+            #expect(undone.kind == .gathering)
             #expect(undone.sortField == .createdAt)
             #expect(undone.sortDir == .desc)
             #expect(try liveMemberships(db, reading.id).isEmpty)
@@ -335,7 +337,7 @@ struct SmartConversionTests {
             try stack.redo(with: ops)
 
             let redone = try #require(try db.read { try Queries.reading($0, id: reading.id) })
-            #expect(redone.kind == .curated)
+            #expect(redone.kind == .book)
             #expect(redone.sortField == .manual)
             // EXACT rows — the same membership ids, not fresh ones.
             #expect(try liveMemberships(db, reading.id).map(\.id) == result.membershipIDs)
@@ -406,11 +408,11 @@ struct SmartConversionTests {
 
             #expect(throws: OperationError.self) { try stack.undo(with: ops) }
             #expect(stack.depth == 1)
-            #expect(try db.read { try Queries.reading($0, id: reading.id)?.kind } == .curated)
+            #expect(try db.read { try Queries.reading($0, id: reading.id)?.kind } == .book)
 
             try ops.unlockReading(reading.id)
             try stack.undo(with: ops)
-            #expect(try db.read { try Queries.reading($0, id: reading.id)?.kind } == .smart)
+            #expect(try db.read { try Queries.reading($0, id: reading.id)?.kind } == .gathering)
         }
     }
 
@@ -438,7 +440,7 @@ struct SmartConversionTests {
     @Test func anOrderOverrideReturnsExactlyWhatSavingItWouldShow() throws {
         // The whole promise of a preview, pinned: browse == save-then-look.
         try withOperations { ops, db in
-            let reading = try ops.createReading(name: "book", kind: .curated)
+            let reading = try ops.createReading(name: "book", kind: .book)
             var posts: [Container] = []
             for (i, day) in ["2026-03-02", "2026-01-05", "2026-02-09"].enumerated() {
                 let post = try ops.createPost(title: "p\(i)", entryDate: day)
@@ -469,7 +471,7 @@ struct SmartConversionTests {
 
     @Test func browsingByAnAttributeWritesNothingAndKeepsTheHandOrderIntact() throws {
         try withOperations { ops, db in
-            let reading = try ops.createReading(name: "book", kind: .curated)
+            let reading = try ops.createReading(name: "book", kind: .book)
             let late = try ops.createPost(title: "late", entryDate: "2026-05-01")
             let early = try ops.createPost(title: "early", entryDate: "2026-01-01")
             try ops.addPostToReading(late.id, to: reading.id)
@@ -496,7 +498,7 @@ struct SmartConversionTests {
         // Chapters keep governing — the same precedence a STORED stamp sort
         // has always had on a chaptered book. One rule, not two.
         try withOperations { ops, db in
-            let reading = try ops.createReading(name: "book", kind: .curated)
+            let reading = try ops.createReading(name: "book", kind: .book)
             let one = try ops.createSection(in: reading.id, name: "I")
             let two = try ops.createSection(in: reading.id, name: "II")
             let lateInOne = try ops.createPost(title: "late-I", entryDate: "2026-09-01")
@@ -523,7 +525,7 @@ struct SmartConversionTests {
         // The reason the parameter belongs in the query: with a window, a
         // post-fetch re-sort would sort the first N of the OLD order.
         try withOperations { ops, db in
-            let reading = try ops.createReading(name: "book", kind: .curated)
+            let reading = try ops.createReading(name: "book", kind: .book)
             var posts: [Container] = []
             for i in 0..<5 {
                 let post = try ops.createPost(

@@ -63,7 +63,7 @@ final class MobileBookDetailsModel {
     /// journal profile; P-2: a door that can never mean what it says
     /// isn't rendered).
     nonisolated static func showsDailyDoor(_ reading: Reading) -> Bool {
-        reading.kind == .curated && reading.profile == "journal"
+        reading.kind == .book && reading.profile == "journal"
     }
 
     /// The rename face's gate (the create sheet's rule: no nameless book).

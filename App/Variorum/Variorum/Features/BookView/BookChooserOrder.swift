@@ -39,8 +39,8 @@ nonisolated enum BookChooserOrder {
             rank[id] = index
         }
         return books.sorted { a, b in
-            let aCurated = a.kind == .curated
-            let bCurated = b.kind == .curated
+            let aCurated = a.kind == .book
+            let bCurated = b.kind == .book
             if aCurated != bCurated { return aCurated }
             let aRank = rank[a.id] ?? Int.max
             let bRank = rank[b.id] ?? Int.max

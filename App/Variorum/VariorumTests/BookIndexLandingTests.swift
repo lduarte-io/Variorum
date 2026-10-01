@@ -61,7 +61,7 @@ private func withLongIndexBook<T>(
         $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 41))
     } operation: { @MainActor in
         let session = AppSession(database: db)
-        let reading = try session.operations.createReading(name: "a long book", kind: .curated)
+        let reading = try session.operations.createReading(name: "a long book", kind: .book)
         var postIDs: [String] = []
         for p in 0..<notes {
             let post = try session.operations.createPost(title: "story \(p)")

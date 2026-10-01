@@ -13,7 +13,7 @@ struct ReadingSectionTests {
     private func makeBook(
         _ ops: Operations, posts: Int = 3
     ) throws -> (reading: Reading, postIDs: [String]) {
-        let reading = try ops.createReading(name: "orbit", kind: .curated)
+        let reading = try ops.createReading(name: "orbit", kind: .book)
         var postIDs: [String] = []
         for index in 0..<posts {
             let post = try ops.createPost(title: "post \(index)", profile: .generic)
@@ -186,9 +186,9 @@ struct ReadingSectionTests {
     @Test func smartReadingsRefuseChapters() throws {
         try withOperations { ops, _ in
             let smart = try ops.createReading(
-                name: "star-notes", kind: .smart,
+                name: "star-notes", kind: .gathering,
                 querySpec: try Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())
-            #expect(throws: OperationError.wrongReadingKind(id: smart.id, expected: .curated)) {
+            #expect(throws: OperationError.wrongReadingKind(id: smart.id, expected: .book)) {
                 _ = try ops.createSection(in: smart.id, name: "I")
             }
         }

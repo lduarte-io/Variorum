@@ -109,12 +109,27 @@ extension Operations {
         return try database.write { db in
             if let raced = try Queries.quicknotesBookID(db) { return raced }
             let now = date.now
+            // 13i-a: the rule is stored v2 and references the tag BY ID
+            // (§19's ruling), so the tag row must exist before the rule
+            // can name it — ensure it HERE too (idempotent beside the
+            // door's own ensure; a caller reaching this mint first must
+            // not store a dead term).
+            let tagID: String
+            if let existing = try Self.liveTagID(db, path: Self.quicknoteTagPath) {
+                tagID = existing
+            } else {
+                let tag = Tag(
+                    id: newID(), ownerId: currentOwnerID(), parentId: nil,
+                    name: Self.quicknoteTagPath, path: Self.quicknoteTagPath,
+                    createdAt: now, updatedAt: now)
+                try tag.insert(db)
+                tagID = tag.id
+            }
             let book = Reading(
                 id: newID(), ownerId: currentOwnerID(),
-                name: Self.defaultQuicknoteBookName, kind: .smart,
+                name: Self.defaultQuicknoteBookName, kind: .gathering,
                 profile: "collection", sortField: .createdAt, sortDir: .desc,
-                querySpec: try Queries.SmartQuerySpec(
-                    tags: [Self.quicknoteTagPath]).encodedJSON(),
+                querySpec: try RuleGrammar.encode(.tag(tagID)),
                 createdAt: now, updatedAt: now)
             try book.insert(db)
             try upsertSetting(db, key: "quicknote_book", value: book.id)

@@ -86,7 +86,7 @@ private func withLeavingBook<T>(
         $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 14))
     } operation: { @MainActor in
         let session = AppSession(database: db)
-        let reading = try session.operations.createReading(name: "the leaving book", kind: .curated)
+        let reading = try session.operations.createReading(name: "the leaving book", kind: .book)
         var postIDs: [String] = []
         var blocks: Blocks = [:]
         for p in 0..<posts {

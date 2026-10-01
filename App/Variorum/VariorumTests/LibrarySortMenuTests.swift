@@ -240,7 +240,7 @@ struct LibrarySortMenuTests {
             // A BOOK row has no such stamp and draws nothing — `detail` there
             // is the word "book", and a face that relied on the parse failing
             // would be one edit from printing it as a date.
-            let book = try session.operations.createReading(name: "the field guide", kind: .curated)
+            let book = try session.operations.createReading(name: "the field guide", kind: .book)
             await model.search()
             let bookHit = try #require(model.hits.first { $0.kind == .book && $0.id == book.id })
             #expect(bookHit.detail == "book")

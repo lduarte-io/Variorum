@@ -72,7 +72,7 @@ struct SyncPullTests {
             let post = try ops.createPost(title: "post", profile: nil)
             _ = try ops.newBlock(in: post.id, text: "one", at: .end)
             _ = try ops.newBlock(in: post.id, text: "two", at: .end)
-            let reading = try ops.createReading(name: "r", kind: .curated, maxPosts: nil)
+            let reading = try ops.createReading(name: "r", kind: .book, maxPosts: nil)
             _ = try ops.addPostToReading(post.id, to: reading.id)
         }
         _ = try await productionRound(a)

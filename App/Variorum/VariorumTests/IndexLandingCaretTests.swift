@@ -88,7 +88,7 @@ private func withStoryBook<T>(
         $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 53))
     } operation: { @MainActor in
         let session = AppSession(database: db)
-        let reading = try session.operations.createReading(name: "the stories", kind: .curated)
+        let reading = try session.operations.createReading(name: "the stories", kind: .book)
         var postIDs: [String] = []
         var blocks: [String: [Minted]] = [:]
         for p in 0..<3 {

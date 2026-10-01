@@ -75,7 +75,8 @@ struct JournalKeeperRepairTests {
                 db,
                 sql: """
                     SELECT id FROM reading
-                    WHERE kind = 'curated' AND profile = 'journal' AND deleted_at IS NULL
+                    WHERE kind = 'book' AND profile IN ('daily', 'journal')
+                      AND deleted_at IS NULL
                     ORDER BY id
                     """)
         }
@@ -207,7 +208,7 @@ struct JournalKeeperRepairTests {
         // 'journal'), never the name.
         try b.with { ops, _ in
             let book = try ops.createReading(
-                name: Operations.defaultDailyJournalBookName, kind: .curated, profile: "book")
+                name: Operations.defaultDailyJournalBookName, kind: .book, profile: "book")
             let post = try ops.createPost(title: "mine", profile: nil)
             _ = try ops.addPostToReading(post.id, to: book.id)
         }
@@ -247,8 +248,10 @@ struct JournalKeeperRepairTests {
         let notebooks: [(bookID: String, postID: String)] = try a.with { ops, _ in
             try ["Work journal", "2027"].map { name in
                 try ops.assertBookNameIsFree(name)
+                // 13i-a: the deliberate door mints the journal TRAIT —
+                // the 'daily' marker is the one daily mint's alone.
                 let book = try ops.createReading(
-                    name: name, kind: .curated, profile: Queries.dailyJournalBookProfile,
+                    name: name, kind: .book, profile: Queries.journalTraitProfile,
                     sortField: .entryDate, sortDir: .asc)
                 let post = try ops.createPost(title: "an entry in \(name)", profile: .journal)
                 _ = try ops.addPostToReading(post.id, to: book.id)
@@ -288,37 +291,40 @@ struct JournalKeeperRepairTests {
         let daily = try mintJournal(a, day: "2026-08-30")
         let notebook: String = try a.with { ops, _ in
             try ops.createReading(
-                name: "Untitled Journal", kind: .curated,
-                profile: Queries.dailyJournalBookProfile,
+                name: "Untitled Journal", kind: .book,
+                profile: Queries.journalTraitProfile,
                 sortField: .entryDate, sortDir: .asc).id
         }
         let candidates = try await a.db.read { db in try Queries.dailyJournalBookCandidates(db) }
         #expect(candidates == [daily.bookID])
         #expect(!candidates.contains(notebook))
-        // The name leg is BookNaming's key — case and end-whitespace fold,
-        // nothing else (E13's letter): a "  journal " notebook IS the
-        // Journal's shape; "Journal 2" is not.
+        // 13i-a RE-KEY (the identity memo §3, built at the sitting's §10
+        // ruling): the NAME LEG IS GONE — the marker alone decides. A
+        // renamed daily book stays a candidate (which is what closes
+        // #85(a)'s corner); a trait notebook never is, whatever it wears.
         let readings = try await a.db.read { db in try Queries.readings(db) }
         let dailyRow = try #require(readings.first { $0.id == daily.bookID })
-        var folded = dailyRow
-        folded.name = "  JOURNAL "
-        #expect(Queries.isDailyJournalMintShape(folded))
-        var other = dailyRow
-        other.name = "Journal 2"
-        #expect(!Queries.isDailyJournalMintShape(other))
+        var renamed = dailyRow
+        renamed.name = "My Journal"
+        #expect(Queries.isDailyJournalMintShape(renamed),
+                "the marker survives any rename — names are never keys")
+        var traitBook = dailyRow
+        traitBook.profile = Queries.journalTraitProfile
+        #expect(!Queries.isDailyJournalMintShape(traitBook),
+                "a journal-TRAIT notebook is never a candidate, even named Journal")
         var plainBook = dailyRow
         plainBook.profile = "book"
         #expect(!Queries.isDailyJournalMintShape(plainBook),
                 "a plain book wearing the name is E13's legal same-name book, never a candidate")
     }
 
-    /// **DOCUMENTED CORNER (QUESTIONS #85(a), the F6 amendment):** a daily
-    /// Journal she RENAMED no longer converges with a fresh phone mint — the
-    /// name leg reads the renamed book as her own notebook, so the two
-    /// stand as separate journal-profile books until she merges them by
-    /// hand. The honest consequence of narrowing the predicate; pinned so a
-    /// later change to the name leg says so out loud.
-    @Test func aRenamedDailyJournalStandsBesideAFreshMint() async throws {
+    /// **#85(a)'s CORNER, CLOSED (13i-a — the identity memo §3 built):**
+    /// a daily Journal she RENAMED now CONVERGES with a fresh phone mint —
+    /// the keeper keys on the 'daily' marker, never the name, so the rename
+    /// changes nothing about convergence. (The old documented corner — two
+    /// books standing — was the name-shape interim's honest consequence;
+    /// this pin now says the memo's promise out loud instead.)
+    @Test func aRenamedDailyJournalConvergesWithAFreshMint() async throws {
         let (a, b, server) = try furniturePair()
         let renamed = try mintJournal(a, day: "2026-08-30")
         try a.with { ops, _ in try ops.renameReading(renamed.bookID, name: "My Journal") }
@@ -330,15 +336,15 @@ struct JournalKeeperRepairTests {
         try await a.pull()
         try await assertFurnitureConverged(a, b, server)
 
+        let keeper = min(renamed.bookID, fresh.bookID)
         for client in [a, b] {
-            #expect(try liveJournalBookIDs(client) == [renamed.bookID, fresh.bookID].sorted(),
-                    "two journal-profile books stand — the renamed one is hers by name")
+            #expect(try liveJournalBookIDs(client) == [keeper],
+                    "ONE daily Journal stands — the rename never forked it")
             #expect(try client.db.fetchInt(
                 "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
-                [renamed.bookID]) == 1)
-            #expect(try client.db.fetchInt(
-                "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
-                [fresh.bookID]) == 1)
+                [keeper]) == 2,
+                "both days' entries live on the keeper")
+            #expect(try designation(client) == keeper)
         }
     }
 
@@ -604,7 +610,7 @@ struct JournalKeeperRepairTests {
                     "N + 1 + today's entry, all on the keeper")
             #expect(try designation(client) == journalA.bookID)
             #expect(try client.db.fetchInt(
-                "SELECT COUNT(*) FROM reading WHERE profile = 'journal'") == 2,
+                "SELECT COUNT(*) FROM reading WHERE profile = 'daily'") == 2,
                 "no third Journal was ever minted (old: a retired third row in the Trash)")
         }
     }
@@ -654,7 +660,7 @@ struct JournalKeeperRepairTests {
             #expect(try designation(client) == fresh.bookID)
             #expect(try liveMemberships(client, in: fresh.bookID) == 2)
             #expect(try client.db.fetchInt(
-                "SELECT COUNT(*) FROM reading WHERE profile = 'journal'") == 2,
+                "SELECT COUNT(*) FROM reading WHERE profile = 'daily'") == 2,
                 "the deleted one and the adopted one — no third ever minted (old: 3)")
         }
     }

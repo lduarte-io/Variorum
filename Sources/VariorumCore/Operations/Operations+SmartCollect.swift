@@ -6,8 +6,16 @@ import GRDB
 // going to be added" — refined at the batch-10 question round to APPLY AND
 // REPORT ("the user already deliberately tried to add it"), with a filter
 // that tagging can't satisfy refusing DESCRIPTIVELY, naming the filter.
-// Adding to a smart book mints NO membership row (smart membership is
-// derived, #25a) — the add IS the tagging.
+// Adding to a gathering mints NO membership row (its assembly is derived,
+// #25a) — the add IS the tagging. The 13i sitting's §14.6 recast keeps this
+// exactly: "adding a note to a GATHERING applies the tag."
+//
+// 13i-a: the stored rule is the v2 grammar (Domain/RuleGrammar). The
+// collection walk reads the tree's TOP-LEVEL conjuncts — the shapes every
+// migrated and door-written rule has (AND of tag terms / one OR-of-tags /
+// legacy terms). Anything deeper (NOT, nested trees — authorable only from
+// 13i-b's grammar faces) falls through to the end probe, whose standing
+// refusal already says the honest thing: tagging alone can't satisfy it.
 extension Operations {
     /// What collecting did — the report half of apply-and-report.
     public struct SmartCollectResult: Equatable, Sendable {
@@ -17,9 +25,9 @@ extension Operations {
         public let alreadyMatched: Bool
     }
 
-    /// Makes the post satisfy the smart reading's filter by applying the
-    /// tags the filter needs: every missing `tagsAll` path, plus the FIRST
-    /// `tags` (any-of) path when none matches — deterministic, reported.
+    /// Makes the post satisfy the gathering's rule by applying the tags the
+    /// rule needs: every missing top-level tag conjunct, plus the FIRST of
+    /// an any-of (OR) group when none matches — deterministic, reported.
     /// One transaction: a refusal mid-way applies nothing.
     @discardableResult
     public func collectPostIntoSmartReading(
@@ -28,18 +36,22 @@ extension Operations {
         try database.write { db in
             let post = try livePost(db, postID)
             let reading = try liveReading(db, readingID)
-            guard reading.kind == .smart else {
-                throw OperationError.wrongReadingKind(id: readingID, expected: .smart)
+            guard reading.kind == .gathering else {
+                throw OperationError.wrongReadingKind(id: readingID, expected: .gathering)
             }
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: readingID)
             }
-            guard let spec = Queries.decodeSpec(reading.querySpec) else {
+            let term: RuleTerm?
+            switch RuleGrammar.read(reading.querySpec) {
+            case .malformed:
                 throw OperationError.smartFilterUnsatisfiable(
                     readingID: readingID,
                     reason: "its filter is unreadable (malformed) — edit the filter first")
+            case .none: term = nil
+            case .rule(let t): term = t
             }
-            if try matchesSmartSpec(db, postID: postID, spec: spec) {
+            if try matchesRule(db, postID: postID, term: term, wingID: reading.wingId) {
                 return SmartCollectResult(appliedTagPaths: [], alreadyMatched: true)
             }
             // The filters tagging cannot satisfy refuse BEFORE any write,
@@ -50,62 +62,89 @@ extension Operations {
                     reason: "this note is archived — books don't show archived notes; "
                         + "unarchive it first")
             }
-            if let profile = spec.profile, post.profile?.rawValue != profile {
-                throw OperationError.smartFilterUnsatisfiable(
-                    readingID: readingID,
-                    reason: "it collects \(profile) notes — this note isn't one, "
-                        + "and adding can't change that")
+            let conjuncts: [RuleTerm] = switch term {
+            case .and(let terms): terms
+            case .some(let single): [single]
+            case nil: []
             }
-            if spec.entryDateFrom != nil || spec.entryDateTo != nil {
-                guard let day = post.entryDate else {
+            for conjunct in conjuncts {
+                switch conjunct {
+                case .legacyProfile(let profile) where post.profile?.rawValue != profile:
                     throw OperationError.smartFilterUnsatisfiable(
                         readingID: readingID,
-                        reason: "it collects notes by their entry date — this note has "
-                            + "no entry date; set one first (set date…)")
-                }
-                if let from = spec.entryDateFrom, day < from {
-                    throw OperationError.smartFilterUnsatisfiable(
-                        readingID: readingID,
-                        reason: "it collects notes dated \(from) or later — "
-                            + "this one is dated \(day)")
-                }
-                if let to = spec.entryDateTo, day > to {
-                    throw OperationError.smartFilterUnsatisfiable(
-                        readingID: readingID,
-                        reason: "it collects notes dated \(to) or earlier — "
-                            + "this one is dated \(day)")
+                        reason: "it collects \(profile) notes — this note isn't one, "
+                            + "and adding can't change that")
+                case .legacyEntryDateFrom, .legacyEntryDateTo:
+                    guard let day = post.entryDate else {
+                        throw OperationError.smartFilterUnsatisfiable(
+                            readingID: readingID,
+                            reason: "it collects notes by their entry date — this note has "
+                                + "no entry date; set one first (set date…)")
+                    }
+                    if case .legacyEntryDateFrom(let from) = conjunct, day < from {
+                        throw OperationError.smartFilterUnsatisfiable(
+                            readingID: readingID,
+                            reason: "it collects notes dated \(from) or later — "
+                                + "this one is dated \(day)")
+                    }
+                    if case .legacyEntryDateTo(let to) = conjunct, day > to {
+                        throw OperationError.smartFilterUnsatisfiable(
+                            readingID: readingID,
+                            reason: "it collects notes dated \(to) or earlier — "
+                                + "this one is dated \(day)")
+                    }
+                default:
+                    break
                 }
             }
-            // The tags the filter needs.
-            var needed: [String] = []
-            for path in spec.tagsAll ?? [] where try !hasLiveTagApplication(
-                db, postID: postID, atOrUnder: path) {
-                needed.append(path)
-            }
-            if let anyOf = spec.tags, !anyOf.isEmpty {
-                let satisfied = try anyOf.contains {
-                    try hasLiveTagApplication(db, postID: postID, atOrUnder: $0)
-                }
-                if !satisfied, let first = anyOf.first, !needed.contains(first) {
-                    needed.append(first)
+            // The tag terms the rule needs: every top-level tag conjunct
+            // without a live application, plus an OR group's FIRST tag when
+            // none of its members matches (the v1 any-of rule, kept).
+            var neededTagIDs: [String] = []
+            for conjunct in conjuncts {
+                switch conjunct {
+                case .tag(let id):
+                    if try !hasLiveTagApplication(db, postID: postID, underTagID: id) {
+                        neededTagIDs.append(id)
+                    }
+                case .or(let options):
+                    let tagOptions = options.compactMap {
+                        if case .tag(let id) = $0 { return id } else { return nil as String? }
+                    }
+                    // A mixed OR (tags beside star/NOT terms) is not a
+                    // taggable group — leave it to the end probe.
+                    guard tagOptions.count == options.count, !tagOptions.isEmpty else { break }
+                    let satisfied = try tagOptions.contains {
+                        try hasLiveTagApplication(db, postID: postID, underTagID: $0)
+                    }
+                    if !satisfied, let first = tagOptions.first,
+                       !neededTagIDs.contains(first) {
+                        neededTagIDs.append(first)
+                    }
+                default:
+                    break
                 }
             }
             var applied: [String] = []
             let now = date.now
-            for path in needed {
-                // The tag row must EXIST — the op applies tags, it never
-                // mints taxonomy (a build-time call, recorded batch 10).
-                guard let tagID = try String.fetchOne(
+            for tagID in neededTagIDs {
+                // The tag row must EXIST AND BE LIVE — the op applies tags,
+                // it never mints taxonomy (a build-time call, batch 10). A
+                // dead term ('' or a deleted tag) can never be satisfied.
+                guard let path = try String.fetchOne(
                     db,
-                    sql: """
-                        SELECT id FROM tag WHERE path = ? AND deleted_at IS NULL
-                        ORDER BY id LIMIT 1
-                        """,
-                    arguments: [path])
+                    sql: "SELECT path FROM tag WHERE id = ? AND deleted_at IS NULL",
+                    arguments: [tagID])
                 else {
+                    // Name the tag when any row (even a tombstone) still
+                    // knows its path — the refusal names the filter, the
+                    // standing R98 copy.
+                    let known = try String.fetchOne(
+                        db, sql: "SELECT path FROM tag WHERE id = ?", arguments: [tagID])
+                    let name = known.map { "the tag #\($0)" } ?? "a tag"
                     throw OperationError.smartFilterUnsatisfiable(
                         readingID: readingID,
-                        reason: "its filter needs the tag #\(path), which doesn't exist "
+                        reason: "its filter needs \(name), which doesn't exist "
                             + "right now — recreate it (Settings → Tags) first")
                 }
                 let alreadyApplied = try Bool.fetchOne(
@@ -121,10 +160,10 @@ extension Operations {
                 }
                 applied.append(path)
             }
-            // The probe must pass now — a filter this op can't satisfy by
+            // The probe must pass now — a rule this op can't satisfy by
             // tagging refuses loudly, and the transaction unwinds the
             // applications (never a half-tagged post).
-            guard try matchesSmartSpec(db, postID: postID, spec: spec) else {
+            guard try matchesRule(db, postID: postID, term: term, wingID: reading.wingId) else {
                 throw OperationError.smartFilterUnsatisfiable(
                     readingID: readingID,
                     reason: "tagging alone can't satisfy its filter")
@@ -133,12 +172,12 @@ extension Operations {
         }
     }
 
-    /// The assembly's own predicate (`smartMatchSQL` — ONE implementation,
+    /// The assembly's own predicate (`ruleMatchSQL` — ONE implementation,
     /// the Stage B rule), probed for a single post.
-    func matchesSmartSpec(
-        _ db: Database, postID: String, spec: Queries.SmartQuerySpec
+    func matchesRule(
+        _ db: Database, postID: String, term: RuleTerm?, wingID: String
     ) throws -> Bool {
-        let match = Queries.smartMatchSQL(spec)
+        let match = Queries.ruleMatchSQL(term, wingID: wingID)
         let conditions = [
             "c.id = ?", "c.deleted_at IS NULL", "c.archived_at IS NULL", "c.kind = 'post'",
         ] + match.conditions
@@ -151,20 +190,22 @@ extension Operations {
             arguments: StatementArguments(arguments)) ?? false
     }
 
-    /// A live application of a live tag at-or-under the path (the
-    /// `smartMatchSQL` tag test, single-post form).
+    /// A live application of a live tag at-or-under the REFERENCED tag's
+    /// subtree (the `ruleMatchSQL` tag test, single-post form — the root is
+    /// reached by ID, §19's rule).
     private func hasLiveTagApplication(
-        _ db: Database, postID: String, atOrUnder path: String
+        _ db: Database, postID: String, underTagID tagID: String
     ) throws -> Bool {
         try Bool.fetchOne(
             db,
             sql: """
                 SELECT EXISTS (SELECT 1 FROM post_tag pt
-                 JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                 JOIN tag applied ON applied.id = pt.tag_id AND applied.deleted_at IS NULL
+                 JOIN tag root ON root.id = ? AND root.deleted_at IS NULL
                 WHERE pt.post_id = ? AND pt.deleted_at IS NULL
-                  AND (t.path = ?
-                       OR substr(t.path, 1, length(?) + 1) = ? || '/'))
+                  AND (applied.path = root.path
+                       OR substr(applied.path, 1, length(root.path) + 1) = root.path || '/'))
                 """,
-            arguments: [postID, path, path, path]) ?? false
+            arguments: [tagID, postID]) ?? false
     }
 }

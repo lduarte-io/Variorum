@@ -36,7 +36,7 @@ struct NavigatorReadRowsTests {
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 47))
         } operation: { @MainActor in
             let session = AppSession(database: db)
-            let reading = try session.operations.createReading(name: "the read tab", kind: .curated)
+            let reading = try session.operations.createReading(name: "the read tab", kind: .book)
             var entries: [Queries.ReadingEntry] = []
             for c in 0..<2 {
                 let section = try session.operations.createSection(in: reading.id, name: "chapter \(c)")

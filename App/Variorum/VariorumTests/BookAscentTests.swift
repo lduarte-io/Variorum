@@ -265,10 +265,10 @@ struct BookChooserOrderTests {
     /// not outrank a hand-made one).
     @Test func curatedComeFirstAndRecencyFloatsInsideEachGroup() {
         let books = [
-            book("s1", "Alpha smart", .smart),
-            book("c1", "Zeta curated", .curated),
-            book("c2", "Beta curated", .curated),
-            book("s2", "Zulu smart", .smart),
+            book("s1", "Alpha smart", .gathering),
+            book("c1", "Zeta curated", .book),
+            book("c2", "Beta curated", .book),
+            book("s2", "Zulu smart", .gathering),
         ]
         let ordered = BookChooserOrder.ordered(books, recentlyVisited: ["s2", "c1"])
         #expect(ordered.map(\.id) == ["c1", "c2", "s2", "s1"])
@@ -281,7 +281,7 @@ struct BookChooserOrderTests {
     /// Duplicate names cannot make the order ambiguous — the id breaks it,
     /// so every device shows the same list.
     @Test func theOrderIsTotal() {
-        let twins = [book("b", "Same", .curated), book("a", "Same", .curated)]
+        let twins = [book("b", "Same", .book), book("a", "Same", .book)]
         #expect(BookChooserOrder.ordered(twins, recentlyVisited: []).map(\.id) == ["a", "b"])
     }
 
@@ -312,7 +312,7 @@ struct BookChooserOrderTests {
 struct ContextBarTests {
     private func book(_ name: String) -> Reading {
         let now = Date(timeIntervalSince1970: 1_782_864_000)
-        return Reading(id: name, name: name, kind: .curated, createdAt: now, updatedAt: now)
+        return Reading(id: name, name: name, kind: .book, createdAt: now, updatedAt: now)
     }
 
     /// 13k K11 rebuilt the bar's face: no `collapsed`, a real forward door,
@@ -486,7 +486,7 @@ struct AscentRoutingTests {
         } operation: { @MainActor in
             let session = AppSession(database: db)
             let post = try session.operations.createPost(title: "the note")
-            let reading = try session.operations.createReading(name: "Orbit", kind: .curated)
+            let reading = try session.operations.createReading(name: "Orbit", kind: .book)
             try session.operations.addPostToReading(post.id, to: reading.id)
 
             let router = ShellRouter()
@@ -587,7 +587,7 @@ struct MultiBookEditNoteTriggerTests {
             let post = try session.operations.createPost(title: "shared")
             let block = try session.operations.newBlock(in: post.id, text: "Some prose.")
             for name in ["Orbit", "Field Notes"] {
-                let reading = try session.operations.createReading(name: name, kind: .curated)
+                let reading = try session.operations.createReading(name: name, kind: .book)
                 try session.operations.addPostToReading(post.id, to: reading.id)
             }
             let before = try await db.read { db -> [Int] in
@@ -634,7 +634,7 @@ struct MultiBookEditNoteTriggerTests {
             let session = AppSession(database: db)
             let post = try session.operations.createPost(title: "lonely")
             let block = try session.operations.newBlock(in: post.id, text: "Some prose.")
-            let reading = try session.operations.createReading(name: "Orbit", kind: .curated)
+            let reading = try session.operations.createReading(name: "Orbit", kind: .book)
             try session.operations.addPostToReading(post.id, to: reading.id)
 
             session.autosave(forPost: post.id)
@@ -684,7 +684,7 @@ struct DivergeDoorTests {
         #expect(done.contains("\u{2325}\u{2318}Z"), "the ratified undo grammar")
 
         let smart = DivergeCopy.refusal(
-            for: OperationError.wrongReadingKind(id: "r", expected: .curated), book: "Dreams")
+            for: OperationError.wrongReadingKind(id: "r", expected: .book), book: "Dreams")
         #expect(smart.contains("tags"), "it names the tag road rather than staying silent")
         #expect(smart.contains("Duplicate as Version"))
         // Everything else falls through to the standing chip wording.
@@ -731,9 +731,9 @@ struct DivergeDoorTests {
     /// whenever she came from one, because arriving floats it.
     @Test func theNotesButtonTargetsTheFirstCuratedBookInTheChoosersOrder() {
         let books = [
-            book("s1", "Alpha smart", .smart),
-            book("c1", "Zeta curated", .curated),
-            book("c2", "Beta curated", .curated),
+            book("s1", "Alpha smart", .gathering),
+            book("c1", "Zeta curated", .book),
+            book("c2", "Beta curated", .book),
         ]
         #expect(MultiBookEditNote.divergeTarget(books, recentlyVisited: [])?.id == "c2",
                 "no recency ⇒ the chooser's plain order")
@@ -742,7 +742,7 @@ struct DivergeDoorTests {
         #expect(MultiBookEditNote.divergeTarget(books, recentlyVisited: ["s1"])?.id == "c2",
                 "a recent SMART book never takes it — it could only refuse")
         #expect(MultiBookEditNote.divergeTarget(
-            [book("s1", "Only smart", .smart), book("s2", "Also smart", .smart)],
+            [book("s1", "Only smart", .gathering), book("s2", "Also smart", .gathering)],
             recentlyVisited: []) == nil,
                 "every membership derived ⇒ the note speaks with NO button")
     }
@@ -766,7 +766,7 @@ struct DivergeDoorTests {
             let session = AppSession(database: db)
             let post = try session.operations.createPost(title: "shared")
             let block = try session.operations.newBlock(in: post.id, text: "Alpha beta.")
-            let book = try session.operations.createReading(name: "Orbit", kind: .curated)
+            let book = try session.operations.createReading(name: "Orbit", kind: .book)
             try session.operations.addPostToReading(post.id, to: book.id)
 
             // The bug's exact state: the edit is PENDING in the shared

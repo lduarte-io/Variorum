@@ -166,7 +166,7 @@ struct OutlineRoomTests {
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 22))
         } operation: { @MainActor in
             let session = AppSession(database: db)
-            let reading = try session.operations.createReading(name: "the room", kind: .curated)
+            let reading = try session.operations.createReading(name: "the room", kind: .book)
             var entries: [Queries.ReadingEntry] = []
             var sectionIDs: [String] = []
             for c in 0..<2 {

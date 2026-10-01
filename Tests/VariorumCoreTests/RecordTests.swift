@@ -64,7 +64,7 @@ struct RecordTests {
             #expect(try Tag.fetchOne(db, key: "t1") == tag)
 
             let reading = Reading(
-                id: "r1", name: "The Journal, Year One", kind: .curated,
+                id: "r1", name: "The Journal, Year One", kind: .book,
                 profile: "journal", sortField: .entryDate, sortDir: .desc,
                 groupingTagId: "t1", maxPosts: 365, createdAt: t0, updatedAt: t0)
             try reading.insert(db)
@@ -169,7 +169,7 @@ struct RecordTests {
             try CommitPoint(id: "cp2", variantId: "v1", text: "two", createdAt: t1).insert(db)
             try ContainerBlock(id: "cb1", containerId: "c1", blockId: "b1", position: "A", createdAt: t0, updatedAt: t0).insert(db)
             try ContainerBlock(id: "cb2", containerId: "c1", blockId: "b2", position: "B", createdAt: t0, updatedAt: t0).insert(db)
-            try Reading(id: "r1", name: "r", kind: .curated, createdAt: t0, updatedAt: t0).insert(db)
+            try Reading(id: "r1", name: "r", kind: .book, createdAt: t0, updatedAt: t0).insert(db)
             try ReadingPost(id: "rp1", readingId: "r1", postId: "c1", position: "V", createdAt: t0).insert(db)
             try Tag(id: "t1", name: "life", path: "life", createdAt: t0, updatedAt: t0).insert(db)
             try Tag(id: "t2", parentId: "t1", name: "goals", path: "life/goals", createdAt: t0, updatedAt: t0).insert(db)

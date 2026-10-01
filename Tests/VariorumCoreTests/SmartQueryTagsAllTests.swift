@@ -30,7 +30,7 @@ struct SmartQueryTagsAllTests {
         _ ops: Operations, _ db: AppDatabase, spec: Queries.SmartQuerySpec
     ) throws -> Set<String> {
         let reading = try ops.createReading(
-            name: "smart-\(UUID().uuidString)", kind: .smart,
+            name: "smart-\(UUID().uuidString)", kind: .gathering,
             querySpec: try spec.encodedJSON())
         return Set(try db.read {
             try Queries.assembleReading($0, readingID: reading.id).map(\.postID)

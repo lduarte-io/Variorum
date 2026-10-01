@@ -73,7 +73,7 @@ struct MobileTrashTests {
         try await withEditorWorld { session, _ in
             let noteID = try await seedDeletedNote(session, title: "A note")
             let readingID = try await session.runner.run { ops -> String in
-                let book = try ops.createReading(name: "A book", kind: .curated)
+                let book = try ops.createReading(name: "A book", kind: .book)
                 return book.id
             }
             try await session.runner.run { ops in try ops.deleteReading(readingID) }
@@ -352,7 +352,7 @@ struct MobileTrashTests {
             _ = try await seedDeletedNote(session, title: "One")
             _ = try await seedDeletedNote(session, title: "Two")
             let readingID = try await session.runner.run { ops in
-                try ops.createReading(name: "A book", kind: .curated).id
+                try ops.createReading(name: "A book", kind: .book).id
             }
             try await session.runner.run { ops in try ops.deleteReading(readingID) }
 

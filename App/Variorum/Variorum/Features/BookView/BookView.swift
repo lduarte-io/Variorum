@@ -661,7 +661,7 @@ struct BookView: View {
                         // one to land it at the end (R19). 13f W11a: taller,
                         // because with TWO chapters this strip was the ONLY
                         // way to move one down and it was 14 pt of nothing.
-                        if structure.chaptersActive, structure.reading?.kind == .curated {
+                        if structure.chaptersActive, structure.reading?.kind == .book {
                             if chapterDropAtEnd {
                                 Rectangle()
                                     .fill(tokens.ring)
@@ -679,7 +679,7 @@ struct BookView: View {
                     .id("nav-noop")
                 }
                 Spacer(minLength: 4)
-                if structure.reading?.kind == .curated {
+                if structure.reading?.kind == .book {
                     Button(tokens.chromeLabel("+ new chapter")) {
                         chapterNameField = ""
                         newChapterPresented = true
@@ -713,7 +713,7 @@ struct BookView: View {
                         .buttonStyle(.borderless)
                         .font(tokens.small)
                         .foregroundStyle(tokens.accent)
-                    } else if structure.reading?.kind == .curated,
+                    } else if structure.reading?.kind == .book,
                               structure.reading?.locked != true {
                         // Sitting 9 (R62/R75): "it needs to be easy to make
                         // a post inside of a book" — the non-journal door.
@@ -730,7 +730,7 @@ struct BookView: View {
                         .help("A new note born inside this book — no drag needed")
                     }
                 }
-                if structure.reading?.kind == .smart {
+                if structure.reading?.kind == .gathering {
                     // 13c 2D (C2/N38, the memo's §3 + P-2): the chapter door
                     // is RENDERED on a smart book and it ACTS — it opens the
                     // conversion offer and, on confirm, creates the chapter.
@@ -1406,7 +1406,7 @@ struct BookView: View {
                             .font(tokens.small)
                             .foregroundStyle(tokens.accent)
                             .padding(.top, 12)
-                        } else if structure.reading?.kind == .curated {
+                        } else if structure.reading?.kind == .book {
                             Button(tokens.chromeLabel("+ new note in this book")) {
                                 Task {
                                     if let id = await structure.newPost() {
@@ -1706,7 +1706,7 @@ struct BookView: View {
     /// The body's end drop zone (N21's twin of the navigator's R19 zone).
     @ViewBuilder
     private var bodyChapterEndZone: some View {
-        if structure.chaptersActive, structure.reading?.kind == .curated {
+        if structure.chaptersActive, structure.reading?.kind == .book {
             if bodyChapterDropAtEnd {
                 Rectangle()
                     .fill(tokens.ring)
@@ -1771,7 +1771,7 @@ struct BookView: View {
 
     /// Batch 12: kind + extent at a glance under the title.
     private var bookMetaLine: String {
-        var parts: [String] = [structure.reading?.kind == .smart ? "smart book" : "book"]
+        var parts: [String] = [structure.reading?.kind == .gathering ? "smart book" : "book"]
         if structure.sections.count > 0 { parts.append("\(structure.sections.count) chapters") }
         parts.append("\(model.entries.count) notes")
         return parts.joined(separator: " · ")
@@ -2457,7 +2457,7 @@ private extension View {
 private func outlineChapterMenu(
     structure: BookStructureModel, postID: String
 ) -> some View {
-    if structure.reading?.kind == .curated {
+    if structure.reading?.kind == .book {
         Menu("Chapter") {
             ForEach(structure.sections, id: \.id) { section in
                 Button(section.name) {

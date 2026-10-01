@@ -216,7 +216,7 @@ struct TutorialBookShapeTests {
             }
             #expect(lessonIDs.isSubset(of: taggedIDs),
                     "the tag IS the restore identity — every lesson wears it")
-            #expect(reading?.kind == .curated)
+            #expect(reading?.kind == .book)
             #expect(reading?.wordTarget == 4000, "the books lesson's extent face is real")
         }
     }
@@ -457,7 +457,7 @@ struct TutorialDoorTests {
             // A user's own world beside the tutorial.
             let userPost = try session.operations.createPost(title: "my real essay")
             _ = try session.operations.newBlock(in: userPost.id, text: "my own words.")
-            let userBook = try session.operations.createReading(name: "my book", kind: .curated)
+            let userBook = try session.operations.createReading(name: "my book", kind: .book)
             let userRows = try await db.read { [postID = userPost.id] db in
                 try userPostRows(db, postID: postID)
             }
@@ -566,7 +566,7 @@ struct TutorialDoorTests {
     @Test func aSameNamedUserBookDiesWithTheConfirmedReplaceButItsPostsSurvive() async throws {
         try await withTutorialWorld { session, db, bookID in
             let herBook = try session.operations.createReading(
-                name: TutorialSeeder.bookName, kind: .curated)
+                name: TutorialSeeder.bookName, kind: .book)
             let herPost = try session.operations.createPost(title: "her chapter draft")
             _ = try session.operations.newBlock(
                 in: herPost.id, text: "her words, in her same-named book.")

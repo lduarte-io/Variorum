@@ -199,7 +199,7 @@ enum MobileTutorialSeeder {
         }
 
         let book = try ops.createReading(
-            name: bookName, kind: .curated, profile: "collection")
+            name: bookName, kind: .book, profile: "collection")
         // The shelf's pin face, taught by wearing it (pinned books sit
         // first — the guide leads the shelf so it is findable on a fresh
         // dev store; "getting around" says so).

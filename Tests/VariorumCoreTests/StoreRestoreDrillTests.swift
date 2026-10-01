@@ -41,7 +41,7 @@ struct StoreRestoreDrillTests {
                 _ = try ops.branchVariant(made.block.id, from: made.variant.id)
                 _ = try ops.addBlockComment(to: made.block.id, text: "drill note")
                 let reading = try ops.createReading(
-                    name: "drill book", kind: .curated, wordTarget: 1_000)
+                    name: "drill book", kind: .book, wordTarget: 1_000)
                 _ = try ops.addPostToReading(post.id, to: reading.id)
                 let chapter = try ops.createSection(in: reading.id, name: "I")
                 try ops.assignPostToSection(post.id, in: reading.id, section: chapter.id)

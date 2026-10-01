@@ -258,7 +258,7 @@ struct NoteCardFaceTests {
         try withOperations { ops, db in
             let entry = try ops.createOrOpenJournalEntry(entryDate: "2026-01-15")
             let dated = try ops.createPost(title: nil, entryDate: "2026-01-16")
-            _ = try ops.createReading(name: "the field guide", kind: .curated)
+            _ = try ops.createReading(name: "the field guide", kind: .book)
 
             let hits = try db.read { try Queries.searchCatalog($0, query: "") }
             let byID = Dictionary(

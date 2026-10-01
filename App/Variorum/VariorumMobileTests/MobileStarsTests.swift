@@ -28,7 +28,7 @@ struct MobileStarsTests {
         try await withEditorWorld { session, db in
             let (noteID, bookID) = try await session.runner.run { ops -> (String, String) in
                 (try ops.createPost(title: "Harbor").id,
-                 try ops.createReading(name: "Poems", kind: .curated).id)
+                 try ops.createReading(name: "Poems", kind: .book).id)
             }
             let model = MobileStarsModel(session: session)
             await model.refresh()
@@ -108,7 +108,7 @@ struct MobileStarsTests {
                 ops -> (String, String, String) in
                 (try ops.createPost(title: nil).id,
                  try ops.createPost(title: "Harbor Light").id,
-                 try ops.createReading(name: "Poems", kind: .curated).id)
+                 try ops.createReading(name: "Poems", kind: .book).id)
             }
             let model = MobileStarsModel(session: session)
             await model.toggle(.post(bareID), from: .shelf)

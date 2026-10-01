@@ -57,7 +57,7 @@ private func withLandingBook<T>(
         $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 44))
     } operation: { @MainActor in
         let session = AppSession(database: db)
-        let reading = try session.operations.createReading(name: "the landing", kind: .curated)
+        let reading = try session.operations.createReading(name: "the landing", kind: .book)
         var postIDs: [String] = []
         for p in 0..<posts {
             let post = try session.operations.createPost(title: "note \(p)")

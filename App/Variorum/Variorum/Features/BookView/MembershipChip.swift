@@ -246,11 +246,11 @@ struct MembershipChip: View {
         }) ?? [])
         // Addable = open curated books the post isn't already in.
         addableBooks = all
-            .filter { $0.kind == .curated && !$0.locked && !memberIDs.contains($0.id) }
+            .filter { $0.kind == .book && !$0.locked && !memberIDs.contains($0.id) }
         // R98 (supersedes the pre-batch-10 "never pretends to add there"):
         // open smart books too — the add applies the filter's tags.
         addableSmartBooks = all
-            .filter { $0.kind == .smart && !$0.locked && !memberIDs.contains($0.id) }
+            .filter { $0.kind == .gathering && !$0.locked && !memberIDs.contains($0.id) }
     }
 
     /// R98 — apply-and-report through `collectPostIntoSmartReading`.

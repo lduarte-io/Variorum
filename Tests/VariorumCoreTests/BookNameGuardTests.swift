@@ -31,7 +31,7 @@ struct BookNamingRuleTests {
 struct BookNameGuardTests {
     @Test func aLiveBookMakesItsNameUnavailableCaseInsensitively() throws {
         try withOperations { ops, _ in
-            _ = try ops.createReading(name: "Ideas", kind: .curated)
+            _ = try ops.createReading(name: "Ideas", kind: .book)
 
             // The refusal carries the EXISTING book's stored casing, so the
             // door can name back the book she already has.
@@ -51,7 +51,7 @@ struct BookNameGuardTests {
     /// a smart "Ideas" are exactly the pair 13k K4 surfaced (#53(l)).
     @Test func theKindOfTheSittingBookIsIrrelevant() throws {
         try withOperations { ops, _ in
-            _ = try ops.createReading(name: "Ideas", kind: .smart)
+            _ = try ops.createReading(name: "Ideas", kind: .gathering)
             #expect(throws: OperationError.duplicateBookName(name: "Ideas")) {
                 try ops.assertBookNameIsFree("Ideas")
             }
@@ -62,11 +62,11 @@ struct BookNameGuardTests {
     /// pure casing change, which is a rename she is entitled to make.
     @Test func theExcludedRowNeverCollidesWithItself() throws {
         try withOperations { ops, _ in
-            let book = try ops.createReading(name: "Ideas", kind: .curated)
+            let book = try ops.createReading(name: "Ideas", kind: .book)
             try ops.assertBookNameIsFree("Ideas", excluding: book.id)
             try ops.assertBookNameIsFree("ideas", excluding: book.id)
             // …but another book's name is still taken.
-            _ = try ops.createReading(name: "Orbit", kind: .curated)
+            _ = try ops.createReading(name: "Orbit", kind: .book)
             #expect(throws: OperationError.duplicateBookName(name: "Orbit")) {
                 try ops.assertBookNameIsFree("orbit", excluding: book.id)
             }
@@ -78,11 +78,11 @@ struct BookNameGuardTests {
     /// confusion the ruling is about.
     @Test func aDeletedBookFreesItsNameAndAFinishedOneDoesNot() throws {
         try withOperations { ops, _ in
-            let gone = try ops.createReading(name: "Ideas", kind: .curated)
+            let gone = try ops.createReading(name: "Ideas", kind: .book)
             try ops.deleteReading(gone.id)
             try ops.assertBookNameIsFree("Ideas")
 
-            let finished = try ops.createReading(name: "Orbit", kind: .curated)
+            let finished = try ops.createReading(name: "Orbit", kind: .book)
             try ops.lockReading(finished.id)
             #expect(throws: OperationError.duplicateBookName(name: "Orbit")) {
                 try ops.assertBookNameIsFree("Orbit")
@@ -96,11 +96,11 @@ struct BookNameGuardTests {
     /// all mint through these, and a name refusal there would break them.
     @Test func createAndRenameStillAcceptDuplicateNamesThemselves() throws {
         try withOperations { ops, db in
-            _ = try ops.createReading(name: "Ideas", kind: .curated)
-            let second = try ops.createReading(name: "Ideas", kind: .smart)
+            _ = try ops.createReading(name: "Ideas", kind: .book)
+            let second = try ops.createReading(name: "Ideas", kind: .gathering)
             #expect(second.name == "Ideas")
 
-            let third = try ops.createReading(name: "Orbit", kind: .curated)
+            let third = try ops.createReading(name: "Orbit", kind: .book)
             try ops.renameReading(third.id, name: "ideas")
             let names = try db.read { try Queries.readings($0) }.map(\.name)
             #expect(names.sorted() == ["Ideas", "Ideas", "ideas"])

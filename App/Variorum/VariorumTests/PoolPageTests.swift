@@ -49,7 +49,7 @@ struct PoolPageTests {
         try await withWorld { session, db in
             let (postID, bookID) = try await session.runner.run { ops -> (String, String) in
                 let post = try ops.createPost(title: "floating")
-                let book = try ops.createReading(name: "shelfbound", kind: .curated)
+                let book = try ops.createReading(name: "shelfbound", kind: .book)
                 return (post.id, book.id)
             }
             let before = try await db.read { try Queries.poolPosts($0, limit: 10) }
@@ -68,7 +68,7 @@ struct PoolPageTests {
         try await withWorld { session, _ in
             let (postID, bookID) = try await session.runner.run { ops -> (String, String) in
                 let post = try ops.createPost(title: "floating")
-                let book = try ops.createReading(name: "done", kind: .curated)
+                let book = try ops.createReading(name: "done", kind: .book)
                 try ops.lockReading(book.id)
                 return (post.id, book.id)
             }

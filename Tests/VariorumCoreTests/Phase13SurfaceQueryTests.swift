@@ -142,7 +142,7 @@ struct Phase13SurfaceQueryTests {
             let post = try ops.createPost(title: "Framed Post", profile: .generic)
             let callout = try ops.newBlock(in: post.id, text: "the aside", at: .end).block
             try ops.setBlockPresentation(callout.id, BlockPresentation(color: "green"))
-            let reading = try ops.createReading(name: "Book", kind: .curated)
+            let reading = try ops.createReading(name: "Book", kind: .book)
             try ops.addPostToReading(post.id, to: reading.id, at: .end)
 
             let readingExport = try db.read {

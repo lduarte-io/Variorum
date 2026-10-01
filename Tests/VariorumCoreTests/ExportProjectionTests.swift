@@ -175,7 +175,7 @@ struct ExportProjectionTests {
             try ops.newBlock(in: first.id, text: "Alpha body.")
             let second = try ops.createPost(title: nil, entryDate: "2026-07-14")
             try ops.newBlock(in: second.id, text: "Beta body.")
-            let reading = try ops.createReading(name: "My Book", kind: .curated)
+            let reading = try ops.createReading(name: "My Book", kind: .book)
             try ops.addPostToReading(first.id, to: reading.id)
             try ops.addPostToReading(second.id, to: reading.id)
 
@@ -212,7 +212,7 @@ struct ExportProjectionTests {
             try ops.applyTag(partTwo.id, toPost: b.id)
 
             let reading = try ops.createReading(
-                name: "Grouped", kind: .curated, groupingTagId: root.id)
+                name: "Grouped", kind: .book, groupingTagId: root.id)
             try ops.addPostToReading(a.id, to: reading.id)
             try ops.addPostToReading(b.id, to: reading.id)
 
@@ -249,7 +249,7 @@ struct ExportProjectionTests {
             let deleted = try ops.createPost(title: "Gone", entryDate: "2026-07-13")
             try ops.newBlock(in: deleted.id, text: "Gone body.")
             try ops.deleteContainer(deleted.id)
-            let reading = try ops.createReading(name: "Shelf", kind: .curated)
+            let reading = try ops.createReading(name: "Shelf", kind: .book)
             try ops.addPostToReading(live.id, to: reading.id)
             // Pools join the totality (author ruling 2026-07-16, #22c):
             // every live pool exactly once; a tombstoned pool absent.
@@ -356,7 +356,7 @@ struct ExportProjectionTests {
             let minted = try ops.newBlock(in: post.id, text: "Body.")
             let alt = try ops.branchVariant(minted.block.id, from: minted.variant.id)
             try ops.autosave(alt.id, text: "Alt.", charDelta: 0)
-            let reading = try ops.createReading(name: "R", kind: .curated)
+            let reading = try ops.createReading(name: "R", kind: .book)
             try ops.addPostToReading(post.id, to: reading.id)
             try db.clearOutbox()
 

@@ -126,7 +126,7 @@ struct ContainerOperationsTests {
             let postApp = try ops.applyTag(tag.id, toPost: post.id)
             let blockApp = try ops.applyTag(tag.id, toBlock: first.block.id)
             let reference = try ops.addReference(to: post.id, kind: .url, url: "https://x.example")
-            let reading = try ops.createReading(name: "r", kind: .curated)
+            let reading = try ops.createReading(name: "r", kind: .book)
             let membership = try ops.addPostToReading(post.id, to: reading.id)
             // A block deleted BEFORE the post keeps its own stamp and must
             // stay dead through the restore.
@@ -155,7 +155,7 @@ struct ContainerOperationsTests {
             let post = try ops.createPost()
             let tag = try ops.createTag(name: "doomed")
             let postApp = try ops.applyTag(tag.id, toPost: post.id)
-            let reading = try ops.createReading(name: "doomed", kind: .curated)
+            let reading = try ops.createReading(name: "doomed", kind: .book)
             let membership = try ops.addPostToReading(post.id, to: reading.id)
 
             try ops.deleteContainer(post.id)
@@ -253,8 +253,10 @@ struct ContainerOperationsTests {
             }
             let book = try #require(try db.read { try Queries.reading($0, id: bookID) })
             #expect(book.name == Operations.defaultDailyJournalBookName)
-            #expect(book.kind == .curated)
-            #expect(book.profile == "journal")
+            #expect(book.kind == .book)
+            // 13i-a: the daily mint stamps the MARKER (the identity memo
+            // §3 — convergence keys on it, never the name).
+            #expect(book.profile == "daily")
             #expect(book.sortField == .entryDate)
             #expect(book.sortDir == .asc)
             #expect(try db.read { try Queries.dailyJournalBookID($0) } == bookID)

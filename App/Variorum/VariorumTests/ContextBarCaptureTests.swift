@@ -74,10 +74,10 @@ struct ContextBarCaptureTests {
         try FileManager.default.createDirectory(
             at: Self.outputDirectory, withIntermediateDirectories: true)
 
-        let one = [book("b1", "Orbit", .curated)]
+        let one = [book("b1", "Orbit", .book)]
         let several = [
-            book("b1", "Orbit", .curated), book("b2", "Field Notes", .curated),
-            book("b3", "Dreams", .smart),
+            book("b1", "Orbit", .book), book("b2", "Field Notes", .book),
+            book("b3", "Dreams", .gathering),
         ]
         let tags = [tag("life/goals"), tag("work"), tag("reading/2026")]
 
@@ -134,7 +134,7 @@ struct ContextBarCaptureTests {
     @Test func captureTheChipRadiusVariants() throws {
         try FileManager.default.createDirectory(
             at: Self.outputDirectory, withIntermediateDirectories: true)
-        let one = [book("b1", "Orbit", .curated)]
+        let one = [book("b1", "Orbit", .book)]
         let tags = [tag("life/goals"), tag("work"), tag("reading/2026")]
 
         for (voiceName, tokens) in [

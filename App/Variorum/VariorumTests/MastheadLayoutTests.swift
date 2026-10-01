@@ -366,7 +366,7 @@ struct MastheadLayoutTests {
             let post = try session.operations.createPost(title: "three ways of working")
             _ = try session.operations.newBlock(in: post.id, text: "a block, so the mode can host.")
             // In a book, so the chip wears its widest face (`~/the field guide`).
-            let book = try session.operations.createReading(name: "the field guide", kind: .curated)
+            let book = try session.operations.createReading(name: "the field guide", kind: .book)
             _ = try session.operations.addPostToReading(post.id, to: book.id)
             // FIVE tags — the walk's own case.
             for name in ["again", "final", "once", "tutorial", "walked"] {
@@ -642,7 +642,7 @@ struct MastheadLayoutTests {
             let post = try session.operations.createPost(title: title)
             _ = try session.operations.newBlock(in: post.id, text: "a block, so the mode can host.")
             if let book {
-                let reading = try session.operations.createReading(name: book, kind: .curated)
+                let reading = try session.operations.createReading(name: book, kind: .book)
                 _ = try session.operations.addPostToReading(post.id, to: reading.id)
             }
             for name in tags {

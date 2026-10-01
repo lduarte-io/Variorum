@@ -44,7 +44,7 @@ struct ShelfModelTests {
         func book(_ id: String, _ name: String, profile: String? = nil) -> Queries.ShelfBook {
             Queries.ShelfBook(
                 reading: Reading(
-                    id: id, name: name, kind: .curated, profile: profile,
+                    id: id, name: name, kind: .book, profile: profile,
                     createdAt: Date(), updatedAt: Date()),
                 postCount: 0, sectionCount: 0)
         }
@@ -71,7 +71,7 @@ struct ShelfModelTests {
             let model = ShelfViewModel(session: session)
             let (postID, bookID) = try await session.runner.run { ops in
                 let post = try ops.createPost(title: "floating")
-                let book = try ops.createReading(name: "orbit", kind: .curated)
+                let book = try ops.createReading(name: "orbit", kind: .book)
                 return (post.id, book.id)
             }
             await model.addPost(postID, to: bookID)
@@ -86,7 +86,7 @@ struct ShelfModelTests {
         try await withShellSession { session, db in
             let model = ShelfViewModel(session: session)
             let bookID = try await session.runner.run { ops in
-                try ops.createReading(name: "dream", kind: .curated).id
+                try ops.createReading(name: "dream", kind: .book).id
             }
             await model.setWordTarget(bookID, target: 10_000)
             await model.setFinished(bookID, finished: true)
@@ -118,7 +118,7 @@ struct PromoteAndPaletteTests {
             _ = try await session.runner.run { ops in
                 let post = try ops.createPost(title: "the storm chapter")
                 _ = try ops.newBlock(in: post.id, text: "Prose.", at: .end)
-                _ = try ops.createReading(name: "Orbit", kind: .curated)
+                _ = try ops.createReading(name: "Orbit", kind: .book)
                 return post.id
             }
             let model = PaletteModel(session: session)

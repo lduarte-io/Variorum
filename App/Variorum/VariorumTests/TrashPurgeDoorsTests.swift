@@ -449,7 +449,7 @@ struct TrashPurgeDoorsTests {
             try await editor.session.runner.run { (ops: Operations) in
                 try ops.deleteBlock(blockID)
                 try ops.deleteBlock(secondBlock)
-                let book = try ops.createReading(name: "orbit", kind: .curated)
+                let book = try ops.createReading(name: "orbit", kind: .book)
                 try ops.deleteReading(book.id)
                 let doomed = try ops.createPost(title: "doomed")
                 try ops.deleteContainer(doomed.id)

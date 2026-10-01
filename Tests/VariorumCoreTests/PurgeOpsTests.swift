@@ -185,7 +185,7 @@ struct PurgeOpsTests {
             let doomedPost = try ops.createPost(title: "doomed note", profile: .generic)
             _ = try ops.newBlock(in: doomedPost.id, text: "going", at: .end)
             try ops.deleteContainer(doomedPost.id)
-            let book = try ops.createReading(name: "doomed book", kind: .curated, maxPosts: nil)
+            let book = try ops.createReading(name: "doomed book", kind: .book, maxPosts: nil)
             try ops.deleteReading(book.id)
 
             let now = harnessNow
@@ -276,7 +276,7 @@ struct PurgeOpsTests {
             let tag = try ops.createTag(parent: nil, name: "life")
             _ = try ops.applyTag(tag.id, toPost: post.id)
             _ = try ops.applyTag(tag.id, toBlock: made.block.id)
-            let book = try ops.createReading(name: "book", kind: .curated, maxPosts: nil)
+            let book = try ops.createReading(name: "book", kind: .book, maxPosts: nil)
             _ = try ops.addPostToReading(post.id, to: book.id)
             _ = try ops.addReference(to: post.id, kind: .url, url: "https://example.org")
             let lens = try ops.createLens(post: post.id, name: "cut")
@@ -428,7 +428,7 @@ struct PurgeOpsTests {
                 """, [post.id]) == 0)
 
             // Book: delete → intent → restoreReading voids it.
-            let book = try ops.createReading(name: "book", kind: .curated)
+            let book = try ops.createReading(name: "book", kind: .book)
             try ops.deleteReading(book.id)
             _ = try ops.requestPurge([SyncPurgeTarget(table: "reading", rowID: book.id)])
             try ops.restoreReading(book.id)

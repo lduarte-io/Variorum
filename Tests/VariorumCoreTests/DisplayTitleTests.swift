@@ -162,7 +162,7 @@ struct DisplayTitleTests {
 
     @Test func aBooksEntryNamesItselfTheSameWay() throws {
         try withOperations { ops, db in
-            let book = try ops.createReading(name: "Shelf", kind: .curated)
+            let book = try ops.createReading(name: "Shelf", kind: .book)
             let bare = try ops.createPost(title: nil)
             try ops.addPostToReading(bare.id, to: book.id)
 
@@ -179,7 +179,7 @@ struct DisplayTitleTests {
     /// first expectation fails — the exported note is headed "Untitled".
     @Test func aReadingExportHeadsAnUntitledNoteWithItsDateNotWithUntitled() throws {
         try withOperations { ops, db in
-            let book = try ops.createReading(name: "Shelf", kind: .curated)
+            let book = try ops.createReading(name: "Shelf", kind: .book)
             let bare = try ops.createPost(title: nil)
             try ops.newBlock(in: bare.id, text: "Body of the bare note.")
             try ops.addPostToReading(bare.id, to: book.id)

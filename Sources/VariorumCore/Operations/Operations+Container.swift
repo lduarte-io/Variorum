@@ -220,7 +220,7 @@ extension Operations {
         let now = date.now
         let book = Reading(
             id: newID(), ownerId: currentOwnerID(),
-            name: Self.defaultDailyJournalBookName, kind: .curated,
+            name: Self.defaultDailyJournalBookName, kind: .book,
             // The shared mint-mark: the Journal-keeper repair's predicate
             // filters on exactly this constant (pre-13u Act 0).
             profile: Queries.dailyJournalBookProfile, sortField: .entryDate, sortDir: .asc,

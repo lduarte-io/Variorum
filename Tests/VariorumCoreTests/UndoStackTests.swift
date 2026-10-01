@@ -185,7 +185,7 @@ struct UndoStackTests {
             let tag = try ops.createTag(name: "t")
             try ops.applyTag(tag.id, toPost: post.id)
             try ops.removeTag(tag.id, fromPost: post.id)
-            let reading = try ops.createReading(name: "r", kind: .curated)
+            let reading = try ops.createReading(name: "r", kind: .book)
             try ops.addPostToReading(post.id, to: reading.id)
             try ops.renameContainer(post.id, title: "t2")
 

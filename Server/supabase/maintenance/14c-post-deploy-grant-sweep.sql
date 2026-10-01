@@ -180,6 +180,10 @@ expected_tables (relname, exp_anon, exp_authenticated, exp_rls, exp_forced, exp_
     -- guard's accounting row — server-only, the device_cursor posture.
     ('key_proof_challenge', false, false, true, true, 1),
     ('sync_write_budget',   false, false, true, true, 1),
+    -- 13i-a (13_phase13i_wings.sql): the two wings/shelves data tables,
+    -- born on the standard forced-RLS posture.
+    ('wing',            false, false, true,  true,  1),
+    ('shelf',           false, false, true,  true,  1),
     -- policy counts +1 each since the 14c-gate BYPASSRLS repair
     -- (2026-08-11, maintenance/14c-gate-definer-owner.sql): the own-row
     -- SELECT policies for the non-bypass variorum_definer owner

@@ -144,15 +144,21 @@ struct SupabaseTransportTests {
             + "\n"
             + String(contentsOf: root.appendingPathComponent("09_phase14c_multitenant.sql"), encoding: .utf8)
             + "\n"
-            + String(contentsOf: root.appendingPathComponent("10_phase13j_purge.sql"), encoding: .utf8))
+            + String(contentsOf: root.appendingPathComponent("10_phase13j_purge.sql"), encoding: .utf8)
+            + "\n"
+            // 13i-a: wing + shelf are born at 13 (their creates live there).
+            + String(contentsOf: root.appendingPathComponent("13_phase13i_wings.sql"), encoding: .utf8))
         // The deployed RPC bodies are the LAST rework in deploy order —
         // 11's (pre-13x) since it re-creates both functions with the
         // key-proof parameter (annotated pin edit, batch 1b: this read was
         // 10's; the claim — the deployed allowlists carry the whole
         // registry — is unchanged, and AuthRLSDDLTests' composition pins
         // carry the deeper body checks).
+        // Annotated pin edit (13i-a, the 1b precedent): the LAST rework in
+        // deploy order is 13's — it redefines the six registry-carrying
+        // bodies with wing + shelf; the claim is unchanged.
         let rpc = try strippingComments(String(
-            contentsOf: root.appendingPathComponent("11_pre13x_postures.sql"), encoding: .utf8))
+            contentsOf: root.appendingPathComponent("13_phase13i_wings.sql"), encoding: .utf8))
 
         for table in SyncSchema.tables {
             #expect(schema.contains("create table \(table.name) ("),

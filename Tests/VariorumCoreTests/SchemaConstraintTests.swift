@@ -136,8 +136,8 @@ struct SchemaConstraintTests {
             ("commit_point.kind", "INSERT INTO commit_point (id, variant_id, text, kind, created_at) VALUES ('x5', 'v1', 't', 'scheduled', ?)", [now]),
             ("edge.type", "INSERT INTO edge (id, source_block_id, target_block_id, type, created_at) VALUES ('x6', 'b1', 'b2', 'linked_to', ?)", [now]),
             ("reading.kind", "INSERT INTO reading (id, name, kind, created_at, updated_at) VALUES ('x7', 'r', 'dynamic', ?, ?)", [now, now]),
-            ("reading.sort_field", "INSERT INTO reading (id, name, kind, sort_field, created_at, updated_at) VALUES ('x8', 'r', 'curated', 'title', ?, ?)", [now, now]),
-            ("reading.sort_dir", "INSERT INTO reading (id, name, kind, sort_dir, created_at, updated_at) VALUES ('x9', 'r', 'curated', 'up', ?, ?)", [now, now]),
+            ("reading.sort_field", "INSERT INTO reading (id, name, kind, sort_field, created_at, updated_at) VALUES ('x8', 'r', 'book', 'title', ?, ?)", [now, now]),
+            ("reading.sort_dir", "INSERT INTO reading (id, name, kind, sort_dir, created_at, updated_at) VALUES ('x9', 'r', 'book', 'up', ?, ?)", [now, now]),
             ("reference.kind", "INSERT INTO reference (id, container_id, kind, position, created_at, updated_at) VALUES ('x10', 'c1', 'epub', 'V', ?, ?)", [now, now]),
         ]
         for (label, sql, arguments) in badInserts {
@@ -169,7 +169,7 @@ struct SchemaConstraintTests {
             ("container_block.container_id", "INSERT INTO container_block (id, container_id, block_id, position, created_at, updated_at) VALUES ('d6', 'ghost', 'b1', 'V', ?, ?)", [now, now]),
             ("container_block.block_id", "INSERT INTO container_block (id, container_id, block_id, position, created_at, updated_at) VALUES ('d7', 'c1', 'ghost', 'V', ?, ?)", [now, now]),
             ("container_block.chosen_variant_id", "INSERT INTO container_block (id, container_id, block_id, position, chosen_variant_id, created_at, updated_at) VALUES ('d8', 'c1', 'b1', 'V', 'ghost', ?, ?)", [now, now]),
-            ("reading.grouping_tag_id", "INSERT INTO reading (id, name, kind, grouping_tag_id, created_at, updated_at) VALUES ('d9', 'r', 'curated', 'ghost', ?, ?)", [now, now]),
+            ("reading.grouping_tag_id", "INSERT INTO reading (id, name, kind, grouping_tag_id, created_at, updated_at) VALUES ('d9', 'r', 'book', 'ghost', ?, ?)", [now, now]),
             ("reading_post.reading_id", "INSERT INTO reading_post (id, reading_id, post_id, position, created_at) VALUES ('d10', 'ghost', 'c1', 'V', ?)", [now]),
             ("reading_post.post_id", "INSERT INTO reading_post (id, reading_id, post_id, position, created_at) VALUES ('d11', 'r1', 'ghost', 'V', ?)", [now]),
             ("tag.parent_id", "INSERT INTO tag (id, parent_id, name, path, created_at, updated_at) VALUES ('d12', 'ghost', 'y', 'y', ?, ?)", [now, now]),

@@ -35,8 +35,8 @@ struct MobileMembershipTests {
                 querySpec: nil, maxPosts: nil, wordTarget: nil, locked: false,
                 createdAt: Date(), updatedAt: Date(), deletedAt: nil, syncVersion: 0)
         }
-        let smart = reading("s", "Alpha", kind: .smart)
-        let curated = reading("c", "Zeta", kind: .curated)
+        let smart = reading("s", "Alpha", kind: .gathering)
+        let curated = reading("c", "Zeta", kind: .book)
         #expect(MobileMembershipModel.ordered([smart, curated]).map(\.id) == ["c", "s"],
                 "curated before smart, whatever the names say")
         #expect(MobileMembershipModel.rowCarriesRemove(curated))
@@ -52,10 +52,10 @@ struct MobileMembershipTests {
             let (postID, curatedID, smartID) = try await session.runner.run {
                 ops -> (String, String, String) in
                 let post = try ops.createPost(title: "Harbor")
-                let curated = try ops.createReading(name: "Essays", kind: .curated)
+                let curated = try ops.createReading(name: "Essays", kind: .book)
                 _ = try ops.createTag(name: "sea")
                 let smart = try ops.createReading(
-                    name: "By the Water", kind: .smart, querySpec: #"{"tags":["sea"]}"#)
+                    name: "By the Water", kind: .gathering, querySpec: #"{"tags":["sea"]}"#)
                 return (post.id, curated.id, smart.id)
             }
             let model = MobileMembershipModel(session: session, postID: postID)
@@ -112,7 +112,7 @@ struct MobileMembershipTests {
                 let post = try ops.createPost(title: "Tides")
                 let block = try ops.newBlock(in: post.id, text: "First words.", at: .end)
                 let other = try ops.createPost(title: "Anchor")
-                let book = try ops.createReading(name: "Logbook", kind: .curated)
+                let book = try ops.createReading(name: "Logbook", kind: .book)
                 _ = try ops.addPostToReading(other.id, to: book.id)
                 _ = try ops.addPostToReading(post.id, to: book.id)
                 return (post.id, other.id, book.id, block.variant.id)
@@ -187,7 +187,7 @@ struct MobileMembershipTests {
                 let tag = try ops.createTag(name: "sea")
                 _ = try ops.applyTag(tag.id, toPost: post.id)
                 _ = try ops.createReading(
-                    name: "By the Water", kind: .smart, querySpec: #"{"tags":["sea"]}"#)
+                    name: "By the Water", kind: .gathering, querySpec: #"{"tags":["sea"]}"#)
                 return post.id
             }
             let model = MobileMembershipModel(session: session, postID: postID)

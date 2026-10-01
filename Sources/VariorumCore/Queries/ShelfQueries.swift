@@ -86,9 +86,16 @@ extension Queries {
         // Smart books: derived membership through the ONE shared predicate
         // (a word target on a smart book must show real progress — the
         // extent sheet offers it).
-        for reading in try readings(db) where reading.kind == .smart {
-            guard let spec = decodeSpec(reading.querySpec) else { continue }
-            let match = smartMatchSQL(spec)
+        for reading in try readings(db) where reading.kind == .gathering {
+            // Malformed rules fail closed (skipped); NO rule counts every
+            // post — the v1 letter per site.
+            let term: RuleTerm?
+            switch RuleGrammar.read(reading.querySpec) {
+            case .malformed: continue
+            case .none: term = nil
+            case .rule(let t): term = t
+            }
+            let match = ruleMatchSQL(term, wingID: reading.wingId)
             let conditions = (["c.deleted_at IS NULL", "c.archived_at IS NULL",
                                "c.kind = 'post'"] + match.conditions)
                 .joined(separator: " AND ")
@@ -180,21 +187,28 @@ extension Queries {
     /// nothing (fail closed); an EMPTY spec matches everything (the
     /// ratified NULL-spec rule — such a book empties the Pool). Newest
     /// touched first; bounded like every held listing.
+
     public static func poolPosts(_ db: Database, limit: Int) throws -> [TimelineItem] {
         var exclusions: [String] = ["""
             NOT EXISTS (SELECT 1 FROM reading_post rp
                          WHERE rp.post_id = c.id AND rp.deleted_at IS NULL)
             """]
         var arguments: [(any DatabaseValueConvertible)?] = []
-        for reading in try readings(db) where reading.kind == .smart {
-            guard let spec = decodeSpec(reading.querySpec) else { continue }
-            let match = smartMatchSQL(spec)
-            if match.conditions.isEmpty {
-                // The empty spec matches every post — nothing is bookless.
+        for reading in try readings(db) where reading.kind == .gathering {
+            switch RuleGrammar.read(reading.querySpec) {
+            case .none:
+                // No rule matches every post — nothing is bookless (the
+                // v1 empty-spec rule).
                 return []
+            case .malformed:
+                // Fails closed: the gathering shows nothing, so it
+                // excludes nothing here (the v1 letter).
+                continue
+            case .rule(let term):
+                let match = ruleMatchSQL(term, wingID: reading.wingId)
+                exclusions.append("NOT (" + match.conditions.joined(separator: " AND ") + ")")
+                arguments += match.arguments
             }
-            exclusions.append("NOT (" + match.conditions.joined(separator: " AND ") + ")")
-            arguments += match.arguments
         }
         return try Row.fetchAll(
             db,
@@ -233,9 +247,16 @@ extension Queries {
                 ORDER BY r.name, r.id
                 """,
             arguments: [postID])
-        for reading in try readings(db) where reading.kind == .smart {
-            guard let spec = decodeSpec(reading.querySpec) else { continue }
-            let match = smartMatchSQL(spec)
+        for reading in try readings(db) where reading.kind == .gathering {
+            // Malformed fails closed (skipped); NO rule matches every
+            // post, so the chip lists the gathering (the v1 letter).
+            let term: RuleTerm?
+            switch RuleGrammar.read(reading.querySpec) {
+            case .malformed: continue
+            case .none: term = nil
+            case .rule(let t): term = t
+            }
+            let match = ruleMatchSQL(term, wingID: reading.wingId)
             let conditions = (["c.id = ?", "c.deleted_at IS NULL",
                                "c.archived_at IS NULL", "c.kind = 'post'"]
                               + match.conditions).joined(separator: " AND ")
@@ -289,9 +310,14 @@ extension Queries {
             decoding: (try? JSONEncoder().encode(postIDs)) ?? Data("[]".utf8),
             as: UTF8.self)
         var result: [String: [String]] = [:]
-        for reading in try readings(db) where reading.kind == .smart {
-            guard let spec = decodeSpec(reading.querySpec) else { continue }
-            let statement = smartMembershipSQL(spec)
+        for reading in try readings(db) where reading.kind == .gathering {
+            let term: RuleTerm?
+            switch RuleGrammar.read(reading.querySpec) {
+            case .malformed: continue  // fails closed (the v1 letter)
+            case .none: term = nil
+            case .rule(let t): term = t
+            }
+            let statement = smartMembershipSQL(term, wingID: reading.wingId)
             let ids = try String.fetchAll(
                 db, sql: statement.sql,
                 arguments: StatementArguments([json] + statement.arguments))
@@ -305,9 +331,9 @@ extension Queries {
     /// than a copy of it that could drift away from what ships. The first
     /// argument is always the page's ids as a JSON array.
     static func smartMembershipSQL(
-        _ spec: SmartQuerySpec
+        _ term: RuleTerm?, wingID: String
     ) -> (sql: String, arguments: [(any DatabaseValueConvertible)?]) {
-        let match = smartMatchSQL(spec)
+        let match = ruleMatchSQL(term, wingID: wingID)
         let conditions = (["c.deleted_at IS NULL", "c.archived_at IS NULL",
                            "c.kind = 'post'"] + match.conditions)
             .joined(separator: " AND ")
@@ -459,7 +485,7 @@ extension Queries {
             hits += books.map {
                 CatalogHit(
                     kind: .book, id: $0["id"], title: $0["name"],
-                    detail: ($0["kind"] as String) == "smart" ? "smart book"
+                    detail: ($0["kind"] as String) == "gathering" ? "smart book"
                         : (($0["locked"] as Int) == 1 ? "finished book" : "book"))
             }
         }

@@ -65,7 +65,7 @@ struct BookOutlineCostTests {
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 13))
         } operation: { @MainActor in
             let session = AppSession(database: db)
-            let reading = try session.operations.createReading(name: "the cap", kind: .curated)
+            let reading = try session.operations.createReading(name: "the cap", kind: .book)
             var postIDs: [String] = []
             for p in 0..<notes {
                 let post = try session.operations.createPost(title: "note \(p)")

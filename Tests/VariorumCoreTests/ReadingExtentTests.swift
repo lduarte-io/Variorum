@@ -22,7 +22,7 @@ struct ReadingExtentTests {
     @Test func setUpdateClearWordTargetAndBirthValue() throws {
         try withOperations { ops, db in
             let book = try ops.createReading(
-                name: "dream-journal", kind: .curated, wordTarget: 10_000)
+                name: "dream-journal", kind: .book, wordTarget: 10_000)
             #expect(try db.fetchInt(
                 "SELECT word_target FROM reading WHERE id = ?", [book.id]) == 10_000)
 
@@ -39,7 +39,7 @@ struct ReadingExtentTests {
 
     @Test func nonPositiveExtentsRefuseAndLockedReadingsFreeze() throws {
         try withOperations { ops, _ in
-            let book = try ops.createReading(name: "orbit", kind: .curated)
+            let book = try ops.createReading(name: "orbit", kind: .book)
             #expect(throws: OperationError.invalidExtent(value: 0)) {
                 try ops.setReadingWordTarget(book.id, wordTarget: 0)
             }
@@ -62,14 +62,14 @@ struct ReadingExtentTests {
         // a post: missing reading, wrong kind, locked, at capacity; a
         // willing book passes.
         try withOperations { ops, _ in
-            let book = try ops.createReading(name: "orbit", kind: .curated, maxPosts: 1)
+            let book = try ops.createReading(name: "orbit", kind: .book, maxPosts: 1)
             try ops.assertReadingAcceptsPosts(book.id)  // willing: no throw
 
             #expect(throws: OperationError.self) {
                 try ops.assertReadingAcceptsPosts("no-such-reading")
             }
-            let smart = try ops.createReading(name: "auto", kind: .smart)
-            #expect(throws: OperationError.wrongReadingKind(id: smart.id, expected: .curated)) {
+            let smart = try ops.createReading(name: "auto", kind: .gathering)
+            #expect(throws: OperationError.wrongReadingKind(id: smart.id, expected: .book)) {
                 try ops.assertReadingAcceptsPosts(smart.id)
             }
             let filler = try ops.createPost(title: "f", profile: .generic)
@@ -92,7 +92,7 @@ struct ReadingExtentTests {
             // add succeeds: the target is progress display, not a gate
             // (edits change word counts; membership can't enforce them).
             let book = try ops.createReading(
-                name: "bounded", kind: .curated, wordTarget: 5)
+                name: "bounded", kind: .book, wordTarget: 5)
             for index in 0..<3 {
                 let post = try ops.createPost(title: "post \(index)", profile: .generic)
                 _ = try ops.newBlock(
@@ -106,7 +106,7 @@ struct ReadingExtentTests {
 
     @Test func maxPostsSetterFeedsTheStandingCapacityGate() throws {
         try withOperations { ops, _ in
-            let book = try ops.createReading(name: "letters", kind: .curated)
+            let book = try ops.createReading(name: "letters", kind: .book)
             let first = try ops.createPost(title: "one", profile: .generic)
             let second = try ops.createPost(title: "two", profile: .generic)
             _ = try ops.addPostToReading(first.id, to: book.id)

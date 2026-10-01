@@ -182,10 +182,17 @@ ALTER TABLE reading_post ADD COLUMN status  TEXT NOT NULL DEFAULT 'member'
 `reading.kind`'s CHECK must change (`'curated','smart'` → `'book','gathering'`), which SQLite only
 does by table rebuild: recreate `reading` with the new CHECK + the new columns above, copy rows
 with `kind` mapped (`CASE WHEN kind='smart' THEN 'gathering' ELSE 'book' END`), then recreate its
-outbox trigger and any dependent indexes, with FK enforcement handled per GRDB's migration
-discipline. **Pins owed:** a schema-equivalence pin (fresh store vs migrated store — identical
-`sqlite_master` shapes for `reading`), a trigger walk (outbox capture still fires on the rebuilt
-table; `_sync_applying` suppression intact), and tombstone/sync_version preservation.
+FOUR triggers (`cascade_reading_tombstone`, `cascade_reading_tombstone_section`, the two outbox
+captures), with FK enforcement handled per GRDB's migration discipline (deferred checks).
+**The copy fires NO outbox triggers, so the migration EXPLICITLY ENQUEUES every live `reading`
+row** (the repairs' explicit-outbox pattern) — without this the mirror never learns the recast
+values; `sync_version` is preserved by the copy so CAS keeps working, and both devices running the
+same migration converge by ordinary server-wins. The serializer's APPLY must read an absent/NULL
+new column as its default (`''` wing, `'member'` status) — old mirror rows predate the columns;
+pinned. **Pins owed:** a schema-equivalence pin (fresh store vs migrated store — identical
+`sqlite_master` shapes for `reading` incl. triggers), a trigger walk (outbox capture fires on the
+rebuilt table; `_sync_applying` suppression intact), tombstone/sync_version preservation, and the
+enqueue-all-live-readings assertion.
 
 ### Index rebuild (per-wing tags, R-13ia-1)
 
@@ -352,16 +359,16 @@ with `grep -q … && break` loops (the `tail -f` trap). Background-wait = death 
 
 | # | Item | Status |
 |---|---|---|
-| 1 | v1_18 migration (tables, columns, rebuild, index, data migrations) | NOT-STARTED — design settled (§3) |
-| 2 | ReadingKind recast sweep (3 targets + tests) | NOT-STARTED — design settled (§3; UI strings stay until 13i-d) |
-| 3 | Wing/Shelf models + records | NOT-STARTED |
-| 4 | v2 grammar decoder + parity pins + the `status='member'` filter | NOT-STARTED — design settled (§4) |
-| 5 | Daily marker: mint stamp + migration stamp + predicate re-key | NOT-STARTED — design settled (§3) |
-| 6 | `setJournalTrait` op + pins | NOT-STARTED — design settled (§3, §9) |
-| 7 | Serializer classifications + completeness walk green | NOT-STARTED — design settled (§5; `query_spec`'s current class verified at build) |
-| 8 | Repairs R1–R5 + convergence suites | NOT-STARTED — design settled (§5; R2 PROVISIONAL #167) |
-| 9 | Fake server marker 10 + mirrors | NOT-STARTED |
-| 10 | `13_phase13i_wings.sql` + deploy checklist | NOT-STARTED — conventions: `12_phase13y_tenant_seq.sql`'s |
+| 1 | v1_18 migration (tables, columns, rebuild, index, data migrations) | DONE (commit 1 — incl. the explicit enqueue-all-readings; schema pins in MigrationTests) |
+| 2 | ReadingKind recast sweep (3 targets + tests) | DONE for core + the sed sweep of App targets (commit 1); the Mac/mobile BUILDS verify next |
+| 3 | Wing/Shelf models + records | DONE (commit 1) |
+| 4 | v2 grammar decoder + parity pins + the `status='member'` filter | DONE (commit 1 — `Domain/RuleGrammar`; every consumer keeps its v1-letter malformed semantics (fail-closed per site, restored after the first run caught the laundering); the write choke point normalizes v1 drafts, stores undecodable bytes RAW) |
+| 5 | Daily marker: mint stamp + migration stamp + predicate re-key | DONE (commit 1 — `dailyJournalBookProfile`='daily' + `journalTraitProfile`='journal' split; the name leg dropped; #85(a)'s corner CLOSED and the keeper pin flipped to say so) |
+| 6 | `setJournalTrait` op + pins | OP DONE (commit 1); dedicated pins ride the U1 close |
+| 7 | Serializer classifications + completeness walk green | DONE (commit 1 — wing name ENCRYPTED; shelf name+glyph ENCRYPTED; everything else PLAIN; `query_spec` stays ENCRYPTED, its pre-13i class) |
+| 8 | Repairs R1–R5 + convergence suites | NOT-STARTED — design settled (§5; R2 PROVISIONAL #167). NOTE: the keeper R4 re-key itself LANDED with row 5; R1–R3/R5 + suites are U2's |
+| 9 | Fake server marker 10 + mirrors | PARTIAL (commit 1): `lockstepVersion`=10 + registry-derived fake tables; the repairs' convergence scenarios are U2's |
+| 10 | `13_phase13i_wings.sql` + deploy checklist | ARTIFACT DONE (commit 1 — pulled forward: the DDL pins demand it beside the registry; 12's six registry-carrying bodies redefined verbatim + wing/shelf, `sync_purge_execute` included; the grant sweep + the era-frozen pins updated). The checklist doc is row 13's |
 | 11 | SyncSpec §7/§12 text amendments | NOT-STARTED (the §12 running-record entry is written only AT the deploy) |
 | 12 | The ladder (fresh `fable-reviewer`, combined diff) | NOT-STARTED |
 | 13 | Her deploy window (§8) | NOT-STARTED — held for her go by rule |
@@ -373,3 +380,13 @@ with `grep -q … && break` loops (the `tail -f` trap). Background-wait = death 
   open tail incl. #166, the sitting record whole, the brief, the daily-Journal memo, SyncSpec in
   full, the resiliency protocol; TEXTKIT2_NOTES not required — no editor seam). Her two kickoff
   rulings recorded (§1). This plan authored as the first act. No revert in flight. U1 opens next.
+- U1 commit 1: the schema event's CORE whole — v1_18 + recast + v2 grammar + daily re-key +
+  classifications + the mirror artifact + marker 10. **Core suite GREEN: 1751 tests / 184 suites.**
+  Honest test-edit inventory (a renamed vocabulary + two ruled behavior flips, no assertion
+  weakened): the kind sweep across test fixtures; pins flipped TO THE RULED TRUTH — the renamed
+  daily Journal CONVERGES (#85(a) closed), deliberate notebooks mint the TRAIT; the pin-list suites
+  rewritten to the starred-column semantics (the self-heal became by-construction; restore brings
+  the star back — an upgrade the old stored list could not make); the v1-draft expectation pins
+  read the NORMALIZED stored value; era-frozen DDL pins (the 13y floor, the superseded overlay)
+  subtract the 13i-born tables with the reason at the pin. Next: the Mac + mobile builds/sweeps,
+  the trait-setter pins, the dev-store walk — then U1 closes.

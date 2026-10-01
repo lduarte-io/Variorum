@@ -173,7 +173,7 @@ private func openShelfSurface(
 private func makeBooks(_ session: AppSession, count: Int, prefix: String) async throws {
     for index in 0..<count {
         _ = try await session.runner.run { ops in
-            try ops.createReading(name: "\(prefix) \(index)", kind: .curated)
+            try ops.createReading(name: "\(prefix) \(index)", kind: .book)
         }
     }
 }

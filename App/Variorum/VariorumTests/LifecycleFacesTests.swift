@@ -260,7 +260,7 @@ struct LifecycleFacesTests {
     /// suite owns the exact-stamp semantics — this pins the FACE's road).
     @Test func theDeletedBooksDoorRestoresThroughTheModel() async throws {
         try await withWorld { session, db in
-            let book = try session.operations.createReading(name: "orbit", kind: .curated)
+            let book = try session.operations.createReading(name: "orbit", kind: .book)
             let post = try session.operations.createPost(title: "p", profile: .generic)
             _ = try session.operations.newBlock(in: post.id, text: "Prose.", at: .end)
             _ = try session.operations.addPostToReading(post.id, to: book.id)

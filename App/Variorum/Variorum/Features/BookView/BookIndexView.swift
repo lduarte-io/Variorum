@@ -775,7 +775,7 @@ struct BookIndexView<Masthead: View>: View {
             NotificationCenter.default.post(
                 name: .variorumOpenPost, object: nil, userInfo: ["postID": postID])
         }
-        if structure.reading?.kind == .curated {
+        if structure.reading?.kind == .book {
             Divider()
             Menu("Chapter") {
                 ForEach(structure.sections, id: \.id) { section in

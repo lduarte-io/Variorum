@@ -40,6 +40,10 @@ public struct Container: VariorumRecord {
     public var archivedAt: Date?
     public var deletedAt: Date?
     public var syncVersion: Int
+    /// The wing this note/pool lives in (13i-a, v1_18). '' = the virtual
+    /// Home wing (R-13ia-2). Surfaces scope by it; the state machinery
+    /// (clocks, purge, restore) stays global and single.
+    public var wingId: String
 
     public init(
         id: String,
@@ -57,6 +61,7 @@ public struct Container: VariorumRecord {
         lastMajorRevisionAt: Date? = nil,
         churnAccumulator: Double = 0,
         baselineLength: Int = 0,
+        wingId: String = "",
         createdAt: Date,
         updatedAt: Date,
         archivedAt: Date? = nil,
@@ -78,6 +83,7 @@ public struct Container: VariorumRecord {
         self.lastMajorRevisionAt = lastMajorRevisionAt
         self.churnAccumulator = churnAccumulator
         self.baselineLength = baselineLength
+        self.wingId = wingId
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.archivedAt = archivedAt

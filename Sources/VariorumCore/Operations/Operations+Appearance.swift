@@ -209,42 +209,25 @@ extension Operations {
     /// transaction shares the ONE implementation instead of copying it
     /// (13d batch 5 — the daily book's create-and-pin ensure). The liveness
     /// check stays with the public door: an in-transaction caller has just
-    /// inserted the reading it is pinning (live by then, so the heal below
-    /// keeps it).
+    /// inserted the reading it is pinning (live by then).
     ///
-    /// **EVERY WRITE SELF-HEALS** — `setStarred`'s rule, below (18o U1, 17e
-    /// P35): it persists the LIVE list (pin order kept, ids whose reading is
-    /// gone dropped), so a deleted book's id leaves the stored value the next
-    /// time any pin is written, instead of riding the synced row forever.
-    /// A write that changes nothing writes nothing — no `updated_at`, no
-    /// outbox row. Consequence, the same one `starred` carries: a book
-    /// deleted and later RESTORED comes back pinned only if no pin write
-    /// happened in between.
+    /// **13i-a — STARRED ABSORBS PINS (sitting record §7):** the storage is
+    /// `reading.starred` since v1_18 (the migration converted the old
+    /// `shelf_pins` setting; no reader of the setting remains). The name
+    /// survives until 13i-d's vocabulary sweep. Idempotent both ways; a
+    /// write that changes nothing writes nothing (no outbox row, no
+    /// `updated_at` — identity-level metadata, the standing convention).
+    /// UNPINNING a dead book is a no-op by the same WHERE (its row update
+    /// matches nothing live — and a tombstoned book's `starred` is
+    /// display-dead anyway; restore brings the flag back with the row,
+    /// which upgrades the old setting-list behavior honestly).
     func setShelfPinned(_ db: Database, _ readingID: String, pinned: Bool) throws {
-        let stored = try Queries.shelfPins(db)
-        var pins = try liveShelfPins(db, stored)
-        if pinned {
-            if !pins.contains(readingID) { pins.append(readingID) }
-        } else {
-            pins.removeAll { $0 == readingID }
-        }
-        guard pins != stored else { return }
-        let encoder = JSONEncoder()
-        let json = String(decoding: try encoder.encode(pins), as: UTF8.self)
-        try upsertSetting(db, key: "shelf_pins", value: json)
-    }
-
-    /// The stored pin list narrowed to live readings, in pin order — one
-    /// indexed read over the pin list itself (P1: ∝ the pins, never the
-    /// corpus).
-    private func liveShelfPins(_ db: Database, _ ids: [String]) throws -> [String] {
-        guard !ids.isEmpty else { return [] }
-        let placeholders = Array(repeating: "?", count: ids.count).joined(separator: ", ")
-        let live = Set(try String.fetchAll(
-            db,
-            sql: "SELECT id FROM reading WHERE deleted_at IS NULL AND id IN (\(placeholders))",
-            arguments: StatementArguments(ids)))
-        return ids.filter(live.contains)
+        try db.execute(
+            sql: """
+                UPDATE reading SET starred = ?
+                WHERE id = ? AND deleted_at IS NULL AND starred <> ?
+                """,
+            arguments: [pinned, readingID, pinned])
     }
 
     // MARK: - Stars (13f W4)

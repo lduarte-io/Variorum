@@ -107,7 +107,7 @@ struct EditorRateSyncTests {
         var postIDs: [String] = []
         var variantIDs: [String] = []
         let readingID: String = try mac.with { ops, _ in
-            let reading = try ops.createReading(name: "book", kind: .curated)
+            let reading = try ops.createReading(name: "book", kind: .book)
             for i in 0..<3 {
                 let post = try ops.createPost(title: "post \(i)")
                 let minted = try ops.newBlock(

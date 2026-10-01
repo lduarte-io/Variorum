@@ -92,7 +92,7 @@ nonisolated enum LibraryPreview {
     }
 
     struct BookPreview: Equatable, Sendable {
-        var kind: ReadingKind = .curated
+        var kind: ReadingKind = .book
         var finished = false
         var chapters = 0
         var notes = 0
@@ -122,7 +122,7 @@ nonisolated enum LibraryPreview {
 
     /// `book · N chapters · N notes` (`smart book`; `finished` when so).
     static func bookFactsLine(kind: ReadingKind, finished: Bool, chapters: Int, notes: Int) -> String {
-        var pieces = [kind == .smart ? "smart book" : "book"]
+        var pieces = [kind == .gathering ? "smart book" : "book"]
         if chapters > 0 { pieces.append("\(chapters) chapter\(chapters == 1 ? "" : "s")") }
         pieces.append("\(notes) note\(notes == 1 ? "" : "s")")
         if finished { pieces.append("finished") }
@@ -163,7 +163,7 @@ nonisolated enum LibraryPreview {
         preview.notes = entries.count
         preview.chapters = sections.count
         let rows: [BookOutlineRows.Row]
-        if reading.kind == .curated, !sections.isEmpty {
+        if reading.kind == .book, !sections.isEmpty {
             let assignments = try Queries.sectionAssignments(db, readingID: id)
             rows = BookOutlineRows.rows(grouped: BookStructureModel.grouped(
                 entries: entries, sections: sections, assignments: assignments))

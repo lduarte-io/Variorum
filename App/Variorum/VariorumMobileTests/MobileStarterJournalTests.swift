@@ -72,7 +72,7 @@ struct MobileStarterJournalTests {
                 let daily = try Queries.dailyJournalBookID(db)
                 let members = try Queries.assembleReading(db, readingID: readingID)
                 return (book.name, book.profile, daily,
-                        members.count, book.kind == .curated)
+                        members.count, book.kind == .book)
             }
             #expect(facts.0 == Operations.defaultDailyJournalBookName)
             #expect(facts.1 == "journal")
@@ -218,7 +218,7 @@ struct MobileStarterJournalTests {
     @Test func aStoreWithOnlyBooksIsNeverSeeded() async throws {
         try await withEditorWorld { session, _ in
             _ = try await session.runner.run { ops in
-                try ops.createReading(name: "Essays", kind: .curated)
+                try ops.createReading(name: "Essays", kind: .book)
             }
             let wasEmpty = try await MobileStarterJournal.storeIsNew(session)
             let mark = Mark()
@@ -371,7 +371,7 @@ struct MobileStarterJournalTests {
             let wasEmpty = try await MobileStarterJournal.storeIsNew(session)
             _ = try await session.runner.run { ops in
                 try ops.createReading(
-                    name: MobileStarterJournal.bookName, kind: .curated)
+                    name: MobileStarterJournal.bookName, kind: .book)
             }
             let mark = Mark()
             let outcome = await MobileStarterJournal.seedIfNeeded(

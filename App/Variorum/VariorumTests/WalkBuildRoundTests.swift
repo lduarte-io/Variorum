@@ -114,8 +114,8 @@ struct NoteCardSmartBooksTests {
             let (curatedOnly, smartOnly, both) = try await session.runner.run {
                 ops -> (String, String, String) in
                 let stars = try Self.seedTag(ops, path: "stars")
-                let hand = try ops.createReading(name: "hand-made", kind: .curated)
-                let smart = try ops.createReading(name: "starred", kind: .smart)
+                let hand = try ops.createReading(name: "hand-made", kind: .book)
+                let smart = try ops.createReading(name: "starred", kind: .gathering)
                 try ops.setReadingQuerySpec(
                     smart.id,
                     querySpec: Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())
@@ -152,8 +152,8 @@ struct NoteCardSmartBooksTests {
         try await withStore { db, session in
             let postID = try await session.runner.run { ops -> String in
                 let stars = try Self.seedTag(ops, path: "stars")
-                let curated = try ops.createReading(name: "Ideas", kind: .curated)
-                let smart = try ops.createReading(name: "Ideas", kind: .smart)
+                let curated = try ops.createReading(name: "Ideas", kind: .book)
+                let smart = try ops.createReading(name: "Ideas", kind: .gathering)
                 try ops.setReadingQuerySpec(
                     smart.id,
                     querySpec: Queries.SmartQuerySpec(tags: ["stars"]).encodedJSON())

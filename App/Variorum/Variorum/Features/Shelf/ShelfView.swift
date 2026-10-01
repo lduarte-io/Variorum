@@ -97,11 +97,11 @@ struct ShelfView: View {
             TextField("Name", text: $nameField)
             Button("Create Book") {
                 let name = nameField
-                Task { await readings.create(name: name.isEmpty ? "Untitled" : name, kind: .curated) }
+                Task { await readings.create(name: name.isEmpty ? "Untitled" : name, kind: .book) }
             }
             Button("Create Smart Book") {
                 let name = nameField
-                Task { await readings.create(name: name.isEmpty ? "Untitled" : name, kind: .smart) }
+                Task { await readings.create(name: name.isEmpty ? "Untitled" : name, kind: .gathering) }
             }
             // §14 item 10's "starting a 'new' journal as a separate
             // notebook" — a journal-profile book (dated, one entry after
@@ -111,7 +111,7 @@ struct ShelfView: View {
                 Task {
                     await readings.create(
                         name: name.isEmpty ? "Untitled Journal" : name,
-                        kind: .curated, profile: Queries.dailyJournalBookProfile,
+                        kind: .book, profile: Queries.journalTraitProfile,
                         sortField: .entryDate, sortDir: .asc)
                 }
             }
@@ -256,7 +256,7 @@ struct ShelfView: View {
         if reading.locked {
             parts.append("finished")
         }
-        if reading.kind == .smart {
+        if reading.kind == .gathering {
             parts.append("smart")
         } else {
             parts.append("\(book.postCount) notes")
@@ -291,7 +291,7 @@ struct ShelfView: View {
             nameField = reading.name
             renameTarget = reading
         }
-        if reading.kind == .curated {
+        if reading.kind == .book {
             Button("Manage Notes…") { manageTarget = reading }
         } else {
             Button("Edit Filter…") { smartTarget = reading }
@@ -310,7 +310,7 @@ struct ShelfView: View {
             }
         }
         Button("Length & Extent…") { extentTarget = reading }
-        if reading.kind == .curated, reading.profile == "journal" {
+        if reading.kind == .book, reading.profile == "journal" {
             // Round 2, MAJOR 2's re-designation door: finishing a bounded
             // daily journal is the EXPECTED flow — this is where the next
             // one takes over.

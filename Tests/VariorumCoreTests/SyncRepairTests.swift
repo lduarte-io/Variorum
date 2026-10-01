@@ -448,7 +448,7 @@ struct SyncRepairTests {
     @Test func duplicateReadingMembershipsKeepTheSmallerID() async throws {
         let (a, b, server) = try await twoDevices { ops, _ in
             let post = try ops.createPost(title: "post", profile: nil)
-            _ = try ops.createReading(name: "book", kind: .curated, maxPosts: nil)
+            _ = try ops.createReading(name: "book", kind: .book, maxPosts: nil)
             _ = post
         }
         let postID = try a.db.fetchString("SELECT id FROM container WHERE kind = 'post'")!

@@ -70,20 +70,20 @@ struct DuplicateBookNameDoorTests {
     @Test func theShelfsNewBookDoorRefusesANameAlreadyTaken() async throws {
         try await withStore { db, session in
             let readings = ReadingsViewModel(session: session)
-            _ = try #require(await readings.create(name: "Ideas", kind: .curated))
+            _ = try #require(await readings.create(name: "Ideas", kind: .book))
 
             // Case-insensitively, and across KINDS — the curated/smart
             // "Ideas" pair is the one she named.
-            let refused = await readings.create(name: "ideas", kind: .smart)
+            let refused = await readings.create(name: "ideas", kind: .gathering)
             #expect(refused == nil, "the door refuses rather than minting")
             #expect(readings.lastError == BookNameCopy.refusal(existing: "Ideas"))
             #expect(try await names(db) == ["Ideas"], "nothing was written")
 
             // Ends-trimmed, so " IDEAS " is the same name…
-            #expect(await readings.create(name: "  IDEAS  ", kind: .curated) == nil)
+            #expect(await readings.create(name: "  IDEAS  ", kind: .book) == nil)
             // …and a genuinely different name still goes through, clearing
             // the door's error line behind it.
-            _ = try #require(await readings.create(name: "Ideas 2", kind: .curated))
+            _ = try #require(await readings.create(name: "Ideas 2", kind: .book))
             #expect(readings.lastError == nil)
             #expect(try await names(db).sorted() == ["Ideas", "Ideas 2"])
         }
@@ -99,8 +99,8 @@ struct DuplicateBookNameDoorTests {
     @Test func theShelfsRenameDoorRefusesAnotherBooksNameButNeverItsOwn() async throws {
         try await withStore { db, session in
             let readings = ReadingsViewModel(session: session)
-            _ = try #require(await readings.create(name: "Ideas", kind: .curated))
-            let orbit = try #require(await readings.create(name: "Orbit", kind: .curated))
+            _ = try #require(await readings.create(name: "Ideas", kind: .book))
+            let orbit = try #require(await readings.create(name: "Orbit", kind: .book))
 
             await readings.rename(orbit, to: "ideas")
             #expect(readings.lastError == BookNameCopy.refusal(existing: "Ideas"))
@@ -123,8 +123,8 @@ struct DuplicateBookNameDoorTests {
     @Test func theNavigatorsRenameDoorCarriesTheSameGuard() async throws {
         try await withStore { db, session in
             let (ideas, orbit) = try await session.runner.run { ops -> (String, String) in
-                (try ops.createReading(name: "Ideas", kind: .curated).id,
-                 try ops.createReading(name: "Orbit", kind: .curated).id)
+                (try ops.createReading(name: "Ideas", kind: .book).id,
+                 try ops.createReading(name: "Orbit", kind: .book).id)
             }
             let structure = BookStructureModel(session: session, readingID: orbit)
 
@@ -150,8 +150,8 @@ struct DuplicateBookNameDoorTests {
     @Test func theConversionsTypedCollectorNameIsGuardedAndTheDerivedOneIsNot() async throws {
         try await withStore { db, session in
             let (smart, _) = try await session.runner.run { ops -> (String, String) in
-                let smart = try ops.createReading(name: "Starred", kind: .smart)
-                let taken = try ops.createReading(name: "Ideas", kind: .curated)
+                let smart = try ops.createReading(name: "Starred", kind: .gathering)
+                let taken = try ops.createReading(name: "Ideas", kind: .book)
                 return (smart.id, taken.id)
             }
             let shelf = ShelfViewModel(session: session)
@@ -162,14 +162,14 @@ struct DuplicateBookNameDoorTests {
             // The whole compound refused — the smart book is still smart.
             var kinds = try await db.read { try Queries.readings($0) }
                 .filter { $0.id == smart }.map(\.kind)
-            #expect(kinds == [.smart], "a refused name changes nothing")
+            #expect(kinds == [.gathering], "a refused name changes nothing")
 
             // The derived name goes through untouched.
             await shelf.convertToCurated(smart, keepCollecting: true, collectingName: nil)
             #expect(shelf.lastError == nil)
             kinds = try await db.read { try Queries.readings($0) }
                 .filter { $0.id == smart }.map(\.kind)
-            #expect(kinds == [.curated])
+            #expect(kinds == [.book])
             #expect(try await names(db).contains("Starred (collecting)"))
         }
     }
@@ -426,7 +426,7 @@ struct CalloutEmojiPickerTests {
 struct BookAscentDeclarationTests {
     private func book(_ name: String) -> Reading {
         let now = Date(timeIntervalSince1970: 1_782_864_000)
-        return Reading(id: name, name: name, kind: .curated, createdAt: now, updatedAt: now)
+        return Reading(id: name, name: name, kind: .book, createdAt: now, updatedAt: now)
     }
 
     private func bar(books: [Reading]) -> ContextBar {

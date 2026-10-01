@@ -131,7 +131,7 @@ final class BookStructureModel {
     /// Phase 4 tag-path headers.
     var chaptersActive: Bool {
         guard let reading else { return false }
-        return reading.kind == .curated && !sections.isEmpty
+        return reading.kind == .book && !sections.isEmpty
     }
 
     /// The grouped presentation (pure, pinned): chapters in (position, id)

@@ -154,7 +154,7 @@ struct LibraryDayFilterTests {
             let note = try session.operations.createPost(title: "shelf note")
             let block = try session.operations.newBlock(in: note.id, text: "shelf words")
             try session.operations.setBlockName(block.block.id, name: "shelf")
-            _ = try session.operations.createReading(name: "shelf", kind: .curated)
+            _ = try session.operations.createReading(name: "shelf", kind: .book)
 
             let model = LibraryCatalogModel(session: session, defaults: try scrubbed("clear"))
             model.query = "shelf"
@@ -238,7 +238,7 @@ struct LibraryDayFilterTests {
         try await withTravellingLibrary { session, clock in
             let note = try session.operations.createPost(title: "today's note")
             _ = try session.operations.newBlock(in: note.id, text: "words")
-            _ = try session.operations.createReading(name: "a book", kind: .curated)
+            _ = try session.operations.createReading(name: "a book", kind: .book)
 
             let model = LibraryCatalogModel(session: session, defaults: try scrubbed("scope"))
             model.scope = .books
@@ -423,7 +423,7 @@ struct LibraryDayFilterTests {
         try await withTravellingLibrary { session, _ in
             for index in 0..<(LibraryCatalogModel.pageSize + 1) {
                 _ = try session.operations.createReading(
-                    name: String(format: "book %03d", index), kind: .curated)
+                    name: String(format: "book %03d", index), kind: .book)
             }
             for index in 0..<3 {
                 let note = try session.operations.createPost(title: "note \(index)")

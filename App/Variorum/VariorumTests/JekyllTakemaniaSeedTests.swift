@@ -153,7 +153,7 @@ struct JekyllTakemaniaSeedTests {
             #expect(session.undoStack.topLabel == nil)
             try await db.read { db in
                 let book = try #require(try Queries.reading(db, id: bookID))
-                #expect(book.name == SampleLibraryJekyllBook.name && book.kind == .curated)
+                #expect(book.name == SampleLibraryJekyllBook.name && book.kind == .book)
                 #expect(book.createdAt == SampleLibraryJekyllBook.publicationDate,
                         "the book itself carries the novella's publication date")
                 let chapters = try Queries.readingSections(db, readingID: bookID).map(\.name)

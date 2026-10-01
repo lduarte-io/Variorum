@@ -67,7 +67,7 @@ enum CorpusFactory {
                 if b == 0 { smallVariantID = minted.variant.id }
             }
 
-            let book = try ops.createReading(name: "the book", kind: .curated)
+            let book = try ops.createReading(name: "the book", kind: .book)
 
             // The corpus body: journal-shaped posts with entry dates, some
             // fans, some lineage, some tags.

@@ -15,17 +15,54 @@ extension Operations {
         groupingTagId: String? = nil,
         querySpec: String? = nil,
         maxPosts: Int? = nil,
-        wordTarget: Int? = nil
+        wordTarget: Int? = nil,
+        wingId: String = ""
     ) throws -> Reading {
         let now = date.now
-        let reading = Reading(
-            id: newID(), ownerId: currentOwnerID(), name: name, kind: kind,
-            profile: profile, sortField: sortField, sortDir: sortDir,
-            groupingTagId: groupingTagId, querySpec: querySpec, maxPosts: maxPosts,
-            wordTarget: wordTarget,
-            createdAt: now, updatedAt: now)
-        try database.write { db in try reading.insert(db) }
-        return reading
+        return try database.write { db -> Reading in
+            let reading = Reading(
+                id: newID(), ownerId: currentOwnerID(), name: name, kind: kind,
+                profile: profile, sortField: sortField, sortDir: sortDir,
+                groupingTagId: groupingTagId,
+                querySpec: try normalizedRuleSpec(db, querySpec, wingID: wingId),
+                maxPosts: maxPosts,
+                wordTarget: wordTarget, wingId: wingId,
+                createdAt: now, updatedAt: now)
+            try reading.insert(db)
+            return reading
+        }
+    }
+
+    /// STORAGE IS v2 (13i-a; Domain/RuleGrammar): the rule-builder faces
+    /// still hand this layer the v1 DRAFT encoding until 13i-b's grammar
+    /// faces land, so the ONE write choke point normalizes — a v2 value
+    /// stores as-is; a v1 draft converts (paths resolve to tag IDs in the
+    /// reading's wing, live first, else the smallest-id tombstone, else the
+    /// deliberate dead term); anything else stores as NO RULE (the standing
+    /// malformed tolerance).
+    private func normalizedRuleSpec(
+        _ db: Database, _ json: String?, wingID: String
+    ) throws -> String? {
+        guard let json, !json.isEmpty else { return nil }
+        if RuleGrammar.decode(json) != nil { return json }
+        guard let v1 = try? JSONDecoder().decode(
+            Queries.SmartQuerySpec.self, from: Data(json.utf8))
+        else {
+            // Undecodable bytes store AS THEY ARE: the read side fails
+            // CLOSED on malformed (the v1 letter) — laundering to NULL
+            // would silently flip a broken rule to match-all.
+            return json
+        }
+        let v2 = RuleGrammar.fromLegacy(
+            tags: v1.tags, tagsAll: v1.tagsAll, profile: v1.profile,
+            entryDateFrom: v1.entryDateFrom, entryDateTo: v1.entryDateTo
+        ) { path in
+            (try? String.fetchOne(db, sql: """
+                SELECT id FROM tag WHERE path = ? AND wing_id = ?
+                ORDER BY (deleted_at IS NOT NULL), id LIMIT 1
+                """, arguments: [path, wingID])) ?? nil
+        }
+        return try RuleGrammar.encode(v2)
     }
 
     // MARK: - Extent faces (Phase 13, A1/A2 — the bounded-notebook thread)
@@ -95,7 +132,40 @@ extension Operations {
     }
 
     public func setReadingQuerySpec(_ id: String, querySpec: String?) throws {
-        try updateLiveReading(id) { $0.querySpec = querySpec }
+        try database.write { db in
+            var reading = try liveReading(db, id)
+            reading.querySpec = try normalizedRuleSpec(
+                db, querySpec, wingID: reading.wingId)
+            reading.updatedAt = date.now
+            try reading.update(db)
+        }
+    }
+
+    /// THE JOURNAL TRAIT's per-book setter (13i-a; the sitting record §10's
+    /// ruling — "let's do create journal book for daily notebooks as a
+    /// setting"; the Collecting pane's sentence is 13i-e's face): ON writes
+    /// `profile='journal'` ("entries date-stamped at creation, named by
+    /// their day, sorted by entry date"), OFF writes `profile='book'`.
+    /// Flipping it never rewrites existing entries (ruled). The DAILY book
+    /// refuses — its marker is constitutive (the memo §3). A finished
+    /// (locked) book refuses: the trait governs the book's ordering
+    /// semantics, `setReadingSort`'s own rule (PROVISIONAL, plan §9).
+    /// No-op-guarded like every identity-level metadata setter.
+    public func setJournalTrait(_ id: String, on: Bool) throws {
+        try database.write { db in
+            var reading = try liveReading(db, id)
+            guard reading.profile != Queries.dailyJournalBookProfile else {
+                throw OperationError.dailyJournalTraitIsConstitutive(id: id)
+            }
+            guard !reading.locked else {
+                throw OperationError.lockedReading(id: id)
+            }
+            let target = on ? Queries.journalTraitProfile : "book"
+            guard reading.profile != target else { return }
+            reading.profile = target
+            reading.updatedAt = date.now
+            try reading.update(db)
+        }
     }
 
     /// "Declared done" — freezes membership and order below; reversible.
@@ -189,8 +259,8 @@ extension Operations {
     ) throws -> ReadingPost {
         try database.write { db in
             let reading = try liveReading(db, readingID)
-            guard reading.kind == .curated else {
-                throw OperationError.wrongReadingKind(id: readingID, expected: .curated)
+            guard reading.kind == .book else {
+                throw OperationError.wrongReadingKind(id: readingID, expected: .book)
             }
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: readingID)
@@ -236,8 +306,8 @@ extension Operations {
         }
         return try database.write { db in
             let reading = try liveReading(db, readingID)
-            guard reading.kind == .curated else {
-                throw OperationError.wrongReadingKind(id: readingID, expected: .curated)
+            guard reading.kind == .book else {
+                throw OperationError.wrongReadingKind(id: readingID, expected: .book)
             }
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: readingID)
@@ -279,8 +349,8 @@ extension Operations {
     public func assertReadingAcceptsPosts(_ readingID: String) throws {
         try database.read { db in
             let reading = try liveReading(db, readingID)
-            guard reading.kind == .curated else {
-                throw OperationError.wrongReadingKind(id: readingID, expected: .curated)
+            guard reading.kind == .book else {
+                throw OperationError.wrongReadingKind(id: readingID, expected: .book)
             }
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: readingID)
