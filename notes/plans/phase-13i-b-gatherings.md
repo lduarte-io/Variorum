@@ -849,7 +849,22 @@ schema/`Sync/`/migrations (zero).
   - **D — the teaching moment:** `BookStructureModel.acceptDrop` on a GATHERING answers a post drag
     with an OFFER ("Turn into a book to arrange by hand?") whose act opens the bind confirm.
   - **E — registry:** `.editRule`, `.bindIntoBook`, `.makeBookFromGathering` (shelf context menu).
-- Piece 1 (this commit): the record opened.
+- Piece 1 (4761d789): the record opened.
+- Piece 2 (this commit) — **P-13ib-6, FIXED with its pins.** `revertSmartConversion` now
+  tombstones EVERY live pair row on the reverted row (members and arrivals; one stamp) and returns
+  their ids; the registration hands them to the redo through a `LockIsolated` box (the ids exist
+  only at undo time), so `reapplySmartConversion` revives exactly what the undo took — status
+  untouched (a waiting arrival returns waiting). Pins (core `SmartConversionTests`):
+  `undoingABindLeavesNoLiveRowAndRedoBringsEveryRowBackByID` (an intake seat + a hand-add after the
+  bind) and `undoingABindTakesAWaitingArrivalAndRedoReturnsItWaiting`. **Red-on-old watched: both
+  red on the pre-fix tree, each exactly at "a gathering holds nothing"** (the old inverse left the
+  intake row, the hand row and the arrival live); green after. ONE honest test edit:
+  `undoTombstonesOnlyWhatTheConversionMintedNotWhatSheAddedByHand` asserted the superseded shape
+  ("her row is hers") — rewritten as `undoTakesHerHandAddedRowTooAndAFreshBindStillWorks` (the
+  ruled truth; the redo is her road back). Plus the §19.6 identity pin
+  `bindingPreservesTheRowsIdentityNameStarShelfSpotAndWing` (shelf row staged by direct insert —
+  no shelf door before 13i-d). Neighbour suites (conversion, ritual, intake ops + soak, arrival
+  hygiene, reading ops): 84 tests / 6 suites green; conversion 24/24.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 

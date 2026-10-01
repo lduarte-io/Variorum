@@ -178,19 +178,28 @@ extension Operations {
         // with (memo Q5's lean is that curated → smart should not exist).
         // Both halves ride the SAME do-time ids, so undo↔redo ping-pongs
         // without re-deriving membership (13c 1B's redo contract).
-        let membershipIDs = result.membershipIDs
+        //
+        // P-13ib-6 (13i-b U3 — the architect's ruling): the inverse takes
+        // EVERY live row standing on the book at the revert, not only the
+        // do-time mints (a bound book keeps collecting, so intake's seats and
+        // her hand-adds stand there too, and a gathering holds nothing). Those
+        // ids exist only at UNDO time, so the inverse hands them to the redo
+        // through this box — still exact-row (the same ids come back), never
+        // a re-run.
         let collectingID = result.collectingReading?.id
+        let takenAtRevert = LockIsolated<[String]>([])
         undoStack?.register(
             label: "Convert to Book",
             inverse: {
-                try $0.revertSmartConversion(
-                    readingID: readingID, membershipIDs: membershipIDs,
+                let taken = try $0.revertSmartConversion(
+                    readingID: readingID,
                     sortField: preImage.sortField, sortDir: preImage.sortDir,
                     collectingReadingID: collectingID)
+                takenAtRevert.setValue(taken)
             },
             redo: {
                 try $0.reapplySmartConversion(
-                    readingID: readingID, membershipIDs: membershipIDs,
+                    readingID: readingID, membershipIDs: takenAtRevert.value,
                     collectingReadingID: collectingID)
             })
         return result
@@ -198,37 +207,52 @@ extension Operations {
 
     // MARK: - The two halves of the undo entry
 
-    /// Inverse of `convertSmartReadingToCurated`: exact-row, like every
-    /// other inverse. Tombstone precisely the memberships this conversion
-    /// minted (never a blanket sweep — a row she added by hand after
-    /// converting is hers), put the fresh collector back in its tombstone,
-    /// and restore `kind` + the stored sort pair from the do-time
-    /// pre-images.
+    /// Inverse of `convertSmartReadingToCurated` (the BIND): put the fresh
+    /// collector back in its tombstone, restore `kind` + the stored sort pair
+    /// from the do-time pre-images — and **tombstone EVERY live row standing
+    /// on the book**, on one stamp (P-13ib-6, 13i-b U3 — the architect's
+    /// ruling, PROVISIONAL): a gathering holds nothing (the sitting record §1),
+    /// and since 13i-b U1 a bound book keeps collecting, so rows the bind
+    /// never minted stand there by the time an undo comes — intake's seats,
+    /// a waiting ARRIVAL, her hand-adds alike. *(This replaced "tombstone only
+    /// what the conversion minted — a row she added by hand is hers", which
+    /// left those rows live on a gathering: invisible in its assembly but
+    /// counted as membership by the Pool exclusion and `readingsContaining`.)*
+    /// Their notes keep showing wherever the rule matches them. Returns the
+    /// ids it tombstoned, in book order, so the REDO revives exactly those
+    /// (exact-row — AppSpec §9).
     ///
     /// Refusal buckets, the standing ones: a book deleted meanwhile ⇒
-    /// obsolete, quiet (its cascade already took the memberships); a book
-    /// FINISHED meanwhile ⇒ throws, so the entry stays on the stack for
+    /// obsolete, quiet, nothing taken (its cascade already took the rows); a
+    /// book FINISHED meanwhile ⇒ throws, so the entry stays on the stack for
     /// retry after un-finishing.
+    @discardableResult
     func revertSmartConversion(
-        readingID: String, membershipIDs: [String],
+        readingID: String,
         sortField: SortField, sortDir: SortDirection,
         collectingReadingID: String?
-    ) throws {
+    ) throws -> [String] {
         try database.write { db in
             guard var reading = try Reading.fetchOne(db, key: readingID),
                   reading.deletedAt == nil
-            else { return }
+            else { return [] }
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: readingID)
             }
             let now = date.now
-            for id in membershipIDs {
-                guard var membership = try ReadingPost.fetchOne(db, key: id),
-                      membership.deletedAt == nil
-                else { continue }
-                membership.deletedAt = now
-                try membership.update(db)
+            let standing = try ReadingPost.fetchAll(
+                db,
+                sql: """
+                    SELECT * FROM reading_post
+                    WHERE reading_id = ? AND deleted_at IS NULL
+                    ORDER BY position, id
+                    """,
+                arguments: [readingID])
+            for var row in standing {
+                row.deletedAt = now
+                try row.update(db)
             }
+            let taken = standing.map(\.id)
             if let collectingReadingID,
                var fresh = try Reading.fetchOne(db, key: collectingReadingID),
                fresh.deletedAt == nil {
@@ -238,20 +262,23 @@ extension Operations {
             }
             guard reading.kind != .gathering || reading.sortField != sortField
                 || reading.sortDir != sortDir
-            else { return }
+            else { return taken }
             reading.kind = .gathering
             reading.sortField = sortField
             reading.sortDir = sortDir
             reading.updatedAt = now
             try reading.update(db)
+            return taken
         }
     }
 
     /// The RE-APPLY half (13c 1B's contract: a re-apply is exact-row, never
     /// a re-run of the forward operation — re-running would mint fresh
-    /// UUIDs and strand the inverse's captured ids). The same membership
-    /// rows come back out of their tombstones and the kind/sort flip is
-    /// re-applied.
+    /// UUIDs and strand the inverse's captured ids). The rows the INVERSE
+    /// took (P-13ib-6 — every live row at the revert, handed over by the
+    /// registration's box) come back out of their tombstones with their
+    /// status untouched (a waiting arrival returns waiting), and the
+    /// kind/sort flip is re-applied.
     ///
     /// A membership whose POST has since died stays dead (`restoreReading`'s
     /// live-parent guard — a live pointer at a dead post helps nobody), and

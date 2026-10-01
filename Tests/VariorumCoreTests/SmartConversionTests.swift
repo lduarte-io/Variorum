@@ -351,29 +351,158 @@ struct SmartConversionTests {
         }
     }
 
-    @Test func undoTombstonesOnlyWhatTheConversionMintedNotWhatSheAddedByHand() throws {
+    /// **Rewritten at 13i-b U3 — the ruled new truth (P-13ib-6).** This pin
+    /// used to assert the opposite — "undo tombstones only what the
+    /// conversion minted; a row she added by hand is hers" — which left that
+    /// row LIVE on a GATHERING, and a gathering holds nothing (the sitting
+    /// record §1). The architect's ruling: the undo takes every live row,
+    /// hand-added included; the REDO is her road back to it (the
+    /// `undoingABind…` pins below hold the exact-row round trip).
+    @Test func undoTakesHerHandAddedRowTooAndAFreshBindStillWorks() throws {
         try withOperations { _, db in
             let stack = UndoStack()
             let ops = Operations(undoStack: stack)
-            let (reading, _, _) = try smartBookWithTaggedPosts(ops, count: 1)
-            let result = try ops.convertSmartReadingToCurated(reading.id)
+            let (reading, posts, _) = try smartBookWithTaggedPosts(ops, count: 1)
+            try ops.convertSmartReadingToCurated(reading.id)
 
-            // She adds a post by hand to her new hand-shaped book…
+            // She adds a post by hand to her new book…
             let byHand = try ops.createPost(title: "by hand")
             let handRow = try ops.addPostToReading(byHand.id, to: reading.id)
 
-            // …then undoes the conversion. Her row is hers.
+            // …then undoes the bind: the gathering holds nothing.
             try stack.undo(with: ops)
-            let surviving = try liveMemberships(db, reading.id)
-            #expect(surviving.map(\.id) == [handRow.id])
-            #expect(result.membershipIDs.allSatisfy { !surviving.map(\.id).contains($0) })
+            #expect(try liveMemberships(db, reading.id).isEmpty)
+            let dead = try #require(try db.read { try ReadingPost.fetchOne($0, key: handRow.id) })
+            #expect(dead.deletedAt != nil, "her row is tombstoned, not destroyed")
 
-            // And a SECOND conversion doesn't trip uq_reading_post_live on
-            // that surviving row — the pair is skipped, not duplicated.
+            // A FRESH bind (not the redo) materializes the gathering's
+            // current assembly — the one tagged note — and the tombstoned
+            // hand row never trips `uq_reading_post_live`.
             let again = try ops.convertSmartReadingToCurated(reading.id)
             #expect(!again.membershipIDs.contains(handRow.id))
-            let rows = try liveMemberships(db, reading.id)
-            #expect(rows.filter { $0.postId == byHand.id }.count == 1)
+            #expect(try liveMemberships(db, reading.id).map(\.postId) == [posts[0].id])
+        }
+    }
+
+    /// **Binding preserves identity** (the sitting record §19.6, ratified §20:
+    /// "the gathering's row IS the book's row (same id; the mode flips) —
+    /// name, star, shelf spot, glyphless chip, everything survives the
+    /// bind"). The shelf row is staged by direct insert — no shelf door
+    /// exists before 13i-d — exactly as the 13i-a hand-off pins stage state.
+    @Test func bindingPreservesTheRowsIdentityNameStarShelfSpotAndWing() throws {
+        try withOperations { ops, db in
+            let (reading, _, _) = try smartBookWithTaggedPosts(ops, count: 2)
+            try db.write { db in
+                try db.execute(sql: """
+                    INSERT INTO shelf (id, wing_id, name, position, created_at, updated_at)
+                    VALUES ('shelf-1', '', 'Work', 'a0', '2026-01-01T00:00:00.000Z',
+                            '2026-01-01T00:00:00.000Z')
+                    """)
+                try db.execute(
+                    sql: """
+                        UPDATE reading SET shelf_id = 'shelf-1', shelf_position = 'b7',
+                               starred = 1 WHERE id = ?
+                        """,
+                    arguments: [reading.id])
+            }
+            let before = try #require(try db.read { try Queries.reading($0, id: reading.id) })
+
+            let result = try ops.convertSmartReadingToCurated(reading.id)
+
+            let after = try #require(try db.read { try Queries.reading($0, id: reading.id) })
+            #expect(result.reading.id == before.id)
+            #expect(after.id == before.id)
+            #expect(after.name == before.name)
+            #expect(after.starred == true)
+            #expect(after.shelfId == "shelf-1")
+            #expect(after.shelfPosition == "b7")
+            #expect(after.wingId == before.wingId)
+            #expect(after.querySpec == before.querySpec, "the rule rides the row — it keeps collecting")
+            #expect(after.kind == .book)
+            #expect(try db.read { try Queries.readings($0).count } == 1, "no second row")
+        }
+    }
+
+    // MARK: - P-13ib-6 (13i-b U3 — the architect's ruling, PROVISIONAL)
+
+    /// **Undoing a BIND leaves NO live row on the reverted row — a gathering
+    /// holds nothing** (the sitting record §1's table is the law). Since U1 a
+    /// bound book keeps collecting, so rows the bind did NOT mint stand on it
+    /// by the time an undo comes: intake's seats (no hand involved — F-4) and
+    /// her hand-adds alike. The pre-U3 inverse tombstoned only the do-time
+    /// minted ids, leaving those rows live on a GATHERING — invisible in its
+    /// assembly, but counted as membership by the Pool exclusion and
+    /// `readingsContaining`'s membership leg.
+    ///
+    /// RED-ON-OLD (by behavioural revert, verified): on the pre-U3 inverse the
+    /// "a gathering holds nothing" expectation fails with the intake-seated
+    /// row and the hand-added row still live. The redo half is the exact-row
+    /// contract (AppSpec §9): every row the undo tombstoned comes back, by id.
+    @Test func undoingABindLeavesNoLiveRowAndRedoBringsEveryRowBackByID() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let (reading, posts, tag) = try smartBookWithTaggedPosts(ops, count: 2)
+            let bound = try ops.convertSmartReadingToCurated(reading.id)
+            #expect(bound.membershipIDs.count == 2)
+
+            // It keeps collecting: a fresh tagging act SEATS a newcomer (a row
+            // the bind never minted) …
+            let later = try ops.createPost(title: "later")
+            _ = try ops.applyTag(tag.id, toPost: later.id)
+            // … and she adds one by hand.
+            let byHand = try ops.createPost(title: "by hand")
+            let handRow = try ops.addPostToReading(byHand.id, to: reading.id)
+            let beforeUndo = try liveMemberships(db, reading.id)
+            #expect(Set(beforeUndo.map(\.postId))
+                    == Set([posts[0].id, posts[1].id, later.id, byHand.id]),
+                    "non-vacuity: the intake seat and the hand-add both stand")
+            #expect(beforeUndo.contains { $0.id == handRow.id })
+
+            #expect(stack.topLabel == "Convert to Book")
+            try stack.undo(with: ops)
+
+            let undone = try #require(try db.read { try Queries.reading($0, id: reading.id) })
+            #expect(undone.kind == .gathering)
+            #expect(try liveMemberships(db, reading.id).isEmpty,
+                    "a gathering holds nothing — every live row tombstones at the revert")
+            // Its matches still SHOW (a gathering assembles; the hand-added
+            // note is no match, so it is simply not shown here any more).
+            #expect(Set(try db.read { try Queries.assembleReading($0, readingID: reading.id) }
+                .map(\.postID)) == Set([posts[0].id, posts[1].id, later.id]))
+
+            try stack.redo(with: ops)
+            let redone = try liveMemberships(db, reading.id)
+            #expect(Set(redone.map(\.id)) == Set(beforeUndo.map(\.id)),
+                    "the redo revives exactly the rows the undo took — the same ids")
+            #expect(try db.read { try Queries.reading($0, id: reading.id)?.kind } == .book)
+        }
+    }
+
+    /// The same law for a waiting ARRIVAL: a gathering has no door, so an
+    /// arrival row standing on the bound book at the undo tombstones with the
+    /// members — and the redo brings it back AS an arrival (its status rides
+    /// the row untouched).
+    @Test func undoingABindTakesAWaitingArrivalAndRedoReturnsItWaiting() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let (reading, _, tag) = try smartBookWithTaggedPosts(ops, count: 1)
+            try ops.convertSmartReadingToCurated(reading.id)
+            try ops.setReadingIntakeSeating(reading.id, .arrivals)
+            let newcomer = try ops.createPost(title: "newcomer")
+            _ = try ops.applyTag(tag.id, toPost: newcomer.id)
+            let waiting = try #require(try liveMemberships(db, reading.id)
+                .first { $0.postId == newcomer.id })
+            #expect(waiting.status == .arrival, "non-vacuity: the dial sent it to the door")
+
+            try stack.undo(with: ops)
+            #expect(try liveMemberships(db, reading.id).isEmpty)
+
+            try stack.redo(with: ops)
+            let back = try #require(try liveMemberships(db, reading.id)
+                .first { $0.id == waiting.id })
+            #expect(back.status == .arrival)
         }
     }
 
