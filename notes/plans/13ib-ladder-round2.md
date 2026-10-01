@@ -16,8 +16,12 @@ CoreDescription. Code read in full in this session: the whole fix diff, plus (cu
 **Job:** verdict each round-1 disposition FIXED / NOT-FIXED / REGRESSED; surface any NEW
 finding the fix diff introduces (a new BLOCKER/MAJOR earns round 3).
 
-**STATUS: ROUND 2 COMPLETE. All eight dispositions upheld (5 FIXED, 3 record-class sound);
-ONE new finding, MINOR (no round 3 earned).**
+**STATUS: ROUND 2 COMPLETE — LADDER CLOSED AT TWO ROUNDS.** All eight round-1 dispositions
+upheld (5 FIXED, 3 record-class sound); ONE new finding, MINOR (NEW-R2-1), confirmed after
+the implementer's AGREE and **FIXED in-window by this reviewer (70b8606a)** with its
+red-watched pin. No new BLOCKER/MAJOR, so no round 3 under the standing rules; the
+implementer's one sanity pass over the reviewer's cumulative fix diff remains, per the
+cross-model flow.
 
 ---
 
@@ -242,3 +246,42 @@ one value.
 existing end-to-end malformed test builds its expectation by calling `BindCopy.spawned(...)`
 itself, that test is self-referential and cannot go red by itself. The negative assertion is
 the red-on-old.
+
+## THE REVIEWER'S FINAL CALL ON NEW-R2-1 (2026-10-01, after the implementer's agree; fix implemented by the reviewer in the same session, per the cross-model flow)
+
+**NEW-R2-1 — CONFIRMED · FIXED (70b8606a), the implementer's three refinements taken
+whole.** The line pointer stands corrected (`BindCopy.spawned` is
+`BookOrderAndConversion.swift:244–248` pre-fix; the finding's `:44–48` was a dropped digit
+into `BookOrderChoices`). The fix is the agreed shape: `spawned(_:count:rule:)` takes
+`RuleGrammar.ReadResult` — the type `spawnMessage(for:)` already switches on — so the sheet
+and the receipt read ONE value (`ShelfViewModel` computes `RuleGrammar.read` once in the
+serialized closure and returns it). The three arms: `.rule` keeps the standing promise;
+`.none` keeps "give it a rule (Edit Rule…)" — true there, a NULL spec edits fine, and the
+pin holds it as the POSITIVE CONTROL; `.malformed` mirrors its sheet's truth ("starts empty
+and won't collect until the rule is fixed"), naming no door. Words only; no operation,
+query or stored byte changes.
+
+**The pin (the implementer's discriminating shape):** the malformed cell's end-to-end
+assertions are INDEPENDENT strings — never `BindCopy.spawned` itself (a self-referential
+equality could not go red) — `!brokenReport.contains("Edit Rule")` plus the
+mirror-the-sheet positive, inside `spawnFromARuleLessGatheringNeverClaimsItCollects`.
+**RED WATCHED on the pre-fix words** at the exact lie (two issues: Edit Rule present;
+the mirror absent — BindDoorTests.swift:369/373 in the watch run), green on the fix.
+
+**The ladder's closure (the reviewer's call, authorized):** CLOSED AT TWO ROUNDS. Round 2
+found no new BLOCKER/MAJOR — one MINOR, confirmed and fixed in-window with its red-watched
+pin — so no round 3 is earned under the standing rules (a new BLOCKER/MAJOR earns round 3;
+hard cap three). Owed next per the cross-model flow: the implementer's ONE sanity pass over
+the reviewer's cumulative fix diff (rounds 1+2: df25b855 · c5f84d88 · 223ffaa8 · 665431ad ·
+27723b9b's F-R1-8 hunk · 70b8606a); anything it raises returns to the reviewer for the
+final word. Then ledger row 7 (closeout) lifts: F-R1-4's two canon clauses, F-R1-7's
+13i-c enumeration row, the morning-bundle riders, and NEW-R2-1's record.
+
+### The round-2 fix pass, verified
+
+Commit: 70b8606a (NEW-R2-1 — words + pin, one piece). End of pass, after the last code
+edit: Mac `BindDoorTests` — **"Test run with 11 tests in 1 suite passed"** (the pin's two
+new assertion groups included; 0 issues); the FULL core suite — **"Test run with 1913
+tests in 200 suites passed"** (unchanged — the fix touches only the Mac target's words);
+zero instances (`pgrep` clean). No `Sync/`, schema, migration, editor-seam or
+`VariorumCore` line in the round-2 fix diff; no attribution trailers.
