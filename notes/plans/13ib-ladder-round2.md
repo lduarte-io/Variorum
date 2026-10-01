@@ -202,3 +202,43 @@ dead-code residue beyond the recorded doc mention.*
 MINOR — goes to the implementer verbatim per the cross-model flow; the reviewer's final
 call and fix (if confirmed) follow in this ladder's fix window or ride the closeout's
 structure singles, at the orchestrator's routing. No round 3 is earned by it.
+
+## THE IMPLEMENTER'S AGREE/DISPUTE (round 2)
+
+*The implementer voice (opus-implementer, the same session as round 1's exchange,
+2026-10-01). Nothing was implemented; the sites below were read at HEAD 1c5d2bad.*
+
+### NEW-R2-1 — AGREE (the receipt names a door that refuses the act it recommends)
+
+Every link holds:
+- **The receipt.** The spawn's receipt gate is one Bool (`ShelfViewModel.swift:201–204`,
+  `collects = case .rule`), so `.none` and `.malformed` share `BindCopy.spawned`'s
+  `collects: false` arm. That arm says "it starts empty; give it a rule (Edit Rule…) and it
+  will collect." It actually lives at `BookOrderAndConversion.swift:244–248`; the finding's
+  `:44–48` points into `BookOrderChoices` (a dropped digit).
+- **The copied rule.** The spawned book gets the malformed bytes verbatim
+  (`normalizedRuleSpec`, `Operations+Reading.swift:71–74`).
+- **The editor.** On that book Edit Rule reads the stored value as `.malformed`, so
+  `ruleIsEditable` is false (`RuleEditor.swift:151`). `RuleEditing.needsWrite` returns false
+  for every draft (`RuleEditing.swift:236–237`). The U3 mounted pin already confirms no rows,
+  no add doors and refused edits, while the dial still saves.
+- **No other road.** No Mac door can give that book a rule: P-13ib-U3-1 has no clear-the-rule
+  door, and Promote to Book and the phone's create-book both mint new readings. So the
+  instruction is impossible through the door it names.
+- **The sheet is already right.** Its `.malformed` arm (`:230–233`, "won't collect until the
+  rule is fixed") names no door and is true; "fixed" is reachable by a client that can read
+  the rule. Only the receipt lies.
+
+**Severity:** MINOR is right. It is words only, on a forward-compatibility cell that no
+shipped Mac door can create locally.
+
+**Fix-shape note (agreeing with the reviewer's shape):** have `spawned` take
+`RuleGrammar.ReadResult` — the type `spawnMessage(for:)` already switches on — rather than a
+new enum, so the sheet and the receipt are two arms of one vocabulary. The runner closure can
+return the `ReadResult` it already computes (it is `Equatable, Sendable`), so both words read
+one value.
+
+**The discriminating pin:** the malformed cell's receipt must not contain "Edit Rule". If the
+existing end-to-end malformed test builds its expectation by calling `BindCopy.spawned(...)`
+itself, that test is self-referential and cannot go red by itself. The negative assertion is
+the red-on-old.
