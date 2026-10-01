@@ -222,12 +222,11 @@ extension Queries {
     /// below filters on it, so no door can drift into a profile spelling
     /// the repair does not recognise.
     ///
-    /// What the profile means: *a dated notebook* (entries in `entry_date`
-    /// order). It does NOT mean "the daily Journal" — the product
-    /// deliberately mints ADDITIONAL journal-profile notebooks through two
-    /// user doors (AppSpec §14 item 10's "starting a 'new' journal as a
-    /// separate notebook"), which is why the predicate below needs a
-    /// second leg.
+    /// 13i-a: this is THE DAILY JOURNAL'S OWN MARKER (the identity memo
+    /// §3) — exactly one live book wears it per converged account; the ONE
+    /// daily mint stamps it and `setDailyJournalBook` moves it with the
+    /// designation. The deliberate-notebook doors mint the journal TRAIT
+    /// (`journalTraitProfile`, next) instead.
     public static let dailyJournalBookProfile = "daily"
 
     /// The JOURNAL TRAIT's profile (13i-a; the sitting record §10): "entries
@@ -239,32 +238,32 @@ extension Queries {
     /// pane exposes it as the per-book settings row.
     public static let journalTraitProfile = "journal"
 
+    /// THE one journal-trait predicate (13i-a ladder R1 M-2): "entries
+    /// date-stamped at creation, named by their day, sorted by entry date"
+    /// is TRUE of a trait book AND of the daily Journal — 'daily' implies
+    /// the trait by construction (sitting record §10). Every FACE keying
+    /// the trait consults this, never a raw profile compare: the recast
+    /// made the designated book 'daily', and a face comparing to "journal"
+    /// alone silently dropped the daily Journal from its own rule (the
+    /// + new entry doors, the entries unit, the shelf's journal group).
+    public static func hasJournalTrait(_ profile: String?) -> Bool {
+        profile == journalTraitProfile || profile == dailyJournalBookProfile
+    }
+
     /// **The daily mint's SIGNATURE — the Journal-keeper repair's "same
     /// book" predicate, as one pure function** (pre-13u Act 0, R-pre13u-1;
-    /// NARROWED at the ladder's F6). A reading is the daily Journal's shape
-    /// when it is curated, wears the journal profile, AND wears the daily
-    /// mint's default name under `BookNaming`'s key (ends-trimmed,
-    /// case-folded — the E13 rule, reused rather than re-derived).
+    /// name-shape at the F6 interim; RE-KEYED ON THE MARKER at 13i-a — the
+    /// identity memo §3 built): a reading is the daily Journal iff it is a
+    /// book wearing `profile='daily'`. Names are never keys.
     ///
-    /// Why all three legs: `insertDailyJournalBook` — the one shared daily
-    /// door (⌘J, Today's Entry, the phone's furniture; the retired bridge
-    /// until 2026-09-04) — stamps
-    /// exactly this triple, so two devices each minting the Journal offline
-    /// produce two rows that BOTH satisfy it and converge. A deliberate
-    /// second notebook never does: the Mac's "Create Journal Book" and the
-    /// phone's `.journal` kind mint the profile but refuse the name
-    /// (`assertBookNameIsFree` at their doors, against the live Journal),
-    /// and the F6 finding was exactly the profile-only predicate merging
-    /// those notebooks into the Journal. E13's objection was to keying on
-    /// the name ALONE ("would delete a book she made on her phone") — a
-    /// plain `profile:'book'` book named "Journal" still fails the profile
-    /// leg and survives.
-    ///
-    /// The honest consequence of the name leg, recorded at QUESTIONS #85(a):
-    /// a daily Journal she RENAMED no longer converges with a fresh phone
-    /// mint — the two stand as separate journal-profile books until she
-    /// merges them by hand. The repair heals the race it was built for
-    /// (two untouched mints) and never touches a book whose name she chose.
+    /// Why the marker suffices where F6's name shape could not: the ONE
+    /// daily door (`insertDailyJournalBook` — ⌘J, Today's Entry, the
+    /// phone's furniture) stamps `'daily'` and NOTHING ELSE ever does
+    /// (the deliberate doors stamp the TRAIT; `setJournalTrait` refuses
+    /// the marker as constitutive; `setDailyJournalBook` moves it), so
+    /// two offline mints both wear it and converge, a deliberate notebook
+    /// never wears it and survives, and a RENAME changes nothing —
+    /// QUESTIONS #85(a)'s corner is CLOSED, the pin flipped to say so.
     public static func isDailyJournalMintShape(_ reading: Reading) -> Bool {
         isDailyJournalMintShape(kind: reading.kind, profile: reading.profile, name: reading.name)
     }
@@ -289,11 +288,10 @@ extension Queries {
     /// **The Journal-keeper repair's candidate set**: every live reading
     /// satisfying `isDailyJournalMintShape`, sorted by id, so index 0 is the
     /// deterministic keeper everywhere. Two rows here is the offline-race
-    /// state the repair heals. The name leg is applied in Swift so the ONE
-    /// key (`BookNaming.key`) serves — SQLite's `LOWER` is ASCII-only and
-    /// its `TRIM` trims spaces only, and a second folding rule would be a
-    /// second predicate. Cost ∝ the shelf's journal-profile books, never
-    /// the corpus.
+    /// state the repair heals. The Swift-side `.filter` through the ONE
+    /// predicate is kept (13i-a: it is the no-drift seam, even though the
+    /// marker-only predicate makes it coincide with the SQL filter today).
+    /// Cost ∝ the marker-bearing books, never the corpus.
     public static func dailyJournalBookCandidates(_ db: Database) throws -> [String] {
         try Reading.fetchAll(
             db,

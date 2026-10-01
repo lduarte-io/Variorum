@@ -18,8 +18,9 @@ import Foundation
 /// `{"and":[…]}` · `{"or":[…]}` · `{"not":…}` · `{"tag":"<id>"}` ·
 /// `{"star":true}` · `{"profile":"…"}` · `{"entryDateFrom":"…"}` ·
 /// `{"entryDateTo":"…"}`. A NULL column is "no rule" (a gathering with no
-/// rule assembles every post — the standing NULL-spec rule); a malformed
-/// value reads as no rule (today's tolerance, kept).
+/// rule assembles every post — the standing NULL-spec rule); a MALFORMED
+/// value fails CLOSED per consumer (`ReadResult` below carries the exact
+/// per-site letters).
 public indirect enum RuleTerm: Equatable, Sendable {
     case and([RuleTerm])
     case or([RuleTerm])

@@ -277,6 +277,9 @@ struct MobileBookDetailsTests {
             #expect(MobileBookDetailsModel.showsDailyDoor(reading(.book, "journal")))
             #expect(!MobileBookDetailsModel.showsDailyDoor(reading(.book, nil)))
             #expect(!MobileBookDetailsModel.showsDailyDoor(reading(.gathering, "journal")))
+            // 13i-a (ladder R1 M-2): the marker-bearing book still renders
+            // the door (the trait predicate; idempotent designation).
+            #expect(MobileBookDetailsModel.showsDailyDoor(reading(.book, "daily")))
         }
     }
 

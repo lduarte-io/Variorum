@@ -50,6 +50,11 @@ struct MobileShellTests {
         let journal = book("Journal", profile: "journal", posts: 1)
         #expect(MobileShelfFaces.meta(for: journal, tagPaths: [], isDaily: true)
             == "1 entry · daily", "journal counts entries; daily ranks behind")
+        // 13i-a (ladder R1 M-2): THE daily Journal wears 'daily' — the
+        // trait keeps its entries unit.
+        let daily = book("Journal", profile: "daily", posts: 1)
+        #expect(MobileShelfFaces.meta(for: daily, tagPaths: [], isDaily: true)
+            == "1 entry · daily", "the 'daily' marker HAS the journal trait")
         #expect(MobileShelfFaces.meta(for: journal, tagPaths: ["dreams"], isDaily: true)
             == "1 entry · #dreams · daily", "tags outrank the daily marker")
 

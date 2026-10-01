@@ -310,7 +310,7 @@ struct ShelfView: View {
             }
         }
         Button("Length & Extent…") { extentTarget = reading }
-        if reading.kind == .book, reading.profile == "journal" {
+        if reading.kind == .book, Queries.hasJournalTrait(reading.profile) {
             // Round 2, MAJOR 2's re-designation door: finishing a bounded
             // daily journal is the EXPECTED flow — this is where the next
             // one takes over.

@@ -124,8 +124,9 @@ struct Phase13iRepairTests {
         }
     }
 
-    /// The MIRRORED keep-shape: the member row's id sorts SMALLER, the
-    /// bell's larger — the kept member simply stays a member.
+    /// The MIRRORED keep-shape: here the ARRIVAL's id sorts smaller (AA),
+    /// the member's larger (BB) — the kept arrival must be PROMOTED, which
+    /// is branch 1's adopt-member arm doing the work.
     @Test func theSeatKeepsWhenItsIDSortsSmallerToo() async throws {
         let (a, b, server) = try furniturePair()
         let (postID, readingID): (String, String) = try a.with { ops, _ in
@@ -155,6 +156,70 @@ struct Phase13iRepairTests {
                     arguments: [readingID, postID, "2026-09-30T00:00:02.000Z"])
             }
         }
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try client.db.fetchString(
+                "SELECT status FROM reading_post WHERE post_id = ? AND deleted_at IS NULL",
+                [postID]) == "member")
+        }
+    }
+
+    /// Ladder R1 B-1's pin (red-on-old): the ASYMMETRIC choreography — the
+    /// promotion branch's device must PUSH the kept row's new status, or
+    /// the mirror (and any device that never sees the live loser) holds
+    /// 'arrival' forever. The §7 outbox rule asserted directly.
+    @Test func thePromotedKeptRowReachesTheOutboxAndAsymmetricRoundsConverge() async throws {
+        let (a, b, server) = try furniturePair()
+        let (postID, readingID): (String, String) = try a.with { ops, _ in
+            let post = try ops.createPost(title: "the note")
+            let book = try ops.createReading(name: "the book", kind: .book)
+            return (post.id, book.id)
+        }
+        try await a.push()
+        _ = try await b.pull()
+        // A mints the ARRIVAL (AA — the smaller id) and pushes FIRST;
+        // B mints the MEMBER (BB) and only then meets A's row.
+        try a.with { _, db in
+            try db.write { database in
+                try database.execute(
+                    sql: """
+                        INSERT INTO reading_post (id, reading_id, post_id, position, status, created_at)
+                        VALUES ('AA000000-0000-4000-8000-00000000ARRV', ?, ?, 'a1', 'arrival', ?)
+                        """,
+                    arguments: [readingID, postID, "2026-09-30T00:00:01.000Z"])
+            }
+        }
+        try await a.push()
+        try b.with { _, db in
+            try db.write { database in
+                try database.execute(
+                    sql: """
+                        INSERT INTO reading_post (id, reading_id, post_id, position, status, created_at)
+                        VALUES ('BB000000-0000-4000-8000-00000000MEMB', ?, ?, 'a2', 'member', ?)
+                        """,
+                    arguments: [readingID, postID, "2026-09-30T00:00:02.000Z"])
+            }
+        }
+        try await b.push()
+        _ = try await b.pull()  // the collision lands on B: AA kept, promoted
+        #expect(try b.db.fetchString(
+            """
+            SELECT status FROM reading_post
+            WHERE id = 'AA000000-0000-4000-8000-00000000ARRV'
+            """) == "member")
+        // THE §7 RULE, asserted directly: the promotion is a repair write
+        // on the kept row and must be enqueued (B-1's exact hole).
+        #expect(try b.db.fetchInt(
+            """
+            SELECT COUNT(*) FROM sync_outbox
+            WHERE table_name = 'reading_post'
+              AND row_id = 'AA000000-0000-4000-8000-00000000ARRV'
+            """) == 1,
+            "the kept row's promotion reaches the outbox — a forgotten enqueue is silent divergence")
+        // And the asymmetric tail converges WITHOUT B ever re-meeting a
+        // live loser on A's side.
+        try await b.push()
+        _ = try await a.pull()
         try await assertFurnitureConverged(a, b, server)
         for client in [a, b] {
             #expect(try client.db.fetchString(

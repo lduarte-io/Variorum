@@ -326,7 +326,34 @@ extension Operations {
 
     /// The designation write at db level — same reason as `setShelfPinned`'s
     /// twin above (13d batch 5).
+    ///
+    /// **13i-a (ladder R1 M-3): the 'daily' MARKER moves WITH the
+    /// designation, in the same transaction.** The marker is the identity
+    /// (the memo §3 — the keeper repair, `isDailyJournalMintShape` and the
+    /// constitutive-trait refusal all key on it), so a re-designation that
+    /// moved only the setting left a STALE marker-bearer behind — and a
+    /// later dangling-designation mint would then put TWO marker-bearing
+    /// books in front of the keeper repair, which would MERGE them (the F6
+    /// class re-opened through staleness). Every OTHER live 'daily' row
+    /// demotes to the journal TRAIT it was wearing as the daily book; the
+    /// live designee gains 'daily' (whatever profile it wore — designating
+    /// a book MAKES it the daily Journal, trait included). Ordinary CAS
+    /// metadata writes; outbox via the live triggers (this runs outside
+    /// apply).
     func setDailyJournalBook(_ db: Database, _ readingID: String) throws {
+        try db.execute(
+            sql: """
+                UPDATE reading SET profile = ?
+                WHERE profile = ? AND id <> ? AND deleted_at IS NULL
+                """,
+            arguments: [Queries.journalTraitProfile, Queries.dailyJournalBookProfile, readingID])
+        try db.execute(
+            sql: """
+                UPDATE reading SET profile = ?
+                WHERE id = ? AND deleted_at IS NULL AND profile IS NOT ?
+                """,
+            arguments: [Queries.dailyJournalBookProfile, readingID,
+                        Queries.dailyJournalBookProfile])
         try upsertSetting(db, key: "daily_journal_book", value: readingID)
     }
 

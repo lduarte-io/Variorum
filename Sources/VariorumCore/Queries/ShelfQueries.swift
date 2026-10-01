@@ -28,10 +28,15 @@ extension Queries {
     public static func bookshelf(_ db: Database) throws -> [ShelfBook] {
         let readings = try Queries.readings(db)
         guard !readings.isEmpty else { return [] }
+        // 13i-a (ladder R1 MIN-3): an ARRIVAL is not a member — the
+        // shelf's count, the capacity gate and the Pool's bookless
+        // exclusion all read status='member' (sitting record §4's letter:
+        // "membership rows counted").
         let postCounts = try countsByReading(
             db, sql: """
                 SELECT reading_id, COUNT(*) AS n FROM reading_post
-                WHERE deleted_at IS NULL GROUP BY reading_id
+                WHERE deleted_at IS NULL AND status = 'member'
+                GROUP BY reading_id
                 """)
         let sectionCounts = try countsByReading(
             db, sql: """
@@ -191,7 +196,8 @@ extension Queries {
     public static func poolPosts(_ db: Database, limit: Int) throws -> [TimelineItem] {
         var exclusions: [String] = ["""
             NOT EXISTS (SELECT 1 FROM reading_post rp
-                         WHERE rp.post_id = c.id AND rp.deleted_at IS NULL)
+                         WHERE rp.post_id = c.id AND rp.deleted_at IS NULL
+                           AND rp.status = 'member')
             """]
         var arguments: [(any DatabaseValueConvertible)?] = []
         for reading in try readings(db) where reading.kind == .gathering {

@@ -701,7 +701,7 @@ struct BookView: View {
                     // Round 3, MINOR: no entry door on a FINISHED book
                     // (additive — the model's in-closure gate covers the
                     // concurrent-lock race the hidden button can't).
-                    if structure.reading?.profile == "journal",
+                    if Queries.hasJournalTrait(structure.reading?.profile),
                        structure.reading?.locked != true {
                         Button(tokens.chromeLabel("+ new entry")) {
                             Task {
@@ -1393,7 +1393,7 @@ struct BookView: View {
                     // book's flow too, where writing ends — the navigator
                     // rail's twin (R62/R75; discoverability is the point).
                     if structure.reading?.locked != true {
-                        if structure.reading?.profile == "journal" {
+                        if Queries.hasJournalTrait(structure.reading?.profile) {
                             Button(tokens.chromeLabel("+ new entry")) {
                                 Task {
                                     if let id = await structure.newEntry() {

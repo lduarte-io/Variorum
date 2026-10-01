@@ -664,6 +664,11 @@ extension SyncEngine {
                    sql: "SELECT status = 'member' FROM reading_post WHERE id = ?",
                    arguments: [rivalID]) ?? false {
                 resolved.columns["status"] = .text("member")
+                // Ladder R1 B-1: the PROMOTION is a repair write on the
+                // KEPT row — it must push, or asymmetric rounds leave the
+                // mirror (and the un-met device) holding 'arrival' forever
+                // (§7's forgotten-enqueue divergence, exactly).
+                try enqueueExplicitly(db, table: row.table, rowID: resolved.rowID)
             }
             try db.execute(
                 sql: "UPDATE \(row.table) SET deleted_at = ? WHERE id = ?",

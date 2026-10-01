@@ -376,6 +376,7 @@ public enum SyncSchema {
     /// schema is fixed after migration and identical across every
     /// `AppDatabase` in a process, so a process-wide cache is sound.
     nonisolated(unsafe) private static var columnCatalog: [String: Set<String>] = [:]
+    nonisolated(unsafe) private static var notNullDefaultedCatalog: [String: Set<String>] = [:]
 
     /// The actual columns of a registered table. Callers validate payload
     /// column names against this before interpolating them into SQL —
@@ -394,6 +395,32 @@ public enum SyncSchema {
                 .map { $0["name"] as String })
         catalogLock.lock()
         columnCatalog[tableName] = names
+        catalogLock.unlock()
+        return names
+    }
+
+    /// The columns the LOCAL schema declares NOT NULL **with a default** —
+    /// the set an arriving EXPLICIT NULL must normalize against (13i-a
+    /// ladder R1 B-2). A mirror row pushed BEFORE a lockstep event that
+    /// added such a column holds NULL there, and `to_jsonb` serves it as a
+    /// PRESENT null — the client's additive-column tolerance must therefore
+    /// cover null-as-absent, not absence alone, or the first old row aborts
+    /// the apply transaction (`SQLITE_CONSTRAINT_NOTNULL`) and the pull
+    /// refuses forever. Schema-introspected so every FUTURE additive
+    /// NOT-NULL-defaulted column inherits the tolerance for free.
+    static func notNullDefaultedColumns(of tableName: String, _ db: Database) throws -> Set<String> {
+        catalogLock.lock()
+        if let cached = notNullDefaultedCatalog[tableName] {
+            catalogLock.unlock()
+            return cached
+        }
+        catalogLock.unlock()
+        let names = Set(
+            try Row.fetchAll(db, sql: "PRAGMA table_info(\(tableName))")
+                .filter { ($0["notnull"] as Int64) == 1 && ($0["dflt_value"] as String?) != nil }
+                .map { $0["name"] as String })
+        catalogLock.lock()
+        notNullDefaultedCatalog[tableName] = names
         catalogLock.unlock()
         return names
     }
@@ -817,15 +844,29 @@ public struct SyncRow: Equatable, Sendable, Codable {
         for name in columns.keys where !allowed.contains(name) {
             throw SyncError.unknownColumn(table: table.name, column: name)
         }
+        // 13i-a (ladder R1 B-2): an arriving EXPLICIT NULL in a column the
+        // local schema declares NOT NULL WITH a default is a pre-event
+        // mirror row's "never set" — it lands as the default (dropped from
+        // the write set: an INSERT takes the DDL default; an UPDATE keeps
+        // the local value, which for such a row IS the default). Without
+        // this, the first pre-window `container` row aborts a fresh
+        // device's whole first pull.
+        var columns = self.columns
+        let defaulted = try SyncSchema.notNullDefaultedColumns(of: table.name, db)
+        for (name, value) in columns where value == .null && defaulted.contains(name) {
+            columns.removeValue(forKey: name)
+        }
         let names = columns.keys.sorted()
-        let updateAssignments = names
+        // sync_version joins the assignment list directly so the statement
+        // stays well-formed even if the normalize above left only the PK.
+        let updateAssignments = (names
             .filter { $0 != table.primaryKey }
-            .map { "\($0) = ?" }
+            .map { "\($0) = ?" } + ["sync_version = ?"])
             .joined(separator: ", ")
         let updateArguments = names.filter { $0 != table.primaryKey }.map { columns[$0]!.databaseValue }
         try db.execute(
             sql: """
-                UPDATE \(table.name) SET \(updateAssignments), sync_version = ?
+                UPDATE \(table.name) SET \(updateAssignments)
                 WHERE \(table.primaryKey) = ?
                 """,
             arguments: StatementArguments(updateArguments + [syncVersion.databaseValue, rowID.databaseValue]))

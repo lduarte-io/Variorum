@@ -145,6 +145,21 @@ alter table container add column wing_id text;
 alter table tag add column wing_id text;
 alter table reading_post add column status text;
 
+-- Ladder R1 B-2 (belt beside the client's null-normalize): every PRE-WINDOW
+-- row is backfilled with the client defaults, so a fresh device's first
+-- pull serves real values rather than explicit nulls. (The re-seq the
+-- stamp trigger performs on these updates is harmless: existing clients
+-- discard the re-served rows by the sync_version-not-newer rule; fresh
+-- pulls are exactly who the values are for. reading's nine columns are
+-- backfilled too — its clients likewise read null-as-default, but the
+-- mirror should say what the fleet converged on.)
+update container set wing_id = '' where wing_id is null;
+update tag set wing_id = '' where wing_id is null;
+update reading_post set status = 'member' where status is null;
+update reading set wing_id = '' where wing_id is null;
+update reading set starred = 0 where starred is null;
+update reading set owned = 0 where owned is null;
+
 -- ---------------------------------------------------------------------------
 -- 3. The six registry-carrying RPC bodies, REDEFINED (12's bodies VERBATIM
 --    except the two tables joining each registry array — the headers and

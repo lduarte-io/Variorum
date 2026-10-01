@@ -269,7 +269,11 @@ extension Operations {
 
             let liveCount = try Int.fetchOne(
                 db,
-                sql: "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+                sql: """
+                    SELECT COUNT(*) FROM reading_post
+                    WHERE reading_id = ? AND deleted_at IS NULL
+                      AND status = 'member'
+                    """,
                 arguments: [readingID]) ?? 0
             if try liveMembership(db, postID: postID, readingID: readingID) != nil {
                 throw OperationError.alreadyInReading(postID: postID, readingID: readingID)
@@ -315,7 +319,11 @@ extension Operations {
             if let maxPosts = reading.maxPosts {
                 let liveCount = try Int.fetchOne(
                     db,
-                    sql: "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+                    sql: """
+                    SELECT COUNT(*) FROM reading_post
+                    WHERE reading_id = ? AND deleted_at IS NULL
+                      AND status = 'member'
+                    """,
                     arguments: [readingID]) ?? 0
                 if liveCount >= maxPosts {
                     throw OperationError.readingAtCapacity(id: readingID)
@@ -358,7 +366,11 @@ extension Operations {
             if let maxPosts = reading.maxPosts {
                 let liveCount = try Int.fetchOne(
                     db,
-                    sql: "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+                    sql: """
+                    SELECT COUNT(*) FROM reading_post
+                    WHERE reading_id = ? AND deleted_at IS NULL
+                      AND status = 'member'
+                    """,
                     arguments: [readingID]) ?? 0
                 if liveCount >= maxPosts {
                     throw OperationError.readingAtCapacity(id: readingID)

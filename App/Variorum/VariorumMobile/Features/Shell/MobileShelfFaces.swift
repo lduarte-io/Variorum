@@ -74,7 +74,7 @@ nonisolated enum MobileShelfFaces {
         if book.reading.kind == .gathering {
             parts.append("smart")
         } else {
-            let unit = book.reading.profile == "journal" ? "entr" : "note"
+            let unit = Queries.hasJournalTrait(book.reading.profile) ? "entr" : "note"
             let count = book.postCount
             let word = unit == "entr" ? (count == 1 ? "entry" : "entries")
                                       : (count == 1 ? "note" : "notes")

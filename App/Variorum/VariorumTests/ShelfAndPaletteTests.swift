@@ -53,11 +53,14 @@ struct ShelfModelTests {
             book("j", "Journal 2026", profile: "journal"),
             book("a", "alpha"),
             book("d", "Dream Journal", profile: "journal"),
+            // 13i-a (ladder R1 M-2): THE daily Journal wears 'daily' now —
+            // the trait predicate must keep it in the journal group.
+            book("t", "Journal", profile: "daily"),
             book("p", "pinned late"),
         ]
         let ordered = ShelfViewModel.ordered(books: books, pins: ["p", "z"])
-        #expect(ordered.map(\.reading.id) == ["p", "z", "d", "j", "a"],
-                "pins first in PIN order (R38), then journal books, then the rest by name")
+        #expect(ordered.map(\.reading.id) == ["p", "z", "d", "j", "t", "a"],
+                "pins first in PIN order (R38), then journal-TRAIT books ('daily' included), then the rest by name")
     }
 
     // `quickEntryMintsASegmentedPostAndReturnsItsID` retired with

@@ -719,10 +719,10 @@ extension AppDatabase {
                 guard let v1 = try? JSONDecoder().decode(
                     Queries.SmartQuerySpec.self, from: Data(json.utf8))
                 else {
-                    // Malformed v1 read as no constraints (today's
-                    // tolerance) — store the same meaning: no rule.
-                    try db.execute(
-                        sql: "UPDATE reading SET query_spec = NULL WHERE id = ?", arguments: [id])
+                    // Undecodable bytes stay RAW (ladder R1 MIN-1 — the
+                    // write seam's own ruling): the read side fails CLOSED
+                    // on malformed; laundering to NULL would flip a broken
+                    // rule to match-all and empty the Pool.
                     continue
                 }
                 let v2 = RuleGrammar.fromLegacy(
