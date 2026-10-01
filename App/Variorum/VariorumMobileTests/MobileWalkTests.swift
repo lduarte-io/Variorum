@@ -560,6 +560,9 @@ struct MobileWalkTests {
                 }
                 let poems = try ops.createReading(name: "Poems", kind: .book)
                 try ops.lockReading(poems.id)
+                // 13i-a: rules resolve paths to tag IDs at the write (§19),
+                // so the tag exists first — the doors' own flow.
+                _ = try ops.createTag(name: "books")
                 _ = try ops.createReading(
                     name: "reading notes", kind: .gathering,
                     querySpec: #"{"tags":["books"]}"#)
@@ -595,7 +598,7 @@ struct MobileWalkTests {
             let journalMembers = try await db.read { db in
                 try String.fetchAll(db, sql: """
                     SELECT rp.post_id FROM reading_post rp
-                    JOIN reading r ON r.id = rp.reading_id AND r.profile = 'journal'
+                    JOIN reading r ON r.id = rp.reading_id AND r.profile = 'daily'
                     WHERE rp.deleted_at IS NULL
                     """)
             }

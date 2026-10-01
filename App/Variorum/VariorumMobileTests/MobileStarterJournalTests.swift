@@ -75,7 +75,8 @@ struct MobileStarterJournalTests {
                         members.count, book.kind == .book)
             }
             #expect(facts.0 == Operations.defaultDailyJournalBookName)
-            #expect(facts.1 == "journal")
+            // 13i-a: the daily mint stamps the MARKER (the memo §3).
+            #expect(facts.1 == "daily")
             #expect(facts.2 == readingID, "the seeded book is the daily journal")
             #expect(facts.3 == 1, "exactly ONE entry — her word")
             #expect(facts.4, "curated, like the core's own")

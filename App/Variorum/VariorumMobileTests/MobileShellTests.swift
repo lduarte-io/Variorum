@@ -55,8 +55,12 @@ struct MobileShellTests {
 
         let smart = book(
             "reading notes", kind: .gathering, spec: #"{"tags":["books"]}"#)
-        #expect(MobileShelfFaces.tagPaths(for: smart, curatedTags: [:]) == ["books"],
-                "a smart book's tags are its own spec")
+        // 13i-a: rules hold tag IDs, so the paths arrive RESOLVED
+        // (`Queries.ruleTagPaths` at the load) — the face consumes the map.
+        #expect(MobileShelfFaces.tagPaths(
+                    for: smart, curatedTags: [:], ruleTags: [smart.reading.id: ["books"]])
+                == ["books"],
+                "a gathering's tags are its rule's, resolved")
         #expect(MobileShelfFaces.meta(for: smart, tagPaths: ["books"], isDaily: false)
             == "smart · #books", "derived membership is never a count")
     }

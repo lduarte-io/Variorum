@@ -121,7 +121,14 @@ struct MobileBookCreateTests {
 
             let row = try #require(await db.read { db in try Queries.reading(db, id: bookID) })
             #expect(row.kind == .gathering)
-            #expect(row.querySpec == #"{"tags":["sea"]}"#, "the OR spec, canonical JSON")
+            // 13i-a: the draft normalizes at the write — the stored rule
+            // is v2 and references the tag BY ID (§19).
+            let seaID = try #require(await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT id FROM tag WHERE path = 'sea' AND deleted_at IS NULL")
+            })
+            #expect(row.querySpec == #"{"tag":""# + seaID + #""}"#,
+                    "the v2 rule, canonical JSON, the tag by id")
             let assembled = try await db.read { db in
                 try Queries.assembleReading(db, readingID: bookID)
             }
