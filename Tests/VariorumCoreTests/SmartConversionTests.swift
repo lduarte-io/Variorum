@@ -513,6 +513,49 @@ struct SmartConversionTests {
         }
     }
 
+    /// THE CONTROL (the sanity pass's item 1, taken at the closeout): a
+    /// member she REMOVED BY HAND before the undo keeps its member-class
+    /// tombstone through the un-bind — the revert takes only LIVE rows —
+    /// so the pair stays DECIDED against a fresh act (removed stays out,
+    /// her ratified U1-1 boundary). Green on both sides by construction;
+    /// a guard, not a red-on-old.
+    @Test func aHandRemovedMemberStaysRemovedThroughAnUnbind() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let (reading, posts, tag) = try smartBookWithTaggedPosts(ops, count: 2)
+            try ops.convertSmartReadingToCurated(reading.id)
+            try ops.removePostFromReading(posts[0].id, from: reading.id)
+            try stack.undo(with: ops)
+
+            let removedRow = try #require(
+                try db.read { database in
+                    try ReadingPost.fetchAll(
+                        database,
+                        sql: """
+                            SELECT * FROM reading_post
+                            WHERE reading_id = ? AND post_id = ? AND deleted_at IS NOT NULL
+                            """,
+                        arguments: [reading.id, posts[0].id])
+                }.first,
+                "her removal's tombstone survives the un-bind")
+            #expect(removedRow.status == .member,
+                    "the hand-removal keeps its MEMBER-class tombstone — never flipped")
+
+            // The F-R1-1 pin's own staging, expecting the OPPOSITE: untag
+            // (so the note leaves the assembly), RE-BIND (a deliberate bind
+            // re-members only what the gathering shows), then the fresh
+            // applying act — a hand-REMOVED pair stays silent where a
+            // dismissed one rings (the ratified boundary).
+            try ops.removeTag(tag.id, fromPost: posts[0].id)
+            _ = try ops.convertSmartReadingToCurated(reading.id)
+            _ = try ops.applyTag(tag.id, toPost: posts[0].id)
+            #expect(try liveMemberships(db, reading.id)
+                .allSatisfy { $0.postId != posts[0].id },
+                "removed stays out: no live row of any status for the pair")
+        }
+    }
+
     @Test func aRedoWhoseMemberPostDiedLeavesThatMembershipDead() throws {
         try withOperations { _, db in
             let stack = UndoStack()
