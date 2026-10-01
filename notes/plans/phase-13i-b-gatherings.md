@@ -1191,6 +1191,60 @@ STOP condition met.
   of the pre-bind GATHERING as a book; exact words would be "it stays on your shelf — same
   name, same star." Recorded, not patched (copy is hers).
 
+## U4 RECORD — the star context · the starred gathering · Quicknotes verify · the Pool tuck · the filter mechanics (opus-implementer, 2026-10-01)
+
+**NOT DONE BY THIS UNIT (first line, per the contract):** PENDING — written at close.
+
+**UNIT STATUS: IN PROGRESS.**
+
+### The settled design (written before code)
+
+- **A — the star context (F-U3-3).** `ruleMatchSQL` loses its `starredNoteIDs = []` default, and so do
+  its two wrappers (`matchesRule`, `smartMembershipSQL`) — every caller must pass the context, so the
+  compiler enumerates the sites and no future one can silently match nothing. The context is fetched
+  LAZILY (only when the rule in hand references a star term — `RuleGrammar.referencesStar`) through
+  `Queries.starredNoteIDs` (live NOTE targets only, star order; bounded by `Operations.starLimit`,
+  which caps the WRITE side, so the `IN` list is ≤ 15 by construction). Site classes: the gathering
+  ASSEMBLY (→ the book view, export, the bind's materialization + its count, the shelf count, the info
+  panel, the phone's book view), the WORD COUNTS, the POOL, the membership CHIP, the Library card's
+  gathering list, the COLLECT door's two probes; intake (U1) already passes it. A held observation that
+  reads the context tracks the `setting` row, so un-starring evicts on the next tick (derived).
+- **B — the starred-notes gathering.** Core op `ensureStarredNotesGathering()` (silent, never throws —
+  the `fileAsQuicknote` shape): ONE write transaction; PRESENT = a live Home reading whose rule is
+  exactly `{"star":true}` (any kind — a bind keeps the row) or wearing the reserved name (E13's
+  sense — never mint a second same-named row); DELETED = a tombstoned Home reading with that rule or
+  that name (`readingTombstoneExists`'s class, rule-keyed too); else MINT an ordinary gathering —
+  rule `{"star":true}`, name `"starred notes"` (P-13ib-4, one constant), unshelved, unstarred, sort
+  as Quicknotes (created, newest first). App side, `Shared/StarredGatheringSeeder` holds the
+  per-store-variant DEVICE MARK and the sync gate (the `SampleLibrarySeeder` discipline); the Mac's
+  launch task calls it after the sample books. The phone's occasion is DEFERRED to the mobile
+  catch-up (its pins count readings at the first write — a second surface).
+- **C — Quicknotes verify.** Read: kind gathering, rule `#quicknote`, no delete guard anywhere, no
+  sync keeper, evict-on-untag derived (pinned since 13g). Found: the filing door RE-MINTS the
+  gathering after she deletes it (the designation dangles ⇒ mint) — the daily Journal's "comes back"
+  trait, which §20 explicitly withholds from Quicknotes. Fix (PROVISIONAL): a dangling designation
+  is her decision — no re-mint; the note still lands tagged and the receipt stops claiming a
+  Quicknotes landing that did not happen.
+- **D — the Pool tuck.** `Queries.poolListing(db, window:)` — ONE statement classifies every
+  bookless note (no live MEMBER row) as shown-by-some-live-gathering or not, with per-class counts and
+  per-class windows (window functions); `poolPosts` keeps its contract (the untucked class) so the
+  phone and the pins read the same split. The Pool's masthead reads "Pool · N notes · M in gatherings
+  · show"; the click toggles the tucked run (view state); an empty-but-gathered Pool says so.
+- **E — the in-book filter mechanics.** `assembleReading(…, filter: RuleTerm?)` — view-local, a read
+  (never membership); the filter applies to the ASSEMBLY (after a cap, before the caller's window).
+  `saveFilterAsGathering(readingID, filter:, name:)` mints a gathering whose rule = the reading's tag
+  association ∧ the filter (PROVISIONAL reading of "association": a gathering's or living book's own
+  rule, else the book's live auto-tag, else none — the filter alone, reported).
+
+### U4 LIVE STATUS (per commit; every unverified claim PENDING)
+
+- Preflight read in this session, not delegated: CLAUDE.md + canon, this plan whole (§1–§7, the U1/U2/U3
+  RECORDS + the three orchestrator verifications, the ledger, the morning bundle), the sitting record §1–§4,
+  §7–§9, §14, §17–§25 (§3, §8, §18.1, §19.3, §20, §25 lesson 10 closely), the resiliency protocol whole.
+  No `Sync/`, custody, schema or editor-seam work planned (SyncSpec / TEXTKIT2_NOTES not required). No
+  revert in flight. No subagents.
+- Piece 1 (this commit): the record opened.
+
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
 | # | Item | Status |
