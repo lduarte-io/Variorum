@@ -661,8 +661,19 @@ written at the close. Standing scope fence: no face of any kind (U3/U4), zero `S
   recorded "fourteen put-backs" shape — the question it recorded (should `restoreReading` revive
   stamp-matched member containers?) is answered by §18.3 / this plan §6, so the book's Put back
   now brings the notes home and a member's own Put back refuses `containerNotDeleted`.
-  Red-on-old for the revival pass: PENDING (the behavioural revert runs next).
-- **Piece D — Seal / Unseal, the lock/unlock guards** — NOT-STARTED.
+  **Red-on-old, by behavioural revert** (committed tree; an early `return` in
+  `enforceOwnershipAfterRevival` AND in `consultOwnership`; restored by `git checkout`, the
+  marker grep 0, green again): all FIVE revival pins red (owned-restore's later plain row stayed
+  live; plain-restore's owned claim stayed a member; the note restore; the bind redo; the diverge
+  undo — twice), and every consult pin red (row-1 add ×2, the seat, the daily bell ×2) — 18
+  issues / 34 tests. No revert in flight.
+- **Piece D — Seal / Unseal, the lock/unlock guards:** DONE (commit "13i-c U2 piece D").
+  `Operations+Seal.swift` (`sealReading` — forks · finish+dismiss · stamp · members sealed on the
+  exact stamp; `unsealReading` — exact-stamp members, open in one step, the catch-up);
+  `lockPost`/`unlockPost` bodies shared (`sealPost`/`unsealPost`); `unlockReading` refuses
+  `readingSealed`; `lockReading` on a sealed book a no-op; `Queries.sealPreview` +
+  `pendingArrivalCount` (the Arrivals face's own predicate). `BookSealTests` 7/7 (lesson 6's
+  first sentence pinned there); the lock-op regression sweep 654 tests / 61 suites green.
 - **Piece E — hide-owned (fragment + setter + the setting), the badge facts, `ownership_badges`**
   — NOT-STARTED.
 - **Piece F — `OwnershipDoorTests` rows 1–12, the soak, the R4 ritual + lessons 5/6/8; the shared

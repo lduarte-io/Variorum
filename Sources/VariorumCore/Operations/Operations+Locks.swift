@@ -25,14 +25,7 @@ extension Operations {
     /// in every other operation via the centralized locked-post guard.
     public func lockPost(_ id: String) throws {
         try database.write { db in
-            var post = try livePost(db, id)
-            guard !post.locked else { return }
-            let now = date.now
-            _ = try autoCommitDirtyVariants(db, containerID: id, now: now)
-            post.locked = true
-            post.lockedAt = now
-            post.updatedAt = now
-            try post.update(db)
+            try sealPost(db, id: id, now: date.now)
         }
     }
 
@@ -40,13 +33,33 @@ extension Operations {
     /// editing surface.
     public func unlockPost(_ id: String) throws {
         try database.write { db in
-            var post = try livePost(db, id)
-            guard post.locked else { return }
-            post.locked = false
-            post.lockedAt = nil
-            post.updatedAt = date.now
-            try post.update(db)
+            try unsealPost(db, id: id, now: date.now)
         }
+    }
+
+    /// The `lockPost` body — shared with `sealReading` (13i-c U2), which seals
+    /// every member on the BOOK's exact stamp (`now`): dirty live buffers are
+    /// insured by one quiet auto commit each (the standing seal insurance),
+    /// then the freeze. An already-sealed note is untouched — its own stamp
+    /// stands (so it is "independent" of any book's unseal).
+    func sealPost(_ db: Database, id: String, now: Date) throws {
+        var post = try livePost(db, id)
+        guard !post.locked else { return }
+        _ = try autoCommitDirtyVariants(db, containerID: id, now: now)
+        post.locked = true
+        post.lockedAt = now
+        post.updatedAt = now
+        try post.update(db)
+    }
+
+    /// The `unlockPost` body — shared with `unsealReading` (13i-c U2).
+    func unsealPost(_ db: Database, id: String, now: Date) throws {
+        var post = try livePost(db, id)
+        guard post.locked else { return }
+        post.locked = false
+        post.lockedAt = nil
+        post.updatedAt = now
+        try post.update(db)
     }
 
     private func setVariantLock(_ id: String, locked: Bool) throws {

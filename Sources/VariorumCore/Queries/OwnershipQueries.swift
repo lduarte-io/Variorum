@@ -221,4 +221,33 @@ extension Queries {
                 """,
             arguments: [readingID]) ?? 0
     }
+
+    /// **"Seal…" — the confirm's facts** (the 13i-c plan §5): the members
+    /// that WILL fork (named, with where else they live — the confirm LISTS
+    /// them, ruled) and how many arrivals the seal's finish will dismiss
+    /// (§24's line, shown only when > 0; 0 on a book already finished — its
+    /// finish happened). Empty for a sealed book or a gathering.
+    public struct SealPreview: Equatable, Sendable {
+        public let forks: [SharedMember]
+        public let pendingArrivals: Int
+
+        public static let none = SealPreview(forks: [], pendingArrivals: 0)
+    }
+
+    public static func sealPreview(_ db: Database, readingID: String) throws -> SealPreview {
+        guard let reading = try Queries.reading(db, id: readingID),
+              reading.kind == .book, reading.sealedAt == nil
+        else { return .none }
+        return SealPreview(
+            forks: try sharedMembers(db, readingID: readingID),
+            pendingArrivals: reading.locked ? 0 : try pendingArrivalCount(db, readingID: readingID))
+    }
+
+    /// **The finish confirm's N** (the sitting record §24 — "N waiting at the
+    /// door will be dismissed"): the book's pending arrivals, counted by the
+    /// Arrivals face's own predicate (`bookArrivals`), so the confirm and the
+    /// door's line can never disagree.
+    public static func pendingArrivalCount(_ db: Database, readingID: String) throws -> Int {
+        try bookArrivals(db, readingID: readingID, limit: 0).count
+    }
 }

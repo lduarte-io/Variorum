@@ -230,9 +230,13 @@ extension Operations {
     /// this transaction, on the finish's stamp — the decision record. The
     /// finish CONFIRM's "N waiting at the door will be dismissed" line is
     /// 13i-c's face.
+    ///
+    /// 13i-c U2 (the plan §5): on a SEALED book this is a no-op — a sealed
+    /// book is finished already (Sealed = Finished + text immutability).
     public func lockReading(_ id: String) throws {
         try database.write { db in
             var reading = try liveReading(db, id)
+            guard reading.sealedAt == nil else { return }
             let now = date.now
             reading.locked = true
             reading.updatedAt = now
@@ -246,9 +250,16 @@ extension Operations {
     /// and only those, since every pair it had decided stays decided —
     /// wait at Arrivals (gap = judgment). Un-finishing a book that was not
     /// finished is no occasion.
+    ///
+    /// 13i-c U2 (R-13ic-3): a SEALED book refuses (`readingSealed`) — the ONE
+    /// door down from Sealed is Unseal, which reopens the book too; the two
+    /// states never contradict.
     public func unlockReading(_ id: String) throws {
         try database.write { db in
             var reading = try liveReading(db, id)
+            guard reading.sealedAt == nil else {
+                throw OperationError.readingSealed(id: id)
+            }
             let wasFinished = reading.locked
             let now = date.now
             reading.locked = false
