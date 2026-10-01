@@ -176,6 +176,41 @@ public enum RuleGrammar {
         }
     }
 
+    /// **The SPAWN door's outflow derivation** (her morning ruling, 13i-b —
+    /// *"the spawn isn't adding the auto tag? it should"* — read as: where
+    /// the copied rule references exactly ONE distinct tag; ladder F-R1-2
+    /// sharpened the letter): the sole tag qualifies only when the rule
+    /// references exactly one distinct tag id AND references it POSITIVELY
+    /// somewhere — under an EVEN number of `not`s — so `NOT #a` can never
+    /// make #a the outflow of a book whose rule excludes it. A rule naming
+    /// two distinct tags (`#a ∧ NOT #b`) stays nil: her letter names ONE
+    /// distinct tag, and the ambiguous arm is the bundled PROVISIONAL (the
+    /// editor's auto-tag row is one click). Pure; liveness is the caller's
+    /// (`Queries.tagIsLive`).
+    public static func soleOutflowTagID(of term: RuleTerm?) -> String? {
+        let ids = tagIDs(of: term)
+        guard ids.count == 1, let sole = ids.first else { return nil }
+        return referencesPositively(term, tagID: sole) ? sole : nil
+    }
+
+    /// Whether some reference to `tagID` sits under an even number of `not`s
+    /// (`NOT NOT #a` is positive — parity, not presence).
+    private static func referencesPositively(
+        _ term: RuleTerm?, tagID: String, negated: Bool = false
+    ) -> Bool {
+        guard let term else { return false }
+        switch term {
+        case .and(let ts), .or(let ts):
+            return ts.contains { referencesPositively($0, tagID: tagID, negated: negated) }
+        case .not(let t):
+            return referencesPositively(t, tagID: tagID, negated: !negated)
+        case .tag(let id):
+            return id == tagID && !negated
+        case .star, .legacyProfile, .legacyEntryDateFrom, .legacyEntryDateTo:
+            return false
+        }
+    }
+
     /// `a ∧ b` as ONE flat conjunction (13i-b U4 — "Save this filter as a
     /// gathering": the rule = the reading's tag association ∧ the filter, the
     /// sitting record §18.1). A nil `a` (no association) is the filter alone;

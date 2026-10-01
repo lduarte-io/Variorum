@@ -264,6 +264,31 @@ struct BindDoorTests {
         }
     }
 
+    /// **Ladder F-R1-2 (confirmed):** a NEGATED sole tag is not an outflow.
+    /// The pre-fix derivation read `RuleGrammar.tagIDs`, which descends
+    /// `not` — so a `NOT #a` gathering spawned a book whose auto-tag was the
+    /// very tag its rule EXCLUDES: every note minted or hand-added there was
+    /// tagged into the one thing the book refuses. The derivation is now the
+    /// pure `RuleGrammar.soleOutflowTagID` (positive-polarity sole tag —
+    /// `RuleOutflowTests` holds the table); this is the door-level red-on-old.
+    ///
+    /// RED-ON-OLD (watched, by behavioural revert of the `ShelfViewModel`
+    /// hunk): the pre-fix spawn set `autoTagId` to the negated tag.
+    @Test func spawnFromANegatedRuleLeavesTheOutflowUnset() async throws {
+        try await withBindWorld { session, db in
+            let ops = session.operations
+            let avoid = try ops.createTag(name: "avoid")
+            let negated = try ops.createReading(
+                name: "everything else", kind: .gathering,
+                querySpec: try RuleGrammar.encode(.not(.tag(avoid.id))))
+            let shelf = ShelfViewModel(session: session)
+            let book = try #require(
+                await shelf.spawnBook(from: negated.id, named: "everything else (book)"))
+            #expect(try await db.read { try Queries.reading($0, id: book)?.autoTagId } == nil,
+                    "a book must never flow out the tag its rule excludes")
+        }
+    }
+
     // MARK: - The teaching moment
 
     private func structure(

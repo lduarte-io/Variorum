@@ -197,16 +197,17 @@ final class ShelfViewModel {
                 try ops.assertBookNameIsFree(name)
                 // HER MORNING RULING (13i-b, 2026-10-01 — P-13ib-3
                 // overruled): "the spawn isn't adding the auto tag? it
-                // should." Where the copied rule references exactly ONE
-                // tag, that tag is the spawned book's outflow; an OR fan
-                // or a star-only rule has no single honest outflow, so it
-                // stays unset (the editor's row is one click). The tag
-                // must be LIVE in the gathering's wing — a dead reference
-                // would make the outflow a silent no-op from birth.
+                // should." The derivation is the pure Domain rule
+                // `RuleGrammar.soleOutflowTagID` (ladder F-R1-2: exactly ONE
+                // distinct tag, referenced POSITIVELY — a NOT-#a rule must
+                // never flow out the tag it excludes; an OR fan, star-only
+                // or two-tag rule stays unset, the editor's row one click).
+                // The view model adds only the liveness fact: the tag must
+                // be LIVE in the gathering's wing — a dead reference would
+                // make the outflow a silent no-op from birth.
                 var autoTagID: String?
-                let ruleTagIDs = RuleGrammar.tagIDs(
-                    of: RuleGrammar.decode(gathering.querySpec))
-                if ruleTagIDs.count == 1, let sole = ruleTagIDs.first,
+                if let sole = RuleGrammar.soleOutflowTagID(
+                       of: RuleGrammar.decode(gathering.querySpec)),
                    try database.read({
                        try Queries.tagIsLive($0, id: sole, wingID: gathering.wingId)
                    }) {
