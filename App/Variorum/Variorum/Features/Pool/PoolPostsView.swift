@@ -20,7 +20,18 @@ import VariorumCore
 @Observable
 final class PoolPostsModel {
     @ObservationIgnored let session: AppSession
+    /// The Pool's LOOSE notes — bookless and shown by no gathering (13i-b U4:
+    /// the split's own class; the rows the page always lists).
     private(set) var posts: [Queries.TimelineItem] = []
+    /// 13i-b U4 — THE TUCK (the sitting record §8; lesson 10): the bookless
+    /// notes some gathering shows, tucked behind the masthead count. Rows are
+    /// windowed like `posts`; the counts are exact.
+    private(set) var tucked: [Queries.TimelineItem] = []
+    private(set) var looseCount = 0
+    private(set) var tuckedCount = 0
+    /// Is the tucked run showing? VIEW state — off on every visit, never
+    /// remembered (PROVISIONAL P-13ib-U4-4), the Arrivals expansion's rule.
+    private(set) var showsTucked = false
     /// 13e E8: whole tags, like the Library's — the chips need the id to
     /// take one off (`TagChips` carries the reasoning).
     private(set) var postTags: [String: [Tag]] = [:]
@@ -43,10 +54,9 @@ final class PoolPostsModel {
     func start() async {
         do {
             for try await value in session.database.observe({ db in
-                try Queries.poolPosts(db, limit: Self.window)
+                try Queries.poolListing(db, window: Self.window)
             }) {
-                posts = value
-                await loadTags()
+                await adopt(value)
             }
         } catch is CancellationError {
         } catch {
@@ -54,8 +64,30 @@ final class PoolPostsModel {
         }
     }
 
+    /// One delivered split, adopted — the observation's body, and the pins'
+    /// seam (a hosted `.task` does not fire under the test host).
+    func adopt(_ listing: Queries.PoolListing) async {
+        posts = listing.loose
+        tucked = listing.tucked
+        looseCount = listing.looseCount
+        tuckedCount = listing.tuckedCount
+        await loadTags()
+    }
+
+    /// The masthead's one click: show the tucked notes, or tuck them away.
+    func toggleTucked() async {
+        showsTucked.toggle()
+        await loadTags()
+    }
+
+    /// The rows the page draws: the loose ones, plus the tucked run while it
+    /// shows — so the chips/previews reads stay bounded by what is on screen.
+    var drawnIDs: [String] {
+        posts.map(\.postID) + (showsTucked ? tucked.map(\.postID) : [])
+    }
+
     private func loadTags() async {
-        let ids = posts.map(\.postID)
+        let ids = drawnIDs
         guard !ids.isEmpty else {
             postTags = [:]
             snippets = [:]
@@ -192,11 +224,21 @@ struct PoolPostsView: View {
                 Text(tokens.path(["Pool"]))
                     .font(tokens.heading)
                     .foregroundStyle(tokens.accent)
+                    .lineLimit(1)
+                // 13i-b U4 — her masthead shape, the sitting record §8:
+                // "Pool · 2 notes · 14 in gatherings · show".
                 Text(tokens.chromeLabel(
-                    "\(model.posts.count) notes in no book — most things belong in one"))
+                    PoolTuckCopy.masthead(loose: model.looseCount, tucked: model.tuckedCount)))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                     .lineLimit(1)
+                if model.tuckedCount > 0 {
+                    Button(tokens.chromeLabel(PoolTuckCopy.toggle(showing: model.showsTucked))) {
+                        Task { await model.toggleTucked() }
+                    }
+                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                    .help(PoolTuckCopy.toggleHelp(showing: model.showsTucked))
+                }
                 Spacer()
             }
             .padding(.horizontal, 24)
@@ -210,14 +252,34 @@ struct PoolPostsView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 6) {
                     ForEach(model.posts, id: \.postID) { item in
-                        row(item)
+                        row(item, tucked: false)
                     }
-                    if model.posts.isEmpty {
-                        Text(tokens.chromeLabel("Every note lives in a book. The pool is empty."))
+                    if let empty = PoolTuckCopy.empty(loose: model.looseCount, tucked: model.tuckedCount) {
+                        // 13i-b U4: an empty-but-gathered Pool SAYS so (§8) —
+                        // never "the pool is empty" over tucked notes.
+                        Text(tokens.chromeLabel(empty))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
                             .padding(.vertical, 18)
                             .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                    // The tucked run, on her click: under the Library's quiet
+                    // section-label idiom (gray words over a hairline).
+                    if model.showsTucked, !model.tucked.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(tokens.chromeLabel(PoolTuckCopy.tuckedSection))
+                                .font(tokens.small)
+                                .foregroundStyle(tokens.faint)
+                                .lineLimit(1)
+                            Rectangle().fill(tokens.line).frame(height: 1)
+                        }
+                        .padding(.top, 14)
+                        .padding(.horizontal, 4)
+                        ForEach(model.tucked, id: \.postID) { item in
+                            row(item, tucked: true)
+                        }
                     }
                 }
                 .padding(.horizontal, 20)
@@ -226,6 +288,11 @@ struct PoolPostsView: View {
         }
         .background(tokens.surface)
         .task { await model.start() }
+        #if DEBUG
+        .onAppear { recordMasthead() }
+        .onChange(of: PoolTuckProbe.Face(model)) { _, _ in recordMasthead() }
+        .onDisappear { PoolTuckProbe.forgetFace() }
+        #endif
         .deleteNoteConfirmDialog($pendingDelete) { confirm in
             NoteDeletion.fire(session: session, postIDs: confirm.postIDs)
         }
@@ -255,7 +322,17 @@ struct PoolPostsView: View {
         }
     }
 
-    private func row(_ item: Queries.TimelineItem) -> some View {
+    #if DEBUG
+    private func recordMasthead() {
+        PoolTuckProbe.recordFace(
+            masthead: PoolTuckCopy.masthead(loose: model.looseCount, tucked: model.tuckedCount),
+            toggle: model.tuckedCount > 0 ? PoolTuckCopy.toggle(showing: model.showsTucked) : nil,
+            empty: PoolTuckCopy.empty(loose: model.looseCount, tucked: model.tuckedCount),
+            tuckedSection: model.showsTucked && !model.tucked.isEmpty)
+    }
+    #endif
+
+    private func row(_ item: Queries.TimelineItem, tucked: Bool) -> some View {
         // 13u3 UNIT B (her item 4): the ONE brain the Library's rows ask —
         // her name where she typed one, a daily entry's day, else the note's
         // own first words.
@@ -317,6 +394,10 @@ struct PoolPostsView: View {
         .contentShape(Rectangle())
         .onTapGesture { onOpen(.post(item.postID)) }
         .draggable(item.postID)
+        #if DEBUG
+        .onAppear { PoolTuckProbe.recordRow(item.postID, tucked: tucked) }
+        .onDisappear { PoolTuckProbe.forgetRow(item.postID, tucked: tucked) }
+        #endif
         .contextMenu {
             Button("Open") { onOpen(.post(item.postID)) }
             if let onOpenBeside {
@@ -383,3 +464,115 @@ nonisolated enum PoolCardFace {
         return card.preview.isEmpty ? nil : card.preview
     }
 }
+
+/// **THE TUCK'S WORDS, ONE HOME** (13i-b U4 — the sitting record §8, her
+/// masthead shape verbatim: "Pool · 2 notes · 14 in gatherings · show"; §25
+/// lesson 10). Pure. The count words agree in number ("1 note", "1 in a
+/// gathering"); the voice casing is the caller's `chromeLabel`. 13s
+/// re-voices all of it (PROVISIONAL P-13ib-U4-5).
+nonisolated enum PoolTuckCopy {
+    static func notes(_ count: Int) -> String {
+        count == 1 ? "1 note" : "\(count) notes"
+    }
+
+    static func inGatherings(_ count: Int) -> String {
+        count == 1 ? "1 in a gathering" : "\(count) in gatherings"
+    }
+
+    /// The words after "Pool": "· 2 notes · 14 in gatherings ·", the toggle
+    /// then closing her shape. With nothing tucked, the tuck says nothing.
+    static func masthead(loose: Int, tucked: Int) -> String {
+        guard tucked > 0 else { return "\u{B7} \(notes(loose))" }
+        return "\u{B7} \(notes(loose)) \u{B7} \(inGatherings(tucked)) \u{B7}"
+    }
+
+    /// The one click.
+    static func toggle(showing: Bool) -> String { showing ? "hide" : "show" }
+
+    static func toggleHelp(showing: Bool) -> String {
+        showing
+            ? "Tuck the notes that show in gatherings back behind the count."
+            : "Notes that show in gatherings tuck behind this count \u{2014} one click lists them here too."
+    }
+
+    /// The label over the tucked run while it shows.
+    static let tuckedSection = "in gatherings"
+
+    /// The empty state — nil while loose notes list. An EMPTY-BUT-GATHERED
+    /// Pool says so (§8); only a Pool with nothing tucked either says it is
+    /// empty.
+    static func empty(loose: Int, tucked: Int) -> String? {
+        guard loose == 0 else { return nil }
+        switch tucked {
+        case 0: return "Every note lives in a book. The pool is empty."
+        case 1: return "No loose notes \u{2014} the one bookless note shows in a gathering."
+        default: return "No loose notes \u{2014} all \(tucked) bookless notes show in gatherings."
+        }
+    }
+}
+
+#if DEBUG
+/// **WHAT THE MOUNTED POOL DREW, AS A TEST ORACLE** (the `ArrivalsLineProbe`
+/// pattern, for its measured reason: a hosted SwiftUI tree exposes no
+/// accessibility children in this test host). The masthead/empty/section facts
+/// are recorded from the page's own `onAppear`/`onChange`; each card from its
+/// own `onAppear`, cleared on disappear — so an absent row is an honest "not
+/// drawn". DEBUG only; the shipping face carries none of it. One Pool page is
+/// mounted at a time (the sidebar's one destination), so it is unkeyed.
+@MainActor
+enum PoolTuckProbe {
+    struct Drawn: Equatable {
+        var masthead: String?
+        var toggle: String?
+        var empty: String?
+        var tuckedSection = false
+        var looseRows: Set<String> = []
+        var tuckedRows: Set<String> = []
+    }
+
+    /// The facts the masthead/empty state read — `onChange`'s key.
+    struct Face: Equatable {
+        let loose: Int
+        let tucked: Int
+        let showing: Bool
+        let tuckedRows: Int
+
+        init(_ model: PoolPostsModel) {
+            loose = model.looseCount
+            tucked = model.tuckedCount
+            showing = model.showsTucked
+            tuckedRows = model.tucked.count
+        }
+    }
+
+    private(set) static var drawn = Drawn()
+
+    static func reset() { drawn = Drawn() }
+
+    static func recordFace(
+        masthead: String, toggle: String?, empty: String?, tuckedSection: Bool
+    ) {
+        drawn.masthead = masthead
+        drawn.toggle = toggle
+        drawn.empty = empty
+        drawn.tuckedSection = tuckedSection
+    }
+
+    static func forgetFace() {
+        drawn.masthead = nil
+        drawn.toggle = nil
+        drawn.empty = nil
+        drawn.tuckedSection = false
+    }
+
+    static func recordRow(_ postID: String, tucked: Bool) {
+        if tucked { drawn.tuckedRows.insert(postID) } else { drawn.looseRows.insert(postID) }
+    }
+
+    /// Per class: SwiftUI may mount a card's NEW place before it unmounts the
+    /// old one (an untucked note moving runs), so a forget clears only its own.
+    static func forgetRow(_ postID: String, tucked: Bool) {
+        if tucked { drawn.tuckedRows.remove(postID) } else { drawn.looseRows.remove(postID) }
+    }
+}
+#endif

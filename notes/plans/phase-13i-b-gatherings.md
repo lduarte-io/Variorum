@@ -1328,6 +1328,31 @@ STOP condition met.
   predicate's own plan, ∝ the taxonomy — no SCAN of `rp`/`pt`, no block/variant). **7/7 green**; with
   the neighbours (star context, wing scoping, quicknote, shelf queries, membership, the intake SOAK whose
   invariants include Pool agreement, the ritual, pool tray) **80 tests / 12 suites green**.
+- **REVERT CHECK — DONE, tree restored (no revert in flight).** `poolPosts` alone swapped back to its
+  pre-U4 `NOT (<rule>)` body against the committed 8a07852d: `aLegacyTermOverANullColumnNeverHidesA
+  NoteFromThePool` **RED** (the plain note hidden — `pool → []`), the other six green; restored by `git
+  checkout --`, `git status` clean. **F-U4-1 (a latent Pool bug, FIXED with the split):** since 13i-a's
+  v2 rules, any grandfathered `{"profile":…}` / date-bound gathering emptied the Pool of every note
+  lacking that column (NULL) — the notes every ordinary door mints.
+- Piece 7 (this commit) — **D, the Pool tuck's FACE** (`Features/Pool/PoolPostsView.swift`). The model
+  observes `poolListing` and keeps `posts` (loose), `tucked`, both exact counts and `showsTucked` (VIEW
+  state — off on every visit, never remembered: P-13ib-U4-4); `adopt(_:)` is the observation's body and
+  the pins' seam; `toggleTucked()` is the one click; the chips/previews read covers only the DRAWN rows.
+  The masthead: "Pool" + "· N notes · M in gatherings ·" + the accent `VoicedButtonStyle(.primary)`
+  "show"/"hide" (only when something is tucked); the tucked run renders after the loose cards under the
+  Library's quiet section-label idiom ("in gatherings" over a hairline); the empty state says "No loose
+  notes — all M bookless notes show in gatherings." when empty-but-gathered (never "the pool is empty"
+  over tucked notes). Words in one pure home, `PoolTuckCopy` (number-agreeing; voice casing by
+  `chromeLabel`; P-13ib-U4-5). Every chrome text `lineLimit`-ed; tokens only. DEBUG `PoolTuckProbe` (the
+  `ArrivalsLineProbe` pattern; per-class row forgets). **Registry call (F):** the show/hide toggle is NOT
+  declared — a view-local disclosure over rows the page already owns, the Arrivals line's own expansion
+  precedent (U2 declared only the judgment acts); the cards' acts are unchanged and stay declared
+  (`.tagNote`). Mac `PoolTuckFaceTests` (5): her shape verbatim + the count words · mounted: the
+  gathered notes tuck (masthead "· 2 notes · 3 in gatherings ·", "show", loose drawn, none tucked) → the
+  click draws the tucked run under its label ("hide") → back · the empty-but-gathered sentence and its
+  show · the truly-empty Pool offers no toggle · starring tucks a note, un-starring brings it back (the
+  starred gathering present). **"Test run with 9 tests in 3 suites passed", 0 skipped** (with
+  `PoolPageTests` + `PoolCardPreviewTests`).
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 
