@@ -187,8 +187,8 @@ final class ShelfViewModel {
     func spawnBook(from gatheringID: String, named name: String) async -> String? {
         let database = session.database
         do {
-            let (book, seated, collects) = try await session.runner.run {
-                ops -> (Reading, Int, Bool) in
+            let (book, seated, ruleState) = try await session.runner.run {
+                ops -> (Reading, Int, RuleGrammar.ReadResult) in
                 guard let gathering = try database.read({
                     try Queries.reading($0, id: gatheringID)
                 }) else { throw OperationError.readingNotFound(id: gatheringID) }
@@ -196,12 +196,13 @@ final class ShelfViewModel {
                     throw OperationError.wrongReadingKind(id: gatheringID, expected: .gathering)
                 }
                 try ops.assertBookNameIsFree(name)
-                // Ladder F-R1-3's gate: only a READABLE rule collects — the
-                // receipt must not promise what a NULL or unreadable rule
-                // cannot do (P-13ib-5: intake runs iff the rule reads).
-                let collects = if case .rule = RuleGrammar.read(gathering.querySpec) {
-                    true
-                } else { false }
+                // Ladder F-R1-3's gate, carried whole into the receipt's
+                // vocabulary at round 2 (NEW-R2-1): the receipt speaks the
+                // same THREE-STATE rule reading as the sheet — only a
+                // READABLE rule collects (P-13ib-5), and the malformed cell
+                // must not name Edit Rule (the editor refuses a malformed
+                // rule by design).
+                let ruleState = RuleGrammar.read(gathering.querySpec)
                 // HER MORNING RULING (13i-b, 2026-10-01 — P-13ib-3
                 // overruled): "the spawn isn't adding the auto tag? it
                 // should." The derivation is the pure Domain rule
@@ -227,10 +228,10 @@ final class ShelfViewModel {
                 let seated = try database.read {
                     try Queries.assembleReading($0, readingID: book.id).count
                 }
-                return (book, seated, collects)
+                return (book, seated, ruleState)
             }
             lastError = nil
-            lastReport = BindCopy.spawned(book.name, count: seated, collects: collects)
+            lastReport = BindCopy.spawned(book.name, count: seated, rule: ruleState)
             await refreshAggregates()
             return book.id
         } catch let error as OperationError {

@@ -238,16 +238,29 @@ nonisolated enum BindCopy {
     static func spawnDefaultName(_ name: String) -> String { "\(name) (book)" }
     static let spawnConfirm = "Make Book"
 
-    /// The spawn's receipt. `collects` is the same F-R1-3 gate (a READABLE
-    /// rule rode the copy): false speaks the born-empty truth — nothing
-    /// joined, nothing will, until a rule lands.
-    static func spawned(_ name: String, count: Int, collects: Bool) -> String {
-        guard collects else {
+    /// The spawn's receipt — the SAME rule-state vocabulary as the sheet
+    /// (ladder round 2, NEW-R2-1: sheet and receipt read ONE
+    /// `RuleGrammar.ReadResult`, so no cell can promise a door its rule
+    /// state refuses). `.rule` keeps the standing promise (F-R1-3's gate:
+    /// only a readable rule collects, P-13ib-5). `.none` is born empty and
+    /// MAY name Edit Rule — a NULL spec edits fine, the door works.
+    /// `.malformed` is born empty and names NO door: the editor refuses to
+    /// edit a malformed rule by design (`ruleIsEditable` false, `needsWrite`
+    /// false — a newer client's rule is not this build's to destroy), so the
+    /// receipt mirrors its sheet's truth instead of instructing an
+    /// impossible act.
+    static func spawned(_ name: String, count: Int, rule: RuleGrammar.ReadResult) -> String {
+        switch rule {
+        case .rule:
+            let notes = count == 1 ? "1 note" : "\(count) notes"
+            return "Made \u{201C}\(name)\u{201D} \u{2014} \(notes) joined, and it keeps collecting."
+        case .none:
             return "Made \u{201C}\(name)\u{201D} \u{2014} it starts empty; give it a rule "
                 + "(Edit Rule\u{2026}) and it will collect."
+        case .malformed:
+            return "Made \u{201C}\(name)\u{201D} \u{2014} it starts empty and won\u{2019}t "
+                + "collect until the rule is fixed."
         }
-        let notes = count == 1 ? "1 note" : "\(count) notes"
-        return "Made \u{201C}\(name)\u{201D} \u{2014} \(notes) joined, and it keeps collecting."
     }
 
     static let bindUnavailable =

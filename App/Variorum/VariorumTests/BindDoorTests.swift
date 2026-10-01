@@ -201,7 +201,8 @@ struct BindDoorTests {
             let bookID = try #require(made)
             #expect(shelf.lastError == nil)
             #expect(shelf.lastReport
-                    == BindCopy.spawned("the door (book)", count: 2, collects: true))
+                    == BindCopy.spawned("the door (book)", count: 2,
+                                        rule: RuleGrammar.read(source.querySpec)))
             let book = try #require(try await db.read { try Queries.reading($0, id: bookID) })
             #expect(book.kind == .book)
             #expect(book.querySpec == source.querySpec, "the rule copied")
@@ -326,7 +327,7 @@ struct BindDoorTests {
                     "the receipt must not claim a collecting that cannot happen")
             #expect(!report.contains("joined"),
                     "nothing joined — the receipt says what the book IS: born empty")
-            #expect(report == BindCopy.spawned("everything (book)", count: 0, collects: false))
+            #expect(report == BindCopy.spawned("everything (book)", count: 0, rule: .none))
 
             // The sheet's body for this gathering speaks the same truth —
             // and the MALFORMED cell (the implementer's refinement: an
@@ -341,15 +342,38 @@ struct BindDoorTests {
             // A readable rule keeps the standing promise.
             #expect(BindCopy.spawnMessage(for: .rule(.star)).contains("keep joining"))
 
+            // **NEW-R2-1 (ladder round 2, confirmed):** the RULE-LESS receipt
+            // may name Edit Rule — a NULL spec edits fine, so the door it
+            // names works (the positive control for the negative below).
+            #expect(report.contains("Edit Rule"),
+                    "control: a rule-less book CAN be given a rule through Edit Rule")
+
             // The malformed cell end-to-end: the receipt is the born-empty
-            // truth there too (assembleReading fails closed → 0 seated).
+            // truth there too (assembleReading fails closed → 0 seated) —
+            // and **NEW-R2-1**: it must NOT instruct "give it a rule
+            // (Edit Rule…)", because the editor refuses a malformed rule by
+            // design (`ruleIsEditable` false, `needsWrite` false — "a newer
+            // client's rule is not this build's to destroy") and no other
+            // Mac road can give that book a rule. The expectations here are
+            // INDEPENDENT strings, never `BindCopy.spawned` itself (a
+            // self-referential equality could not go red).
+            //
+            // RED-ON-OLD (watched): the pre-fix malformed receipt was the
+            // shared collects-false arm — "…give it a rule (Edit Rule…) and
+            // it will collect." — so the no-Edit-Rule assertion failed.
             let broken = try ops.createReading(
                 name: "broken", kind: .gathering, querySpec: "not json {{")
             let brokenBook = try #require(
                 await shelf.spawnBook(from: broken.id, named: "broken (book)"))
             #expect(try await db.read { try Queries.reading($0, id: brokenBook) } != nil)
-            #expect(shelf.lastReport
-                    == BindCopy.spawned("broken (book)", count: 0, collects: false))
+            let brokenReport = try #require(shelf.lastReport)
+            #expect(!brokenReport.contains("Edit Rule"),
+                    "the malformed receipt must not name a door that refuses the act")
+            #expect(!brokenReport.contains("keeps collecting")
+                    && !brokenReport.contains("joined"))
+            #expect(brokenReport.contains("starts empty")
+                    && brokenReport.contains("won\u{2019}t collect until the rule is fixed"),
+                    "the receipt mirrors its sheet's own truth (no door named)")
         }
     }
 
