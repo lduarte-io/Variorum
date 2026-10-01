@@ -148,8 +148,10 @@ final class ReadingsViewModel {
             // 13c 2D: the message used to state the CURATED direction only,
             // which read as nonsense on the conversion door's refusal (a
             // curated book asked to convert throws `expected: .gathering`).
+            // 13i-b U3: the gathering-direction words are the BIND door's
+            // now (the door 13c 2D shipped as "convert").
             return expected == .gathering
-                ? "That's already a hand-shaped book — only smart books convert."
+                ? "That's already a book — only a gathering binds into one."
                 : "Only hand-shaped (curated) books hold a note list you pick by hand."
         case .postNotInReading:
             return "That note isn't in this book."

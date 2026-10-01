@@ -407,6 +407,19 @@ final class BookStructureModel {
         entries: [Queries.ReadingEntry], viewOrder: Queries.ReadingOrder?
     ) -> Bool {
         guard let raw = items.first, let drag = BookDrag.decode(raw) else { return false }
+        // 13i-b U3 — THE TEACHING MOMENT (the sitting record §3, verbatim:
+        // "A hand-drag inside one is the teaching moment: 'Turn into a book
+        // to arrange by hand?'"). A gathering holds no rows, so a hand-drag
+        // in its view used to reach `assignPostToSection` and come back as
+        // "That note isn't in this book." — true, and a dead end. The answer
+        // is an OFFER on the one status seam (18i's kinds: offers always
+        // show), and its act IS the bind's confirm (P-2: fire-and-DO — the
+        // door opens the real sheet, with the order she is looking through).
+        // Nothing is filed and nothing is written by the drag itself.
+        if reading?.kind == .gathering, case .post = drag {
+            offerToBind(viewOrder: viewOrder)
+            return true
+        }
         switch drag {
         case .chapter(let sectionID):
             Task { await moveChapter(sectionID, onto: chapterSite, entries: entries) }
@@ -418,6 +431,24 @@ final class BookStructureModel {
             }
         }
         return true
+    }
+
+    /// The teaching OFFER (13i-b U3): "Turn into a book to arrange by hand?"
+    /// — its button opens the bind confirm for this gathering. A finished
+    /// gathering refuses a bind (the op's own rule), so there the honest
+    /// answer is the refusal in words, never an offer that can only fail.
+    func offerToBind(viewOrder: Queries.ReadingOrder?) {
+        guard let reading, reading.kind == .gathering else { return }
+        guard !reading.locked else {
+            session.status.refuse(ReadingsViewModel.message(
+                OperationError.lockedReading(id: reading.id)))
+            return
+        }
+        session.status.offer(
+            BindCopy.teachingOffer,
+            action: .init(label: BindCopy.teachingAction) { [weak self] in
+                Task { await self?.openBindOffer(order: viewOrder) }
+            })
     }
 
     /// The post drag's one door (13f W11b): assignment through the standing
@@ -474,35 +505,45 @@ final class BookStructureModel {
         }
     }
 
-    // MARK: - Smart → curated (13c 2D — C2/N38)
+    // MARK: - Bind into a book (13i-b U3; the door 13c 2D shipped as "convert")
 
-    /// Convert, then finish the act she asked for. Returns true on success
-    /// so the caller can run the follow-up (P-2's choreography: "+ new
-    /// chapter" on a smart book converts AND opens the chapter prompt).
+    /// The bind sheet's ITEM while it is up (13i-b U3) — held HERE rather than
+    /// in the view because two roads open it: the navigator's "+ new chapter"
+    /// on a gathering, and the teaching OFFER `acceptDrop` makes on a
+    /// gathering's hand-drag, which is this model's to make. The item carries
+    /// its own count (F-U2-3's fix shape).
+    var bindOffer: BindOffer?
+
+    /// Open the bind confirm for THIS gathering: load the offer (count
+    /// included), then present it with one write. `order` is the A31 view
+    /// order the book view is looking through, so the bind freezes what she
+    /// sees.
+    func openBindOffer(
+        followUp: BindFollowUp = .none, order: Queries.ReadingOrder? = nil
+    ) async {
+        guard let reading, reading.kind == .gathering else { return }
+        bindOffer = await BindOffer.load(
+            session, reading: reading, followUp: followUp, order: order)
+    }
+
+    /// Bind, then finish the act she asked for. Returns true on success so
+    /// the caller can run the follow-up (P-2's choreography: "+ new chapter"
+    /// on a gathering binds AND opens the chapter prompt). The same row
+    /// becomes the book and keeps collecting (the sitting record §14.6,
+    /// §19.6); no "(collecting)" sibling any more (the ruling's clause).
     ///
     /// `order` (13c K6 review, K2): the A31 view-order override the book
-    /// view is browsing through, so the conversion freezes the order she is
-    /// actually LOOKING at — the offer sheet's own promise. nil = the
-    /// stored order (the shelf door, where no override exists).
-    func convertToCurated(
-        keepCollecting: Bool, collectingName: String?,
-        order: Queries.ReadingOrder? = nil
-    ) async -> Bool {
+    /// view is browsing through, so the bind freezes the order she is
+    /// actually LOOKING at — the sheet's own promise. nil = the stored order.
+    func bind(order: Queries.ReadingOrder? = nil) async -> Bool {
         do {
             let readingID = readingID
-            _ = try await session.runner.run { ops in
-                // 13e E13: the fresh collector is a book she NAMED, so the
-                // guard rides it — but only when she typed one. A nil name
-                // means the op derives "<book> (collecting)", and a derived
-                // name is not "purposefully" naming two books the same thing
-                // (her ruling's own words), so the derivation is left alone
-                // rather than made able to refuse a conversion.
-                if let collectingName { try ops.assertBookNameIsFree(collectingName) }
-                return try ops.convertSmartReadingToCurated(
-                    readingID, keepCollecting: keepCollecting,
-                    collectingName: collectingName, order: order)
+            let result = try await session.runner.run { ops in
+                try ops.convertSmartReadingToCurated(readingID, order: order)
             }
             lastError = nil
+            session.status.receipt(
+                BindCopy.bound(result.reading.name, count: result.membershipIDs.count))
             return true
         } catch let error as OperationError {
             lastError = ReadingsViewModel.message(error)

@@ -137,6 +137,9 @@ final class RuleEditorModel: Identifiable {
     /// wing still reads its path; a dead one has no entry).
     private(set) var referencedPaths: [String: String] = [:]
     private(set) var saving = false
+    /// Adopted once: the sheet's `.task` loads on appear, and a load that
+    /// landed after her first edit must never reset the draft under her.
+    @ObservationIgnored private var adopted = false
 
     init(session: AppSession, readingID: String) {
         self.session = session
@@ -176,6 +179,7 @@ final class RuleEditorModel: Identifiable {
     // MARK: Loading
 
     func load() async {
+        guard !adopted else { return }
         let id = readingID
         let fetched = try? await session.database.read { db -> (Reading?, [Tag], [String: String]) in
             guard let reading = try Queries.reading(db, id: id) else { return (nil, [], [:]) }
@@ -192,6 +196,7 @@ final class RuleEditorModel: Identifiable {
     /// callbacks don't fire under the test host — the `BookArrivalsModel`
     /// precedent).
     func adopt(reading: Reading, tags: [Tag], referencedPaths: [String: String]) {
+        adopted = true
         self.reading = reading
         self.tags = tags
         self.referencedPaths = referencedPaths

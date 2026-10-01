@@ -910,6 +910,35 @@ schema/`Sync/`/migrations (zero).
   a fresh snapshot) turned the same pin GREEN; the scratch line was then removed (verified, `grep
   SCRATCH` = 0). The instrumentation added to the old tree changes no behaviour (the menu closure's
   body moved verbatim into one function; the probe is DEBUG-only).
+- Piece 5b (this commit) — **the two doors rebuilt; F-U2-3 + F-1 FIXED; the teaching moment.**
+  `BookOrderAndConversion.swift`'s conversion half → BIND: `BindOffer` (the sheet's ITEM, carrying
+  its count + follow-up + the A31 order — one write presents it), `BindCopy` (every word: the
+  truth sentence "it keeps collecting after you bind it: new notes that match its rule join at the
+  end" replaces F-1's false "New tag matches will stop arriving here."; the spawn's words; the
+  teaching offer verbatim from the sitting record §3, "Turn into a book to arrange by hand?"),
+  `BindIntoBookSheet` (no "(collecting)" toggle — the ruling's clause), `BindDoorProbe` (DEBUG).
+  Shelf: "Bind into a Book…" (hidden on a finished gathering, P-2) + "Make a Book from This
+  Gathering…" (a name prompt prefilled "<name> (book)" — P-13ib-U3-2) on a gathering's menu;
+  `ShelfViewModel.bind` (report "… is a book now — N notes bound in … It keeps collecting.") and
+  `ShelfViewModel.spawnBook` (composition in ONE runner closure: the gathering read live inside
+  it, E13's name guard, `createReading(kind: .book, querySpec: rule, wingId:)` — backfill seats,
+  auto-tag off, the gathering untouched). Book view: the sheet hangs off `structure.bindOffer`;
+  "+ new chapter" on a gathering → `openBindOffer(followUp: .createChapter, order:)`;
+  `BookStructureModel.bind(order:)` (receipt on the seam). **The teaching moment:**
+  `BookStructureModel.acceptDrop` on a GATHERING answers a POST drag (the navigator rows and the
+  Outline body rows — the one brain behind both) with `offerToBind` — an OFFER whose act opens the
+  bind confirm; nothing is filed or written; a finished gathering hears the refusal in words
+  instead (no offer that can only fail). What it replaced: the drag reached `assignPostToSection`
+  and came back as "That note isn't in this book." Index/Book/Read carry no post drag (recorded).
+  Registry: `.bindIntoBook`, `.makeBookFromGathering` (`.contextMenu`, book scope, `always`,
+  `.native`); `ShelfView.contextMenuCapabilities` names all four. Refusal copy:
+  `wrongReadingKind(expected: .gathering)` now says "That's already a book — only a gathering
+  binds into one." **F-U2-3's pin GREEN on the fix** (red on the old plumbing — piece 5a). Honest
+  test edits: `BookOrderConversionTests` (the door's new API/words: the report pin now asserts the
+  bind's truth and that no sibling exists; the refusal pin the new sentence) and `DoorSetTests`
+  (the collector-name guard died with the collector → `theSpawnDoorsNameIsGuarded`, E13 on the
+  new naming door). `RuleEditorModel.load()` made idempotent (a late `.task` load can never reset
+  her draft). Mac TEST BUILD SUCCEEDED.
 
 ## §8 LEDGER (every row owned; statuses flip in the same commit as the work)
 

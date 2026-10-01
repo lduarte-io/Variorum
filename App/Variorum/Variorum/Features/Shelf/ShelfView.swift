@@ -18,8 +18,11 @@ struct ShelfView: View {
     /// The REGISTRY capabilities this view's book menu renders (P-1's walk).
     /// The menu's other items (Rename…, Finish, Delete Book…) are the
     /// shelf's own book-management vocabulary and were never registry acts.
-    /// 13i-b U3 adds the rule editor's door (gatherings AND books).
-    static let contextMenuCapabilities: [CapabilityID] = [.toggleStar, .editRule]
+    /// 13i-b U3 adds the rule editor's door (gatherings AND books) and the
+    /// two strengthening doors (gatherings).
+    static let contextMenuCapabilities: [CapabilityID] = [
+        .toggleStar, .editRule, .bindIntoBook, .makeBookFromGathering,
+    ]
 
     let session: AppSession
     let model: ShelfViewModel
@@ -46,11 +49,12 @@ struct ShelfView: View {
     /// draft can never be rebuilt under her by a shelf re-render.
     @State private var ruleEditor: RuleEditorModel?
     @State private var extentTarget: Reading?
-    /// 13c 2D: the smart→curated offer (C2/N38), and the derived count it
-    /// promises will stay (loaded at the press — the shelf's own postCount
-    /// is membership rows, which a smart book has none of).
-    @State private var convertTarget: Reading?
-    @State private var convertCount = 0
+    /// 13i-b U3: the BIND door's sheet item — and it carries its count
+    /// (F-U2-3: the old door kept the count in a separate `@State` that the
+    /// sheet's closure read from a stale snapshot, promising "0 notes").
+    @State private var bindOffer: BindOffer?
+    /// 13i-b U3: the SPAWN door's name prompt — the gathering it copies.
+    @State private var spawnSource: Reading?
     /// Batch 9 (R102): the list region hugs its content, so the
     /// quick-entry bar rides RIGHT BELOW the rows — the round-2 mockup's
     /// geometry at every window size ("the start new post typing isn't
@@ -97,7 +101,7 @@ struct ShelfView: View {
         .task { await model.start() }
         .task { await model.refreshAggregates() }
         #if DEBUG
-        .onAppear { BindDoorProbe.openShelfDoor = { openConvertOffer($0) } }
+        .onAppear { BindDoorProbe.openShelfDoor = { openBindOffer($0) } }
         #endif
         .alert("New Book", isPresented: $createPresented) {
             TextField("Name", text: $nameField)
@@ -148,18 +152,30 @@ struct ShelfView: View {
         .sheet(item: $extentTarget) { reading in
             BookExtentSheet(model: model, reading: reading)
         }
-        .sheet(item: $convertTarget) { reading in
-            SmartConversionOfferSheet(
-                reading: reading,
-                memberCount: convertCount,
-                followUp: .none
-            ) { keepCollecting, collectingName in
+        .sheet(item: $bindOffer) { offer in
+            BindIntoBookSheet(offer: offer) {
+                Task { await model.bind(offer.reading.id) }
+            }
+        }
+        .alert(
+            spawnSource.map { BindCopy.spawnTitle($0.name) } ?? "",
+            isPresented: Binding(
+                get: { spawnSource != nil },
+                set: { if !$0 { spawnSource = nil } }),
+            presenting: spawnSource
+        ) { source in
+            TextField("Name", text: $nameField)
+            Button(BindCopy.spawnConfirm) {
+                let name = nameField.trimmingCharacters(in: .whitespacesAndNewlines)
                 Task {
-                    await model.convertToCurated(
-                        reading.id, keepCollecting: keepCollecting,
-                        collectingName: collectingName)
+                    await model.spawnBook(
+                        from: source.id,
+                        named: name.isEmpty ? BindCopy.spawnDefaultName(source.name) : name)
                 }
             }
+            Button("Cancel", role: .cancel) {}
+        } message: { _ in
+            Text(BindCopy.spawnMessage)
         }
         .overlay(alignment: .bottomLeading) {
             if let error = model.lastError ?? readings.lastError {
@@ -306,12 +322,21 @@ struct ShelfView: View {
         if reading.kind == .book {
             Button("Manage Notes…") { manageTarget = reading }
         } else {
-            // 13c 2D (C2/N38): the DELIBERATE conversion door, beside the
-            // navigator's "+ new chapter" offer. Hidden on a finished book —
-            // converting is a structural act on a book declared done, and
-            // the op refuses it (P-2: a door that can't act isn't rendered).
+            // 13i-b U3 — THE TWO STRENGTHENING DOORS (the sitting record §3),
+            // visibly different: BIND makes THIS row a book in place (§19.6
+            // — same id, name, star; it keeps collecting, §14.6); SPAWN
+            // seeds a sibling book from the rule and leaves the gathering as
+            // it is. Bind is hidden on a finished gathering — binding is a
+            // structural act on a thing declared done, and the op refuses it
+            // (P-2: a door that can't act isn't rendered).
             if !reading.locked {
-                Button("Convert to a Hand-Shaped Book…") { openConvertOffer(reading) }
+                Button(CapabilityRegistry.capability(.bindIntoBook).verb) {
+                    openBindOffer(reading)
+                }
+            }
+            Button(CapabilityRegistry.capability(.makeBookFromGathering).verb) {
+                nameField = BindCopy.spawnDefaultName(reading.name)
+                spawnSource = reading
             }
         }
         Button("Length & Extent…") { extentTarget = reading }
@@ -336,12 +361,10 @@ struct ShelfView: View {
         }
     }
 
-    private func openConvertOffer(_ reading: Reading) {
-        Task {
-            convertCount = await SmartConversionCount.collected(
-                session, readingID: reading.id)
-            convertTarget = reading
-        }
+    /// The bind door's one road: load the offer (count included), then
+    /// present it with ONE write — the sheet reads everything from its item.
+    private func openBindOffer(_ reading: Reading) {
+        Task { bindOffer = await BindOffer.load(session, reading: reading) }
     }
 
     // MARK: - Quick entry (R3 — the shared bar; Library carries it too)

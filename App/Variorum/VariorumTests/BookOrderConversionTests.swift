@@ -176,8 +176,8 @@ struct BookOrderConversionTests {
             #expect(try await db.read { try Queries.readingSections($0, readingID: reading.id) }.isEmpty)
 
             // The offer's confirm, then the follow-up the door promised.
-            let converted = await structure.convertToCurated(
-                keepCollecting: false, collectingName: nil)
+            // (13i-b U3: the confirm is the BIND now — same act, same row.)
+            let converted = await structure.bind()
             #expect(converted)
             await structure.createChapter(named: "I")
             #expect(structure.lastError == nil)
@@ -192,7 +192,7 @@ struct BookOrderConversionTests {
     }
 
     /// 13c K6 review, K2 (the face half — red-on-old by behavioral revert:
-    /// drop the `order:` forwarding in `BookStructureModel.convertToCurated`
+    /// drop the `order:` forwarding in `BookStructureModel.bind` (13c's `convertToCurated`)
     /// and the memberships land in the STORED order, failing the assertion).
     /// The core half's pin is `conversionUnderAViewOrderOverrideFreezesThe-
     /// OrderSheIsLookingAt` (SmartConversionTests); this one pins the door
@@ -214,8 +214,7 @@ struct BookOrderConversionTests {
             // She is browsing newest-first through the A31 override.
             let looking = Queries.ReadingOrder(field: .createdAt, direction: .desc)
             let structure = BookStructureModel(session: session, readingID: reading.id)
-            let converted = await structure.convertToCurated(
-                keepCollecting: false, collectingName: nil, order: looking)
+            let converted = await structure.bind(order: looking)
             #expect(converted)
 
             let frozen = try await db.read { [id = reading.id] in
@@ -226,8 +225,12 @@ struct BookOrderConversionTests {
         }
     }
 
-    @Test func theShelfReportsWhatConversionDidRatherThanGoingQuiet() async throws {
-        try await withBooksWorld { session, _ in
+    /// 13i-b U3 — the report says the BIND's truth now: the same book,
+    /// N notes bound in, and it KEEPS COLLECTING (the sitting record §14.6).
+    /// The pre-U3 report ("a hand-shaped book now … “<collector>” keeps
+    /// collecting the filter") named the retired "(collecting)" sibling.
+    @Test func theShelfReportsWhatTheBindDidRatherThanGoingQuiet() async throws {
+        try await withBooksWorld { session, db in
             let tag = try session.operations.createTag(name: "work")
             let spec = try Queries.SmartQuerySpec(tags: ["work"]).encodedJSON()
             let reading = try session.operations.createReading(
@@ -237,14 +240,15 @@ struct BookOrderConversionTests {
                 _ = try session.operations.applyTag(tag.id, toPost: post.id)
             }
             let model = ShelfViewModel(session: session)
-            await model.convertToCurated(
-                reading.id, keepCollecting: true, collectingName: "still #work")
+            await model.bind(reading.id)
 
             #expect(model.lastError == nil)
             let report = try #require(model.lastReport)
-            #expect(report.contains("hand-shaped book now"))
-            #expect(report.contains("2 notes kept"))
-            #expect(report.contains("still #work"))
+            #expect(report == BindCopy.bound("collected", count: 2))
+            #expect(report.contains("2 notes bound in"))
+            #expect(report.contains("keeps collecting"))
+            #expect(try await db.read { try Queries.readings($0).count } == 1,
+                    "no \"(collecting)\" sibling — the ruling's own clause")
         }
     }
 
@@ -264,8 +268,7 @@ struct BookOrderConversionTests {
             _ = try session.operations.applyTag(tag.id, toPost: post.id)
 
             let model = ShelfViewModel(session: session)
-            await model.convertToCurated(
-                reading.id, keepCollecting: true, collectingName: nil)
+            await model.bind(reading.id)
             #expect(session.undoStack.topLabel == "Convert to Book")
 
             let stack = session.undoStack
@@ -276,7 +279,7 @@ struct BookOrderConversionTests {
             #expect(back.kind == .gathering)
             #expect(back.sortField == .entryDate)
             #expect(back.sortDir == .desc)
-            // The collector it minted went with it.
+            // One row throughout — the bind mints no sibling (13i-b U3).
             #expect(try await db.read { try Queries.readings($0).count } == 1)
         }
     }
@@ -286,14 +289,14 @@ struct BookOrderConversionTests {
             let reading = try session.operations.createReading(
                 name: "already hand-shaped", kind: .book)
             let model = ShelfViewModel(session: session)
-            await model.convertToCurated(
-                reading.id, keepCollecting: false, collectingName: nil)
+            await model.bind(reading.id)
             #expect(model.lastReport == nil)
-            // The direction-aware message: a CURATED book asked to convert
-            // throws `expected: .gathering`, and the old copy stated the other
+            // The direction-aware message: a BOOK asked to bind throws
+            // `expected: .gathering`, and the old copy stated the other
             // direction ("Only curated readings hold a hand-picked post
-            // list"), which read as nonsense here.
-            #expect(model.lastError == "That's already a hand-shaped book — only smart books convert.")
+            // list"), which read as nonsense here. (13i-b U3: worded for the
+            // bind door — the door 13c 2D shipped as "convert".)
+            #expect(model.lastError == "That's already a book — only a gathering binds into one.")
         }
     }
 

@@ -139,38 +139,36 @@ struct DuplicateBookNameDoorTests {
         }
     }
 
-    /// The conversion offer's FRESH COLLECTOR field is a book she names, so
-    /// it is guarded — and the DERIVED default ("<book> (collecting)") is
-    /// deliberately not, because a name the app computed is not "purposefully"
-    /// naming two books the same thing (her ruling's own words).
+    /// **13i-b U3 — the guard moved with the naming door.** This pin used to
+    /// guard the conversion offer's FRESH COLLECTOR name ("<book>
+    /// (collecting)"); that offer DIED by ruling (the sitting record §14.6 —
+    /// the bound book keeps collecting, "the '(collecting)' offer dies"). The
+    /// door that names a NEW book from a gathering now is the SPAWN ("Make a
+    /// Book from This Gathering…"), so E13's guard rides it: a taken name
+    /// refuses, the whole compound with it; a free one mints.
     ///
     /// DISCRIMINATING REVERT (verified): drop the `assertBookNameIsFree` line
-    /// from `ShelfViewModel.convertToCurated` and the first half's refusal
-    /// expectations fail — the conversion runs and a second "Ideas" is minted.
-    @Test func theConversionsTypedCollectorNameIsGuardedAndTheDerivedOneIsNot() async throws {
+    /// from `ShelfViewModel.spawnBook` and the refusal expectations fail — a
+    /// second "Ideas" is minted.
+    @Test func theSpawnDoorsNameIsGuarded() async throws {
         try await withStore { db, session in
-            let (smart, _) = try await session.runner.run { ops -> (String, String) in
-                let smart = try ops.createReading(name: "Starred", kind: .gathering)
+            let (gathering, _) = try await session.runner.run { ops -> (String, String) in
+                let gathering = try ops.createReading(name: "Starred", kind: .gathering)
                 let taken = try ops.createReading(name: "Ideas", kind: .book)
-                return (smart.id, taken.id)
+                return (gathering.id, taken.id)
             }
             let shelf = ShelfViewModel(session: session)
 
-            await shelf.convertToCurated(smart, keepCollecting: true, collectingName: "ideas")
+            let refused = await shelf.spawnBook(from: gathering, named: "ideas")
+            #expect(refused == nil)
             #expect(shelf.lastError == BookNameCopy.refusal(existing: "Ideas"))
             #expect(shelf.lastReport == nil)
-            // The whole compound refused — the smart book is still smart.
-            var kinds = try await db.read { try Queries.readings($0) }
-                .filter { $0.id == smart }.map(\.kind)
-            #expect(kinds == [.gathering], "a refused name changes nothing")
+            #expect(try await names(db).sorted() == ["Ideas", "Starred"], "a refused name mints nothing")
 
-            // The derived name goes through untouched.
-            await shelf.convertToCurated(smart, keepCollecting: true, collectingName: nil)
+            let made = await shelf.spawnBook(from: gathering, named: "Starred book")
+            #expect(made != nil)
             #expect(shelf.lastError == nil)
-            kinds = try await db.read { try Queries.readings($0) }
-                .filter { $0.id == smart }.map(\.kind)
-            #expect(kinds == [.book])
-            #expect(try await names(db).contains("Starred (collecting)"))
+            #expect(try await names(db).sorted() == ["Ideas", "Starred", "Starred book"])
         }
     }
 }

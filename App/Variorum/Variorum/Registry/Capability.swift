@@ -680,6 +680,14 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // 13i-b U3 — THE RULE EDITOR's door (the 13i-b plan §4 item 1): one
     // act on a shelf row's menu, for a gathering's rule and a book's intake.
     case editRule
+    // 13i-b U3 — THE TWO STRENGTHENING DOORS (the sitting record §3: "two
+    // doors"), visibly different: BIND makes the gathering's own row a book
+    // in place (§19.6; it keeps collecting, §14.6) — the door 13c 2D shipped
+    // as the smart→curated conversion, now declared — and SPAWN seeds a
+    // sibling book from the rule. Two declarations on the
+    // `.moveTakeEarlier`/`.moveTakeLater` grounds: each its own door with its
+    // own words, and one declaration could not say that.
+    case bindIntoBook, makeBookFromGathering
     case newPost, todaysEntry, findAnything, importFiles, exportLibrary
     case toggleSeams, helper
     case restoreTutorial

@@ -114,11 +114,9 @@ struct BookView: View {
     /// first pass, where `outlineGutter` answers `.contained` — the shipped
     /// geometry, so the first frame is unchanged.
     @State private var outlinePaneWidth: CGFloat = 0
-    /// 13c 2D: the smart→curated offer, what it finishes afterwards, and the
-    /// derived count it promises will stay.
-    @State private var conversionOffer = false
-    @State private var conversionFollowUp: SmartConversionFollowUp = .none
-    @State private var conversionCount = 0
+    // (13i-b U3: the bind sheet's state moved to `structure.bindOffer` — an
+    // item that carries its own count, F-U2-3 — because the teaching offer
+    // opens it from the structure model too.)
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -338,40 +336,26 @@ struct BookView: View {
         .sheet(isPresented: $settingsShown) {
             BookSettingsSheet(structure: structure)
         }
-        // 13c 2D (C2/N38): the conversion offer — the memo's §3 "the
-        // refusal becomes an offer". One sheet, whichever door opened it.
-        .sheet(isPresented: $conversionOffer) {
-            if let reading = structure.reading {
-                SmartConversionOfferSheet(
-                    reading: reading,
-                    // The DERIVED count, not `entries.count` — the book
-                    // view's assembly is windowed (entryWindow), so a book
-                    // collecting more than the window would have promised
-                    // fewer posts than the conversion actually keeps.
-                    memberCount: conversionCount,
-                    followUp: conversionFollowUp
-                ) { keepCollecting, collectingName in
-                    let followUp = conversionFollowUp
-                    Task {
-                        // K2 (13c K6 review): the sheet promises "the order
-                        // you're looking at them" — with an A31 override on,
-                        // that is the override, so it rides the conversion.
-                        let converted = await structure.convertToCurated(
-                            keepCollecting: keepCollecting,
-                            collectingName: collectingName,
-                            order: model.viewOrder)
-                        // FROZEN is the book's order now — drop the override
-                        // so the menu stops claiming a separate way of
-                        // looking (the "Save as This Book's Order" door's own
-                        // rule; the content is identical at this instant, so
-                        // nothing on screen moves).
-                        if converted { model.viewOrder = nil }
-                        // P-2: the door performs the act she asked for —
-                        // conversion was the step on the way, not the point.
-                        if converted, followUp == .createChapter {
-                            chapterNameField = ""
-                            newChapterPresented = true
-                        }
+        // 13i-b U3 — BIND INTO A BOOK (the door 13c 2D shipped as the
+        // conversion offer). One sheet, whichever road opened it: the
+        // navigator's "+ new chapter" on a gathering, or the teaching offer a
+        // hand-drag earns. The item carries its count (F-U2-3) and the view
+        // order she was looking through (K2).
+        .sheet(item: Bindable(structure).bindOffer) { offer in
+            BindIntoBookSheet(offer: offer) {
+                Task {
+                    let bound = await structure.bind(order: offer.order)
+                    // FROZEN is the book's order now — drop the override
+                    // so the menu stops claiming a separate way of
+                    // looking (the "Save as This Book's Order" door's own
+                    // rule; the content is identical at this instant, so
+                    // nothing on screen moves).
+                    if bound { model.viewOrder = nil }
+                    // P-2: the door performs the act she asked for —
+                    // binding was the step on the way, not the point.
+                    if bound, offer.followUp == .createChapter {
+                        chapterNameField = ""
+                        newChapterPresented = true
                     }
                 }
             }
@@ -758,18 +742,17 @@ struct BookView: View {
                     // on a membership row and derived membership has none.
                     if structure.reading?.locked != true {
                         Button(tokens.chromeLabel("+ new chapter")) {
-                            conversionFollowUp = .createChapter
                             Task {
-                                conversionCount = await SmartConversionCount.collected(
-                                    session, readingID: readingID)
-                                conversionOffer = true
+                                await structure.openBindOffer(
+                                    followUp: .createChapter, order: model.viewOrder)
                             }
                         }
                         .buttonStyle(.borderless)
                         .font(tokens.small)
                         .foregroundStyle(tokens.accent)
-                        .help("Chapters need a hand-shaped book — this offers to "
-                            + "convert, keeping every note it has collected.")
+                        .help("Chapters need a book that holds its notes — this "
+                            + "offers to bind the gathering into one, keeping every "
+                            + "note it shows; it keeps collecting after.")
                     }
                     // Batch 6 legibility: a smart book's derived membership
                     // is DESIGNED (#25a) — but absent-and-silent read as

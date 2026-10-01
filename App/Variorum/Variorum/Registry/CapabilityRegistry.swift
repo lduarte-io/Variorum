@@ -1564,6 +1564,28 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: RuleEditorCopy.unavailableNote,
             availability: always),
+        // 13i-b U3 — THE TWO STRENGTHENING DOORS (the sitting record §3). Both
+        // on the shelf row's menu of a GATHERING, `always` for `.editRule`'s
+        // reason (the row carries its target). Bind's other two roads open
+        // the SAME confirm and are not doors of their own in this table: the
+        // book navigator's "+ new chapter" on a gathering is the chapter
+        // act's choreography (P-2), and the teaching moment is an OFFER on
+        // the status seam (18i), the kind the `.divergeForBook` toast
+        // precedent never declared as a door. The per-target condition — a
+        // finished gathering refuses a bind — is the op's, and the menu hides
+        // the door there (P-2).
+        Capability(
+            id: .bindIntoBook, verb: BindCopy.bindVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BindCopy.bindUnavailable,
+            availability: always),
+        Capability(
+            id: .makeBookFromGathering, verb: BindCopy.spawnVerb, scope: .book,
+            doors: [.contextMenu],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BindCopy.spawnUnavailable,
+            availability: always),
 
         Capability(
             id: .newPost, verb: "New Note", scope: .app,

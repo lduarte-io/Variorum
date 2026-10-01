@@ -145,31 +145,22 @@ final class ShelfViewModel {
         await run { try $0.setDailyJournalBook(readingID) }
     }
 
-    /// SMART → CURATED (13c 2D — C2/N38). Reports what happened rather than
-    /// going quiet: the conversion changes what a book IS, so a silent
-    /// success on a list of book names would be the least legible outcome
-    /// on the shelf.
-    func convertToCurated(
-        _ readingID: String, keepCollecting: Bool, collectingName: String?
-    ) async {
+    /// **BIND INTO A BOOK** (13i-b U3 — the sitting record §3, §14.6; the
+    /// door 13c 2D shipped as "convert to a hand-shaped book"). The SAME row
+    /// becomes the book (§19.6) and it keeps collecting. Reports what
+    /// happened rather than going quiet: binding changes what a shelf row
+    /// IS, so a silent success would be the least legible outcome here.
+    ///
+    /// No "(collecting)" sibling any more — the ruling's own clause ("the
+    /// '(collecting)' offer dies"); its reason (the book stopped collecting)
+    /// is gone, and the deliberate sibling road is `spawnBook` below.
+    func bind(_ readingID: String) async {
         do {
             let result = try await session.runner.run { ops in
-                // 13e E13 — the typed fresh-collector name only (the shelf
-                // half of the same guard the navigator's door carries; a
-                // derived name is never refused).
-                if let collectingName { try ops.assertBookNameIsFree(collectingName) }
-                return try ops.convertSmartReadingToCurated(
-                    readingID, keepCollecting: keepCollecting,
-                    collectingName: collectingName)
+                try ops.convertSmartReadingToCurated(readingID)
             }
             lastError = nil
-            let posts = result.membershipIDs.count
-            var report = "“\(result.reading.name)” is a hand-shaped book now — "
-                + "\(posts) note\(posts == 1 ? "" : "s") kept, in the order you had them."
-            if let fresh = result.collectingReading {
-                report += " “\(fresh.name)” keeps collecting the filter."
-            }
-            lastReport = report
+            lastReport = BindCopy.bound(result.reading.name, count: result.membershipIDs.count)
         } catch let error as OperationError {
             lastReport = nil
             lastError = ReadingsViewModel.message(error)
@@ -178,6 +169,52 @@ final class ShelfViewModel {
             lastError = String(describing: error)
         }
         await refreshAggregates()
+    }
+
+    /// **MAKE A BOOK FROM THIS GATHERING** (13i-b U3 — the spawn; the sitting
+    /// record §3): a SIBLING book carrying the gathering's rule, in its wing,
+    /// with intake on (a book with a rule IS a living book) and the auto-tag
+    /// OFF (PROVISIONAL P-13ib-3 — the ruled auto-tag-on default belongs to a
+    /// book born from a TAG, and a rule may be a tree with no one tag to flow
+    /// out). `createReading`'s creation-time BACKFILL seats the current
+    /// matches (birth = intent). The gathering is untouched.
+    ///
+    /// Composition, not a new operation: the duplicate-name guard (E13) and
+    /// the mint ride ONE serialized runner closure, and the gathering's rule
+    /// is read INSIDE it, so the copy is the rule as it stands at the act.
+    /// Returns the new book's id.
+    @discardableResult
+    func spawnBook(from gatheringID: String, named name: String) async -> String? {
+        let database = session.database
+        do {
+            let (book, seated) = try await session.runner.run { ops -> (Reading, Int) in
+                guard let gathering = try database.read({
+                    try Queries.reading($0, id: gatheringID)
+                }) else { throw OperationError.readingNotFound(id: gatheringID) }
+                guard gathering.kind == .gathering else {
+                    throw OperationError.wrongReadingKind(id: gatheringID, expected: .gathering)
+                }
+                try ops.assertBookNameIsFree(name)
+                let book = try ops.createReading(
+                    name: name, kind: .book,
+                    querySpec: gathering.querySpec, wingId: gathering.wingId)
+                let seated = try database.read {
+                    try Queries.assembleReading($0, readingID: book.id).count
+                }
+                return (book, seated)
+            }
+            lastError = nil
+            lastReport = BindCopy.spawned(book.name, count: seated)
+            await refreshAggregates()
+            return book.id
+        } catch let error as OperationError {
+            lastReport = nil
+            lastError = ReadingsViewModel.message(error)
+        } catch {
+            lastReport = nil
+            lastError = String(describing: error)
+        }
+        return nil
     }
 
     /// Drag a post ONTO a book row (sitting 1: "drag posts onto a book").
