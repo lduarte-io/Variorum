@@ -84,6 +84,29 @@ mirror, the deploy checklist). The 13i-b-shipped single `auto_tag_id` + sole-tag
 derivation stand until this build replaces them; the migration carries existing `auto_tag_id`
 values into the new shape.
 
+## HER POST-CLOSE RULINGS (2026-10-01, after the 13i-b hard stop; verbatim-faithful)
+
+1. **A GATHERING REQUIRES A RULE AT CREATION.** Her words: *"how does a freshly minted gathering
+   have no rule? I thought you basically needed a rule just to mint a gathering? … I think it
+   should be a requirement to have it at creation, unless you have any compelling reason against
+   that. I just don't think that a rule-less gathering makes sense."* No compelling reason
+   exists (the NULL=match-all letter is an old-data tolerance, not a product want; "show
+   everything" is the Library's job — her own place/finder boundary). RULED: the mint door
+   requires a rule (the mint flow gains the rule editor inline); the op guards it for
+   gatherings. Two edges for this phase's design: (a) existing rule-less gatherings are
+   GRANDFATHERED at the assembly (the tolerance letter stands for old rows); (b) the rule
+   editor's clear-to-nothing on a GATHERING needs an answer consistent with her ruling (refuse,
+   or offer delete-the-gathering — a rule-less gathering "doesn't make sense"). This RESOLVES
+   #168's open call (a) and nearly moots (b) (the bind/spawn offer on a rule-less gathering
+   becomes unreachable by mint; the malformed arm remains).
+2. **THE RULE EDITOR'S DISCOVERABILITY GAP (her report, with a screenshot of her real store):**
+   the book's own ⚙ Book Settings sheet (Name · Word target · Note cap · Finished) carries NO
+   rule/dial/auto-tag — the ONLY door 13i-b shipped is the SHELF row's right-click "Edit
+   Rule…", and she could not find it from inside the book. The Collecting-pane re-homing was
+   always 13i-d's; her report makes it concrete: the book's settings sheet (and the gathering's)
+   must carry the Collecting section — rule, dial, outflow — or at least a door to it. Slot:
+   with this phase's settings-sheet work (Finished/Sealed land in that same sheet) rather than
+   waiting for 13i-d, since the sheet is already under this phase's hands.
 ## Standing constraints
 
 Schema: ONE RULED EXCEPTION — her outflow ruling above authorizes ONE further §12 lockstep
